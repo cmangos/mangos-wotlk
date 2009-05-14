@@ -19,6 +19,7 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "World.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "Opcodes.h"
 #include "Chat.h"
@@ -261,3 +262,75 @@ bool ChatHandler::HandleServerMotdCommand(const char* /*args*/)
     PSendSysMessage(LANG_MOTD_CURRENT, sWorld.GetMotd());
     return true;
 }
+
+// Playerbot mod
+bool ChatHandler::HandlePlayerbotCommand(const char* args)
+{
+    if (! m_session)
+    {
+        PSendSysMessage("You may only add bots from an active session");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (!*args)
+    {
+        PSendSysMessage("usage: add PLAYERNAME  or  remove PLAYERNAME");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    char *cmd = strtok ((char*)args, " ");
+    char *charname = strtok (NULL, " ");
+    if (!cmd || !charname)
+    {
+        PSendSysMessage("usage: add PLAYERNAME  or  remove PLAYERNAME");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    std::string cmdStr = cmd;
+    std::string charnameStr = charname;
+
+    if(!normalizePlayerName(charnameStr))
+        return false;
+
+    uint64 guid = objmgr.GetPlayerGUIDByName(charnameStr.c_str());
+    if (guid == 0 || (guid == m_session->GetPlayer()->GetGUID()))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 accountId = objmgr.GetPlayerAccountIdByGUID(guid);
+    if (accountId != m_session->GetAccountId()) {
+        PSendSysMessage("You may only add bots from the same account.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (cmdStr == "add" || cmdStr == "login")
+    {
+        if (m_session->GetPlayerBot(guid) != NULL) {
+            PSendSysMessage("Bot already exists in world.");
+            SetSentErrorMessage(true);
+            return false;
+        }
+        m_session->AddPlayerBot(guid);
+        PSendSysMessage("Bot added successfully.");
+    }
+    else if (cmdStr == "remove" || cmdStr == "logout")
+    {
+        if (m_session->GetPlayerBot(guid) == NULL) {
+            PSendSysMessage("Bot can not be removed because bot does not exist in world.");
+            SetSentErrorMessage(true);
+            return false;
+        }
+        m_session->LogoutPlayerBot(guid, true);
+        PSendSysMessage("Bot removed successfully.");
+    }
+
+    return true;
+}
+

@@ -5299,6 +5299,8 @@ void Spell::EffectDuel(uint32 i)
     map->Add(pGameObj);
     //END
 
+    // Playerbot moved Send request below (actually moved it back)
+
     // Send request
     WorldPacket data(SMSG_DUEL_REQUESTED, 16);
     data << pGameObj->GetGUID();

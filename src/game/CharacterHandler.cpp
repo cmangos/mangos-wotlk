@@ -38,6 +38,9 @@
 #include "ArenaTeam.h"
 #include "Language.h"
 
+// Playerbot mod:
+#include "PlayerbotAI.h"
+
 class LoginQueryHolder : public SqlQueryHolder
 {
     private:
@@ -112,6 +115,48 @@ class CharacterHandler
                 return;
             }
             session->HandlePlayerLogin((LoginQueryHolder*)holder);
+        }
+        // Playerbot mod: is different from the normal HandlePlayerLoginCallback in that it
+        // sets up the bot's world session and also stores the pointer to the bot player in the master's
+        // world session m_playerBots map
+        void HandlePlayerBotLoginCallback(QueryResult * /*dummy*/, SqlQueryHolder * holder)
+        {
+            if (!holder) return;
+
+            LoginQueryHolder* lqh = (LoginQueryHolder*) holder;
+
+            WorldSession* masterSession = sWorld.FindSession(lqh->GetAccountId());
+
+            if (! masterSession)
+            {
+                delete holder;
+                return;
+            }
+
+            // This WorldSession is owned by the bot player object
+            // it will deleted in the Player class constructor for Playerbots only
+            WorldSession *botSession = new WorldSession(lqh->GetAccountId(), NULL, SEC_PLAYER, true, 0, LOCALE_enUS);
+            botSession->m_Address = "bot";
+            botSession->m_expansion = 2;
+
+            uint64 guid = lqh->GetGuid();
+
+            botSession->HandlePlayerLogin(lqh);
+            Player* botPlayer = botSession->GetPlayer();
+
+            // give the bot some AI, object is owned by the player class
+            PlayerbotAI* ai = new PlayerbotAI(masterSession->GetPlayer(), botPlayer);
+            botPlayer->SetPlayerbotAI(ai);
+
+            // tell the world session that they now manage this new bot
+            (masterSession->m_playerBots)[guid] = botPlayer;
+
+            // if bot is in a group and master is not in group then
+            // have bot leave their group
+            if (botPlayer->GetGroup() &&
+                (masterSession->GetPlayer()->GetGroup() == NULL ||
+                masterSession->GetPlayer()->GetGroup()->IsMember(guid) == false))
+                botPlayer->RemoveFromGroup();
         }
 } chrHandler;
 
@@ -1298,4 +1343,20 @@ void WorldSession::HandleCharCustomize(WorldPacket& recv_data)
     data << uint8(hairColor);
     data << uint8(facialHair);
     SendPacket(&data);
+}
+
+// Playerbot mod - add new player bot for this master. This definition must appear in this file
+// because it utilizes the CharacterHandler class which isn't accessible outside this file
+void WorldSession::AddPlayerBot(uint64 playerGuid)
+{
+    // has bot already been added?
+    if (GetPlayerBot(playerGuid) != 0) return;
+
+    LoginQueryHolder *holder = new LoginQueryHolder(GetAccountId(), playerGuid);
+    if(!holder->Initialize())
+    {
+        delete holder;                                      // delete all unprocessed queries
+        return;
+    }
+    CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerBotLoginCallback, holder);
 }

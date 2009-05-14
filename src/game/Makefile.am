@@ -209,6 +209,26 @@ libmangosgame_a_SOURCES = \
 	PetitionsHandler.cpp \
 	Player.cpp \
 	Player.h \
+	PlayerbotAI.cpp \
+	PlayerbotAI.h \
+	PlayerbotClassAI.cpp \
+	PlayerbotClassAI.h \
+	PlayerbotDruidAI.cpp \
+	PlayerbotDruidAI.h \
+	PlayerbotMageAI.cpp \
+	PlayerbotMageAI.h \
+	PlayerbotPaladinAI.cpp \
+	PlayerbotPaladinAI.h \
+	PlayerbotPriestAI.cpp \
+	PlayerbotPriestAI.h \
+	PlayerbotRogueAI.cpp \
+	PlayerbotRogueAI.h \
+	PlayerbotShamanAI.cpp \
+	PlayerbotShamanAI.h \
+	PlayerbotWarlockAI.cpp \
+	PlayerbotWarlockAI.h \
+	PlayerbotWarriorAI.cpp \
+	PlayerbotWarriorAI.h \
 	PlayerDump.cpp \
 	PlayerDump.h \
 	PointMovementGenerator.cpp \

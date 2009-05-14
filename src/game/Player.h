@@ -52,6 +52,9 @@ class SpellCastTargets;
 class PlayerSocial;
 class Vehicle;
 
+// Playerbot mod
+class PlayerbotAI;
+
 typedef std::deque<Mail*> PlayerMails;
 
 #define PLAYER_MAX_SKILLS       127
@@ -349,6 +352,12 @@ enum DrunkenState
     DRUNKEN_TIPSY   = 1,
     DRUNKEN_DRUNK   = 2,
     DRUNKEN_SMASHED = 3
+};
+
+enum PlayerStateType
+{
+    PLAYER_STATE_NONE              = 0,
+    PLAYER_STATE_SIT               = 1
 };
 
 enum PlayerFlags
@@ -2050,6 +2059,11 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool isActiveObject() const { return true; }
         bool canSeeSpellClickOn(Creature const* creature) const;
+		// Playerbot mod:
+        void SetPlayerbotAI(PlayerbotAI * ai);
+        PlayerbotAI* GetPlayerbotAI() { return m_playerbotAI; }
+        bool IsPlayerbot() { return (GetSession()->GetRemoteAddress() == "bot"); }
+
     protected:
 
         /*********************************************************/
@@ -2288,6 +2302,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         GridReference<Player> m_gridRef;
         MapReference m_mapRef;
+
+        // Playerbot mod:
+        PlayerbotAI* m_playerbotAI;
 
         uint32 m_lastFallTime;
         float  m_lastFallZ;
