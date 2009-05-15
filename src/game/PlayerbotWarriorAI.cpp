@@ -21,6 +21,7 @@ PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, 
 	HEROIC_THROW			= ai->getSpellId("heroic throw");  //ARMS
 	BLOODRAGE				= ai->getSpellId("bloodrage"); //PROTECTION
 	DEFENSIVE_STANCE		= ai->getSpellId("defensive stance"); //PROTECTION
+	DEVASTATE				= ai->getSpellId("devastate");
 	SUNDER_ARMOR			= 7386; //ai->getSpellId("sunder armor"); //PROTECTION
 	TAUNT					= 355; //ai->getSpellId("taunt"); //PROTECTION
 	SHIELD_BASH				= ai->getSpellId("shield bash"); //PROTECTION
@@ -80,23 +81,21 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 		GetAI()->CastSpell (DEMORALIZING_SHOUT);
 		GetAI()->TellMaster("DShout");
 	}
-	if (COMMANDING_SHOUT > 0 && !m_bot->HasAura(COMMANDING_SHOUT, 0) && ai->GetRageAmount() >= 10) {
-		GetAI()->CastSpell (COMMANDING_SHOUT);
-	}
 	if (SHIELD_WALL > 0 && ai->GetHealthPercent() < 20) {
-		GetAI()->CastSpell (SHIELD_WALL);
+		GetAI()->CastSpell (SHIELD_WALL, *m_bot);
+		GetAI()->TellMaster("Shield Wall");
 	}
 	if (SPELL_REFLECTION > 0 && pTarget->getVictim() == m_bot && pTarget->IsNonMeleeSpellCasted(true) && ai->GetRageAmount() >= 15) {
-		GetAI()->CastSpell (SPELL_REFLECTION);
+		GetAI()->CastSpell (SPELL_REFLECTION, *m_bot);
 		GetAI()->TellMaster("SpellRef");
 	}
-	if (SHIELD_BASH > 0 && pTarget->IsNonMeleeSpellCasted(true) && ai->GetRageAmount() >= 10) {
+	else {
 		GetAI()->CastSpell (SHIELD_BASH, *pTarget);
 		GetAI()->TellMaster("SHBash");
 	}
-	if (SUNDER_ARMOR > 0 && ai->GetRageAmount() >= 15) {
-		GetAI()->CastSpell (SUNDER_ARMOR);
-		GetAI()->TellMaster("Sunder");
+	if (DEVASTATE > 0 && ai->GetRageAmount() >= 15) {
+		GetAI()->CastSpell (DEVASTATE);
+		GetAI()->TellMaster("DEVASTATE");
 	}
 	if (pTarget->GetHealth() > pTarget->GetMaxHealth()*0.2) {
 		SpellSequence = Tanking;
@@ -154,7 +153,17 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 				TankCounter++;
 				break;
 			}
-			else if (TankCounter < 9) {
+			else if (CLEAVE > 0 && TankCounter < 9) {
+				GetAI()->CastSpell (CLEAVE, *pTarget);
+				TankCounter++;
+				break;
+			}
+			else if (COMMANDING_SHOUT > 0 && TankCounter < 10 && !m_bot->HasAura(COMMANDING_SHOUT, 0) && ai->GetRageAmount() >= 10) {
+				GetAI()->CastSpell (COMMANDING_SHOUT);
+				TankCounter++;
+				break;
+			}
+			else if (TankCounter < 11) {
 				TankCounter = 0;
 				//GetAI()->TellMaster("TankCounterReseter");
 				break;
