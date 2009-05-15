@@ -2,7 +2,7 @@
 	Name	: PlayerbotWarriorAI.cpp
     Complete: maybe around 34%
     Author	: Natsukawa
-	Version : 0.30
+	Version : 0.32
     */
 #include "PlayerbotWarriorAI.h"
 
@@ -105,10 +105,6 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 		SpellSequence = Berserker;
 	}
 
-	// wait 3 seconds
-	//time_t currentTime = time(0);
-	//m_ignoreAIUpdatesUntilTime = currentTime + 3;
-	
 	switch (SpellSequence) {
 		case Tanking:
 			//GetAI()->TellMaster("Tanking");
@@ -119,37 +115,37 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 			}
 			else if (SHIELD_BLOCK > 0 && TankCounter < 2 && pTarget->getVictim() == m_bot) {
 				GetAI()->CastSpell (SHIELD_BLOCK);
-				GetAI()->TellMaster("SB1");
+				//GetAI()->TellMaster("SB1");
 				TankCounter++;
 				break;
 			}
 			else if (REVENGE > 0 && TankCounter < 3 && ai->GetRageAmount() >= 5) {
 				GetAI()->CastSpell (REVENGE, *pTarget);
-				GetAI()->TellMaster("Revenge");
+				//GetAI()->TellMaster("Revenge");
 				TankCounter++;
 				break;
 			}
 			else if (SHIELD_SLAM > 0 && TankCounter < 4 && ai->GetRageAmount() >= 20) {
 				GetAI()->CastSpell (SHIELD_SLAM, *pTarget);
-				GetAI()->TellMaster("SSlam");
+				//GetAI()->TellMaster("SSlam");
 				TankCounter++;
 				break;
 			}
 			else if (SHIELD_BLOCK > 0 && TankCounter < 5 && pTarget->getVictim() == m_bot) {
 				GetAI()->CastSpell (SHIELD_BLOCK);
-				GetAI()->TellMaster("SB2");
+				//GetAI()->TellMaster("SB2");
 				TankCounter++;
 				break;
 			}
 			else if (DISARM > 0 && TankCounter < 6 && ai->GetRageAmount() >= 5) {
 				GetAI()->CastSpell (DISARM, *pTarget);
-				GetAI()->TellMaster("DISARM");
+				//GetAI()->TellMaster("DISARM");
 				TankCounter++;
 				break;
 			}
 			else if (HEROIC_STRIKE > 0 && TankCounter < 7 && ai->GetRageAmount() >= 15) {
 				GetAI()->CastSpell (HEROIC_STRIKE, *pTarget);
-				GetAI()->TellMaster("Hstrike");
+				//GetAI()->TellMaster("Hstrike");
 				TankCounter++;
 				break;
 			}
@@ -160,12 +156,12 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 			}
 			else if (TankCounter < 9) {
 				TankCounter = 0;
-				GetAI()->TellMaster("TankCounterReseter");
+				//GetAI()->TellMaster("TankCounterReseter");
 				break;
 			}
 			else {
-				TankCounter++;
-				GetAI()->TellMaster("TankCounter + 1");
+				TankCounter = 0;
+				//GetAI()->TellMaster("TankCounter + 1");
 				break;
 			}
 		case Berserker:
@@ -173,30 +169,30 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 
 			if (BERSERKER_STANCE > 0 && BerserkerCounter < 1 && !m_bot->HasAura(BERSERKER_STANCE, 0)) {
 				GetAI()->CastSpell (BERSERKER_STANCE);
-				GetAI()->TellMaster("BStance");
+				//GetAI()->TellMaster("BStance");
 				BerserkerCounter++;
 				break;
 			}
 			else if (EXECUTE > 0 && BerserkerCounter < 2 && pTarget->GetHealth() < pTarget->GetMaxHealth()*0.2 && ai->GetRageAmount() >= 15) {
 				GetAI()->CastSpell (EXECUTE, *pTarget);
-				GetAI()->TellMaster("Execute");
+				//GetAI()->TellMaster("Execute");
 				BerserkerCounter++;
 				break;
 			}
 			else if (WHIRLWIND > 0 && BerserkerCounter < 3 && ai->GetRageAmount() >= 15) {
 				GetAI()->CastSpell (WHIRLWIND, *pTarget);
-				GetAI()->TellMaster("WWind");
+				//GetAI()->TellMaster("WWind");
 				BerserkerCounter++;
 				break;
 			}
 			else if (BerserkerCounter < 4) {
 				BerserkerCounter = 0;
-				GetAI()->TellMaster("BerserkerCounterReseter");
+				//GetAI()->TellMaster("BerserkerCounterReseter");
 				break;
 			}
 			else {
-				BerserkerCounter++;
-				GetAI()->TellMaster("BerserkerCounter + 1");
+				BerserkerCounter = 0;
+				//GetAI()->TellMaster("BerserkerCounter + 1");
 				break;
 			}
 	}

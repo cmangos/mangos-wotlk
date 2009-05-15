@@ -2,7 +2,7 @@
 	Name	: PlayerbotPaladinAI.cpp
     Complete: maybe around 27% :D
     Author	: Natsukawa
-	Version : 0.32
+	Version : 0.33
     */
 
 #include "PlayerbotPaladinAI.h"
@@ -17,7 +17,7 @@ PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, 
 	FROST_RESISTANCE_AURA		= ai->getSpellId("frost resistance aura");
 	CONCENTRATION_AURA			= ai->getSpellId("concentration aura");
 	CRUSADER_AURA				= ai->getSpellId("crusader aura");
-	//CRUSADER_STRIKE				= ai->getSpellId("crusader strike");
+	CRUSADER_STRIKE				= ai->getSpellId("crusader strike");
 	SEAL_OF_COMMAND				= 20375; //For some reason getSpellId was not working. Replaced with spell id
 	JUDGEMENT_OF_LIGHT			= ai->getSpellId("judgement of light");
 	JUDGEMENT_OF_WISDOM			= ai->getSpellId("judgement of wisdom");
@@ -123,14 +123,12 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget){
 				CombatCounter++;
 				break;
 			}
-			/* TODO: CRUSADER_STRIKE doesn't exist! COMMENTED OUT FOR NOW
 			else if (CRUSADER_STRIKE > 0 && CombatCounter < 4 && ai->GetManaPercent() >=15) {
 				GetAI()->CastSpell (CRUSADER_STRIKE, *pTarget);
 				GetAI()->TellMaster("CStrike");
 				CombatCounter++;
 				break;
 			}
-			*/
 			else if (CombatCounter < 5) {
 				CombatCounter = 0;
 				//GetAI()->TellMaster("CombatCounter Reset");
