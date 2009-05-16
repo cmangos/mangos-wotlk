@@ -42,7 +42,7 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget){
 	PlayerbotAI* ai = GetAI();
 	if (!ai) return;
 	switch (ai->GetScenarioType()) {
-		case SCENARIO_DUEL:
+		case PlayerbotAI::SCENARIO_DUEL:
 
 			if (SINISTER_STRIKE > 0) {
 				ai->CastSpell(SINISTER_STRIKE);
@@ -153,6 +153,7 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget){
 			break;
 	}
 }
+>>>>>>> origin/master:src/game/PlayerbotRogueAI.cpp
 	
  // end DoNextCombatManeuver
 
@@ -161,7 +162,6 @@ void PlayerbotRogueAI::DoNonCombatActions(){
 	if (!m_bot) {
 		return;
 	}
-	
 	// hp check
 	if (m_bot->getStandState() != PLAYER_STATE_NONE)
 		m_bot->SetStandState(PLAYER_STATE_NONE);

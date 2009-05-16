@@ -49,7 +49,7 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget){
 	if (!ai) return;
 	switch (ai->GetScenarioType()) {
 
-		case SCENARIO_DUEL:
+		case PlayerbotAI::SCENARIO_DUEL:
 
 				if (HAMMER_OF_JUSTICE > 0) {
 						ai->CastSpell(HAMMER_OF_JUSTICE);

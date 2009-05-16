@@ -41,7 +41,7 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget){
 	PlayerbotAI* ai = GetAI();
 	if (!ai) return;
 	switch (ai->GetScenarioType()) {
-		case SCENARIO_DUEL:
+		case PlayerbotAI::SCENARIO_DUEL:
 
 			if (SHADOW_BOLT > 0) {
 				ai->CastSpell(SHADOW_BOLT);
