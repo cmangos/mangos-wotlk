@@ -20,6 +20,7 @@
 #include "Unit.h"
 #include "SpellAuras.h"
 #include "SharedDefines.h"
+#include "Log.h"
 
 // returns a float in range of..
 float rand_float(float low, float high) {
@@ -54,6 +55,26 @@ uint64 extractGuid(WorldPacket& packet) {
 	return guid;
 }
 
+// ChatHandler already implements some useful commands the master can call on bots
+// These commands are protected inside the ChatHandler class so this class provides access to the commands
+// we'd like to call on our bots
+class PlayerbotChatHandler: protected ChatHandler {
+public:
+	explicit PlayerbotChatHandler(Player* pMasterPlayer) :
+		ChatHandler(pMasterPlayer) {
+	}
+
+	bool revive(const Player& botPlayer) {
+		return HandleReviveCommand(botPlayer.GetName());
+	}
+	bool teleport(const Player& botPlayer) {
+		return HandleNamegoCommand(botPlayer.GetName());
+	}
+	void sysmessage(const char *str) {
+		SendSysMessage(str);
+	}
+};
+
 PlayerbotAI::PlayerbotAI(Player* const master, Player* const bot) :
 	m_master(master), m_bot(bot), m_ignoreAIUpdatesUntilTime(0), m_combatOrder(
 			ORDERS_NONE), m_ScenarioType(SCENARIO_PVEEASY),
@@ -61,14 +82,17 @@ PlayerbotAI::PlayerbotAI(Player* const master, Player* const bot) :
 			m_CurrentlyCastingSpellId(0), m_IsFollowingMaster(true),
 			m_spellIdCommand(0), m_targetGuidCommand(0), m_classAI(0) {
 
+	// set bot state and needed item list
+	m_botState = BOTSTATE_NORMAL;
+	SetQuestNeedItems();
+
 	// get class specific ai
 	switch (m_bot->getClass()) {
 	case CLASS_PRIEST:
 		m_classAI = (PlayerbotClassAI*) new PlayerbotPriestAI(master, m_bot, this);
 		break;
 	case CLASS_MAGE:
-		m_classAI
-				= (PlayerbotClassAI*) new PlayerbotMageAI(master, m_bot, this);
+		m_classAI = (PlayerbotClassAI*) new PlayerbotMageAI(master, m_bot, this);
 		break;
 	case CLASS_WARLOCK:
 		m_classAI = (PlayerbotClassAI*) new PlayerbotWarlockAI(master, m_bot, this);
@@ -1074,6 +1098,10 @@ void PlayerbotAI::Feast() {
 // intelligently sets a reasonable combat order for this bot
 // based on its class / level / etc
 void PlayerbotAI::GetCombatOrders() {
+	// set combat state
+	if( m_botState != BOTSTATE_COMBAT )
+		SetState( BOTSTATE_COMBAT );
+
 	Unit* thingToAttack = m_master->getAttackerForHelper();
 	if (!thingToAttack)
 		return;
@@ -1097,6 +1125,9 @@ void PlayerbotAI::GetCombatOrders() {
 	m_bot->Attack(thingToAttack, true);
 
 	m_bot->GetMotionMaster()->Clear(true);
+
+	// add thingToAttack to loot list
+	m_lootCreature.push_back( thingToAttack->GetGUID() );
 
 	// follow target in casting range - I commented out the priest & mage classes because of strange behavior - feel free to experiment
 	switch (m_bot->getClass()) {
@@ -1145,6 +1176,113 @@ void PlayerbotAI::DoNextCombatManeuver() {
 		(GetClassAI())->DoNextCombatManeuver(pTarget);
 }
 
+void PlayerbotAI::SetQuestNeedItems() {
+	// reset values first
+	m_needItemList.clear();
+	m_lootCreature.clear();
+	m_lootCurrent = 0;
+
+	// run through accepted quests, get quest infoand data
+	for( QuestStatusMap::iterator iter=m_bot->getQuestStatusMap().begin(); iter!=m_bot->getQuestStatusMap().end(); ++iter ) {
+		const Quest *qInfo = objmgr.GetQuestTemplate( iter->first );
+		if( !qInfo ) continue;
+		QuestStatusData *qData = &iter->second;
+
+		// only check quest if it is incomplete
+		if( qData->m_status != QUEST_STATUS_INCOMPLETE ) continue;
+
+		// check for items we not have enough of
+		for( int i=0; i<QUEST_OBJECTIVES_COUNT; i++ ) {
+			if( !qInfo->ReqItemCount[i] || (qInfo->ReqItemCount[i]-qData->m_itemcount[i])<=0 ) continue;
+			m_needItemList[qInfo->ReqItemId[i]] = (qInfo->ReqItemCount[i]-qData->m_itemcount[i]);
+		}
+	}
+}
+
+void PlayerbotAI::SetState( BotState state ) {
+	sLog.outDebug( "[PlayerbotAI]: %s switch state %d to %d", m_bot->GetName(), m_botState, state );
+	m_botState = state;
+}
+
+void PlayerbotAI::DoLoot() {
+	if( !m_lootCurrent && m_lootCreature.empty() ) {
+		sLog.outDebug( "[PlayerbotAI]: %s reset loot list / go back to idle", m_bot->GetName() );
+		m_botState = BOTSTATE_NORMAL;
+		SetQuestNeedItems();
+		return;
+	}
+
+	if( !m_lootCurrent ) {
+		m_lootCurrent = m_lootCreature.front();
+		m_lootCreature.pop_front();
+		WorldLocation loc;
+		Creature *c = m_bot->GetMap()->GetCreature( m_lootCurrent );
+		if( !c ) { m_lootCurrent = 0; return; }
+		c->GetPosition( loc );
+		m_bot->GetMotionMaster()->MovePoint( loc.mapid, loc.x, loc.y, loc.z );
+		sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s'", m_bot->GetName(), c->GetName() );
+	} else {
+		Creature *c = m_bot->GetMap()->GetCreature( m_lootCurrent );
+		if( !c ) { m_lootCurrent = 0; return; }
+		if( m_bot->IsWithinDistInMap( c, INTERACTION_DISTANCE ) ) {
+			// check for needed items
+			m_bot->SendLoot( m_lootCurrent, LOOT_CORPSE );
+			Loot *loot = &c->loot;
+			uint32 lootNum = loot->GetMaxSlotInLootFor( m_bot );
+			sLog.outDebug( "[PlayerbotAI]: %s looting: '%s' got %d items", m_bot->GetName(), c->GetName(), loot->GetMaxSlotInLootFor( m_bot ) );
+			for( uint32 l=0; l<lootNum; l++ ) {
+				QuestItem *qitem=0, *ffaitem=0, *conditem=0;
+				LootItem *item = loot->LootItemInSlot( l, m_bot, &qitem, &ffaitem, &conditem );
+				if( !item ) continue;
+				if( !qitem && item->is_blocked ) {
+					m_bot->SendLootRelease( m_bot->GetLootGUID() );
+					continue;
+				}
+				if( m_needItemList[item->itemid]>0 ) {
+					sLog.outDebug( "[PlayerbotAI]: %s looting: needed item '%s'", m_bot->GetName(), objmgr.GetItemLocale(item->itemid)->Name );
+				    ItemPosCountVec dest;
+					if( m_bot->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item->itemid, item->count ) == EQUIP_ERR_OK ) {
+						Item * newitem = m_bot->StoreNewItem( dest, item->itemid, true, item->randomPropertyId);
+
+						if( qitem ) {
+							qitem->is_looted = true;
+							if( item->freeforall || loot->GetPlayerQuestItems().size() == 1 )
+								m_bot->SendNotifyLootItemRemoved( l );
+							else
+								loot->NotifyQuestItemRemoved( qitem->index );
+						} else {
+							if( ffaitem ) {
+								ffaitem->is_looted=true;
+								m_bot->SendNotifyLootItemRemoved( l );
+							} else {
+								if( conditem )
+									conditem->is_looted=true;
+								loot->NotifyItemRemoved( l );
+							}
+						}
+						if (!item->freeforall)
+							item->is_looted = true;
+						--loot->unlootedCount;
+						m_bot->SendNewItem( newitem, uint32(item->count), false, false, true );
+						m_bot->GetAchievementMgr().UpdateAchievementCriteria( ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count );
+					}
+				}
+			}
+			// release loot
+		    if( uint64 lguid = m_bot->GetLootGUID() && m_bot->GetSession() )
+				m_bot->GetSession()->DoLootRelease( lguid );
+			else if( !m_bot->GetSession() )
+				sLog.outDebug( "[PlayerbotAI]: %s has no session. Cannot release loot!", m_bot->GetName() );
+
+			// clear movement target, take next target on next update
+			m_bot->GetMotionMaster()->Clear();
+			m_bot->GetMotionMaster()->MoveIdle();
+			sLog.outDebug( "[PlayerbotAI]: %s looted target 0x%08X", m_bot->GetName(), m_lootCurrent );
+			m_lootCurrent = 0;
+		}
+	}
+}
+
 // some possible things to use in AI
 //GetRandomContactPoint
 //GetPower, GetMaxPower
@@ -1163,44 +1301,114 @@ void PlayerbotAI::UpdateAI(const uint32 p_time) {
 	// default updates occur every two seconds
 	m_ignoreAIUpdatesUntilTime = time(0) + 2;
 
-	// if we are casting a spell then interrupt it
-	// make sure any actions that cast a spell set a proper m_ignoreAIUpdatesUntilTime!
-	Spell* const pSpell = GetCurrentSpell();
-	if (pSpell && !(pSpell->IsChannelActive() || pSpell->IsAutoRepeat()))
-		InterruptCurrentCastingSpell();
+	if( !m_bot->isAlive() ) {
+		if( m_botState != BOTSTATE_DEAD && m_botState != BOTSTATE_DEADRELEASED ) {
+			sLog.outDebug( "[PlayerbotAI]: %s died and is not in correct state...", m_bot->GetName() );
+			// clear loot list on death
+			m_lootCreature.clear();
+			m_lootCurrent = 0;
+			// clear combat orders
+			m_combatOrder = ORDERS_NONE;
+			m_bot->SetSelection(0);
+			m_bot->GetMotionMaster()->Clear(true);
+			// set state to dead
+			SetState( BOTSTATE_DEAD );
+			// wait 30sec
+			m_ignoreAIUpdatesUntilTime = time(0) + 30;
+		} else if( m_botState == BOTSTATE_DEAD ) {
+			// become ghost (mostly taken from Player::BuildPlayerRepop)
+			if( !m_bot->GetCorpse() )
+				m_bot->CreateCorpse();
+			Corpse *corpse = m_bot->GetCorpse();
+		    m_bot->GetMap()->Add( corpse );
+		    m_bot->SetHealth( 1 );
+			m_bot->SetMovement(MOVE_WATER_WALK);
+			m_bot->SetMovement(MOVE_UNROOT);
+			m_bot->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+			corpse->ResetGhostTime();
+			m_bot->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, (float)1.0);
+			m_bot->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+			// relocate ghost
+			WorldLocation loc;
+			corpse->GetPosition( loc );
+			m_bot->TeleportTo( loc.mapid, loc.x, loc.y, loc.z, m_bot->GetOrientation() );
+			// set state to released
+			SetState( BOTSTATE_DEADRELEASED );
+		} else if( m_botState == BOTSTATE_DEADRELEASED ) {
+			// get bot's corpse
+			Corpse *corpse = m_bot->GetCorpse();
+			if( !corpse ) {
+				sLog.outDebug( "[PlayerbotAI]: %s has no corpse!", m_bot->GetName() );
+				return;
+			}
+			// teleport ghost from graveyard to corpse
+			sLog.outDebug( "[PlayerbotAI]: Teleport %s to corpse...", m_bot->GetName() );
+			FollowCheckTeleport( *corpse );
+			// check if we are allowed to resurrect now
+			if( corpse->GetGhostTime() + m_bot->GetCorpseReclaimDelay( corpse->GetType()==CORPSE_RESURRECTABLE_PVP ) > time(0) ) {
+				m_ignoreAIUpdatesUntilTime = corpse->GetGhostTime() + m_bot->GetCorpseReclaimDelay( corpse->GetType()==CORPSE_RESURRECTABLE_PVP );
+				sLog.outDebug( "[PlayerbotAI]: %s has to wait for %d seconds to revive...", m_bot->GetName(), m_ignoreAIUpdatesUntilTime-time(0) );
+				return;
+			}
+			// resurrect now
+			sLog.outDebug( "[PlayerbotAI]: Reviving %s to corpse...", m_bot->GetName() );
+    		m_ignoreAIUpdatesUntilTime = time(0) + 6;
+			PlayerbotChatHandler ch(m_master);
+			if (! ch.revive(*m_bot)) {
+				ch.sysmessage(".. could not be revived ..");
+				return;
+			}
+			// set back to normal
+			SetState( BOTSTATE_NORMAL );
+		}
+	} else {
+		if( m_botState == BOTSTATE_LOOTING ) {
+			DoLoot();
+		} else {
+			// if we are casting a spell then interrupt it
+			// make sure any actions that cast a spell set a proper m_ignoreAIUpdatesUntilTime!
+			Spell* const pSpell = GetCurrentSpell();
+			if (pSpell && !(pSpell->IsChannelActive() || pSpell->IsAutoRepeat()))
+				InterruptCurrentCastingSpell();
 
-	// direct cast command from master
-	else if (m_spellIdCommand != 0) {
-		Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, m_targetGuidCommand);
-		if (pTarget != NULL)
-			CastSpell(m_spellIdCommand, *pTarget);
-		m_spellIdCommand = 0;
-		m_targetGuidCommand = 0;
-	}
+			// direct cast command from master
+			else if (m_spellIdCommand != 0) {
+				Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, m_targetGuidCommand);
+				if (pTarget != NULL)
+					CastSpell(m_spellIdCommand, *pTarget);
+				m_spellIdCommand = 0;
+				m_targetGuidCommand = 0;
+			}
 
-	// handle combat
-	else if (m_combatOrder != ORDERS_NONE)
-		DoNextCombatManeuver();
+			// handle combat
+			else if (m_combatOrder != ORDERS_NONE)
+				DoNextCombatManeuver();
 
-	// if master is in combat and bot is not, automatically assist master
-	// NOTE: combat orders are also set via incoming packets to bot or outgoing packets from master
-	//	else if (m_master->isInCombat() && ! m_bot->isInCombat())
-	else if (m_master->isInCombat())
-		GetCombatOrders();
-	/*
-	 // are we sitting, if so feast if possible
-	 else if (m_bot->getStandState() == PLAYER_STATE_SIT)
-	 Feast();
-	 */
-	// if commanded to follow master and not already following master then follow master
-	else if (!m_bot->isInCombat() && m_IsFollowingMaster
-			&& m_bot->GetMotionMaster()->GetCurrentMovementGeneratorType()
+			// if master is in combat and bot is not, automatically assist master
+			// NOTE: combat orders are also set via incoming packets to bot or outgoing packets from master
+			//	else if (m_master->isInCombat() && ! m_bot->isInCombat())
+			else if (m_master->isInCombat())
+				GetCombatOrders();
+
+			// bot was in combat recently - loot now
+			else if (m_botState == BOTSTATE_COMBAT)
+				SetState( BOTSTATE_LOOTING );
+/*
+			// are we sitting, if so feast if possible
+			else if (m_bot->getStandState() == PLAYER_STATE_SIT)
+			Feast();
+*/
+			// if commanded to follow master and not already following master then follow master
+			else if (!m_bot->isInCombat() && m_IsFollowingMaster
+					&& m_bot->GetMotionMaster()->GetCurrentMovementGeneratorType()
 					== IDLE_MOTION_TYPE)
-		Follow(*m_master);
+				Follow(*m_master);
 
-	// do class specific non combat actions
-	else if (GetClassAI()) {
-		(GetClassAI())->DoNonCombatActions();
+			// do class specific non combat actions
+			else if (GetClassAI()) {
+				(GetClassAI())->DoNonCombatActions();
+			}
+		}
 	}
 }
 
@@ -1299,26 +1507,6 @@ bool PlayerbotAI::CastSpell(uint32 spellId) {
 
 	return true;
 }
-
-// ChatHandler already implements some useful commands the master can call on bots
-// These commands are protected inside the ChatHandler class so this class provides access to the commands
-// we'd like to call on our bots
-class PlayerbotChatHandler: protected ChatHandler {
-public:
-	explicit PlayerbotChatHandler(Player* pMasterPlayer) :
-		ChatHandler(pMasterPlayer) {
-	}
-
-	bool revive(const Player& botPlayer) {
-		return HandleReviveCommand(botPlayer.GetName());
-	}
-	bool teleport(const Player& botPlayer) {
-		return HandleNamegoCommand(botPlayer.GetName());
-	}
-	void sysmessage(const char *str) {
-		SendSysMessage(str);
-	}
-};
 
 // extracts all item ids in format below
 // I decided to roll my own extractor rather then use the one in ChatHandler
@@ -1497,30 +1685,13 @@ bool PlayerbotAI::Follow(Player& player) {
 		m_bot->SetStandState(PLAYER_STATE_NONE);
 
 	if (!m_bot->isInCombat()) {
-		// if bot is dead and master is alive, revive bot
-		if (m_master->isAlive() && !m_bot->isAlive()) {
-			m_ignoreAIUpdatesUntilTime = time(0) + 6;
-			PlayerbotChatHandler ch(m_master);
-			if (!ch.revive(*m_bot)) {
-				ch.sysmessage(".. could not be revived ..");
+		// follow player or his corpse if dead (stops bot from running to graveyard if player repops...)
+		if( player.GetCorpse() ) {
+			if( !FollowCheckTeleport( *player.GetCorpse() ) )
 				return false;
-			}
-		}
-
-		// if bot has strayed too far from the master, teleport bot
-		if (m_bot->GetMapId() != player.GetMapId() || m_bot->GetZoneId()
-				!= player.GetZoneId() || (abs(abs(m_bot->GetPositionX()) - abs(
-				player.GetPositionX())) > 50) || (abs(
-				abs(m_bot->GetPositionY()) - abs(player.GetPositionY())) > 50)
-				|| (abs(abs(m_bot->GetPositionZ()) - abs(player.GetPositionZ()))
-						> 50)) {
-			m_ignoreAIUpdatesUntilTime = time(0) + 6;
-			PlayerbotChatHandler ch(m_master);
-
-			if (!ch.teleport(*m_bot)) {
-				ch.sysmessage(".. could not be teleported ..");
+		} else {
+			if( !FollowCheckTeleport( player ) )
 				return false;
-			}
 		}
 	}
 
@@ -1532,6 +1703,29 @@ bool PlayerbotAI::Follow(Player& player) {
 		return true;
 	}
 	return false;
+}
+
+bool PlayerbotAI::FollowCheckTeleport( WorldObject &obj ) {
+	// if bot has strayed too far from the master, teleport bot
+	sLog.outDebug( "[PlayerbotAI]: %s (m=%d,z=%d,[%.2f,%.2f,%.2f]) target (m=%d,z=%d,[%.2f,%.2f,%.2f])", m_bot->GetName(),
+		m_bot->GetMapId(), m_bot->GetZoneId(),
+		m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(),
+		obj.GetMapId(), obj.GetZoneId(),
+		obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ() );
+	if (m_bot->GetMapId() != obj.GetMapId() ||
+		m_bot->GetZoneId() != obj.GetZoneId() ||
+		(abs(abs(m_bot->GetPositionX()) - abs(obj.GetPositionX())) > 50) ||
+		(abs(abs(m_bot->GetPositionY()) - abs(obj.GetPositionY())) > 50) ||
+		(abs(abs(m_bot->GetPositionZ()) - abs(obj.GetPositionZ())) > 50)) {
+   		m_ignoreAIUpdatesUntilTime = time(0) + 6;
+		PlayerbotChatHandler ch(m_master);
+		if (! ch.teleport(*m_bot)) {
+			ch.sysmessage(".. could not be teleported ..");
+			sLog.outDebug( "[PlayerbotAI]: %s failed to teleport", m_bot->GetName() );
+			return false;
+		}
+	}
+	return true;
 }
 
 // handle commands sent through chat channels

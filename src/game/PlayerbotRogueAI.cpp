@@ -42,7 +42,7 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget){
 	PlayerbotAI* ai = GetAI();
 	if (!ai) return;
 	switch (ai->GetScenarioType()) {
-		case SCENARIO_DUEL:
+		case PlayerbotAI::SCENARIO_DUEL:
 
 			if (SINISTER_STRIKE > 0) {
 				ai->CastSpell(SINISTER_STRIKE);

@@ -99,7 +99,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget){
 	PlayerbotAI* ai = GetAI();
 	if (!ai) return;
 	switch (ai->GetScenarioType()) {
-		case SCENARIO_DUEL:
+		case PlayerbotAI::SCENARIO_DUEL:
 			(ai->HasAura(SCREAM,*pTarget) && ai->GetHealthPercent() < 60 && ai->CastSpell(HEAL)) ||
 			ai->CastSpell(PAIN) ||
 			(ai->GetHealthPercent() < 80 && ai->CastSpell(RENEW)) ||

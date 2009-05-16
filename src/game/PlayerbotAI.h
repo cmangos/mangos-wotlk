@@ -10,15 +10,39 @@ class Object;
 class Item;
 class PlayerbotClassAI;
 
-enum ScenarioType {
-	SCENARIO_PVEEASY,
-	SCENARIO_PVEHARD,
-	SCENARIO_DUEL,
-	SCENARIO_PVPEASY,
-	SCENARIO_PVPHARD
-};
-
 class MANGOS_DLL_SPEC PlayerbotAI {
+	public:
+		enum ScenarioType {
+			SCENARIO_PVEEASY,
+			SCENARIO_PVEHARD,
+			SCENARIO_DUEL,
+			SCENARIO_PVPEASY,
+			SCENARIO_PVPHARD
+		};
+
+		// masters orders that should be obeyed by the AI during the updteAI routine
+		// the master will auto set the target of the bot
+		enum CombatOrderType {
+			ORDERS_NONE,
+			ORDERS_KILL,
+			ORDERS_CC,
+			ORDERS_HEAL,
+			ORDERS_TANK,
+			ORDERS_PROTECT,
+			ORDERS_REGEN
+		};
+
+		enum BotState {
+			BOTSTATE_NORMAL,		// normal AI routines are processed
+			BOTSTATE_COMBAT,		// bot is in combat
+			BOTSTATE_DEAD,			// we are dead and wait for becoming ghost
+			BOTSTATE_DEADRELEASED,	// we released as ghost and wait to revive
+			BOTSTATE_LOOTING		// looting mode, used just after combat
+		};
+
+		typedef std::map<uint32, uint32> BotNeedItem;
+		typedef std::list<uint64> BotLootCreature;
+
     public:
 	// ******* Stuff the outside world calls ****************************
         PlayerbotAI(Player* const master, Player* const bot);
@@ -88,7 +112,6 @@ class MANGOS_DLL_SPEC PlayerbotAI {
 		uint8 GetEnergyAmount(const Unit& target) const;
 		uint8 GetEnergyAmount() const;
 
-
         Item* FindFood() const;
         Item* FindDrink() const;
         Item* FindBandage() const;
@@ -115,50 +138,53 @@ class MANGOS_DLL_SPEC PlayerbotAI {
 
 		Player *GetPlayerBot() {return m_bot;}
 
+		BotState GetState() { return m_botState; };
+		void SetState( BotState state );
+		void SetQuestNeedItems();
+		bool FollowCheckTeleport( WorldObject &obj );
+		void DoLoot();
+
     private:
+		// ****** Closed Actions ********************************
+		// These actions may only be called at special times.
+		// Trade methods are only applicable when the trade window is open
+		// and are only called from within HandleCommand.
+		bool TradeItem(const Item& item);
+		bool TradeCopper(uint32 copper);
 
-	// ****** Closed Actions ********************************
-	// These actions may only be called at special times.
-	// Trade methods are only applicable when the trade window is open
-	// and are only called from within HandleCommand.
-        bool TradeItem(const Item& item);
-        bool TradeCopper(uint32 copper);
-
-	// it is safe to keep these back reference pointers because m_bot
-        // owns the "this" object and m_master owns m_bot. The owner always cleans up.
-	Player* const m_master;
-	Player* const m_bot;
+		// it is safe to keep these back reference pointers because m_bot
+		// owns the "this" object and m_master owns m_bot. The owner always cleans up.
+		Player* const m_master;
+		Player* const m_bot;
 		PlayerbotClassAI* m_classAI;
 
-	// ignores AI updates until time specified
-	// no need to waste CPU cycles during casting etc
-	time_t m_ignoreAIUpdatesUntilTime;
+		// ignores AI updates until time specified
+		// no need to waste CPU cycles during casting etc
+		time_t m_ignoreAIUpdatesUntilTime;
 
-	// masters orders that should be obeyed by the AI during the updteAI routine
-	// the master will auto set the target of the bot
-	enum CombatOrderType {
-		ORDERS_NONE,
-		ORDERS_KILL,
-		ORDERS_CC,
-		ORDERS_HEAL,
-		ORDERS_TANK,
-		ORDERS_PROTECT,
-		ORDERS_REGEN
-	};
-	CombatOrderType m_combatOrder;
+		CombatOrderType m_combatOrder;
 
 		ScenarioType m_ScenarioType;
 
-	time_t m_TimeDoneEating;
-	time_t m_TimeDoneDrinking;
-	uint32 m_CurrentlyCastingSpellId;
-	bool m_IsFollowingMaster;
+		// defines the state of behaviour of the bot
+		BotState m_botState;
 
-	// if master commands bot to do something, store here until updateAI
-	// can do it
-	uint32 m_spellIdCommand;
-	uint64 m_targetGuidCommand;
+		// list of items needed to fullfill quests
+		BotNeedItem m_needItemList;
+
+		// list of creatures we recently attacked and want to loot
+		BotLootCreature m_lootCreature;	// list of creatures
+		uint64 m_lootCurrent;			// current remains of interest
+
+		time_t m_TimeDoneEating;
+		time_t m_TimeDoneDrinking;
+		uint32 m_CurrentlyCastingSpellId;
+		bool m_IsFollowingMaster;
+
+		// if master commands bot to do something, store here until updateAI
+		// can do it
+		uint32 m_spellIdCommand;
+		uint64 m_targetGuidCommand;
 };
-
 
 #endif
