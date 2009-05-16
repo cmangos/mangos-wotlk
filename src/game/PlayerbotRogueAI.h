@@ -5,9 +5,9 @@
 #include "PlayerbotClassAI.h"
 
 enum {
-	SPELL_COMBAT,
-	SPELL_SUBTLETY,
-	SPELL_ASSASSINATION
+	RogueCombat,
+	RogueSpellPreventing,
+	Threat
 };
 
 
