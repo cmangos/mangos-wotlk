@@ -153,7 +153,6 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget){
 			break;
 	}
 }
->>>>>>> origin/master:src/game/PlayerbotRogueAI.cpp
 	
  // end DoNextCombatManeuver
 
