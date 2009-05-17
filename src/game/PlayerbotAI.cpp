@@ -1449,6 +1449,10 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit& target) {
 }
 
 bool PlayerbotAI::CastSpell(uint32 spellId) {
+	// some AIs don't check if the bot doesn't have spell before using it
+	// so just return false when this happens
+	if (spellId == 0)
+		return false;
 
 	// see Creature.cpp 1738 for reference
 	// don't allow bot to cast damage spells on friends
