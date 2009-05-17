@@ -735,15 +735,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 		return;
 	}
 
-	// the server sends this packet when it wants the client to acknowledge that toon was teleported close by
-	case MSG_MOVE_TELEPORT_ACK: {
-		WorldPacket p = WorldPacket(MSG_MOVE_TELEPORT_ACK, 8 + 4 + 4);
-		p << m_bot->GetGUID();
-		p << (uint32) 0; // supposed to be flags? not used currently
-		p << (uint32) time(0); // time - not currently used
-		m_bot->GetSession()->HandleMoveTeleportAck(p);
-	}
-
 	/* uncomment this and your bots will tell you all their outgoing packet opcode names
 	case SMSG_MONSTER_MOVE:
 	case SMSG_UPDATE_WORLD_STATE:
@@ -1239,7 +1230,7 @@ void PlayerbotAI::DoLoot() {
 					continue;
 				}
 				if( m_needItemList[item->itemid]>0 ) {
-					sLog.outDebug( "[PlayerbotAI]: %s looting: needed item '%s'", m_bot->GetName(), objmgr.GetItemLocale(item->itemid)->Name );
+					//sLog.outDebug( "[PlayerbotAI]: %s looting: needed item '%s'", m_bot->GetName(), objmgr.GetItemLocale(item->itemid)->Name );
 				    ItemPosCountVec dest;
 					if( m_bot->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item->itemid, item->count ) == EQUIP_ERR_OK ) {
 						Item * newitem = m_bot->StoreNewItem( dest, item->itemid, true, item->randomPropertyId);
@@ -1277,7 +1268,7 @@ void PlayerbotAI::DoLoot() {
 			// clear movement target, take next target on next update
 			m_bot->GetMotionMaster()->Clear();
 			m_bot->GetMotionMaster()->MoveIdle();
-			sLog.outDebug( "[PlayerbotAI]: %s looted target 0x%08X", m_bot->GetName(), m_lootCurrent );
+			//sLog.outDebug( "[PlayerbotAI]: %s looted target 0x%08X", m_bot->GetName(), m_lootCurrent );
 			m_lootCurrent = 0;
 		}
 	}
@@ -1347,7 +1338,7 @@ void PlayerbotAI::UpdateAI(const uint32 p_time) {
 			// check if we are allowed to resurrect now
 			if( corpse->GetGhostTime() + m_bot->GetCorpseReclaimDelay( corpse->GetType()==CORPSE_RESURRECTABLE_PVP ) > time(0) ) {
 				m_ignoreAIUpdatesUntilTime = corpse->GetGhostTime() + m_bot->GetCorpseReclaimDelay( corpse->GetType()==CORPSE_RESURRECTABLE_PVP );
-				sLog.outDebug( "[PlayerbotAI]: %s has to wait for %d seconds to revive...", m_bot->GetName(), m_ignoreAIUpdatesUntilTime-time(0) );
+				//sLog.outDebug( "[PlayerbotAI]: %s has to wait for %d seconds to revive...", m_bot->GetName(), m_ignoreAIUpdatesUntilTime-time(0) );
 				return;
 			}
 			// resurrect now
@@ -1716,11 +1707,8 @@ bool PlayerbotAI::FollowCheckTeleport( WorldObject &obj ) {
 		m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(),
 		obj.GetMapId(), obj.GetZoneId(),
 		obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ() );
-	if (m_bot->GetMapId() != obj.GetMapId() ||
-		m_bot->GetZoneId() != obj.GetZoneId() ||
-		(abs(abs(m_bot->GetPositionX()) - abs(obj.GetPositionX())) > 50) ||
-		(abs(abs(m_bot->GetPositionY()) - abs(obj.GetPositionY())) > 50) ||
-		(abs(abs(m_bot->GetPositionZ()) - abs(obj.GetPositionZ())) > 50)) {
+
+	if (! m_bot->IsInMap(&obj) || ! m_bot->IsInRange(&obj, 0, 50)) {
    		m_ignoreAIUpdatesUntilTime = time(0) + 6;
 		PlayerbotChatHandler ch(m_master);
 		if (! ch.teleport(*m_bot)) {
@@ -1730,6 +1718,20 @@ bool PlayerbotAI::FollowCheckTeleport( WorldObject &obj ) {
 		}
 	}
 	return true;
+}
+
+void PlayerbotAI::HandleTeleportAck() {
+	m_ignoreAIUpdatesUntilTime = time(0) + 6;
+	m_bot->GetMotionMaster()->Clear(true);
+	if (m_bot->IsBeingTeleportedNear()) {
+		WorldPacket p = WorldPacket(MSG_MOVE_TELEPORT_ACK, 8 + 4 + 4);
+		p << m_bot->GetGUID();
+		p << (uint32) 0; // supposed to be flags? not used currently
+		p << (uint32) time(0); // time - not currently used
+		m_bot->GetSession()->HandleMoveTeleportAck(p);
+	}
+	else if (m_bot->IsBeingTeleportedFar())
+		m_bot->GetSession()->HandleMoveWorldportAckOpcode();
 }
 
 // handle commands sent through chat channels

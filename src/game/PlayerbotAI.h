@@ -55,11 +55,16 @@ class MANGOS_DLL_SPEC PlayerbotAI {
         // from a whisper or from the party channel
         void HandleCommand(const std::string& text, Player& fromPlayer);
 
-        // This is called by WorldSession.pm
+        // This is called by WorldSession.cpp
         // It provides a view of packets normally sent to the client.
         // Since there is no client at the other end, the packets are dropped of course.
         // For a list of opcodes that can be caught see Opcodes.cpp (SMSG_* opcodes only)
         void HandleBotOutgoingPacket(const WorldPacket& packet);
+
+        // This is called by WorldSession.cpp
+        // when it detects that a bot is being teleported. It acknowledges to the server to complete the
+        // teleportation
+        void HandleTeleportAck();
 
         // This is called whenever the master sends a packet to the server.
         // These packets can be viewed, but not edited.
