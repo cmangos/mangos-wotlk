@@ -4,7 +4,9 @@
 #include "World.h"
 #include "SpellMgr.h"
 #include "PlayerbotAI.h"
+#include "PlayerbotDeathKnightAI.h"
 #include "PlayerbotDruidAI.h"
+#include "PlayerbotHunterAI.h"
 #include "PlayerbotMageAI.h"
 #include "PlayerbotPaladinAI.h"
 #include "PlayerbotPriestAI.h"
@@ -112,6 +114,12 @@ PlayerbotAI::PlayerbotAI(Player* const master, Player* const bot) :
 	case CLASS_DRUID:
 		m_classAI = (PlayerbotClassAI*) new PlayerbotDruidAI(master, m_bot, this);
 		break;
+  case CLASS_HUNTER:
+    m_classAI = (PlayerbotClassAI*)new PlayerbotHunterAI(master, m_bot, this);
+    break;
+  case CLASS_DEATH_KNIGHT:
+    m_classAI = (PlayerbotClassAI*)new PlayerbotDeathKnightAI(master, m_bot, this);
+    break;
 	}
 }
 PlayerbotAI::~PlayerbotAI() {
@@ -794,6 +802,12 @@ uint8 PlayerbotAI::GetEnergyAmount(const Unit& target) const {
 }
 uint8 PlayerbotAI::GetEnergyAmount() const {
 	return GetEnergyAmount(*m_bot);
+}
+uint8 PlayerbotAI::GetRunicPower(const Unit& target) const {
+    return (static_cast<float>(target.GetPower(POWER_RUNIC_POWER)));
+}
+uint8 PlayerbotAI::GetRunicPower() const {
+    return GetRunicPower(*m_bot);
 }
 
 typedef std::pair<uint32, uint8> spellEffectPair;
