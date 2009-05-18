@@ -6,7 +6,7 @@ This was taken from the Trinity site, and modified slightly by me to get some of
 
 Bots will only use abilities that they have - for example, a priest will only use the renew spell if it has been trained. Also, bot's equipment will lose durability like any other character. So every so often you'll need to log in and repair and train your bot.
 
-For Mangos 7568
+For Mangos 7800+
 
 Commands:
 
@@ -22,6 +22,8 @@ Commands:
 /t BOTNAME cast <SPELL SUBSTRING>
 /t BOTNAME use <ITEM LINK>
 /t BOTNAME equip <ITEM LINK>
+/t BOTNAME reset (will reset states, orders and loot list)
+/t BOTNAME report (bot reports all items needed to finish quests)
 
 If specifying a spell substring, the spell chosen will be in priority of exact name match, highest spell rank, and spell using no reagents. Case does not matter. Here's some examples:
 /t BOTNAME cast greater heal

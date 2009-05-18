@@ -83,9 +83,9 @@ class MANGOS_DLL_SPEC PlayerbotAI {
 
 	// ******* Utilities ***************************************************
 
-	// finds spell ID for matching substring args
+		// finds spell ID for matching substring args
         // in priority of full text match, spells not taking reagents, and highest rank
-	uint32 getSpellId(const char* args) const;
+		uint32 getSpellId(const char* args) const;
 
         // extracts item ids from links
         void extractItemIds(const std::string& text, std::list<uint32>& itemIds) const;
@@ -148,6 +148,7 @@ class MANGOS_DLL_SPEC PlayerbotAI {
 		BotState GetState() { return m_botState; };
 		void SetState( BotState state );
 		void SetQuestNeedItems();
+		void SendQuestItemList( Player& player );
 		bool FollowCheckTeleport( WorldObject &obj );
 		void DoLoot();
 
