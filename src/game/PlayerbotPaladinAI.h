@@ -45,3 +45,4 @@ class MANGOS_DLL_SPEC PlayerbotPaladinAI : PlayerbotClassAI {
 };
 
 #endif
+

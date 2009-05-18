@@ -205,15 +205,15 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 			//GetAI()->TellMaster("Case SpellPreventing");
 			if (SPELL_REFLECTION > 0 && m_bot->HasAura(DEFENSIVE_STANCE, 0) && pTarget->getVictim() == m_bot && pTarget->IsNonMeleeSpellCasted(true) && ai->GetRageAmount() >= 15) {
 				GetAI()->CastSpell (SPELL_REFLECTION, *m_bot);
-				GetAI()->TellMaster("SpellRef");
+				//GetAI()->TellMaster("SpellRef");
 			}
 			else if (PUMMEL > 0 && m_bot->HasAura(BERSERKER_STANCE, 0) && pTarget->IsNonMeleeSpellCasted(true) && ai->GetRageAmount() >= 10) {
 				GetAI()->CastSpell (PUMMEL, *pTarget);
-				GetAI()->TellMaster("PUMMEL");
+				//GetAI()->TellMaster("PUMMEL");
 			}
 			else {
 				GetAI()->CastSpell (SHIELD_BASH, *pTarget);
-				GetAI()->TellMaster("SHBash");
+				//GetAI()->TellMaster("SHBash");
 			}
 			break;
 	}
@@ -225,14 +225,19 @@ void PlayerbotWarriorAI::DoNonCombatActions(){
 		return;
 	}
 
-	if (COMMANDING_SHOUT > 0 && !m_bot->HasAura(COMMANDING_SHOUT, 0)) {
-		if (BLOODRAGE > 0) {
-			GetAI()->CastSpell (BLOODRAGE, *m_bot);
-		}		
-	}
-
-	if (COMMANDING_SHOUT > 0 && !m_bot->HasAura(COMMANDING_SHOUT, 0)) {
-		GetAI()->CastSpell (COMMANDING_SHOUT, *m_bot);
+	// TODO (by Runsttren): check if shout aura bot has is casted by this bot, 
+	// otherwise cast other useful shout
+	if( ( (COMMANDING_SHOUT>0 && !m_bot->HasAura( COMMANDING_SHOUT, 0 )) ||
+		(BATTLE_SHOUT>0 && !m_bot->HasAura( BATTLE_SHOUT, 0 )) ) && 
+		GetAI()->GetRageAmount()<10 && BLOODRAGE>0 && !m_bot->HasAura( BLOODRAGE, 0 ) ) {
+		// we do have a useful shout, no rage coming but can cast bloodrage... do it
+		GetAI()->CastSpell( BLOODRAGE, *m_bot );
+	} else if( COMMANDING_SHOUT>0 && !m_bot->HasAura( COMMANDING_SHOUT, 0 ) ) {
+		// use commanding shout now
+		GetAI()->CastSpell( COMMANDING_SHOUT, *m_bot );
+	} else if( BATTLE_SHOUT>0 && !m_bot->HasAura( BATTLE_SHOUT, 0 ) ) {
+		// use battle shout
+		GetAI()->CastSpell( BATTLE_SHOUT, *m_bot );
 	}
 
 	// hp check
