@@ -4,7 +4,9 @@
 #include "World.h"
 #include "SpellMgr.h"
 #include "PlayerbotAI.h"
+#include "PlayerbotDeathKnightAI.h"
 #include "PlayerbotDruidAI.h"
+#include "PlayerbotHunterAI.h"
 #include "PlayerbotMageAI.h"
 #include "PlayerbotPaladinAI.h"
 #include "PlayerbotPriestAI.h"
@@ -112,6 +114,12 @@ PlayerbotAI::PlayerbotAI(Player* const master, Player* const bot) :
 	case CLASS_DRUID:
 		m_classAI = (PlayerbotClassAI*) new PlayerbotDruidAI(master, m_bot, this);
 		break;
+  case CLASS_HUNTER:
+    m_classAI = (PlayerbotClassAI*)new PlayerbotHunterAI(master, m_bot, this);
+    break;
+  case CLASS_DEATH_KNIGHT:
+    m_classAI = (PlayerbotClassAI*)new PlayerbotDeathKnightAI(master, m_bot, this);
+    break;
 	}
 }
 PlayerbotAI::~PlayerbotAI() {
@@ -749,15 +757,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 		return;
 	}
 
-	// the server sends this packet when it wants the client to acknowledge that toon was teleported close by
-	case MSG_MOVE_TELEPORT_ACK: {
-		WorldPacket p = WorldPacket(MSG_MOVE_TELEPORT_ACK, 8 + 4 + 4);
-		p << m_bot->GetGUID();
-		p << (uint32) 0; // supposed to be flags? not used currently
-		p << (uint32) time(0); // time - not currently used
-		m_bot->GetSession()->HandleMoveTeleportAck(p);
-	}
-
 	/* uncomment this and your bots will tell you all their outgoing packet opcode names
 	case SMSG_MONSTER_MOVE:
 	case SMSG_UPDATE_WORLD_STATE:
@@ -817,6 +816,12 @@ uint8 PlayerbotAI::GetEnergyAmount(const Unit& target) const {
 }
 uint8 PlayerbotAI::GetEnergyAmount() const {
 	return GetEnergyAmount(*m_bot);
+}
+uint8 PlayerbotAI::GetRunicPower(const Unit& target) const {
+    return (static_cast<float>(target.GetPower(POWER_RUNIC_POWER)));
+}
+uint8 PlayerbotAI::GetRunicPower() const {
+    return GetRunicPower(*m_bot);
 }
 
 typedef std::pair<uint32, uint8> spellEffectPair;
@@ -1218,13 +1223,13 @@ void PlayerbotAI::SetQuestNeedItems() {
 }
 
 void PlayerbotAI::SetState( BotState state ) {
-	sLog.outDetail( "[PlayerbotAI]: %s switch state %d to %d", m_bot->GetName(), m_botState, state );
+	//sLog.outDebug( "[PlayerbotAI]: %s switch state %d to %d", m_bot->GetName(), m_botState, state );
 	m_botState = state;
 }
 
 void PlayerbotAI::DoLoot() {
 	if( !m_lootCurrent && m_lootCreature.empty() ) {
-		sLog.outDetail( "[PlayerbotAI]: %s reset loot list / go back to idle", m_bot->GetName() );
+		//sLog.outDebug( "[PlayerbotAI]: %s reset loot list / go back to idle", m_bot->GetName() );
 		m_botState = BOTSTATE_NORMAL;
 		SetQuestNeedItems();
 		return;
@@ -1238,7 +1243,7 @@ void PlayerbotAI::DoLoot() {
 		if( !c ) { m_lootCurrent = 0; return; }
 		c->GetPosition( loc );
 		m_bot->GetMotionMaster()->MovePoint( loc.mapid, loc.x, loc.y, loc.z );
-		sLog.outDetail( "[PlayerbotAI]: %s is going to loot '%s'", m_bot->GetName(), c->GetName() );
+		//sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s'", m_bot->GetName(), c->GetName() );
 	} else {
 		Creature *c = m_bot->GetMap()->GetCreature( m_lootCurrent );
 		if( !c ) { m_lootCurrent = 0; return; }
@@ -1247,7 +1252,7 @@ void PlayerbotAI::DoLoot() {
 			m_bot->SendLoot( m_lootCurrent, LOOT_CORPSE );
 			Loot *loot = &c->loot;
 			uint32 lootNum = loot->GetMaxSlotInLootFor( m_bot );
-			sLog.outDetail( "[PlayerbotAI]: %s looting: '%s' got %d items", m_bot->GetName(), c->GetName(), loot->GetMaxSlotInLootFor( m_bot ) );
+			//sLog.outDebug( "[PlayerbotAI]: %s looting: '%s' got %d items", m_bot->GetName(), c->GetName(), loot->GetMaxSlotInLootFor( m_bot ) );
 			for( uint32 l=0; l<lootNum; l++ ) {
 				QuestItem *qitem=0, *ffaitem=0, *conditem=0;
 				LootItem *item = loot->LootItemInSlot( l, m_bot, &qitem, &ffaitem, &conditem );
@@ -1257,8 +1262,8 @@ void PlayerbotAI::DoLoot() {
 					continue;
 				}
 				if( m_needItemList[item->itemid]>0 ) {
-					sLog.outDetail( "[PlayerbotAI]: %s looting: needed item '%s'", m_bot->GetName(), objmgr.GetItemLocale(item->itemid)->Name );
-				    ItemPosCountVec dest;
+					//sLog.outDebug( "[PlayerbotAI]: %s looting: needed item '%s'", m_bot->GetName(), objmgr.GetItemLocale(item->itemid)->Name );
+					ItemPosCountVec dest;
 					if( m_bot->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item->itemid, item->count ) == EQUIP_ERR_OK ) {
 						Item * newitem = m_bot->StoreNewItem( dest, item->itemid, true, item->randomPropertyId);
 
@@ -1287,15 +1292,15 @@ void PlayerbotAI::DoLoot() {
 				}
 			}
 			// release loot
-		    if( uint64 lguid = m_bot->GetLootGUID() && m_bot->GetSession() )
+			if( uint64 lguid = m_bot->GetLootGUID() && m_bot->GetSession() )
 				m_bot->GetSession()->DoLootRelease( lguid );
-			else if( !m_bot->GetSession() )
-				sLog.outDetail( "[PlayerbotAI]: %s has no session. Cannot release loot!", m_bot->GetName() );
+			//else if( !m_bot->GetSession() )
+			//	sLog.outDebug( "[PlayerbotAI]: %s has no session. Cannot release loot!", m_bot->GetName() );
 
 			// clear movement target, take next target on next update
 			m_bot->GetMotionMaster()->Clear();
 			m_bot->GetMotionMaster()->MoveIdle();
-			sLog.outDetail( "[PlayerbotAI]: %s looted target 0x%08X", m_bot->GetName(), m_lootCurrent );
+			//sLog.outDebug( "[PlayerbotAI]: %s looted target 0x%08X", m_bot->GetName(), m_lootCurrent );
 			m_lootCurrent = 0;
 		}
 	}
@@ -1321,7 +1326,7 @@ void PlayerbotAI::UpdateAI(const uint32 p_time) {
 
 	if( !m_bot->isAlive() ) {
 		if( m_botState != BOTSTATE_DEAD && m_botState != BOTSTATE_DEADRELEASED ) {
-			sLog.outDetail( "[PlayerbotAI]: %s died and is not in correct state...", m_bot->GetName() );
+			//sLog.outDebug( "[PlayerbotAI]: %s died and is not in correct state...", m_bot->GetName() );
 			// clear loot list on death
 			m_lootCreature.clear();
 			m_lootCurrent = 0;
@@ -1356,20 +1361,20 @@ void PlayerbotAI::UpdateAI(const uint32 p_time) {
 			// get bot's corpse
 			Corpse *corpse = m_bot->GetCorpse();
 			if( !corpse ) {
-				sLog.outDetail( "[PlayerbotAI]: %s has no corpse!", m_bot->GetName() );
+				//sLog.outDebug( "[PlayerbotAI]: %s has no corpse!", m_bot->GetName() );
 				return;
 			}
 			// teleport ghost from graveyard to corpse
-			sLog.outDetail( "[PlayerbotAI]: Teleport %s to corpse...", m_bot->GetName() );
+			//sLog.outDebug( "[PlayerbotAI]: Teleport %s to corpse...", m_bot->GetName() );
 			FollowCheckTeleport( *corpse );
 			// check if we are allowed to resurrect now
 			if( corpse->GetGhostTime() + m_bot->GetCorpseReclaimDelay( corpse->GetType()==CORPSE_RESURRECTABLE_PVP ) > time(0) ) {
 				m_ignoreAIUpdatesUntilTime = corpse->GetGhostTime() + m_bot->GetCorpseReclaimDelay( corpse->GetType()==CORPSE_RESURRECTABLE_PVP );
-				sLog.outDetail( "[PlayerbotAI]: %s has to wait for %d seconds to revive...", m_bot->GetName(), m_ignoreAIUpdatesUntilTime-time(0) );
+				//sLog.outDebug( "[PlayerbotAI]: %s has to wait for %d seconds to revive...", m_bot->GetName(), m_ignoreAIUpdatesUntilTime-time(0) );
 				return;
 			}
 			// resurrect now
-			sLog.outDetail( "[PlayerbotAI]: Reviving %s to corpse...", m_bot->GetName() );
+			//sLog.outDebug( "[PlayerbotAI]: Reviving %s to corpse...", m_bot->GetName() );
     		m_ignoreAIUpdatesUntilTime = time(0) + 6;
 			PlayerbotChatHandler ch(m_master);
 			if (! ch.revive(*m_bot)) {
@@ -1465,6 +1470,10 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit& target) {
 }
 
 bool PlayerbotAI::CastSpell(uint32 spellId) {
+	// some AIs don't check if the bot doesn't have spell before using it
+	// so just return false when this happens
+	if (spellId == 0)
+		return false;
 
 	// see Creature.cpp 1738 for reference
 	// don't allow bot to cast damage spells on friends
@@ -1723,20 +1732,30 @@ bool PlayerbotAI::Follow(Player& player) {
 
 bool PlayerbotAI::FollowCheckTeleport( WorldObject &obj ) {
 	// if bot has strayed too far from the master, teleport bot
-	if (m_bot->GetMapId() != obj.GetMapId() ||
-		m_bot->GetZoneId() != obj.GetZoneId() ||
-		(abs(abs(m_bot->GetPositionX()) - abs(obj.GetPositionX())) > 50) ||
-		(abs(abs(m_bot->GetPositionY()) - abs(obj.GetPositionY())) > 50) ||
-		(abs(abs(m_bot->GetPositionZ()) - abs(obj.GetPositionZ())) > 50)) {
+	if (! m_bot->IsInMap(&obj) || ! m_bot->IsInRange(&obj, 0, 50)) {
    		m_ignoreAIUpdatesUntilTime = time(0) + 6;
 		PlayerbotChatHandler ch(m_master);
 		if (! ch.teleport(*m_bot)) {
 			ch.sysmessage(".. could not be teleported ..");
-			sLog.outDetail( "[PlayerbotAI]: %s failed to teleport", m_bot->GetName() );
+			//sLog.outDebug( "[PlayerbotAI]: %s failed to teleport", m_bot->GetName() );
 			return false;
 		}
 	}
 	return true;
+}
+
+void PlayerbotAI::HandleTeleportAck() {
+	m_ignoreAIUpdatesUntilTime = time(0) + 6;
+	m_bot->GetMotionMaster()->Clear(true);
+	if (m_bot->IsBeingTeleportedNear()) {
+		WorldPacket p = WorldPacket(MSG_MOVE_TELEPORT_ACK, 8 + 4 + 4);
+		p << m_bot->GetGUID();
+		p << (uint32) 0; // supposed to be flags? not used currently
+		p << (uint32) time(0); // time - not currently used
+		m_bot->GetSession()->HandleMoveTeleportAck(p);
+	}
+	else if (m_bot->IsBeingTeleportedFar())
+		m_bot->GetSession()->HandleMoveWorldportAckOpcode();
 }
 
 // handle commands sent through chat channels

@@ -1,8 +1,8 @@
     /* 
 	Name	: PlayerbotRogueAI.cpp
-    Complete: maybe around 27%
+    Complete: maybe around 28%
     Author	: Natsukawa
-	Version : 0.34
+	Version : 0.37
     */
 #include "PlayerbotRogueAI.h"
 
@@ -56,12 +56,16 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget){
 	}
 
 	//Rouge like behaviour. ^^
-	if (VANISH > 0 && GetMaster()->isDead()) {
+/*	if (VANISH > 0 && GetMaster()->isDead()) { //Causes the server to crash :( removed for now.
 		m_bot->AttackStop();
+		m_bot->RemoveAllAttackers();
 		ai->CastSpell(VANISH);
+//		m_bot->RemoveAllSpellCooldown();
+		GetAI()->TellMaster("AttackStop, CombatStop, Vanish");
 	}
-	if (m_bot->HasAura(SPELL_AURA_PERIODIC_DAMAGE)) {
+*/	if (pTarget->getVictim()->HasAura(SPELL_AURA_PERIODIC_DAMAGE)) {
 		ai->CastSpell(CLOAK_OF_SHADOWS, *m_bot);
+		GetAI()->TellMaster("CoS");
 	}
 	if (pTarget->getVictim() == m_bot && ai->GetHealthPercent() < 40) {
 		SpellSequence = Threat;
@@ -80,11 +84,13 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget){
 				GetAI()->TellMaster("Evasion");
 				ai->CastSpell(EVASION, *m_bot);
 			}
-			if (VANISH > 0 && ai->GetHealthPercent() < 20) {
-				m_bot->AttackStop();
+/*			else if (VANISH > 0 && ai->GetHealthPercent() < 20) { //Causes the server to crash :( removed for now.
+				m_bot->CombatStop();
+				m_bot->RemoveAllAttackers(); 
 				ai->CastSpell(VANISH);
+				GetAI()->TellMaster("AttackStop, CombatStop, Vanish");
 			}
-			else {
+*/			else {
 				ai->CastSpell(FEINT);
 				GetAI()->TellMaster("Feint");
 			}
@@ -110,45 +116,51 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget){
 			if (DISMANTLE > 0 && ai->GetEnergyAmount() >= 25) { 
 				ai->CastSpell(DISMANTLE, *pTarget);
 			}
-			if (EVISCERATE > 0 && m_bot->GetComboPoints() == 5 && pTarget->getClass() == CLASS_ROGUE && ai->GetEnergyAmount() >= 35) {
-				ai->CastSpell(EVISCERATE, *pTarget);
-				GetAI()->TellMaster("Rogue Eviscerate");
-			}
-			if (EVISCERATE > 0 && m_bot->GetComboPoints() == 5 && pTarget->getClass() == CLASS_DRUID && ai->GetEnergyAmount() >= 35) {
-				ai->CastSpell(EVISCERATE, *pTarget);
-				GetAI()->TellMaster("Druid Eviscerate");
-			}
-			if (KIDNEY_SHOT > 0 && m_bot->GetComboPoints() == 5 && pTarget->getClass() == CLASS_SHAMAN && ai->GetEnergyAmount() >= 25) {
-				ai->CastSpell(KIDNEY_SHOT, *pTarget);
-				GetAI()->TellMaster("Shaman Kidney");
-			}
-			if (SLICE_DICE > 0 && m_bot->GetComboPoints() == 5 && pTarget->getClass() == CLASS_WARLOCK && ai->GetEnergyAmount() >= 25) {
-				ai->CastSpell(SLICE_DICE, *pTarget);
-				GetAI()->TellMaster("Warlock Slice & Dice");
-			}
-			if (SLICE_DICE > 0 && m_bot->GetComboPoints() == 5 && pTarget->getClass() == CLASS_HUNTER && ai->GetEnergyAmount() >= 25) {
-				ai->CastSpell(SLICE_DICE, *pTarget);
-				GetAI()->TellMaster("Hunter Slice & Dice");
-			}
-			if (EXPOSE_ARMOR > 0 && m_bot->GetComboPoints() == 5 && pTarget->getClass() == CLASS_WARRIOR && ai->GetEnergyAmount() >= 25) {
-				ai->CastSpell(EXPOSE_ARMOR, *pTarget);
-				GetAI()->TellMaster("Warrior Expose Armor");
-			}
-			if (EXPOSE_ARMOR > 0 && m_bot->GetComboPoints() == 5 && pTarget->getClass() == CLASS_PALADIN && ai->GetEnergyAmount() >= 25) {
-				ai->CastSpell(EXPOSE_ARMOR, *pTarget);
-				GetAI()->TellMaster("Paladin Expose Armor");
-			}
-			if (EXPOSE_ARMOR > 0 && m_bot->GetComboPoints() == 5 && pTarget->getClass() == CLASS_DEATH_KNIGHT && ai->GetEnergyAmount() >= 25) {
-				ai->CastSpell(EXPOSE_ARMOR, *pTarget);
-				GetAI()->TellMaster("DK Expose Armor");
-			}
-			if (RUPTURE > 0 && m_bot->GetComboPoints() == 5 && pTarget->getClass() == CLASS_MAGE && ai->GetEnergyAmount() >= 25) {
-				ai->CastSpell(EXPOSE_ARMOR, *pTarget);
-				GetAI()->TellMaster("Mage Rupture");
-			}
-			if (RUPTURE > 0 && m_bot->GetComboPoints() == 5 && pTarget->getClass() == CLASS_PRIEST && ai->GetEnergyAmount() >= 25) {
-				ai->CastSpell(EXPOSE_ARMOR, *pTarget);
-				GetAI()->TellMaster("Priest Rupture");
+			if (m_bot->GetComboPoints() == 5) {
+				if (EVISCERATE > 0 && pTarget->getClass() == CLASS_ROGUE && ai->GetEnergyAmount() >= 35) {
+					ai->CastSpell(EVISCERATE, *pTarget);
+					GetAI()->TellMaster("Rogue Eviscerate");
+				}
+				else if (EVISCERATE > 0 && pTarget->getClass() == CLASS_DRUID && ai->GetEnergyAmount() >= 35) {
+					ai->CastSpell(EVISCERATE, *pTarget);
+					GetAI()->TellMaster("Druid Eviscerate");
+				}
+				else if (KIDNEY_SHOT > 0 && pTarget->getClass() == CLASS_SHAMAN && ai->GetEnergyAmount() >= 25) {
+					ai->CastSpell(KIDNEY_SHOT, *pTarget);
+					GetAI()->TellMaster("Shaman Kidney");
+				}
+				else if (SLICE_DICE > 0 && pTarget->getClass() == CLASS_WARLOCK && ai->GetEnergyAmount() >= 25) {
+					ai->CastSpell(SLICE_DICE, *pTarget);
+					GetAI()->TellMaster("Warlock Slice & Dice");
+				}
+				else if (SLICE_DICE > 0 && pTarget->getClass() == CLASS_HUNTER && ai->GetEnergyAmount() >= 25) {
+					ai->CastSpell(SLICE_DICE, *pTarget);
+					GetAI()->TellMaster("Hunter Slice & Dice");
+				}
+				else if (EXPOSE_ARMOR > 0 && pTarget->getClass() == CLASS_WARRIOR && ai->GetEnergyAmount() >= 25) {
+					ai->CastSpell(EXPOSE_ARMOR, *pTarget);
+					GetAI()->TellMaster("Warrior Expose Armor");
+				}
+				else if (EXPOSE_ARMOR > 0 && pTarget->getClass() == CLASS_PALADIN && ai->GetEnergyAmount() >= 25) {
+					ai->CastSpell(EXPOSE_ARMOR, *pTarget);
+					GetAI()->TellMaster("Paladin Expose Armor");
+				}
+				else if (EXPOSE_ARMOR > 0 && pTarget->getClass() == CLASS_DEATH_KNIGHT && ai->GetEnergyAmount() >= 25) {
+					ai->CastSpell(EXPOSE_ARMOR, *pTarget);
+					GetAI()->TellMaster("DK Expose Armor");
+				}
+				else if (RUPTURE > 0 && pTarget->getClass() == CLASS_MAGE && ai->GetEnergyAmount() >= 25) {
+					ai->CastSpell(EXPOSE_ARMOR, *pTarget);
+					GetAI()->TellMaster("Mage Rupture");
+				}
+				else if (RUPTURE > 0 && pTarget->getClass() == CLASS_PRIEST && ai->GetEnergyAmount() >= 25) {
+					ai->CastSpell(EXPOSE_ARMOR, *pTarget);
+					GetAI()->TellMaster("Priest Rupture");
+				}
+				else {
+					ai->CastSpell(EVISCERATE, *pTarget);
+					GetAI()->TellMaster("Else Eviscerate");
+				}
 			}
 			break;
 	}
@@ -161,6 +173,7 @@ void PlayerbotRogueAI::DoNonCombatActions(){
 	if (!m_bot) {
 		return;
 	}
+	
 	// hp check
 	if (m_bot->getStandState() != PLAYER_STATE_NONE)
 		m_bot->SetStandState(PLAYER_STATE_NONE);

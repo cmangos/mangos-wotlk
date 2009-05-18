@@ -240,8 +240,8 @@ bool WorldSession::Update(uint32 /*diff*/)
     for (PlayerBotMap::const_iterator itr = GetPlayerBotsBegin(); itr != GetPlayerBotsEnd(); ++itr) {
         Player* const botPlayer = itr->second;
         WorldSession* const pBotWorldSession = botPlayer->GetSession();
-        if (botPlayer->IsBeingTeleportedFar())
-            pBotWorldSession->HandleMoveWorldportAckOpcode();
+        if (botPlayer->IsBeingTeleported())
+        	botPlayer->GetPlayerbotAI()->HandleTeleportAck();
         else if (botPlayer->IsInWorld()) {
             while (! pBotWorldSession->_recvQueue.empty()) {
                 WorldPacket* const packet = pBotWorldSession->_recvQueue.next();
