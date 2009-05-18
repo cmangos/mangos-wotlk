@@ -2,7 +2,7 @@
 	Name	: PlayerbotPaladinAI.cpp
     Complete: maybe around 27% :D
     Author	: Natsukawa
-	Version : 0.33
+	Version : 0.35
     */
 
 #include "PlayerbotPaladinAI.h"
@@ -68,32 +68,26 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget){
 				ai->CastSpell(HAND_OF_PROTECTION, *(GetMaster()));
 		}
 	}
-	if (SHADOW_RESISTANCE_AURA > 0) {
-		(!m_bot->HasAura(SHADOW_RESISTANCE_AURA, 0) && pTarget->getClass() == CLASS_WARLOCK && GetAI()->CastSpell (SHADOW_RESISTANCE_AURA, *m_bot));
+	if (SHADOW_RESISTANCE_AURA > 0 && !m_bot->HasAura(SHADOW_RESISTANCE_AURA, 0) && pTarget->getClass() == CLASS_WARLOCK) {
+		GetAI()->CastSpell (SHADOW_RESISTANCE_AURA, *m_bot);
 	}
-
-	if (DEVOTION_AURA > 0) {
-		(!m_bot->HasAura(DEVOTION_AURA, 0) && pTarget->getClass() == CLASS_WARRIOR && GetAI()->CastSpell (DEVOTION_AURA, *m_bot));
+	if (DEVOTION_AURA > 0 && !m_bot->HasAura(DEVOTION_AURA, 0) && pTarget->getClass() == CLASS_WARRIOR) {
+		GetAI()->CastSpell (DEVOTION_AURA, *m_bot);
 	}
-
-	if (FIRE_RESISTANCE_AURA > 0) {
-		(!m_bot->HasAura(FIRE_RESISTANCE_AURA, 0) && pTarget->getClass() == CLASS_MAGE && GetAI()->CastSpell (FIRE_RESISTANCE_AURA, *m_bot));
+	if (FIRE_RESISTANCE_AURA > 0 && !m_bot->HasAura(FIRE_RESISTANCE_AURA, 0) && pTarget->getClass() == CLASS_MAGE) {
+		GetAI()->CastSpell (FIRE_RESISTANCE_AURA, *m_bot);
 	}
-
-	if (RETRIBUTION_AURA > 0) {
-		(!m_bot->HasAura(RETRIBUTION_AURA, 0) && pTarget->getClass() == CLASS_PRIEST && GetAI()->CastSpell (RETRIBUTION_AURA, *m_bot));
+	if (RETRIBUTION_AURA > 0 && !m_bot->HasAura(RETRIBUTION_AURA, 0) && pTarget->getClass() == CLASS_PRIEST) {
+		GetAI()->CastSpell (RETRIBUTION_AURA, *m_bot);
 	}
-
-	if (DEVOTION_AURA > 0) {
-		(!m_bot->HasAura(DEVOTION_AURA, 0) && pTarget->getClass() == CLASS_SHAMAN && GetAI()->CastSpell (DEVOTION_AURA, *m_bot));
+	if (DEVOTION_AURA > 0 && !m_bot->HasAura(DEVOTION_AURA, 0) && pTarget->getClass() == CLASS_SHAMAN) {
+		GetAI()->CastSpell (DEVOTION_AURA, *m_bot);
 	}
-
-	if (DEVOTION_AURA > 0) {
-		(!m_bot->HasAura(DEVOTION_AURA, 0) && pTarget->getClass() == CLASS_ROGUE && GetAI()->CastSpell (DEVOTION_AURA, *m_bot));
+	if (DEVOTION_AURA > 0 && !m_bot->HasAura(DEVOTION_AURA, 0) && pTarget->getClass() == CLASS_ROGUE) {
+		GetAI()->CastSpell (DEVOTION_AURA, *m_bot);
 	}
-
-	if (DEVOTION_AURA > 0) {
-		(!m_bot->HasAura(DEVOTION_AURA, 0) && pTarget->getClass() == CLASS_PALADIN && GetAI()->CastSpell (DEVOTION_AURA, *m_bot));
+	if (DEVOTION_AURA > 0 && !m_bot->HasAura(DEVOTION_AURA, 0) && pTarget->getClass() == CLASS_PALADIN) {
+		GetAI()->CastSpell (DEVOTION_AURA, *m_bot);
 	}
 	if (ai->GetHealthPercent() < 55) {
 		SpellSequence = Healing;
@@ -186,7 +180,7 @@ void PlayerbotPaladinAI::DoNonCombatActions(){
 
 	// buff myself
 	if (BLESSING_OF_MIGHT > 0 && !m_bot->HasAura(BLESSING_OF_MIGHT, 0)) {
-		GetAI()->CastSpell (BLESSING_OF_MIGHT, *m_bot;
+		GetAI()->CastSpell (BLESSING_OF_MIGHT, *m_bot);
 	}
 	if (RIGHTEOUS_FURY > 0 && !m_bot->HasAura(RIGHTEOUS_FURY, 0)) {
 		GetAI()->CastSpell (RIGHTEOUS_FURY, *m_bot);
@@ -199,59 +193,59 @@ void PlayerbotPaladinAI::DoNonCombatActions(){
 	//Select Class buff seq.
 	///Process Who is my master --> get the player class --> aura already present if not then proced --> cast the spell
 	//Priest
-	if (BLESSING_OF_WISDOM > 0 && GetMaster()->getClass()) == CLASS_PRIEST && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0) && !GetMaster()->HasAura(BLESSING_OF_WISDOM, 0)) {
-		GetAI()->CastSpell (BLESSING_OF_WISDOM, *(GetMaster());
+	if (BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_PRIEST && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0) && !GetMaster()->HasAura(BLESSING_OF_WISDOM, 0)) {
+		GetAI()->CastSpell (BLESSING_OF_WISDOM, *(GetMaster()));
 	}
-	if (GREATER_BLESSING_OF_WISDOM > 0 && GetMaster()->getClass()) == CLASS_PRIEST && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0)) {
-		GetAI()->CastSpell (GREATER_BLESSING_OF_WISDOM, *(GetMaster());
+	if (GREATER_BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_PRIEST && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0)) {
+		GetAI()->CastSpell (GREATER_BLESSING_OF_WISDOM, *(GetMaster()));
 	}
 	//Mage
-	if (BLESSING_OF_WISDOM > 0 && GetMaster()->getClass()) == CLASS_MAGE && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0) && !GetMaster()->HasAura(BLESSING_OF_WISDOM, 0)) {
-		GetAI()->CastSpell (BLESSING_OF_WISDOM, *(GetMaster());
+	if (BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_MAGE && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0) && !GetMaster()->HasAura(BLESSING_OF_WISDOM, 0)) {
+		GetAI()->CastSpell (BLESSING_OF_WISDOM, *(GetMaster()));
 	}
-	if (GREATER_BLESSING_OF_WISDOM > 0 && GetMaster()->getClass()) == CLASS_MAGE && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0)) {
-		GetAI()->CastSpell (GREATER_BLESSING_OF_WISDOM, *(GetMaster());
+	if (GREATER_BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_MAGE && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0)) {
+		GetAI()->CastSpell (GREATER_BLESSING_OF_WISDOM, *(GetMaster()));
 	}
 	//Paladin
-	if (BLESSING_OF_WISDOM > 0 && GetMaster()->getClass()) == CLASS_PALADIN && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0) && !GetMaster()->HasAura(BLESSING_OF_WISDOM, 0)) {
-		GetAI()->CastSpell (BLESSING_OF_WISDOM, *(GetMaster());
+	if (BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_PALADIN && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0) && !GetMaster()->HasAura(BLESSING_OF_WISDOM, 0)) {
+		GetAI()->CastSpell (BLESSING_OF_WISDOM, *(GetMaster()));
 	}
-	if (GREATER_BLESSING_OF_WISDOM > 0 && GetMaster()->getClass()) == CLASS_PALADIN && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0)) {
-		GetAI()->CastSpell (GREATER_BLESSING_OF_WISDOM, *(GetMaster());
+	if (GREATER_BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_PALADIN && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0)) {
+		GetAI()->CastSpell (GREATER_BLESSING_OF_WISDOM, *(GetMaster()));
 	}
 	//Warlock
-	if (BLESSING_OF_WISDOM > 0 && GetMaster()->getClass()) == CLASS_WARLOCK && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0) && !GetMaster()->HasAura(BLESSING_OF_WISDOM, 0)) {
-		GetAI()->CastSpell (BLESSING_OF_WISDOM, *(GetMaster());
+	if (BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_WARLOCK && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0) && !GetMaster()->HasAura(BLESSING_OF_WISDOM, 0)) {
+		GetAI()->CastSpell (BLESSING_OF_WISDOM, *(GetMaster()));
 	}
-	if (GREATER_BLESSING_OF_WISDOM > 0 && GetMaster()->getClass()) == CLASS_WARLOCK && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0)) {
-		GetAI()->CastSpell (GREATER_BLESSING_OF_WISDOM, *(GetMaster());
+	if (GREATER_BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_WARLOCK && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, 0)) {
+		GetAI()->CastSpell (GREATER_BLESSING_OF_WISDOM, *(GetMaster()));
 	}
 	//Warrior
-	if (BLESSING_OF_MIGHT > 0 && GetMaster()->getClass()) == CLASS_WARRIOR && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, 0) && !GetMaster()->HasAura(BLESSING_OF_MIGHT, 0) && !GetMaster()->HasAura(DEFENSIVE_STANCE, 0)) {
-		GetAI()->CastSpell (BLESSING_OF_MIGHT, *(GetMaster());
+	if (BLESSING_OF_MIGHT > 0 && GetMaster()->getClass() == CLASS_WARRIOR && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, 0) && !GetMaster()->HasAura(BLESSING_OF_MIGHT, 0) && !GetMaster()->HasAura(DEFENSIVE_STANCE, 0)) {
+		GetAI()->CastSpell (BLESSING_OF_MIGHT, *(GetMaster()));
 	}
-	if (GREATER_BLESSING_OF_MIGHT > 0 && GetMaster()->getClass()) == CLASS_WARRIOR && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, 0) && !GetMaster()->HasAura(DEFENSIVE_STANCE, 0)) {
-		GetAI()->CastSpell (GREATER_BLESSING_OF_MIGHT, *(GetMaster());
+	if (GREATER_BLESSING_OF_MIGHT > 0 && GetMaster()->getClass() == CLASS_WARRIOR && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, 0) && !GetMaster()->HasAura(DEFENSIVE_STANCE, 0)) {
+		GetAI()->CastSpell (GREATER_BLESSING_OF_MIGHT, *(GetMaster()));
 	}
-	if (BLESSING_OF_KINGS > 0 && GetMaster()->getClass()) == CLASS_WARRIOR && !GetMaster()->HasAura(GREATER_BLESSING_OF_KINGS, 0) && !GetMaster()->HasAura(BLESSING_OF_KINGS, 0) && !GetMaster()->HasAura(BERSERKER_STANCE, 0) && !GetMaster()->HasAura(BATTLE_STANCE, 0)) {
-		GetAI()->CastSpell (BLESSING_OF_KINGS, *(GetMaster());
+	if (BLESSING_OF_KINGS > 0 && GetMaster()->getClass() == CLASS_WARRIOR && !GetMaster()->HasAura(GREATER_BLESSING_OF_KINGS, 0) && !GetMaster()->HasAura(BLESSING_OF_KINGS, 0) && !GetMaster()->HasAura(BERSERKER_STANCE, 0) && !GetMaster()->HasAura(BATTLE_STANCE, 0)) {
+		GetAI()->CastSpell (BLESSING_OF_KINGS, *(GetMaster()));
 	}
-	if (GREATER_BLESSING_OF_KINGS > 0 && GetMaster()->getClass()) == CLASS_WARRIOR && !GetMaster()->HasAura(GREATER_BLESSING_OF_KINGS, 0) && !GetMaster()->HasAura(BERSERKER_STANCE, 0) && !GetMaster()->HasAura(BATTLE_STANCE, 0)) {
-		GetAI()->CastSpell (GREATER_BLESSING_OF_KINGS, *(GetMaster());
+	if (GREATER_BLESSING_OF_KINGS > 0 && GetMaster()->getClass() == CLASS_WARRIOR && !GetMaster()->HasAura(GREATER_BLESSING_OF_KINGS, 0) && !GetMaster()->HasAura(BERSERKER_STANCE, 0) && !GetMaster()->HasAura(BATTLE_STANCE, 0)) {
+		GetAI()->CastSpell (GREATER_BLESSING_OF_KINGS, *(GetMaster()));
 	}
 	//Rogue
-	if (BLESSING_OF_MIGHT > 0 && GetMaster()->getClass()) == CLASS_ROGUE && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, 0) && !GetMaster()->HasAura(BLESSING_OF_MIGHT, 0)) {
-		GetAI()->CastSpell (BLESSING_OF_MIGHT, *(GetMaster());
+	if (BLESSING_OF_MIGHT > 0 && GetMaster()->getClass() == CLASS_ROGUE && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, 0) && !GetMaster()->HasAura(BLESSING_OF_MIGHT, 0)) {
+		GetAI()->CastSpell (BLESSING_OF_MIGHT, *(GetMaster()));
 	}
-	if (GREATER_BLESSING_OF_MIGHT > 0 && GetMaster()->getClass()) == CLASS_ROGUE && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, 0)) {
-		GetAI()->CastSpell (GREATER_BLESSING_OF_MIGHT, *(GetMaster());
+	if (GREATER_BLESSING_OF_MIGHT > 0 && GetMaster()->getClass() == CLASS_ROGUE && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, 0)) {
+		GetAI()->CastSpell (GREATER_BLESSING_OF_MIGHT, *(GetMaster()));
 	}
 	//Shaman
-	if (BLESSING_OF_MIGHT > 0 && GetMaster()->getClass()) == CLASS_SHAMAN && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, 0) && !GetMaster()->HasAura(BLESSING_OF_MIGHT, 0)) {
-		GetAI()->CastSpell (BLESSING_OF_MIGHT, *(GetMaster());
+	if (BLESSING_OF_MIGHT > 0 && GetMaster()->getClass() == CLASS_SHAMAN && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, 0) && !GetMaster()->HasAura(BLESSING_OF_MIGHT, 0)) {
+		GetAI()->CastSpell (BLESSING_OF_MIGHT, *(GetMaster()));
 	}
-	if (GREATER_BLESSING_OF_MIGHT > 0 && GetMaster()->getClass()) == CLASS_SHAMAN && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, 0)) {
-		GetAI()->CastSpell (GREATER_BLESSING_OF_MIGHT, *(GetMaster());
+	if (GREATER_BLESSING_OF_MIGHT > 0 && GetMaster()->getClass() == CLASS_SHAMAN && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, 0)) {
+		GetAI()->CastSpell (GREATER_BLESSING_OF_MIGHT, *(GetMaster()));
 	}
 
 
