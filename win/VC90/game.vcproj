@@ -1315,11 +1315,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PlayerbotDeathKnightAI.cpp"
+				RelativePath="..\..\src\game\PlayerbotDeathKnightAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\PlayerbotDeathKnightAI.h"
+				RelativePath="..\..\src\game\PlayerbotDeathKnightAI.h"
 				>
 			</File>
 			<File
@@ -1331,11 +1331,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PlayerbotHunterAI.cpp"
+				RelativePath="..\..\src\game\PlayerbotHunterAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\PlayerbotHunterAI.h"
+				RelativePath="..\..\src\game\PlayerbotHunterAI.h"
 				>
 			</File>
 			<File
