@@ -36,7 +36,7 @@ void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget){
 	PlayerbotAI* ai = GetAI();
 	if (!ai) return;
 	switch (ai->GetScenarioType()) {
-		case SCENARIO_DUEL: 
+		case PlayerbotAI::SCENARIO_DUEL:
 
 			ai->CastSpell(PLAGUE_STRIKE);
 			return;
