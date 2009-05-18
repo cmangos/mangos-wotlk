@@ -2,7 +2,7 @@
 	Name	: PlayerbotDruidAI.cpp
     Complete: maybe around 20%
     Authors	: rrtn, Natsukawa
-	Version : 0.33
+	Version : 0.37
 */
 #include "PlayerbotDruidAI.h"
 
@@ -69,16 +69,19 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget){
 			ai->CastSpell(MOONFIRE);
 			return;
 	}
-	Player *m_bot = GetPlayerBot();
 	uint32 masterHP = GetMaster()->GetHealth()*100 / GetMaster()->GetMaxHealth();
+	Player *m_bot = GetPlayerBot();
+	if( !m_bot->HasInArc(M_PI, pTarget)) {
+	    m_bot->SetInFront(pTarget);
+	}
 
 	if (pTarget->getVictim() == m_bot) {
 		SpellSequence = DruidTank;
 	}
-	else if (ai->GetManaPercent() >= 75) {
+	else if (ai->GetManaPercent() >= 90 && pTarget->getVictim() != m_bot) {
 		SpellSequence = DruidSpell;
 	}
-	else if (ai->GetHealthPercent() <= 70 || GetMaster()->GetHealth() > GetMaster()->GetMaxHealth()*0.7) {
+	else if (ai->GetHealthPercent() <= 40 || GetMaster()->GetHealth() > GetMaster()->GetMaxHealth()*0.7) {
 		SpellSequence = DruidHeal;
 	}
 	else {
@@ -87,20 +90,29 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget){
 	switch (SpellSequence) {
 		case DruidTank: // Its not a tank druid, only self protecting from heavy damage if got aggro.
 			GetAI()->TellMaster("DruidTank");
-			
+
 			if( !m_bot->HasInArc(M_PI, pTarget)) {
 				m_bot->SetInFront(pTarget);
+			}
+			if(m_bot->HasAura(CAT_FORM, 0)) {
+				m_bot->RemoveAurasDueToSpell(768);
+				GetAI()->TellMaster("FormClearCat");
 			}
 			if (DIRE_BEAR_FORM > 0 && !m_bot->HasAura(DIRE_BEAR_FORM, 0)) {
 				GetAI()->CastSpell (DIRE_BEAR_FORM);
-				break;
 			}
+			break;
 		case DruidSpell:
 			GetAI()->TellMaster("DruidSpell");
 			ai->Follow(*GetMaster());
-			
-			if( !m_bot->HasInArc(M_PI, pTarget)) {
-				m_bot->SetInFront(pTarget);
+
+			if(m_bot->HasAura(CAT_FORM, 0)) {
+				m_bot->RemoveAurasDueToSpell(768);
+				GetAI()->TellMaster("FormClearCat");
+			}
+			if(m_bot->HasAura(DIRE_BEAR_FORM, 0)) {
+				m_bot->RemoveAurasDueToSpell(9634);
+				GetAI()->TellMaster("FormClearBear");
 			}
 			if (FAERIE_FIRE > 0 && DruidSpellCombat < 1 && ai->GetManaPercent() >= 15) {
 				ai->CastSpell(FAERIE_FIRE);
@@ -122,13 +134,27 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget){
 				DruidSpellCombat++;
 				break;
 			}
+			else if (DruidSpellCombat < 5) {
+				DruidSpellCombat = 0;
+				break;
+			}
 			else {
 				DruidSpellCombat = 0;
 				break;
 			}
+			break;
 		case DruidHeal:
 			GetAI()->TellMaster("DruidHeal");
-			
+			ai->Follow(*GetMaster());
+
+			if(m_bot->HasAura(CAT_FORM, 0)) {
+				m_bot->RemoveAurasDueToSpell(768);
+				GetAI()->TellMaster("FormClearCat");
+			}
+			if(m_bot->HasAura(DIRE_BEAR_FORM, 0)) {
+				m_bot->RemoveAurasDueToSpell(9634);
+				GetAI()->TellMaster("FormClearBear");
+			}
 			if (ai->GetHealthPercent() < 70) {
 				HealTarget (*GetPlayerBot(), ai->GetHealthPercent());
 				break;
@@ -137,9 +163,17 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget){
 				HealTarget (*GetMaster(), masterHP);
 				break;
 			}
+			break;
 		case DruidCombat:
+			if( !m_bot->HasInArc(M_PI, pTarget)) {
+				m_bot->SetInFront(pTarget);
+			}
 			GetAI()->TellMaster("DruidCombat");
 
+			if(m_bot->HasAura(DIRE_BEAR_FORM, 0)) {
+				m_bot->RemoveAurasDueToSpell(9634);
+				GetAI()->TellMaster("FormClearBear");
+			}
 			if (CAT_FORM > 0 && !m_bot->HasAura(CAT_FORM, 0)) {
 				GetAI()->CastSpell (CAT_FORM);
 				break;
@@ -147,7 +181,8 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget){
 			if (MAIM > 0 && m_bot->GetComboPoints() >= 1 && pTarget->IsNonMeleeSpellCasted(true)) {
 				ai->CastSpell(MAIM, *pTarget);
 				GetAI()->TellMaster("SpellPreventing Maim");
-				}
+				break;
+			}
 			if (RAKE > 0 && m_bot->GetComboPoints() == 0 && ai->GetEnergyAmount() >= 40) {
         		GetAI()->CastSpell (RAKE, *pTarget);
 				GetAI()->TellMaster("Rake");
@@ -220,6 +255,7 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget){
 				}
 				break;
 			}
+			break;
 	}
 } // end DoNextCombatManeuver
 
@@ -227,6 +263,14 @@ void PlayerbotDruidAI::DoNonCombatActions(){
 	Player * m_bot = GetPlayerBot();
 	if (!m_bot) {
 		return;
+	}
+	if(m_bot->HasAura(CAT_FORM, 0)) {
+		m_bot->RemoveAurasDueToSpell(768);
+		GetAI()->TellMaster("FormClearCat");
+	}
+	if(m_bot->HasAura(DIRE_BEAR_FORM, 0)) {
+		m_bot->RemoveAurasDueToSpell(9634);
+		GetAI()->TellMaster("FormClearBear");
 	}
 
 	// buff myself MARK_OF_THE_WILD, THORNS
