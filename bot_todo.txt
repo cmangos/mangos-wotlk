@@ -1,0 +1,32 @@
+///---Quest---///
+Bot can accept quest.
+Bot can join quest.
+
+///---Loot---///
+Bot can loot.
+Bot can loot --- maybe only needed q item.
+
+//---Instance teleport Problems---///
+Needs some fix.
+
+///---Combat Scenario Types---///
+Tank
+Heal
+Assist
+Protect --- maybe class specific protect?
+
+///---Chat Commands---///
+.bot Tank
+.bot Heal
+.bot Assist
+.bot Protect
+
+///---Temporary item enchantments---///
+Rogue	: Poison
+Warrior	: Sharpening Stone, Rune of Warding, Rune of Shielding.
+
+//---After fear bot's lose target---///
+Needs some fix.
+
+///---Move behind target---///
+Rogue	: some abilitys require Rogue to be stealthed and behind target.
