@@ -227,6 +227,10 @@ void PlayerbotWarriorAI::DoNonCombatActions(){
 
 	// TODO (by Runsttren): check if shout aura bot has is casted by this bot, 
 	// otherwise cast other useful shout
+	// If the bot is protect talented, she/he needs stamina not attack power.
+	// With stance change can the shout change to. 
+	// Inserted line to battle shout m_bot->HasAura( COMMANDING_SHOUT, 0 )
+	// Natsukawa
 	if( ( (COMMANDING_SHOUT>0 && !m_bot->HasAura( COMMANDING_SHOUT, 0 )) ||
 		(BATTLE_SHOUT>0 && !m_bot->HasAura( BATTLE_SHOUT, 0 )) ) && 
 		GetAI()->GetRageAmount()<10 && BLOODRAGE>0 && !m_bot->HasAura( BLOODRAGE, 0 ) ) {
@@ -235,7 +239,7 @@ void PlayerbotWarriorAI::DoNonCombatActions(){
 	} else if( COMMANDING_SHOUT>0 && !m_bot->HasAura( COMMANDING_SHOUT, 0 ) ) {
 		// use commanding shout now
 		GetAI()->CastSpell( COMMANDING_SHOUT, *m_bot );
-	} else if( BATTLE_SHOUT>0 && !m_bot->HasAura( BATTLE_SHOUT, 0 ) ) {
+	} else if( BATTLE_SHOUT>0 && !m_bot->HasAura( BATTLE_SHOUT, 0 ) && !m_bot->HasAura( COMMANDING_SHOUT, 0 ) ) {
 		// use battle shout
 		GetAI()->CastSpell( BATTLE_SHOUT, *m_bot );
 	}
