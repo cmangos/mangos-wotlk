@@ -152,6 +152,8 @@ class MANGOS_DLL_SPEC PlayerbotAI {
 		bool FollowCheckTeleport( WorldObject &obj );
 		void DoLoot();
 
+		void AcceptQuest( Quest const *qInfo, Player *pGiver );
+
     private:
 		// ****** Closed Actions ********************************
 		// These actions may only be called at special times.

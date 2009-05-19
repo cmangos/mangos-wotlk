@@ -1,10 +1,10 @@
-///---Quest---///
-Bot can accept quest.
-Bot can join quest.
+[DONE] ///---Quest---///
+[DONE] Bot can accept quest.
+[DONE] Bot can join quest.
 
-///---Loot---///
-Bot can loot.
-Bot can loot --- maybe only needed q item.
+[DONE] ///---Loot---///
+[DONE] Bot can loot.
+[DONE] Bot can loot --- maybe only needed q item.
 
 //---Instance teleport Problems---///
 Needs some fix.
@@ -30,3 +30,6 @@ Needs some fix.
 
 ///---Move behind target---///
 Rogue	: some abilitys require Rogue to be stealthed and behind target.
+
+///---Implement locale independet way of getting spellIDs---///
+Hardcode lowest rank spellID, use function to get highest rank 

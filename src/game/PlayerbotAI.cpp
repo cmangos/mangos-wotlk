@@ -1306,6 +1306,44 @@ void PlayerbotAI::DoLoot() {
 	}
 }
 
+void PlayerbotAI::AcceptQuest( Quest const *qInfo, Player *pGiver ) {
+	if( !qInfo || !pGiver ) return;
+
+	uint32 quest = qInfo->GetQuestId();
+
+	if( !pGiver->CanShareQuest( qInfo->GetQuestId() ) ) {
+		// giver can't share quest
+		m_bot->SetDivider( 0 );
+		return;
+	}
+
+	if( !m_bot->CanTakeQuest( qInfo, false ) ) {
+		// can't take quest
+		m_bot->SetDivider( 0 );
+		return;
+	}
+
+	if( m_bot->GetDivider() != 0 ) {
+		// send msg to quest giving player
+		pGiver->SendPushToPartyResponse( m_bot, QUEST_PARTY_MSG_ACCEPT_QUEST );
+		m_bot->SetDivider( 0 );
+	}
+
+	if( m_bot->CanAddQuest( qInfo, false ) ) {
+		m_bot->AddQuest( qInfo, pGiver );
+
+		if( m_bot->CanCompleteQuest( quest ) )
+			m_bot->CompleteQuest( quest );
+
+		// Runsttren: did not add typeid switch from WorldSession::HandleQuestgiverAcceptQuestOpcode!
+		// I think it's not needed, cause typeid should be TYPEID_PLAYER - and this one is not handled
+		// there and there is no default case also.
+
+		if( qInfo->GetSrcSpell() > 0 )
+			m_bot->CastSpell( m_bot, qInfo->GetSrcSpell(), true );
+	}
+}
+
 // some possible things to use in AI
 //GetRandomContactPoint
 //GetPower, GetMaxPower

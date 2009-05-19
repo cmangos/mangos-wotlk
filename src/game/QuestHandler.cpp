@@ -30,6 +30,9 @@
 #include "ScriptCalls.h"
 #include "Group.h"
 
+// Playerbot mod:
+#include "PlayerbotAI.h"
+
 void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8);
@@ -473,8 +476,11 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
                         continue;
                     }
 
-                    pPlayer->PlayerTalkClass->SendQuestGiverQuestDetails( pQuest, _player->GetGUID(), true );
-                    pPlayer->SetDivider( _player->GetGUID() );
+					pPlayer->SetDivider( _player->GetGUID() );
+					if( !pPlayer->IsPlayerbot() )
+						pPlayer->PlayerTalkClass->SendQuestGiverQuestDetails( pQuest, _player->GetGUID(), true );
+					else
+						pPlayer->GetPlayerbotAI()->AcceptQuest( pQuest, _player );
                 }
             }
         }
