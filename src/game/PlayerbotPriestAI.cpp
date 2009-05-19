@@ -381,6 +381,7 @@ void PlayerbotPriestAI::DoNonCombatActions(){
 	Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
 	for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++) {
 		Player *tPlayer = objmgr.GetPlayer(uint64 (itr->guid));
+		if( !tPlayer ) continue;
 		
 		// first rezz em
 		if (tPlayer->isDead()) {
