@@ -33,6 +33,7 @@ PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, 
 	VIGILANCE				= ai->getSpellId("vigilance"); //PROTECTION
 	DEVASTATE				= ai->getSpellId("devastate"); //PROTECTION
 	SHOCKWAVE				= ai->getSpellId("shockwave"); //PROTECTION
+	CONCUSSION_BLOW			= ai->getSpellId("concussion blow");
 	SPELL_REFLECTION		= ai->getSpellId("spell reflection"); //PROTECTION
 	BATTLE_SHOUT			= ai->getSpellId("battle shout"); //FURY
 	DEMORALIZING_SHOUT		= ai->getSpellId("demoralizing shout"); //11556; //
@@ -86,10 +87,13 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 	if (DEVASTATE > 0 && ai->GetRageAmount() >= 15) {
 		GetAI()->CastSpell (DEVASTATE);
 	}
+	else if (SUNDER_ARMOR > 0 && ai->GetRageAmount() >= 15) {
+		GetAI()->CastSpell (SUNDER_ARMOR);
+	}
 	if (pTarget->IsNonMeleeSpellCasted(true)) {
 		SpellSequence = SpellPreventing;
 	}
-	else if (pTarget->GetHealth() > pTarget->GetMaxHealth()*0.2) {
+	if (pTarget->GetHealth() > pTarget->GetMaxHealth()*0.2) {
 		SpellSequence = Tanking;
 	}
 	else {
@@ -99,72 +103,60 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 	switch (SpellSequence) {
 		case Tanking:
 			//GetAI()->TellMaster("Tanking");
-			if (DEFENSIVE_STANCE > 0 && TankCounter < 1 && !m_bot->HasAura(DEFENSIVE_STANCE, 0)) {
+			if (DEFENSIVE_STANCE > 0 && !m_bot->HasAura(DEFENSIVE_STANCE, 0)) {
 				GetAI()->CastSpell (DEFENSIVE_STANCE);
-				TankCounter++;
-				break;
 			}
-			else if (SHIELD_BLOCK > 0 && TankCounter < 2 && pTarget->getVictim() == m_bot) {
+			else if (SHIELD_BLOCK > 0 && TankCounter < 1 && pTarget->getVictim() == m_bot) {
 				GetAI()->CastSpell (SHIELD_BLOCK);
 				TankCounter++;
 				break;
 			}
-			else if (REVENGE > 0 && TankCounter < 3 && ai->GetRageAmount() >= 5) {
-				GetAI()->CastSpell (REVENGE, *pTarget);
-				TankCounter++;
-				break;
-			}
-			else if (SHIELD_SLAM > 0 && TankCounter < 4 && ai->GetRageAmount() >= 20) {
+			else if (SHIELD_SLAM > 0 && TankCounter < 2 && ai->GetRageAmount() >= 20) {
 				GetAI()->CastSpell (SHIELD_SLAM, *pTarget);
 				TankCounter++;
 				break;
 			}
-			else if (SHIELD_BLOCK > 0 && TankCounter < 5 && pTarget->getVictim() == m_bot) {
-				GetAI()->CastSpell (SHIELD_BLOCK);
+			else if (CONCUSSION_BLOW > 0 && TankCounter < 3 && ai->GetRageAmount() >= 20) {
+				GetAI()->CastSpell (CONCUSSION_BLOW, *pTarget);
 				TankCounter++;
 				break;
 			}
-			else if (DISARM > 0 && TankCounter < 6 && ai->GetRageAmount() >= 5) {
-				GetAI()->CastSpell (DISARM, *pTarget);
-				TankCounter++;
-				break;
-			}
-			else if (HEROIC_STRIKE > 0 && TankCounter < 7 && ai->GetRageAmount() >= 15) {
-				GetAI()->CastSpell (HEROIC_STRIKE, *pTarget);
-				TankCounter++;
-				break;
-			}
-			else if (TAUNT > 0 && TankCounter < 8) {
-				GetAI()->CastSpell (TAUNT, *pTarget);
-				TankCounter++;
-				break;
-			}
-			else if (SHIELD_BLOCK > 0 && TankCounter < 9 && pTarget->getVictim() == m_bot) {
-				GetAI()->CastSpell (SHIELD_BLOCK);
-				TankCounter++;
-				break;
-			}
-			else if (CLEAVE > 0 && TankCounter < 10) {
-				GetAI()->CastSpell (CLEAVE, *pTarget);
-				TankCounter++;
-				break;
-			}
-			else if (COMMANDING_SHOUT > 0 && TankCounter < 11 && !m_bot->HasAura(COMMANDING_SHOUT, 0) && ai->GetRageAmount() >= 10) {
-				GetAI()->CastSpell (COMMANDING_SHOUT);
-				TankCounter++;
-				break;
-			}
-			else if (SHOCKWAVE > 0 && TankCounter < 12 && ai->GetRageAmount() >= 15) {
+			else if (SHOCKWAVE > 0 && TankCounter < 4 && ai->GetRageAmount() >= 15) {
 				GetAI()->CastSpell (SHOCKWAVE);
 				TankCounter++;
 				break;
 			}
-			else if (SHIELD_BLOCK > 0 && TankCounter < 13 && pTarget->getVictim() == m_bot) {
+			else if (REVENGE > 0 && TankCounter < 5 && ai->GetRageAmount() >= 5) {
+				GetAI()->CastSpell (REVENGE, *pTarget);
+				TankCounter++;
+				break;
+			}
+			else if (THUNDER_CLAP > 0 && TankCounter < 6 && ai->GetRageAmount() >= 5) {
+				GetAI()->CastSpell (THUNDER_CLAP, *pTarget);
+				TankCounter++;
+				break;
+			}
+			else if (SHIELD_BLOCK > 0 && TankCounter < 7 && pTarget->getVictim() == m_bot) {
 				GetAI()->CastSpell (SHIELD_BLOCK);
 				TankCounter++;
 				break;
 			}
-			else if (TankCounter < 14) {
+			else if (HEROIC_STRIKE > 0 && TankCounter < 8 && ai->GetRageAmount() >= 15) {
+				GetAI()->CastSpell (HEROIC_STRIKE, *pTarget);
+				TankCounter++;
+				break;
+			}
+			else if (TAUNT > 0 && TankCounter < 9) {
+				GetAI()->CastSpell (TAUNT, *pTarget);
+				TankCounter++;
+				break;
+			}
+			else if (COMMANDING_SHOUT > 0 && TankCounter < 10 && !m_bot->HasAura(COMMANDING_SHOUT, 0) && ai->GetRageAmount() >= 10) {
+				GetAI()->CastSpell (COMMANDING_SHOUT);
+				TankCounter++;
+				break;
+			}
+			else if (TankCounter < 11) {
 				TankCounter = 0;
 				//GetAI()->TellMaster("TankCounterReseter");
 				break;
@@ -174,24 +166,23 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 				//GetAI()->TellMaster("TankCounterReseter");
 				break;
 			}
+			break;
 		case Berserker:
 			//GetAI()->TellMaster("Berserker");
-			if (BERSERKER_STANCE > 0 && BerserkerCounter < 1 && !m_bot->HasAura(BERSERKER_STANCE, 0)) {
+			if (BERSERKER_STANCE > 0 && !m_bot->HasAura(BERSERKER_STANCE, 0)) {
 				GetAI()->CastSpell (BERSERKER_STANCE);
-				BerserkerCounter++;
-				break;
 			}
-			else if (EXECUTE > 0 && BerserkerCounter < 2 && pTarget->GetHealth() < pTarget->GetMaxHealth()*0.2 && ai->GetRageAmount() >= 15) {
+			else if (EXECUTE > 0 && BerserkerCounter < 1 && pTarget->GetHealth() < pTarget->GetMaxHealth()*0.2 && ai->GetRageAmount() >= 15) {
 				GetAI()->CastSpell (EXECUTE, *pTarget);
 				BerserkerCounter++;
 				break;
 			}
-			else if (WHIRLWIND > 0 && BerserkerCounter < 3 && ai->GetRageAmount() >= 15) {
+			else if (WHIRLWIND > 0 && BerserkerCounter < 2 && ai->GetRageAmount() >= 15) {
 				GetAI()->CastSpell (WHIRLWIND, *pTarget);
 				BerserkerCounter++;
 				break;
 			}
-			else if (BerserkerCounter < 4) {
+			else if (BerserkerCounter < 3) {
 				BerserkerCounter = 0;
 				//GetAI()->TellMaster("BerserkerCounterReseter");
 				break;
@@ -201,6 +192,7 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 				//GetAI()->TellMaster("BerserkerCounterReseter");
 				break;
 			}
+			break;
 		case SpellPreventing:
 			//GetAI()->TellMaster("Case SpellPreventing");
 			if (SPELL_REFLECTION > 0 && m_bot->HasAura(DEFENSIVE_STANCE, 0) && pTarget->getVictim() == m_bot && pTarget->IsNonMeleeSpellCasted(true) && ai->GetRageAmount() >= 15) {
