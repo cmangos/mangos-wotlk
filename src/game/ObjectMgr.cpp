@@ -787,8 +787,8 @@ void ObjectMgr::LoadEquipmentTemplates()
     sLog.outString( ">> Loaded %u equipment template", sEquipmentStorage.RecordCount );
     sLog.outString();
 
-    // This DBC is currently only used for item templates and creature equipments checks.
-    sItemStore.Clear();
+    // Creature items can be not listed in item_template
+    //sItemStore.Clear(); -- so used in spell casting
 }
 
 CreatureModelInfo const* ObjectMgr::GetCreatureModelInfo(uint32 modelid)
@@ -6553,11 +6553,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
     for(MangosStringLocaleMap::iterator itr = mMangosStringLocaleMap.begin(); itr != mMangosStringLocaleMap.end();)
     {
         if (itr->first >= start_value && itr->first < end_value)
-        {
-            MangosStringLocaleMap::iterator itr2 = itr;
-            ++itr;
-            mMangosStringLocaleMap.erase(itr2);
-        }
+            mMangosStringLocaleMap.erase(itr++);
         else
             ++itr;
     }
