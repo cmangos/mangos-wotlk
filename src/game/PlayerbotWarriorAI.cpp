@@ -2,7 +2,7 @@
 	Name	: PlayerbotWarriorAI.cpp
     Complete: maybe around 37%
     Author	: Natsukawa
-	Version : 0.37
+	Version : 0.39
     */
 #include "PlayerbotWarriorAI.h"
 
@@ -78,9 +78,6 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 	if( !m_bot->HasInArc(M_PI, pTarget)) {
 	    m_bot->SetInFront(pTarget);
 	}
-	if (DEMORALIZING_SHOUT > 0 && !pTarget->HasAura(DEMORALIZING_SHOUT, 0) && ai->GetRageAmount() >= 10) {
-		GetAI()->CastSpell (DEMORALIZING_SHOUT);
-	}
 	if (SHIELD_WALL > 0 && ai->GetHealthPercent() < 20) {
 		GetAI()->CastSpell (SHIELD_WALL, *m_bot);
 	}
@@ -93,11 +90,11 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 	if (pTarget->IsNonMeleeSpellCasted(true)) {
 		SpellSequence = SpellPreventing;
 	}
-	if (pTarget->GetHealth() > pTarget->GetMaxHealth()*0.2) {
-		SpellSequence = Tanking;
+	if (pTarget->GetHealth() < pTarget->GetMaxHealth()*0.2 && pTarget->getLevel() <= m_bot->getLevel() ) {
+		SpellSequence = Berserker;
 	}
 	else {
-		SpellSequence = Berserker;
+		SpellSequence = Tanking;
 	}
 
 	switch (SpellSequence) {
@@ -105,6 +102,9 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 			//GetAI()->TellMaster("Tanking");
 			if (DEFENSIVE_STANCE > 0 && !m_bot->HasAura(DEFENSIVE_STANCE, 0)) {
 				GetAI()->CastSpell (DEFENSIVE_STANCE);
+			}
+			if (DEMORALIZING_SHOUT > 0 && !pTarget->HasAura(DEMORALIZING_SHOUT, 0) && ai->GetRageAmount() >= 10) {
+				GetAI()->CastSpell (DEMORALIZING_SHOUT);
 			}
 			else if (SHIELD_BLOCK > 0 && TankCounter < 1 && pTarget->getVictim() == m_bot) {
 				GetAI()->CastSpell (SHIELD_BLOCK);
