@@ -115,26 +115,26 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget){
 
 	ai->Follow(*GetMaster()); // dont want to melee mob
 
-	// Heal myself
+	Player *m_bot = GetPlayerBot();
+	Group *m_group = m_bot->GetGroup();
 
-	if (ai->GetHealthPercent() < 15 && FADE > 0 && !GetPlayerBot()->HasAura(FADE, 0)) {
+	// Heal myself
+	if (ai->GetHealthPercent() < 15 && FADE > 0 && !m_bot->HasAura(FADE, 0)) {
 		GetAI()->TellMaster("I'm casting fade");
 		ai->CastSpell(FADE);
-		
+
 	}
-	else if (ai->GetHealthPercent() < 25 && PWS > 0 && !GetPlayerBot()->HasAura(PWS, 0)) {
+	else if (ai->GetHealthPercent() < 25 && PWS > 0 && !m_bot->HasAura(PWS, 0)) {
 		GetAI()->TellMaster("I'm casting pws on myself.");
 		ai->CastSpell(PWS);
 		
 	}
 	else if (ai->GetHealthPercent() < 80) {
-		HealTarget (*GetPlayerBot(), ai->GetHealthPercent());
+		HealTarget (*m_bot, ai->GetHealthPercent());
 	}
 
 	// Heal master
-
 	uint32 masterHP = GetMaster()->GetHealth()*100 / GetMaster()->GetMaxHealth();
-
 	if (GetMaster()->isAlive()) {
 		if (masterHP < 25 && PWS > 0 && !GetMaster()->HasAura(PWS, 0)) {
 				ai->CastSpell(PWS, *(GetMaster()));
@@ -144,8 +144,19 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget){
 		}
 	}
 
+	// Heal group
+	if( m_group ) {
+		Group::MemberSlotList const& groupSlot = m_group->GetMemberSlots();
+		for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++) {
+			Player *m_groupMember = objmgr.GetPlayer( itr->guid );
+			if( !m_groupMember || !m_groupMember->isAlive() ) continue;
+			uint32 memberHP = m_groupMember->GetHealth()*100 / m_groupMember->GetMaxHealth();
+			if( memberHP < 25 )
+				HealTarget( *m_groupMember, memberHP );
+		}
+	}
+
 	// Damage Spells
-	Player *m_bot = GetPlayerBot();
 	if( !m_bot->HasInArc(M_PI, pTarget)) {
 	    m_bot->SetInFront(pTarget);
 	}
