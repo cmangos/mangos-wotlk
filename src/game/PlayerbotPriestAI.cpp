@@ -382,35 +382,28 @@ void PlayerbotPriestAI::DoNonCombatActions(){
 
 	//(!GetMaster()->HasAura(FORTITUDE,0) && GetAI()->CastSpell (FORTITUDE, *(GetMaster())) );
 
-
-
-
-
-
 	// buff and heal master's group
 	if (GetMaster()->GetGroup()) {
-	Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
-	for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++) {
-		Player *tPlayer = objmgr.GetPlayer(uint64 (itr->guid));
-		if( !tPlayer ) continue;
+		Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
+		for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++) {
+			Player *tPlayer = objmgr.GetPlayer(uint64 (itr->guid));
+			if( !tPlayer ) continue;
 		
-		// first rezz em
-		if (tPlayer->isDead() && !tPlayer->IsPlayerbot() ) {
-			std::string msg = "rezzing ";
-			msg += tPlayer->GetName();
-			GetPlayerBot()->Say(msg, LANG_UNIVERSAL);
-			GetAI()->CastSpell(REZZ, *tPlayer);
-			// rez is only 10 sec, but give time for lag
-			GetAI()->SetIgnoreUpdateTime(17);
-		} else {
-			// buff and heal
-			(!tPlayer->HasAura(FORTITUDE,0) && GetAI()->CastSpell (FORTITUDE, *tPlayer));
-			(HealTarget(*tPlayer, tPlayer->GetHealth()*100 / tPlayer->GetMaxHealth()));
+			// first rezz em
+			if ( !tPlayer->isAlive() && !tPlayer->IsPlayerbot() ) {
+				std::string msg = "rezzing ";
+				msg += tPlayer->GetName();
+				GetPlayerBot()->Say(msg, LANG_UNIVERSAL);
+				GetAI()->CastSpell(REZZ, *tPlayer);
+				// rez is only 10 sec, but give time for lag
+				GetAI()->SetIgnoreUpdateTime(17);
+			} else if( tPlayer->isAlive() ) {
+				// buff and heal
+				(!tPlayer->HasAura(FORTITUDE,0) && GetAI()->CastSpell (FORTITUDE, *tPlayer));
+				(HealTarget(*tPlayer, tPlayer->GetHealth()*100 / tPlayer->GetMaxHealth()));
+			}
 		}
 	}
-	}
-
-
 } // end DoNonCombatActions
 
 void PlayerbotPriestAI::BuffPlayer(Player* target) {
