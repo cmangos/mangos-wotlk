@@ -141,7 +141,7 @@ uint32 PlayerbotAI::getSpellId(const char* args) const {
 	// converting string that we try to find to lower case
 	wstrToLower(wnamepart);
 
-	int loc = m_master->GetSession()->GetSessionDbcLocale();
+	int loc = m_bot->GetSession()->GetSessionDbcLocale();
 
 	uint32 foundSpellId = 0;
 	bool foundExactMatch = false;
@@ -1125,7 +1125,11 @@ void PlayerbotAI::GetCombatOrders() {
 		m_lootCurrent = 0;
 	}
 
-	Unit* thingToAttack = m_master->getAttackerForHelper();
+	// update attacker info now
+	UpdateAttackerInfo();
+
+	//Unit* thingToAttack = m_master->getAttackerForHelper();
+	Unit *thingToAttack = FindAttacker();
 	if (!thingToAttack)
 		return;
 
@@ -1194,6 +1198,9 @@ void PlayerbotAI::DoNextCombatManeuver() {
 		m_bot->GetMotionMaster()->Clear(true);
 		return;
 	}
+
+	// update attacker info now
+	UpdateAttackerInfo();
 
 	if (GetClassAI())
 		(GetClassAI())->DoNextCombatManeuver(pTarget);
@@ -1344,6 +1351,115 @@ void PlayerbotAI::AcceptQuest( Quest const *qInfo, Player *pGiver ) {
 	}
 }
 
+bool PlayerbotAI::IsInCombat() {
+	bool inCombat = false;
+	inCombat |= m_bot->isInCombat();
+	inCombat |= m_master->isInCombat();
+	if( m_bot->GetGroup() ) {
+		GroupReference *ref = m_bot->GetGroup()->GetFirstMember();
+		while( ref ) {
+			inCombat |= ref->getSource()->isInCombat();
+			ref = ref->next();
+		}
+	}
+	return inCombat;
+}
+
+void PlayerbotAI::UpdateAttackerInfo() {
+	// clear old list
+	m_attackerInfo.clear();
+
+	// check own attackers
+	HostilReference *ref = m_bot->getHostilRefManager().getFirst();
+	while( ref ) {
+		ThreatManager *target = ref->getSource();
+		uint64 guid = target->getOwner()->GetGUID();
+		m_attackerInfo[guid].attacker = target->getOwner();
+		m_attackerInfo[guid].victim = target->getOwner()->getVictim();
+		m_attackerInfo[guid].threat = target->getThreat( m_bot );
+		m_attackerInfo[guid].count = 1;
+		m_attackerInfo[guid].source = 1;
+		ref = ref->next();
+	}
+
+	// check master's attackers
+	ref = m_master->getHostilRefManager().getFirst();
+	while( ref ) {
+		ThreatManager *target = ref->getSource();
+		uint64 guid = target->getOwner()->GetGUID();
+		if( m_attackerInfo.find( guid ) == m_attackerInfo.end() ) {
+			m_attackerInfo[guid].attacker = target->getOwner();
+			m_attackerInfo[guid].victim = target->getOwner()->getVictim();
+			m_attackerInfo[guid].count = 0;
+			m_attackerInfo[guid].source = 2;
+		}
+		m_attackerInfo[guid].threat = target->getThreat( m_bot );
+		m_attackerInfo[guid].count++;
+		ref = ref->next();
+	}
+
+	// check all group members now
+	if( m_bot->GetGroup() ) {
+		GroupReference *gref = m_bot->GetGroup()->GetFirstMember();
+		while( gref ) {
+			if( gref->getSource() == m_bot || gref->getSource() == m_master ) {
+				gref = gref->next();
+				continue;
+			}
+			ref = m_master->getHostilRefManager().getFirst();
+			while( ref ) {
+				ThreatManager *target = ref->getSource();
+				uint64 guid = target->getOwner()->GetGUID();
+				if( m_attackerInfo.find( guid ) == m_attackerInfo.end() ) {
+					m_attackerInfo[guid].attacker = target->getOwner();
+					m_attackerInfo[guid].victim = target->getOwner()->getVictim();
+					m_attackerInfo[guid].count = 0;
+					m_attackerInfo[guid].source = 3;
+				}
+				m_attackerInfo[guid].threat = target->getThreat( m_bot );
+				m_attackerInfo[guid].count++;
+				ref = ref->next();
+			}
+			gref = gref->next();
+		}
+	}
+
+	// DEBUG: output attacker info
+	//sLog.outBasic( "[PlayerbotAI]: %s m_attackerInfo = {", m_bot->GetName() );
+	//for( AttackerInfoList::iterator i=m_attackerInfo.begin(); i!=m_attackerInfo.end(); ++i )
+	//	sLog.outBasic( "[PlayerbotAI]:     [%016I64X] { %08X, %08X, %.2f, %d, %d }", i->first, (i->second.attacker?i->second.attacker->GetGUIDLow():0), (i->second.victim?i->second.victim->GetGUIDLow():0), i->second.threat, i->second.count, i->second.source );
+	//sLog.outBasic( "[PlayerbotAI]: };" );
+}
+
+Unit *PlayerbotAI::FindAttacker( ATTACKERINFOTYPE ait ) {
+	// list empty? why are we here?
+	if( m_attackerInfo.empty() ) return 0;
+	
+	// not searching something specific - return first in list
+	if( !ait ) return (m_attackerInfo.begin())->second.attacker;
+
+	float t = ( (ait & AIT_HIGHESTTHREAT) ? 0.00 : 9999.00 );
+	Unit *a = 0;
+	AttackerInfoList::iterator itr = m_attackerInfo.begin();
+	for( ; itr != m_attackerInfo.end(); ++itr ) {
+		if( (ait & AIT_VICTIMSELF) && !(ait & AIT_VICTIMNOTSELF) && itr->second.victim != m_bot ) continue;
+		if( !(ait & AIT_VICTIMSELF) && (ait & AIT_VICTIMNOTSELF) && itr->second.victim == m_bot ) continue;
+		if( !(ait & (AIT_LOWESTTHREAT|AIT_HIGHESTTHREAT)) ) {
+			a = itr->second.attacker;
+			itr = m_attackerInfo.end();
+		} else {
+			if( (ait & AIT_HIGHESTTHREAT) && (itr->second.victim==m_bot) && itr->second.threat>t ) {
+				t = itr->second.threat;
+				a = itr->second.attacker;
+			} else if( (ait & AIT_LOWESTTHREAT) && (itr->second.victim==m_bot) && itr->second.threat<t ) {
+				t = itr->second.threat;
+				a = itr->second.attacker;
+			}
+		}
+	}
+	return a;
+}
+
 // some possible things to use in AI
 //GetRandomContactPoint
 //GetPower, GetMaxPower
@@ -1442,10 +1558,8 @@ void PlayerbotAI::UpdateAI(const uint32 p_time) {
 		else if (m_combatOrder != ORDERS_NONE)
 			DoNextCombatManeuver();
 
-		// if master is in combat and bot is not, automatically assist master
-		// NOTE: combat orders are also set via incoming packets to bot or outgoing packets from master
-		//	else if (m_master->isInCombat() && ! m_bot->isInCombat())
-		else if (m_master->isInCombat())
+		// check for combat and get combat orders
+		else if ( IsInCombat() )
 			GetCombatOrders();
 
 		// bot was in combat recently - loot now

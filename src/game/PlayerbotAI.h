@@ -43,6 +43,23 @@ class MANGOS_DLL_SPEC PlayerbotAI {
 		typedef std::map<uint32, uint32> BotNeedItem;
 		typedef std::list<uint64> BotLootCreature;
 
+		// attacker query used in PlayerbotAI::FindAttacker()
+		enum ATTACKERINFOTYPE {
+			AIT_NONE			= 0x00,
+			AIT_LOWESTTHREAT	= 0x01,
+			AIT_HIGHESTTHREAT	= 0x02,
+			AIT_VICTIMSELF		= 0x04,
+			AIT_VICTIMNOTSELF	= 0x08
+		};
+		typedef struct AttackerInfo {
+			Unit*	attacker;		// reference to the attacker
+			Unit*	victim;			// combatant's current victim
+			float	threat;			// own threat on this combatant
+			uint32  count;			// number of units attacking
+			uint32  source;			// 1=bot, 2=master, 3=group
+		};
+		typedef std::map<uint64,AttackerInfo> AttackerInfoList;
+
     public:
 	// ******* Stuff the outside world calls ****************************
         PlayerbotAI(Player* const master, Player* const bot);
@@ -154,6 +171,10 @@ class MANGOS_DLL_SPEC PlayerbotAI {
 
 		void AcceptQuest( Quest const *qInfo, Player *pGiver );
 
+		bool IsInCombat();
+		void UpdateAttackerInfo();
+		Unit* FindAttacker( ATTACKERINFOTYPE ait=AIT_NONE );
+
     private:
 		// ****** Closed Actions ********************************
 		// These actions may only be called at special times.
@@ -195,6 +216,8 @@ class MANGOS_DLL_SPEC PlayerbotAI {
 		// can do it
 		uint32 m_spellIdCommand;
 		uint64 m_targetGuidCommand;
+
+		AttackerInfoList m_attackerInfo;
 };
 
 #endif
