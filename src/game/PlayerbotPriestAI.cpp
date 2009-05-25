@@ -212,13 +212,12 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget){
 			
 		
 		case SPELL_SHADOWMAGIC:
-			if (PAIN > 0 && LastSpellShadowMagic <1 && ai->GetManaPercent() >= 60) {
-						GetAI()->TellMaster("I'm casting pain");
-						ai->CastSpell(PAIN, *pTarget);
-						
-						SpellSequence = SPELL_DISCIPLINE;
-						(LastSpellShadowMagic = LastSpellShadowMagic +1);
-				break;
+				if (PAIN > 0 && LastSpellShadowMagic <1 && ai->GetManaPercent() >= 60) {
+					GetAI()->TellMaster("I'm casting pain");
+					ai->CastSpell(PAIN, *pTarget);
+					SpellSequence = SPELL_DISCIPLINE;
+					(LastSpellShadowMagic = LastSpellShadowMagic +1);
+					break;
 				  }
 				else if (MIND_BLAST > 0 && LastSpellShadowMagic <2 && ai->GetManaPercent() >= 60) {
 						GetAI()->TellMaster("I'm casting mind blast");
@@ -228,7 +227,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget){
 						(LastSpellShadowMagic = LastSpellShadowMagic +1);
 						break;
 				  }
-				else if (SCREAM > 0 && LastSpellShadowMagic <3 && ai->GetManaPercent() >= 60) {
+/*				else if (SCREAM > 0 && LastSpellShadowMagic <3 && ai->GetManaPercent() >= 60) {
 						GetAI()->TellMaster("I'm casting scream.");
 						ai->CastSpell(SCREAM);
 						
@@ -236,6 +235,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget){
 						(LastSpellShadowMagic = LastSpellShadowMagic +1);
 						break;
 				  }
+*/
 				else if (MIND_FLAY > 0 && LastSpellShadowMagic <4 && ai->GetManaPercent() >= 60) {
 						GetAI()->TellMaster("I'm casting mind flay.");
 						ai->CastSpell(MIND_FLAY, *pTarget);

@@ -10,6 +10,8 @@ class Object;
 class Item;
 class PlayerbotClassAI;
 
+#define BOTLOOT_DISTANCE 25.0f
+
 class MANGOS_DLL_SPEC PlayerbotAI {
 	public:
 		enum ScenarioType {
@@ -55,6 +57,7 @@ class MANGOS_DLL_SPEC PlayerbotAI {
 			Unit*	attacker;		// reference to the attacker
 			Unit*	victim;			// combatant's current victim
 			float	threat;			// own threat on this combatant
+			float	threat2;		// highest threat not caused by bot
 			uint32  count;			// number of units attacking
 			uint32  source;			// 1=bot, 2=master, 3=group
 		};

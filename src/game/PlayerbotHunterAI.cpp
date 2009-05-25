@@ -148,5 +148,5 @@ void PlayerbotHunterAI::DoNonCombatActions(){
 		GetAI()->SetIgnoreUpdateTime(30);
 		return;
 	}
-	
+
 } // end DoNonCombatActions

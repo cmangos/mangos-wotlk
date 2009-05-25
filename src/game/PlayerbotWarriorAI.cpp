@@ -74,7 +74,7 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 
 	// Damage Attacks
 	
-  Player *m_bot = GetPlayerBot();
+	Player *m_bot = GetPlayerBot();
 	if( !m_bot->HasInArc(M_PI, pTarget)) {
 	    m_bot->SetInFront(pTarget);
 	}

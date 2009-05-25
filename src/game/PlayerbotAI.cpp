@@ -1245,15 +1245,14 @@ void PlayerbotAI::DoLoot() {
 	if( !m_lootCurrent ) {
 		m_lootCurrent = m_lootCreature.front();
 		m_lootCreature.pop_front();
-		WorldLocation loc;
 		Creature *c = m_bot->GetMap()->GetCreature( m_lootCurrent );
-		if( !c ) { m_lootCurrent = 0; return; }
-		c->GetPosition( loc );
-		m_bot->GetMotionMaster()->MovePoint( loc.mapid, loc.x, loc.y, loc.z );
-		//sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s'", m_bot->GetName(), c->GetName() );
+		// check if we got a creature and if it is still a corpse, otherwise bot runs to spawn point
+		if( !c || c->getDeathState()!=CORPSE || m_master->GetDistance( c )>BOTLOOT_DISTANCE ) { m_lootCurrent = 0; return; }
+		m_bot->GetMotionMaster()->MovePoint( c->GetMapId(), c->GetPositionX(), c->GetPositionY(), c->GetPositionZ() );
+		//sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s' deathState=%d", m_bot->GetName(), c->GetName(), c->getDeathState() );
 	} else {
 		Creature *c = m_bot->GetMap()->GetCreature( m_lootCurrent );
-		if( !c ) { m_lootCurrent = 0; return; }
+		if( !c || c->getDeathState()!=CORPSE || m_master->GetDistance( c )>BOTLOOT_DISTANCE ) { m_lootCurrent = 0; return; }
 		if( m_bot->IsWithinDistInMap( c, INTERACTION_DISTANCE ) ) {
 			// check for needed items
 			m_bot->SendLoot( m_lootCurrent, LOOT_CORPSE );
@@ -1406,7 +1405,7 @@ void PlayerbotAI::UpdateAttackerInfo() {
 				gref = gref->next();
 				continue;
 			}
-			ref = m_master->getHostilRefManager().getFirst();
+			ref = gref->getSource()->getHostilRefManager().getFirst();
 			while( ref ) {
 				ThreatManager *target = ref->getSource();
 				uint64 guid = target->getOwner()->GetGUID();
@@ -1424,10 +1423,30 @@ void PlayerbotAI::UpdateAttackerInfo() {
 		}
 	}
 
+	// get highest threat not caused by bot for every entry in AttackerInfoList...
+	for( AttackerInfoList::iterator itr=m_attackerInfo.begin(); itr!=m_attackerInfo.end(); ++itr ) {
+		if( !itr->second.attacker ) continue;
+		Unit *a = itr->second.attacker;
+		float t = 0.00;
+		std::list<HostilReference*>::const_iterator i=a->getThreatManager().getThreatList().begin();
+		for( ; i!=a->getThreatManager().getThreatList().end(); ++i ) {
+			if( (*i)->getThreat() > t && (*i)->getTarget() != m_bot )
+				t = (*i)->getThreat();
+		}
+		m_attackerInfo[itr->first].threat2 = t;
+	}
+
 	// DEBUG: output attacker info
 	//sLog.outBasic( "[PlayerbotAI]: %s m_attackerInfo = {", m_bot->GetName() );
 	//for( AttackerInfoList::iterator i=m_attackerInfo.begin(); i!=m_attackerInfo.end(); ++i )
-	//	sLog.outBasic( "[PlayerbotAI]:     [%016I64X] { %08X, %08X, %.2f, %d, %d }", i->first, (i->second.attacker?i->second.attacker->GetGUIDLow():0), (i->second.victim?i->second.victim->GetGUIDLow():0), i->second.threat, i->second.count, i->second.source );
+	//	sLog.outBasic( "[PlayerbotAI]:     [%016I64X] { %08X, %08X, %.2f, %.2f, %d, %d }", 
+	//		i->first, 
+	//		(i->second.attacker?i->second.attacker->GetGUIDLow():0), 
+	//		(i->second.victim?i->second.victim->GetGUIDLow():0), 
+	//		i->second.threat, 
+	//		i->second.threat2, 
+	//		i->second.count, 
+	//		i->second.source );
 	//sLog.outBasic( "[PlayerbotAI]: };" );
 }
 
