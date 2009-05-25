@@ -128,7 +128,7 @@ PlayerbotAI::~PlayerbotAI() {
 
 // finds spell ID for matching substring args
 // in priority of full text match, spells not taking reagents, and highest rank
-uint32 PlayerbotAI::getSpellId(const char* args) const {
+uint32 PlayerbotAI::getSpellId(const char* args, bool master) const {
 	if (!*args)
 		return 0;
 
@@ -141,7 +141,11 @@ uint32 PlayerbotAI::getSpellId(const char* args) const {
 	// converting string that we try to find to lower case
 	wstrToLower(wnamepart);
 
-	int loc = m_bot->GetSession()->GetSessionDbcLocale();
+	int loc = 0;
+	if (master)
+		loc = m_master->GetSession()->GetSessionDbcLocale();
+	else
+		loc = m_bot->GetSession()->GetSessionDbcLocale();
 
 	uint32 foundSpellId = 0;
 	bool foundExactMatch = false;
@@ -2014,7 +2018,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer) {
 
 		// try and get spell ID by name
 		if (spellId == 0)
-			spellId = getSpellId(spellStr.c_str());
+			spellId = getSpellId(spellStr.c_str(), true);
 
 		uint64 castOnGuid = fromPlayer.GetSelection();
 		if (spellId != 0 && castOnGuid != 0) {
