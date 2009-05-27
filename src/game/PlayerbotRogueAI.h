@@ -28,9 +28,6 @@ class MANGOS_DLL_SPEC PlayerbotRogueAI : PlayerbotClassAI {
 		void BuffPlayer(Player *target);
 
 	private:
-
-		
-
 		// COMBAT
 		uint32 SINISTER_STRIKE, BACKSTAB, GOUGE, EVASION, SPRINT, KICK, FEINT, SHIV, FAN_OF_KNIVES;
 		
@@ -40,10 +37,7 @@ class MANGOS_DLL_SPEC PlayerbotRogueAI : PlayerbotClassAI {
 		// ASSASSINATION
 		uint32 EVISCERATE, SLICE_DICE, GARROTE, EXPOSE_ARMOR, AMBUSH, RUPTURE, DISMANTLE, CHEAP_SHOT, KIDNEY_SHOT, MUTILATE, ENVENOM, DEADLY_THROW;
 
-
 		uint32 SpellSequence, LastSpellCombat, LastSpellSubtlety, LastSpellAssassination, Aura;
-		
-		
 };
 
 #endif

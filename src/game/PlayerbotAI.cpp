@@ -1687,8 +1687,8 @@ bool PlayerbotAI::CastSpell(uint32 spellId) {
 		return false;
 
 	m_CurrentlyCastingSpellId = spellId;
-	// m_ignoreAIUpdatesUntilTime = time(0) + pSpell->GetCastTime() + 3;
-	m_ignoreAIUpdatesUntilTime = time(0) + 6;
+	m_ignoreAIUpdatesUntilTime = time(0) + (int32)((float)pSpell->GetCastTime()/1000.0f) + 1;
+	//m_ignoreAIUpdatesUntilTime = time(0) + 6;
 
 	// if this caused the caster to move (blink) update the position
 	// I think this is normally done on the client
