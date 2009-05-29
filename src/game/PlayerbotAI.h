@@ -159,7 +159,7 @@ class MANGOS_DLL_SPEC PlayerbotAI {
         void SendNotEquipList(Player& player);
         void Feast();
         void InterruptCurrentCastingSpell();
-        void GetCombatOrders();
+        void GetCombatOrders( Unit* forcedTarged = 0 );
         void DoNextCombatManeuver();
 		void SetIgnoreUpdateTime(uint8 t) {m_ignoreAIUpdatesUntilTime=time(0) + t; };
 
@@ -177,6 +177,7 @@ class MANGOS_DLL_SPEC PlayerbotAI {
 		bool IsInCombat();
 		void UpdateAttackerInfo();
 		Unit* FindAttacker( ATTACKERINFOTYPE ait=AIT_NONE );
+		uint32 GetAttackerCount() { return m_attackerInfo.size(); };
 
 		void SetInFront( const Unit* obj );
 

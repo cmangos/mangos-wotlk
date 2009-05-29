@@ -1109,7 +1109,7 @@ void PlayerbotAI::Feast() {
 
 // intelligently sets a reasonable combat order for this bot
 // based on its class / level / etc
-void PlayerbotAI::GetCombatOrders() {
+void PlayerbotAI::GetCombatOrders( Unit* forcedTarget ) {
 	// set combat state, and clear looting, etc...
 	if( m_botState != BOTSTATE_COMBAT ) {
 		SetState( BOTSTATE_COMBAT );
@@ -1122,7 +1122,7 @@ void PlayerbotAI::GetCombatOrders() {
 	UpdateAttackerInfo();
 
 	//Unit* thingToAttack = m_master->getAttackerForHelper();
-	Unit *thingToAttack = FindAttacker();
+	Unit *thingToAttack = ( !forcedTarget ? FindAttacker() : forcedTarget );
 	if (!thingToAttack)
 		return;
 
@@ -1145,6 +1145,8 @@ void PlayerbotAI::GetCombatOrders() {
 	m_bot->Attack(thingToAttack, true);
 
 	m_bot->GetMotionMaster()->Clear(true);
+	m_bot->clearUnitState(UNIT_STAT_CHASE);
+	m_bot->clearUnitState(UNIT_STAT_FOLLOW);
 
 	// add thingToAttack to loot list
 	m_lootCreature.push_back( thingToAttack->GetGUID() );
@@ -1153,22 +1155,14 @@ void PlayerbotAI::GetCombatOrders() {
 	switch (m_bot->getClass()) {
 	case CLASS_PRIEST:
 		break;
-	case CLASS_MAGE: {
-		float angle = rand_float(0, M_PI);
-		float dist = rand_float(4, 8);
-		m_bot->GetMotionMaster()->Clear(true);
-		m_bot->GetMotionMaster()->MoveFollow(thingToAttack, dist, angle);
-		break;
-	}
 	case CLASS_SHAMAN:
 		break;
 	case CLASS_WARLOCK:
-		break;
-	case CLASS_DRUID: {
-		float angle = rand_float(0, M_PI);
-		float dist = rand_float(4, 8);
-		m_bot->GetMotionMaster()->Clear(true);
-		m_bot->GetMotionMaster()->MoveFollow(thingToAttack, dist, angle);
+	case CLASS_HUNTER:
+	case CLASS_DRUID:
+	case CLASS_MAGE: {
+		float dist = rand_float(8, 12);
+		m_bot->GetMotionMaster()->MoveChase(thingToAttack,dist,m_bot->GetAngle(thingToAttack));
 		break;
 	}
 	default:
@@ -1189,6 +1183,7 @@ void PlayerbotAI::DoNextCombatManeuver() {
 		m_combatOrder = ORDERS_NONE;
 		m_bot->SetSelection(0);
 		m_bot->GetMotionMaster()->Clear(true);
+		m_bot->InterruptNonMeleeSpells(true);
 		return;
 	}
 
@@ -1475,8 +1470,11 @@ Unit *PlayerbotAI::FindAttacker( ATTACKERINFOTYPE ait ) {
 void PlayerbotAI::SetInFront( const Unit* obj ) {
 	if( !m_bot->HasInArc( M_PI, obj ) ) {
 	    m_bot->SetInFront( obj );
+		m_bot->SendUpdateToPlayer( m_master );
 	}
 }
+
+
 
 // some possible things to use in AI
 //GetRandomContactPoint
@@ -1996,12 +1994,13 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer) {
 			Unit* thingToAttack = ObjectAccessor::GetUnit(*m_bot, attackOnGuid);
 			if (!m_bot->IsFriendlyTo(thingToAttack) && m_bot->IsWithinLOSInMap(
 					thingToAttack)) {
-				m_bot->GetMotionMaster()->Clear(true);
+				/*m_bot->GetMotionMaster()->Clear(true);
 				m_combatOrder = ORDERS_KILL;
 				m_bot->SetSelection(thingToAttack->GetGUID());
 				m_bot->Attack(thingToAttack, true);
 				m_bot->GetMotionMaster()->MoveChase(thingToAttack);
-				m_ignoreAIUpdatesUntilTime = time(0) + 6;
+				m_ignoreAIUpdatesUntilTime = time(0) + 6;*/
+				GetCombatOrders( thingToAttack );
 			}
 		} else {
 			TellMaster("No target is selected.");
