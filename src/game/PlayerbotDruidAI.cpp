@@ -68,10 +68,9 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget){
 			return;
 	}
 	uint32 masterHP = GetMaster()->GetHealth()*100 / GetMaster()->GetMaxHealth();
+
+	ai->SetInFront( pTarget );
 	Player *m_bot = GetPlayerBot();
-	if( !m_bot->HasInArc(M_PI, pTarget)) {
-	    m_bot->SetInFront(pTarget);
-	}
 
 	if (pTarget->getVictim() == m_bot && ai->GetHealthPercent() >= 40) {
 		SpellSequence = DruidTank;

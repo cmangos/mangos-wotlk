@@ -63,6 +63,8 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget){
 	ai->Follow(*GetMaster()); // dont want to melee mob
 
 	// Damage Spells (primitive example)
+	ai->SetInFront( pTarget );
+	Player *m_bot = GetPlayerBot();
 
 	switch (SpellSequence) {
 		case SPELL_FROST:

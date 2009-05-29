@@ -314,148 +314,137 @@ void PlayerbotAI::HandleMasterOutgoingPacket(const WorldPacket& packet,
 	 */
 }
 
-void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet,
-		WorldSession& masterSession) {
+void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSession& masterSession) {
 	switch (packet.GetOpcode()) {
-
-	// If master inspects one of his bots, give the master useful info in chat window
-	// such as inventory that can be equipped
-	case CMSG_INSPECT: {
-		WorldPacket p(packet);
-		p.rpos(0); // reset reader
-		uint64 guid;
-		p >> guid;
-		Player* const bot = masterSession.GetPlayerBot(guid);
-		if (!bot)
-			return;
-		bot->GetPlayerbotAI()->SendNotEquipList(*bot);
-	}
+		// If master inspects one of his bots, give the master useful info in chat window
+		// such as inventory that can be equipped
+		case CMSG_INSPECT: {
+			WorldPacket p(packet);
+			p.rpos(0); // reset reader
+			uint64 guid;
+			p >> guid;
+			Player* const bot = masterSession.GetPlayerBot(guid);
+			if (!bot)
+				return;
+			bot->GetPlayerbotAI()->SendNotEquipList(*bot);
+		}
 
 		// handle emotes from the master
 		//case CMSG_EMOTE:
-	case CMSG_TEXT_EMOTE: {
-		WorldPacket p(packet);
-		p.rpos(0); // reset reader
-		uint32 emoteNum;
-		p >> emoteNum;
+		case CMSG_TEXT_EMOTE: {
+			WorldPacket p(packet);
+			p.rpos(0); // reset reader
+			uint32 emoteNum;
+			p >> emoteNum;
 
-		/*
-		 std::ostringstream out;
-		 out << "emote is: " << emoteNum;
-		 ChatHandler ch(masterSession.GetPlayer());
-		 ch.SendSysMessage(out.str().c_str());
-		 */
-		switch (emoteNum) {
-
-		case TEXTEMOTE_BOW: {
-			// Buff anyone who bows before me. Useful for players not in bot's group
-			// How do I get correct target???
-			//Player* const pPlayer = masterSession.GetPlayerBot(masterSession.GetPlayer()->GetSelection());
-			//if (pPlayer->GetPlayerbotAI()->GetClassAI())
-			//	pPlayer->GetPlayerbotAI()->GetClassAI()->BuffPlayer(pPlayer);
-			return;
-		}
-
-		case TEXTEMOTE_BONK: {
-			Player* const pPlayer = masterSession.GetPlayerBot(
-					masterSession.GetPlayer()->GetSelection());
-			if (!pPlayer || !pPlayer->GetPlayerbotAI())
-				return;
-			PlayerbotAI* const pBot = pPlayer->GetPlayerbotAI();
-
+			/* std::ostringstream out;
+			out << "emote is: " << emoteNum;
 			ChatHandler ch(masterSession.GetPlayer());
-			{
-				std::ostringstream out;
-				out << "time(0): " << time(0)
-						<< " m_ignoreAIUpdatesUntilTime: "
-						<< pBot->m_ignoreAIUpdatesUntilTime;
-				ch.SendSysMessage(out.str().c_str());
-			}
-			{
-				std::ostringstream out;
-				out << "m_TimeDoneEating: " << pBot->m_TimeDoneEating
-						<< " m_TimeDoneDrinking: " << pBot->m_TimeDoneDrinking;
-				ch.SendSysMessage(out.str().c_str());
-			}
-			{
-				std::ostringstream out;
-				out << "m_CurrentlyCastingSpellId: "
-						<< pBot->m_CurrentlyCastingSpellId;
-				ch.SendSysMessage(out.str().c_str());
-			}
-			{
-				std::ostringstream out;
-				out << "m_IsFollowingMaster: " << pBot->m_IsFollowingMaster;
-				ch.SendSysMessage(out.str().c_str());
-			}
-			{
-				std::ostringstream out;
-				out << "IsBeingTeleported() "
-						<< pBot->m_bot->IsBeingTeleported();
-				ch.SendSysMessage(out.str().c_str());
-			}
-			{
-				std::ostringstream out;
-				bool tradeActive = (pBot->m_bot->GetTrader()) ? true : false;
-				out << "tradeActive: " << tradeActive;
-				ch.SendSysMessage(out.str().c_str());
-			}
-			{
-				std::ostringstream out;
-				out << "IsCharmed() " << pBot->m_bot->isCharmed();
-				ch.SendSysMessage(out.str().c_str());
-			}
-			return;
-		}
+			ch.SendSysMessage(out.str().c_str()); */
 
-		case TEXTEMOTE_EAT:
-		case TEXTEMOTE_DRINK: {
-			for (PlayerBotMap::const_iterator it =
-					masterSession.GetPlayerBotsBegin(); it
-					!= masterSession.GetPlayerBotsEnd(); ++it) {
-				Player* const bot = it->second;
-				bot->GetPlayerbotAI()->Feast();
-			}
-			return;
-		}
+			switch (emoteNum) {
+				case TEXTEMOTE_BOW: {
+					// Buff anyone who bows before me. Useful for players not in bot's group
+					// How do I get correct target???
+					//Player* const pPlayer = masterSession.GetPlayerBot(masterSession.GetPlayer()->GetSelection());
+					//if (pPlayer->GetPlayerbotAI()->GetClassAI())
+					//	pPlayer->GetPlayerbotAI()->GetClassAI()->BuffPlayer(pPlayer);
+					return;
+				}
 
-			// emote to stay
-		case TEXTEMOTE_STAND: {
-			Player* const bot = masterSession.GetPlayerBot(
+				case TEXTEMOTE_BONK: {
+					Player* const pPlayer = masterSession.GetPlayerBot(
 					masterSession.GetPlayer()->GetSelection());
-			if (bot)
-				bot->GetPlayerbotAI()->Stay();
-			else {
-				for (PlayerBotMap::const_iterator it =
-						masterSession.GetPlayerBotsBegin(); it
-						!= masterSession.GetPlayerBotsEnd(); ++it) {
-					Player* const bot = it->second;
-					bot->GetPlayerbotAI()->Stay();
+					if (!pPlayer || !pPlayer->GetPlayerbotAI())
+						return;
+					PlayerbotAI* const pBot = pPlayer->GetPlayerbotAI();
+
+					ChatHandler ch(masterSession.GetPlayer());
+					{
+						std::ostringstream out;
+						out << "time(0): " << time(0)
+							<< " m_ignoreAIUpdatesUntilTime: "
+							<< pBot->m_ignoreAIUpdatesUntilTime;
+						ch.SendSysMessage(out.str().c_str());
+					}
+					{
+						std::ostringstream out;
+						out << "m_TimeDoneEating: " << pBot->m_TimeDoneEating
+							<< " m_TimeDoneDrinking: " << pBot->m_TimeDoneDrinking;
+						ch.SendSysMessage(out.str().c_str());
+					}
+					{
+						std::ostringstream out;
+						out << "m_CurrentlyCastingSpellId: "
+							<< pBot->m_CurrentlyCastingSpellId;
+						ch.SendSysMessage(out.str().c_str());
+					}
+					{
+						std::ostringstream out;
+						out << "m_IsFollowingMaster: " << pBot->m_IsFollowingMaster;
+						ch.SendSysMessage(out.str().c_str());
+					}
+					{
+						std::ostringstream out;
+						out << "IsBeingTeleported() "
+							<< pBot->m_bot->IsBeingTeleported();
+						ch.SendSysMessage(out.str().c_str());
+					}
+					{
+						std::ostringstream out;
+						bool tradeActive = (pBot->m_bot->GetTrader()) ? true : false;
+						out << "tradeActive: " << tradeActive;
+						ch.SendSysMessage(out.str().c_str());
+					}
+					{
+						std::ostringstream out;
+						out << "IsCharmed() " << pBot->m_bot->isCharmed();
+						ch.SendSysMessage(out.str().c_str());
+					}
+					return;
+				}
+
+				case TEXTEMOTE_EAT:
+				case TEXTEMOTE_DRINK: {
+					for (PlayerBotMap::const_iterator it = masterSession.GetPlayerBotsBegin(); it != masterSession.GetPlayerBotsEnd(); ++it) {
+						Player* const bot = it->second;
+						bot->GetPlayerbotAI()->Feast();
+					}
+					return;
+				}
+
+				// emote to stay
+				case TEXTEMOTE_STAND: {
+					Player* const bot = masterSession.GetPlayerBot(masterSession.GetPlayer()->GetSelection());
+					if (bot)
+						bot->GetPlayerbotAI()->Stay();
+					else {
+						for (PlayerBotMap::const_iterator it = masterSession.GetPlayerBotsBegin(); it != masterSession.GetPlayerBotsEnd(); ++it) {
+							Player* const bot = it->second;
+							bot->GetPlayerbotAI()->Stay();
+						}
+					}
+					return;
+				}
+
+				// 324 is the followme emote (not defined in enum)
+				// if master has bot selected then only bot follows, else all bots follow
+				case 324:
+				case TEXTEMOTE_WAVE: {
+					Player* const bot = masterSession.GetPlayerBot(masterSession.GetPlayer()->GetSelection());
+					if (bot)
+						bot->GetPlayerbotAI()->Follow(*masterSession.GetPlayer());
+					else {
+						for (PlayerBotMap::const_iterator it = masterSession.GetPlayerBotsBegin(); it != masterSession.GetPlayerBotsEnd(); ++it) {
+							Player* const bot = it->second;
+							bot->GetPlayerbotAI()->Follow(*masterSession.GetPlayer());
+						}
+					}
+					return;
 				}
 			}
-			return;
-		}
+		} /* EMOTE ends here */
 
-			// 324 is the followme emote (not defined in enum)
-			// if master has bot selected then only bot follows, else all bots follow
-		case 324:
-		case TEXTEMOTE_WAVE: {
-			Player* const bot = masterSession.GetPlayerBot(
-					masterSession.GetPlayer()->GetSelection());
-			if (bot)
-				bot->GetPlayerbotAI()->Follow(*masterSession.GetPlayer());
-			else {
-				for (PlayerBotMap::const_iterator it =
-						masterSession.GetPlayerBotsBegin(); it
-						!= masterSession.GetPlayerBotsEnd(); ++it) {
-					Player* const bot = it->second;
-					bot->GetPlayerbotAI()->Follow(*masterSession.GetPlayer());
-				}
-			}
-			return;
-		}
-		}
-	}
 		/*
 
 		 default: {
@@ -1483,6 +1472,12 @@ Unit *PlayerbotAI::FindAttacker( ATTACKERINFOTYPE ait ) {
 	return a;
 }
 
+void PlayerbotAI::SetInFront( const Unit* obj ) {
+	if( !m_bot->HasInArc( M_PI, obj ) ) {
+	    m_bot->SetInFront( obj );
+	}
+}
+
 // some possible things to use in AI
 //GetRandomContactPoint
 //GetPower, GetMaxPower
@@ -1648,6 +1643,10 @@ bool PlayerbotAI::CastSpell(uint32 spellId) {
 	// some AIs don't check if the bot doesn't have spell before using it
 	// so just return false when this happens
 	if (spellId == 0)
+		return false;
+
+	// check spell cooldown
+	if( m_bot->HasSpellCooldown( spellId ) )
 		return false;
 
 	// see Creature.cpp 1738 for reference

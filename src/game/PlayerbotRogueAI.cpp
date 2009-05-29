@@ -39,8 +39,11 @@ PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, Play
 PlayerbotRogueAI::~PlayerbotRogueAI() {}
 
 void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget){
+	if( !pTarget ) return;
+
 	PlayerbotAI* ai = GetAI();
 	if (!ai) return;
+	
 	switch (ai->GetScenarioType()) {
 		case PlayerbotAI::SCENARIO_DUEL:
 
@@ -50,12 +53,11 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget){
 			return;
 	}
 
+	ai->SetInFront( pTarget );
 	Player *m_bot = GetPlayerBot();
-	if( !m_bot->isInFrontInMap( pTarget, 1 ) ) {
-	    m_bot->SetInFront( pTarget );
-	}
 
-	if( pTarget->getVictim()!=m_bot && !m_bot->hasUnitState(UNIT_STAT_FOLLOW) && !pTarget->isInBackInMap(m_bot,10) ) {
+	// TODO: make this work better...
+/*	if( pTarget->getVictim()!=m_bot && !m_bot->hasUnitState(UNIT_STAT_FOLLOW) && !pTarget->isInBackInMap(m_bot,10) ) {
 		GetAI()->TellMaster( "getting behind target" );
 		m_bot->GetMotionMaster()->Clear( true );
 		m_bot->GetMotionMaster()->MoveFollow( pTarget, 1, 2*M_PI );
@@ -63,7 +65,7 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget){
 		GetAI()->TellMaster( "chasing attacking target" );
 		m_bot->GetMotionMaster()->Clear( true );
 		m_bot->GetMotionMaster()->MoveChase( pTarget );
-	}
+	}*/
 
 	//Rouge like behaviour. ^^
 /*	if (VANISH > 0 && GetMaster()->isDead()) { //Causes the server to crash :( removed for now.
@@ -147,94 +149,6 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget){
 			break;
 	}
 	ai->TellMaster( out.str().c_str() );
-
-/*	switch (SpellSequence) {
-		case Threat:
-			GetAI()->TellMaster("Case Threat");
-			if (EVASION > 0 && ai->GetHealthPercent() < 35 && !GetPlayerBot()->HasAura(EVASION, 0) ) {
-				GetAI()->TellMaster("Evasion");
-				ai->CastSpell(EVASION, *m_bot);
-			}
-/ *			else if (VANISH > 0 && ai->GetHealthPercent() < 20) { //Causes the server to crash :( removed for now.
-				m_bot->CombatStop();
-				m_bot->RemoveAllAttackers(); 
-				ai->CastSpell(VANISH);
-				GetAI()->TellMaster("AttackStop, CombatStop, Vanish");
-			}
-* /			else {
-				ai->CastSpell(FEINT);
-				GetAI()->TellMaster("Feint");
-			}
-			break;
-		case RogueSpellPreventing:
-			GetAI()->TellMaster("Case SpellPreventing");
-			if (ai->GetEnergyAmount() >= 25 && m_bot->GetComboPoints() >= 2) {
-				ai->CastSpell(KIDNEY_SHOT, *pTarget);
-				GetAI()->TellMaster("Kidney Shot");
-			}
-			else { 
-				GetAI()->TellMaster("Kick.");
-				ai->CastSpell(KICK, *pTarget);
-			}
-			break;
-		case RogueCombat:
-			GetAI()->TellMaster("Case Combat");
-			if (SINISTER_STRIKE > 0 && m_bot->GetComboPoints() <= 4)  {
-				if  (ai->GetEnergyAmount() >= 35) {
-					ai->CastSpell(SINISTER_STRIKE, *pTarget);
-				}
-			}
-			if (DISMANTLE > 0 && ai->GetEnergyAmount() >= 25) { 
-				ai->CastSpell(DISMANTLE, *pTarget);
-			}
-			if (m_bot->GetComboPoints() == 5) {
-				if (EVISCERATE > 0 && pTarget->getClass() == CLASS_ROGUE && ai->GetEnergyAmount() >= 35) {
-					ai->CastSpell(EVISCERATE, *pTarget);
-					GetAI()->TellMaster("Rogue Eviscerate");
-				}
-				else if (EVISCERATE > 0 && pTarget->getClass() == CLASS_DRUID && ai->GetEnergyAmount() >= 35) {
-					ai->CastSpell(EVISCERATE, *pTarget);
-					GetAI()->TellMaster("Druid Eviscerate");
-				}
-				else if (KIDNEY_SHOT > 0 && pTarget->getClass() == CLASS_SHAMAN && ai->GetEnergyAmount() >= 25) {
-					ai->CastSpell(KIDNEY_SHOT, *pTarget);
-					GetAI()->TellMaster("Shaman Kidney");
-				}
-				else if (SLICE_DICE > 0 && pTarget->getClass() == CLASS_WARLOCK && ai->GetEnergyAmount() >= 25) {
-					ai->CastSpell(SLICE_DICE, *pTarget);
-					GetAI()->TellMaster("Warlock Slice & Dice");
-				}
-				else if (SLICE_DICE > 0 && pTarget->getClass() == CLASS_HUNTER && ai->GetEnergyAmount() >= 25) {
-					ai->CastSpell(SLICE_DICE, *pTarget);
-					GetAI()->TellMaster("Hunter Slice & Dice");
-				}
-				else if (EXPOSE_ARMOR > 0 && pTarget->getClass() == CLASS_WARRIOR && ai->GetEnergyAmount() >= 25) {
-					ai->CastSpell(EXPOSE_ARMOR, *pTarget);
-					GetAI()->TellMaster("Warrior Expose Armor");
-				}
-				else if (EXPOSE_ARMOR > 0 && pTarget->getClass() == CLASS_PALADIN && ai->GetEnergyAmount() >= 25) {
-					ai->CastSpell(EXPOSE_ARMOR, *pTarget);
-					GetAI()->TellMaster("Paladin Expose Armor");
-				}
-				else if (EXPOSE_ARMOR > 0 && pTarget->getClass() == CLASS_DEATH_KNIGHT && ai->GetEnergyAmount() >= 25) {
-					ai->CastSpell(EXPOSE_ARMOR, *pTarget);
-					GetAI()->TellMaster("DK Expose Armor");
-				}
-				else if (RUPTURE > 0 && pTarget->getClass() == CLASS_MAGE && ai->GetEnergyAmount() >= 25) {
-					ai->CastSpell(EXPOSE_ARMOR, *pTarget);
-					GetAI()->TellMaster("Mage Rupture");
-				}
-				else if (RUPTURE > 0 && pTarget->getClass() == CLASS_PRIEST && ai->GetEnergyAmount() >= 25) {
-					ai->CastSpell(EXPOSE_ARMOR, *pTarget);
-					GetAI()->TellMaster("Priest Rupture");
-				}
-				else {
-					ai->CastSpell(EVISCERATE, *pTarget);
-					GetAI()->TellMaster("Else Eviscerate");
-				}
-			}
-			break;
-	}*/
 }
 	
  // end DoNextCombatManeuver

@@ -178,6 +178,8 @@ class MANGOS_DLL_SPEC PlayerbotAI {
 		void UpdateAttackerInfo();
 		Unit* FindAttacker( ATTACKERINFOTYPE ait=AIT_NONE );
 
+		void SetInFront( const Unit* obj );
+
     private:
 		// ****** Closed Actions ********************************
 		// These actions may only be called at special times.

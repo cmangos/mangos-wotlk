@@ -56,10 +56,11 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget){
 				}
 			return;
 	}
-  Player *m_bot = GetPlayerBot();
-	if( !m_bot->HasInArc(M_PI, pTarget)) {
-	    m_bot->SetInFront(pTarget);
-	}
+
+	// damage spells
+	ai->SetInFront( pTarget );
+	Player *m_bot = GetPlayerBot();
+
 	//Shield master if low hp.
 	uint32 masterHP = GetMaster()->GetHealth()*100 / GetMaster()->GetMaxHealth();
 
