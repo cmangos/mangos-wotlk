@@ -490,21 +490,27 @@ void ObjectMgr::LoadCreatureTemplates()
                 continue;
             }
 
+            if(cInfo->unit_class != heroicInfo->unit_class)
+            {
+                sLog.outErrorDb("Creature (Entry: %u, class %u) has different `unit_class` in heroic mode (Entry: %u, class %u).",i, cInfo->unit_class, cInfo->HeroicEntry, heroicInfo->unit_class);
+                continue;
+            }
+
             if(cInfo->npcflag != heroicInfo->npcflag)
             {
                 sLog.outErrorDb("Creature (Entry: %u) has different `npcflag` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
                 continue;
             }
 
-            if(cInfo->classNum != heroicInfo->classNum)
+            if(cInfo->trainer_class != heroicInfo->trainer_class)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has different `classNum` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
+                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_class` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
                 continue;
             }
 
-            if(cInfo->race != heroicInfo->race)
+            if(cInfo->trainer_race != heroicInfo->trainer_race)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has different `race` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
+                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_race` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
                 continue;
             }
 
@@ -550,6 +556,9 @@ void ObjectMgr::LoadCreatureTemplates()
         minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->DisplayID_H);
         if (!minfo)
             sLog.outErrorDb("Creature (Entry: %u) has non-existing modelId_H (%u)", cInfo->Entry, cInfo->DisplayID_H);
+
+        if (cInfo->unit_class && ((1 << (cInfo->unit_class-1)) & CLASSMASK_ALL_CREATURES) == 0)
+            sLog.outErrorDb("Creature (Entry: %u) has invalid unit_class(%u) for creature_template", cInfo->Entry, cInfo->unit_class);
 
         if(cInfo->dmgschool >= MAX_SPELL_SCHOOL)
         {
@@ -3560,90 +3569,6 @@ void ObjectMgr::LoadQuestLocales()
 
     sLog.outString();
     sLog.outString( ">> Loaded %lu Quest locale strings", (unsigned long)mQuestLocaleMap.size() );
-}
-
-void ObjectMgr::LoadPetCreateSpells()
-{
-    QueryResult *result = WorldDatabase.Query("SELECT entry, Spell1, Spell2, Spell3, Spell4 FROM petcreateinfo_spell");
-    if(!result)
-    {
-        barGoLink bar( 1 );
-        bar.step();
-
-        sLog.outString();
-        sLog.outString( ">> Loaded 0 pet create spells" );
-        sLog.outErrorDb("`petcreateinfo_spell` table is empty!");
-        return;
-    }
-
-    uint32 count = 0;
-
-    barGoLink bar( result->GetRowCount() );
-
-    mPetCreateSpell.clear();
-
-    do
-    {
-        Field *fields = result->Fetch();
-        bar.step();
-
-        uint32 creature_id = fields[0].GetUInt32();
-
-        if(!creature_id)
-        {
-            sLog.outErrorDb("Creature id %u listed in `petcreateinfo_spell` not exist.",creature_id);
-            continue;
-        }
-
-        CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(creature_id);
-        if(!cInfo)
-        {
-            sLog.outErrorDb("Creature id %u listed in `petcreateinfo_spell` not exist.",creature_id);
-            continue;
-        }
-
-        PetCreateSpellEntry PetCreateSpell;
-
-        bool have_spell = false;
-        bool have_spell_db = false;
-        for(int i = 0; i < 4; i++)
-        {
-            PetCreateSpell.spellid[i] = fields[i + 1].GetUInt32();
-
-            if(!PetCreateSpell.spellid[i])
-                continue;
-
-            have_spell_db = true;
-
-            SpellEntry const* i_spell = sSpellStore.LookupEntry(PetCreateSpell.spellid[i]);
-            if(!i_spell)
-            {
-                sLog.outErrorDb("Spell %u listed in `petcreateinfo_spell` does not exist",PetCreateSpell.spellid[i]);
-                PetCreateSpell.spellid[i] = 0;
-                continue;
-            }
-
-            have_spell = true;
-        }
-
-        if(!have_spell_db)
-        {
-            sLog.outErrorDb("Creature %u listed in `petcreateinfo_spell` have only 0 spell data, why it listed?",creature_id);
-            continue;
-        }
-
-        if(!have_spell)
-            continue;
-
-        mPetCreateSpell[creature_id] = PetCreateSpell;
-        ++count;
-    }
-    while (result->NextRow());
-
-    delete result;
-
-    sLog.outString();
-    sLog.outString( ">> Loaded %u pet create spells", count );
 }
 
 void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)

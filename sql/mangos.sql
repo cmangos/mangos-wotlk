@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_7855_01_mangos_pools` bit(1) default NULL
+  `required_7908_03_mangos_creature_template_addon` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -340,9 +340,9 @@ INSERT INTO `command` VALUES
 ('gps',1,'Syntax: .gps [$name|$shift-link]\r\n\r\nDisplay the position information for a selected character or creature (also if player name $name provided then for named player, or if creature/gameobject shift-link provided then pointed creature/gameobject if it loaded). Position information includes X, Y, Z, and orientation, map Id and zone Id'),
 ('groupgo',1,'Syntax: .groupgo [$charactername]\r\n\r\nTeleport the given character and his group to you. Teleported only online characters but original selected group member can be offline.'),
 ('guid',2,'Syntax: .guid\r\n\r\nDisplay the GUID for the selected character.'),
-('guild create',2,'Syntax: .guild create [$GuildLeaderName] $GuildName\r\n\r\nCreate a guild named $GuildName with the player $GuildLeaderName (or selected) as leader.'),
-('guild delete',2,'Syntax: .guild delete $GuildName\r\n\r\nDelete guild $GuildName.'),
-('guild invite',2,'Syntax: .guild invite [$CharacterName] $GuildName\r\n\r\nAdd player $CharacterName (or selected) into a guild $GuildName.'),
+('guild create',2,'Syntax: .guild create [$GuildLeaderName] "$GuildName"\r\n\r\nCreate a guild named $GuildName with the player $GuildLeaderName (or selected) as leader.  Guild name must in quotes.'),
+('guild delete',2,'Syntax: .guild delete "$GuildName"\r\n\r\nDelete guild $GuildName. Guild name must in quotes.'),
+('guild invite',2,'Syntax: .guild invite [$CharacterName] "$GuildName"\r\n\r\nAdd player $CharacterName (or selected) into a guild $GuildName. Guild name must in quotes.'),
 ('guild rank',2,'Syntax: .guild rank $CharacterName #Rank\r\n\r\nSet for $CharacterName rank #Rank in a guild.'),
 ('guild uninvite',2,'Syntax: .guild uninvite [$CharacterName]\r\n\r\nRemove player $CharacterName (or selected) from a guild.'),
 ('help',0,'Syntax: .help [$command]\r\n\r\nDisplay usage instructions for the given $command. If no $command provided show list available commands.'),
@@ -564,7 +564,6 @@ DROP TABLE IF EXISTS `creature_addon`;
 CREATE TABLE `creature_addon` (
   `guid` int(11) NOT NULL default '0',
   `mount` mediumint(8) unsigned NOT NULL default '0',
-  `bytes0` int(10) unsigned NOT NULL default '0',
   `bytes1` int(10) unsigned NOT NULL default '0',
   `bytes2` int(10) unsigned NOT NULL default '0',
   `emote` int(10) unsigned NOT NULL default '0',
@@ -813,15 +812,17 @@ CREATE TABLE `creature_template` (
   `maxdmg` float NOT NULL default '0',
   `dmgschool` tinyint(4) NOT NULL default '0',
   `attackpower` int(10) unsigned NOT NULL default '0',
+  `dmg_multiplier` float NOT NULL default '1',
   `baseattacktime` int(10) unsigned NOT NULL default '0',
   `rangeattacktime` int(10) unsigned NOT NULL default '0',
+  `unit_class` tinyint(3) unsigned NOT NULL default '0',
   `unit_flags` int(10) unsigned NOT NULL default '0',
   `dynamicflags` int(10) unsigned NOT NULL default '0',
   `family` tinyint(4) NOT NULL default '0',
   `trainer_type` tinyint(4) NOT NULL default '0',
   `trainer_spell` mediumint(8) unsigned NOT NULL default '0',
-  `class` tinyint(3) unsigned NOT NULL default '0',
-  `race` tinyint(3) unsigned NOT NULL default '0',
+  `trainer_class` tinyint(3) unsigned NOT NULL default '0',
+  `trainer_race` tinyint(3) unsigned NOT NULL default '0',
   `minrangedmg` float NOT NULL default '0',
   `maxrangedmg` float NOT NULL default '0',
   `rangedattackpower` smallint(5) unsigned NOT NULL default '0',
@@ -864,7 +865,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,0,10045,0,10045,0,'Waypoint(Only GM can see it)','Visual',NULL,1,1,64,64,0,0,0,35,35,0,0.91,1,0,14,15,0,100,2000,2200,4096,0,0,0,0,0,0,1.76,2.42,100,8,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,1.0,1.0,0,1,0,0,0x82,'');
+(1,0,10045,0,10045,0,'Waypoint(Only GM can see it)','Visual',NULL,1,1,64,64,0,0,0,35,35,0,0.91,1,0,14,15,0,100,1,2000,2200,8,4096,0,0,0,0,0,0,1.76,2.42,100,8,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,1.0,1.0,0,1,0,0,0x82,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -876,7 +877,6 @@ DROP TABLE IF EXISTS `creature_template_addon`;
 CREATE TABLE `creature_template_addon` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
   `mount` mediumint(8) unsigned NOT NULL default '0',
-  `bytes0` int(10) unsigned NOT NULL default '0',
   `bytes1` int(10) unsigned NOT NULL default '0',
   `bytes2` int(10) unsigned NOT NULL default '0',
   `emote` mediumint(8) unsigned NOT NULL default '0',
@@ -3658,29 +3658,6 @@ INSERT INTO `pet_name_generation` (`word`,`entry`,`half`) VALUES
 ('tom',17252,1);
 
 /*!40000 ALTER TABLE `pet_name_generation` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `petcreateinfo_spell`
---
-
-DROP TABLE IF EXISTS `petcreateinfo_spell`;
-CREATE TABLE `petcreateinfo_spell` (
-  `entry` mediumint(8) unsigned NOT NULL default '0',
-  `Spell1` mediumint(8) unsigned NOT NULL default '0',
-  `Spell2` mediumint(8) unsigned NOT NULL default '0',
-  `Spell3` mediumint(8) unsigned NOT NULL default '0',
-  `Spell4` mediumint(8) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`entry`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet Create Spells';
-
---
--- Dumping data for table `petcreateinfo_spell`
---
-
-LOCK TABLES `petcreateinfo_spell` WRITE;
-/*!40000 ALTER TABLE `petcreateinfo_spell` DISABLE KEYS */;
-/*!40000 ALTER TABLE `petcreateinfo_spell` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -12961,7 +12938,8 @@ CREATE TABLE `pool_creature` (
   `pool_entry` mediumint(8) unsigned NOT NULL default '0',
   `chance` float unsigned NOT NULL default '0',
   `description` varchar(255) NOT NULL,
-  PRIMARY KEY  (`pool_entry`,`guid`)
+  PRIMARY KEY  (`pool_entry`,`guid`),
+  INDEX `idx_guid`(`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
@@ -12984,7 +12962,8 @@ CREATE TABLE `pool_gameobject` (
   `pool_entry` mediumint(8) unsigned NOT NULL default '0',
   `chance` float unsigned NOT NULL default '0',
   `description` varchar(255) NOT NULL,
-  PRIMARY KEY  (`guid`,`pool_entry`)
+  PRIMARY KEY  (`guid`,`pool_entry`),
+  INDEX `idx_guid`(`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --

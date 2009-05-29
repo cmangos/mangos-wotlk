@@ -191,6 +191,8 @@ enum SheathState
     SHEATH_STATE_RANGED   = 2                               // prepared ranged weapon
 };
 
+#define MAX_SHEATH_STATE    3
+
 // byte (1 from 0..3) of UNIT_FIELD_BYTES_2
 enum UnitBytes2_Flags
 {
@@ -317,7 +319,7 @@ enum DamageTypeToSchool
 enum AuraRemoveMode
 {
     AURA_REMOVE_BY_DEFAULT,
-    AURA_REMOVE_BY_STACK,                                   // at replace by semillar aura
+    AURA_REMOVE_BY_STACK,                                   // at replace by similar aura
     AURA_REMOVE_BY_CANCEL,
     AURA_REMOVE_BY_DISPEL,
     AURA_REMOVE_BY_DEATH
@@ -678,24 +680,6 @@ struct SpellNonMeleeDamage{
 
 uint32 createProcExtendMask(SpellNonMeleeDamage *damageInfo, SpellMissInfo missCondition);
 
-struct UnitActionBarEntry
-{
-    UnitActionBarEntry() : Raw(0) {}
-
-    union
-    {
-        struct
-        {
-            uint16 SpellOrAction;
-            uint16 Type;
-        };
-        struct
-        {
-            uint32 Raw;
-        };
-    };
-};
-
 #define MAX_DECLINED_NAME_CASES 5
 
 struct DeclinedName
@@ -738,11 +722,27 @@ enum CommandStates
     COMMAND_ABANDON = 3
 };
 
+struct UnitActionBarEntry
+{
+    UnitActionBarEntry() : SpellOrAction(0), Type(ACT_DISABLED) {}
+
+    uint16 SpellOrAction;
+    uint16 Type;
+
+    // helper
+    bool IsActionBarForSpell() const
+    {
+        return Type == ACT_DISABLED || Type == ACT_ENABLED || Type == ACT_PASSIVE;
+    }
+};
+
 struct CharmSpellEntry
 {
     uint16 spellId;
     uint16 active;
 };
+
+#define MAX_UNIT_ACTION_BAR_INDEX 10
 
 struct CharmInfo
 {
@@ -762,15 +762,27 @@ struct CharmInfo
         void InitCharmCreateSpells();
         void InitPetActionBar();
         void InitEmptyActionBar();
+
                                                             //return true if successful
-        bool AddSpellToAB(uint32 oldid, uint32 newid, ActiveStates newstate = ACT_DECIDE);
+        bool AddSpellToActionBar(uint32 spellid, ActiveStates newstate = ACT_DECIDE);
+        bool RemoveSpellFromActionBar(uint32 spell_id);
+        bool LoadActionBar(std::string data);
+        void BuildActionBar(WorldPacket* data);
+        void SetSpellAutocast(uint32 spell_id, bool state);
+        void SetActionBar(uint8 index, uint32 spellOrAction,ActiveStates type)
+        {
+            PetActionBar[index].Type = type;
+            PetActionBar[index].SpellOrAction = spellOrAction;
+        }
+        UnitActionBarEntry const* GetActionBarEntry(uint8 index) const { return &(PetActionBar[index]); }
+
         void ToggleCreatureAutocast(uint32 spellid, bool apply);
 
-        UnitActionBarEntry* GetActionBarEntry(uint8 index) { return &(PetActionBar[index]); }
         CharmSpellEntry* GetCharmSpell(uint8 index) { return &(m_charmspells[index]); }
     private:
+
         Unit* m_unit;
-        UnitActionBarEntry PetActionBar[10];
+        UnitActionBarEntry PetActionBar[MAX_UNIT_ACTION_BAR_INDEX];
         CharmSpellEntry m_charmspells[4];
         CommandStates   m_CommandState;
         ReactStates     m_reactState;
@@ -907,6 +919,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetAttackTime(WeaponAttackType att, uint32 val) { SetFloatValue(UNIT_FIELD_BASEATTACKTIME+att,val*m_modAttackSpeedPct[att]); }
         void ApplyAttackTimePercentMod(WeaponAttackType att,float val, bool apply);
         void ApplyCastTimePercentMod(float val, bool apply);
+
+        SheathState GetSheath() const { return SheathState(GetByteValue(UNIT_FIELD_BYTES_2, 0)); }
+        virtual void SetSheath( SheathState sheathed ) { SetByteValue(UNIT_FIELD_BYTES_2, 0, sheathed); }
 
         // faction template id
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }

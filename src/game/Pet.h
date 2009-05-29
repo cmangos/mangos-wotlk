@@ -65,6 +65,7 @@ enum PetSpellType
 {
     PETSPELL_NORMAL = 0,
     PETSPELL_FAMILY = 1,
+    PETSPELL_TALENT = 2,
 };
 
 struct PetSpell
@@ -107,7 +108,6 @@ enum PetNameInvalidReason
 };
 
 typedef UNORDERED_MAP<uint32, PetSpell> PetSpellMap;
-typedef std::map<uint32,uint32> TeachSpellMap;
 typedef std::vector<uint32> AutoSpellList;
 
 #define HAPPINESS_LEVEL_SIZE        333000
@@ -183,7 +183,6 @@ class Pet : public Creature
         void ToggleAutocast(uint32 spellid, bool apply);
 
         bool HasSpell(uint32 spell) const;
-        void AddTeachSpell(uint32 learned_id, uint32 source_id) { m_teachspells[learned_id] = source_id; }
 
         void LearnPetPassives();
         void CastPetAuras(bool current);
@@ -200,15 +199,14 @@ class Pet : public Creature
         bool learnSpell(uint32 spell_id);
         void learnSpellHighRank(uint32 spellid);
         void InitLevelupSpellsForLevel();
-        bool unlearnSpell(uint32 spell_id, bool learn_prev);
-        bool removeSpell(uint32 spell_id, bool learn_prev);
+        bool unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
+        bool removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
+        void CleanupActionBar();
 
         PetSpellMap     m_spells;
-        TeachSpellMap   m_teachspells;
         AutoSpellList   m_autospells;
 
         void InitPetCreateSpells();
-        void CheckLearning(uint32 spellid);
 
         bool resetTalents(bool no_cost = false);
         uint32 resetTalentsCost() const;
