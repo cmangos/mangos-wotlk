@@ -117,11 +117,8 @@ void PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget){
 	}
 
 	// Damage Spells
-
+	ai->SetInFront( pTarget );
 	Player *m_bot = GetPlayerBot();
-	if( !m_bot->HasInArc(M_PI, pTarget)) {
-	    m_bot->SetInFront(pTarget);
-	}
 
 	switch (SpellSequence) {
 	

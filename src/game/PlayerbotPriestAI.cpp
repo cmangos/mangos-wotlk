@@ -157,12 +157,10 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget){
 	}
 
 	// Damage Spells
-	if( !m_bot->HasInArc(M_PI, pTarget)) {
-	    m_bot->SetInFront(pTarget);
-	}
+	ai->SetInFront( pTarget );
 
 	switch (SpellSequence) {
-	
+
 	  case SPELL_HOLY:
 			if (SMITE > 0 && LastSpellHoly <= 1 && ai->GetManaPercent() >= 60) {
 			
