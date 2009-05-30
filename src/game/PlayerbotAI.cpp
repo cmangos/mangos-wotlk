@@ -1055,6 +1055,7 @@ void PlayerbotAI::InterruptCurrentCastingSpell() {
 	TellMaster("I'm interrupting my current spell!");
 	WorldPacket* const packet = new WorldPacket(CMSG_CANCEL_CAST, 5);  //changed from thetourist suggestion
 	*packet << m_CurrentlyCastingSpellId;
+  *packet << m_targetGuidCommand;   //changed from thetourist suggestion
 	m_CurrentlyCastingSpellId = 0;
 	m_bot->GetSession()->QueuePacket(packet);
 }
