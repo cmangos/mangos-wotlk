@@ -539,7 +539,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 				m_bot->GetPlayerbotAI()->UseItem(*pItem);
 		} else if (!m_master->IsMounted() && m_bot->IsMounted()) {
 			WorldPacket emptyPacket;
-			m_bot->GetSession()->HandleDismountOpcode(emptyPacket);
+			m_bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
 		}
 	}
 
@@ -578,7 +578,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 				m_bot->GetSession()->HandleGroupSetLeaderOpcode(p);
 			} else {
 				p.clear(); // not really needed
-				m_bot->GetSession()->HandleGroupLeaveOpcode(p); // packet not used
+				m_bot->GetSession()->HandleGroupDisbandOpcode(p); // packet not used updated code
 			}
 		}
 		return;
@@ -596,7 +596,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 		p.clear();
 		if (operation == PARTY_OP_LEAVE) {
 			if (member == m_master->GetName())
-				m_bot->GetSession()->HandleGroupLeaveOpcode(p); // packet not used
+				m_bot->GetSession()->HandleGroupDisbandOpcode(p); // packet not used updated code
 		}
 		return;
 	}
