@@ -717,7 +717,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 				m_bot->GetPlayerbotAI()->UseItem(*pItem);
 		} else if (!m_master->IsMounted() && m_bot->IsMounted()) {
 			WorldPacket emptyPacket;
-			m_bot->GetSession()->HandleDismountOpcode(emptyPacket);
+			m_bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
 		}
 		return;
 	}
@@ -757,7 +757,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 				m_bot->GetSession()->HandleGroupSetLeaderOpcode(p);
 			} else {
 				p.clear(); // not really needed
-				m_bot->GetSession()->HandleGroupLeaveOpcode(p); // packet not used
+				m_bot->GetSession()->HandleGroupDisbandOpcode(p); // packet not used updated code
 			}
 		}
 		return;
@@ -775,7 +775,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 		p.clear();
 		if (operation == PARTY_OP_LEAVE) {
 			if (member == m_master->GetName())
-				m_bot->GetSession()->HandleGroupLeaveOpcode(p); // packet not used
+				m_bot->GetSession()->HandleGroupDisbandOpcode(p); // packet not used updated code
 		}
 		return;
 	}
@@ -1246,8 +1246,9 @@ Item* PlayerbotAI::FindPoison() const {
 
 void PlayerbotAI::InterruptCurrentCastingSpell() {
 	TellMaster("I'm interrupting my current spell!");
-	WorldPacket* const packet = new WorldPacket(CMSG_CANCEL_CAST, 4);
+	WorldPacket* const packet = new WorldPacket(CMSG_CANCEL_CAST, 5);  //changed from thetourist suggestion
 	*packet << m_CurrentlyCastingSpellId;
+  *packet << m_targetGuidCommand;   //changed from thetourist suggestion
 	m_CurrentlyCastingSpellId = 0;
 	m_bot->GetSession()->QueuePacket(packet);
 }
