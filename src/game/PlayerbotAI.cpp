@@ -23,6 +23,7 @@
 #include "SpellAuras.h"
 #include "SharedDefines.h"
 #include "Log.h"
+#include "GossipDef.h"
 
 // returns a float in range of..
 float rand_float(float low, float high) {
@@ -36,6 +37,8 @@ float rand_float(float low, float high) {
  * the guid and what weight they hold. I call it the mask. For example) if mask is 01001001,
  * there will be only 3 words. The first word is shifted to the left 0 times,
  * the second is shifted 3 times, and the third is shifted 6.
+ * 
+ * Possibly use ByteBuffer::readPackGUID?
  */
 uint64 extractGuid(WorldPacket& packet) {
 	uint8 mask;
@@ -305,13 +308,28 @@ void PlayerbotAI::SendQuestItemList( Player& player ) {
 
 void PlayerbotAI::HandleMasterOutgoingPacket(const WorldPacket& packet,
 		WorldSession& masterSession) {
-	/*
-	 const char* oc = LookupOpcodeName(packet.GetOpcode());
+	switch (packet.GetOpcode()) {
+	
+	case SMSG_NAME_QUERY_RESPONSE:
+	case SMSG_MONSTER_MOVE:
+	case SMSG_COMPRESSED_UPDATE_OBJECT:
+	case SMSG_DESTROY_OBJECT:
+	case SMSG_UPDATE_OBJECT:
+	case SMSG_STANDSTATE_UPDATE:
+	case MSG_MOVE_HEARTBEAT:
+	case SMSG_QUERY_TIME_RESPONSE:
+	case SMSG_AURA_UPDATE_ALL:
+	case SMSG_CREATURE_QUERY_RESPONSE:
+	case SMSG_GAMEOBJECT_QUERY_RESPONSE:
+		return;
+	default: {
+		const char* oc = LookupOpcodeName(packet.GetOpcode());
 
-	 std::ostringstream out;
-	 out << "out: " << oc;
-	 sLog.outError(out.str().c_str());
-	 */
+		std::ostringstream out;
+		out << "masterout: " << oc;
+		sLog.outError(out.str().c_str());
+	}
+	}
 }
 
 void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSession& masterSession) {
@@ -444,19 +462,179 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
 				}
 			}
 		} /* EMOTE ends here */
+		
+		// if master talks to an NPC
+		case CMSG_GOSSIP_HELLO: 
+		case CMSG_QUESTGIVER_HELLO: {
+			WorldPacket p(packet);
+			p.rpos(0); // reset reader
+			uint64 npcGUID;	p >> npcGUID;
 
+			Object* const pNpc = ObjectAccessor::GetObjectByTypeMask(*masterSession.GetPlayer(), npcGUID, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
+			if (! pNpc) return;
+
+			// for all master's bots
+			for (PlayerBotMap::const_iterator it = masterSession.GetPlayerBotsBegin(); it != masterSession.GetPlayerBotsEnd(); ++it) {
+				Player* const bot = it->second;
+				if (! bot->IsInMap((WorldObject*) pNpc))
+					bot->GetPlayerbotAI()->TellMaster("hey you are turning in quests without me!");
+				else {
+					// auto complete every completed quest this NPC has
+					bot->PrepareQuestMenu(npcGUID);
+					QuestMenu& questMenu = bot->PlayerTalkClass->GetQuestMenu();
+					for (uint32 iI = 0; iI < questMenu.MenuItemCount(); ++iI) {
+						QuestMenuItem const& qItem = questMenu.GetItem(iI);
+						uint32 questID = qItem.m_qId;
+						Quest const* pQuest = objmgr.GetQuestTemplate(questID);
+
+						std::ostringstream out;
+
+						// if quest incomplete (grey ?)
+						if (qItem.m_qIcon == 3) {
+							out << "|cffff0000Quest incomplete:|r " << "|cff808080" << "<?>" << "|r"
+							<< " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+						}
+
+						// if quest available (yellow !)
+						else if (qItem.m_qIcon == 6) {
+							out << "|cff00ff00Quest available:|r " << "|cfffff000" << "<!>" << "|r"
+							<< " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+						}
+
+						// is quest ready to turn in (yellow ?)
+						else if (qItem.m_qIcon == 4) {
+							// no choice in rewards
+							if (pQuest->GetRewItemsCount() == 0) {
+								if (bot->CanRewardQuest(pQuest, false)) {
+									bot->RewardQuest(pQuest, 0, pNpc, false);									
+									out << "Quest complete: " << "|cfffff000" << "<?>" << "|r"
+									<< " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+								}
+								else {
+									out << "|cffff0000Unable to turn quest in:|r " 
+									<< "|cfffff000" << "<?>" << "|r "
+									<< "|cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+								}
+							}
+							// auto choose reward
+							else {
+								ItemPrototype const *pRewardItem = NULL;
+
+								for (uint8 i=0; i < pQuest->GetRewItemsCount(); ++i) {
+									ItemPrototype const * const pRewardItemCompare = objmgr.GetItemPrototype(pQuest->RewChoiceItemId[i]);
+									if (bot->CanUseItem(pRewardItemCompare)) {
+										if (pRewardItem == NULL) 
+											pRewardItem = pRewardItemCompare;
+										else {
+											// choose highest armor if item has armor rating
+											if (pRewardItem->Armor > pRewardItemCompare->Armor)
+												pRewardItem = pRewardItemCompare;
+										}
+									}
+								}
+								// just choose first reward if we cant use any of the rewards
+								uint32 rewardItemId = (pRewardItem == NULL) ? pQuest->RewChoiceItemId[0] : pRewardItem->ItemId;
+
+								if (bot->CanRewardQuest(pQuest, rewardItemId, false)) {
+									bot->RewardQuest(pQuest, rewardItemId, pNpc, false);
+
+									out << "Quest complete: " << "|cfffff000" << "<?>" << "|r"
+									<< " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r"
+									<< "reward: "
+									<< " |cffffffff|Hitem:" << rewardItemId << ":0:0:0:0:0:0:0" << "|h[" << pRewardItem->Name1 << "]|h|r";
+
+									// TODO: auto equip reward?
+								}
+								else {
+									out << "|cffff0000Unable to turn quest in:|r " 
+									<< "|cfffff000" << "<?>" << "|r "
+									<< "|cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+								}
+							}
+
+							// if something to report to master, tell master
+							if (! out.str().empty())
+								bot->GetPlayerbotAI()->TellMaster(out.str());
+						}
+
+						// else report unknown icon meaning
+						else {
+							out << "unknown qItem.m_qIcon == " << qItem.m_qIcon << ". If you know the significance of it please report in forum.";
+							bot->GetPlayerbotAI()->TellMaster(out.str());
+						}
+					}
+				}
+
+			}
+			return;
+		}
+		
+		
+		// if master accepts a quest, bots should also try to accept quest
+		case CMSG_QUESTGIVER_ACCEPT_QUEST: {
+			WorldPacket p(packet);
+			p.rpos(0); // reset reader
+		    uint64 guid;
+		    uint32 quest;
+		    p >> guid >> quest;
+		    Quest const* qInfo = objmgr.GetQuestTemplate(quest);
+		    if (qInfo) {
+				for (PlayerBotMap::const_iterator it = masterSession.GetPlayerBotsBegin(); it != masterSession.GetPlayerBotsEnd(); ++it) {
+					Player* const bot = it->second;
+					
+					if (! bot->CanTakeQuest(qInfo, false)) {
+						if (! bot->SatisfyQuestStatus(qInfo, false))
+							bot->GetPlayerbotAI()->TellMaster("I already have that quest.");
+						else	
+							bot->GetPlayerbotAI()->TellMaster("I can't take this quest.");
+					}
+					else if (! bot->SatisfyQuestLog(false))
+						bot->GetPlayerbotAI()->TellMaster("My quest log is full.");
+					else if (! bot->CanAddQuest(qInfo, false))
+						bot->GetPlayerbotAI()->TellMaster("I can't take this quest because this quest requires that I take items, but my bags are full!");
+					else {					
+						p.rpos(0); // reset reader
+						bot->GetSession()->HandleQuestgiverAcceptQuestOpcode(p);
+						bot->GetPlayerbotAI()->TellMaster("Got the quest.");
+					}
+				}
+		    }
+		    return;
+		}
+		
 		/*
+		case CMSG_QUESTLOG_REMOVE_QUEST: {
+			break;
+		}
+		*/
 
-		 default: {
-		 const char* oc = LookupOpcodeName(packet.GetOpcode());
-		 ChatHandler ch(masterSession.GetPlayer());
-		 ch.SendSysMessage(oc);
+		case CMSG_NAME_QUERY:
+		case MSG_MOVE_START_FORWARD:
+		case MSG_MOVE_STOP:
+		case MSG_MOVE_SET_FACING:
+		case MSG_MOVE_START_STRAFE_LEFT:
+		case MSG_MOVE_START_STRAFE_RIGHT:
+		case MSG_MOVE_STOP_STRAFE:
+		case MSG_MOVE_START_BACKWARD:
+		case MSG_MOVE_HEARTBEAT:
+		case CMSG_STANDSTATECHANGE:
+		case CMSG_QUERY_TIME:
+		case CMSG_CREATURE_QUERY:
+		case CMSG_GAMEOBJECT_QUERY:
+		case MSG_MOVE_JUMP:
+		case MSG_MOVE_FALL_LAND:
+			return;
 
-		 std::ostringstream out;
-		 out << "in: " << oc;
-		 sLog.outError(out.str().c_str());
-		 }
-		 */
+		default: {
+			const char* oc = LookupOpcodeName(packet.GetOpcode());
+			// ChatHandler ch(masterSession.GetPlayer());
+			// ch.SendSysMessage(oc);
+
+			std::ostringstream out;
+			out << "masterin: " << oc;
+			sLog.outError(out.str().c_str());
+		}
+		 
 
 	}
 }
@@ -541,6 +719,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 			WorldPacket emptyPacket;
 			m_bot->GetSession()->HandleDismountOpcode(emptyPacket);
 		}
+		return;
 	}
 
 		// handle flying acknowledgement
@@ -749,8 +928,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 
 		return;
 	}
-
-	/* uncomment this and your bots will tell you all their outgoing packet opcode names
+	
+	/* uncomment this and your bots will tell you all their outgoing packet opcode names */
 	case SMSG_MONSTER_MOVE:
 	case SMSG_UPDATE_WORLD_STATE:
 	case SMSG_COMPRESSED_UPDATE_OBJECT:
@@ -761,17 +940,31 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 	case MSG_MOVE_START_STRAFE_LEFT:
 	case SMSG_UPDATE_OBJECT:
 	case MSG_MOVE_START_FORWARD:
+	case MSG_MOVE_START_STRAFE_RIGHT:
+	case SMSG_DESTROY_OBJECT:
+	case MSG_MOVE_START_BACKWARD:
+	case SMSG_AURA_UPDATE_ALL:
+	case MSG_MOVE_FALL_LAND:
+	case MSG_MOVE_JUMP:
 		return;
 
 	default: {
 		const char* oc = LookupOpcodeName(packet.GetOpcode());
-		TellMaster(oc);
-		sLog.outError("opcode: %s", oc);
+		
+		std::ostringstream out;
+		out << "botout: " << oc;
+		sLog.outError(out.str().c_str());
+		
+		//TellMaster(oc);		
 	}
-	*/
+
 
 	}
 }
+
+
+
+
 
 uint8 PlayerbotAI::GetHealthPercent(const Unit& target) const {
 	return (static_cast<float> (target.GetHealth()) / target.GetMaxHealth())
@@ -1971,6 +2164,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer) {
 				TradeItem(**it);
 		}
 	}
+	
+	// if we are turning in a quest
 
 	else if (text == "reset") {
 		SetState( BOTSTATE_NORMAL );
