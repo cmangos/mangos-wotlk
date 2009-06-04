@@ -310,6 +310,11 @@ void PlayerbotAI::HandleMasterOutgoingPacket(const WorldPacket& packet,
 		WorldSession& masterSession) {
 	switch (packet.GetOpcode()) {
 	
+	/* maybe our bots should only start looting after the master loots?
+	case SMSG_LOOT_RELEASE_RESPONSE: {
+	}
+	*/
+	
 	case SMSG_NAME_QUERY_RESPONSE:
 	case SMSG_MONSTER_MOVE:
 	case SMSG_COMPRESSED_UPDATE_OBJECT:

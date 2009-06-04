@@ -157,6 +157,12 @@ class CharacterHandler
                 (masterSession->GetPlayer()->GetGroup() == NULL ||
                 masterSession->GetPlayer()->GetGroup()->IsMember(guid) == false))
                 botPlayer->RemoveFromGroup();
+            
+            // sometimes master can lose leadership, pass leadership to master check
+            const uint64 masterGuid = masterSession->GetPlayer()->GetGUID();
+            if (masterSession->GetPlayer()->GetGroup() && 
+            	! masterSession->GetPlayer()->GetGroup()->IsLeader(masterGuid))
+            	masterSession->GetPlayer()->GetGroup()->ChangeLeader(masterGuid);
         }
 } chrHandler;
 
