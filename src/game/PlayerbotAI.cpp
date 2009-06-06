@@ -206,6 +206,9 @@ void PlayerbotAI::SendNotEquipList(Player& player) {
 	// so NO EARLY RETURNS!
 	// see enum EquipmentSlots in Player.h to see what equipment slot each index in vector
 	// is assigned to. (The first is EQUIPMENT_SLOT_HEAD=0, and last is EQUIPMENT_SLOT_TABARD=18)
+    int loc = m_master->GetSession()->GetSessionDbLocaleIndex();
+    std::wstring wnamepart;
+
 	std::list<Item*>* equip[19];
 	for (uint8 i = 0; i < 19; ++i)
 		equip[i] = NULL;
@@ -282,8 +285,23 @@ void PlayerbotAI::SendNotEquipList(Player& player) {
 		for (std::list<Item*>::iterator it = itemListForEqSlot->begin(); it
 				!= itemListForEqSlot->end(); ++it) {
 			const ItemPrototype* const pItemProto = (*it)->GetProto();
+
+            std::string pItemName;
+            ItemLocale const *pItemInfo = objmgr.GetItemLocale(pItemProto->ItemId);
+            if (pItemInfo)
+            {
+                if (pItemInfo->Name.size() > loc && !pItemInfo->Name[loc].empty())
+                {
+                    const std::string name = pItemInfo->Name[loc];
+                    if (Utf8FitTo(name, wnamepart))
+                        pItemName = name.c_str();
+                }
+            }
+            if (pItemName.empty())
+                pItemName = pItemProto->Name1;
+
 			out << " |cffffffff|Hitem:" << pItemProto->ItemId
-				<< ":0:0:0:0:0:0:0" << "|h[" << pItemProto->Name1
+				<< ":0:0:0:0:0:0:0" << "|h[" << pItemName
 				<< "]|h|r";
 		}
 		ch.SendSysMessage(out.str().c_str());
@@ -293,12 +311,29 @@ void PlayerbotAI::SendNotEquipList(Player& player) {
 }
 
 void PlayerbotAI::SendQuestItemList( Player& player ) {
+    int loc = m_master->GetSession()->GetSessionDbLocaleIndex();
+	std::wstring wnamepart;
 	std::ostringstream out;
 
 	for( BotNeedItem::iterator itr=m_needItemList.begin(); itr!=m_needItemList.end(); ++itr ) {
 		const ItemPrototype * pItemProto = objmgr.GetItemPrototype( itr->first );
+
+        std::string pItemName;
+        ItemLocale const *pItemInfo = objmgr.GetItemLocale(pItemProto->ItemId);
+        if (pItemInfo)
+        {
+            if (pItemInfo->Name.size() > loc && !pItemInfo->Name[loc].empty())
+            {
+                const std::string name = pItemInfo->Name[loc];
+                if (Utf8FitTo(name, wnamepart))
+                    pItemName = name.c_str();
+            }
+        }
+        if (pItemName.empty())
+            pItemName = pItemProto->Name1;
+
 		out << " " << itr->second << "x|cffffffff|Hitem:" << pItemProto->ItemId
-			<< ":0:0:0:0:0:0:0" << "|h[" << pItemProto->Name1
+			<< ":0:0:0:0:0:0:0" << "|h[" << pItemName
 			<< "]|h|r";
 	}
 
@@ -836,6 +871,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 
 			// list out items available for trade
 			std::ostringstream out;
+			std::wstring wnamepart;
+            int loc = m_master->GetSession()->GetSessionDbLocaleIndex();
 
 			// list out items in main backpack
 			for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot
@@ -844,10 +881,23 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 						INVENTORY_SLOT_BAG_0, slot);
 				if (pItem && pItem->CanBeTraded()) {
 					const ItemPrototype* const pItemProto = pItem->GetProto();
-					std::string name = pItemProto->Name1;
+
+                    std::string pItemName;
+                    ItemLocale const *pItemInfo = objmgr.GetItemLocale(pItemProto->ItemId);
+                    if (pItemInfo)
+                    {
+                        if (pItemInfo->Name.size() > loc && !pItemInfo->Name[loc].empty())
+                        {
+                            const std::string name = pItemInfo->Name[loc];
+                            if (Utf8FitTo(name, wnamepart))
+                                pItemName = name.c_str();
+                        }
+                    }
+                    if (pItemName.empty())
+                        pItemName = pItemProto->Name1;
 
 					out << " |cffffffff|Hitem:" << pItemProto->ItemId
-							<< ":0:0:0:0:0:0:0" << "|h[" << name << "]|h|r";
+							<< ":0:0:0:0:0:0:0" << "|h[" << pItemName << "]|h|r";
 					if (pItem->GetCount() > 1)
 						out << "x" << pItem->GetCount() << ' ';
 				}
@@ -864,12 +914,25 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
 						if (pItem && pItem->CanBeTraded()) {
 							const ItemPrototype* const pItemProto =
 									pItem->GetProto();
-							const std::string name = pItemProto->Name1;
+
+                            std::string pItemName;
+                            ItemLocale const *pItemInfo = objmgr.GetItemLocale(pItemProto->ItemId);
+                            if (pItemInfo)
+                            {
+                                if (pItemInfo->Name.size() > loc && !pItemInfo->Name[loc].empty())
+                                {
+                                    const std::string name = pItemInfo->Name[loc];
+                                    if (Utf8FitTo(name, wnamepart))
+                                        pItemName = name.c_str();
+                                }
+                            }
+                            if (pItemName.empty())
+                                pItemName = pItemProto->Name1;
 
 							// item link format: http://www.wowwiki.com/ItemString
 							// itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId
 							out << " |cffffffff|Hitem:" << pItemProto->ItemId
-									<< ":0:0:0:0:0:0:0" << "|h[" << name
+									<< ":0:0:0:0:0:0:0" << "|h[" << pItemName
 									<< "]|h|r";
 							if (pItem->GetCount() > 1)
 								out << "x" << pItem->GetCount() << ' ';
