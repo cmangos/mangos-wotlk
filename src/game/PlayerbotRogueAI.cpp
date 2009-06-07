@@ -57,16 +57,22 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
 
     ai->SetInFront( pTarget );
     Player *m_bot = GetPlayerBot();
+    Unit* pVictim = pTarget->getVictim();
 
     // TODO: make this work better...
-/*    if( pTarget->getVictim()!=m_bot && !m_bot->hasUnitState(UNIT_STAT_FOLLOW) && !pTarget->isInBackInMap(m_bot,10) ) {
-        GetAI()->TellMaster( "getting behind target" );
-        m_bot->GetMotionMaster()->Clear( true );
-        m_bot->GetMotionMaster()->MoveFollow( pTarget, 1, 2*M_PI );
-    } else if( pTarget->getVictim()==m_bot && m_bot->hasUnitState(UNIT_STAT_FOLLOW) ) {
-        GetAI()->TellMaster( "chasing attacking target" );
-        m_bot->GetMotionMaster()->Clear( true );
-        m_bot->GetMotionMaster()->MoveChase( pTarget );
+    /*if (pVictim)
+    {
+        if( pVictim!=m_bot && !m_bot->hasUnitState(UNIT_STAT_FOLLOW) && !pTarget->isInBackInMap(m_bot,10) ) {
+            GetAI()->TellMaster( "getting behind target" );
+            m_bot->GetMotionMaster()->Clear( true );
+            m_bot->GetMotionMaster()->MoveFollow( pTarget, 1, 2*M_PI );
+        }
+        else if( pVictim==m_bot && m_bot->hasUnitState(UNIT_STAT_FOLLOW) )
+        {
+            GetAI()->TellMaster( "chasing attacking target" );
+            m_bot->GetMotionMaster()->Clear( true );
+            m_bot->GetMotionMaster()->MoveChase( pTarget );
+        }
     }*/
 
     //Rouge like behaviour. ^^
@@ -78,7 +84,7 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
         GetAI()->TellMaster("AttackStop, CombatStop, Vanish");
     }*/
 
-    if (Unit* pVictim = pTarget->getVictim())
+    if (pVictim)
     {
         if (pVictim->HasAura(SPELL_AURA_PERIODIC_DAMAGE))
         {

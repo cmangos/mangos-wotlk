@@ -237,13 +237,16 @@ bool WorldSession::Update(uint32 /*diff*/)
     // The PlayerbotAI class adds to the packet queue to simulate a real player
     // since Playerbots are known to the World obj only by its master's WorldSession object
     // we need to process all master's bot's packets.
-    for (PlayerBotMap::const_iterator itr = GetPlayerBotsBegin(); itr != GetPlayerBotsEnd(); ++itr) {
+    for (PlayerBotMap::const_iterator itr = GetPlayerBotsBegin(); itr != GetPlayerBotsEnd(); ++itr)
+    {
         Player* const botPlayer = itr->second;
         WorldSession* const pBotWorldSession = botPlayer->GetSession();
         if (botPlayer->IsBeingTeleported())
-        	botPlayer->GetPlayerbotAI()->HandleTeleportAck();
-        else if (botPlayer->IsInWorld()) {
-            while (! pBotWorldSession->_recvQueue.empty()) {
+            botPlayer->GetPlayerbotAI()->HandleTeleportAck();
+        else if (botPlayer->IsInWorld())
+        {
+            while (! pBotWorldSession->_recvQueue.empty())
+            {
                 WorldPacket* const packet = pBotWorldSession->_recvQueue.next();
                 OpcodeHandler& opHandle = opcodeTable[packet->GetOpcode()];
                 (pBotWorldSession->*opHandle.handler)(*packet);
@@ -362,7 +365,7 @@ void WorldSession::LogoutPlayer(bool Save)
         // no point resetting online in character table here as Player::SaveToDB() will set it to 1 since player has not been removed from world at this stage
         //No SQL injection as AccountID is uint32
         if (! _player->IsPlayerbot())
-        loginDatabase.PExecute("UPDATE account SET online = 0 WHERE id = '%u'", GetAccountId());
+            loginDatabase.PExecute("UPDATE account SET online = 0 WHERE id = '%u'", GetAccountId());
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
         Guild *guild = objmgr.GetGuildById(_player->GetGuildId());

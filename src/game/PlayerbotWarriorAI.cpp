@@ -77,6 +77,8 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
     // Damage Attacks
 
     Player *m_bot = GetPlayerBot();
+    Unit* pVictim = pTarget->getVictim();
+
     if( !m_bot->HasInArc(M_PI, pTarget))
         m_bot->SetInFront(pTarget);
 
@@ -105,11 +107,14 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
 
             if (DEMORALIZING_SHOUT > 0 && !pTarget->HasAura(DEMORALIZING_SHOUT, 0) && ai->GetRageAmount() >= 10)
                 GetAI()->CastSpell (DEMORALIZING_SHOUT);
-            else if (SHIELD_BLOCK > 0 && TankCounter < 1 && pTarget->getVictim() == m_bot)
+            else if (SHIELD_BLOCK > 0 && TankCounter < 1 && pVictim)
             {
-                GetAI()->CastSpell (SHIELD_BLOCK);
-                TankCounter++;
-                break;
+                if (pVictim == m_bot)
+                {
+                    GetAI()->CastSpell (SHIELD_BLOCK);
+                    TankCounter++;
+                    break;
+                }
             }
             else if (SHIELD_SLAM > 0 && TankCounter < 2 && ai->GetRageAmount() >= 20)
             {
@@ -141,11 +146,14 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
                 TankCounter++;
                 break;
             }
-            else if (SHIELD_BLOCK > 0 && TankCounter < 7 && pTarget->getVictim() == m_bot)
+            else if (SHIELD_BLOCK > 0 && TankCounter < 7 && pVictim)
             {
-                GetAI()->CastSpell (SHIELD_BLOCK);
-                TankCounter++;
-                break;
+                if (pVictim == m_bot)
+                {
+                    GetAI()->CastSpell (SHIELD_BLOCK);
+                    TankCounter++;
+                    break;
+                }
             }
             else if (HEROIC_STRIKE > 0 && TankCounter < 8 && ai->GetRageAmount() >= 15)
             {
@@ -211,10 +219,13 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
 
         case SpellPreventing:
             //GetAI()->TellMaster("Case SpellPreventing");
-            if (SPELL_REFLECTION > 0 && m_bot->HasAura(DEFENSIVE_STANCE, 0) && pTarget->getVictim() == m_bot && pTarget->IsNonMeleeSpellCasted(true) && ai->GetRageAmount() >= 15)
+            if (SPELL_REFLECTION > 0 && m_bot->HasAura(DEFENSIVE_STANCE, 0) && pVictim && pTarget->IsNonMeleeSpellCasted(true) && ai->GetRageAmount() >= 15)
             {
-                GetAI()->CastSpell (SPELL_REFLECTION, *m_bot);
-                //GetAI()->TellMaster("SpellRef");
+                if (pVictim == m_bot)
+                {
+                    GetAI()->CastSpell (SPELL_REFLECTION, *m_bot);
+                    //GetAI()->TellMaster("SpellRef");
+                }
             }
             else if (PUMMEL > 0 && m_bot->HasAura(BERSERKER_STANCE, 0) && pTarget->IsNonMeleeSpellCasted(true) && ai->GetRageAmount() >= 10)
             {

@@ -77,11 +77,18 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 
     ai->SetInFront( pTarget );
     Player *m_bot = GetPlayerBot();
+    Unit* pVictim = pTarget->getVictim();
 
-    if (pTarget->getVictim() == m_bot && ai->GetHealthPercent() >= 40)
-        SpellSequence = DruidTank;
-    else if (pTarget->GetHealth() > pTarget->GetMaxHealth()*0.8 && pTarget->getVictim() != m_bot)
-        SpellSequence = DruidSpell;
+    if (pVictim && ai->GetHealthPercent() >= 40)
+    {
+        if (pVictim == m_bot)
+            SpellSequence = DruidTank;
+    }
+    else if (pTarget->GetHealth() > pTarget->GetMaxHealth()*0.8 && pVictim)
+    {
+        if (pVictim != m_bot)
+            SpellSequence = DruidSpell;
+    }
     else if (ai->GetHealthPercent() <= 40 || GetMaster()->GetHealth() < GetMaster()->GetMaxHealth()*0.8)
         SpellSequence = DruidHeal;
     else
@@ -95,7 +102,8 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
             if( !m_bot->HasInArc(M_PI, pTarget))
             {
                 m_bot->SetInFront(pTarget);
-                m_bot->getVictim()->Attack(pTarget, true);
+                if (pVictim)
+                    pVictim->Attack(pTarget, true);
             }
             if(m_bot->HasAura(CAT_FORM, 0))
             {
@@ -189,7 +197,8 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
             if( !m_bot->HasInArc(M_PI, pTarget))
             {
                 m_bot->SetInFront(pTarget);
-                m_bot->getVictim()->Attack(pTarget, true);
+                if (pVictim)
+                    pVictim->Attack(pTarget, true);
             }
             if(m_bot->HasAura(DIRE_BEAR_FORM, 0))
             {
