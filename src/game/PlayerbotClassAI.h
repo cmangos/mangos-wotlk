@@ -14,30 +14,31 @@
 class Player;
 class PlayerbotAI;
 
-class MANGOS_DLL_SPEC PlayerbotClassAI  {
+class MANGOS_DLL_SPEC PlayerbotClassAI
+{
     public:
         PlayerbotClassAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
         virtual ~PlayerbotClassAI();
 
-		// all combat actions go here
-		virtual void DoNextCombatManeuver(Unit*);
+        // all combat actions go here
+        virtual void DoNextCombatManeuver(Unit*);
 
-		// all non combat actions go here, ex buffs, heals, rezzes
-		virtual void DoNonCombatActions();
+        // all non combat actions go here, ex buffs, heals, rezzes
+        virtual void DoNonCombatActions();
 
-		// buff a specific player, usually a real PC who is not in group
-		virtual void BuffPlayer(Player* target);
+        // buff a specific player, usually a real PC who is not in group
+        virtual void BuffPlayer(Player* target);
 
-		// Utilities
-		Player* GetMaster () {return m_master;}
-		Player* GetPlayerBot() {return m_bot;}
-		PlayerbotAI* GetAI (){return m_ai;};
+        // Utilities
+        Player* GetMaster () {return m_master;}
+        Player* GetPlayerBot() {return m_bot;}
+        PlayerbotAI* GetAI (){return m_ai;};
 
 
-	private:
-		Player* m_master;
-		Player* m_bot;
-		PlayerbotAI* m_ai;
+    private:
+        Player* m_master;
+        Player* m_bot;
+        PlayerbotAI* m_ai;
 };
 
 #endif

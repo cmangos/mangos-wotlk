@@ -275,7 +275,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
 {
     m_transport = 0;
 
-	// Playerbot mod:
+    // Playerbot mod:
     m_playerbotAI = NULL;
 
     m_speakTime = 0;
@@ -1579,7 +1579,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
 
-	// Playerbot mod: if this user has bots, tell them to stop following master
+    // Playerbot mod: if this user has bots, tell them to stop following master
     // so they don't try to follow the master after the master teleports
     for (PlayerBotMap::const_iterator itr = GetSession()->GetPlayerBotsBegin(); itr != GetSession()->GetPlayerBotsEnd(); ++itr)
     {
@@ -20043,20 +20043,24 @@ bool Player::canSeeSpellClickOn(Creature const *c) const
 }
 
 // Playerbot mod:
-void Player::SetPlayerbotAI(PlayerbotAI * ai) {
+void Player::SetPlayerbotAI(PlayerbotAI * ai)
+{
 
-    if (ai == NULL) {
+    if (ai == NULL)
+    {
         sLog.outError("Tried to assign playerbot AI to NULL; this is not supported!");
         return;
     }
 
-    if (GetPlayerbotAI() != NULL) {
+    if (GetPlayerbotAI() != NULL)
+    {
         sLog.outError("Tried to reassign playerbot AI; this is not yet supported!");
         return;
     }
 
     // assigning bot AI to normal players is not currently supported
-    if (! IsPlayerbot()) {
+    if (! IsPlayerbot())
+    {
         sLog.outError("Tried to set playerbot AI for a player that was not a bot.");
         return;
     }

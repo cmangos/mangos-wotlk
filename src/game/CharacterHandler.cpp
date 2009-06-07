@@ -121,7 +121,8 @@ class CharacterHandler
         // world session m_playerBots map
         void HandlePlayerBotLoginCallback(QueryResult * /*dummy*/, SqlQueryHolder * holder)
         {
-            if (!holder) return;
+            if (!holder)
+                return;
 
             LoginQueryHolder* lqh = (LoginQueryHolder*) holder;
 
@@ -157,12 +158,12 @@ class CharacterHandler
                 (masterSession->GetPlayer()->GetGroup() == NULL ||
                 masterSession->GetPlayer()->GetGroup()->IsMember(guid) == false))
                 botPlayer->RemoveFromGroup();
-            
+
             // sometimes master can lose leadership, pass leadership to master check
             const uint64 masterGuid = masterSession->GetPlayer()->GetGUID();
             if (masterSession->GetPlayer()->GetGroup() && 
-            	! masterSession->GetPlayer()->GetGroup()->IsLeader(masterGuid))
-            	masterSession->GetPlayer()->GetGroup()->ChangeLeader(masterGuid);
+                ! masterSession->GetPlayer()->GetGroup()->IsLeader(masterGuid))
+                masterSession->GetPlayer()->GetGroup()->ChangeLeader(masterGuid);
         }
 } chrHandler;
 
@@ -1356,7 +1357,8 @@ void WorldSession::HandleCharCustomize(WorldPacket& recv_data)
 void WorldSession::AddPlayerBot(uint64 playerGuid)
 {
     // has bot already been added?
-    if (GetPlayerBot(playerGuid) != 0) return;
+    if (GetPlayerBot(playerGuid) != 0)
+        return;
 
     LoginQueryHolder *holder = new LoginQueryHolder(GetAccountId(), playerGuid);
     if(!holder->Initialize())

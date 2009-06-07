@@ -214,11 +214,11 @@ libmangosgame_a_SOURCES = \
 	PlayerbotClassAI.cpp \
 	PlayerbotClassAI.h \
 	PlayerbotDeathKnightAI.cpp \
-  PlayerbotDeathKnightAI.h \
+	PlayerbotDeathKnightAI.h \
 	PlayerbotDruidAI.cpp \
 	PlayerbotDruidAI.h \
-  PlayerbotHunterAI.cpp \
-  PlayerbotHunterAI.h \
+	PlayerbotHunterAI.cpp \
+	PlayerbotHunterAI.h \
 	PlayerbotMageAI.cpp \
 	PlayerbotMageAI.h \
 	PlayerbotPaladinAI.cpp \

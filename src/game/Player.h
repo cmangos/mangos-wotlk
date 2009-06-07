@@ -2080,7 +2080,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool isActiveObject() const { return true; }
         bool canSeeSpellClickOn(Creature const* creature) const;
-		// Playerbot mod:
+        // Playerbot mod:
         void SetPlayerbotAI(PlayerbotAI * ai);
         PlayerbotAI* GetPlayerbotAI() { return m_playerbotAI; }
         bool IsPlayerbot() { return (GetSession()->GetRemoteAddress() == "bot"); }
