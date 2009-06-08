@@ -565,10 +565,13 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
                                 {
                                     bot->RewardQuest(pQuest, rewardItemId, pNpc, false);
 
+                                    std::string itemName = pRewardItem->Name1;
+                                    bot->GetPlayerbotAI()->ItemLocalization(itemName, rewardItemId);
+
                                     out << "Quest complete: " << "|cfffff000" << "<?>" << "|r"
                                     << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r"
                                     << "reward: "
-                                    << " |cffffffff|Hitem:" << rewardItemId << ":0:0:0:0:0:0:0" << "|h[" << pRewardItem->Name1 << "]|h|r";
+                                    << " |cffffffff|Hitem:" << rewardItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
 
                                     // TODO: auto equip reward?
                                 }
@@ -579,16 +582,31 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
                                     << "|cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
                                 }
                             }
-                            // multiple rewards (take all)
-                            //else if ( pQuest->GetRewItemsCount() > 0 ) {}
-                            // no choice in rewards
+                            // no choice in rewards, or multiple rewards (taking all)
                             else
                             {
+                                std::ostringstream itemlist;
+                                if ( pQuest->GetRewItemsCount() > 0 )
+                                {
+                                    for (uint32 i = 0; i < pQuest->GetRewItemsCount(); ++i)
+                                    {
+                                        if( pQuest->RewItemId[i] )
+                                        {
+                                            ItemPrototype const * const pItemProto = objmgr.GetItemPrototype(pQuest->RewItemId[i]);
+                                            std::string itemName = pItemProto->Name1;
+                                            bot->GetPlayerbotAI()->ItemLocalization(itemName, pItemProto->ItemId);
+                                            itemlist << " |cffffffff|Hitem:" << pItemProto->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
+                                        }
+                                    }
+                                }
+
                                 if (bot->CanRewardQuest(pQuest, false))
                                 {
                                     bot->RewardQuest(pQuest, 0, pNpc, false);
                                     out << "Quest complete: " << "|cfffff000" << "<?>" << "|r"
                                     << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
+                                    if (!itemlist.str().empty())
+                                        out << " reward: " << itemlist.str();
                                 }
                                 else
                                 {
