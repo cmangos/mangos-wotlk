@@ -206,9 +206,6 @@ void PlayerbotAI::SendNotEquipList(Player& player)
     // so NO EARLY RETURNS!
     // see enum EquipmentSlots in Player.h to see what equipment slot each index in vector
     // is assigned to. (The first is EQUIPMENT_SLOT_HEAD=0, and last is EQUIPMENT_SLOT_TABARD=18)
-    int loc = m_master->GetSession()->GetSessionDbLocaleIndex();
-    std::wstring wnamepart;
-
     std::list<Item*>* equip[19];
     for (uint8 i = 0; i < 19; ++i)
         equip[i] = NULL;
@@ -287,22 +284,11 @@ void PlayerbotAI::SendNotEquipList(Player& player)
         for (std::list<Item*>::iterator it = itemListForEqSlot->begin(); it != itemListForEqSlot->end(); ++it) {
             const ItemPrototype* const pItemProto = (*it)->GetProto();
 
-            std::string pItemName;
-            ItemLocale const *pItemInfo = objmgr.GetItemLocale(pItemProto->ItemId);
-            if (pItemInfo)
-            {
-                if (pItemInfo->Name.size() > loc && !pItemInfo->Name[loc].empty())
-                {
-                    const std::string name = pItemInfo->Name[loc];
-                    if (Utf8FitTo(name, wnamepart))
-                        pItemName = name.c_str();
-                }
-            }
-            if (pItemName.empty())
-                pItemName = pItemProto->Name1;
+            std::string itemName = pItemProto->Name1;
+            ItemLocalization(itemName, pItemProto->ItemId);
 
             out << " |cffffffff|Hitem:" << pItemProto->ItemId
-                << ":0:0:0:0:0:0:0" << "|h[" << pItemName
+                << ":0:0:0:0:0:0:0" << "|h[" << itemName
                 << "]|h|r";
         }
         ch.SendSysMessage(out.str().c_str());
@@ -313,30 +299,17 @@ void PlayerbotAI::SendNotEquipList(Player& player)
 
 void PlayerbotAI::SendQuestItemList( Player& player )
 {
-    int loc = m_master->GetSession()->GetSessionDbLocaleIndex();
-    std::wstring wnamepart;
     std::ostringstream out;
 
     for( BotNeedItem::iterator itr=m_needItemList.begin(); itr!=m_needItemList.end(); ++itr )
     {
         const ItemPrototype * pItemProto = objmgr.GetItemPrototype( itr->first );
 
-        std::string pItemName;
-        ItemLocale const *pItemInfo = objmgr.GetItemLocale(pItemProto->ItemId);
-        if (pItemInfo)
-        {
-            if (pItemInfo->Name.size() > loc && !pItemInfo->Name[loc].empty())
-            {
-                const std::string name = pItemInfo->Name[loc];
-                if (Utf8FitTo(name, wnamepart))
-                    pItemName = name.c_str();
-            }
-        }
-        if (pItemName.empty())
-            pItemName = pItemProto->Name1;
+        std::string itemName = pItemProto->Name1;
+        ItemLocalization(itemName, pItemProto->ItemId);
 
         out << " " << itr->second << "x|cffffffff|Hitem:" << pItemProto->ItemId
-            << ":0:0:0:0:0:0:0" << "|h[" << pItemName
+            << ":0:0:0:0:0:0:0" << "|h[" << itemName
             << "]|h|r";
     }
 
@@ -546,42 +519,27 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
                         Quest const* pQuest = objmgr.GetQuestTemplate(questID);
 
                         std::ostringstream out;
+                        std::string questTitle  = pQuest->GetTitle();
+                        bot->GetPlayerbotAI()->QuestLocalization(questTitle, questID);
 
                         // if quest incomplete (grey ?)
                         if (qItem.m_qIcon == 3)
                         {
                             out << "|cffff0000Quest incomplete:|r " << "|cff808080" << "<?>" << "|r"
-                            << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+                            << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
                         }
-
                         // if quest available (yellow !)
                         else if (qItem.m_qIcon == 6)
                         {
                             out << "|cff00ff00Quest available:|r " << "|cfffff000" << "<!>" << "|r"
-                            << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+                            << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
                         }
 
                         // is quest ready to turn in (yellow ?)
                         else if (qItem.m_qIcon == 4)
                         {
-                            // no choice in rewards
-                            if (pQuest->GetRewItemsCount() == 0)
-                            {
-                                if (bot->CanRewardQuest(pQuest, false))
-                                {
-                                    bot->RewardQuest(pQuest, 0, pNpc, false);
-                                    out << "Quest complete: " << "|cfffff000" << "<?>" << "|r"
-                                    << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
-                                }
-                                else
-                                {
-                                    out << "|cffff0000Unable to turn quest in:|r " 
-                                    << "|cfffff000" << "<?>" << "|r "
-                                    << "|cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
-                                }
-                            }
-                            // auto choose reward
-                            else
+                            // Auto choose reward
+                            if ( pQuest->GetRewChoiceItemsCount() > 0 )
                             {
                                 ItemPrototype const *pRewardItem = NULL;
 
@@ -608,7 +566,7 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
                                     bot->RewardQuest(pQuest, rewardItemId, pNpc, false);
 
                                     out << "Quest complete: " << "|cfffff000" << "<?>" << "|r"
-                                    << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r"
+                                    << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r"
                                     << "reward: "
                                     << " |cffffffff|Hitem:" << rewardItemId << ":0:0:0:0:0:0:0" << "|h[" << pRewardItem->Name1 << "]|h|r";
 
@@ -618,7 +576,25 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
                                 {
                                     out << "|cffff0000Unable to turn quest in:|r " 
                                     << "|cfffff000" << "<?>" << "|r "
-                                    << "|cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+                                    << "|cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
+                                }
+                            }
+                            // multiple rewards (take all)
+                            //else if ( pQuest->GetRewItemsCount() > 0 ) {}
+                            // no choice in rewards
+                            else
+                            {
+                                if (bot->CanRewardQuest(pQuest, false))
+                                {
+                                    bot->RewardQuest(pQuest, 0, pNpc, false);
+                                    out << "Quest complete: " << "|cfffff000" << "<?>" << "|r"
+                                    << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
+                                }
+                                else
+                                {
+                                    out << "|cffff0000Unable to turn quest in:|r " 
+                                    << "|cfffff000" << "<?>" << "|r "
+                                    << "|cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
                                 }
                             }
 
@@ -933,8 +909,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
                 // list out items available for trade
                 std::ostringstream out;
-                std::wstring wnamepart;
-                int loc = m_master->GetSession()->GetSessionDbLocaleIndex();
 
                 // list out items in main backpack
                 for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
@@ -944,22 +918,11 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     {
                         const ItemPrototype* const pItemProto = pItem->GetProto();
 
-                        std::string pItemName;
-                        ItemLocale const *pItemInfo = objmgr.GetItemLocale(pItemProto->ItemId);
-                        if (pItemInfo)
-                        {
-                            if (pItemInfo->Name.size() > loc && !pItemInfo->Name[loc].empty())
-                            {
-                                const std::string name = pItemInfo->Name[loc];
-                                if (Utf8FitTo(name, wnamepart))
-                                    pItemName = name.c_str();
-                            }
-                        }
-                        if (pItemName.empty())
-                            pItemName = pItemProto->Name1;
+                        std::string itemName = pItemProto->Name1;
+                        ItemLocalization(itemName, pItemProto->ItemId);
 
                         out << " |cffffffff|Hitem:" << pItemProto->ItemId
-                            << ":0:0:0:0:0:0:0" << "|h[" << pItemName << "]|h|r";
+                            << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
                         if (pItem->GetCount() > 1)
                             out << "x" << pItem->GetCount() << ' ';
                     }
@@ -976,24 +939,14 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                             if (pItem && pItem->CanBeTraded())
                             {
                                 const ItemPrototype* const pItemProto = pItem->GetProto();
-                                std::string pItemName;
-                                ItemLocale const *pItemInfo = objmgr.GetItemLocale(pItemProto->ItemId);
-                                if (pItemInfo)
-                                {
-                                    if (pItemInfo->Name.size() > loc && !pItemInfo->Name[loc].empty())
-                                    {
-                                        const std::string name = pItemInfo->Name[loc];
-                                        if (Utf8FitTo(name, wnamepart))
-                                            pItemName = name.c_str();
-                                    }
-                                }
-                                if (pItemName.empty())
-                                    pItemName = pItemProto->Name1;
+
+                                std::string itemName = pItemProto->Name1;
+                                ItemLocalization(itemName, pItemProto->ItemId);
 
                                 // item link format: http://www.wowwiki.com/ItemString
                                 // itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId
                                 out << " |cffffffff|Hitem:" << pItemProto->ItemId
-                                    << ":0:0:0:0:0:0:0" << "|h[" << pItemName
+                                    << ":0:0:0:0:0:0:0" << "|h[" << itemName
                                     << "]|h|r";
                                 if (pItem->GetCount() > 1)
                                     out << "x" << pItem->GetCount() << ' ';
@@ -2437,6 +2390,41 @@ void PlayerbotAI::HandleTeleportAck()
     }
     else if (m_bot->IsBeingTeleportedFar())
         m_bot->GetSession()->HandleMoveWorldportAckOpcode();
+}
+
+// Localization support
+void PlayerbotAI::ItemLocalization(std::string& itemName, const uint32 itemID) const
+{
+    int loc = m_master->GetSession()->GetSessionDbLocaleIndex();
+    std::wstring wnamepart;
+
+    ItemLocale const *pItemInfo = objmgr.GetItemLocale(itemID);
+    if (pItemInfo)
+    {
+        if (pItemInfo->Name.size() > loc && !pItemInfo->Name[loc].empty())
+        {
+            const std::string name = pItemInfo->Name[loc];
+            if (Utf8FitTo(name, wnamepart))
+                itemName = name.c_str();
+        }
+    }
+}
+
+void PlayerbotAI::QuestLocalization(std::string& questTitle, const uint32 questID) const
+{
+    int loc = m_master->GetSession()->GetSessionDbLocaleIndex();
+    std::wstring wnamepart;
+
+    QuestLocale const *pQuestInfo = objmgr.GetQuestLocale(questID);
+    if (pQuestInfo)
+    {
+        if (pQuestInfo->Title.size() > loc && !pQuestInfo->Title[loc].empty())
+        {
+            const std::string title = pQuestInfo->Title[loc];
+            if (Utf8FitTo(title, wnamepart))
+                questTitle = title.c_str();
+        }
+    }
 }
 
 // handle commands sent through chat channels
