@@ -37,6 +37,9 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 
+// Playerbot mod
+#include "PlayerbotAI.h"
+
 void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,4+4+1);
@@ -213,6 +216,15 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 }
             }
 
+            // Playerbot mod: handle whispered command to bot
+            if (player->GetPlayerbotAI())
+            {
+                player->GetPlayerbotAI()->HandleCommand(msg, *GetPlayer());
+                GetPlayer()->m_speakTime = 0;
+                GetPlayer()->m_speakCount = 0;
+            }
+            else
+                // END Playerbot mod
             GetPlayer()->Whisper(msg, lang,player->GetGUID());
         } break;
 
@@ -239,6 +251,19 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             // so if player hasn't OriginalGroup and his player->GetGroup() is BG raid, then return
             if( !group && (!(group = GetPlayer()->GetGroup()) || group->isBGGroup()) )
                 return;
+
+            // Playerbot mod: broadcast message to bot members
+            for(GroupReference* itr = group->GetFirstMember(); itr != NULL; itr=itr->next())
+            {
+                Player* player = itr->getSource();
+                if (player && player->GetPlayerbotAI())
+                {
+                    player->GetPlayerbotAI()->HandleCommand(msg, *GetPlayer());
+                    GetPlayer()->m_speakTime = 0;
+                    GetPlayer()->m_speakCount = 0;
+                }
+            }
+            // END Playerbot mod
 
             WorldPacket data;
             ChatHandler::FillMessageData(&data, this, CHAT_MSG_PARTY, lang, NULL, 0, msg.c_str(),NULL);

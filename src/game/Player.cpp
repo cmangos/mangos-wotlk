@@ -59,6 +59,9 @@
 #include "SocialMgr.h"
 #include "AchievementMgr.h"
 
+// Playerbot mod:
+#include "PlayerbotAI.h"
+
 #include <cmath>
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILISECONDS)
@@ -271,6 +274,9 @@ UpdateMask Player::updateVisualBits;
 Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputationMgr(this)
 {
     m_transport = 0;
+
+    // Playerbot mod:
+    m_playerbotAI = NULL;
 
     m_speakTime = 0;
     m_speakCount = 0;
@@ -508,6 +514,12 @@ Player::~Player ()
 
     delete m_declinedname;
     delete m_runes;
+
+    // Playerbot mod: remove AI if exists
+    if (m_playerbotAI != NULL) {
+        delete m_playerbotAI;
+        m_playerbotAI = NULL;
+    }
 }
 
 void Player::CleanupsBeforeDelete()
@@ -1108,6 +1120,11 @@ void Player::Update( uint32 p_time )
 
     UpdateAfkReport(now);
 
+    // Playerbot mod: this was added as part of the Playerbot mod
+    if (m_playerbotAI != NULL) {
+        m_playerbotAI->UpdateAI(p_time);
+    }
+
     // Update items that have just a limited lifetime
     if (now>m_Last_tick)
         UpdateItemDuration(uint32(now- m_Last_tick));
@@ -1561,6 +1578,14 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
+
+    // Playerbot mod: if this user has bots, tell them to stop following master
+    // so they don't try to follow the master after the master teleports
+    for (PlayerBotMap::const_iterator itr = GetSession()->GetPlayerBotsBegin(); itr != GetSession()->GetPlayerBotsEnd(); ++itr)
+    {
+        Player* botPlayer = itr->second;
+        botPlayer->GetMotionMaster()->Clear();
+    }
 
     MapEntry const* mEntry = sMapStore.LookupEntry(mapid);
 
@@ -20292,4 +20317,28 @@ void Player::ActivateSpec(uint32 specNum)
         return;
 
     resetTalents(true);
+}
+// Playerbot mod:
+void Player::SetPlayerbotAI(PlayerbotAI * ai)
+{
+
+    if (ai == NULL)
+    {
+        sLog.outError("Tried to assign playerbot AI to NULL; this is not supported!");
+        return;
+    }
+
+    if (GetPlayerbotAI() != NULL)
+    {
+        sLog.outError("Tried to reassign playerbot AI; this is not yet supported!");
+        return;
+    }
+
+    // assigning bot AI to normal players is not currently supported
+    if (! IsPlayerbot())
+    {
+        sLog.outError("Tried to set playerbot AI for a player that was not a bot.");
+        return;
+    }
+    m_playerbotAI = ai;
 }

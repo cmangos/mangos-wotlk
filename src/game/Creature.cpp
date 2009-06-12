@@ -270,6 +270,10 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
     else
         setFaction(GetCreatureInfo()->faction_A);
 
+    //SetUInt32Value(UNIT_NPC_FLAGS,GetCreatureInfo()->npcflag);
+    if(isBotGiver())
+        SetUInt32Value(UNIT_NPC_FLAGS, 1);
+    else
     SetUInt32Value(UNIT_NPC_FLAGS,GetCreatureInfo()->npcflag);
 
     SetAttackTime(BASE_ATTACK,  GetCreatureInfo()->baseattacktime);
@@ -726,6 +730,8 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
 
     // lazy loading single time at use
     LoadGossipOptions();
+    if(isBotGiver())
+        LoadBotMenu(pPlayer);
 
     for( GossipOptionList::iterator i = m_goptions.begin( ); i != m_goptions.end( ); ++i )
     {
@@ -946,6 +952,8 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             player->GetSession()->SendBattlegGroundList( GetGUID(), bgTypeId );
             break;
         }
+        case GOSSIP_OPTION_BOT:
+            break;
         default:
             OnPoiSelect( player, gossip );
             break;
@@ -1523,6 +1531,11 @@ void Creature::setDeathState(DeathState s)
         SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
         AddUnitMovementFlag(MONSTER_MOVE_WALK);
+        AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
+        //SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
+        if(isBotGiver())
+            SetUInt32Value(UNIT_NPC_FLAGS, 1);
+        else
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
         clearUnitState(UNIT_STAT_ALL_STATE);
         i_motionMaster.Clear();
@@ -2223,4 +2236,49 @@ void Creature::SetActiveObjectState( bool on )
 
     if(world)
         map->Add(this);
+}
+void Creature::LoadBotMenu(Player *pPlayer)
+{
+    uint64 guid = pPlayer->GetGUID();
+    uint32 accountId = objmgr.GetPlayerAccountIdByGUID(guid);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, name FROM characters WHERE account='%d'",accountId);
+    do
+    {
+        Field *fields = result->Fetch();
+        uint64 guidlo = fields[0].GetUInt64();
+        std::string name = fields[1].GetString();
+        std::string word = "";
+
+        if( (guid == 0) || (guid == guidlo) )
+        {
+            //not found or himself
+        }
+        else
+        {
+            if(pPlayer->GetSession()->GetPlayerBot(guidlo) == NULL) // add (if not already in game)
+            {
+                word += "Recruit ";
+                word += name;
+                word += " as a Bot.";
+                pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8)9, word, guidlo, guidlo, word, false);
+            }
+            else if(pPlayer->GetSession()->GetPlayerBot(guidlo) != NULL) // remove (if in game)
+            {
+                word += "Dismiss ";
+                word += name;
+                word += " from duty.";
+                pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8)0, word, guidlo, guidlo, word, false);
+            }
+        }
+    }
+    while (result->NextRow());
+    delete result;
+}
+
+bool Creature::isBotGiver()
+{
+    std::string scriptname = GetScriptName();
+    if( scriptname == "bot_giver" )
+        return true;
+    return false;
 }
