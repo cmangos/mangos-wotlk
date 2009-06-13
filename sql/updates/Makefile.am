@@ -210,6 +210,17 @@ pkgdata_DATA = \
 	7908_03_mangos_creature_template_addon.sql \
 	7932_01_characters_character_pet.sql \
 	7938_01_realmd_account.sql \
+	7945_01_mangos_quest_template.sql \
+	7980_01_mangos_item_required_target.sql \
+	7988_01_mangos_item_template.sql \
+	7988_02_characters_character_equipmentsets.sql \
+	7988_03_mangos_spell_chain.sql \
+	7988_04_mangos_creature_template.sql \
+	7988_05_mangos_item_template.sql \
+	7988_06_mangos_gameobject_template.sql \
+	7988_07_characters_characters.sql \
+	7988_08_mangos_spell_bonus_data.sql \
+	7988_09_mangos_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -400,4 +411,15 @@ EXTRA_DIST = \
 	7908_03_mangos_creature_template_addon.sql \
 	7932_01_characters_character_pet.sql \
 	7938_01_realmd_account.sql \
+	7945_01_mangos_quest_template.sql \
+	7980_01_mangos_item_required_target.sql \
+	7988_01_mangos_item_template.sql \
+	7988_02_characters_character_equipmentsets.sql \
+	7988_03_mangos_spell_chain.sql \
+	7988_04_mangos_creature_template.sql \
+	7988_05_mangos_item_template.sql \
+	7988_06_mangos_gameobject_template.sql \
+	7988_07_characters_characters.sql \
+	7988_08_mangos_spell_bonus_data.sql \
+	7988_09_mangos_spell_proc_event.sql \
 	README

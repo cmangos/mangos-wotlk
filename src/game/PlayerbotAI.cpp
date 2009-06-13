@@ -1413,7 +1413,7 @@ void PlayerbotAI::Feast()
     // stand up if we are done feasting
     if (!(m_bot->GetHealth() < m_bot->GetMaxHealth() || (m_bot->getPowerType() == POWER_MANA && m_bot->GetPower(POWER_MANA) < m_bot->GetMaxPower(POWER_MANA))))
     {
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
         return;
     }
 
@@ -1454,7 +1454,7 @@ void PlayerbotAI::Feast()
     if (currentTime > m_TimeDoneEating && currentTime > m_TimeDoneDrinking)
     {
         TellMaster("done feasting!");
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
     }
 }
 
@@ -1492,8 +1492,8 @@ void PlayerbotAI::GetCombatOrders( Unit* forcedTarget )
     m_ignoreAIUpdatesUntilTime = time(0) + 1;
     m_combatOrder = ORDERS_KILL;
 
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     m_bot->Attack(thingToAttack, true);
 
@@ -2024,7 +2024,7 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
             DoLoot();
 /*
         // are we sitting, if so feast if possible
-        else if (m_bot->getStandState() == PLAYER_STATE_SIT)
+        else if (m_bot->getStandState() == UNIT_STAND_STATE_SIT)
         Feast();
 */
         // if commanded to follow master and not already following master then follow master
@@ -2351,7 +2351,7 @@ bool PlayerbotAI::Follow(Player& player)
     m_IsFollowingMaster = true;
 
     if (!m_bot->IsStandState())
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     if (!m_bot->isInCombat())
     {

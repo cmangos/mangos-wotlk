@@ -243,8 +243,8 @@ void PlayerbotDeathKnightAI::DoNonCombatActions()
         (!GetMaster()->HasAura(HORN_OF_WINTER,0) && GetAI()->CastSpell (HORN_OF_WINTER, *(GetMaster())) );
 
     // hp check
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = GetAI()->FindFood();
 

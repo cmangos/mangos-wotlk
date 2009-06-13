@@ -104,13 +104,15 @@ enum __QuestGiverStatus
 {
     DIALOG_STATUS_NONE                     = 0,
     DIALOG_STATUS_UNAVAILABLE              = 1,
-    DIALOG_STATUS_CHAT                     = 2,
-    DIALOG_STATUS_INCOMPLETE               = 3,
-    DIALOG_STATUS_REWARD_REP               = 4,
-    DIALOG_STATUS_AVAILABLE_REP            = 5,
-    DIALOG_STATUS_AVAILABLE                = 6,
-    DIALOG_STATUS_REWARD2                  = 7,             // not yellow dot on minimap
-    DIALOG_STATUS_REWARD                   = 8              // yellow dot on minimap
+    DIALOG_STATUS_CHAT                     = 2,             // 3.1 - may be changed
+    DIALOG_STATUS_UNK1                     = 3,             // 3.1
+    DIALOG_STATUS_UNK2                     = 4,             // 3.1
+    DIALOG_STATUS_INCOMPLETE               = 5,
+    DIALOG_STATUS_REWARD_REP               = 6,
+    DIALOG_STATUS_AVAILABLE_REP            = 7,
+    DIALOG_STATUS_AVAILABLE                = 8,
+    DIALOG_STATUS_REWARD2                  = 9,             // no yellow dot on minimap
+    DIALOG_STATUS_REWARD                   = 10             // yellow dot on minimap
 };
 
 enum __QuestFlags
@@ -239,7 +241,9 @@ class Quest
         uint32 RewRepFaction[QUEST_REPUTATIONS_COUNT];
         int32  RewRepValue[QUEST_REPUTATIONS_COUNT];
         uint32 DetailsEmote[QUEST_EMOTE_COUNT];
+        uint32 DetailsEmoteDelay[QUEST_EMOTE_COUNT];
         uint32 OfferRewardEmote[QUEST_EMOTE_COUNT];
+        uint32 OfferRewardEmoteDelay[QUEST_EMOTE_COUNT];
 
         uint32 GetReqItemsCount() const { return m_reqitemscount; }
         uint32 GetReqCreatureOrGOcount() const { return m_reqCreatureOrGOcount; }

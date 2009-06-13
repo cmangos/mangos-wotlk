@@ -418,8 +418,8 @@ void PlayerbotShamanAI::DoNonCombatActions()
         (!m_bot->HasAura(ROCKBITER_WEAPON, 0) && GetAI()->CastSpell (ROCKBITER_WEAPON, *m_bot));
 
     // mana check
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = GetAI()->FindDrink();
 
@@ -432,8 +432,8 @@ void PlayerbotShamanAI::DoNonCombatActions()
     }
 
     // hp check
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     pItem = GetAI()->FindFood();
 

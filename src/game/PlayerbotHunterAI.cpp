@@ -164,8 +164,8 @@ void PlayerbotHunterAI::DoNonCombatActions()
     (ASPECT_OF_THE_HAWK>0 && !m_bot->HasAura(ASPECT_OF_THE_HAWK, 0) && ai->CastSpell (ASPECT_OF_THE_HAWK, *m_bot));
 
     // mana check
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = ai->FindDrink();
 
@@ -178,8 +178,8 @@ void PlayerbotHunterAI::DoNonCombatActions()
     }
 
     // hp check
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     pItem = ai->FindFood();
 

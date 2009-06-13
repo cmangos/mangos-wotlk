@@ -158,6 +158,8 @@ struct CreatureInfo
 {
     uint32  Entry;
     uint32  HeroicEntry;
+    uint32  unk1;
+    uint32  unk2;
     uint32  DisplayID_A;
     uint32  DisplayID_A2;
     uint32  DisplayID_H;
@@ -217,6 +219,8 @@ struct CreatureInfo
     float   unk16;
     float   unk17;
     bool    RacialLeader;
+    uint32  questItems[4];
+    uint32  movementId;
     bool    RegenHealth;
     uint32  equipmentId;
     uint32  MechanicImmuneMask;
@@ -236,9 +240,13 @@ struct CreatureInfo
             return SKILL_SKINNING;                          // normal case
     }
 
-    bool isTameable() const
+    bool isTameable(bool exotic) const
     {
-        return type == CREATURE_TYPE_BEAST && family != 0 && (type_flags & CREATURE_TYPEFLAGS_TAMEABLE);
+        if(type != CREATURE_TYPE_BEAST || family == 0 || (type_flags & CREATURE_TYPEFLAGS_TAMEABLE)==0)
+            return false;
+
+        // if can tame exotic then can tame any temable
+        return exotic || (type_flags & CREATURE_TYPEFLAGS_EXOTIC)==0;
     }
 };
 
@@ -607,6 +615,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         float GetAttackDistance(Unit const* pl) const;
 
         void DoFleeToGetAssistance();
+        void CallForHelp(float fRadius);
         void CallAssistance();
         void SetNoCallAssistance(bool val) { m_AlreadyCallAssistance = val; }
         void SetNoSearchAssistance(bool val) { m_AlreadySearchedAssistance = val; }

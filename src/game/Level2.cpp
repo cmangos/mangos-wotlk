@@ -648,9 +648,6 @@ bool ChatHandler::HandleGameObjectMoveCommand(const char* args)
         map->Remove(obj,false);
 
         obj->Relocate(chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), obj->GetOrientation());
-        obj->SetFloatValue(GAMEOBJECT_POS_X, chr->GetPositionX());
-        obj->SetFloatValue(GAMEOBJECT_POS_Y, chr->GetPositionY());
-        obj->SetFloatValue(GAMEOBJECT_POS_Z, chr->GetPositionZ());
 
         map->Add(obj);
     }
@@ -674,9 +671,6 @@ bool ChatHandler::HandleGameObjectMoveCommand(const char* args)
         map->Remove(obj,false);
 
         obj->Relocate(x, y, z, obj->GetOrientation());
-        obj->SetFloatValue(GAMEOBJECT_POS_X, x);
-        obj->SetFloatValue(GAMEOBJECT_POS_Y, y);
-        obj->SetFloatValue(GAMEOBJECT_POS_Z, z);
 
         map->Add(obj);
     }
@@ -1786,7 +1780,7 @@ bool ChatHandler::HandleNpcTameCommand(const char* /*args*/)
 
     CreatureInfo const* cInfo = creatureTarget->GetCreatureInfo();
 
-    if (!cInfo->isTameable ())
+    if (!cInfo->isTameable (player->CanTameExoticPets()))
     {
         PSendSysMessage (LANG_CREATURE_NON_TAMEABLE,cInfo->Entry);
         SetSentErrorMessage (true);

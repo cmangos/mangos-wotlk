@@ -122,7 +122,7 @@ m_creatureInfo(NULL), m_isActiveObject(false), m_AlreadySearchedAssistance(false
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
     m_GlobalCooldown = 0;
-    m_unit_movement_flags = MOVEMENTFLAG_WALK_MODE;
+    m_unit_movement_flags = MONSTER_MOVE_WALK;
 }
 
 Creature::~Creature()
@@ -266,9 +266,9 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
 
     SelectLevel(GetCreatureInfo());
     if (team == HORDE)
-        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, GetCreatureInfo()->faction_H);
+        setFaction(GetCreatureInfo()->faction_H);
     else
-        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, GetCreatureInfo()->faction_A);
+        setFaction(GetCreatureInfo()->faction_A);
 
     //SetUInt32Value(UNIT_NPC_FLAGS,GetCreatureInfo()->npcflag);
     if(isBotGiver())
@@ -1509,8 +1509,8 @@ void Creature::setDeathState(DeathState s)
 
     if(s == JUST_DIED)
     {
-        SetUInt64Value (UNIT_FIELD_TARGET,0);               // remove target selection in any cases (can be set at aura remove in Unit::setDeathState)
-        SetUInt32Value(UNIT_NPC_FLAGS, 0);
+        SetUInt64Value(UNIT_FIELD_TARGET,0);                // remove target selection in any cases (can be set at aura remove in Unit::setDeathState)
+        SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
         if(!isPet() && GetCreatureInfo()->SkinLootId)
             if ( LootTemplates_Skinning.HaveLootFor(GetCreatureInfo()->SkinLootId) )
@@ -1530,11 +1530,16 @@ void Creature::setDeathState(DeathState s)
         CreatureInfo const *cinfo = GetCreatureInfo();
         SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+
+        // Playerbot mod
         AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
         //SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
         if(isBotGiver())
             SetUInt32Value(UNIT_NPC_FLAGS, 1);
         else
+        // End Playerbot mod
+
+        AddUnitMovementFlag(MONSTER_MOVE_WALK);
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
         clearUnitState(UNIT_STAT_ALL_STATE);
         i_motionMaster.Clear();
@@ -1787,6 +1792,25 @@ void Creature::CallAssistance()
             }
         }
     }
+}
+
+void Creature::CallForHelp(float fRadius)
+{
+    if (fRadius <= 0.0f || !getVictim() || isPet() || isCharmed())
+        return;
+
+    CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
+    Cell cell(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
+
+    MaNGOS::CallOfHelpCreatureInRangeDo u_do(this, getVictim(), fRadius);
+    MaNGOS::CreatureWorker<MaNGOS::CallOfHelpCreatureInRangeDo> worker(this, u_do);
+
+    TypeContainerVisitor<MaNGOS::CreatureWorker<MaNGOS::CallOfHelpCreatureInRangeDo>, GridTypeMapContainer >  grid_creature_searcher(worker);
+
+    CellLock<GridReadGuard> cell_lock(cell, p);
+    cell_lock->Visit(cell_lock, grid_creature_searcher, *GetMap());
 }
 
 bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /*= true*/) const

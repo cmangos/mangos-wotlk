@@ -74,8 +74,8 @@ Unit::Unit()
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
-                                                            // 2.3.2 - 0x70
-    m_updateFlag = (UPDATEFLAG_LOWGUID | UPDATEFLAG_HIGHGUID | UPDATEFLAG_LIVING | UPDATEFLAG_HAS_POSITION);
+
+    m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_LIVING | UPDATEFLAG_HAS_POSITION);
 
     m_attackTimer[BASE_ATTACK]   = 0;
     m_attackTimer[OFF_ATTACK]    = 0;
@@ -257,9 +257,11 @@ void Unit::SendMonsterMoveWithSpeed(float x, float y, float z, uint32 transitTim
 
 void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time, Player* player)
 {
+    float moveTime = Time;
+
     WorldPacket data( SMSG_MONSTER_MOVE, (41 + GetPackGUID().size()) );
     data.append(GetPackGUID());
-
+    data << uint8(0);                                       // new in 3.1
     data << GetPositionX() << GetPositionY() << GetPositionZ();
     data << uint32(getMSTime());
 
@@ -286,7 +288,10 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 ty
 
     data << uint32(MovementFlags);
 
-    data << uint32(Time);                                   // Time in between points
+    if(MovementFlags & MONSTER_MOVE_WALK)
+        moveTime *= 1.05f;
+
+    data << uint32(moveTime);                               // Time in between points
     data << uint32(1);                                      // 1 single waypoint
     data << NewPosX << NewPosY << NewPosZ;                  // the single waypoint Point B
 
@@ -302,8 +307,9 @@ void Unit::SendMonsterMoveByPath(Path const& path, uint32 start, uint32 end, uin
 
     uint32 pathSize = end - start;
 
-    WorldPacket data( SMSG_MONSTER_MOVE, (GetPackGUID().size()+4+4+4+4+1+4+4+4+pathSize*4*3) );
+    WorldPacket data( SMSG_MONSTER_MOVE, (GetPackGUID().size()+1+4+4+4+4+1+4+4+4+pathSize*4*3) );
     data.append(GetPackGUID());
+    data << uint8(0);
     data << GetPositionX();
     data << GetPositionY();
     data << GetPositionZ();
@@ -1499,11 +1505,9 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
     // If not miss
     if (!(damageInfo->HitInfo & HITINFO_MISS))
     {
+        // on weapon hit casts
         if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
-        {
-            for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
-                ((Player*)this)->CastItemCombatSpell(((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0,i), pVictim, damageInfo->attackType);
-        }
+            ((Player*)this)->CastItemCombatSpell(pVictim, damageInfo->attackType);
 
         // victim's damage shield
         std::set<Aura*> alreadyDone;
@@ -1802,7 +1806,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
                     // This, if I'm not mistaken, shows that we get back ~2% of the absorbed damage as runic power.
                     int32 absorbed = RemainingDamage * currentAbsorb / 100;
                     int32 regen = absorbed * 2 / 10;
-                    pVictim->CastCustomSpell(pVictim, 49088, &regen, 0, 0, true, 0, *i);
+                    pVictim->CastCustomSpell(pVictim, 49088, &regen, NULL, NULL, true, NULL, *i);
                     RemainingDamage -= absorbed;
                     continue;
                 }
@@ -5087,8 +5091,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 target = GetPet();
                 if (!target)
                     return false;
-                triggered_spell_id = 54181;
                 basepoints0 = damage * triggerAmount / 100;
+                triggered_spell_id = 54181;
                 break;
             }
             switch(dummySpell->Id)
@@ -5500,14 +5504,18 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     int32 holy = caster->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_HOLY) +
                                  caster->SpellBaseDamageBonusForVictim(SPELL_SCHOOL_MASK_HOLY, this);
                     basepoints0 = int32(ap*0.10f + 0.10f*holy);
-                    pVictim->CastCustomSpell(pVictim, 20267, &basepoints0, 0, 0, true, 0, triggeredByAura);
+                    pVictim->CastCustomSpell(pVictim, 20267, &basepoints0, NULL, NULL, true, NULL, triggeredByAura);
                     return true;
                 }
                 // Judgement of Wisdom
                 case 20186:
                 {
                     if (pVictim->getPowerType() == POWER_MANA)
-                        pVictim->CastSpell(pVictim, 20268, true, 0, triggeredByAura);
+                    {
+                        // 2% of maximum base mana
+                        basepoints0 = int32(pVictim->GetCreateMana() * 2 / 100);
+                        pVictim->CastCustomSpell(pVictim, 20268, &basepoints0, NULL, NULL, true, NULL, triggeredByAura);
+                    }
                     return true;
                 }
                 // Holy Power (Redemption Armor set)
@@ -5535,6 +5543,29 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                             break;
                         case CLASS_WARRIOR:
                             triggered_spell_id = 28790;     // Increases the friendly target's armor
+                            break;
+                        default:
+                            return false;
+                    }
+                    break;
+                }
+                case 25899:                                 // Greater Blessing of Sanctuary
+                case 20911:                                 // Blessing of Sanctuary
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
+                    target = this;
+                    switch (target->getPowerType())
+                    {
+                        case POWER_MANA:
+                            triggered_spell_id = 57319;
+                            break;
+                        case POWER_RAGE:
+                            triggered_spell_id = 57320;
+                            break;
+                        case POWER_RUNIC_POWER:
+                            triggered_spell_id = 57321;
                             break;
                         default:
                             return false;
@@ -5634,7 +5665,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                         if (procSpell->Effect[i] == SPELL_EFFECT_ENERGIZE)
                         {
                             int32 mana = procSpell->EffectBasePoints[i];
-                            CastCustomSpell(this, 54986, 0, &mana, 0, true, castItem, triggeredByAura);
+                            CastCustomSpell(this, 54986, NULL, &mana, NULL, true, castItem, triggeredByAura);
                             break;
                         }
                     return true;
@@ -6864,7 +6895,7 @@ bool Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, uint32 damage, Aura 
                 return false;
             int32 cost = procSpell->manaCost + procSpell->ManaCostPercentage * GetCreateMana() / 100;
             int32 basepoints0 = cost * triggeredByAura->GetModifier()->m_amount/100;
-            CastCustomSpell(this, 47762, &basepoints0, 0, 0, true, 0, triggeredByAura);
+            CastCustomSpell(this, 47762, &basepoints0, NULL, NULL, true, NULL, triggeredByAura);
             return true;
         }
     }
@@ -8414,13 +8445,6 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo)
 {
     if (!spellInfo)
         return false;
-
-    //FIX ME this hack: don't get feared if stunned
-    if (spellInfo->Mechanic == MECHANIC_FEAR )
-    {
-        if ( hasUnitState(UNIT_STAT_STUNNED) )
-            return true;
-    }
 
     //TODO add spellEffect immunity checks!, player with flag in bg is imune to imunity buffs from other friendly players!
     //SpellImmuneList const& dispelList = m_spellImmune[IMMUNITY_EFFECT];
@@ -10764,6 +10788,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 DealSpellDamage(&damageInfo, true);
                 break;
             }
+            case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
             case SPELL_AURA_MANA_SHIELD:
             case SPELL_AURA_OBS_MOD_MANA:
             case SPELL_AURA_DUMMY:
@@ -11460,7 +11485,7 @@ Pet* Unit::CreateTamedPetFrom(Creature* creatureTarget,uint32 spell_id)
 
     pet->SetOwnerGUID(GetGUID());
     pet->SetCreatorGUID(GetGUID());
-    pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, getFaction());
+    pet->setFaction(getFaction());
     pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, spell_id);
 
     if(GetTypeId()==TYPEID_PLAYER)

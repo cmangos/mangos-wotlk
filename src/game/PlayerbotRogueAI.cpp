@@ -178,8 +178,8 @@ void PlayerbotRogueAI::DoNonCombatActions()
         return;
 
     // hp check
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = GetAI()->FindFood();
 
@@ -219,8 +219,8 @@ void PlayerbotRogueAI::DoNonCombatActions()
     };
 
 //thi is only a guess, dont get how to apply temp enchant on weapons.
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     pItem = GetAI()->FindPoison();
     Item* item = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
