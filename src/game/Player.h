@@ -374,11 +374,15 @@ enum DrunkenState
     DRUNKEN_SMASHED = 3
 };
 
+
 enum PlayerStateType
 {
     PLAYER_STATE_NONE              = 0,
     PLAYER_STATE_SIT               = 1
 };
+
+#define MAX_DRUNKEN   4
+
 
 enum PlayerFlags
 {
