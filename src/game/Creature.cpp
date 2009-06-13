@@ -1532,6 +1532,7 @@ void Creature::setDeathState(DeathState s)
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
         // Playerbot mod
+        AddUnitMovementFlag(MONSTER_MOVE_WALK);
         AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
         //SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
         if(isBotGiver())
