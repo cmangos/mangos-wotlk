@@ -78,6 +78,9 @@ public:
 	void sysmessage(const char *str) {
 		SendSysMessage(str);
 	}
+	bool dropQuest(const char *str) {
+		return HandleQuestRemove(str);
+	}
 };
 
 PlayerbotAI::PlayerbotAI(Player* const master, Player* const bot) :
@@ -496,29 +499,30 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
 
 						// if quest incomplete (grey ?)
 						if (qItem.m_qIcon == 3) {
-							out << "|cffff0000Quest incomplete:|r " << "|cff808080" << "<?>" << "|r"
-							<< " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+							out << "|cFF808080Quest incomplete:|r " << "|cFF808080" << "<?>" << "|r"
+							<< " |cFF808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
 						}
 
 						// if quest available (yellow !)
 						else if (qItem.m_qIcon == 6) {
-							out << "|cff00ff00Quest available:|r " << "|cfffff000" << "<!>" << "|r"
-							<< " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+							out << "|cFFFFFF00Quest available:|r " << "|cFFFFFF00" << "<!>" << "|r"
+							<< " |cFFFFFF00|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
 						}
 
 						// is quest ready to turn in (yellow ?)
 						else if (qItem.m_qIcon == 4) {
+							
 							// no choice in rewards
-							if (pQuest->GetRewItemsCount() == 0) {
+							if (pQuest->GetRewChoiceItemsCount() == 0) {
 								if (bot->CanRewardQuest(pQuest, false)) {
 									bot->RewardQuest(pQuest, 0, pNpc, false);									
-									out << "Quest complete: " << "|cfffff000" << "<?>" << "|r"
-									<< " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+									out << "Quest complete: " << "|cFFFFFF00" << "<?>" << "|r"
+									<< " |cFFFFFF00|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
 								}
 								else {
 									out << "|cffff0000Unable to turn quest in:|r " 
-									<< "|cfffff000" << "<?>" << "|r "
-									<< "|cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+									<< "|cFFFFFF00" << "<?>" << "|r "
+									<< "|cFFFFFF00|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
 								}
 							}
 							// auto choose reward
@@ -544,16 +548,16 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
 									bot->RewardQuest(pQuest, rewardItemId, pNpc, false);
 
 									out << "Quest complete: " << "|cfffff000" << "<?>" << "|r"
-									<< " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r"
+									<< " |cFFFFFF00|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r"
 									<< "reward: "
-									<< " |cffffffff|Hitem:" << rewardItemId << ":0:0:0:0:0:0:0" << "|h[" << pRewardItem->Name1 << "]|h|r";
+									<< " |cFFFFFFFF|Hitem:" << rewardItemId << ":0:0:0:0:0:0:0" << "|h[" << pRewardItem->Name1 << "]|h|r";
 
 									// TODO: auto equip reward?
 								}
 								else {
-									out << "|cffff0000Unable to turn quest in:|r " 
-									<< "|cfffff000" << "<?>" << "|r "
-									<< "|cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+									out << "|cFFFFFF00Unable to turn quest in:|r " 
+									<< "|cFFFFFF00" << "<?>" << "|r "
+									<< "|cFFFFFF00|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
 								}
 							}
 
@@ -609,9 +613,29 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
 		
 		/*
 		case CMSG_QUESTLOG_REMOVE_QUEST: {
+			WorldPacket p(packet);
+			p.rpos(0); // reset reader
+		    uint8 slot;
+		    p >> slot;
+		    uint32 questId = masterSession.GetPlayer()->GetQuestSlotQuestId(slot);
+
+			for (PlayerBotMap::const_iterator it = masterSession.GetPlayerBotsBegin(); it != masterSession.GetPlayerBotsEnd(); ++it)
+			{
+				Player* const bot = it->second;				
+				const uint8 questSlotForBot = (uint8) bot->FindQuestSlot(questId);
+				if (questSlotForBot != MAX_QUEST_LOG_SIZE)
+				{
+		            bot->SetQuestSlot(questSlotForBot,0);
+		            bot->TakeQuestSourceItem(questId, false );
+				}
+			    bot->SetQuestStatus(questId, QUEST_STATUS_NONE);
+			    bot->getQuestStatusMap()[questId].m_rewarded = false;
+			}
+			
 			break;
 		}
 		*/
+		
 
 		case CMSG_NAME_QUERY:
 		case MSG_MOVE_START_FORWARD:
@@ -2249,9 +2273,35 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer) {
 				!= itemList.end(); ++it)
 			EquipItem(**it);
 	}
+	
+	else if (text == "quests") {
+    	std::ostringstream incomout;
+    	incomout << "my incomplete quests are:";
+    	std::ostringstream comout;
+    	comout << "my complete quests are:";
+	    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+		{
+	        if(uint32 questId = m_bot->GetQuestSlotQuestId(slot))
+	        {
+	        	Quest const* pQuest = objmgr.GetQuestTemplate(questId);
+				if (m_bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE)
+					comout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+				else
+					incomout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+	        }
+	    }
+		SendWhisper(comout.str(), fromPlayer);
+		SendWhisper(incomout.str(), fromPlayer);
+	}
+	
+	else if (text.size() > 5 && text.substr(0, 5) == "drop ") {
+		PlayerbotChatHandler ch(m_master);
+		if (! ch.dropQuest(text.substr(5).c_str()))
+			ch.sysmessage("ERROR: could not drop quest");
+	}
 
 	else if (text == "spells") {
-
+		
 		int loc = m_master->GetSession()->GetSessionDbcLocale();
 
 		std::ostringstream posOut;
