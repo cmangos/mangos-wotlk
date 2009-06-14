@@ -23,12 +23,12 @@ PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* con
     STRANGULATE       = ai->getSpellId("strangulate");
     BLOOD_BOIL        = ai->getSpellId("blood boil");
     HEART_STRIKE      = ai->getSpellId("heart strike");
-    UNHOLY_PRESENCE   = ai->getSpellId("unholy presence"); // buffs
-    FROST_PRESENCE    = ai->getSpellId("frost presence");
-    BLOOD_PRESENCE    = ai->getSpellId("blood presence");
-    MARK_OF_BLOOD     = ai->getSpellId("mark of blood");
+    MARK_OF_BLOOD     = ai->getSpellId("mark of blood"); // buffs
     KILLING_MACHINE   = ai->getSpellId("killing machine");
     HORN_OF_WINTER    = ai->getSpellId("horn of winter");
+    UNHOLY_PRESENCE   = 48265; // presence
+    FROST_PRESENCE    = 48263;
+    BLOOD_PRESENCE    = 48266;
 }
 
 PlayerbotDeathKnightAI::~PlayerbotDeathKnightAI() {}
@@ -231,7 +231,7 @@ void PlayerbotDeathKnightAI::DoNonCombatActions()
 
     SpellSequence = SPELL_DK_UNHOLY;
 
-    // buff myself (Unholy DK) UNHOLY_PRESENCE, HORN_OF_WINTER, DEATH_RUNE_MASTERY
+    // buff myself (Unholy DK) UNHOLY_PRESENCE, HORN_OF_WINTER
     if (UNHOLY_PRESENCE > 0)
         (!m_bot->HasAura(UNHOLY_PRESENCE, 0) && GetAI()->CastSpell (UNHOLY_PRESENCE, *m_bot));
 

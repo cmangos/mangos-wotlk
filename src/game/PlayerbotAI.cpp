@@ -321,10 +321,11 @@ void PlayerbotAI::SendQuestItemList( Player& player )
 
 void PlayerbotAI::HandleMasterOutgoingPacket(const WorldPacket& packet, WorldSession& masterSession)
 {
+	/**
     switch (packet.GetOpcode())
     {
-        /* maybe our bots should only start looting after the master loots?
-        case SMSG_LOOT_RELEASE_RESPONSE: {} */
+        // maybe our bots should only start looting after the master loots?
+        //case SMSG_LOOT_RELEASE_RESPONSE: {} 
         case SMSG_NAME_QUERY_RESPONSE:
         case SMSG_MONSTER_MOVE:
         case SMSG_COMPRESSED_UPDATE_OBJECT:
@@ -346,6 +347,7 @@ void PlayerbotAI::HandleMasterOutgoingPacket(const WorldPacket& packet, WorldSes
             sLog.outError(out.str().c_str());
         }
     }
+	 */
 }
 
 void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSession& masterSession)
@@ -676,7 +678,6 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
         case CMSG_QUESTLOG_REMOVE_QUEST: {
             break;
         }
-        */
 
         case CMSG_NAME_QUERY:
         case MSG_MOVE_START_FORWARD:
@@ -705,6 +706,7 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
             out << "masterin: " << oc;
             sLog.outError(out.str().c_str());
         }
+        */
     }
 }
 
@@ -1031,7 +1033,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             return;
         }
 
-        /* uncomment this and your bots will tell you all their outgoing packet opcode names */
+        /* uncomment this and your bots will tell you all their outgoing packet opcode names 
         case SMSG_MONSTER_MOVE:
         case SMSG_UPDATE_WORLD_STATE:
         case SMSG_COMPRESSED_UPDATE_OBJECT:
@@ -1060,6 +1062,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
             //TellMaster(oc);
         }
+        */
     }
 }
 

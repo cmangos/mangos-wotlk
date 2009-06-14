@@ -18,6 +18,7 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     SMITE              = ai->getSpellId("smite");
     CLEARCASTING       = ai->getSpellId("clearcasting");
     HOLY_NOVA          = ai->getSpellId("holy nova");
+    HOLY_FIRE          = ai->getSpellId("holy fire");
     DESPERATE_PRAYER   = ai->getSpellId("desperate prayer");
     PRAYER_OF_HEALING  = ai->getSpellId("prayer of healing");
     CIRCLE_OF_HEALING  = ai->getSpellId("circle of healing");
@@ -51,6 +52,7 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
         DSPIRIT        = ai->getSpellId("divine spirit");
 
     MASS_DISPEL        = ai->getSpellId("mass dispel");
+    POWER_INFUSION     = ai->getSpellId("power infusion");
 }
 
 PlayerbotPriestAI::~PlayerbotPriestAI() {}
