@@ -7568,7 +7568,8 @@ int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellPro
 
     if (GetTypeId()==TYPEID_PLAYER)
     {
-        SendHealSpellLog(pVictim, spellProto->Id, addhealth, critical);
+        // overheal = addhealth - gain
+        SendHealSpellLog(pVictim, spellProto->Id, addhealth, addhealth - gain, critical);
 
         if (BattleGround *bg = ((Player*)this)->GetBattleGround())
             bg->UpdatePlayerScore((Player*)this, SCORE_HEALING_DONE, gain);
@@ -7617,7 +7618,7 @@ Unit* Unit::SelectMagnetTarget(Unit *victim, SpellEntry const *spellInfo)
     return victim;
 }
 
-void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, bool critical)
+void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, uint32 OverHeal, bool critical)
 {
     // we guess size
     WorldPacket data(SMSG_SPELLHEALLOG, (8+8+4+4+1));
@@ -7625,7 +7626,7 @@ void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, bool c
     data.append(GetPackGUID());
     data << uint32(SpellID);
     data << uint32(Damage);
-    data << uint32(0);                                      // over healing?
+    data << uint32(OverHeal);
     data << uint8(critical ? 1 : 0);
     data << uint8(0);                                       // unused in client?
     SendMessageToSet(&data, true);
@@ -7640,6 +7641,13 @@ void Unit::SendEnergizeSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, Po
     data << uint32(powertype);
     data << uint32(Damage);
     SendMessageToSet(&data, true);
+}
+
+void Unit::EnergizeBySpell(Unit *pVictim, uint32 SpellID, uint32 Damage, Powers powertype)
+{
+    SendEnergizeSpellLog(pVictim, SpellID, Damage, powertype);
+    // needs to be called after sending spell log
+    ModifyPower(powertype, Damage);
 }
 
 uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
@@ -10495,7 +10503,7 @@ void CharmInfo::SetPetNumber(uint32 petnumber, bool statwindow)
         m_unit->SetUInt32Value(UNIT_FIELD_PETNUMBER, 0);
 }
 
-void CharmInfo::LoadPetActionBar( std::string data )
+void CharmInfo::LoadPetActionBar(const std::string& data )
 {
     InitPetActionBar();
 

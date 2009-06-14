@@ -58,7 +58,7 @@ struct AccountData
 
 struct AddonInfo
 {
-    AddonInfo(std::string name, uint8 enabled, uint32 crc)
+    AddonInfo(const std::string& name, uint8 enabled, uint32 crc)
     {
         Name = name;
         Enabled = enabled;
@@ -237,7 +237,7 @@ class MANGOS_DLL_SPEC WorldSession
         //Taxi
         void SendTaxiStatus( uint64 guid );
         void SendTaxiMenu( Creature* unit );
-        void SendDoFlight( uint16 MountId, uint32 path, uint32 pathNode = 0 );
+        void SendDoFlight( uint32 mountDisplayId, uint32 path, uint32 pathNode = 0 );
         bool SendLearnNewTaxiNode( Creature* unit );
 
         // Guild/Arena Team

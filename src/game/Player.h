@@ -687,7 +687,8 @@ enum InstanceResetWarningType
     RAID_INSTANCE_WARNING_HOURS     = 1,                    // WARNING! %s is scheduled to reset in %d hour(s).
     RAID_INSTANCE_WARNING_MIN       = 2,                    // WARNING! %s is scheduled to reset in %d minute(s)!
     RAID_INSTANCE_WARNING_MIN_SOON  = 3,                    // WARNING! %s is scheduled to reset in %d minute(s). Please exit the zone or you will be returned to your bind location!
-    RAID_INSTANCE_WELCOME           = 4                     // Welcome to %s. This raid instance is scheduled to reset in %s.
+    RAID_INSTANCE_WELCOME           = 4,                    // Welcome to %s. This raid instance is scheduled to reset in %s.
+    RAID_INSTANCE_EXPIRED           = 5
 };
 
 struct MovementInfo
@@ -915,7 +916,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
         void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
-        void SendInstanceResetWarning(uint32 mapid, uint32 time);
+        void SendInstanceResetWarning(uint32 mapid, uint32 difficulty, uint32 time);
 
         Creature* GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask);
         bool CanInteractWithNPCs(bool alive = true) const;
@@ -1540,6 +1541,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetDifficulty(uint32 dungeon_difficulty) { m_dungeonDifficulty = dungeon_difficulty; }
         uint8 GetDifficulty() { return m_dungeonDifficulty; }
+        bool IsHeroic() { return m_dungeonDifficulty == DIFFICULTY_HEROIC; }
 
         bool UpdateSkill(uint32 skill_id, uint32 step);
         bool UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step);
@@ -1617,11 +1619,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendDelayResponse(const uint32);
         void SendLogXPGain(uint32 GivenXP,Unit* victim,uint32 RestXP);
 
-        //notifiers
+        // notifiers
         void SendAttackSwingCantAttack();
         void SendAttackSwingCancelAttack();
         void SendAttackSwingDeadTarget();
-        void SendAttackSwingNotStanding();
         void SendAttackSwingNotInRange();
         void SendAttackSwingBadFacingAttack();
         void SendAutoRepeatCancel();

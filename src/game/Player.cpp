@@ -226,7 +226,7 @@ bool PlayerTaxi::LoadTaxiDestinationsFromString( const std::string& values, uint
     }
 
     // can't load taxi path without mount set (quest taxi path?)
-    if(!objmgr.GetTaxiMount(GetTaxiSource(),team,true))
+    if(!objmgr.GetTaxiMountDisplayId(GetTaxiSource(),team,true))
         return false;
 
     return true;
@@ -1886,7 +1886,7 @@ void Player::Regenerate(Powers power)
         case POWER_RAGE:                                    // Regenerate rage
         {
             float RageDecreaseRate = sWorld.getRate(RATE_POWER_RAGE_LOSS);
-            addvalue = 30 * RageDecreaseRate;               // 3 rage by tick
+            addvalue = 20 * RageDecreaseRate;               // 2 rage by tick (= 2 seconds => 1 rage/sec)
         }   break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
             addvalue = 20;
@@ -5584,17 +5584,43 @@ void Player::SaveRecallPosition()
 
 void Player::SendMessageToSet(WorldPacket *data, bool self)
 {
-    GetMap()->MessageBroadcast(this, data, self);
+    Map * _map = IsInWorld() ? GetMap() : MapManager::Instance().FindMap(GetMapId(), GetInstanceId());
+    if(_map)
+    {
+        _map->MessageBroadcast(this, data, self);
+        return;
+    }
+
+    //if player is not in world and map in not created/already destroyed
+    //no need to create one, just send packet for itself!
+    if(self)
+        GetSession()->SendPacket(data);
 }
 
 void Player::SendMessageToSetInRange(WorldPacket *data, float dist, bool self)
 {
-    GetMap()->MessageDistBroadcast(this, data, dist, self);
+    Map * _map = IsInWorld() ? GetMap() : MapManager::Instance().FindMap(GetMapId(), GetInstanceId());
+    if(_map)
+    {
+        _map->MessageDistBroadcast(this, data, dist, self);
+        return;
+    }
+
+    if(self)
+        GetSession()->SendPacket(data);
 }
 
 void Player::SendMessageToSetInRange(WorldPacket *data, float dist, bool self, bool own_team_only)
 {
-    GetMap()->MessageDistBroadcast(this, data, dist, self,own_team_only);
+    Map * _map = IsInWorld() ? GetMap() : MapManager::Instance().FindMap(GetMapId(), GetInstanceId());
+    if(_map)
+    {
+        _map->MessageDistBroadcast(this, data, dist, self, own_team_only);
+        return;
+    }
+
+    if(self)
+        GetSession()->SendPacket(data);
 }
 
 void Player::SendDirectMessage(WorldPacket *data)
@@ -15211,6 +15237,8 @@ void Player::SendRaidInfo()
     size_t p_counter = data.wpos();
     data << uint32(counter);                                // placeholder
 
+    time_t now = time(NULL);
+
     for(int i = 0; i < TOTAL_DIFFICULTIES; ++i)
     {
         for (BoundInstancesMap::const_iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
@@ -15218,10 +15246,11 @@ void Player::SendRaidInfo()
             if(itr->second.perm)
             {
                 InstanceSave *save = itr->second.save;
-                data << uint32(save->GetMapId());
-                data << uint32(save->GetResetTime() - time(NULL));
-                data << uint32(save->GetInstanceId());
-                data << uint32(save->GetDifficulty());
+                data << uint32(save->GetMapId());           // map id
+                data << uint32(save->GetDifficulty());      // difficulty
+                data << uint64(save->GetInstanceId());      // instance id
+                data << uint32(save->GetResetTime() - now); // reset time
+                data << uint32(0);                          // is extended
                 ++counter;
             }
         }
@@ -15999,12 +16028,6 @@ void Player::Customize(uint64 guid, uint8 gender, uint8 skin, uint8 face, uint8 
     SetUInt32ValueInArray(tokens, PLAYER_BYTES_3, player_bytes3);
 
     SaveValuesArrayInDB(tokens, guid);
-}
-
-void Player::SendAttackSwingNotStanding()
-{
-    WorldPacket data(SMSG_ATTACKSWING_NOTSTANDING, 0);
-    GetSession()->SendPacket( &data );
 }
 
 void Player::SendAttackSwingDeadTarget()
@@ -16917,10 +16940,10 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     }
 
     // get mount model (in case non taximaster (npc==NULL) allow more wide lookup)
-    uint16 mount_id = objmgr.GetTaxiMount(sourcenode, GetTeam(), npc == NULL);
+    uint32 mount_display_id = objmgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == NULL);
 
     // in spell case allow 0 model
-    if (mount_id == 0 && spellid == 0 || sourcepath == 0)
+    if (mount_display_id == 0 && spellid == 0 || sourcepath == 0)
     {
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXIUNSPECIFIEDSERVERERROR);
@@ -16957,7 +16980,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
     sLog.outDebug("WORLD: Sent SMSG_ACTIVATETAXIREPLY");
 
-    GetSession()->SendDoFlight(mount_id, sourcepath);
+    GetSession()->SendDoFlight(mount_display_id, sourcepath);
 
     return true;
 }
@@ -18065,7 +18088,7 @@ void Player::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg)
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendInstanceResetWarning(uint32 mapid, uint32 time)
+void Player::SendInstanceResetWarning( uint32 mapid, uint32 difficulty, uint32 time )
 {
     // type of warning, based on the time remaining until reset
     uint32 type;
@@ -18077,10 +18100,17 @@ void Player::SendInstanceResetWarning(uint32 mapid, uint32 time)
         type = RAID_INSTANCE_WARNING_MIN;
     else
         type = RAID_INSTANCE_WARNING_MIN_SOON;
-    WorldPacket data(SMSG_RAID_INSTANCE_MESSAGE, 4+4+4);
+
+    WorldPacket data(SMSG_RAID_INSTANCE_MESSAGE, 4+4+4+4);
     data << uint32(type);
     data << uint32(mapid);
+    data << uint32(difficulty);                             // difficulty
     data << uint32(time);
+    if(type == RAID_INSTANCE_WELCOME)
+    {
+        data << uint8(0);                                   // is your (1)
+        data << uint8(0);                                   // is extended (1), ignored if prev field is 0
+    }
     GetSession()->SendPacket(&data);
 }
 

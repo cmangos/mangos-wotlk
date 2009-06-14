@@ -1447,8 +1447,7 @@ void Aura::TriggerSpell()
                         if (mana)
                         {
                             mana /= 10;
-                            caster->ModifyPower( POWER_MANA, mana );
-                            caster->SendEnergizeSpellLog(caster, 23493, mana, POWER_MANA);
+                            caster->EnergizeBySpell(caster, 23493, mana, POWER_MANA);
                         }
                         return;
                     }
@@ -2858,7 +2857,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             else
             {
                                                             // Will use the default model here
-                m_target->SetDisplayId(ci->DisplayID_A);
+                m_target->SetDisplayId(ci->DisplayID_A[0]);
 
                 // Dragonmaw Illusion (set mount model also)
                 if(GetId()==42016 && m_target->GetMountID() && !m_target->GetAurasByType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED).empty())
