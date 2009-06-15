@@ -243,7 +243,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
         else if( ((float)pet->GetHealth()/(float)pet->GetMaxHealth()) < 0.5f )
         {
             // heal pet when health lower 50%
-            if( PET_MEND>0 && ai->CastSpell(PET_MEND,*m_bot) )
+            if( PET_MEND>0 && !pet->HasAura(PET_MEND,0) && ai->CastSpell(PET_MEND,*m_bot) )
                 ai->TellMaster( "healing pet" );
         }
     }
