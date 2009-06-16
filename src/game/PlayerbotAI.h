@@ -28,13 +28,11 @@ class MANGOS_DLL_SPEC PlayerbotAI
         // the master will auto set the target of the bot
         enum CombatOrderType
         {
-            ORDERS_NONE,
-            ORDERS_KILL,
-            ORDERS_CC,
-            ORDERS_HEAL,
-            ORDERS_TANK,
-            ORDERS_PROTECT,
-            ORDERS_REGEN
+            ORDERS_NONE			= 0x00,		// no special orders given
+			ORDERS_TANK			= 0x01,		// bind attackers by gaining threat
+			ORDERS_ASSISST		= 0x02,		// assist someone (dps type)
+			ORDERS_HEAL			= 0x04,		// concentrate on healing (no attacks, only self defense)
+			ORDERS_PROTECT		= 0x10,		// combinable state: check if protectee is attacked
         };
 
         enum BotState
@@ -56,7 +54,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
             AIT_LOWESTTHREAT    = 0x01,
             AIT_HIGHESTTHREAT   = 0x02,
             AIT_VICTIMSELF      = 0x04,
-            AIT_VICTIMNOTSELF   = 0x08
+            AIT_VICTIMNOTSELF   = 0x08		// !!! must use victim param in FindAttackers
         };
         typedef struct AttackerInfo
         {
@@ -165,7 +163,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void SendNotEquipList(Player& player);
         void Feast();
         void InterruptCurrentCastingSpell();
-        void GetCombatOrders( Unit* forcedTarged = 0 );
+        void GetCombatTarget( Unit* forcedTarged = 0 );
         void DoNextCombatManeuver();
         void SetIgnoreUpdateTime(uint8 t) {m_ignoreAIUpdatesUntilTime=time(0) + t; };
 
@@ -182,7 +180,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
 
         bool IsInCombat();
         void UpdateAttackerInfo();
-        Unit* FindAttacker( ATTACKERINFOTYPE ait=AIT_NONE );
+        Unit* FindAttacker( ATTACKERINFOTYPE ait=AIT_NONE, Unit *victim=0 );
         uint32 GetAttackerCount() { return m_attackerInfo.size(); };
 
         void SetInFront( const Unit* obj );
@@ -233,6 +231,10 @@ class MANGOS_DLL_SPEC PlayerbotAI
         uint64 m_targetGuidCommand;
 
         AttackerInfoList m_attackerInfo;
+
+		Unit *m_targetCombat;
+		Unit *m_targetAssisst;
+		Unit *m_targetProtect;
 };
 
 #endif
