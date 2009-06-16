@@ -18,6 +18,7 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     SMITE              = ai->getSpellId("smite");
     CLEARCASTING       = ai->getSpellId("clearcasting");
     HOLY_NOVA          = ai->getSpellId("holy nova");
+    HOLY_FIRE          = ai->getSpellId("holy fire");
     DESPERATE_PRAYER   = ai->getSpellId("desperate prayer");
     PRAYER_OF_HEALING  = ai->getSpellId("prayer of healing");
     CIRCLE_OF_HEALING  = ai->getSpellId("circle of healing");
@@ -51,6 +52,7 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
         DSPIRIT        = ai->getSpellId("divine spirit");
 
     MASS_DISPEL        = ai->getSpellId("mass dispel");
+    POWER_INFUSION     = ai->getSpellId("power infusion");
 }
 
 PlayerbotPriestAI::~PlayerbotPriestAI() {}
@@ -357,8 +359,8 @@ void PlayerbotPriestAI::DoNonCombatActions()
         (!GetMaster()->HasAura(FORTITUDE,0) && GetAI()->CastSpell (FORTITUDE, *(GetMaster())) );
 
     // mana check
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = GetAI()->FindDrink();
 
@@ -371,8 +373,8 @@ void PlayerbotPriestAI::DoNonCombatActions()
     }
 
     // hp check
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     pItem = GetAI()->FindFood();
 

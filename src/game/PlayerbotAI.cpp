@@ -74,6 +74,7 @@ public:
     bool revive(const Player& botPlayer) { return HandleReviveCommand(botPlayer.GetName()); }
     bool teleport(const Player& botPlayer) { return HandleNamegoCommand(botPlayer.GetName()); }
     void sysmessage(const char *str) { SendSysMessage(str); }
+	bool dropQuest(const char *str) { return HandleQuestRemove(str); }
 };
 
 PlayerbotAI::PlayerbotAI(Player* const master, Player* const bot) :
@@ -202,6 +203,7 @@ uint32 PlayerbotAI::getSpellId(const char* args, bool master) const
  * Send a list of equipment that is in bot's inventor that is currently unequipped.
  * This is called when the master is inspecting the bot.
  */
+
 void PlayerbotAI::SendNotEquipList(Player& player)
 {
     // find all unequipped items and put them in
@@ -324,10 +326,11 @@ void PlayerbotAI::SendQuestItemList( Player& player )
 
 void PlayerbotAI::HandleMasterOutgoingPacket(const WorldPacket& packet, WorldSession& masterSession)
 {
+	/**
     switch (packet.GetOpcode())
     {
-        /* maybe our bots should only start looting after the master loots?
-        case SMSG_LOOT_RELEASE_RESPONSE: {} */
+        // maybe our bots should only start looting after the master loots?
+        //case SMSG_LOOT_RELEASE_RESPONSE: {} 
         case SMSG_NAME_QUERY_RESPONSE:
         case SMSG_MONSTER_MOVE:
         case SMSG_COMPRESSED_UPDATE_OBJECT:
@@ -349,6 +352,7 @@ void PlayerbotAI::HandleMasterOutgoingPacket(const WorldPacket& packet, WorldSes
             sLog.outError(out.str().c_str());
         }
     }
+	 */
 }
 
 void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSession& masterSession)
@@ -679,7 +683,6 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
         case CMSG_QUESTLOG_REMOVE_QUEST: {
             break;
         }
-        */
 
         case CMSG_NAME_QUERY:
         case MSG_MOVE_START_FORWARD:
@@ -708,6 +711,7 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
             out << "masterin: " << oc;
             sLog.outError(out.str().c_str());
         }
+        */
     }
 }
 
@@ -1032,7 +1036,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             return;
         }
 
-        /* uncomment this and your bots will tell you all their outgoing packet opcode names */
+        /* uncomment this and your bots will tell you all their outgoing packet opcode names 
         case SMSG_MONSTER_MOVE:
         case SMSG_UPDATE_WORLD_STATE:
         case SMSG_COMPRESSED_UPDATE_OBJECT:
@@ -1061,6 +1065,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
             //TellMaster(oc);
         }
+        */
     }
 }
 
@@ -1414,7 +1419,7 @@ void PlayerbotAI::Feast()
     // stand up if we are done feasting
     if (!(m_bot->GetHealth() < m_bot->GetMaxHealth() || (m_bot->getPowerType() == POWER_MANA && m_bot->GetPower(POWER_MANA) < m_bot->GetMaxPower(POWER_MANA))))
     {
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
         return;
     }
 
@@ -1455,7 +1460,7 @@ void PlayerbotAI::Feast()
     if (currentTime > m_TimeDoneEating && currentTime > m_TimeDoneDrinking)
     {
         TellMaster("done feasting!");
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
     }
 }
 
@@ -1497,8 +1502,8 @@ void PlayerbotAI::GetCombatTarget( Unit* forcedTarget )
     m_bot->SetSelection(m_targetCombat->GetGUID());
     m_ignoreAIUpdatesUntilTime = time(0) + 1;
 
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     m_bot->Attack(m_targetCombat, true);
 
@@ -2024,7 +2029,7 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
             DoLoot();
 /*
         // are we sitting, if so feast if possible
-        else if (m_bot->getStandState() == PLAYER_STATE_SIT)
+        else if (m_bot->getStandState() == UNIT_STAND_STATE_SIT)
         Feast();
 */
         // if commanded to follow master and not already following master then follow master
@@ -2351,7 +2356,7 @@ bool PlayerbotAI::Follow(Player& player)
     m_IsFollowingMaster = true;
 
     if (!m_bot->IsStandState())
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     if (!m_bot->isInCombat())
     {
@@ -2564,6 +2569,34 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         for (std::list<Item*>::iterator it = itemList.begin(); it != itemList.end(); ++it)
             EquipItem(**it);
     }
+    
+	else if (text == "quests")
+	{
+    	std::ostringstream incomout;
+    	incomout << "my incomplete quests are:";
+    	std::ostringstream comout;
+    	comout << "my complete quests are:";
+	    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+		{
+	        if(uint32 questId = m_bot->GetQuestSlotQuestId(slot))
+	        {
+	        	Quest const* pQuest = objmgr.GetQuestTemplate(questId);
+				if (m_bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE)
+					comout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+				else
+					incomout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+	        }
+	    }
+		SendWhisper(comout.str(), fromPlayer);
+		SendWhisper(incomout.str(), fromPlayer);
+	}
+	
+	else if (text.size() > 5 && text.substr(0, 5) == "drop ")
+	{
+		PlayerbotChatHandler ch(m_master);
+		if (! ch.dropQuest(text.substr(5).c_str()))
+			ch.sysmessage("ERROR: could not drop quest");
+	}
 
     else if (text == "spells")
     {

@@ -339,6 +339,12 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleUnused,                                    //286 not used by any spells (3.08a)
     &Aura::HandleNoImmediateEffect,                         //287 SPELL_AURA_DEFLECT_SPELLS             implemented in Unit::MagicSpellHitResult and Unit::MeleeSpellHitResult
     &Aura::HandleUnused,                                    //288 not used by any spells (3.09) except 1 test spell.
+    &Aura::HandleUnused,                                    //289 unused
+    &Aura::HandleUnused,                                    //290 unused
+    &Aura::HandleUnused,                                    //291 unused
+    &Aura::HandleNULL,                                      //292 call stabled pet
+    &Aura::HandleNULL,                                      //293 2 test spells
+    &Aura::HandleNULL                                       //294 2 spells, possible prevent mana regen
 };
 
 static AuraType const frozenAuraTypes[] = { SPELL_AURA_MOD_ROOT, SPELL_AURA_MOD_STUN, SPELL_AURA_NONE };
@@ -1441,8 +1447,7 @@ void Aura::TriggerSpell()
                         if (mana)
                         {
                             mana /= 10;
-                            caster->ModifyPower( POWER_MANA, mana );
-                            caster->SendEnergizeSpellLog(caster, 23493, mana, POWER_MANA);
+                            caster->EnergizeBySpell(caster, 23493, mana, POWER_MANA);
                         }
                         return;
                     }
@@ -2017,7 +2022,7 @@ void Aura::TriggerSpellWithValue()
     uint32 trigger_spell_id = GetSpellProto()->EffectTriggerSpell[m_effIndex];
     int32  basepoints0 = this->GetModifier()->m_amount;
 
-    caster->CastCustomSpell(target, trigger_spell_id, &basepoints0, 0, 0, true, 0, this);
+    caster->CastCustomSpell(target, trigger_spell_id, &basepoints0, NULL, NULL, true, NULL, this);
 }
 
 /*********************************************************/
@@ -2852,7 +2857,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             else
             {
                                                             // Will use the default model here
-                m_target->SetDisplayId(ci->DisplayID_A);
+                m_target->SetDisplayId(ci->DisplayID_A[0]);
 
                 // Dragonmaw Illusion (set mount model also)
                 if(GetId()==42016 && m_target->GetMountID() && !m_target->GetAurasByType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED).empty())
@@ -3068,7 +3073,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
     if( apply )
     {
         m_target->SetCharmerGUID(GetCasterGUID());
-        m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, caster->getFaction());
+        m_target->setFaction(caster->getFaction());
 
         caster->SetCharm(m_target);
 
@@ -3110,7 +3115,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
         else if(m_target->GetTypeId() == TYPEID_UNIT)
         {
             CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
-            m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, cinfo->faction_A);
+            m_target->setFaction(cinfo->faction_A);
         }
 
         caster->SetCharm(NULL);
@@ -3120,9 +3125,8 @@ void Aura::HandleModPossess(bool apply, bool Real)
             ((Player*)caster)->SetFarSightGUID(0);
             ((Player*)caster)->SetClientControl(m_target, 0);
 
-            WorldPacket data(SMSG_PET_SPELLS, 8+4);
+            WorldPacket data(SMSG_PET_SPELLS, 8);
             data << uint64(0);
-            data << uint32(0);
             ((Player*)caster)->GetSession()->SendPacket(&data);
         }
 
@@ -3168,7 +3172,7 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
     {
         pet->AttackStop();
         pet->GetMotionMaster()->MoveFollow(caster, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-        pet->SetUnitMovementFlags(MOVEMENTFLAG_NONE);
+        pet->SetUnitMovementFlags(MONSTER_MOVE_WALK);
     }
 }
 
@@ -3200,7 +3204,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
         if( apply )
         {
             m_target->SetCharmerGUID(GetCasterGUID());
-            m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, caster->getFaction());
+            m_target->setFaction(caster->getFaction());
             m_target->CastStop(m_target == caster ? GetId() : 0);
             caster->SetCharm(m_target);
 
@@ -3249,12 +3253,12 @@ void Aura::HandleModCharm(bool apply, bool Real)
                 if(((Creature*)m_target)->isPet())
                 {
                     if(Unit* owner = m_target->GetOwner())
-                        m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, owner->getFaction());
+                        m_target->setFaction(owner->getFaction());
                     else if(cinfo)
-                        m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, cinfo->faction_A);
+                        m_target->setFaction(cinfo->faction_A);
                 }
                 else if(cinfo)                              // normal creature
-                    m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, cinfo->faction_A);
+                    m_target->setFaction(cinfo->faction_A);
 
                 // restore UNIT_FIELD_BYTES_0
                 if(cinfo && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK && cinfo->type == CREATURE_TYPE_DEMON)
@@ -3278,9 +3282,8 @@ void Aura::HandleModCharm(bool apply, bool Real)
 
             if(caster->GetTypeId() == TYPEID_PLAYER)
             {
-                WorldPacket data(SMSG_PET_SPELLS, 8+4);
+                WorldPacket data(SMSG_PET_SPELLS, 8);
                 data << uint64(0);
-                data << uint32(0);
                 ((Player*)caster)->GetSession()->SendPacket(&data);
             }
             if(m_target->GetTypeId() == TYPEID_UNIT)
@@ -3413,7 +3416,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             ((Creature*)m_target)->StopMoving();
         else
         {
-            m_target->SetUnitMovementFlags(0);              // Clear movement flags
+            ((Player*)m_target)->m_movementInfo.flags = 0;  // Clear movement flags
             m_target->SetStandState(UNIT_STAND_STATE_STAND);// in 1.5 client
         }
 
@@ -3697,7 +3700,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
             m_target->SendMessageToSet(&data, true);
 
             //Clear unit movement flags
-            m_target->SetUnitMovementFlags(0);
+            ((Player*)m_target)->m_movementInfo.flags = 0;
         }
         else
             ((Creature *)m_target)->StopMoving();
@@ -6412,7 +6415,7 @@ void Aura::PeriodicDummyTick()
                 // Increases your attack power by $s1 for every $s2 armor value you have.
                 // Calculate AP bonus (from 1 efect of this spell)
                 int32 apBonus = m_modifier.m_amount * m_target->GetArmor() / m_target->CalculateSpellDamage(spell, 1, spell->EffectBasePoints[1], m_target);
-                m_target->CastCustomSpell(m_target, 61217, &apBonus, &apBonus, 0, true, 0, this);
+                m_target->CastCustomSpell(m_target, 61217, &apBonus, &apBonus, NULL, true, NULL, this);
                 return;
             }
             break;
@@ -6435,7 +6438,7 @@ void Aura::PeriodicDummyTick()
                     int32 mod = (rage < 100) ? rage : 100;
                     int32 points = m_target->CalculateSpellDamage(spell, 1, spell->EffectBasePoints[1], m_target);
                     int32 regen = m_target->GetMaxHealth() * (mod * points / 10) / 1000;
-                    m_target->CastCustomSpell(m_target, 22845, &regen, 0, 0, true, 0, this);
+                    m_target->CastCustomSpell(m_target, 22845, &regen, NULL, NULL, true, NULL, this);
                     m_target->SetPower(POWER_RAGE, rage-mod);
                     return;
                 }
@@ -6449,8 +6452,42 @@ void Aura::PeriodicDummyTick()
         }
         case SPELLFAMILY_ROGUE:
         {
-//            switch (spell->Id)
-//            {
+            switch (spell->Id)
+            {
+                case 51690:
+                {
+                    std::list<Unit*> targets;
+                    {
+                        // eff_radius ==0
+                        float radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spell->rangeIndex));
+
+                        CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(),caster->GetPositionY()));
+                        Cell cell(p);
+                        cell.data.Part.reserved = ALL_DISTRICT;
+
+                        MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck u_check(caster, caster, radius);
+                        MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck> checker(caster,targets, u_check);
+
+                        TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck>, GridTypeMapContainer > grid_object_checker(checker);
+                        TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck>, WorldTypeMapContainer > world_object_checker(checker);
+
+                        CellLock<GridReadGuard> cell_lock(cell, p);
+
+                        cell_lock->Visit(cell_lock, grid_object_checker,  *caster->GetMap());
+                        cell_lock->Visit(cell_lock, world_object_checker, *caster->GetMap());
+                    }
+
+                    if(targets.empty())
+                        return;
+
+                    std::list<Unit*>::const_iterator itr = targets.begin();
+                    std::advance(itr, rand()%targets.size());
+                    Unit* target = *itr;
+
+                    caster->CastSpell(target, 57840, true);
+                    caster->CastSpell(target, 57841, true);
+                    return;
+                }
                 // Master of Subtlety
 //                case 31666: break;
                 // Killing Spree
@@ -6459,7 +6496,7 @@ void Aura::PeriodicDummyTick()
 //                case 58428: break;
 //                default:
 //                    break;
-//            }
+            }
             break;
         }
         case SPELLFAMILY_HUNTER:
@@ -6473,11 +6510,11 @@ void Aura::PeriodicDummyTick()
                 // Full damage to target at 0 tick
                 if (m_duration > m_modifier.periodictime)
                 {
-                    caster->CastCustomSpell(m_target, 53352, &damage, 0, 0, true, 0, this);
+                    caster->CastCustomSpell(m_target, 53352, &damage, NULL, NULL, true, NULL, this);
                     return;
                 }
                 damage/=4;
-                caster->CastCustomSpell(m_target, 56298, &damage, 0, 0, true, 0, this);
+                caster->CastCustomSpell(m_target, 56298, &damage, NULL, NULL, true, NULL, this);
                 return;
             }
             switch (spell->Id)
@@ -6518,7 +6555,7 @@ void Aura::PeriodicDummyTick()
             if (spell->SpellFamilyFlags & UI64LIT(0x0000000000000020))
             {
                 if (caster)
-                    caster->CastCustomSpell(m_target, 52212, &m_modifier.m_amount, NULL, NULL, true, 0, this);
+                    caster->CastCustomSpell(m_target, 52212, &m_modifier.m_amount, NULL, NULL, true, NULL, this);
                 return;
             }
             // Raise Dead
@@ -6551,7 +6588,7 @@ void Aura::PeriodicDummyTick()
                 // Increases your attack power by $s1 for every $s2 armor value you have.
                 // Calculate AP bonus (from 1 efect of this spell)
                 int32 apBonus = m_modifier.m_amount * m_target->GetArmor() / m_target->CalculateSpellDamage(spell, 1, spell->EffectBasePoints[1], m_target);
-                m_target->CastCustomSpell(m_target, 61217, &apBonus, &apBonus, 0, true, 0, this);
+                m_target->CastCustomSpell(m_target, 61217, &apBonus, &apBonus, NULL, true, NULL, this);
                 return;
             }
             // Reaping

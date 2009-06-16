@@ -339,8 +339,8 @@ void PlayerbotDruidAI::DoNonCombatActions()
         GetAI()->CastSpell (MARK_OF_THE_WILD, *(GetMaster()));
 
     // mana check
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = GetAI()->FindDrink();
 
@@ -353,8 +353,8 @@ void PlayerbotDruidAI::DoNonCombatActions()
     }
 
     // hp check
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     pItem = GetAI()->FindFood();
 

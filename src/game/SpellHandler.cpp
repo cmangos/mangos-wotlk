@@ -119,8 +119,29 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     }
 
     SpellCastTargets targets;
-    if(!targets.read(&recvPacket, pUser))
+    if (!targets.read(&recvPacket, pUser))
         return;
+
+    targets.Update(pUser);
+
+    if (!pItem->IsTargetValidForItemUse(targets.getUnitTarget()))
+    {
+        // free gray item after use fail
+        pUser->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
+
+        // send spell error
+        if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid))
+        {
+            // for implicit area/coord target spells 
+            if (IsPointEffectTarget(Targets(spellInfo->EffectImplicitTargetA[0])) ||
+                IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[0])))
+                Spell::SendCastResult(_player,spellInfo,cast_count,SPELL_FAILED_NO_VALID_TARGETS);
+            // for explicit target spells 
+            else
+                Spell::SendCastResult(_player,spellInfo,cast_count,SPELL_FAILED_BAD_TARGETS);
+        }
+        return;
+    }
 
     //Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
     if(!Script->ItemUse(pUser,pItem,targets))
@@ -497,15 +518,17 @@ void WorldSession::HandleSpellClick( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-    Creature *unit = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, guid);
-
-    if(!unit)
+    if (_player->isInCombat())                              // client prevent click and set different icon at combat state
         return;
 
-    SpellClickInfoMap const& map = objmgr.mSpellClickInfoMap;
-    for(SpellClickInfoMap::const_iterator itr = map.lower_bound(unit->GetEntry()); itr != map.upper_bound(unit->GetEntry()); ++itr)
+    Creature *unit = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, guid);
+    if (!unit || unit->isInCombat())                        // client prevent click and set different icon at combat state
+        return;
+
+    SpellClickInfoMapBounds clickPair = objmgr.GetSpellClickInfoMapBounds(unit->GetEntry());
+    for(SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
     {
-        if(itr->second.questId == 0 || _player->GetQuestStatus(itr->second.questId) == QUEST_STATUS_INCOMPLETE)
+        if (itr->second.IsFitToRequirements(_player))
         {
             Unit *caster = (itr->second.castFlags & 0x1) ? (Unit*)_player : (Unit*)unit;
             Unit *target = (itr->second.castFlags & 0x2) ? (Unit*)_player : (Unit*)unit;

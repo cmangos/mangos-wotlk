@@ -27,6 +27,7 @@
 struct SpellEntry;
 class Bag;
 class QueryResult;
+class Unit;
 
 struct ItemSetEffect
 {
@@ -166,7 +167,7 @@ enum EnchantmentSlot
     MAX_ENCHANTMENT_SLOT            = 12
 };
 
-#define MAX_VISIBLE_ITEM_OFFSET       18                    // 18 fields per visible item (creator(2) + enchantments(13) + properties(1) + seed(1) + pad(1))
+#define MAX_VISIBLE_ITEM_OFFSET       2                     // 2 fields per visible item (entry+enchantment)
 
 #define MAX_GEM_SOCKETS               MAX_ITEM_PROTO_SOCKETS// (BONUS_ENCHANTMENT_SLOT-SOCK_ENCHANTMENT_SLOT) and item proto size, equal value expected
 
@@ -193,6 +194,24 @@ enum ItemUpdateState
     ITEM_CHANGED                                 = 1,
     ITEM_NEW                                     = 2,
     ITEM_REMOVED                                 = 3
+};
+
+enum ItemRequiredTargetType
+{
+    ITEM_TARGET_TYPE_CREATURE   = 1,
+    ITEM_TARGET_TYPE_DEAD       = 2
+};
+
+#define MAX_ITEM_REQ_TARGET_TYPE 2
+
+struct ItemRequiredTarget
+{
+    ItemRequiredTarget(ItemRequiredTargetType uiType, uint32 uiTargetEntry) : m_uiType(uiType), m_uiTargetEntry(uiTargetEntry) {}
+    ItemRequiredTargetType m_uiType;
+    uint32 m_uiTargetEntry;
+
+    // helpers
+    bool IsFitToRequirements(Unit* pUnitTarget) const;
 };
 
 bool ItemCanGoIntoBag(ItemPrototype const *proto, ItemPrototype const *pBagProto);
@@ -230,6 +249,7 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsInTrade() const { return mb_in_trade; }
 
         bool IsFitToSpellRequirements(SpellEntry const* spellInfo) const;
+        bool IsTargetValidForItemUse(Unit* pUnitTarget);
         bool IsLimitedToAnotherMapOrZone( uint32 cur_mapId, uint32 cur_zoneId) const;
         bool GemsFitSockets() const;
 
@@ -292,6 +312,7 @@ class MANGOS_DLL_SPEC Item : public Object
         bool hasInvolvedQuest(uint32 /*quest_id*/) const { return false; }
         bool IsPotion() const { return GetProto()->IsPotion(); }
         bool IsConjuredConsumable() const { return GetProto()->IsConjuredConsumable(); }
+
     private:
         uint8 m_slot;
         Bag *m_container;

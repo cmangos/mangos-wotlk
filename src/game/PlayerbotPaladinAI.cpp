@@ -255,8 +255,8 @@ void PlayerbotPaladinAI::DoNonCombatActions()
         GetAI()->CastSpell (GREATER_BLESSING_OF_MIGHT, *(GetMaster()));
 
     // mana check
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = GetAI()->FindDrink();
 
@@ -269,8 +269,8 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     }
 
     // hp check original
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     pItem = GetAI()->FindFood();
 
@@ -284,8 +284,8 @@ void PlayerbotPaladinAI::DoNonCombatActions()
 
     //This is a paladin, self healing maybe? ;D Out of combat he can take care of him self, no ned to be healed.
     //Causes server to crash in some cases /disabled for now/
-/*    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        m_bot->SetStandState(PLAYER_STATE_NONE);
+/*    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
+        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     if (HOLY_LIGHT > 0 && GetAI()->GetHealthPercent() < 98 && GetAI()->GetManaPercent() >= 41)
         GetAI()->CastSpell(HOLY_LIGHT);
