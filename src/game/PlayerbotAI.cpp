@@ -1958,7 +1958,7 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
             // relocate ghost
             WorldLocation loc;
             corpse->GetPosition( loc );
-            m_bot->TeleportTo( loc.mapid, loc.x, loc.y, loc.z, m_bot->GetOrientation() );
+            m_bot->TeleportTo( loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, m_bot->GetOrientation() );
             // set state to released
             SetState( BOTSTATE_DEADRELEASED );
         }
