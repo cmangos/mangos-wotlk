@@ -563,11 +563,19 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
                                     }
                                 }
                                 // just choose first reward if we cant use any of the rewards
-                                uint32 rewardItemId = (pRewardItem == NULL) ? pQuest->RewChoiceItemId[0] : pRewardItem->ItemId;
-
-                                if (bot->CanRewardQuest(pQuest, rewardItemId, false))
+                                uint32 rewardItemId;
+                                if (pRewardItem == NULL)
                                 {
-                                    bot->RewardQuest(pQuest, rewardItemId, pNpc, false);
+                                        rewardItemId = pQuest->RewChoiceItemId[0];
+                                        pRewardItem = objmgr.GetItemPrototype(rewardItemId);
+                                }
+                                else
+                                {
+                                        rewardItemId = pRewardItem->ItemId;
+                                }
+ 
+                                 if (bot->CanRewardQuest(pQuest, rewardItemId, false))
+                                 {
 
                                     std::string itemName = pRewardItem->Name1;
                                     bot->GetPlayerbotAI()->ItemLocalization(itemName, rewardItemId);
