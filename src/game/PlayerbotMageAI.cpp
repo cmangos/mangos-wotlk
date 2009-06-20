@@ -326,7 +326,7 @@ void PlayerbotMageAI::DoNonCombatActions()
 
     Item* pItem = GetAI()->FindDrink();
 
-    if (pItem == NULL && GetAI()->GetBaseManaPercent() >= 48)
+    if (pItem == NULL && CONJURE_WATER && GetAI()->GetBaseManaPercent() >= 48)
     {
         GetAI()->TellMaster("I'm conjuring some water.");
         GetAI()->CastSpell(CONJURE_WATER, *m_bot);
@@ -342,7 +342,7 @@ void PlayerbotMageAI::DoNonCombatActions()
 
     pItem = GetAI()->FindFood();
 
-    if (pItem == NULL && GetAI()->GetBaseManaPercent() >= 48)
+    if (pItem == NULL && CONJURE_FOOD && GetAI()->GetBaseManaPercent() >= 48)
     {
         GetAI()->TellMaster("I'm conjuring some food.");
         GetAI()->CastSpell(CONJURE_FOOD, *m_bot);

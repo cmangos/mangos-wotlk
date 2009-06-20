@@ -551,46 +551,29 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
 								// Auto choose reward
 								if ( pQuest->GetRewChoiceItemsCount() > 0 )
 								{
-									ItemPrototype const *pRewardItem = NULL;
-
-									for (uint8 i=0; i < pQuest->GetRewItemsCount(); ++i)
+									ItemPrototype const *pRewardItem = objmgr.GetItemPrototype(pQuest->RewChoiceItemId[0]);
+									uint32 rewardIdx = 0;
+									for (uint8 i=1; i < pQuest->GetRewItemsCount(); ++i)
 									{
 										ItemPrototype const * const pRewardItemCompare = objmgr.GetItemPrototype(pQuest->RewChoiceItemId[i]);
-										if (bot->CanUseItem(pRewardItemCompare))
+										if (bot->CanUseItem(pRewardItemCompare) && pRewardItem->Armor > pRewardItemCompare->Armor)
 										{
-											if (pRewardItem == NULL) 
-												pRewardItem = pRewardItemCompare;
-											else
-											{
-												// choose highest armor if item has armor rating
-												if (pRewardItem->Armor > pRewardItemCompare->Armor)
-													pRewardItem = pRewardItemCompare;
-											}
+											rewardIdx = i;
+											pRewardItem = pRewardItemCompare;
 										}
 									}
-	                                // just choose first reward if we cant use any of the rewards
-	                                uint32 rewardItemId;
-	                                if (pRewardItem == NULL)
-	                                {
-	                                        rewardItemId = pQuest->RewChoiceItemId[0];
-	                                        pRewardItem = objmgr.GetItemPrototype(rewardItemId);
-	                                }
-	                                else
-	                                {
-	                                        rewardItemId = pRewardItem->ItemId;
-	                                }
-	                                
-									if (bot->CanRewardQuest(pQuest, rewardItemId, false))
+      
+									if (bot->CanRewardQuest(pQuest, rewardIdx, false))
 									{
-										bot->RewardQuest(pQuest, rewardItemId, pNpc, false);
+										bot->RewardQuest(pQuest, rewardIdx, pNpc, true);
 
 										std::string itemName = pRewardItem->Name1;
-										bot->GetPlayerbotAI()->ItemLocalization(itemName, rewardItemId);
+										bot->GetPlayerbotAI()->ItemLocalization(itemName, pRewardItem->ItemId);
 
 										out << "Quest complete: " << "|cfffff000" << "<?>" << "|r"
 											<< " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r"
-											<< "reward: "
-											<< " |cffffffff|Hitem:" << rewardItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
+											<< " reward: "
+											<< " |cffffffff|Hitem:" << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
 
 										// TODO: auto equip reward?
 									}
@@ -635,6 +618,7 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
 											<< "|cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
 									}
 								}
+								break;
 							}
 
 							default: {
@@ -642,7 +626,8 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
 							}
 						}
 
-       					bot->GetPlayerbotAI()->TellMaster(out.str());
+        				if (! out.str().empty())
+        					bot->GetPlayerbotAI()->TellMaster(out.str());
         			}
         		}
         	}
