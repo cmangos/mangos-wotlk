@@ -4,42 +4,47 @@
 class PlayerbotAI;
 PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, PlayerbotAI* const ai): PlayerbotClassAI(master, bot, ai)
 {
-    SHADOW_BOLT           = ai->getSpellId("shadow bolt");
+    SHADOW_BOLT           = ai->getSpellId("shadow bolt"); // DESTRUCTION
     IMMOLATE              = ai->getSpellId("immolate");
     INCINERATE            = ai->getSpellId("incinerate");
     SEARING_PAIN          = ai->getSpellId("searing pain");
     CONFLAGRATE           = ai->getSpellId("conflagrate");
     SOUL_FIRE             = ai->getSpellId("soul fire");
     SHADOWFURY            = ai->getSpellId("shadowfury");
-    CORRUPTION            = ai->getSpellId("corruption"); //affliction
-    CURSE_OF_WEAKNESS     = ai->getSpellId("curse of weakness"); //CURSE
+    CURSE_OF_WEAKNESS     = ai->getSpellId("curse of weakness"); // CURSE
     CHAOS_BOLT            = ai->getSpellId("chaos bolt");
-    CURSE_OF_AGONY        = ai->getSpellId("curse of agony"); //CURSE
-    DEMON_SKIN            = ai->getSpellId("demon skin"); //DEMONOLOGY
-    DEMON_ARMOR           = ai->getSpellId("demon armor");//DEMONOLOGY
-    FEL_ARMOR             = ai->getSpellId("fel armor");//DEMONOLOGY
-    SHADOW_WARD           = ai->getSpellId("shadow ward");//DEMONOLOGY
-    SOULSHATTER           = ai->getSpellId("soulshatter"); //DEMONOLOGY
-    DRAIN_SOUL            = ai->getSpellId("drain soul"); //affliction
-    CURSE_OF_RECKLESSNESS = ai->getSpellId("curse of recklessness"); //CURSE
-    DRAIN_LIFE            = ai->getSpellId("drain life"); //affliction
-    CURSE_OF_TONGUES      = ai->getSpellId("curse of tongues"); //CURSE
-    SIPHON_LIFE           = ai->getSpellId("siphon life"); //affliction
-    UNSTABLE_AFFLICTION   = ai->getSpellId("unstable affliction"); //affliction
-    HAUNT                 = ai->getSpellId("haunt"); //affliction
-    ATROCITY              = ai->getSpellId("atrocity"); //affliction
-    SEED_OF_CORRUPTION    = ai->getSpellId("seed of corruption"); //affliction
-    SUMMON_IMP            = ai->getSpellId("summon imp"); //DEMONOLOGY
-    SUMMON_VOIDWALKER     = ai->getSpellId("summon voidwalker"); //DEMONOLOGY
-    SUMMON_SUCCUBUS       = ai->getSpellId("summon succubus"); //DEMONOLOGY
-    SUMMON_FELHUNTER      = ai->getSpellId("summon fellhunter"); //DEMONOLOGY
-    SUMMON_FELGUARD       = ai->getSpellId("summon fellguard"); //DEMONOLOGY
+    CURSE_OF_AGONY        = ai->getSpellId("curse of agony");
+    CURSE_OF_RECKLESSNESS = ai->getSpellId("curse of recklessness");
+    CURSE_OF_TONGUES      = ai->getSpellId("curse of tongues");
+	CORRUPTION            = ai->getSpellId("corruption"); // AFFLICTION
+	DRAIN_SOUL            = ai->getSpellId("drain soul");
+	DRAIN_LIFE            = ai->getSpellId("drain life");
+    SIPHON_LIFE           = ai->getSpellId("siphon life");
+    UNSTABLE_AFFLICTION   = ai->getSpellId("unstable affliction");
+    HAUNT                 = ai->getSpellId("haunt");
+    ATROCITY              = ai->getSpellId("atrocity");
+    SEED_OF_CORRUPTION    = ai->getSpellId("seed of corruption");
+	DEMON_SKIN            = ai->getSpellId("demon skin"); // DEMONOLOGY
+    DEMON_ARMOR           = ai->getSpellId("demon armor");
+    FEL_ARMOR             = ai->getSpellId("fel armor");
+    SHADOW_WARD           = ai->getSpellId("shadow ward");
+    SOULSHATTER           = ai->getSpellId("soulshatter");
+	SOUL_LINK             = ai->getSpellId("soul link");
+	HEALTH_FUNNEL         = ai->getSpellId("health funnel");
+    SUMMON_IMP            = ai->getSpellId("summon imp"); // summon
+    SUMMON_VOIDWALKER     = ai->getSpellId("summon voidwalker");
+    SUMMON_SUCCUBUS       = ai->getSpellId("summon succubus");
+    SUMMON_FELHUNTER      = ai->getSpellId("summon fellhunter"); 
+    SUMMON_FELGUARD       = ai->getSpellId("summon fellguard");
+
+	m_demonSummonFailed = false;
 }
 
 PlayerbotWarlockAI::~PlayerbotWarlockAI() {}
 
 void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 {
+	Player *m_bot = GetPlayerBot();
     PlayerbotAI* ai = GetAI();
     if (!ai)
         return;
@@ -56,9 +61,17 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 
     ai->Follow(*GetMaster()); // dont want to melee mob
 
-    // Damage Spells
+	// check for soul link with demon
+    Pet *pet = m_bot->GetPet();
+    if(( pet )
+		&& ( SOUL_LINK>0 && !m_bot->HasAura(SOUL_LINK,0) && ai->GetManaPercent() >= 16 && ai->CastSpell(SOUL_LINK,*m_bot) ))
+		{
+			ai->TellMaster( "casting soul link." );
+			return;
+		}
+
+	// Damage Spells
     ai->SetInFront( pTarget );
-    Player *m_bot = GetPlayerBot();
 
     switch (SpellSequence)
     {
@@ -247,8 +260,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
 
     SpellSequence = SPELL_CURSES;
 
-    // buff myself  DEMON_SKIN, DEMON_ARMOR, SHADOW_WARD, FEL_ARMOR
-
+    // buff myself  DEMON_SKIN, DEMON_ARMOR, FEL_ARMOR
     if (FEL_ARMOR > 0)
         (!m_bot->HasAura(FEL_ARMOR, 0) && GetAI()->CastSpell(FEL_ARMOR, *m_bot));
     else if (DEMON_ARMOR > 0)
@@ -284,10 +296,29 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         return;
     }
 
-
+    // check for demon
+    if( SUMMON_IMP>0 && !m_demonSummonFailed )
+    {
+        Pet *pet = m_bot->GetPet();
+        if( !pet )
+        {
+            // summon demon (only imp for now)
+            if( SUMMON_IMP>0 && GetAI()->GetManaPercent() >= 64 && GetAI()->CastSpell(SUMMON_IMP,*m_bot) )
+                GetAI()->TellMaster( "summoning demon." );
+            else
+            {
+                m_demonSummonFailed = true;
+                GetAI()->TellMaster( "summon demon failed!" );
+            }
+        // check for soul link with demon
+		if ( SOUL_LINK>0 && !m_bot->HasAura(SOUL_LINK, 0) && GetAI()->GetManaPercent() >= 16 && GetAI()->CastSpell(SOUL_LINK,*m_bot) )
+			GetAI()->TellMaster( "casting soul link." );
+        }
+        else if( ((float)pet->GetHealth()/(float)pet->GetMaxHealth()) < 0.5f )
+        {
+            // heal demon when health lower 50%
+            if( HEALTH_FUNNEL>0 && !pet->HasAura(HEALTH_FUNNEL,0) && GetAI()->CastSpell(HEALTH_FUNNEL,*m_bot) )
+                GetAI()->TellMaster( "healing demon." );
+        }
+    }
 } // end DoNonCombatActions
-
-//void PlayerbotWarlockAI::BuffPlayer(Player* target)
-//{
-//    GetAI()->CastSpell(ARCANE_INTELLECT, *target);
-//}
