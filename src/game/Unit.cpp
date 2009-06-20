@@ -3229,12 +3229,12 @@ bool Unit::isInAccessablePlaceFor(Creature const* c) const
 
 bool Unit::IsInWater() const
 {
-    return MapManager::Instance().GetBaseMap(GetMapId())->IsInWater(GetPositionX(),GetPositionY(), GetPositionZ());
+    return GetBaseMap()->IsInWater(GetPositionX(),GetPositionY(), GetPositionZ());
 }
 
 bool Unit::IsUnderWater() const
 {
-    return MapManager::Instance().GetBaseMap(GetMapId())->IsUnderWater(GetPositionX(),GetPositionY(),GetPositionZ());
+    return GetBaseMap()->IsUnderWater(GetPositionX(),GetPositionY(),GetPositionZ());
 }
 
 void Unit::DeMorph()
@@ -4891,7 +4891,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 break;
             }
 
-            //Arcane Potency
+            // Arcane Potency
             if (dummySpell->SpellIconID == 2120)
             {
                 if(!procSpell)
@@ -5850,6 +5850,20 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     triggered_spell_id = 58879;
                     break;
                 }
+            }
+            // Storm, Earth and Fire
+            if (dummySpell->SpellIconID == 3063)
+            {
+                // Earthbind Totem summon only
+                if(procSpell->Id != 2484)
+                    return false;
+
+                float chance = triggerAmount;
+                if (!roll_chance_f(chance))
+                    return false;
+
+                triggered_spell_id = 64695;
+                break;
             }
             // Ancestral Awakening
             if (dummySpell->SpellIconID == 3065)
@@ -7369,13 +7383,10 @@ void Unit::CombatStopWithPets(bool includingCast)
         pet->CombatStop(includingCast);
     if(Unit* charm = GetCharm())
         charm->CombatStop(includingCast);
-    if(GetTypeId()==TYPEID_PLAYER)
-    {
-        GuardianPetList const& guardians = ((Player*)this)->GetGuardians();
-        for(GuardianPetList::const_iterator itr = guardians.begin(); itr != guardians.end(); ++itr)
-            if(Unit* guardian = Unit::GetUnit(*this,*itr))
-                guardian->CombatStop(includingCast);
-    }
+
+    for(GuardianPetList::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
+        if(Unit* guardian = Unit::GetUnit(*this,*itr))
+            guardian->CombatStop(includingCast);
 }
 
 bool Unit::isAttackingPlayer() const
@@ -7547,6 +7558,44 @@ void Unit::SetCharm(Unit* pet)
 
     if(GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->m_mover = pet ? pet : this;
+}
+
+
+void Unit::AddGuardian( Pet* pet )
+{
+    m_guardianPets.insert(pet->GetGUID());
+}
+
+
+void Unit::RemoveGuardian( Pet* pet )
+{
+    m_guardianPets.erase(pet->GetGUID());
+}
+
+void Unit::RemoveGuardians()
+{
+    while(!m_guardianPets.empty())
+    {
+        uint64 guid = *m_guardianPets.begin();
+        if(Pet* pet = ObjectAccessor::GetPet(guid))
+            pet->Remove(PET_SAVE_AS_DELETED);
+
+        m_guardianPets.erase(guid);
+    }
+}
+
+Pet* Unit::FindGuardianWithEntry(uint32 entry)
+{
+    // pet guid middle part is entry (and creature also)
+    // and in guardian list must be guardians with same entry _always_
+    for(GuardianPetList::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
+    {
+        if(Pet* pet = ObjectAccessor::GetPet(*itr))
+            if (pet->GetEntry() == entry)
+                return pet;
+    }
+
+    return NULL;
 }
 
 void Unit::UnsummonAllTotems()
@@ -9447,6 +9496,7 @@ void Unit::setDeathState(DeathState s)
     if (s == JUST_DIED)
     {
         RemoveAllAurasOnDeath();
+        RemoveGuardians();
         UnsummonAllTotems();
 
         ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
@@ -10308,6 +10358,7 @@ void Unit::RemoveFromWorld()
     if(IsInWorld())
     {
         RemoveNotOwnSingleTargetAuras();
+        RemoveGuardians();
     }
 
     Object::RemoveFromWorld();
@@ -10867,6 +10918,10 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
             case SPELL_AURA_MOD_DAMAGE_FROM_CASTER:
                 // Compare casters
                 if (triggeredByAura->GetCasterGUID() != pTarget->GetGUID())
+                    continue;
+                break;
+            case SPELL_AURA_MOD_SPELL_CRIT_CHANCE:
+                if (!procSpell)
                     continue;
                 break;
             default:

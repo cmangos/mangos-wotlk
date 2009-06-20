@@ -496,12 +496,6 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
         case CMSG_GOSSIP_HELLO:
         case CMSG_QUESTGIVER_HELLO:
         {
-        	
-        	
-        	
-        	
-        	
-
         	WorldPacket p(packet);
         	p.rpos(0); // reset reader
         	uint64 npcGUID;
@@ -574,9 +568,18 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
 											}
 										}
 									}
-									// just choose first reward if we cant use any of the rewards
-									uint32 rewardItemId = (pRewardItem == NULL) ? pQuest->RewChoiceItemId[0] : pRewardItem->ItemId;
-
+	                                // just choose first reward if we cant use any of the rewards
+	                                uint32 rewardItemId;
+	                                if (pRewardItem == NULL)
+	                                {
+	                                        rewardItemId = pQuest->RewChoiceItemId[0];
+	                                        pRewardItem = objmgr.GetItemPrototype(rewardItemId);
+	                                }
+	                                else
+	                                {
+	                                        rewardItemId = pRewardItem->ItemId;
+	                                }
+	                                
 									if (bot->CanRewardQuest(pQuest, rewardItemId, false))
 									{
 										bot->RewardQuest(pQuest, rewardItemId, pNpc, false);
@@ -626,9 +629,11 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
 										out << " reward: " << itemlist.str();
 									}
 									else
+									{
 										out << "|cffff0000Unable to turn quest in:|r " 
 											<< "|cfffff000" << "<?>" << "|r "
 											<< "|cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
+									}
 								}
 							}
 
@@ -643,7 +648,6 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
         	}
         	        
         	return;
-
         }
 
         // if master accepts a quest, bots should also try to accept quest
@@ -1970,7 +1974,7 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
             // relocate ghost
             WorldLocation loc;
             corpse->GetPosition( loc );
-            m_bot->TeleportTo( loc.mapid, loc.x, loc.y, loc.z, m_bot->GetOrientation() );
+            m_bot->TeleportTo( loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, m_bot->GetOrientation() );
             // set state to released
             SetState( BOTSTATE_DEADRELEASED );
         }
