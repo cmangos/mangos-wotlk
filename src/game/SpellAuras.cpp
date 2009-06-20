@@ -2371,6 +2371,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     {
                         int32 amount = m_modifier.m_amount / m_stackAmount;
                         m_target->CastCustomSpell(m_target, 33778, &amount, NULL, NULL, true, NULL, this, GetCasterGUID());
+
+                        if (caster)
+                        {
+                            int32 returnmana = (GetSpellProto()->ManaCostPercentage * caster->GetCreateMana() / 100) * m_stackAmount / 2;
+                            caster->CastCustomSpell(caster, 64372, &returnmana, NULL, NULL, true, NULL, this, GetCasterGUID());
+                        }
                     }
                 }
                 return;
@@ -6217,9 +6223,12 @@ void Aura::PeriodicDummyTick()
             case 22734:
             case 27089:
             case 34291:
+            case 43182:
+            case 43183:
             case 43706:
             case 46755:
             case 49472: // Drink Coffee
+            case 57073:
             case 61830:
             {
                 if (m_target->GetTypeId() != TYPEID_PLAYER)
