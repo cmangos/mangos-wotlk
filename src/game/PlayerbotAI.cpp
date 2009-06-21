@@ -74,7 +74,7 @@ public:
     bool revive(const Player& botPlayer) { return HandleReviveCommand(botPlayer.GetName()); }
     bool teleport(const Player& botPlayer) { return HandleNamegoCommand(botPlayer.GetName()); }
     void sysmessage(const char *str) { SendSysMessage(str); }
-	bool dropQuest(const char *str) { return HandleQuestRemove(str); }
+    bool dropQuest(const char *str) { return HandleQuestRemove(str); }
 };
 
 PlayerbotAI::PlayerbotAI(Player* const master, Player* const bot) :

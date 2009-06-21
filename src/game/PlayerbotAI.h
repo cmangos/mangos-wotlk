@@ -58,7 +58,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
             AIT_VICTIMSELF      = 0x04,
             AIT_VICTIMNOTSELF   = 0x08
         };
-        typedef struct AttackerInfo
+        struct AttackerInfo
         {
             Unit*    attacker;        // reference to the attacker
             Unit*    victim;          // combatant's current victim
