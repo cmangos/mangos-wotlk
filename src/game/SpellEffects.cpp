@@ -680,15 +680,24 @@ void Spell::EffectDummy(uint32 i)
 
                     switch (m_spellInfo->Id)
                     {
-                        case 12850: damage *= 0.2f; break;
-                        case 12162: damage *= 0.4f; break;
-                        case 12868: damage *= 0.6f; break;
+                        case 12162: damage *= 0.16f; break; // Rank 1
+                        case 12850: damage *= 0.32f; break; // Rank 2
+                        case 12868: damage *= 0.48f; break; // Rank 3
                         default:
                             sLog.outError("Spell::EffectDummy: Spell %u not handled in DW",m_spellInfo->Id);
                             return;
                     };
 
-                    int32 deepWoundsDotBasePoints0 = int32(damage / 4);
+                    // get remaining damage of old Deep Wound aura
+                    Aura* deepWound = unitTarget->GetAura(12721, 0);
+                    if(deepWound)
+                    {
+                        int32 remainingTicks = deepWound->GetAuraDuration() / deepWound->GetModifier()->periodictime;
+                        damage += remainingTicks * deepWound->GetModifier()->m_amount;
+                    }
+
+                    // 1 tick/sec * 6 sec = 6 ticks
+                    int32 deepWoundsDotBasePoints0 = int32(damage / 6);
                     m_caster->CastCustomSpell(unitTarget, 12721, &deepWoundsDotBasePoints0, NULL, NULL, true, NULL);
                     return;
                 }
@@ -1769,7 +1778,7 @@ void Spell::EffectDummy(uint32 i)
     }
 
     // pet auras
-    if(PetAura const* petSpell = spellmgr.GetPetAura(m_spellInfo->Id))
+    if(PetAura const* petSpell = spellmgr.GetPetAura(m_spellInfo->Id, i))
     {
         m_caster->AddPetAura(petSpell);
         return;
@@ -3171,6 +3180,7 @@ void Spell::EffectSummonType(uint32 i)
             EffectSummonDemon(i);
             break;
         case SUMMON_TYPE_SUMMON:
+        case SUMMON_TYPE_ELEMENTAL:
             EffectSummon(i);
             break;
         case SUMMON_TYPE_CRITTER:

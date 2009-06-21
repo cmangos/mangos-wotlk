@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_8050_02_mangos_spell_bonus_data` bit(1) default NULL
+  `required_8065_01_mangos_spell_proc_event` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -461,12 +461,12 @@ INSERT INTO `command` VALUES
 ('reload config',3,'Syntax: .reload config\r\n\r\nReload config settings (by default stored in mangosd.conf). Not all settings can be change at reload: some new setting values will be ignored until restart, some values will applied with delay or only to new objects/maps, some values will explicitly rejected to change at reload.'),
 ('repairitems',2,'Syntax: .repairitems\r\n\r\nRepair all selected player''s items.'),
 ('reset achievements',3,'Syntax: .reset achievements [$playername]\r\n\r\nReset achievements data for selected or named (online or offline) character. Achievements for persistance progress data like completed quests/etc re-filled at reset. Achievements for events like kills/casts/etc will lost.'),
-('reset all',3,'Syntax: .reset all spells\r\n\r\nSyntax: .reset all talents\r\n\r\nRequest reset spells or talents at next login each existed character.'),
+('reset all',3,'Syntax: .reset all spells\r\n\r\nSyntax: .reset all talents\r\n\r\nRequest reset spells or talents (including talents for all character\'s pets if any) at next login each existed character.'),
 ('reset honor',3,'Syntax: .reset honor [Playername]\r\n  Reset all honor data for targeted character.'),
 ('reset level',3,'Syntax: .reset level [Playername]\r\n  Reset level to 1 including reset stats and talents.  Equipped items with greater level requirement can be lost.'),
 ('reset spells',3,'Syntax: .reset spells [Playername]\r\n  Removes all non-original spells from spellbook.\r\n. Playername can be name of offline character.'),
 ('reset stats',3,'Syntax: .reset stats [Playername]\r\n  Resets(recalculate) all stats of the targeted player to their original VALUESat current level.'),
-('reset talents',3,'Syntax: .reset talents [Playername]\r\n  Removes all talents of the targeted player. Playername can be name of offline character.'),
+('reset talents',3,'Syntax: .reset talents [Playername]\r\n  Removes all talents of the targeted player or pet or named player. Playername can be name of offline character. With player talents also will be reset talents for all character\'s pets if any.'),
 ('respawn',3,'Syntax: .respawn\r\n\r\nRespawn selected creature or respawn all nearest creatures (if none selected) and GO without waiting respawn time expiration.'),
 ('revive',3,'Syntax: .revive\r\n\r\nRevive the selected player. If no player is selected, it will revive you.'),
 ('save',0,'Syntax: .save\r\n\r\nSaves your character.'),
@@ -16152,6 +16152,10 @@ INSERT INTO spell_chain VALUES
 (27681,0,27681,1,14752),
 (32999,27681,27681,2,0),
 (48074,32999,27681,3,0),
+/*Rapture*/
+(47535,0,47535,1,0),
+(47536,47535,47535,2,0),
+(47537,47536,47535,3,0),
 /*ShackleUndead*/
 (9484,0,9484,1,0),
 (9485,9484,9484,2,0),
@@ -16707,9 +16711,10 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `spell_pet_auras`;
 CREATE TABLE `spell_pet_auras` (
   `spell` mediumint(8) unsigned NOT NULL COMMENT 'dummy spell id',
+  `effectId` tinyint(3) unsigned NOT NULL default '0',
   `pet` mediumint(8) unsigned NOT NULL default '0' COMMENT 'pet id; 0 = all',
   `aura` mediumint(8) unsigned NOT NULL COMMENT 'pet aura id',
-  PRIMARY KEY  (`spell`,`pet`)
+  PRIMARY KEY  (`spell`,`effectId`,`pet`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 --
@@ -16719,40 +16724,50 @@ CREATE TABLE `spell_pet_auras` (
 LOCK TABLES `spell_pet_auras` WRITE;
 /*!40000 ALTER TABLE `spell_pet_auras` DISABLE KEYS */;
 INSERT INTO `spell_pet_auras` VALUES
-(19028, 0, 25228),
-(19578, 0, 19579),
-(20895, 0, 24529),
-(28757, 0, 28758),
-(35029, 0, 35060),
-(35030, 0, 35061),
-(35691, 0, 35696),
-(35692, 0, 35696),
-(35693, 0, 35696),
-(23785, 416, 23759),
-(23822, 416, 23826),
-(23823, 416, 23827),
-(23824, 416, 23828),
-(23825, 416, 23829),
-(23785, 417, 23762),
-(23822, 417, 23837),
-(23823, 417, 23838),
-(23824, 417, 23839),
-(23825, 417, 23840),
-(23785, 1860, 23760),
-(23822, 1860, 23841),
-(23823, 1860, 23842),
-(23824, 1860, 23843),
-(23825, 1860, 23844),
-(23785, 1863, 23761),
-(23822, 1863, 23833),
-(23823, 1863, 23834),
-(23824, 1863, 23835),
-(23825, 1863, 23836),
-(23785, 17252, 35702),
-(23822, 17252, 35703),
-(23823, 17252, 35704),
-(23824, 17252, 35705),
-(23825, 17252, 35706);
+(19028, 0, 0, 25228),
+(19578, 0, 0, 19579),
+(20895, 0, 0, 24529),
+(28757, 0, 0, 28758),
+(35029, 0, 0, 35060),
+(35030, 0, 0, 35061),
+(35691, 0, 0, 35696),
+(35692, 0, 0, 35696),
+(35693, 0, 0, 35696),
+(56314, 0, 0, 57447),
+(56314, 1, 0, 57485),
+(56315, 0, 0, 57452),
+(56315, 1, 0, 57484),
+(56316, 0, 0, 57453),
+(56316, 1, 0, 57483),
+(56317, 0, 0, 57457),
+(56317, 1, 0, 57482),
+(56318, 0, 0, 57458),
+(56318, 1, 0, 57475),
+(23785, 0, 416, 23759),
+(23822, 0, 416, 23826),
+(23823, 0, 416, 23827),
+(23824, 0, 416, 23828),
+(23825, 0, 416, 23829),
+(23785, 0, 417, 23762),
+(23822, 0, 417, 23837),
+(23823, 0, 417, 23838),
+(23824, 0, 417, 23839),
+(23825, 0, 417, 23840),
+(23785, 0, 1860, 23760),
+(23822, 0, 1860, 23841),
+(23823, 0, 1860, 23842),
+(23824, 0, 1860, 23843),
+(23825, 0, 1860, 23844),
+(23785, 0, 1863, 23761),
+(23822, 0, 1863, 23833),
+(23823, 0, 1863, 23834),
+(23824, 0, 1863, 23835),
+(23825, 0, 1863, 23836),
+(23785, 0, 17252, 35702),
+(23822, 0, 17252, 35703),
+(23823, 0, 17252, 35704),
+(23824, 0, 17252, 35705),
+(23825, 0, 17252, 35706);
 
 /*!40000 ALTER TABLE `spell_pet_auras` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -17350,9 +17365,6 @@ INSERT INTO `spell_proc_event` VALUES
 (47515, 0x00000000,  0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002, 0.000000, 0.000000,  0),
 (47516, 0x00000000,  6, 0x00001800, 0x00010000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
 (47517, 0x00000000,  6, 0x00001800, 0x00010000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
-(47535, 0x00000000,  6, 0x00001800, 0x00800000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
-(47536, 0x00000000,  6, 0x00001800, 0x00800000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
-(47537, 0x00000000,  6, 0x00001800, 0x00800000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
 (47580, 0x00000000,  6, 0x00000000, 0x00000000, 0x00000040, 0x00000000, 0x00010000, 0.000000, 0.000000,  0),
 (47581, 0x00000000,  6, 0x00000000, 0x00000000, 0x00000040, 0x00000000, 0x00010000, 0.000000, 0.000000,  0),
 (47582, 0x00000000,  6, 0x00000000, 0x00000000, 0x00000040, 0x00000000, 0x00010000, 0.000000, 0.000000,  0),
@@ -17551,7 +17563,6 @@ INSERT INTO `spell_proc_event` VALUES
 (58364, 0x00000000,  4, 0x00000400, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
 (58372, 0x00000000,  4, 0x00000002, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
 (58386, 0x00000000,  0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000020, 0.000000, 0.000000,  0),
-(58435, 0x00000000,  5, 0x00000002, 0x00000100, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
 (58616, 0x00000000, 15, 0x00040000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
 (58620, 0x00000000, 15, 0x00000000, 0x00004000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
 (58626, 0x00000000, 15, 0x02000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
