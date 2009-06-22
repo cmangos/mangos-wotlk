@@ -62,49 +62,49 @@ void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
             if(PLAGUE_STRIKE > 0 && LastSpellUnholyDK < 1)
             {
                 ai->CastSpell(PLAGUE_STRIKE, *pTarget);
-                SpellSequence = SPELL_DK_FROST;
+                SpellSequence = SPELL_DK_UNHOLY;
                 LastSpellUnholyDK = LastSpellUnholyDK +1;
                 break;
             }
             else if (DEATH_GRIP > 0 && LastSpellUnholyDK < 2)
             {
                 ai->CastSpell(DEATH_GRIP);
-                SpellSequence = SPELL_DK_FROST;
+                SpellSequence = SPELL_DK_UNHOLY;
                 LastSpellUnholyDK = LastSpellUnholyDK +1;
                 break;
             }
             else if (DEATH_COIL > 0 && LastSpellUnholyDK <3 && ai->GetRunicPower() >= 40)
             {
                 ai->CastSpell(DEATH_COIL);
-                SpellSequence = SPELL_DK_FROST;
+                SpellSequence = SPELL_DK_UNHOLY;
                 LastSpellUnholyDK = LastSpellUnholyDK +1;
                 break;
             }
             else if (DEATH_STRIKE > 0 && LastSpellUnholyDK < 4)
             {
                 ai->CastSpell(DEATH_STRIKE);
-                SpellSequence = SPELL_DK_FROST;
+                SpellSequence = SPELL_DK_UNHOLY;
                 LastSpellUnholyDK = LastSpellUnholyDK +1;
                 break;
             }
             else if (UNHOLY_BLIGHT > 0 && LastSpellUnholyDK <5 && ai->GetRunicPower() >= 40)
             {
                 ai->CastSpell(UNHOLY_BLIGHT);
-                SpellSequence = SPELL_DK_FROST;
+                SpellSequence = SPELL_DK_UNHOLY;
                 LastSpellUnholyDK = LastSpellUnholyDK +1;
                 break;
             }
             else if (SCOURGE_STRIKE > 0 && LastSpellUnholyDK < 6)
             {
                 ai->CastSpell(SCOURGE_STRIKE);
-                SpellSequence = SPELL_DK_FROST;
+                SpellSequence = SPELL_DK_UNHOLY;
                 LastSpellUnholyDK = LastSpellUnholyDK +1;
                 break;
             }
             else if (LastSpellUnholyDK > 7)
             {
                 LastSpellUnholyDK = 0;
-                SpellSequence = SPELL_DK_FROST;
+                SpellSequence = SPELL_DK_UNHOLY;
                 break;
             }
             LastSpellUnholyDK = 0;
@@ -116,56 +116,56 @@ void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
             if (ICY_TOUCH > 0 && LastSpellFrostDK < 1)
             {
                 ai->CastSpell(ICY_TOUCH, *pTarget);
-                SpellSequence = SPELL_DK_BLOOD;
+                SpellSequence = SPELL_DK_FROST;
                 LastSpellFrostDK = LastSpellFrostDK +1;
                 break;
             }
             else if (OBLITERATE > 0 && LastSpellFrostDK < 2)
             {
                 ai->CastSpell(OBLITERATE);
-                SpellSequence = SPELL_DK_BLOOD;
+                SpellSequence = SPELL_DK_FROST;
                 LastSpellFrostDK = LastSpellFrostDK +1;
                 break;
             }
             else if (FROST_STRIKE > 0 && LastSpellFrostDK < 3 && ai->GetRunicPower() >= 32)
             {
                 ai->CastSpell(FROST_STRIKE);
-                SpellSequence = SPELL_DK_BLOOD;
+                SpellSequence = SPELL_DK_FROST;
                 LastSpellFrostDK = LastSpellFrostDK +1;
                 break;
             }
             else if (HOWLING_BLAST > 0 && LastSpellFrostDK < 4)
             {
                 ai->CastSpell(HOWLING_BLAST);
-                SpellSequence = SPELL_DK_BLOOD;
+                SpellSequence = SPELL_DK_FROST;
                 LastSpellFrostDK = LastSpellFrostDK +1;
                 break;
             }
             else if (RUNE_STRIKE > 0 && LastSpellFrostDK < 5 && ai->GetRunicPower() >= 20)
             {
                 ai->CastSpell(RUNE_STRIKE);
-                SpellSequence = SPELL_DK_BLOOD;
+                SpellSequence = SPELL_DK_FROST;
                 LastSpellFrostDK = LastSpellFrostDK +1;
                 break;
             }
             else if (FROSTFEVER > 0 && LastSpellFrostDK < 6)
             {
                 ai->CastSpell(FROSTFEVER);
-                SpellSequence = SPELL_DK_BLOOD;
+                SpellSequence = SPELL_DK_FROST;
                 LastSpellFrostDK = LastSpellFrostDK +1;
                 break;
             }
             else if (ICY_CLUTCH > 0 && LastSpellFrostDK < 7)
             {
                 ai->CastSpell(ICY_CLUTCH, *pTarget);
-                SpellSequence = SPELL_DK_BLOOD;
+                SpellSequence = SPELL_DK_FROST;
                 LastSpellFrostDK = LastSpellFrostDK +1;
                 break;
             }
             else if (LastSpellFrostDK > 8)
             {
                 LastSpellFrostDK = 0;
-                SpellSequence = SPELL_DK_BLOOD;
+                SpellSequence = SPELL_DK_FROST;
                 break;
             }
             LastSpellFrostDK = 0;
@@ -177,48 +177,48 @@ void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
             if (BLOOD_STRIKE > 0 && LastSpellBloodDK < 1)
             {
                 ai->CastSpell(BLOOD_STRIKE, *pTarget);
-                SpellSequence = SPELL_DK_UNHOLY;
+                SpellSequence = SPELL_DK_BLOOD;
                 LastSpellBloodDK =  LastSpellBloodDK +1;
                 break;
             }
             else if (PESTILENCE > 0 && LastSpellBloodDK < 2)
             {
                 ai->CastSpell(PESTILENCE);
-                SpellSequence = SPELL_DK_UNHOLY;
+                SpellSequence = SPELL_DK_BLOOD;
                 LastSpellBloodDK = LastSpellBloodDK +1;
                 break;
             }
             else if (STRANGULATE > 0 && LastSpellBloodDK < 3)
             {
                 ai->CastSpell(STRANGULATE);
-                SpellSequence = SPELL_DK_UNHOLY;
+                SpellSequence = SPELL_DK_BLOOD;
                 LastSpellBloodDK = LastSpellBloodDK +1;
                 break;
             }
             else if (BLOOD_BOIL > 0 && LastSpellBloodDK < 4)
             {
                 ai->CastSpell(BLOOD_BOIL);
-                SpellSequence = SPELL_DK_UNHOLY;
+                SpellSequence = SPELL_DK_BLOOD;
                 LastSpellBloodDK = LastSpellBloodDK +1;
                 break;
             }
             else if (HEART_STRIKE > 0 && LastSpellFrostDK < 5)
             {
                 ai->CastSpell(HEART_STRIKE);
-                SpellSequence = SPELL_DK_UNHOLY;
+                SpellSequence = SPELL_DK_BLOOD;
                 LastSpellBloodDK = LastSpellBloodDK +1;
                 break;
             }
             else if (LastSpellBloodDK > 6)
             {
                 LastSpellBloodDK = 0;
-                SpellSequence = SPELL_DK_UNHOLY;
+                SpellSequence = SPELL_DK_BLOOD;
                 break;
             }
             else
             {
                 LastSpellBloodDK = 0;
-                SpellSequence = SPELL_DK_UNHOLY;
+                SpellSequence = SPELL_DK_BLOOD;
             }
     }
 } // end DoNextCombatManeuver
