@@ -1637,6 +1637,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
     // Reflect damage spells (not cast any damage spell in aura lookup)
     uint32 reflectSpell = 0;
     int32  reflectDamage = 0;
+    Aura*  reflectTriggeredBy = NULL;                       // expected as not expired at reflect as in current cases
     // Death Prevention Aura
     SpellEntry const*  preventDeathSpell = NULL;
     int32  preventDeathAmount = 0;
@@ -1700,6 +1701,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
                     else
                         reflectDamage = currentAbsorb / 2;
                     reflectSpell = 33619;
+                    reflectTriggeredBy = *i;
                     break;
                 }
                 if (spellProto->Id == 39228 || // Argussian Compass
@@ -1762,15 +1764,15 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
                     {
                         switch((*k)->GetModifier()->m_miscvalue)
                         {
-                            case 5065:                          // Rank 1
-                            case 5064:                          // Rank 2
-                            case 5063:                          // Rank 3
+                            case 5065:                      // Rank 1
+                            case 5064:                      // Rank 2
                             {
                                 if(RemainingDamage >= currentAbsorb)
                                     reflectDamage = (*k)->GetModifier()->m_amount * currentAbsorb/100;
                                 else
                                     reflectDamage = (*k)->GetModifier()->m_amount * RemainingDamage/100;
                                 reflectSpell = 33619;
+                                reflectTriggeredBy = *i;
                             } break;
                             default: break;
                         }
@@ -1871,7 +1873,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
 
     // Cast back reflect damage spell
     if (reflectSpell)
-        pVictim->CastCustomSpell(this,  reflectSpell, &reflectDamage, NULL, NULL, true);
+        pVictim->CastCustomSpell(this,  reflectSpell, &reflectDamage, NULL, NULL, true, NULL, reflectTriggeredBy);
 
     // absorb by mana cost
     AuraList const& vManaShield = pVictim->GetAurasByType(SPELL_AURA_MANA_SHIELD);
@@ -11036,15 +11038,10 @@ void Unit::StopMoving()
     clearUnitState(UNIT_STAT_MOVING);
 
     // send explicit stop packet
-    // rely on vmaps here because for example stormwind is in air
-    //float z = MapManager::Instance().GetBaseMap(GetMapId())->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ(), true);
-    //if (fabs(GetPositionZ() - z) < 2.0f)
-    //    Relocate(GetPositionX(), GetPositionY(), z);
-    Relocate(GetPositionX(), GetPositionY(),GetPositionZ());
+    // player expected for correct work MONSTER_MOVE_WALK
+    SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(), 0, GetTypeId()==TYPEID_PLAYER ? MONSTER_MOVE_WALK : MONSTER_MOVE_NONE, 0);
 
-    SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(), 0, 0, 0);
-
-    // update position and orientation;
+    // update position and orientation for near players
     WorldPacket data;
     BuildHeartBeatMsg(&data);
     SendMessageToSet(&data,false);
