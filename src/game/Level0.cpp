@@ -30,6 +30,7 @@
 #include "revision.h"
 #include "revision_nr.h"
 #include "Util.h"
+#include "PlayerbotAI.h"
 
 bool ChatHandler::HandleHelpCommand(const char* args)
 {
@@ -330,6 +331,42 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
         m_session->LogoutPlayerBot(guid, true);
         PSendSysMessage("Bot removed successfully.");
     }
+	else if (cmdStr == "co" || cmdStr == "combatorder")
+	{
+		Unit *target = 0;
+		char *orderChar = strtok( NULL, " " );
+		if( !orderChar ) {
+			PSendSysMessage("Syntax error: .bot co <botName> <order=reset|tank|assist|heal|protect> [targetPlayer]");
+            SetSentErrorMessage(true);
+            return false;
+		}
+		std::string orderStr = orderChar;
+		if( orderStr == "protect" || orderStr == "assist" ) {
+			char *targetChar = strtok( NULL, " " );
+			uint64 targetGUID = m_session->GetPlayer()->GetSelection();
+			if( !targetChar && !targetGUID ) {
+				PSendSysMessage("Combat orders protect and assist expect a target either by selection or by giving target player in command string!");
+		        SetSentErrorMessage(true);
+	            return false;
+			}
+			std::string targetStr = targetChar;
+			if( targetChar ) {
+				targetGUID = objmgr.GetPlayerGUIDByName( targetStr.c_str() );
+			}
+			target = ObjectAccessor::GetUnit( *m_session->GetPlayer(), targetGUID );
+			if( !target ) {
+				PSendSysMessage("Invalid target for combat order protect or assist!");
+		        SetSentErrorMessage(true);
+	            return false;
+			}
+		}
+	    if (m_session->GetPlayerBot(guid) == NULL) {
+            PSendSysMessage("Bot can not receive combat order because bot does not exist in world.");
+		    SetSentErrorMessage(true);
+	        return false;
+        }
+		m_session->GetPlayerBot( guid )->GetPlayerbotAI()->SetCombatOrderByStr( orderStr, target );
+	}
 
     return true;
 }

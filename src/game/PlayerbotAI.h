@@ -24,15 +24,23 @@ class MANGOS_DLL_SPEC PlayerbotAI
             SCENARIO_PVPHARD
         };
 
+		enum CombatStyle {
+			COMBAT_MELEE		= 0x01,		// class melee attacker
+			COMBAT_RANGED		= 0x02		// class is ranged attacker
+		};
+
         // masters orders that should be obeyed by the AI during the updteAI routine
         // the master will auto set the target of the bot
         enum CombatOrderType
         {
             ORDERS_NONE			= 0x00,		// no special orders given
 			ORDERS_TANK			= 0x01,		// bind attackers by gaining threat
-			ORDERS_ASSISST		= 0x02,		// assist someone (dps type)
+			ORDERS_ASSIST		= 0x02,		// assist someone (dps type)
 			ORDERS_HEAL			= 0x04,		// concentrate on healing (no attacks, only self defense)
 			ORDERS_PROTECT		= 0x10,		// combinable state: check if protectee is attacked
+			ORDERS_PRIMARY		= 0x0F,
+			ORDERS_SECONDARY	= 0xF0,
+			ORDERS_RESET		= 0xFF
         };
 
         enum BotState
@@ -43,6 +51,13 @@ class MANGOS_DLL_SPEC PlayerbotAI
             BOTSTATE_DEADRELEASED,  // we released as ghost and wait to revive
             BOTSTATE_LOOTING        // looting mode, used just after combat
         };
+
+		enum MovementOrderType 
+		{
+			MOVEMENT_NONE		= 0x00,
+			MOVEMENT_FOLLOW		= 0x01,
+			MOVEMENT_STAY		= 0x02
+		};
 
         typedef std::map<uint32, uint32> BotNeedItem;
         typedef std::list<uint64> BotLootCreature;
@@ -158,13 +173,14 @@ class MANGOS_DLL_SPEC PlayerbotAI
         bool CastSpell(uint32 spellId, Unit& target);
         void UseItem(Item& item);
         void EquipItem(Item& item);
-        void Stay();
-        bool Follow(Player& player);
+        //void Stay();
+        //bool Follow(Player& player);
         void SendNotEquipList(Player& player);
         void Feast();
         void InterruptCurrentCastingSpell();
         void GetCombatTarget( Unit* forcedTarged = 0 );
         void DoNextCombatManeuver();
+		void DoCombatMovement();
         void SetIgnoreUpdateTime(uint8 t) {m_ignoreAIUpdatesUntilTime=time(0) + t; };
 
         Player *GetPlayerBot() {return m_bot;}
@@ -182,6 +198,15 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void UpdateAttackerInfo();
         Unit* FindAttacker( ATTACKERINFOTYPE ait=AIT_NONE, Unit *victim=0 );
         uint32 GetAttackerCount() { return m_attackerInfo.size(); };
+		void SetCombatOrderByStr( std::string str, Unit *target=0 );
+		void SetCombatOrder( CombatOrderType co, Unit *target=0 );
+		CombatOrderType GetCombatOrder() { return this->m_combatOrder; }
+		void SetMovementOrder( MovementOrderType mo, Unit *followTarget=0 );
+		MovementOrderType GetMovementOrder() { return this->m_movementOrder; }
+		void MovementReset();
+		void MovementUpdate();
+		void MovementClear();
+		bool IsMoving();
 
         void SetInFront( const Unit* obj );
 
@@ -206,7 +231,9 @@ class MANGOS_DLL_SPEC PlayerbotAI
         // no need to waste CPU cycles during casting etc
         time_t m_ignoreAIUpdatesUntilTime;
 
+		CombatStyle m_combatStyle;
         CombatOrderType m_combatOrder;
+		MovementOrderType m_movementOrder;
 
         ScenarioType m_ScenarioType;
 
@@ -223,7 +250,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         time_t m_TimeDoneEating;
         time_t m_TimeDoneDrinking;
         uint32 m_CurrentlyCastingSpellId;
-        bool m_IsFollowingMaster;
+        //bool m_IsFollowingMaster;
 
         // if master commands bot to do something, store here until updateAI
         // can do it
@@ -232,9 +259,11 @@ class MANGOS_DLL_SPEC PlayerbotAI
 
         AttackerInfoList m_attackerInfo;
 
-		Unit *m_targetCombat;
-		Unit *m_targetAssisst;
-		Unit *m_targetProtect;
+		Unit *m_targetCombat;	// current combat target
+		Unit *m_targetAssist;	// get new target by checking attacker list of assisted player
+		Unit *m_targetProtect;	// check 
+
+		Unit *m_followTarget;	// whom to follow in non combat situation?
 };
 
 #endif

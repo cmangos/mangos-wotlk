@@ -64,7 +64,7 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
 
     // ------- Non Duel combat ----------
 
-    ai->Follow(*GetMaster()); // dont want to melee mob
+	ai->SetMovementOrder( PlayerbotAI::MOVEMENT_FOLLOW, GetMaster() ); // dont want to melee mob
 
     // Damage Spells (primitive example)
     ai->SetInFront( pTarget );
