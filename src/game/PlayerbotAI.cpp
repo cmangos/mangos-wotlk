@@ -1951,7 +1951,7 @@ void PlayerbotAI::MovementReset() {
 			// target is player and currently a corpse - move to corpse and stay there
 			WorldLocation loc;
 			((Player*)m_followTarget)->GetPosition( loc );
-			m_bot->GetMotionMaster()->MovePoint( loc.mapid, loc.x, loc.y, loc.z );
+			m_bot->GetMotionMaster()->MovePoint( loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z );//<------changed
 		}
 		else
 		{
