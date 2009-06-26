@@ -13,6 +13,7 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     else if((HEAL = ai->getSpellId ("greater heal"))==0 && (HEAL = ai->getSpellId ("heal"))==0)
         HEAL           = ai->getSpellId("lesser heal");
 
+	GREAT_HEAL		   = ai->getSpellId("great heal");
     FLASH_HEAL         = ai->getSpellId("flash heal");
     REZZ               = ai->getSpellId("resurrection");
     SMITE              = ai->getSpellId("smite");
@@ -37,6 +38,7 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     SHADOWFIEND        = ai->getSpellId("shadowfiend");
     MIND_SEAR          = ai->getSpellId("mind sear");
     //DISCIPLINE
+	PENANCE			   = ai->getSpellId("penance");
     INNER_FIRE         = ai->getSpellId("inner fire");
     PWS                = ai->getSpellId("power word: shield");
     if((FORTITUDE = ai->getSpellId ("prayer of fortitude"))==1)
@@ -69,6 +71,11 @@ void PlayerbotPriestAI::HealTarget(Unit &target, uint8 hp)
     {
         GetAI()->TellMaster("I'm casting flash heal.");
         ai->CastSpell(FLASH_HEAL, target);
+    }
+    else if (hp < 30 && GREAT_HEAL > 0 && ai->GetManaPercent() >= 36)
+    {
+        GetAI()->TellMaster("I'm casting one of the sorted heal spells.");
+        ai->CastSpell(GREAT_HEAL, target);
     }
     else if (hp < 33 && BINDING_HEAL > 0 && ai->GetManaPercent() >= 27)
     {
@@ -112,14 +119,14 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 (ai->GetHealthPercent() < 80 && ai->CastSpell(RENEW)) ||
                 (ai->GetPlayerBot()->GetDistance(pTarget) <= 5 && ai->CastSpell(SCREAM)) ||
                 ai->CastSpell(MIND_BLAST) ||
-                (ai->GetHealthPercent() < 20 && ai->CastSpell(FLASH_HEAL)) ||
+                (ai->GetHealthPercent() < 20 && ai->CastSpell(GREAT_HEAL)) ||
                 ai->CastSpell(SMITE);
             return;
     }
 
     // ------- Non Duel combat ----------
 
-	ai->SetMovementOrder( PlayerbotAI::MOVEMENT_FOLLOW, GetMaster() ); // dont want to melee mob
+    ai->SetMovementOrder( PlayerbotAI::MOVEMENT_FOLLOW, GetMaster() ); // dont want to melee mob 
 
     Player *m_bot = GetPlayerBot();
     Group *m_group = m_bot->GetGroup();
@@ -228,7 +235,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 LastSpellShadowMagic = LastSpellShadowMagic +1;
                 break;
             }
-/*            else if (SCREAM > 0 && LastSpellShadowMagic <3 && ai->GetManaPercent() >= 60)
+           else if (SCREAM > 0 && LastSpellShadowMagic <3 && ai->GetManaPercent() >= 60)
             {
                 GetAI()->TellMaster("I'm casting scream.");
                 ai->CastSpell(SCREAM);
@@ -236,7 +243,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 (LastSpellShadowMagic = LastSpellShadowMagic +1);
                 break;
             }
-*/
+
             else if (MIND_FLAY > 0 && LastSpellShadowMagic <4 && ai->GetManaPercent() >= 60)
             {
                 GetAI()->TellMaster("I'm casting mind flay.");
@@ -322,7 +329,15 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 LastSpellDiscipline = LastSpellDiscipline + 1;
                 break;
             }
-            else if (LastSpellDiscipline > 4)
+            else if (PENANCE > 0 && LastSpellDiscipline <4 && ai->GetManaPercent() >= 60)
+            {
+                GetAI()->TellMaster("I'm casting PENANCE");
+                ai->CastSpell(PENANCE);
+                SpellSequence = SPELL_HOLY;
+                LastSpellDiscipline = LastSpellDiscipline + 1;
+                break;
+            }
+            else if (LastSpellDiscipline > 5)
             {
                 LastSpellDiscipline = 0;
                 SpellSequence = SPELL_HOLY;
