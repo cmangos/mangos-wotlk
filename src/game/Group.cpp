@@ -310,6 +310,19 @@ bool Group::AddMember(const uint64 &guid, const char* name)
 
 uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
 {
+    //Playerbot mod - if master leaves group, all bots leave group
+    if(Player* const player = objmgr.GetPlayer( guid ))
+    {
+        for (PlayerBotMap::const_iterator it = player->GetSession()->GetPlayerBotsBegin();
+            it != player->GetSession()->GetPlayerBotsEnd(); ++it)
+        {
+            Player* const bot = it->second;
+            if (bot->IsInSameGroupWith(player))
+                RemoveMember(bot->GetGUID(), 0);
+        }
+    }
+    //END Playerbot mod
+
     // remove member and change leader (if need) only if strong more 2 members _before_ member remove
     if(GetMembersCount() > (isBGGroup() ? 1 : 2))           // in BG group case allow 1 members group
     {

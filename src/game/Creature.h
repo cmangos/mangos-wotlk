@@ -451,7 +451,7 @@ typedef std::map<uint32,time_t> CreatureSpellCooldowns;
 // max different by z coordinate for creature aggro reaction
 #define CREATURE_Z_ATTACK_RANGE 3
 
-#define MAX_VENDOR_ITEMS 255                                // Limitation in item count field size in SMSG_LIST_INVENTORY
+#define MAX_VENDOR_ITEMS 150                                // Limitation in 3.x.x item count in SMSG_LIST_INVENTORY
 
 class MANGOS_DLL_SPEC Creature : public Unit
 {
@@ -632,6 +632,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void RemoveCorpse();
         bool isDeadByDefault() const { return m_isDeadByDefault; };
 
+        void ForcedDespawn();
+
         time_t const& GetRespawnTime() const { return m_respawnTime; }
         time_t GetRespawnTimeEx() const;
         void SetRespawnTime(uint32 respawn) { m_respawnTime = respawn ? time(NULL) + respawn : 0; }
@@ -648,6 +650,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint64 lootingGroupLeaderGUID;                      // used to find group which is looting corpse
 
         void SendZoneUnderAttackMessage(Player* attacker);
+
+        void SetInCombatWithZone();
 
         bool hasQuest(uint32 quest_id) const;
         bool hasInvolvedQuest(uint32 quest_id)  const;

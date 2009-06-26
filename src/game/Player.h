@@ -276,8 +276,6 @@ struct Runes
     }
 };
 
-typedef std::set<uint64> GuardianPetList;
-
 struct EnchantDuration
 {
     EnchantDuration() : item(NULL), slot(MAX_ENCHANTMENT_SLOT), leftduration(0) {};
@@ -512,11 +510,12 @@ enum PlayerExtraFlags
 // 2^n values
 enum AtLoginFlags
 {
-    AT_LOGIN_NONE          = 0,
-    AT_LOGIN_RENAME        = 1,
-    AT_LOGIN_RESET_SPELLS  = 2,
-    AT_LOGIN_RESET_TALENTS = 4,
-    AT_LOGIN_CUSTOMIZE     = 8
+    AT_LOGIN_NONE              = 0x00,
+    AT_LOGIN_RENAME            = 0x01,
+    AT_LOGIN_RESET_SPELLS      = 0x02,
+    AT_LOGIN_RESET_TALENTS     = 0x04,
+    AT_LOGIN_CUSTOMIZE         = 0x08,
+    AT_LOGIN_RESET_PET_TALENTS = 0x10,
 };
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;
@@ -889,7 +888,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool TeleportTo(WorldLocation const &loc, uint32 options = 0)
         {
-            return TeleportTo(loc.mapid, loc.x, loc.y, loc.z, options);
+            return TeleportTo(loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation, options);
         }
 
         void SetSummonPoint(uint32 mapid, float x, float y, float z)
@@ -906,7 +905,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void Update( uint32 time );
 
-        void BuildEnumData( QueryResult * result,  WorldPacket * p_data );
+        static bool BuildEnumData( QueryResult * result,  WorldPacket * p_data );
 
         void SetInWater(bool apply);
 
@@ -994,10 +993,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemoveMiniPet();
         Pet* GetMiniPet();
         void SetMiniPet(Pet* pet) { m_miniPet = pet->GetGUID(); }
-        void RemoveGuardians();
-        bool HasGuardianWithEntry(uint32 entry);
-        void AddGuardian(Pet* pet) { m_guardianPets.insert(pet->GetGUID()); }
-        GuardianPetList const& GetGuardians() const { return m_guardianPets; }
         void Uncharm();
         uint32 GetPhaseMaskForSpawn() const;                // used for proper set phase for DB at GM-mode creature/GO spawn
 
@@ -1269,6 +1264,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static uint32 GetUInt32ValueFromDB(uint16 index, uint64 guid);
         static float  GetFloatValueFromDB(uint16 index, uint64 guid);
         static uint32 GetZoneIdFromDB(uint64 guid);
+        static uint32 GetLevelFromDB(uint64 guid);
         static bool   LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, bool& in_flight, uint64 guid);
 
         /*********************************************************/
@@ -1277,6 +1273,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SaveToDB();
         void SaveInventoryAndGoldToDB();                    // fast save function for item/money cheating preventing
+        void SaveGoldToDB();
         void SaveDataFieldToDB();
         static bool SaveValuesArrayInDB(Tokens const& data,uint64 guid);
         static void SetUInt32ValueInArray(Tokens& data,uint16 index, uint32 value);
@@ -1450,6 +1447,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendCooldownEvent(SpellEntry const *spellInfo, uint32 itemId = 0, Spell* spell = NULL);
         void ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs );
         void RemoveSpellCooldown(uint32 spell_id, bool update = false);
+        void SendClearCooldown( uint32 spell_id, Unit* target );
+
         void RemoveArenaSpellCooldowns();
         void RemoveAllSpellCooldown();
         void _LoadSpellCooldowns(QueryResult *result);
@@ -2016,6 +2015,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool HasAtLoginFlag(AtLoginFlags f) const { return m_atLoginFlags & f; }
         void SetAtLoginFlag(AtLoginFlags f) { m_atLoginFlags |= f; }
+        void RemoveAtLoginFlag(AtLoginFlags f, bool in_db_also = false);
 
         LookingForGroup m_lookingForGroup;
 
@@ -2197,8 +2197,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void outDebugValues() const;
         uint64 m_lootGuid;
 
-        uint32 m_race;
-        uint32 m_class;
         uint32 m_team;
         uint32 m_nextSave;
         time_t m_speakTime;
@@ -2319,7 +2317,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint64 m_auraUpdateMask;
 
         uint64 m_miniPet;
-        GuardianPetList m_guardianPets;
 
         // Player summoning
         time_t m_summon_expire;

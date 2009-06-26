@@ -229,11 +229,11 @@ class Spell
         void EffectQuestComplete(uint32 i);
         void EffectCreateItem(uint32 i);
         void EffectCreateItem2(uint32 i);
+        void EffectCreateRandomItem(uint32 i);
         void EffectPersistentAA(uint32 i);
         void EffectEnergize(uint32 i);
         void EffectOpenLock(uint32 i);
         void EffectSummonChangeItem(uint32 i);
-        void EffectOpenSecretSafe(uint32 i);
         void EffectProficiency(uint32 i);
         void EffectApplyAreaAura(uint32 i);
         void EffectSummonType(uint32 i);
@@ -366,7 +366,11 @@ class Spell
         typedef std::list<Unit*> UnitList;
         void FillTargetMap();
         void SetTargetMap(uint32 i,uint32 cur,UnitList& TagUnitMap);
+
         void FillAreaTargets( UnitList& TagUnitMap, float x, float y, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets );
+        void FillRaidOrPartyTargets( UnitList &TagUnitMap, Unit* target, float radius, bool raid, bool withPets, bool withcaster );
+        void FillRaidOrPartyManaPriorityTargets( UnitList &TagUnitMap, Unit* target, float radius, uint32 count, bool raid, bool withPets, bool withcaster );
+        void FillRaidOrPartyHealthPriorityTargets( UnitList &TagUnitMap, Unit* target, float radius, uint32 count, bool raid, bool withPets, bool withcaster );
 
         template<typename T> WorldObject* FindCorpseUsing();
 

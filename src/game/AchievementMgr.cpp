@@ -226,7 +226,7 @@ bool AchievementCriteriaData::IsValid(AchievementCriteriaEntry const* criteria)
             if (!sHolidaysStore.LookupEntry(holiday.id))
             {
                 sLog.outErrorDb( "Table `achievement_criteria_data` (Entry: %u Type: %u) for data type ACHIEVEMENT_CRITERIA_DATA_TYPE_HOLIDAY (%u) have unknown holiday in value1 (%u), ignore.",
-                    criteria->ID, criteria->requiredType,dataType,drunk.state);
+                    criteria->ID, criteria->requiredType,dataType,holiday.id);
                 return false;
             }
             return true;
@@ -533,7 +533,7 @@ void AchievementMgr::LoadFromDB(QueryResult *achievementResult, QueryResult *cri
             if (!criteria)
             {
                 // we will remove not existed criteria for all characters
-                sLog.outError("Not existed achievement creataria %u data removed from table `character_achievement_progress`.",id);
+                sLog.outError("Not existed achievement criteria %u data removed from table `character_achievement_progress`.",id);
                 CharacterDatabase.PExecute("DELETE FROM character_achievement_progress WHERE criteria = %u",id);
                 continue;
             }

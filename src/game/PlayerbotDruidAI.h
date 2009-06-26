@@ -32,8 +32,14 @@ class MANGOS_DLL_SPEC PlayerbotDruidAI : PlayerbotClassAI
         // Heals the target based off its hps
         void HealTarget (Unit& target, uint8 hp);
 
-        // attack, debuff, buff & heal
-        uint32 CLAW, COWER, TIGERS_FURY, RAKE, RIP, FEROCIOUS_BITE, MAIM, CAT_FORM, DIRE_BEAR_FORM, MOONFIRE, ROOTS, FAERIE_FIRE, WRATH, STARFALL, STARFIRE, MANGLE, MARK_OF_THE_WILD, THORNS, LIFEBLOOM, REJUVENATION, REGROWTH, NOURISH, HEALING_TOUCH, MANA_REJUVENATION;
+        // druid cat/bear forms & attacks
+        uint32 CLAW, COWER, TIGERS_FURY, RAKE, RIP, FEROCIOUS_BITE, MAIM, MANGLE, CAT_FORM, DIRE_BEAR_FORM;
+
+		// druid attacks & debuffs
+		uint32 MOONFIRE, ROOTS, WRATH, STARFALL, STARFIRE, INSECT_SWARM, FAERIE_FIRE;
+
+		// druid heals & buffs
+		uint32 MARK_OF_THE_WILD, THORNS, LIFEBLOOM, REJUVENATION, REGROWTH, NOURISH, HEALING_TOUCH, WILD_GROWTH, MANA_REJUVENATION;
 
         uint32 SpellSequence, DruidSpellCombat;
 };

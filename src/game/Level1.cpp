@@ -1040,23 +1040,44 @@ bool ChatHandler::HandleModifyTalentCommand (const char* args)
         return false;
 
     int tp = atoi((char*)args);
-    if (tp>0)
+    if (tp < 0)
+        return false;
+
+    Unit* target = getSelectedUnit();
+    if(!target)
     {
-        Player* player = getSelectedPlayer();
-        if(!player)
-        {
-            SendSysMessage(LANG_NO_CHAR_SELECTED);
-            SetSentErrorMessage(true);
-            return false;
-        }
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
+    if(target->GetTypeId()==TYPEID_PLAYER)
+    {
         // check online security
-        if (HasLowerSecurity(player, 0))
+        if (HasLowerSecurity((Player*)target, 0))
             return false;
 
-        player->SetFreeTalentPoints(tp);
+        ((Player*)target)->SetFreeTalentPoints(tp);
+        ((Player*)target)->SendTalentsInfoData(false);
         return true;
     }
+    else if(((Creature*)target)->isPet())
+    {
+        Unit *owner = target->GetOwner();
+        if(owner && owner->GetTypeId() == TYPEID_PLAYER && ((Pet *)target)->IsPermanentPetFor((Player*)owner))
+        {
+            // check online security
+            if (HasLowerSecurity((Player*)owner, 0))
+                return false;
+
+            ((Pet *)target)->SetFreeTalentPoints(tp);
+            ((Player*)owner)->SendTalentsInfoData(true);
+            return true;
+        }
+    }
+
+    SendSysMessage(LANG_NO_CHAR_SELECTED);
+    SetSentErrorMessage(true);
     return false;
 }
 
@@ -2315,7 +2336,7 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
     else
         _player->SaveRecallPosition();
 
-    Map const *map = MapManager::Instance().GetBaseMap(mapid);
+    Map const *map = MapManager::Instance().CreateBaseMap(mapid);
     float z = std::max(map->GetHeight(x, y, MAX_HEIGHT), map->GetWaterLevel(x, y));
 
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
@@ -2408,7 +2429,7 @@ bool ChatHandler::HandleGoZoneXYCommand(const char* args)
     // update to parent zone if exist (client map show only zones without parents)
     AreaTableEntry const* zoneEntry = areaEntry->zone ? GetAreaEntryByAreaID(areaEntry->zone) : areaEntry;
 
-    Map const *map = MapManager::Instance().GetBaseMap(zoneEntry->mapid);
+    Map const *map = MapManager::Instance().CreateBaseMap(zoneEntry->mapid);
 
     if(map->Instanceable())
     {
@@ -2483,7 +2504,7 @@ bool ChatHandler::HandleGoGridCommand(const char* args)
     else
         _player->SaveRecallPosition();
 
-    Map const *map = MapManager::Instance().GetBaseMap(mapid);
+    Map const *map = MapManager::Instance().CreateBaseMap(mapid);
     float z = std::max(map->GetHeight(x, y, MAX_HEIGHT), map->GetWaterLevel(x, y));
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
 

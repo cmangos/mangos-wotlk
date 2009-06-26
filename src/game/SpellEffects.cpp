@@ -116,7 +116,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummonPet,                                // 56 SPELL_EFFECT_SUMMON_PET
     &Spell::EffectLearnPetSpell,                            // 57 SPELL_EFFECT_LEARN_PET_SPELL
     &Spell::EffectWeaponDmg,                                // 58 SPELL_EFFECT_WEAPON_DAMAGE
-    &Spell::EffectOpenSecretSafe,                           // 59 SPELL_EFFECT_OPEN_LOCK_ITEM
+    &Spell::EffectCreateRandomItem,                         // 59 SPELL_EFFECT_CREATE_RANDOM_ITEM       create item base at spell specific loot
     &Spell::EffectProficiency,                              // 60 SPELL_EFFECT_PROFICIENCY
     &Spell::EffectSendEvent,                                // 61 SPELL_EFFECT_SEND_EVENT
     &Spell::EffectPowerBurn,                                // 62 SPELL_EFFECT_POWER_BURN
@@ -214,12 +214,12 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //154 unused
     &Spell::EffectTitanGrip,                                //155 SPELL_EFFECT_TITAN_GRIP Allows you to equip two-handed axes, maces and swords in one hand, but you attack $49152s1% slower than normal.
     &Spell::EffectEnchantItemPrismatic,                     //156 SPELL_EFFECT_ENCHANT_ITEM_PRISMATIC
-    &Spell::EffectCreateItem2,                              //157 SPELL_EFFECT_CREATE_ITEM_2            create/learn item/spell for profession
+    &Spell::EffectCreateItem2,                              //157 SPELL_EFFECT_CREATE_ITEM_2            create item or create item template and replace by some randon spell loot item
     &Spell::EffectMilling,                                  //158 SPELL_EFFECT_MILLING                  milling
     &Spell::EffectRenamePet,                                //159 SPELL_EFFECT_ALLOW_RENAME_PET         allow rename pet once again
     &Spell::EffectNULL,                                     //160 SPELL_EFFECT_160                      unused
-    &Spell::EffectNULL,                                     //161 SPELL_EFFECT_161                      second talent spec (learn/revert)
-    &Spell::EffectNULL                                      //162 SPELL_EFFECT_162                      activate primary/secondary spec
+    &Spell::EffectNULL,                                     //161 SPELL_EFFECT_TALENT_SPEC_COUNT        second talent spec (learn/revert)
+    &Spell::EffectNULL,                                     //162 SPELL_EFFECT_TALENT_SPEC_SELECT       activate primary/secondary spec
 };
 
 void Spell::EffectNULL(uint32 /*i*/)
@@ -680,15 +680,24 @@ void Spell::EffectDummy(uint32 i)
 
                     switch (m_spellInfo->Id)
                     {
-                        case 12850: damage *= 0.2f; break;
-                        case 12162: damage *= 0.4f; break;
-                        case 12868: damage *= 0.6f; break;
+                        case 12162: damage *= 0.16f; break; // Rank 1
+                        case 12850: damage *= 0.32f; break; // Rank 2
+                        case 12868: damage *= 0.48f; break; // Rank 3
                         default:
                             sLog.outError("Spell::EffectDummy: Spell %u not handled in DW",m_spellInfo->Id);
                             return;
                     };
 
-                    int32 deepWoundsDotBasePoints0 = int32(damage / 4);
+                    // get remaining damage of old Deep Wound aura
+                    Aura* deepWound = unitTarget->GetAura(12721, 0);
+                    if(deepWound)
+                    {
+                        int32 remainingTicks = deepWound->GetAuraDuration() / deepWound->GetModifier()->periodictime;
+                        damage += remainingTicks * deepWound->GetModifier()->m_amount;
+                    }
+
+                    // 1 tick/sec * 6 sec = 6 ticks
+                    int32 deepWoundsDotBasePoints0 = int32(damage / 6);
                     m_caster->CastCustomSpell(unitTarget, 12721, &deepWoundsDotBasePoints0, NULL, NULL, true, NULL);
                     return;
                 }
@@ -735,9 +744,8 @@ void Spell::EffectDummy(uint32 i)
                         return;
 
                     Creature* creatureTarget = (Creature*)unitTarget;
-                    creatureTarget->setDeathState(JUST_DIED);
-                    creatureTarget->RemoveCorpse();
-                    creatureTarget->SetHealth(0);           // just for nice GM-mode view
+
+                    creatureTarget->ForcedDespawn();
                     return;
                 }
                 case 16589:                                 // Noggenfogger Elixir
@@ -810,9 +818,7 @@ void Spell::EffectDummy(uint32 i)
                     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() );
                     pGameObj->SetSpellId(m_spellInfo->Id);
 
-                    creatureTarget->setDeathState(JUST_DIED);
-                    creatureTarget->RemoveCorpse();
-                    creatureTarget->SetHealth(0);                   // just for nice GM-mode view
+                    creatureTarget->ForcedDespawn();
 
                     DEBUG_LOG("AddObject at SpellEfects.cpp EffectDummy");
                     map->Add(pGameObj);
@@ -1026,9 +1032,7 @@ void Spell::EffectDummy(uint32 i)
 
                     Creature* creatureTarget = (Creature*)unitTarget;
 
-                    creatureTarget->setDeathState(JUST_DIED);
-                    creatureTarget->RemoveCorpse();
-                    creatureTarget->SetHealth(0);           // just for nice GM-mode view
+                    creatureTarget->ForcedDespawn();
 
                     //cast spell Raptor Capture Credit
                     m_caster->CastSpell(m_caster, 42337, true, NULL);
@@ -1117,9 +1121,7 @@ void Spell::EffectDummy(uint32 i)
 
                     Creature* creatureTarget = (Creature*)unitTarget;
 
-                    creatureTarget->setDeathState(JUST_DIED);
-                    creatureTarget->RemoveCorpse();
-                    creatureTarget->SetHealth(0);           // just for nice GM-mode view
+                    creatureTarget->ForcedDespawn();
                     return;
 
                 }
@@ -1776,7 +1778,7 @@ void Spell::EffectDummy(uint32 i)
     }
 
     // pet auras
-    if(PetAura const* petSpell = spellmgr.GetPetAura(m_spellInfo->Id))
+    if(PetAura const* petSpell = spellmgr.GetPetAura(m_spellInfo->Id, i))
     {
         m_caster->AddPetAura(petSpell);
         return;
@@ -2703,25 +2705,32 @@ void Spell::EffectCreateItem2(uint32 i)
     Player* player = (Player*)m_caster;
 
     uint32 item_id = m_spellInfo->EffectItemType[i];
-    if(item_id)
-        DoCreateItem(i, item_id);
+
+    DoCreateItem(i, item_id);
 
     // special case: fake item replaced by generate using spell_loot_template
     if(IsLootCraftingSpell(m_spellInfo))
     {
-        if(item_id)
-        {
-            if(!player->HasItemCount(item_id, 1))
-                return;
+        if(!player->HasItemCount(item_id, 1))
+            return;
 
-            // remove reagent
-            uint32 count = 1;
-            player->DestroyItemCount(item_id, count, true);
-        }
+        // remove reagent
+        uint32 count = 1;
+        player->DestroyItemCount(item_id, count, true);
 
         // create some random items
         player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell);
     }
+}
+
+void Spell::EffectCreateRandomItem(uint32 i)
+{
+    if(m_caster->GetTypeId()!=TYPEID_PLAYER)
+        return;
+    Player* player = (Player*)m_caster;
+
+    // create some random items
+    player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell);
 }
 
 void Spell::EffectPersistentAA(uint32 i)
@@ -2742,7 +2751,7 @@ void Spell::EffectPersistentAA(uint32 i)
     dynObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 368003);
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x01eeeeee);
     m_caster->AddDynObject(dynObj);
-    dynObj->GetMap()->Add(dynObj);
+    m_caster->GetMap()->Add(dynObj);
 }
 
 void Spell::EffectEnergize(uint32 i)
@@ -3125,11 +3134,6 @@ void Spell::EffectSummonChangeItem(uint32 i)
     delete pNewItem;
 }
 
-void Spell::EffectOpenSecretSafe(uint32 i)
-{
-    EffectOpenLock(i);                                      //no difference for now
-}
-
 void Spell::EffectProficiency(uint32 /*i*/)
 {
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -3178,6 +3182,7 @@ void Spell::EffectSummonType(uint32 i)
             EffectSummonDemon(i);
             break;
         case SUMMON_TYPE_SUMMON:
+        case SUMMON_TYPE_ELEMENTAL:
             EffectSummon(i);
             break;
         case SUMMON_TYPE_CRITTER:
@@ -3536,7 +3541,7 @@ void Spell::EffectAddFarsight(uint32 i)
     dynObj->SetUInt32Value(OBJECT_FIELD_TYPE, 65);
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x80000002);
     m_caster->AddDynObject(dynObj);
-    dynObj->GetMap()->Add(dynObj);
+    m_caster->GetMap()->Add(dynObj);
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
         ((Player*)m_caster)->SetFarSightGUID(dynObj->GetGUID());
 }
@@ -3621,7 +3626,7 @@ void Spell::EffectSummonGuardian(uint32 i)
     // FIXME: some guardians have control spell applied and controlled by player and anyway player can't summon in this time
     //        so this code hack in fact
     if( m_caster->GetTypeId() == TYPEID_PLAYER && (duration <= 0 || GetSpellRecoveryTime(m_spellInfo) == 0) )
-        if(((Player*)m_caster)->HasGuardianWithEntry(pet_entry))
+        if(m_caster->FindGuardianWithEntry(pet_entry))
             return;                                         // find old guardian, ignore summon
 
     // in another case summon new
@@ -3711,8 +3716,7 @@ void Spell::EffectSummonGuardian(uint32 i)
 
         spawnCreature->AIM_Initialize();
 
-        if(m_caster->GetTypeId()==TYPEID_PLAYER)
-            ((Player*)m_caster)->AddGuardian(spawnCreature);
+        m_caster->AddGuardian(spawnCreature);
 
         map->Add((Creature*)spawnCreature);
     }
@@ -4041,10 +4045,8 @@ void Spell::EffectTameCreature(uint32 /*i*/)
     if(!pet)                                                // in versy specific state like near world end/etc.
         return;
 
-    // kill original creature
-    creatureTarget->setDeathState(JUST_DIED);
-    creatureTarget->RemoveCorpse();
-    creatureTarget->SetHealth(0);                       // just for nice GM-mode view
+    // "kill" original creature
+    creatureTarget->ForcedDespawn();
 
     uint32 level = (creatureTarget->getLevel() < (m_caster->getLevel() - 5)) ? (m_caster->getLevel() - 5) : creatureTarget->getLevel();
 

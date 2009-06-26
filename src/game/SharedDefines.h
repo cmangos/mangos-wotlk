@@ -579,7 +579,7 @@ enum SpellEffects
     SPELL_EFFECT_SUMMON_PET                = 56,
     SPELL_EFFECT_LEARN_PET_SPELL           = 57,
     SPELL_EFFECT_WEAPON_DAMAGE             = 58,
-    SPELL_EFFECT_OPEN_LOCK_ITEM            = 59,
+    SPELL_EFFECT_CREATE_RANDOM_ITEM        = 59,
     SPELL_EFFECT_PROFICIENCY               = 60,
     SPELL_EFFECT_SEND_EVENT                = 61,
     SPELL_EFFECT_POWER_BURN                = 62,
@@ -681,8 +681,8 @@ enum SpellEffects
     SPELL_EFFECT_MILLING                   = 158,
     SPELL_EFFECT_ALLOW_RENAME_PET          = 159,
     SPELL_EFFECT_160                       = 160,
-    SPELL_EFFECT_161                       = 161,
-    SPELL_EFFECT_162                       = 162,
+    SPELL_EFFECT_TALENT_SPEC_COUNT         = 161,
+    SPELL_EFFECT_TALENT_SPEC_SELECT        = 162,
     TOTAL_SPELL_EFFECTS                    = 163
 };
 
@@ -2373,8 +2373,9 @@ enum SummonType
     SUMMON_TYPE_UNKNOWN5    = 409,
     SUMMON_TYPE_UNKNOWN2    = 427,
     SUMMON_TYPE_POSESSED2   = 428,
-    SUMMON_TYPE_FORCE_OF_NATURE = 669,
-    SUMMON_TYPE_GUARDIAN2   = 1161
+    SUMMON_TYPE_GUARDIAN2   = 1161,
+    SUMMON_TYPE_ELEMENTAL   = 1561,
+    SUMMON_TYPE_FORCE_OF_NATURE = 1562
 };
 
 enum ResponseCodes
