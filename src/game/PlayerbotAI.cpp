@@ -1929,48 +1929,47 @@ void PlayerbotAI::MovementReset() {
 	// stop moving...
 	MovementClear();
 
-	if( m_movementOrder == MOVEMENT_FOLLOW ) {
+	if( m_movementOrder == MOVEMENT_FOLLOW ) 
+    {
 		if( !m_followTarget ) return;
 
 		// target player is teleporting...
 		if( m_followTarget->GetTypeId()==TYPEID_PLAYER && ((Player*)m_followTarget)->IsBeingTeleported() )
 			return;
 
-		if( !m_bot->isAlive() )
-			return;
-
 		// check if bot needs to teleport to reach target...
-		if( m_followTarget->GetTypeId()==TYPEID_PLAYER && ((Player*)m_followTarget)->GetCorpse() )
-			if( !FollowCheckTeleport( *((Player*)m_followTarget)->GetCorpse() ) ) return;
-		else
-			if( !FollowCheckTeleport( *m_followTarget ) ) return;
+        if( !m_bot->isInCombat() )
+        {
+		    if( m_followTarget->GetTypeId()==TYPEID_PLAYER && ((Player*)m_followTarget)->GetCorpse() )
+            {
+			    if( !FollowCheckTeleport( *((Player*)m_followTarget)->GetCorpse() ) ) return;
+            }
+		    else
+            {
+			    if( !FollowCheckTeleport( *m_followTarget ) ) return;
+            }
+        }
 
-		if( m_followTarget->GetTypeId()==TYPEID_PLAYER && ((Player*)m_followTarget)->GetCorpse() &&
-			m_bot->GetDistance( ((Player*)m_followTarget)->GetCorpse() )>INTERACTION_DISTANCE ) 
-		{
-			// target is player and currently a corpse - move to corpse and stay there
-			WorldLocation loc;
-			((Player*)m_followTarget)->GetPosition( loc );
-			m_bot->GetMotionMaster()->MovePoint( loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z );//<------changed
-		}
-		else
-		{
+        if( m_bot->isAlive() )
+        {
 			float angle = rand_float(0, M_PI);
 		    float dist = rand_float(0.5f, 1.0f);
 			m_bot->GetMotionMaster()->MoveFollow( m_followTarget, dist, angle );
-		}
+        }
 	}
 }
 
-void PlayerbotAI::MovementUpdate() {
+void PlayerbotAI::MovementUpdate() 
+{
 	// send heartbeats to world
 	WorldPacket data;
 	m_bot->BuildHeartBeatMsg( &data );
 	m_bot->SendMessageToSet( &data, false );
 }
 
-void PlayerbotAI::MovementClear() {
-	// stop...
+void PlayerbotAI::MovementClear() 
+{
+    // stop...
     m_bot->GetMotionMaster()->Clear( true );
     m_bot->clearUnitState( UNIT_STAT_CHASE );
     m_bot->clearUnitState( UNIT_STAT_FOLLOW );
@@ -1980,7 +1979,8 @@ void PlayerbotAI::MovementClear() {
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 }
 
-bool PlayerbotAI::IsMoving() {
+bool PlayerbotAI::IsMoving() 
+{
 	return (m_bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE ? false : true);
 }
 
