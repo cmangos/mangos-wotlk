@@ -2183,6 +2183,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         {
             switch(GetId())
             {
+                // Recently Bandaged
+                case 11196:
+                    m_target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, GetMiscValue(), apply);
+                    return;
                 // Unstable Power
                 case 24658:
                 {
@@ -3174,7 +3178,7 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
     {
         pet->AttackStop();
         pet->GetMotionMaster()->MoveFollow(caster, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-        pet->SetUnitMovementFlags(MONSTER_MOVE_WALK);
+        pet->AddMonsterMoveFlag(MONSTER_MOVE_WALK);
     }
 }
 
@@ -3415,10 +3419,10 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
         // Creature specific
         if(m_target->GetTypeId() != TYPEID_PLAYER)
-            ((Creature*)m_target)->StopMoving();
+            m_target->StopMoving();
         else
         {
-            ((Player*)m_target)->m_movementInfo.flags = 0;  // Clear movement flags
+            ((Player*)m_target)->m_movementInfo.SetMovementFlags(MOVEMENTFLAG_NONE);
             m_target->SetStandState(UNIT_STAND_STATE_STAND);// in 1.5 client
         }
 
@@ -3702,10 +3706,10 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
             m_target->SendMessageToSet(&data, true);
 
             //Clear unit movement flags
-            ((Player*)m_target)->m_movementInfo.flags = 0;
+            ((Player*)m_target)->m_movementInfo.SetMovementFlags(MOVEMENTFLAG_NONE);
         }
         else
-            ((Creature *)m_target)->StopMoving();
+            m_target->StopMoving();
     }
     else
     {
@@ -3857,7 +3861,7 @@ void Aura::HandleModTaunt(bool apply, bool Real)
 
     Unit* caster = GetCaster();
 
-    if(!caster || !caster->isAlive() || caster->GetTypeId() != TYPEID_PLAYER)
+    if(!caster || !caster->isAlive())
         return;
 
     if(apply)
@@ -3961,6 +3965,12 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
     SpellEntry const* spellInfo = GetSpellProto();
     uint32 misc  = m_modifier.m_miscvalue;
     Unit* target = m_target;
+
+    // Forbearance
+    // in DBC wrong mechanic immune since 3.0.x
+    if (GetId() == 25771)
+        misc = MECHANIC_IMMUNE_SHIELD;
+
 
     if(apply && spellInfo->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
     {
