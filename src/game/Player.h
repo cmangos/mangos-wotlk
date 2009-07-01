@@ -54,6 +54,7 @@ class Vehicle;
 
 // Playerbot mod
 class PlayerbotAI;
+class PlayerbotMgr;
 
 typedef std::deque<Mail*> PlayerMails;
 
@@ -2139,10 +2140,14 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool isActiveObject() const { return true; }
         bool canSeeSpellClickOn(Creature const* creature) const;
+
         // Playerbot mod:
-        void SetPlayerbotAI(PlayerbotAI * ai);
+        // A Player can either have a playerbotMgr (to manage its bots), or have playerbotAI (if it is a bot), or
+        // neither. Code that enables bots must create the playerbotMgr and set it using SetPlayerbotMgr.
+        void SetPlayerbotAI(PlayerbotAI* ai) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotAI=ai; }
         PlayerbotAI* GetPlayerbotAI() { return m_playerbotAI; }
-        bool IsPlayerbot() { return (GetSession()->GetRemoteAddress() == "bot"); }
+        void SetPlayerbotMgr(PlayerbotMgr* mgr) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotMgr=mgr; }
+        PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr; }
 
     protected:
 
@@ -2383,6 +2388,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         // Playerbot mod:
         PlayerbotAI* m_playerbotAI;
+        PlayerbotMgr* m_playerbotMgr;
 
         uint32 m_lastFallTime;
         float  m_lastFallZ;

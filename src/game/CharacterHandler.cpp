@@ -39,7 +39,7 @@
 #include "Language.h"
 
 // Playerbot mod:
-#include "PlayerbotAI.h"
+#include "PlayerbotMgr.h"
 
 class LoginQueryHolder : public SqlQueryHolder
 {
@@ -128,42 +128,18 @@ class CharacterHandler
 
             WorldSession* masterSession = sWorld.FindSession(lqh->GetAccountId());
 
-            if (! masterSession)
+            if (! masterSession || objmgr.GetPlayer(lqh->GetGuid()))
             {
                 delete holder;
                 return;
             }
 
-            // This WorldSession is owned by the bot player object
-            // it will deleted in the Player class constructor for Playerbots only
-            WorldSession *botSession = new WorldSession(lqh->GetAccountId(), NULL, SEC_PLAYER, true, 0, LOCALE_enUS);
+            // The bot's WorldSession is owned by the bot's Player object
+            // The bot's WorldSession is deleted by PlayerbotMgr::LogoutPlayerBot
+            WorldSession *botSession = new WorldSession(lqh->GetAccountId(), NULL, SEC_PLAYER, masterSession->Expansion(), 0, LOCALE_enUS);
             botSession->m_Address = "bot";
-            botSession->m_expansion = 2;
-
-            uint64 guid = lqh->GetGuid();
-
-            botSession->HandlePlayerLogin(lqh);
-            Player* botPlayer = botSession->GetPlayer();
-
-            // give the bot some AI, object is owned by the player class
-            PlayerbotAI* ai = new PlayerbotAI(masterSession->GetPlayer(), botPlayer);
-            botPlayer->SetPlayerbotAI(ai);
-
-            // tell the world session that they now manage this new bot
-            (masterSession->m_playerBots)[guid] = botPlayer;
-
-            // if bot is in a group and master is not in group then
-            // have bot leave their group
-            if (botPlayer->GetGroup() &&
-                (masterSession->GetPlayer()->GetGroup() == NULL ||
-                masterSession->GetPlayer()->GetGroup()->IsMember(guid) == false))
-                botPlayer->RemoveFromGroup();
-
-            // sometimes master can lose leadership, pass leadership to master check
-            const uint64 masterGuid = masterSession->GetPlayer()->GetGUID();
-            if (masterSession->GetPlayer()->GetGroup() && 
-                ! masterSession->GetPlayer()->GetGroup()->IsLeader(masterGuid))
-                masterSession->GetPlayer()->GetGroup()->ChangeLeader(masterGuid);
+            botSession->HandlePlayerLogin(lqh); // will delete lqh
+            masterSession->GetPlayer()->GetPlayerbotMgr()->OnBotLogin(botSession->GetPlayer());
         }
 } chrHandler;
 
@@ -1463,15 +1439,18 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket &recv_data)
     SendPacket(&data);
 }
 
-// Playerbot mod - add new player bot for this master. This definition must appear in this file
-// because it utilizes the CharacterHandler class which isn't accessible outside this file
-void WorldSession::AddPlayerBot(uint64 playerGuid)
+// Playerbot mod
+void PlayerbotMgr::AddPlayerBot(uint64 playerGuid)
 {
     // has bot already been added?
-    if (GetPlayerBot(playerGuid) != 0)
+    if (objmgr.GetPlayer(playerGuid))
         return;
 
-    LoginQueryHolder *holder = new LoginQueryHolder(GetAccountId(), playerGuid);
+    uint32 accountId = objmgr.GetPlayerAccountIdByGUID(playerGuid);
+    if (accountId == 0)
+        return;
+
+    LoginQueryHolder *holder = new LoginQueryHolder(accountId, playerGuid);
     if(!holder->Initialize())
     {
         delete holder;                                      // delete all unprocessed queries

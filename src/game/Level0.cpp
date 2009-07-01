@@ -30,7 +30,7 @@
 #include "revision.h"
 #include "revision_nr.h"
 #include "Util.h"
-#include "PlayerbotAI.h"
+#include "PlayerbotMgr.h"
 
 bool ChatHandler::HandleHelpCommand(const char* args)
 {
@@ -311,26 +311,35 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
         return false;
     }
 
+    // create the playerbot manager if it doesn't already exist
+    PlayerbotMgr* mgr = m_session->GetPlayer()->GetPlayerbotMgr();
+    if (!mgr)
+    {
+        mgr = new PlayerbotMgr(m_session->GetPlayer());
+        m_session->GetPlayer()->SetPlayerbotMgr(mgr);
+    }
+
     if (cmdStr == "add" || cmdStr == "login")
     {
-        if (m_session->GetPlayerBot(guid) != NULL) {
+        if (mgr->GetPlayerBot(guid)) {
             PSendSysMessage("Bot already exists in world.");
             SetSentErrorMessage(true);
             return false;
         }
-        m_session->AddPlayerBot(guid);
+        mgr->AddPlayerBot(guid);
         PSendSysMessage("Bot added successfully.");
     }
     else if (cmdStr == "remove" || cmdStr == "logout")
     {
-        if (m_session->GetPlayerBot(guid) == NULL) {
+        if (! mgr->GetPlayerBot(guid)) {
             PSendSysMessage("Bot can not be removed because bot does not exist in world.");
             SetSentErrorMessage(true);
             return false;
         }
-        m_session->LogoutPlayerBot(guid, true);
+        mgr->LogoutPlayerBot(guid);
         PSendSysMessage("Bot removed successfully.");
     }
+    /*
 	else if (cmdStr == "co" || cmdStr == "combatorder")
 	{
 		Unit *target = 0;
@@ -367,6 +376,7 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
         }
 		m_session->GetPlayerBot( guid )->GetPlayerbotAI()->SetCombatOrderByStr( orderStr, target );
 	}
+    */
 
     return true;
 }

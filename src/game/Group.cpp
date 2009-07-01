@@ -31,6 +31,7 @@
 #include "InstanceSaveMgr.h"
 #include "MapInstanced.h"
 #include "Util.h"
+#include "PlayerbotMgr.h"
 
 Group::Group()
 {
@@ -311,15 +312,10 @@ bool Group::AddMember(const uint64 &guid, const char* name)
 uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
 {
     //Playerbot mod - if master leaves group, all bots leave group
-    if(Player* const player = objmgr.GetPlayer( guid ))
     {
-        for (PlayerBotMap::const_iterator it = player->GetSession()->GetPlayerBotsBegin();
-            it != player->GetSession()->GetPlayerBotsEnd(); ++it)
-        {
-            Player* const bot = it->second;
-            if (bot->IsInSameGroupWith(player))
-                RemoveMember(bot->GetGUID(), 0);
-        }
+        Player* const player = objmgr.GetPlayer(guid);
+        if (player && player->GetPlayerbotMgr())
+            player->GetPlayerbotMgr()->RemoveAllBotsFromGroup();
     }
     //END Playerbot mod
 

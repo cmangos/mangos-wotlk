@@ -41,6 +41,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "PlayerbotMgr.h"
 
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
@@ -2303,6 +2304,7 @@ void Creature::SetActiveObjectState( bool on )
 
 void Creature::LoadBotMenu(Player *pPlayer)
 {
+    if (pPlayer->GetPlayerbotAI()) return;
     uint64 guid = pPlayer->GetGUID();
     uint32 accountId = objmgr.GetPlayerAccountIdByGUID(guid);
     QueryResult *result = CharacterDatabase.PQuery("SELECT guid, name FROM characters WHERE account='%d'",accountId);
@@ -2319,14 +2321,17 @@ void Creature::LoadBotMenu(Player *pPlayer)
         }
         else
         {
-            if(pPlayer->GetSession()->GetPlayerBot(guidlo) == NULL) // add (if not already in game)
+            // create the manager if it doesn't already exist
+            if (! pPlayer->GetPlayerbotMgr())
+                pPlayer->SetPlayerbotMgr(new PlayerbotMgr(pPlayer));
+            if(pPlayer->GetPlayerbotMgr()->GetPlayerBot(guidlo) == NULL) // add (if not already in game)
             {
                 word += "Recruit ";
                 word += name;
                 word += " as a Bot.";
                 pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8)9, word, guidlo, guidlo, word, false);
             }
-            else if(pPlayer->GetSession()->GetPlayerBot(guidlo) != NULL) // remove (if in game)
+            else if(pPlayer->GetPlayerbotMgr()->GetPlayerBot(guidlo) != NULL) // remove (if in game)
             {
                 word += "Dismiss ";
                 word += name;

@@ -209,6 +209,8 @@ libmangosgame_a_SOURCES = \
 	PetitionsHandler.cpp \
 	Player.cpp \
 	Player.h \
+	PlayerbotMgr.cpp \
+	PlayerbotMgr.h \
 	PlayerbotAI.cpp \
 	PlayerbotAI.h \
 	PlayerbotClassAI.cpp \

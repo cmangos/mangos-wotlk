@@ -35,6 +35,7 @@
 #include "BattleGroundMgr.h"
 #include "BattleGround.h"
 #include "Guild.h"
+#include "PlayerbotMgr.h"
 
 void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
 {
@@ -344,17 +345,19 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-    if(unit->isBotGiver())
+    if(unit->isBotGiver() && ! _player->GetPlayerbotAI())
     {
+        if (! _player->GetPlayerbotMgr())
+            _player->SetPlayerbotMgr(new PlayerbotMgr(_player));
         WorldSession * m_session = _player->GetSession();
         uint64 guidlo = _player->PlayerTalkClass->GossipOptionSender(option);
-        if(m_session->GetPlayerBot(guidlo) != NULL)
+        if(_player->GetPlayerbotMgr()->GetPlayerBot(guidlo) != NULL)
         {
-            m_session->LogoutPlayerBot(guidlo, true);
+            _player->GetPlayerbotMgr()->LogoutPlayerBot(guidlo);
         }
-        else if(m_session->GetPlayerBot(guidlo) == NULL)
+        else if(_player->GetPlayerbotMgr()->GetPlayerBot(guidlo) == NULL)
         {
-            m_session->AddPlayerBot(guidlo);
+            _player->GetPlayerbotMgr()->AddPlayerBot(guidlo);
         }
         _player->PlayerTalkClass->CloseGossip();
     }

@@ -414,7 +414,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
                 continue;
 
             // first rezz em
-            if ( !tPlayer->isAlive() && !tPlayer->IsPlayerbot() )
+            if ( !tPlayer->isAlive() && !tPlayer->GetPlayerbotAI() )
             {
                 std::string msg = "rezzing ";
                 msg += tPlayer->GetName();

@@ -9,6 +9,7 @@ class Unit;
 class Object;
 class Item;
 class PlayerbotClassAI;
+class PlayerbotMgr;
 
 #define BOTLOOT_DISTANCE 25.0f
 
@@ -83,8 +84,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         typedef std::map<uint64,AttackerInfo> AttackerInfoList;
 
     public:
-    // ******* Stuff the outside world calls ****************************
-        PlayerbotAI(Player* const master, Player* const bot);
+        PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot);
         virtual ~PlayerbotAI();
 
         // This is called from Unit.cpp and is called every second (I think)
@@ -105,22 +105,10 @@ class MANGOS_DLL_SPEC PlayerbotAI
         // teleportation
         void HandleTeleportAck();
 
-        // This is called whenever the master sends a packet to the server.
-        // These packets can be viewed, but not edited.
-        // It allows bot creators to craft AI in response to a master's actions.
-        // For a list of opcodes that can be caught see Opcodes.cpp (CMSG_* opcodes only)
-        // Notice: that this is static which means it is called once for all bots of the master.
-        static void HandleMasterIncomingPacket(const WorldPacket& packet, WorldSession& masterSession);
-        static void HandleMasterOutgoingPacket(const WorldPacket& packet, WorldSession& masterSession);
-
         // Returns what kind of situation we are in so the ai can react accordingly
         ScenarioType GetScenarioType() {return m_ScenarioType;}
 
         PlayerbotClassAI* GetClassAI() {return m_classAI;}
-
-    //protected:
-
-    // ******* Utilities ***************************************************
 
         // finds spell ID for matching substring args
         // in priority of full text match, spells not taking reagents, and highest rank
@@ -183,7 +171,9 @@ class MANGOS_DLL_SPEC PlayerbotAI
 		void DoCombatMovement();
         void SetIgnoreUpdateTime(uint8 t) {m_ignoreAIUpdatesUntilTime=time(0) + t; };
 
-        Player *GetPlayerBot() {return m_bot;}
+        Player *GetPlayerBot() const {return m_bot;}
+        Player *GetPlayer() const {return m_bot;}
+        Player *GetMaster() const;
 
         BotState GetState() { return m_botState; };
         void SetState( BotState state );
@@ -223,7 +213,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
 
         // it is safe to keep these back reference pointers because m_bot
         // owns the "this" object and m_master owns m_bot. The owner always cleans up.
-        Player* const m_master;
+        PlayerbotMgr* const m_mgr;
         Player* const m_bot;
         PlayerbotClassAI* m_classAI;
 
