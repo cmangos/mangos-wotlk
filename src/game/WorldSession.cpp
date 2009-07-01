@@ -439,10 +439,6 @@ void WorldSession::LogoutPlayer(bool Save)
         ///- Delete the player object
         _player->CleanupsBeforeDelete();                    // do some cleanup before deleting to prevent crash at crossreferences to already deleted data
 
-		sSocialMgr.RemovePlayerSocial (_player->GetGUIDLow ());
-
-        uint32 guid = _player->GetGUIDLow();
-
         delete _player;
         _player = NULL;
 
@@ -452,7 +448,14 @@ void WorldSession::LogoutPlayer(bool Save)
 
         ///- Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
         //No SQL injection as AccountId is uint32
+        //CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE account = '%u'",
+        //    GetAccountId());
+
+        // Playerbot mod: commented out above and do this instead
+        uint32 guid = _player->GetGUIDLow();
         CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE guid = '%u'", guid);
+        // END Playerbot mod
+
         sLog.outDebug( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
     }
 

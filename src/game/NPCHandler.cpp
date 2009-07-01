@@ -280,6 +280,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
+    // Playerbot mod
     if(unit->isBotGiver())
     {
         GetPlayer()->TalkedToCreature(unit->GetEntry(),unit->GetGUID());
@@ -345,6 +346,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
+    // Playerbot mod
     if(unit->isBotGiver() && ! _player->GetPlayerbotAI())
     {
         if (! _player->GetPlayerbotMgr())

@@ -272,10 +272,11 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
     else
         setFaction(GetCreatureInfo()->faction_A);
 
-    //SetUInt32Value(UNIT_NPC_FLAGS,GetCreatureInfo()->npcflag);
+    // Playerbot START
     if(isBotGiver())
         SetUInt32Value(UNIT_NPC_FLAGS, 1);
     else
+    // Playerbot END
     SetUInt32Value(UNIT_NPC_FLAGS,GetCreatureInfo()->npcflag);
 
     SetAttackTime(BASE_ATTACK,  GetCreatureInfo()->baseattacktime);
@@ -732,6 +733,8 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
 
     // lazy loading single time at use
     LoadGossipOptions();
+
+    // Playerbot mod
     if(isBotGiver())
         LoadBotMenu(pPlayer);
 
@@ -954,8 +957,10 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             player->GetSession()->SendBattlegGroundList( GetGUID(), bgTypeId );
             break;
         }
+        // Playerbot START
         case GOSSIP_OPTION_BOT:
             break;
+        // Playerbot END
         default:
             OnPoiSelect( player, gossip );
             break;

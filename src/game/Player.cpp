@@ -20465,7 +20465,6 @@ void Player::SendClearCooldown( uint32 spell_id, Unit* target )
     data << uint32(spell_id);
     data << uint64(target->GetGUID());
     SendDirectMessage(&data);
-
 }
 
 void Player::BuildTeleportAckMsg( WorldPacket *data, float x, float y, float z, float ang ) const
