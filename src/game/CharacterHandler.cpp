@@ -586,6 +586,27 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerLoginCallback, holder);
 }
 
+// Playerbot mod. Can't easily reuse HandlePlayerLoginOpcode for logging in bots because it assumes
+// a WorldSession exists for the bot. The WorldSession for a bot is created after the character is loaded.
+void PlayerbotMgr::AddPlayerBot(uint64 playerGuid)
+{
+    // has bot already been added?
+    if (objmgr.GetPlayer(playerGuid))
+        return;
+
+    uint32 accountId = objmgr.GetPlayerAccountIdByGUID(playerGuid);
+    if (accountId == 0)
+        return;
+
+    LoginQueryHolder *holder = new LoginQueryHolder(accountId, playerGuid);
+    if(!holder->Initialize())
+    {
+        delete holder;                                      // delete all unprocessed queries
+        return;
+    }
+    CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerBotLoginCallback, holder);
+}
+
 void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 {
     uint64 playerGuid = holder->GetGuid();
@@ -1437,24 +1458,4 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket &recv_data)
     WorldPacket data(SMSG_EQUIPMENT_SET_USE_RESULT, 1);
     data << uint8(0);                                       // 4 - equipment swap failed - inventory is full
     SendPacket(&data);
-}
-
-// Playerbot mod
-void PlayerbotMgr::AddPlayerBot(uint64 playerGuid)
-{
-    // has bot already been added?
-    if (objmgr.GetPlayer(playerGuid))
-        return;
-
-    uint32 accountId = objmgr.GetPlayerAccountIdByGUID(playerGuid);
-    if (accountId == 0)
-        return;
-
-    LoginQueryHolder *holder = new LoginQueryHolder(accountId, playerGuid);
-    if(!holder->Initialize())
-    {
-        delete holder;                                      // delete all unprocessed queries
-        return;
-    }
-    CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerBotLoginCallback, holder);
 }

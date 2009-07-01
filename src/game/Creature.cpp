@@ -41,7 +41,6 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
-#include "PlayerbotMgr.h"
 
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
@@ -1546,16 +1545,10 @@ void Creature::setDeathState(DeathState s)
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
         // Playerbot mod
-        AddMonsterMoveFlag(MONSTER_MOVE_WALK);
-        //Deleted in 8077 
-		//AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
-        //SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
-        if(isBotGiver())
-            SetUInt32Value(UNIT_NPC_FLAGS, 1);
-        else
-        // End Playerbot mod
+        if(isBotGiver()) SetUInt32Value(UNIT_NPC_FLAGS, 1);
+        else AddMonsterMoveFlag(MONSTER_MOVE_WALK);
+        // original: AddMonsterMoveFlag(MONSTER_MOVE_WALK);
 
-        AddMonsterMoveFlag(MONSTER_MOVE_WALK);
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
         clearUnitState(UNIT_STAT_ALL_STATE);
         i_motionMaster.Clear();
@@ -2300,56 +2293,6 @@ void Creature::SetActiveObjectState( bool on )
 
     if(world)
         map->Add(this);
-}
-
-void Creature::LoadBotMenu(Player *pPlayer)
-{
-    if (pPlayer->GetPlayerbotAI()) return;
-    uint64 guid = pPlayer->GetGUID();
-    uint32 accountId = objmgr.GetPlayerAccountIdByGUID(guid);
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, name FROM characters WHERE account='%d'",accountId);
-    do
-    {
-        Field *fields = result->Fetch();
-        uint64 guidlo = fields[0].GetUInt64();
-        std::string name = fields[1].GetString();
-        std::string word = "";
-
-        if( (guid == 0) || (guid == guidlo) )
-        {
-            //not found or himself
-        }
-        else
-        {
-            // create the manager if it doesn't already exist
-            if (! pPlayer->GetPlayerbotMgr())
-                pPlayer->SetPlayerbotMgr(new PlayerbotMgr(pPlayer));
-            if(pPlayer->GetPlayerbotMgr()->GetPlayerBot(guidlo) == NULL) // add (if not already in game)
-            {
-                word += "Recruit ";
-                word += name;
-                word += " as a Bot.";
-                pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8)9, word, guidlo, guidlo, word, false);
-            }
-            else if(pPlayer->GetPlayerbotMgr()->GetPlayerBot(guidlo) != NULL) // remove (if in game)
-            {
-                word += "Dismiss ";
-                word += name;
-                word += " from duty.";
-                pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8)0, word, guidlo, guidlo, word, false);
-            }
-        }
-    }
-    while (result->NextRow());
-    delete result;
-}
-
-bool Creature::isBotGiver()
-{
-    std::string scriptname = GetScriptName();
-    if( scriptname == "bot_giver" )
-        return true;
-    return false;
 }
 
 void Creature::SendMonsterMoveWithSpeedToCurrentDestination(Player* player)

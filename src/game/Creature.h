@@ -483,7 +483,11 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isTotem() const { return m_isTotem; }
         bool isRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool isCivilian() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
+
+        // Playerbot mod - adds functionality to load/unload bots from NPC, also need to apply SQL scripts
         bool isBotGiver();
+        void LoadBotMenu(Player *pPlayer);
+
         bool canWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
         bool canSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
         bool canFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
@@ -580,7 +584,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 GetGossipTextId(uint32 action, uint32 zoneid);
         uint32 GetNpcTextId();
         void LoadGossipOptions();
-        void LoadBotMenu(Player *pPlayer);
         GossipOption const* GetGossipOption( uint32 id ) const;
         void addGossipOption(GossipOption const& gso) { m_goptions.push_back(gso); }
 

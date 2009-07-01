@@ -6,6 +6,8 @@
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "GossipDef.h"
+#include "Chat.h"
+#include "Language.h"
 
 class LoginQueryHolder;
 class CharacterHandler;
@@ -460,4 +462,168 @@ void PlayerbotMgr::RemoveAllBotsFromGroup()
         if (bot->IsInSameGroupWith(m_master))
             m_master->GetGroup()->RemoveMember(bot->GetGUID(), 0);
     }
+}
+
+bool ChatHandler::HandlePlayerbotCommand(const char* args)
+{
+    if (! m_session)
+    {
+        PSendSysMessage("You may only add bots from an active session");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (!*args)
+    {
+        PSendSysMessage("usage: add PLAYERNAME  or  remove PLAYERNAME");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    char *cmd = strtok ((char*)args, " ");
+    char *charname = strtok (NULL, " ");
+    if (!cmd || !charname)
+    {
+        PSendSysMessage("usage: add PLAYERNAME  or  remove PLAYERNAME");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    std::string cmdStr = cmd;
+    std::string charnameStr = charname;
+
+    if(!normalizePlayerName(charnameStr))
+        return false;
+
+    uint64 guid = objmgr.GetPlayerGUIDByName(charnameStr.c_str());
+    if (guid == 0 || (guid == m_session->GetPlayer()->GetGUID()))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 accountId = objmgr.GetPlayerAccountIdByGUID(guid);
+    if (accountId != m_session->GetAccountId()) {
+        PSendSysMessage("You may only add bots from the same account.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    // create the playerbot manager if it doesn't already exist
+    PlayerbotMgr* mgr = m_session->GetPlayer()->GetPlayerbotMgr();
+    if (!mgr)
+    {
+        mgr = new PlayerbotMgr(m_session->GetPlayer());
+        m_session->GetPlayer()->SetPlayerbotMgr(mgr);
+    }
+
+    if (cmdStr == "add" || cmdStr == "login")
+    {
+        if (mgr->GetPlayerBot(guid)) {
+            PSendSysMessage("Bot already exists in world.");
+            SetSentErrorMessage(true);
+            return false;
+        }
+        mgr->AddPlayerBot(guid);
+        PSendSysMessage("Bot added successfully.");
+    }
+    else if (cmdStr == "remove" || cmdStr == "logout")
+    {
+        if (! mgr->GetPlayerBot(guid)) {
+            PSendSysMessage("Bot can not be removed because bot does not exist in world.");
+            SetSentErrorMessage(true);
+            return false;
+        }
+        mgr->LogoutPlayerBot(guid);
+        PSendSysMessage("Bot removed successfully.");
+    }
+	else if (cmdStr == "co" || cmdStr == "combatorder")
+	{
+		Unit *target = 0;
+		char *orderChar = strtok( NULL, " " );
+		if( !orderChar ) {
+			PSendSysMessage("Syntax error: .bot co <botName> <order=reset|tank|assist|heal|protect> [targetPlayer]");
+            SetSentErrorMessage(true);
+            return false;
+		}
+		std::string orderStr = orderChar;
+		if( orderStr == "protect" || orderStr == "assist" ) {
+			char *targetChar = strtok( NULL, " " );
+			uint64 targetGUID = m_session->GetPlayer()->GetSelection();
+			if( !targetChar && !targetGUID ) {
+				PSendSysMessage("Combat orders protect and assist expect a target either by selection or by giving target player in command string!");
+		        SetSentErrorMessage(true);
+	            return false;
+			}
+			std::string targetStr = targetChar;
+			if( targetChar ) {
+				targetGUID = objmgr.GetPlayerGUIDByName( targetStr.c_str() );
+			}
+			target = ObjectAccessor::GetUnit( *m_session->GetPlayer(), targetGUID );
+			if( !target ) {
+				PSendSysMessage("Invalid target for combat order protect or assist!");
+		        SetSentErrorMessage(true);
+	            return false;
+			}
+		}
+	    if (mgr->GetPlayerBot(guid) == NULL) {
+            PSendSysMessage("Bot can not receive combat order because bot does not exist in world.");
+		    SetSentErrorMessage(true);
+	        return false;
+        }
+		mgr->GetPlayerBot( guid )->GetPlayerbotAI()->SetCombatOrderByStr( orderStr, target );
+	}
+
+    return true;
+}
+
+void Creature::LoadBotMenu(Player *pPlayer)
+{
+    if (pPlayer->GetPlayerbotAI()) return;
+    uint64 guid = pPlayer->GetGUID();
+    uint32 accountId = objmgr.GetPlayerAccountIdByGUID(guid);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, name FROM characters WHERE account='%d'",accountId);
+    do
+    {
+        Field *fields = result->Fetch();
+        uint64 guidlo = fields[0].GetUInt64();
+        std::string name = fields[1].GetString();
+        std::string word = "";
+
+        if( (guid == 0) || (guid == guidlo) )
+        {
+            //not found or himself
+        }
+        else
+        {
+            // create the manager if it doesn't already exist
+            if (! pPlayer->GetPlayerbotMgr())
+                pPlayer->SetPlayerbotMgr(new PlayerbotMgr(pPlayer));
+            if(pPlayer->GetPlayerbotMgr()->GetPlayerBot(guidlo) == NULL) // add (if not already in game)
+            {
+                word += "Recruit ";
+                word += name;
+                word += " as a Bot.";
+                pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8)9, word, guidlo, guidlo, word, false);
+            }
+            else if(pPlayer->GetPlayerbotMgr()->GetPlayerBot(guidlo) != NULL) // remove (if in game)
+            {
+                word += "Dismiss ";
+                word += name;
+                word += " from duty.";
+                pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8)0, word, guidlo, guidlo, word, false);
+            }
+        }
+    }
+    while (result->NextRow());
+    delete result;
+}
+
+bool Creature::isBotGiver()
+{
+    std::string scriptname = GetScriptName();
+    if( scriptname == "bot_giver" )
+        return true;
+    return false;
 }
