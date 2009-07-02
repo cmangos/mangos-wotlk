@@ -439,6 +439,9 @@ void WorldSession::LogoutPlayer(bool Save)
         ///- Delete the player object
         _player->CleanupsBeforeDelete();                    // do some cleanup before deleting to prevent crash at crossreferences to already deleted data
 
+        // Playerbot - remember player GUID for update SQL below
+        uint32 guid = _player->GetGUIDLow();
+
         delete _player;
         _player = NULL;
 
@@ -451,10 +454,8 @@ void WorldSession::LogoutPlayer(bool Save)
         //CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE account = '%u'",
         //    GetAccountId());
 
-        // Playerbot mod: commented out above and do this instead
-        uint32 guid = _player->GetGUIDLow();
+        // Playerbot mod: commented out above and do this one instead
         CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE guid = '%u'", guid);
-        // END Playerbot mod
 
         sLog.outDebug( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
     }
