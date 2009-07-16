@@ -24,7 +24,7 @@ PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, Pl
     ARCANE_SHOT          = ai->getSpellId("arcane shot");
     CONCUSSIVE_SHOT      = ai->getSpellId("concussive shot");
     DISTRACTING_SHOT     = ai->getSpellId("distracting shot");
-    MULTI_SHOT           = ai->getSpellId("multi shot");
+    MULTI_SHOT           = ai->getSpellId("multi-shot");
 	EXPLOSIVE_SHOT       = ai->getSpellId("explosive shot");
     SERPENT_STING        = ai->getSpellId("serpent sting");
     SCORPID_STING        = ai->getSpellId("scorpid sting");

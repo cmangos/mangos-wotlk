@@ -235,7 +235,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 LastSpellShadowMagic = LastSpellShadowMagic +1;
                 break;
             }
-           else if (SCREAM > 0 && LastSpellShadowMagic <3 && ai->GetManaPercent() >= 60)
+           else if (SCREAM > 0 && LastSpellShadowMagic <3 && ai->GetAttackerCount()>=3 && ai->GetManaPercent() >= 60)
             {
                 GetAI()->TellMaster("I'm casting scream.");
                 ai->CastSpell(SCREAM);
