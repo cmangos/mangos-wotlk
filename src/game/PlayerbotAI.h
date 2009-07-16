@@ -179,6 +179,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void SetState( BotState state );
         void SetQuestNeedItems();
         void SendQuestItemList( Player& player );
+		void SendOrders( Player& player );
         bool FollowCheckTeleport( WorldObject &obj );
         void DoLoot();
 

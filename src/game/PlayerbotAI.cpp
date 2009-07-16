@@ -94,6 +94,9 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
 	m_targetAssist = 0;
 	m_targetProtect = 0;
 
+	// start following master (will also teleport bot to master)
+	SetMovementOrder( MOVEMENT_FOLLOW, GetMaster() );
+
     // get class specific ai
     switch (m_bot->getClass())
     {
@@ -334,6 +337,47 @@ void PlayerbotAI::SendQuestItemList( Player& player )
 
     TellMaster( "Here's a list of all items I need for quests:" );
     TellMaster( out.str().c_str() );
+}
+
+void PlayerbotAI::SendOrders( Player& player )
+{
+	std::ostringstream out;
+	
+	if( !m_combatOrder )
+		out << "Got no combat orders!";
+	else if( m_combatOrder&ORDERS_TANK )
+		out << "I TANK";
+	else if( m_combatOrder&ORDERS_ASSIST )
+		out << "I ASSIST" << (m_targetAssist?m_targetAssist->GetName():"unknown") << " ";
+	else if( m_combatOrder&ORDERS_HEAL )
+		out << "I HEAL";
+	if( (m_combatOrder&ORDERS_PRIMARY) && (m_combatOrder&ORDERS_SECONDARY) )
+		out << " and ";
+	if( m_combatOrder&ORDERS_PROTECT )
+		out << "I PROTECT" << (m_targetProtect?m_targetProtect->GetName():"unknown");
+    
+	out << ". " << (IsInCombat()?"I'm in COMBAT! ":"Not in combat. ");
+    out << "Current state is ";
+    if( m_botState == BOTSTATE_NORMAL )
+        out << "NORMAL";
+    else if( m_botState == BOTSTATE_COMBAT )
+        out << "COMBAT";
+    else if( m_botState == BOTSTATE_DEAD )
+        out << "DEAD";
+    else if( m_botState == BOTSTATE_DEADRELEASED )
+        out << "RELEASED";
+    else if( m_botState == BOTSTATE_LOOTING )
+        out << "LOOTING";
+    out << ". Movement order is ";
+    if( m_movementOrder == MOVEMENT_NONE )
+        out << "NONE";
+    else if( m_movementOrder == MOVEMENT_FOLLOW )
+        out << "FOLLOW " << (m_followTarget?m_followTarget->GetName():"unknown");
+    else if( m_movementOrder == MOVEMENT_STAY )
+        out << "STAY";
+    out << ". Got " << m_attackerInfo.size() << "attacker(s) in list.";
+
+	TellMaster( out.str().c_str() );
 }
 
 // handle outgoing packets the server would send to the client
@@ -1102,12 +1146,24 @@ void PlayerbotAI::GetCombatTarget( Unit* forcedTarget )
     // update attacker info now
     UpdateAttackerInfo();
 
+	// check for attackers on protected unit, and make it a forcedTarget if any
+	if( !forcedTarget && (m_combatOrder&ORDERS_PROTECT) && m_targetProtect!=0 )
+		forcedTarget = FindAttacker( (ATTACKERINFOTYPE)(AIT_VICTIMNOTSELF|AIT_HIGHESTTHREAT), m_targetProtect );
+
 	// we already have a target and we are not forced to change it
 	if( m_targetCombat && !forcedTarget )
 		return;
 
-    //Unit* thingToAttack = GetMaster()->getAttackerForHelper();
-    m_targetCombat = ( !forcedTarget ? FindAttacker() : forcedTarget );
+	// are we forced on a target?
+	if( forcedTarget )
+		m_targetCombat = forcedTarget;
+	// do we have to assist someone?
+	if( !m_targetCombat && (m_combatOrder&ORDERS_ASSIST) && m_targetAssist!=0 )
+		m_targetCombat = FindAttacker( (ATTACKERINFOTYPE)(AIT_VICTIMNOTSELF|AIT_LOWESTTHREAT), m_targetAssist );
+	// are there any other attackers?
+	if( !m_targetCombat )
+		m_targetCombat = FindAttacker();
+	// no attacker found anyway
     if (!m_targetCombat)
         return;
 
@@ -2218,9 +2274,12 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (text == "reset")
     {
         SetState( BOTSTATE_NORMAL );
+		MovementReset();
         SetQuestNeedItems();
+		UpdateAttackerInfo();
         m_lootCreature.clear();
         m_lootCurrent = 0;
+		m_targetCombat = 0;
 		// do we want to reset all states on this command?
 //		m_combatOrder = ORDERS_NONE;
 //		m_targetCombat = 0;
@@ -2229,6 +2288,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     }
     else if (text == "report")
         SendQuestItemList( *GetMaster() );
+    else if (text == "orders")
+        SendOrders( *GetMaster() );
     else if (text == "follow" || text == "come")
         SetMovementOrder( MOVEMENT_FOLLOW, GetMaster() );
     else if (text == "stay" || text == "stop")
