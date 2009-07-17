@@ -376,7 +376,7 @@ void PlayerbotAI::SendOrders( Player& player )
     else if( m_movementOrder == MOVEMENT_STAY )
         out << "STAY";
     out << ". Got " << m_attackerInfo.size() << " attacker(s) in list.";
-    out << " Next action in " << (m_ignoreAIUpdatesUntilTime-mktime(0)) << "sec.";
+    out << " Next action in " << (m_ignoreAIUpdatesUntilTime-time(0)) << "sec.";
 
 	TellMaster( out.str().c_str() );
 }
