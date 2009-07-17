@@ -348,13 +348,13 @@ void PlayerbotAI::SendOrders( Player& player )
 	else if( m_combatOrder&ORDERS_TANK )
 		out << "I TANK";
 	else if( m_combatOrder&ORDERS_ASSIST )
-		out << "I ASSIST" << (m_targetAssist?m_targetAssist->GetName():"unknown") << " ";
+		out << "I ASSIST " << (m_targetAssist?m_targetAssist->GetName():"unknown");
 	else if( m_combatOrder&ORDERS_HEAL )
 		out << "I HEAL";
 	if( (m_combatOrder&ORDERS_PRIMARY) && (m_combatOrder&ORDERS_SECONDARY) )
 		out << " and ";
 	if( m_combatOrder&ORDERS_PROTECT )
-		out << "I PROTECT" << (m_targetProtect?m_targetProtect->GetName():"unknown");
+		out << "I PROTECT " << (m_targetProtect?m_targetProtect->GetName():"unknown");
     
 	out << ". " << (IsInCombat()?"I'm in COMBAT! ":"Not in combat. ");
     out << "Current state is ";
@@ -375,7 +375,8 @@ void PlayerbotAI::SendOrders( Player& player )
         out << "FOLLOW " << (m_followTarget?m_followTarget->GetName():"unknown");
     else if( m_movementOrder == MOVEMENT_STAY )
         out << "STAY";
-    out << ". Got " << m_attackerInfo.size() << "attacker(s) in list.";
+    out << ". Got " << m_attackerInfo.size() << " attacker(s) in list.";
+    out << " Next action in " << (m_ignoreAIUpdatesUntilTime-mktime(0)) << "sec.";
 
 	TellMaster( out.str().c_str() );
 }
@@ -1800,7 +1801,10 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
 
         // bot was in combat recently - loot now
         else if (m_botState == BOTSTATE_COMBAT)
+        {
             SetState( BOTSTATE_LOOTING );
+            m_attackerInfo.clear();
+        }
         else if (m_botState == BOTSTATE_LOOTING)
             DoLoot();
 /*

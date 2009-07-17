@@ -126,6 +126,25 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     return;
                 }
 
+                // emote to attack selected target
+                case TEXTEMOTE_POINT:
+                {
+                    uint64 attackOnGuid = m_master->GetSelection();
+                    if( !attackOnGuid ) return;
+
+                    Unit* thingToAttack = ObjectAccessor::GetUnit(*m_master, attackOnGuid);
+                    if( !thingToAttack ) return;
+
+                    Player *bot = 0;
+                    for( PlayerBotMap::iterator itr=m_playerBots.begin(); itr!=m_playerBots.end(); ++itr )
+                    {
+                        bot = itr->second;
+                        if (!bot->IsFriendlyTo(thingToAttack) && bot->IsWithinLOSInMap(thingToAttack))
+                            bot->GetPlayerbotAI()->GetCombatTarget( thingToAttack );
+                    }
+                    return;
+                }
+
                 // emote to stay
                 case TEXTEMOTE_STAND:
                 {
