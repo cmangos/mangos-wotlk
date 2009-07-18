@@ -47,6 +47,7 @@ PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, Player
     FROST_ARMOR             = ai->getSpellId("frost armor");
     ICE_ARMOR               = ai->getSpellId("ice armor");
 	ICE_BLOCK               = ai->getSpellId("ice block");
+	COLD_SNAP               = ai->getSpellId("cold snap");
 }
 
 PlayerbotMageAI::~PlayerbotMageAI() {}
