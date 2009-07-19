@@ -262,21 +262,28 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 LastSpellShadowMagic = LastSpellShadowMagic +1;
                 break;
             }
-            else if (VAMPIRIC_TOUCH > 0 && LastSpellShadowMagic <6 && !pTarget->HasAura(VAMPIRIC_TOUCH, 0) && ai->GetManaPercent() >= 18)
+			else if (SHADOW_PROTECTION > 0 && LastSpellShadowMagic <6 && ai->GetManaPercent() >= 60)
+            {
+                ai->CastSpell(SHADOW_PROTECTION, *pTarget);
+                SpellSequence = SPELL_DISCIPLINE;
+                LastSpellShadowMagic = LastSpellShadowMagic +1;
+                break;
+            }
+            else if (VAMPIRIC_TOUCH > 0 && LastSpellShadowMagic <7 && !pTarget->HasAura(VAMPIRIC_TOUCH, 0) && ai->GetManaPercent() >= 18)
             {
                 ai->CastSpell(VAMPIRIC_TOUCH, *pTarget);
                 SpellSequence = SPELL_DISCIPLINE;
                 LastSpellShadowMagic = LastSpellShadowMagic +1;
                 break;
             }
-            else if (SHADOWFIEND > 0 && LastSpellShadowMagic <7)
+            else if (SHADOWFIEND > 0 && LastSpellShadowMagic <8)
             {
                 ai->CastSpell(SHADOWFIEND);
                 SpellSequence = SPELL_DISCIPLINE;
                 LastSpellShadowMagic = LastSpellShadowMagic +1;
                 break;
             }
-            else if (MIND_SEAR > 0 && LastSpellShadowMagic <8 && ai->GetAttackerCount()>=3 && ai->GetManaPercent() >= 28)
+            else if (MIND_SEAR > 0 && LastSpellShadowMagic <9 && ai->GetAttackerCount()>=3 && ai->GetManaPercent() >= 28)
             {
                 ai->CastSpell(MIND_SEAR, *pTarget);
 				ai->SetIgnoreUpdateTime(5);
@@ -284,7 +291,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 LastSpellShadowMagic = LastSpellShadowMagic +1;
                 break;
             }
-            else if (LastSpellShadowMagic > 9)
+            else if (LastSpellShadowMagic > 10)
             {
                 LastSpellShadowMagic = 0;
                 SpellSequence = SPELL_DISCIPLINE;
@@ -362,11 +369,12 @@ void PlayerbotPriestAI::DoNonCombatActions()
     if (FORTITUDE > 0)
         (!m_bot->HasAura(FORTITUDE, 0) && ai->CastSpell (FORTITUDE, *m_bot));
 
-	if (DIVINE_SPIRIT > 0)
-        (!m_bot->HasAura(DIVINE_SPIRIT, 0) && ai->CastSpell (DIVINE_SPIRIT, *m_bot));
-
     if (INNER_FIRE > 0)
         (!m_bot->HasAura(INNER_FIRE, 0) && ai->CastSpell (INNER_FIRE, *m_bot));
+
+	// buff master
+	if (FORTITUDE > 0)
+		(!GetMaster()->HasAura(FORTITUDE, 0) && ai->CastSpell(FORTITUDE,*(GetMaster())) );
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
@@ -403,27 +411,25 @@ void PlayerbotPriestAI::DoNonCombatActions()
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player *tPlayer = objmgr.GetPlayer(uint64 (itr->guid));
-            if( !tPlayer || !tPlayer->isAlive() )
+            if( !tPlayer )
                 continue;
 
-			/* // first rezz em (*removed: doesnt work)
+            // first rezz em
             if ( !tPlayer->isAlive() && !tPlayer->GetPlayerbotAI() )
             {
                 std::string msg = "rezzing ";
                 msg += tPlayer->GetName();
                 GetPlayerBot()->Say(msg, LANG_UNIVERSAL);
-                GetAI()->CastSpell(REZZ, *tPlayer);
+                ai->CastSpell(REZZ, *tPlayer);
                 // rez is only 10 sec, but give time for lag
-                GetAI()->SetIgnoreUpdateTime(17);
+                ai->SetIgnoreUpdateTime(17);
             }
             else if( tPlayer->isAlive() )
-            {*/
-
+            {
                 // buff and heal
                 (!tPlayer->HasAura(FORTITUDE,0) && ai->CastSpell (FORTITUDE, *tPlayer));
-				(!tPlayer->HasAura(DIVINE_SPIRIT,0) && ai->CastSpell (DIVINE_SPIRIT, *tPlayer));
-				(!tPlayer->HasAura(SHADOW_PROTECTION,0) && ai->CastSpell (SHADOW_PROTECTION, *tPlayer));
                 (HealTarget(*tPlayer, tPlayer->GetHealth()*100 / tPlayer->GetMaxHealth()));
+            }
         }
     }
 } // end DoNonCombatActions

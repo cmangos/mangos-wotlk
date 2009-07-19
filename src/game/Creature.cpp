@@ -1545,11 +1545,14 @@ void Creature::setDeathState(DeathState s)
         CreatureInfo const *cinfo = GetCreatureInfo();
         SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+        AddMonsterMoveFlag(MONSTER_MOVE_WALK);
 
-        // Playerbot mod
-        if(isBotGiver()) SetUInt32Value(UNIT_NPC_FLAGS, 1);
-        else AddMonsterMoveFlag(MONSTER_MOVE_WALK);
-        // original: AddMonsterMoveFlag(MONSTER_MOVE_WALK);
+		// Playerbot mod
+        //SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
+        if(isBotGiver())
+            SetUInt32Value(UNIT_NPC_FLAGS, 1);
+        else
+        // End Playerbot mod
 
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
         clearUnitState(UNIT_STAT_ALL_STATE);
