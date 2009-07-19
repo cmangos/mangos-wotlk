@@ -272,30 +272,31 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     }
 
     // prevent character creating with invalid name
-    if(!normalizePlayerName(name))
+    if (!normalizePlayerName(name))
     {
-        data << (uint8)CHAR_NAME_INVALID_CHARACTER;
+        data << (uint8)CHAR_NAME_NO_NAME;
         SendPacket( &data );
         sLog.outError("Account:[%d] but tried to Create character with empty [name] ",GetAccountId());
         return;
     }
 
     // check name limitations
-    if(!ObjectMgr::IsValidName(name,true))
+    uint8 res = ObjectMgr::CheckPlayerName(name,true);
+    if (res != CHAR_NAME_SUCCESS)
     {
-        data << (uint8)CHAR_NAME_INVALID_CHARACTER;
+        data << uint8(res);
         SendPacket( &data );
         return;
     }
 
-    if(GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(name))
+    if (GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(name))
     {
         data << (uint8)CHAR_NAME_RESERVED;
         SendPacket( &data );
         return;
     }
 
-    if(objmgr.GetPlayerGUIDByName(name))
+    if (objmgr.GetPlayerGUIDByName(name))
     {
         data << (uint8)CHAR_CREATE_NAME_IN_USE;
         SendPacket( &data );
@@ -303,7 +304,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     }
 
     QueryResult *resultacct = loginDatabase.PQuery("SELECT SUM(numchars) FROM realmcharacters WHERE acctid = '%d'", GetAccountId());
-    if ( resultacct )
+    if (resultacct)
     {
         Field *fields=resultacct->Fetch();
         uint32 acctcharcount = fields[0].GetUInt32();
@@ -1016,7 +1017,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recv_data)
     recv_data >> newname;
 
     // prevent character rename to invalid name
-    if(!normalizePlayerName(newname))
+    if (!normalizePlayerName(newname))
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << uint8(CHAR_NAME_NO_NAME);
@@ -1024,16 +1025,17 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if(!ObjectMgr::IsValidName(newname, true))
+    uint8 res = ObjectMgr::CheckPlayerName(newname,true);
+    if (res != CHAR_NAME_SUCCESS)
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
-        data << uint8(CHAR_NAME_INVALID_CHARACTER);
+        data << uint8(res);
         SendPacket( &data );
         return;
     }
 
     // check name limitations
-    if(GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(newname))
+    if (GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(newname))
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << uint8(CHAR_NAME_RESERVED);
@@ -1289,7 +1291,7 @@ void WorldSession::HandleCharCustomize(WorldPacket& recv_data)
     }
 
     // prevent character rename to invalid name
-    if(!normalizePlayerName(newname))
+    if (!normalizePlayerName(newname))
     {
         WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
         data << uint8(CHAR_NAME_NO_NAME);
@@ -1297,16 +1299,17 @@ void WorldSession::HandleCharCustomize(WorldPacket& recv_data)
         return;
     }
 
-    if(!ObjectMgr::IsValidName(newname,true))
+    uint8 res = ObjectMgr::CheckPlayerName(newname,true);
+    if (res != CHAR_NAME_SUCCESS)
     {
         WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
-        data << uint8(CHAR_NAME_INVALID_CHARACTER);
+        data << uint8(res);
         SendPacket( &data );
         return;
     }
 
     // check name limitations
-    if(GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(newname))
+    if (GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(newname))
     {
         WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
         data << uint8(CHAR_NAME_RESERVED);
@@ -1315,9 +1318,9 @@ void WorldSession::HandleCharCustomize(WorldPacket& recv_data)
     }
 
     // character with this name already exist
-    if(uint64 newguid = objmgr.GetPlayerGUIDByName(newname))
+    if (uint64 newguid = objmgr.GetPlayerGUIDByName(newname))
     {
-        if(newguid != guid)
+        if (newguid != guid)
         {
             WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
             data << uint8(CHAR_CREATE_NAME_IN_USE);

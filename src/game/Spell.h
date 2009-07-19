@@ -333,7 +333,6 @@ class Spell
         void TakeRunePower();
         void TakeReagents();
         void TakeCastItem();
-        void TriggerSpell();
 
         SpellCastResult CheckCast(bool strict);
         SpellCastResult CheckPetCast(Unit* target);
@@ -399,7 +398,6 @@ class Spell
         Item* m_CastItem;
         uint8 m_cast_count;
         uint32 m_glyphIndex;
-        uint32 m_preCastSpell;
         SpellCastTargets m_targets;
 
         int32 GetCastTime() const { return m_casttime; }
@@ -439,7 +437,12 @@ class Spell
 
         bool CheckTargetCreatureType(Unit* target) const;
 
-        void AddTriggeredSpell(SpellEntry const* spell) { m_TriggerSpells.push_back(spell); }
+        void AddTriggeredSpell(SpellEntry const* spellInfo) { m_TriggerSpells.push_back(spellInfo); }
+        void AddPrecastSpell(SpellEntry const* spellInfo) { m_preCastSpells.push_back(spellInfo); }
+        void AddTriggeredSpell(uint32 spellId);
+        void AddPrecastSpell(uint32 spellId);
+        void CastPreCastSpells(Unit* target);
+        void CastTriggerSpells();
 
         void CleanupTargetList();
     protected:
@@ -558,8 +561,9 @@ class Spell
         // -------------------------------------------
 
         //List For Triggered Spells
-        typedef std::list<SpellEntry const*> TriggerSpells;
-        TriggerSpells m_TriggerSpells;
+        typedef std::list<SpellEntry const*> SpellInfoList;
+        SpellInfoList m_TriggerSpells;                      // casted by caster to same targets settings in m_targets at success finish of current spell
+        SpellInfoList m_preCastSpells;                      // casted by caster to each target at spell hit before spell effects apply
 
         uint32 m_spellState;
         uint32 m_timer;

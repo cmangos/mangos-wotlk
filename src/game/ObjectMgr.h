@@ -236,7 +236,7 @@ enum ConditionType
     CONDITION_SKILL                 = 7,                    // skill_id     skill_value
     CONDITION_QUESTREWARDED         = 8,                    // quest_id     0
     CONDITION_QUESTTAKEN            = 9,                    // quest_id     0,      for condition true while quest active.
-    CONDITION_AD_COMMISSION_AURA    = 10,                   // 0            0,      for condition true while one from AD ñommission aura active
+    CONDITION_AD_COMMISSION_AURA    = 10,                   // 0            0,      for condition true while one from AD commission aura active
     CONDITION_NO_AURA               = 11,                   // spell_id     effindex
     CONDITION_ACTIVE_EVENT          = 12,                   // event_id
 };
@@ -279,8 +279,10 @@ enum SkillRangeType
 
 SkillRangeType GetSkillRangeType(SkillLineEntry const *pSkill, bool racial);
 
-#define MAX_PLAYER_NAME 12                                  // max allowed by client name length
+#define MAX_PLAYER_NAME          12                         // max allowed by client name length
 #define MAX_INTERNAL_PLAYER_NAME 15                         // max server internal player name length ( > MAX_PLAYER_NAME for support declined names )
+#define MAX_PET_NAME             12                         // max allowed by client name length
+#define MAX_CHARTER_NAME         24                         // max allowed by client name length
 
 bool normalizePlayerName(std::string& name);
 
@@ -570,6 +572,7 @@ class ObjectMgr
         uint32 GeneratePetNumber();
 
         uint32 CreateItemText(std::string text);
+        void AddItemText(uint32 itemTextId, std::string text) { mItemTexts[itemTextId] = text; }
         std::string GetItemText( uint32 id )
         {
             ItemTextMap::const_iterator itr = mItemTexts.find( id );
@@ -693,9 +696,9 @@ class ObjectMgr
         bool IsReservedName(const std::string& name) const;
 
         // name with valid structure and symbols
-        static bool IsValidName( const std::string& name, bool create = false );
+        static uint8 CheckPlayerName( const std::string& name, bool create = false );
+        static PetNameInvalidReason CheckPetName( const std::string& name );
         static bool IsValidCharterName( const std::string& name );
-        static bool IsValidPetName( const std::string& name );
 
         static bool CheckDeclinedNames(std::wstring mainpart, DeclinedName const& names);
 
@@ -841,6 +844,7 @@ class ObjectMgr
     private:
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
         void CheckScripts(ScriptMapMap const& scripts,std::set<int32>& ids);
+        void LoadCreatureAddons(SQLStorage& creatureaddons, char const* entryName, char const* comment);
         void ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* table, char const* guidEntryStr);
         void LoadQuestRelationsHelper(QuestRelations& map,char const* table);
 
