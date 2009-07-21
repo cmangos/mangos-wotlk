@@ -39,3 +39,4 @@ class MANGOS_DLL_SPEC PlayerbotHunterAI : PlayerbotClassAI
 };
 
 #endif
+

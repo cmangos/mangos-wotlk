@@ -42,3 +42,4 @@ class MANGOS_DLL_SPEC PlayerbotDeathKnightAI : PlayerbotClassAI
 };
 
 #endif
+

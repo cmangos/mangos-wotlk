@@ -2,8 +2,10 @@
 #define _PLAYERBOTAI_H
 
 #include "Common.h"
+#include "QuestDef.h"
 
 class WorldPacket;
+class WorldObject;
 class Player;
 class Unit;
 class Object;
