@@ -7,19 +7,13 @@
 [DONE] Bot can loot --- maybe only needed q item.
 
 //---Instance teleport Problems---///
-Needs some fix.
+[DONE] Needs some fix.
 
-///---Combat Scenario Types---///
-Tank
-Heal
-Assist
-Protect --- maybe class specific protect?
-
-///---Chat Commands---///
-.bot Tank
-.bot Heal
-.bot Assist
-.bot Protect
+///---Combat and Movement Orders---///
+[DONE] Movement orders (stay, follow)
+[DONE] Combat orders (protect, assist)
+Combat order TANK
+Combat order HEAL
 
 ///---Temporary item enchantments---///
 Rogue	: Poison

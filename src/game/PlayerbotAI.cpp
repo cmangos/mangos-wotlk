@@ -1,4 +1,5 @@
 #include "Common.h"
+#include "Config/ConfigEnv.h"
 #include "Database/DatabaseEnv.h"
 #include "ItemPrototype.h"
 #include "World.h"
@@ -141,6 +142,11 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
             m_classAI = (PlayerbotClassAI*)new PlayerbotDeathKnightAI(GetMaster(), m_bot, this);
             break;
     }
+
+    // load config variables
+    m_confDebugWhisper = sConfig.GetBoolDefault( "PlayerbotAI.DebugWhisper", false );
+    m_confFollowDistance[0] = sConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 0.5f );
+    m_confFollowDistance[1] = sConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 1.0f );
 }
 
 PlayerbotAI::~PlayerbotAI()
@@ -355,28 +361,32 @@ void PlayerbotAI::SendOrders( Player& player )
 		out << " and ";
 	if( m_combatOrder&ORDERS_PROTECT )
 		out << "I PROTECT " << (m_targetProtect?m_targetProtect->GetName():"unknown");
+    out << ".";
     
-	out << ". " << (IsInCombat()?"I'm in COMBAT! ":"Not in combat. ");
-    out << "Current state is ";
-    if( m_botState == BOTSTATE_NORMAL )
-        out << "NORMAL";
-    else if( m_botState == BOTSTATE_COMBAT )
-        out << "COMBAT";
-    else if( m_botState == BOTSTATE_DEAD )
-        out << "DEAD";
-    else if( m_botState == BOTSTATE_DEADRELEASED )
-        out << "RELEASED";
-    else if( m_botState == BOTSTATE_LOOTING )
-        out << "LOOTING";
-    out << ". Movement order is ";
-    if( m_movementOrder == MOVEMENT_NONE )
-        out << "NONE";
-    else if( m_movementOrder == MOVEMENT_FOLLOW )
-        out << "FOLLOW " << (m_followTarget?m_followTarget->GetName():"unknown");
-    else if( m_movementOrder == MOVEMENT_STAY )
-        out << "STAY";
-    out << ". Got " << m_attackerInfo.size() << " attacker(s) in list.";
-    out << " Next action in " << (m_ignoreAIUpdatesUntilTime-time(0)) << "sec.";
+    if( m_confDebugWhisper )
+    {
+	    out << " " << (IsInCombat()?"I'm in COMBAT! ":"Not in combat. ");
+        out << "Current state is ";
+        if( m_botState == BOTSTATE_NORMAL )
+            out << "NORMAL";
+        else if( m_botState == BOTSTATE_COMBAT )
+            out << "COMBAT";
+        else if( m_botState == BOTSTATE_DEAD )
+            out << "DEAD";
+        else if( m_botState == BOTSTATE_DEADRELEASED )
+            out << "RELEASED";
+        else if( m_botState == BOTSTATE_LOOTING )
+            out << "LOOTING";
+        out << ". Movement order is ";
+        if( m_movementOrder == MOVEMENT_NONE )
+            out << "NONE";
+        else if( m_movementOrder == MOVEMENT_FOLLOW )
+            out << "FOLLOW " << (m_followTarget?m_followTarget->GetName():"unknown");
+        else if( m_movementOrder == MOVEMENT_STAY )
+            out << "STAY";
+        out << ". Got " << m_attackerInfo.size() << " attacker(s) in list.";
+        out << " Next action in " << (m_ignoreAIUpdatesUntilTime-time(0)) << "sec.";
+    }
 
 	TellMaster( out.str().c_str() );
 }
@@ -1149,7 +1159,15 @@ void PlayerbotAI::GetCombatTarget( Unit* forcedTarget )
 
 	// check for attackers on protected unit, and make it a forcedTarget if any
 	if( !forcedTarget && (m_combatOrder&ORDERS_PROTECT) && m_targetProtect!=0 )
-		forcedTarget = FindAttacker( (ATTACKERINFOTYPE)(AIT_VICTIMNOTSELF|AIT_HIGHESTTHREAT), m_targetProtect );
+    {
+		Unit *newTarget = FindAttacker( (ATTACKERINFOTYPE)(AIT_VICTIMNOTSELF|AIT_HIGHESTTHREAT), m_targetProtect );
+        if( newTarget && newTarget!=m_targetCombat )
+        {
+            forcedTarget = newTarget;
+            if( m_confDebugWhisper )
+                TellMaster( "Changing target to %s to protect %s", forcedTarget->GetName(), m_targetProtect->GetName() );
+        }
+    }
 
 	// we already have a target and we are not forced to change it
 	if( m_targetCombat && !forcedTarget )
@@ -1160,7 +1178,11 @@ void PlayerbotAI::GetCombatTarget( Unit* forcedTarget )
 		m_targetCombat = forcedTarget;
 	// do we have to assist someone?
 	if( !m_targetCombat && (m_combatOrder&ORDERS_ASSIST) && m_targetAssist!=0 )
+    {
 		m_targetCombat = FindAttacker( (ATTACKERINFOTYPE)(AIT_VICTIMNOTSELF|AIT_LOWESTTHREAT), m_targetAssist );
+        if( m_confDebugWhisper && m_targetCombat )
+            TellMaster( "Attacking to %s to assist %s", m_targetCombat->GetName(), m_targetAssist->GetName() );
+    }
 	// are there any other attackers?
 	if( !m_targetCombat )
 		m_targetCombat = FindAttacker();
@@ -1559,7 +1581,7 @@ Unit *PlayerbotAI::FindAttacker( ATTACKERINFOTYPE ait, Unit *victim )
             continue;
 
 		if( (ait & AIT_VICTIMNOTSELF) && victim && itr->second.victim != victim )
-			continue;
+            continue;
 
         if( !(ait & (AIT_LOWESTTHREAT|AIT_HIGHESTTHREAT)) )
         {
@@ -1568,12 +1590,12 @@ Unit *PlayerbotAI::FindAttacker( ATTACKERINFOTYPE ait, Unit *victim )
         }
         else
         {
-            if( (ait & AIT_HIGHESTTHREAT) && (itr->second.victim==m_bot) && itr->second.threat>t )
+            if( (ait & AIT_HIGHESTTHREAT) && /*(itr->second.victim==m_bot) &&*/ itr->second.threat>=t )
             {
                 t = itr->second.threat;
                 a = itr->second.attacker;
             }
-            else if( (ait & AIT_LOWESTTHREAT) && (itr->second.victim==m_bot) && itr->second.threat<t )
+            else if( (ait & AIT_LOWESTTHREAT) && /*(itr->second.victim==m_bot) &&*/ itr->second.threat<=t )
             {
                 t = itr->second.threat;
                 a = itr->second.attacker;
@@ -1646,7 +1668,7 @@ void PlayerbotAI::MovementReset() {
         if( m_bot->isAlive() )
         {
 			float angle = rand_float(0, M_PI);
-		    float dist = rand_float(0.5f, 1.0f);
+		    float dist = rand_float( m_confFollowDistance[0], m_confFollowDistance[1] );
 			m_bot->GetMotionMaster()->MoveFollow( m_followTarget, dist, angle );
         }
 	}
@@ -1834,6 +1856,17 @@ Spell* PlayerbotAI::GetCurrentSpell() const
 void PlayerbotAI::TellMaster(const std::string& text)
 {
     SendWhisper(text, *GetMaster());
+}
+
+void PlayerbotAI::TellMaster( const char *fmt, ... )
+{
+    char temp_buf[1024];
+    va_list ap;
+    va_start( ap, fmt );
+    size_t temp_len = vsnprintf( temp_buf, 1024, fmt, ap );
+    va_end( ap );
+    std::string str = temp_buf;
+    TellMaster( str );
 }
 
 void PlayerbotAI::SendWhisper(const std::string& text, Player& player)

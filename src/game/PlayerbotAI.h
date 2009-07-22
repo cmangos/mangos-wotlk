@@ -157,6 +157,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         // ******* Actions ****************************************
         // Your handlers can call these actions to make the bot do things.
         void TellMaster(const std::string& text);
+        void TellMaster( const char *fmt, ... );
         void SendWhisper(const std::string& text, Player& player);
         bool CastSpell(const char* args);
         bool CastSpell(uint32 spellId);
@@ -257,6 +258,10 @@ class MANGOS_DLL_SPEC PlayerbotAI
 		Unit *m_targetProtect;	// check 
 
 		Unit *m_followTarget;	// whom to follow in non combat situation?
+
+        // config variables
+        bool m_confDebugWhisper;
+        float m_confFollowDistance[2];
 };
 
 #endif
