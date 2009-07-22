@@ -97,7 +97,7 @@ Configuration variables:
 ========================
 Also see src/mangosd/mangosd.conf.dist for configuration variables!
 
-    PlayerbotAI.Debug
+    PlayerbotAI.DebugWhisper
         Enable debug output by whispering master
         Default: 0 - off
                  1 - on
