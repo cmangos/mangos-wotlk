@@ -1680,6 +1680,9 @@ void PlayerbotAI::MovementUpdate()
 	WorldPacket data;
 	m_bot->BuildHeartBeatMsg( &data );
 	m_bot->SendMessageToSet( &data, false );
+
+    // call set position (updates states, exploration, etc.)
+    m_bot->SetPosition( m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(), m_bot->GetOrientation(), false );
 }
 
 void PlayerbotAI::MovementClear() 
