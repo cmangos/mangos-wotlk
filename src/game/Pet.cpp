@@ -146,7 +146,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     }
 
     uint32 pet_number = fields[0].GetUInt32();
-    
+
     if (current && owner->IsPetNeedBeTemporaryUnsummoned())
     {
         owner->SetTemporaryUnsummonedPetNumber(pet_number);
@@ -1918,13 +1918,19 @@ void Pet::CastPetAura(PetAura const* aura)
         CastSpell(this, auraId, true);
 }
 
+struct DoPetLearnSpell
+{
+    DoPetLearnSpell(Pet& _pet) : pet(_pet) {}
+    void operator() (uint32 spell_id) { pet.learnSpell(spell_id); }
+    Pet& pet;
+};
+
 void Pet::learnSpellHighRank(uint32 spellid)
 {
     learnSpell(spellid);
 
-    SpellChainMapNext const& nextMap = spellmgr.GetSpellChainNext();
-    for(SpellChainMapNext::const_iterator itr = nextMap.lower_bound(spellid); itr != nextMap.upper_bound(spellid); ++itr)
-        learnSpellHighRank(itr->second);
+    DoPetLearnSpell worker(*this);
+    spellmgr.doForHighRanks(spellid,worker);
 }
 
 void Pet::SynchronizeLevelWithOwner()

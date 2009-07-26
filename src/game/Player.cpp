@@ -1298,8 +1298,8 @@ void Player::Update( uint32 p_time )
     {
         if (p_time >= m_DetectInvTimer)
         {
-            m_DetectInvTimer = 3000;
             HandleStealthedUnitsDetection();
+            m_DetectInvTimer = 3000;
         }
         else
             m_DetectInvTimer -= p_time;
@@ -3789,9 +3789,9 @@ void Player::BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target )
     Unit::BuildCreateUpdateBlockForPlayer( data, target );
 }
 
-void Player::DestroyForPlayer( Player *target ) const
+void Player::DestroyForPlayer( Player *target, bool anim ) const
 {
-    Unit::DestroyForPlayer( target );
+    Unit::DestroyForPlayer( target, anim );
 
     for(int i = 0; i < INVENTORY_SLOT_BAG_END; ++i)
     {
@@ -7026,7 +7026,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
 
         if(spellData.SpellPPMRate)
         {
-            uint32 WeaponSpeed = GetAttackTime(attType);
+            uint32 WeaponSpeed = proto->Delay;
             chance = GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate);
         }
         else if(chance > 100.0f)
@@ -7056,7 +7056,17 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
                 continue;
             }
 
-            float chance = pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
+            // Use first rank to access spell item enchant procs
+            float ppmRate = spellmgr.GetItemEnchantProcChance(spellInfo->Id);
+
+            float chance = ppmRate
+                ? GetPPMProcChance(proto->Delay, ppmRate)
+                : pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
+
+
+            ApplySpellMod(spellInfo->Id,SPELLMOD_CHANCE_OF_SUCCESS,chance);
+            ApplySpellMod(spellInfo->Id,SPELLMOD_FREQUENCY_OF_SUCCESS,chance);
+
             if (roll_chance_f(chance))
             {
                 if(IsPositiveSpell(pEnchant->spellid[s]))
@@ -10396,7 +10406,6 @@ Item* Player::EquipNewItem( uint16 pos, uint32 item, bool update )
 
 Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
 {
-
     AddEnchantmentDurations(pItem);
     AddItemDurations(pItem);
 
@@ -12531,7 +12540,7 @@ void Player::AddQuest( Quest const *pQuest, Object *questGiver )
 
     //starting initial quest script
     if(questGiver && pQuest->GetQuestStartScript()!=0)
-        sWorld.ScriptsStart(sQuestStartScripts, pQuest->GetQuestStartScript(), questGiver, this);
+        GetMap()->ScriptsStart(sQuestStartScripts, pQuest->GetQuestStartScript(), questGiver, this);
 
     // Some spells applied at quest activation
     SpellAreaForQuestMapBounds saBounds = spellmgr.GetSpellAreaForQuestMapBounds(quest_id,true);
@@ -13789,7 +13798,7 @@ void Player::SendQuestReward( Quest const *pQuest, uint32 XP, Object * questGive
     GetSession()->SendPacket( &data );
 
     if (pQuest->GetQuestCompleteScript() != 0)
-        sWorld.ScriptsStart(sQuestEndScripts, pQuest->GetQuestCompleteScript(), questGiver, this);
+        GetMap()->ScriptsStart(sQuestEndScripts, pQuest->GetQuestCompleteScript(), questGiver, this);
 }
 
 void Player::SendQuestFailed( uint32 quest_id )
@@ -16222,10 +16231,10 @@ void Player::SendAttackSwingBadFacingAttack()
     GetSession()->SendPacket( &data );
 }
 
-void Player::SendAutoRepeatCancel()
+void Player::SendAutoRepeatCancel(Unit *target)
 {
-    WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, GetPackGUID().size());
-    data.append(GetPackGUID());                             // may be it's target guid
+    WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, target->GetPackGUID().size());
+    data.append(target->GetPackGUID());                     // may be it's target guid
     GetSession()->SendPacket( &data );
 }
 
@@ -16906,35 +16915,40 @@ void Player::HandleStealthedUnitsDetection()
     cell_lock->Visit(cell_lock, world_unit_searcher, *GetMap());
     cell_lock->Visit(cell_lock, grid_unit_searcher, *GetMap());
 
-    for (std::list<Unit*>::iterator i = stealthedUnits.begin(); i != stealthedUnits.end();)
+    for (std::list<Unit*>::const_iterator i = stealthedUnits.begin(); i != stealthedUnits.end(); ++i)
     {
         if((*i)==this)
-        {
-            i = stealthedUnits.erase(i);
             continue;
-        }
 
-        if ((*i)->isVisibleForOrDetect(this,true))
+        bool hasAtClient = HaveAtClient((*i));
+        bool hasDetected = (*i)->isVisibleForOrDetect(this, true);
+
+        if (hasDetected)
         {
+            if(!hasAtClient)
+            {
+                (*i)->SendUpdateToPlayer(this);
+                m_clientGUIDs.insert((*i)->GetGUID());
 
-            (*i)->SendUpdateToPlayer(this);
-            m_clientGUIDs.insert((*i)->GetGUID());
+                #ifdef MANGOS_DEBUG
+                if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
+                    sLog.outDebug("Object %u (Type: %u) is detected in stealth by player %u. Distance = %f",(*i)->GetGUIDLow(),(*i)->GetTypeId(),GetGUIDLow(),GetDistance(*i));
+                #endif
 
-            #ifdef MANGOS_DEBUG
-            if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
-                sLog.outDebug("Object %u (Type: %u) is detected in stealth by player %u. Distance = %f",(*i)->GetGUIDLow(),(*i)->GetTypeId(),GetGUIDLow(),GetDistance(*i));
-            #endif
-
-            // target aura duration for caster show only if target exist at caster client
-            // send data at target visibility change (adding to client)
-            if((*i)!=this && (*i)->isType(TYPEMASK_UNIT))
-                SendAurasForTarget(*i);
-
-            i = stealthedUnits.erase(i);
-            continue;
+                // target aura duration for caster show only if target exist at caster client
+                // send data at target visibility change (adding to client)
+                if((*i)!=this && (*i)->isType(TYPEMASK_UNIT))
+                    SendAurasForTarget(*i);
+            }
         }
-
-        ++i;
+        else
+        {
+            if(hasAtClient)
+            {
+                (*i)->DestroyForPlayer(this);
+                m_clientGUIDs.erase((*i)->GetGUID());
+            }
+        }
     }
 }
 
@@ -17955,7 +17969,7 @@ void Player::UpdateVisibilityOf(WorldObject* target)
 {
     if(HaveAtClient(target))
     {
-        if(!target->isVisibleForInState(this,true))
+        if(!target->isVisibleForInState(this, true))
         {
             target->DestroyForPlayer(this);
             m_clientGUIDs.erase(target->GetGUID());
@@ -19567,11 +19581,30 @@ bool Player::HasTitle(uint32 bitIndex)
     return HasFlag(PLAYER__FIELD_KNOWN_TITLES + fieldIndexOffset, flag);
 }
 
-void Player::SetTitle(CharTitlesEntry const* title)
+void Player::SetTitle(CharTitlesEntry const* title, bool lost)
 {
     uint32 fieldIndexOffset = title->bit_index / 32;
     uint32 flag = 1 << (title->bit_index % 32);
-    SetFlag(PLAYER__FIELD_KNOWN_TITLES + fieldIndexOffset, flag);
+
+    if(lost)
+    {
+        if(!HasFlag(PLAYER__FIELD_KNOWN_TITLES + fieldIndexOffset, flag))
+            return;
+
+        RemoveFlag(PLAYER__FIELD_KNOWN_TITLES + fieldIndexOffset, flag);
+    }
+    else
+    {
+        if(HasFlag(PLAYER__FIELD_KNOWN_TITLES + fieldIndexOffset, flag))
+            return;
+
+        SetFlag(PLAYER__FIELD_KNOWN_TITLES + fieldIndexOffset, flag);
+    }
+
+    WorldPacket data(SMSG_TITLE_EARNED, 4 + 4);
+    data << uint32(title->bit_index);
+    data << uint32(lost ? 0 : 1);                           // 1 - earned, 0 - lost
+    GetSession()->SendPacket(&data);
 }
 
 void Player::ConvertRune(uint8 index, uint8 newType)
@@ -19675,13 +19708,19 @@ bool Player::IsAllowUseFlyMountsHere() const
     return v_map == 530 || v_map == 571 && HasSpell(54197);
 }
 
+struct DoPlayerLearnSpell
+{
+    DoPlayerLearnSpell(Player& _player) : player(_player) {}
+    void operator() (uint32 spell_id) { player.learnSpell(spell_id,false); }
+    Player& player;
+};
+
 void Player::learnSpellHighRank(uint32 spellid)
 {
     learnSpell(spellid,false);
 
-    SpellChainMapNext const& nextMap = spellmgr.GetSpellChainNext();
-    for(SpellChainMapNext::const_iterator itr = nextMap.lower_bound(spellid); itr != nextMap.upper_bound(spellid); ++itr)
-        learnSpellHighRank(itr->second);
+    DoPlayerLearnSpell worker(*this);
+    spellmgr.doForHighRanks(spellid,worker);
 }
 
 void Player::_LoadSkills()

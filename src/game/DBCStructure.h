@@ -661,7 +661,7 @@ struct CinematicCameraEntry
     float       start_x;                                    // 3
     float       start_y;                                    // 4
     float       start_z;                                    // 5
-    float       unk6;                                       // 6 speed?     
+    float       unk6;                                       // 6 speed?
 };
 */
 
@@ -1424,13 +1424,6 @@ struct SpellFocusObjectEntry
     uint32    ID;                                           // 0
     //char*     Name[16];                                   // 1-15 unused
                                                             // 16 string flags, unused
-};
-
-// stored in SQL table
-struct SpellThreatEntry
-{
-    uint32      spellId;
-    int32       threat;
 };
 
 struct SpellRadiusEntry

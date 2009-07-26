@@ -246,6 +246,21 @@ pkgdata_DATA = \
 	8158_01_mangos_playercreateinfo_action.sql \
 	8190_01_mangos_creature_template.sql \
 	8191_01_mangos_spell_affect.sql \
+	8211_01_mangos_spell_proc_event.sql \
+	8212_01_mangos_spell_proc_event.sql \
+	8213_01_mangos_spell_bonus_data.sql \
+	8227_01_mangos_spell_proc_event.sql \
+	8237_01_mangos_creature_template.sql \
+	8247_01_mangos_spell_bonus_data.sql \
+	8249_01_mangos_spell_proc_item_enchant.sql \
+	8249_02_mangos_spell_chain.sql \
+	8250_01_mangos_spell_threat.sql \
+	8251_01_mangos_spell_chain.sql \
+	8251_02_mangos_spell_bonus_data.sql \
+	8251_03_mangos_spell_proc_event.sql \
+	8253_01_mangos_spell_chain.sql \
+	8253_02_mangos_spell_proc_event.sql \
+	8254_01_mangos_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -472,4 +487,19 @@ EXTRA_DIST = \
 	8158_01_mangos_playercreateinfo_action.sql \
 	8190_01_mangos_creature_template.sql \
 	8191_01_mangos_spell_affect.sql \
+	8211_01_mangos_spell_proc_event.sql \
+	8212_01_mangos_spell_proc_event.sql \
+	8213_01_mangos_spell_bonus_data.sql \
+	8227_01_mangos_spell_proc_event.sql \
+	8237_01_mangos_creature_template.sql \
+	8247_01_mangos_spell_bonus_data.sql \
+	8249_01_mangos_spell_proc_item_enchant.sql \
+	8249_02_mangos_spell_chain.sql \
+	8250_01_mangos_spell_threat.sql \
+	8251_01_mangos_spell_chain.sql \
+	8251_02_mangos_spell_bonus_data.sql \
+	8251_03_mangos_spell_proc_event.sql \
+	8253_01_mangos_spell_chain.sql \
+	8253_02_mangos_spell_proc_event.sql \
+	8254_01_mangos_spell_proc_event.sql \
 	README
