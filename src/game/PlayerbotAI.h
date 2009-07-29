@@ -122,6 +122,8 @@ class MANGOS_DLL_SPEC PlayerbotAI
         // extracts currency from a string as #g#s#c and returns the total in copper
         uint32 extractMoney(const std::string& text) const;
 
+        // finds items in bots equipment and adds them to foundItemList, removes found items from itemIdSearchList
+        void findItemsInEquip(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const;
         // finds items in bots inventory and adds them to foundItemList, removes found items from itemIdSearchList
         void findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const;
 
@@ -212,7 +214,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         // These actions may only be called at special times.
         // Trade methods are only applicable when the trade window is open
         // and are only called from within HandleCommand.
-        bool TradeItem(const Item& item);
+        bool TradeItem(const Item& item, int8 slot=-1);
         bool TradeCopper(uint32 copper);
 
         // it is safe to keep these back reference pointers because m_bot

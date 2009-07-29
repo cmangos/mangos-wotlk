@@ -2033,6 +2033,27 @@ uint32 PlayerbotAI::extractMoney(const std::string& text) const
     return copper;
 }
 
+// finds items in equipment and adds Item* to foundItemList
+// also removes found item IDs from itemIdSearchList when found
+void PlayerbotAI::findItemsInEquip(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const
+{
+    for( uint8 slot=EQUIPMENT_SLOT_START; itemIdSearchList.size()>0 && slot<EQUIPMENT_SLOT_END; slot++ ) {
+        Item* const pItem = m_bot->GetItemByPos( INVENTORY_SLOT_BAG_0, slot );
+        if( !pItem )
+            continue;
+
+        for (std::list<uint32>::iterator it = itemIdSearchList.begin(); it != itemIdSearchList.end(); ++it)
+        {
+            if (pItem->GetProto()->ItemId != *it)
+                continue;
+
+            foundItemList.push_back(pItem);
+            itemIdSearchList.erase(it);
+            break;
+        }
+    }
+}
+
 // finds items in inventory and adds Item* to foundItemList
 // also removes found item IDs from itemIdSearchList when found
 void PlayerbotAI::findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const
@@ -2125,23 +2146,41 @@ void PlayerbotAI::EquipItem(Item& item)
 }
 
 // submits packet to trade an item (trade window must already be open)
-bool PlayerbotAI::TradeItem(const Item& item)
+// default slot is -1 which means trade slots 0 to 5. if slot is set 
+// to TRADE_SLOT_NONTRADED (which is slot 6) item will be shown in the
+// 'Will not be traded' slot.
+bool PlayerbotAI::TradeItem(const Item& item, int8 slot)
 {
-    if (!m_bot->GetTrader() || item.IsInTrade() || !item.CanBeTraded())
+    sLog.outDebug( "[PlayerbotAI::TradeItem]: slot=%d, hasTrader=%d, itemInTrade=%d, itemTradeable=%d", 
+        slot, 
+        (m_bot->GetTrader()?1:0),
+        (item.IsInTrade()?1:0),
+        (item.CanBeTraded()?1:0)
+        );
+
+    if (!m_bot->GetTrader() || item.IsInTrade() || (!item.CanBeTraded() && slot!=TRADE_SLOT_NONTRADED) )
         return false;
 
-    for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT; ++i)
+    int8 tradeSlot = -1;
+
+    if( (slot>=0 && slot<TRADE_SLOT_COUNT) && m_bot->GetItemPosByTradeSlot(slot)==NULL_SLOT )
+        tradeSlot = slot;
+    else
     {
-        if (m_bot->GetItemPosByTradeSlot(i) == NULL_SLOT)
+        for( uint8 i=0; i<TRADE_SLOT_TRADED_COUNT && tradeSlot==-1; i++ )
         {
-            WorldPacket* const packet = new WorldPacket(CMSG_SET_TRADE_ITEM, 3);
-            *packet << (uint8) i << (uint8) item.GetBagSlot()
-                    << (uint8) item.GetSlot();
-            m_bot->GetSession()->QueuePacket(packet);
-            return true;
+            if( m_bot->GetItemPosByTradeSlot(i) == NULL_SLOT )
+                tradeSlot = i;
         }
     }
-    return false;
+
+    if( tradeSlot == -1 ) return false;
+
+    WorldPacket* const packet = new WorldPacket(CMSG_SET_TRADE_ITEM, 3);
+    *packet << (uint8) tradeSlot << (uint8) item.GetBagSlot()
+            << (uint8) item.GetSlot();
+    m_bot->GetSession()->QueuePacket(packet);
+    return true;
 }
 
 // submits packet to trade copper (trade window must be open)
@@ -2300,6 +2339,21 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         extractItemIds(text, itemIds);
         if (itemIds.size() == 0)
             SendWhisper("Show me what item you want by shift clicking the item in the chat window.", fromPlayer);
+        else if( !strncmp( text.c_str(), "nt ", 3 ) ) 
+        {
+            if( itemIds.size() > 1 )
+                SendWhisper( "There is only one 'Will not be traded' slot. Shift-click just one item, please!", fromPlayer );
+            else
+            {
+                std::list<Item*> itemList;
+                findItemsInEquip( itemIds, itemList );
+                findItemsInInv( itemIds, itemList );
+                if( itemList.size()>0 )
+                    TradeItem( (**itemList.begin()), TRADE_SLOT_NONTRADED );
+                else
+                    SendWhisper( "I do not have this item equipped or in my bags!", fromPlayer );
+            }
+        }
         else
         {
             std::list<Item*> itemList;
