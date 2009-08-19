@@ -212,6 +212,7 @@ enum WorldConfigs
     CONFIG_ARENA_SEASON_ID,
     CONFIG_ARENA_SEASON_IN_PROGRESS,
     CONFIG_OFFHAND_CHECK_AT_TALENTS_RESET,
+    CONFIG_CLIENTCACHE_VERSION,
     CONFIG_VALUE_COUNT
 };
 
@@ -485,7 +486,8 @@ class World
 
         uint32 IncreaseScheduledScriptsCount() { return (uint32)++m_scheduledScripts; }
         uint32 DecreaseScheduledScriptCount() { return (uint32)--m_scheduledScripts; }
-        bool IsScriptScheduled() const { return m_scheduledScripts == 0; }
+        uint32 DecreaseScheduledScriptCount(size_t count) { return (uint32)(m_scheduledScripts -= count); }
+        bool IsScriptScheduled() const { return m_scheduledScripts > 0; }
 
         // for max speed access
         static float GetMaxVisibleDistanceForCreature() { return m_MaxVisibleDistanceForCreature; }

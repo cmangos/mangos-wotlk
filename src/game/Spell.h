@@ -83,6 +83,7 @@ enum SpellCastFlags
 enum SpellNotifyPushType
 {
     PUSH_IN_FRONT,
+    PUSH_IN_FRONT_30,
     PUSH_IN_BACK,
     PUSH_SELF_CENTER,
     PUSH_DEST_CENTER,
@@ -209,6 +210,7 @@ class Spell
 {
     friend struct MaNGOS::SpellNotifierPlayer;
     friend struct MaNGOS::SpellNotifierCreatureAndPlayer;
+    friend void Unit::SetCurrentCastedSpell( Spell * pSpell );
     public:
 
         void EffectNULL(uint32 );
@@ -704,6 +706,10 @@ namespace MaNGOS
                 {
                     case PUSH_IN_FRONT:
                         if(i_spell.GetCaster()->isInFrontInMap((Unit*)(itr->getSource()), i_radius, 2*M_PI/3 ))
+                            i_data->push_back(itr->getSource());
+                        break;
+                    case PUSH_IN_FRONT_30:
+                        if(i_spell.GetCaster()->isInFrontInMap((Unit*)(itr->getSource()), i_radius, M_PI/6 ))
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_IN_BACK:
