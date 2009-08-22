@@ -28,6 +28,11 @@ Commands:
 /t BOTNAME reset (will reset states, orders and loot list)
 /t BOTNAME report (bot reports all items needed to finish quests)
 
+Shortcuts:
+c = cast
+e = equip
+u = use
+
 Combat Orders explained:
 ========================
 
@@ -64,11 +69,13 @@ More Information:
 =================
 
 If specifying a spell substring, the spell chosen will be in priority of exact name match, highest spell rank, and spell using no reagents. Case does not matter. Here's some examples:
-/t BOTNAME cast greater heal
+/t BOTNAME c greater heal
 /t BOTNAME cast pain
-/t BOTNAME cast poly
-/t BOTNAME cast fort
-/t BOTNAME cast SPELLID
+/w BOTNAME c poly
+/w BOTNAME cast fort
+/t BOTNAME cast <SPELLID>
+- OR -
+/w BOTNAME c <SPELLID>
 
 Also all commands can be broadcast to the party. For example:
 /p follow
@@ -77,6 +84,9 @@ Also all commands can be broadcast to the party. For example:
 To use or equip items for your bot say:
 /w BOTNAME use <ITEMLINK1> <ITEMLINK2>
 /w BOTNAME equip <ITEMLINK1> <ITEMLINK2>
+- OR -
+/w BOTNAME u <ITEMLINK1> <ITEMLINK2>
+/w BOTNAME e <ITEMLINK1> <ITEMLINK2>
 
 If you inspect your bot, your bot will tell you what items you have in your inventory that you can equip. To create a link in the chat window, hold the shift key and press the left mouse button when clicking the link.
 
