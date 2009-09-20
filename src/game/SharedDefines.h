@@ -179,11 +179,6 @@ enum SpellSchoolMask
     SPELL_SCHOOL_MASK_ALL     = ( SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_MAGIC )
 };
 
-#define SPELL_SCHOOL_MASK_MAGIC                            \
-    ( SPELL_SCHOOL_MASK_HOLY | SPELL_SCHOOL_MASK_FIRE | SPELL_SCHOOL_MASK_NATURE |  \
-      SPELL_SCHOOL_MASK_FROST | SPELL_SCHOOL_MASK_SHADOW | \
-      SPELL_SCHOOL_MASK_ARCANE )
-
 inline SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
 {
     for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)
@@ -207,6 +202,18 @@ enum ItemQualities
 
 #define MAX_ITEM_QUALITY                 8
 
+const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
+    0xff9d9d9d,        //GREY
+    0xffffffff,        //WHITE
+    0xff1eff00,        //GREEN
+    0xff0070dd,        //BLUE
+    0xffa335ee,        //PURPLE
+    0xffff8000,        //ORANGE
+    0xffe6cc80,        //LIGHT YELLOW
+    0xffe6cc80         //LIGHT YELLOW
+};
+
+
 // ***********************************
 // Spell Attributes definitions
 // ***********************************
@@ -216,7 +223,7 @@ enum ItemQualities
 #define SPELL_ATTR_ON_NEXT_SWING_1                0x00000004            // 2 on next swing
 #define SPELL_ATTR_UNK3                           0x00000008            // 3 not set in 3.0.3
 #define SPELL_ATTR_UNK4                           0x00000010            // 4
-#define SPELL_ATTR_UNK5                           0x00000020            // 5 trade spells?
+#define SPELL_ATTR_TRADESPELL                     0x00000020            // 5 trade spells, will be added by client to a sublist of profession spell
 #define SPELL_ATTR_PASSIVE                        0x00000040            // 6 Passive spell
 #define SPELL_ATTR_UNK7                           0x00000080            // 7 visible?
 #define SPELL_ATTR_UNK8                           0x00000100            // 8
@@ -410,7 +417,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX5_UNK31                      0x80000000            // 31 Forces all nearby enemies to focus attacks caster
 
 #define SPELL_ATTR_EX6_UNK0                       0x00000001            // 0 Only Move spell have this flag
-#define SPELL_ATTR_EX6_UNK1                       0x00000002            // 1 not set in 3.0.3
+#define SPELL_ATTR_EX6_ONLY_IN_ARENA              0x00000002            // 1 only usable in arena, not used in 3.2.0a and early
 #define SPELL_ATTR_EX6_UNK2                       0x00000004            // 2
 #define SPELL_ATTR_EX6_UNK3                       0x00000008            // 3
 #define SPELL_ATTR_EX6_UNK4                       0x00000010            // 4
@@ -420,7 +427,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX6_UNK8                       0x00000100            // 8
 #define SPELL_ATTR_EX6_UNK9                       0x00000200            // 9
 #define SPELL_ATTR_EX6_UNK10                      0x00000400            // 10
-#define SPELL_ATTR_EX6_UNK11                      0x00000800            // 11
+#define SPELL_ATTR_EX6_NOT_IN_RAID_INSTANCE       0x00000800            // 11 not usable in raid instance
 #define SPELL_ATTR_EX6_UNK12                      0x00001000            // 12
 #define SPELL_ATTR_EX6_UNK13                      0x00002000            // 13
 #define SPELL_ATTR_EX6_UNK14                      0x00004000            // 14
@@ -658,7 +665,7 @@ enum SpellEffects
     SPELL_EFFECT_CALL_PET                  = 135,
     SPELL_EFFECT_HEAL_PCT                  = 136,
     SPELL_EFFECT_ENERGIZE_PCT              = 137,
-    SPELL_EFFECT_138                       = 138,
+    SPELL_EFFECT_LEAP_BACK                 = 138,
     SPELL_EFFECT_CLEAR_QUEST               = 139,
     SPELL_EFFECT_FORCE_CAST                = 140,
     SPELL_EFFECT_141                       = 141,
@@ -2309,6 +2316,16 @@ enum ChatMsg
 
 #define MAX_CHAT_MSG_TYPE 0x32
 
+enum ChatLinkColors
+{
+    CHAT_LINK_COLOR_TRADE       = 0xffffd000,   // orange
+    CHAT_LINK_COLOR_TALENT      = 0xff4e96f7,   // blue
+    CHAT_LINK_COLOR_SPELL       = 0xff71d5ff,   // bright blue
+    CHAT_LINK_COLOR_ENCHANT     = 0xffffd000,   // orange
+    CHAT_LINK_COLOR_ACHIEVEMENT = 0xffffff00,
+    CHAT_LINK_COLOR_GLYPH       = 0xff66bbff
+};
+
 // Values from ItemPetFood (power of (value-1) used for compare with CreatureFamilyEntry.petDietMask
 enum PetDiet
 {
@@ -2332,7 +2349,8 @@ enum PetDiet
 #define GUILD_BANK_MAX_LOGS         25
 #define GUILD_BANK_MONEY_LOGS_TAB   100
 #define GUILD_EVENTLOG_MAX_RECORDS  100
-#define GUILD_MAX_RANKS             10
+#define GUILD_RANKS_MIN_COUNT       5
+#define GUILD_RANKS_MAX_COUNT       10
 
 enum AiReaction
 {
@@ -2406,7 +2424,8 @@ enum SummonType
     SUMMON_TYPE_UNKNOWN2    = 427,
     SUMMON_TYPE_POSESSED2   = 428,
     SUMMON_TYPE_INFERNO     = 711,
-    SUMMON_TYPE_GUARDIAN2   = 1161,
+    SUMMON_TYPE_GUARDIAN2   = 713,
+    SUMMON_TYPE_GUARDIAN3   = 1161,
     SUMMON_TYPE_ELEMENTAL   = 1561,
     SUMMON_TYPE_FORCE_OF_NATURE = 1562
 };

@@ -73,11 +73,9 @@ WorldSession::~WorldSession()
     }
 
     ///- empty incoming packet queue
-    while(!_recvQueue.empty())
-    {
-        WorldPacket *packet = _recvQueue.next ();
+    WorldPacket* packet;
+    while(_recvQueue.next(packet))
         delete packet;
-    }
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
@@ -175,10 +173,9 @@ bool WorldSession::Update(uint32 /*diff*/)
 {
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not proccess packets if socket already closed
-    while (!_recvQueue.empty() && m_Socket && !m_Socket->IsClosed ())
+    WorldPacket* packet;
+    while (_recvQueue.next(packet) && m_Socket && !m_Socket->IsClosed ())
     {
-        WorldPacket *packet = _recvQueue.next();
-
         /*#if 1
         sLog.outError( "MOEP: %s (0x%.4X)",
                         LookupOpcodeName(packet->GetOpcode()),
@@ -213,6 +210,19 @@ bool WorldSession::Update(uint32 /*diff*/)
                         }
                         // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
                         break;
+                    case STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT:
+                        if(!_player && !m_playerRecentlyLogout)
+                        {
+                            LogUnexpectedOpcode(packet, "the player has not logged in yet and not recently logout");
+                        }
+                        else
+                        {
+                            // not expected _player or must checked in packet hanlder
+                            (this->*opHandle.handler)(*packet);
+                            if (sLog.IsOutDebug() && packet->rpos() < packet->wpos())
+                                LogUnprocessedTail(packet);
+                        }
+                        break;
                     case STATUS_TRANSFER:
                         if(!_player)
                             LogUnexpectedOpcode(packet, "the player has not logged in yet");
@@ -233,7 +243,11 @@ bool WorldSession::Update(uint32 /*diff*/)
                             break;
                         }
 
-                        m_playerRecentlyLogout = false;
+                        // single from authed time opcodes send in to after logout time
+                        // and before other STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT opcodes.
+                        if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL)
+                            m_playerRecentlyLogout = false;
+
                         (this->*opHandle.handler)(*packet);
                         if (sLog.IsOutDebug() && packet->rpos() < packet->wpos())
                             LogUnprocessedTail(packet);
@@ -410,7 +424,7 @@ void WorldSession::LogoutPlayer(bool Save)
         Guild *guild = objmgr.GetGuildById(_player->GetGuildId());
         if(guild)
         {
-            guild->LoadPlayerStatsByGuid(_player->GetGUID());
+            guild->SetMemberStats(_player->GetGUID());
             guild->UpdateLogoutTime(_player->GetGUID());
 
             WorldPacket data(SMSG_GUILD_EVENT, (1+1+12+8)); // name limited to 12 in character table.
@@ -467,7 +481,7 @@ void WorldSession::LogoutPlayer(bool Save)
         // calls to GetMap in this case may cause crashes
         Map* _map = _player->GetMap();
         _map->Remove(_player, true);
-        _player = NULL;                                     // deleted in Remove call
+        SetPlayer(NULL);                                    // deleted in Remove call
 
         ///- Send the 'logout complete' packet to the client
         WorldPacket data( SMSG_LOGOUT_COMPLETE, 0 );
@@ -607,15 +621,19 @@ void WorldSession::SendAuthWaitQue(uint32 position)
     }
 }
 
-void WorldSession::LoadAccountData()
+void WorldSession::LoadGlobalAccountData()
+{
+    LoadAccountData(
+        CharacterDatabase.PQuery("SELECT type, time, data FROM account_data WHERE account='%u'", GetAccountId()),
+        GLOBAL_CACHE_MASK
+    );
+}
+
+void WorldSession::LoadAccountData(QueryResult* result, uint32 mask)
 {
     for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
-    {
-        AccountData data;
-        m_accountData[i] = data;
-    }
-
-    QueryResult *result = CharacterDatabase.PQuery("SELECT type, time, data FROM account_data WHERE account='%u'", GetAccountId());
+        if (mask & (1 << i))
+            m_accountData[i] = AccountData();
 
     if(!result)
         return;
@@ -625,28 +643,65 @@ void WorldSession::LoadAccountData()
         Field *fields = result->Fetch();
 
         uint32 type = fields[0].GetUInt32();
-        if(type < NUM_ACCOUNT_DATA_TYPES)
+        if (type >= NUM_ACCOUNT_DATA_TYPES)
         {
-            m_accountData[type].Time = fields[1].GetUInt32();
-            m_accountData[type].Data = fields[2].GetCppString();
+            sLog.outError("Table `%s` have invalid account data type (%u), ignore.",
+                mask == GLOBAL_CACHE_MASK ? "account_data" : "character_account_data", type);
+            continue;
         }
+
+        if ((mask & (1 << type))==0)
+        {
+            sLog.outError("Table `%s` have non appropriate for table  account data type (%u), ignore.",
+                mask == GLOBAL_CACHE_MASK ? "account_data" : "character_account_data", type);
+            continue;
+        }
+
+        m_accountData[type].Time = fields[1].GetUInt32();
+        m_accountData[type].Data = fields[2].GetCppString();
+
     } while (result->NextRow());
 
     delete result;
 }
 
-void WorldSession::SetAccountData(uint32 type, time_t time_, std::string data)
+void WorldSession::SetAccountData(AccountDataType type, time_t time_, std::string data)
 {
+    if ((1 << type) & GLOBAL_CACHE_MASK)
+    {
+        uint32 acc = GetAccountId();
+
+        CharacterDatabase.BeginTransaction ();
+        CharacterDatabase.PExecute("DELETE FROM account_data WHERE account='%u' AND type='%u'", acc, type);
+        CharacterDatabase.escape_string(data);
+        CharacterDatabase.PExecute("INSERT INTO account_data VALUES ('%u','%u','%u','%s')", acc, type, (uint32)time_, data.c_str());
+        CharacterDatabase.CommitTransaction ();
+    }
+    else
+    {
+        // _player can be NULL and packet received after logout but m_GUID still store correct guid
+        if(!m_GUIDLow)
+            return;
+
+        CharacterDatabase.BeginTransaction ();
+        CharacterDatabase.PExecute("DELETE FROM character_account_data WHERE guid='%u' AND type='%u'", m_GUIDLow, type);
+        CharacterDatabase.escape_string(data);
+        CharacterDatabase.PExecute("INSERT INTO character_account_data VALUES ('%u','%u','%u','%s')", m_GUIDLow, type, (uint32)time_, data.c_str());
+        CharacterDatabase.CommitTransaction ();
+    }
+
     m_accountData[type].Time = time_;
     m_accountData[type].Data = data;
+}
 
-    uint32 acc = GetAccountId();
-
-    CharacterDatabase.BeginTransaction ();
-    CharacterDatabase.PExecute("DELETE FROM account_data WHERE account='%u' AND type='%u'", acc, type);
-    CharacterDatabase.escape_string(data);
-    CharacterDatabase.PExecute("INSERT INTO account_data VALUES ('%u','%u','%u','%s')", acc, type, (uint32)time_, data.c_str());
-    CharacterDatabase.CommitTransaction ();
+void WorldSession::SendAccountDataTimes()
+{
+    WorldPacket data( SMSG_ACCOUNT_DATA_TIMES, 4+1+8*4 );   // changed in WotLK
+    data << uint32(time(NULL));                             // unix time of something
+    data << uint8(1);
+    for(int i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
+        data << uint32(m_accountData[i].Time);              // also unix time
+    SendPacket(&data);
 }
 
 void WorldSession::LoadTutorialsData()
@@ -872,4 +927,13 @@ void WorldSession::SendAddonsInfo()
     }*/
 
     SendPacket(&data);
+}
+
+void WorldSession::SetPlayer( Player *plr )
+{
+    _player = plr;
+
+    // set m_GUID that can be used while player loggined and later until m_playerRecentlyLogout not reset
+    if(_player)
+        m_GUIDLow = _player->GetGUIDLow();
 }

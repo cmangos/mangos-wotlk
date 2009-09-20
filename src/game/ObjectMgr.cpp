@@ -111,7 +111,7 @@ bool SpellClickInfo::IsFitToRequirements(Player const* player) const
     if(questStart)
     {
         // not in expected required quest state
-        if(!player || (!questStartCanActive || !player->IsActiveQuest(questStart)) && !player->GetQuestRewardStatus(questStart))
+        if (!player || ((!questStartCanActive || !player->IsActiveQuest(questStart)) && !player->GetQuestRewardStatus(questStart)))
             return false;
     }
 
@@ -782,8 +782,8 @@ void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* 
     // replace by new structures array
     const_cast<CreatureDataAddonAura*&>(addon->auras) = new CreatureDataAddonAura[val.size()/2+1];
 
-    int i=0;
-    for(int j=0;j<val.size()/2;++j)
+    uint32 i=0;
+    for(uint32 j = 0; j < val.size()/2; ++j)
     {
         CreatureDataAddonAura& cAura = const_cast<CreatureDataAddonAura&>(addon->auras[i]);
         cAura.spell_id = (uint32)val[2*j+0];
@@ -1082,7 +1082,7 @@ void ObjectMgr::LoadCreatures()
 
         if(heroicCreatures.find(data.id)!=heroicCreatures.end())
         {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u) that listed as heroic template in `creature_template`, skipped.",guid,data.id );
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u) that listed as heroic template (entry: %u) in `creature_template`, skipped.",guid, data.id );
             continue;
         }
 
@@ -1220,13 +1220,13 @@ void ObjectMgr::LoadGameobjects()
         uint32 entry        = fields[ 1].GetUInt32();
 
         GameObjectInfo const* gInfo = GetGameObjectInfo(entry);
-        if(!gInfo)
+        if (!gInfo)
         {
             sLog.outErrorDb("Table `gameobject` has gameobject (GUID: %u) with non existing gameobject entry %u, skipped.", guid, entry);
             continue;
         }
 
-        if(gInfo->displayId && !sGameObjectDisplayInfoStore.LookupEntry(gInfo->displayId))
+        if (gInfo->displayId && !sGameObjectDisplayInfoStore.LookupEntry(gInfo->displayId))
         {
             sLog.outErrorDb("Gameobject (GUID: %u Entry %u GoType: %u) have invalid displayId (%u), not loaded.",guid, entry, gInfo->type, gInfo->displayId);
             continue;
@@ -1266,25 +1266,25 @@ void ObjectMgr::LoadGameobjects()
         int16 gameEvent     = fields[16].GetInt16();
         int16 PoolId        = fields[17].GetInt16();
 
-        if(data.rotation2 < -1.0f || data.rotation2 > 1.0f)
+        if (data.rotation2 < -1.0f || data.rotation2 > 1.0f)
         {
             sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation2 (%f) value, skip",guid,data.id,data.rotation2 );
             continue;
         }
 
-        if(data.rotation3 < -1.0f || data.rotation3 > 1.0f)
+        if (data.rotation3 < -1.0f || data.rotation3 > 1.0f)
         {
             sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation3 (%f) value, skip",guid,data.id,data.rotation3 );
             continue;
         }
 
-        if(!MapManager::IsValidMapCoord(data.mapid,data.posX,data.posY,data.posZ,data.orientation))
+        if (!MapManager::IsValidMapCoord(data.mapid,data.posX,data.posY,data.posZ,data.orientation))
         {
             sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid coordinates, skip",guid,data.id );
             continue;
         }
 
-        if(data.phaseMask==0)
+        if (data.phaseMask==0)
         {
             sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with `phaseMask`=0 (not visible for anyone), set to 1.",guid,data.id );
             data.phaseMask = 1;
@@ -1768,6 +1768,16 @@ void ObjectMgr::LoadItemPrototypes()
                 sLog.outErrorDb("Item (Entry: %u) has wrong stat_type%d (%u)",i,j+1,proto->ItemStat[j].ItemStatType);
                 const_cast<ItemPrototype*>(proto)->ItemStat[j].ItemStatType = 0;
             }
+
+            switch(proto->ItemStat[j].ItemStatType)
+            {
+                case ITEM_MOD_SPELL_HEALING_DONE:
+                case ITEM_MOD_SPELL_DAMAGE_DONE:
+                    sLog.outErrorDb("Item (Entry: %u) has deprecated stat_type%d (%u)",i,j+1,proto->ItemStat[j].ItemStatType);
+                    break;
+                default:
+                    break;
+            }
         }
 
         for (int j = 0; j < MAX_ITEM_PROTO_DAMAGES; ++j)
@@ -2028,10 +2038,8 @@ void ObjectMgr::LoadItemRequiredTarget()
                 if (pItemProto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_USE ||
                     pItemProto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_NO_DELAY_USE)
                 {
-                    SpellScriptTarget::const_iterator lower = spellmgr.GetBeginSpellScriptTarget(pSpellInfo->Id);
-                    SpellScriptTarget::const_iterator upper = spellmgr.GetEndSpellScriptTarget(pSpellInfo->Id);
-
-                    if (lower != upper)
+                    SpellScriptTargetBounds bounds = spellmgr.GetSpellScriptTargetBounds(pSpellInfo->Id);
+                    if (bounds.first != bounds.second)
                         break;
 
                     for (int j = 0; j < 3; ++j)
@@ -2886,6 +2894,11 @@ void ObjectMgr::LoadGuilds()
 
     delete result;
 
+    //delete unused LogGuid records in guild_eventlog and guild_bank_eventlog table
+    //you can comment these lines if you don't plan to change CONFIG_GUILD_EVENT_LOG_COUNT and CONFIG_GUILD_BANK_EVENT_LOG_COUNT
+    CharacterDatabase.PQuery("DELETE FROM guild_eventlog WHERE LogGuid > '%u'", sWorld.getConfig(CONFIG_GUILD_EVENT_LOG_COUNT));
+    CharacterDatabase.PQuery("DELETE FROM guild_bank_eventlog WHERE LogGuid > '%u'", sWorld.getConfig(CONFIG_GUILD_BANK_EVENT_LOG_COUNT));
+
     sLog.outString();
     sLog.outString( ">> Loaded %u guild definitions", count );
 }
@@ -3451,8 +3464,8 @@ void ObjectMgr::LoadQuests()
                     bool found = false;
                     for(int k = 0; k < 3; ++k)
                     {
-                        if( spellInfo->Effect[k]==SPELL_EFFECT_QUEST_COMPLETE && uint32(spellInfo->EffectMiscValue[k])==qinfo->QuestId ||
-                            spellInfo->Effect[k]==SPELL_EFFECT_SEND_EVENT)
+                        if ((spellInfo->Effect[k] == SPELL_EFFECT_QUEST_COMPLETE && uint32(spellInfo->EffectMiscValue[k]) == qinfo->QuestId) ||
+                            spellInfo->Effect[k] == SPELL_EFFECT_SEND_EVENT)
                         {
                             found = true;
                             break;
@@ -3607,20 +3620,17 @@ void ObjectMgr::LoadQuests()
                     qinfo->GetQuestId(),qinfo->RewSpell,qinfo->RewSpell);
                 qinfo->RewSpell = 0;                        // no spell reward will display for this quest
             }
-
-            if(!SpellMgr::IsSpellValid(spellInfo))
+            else if(!SpellMgr::IsSpellValid(spellInfo))
             {
                 sLog.outErrorDb("Quest %u has `RewSpell` = %u but spell %u is broken, quest will not have a spell reward.",
                     qinfo->GetQuestId(),qinfo->RewSpell,qinfo->RewSpell);
                 qinfo->RewSpell = 0;                        // no spell reward will display for this quest
             }
-
-            if(GetTalentSpellCost(qinfo->RewSpell))
+            else if(GetTalentSpellCost(qinfo->RewSpell))
             {
                 sLog.outErrorDb("Quest %u has `RewSpell` = %u but spell %u is talent, quest will not have a spell reward.",
                     qinfo->GetQuestId(),qinfo->RewSpell,qinfo->RewSpell);
                 qinfo->RewSpell = 0;                        // no spell reward will display for this quest
-                continue;
             }
         }
 
@@ -3634,20 +3644,17 @@ void ObjectMgr::LoadQuests()
                     qinfo->GetQuestId(),qinfo->RewSpellCast,qinfo->RewSpellCast);
                 qinfo->RewSpellCast = 0;                    // no spell will be casted on player
             }
-
-            if(!SpellMgr::IsSpellValid(spellInfo))
+            else if(!SpellMgr::IsSpellValid(spellInfo))
             {
                 sLog.outErrorDb("Quest %u has `RewSpellCast` = %u but spell %u is broken, quest will not have a spell reward.",
                     qinfo->GetQuestId(),qinfo->RewSpellCast,qinfo->RewSpellCast);
                 qinfo->RewSpellCast = 0;                    // no spell will be casted on player
             }
-
-            if(GetTalentSpellCost(qinfo->RewSpellCast))
+            else if(GetTalentSpellCost(qinfo->RewSpellCast))
             {
                 sLog.outErrorDb("Quest %u has `RewSpell` = %u but spell %u is talent, quest will not have a spell reward.",
                     qinfo->GetQuestId(),qinfo->RewSpellCast,qinfo->RewSpellCast);
                 qinfo->RewSpellCast = 0;                    // no spell will be casted on player
-                continue;
             }
         }
 
@@ -7067,7 +7074,7 @@ bool PlayerCondition::Meets(Player const * player) const
         case CONDITION_REPUTATION_RANK:
         {
             FactionEntry const* faction = sFactionStore.LookupEntry(value1);
-            return faction && player->GetReputationMgr().GetRank(faction) >= value2;
+            return faction && player->GetReputationMgr().GetRank(faction) >= int32(value2);
         }
         case CONDITION_TEAM:
             return player->GetTeam() == value1;

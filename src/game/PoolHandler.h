@@ -43,7 +43,7 @@ class PoolGroup
     public:
         PoolGroup();
         ~PoolGroup() {};
-        bool isEmpty() { return ExplicitlyChanced.size()==0 && EqualChanced.size()==0; }
+        bool isEmpty() { return ExplicitlyChanced.empty() && EqualChanced.empty(); }
         void AddEntry(PoolObject& poolitem, uint32 maxentries);
         bool CheckPool(void);
         uint32 RollOne(void);
@@ -56,10 +56,10 @@ class PoolGroup
         void RemoveOneRelation(uint16 child_pool_id);
     private:
         typedef std::vector<PoolObject> PoolObjectList;
-        uint32 CacheValue;                                  // Store the guid of the removed creature/gameobject during a pool update
         PoolObjectList ExplicitlyChanced;
         PoolObjectList EqualChanced;
-        uint32 Spawned;                                     // Used to know the number of spawned objects
+        uint32 m_LastDespawnedNode;                         // Store the guid of the removed creature/gameobject during a pool update
+        uint32 m_SpawnedPoolAmount;                         // Used to know the number of spawned objects
 };
 
 class Pool                                                  // for Pool of Pool case
@@ -81,7 +81,7 @@ class PoolHandler
         void Initialize();
 
     protected:
-        bool isSystemInit;
+        bool m_IsPoolSystemStarted;
         uint16 max_pool_id;
         typedef std::vector<PoolTemplateData> PoolTemplateDataMap;
         typedef std::vector<PoolGroup<Creature> >   PoolGroupCreatureMap;

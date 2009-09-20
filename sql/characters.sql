@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_8402_02_characters_guild_bank_eventlog` bit(1) default NULL
+  `required_8505_01_characters_character_spell` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
@@ -245,6 +245,28 @@ CREATE TABLE `characters` (
 LOCK TABLES `characters` WRITE;
 /*!40000 ALTER TABLE `characters` DISABLE KEYS */;
 /*!40000 ALTER TABLE `characters` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `character_account_data`
+--
+
+DROP TABLE IF EXISTS `character_account_data`;
+CREATE TABLE `character_account_data` (
+  `guid` int(11) unsigned NOT NULL default '0',
+  `type` int(11) unsigned NOT NULL default '0',
+  `time` bigint(11) unsigned NOT NULL default '0',
+  `data` longtext NOT NULL,
+  PRIMARY KEY  (`guid`,`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `character_account_data`
+--
+
+LOCK TABLES `character_account_data` WRITE;
+/*!40000 ALTER TABLE `character_account_data` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_account_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -915,7 +937,7 @@ CREATE TABLE `guild` (
   `BackgroundColor` int(5) NOT NULL default '0',
   `info` text NOT NULL,
   `motd` varchar(255) NOT NULL default '',
-  `createdate` datetime default NULL,
+  `createdate` bigint(20) NOT NULL default '0',
   `BankMoney` bigint(20) NOT NULL default '0',
   PRIMARY KEY  (`guildid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';

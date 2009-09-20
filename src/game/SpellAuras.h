@@ -211,6 +211,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraIncreaseBaseHealthPercent(bool Apply, bool Real);
         void HandleNoReagentUseAura(bool Apply, bool Real);
         void HandlePhase(bool Apply, bool Real);
+        void HandleModTargetArmorPct(bool Apply, bool Real);
 
         virtual ~Aura();
 
@@ -261,7 +262,7 @@ class MANGOS_DLL_SPEC Aura
             m_procCharges = charges;
             SendAuraUpdate(false);
         }
-        bool DropAuraCharge() // return true if last charge dropped
+        bool DropAuraCharge()                               // return true if last charge dropped
         {
             if (m_procCharges == 0)
                 return false;
@@ -341,6 +342,7 @@ class MANGOS_DLL_SPEC Aura
         void PeriodicDummyTick();
 
         bool IsCritFromAbilityAura(Unit* caster, uint32& damage);
+        void ReapplyAffectedPassiveAuras(Unit* target);
 
         Modifier m_modifier;
         SpellModifier *m_spellmod;
@@ -381,6 +383,7 @@ class MANGOS_DLL_SPEC Aura
         uint32 m_in_use;                                    // > 0 while in Aura::ApplyModifier call/Aura::Update/etc
     private:
         void CleanupTriggeredSpells();
+        bool IsNeedVisibleSlot(Unit const* caster) const;   // helper for check req. visibility slot
 };
 
 class MANGOS_DLL_SPEC AreaAura : public Aura

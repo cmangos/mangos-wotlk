@@ -273,7 +273,7 @@ struct Areas
 };
 
 #define MAX_RUNES       6
-#define RUNE_COOLDOWN   5                                   // 5*2=10 sec
+#define RUNE_COOLDOWN   10000                               // msec
 
 enum RuneType
 {
@@ -286,9 +286,9 @@ enum RuneType
 
 struct RuneInfo
 {
-    uint8 BaseRune;
-    uint8 CurrentRune;
-    uint8 Cooldown;
+    uint8  BaseRune;
+    uint8  CurrentRune;
+    uint16 Cooldown;                                        // msec
 };
 
 struct Runes
@@ -871,7 +871,8 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADCRITERIAPROGRESS     = 19,
     PLAYER_LOGIN_QUERY_LOADEQUIPMENTSETS        = 20,
     PLAYER_LOGIN_QUERY_LOADBGDATA               = 21,
-    MAX_PLAYER_LOGIN_QUERY                      = 22
+    PLAYER_LOGIN_QUERY_LOADACCOUNTDATA          = 22,
+    MAX_PLAYER_LOGIN_QUERY                      = 23
 };
 
 enum PlayerDelayedOperations
@@ -1406,9 +1407,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RewardRage( uint32 damage, uint32 weaponSpeedHitFactor, bool attacker );
         void SendPetSkillWipeConfirm();
         void CalcRage( uint32 damage,bool attacker );
-        void RegenerateAll();
-        void Regenerate(Powers power);
-        void RegenerateHealth();
+        void RegenerateAll(uint32 diff = REGEN_TIME_FULL);
+        void Regenerate(Powers power, uint32 diff);
+        void RegenerateHealth(uint32 diff);
         void setRegenTimer(uint32 time) {m_regenTimer = time;}
         void setWeaponChangeTimer(uint32 time) {m_weaponChangeTimer = time;}
 
@@ -1689,8 +1690,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateAttackPowerAndDamage(bool ranged = false);
         void UpdateShieldBlockValue();
         void UpdateDamagePhysical(WeaponAttackType attType);
-        void ApplySpellDamageBonus(int32 amount, bool apply);
-        void ApplySpellHealingBonus(int32 amount, bool apply);
+        void ApplySpellPowerBonus(int32 amount, bool apply);
         void UpdateSpellDamageAndHealingBonus();
 
         void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, float& min_damage, float& max_damage);
@@ -1708,8 +1708,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetRangedCritDamageReduction(uint32 damage) const;
         uint32 GetSpellCritDamageReduction(uint32 damage) const;
         uint32 GetDotDamageReduction(uint32 damage) const;
-        uint32 GetBaseSpellDamageBonus() { return m_baseSpellDamage;}
-        uint32 GetBaseSpellHealingBonus() { return m_baseSpellHealing;}
+        uint32 GetBaseSpellPowerBonus() { return m_baseSpellPower; }
 
         float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const;
         void UpdateBlockPercentage();
@@ -1724,6 +1723,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateAllSpellCritChances();
         void UpdateSpellCritChance(uint32 school);
         void UpdateExpertise(WeaponAttackType attType);
+        void UpdateArmorPenetration();
         void ApplyManaRegenBonus(int32 amount, bool apply);
         void UpdateManaRegen();
 
@@ -1887,6 +1887,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         float GetTotalPercentageModValue(BaseModGroup modGroup) const { return m_auraBaseMod[modGroup][FLAT_MOD] + m_auraBaseMod[modGroup][PCT_MOD]; }
         void _ApplyAllStatBonuses();
         void _RemoveAllStatBonuses();
+        float GetArmorPenetrationPct() const { return m_armorPenetrationPct; }
 
         void _ApplyWeaponDependentAuraMods(Item *item, WeaponAttackType attackType, bool apply);
         void _ApplyWeaponDependentAuraCritMod(Item *item, WeaponAttackType attackType, Aura* aura, bool apply);
@@ -2048,7 +2049,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***              ENVIROMENTAL SYSTEM                  ***/
         /*********************************************************/
 
-        void EnvironmentalDamage(EnviromentalDamage type, uint32 damage);
+        uint32 EnvironmentalDamage(EnviromentalDamage type, uint32 damage);
 
         /*********************************************************/
         /***               FLOOD FILTER SYSTEM                 ***/
@@ -2088,7 +2089,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ExitVehicle(Vehicle *vehicle);
 
         uint64 GetFarSight() const { return GetUInt64Value(PLAYER_FARSIGHT); }
-        void SetFarSightGUID(uint64 guid) { SetUInt64Value(PLAYER_FARSIGHT, guid); }
+        void SetFarSightGUID(uint64 guid);
 
         // Transports
         Transport * GetTransport() const { return m_transport; }
@@ -2126,13 +2127,14 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool HaveAtClient(WorldObject const* u) { return u==this || m_clientGUIDs.find(u->GetGUID())!=m_clientGUIDs.end(); }
 
+        WorldObject const* GetViewPoint() const;
         bool IsVisibleInGridForPlayer(Player* pl) const;
         bool IsVisibleGloballyFor(Player* pl) const;
 
-        void UpdateVisibilityOf(WorldObject* target);
+        void UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* target);
 
         template<class T>
-            void UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& data_updates, std::set<WorldObject*>& visibleNow);
+            void UpdateVisibilityOf(WorldObject const* viewPoint,T* target, UpdateData& data, UpdateDataMapType& data_updates, std::set<WorldObject*>& visibleNow);
 
         // Stealth detection system
         void HandleStealthedUnitsDetection();
@@ -2210,10 +2212,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 GetRunesState() const { return m_runes->runeState; }
         uint8 GetBaseRune(uint8 index) const { return m_runes->runes[index].BaseRune; }
         uint8 GetCurrentRune(uint8 index) const { return m_runes->runes[index].CurrentRune; }
-        uint8 GetRuneCooldown(uint8 index) const { return m_runes->runes[index].Cooldown; }
+        uint16 GetRuneCooldown(uint8 index) const { return m_runes->runes[index].Cooldown; }
         void SetBaseRune(uint8 index, uint8 baseRune) { m_runes->runes[index].BaseRune = baseRune; }
         void SetCurrentRune(uint8 index, uint8 currentRune) { m_runes->runes[index].CurrentRune = currentRune; }
-        void SetRuneCooldown(uint8 index, uint8 cooldown) { m_runes->runes[index].Cooldown = cooldown; m_runes->SetRuneState(index, (cooldown == 0) ? true : false); }
+        void SetRuneCooldown(uint8 index, uint16 cooldown) { m_runes->runes[index].Cooldown = cooldown; m_runes->SetRuneState(index, (cooldown == 0) ? true : false); }
         void ConvertRune(uint8 index, uint8 newType);
         void ResyncRunes(uint8 count);
         void AddRunePower(uint8 index);
@@ -2359,10 +2361,10 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         float m_auraBaseMod[BASEMOD_END][MOD_END];
         int16 m_baseRatingValue[MAX_COMBAT_RATING];
-        uint16 m_baseSpellDamage;
-        uint16 m_baseSpellHealing;
+        uint16 m_baseSpellPower;
         uint16 m_baseFeralAP;
         uint16 m_baseManaRegen;
+        float m_armorPenetrationPct;
 
         SpellModList m_spellMods[MAX_SPELLMOD];
         int32 m_SpellModRemoveCount;

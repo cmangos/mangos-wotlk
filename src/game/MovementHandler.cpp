@@ -65,7 +65,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->SetSemaphoreTeleportFar(false);
 
     // relocate the player to the teleport destination
-    GetPlayer()->SetMap(MapManager::Instance().CreateMap(loc.mapid, GetPlayer()));    GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
+    GetPlayer()->SetMap(MapManager::Instance().CreateMap(loc.mapid, GetPlayer()));
     GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
 
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
@@ -453,7 +453,7 @@ void WorldSession::HandleMoveNotActiveMover(WorldPacket &recv_data)
 
     if(_player->m_mover->GetGUID() == old_mover_guid)
     {
-        sLog.outError("HandleMoveNotActiveMover: incorrect mover guid: mover is " I64FMT " and should be " I64FMT " instead of " I64FMT, _player->m_mover->GetGUID(), _player->GetGUID(), old_mover_guid);
+        sLog.outError("HandleMoveNotActiveMover: incorrect mover guid: mover is " I64FMT " and should be " I64FMT " instead of " UI64FMTD, _player->m_mover->GetGUID(), _player->GetGUID(), old_mover_guid);
         recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
         return;
     }
@@ -498,43 +498,41 @@ void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvdata*/)
     GetPlayer()->SendMessageToSet(&data, false);
 }
 
-void WorldSession::HandleMoveKnockBackAck( WorldPacket & /*recv_data*/ )
+void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
 {
     sLog.outDebug("CMSG_MOVE_KNOCK_BACK_ACK");
-    // Currently not used but maybe use later for recheck final player position
-    // (must be at call same as into "recv_data >> x >> y >> z >> orientation;"
 
-    /*
-    uint32 flags, time;
-    float x, y, z, orientation;
-    uint64 guid;
-    uint32 sequence;
-    uint32 ukn1;
-    float xdirection,ydirection,hspeed,vspeed;
+    recv_data.read_skip<uint64>();                          // guid
+    recv_data.read_skip<uint32>();                          // unk
 
-    recv_data >> guid;
-    recv_data >> sequence;
-    recv_data >> flags >> time;
-    recv_data >> x >> y >> z >> orientation;
-    recv_data >> ukn1; //unknown
-    recv_data >> vspeed >> xdirection >> ydirection >> hspeed;
-
-    // skip not personal message;
-    if(GetPlayer()->GetGUID()!=guid)
-        return;
-
-    // check code
-    */
+    MovementInfo movementInfo;
+    ReadMovementInfo(recv_data, &movementInfo);
 }
 
-void WorldSession::HandleMoveHoverAck( WorldPacket& /*recv_data*/ )
+void WorldSession::HandleMoveHoverAck( WorldPacket& recv_data )
 {
     sLog.outDebug("CMSG_MOVE_HOVER_ACK");
+
+    recv_data.read_skip<uint64>();                          // guid
+    recv_data.read_skip<uint32>();                          // unk
+
+    MovementInfo movementInfo;
+    ReadMovementInfo(recv_data, &movementInfo);
+
+    recv_data.read_skip<uint32>();                          // unk2
 }
 
-void WorldSession::HandleMoveWaterWalkAck(WorldPacket& /*recv_data*/)
+void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
 {
     sLog.outDebug("CMSG_MOVE_WATER_WALK_ACK");
+
+    recv_data.read_skip<uint64>();                          // guid
+    recv_data.read_skip<uint32>();                          // unk
+
+    MovementInfo movementInfo;
+    ReadMovementInfo(recv_data, &movementInfo);
+
+    recv_data.read_skip<uint32>();                          // unk2
 }
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)

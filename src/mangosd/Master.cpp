@@ -38,6 +38,7 @@
 #include "RASocket.h"
 #include "ScriptCalls.h"
 #include "Util.h"
+#include "revision_sql.h"
 
 #include "sockets/TcpSocket.h"
 #include "sockets/Utility.h"
@@ -292,10 +293,6 @@ int Master::Run()
 
     uint32 socketSelecttime = sWorld.getConfig(CONFIG_SOCKET_SELECTTIME);
 
-    // maximum counter for next ping
-    uint32 numLoops = (sConfig.GetIntDefault( "MaxPingTime", 30 ) * (MINUTE * 1000000 / socketSelecttime));
-    uint32 loopCounter = 0;
-
     ///- Start up freeze catcher thread
     if(uint32 freeze_delay = sConfig.GetIntDefault("MaxCoreStuckTime", 0))
     {
@@ -416,6 +413,9 @@ bool Master::_StartDB()
         return false;
     }
 
+    if(!WorldDatabase.CheckRequiredField("db_version",REVISION_DB_MANGOS))
+        return false;
+
     if(!sConfig.GetString("CharacterDatabaseInfo", &dbstring))
     {
         sLog.outError("Character Database not specified in configuration file");
@@ -429,6 +429,9 @@ bool Master::_StartDB()
         sLog.outError("Cannot connect to Character database %s",dbstring.c_str());
         return false;
     }
+
+    if(!CharacterDatabase.CheckRequiredField("character_db_version",REVISION_DB_CHARACTERS))
+        return false;
 
     ///- Get login database info from configuration file
     if(!sConfig.GetString("LoginDatabaseInfo", &dbstring))
@@ -444,6 +447,9 @@ bool Master::_StartDB()
         sLog.outError("Cannot connect to login database %s",dbstring.c_str());
         return false;
     }
+
+    if(!loginDatabase.CheckRequiredField("realmd_db_version",REVISION_DB_REALMD))
+        return false;
 
     ///- Get the realm Id from the configuration file
     realmID = sConfig.GetIntDefault("RealmID", 0);

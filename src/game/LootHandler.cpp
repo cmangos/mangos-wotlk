@@ -45,7 +45,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         GameObject *go = player->GetMap()->GetGameObject(lguid);
 
         // not check distance for GO in case owned GO (fishing bobber case, for example) or Fishing hole GO
-        if (!go || (go->GetOwnerGUID() != _player->GetGUID() && go->GetGoType() != GAMEOBJECT_TYPE_FISHINGHOLE) && !go->IsWithinDistInMap(_player,INTERACTION_DISTANCE))
+        if (!go || ((go->GetOwnerGUID() != _player->GetGUID() && go->GetGoType() != GAMEOBJECT_TYPE_FISHINGHOLE) && !go->IsWithinDistInMap(_player,INTERACTION_DISTANCE)))
         {
             player->SendLootRelease(lguid);
             return;
@@ -256,8 +256,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 
     // cheaters can modify lguid to prevent correct apply loot release code and re-loot
     // use internal stored guid
-    //uint64   lguid;
-    //recv_data >> lguid;
+    recv_data.read_skip<uint64>();                          // guid;
 
     if(uint64 lguid = GetPlayer()->GetLootGUID())
         DoLootRelease(lguid);
@@ -281,7 +280,7 @@ void WorldSession::DoLootRelease( uint64 lguid )
         GameObject *go = GetPlayer()->GetMap()->GetGameObject(lguid);
 
         // not check distance for GO in case owned GO (fishing bobber case, for example) or Fishing hole GO
-        if (!go || (go->GetOwnerGUID() != _player->GetGUID() && go->GetGoType() != GAMEOBJECT_TYPE_FISHINGHOLE) && !go->IsWithinDistInMap(_player,INTERACTION_DISTANCE))
+        if (!go || ((go->GetOwnerGUID() != _player->GetGUID() && go->GetGoType() != GAMEOBJECT_TYPE_FISHINGHOLE) && !go->IsWithinDistInMap(_player,INTERACTION_DISTANCE)))
             return;
 
         loot = &go->loot;
