@@ -288,9 +288,9 @@ bool WorldSession::Update(uint32 /*diff*/)
                 botPlayer->GetPlayerbotAI()->HandleTeleportAck();
             else if (botPlayer->IsInWorld())
             {
-                while (! pBotWorldSession->_recvQueue.empty())
+                WorldPacket* packet;
+                while (! pBotWorldSession->_recvQueue.next(packet))
                 {
-                    WorldPacket* const packet = pBotWorldSession->_recvQueue.next();
                     OpcodeHandler& opHandle = opcodeTable[packet->GetOpcode()];
                     (pBotWorldSession->*opHandle.handler)(*packet);
                     delete packet;
