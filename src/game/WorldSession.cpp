@@ -289,7 +289,7 @@ bool WorldSession::Update(uint32 /*diff*/)
             else if (botPlayer->IsInWorld())
             {
                 WorldPacket* packet;
-                while (! pBotWorldSession->_recvQueue.next(packet))
+                while (pBotWorldSession->_recvQueue.next(packet))
                 {
                     OpcodeHandler& opHandle = opcodeTable[packet->GetOpcode()];
                     (pBotWorldSession->*opHandle.handler)(*packet);
