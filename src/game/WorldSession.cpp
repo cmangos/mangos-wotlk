@@ -209,6 +209,11 @@ bool WorldSession::Update(uint32 /*diff*/)
                                 LogUnprocessedTail(packet);
                         }
                         // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
+
+                        // playerbot mod
+                        if (_player && _player->GetPlayerbotMgr())
+                            _player->GetPlayerbotMgr()->HandleMasterIncomingPacket(*packet);
+                        // playerbot mod end
                         break;
                     case STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT:
                         if(!_player && !m_playerRecentlyLogout)
