@@ -189,6 +189,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void DoLoot();
 
         void AcceptQuest( Quest const *qInfo, Player *pGiver );
+        void TurnInQuests( WorldObject *questgiver );
 
         bool IsInCombat();
         void UpdateAttackerInfo();

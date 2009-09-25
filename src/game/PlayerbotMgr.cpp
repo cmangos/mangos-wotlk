@@ -184,17 +184,41 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             return;
         } /* EMOTE ends here */
 
+        case CMSG_GAMEOBJ_USE:
+            {
+                WorldPacket p(packet);
+        	    p.rpos(0); // reset reader
+        	    uint64 objGUID;
+        	    p >> objGUID;
+
+                GameObject *obj = m_master->GetMap()->GetGameObject( objGUID );
+                if( !obj )
+                    return;
+
+            	for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            	{
+            		Player* const bot = it->second;
+
+                    if( obj->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER )
+                    {
+                        bot->GetPlayerbotAI()->TurnInQuests( obj );
+                    }
+                    // add other go types here, i.e.:
+                    // GAMEOBJECT_TYPE_CHEST - loot quest items of chest
+                }
+            }
+            break;
+
         // if master talks to an NPC
-        case CMSG_SET_SELECTION:
-        //case CMSG_GOSSIP_HELLO:
-        //case CMSG_QUESTGIVER_HELLO:
+        case CMSG_GOSSIP_HELLO:
+        case CMSG_QUESTGIVER_HELLO:
         {
         	WorldPacket p(packet);
         	p.rpos(0); // reset reader
         	uint64 npcGUID;
         	p >> npcGUID;
         	
-        	Object* const pNpc = ObjectAccessor::GetObjectByTypeMask(*m_master, npcGUID, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
+        	WorldObject* pNpc = ObjectAccessor::GetWorldObject( *m_master, npcGUID );
         	if (!pNpc)
         		return;
 
@@ -202,105 +226,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
         	for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
         	{
         		Player* const bot = it->second;
-        		if (!bot->IsInMap((WorldObject*) pNpc))
-        			bot->GetPlayerbotAI()->TellMaster("hey you are turning in quests without me!");
-        		else
-        		{
-        			bot->SetSelection(npcGUID);
-        			
-        			// auto complete every completed quest this NPC has
-        			bot->PrepareQuestMenu(npcGUID);
-        			QuestMenu& questMenu = bot->PlayerTalkClass->GetQuestMenu();
-        			for (uint32 iI = 0; iI < questMenu.MenuItemCount(); ++iI)
-        			{
-        				QuestMenuItem const& qItem = questMenu.GetItem(iI);
-        				uint32 questID = qItem.m_qId;
-        				Quest const* pQuest = objmgr.GetQuestTemplate(questID);
-
-        				std::ostringstream out;
-        				std::string questTitle  = pQuest->GetTitle();
-        				bot->GetPlayerbotAI()->QuestLocalization(questTitle, questID);
-        				
-        		        QuestStatus status = bot->GetQuestStatus(questID);
-        		        
-        		        // if quest is complete, turn it in
-        		        if (status == QUEST_STATUS_COMPLETE)
-        		        {
-        		        	// if bot hasn't already turned quest in
-        		        	if (! bot->GetQuestRewardStatus(questID))
-        		        	{
-        		        		// auto reward quest if no choice in reward
-        		        		if (pQuest->GetRewChoiceItemsCount() == 0)
-        		        		{
-									if (bot->CanRewardQuest(pQuest, false))
-									{
-										bot->RewardQuest(pQuest, 0, pNpc, false);
-										out << "Quest complete: |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
-									}
-									else
-									{
-										out << "|cffff0000Unable to turn quest in:|r |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
-									}
-        		        		}
-        		        		
-        		        		// auto reward quest if one item as reward
-        		        		else if (pQuest->GetRewChoiceItemsCount() == 1)
-        		        		{
-        		        			int rewardIdx = 0;
-        		        			ItemPrototype const *pRewardItem = objmgr.GetItemPrototype(pQuest->RewChoiceItemId[rewardIdx]);
-									std::string itemName = pRewardItem->Name1;
-									bot->GetPlayerbotAI()->ItemLocalization(itemName, pRewardItem->ItemId);
-									if (bot->CanRewardQuest(pQuest, rewardIdx, false))
-									{
-										bot->RewardQuest(pQuest, rewardIdx, pNpc, true);
-
-										std::string itemName = pRewardItem->Name1;
-										bot->GetPlayerbotAI()->ItemLocalization(itemName, pRewardItem->ItemId);
-
-										out << "Quest complete: "
-											<< " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() 
-											<< "|h[" << questTitle << "]|h|r reward: |cffffffff|Hitem:" 
-											<< pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
-									}
-									else
-									{
-										out << "|cffff0000Unable to turn quest in:|r "
-											<< "|cff808080|Hquest:" << questID << ':' 
-											<< pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r"
-											<< " reward: |cffffffff|Hitem:" 
-											<< pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
-									}
-        		        		}
-        		        		
-        		        		// else multiple rewards - let master pick
-        		        		else {
-        		        			out << "What reward should I take for |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() 
-										<< "|h[" << questTitle << "]|h|r? ";
-        		        			for (uint8 i=0; i < pQuest->GetRewChoiceItemsCount(); ++i)
-									{
-										ItemPrototype const * const pRewardItem = objmgr.GetItemPrototype(pQuest->RewChoiceItemId[i]);
-										std::string itemName = pRewardItem->Name1;
-										bot->GetPlayerbotAI()->ItemLocalization(itemName, pRewardItem->ItemId);
-										out << "|cffffffff|Hitem:" << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
-									}
-        		        		}
-        		        	}
-        		        }
-        		        
-        		        else if (status == QUEST_STATUS_INCOMPLETE) {
-							out << "|cffff0000Quest incomplete:|r " 
-								<< " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
-        		        }
-        		        
-        		        else if (status == QUEST_STATUS_AVAILABLE){
-							out << "|cff00ff00Quest available:|r " 
-								<< " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
-        		        }
-
-        				if (! out.str().empty())
-        					bot->GetPlayerbotAI()->TellMaster(out.str());
-        			}
-        		}
+                bot->GetPlayerbotAI()->TurnInQuests( pNpc );
         	}
         	        
         	return;
