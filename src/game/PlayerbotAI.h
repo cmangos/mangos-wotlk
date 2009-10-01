@@ -46,6 +46,12 @@ class MANGOS_DLL_SPEC PlayerbotAI
 			ORDERS_RESET		= 0xFF
         };
 
+        enum CombatTargetType
+        {
+            TARGET_NORMAL       = 0x00,
+            TARGET_THREATEN     = 0x01     
+        };
+
         enum BotState
         {
             BOTSTATE_NORMAL,        // normal AI routines are processed
@@ -111,6 +117,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         ScenarioType GetScenarioType() {return m_ScenarioType;}
 
         PlayerbotClassAI* GetClassAI() {return m_classAI;}
+        PlayerbotMgr* const GetManager() {return m_mgr;}
 
         // finds spell ID for matching substring args
         // in priority of full text match, spells not taking reagents, and highest rank
@@ -256,15 +263,14 @@ class MANGOS_DLL_SPEC PlayerbotAI
 
         AttackerInfoList m_attackerInfo;
 
+        bool m_targetChanged;
+        CombatTargetType m_targetType;
+
 		Unit *m_targetCombat;	// current combat target
 		Unit *m_targetAssist;	// get new target by checking attacker list of assisted player
 		Unit *m_targetProtect;	// check 
 
 		Unit *m_followTarget;	// whom to follow in non combat situation?
-
-        // config variables
-        bool m_confDebugWhisper;
-        float m_confFollowDistance[2];
 };
 
 #endif

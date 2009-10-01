@@ -5,6 +5,7 @@
     Version : 0.37
     */
 #include "PlayerbotRogueAI.h"
+#include "PlayerbotMgr.h"
 
 class PlayerbotAI;
 PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, PlayerbotAI* const ai): PlayerbotClassAI(master, bot, ai)
@@ -23,6 +24,7 @@ PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, Play
     GOUGE               = ai->getSpellId("gouge");
 
     SHADOWSTEP          = ai->getSpellId("shadowstep"); //SUBTLETY
+    STEALTH             = ai->getSpellId("stealth");
     VANISH              = ai->getSpellId("vanish");
     EVASION             = ai->getSpellId("evasion");
     CLOAK_OF_SHADOWS    = ai->getSpellId("cloak of shadows");
@@ -34,9 +36,26 @@ PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, Play
     EXPOSE_ARMOR        = ai->getSpellId("expose armor");
     RUPTURE             = ai->getSpellId("rupture");
     DISMANTLE           = ai->getSpellId("dismantle");
+    CHEAP_SHOT          = ai->getSpellId("cheap shot");
+    AMBUSH              = ai->getSpellId("ambush");
 }
 
 PlayerbotRogueAI::~PlayerbotRogueAI() {}
+
+bool PlayerbotRogueAI::DoFirstCombatManeuver(Unit *pTarget)
+{
+    PlayerbotAI* ai = GetAI();
+    Player * m_bot = GetPlayerBot();
+
+    if( STEALTH>0 && !m_bot->HasAura( STEALTH ) && ai->CastSpell(STEALTH, *m_bot) )
+    {
+        if( ai->GetManager()->m_confDebugWhisper ) 
+            ai->TellMaster( "First > Stealth (%d)", STEALTH );
+        return false;
+    }
+    
+    return false;
+}
 
 void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
 {
@@ -58,6 +77,7 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     ai->SetInFront( pTarget );
     Player *m_bot = GetPlayerBot();
     Unit* pVictim = pTarget->getVictim();
+    float fTargetDist = m_bot->GetDistance( pTarget );
 
     // TODO: make this work better...
     /*if (pVictim)
@@ -84,29 +104,39 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
         GetAI()->TellMaster("AttackStop, CombatStop, Vanish");
     }*/
 
-    if (pVictim)
+    // decide what to do:
+    if( CLOAK_OF_SHADOWS>0 && pVictim->HasAura(SPELL_AURA_PERIODIC_DAMAGE) && !m_bot->HasAura(CLOAK_OF_SHADOWS,0) && ai->CastSpell(CLOAK_OF_SHADOWS) )
     {
-        if (pVictim->HasAura(SPELL_AURA_PERIODIC_DAMAGE))
-        {
-            ai->CastSpell(CLOAK_OF_SHADOWS, *m_bot);
-            GetAI()->TellMaster("CoS");
-        }
-
-        if (pVictim == m_bot && ai->GetHealthPercent() < 40)
-            SpellSequence = Threat;
+        if( ai->GetManager()->m_confDebugWhisper )
+            ai->TellMaster( "CoS!" );
+        return;
     }
+    else if( m_bot->HasAura( STEALTH ) )
+        SpellSequence = RogueStealth;
+    else if( pTarget->IsNonMeleeSpellCasted(true) )
+        SpellSequence = RogueSpellPreventing;
+    else if( pVictim==m_bot && ai->GetHealthPercent()<40 )
+        SpellSequence = RogueThreat;
     else
-    {
-        if (pTarget->IsNonMeleeSpellCasted(true))
-            SpellSequence = RogueSpellPreventing;
-        else
-            SpellSequence = RogueCombat;
-    }
+        SpellSequence = RogueCombat;
+
+    // we fight in melee, target is not in range, skip the next part!
+    if( fTargetDist > ATTACK_DISTANCE )
+        return;
 
     std::ostringstream out;
     switch (SpellSequence)
     {
-        case Threat:
+        case RogueStealth:
+            out << "Case Stealth";
+            if( AMBUSH>0 && ai->GetEnergyAmount()>=60 && ai->CastSpell(AMBUSH,*pTarget) )
+                out << " > Ambush";
+            if( CHEAP_SHOT>0 && ai->GetEnergyAmount()>=60 && ai->CastSpell(CHEAP_SHOT,*pTarget) )
+                out << " > Cheap Shot";
+            else
+                out << " NONE!";
+            break;
+        case RogueThreat:
             out << "Case Threat";
             if( EVASION>0 && ai->GetHealthPercent()<=35 && !m_bot->HasAura(EVASION,0) && ai->CastSpell(EVASION) )
                 out << " > Evasion";
@@ -125,15 +155,16 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
                 out << " NONE!";
             break;
         case RogueCombat:
+        default:
             out << "Case Combat";
-            if( DISMANTLE>0 && !pTarget->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISARMED) && ai->GetEnergyAmount()>=25 && ai->CastSpell(DISMANTLE,*pTarget) )
-                out << " > Dismantle";
             if( m_bot->GetComboPoints()<=4 )
             {
                 if( BACKSTAB>0 && pTarget->isInBackInMap(m_bot,1) && ai->GetEnergyAmount()>=60 && ai->CastSpell(BACKSTAB,*pTarget) )
                     out << " > Backstab";
                 else if( SINISTER_STRIKE>0 && ai->GetEnergyAmount()>=45 && ai->CastSpell(SINISTER_STRIKE,*pTarget) )
                     out << " > Sinister Strike";
+                else if( DISMANTLE>0 && !pTarget->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISARMED) && ai->GetEnergyAmount()>=25 && ai->CastSpell(DISMANTLE,*pTarget) )
+                    out << " > Dismantle";
                 else
                     out << " NONE!";
             }
@@ -166,7 +197,8 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
             }
             break;
     }
-    ai->TellMaster( out.str().c_str() );
+    if( ai->GetManager()->m_confDebugWhisper )
+        ai->TellMaster( out.str().c_str() );
 }
 
 // end DoNextCombatManeuver
@@ -177,19 +209,16 @@ void PlayerbotRogueAI::DoNonCombatActions()
     if (!m_bot)
         return;
 
+    // remove stealth
+    if( m_bot->HasAura( STEALTH ) )
+        m_bot->RemoveAurasDueToSpell( STEALTH );
+
     // hp check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    Item* pItem = GetAI()->FindFood();
-
-    if (pItem != NULL && GetAI()->GetHealthPercent() < 15)
-    {
-        GetAI()->TellMaster("I could use some food.");
-        GetAI()->UseItem(*pItem);
-        GetAI()->SetIgnoreUpdateTime(30);
-        return;
-    }
+    if (GetAI()->GetHealthPercent() < 60)
+        GetAI()->Feast();
 /*
     // Poison check //Not working needs some mor testing...i think need to tell the bott where "slot" to apply poison.
 

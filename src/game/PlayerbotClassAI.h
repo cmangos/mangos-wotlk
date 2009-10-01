@@ -21,6 +21,7 @@ class MANGOS_DLL_SPEC PlayerbotClassAI
         virtual ~PlayerbotClassAI();
 
         // all combat actions go here
+        virtual bool DoFirstCombatManeuver(Unit*);
         virtual void DoNextCombatManeuver(Unit*);
 
         // all non combat actions go here, ex buffs, heals, rezzes

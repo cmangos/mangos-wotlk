@@ -5,10 +5,14 @@
     Version : 0.39
     */
 #include "PlayerbotWarriorAI.h"
+#include "PlayerbotMgr.h"
 
 class PlayerbotAI;
 PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, PlayerbotAI* const ai): PlayerbotClassAI(master, bot, ai)
 {
+    BATTLE_STANCE           = ai->getSpellId("battle stance"); //ARMS
+    CHARGE                  = ai->getSpellId("charge"); //ARMS
+    OVERPOWER               = ai->getSpellId("overpower"); // ARMS
     HEROIC_STRIKE           = ai->getSpellId("heroic strike"); //ARMS
     REND                    = ai->getSpellId("rend"); //ARMS
     THUNDER_CLAP            = ai->getSpellId("thunder clap");  //ARMS
@@ -57,6 +61,48 @@ PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, 
 }
 PlayerbotWarriorAI::~PlayerbotWarriorAI() {}
 
+bool PlayerbotWarriorAI::DoFirstCombatManeuver(Unit *pTarget)
+{
+    Player *m_bot = GetPlayerBot();
+    PlayerbotAI *ai = GetAI();
+    PlayerbotAI::CombatOrderType co = ai->GetCombatOrder();
+    float fTargetDist = m_bot->GetDistance( pTarget );
+
+    if( (co&PlayerbotAI::ORDERS_TANK) && DEFENSIVE_STANCE>0 && !m_bot->HasAura(DEFENSIVE_STANCE, 0) && ai->CastSpell(DEFENSIVE_STANCE) )
+    {
+        if( ai->GetManager()->m_confDebugWhisper ) 
+            ai->TellMaster( "First > Defensive Stance (%d)", DEFENSIVE_STANCE );
+        return true;
+    }
+    else if( (co&PlayerbotAI::ORDERS_TANK) && TAUNT>0 && m_bot->HasAura(DEFENSIVE_STANCE, 0) && ai->CastSpell(TAUNT,*pTarget) )
+    {
+        if( ai->GetManager()->m_confDebugWhisper ) 
+            ai->TellMaster( "First > Taunt (%d)", TAUNT );
+        return false;
+    }
+    else if( BATTLE_STANCE>0 && !m_bot->HasAura(BATTLE_STANCE, 0) && ai->CastSpell(BATTLE_STANCE) )
+    {
+        if( ai->GetManager()->m_confDebugWhisper ) 
+            ai->TellMaster( "First > Battle Stance (%d)", BATTLE_STANCE );
+        return true;
+    }
+    else if( BATTLE_STANCE>0 && m_bot->HasAura(BATTLE_STANCE, 0) )
+    {
+        if( fTargetDist<8.0f )
+            return false;
+        else if( fTargetDist>25.0f )
+            return true;
+        else if( CHARGE>0 && ai->CastSpell(CHARGE,*pTarget) )
+        {
+            if( ai->GetManager()->m_confDebugWhisper ) 
+                ai->TellMaster( "First > Charge (%d)", CHARGE );
+            return false;
+        }
+    }
+
+    return false;
+}
+
 void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();
@@ -76,169 +122,85 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
 
     // Damage Attacks
 
+    ai->SetInFront( pTarget );
     Player *m_bot = GetPlayerBot();
     Unit* pVictim = pTarget->getVictim();
+    float fTargetDist = m_bot->GetDistance( pTarget );
+    PlayerbotAI::CombatOrderType co = ai->GetCombatOrder();
 
-    if( !m_bot->HasInArc(M_PI, pTarget))
-        m_bot->SetInFront(pTarget);
+    // decide what stance to use
+    if( (co&PlayerbotAI::ORDERS_TANK) && !m_bot->HasAura(DEFENSIVE_STANCE,0) && ai->CastSpell(DEFENSIVE_STANCE) )
+        if( ai->GetManager()->m_confDebugWhisper )
+            ai->TellMaster( "Stance > Defensive" );
+    else if( !(co&PlayerbotAI::ORDERS_TANK) && !m_bot->HasAura(BATTLE_STANCE,0) && ai->CastSpell(BATTLE_STANCE) )
+        if( ai->GetManager()->m_confDebugWhisper )
+            ai->TellMaster( "Stance > Battle" );
 
-    if (SHIELD_WALL > 0 && ai->GetHealthPercent() < 20)
-        ai->CastSpell (SHIELD_WALL, *m_bot);
+    // get spell sequence
+    if( pTarget->IsNonMeleeSpellCasted(true) )
+        SpellSequence = WarriorSpellPreventing;
+    else if( m_bot->HasAura( BATTLE_STANCE, 0 ) )
+        SpellSequence = WarriorBattle;
+    else if( m_bot->HasAura( DEFENSIVE_STANCE, 0 ) )
+        SpellSequence = WarriorDefensive;
+    else if( m_bot->HasAura( BERSERKER_STANCE, 0 ) )
+        SpellSequence = WarriorBerserker;
 
-    if (DEVASTATE > 0 && ai->GetRageAmount() >= 15)
-        ai->CastSpell (DEVASTATE);
-    else if (SUNDER_ARMOR > 0 && ai->GetRageAmount() >= 15)
-        ai->CastSpell (SUNDER_ARMOR);
+    // do shouts, berserker rage, etc...
+    if( BERSERKER_RAGE>0 && !m_bot->HasAura( BERSERKER_RAGE, 0 ) && ai->CastSpell( BERSERKER_RAGE ) )
+        if( ai->GetManager()->m_confDebugWhisper )
+            ai->TellMaster( "Pre > Berseker Rage" );
+    else if( DEMORALIZING_SHOUT>0 && ai->GetRageAmount()>=10 && !pTarget->HasAura( DEMORALIZING_SHOUT, 0 ) && ai->CastSpell( DEMORALIZING_SHOUT ) )
+        if( ai->GetManager()->m_confDebugWhisper )
+            ai->TellMaster( "Pre > Demoralizing Shout" );
+    else if( BATTLE_SHOUT>0 && ai->GetRageAmount()>=10 && !m_bot->HasAura( BATTLE_SHOUT, 0 ) && ai->CastSpell( BATTLE_SHOUT ) )
+        if( ai->GetManager()->m_confDebugWhisper )
+            ai->TellMaster( "Pre > Battle Shout" );
 
-    if (pTarget->IsNonMeleeSpellCasted(true))
-        SpellSequence = SpellPreventing;
-
-    if (pTarget->GetHealth() < pTarget->GetMaxHealth()*0.2 && pTarget->getLevel() <= m_bot->getLevel() )
-        SpellSequence = Berserker;
-    else
-        SpellSequence = Tanking;
-
+    std::ostringstream out;
     switch (SpellSequence)
     {
-        case Tanking:
-            //ai->TellMaster("Tanking");
-            if (DEFENSIVE_STANCE > 0 && !m_bot->HasAura(DEFENSIVE_STANCE, 0))
-                ai->CastSpell (DEFENSIVE_STANCE);
-
-            if (DEMORALIZING_SHOUT > 0 && !pTarget->HasAura(DEMORALIZING_SHOUT, 0) && ai->GetRageAmount() >= 10)
-                ai->CastSpell (DEMORALIZING_SHOUT);
-            else if (SHIELD_BLOCK > 0 && TankCounter < 1 && pVictim)
-            {
-                if (pVictim == m_bot)
-                {
-                    ai->CastSpell (SHIELD_BLOCK);
-                    TankCounter++;
-                    break;
-                }
-            }
-            else if (SHIELD_SLAM > 0 && TankCounter < 2 && ai->GetRageAmount() >= 20)
-            {
-                ai->CastSpell (SHIELD_SLAM, *pTarget);
-                TankCounter++;
-                break;
-            }
-            else if (CONCUSSION_BLOW > 0 && TankCounter < 3 && ai->GetRageAmount() >= 20)
-            {
-                ai->CastSpell (CONCUSSION_BLOW, *pTarget);
-                TankCounter++;
-                break;
-            }
-            else if (SHOCKWAVE > 0 && TankCounter < 4 && ai->GetRageAmount() >= 15)
-            {
-                ai->CastSpell (SHOCKWAVE);
-                TankCounter++;
-                break;
-            }
-            else if (REVENGE > 0 && TankCounter < 5 && ai->GetRageAmount() >= 5)
-            {
-                ai->CastSpell (REVENGE, *pTarget);
-                TankCounter++;
-                break;
-            }
-            else if (THUNDER_CLAP > 0 && TankCounter < 6 && ai->GetRageAmount() >= 5)
-            {
-                ai->CastSpell (THUNDER_CLAP, *pTarget);
-                TankCounter++;
-                break;
-            }
-            else if (SHIELD_BLOCK > 0 && TankCounter < 7 && pVictim)
-            {
-                if (pVictim == m_bot)
-                {
-                    ai->CastSpell (SHIELD_BLOCK);
-                    TankCounter++;
-                    break;
-                }
-            }
-            else if (HEROIC_STRIKE > 0 && TankCounter < 8 && ai->GetRageAmount() >= 15)
-            {
-                ai->CastSpell (HEROIC_STRIKE, *pTarget);
-                TankCounter++;
-                break;
-            }
-            else if (TAUNT > 0 && TankCounter < 9)
-            {
-                ai->CastSpell (TAUNT, *pTarget);
-                TankCounter++;
-                break;
-            }
-            else if (COMMANDING_SHOUT > 0 && TankCounter < 10 && !m_bot->HasAura(COMMANDING_SHOUT, 0) && ai->GetRageAmount() >= 10)
-            {
-                ai->CastSpell (COMMANDING_SHOUT);
-                TankCounter++;
-                break;
-            }
-            else if (TankCounter < 11)
-            {
-                TankCounter = 0;
-                //ai->TellMaster("TankCounterReseter");
-                break;
-            }
+        case WarriorSpellPreventing:
+            out << "Case Prevent";
+            if( SHIELD_BASH>0 && ai->GetRageAmount()>=10 && ai->CastSpell( SHIELD_BASH, *pTarget ) )
+                out << " > Shield Bash";
             else
-            {
-                TankCounter = 0;
-                //ai->TellMaster("TankCounterReseter");
-                break;
-            }
+                out << " > NONE";
             break;
 
-        case Berserker:
-            //ai->TellMaster("Berserker");
-            if (BERSERKER_STANCE > 0 && !m_bot->HasAura(BERSERKER_STANCE, 0))
-                ai->CastSpell (BERSERKER_STANCE);
-            else if (EXECUTE > 0 && BerserkerCounter < 1 && pTarget->GetHealth() < pTarget->GetMaxHealth()*0.2 && ai->GetRageAmount() >= 15)
-            {
-                ai->CastSpell (EXECUTE, *pTarget);
-                BerserkerCounter++;
-                break;
-            }
-            else if (WHIRLWIND > 0 && BerserkerCounter < 2 && ai->GetRageAmount() >= 15)
-            {
-                ai->CastSpell (WHIRLWIND, *pTarget);
-                BerserkerCounter++;
-                break;
-            }
-            else if (BerserkerCounter < 3)
-            {
-                BerserkerCounter = 0;
-                //ai->TellMaster("BerserkerCounterReseter");
-                break;
-            }
+        case WarriorBattle:
+            out << "Case Battle";
+            if( OVERPOWER>0 && ai->GetRageAmount()>=5 && ai->CastSpell( OVERPOWER, *pTarget ) )
+                out << " > Overpower";
+            else if( REND>0 && ai->GetRageAmount()>=10 && !pTarget->HasAura( REND ) && ai->CastSpell( REND, *pTarget ) )
+                out << " > Rend";
+            else if( SUNDER_ARMOR>0 && ai->GetRageAmount()>=15 && ai->CastSpell( SUNDER_ARMOR, *pTarget ) )
+                out << " > Sunder Armor";
+            else if( HEROIC_STRIKE>0 && ai->GetRageAmount()>=15 && ai->CastSpell( HEROIC_STRIKE, *pTarget ) )
+                out << " > Heroic Strike";
             else
-            {
-                BerserkerCounter = 0;
-                //ai->TellMaster("BerserkerCounterReseter");
-                break;
-            }
+                out << " > NONE";
             break;
 
-        case SpellPreventing:
-            //ai->TellMaster("Case SpellPreventing");
-            if (SPELL_REFLECTION > 0 && m_bot->HasAura(DEFENSIVE_STANCE, 0) && pVictim && pTarget->IsNonMeleeSpellCasted(true) && ai->GetRageAmount() >= 15)
-            {
-                if (pVictim == m_bot)
-                {
-                    ai->CastSpell (SPELL_REFLECTION, *m_bot);
-                    //ai->TellMaster("SpellRef");
-                }
-            }
-            else if (PUMMEL > 0 && m_bot->HasAura(BERSERKER_STANCE, 0) && pTarget->IsNonMeleeSpellCasted(true) && ai->GetRageAmount() >= 10)
-            {
-                ai->CastSpell (PUMMEL, *pTarget);
-                //ai->TellMaster("PUMMEL");
-            }
+        case WarriorDefensive:
+            out << "Case Defensive";
+            if( REVENGE>0 && ai->GetRageAmount()>=5 && ai->CastSpell( REVENGE, *pTarget ) )
+                out << " > Revenge";
+            else if( SUNDER_ARMOR>0 && ai->GetRageAmount()>=15 && ai->CastSpell( SUNDER_ARMOR, *pTarget ) )
+                out << " > Sunder Armor";
+            else if( SHIELD_BLOCK>0 && ai->CastSpell( SHIELD_BLOCK ) )
+                out << " > Shield Block";
             else
-            {
-                ai->CastSpell (SHIELD_BASH, *pTarget);
-                //ai->TellMaster("SHBash");
-            }
+                out << " > NONE";
+            break;
+
+        case WarriorBerserker:
+            out << "Case Berserker";
+            out << " > NONE";
             break;
     }
+    if( ai->GetManager()->m_confDebugWhisper )
+        ai->TellMaster( out.str().c_str() );
 }
 
 void PlayerbotWarriorAI::DoNonCombatActions()

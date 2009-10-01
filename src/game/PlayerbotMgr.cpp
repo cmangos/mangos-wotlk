@@ -1,4 +1,5 @@
 
+#include "Config/ConfigEnv.h"
 #include "Player.h"
 #include "PlayerbotAI.h"
 #include "PlayerbotMgr.h"
@@ -13,8 +14,16 @@ class LoginQueryHolder;
 class CharacterHandler;
 
 
-PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master) {}
-PlayerbotMgr::~PlayerbotMgr() {
+PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master) 
+{
+    // load config variables
+    m_confDebugWhisper = sConfig.GetBoolDefault( "PlayerbotAI.DebugWhisper", false );
+    m_confFollowDistance[0] = sConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 0.5f );
+    m_confFollowDistance[1] = sConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 1.0f );
+}
+
+PlayerbotMgr::~PlayerbotMgr() 
+{
   LogoutAllBots();
 }
 

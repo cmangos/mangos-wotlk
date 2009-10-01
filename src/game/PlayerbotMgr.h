@@ -41,6 +41,11 @@ class MANGOS_DLL_SPEC PlayerbotMgr
         void OnBotLogin(Player * const bot);
         void Stay();
 
+    public:
+        // config variables
+        bool m_confDebugWhisper;
+        float m_confFollowDistance[2];
+
     private:
         Player* const m_master;
         PlayerBotMap m_playerBots;     

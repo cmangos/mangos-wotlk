@@ -1,5 +1,4 @@
 #include "Common.h"
-#include "Config/ConfigEnv.h"
 #include "Database/DatabaseEnv.h"
 #include "ItemPrototype.h"
 #include "World.h"
@@ -91,6 +90,8 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     SetQuestNeedItems();
 
 	// reset some pointers
+    m_targetChanged = false;
+    m_targetType = TARGET_NORMAL;
 	m_targetCombat = 0;
 	m_targetAssist = 0;
 	m_targetProtect = 0;
@@ -142,11 +143,6 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
             m_classAI = (PlayerbotClassAI*)new PlayerbotDeathKnightAI(GetMaster(), m_bot, this);
             break;
     }
-
-    // load config variables
-    m_confDebugWhisper = sConfig.GetBoolDefault( "PlayerbotAI.DebugWhisper", false );
-    m_confFollowDistance[0] = sConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 0.5f );
-    m_confFollowDistance[1] = sConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 1.0f );
 }
 
 PlayerbotAI::~PlayerbotAI()
@@ -363,7 +359,7 @@ void PlayerbotAI::SendOrders( Player& player )
 		out << "I PROTECT " << (m_targetProtect?m_targetProtect->GetName():"unknown");
     out << ".";
     
-    if( m_confDebugWhisper )
+    if( m_mgr->m_confDebugWhisper )
     {
 	    out << " " << (IsInCombat()?"I'm in COMBAT! ":"Not in combat. ");
         out << "Current state is ";
@@ -1164,9 +1160,15 @@ void PlayerbotAI::GetCombatTarget( Unit* forcedTarget )
         if( newTarget && newTarget!=m_targetCombat )
         {
             forcedTarget = newTarget;
-            if( m_confDebugWhisper )
+            m_targetType = TARGET_THREATEN;
+            if( m_mgr->m_confDebugWhisper )
                 TellMaster( "Changing target to %s to protect %s", forcedTarget->GetName(), m_targetProtect->GetName() );
         }
+    } else if( forcedTarget )
+    {
+		if( m_mgr->m_confDebugWhisper )
+            TellMaster( "Changing target to %s by force!", forcedTarget->GetName() );
+        m_targetType = (m_combatOrder==ORDERS_TANK ? TARGET_THREATEN : TARGET_NORMAL);
     }
 
 	// we already have a target and we are not forced to change it
@@ -1175,20 +1177,33 @@ void PlayerbotAI::GetCombatTarget( Unit* forcedTarget )
 
 	// are we forced on a target?
 	if( forcedTarget )
-		m_targetCombat = forcedTarget;
+    {
+        m_targetCombat = forcedTarget;
+        m_targetChanged = true;
+    }
 	// do we have to assist someone?
 	if( !m_targetCombat && (m_combatOrder&ORDERS_ASSIST) && m_targetAssist!=0 )
     {
 		m_targetCombat = FindAttacker( (ATTACKERINFOTYPE)(AIT_VICTIMNOTSELF|AIT_LOWESTTHREAT), m_targetAssist );
-        if( m_confDebugWhisper && m_targetCombat )
-            TellMaster( "Attacking to %s to assist %s", m_targetCombat->GetName(), m_targetAssist->GetName() );
+        if( m_mgr->m_confDebugWhisper && m_targetCombat )
+            TellMaster( "Attacking %s to assist %s", m_targetCombat->GetName(), m_targetAssist->GetName() );
+        m_targetType = (m_combatOrder==ORDERS_TANK ? TARGET_THREATEN : TARGET_NORMAL);
+        m_targetChanged = true;
     }
 	// are there any other attackers?
 	if( !m_targetCombat )
+    {
 		m_targetCombat = FindAttacker();
+        m_targetType = (m_combatOrder==ORDERS_TANK ? TARGET_THREATEN : TARGET_NORMAL);
+        m_targetChanged = true;
+    }
 	// no attacker found anyway
     if (!m_targetCombat)
+    {
+        m_targetType = TARGET_NORMAL;
+        m_targetChanged = false;
         return;
+    }
 
     // if thing to attack is in a duel, then ignore and don't call updateAI for 6 seconds
     // this method never gets called when the bot is in a duel and this code
@@ -1217,24 +1232,36 @@ void PlayerbotAI::GetCombatTarget( Unit* forcedTarget )
 
 void PlayerbotAI::DoNextCombatManeuver()
 {
+    // check for new targets
 	GetCombatTarget();
-	DoCombatMovement();
-
 	// check if we have a target - fixes crash reported by rrtn (kill hunter's pet bug)
-	if( !m_targetCombat ) return;
-
 	// if current target for attacks doesn't make sense anymore
     // clear our orders so we can get orders in next update
-    if( m_targetCombat->isDead() || !m_targetCombat->IsInWorld() || !m_bot->IsHostileTo(m_targetCombat) )
+    if( !m_targetCombat || m_targetCombat->isDead() || !m_targetCombat->IsInWorld() || !m_bot->IsHostileTo(m_targetCombat) )
     {
+        m_bot->AttackStop();
         m_bot->SetSelection(0);
-        m_bot->GetMotionMaster()->Clear(true);
+        MovementReset();
         m_bot->InterruptNonMeleeSpells(true);
 		m_targetCombat = 0;
+        m_targetChanged = false;
+        m_targetType = TARGET_NORMAL;
         return;
     }
 
-    if (GetClassAI())
+    // do opening moves, if we changed target
+    if( m_targetChanged )
+    {
+        if( GetClassAI() )
+            m_targetChanged = GetClassAI()->DoFirstCombatManeuver( m_targetCombat );
+        else
+            m_targetChanged = false;
+    }
+
+    // do normal combat movement
+	DoCombatMovement();
+
+    if (GetClassAI() && !m_targetChanged )
         (GetClassAI())->DoNextCombatManeuver( m_targetCombat );
 }
 
@@ -1773,7 +1800,7 @@ void PlayerbotAI::MovementReset() {
         if( m_bot->isAlive() )
         {
 			float angle = rand_float(0, M_PI);
-		    float dist = rand_float( m_confFollowDistance[0], m_confFollowDistance[1] );
+		    float dist = rand_float( m_mgr->m_confFollowDistance[0], m_mgr->m_confFollowDistance[1] );
 			m_bot->GetMotionMaster()->MoveFollow( m_followTarget, dist, angle );
         }
 	}
@@ -1925,8 +1952,8 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
             m_targetGuidCommand = 0;
         }
 
-        // handle combat
-        else if ( IsInCombat() )
+        // handle combat (either self/master/group in combat, or combat state and valid target)
+        else if ( IsInCombat() || (m_botState == BOTSTATE_COMBAT && m_targetCombat) )
             DoNextCombatManeuver();
 
         // bot was in combat recently - loot now
@@ -2041,16 +2068,19 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         if (!m_bot->isInFrontInMap(pTarget, 10))
         {
             m_bot->SetInFront(pTarget);
-            WorldPacket data;
-            m_bot->BuildHeartBeatMsg(&data);
-            m_bot->SendMessageToSet(&data, true);
+        	MovementUpdate();
         }
     }
 
     if (HasAura(spellId, *pTarget))
         return false;
 
+    // stop movement to prevent cancel spell casting
+    MovementClear();
+
+    // actually cast spell
     m_bot->CastSpell(pTarget, pSpellInfo, false);
+   	MovementUpdate();
 
     Spell* const pSpell = m_bot->FindCurrentSpellBySpellId(spellId);
     if (!pSpell)
@@ -2058,7 +2088,6 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
 
     m_CurrentlyCastingSpellId = spellId;
     m_ignoreAIUpdatesUntilTime = time(0) + (int32)((float)pSpell->GetCastTime()/1000.0f) + 1;
-    //m_ignoreAIUpdatesUntilTime = time(0) + 6;
 
     // if this caused the caster to move (blink) update the position
     // I think this is normally done on the client
