@@ -1988,12 +1988,12 @@ Spell* PlayerbotAI::GetCurrentSpell() const
     return pSpell;
 }
 
-void PlayerbotAI::TellMaster(const std::string& text)
+void PlayerbotAI::TellMaster(const std::string& text) const
 {
     SendWhisper(text, *GetMaster());
 }
 
-void PlayerbotAI::TellMaster( const char *fmt, ... )
+void PlayerbotAI::TellMaster( const char *fmt, ... ) const
 {
     char temp_buf[1024];
     va_list ap;
@@ -2004,7 +2004,7 @@ void PlayerbotAI::TellMaster( const char *fmt, ... )
     TellMaster( str );
 }
 
-void PlayerbotAI::SendWhisper(const std::string& text, Player& player)
+void PlayerbotAI::SendWhisper(const std::string& text, Player& player) const
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     m_bot->BuildPlayerChat(&data, CHAT_MSG_WHISPER, text, LANG_UNIVERSAL);
@@ -2080,7 +2080,6 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
 
     // actually cast spell
     m_bot->CastSpell(pTarget, pSpellInfo, false);
-   	MovementUpdate();
 
     Spell* const pSpell = m_bot->FindCurrentSpellBySpellId(spellId);
     if (!pSpell)

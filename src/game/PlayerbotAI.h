@@ -165,9 +165,9 @@ class MANGOS_DLL_SPEC PlayerbotAI
 
         // ******* Actions ****************************************
         // Your handlers can call these actions to make the bot do things.
-        void TellMaster(const std::string& text);
-        void TellMaster( const char *fmt, ... );
-        void SendWhisper(const std::string& text, Player& player);
+        void TellMaster(const std::string& text) const;
+        void TellMaster( const char *fmt, ... ) const;
+        void SendWhisper(const std::string& text, Player& player) const;
         bool CastSpell(const char* args);
         bool CastSpell(uint32 spellId);
         bool CastSpell(uint32 spellId, Unit& target);
@@ -179,6 +179,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void Feast();
         void InterruptCurrentCastingSpell();
         void GetCombatTarget( Unit* forcedTarged = 0 );
+        Unit *GetCurrentTarget() { return m_targetCombat; };
         void DoNextCombatManeuver();
 		void DoCombatMovement();
         void SetIgnoreUpdateTime(uint8 t) {m_ignoreAIUpdatesUntilTime=time(0) + t; };

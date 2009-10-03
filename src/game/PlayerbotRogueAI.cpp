@@ -52,7 +52,7 @@ bool PlayerbotRogueAI::DoFirstCombatManeuver(Unit *pTarget)
         if( ai->GetManager()->m_confDebugWhisper ) 
             ai->TellMaster( "First > Stealth (%d)", STEALTH );
         return false;
-    }
+    } 
     
     return false;
 }
@@ -211,7 +211,7 @@ void PlayerbotRogueAI::DoNonCombatActions()
 
     // remove stealth
     if( m_bot->HasAura( STEALTH ) )
-        m_bot->RemoveAurasDueToSpell( STEALTH );
+        m_bot->RemoveSpellsCausingAura( SPELL_AURA_MOD_STEALTH );
 
     // hp check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)

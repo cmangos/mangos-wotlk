@@ -1,6 +1,7 @@
 // an improved Hunter by rrtn & Runsttren :)
 
 #include "PlayerbotHunterAI.h"
+#include "PlayerbotMgr.h"
 
 class PlayerbotAI;
 
@@ -205,7 +206,8 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
         else
             out << " NONE!";
     }
-    //ai->TellMaster( out.str().c_str() );
+    if( ai->GetManager()->m_confDebugWhisper )
+        ai->TellMaster( out.str().c_str() );
 } // end DoNextCombatManeuver
 
 void PlayerbotHunterAI::DoNonCombatActions()

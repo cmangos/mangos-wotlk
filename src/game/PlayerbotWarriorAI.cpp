@@ -94,6 +94,10 @@ bool PlayerbotWarriorAI::DoFirstCombatManeuver(Unit *pTarget)
             return true;
         else if( CHARGE>0 && ai->CastSpell(CHARGE,*pTarget) )
         {
+            float x, y, z;
+            pTarget->GetContactPoint( m_bot, x, y, z, 3.666666f );
+            m_bot->Relocate( x, y, z );
+
             if( ai->GetManager()->m_confDebugWhisper ) 
                 ai->TellMaster( "First > Charge (%d)", CHARGE );
             return false;

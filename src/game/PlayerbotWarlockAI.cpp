@@ -59,7 +59,6 @@ PlayerbotWarlockAI::~PlayerbotWarlockAI() {}
 
 void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 {
-	Player *m_bot = GetPlayerBot();
     PlayerbotAI* ai = GetAI();
     if (!ai)
         return;
@@ -74,7 +73,11 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 
     // ------- Non Duel combat ----------
 
-	ai->SetMovementOrder( PlayerbotAI::MOVEMENT_FOLLOW, GetMaster() ); // dont want to melee mob
+	//ai->SetMovementOrder( PlayerbotAI::MOVEMENT_FOLLOW, GetMaster() ); // dont want to melee mob
+
+    ai->SetInFront( pTarget );
+    Player *m_bot = GetPlayerBot();
+	Unit* pVictim = pTarget->getVictim();
 
 	// check for soul link with demon, also blood & dark pact with imp
     Pet *pet = m_bot->GetPet();
