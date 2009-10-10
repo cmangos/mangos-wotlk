@@ -32,8 +32,6 @@
 #include "ObjectAccessor.h"
 #include "Creature.h"
 #include "Pet.h"
-#include "BattleGroundMgr.h"
-#include "BattleGround.h"
 #include "Guild.h"
 #include "PlayerbotMgr.h"
 
@@ -283,17 +281,8 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
         unit->StopMoving();
     }
 
-    // If spiritguide, no need for gossip menu, just put player into resurrect queue
     if (unit->isSpiritGuide())
-    {
-        BattleGround *bg = _player->GetBattleGround();
-        if(bg)
-        {
-            bg->AddPlayerToResurrectQueue(unit->GetGUID(), _player->GetGUID());
-            sBattleGroundMgr.SendAreaSpiritHealerQueryOpcode(_player, bg, unit->GetGUID());
-            return;
-        }
-    }
+        unit->SendAreaSpiritHealerQueryOpcode(_player);
 
     if(!Script->GossipHello( _player, unit ))
     {
@@ -410,11 +399,11 @@ void WorldSession::SendSpiritResurrect()
             _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
         // or update at original position
         else
-            ObjectAccessor::UpdateVisibilityForPlayer(_player);
+            _player->UpdateVisibilityForPlayer();
     }
     // or update at original position
     else
-        ObjectAccessor::UpdateVisibilityForPlayer(_player);
+        _player->UpdateVisibilityForPlayer();
 
     _player->SaveToDB();
 }

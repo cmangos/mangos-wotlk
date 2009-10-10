@@ -32,6 +32,17 @@ MapInstanced::MapInstanced(uint32 id, time_t expiry) : Map(id, expiry, 0, 0)
     memset(&GridMapReference, 0, MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_GRIDS*sizeof(uint16));
 }
 
+void MapInstanced::InitVisibilityDistance()
+{
+    if(m_InstancedMaps.empty())
+        return;
+    //initialize visibility distances for all instance copies
+    for (InstancedMaps::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); ++i)
+    {
+        (*i).second->InitVisibilityDistance();
+    }
+}
+
 void MapInstanced::Update(const uint32& t)
 {
     // take care of loaded GridMaps (when unused, unload it!)
@@ -124,11 +135,11 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
         ASSERT(NewInstanceId);
         map = _FindMap(NewInstanceId);
         if(!map)
-            map = CreateBattleGround(NewInstanceId);
+            map = CreateBattleGroundMap(NewInstanceId, player->GetBattleGround());
     }
     else
     {
-        InstancePlayerBind *pBind = player->GetBoundInstance(GetId(), player->GetDifficulty());
+        InstancePlayerBind *pBind = player->GetBoundInstance(GetId(), player->GetDifficulty(IsRaid()));
         InstanceSave *pSave = pBind ? pBind->save : NULL;
 
         // the player's permanent player bind is taken into consideration first
@@ -138,7 +149,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
             InstanceGroupBind *groupBind = NULL;
             Group *group = player->GetGroup();
             // use the player's difficulty setting (it may not be the same as the group's)
-            if(group && (groupBind = group->GetBoundInstance(GetId(), player->GetDifficulty())))
+            if(group && (groupBind = group->GetBoundInstance(this)))
                 pSave = groupBind->save;
         }
 
@@ -156,14 +167,14 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
             // if no instanceId via group members or instance saves is found
             // the instance will be created for the first time
             NewInstanceId = MapManager::Instance().GenerateInstanceId();
-            map = CreateInstance(NewInstanceId, NULL, player->GetDifficulty());
+            map = CreateInstance(NewInstanceId, NULL, player->GetDifficulty(IsRaid()));
         }
     }
 
     return map;
 }
 
-InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save, uint8 difficulty)
+InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save, Difficulty difficulty)
 {
     // load/create a map
     Guard guard(*this);
@@ -183,7 +194,9 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save,
     }
 
     // some instances only have one difficulty
-    if (entry && !entry->SupportsHeroicMode()) difficulty = DIFFICULTY_NORMAL;
+    MapDifficulty const* mapDiff = GetMapDifficultyData(GetId(),difficulty);
+    if (!mapDiff)
+        difficulty = DUNGEON_DIFFICULTY_NORMAL;
 
     sLog.outDebug("MapInstanced::CreateInstance: %s map instance %d for %d created with difficulty %s", save?"":"new ", InstanceId, GetId(), difficulty?"heroic":"normal");
 
@@ -197,15 +210,17 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save,
     return map;
 }
 
-BattleGroundMap* MapInstanced::CreateBattleGround(uint32 InstanceId)
+BattleGroundMap* MapInstanced::CreateBattleGroundMap(uint32 InstanceId, BattleGround* bg)
 {
     // load/create a map
     Guard guard(*this);
 
-    sLog.outDebug("MapInstanced::CreateBattleGround: map bg %d for %d created.", InstanceId, GetId());
+    sLog.outDebug("MapInstanced::CreateBattleGroundMap: instance:%d for map:%d and bgType:%d created.", InstanceId, GetId(), bg->GetTypeID());
 
     BattleGroundMap *map = new BattleGroundMap(GetId(), GetGridExpiry(), InstanceId, this);
     ASSERT(map->IsBattleGroundOrArena());
+    map->SetBG(bg);
+    bg->SetBgMap(map);
 
     m_InstancedMaps[InstanceId] = map;
     return map;

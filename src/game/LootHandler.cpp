@@ -65,6 +65,16 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 
         loot = &pItem->loot;
     }
+    else if (IS_CORPSE_GUID(lguid))
+    {
+        Corpse *bones = ObjectAccessor::GetCorpse(*player, lguid);
+        if (!bones)
+        {
+            player->SendLootRelease(lguid);
+            return;
+        }
+        loot = &bones->loot;
+    }
     else
     {
         Creature* pCreature = GetPlayer()->GetMap()->GetCreature(lguid);
@@ -489,7 +499,7 @@ void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
         return;
     }
 
-    // not move item from loot to target inventory
+    // now move item from loot to target inventory
     Item * newitem = target->StoreNewItem( dest, item.itemid, true, item.randomPropertyId );
     target->SendNewItem(newitem, uint32(item.count), false, false, true );
     target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item.itemid, item.count);
@@ -498,7 +508,6 @@ void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
     // mark as looted
     item.count=0;
     item.is_looted=true;
-
 
     pLoot->NotifyItemRemoved(slotid);
     --pLoot->unlootedCount;

@@ -254,7 +254,9 @@ ObjectAccessor::_buildChangeObjectForPlayer(WorldObject *obj, UpdateDataMapType 
     WorldObjectChangeAccumulator notifier(*obj, update_players);
     TypeContainerVisitor<WorldObjectChangeAccumulator, WorldTypeMapContainer > player_notifier(notifier);
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, player_notifier, *obj->GetMap());
+    Map& map = *obj->GetMap();
+    //we must build packets for all visible players
+    cell_lock->Visit(cell_lock, player_notifier, map, *obj, map.GetVisibilityDistance());
 }
 
 Pet*
@@ -438,36 +440,6 @@ ObjectAccessor::WorldObjectChangeAccumulator::Visit(PlayerMapType &m)
     for(PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
         if(iter->getSource()->HaveAtClient(&i_object))
             ObjectAccessor::_buildPacket(iter->getSource(), &i_object, i_updateDatas);
-}
-
-void
-ObjectAccessor::UpdateObjectVisibility(WorldObject *obj)
-{
-    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-    Cell cell(p);
-
-    obj->GetMap()->UpdateObjectVisibility(obj, cell, p);
-}
-
-void ObjectAccessor::UpdateVisibilityForPlayer( Player* player )
-{
-    WorldObject const* viewPoint = player->GetViewPoint();
-    Map* m = player->GetMap();
-
-    CellPair p(MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY()));
-    Cell cell(p);
-
-    m->UpdatePlayerVisibility(player, cell, p);
-
-    if (player!=viewPoint)
-    {
-        CellPair pView(MaNGOS::ComputeCellPair(viewPoint->GetPositionX(), viewPoint->GetPositionY()));
-        Cell cellView(pView);
-
-        m->UpdateObjectsVisibilityFor(player, cellView, pView);
-    }
-    else
-        m->UpdateObjectsVisibilityFor(player, cell, p);
 }
 
 /// Define the static member of HashMapHolder
