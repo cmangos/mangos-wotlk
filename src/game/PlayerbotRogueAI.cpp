@@ -105,7 +105,7 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     }*/
 
     // decide what to do:
-    if( CLOAK_OF_SHADOWS>0 && pVictim->HasAura(SPELL_AURA_PERIODIC_DAMAGE) && !m_bot->HasAura(CLOAK_OF_SHADOWS,0) && ai->CastSpell(CLOAK_OF_SHADOWS) )
+    if( pVictim==m_bot && CLOAK_OF_SHADOWS>0 && pVictim->HasAura(SPELL_AURA_PERIODIC_DAMAGE) && !m_bot->HasAura(CLOAK_OF_SHADOWS,0) && ai->CastSpell(CLOAK_OF_SHADOWS) )
     {
         if( ai->GetManager()->m_confDebugWhisper )
             ai->TellMaster( "CoS!" );

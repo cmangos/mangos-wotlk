@@ -15,7 +15,7 @@ PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* con
    BONE_SHIELD		 = 49222; // buffs
    RAISE_DEAD        = ai->getSpellId("raise dead"); // pets (TODO: check for pets exist)
    SUMMON_GARGOYLE   = 49206;
-   ARMY_OF_THE_DEAD  = 42650;
+   ARMY_OF_THE_DEAD  = ai->getSpellId("army of the dead");
    ICY_TOUCH         = ai->getSpellId("icy touch"); // Frost
    OBLITERATE        = ai->getSpellId("obliterate");
    HOWLING_BLAST     = ai->getSpellId("howling blast");
@@ -72,7 +72,7 @@ void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
    {
        case SPELL_DK_UNHOLY:
 		   if (UNHOLY_PRESENCE > 0)
-			   (!m_bot->HasAura(UNHOLY_PRESENCE, 0) && ai->CastSpell (UNHOLY_PRESENCE, *m_bot));
+			   (!m_bot->HasAura(UNHOLY_PRESENCE, 0) && !m_bot->HasAura(BLOOD_PRESENCE, 0) && !m_bot->HasAura(FROST_PRESENCE, 0) && ai->CastSpell (UNHOLY_PRESENCE, *m_bot));
 
 		   // check for BONE_SHIELD in combat
 		   if (BONE_SHIELD > 0)
@@ -166,7 +166,7 @@ void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
 
        case SPELL_DK_FROST:
            if (FROST_PRESENCE > 0)
-               (!m_bot->HasAura(FROST_PRESENCE, 0) && ai->CastSpell (FROST_PRESENCE, *m_bot));
+               (!m_bot->HasAura(FROST_PRESENCE, 0) && !m_bot->HasAura(BLOOD_PRESENCE, 0) && !m_bot->HasAura(UNHOLY_PRESENCE, 0) && ai->CastSpell (FROST_PRESENCE, *m_bot));
 
 		   if (DEATHCHILL > 0)
 			   (!m_bot->HasAura(DEATHCHILL, 0) && !m_bot->HasAura(KILLING_MACHINE, 0) && ai->CastSpell (DEATHCHILL, *m_bot));
@@ -240,7 +240,7 @@ void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
 
        case SPELL_DK_BLOOD:
            if (BLOOD_PRESENCE > 0)
-               (!m_bot->HasAura(BLOOD_PRESENCE, 0) && ai->CastSpell (BLOOD_PRESENCE, *m_bot));
+               (!m_bot->HasAura(BLOOD_PRESENCE, 0) && !m_bot->HasAura(UNHOLY_PRESENCE, 0) && !m_bot->HasAura(FROST_PRESENCE, 0) && ai->CastSpell (BLOOD_PRESENCE, *m_bot));
 
 		   if (DEATH_RUNE_MASTERY > 0 && !m_bot->HasAura(DEATH_RUNE_MASTERY, 0) && LastSpellBloodDK < 1)
            {
