@@ -38,8 +38,8 @@ class MANGOS_DLL_SPEC PlayerbotDruidAI : PlayerbotClassAI
         // druid cat attacks
         uint32 CLAW, COWER, TIGERS_FURY, RAKE, RIP, FEROCIOUS_BITE, MAIM, MANGLE;
 
-		// druid bear/dire bear attacks
-		uint32 BASH, MAUL, SWIPE, DEMORALIZING_ROAR;
+		// druid bear/dire bear attacks & buffs
+		uint32 BASH, MAUL, SWIPE, DEMORALIZING_ROAR, CHALLENGING_ROAR, GROWL, ENRAGE;
 
 		// druid attacks & debuffs
 		uint32 MOONFIRE, ROOTS, WRATH, STARFALL, STARFIRE, INSECT_SWARM, FAERIE_FIRE, FORCE_OF_NATURE, HURRICANE;
@@ -48,7 +48,7 @@ class MANGOS_DLL_SPEC PlayerbotDruidAI : PlayerbotClassAI
 		uint32 MARK_OF_THE_WILD, THORNS, MANA_REJUVENATION, INNERVATE, BARKSKIN;
 
 		// druid heals
-		uint32 LIFEBLOOM, REJUVENATION, REGROWTH, NOURISH, HEALING_TOUCH, WILD_GROWTH, SWIFTMEND;
+		uint32 LIFEBLOOM, REJUVENATION, REGROWTH, NOURISH, HEALING_TOUCH, WILD_GROWTH, SWIFTMEND, TRANQUILITY;
 
         uint32 SpellSequence, DruidSpellCombat;
 };
