@@ -1050,7 +1050,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time);
 
         Creature* GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask);
-        bool CanInteractWithNPCs(bool alive = true) const;
         GameObject* GetGameObjectIfCanInteractWith(uint64 guid, GameobjectTypes type) const;
 
         void UpdateVisibilityForPlayer();
@@ -1373,6 +1372,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendQuestFailed( uint32 quest_id );
         void SendQuestTimerFailed( uint32 quest_id );
         void SendCanTakeQuestResponse( uint32 msg );
+        void SendQuestConfirmAccept(Quest const* pQuest, Player* pReceiver);
         void SendPushToPartyResponse( Player *pPlayer, uint32 msg );
         void SendQuestUpdateAddItem( Quest const* pQuest, uint32 item_idx, uint32 count );
         void SendQuestUpdateAddCreatureOrGo( Quest const* pQuest, uint64 guid, uint32 creatureOrGO_idx, uint32 old_count, uint32 add_count );
@@ -1420,6 +1420,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool m_mailsLoaded;
         bool m_mailsUpdated;
+
+        void SendPetTameFailure(PetTameFailureReason reason);
 
         void SetBindPoint(uint64 guid);
         void SendTalentWipeConfirm(uint64 guid);

@@ -996,6 +996,26 @@ bool Item::IsBindedNotWith( Player const* player ) const
     }
 }
 
+void Item::AddToClientUpdateList()
+{
+    if (Player* pl = GetOwner())
+        pl->GetMap()->AddUpdateObject(this);
+}
+
+void Item::RemoveFromClientUpdateList()
+{
+    if (Player* pl = GetOwner())
+        pl->GetMap()->RemoveUpdateObject(this);
+}
+
+void Item::BuildUpdateData(UpdateDataMapType& update_players)
+{
+    if (Player* pl = GetOwner())
+        BuildUpdateDataForPlayer(pl, update_players);
+
+    ClearUpdateMask(false);
+}
+
 bool ItemRequiredTarget::IsFitToRequirements( Unit* pUnitTarget ) const
 {
     if(pUnitTarget->GetTypeId() != TYPEID_UNIT)

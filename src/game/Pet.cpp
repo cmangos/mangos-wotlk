@@ -57,23 +57,24 @@ m_declinedname(NULL)
 
 Pet::~Pet()
 {
-    if(m_uint32Values)                                      // only for fully created Object
-        ObjectAccessor::Instance().RemoveObject(this);
-
     delete m_declinedname;
 }
 
 void Pet::AddToWorld()
 {
     ///- Register the pet for guid lookup
-    if(!IsInWorld()) ObjectAccessor::Instance().AddObject(this);
+    if(!IsInWorld())
+        GetMap()->GetObjectsStore().insert<Pet>(GetGUID(), (Pet*)this);
+
     Unit::AddToWorld();
 }
 
 void Pet::RemoveFromWorld()
 {
     ///- Remove the pet from the accessor
-    if(IsInWorld()) ObjectAccessor::Instance().RemoveObject(this);
+    if(IsInWorld())
+        GetMap()->GetObjectsStore().erase<Pet>(GetGUID(), (Pet*)NULL);
+
     ///- Don't call the function for Creature, normal mobs + totems go in a different storage
     Unit::RemoveFromWorld();
 }
@@ -1178,10 +1179,10 @@ void Pet::_LoadAuras(uint32 timediff)
             // negative effects should continue counting down after logout
             if (remaintime != -1 && !IsPositiveEffect(spellid, effindex))
             {
-                if(remaintime  <= int32(timediff))
+                if (remaintime/IN_MILISECONDS <= int32(timediff))
                     continue;
 
-                remaintime -= timediff;
+                remaintime -= timediff*IN_MILISECONDS;
             }
 
             // prevent wrong values of remaincharges

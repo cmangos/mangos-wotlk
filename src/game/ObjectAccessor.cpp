@@ -53,16 +53,16 @@ ObjectAccessor::~ObjectAccessor()
 Creature*
 ObjectAccessor::GetCreatureOrPetOrVehicle(WorldObject const &u, uint64 guid)
 {
-    if(IS_PLAYER_GUID(guid))
+    if(IS_PLAYER_GUID(guid) || !u.IsInWorld())
         return NULL;
 
     if(IS_PET_GUID(guid))
-        return GetPet(guid);
+        return u.GetMap()->GetPet(guid);
 
     if(IS_VEHICLE_GUID(guid))
-        return GetVehicle(guid);
+        return u.GetMap()->GetVehicle(guid);
 
-    return u.IsInWorld() ? u.GetMap()->GetCreature(guid) : NULL;
+    return u.GetMap()->GetCreature(guid);
 }
 
 Unit*
@@ -97,8 +97,8 @@ WorldObject* ObjectAccessor::GetWorldObject(WorldObject const &p, uint64 guid)
         case HIGHGUID_PLAYER:       return FindPlayer(guid);
         case HIGHGUID_GAMEOBJECT:   return p.GetMap()->GetGameObject(guid);
         case HIGHGUID_UNIT:         return p.GetMap()->GetCreature(guid);
-        case HIGHGUID_PET:          return GetPet(guid);
-        case HIGHGUID_VEHICLE:      return GetVehicle(guid);
+        case HIGHGUID_PET:          return p.GetMap()->GetPet(guid);
+        case HIGHGUID_VEHICLE:      return p.GetMap()->GetVehicle(guid);
         case HIGHGUID_DYNAMICOBJECT:return p.GetMap()->GetDynamicObject(guid);
         case HIGHGUID_TRANSPORT:    return NULL;
         case HIGHGUID_CORPSE:       return GetCorpse(p,guid);
@@ -131,11 +131,11 @@ Object* ObjectAccessor::GetObjectByTypeMask(WorldObject const &p, uint64 guid, u
             break;
         case HIGHGUID_PET:
             if(typemask & TYPEMASK_UNIT)
-                return GetPet(guid);
+                return p.GetMap()->GetPet(guid);
             break;
         case HIGHGUID_VEHICLE:
             if(typemask & TYPEMASK_UNIT)
-                return GetVehicle(guid);
+                return p.GetMap()->GetVehicle(guid);
             break;
         case HIGHGUID_DYNAMICOBJECT:
             if(typemask & TYPEMASK_DYNAMICOBJECT)
@@ -175,100 +175,11 @@ ObjectAccessor::FindPlayerByName(const char *name)
 void
 ObjectAccessor::SaveAllPlayers()
 {
-    Guard guard(*HashMapHolder<Player*>::GetLock());
+    Guard guard(*HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType& m = HashMapHolder<Player>::GetContainer();
     HashMapHolder<Player>::MapType::iterator itr = m.begin();
     for(; itr != m.end(); ++itr)
         itr->second->SaveToDB();
-}
-
-void
-ObjectAccessor::UpdateObject(Object* obj, Player* exceptPlayer)
-{
-    UpdateDataMapType update_players;
-    obj->BuildUpdate(update_players);
-
-    WorldPacket packet;
-    for(UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
-    {
-        if(iter->first == exceptPlayer)
-            continue;
-
-        iter->second.BuildPacket(&packet);
-        iter->first->GetSession()->SendPacket(&packet);
-        packet.clear();
-    }
-}
-
-void
-ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_players)
-{
-    bool build_for_all = true;
-    Player *pl = NULL;
-    if( obj->isType(TYPEMASK_ITEM) )
-    {
-        Item *item = static_cast<Item *>(obj);
-        pl = item->GetOwner();
-        build_for_all = false;
-    }
-
-    if( pl != NULL )
-        _buildPacket(pl, obj, update_players);
-
-    // Capt: okey for all those fools who think its a real fix
-    //       THIS IS A TEMP FIX
-    if( build_for_all )
-    {
-        WorldObject * temp = dynamic_cast<WorldObject*>(obj);
-
-        //assert(dynamic_cast<WorldObject*>(obj)!=NULL);
-        if (temp)
-            _buildChangeObjectForPlayer(temp, update_players);
-        else
-            sLog.outDebug("ObjectAccessor: Ln 405 Temp bug fix");
-    }
-}
-
-void
-ObjectAccessor::_buildPacket(Player *pl, Object *obj, UpdateDataMapType &update_players)
-{
-    UpdateDataMapType::iterator iter = update_players.find(pl);
-
-    if( iter == update_players.end() )
-    {
-        std::pair<UpdateDataMapType::iterator, bool> p = update_players.insert( UpdateDataValueType(pl, UpdateData()) );
-        assert(p.second);
-        iter = p.first;
-    }
-
-    obj->BuildValuesUpdateBlockForPlayer(&iter->second, iter->first);
-}
-
-void
-ObjectAccessor::_buildChangeObjectForPlayer(WorldObject *obj, UpdateDataMapType &update_players)
-{
-    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-    Cell cell(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
-    cell.SetNoCreate();
-    WorldObjectChangeAccumulator notifier(*obj, update_players);
-    TypeContainerVisitor<WorldObjectChangeAccumulator, WorldTypeMapContainer > player_notifier(notifier);
-    CellLock<GridReadGuard> cell_lock(cell, p);
-    Map& map = *obj->GetMap();
-    //we must build packets for all visible players
-    cell_lock->Visit(cell_lock, player_notifier, map, *obj, map.GetVisibilityDistance());
-}
-
-Pet*
-ObjectAccessor::GetPet(uint64 guid)
-{
-    return GetObjectInWorld(guid, (Pet*)NULL);
-}
-
-Vehicle*
-ObjectAccessor::GetVehicle(uint64 guid)
-{
-    return GetObjectInWorld(guid, (Vehicle*)NULL);
 }
 
 Corpse*
@@ -408,40 +319,6 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid, bool insignia)
     return bones;
 }
 
-void
-ObjectAccessor::Update(uint32 diff)
-{
-    UpdateDataMapType update_players;
-    {
-        Guard guard(i_updateGuard);
-        while(!i_objects.empty())
-        {
-            Object* obj = *i_objects.begin();
-            i_objects.erase(i_objects.begin());
-            if (!obj)
-                continue;
-            _buildUpdateObject(obj, update_players);
-            obj->ClearUpdateMask(false);
-        }
-    }
-
-    WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
-    for(UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
-    {
-        iter->second.BuildPacket(&packet);
-        iter->first->GetSession()->SendPacket(&packet);
-        packet.clear();                                     // clean the string
-    }
-}
-
-void
-ObjectAccessor::WorldObjectChangeAccumulator::Visit(PlayerMapType &m)
-{
-    for(PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
-        if(iter->getSource()->HaveAtClient(&i_object))
-            ObjectAccessor::_buildPacket(iter->getSource(), &i_object, i_updateDatas);
-}
-
 /// Define the static member of HashMapHolder
 
 template <class T> UNORDERED_MAP< uint64, T* > HashMapHolder<T>::m_objectMap;
@@ -450,17 +327,7 @@ template <class T> ACE_Thread_Mutex HashMapHolder<T>::i_lock;
 /// Global definitions for the hashmap storage
 
 template class HashMapHolder<Player>;
-template class HashMapHolder<Pet>;
-template class HashMapHolder<Vehicle>;
-template class HashMapHolder<GameObject>;
-template class HashMapHolder<DynamicObject>;
-template class HashMapHolder<Creature>;
 template class HashMapHolder<Corpse>;
 
-template Player* ObjectAccessor::GetObjectInWorld<Player>(uint32 mapid, float x, float y, uint64 guid, Player* /*fake*/);
-template Pet* ObjectAccessor::GetObjectInWorld<Pet>(uint32 mapid, float x, float y, uint64 guid, Pet* /*fake*/);
-template Vehicle* ObjectAccessor::GetObjectInWorld<Vehicle>(uint32 mapid, float x, float y, uint64 guid, Vehicle* /*fake*/);
-template Creature* ObjectAccessor::GetObjectInWorld<Creature>(uint32 mapid, float x, float y, uint64 guid, Creature* /*fake*/);
-template Corpse* ObjectAccessor::GetObjectInWorld<Corpse>(uint32 mapid, float x, float y, uint64 guid, Corpse* /*fake*/);
-template GameObject* ObjectAccessor::GetObjectInWorld<GameObject>(uint32 mapid, float x, float y, uint64 guid, GameObject* /*fake*/);
-template DynamicObject* ObjectAccessor::GetObjectInWorld<DynamicObject>(uint32 mapid, float x, float y, uint64 guid, DynamicObject* /*fake*/);
+/// Define the static member of ObjectAccessor
+std::list<Map*> ObjectAccessor::i_mapList;

@@ -241,13 +241,18 @@ struct CreatureInfo
             return SKILL_SKINNING;                          // normal case
     }
 
+    bool IsExotic() const
+    {
+        return (type_flags & CREATURE_TYPEFLAGS_EXOTIC);
+    }
+
     bool isTameable(bool exotic) const
     {
-        if(type != CREATURE_TYPE_BEAST || family == 0 || (type_flags & CREATURE_TYPEFLAGS_TAMEABLE)==0)
+        if(type != CREATURE_TYPE_BEAST || family == 0 || (type_flags & CREATURE_TYPEFLAGS_TAMEABLE) == 0)
             return false;
 
         // if can tame exotic then can tame any temable
-        return exotic || (type_flags & CREATURE_TYPEFLAGS_EXOTIC)==0;
+        return exotic || !IsExotic();
     }
 };
 
@@ -626,6 +631,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_GlobalCooldown;
 
         float GetAttackDistance(Unit const* pl) const;
+
+        void SendAIReaction(AiReaction reactionType);
 
         void DoFleeToGetAssistance();
         void CallForHelp(float fRadius);

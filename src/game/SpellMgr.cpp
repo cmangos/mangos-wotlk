@@ -90,6 +90,60 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
     return (castTime > 0) ? uint32(castTime) : 0;
 }
 
+uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo)
+{
+    int32 DotDuration = GetSpellDuration(spellInfo);
+    if(DotDuration == 0)
+        return 1;
+
+    // 200% limit
+    if(DotDuration > 30000)
+        DotDuration = 30000;
+
+    int j = 0;
+    for( ; j < 3; j++)
+    {
+        if( spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA && (
+            spellInfo->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_DAMAGE ||
+            spellInfo->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_HEAL ||
+            spellInfo->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH) )
+        {
+            break;
+        }
+    }
+
+    if(spellInfo->EffectAmplitude[j] != 0)
+        return DotDuration / spellInfo->EffectAmplitude[j];
+
+    return 6;
+}
+
+WeaponAttackType GetWeaponAttackType(SpellEntry const *spellInfo)
+{
+    if(!spellInfo)
+        return BASE_ATTACK;
+
+    switch (spellInfo->DmgClass)
+    {
+        case SPELL_DAMAGE_CLASS_MELEE:
+            if (spellInfo->AttributesEx3 & SPELL_ATTR_EX3_REQ_OFFHAND)
+                return OFF_ATTACK;
+            else
+                return BASE_ATTACK;
+            break;
+        case SPELL_DAMAGE_CLASS_RANGED:
+            return RANGED_ATTACK;
+            break;
+        default:
+                                                            // Wands
+            if (spellInfo->AttributesEx2 & SPELL_ATTR_EX2_AUTOREPEAT_FLAG)
+                return RANGED_ATTACK;
+            else
+                return BASE_ATTACK;
+            break;
+    }
+}
+
 bool IsPassiveSpell(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
@@ -384,7 +438,8 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
             // some explicitly required dummy effect sets
             switch(spellId)
             {
-                case 28441: return false;                   // AB Effect 000
+                case 28441:                                 // AB Effect 000
+                    return false;
                 default:
                     break;
             }
@@ -415,6 +470,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                         case 38638:                         // Nether Exhaustion (green)
                         case 38639:                         // Nether Exhaustion (blue)
                         case 11196:                         // Recently Bandaged
+                        case 44689:                         // Relay Race Accept Hidden Debuff - DND
                             return false;
                         // some spells have unclear target modes for selection, so just make effect positive
                         case 27184:
@@ -1579,6 +1635,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Beacon of Light and Light's Beacon
                 if ((spellInfo_1->SpellIconID == 3032) && (spellInfo_2->SpellIconID == 3032))
                     return false;
+
+                // Concentration Aura and Improved Concentration Aura and Aura Mastery
+                if ((spellInfo_1->SpellIconID == 1487) && (spellInfo_2->SpellIconID == 1487))
+                    return false;
             }
 
             // Combustion and Fire Protection Aura (multi-family check)
@@ -2089,7 +2149,7 @@ void SpellMgr::LoadSpellScriptTarget()
 
     QueryResult *result = WorldDatabase.Query("SELECT entry,type,targetEntry FROM spell_script_target");
 
-    if(!result)
+    if (!result)
     {
         barGoLink bar(1);
 
@@ -2113,46 +2173,47 @@ void SpellMgr::LoadSpellScriptTarget()
 
         SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
 
-        if(!spellProto)
+        if (!spellProto)
         {
             sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u does not exist.",spellId,targetEntry);
             continue;
         }
 
         bool targetfound = false;
-        for(int i = 0; i <3; ++i)
+        for (int i = 0; i < 3; ++i)
         {
-            if( spellProto->EffectImplicitTargetA[i]==TARGET_SCRIPT ||
-                spellProto->EffectImplicitTargetB[i]==TARGET_SCRIPT ||
-                spellProto->EffectImplicitTargetA[i]==TARGET_SCRIPT_COORDINATES ||
-                spellProto->EffectImplicitTargetB[i]==TARGET_SCRIPT_COORDINATES ||
-                spellProto->EffectImplicitTargetA[i]==TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT ||
-                spellProto->EffectImplicitTargetB[i]==TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT )
+            if( spellProto->EffectImplicitTargetA[i] == TARGET_SCRIPT ||
+                spellProto->EffectImplicitTargetB[i] == TARGET_SCRIPT ||
+                spellProto->EffectImplicitTargetA[i] == TARGET_SCRIPT_COORDINATES ||
+                spellProto->EffectImplicitTargetB[i] == TARGET_SCRIPT_COORDINATES ||
+                spellProto->EffectImplicitTargetA[i] == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT ||
+                spellProto->EffectImplicitTargetB[i] == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT )
             {
                 targetfound = true;
                 break;
             }
         }
-        if(!targetfound)
+        if (!targetfound)
         {
-            sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u does not have any implicit target TARGET_SCRIPT(38) or TARGET_SCRIPT_COORDINATES (46) or TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT (40).",spellId,targetEntry);
+            sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u does not have any implicit target TARGET_SCRIPT(38) or TARGET_SCRIPT_COORDINATES (46) or TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT (40).", spellId, targetEntry);
             continue;
         }
 
-        if( type >= MAX_SPELL_TARGET_TYPE )
+        if (type >= MAX_SPELL_TARGET_TYPE)
         {
             sLog.outErrorDb("Table `spell_script_target`: target type %u for TargetEntry %u is incorrect.",type,targetEntry);
             continue;
         }
 
-        switch(type)
+        // Checks by target type
+        switch (type)
         {
             case SPELL_TARGET_TYPE_GAMEOBJECT:
             {
-                if( targetEntry==0 )
+                if (!targetEntry)
                     break;
 
-                if(!sGOStorage.LookupEntry<GameObjectInfo>(targetEntry))
+                if (!sGOStorage.LookupEntry<GameObjectInfo>(targetEntry))
                 {
                     sLog.outErrorDb("Table `spell_script_target`: gameobject template entry %u does not exist.",targetEntry);
                     continue;
@@ -2160,26 +2221,25 @@ void SpellMgr::LoadSpellScriptTarget()
                 break;
             }
             default:
-            {
-                if( targetEntry==0 )
+                if (!targetEntry)
                 {
                     sLog.outErrorDb("Table `spell_script_target`: target entry == 0 for not GO target type (%u).",type);
                     continue;
                 }
-                if(!sCreatureStorage.LookupEntry<CreatureInfo>(targetEntry))
+                if (const CreatureInfo* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(targetEntry))
+                {
+                    if (spellId == 30427 && !cInfo->SkinLootId)
+                    {
+                        sLog.outErrorDb("Table `spell_script_target` has creature %u as a target of spellid 30427, but this creature has no skinlootid. Gas extraction will not work!", cInfo->Entry);
+                        continue;
+                    }
+                }
+                else
                 {
                     sLog.outErrorDb("Table `spell_script_target`: creature template entry %u does not exist.",targetEntry);
                     continue;
                 }
-                const CreatureInfo* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(targetEntry);
-
-                if(spellId == 30427 && !cInfo->SkinLootId)
-                {
-                    sLog.outErrorDb("Table `spell_script_target` has creature %u as a target of spellid 30427, but this creature has no skinlootid. Gas extraction will not work!", cInfo->Entry);
-                    continue;
-                }
                 break;
-            }
         }
 
         mSpellScriptTarget.insert(SpellScriptTarget::value_type(spellId,SpellTargetEntry(SpellTargetType(type),targetEntry)));
@@ -3230,23 +3290,33 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
 
     // Get by mechanic
     uint32 mechanic = GetAllSpellMechanicMask(spellproto);
-    if (mechanic == MECHANIC_NONE)          return DIMINISHING_NONE;
-    if (mechanic & ((1<<MECHANIC_STUN) |
-                    (1<<MECHANIC_SHACKLE))) return triggered ? DIMINISHING_TRIGGER_STUN : DIMINISHING_CONTROL_STUN;
-    if (mechanic & (1<<MECHANIC_SLEEP))     return DIMINISHING_FREEZE_SLEEP;
-    if (mechanic & (1<<MECHANIC_POLYMORPH)) return DIMINISHING_POLYMORPH_GOUGE_SAP;
-    if (mechanic & (1<<MECHANIC_ROOT))      return triggered ? DIMINISHING_TRIGGER_ROOT : DIMINISHING_CONTROL_ROOT;
-    if (mechanic & ((1<<MECHANIC_FEAR) |
-                    (1<<MECHANIC_TURN)))    return DIMINISHING_FEAR_BLIND;
-    if (mechanic & (1<<MECHANIC_CHARM))     return DIMINISHING_CHARM;
-    if (mechanic & (1<<MECHANIC_SILENCE))   return DIMINISHING_SILENCE;
-    if (mechanic & (1<<MECHANIC_DISARM))    return DIMINISHING_DISARM;
-    if (mechanic & (1<<MECHANIC_FREEZE))    return DIMINISHING_FREEZE_SLEEP;
-    if (mechanic & ((1<<MECHANIC_KNOCKOUT) |
-                    (1<<MECHANIC_SAPPED)))  return DIMINISHING_POLYMORPH_GOUGE_SAP;
-    if (mechanic & (1<<MECHANIC_BANISH))    return DIMINISHING_BANISH;
-    if (mechanic & (1<<MECHANIC_HORROR))    return DIMINISHING_DEATHCOIL;
+    if (!mechanic)
+        return DIMINISHING_NONE;
 
+    if (mechanic & ((1<<(MECHANIC_STUN-1))|(1<<(MECHANIC_SHACKLE-1))))
+        return triggered ? DIMINISHING_TRIGGER_STUN : DIMINISHING_CONTROL_STUN;
+    if (mechanic & (1<<(MECHANIC_SLEEP-1)))
+        return DIMINISHING_FREEZE_SLEEP;
+    if (mechanic & (1<<(MECHANIC_POLYMORPH-1)))
+        return DIMINISHING_POLYMORPH_GOUGE_SAP;
+    if (mechanic & (1<<(MECHANIC_ROOT-1)))
+        return triggered ? DIMINISHING_TRIGGER_ROOT : DIMINISHING_CONTROL_ROOT;
+    if (mechanic & ((1<<(MECHANIC_FEAR-1))|(1<<(MECHANIC_TURN-1))))
+        return DIMINISHING_FEAR_BLIND;
+    if (mechanic & (1<<(MECHANIC_CHARM-1)))
+        return DIMINISHING_CHARM;
+    if (mechanic & (1<<(MECHANIC_SILENCE-1)))
+        return DIMINISHING_SILENCE;
+    if (mechanic & (1<<(MECHANIC_DISARM-1)))
+        return DIMINISHING_DISARM;
+    if (mechanic & (1<<(MECHANIC_FREEZE-1)))
+        return DIMINISHING_FREEZE_SLEEP;
+    if (mechanic & ((1<<(MECHANIC_KNOCKOUT-1))|(1<<(MECHANIC_SAPPED-1))))
+        return DIMINISHING_POLYMORPH_GOUGE_SAP;
+    if (mechanic & (1<<(MECHANIC_BANISH-1)))
+        return DIMINISHING_BANISH;
+    if (mechanic & (1<<(MECHANIC_HORROR-1)))
+        return DIMINISHING_DEATHCOIL;
 
     return DIMINISHING_NONE;
 }

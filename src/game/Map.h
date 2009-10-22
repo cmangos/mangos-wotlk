@@ -32,6 +32,7 @@
 #include "SharedDefines.h"
 #include "GameSystem/GridRefManager.h"
 #include "MapRefManager.h"
+#include "Utilities/TypeList.h"
 
 #include <bitset>
 #include <list>
@@ -285,7 +286,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         virtual void InitVisibilityDistance();
 
         void PlayerRelocation(Player *, float x, float y, float z, float angl);
-        void CreatureRelocation(Creature *creature, float x, float y, float, float);
+        void CreatureRelocation(Creature *creature, float x, float y, float z, float orientation);
 
         template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor);
 
@@ -293,6 +294,12 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         {
             GridPair p = MaNGOS::ComputeGridPair(x, y);
             return( !getNGrid(p.x_coord, p.y_coord) || getNGrid(p.x_coord, p.y_coord)->GetGridState() == GRID_STATE_REMOVAL );
+        }
+
+        bool IsLoaded(float x, float y) const
+        {
+            GridPair p = MaNGOS::ComputeGridPair(x, y);
+            return loaded(p);
         }
 
         bool GetUnloadLock(const GridPair &p) const { return getNGrid(p.x_coord, p.y_coord)->getUnloadLock(); }
@@ -420,8 +427,26 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         void RemoveFromActive(Creature* obj);
 
         Creature* GetCreature(uint64 guid);
+        Vehicle* GetVehicle(uint64 guid);
+        Pet* GetPet(uint64 guid);
+        Unit* GetCreatureOrPet(uint64 guid);
         GameObject* GetGameObject(uint64 guid);
         DynamicObject* GetDynamicObject(uint64 guid);
+
+        TypeUnorderedMapContainer<AllMapStoredObjectTypes>& GetObjectsStore() { return m_objectsStore; }
+
+        void AddUpdateObject(Object *obj)
+        {
+            i_objectsToClientUpdate.insert(obj);
+        }
+
+        void RemoveUpdateObject(Object *obj)
+        {
+            i_objectsToClientUpdate.erase( obj );
+        }
+
+        // DynObjects currently
+        uint32 GenerateLocalLowGuid(HighGuid guidhigh);
     private:
         void LoadMapAndVMap(int gx, int gy);
         void LoadVMap(int gx, int gy);
@@ -466,6 +491,8 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         void setNGrid(NGridType* grid, uint32 x, uint32 y);
         void ScriptsProcess();
 
+        void SendObjectUpdates();
+        std::set<Object *> i_objectsToClientUpdate;
     protected:
         void SetUnloadReferenceLock(const GridPair &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadReferenceLock(on); }
 
@@ -484,6 +511,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         typedef std::set<WorldObject*> ActiveNonPlayers;
         ActiveNonPlayers m_activeNonPlayers;
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
+        TypeUnorderedMapContainer<AllMapStoredObjectTypes> m_objectsStore;
     private:
         time_t i_gridExpiry;
 
@@ -500,6 +528,8 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         std::set<WorldObject *> i_objectsToRemove;
         std::multimap<time_t, ScriptAction> m_scriptSchedule;
+
+        uint32 m_hiDynObjectGuid;                           // Map local dynobject low guid counter
 
         // Type specific code for add/remove to/from grid
         template<class T>

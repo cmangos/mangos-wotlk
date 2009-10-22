@@ -956,18 +956,31 @@ enum Mechanics
 
 // Used for spell 42292 Immune Movement Impairment and Loss of Control (0x49967da6)
 #define IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK ( \
-    (1<<MECHANIC_CHARM   )|(1<<MECHANIC_DISORIENTED )|(1<<MECHANIC_FEAR  )| \
-    (1<<MECHANIC_ROOT    )|(1<<MECHANIC_PACIFY   )|(1<<MECHANIC_SLEEP )| \
-    (1<<MECHANIC_SNARE   )|(1<<MECHANIC_STUN     )|(1<<MECHANIC_FREEZE)| \
-    (1<<MECHANIC_KNOCKOUT)|(1<<MECHANIC_POLYMORPH)|(1<<MECHANIC_BANISH)| \
-    (1<<MECHANIC_SHACKLE )|(1<<MECHANIC_TURN     )|(1<<MECHANIC_HORROR)| \
-    (1<<MECHANIC_DAZE    )|(1<<MECHANIC_SAPPED   ) )
+    (1<<(MECHANIC_CHARM   -1))|(1<<(MECHANIC_DISORIENTED-1))|(1<<(MECHANIC_FEAR  -1))| \
+    (1<<(MECHANIC_ROOT    -1))|(1<<(MECHANIC_PACIFY     -1))|(1<<(MECHANIC_SLEEP -1))| \
+    (1<<(MECHANIC_SNARE   -1))|(1<<(MECHANIC_STUN       -1))|(1<<(MECHANIC_FREEZE-1))| \
+    (1<<(MECHANIC_KNOCKOUT-1))|(1<<(MECHANIC_POLYMORPH  -1))|(1<<(MECHANIC_BANISH-1))| \
+    (1<<(MECHANIC_SHACKLE -1))|(1<<(MECHANIC_TURN       -1))|(1<<(MECHANIC_HORROR-1))| \
+    (1<<(MECHANIC_DAZE    -1))|(1<<(MECHANIC_SAPPED     -1)))
+
+#define IMMUNE_TO_ROOT_AND_SNARE_MASK ( \
+    (1<<(MECHANIC_ROOT-1))|(1<<(MECHANIC_SNARE-1)))
+
+#define IMMUNE_TO_ROOT_AND_STUN_MASK ( \
+    (1<<(MECHANIC_ROOT-1))|(1<<(MECHANIC_STUN-1)))
+
+#define IMMUNE_TO_SILENCE_AND_STUN_AND_FEAR_MASK ( \
+    (1<<(MECHANIC_SILENCE-1))|(1<<(MECHANIC_STUN-1))|(1<<(MECHANIC_FEAR-1)))
+
+#define IMMUNE_TO_INTERRUPT_AND_SILENCE_MASK ( \
+    (1<<(MECHANIC_INTERRUPT-1))|(1<<(MECHANIC_SILENCE-1)))
 
 // Daze and all croud control spells except polymorph are not removed
 #define MECHANIC_NOT_REMOVED_BY_SHAPESHIFT ( \
-    (1<<MECHANIC_CHARM )|(1<<MECHANIC_DISORIENTED)|(1<<MECHANIC_FEAR  )|(1<<MECHANIC_PACIFY )| \
-    (1<<MECHANIC_STUN  )|(1<<MECHANIC_FREEZE     )|(1<<MECHANIC_BANISH)|(1<<MECHANIC_SHACKLE)| \
-    (1<<MECHANIC_HORROR)|(1<<MECHANIC_TURN       )|(1<<MECHANIC_DAZE  )|(1<<MECHANIC_SAPPED ) )
+    (1<<(MECHANIC_CHARM -1))|(1<<(MECHANIC_DISORIENTED-1))|(1<<(MECHANIC_FEAR  -1))| \
+    (1<<(MECHANIC_PACIFY-1))|(1<<(MECHANIC_STUN       -1))|(1<<(MECHANIC_FREEZE-1))| \
+    (1<<(MECHANIC_BANISH-1))|(1<<(MECHANIC_SHACKLE    -1))|(1<<(MECHANIC_HORROR-1))| \
+    (1<<(MECHANIC_TURN  -1))|(1<<(MECHANIC_DAZE       -1))|(1<<(MECHANIC_SAPPED-1)))
 
 // Spell dispell type
 enum DispelType
@@ -1003,6 +1016,15 @@ enum SpellImmunity
 };
 
 #define MAX_SPELL_IMMUNITY           6
+
+enum WeaponAttackType
+{
+    BASE_ATTACK   = 0,
+    OFF_ATTACK    = 1,
+    RANGED_ATTACK = 2
+};
+
+#define MAX_ATTACK  3
 
 enum Targets
 {
@@ -1861,26 +1883,30 @@ enum CreatureFamily
 
 enum CreatureTypeFlags
 {
-    CREATURE_TYPEFLAGS_TAMEABLE        = 0x00001,           //tameable by any hunter
-    CREATURE_TYPEFLAGS_UNK2            = 0x00002,           //? Related to spirits/ghosts in any form? Allow gossip interaction if player is also ghost? Visibility?
-    CREATURE_TYPEFLAGS_UNK3            = 0x00004,
-    CREATURE_TYPEFLAGS_UNK4            = 0x00008,
-    CREATURE_TYPEFLAGS_UNK5            = 0x00010,
-    CREATURE_TYPEFLAGS_UNK6            = 0x00020,
-    CREATURE_TYPEFLAGS_UNK7            = 0x00040,
-    CREATURE_TYPEFLAGS_UNK8            = 0x00080,
-    CREATURE_TYPEFLAGS_HERBLOOT        = 0x00100,           //can be looted by herbalist
-    CREATURE_TYPEFLAGS_MININGLOOT      = 0x00200,           //can be looted by miner
-    CREATURE_TYPEFLAGS_UNK11           = 0x00400,
-    CREATURE_TYPEFLAGS_UNK12           = 0x00800,           //? Related to mounts in some way. If mounted, fight mounted, mount appear as independant when rider dies?
-    CREATURE_TYPEFLAGS_UNK13           = 0x01000,           //? Can aid any player in combat if in range?
-    CREATURE_TYPEFLAGS_UNK14           = 0x02000,
-    CREATURE_TYPEFLAGS_UNK15           = 0x04000,           //? Possibly not in use
-    CREATURE_TYPEFLAGS_ENGINEERLOOT    = 0x08000,           //can be looted by engineer
-    CREATURE_TYPEFLAGS_EXOTIC          = 0x10000,           //can be tamed by hunter as exotic pet
-    CREATURE_TYPEFLAGS_UNK18           = 0x20000,           //? Related to veichles/pvp?
-    CREATURE_TYPEFLAGS_UNK19           = 0x40000,           //? Related to veichle/siege weapons?
-    CREATURE_TYPEFLAGS_UNK20           = 0x80000
+    CREATURE_TYPEFLAGS_TAMEABLE         = 0x000001,         // Tameable by any hunter
+    CREATURE_TYPEFLAGS_GHOST_VISIBLE    = 0x000002,         // Creatures which can _also_ be seen when player is a ghost
+    CREATURE_TYPEFLAGS_UNK3             = 0x000004,
+    CREATURE_TYPEFLAGS_UNK4             = 0x000008,
+    CREATURE_TYPEFLAGS_UNK5             = 0x000010,
+    CREATURE_TYPEFLAGS_UNK6             = 0x000020,
+    CREATURE_TYPEFLAGS_UNK7             = 0x000040,
+    CREATURE_TYPEFLAGS_UNK8             = 0x000080,
+    CREATURE_TYPEFLAGS_HERBLOOT         = 0x000100,         // Can be looted by herbalist
+    CREATURE_TYPEFLAGS_MININGLOOT       = 0x000200,         // Can be looted by miner
+    CREATURE_TYPEFLAGS_UNK11            = 0x000400,
+    CREATURE_TYPEFLAGS_UNK12            = 0x000800,         // ? Related to mounts in some way. If mounted, fight mounted, mount appear as independant when rider dies?
+    CREATURE_TYPEFLAGS_UNK13            = 0x001000,         // ? Can aid any player in combat if in range?
+    CREATURE_TYPEFLAGS_UNK14            = 0x002000,
+    CREATURE_TYPEFLAGS_UNK15            = 0x004000,         // ? Possibly not in use
+    CREATURE_TYPEFLAGS_ENGINEERLOOT     = 0x008000,         // Can be looted by engineer
+    CREATURE_TYPEFLAGS_EXOTIC           = 0x010000,         // Can be tamed by hunter as exotic pet
+    CREATURE_TYPEFLAGS_UNK18            = 0x020000,         // ? Related to vehicles/pvp?
+    CREATURE_TYPEFLAGS_UNK19            = 0x040000,         // ? Related to vehicle/siege weapons?
+    CREATURE_TYPEFLAGS_UNK20            = 0x080000,
+    CREATURE_TYPEFLAGS_UNK21            = 0x100000,
+    CREATURE_TYPEFLAGS_UNK22            = 0x200000,
+    CREATURE_TYPEFLAGS_UNK23            = 0x400000,
+    CREATURE_TYPEFLAGS_UNK24            = 0x800000          // ? First seen in 3.2.2. Related to banner/backpack of creature/companion?
 };
 
 enum CreatureEliteType
@@ -2368,8 +2394,8 @@ enum PetDiet
 enum AiReaction
 {
     AI_REACTION_UNK1    = 1,
-    AI_REACTION_AGGRO   = 2,
-    AI_REACTION_UNK3    = 3,
+    AI_REACTION_AGGRO   = 2,                                // trigger aggro sound to play, if defined in dbc
+    AI_REACTION_UNK3    = 3,                                // seen happen at polymorph, possible when AI not in control of self?
     AI_REACTION_UNK4    = 4
 };
 
@@ -2616,6 +2642,25 @@ enum MailResponseResult
     MAIL_ERR_TOO_MANY_ATTACHMENTS      = 18,
     MAIL_ERR_MAIL_ATTACHMENT_INVALID   = 19,
     MAIL_ERR_ITEM_HAS_EXPIRED          = 21,
+};
+
+// reasons for why pet tame may fail
+// in fact, these are also used elsewhere
+enum PetTameFailureReason
+{
+    PETTAME_INVALIDCREATURE         = 0,
+    PETTAME_TOOMANY                 = 1,
+    PETTAME_CREATUREALREADYOWNED    = 2,
+    PETTAME_NOTTAMEABLE             = 3,
+    PETTAME_ANOTHERSUMMONACTIVE     = 4,
+    PETTAME_UNITSCANTTAME           = 5,
+    PETTAME_NOPETAVAILABLE          = 6,  // not used in taming
+    PETTAME_INTERNALERROR           = 7,
+    PETTAME_TOOHIGHLEVEL            = 8,
+    PETTAME_DEAD                    = 9,  // not used in taming
+    PETTAME_NOTDEAD                 = 10, // not used in taming
+    PETTAME_CANTCONTROLEXOTIC       = 11, // 3.x
+    PETTAME_UNKNOWNERROR            = 12
 };
 
 #endif
