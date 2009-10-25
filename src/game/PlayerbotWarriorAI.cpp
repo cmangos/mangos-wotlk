@@ -14,8 +14,8 @@ PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, 
     CHARGE                  = ai->getSpellId("charge"); //ARMS
     OVERPOWER               = ai->getSpellId("overpower"); // ARMS
     HEROIC_STRIKE           = ai->getSpellId("heroic strike"); //ARMS
-    REND                    = ai->getSpellId("rend"); //ARMS
-    THUNDER_CLAP            = ai->getSpellId("thunder clap");  //ARMS
+    REND                    = 13445; //ai->getSpellId("rend"); //ARMS
+    THUNDER_CLAP            = ai->getSpellId("thunder");  //ARMS
     HAMSTRING               = ai->getSpellId("hamstring");  //ARMS
     MOCKING_BLOW            = ai->getSpellId("mocking blow");  //ARMS
     RETALIATION             = ai->getSpellId("retaliation");  //ARMS
@@ -25,9 +25,9 @@ PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, 
     HEROIC_THROW            = ai->getSpellId("heroic throw");  //ARMS
     BLOODRAGE               = ai->getSpellId("bloodrage"); //PROTECTION
     DEFENSIVE_STANCE        = ai->getSpellId("defensive stance"); //PROTECTION
-    DEVASTATE               = ai->getSpellId("devastate");
-    SUNDER_ARMOR            = 7386; //ai->getSpellId("sunder armor"); //PROTECTION
-    TAUNT                   = 355; //ai->getSpellId("taunt"); //PROTECTION
+    DEVASTATE               = ai->getSpellId("devastate"); //PROTECTION
+    SUNDER_ARMOR            = ai->getSpellId("sunder armor"); //PROTECTION
+    TAUNT                   = ai->getSpellId("taunt"); //PROTECTION
     SHIELD_BASH             = ai->getSpellId("shield bash"); //PROTECTION
     REVENGE                 = ai->getSpellId("revenge"); //PROTECTION
     SHIELD_BLOCK            = ai->getSpellId("shield block"); //PROTECTION
@@ -37,12 +37,13 @@ PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, 
     VIGILANCE               = ai->getSpellId("vigilance"); //PROTECTION
     DEVASTATE               = ai->getSpellId("devastate"); //PROTECTION
     SHOCKWAVE               = ai->getSpellId("shockwave"); //PROTECTION
-    CONCUSSION_BLOW         = ai->getSpellId("concussion blow");
+    CONCUSSION_BLOW         = ai->getSpellId("blow"); //PROTECTION
     SPELL_REFLECTION        = ai->getSpellId("spell reflection"); //PROTECTION
+	LAST_STAND              = ai->getSpellId("last stand"); //PROTECTION
     BATTLE_SHOUT            = ai->getSpellId("battle shout"); //FURY
-    DEMORALIZING_SHOUT      = ai->getSpellId("demoralizing shout"); //11556; //
+    DEMORALIZING_SHOUT      = ai->getSpellId("demoralizing shout"); //FURY
     CLEAVE                  = ai->getSpellId("cleave"); //FURY
-    INTIMIDATING_SHOUT      = ai->getSpellId("intimidating shout"); //FURY
+    INTIMIDATING_SHOUT      = ai->getSpellId("shout"); //FURY
     EXECUTE                 = ai->getSpellId("execute"); //FURY
     CHALLENGING_SHOUT       = ai->getSpellId("challenging shout"); //FURY
     SLAM                    = ai->getSpellId("slam"); //FURY
@@ -168,20 +169,52 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
             out << "Case Prevent";
             if( SHIELD_BASH>0 && ai->GetRageAmount()>=10 && ai->CastSpell( SHIELD_BASH, *pTarget ) )
                 out << " > Shield Bash";
+			else if( PUMMEL>0 && ai->GetRageAmount()>=10 && ai->CastSpell( PUMMEL, *pTarget ) )
+                out << " > Pummel";
+            else if( SPELL_REFLECTION>0 && ai->GetRageAmount()>=15 && ai->CastSpell( SPELL_REFLECTION, *pTarget ) )
+                out << " > Spell Reflection";
             else
                 out << " > NONE";
             break;
 
         case WarriorBattle:
             out << "Case Battle";
-            if( OVERPOWER>0 && ai->GetRageAmount()>=5 && ai->CastSpell( OVERPOWER, *pTarget ) )
-                out << " > Overpower";
+			if( EXECUTE>0 && ai->GetRageAmount()>=15 && pTarget->GetHealth() < pTarget->GetMaxHealth()*0.20 && ai->CastSpell( EXECUTE, *pTarget ) )
+                out << " > Execute!";
+			else if( DEATH_WISH>0 && ai->GetRageAmount()>=10 && !m_bot->HasAura( DEATH_WISH, 0 ) && ai->CastSpell( DEATH_WISH, *m_bot ) )
+                out << " > Death Wish";
             else if( REND>0 && ai->GetRageAmount()>=10 && !pTarget->HasAura( REND ) && ai->CastSpell( REND, *pTarget ) )
                 out << " > Rend";
             else if( SUNDER_ARMOR>0 && ai->GetRageAmount()>=15 && ai->CastSpell( SUNDER_ARMOR, *pTarget ) )
                 out << " > Sunder Armor";
             else if( HEROIC_STRIKE>0 && ai->GetRageAmount()>=15 && ai->CastSpell( HEROIC_STRIKE, *pTarget ) )
                 out << " > Heroic Strike";
+			else if( CHALLENGING_SHOUT>0 && ai->GetRageAmount()>=5 && pVictim != m_bot && ai->CastSpell( CHALLENGING_SHOUT, *pTarget ) )
+                out << " > Challenging Shout";
+			else if( THUNDER_CLAP>0 && ai->GetRageAmount()>=20 && !pTarget->HasAura( THUNDER_CLAP, 0 ) && ai->CastSpell( THUNDER_CLAP, *pTarget ) )
+                out << " > Thunder Clap";
+			else if( MORTAL_STRIKE>0 && ai->GetRageAmount()>=30 && !pTarget->HasAura( MORTAL_STRIKE, 0 ) && ai->CastSpell( MORTAL_STRIKE, *pTarget ) )
+                out << " > Mortal Strike";
+            else if( CLEAVE>0 && ai->GetRageAmount()>=20 && ai->CastSpell( CLEAVE, *pTarget ) )
+                out << " > Cleave";
+			else if( INTIMIDATING_SHOUT>0 && ai->GetRageAmount()>=25 && ai->GetAttackerCount()>5 && ai->CastSpell( INTIMIDATING_SHOUT, *pTarget ) )
+                out << " > Intimidating Shout";
+            else if( HAMSTRING>0 && ai->GetRageAmount()>=10 && !pTarget->HasAura( HAMSTRING, 0 ) && ai->CastSpell( HAMSTRING, *pTarget ) )
+                out << " > Hamstring";
+			else if( BLADESTORM>0 && ai->GetRageAmount()>=25 && pVictim == m_bot && !m_bot->HasAura( BLADESTORM, 0 ) && ai->GetAttackerCount()>=3 && ai->CastSpell( BLADESTORM, *pTarget ) )
+                out << " > Bladestorm";
+			else if( LAST_STAND>0 && !m_bot->HasAura( LAST_STAND, 0 ) && m_bot->GetHealth() < m_bot->GetMaxHealth()*0.5 && ai->CastSpell( LAST_STAND, *m_bot ) )
+                out << " > Last Stand!";
+			else if( CONCUSSION_BLOW>0 && ai->GetRageAmount()>=15 && !pTarget->HasAura( CONCUSSION_BLOW, 0 ) && ai->CastSpell( CONCUSSION_BLOW, *pTarget ) )
+                out << " > Concussion Blow";
+			else if( SLAM>0 && ai->GetRageAmount()>=15 && ai->CastSpell( SLAM, *pTarget ) )
+                out << " > Slam";
+			else if( ENRAGED_REGENERATION>0 && ai->GetRageAmount()>=15 && !m_bot->HasAura( ENRAGED_REGENERATION, 0 ) && m_bot->GetHealth() < m_bot->GetMaxHealth()*0.7 && ai->CastSpell( ENRAGED_REGENERATION, *m_bot ) )
+                out << " > Enraged Regeneration";
+			else if( WHIRLWIND>0 && ai->GetRageAmount()>=25 && ai->CastSpell( WHIRLWIND, *pTarget ) )
+                out << " > Whirlwind";
+			else if( OVERPOWER>0 && ai->GetRageAmount()>=5 && ai->CastSpell( OVERPOWER, *pTarget ) )
+                out << " > Overpower";
             else
                 out << " > NONE";
             break;
@@ -194,6 +227,10 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
                 out << " > Sunder Armor";
             else if( SHIELD_BLOCK>0 && ai->CastSpell( SHIELD_BLOCK ) )
                 out << " > Shield Block";
+			else if( SHIELD_WALL>0 && !m_bot->HasAura( SHIELD_WALL, 0 ) && ai->CastSpell( SHIELD_WALL, *m_bot ) )
+                out << " > Shield Wall";
+			else if( DISARM>0 && ai->CastSpell( DISARM, *pTarget ) )
+                out << " > Disarm";
             else
                 out << " > NONE";
             break;
