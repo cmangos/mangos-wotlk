@@ -396,7 +396,7 @@ ChatCommand * ChatHandler::getCommandTable()
 
         { "config",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleReloadConfigCommand,        "", NULL },
 
-        { "achievement_criteria_data",   SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadAchievementCriteriaDataCommand, "", NULL },
+        { "achievement_criteria_requirement",SEC_ADMINISTRATOR,true,&ChatHandler::HandleReloadAchievementCriteriaRequirementCommand,"",NULL },
         { "achievement_reward",          SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadAchievementRewardCommand,       "", NULL },
         { "areatrigger_involvedrelation",SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadQuestAreaTriggersCommand,       "", NULL },
         { "areatrigger_tavern",          SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadAreaTriggerTavernCommand,       "", NULL },
@@ -770,7 +770,7 @@ void ChatHandler::SendSysMessage(const char *str)
     WorldPacket data;
 
     // need copy to prevent corruption by strtok call in LineFromMessage original string
-    char* buf = strdup(str);
+    char* buf = mangos_strdup(str);
     char* pos = buf;
 
     while(char* line = LineFromMessage(pos))
@@ -779,7 +779,7 @@ void ChatHandler::SendSysMessage(const char *str)
         m_session->SendPacket(&data);
     }
 
-    free(buf);
+    delete [] buf;
 }
 
 void ChatHandler::SendGlobalSysMessage(const char *str)
@@ -788,7 +788,7 @@ void ChatHandler::SendGlobalSysMessage(const char *str)
     WorldPacket data;
 
     // need copy to prevent corruption by strtok call in LineFromMessage original string
-    char* buf = strdup(str);
+    char* buf = mangos_strdup(str);
     char* pos = buf;
 
     while(char* line = LineFromMessage(pos))
@@ -797,7 +797,7 @@ void ChatHandler::SendGlobalSysMessage(const char *str)
         sWorld.SendGlobalMessage(&data);
     }
 
-    free(buf);
+    delete [] buf;
 }
 
 void ChatHandler::SendSysMessage(int32 entry)
@@ -1780,7 +1780,7 @@ Creature* ChatHandler::getSelectedCreature()
     if(!m_session)
         return NULL;
 
-    return ObjectAccessor::GetCreatureOrPetOrVehicle(*m_session->GetPlayer(),m_session->GetPlayer()->GetSelection());
+    return m_session->GetPlayer()->GetMap()->GetCreatureOrPetOrVehicle(m_session->GetPlayer()->GetSelection());
 }
 
 char* ChatHandler::extractKeyFromLink(char* text, char const* linkType, char** something1)

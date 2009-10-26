@@ -1760,13 +1760,25 @@ void Spell::EffectDummy(uint32 i)
                 }
                 case 31789:                                 // Righteous Defense (step 1)
                 {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                    {
+                        SendCastResult(SPELL_FAILED_TARGET_AFFECTING_COMBAT);
+                        return;
+                    }
+
                     // 31989 -> dummy effect (step 1) + dummy effect (step 2) -> 31709 (taunt like spell for each target)
+                    Unit* friendTarget = !unitTarget || unitTarget->IsFriendlyTo(m_caster) ? unitTarget : unitTarget->getVictim();
+                    if (friendTarget)
+                    {
+                        Player* player = friendTarget->GetCharmerOrOwnerPlayerOrPlayerItself();
+                        if (!player || !player->IsInSameRaidWith((Player*)m_caster))
+                            friendTarget = NULL;
+                    }
 
                     // non-standard cast requirement check
-                    if (!unitTarget || unitTarget->getAttackers().empty())
+                    if (!friendTarget || friendTarget->getAttackers().empty())
                     {
-                        if (m_caster->GetTypeId()==TYPEID_PLAYER)
-                            ((Player*)m_caster)->RemoveSpellCooldown(m_spellInfo->Id,true);
+                        ((Player*)m_caster)->RemoveSpellCooldown(m_spellInfo->Id,true);
                         SendCastResult(SPELL_FAILED_TARGET_AFFECTING_COMBAT);
                         return;
                     }
@@ -1776,18 +1788,16 @@ void Spell::EffectDummy(uint32 i)
                     for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
                         ihit->effectMask &= ~(1<<1);
 
-                    // not empty (checked)
-                    Unit::AttackerSet const& attackers = unitTarget->getAttackers();
+                    // not empty (checked), copy
+                    Unit::AttackerSet attackers = friendTarget->getAttackers();
 
-                    // chance to be selected from list
-                    float chance = 100.0f/attackers.size();
-                    uint32 count=0;
-                    for(Unit::AttackerSet::const_iterator aItr = attackers.begin(); aItr != attackers.end() && count < 3; ++aItr)
+                    // selected from list 3
+                    for(int i = 0; i < std::min(size_t(3),attackers.size()); ++i)
                     {
-                        if (!roll_chance_f(chance))
-                            continue;
-                        ++count;
+                        Unit::AttackerSet::iterator aItr = attackers.begin();
+                        std::advance(aItr, rand() % attackers.size());
                         AddUnitTarget((*aItr), 1);
+                        attackers.erase(aItr);
                     }
 
                     // now let next effect cast spell at each target.
@@ -1817,19 +1827,21 @@ void Spell::EffectDummy(uint32 i)
             // Cleansing Totem
             if ((m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000004000000)) && m_spellInfo->SpellIconID==1673)
             {
-                m_caster->CastSpell(unitTarget, 52025, true);
+                if (unitTarget)
+                    m_caster->CastSpell(unitTarget, 52025, true);
                 return;
             }
             // Healing Stream Totem
             if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000002000))
             {
-                m_caster->CastCustomSpell(unitTarget, 52042, &damage, 0, 0, true, 0, 0, m_originalCasterGUID);
+                if (unitTarget)
+                    m_caster->CastCustomSpell(unitTarget, 52042, &damage, 0, 0, true, 0, 0, m_originalCasterGUID);
                 return;
             }
             // Mana Spring Totem
             if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000004000))
             {
-                if (unitTarget->getPowerType()!=POWER_MANA)
+                if (!unitTarget || unitTarget->getPowerType()!=POWER_MANA)
                     return;
                 m_caster->CastCustomSpell(unitTarget, 52032, &damage, 0, 0, true, 0, 0, m_originalCasterGUID);
                 return;
@@ -3384,7 +3396,7 @@ void Spell::EffectSummon(uint32 i)
 
     Map *map = m_caster->GetMap();
     uint32 pet_number = objmgr.GeneratePetNumber();
-    if (!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET), map, m_caster->GetPhaseMask(),
+    if (!spawnCreature->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), map, m_caster->GetPhaseMask(),
         m_spellInfo->EffectMiscValue[i], pet_number))
     {
         sLog.outErrorDb("Spell::EffectSummon: no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
@@ -3799,7 +3811,7 @@ void Spell::EffectSummonGuardian(uint32 i)
 
         Map *map = m_caster->GetMap();
         uint32 pet_number = objmgr.GeneratePetNumber();
-        if (!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET), map,m_caster->GetPhaseMask(),
+        if (!spawnCreature->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), map,m_caster->GetPhaseMask(),
             m_spellInfo->EffectMiscValue[i], pet_number))
         {
             sLog.outError("no such creature entry %u", m_spellInfo->EffectMiscValue[i]);
@@ -4156,7 +4168,8 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 void Spell::EffectTameCreature(uint32 /*i*/)
 {
     // Caster must be player, checked in Spell::CheckCast
-    Player* plr = (Player*)m_caster;
+    // Spell can be triggered, we need to check original caster prior to caster
+    Player* plr = (Player*)(m_originalCaster ? m_originalCaster : m_caster);
 
     Creature* creatureTarget = (Creature*)unitTarget;
 
@@ -4267,7 +4280,7 @@ void Spell::EffectSummonPet(uint32 i)
 
     Map *map = m_caster->GetMap();
     uint32 pet_number = objmgr.GeneratePetNumber();
-    if(!NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_PET), map, m_caster->GetPhaseMask(),
+    if(!NewSummon->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), map, m_caster->GetPhaseMask(),
         petentry, pet_number))
     {
         delete NewSummon;
@@ -5083,10 +5096,10 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                 // Emblazon Runeblade
                 case 51770:
                 {
-                    if(!unitTarget)
+                    if(!m_originalCaster)
                         return;
 
-                    unitTarget->CastSpell(unitTarget, 51771, false);
+                    m_originalCaster->CastSpell(m_originalCaster, damage, false);
                     break;
                 }
                 // Death Gate
@@ -6288,7 +6301,7 @@ void Spell::EffectSummonCritter(uint32 i)
 
     Map *map = m_caster->GetMap();
     uint32 pet_number = objmgr.GeneratePetNumber();
-    if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_PET), map, m_caster->GetPhaseMask(),
+    if(!critter->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), map, m_caster->GetPhaseMask(),
         pet_entry, pet_number))
     {
         sLog.outError("Spell::EffectSummonCritter, spellid %u: no such creature entry %u", m_spellInfo->Id, pet_entry);

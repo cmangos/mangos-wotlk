@@ -422,7 +422,7 @@ void WorldSession::LogoutPlayer(bool Save)
         // no point resetting online in character table here as Player::SaveToDB() will set it to 1 since player has not been removed from world at this stage
         //No SQL injection as AccountID is uint32
         if (! _player->GetPlayerbotAI())
-            loginDatabase.PExecute("UPDATE account SET online = 0 WHERE id = '%u'", GetAccountId());
+            loginDatabase.PExecute("UPDATE account SET active_realm_id = 0 WHERE id = '%u'", GetAccountId());
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
         Guild *guild = objmgr.GetGuildById(_player->GetGuildId());
@@ -949,7 +949,7 @@ void WorldSession::SendAddonsInfo()
         if (unk1)
         {
             uint8 unk2 = (itr->CRC != 0x4c1c776d);          // If addon is Standard addon CRC
-            data << uint8(unk2);
+            data << uint8(unk2);                            // if 1, than add addon public signature
             if (unk2)                                       // if CRC is wrong, add public key (client need it)
                 data.append(tdata, sizeof(tdata));
 
@@ -957,7 +957,7 @@ void WorldSession::SendAddonsInfo()
         }
 
         uint8 unk3 = 0;                                     // 0 is sent here
-        data << uint8(unk3);
+        data << uint8(unk3);                                // use <Addon>\<Addon>.url file or not
         if (unk3)
         {
             // String, 256 (null terminated?)
@@ -968,7 +968,7 @@ void WorldSession::SendAddonsInfo()
     m_addonsList.clear();
 
     uint32 count = 0;
-    data << uint32(count);
+    data << uint32(count);                                  // BannedAddons count
     /*for(uint32 i = 0; i < count; ++i)
     {
         uint32

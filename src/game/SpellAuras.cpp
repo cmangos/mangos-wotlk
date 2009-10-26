@@ -577,7 +577,7 @@ Unit* Aura::GetCaster() const
 
     //return ObjectAccessor::GetUnit(*m_target,m_caster_guid);
     //must return caster even if it's in another grid/map
-    Unit *unit = ObjectAccessor::GetObjectInWorld(m_caster_guid, (Unit*)NULL);
+    Unit *unit = ObjectAccessor::GetUnitInWorld(*m_target,m_caster_guid);
     return unit && unit->IsInWorld() ? unit : NULL;
 }
 
@@ -4401,13 +4401,23 @@ void Aura::HandlePeriodicEnergize(bool apply, bool Real)
     if (!Real)
         return;
 
-    m_isPeriodic = apply;
+    if (apply)
+    {
+        switch (GetId())
+        {
+            case 48391:                                     // Owlkin Frenzy 2% base mana
+                m_modifier.m_amount = m_target->GetCreateMana() * 2 / 100;
+                break;
+            case 57669:                                     // Replenishment (0.25% from max)
+            case 61782:                                     // Infinite Replenishment
+                m_modifier.m_amount = m_target->GetMaxPower(POWER_MANA) * 25 / 10000;
+                break;
+            default:
+                break;
+        }
+    }
 
-    // Replenishment (0.25% from max)
-    // Infinite Replenishment
-    if (GetId() == 57669 ||
-        GetId() == 61782)
-        m_modifier.m_amount = m_target->GetMaxPower(POWER_MANA) * 25 / 10000;
+    m_isPeriodic = apply;
 }
 
 void Aura::HandleAuraPowerBurn(bool apply, bool /*Real*/)
@@ -4505,17 +4515,6 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     float mwb_min = caster->GetWeaponDamageRange(BASE_ATTACK,MINDAMAGE);
                     float mwb_max = caster->GetWeaponDamageRange(BASE_ATTACK,MAXDAMAGE);
                     m_modifier.m_amount+=int32(((mwb_min+mwb_max)/2+ap*mws/14000)*0.2f);
-                    return;
-                }
-                break;
-            }
-            case SPELLFAMILY_WARLOCK:
-            {
-                // Drain Soul
-                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000004000))
-                {
-                    if (m_target->GetHealth() * 100 / m_target->GetMaxHealth() <= 25)
-                       m_modifier.m_amount *= 4;
                     return;
                 }
                 break;
@@ -6160,11 +6159,6 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                         DoneActualBenefit = caster->SpellBaseHealingBonus(GetSpellSchoolMask(m_spellProto)) * 0.75f;
                     }
                     break;
-                case SPELLFAMILY_DRUID:
-                    // Savage Defense (amount store original percent of attack power applied)
-                    if (m_spellProto->SpellIconID == 50)    // only spell with this aura fit
-                        m_modifier.m_amount = int32(m_modifier.m_amount * m_target->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
-                    break;
                 default:
                     break;
             }
@@ -6221,7 +6215,7 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
             ((m_removeMode == AURA_REMOVE_BY_DEFAULT && !m_modifier.m_amount) || m_removeMode == AURA_REMOVE_BY_DISPEL))
         {
             Unit::AuraList const& vDummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
-            for(Unit::AuraList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); itr++)
+            for(Unit::AuraList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); ++itr)
             {
                 SpellEntry const* vSpell = (*itr)->GetSpellProto();
 

@@ -196,7 +196,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 
                     // destroy not required for quest finish quest starting item
                     bool destroyItem = true;
-                    for(int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+                    for(int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
                     {
                         if ((qInfo->ReqItemId[i] == ((Item*)pObject)->GetEntry()) && (((Item*)pObject)->GetProto()->MaxCount > 0))
                         {
@@ -206,7 +206,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
                     }
 
                     if(destroyItem)
-                        _player->DestroyItem(((Item*)pObject)->GetBagSlot(),((Item*)pObject)->GetSlot(),true);
+                        _player->DestroyItem(((Item*)pObject)->GetBagSlot(), ((Item*)pObject)->GetSlot(), true);
 
                     break;
                 }
@@ -652,7 +652,7 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
         if (IS_CREATURE_OR_PET_GUID(*itr))
         {
             // need also pet quests case support
-            Creature *questgiver = ObjectAccessor::GetCreatureOrPetOrVehicle(*GetPlayer(),*itr);
+            Creature *questgiver = GetPlayer()->GetMap()->GetCreatureOrPetOrVehicle(*itr);
             if(!questgiver || questgiver->IsHostileTo(_player))
                 continue;
             if(!questgiver->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))

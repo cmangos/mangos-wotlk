@@ -227,7 +227,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
         	uint64 npcGUID;
         	p >> npcGUID;
         	
-        	WorldObject* pNpc = ObjectAccessor::GetWorldObject( *m_master, npcGUID );
+        	WorldObject* pNpc = m_master->GetMap()->GetWorldObject( npcGUID );
         	if (!pNpc)
         		return;
 

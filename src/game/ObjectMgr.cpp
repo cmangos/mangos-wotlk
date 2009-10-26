@@ -129,8 +129,6 @@ ObjectMgr::ObjectMgr()
 {
     m_hiCharGuid        = 1;
     m_hiCreatureGuid    = 1;
-    m_hiPetGuid         = 1;
-    m_hiVehicleGuid     = 1;
     m_hiItemGuid        = 1;
     m_hiGoGuid          = 1;
     m_hiCorpseGuid      = 1;
@@ -475,8 +473,8 @@ void ObjectMgr::LoadCreatureTemplates()
     sLog.outString( ">> Loaded %u creature definitions", sCreatureStorage.RecordCount );
     sLog.outString();
 
-    std::set<uint32> heroicEntries;                         // already loaded heroic value in creatures
-    std::set<uint32> hasHeroicEntries;                      // already loaded creatures with heroic entry values
+    std::set<uint32> difficultyEntries1;                    // already loaded difficulty 1 value in creatures
+    std::set<uint32> hasDifficultyEntries1;                 // already loaded creatures with difficulty 1  values
 
     // check data correctness
     for(uint32 i = 1; i < sCreatureStorage.MaxEntry; ++i)
@@ -485,83 +483,83 @@ void ObjectMgr::LoadCreatureTemplates()
         if (!cInfo)
             continue;
 
-        if (cInfo->HeroicEntry)
+        if (cInfo->DifficultyEntry1)
         {
-            CreatureInfo const* heroicInfo = GetCreatureTemplate(cInfo->HeroicEntry);
-            if (!heroicInfo)
+            CreatureInfo const* difficultyInfo = GetCreatureTemplate(cInfo->DifficultyEntry1);
+            if (!difficultyInfo)
             {
-                sLog.outErrorDb("Creature (Entry: %u) have `heroic_entry`=%u but creature entry %u not exist.", i, cInfo->HeroicEntry, cInfo->HeroicEntry);
+                sLog.outErrorDb("Creature (Entry: %u) have `difficulty_entry_1`=%u but creature entry %u not exist.", i, cInfo->DifficultyEntry1, cInfo->DifficultyEntry1);
                 continue;
             }
 
-            if (heroicEntries.find(i)!=heroicEntries.end())
+            if (difficultyEntries1.find(i)!=difficultyEntries1.end())
             {
-                sLog.outErrorDb("Creature (Entry: %u) listed as heroic but have value in `heroic_entry`.",i);
+                sLog.outErrorDb("Creature (Entry: %u) listed as difficulty 1 but have value in `difficulty_entry_1`.",i);
                 continue;
             }
 
-            if (heroicEntries.find(cInfo->HeroicEntry)!=heroicEntries.end())
+            if (difficultyEntries1.find(cInfo->DifficultyEntry1)!=difficultyEntries1.end())
             {
-                sLog.outErrorDb("Creature (Entry: %u) already listed as heroic for another entry.",cInfo->HeroicEntry);
+                sLog.outErrorDb("Creature (Entry: %u) already listed as difficulty 1 for another entry.",cInfo->DifficultyEntry1);
                 continue;
             }
 
-            if (hasHeroicEntries.find(cInfo->HeroicEntry)!=hasHeroicEntries.end())
+            if (hasDifficultyEntries1.find(cInfo->DifficultyEntry1)!=hasDifficultyEntries1.end())
             {
-                sLog.outErrorDb("Creature (Entry: %u) have `heroic_entry`=%u but creature entry %u have heroic entry also.",i,cInfo->HeroicEntry,cInfo->HeroicEntry);
+                sLog.outErrorDb("Creature (Entry: %u) have `difficulty_entry_1`=%u but creature entry %u have difficulty 1 entry also.",i,cInfo->DifficultyEntry1,cInfo->DifficultyEntry1);
                 continue;
             }
 
-            if (cInfo->unit_class != heroicInfo->unit_class)
+            if (cInfo->unit_class != difficultyInfo->unit_class)
             {
-                sLog.outErrorDb("Creature (Entry: %u, class %u) has different `unit_class` in heroic mode (Entry: %u, class %u).",i, cInfo->unit_class, cInfo->HeroicEntry, heroicInfo->unit_class);
+                sLog.outErrorDb("Creature (Entry: %u, class %u) has different `unit_class` in difficulty 1 mode (Entry: %u, class %u).",i, cInfo->unit_class, cInfo->DifficultyEntry1, difficultyInfo->unit_class);
                 continue;
             }
 
-            if (cInfo->npcflag != heroicInfo->npcflag)
+            if (cInfo->npcflag != difficultyInfo->npcflag)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has different `npcflag` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
+                sLog.outErrorDb("Creature (Entry: %u) has different `npcflag` in difficulty 1 mode (Entry: %u).",i,cInfo->DifficultyEntry1);
                 continue;
             }
 
-            if (cInfo->trainer_class != heroicInfo->trainer_class)
+            if (cInfo->trainer_class != difficultyInfo->trainer_class)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_class` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
+                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_class` in difficulty 1 mode (Entry: %u).",i,cInfo->DifficultyEntry1);
                 continue;
             }
 
-            if (cInfo->trainer_race != heroicInfo->trainer_race)
+            if (cInfo->trainer_race != difficultyInfo->trainer_race)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_race` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
+                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_race` in difficulty 1 mode (Entry: %u).",i,cInfo->DifficultyEntry1);
                 continue;
             }
 
-            if (cInfo->trainer_type != heroicInfo->trainer_type)
+            if (cInfo->trainer_type != difficultyInfo->trainer_type)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_type` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
+                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_type` in difficulty 1 mode (Entry: %u).",i,cInfo->DifficultyEntry1);
                 continue;
             }
 
-            if (cInfo->trainer_spell != heroicInfo->trainer_spell)
+            if (cInfo->trainer_spell != difficultyInfo->trainer_spell)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_spell` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
+                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_spell` in difficulty 1 mode (Entry: %u).",i,cInfo->DifficultyEntry1);
                 continue;
             }
 
-            if (heroicInfo->AIName && *heroicInfo->AIName)
+            if (difficultyInfo->AIName && *difficultyInfo->AIName)
             {
-                sLog.outErrorDb("Heroic mode creature (Entry: %u) has `AIName`, but in any case will used normal mode creature (Entry: %u) AIName.",cInfo->HeroicEntry,i);
+                sLog.outErrorDb("Difficulty 1 mode creature (Entry: %u) has `AIName`, but in any case will used difficulty 0 mode creature (Entry: %u) AIName.",cInfo->DifficultyEntry1,i);
                 continue;
             }
 
-            if (heroicInfo->ScriptID)
+            if (difficultyInfo->ScriptID)
             {
-                sLog.outErrorDb("Heroic mode creature (Entry: %u) has `ScriptName`, but in any case will used normal mode creature (Entry: %u) ScriptName.",cInfo->HeroicEntry,i);
+                sLog.outErrorDb("Difficulty 1 mode creature (Entry: %u) has `ScriptName`, but in any case will used difficulty 0 mode creature (Entry: %u) ScriptName.",cInfo->DifficultyEntry1,i);
                 continue;
             }
 
-            hasHeroicEntries.insert(i);
-            heroicEntries.insert(cInfo->HeroicEntry);
+            hasDifficultyEntries1.insert(i);
+            difficultyEntries1.insert(cInfo->DifficultyEntry1);
         }
 
         FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->faction_A);
@@ -1034,11 +1032,11 @@ void ObjectMgr::LoadCreatures()
     }
 
     // build single time for check creature data
-    std::set<uint32> heroicCreatures;
+    std::set<uint32> difficultyCreatures1;
     for(uint32 i = 0; i < sCreatureStorage.MaxEntry; ++i)
         if(CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
-            if(cInfo->HeroicEntry)
-                heroicCreatures.insert(cInfo->HeroicEntry);
+            if(cInfo->DifficultyEntry1)
+                difficultyCreatures1.insert(cInfo->DifficultyEntry1);
 
     // build single time for check spawnmask
     std::map<uint32,uint32> spawnMasks;
@@ -1097,9 +1095,9 @@ void ObjectMgr::LoadCreatures()
         if (data.spawnMask & ~spawnMasks[data.mapid])
             sLog.outErrorDb("Table `creature` have creature (GUID: %u) that have wrong spawn mask %u including not supported difficulty modes for map (Id: %u).",guid, data.spawnMask, data.mapid );
 
-        if(heroicCreatures.find(data.id)!=heroicCreatures.end())
+        if(difficultyCreatures1.find(data.id)!=difficultyCreatures1.end())
         {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u) that listed as heroic template (entry: %u) in `creature_template`, skipped.",guid, data.id );
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u) that listed as difficulty 1 template (entry: %u) in `creature_template`, skipped.",guid, data.id );
             continue;
         }
 
@@ -3226,31 +3224,31 @@ void ObjectMgr::LoadQuests()
         "QuestFlags, SpecialFlags, CharTitleId, PlayersSlain, BonusTalents, PrevQuestId, NextQuestId, ExclusiveGroup, NextQuestInChain, SrcItemId, SrcItemCount, SrcSpell,"
     //   29     30       31          32               33                34       35              36              37              38
         "Title, Details, Objectives, OfferRewardText, RequestItemsText, EndText, ObjectiveText1, ObjectiveText2, ObjectiveText3, ObjectiveText4,"
-    //   39          40          41          42          43             44             45             46
-        "ReqItemId1, ReqItemId2, ReqItemId3, ReqItemId4, ReqItemCount1, ReqItemCount2, ReqItemCount3, ReqItemCount4,"
-    //   47            48            49            50            51               52               53               54
+    //   39          40          41          42          43          44          45             46             47             48             49             50
+        "ReqItemId1, ReqItemId2, ReqItemId3, ReqItemId4, ReqItemId5, ReqItemId6, ReqItemCount1, ReqItemCount2, ReqItemCount3, ReqItemCount4, ReqItemCount5, ReqItemCount6,"
+    //   51            52            53            54            55               56               57               58
         "ReqSourceId1, ReqSourceId2, ReqSourceId3, ReqSourceId4, ReqSourceCount1, ReqSourceCount2, ReqSourceCount3, ReqSourceCount4,"
-    //   55                  56                  57                  58                  59                     60                     61                     62
+    //   59                  60                  61                  62                  63                     64                     65                     66
         "ReqCreatureOrGOId1, ReqCreatureOrGOId2, ReqCreatureOrGOId3, ReqCreatureOrGOId4, ReqCreatureOrGOCount1, ReqCreatureOrGOCount2, ReqCreatureOrGOCount3, ReqCreatureOrGOCount4,"
-    //   63             64             65             66
+    //   67             68             69             70
         "ReqSpellCast1, ReqSpellCast2, ReqSpellCast3, ReqSpellCast4,"
-    //   67                68                69                70                71                72
+    //   71                72                73                74                75                76
         "RewChoiceItemId1, RewChoiceItemId2, RewChoiceItemId3, RewChoiceItemId4, RewChoiceItemId5, RewChoiceItemId6,"
-    //   73                   74                   75                   76                   77                   78
+    //   77                   78                   79                   80                   81                   82
         "RewChoiceItemCount1, RewChoiceItemCount2, RewChoiceItemCount3, RewChoiceItemCount4, RewChoiceItemCount5, RewChoiceItemCount6,"
-    //   79          80          81          82          83             84             85             86
+    //   83          84          85          86          87             88             89             90
         "RewItemId1, RewItemId2, RewItemId3, RewItemId4, RewItemCount1, RewItemCount2, RewItemCount3, RewItemCount4,"
-    //   87              88              89              90              91              92            93            94            95            96
+    //   91              92              93              94              95              96            97            98            99            100
         "RewRepFaction1, RewRepFaction2, RewRepFaction3, RewRepFaction4, RewRepFaction5, RewRepValue1, RewRepValue2, RewRepValue3, RewRepValue4, RewRepValue5,"
-    //   97                 98             99                100       101           102                103               104         105     106     107
+    //   101                102            103               104       105           106                107               108         109     110     111
         "RewHonorableKills, RewOrReqMoney, RewMoneyMaxLevel, RewSpell, RewSpellCast, RewMailTemplateId, RewMailDelaySecs, PointMapId, PointX, PointY, PointOpt,"
-    //   108            109            110            111            112                 113                 114                 115
+    //   112            113            114            115            116                 117                 118                 119
         "DetailsEmote1, DetailsEmote2, DetailsEmote3, DetailsEmote4, DetailsEmoteDelay1, DetailsEmoteDelay2, DetailsEmoteDelay3, DetailsEmoteDelay4,"
-    //   116              117            118                119                120                121
+    //   120              121            122                123                124                125
         "IncompleteEmote, CompleteEmote, OfferRewardEmote1, OfferRewardEmote2, OfferRewardEmote3, OfferRewardEmote4,"
-    //   122                     123                     124                     125
+    //   126                     127                     128                     129
         "OfferRewardEmoteDelay1, OfferRewardEmoteDelay2, OfferRewardEmoteDelay3, OfferRewardEmoteDelay4,"
-    //   126          127
+    //   130          131
         "StartScript, CompleteScript"
         " FROM quest_template");
     if(result == NULL)
@@ -3504,15 +3502,15 @@ void ObjectMgr::LoadQuests()
             }
         }
 
-        for(int j = 0; j < QUEST_OBJECTIVES_COUNT; ++j )
+        for(int j = 0; j < QUEST_ITEM_OBJECTIVES_COUNT; ++j )
         {
             uint32 id = qinfo->ReqItemId[j];
             if(id)
             {
-                if(qinfo->ReqItemCount[j]==0)
+                if(qinfo->ReqItemCount[j] == 0)
                 {
                     sLog.outErrorDb("Quest %u has `ReqItemId%d` = %u but `ReqItemCount%d` = 0, quest can't be done.",
-                        qinfo->GetQuestId(),j+1,id,j+1);
+                        qinfo->GetQuestId(), j+1, id, j+1);
                     // no changes, quest can't be done for this requirement
                 }
 
@@ -3521,14 +3519,14 @@ void ObjectMgr::LoadQuests()
                 if(!sItemStorage.LookupEntry<ItemPrototype>(id))
                 {
                     sLog.outErrorDb("Quest %u has `ReqItemId%d` = %u but item with entry %u does not exist, quest can't be done.",
-                        qinfo->GetQuestId(),j+1,id,id);
+                        qinfo->GetQuestId(), j+1, id, id);
                     qinfo->ReqItemCount[j] = 0;             // prevent incorrect work of quest
                 }
             }
-            else if(qinfo->ReqItemCount[j]>0)
+            else if(qinfo->ReqItemCount[j] > 0)
             {
                 sLog.outErrorDb("Quest %u has `ReqItemId%d` = 0 but `ReqItemCount%d` = %u, quest can't be done.",
-                    qinfo->GetQuestId(),j+1,j+1,qinfo->ReqItemCount[j]);
+                    qinfo->GetQuestId(), j+1, j+1, qinfo->ReqItemCount[j]);
                 qinfo->ReqItemCount[j] = 0;                 // prevent incorrect work of quest
             }
         }
@@ -5678,20 +5676,6 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
                 World::StopNow(ERROR_EXIT_CODE);
             }
             return m_hiCreatureGuid++;
-        case HIGHGUID_PET:
-            if(m_hiPetGuid>=0x00FFFFFE)
-            {
-                sLog.outError("Pet guid overflow!! Can't continue, shutting down server. ");
-                World::StopNow(ERROR_EXIT_CODE);
-            }
-            return m_hiPetGuid++;
-        case HIGHGUID_VEHICLE:
-            if(m_hiVehicleGuid>=0x00FFFFFF)
-            {
-                sLog.outError("Vehicle guid overflow!! Can't continue, shutting down server. ");
-                World::StopNow(ERROR_EXIT_CODE);
-            }
-            return m_hiVehicleGuid++;
         case HIGHGUID_PLAYER:
             if(m_hiCharGuid>=0xFFFFFFFE)
             {
