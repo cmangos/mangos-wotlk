@@ -171,7 +171,11 @@ uint32 PlayerbotAI::getSpellId(const char* args, bool master) const
     // converting string that we try to find to lower case
     wstrToLower(wnamepart);
 
-    const int loc = GetMaster()->GetSession()->GetSessionDbcLocale();
+    int loc = 0;
+	if (master)
+		loc = GetMaster()->GetSession()->GetSessionDbcLocale();
+	else
+		loc = m_bot->GetSession()->GetSessionDbcLocale();
 
     uint32 foundSpellId = 0;
     bool foundExactMatch = false;

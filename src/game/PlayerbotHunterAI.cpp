@@ -46,6 +46,7 @@ PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, Pl
     MONGOOSE_BITE        = ai->getSpellId("mongoose bite");
 	DISENGAGE            = ai->getSpellId("disengage");
 	MISDIRECTION         = ai->getSpellId("misdirection");
+	DETERRENCE           = ai->getSpellId("deterrence");
     
     // TRAPS
     BEAR_TRAP            = ai->getSpellId("bear trap");
@@ -54,6 +55,7 @@ PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, Pl
 	FROST_TRAP           = ai->getSpellId("frost trap");
 	EXPLOSIVE_TRAP       = ai->getSpellId("explosive trap");
 	ARCANE_TRAP          = ai->getSpellId("arcane trap");
+	SNAKE_TRAP           = ai->getSpellId("snake trap");
 
     // BUFFS
     ASPECT_OF_THE_HAWK   = ai->getSpellId("aspect of the hawk");
@@ -91,7 +93,7 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
     Pet *pet = m_bot->GetPet();
     if(( pet )
 		&& ( ((float)pet->GetHealth()/(float)pet->GetMaxHealth()) < 0.5f )
-		&& ( PET_MEND>0 && !pet->HasAura(PET_MEND,0) && ai->GetManaPercent()>=13 && ai->CastSpell(PET_MEND,*m_bot) ))
+		&& ( PET_MEND>0 && !pet->getDeathState() != ALIVE && pVictim != m_bot && !pet->HasAura(PET_MEND,0) && ai->GetManaPercent()>=13 && ai->CastSpell(PET_MEND,*m_bot) ))
 		{
 			ai->TellMaster( "healing pet." );
 			return;
@@ -199,7 +201,9 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
             out << " > Frost Trap";
 		else if( ARCANE_TRAP>0 && !pTarget->HasAura(ARCANE_TRAP,0) && !pTarget->HasAura(BEAR_TRAP,0) && !pTarget->HasAura(EXPLOSIVE_TRAP,0) && !pTarget->HasAura(IMMOLATION_TRAP,0) && !pTarget->HasAura(FROST_TRAP,0) && ai->CastSpell(ARCANE_TRAP,*pTarget) )
             out << " > Arcane Trap";
-		else if(( pet )
+		else if( DETERRENCE>0 && pVictim == m_bot && m_bot->GetHealth() < m_bot->GetMaxHealth()*0.50 && !m_bot->HasAura(DETERRENCE,0) && ai->CastSpell(DETERRENCE,*m_bot) )
+            out << " > Deterrence";
+		else if(( pet && !pet->getDeathState() != ALIVE)
 		&& ( MISDIRECTION>0 && pVictim == m_bot && !m_bot->HasAura(MISDIRECTION,0) && ai->GetManaPercent()>=9 && ai->CastSpell(MISDIRECTION,*pet)) )
             out << " > Misdirection"; // give threat to pet
         /*else if( FREEZING_TRAP>0 && ai->GetManaPercent()>=5 && !pTarget->HasAura(FREEZING_TRAP,0) && !pTarget->HasAura(ARCANE_TRAP,0) && !pTarget->HasAura(EXPLOSIVE_TRAP,0) && !pTarget->HasAura(BEAR_TRAP,0) && !pTarget->HasAura(IMMOLATION_TRAP,0) && !pTarget->HasAura(FROST_TRAP,0) && ai->CastSpell(FREEZING_TRAP,*pTarget) )
@@ -290,7 +294,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
         else if( ((float)pet->GetHealth()/(float)pet->GetMaxHealth()) < 0.5f )
         {
             // heal pet when health lower 50%
-            if( PET_MEND>0 && !pet->HasAura(PET_MEND,0) && ai->GetManaPercent()>=13 && ai->CastSpell(PET_MEND,*m_bot) )
+            if( PET_MEND>0 && !pet->getDeathState() != ALIVE && !pet->HasAura(PET_MEND,0) && ai->GetManaPercent()>=13 && ai->CastSpell(PET_MEND,*m_bot) )
                 ai->TellMaster( "healing pet." );
         }
         else if(pet->GetHappinessState() != HAPPY) // if pet is hungry
@@ -348,8 +352,9 @@ void PlayerbotHunterAI::DoNonCombatActions()
 				}
 			}
 		}
-            if( pItem == NULL && pet->GetHealth() < pet->GetMaxHealth()*0.25 && !pet->HasAura(PET_FEED,0) )
+            if( pet->HasAura(PET_MEND,0) && !pet->HasAura(PET_FEED,0) )
                 ai->TellMaster( "..no pet food!" );
+			    ai->SetIgnoreUpdateTime(7);
         }
     }
 } // end DoNonCombatActions

@@ -123,7 +123,7 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
     }
     // ------- Non Duel combat ----------
 
-    //ai->Follow(*GetMaster()); // dont want to melee mob
+    //ai->SetMovementOrder( PlayerbotAI::MOVEMENT_FOLLOW, GetMaster() ); // dont want to melee mob
 
     // Damage Attacks
 
@@ -181,40 +181,50 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
             out << "Case Battle";
 			if( EXECUTE>0 && ai->GetRageAmount()>=15 && pTarget->GetHealth() < pTarget->GetMaxHealth()*0.20 && ai->CastSpell( EXECUTE, *pTarget ) )
                 out << " > Execute!";
-			else if( DEATH_WISH>0 && ai->GetRageAmount()>=10 && !m_bot->HasAura( DEATH_WISH, 0 ) && ai->CastSpell( DEATH_WISH, *m_bot ) )
-                out << " > Death Wish";
-            else if( REND>0 && ai->GetRageAmount()>=10 && !pTarget->HasAura( REND ) && ai->CastSpell( REND, *pTarget ) )
-                out << " > Rend";
-            else if( SUNDER_ARMOR>0 && ai->GetRageAmount()>=15 && ai->CastSpell( SUNDER_ARMOR, *pTarget ) )
-                out << " > Sunder Armor";
-            else if( HEROIC_STRIKE>0 && ai->GetRageAmount()>=15 && ai->CastSpell( HEROIC_STRIKE, *pTarget ) )
-                out << " > Heroic Strike";
-			else if( CHALLENGING_SHOUT>0 && ai->GetRageAmount()>=5 && pVictim != m_bot && ai->CastSpell( CHALLENGING_SHOUT, *pTarget ) )
-                out << " > Challenging Shout";
-			else if( THUNDER_CLAP>0 && ai->GetRageAmount()>=20 && !pTarget->HasAura( THUNDER_CLAP, 0 ) && ai->CastSpell( THUNDER_CLAP, *pTarget ) )
-                out << " > Thunder Clap";
-			else if( MORTAL_STRIKE>0 && ai->GetRageAmount()>=30 && !pTarget->HasAura( MORTAL_STRIKE, 0 ) && ai->CastSpell( MORTAL_STRIKE, *pTarget ) )
-                out << " > Mortal Strike";
-            else if( CLEAVE>0 && ai->GetRageAmount()>=20 && ai->CastSpell( CLEAVE, *pTarget ) )
-                out << " > Cleave";
-			else if( INTIMIDATING_SHOUT>0 && ai->GetRageAmount()>=25 && ai->GetAttackerCount()>5 && ai->CastSpell( INTIMIDATING_SHOUT, *pTarget ) )
-                out << " > Intimidating Shout";
-            else if( HAMSTRING>0 && ai->GetRageAmount()>=10 && !pTarget->HasAura( HAMSTRING, 0 ) && ai->CastSpell( HAMSTRING, *pTarget ) )
-                out << " > Hamstring";
-			else if( BLADESTORM>0 && ai->GetRageAmount()>=25 && pVictim == m_bot && !m_bot->HasAura( BLADESTORM, 0 ) && ai->GetAttackerCount()>=3 && ai->CastSpell( BLADESTORM, *pTarget ) )
-                out << " > Bladestorm";
 			else if( LAST_STAND>0 && !m_bot->HasAura( LAST_STAND, 0 ) && m_bot->GetHealth() < m_bot->GetMaxHealth()*0.5 && ai->CastSpell( LAST_STAND, *m_bot ) )
                 out << " > Last Stand!";
-			else if( CONCUSSION_BLOW>0 && ai->GetRageAmount()>=15 && !pTarget->HasAura( CONCUSSION_BLOW, 0 ) && ai->CastSpell( CONCUSSION_BLOW, *pTarget ) )
+			else if( BLOODRAGE>0 && ai->GetRageAmount()<50 && !m_bot->HasAura( BLOODRAGE, 0 ) && ai->CastSpell( BLOODRAGE, *m_bot ) )
+                out << " > Bloodrage";
+			else if( DEATH_WISH>0 && ai->GetRageAmount()>=10 && !m_bot->HasAura( DEATH_WISH, 0 ) && ai->CastSpell( DEATH_WISH, *m_bot ) )
+                out << " > Death Wish";
+			else if( RETALIATION>0 && pVictim == m_bot && ai->GetAttackerCount()>=2 && !m_bot->HasAura( RETALIATION, 0 ) && ai->CastSpell( RETALIATION, *m_bot ) )
+                out << " > Retaliation";
+			else if( DEMORALIZING_SHOUT>0 && ai->GetRageAmount()>=10 && !pTarget->HasAura( DEMORALIZING_SHOUT, 0 ) && ai->CastSpell( DEMORALIZING_SHOUT, *pTarget ) )
+                out << " > Demoralizing Shout";
+			else if( SWEEPING_STRIKES>0 && ai->GetRageAmount()>=30 && ai->GetAttackerCount()>=2 && !m_bot->HasAura( SWEEPING_STRIKES, 0 ) && ai->CastSpell( SWEEPING_STRIKES, *m_bot ) )
+                out << " > Sweeping Strikes!";
+			else if( BLADESTORM>0 && ai->GetRageAmount()>=25 && pVictim == m_bot && !m_bot->HasAura( BLADESTORM, 0 ) && ai->GetAttackerCount()>=3 && ai->CastSpell( BLADESTORM, *pTarget ) )
+                out << " > Bladestorm!";
+			else if( MORTAL_STRIKE>0 && ai->GetRageAmount()>=30 && !pTarget->HasAura( MORTAL_STRIKE, 0 ) && ai->CastSpell( MORTAL_STRIKE, *pTarget ) )
+                out << " > Mortal Strike";
+			else if( INTIMIDATING_SHOUT>0 && ai->GetRageAmount()>=25 && ai->GetAttackerCount()>5 && ai->CastSpell( INTIMIDATING_SHOUT, *pTarget ) )
+                out << " > Intimidating Shout";
+			else if( THUNDER_CLAP>0 && ai->GetRageAmount()>=20 && pVictim == m_bot && !pTarget->HasAura( THUNDER_CLAP, 0 ) && ai->CastSpell( THUNDER_CLAP, *pTarget ) )
+                out << " > Thunder Clap";
+			else if( ENRAGED_REGENERATION>0 && ai->GetRageAmount()>=15 && !m_bot->HasAura( BERSERKER_RAGE, 0 ) && !m_bot->HasAura( ENRAGED_REGENERATION, 0 ) && m_bot->GetHealth() < m_bot->GetMaxHealth()*0.5 && ai->CastSpell( ENRAGED_REGENERATION, *m_bot ) )
+                out << " > Enraged Regeneration";
+			else if( SHOCKWAVE>0 && ai->GetRageAmount()>=15 && pVictim == m_bot && !pTarget->HasAura( SHOCKWAVE, 0 ) && !pTarget->HasAura( CONCUSSION_BLOW, 0 ) && ai->CastSpell( SHOCKWAVE, *pTarget ) )
+                out << " > Shockwave";
+			else if( REND>0 && ai->GetRageAmount()>=10 && !pTarget->HasAura( REND ) && ai->CastSpell( REND, *pTarget ) )
+                out << " > Rend";
+			else if( HAMSTRING>0 && ai->GetRageAmount()>=10 && !pTarget->HasAura( HAMSTRING, 0 ) && ai->CastSpell( HAMSTRING, *pTarget ) )
+                out << " > Hamstring";
+            else if( CHALLENGING_SHOUT>0 && ai->GetRageAmount()>=5 && pVictim != m_bot && ai->CastSpell( CHALLENGING_SHOUT, *pTarget ) )
+                out << " > Challenging Shout";
+			else if( BLOODTHIRST>0 && ai->GetRageAmount()>=20 && !m_bot->HasAura( BLOODTHIRST, 0 ) && m_bot->GetHealth() < m_bot->GetMaxHealth()*0.7 && ai->CastSpell( BLOODTHIRST, *pTarget ) )
+                out << " > Bloodthrist";
+			else if( CLEAVE>0 && ai->GetRageAmount()>=20 && ai->CastSpell( CLEAVE, *pTarget ) )
+                out << " > Cleave";
+			else if( CONCUSSION_BLOW>0 && ai->GetRageAmount()>=15 && !pTarget->HasAura( SHOCKWAVE, 0 ) && !pTarget->HasAura( CONCUSSION_BLOW, 0 ) && ai->CastSpell( CONCUSSION_BLOW, *pTarget ) )
                 out << " > Concussion Blow";
+			else if( HEROIC_STRIKE>0 && ai->GetRageAmount()>=15 && ai->CastSpell( HEROIC_STRIKE, *pTarget ) )
+                out << " > Heroic Strike";
 			else if( SLAM>0 && ai->GetRageAmount()>=15 && ai->CastSpell( SLAM, *pTarget ) )
                 out << " > Slam";
-			else if( ENRAGED_REGENERATION>0 && ai->GetRageAmount()>=15 && !m_bot->HasAura( ENRAGED_REGENERATION, 0 ) && m_bot->GetHealth() < m_bot->GetMaxHealth()*0.7 && ai->CastSpell( ENRAGED_REGENERATION, *m_bot ) )
-                out << " > Enraged Regeneration";
-			else if( WHIRLWIND>0 && ai->GetRageAmount()>=25 && ai->CastSpell( WHIRLWIND, *pTarget ) )
-                out << " > Whirlwind";
 			else if( OVERPOWER>0 && ai->GetRageAmount()>=5 && ai->CastSpell( OVERPOWER, *pTarget ) )
                 out << " > Overpower";
+			else if( SUNDER_ARMOR>0 && ai->CastSpell( SUNDER_ARMOR, *pTarget ) )
+                out << " > Sunder Armor";
             else
                 out << " > NONE";
             break;
@@ -237,6 +247,8 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
 
         case WarriorBerserker:
             out << "Case Berserker";
+			if( WHIRLWIND>0 && ai->GetRageAmount()>=25 && ai->CastSpell( WHIRLWIND, *pTarget ) )
+                out << " > Whirlwind";
             out << " > NONE";
             break;
     }
@@ -273,6 +285,10 @@ void PlayerbotWarriorAI::DoNonCombatActions()
         // use battle shout
         GetAI()->CastSpell( BATTLE_SHOUT, *m_bot );
     }
+
+	// buff master with VIGILANCE
+	if (VIGILANCE > 0)
+		(!GetMaster()->HasAura( VIGILANCE, 0 ) && GetAI()->CastSpell( VIGILANCE, *GetMaster() ) );
 
     // hp check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
