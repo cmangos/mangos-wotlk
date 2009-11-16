@@ -177,11 +177,9 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 {
     sLog.outDebug("MSG_MOVE_TELEPORT_ACK");
     uint64 guid;
-
-    if(!recv_data.readPackGUID(guid))
-        return;
-
     uint32 flags, time;
+
+	recv_data >> guid;
     recv_data >> flags >> time;
     DEBUG_LOG("Guid " UI64FMTD, guid);
     DEBUG_LOG("Flags %u, time %u", flags, time/IN_MILISECONDS);

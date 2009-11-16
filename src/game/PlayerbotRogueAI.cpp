@@ -22,12 +22,20 @@ PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, Play
     CRIPPLING_POISON    = 3408; //SpellID
     MIND_NUMBING_POISON = 5761; //SpellID
     GOUGE               = ai->getSpellId("gouge");
+	SPRINT              = ai->getSpellId("sprint");
 
     SHADOWSTEP          = ai->getSpellId("shadowstep"); //SUBTLETY
     STEALTH             = ai->getSpellId("stealth");
     VANISH              = ai->getSpellId("vanish");
     EVASION             = ai->getSpellId("evasion");
     CLOAK_OF_SHADOWS    = ai->getSpellId("cloak of shadows");
+	HEMORRHAGE          = ai->getSpellId("hemorrhage");
+	GHOSTLY_STRIKE      = ai->getSpellId("ghostly strike");
+	SHADOW_DANCE        = ai->getSpellId("shadow dance");
+	BLIND               = ai->getSpellId("blind");
+	DISTRACT            = ai->getSpellId("distract");
+	PREPARATION         = ai->getSpellId("preparation");
+	PREMEDITATION       = ai->getSpellId("premeditation");
 
     EVISCERATE          = ai->getSpellId("eviscerate"); //ASSASSINATION
     KIDNEY_SHOT         = ai->getSpellId("kidney shot");
@@ -38,6 +46,7 @@ PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, Play
     DISMANTLE           = ai->getSpellId("dismantle");
     CHEAP_SHOT          = ai->getSpellId("cheap shot");
     AMBUSH              = ai->getSpellId("ambush");
+	MUTILATE            = ai->getSpellId("mutilate");
 }
 
 PlayerbotRogueAI::~PlayerbotRogueAI() {}
@@ -129,19 +138,31 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     {
         case RogueStealth:
             out << "Case Stealth";
-            if( AMBUSH>0 && ai->GetEnergyAmount()>=60 && ai->CastSpell(AMBUSH,*pTarget) )
+			if( PREMEDITATION>0 && ai->CastSpell(PREMEDITATION,*pTarget) )
+                out << " > Premeditation";
+            else if( AMBUSH>0 && ai->GetEnergyAmount()>=60 && ai->CastSpell(AMBUSH,*pTarget) )
                 out << " > Ambush";
-            if( CHEAP_SHOT>0 && ai->GetEnergyAmount()>=60 && ai->CastSpell(CHEAP_SHOT,*pTarget) )
+            else if( CHEAP_SHOT>0 && !pTarget->HasAura(CHEAP_SHOT,0) && ai->GetEnergyAmount()>=60 && ai->CastSpell(CHEAP_SHOT,*pTarget) )
                 out << " > Cheap Shot";
+			else if( GARROTE>0 && ai->GetEnergyAmount()>=50 && ai->CastSpell(GARROTE,*pTarget) )
+                out << " > Garrote";
             else
                 out << " NONE!";
             break;
         case RogueThreat:
             out << "Case Threat";
-            if( EVASION>0 && ai->GetHealthPercent()<=35 && !m_bot->HasAura(EVASION,0) && ai->CastSpell(EVASION) )
+			if( GOUGE>0 && ai->GetEnergyAmount()>=45 && !pTarget->HasAura(GOUGE,0) && ai->CastSpell(GOUGE,*pTarget) )
+                 out << " > Gouge";
+            else if( EVASION>0 && ai->GetHealthPercent()<=35 && !m_bot->HasAura(EVASION,0) && ai->CastSpell(EVASION) )
                 out << " > Evasion";
-            else if( FEINT>0 && ai->GetHealthPercent()<=25 && ai->GetEnergyAmount()>=20 && ai->CastSpell(FEINT) )
+			else if( BLIND>0 && ai->GetHealthPercent()<=30 && !pTarget->HasAura(BLIND,0) && ai->GetEnergyAmount()>=30 && ai->CastSpell(BLIND,*pTarget) )
+                out << " > Blind";
+			else if( FEINT>0 && ai->GetHealthPercent()<=25 && ai->GetEnergyAmount()>=20 && ai->CastSpell(FEINT) )
                 out << " > Feint";
+			else if( VANISH>0 && ai->GetHealthPercent()<=20 && !m_bot->HasAura(FEINT,0) && ai->CastSpell(VANISH) )
+                out << " > Vanish";
+			else if( PREPARATION>0 && ai->CastSpell(PREPARATION) )
+                out << " > Preparation";
             else
                 out << " NONE!";
             break;
@@ -159,12 +180,28 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
             out << "Case Combat";
             if( m_bot->GetComboPoints()<=4 )
             {
-                if( BACKSTAB>0 && pTarget->isInBackInMap(m_bot,1) && ai->GetEnergyAmount()>=60 && ai->CastSpell(BACKSTAB,*pTarget) )
+				if( SHADOW_DANCE>0 && !m_bot->HasAura(SHADOW_DANCE,0) && ai->CastSpell(SHADOW_DANCE,*m_bot) )
+                    out << " > Shadow Dance";
+				else if( CHEAP_SHOT>0 && m_bot->HasAura(SHADOW_DANCE,0) && !pTarget->HasAura(CHEAP_SHOT,0) && ai->GetEnergyAmount()>=60 && ai->CastSpell(CHEAP_SHOT,*pTarget) )
+                    out << " > Cheap Shot";
+				else if( AMBUSH>0 && m_bot->HasAura(SHADOW_DANCE,0) && ai->GetEnergyAmount()>=60 && ai->CastSpell(AMBUSH,*pTarget) )
+                    out << " > Ambush";
+				else if( GARROTE>0 && m_bot->HasAura(SHADOW_DANCE,0) && ai->GetEnergyAmount()>=50 && ai->CastSpell(GARROTE,*pTarget) )
+                    out << " > Garrote";
+                else if( BACKSTAB>0 && pTarget->isInBackInMap(m_bot,1) && ai->GetEnergyAmount()>=60 && ai->CastSpell(BACKSTAB,*pTarget) )
                     out << " > Backstab";
+				else if( MUTILATE>0 && ai->GetEnergyAmount()>=60 && ai->CastSpell(MUTILATE,*pTarget) )
+                    out << " > Mutilate";
                 else if( SINISTER_STRIKE>0 && ai->GetEnergyAmount()>=45 && ai->CastSpell(SINISTER_STRIKE,*pTarget) )
                     out << " > Sinister Strike";
+				else if( GHOSTLY_STRIKE>0 && ai->GetEnergyAmount()>=40 && ai->CastSpell(GHOSTLY_STRIKE,*pTarget) )
+                    out << " > Ghostly Strike";
+				else if( HEMORRHAGE>0 && ai->GetEnergyAmount()>=35 && ai->CastSpell(HEMORRHAGE,*pTarget) )
+                    out << " > Hemorrhage";
                 else if( DISMANTLE>0 && !pTarget->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISARMED) && ai->GetEnergyAmount()>=25 && ai->CastSpell(DISMANTLE,*pTarget) )
                     out << " > Dismantle";
+				else if( SHADOWSTEP>0 && ai->GetEnergyAmount()>=10 && ai->CastSpell(SHADOWSTEP,*pTarget) )
+                    out << " > Shadowstep";
                 else
                     out << " NONE!";
             }
@@ -180,15 +217,15 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
                     out << " > Warlock Slice & Dice";
                 else if (SLICE_DICE>0 && pTarget->getClass()==CLASS_HUNTER && ai->GetEnergyAmount()>=25 && ai->CastSpell(SLICE_DICE, *pTarget) )
                     out << " > Hunter Slice & Dice";
-                else if (EXPOSE_ARMOR>0 && pTarget->getClass()==CLASS_WARRIOR && ai->GetEnergyAmount()>=25 && ai->CastSpell(EXPOSE_ARMOR, *pTarget) )
+                else if (EXPOSE_ARMOR>0 && pTarget->getClass()==CLASS_WARRIOR && !pTarget->HasAura(EXPOSE_ARMOR, 0) && ai->GetEnergyAmount()>=25 && ai->CastSpell(EXPOSE_ARMOR, *pTarget) )
                     out << " > Warrior Expose Armor";
-                else if (EXPOSE_ARMOR>0 && pTarget->getClass()==CLASS_PALADIN && ai->GetEnergyAmount()>=25 && ai->CastSpell(EXPOSE_ARMOR, *pTarget) )
+                else if (EXPOSE_ARMOR>0 && pTarget->getClass()==CLASS_PALADIN && !pTarget->HasAura(EXPOSE_ARMOR, 0) && ai->GetEnergyAmount()>=25 && ai->CastSpell(EXPOSE_ARMOR, *pTarget) )
                     out << " > Paladin Expose Armor";
-                else if (EXPOSE_ARMOR>0 && pTarget->getClass()==CLASS_DEATH_KNIGHT && ai->GetEnergyAmount()>=25 && ai->CastSpell(EXPOSE_ARMOR, *pTarget) )
+                else if (EXPOSE_ARMOR>0 && pTarget->getClass()==CLASS_DEATH_KNIGHT && !pTarget->HasAura(EXPOSE_ARMOR, 0) && ai->GetEnergyAmount()>=25 && ai->CastSpell(EXPOSE_ARMOR, *pTarget) )
                     out << " > DK Expose Armor";
-                else if (RUPTURE>0 && pTarget->getClass()==CLASS_MAGE && ai->GetEnergyAmount()>=25 && ai->CastSpell(EXPOSE_ARMOR, *pTarget) )
+                else if (RUPTURE>0 && pTarget->getClass()==CLASS_MAGE && ai->GetEnergyAmount()>=25 && ai->CastSpell(RUPTURE, *pTarget) )
                     out << " > Mage Rupture";
-                else if (RUPTURE>0 && pTarget->getClass()==CLASS_PRIEST && ai->GetEnergyAmount()>=25 && ai->CastSpell(EXPOSE_ARMOR, *pTarget) )
+                else if (RUPTURE>0 && pTarget->getClass()==CLASS_PRIEST && ai->GetEnergyAmount()>=25 && ai->CastSpell(RUPTURE, *pTarget) )
                     out << " > Priest Rupture";
                 else if( EVISCERATE>0 && ai->GetEnergyAmount()>=35 && ai->CastSpell(EVISCERATE, *pTarget) )
                     out << " > Eviscerate";
@@ -219,6 +256,7 @@ void PlayerbotRogueAI::DoNonCombatActions()
 
     if (GetAI()->GetHealthPercent() < 60)
         GetAI()->Feast();
+        GetAI()->SetIgnoreUpdateTime(30);
 /*
     // Poison check //Not working needs some mor testing...i think need to tell the bott where "slot" to apply poison.
 
