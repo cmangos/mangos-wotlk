@@ -64,7 +64,7 @@ Guild::~Guild()
 
 bool Guild::Create(Player* leader, std::string gname)
 {
-    if (objmgr.GetGuildByName(gname))
+    if (sObjectMgr.GetGuildByName(gname))
         return false;
 
     WorldSession* lSession = leader->GetSession();
@@ -77,7 +77,7 @@ bool Guild::Create(Player* leader, std::string gname)
     MOTD = "No message set.";
     m_GuildBankMoney = 0;
     m_PurchasedTabs = 0;
-    m_Id = objmgr.GenerateGuildId();
+    m_Id = sObjectMgr.GenerateGuildId();
 
     sLog.outDebug("GUILD: creating guild %s to leader: %u", gname.c_str(), GUID_LOPART(m_LeaderGuid));
 
@@ -107,18 +107,18 @@ void Guild::CreateDefaultGuildRanks(int locale_idx)
     CharacterDatabase.PExecute("DELETE FROM guild_rank WHERE guildid='%u'", m_Id);
     CharacterDatabase.PExecute("DELETE FROM guild_bank_right WHERE guildid = '%u'", m_Id);
 
-    CreateRank(objmgr.GetMangosString(LANG_GUILD_MASTER, locale_idx),   GR_RIGHT_ALL);
-    CreateRank(objmgr.GetMangosString(LANG_GUILD_OFFICER, locale_idx),  GR_RIGHT_ALL);
-    CreateRank(objmgr.GetMangosString(LANG_GUILD_VETERAN, locale_idx),  GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
-    CreateRank(objmgr.GetMangosString(LANG_GUILD_MEMBER, locale_idx),   GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
-    CreateRank(objmgr.GetMangosString(LANG_GUILD_INITIATE, locale_idx), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
+    CreateRank(sObjectMgr.GetMangosString(LANG_GUILD_MASTER, locale_idx),   GR_RIGHT_ALL);
+    CreateRank(sObjectMgr.GetMangosString(LANG_GUILD_OFFICER, locale_idx),  GR_RIGHT_ALL);
+    CreateRank(sObjectMgr.GetMangosString(LANG_GUILD_VETERAN, locale_idx),  GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
+    CreateRank(sObjectMgr.GetMangosString(LANG_GUILD_MEMBER, locale_idx),   GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
+    CreateRank(sObjectMgr.GetMangosString(LANG_GUILD_INITIATE, locale_idx), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
 
     SetBankMoneyPerDay((uint32)GR_GUILDMASTER, WITHDRAW_MONEY_UNLIMITED);
 }
 
 bool Guild::AddMember(uint64 plGuid, uint32 plRank)
 {
-    Player* pl = objmgr.GetPlayer(plGuid);
+    Player* pl = sObjectMgr.GetPlayer(plGuid);
     if (pl)
     {
         if (pl->GetGuildId() != 0)
@@ -482,7 +482,7 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
         SetLeader(newLeaderGUID);
 
         // If player not online data in data field will be loaded from guild tabs no need to update it !!
-        if (Player *newLeader = objmgr.GetPlayer(newLeaderGUID))
+        if (Player *newLeader = sObjectMgr.GetPlayer(newLeaderGUID))
             newLeader->SetRank(GR_GUILDMASTER);
 
         // when leader non-exist (at guild load with deleted leader only) not send broadcasts
@@ -507,7 +507,7 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
 
     members.erase(GUID_LOPART(guid));
 
-    Player *player = objmgr.GetPlayer(guid);
+    Player *player = sObjectMgr.GetPlayer(guid);
     // If player not online data in data field will be loaded from guild tabs no need to update it !!
     if (player)
     {
@@ -524,7 +524,7 @@ void Guild::ChangeRank(uint64 guid, uint32 newRank)
     if (itr != members.end())
         itr->second.RankId = newRank;
 
-    Player *player = objmgr.GetPlayer(guid);
+    Player *player = sObjectMgr.GetPlayer(guid);
     // If player not online data in data field will be loaded from guild tabs no need to update it !!
     if (player)
         player->SetRank(newRank);
@@ -723,7 +723,7 @@ void Guild::Disband()
     CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid = '%u'", m_Id);
     CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE guildid = '%u'", m_Id);
     CharacterDatabase.CommitTransaction();
-    objmgr.RemoveGuild(m_Id);
+    sObjectMgr.RemoveGuild(m_Id);
 }
 
 void Guild::Roster(WorldSession *session /*= NULL*/)
@@ -951,14 +951,12 @@ void Guild::LogGuildEvent(uint8 EventType, uint32 PlayerGuid1, uint32 PlayerGuid
 // Bank content related
 void Guild::DisplayGuildBankContent(WorldSession *session, uint8 TabId)
 {
-    WorldPacket data(SMSG_GUILD_BANK_LIST,1200);
-
-    GuildBankTab const* tab = GetBankTab(TabId);
-    if (!tab)
-        return;
+    GuildBankTab const* tab = m_TabListMap[TabId];
 
     if (!IsMemberHaveRights(session->GetPlayer()->GetGUIDLow(),TabId,GUILD_BANK_RIGHT_VIEW_TAB))
         return;
+
+    WorldPacket data(SMSG_GUILD_BANK_LIST,1200);
 
     data << uint64(GetGuildBankMoney());
     data << uint8(TabId);
@@ -992,9 +990,7 @@ void Guild::DisplayGuildBankMoneyUpdate()
 
 void Guild::DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2)
 {
-    GuildBankTab const* tab = GetBankTab(TabId);
-    if (!tab)
-        return;
+    GuildBankTab const* tab = m_TabListMap[TabId];
 
     WorldPacket data(SMSG_GUILD_BANK_LIST,1200);
 
@@ -1042,9 +1038,7 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2)
 
 void Guild::DisplayGuildBankContentUpdate(uint8 TabId, GuildItemPosCountVec const& slots)
 {
-    GuildBankTab const* tab = GetBankTab(TabId);
-    if (!tab)
-        return;
+    GuildBankTab const* tab = m_TabListMap[TabId];
 
     WorldPacket data(SMSG_GUILD_BANK_LIST,1200);
 
@@ -1134,14 +1128,6 @@ void Guild::CreateNewBankTab()
 
 void Guild::SetGuildBankTabInfo(uint8 TabId, std::string Name, std::string Icon)
 {
-    if (TabId >= GUILD_BANK_MAX_TABS)
-        return;
-    if (TabId >= m_TabListMap.size())
-        return;
-
-    if (!m_TabListMap[TabId])
-        return;
-
     if (m_TabListMap[TabId]->Name == Name && m_TabListMap[TabId]->Icon == Icon)
         return;
 
@@ -1225,7 +1211,7 @@ void Guild::LoadGuildBankFromDB()
             continue;
         }
 
-        ItemPrototype const *proto = objmgr.GetItemPrototype(ItemEntry);
+        ItemPrototype const *proto = ObjectMgr::GetItemPrototype(ItemEntry);
 
         if (!proto)
         {
@@ -1993,12 +1979,7 @@ void Guild::SetGuildBankTabText(uint8 TabId, std::string text)
 
 void Guild::SendGuildBankTabText(WorldSession *session, uint8 TabId)
 {
-    if (TabId > GUILD_BANK_MAX_TABS)
-        return;
-
-    GuildBankTab const *tab = GetBankTab(TabId);
-    if (!tab)
-        return;
+    GuildBankTab const* tab = m_TabListMap[TabId];
 
     WorldPacket data(MSG_QUERY_GUILD_BANK_TEXT, 1+tab->Text.size()+1);
     data << uint8(TabId);

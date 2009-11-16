@@ -179,6 +179,19 @@ struct PetLevelInfo
     uint16 armor;
 };
 
+struct MailLevelReward
+{
+    MailLevelReward() : raceMask(0), mailTemplateId(0), senderEntry(0) {}
+    MailLevelReward(uint32 _raceMask, uint32 _mailTemplateId, uint32 _senderEntry) : raceMask(_raceMask), mailTemplateId(_mailTemplateId), senderEntry(_senderEntry) {}
+
+    uint32 raceMask;
+    uint32 mailTemplateId;
+    uint32 senderEntry;
+};
+
+typedef std::list<MailLevelReward> MailLevelRewardList;
+typedef UNORDERED_MAP<uint8,MailLevelRewardList> MailLevelRewardMap;
+
 struct ReputationOnKillEntry
 {
     uint32 repfaction1;
@@ -326,7 +339,7 @@ class ObjectMgr
 
         typedef std::vector<std::string> ScriptNameMap;
 
-        Player* GetPlayer(const char* name) const { return ObjectAccessor::Instance().FindPlayerByName(name);}
+        Player* GetPlayer(const char* name) const { return ObjectAccessor::FindPlayerByName(name);}
         Player* GetPlayer(uint64 guid) const { return ObjectAccessor::FindPlayer(guid); }
 
         static GameObjectInfo const *GetGameObjectInfo(uint32 id) { return sGOStorage.LookupEntry<GameObjectInfo>(id); }
@@ -515,6 +528,7 @@ class ObjectMgr
         void LoadNpcOptionLocales();
         void LoadPointOfInterestLocales();
         void LoadInstanceTemplate();
+        void LoadMailLevelRewards();
 
         void LoadGossipText();
 
@@ -583,6 +597,19 @@ class ObjectMgr
 
         typedef std::multimap<int32, uint32> ExclusiveQuestGroups;
         ExclusiveQuestGroups mExclusiveQuestGroups;
+
+        MailLevelReward const* GetMailLevelReward(uint32 level,uint32 raceMask)
+        {
+            MailLevelRewardMap::const_iterator map_itr = m_mailLevelRewardMap.find(level);
+            if (map_itr == m_mailLevelRewardMap.end())
+                return NULL;
+
+            for(MailLevelRewardList::const_iterator set_itr = map_itr->second.begin(); set_itr != map_itr->second.end(); ++set_itr)
+                if (set_itr->raceMask & raceMask)
+                    return &*set_itr;
+
+            return NULL;
+        }
 
         WeatherZoneChances const* GetWeatherChances(uint32 zone_id) const
         {
@@ -844,6 +871,8 @@ class ObjectMgr
         void ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* table, char const* guidEntryStr);
         void LoadQuestRelationsHelper(QuestRelations& map,char const* table);
 
+        MailLevelRewardMap m_mailLevelRewardMap;
+
         typedef std::map<uint32,PetLevelInfo*> PetLevelInfoMap;
         // PetLevelInfoMap[creature_id][level]
         PetLevelInfoMap petInfo;                            // [creature_id][level]
@@ -891,7 +920,7 @@ class ObjectMgr
         CacheTrainerSpellMap m_mCacheTrainerSpellMap;
 };
 
-#define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()
+#define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()
 
 // scripting access functions
 MANGOS_DLL_SPEC bool LoadMangosStrings(DatabaseType& db, char const* table,int32 start_value = MAX_CREATURE_AI_TEXT_STRING_ID, int32 end_value = std::numeric_limits<int32>::min());

@@ -1194,7 +1194,11 @@ enum GameObjectFlags
     GO_FLAG_TRANSPORT       = 0x00000008,                   //any kind of transport? Object can transport (elevator, boat, car)
     GO_FLAG_UNK1            = 0x00000010,                   //
     GO_FLAG_NODESPAWN       = 0x00000020,                   //never despawn, typically for doors, they just change state
-    GO_FLAG_TRIGGERED       = 0x00000040                    //typically, summoned objects. Triggered by spell or other events
+    GO_FLAG_TRIGGERED       = 0x00000040,                   //typically, summoned objects. Triggered by spell or other events
+    GO_FLAG_UNK_8           = 0x00000080,
+    GO_FLAG_UNK_9           = 0x00000100,                   //? Seen on type 33, possible meaning "destruct in progress"
+    GO_FLAG_UNK_10          = 0x00000200,                   //? Seen on type 33
+    GO_FLAG_UNK_11          = 0x00000400                    //? Seen on type 33, possibly meaning "destructed"
 };
 
 enum TextEmotes
@@ -2387,10 +2391,10 @@ enum PetDiet
 #define CHAIN_SPELL_JUMP_RADIUS 10
 
 // Max values for Guild & Guild Bank
-#define GUILD_BANK_MAX_TABS         6
+#define GUILD_BANK_MAX_TABS         6                       // send by client for money log also
 #define GUILD_BANK_MAX_SLOTS        98
 #define GUILD_BANK_MAX_LOGS         25
-#define GUILD_BANK_MONEY_LOGS_TAB   100
+#define GUILD_BANK_MONEY_LOGS_TAB   100                     // used for money log in DB
 #define GUILD_EVENTLOG_MAX_RECORDS  100
 #define GUILD_RANKS_MIN_COUNT       5
 #define GUILD_RANKS_MAX_COUNT       10

@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_8731_01_mangos_creature_template` bit(1) default NULL
+  `required_8818_01_mangos_mangos_string` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -1062,6 +1062,8 @@ DROP TABLE IF EXISTS `creature_template`;
 CREATE TABLE `creature_template` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
   `difficulty_entry_1` mediumint(8) unsigned NOT NULL default '0',
+  `difficulty_entry_2` mediumint(8) unsigned NOT NULL default '0',
+  `difficulty_entry_3` mediumint(8) unsigned NOT NULL default '0',
   `KillCredit1` int(11) unsigned NOT NULL default '0',
   `KillCredit2` int(11) unsigned NOT NULL default '0',
   `modelid_A` mediumint(8) unsigned NOT NULL default '0',
@@ -1148,7 +1150,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,0,0,0,10045,0,10045,0,'Waypoint(Only GM can see it)','Visual',NULL,1,1,64,64,0,0,0,35,35,0,0.91,1,0,14,15,0,100,1,2000,2200,8,4096,0,0,0,0,0,0,1.76,2.42,100,8,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,1.0,1.0,0,0,0,0,0,0,0,0,1,0,0,0x82,'');
+(1,0,0,0,0,0,10045,0,10045,0,'Waypoint(Only GM can see it)','Visual',NULL,1,1,64,64,0,0,0,35,35,0,0.91,1,0,14,15,0,100,1,2000,2200,8,4096,0,0,0,0,0,0,1.76,2.42,100,8,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,1.0,1.0,0,0,0,0,0,0,0,0,1,0,0,0x82,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2712,6 +2714,55 @@ LOCK TABLES `locales_quest` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `mail_level_reward`
+--
+
+DROP TABLE IF EXISTS `mail_level_reward`;
+CREATE TABLE `mail_level_reward` (
+  `level` mediumint(8) unsigned NOT NULL default '0',
+  `raceMask` mediumint(8) unsigned NOT NULL default '0',
+  `mailTemplateId` mediumint(8) unsigned NOT NULL default '0',
+  `senderEntry`    mediumint(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`level`,`raceMask`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Mail System';
+
+--
+-- Dumping data for table `mail_level_reward`
+--
+
+LOCK TABLES `mail_level_reward` WRITE;
+/*!40000 ALTER TABLE `mail_level_reward` DISABLE KEYS */;
+/*!40000 ALTER TABLE `mail_level_reward` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `mail_loot_template`
+--
+
+DROP TABLE IF EXISTS `mail_loot_template`;
+CREATE TABLE `mail_loot_template` (
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `item` mediumint(8) unsigned NOT NULL default '0',
+  `ChanceOrQuestChance` float NOT NULL default '100',
+  `groupid` tinyint(3) unsigned NOT NULL default '0',
+  `mincountOrRef` mediumint(9) NOT NULL default '1',
+  `maxcount` tinyint(3) unsigned NOT NULL default '1',
+  `lootcondition` tinyint(3) unsigned NOT NULL default '0',
+  `condition_value1` mediumint(8) unsigned NOT NULL default '0',
+  `condition_value2` mediumint(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`,`item`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
+
+--
+-- Dumping data for table `mail_loot_template`
+--
+
+LOCK TABLES `mail_loot_template` WRITE;
+/*!40000 ALTER TABLE `mail_loot_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE `mail_loot_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `mangos_string`
 --
 
@@ -3287,12 +3338,10 @@ INSERT INTO `mangos_string` VALUES
 (711,'Queue status for %s (Lvl: %u to %u)\nQueued alliances: %u (Need at least %u more)\nQueued hordes: %u (Need at least %u more)',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (712,'|cffff0000[BG Queue Announcer]:|r %s -- [%u-%u] A: %u/%u, H: %u/%u|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (713,'You must be level %u to join an arena team!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(714,'%s is not high enough level to join your team',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (715,'You don\'t meet Battleground level requirements',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(716,'Your arena team is full, %s cannot join it.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (717,'|cffff0000[BG Queue Announcer]:|r %s -- [%u-%u] Started!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(718,'|cffff0000[Arena Queue Announcer]:|r %s -- Joined : %ux%u : %u|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(719,'|cffff0000[Arena Queue Announcer]:|r %s -- Exited : %ux%u : %u|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(718,'|cffff0000[Arena Queue Announcer]:|r All Arenas -- Joined : %ux%u : %u|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(719,'|cffff0000[Arena Queue Announcer]:|r All Arenas -- Exited : %ux%u : %u|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (720,'Your group is too large for this battleground. Please regroup to join.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (721,'Your group is too large for this arena. Please regroup to join.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (722,'Your group has members not in your arena team. Please regroup to join.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -3321,15 +3370,12 @@ INSERT INTO `mangos_string` VALUES
 (746,'Done flushing Arena points.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (750,'Not enough players. This game will close in %u mins.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (751,'Not enough players. This game will close in %u seconds.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(753,'The battle for Warsong Gulch begins in 2 minutes.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(754,'The battle for Arathi Basin begins in 2 minutes.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(755,'The battle begins in 2 minutes.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(757,'Alliance',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(758,'Horde',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(752,'Only the Alliance can use that portal',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(753,'Only the Horde can use that portal',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (759,'%s was destroyed by the %s!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (760,'The %s is under attack! If left unchecked, the %s will destroy it!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (761,'The %s was taken by the %s!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(762,'The %s was taken by the %s!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(762,'The %s was taken by the %s!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL), -- WTF? why 3 same strings?
 (763,'The %s was taken by the %s!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (764,'The %s is under attack! If left unchecked, the %s will capture it!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (765,'The %s has taken the %s! Its supplies will now be used for reinforcements!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -3350,7 +3396,6 @@ INSERT INTO `mangos_string` VALUES
 (780,'East Frostwolf Tower',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (781,'West Frostwolf Tower',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (782,'Frostwolf Relief Hut',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(783,'2 minutes until the battle for Alterac Valley begins.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (784,'1 minute until the battle for Alterac Valley begins.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (785,'30 seconds until the battle for Alterac Valley begins. Prepare yourselves!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (786,'The battle for Alterac Valley has begun!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -10369,7 +10414,7 @@ INSERT INTO `playercreateinfo_action` VALUES
 (8,1,72,6603,0),
 (8,1,73,78,0),
 (8,1,74,2764,0),
-(8,1,75,26296,0),
+(8,1,75,26297,0),
 (8,1,83,117,128),
 (8,1,84,6603,0),
 (8,1,96,6603,0),
@@ -10377,7 +10422,7 @@ INSERT INTO `playercreateinfo_action` VALUES
 (8,3,0,6603,0),
 (8,3,1,2973,0),
 (8,3,2,75,0),
-(8,3,3,20554,0),
+(8,3,3,26297,0),
 (8,3,10,159,128),
 (8,3,11,4604,128),
 (8,4,0,6603,0),
@@ -10389,7 +10434,7 @@ INSERT INTO `playercreateinfo_action` VALUES
 (8,5,0,6603,0),
 (8,5,1,585,0),
 (8,5,2,2050,0),
-(8,5,3,20554,0),
+(8,5,3,26297,0),
 (8,5,10,159,128),
 (8,5,11,4540,128),
 (8,6,0,6603,0),
@@ -10398,17 +10443,17 @@ INSERT INTO `playercreateinfo_action` VALUES
 (8,6,3,45462,0),
 (8,6,4,45902,0),
 (8,6,5,47541,0),
-(8,6,10,50621,0),
+(8,6,10,26297,0),
 (8,7,0,6603,0),
 (8,7,1,403,0),
 (8,7,2,331,0),
-(8,7,3,20554,0),
+(8,7,3,26297,0),
 (8,7,10,159,128),
 (8,7,11,117,128),
 (8,8,0,6603,0),
 (8,8,1,133,0),
 (8,8,2,168,0),
-(8,8,3,20554,0),
+(8,8,3,26297,0),
 (8,8,10,159,128),
 (8,8,11,117,128),
 (10,2,0,6603,0),
@@ -12462,7 +12507,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (8,1,22027,'Remove Insignia'),
 (8,1,22810,'Opening - No Text'),
 (8,1,26290,'Bow Specialization'),
-(8,1,26296,'Berserking'),
+(8,1,26297,'Berserking'),
 (8,1,32215,'Victorious State'),
 (8,1,45927,'Summon Friend'),
 (8,1,58943,'Da Voodoo Shuffle'),
@@ -12496,7 +12541,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (8,3,9078,'Cloth'),
 (8,3,9125,'Generic'),
 (8,3,13358,'Defensive State (DND)'),
-(8,3,20554,'Berserking'),
+(8,3,26297,'Berserking'),
 (8,3,20555,'Regeneration'),
 (8,3,20557,'Beast Slaying'),
 (8,3,20558,'Throwing Specialization'),
@@ -12581,7 +12626,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (8,5,8386,'Attacking'),
 (8,5,9078,'Cloth'),
 (8,5,9125,'Generic'),
-(8,5,20554,'Berserking'),
+(8,5,26297,'Berserking'),
 (8,5,20555,'Regeneration'),
 (8,5,20557,'Beast Slaying'),
 (8,5,20558,'Throwing Specialization'),
@@ -12656,7 +12701,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (8,6,48266,'Blood Presence'),
 (8,6,49410,'Forceful Deflection'),
 (8,6,49576,'Death Grip'),
-(8,6,50621,'Berserking'),
+(8,6,26297,'Berserking'),
 (8,6,52665,'Sigil'),
 (8,6,58943,'Da Voodoo Shuffle'),
 (8,6,59879,'Blood Plague'),
@@ -12693,7 +12738,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (8,7,9078,'Cloth'),
 (8,7,9116,'Shield'),
 (8,7,9125,'Generic'),
-(8,7,20554,'Berserking'),
+(8,7,26297,'Berserking'),
 (8,7,20555,'Regeneration'),
 (8,7,20557,'Beast Slaying'),
 (8,7,20558,'Throwing Specialization'),
@@ -12734,7 +12779,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (8,8,8386,'Attacking'),
 (8,8,9078,'Cloth'),
 (8,8,9125,'Generic'),
-(8,8,20554,'Berserking'),
+(8,8,26297,'Berserking'),
 (8,8,20555,'Regeneration'),
 (8,8,20557,'Beast Slaying'),
 (8,8,20558,'Throwing Specialization'),
@@ -13562,33 +13607,6 @@ LOCK TABLES `quest_start_scripts` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `quest_mail_loot_template`
---
-
-DROP TABLE IF EXISTS `quest_mail_loot_template`;
-CREATE TABLE `quest_mail_loot_template` (
-  `entry` mediumint(8) unsigned NOT NULL default '0',
-  `item` mediumint(8) unsigned NOT NULL default '0',
-  `ChanceOrQuestChance` float NOT NULL default '100',
-  `groupid` tinyint(3) unsigned NOT NULL default '0',
-  `mincountOrRef` mediumint(9) NOT NULL default '1',
-  `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `lootcondition` tinyint(3) unsigned NOT NULL default '0',
-  `condition_value1` mediumint(8) unsigned NOT NULL default '0',
-  `condition_value2` mediumint(8) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`entry`,`item`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-
---
--- Dumping data for table `quest_mail_loot_template`
---
-
-LOCK TABLES `quest_mail_loot_template` WRITE;
-/*!40000 ALTER TABLE `quest_mail_loot_template` DISABLE KEYS */;
-/*!40000 ALTER TABLE `quest_mail_loot_template` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `quest_template`
 --
 
@@ -13599,7 +13617,7 @@ CREATE TABLE `quest_template` (
   `ZoneOrSort` smallint(6) NOT NULL default '0',
   `SkillOrClass` smallint(6) NOT NULL default '0',
   `MinLevel` tinyint(3) unsigned NOT NULL default '0',
-  `QuestLevel` tinyint(3) unsigned NOT NULL default '0',
+  `QuestLevel` smallint(6) NOT NULL default '0',
   `Type` smallint(5) unsigned NOT NULL default '0',
   `RequiredRaces` smallint(5) unsigned NOT NULL default '0',
   `RequiredSkillValue` smallint(5) unsigned NOT NULL default '0',
@@ -17393,6 +17411,9 @@ INSERT INTO `spell_elixir` VALUES
 (60346,0x1),
 (60347,0x2),
 (62380,0x3),
+(67016,0x3),
+(67017,0x3),
+(67018,0x3),
 (67019,0x3);
 
 

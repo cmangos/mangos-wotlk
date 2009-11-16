@@ -32,8 +32,6 @@
 #include "Auth/Sha1.h"
 //#include "Util.h" -- for commented utf8ToUpperOnlyLatin
 
-extern RealmList m_realmList;
-
 extern DatabaseType loginDatabase;
 
 #define ChunkSize 2048
@@ -381,15 +379,15 @@ bool AuthSocket::_HandleLogonChallenge()
 
     ///- Verify that this IP is not in the ip_banned table
     // No SQL injection possible (paste the IP address as passed by the socket)
-    loginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
-
     std::string address = GetRemoteAddress();
     loginDatabase.escape_string(address);
-    QueryResult *result = loginDatabase.PQuery(  "SELECT * FROM ip_banned WHERE ip = '%s'",address.c_str());
-    if(result)
+    QueryResult *result = loginDatabase.PQuery("SELECT unbandate FROM ip_banned WHERE "
+    //    permanent                    still banned
+        "(unbandate = bandate OR unbandate > UNIX_TIMESTAMP()) AND ip = '%s'", address.c_str());
+    if (result)
     {
         pkt << (uint8)REALM_AUTH_ACCOUNT_BANNED;
-        sLog.outBasic("[AuthChallenge] Banned ip %s tries to login!",GetRemoteAddress().c_str ());
+        sLog.outBasic("[AuthChallenge] Banned ip %s tries to login!", GetRemoteAddress().c_str());
         delete result;
     }
     else
@@ -424,13 +422,12 @@ bool AuthSocket::_HandleLogonChallenge()
 
             if (!locked)
             {
-                //set expired bans to inactive
-                loginDatabase.Execute("UPDATE account_banned SET active = 0 WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
                 ///- If the account is banned, reject the logon attempt
-                QueryResult *banresult = loginDatabase.PQuery("SELECT bandate,unbandate FROM account_banned WHERE id = %u AND active = 1", (*result)[1].GetUInt32());
+                QueryResult *banresult = loginDatabase.PQuery("SELECT bandate,unbandate FROM account_banned WHERE "
+                    "id = %u AND active = 1 AND (unbandate > UNIX_TIMESTAMP() OR unbandate = bandate)", (*result)[1].GetUInt32());
                 if(banresult)
                 {
-                    if((*banresult)[0].GetUInt64() == (*banresult)[1].GetUInt64())
+                    if((*banresult)[0].GetUInt64() != (*banresult)[1].GetUInt64())
                     {
                         pkt << (uint8) REALM_AUTH_ACCOUNT_BANNED;
                         sLog.outBasic("[AuthChallenge] Banned account %s tries to login!",_login.c_str ());
@@ -881,14 +878,14 @@ bool AuthSocket::_HandleRealmList()
     delete result;
 
     ///- Update realm list if need
-    m_realmList.UpdateIfNeed();
+    sRealmList.UpdateIfNeed();
 
     ///- Circle through realms in the RealmList and construct the return packet (including # of user characters in each realm)
     ByteBuffer pkt;
     pkt << (uint32) 0;
-    pkt << (uint16) m_realmList.size();
+    pkt << (uint16) sRealmList.size();
     RealmList::RealmMap::const_iterator i;
-    for( i = m_realmList.begin(); i != m_realmList.end(); ++i )
+    for( i = sRealmList.begin(); i != sRealmList.end(); ++i )
     {
         uint8 AmountOfCharacters;
 

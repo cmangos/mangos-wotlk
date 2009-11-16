@@ -24,7 +24,7 @@
 #include "InstanceSaveMgr.h"
 #include "World.h"
 
-MapInstanced::MapInstanced(uint32 id, time_t expiry) : Map(id, expiry, 0, 0)
+MapInstanced::MapInstanced(uint32 id, time_t expiry) : Map(id, expiry, 0, DUNGEON_DIFFICULTY_NORMAL)
 {
     // initialize instanced maps list
     m_InstancedMaps.clear();
@@ -166,7 +166,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
         {
             // if no instanceId via group members or instance saves is found
             // the instance will be created for the first time
-            NewInstanceId = MapManager::Instance().GenerateInstanceId();
+            NewInstanceId = sMapMgr.GenerateInstanceId();
 
             Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficulty(IsRaid()) : player->GetDifficulty(IsRaid());
             map = CreateInstance(NewInstanceId, NULL, diff);
@@ -182,22 +182,19 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save,
     Guard guard(*this);
 
     // make sure we have a valid map id
-    const MapEntry* entry = sMapStore.LookupEntry(GetId());
-    if(!entry)
+    if (!sMapStore.LookupEntry(GetId()))
     {
         sLog.outError("CreateInstance: no entry for map %d", GetId());
         assert(false);
     }
-    const InstanceTemplate * iTemplate = objmgr.GetInstanceTemplate(GetId());
-    if(!iTemplate)
+    if (!ObjectMgr::GetInstanceTemplate(GetId()))
     {
         sLog.outError("CreateInstance: no instance template for map %d", GetId());
         assert(false);
     }
 
     // some instances only have one difficulty
-    MapDifficulty const* mapDiff = GetMapDifficultyData(GetId(),difficulty);
-    if (!mapDiff)
+    if (!GetMapDifficultyData(GetId(),difficulty))
         difficulty = DUNGEON_DIFFICULTY_NORMAL;
 
     sLog.outDebug("MapInstanced::CreateInstance: %s map instance %d for %d created with difficulty %s", save?"":"new ", InstanceId, GetId(), difficulty?"heroic":"normal");
@@ -219,7 +216,12 @@ BattleGroundMap* MapInstanced::CreateBattleGroundMap(uint32 InstanceId, BattleGr
 
     sLog.outDebug("MapInstanced::CreateBattleGroundMap: instance:%d for map:%d and bgType:%d created.", InstanceId, GetId(), bg->GetTypeID());
 
-    BattleGroundMap *map = new BattleGroundMap(GetId(), GetGridExpiry(), InstanceId, this);
+    // 0-59 normal spawn 60-69 difficulty_1, 70-79 difficulty_2, 80 dufficulty_3
+    uint8 spawnMode = (bg->GetQueueId() > QUEUE_ID_MAX_LEVEL_59) ? (bg->GetQueueId() - QUEUE_ID_MAX_LEVEL_59) : 0;
+    // some bgs don't have different spawnmodes, with this we can stay close to dbc-data
+    while (!GetMapDifficultyData(GetId(), Difficulty(spawnMode)))
+        spawnMode--;
+    BattleGroundMap *map = new BattleGroundMap(GetId(), GetGridExpiry(), InstanceId, this, spawnMode);
     ASSERT(map->IsBattleGroundOrArena());
     map->SetBG(bg);
     bg->SetBgMap(map);
