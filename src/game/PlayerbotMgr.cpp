@@ -249,7 +249,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             uint64 guid;
             uint32 quest;
             p >> guid >> quest;
-            Quest const* qInfo = objmgr.GetQuestTemplate(quest);
+            Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest);
             if (qInfo)
             {
                 for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
@@ -449,7 +449,7 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
     if(!normalizePlayerName(charnameStr))
         return false;
 
-    uint64 guid = objmgr.GetPlayerGUIDByName(charnameStr.c_str());
+    uint64 guid = sObjectMgr.GetPlayerGUIDByName(charnameStr.c_str());
     if (guid == 0 || (guid == m_session->GetPlayer()->GetGUID()))
     {
         SendSysMessage(LANG_PLAYER_NOT_FOUND);
@@ -457,7 +457,7 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
         return false;
     }
 
-    uint32 accountId = objmgr.GetPlayerAccountIdByGUID(guid);
+    uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guid);
     if (accountId != m_session->GetAccountId()) {
         PSendSysMessage("You may only add bots from the same account.");
         SetSentErrorMessage(true);
@@ -512,7 +512,7 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
 			}
 			std::string targetStr = targetChar;
 			if( targetChar ) {
-				targetGUID = objmgr.GetPlayerGUIDByName( targetStr.c_str() );
+				targetGUID = sObjectMgr.GetPlayerGUIDByName( targetStr.c_str() );
 			}
 			target = ObjectAccessor::GetUnit( *m_session->GetPlayer(), targetGUID );
 			if( !target ) {
@@ -536,7 +536,7 @@ void Creature::LoadBotMenu(Player *pPlayer)
 {
     if (pPlayer->GetPlayerbotAI()) return;
     uint64 guid = pPlayer->GetGUID();
-    uint32 accountId = objmgr.GetPlayerAccountIdByGUID(guid);
+    uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guid);
     QueryResult *result = CharacterDatabase.PQuery("SELECT guid, name FROM characters WHERE account='%d'",accountId);
     do
     {

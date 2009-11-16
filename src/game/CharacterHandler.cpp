@@ -130,7 +130,7 @@ class CharacterHandler
 
             WorldSession* masterSession = sWorld.FindSession(lqh->GetAccountId());
 
-            if (! masterSession || objmgr.GetPlayer(lqh->GetGuid()))
+            if (! masterSession || sObjectMgr.GetPlayer(lqh->GetGuid()))
             {
                 delete holder;
                 return;
@@ -582,10 +582,10 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 void PlayerbotMgr::AddPlayerBot(uint64 playerGuid)
 {
     // has bot already been added?
-    if (objmgr.GetPlayer(playerGuid))
+    if (sObjectMgr.GetPlayer(playerGuid))
         return;
 
-    uint32 accountId = objmgr.GetPlayerAccountIdByGUID(playerGuid);
+    uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(playerGuid);
     if (accountId == 0)
         return;
 

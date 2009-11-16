@@ -331,7 +331,7 @@ void PlayerbotAI::SendQuestItemList( Player& player )
 
     for( BotNeedItem::iterator itr=m_needItemList.begin(); itr!=m_needItemList.end(); ++itr )
     {
-        const ItemPrototype * pItemProto = objmgr.GetItemPrototype( itr->first );
+        const ItemPrototype * pItemProto = sObjectMgr.GetItemPrototype( itr->first );
 
         std::string itemName = pItemProto->Name1;
         ItemLocalization(itemName, pItemProto->ItemId);
@@ -562,7 +562,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 if (!grp)
                     return;
 
-                Player* const inviter = objmgr.GetPlayer(grp->GetLeaderGUID());
+                Player* const inviter = sObjectMgr.GetPlayer(grp->GetLeaderGUID());
                 if (!inviter)
                     return;
 
@@ -1301,7 +1301,7 @@ void PlayerbotAI::SetQuestNeedItems()
     // run through accepted quests, get quest infoand data
     for( QuestStatusMap::iterator iter=m_bot->getQuestStatusMap().begin(); iter!=m_bot->getQuestStatusMap().end(); ++iter )
     {
-        const Quest *qInfo = objmgr.GetQuestTemplate( iter->first );
+        const Quest *qInfo = sObjectMgr.GetQuestTemplate( iter->first );
         if( !qInfo )
             continue;
 
@@ -1380,7 +1380,7 @@ void PlayerbotAI::DoLoot()
 
                 if( m_needItemList[item->itemid]>0 )
                 {
-                    //sLog.outDebug( "[PlayerbotAI]: %s looting: needed item '%s'", m_bot->GetName(), objmgr.GetItemLocale(item->itemid)->Name );
+                    //sLog.outDebug( "[PlayerbotAI]: %s looting: needed item '%s'", m_bot->GetName(), sObjectMgr.GetItemLocale(item->itemid)->Name );
                     ItemPosCountVec dest;
                     if( m_bot->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item->itemid, item->count ) == EQUIP_ERR_OK )
                     {
@@ -1492,7 +1492,7 @@ void PlayerbotAI::TurnInQuests( WorldObject *questgiver )
         {
         	QuestMenuItem const& qItem = questMenu.GetItem(iI);
         	uint32 questID = qItem.m_qId;
-        	Quest const* pQuest = objmgr.GetQuestTemplate(questID);
+        	Quest const* pQuest = sObjectMgr.GetQuestTemplate(questID);
 
         	std::ostringstream out;
         	std::string questTitle  = pQuest->GetTitle();
@@ -1524,7 +1524,7 @@ void PlayerbotAI::TurnInQuests( WorldObject *questgiver )
                     else if (pQuest->GetRewChoiceItemsCount() == 1)
                     {
                         int rewardIdx = 0;
-                        ItemPrototype const *pRewardItem = objmgr.GetItemPrototype(pQuest->RewChoiceItemId[rewardIdx]);
+                        ItemPrototype const *pRewardItem = sObjectMgr.GetItemPrototype(pQuest->RewChoiceItemId[rewardIdx]);
                         std::string itemName = pRewardItem->Name1;
                         ItemLocalization(itemName, pRewardItem->ItemId);
                         if (m_bot->CanRewardQuest(pQuest, rewardIdx, false))
@@ -1555,7 +1555,7 @@ void PlayerbotAI::TurnInQuests( WorldObject *questgiver )
                             << "|h[" << questTitle << "]|h|r? ";
                         for (uint8 i=0; i < pQuest->GetRewChoiceItemsCount(); ++i)
                         {
-                            ItemPrototype const * const pRewardItem = objmgr.GetItemPrototype(pQuest->RewChoiceItemId[i]);
+                            ItemPrototype const * const pRewardItem = sObjectMgr.GetItemPrototype(pQuest->RewChoiceItemId[i]);
                             std::string itemName = pRewardItem->Name1;
                             ItemLocalization(itemName, pRewardItem->ItemId);
                             out << "|cffffffff|Hitem:" << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
@@ -2416,7 +2416,7 @@ void PlayerbotAI::ItemLocalization(std::string& itemName, const uint32 itemID) c
     int loc = GetMaster()->GetSession()->GetSessionDbLocaleIndex();
     std::wstring wnamepart;
 
-    ItemLocale const *pItemInfo = objmgr.GetItemLocale(itemID);
+    ItemLocale const *pItemInfo = sObjectMgr.GetItemLocale(itemID);
     if (pItemInfo)
     {
         if (pItemInfo->Name.size() > loc && !pItemInfo->Name[loc].empty())
@@ -2433,7 +2433,7 @@ void PlayerbotAI::QuestLocalization(std::string& questTitle, const uint32 questI
     int loc = GetMaster()->GetSession()->GetSessionDbLocaleIndex();
     std::wstring wnamepart;
 
-    QuestLocale const *pQuestInfo = objmgr.GetQuestLocale(questID);
+    QuestLocale const *pQuestInfo = sObjectMgr.GetQuestLocale(questID);
     if (pQuestInfo)
     {
         if (pQuestInfo->Title.size() > loc && !pQuestInfo->Title[loc].empty())
@@ -2593,7 +2593,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 		{
 	        if(uint32 questId = m_bot->GetQuestSlotQuestId(slot))
 	        {
-	        	Quest const* pQuest = objmgr.GetQuestTemplate(questId);
+	        	Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
 				if (m_bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE) {
 					hasCompleteQuests = true;
 					comout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
@@ -2697,7 +2697,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         		QuestMenuItem const& qItem = questMenu.GetItem(iI);
         		
         	    uint32 questID = qItem.m_qId;
-        	    Quest const* pQuest = objmgr.GetQuestTemplate(questID);
+        	    Quest const* pQuest = sObjectMgr.GetQuestTemplate(questID);
         	    QuestStatus status = m_bot->GetQuestStatus(questID);
         	        		        
         	    // if quest is complete, turn it in
@@ -2708,7 +2708,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         	    {
 	        		for (uint8 rewardIdx=0; !wasRewarded && rewardIdx < pQuest->GetRewChoiceItemsCount(); ++rewardIdx)
 					{
-						ItemPrototype const * const pRewardItem = objmgr.GetItemPrototype(pQuest->RewChoiceItemId[rewardIdx]);
+						ItemPrototype const * const pRewardItem = sObjectMgr.GetItemPrototype(pQuest->RewChoiceItemId[rewardIdx]);
 						if (itemId == pRewardItem->ItemId)
 						{
 							m_bot->RewardQuest(pQuest, rewardIdx, pNpc, false);

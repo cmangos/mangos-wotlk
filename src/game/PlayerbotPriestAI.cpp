@@ -162,7 +162,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
         Group::MemberSlotList const& groupSlot = m_group->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
-            Player *m_groupMember = objmgr.GetPlayer( itr->guid );
+            Player *m_groupMember = sObjectMgr.GetPlayer( itr->guid );
             if( !m_groupMember || !m_groupMember->isAlive() )
                 continue;
 
@@ -410,7 +410,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
-            Player *tPlayer = objmgr.GetPlayer(uint64 (itr->guid));
+            Player *tPlayer = sObjectMgr.GetPlayer(uint64 (itr->guid));
             if( !tPlayer )
                 continue;
 

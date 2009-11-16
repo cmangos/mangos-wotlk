@@ -341,7 +341,7 @@ uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
 {
     //Playerbot mod - if master leaves group, all bots leave group
     {
-        Player* const player = objmgr.GetPlayer(guid);
+        Player* const player = sObjectMgr.GetPlayer(guid);
         if (player && player->GetPlayerbotMgr())
             player->GetPlayerbotMgr()->RemoveAllBotsFromGroup();
     }
