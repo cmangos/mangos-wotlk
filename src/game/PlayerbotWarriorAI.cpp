@@ -59,6 +59,8 @@ PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, 
     HEROIC_FURY             = ai->getSpellId("heroic fury"); //FURY
     COMMANDING_SHOUT        = ai->getSpellId("commanding shout"); //FURY
     ENRAGED_REGENERATION    = ai->getSpellId("enraged regeneration"); //FURY
+
+	RECENTLY_BANDAGED       = 11196; // first aid check
 }
 PlayerbotWarriorAI::~PlayerbotWarriorAI() {}
 
@@ -258,6 +260,7 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
 
 void PlayerbotWarriorAI::DoNonCombatActions()
 {
+	PlayerbotAI *ai = GetAI();
     Player * m_bot = GetPlayerBot();
     if (!m_bot)
         return;
@@ -270,37 +273,45 @@ void PlayerbotWarriorAI::DoNonCombatActions()
     // Natsukawa
     if( ( (COMMANDING_SHOUT>0 && !m_bot->HasAura( COMMANDING_SHOUT, 0 )) ||
         (BATTLE_SHOUT>0 && !m_bot->HasAura( BATTLE_SHOUT, 0 )) ) && 
-        GetAI()->GetRageAmount()<10 && BLOODRAGE>0 && !m_bot->HasAura( BLOODRAGE, 0 ) )
+        ai->GetRageAmount()<10 && BLOODRAGE>0 && !m_bot->HasAura( BLOODRAGE, 0 ) )
     {
         // we do have a useful shout, no rage coming but can cast bloodrage... do it
-        GetAI()->CastSpell( BLOODRAGE, *m_bot );
+        ai->CastSpell( BLOODRAGE, *m_bot );
     }
     else if( COMMANDING_SHOUT>0 && !m_bot->HasAura( COMMANDING_SHOUT, 0 ) )
     {
         // use commanding shout now
-        GetAI()->CastSpell( COMMANDING_SHOUT, *m_bot );
+        ai->CastSpell( COMMANDING_SHOUT, *m_bot );
     }
     else if( BATTLE_SHOUT>0 && !m_bot->HasAura( BATTLE_SHOUT, 0 ) && !m_bot->HasAura( COMMANDING_SHOUT, 0 ) )
     {
         // use battle shout
-        GetAI()->CastSpell( BATTLE_SHOUT, *m_bot );
+        ai->CastSpell( BATTLE_SHOUT, *m_bot );
     }
 
 	// buff master with VIGILANCE
 	if (VIGILANCE > 0)
-		(!GetMaster()->HasAura( VIGILANCE, 0 ) && GetAI()->CastSpell( VIGILANCE, *GetMaster() ) );
+		(!GetMaster()->HasAura( VIGILANCE, 0 ) && ai->CastSpell( VIGILANCE, *GetMaster() ) );
 
     // hp check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    Item* pItem = GetAI()->FindFood();
+    Item* pItem = ai->FindFood();
+	Item* fItem = ai->FindBandage();
 
-    if (pItem != NULL && GetAI()->GetHealthPercent() < 30)
+    if (pItem != NULL && ai->GetHealthPercent() < 30)
     {
-        GetAI()->TellMaster("I could use some food.");
-        GetAI()->UseItem(*pItem);
-        GetAI()->SetIgnoreUpdateTime(30);
+        ai->TellMaster("I could use some food.");
+        ai->UseItem(*pItem);
+        ai->SetIgnoreUpdateTime(30);
+        return;
+    }
+    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, 0) && ai->GetHealthPercent() < 70)
+    {
+        ai->TellMaster("I could use first aid.");
+        ai->UseItem(*fItem);
+        ai->SetIgnoreUpdateTime(8);
         return;
     }
 } // end DoNonCombatActions

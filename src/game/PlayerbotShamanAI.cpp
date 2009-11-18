@@ -58,6 +58,8 @@ PlayerbotShamanAI::PlayerbotShamanAI(Player* const master, Player* const bot, Pl
 	EARTHBIND_TOTEM          = ai->getSpellId("earthbind totem");
 	TOTEM_OF_WRATH           = ai->getSpellId("totem of wrath");
     FIRE_ELEMENTAL_TOTEM     = ai->getSpellId("fire elemental totem");
+
+	RECENTLY_BANDAGED        = 11196; // first aid check
 }
 
 PlayerbotShamanAI::~PlayerbotShamanAI() {}
@@ -439,6 +441,7 @@ void PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
 
 void PlayerbotShamanAI::DoNonCombatActions()
 {
+	PlayerbotAI* ai = GetAI();
     Player * m_bot = GetPlayerBot();
     if (!m_bot)
         return;
@@ -447,37 +450,38 @@ void PlayerbotShamanAI::DoNonCombatActions()
 
     // buff master with EARTH_SHIELD
     if (EARTH_SHIELD > 0)
-		(!GetMaster()->HasAura(EARTH_SHIELD, 0) && GetAI()->CastSpell(EARTH_SHIELD,*(GetMaster())) );
+		(!GetMaster()->HasAura(EARTH_SHIELD, 0) && ai->CastSpell(EARTH_SHIELD,*(GetMaster())) );
 
     // buff myself with WATER_SHIELD, LIGHTNING_SHIELD
     if (WATER_SHIELD > 0)
-		(!m_bot->HasAura(WATER_SHIELD, 0) && !m_bot->HasAura(LIGHTNING_SHIELD, 0) && GetAI()->CastSpell(WATER_SHIELD,*m_bot) );
+		(!m_bot->HasAura(WATER_SHIELD, 0) && !m_bot->HasAura(LIGHTNING_SHIELD, 0) && ai->CastSpell(WATER_SHIELD,*m_bot) );
 	else if (LIGHTNING_SHIELD > 0)
-		(!m_bot->HasAura(LIGHTNING_SHIELD, 0) && !m_bot->HasAura(WATER_SHIELD, 0) && GetAI()->CastSpell(LIGHTNING_SHIELD,*m_bot) );
+		(!m_bot->HasAura(LIGHTNING_SHIELD, 0) && !m_bot->HasAura(WATER_SHIELD, 0) && ai->CastSpell(LIGHTNING_SHIELD,*m_bot) );
 /*
 	// buff myself weapon
 	if (ROCKBITER_WEAPON > 0)
-		(!m_bot->HasAura(ROCKBITER_WEAPON, 0) && !m_bot->HasAura(EARTHLIVING_WEAPON, 0) && !m_bot->HasAura(WINDFURY_WEAPON, 0) && !m_bot->HasAura(FLAMETONGUE_WEAPON, 0) && !m_bot->HasAura(FROSTBRAND_WEAPON, 0) && GetAI()->CastSpell(ROCKBITER_WEAPON,*m_bot) );
+		(!m_bot->HasAura(ROCKBITER_WEAPON, 0) && !m_bot->HasAura(EARTHLIVING_WEAPON, 0) && !m_bot->HasAura(WINDFURY_WEAPON, 0) && !m_bot->HasAura(FLAMETONGUE_WEAPON, 0) && !m_bot->HasAura(FROSTBRAND_WEAPON, 0) && ai->CastSpell(ROCKBITER_WEAPON,*m_bot) );
 	else if (EARTHLIVING_WEAPON > 0)
-		(!m_bot->HasAura(EARTHLIVING_WEAPON, 0) && !m_bot->HasAura(EARTHLIVING_WEAPON, 0) && !m_bot->HasAura(FLAMETONGUE_WEAPON, 0) && !m_bot->HasAura(FROSTBRAND_WEAPON, 0) && !m_bot->HasAura(ROCKBITER_WEAPON, 0) && GetAI()->CastSpell(WINDFURY_WEAPON,*m_bot) );
+		(!m_bot->HasAura(EARTHLIVING_WEAPON, 0) && !m_bot->HasAura(EARTHLIVING_WEAPON, 0) && !m_bot->HasAura(FLAMETONGUE_WEAPON, 0) && !m_bot->HasAura(FROSTBRAND_WEAPON, 0) && !m_bot->HasAura(ROCKBITER_WEAPON, 0) && ai->CastSpell(WINDFURY_WEAPON,*m_bot) );
     else if (WINDFURY_WEAPON > 0)
-		(!m_bot->HasAura(WINDFURY_WEAPON, 0) && !m_bot->HasAura(EARTHLIVING_WEAPON, 0) && !m_bot->HasAura(FLAMETONGUE_WEAPON, 0) && !m_bot->HasAura(FROSTBRAND_WEAPON, 0) && !m_bot->HasAura(ROCKBITER_WEAPON, 0) && GetAI()->CastSpell(WINDFURY_WEAPON,*m_bot) );
+		(!m_bot->HasAura(WINDFURY_WEAPON, 0) && !m_bot->HasAura(EARTHLIVING_WEAPON, 0) && !m_bot->HasAura(FLAMETONGUE_WEAPON, 0) && !m_bot->HasAura(FROSTBRAND_WEAPON, 0) && !m_bot->HasAura(ROCKBITER_WEAPON, 0) && ai->CastSpell(WINDFURY_WEAPON,*m_bot) );
     else if (FLAMETONGUE_WEAPON > 0)
-		(!m_bot->HasAura(FLAMETONGUE_WEAPON, 0) && !m_bot->HasAura(EARTHLIVING_WEAPON, 0) && !m_bot->HasAura(WINDFURY_WEAPON, 0) && !m_bot->HasAura(FROSTBRAND_WEAPON, 0) && !m_bot->HasAura(ROCKBITER_WEAPON, 0) && GetAI()->CastSpell(FLAMETONGUE_WEAPON,*m_bot) );
+		(!m_bot->HasAura(FLAMETONGUE_WEAPON, 0) && !m_bot->HasAura(EARTHLIVING_WEAPON, 0) && !m_bot->HasAura(WINDFURY_WEAPON, 0) && !m_bot->HasAura(FROSTBRAND_WEAPON, 0) && !m_bot->HasAura(ROCKBITER_WEAPON, 0) && ai->CastSpell(FLAMETONGUE_WEAPON,*m_bot) );
     else if (FROSTBRAND_WEAPON > 0)
-		(!m_bot->HasAura(FROSTBRAND_WEAPON, 0) && !m_bot->HasAura(EARTHLIVING_WEAPON, 0) && !m_bot->HasAura(WINDFURY_WEAPON, 0) && !m_bot->HasAura(FLAMETONGUE_WEAPON, 0) && !m_bot->HasAura(ROCKBITER_WEAPON, 0) && GetAI()->CastSpell(FROSTBRAND_WEAPON,*m_bot) );
+		(!m_bot->HasAura(FROSTBRAND_WEAPON, 0) && !m_bot->HasAura(EARTHLIVING_WEAPON, 0) && !m_bot->HasAura(WINDFURY_WEAPON, 0) && !m_bot->HasAura(FLAMETONGUE_WEAPON, 0) && !m_bot->HasAura(ROCKBITER_WEAPON, 0) && ai->CastSpell(FROSTBRAND_WEAPON,*m_bot) );
 */
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    Item* pItem = GetAI()->FindDrink();
+    Item* pItem = ai->FindDrink();
+	Item* fItem = ai->FindBandage();
 
-    if (pItem != NULL && GetAI()->GetManaPercent() < 15)
+    if (pItem != NULL && ai->GetManaPercent() < 30)
     {
-        GetAI()->TellMaster("I could use a drink.");
-        GetAI()->UseItem(*pItem);
-        GetAI()->SetIgnoreUpdateTime(30);
+        ai->TellMaster("I could use a drink.");
+        ai->UseItem(*pItem);
+        ai->SetIgnoreUpdateTime(30);
         return;
     }
 
@@ -485,13 +489,20 @@ void PlayerbotShamanAI::DoNonCombatActions()
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    pItem = GetAI()->FindFood();
+    pItem = ai->FindFood();
 
-    if (pItem != NULL && GetAI()->GetHealthPercent() < 15)
+    if (pItem != NULL && ai->GetHealthPercent() < 30)
     {
-        GetAI()->TellMaster("I could use some food.");
-        GetAI()->UseItem(*pItem);
-        GetAI()->SetIgnoreUpdateTime(30);
+        ai->TellMaster("I could use some food.");
+        ai->UseItem(*pItem);
+        ai->SetIgnoreUpdateTime(30);
+        return;
+    }
+    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, 0) && ai->GetHealthPercent() < 70)
+    {
+        ai->TellMaster("I could use first aid.");
+        ai->UseItem(*fItem);
+        ai->SetIgnoreUpdateTime(8);
         return;
     }
 

@@ -49,6 +49,8 @@ PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, Player
     ICE_ARMOR               = ai->getSpellId("ice armor");
 	ICE_BLOCK               = ai->getSpellId("ice block");
 	COLD_SNAP               = ai->getSpellId("cold snap");
+
+	RECENTLY_BANDAGED       = 11196; // first aid check
 }
 
 PlayerbotMageAI::~PlayerbotMageAI() {}
@@ -376,6 +378,7 @@ void PlayerbotMageAI::DoNonCombatActions()
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = ai->FindDrink();
+	Item* fItem = ai->FindBandage();
 
     if (pItem == NULL && CONJURE_WATER && ai->GetBaseManaPercent() >= 48)
     {
@@ -414,6 +417,14 @@ void PlayerbotMageAI::DoNonCombatActions()
         ai->SetIgnoreUpdateTime(30);
         return;
     }
+	else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, 0) && ai->GetHealthPercent() < 70)
+    {
+        ai->TellMaster("I could use first aid.");
+        ai->UseItem(*fItem);
+        ai->SetIgnoreUpdateTime(8);
+        return;
+    }
+
 } // end DoNonCombatActions
 
 void PlayerbotMageAI::BuffPlayer(Player* target)

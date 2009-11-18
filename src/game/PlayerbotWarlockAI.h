@@ -49,6 +49,9 @@ class MANGOS_DLL_SPEC PlayerbotWarlockAI : PlayerbotClassAI
 		// DEMON SKILLS
 		uint32 BLOOD_PACT, CONSUME_SHADOWS, FEL_INTELLIGENCE;
 
+		// first aid
+		uint32 RECENTLY_BANDAGED;
+
         uint32 SpellSequence, LastSpellCurse, LastSpellAffliction, LastSpellDestruction;
 };
 

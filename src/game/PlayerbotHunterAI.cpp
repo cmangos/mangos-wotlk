@@ -63,6 +63,8 @@ PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, Pl
     RAPID_FIRE           = ai->getSpellId("rapid fire");
 	TRUESHOT_AURA        = 19506;
 
+	RECENTLY_BANDAGED    = 11196; // first aid check
+
     m_petSummonFailed = false;
     m_rangedCombat = true;
 }
@@ -246,6 +248,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = ai->FindDrink();
+	Item* fItem = ai->FindBandage();
 
     if (pItem != NULL && ai->GetManaPercent() < 30)
     {
@@ -266,6 +269,13 @@ void PlayerbotHunterAI::DoNonCombatActions()
         ai->TellMaster("I could use some food.");
         ai->UseItem(*pItem);
         ai->SetIgnoreUpdateTime(30);
+        return;
+    }
+	else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, 0) && ai->GetHealthPercent() < 70)
+    {
+        ai->TellMaster("I could use first aid.");
+        ai->UseItem(*fItem);
+        ai->SetIgnoreUpdateTime(8);
         return;
     }
 

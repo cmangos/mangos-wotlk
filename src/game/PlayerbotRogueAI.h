@@ -40,6 +40,9 @@ class MANGOS_DLL_SPEC PlayerbotRogueAI : PlayerbotClassAI
         // ASSASSINATION
         uint32 EVISCERATE, SLICE_DICE, GARROTE, EXPOSE_ARMOR, AMBUSH, RUPTURE, DISMANTLE, CHEAP_SHOT, KIDNEY_SHOT, MUTILATE, ENVENOM, DEADLY_THROW;
 
+		// first aid
+		uint32 RECENTLY_BANDAGED;
+
         uint32 SpellSequence, LastSpellCombat, LastSpellSubtlety, LastSpellAssassination, Aura;
 };
 

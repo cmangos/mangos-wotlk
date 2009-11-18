@@ -50,6 +50,9 @@ class MANGOS_DLL_SPEC PlayerbotDruidAI : PlayerbotClassAI
 		// druid heals
 		uint32 LIFEBLOOM, REJUVENATION, REGROWTH, NOURISH, HEALING_TOUCH, WILD_GROWTH, SWIFTMEND, TRANQUILITY;
 
+		// first aid
+		uint32 RECENTLY_BANDAGED;
+
         uint32 SpellSequence, DruidSpellCombat;
 };
 

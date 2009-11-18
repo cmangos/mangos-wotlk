@@ -57,6 +57,8 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
 	CONSUME_SHADOWS       = ai->getSpellId("consume shadows"); // voidwalker skill
 	FEL_INTELLIGENCE      = ai->getSpellId("fel intelligence"); // felhunter skill
 
+	RECENTLY_BANDAGED     = 11196; // first aid check
+
 	m_demonSummonFailed = false;
 }
 
@@ -357,6 +359,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = ai->FindDrink();
+	Item* fItem = ai->FindBandage();
 
     if (pItem != NULL && ai->GetManaPercent() < 25)
     {
@@ -386,15 +389,22 @@ void PlayerbotWarlockAI::DoNonCombatActions()
 
     pItem = ai->FindFood();
 
-    if (pItem != NULL && ai->GetHealthPercent() < 25)
+    if (pItem != NULL && ai->GetHealthPercent() < 30)
     {
         ai->TellMaster("I could use some food.");
         ai->UseItem(*pItem);
         ai->SetIgnoreUpdateTime(30);
 		return;
     }
+	else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, 0) && ai->GetHealthPercent() < 70)
+    {
+        ai->TellMaster("I could use first aid.");
+        ai->UseItem(*fItem);
+        ai->SetIgnoreUpdateTime(8);
+        return;
+    }
 	else if(( pet )
-		&& (pItem == NULL && CONSUME_SHADOWS>0 && !m_bot->HasAura(CONSUME_SHADOWS, 0) && ai->GetHealthPercent() < 75) )
+		&& (pItem == NULL && fItem == NULL && CONSUME_SHADOWS>0 && !m_bot->HasAura(CONSUME_SHADOWS, 0) && ai->GetHealthPercent() < 75) )
     {
 		ai->CastSpell(CONSUME_SHADOWS, *m_bot);
         //ai->TellMaster("casting consume shadows.");

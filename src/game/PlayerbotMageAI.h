@@ -40,6 +40,9 @@ class MANGOS_DLL_SPEC PlayerbotMageAI : PlayerbotClassAI
         // buffs
         uint32 FROST_ARMOR, ICE_ARMOR, MAGE_ARMOR, MOLTEN_ARMOR, ARCANE_INTELLECT, ARCANE_BRILLIANCE, DALARAN_INTELLECT, DALARAN_BRILLIANCE, MANA_SHIELD, DAMPEN_MAGIC, AMPLIFY_MAGIC;
 
+		// first aid
+		uint32 RECENTLY_BANDAGED;
+
         uint32 SpellSequence, LastSpellArcane, LastSpellFire, LastSpellFrost, CONJURE_WATER, CONJURE_FOOD;
 };
 

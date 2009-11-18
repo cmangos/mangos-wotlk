@@ -57,6 +57,8 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
 	CHALLENGING_ROAR    = ai->getSpellId("challenging roar");//15
 	ENRAGE              = ai->getSpellId("enrage");
 	GROWL               = ai->getSpellId("growl");
+
+	RECENTLY_BANDAGED    = 11196; // first aid check
 }
 
 PlayerbotDruidAI::~PlayerbotDruidAI() {}
@@ -608,8 +610,9 @@ void PlayerbotDruidAI::DoNonCombatActions()
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = ai->FindDrink();
+	Item* fItem = ai->FindBandage();
 
-    if (pItem != NULL && ai->GetManaPercent() < 25)
+    if (pItem != NULL && ai->GetManaPercent() < 30)
     {
         ai->TellMaster("I could use a drink.");
         ai->UseItem(*pItem);
@@ -635,11 +638,18 @@ void PlayerbotDruidAI::DoNonCombatActions()
 
     pItem = ai->FindFood();
 
-    if (pItem != NULL && ai->GetHealthPercent() < 25)
+    if (pItem != NULL && ai->GetHealthPercent() < 30)
     {
         ai->TellMaster("I could use some food.");
         ai->UseItem(*pItem);
         ai->SetIgnoreUpdateTime(30);
+        return;
+    }
+    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, 0) && ai->GetHealthPercent() < 70)
+    {
+        ai->TellMaster("I could use first aid.");
+        ai->UseItem(*fItem);
+        ai->SetIgnoreUpdateTime(8);
         return;
     }
     

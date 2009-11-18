@@ -47,6 +47,8 @@ PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, Play
     CHEAP_SHOT          = ai->getSpellId("cheap shot");
     AMBUSH              = ai->getSpellId("ambush");
 	MUTILATE            = ai->getSpellId("mutilate");
+
+	RECENTLY_BANDAGED   = 11196; // first aid check
 }
 
 PlayerbotRogueAI::~PlayerbotRogueAI() {}
@@ -254,9 +256,23 @@ void PlayerbotRogueAI::DoNonCombatActions()
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    if (GetAI()->GetHealthPercent() < 60)
-        GetAI()->Feast();
+    Item* pItem = GetAI()->FindFood();
+    Item* fItem = GetAI()->FindBandage();
+
+    if (pItem != NULL && GetAI()->GetHealthPercent() < 30)
+    {
+        GetAI()->TellMaster("I could use some food.");
+        GetAI()->UseItem(*pItem);
         GetAI()->SetIgnoreUpdateTime(30);
+        return;
+    }
+    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, 0) && GetAI()->GetHealthPercent() < 70)
+    {
+        GetAI()->TellMaster("I could use first aid.");
+        GetAI()->UseItem(*fItem);
+        GetAI()->SetIgnoreUpdateTime(8);
+        return;
+    }
 /*
     // Poison check //Not working needs some mor testing...i think need to tell the bott where "slot" to apply poison.
 

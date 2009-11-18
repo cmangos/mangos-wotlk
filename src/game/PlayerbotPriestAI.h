@@ -40,6 +40,9 @@ class MANGOS_DLL_SPEC PlayerbotPriestAI : PlayerbotClassAI
         // discipline
         uint32 PWS, INNER_FIRE, FORTITUDE, TOUCH_OF_WEAKNESS, FEAR_WARD, DSPIRIT, POWER_INFUSION, MASS_DISPEL, PENANCE, DIVINE_SPIRIT, INNER_FOCUS;
 
+		// first aid
+		uint32 RECENTLY_BANDAGED;
+
         uint32 SpellSequence, LastSpellHoly, LastSpellShadowMagic, LastSpellDiscipline;
 };
 

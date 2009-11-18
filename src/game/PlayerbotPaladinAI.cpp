@@ -6,47 +6,88 @@
     */
 
 #include "PlayerbotPaladinAI.h"
+#include "PlayerbotMgr.h"
 
 class PlayerbotAI;
 
 PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, PlayerbotAI* const ai): PlayerbotClassAI(master, bot, ai)
 {
 
-    RETRIBUTION_AURA             = ai->getSpellId("retribution aura");
-    SHADOW_RESISTANCE_AURA       = ai->getSpellId("shadow resistance aura");
-    DEVOTION_AURA                = ai->getSpellId("devotion aura");
-    FIRE_RESISTANCE_AURA         = ai->getSpellId("fire resistance aura");
-    FROST_RESISTANCE_AURA        = ai->getSpellId("frost resistance aura");
-    CONCENTRATION_AURA           = ai->getSpellId("concentration aura");
+    RETRIBUTION_AURA             = ai->getSpellId("retribution aura");// Retribution
     CRUSADER_AURA                = ai->getSpellId("crusader aura");
     CRUSADER_STRIKE              = ai->getSpellId("crusader strike");
-    SEAL_OF_COMMAND              = 20375; //For some reason getSpellId was not working. Replaced with spell id
+    SEAL_OF_COMMAND              = ai->getSpellId("command");
     JUDGEMENT_OF_LIGHT           = ai->getSpellId("judgement of light");
     JUDGEMENT_OF_WISDOM          = ai->getSpellId("judgement of wisdom");
-    FLASH_OF_LIGHT               = ai->getSpellId("flash of light");
+	JUDGEMENT_OF_JUSTICE         = ai->getSpellId("judgement of justice");
+	DIVINE_STORM                 = ai->getSpellId("divine storm");
+	BLESSING_OF_MIGHT            = ai->getSpellId("blessing of might");
+	GREATER_BLESSING_OF_MIGHT    = ai->getSpellId("greater blessing of might");
+	HAMMER_OF_WRATH              = ai->getSpellId("hammer of wrath");
+    FLASH_OF_LIGHT               = ai->getSpellId("flash of light"); // Holy
     HOLY_LIGHT                   = ai->getSpellId("holy light");
-    DIVINE_SHIELD                = 642; // ai->getSpellId("divine shield");
-    HAND_OF_PROTECTION           = 10278;
-    BLESSING_OF_MIGHT            = ai->getSpellId("blessing of might");
-    GREATER_BLESSING_OF_MIGHT    = ai->getSpellId("greater blessing of might");
+	HOLY_SHOCK                   = ai->getSpellId("shock");
+	HOLY_WRATH                   = ai->getSpellId("wrath");
+	DIVINE_FAVOR                 = ai->getSpellId("divine favor");
+	CONCENTRATION_AURA           = ai->getSpellId("concentration aura");
     BLESSING_OF_WISDOM           = ai->getSpellId("blessing of wisdom");
     GREATER_BLESSING_OF_WISDOM   = ai->getSpellId("greater blessing of wisdom");
-    BLESSING_OF_KINGS            = ai->getSpellId("blessing of kings");
+	CONSECRATION                 = ai->getSpellId("consecration");
+	AVENGING_WRATH               = ai->getSpellId("avenging wrath");
+	LAY_ON_HANDS                 = ai->getSpellId("lay on hands");
+	EXORCISM                     = ai->getSpellId("exorcism");
+	SACRED_SHIELD                = ai->getSpellId("sacred shield");
+    BLESSING_OF_KINGS            = ai->getSpellId("blessing of kings"); // Protection
     GREATER_BLESSING_OF_KINGS    = ai->getSpellId("greater blessing of kings");
+	GREATER_BLESSING_OF_SANCTUARY= ai->getSpellId("greater blessing of sanctuary");
     HAMMER_OF_JUSTICE            = ai->getSpellId("hammer of justice");
     RIGHTEOUS_FURY               = ai->getSpellId("righteous fury");
-    CONSECRATION                 = ai->getSpellId("consecration");
-    AVENGING_WRATH               = ai->getSpellId("avenging wrath");
-    HAMMER_OF_WRATH              = ai->getSpellId("hammer of wrath");
-    DEFENSIVE_STANCE             = 71; //Deff Stance
+	RIGHTEOUS_DEFENSE            = ai->getSpellId("righteous defense");
+	SHADOW_RESISTANCE_AURA       = ai->getSpellId("shadow resistance aura");
+	DEVOTION_AURA                = ai->getSpellId("devotion aura");
+	FIRE_RESISTANCE_AURA         = ai->getSpellId("fire resistance aura");
+	FROST_RESISTANCE_AURA        = ai->getSpellId("frost resistance aura");
+	HAND_OF_PROTECTION           = ai->getSpellId("hand of protection");
+	DIVINE_PROTECTION            = ai->getSpellId("divine protection");
+	DIVINE_INTERVENTION          = ai->getSpellId("divine intervention");
+	DIVINE_SACRIFICE             = ai->getSpellId("divine");
+	DIVINE_SHIELD                = ai->getSpellId("divine shield");
+	HOLY_SHIELD                  = ai->getSpellId("holy shield");
+	AVENGERS_SHIELD              = ai->getSpellId("avenger's shield");
+	HAND_OF_SACRIFICE            = ai->getSpellId("hand of sacrifice");
+	SHIELD_OF_RIGHTEOUSNESS      = ai->getSpellId("shield of righteousness");
+    DEFENSIVE_STANCE             = 71; //Def Stance
     BERSERKER_STANCE             = 2458; //Ber Stance
     BATTLE_STANCE                = 2457; //Bat Stance
+
+	FORBEARANCE                  = 25771; // cannot be protected
+
+	RECENTLY_BANDAGED            = 11196; // first aid check
 }
 
 PlayerbotPaladinAI::~PlayerbotPaladinAI() {}
 
+void PlayerbotPaladinAI::HealTarget(Unit &target, uint8 hp)
+{
+    PlayerbotAI* ai = GetAI();
+
+	if (hp < 40 && HOLY_LIGHT > 0 && ai->GetManaPercent() >= 34)
+        ai->CastSpell(HOLY_LIGHT, target);
+
+	if (hp < 30 && HOLY_SHOCK > 0 && ai->GetManaPercent() >= 21)
+        ai->CastSpell(HOLY_SHOCK, target);
+
+	if (hp < 40 && FLASH_OF_LIGHT > 0 && ai->GetManaPercent() >= 8)
+        ai->CastSpell(FLASH_OF_LIGHT, target);
+
+	if (hp < 25 && LAY_ON_HANDS > 0 && ai->GetHealthPercent() > 30 && ai->GetManaPercent() >= 8)
+        ai->CastSpell(LAY_ON_HANDS, target);
+
+} // end HealTarget
+
 void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
 {
+	Unit* pVictim = pTarget->getVictim();
     PlayerbotAI* ai = GetAI();
     if (!ai)
         return;
@@ -62,12 +103,14 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     // damage spells
     ai->SetInFront( pTarget );
     Player *m_bot = GetPlayerBot();
+	float dist = m_bot->GetDistance( pTarget );
+	std::ostringstream out;
 
     //Shield master if low hp.
     uint32 masterHP = GetMaster()->GetHealth()*100 / GetMaster()->GetMaxHealth();
 
     if (GetMaster()->isAlive())
-        if (masterHP < 25 && HAND_OF_PROTECTION > 0 && !GetMaster()->HasAura(HAND_OF_PROTECTION, 0))
+        if (masterHP < 25 && HAND_OF_PROTECTION > 0 && !GetMaster()->HasAura(FORBEARANCE, 0) && !GetMaster()->HasAura(HAND_OF_PROTECTION, 0) && !GetMaster()->HasAura(DIVINE_PROTECTION, 0) && !GetMaster()->HasAura(DIVINE_SHIELD, 0))
                 ai->CastSpell(HAND_OF_PROTECTION, *(GetMaster()));
 
     if (SHADOW_RESISTANCE_AURA > 0 && !m_bot->HasAura(SHADOW_RESISTANCE_AURA, 0) && pTarget->getClass() == CLASS_WARLOCK)
@@ -91,7 +134,7 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     if (DEVOTION_AURA > 0 && !m_bot->HasAura(DEVOTION_AURA, 0) && pTarget->getClass() == CLASS_PALADIN)
         ai->CastSpell (DEVOTION_AURA, *m_bot);
 
-    if (ai->GetHealthPercent() < 55)
+    if (ai->GetHealthPercent() <= 40 || GetMaster()->GetHealth() <= GetMaster()->GetMaxHealth()*0.4)
         SpellSequence = Healing;
     else
         SpellSequence = Combat;
@@ -103,32 +146,88 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
             if (JUDGEMENT_OF_LIGHT > 0 && CombatCounter < 1 && ai->GetManaPercent() >=15)
             {
                 ai->CastSpell (JUDGEMENT_OF_LIGHT, *pTarget);
-                //ai->TellMaster("Judgement");
+                out << " Judgement of Light";
                 CombatCounter++;
                 break;
             }
             else if (SEAL_OF_COMMAND > 0 && CombatCounter < 2 && ai->GetManaPercent() >= 25)
             {
                 ai->CastSpell (SEAL_OF_COMMAND, *m_bot);
-                //ai->TellMaster("SealC");
+                out << " Seal of Command";
                 CombatCounter++;
                 break;
             }
             else if (HAMMER_OF_JUSTICE > 0 && CombatCounter < 3 && ai->GetManaPercent() >=15)
             {
                 ai->CastSpell (HAMMER_OF_JUSTICE, *pTarget);
-                //ai->TellMaster("Hammer");
+                out << " Hammer of Justice";
                 CombatCounter++;
                 break;
             }
             else if (CRUSADER_STRIKE > 0 && CombatCounter < 4 && ai->GetManaPercent() >=15)
             {
                 ai->CastSpell (CRUSADER_STRIKE, *pTarget);
-                //ai->TellMaster("CStrike");
+                out << " Crusader Strike";
                 CombatCounter++;
                 break;
             }
-            else if (CombatCounter < 5)
+            else if (AVENGING_WRATH > 0 && CombatCounter < 5 && !m_bot->HasAura(AVENGING_WRATH, 0) && ai->GetManaPercent() >=8)
+            {
+                ai->CastSpell (AVENGING_WRATH, *m_bot);
+                out << " Avenging Wrath";
+                CombatCounter++;
+                break;
+            }
+            else if (SACRED_SHIELD > 0 && CombatCounter < 6 && pVictim == m_bot && ai->GetHealthPercent() < 70 && !m_bot->HasAura(SACRED_SHIELD, 0) && ai->GetManaPercent() >=12)
+            {
+                ai->CastSpell (SACRED_SHIELD, *m_bot);
+                out << " Sacred Shield";
+                CombatCounter++;
+                break;
+            }
+            else if (DIVINE_STORM > 0 && CombatCounter < 7 && ai->GetAttackerCount()>=3 && dist <= ATTACK_DISTANCE && ai->GetManaPercent() >=12)
+            {
+                ai->CastSpell (DIVINE_STORM, *pTarget);
+                out << " Divine Storm";
+                CombatCounter++;
+                break;
+            }
+            else if (HAMMER_OF_WRATH > 0 && CombatCounter < 8 && pTarget->GetHealth() < pTarget->GetMaxHealth()*0.20 && ai->GetManaPercent() >=14)
+            {
+                ai->CastSpell (HAMMER_OF_WRATH, *pTarget);
+                out << " Hammer of Wrath";
+                CombatCounter++;
+                break;
+            }
+            else if (HOLY_WRATH > 0 && CombatCounter < 9 && ai->GetAttackerCount()>=3 && dist <= ATTACK_DISTANCE && ai->GetManaPercent() >=24)
+            {
+                ai->CastSpell (HOLY_WRATH, *pTarget);
+                out << " Holy Wrath";
+                CombatCounter++;
+                break;
+            }
+            else if (HAND_OF_SACRIFICE > 0 && pVictim == GetMaster() && CombatCounter < 10 && ai->GetManaPercent() >=6)
+            {
+                ai->CastSpell (HAND_OF_SACRIFICE, *GetMaster());
+                out << " Hand of Sacrifice";
+                CombatCounter++;
+                break;
+            }
+            else if (DIVINE_PROTECTION > 0 && pVictim == m_bot && ai->GetHealthPercent() < 30 && CombatCounter < 11 && ai->GetManaPercent() >=3)
+            {
+                ai->CastSpell (DIVINE_PROTECTION, *m_bot);
+                out << " Divine Protection";
+                CombatCounter++;
+                break;
+            }
+            else if (RIGHTEOUS_DEFENSE > 0 && pVictim != m_bot && ai->GetHealthPercent() > 70 && CombatCounter < 12)
+            {
+                ai->CastSpell (RIGHTEOUS_DEFENSE, *pTarget);
+                out << " Righteous Defense";
+                CombatCounter++;
+                break;
+            }
+            else if (CombatCounter < 13)
             {
                 CombatCounter = 0;
                 //ai->TellMaster("CombatCounter Reset");
@@ -142,43 +241,39 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
             }
 
         case Healing:
-            //ai->TellMaster("Healing");
-            if (HOLY_LIGHT > 0 && HealCounter < 1 && ai->GetHealthPercent() < 45 && ai->GetManaPercent() >= 20)
+            if (ai->GetHealthPercent() <= 40)
             {
-                ai->CastSpell (HOLY_LIGHT);
-                //ai->TellMaster("HLight1");
-                HealCounter++;
+                HealTarget (*m_bot, ai->GetHealthPercent());
+				out << " ...healing bot";
                 break;
             }
-            else if (HOLY_LIGHT > 0 && HealCounter < 2 && ai->GetHealthPercent() < 75 && ai->GetManaPercent() >= 20)
+            if (masterHP <= 40)
             {
-                ai->CastSpell (HOLY_LIGHT);
-                //ai->TellMaster("Hlight2");
-                HealCounter++;
-                break;
-            }
-            else if (HealCounter < 3)
-            {
-                HealCounter = 0;
-                //ai->TellMaster("HealCounter Reset");
+                HealTarget (*GetMaster(), masterHP);
+				out << " ...healing master";
                 break;
             }
             else
             {
-                HealCounter = 0;
+                CombatCounter = 0;
                 //ai->TellMaster("Counter = 0");
                 break;
             }
     }
+	if( ai->GetManager()->m_confDebugWhisper )
+        ai->TellMaster( out.str().c_str() );
 
     if (HAMMER_OF_WRATH > 0 && pTarget->GetHealth() < pTarget->GetMaxHealth()*0.2 && ai->GetManaPercent() >=15)
         ai->CastSpell(HAMMER_OF_WRATH, *pTarget);
 
-    if (AVENGING_WRATH > 0 && ai->GetManaPercent() >= 8)
-        ai->CastSpell(AVENGING_WRATH);
+    if (AVENGING_WRATH > 0 && !m_bot->HasAura(AVENGING_WRATH, 0) && ai->GetManaPercent() >= 8)
+        ai->CastSpell(AVENGING_WRATH, *m_bot);
 
-    if (DIVINE_SHIELD > 0 && ai->GetHealthPercent() < 30 && ai->GetManaPercent() >= 3)
+    if (DIVINE_SHIELD > 0 && ai->GetHealthPercent() < 30 && !m_bot->HasAura(DIVINE_SHIELD, 0) && ai->GetManaPercent() >= 3)
         ai->CastSpell(DIVINE_SHIELD, *m_bot);
+
+	if (DIVINE_SACRIFICE > 0 && ai->GetHealthPercent() > 50 && pVictim != m_bot && !m_bot->HasAura(DIVINE_SACRIFICE, 0))
+        ai->CastSpell(DIVINE_SACRIFICE, *m_bot);
 }
 
 void PlayerbotPaladinAI::DoNonCombatActions()
@@ -189,15 +284,20 @@ void PlayerbotPaladinAI::DoNonCombatActions()
         return;
 
     // buff myself
-    if (BLESSING_OF_MIGHT > 0 && !m_bot->HasAura(BLESSING_OF_MIGHT, 0))
+	if (GREATER_BLESSING_OF_MIGHT > 0 && !m_bot->HasAura(GREATER_BLESSING_OF_MIGHT, 0))
+        ai->CastSpell (GREATER_BLESSING_OF_MIGHT, *m_bot);
+    else if (BLESSING_OF_MIGHT > 0 && !m_bot->HasAura(GREATER_BLESSING_OF_MIGHT, 0) && !m_bot->HasAura(BLESSING_OF_MIGHT, 0))
         ai->CastSpell (BLESSING_OF_MIGHT, *m_bot);
 
     if (RIGHTEOUS_FURY > 0 && !m_bot->HasAura(RIGHTEOUS_FURY, 0))
         ai->CastSpell (RIGHTEOUS_FURY, *m_bot);
 
+	if (DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, 0) && ai->GetManaPercent() >= 3)
+        ai->CastSpell(DIVINE_FAVOR , *m_bot);
+/*
     if (SEAL_OF_COMMAND > 0)
-        ai->CastSpell (SEAL_OF_COMMAND, *m_bot);
-
+        ai->CastSpell (SEAL_OF_COMMAND, *m_bot); // interferes with drinking/eating
+*/
     //Select Class buff seq.
     ///Process Who is my master --> get the player class --> aura already present if not then proced --> cast the spell
     //Priest
@@ -260,6 +360,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = ai->FindDrink();
+	Item* fItem = ai->FindBandage();
 
     if (pItem != NULL && ai->GetManaPercent() < 40)
     {
@@ -282,15 +383,28 @@ void PlayerbotPaladinAI::DoNonCombatActions()
         ai->SetIgnoreUpdateTime(30);
         return;
     }
+    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, 0) && ai->GetHealthPercent() < 70)
+    {
+        ai->TellMaster("I could use first aid.");
+        ai->UseItem(*fItem);
+        ai->SetIgnoreUpdateTime(8);
+        return;
+    }
 
-    //This is a paladin, self healing maybe? ;D Out of combat he can take care of him self, no ned to be healed.
-    //Causes server to crash in some cases /disabled for now/
-/*    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
-        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
+    // heal group
+    if (GetMaster()->GetGroup())
+    {
+        Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player *tPlayer = sObjectMgr.GetPlayer(uint64 (itr->guid));
+            if( !tPlayer || !tPlayer->isAlive() )
+                continue;
 
-    if (HOLY_LIGHT > 0 && ai->GetHealthPercent() < 98 && ai->GetManaPercent() >= 41)
-        ai->CastSpell(HOLY_LIGHT);
-*/
+             // heal player
+             (HealTarget(*tPlayer, tPlayer->GetHealth()*100 / tPlayer->GetMaxHealth()));
+        }
+    }
 }
 
 void PlayerbotPaladinAI::BuffPlayer(Player* target)

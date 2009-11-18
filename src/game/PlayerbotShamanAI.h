@@ -40,6 +40,9 @@ class MANGOS_DLL_SPEC PlayerbotShamanAI : PlayerbotClassAI
         // ELEMENTAL
         uint32 LIGHTNING_BOLT, EARTH_SHOCK, STONECLAW_TOTEM, FLAME_SHOCK, SEARING_TOTEM, PURGE, FIRE_NOVA_TOTEM, WIND_SHOCK, FROST_SHOCK, MAGMA_TOTEM, CHAIN_LIGHTNING, TOTEM_OF_WRATH, FIRE_ELEMENTAL_TOTEM, LAVA_BURST, EARTHBIND_TOTEM, HEX;
 
+		// first aid
+		uint32 RECENTLY_BANDAGED;
+
         uint32 SpellSequence, LastSpellEnhancement, LastSpellRestoration, LastSpellElemental;
 };
 
