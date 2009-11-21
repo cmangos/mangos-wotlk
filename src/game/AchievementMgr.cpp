@@ -302,7 +302,7 @@ bool AchievementCriteriaRequirement::Meets(Player const* source, Unit const* tar
                 return false;
             return ((Player*)target)->GetTeam() == team.team;
         case ACHIEVEMENT_CRITERIA_REQUIRE_S_DRUNK:
-            return Player::GetDrunkenstateByValue(source->GetDrunkValue()) >= drunk.state;
+            return (uint32)Player::GetDrunkenstateByValue(source->GetDrunkValue()) >= drunk.state;
         case ACHIEVEMENT_CRITERIA_REQUIRE_HOLIDAY:
             return IsHolidayActive(HolidayIds(holiday.id));
         case ACHIEVEMENT_CRITERIA_REQUIRE_BG_LOSS_TEAM_SCORE:
@@ -923,7 +923,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
 
                 //FIXME: work only for instances where max==min for players
-                if(((InstanceMap*)map)->GetMaxPlayers() != achievementCriteria->death_in_dungeon.manLimit)
+                if (map->GetMaxPlayers() != achievementCriteria->death_in_dungeon.manLimit)
                     continue;
                 SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
                 break;

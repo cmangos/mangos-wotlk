@@ -21,6 +21,7 @@
 #include "WorldPacket.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "ObjectDefines.h"
 #include "SpellMgr.h"
 #include "Creature.h"
 #include "QuestDef.h"
@@ -846,9 +847,9 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                     NpcOptionLocale const *no = sObjectMgr.GetNpcOptionLocale(gso->Id);
                     if (no)
                     {
-                        if (no->OptionText.size() > loc_idx && !no->OptionText[loc_idx].empty())
+                        if (no->OptionText.size() > (size_t)loc_idx && !no->OptionText[loc_idx].empty())
                             OptionText=no->OptionText[loc_idx];
-                        if (no->BoxText.size() > loc_idx && !no->BoxText[loc_idx].empty())
+                        if (no->BoxText.size() > (size_t)loc_idx && !no->BoxText[loc_idx].empty())
                             BoxText=no->BoxText[loc_idx];
                     }
                 }
@@ -2321,7 +2322,7 @@ const char* Creature::GetNameForLocaleIdx(int32 loc_idx) const
         CreatureLocale const *cl = sObjectMgr.GetCreatureLocale(GetEntry());
         if (cl)
         {
-            if (cl->Name.size() > loc_idx && !cl->Name[loc_idx].empty())
+            if (cl->Name.size() > (size_t)loc_idx && !cl->Name[loc_idx].empty())
                 return cl->Name[loc_idx].c_str();
         }
     }
