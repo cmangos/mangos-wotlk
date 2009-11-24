@@ -16,6 +16,7 @@ class MANGOS_DLL_SPEC PlayerbotHunterAI : PlayerbotClassAI
     public:
         PlayerbotHunterAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
         virtual ~PlayerbotHunterAI();
+        bool HasPet(Player* bot);
 
         // all combat actions go here
         void DoNextCombatManeuver(Unit*);
