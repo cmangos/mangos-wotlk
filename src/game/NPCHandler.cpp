@@ -250,45 +250,44 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     SendPacket(&data);
 }
 
-void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
+void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
 {
-    sLog.outDebug(  "WORLD: Received CMSG_GOSSIP_HELLO" );
+    sLog.outDebug("WORLD: Received CMSG_GOSSIP_HELLO");
 
     uint64 guid;
     recv_data >> guid;
 
-    Creature *unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
-    if (!unit)
+    Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
+
+    if (!pCreature)
     {
-        sLog.outDebug( "WORLD: HandleGossipHelloOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
+        sLog.outDebug("WORLD: HandleGossipHelloOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)));
         return;
     }
 
     // remove fake death
-    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     // Playerbot mod
-    if(unit->isBotGiver())
+    if(pCreature->isBotGiver())
     {
-        GetPlayer()->TalkedToCreature(unit->GetEntry(),unit->GetGUID());
-        unit->prepareGossipMenu(GetPlayer(),GOSSIP_OPTION_BOT);
-        unit->sendPreparedGossip(GetPlayer());
-        unit->StopMoving();
+        GetPlayer()->TalkedToCreature(pCreature->GetEntry(),pCreature->GetGUID());
+        pCreature->prepareGossipMenu(GetPlayer(),GOSSIP_OPTION_BOT);
+        pCreature->sendPreparedGossip(GetPlayer());
+        pCreature->StopMoving();
     }
-    else if( unit->isArmorer() || unit->isCivilian() || unit->isQuestGiver() || unit->isServiceProvider())
-    {
-        unit->StopMoving();
-    }
+    else if (!pCreature->IsStopped())
+        pCreature->StopMoving();
 
-    if (unit->isSpiritGuide())
-        unit->SendAreaSpiritHealerQueryOpcode(_player);
+    if (pCreature->isSpiritGuide())
+        pCreature->SendAreaSpiritHealerQueryOpcode(_player);
 
-    if(!Script->GossipHello( _player, unit ))
+    if (!Script->GossipHello(_player, pCreature))
     {
-        _player->TalkedToCreature(unit->GetEntry(),unit->GetGUID());
-        unit->prepareGossipMenu(_player);
-        unit->sendPreparedGossip(_player);
+        _player->TalkedToCreature(pCreature->GetEntry(), pCreature->GetGUID());
+        pCreature->prepareGossipMenu(_player);
+        pCreature->sendPreparedGossip(_player);
     }
 }
 
