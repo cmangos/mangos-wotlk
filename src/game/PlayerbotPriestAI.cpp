@@ -110,6 +110,7 @@ void PlayerbotPriestAI::HealTarget(Unit &target, uint8 hp)
 
 void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 {
+	Unit* pVictim = pTarget->getVictim();
     PlayerbotAI* ai = GetAI();
     if (!ai)
         return;
@@ -138,12 +139,17 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     if (ai->GetHealthPercent() < 15 && FADE > 0 && !m_bot->HasAura(FADE, 0))
     {
         ai->TellMaster("I'm casting fade.");
-        ai->CastSpell(FADE);
+        ai->CastSpell(FADE, *m_bot);
     }
     else if (ai->GetHealthPercent() < 25 && PWS > 0 && !m_bot->HasAura(PWS, 0))
     {
         ai->TellMaster("I'm casting pws on myself.");
         ai->CastSpell(PWS);
+    }
+    else if (ai->GetHealthPercent() < 35 && DESPERATE_PRAYER > 0)
+    {
+        ai->TellMaster("I'm casting desperate prayer.");
+        ai->CastSpell(DESPERATE_PRAYER, *m_bot);
     }
     else if (ai->GetHealthPercent() < 80)
         HealTarget (*m_bot, ai->GetHealthPercent());
@@ -176,6 +182,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 
     // Damage Spells
     ai->SetInFront( pTarget );
+	float dist = m_bot->GetDistance( pTarget );
 
     switch (SpellSequence)
     {
@@ -196,7 +203,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 LastSpellHoly = LastSpellHoly +1;
                 break;
             }
-            else if (HOLY_NOVA > 0 && LastSpellHoly <3 && ai->GetManaPercent() >= 22)
+            else if (HOLY_NOVA > 0 && LastSpellHoly <3 && dist <= ATTACK_DISTANCE && ai->GetManaPercent() >= 22)
             {
                 //ai->TellMaster("I'm casting holy nova.");
                 ai->CastSpell(HOLY_NOVA);
@@ -212,7 +219,15 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                  LastSpellHoly = LastSpellHoly +1;
                  break;
              }
-             else if (LastSpellHoly > 5)
+             else if (PRAYER_OF_MENDING > 0 && LastSpellHoly <5 && pVictim == GetMaster() && GetMaster()->GetHealth() <= GetMaster()->GetMaxHealth()*0.7 && !GetMaster()->HasAura(PRAYER_OF_MENDING, 0) && ai->GetManaPercent() >= 15)
+             {
+                 //ai->TellMaster("I'm casting prayer of mending on master.");
+                 ai->CastSpell(PRAYER_OF_MENDING, *GetMaster());
+                 SpellSequence = SPELL_SHADOWMAGIC;
+                 LastSpellHoly = LastSpellHoly +1;
+                 break;
+             }
+             else if (LastSpellHoly > 6)
              {
                  LastSpellHoly = 0;
                  SpellSequence = SPELL_SHADOWMAGIC;

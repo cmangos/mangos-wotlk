@@ -290,7 +290,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
     }
 
     // check for pet
-    if( PET_SUMMON>0 && !m_petSummonFailed && HasPet(m_bot))
+    if( PET_SUMMON>0 && !m_petSummonFailed ) //&& HasPet(m_bot))
     {
         // we can summon pet, and no critical summon errors before
         Pet *pet = m_bot->GetPet();
