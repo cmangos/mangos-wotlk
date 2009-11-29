@@ -73,7 +73,7 @@ PlayerbotHunterAI::~PlayerbotHunterAI() {}
 
 bool PlayerbotHunterAI::HasPet(Player* bot)
 {
-	QueryResult* result = CharacterDatabase.PQuery("SELECT * FROM character_pet WHERE owner = '%u' AND slot = '%u'",bot->GetGUIDLow(),PET_SAVE_AS_CURRENT);
+	QueryResult* result = CharacterDatabase.PQuery("SELECT * FROM character_pet WHERE owner = '%u' AND (slot = '%u' OR slot = '%u')",bot->GetGUIDLow(),PET_SAVE_AS_CURRENT,PET_SAVE_NOT_IN_SLOT);
 
 	if(result)
 		return true; //hunter has current pet
@@ -290,7 +290,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
     }
 
     // check for pet
-    if( PET_SUMMON>0 && !m_petSummonFailed ) //&& HasPet(m_bot))
+    if( PET_SUMMON>0 && !m_petSummonFailed && HasPet(m_bot) )
     {
         // we can summon pet, and no critical summon errors before
         Pet *pet = m_bot->GetPet();
