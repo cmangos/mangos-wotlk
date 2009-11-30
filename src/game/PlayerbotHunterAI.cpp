@@ -65,6 +65,18 @@ PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, Pl
 
 	RECENTLY_BANDAGED    = 11196; // first aid check
 
+	// racial
+	ARCANE_TORRENT       = ai->getSpellId("arcane torrent"); // blood elf
+	GIFT_OF_THE_NAARU    = ai->getSpellId("gift of the naaru"); // draenei
+	STONEFORM            = ai->getSpellId("stoneform"); // dwarf
+	ESCAPE_ARTIST        = ai->getSpellId("escape artist"); // gnome
+	EVERY_MAN_FOR_HIMSELF= ai->getSpellId("every man for himself"); // human
+	SHADOWMELD           = ai->getSpellId("shadowmeld"); // night elf
+	BLOOD_FURY           = ai->getSpellId("blood fury"); // orc
+	WAR_STOMP            = ai->getSpellId("war stomp"); // tauren
+	BERSERKING           = ai->getSpellId("berserking"); // troll
+	WILL_OF_THE_FORSAKEN = ai->getSpellId("will of the forsaken"); // undead
+
     m_petSummonFailed = false;
     m_rangedCombat = true;
 }
@@ -116,6 +128,18 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
 			//ai->TellMaster( "casting intimidation." ); // if pet has aggro :)
 			return;
 		}
+
+	// racial traits
+	if( m_bot->getRace() == RACE_ORC && !m_bot->HasAura( BLOOD_FURY,0 ) )
+	{
+		ai->CastSpell( BLOOD_FURY,*m_bot );
+		//ai->TellMaster( "Blood Fury." );
+	}
+	else if( m_bot->getRace() == RACE_TROLL && !m_bot->HasAura( BERSERKING,0 ) )
+	{
+		ai->CastSpell( BERSERKING,*m_bot );
+		//ai->TellMaster( "Berserking." );
+	}
 
     // check if ranged combat is possible (set m_rangedCombat and switch auras
     float dist = m_bot->GetDistance( pTarget );
@@ -191,7 +215,7 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
             out << " > Aimed Shot";
 		else if( STEADY_SHOT>0 && ai->GetManaPercent()>=5 && ai->CastSpell(STEADY_SHOT,*pTarget) )
             out << " > Steady Shot";
-		else if( KILL_SHOT>0 && ai->GetManaPercent()>=7 && pTarget->GetHealth() < pTarget->GetMaxHealth()*0.20 && ai->CastSpell(KILL_SHOT,*pTarget) )
+		else if( KILL_SHOT>0 && ai->GetManaPercent()>=7 && pTarget->GetHealth() < pTarget->GetMaxHealth()*0.2 && ai->CastSpell(KILL_SHOT,*pTarget) )
             out << " > Kill Shot!";
 		else
             out << " NONE!";
@@ -213,8 +237,24 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
             out << " > Frost Trap";
 		else if( ARCANE_TRAP>0 && !pTarget->HasAura(ARCANE_TRAP,0) && !pTarget->HasAura(BEAR_TRAP,0) && !pTarget->HasAura(EXPLOSIVE_TRAP,0) && !pTarget->HasAura(IMMOLATION_TRAP,0) && !pTarget->HasAura(FROST_TRAP,0) && ai->CastSpell(ARCANE_TRAP,*pTarget) )
             out << " > Arcane Trap";
-		else if( DETERRENCE>0 && pVictim == m_bot && m_bot->GetHealth() < m_bot->GetMaxHealth()*0.50 && !m_bot->HasAura(DETERRENCE,0) && ai->CastSpell(DETERRENCE,*m_bot) )
+		else if( DETERRENCE>0 && pVictim == m_bot && m_bot->GetHealth() < m_bot->GetMaxHealth()*0.5 && !m_bot->HasAura(DETERRENCE,0) && ai->CastSpell(DETERRENCE,*m_bot) )
             out << " > Deterrence";
+		else if( m_bot->getRace() == RACE_TAUREN && !pTarget->HasAura( WAR_STOMP,0 ) && ai->CastSpell(WAR_STOMP,*pTarget) )
+            out << " > War Stomp";
+		else if( m_bot->getRace() == RACE_BLOODELF && !pTarget->HasAura( ARCANE_TORRENT,0 ) && ai->CastSpell( ARCANE_TORRENT,*pTarget ) )
+            out << " > Arcane Torrent";
+		else if( m_bot->getRace() == RACE_HUMAN && m_bot->hasUnitState( UNIT_STAT_STUNNED ) || m_bot->hasUnitState( UNIT_STAND_STATE_SLEEP ) || m_bot->HasAuraType( SPELL_AURA_MOD_FEAR ) || m_bot->HasAuraType( SPELL_AURA_MOD_DECREASE_SPEED ) || m_bot->HasAuraType( SPELL_AURA_MOD_CHARM ) && ai->CastSpell( EVERY_MAN_FOR_HIMSELF,*m_bot ) )
+            out << " > Every Man for Himself";
+		else if( m_bot->getRace() == RACE_UNDEAD_PLAYER && m_bot->hasUnitState( UNIT_STAND_STATE_SLEEP ) || m_bot->HasAuraType( SPELL_AURA_MOD_FEAR ) || m_bot->HasAuraType( SPELL_AURA_MOD_CHARM ) && ai->CastSpell( WILL_OF_THE_FORSAKEN,*m_bot ) )
+            out << " > Will of the Forsaken";
+		else if( m_bot->getRace() == RACE_DWARF && m_bot->HasAuraState( AURA_STATE_DEADLY_POISON ) && ai->CastSpell( STONEFORM,*m_bot ) )
+            out << " > Stoneform";
+		else if( m_bot->getRace() == RACE_GNOME && m_bot->hasUnitState( UNIT_STAT_STUNNED ) || m_bot->HasAuraType( SPELL_AURA_MOD_DECREASE_SPEED ) && ai->CastSpell( ESCAPE_ARTIST,*m_bot ) )
+            out << " > Escape Artist";
+		else if( m_bot->getRace() == RACE_NIGHTELF && pVictim == m_bot && ai->GetHealthPercent() < 25 && !m_bot->HasAura( SHADOWMELD,0 ) && ai->CastSpell( SHADOWMELD,*m_bot ) )
+            out << " > Shadowmeld";
+		else if( m_bot->getRace() == RACE_DRAENEI && ai->GetHealthPercent() < 25 && !m_bot->HasAura(GIFT_OF_THE_NAARU,0) && ai->CastSpell(GIFT_OF_THE_NAARU,*m_bot) )
+            out << " > Gift of the Naaru";
 		else if(( pet && !pet->getDeathState() != ALIVE)
 		&& ( MISDIRECTION>0 && pVictim == m_bot && !m_bot->HasAura(MISDIRECTION,0) && ai->GetManaPercent()>=9 && ai->CastSpell(MISDIRECTION,*pet)) )
             out << " > Misdirection"; // give threat to pet
@@ -286,6 +326,12 @@ void PlayerbotHunterAI::DoNonCombatActions()
         ai->TellMaster("I could use first aid.");
         ai->UseItem(*fItem);
         ai->SetIgnoreUpdateTime(8);
+        return;
+    }
+    else if (pItem == NULL && fItem == NULL && m_bot->getRace() == RACE_DRAENEI && !m_bot->HasAura(GIFT_OF_THE_NAARU, 0) && ai->GetHealthPercent() < 70)
+    {
+        ai->TellMaster("I'm casting gift of the naaru.");
+        ai->CastSpell(GIFT_OF_THE_NAARU, *m_bot);
         return;
     }
 

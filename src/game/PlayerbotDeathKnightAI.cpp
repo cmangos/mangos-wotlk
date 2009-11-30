@@ -55,6 +55,18 @@ PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* con
     BLOOD_PRESENCE    = ai->getSpellId("blood presence");
 
     RECENTLY_BANDAGED = 11196; // first aid check
+
+	// racial
+	ARCANE_TORRENT          = ai->getSpellId("arcane torrent"); // blood elf
+	GIFT_OF_THE_NAARU       = ai->getSpellId("gift of the naaru"); // draenei
+	STONEFORM               = ai->getSpellId("stoneform"); // dwarf
+	ESCAPE_ARTIST           = ai->getSpellId("escape artist"); // gnome
+	EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
+	SHADOWMELD              = ai->getSpellId("shadowmeld"); // night elf
+	BLOOD_FURY              = ai->getSpellId("blood fury"); // orc
+	WAR_STOMP               = ai->getSpellId("war stomp"); // tauren
+	BERSERKING              = ai->getSpellId("berserking"); // troll
+	WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
 }
 
 PlayerbotDeathKnightAI::~PlayerbotDeathKnightAI() {}
