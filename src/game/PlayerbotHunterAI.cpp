@@ -69,13 +69,10 @@ PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, Pl
 	ARCANE_TORRENT       = ai->getSpellId("arcane torrent"); // blood elf
 	GIFT_OF_THE_NAARU    = ai->getSpellId("gift of the naaru"); // draenei
 	STONEFORM            = ai->getSpellId("stoneform"); // dwarf
-	ESCAPE_ARTIST        = ai->getSpellId("escape artist"); // gnome
-	EVERY_MAN_FOR_HIMSELF= ai->getSpellId("every man for himself"); // human
 	SHADOWMELD           = ai->getSpellId("shadowmeld"); // night elf
 	BLOOD_FURY           = ai->getSpellId("blood fury"); // orc
 	WAR_STOMP            = ai->getSpellId("war stomp"); // tauren
 	BERSERKING           = ai->getSpellId("berserking"); // troll
-	WILL_OF_THE_FORSAKEN = ai->getSpellId("will of the forsaken"); // undead
 
     m_petSummonFailed = false;
     m_rangedCombat = true;
@@ -243,14 +240,8 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
             out << " > War Stomp";
 		else if( m_bot->getRace() == RACE_BLOODELF && !pTarget->HasAura( ARCANE_TORRENT,0 ) && ai->CastSpell( ARCANE_TORRENT,*pTarget ) )
             out << " > Arcane Torrent";
-		else if( m_bot->getRace() == RACE_HUMAN && m_bot->hasUnitState( UNIT_STAT_STUNNED ) || m_bot->hasUnitState( UNIT_STAND_STATE_SLEEP ) || m_bot->HasAuraType( SPELL_AURA_MOD_FEAR ) || m_bot->HasAuraType( SPELL_AURA_MOD_DECREASE_SPEED ) || m_bot->HasAuraType( SPELL_AURA_MOD_CHARM ) && ai->CastSpell( EVERY_MAN_FOR_HIMSELF,*m_bot ) )
-            out << " > Every Man for Himself";
-		else if( m_bot->getRace() == RACE_UNDEAD_PLAYER && m_bot->hasUnitState( UNIT_STAND_STATE_SLEEP ) || m_bot->HasAuraType( SPELL_AURA_MOD_FEAR ) || m_bot->HasAuraType( SPELL_AURA_MOD_CHARM ) && ai->CastSpell( WILL_OF_THE_FORSAKEN,*m_bot ) )
-            out << " > Will of the Forsaken";
 		else if( m_bot->getRace() == RACE_DWARF && m_bot->HasAuraState( AURA_STATE_DEADLY_POISON ) && ai->CastSpell( STONEFORM,*m_bot ) )
             out << " > Stoneform";
-		else if( m_bot->getRace() == RACE_GNOME && m_bot->hasUnitState( UNIT_STAT_STUNNED ) || m_bot->HasAuraType( SPELL_AURA_MOD_DECREASE_SPEED ) && ai->CastSpell( ESCAPE_ARTIST,*m_bot ) )
-            out << " > Escape Artist";
 		else if( m_bot->getRace() == RACE_NIGHTELF && pVictim == m_bot && ai->GetHealthPercent() < 25 && !m_bot->HasAura( SHADOWMELD,0 ) && ai->CastSpell( SHADOWMELD,*m_bot ) )
             out << " > Shadowmeld";
 		else if( m_bot->getRace() == RACE_DRAENEI && ai->GetHealthPercent() < 25 && !m_bot->HasAura(GIFT_OF_THE_NAARU,0) && ai->CastSpell(GIFT_OF_THE_NAARU,*m_bot) )

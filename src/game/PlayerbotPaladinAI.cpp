@@ -42,7 +42,7 @@ PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, 
     GREATER_BLESSING_OF_KINGS    = ai->getSpellId("greater blessing of kings");
 	GREATER_BLESSING_OF_SANCTUARY= ai->getSpellId("greater blessing of sanctuary");
     HAMMER_OF_JUSTICE            = ai->getSpellId("hammer of justice");
-    RIGHTEOUS_FURY               = 25780; //ai->getSpellId("righteous fury");
+    RIGHTEOUS_FURY               = ai->getSpellId("righteous fury");
 	RIGHTEOUS_DEFENSE            = ai->getSpellId("righteous defense");
 	SHADOW_RESISTANCE_AURA       = ai->getSpellId("shadow resistance aura");
 	DEVOTION_AURA                = ai->getSpellId("devotion aura");
@@ -69,13 +69,7 @@ PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, 
 	ARCANE_TORRENT               = ai->getSpellId("arcane torrent"); // blood elf
 	GIFT_OF_THE_NAARU            = ai->getSpellId("gift of the naaru"); // draenei
 	STONEFORM                    = ai->getSpellId("stoneform"); // dwarf
-	ESCAPE_ARTIST                = ai->getSpellId("escape artist"); // gnome
 	EVERY_MAN_FOR_HIMSELF        = ai->getSpellId("every man for himself"); // human
-	SHADOWMELD                   = ai->getSpellId("shadowmeld"); // night elf
-	BLOOD_FURY                   = ai->getSpellId("blood fury"); // orc
-	WAR_STOMP                    = ai->getSpellId("war stomp"); // tauren
-	BERSERKING                   = ai->getSpellId("berserking"); // troll
-	WILL_OF_THE_FORSAKEN         = ai->getSpellId("will of the forsaken"); // undead
 }
 
 PlayerbotPaladinAI::~PlayerbotPaladinAI() {}
@@ -125,7 +119,7 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
 
     if (GetMaster()->isAlive())
         if (masterHP < 25 && HAND_OF_PROTECTION > 0 && !GetMaster()->HasAura(FORBEARANCE, 0) && !GetMaster()->HasAura(HAND_OF_PROTECTION, 0) && !GetMaster()->HasAura(DIVINE_PROTECTION, 0) && !GetMaster()->HasAura(DIVINE_SHIELD, 0))
-                ai->CastSpell(HAND_OF_PROTECTION, *(GetMaster()));
+			ai->CastSpell(HAND_OF_PROTECTION, *GetMaster());
 
 	// heal group inside combat, but do not heal if tank
     if( m_group && pVictim != m_bot ) // possible tank
@@ -142,6 +136,9 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
                 HealTarget( *m_groupMember, memberHP );
         }
     }
+
+	if (RIGHTEOUS_FURY > 0 && !m_bot->HasAura(RIGHTEOUS_FURY, 0))
+        ai->CastSpell (RIGHTEOUS_FURY, *m_bot);
 
     if (SHADOW_RESISTANCE_AURA > 0 && !m_bot->HasAura(SHADOW_RESISTANCE_AURA, 0) && pTarget->getClass() == CLASS_WARLOCK)
         ai->CastSpell (SHADOW_RESISTANCE_AURA, *m_bot);
@@ -270,7 +267,7 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
                 CombatCounter++;
                 break;
             }
-            else if (CombatCounter < 15)
+            else if (CombatCounter > 15)
             {
                 CombatCounter = 0;
                 //ai->TellMaster("CombatCounter Reset");
@@ -328,9 +325,6 @@ void PlayerbotPaladinAI::DoNonCombatActions()
         ai->CastSpell (GREATER_BLESSING_OF_MIGHT, *m_bot);
     else if (BLESSING_OF_MIGHT > 0 && !m_bot->HasAura(GREATER_BLESSING_OF_MIGHT, 0) && !m_bot->HasAura(BLESSING_OF_MIGHT, 0))
         ai->CastSpell (BLESSING_OF_MIGHT, *m_bot);
-
-    if (RIGHTEOUS_FURY > 0 && !m_bot->HasAura(RIGHTEOUS_FURY, 0))
-        ai->CastSpell (RIGHTEOUS_FURY, *m_bot);
 
 	if (DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, 0) && ai->GetManaPercent() >= 3)
         ai->CastSpell(DIVINE_FAVOR , *m_bot);

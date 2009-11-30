@@ -65,7 +65,6 @@ PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, 
 	RECENTLY_BANDAGED       = 11196; // first aid check
 
 	// racial
-	ARCANE_TORRENT          = ai->getSpellId("arcane torrent"); // blood elf
 	GIFT_OF_THE_NAARU       = ai->getSpellId("gift of the naaru"); // draenei
 	STONEFORM               = ai->getSpellId("stoneform"); // dwarf
 	ESCAPE_ARTIST           = ai->getSpellId("escape artist"); // gnome
@@ -221,7 +220,7 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
                 out << " > Enraged Regeneration";
 			else if( SHOCKWAVE>0 && ai->GetRageAmount()>=15 && pVictim == m_bot && !pTarget->HasAura( WAR_STOMP, 0 ) && !pTarget->HasAura( PIERCING_HOWL, 0 ) && !pTarget->HasAura( SHOCKWAVE, 0 ) && !pTarget->HasAura( CONCUSSION_BLOW, 0 ) && ai->CastSpell( SHOCKWAVE, *pTarget ) )
                 out << " > Shockwave";
-			else if( REND>0 && ai->GetRageAmount()>=10 && !pTarget->HasAura( REND ) && ai->CastSpell( REND, *pTarget ) )
+			else if( REND>0 && ai->GetRageAmount()>=10 && !pTarget->HasAura( REND, 0 ) && ai->CastSpell( REND, *pTarget ) )
                 out << " > Rend";
 			else if( HAMSTRING>0 && ai->GetRageAmount()>=10 && !pTarget->HasAura( HAMSTRING, 0 ) && ai->CastSpell( HAMSTRING, *pTarget ) )
                 out << " > Hamstring";
@@ -251,8 +250,6 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
                 out << " > Heroic Throw";
 			else if( m_bot->getRace() == RACE_TAUREN && !pTarget->HasAura( WAR_STOMP, 0 ) && !pTarget->HasAura( PIERCING_HOWL, 0 ) && !pTarget->HasAura( SHOCKWAVE, 0 ) && !pTarget->HasAura( CONCUSSION_BLOW, 0 ) && ai->CastSpell( WAR_STOMP, *pTarget ) )
                 out << " > War Stomp";
-			else if( m_bot->getRace() == RACE_BLOODELF && !pTarget->HasAura( ARCANE_TORRENT, 0 ) && ai->CastSpell( ARCANE_TORRENT, *pTarget ) )
-                out << " > Arcane Torrent";
 			else if( m_bot->getRace() == RACE_HUMAN && m_bot->hasUnitState( UNIT_STAT_STUNNED ) || m_bot->hasUnitState( UNIT_STAND_STATE_SLEEP ) || m_bot->HasAuraType( SPELL_AURA_MOD_FEAR ) || m_bot->HasAuraType( SPELL_AURA_MOD_DECREASE_SPEED ) || m_bot->HasAuraType( SPELL_AURA_MOD_CHARM ) && ai->CastSpell( EVERY_MAN_FOR_HIMSELF, *m_bot ) )
                 out << " > Every Man for Himself";
 			else if( m_bot->getRace() == RACE_UNDEAD_PLAYER && m_bot->hasUnitState( UNIT_STAND_STATE_SLEEP ) || m_bot->HasAuraType( SPELL_AURA_MOD_FEAR ) || m_bot->HasAuraType( SPELL_AURA_MOD_CHARM ) && ai->CastSpell( WILL_OF_THE_FORSAKEN, *m_bot ) )
@@ -275,16 +272,16 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
 
         case WarriorDefensive:
             out << "Case Defensive";
-            if( REVENGE>0 && ai->GetRageAmount()>=5 && ai->CastSpell( REVENGE, *pTarget ) )
-                out << " > Revenge";
+            if( DISARM>0 && ai->GetRageAmount()>=15 && !pTarget->HasAura( DISARM, 0 ) && ai->CastSpell( DISARM, *pTarget ) )
+                out << " > Disarm";
             else if( SUNDER_ARMOR>0 && ai->GetRageAmount()>=15 && ai->CastSpell( SUNDER_ARMOR, *pTarget ) )
                 out << " > Sunder Armor";
-            else if( SHIELD_BLOCK>0 && ai->CastSpell( SHIELD_BLOCK ) )
+			else if( REVENGE>0 && ai->GetRageAmount()>=5 && ai->CastSpell( REVENGE, *pTarget ) )
+                out << " > Revenge";
+            else if( SHIELD_BLOCK>0 && !m_bot->HasAura( SHIELD_BLOCK, 0 ) && ai->CastSpell( SHIELD_BLOCK, *m_bot ) )
                 out << " > Shield Block";
 			else if( SHIELD_WALL>0 && !m_bot->HasAura( SHIELD_WALL, 0 ) && ai->CastSpell( SHIELD_WALL, *m_bot ) )
                 out << " > Shield Wall";
-			else if( DISARM>0 && ai->CastSpell( DISARM, *pTarget ) )
-                out << " > Disarm";
             else
                 out << " > NONE";
             break;
