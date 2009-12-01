@@ -474,9 +474,59 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 return;
             if (GetMaster()->IsMounted() && !m_bot->IsMounted())
             {
-                Item* const pItem = m_bot->GetPlayerbotAI()->FindMount(300);
-                if (pItem)
-                    m_bot->GetPlayerbotAI()->UseItem(*pItem);
+                //Player Part
+                if (!GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).empty())
+                {
+                    int32 master_speed1 = 0;
+                    int32 master_speed2 = 0;
+                    master_speed1 = GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetSpellProto()->EffectBasePoints[1];
+                    master_speed2 = GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetSpellProto()->EffectBasePoints[2];
+
+                    //Bot Part
+                    uint32 spellMount = 0;
+                    for(PlayerSpellMap::iterator itr = m_bot->GetSpellMap().begin(); itr != m_bot->GetSpellMap().end(); ++itr)
+                    {
+                        uint32 spellId = itr->first;
+                        if(itr->second->state == PLAYERSPELL_REMOVED || itr->second->disabled || IsPassiveSpell(spellId))
+                            continue;
+                        const SpellEntry* pSpellInfo = sSpellStore.LookupEntry(spellId);
+                        if (!pSpellInfo)
+                            continue;
+
+                        if(pSpellInfo->EffectApplyAuraName[0] == SPELL_AURA_MOUNTED)
+                        {
+                            if(pSpellInfo->EffectApplyAuraName[1] == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
+                            {
+                                if(pSpellInfo->EffectBasePoints[1] == master_speed1)
+                                {
+                                    spellMount = spellId;
+                                    break;
+                                }
+                            }
+                            else if((pSpellInfo->EffectApplyAuraName[1] == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
+                                && (pSpellInfo->EffectApplyAuraName[2] == SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED))
+                            {
+                                if((pSpellInfo->EffectBasePoints[1] == master_speed1)
+                                    && (pSpellInfo->EffectBasePoints[2] == master_speed2))
+                                {
+                                    spellMount = spellId;
+                                    break;
+                                }
+                            }
+                            else if((pSpellInfo->EffectApplyAuraName[2] == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
+                                && (pSpellInfo->EffectApplyAuraName[1] == SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED))
+                            {
+                                if((pSpellInfo->EffectBasePoints[2] == master_speed2) 
+                                    && (pSpellInfo->EffectBasePoints[1] == master_speed1))
+                                {
+                                    spellMount = spellId;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if(spellMount > 0) m_bot->CastSpell(m_bot, spellMount, false);
+                }
             }
             else if (!GetMaster()->IsMounted() && m_bot->IsMounted())
             {
@@ -1887,20 +1937,15 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
         }
         else if( m_botState == BOTSTATE_DEAD )
         {
-            // become ghost (mostly taken from Player::BuildPlayerRepop)
-            if( !m_bot->GetCorpse() )
-                m_bot->CreateCorpse();
-            Corpse *corpse = m_bot->GetCorpse();
-            m_bot->GetMap()->Add( corpse );
-            m_bot->SetHealth( 1 );
-            m_bot->SetMovement(MOVE_WATER_WALK);
-            m_bot->SetMovement(MOVE_UNROOT);
-            m_bot->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-            corpse->ResetGhostTime();
-            m_bot->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, (float)1.0);
-            m_bot->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+            // become ghost
+            if( m_bot->GetCorpse() )
+                return;
+
+            m_bot->SetBotDeathTimer();
+            m_bot->BuildPlayerRepop();
             // relocate ghost
             WorldLocation loc;
+            Corpse *corpse = m_bot->GetCorpse();
             corpse->GetPosition( loc );
             m_bot->TeleportTo( loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, m_bot->GetOrientation() );
             // set state to released
