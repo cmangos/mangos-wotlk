@@ -17,6 +17,7 @@ class CharacterHandler;
 PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master) 
 {
     // load config variables
+	m_confDisableBots = sConfig.GetBoolDefault( "PlayerbotAI.DisableBots", false );
     m_confDebugWhisper = sConfig.GetBoolDefault( "PlayerbotAI.DebugWhisper", false );
     m_confFollowDistance[0] = sConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 0.5f );
     m_confFollowDistance[1] = sConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 1.0f );
@@ -481,6 +482,13 @@ void PlayerbotMgr::RemoveAllBotsFromGroup()
 
 bool ChatHandler::HandlePlayerbotCommand(const char* args)
 {
+	if(sConfig.GetBoolDefault("PlayerbotAI.DisableBots", false))
+	{
+		PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
+        SetSentErrorMessage(true);
+        return false;
+	}
+
     if (! m_session)
     {
         PSendSysMessage("You may only add bots from an active session");
@@ -612,6 +620,7 @@ void Creature::LoadBotMenu(Player *pPlayer)
         }
         else
         {
+			if(sConfig.GetBoolDefault("PlayerbotAI.DisableBots", false)) return;
             // create the manager if it doesn't already exist
             if (! pPlayer->GetPlayerbotMgr())
                 pPlayer->SetPlayerbotMgr(new PlayerbotMgr(pPlayer));

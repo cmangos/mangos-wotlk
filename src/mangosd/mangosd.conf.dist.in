@@ -1378,6 +1378,11 @@ Ra.Secure = 1
 ###################################################################################################################
 # PLAYERBOTAI CONFIGURATION
 #
+#    PlayerbotAI.DisableBots
+#        Disable the bot command and bot menu
+#        Default: 0 - off
+#                 1 - on
+#
 #    PlayerbotAI.DebugWhisper
 #        Enable debug output by whispering master
 #        Default: 0 - off
@@ -1385,10 +1390,11 @@ Ra.Secure = 1
 #
 #    PlayerbotAI.FollowDistanceMin
 #    PlayerbotAI.FollowDistanceMax
-#        Min. and max. follow distance for bots
+#        Min. and Max. follow distance for bots
 #        Default: 0.5 / 1.0
 ###################################################################################################################
 
-PlayerbotAI.DebugWhisper = 1
+PlayerbotAI.DisableBots = 0
+PlayerbotAI.DebugWhisper = 0
 PlayerbotAI.FollowDistanceMin = 0.5
 PlayerbotAI.FollowDistanceMax = 1.0

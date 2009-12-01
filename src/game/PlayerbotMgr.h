@@ -43,6 +43,7 @@ class MANGOS_DLL_SPEC PlayerbotMgr
 
     public:
         // config variables
+		bool m_confDisableBots;
         bool m_confDebugWhisper;
         float m_confFollowDistance[2];
 
