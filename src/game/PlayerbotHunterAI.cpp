@@ -12,7 +12,7 @@ PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, Pl
     PET_DISMISS          = ai->getSpellId("dismiss pet");
     PET_REVIVE           = ai->getSpellId("revive pet");
     PET_MEND             = ai->getSpellId("mend pet");
-	PET_FEED             = 1539;
+    PET_FEED             = 1539;
 
     // PET SKILLS
 	INTIMIDATION         = ai->getSpellId("intimidation"); // (generic)
@@ -355,63 +355,63 @@ void PlayerbotHunterAI::DoNonCombatActions()
                 ai->TellMaster( "healing pet." );
         }
         else if(pet->GetHappinessState() != HAPPY) // if pet is hungry
-		{
-			// list out items in main backpack
-			for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
-			{
-				Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
-				if (pItem)
-				{
-					const ItemPrototype* const pItemProto = pItem->GetProto();
-				if (!pItemProto )
-					continue;
+        {
+            // list out items in main backpack
+            for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
+            {
+                Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+                if (pItem)
+                {
+                    const ItemPrototype* const pItemProto = pItem->GetProto();
+                    if (!pItemProto )
+                        continue;
 
-				if(pet->HaveInDiet(pItemProto)) // is pItem in pets diet
-					{
-						//sLog.outDebug("Food for pet: %s",pItemProto->Name1);
-						uint32 count = 1; // number of items used 
-						int32 benefit = pet->GetCurrentFoodBenefitLevel(pItemProto->ItemLevel); // nutritional value of food
-						m_bot->DestroyItemCount(pItem,count,true); // remove item from inventory
-						m_bot->CastCustomSpell(m_bot,PET_FEED,&benefit,NULL,NULL,true); // feed pet
-						ai->TellMaster( "feeding pet." );
-						ai->SetIgnoreUpdateTime(10);
-						return;
-					}
-				}
-			}
-			// list out items in other removable backpacks
-			for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
-			{
-				const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
-				if (pBag)
-				{
-					for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
-					{
-						Item* const pItem = m_bot->GetItemByPos(bag, slot);
-						if (pItem)
-						{
-							const ItemPrototype* const pItemProto = pItem->GetProto();
-							if (!pItemProto )
-								continue;
+                    if(pet->HaveInDiet(pItemProto)) // is pItem in pets diet
+                    {
+                        //sLog.outDebug("Food for pet: %s",pItemProto->Name1);
+                        uint32 count = 1; // number of items used 
+                        int32 benefit = pet->GetCurrentFoodBenefitLevel(pItemProto->ItemLevel); // nutritional value of food
+                        m_bot->DestroyItemCount(pItem,count,true); // remove item from inventory
+                        m_bot->CastCustomSpell(m_bot,PET_FEED,&benefit,NULL,NULL,true); // feed pet
+                        ai->TellMaster( "feeding pet." );
+                        ai->SetIgnoreUpdateTime(10);
+                        return;
+                    }
+                }
+            }
+            // list out items in other removable backpacks
+            for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
+            {
+                const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+                if (pBag)
+                {
+                    for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
+                    {
+                        Item* const pItem = m_bot->GetItemByPos(bag, slot);
+                        if (pItem)
+                        {
+                            const ItemPrototype* const pItemProto = pItem->GetProto();
+                            if (!pItemProto )
+                                continue;
 
-                      if(pet->HaveInDiet(pItemProto)) // is pItem in pets diet
-						  {
-							  //sLog.outDebug("Food for pet: %s",pItemProto->Name1);
-							  uint32 count = 1; // number of items used
-							  int32 benefit = pet->GetCurrentFoodBenefitLevel(pItemProto->ItemLevel); // nutritional value of food
-							  m_bot->DestroyItemCount(pItem,count,true); // remove item from inventory
-							  m_bot->CastCustomSpell(m_bot,PET_FEED,&benefit,NULL,NULL,true); // feed pet
-							  ai->TellMaster( "feeding pet." );
-							  ai->SetIgnoreUpdateTime(10);
-							  return;
-						  }
-					 }
-				}
-			}
-		}
+                            if(pet->HaveInDiet(pItemProto)) // is pItem in pets diet
+                            {
+                                //sLog.outDebug("Food for pet: %s",pItemProto->Name1);
+                                uint32 count = 1; // number of items used
+                                int32 benefit = pet->GetCurrentFoodBenefitLevel(pItemProto->ItemLevel); // nutritional value of food
+                                m_bot->DestroyItemCount(pItem,count,true); // remove item from inventory
+                                m_bot->CastCustomSpell(m_bot,PET_FEED,&benefit,NULL,NULL,true); // feed pet
+                                ai->TellMaster( "feeding pet." );
+                                ai->SetIgnoreUpdateTime(10);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
             if( pet->HasAura(PET_MEND,0) && !pet->HasAura(PET_FEED,0) )
                 ai->TellMaster( "..no pet food!" );
-			    ai->SetIgnoreUpdateTime(7);
+            ai->SetIgnoreUpdateTime(7);
         }
     }
 } // end DoNonCombatActions

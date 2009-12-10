@@ -273,8 +273,8 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
     if(pCreature->isBotGiver())
     {
         GetPlayer()->TalkedToCreature(pCreature->GetEntry(),pCreature->GetGUID());
-        pCreature->prepareGossipMenu(GetPlayer(),GOSSIP_OPTION_BOT);
-        pCreature->sendPreparedGossip(GetPlayer());
+        _player->PrepareGossipMenu(pCreature,GOSSIP_OPTION_BOT);
+        _player->SendPreparedGossip(pCreature);
         pCreature->StopMoving();
     }
     else if (!pCreature->IsStopped())
@@ -320,6 +320,24 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
+    // Playerbot mod
+    if(pCreature->isBotGiver() && !_player->GetPlayerbotAI())
+    {
+        if (!_player->GetPlayerbotMgr())
+            _player->SetPlayerbotMgr(new PlayerbotMgr(_player));
+        WorldSession * m_session = _player->GetSession();
+        uint64 guidlo = _player->PlayerTalkClass->GossipOptionSender(gossipListId);
+        if(_player->GetPlayerbotMgr()->GetPlayerBot(guidlo) != NULL)
+        {
+            _player->GetPlayerbotMgr()->LogoutPlayerBot(guidlo);
+        }
+        else if(_player->GetPlayerbotMgr()->GetPlayerBot(guidlo) == NULL)
+        {
+            _player->GetPlayerbotMgr()->AddPlayerBot(guidlo);
+        }
+        _player->PlayerTalkClass->CloseGossip();
+    }
 
     if (!code.empty())
     {

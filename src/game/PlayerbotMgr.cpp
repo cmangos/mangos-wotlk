@@ -281,65 +281,46 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             }
             return;
         }
-		case CMSG_LOOT_ROLL:
-		{
+        case CMSG_LOOT_ROLL:
+        {
 
-			WorldPacket p(packet); //WorldPacket packet for CMSG_LOOT_ROLL, (8+4+1)
-			uint64 Guid;
-			uint32 NumberOfPlayers;
-			uint8 rollType;
-			p.rpos(0); //reset packet pointer
-			p >> Guid; //guid of the item rolled
-			p >> NumberOfPlayers; //number of players invited to roll
-			p >> rollType; //need,greed or pass on roll
+            WorldPacket p(packet); //WorldPacket packet for CMSG_LOOT_ROLL, (8+4+1)
+            uint64 Guid;
+            uint32 NumberOfPlayers;
+            uint8 rollType;
+            p.rpos(0); //reset packet pointer
+            p >> Guid; //guid of the item rolled
+            p >> NumberOfPlayers; //number of players invited to roll
+            p >> rollType; //need,greed or pass on roll
 
 
-			for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
-				{
+            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
 
-					uint32 choice = urand(0,2); //returns 0,1,or 2
+                uint32 choice = urand(0,2); //returns 0,1,or 2
 
-					Player* const bot = it->second;
-					if(!bot)
-						return;
+                Player* const bot = it->second;
+                if(!bot)
+                    return;
 
-					Group* group = bot->GetGroup();
-					if(!group)
-						return;
+                Group* group = bot->GetGroup();
+                if(!group)
+                    return;
 
-					switch (group->GetLootMethod())
-						{
-						case GROUP_LOOT:
-							// bot random roll
-							group->CountRollVote(bot->GetGUID(), Guid, NumberOfPlayers, choice);
-							break;
-						case NEED_BEFORE_GREED:
-							choice = 1;
-							// bot need roll
-							group->CountRollVote(bot->GetGUID(), Guid, NumberOfPlayers, choice);
-							break;
-						case MASTER_LOOT:
-							choice = 0;
-							// bot pass on roll
-							group->CountRollVote(bot->GetGUID(), Guid, NumberOfPlayers, choice);
-							break;
-						default:
-							break;
-						}
+                group->CountRollVote(bot->GetGUID(), Guid, NumberOfPlayers, choice);
 
-					switch (rollType)
-						{
-						case ROLL_NEED:
-							bot->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_NEED, 1);
-							break;
-						case ROLL_GREED:
-							bot->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_GREED, 1);
-							break;
-						}
-
-				}
-		return;
-		}
+                switch (choice)
+                {
+                    case ROLL_NEED:
+                        bot->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_NEED, 1);
+                        break;
+                    case ROLL_GREED:
+                        bot->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_GREED, 1);
+                        break;
+                }
+            }
+            return;
+        }
 
 
         /*
