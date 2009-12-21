@@ -581,11 +581,13 @@ void Spell::FillTargetMap()
                             SetTargetMap(i, m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
                         }
                         break;
+                    case 0:
+                        SetTargetMap(i, m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
+                        tmpUnitMap.push_back(m_caster);
+                        break;
                     default:
-                        {
-                            SetTargetMap(i, m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                            SetTargetMap(i, m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
-                        }
+                        SetTargetMap(i, m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
+                        SetTargetMap(i, m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
                         break;
                 }
                 break;
@@ -685,6 +687,9 @@ void Spell::prepareDataForTriggerSystem()
                     m_canTrigger = true;
                 // Clearcasting trigger need do it
                 else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000200000000) && m_spellInfo->SpellFamilyFlags2 & 0x8)
+                    m_canTrigger = true;
+                // Replenish Mana, item spell with triggered cases (Mana Agate, etc mana gems)
+                else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000010000000000))
                     m_canTrigger = true;
                 break;
             case SPELLFAMILY_WARLOCK: // For Hellfire Effect / Rain of Fire / Seed of Corruption triggers need do it
@@ -1301,7 +1306,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
     {
         case SPELLFAMILY_DRUID:
             // Starfall
-            if (m_spellInfo->SpellFamilyFlags2 & UI64LIT(0x00000100))
+            if (m_spellInfo->SpellFamilyFlags2 & 0x00000100)
                 unMaxTargets = 2;
             break;
         default:
@@ -2417,11 +2422,10 @@ void Spell::cancel()
                 {
                     Unit* unit = m_caster->GetGUID()==(*ihit).targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, ihit->targetGUID);
                     if( unit && unit->isAlive() )
-                        unit->RemoveAurasDueToSpell(m_spellInfo->Id);
+                        unit->RemoveAurasByCasterSpell(m_spellInfo->Id,m_caster->GetGUID());
                 }
             }
 
-            m_caster->RemoveAurasDueToSpell(m_spellInfo->Id);
             SendChannelUpdate(0);
             SendInterrupted(0);
             SendCastResult(SPELL_FAILED_INTERRUPTED);
@@ -2521,6 +2525,13 @@ void Spell::cast(bool skipCheck)
                 case 48078: AddTriggeredSpell(48076); break;// Holy Nova, rank 9
                 default:break;
             }
+            break;
+        }
+        case SPELLFAMILY_DRUID:
+        {
+            // Faerie Fire (Feral)
+            if (m_spellInfo->Id == 16857 && m_caster->m_form != FORM_CAT)
+                AddTriggeredSpell(60089);
             break;
         }
         case SPELLFAMILY_ROGUE:
@@ -3441,6 +3452,13 @@ void Spell::SendChannelUpdate(uint32 time)
 {
     if(time == 0)
     {
+        m_caster->RemoveAurasByCasterSpell(m_spellInfo->Id,m_caster->GetGUID());
+
+        if(uint64 target_guid = m_caster->GetChannelObjectGUID())
+            if(target_guid != m_caster->GetGUID() && IS_UNIT_GUID(target_guid))
+                if(Unit* target = ObjectAccessor::GetUnit(*m_caster, target_guid))
+                    target->RemoveAurasByCasterSpell(m_spellInfo->Id,m_caster->GetGUID());
+
         m_caster->SetChannelObjectGUID(0);
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
     }
@@ -4061,20 +4079,34 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
         }
 
-        // TODO: this check can be applied and for player to prevent cheating when IsPositiveSpell will return always correct result.
-        // check target for pet/charmed casts (not self targeted), self targeted cast used for area effects and etc
-        if(non_caster_target && m_caster->GetTypeId() == TYPEID_UNIT && m_caster->GetCharmerOrOwnerGUID())
+        if(non_caster_target)
         {
-            // check correctness positive/negative cast target (pet cast real check and cheating check)
-            if(IsPositiveSpell(m_spellInfo->Id))
+            // simple cases
+            if (IsExplicitPositiveTarget(m_spellInfo->EffectImplicitTargetA[0]))
             {
                 if(m_caster->IsHostileTo(target))
                     return SPELL_FAILED_BAD_TARGETS;
             }
-            else
+            else if (IsExplicitNegativeTarget(m_spellInfo->EffectImplicitTargetA[0]))
             {
                 if(m_caster->IsFriendlyTo(target))
                     return SPELL_FAILED_BAD_TARGETS;
+            }
+            // TODO: this check can be applied and for player to prevent cheating when IsPositiveSpell will return always correct result.
+            // check target for pet/charmed casts (not self targeted), self targeted cast used for area effects and etc
+            else if (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->GetCharmerOrOwnerGUID())
+            {
+                // check correctness positive/negative cast target (pet cast real check and cheating check)
+                if(IsPositiveSpell(m_spellInfo->Id))
+                {
+                    if(m_caster->IsHostileTo(target))
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+                else
+                {
+                    if(m_caster->IsFriendlyTo(target))
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
             }
         }
 
@@ -4311,7 +4343,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
                     Pet* target = m_caster->GetMap()->GetPet(((Player*)m_caster)->GetSelection());
 
-                    // alive 
+                    // alive
                     if (!target || target->isDead())
                         return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
                     // undead
@@ -5251,11 +5283,11 @@ SpellCastResult Spell::CheckItems()
     {
         uint32 itemid = m_CastItem->GetEntry();
         if( !p_caster->HasItemCount(itemid, 1) )
-            return SPELL_FAILED_ITEM_NOT_READY;
+            return SPELL_FAILED_ITEM_NOT_FOUND;
 
         ItemPrototype const *proto = m_CastItem->GetProto();
         if(!proto)
-            return SPELL_FAILED_ITEM_NOT_READY;
+            return SPELL_FAILED_ITEM_NOT_FOUND;
 
         for (int i = 0; i < 5; ++i)
             if (proto->Spells[i].SpellCharges)
@@ -5371,7 +5403,7 @@ SpellCastResult Spell::CheckItems()
             {
                 ItemPrototype const *proto = m_CastItem->GetProto();
                 if(!proto)
-                    return SPELL_FAILED_ITEM_NOT_READY;
+                    return SPELL_FAILED_REAGENTS;
                 for(int s = 0; s < MAX_ITEM_PROTO_SPELLS; ++s)
                 {
                     // CastItem will be used up and does not count as reagent
@@ -5384,7 +5416,7 @@ SpellCastResult Spell::CheckItems()
                 }
             }
             if( !p_caster->HasItemCount(itemid, itemcount) )
-                return SPELL_FAILED_ITEM_NOT_READY;         //0x54
+                return SPELL_FAILED_REAGENTS;
         }
     }
 
@@ -5563,8 +5595,8 @@ SpellCastResult Spell::CheckItems()
                 if(m_caster->GetTypeId() != TYPEID_PLAYER) return SPELL_FAILED_TARGET_NOT_PLAYER;
                 if( m_attackType != RANGED_ATTACK )
                     break;
-                Item *pItem = ((Player*)m_caster)->GetWeaponForAttack(m_attackType);
-                if(!pItem || pItem->IsBroken())
+                Item *pItem = ((Player*)m_caster)->GetWeaponForAttack(m_attackType,true,false);
+                if (!pItem)
                     return SPELL_FAILED_EQUIPPED_ITEM;
 
                 switch(pItem->GetProto()->SubClass)
@@ -5740,7 +5772,10 @@ void Spell::UpdatePointers()
 
 bool Spell::IsAffectedByAura(Aura *aura) const
 {
-    return sSpellMgr.IsAffectedByMod(m_spellInfo, aura->getAuraSpellMod());
+    if(SpellModifier* mod = aura->getAuraSpellMod())
+        return mod->isAffectedOnSpell(m_spellInfo);
+    else
+        return false;
 }
 
 bool Spell::CheckTargetCreatureType(Unit* target) const

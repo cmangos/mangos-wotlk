@@ -365,16 +365,12 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 }
                 break;
             }
-
             case SPELLFAMILY_MAGE:
-            {
-                // Arcane Blast
-                if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x20000000))
-                {
-                    m_caster->CastSpell(m_caster, 36032, true);
-                }
+                // remove Arcane Blast buffs at any non-Arcane Blast arcane damage spell.
+                // NOTE: it removed at hit instead cast because currently spell done-damage calculated at hit instead cast
+                if ((m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_ARCANE) && !(m_spellInfo->SpellFamilyFlags & UI64LIT(0x20000000)))
+                    m_caster->RemoveAurasDueToSpell(36032); // Arcane Blast buff
                 break;
-            }
             case SPELLFAMILY_WARRIOR:
             {
                 // Bloodthirst
@@ -475,6 +471,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                     // found Immolate or Shadowflame
                     if (aura)
                     {
+                        // DoT not have applied spell bonuses in m_amount
                         int32 damagetick = m_caster->SpellDamageBonus(unitTarget, aura->GetSpellProto(), aura->GetModifier()->m_amount, DOT);
                         damage += damagetick * 4;
 
@@ -630,7 +627,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x100000000))
                 {
                     int32 base = irand((int32)m_caster->GetWeaponDamageRange(RANGED_ATTACK, MINDAMAGE),(int32)m_caster->GetWeaponDamageRange(RANGED_ATTACK, MAXDAMAGE));
-                    damage += int32(float(base)/m_caster->GetAttackTime(RANGED_ATTACK)*2800 + m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2f);
+                    damage += int32(float(base)/m_caster->GetAttackTime(RANGED_ATTACK)*2800 + m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.1f);
                 }
                 // Explosive Trap Effect
                 else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x00000004))
@@ -670,22 +667,6 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                     // + 10% for each application of Holy Vengeance on the target
                     if(stacks)
                         damage += damage * stacks * 10 /100;
-                }
-                // Avenger's Shield ($m1+0.07*$SPH+0.07*$AP) - ranged sdb for future
-                else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000004000))
-                {
-                    float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    int32 holy = m_caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellInfo)) +
-                                 m_caster->SpellBaseDamageBonusForVictim(GetSpellSchoolMask(m_spellInfo), unitTarget);
-                    damage += int32(ap * 0.07f) + int32(holy * 7 / 100);
-                }
-                // Hammer of Wrath ($m1+0.15*$SPH+0.15*$AP) - ranged type sdb future fix
-                else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000008000000000))
-                {
-                    float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    int32 holy = m_caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellInfo)) +
-                                 m_caster->SpellBaseDamageBonusForVictim(GetSpellSchoolMask(m_spellInfo), unitTarget);
-                    damage += int32(ap * 0.15f) + int32(holy * 15 / 100);
                 }
                 // Hammer of the Righteous
                 else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0004000000000000))
@@ -2223,10 +2204,10 @@ void Spell::EffectTriggerSpell(uint32 effIndex)
         // main hand weapon required
         if (spellInfo->AttributesEx3 & SPELL_ATTR_EX3_MAIN_HAND)
         {
-            Item* item = ((Player*)m_caster)->GetWeaponForAttack(BASE_ATTACK);
+            Item* item = ((Player*)m_caster)->GetWeaponForAttack(BASE_ATTACK, true, false);
 
             // skip spell if no weapon in slot or broken
-            if (!item || item->IsBroken() )
+            if (!item)
                 return;
 
             // skip spell if weapon not fit to triggered spell
@@ -2237,10 +2218,10 @@ void Spell::EffectTriggerSpell(uint32 effIndex)
         // offhand hand weapon required
         if (spellInfo->AttributesEx3 & SPELL_ATTR_EX3_REQ_OFFHAND)
         {
-            Item* item = ((Player*)m_caster)->GetWeaponForAttack(OFF_ATTACK);
+            Item* item = ((Player*)m_caster)->GetWeaponForAttack(OFF_ATTACK, true, false);
 
             // skip spell if no weapon in slot or broken
-            if (!item || item->IsBroken() )
+            if (!item)
                 return;
 
             // skip spell if weapon not fit to triggered spell
@@ -3414,16 +3395,15 @@ void Spell::EffectSummonType(uint32 i)
         {
             switch(summon_prop->Type)
             {
-                case SUMMON_PROP_TYPE_SIEGE_VEH:
-                case SUMMON_PROP_TYPE_DRAKE_VEH:
+                case SUMMON_PROP_TYPE_OTHER:
                 {
-                    // TODO
-                    // EffectSummonVehicle(i);
-                    break;
-                }
-                case SUMMON_PROP_TYPE_TOTEM:
-                {
-                    EffectSummonTotem(i, summon_prop->Slot);
+                    // those are classical totems - effectbasepoints is their hp and not summon ammount!
+                    //SUMMON_TYPE_TOTEM = 121: 23035, battlestands
+                    //SUMMON_TYPE_TOTEM2 = 647: 52893, Anti-Magic Zone (npc used)
+                    if(prop_id == 121 || prop_id == 647)
+                        EffectSummonTotem(i);
+                    else
+                        EffectSummonWild(i, summon_prop->FactionId);
                     break;
                 }
                 case SUMMON_PROP_TYPE_SUMMON:
@@ -3441,24 +3421,22 @@ void Spell::EffectSummonType(uint32 i)
                         EffectSummonGuardian(i, summon_prop->FactionId);
                     break;
                 }
+                case SUMMON_PROP_TYPE_TOTEM:
+                    EffectSummonTotem(i, summon_prop->Slot);
+                    break;
                 case SUMMON_PROP_TYPE_CRITTER:
-                {
                     EffectSummonCritter(i, summon_prop->FactionId);
                     break;
-                }
-                case SUMMON_PROP_TYPE_OTHER:
                 case SUMMON_PROP_TYPE_PHASING:
                 case SUMMON_PROP_TYPE_LIGHTWELL:
-                {
-                    // those are classical totems - effectbasepoints is their hp and not summon ammount!
-                    //SUMMON_TYPE_TOTEM = 121: 23035, battlestands
-                    //SUMMON_TYPE_TOTEM2 = 647: 52893, Anti-Magic Zone (npc used)
-                    if(prop_id == 121 || prop_id == 647)
-                        EffectSummonTotem(i);
-                    else
-                        EffectSummonWild(i, summon_prop->FactionId);
+                case SUMMON_PROP_TYPE_REPAIR_BOT:
+                    EffectSummonWild(i, summon_prop->FactionId);
                     break;
-                }
+                case SUMMON_PROP_TYPE_SIEGE_VEH:
+                case SUMMON_PROP_TYPE_DRAKE_VEH:
+                    // TODO
+                    // EffectSummonVehicle(i);
+                    break;
                 default:
                     sLog.outError("EffectSummonType: Unhandled summon type %u", summon_prop->Type);
                 break;
@@ -4583,14 +4561,8 @@ void Spell::EffectWeaponDmg(uint32 i)
     {
         case SPELLFAMILY_WARRIOR:
         {
-            // Whirlwind, single only spell with 2 weapon white damage apply if have
-            if(m_caster->GetTypeId()==TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags & UI64LIT(0x00000400000000)))
-            {
-                if(((Player*)m_caster)->GetWeaponForAttack(OFF_ATTACK,true))
-                    spell_bonus += m_caster->CalculateDamage (OFF_ATTACK, normalized);
-            }
             // Devastate bonus and sunder armor refresh
-            else if(m_spellInfo->SpellVisual[0] == 12295 && m_spellInfo->SpellIconID == 1508)
+            if(m_spellInfo->SpellVisual[0] == 12295 && m_spellInfo->SpellIconID == 1508)
             {
                 uint32 stack = 0;
                 // Need refresh all Sunder Armor auras from this caster
@@ -4646,7 +4618,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             // Fan of Knives
             else if (m_caster->GetTypeId()==TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0004000000000000)))
             {
-                Item* weapon = ((Player*)m_caster)->GetWeaponForAttack(m_attackType,true);
+                Item* weapon = ((Player*)m_caster)->GetWeaponForAttack(m_attackType,true,true);
                 if (weapon && weapon->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
                     totalDamagePercentMod *= 1.5f;          // 150% to daggers
             }
@@ -4821,13 +4793,13 @@ void Spell::EffectWeaponDmg(uint32 i)
     // take ammo
     if(m_attackType == RANGED_ATTACK && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        Item *pItem = ((Player*)m_caster)->GetWeaponForAttack( RANGED_ATTACK );
+        Item *pItem = ((Player*)m_caster)->GetWeaponForAttack(RANGED_ATTACK, true, false);
 
         // wands don't have ammo
-        if(!pItem  || pItem->IsBroken() || pItem->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_WAND)
+        if (!pItem || pItem->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_WAND)
             return;
 
-        if( pItem->GetProto()->InventoryType == INVTYPE_THROWN )
+        if (pItem->GetProto()->InventoryType == INVTYPE_THROWN)
         {
             if(pItem->GetMaxStackCount()==1)
             {
@@ -5467,19 +5439,35 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                         // Serpent Sting - Instantly deals 40% of the damage done by your Serpent Sting.
                         if ((familyFlag & UI64LIT(0x0000000000004000)) && aura->GetEffIndex() == 0)
                         {
-                            spellId = 53353; // 53353 Chimera Shot - Serpent
+                            // m_amount already include RAP bonus
                             basePoint = aura->GetModifier()->m_amount * 5 * 40 / 100;
+                            spellId = 53353;                // Chimera Shot - Serpent
                         }
                         // Viper Sting - Instantly restores mana to you equal to 60% of the total amount drained by your Viper Sting.
                         if ((familyFlag & UI64LIT(0x0000008000000000)) && aura->GetEffIndex() == 0)
                         {
-                            spellId = 53358; // 53358 Chimera Shot - Viper
-                            basePoint = aura->GetModifier()->m_amount * 4 * 60 / 100;
+                            uint32 target_max_mana = unitTarget->GetMaxPower(POWER_MANA);
+                            if (!target_max_mana)
+                                continue;
+
+                            // ignore non positive values (can be result apply spellmods to aura damage
+                            uint32 pdamage = aura->GetModifier()->m_amount > 0 ? aura->GetModifier()->m_amount : 0;
+
+                            // Special case: draining x% of mana (up to a maximum of 2*x% of the caster's maximum mana)
+                            uint32 maxmana = m_caster->GetMaxPower(POWER_MANA)  * pdamage * 2 / 100;
+
+                            pdamage = target_max_mana * pdamage / 100;
+                            if (pdamage > maxmana)
+                                pdamage = maxmana;
+
+                            pdamage *= 4;                   // total aura damage
+                            basePoint = pdamage * 60 / 100;
+                            spellId = 53358;                // Chimera Shot - Viper
                             target = m_caster;
                         }
                         // Scorpid Sting - Attempts to Disarm the target for 10 sec. This effect cannot occur more than once per 1 minute.
                         if (familyFlag & UI64LIT(0x0000000000008000))
-                            spellId = 53359; // 53359 Chimera Shot - Scorpid
+                            spellId = 53359;                // Chimera Shot - Scorpid
                         // ?? nothing say in spell desc (possibly need addition check)
                         //if ((familyFlag & UI64LIT(0x0000010000000000)) || // dot
                         //    (familyFlag & UI64LIT(0x0000100000000000)))   // stun

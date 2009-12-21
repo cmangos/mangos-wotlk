@@ -278,6 +278,33 @@ std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
     return ss;
 }
 
+SpellModifier::SpellModifier( SpellModOp _op, SpellModType _type, int32 _value, SpellEntry const* spellEntry, uint8 eff, int16 _charges /*= 0*/ ) : op(_op), type(_type), charges(_charges), value(_value), spellId(spellEntry->Id), lastAffected(NULL)
+{
+    uint32 const* ptr = spellEntry->GetEffectSpellClassMask(eff);
+    mask = uint64(ptr[0]) | (uint64(ptr[1]) << 32);
+    mask2= ptr[2];
+}
+
+SpellModifier::SpellModifier( SpellModOp _op, SpellModType _type, int32 _value, Aura const* aura, int16 _charges /*= 0*/ ) : op(_op), type(_type), charges(_charges), value(_value), spellId(aura->GetId()), lastAffected(NULL)
+{
+    uint32 const* ptr = aura->getAuraSpellClassMask();
+    mask = uint64(ptr[0]) | (uint64(ptr[1]) << 32);
+    mask2= ptr[2];
+}
+
+bool SpellModifier::isAffectedOnSpell( SpellEntry const *spell ) const
+{
+    SpellEntry const *affect_spell = sSpellStore.LookupEntry(spellId);
+    // False if affect_spell == NULL or spellFamily not equal
+    if (!affect_spell || affect_spell->SpellFamilyName != spell->SpellFamilyName)
+        return false;
+    if (mask & spell->SpellFamilyFlags)
+        return true;
+    if (mask2 & spell->SpellFamilyFlags2)
+        return true;
+    return false;
+}
+
 //== Player ====================================================
 
 UpdateMask Player::updateVisualBits;
@@ -2117,6 +2144,12 @@ Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
     if (npcflagmask && !unit->HasFlag( UNIT_NPC_FLAGS, npcflagmask ))
         return NULL;
 
+    if (npcflagmask == UNIT_NPC_FLAG_STABLEMASTER)
+    {
+        if (getClass() != CLASS_HUNTER)
+            return NULL;
+    }
+
     // if a dead unit should be able to talk - the creature must be alive and have special flags
     if (!unit->isAlive())
         return NULL;
@@ -2146,14 +2179,14 @@ Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
     return unit;
 }
 
-GameObject* Player::GetGameObjectIfCanInteractWith(uint64 guid, GameobjectTypes type) const
+GameObject* Player::GetGameObjectIfCanInteractWith(uint64 guid, uint32 gameobject_type) const
 {
-    if(GameObject *go = GetMap()->GetGameObject(guid))
+    if (GameObject *go = GetMap()->GetGameObject(guid))
     {
-        if(go->GetGoType() == type)
+        if (uint32(go->GetGoType()) == gameobject_type || gameobject_type == MAX_GAMEOBJECT_TYPE)
         {
             float maxdist;
-            switch(type)
+            switch(go->GetGoType())
             {
                 // TODO: find out how the client calculates the maximal usage distance to spellless working
                 // gameobjects like guildbanks and mailboxes - 10.0 is a just an abitrary choosen number
@@ -2169,10 +2202,10 @@ GameObject* Player::GetGameObjectIfCanInteractWith(uint64 guid, GameobjectTypes 
                     break;
             }
 
-            if (go->IsWithinDistInMap(this, maxdist))
+            if (go->IsWithinDistInMap(this, maxdist) && go->isSpawned())
                 return go;
 
-            sLog.outError("IsGameObjectOfTypeInRange: GameObject '%s' [GUID: %u] is too far away from player %s [GUID: %u] to be used by him (distance=%f, maximal 10 is allowed)", go->GetGOInfo()->name,
+            sLog.outError("GetGameObjectIfCanInteractWith: GameObject '%s' [GUID: %u] is too far away from player %s [GUID: %u] to be used by him (distance=%f, maximal 10 is allowed)", go->GetGOInfo()->name,
                 go->GetGUIDLow(), GetName(), GetGUIDLow(), go->GetDistance(this));
         }
     }
@@ -3211,7 +3244,7 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
     GetSession()->SendPacket(&data);
 }
 
-void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
+void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bool sendUpdate)
 {
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr == m_spells.end())
@@ -3390,7 +3423,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
     }
 
     // remove from spell book if not replaced by lesser rank
-    if(!prev_activate)
+    if (!prev_activate && sendUpdate)
     {
         WorldPacket data(SMSG_REMOVED_SPELL, 4);
         data << uint32(spell_id);
@@ -5038,8 +5071,8 @@ void Player::SetRegularAttackTime()
 {
     for(int i = 0; i < MAX_ATTACK; ++i)
     {
-        Item *tmpitem = GetWeaponForAttack(WeaponAttackType(i));
-        if(tmpitem && !tmpitem->IsBroken())
+        Item *tmpitem = GetWeaponForAttack(WeaponAttackType(i),true,false);
+        if (tmpitem)
         {
             ItemPrototype const *proto = tmpitem->GetProto();
             if(proto->Delay)
@@ -5245,7 +5278,7 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
     {
         case BASE_ATTACK:
         {
-            Item *tmpitem = GetWeaponForAttack(attType,true);
+            Item *tmpitem = GetWeaponForAttack(attType,true,true);
 
             if (!tmpitem)
                 UpdateSkill(SKILL_UNARMED,weapon_skill_gain);
@@ -5256,7 +5289,7 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
         case OFF_ATTACK:
         case RANGED_ATTACK:
         {
-            Item *tmpitem = GetWeaponForAttack(attType,true);
+            Item *tmpitem = GetWeaponForAttack(attType,true,true);
             if (tmpitem)
                 UpdateSkill(tmpitem->GetSkill(),weapon_skill_gain);
             break;
@@ -7064,8 +7097,8 @@ void Player::UpdateEquipSpellsAtFormChange()
 
 void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
 {
-    Item *item = GetWeaponForAttack(attType, false);
-    if(!item || item->IsBroken())
+    Item *item = GetWeaponForAttack(attType, true, false);
+    if(!item)
         return;
 
     ItemPrototype const *proto = item->GetProto();
@@ -7385,8 +7418,8 @@ bool Player::CheckAmmoCompatibility(const ItemPrototype *ammo_proto) const
         return false;
 
     // check ranged weapon
-    Item *weapon = GetWeaponForAttack( RANGED_ATTACK );
-    if(!weapon  || weapon->IsBroken() )
+    Item *weapon = GetWeaponForAttack( RANGED_ATTACK, true, false );
+    if (!weapon)
         return false;
 
     ItemPrototype const* weapon_proto = weapon->GetProto();
@@ -8203,14 +8236,14 @@ void Player::SetSheath( SheathState sheathed )
             break;
         case SHEATH_STATE_MELEE:                            // prepared melee weapon
         {
-            SetVirtualItemSlot(0,GetWeaponForAttack(BASE_ATTACK,true));
-            SetVirtualItemSlot(1,GetWeaponForAttack(OFF_ATTACK,true));
+            SetVirtualItemSlot(0,GetWeaponForAttack(BASE_ATTACK,true,true));
+            SetVirtualItemSlot(1,GetWeaponForAttack(OFF_ATTACK,true,true));
             SetVirtualItemSlot(2,NULL);
         };  break;
         case SHEATH_STATE_RANGED:                           // prepared ranged weapon
             SetVirtualItemSlot(0,NULL);
             SetVirtualItemSlot(1,NULL);
-            SetVirtualItemSlot(2,GetWeaponForAttack(RANGED_ATTACK,true));
+            SetVirtualItemSlot(2,GetWeaponForAttack(RANGED_ATTACK,true,true));
             break;
         default:
             SetVirtualItemSlot(0,NULL);
@@ -8581,7 +8614,7 @@ Item* Player::GetItemByPos( uint8 bag, uint8 slot ) const
     return NULL;
 }
 
-Item* Player::GetWeaponForAttack(WeaponAttackType attackType, bool useable) const
+Item* Player::GetWeaponForAttack(WeaponAttackType attackType, bool nonbroken, bool useable) const
 {
     uint16 slot;
     switch (attackType)
@@ -8596,10 +8629,10 @@ Item* Player::GetWeaponForAttack(WeaponAttackType attackType, bool useable) cons
     if (!item || item->GetProto()->Class != ITEM_CLASS_WEAPON)
         return NULL;
 
-    if(!useable)
-        return item;
+    if (useable && !IsUseEquipedWeapon(attackType==BASE_ATTACK))
+        return NULL;
 
-    if( item->IsBroken() || !IsUseEquipedWeapon(attackType==BASE_ATTACK) )
+    if (nonbroken && item->IsBroken())
         return NULL;
 
     return item;
@@ -12316,11 +12349,10 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 menuId)
                     bCanTalk = false;
                     break;
                 case GOSSIP_OPTION_GOSSIP:
-                    if (pGo->GetGoType() != GAMEOBJECT_TYPE_QUESTGIVER || pGo->GetGoType() != GAMEOBJECT_TYPE_GOOBER)
+                    if (pGo->GetGoType() != GAMEOBJECT_TYPE_QUESTGIVER && pGo->GetGoType() != GAMEOBJECT_TYPE_GOOBER)
                         bCanTalk = false;
                     break;
                 default:
-                    sLog.outErrorDb("GameObject entry %u are using invalid gossip option %u for menu %u", pGo->GetEntry(), itr->second.option_id, itr->second.menu_id);
                     bCanTalk = false;
                     break;
             }
@@ -12522,7 +12554,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
 uint32 Player::GetGossipTextId(WorldObject *pSource)
 {
     if (!pSource || pSource->GetTypeId() != TYPEID_UNIT || !((Creature*)pSource)->GetDBTableGUIDLow())
-        return 0;
+        return DEFAULT_GOSSIP_MESSAGE;
 
     if (uint32 pos = sObjectMgr.GetNpcGossip(((Creature*)pSource)->GetDBTableGUIDLow()))
         return pos;
@@ -17197,7 +17229,7 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
             return false;
     }
 
-    return sSpellMgr.IsAffectedByMod(spellInfo, mod);
+    return mod->isAffectedOnSpell(spellInfo);
 }
 
 void Player::AddSpellMod(SpellModifier* mod, bool apply)
@@ -17207,9 +17239,9 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
     for(int eff=0;eff<96;++eff)
     {
         uint64 _mask = 0;
-        uint64 _mask2= 0;
+        uint32 _mask2= 0;
         if (eff<64) _mask = uint64(1) << (eff- 0);
-        else        _mask2= uint64(1) << (eff-64);
+        else        _mask2= uint32(1) << (eff-64);
         if ( mod->mask & _mask || mod->mask2 & _mask2)
         {
             int32 val = 0;
@@ -19668,7 +19700,7 @@ bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
 
 uint32 Player::GetBaseWeaponSkillValue (WeaponAttackType attType) const
 {
-    Item* item = GetWeaponForAttack(attType,true);
+    Item* item = GetWeaponForAttack(attType,true,true);
 
     // unarmed only with base attack
     if(attType != BASE_ATTACK && !item)

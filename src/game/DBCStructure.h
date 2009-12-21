@@ -1426,6 +1426,10 @@ struct SpellEntry
 
     // helpers
     int32 CalculateSimpleValue(uint8 eff) const { return EffectBasePoints[eff]+int32(EffectBaseDice[eff]); }
+    uint32 const* GetEffectSpellClassMask(uint8 effect) const
+    {
+        return EffectSpellClassMaskA + effect * 3;
+    }
 
     private:
         // prevent creating custom entries (copy data from original in fact)
@@ -1488,18 +1492,11 @@ struct SpellShapeshiftEntry
     int32  creatureType;                                    // 20 <=0 humanoid, other normal creature types
     //uint32 unk1;                                          // 21 unused
     uint32 attackSpeed;                                     // 22
-    //uint32 modelID;                                       // 23 unused, alliance modelid (where horde case?)
-    //uint32 unk2;                                          // 24 unused
-    //uint32 unk3;                                          // 25 unused
-    //uint32 unk4;                                          // 26 unused
-    //uint32 unk5;                                          // 27 unused
-    //uint32 unk6;                                          // 28 unused
-    //uint32 unk7;                                          // 29 unused
-    //uint32 unk8;                                          // 30 unused
-    //uint32 unk9;                                          // 31 unused
-    //uint32 unk10;                                         // 32 unused
-    //uint32 unk11;                                         // 33 unused
-    //uint32 unk12;                                         // 34 unused
+    uint32 modelID_A;                                       // 23 alliance modelid (0 means no model)
+    uint32 modelID_H;                                       // 24 horde modelid (but only for one form)
+    //uint32 unk3;                                          // 25 unused always 0
+    //uint32 unk4;                                          // 26 unused always 0
+    uint32 spellId[8];                                      // 27-34 spells which appear in the bar after shapeshifting
 };
 
 struct SpellDurationEntry

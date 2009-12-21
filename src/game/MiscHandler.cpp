@@ -636,7 +636,7 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket &recv_data)
     if(corpse->GetGhostTime() + GetPlayer()->GetCorpseReclaimDelay(corpse->GetType()==CORPSE_RESURRECTABLE_PVP) > time(NULL))
         return;
 
-    if (!corpse->IsWithinDist(GetPlayer(), CORPSE_RECLAIM_RADIUS, true))
+    if (!corpse->IsWithinDistInMap(GetPlayer(), CORPSE_RECLAIM_RADIUS, true))
         return;
 
     uint64 guid;
@@ -1026,9 +1026,12 @@ void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
     */
 }
 
-void WorldSession::HandleFeatherFallAck(WorldPacket &/*recv_data*/)
+void WorldSession::HandleFeatherFallAck(WorldPacket &recv_data)
 {
     DEBUG_LOG("WORLD: CMSG_MOVE_FEATHER_FALL_ACK");
+
+    // no used
+    recv_data.rpos(recv_data.wpos());                       // prevent warnings spam
 }
 
 void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)

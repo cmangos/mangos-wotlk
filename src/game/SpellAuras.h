@@ -339,7 +339,7 @@ class MANGOS_DLL_SPEC Aura
         void TriggerSpell();
         void TriggerSpellWithValue();
 
-        uint32 const *getAuraSpellClassMask() const { return  m_spellProto->EffectSpellClassMaskA + m_effIndex * 3; }
+        uint32 const *getAuraSpellClassMask() const { return  m_spellProto->GetEffectSpellClassMask(m_effIndex); }
         bool isAffectedOnSpell(SpellEntry const *spell) const;
     protected:
         Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
@@ -352,7 +352,7 @@ class MANGOS_DLL_SPEC Aura
         void PeriodicDummyTick();
 
         bool IsCritFromAbilityAura(Unit* caster, uint32& damage);
-        void ReapplyAffectedPassiveAuras(Unit* target);
+        void ReapplyAffectedPassiveAuras(Unit* target, bool owner_mode);
 
         Modifier m_modifier;
         SpellModifier *m_spellmod;

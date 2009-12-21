@@ -667,6 +667,12 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
                             if (!((Creature*)this)->isCanTrainingOf(target, false))
                                 appendValue &= ~(UNIT_NPC_FLAG_TRAINER | UNIT_NPC_FLAG_TRAINER_CLASS | UNIT_NPC_FLAG_TRAINER_PROFESSION);
                         }
+
+                        if (appendValue & UNIT_NPC_FLAG_STABLEMASTER)
+                        {
+                            if (target->getClass() != CLASS_HUNTER)
+                                appendValue &= ~UNIT_NPC_FLAG_STABLEMASTER;
+                        }
                     }
 
                     *data << uint32(appendValue);
@@ -1421,6 +1427,16 @@ bool WorldObject::isInFrontInMap(WorldObject const* target, float distance,  flo
 bool WorldObject::isInBackInMap(WorldObject const* target, float distance, float arc) const
 {
     return IsWithinDistInMap(target, distance) && !HasInArc( 2 * M_PI - arc, target );
+}
+
+bool WorldObject::isInFront(WorldObject const* target, float distance,  float arc) const
+{
+    return IsWithinDist(target, distance) && HasInArc( arc, target );
+}
+
+bool WorldObject::isInBack(WorldObject const* target, float distance, float arc) const
+{
+    return IsWithinDist(target, distance) && !HasInArc( 2 * M_PI - arc, target );
 }
 
 void WorldObject::GetRandomPoint( float x, float y, float z, float distance, float &rand_x, float &rand_y, float &rand_z) const
