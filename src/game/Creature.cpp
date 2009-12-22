@@ -1253,15 +1253,13 @@ void Creature::setDeathState(DeathState s)
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
         AddMonsterMoveFlag(MONSTER_MOVE_WALK);
 
-       // Playerbot mod
-        //SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
+        // Playerbot mod
         if(isBotGiver())
             SetUInt32Value(UNIT_NPC_FLAGS, 1);
         else
             SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
         // End Playerbot mod
 
-        SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
         Unit::setDeathState(ALIVE);
         clearUnitState(UNIT_STAT_ALL_STATE);
         i_motionMaster.Clear();
