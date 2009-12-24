@@ -429,10 +429,9 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB)
 
 bool IsExplicitPositiveTarget(uint32 targetA)
 {
-    // positive targets
+    // positive targets that in target selection code expect target in m_targers, so not that auto-select target by spell data by m_caster and etc
     switch(targetA)
     {
-        case TARGET_SELF:
         case TARGET_SINGLE_FRIEND:
         case TARGET_SINGLE_PARTY:
         case TARGET_CHAIN_HEAL:
@@ -448,7 +447,7 @@ bool IsExplicitPositiveTarget(uint32 targetA)
 
 bool IsExplicitNegativeTarget(uint32 targetA)
 {
-    // non-positive targets
+    // non-positive targets that in target selection code expect target in m_targers, so not that auto-select target by spell data by m_caster and etc
     switch(targetA)
     {
         case TARGET_CHAIN_DAMAGE:
@@ -1454,6 +1453,16 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Blink & Improved Blink
                 if( (spellInfo_1->SpellFamilyFlags & UI64LIT(0x0000000000010000)) && (spellInfo_2->SpellVisual[0] == 72 && spellInfo_2->SpellIconID == 1499) ||
                     (spellInfo_2->SpellFamilyFlags & UI64LIT(0x0000000000010000)) && (spellInfo_1->SpellVisual[0] == 72 && spellInfo_1->SpellIconID == 1499) )
+                    return false;
+
+                // Living Bomb & Ignite (Dots)
+                if( (spellInfo_1->SpellFamilyFlags & UI64LIT(0x2000000000000)) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x8000000)) ||
+                    (spellInfo_2->SpellFamilyFlags & UI64LIT(0x2000000000000)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x8000000)) )
+                    return false;
+
+                // Fireball & Pyroblast (Dots)
+                if( (spellInfo_1->SpellFamilyFlags & UI64LIT(0x1)) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x400000)) ||
+                    (spellInfo_2->SpellFamilyFlags & UI64LIT(0x1)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x400000)) )
                     return false;
             }
             // Detect Invisibility and Mana Shield (multi-family check)

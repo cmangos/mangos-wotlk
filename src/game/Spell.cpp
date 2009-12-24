@@ -1617,9 +1617,6 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                     break;
                 default:
                     FillAreaTargets(TagUnitMap,m_targets.m_destX, m_targets.m_destY,radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
-
-                    // exclude caster (this can be important if this not original caster)
-                    TagUnitMap.remove(m_caster);
                     break;
             }
             break;
@@ -2390,13 +2387,21 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
     }
 
-    if(m_IsTriggeredSpell)
-        cast(true);
-    else
+    // add non-triggered (with cast time and without)
+    if (!m_IsTriggeredSpell)
     {
+        // add to cast type slot
         m_caster->SetCurrentCastedSpell( this );
+
+        // will show cast bar
         SendSpellStart();
     }
+    // execute triggered without cast time explicitly in call point
+    else if(m_timer == 0)
+        cast(true);
+    // else triggered with cast time will execute execute at next tick or later
+    // without adding to cast type slot
+    // will not show cast bar but will show effects at casting time etc
 }
 
 void Spell::cancel()
@@ -3463,14 +3468,11 @@ void Spell::SendChannelUpdate(uint32 time)
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
     }
 
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-
     WorldPacket data( MSG_CHANNEL_UPDATE, 8+4 );
     data.append(m_caster->GetPackGUID());
     data << uint32(time);
 
-    ((Player*)m_caster)->GetSession()->SendPacket( &data );
+    m_caster->SendMessageToSet(&data, true);
 }
 
 void Spell::SendChannelStart(uint32 duration)
@@ -3501,15 +3503,12 @@ void Spell::SendChannelStart(uint32 duration)
         }
     }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        WorldPacket data( MSG_CHANNEL_START, (8+4+4) );
-        data.append(m_caster->GetPackGUID());
-        data << uint32(m_spellInfo->Id);
-        data << uint32(duration);
+    WorldPacket data( MSG_CHANNEL_START, (8+4+4) );
+    data.append(m_caster->GetPackGUID());
+    data << uint32(m_spellInfo->Id);
+    data << uint32(duration);
 
-        ((Player*)m_caster)->GetSession()->SendPacket( &data );
-    }
+    m_caster->SendMessageToSet(&data, true);
 
     m_timer = duration;
     if(target)
