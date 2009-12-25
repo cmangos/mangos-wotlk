@@ -156,7 +156,7 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
             {
                 ai->CastSpell (BEAR_FORM);
             }
-			else if (DEMORALIZING_ROAR > 0 && m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0) && !m_bot->HasAura(MOONKIN_FORM, 0) && !pTarget->HasAura(DEMORALIZING_ROAR, 0) && ai->GetRageAmount() >= 10)
+                        else if (DEMORALIZING_ROAR > 0 && (m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0)) && !m_bot->HasAura(MOONKIN_FORM, 0) && !pTarget->HasAura(DEMORALIZING_ROAR, 0) && ai->GetRageAmount() >= 10)
             {
                 ai->CastSpell(DEMORALIZING_ROAR, *pTarget);
             }
@@ -235,37 +235,37 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
                 DruidSpellCombat++;
                 break;
             }
-			else if (ENRAGE > 0 && m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0) && DruidSpellCombat < 2 && !m_bot->HasAura(ENRAGE, 0))
+                        else if (ENRAGE > 0 && (m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0)) && DruidSpellCombat < 2 && !m_bot->HasAura(ENRAGE, 0))
             {
                 ai->CastSpell(ENRAGE, *m_bot);
                 DruidSpellCombat = DruidSpellCombat +2;
                 break;
             }
-			else if (SWIPE > 0 && m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0) && DruidSpellCombat < 4 && ai->GetRageAmount()>=20)
+                        else if (SWIPE > 0 && (m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0)) && DruidSpellCombat < 4 && ai->GetRageAmount()>=20)
             {
                 ai->CastSpell(SWIPE, *pTarget);
                 DruidSpellCombat = DruidSpellCombat +2;
                 break;
             }
-			else if (MAUL > 0 && m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0) && DruidSpellCombat < 6 && ai->GetRageAmount()>=15)
+                        else if (MAUL > 0 && (m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0)) && DruidSpellCombat < 6 && ai->GetRageAmount()>=15)
             {
                 ai->CastSpell(MAUL, *pTarget);
                 DruidSpellCombat = DruidSpellCombat +2;
                 break;
             }
-			else if (BASH > 0 && m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0) && !pTarget->HasAura(BASH, 0) && DruidSpellCombat < 8 && ai->GetRageAmount()>=10)
+                        else if (BASH > 0 && (m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0)) && !pTarget->HasAura(BASH, 0) && DruidSpellCombat < 8 && ai->GetRageAmount()>=10)
             {
                 ai->CastSpell(BASH, *pTarget);
                 DruidSpellCombat = DruidSpellCombat +2;
                 break;
             }
-			else if (CHALLENGING_ROAR > 0 && m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0) && pVictim != m_bot && DruidSpellCombat < 10 && !pTarget->HasAura(CHALLENGING_ROAR, 0) && !pTarget->HasAura(GROWL, 0) && ai->GetRageAmount()>=15)
+                        else if (CHALLENGING_ROAR > 0 && (m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0)) && pVictim != m_bot && DruidSpellCombat < 10 && !pTarget->HasAura(CHALLENGING_ROAR, 0) && !pTarget->HasAura(GROWL, 0) && ai->GetRageAmount()>=15)
             {
                 ai->CastSpell(CHALLENGING_ROAR, *pTarget);
                 DruidSpellCombat = DruidSpellCombat +2;
                 break;
             }
-			else if (GROWL > 0 && m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0) && pVictim != m_bot && DruidSpellCombat < 12 && !pTarget->HasAura(CHALLENGING_ROAR, 0) && !pTarget->HasAura(GROWL, 0))
+                        else if (GROWL > 0 && (m_bot->HasAura(DIRE_BEAR_FORM, 0) || m_bot->HasAura(BEAR_FORM, 0)) && pVictim != m_bot && DruidSpellCombat < 12 && !pTarget->HasAura(CHALLENGING_ROAR, 0) && !pTarget->HasAura(GROWL, 0))
             {
                 ai->CastSpell(GROWL, *pTarget);
                 DruidSpellCombat = DruidSpellCombat +2;

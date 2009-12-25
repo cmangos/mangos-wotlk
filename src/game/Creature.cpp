@@ -287,12 +287,7 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
     else
         setFaction(GetCreatureInfo()->faction_A);
 
-    // Playerbot START
-    if(isBotGiver())
-        SetUInt32Value(UNIT_NPC_FLAGS, 1);
-    else
-        SetUInt32Value(UNIT_NPC_FLAGS,GetCreatureInfo()->npcflag);
-    // Playerbot END
+    SetUInt32Value(UNIT_NPC_FLAGS,GetCreatureInfo()->npcflag);
 
     SetAttackTime(BASE_ATTACK,  GetCreatureInfo()->baseattacktime);
     SetAttackTime(OFF_ATTACK,   GetCreatureInfo()->baseattacktime);
@@ -1253,12 +1248,7 @@ void Creature::setDeathState(DeathState s)
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
         AddMonsterMoveFlag(MONSTER_MOVE_WALK);
 
-        // Playerbot mod
-        if(isBotGiver())
-            SetUInt32Value(UNIT_NPC_FLAGS, 1);
-        else
-            SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
-        // End Playerbot mod
+        SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
 
         Unit::setDeathState(ALIVE);
         clearUnitState(UNIT_STAT_ALL_STATE);

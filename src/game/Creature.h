@@ -392,10 +392,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool isCivilian() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
 
-        // Playerbot mod - adds functionality to load/unload bots from NPC, also need to apply SQL scripts
-        bool isBotGiver();
-        void LoadBotMenu(Player *pPlayer);
-
         bool canWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
         bool canSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
         bool canFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }

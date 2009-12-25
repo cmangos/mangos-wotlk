@@ -12257,12 +12257,6 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 menuId)
 
     GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(menuId);
 
-    // Playerbot mod
-    Creature *pCreature = (Creature*)pSource;
-
-    if (pCreature->isBotGiver())
-        pCreature->LoadBotMenu(this);
-
     // if default menuId and no menu options exist for this, use options from default options
     if (pMenuItemBounds.first == pMenuItemBounds.second && menuId == GetDefaultGossipMenuForSource(pSource))
         pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(0);
@@ -12561,10 +12555,6 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
             GetSession()->SendBattlegGroundList(guid, bgTypeId);
             break;
         }
-        // Playerbot START
-	case GOSSIP_OPTION_BOT:
-	    break;
-	// Playerbot END    
     }
 }
 
