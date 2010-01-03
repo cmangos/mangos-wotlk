@@ -437,7 +437,6 @@ bool IsExplicitPositiveTarget(uint32 targetA)
         case TARGET_CHAIN_HEAL:
         case TARGET_SINGLE_FRIEND_2:
         case TARGET_AREAEFFECT_PARTY_AND_CLASS:
-        case TARGET_SELF2:
             return true;
         default:
             break;
@@ -585,12 +584,14 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                     return false;
                 case SPELL_AURA_PERIODIC_DAMAGE:            // used in positive spells also.
                     // part of negative spell if casted at self (prevent cancel)
-                    if(spellproto->EffectImplicitTargetA[effIndex] == TARGET_SELF)
+                    if (spellproto->EffectImplicitTargetA[effIndex] == TARGET_SELF ||
+                        spellproto->EffectImplicitTargetA[effIndex] == TARGET_SELF2)
                         return false;
                     break;
                 case SPELL_AURA_MOD_DECREASE_SPEED:         // used in positive spells also
                     // part of positive spell if casted at self
-                    if(spellproto->EffectImplicitTargetA[effIndex] != TARGET_SELF)
+                    if (spellproto->EffectImplicitTargetA[effIndex] == TARGET_SELF ||
+                        spellproto->EffectImplicitTargetA[effIndex] == TARGET_SELF2)
                         return false;
                     // but not this if this first effect (don't found batter check)
                     if(spellproto->Attributes & 0x4000000 && effIndex==0)
@@ -1361,6 +1362,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                         (spellInfo_2->Id == 23170 && spellInfo_1->Id == 23171) )
                         return false;
 
+                    // Cool Down (See PeriodicAuraTick())
+                    if ((spellInfo_1->Id == 52441 && spellInfo_2->Id == 52443) ||
+                        (spellInfo_2->Id == 52441 && spellInfo_1->Id == 52443))
+                        return false;
+
                     // See Chapel Invisibility and See Noth Invisibility
                     if( (spellInfo_1->Id == 52950 && spellInfo_2->Id == 52707) ||
                         (spellInfo_2->Id == 52950 && spellInfo_1->Id == 52707) )
@@ -1566,6 +1572,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 //  Tree of Life (Shapeshift) and 34123 Tree of Life (Passive)
                 if ((spellId_1 == 33891 && spellId_2 == 34123) ||
                     (spellId_2 == 33891 && spellId_1 == 34123))
+                    return false;
+
+                // Lifebloom and Wild Growth
+                if (spellInfo_1->SpellIconID == 2101 && spellInfo_2->SpellIconID == 2864 ||
+                    spellInfo_2->SpellIconID == 2101 && spellInfo_1->SpellIconID == 2864 )
                     return false;
 
                 //  Innervate and Glyph of Innervate and some other spells

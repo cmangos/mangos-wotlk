@@ -46,6 +46,12 @@
 
 GridState* si_GridStates[MAX_GRID_STATE];
 
+static char const* MAP_MAGIC         = "MAPS";
+static char const* MAP_VERSION_MAGIC = "w1.0";
+static char const* MAP_AREA_MAGIC    = "AREA";
+static char const* MAP_HEIGHT_MAGIC  = "MHGT";
+static char const* MAP_LIQUID_MAGIC  = "MLIQ";
+
 struct ScriptAction
 {
     uint64 sourceGUID;
@@ -80,8 +86,8 @@ bool Map::ExistMap(uint32 mapid,int gx,int gy)
 
     map_fileheader header;
     fread(&header, sizeof(header), 1, pf);
-    if (header.mapMagic     != uint32(MAP_MAGIC) ||
-        header.versionMagic != uint32(MAP_VERSION_MAGIC))
+    if (header.mapMagic     != *((uint32 const*)(MAP_MAGIC)) ||
+        header.versionMagic != *((uint32 const*)(MAP_VERSION_MAGIC)))
     {
         sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.",tmp);
         delete [] tmp;
@@ -1195,8 +1201,8 @@ bool GridMap::loadData(char *filename)
     if (!in)
         return true;
     fread(&header, sizeof(header),1,in);
-    if (header.mapMagic     == uint32(MAP_MAGIC) &&
-        header.versionMagic == uint32(MAP_VERSION_MAGIC))
+    if (header.mapMagic     == *((uint32 const*)(MAP_MAGIC)) &&
+        header.versionMagic == *((uint32 const*)(MAP_VERSION_MAGIC)))
     {
         // loadup area data
         if (header.areaMapOffset && !loadAreaData(in, header.areaMapOffset, header.areaMapSize))
@@ -1247,7 +1253,7 @@ bool GridMap::loadAreaData(FILE *in, uint32 offset, uint32 size)
     map_areaHeader header;
     fseek(in, offset, SEEK_SET);
     fread(&header, sizeof(header), 1, in);
-    if (header.fourcc != uint32(MAP_AREA_MAGIC))
+    if (header.fourcc != *((uint32 const*)(MAP_AREA_MAGIC)))
         return false;
 
     m_gridArea = header.gridArea;
@@ -1264,7 +1270,7 @@ bool  GridMap::loadHeihgtData(FILE *in, uint32 offset, uint32 size)
     map_heightHeader header;
     fseek(in, offset, SEEK_SET);
     fread(&header, sizeof(header), 1, in);
-    if (header.fourcc != uint32(MAP_HEIGHT_MAGIC))
+    if (header.fourcc != *((uint32 const*)(MAP_HEIGHT_MAGIC)))
         return false;
 
     m_gridHeight = header.gridHeight;
@@ -1307,7 +1313,7 @@ bool  GridMap::loadLiquidData(FILE *in, uint32 offset, uint32 size)
     map_liquidHeader header;
     fseek(in, offset, SEEK_SET);
     fread(&header, sizeof(header), 1, in);
-    if (header.fourcc != uint32(MAP_LIQUID_MAGIC))
+    if (header.fourcc != *((uint32 const*)(MAP_LIQUID_MAGIC)))
         return false;
 
     m_liquidType   = header.liquidType;
@@ -1755,6 +1761,18 @@ uint16 Map::GetAreaFlag(float x, float y, float z) const
         case 856:                                           // The Noxious Glade (Eastern Plaguelands)
         case 2456:                                          // Death's Breach (Eastern Plaguelands)
             if(z > 350.0f) areaflag = 1950; break;
+        // Winterfin Caverns
+        case 1652:                                          // Coldarra
+        case 1653:                                          // The Westrift
+        case 1661:                                          // Winterfin Village
+            if (x > 3823.0f && x < 4141.5f && y > 6247.0f && y < 64890.0f && z < 42.5f)
+                areaflag = 1723;
+            break;
+        // Moonrest Gardens
+        case 1787:
+            if (x > 3315.3f && x < 3361.6f && y > 2469.4f && y < 2565.8f && z > 197.0f)
+                areaflag = 1786;                            // Surge Needle (cords not entirely correct, will need round circle if this is really needed(see spell 47097 eff 77))
+            break;
         // Dalaran
         case 2492:                                          // Forlorn Woods (Crystalsong Forest)
         case 2371:                                          // Valley of Echoes (Icecrown Glacier)

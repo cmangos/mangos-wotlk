@@ -1555,6 +1555,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         }
 
         void PetSpellInitialize();
+        void SendPetGUIDs();
         void CharmSpellInitialize();
         void PossessSpellInitialize();
         void RemovePetActionBar();
