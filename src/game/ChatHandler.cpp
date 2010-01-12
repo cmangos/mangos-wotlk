@@ -242,7 +242,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             }
             else
                 // END Playerbot mod
-            GetPlayer()->Whisper(msg, lang,player->GetGUID());
+            GetPlayer()->Whisper(msg, lang, player->GetGUID());
         } break;
 
         case CHAT_MSG_PARTY:
