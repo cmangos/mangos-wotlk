@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -244,8 +244,6 @@ World::AddSession_ (WorldSession* s)
     WorldPacket pkt(SMSG_CLIENTCACHE_VERSION, 4);
     pkt << uint32(getConfig(CONFIG_CLIENTCACHE_VERSION));
     s->SendPacket(&pkt);
-
-    s->SendAccountDataTimes(GLOBAL_CACHE_MASK);
 
     s->SendTutorialsData();
 
@@ -1289,6 +1287,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Quests..." );
     sObjectMgr.LoadQuests();                                    // must be loaded after DBCs, creature_template, item_template, gameobject tables
+
+    sLog.outString( "Loading Quest POI" );
+    sObjectMgr.LoadQuestPOI();
 
     sLog.outString( "Loading Quests Relations..." );
     sLog.outString();

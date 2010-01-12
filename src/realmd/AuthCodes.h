@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,8 @@ enum eAuthResults
 
 #define EXPECTED_REALMD_CLIENT_BUILD    \
 {                                       \
-    10505,  /* 3.2.2a and higher */     \
+    11159,  /* 3.3.0a and higher */     \
+    10505,  /* 3.2.2a */                \
     8606,   /* 2.4.3  */                \
     6005,   /* 1.12.2 */                \
     5875,   /* 1.12.1 */                \

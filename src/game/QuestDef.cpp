@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -130,7 +130,7 @@ Quest::Quest(Field * questRecord)
     QuestStartScript = questRecord[130].GetUInt32();
     QuestCompleteScript = questRecord[131].GetUInt32();
 
-    QuestFlags |= SpecialFlags << 16;
+    QuestFlags |= SpecialFlags << 24;
 
     m_reqitemscount = 0;
     m_reqCreatureOrGOcount = 0;

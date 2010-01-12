@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -347,6 +347,7 @@ void AuthSocket::SendProof(Sha1Hash sha)
         }
         case 8606:                                          // 2.4.3
         case 10505:                                         // 3.2.2a
+        case 11159:                                         // 3.3.0a
         default:                                            // or later
         {
             sAuthLogonProof_S proof;
@@ -980,6 +981,7 @@ void AuthSocket::LoadRealmlist(ByteBuffer &pkt, uint32 acctid)
             
         case 8606:                                          // 2.4.3
         case 10505:                                         // 3.2.2a
+        case 11159:                                         // 3.3.0a
         default:                                            // and later
         {
             pkt << uint32(0);

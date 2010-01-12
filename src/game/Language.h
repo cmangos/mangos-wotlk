@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -277,7 +277,7 @@ enum MangosStrings
     LANG_COMMAND_TICKETVIEW             = 290,
     LANG_COMMAND_TICKETON               = 291,
     LANG_COMMAND_TICKETOFF              = 292,
-    LANG_COMMAND_TICKENOTEXIST          = 293,
+    LANG_COMMAND_TICKETNOTEXIST         = 293,
     LANG_COMMAND_ALLTICKETDELETED       = 294,
     LANG_COMMAND_TICKETPLAYERDEL        = 295,
     LANG_COMMAND_TICKETDEL              = 296,

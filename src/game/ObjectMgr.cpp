@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2079,6 +2079,29 @@ void ObjectMgr::LoadItemPrototypes()
             const_cast<ItemPrototype*>(proto)->HolidayId = 0;
         }
     }
+
+    // check some dbc referenced items (avoid duplicate reports)
+    std::set<uint32> notFoundOutfit;
+    for (uint32 i = 1; i < sCharStartOutfitStore.GetNumRows(); ++i)
+    {
+        CharStartOutfitEntry const* entry = sCharStartOutfitStore.LookupEntry(i);
+        if (!entry)
+            continue;
+
+        for(int j = 0; j < MAX_OUTFIT_ITEMS; ++j)
+        {
+            if(entry->ItemId[j] <= 0)
+                continue;
+
+            uint32 item_id = entry->ItemId[j];
+
+            if(!GetItemPrototype(item_id))
+                notFoundOutfit.insert(item_id);
+        }
+    }
+
+    for(std::set<uint32>::const_iterator itr = notFoundOutfit.begin(); itr != notFoundOutfit.end(); ++itr)
+        sLog.outErrorDb("Item (Entry: %u) not exist in `item_template` but referenced in `CharStartOutfit.dbc`", *itr);
 }
 
 void ObjectMgr::LoadItemRequiredTarget()
@@ -2611,7 +2634,12 @@ void ObjectMgr::LoadPlayerInfo()
             }
 
             uint32 current_level = fields[1].GetUInt32();
-            if(current_level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+            if(current_level == 0)
+            {
+                sLog.outErrorDb("Wrong level %u in `player_classlevelstats` table, ignoring.",current_level);
+                continue;
+            }
+            else if(current_level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
             {
                 if(current_level > STRONG_MAX_LEVEL)        // hardcoded level maximum
                     sLog.outErrorDb("Wrong (> %u) level %u in `player_classlevelstats` table, ignoring.",STRONG_MAX_LEVEL,current_level);
@@ -3021,9 +3049,11 @@ void ObjectMgr::LoadGuilds()
             delete newGuild;
             continue;
         }
+        newGuild->LoadGuildEventLogFromDB();
+        newGuild->LoadGuildBankEventLogFromDB();
+        newGuild->LoadGuildBankFromDB();
         AddGuild(newGuild);
-
-    }while( result->NextRow() );
+    } while( result->NextRow() );
 
     delete result;
     delete guildRanksResult;
@@ -3343,7 +3373,7 @@ void ObjectMgr::LoadQuests()
         if (qinfo->QuestFlags & ~QUEST_MANGOS_FLAGS_DB_ALLOWED)
         {
             sLog.outErrorDb("Quest %u has `SpecialFlags` = %u > max allowed value. Correct `SpecialFlags` to value <= %u",
-                qinfo->GetQuestId(),qinfo->QuestFlags,QUEST_MANGOS_FLAGS_DB_ALLOWED >> 16);
+                qinfo->GetQuestId(),qinfo->QuestFlags  >> 24,QUEST_MANGOS_FLAGS_DB_ALLOWED >> 24);
             qinfo->QuestFlags &= QUEST_MANGOS_FLAGS_DB_ALLOWED;
         }
 
@@ -4524,7 +4554,7 @@ void ObjectMgr::LoadPageTexts()
                     ss << *itr << " ";
                 ss << "create(s) a circular reference, which can cause the server to freeze. Changing Next_Page of page "
                     << pageItr->Page_ID <<" to 0";
-                sLog.outErrorDb(ss.str().c_str());
+                sLog.outErrorDb("%s", ss.str().c_str());
                 const_cast<PageText*>(pageItr)->Next_Page = 0;
                 break;
             }
@@ -4808,7 +4838,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
         Player *pl = 0;
         if (serverUp)
             pl = GetPlayer((uint64)m->receiver);
-        if (pl && pl->m_mailsLoaded)
+        if (pl)
         {                                                   //this code will run very improbably (the time is between 4 and 5 am, in game is online a player, who has old mail
             //his in mailbox and he has already listed his mails )
             delete m;
@@ -6363,6 +6393,68 @@ void ObjectMgr::LoadPointsOfInterest()
     sLog.outString(">> Loaded %u Points of Interest definitions", count);
 }
 
+void ObjectMgr::LoadQuestPOI()
+{
+    uint32 count = 0;
+
+    //                                                0        1         2      3     4     5     6
+    QueryResult *result = WorldDatabase.Query("SELECT questId, objIndex, mapId, unk1, unk2, unk3, unk4 FROM quest_poi");
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outErrorDb(">> Loaded 0 quest POI definitions. DB table `quest_poi` is empty.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 questId  = fields[0].GetUInt32();
+        int32 objIndex  = fields[1].GetInt32();
+        uint32 mapId    = fields[2].GetUInt32();
+        uint32 unk1     = fields[3].GetUInt32();
+        uint32 unk2     = fields[4].GetUInt32();
+        uint32 unk3     = fields[5].GetUInt32();
+        uint32 unk4     = fields[6].GetUInt32();
+
+        QuestPOI POI(objIndex, mapId, unk1, unk2, unk3, unk4);
+
+        QueryResult *points = WorldDatabase.PQuery("SELECT x, y FROM quest_poi_points WHERE questId='%u' AND objIndex='%i'", questId, objIndex);
+
+        if(points)
+        {
+            do 
+            {
+                Field *pointFields = points->Fetch();
+                int32 x = pointFields[0].GetInt32();
+                int32 y = pointFields[1].GetInt32();
+                QuestPOIPoint point(x, y);
+                POI.points.push_back(point);
+            } while (points->NextRow());
+
+            delete points;
+        }
+
+        mQuestPOIMap[questId].push_back(POI);
+
+        ++count;
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString(">> Loaded %u quest POI definitions", count);
+}
+
 void ObjectMgr::LoadNPCSpellClickSpells()
 {
     uint32 count = 0;
@@ -7257,6 +7349,16 @@ bool PlayerCondition::Meets(Player const * player) const
             if ((!value1 || (player->getRaceMask() & value1)) && (!value2 || (player->getClassMask() & value2)))
                 return true;
             return false;
+        case CONDITION_LEVEL:
+        {
+            switch(value2)
+            {
+                case 0: return player->getLevel() == value1;
+                case 1: return player->getLevel() >= value1;
+                case 2: return player->getLevel() <= value1;
+            }
+            return false;
+        }
         default:
             return false;
     }
@@ -7429,6 +7531,22 @@ bool PlayerCondition::IsValid(ConditionType condition, uint32 value1, uint32 val
                 sLog.outErrorDb("Race_class condition has invalid race mask %u, skipped", value2);
                 return false;
             }
+            break;
+        }
+        case CONDITION_LEVEL:
+        {
+            if (!value1 || value1 > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+            {
+                sLog.outErrorDb("Level condition has invalid level %u, skipped", value1);
+                return false;
+            }
+
+            if (value2 > 2)
+            {
+                sLog.outErrorDb("Level condition has invalid argument %u (must be 0..2), skipped", value2);
+                return false;
+            }
+
             break;
         }
         case CONDITION_NONE:
