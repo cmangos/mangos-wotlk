@@ -500,7 +500,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                             int chance = (*i)->GetSpellProto()->CalculateSimpleValue(1);
                             if (roll_chance_i(chance))
                                 // Mind Trauma
-                                m_caster->CastSpell(unitTarget, 48301, true, 0);
+                                m_caster->CastSpell(unitTarget, 48301, true);
                             break;
                         }
                     }
@@ -1230,7 +1230,13 @@ void Spell::EffectDummy(uint32 i)
                     }
                     return;
                 }
-                case 51582:                                 //Rocket Boots Engaged (Rocket Boots Xtreme and Rocket Boots Xtreme Lite)
+                case 46797:                                 // Quest - Borean Tundra - Set Explosives Cart
+                    if (!unitTarget)
+                        return;
+                    // Quest - Borean Tundra - Summon Explosives Cart
+                    unitTarget->CastSpell(unitTarget,46798,true,m_CastItem,NULL,m_originalCasterGUID);
+                    break;
+                case 51582:                                 // Rocket Boots Engaged (Rocket Boots Xtreme and Rocket Boots Xtreme Lite)
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
@@ -1582,9 +1588,9 @@ void Spell::EffectDummy(uint32 i)
                         return;
                 }
                 if (m_caster->IsFriendlyTo(unitTarget))
-                    m_caster->CastSpell(unitTarget, heal, true, 0);
+                    m_caster->CastSpell(unitTarget, heal, true);
                 else
-                    m_caster->CastSpell(unitTarget, hurt, true, 0);
+                    m_caster->CastSpell(unitTarget, hurt, true);
                 return;
             }
             break;
@@ -1800,9 +1806,9 @@ void Spell::EffectDummy(uint32 i)
                     }
 
                     if (m_caster->IsFriendlyTo(unitTarget))
-                        m_caster->CastSpell(unitTarget, heal, true, 0);
+                        m_caster->CastSpell(unitTarget, heal, true);
                     else
-                        m_caster->CastSpell(unitTarget, hurt, true, 0);
+                        m_caster->CastSpell(unitTarget, hurt, true);
 
                     return;
                 }
@@ -3099,66 +3105,20 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
         {
             case GAMEOBJECT_TYPE_DOOR:
             case GAMEOBJECT_TYPE_BUTTON:
-                gameObjTarget->UseDoorOrButton();
-                player->GetMap()->ScriptsStart(sGameObjectScripts, gameObjTarget->GetDBTableGUIDLow(), player, gameObjTarget);
-                return;
-
             case GAMEOBJECT_TYPE_QUESTGIVER:
-                // start or end quest
-                player->PrepareQuestMenu(guid);
-                player->SendPreparedQuest(guid);
-                return;
-
             case GAMEOBJECT_TYPE_SPELL_FOCUS:
-                // triggering linked GO
-                if (uint32 trapEntry = gameObjTarget->GetGOInfo()->spellFocus.linkedTrapId)
-                    gameObjTarget->TriggeringLinkedGameObject(trapEntry,m_caster);
-                return;
-
             case GAMEOBJECT_TYPE_GOOBER:
-                // goober_scripts can be triggered if the player don't have the quest
-                if (gameObjTarget->GetGOInfo()->goober.eventId)
-                {
-                    sLog.outDebug("Goober ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->goober.eventId,gameObjTarget->GetDBTableGUIDLow());
-                    player->GetMap()->ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->goober.eventId, player, gameObjTarget);
-                }
-
-                // cast goober spell
-                if (gameObjTarget->GetGOInfo()->goober.questId)
-                    ///Quest require to be active for GO using
-                    if (player->GetQuestStatus(gameObjTarget->GetGOInfo()->goober.questId) != QUEST_STATUS_INCOMPLETE)
-                        return;
-
-                gameObjTarget->AddUniqueUse(player);
-                gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
-
-                //TODO? Objective counting called without spell check but with quest objective check
-                // if send spell id then this line will duplicate to spell casting call (double counting)
-                // So we or have this line and not required in quest_template have reqSpellIdN
-                // or must remove this line and required in DB have data in quest_template have reqSpellIdN for all quest using cases.
-                player->CastedCreatureOrGO(gameObjTarget->GetEntry(), gameObjTarget->GetGUID(), 0);
-
-                // triggering linked GO
-                if (uint32 trapEntry = gameObjTarget->GetGOInfo()->goober.linkedTrapId)
-                    gameObjTarget->TriggeringLinkedGameObject(trapEntry,m_caster);
-
+                gameObjTarget->Use(m_caster);
                 return;
 
             case GAMEOBJECT_TYPE_CHEST:
-                // TODO: possible must be moved to loot release (in different from linked triggering)
-                if (gameObjTarget->GetGOInfo()->chest.eventId)
-                {
-                    sLog.outDebug("Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->chest.eventId,gameObjTarget->GetDBTableGUIDLow());
-                    player->GetMap()->ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
-                }
-
-                // triggering linked GO
-                if (uint32 trapEntry = gameObjTarget->GetGOInfo()->chest.linkedTrapId)
-                    gameObjTarget->TriggeringLinkedGameObject(trapEntry,m_caster);
-
+                gameObjTarget->Use(m_caster);
                 // Don't return, let loots been taken
-            default:
                 break;
+
+            default:
+                sLog.outError("Spell::SendLoot unhandled GameObject type %u (entry %u).", gameObjTarget->GetGoType(), gameObjTarget->GetEntry());
+                return;
         }
     }
 
@@ -3567,6 +3527,9 @@ void Spell::EffectSummon(uint32 i)
     spawnCreature->InitStatsForLevel(level, m_caster);
 
     spawnCreature->GetCharmInfo()->SetPetNumber(pet_number, false);
+    
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        spawnCreature->UpdateWalkModeForPets(((Player*)m_caster)->HasMovementFlag(MOVEMENTFLAG_WALK_MODE));
 
     spawnCreature->AIM_Initialize();
     spawnCreature->InitPetCreateSpells();
@@ -4434,6 +4397,9 @@ void Spell::EffectSummonPet(uint32 i)
     NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
     NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        NewSummon->UpdateWalkModeForPets(((Player*)m_caster)->HasMovementFlag(MOVEMENTFLAG_WALK_MODE));
+
     NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
     // this enables pet details window (Shift+P)
 
@@ -4443,6 +4409,9 @@ void Spell::EffectSummonPet(uint32 i)
 
     if(m_caster->IsPvP())
         NewSummon->SetPvP(true);
+
+    if(m_caster->IsFFAPvP())
+        NewSummon->SetFFAPvP(true);
 
     NewSummon->InitStatsForLevel(petlevel, m_caster);
     NewSummon->InitPetCreateSpells();
@@ -5852,7 +5821,7 @@ void Spell::EffectActivateObject(uint32 effect_idx)
 
     static ScriptInfo activateCommand = generateActivateCommand();
 
-    int32 delay_secs = m_spellInfo->EffectMiscValue[effect_idx];
+    int32 delay_secs = m_spellInfo->CalculateSimpleValue(effect_idx);
 
     gameObjTarget->GetMap()->ScriptCommandStart(activateCommand, delay_secs, m_caster, gameObjTarget);
 }
@@ -5958,6 +5927,9 @@ void Spell::EffectSummonTotem(uint32 i, uint8 slot)
 
     if(m_caster->IsPvP())
         pTotem->SetPvP(true);
+
+    if(m_caster->IsFFAPvP())
+        pTotem->SetFFAPvP(true);
 
     pTotem->Summon(m_caster);
 

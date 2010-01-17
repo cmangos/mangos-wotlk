@@ -299,6 +299,7 @@ class Item;
 class Pet;
 class Path;
 class PetAura;
+class Totem;
 
 struct SpellImmune
 {
@@ -1009,6 +1010,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         }
         bool IsPvP() const { return HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_PVP); }
         void SetPvP(bool state);
+        bool IsFFAPvP() const { return HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP); }
+        void SetFFAPvP(bool state);
         uint32 GetCreatureType() const;
         uint32 GetCreatureTypeMask() const
         {
@@ -1240,6 +1243,13 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         Pet* CreateTamedPetFrom(Creature* creatureTarget,uint32 spell_id = 0);
 
+        Totem* GetTotem(uint8 slot) const;
+
+        template<typename Func>
+        void CallForAllControlledUnits(Func const& func, bool withTotems, bool withGuardians, bool withCharms);
+        template<typename Func>
+        bool CheckAllControlledUnits(Func const& func, bool withTotems, bool withGuardians, bool withCharms) const;
+
         bool AddAura(Aura *aur);
 
         // removing specific aura stack
@@ -1366,7 +1376,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetBaseWeaponDamage(WeaponAttackType attType ,WeaponDamageRange damageRange, float value) { m_weaponDamage[attType][damageRange] = value; }
 
         void SetInFront(Unit const* target);
-        void SetFacingToObject(WorldObject* pObject);
+        void SetFacingTo(float ori);
+        void SetFacingToObject(WorldObject* pObject) { SetFacingTo(GetAngle(pObject)); }
 
         // Visibility system
         UnitVisibility GetVisibility() const { return m_Visibility; }
@@ -1513,6 +1524,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 CalcArmorReducedDamage(Unit* pVictim, const uint32 damage);
         void CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, bool canReflect = false);
 
+        void  UpdateWalkModeForPets(bool on);
         void  UpdateSpeed(UnitMoveType mtype, bool forced);
         float GetSpeed( UnitMoveType mtype ) const;
         float GetSpeedRate( UnitMoveType mtype ) const { return m_speed_rate[mtype]; }
@@ -1535,7 +1547,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void addFollower(FollowerReference* pRef) { m_FollowingRefManager.insertFirst(pRef); }
         void removeFollower(FollowerReference* /*pRef*/ ) { /* nothing to do yet */ }
-        static Unit* GetUnit(WorldObject& object, uint64 guid);
+        static Unit* GetUnit(WorldObject const& object, uint64 guid);
 
         MotionMaster* GetMotionMaster() { return &i_motionMaster; }
 
@@ -1638,6 +1650,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float GetCombatRatingReduction(CombatRating cr) const;
         uint32 GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint32 damage) const;
 
+        Unit* _GetTotem(uint8 slot) const;                  // for templated function without include need
+
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
 
@@ -1657,4 +1671,62 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         GuardianPetList m_guardianPets;
 };
+
+template<typename Func>
+void Unit::CallForAllControlledUnits(Func const& func, bool withTotems, bool withGuardians, bool withCharms)
+{
+    if(Pet* pet = GetPet())
+        func(pet);
+
+    if (withGuardians)
+    {
+        for(GuardianPetList::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
+            if(Unit* guardian = Unit::GetUnit(*this,*itr))
+                func(guardian);
+    }
+
+    if (withTotems)
+    {
+        for (int8 i = 0; i < MAX_TOTEM; ++i)
+            if (Unit *totem = _GetTotem(i))
+                func(totem);
+    }
+
+    if (withCharms)
+        if(Unit* charm = GetCharm())
+            func(charm);
+}
+
+
+template<typename Func>
+bool Unit::CheckAllControlledUnits(Func const& func, bool withTotems, bool withGuardians, bool withCharms) const
+{
+    if (Pet* pet = GetPet())
+        if (func(pet))
+            return true;
+
+    if (withGuardians)
+    {
+        for(GuardianPetList::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
+            if (Unit* guardian = Unit::GetUnit(*this,*itr))
+                if (func(guardian))
+                    return true;
+
+    }
+
+    if (withTotems)
+    {
+        for (int8 i = 0; i < MAX_TOTEM; ++i)
+            if (Unit *totem = _GetTotem(i))
+                if (func(totem))
+                    return true;
+    }
+
+    if (withCharms)
+        if(Unit* charm = GetCharm())
+            if (func(charm))
+                return true;
+
+    return false;
+}
 #endif

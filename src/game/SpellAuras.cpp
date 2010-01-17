@@ -1379,6 +1379,13 @@ void Aura::ReapplyAffectedPassiveAuras( Unit* target, bool owner_mode )
 /*********************************************************/
 /***               BASIC AURA FUNCTION                 ***/
 /*********************************************************/
+struct AuraHandleAddModifierHelper
+{
+    explicit AuraHandleAddModifierHelper(Aura* _aura) : aura(_aura) {}
+    void operator()(Unit* unit) const { aura->ReapplyAffectedPassiveAuras(unit, true); }
+    Aura* aura;
+};
+
 void Aura::HandleAddModifier(bool apply, bool Real)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER || !Real)
@@ -1422,15 +1429,8 @@ void Aura::HandleAddModifier(bool apply, bool Real)
     // reapply talents to own passive persistent auras
     ReapplyAffectedPassiveAuras(m_target, true);
 
-    // re-apply talents/passives/area auras applied to pet (it affected by player spellmods)
-    if(Pet* pet = m_target->GetPet())
-        ReapplyAffectedPassiveAuras(pet, true);
-
-    // re-apply talents/passives/area auras applied to totems (it affected by player spellmods)
-    for(int i = 0; i < MAX_TOTEM; ++i)
-        if(m_target->m_TotemSlot[i])
-            if(Creature* totem = m_target->GetMap()->GetCreature(m_target->m_TotemSlot[i]))
-                ReapplyAffectedPassiveAuras(totem, true);
+    // re-apply talents/passives/area auras applied to pet/totems (it affected by player spellmods)
+    m_target->CallForAllControlledUnits(AuraHandleAddModifierHelper(this),true,false,false);
 
     // re-apply talents/passives/area auras applied to group members (it affected by player spellmods)
     if (Group* group = ((Player*)m_target)->GetGroup())
@@ -1540,7 +1540,7 @@ void Aura::TriggerSpell()
                     // Brood Affliction: Bronze
                     case 23170:
                     {
-                        m_target->CastSpell(m_target, 23171, true, 0, this);
+                        m_target->CastSpell(m_target, 23171, true, NULL, this);
                         return;
                     }
 //                    // Mark of Frost
@@ -4363,7 +4363,7 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
                 if ((*i)->GetSpellProto()->SpellIconID == 2229)
                 {
                     if (apply)
-                        owner->CastSpell(owner, 34471, true, 0, this);
+                        owner->CastSpell(owner, 34471, true, NULL, this);
                     else
                         owner->RemoveAurasDueToSpell(34471);
                     break;
@@ -7488,12 +7488,12 @@ void Aura::PeriodicDummyTick()
                 // Feeding Frenzy Rank 1
                 case 53511:
                     if ( m_target->GetHealth() * 100 < m_target->GetMaxHealth() * 35 )
-                        m_target->CastSpell(m_target, 60096, true, 0, this);
+                        m_target->CastSpell(m_target, 60096, true, NULL, this);
                     return;
                 // Feeding Frenzy Rank 2
                 case 53512:
                     if ( m_target->GetHealth() * 100 < m_target->GetMaxHealth() * 35 )
-                        m_target->CastSpell(m_target, 60097, true, 0, this);
+                        m_target->CastSpell(m_target, 60097, true, NULL, this);
                     return;
                 default:
                     break;

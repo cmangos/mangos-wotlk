@@ -677,7 +677,8 @@ void ObjectMgr::LoadCreatureTemplates()
             }
         }
 
-        if (cInfo->unit_class && ((1 << (cInfo->unit_class-1)) & CLASSMASK_ALL_CREATURES) == 0)
+        // use below code for 0-checks for unit_class
+        if (/*!cInfo->unit_class ||*/cInfo->unit_class && ((1 << (cInfo->unit_class-1)) & CLASSMASK_ALL_CREATURES) == 0)
             sLog.outErrorDb("Creature (Entry: %u) has invalid unit_class(%u) for creature_template", cInfo->Entry, cInfo->unit_class);
 
         if(cInfo->dmgschool >= MAX_SPELL_SCHOOL)
@@ -5871,7 +5872,7 @@ inline void CheckGOLockId(GameObjectInfo const* goInfo,uint32 dataN,uint32 N)
         return;
 
     sLog.outErrorDb("Gameobject (Entry: %u GoType: %u) have data%d=%u but lock (Id: %u) not found.",
-        goInfo->id,goInfo->type,N,goInfo->door.lockId,goInfo->door.lockId);
+        goInfo->id,goInfo->type,N,dataN,dataN);
 }
 
 inline void CheckGOLinkedTrapId(GameObjectInfo const* goInfo,uint32 dataN,uint32 N)

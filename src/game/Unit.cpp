@@ -3347,10 +3347,10 @@ void Unit::SetInFront(Unit const* target)
     SetOrientation(GetAngle(target));
 }
 
-void Unit::SetFacingToObject(WorldObject* pObject)
+void Unit::SetFacingTo(float ori)
 {
     // update orientation at server
-    SetOrientation(GetAngle(pObject));
+    SetOrientation(ori);
 
     // and client
     WorldPacket data;
@@ -7879,7 +7879,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
             return false;
 
         // PvP FFA state
-        if(pTester->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP) && pTarget->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP))
+        if(pTester->IsFFAPvP() && pTarget->IsFFAPvP())
             return true;
 
         //= PvP states
@@ -7991,7 +7991,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
             return true;
 
         // PvP FFA state
-        if(pTester->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP) && pTarget->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP))
+        if(pTester->IsFFAPvP() && pTarget->IsFFAPvP())
             return false;
 
         //= PvP states
@@ -8174,7 +8174,12 @@ bool Unit::AttackStop(bool targetSwitch /*=false*/)
     if(!targetSwitch && GetTypeId()==TYPEID_UNIT )
     {
         ((Creature*)this)->SetNoCallAssistance(false);
-        ((Creature*)this)->SetNoSearchAssistance(false);
+
+        if (((Creature*)this)->HasSearchedAssistance())
+        {
+            ((Creature*)this)->SetNoSearchAssistance(false);
+            UpdateSpeed(MOVE_RUN, false);
+        }
     }
 
     SendMeleeAttackStop(victim);
@@ -8194,43 +8199,31 @@ void Unit::CombatStop(bool includingCast)
     ClearInCombat();
 }
 
+struct CombatStopWithPetsHelper
+{
+    explicit CombatStopWithPetsHelper(bool _includingCast) : includingCast(_includingCast) {}
+    void operator()(Unit* unit) const { unit->CombatStop(includingCast); }
+    bool includingCast;
+};
+
 void Unit::CombatStopWithPets(bool includingCast)
 {
     CombatStop(includingCast);
-    if(Pet* pet = GetPet())
-        pet->CombatStop(includingCast);
-    if(Unit* charm = GetCharm())
-        charm->CombatStop(includingCast);
-
-    for(GuardianPetList::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
-        if(Unit* guardian = Unit::GetUnit(*this,*itr))
-            guardian->CombatStop(includingCast);
+    CallForAllControlledUnits(CombatStopWithPetsHelper(includingCast),false,true,true);
 }
+
+struct IsAttackingPlayerHelper
+{
+    explicit IsAttackingPlayerHelper() {}
+    bool operator()(Unit* unit) const { return unit->isAttackingPlayer(); }
+};
 
 bool Unit::isAttackingPlayer() const
 {
     if(hasUnitState(UNIT_STAT_ATTACK_PLAYER))
         return true;
 
-    Pet* pet = GetPet();
-    if(pet && pet->isAttackingPlayer())
-        return true;
-
-    Unit* charmed = GetCharm();
-    if(charmed && charmed->isAttackingPlayer())
-        return true;
-
-    for (int8 i = 0; i < MAX_TOTEM; ++i)
-    {
-        if(m_TotemSlot[i])
-        {
-            Creature *totem = GetMap()->GetCreature(m_TotemSlot[i]);
-            if(totem && totem->isAttackingPlayer())
-                return true;
-        }
-    }
-
-    return false;
+    return CheckAllControlledUnits(IsAttackingPlayerHelper(),true,true,true);
 }
 
 void Unit::RemoveAllAttackers()
@@ -8447,6 +8440,20 @@ Pet* Unit::FindGuardianWithEntry(uint32 entry)
                 return pet;
 
     return NULL;
+}
+
+Unit* Unit::_GetTotem(uint8 slot) const
+{
+    return GetTotem(slot);
+}
+
+Totem* Unit::GetTotem( uint8 slot ) const
+{
+    if(slot >= MAX_TOTEM || !IsInWorld())
+        return NULL;
+
+    Creature *totem = GetMap()->GetCreature(m_TotemSlot[slot]);
+    return totem && totem->isTotem() ? (Totem*)totem : NULL;
 }
 
 void Unit::UnsummonAllTotems()
@@ -10387,6 +10394,34 @@ bool Unit::canDetectInvisibilityOf(Unit const* u) const
     return false;
 }
 
+struct UpdateWalkModeForPetsHelper
+{
+    explicit UpdateWalkModeForPetsHelper(bool _on) : on(_on) {}
+    void operator()(Unit* unit) const { unit->UpdateWalkModeForPets(on); }
+    bool on;
+};
+
+void Unit::UpdateWalkModeForPets(bool on)
+{
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->CallForAllControlledUnits(UpdateWalkModeForPetsHelper(on),false,true,true,true);
+    else
+    {
+        if (on)
+        {
+            if (((Creature*)this)->isPet() && hasUnitState(UNIT_STAT_FOLLOW))
+                ((Creature*)this)->AddMonsterMoveFlag(MONSTER_MOVE_WALK);
+        }
+        else
+        {
+            if (((Creature*)this)->isPet())
+                ((Creature*)this)->RemoveMonsterMoveFlag(MONSTER_MOVE_WALK);
+        }
+
+        CallForAllControlledUnits(UpdateWalkModeForPetsHelper(on),false,true,true);
+    }
+}
+
 void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
 {
     int32 main_speed_mod  = 0;
@@ -10462,6 +10497,13 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
         }
         default:
             break;
+    }
+
+    // for creature case, we check explicit if mob searched for assistance
+    if (GetTypeId() == TYPEID_UNIT)
+    {
+        if (((Creature*)this)->HasSearchedAssistance())
+            speed *= 0.66f;                                 // best guessed value, so this will be 33% reduction. Based off initial speed, mob can then "run", "walk fast" or "walk".
     }
 
     // Apply strongest slow aura mod to speed
@@ -10831,7 +10873,7 @@ bool Unit::SelectHostileTarget()
     // it in combat but attacker not make any damage and not enter to aggro radius to have record in threat list
     // for example at owner command to pet attack some far away creature
     // Note: creature not have targeted movement generator but have attacker in this case
-    if (GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE || hasUnitState(UNIT_STAT_FOLLOW))
+    if (GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
     {
         for(AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
         {
@@ -11051,7 +11093,7 @@ void Unit::ApplyDiminishingAura( DiminishingGroup group, bool apply )
     }
 }
 
-Unit* Unit::GetUnit(WorldObject& object, uint64 guid)
+Unit* Unit::GetUnit(WorldObject const& object, uint64 guid)
 {
     return ObjectAccessor::GetUnit(object,guid);
 }
@@ -12755,6 +12797,9 @@ Pet* Unit::CreateTamedPetFrom(Creature* creatureTarget,uint32 spell_id)
     if(IsPvP())
         pet->SetPvP(true);
 
+    if(IsFFAPvP())
+        pet->SetFFAPvP(true);
+
     uint32 level = (creatureTarget->getLevel() < (getLevel() - 5)) ? (getLevel() - 5) : creatureTarget->getLevel();
 
     if(!pet->InitStatsForLevel(level))
@@ -12968,6 +13013,13 @@ void Unit::NearTeleportTo( float x, float y, float z, float orientation, bool ca
     }
 }
 
+struct SetPvPHelper
+{
+    explicit SetPvPHelper(bool _state) : state(_state) {}
+    void operator()(Unit* unit) const { unit->SetPvP(state); }
+    bool state;
+};
+
 void Unit::SetPvP( bool state )
 {
     if(state)
@@ -12975,15 +13027,24 @@ void Unit::SetPvP( bool state )
     else
         RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_PVP);
 
-    if(Pet* pet = GetPet())
-        pet->SetPvP(state);
-    if(Unit* charmed = GetCharm())
-        charmed->SetPvP(state);
+    CallForAllControlledUnits(SetPvPHelper(state),true,true,true);
+}
 
-    for (int8 i = 0; i < MAX_TOTEM; ++i)
-        if(m_TotemSlot[i])
-            if(Creature *totem = GetMap()->GetCreature(m_TotemSlot[i]))
-                totem->SetPvP(state);
+struct SetFFAPvPHelper
+{
+    explicit SetFFAPvPHelper(bool _state) : state(_state) {}
+    void operator()(Unit* unit) const { unit->SetFFAPvP(state); }
+    bool state;
+};
+
+void Unit::SetFFAPvP( bool state )
+{
+    if(state)
+        SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+    else
+        RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+
+    CallForAllControlledUnits(SetFFAPvPHelper(state),true,true,true);
 }
 
 void Unit::KnockBackFrom(Unit* target, float horizintalSpeed, float verticalSpeed)
@@ -13107,6 +13168,13 @@ void Unit::SendThreatRemove(HostileReference* pHostileReference)
     SendMessageToSet(&data, false);
 }
 
+struct StopAttackFactionHelper
+{
+    explicit StopAttackFactionHelper(uint32 _faction_id) : faction_id(_faction_id) {}
+    void operator()(Unit* unit) const { unit->StopAttackFaction(faction_id); }
+    uint32 faction_id;
+};
+
 void Unit::StopAttackFaction(uint32 faction_id)
 {
     if (Unit* victim = getVictim())
@@ -13137,14 +13205,7 @@ void Unit::StopAttackFaction(uint32 faction_id)
 
     getHostileRefManager().deleteReferencesForFaction(faction_id);
 
-    if(Pet* pet = GetPet())
-        pet->StopAttackFaction(faction_id);
-    if(Unit* charm = GetCharm())
-        charm->StopAttackFaction(faction_id);
-
-    for(GuardianPetList::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
-        if(Unit* guardian = Unit::GetUnit(*this,*itr))
-            guardian->StopAttackFaction(faction_id);
+    CallForAllControlledUnits(StopAttackFactionHelper(faction_id),false,true,true);
 }
 
 void Unit::CleanupDeletedAuras()

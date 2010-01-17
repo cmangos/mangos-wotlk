@@ -225,6 +225,9 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     if(owner->IsPvP())
         SetPvP(true);
 
+    if(owner->IsFFAPvP())
+        SetFFAPvP(true);
+
     SetCanModifyStats(true);
     InitStatsForLevel(petlevel);
     InitTalentForLevel();                                   // set original talents points before spell loading
@@ -289,6 +292,8 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
         SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
         SetPower(POWER_MANA, savedmana > GetMaxPower(POWER_MANA) ? GetMaxPower(POWER_MANA) : savedmana);
     }
+
+    UpdateWalkModeForPets(owner->HasMovementFlag(MOVEMENTFLAG_WALK_MODE));
 
     AIM_Initialize();
     map->Add((Creature*)this);

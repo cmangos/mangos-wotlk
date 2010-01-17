@@ -299,6 +299,9 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     if (opcode == MSG_MOVE_FALL_LAND && plMover && !plMover->isInFlight())
         plMover->HandleFall(movementInfo);
 
+    if ((opcode == MSG_MOVE_SET_WALK_MODE || opcode == MSG_MOVE_SET_RUN_MODE) && plMover)
+        plMover->UpdateWalkModeForPets(movementInfo.HasMovementFlag(MOVEMENTFLAG_WALK_MODE));
+
     if (plMover && (movementInfo.HasMovementFlag(MOVEMENTFLAG_SWIMMING) != plMover->IsInWater()))
     {
         // now client not include swimming flag in case jumping under water

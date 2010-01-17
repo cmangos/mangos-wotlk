@@ -2229,6 +2229,27 @@ void Player::SetInWater(bool apply)
     getHostileRefManager().updateThreatTables();
 }
 
+struct SetGameMasterOnHelper
+{
+    explicit SetGameMasterOnHelper() {}
+    void operator()(Unit* unit) const
+    {
+        unit->setFaction(35);
+        unit->getHostileRefManager().setOnlineOfflineState(false);
+    }
+};
+
+struct SetGameMasterOffHelper
+{
+    explicit SetGameMasterOffHelper(uint32 _faction) : faction(_faction) {}
+    void operator()(Unit* unit) const
+    {
+        unit->setFaction(faction);
+        unit->getHostileRefManager().setOnlineOfflineState(true);
+    }
+    uint32 faction;
+};
+
 void Player::SetGameMaster(bool on)
 {
     if(on)
@@ -2237,18 +2258,9 @@ void Player::SetGameMaster(bool on)
         setFaction(35);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 
-        if (Pet* pet = GetPet())
-        {
-            pet->setFaction(35);
-            pet->getHostileRefManager().setOnlineOfflineState(false);
-        }
+        CallForAllControlledUnits(SetGameMasterOnHelper(),true,true,true,false);
 
-        for (int8 i = 0; i < MAX_TOTEM; ++i)
-            if(m_TotemSlot[i])
-                if(Creature *totem = GetMap()->GetCreature(m_TotemSlot[i]))
-                    totem->setFaction(35);
-
-        RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+        SetFFAPvP(false);
         ResetContestedPvP();
 
         getHostileRefManager().setOnlineOfflineState(false);
@@ -2266,20 +2278,11 @@ void Player::SetGameMaster(bool on)
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 
-        if (Pet* pet = GetPet())
-        {
-            pet->setFaction(getFaction());
-            pet->getHostileRefManager().setOnlineOfflineState(true);
-        }
-
-        for (int8 i = 0; i < MAX_TOTEM; ++i)
-            if(m_TotemSlot[i])
-                if(Creature *totem = GetMap()->GetCreature(m_TotemSlot[i]))
-                    totem->setFaction(getFaction());
+        CallForAllControlledUnits(SetGameMasterOffHelper(getFaction()),true,true,true,false);
 
         // restore FFA PvP Server state
         if(sWorld.IsFFAPvPRealm())
-            SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+            SetFFAPvP(true);
 
         // restore FFA PvP area state, remove not allowed for GM mounts
         UpdateArea(m_areaUpdateId);
@@ -4098,6 +4101,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     CharacterDatabase.PExecute("DELETE FROM group_instance WHERE leaderGuid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_queststatus WHERE guid = '%u'",guid);
+    CharacterDatabase.PExecute("DELETE FROM character_queststatus_daily WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_reputation WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_skills WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_spell WHERE guid = '%u'",guid);
@@ -6337,14 +6341,14 @@ void Player::UpdateArea(uint32 newArea)
     if(area && (area->flags & AREA_FLAG_ARENA))
     {
         if(!isGameMaster())
-            SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+            SetFFAPvP(true);
     }
     else
     {
         // remove ffa flag only if not ffapvp realm
         // removal in sanctuaries and capitals is handled in zone update
-        if(HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP) && !sWorld.IsFFAPvPRealm())
-            RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+        if(IsFFAPvP() && !sWorld.IsFFAPvPRealm())
+            SetFFAPvP(false);
     }
 
     UpdateAreaDependentAuras(newArea);
@@ -6412,7 +6416,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         if(sWorld.IsFFAPvPRealm())
-            RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+            SetFFAPvP(false);
     }
     else
     {
@@ -6426,7 +6430,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         InnEnter(time(0),GetMapId(),0,0,0);
 
         if(sWorld.IsFFAPvPRealm())
-            RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+            SetFFAPvP(false);
     }
     else                                                    // anywhere else
     {
@@ -6440,7 +6444,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                     SetRestType(REST_TYPE_NO);
 
                     if(sWorld.IsFFAPvPRealm())
-                        SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+                        SetFFAPvP(true);
                 }
             }
             else                                            // not in tavern (leave city then)
@@ -6450,7 +6454,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
                 // Set player to FFA PVP when not in rested environment.
                 if(sWorld.IsFFAPvPRealm())
-                    SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+                    SetFFAPvP(true);
             }
         }
     }
@@ -14730,7 +14734,9 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     {
         BattleGround *currentBg = sBattleGroundMgr.GetBattleGround(m_bgData.bgInstanceID, BATTLEGROUND_TYPE_NONE);
 
-        if(currentBg && currentBg->IsPlayerInBattleGround(GetGUID()))
+        bool player_at_bg = currentBg && currentBg->IsPlayerInBattleGround(GetGUID());
+
+        if(player_at_bg && currentBg->GetStatus() != STATUS_WAIT_LEAVE)
         {
             BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(currentBg->GetTypeID(), currentBg->GetArenaType());
             AddBattleGroundQueueId(bgQueueTypeId);
@@ -14745,6 +14751,11 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         }
         else
         {
+            // leave bg
+            if (player_at_bg)
+                currentBg->RemovePlayerAtLeave(GetGUID(), false, true);
+
+            // move to bg enter point
             const WorldLocation& _loc = GetBattleGroundEntryPoint();
             SetLocationMapId(_loc.mapid);
             Relocate(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
