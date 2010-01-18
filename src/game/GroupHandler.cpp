@@ -160,7 +160,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
 {
-    recv_data.read_skip<uint32>();                          // value received in WorldSession::HandleGroupInviteOpcode and also skipeed currently?
+    // recv_data.read_skip<uint32>();                          // value received in WorldSession::HandleGroupInviteOpcode and also skipeed currently?
 
     Group *group = GetPlayer()->GetGroupInvite();
     if (!group) return;
