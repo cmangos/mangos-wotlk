@@ -95,12 +95,16 @@ class MANGOS_DLL_SPEC CreatureAI
         // Called when the creature is killed
         virtual void JustDied(Unit *) {}
 
+        // Called when the creature summon is killed
+        virtual void SummonedCreatureJustDied(Creature* /*unit*/) {}
+
         // Called when the creature kills a unit
         virtual void KilledUnit(Unit *) {}
 
         // Called when the creature summon successfully other creature
         virtual void JustSummoned(Creature* ) {}
 
+        // Called when the creature summon despawn
         virtual void SummonedCreatureDespawn(Creature* /*unit*/) {}
 
         // Called when hit by a spell
@@ -117,6 +121,9 @@ class MANGOS_DLL_SPEC CreatureAI
 
         // Called at waypoint reached or point movement finished
         virtual void MovementInform(uint32 /*MovementType*/, uint32 /*Data*/) {}
+
+        // Called if a temporary summoned of m_creature reach a move point
+        virtual void SummonedMovementInform(Creature* /*summoned*/, uint32 /*motion_type*/, uint32 /*point_id*/) {}
 
         // Called at text emote receive from player
         virtual void ReceiveEmote(Player* /*pPlayer*/, uint32 /*text_emote*/) {}

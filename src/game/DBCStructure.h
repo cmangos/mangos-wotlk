@@ -1007,7 +1007,7 @@ struct ItemExtendedCostEntry
     uint32      ID;                                         // 0 extended-cost entry id
     uint32      reqhonorpoints;                             // 1 required honor points
     uint32      reqarenapoints;                             // 2 required arena points
-    //uint32 unk1;                                          // 4 probably indicates new 2v2 bracket restrictions
+    uint32      reqarenaslot;                               // 4 arena slot restrctions (min slot value)
     uint32      reqitem[5];                                 // 5-8 required item id
     uint32      reqitemcount[5];                            // 9-13 required count of 1st item
     uint32      reqpersonalarenarating;                     // 14 required personal arena rating
@@ -1112,8 +1112,8 @@ struct MapEntry
         return !IsDungeon() ||
             MapID==209 || MapID==269 || MapID==309 ||       // TanarisInstance, CavernsOfTime, Zul'gurub
             MapID==509 || MapID==534 || MapID==560 ||       // AhnQiraj, HyjalPast, HillsbradPast
-            MapID==568 || MapID==580 || MapID==615 ||       // ZulAman, Sunwell Plateau, Obsidian Sanctrum
-            MapID==616;                                     // Eye Of Eternity
+            MapID==568 || MapID==580 || MapID==595 ||       // ZulAman, Sunwell Plateau, Culling of Stratholme
+            MapID==615 || MapID==616;                       // Obsidian Sanctum, Eye Of Eternity
     }
 
     bool IsContinent() const
