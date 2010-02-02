@@ -304,6 +304,7 @@ class Spell
         void EffectPlayerPull(uint32 i);
         void EffectDispelMechanic(uint32 i);
         void EffectSummonDeadPet(uint32 i);
+        void EffectSummonAllTotems(uint32 i);
         void EffectDestroyAllTotems(uint32 i);
         void EffectDurabilityDamage(uint32 i);
         void EffectSkill(uint32 i);
@@ -430,7 +431,8 @@ class Spell
         void SetDelayStart(uint64 m_time) { m_delayStart = m_time; }
         uint64 GetDelayMoment() const { return m_delayMoment; }
 
-        bool IsNeedSendToClient() const;
+        bool IsNeedSendToClient() const;                    // use for hide spell cast for client in case when cast not have client side affect (animation or log entries)
+        bool IsTriggeredSpellWithRedundentData() const;     // use for ignore some spell data for triggered spells like cast time, some triggered spells have redundent copy data from main spell for client use purpose
 
         CurrentSpellTypes GetCurrentContainer();
 
@@ -455,6 +457,7 @@ class Spell
     protected:
 
         void SendLoot(uint64 guid, LootType loottype);
+        bool IgnoreItemRequirements() const;                        // some item use spells have unexpected reagent data
 
         Unit* m_caster;
 

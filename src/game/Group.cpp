@@ -1260,8 +1260,15 @@ void Group::_setLeader(const uint64 &guid)
         CharacterDatabase.CommitTransaction();
     }
 
+    uint32 old_guidlow = m_leaderGuid;
+
     m_leaderGuid = slot->guid;
     m_leaderName = slot->name;
+
+    // Non-BG groups stored in sObjectMgr with leader low-guids as keys
+    if (IsCreated() && !isBGGroup())
+        sObjectMgr.UpdateGroup(old_guidlow,this);
+
 }
 
 void Group::_removeRolls(const uint64 &guid)

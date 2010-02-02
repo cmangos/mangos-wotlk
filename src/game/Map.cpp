@@ -900,16 +900,16 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
     if( old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell) )
     {
         #ifdef MANGOS_DEBUG
-        if((sLog.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
+        if((sLog.getLogFilter() & LOG_FILTER_CREATURE_MOVES) == 0)
             sLog.outDebug("Creature (GUID: %u Entry: %u) added to moving list from grid[%u,%u]cell[%u,%u] to grid[%u,%u]cell[%u,%u].", creature->GetGUIDLow(), creature->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
         #endif
-        AddCreatureToMoveList(creature,x,y,z,ang);
+        AddCreatureToMoveList(creature, x, y, z, ang);
         // in diffcell/diffgrid case notifiers called at finishing move creature in Map::MoveAllCreaturesInMoveList
     }
     else
     {
         creature->Relocate(x, y, z, ang);
-        CreatureRelocationNotify(creature,new_cell,new_val);
+        CreatureRelocationNotify(creature, new_cell, new_val);
     }
     assert(CheckGridIntegrity(creature,true));
 }
@@ -919,7 +919,7 @@ void Map::AddCreatureToMoveList(Creature *c, float x, float y, float z, float an
     if(!c)
         return;
 
-    i_creaturesToMove[c] = CreatureMover(x,y,z,ang);
+    i_creaturesToMove[c] = CreatureMover(x, y, z, ang);
 }
 
 void Map::MoveAllCreaturesInMoveList()
@@ -941,7 +941,7 @@ void Map::MoveAllCreaturesInMoveList()
         {
             // update pos
             c->Relocate(cm.x, cm.y, cm.z, cm.ang);
-            CreatureRelocationNotify(c,new_cell,new_cell.cellPair());
+            CreatureRelocationNotify(c, new_cell, new_cell.cellPair());
         }
         else
         {
@@ -1775,7 +1775,7 @@ uint16 Map::GetAreaFlag(float x, float y, float z) const
                     // Krasus' Landing (Dalaran), with open east side
                     if (y < 449.33f || (x-5813.9f)*(x-5813.9f)+(y-449.33f)*(y-449.33f) < 1864.0f)
                     {
-                        areaflag = 2533;                    // Note: also 2633, possible one flight allowed and other not allowed case
+                        areaflag = 2531;                    // Note: also 2633, possible one flight allowed and other not allowed case
                         break;
                     }
                 }
