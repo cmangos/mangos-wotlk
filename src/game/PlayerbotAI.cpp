@@ -543,7 +543,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             uint64 guid = extractGuid(p);
             if (guid != m_bot->GetGUID())
                 return;
-			m_bot->m_movementInfo.AddMovementFlag(MOVEMENTFLAG_FLYING);
+			m_bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
             //m_bot->SetSpeed(MOVE_RUN, GetMaster()->GetSpeed(MOVE_FLIGHT) +0.1f, true);
             return;
         }
@@ -555,7 +555,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             uint64 guid = extractGuid(p);
             if (guid != m_bot->GetGUID())
                 return;
-			m_bot->m_movementInfo.RemoveMovementFlag(MOVEMENTFLAG_FLYING);
+			m_bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING);
             //m_bot->SetSpeed(MOVE_RUN,GetMaster()->GetSpeedRate(MOVE_RUN),true);
             return;
         }
