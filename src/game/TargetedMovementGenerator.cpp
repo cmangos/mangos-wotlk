@@ -74,17 +74,17 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
 
     D::_addUnitStateMove(owner);
     if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->canFly())
-        ((Creature&)owner).AddMonsterMoveFlag(MONSTER_MOVE_FLY);
+        ((Creature&)owner).AddSplineFlag(SPLINEFLAG_UNKNOWN7);
 }
 
 template<>
-void TargetedMovementGeneratorMedium<Player,ChaseMovementGenerator<Player> >::UpdateFinalDistance(float fDistance)
+void TargetedMovementGeneratorMedium<Player,ChaseMovementGenerator<Player> >::UpdateFinalDistance(float /*fDistance*/)
 {
     // nothing to do for Player
 }
 
 template<>
-void TargetedMovementGeneratorMedium<Player,FollowMovementGenerator<Player> >::UpdateFinalDistance(float fDistance)
+void TargetedMovementGeneratorMedium<Player,FollowMovementGenerator<Player> >::UpdateFinalDistance(float /*fDistance*/)
 {
     // nothing to do for Player
 }
@@ -141,7 +141,7 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
     {
         D::_addUnitStateMove(owner);
         if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->canFly())
-            ((Creature&)owner).AddMonsterMoveFlag(MONSTER_MOVE_FLY);
+            ((Creature&)owner).AddSplineFlag(SPLINEFLAG_UNKNOWN7);
 
         i_destinationHolder.StartTravel(traveller);
         return true;
@@ -199,10 +199,10 @@ template<>
 void ChaseMovementGenerator<Creature>::Initialize(Creature &owner)
 {
     owner.addUnitState(UNIT_STAT_CHASE|UNIT_STAT_CHASE_MOVE);
-    owner.RemoveMonsterMoveFlag(MONSTER_MOVE_WALK);
+    owner.RemoveSplineFlag(SPLINEFLAG_WALKMODE);
 
     if (((Creature*)&owner)->canFly())
-        owner.AddMonsterMoveFlag(MONSTER_MOVE_FLY);
+        owner.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
 
     _setTargetLocation(owner);
 }
@@ -239,7 +239,7 @@ void FollowMovementGenerator<Player>::_updateWalkMode(Player &)
 }
 
 template<>
-void FollowMovementGenerator<Player>::_updateSpeed(Player &u)
+void FollowMovementGenerator<Player>::_updateSpeed(Player &/*u*/)
 {
     // nothing to do for Player
 }
@@ -273,7 +273,7 @@ void FollowMovementGenerator<Creature>::Initialize(Creature &owner)
     _updateSpeed(owner);
 
     if (((Creature*)&owner)->canFly())
-        owner.AddMonsterMoveFlag(MONSTER_MOVE_FLY);
+        owner.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
 
     _setTargetLocation(owner);
 }

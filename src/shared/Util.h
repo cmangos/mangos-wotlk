@@ -30,7 +30,7 @@ Tokens StrSplit(const std::string &src, const std::string &sep);
 
 void stripLineInvisibleChars(std::string &src);
 
-std::string secsToTimeString(uint32 timeInSecs, bool shortText = false, bool hoursOnly = false);
+std::string secsToTimeString(time_t timeInSecs, bool shortText = false, bool hoursOnly = false);
 uint32 TimeStringToSecs(const std::string& timestring);
 std::string TimeToTimestampStr(time_t t);
 
@@ -55,10 +55,14 @@ MANGOS_DLL_SPEC int32 rand32();
  * With an FPU, there is usually no difference in performance between float and double. */
 MANGOS_DLL_SPEC double rand_norm(void);
 
+MANGOS_DLL_SPEC float rand_norm_f(void);
+
 /* Return a random double from 0.0 to 99.9999999999999. Floats support only 7 valid decimal digits.
  * A double supports up to 15 valid decimal digits and is used internaly (RAND32_MAX has 10 digits).
  * With an FPU, there is usually no difference in performance between float and double. */
 MANGOS_DLL_SPEC double rand_chance(void);
+
+MANGOS_DLL_SPEC float rand_chance_f(void);
 
 /* Return true if a random roll fits in the specified chance (range 0-100). */
 inline bool roll_chance_f(float chance)

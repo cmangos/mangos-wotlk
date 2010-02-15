@@ -41,8 +41,8 @@ ConfusedMovementGenerator<T>::Initialize(T &unit)
 
     for(unsigned int idx=0; idx < MAX_CONF_WAYPOINTS+1; ++idx)
     {
-        const float wanderX=wander_distance*rand_norm() - wander_distance/2;
-        const float wanderY=wander_distance*rand_norm() - wander_distance/2;
+        const float wanderX=wander_distance*rand_norm_f() - wander_distance/2;
+        const float wanderY=wander_distance*rand_norm_f() - wander_distance/2;
 
         i_waypoints[idx][0] = x + wanderX;
         i_waypoints[idx][1] = y + wanderY;
@@ -71,7 +71,7 @@ template<>
 void
 ConfusedMovementGenerator<Creature>::_InitSpecific(Creature &creature, bool &is_water_ok, bool &is_land_ok)
 {
-    creature.RemoveMonsterMoveFlag(MONSTER_MOVE_WALK);
+    creature.RemoveSplineFlag(SPLINEFLAG_WALKMODE);
 
     is_water_ok = creature.canSwim();
     is_land_ok  = creature.canWalk();
@@ -158,7 +158,7 @@ template<>
 void ConfusedMovementGenerator<Creature>::Finalize(Creature &unit)
 {
     unit.clearUnitState(UNIT_STAT_CONFUSED|UNIT_STAT_CONFUSED_MOVE);
-    unit.AddMonsterMoveFlag(MONSTER_MOVE_WALK);
+    unit.AddSplineFlag(SPLINEFLAG_WALKMODE);
 }
 
 template void ConfusedMovementGenerator<Player>::Initialize(Player &player);

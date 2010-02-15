@@ -449,6 +449,7 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
 #define SPELL_ATTR_EX6_UNK30                      0x40000000            // 30 not set in 3.0.3
 #define SPELL_ATTR_EX6_UNK31                      0x80000000            // 31 not set in 3.0.3
 
+#define MAX_TALENT_SPEC_COUNT   2
 #define MAX_GLYPH_SLOT_INDEX    6
 
 enum SheathTypes
@@ -2428,14 +2429,12 @@ enum DiminishingGroup
     DIMINISHING_TRIGGER_STUN,                               // By aura proced stuns, usualy chance on hit talents
     DIMINISHING_CONTROL_ROOT,                               // Immobilizing effects from casted spells
     DIMINISHING_TRIGGER_ROOT,                               // Immobilizing effects from triggered spells like Frostbite
-    DIMINISHING_FEAR_BLIND,                                 // Fears & blind
-    DIMINISHING_CHARM,
-    DIMINISHING_POLYMORPH_GOUGE_SAP,
-    // Warlock Specific
-    DIMINISHING_DEATHCOIL,                                  // Death Coil Diminish only with another Death Coil
-    // Druid Specific
-    DIMINISHING_CYCLONE,                                    // From 2.3.0
     // Shared Class Specific
+    DIMINISHING_FEAR_CHARM_BLIND,                           // Fears & charm and Blind
+    DIMINISHING_DISORIENT,
+    DIMINISHING_HORROR,
+    // Druid Specific
+    DIMINISHING_CYCLONE,
     DIMINISHING_CHEAPSHOT_POUNCE,
     DIMINISHING_DISARM,                                     // From 2.3.0
     DIMINISHING_SILENCE,                                    // From 2.3.0
@@ -2630,26 +2629,26 @@ enum MailResponseResult
 // in fact, these are also used elsewhere
 enum PetTameFailureReason
 {
-    PETTAME_INVALIDCREATURE         = 0,
-    PETTAME_TOOMANY                 = 1,
-    PETTAME_CREATUREALREADYOWNED    = 2,
-    PETTAME_NOTTAMEABLE             = 3,
-    PETTAME_ANOTHERSUMMONACTIVE     = 4,
-    PETTAME_UNITSCANTTAME           = 5,
-    PETTAME_NOPETAVAILABLE          = 6,  // not used in taming
-    PETTAME_INTERNALERROR           = 7,
-    PETTAME_TOOHIGHLEVEL            = 8,
-    PETTAME_DEAD                    = 9,  // not used in taming
-    PETTAME_NOTDEAD                 = 10, // not used in taming
-    PETTAME_CANTCONTROLEXOTIC       = 11, // 3.x
-    PETTAME_UNKNOWNERROR            = 12
+    PETTAME_INVALIDCREATURE         = 1,
+    PETTAME_TOOMANY                 = 2,
+    PETTAME_CREATUREALREADYOWNED    = 3,
+    PETTAME_NOTTAMEABLE             = 4,
+    PETTAME_ANOTHERSUMMONACTIVE     = 5,
+    PETTAME_UNITSCANTTAME           = 6,
+    PETTAME_NOPETAVAILABLE          = 7,                    // not used in taming
+    PETTAME_INTERNALERROR           = 8,
+    PETTAME_TOOHIGHLEVEL            = 9,
+    PETTAME_DEAD                    = 10,                   // not used in taming
+    PETTAME_NOTDEAD                 = 11,                   // not used in taming
+    PETTAME_CANTCONTROLEXOTIC       = 12,                   // 3.x
+    PETTAME_UNKNOWNERROR            = 13
 };
 
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
-// will only support WoW, WoW:TBC and WoW:WotLK 3.3.0a client build 11159...
+// will only support WoW, WoW:TBC and WoW:WotLK 3.3.2 client build 11403...
 
-#define EXPECTED_MANGOSD_CLIENT_BUILD        {11159, 0}
+#define EXPECTED_MANGOSD_CLIENT_BUILD        {11403, 0}
 
 // max supported expansion level in mangosd
 // NOTE: not set it more that supported by targeted client version with all expansions installed
