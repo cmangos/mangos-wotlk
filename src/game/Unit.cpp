@@ -424,7 +424,7 @@ void Unit::SendMonsterMoveByPath(Path const& path, uint32 start, uint32 end, Spl
     data << GetPositionY();
     data << GetPositionZ();
     data << uint32(getMSTime());
-    data << uint8(0);
+    data << uint8(SPLINETYPE_NORMAL);
     data << uint32(flags);
     data << uint32(traveltime);
     data << uint32(pathSize);
@@ -697,14 +697,18 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     {
         DEBUG_LOG("DealDamage: victim just died");
 
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)pVictim)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, health);
-
         // find player: owner of controlled `this` or `this` itself maybe
         Player *player = GetCharmerOrOwnerPlayerOrPlayerItself();
-
         if(pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->GetLootRecipient())
             player = ((Creature*)pVictim)->GetLootRecipient();
+
+        if (pVictim->GetTypeId() == TYPEID_PLAYER)
+        {
+            ((Player*)pVictim)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, health);
+            if (player)
+                player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL,1,0,pVictim);
+        }
+
         // Reward player, his pets, and group/raid members
         // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
         if(player && player!=pVictim)
@@ -1490,6 +1494,9 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
                 damageInfo->blocked_amount = damageInfo->damage;
                 damageInfo->procEx |= PROC_EX_FULL_BLOCK;
             }
+            else
+                damageInfo->procEx |= PROC_EX_NORMAL_HIT;   // Partial blocks can still cause attacker procs
+
             damageInfo->damage      -= damageInfo->blocked_amount;
             damageInfo->cleanDamage += damageInfo->blocked_amount;
             break;
@@ -4924,7 +4931,7 @@ bool Unit::HandleHasteAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 case 13877:
                 case 33735:
                 {
-                    target = SelectNearbyTarget(pVictim);
+                    target = SelectRandomUnfriendlyTarget(pVictim);
                     if(!target)
                         return false;
                     basepoints0 = damage;
@@ -5067,7 +5074,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     if(procSpell && procSpell->Id == 26654)
                         return false;
 
-                    target = SelectNearbyTarget(pVictim);
+                    target = SelectRandomUnfriendlyTarget(pVictim);
                     if(!target)
                         return false;
 
@@ -5642,7 +5649,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 if(procSpell && procSpell->Id == 26654)
                     return false;
 
-                target = SelectNearbyTarget(pVictim);
+                target = SelectRandomUnfriendlyTarget(pVictim);
                 if(!target)
                     return false;
 
@@ -6004,6 +6011,28 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     basepoints0 = triggerAmount * damage / 100;
                     triggered_spell_id = 54755;
                     break;
+                }
+                // Item - Druid T10 Restoration 4P Bonus (Rejuvenation)
+                case 70664:
+                {
+                    if (!procSpell || GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
+                    float radius;
+                    if (procSpell->EffectRadiusIndex[EFFECT_INDEX_0])
+                        radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(procSpell->EffectRadiusIndex[EFFECT_INDEX_0]));
+                    else
+                        radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(procSpell->rangeIndex));
+
+                    ((Player*)this)->ApplySpellMod(procSpell->Id, SPELLMOD_RADIUS, radius,NULL);
+
+                    Unit *second = pVictim->SelectRandomFriendlyTarget(pVictim, radius);
+
+                    if (!second)
+                        return false;
+
+                    pVictim->CastSpell(second, procSpell, true, NULL, triggeredByAura, GetGUID());
+                    return true;
                 }
             }
             // Eclipse
@@ -8466,7 +8495,7 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
                 const PlayerSpellMap& sp_list = ((Player*)this)->GetSpellMap();
                 for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
                 {
-                    if(itr->second->state == PLAYERSPELL_REMOVED) continue;
+                    if(itr->second.state == PLAYERSPELL_REMOVED) continue;
                     SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
                     if (!spellInfo || !IsPassiveSpell(itr->first)) continue;
                     if (spellInfo->CasterAuraState == flag)
@@ -11217,8 +11246,9 @@ int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto, SpellEffectInde
         int32 mechanic = GetEffectMechanic(spellProto, effect_index);
         // Find total mod value (negative bonus)
         int32 durationMod_always = target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, mechanic);
-        // Modify from SPELL_AURA_MOD_DURATION_OF_EFFECTS_BY_DISPEL aura (stack always ?)
-        durationMod_always+=target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DURATION_OF_EFFECTS_BY_DISPEL, spellProto->Dispel);
+        // Modify from SPELL_AURA_MOD_DURATION_OF_EFFECTS_BY_DISPEL aura for negatve effects (stack always ?)
+        if (!IsPositiveEffect(spellProto->Id, effect_index))
+            durationMod_always+=target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DURATION_OF_EFFECTS_BY_DISPEL, spellProto->Dispel);
         // Find max mod (negative bonus)
         int32 durationMod_not_stack = target->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD_NOT_STACK, mechanic);
 
@@ -11643,6 +11673,12 @@ void Unit::SetMaxHealth(uint32 val)
 
     if(val < health)
         SetHealth(val);
+}
+
+void Unit::SetHealthPercent(float percent)
+{
+    uint32 newHealth = GetMaxHealth() * percent/100.0f;
+    SetHealth(newHealth);
 }
 
 void Unit::SetPower(Powers power, uint32 val)
@@ -12754,7 +12790,7 @@ void Unit::UpdateReactives( uint32 p_time )
     }
 }
 
-Unit* Unit::SelectNearbyTarget(Unit* except /*= NULL*/) const
+Unit* Unit::SelectRandomUnfriendlyTarget(Unit* except /*= NULL*/, float radius /*= ATTACK_DISTANCE*/) const
 {
     CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
     Cell cell(p);
@@ -12763,14 +12799,62 @@ Unit* Unit::SelectNearbyTarget(Unit* except /*= NULL*/) const
 
     std::list<Unit *> targets;
 
-    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, this, ATTACK_DISTANCE);
+    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, this, radius);
     MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(this, targets, u_check);
 
     TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
     TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
 
-    cell.Visit(p, world_unit_searcher, *GetMap(), *this, ATTACK_DISTANCE);
-    cell.Visit(p, grid_unit_searcher, *GetMap(), *this, ATTACK_DISTANCE);
+    cell.Visit(p, world_unit_searcher, *GetMap(), *this, radius);
+    cell.Visit(p, grid_unit_searcher, *GetMap(), *this, radius);
+
+    // remove current target
+    if(except)
+        targets.remove(except);
+
+    // remove not LoS targets
+    for(std::list<Unit *>::iterator tIter = targets.begin(); tIter != targets.end();)
+    {
+        if(!IsWithinLOSInMap(*tIter))
+        {
+            std::list<Unit *>::iterator tIter2 = tIter;
+            ++tIter;
+            targets.erase(tIter2);
+        }
+        else
+            ++tIter;
+    }
+
+    // no appropriate targets
+    if(targets.empty())
+        return NULL;
+
+    // select random
+    uint32 rIdx = urand(0,targets.size()-1);
+    std::list<Unit *>::const_iterator tcIter = targets.begin();
+    for(uint32 i = 0; i < rIdx; ++i)
+        ++tcIter;
+
+    return *tcIter;
+}
+
+Unit* Unit::SelectRandomFriendlyTarget(Unit* except /*= NULL*/, float radius /*= ATTACK_DISTANCE*/) const
+{
+    CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
+    Cell cell(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
+
+    std::list<Unit *> targets;
+
+    MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(this, this, radius);
+    MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(this, targets, u_check);
+
+    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+
+    cell.Visit(p, world_unit_searcher, *GetMap(), *this, radius);
+    cell.Visit(p, grid_unit_searcher, *GetMap(), *this, radius);
 
     // remove current target
     if(except)

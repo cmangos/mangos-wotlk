@@ -2511,14 +2511,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     caster->InterruptSpell(CURRENT_CHANNELED_SPELL);
                 return;
             }
-            // Stop caster Penance chanelling on death
-            if (m_spellProto->SpellFamilyName == SPELLFAMILY_PRIEST &&
-                (m_spellProto->SpellFamilyFlags2 & UI64LIT(0x00000080)))
-            {
-                if (Unit* caster = GetCaster())
-                    caster->InterruptSpell(CURRENT_CHANNELED_SPELL);
-                return;
-            }
         }
     }
 
@@ -2859,6 +2851,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
         }
     }
+
+    // script has to "handle with care", only use where data are not ok to use in the above code.
+    if (m_target->GetTypeId() == TYPEID_UNIT)
+        Script->EffectAuraDummy(this, apply);
 }
 
 void Aura::HandleAuraMounted(bool apply, bool Real)
@@ -3141,7 +3137,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                         PlayerSpellMap const& sp_list = ((Player *)m_target)->GetSpellMap();
                         for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
                         {
-                            if(itr->second->state == PLAYERSPELL_REMOVED) continue;
+                            if(itr->second.state == PLAYERSPELL_REMOVED) continue;
                             SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
                             if (spellInfo && spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && spellInfo->SpellIconID == 139)
                                 Rage_val += m_target->CalculateSpellDamage(spellInfo, EFFECT_INDEX_0, spellInfo->EffectBasePoints[EFFECT_INDEX_0], m_target) * 10;
@@ -4575,6 +4571,14 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 if (m_removeMode == AURA_REMOVE_BY_DEFAULT && GetEffIndex() + 1 < MAX_EFFECT_INDEX)
                     m_target->CastSpell(m_target, m_spellProto->CalculateSimpleValue(SpellEffectIndex(GetEffIndex()+1)), true);
                 return;
+            case 51912:                                     // Ultra-Advanced Proto-Typical Shortening Blaster
+                if (m_removeMode == AURA_REMOVE_BY_DEFAULT && m_duration <= 0)
+                {
+                    if (Unit* pCaster = GetCaster())
+                        pCaster->CastSpell(m_target, m_spellProto->EffectTriggerSpell[GetEffIndex()], true, NULL, this);
+                }
+
+                return;
             default:
                 break;
         }
@@ -4680,6 +4684,30 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
 void Aura::HandlePeriodicHeal(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
+
+    // For prevent double apply bonuses
+    bool loading = (m_target->GetTypeId() == TYPEID_PLAYER && ((Player*)m_target)->GetSession()->PlayerLoading());
+
+    // Custom damage calculation after
+    if (apply)
+    {
+        if(loading)
+            return;
+
+        Unit *caster = GetCaster();
+        if (!caster)
+            return;
+
+        // Gift of the Naaru (have diff spellfamilies)
+        if (m_spellProto->SpellIconID == 329 && m_spellProto->SpellVisual[0] == 7625)
+        {
+            int32 ap = int32 (0.22f * caster->GetTotalAttackPowerValue(BASE_ATTACK));
+            int32 holy = caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto))
+                + caster->SpellBaseDamageBonusForVictim(GetSpellSchoolMask(m_spellProto), m_target);
+            holy = int32(holy * 377 / 1000);
+            m_modifier.m_amount += ap > holy ? ap : holy;
+        }
+    }
 }
 
 void Aura::HandlePeriodicDamage(bool apply, bool Real)
@@ -5852,7 +5880,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             const PlayerSpellMap& sp_list = ((Player *)m_target)->GetSpellMap();
             for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
             {
-                if (itr->second->state == PLAYERSPELL_REMOVED) continue;
+                if (itr->second.state == PLAYERSPELL_REMOVED) continue;
                 if (itr->first==spellId1 || itr->first==spellId2) continue;
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
                 if (!spellInfo || !(spellInfo->Attributes & (SPELL_ATTR_PASSIVE | (1<<7))))
@@ -6003,24 +6031,47 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
                 else
                     return;
             }
-            // Combustion (remove triggered aura stack)
-            else if (m_spellProto->Id == 11129)
+
+            switch(GetId())
             {
-                if(!apply)
-                    spellId1 = 28682;
-                else
+                case 11129:                                 // Combustion (remove triggered aura stack)
+                {
+                    if(!apply)
+                        spellId1 = 28682;
+                    else
+                        return;
+                    break;
+                }
+                case 28682:                                 // Combustion (remove main aura)
+                {
+                    if(!apply)
+                        spellId1 = 11129;
+                    else
+                        return;
+                    break;
+                }
+                case 44401:                                 // Missile Barrage (triggered)
+                case 48108:                                 // Hot Streak (triggered)
+                case 57761:                                 // Fireball! (Brain Freeze triggered)
+                {
+                    // consumed aura
+                    if (!apply && m_removeMode == AURA_REMOVE_BY_DEFAULT && m_duration != 0)
+                    {
+                        Unit* caster = GetCaster();
+                        // Item - Mage T10 2P Bonus
+                        if (!caster || !caster->HasAura(70752))
+                            return;
+
+                        cast_at_remove = true;
+                        spellId1 = 70753;                   // Pushing the Limit
+                    }
+                    else
+                        return;
+                    break;
+                }
+                default:
                     return;
             }
-            // Combustion (remove main aura)
-            else if (m_spellProto->Id == 28682)
-            {
-                if(!apply)
-                    spellId1 = 11129;
-                else
-                    return;
-            }
-            else
-                return;
             break;
         }
         case SPELLFAMILY_WARRIOR:
@@ -6898,7 +6949,14 @@ void Aura::PeriodicTick()
                 {
                     int32 ticks = GetAuraMaxTicks();
                     int32 remainingTicks = ticks - GetAuraTicks();
-                    pdamage = int32(pdamage) + int32(amount)*ticks*(-6+2*remainingTicks)/100;
+                    int32 addition = int32(amount)*ticks*(-6+2*remainingTicks)/100;
+
+                    if (GetAuraTicks() != 1)
+                        // Item - Druid T10 Restoration 2P Bonus
+                        if (Aura *aura = pCaster->GetAura(70658, EFFECT_INDEX_0))
+                            addition += abs(int32((addition * aura->GetModifier()->m_amount) / ((ticks-1)* 100)));
+
+                    pdamage = int32(pdamage) + addition;
                 }
             }
 
