@@ -805,7 +805,7 @@ void Group::CountTheRoll(Rolls::iterator rollI, uint32 NumberOfPlayers)
                 else
                 {
                     item->is_blocked = false;
-                    player->SendEquipError( msg, NULL, NULL );
+                    player->SendEquipError( msg, NULL, NULL, roll->itemid );
                 }
             }
         }
@@ -857,7 +857,7 @@ void Group::CountTheRoll(Rolls::iterator rollI, uint32 NumberOfPlayers)
                     else
                     {
                         item->is_blocked = false;
-                        player->SendEquipError( msg, NULL, NULL );
+                        player->SendEquipError( msg, NULL, NULL, roll->itemid );
                     }
                 }
                 else if(rollvote == DISENCHANT)
