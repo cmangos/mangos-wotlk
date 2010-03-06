@@ -356,6 +356,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
         }
         else if(pet->GetHappinessState() != HAPPY) // if pet is hungry
         {
+ 	    Unit *caster = (Unit*)m_bot;
             // list out items in main backpack
             for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
             {
@@ -369,6 +370,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
                     if(pet->HaveInDiet(pItemProto)) // is pItem in pets diet
                     {
                         //sLog.outDebug("Food for pet: %s",pItemProto->Name1);
+                        caster->CastSpell(caster,51284,true); // pet feed visual
                         uint32 count = 1; // number of items used 
                         int32 benefit = pet->GetCurrentFoodBenefitLevel(pItemProto->ItemLevel); // nutritional value of food
                         m_bot->DestroyItemCount(pItem,count,true); // remove item from inventory
@@ -397,7 +399,8 @@ void PlayerbotHunterAI::DoNonCombatActions()
                             if(pet->HaveInDiet(pItemProto)) // is pItem in pets diet
                             {
                                 //sLog.outDebug("Food for pet: %s",pItemProto->Name1);
-                                uint32 count = 1; // number of items used
+                                caster->CastSpell(caster,51284,true); // pet feed visual
+				uint32 count = 1; // number of items used
                                 int32 benefit = pet->GetCurrentFoodBenefitLevel(pItemProto->ItemLevel); // nutritional value of food
                                 m_bot->DestroyItemCount(pItem,count,true); // remove item from inventory
                                 m_bot->CastCustomSpell(m_bot,PET_FEED,&benefit,NULL,NULL,true); // feed pet
