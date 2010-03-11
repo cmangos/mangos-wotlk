@@ -34,7 +34,7 @@
 #include "Mail.h"
 #include "Map.h"
 #include "ObjectAccessor.h"
-#include "ObjectDefines.h"
+#include "ObjectGuid.h"
 #include "Policies/Singleton.h"
 #include "Database/SQLStorage.h"
 
@@ -313,9 +313,10 @@ enum ConditionType
     CONDITION_AREA_FLAG             = 13,                   // area_flag    area_flag_not
     CONDITION_RACE_CLASS            = 14,                   // race_mask    class_mask
     CONDITION_LEVEL                 = 15,                   // player_level 0, 1 or 2 (0: equal to, 1: equal or higher than, 2: equal or less than)
+    CONDITION_NOITEM                = 16,                   // item_id      count
 };
 
-#define MAX_CONDITION                 16                    // maximum value in ConditionType enum
+#define MAX_CONDITION                 17                    // maximum value in ConditionType enum
 
 struct PlayerCondition
 {
@@ -370,6 +371,24 @@ extern LanguageDesc lang_description[LANGUAGES_COUNT];
 MANGOS_DLL_SPEC LanguageDesc const* GetLanguageDescByID(uint32 lang);
 
 class PlayerDumpReader;
+
+template<typename T>
+class IdGenerator
+{
+    public:                                                 // constructors
+        explicit IdGenerator(char const* _name) : m_name(_name), m_nextGuid(1) {}
+
+    public:                                                 // modifiers
+        void Set(T val) { m_nextGuid = val; }
+        T Generate();
+
+    public:                                                 // accessors
+        T GetNextAfterMaxUsed() const { return m_nextGuid; }
+
+    private:                                                // fields
+        char const* m_name;
+        T m_nextGuid;
+};
 
 class ObjectMgr
 {
@@ -652,14 +671,14 @@ class ObjectMgr
 
         void SetHighestGuids();
         uint32 GenerateLowGuid(HighGuid guidhigh);
-        uint32 GenerateArenaTeamId();
-        uint32 GenerateAuctionID();
-        uint64 GenerateEquipmentSetGuid();
-        uint32 GenerateGuildId();
-        uint32 GenerateGroupId();
-        uint32 GenerateItemTextID();
-        uint32 GenerateMailID();
-        uint32 GeneratePetNumber();
+        uint32 GenerateArenaTeamId() { return m_ArenaTeamIds.Generate(); }
+        uint32 GenerateAuctionID() { return m_AuctionIds.Generate(); }
+        uint64 GenerateEquipmentSetGuid() { return m_EquipmentSetIds.Generate(); }
+        uint32 GenerateGuildId() { return m_GuildIds.Generate(); }
+        uint32 GenerateGroupId() { return m_GroupIds.Generate(); }
+        uint32 GenerateItemTextID() { return m_ItemGuids.Generate(); }
+        uint32 GenerateMailID() { return m_MailIds.Generate(); }
+        uint32 GeneratePetNumber() { return m_PetNumbers.Generate(); }
 
         uint32 CreateItemText(std::string text);
         void AddItemText(uint32 itemTextId, std::string text) { mItemTexts[itemTextId] = text; }
@@ -888,21 +907,21 @@ class ObjectMgr
     protected:
 
         // first free id for selected id type
-        uint32 m_arenaTeamId;
-        uint32 m_auctionid;
-        uint64 m_equipmentSetGuid;
-        uint32 m_guildId;
-        uint32 m_ItemTextId;
-        uint32 m_mailid;
-        uint32 m_hiPetNumber;
-        uint32 m_groupId;
+        IdGenerator<uint32> m_ArenaTeamIds;
+        IdGenerator<uint32> m_AuctionIds;
+        IdGenerator<uint64> m_EquipmentSetIds;
+        IdGenerator<uint32> m_GuildIds;
+        IdGenerator<uint32> m_ItemTextIds;
+        IdGenerator<uint32> m_MailIds;
+        IdGenerator<uint32> m_PetNumbers;
+        IdGenerator<uint32> m_GroupIds;
 
         // first free low guid for selected guid type
-        uint32 m_hiCharGuid;
-        uint32 m_hiCreatureGuid;
-        uint32 m_hiItemGuid;
-        uint32 m_hiGoGuid;
-        uint32 m_hiCorpseGuid;
+        ObjectGuidGenerator<HIGHGUID_PLAYER>     m_CharGuids;
+        ObjectGuidGenerator<HIGHGUID_UNIT>       m_CreatureGuids;
+        ObjectGuidGenerator<HIGHGUID_ITEM>       m_ItemGuids;
+        ObjectGuidGenerator<HIGHGUID_GAMEOBJECT> m_GameobjectGuids;
+        ObjectGuidGenerator<HIGHGUID_CORPSE>     m_CorpseGuids;
 
         QuestMap            mQuestTemplates;
 
