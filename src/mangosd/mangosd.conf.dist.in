@@ -1445,11 +1445,6 @@ SOAP.Port = 7878
 #        Limits the number of bots per account (Max 9)
 #        Default: 9
 #
-#    PlayerbotAI.DisableBotsInRealm
-#        Disable the bot command and bot menu for this realm
-#        Default: 0 - off
-#        Realm id: - on
-#
 #    PlayerbotAI.RestrictBotLevel
 #        Restrict the allowed bot level (Current Max 80)
 #        Default: 80 
@@ -1461,5 +1456,4 @@ PlayerbotAI.DebugWhisper = 0
 PlayerbotAI.FollowDistanceMin = 0.5
 PlayerbotAI.FollowDistanceMax = 1.0
 PlayerbotAI.MaxNumBots = 9
-PlayerbotAI.DisableBotsInRealm = 0
 PlayerbotAI.RestrictBotLevel = 80

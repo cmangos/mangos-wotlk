@@ -13,7 +13,7 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     else if((HEAL = ai->getSpellId ("greater heal"))==0 && (HEAL = ai->getSpellId ("heal"))==0)
         HEAL           = ai->getSpellId("lesser heal");
 
-	GREAT_HEAL		   = ai->getSpellId("great heal");
+    GREAT_HEAL		   = ai->getSpellId("great heal");
     FLASH_HEAL         = ai->getSpellId("flash heal");
     REZZ               = ai->getSpellId("resurrection");
     SMITE              = ai->getSpellId("smite");

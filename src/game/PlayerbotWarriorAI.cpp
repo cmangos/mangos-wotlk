@@ -23,7 +23,7 @@ PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, 
     MORTAL_STRIKE           = ai->getSpellId("mortal strike");  //ARMS
     BLADESTORM              = ai->getSpellId("bladestorm");  //ARMS
     HEROIC_THROW            = ai->getSpellId("heroic throw");  //ARMS
-	SHATTERING_THROW        = ai->getSpellId("shattering throw");  //ARMS
+    SHATTERING_THROW        = ai->getSpellId("shattering throw");  //ARMS
     BLOODRAGE               = ai->getSpellId("bloodrage"); //PROTECTION
     DEFENSIVE_STANCE        = ai->getSpellId("defensive stance"); //PROTECTION
     DEVASTATE               = ai->getSpellId("devastate"); //PROTECTION
@@ -40,7 +40,7 @@ PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, 
     SHOCKWAVE               = ai->getSpellId("shockwave"); //PROTECTION
     CONCUSSION_BLOW         = ai->getSpellId("blow"); //PROTECTION
     SPELL_REFLECTION        = ai->getSpellId("spell reflection"); //PROTECTION
-	LAST_STAND              = ai->getSpellId("last stand"); //PROTECTION
+    LAST_STAND              = ai->getSpellId("last stand"); //PROTECTION
     BATTLE_SHOUT            = ai->getSpellId("battle shout"); //FURY
     DEMORALIZING_SHOUT      = ai->getSpellId("demoralizing shout"); //FURY
     CLEAVE                  = ai->getSpellId("cleave"); //FURY
@@ -60,20 +60,20 @@ PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, 
     HEROIC_FURY             = ai->getSpellId("heroic fury"); //FURY
     COMMANDING_SHOUT        = ai->getSpellId("commanding shout"); //FURY
     ENRAGED_REGENERATION    = ai->getSpellId("enraged regeneration"); //FURY
-	PIERCING_HOWL           = ai->getSpellId("piercing howl"); //FURY
+    PIERCING_HOWL           = ai->getSpellId("piercing howl"); //FURY
 
-	RECENTLY_BANDAGED       = 11196; // first aid check
+    RECENTLY_BANDAGED       = 11196; // first aid check
 
 	// racial
-	GIFT_OF_THE_NAARU       = ai->getSpellId("gift of the naaru"); // draenei
-	STONEFORM               = ai->getSpellId("stoneform"); // dwarf
-	ESCAPE_ARTIST           = ai->getSpellId("escape artist"); // gnome
-	EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
-	SHADOWMELD              = ai->getSpellId("shadowmeld"); // night elf
-	BLOOD_FURY              = ai->getSpellId("blood fury"); // orc
-	WAR_STOMP               = ai->getSpellId("war stomp"); // tauren
-	BERSERKING              = ai->getSpellId("berserking"); // troll
-	WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
+    GIFT_OF_THE_NAARU       = ai->getSpellId("gift of the naaru"); // draenei
+    STONEFORM               = ai->getSpellId("stoneform"); // dwarf
+    ESCAPE_ARTIST           = ai->getSpellId("escape artist"); // gnome
+    EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
+    SHADOWMELD              = ai->getSpellId("shadowmeld"); // night elf
+    BLOOD_FURY              = ai->getSpellId("blood fury"); // orc
+    WAR_STOMP               = ai->getSpellId("war stomp"); // tauren
+    BERSERKING              = ai->getSpellId("berserking"); // troll
+    WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
 }
 PlayerbotWarriorAI::~PlayerbotWarriorAI() {}
 

@@ -27,7 +27,7 @@ Commands:
 /t BOTNAME equip <ITEM LINK>
 /t BOTNAME reset (will reset states, orders and loot list)
 /t BOTNAME report (bot reports all items needed to finish quests)
-/t BOTNAME free (bot shows free empty space in its inventory) 
+/t BOTNAME free (bot shows free empty space in its inventory)
 
 Shortcuts:
 c = cast

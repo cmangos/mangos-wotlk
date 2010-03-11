@@ -78,7 +78,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
             AIT_LOWESTTHREAT    = 0x01,
             AIT_HIGHESTTHREAT   = 0x02,
             AIT_VICTIMSELF      = 0x04,
-            AIT_VICTIMNOTSELF   = 0x08		// !!! must use victim param in FindAttackers
+            AIT_VICTIMNOTSELF   = 0x08	// !!! must use victim param in FindAttackers
         };
         struct AttackerInfo
         {

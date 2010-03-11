@@ -11,12 +11,12 @@ PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, Player
     SLOW                    = ai->getSpellId("slow");
     ARCANE_BARRAGE          = ai->getSpellId("arcane barrage");
     ARCANE_BLAST            = ai->getSpellId("arcane blast");
-	ARCANE_POWER            = ai->getSpellId("arcane power");
+    ARCANE_POWER            = ai->getSpellId("arcane power");
     DAMPEN_MAGIC            = ai->getSpellId("dampen magic");
-	AMPLIFY_MAGIC           = ai->getSpellId("amplify magic");
-	MAGE_ARMOR              = ai->getSpellId("mage armor");
-	MIRROR_IMAGE            = ai->getSpellId("mirror image");
-	ARCANE_INTELLECT        = ai->getSpellId("arcane intellect");
+    AMPLIFY_MAGIC           = ai->getSpellId("amplify magic");
+    MAGE_ARMOR              = ai->getSpellId("mage armor");
+    MIRROR_IMAGE            = ai->getSpellId("mirror image");
+    ARCANE_INTELLECT        = ai->getSpellId("arcane intellect");
     ARCANE_BRILLIANCE       = ai->getSpellId("arcane brilliance");
     DALARAN_INTELLECT       = ai->getSpellId("dalaran intellect");
     DALARAN_BRILLIANCE      = ai->getSpellId("dalaran brilliance");
@@ -33,8 +33,8 @@ PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, Player
     DRAGONS_BREATH          = ai->getSpellId("dragon's breath");
     LIVING_BOMB             = ai->getSpellId("living bomb");
     FROSTFIRE_BOLT          = ai->getSpellId("frostfire bolt");
-	FIRE_WARD               = ai->getSpellId("fire ward");
-	MOLTEN_ARMOR            = ai->getSpellId("molten armor");
+    FIRE_WARD               = ai->getSpellId("fire ward");
+    MOLTEN_ARMOR            = ai->getSpellId("molten armor");
     ICY_VEINS               = ai->getSpellId("icy veins"); //FROST
     DEEP_FREEZE             = ai->getSpellId("deep freeze");
     FROSTBOLT               = ai->getSpellId("frostbolt");
@@ -43,22 +43,22 @@ PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, Player
     CONE_OF_COLD            = ai->getSpellId("cone of cold");
     ICE_BARRIER             = ai->getSpellId("ice barrier");
     SUMMON_WATER_ELEMENTAL  = ai->getSpellId("summon water elemental");
-	FROST_WARD              = ai->getSpellId("frost ward"); 
+    FROST_WARD              = ai->getSpellId("frost ward");
     ICE_LANCE               = ai->getSpellId("ice lance");
     FROST_ARMOR             = ai->getSpellId("frost armor");
     ICE_ARMOR               = ai->getSpellId("ice armor");
-	ICE_BLOCK               = ai->getSpellId("ice block");
-	COLD_SNAP               = ai->getSpellId("cold snap");
+    ICE_BLOCK               = ai->getSpellId("ice block");
+    COLD_SNAP               = ai->getSpellId("cold snap");
 
-	RECENTLY_BANDAGED       = 11196; // first aid check
+    RECENTLY_BANDAGED       = 11196; // first aid check
 
-	// racial
-	ARCANE_TORRENT          = ai->getSpellId("arcane torrent"); // blood elf
-	GIFT_OF_THE_NAARU       = ai->getSpellId("gift of the naaru"); // draenei
-	ESCAPE_ARTIST           = ai->getSpellId("escape artist"); // gnome
-	EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
-	BERSERKING              = ai->getSpellId("berserking"); // troll
-	WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
+    // racial
+    ARCANE_TORRENT          = ai->getSpellId("arcane torrent"); // blood elf
+    GIFT_OF_THE_NAARU       = ai->getSpellId("gift of the naaru"); // draenei
+    ESCAPE_ARTIST           = ai->getSpellId("escape artist"); // gnome
+    EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
+    BERSERKING              = ai->getSpellId("berserking"); // troll
+    WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
 }
 
 PlayerbotMageAI::~PlayerbotMageAI() {}

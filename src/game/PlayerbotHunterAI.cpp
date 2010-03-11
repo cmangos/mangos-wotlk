@@ -15,11 +15,11 @@ PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, Pl
     PET_FEED             = 1539;
 
     // PET SKILLS
-	INTIMIDATION         = ai->getSpellId("intimidation"); // (generic)
-	SONIC_BLAST          = ai->getSpellId("sonic blast"); // bat
-	DEMORALIZING_SCREECH = ai->getSpellId("demoralizing screech"); // carrion bird
+    INTIMIDATION         = ai->getSpellId("intimidation"); // (generic)
+    SONIC_BLAST          = ai->getSpellId("sonic blast"); // bat
+    DEMORALIZING_SCREECH = ai->getSpellId("demoralizing screech"); // carrion bird
     BAD_ATTITUDE         = ai->getSpellId("bad attitude"); // crocolisk
-	NETHER_SHOCK         = ai->getSpellId("nether shock"); // nether ray
+    NETHER_SHOCK         = ai->getSpellId("nether shock"); // nether ray
 
     // RANGED COMBAT
     AUTO_SHOT            = ai->getSpellId("auto shot"); // basic ranged hunter fighting
@@ -28,51 +28,51 @@ PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, Pl
     CONCUSSIVE_SHOT      = ai->getSpellId("concussive shot");
     DISTRACTING_SHOT     = ai->getSpellId("distracting shot");
     MULTI_SHOT           = ai->getSpellId("multi-shot");
-	EXPLOSIVE_SHOT       = ai->getSpellId("explosive shot");
+    EXPLOSIVE_SHOT       = ai->getSpellId("explosive shot");
     SERPENT_STING        = ai->getSpellId("serpent sting");
     SCORPID_STING        = ai->getSpellId("scorpid sting");
-	WYVERN_STING         = ai->getSpellId("wyvern sting");
-	VIPER_STING          = ai->getSpellId("viper sting");
-	AIMED_SHOT           = ai->getSpellId("aimed shot");
-	STEADY_SHOT          = ai->getSpellId("steady shot");
-	CHIMERA_SHOT         = ai->getSpellId("chimera shot");
-	VOLLEY               = ai->getSpellId("volley");
-	BLACK_ARROW          = ai->getSpellId("black arrow");
-	KILL_SHOT            = ai->getSpellId("kill shot");
+    WYVERN_STING         = ai->getSpellId("wyvern sting");
+    VIPER_STING          = ai->getSpellId("viper sting");
+    AIMED_SHOT           = ai->getSpellId("aimed shot");
+    STEADY_SHOT          = ai->getSpellId("steady shot");
+    CHIMERA_SHOT         = ai->getSpellId("chimera shot");
+    VOLLEY               = ai->getSpellId("volley");
+    BLACK_ARROW          = ai->getSpellId("black arrow");
+    KILL_SHOT            = ai->getSpellId("kill shot");
 
     // MELEE
     RAPTOR_STRIKE        = ai->getSpellId("raptor strike");
     WING_CLIP            = ai->getSpellId("wing clip");
     MONGOOSE_BITE        = ai->getSpellId("mongoose bite");
-	DISENGAGE            = ai->getSpellId("disengage");
-	MISDIRECTION         = ai->getSpellId("misdirection");
-	DETERRENCE           = ai->getSpellId("deterrence");
+    DISENGAGE            = ai->getSpellId("disengage");
+    MISDIRECTION         = ai->getSpellId("misdirection");
+    DETERRENCE           = ai->getSpellId("deterrence");
     
     // TRAPS
     BEAR_TRAP            = ai->getSpellId("bear trap");
     FREEZING_TRAP        = ai->getSpellId("freezing trap");
     IMMOLATION_TRAP      = ai->getSpellId("immolation trap");
-	FROST_TRAP           = ai->getSpellId("frost trap");
-	EXPLOSIVE_TRAP       = ai->getSpellId("explosive trap");
-	ARCANE_TRAP          = ai->getSpellId("arcane trap");
-	SNAKE_TRAP           = ai->getSpellId("snake trap");
+    FROST_TRAP           = ai->getSpellId("frost trap");
+    EXPLOSIVE_TRAP       = ai->getSpellId("explosive trap");
+    ARCANE_TRAP          = ai->getSpellId("arcane trap");
+    SNAKE_TRAP           = ai->getSpellId("snake trap");
 
     // BUFFS
     ASPECT_OF_THE_HAWK   = ai->getSpellId("aspect of the hawk");
     ASPECT_OF_THE_MONKEY = ai->getSpellId("aspect of the monkey");
     RAPID_FIRE           = ai->getSpellId("rapid fire");
-	TRUESHOT_AURA        = 19506;
+    TRUESHOT_AURA        = 19506;
 
-	RECENTLY_BANDAGED    = 11196; // first aid check
+    RECENTLY_BANDAGED    = 11196; // first aid check
 
 	// racial
-	ARCANE_TORRENT       = ai->getSpellId("arcane torrent"); // blood elf
-	GIFT_OF_THE_NAARU    = ai->getSpellId("gift of the naaru"); // draenei
-	STONEFORM            = ai->getSpellId("stoneform"); // dwarf
-	SHADOWMELD           = ai->getSpellId("shadowmeld"); // night elf
-	BLOOD_FURY           = ai->getSpellId("blood fury"); // orc
-	WAR_STOMP            = ai->getSpellId("war stomp"); // tauren
-	BERSERKING           = ai->getSpellId("berserking"); // troll
+    ARCANE_TORRENT       = ai->getSpellId("arcane torrent"); // blood elf
+    GIFT_OF_THE_NAARU    = ai->getSpellId("gift of the naaru"); // draenei
+    STONEFORM            = ai->getSpellId("stoneform"); // dwarf
+    SHADOWMELD           = ai->getSpellId("shadowmeld"); // night elf
+    BLOOD_FURY           = ai->getSpellId("blood fury"); // orc
+    WAR_STOMP            = ai->getSpellId("war stomp"); // tauren
+    BERSERKING           = ai->getSpellId("berserking"); // troll
 
     m_petSummonFailed = false;
     m_rangedCombat = true;

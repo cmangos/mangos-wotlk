@@ -11,41 +11,41 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     SEARING_PAIN          = ai->getSpellId("searing pain");
     CONFLAGRATE           = ai->getSpellId("conflagrate");
     SHADOWFURY            = ai->getSpellId("shadowfury");
-	CHAOS_BOLT            = ai->getSpellId("chaos bolt");
-	SHADOWFLAME           = ai->getSpellId("shadowflame");
-	HELLFIRE              = ai->getSpellId("hellfire");
-	RAIN_OF_FIRE          = ai->getSpellId("rain of fire");
-	SOUL_FIRE             = ai->getSpellId("soul fire"); // soul shard spells
-	SHADOWBURN            = ai->getSpellId("shadowburn");
+    CHAOS_BOLT            = ai->getSpellId("chaos bolt");
+    SHADOWFLAME           = ai->getSpellId("shadowflame");
+    HELLFIRE              = ai->getSpellId("hellfire");
+    RAIN_OF_FIRE          = ai->getSpellId("rain of fire");
+    SOUL_FIRE             = ai->getSpellId("soul fire"); // soul shard spells
+    SHADOWBURN            = ai->getSpellId("shadowburn");
 	// CURSE
     CURSE_OF_WEAKNESS     = ai->getSpellId("curse of weakness");
     CURSE_OF_THE_ELEMENTS = ai->getSpellId("curse of the elements");
     CURSE_OF_AGONY        = ai->getSpellId("curse of agony");
     CURSE_OF_EXHAUSTION   = ai->getSpellId("curse of exhaustion");
     CURSE_OF_TONGUES      = ai->getSpellId("curse of tongues");
-	CURSE_OF_DOOM         = ai->getSpellId("curse of doom");
+    CURSE_OF_DOOM         = ai->getSpellId("curse of doom");
 	// AFFLICTION
-	CORRUPTION            = ai->getSpellId("corruption");
-	DRAIN_SOUL            = ai->getSpellId("drain soul");
-	DRAIN_LIFE            = ai->getSpellId("drain life");
-	DRAIN_MANA            = ai->getSpellId("drain mana");
+    CORRUPTION            = ai->getSpellId("corruption");
+    DRAIN_SOUL            = ai->getSpellId("drain soul");
+    DRAIN_LIFE            = ai->getSpellId("drain life");
+    DRAIN_MANA            = ai->getSpellId("drain mana");
     LIFE_TAP              = ai->getSpellId("life tap");
     UNSTABLE_AFFLICTION   = ai->getSpellId("unstable affliction");
     HAUNT                 = ai->getSpellId("haunt");
     ATROCITY              = ai->getSpellId("atrocity");
     SEED_OF_CORRUPTION    = ai->getSpellId("seed of corruption");
-	DARK_PACT             = ai->getSpellId("dark pact");
-	HOWL_OF_TERROR        = ai->getSpellId("howl of terror");
-	FEAR                  = ai->getSpellId("fear");
+    DARK_PACT             = ai->getSpellId("dark pact");
+    HOWL_OF_TERROR        = ai->getSpellId("howl of terror");
+    FEAR                  = ai->getSpellId("fear");
 	// DEMONOLOGY
-	DEMON_SKIN            = ai->getSpellId("demon skin");
+    DEMON_SKIN            = ai->getSpellId("demon skin");
     DEMON_ARMOR           = ai->getSpellId("demon armor");
     FEL_ARMOR             = ai->getSpellId("fel armor");
     SHADOW_WARD           = ai->getSpellId("shadow ward");
     SOULSHATTER           = ai->getSpellId("soulshatter");
-	SOUL_LINK             = ai->getSpellId("soul link");
-	HEALTH_FUNNEL         = ai->getSpellId("health funnel");
-	DETECT_INVISIBILITY   = ai->getSpellId("detect invisibility");
+    SOUL_LINK             = ai->getSpellId("soul link");
+    HEALTH_FUNNEL         = ai->getSpellId("health funnel");
+    DETECT_INVISIBILITY   = ai->getSpellId("detect invisibility");
 	// demon summon
     SUMMON_IMP            = ai->getSpellId("summon imp");
     SUMMON_VOIDWALKER     = ai->getSpellId("summon voidwalker");
@@ -53,9 +53,9 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     SUMMON_FELHUNTER      = ai->getSpellId("summon felhunter"); 
     SUMMON_FELGUARD       = ai->getSpellId("summon felguard");
 	// demon skills
-	BLOOD_PACT            = ai->getSpellId("blood pact"); // imp skill
-	CONSUME_SHADOWS       = ai->getSpellId("consume shadows"); // voidwalker skill
-	FEL_INTELLIGENCE      = ai->getSpellId("fel intelligence"); // felhunter skill
+    BLOOD_PACT            = ai->getSpellId("blood pact"); // imp skill
+    CONSUME_SHADOWS       = ai->getSpellId("consume shadows"); // voidwalker skill
+    FEL_INTELLIGENCE      = ai->getSpellId("fel intelligence"); // felhunter skill
 
 	RECENTLY_BANDAGED     = 11196; // first aid check
 

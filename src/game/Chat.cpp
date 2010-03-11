@@ -906,7 +906,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text, co
                         fullcmd.c_str(),p->GetName(),GetAccountId(),p->GetPositionX(),p->GetPositionY(),p->GetPositionZ(),p->GetMapId(),
                         sel_guid.GetString().c_str());
                 }
-                else                                        // 0 account -> console
+                else                                   // 0 account -> console
                 {
                     sLog.outCommand(GetAccountId(),"Command: %s [Account: %u from %s]",
                         fullcmd.c_str(),GetAccountId(),GetAccountId() ? "RA-connection" : "Console");

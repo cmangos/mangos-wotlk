@@ -14,7 +14,7 @@ PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* con
     UNHOLY_BLIGHT     = ai->getSpellId("unholy blight");
     SCOURGE_STRIKE    = ai->getSpellId("scourge strike");
     DEATH_AND_DECAY   = ai->getSpellId("death and decay");
-	CORPSE_EXPLOSION  = ai->getSpellId("corpse explosion");
+    CORPSE_EXPLOSION  = ai->getSpellId("corpse explosion");
     BONE_SHIELD		  = ai->getSpellId("shield"); // buffs
     ANTI_MAGIC_SHELL  = ai->getSpellId("anti-magic shell");
     ANTI_MAGIC_ZONE   = ai->getSpellId("anti-magic");
@@ -36,14 +36,14 @@ PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* con
     HORN_OF_WINTER    = ai->getSpellId("horn of winter");
     ICEBOUND_FORTITUDE= ai->getSpellId("icebound fortitude");
     EMPOWER_WEAPON    = ai->getSpellId("empower rune weapon");
-	UNBREAKABLE_ARMOR = ai->getSpellId("unbreakable armor");
+    UNBREAKABLE_ARMOR = ai->getSpellId("unbreakable armor");
     BLOOD_STRIKE      = ai->getSpellId("blood strike"); // Blood
     PESTILENCE        = ai->getSpellId("pestilence");
     STRANGULATE       = ai->getSpellId("strangulate");
     BLOOD_BOIL        = ai->getSpellId("blood boil");
     HEART_STRIKE      = ai->getSpellId("heart strike");
     DANCING_WEAPON    = ai->getSpellId("dancing rune weapon");
-	DARK_COMMAND      = ai->getSpellId("dark command");
+    DARK_COMMAND      = ai->getSpellId("dark command");
     MARK_OF_BLOOD     = ai->getSpellId("mark of blood"); // buffs
     RUNE_TAP		  = ai->getSpellId("rune tap");
     VAMPIRIC_BLOOD    = ai->getSpellId("vampiric blood");
@@ -57,16 +57,16 @@ PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* con
     RECENTLY_BANDAGED = 11196; // first aid check
 
 	// racial
-	ARCANE_TORRENT          = ai->getSpellId("arcane torrent"); // blood elf
-	GIFT_OF_THE_NAARU       = ai->getSpellId("gift of the naaru"); // draenei
-	STONEFORM               = ai->getSpellId("stoneform"); // dwarf
-	ESCAPE_ARTIST           = ai->getSpellId("escape artist"); // gnome
-	EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
-	SHADOWMELD              = ai->getSpellId("shadowmeld"); // night elf
-	BLOOD_FURY              = ai->getSpellId("blood fury"); // orc
-	WAR_STOMP               = ai->getSpellId("war stomp"); // tauren
-	BERSERKING              = ai->getSpellId("berserking"); // troll
-	WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
+    ARCANE_TORRENT          = ai->getSpellId("arcane torrent"); // blood elf
+    GIFT_OF_THE_NAARU       = ai->getSpellId("gift of the naaru"); // draenei
+    STONEFORM               = ai->getSpellId("stoneform"); // dwarf
+    ESCAPE_ARTIST           = ai->getSpellId("escape artist"); // gnome
+    EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
+    SHADOWMELD              = ai->getSpellId("shadowmeld"); // night elf
+    BLOOD_FURY              = ai->getSpellId("blood fury"); // orc
+    WAR_STOMP               = ai->getSpellId("war stomp"); // tauren
+    BERSERKING              = ai->getSpellId("berserking"); // troll
+    WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
 }
 
 PlayerbotDeathKnightAI::~PlayerbotDeathKnightAI() {}

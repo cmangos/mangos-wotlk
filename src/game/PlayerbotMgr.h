@@ -52,7 +52,7 @@ class MANGOS_DLL_SPEC PlayerbotMgr
 
     private:
         Player* const m_master;
-        PlayerBotMap m_playerBots;     
+        PlayerBotMap m_playerBots;
 };
 
 #endif

@@ -18,7 +18,6 @@ PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master)
 {
     // load config variables
     m_confMaxNumBots = sConfig.GetIntDefault( "PlayerbotAI.MaxNumBots", 9 );
-    m_confDisableBotsInRealm = sConfig.GetIntDefault( "PlayerbotAI.DisableBotsInRealm", 0 );
     m_confRestrictBotLevel = sConfig.GetIntDefault( "PlayerbotAI.RestrictBotLevel", 80 );
     m_confDisableBots = sConfig.GetBoolDefault( "PlayerbotAI.DisableBots", false );
     m_confDebugWhisper = sConfig.GetBoolDefault( "PlayerbotAI.DebugWhisper", false );
@@ -525,21 +524,6 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
         mgr = new PlayerbotMgr(m_session->GetPlayer());
         m_session->GetPlayer()->SetPlayerbotMgr(mgr);
     }
-
-    QueryResult *resultrealm = loginDatabase.PQuery("SELECT active_realm_id FROM account WHERE id = '%u'", m_session->GetAccountId());
-    if(resultrealm)
-    {
-        Field *fields=resultrealm->Fetch();
-        uint32 acctrealmid = fields[0].GetUInt32();
-        if(acctrealmid == sConfig.GetIntDefault("PlayerbotAI.DisableBotsInRealm", 0))
-        {
-            PSendSysMessage("|cffff0000bots are disabled for this realm.");
-            SetSentErrorMessage(true);
-            delete resultrealm;
-	    return false;
-        }
-    } 
-    delete resultrealm;
 
     QueryResult *resultchar = CharacterDatabase.PQuery("SELECT Count(*) FROM characters WHERE online = 1 AND account = '%u'", m_session->GetAccountId());
     if(resultchar)

@@ -16,27 +16,27 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
     STARFALL            = ai->getSpellId("starfall");
     WRATH               = ai->getSpellId("wrath");
     ROOTS               = ai->getSpellId("roots");
-	INSECT_SWARM        = ai->getSpellId("insect swarm");
-	FORCE_OF_NATURE     = ai->getSpellId("force of nature");
-	HURRICANE           = ai->getSpellId("hurricane");
+    INSECT_SWARM        = ai->getSpellId("insect swarm");
+    FORCE_OF_NATURE     = ai->getSpellId("force of nature");
+    HURRICANE           = ai->getSpellId("hurricane");
     MARK_OF_THE_WILD    = ai->getSpellId("mark of the wild"); // buffs
     THORNS              = ai->getSpellId("thorns");
-	BARKSKIN            = ai->getSpellId("barkskin");
-	INNERVATE           = ai->getSpellId("innervate");
-	MANA_REJUVENATION   = ai->getSpellId("mana rejuvenation");
+    BARKSKIN            = ai->getSpellId("barkskin");
+    INNERVATE           = ai->getSpellId("innervate");
+    MANA_REJUVENATION   = ai->getSpellId("mana rejuvenation");
     FAERIE_FIRE         = ai->getSpellId("faerie fire"); // debuffs
     REJUVENATION        = ai->getSpellId("rejuvenation"); // heals
     REGROWTH            = ai->getSpellId("regrowth");
-	WILD_GROWTH         = ai->getSpellId("wild growth");
+    WILD_GROWTH         = ai->getSpellId("wild growth");
     LIFEBLOOM           = ai->getSpellId("lifebloom");
     NOURISH             = ai->getSpellId("nourish");
     HEALING_TOUCH       = ai->getSpellId("healing touch");
-	SWIFTMEND           = ai->getSpellId("swiftmend");
-	TRANQUILITY         = ai->getSpellId("tranquility");
+    SWIFTMEND           = ai->getSpellId("swiftmend");
+    TRANQUILITY         = ai->getSpellId("tranquility");
     //Druid Forms
-	MOONKIN_FORM        = ai->getSpellId("moonkin form");
+    MOONKIN_FORM        = ai->getSpellId("moonkin form");
     DIRE_BEAR_FORM      = ai->getSpellId("dire bear form");
-	BEAR_FORM           = ai->getSpellId("bear form");
+    BEAR_FORM           = ai->getSpellId("bear form");
     CAT_FORM            = ai->getSpellId("cat form");
 	TREE_OF_LIFE        = 33891;
     //Cat Attack type's
@@ -50,19 +50,19 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
     FEROCIOUS_BITE      = ai->getSpellId("ferocious bite");  //35
     MAIM                = ai->getSpellId("maim");            //35
 	//Bear/Dire Bear Attacks & Buffs
-	BASH                = ai->getSpellId("bash");            //10 rage
-	MAUL                = ai->getSpellId("maul");            //15
-	SWIPE               = ai->getSpellId("swipe");           //20
-	DEMORALIZING_ROAR   = ai->getSpellId("roar");            //10
-	CHALLENGING_ROAR    = ai->getSpellId("challenging roar");//15
-	ENRAGE              = ai->getSpellId("enrage");
-	GROWL               = ai->getSpellId("growl");
+    BASH                = ai->getSpellId("bash");            //10 rage
+    MAUL                = ai->getSpellId("maul");            //15
+    SWIPE               = ai->getSpellId("swipe");           //20
+    DEMORALIZING_ROAR   = ai->getSpellId("roar");            //10
+    CHALLENGING_ROAR    = ai->getSpellId("challenging roar");//15
+    ENRAGE              = ai->getSpellId("enrage");
+    GROWL               = ai->getSpellId("growl");
 
-	RECENTLY_BANDAGED   = 11196; // first aid check
+    RECENTLY_BANDAGED   = 11196; // first aid check
 
 	// racial
-	SHADOWMELD              = ai->getSpellId("shadowmeld"); // night elf
-	WAR_STOMP               = ai->getSpellId("war stomp"); // tauren
+    SHADOWMELD              = ai->getSpellId("shadowmeld"); // night elf
+    WAR_STOMP               = ai->getSpellId("war stomp"); // tauren
 }
 
 PlayerbotDruidAI::~PlayerbotDruidAI() {}

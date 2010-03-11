@@ -22,7 +22,7 @@ PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, Play
     CRIPPLING_POISON    = 3408; //SpellID
     MIND_NUMBING_POISON = 5761; //SpellID
     GOUGE               = ai->getSpellId("gouge");
-	SPRINT              = ai->getSpellId("sprint");
+    SPRINT              = ai->getSpellId("sprint");
 
     SHADOWSTEP          = ai->getSpellId("shadowstep"); //SUBTLETY
     STEALTH             = ai->getSpellId("stealth");
