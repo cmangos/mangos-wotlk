@@ -29,7 +29,7 @@ class MANGOS_DLL_SPEC PlayerbotWarlockAI : PlayerbotClassAI
 
     private:
 
-		bool m_demonSummonFailed;
+        bool m_demonSummonFailed;
 
         // CURSES
         uint32 CURSE_OF_WEAKNESS, CURSE_OF_AGONY, CURSE_OF_EXHAUSTION, CURSE_OF_TONGUES, CURSE_OF_THE_ELEMENTS, CURSE_OF_DOOM;

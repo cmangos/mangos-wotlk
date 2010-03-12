@@ -2551,7 +2551,7 @@ class MANGOS_DLL_SPEC Player : public Unit
          // Playerbot mod:
         PlayerbotAI* m_playerbotAI;
 	PlayerbotMgr* m_playerbotMgr;
- 
+
         // Homebind coordinates
         uint32 m_homebindMapId;
         uint16 m_homebindAreaId;

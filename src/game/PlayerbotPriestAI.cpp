@@ -13,7 +13,7 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     else if((HEAL = ai->getSpellId ("greater heal"))==0 && (HEAL = ai->getSpellId ("heal"))==0)
         HEAL           = ai->getSpellId("lesser heal");
 
-    GREAT_HEAL		   = ai->getSpellId("great heal");
+    GREAT_HEAL         = ai->getSpellId("great heal");
     FLASH_HEAL         = ai->getSpellId("flash heal");
     REZZ               = ai->getSpellId("resurrection");
     SMITE              = ai->getSpellId("smite");
@@ -38,7 +38,7 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     SHADOWFIEND        = ai->getSpellId("shadowfiend");
     MIND_SEAR          = ai->getSpellId("mind sear");
     //DISCIPLINE
-	PENANCE			   = ai->getSpellId("penance");
+    PENANCE         = ai->getSpellId("penance");
     INNER_FIRE         = ai->getSpellId("inner fire");
     PWS                = ai->getSpellId("power word: shield");
     if((FORTITUDE = ai->getSpellId ("prayer of fortitude"))==1)
@@ -54,19 +54,19 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
 
     MASS_DISPEL        = ai->getSpellId("mass dispel");
     POWER_INFUSION     = ai->getSpellId("power infusion");
-	DIVINE_SPIRIT      = ai->getSpellId("divine spirit");
-	INNER_FOCUS        = ai->getSpellId("inner focus");
+    DIVINE_SPIRIT      = ai->getSpellId("divine spirit");
+    INNER_FOCUS        = ai->getSpellId("inner focus");
 
-	RECENTLY_BANDAGED  = 11196; // first aid check
+    RECENTLY_BANDAGED  = 11196; // first aid check
 
-	// racial
-	ARCANE_TORRENT          = ai->getSpellId("arcane torrent"); // blood elf
-	GIFT_OF_THE_NAARU       = ai->getSpellId("gift of the naaru"); // draenei
-	STONEFORM               = ai->getSpellId("stoneform"); // dwarf
-	EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
-	SHADOWMELD              = ai->getSpellId("shadowmeld"); // night elf
-	BERSERKING              = ai->getSpellId("berserking"); // troll
-	WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
+    // racial
+    ARCANE_TORRENT          = ai->getSpellId("arcane torrent"); // blood elf
+    GIFT_OF_THE_NAARU       = ai->getSpellId("gift of the naaru"); // draenei
+    STONEFORM               = ai->getSpellId("stoneform"); // dwarf
+    EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
+    SHADOWMELD              = ai->getSpellId("shadowmeld"); // night elf
+    BERSERKING              = ai->getSpellId("berserking"); // troll
+    WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
 }
 
 PlayerbotPriestAI::~PlayerbotPriestAI() {}
@@ -77,7 +77,7 @@ void PlayerbotPriestAI::HealTarget(Unit &target, uint8 hp)
 
 //    return ((hp < 80 && !target.HasAura(RENEW, EFFECT_INDEX_0) &&  ai->CastSpell(RENEW, target)) ||
 //        (hp < 60 && ai->CastSpell(HEAL, target)) ||
-//        (hp < 30 && ai->CastSpell(FLASH_HEAL, target)) ) ;
+//        (hp < 30 && ai->CastSpell(FLASH_HEAL, target)) );
 
     if (hp < 25 && FLASH_HEAL > 0 && ai->GetManaPercent() >= 20)
     {
@@ -119,7 +119,7 @@ void PlayerbotPriestAI::HealTarget(Unit &target, uint8 hp)
 
 void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 {
-	Unit* pVictim = pTarget->getVictim();
+    Unit* pVictim = pTarget->getVictim();
     PlayerbotAI* ai = GetAI();
     if (!ai)
         return;
@@ -139,7 +139,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 
     // ------- Non Duel combat ----------
 
-    ai->SetMovementOrder( PlayerbotAI::MOVEMENT_FOLLOW, GetMaster() ); // dont want to melee mob 
+    ai->SetMovementOrder( PlayerbotAI::MOVEMENT_FOLLOW, GetMaster() ); // dont want to melee mob
 
     Player *m_bot = GetPlayerBot();
     Group *m_group = m_bot->GetGroup();
@@ -207,7 +207,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             {
                 //ai->TellMaster("I'm casting mana burn.");
                 ai->CastSpell(MANA_BURN, *pTarget);
-				ai->SetIgnoreUpdateTime(3);
+                ai->SetIgnoreUpdateTime(3);
                 SpellSequence = SPELL_SHADOWMAGIC;
                 LastSpellHoly = LastSpellHoly +1;
                 break;
@@ -276,7 +276,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             {
                 //ai->TellMaster("I'm casting mind flay.");
                 ai->CastSpell(MIND_FLAY, *pTarget);
-				ai->SetIgnoreUpdateTime(3);
+                ai->SetIgnoreUpdateTime(3);
                 SpellSequence = SPELL_DISCIPLINE;
                 LastSpellShadowMagic = LastSpellShadowMagic +1;
                 break;
@@ -288,7 +288,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 LastSpellShadowMagic = LastSpellShadowMagic +1;
                 break;
             }
-			else if (SHADOW_PROTECTION > 0 && LastSpellShadowMagic <6 && ai->GetManaPercent() >= 60)
+            else if (SHADOW_PROTECTION > 0 && LastSpellShadowMagic <6 && ai->GetManaPercent() >= 60)
             {
                 ai->CastSpell(SHADOW_PROTECTION, *pTarget);
                 SpellSequence = SPELL_DISCIPLINE;
@@ -312,7 +312,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             else if (MIND_SEAR > 0 && LastSpellShadowMagic <9 && ai->GetAttackerCount()>=3 && ai->GetManaPercent() >= 28)
             {
                 ai->CastSpell(MIND_SEAR, *pTarget);
-				ai->SetIgnoreUpdateTime(5);
+                ai->SetIgnoreUpdateTime(5);
                 SpellSequence = SPELL_DISCIPLINE;
                 LastSpellShadowMagic = LastSpellShadowMagic +1;
                 break;
@@ -352,7 +352,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 LastSpellDiscipline = LastSpellDiscipline + 1;
                 break;
             }
-			else if (INNER_FOCUS > 0 && !m_bot->HasAura(INNER_FOCUS, EFFECT_INDEX_0) && LastSpellDiscipline <4)
+            else if (INNER_FOCUS > 0 && !m_bot->HasAura(INNER_FOCUS, EFFECT_INDEX_0) && LastSpellDiscipline <4)
             {
                 //ai->TellMaster("I'm casting inner focus");
                 ai->CastSpell(INNER_FOCUS, *m_bot);
@@ -384,7 +384,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 
 void PlayerbotPriestAI::DoNonCombatActions()
 {
-	PlayerbotAI* ai = GetAI();
+    PlayerbotAI* ai = GetAI();
     Player * m_bot = GetPlayerBot();
     if (!m_bot)
         return;
@@ -398,16 +398,16 @@ void PlayerbotPriestAI::DoNonCombatActions()
     if (INNER_FIRE > 0)
         (!m_bot->HasAura(INNER_FIRE, EFFECT_INDEX_0) && ai->CastSpell (INNER_FIRE, *m_bot));
 
-	// buff master
-	if (FORTITUDE > 0)
-		(!GetMaster()->HasAura(FORTITUDE, EFFECT_INDEX_0) && ai->CastSpell(FORTITUDE,*(GetMaster())) );
+    // buff master
+    if (FORTITUDE > 0)
+        (!GetMaster()->HasAura(FORTITUDE, EFFECT_INDEX_0) && ai->CastSpell(FORTITUDE,*(GetMaster())) );
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = ai->FindDrink();
-	Item* fItem = ai->FindBandage();
+    Item* fItem = ai->FindBandage();
 
     if (pItem != NULL && ai->GetManaPercent() < 30)
     {

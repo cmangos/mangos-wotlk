@@ -110,16 +110,16 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     // damage spells
     ai->SetInFront( pTarget );
     Player *m_bot = GetPlayerBot();
-	Group *m_group = m_bot->GetGroup();
-	float dist = m_bot->GetDistance( pTarget );
-	std::ostringstream out;
+    Group *m_group = m_bot->GetGroup();
+    float dist = m_bot->GetDistance( pTarget );
+    std::ostringstream out;
 
     //Shield master if low hp.
     uint32 masterHP = GetMaster()->GetHealth()*100 / GetMaster()->GetMaxHealth();
 
     if (GetMaster()->isAlive())
         if (masterHP < 25 && HAND_OF_PROTECTION > 0 && !GetMaster()->HasAura(FORBEARANCE, EFFECT_INDEX_0) && !GetMaster()->HasAura(HAND_OF_PROTECTION, EFFECT_INDEX_0) && !GetMaster()->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0) && !GetMaster()->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0))
-			ai->CastSpell(HAND_OF_PROTECTION, *GetMaster());
+              ai->CastSpell(HAND_OF_PROTECTION, *GetMaster());
 
 	// heal group inside combat, but do not heal if tank
     if( m_group && pVictim != m_bot ) // possible tank
@@ -284,13 +284,13 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
             if (ai->GetHealthPercent() <= 40)
             {
                 HealTarget (*m_bot, ai->GetHealthPercent());
-				out << " ...healing bot";
+                out << " ...healing bot";
                 break;
             }
             if (masterHP <= 40)
             {
                 HealTarget (*GetMaster(), masterHP);
-				out << " ...healing master";
+                out << " ...healing master";
                 break;
             }
             else
@@ -300,7 +300,7 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
                 break;
             }
     }
-	if( ai->GetManager()->m_confDebugWhisper )
+    if( ai->GetManager()->m_confDebugWhisper )
         ai->TellMaster( out.str().c_str() );
 
     if (AVENGING_WRATH > 0 && !m_bot->HasAura(AVENGING_WRATH, EFFECT_INDEX_0) && ai->GetManaPercent() >= 8)
@@ -309,13 +309,13 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     if (DIVINE_SHIELD > 0 && ai->GetHealthPercent() < 30 && pVictim == m_bot && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && !m_bot->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && ai->GetManaPercent() >= 3)
         ai->CastSpell(DIVINE_SHIELD, *m_bot);
 
-	if (DIVINE_SACRIFICE > 0 && ai->GetHealthPercent() > 50 && pVictim != m_bot && !m_bot->HasAura(DIVINE_SACRIFICE, EFFECT_INDEX_0))
+    if (DIVINE_SACRIFICE > 0 && ai->GetHealthPercent() > 50 && pVictim != m_bot && !m_bot->HasAura(DIVINE_SACRIFICE, EFFECT_INDEX_0))
         ai->CastSpell(DIVINE_SACRIFICE, *m_bot);
 }
 
 void PlayerbotPaladinAI::DoNonCombatActions()
 {
-	PlayerbotAI* ai = GetAI();
+    PlayerbotAI* ai = GetAI();
     Player * m_bot = GetPlayerBot();
     if (!m_bot)
         return;
@@ -326,7 +326,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     else if (BLESSING_OF_MIGHT > 0 && !m_bot->HasAura(GREATER_BLESSING_OF_MIGHT, EFFECT_INDEX_0) && !m_bot->HasAura(BLESSING_OF_MIGHT, EFFECT_INDEX_0))
         ai->CastSpell (BLESSING_OF_MIGHT, *m_bot);
 
-	if (DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && ai->GetManaPercent() >= 3)
+    if (DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && ai->GetManaPercent() >= 3)
         ai->CastSpell(DIVINE_FAVOR , *m_bot);
 /*
     if (SEAL_OF_COMMAND > 0)

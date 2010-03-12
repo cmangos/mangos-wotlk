@@ -1447,7 +1447,7 @@ SOAP.Port = 7878
 #
 #    PlayerbotAI.RestrictBotLevel
 #        Restrict the allowed bot level (Current Max 80)
-#        Default: 80 
+#        Default: 80
 #
 ###################################################################################################################
 

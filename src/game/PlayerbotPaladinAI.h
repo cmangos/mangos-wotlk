@@ -27,7 +27,7 @@ class MANGOS_DLL_SPEC PlayerbotPaladinAI : PlayerbotClassAI
         void BuffPlayer(Player *target);
 
     private:
-		// Heals the target based off its hps
+        // Heals the target based off its hps
         void HealTarget (Unit& target, uint8 hp);
 
         // Retribution

@@ -39,7 +39,7 @@ float rand_float(float low, float high)
  * the guid and what weight they hold. I call it the mask. For example) if mask is 01001001,
  * there will be only 3 words. The first word is shifted to the left 0 times,
  * the second is shifted 3 times, and the third is shifted 6.
- * 
+ *
  * Possibly use ByteBuffer::readPackGUID?
  */
 uint64 extractGuid(WorldPacket& packet)
@@ -82,7 +82,7 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     m_mgr(mgr), m_bot(bot), m_ignoreAIUpdatesUntilTime(0),
     m_combatOrder(ORDERS_NONE), m_ScenarioType(SCENARIO_PVEEASY),
     m_TimeDoneEating(0), m_TimeDoneDrinking(0),
-    m_CurrentlyCastingSpellId(0), m_spellIdCommand(0), 
+    m_CurrentlyCastingSpellId(0), m_spellIdCommand(0),
 	m_targetGuidCommand(0), m_classAI(0) {
 
     // set bot state and needed item list
@@ -348,7 +348,7 @@ void PlayerbotAI::SendQuestItemList( Player& player )
 void PlayerbotAI::SendOrders( Player& player )
 {
 	std::ostringstream out;
-	
+
 	if( !m_combatOrder )
 		out << "Got no combat orders!";
 	else if( m_combatOrder&ORDERS_TANK )
@@ -362,7 +362,7 @@ void PlayerbotAI::SendOrders( Player& player )
 	if( m_combatOrder&ORDERS_PROTECT )
 		out << "I PROTECT " << (m_targetProtect?m_targetProtect->GetName():"unknown");
     out << ".";
-    
+
     if( m_mgr->m_confDebugWhisper )
     {
 	    out << " " << (IsInCombat()?"I'm in COMBAT! ":"Not in combat. ");
@@ -516,7 +516,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                             else if((pSpellInfo->EffectApplyAuraName[2] == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
                                 && (pSpellInfo->EffectApplyAuraName[1] == SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED))
                             {
-                                if((pSpellInfo->EffectBasePoints[2] == master_speed2) 
+                                if((pSpellInfo->EffectBasePoints[2] == master_speed2)
                                     && (pSpellInfo->EffectBasePoints[1] == master_speed1))
                                 {
                                     spellMount = spellId;
@@ -762,7 +762,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             return;
         }
 
-        /* uncomment this and your bots will tell you all their outgoing packet opcode names 
+        /* uncomment this and your bots will tell you all their outgoing packet opcode names
         case SMSG_MONSTER_MOVE:
         case SMSG_UPDATE_WORLD_STATE:
         case SMSG_COMPRESSED_UPDATE_OBJECT:
@@ -1324,12 +1324,12 @@ void PlayerbotAI::DoCombatMovement() {
 
 	float targetDist = m_bot->GetDistance( m_targetCombat );
 
-	if( m_combatStyle==COMBAT_MELEE && !m_bot->hasUnitState( UNIT_STAT_CHASE ) && ( (m_movementOrder==MOVEMENT_STAY && targetDist<=ATTACK_DISTANCE) || (m_movementOrder!=MOVEMENT_STAY) ) ) 
+	if( m_combatStyle==COMBAT_MELEE && !m_bot->hasUnitState( UNIT_STAT_CHASE ) && ( (m_movementOrder==MOVEMENT_STAY && targetDist<=ATTACK_DISTANCE) || (m_movementOrder!=MOVEMENT_STAY) ) )
 	{
 		// melee combat - chase target if in range or if we are not forced to stay
 		m_bot->GetMotionMaster()->MoveChase( m_targetCombat );
-	} 
-	else if( m_combatStyle==COMBAT_RANGED && m_movementOrder!=MOVEMENT_STAY ) 
+	}
+	else if( m_combatStyle==COMBAT_RANGED && m_movementOrder!=MOVEMENT_STAY )
 	{
 		// ranged combat - just move within spell range
 		// TODO: just follow in spell range! how to determine bots spell range?
@@ -1540,20 +1540,20 @@ void PlayerbotAI::TurnInQuests( WorldObject *questgiver )
         QuestMenu& questMenu = m_bot->PlayerTalkClass->GetQuestMenu();
         for (uint32 iI = 0; iI < questMenu.MenuItemCount(); ++iI)
         {
-        	QuestMenuItem const& qItem = questMenu.GetItem(iI);
-        	uint32 questID = qItem.m_qId;
-        	Quest const* pQuest = sObjectMgr.GetQuestTemplate(questID);
+               QuestMenuItem const& qItem = questMenu.GetItem(iI);
+               uint32 questID = qItem.m_qId;
+               Quest const* pQuest = sObjectMgr.GetQuestTemplate(questID);
 
-        	std::ostringstream out;
-        	std::string questTitle  = pQuest->GetTitle();
-        	QuestLocalization(questTitle, questID);
-        				
+               std::ostringstream out;
+               std::string questTitle  = pQuest->GetTitle();
+               QuestLocalization(questTitle, questID);
+
             QuestStatus status = m_bot->GetQuestStatus(questID);
-        		        
-            // if quest is complete, turn it in
-        	if (status == QUEST_STATUS_COMPLETE)
-        	{
-        	    // if bot hasn't already turned quest in
+
+               // if quest is complete, turn it in
+               if (status == QUEST_STATUS_COMPLETE)
+               {
+                // if bot hasn't already turned quest in
                 if (! m_bot->GetQuestRewardStatus(questID))
                 {
                     // auto reward quest if no choice in reward
@@ -1569,7 +1569,7 @@ void PlayerbotAI::TurnInQuests( WorldObject *questgiver )
                             out << "|cffff0000Unable to turn quest in:|r |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
                         }
                     }
-                    
+
                     // auto reward quest if one item as reward
                     else if (pQuest->GetRewChoiceItemsCount() == 1)
                     {
@@ -1580,28 +1580,28 @@ void PlayerbotAI::TurnInQuests( WorldObject *questgiver )
                         if (m_bot->CanRewardQuest(pQuest, rewardIdx, false))
                         {
                             m_bot->RewardQuest(pQuest, rewardIdx, questgiver, true);
-                            
+
                             std::string itemName = pRewardItem->Name1;
                             ItemLocalization(itemName, pRewardItem->ItemId);
-                            
+
                             out << "Quest complete: "
-                                << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() 
-                                << "|h[" << questTitle << "]|h|r reward: |cffffffff|Hitem:" 
+                                << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel()
+                                << "|h[" << questTitle << "]|h|r reward: |cffffffff|Hitem:"
                                 << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
                         }
                         else
                         {
                             out << "|cffff0000Unable to turn quest in:|r "
-                                << "|cff808080|Hquest:" << questID << ':' 
+                                << "|cff808080|Hquest:" << questID << ':'
                                 << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r"
-                                << " reward: |cffffffff|Hitem:" 
+                                << " reward: |cffffffff|Hitem:"
                                 << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
                         }
                     }
-                    
+
                     // else multiple rewards - let master pick
                     else {
-                        out << "What reward should I take for |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() 
+                        out << "What reward should I take for |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel()
                             << "|h[" << questTitle << "]|h|r? ";
                         for (uint8 i=0; i < pQuest->GetRewChoiceItemsCount(); ++i)
                         {
@@ -1615,12 +1615,12 @@ void PlayerbotAI::TurnInQuests( WorldObject *questgiver )
             }
 
             else if (status == QUEST_STATUS_INCOMPLETE) {
-                out << "|cffff0000Quest incomplete:|r " 
+                out << "|cffff0000Quest incomplete:|r "
                     << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
             }
 
             else if (status == QUEST_STATUS_AVAILABLE){
-                out << "|cff00ff00Quest available:|r " 
+                out << "|cff00ff00Quest available:|r "
                     << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
             }
 
@@ -1734,13 +1734,13 @@ void PlayerbotAI::UpdateAttackerInfo()
     // DEBUG: output attacker info
     //sLog.outBasic( "[PlayerbotAI]: %s m_attackerInfo = {", m_bot->GetName() );
     //for( AttackerInfoList::iterator i=m_attackerInfo.begin(); i!=m_attackerInfo.end(); ++i )
-    //    sLog.outBasic( "[PlayerbotAI]:     [%016I64X] { %08X, %08X, %.2f, %.2f, %d, %d }", 
-    //        i->first, 
-    //        (i->second.attacker?i->second.attacker->GetGUIDLow():0), 
-    //        (i->second.victim?i->second.victim->GetGUIDLow():0), 
-    //        i->second.threat, 
-    //        i->second.threat2, 
-    //        i->second.count, 
+    //    sLog.outBasic( "[PlayerbotAI]:     [%016I64X] { %08X, %08X, %.2f, %.2f, %d, %d }",
+    //        i->first,
+    //        (i->second.attacker?i->second.attacker->GetGUIDLow():0),
+    //        (i->second.victim?i->second.victim->GetGUIDLow():0),
+    //        i->second.threat,
+    //        i->second.threat2,
+    //        i->second.count,
     //        i->second.source );
     //sLog.outBasic( "[PlayerbotAI]: };" );
 }
@@ -1810,9 +1810,9 @@ void PlayerbotAI::SetCombatOrder( CombatOrderType co, Unit *target ) {
 		m_targetProtect = 0;
 		return;
 	}
-	if( co == ORDERS_PROTECT ) 
+	if( co == ORDERS_PROTECT )
 		m_targetProtect = target;
-	else if( co == ORDERS_ASSIST ) 
+	else if( co == ORDERS_ASSIST )
 		m_targetAssist = target;
 	if( (co&ORDERS_PRIMARY) )
 		m_combatOrder = (CombatOrderType)(((uint32)m_combatOrder&(uint32)ORDERS_SECONDARY)|(uint32)co);
@@ -1830,7 +1830,7 @@ void PlayerbotAI::MovementReset() {
 	// stop moving...
 	MovementClear();
 
-	if( m_movementOrder == MOVEMENT_FOLLOW ) 
+	if( m_movementOrder == MOVEMENT_FOLLOW )
     {
 		if( !m_followTarget ) return;
 
@@ -1860,7 +1860,7 @@ void PlayerbotAI::MovementReset() {
 	}
 }
 
-void PlayerbotAI::MovementUpdate() 
+void PlayerbotAI::MovementUpdate()
 {
 	// send heartbeats to world
 	WorldPacket data;
@@ -1871,7 +1871,7 @@ void PlayerbotAI::MovementUpdate()
     m_bot->SetPosition( m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(), m_bot->GetOrientation(), false );
 }
 
-void PlayerbotAI::MovementClear() 
+void PlayerbotAI::MovementClear()
 {
     // stop...
     m_bot->GetMotionMaster()->Clear( true );
@@ -1883,7 +1883,7 @@ void PlayerbotAI::MovementClear()
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 }
 
-bool PlayerbotAI::IsMoving() 
+bool PlayerbotAI::IsMoving()
 {
 	return (m_bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE ? false : true);
 }
@@ -2119,7 +2119,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         if (!m_bot->isInFrontInMap(pTarget, 10))
         {
             m_bot->SetInFront(pTarget);
-        	MovementUpdate();
+            MovementUpdate();
         }
     }
 
@@ -2162,7 +2162,7 @@ Item* PlayerbotAI::FindItem(uint32 ItemId)
      // list out items in main backpack
      //INVENTORY_SLOT_ITEM_START = 23
      //INVENTORY_SLOT_ITEM_END = 39
-     
+
      for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
      {
          // sLog.outDebug("[%s's]backpack slot = %u",m_bot->GetName(),slot); // 23 to 38 = 16
@@ -2180,7 +2180,7 @@ Item* PlayerbotAI::FindItem(uint32 ItemId)
      // list out items in other removable backpacks
      //INVENTORY_SLOT_BAG_START = 19
      //INVENTORY_SLOT_BAG_END = 23
-     
+
      for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag) // 20 to 23 = 4
      {
           const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag); // 255, 20 to 23
@@ -2196,7 +2196,7 @@ Item* PlayerbotAI::FindItem(uint32 ItemId)
                           if (!pItemProto )
                                 continue;
 
-                          if( pItemProto->ItemId == ItemId ) // have required item 
+                          if( pItemProto->ItemId == ItemId ) // have required item
                                 return pItem;
                     }
                }
@@ -2378,13 +2378,13 @@ void PlayerbotAI::EquipItem(Item& item)
 }
 
 // submits packet to trade an item (trade window must already be open)
-// default slot is -1 which means trade slots 0 to 5. if slot is set 
+// default slot is -1 which means trade slots 0 to 5. if slot is set
 // to TRADE_SLOT_NONTRADED (which is slot 6) item will be shown in the
 // 'Will not be traded' slot.
 bool PlayerbotAI::TradeItem(const Item& item, int8 slot)
 {
-    sLog.outDebug( "[PlayerbotAI::TradeItem]: slot=%d, hasTrader=%d, itemInTrade=%d, itemTradeable=%d", 
-        slot, 
+    sLog.outDebug( "[PlayerbotAI::TradeItem]: slot=%d, hasTrader=%d, itemInTrade=%d, itemTradeable=%d",
+        slot,
         (m_bot->GetTrader()?1:0),
         (item.IsInTrade()?1:0),
         (item.CanBeTraded()?1:0)
@@ -2474,7 +2474,7 @@ bool PlayerbotAI::TradeCopper(uint32 copper)
 bool PlayerbotAI::FollowCheckTeleport( WorldObject &obj )
 {
     // if bot has strayed too far from the master, teleport bot
-	
+
     if (!m_bot->IsWithinDistInMap( &obj, 50, true ))
     {
         m_ignoreAIUpdatesUntilTime = time(0) + 6;
@@ -2571,7 +2571,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         extractItemIds(text, itemIds);
         if (itemIds.size() == 0)
             SendWhisper("Show me what item you want by shift clicking the item in the chat window.", fromPlayer);
-        else if( !strncmp( text.c_str(), "nt ", 3 ) ) 
+        else if( !strncmp( text.c_str(), "nt ", 3 ) )
         {
             if( itemIds.size() > 1 )
                 SendWhisper( "There is only one 'Will not be traded' slot. Shift-click just one item, please!", fromPlayer );
@@ -2675,55 +2675,55 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         for (std::list<Item*>::iterator it = itemList.begin(); it != itemList.end(); ++it)
             EquipItem(**it);
     }
-    
+
 	else if (text == "quests")
 	{
-		bool hasIncompleteQuests = false;
-    	std::ostringstream incomout;
-    	incomout << "my incomplete quests are:";
-		bool hasCompleteQuests = false;
-    	std::ostringstream comout;
-    	comout << "my complete quests are:";
-	    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
-		{
-	        if(uint32 questId = m_bot->GetQuestSlotQuestId(slot))
-	        {
-	        	Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
-				if (m_bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE) {
-					hasCompleteQuests = true;
-					comout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
-				}
-				else {
-					hasIncompleteQuests = true;
-					incomout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
-				}
-	        }
-	    }
-	    if (hasCompleteQuests)
-	    	SendWhisper(comout.str(), fromPlayer);
-	    if (hasIncompleteQuests)
-	    	SendWhisper(incomout.str(), fromPlayer);
-	    if (! hasCompleteQuests && ! hasIncompleteQuests)
-	    	SendWhisper("I have no quests!", fromPlayer);
-	}
-	
+               bool hasIncompleteQuests = false;
+               std::ostringstream incomout;
+               incomout << "my incomplete quests are:";
+               bool hasCompleteQuests = false;
+               std::ostringstream comout;
+               comout << "my complete quests are:";
+               for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+               {
+                    if(uint32 questId = m_bot->GetQuestSlotQuestId(slot))
+                    {
+                          Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
+                          if (m_bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE) {
+                               hasCompleteQuests = true;
+                               comout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+                          }
+                          else {
+                               hasIncompleteQuests = true;
+                               incomout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+                          }
+                    }
+               }
+               if (hasCompleteQuests)
+                    SendWhisper(comout.str(), fromPlayer);
+               if (hasIncompleteQuests)
+                    SendWhisper(incomout.str(), fromPlayer);
+               if (! hasCompleteQuests && ! hasIncompleteQuests)
+                    SendWhisper("I have no quests!", fromPlayer);
+       }
+
     // drop a quest
-	else if (text.size() > 5 && text.substr(0, 5) == "drop ")
-	{
-		uint64 oldSelectionGUID = 0;
-		if (fromPlayer.GetSelection() != m_bot->GetGUID()) {
-			oldSelectionGUID = m_bot->GetGUID();
-			fromPlayer.SetSelection(m_bot->GetGUID());
-		}
-		PlayerbotChatHandler ch(GetMaster());
-		if (! ch.dropQuest(text.substr(5).c_str()))
-			ch.sysmessage("ERROR: could not drop quest");
-		if (oldSelectionGUID)
-			fromPlayer.SetSelection(oldSelectionGUID);
-	}
+       else if (text.size() > 5 && text.substr(0, 5) == "drop ")
+       {
+            uint64 oldSelectionGUID = 0;
+            if (fromPlayer.GetSelection() != m_bot->GetGUID()) {
+                  oldSelectionGUID = m_bot->GetGUID();
+                  fromPlayer.SetSelection(m_bot->GetGUID());
+            }
+            PlayerbotChatHandler ch(GetMaster());
+            if (! ch.dropQuest(text.substr(5).c_str()))
+                  ch.sysmessage("ERROR: could not drop quest");
+            if (oldSelectionGUID)
+                  fromPlayer.SetSelection(oldSelectionGUID);
+       }
 
 
-    
+
     else if (text == "spells")
     {
 
@@ -2780,80 +2780,80 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
          // list out items in main backpack
          for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
          {
-	      const Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+              const Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
               if (pItem)
                   totalused++;
-	 }
-	 uint32 totalfree = 16 - totalused;
+         }
+         uint32 totalfree = 16 - totalused;
          // list out items in other removable backpacks
          for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
          {
-	      const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+              const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
               if (pBag)
-              {    
-		     ItemPrototype const* pBagProto = pBag->GetProto();
+              {
+                     ItemPrototype const* pBagProto = pBag->GetProto();
                      if (pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass == ITEM_SUBCLASS_CONTAINER)
-	                  totalfree =  totalfree + pBag->GetFreeSlots();
+                     totalfree =  totalfree + pBag->GetFreeSlots();
               }
 
- 	 }
-	 out << totalfree << " Empty Slots (Total)"; 
-	 ChatHandler ch(&fromPlayer);
+         }
+         out << totalfree << " Empty Slots (Total)";
+         ChatHandler ch(&fromPlayer);
          SendWhisper("I have this much space ", fromPlayer);
          ch.SendSysMessage(out.str().c_str());
     }
-    
-    
+
+
     else
     {
-    	// if this looks like an item link, reward item it completed quest and talking to NPC
+        // if this looks like an item link, reward item it completed quest and talking to NPC
         std::list<uint32> itemIds;
         extractItemIds(text, itemIds);
         if (!itemIds.empty()) {
-        	uint32 itemId = itemIds.front();
-        	bool wasRewarded = false;
-    	    uint64 questRewarderGUID = m_bot->GetSelection();
-        	Object* const pNpc = ObjectAccessor::GetObjectByTypeMask(*m_bot, questRewarderGUID, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
-        	if (!pNpc)
-        		return;
-        	
-        	QuestMenu& questMenu = m_bot->PlayerTalkClass->GetQuestMenu();
-        	for (uint32 iI = 0; !wasRewarded && iI < questMenu.MenuItemCount(); ++iI)
-        	{
-        		QuestMenuItem const& qItem = questMenu.GetItem(iI);
-        		
-        	    uint32 questID = qItem.m_qId;
-        	    Quest const* pQuest = sObjectMgr.GetQuestTemplate(questID);
-        	    QuestStatus status = m_bot->GetQuestStatus(questID);
-        	        		        
-        	    // if quest is complete, turn it in
-        	    if (status == QUEST_STATUS_COMPLETE && 
-        	    	! m_bot->GetQuestRewardStatus(questID) && 
-        	    	pQuest->GetRewChoiceItemsCount() > 1 &&
-        	    	m_bot->CanRewardQuest(pQuest, false))
-        	    {
-	                for (uint8 rewardIdx=0; !wasRewarded && rewardIdx < pQuest->GetRewChoiceItemsCount(); ++rewardIdx)
-		        {
-			    ItemPrototype const * const pRewardItem = sObjectMgr.GetItemPrototype(pQuest->RewChoiceItemId[rewardIdx]);
-			    if (itemId == pRewardItem->ItemId)
-			    {
-				m_bot->RewardQuest(pQuest, rewardIdx, pNpc, false);
+               uint32 itemId = itemIds.front();
+               bool wasRewarded = false;
+               uint64 questRewarderGUID = m_bot->GetSelection();
+               Object* const pNpc = ObjectAccessor::GetObjectByTypeMask(*m_bot, questRewarderGUID, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
+               if (!pNpc)
+                    return;
 
-			        std::string questTitle  = pQuest->GetTitle();
-			        m_bot->GetPlayerbotAI()->QuestLocalization(questTitle, questID);
-				std::string itemName = pRewardItem->Name1;
-				m_bot->GetPlayerbotAI()->ItemLocalization(itemName, pRewardItem->ItemId);
-							
-			        std::ostringstream out;
-				out << "|cffffffff|Hitem:" << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r rewarded";
-				SendWhisper(out.str(), fromPlayer);
-				wasRewarded = true;
-			    }
-		        }
-        	    }
-        	}
+               QuestMenu& questMenu = m_bot->PlayerTalkClass->GetQuestMenu();
+               for (uint32 iI = 0; !wasRewarded && iI < questMenu.MenuItemCount(); ++iI)
+               {
+                     QuestMenuItem const& qItem = questMenu.GetItem(iI);
 
-    	}
+                     uint32 questID = qItem.m_qId;
+                     Quest const* pQuest = sObjectMgr.GetQuestTemplate(questID);
+                     QuestStatus status = m_bot->GetQuestStatus(questID);
+
+                     // if quest is complete, turn it in
+                     if (status == QUEST_STATUS_COMPLETE &&
+                     ! m_bot->GetQuestRewardStatus(questID) &&
+                       pQuest->GetRewChoiceItemsCount() > 1 &&
+                          m_bot->CanRewardQuest(pQuest, false))
+                     {
+                           for (uint8 rewardIdx=0; !wasRewarded && rewardIdx < pQuest->GetRewChoiceItemsCount(); ++rewardIdx)
+                           {
+                                ItemPrototype const * const pRewardItem = sObjectMgr.GetItemPrototype(pQuest->RewChoiceItemId[rewardIdx]);
+                                if (itemId == pRewardItem->ItemId)
+                                {
+                                      m_bot->RewardQuest(pQuest, rewardIdx, pNpc, false);
+
+                                      std::string questTitle  = pQuest->GetTitle();
+                                      m_bot->GetPlayerbotAI()->QuestLocalization(questTitle, questID);
+                                      std::string itemName = pRewardItem->Name1;
+                                      m_bot->GetPlayerbotAI()->ItemLocalization(itemName, pRewardItem->ItemId);
+
+                                      std::ostringstream out;
+                                      out << "|cffffffff|Hitem:" << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r rewarded";
+                                      SendWhisper(out.str(), fromPlayer);
+                                      wasRewarded = true;
+                                }
+                           }
+                     }
+               }
+
+        }
         else {
             std::string msg = "What? follow, stay, (c)ast <spellname>, spells, (e)quip <itemlink>, (u)se <itemlink>, drop <questlink>, report, quests";
             SendWhisper(msg, fromPlayer);

@@ -62,8 +62,8 @@ To trade items/money with your bot simply initiate a trade and the bot will tell
 /w BOTNAME 6g500s25c <-- request 6 gold, 500 silver, and 25 cooper
 
 A bot is also able to show an item in its 'Will not be traded' slot. The item can be either
-in its bags or be equipped and even be soulbound. By this you can cast spells/enchantments 
-on soulbound items ('nt' stands for 'not trading'). 
+in its bags or be equipped and even be soulbound. By this you can cast spells/enchantments
+on soulbound items ('nt' stands for 'not trading').
 /w BOTNAME nt [Powerful Soulbound Item]
 
 More Information:

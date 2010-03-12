@@ -49,7 +49,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         enum CombatTargetType
         {
             TARGET_NORMAL       = 0x00,
-            TARGET_THREATEN     = 0x01     
+            TARGET_THREATEN     = 0x01
         };
 
         enum BotState
@@ -61,12 +61,12 @@ class MANGOS_DLL_SPEC PlayerbotAI
             BOTSTATE_LOOTING        // looting mode, used just after combat
         };
 
-		enum MovementOrderType 
-		{
-			MOVEMENT_NONE		= 0x00,
-			MOVEMENT_FOLLOW		= 0x01,
-			MOVEMENT_STAY		= 0x02
-		};
+        enum MovementOrderType
+        {
+            MOVEMENT_NONE		= 0x00,
+            MOVEMENT_FOLLOW		= 0x01,
+            MOVEMENT_STAY		= 0x02
+        };
 
         typedef std::map<uint32, uint32> BotNeedItem;
         typedef std::list<uint64> BotLootCreature;
@@ -163,7 +163,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         Item* FindPoison() const;
         Item* FindMount(uint32 matchingRidingSkill) const;
         Item* FindItem(uint32 ItemId);
-	
+
         // ******* Actions ****************************************
         // Your handlers can call these actions to make the bot do things.
         void TellMaster(const std::string& text) const;
@@ -182,7 +182,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void GetCombatTarget( Unit* forcedTarged = 0 );
         Unit *GetCurrentTarget() { return m_targetCombat; };
         void DoNextCombatManeuver();
-		void DoCombatMovement();
+        void DoCombatMovement();
         void SetIgnoreUpdateTime(uint8 t) {m_ignoreAIUpdatesUntilTime=time(0) + t; };
 
         Player *GetPlayerBot() const {return m_bot;}
@@ -193,7 +193,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void SetState( BotState state );
         void SetQuestNeedItems();
         void SendQuestItemList( Player& player );
-		void SendOrders( Player& player );
+        void SendOrders( Player& player );
         bool FollowCheckTeleport( WorldObject &obj );
         void DoLoot();
 
@@ -204,15 +204,15 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void UpdateAttackerInfo();
         Unit* FindAttacker( ATTACKERINFOTYPE ait=AIT_NONE, Unit *victim=0 );
         uint32 GetAttackerCount() { return m_attackerInfo.size(); };
-		void SetCombatOrderByStr( std::string str, Unit *target=0 );
-		void SetCombatOrder( CombatOrderType co, Unit *target=0 );
-		CombatOrderType GetCombatOrder() { return this->m_combatOrder; }
-		void SetMovementOrder( MovementOrderType mo, Unit *followTarget=0 );
-		MovementOrderType GetMovementOrder() { return this->m_movementOrder; }
-		void MovementReset();
-		void MovementUpdate();
-		void MovementClear();
-		bool IsMoving();
+        void SetCombatOrderByStr( std::string str, Unit *target=0 );
+        void SetCombatOrder( CombatOrderType co, Unit *target=0 );
+        CombatOrderType GetCombatOrder() { return this->m_combatOrder; }
+        void SetMovementOrder( MovementOrderType mo, Unit *followTarget=0 );
+        MovementOrderType GetMovementOrder() { return this->m_movementOrder; }
+        void MovementReset();
+        void MovementUpdate();
+        void MovementClear();
+        bool IsMoving();
 
         void SetInFront( const Unit* obj );
 
@@ -237,9 +237,9 @@ class MANGOS_DLL_SPEC PlayerbotAI
         // no need to waste CPU cycles during casting etc
         time_t m_ignoreAIUpdatesUntilTime;
 
-		CombatStyle m_combatStyle;
+        CombatStyle m_combatStyle;
         CombatOrderType m_combatOrder;
-		MovementOrderType m_movementOrder;
+        MovementOrderType m_movementOrder;
 
         ScenarioType m_ScenarioType;
 
@@ -268,11 +268,11 @@ class MANGOS_DLL_SPEC PlayerbotAI
         bool m_targetChanged;
         CombatTargetType m_targetType;
 
-		Unit *m_targetCombat;	// current combat target
-		Unit *m_targetAssist;	// get new target by checking attacker list of assisted player
-		Unit *m_targetProtect;	// check 
+        Unit *m_targetCombat;	// current combat target
+        Unit *m_targetAssist;	// get new target by checking attacker list of assisted player
+        Unit *m_targetProtect;	// check
 
-		Unit *m_followTarget;	// whom to follow in non combat situation?
+        Unit *m_followTarget;	// whom to follow in non combat situation?
 };
 
 #endif

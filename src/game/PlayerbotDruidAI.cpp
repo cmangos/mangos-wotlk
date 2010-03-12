@@ -10,7 +10,7 @@ class PlayerbotAI;
 
 PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, PlayerbotAI* const ai): PlayerbotClassAI(master, bot, ai)
 {
-    
+
     MOONFIRE            = ai->getSpellId("moonfire"); // attacks
     STARFIRE            = ai->getSpellId("starfire");
     STARFALL            = ai->getSpellId("starfall");
@@ -656,7 +656,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
         ai->SetIgnoreUpdateTime(8);
         return;
     }
-    
+
     // buff and heal master's group
     if (GetMaster()->GetGroup())
     {

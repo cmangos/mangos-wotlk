@@ -1,4 +1,4 @@
-    /* 
+    /*
     Name    : PlayerbotRogueAI.cpp
     Complete: maybe around 28%
     Author    : Natsukawa
@@ -29,13 +29,13 @@ PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, Play
     VANISH              = ai->getSpellId("vanish");
     EVASION             = ai->getSpellId("evasion");
     CLOAK_OF_SHADOWS    = ai->getSpellId("cloak of shadows");
-	HEMORRHAGE          = ai->getSpellId("hemorrhage");
-	GHOSTLY_STRIKE      = ai->getSpellId("ghostly strike");
-	SHADOW_DANCE        = ai->getSpellId("shadow dance");
-	BLIND               = ai->getSpellId("blind");
-	DISTRACT            = ai->getSpellId("distract");
-	PREPARATION         = ai->getSpellId("preparation");
-	PREMEDITATION       = ai->getSpellId("premeditation");
+    HEMORRHAGE          = ai->getSpellId("hemorrhage");
+    GHOSTLY_STRIKE      = ai->getSpellId("ghostly strike");
+    SHADOW_DANCE        = ai->getSpellId("shadow dance");
+    BLIND               = ai->getSpellId("blind");
+    DISTRACT            = ai->getSpellId("distract");
+    PREPARATION         = ai->getSpellId("preparation");
+    PREMEDITATION       = ai->getSpellId("premeditation");
 
     EVISCERATE          = ai->getSpellId("eviscerate"); //ASSASSINATION
     KIDNEY_SHOT         = ai->getSpellId("kidney shot");
@@ -46,18 +46,18 @@ PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, Play
     DISMANTLE           = ai->getSpellId("dismantle");
     CHEAP_SHOT          = ai->getSpellId("cheap shot");
     AMBUSH              = ai->getSpellId("ambush");
-	MUTILATE            = ai->getSpellId("mutilate");
+    MUTILATE            = ai->getSpellId("mutilate");
 
-	RECENTLY_BANDAGED   = 11196; // first aid check
-	// racial
-	ARCANE_TORRENT          = ai->getSpellId("arcane torrent"); // blood elf
-	STONEFORM               = ai->getSpellId("stoneform"); // dwarf
-	ESCAPE_ARTIST           = ai->getSpellId("escape artist"); // gnome
-	EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
-	SHADOWMELD              = ai->getSpellId("shadowmeld"); // night elf
-	BLOOD_FURY              = ai->getSpellId("blood fury"); // orc
-	BERSERKING              = ai->getSpellId("berserking"); // troll
-	WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
+    RECENTLY_BANDAGED   = 11196; // first aid check
+    // racial
+    ARCANE_TORRENT          = ai->getSpellId("arcane torrent"); // blood elf
+    STONEFORM               = ai->getSpellId("stoneform"); // dwarf
+    ESCAPE_ARTIST           = ai->getSpellId("escape artist"); // gnome
+    EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
+    SHADOWMELD              = ai->getSpellId("shadowmeld"); // night elf
+    BLOOD_FURY              = ai->getSpellId("blood fury"); // orc
+    BERSERKING              = ai->getSpellId("berserking"); // troll
+    WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
 }
 
 PlayerbotRogueAI::~PlayerbotRogueAI() {}
@@ -69,11 +69,11 @@ bool PlayerbotRogueAI::DoFirstCombatManeuver(Unit *pTarget)
 
     if( STEALTH>0 && !m_bot->HasAura( STEALTH ) && ai->CastSpell(STEALTH, *m_bot) )
     {
-        if( ai->GetManager()->m_confDebugWhisper ) 
+        if( ai->GetManager()->m_confDebugWhisper )
             ai->TellMaster( "First > Stealth (%d)", STEALTH );
         return false;
-    } 
-    
+    }
+
     return false;
 }
 
@@ -149,32 +149,32 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     {
         case RogueStealth:
             out << "Case Stealth";
-			if( PREMEDITATION>0 && ai->CastSpell(PREMEDITATION,*pTarget) )
+            if( PREMEDITATION>0 && ai->CastSpell(PREMEDITATION,*pTarget) )
                 out << " > Premeditation";
             else if( AMBUSH>0 && ai->GetEnergyAmount()>=60 && ai->CastSpell(AMBUSH,*pTarget) )
                 out << " > Ambush";
             else if( CHEAP_SHOT>0 && !pTarget->HasAura(CHEAP_SHOT, EFFECT_INDEX_0) && ai->GetEnergyAmount()>=60 && ai->CastSpell(CHEAP_SHOT,*pTarget) )
                 out << " > Cheap Shot";
-			else if( GARROTE>0 && ai->GetEnergyAmount()>=50 && ai->CastSpell(GARROTE,*pTarget) )
+            else if( GARROTE>0 && ai->GetEnergyAmount()>=50 && ai->CastSpell(GARROTE,*pTarget) )
                 out << " > Garrote";
             else
                 out << " NONE!";
             break;
         case RogueThreat:
             out << "Case Threat";
-			if( GOUGE>0 && ai->GetEnergyAmount()>=45 && !pTarget->HasAura(GOUGE, EFFECT_INDEX_0) && ai->CastSpell(GOUGE,*pTarget) )
+            if( GOUGE>0 && ai->GetEnergyAmount()>=45 && !pTarget->HasAura(GOUGE, EFFECT_INDEX_0) && ai->CastSpell(GOUGE,*pTarget) )
                  out << " > Gouge";
             else if( EVASION>0 && ai->GetHealthPercent()<=35 && !m_bot->HasAura(EVASION, EFFECT_INDEX_0) && ai->CastSpell(EVASION) )
                 out << " > Evasion";
-			else if( BLIND>0 && ai->GetHealthPercent()<=30 && !pTarget->HasAura(BLIND, EFFECT_INDEX_0) && ai->GetEnergyAmount()>=30 && ai->CastSpell(BLIND,*pTarget) )
+            else if( BLIND>0 && ai->GetHealthPercent()<=30 && !pTarget->HasAura(BLIND, EFFECT_INDEX_0) && ai->GetEnergyAmount()>=30 && ai->CastSpell(BLIND,*pTarget) )
                 out << " > Blind";
-			else if( FEINT>0 && ai->GetHealthPercent()<=25 && ai->GetEnergyAmount()>=20 && ai->CastSpell(FEINT) )
+            else if( FEINT>0 && ai->GetHealthPercent()<=25 && ai->GetEnergyAmount()>=20 && ai->CastSpell(FEINT) )
                 out << " > Feint";
-			else if( VANISH>0 && ai->GetHealthPercent()<=20 && !m_bot->HasAura(FEINT, EFFECT_INDEX_0) && ai->CastSpell(VANISH) )
+            else if( VANISH>0 && ai->GetHealthPercent()<=20 && !m_bot->HasAura(FEINT, EFFECT_INDEX_0) && ai->CastSpell(VANISH) )
                 out << " > Vanish";
-			else if( PREPARATION>0 && ai->CastSpell(PREPARATION) )
+            else if( PREPARATION>0 && ai->CastSpell(PREPARATION) )
                 out << " > Preparation";
-			else if( m_bot->getRace() == RACE_NIGHTELF && ai->GetHealthPercent()<=15 && !m_bot->HasAura( SHADOWMELD, EFFECT_INDEX_0) && ai->CastSpell( SHADOWMELD, *m_bot ) )
+            else if( m_bot->getRace() == RACE_NIGHTELF && ai->GetHealthPercent()<=15 && !m_bot->HasAura( SHADOWMELD, EFFECT_INDEX_0) && ai->CastSpell( SHADOWMELD, *m_bot ) )
                 out << " > Shadowmeld";
             else
                 out << " NONE!";
@@ -193,43 +193,43 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
             out << "Case Combat";
             if( m_bot->GetComboPoints()<=4 )
             {
-				if( SHADOW_DANCE>0 && !m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && ai->CastSpell(SHADOW_DANCE,*m_bot) )
+            if( SHADOW_DANCE>0 && !m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && ai->CastSpell(SHADOW_DANCE,*m_bot) )
                     out << " > Shadow Dance";
-				else if( CHEAP_SHOT>0 && m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && !pTarget->HasAura(CHEAP_SHOT, EFFECT_INDEX_0) && ai->GetEnergyAmount()>=60 && ai->CastSpell(CHEAP_SHOT,*pTarget) )
+            else if( CHEAP_SHOT>0 && m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && !pTarget->HasAura(CHEAP_SHOT, EFFECT_INDEX_0) && ai->GetEnergyAmount()>=60 && ai->CastSpell(CHEAP_SHOT,*pTarget) )
                     out << " > Cheap Shot";
-				else if( AMBUSH>0 && m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && ai->GetEnergyAmount()>=60 && ai->CastSpell(AMBUSH,*pTarget) )
+            else if( AMBUSH>0 && m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && ai->GetEnergyAmount()>=60 && ai->CastSpell(AMBUSH,*pTarget) )
                     out << " > Ambush";
-				else if( GARROTE>0 && m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && ai->GetEnergyAmount()>=50 && ai->CastSpell(GARROTE,*pTarget) )
+            else if( GARROTE>0 && m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && ai->GetEnergyAmount()>=50 && ai->CastSpell(GARROTE,*pTarget) )
                     out << " > Garrote";
-                else if( BACKSTAB>0 && pTarget->isInBackInMap(m_bot,1) && ai->GetEnergyAmount()>=60 && ai->CastSpell(BACKSTAB,*pTarget) )
+            else if( BACKSTAB>0 && pTarget->isInBackInMap(m_bot,1) && ai->GetEnergyAmount()>=60 && ai->CastSpell(BACKSTAB,*pTarget) )
                     out << " > Backstab";
-				else if( MUTILATE>0 && ai->GetEnergyAmount()>=60 && ai->CastSpell(MUTILATE,*pTarget) )
+            else if( MUTILATE>0 && ai->GetEnergyAmount()>=60 && ai->CastSpell(MUTILATE,*pTarget) )
                     out << " > Mutilate";
-                else if( SINISTER_STRIKE>0 && ai->GetEnergyAmount()>=45 && ai->CastSpell(SINISTER_STRIKE,*pTarget) )
+            else if( SINISTER_STRIKE>0 && ai->GetEnergyAmount()>=45 && ai->CastSpell(SINISTER_STRIKE,*pTarget) )
                     out << " > Sinister Strike";
-				else if( GHOSTLY_STRIKE>0 && ai->GetEnergyAmount()>=40 && ai->CastSpell(GHOSTLY_STRIKE,*pTarget) )
+            else if( GHOSTLY_STRIKE>0 && ai->GetEnergyAmount()>=40 && ai->CastSpell(GHOSTLY_STRIKE,*pTarget) )
                     out << " > Ghostly Strike";
-				else if( HEMORRHAGE>0 && ai->GetEnergyAmount()>=35 && ai->CastSpell(HEMORRHAGE,*pTarget) )
+            else if( HEMORRHAGE>0 && ai->GetEnergyAmount()>=35 && ai->CastSpell(HEMORRHAGE,*pTarget) )
                     out << " > Hemorrhage";
-                else if( DISMANTLE>0 && !pTarget->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISARMED) && ai->GetEnergyAmount()>=25 && ai->CastSpell(DISMANTLE,*pTarget) )
+            else if( DISMANTLE>0 && !pTarget->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISARMED) && ai->GetEnergyAmount()>=25 && ai->CastSpell(DISMANTLE,*pTarget) )
                     out << " > Dismantle";
-				else if( SHADOWSTEP>0 && ai->GetEnergyAmount()>=10 && ai->CastSpell(SHADOWSTEP,*pTarget) )
+            else if( SHADOWSTEP>0 && ai->GetEnergyAmount()>=10 && ai->CastSpell(SHADOWSTEP,*pTarget) )
                     out << " > Shadowstep";
-				else if( m_bot->getRace() == RACE_BLOODELF && !pTarget->HasAura( ARCANE_TORRENT, EFFECT_INDEX_0) && ai->CastSpell( ARCANE_TORRENT,*pTarget ) )
+            else if( m_bot->getRace() == RACE_BLOODELF && !pTarget->HasAura( ARCANE_TORRENT, EFFECT_INDEX_0) && ai->CastSpell( ARCANE_TORRENT,*pTarget ) )
                     out << " > Arcane Torrent";
-				else if( m_bot->getRace() == RACE_HUMAN && m_bot->hasUnitState( UNIT_STAT_STUNNED ) || m_bot->HasAuraType( SPELL_AURA_MOD_FEAR ) || m_bot->HasAuraType( SPELL_AURA_MOD_DECREASE_SPEED ) || m_bot->HasAuraType( SPELL_AURA_MOD_CHARM ) && ai->CastSpell( EVERY_MAN_FOR_HIMSELF, *m_bot ) )
-                     out << " > Every Man for Himself";
-				else if( m_bot->getRace() == RACE_UNDEAD_PLAYER && m_bot->HasAuraType( SPELL_AURA_MOD_FEAR ) || m_bot->HasAuraType( SPELL_AURA_MOD_CHARM ) && ai->CastSpell( WILL_OF_THE_FORSAKEN, *m_bot ) )
+            else if( m_bot->getRace() == RACE_HUMAN && m_bot->hasUnitState( UNIT_STAT_STUNNED ) || m_bot->HasAuraType( SPELL_AURA_MOD_FEAR ) || m_bot->HasAuraType( SPELL_AURA_MOD_DECREASE_SPEED ) || m_bot->HasAuraType( SPELL_AURA_MOD_CHARM ) && ai->CastSpell( EVERY_MAN_FOR_HIMSELF, *m_bot ) )
+                    out << " > Every Man for Himself";
+            else if( m_bot->getRace() == RACE_UNDEAD_PLAYER && m_bot->HasAuraType( SPELL_AURA_MOD_FEAR ) || m_bot->HasAuraType( SPELL_AURA_MOD_CHARM ) && ai->CastSpell( WILL_OF_THE_FORSAKEN, *m_bot ) )
                     out << " > Will of the Forsaken";
-				else if( m_bot->getRace() == RACE_DWARF && m_bot->HasAuraState( AURA_STATE_DEADLY_POISON ) && ai->CastSpell( STONEFORM, *m_bot ) )
+            else if( m_bot->getRace() == RACE_DWARF && m_bot->HasAuraState( AURA_STATE_DEADLY_POISON ) && ai->CastSpell( STONEFORM, *m_bot ) )
                     out << " > Stoneform";
-				else if( m_bot->getRace() == RACE_GNOME && m_bot->hasUnitState( UNIT_STAT_STUNNED ) || m_bot->HasAuraType( SPELL_AURA_MOD_DECREASE_SPEED ) && ai->CastSpell( ESCAPE_ARTIST, *m_bot ) )
+            else if( m_bot->getRace() == RACE_GNOME && m_bot->hasUnitState( UNIT_STAT_STUNNED ) || m_bot->HasAuraType( SPELL_AURA_MOD_DECREASE_SPEED ) && ai->CastSpell( ESCAPE_ARTIST, *m_bot ) )
                     out << " > Escape Artist";
-				else if( m_bot->getRace() == RACE_ORC && !m_bot->HasAura( BLOOD_FURY, EFFECT_INDEX_0) && ai->CastSpell( BLOOD_FURY, *m_bot ) )
+            else if( m_bot->getRace() == RACE_ORC && !m_bot->HasAura( BLOOD_FURY, EFFECT_INDEX_0) && ai->CastSpell( BLOOD_FURY, *m_bot ) )
                     out << " > Blood Fury";
-				else if( m_bot->getRace() == RACE_TROLL && !m_bot->HasAura( BERSERKING, EFFECT_INDEX_0) && ai->CastSpell( BERSERKING, *m_bot ) )
+            else if( m_bot->getRace() == RACE_TROLL && !m_bot->HasAura( BERSERKING, EFFECT_INDEX_0) && ai->CastSpell( BERSERKING, *m_bot ) )
                     out << " > Berserking";
-                else
+            else
                     out << " NONE!";
             }
             else

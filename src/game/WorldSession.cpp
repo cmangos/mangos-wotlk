@@ -292,7 +292,7 @@ bool WorldSession::Update(uint32 /*diff*/)
     // since Playerbots are known to the World obj only by its master's WorldSession object
     // we need to process all master's bot's packets.
     if (GetPlayer() && GetPlayer()->GetPlayerbotMgr()) {
-        for (PlayerBotMap::const_iterator itr = GetPlayer()->GetPlayerbotMgr()->GetPlayerBotsBegin(); 
+        for (PlayerBotMap::const_iterator itr = GetPlayer()->GetPlayerbotMgr()->GetPlayerBotsBegin();
                 itr != GetPlayer()->GetPlayerbotMgr()->GetPlayerBotsEnd(); ++itr)
         {
             Player* const botPlayer = itr->second;
