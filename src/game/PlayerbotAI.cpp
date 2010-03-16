@@ -2676,8 +2676,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             EquipItem(**it);
     }
 
-	else if (text == "quests")
-	{
+        else if (text == "quests")
+        {
                bool hasIncompleteQuests = false;
                std::ostringstream incomout;
                incomout << "my incomplete quests are:";

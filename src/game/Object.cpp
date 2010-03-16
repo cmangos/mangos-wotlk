@@ -1429,7 +1429,7 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
     float vmap_z = GetBaseMap()->GetHeight(x,y,z,true);
 
     if(vmap_z > INVALID_HEIGHT)
-	  z = vmap_z - 0.03f;  // adjust offset to suit
+          z = vmap_z - 0.02f;  // adjust offset to suit
 
     if((map_z > vmap_z) && (map_z > z))
           z = map_z;
