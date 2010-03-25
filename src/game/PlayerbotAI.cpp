@@ -2508,7 +2508,7 @@ void PlayerbotAI::HandleTeleportAck()
 // Localization support
 void PlayerbotAI::ItemLocalization(std::string& itemName, const uint32 itemID) const
 {
-    int loc = GetMaster()->GetSession()->GetSessionDbLocaleIndex();
+    uint32 loc = GetMaster()->GetSession()->GetSessionDbLocaleIndex();
     std::wstring wnamepart;
 
     ItemLocale const *pItemInfo = sObjectMgr.GetItemLocale(itemID);
@@ -2525,7 +2525,7 @@ void PlayerbotAI::ItemLocalization(std::string& itemName, const uint32 itemID) c
 
 void PlayerbotAI::QuestLocalization(std::string& questTitle, const uint32 questID) const
 {
-    int loc = GetMaster()->GetSession()->GetSessionDbLocaleIndex();
+    uint32 loc = GetMaster()->GetSession()->GetSessionDbLocaleIndex();
     std::wstring wnamepart;
 
     QuestLocale const *pQuestInfo = sObjectMgr.GetQuestLocale(questID);
