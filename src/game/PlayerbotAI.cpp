@@ -430,7 +430,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 m_bot->GetSession()->QueuePacket(packet); // queue the packet to get around race condition
 
                 // follow target in casting range
-                float angle = rand_float(0, M_PI);
+                float angle = rand_float(0, M_PI_F);
                 float dist = rand_float(4, 10);
 
                 m_bot->GetMotionMaster()->Clear(true);
@@ -1467,16 +1467,16 @@ void PlayerbotAI::DoLoot()
                 }
             }
             // release loot
-            if( uint64 lguid = m_bot->GetLootGUID() && m_bot->GetSession() )
-                m_bot->GetSession()->DoLootRelease( lguid );
+            // if( uint64 lguid = m_bot->GetLootGUID() && m_bot->GetSession() )
+                m_bot->GetSession()->DoLootRelease( m_lootCurrent );
             //else if( !m_bot->GetSession() )
             //    sLog.outDebug( "[PlayerbotAI]: %s has no session. Cannot release loot!", m_bot->GetName() );
 
             // clear movement target, take next target on next update
             m_bot->GetMotionMaster()->Clear();
             m_bot->GetMotionMaster()->MoveIdle();
+            SetQuestNeedItems();
             //sLog.outDebug( "[PlayerbotAI]: %s looted target 0x%08X", m_bot->GetName(), m_lootCurrent );
-            m_lootCurrent = 0;
         }
     }
 }
@@ -1853,7 +1853,7 @@ void PlayerbotAI::MovementReset() {
 
         if( m_bot->isAlive() )
         {
-			float angle = rand_float(0, M_PI);
+			float angle = rand_float(0, M_PI_F);
 		    float dist = rand_float( m_mgr->m_confFollowDistance[0], m_mgr->m_confFollowDistance[1] );
 			m_bot->GetMotionMaster()->MoveFollow( m_followTarget, dist, angle );
         }
@@ -1891,7 +1891,7 @@ bool PlayerbotAI::IsMoving()
 void PlayerbotAI::SetInFront( const Unit* obj )
 {
 	// removed SendUpdateToPlayer (is not updating movement/orientation)
-    if( !m_bot->HasInArc( M_PI, obj ) )
+    if( !m_bot->HasInArc( M_PI_F, obj ) )
         m_bot->SetInFront( obj );
 }
 

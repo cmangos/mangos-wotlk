@@ -133,7 +133,7 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
         case DruidTank: // Its now a tank druid!
             //ai->TellMaster("DruidTank");
 
-            if( !m_bot->HasInArc(M_PI, pTarget))
+            if( !m_bot->HasInArc(M_PI_F, pTarget))
             {
                 m_bot->SetInFront(pTarget);
                 if (pVictim)
@@ -441,7 +441,7 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 
         case DruidCombat:
             //ai->TellMaster("DruidCombat");
-            if( !m_bot->HasInArc(M_PI, pTarget))
+            if( !m_bot->HasInArc(M_PI_F, pTarget))
             {
                 m_bot->SetInFront(pTarget);
                 if (pVictim)

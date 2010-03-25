@@ -465,12 +465,13 @@ void PlayerbotMgr::RemoveAllBotsFromGroup()
 
 bool ChatHandler::HandlePlayerbotCommand(const char* args)
 {
-    if(sConfig.GetBoolDefault("PlayerbotAI.DisableBots", false))
-    {
-        PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
-        SetSentErrorMessage(true);
-        return false;
-    }
+    if(!(m_session->GetSecurity() > SEC_PLAYER))
+        if(sConfig.GetBoolDefault("PlayerbotAI.DisableBots", false))
+        {
+            PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
+            SetSentErrorMessage(true);
+            return false;
+        }
 
     if (! m_session)
     {
@@ -529,14 +530,15 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
     if(resultchar)
     {
         Field *fields=resultchar->Fetch();
-        uint32 acctcharcount = fields[0].GetUInt32();
-        if((acctcharcount > sConfig.GetIntDefault("PlayerbotAI.MaxNumBots", 9)) && (cmdStr == "add" || cmdStr == "login"))
-        {
-            PSendSysMessage("|cffff0000You cannot summon anymore bots, for this account.");
-            SetSentErrorMessage(true);
-            delete resultchar;
-            return false;
-        }
+        int acctcharcount = fields[0].GetUInt32();
+        if(!(m_session->GetSecurity() > SEC_PLAYER))
+            if((acctcharcount > sConfig.GetIntDefault("PlayerbotAI.MaxNumBots", 9)) && (cmdStr == "add" || cmdStr == "login"))
+            {
+                PSendSysMessage("|cffff0000You cannot summon anymore bots, for this account.");
+                SetSentErrorMessage(true);
+                delete resultchar;
+                return false;
+            }
     }
     delete resultchar;
 
@@ -544,17 +546,18 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
     if(resultlvl)
     {
         Field *fields=resultlvl->Fetch();
-        uint32 charlvl = fields[0].GetUInt32();
-        if(charlvl > sConfig.GetIntDefault("PlayerbotAI.RestrictBotLevel", 80))
-        {
-            PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high.",fields[1].GetString());
-            SetSentErrorMessage(true);
-            delete resultlvl;
-            return false;
-        }
+        int charlvl = fields[0].GetUInt32();
+        if(!(m_session->GetSecurity() > SEC_PLAYER))
+            if(charlvl > sConfig.GetIntDefault("PlayerbotAI.RestrictBotLevel", 80))
+            {
+                PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high.",fields[1].GetString());
+                SetSentErrorMessage(true);
+                delete resultlvl;
+                return false;
+            }
     }
     delete resultlvl;
-
+    // end of gmconfig patch
     if (cmdStr == "add" || cmdStr == "login")
     {
         if (mgr->GetPlayerBot(guid))
