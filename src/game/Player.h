@@ -893,7 +893,9 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADACCOUNTDATA          = 20,
     PLAYER_LOGIN_QUERY_LOADSKILLS               = 21,
     PLAYER_LOGIN_QUERY_LOADGLYPHS               = 22,
-    MAX_PLAYER_LOGIN_QUERY                      = 23
+    PLAYER_LOGIN_QUERY_LOADMAILS                = 23,
+    PLAYER_LOGIN_QUERY_LOADMAILEDITEMS          = 24,
+    MAX_PLAYER_LOGIN_QUERY                      = 25
 };
 
 enum PlayerDelayedOperations
@@ -1376,10 +1378,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void GroupEventHappens( uint32 questId, WorldObject const* pEventObject );
         void ItemAddedQuestCheck( uint32 entry, uint32 count );
         void ItemRemovedQuestCheck( uint32 entry, uint32 count );
-        void KilledMonster( CreatureInfo const* cInfo, uint64 guid );
-        void KilledMonsterCredit( uint32 entry, uint64 guid );
-        void CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id );
-        void TalkedToCreature( uint32 entry, uint64 guid );
+        void KilledMonster( CreatureInfo const* cInfo, ObjectGuid guid );
+        void KilledMonsterCredit( uint32 entry, ObjectGuid guid );
+        void CastedCreatureOrGO( uint32 entry, ObjectGuid guid, uint32 spell_id );
+        void TalkedToCreature( uint32 entry, ObjectGuid guid );
         void MoneyChanged( uint32 value );
         void ReputationChanged(FactionEntry const* factionEntry );
         bool HasQuestForItem( uint32 itemid ) const;
@@ -1395,7 +1397,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendQuestConfirmAccept(Quest const* pQuest, Player* pReceiver);
         void SendPushToPartyResponse( Player *pPlayer, uint32 msg );
         void SendQuestUpdateAddItem( Quest const* pQuest, uint32 item_idx, uint32 count );
-        void SendQuestUpdateAddCreatureOrGo( Quest const* pQuest, uint64 guid, uint32 creatureOrGO_idx, uint32 old_count, uint32 add_count );
+        void SendQuestUpdateAddCreatureOrGo( Quest const* pQuest, ObjectGuid guid, uint32 creatureOrGO_idx, uint32 old_count, uint32 add_count );
 
         uint64 GetDivider() { return m_divider; }
         void SetDivider( uint64 guid ) { m_divider = guid; }
@@ -1413,11 +1415,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool LoadFromDB(uint32 guid, SqlQueryHolder *holder);
 
-        static bool   LoadValuesArrayFromDB(Tokens& data,uint64 guid);
         static uint32 GetUInt32ValueFromArray(Tokens const& data, uint16 index);
         static float  GetFloatValueFromArray(Tokens const& data, uint16 index);
-        static uint32 GetUInt32ValueFromDB(uint16 index, uint64 guid);
-        static float  GetFloatValueFromDB(uint16 index, uint64 guid);
         static uint32 GetZoneIdFromDB(uint64 guid);
         static uint32 GetLevelFromDB(uint64 guid);
         static bool   LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, bool& in_flight, uint64 guid);
@@ -1429,12 +1428,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SaveToDB();
         void SaveInventoryAndGoldToDB();                    // fast save function for item/money cheating preventing
         void SaveGoldToDB();
-        void SaveDataFieldToDB();
-        static bool SaveValuesArrayInDB(Tokens const& data,uint64 guid);
         static void SetUInt32ValueInArray(Tokens& data,uint16 index, uint32 value);
         static void SetFloatValueInArray(Tokens& data,uint16 index, float value);
-        static void SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid);
-        static void SetFloatValueInDB(uint16 index, float value, uint64 guid);
         static void Customize(uint64 guid, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair);
         static void SavePositionInDB(uint32 mapid, float x,float y,float z,float o,uint32 zone,uint64 guid);
 
@@ -2325,8 +2320,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadAuras(QueryResult *result, uint32 timediff);
         void _LoadBoundInstances(QueryResult *result);
         void _LoadInventory(QueryResult *result, uint32 timediff);
-        void _LoadMail();
-        void _LoadMailedItems(Mail *mail);
+        void _LoadMails(QueryResult *result);
+        void _LoadMailedItems(QueryResult *result);
         void _LoadQuestStatus(QueryResult *result);
         void _LoadDailyQuestStatus(QueryResult *result);
         void _LoadGroup(QueryResult *result);
@@ -2339,6 +2334,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadEquipmentSets(QueryResult *result);
         void _LoadBGData(QueryResult* result);
         void _LoadGlyphs(QueryResult *result);
+        void _LoadExploredZones(const char* data);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
