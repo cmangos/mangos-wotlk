@@ -863,6 +863,9 @@ uint8 PlayerbotAI::GetRunicPower() const
 
 bool PlayerbotAI::HasAura(uint32 spellId, const Unit& player) const
 {
+    if(spellId <= 0)
+        return false;
+    
     for (Unit::AuraMap::const_iterator iter = player.GetAuras().begin(); iter != player.GetAuras().end(); ++iter)
     {
         if (iter->second->GetId() == spellId)
@@ -2689,13 +2692,17 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                     if(uint32 questId = m_bot->GetQuestSlotQuestId(slot))
                     {
                           Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
-                          if (m_bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE) {
+ 
+                          std::string questTitle  = pQuest->GetTitle();
+                          m_bot->GetPlayerbotAI()->QuestLocalization(questTitle, questId);
+
+                         if (m_bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE) {
                                hasCompleteQuests = true;
-                               comout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+                               comout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
                           }
                           else {
                                hasIncompleteQuests = true;
-                               incomout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << pQuest->GetTitle() << "]|h|r";
+                               incomout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" <<  questTitle << "]|h|r";
                           }
                     }
                }

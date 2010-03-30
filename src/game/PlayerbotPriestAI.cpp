@@ -41,15 +41,15 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     PENANCE         = ai->getSpellId("penance");
     INNER_FIRE         = ai->getSpellId("inner fire");
     PWS                = ai->getSpellId("power word: shield");
-    if((FORTITUDE = ai->getSpellId ("prayer of fortitude"))==1)
+    if((FORTITUDE = ai->getSpellId ("prayer of fortitude"))>0)
         FORTITUDE      = ai->getSpellId("prayer of fortitude");
-    if((FORTITUDE = ai->getSpellId ("power word: fortitude"))==1 && (FORTITUDE = ai->getSpellId ("prayer of fortitude"))==0)
+    if((FORTITUDE = ai->getSpellId ("power word: fortitude"))>0 && (FORTITUDE = ai->getSpellId ("prayer of fortitude"))==0)
         FORTITUDE      = ai->getSpellId("power word: fortitude");
 
     FEAR_WARD          = ai->getSpellId("fear ward");
-    if((DSPIRIT = ai->getSpellId ("prayer of spirit"))==1)
+    if((DSPIRIT = ai->getSpellId ("prayer of spirit"))>0)
         DSPIRIT        = ai->getSpellId("prayer of spirit");
-    if((DSPIRIT = ai->getSpellId ("divine spirit"))==1 && (DSPIRIT = ai->getSpellId ("prayer of spirit"))==0)
+    if((DSPIRIT = ai->getSpellId ("divine spirit"))>0 && (DSPIRIT = ai->getSpellId ("prayer of spirit"))==0)
         DSPIRIT        = ai->getSpellId("divine spirit");
 
     MASS_DISPEL        = ai->getSpellId("mass dispel");
