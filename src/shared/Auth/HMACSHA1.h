@@ -16,14 +16,31 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/// \addtogroup world
-/// @{
-/// \file
+#ifndef _AUTH_HMACSHA1_H
+#define _AUTH_HMACSHA1_H
 
-#ifndef __GLOBALEVENTS_H
-#define __GLOBALEVENTS_H
+#include "Common.h"
+#include <openssl/hmac.h>
+#include <openssl/sha.h>
 
-void CorpsesErase();
-void HandleCorpsesErase(void*);
+class BigNumber;
+
+#define SEED_KEY_SIZE 16
+
+class HMACSHA1
+{
+    public:
+        HMACSHA1(uint32 len, uint8 *seed);
+        ~HMACSHA1();
+        void UpdateBigNumber(BigNumber *bn);
+        void UpdateData(const uint8 *data, int length);
+        void UpdateData(const std::string &str);
+        void Finalize();
+        uint8 *ComputeHash(BigNumber *bn);
+        uint8 *GetDigest() { return (uint8*)m_digest; }
+        int GetLength() { return SHA_DIGEST_LENGTH; }
+    private:
+        HMAC_CTX m_ctx;
+        uint8 m_digest[SHA_DIGEST_LENGTH];
+};
 #endif
-/// @}

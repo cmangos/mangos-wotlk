@@ -622,13 +622,13 @@ void LoadDBCStores(const std::string& dataPath)
     }
 
     // Check loaded DBC files proper version
-    if( !sSpellStore.LookupEntry(74445)            ||       // last added spell in 3.3.2
-        !sMapStore.LookupEntry(718)                ||       // last map added in 3.3.2
-        !sGemPropertiesStore.LookupEntry(1629)     ||       // last gem property added in 3.3.2
-        !sItemExtendedCostStore.LookupEntry(2982)  ||       // last item extended cost added in 3.3.2
-        !sCharTitlesStore.LookupEntry(177)         ||       // last char title added in 3.3.2
-        !sAreaStore.LookupEntry(3461)              ||       // last area (areaflag) added in 3.3.2
-        !sItemStore.LookupEntry(52686)             )        // last client known item added in 3.3.2
+    if( !sAreaStore.LookupEntry(3617)              ||       // last area (areaflag) added in 3.3.3a
+        !sCharTitlesStore.LookupEntry(177)         ||       // last char title added in 3.3.3a
+        !sGemPropertiesStore.LookupEntry(1629)     ||       // last gem property added in 3.3.3a
+        !sItemStore.LookupEntry(54860)             ||       // last client known item added in 3.3.3a
+        !sItemExtendedCostStore.LookupEntry(2997)  ||       // last item extended cost added in 3.3.3a
+        !sMapStore.LookupEntry(724)                ||       // last map added in 3.3.3a
+        !sSpellStore.LookupEntry(76567)            )        // last added spell in 3.3.3a
     {
         sLog.outError("\nYou have mixed version DBC files. Please re-extract DBC files for one from client build: %s",AcceptableClientBuildsListStr().c_str());
         exit(1);
@@ -665,12 +665,17 @@ TalentSpellPos const* GetTalentSpellPos(uint32 spellId)
     return &itr->second;
 }
 
-uint32 GetTalentSpellCost(uint32 spellId)
+uint32 GetTalentSpellCost(TalentSpellPos const* pos)
 {
-    if(TalentSpellPos const* pos = GetTalentSpellPos(spellId))
+    if (pos)
         return pos->rank+1;
 
     return 0;
+}
+
+uint32 GetTalentSpellCost(uint32 spellId)
+{
+    return GetTalentSpellCost(GetTalentSpellPos(spellId));
 }
 
 int32 GetAreaFlagByAreaID(uint32 area_id)
