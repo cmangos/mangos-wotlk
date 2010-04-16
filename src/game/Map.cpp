@@ -761,7 +761,7 @@ void Map::Remove(Player *player, bool remove)
     UpdateObjectVisibility(player,cell,p);
     UpdateObjectsVisibilityFor(player,cell,p);
 
-    player->ResetMap();
+    // player->ResetMap();
     if( remove )
         DeleteFromWorld(player);
 }
