@@ -323,7 +323,18 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                }
                return;
         }
-
+        case CMSG_SPIRIT_HEALER_ACTIVATE:
+        {
+               // sLog.outDebug("SpiritHealer is resurrecting the Player %s",m_master->GetName());
+               for( PlayerBotMap::iterator itr=m_playerBots.begin(); itr!=m_playerBots.end(); ++itr )
+               {
+                    Player* const bot = itr->second;
+                    Group *grp = bot->GetGroup();
+                    if(grp)
+                       grp->RemoveMember(bot->GetGUID(),1);
+               }
+               return;
+        }
 
         /*
         case CMSG_NAME_QUERY:
