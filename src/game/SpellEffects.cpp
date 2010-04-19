@@ -1570,7 +1570,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 58601:                                 // Remove Flight Auras
                 {
                     m_caster->RemoveSpellsCausingAura(SPELL_AURA_FLY);
-                    m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED);
+                    m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED);
                     return;
                 }
                 case 59640:                                 // Underbelly Elixir
@@ -6701,7 +6701,7 @@ void Spell::EffectReputation(SpellEffectIndex eff_idx)
 
     Player *_player = (Player*)unitTarget;
 
-    int32  rep_change = m_currentBasePoints[eff_idx];       // field store reputation change -1
+    int32  rep_change = m_currentBasePoints[eff_idx];
 
     uint32 faction_id = m_spellInfo->EffectMiscValue[eff_idx];
 
