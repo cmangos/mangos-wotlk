@@ -504,7 +504,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                                 }
                             }
                             else if((pSpellInfo->EffectApplyAuraName[1] == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
-                                && (pSpellInfo->EffectApplyAuraName[2] == SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED))
+                                && (pSpellInfo->EffectApplyAuraName[2] == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED))
                             {
                                 if((pSpellInfo->EffectBasePoints[1] == master_speed1)
                                     && (pSpellInfo->EffectBasePoints[2] == master_speed2))
@@ -514,7 +514,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                                 }
                             }
                             else if((pSpellInfo->EffectApplyAuraName[2] == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
-                                && (pSpellInfo->EffectApplyAuraName[1] == SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED))
+                                && (pSpellInfo->EffectApplyAuraName[1] == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED))
                             {
                                 if((pSpellInfo->EffectBasePoints[2] == master_speed2)
                                     && (pSpellInfo->EffectBasePoints[1] == master_speed1))
@@ -1748,6 +1748,67 @@ void PlayerbotAI::UpdateAttackerInfo()
     //sLog.outBasic( "[PlayerbotAI]: };" );
 }
 
+uint32 PlayerbotAI::EstRepairAll()
+{
+    uint32 TotalCost = 0;
+    // equipped, backpack, bags itself
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+        TotalCost += EstRepair(( (INVENTORY_SLOT_BAG_0 << 8) | i ));
+
+    // bank, buyback and keys not repaired
+
+    // items in inventory bags
+    for(int j = INVENTORY_SLOT_BAG_START; j < INVENTORY_SLOT_BAG_END; ++j)
+        for(int i = 0; i < MAX_BAG_SIZE; ++i)
+            TotalCost += EstRepair(( (j << 8) | i ));
+    return TotalCost;
+}
+
+uint32 PlayerbotAI::EstRepair(uint16 pos)
+{
+    Item* item = m_bot->GetItemByPos(pos);
+
+    uint32 TotalCost = 0;
+    if(!item)
+        return TotalCost;
+
+    uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+    if(!maxDurability)
+        return TotalCost;
+
+    uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+
+    uint32 LostDurability = maxDurability - curDurability;
+    if(LostDurability>0)
+    {
+        ItemPrototype const *ditemProto = item->GetProto();
+
+        DurabilityCostsEntry const *dcost = sDurabilityCostsStore.LookupEntry(ditemProto->ItemLevel);
+        if(!dcost)
+        {
+            sLog.outError("RepairDurability: Wrong item lvl %u", ditemProto->ItemLevel);
+            return TotalCost;
+        }
+
+        uint32 dQualitymodEntryId = (ditemProto->Quality+1)*2;
+        DurabilityQualityEntry const *dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
+        if(!dQualitymodEntry)
+        {
+            sLog.outError("RepairDurability: Wrong dQualityModEntry %u", dQualitymodEntryId);
+            return TotalCost;
+        }
+
+        uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class,ditemProto->SubClass)];
+        uint32 costs = uint32(LostDurability*dmultiplier*double(dQualitymodEntry->quality_mod));
+
+        if (costs==0)                                   //fix for ITEM_QUALITY_ARTIFACT
+            costs = 1;
+
+        TotalCost = costs;
+    }
+    return TotalCost;
+}
+
 Unit *PlayerbotAI::FindAttacker( ATTACKERINFOTYPE ait, Unit *victim )
 {
     // list empty? why are we here?
@@ -2778,8 +2839,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         SendWhisper("and here's my attack spells:", fromPlayer);
         ch.SendSysMessage(negOut.str().c_str());
     }
-    // Bag inventory project: 01:42 23/01/10
-    else if (text == "free")
+    
+    // Bag inventory project: 10:00 19/04/10 version 1.0
+    else if (text == "stats")
     {
          std::ostringstream out;
 
@@ -2804,13 +2866,33 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
               }
 
          }
-         out << totalfree << " Empty Slots (Total)";
+
+         // calculate how much money bot has
+         uint32 copper = m_bot->GetMoney();
+         uint32 gold = uint32(copper / 10000);
+         copper -= (gold * 10000);
+         uint32 silver = uint32(copper / 100);
+         copper -= (silver * 100);
+
+         out << "|cffffffff[|h|cff00ffff" << m_bot->GetName() << "|h|cffffffff]" << " has |r|cff00ff00" << gold
+                 << "|r|cfffffc00g|r|cff00ff00" << silver
+                 << "|r|cffcdcdcds|r|cff00ff00" << copper
+                 << "|r|cffffd333c" << "|h|cffffffff bag slots |h|cff00ff00" << totalfree;
+
+         // estimate how much item damage the bot has
+         copper = EstRepairAll();
+         gold = uint32(copper / 10000);
+         copper -= (gold * 10000);
+         silver = uint32(copper / 100);
+         copper -= (silver * 100);
+
+         out << "|h|cffffffff & item damage cost " << "|r|cff00ff00" << gold
+                 << "|r|cfffffc00g|r|cff00ff00" << silver
+                 << "|r|cffcdcdcds|r|cff00ff00" << copper
+                 << "|r|cffffd333c";
          ChatHandler ch(&fromPlayer);
-         SendWhisper("I have this much space ", fromPlayer);
          ch.SendSysMessage(out.str().c_str());
     }
-
-
     else
     {
         // if this looks like an item link, reward item it completed quest and talking to NPC
