@@ -2839,7 +2839,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         SendWhisper("and here's my attack spells:", fromPlayer);
         ch.SendSysMessage(negOut.str().c_str());
     }
-    
+
     // Bag inventory project: 10:00 19/04/10 version 1.0
     else if (text == "stats")
     {

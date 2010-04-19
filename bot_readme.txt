@@ -36,20 +36,20 @@ u = use
 
 Repair with bots:
 =================
-  
-  The bot(s) can now be repaired, as the player repairs. You can decide whether you wish the bot(s) to pay for 
+
+  The bot(s) can now be repaired, as the player repairs. You can decide whether you wish the bot(s) to pay for
   their own repair or if available, use the guild bank. Choose the appropriate repair 'Anvil' at your local
   NPC. Only group bot(s) members can be repaired. If you wish to exclude certain bot(s) from repair, then
   temporarily uninvite bot(s) from the group.
 
-  Limitations: Bot(s) cannot repair individual items. 
+  Limitations: Bot(s) cannot repair individual items.
                If the player does not require repair, you cannot repair bot(s).
-  
+
   The new 'stats' command provides useful information to help in the repair decision.
-  
+
   First:  Money available to bot(s)
   Second: Free inventory slots for bot(s)
-  Third:  Estimated (excludes NPC reputation discount) item damage cost for bot(s). 
+  Third:  Estimated (excludes NPC reputation discount) item damage cost for bot(s).
 
 Combat Orders explained:
 ========================
