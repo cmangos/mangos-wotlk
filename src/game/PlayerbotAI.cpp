@@ -2944,7 +2944,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
         }
         else {
-            std::string msg = "What? follow, stay, (c)ast <spellname>, spells, (e)quip <itemlink>, (u)se <itemlink>, drop <questlink>, report, quests";
+            std::string msg = "What? follow, stay, (c)ast <spellname>, spells, (e)quip <itemlink>, (u)se <itemlink>, drop <questlink>, report, quests, stats";
             SendWhisper(msg, fromPlayer);
             m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
         }
