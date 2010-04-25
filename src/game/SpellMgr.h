@@ -136,6 +136,21 @@ inline bool IsSpellHaveEffect(SpellEntry const *spellInfo, SpellEffects effect)
     return false;
 }
 
+inline bool IsEffectHandledOnDelayedSpellLaunch(SpellEntry const *spellInfo, SpellEffectIndex effecIdx)
+{
+    switch (spellInfo->Effect[effecIdx])
+    {
+        case SPELL_EFFECT_SCHOOL_DAMAGE:
+        case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+        case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+        case SPELL_EFFECT_WEAPON_DAMAGE:
+        case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+            return true;
+        default:
+            return false;
+    }
+}
+
 inline bool IsSpellHaveAura(SpellEntry const *spellInfo, AuraType aura)
 {
     for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -431,6 +446,8 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
 bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group);
 DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group);
 int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry const* spellproto);
+
+SpellEntry const* GetSpellEntryByDifficulty(uint32 id, Difficulty difficulty);
 
 // Spell proc event related declarations (accessed using SpellMgr functions)
 enum ProcFlags

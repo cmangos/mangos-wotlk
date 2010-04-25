@@ -53,7 +53,7 @@ enum SpellCastTargetFlags
     TARGET_FLAG_CORPSE          = 0x00008000,               // pguid, resurrection spells
     TARGET_FLAG_UNK2            = 0x00010000,               // pguid, not used in any spells as of 3.0.3 (can be set dynamically)
     TARGET_FLAG_GLYPH           = 0x00020000,               // used in glyph spells
-    TARGET_FLAG_UNK3            = 0x00040000,               // 
+    TARGET_FLAG_UNK3            = 0x00040000,               //
     TARGET_FLAG_UNK4            = 0x00080000                // uint32, loop { vec3, guid -> if guid == 0 break }
 };
 
@@ -358,7 +358,7 @@ class Spell
         void EffectSpecCount(SpellEffectIndex eff_idx);
         void EffectActivateSpec(SpellEffectIndex eff_idx);
 
-        Spell( Unit* Caster, SpellEntry const *info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), Spell** triggeringContainer = NULL );
+        Spell( Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), Spell** triggeringContainer = NULL );
         ~Spell();
 
         void prepare(SpellCastTargets const* targets, Aura* triggeredByAura = NULL);
@@ -573,6 +573,8 @@ class Spell
         {
             ObjectGuid targetGUID;
             uint64 timeDelay;
+            uint32 HitInfo;
+            uint32 damage;
             SpellMissInfo missCondition:8;
             SpellMissInfo reflectResult:8;
             uint8  effectMask:8;
@@ -603,6 +605,8 @@ class Spell
         void AddGOTarget(uint64 goGUID, SpellEffectIndex effIndex);
         void AddItemTarget(Item* target, SpellEffectIndex effIndex);
         void DoAllEffectOnTarget(TargetInfo *target);
+        void HandleDelayedSpellLaunch(TargetInfo *target);
+        void InitializeDamageMultipliers();
         void DoSpellHitOnUnit(Unit *unit, uint32 effectMask);
         void DoAllEffectOnTarget(GOTargetInfo *target);
         void DoAllEffectOnTarget(ItemTargetInfo *target);

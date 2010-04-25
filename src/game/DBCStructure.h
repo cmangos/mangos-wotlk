@@ -601,12 +601,12 @@ struct CharStartOutfitEntry
 {
     //uint32 Id;                                            // 0
     uint32 RaceClassGender;                                 // 1 (UNIT_FIELD_BYTES_0 & 0x00FFFFFF) comparable (0 byte = race, 1 byte = class, 2 byte = gender)
-    int32 ItemId[MAX_OUTFIT_ITEMS];                         // 2-13
-    //int32 ItemDisplayId[MAX_OUTFIT_ITEMS];                // 14-25 not required at server side
-    //int32 ItemInventorySlot[MAX_OUTFIT_ITEMS];            // 26-37 not required at server side
-    //uint32 Unknown1;                                      // 38, unique values (index-like with gaps ordered in other way as ids)
-    //uint32 Unknown2;                                      // 39
-    //uint32 Unknown3;                                      // 40
+    int32 ItemId[MAX_OUTFIT_ITEMS];                         // 2-25
+    //int32 ItemDisplayId[MAX_OUTFIT_ITEMS];                // 26-29 not required at server side
+    //int32 ItemInventorySlot[MAX_OUTFIT_ITEMS];            // 50-73 not required at server side
+    //uint32 Unknown1;                                      // 74, unique values (index-like with gaps ordered in other way as ids)
+    //uint32 Unknown2;                                      // 75
+    //uint32 Unknown3;                                      // 76
 };
 
 struct CharTitlesEntry
@@ -1469,7 +1469,7 @@ struct SpellEntry
     //uint32  PowerDisplayId;                               // 228 PowerDisplay.dbc, new in 3.1
     //float   unk_320_4[3];                                 // 229-231  3.2.0
     //uint32  spellDescriptionVariableID;                   // 232      3.2.0
-    //uint32  SpellDifficultyId;                            // 233      3.3.0
+    uint32  SpellDifficultyId;                              // 233      m_spellDifficultyID - id from SpellDifficulty.dbc
 
     // helpers
     int32 CalculateSimpleValue(SpellEffectIndex eff) const { return EffectBasePoints[eff] + int32(1); }
@@ -1544,6 +1544,12 @@ struct SpellShapeshiftEntry
     //uint32 unk3;                                          // 25 unused always 0
     //uint32 unk4;                                          // 26 unused always 0
     uint32 spellId[8];                                      // 27-34 spells which appear in the bar after shapeshifting
+};
+
+struct SpellDifficultyEntry
+{
+    uint32 ID;                                              // 0        m_ID
+    uint32 spellId[MAX_DIFFICULTY];                         // 1-4      m_spellId[4]
 };
 
 struct SpellDurationEntry

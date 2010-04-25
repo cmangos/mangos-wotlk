@@ -738,11 +738,6 @@ bool Player::Create( uint32 guidlow, const std::string& name, uint8 race, uint8 
                 if(iProto->Stackable < count)
                     count = iProto->Stackable;
             }
-            // special amount for daggers
-            else if(iProto->Class==ITEM_CLASS_WEAPON && iProto->SubClass==ITEM_SUBCLASS_WEAPON_DAGGER)
-            {
-                count = 2;                                  // will placed to 2 slots
-            }
 
             StoreNewItemInBestSlots(item_id, count);
         }
@@ -875,9 +870,9 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
     uint32 absorb = 0;
     uint32 resist = 0;
     if (type == DAMAGE_LAVA)
-        CalcAbsorbResist(this, SPELL_SCHOOL_MASK_FIRE, DIRECT_DAMAGE, damage, &absorb, &resist);
+        CalculateAbsorbAndResist(this, SPELL_SCHOOL_MASK_FIRE, DIRECT_DAMAGE, damage, &absorb, &resist);
     else if (type == DAMAGE_SLIME)
-        CalcAbsorbResist(this, SPELL_SCHOOL_MASK_NATURE, DIRECT_DAMAGE, damage, &absorb, &resist);
+        CalculateAbsorbAndResist(this, SPELL_SCHOOL_MASK_NATURE, DIRECT_DAMAGE, damage, &absorb, &resist);
 
     damage-=absorb+resist;
 
@@ -4159,7 +4154,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
                     if (has_items)
                     {
                         // data needs to be at first place for Item::LoadFromDB
-                        //                                                          0    1    2         3  
+                        //                                                          0    1    2         3
                         QueryResult *resultItems = CharacterDatabase.PQuery("SELECT data,text,item_guid,item_template FROM mail_items JOIN item_instance ON item_guid = guid WHERE mail_id='%u'", mail_id);
                         if (resultItems)
                         {
@@ -4257,7 +4252,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
         }
         // The character gets unlinked from the account, the name gets freed up and appears as deleted ingame
         case 1:
-            CharacterDatabase.PExecute("UPDATE characters SET deleteInfos_Name=name, deleteInfos_Account=account, deleteDate=%u, name='', account=0 WHERE guid=%u", uint64(time(NULL)), guid);
+            CharacterDatabase.PExecute("UPDATE characters SET deleteInfos_Name=name, deleteInfos_Account=account, deleteDate='" UI64FMTD "', name='', account=0 WHERE guid=%u", uint64(time(NULL)), guid);
             break;
         default:
             sLog.outError("Player::DeleteFromDB: Unsupported delete method: %u.", charDelete_method);
@@ -4292,7 +4287,7 @@ void Player::DeleteOldCharacters(uint32 keepDays)
 {
     sLog.outString("Player::DeleteOldChars: Deleting all characters which have been deleted %u days before...", keepDays);
 
-    QueryResult *resultChars = CharacterDatabase.PQuery("SELECT guid, deleteInfos_Account FROM characters WHERE deleteDate IS NOT NULL AND deleteDate < %u", uint64(time(NULL) - time_t(keepDays * DAY)));
+    QueryResult *resultChars = CharacterDatabase.PQuery("SELECT guid, deleteInfos_Account FROM characters WHERE deleteDate IS NOT NULL AND deleteDate < '" UI64FMTD "'", uint64(time(NULL) - time_t(keepDays * DAY)));
     if (resultChars)
     {
         sLog.outString("Player::DeleteOldChars: Found %u character(s) to delete",resultChars->GetRowCount());
