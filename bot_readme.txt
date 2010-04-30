@@ -27,12 +27,40 @@ Commands:
 /t BOTNAME equip <ITEM LINK>
 /t BOTNAME reset (will reset states, orders and loot list)
 /t BOTNAME report (bot reports all items needed to finish quests)
+/t BOTNAME point (bot will attack selected target)
 /t BOTNAME stats (bot shows available money, free inventory space and estimated item repair costs)
+/t BOTNAME survey (bot shows all available gameobjects, within a local perimeter around the bot)
+/t BOTNAME find <GAMEOBJECT LINK> (bot will travel to the gameobject location and then wait)
+/t BOTNAME get <GAMEOBJECT LINK> (bot will fetch the selected gameobject and then return to the player)
 
 Shortcuts:
 c = cast
 e = equip
 u = use
+
+Gameobject interaction with bots:
+=================================
+
+  The bot(s) can now interact with gameobjects. This is particularly useful, in order to complete 'gather' type
+  quests (e.g Milly's harvest in Northshire). The bot(s) can also now, harvest 'ore deposits' and 'herbs'
+
+  Three new commands have been introduced 'survey, 'find' & 'get', to facilitate this new feature.
+
+  The 'survey' command provides the means for bot(s) to detect gameobjects in the world. It can be used to detect
+  available gameobjects local to a single bot, or more effectively (wider area) those for a party of bots.
+
+  Suggestion: setup the 'survey' command as an assigned macro button, on the client (e.g /p survey). You can
+  then quickly refresh the gameobject list.
+
+  Gameobject list <GAMEOBJECT LINK> (Currently bots can only interact with ore, herb and needed quest items)
+  ---------------
+
+  [Copper Vein][Silverleaf][Earthroot][Milly's Harvest][Battered Chest][Food Crate]
+
+  Then, use the 'find' or 'get' commands to interect with the gameobject.
+
+  Using the gameobject list information, it is possible to locate and/or fetch each of the gameobjects. To select
+  a <GAMEOBJECT LINK>, hold down the shift key and click on the relevant link with your mouse.
 
 Repair with bots:
 =================
