@@ -299,7 +299,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
                {
 
-                    uint32 choice = urand(0,2); //returns 0,1,or 2
+                    uint32 choice = urand(0,3); //returns 0,1,2 or 3
 
                     Player* const bot = it->second;
                     if(!bot)
@@ -309,7 +309,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     if(!group)
                          return;
 
-                    group->CountRollVote(bot->GetGUID(), Guid, NumberOfPlayers, choice);
+                    group->CountRollVote(bot->GetGUID(), Guid, NumberOfPlayers, RollVote(choice));
 
                     switch (choice)
                     {

@@ -864,9 +864,9 @@ enum Opcodes
     SMSG_INSTANCE_DIFFICULTY                        = 0x33B,
     MSG_GM_RESETINSTANCELIMIT                       = 0x33C,
     SMSG_MOTD                                       = 0x33D,
-    SMSG_MOVE_SET_FLIGHT_OBSOLETE                   = 0x33E,
-    SMSG_MOVE_UNSET_FLIGHT_OBSOLETE                 = 0x33F,
-    CMSG_MOVE_FLIGHT_ACK_OBSOLETE                   = 0x340,
+    SMSG_MOVE_SET_FLIGHT                            = 0x33E,
+    SMSG_MOVE_UNSET_FLIGHT                          = 0x33F,
+    CMSG_MOVE_FLIGHT_ACK                            = 0x340,
     MSG_MOVE_START_SWIM_CHEAT                       = 0x341,
     MSG_MOVE_STOP_SWIM_CHEAT                        = 0x342,
     SMSG_MOVE_SET_CAN_FLY                           = 0x343,
@@ -1248,8 +1248,8 @@ enum Opcodes
     SMSG_CALENDAR_ACTION_PENDING                    = 0x4BB, // SMSG, calendar related EVENT_CALENDAR_ACTION_PENDING
     SMSG_EQUIPMENT_SET_LIST                         = 0x4BC, // SMSG, equipment manager list?
     CMSG_EQUIPMENT_SET_SAVE                         = 0x4BD, // CMSG, lua: SaveEquipmentSet
-    CMSG_UNKNOWN_1214                               = 0x4BE, // CMSG, missle?
-    SMSG_UNKNOWN_1215                               = 0x4BF, // SMSG, uint64, uint8, 3 x float
+    CMSG_UPDATE_PROJECTILE_POSITION                 = 0x4BE, // CMSG, uint64 caster, uint32 spellId, uint8 castId, vector3 position
+    SMSG_SET_PROJECTILE_POSITION                    = 0x4BF, // SMSG, uint64 caster, uint8 castId, vector3 position
     SMSG_TALENTS_INFO                               = 0x4C0, // SMSG, talents related
     CMSG_LEARN_PREVIEW_TALENTS                      = 0x4C1, // CMSG, lua: LearnPreviewTalents (for player?)
     CMSG_LEARN_PREVIEW_TALENTS_PET                  = 0x4C2, // CMSG, lua: LearnPreviewTalents (for pet?)
@@ -1322,17 +1322,17 @@ enum Opcodes
     UMSG_UNKNOWN_1285                               = 0x505, // not found
     SMSG_UNKNOWN_1286                               = 0x506, // ERR_CORPSE_IS_NOT_IN_INSTANCE = 0x1A8,
     UMSG_UNKNOWN_1287                               = 0x507, // not found
-    CMSG_UNKNOWN_1288                               = 0x508, // lua: SetAllowLowLevelRaid
-    CMSG_UNKNOWN_1289                               = 0x509, // lua: SetAllowLowLevelRaid
+    CMSG_SET_ALLOW_LOW_LEVEL_RAID1                  = 0x508, // lua: SetAllowLowLevelRaid
+    CMSG_SET_ALLOW_LOW_LEVEL_RAID2                  = 0x509, // lua: SetAllowLowLevelRaid
     SMSG_CAMERA_SHAKE                               = 0x50A, // uint32 SpellEffectCameraShakes.dbc index, uint32
-    SMSG_UNKNOWN_1291                               = 0x50B, // some item update packet?
+    SMSG_UPDATE_ITEM_ENCHANTMENTS                   = 0x50B, // some item update packet?
     UMSG_UNKNOWN_1292                               = 0x50C, // not found
     SMSG_REDIRECT_CLIENT                            = 0x50D, // uint32 ip, uint16 port, uint32 unk, uint8[20] hash (ip + port, seed=sessionkey)
-    CMSG_UNKNOWN_1294                               = 0x50E, // something with networking
+    CMSG_REDIRECTION_FAILED                         = 0x50E, // something with networking
     SMSG_UNKNOWN_1295                               = 0x50F, //
     CMSG_UNKNOWN_1296                               = 0x510, // something with networking
-    SMSG_UNKNOWN_1297                               = 0x511, //
-    CMSG_UNKNOWN_1298                               = 0x512, // something with networking
+    SMSG_FORCE_SEND_QUEUED_PACKETS                  = 0x511, //
+    CMSG_REDIRECTION_AUTH_PROOF                     = 0x512, // something with networking
     UMSG_UNKNOWN_1299                               = 0x513, // not found
     SMSG_COMBAT_LOG_MULTIPLE                        = 0x514, // SMSG, multi combatlog
     SMSG_LFG_OPEN_FROM_GOSSIP                       = 0x515, // event EVENT_LFG_OPEN_FROM_GOSSIP (opens dungeon finder, probably for outdoor bosses)

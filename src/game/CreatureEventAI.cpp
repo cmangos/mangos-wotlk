@@ -1147,37 +1147,6 @@ bool CreatureEventAI::IsVisible(Unit *pl) const
         && pl->isVisibleForOrDetect(m_creature,m_creature,true);
 }
 
-inline Unit* CreatureEventAI::SelectUnit(AttackingTarget target, uint32 position) const
-{
-    //ThreatList m_threatlist;
-    ThreatList const& threatlist = m_creature->getThreatManager().getThreatList();
-    ThreatList::const_iterator i = threatlist.begin();
-    ThreatList::const_reverse_iterator r = threatlist.rbegin();
-
-    if (position >= threatlist.size() || !threatlist.size())
-        return NULL;
-
-    switch (target)
-    {
-        case ATTACKING_TARGET_RANDOM:
-        {
-            advance ( i , position +  (rand() % (threatlist.size() - position ) ));
-            return Unit::GetUnit(*m_creature,(*i)->getUnitGuid());
-        }
-        case ATTACKING_TARGET_TOPAGGRO:
-        {
-            advance ( i , position);
-            return Unit::GetUnit(*m_creature,(*i)->getUnitGuid());
-        }
-        case ATTACKING_TARGET_BOTTOMAGGRO:
-        {
-            advance ( r , position);
-            return Unit::GetUnit(*m_creature,(*r)->getUnitGuid());
-        }
-    }
-    return NULL;
-}
-
 inline uint32 CreatureEventAI::GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3)
 {
     switch (rnd % 3)
@@ -1209,13 +1178,13 @@ inline Unit* CreatureEventAI::GetTargetByType(uint32 Target, Unit* pActionInvoke
         case TARGET_T_HOSTILE:
             return m_creature->getVictim();
         case TARGET_T_HOSTILE_SECOND_AGGRO:
-            return SelectUnit(ATTACKING_TARGET_TOPAGGRO,1);
+            return m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 1);
         case TARGET_T_HOSTILE_LAST_AGGRO:
-            return SelectUnit(ATTACKING_TARGET_BOTTOMAGGRO,0);
+            return m_creature->SelectAttackingTarget(ATTACKING_TARGET_BOTTOMAGGRO, 0);
         case TARGET_T_HOSTILE_RANDOM:
-            return SelectUnit(ATTACKING_TARGET_RANDOM,0);
+            return m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
         case TARGET_T_HOSTILE_RANDOM_NOT_TOP:
-            return SelectUnit(ATTACKING_TARGET_RANDOM,1);
+            return m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
         case TARGET_T_ACTION_INVOKER:
             return pActionInvoker;
         default:
@@ -1277,7 +1246,7 @@ void CreatureEventAI::DoScriptText(int32 textEntry, WorldObject* pSource, Unit* 
         return;
     }
 
-    sLog.outDebug("CreatureEventAI: DoScriptText: text entry=%i, Sound=%u, Type=%u, Language=%u, Emote=%u",textEntry,(*i).second.SoundId,(*i).second.Type,(*i).second.Language,(*i).second.Emote);
+    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "CreatureEventAI: DoScriptText: text entry=%i, Sound=%u, Type=%u, Language=%u, Emote=%u",textEntry,(*i).second.SoundId,(*i).second.Type,(*i).second.Language,(*i).second.Emote);
 
     if((*i).second.SoundId)
     {
@@ -1388,7 +1357,7 @@ void CreatureEventAI::ReceiveEmote(Player* pPlayer, uint32 text_emote)
             PlayerCondition pcon((*itr).Event.receive_emote.condition,(*itr).Event.receive_emote.conditionValue1,(*itr).Event.receive_emote.conditionValue2);
             if (pcon.Meets(pPlayer))
             {
-                sLog.outDebug("CreatureEventAI: ReceiveEmote CreatureEventAI: Condition ok, processing");
+                DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "CreatureEventAI: ReceiveEmote CreatureEventAI: Condition ok, processing");
                 ProcessEvent(*itr, pPlayer);
             }
         }

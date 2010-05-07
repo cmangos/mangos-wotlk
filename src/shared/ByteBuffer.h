@@ -297,7 +297,7 @@ class ByteBuffer
         void read(uint8 *dest, size_t len)
         {
             if(_rpos  + len > size())
-               throw ByteBufferException(false, _rpos, len, size());
+                throw ByteBufferException(false, _rpos, len, size());
             memcpy(dest, &_storage[_rpos], len);
             _rpos += len;
         }
@@ -406,13 +406,13 @@ class ByteBuffer
         void put(size_t pos, const uint8 *src, size_t cnt)
         {
             if(pos + cnt > size())
-               throw ByteBufferException(true, pos, cnt, size());
+                throw ByteBufferException(true, pos, cnt, size());
             memcpy(&_storage[pos], src, cnt);
         }
 
         void print_storage() const
         {
-            if(!sLog.IsOutDebug())                          // optimize disabled debug output
+            if (!sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG))   // optimize disabled debug output
                 return;
 
             sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
@@ -423,7 +423,7 @@ class ByteBuffer
 
         void textlike() const
         {
-            if(!sLog.IsOutDebug())                          // optimize disabled debug output
+            if (!sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG))   // optimize disabled debug output
                 return;
 
             sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
@@ -434,13 +434,13 @@ class ByteBuffer
 
         void hexlike() const
         {
-            if(!sLog.IsOutDebug())                          // optimize disabled debug output
+            if (!sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG))   // optimize disabled debug output
                 return;
 
             uint32 j = 1, k = 1;
             sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
 
-            if(sLog.IsIncludeTime())
+            if (sLog.IsIncludeTime())
                 sLog.outDebugInLine("         ");
 
             for(uint32 i = 0; i < size(); ++i)
