@@ -2910,13 +2910,14 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
              SendWhisper("I have no info on that object", fromPlayer);
     }
 
-    // get project: 10:50 29/04/10 rev.2 allows bots to loot gameobjects for quest items, herbs and minerals
+    // get project: 18:50 03/05/10 rev.3 allows bots to retrieve all lootable & quest items from gameobjects
     else if (text.size() > 2 && text.substr(0, 2) == "g " || text.size() > 4 && text.substr(0, 4) == "get ")
     {
         uint32 guid;
         float x,y,z;
         uint32 entry;
         int mapid;
+        bool looted = false;
         if (extractGOinfo(text, guid, entry, mapid, x, y, z))
         {
 
@@ -2938,10 +2939,37 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             m_bot->SendLoot( m_lootCurrent, LOOT_CORPSE );
             Loot *loot = &go->loot;
             uint32 lootNum = loot->GetMaxSlotInLootFor( m_bot );
-            //sLog.outDebug( "[PlayerbotAI]: GetGOType %u - %s looting: '%s' got %d items", go->GetGoType(), m_bot->GetName(), go->GetGOInfo()->name, loot->GetMaxSlotInLootFor( m_bot ));
+            // sLog.outDebug( "[PlayerbotAI]: GetGOType %u - %s looting: '%s' got %d items", go->GetGoType(), m_bot->GetName(), go->GetGOInfo()->name, loot->GetMaxSlotInLootFor( m_bot ));
+            if(lootNum == 0) // Handle opening gameobjects that contain no items
+            {
+                uint32 lockId = go->GetGOInfo()->GetLockId();
+                LockEntry const *lockInfo = sLockStore.LookupEntry(lockId);
+                if(lockInfo)
+                {
+                    for(int i = 0; i < 8; ++i)
+                    {
+                        uint32 skillId = SkillByLockType(LockType(lockInfo->Index[i]));
+                        if(skillId > 0)
+                        {
+                            if (m_bot->HasSkill(skillId)) // Has skill
+                            {
+                                uint32 reqSkillValue = lockInfo->Skill[i];
+                                uint32 SkillValue = m_bot->GetPureSkillValue(skillId);
+                                if (SkillValue >= reqSkillValue)
+                                {
+                                    // sLog.outDebug("[PlayerbotAI]i: skillId : %u SkillValue : %u reqSkillValue : %u",skillId,SkillValue,reqSkillValue);
+                                    m_bot->UpdateGatherSkill(skillId, SkillValue, reqSkillValue);
+                                    looted = true;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
             for ( uint32 l=0; l<lootNum; l++ )
             {
-
+                // sLog.outDebug("[PlayerbotAI]: lootNum : %u",lootNum);
                 QuestItem *qitem=0, *ffaitem=0, *conditem=0;
                 LootItem *item = loot->LootItemInSlot( l, m_bot, &qitem, &ffaitem, &conditem );
                 if ( !item )
@@ -2987,66 +3015,53 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                         --loot->unlootedCount;
                         m_bot->SendNewItem( newitem, uint32(item->count), false, false, true );
                         m_bot->GetAchievementMgr().UpdateAchievementCriteria( ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count );
+                        looted = true;
                     }
+                    continue;
                 }
 
                 uint32 lockId = go->GetGOInfo()->GetLockId();
                 LockEntry const *lockInfo = sLockStore.LookupEntry(lockId);
-
                 if(lockInfo)
                 {
-                    uint32 skillId = SkillByLockType(LockType(lockInfo->Index[0]));
-
-                    switch(skillId)
+                    uint32 skillId = 0;
+                    uint32 reqSkillValue = 0;
+                    for(int i = 0; i < 8; ++i)
                     {
-                        case SKILL_MINING:
-
-                            if (m_bot->HasSkill(SKILL_MINING) && HasPick()) // Has skill & suitable pick
-                            {
-                                ItemPosCountVec dest;
-                                if ( m_bot->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item->itemid, item->count) == EQUIP_ERR_OK )
-                                {
-                                    Item* pItem = m_bot->StoreNewItem (dest,item->itemid,true,item->randomPropertyId);
-                                    uint32 reqSkillValue = lockInfo->Skill[0];
-                                    uint32 SkillValue = m_bot->GetPureSkillValue(SKILL_MINING);
-                                    if (SkillValue >= reqSkillValue)
-                                    {
-                                        m_bot->SendNewItem(pItem, uint32(item->count), false, false, true);
-                                        m_bot->UpdateGatherSkill(SKILL_MINING, SkillValue, reqSkillValue);
-                                        --loot->unlootedCount;
-                                    }
-                                }
-                            }
+                        skillId = SkillByLockType(LockType(lockInfo->Index[i]));
+                        if(skillId > 0)
+                        {
+                            reqSkillValue = lockInfo->Skill[i];
                             break;
+                        }
+                    }
 
-                        case SKILL_HERBALISM:
+                    if (m_bot->HasSkill(skillId) || skillId == SKILL_NONE) // Has skill or skill not required
+                    {
+                        if((skillId == SKILL_MINING) && !HasPick())
+                            continue;
 
-                            if (m_bot->HasSkill(SKILL_HERBALISM)) // Has skill
+                        ItemPosCountVec dest;
+                        if ( m_bot->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item->itemid, item->count) == EQUIP_ERR_OK )
+                        {
+                            Item* pItem = m_bot->StoreNewItem (dest,item->itemid,true,item->randomPropertyId);
+                            uint32 SkillValue = m_bot->GetPureSkillValue(skillId);
+                            if (SkillValue >= reqSkillValue)
                             {
-                                ItemPosCountVec dest;
-                                if ( m_bot->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item->itemid, item->count) == EQUIP_ERR_OK )
-                                {
-                                    Item* pItem = m_bot->StoreNewItem (dest,item->itemid,true,item->randomPropertyId);
-                                    uint32 reqSkillValue = lockInfo->Skill[0];
-                                    uint32 SkillValue = m_bot->GetPureSkillValue(SKILL_HERBALISM);
-                                    if (SkillValue >= reqSkillValue)
-                                    {
-                                        m_bot->SendNewItem(pItem, uint32(item->count), false, false, true);
-                                        m_bot->UpdateGatherSkill(SKILL_HERBALISM, SkillValue, reqSkillValue);
-                                        --loot->unlootedCount;
-                                    }
-                                }
+                                m_bot->SendNewItem(pItem, uint32(item->count), false, false, true);
+                                m_bot->UpdateGatherSkill(skillId, SkillValue, reqSkillValue);
+                                --loot->unlootedCount;
+                                looted = true;
                             }
-                            break;
+                        }
                     }
                 }
             }
             // release loot
-            m_bot->GetSession()->DoLootRelease( m_lootCurrent );
-
-            // clear movement target, take next target on next update
-            m_bot->GetMotionMaster()->Clear();
-            m_bot->GetMotionMaster()->MoveIdle();
+            if(looted)
+                m_bot->GetSession()->DoLootRelease( m_lootCurrent );
+            else
+                m_bot->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
             // sLog.outDebug( "[PlayerbotAI]: %s looted target 0x%08X", m_bot->GetName(), m_lootCurrent );
             SetQuestNeedItems();
         }
