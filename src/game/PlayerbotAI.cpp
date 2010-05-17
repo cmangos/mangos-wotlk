@@ -2864,7 +2864,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             spellId = getSpellId(spellStr.c_str(), true);
 
         uint64 castOnGuid = fromPlayer.GetSelection();
-        if (spellId != 0 && castOnGuid != 0)
+        if (spellId != 0 && castOnGuid != 0 && m_bot->HasSpell(spellId))
         {
             m_spellIdCommand = spellId;
             m_targetGuidCommand = castOnGuid;
