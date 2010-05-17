@@ -57,6 +57,7 @@ ScriptMapMap sSpellScripts;
 ScriptMapMap sGameObjectScripts;
 ScriptMapMap sEventScripts;
 ScriptMapMap sGossipScripts;
+ScriptMapMap sCreatureMovementScripts;
 
 bool normalizePlayerName(std::string& name)
 {
@@ -4579,6 +4580,13 @@ void ObjectMgr::LoadGossipScripts()
     // checks are done in LoadGossipMenuItems
 }
 
+void ObjectMgr::LoadCreatureMovementScripts()
+{
+    LoadScripts(sCreatureMovementScripts, "creature_movement_scripts");
+
+    // checks are done in WaypointManager::Load
+}
+
 void ObjectMgr::LoadPageTexts()
 {
     sPageTextStore.Free();                                  // for reload case
@@ -8440,7 +8448,7 @@ uint32 ObjectMgr::GetScriptId(const char *name)
     return uint32(itr - m_scriptNames.begin());
 }
 
-void ObjectMgr::CheckScripts(ScriptMapMap const& scripts,std::set<int32>& ids)
+void ObjectMgr::CheckScriptTexts(ScriptMapMap const& scripts,std::set<int32>& ids)
 {
     for(ScriptMapMap::const_iterator itrMM = scripts.begin(); itrMM != scripts.end(); ++itrMM)
     {
@@ -8471,12 +8479,13 @@ void ObjectMgr::LoadDbScriptStrings()
         if(GetMangosStringLocale(i))
             ids.insert(i);
 
-    CheckScripts(sQuestEndScripts,ids);
-    CheckScripts(sQuestStartScripts,ids);
-    CheckScripts(sSpellScripts,ids);
-    CheckScripts(sGameObjectScripts,ids);
-    CheckScripts(sEventScripts,ids);
-    CheckScripts(sGossipScripts,ids);
+    CheckScriptTexts(sQuestEndScripts,ids);
+    CheckScriptTexts(sQuestStartScripts,ids);
+    CheckScriptTexts(sSpellScripts,ids);
+    CheckScriptTexts(sGameObjectScripts,ids);
+    CheckScriptTexts(sEventScripts,ids);
+    CheckScriptTexts(sGossipScripts,ids);
+    CheckScriptTexts(sCreatureMovementScripts,ids);
 
     sWaypointMgr.CheckTextsExistance(ids);
 

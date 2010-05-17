@@ -419,9 +419,7 @@ void World::LoadConfigSettings(bool reload)
         sLog.outError(" WARNING: mangosd.conf does not include a ConfVersion variable.");
         sLog.outError("          Your configuration file may be out of date!");
         sLog.outError("*****************************************************************************");
-        clock_t pause = 3000 + clock();
-        while (pause > clock())
-            ;                                               // empty body
+        Log::WaitBeforeContinueIfNeed();
     }
     else
     {
@@ -432,9 +430,7 @@ void World::LoadConfigSettings(bool reload)
             sLog.outError("          Please check for updates, as your current default values may cause");
             sLog.outError("          unexpected behavior.");
             sLog.outError("*****************************************************************************");
-            clock_t pause = 3000 + clock();
-            while (pause > clock())
-                ;                                           // empty body
+            Log::WaitBeforeContinueIfNeed();
         }
     }
 
@@ -970,10 +966,10 @@ void World::SetInitialWorldSettings()
     sSpellMgr.LoadSpellProcEvents();
 
     sLog.outString( "Loading Spell Bonus Data..." );
-    sSpellMgr.LoadSpellBonusess();
+    sSpellMgr.LoadSpellBonuses();                           // must be after LoadSpellChains
 
     sLog.outString( "Loading Spell Proc Item Enchant..." );
-    sSpellMgr.LoadSpellProcItemEnchant();                    // must be after LoadSpellChains
+    sSpellMgr.LoadSpellProcItemEnchant();                   // must be after LoadSpellChains
 
     sLog.outString( "Loading Aggro Spells Definitions...");
     sSpellMgr.LoadSpellThreats();
@@ -1184,6 +1180,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Trainers..." );
     sObjectMgr.LoadTrainerSpell();                              // must be after load CreatureTemplate
+
+    sLog.outString( "Loading Waypoint scripts..." );            // before loading from creature_movement
+    sObjectMgr.LoadCreatureMovementScripts();
 
     sLog.outString( "Loading Waypoints..." );
     sLog.outString();

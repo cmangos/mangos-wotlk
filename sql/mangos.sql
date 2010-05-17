@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_9886_02_mangos_command` bit(1) default NULL
+  `required_9899_01_mangos_spell_bonus_data` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -984,6 +984,7 @@ CREATE TABLE `creature_movement` (
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
   `waittime` int(10) unsigned NOT NULL default '0',
+  `script_id` int(10) unsigned NOT NULL default '0',
   `textid1` int(11) NOT NULL default '0',
   `textid2` int(11) NOT NULL default '0',
   `textid3` int(11) NOT NULL default '0',
@@ -1005,6 +1006,36 @@ CREATE TABLE `creature_movement` (
 LOCK TABLES `creature_movement` WRITE;
 /*!40000 ALTER TABLE `creature_movement` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_movement` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `creature_movement_scripts`
+--
+
+DROP TABLE IF EXISTS `creature_movement_scripts`;
+CREATE TABLE `creature_movement_scripts` (
+  `id` mediumint(8) unsigned NOT NULL default '0',
+  `delay` int(10) unsigned NOT NULL default '0',
+  `command` mediumint(8) unsigned NOT NULL default '0',
+  `datalong` mediumint(8) unsigned NOT NULL default '0',
+  `datalong2` int(10) unsigned NOT NULL default '0',
+  `datalong3` int(10) unsigned NOT NULL default '0',
+  `datalong4` int(10) unsigned NOT NULL default '0',
+  `data_flags` tinyint(3) unsigned NOT NULL default '0',
+  `dataint` int(11) NOT NULL default '0',
+  `x` float NOT NULL default '0',
+  `y` float NOT NULL default '0',
+  `z` float NOT NULL default '0',
+  `o` float NOT NULL default '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `creature_movement_scripts`
+--
+
+LOCK TABLES `creature_movement_scripts` WRITE;
+/*!40000 ALTER TABLE `creature_movement_scripts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_movement_scripts` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1516,8 +1547,8 @@ CREATE TABLE `game_event` (
   `entry` mediumint(8) unsigned NOT NULL COMMENT 'Entry of the game event',
   `start_time` timestamp NOT NULL default '0000-00-00 00:00:00' COMMENT 'Absolute start date, the event will never start before',
   `end_time` timestamp NOT NULL default '0000-00-00 00:00:00' COMMENT 'Absolute end date, the event will never start afler',
-  `occurence` bigint(20) unsigned NOT NULL default '86400' COMMENT 'Delay in hours between occurences of the event',
-  `length` bigint(20) unsigned NOT NULL default '43200' COMMENT 'Length in hours of the event',
+  `occurence` bigint(20) unsigned NOT NULL default '86400' COMMENT 'Delay in minutes between occurences of the event',
+  `length` bigint(20) unsigned NOT NULL default '43200' COMMENT 'Length in minutes of the event',
   `holiday` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Client side holiday id',
   `description` varchar(255) default NULL COMMENT 'Description of the event displayed in console',
   PRIMARY KEY  (`entry`)
@@ -14194,36 +14225,26 @@ INSERT INTO `spell_bonus_data` VALUES
 (8921,  0.1515, 0.13,    0,     'Druid - Moonfire'),
 (50464, 0.6611, 0,       0,     'Druid - Nourish'),
 (8936,  0.539,  0.188,   0,     'Druid - Regrowth'),
-(774,   0,      0.37604, 0,     'Druid - Rejuvenation'),
 (50288, 0.05,   0,       0,     'Druid - Starfall'),
 (50294, 0.012,  0,       0,     'Druid - Starfall AOE'),
-(2912,  1,      0,       0,     'Druid - Starfire'),
 (18562, 0,      0,       0,     'Druid - Swiftmend'),
 (44203, 0.538,  0,       0,     'Druid - Tranquility Triggered'),
-(61391, 0.193,  0,       0,     'Druid - Typhoon'),
 (48438, 0,      0.11505, 0,     'Druid - Wild Growth'),
 (5176,  0.5714, 0,       0,     'Druid - Wrath'),
 /* Generic */
 (54757, 0,      0,       0,     'Generic - Pyro Rocket'),
 /* Mage */
 (44425, 0.714286,0,      0,     'Mage - Arcane Barrage'),
-(30451, 0.7143, 0,       0,     'Mage - Arcane Blast'),
-(1449,  0.2128, 0,       0,     'Mage - Arcane Explosion'),
 (7268,  0.2857, 0,       0,     'Mage - Arcane Missiles Triggered Spell'),
 (42208, 0.1437, 0,       0,     'Mage - Blizzard Triggered'),
-(2136,  0.4286, 0,       0,     'Mage - Fire Blast'),
 (133,   1,      0,       0,     'Mage - Fire Ball'),
 (2120,  0.2357, 0.122,   0,     'Mage - Flamestrike'),
-(122,   0.193,  0,       0,     'Mage - Frost Nova'),
 (116,   0.8143, 0,       0,     'Mage - Frost Bolt'),
 (44614, 0.8571, 0,       0,     'Mage - Frostfire Bolt'),
-(11426, 0.8053, 0,       0,     'Mage - Ice Barrier'),
 (30455, 0.1429, 0,       0,     'Mage - Ice Lance'),
-(44457, 0.4,    0.2,     0,     'Mage - Living Bomb'),
 (1463,  0.8053, 0,       0,     'Mage - Mana Shield'),
 (34913, 0,      0,       0,     'Mage - Molten Armor Triggered'),
 (11366, 1.15,   0.05,    0,     'Mage - Pyroblast'),
-(2948,  0.4286, 0,       0,     'Mage - Scorch'),
 /* Paladin */
 (26573, 0,      0.04,    0.04,  'Paladin - Consecration'),
 (879,   0.15,   0,       0.15,  'Paladin - Exorcism'),
@@ -14231,7 +14252,6 @@ INSERT INTO `spell_bonus_data` VALUES
 (19750, 1,      0,       0,     'Paladin - Flash of Light'),
 (53595, 0,      0,       0,     'Paladin - Hammer of the Righteous'),
 (635,   1.66,   0,       0,     'Paladin - Holy Light'),
-(25912, 0.4286, 0,       0,     'Paladin - Holy Shock Triggered Hurt'),
 (20925, 0.09,   0,       0.056, 'Paladin - Holy Shield'),
 (2812,  0.07,   0,       0.07,  'Paladin - Holy Wrath'),
 (54158, 0.25,   0,       0,     'Paladin - Judgement'),
@@ -14240,34 +14260,24 @@ INSERT INTO `spell_bonus_data` VALUES
 (20267, 0.1,    0,       0.1,   'Paladin - Judgement of Light Proc'),
 (31804, 0,      0,       0,     'Paladin - Judgement of Vengeance'),
 (20424, 0,      0,       0,     'Paladin - Seal of Command Proc'),
-(53739, 0,      0.00156, 0.003, 'Paladin - Seal of Corruption (full stack proc)'),
+(53739, 0,      0,       0.003, 'Paladin - Seal of Corruption (full stack proc)'),
 (25742, 0.07,   0,       0.039, 'Paladin - Seal of Righteousness Dummy Proc'),
-(42463, 0,      0.00156, 0.003, 'Paladin - Seal of Vengeance (full stack proc)'),
+(42463, 0,      0,       0.003, 'Paladin - Seal of Vengeance (full stack proc)'),
 (53600, 0,      0,       0,     'Paladin - Shield of Righteousness'),
 /* Priest */
-(32546, 0.8068, 0,       0,     'Priest - Binding Heal'),
 (27813, 0,      0,       0,     'Priest - Blessed Recovery'),
-(34861, 0.402,  0,       0,     'Priest - Circle of Healing'),
-(19236, 0.8068, 0,       0,     'Priest - Desperate Prayer'),
 (2944,  0,      0.1849,  0,     'Priest - Devouring Plague'),
 (63544, 0,      0,       0,     'Priest - Empowered Renew Triggered'),
 (14914, 0.5711, 0.024,   0,     'Priest - Holy Fire'),
 (15237, 0.1606, 0,       0,     'Priest - Holy Nova Damage'),
-(2061,  0.8068, 0,       0,     'Priest - Flash Heal'),
-(2060,  1.6135, 0,       0,     'Priest - Greater Heal'),
 (23455, 0.3035, 0,       0,     'Priest - Holy Nova Heal'),
 (63675, 0,      0,       0,     'Priest - Improved Devouring Plague Triggered'),
 (8129,  0,      0,       0,     'Priest - Mana Burn'),
 (58381, 0.257143,0,      0,     'Priest - Mind Flay Triggered'),
-(49821, 0.14286,0,       0,     'Priest - Mind Sear Trigger'),
+(49821, 0.2857, 0,       0,     'Priest - Mind Sear Trigger'),
 (47666, 0.229,  0,       0,     'Priest - Penance dmg effect'),
 (47750, 0.537,  0,       0,     'Priest - Penance heal effect'),
-(17,    0.8068, 0,       0,     'Priest - Power Word: Shield'),
-(33110, 0.8068, 0,       0,     'Priest - Prayer of Mending Heal Proc'),
 (33619, 0,      0,       0,     'Priest - Reflective Shield'),
-(139,   0,      0.376,   0,     'Priest - Renew'),
-(32379, 0.4296, 0,       0,     'Priest - Shadow Word: Death'),
-(589,   0,      0.1829,  0,     'Priest - Shadow Word: Pain'),
 (34433, 0.65,   0,       0,     'Priest - Shadowfiend'),
 (585,   0.714,  0,       0,     'Priest - Smite'),
 (34914, 0,      0.4,     0,     'Priest - Vampiric Touch'),
@@ -14275,8 +14285,6 @@ INSERT INTO `spell_bonus_data` VALUES
 /* Shaman */
 (974,   0.4762, 0,       0,     'Shaman - Earth Shield'),
 (379,   0,      0,       0,     'Shaman - Earth Shield Triggered'),
-(1064,  1.34,   0,       0,     'Shaman - Chain Heal'),
-(421,   0.57,   0,       0,     'Shaman - Chain Lightning'),
 (8042,  0.3858, 0,       0,     'Shaman - Earth Shock'),
 (8050,  0.2142, 0.1,     0,     'Shaman - Flame Shock'),
 (8026,  0.1,    0,       0,     'Shaman - Flametongue Weapon Proc'),
@@ -14284,8 +14292,6 @@ INSERT INTO `spell_bonus_data` VALUES
 (8034,  0.1,    0,       0,     'Shaman - Frostbrand Attack Rank 1'),
 (52042, 0.045,  0,       0,     'Shaman - Healing Stream Totem Triggered Heal'),
 (331,   1.6106, 0,       0,     'Shaman - Healing Wave'),
-(51505, 0.5714, 0,       0,     'Shaman - Lava Burst'),
-(8004,  0.8082, 0,       0,     'Shaman - Lesser Healing Wave'),
 (403,   0.7143, 0,       0,     'Shaman - Lightning Bolt'),
 (26364, 0.33,   0,       0,     'Shaman - Lightning Shield Proc'),
 (8188,  0.1,    0,       0,     'Shaman - Magma Totam Passive'),
