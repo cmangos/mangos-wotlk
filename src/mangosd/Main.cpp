@@ -76,7 +76,7 @@ extern int main(int argc, char **argv)
     //char *leak = new char[1000];                          // test leak detection
 
     ///- Command line parsing to get the configuration file name
-    char const* cfg_file = _MANGOSD_CONFIG;
+    char const* cfg_file = _MANGOSD_CONFIG + _PLAYERBOT_CONFIG;
     int c=1;
     while( c < argc )
     {
