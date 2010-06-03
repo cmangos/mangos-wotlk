@@ -40,8 +40,8 @@
 #include "zlib/zlib.h"
 
 // Playerbot mod
-#include "PlayerbotMgr.h"
-#include "PlayerbotAI.h"
+#include "playerbot/PlayerbotMgr.h"
+#include "playerbot/PlayerbotAI.h"
 
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :

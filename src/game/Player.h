@@ -56,8 +56,8 @@ class Spell;
 class Item;
 
 // Playerbot mod
-class PlayerbotAI;
-class PlayerbotMgr;
+#include "playerbot/PlayerbotMgr.h"
+#include "playerbot/PlayerbotAI.h"
 
 typedef std::deque<Mail*> PlayerMails;
 

@@ -63,8 +63,8 @@
 #include "Mail.h"
 
 // Playerbot mod:
-#include "PlayerbotAI.h"
-#include "PlayerbotMgr.h"
+#include "playerbot/PlayerbotAI.h"
+#include "playerbot/PlayerbotMgr.h"
 
 #include <cmath>
 

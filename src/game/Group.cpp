@@ -32,7 +32,7 @@
 #include "InstanceSaveMgr.h"
 #include "MapInstanced.h"
 #include "Util.h"
-#include "PlayerbotMgr.h"
+#include "playerbot/PlayerbotMgr.h"
 #include "LootMgr.h"
 
 #define LOOT_ROLL_TIMEOUT  (1*MINUTE*IN_MILLISECONDS)
