@@ -1359,95 +1359,95 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotMgr.cpp"
+				RelativePath="..\..\src\game\playerbot\PlayerbotMgr.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotMgr.h"
+				RelativePath="..\..\src\game\playerbot\PlayerbotMgr.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotAI.cpp"
+				RelativePath="..\..\src\game\playerbot\PlayerbotAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotAI.h"
+				RelativePath="..\..\src\game\playerbot\PlayerbotAI.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotClassAI.cpp"
+				RelativePath="..\..\src\game\playerbot\PlayerbotClassAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotClassAI.h"
+				RelativePath="..\..\src\game\playerbot\PlayerbotClassAI.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotDeathKnightAI.cpp"
+				RelativePath="..\..\src\game\playerbot\PlayerbotDeathKnightAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotDeathKnightAI.h"
+				RelativePath="..\..\src\game\playerbot\PlayerbotDeathKnightAI.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotDruidAI.cpp"
+				RelativePath="..\..\src\game\playerbot\PlayerbotDruidAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotDruidAI.h"
+				RelativePath="..\..\src\game\playerbot\PlayerbotDruidAI.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotHunterAI.cpp"
+				RelativePath="..\..\src\game\playerbot\PlayerbotHunterAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotHunterAI.h"
+				RelativePath="..\..\src\game\playerbot\PlayerbotHunterAI.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotMageAI.cpp"
+				RelativePath="..\..\src\game\playerbot\PlayerbotMageAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotMageAI.h"
+				RelativePath="..\..\src\game\playerbot\PlayerbotMageAI.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotPaladinAI.cpp"
+				RelativePath="..\..\src\game\playerbot\PlayerbotPaladinAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotPaladinAI.h"
+				RelativePath="..\..\src\game\playerbot\PlayerbotPaladinAI.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotPriestAI.cpp"
+				RelativePath="..\..\src\game\playerbot\PlayerbotPriestAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotPriestAI.h"
+				RelativePath="..\..\src\game\playerbot\PlayerbotPriestAI.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotRogueAI.cpp"
+				RelativePath="..\..\src\game\playerbot\PlayerbotRogueAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotRogueAI.h"
+				RelativePath="..\..\src\game\playerbot\PlayerbotRogueAI.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotShamanAI.cpp"
+				RelativePath="..\..\src\game\playerbot\PlayerbotShamanAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotShamanAI.h"
+				RelativePath="..\..\src\game\playerbot\PlayerbotShamanAI.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotWarlockAI.cpp"
+				RelativePath="..\..\src\game\playerbot\PlayerbotWarlockAI.cpp"
 				>
 			</File>
 			<File
@@ -1455,11 +1455,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotWarriorAI.cpp"
+				RelativePath="..\..\src\game\playerbot\PlayerbotWarriorAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerbotWarriorAI.h"
+				RelativePath="..\..\src\game\playerbot\PlayerbotWarriorAI.h"
 				>
 			</File>
 			<File

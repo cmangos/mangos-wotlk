@@ -17,6 +17,7 @@
 ## Process this file with automake to produce Makefile.in
 
 ## Sub-directories to parse
+SUBDIRS = playerbot
 
 ## CPP flags for includes, defines, etc.
 AM_CPPFLAGS = $(MANGOS_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared -I$(srcdir)/../shared/vmap -I$(srcdir)/../realmd -DSYSCONFDIR=\"$(sysconfdir)/\"
@@ -214,32 +215,32 @@ libmangosgame_a_SOURCES = \
 	PetitionsHandler.cpp \
 	Player.cpp \
 	Player.h \
-	PlayerbotMgr.cpp \
-	PlayerbotMgr.h \
-	PlayerbotAI.cpp \
-	PlayerbotAI.h \
-	PlayerbotClassAI.cpp \
-	PlayerbotClassAI.h \
-	PlayerbotDeathKnightAI.cpp \
-	PlayerbotDeathKnightAI.h \
-	PlayerbotDruidAI.cpp \
-	PlayerbotDruidAI.h \
-	PlayerbotHunterAI.cpp \
-	PlayerbotHunterAI.h \
-	PlayerbotMageAI.cpp \
-	PlayerbotMageAI.h \
-	PlayerbotPaladinAI.cpp \
-	PlayerbotPaladinAI.h \
-	PlayerbotPriestAI.cpp \
-	PlayerbotPriestAI.h \
-	PlayerbotRogueAI.cpp \
-	PlayerbotRogueAI.h \
-	PlayerbotShamanAI.cpp \
-	PlayerbotShamanAI.h \
-	PlayerbotWarlockAI.cpp \
-	PlayerbotWarlockAI.h \
-	PlayerbotWarriorAI.cpp \
-	PlayerbotWarriorAI.h \
+	playerbot/PlayerbotMgr.cpp \
+	playerbot/PlayerbotMgr.h \
+	playerbot/PlayerbotAI.cpp \
+	playerbot/PlayerbotAI.h \
+	playerbot/PlayerbotClassAI.cpp \
+	playerbot/PlayerbotClassAI.h \
+	playerbot/PlayerbotDeathKnightAI.cpp \
+	playerbot/PlayerbotDeathKnightAI.h \
+	playerbot/PlayerbotDruidAI.cpp \
+	playerbot/PlayerbotDruidAI.h \
+	playerbot/PlayerbotHunterAI.cpp \
+	playerbot/PlayerbotHunterAI.h \
+	playerbot/PlayerbotMageAI.cpp \
+	playerbot/PlayerbotMageAI.h \
+	playerbot/PlayerbotPaladinAI.cpp \
+	playerbot/PlayerbotPaladinAI.h \
+	playerbot/PlayerbotPriestAI.cpp \
+	playerbot/PlayerbotPriestAI.h \
+	playerbot/PlayerbotRogueAI.cpp \
+	playerbot/PlayerbotRogueAI.h \
+	playerbot/PlayerbotShamanAI.cpp \
+	playerbot/PlayerbotShamanAI.h \
+	playerbot/PlayerbotWarlockAI.cpp \
+	playerbot/PlayerbotWarlockAI.h \
+	playerbot/PlayerbotWarriorAI.cpp \
+	playerbot/PlayerbotWarriorAI.h \
 	PlayerDump.cpp \
 	PlayerDump.h \
 	PointMovementGenerator.cpp \
