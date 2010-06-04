@@ -1070,20 +1070,51 @@ void SpellMgr::LoadSpellProcEvents()
 
         mSpellProcEventMap[entry] = spe;
 
+        bool isCustom = false;
+
         // also add to high ranks
         DoSpellProcEvent worker(spe);
         doForHighRanks(entry,worker);
 
-        if (spell->procFlags==0)
+        if (spe.procFlags == 0)
         {
-            if (spe.procFlags == 0)
-            {
-                sLog.outErrorDb("Spell %u listed in `spell_proc_event` probally not triggered spell", entry);
-                continue;
-            }
-            customProc++;
+            if (spell->procFlags==0)
+                sLog.outErrorDb("Spell %u listed in `spell_proc_event` probally not triggered spell (no proc flags)", entry);
         }
-        ++count;
+        else
+        {
+            if (spell->procFlags==spe.procFlags)
+                sLog.outErrorDb("Spell %u listed in `spell_proc_event` have exactly same proc flags as in spell.dbc, field value redundent", entry);
+            else
+                isCustom = true;
+        }
+
+        if (spe.customChance == 0)
+        {
+            /* enable for re-check cases, 0 chance ok for some cases because in some cases it set by another spell/talent spellmod)
+            if (spell->procChance==0 && !spe.ppmRate)
+                sLog.outErrorDb("Spell %u listed in `spell_proc_event` probally not triggered spell (no chance or ppm)", entry);
+            */
+        }
+        else
+        {
+            if (spell->procChance==spe.customChance)
+                sLog.outErrorDb("Spell %u listed in `spell_proc_event` have exactly same custom chance as in spell.dbc, field value redundent", entry);
+            else
+                isCustom = true;
+        }
+
+        // totally redundant record
+        if (!spe.schoolMask && !spe.spellFamilyMask && !spe.spellFamilyMask2 && !spe.procFlags &&
+            !spe.procEx && !spe.ppmRate && !spe.customChance && !spe.cooldown)
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_proc_event` not have any useful data", entry);
+        }
+
+        if (isCustom)
+            ++customProc;
+        else
+            ++count;
     } while( result->NextRow() );
 
     delete result;
@@ -3212,9 +3243,9 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
 
     // do not allow spells to be cast in arenas
     // - with SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA flag
-    // - with greater than 15 min CD
+    // - with greater than 10 min CD
     if ((spellInfo->AttributesEx4 & SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA) ||
-         (GetSpellRecoveryTime(spellInfo) > 15 * MINUTE * IN_MILLISECONDS && !(spellInfo->AttributesEx4 & SPELL_ATTR_EX4_USABLE_IN_ARENA)))
+         (GetSpellRecoveryTime(spellInfo) > 10 * MINUTE * IN_MILLISECONDS && !(spellInfo->AttributesEx4 & SPELL_ATTR_EX4_USABLE_IN_ARENA)))
         if (player && player->InArena())
             return SPELL_FAILED_NOT_IN_ARENA;
 

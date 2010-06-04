@@ -980,8 +980,8 @@ void Group::SendUpdate()
         WorldPacket data(SMSG_GROUP_LIST, (1+1+1+1+8+4+GetMembersCount()*20));
         data << uint8(m_groupType);                         // group type (flags in 3.3)
         data << uint8(citr->group);                         // groupid
-        data << uint8(isBGGroup() ? 1 : 0);                 // 2.0.x, isBattleGroundGroup?
         data << uint8(GetFlags(*citr));                     // group flags
+        data << uint8(isBGGroup() ? 1 : 0);                 // 2.0.x, isBattleGroundGroup?
         if(m_groupType & GROUPTYPE_LFD)
         {
             data << uint8(0);
@@ -1025,16 +1025,16 @@ void Group::UpdatePlayerOutOfRange(Player* pPlayer)
     if(!pPlayer || !pPlayer->IsInWorld())
         return;
 
-    Player *player;
+    if (pPlayer->GetGroupUpdateFlag() == GROUP_UPDATE_FLAG_NONE)
+        return;
+
     WorldPacket data;
     pPlayer->GetSession()->BuildPartyMemberStatsChangedPacket(pPlayer, &data);
 
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
-    {
-        player = itr->getSource();
-        if (player && player != pPlayer && !pPlayer->isVisibleFor(player,player->GetViewPoint()))
-            player->GetSession()->SendPacket(&data);
-    }
+        if (Player *player = itr->getSource())
+            if (player != pPlayer && !player->HaveAtClient(pPlayer))
+                player->GetSession()->SendPacket(&data);
 }
 
 void Group::BroadcastPacket(WorldPacket *packet, bool ignorePlayersInBGRaid, int group, uint64 ignore)
@@ -1307,29 +1307,47 @@ bool Group::_setAssistantFlag(const uint64 &guid, const bool &state)
 
 bool Group::_setMainTank(const uint64 &guid)
 {
-    member_citerator slot = _getMemberCSlot(guid);
-    if(slot == m_memberSlots.end())
+    if (m_mainTank == guid)
         return false;
 
-    if(m_mainAssistant == guid)
-        _setMainAssistant(0);
+    if (guid)
+    {
+        member_citerator slot = _getMemberCSlot(guid);
+        if(slot == m_memberSlots.end())
+            return false;
+
+        if(m_mainAssistant == guid)
+            _setMainAssistant(0);
+    }
+
     m_mainTank = guid;
+
     if(!isBGGroup())
         CharacterDatabase.PExecute("UPDATE groups SET mainTank='%u' WHERE groupId='%u'", GUID_LOPART(m_mainTank), m_Id);
+
     return true;
 }
 
 bool Group::_setMainAssistant(const uint64 &guid)
 {
-    member_witerator slot = _getMemberWSlot(guid);
-    if(slot == m_memberSlots.end())
+    if (m_mainAssistant == guid)
         return false;
 
-    if(m_mainTank == guid)
-        _setMainTank(0);
+    if (guid)
+    {
+        member_witerator slot = _getMemberWSlot(guid);
+        if(slot == m_memberSlots.end())
+            return false;
+
+        if(m_mainTank == guid)
+            _setMainTank(0);
+    }
+
     m_mainAssistant = guid;
+
     if(!isBGGroup())
         CharacterDatabase.PExecute("UPDATE groups SET mainAssistant='%u' WHERE groupId='%u'", GUID_LOPART(m_mainAssistant), m_Id);
+
     return true;
 }
 

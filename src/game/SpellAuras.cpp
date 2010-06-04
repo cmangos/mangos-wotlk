@@ -159,7 +159,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraHover,                                 //106 SPELL_AURA_HOVER
     &Aura::HandleAddModifier,                               //107 SPELL_AURA_ADD_FLAT_MODIFIER
     &Aura::HandleAddModifier,                               //108 SPELL_AURA_ADD_PCT_MODIFIER
-    &Aura::HandleAddTargetTrigger,                          //109 SPELL_AURA_ADD_TARGET_TRIGGER
+    &Aura::HandleNoImmediateEffect,                         //109 SPELL_AURA_ADD_TARGET_TRIGGER
     &Aura::HandleModPowerRegenPCT,                          //110 SPELL_AURA_MOD_POWER_REGEN_PERCENT
     &Aura::HandleNoImmediateEffect,                         //111 SPELL_AURA_ADD_CASTER_HIT_TRIGGER implemented in Unit::SelectMagnetTarget
     &Aura::HandleNoImmediateEffect,                         //112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS implemented in diff functions.
@@ -1472,29 +1472,6 @@ void Aura::HandleAddModifier(bool apply, bool Real)
     ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
 
     ReapplyAffectedPassiveAuras();
-}
-
-void Aura::HandleAddTargetTrigger(bool apply, bool /*Real*/)
-{
-    // Use SpellModifier structure for check
-    // used only fields:
-    //  spellId, mask, mask2
-    if (apply)
-    {
-        SpellModifier *mod = new SpellModifier;
-        mod->spellId = GetId();
-
-        uint32 const *ptr = m_spellProto->GetEffectSpellClassMask(m_effIndex);
-
-        mod->mask = (uint64)ptr[0] | (uint64)ptr[1]<<32;
-        mod->mask2= ptr[2];
-        m_spellmod = mod;
-    }
-    else
-    {
-        delete m_spellmod;
-        m_spellmod = NULL;
-    }
 }
 
 void Aura::TriggerSpell()
@@ -3519,8 +3496,8 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
         if (spellInfo->EffectItemType[m_effIndex] == 6265)
         {
             // Only from non-grey units
-            if ((victim->getLevel() <= MaNGOS::XP::GetGrayLevel(caster->getLevel()) ||
-                victim->GetTypeId() == TYPEID_UNIT && !((Player*)caster)->isAllowedToLoot((Creature*)victim)))
+            if (!((Player*)caster)->isHonorOrXPTarget(victim) ||
+                victim->GetTypeId() == TYPEID_UNIT && !((Player*)caster)->isAllowedToLoot((Creature*)victim))
                 return;
         }
 
@@ -4988,6 +4965,15 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 }
                 break;
             }
+            case SPELLFAMILY_DEATHKNIGHT:
+            {
+                //Frost Fever and Blood Plague AP scale
+                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x400080000000000))
+                {
+                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f * 1.15f);
+                }
+                break;
+            }
             default:
                 break;
         }
@@ -6382,6 +6368,15 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
             }
             break;
         }
+        case SPELLFAMILY_DRUID:
+        {
+            // Barkskin
+            if (GetId()==22812 && m_target->HasAura(63057)) // Glyph of Barkskin
+                spellId1 = 63058;                           // Glyph - Barkskin 01
+            else
+                return;
+            break;
+        }
         case SPELLFAMILY_ROGUE:
             // Sprint (skip non player casted spells by category)
             if (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000040) && GetSpellProto()->Category == 44)
@@ -7190,7 +7185,7 @@ void Aura::PeriodicTick()
             {
                 // Only from non-grey units
                 if (roll_chance_i(10) &&                    // 1-2 from drain with final and without glyph, 0-1 from damage
-                    m_target->getLevel() > MaNGOS::XP::GetGrayLevel(pCaster->getLevel()) &&
+                    ((Player*)pCaster)->isHonorOrXPTarget(m_target) &&
                     (m_target->GetTypeId() != TYPEID_UNIT || ((Player*)pCaster)->isAllowedToLoot((Creature*)m_target)))
                 {
                     pCaster->CastSpell(pCaster, 43836, true, NULL, this);
@@ -7553,7 +7548,7 @@ void Aura::PeriodicTick()
 
             SpellEntry const* spellProto = GetSpellProto();
             // maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
-            SpellNonMeleeDamage damageInfo(pCaster, m_target, spellProto->Id, spellProto->SchoolMask);
+            SpellNonMeleeDamage damageInfo(pCaster, m_target, spellProto->Id, SpellSchoolMask(spellProto->SchoolMask));
             pCaster->CalculateSpellDamage(&damageInfo, gain, spellProto);
 
             damageInfo.target->CalculateAbsorbResistBlock(pCaster, &damageInfo, spellProto);

@@ -1180,7 +1180,7 @@ void Unit::CastSpell(float x, float y, float z, SpellEntry const *spellInfo, boo
 uint32 Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellID);
-    SpellNonMeleeDamage damageInfo(this, pVictim, spellInfo->Id, spellInfo->SchoolMask);
+    SpellNonMeleeDamage damageInfo(this, pVictim, spellInfo->Id, SpellSchoolMask(spellInfo->SchoolMask));
     CalculateSpellDamage(&damageInfo, damage, spellInfo);
     damageInfo.target->CalculateAbsorbResistBlock(this, &damageInfo, spellInfo);
     DealDamageMods(damageInfo.target,damageInfo.damage,&damageInfo.absorb);
@@ -1191,7 +1191,7 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
 
 void Unit::CalculateSpellDamage(SpellNonMeleeDamage *damageInfo, int32 damage, SpellEntry const *spellInfo, WeaponAttackType attackType)
 {
-    SpellSchoolMask damageSchoolMask = SpellSchoolMask(damageInfo->schoolMask);
+    SpellSchoolMask damageSchoolMask = damageInfo->schoolMask;
     Unit *pVictim = damageInfo->target;
 
     if (damage < 0)
@@ -1304,7 +1304,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage *damageInfo, bool durabilityLoss)
 
     // Call default DealDamage (send critical in hit info for threat calculation)
     CleanDamage cleanDamage(0, BASE_ATTACK, damageInfo->HitInfo & SPELL_HIT_TYPE_CRIT ? MELEE_HIT_CRIT : MELEE_HIT_NORMAL);
-    DealDamage(pVictim, damageInfo->damage, &cleanDamage, SPELL_DIRECT_DAMAGE, SpellSchoolMask(damageInfo->schoolMask), spellProto, durabilityLoss);
+    DealDamage(pVictim, damageInfo->damage, &cleanDamage, SPELL_DIRECT_DAMAGE, damageInfo->schoolMask, spellProto, durabilityLoss);
 }
 
 //TODO for melee need create structure as in
@@ -5691,6 +5691,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 triggered_spell_id = 22858;
                 break;
             }
+            // Gag Order
+            if (dummySpell->SpellIconID == 280)
+            {
+                triggered_spell_id = 18498;                 // Silenced - Gag Order
+                break;
+            }
             // Second Wind
             if (dummySpell->SpellIconID == 1697)
             {
@@ -6835,6 +6841,9 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 // Lesser Healing Wave need aditional 60% roll
                 if ((procSpell->SpellFamilyFlags & UI64LIT(0x0000000000000080)) && !roll_chance_i(60))
                     return false;
+                // Chain Heal needs additional 30% roll
+                if ((procSpell->SpellFamilyFlags & UI64LIT(0x0000000000000100)) && !roll_chance_i(30))
+                    return false;
                 // lookup water shield
                 AuraList const& vs = GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
                 for(AuraList::const_iterator itr = vs.begin(); itr != vs.end(); ++itr)
@@ -6844,13 +6853,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     {
                         uint32 spell = (*itr)->GetSpellProto()->EffectTriggerSpell[(*itr)->GetEffIndex()];
                         CastSpell(this, spell, true, castItem, triggeredByAura);
-                        if ((*itr)->DropAuraCharge())
-                            RemoveSingleSpellAurasFromStack((*itr)->GetId());
                         return true;
                     }
                 }
                 return false;
-                break;
             }
             // Lightning Overload
             if (dummySpell->SpellIconID == 2018)            // only this spell have SpellFamily Shaman SpellIconID == 2018 and dummy aura
@@ -7007,6 +7013,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
             // Necrosis
             if (dummySpell->SpellIconID == 2709)
             {
+                // only melee auto attack affected
+                if (!(procFlag & PROC_FLAG_SUCCESSFUL_MELEE_HIT))
+                    return false;
+
                 basepoints[0] = triggerAmount * damage / 100;
                 triggered_spell_id = 51460;
                 break;
@@ -12020,7 +12030,10 @@ void Unit::CleanupsBeforeDelete()
         CombatStop();
         ClearComboPointHolders();
         DeleteThreatList();
-        getHostileRefManager().setOnlineOfflineState(false);
+        if (GetTypeId()==TYPEID_PLAYER)
+            getHostileRefManager().setOnlineOfflineState(false);
+        else
+            getHostileRefManager().deleteReferences();
         RemoveAllAuras(AURA_REMOVE_BY_DELETE);
         GetMotionMaster()->Clear(false);                    // remove different non-standard movement generators.
     }
@@ -12468,7 +12481,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
             case SPELL_AURA_PROC_TRIGGER_DAMAGE:
             {
                 DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: doing %u damage from spell id %u (triggered by %s aura of spell %u)", auraModifier->m_amount, spellInfo->Id, (isVictim?"a victim's":"an attacker's"), triggeredByAura->GetId());
-                SpellNonMeleeDamage damageInfo(this, pTarget, spellInfo->Id, spellInfo->SchoolMask);
+                SpellNonMeleeDamage damageInfo(this, pTarget, spellInfo->Id, SpellSchoolMask(spellInfo->SchoolMask));
                 CalculateSpellDamage(&damageInfo, auraModifier->m_amount, spellInfo);
                 damageInfo.target->CalculateAbsorbResistBlock(this, &damageInfo, spellInfo);
                 DealDamageMods(damageInfo.target,damageInfo.damage,&damageInfo.absorb);
