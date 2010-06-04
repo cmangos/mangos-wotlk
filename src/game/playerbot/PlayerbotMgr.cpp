@@ -13,16 +13,17 @@
 class LoginQueryHolder;
 class CharacterHandler;
 
+extern Config botConfig;
 
 PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master)
 {
     // load config variables
-    m_confMaxNumBots = sConfig.GetIntDefault( "PlayerbotAI.MaxNumBots", 9 );
-    m_confRestrictBotLevel = sConfig.GetIntDefault( "PlayerbotAI.RestrictBotLevel", 80 );
-    m_confDisableBots = sConfig.GetBoolDefault( "PlayerbotAI.DisableBots", false );
-    m_confDebugWhisper = sConfig.GetBoolDefault( "PlayerbotAI.DebugWhisper", false );
-    m_confFollowDistance[0] = sConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 0.5f );
-    m_confFollowDistance[1] = sConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 1.0f );
+    m_confMaxNumBots = botConfig.GetIntDefault( "PlayerbotAI.MaxNumBots", 9 );
+    m_confRestrictBotLevel = botConfig.GetIntDefault( "PlayerbotAI.RestrictBotLevel", 80 );
+    m_confDisableBots = botConfig.GetBoolDefault( "PlayerbotAI.DisableBots", false );
+    m_confDebugWhisper = botConfig.GetBoolDefault( "PlayerbotAI.DebugWhisper", false );
+    m_confFollowDistance[0] = botConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 0.5f );
+    m_confFollowDistance[1] = botConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 1.0f );
 }
 
 PlayerbotMgr::~PlayerbotMgr()
@@ -544,7 +545,7 @@ void PlayerbotMgr::RemoveAllBotsFromGroup()
 bool ChatHandler::HandlePlayerbotCommand(const char* args)
 {
     if(!(m_session->GetSecurity() > SEC_PLAYER))
-        if(sConfig.GetBoolDefault("PlayerbotAI.DisableBots", false))
+        if(botConfig.GetBoolDefault("PlayerbotAI.DisableBots", false))
         {
             PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
             SetSentErrorMessage(true);
@@ -610,7 +611,7 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
         Field *fields=resultchar->Fetch();
         int acctcharcount = fields[0].GetUInt32();
         if(!(m_session->GetSecurity() > SEC_PLAYER))
-            if((acctcharcount > sConfig.GetIntDefault("PlayerbotAI.MaxNumBots", 9)) && (cmdStr == "add" || cmdStr == "login"))
+            if((acctcharcount > botConfig.GetIntDefault("PlayerbotAI.MaxNumBots", 9)) && (cmdStr == "add" || cmdStr == "login"))
             {
                 PSendSysMessage("|cffff0000You cannot summon anymore bots, for this account.");
                 SetSentErrorMessage(true);
@@ -626,7 +627,7 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
         Field *fields=resultlvl->Fetch();
         int charlvl = fields[0].GetUInt32();
         if(!(m_session->GetSecurity() > SEC_PLAYER))
-            if(charlvl > sConfig.GetIntDefault("PlayerbotAI.RestrictBotLevel", 80))
+            if(charlvl > botConfig.GetIntDefault("PlayerbotAI.RestrictBotLevel", 80))
             {
                 PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high.",fields[1].GetString());
                 SetSentErrorMessage(true);
