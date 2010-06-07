@@ -13,7 +13,7 @@
 class LoginQueryHolder;
 class CharacterHandler;
 
-extern Config botConfig;
+Config botConfig;
 
 PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master)
 {
