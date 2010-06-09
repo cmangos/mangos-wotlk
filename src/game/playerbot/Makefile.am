@@ -18,9 +18,47 @@
 
 ## Sub-directories to parse
 
+## CPP flags for includes, defines, etc.
+AM_CPPFLAGS = $(MANGOS_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir) -I$(srcdir)/../../../dep/include -I$(srcdir)/../../framework -I$(srcdir)/../../shared -I$(srcdir)/../../shared/vmap -I$(srcdir)/../../realmd -DSYSCONFDIR=\"$(sysconfdir)/\"
+
+## Build MaNGOS game library as convenience library.
+# libmangosbot shared library will later be reused by world server daemon.
+noinst_LIBRARIES = libmangosbot.a
+
+#  libmangossgame library will later be reused by ...
+libmangosbot_a_SOURCES = \
+        config.h \
+        PlayerbotMgr.cpp \
+        PlayerbotMgr.h \
+        PlayerbotAI.cpp \
+        PlayerbotAI.h \
+        PlayerbotClassAI.cpp \
+        PlayerbotClassAI.h \
+        PlayerbotDeathKnightAI.cpp \
+        PlayerbotDeathKnightAI.h \
+        PlayerbotDruidAI.cpp \
+        PlayerbotDruidAI.h \
+        PlayerbotHunterAI.cpp \
+        PlayerbotHunterAI.h \
+        PlayerbotMageAI.cpp \
+        PlayerbotMageAI.h \
+        PlayerbotPaladinAI.cpp \
+        PlayerbotPaladinAI.h \
+        PlayerbotPriestAI.cpp \
+        PlayerbotPriestAI.h \
+        PlayerbotRogueAI.cpp \
+        PlayerbotRogueAI.h \
+        PlayerbotShamanAI.cpp \
+        PlayerbotShamanAI.h \
+        PlayerbotWarlockAI.cpp \
+        PlayerbotWarlockAI.h \
+        PlayerbotWarriorAI.cpp \
+        PlayerbotWarriorAI.h
+
 ## Additional files to include when running 'make dist'
-#  Include world daemon configuration
+#  Precompiled Headers for WIN
 EXTRA_DIST = \
+	config.h \
 	playerbot.conf.dist
 
 ## Additional files to install

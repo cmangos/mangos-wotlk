@@ -42,6 +42,7 @@ mangos_worldd_SOURCES = \
 mangos_worldd_LDADD = \
 	../bindings/universal/libmangosscript.la \
 	../game/libmangosgame.a \
+	../game/playerbot/libmangosbot.a \
 	../shared/Database/libmangosdatabase.a \
 	../shared/Config/libmangosconfig.a \
 	../shared/Auth/libmangosauth.a \

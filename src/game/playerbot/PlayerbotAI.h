@@ -2,8 +2,8 @@
 #define _PLAYERBOTAI_H
 
 #include "Common.h"
-#include "QuestDef.h"
-#include "GameEventMgr.h"
+#include "../QuestDef.h"
+#include "../GameEventMgr.h"
 
 class WorldPacket;
 class WorldObject;

@@ -1,14 +1,14 @@
 #include "Config/ConfigEnv.h"
-#include "Player.h"
+#include "../Player.h"
 #include "PlayerbotAI.h"
 #include "PlayerbotMgr.h"
-#include "WorldPacket.h"
-#include "Chat.h"
-#include "ObjectMgr.h"
-#include "GossipDef.h"
-#include "Chat.h"
-#include "Language.h"
-#include "Guild.h"
+#include "../WorldPacket.h"
+#include "../Chat.h"
+#include "../ObjectMgr.h"
+#include "../GossipDef.h"
+#include "../Chat.h"
+#include "../Language.h"
+#include "../Guild.h"
 
 class LoginQueryHolder;
 class CharacterHandler;
