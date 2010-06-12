@@ -2612,7 +2612,7 @@ bool PlayerbotAI::TradeItem(const Item& item, int8 slot)
 
     int8 tradeSlot = -1;
 
-    TradeData* pTrade = m_bot->GetTradeData(); 
+    TradeData* pTrade = m_bot->GetTradeData();
     if( (slot>=0 && slot<TRADE_SLOT_COUNT) && pTrade->GetTraderData()->GetItem(TradeSlots(slot)) == NULL )
         tradeSlot = slot;
     else
