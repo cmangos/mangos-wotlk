@@ -641,7 +641,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             WorldPacket p(packet);
             uint32 status;
             p >> status;
-            p.clear();
+            p.resize(4);
 
             //4 == TRADE_STATUS_TRADE_ACCEPT
             if (status == 4)
@@ -2612,13 +2612,14 @@ bool PlayerbotAI::TradeItem(const Item& item, int8 slot)
 
     int8 tradeSlot = -1;
 
-    if( (slot>=0 && slot<TRADE_SLOT_COUNT) && m_bot->GetItemByTradeSlot(slot) == NULL )
+    TradeData* pTrade = m_bot->GetTradeData(); 
+    if( (slot>=0 && slot<TRADE_SLOT_COUNT) && pTrade->GetTraderData()->GetItem(TradeSlots(slot)) == NULL )
         tradeSlot = slot;
     else
     {
         for( uint8 i=0; i<TRADE_SLOT_TRADED_COUNT && tradeSlot==-1; i++ )
         {
-            if( m_bot->GetItemByTradeSlot(i) == NULL )
+            if( pTrade->GetTraderData()->GetItem(TradeSlots(i)) == NULL )
                 tradeSlot = i;
         }
     }
