@@ -43,7 +43,6 @@ class Group;
 */
 class InstanceSave
 {
-    friend class InstanceSaveManager;
     public:
         /* Created either when:
            - any new instance is being generated
@@ -166,7 +165,6 @@ class InstanceResetScheduler
 
 class MANGOS_DLL_DECL InstanceSaveManager : public MaNGOS::Singleton<InstanceSaveManager, MaNGOS::ClassLevelLockable<InstanceSaveManager, ACE_Thread_Mutex> >
 {
-    friend class InstanceSave;
     friend class InstanceResetScheduler;
     public:
         InstanceSaveManager();
@@ -196,7 +194,7 @@ class MANGOS_DLL_DECL InstanceSaveManager : public MaNGOS::Singleton<InstanceSav
         //  called by scheduler
         void _ResetOrWarnAll(uint32 mapid, Difficulty difficulty, bool warn, uint32 timeleft);
         void _ResetInstance(uint32 mapid, uint32 instanceId);
-        void _CleanupExiredInstancesAtTime(time_t t);
+        void _CleanupExpiredInstancesAtTime(time_t t);
 
         void _ResetSave(InstanceSaveHashMap::iterator &itr);
         void _DelHelper(DatabaseType &db, const char *fields, const char *table, const char *queryTail,...);

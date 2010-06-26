@@ -115,8 +115,7 @@ bool InstanceSave::UnloadIfEmpty()
 {
     if(m_playerList.empty() && m_groupList.empty())
     {
-        if(!sInstanceSaveMgr.lock_instLists)
-            sInstanceSaveMgr.RemoveInstanceSave(GetInstanceId());
+        sInstanceSaveMgr.RemoveInstanceSave(GetInstanceId());
         return false;
     }
     else
@@ -218,7 +217,7 @@ void InstanceResetScheduler::LoadResetTimes()
 
     // clean expired instances, references to them will be deleted in CleanupInstances
     // must be done before calculating new reset times
-    m_InstanceSaves._CleanupExiredInstancesAtTime(now);
+    m_InstanceSaves._CleanupExpiredInstancesAtTime(now);
 
     // calculate new global reset times for expired instances and those that have never been reset yet
     // add the global reset times to the priority queue
@@ -419,14 +418,17 @@ void InstanceSaveManager::DeleteInstanceFromDB(uint32 instanceid)
 
 void InstanceSaveManager::RemoveInstanceSave(uint32 InstanceId)
 {
+    if (lock_instLists)
+        return;
+
     InstanceSaveHashMap::iterator itr = m_instanceSaveById.find( InstanceId );
     if(itr != m_instanceSaveById.end())
     {
         // save the resettime for normal instances only when they get unloaded
         if(time_t resettime = itr->second->GetResetTimeForDB())
             CharacterDatabase.PExecute("UPDATE instance SET resettime = '"UI64FMTD"' WHERE id = '%u'", (uint64)resettime, InstanceId);
-        delete itr->second;
-        m_instanceSaveById.erase(itr);
+
+        _ResetSave(itr);
     }
 }
 
@@ -683,7 +685,7 @@ uint32 InstanceSaveManager::GetNumBoundGroupsTotal()
     return ret;
 }
 
-void InstanceSaveManager::_CleanupExiredInstancesAtTime( time_t t )
+void InstanceSaveManager::_CleanupExpiredInstancesAtTime( time_t t )
 {
     _DelHelper(CharacterDatabase, "id, map, instance.difficulty", "instance", "LEFT JOIN instance_reset ON mapid = map AND instance.difficulty =  instance_reset.difficulty WHERE (instance.resettime < '"UI64FMTD"' AND instance.resettime > '0') OR (NOT instance_reset.resettime IS NULL AND instance_reset.resettime < '"UI64FMTD"')",  (uint64)t, (uint64)t);
 }
