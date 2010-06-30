@@ -1294,7 +1294,7 @@ void PlayerbotAI::DoNextCombatManeuver()
 	// check if we have a target - fixes crash reported by rrtn (kill hunter's pet bug)
 	// if current target for attacks doesn't make sense anymore
     // clear our orders so we can get orders in next update
-    if( !m_targetCombat || m_targetCombat->isDead() || !m_targetCombat->IsInWorld() || !m_bot->IsHostileTo(m_targetCombat) )
+    if( !m_targetCombat || m_targetCombat->isDead() || !m_targetCombat->IsInWorld() || !m_bot->IsHostileTo(m_targetCombat) || !m_bot->IsInMap(m_targetCombat) )
     {
         m_bot->AttackStop();
         m_bot->SetSelection(0);
