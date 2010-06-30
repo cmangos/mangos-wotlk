@@ -35,6 +35,7 @@
 #include "Transports.h"
 #include "ProgressBar.h"
 #include "Language.h"
+#include "PoolManager.h"
 #include "GameEventMgr.h"
 #include "Spell.h"
 #include "Chat.h"
@@ -753,7 +754,7 @@ void ObjectMgr::LoadCreatureTemplates()
             if(displayScaleEntry)
                 const_cast<CreatureInfo*>(cInfo)->scale = displayScaleEntry->scale;
             else
-                const_cast<CreatureInfo*>(cInfo)->scale = 1.0f;
+                const_cast<CreatureInfo*>(cInfo)->scale = DEFAULT_OBJECT_SCALE;
         }
     }
 }
@@ -1027,6 +1028,64 @@ void ObjectMgr::LoadCreatureModelInfo()
             sLog.outErrorDb("Table `creature_model_info` has not existed alt.gender model (%u) for existed display id (%u).", minfo->modelid_other_gender, minfo->modelid);
             const_cast<CreatureModelInfo*>(minfo)->modelid_other_gender = 0;
         }
+    }
+
+    // character races expected have model info data in table
+    for(uint32 race = 1; race < sChrRacesStore.GetNumRows(); ++race)
+    {
+        ChrRacesEntry const* raceEntry = sChrRacesStore.LookupEntry(race);
+        if (!raceEntry)
+            continue;
+
+        if (!((1 << (race-1)) & RACEMASK_ALL_PLAYABLE))
+            continue;
+
+        if (CreatureModelInfo const *minfo = GetCreatureModelInfo(raceEntry->model_f))
+        {
+            if (minfo->gender != GENDER_FEMALE)
+                sLog.outErrorDb("Table `creature_model_info` have wrong gender %u for character race %u female model id %u", minfo->gender, race, raceEntry->model_f);
+
+            if (minfo->modelid_other_gender != raceEntry->model_m)
+                sLog.outErrorDb("Table `creature_model_info` have wrong other gender model id %u for character race %u female model id %u", minfo->modelid_other_gender, race, raceEntry->model_f);
+
+            if (minfo->bounding_radius <= 0.0f)
+            {
+                sLog.outErrorDb("Table `creature_model_info` have wrong bounding_radius %f for character race %u female model id %u, use %f instead", minfo->bounding_radius, race, raceEntry->model_f, DEFAULT_WORLD_OBJECT_SIZE);
+                const_cast<CreatureModelInfo*>(minfo)->bounding_radius = DEFAULT_WORLD_OBJECT_SIZE;
+            }
+
+            if (minfo->combat_reach != 1.5f)
+            {
+                sLog.outErrorDb("Table `creature_model_info` have wrong combat_reach %f for character race %u female model id %u, expected always 1.5f", minfo->combat_reach, race, raceEntry->model_f);
+                const_cast<CreatureModelInfo*>(minfo)->combat_reach = 1.5f;
+            }
+        }
+        else
+            sLog.outErrorDb("Table `creature_model_info` expect have data for character race %u female model id %u", race, raceEntry->model_f);
+
+        if (CreatureModelInfo const *minfo = GetCreatureModelInfo(raceEntry->model_m))
+        {
+            if (minfo->gender != GENDER_MALE)
+                sLog.outErrorDb("Table `creature_model_info` have wrong gender %u for character race %u male model id %u", minfo->gender, race, raceEntry->model_m);
+
+            if (minfo->modelid_other_gender != raceEntry->model_f)
+                sLog.outErrorDb("Table `creature_model_info` have wrong other gender model id %u for character race %u male model id %u", minfo->modelid_other_gender, race, raceEntry->model_m);
+
+            if (minfo->bounding_radius <= 0.0f)
+            {
+                sLog.outErrorDb("Table `creature_model_info` have wrong bounding_radius %f for character race %u male model id %u, use %f instead", minfo->bounding_radius, race, raceEntry->model_f, DEFAULT_WORLD_OBJECT_SIZE);
+                const_cast<CreatureModelInfo*>(minfo)->bounding_radius = DEFAULT_WORLD_OBJECT_SIZE;
+            }
+
+            if (minfo->combat_reach != 1.5f)
+            {
+                sLog.outErrorDb("Table `creature_model_info` have wrong combat_reach %f for character race %u male model id %u, expected always 1.5f", minfo->combat_reach, race, raceEntry->model_m);
+                const_cast<CreatureModelInfo*>(minfo)->combat_reach = 1.5f;
+            }
+        }
+        else
+            sLog.outErrorDb("Table `creature_model_info` expect have data for character race %u male model id %u", race, raceEntry->model_m);
+
     }
 
     sLog.outString( ">> Loaded %u creature model based info", sCreatureModelStorage.RecordCount );
@@ -5999,6 +6058,14 @@ void ObjectMgr::LoadGameobjectInfo()
         if (!goInfo)
             continue;
 
+
+        if (goInfo->size <= 0.0f)                           // prevent use too small scales
+        {
+            ERROR_DB_STRICT_LOG("Gameobject (Entry: %u GoType: %u) have too small size=%f",
+                goInfo->id, goInfo->type, goInfo->size);
+            const_cast<GameObjectInfo*>(goInfo)->size =  DEFAULT_OBJECT_SCALE;
+        }
+
         // some GO types have unused go template, check goInfo->displayId at GO spawn data loading or ignore
 
         switch(goInfo->type)
@@ -8623,4 +8690,104 @@ CreatureInfo const* GetCreatureTemplateStore(uint32 entry)
 Quest const* GetQuestTemplateStore(uint32 entry)
 {
     return sObjectMgr.GetQuestTemplate(entry);
+}
+
+bool FindCreatureData::operator()( CreatureDataPair const& dataPair )
+{
+    // skip wrong entry ids
+    if (i_id && dataPair.second.id != i_id)
+        return false;
+
+    if (!i_anyData)
+        i_anyData = &dataPair;
+
+    // without player we can't find more stricted cases, so use fouded
+    if (!i_player)
+        return true;
+
+    // skip diff. map cases
+    if (dataPair.second.mapid != i_player->GetMapId())
+        return false;
+
+    float new_dist = i_player->GetDistance2d(dataPair.second.posX, dataPair.second.posY);
+
+    if (!i_mapData || new_dist < i_mapDist)
+    {
+        i_mapData = &dataPair;
+        i_mapDist = new_dist;
+    }
+
+    // skip not spawned (in any state), 
+    uint16 pool_id = sPoolMgr.IsPartOfAPool<Creature>(dataPair.first);
+    if (pool_id && !sPoolMgr.IsSpawnedObject<Creature>(dataPair.first))
+        return false;
+
+    if (!i_spawnedData || new_dist < i_spawnedDist)
+    {
+        i_spawnedData = &dataPair;
+        i_spawnedDist = new_dist;
+    }
+
+    return false;
+}
+
+CreatureDataPair const* FindCreatureData::GetResult() const
+{
+    if (i_spawnedData)
+        return i_spawnedData;
+
+    if (i_mapData)
+        return i_mapData;
+
+    return i_anyData;
+}
+
+bool FindGOData::operator()( GameObjectDataPair const& dataPair )
+{
+    // skip wrong entry ids
+    if (i_id && dataPair.second.id != i_id)
+        return false;
+
+    if (!i_anyData)
+        i_anyData = &dataPair;
+
+    // without player we can't find more stricted cases, so use fouded
+    if (!i_player)
+        return true;
+
+    // skip diff. map cases
+    if (dataPair.second.mapid != i_player->GetMapId())
+        return false;
+
+    float new_dist = i_player->GetDistance2d(dataPair.second.posX, dataPair.second.posY);
+
+    if (!i_mapData || new_dist < i_mapDist)
+    {
+        i_mapData = &dataPair;
+        i_mapDist = new_dist;
+    }
+
+    // skip not spawned (in any state)
+    uint16 pool_id = sPoolMgr.IsPartOfAPool<GameObject>(dataPair.first);
+    if (pool_id && !sPoolMgr.IsSpawnedObject<GameObject>(dataPair.first))
+        return false;
+
+    if (!i_spawnedData || new_dist < i_spawnedDist)
+    {
+        i_spawnedData = &dataPair;
+        i_spawnedDist = new_dist;
+    }
+
+    return false;
+}
+
+GameObjectDataPair const* FindGOData::GetResult() const
+{
+    if (i_mapData)
+        return i_mapData;
+
+    if (i_spawnedData)
+        return i_spawnedData;
+
+    return i_anyData;
 }

@@ -1131,7 +1131,7 @@ bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant, u
         else
             player->SetGroup(this, group);
         // if the same group invites the player back, cancel the homebind timer
-        InstanceGroupBind *bind = GetBoundInstance(player);
+        InstanceGroupBind *bind = GetBoundInstance(player->GetMapId(), player);
         if(bind && bind->save->GetInstanceId() == player->GetInstanceId())
             player->m_InstanceValid = true;
     }
@@ -1660,9 +1660,8 @@ void Group::ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo)
     }
 }
 
-InstanceGroupBind* Group::GetBoundInstance(Player* player)
+InstanceGroupBind* Group::GetBoundInstance(uint32 mapid, Player* player)
 {
-    uint32 mapid = player->GetMapId();
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
     if(!mapEntry)
         return NULL;
@@ -1745,8 +1744,8 @@ void Group::_homebindIfInstance(Player *player)
     {
         // leaving the group in an instance, the homebind timer is started
         // unless the player is permanently saved to the instance
-        InstanceSave *save = sInstanceSaveMgr.GetInstanceSave(player->GetInstanceId());
-        InstancePlayerBind *playerBind = save ? player->GetBoundInstance(save->GetMapId(), save->GetDifficulty()) : NULL;
+        Map* map = player->GetMap();
+        InstancePlayerBind *playerBind = map->IsDungeon() ? player->GetBoundInstance(map->GetId(), map->GetDifficulty()) : NULL;
         if(!playerBind || !playerBind->perm)
             player->m_InstanceValid = false;
     }
