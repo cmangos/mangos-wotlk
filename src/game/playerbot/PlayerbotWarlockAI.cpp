@@ -44,6 +44,7 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     SHADOW_WARD           = ai->getSpellId("shadow ward");
     SOULSHATTER           = ai->getSpellId("soulshatter");
     SOUL_LINK             = ai->getSpellId("soul link");
+    SOUL_LINK_AURA        = 25228; // dummy aura applied, after spell SOUL_LINK
     HEALTH_FUNNEL         = ai->getSpellId("health funnel");
     DETECT_INVISIBILITY   = ai->getSpellId("detect invisibility");
     // demon summon
@@ -444,7 +445,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
 
     // check for buffs with demon
     if(( pet )
-        && ( SOUL_LINK>0 && !m_bot->HasAura(SOUL_LINK, EFFECT_INDEX_0) && ai->GetManaPercent() >= 16 && ai->CastSpell(SOUL_LINK,*m_bot) ))
+        && ( SOUL_LINK>0 && !m_bot->HasAura(SOUL_LINK_AURA, EFFECT_INDEX_0) && ai->GetBaseManaPercent() >= 16 && ai->CastSpell(SOUL_LINK,*m_bot) ))
     {
         //ai->TellMaster( "casting soul link." );
         return;
