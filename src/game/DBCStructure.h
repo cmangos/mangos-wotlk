@@ -867,7 +867,8 @@ struct GameObjectDisplayInfoEntry
     uint32      Displayid;                                  // 0        m_ID
     // char* filename;                                      // 1
     // uint32 unknown2[10];                                 // 2-11     unknown data
-    // float  unknown12[6];                                 // 12-17    unknown data
+    float  unknown12;                                       // 12-17    unknown size data, use first value as interact dist, mostly in hacks way
+    // float  unknown13[5];                                 // 12-17    unknown size data
     // uint32 unknown18;                                    // 18       unknown data
 };
 
@@ -1518,11 +1519,16 @@ struct SpellRadiusEntry
 
 struct SpellRangeEntry
 {
-    uint32    ID;
-    float     minRange;
-    float     minRangeFriendly;
-    float     maxRange;
-    float     maxRangeFriendly;
+    uint32    ID;                                           // 0
+    float     minRange;                                     // 1
+    float     minRangeFriendly;                             // 2
+    float     maxRange;                                     // 3
+    float     maxRangeFriendly;                             // 4
+    //uint32  Flags;                                        // 5
+    //char*   Name[16];                                     // 6-21 unused
+    //uint32  NameFlags;                                    // 22 unused
+    //char*   ShortName[16];                                // 23-38 unused
+    //uint32  NameFlags;                                    // 39 unused
 };
 
 struct SpellRuneCostEntry

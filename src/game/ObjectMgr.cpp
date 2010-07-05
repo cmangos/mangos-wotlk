@@ -2434,6 +2434,7 @@ void ObjectMgr::LoadPetLevelInfo()
         if(!pInfo || pInfo[0].health == 0 )
         {
             sLog.outErrorDb("Creature %u does not have pet stats data for Level 1!",itr->first);
+            Log::WaitBeforeContinueIfNeed();
             exit(1);
         }
 
@@ -2477,6 +2478,7 @@ void ObjectMgr::LoadPlayerInfo()
             sLog.outString();
             sLog.outString( ">> Loaded %u player create definitions", count );
             sLog.outErrorDb( "Error loading `playercreateinfo` table or empty table.");
+            Log::WaitBeforeContinueIfNeed();
             exit(1);
         }
 
@@ -2756,6 +2758,7 @@ void ObjectMgr::LoadPlayerInfo()
             sLog.outString();
             sLog.outString( ">> Loaded %u level health/mana definitions", count );
             sLog.outErrorDb( "Error loading `player_classlevelstats` table or empty table.");
+            Log::WaitBeforeContinueIfNeed();
             exit(1);
         }
 
@@ -2824,6 +2827,7 @@ void ObjectMgr::LoadPlayerInfo()
         if(!pClassInfo->levelInfo || pClassInfo->levelInfo[0].basehealth == 0 )
         {
             sLog.outErrorDb("Class %i Level 1 does not have health/mana data!",class_);
+            Log::WaitBeforeContinueIfNeed();
             exit(1);
         }
 
@@ -2852,6 +2856,7 @@ void ObjectMgr::LoadPlayerInfo()
             sLog.outString();
             sLog.outString( ">> Loaded %u level stats definitions", count );
             sLog.outErrorDb( "Error loading `player_levelstats` table or empty table.");
+            Log::WaitBeforeContinueIfNeed();
             exit(1);
         }
 
@@ -2942,6 +2947,7 @@ void ObjectMgr::LoadPlayerInfo()
             if(!pInfo->levelInfo || pInfo->levelInfo[0].stats[0] == 0 )
             {
                 sLog.outErrorDb("Race %i Class %i Level 1 does not have stats data!",race,class_);
+                Log::WaitBeforeContinueIfNeed();
                 exit(1);
             }
 
@@ -2975,6 +2981,7 @@ void ObjectMgr::LoadPlayerInfo()
             sLog.outString();
             sLog.outString( ">> Loaded %u xp for level definitions", count );
             sLog.outErrorDb( "Error loading `player_xp_for_level` table or empty table.");
+            Log::WaitBeforeContinueIfNeed();
             exit(1);
         }
 
@@ -4538,6 +4545,16 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
                 // for later, we might consider despawn by database guid, and define in datalong2 as option to despawn self.
                 break;
             }
+            case SCRIPT_COMMAND_PLAY_MOVIE:
+            {
+                if (!sMovieStore.LookupEntry(tmp.datalong))
+                {
+                    sLog.outErrorDb("Table `%s` use non-existing movie_id (id: %u) in SCRIPT_COMMAND_PLAY_MOVIE for script id %u",
+                        tablename, tmp.datalong, tmp.id);
+                    continue;
+                }
+                break;
+           }
         }
 
         if (scripts.find(tmp.id) == scripts.end())
