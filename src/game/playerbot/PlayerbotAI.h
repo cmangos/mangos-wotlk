@@ -127,6 +127,9 @@ class MANGOS_DLL_SPEC PlayerbotAI
         // extracts item ids from links
         void extractItemIds(const std::string& text, std::list<uint32>& itemIds) const;
 
+        // extract spellid from links
+        bool extractSpellId(const std::string& text, uint32 &spellId) const;
+
         // extracts currency from a string as #g#s#c and returns the total in copper
         uint32 extractMoney(const std::string& text) const;
 

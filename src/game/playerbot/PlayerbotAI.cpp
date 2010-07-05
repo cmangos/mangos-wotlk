@@ -2377,6 +2377,34 @@ void PlayerbotAI::extractItemIds(const std::string& text, std::list<uint32>& ite
     }
 }
 
+bool PlayerbotAI::extractSpellId(const std::string& text, uint32 &spellId) const
+{
+
+     //   Link format
+     //   |cffffffff|Hspell:" << spellId << ":" << "|h[" << pSpellInfo->SpellName[loc] << "]|h|r";
+     //   cast |cff71d5ff|Hspell:686|h[Shadow Bolt]|h|r";
+     //   012345678901234567890123456
+     //        base = 16 >|  +7 >|
+
+    uint8 pos = 0;
+
+        int i = text.find("Hspell:", pos);
+        if (i == -1)
+            return false;
+
+        // DEBUG_LOG("extractSpellId first pos %u i %u",pos,i);
+        pos = i + 7; // start of window in text 16 + 7 = 23
+        int endPos = text.find('|', pos);
+        if (endPos == -1)
+            return false;
+
+        // DEBUG_LOG("extractSpellId second endpos : %u pos : %u",endPos,pos);
+        std::string idC = text.substr(pos, endPos - pos); // 26 - 23
+        spellId = atol(idC.c_str());
+        pos = endPos; // end
+        return true;
+}
+
 bool PlayerbotAI::extractGOinfo(const std::string& text, uint32 &guid, uint32 &entry, int &mapid, float &x, float &y, float &z) const
 {
 
@@ -2857,12 +2885,36 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     // handle cast command
     else if (text.size() > 2 && text.substr(0, 2) == "c " || text.size() > 5 && text.substr(0, 5) == "cast ")
     {
+        // sLog.outErrorDb("Selected link : %s", text.c_str());
+
         std::string spellStr = text.substr(text.find(" ") + 1);
         uint32 spellId = (uint32) atol(spellStr.c_str());
 
         // try and get spell ID by name
         if (spellId == 0)
+        {
             spellId = getSpellId(spellStr.c_str(), true);
+
+            // try link if text NOT (spellid OR spellname)
+            if (spellId == 0)
+                extractSpellId(text, spellId);
+
+            QueryResult *result = WorldDatabase.PQuery("SELECT spell_id FROM spell_chain WHERE first_spell = '%u' ORDER BY rank DESC",spellId);
+            if (result)
+            {
+                do
+                {
+                    Field *fields = result->Fetch();
+                    uint32 Id = fields[0].GetUInt32();
+                    // DEBUG_LOG("SPELLID %u",Id);
+                    if(m_bot->HasSpell(Id)) // examine all spell ranks in decreasing order and select first that is in spellbook
+                    {
+                        spellId = Id;
+                        break;
+                    }
+                } while (result->NextRow());
+            }
+        }
 
         uint64 castOnGuid = fromPlayer.GetSelection();
         if (spellId != 0 && castOnGuid != 0 && m_bot->HasSpell(spellId))
@@ -2870,6 +2922,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             m_spellIdCommand = spellId;
             m_targetGuidCommand = castOnGuid;
         }
+
     }
 
     // use items
