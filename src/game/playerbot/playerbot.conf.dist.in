@@ -31,6 +31,17 @@ ConfVersion=2010062001
 #        Restrict the allowed bot level (Current Max 80)
 #        Default: 80
 #
+#    PlayerbotAI.BotguyQuests
+#        List of Quest ids, any of which, once completed will enable botguy menu on NPCs
+#        List must be enclosed in double quotes ("") and multiple Quest Ids separated by a delimiter(,)
+#        Example: "805,54,2160"
+#        Default: "" no quest restriction, memu always displayed by NPCs
+#
+#    PlayerbotAI.BotguyCost
+#        Cost (Copper coins) levied on summoning a bot
+#        If player has the cost, botguy menu will be displayed by NPCs
+#        Default: 0 - no cost, menu always displayed by NPCs
+#
 ###################################################################################################################
 
 PlayerbotAI.DisableBots = 0
@@ -39,3 +50,5 @@ PlayerbotAI.FollowDistanceMin = 0.5
 PlayerbotAI.FollowDistanceMax = 1.0
 PlayerbotAI.MaxNumBots = 9
 PlayerbotAI.RestrictBotLevel = 80
+PlayerbotAI.BotguyQuests = ""
+PlayerbotAI.BotguyCost = 0

@@ -542,6 +542,108 @@ void PlayerbotMgr::RemoveAllBotsFromGroup()
     }
 }
 
+void Creature::LoadBotMenu(Player *pPlayer)
+{
+
+    if (pPlayer->GetPlayerbotAI()) return;
+    uint64 guid = pPlayer->GetGUID();
+    uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guid);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, name FROM characters WHERE account='%d'",accountId);
+    do
+    {
+        Field *fields = result->Fetch();
+        uint64 guidlo = fields[0].GetUInt64();
+        std::string name = fields[1].GetString();
+        std::string word = "";
+
+        if( (guid == 0) || (guid == guidlo) )
+        {
+            //not found or himself
+        }
+        else
+        {
+            // if(sConfig.GetBoolDefault("PlayerbotAI.DisableBots", false)) return;
+            // create the manager if it doesn't already exist
+            if (! pPlayer->GetPlayerbotMgr())
+                pPlayer->SetPlayerbotMgr(new PlayerbotMgr(pPlayer));
+            if(pPlayer->GetPlayerbotMgr()->GetPlayerBot(guidlo) == NULL) // add (if not already in game)
+            {
+                word += "Recruit ";
+                word += name;
+                word += " as a Bot.";
+                pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8)9, word, guidlo, GOSSIP_OPTION_BOT, word, false);
+            }
+            else if(pPlayer->GetPlayerbotMgr()->GetPlayerBot(guidlo) != NULL) // remove (if in game)
+            {
+                word += "Dismiss ";
+                word += name;
+                word += " from duty.";
+                pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8)0, word, guidlo, GOSSIP_OPTION_BOT, word, false);
+            }
+        }
+    }
+    while (result->NextRow());
+    delete result;
+}
+
+void Player::chompAndTrim(std::string& str)
+{
+    while(str.length() >0)
+    {
+        char lc = str[str.length()-1];
+        if(lc == '\r' || lc == '\n' || lc == ' ' || lc == '"' || lc == '\'')
+            str = str.substr(0,str.length()-1);
+        else
+            break;
+        while(str.length() >0)
+        {
+            char lc = str[0];
+            if(lc == ' ' || lc == '"' || lc == '\'')
+                str = str.substr(1,str.length()-1);
+            else
+                break;
+        }
+    }
+}
+
+bool Player::getNextQuestId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId)
+{
+    bool result = false;
+    unsigned int i;
+    for(i=pStartPos;i<pString.size(); ++i)
+    {
+        if(pString[i] == ',')
+            break;
+    }
+    if(i>pStartPos)
+    {
+        std::string idString = pString.substr(pStartPos, i-pStartPos);
+        pStartPos = i+1;
+        chompAndTrim(idString);
+        pId = atoi(idString.c_str());
+        result = true;
+    }
+    return(result);
+}
+
+bool Player::requiredQuests(const char* pQuestIdString)
+{
+    if(pQuestIdString != NULL)
+    {
+        unsigned int pos = 0;
+        unsigned int id;
+        std::string confString(pQuestIdString);
+        chompAndTrim(confString);
+        while(getNextQuestId(confString, pos, id))
+        {
+            QuestStatus status = GetQuestStatus( id );
+            if ( status == QUEST_STATUS_COMPLETE )
+                return true;
+        }
+    }
+    return false;
+}
+
 bool ChatHandler::HandlePlayerbotCommand(const char* args)
 {
     if(!(m_session->GetSecurity() > SEC_PLAYER))

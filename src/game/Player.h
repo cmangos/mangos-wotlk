@@ -1491,6 +1491,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddTimedQuest( uint32 quest_id ) { m_timedquests.insert(quest_id); }
         void RemoveTimedQuest( uint32 quest_id ) { m_timedquests.erase(quest_id); }
 
+        void chompAndTrim(std::string& str);
+        bool getNextQuestId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId);
+        bool requiredQuests(const char* pQuestIdString);
+
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
