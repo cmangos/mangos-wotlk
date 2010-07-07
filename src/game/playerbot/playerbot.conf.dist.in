@@ -34,7 +34,7 @@ ConfVersion=2010062001
 #    PlayerbotAI.BotguyQuests
 #        List of Quest ids, any of which, once completed will enable botguy menu on NPCs
 #        List must be enclosed in double quotes ("") and multiple Quest Ids separated by a delimiter(,)
-#        Example: "805,54,2160"
+#        Example: "805,383,2160,54,8350,9313,1656,2159"
 #        Default: "" no quest restriction, memu always displayed by NPCs
 #
 #    PlayerbotAI.BotguyCost
