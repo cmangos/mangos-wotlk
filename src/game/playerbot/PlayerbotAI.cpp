@@ -2898,22 +2898,6 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             // try link if text NOT (spellid OR spellname)
             if (spellId == 0)
                 extractSpellId(text, spellId);
-
-            QueryResult *result = WorldDatabase.PQuery("SELECT spell_id FROM spell_chain WHERE first_spell = '%u' ORDER BY rank DESC",spellId);
-            if (result)
-            {
-                do
-                {
-                    Field *fields = result->Fetch();
-                    uint32 Id = fields[0].GetUInt32();
-                    // DEBUG_LOG("SPELLID %u",Id);
-                    if(m_bot->HasSpell(Id)) // examine all spell ranks in decreasing order and select first that is in spellbook
-                    {
-                        spellId = Id;
-                        break;
-                    }
-                } while (result->NextRow());
-            }
         }
 
         uint64 castOnGuid = fromPlayer.GetSelection();
