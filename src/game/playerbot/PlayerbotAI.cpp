@@ -3183,8 +3183,13 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         std::ostringstream posOut;
         std::ostringstream negOut;
 
-        const std::string ignoreList = ",Opening,Closing,Stuck,Remove Insignia,Opening - No Text,Grovel,Duel,Honorless Target,";
-        std::string alreadySeenList = ",";
+        typedef std::map<std::string, uint32> spellMap;
+
+        spellMap posSpells, negSpells;
+        std::string spellName;
+
+        // FIXME: This won't work for non-english locales ! Consider making list of spellids
+        const std::string ignoreList = "Attacking;Auto Attack;Closing;Stuck;Remove Insignia;Opening - No Text;Grovel;Duel;Honorless Target;Summon Friend";
 
         for (PlayerSpellMap::iterator itr = m_bot->GetSpellMap().begin(); itr != m_bot->GetSpellMap().end(); ++itr) {
             const uint32 spellId = itr->first;
@@ -3196,24 +3201,53 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             if (!pSpellInfo)
                 continue;
 
-            //|| name.find("Teleport") != -1
+            spellName = pSpellInfo->SpellName[loc];
 
-            std::string comp = ",";
-            comp.append(pSpellInfo->SpellName[loc]);
-            comp.append(",");
+            SkillLineAbilityMapBounds const bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellId);
 
-            if (!(ignoreList.find(comp) == std::string::npos && alreadySeenList.find(comp) == std::string::npos))
+            bool isProfessionOrRidingSpell = false;
+
+            for (SkillLineAbilityMap::const_iterator skillIter = bounds.first; skillIter != bounds.second; ++skillIter) {
+                if (IsProfessionOrRidingSkill(skillIter->second->skillId) && skillIter->first == spellId) {
+                    isProfessionOrRidingSpell = true;
+                    break;
+                }
+            }
+
+            if (isProfessionOrRidingSpell)
                 continue;
 
-            alreadySeenList += pSpellInfo->SpellName[loc];
-            alreadySeenList += ",";
+            if (ignoreList.find(spellName) != std::string::npos)
+                continue;
 
-            if (IsPositiveSpell(spellId))
-                posOut << " |cffffffff|Hspell:" << spellId << "|h["
-                       << pSpellInfo->SpellName[loc] << "]|h|r";
-            else
-                negOut << " |cffffffff|Hspell:" << spellId << "|h["
-                       << pSpellInfo->SpellName[loc] << "]|h|r";
+            // Shoot and Disarm spells can make false positives when searched by name
+            if (spellId == 1843 || spellId == 5019)
+                continue;
+
+            if (IsPositiveSpell(spellId)) {
+                if (posSpells.find(spellName) == posSpells.end())
+                    posSpells[spellName] = spellId;
+                else
+                if (posSpells[spellName] < spellId)
+                    posSpells[spellName] = spellId;
+            }
+            else {
+               if (negSpells.find(spellName) == negSpells.end())
+                   negSpells[spellName] = spellId;
+                else
+                if (negSpells[spellName] < spellId)
+                    negSpells[spellName] = spellId;
+            }
+        }
+
+        for (spellMap::const_iterator iter = posSpells.begin(); iter != posSpells.end(); ++iter) {
+            posOut << " |cffffffff|Hspell:" << iter->second << "|h["
+                   << iter->first << "]|h|r";
+        }
+
+        for (spellMap::const_iterator iter = negSpells.begin(); iter != negSpells.end(); ++iter) {
+            negOut << " |cffffffff|Hspell:" << iter->second << "|h["
+                   << iter->first << "]|h|r";
         }
 
         ChatHandler ch(&fromPlayer);
