@@ -2901,8 +2901,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         }
 
         if(m_bot->HasAura(spellId))
-	{
-	   m_bot->RemoveAurasByCasterSpell(spellId,m_bot->GetGUID());
+        {
+           m_bot->RemoveAurasByCasterSpell(spellId,m_bot->GetGUID());
            return;
         }
 
