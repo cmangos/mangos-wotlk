@@ -2900,6 +2900,12 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 extractSpellId(text, spellId);
         }
 
+        if(m_bot->HasAura(spellId))
+	{
+	   m_bot->RemoveAurasByCasterSpell(spellId,m_bot->GetGUID());
+           return;
+        }
+
         uint64 castOnGuid = fromPlayer.GetSelection();
         if (spellId != 0 && castOnGuid != 0 && m_bot->HasSpell(spellId))
         {
