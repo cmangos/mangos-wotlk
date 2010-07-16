@@ -3178,8 +3178,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         spellMap posSpells, negSpells;
         std::string spellName;
 
-        // FIXME: This won't work for non-english locales ! Consider making list of spellids
-        const std::string ignoreList = "Attacking;Auto Attack;Closing;Stuck;Remove Insignia;Opening - No Text;Grovel;Duel;Honorless Target;Summon Friend";
+        uint32 ignoredSpells[] = {1843, 5019, 2479, 6603, 3365, 8386, 21651, 21652, 6233, 6246, 6247,
+                                  61437, 22810, 22027, 45927, 7266, 7267, 6477, 6478, 7355};
+        uint32 ignoredSpellsCount = sizeof(ignoredSpells)/sizeof(uint32);
 
         for (PlayerSpellMap::iterator itr = m_bot->GetSpellMap().begin(); itr != m_bot->GetSpellMap().end(); ++itr) {
             const uint32 spellId = itr->first;
@@ -3196,22 +3197,23 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             SkillLineAbilityMapBounds const bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellId);
 
             bool isProfessionOrRidingSpell = false;
-
             for (SkillLineAbilityMap::const_iterator skillIter = bounds.first; skillIter != bounds.second; ++skillIter) {
                 if (IsProfessionOrRidingSkill(skillIter->second->skillId) && skillIter->first == spellId) {
                     isProfessionOrRidingSpell = true;
                     break;
                 }
             }
-
             if (isProfessionOrRidingSpell)
                 continue;
 
-            if (ignoreList.find(spellName) != std::string::npos)
-                continue;
-
-            // Shoot and Disarm spells can make false positives when searched by name
-            if (spellId == 1843 || spellId == 5019)
+            bool isIgnoredSpell = false;
+            for (uint i = 0; i < ignoredSpellsCount; ++i) {
+                if (spellId == ignoredSpells[i]) {
+                    isIgnoredSpell = true;
+                    break;
+                }
+            }
+            if (isIgnoredSpell)
                 continue;
 
             if (IsPositiveSpell(spellId)) {
