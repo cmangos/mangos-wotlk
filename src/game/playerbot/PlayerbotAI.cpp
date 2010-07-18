@@ -2898,22 +2898,12 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             // try link if text NOT (spellid OR spellname)
             if (spellId == 0)
                 extractSpellId(text, spellId);
+        }
 
-            QueryResult *result = WorldDatabase.PQuery("SELECT spell_id FROM spell_chain WHERE first_spell = '%u' ORDER BY rank DESC",spellId);
-            if (result)
-            {
-                do
-                {
-                    Field *fields = result->Fetch();
-                    uint32 Id = fields[0].GetUInt32();
-                    // DEBUG_LOG("SPELLID %u",Id);
-                    if(m_bot->HasSpell(Id)) // examine all spell ranks in decreasing order and select first that is in spellbook
-                    {
-                        spellId = Id;
-                        break;
-                    }
-                } while (result->NextRow());
-            }
+        if(m_bot->HasAura(spellId))
+        {
+           m_bot->RemoveAurasByCasterSpell(spellId,m_bot->GetGUID());
+           return;
         }
 
         uint64 castOnGuid = fromPlayer.GetSelection();
@@ -3183,8 +3173,14 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         std::ostringstream posOut;
         std::ostringstream negOut;
 
-        const std::string ignoreList = ",Opening,Closing,Stuck,Remove Insignia,Opening - No Text,Grovel,Duel,Honorless Target,";
-        std::string alreadySeenList = ",";
+        typedef std::map<std::string, uint32> spellMap;
+
+        spellMap posSpells, negSpells;
+        std::string spellName;
+
+        uint32 ignoredSpells[] = {1843, 5019, 2479, 6603, 3365, 8386, 21651, 21652, 6233, 6246, 6247,
+                                  61437, 22810, 22027, 45927, 7266, 7267, 6477, 6478, 7355};
+        uint32 ignoredSpellsCount = sizeof(ignoredSpells)/sizeof(uint32);
 
         for (PlayerSpellMap::iterator itr = m_bot->GetSpellMap().begin(); itr != m_bot->GetSpellMap().end(); ++itr) {
             const uint32 spellId = itr->first;
@@ -3196,24 +3192,54 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             if (!pSpellInfo)
                 continue;
 
-            //|| name.find("Teleport") != -1
+            spellName = pSpellInfo->SpellName[loc];
 
-            std::string comp = ",";
-            comp.append(pSpellInfo->SpellName[loc]);
-            comp.append(",");
+            SkillLineAbilityMapBounds const bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellId);
 
-            if (!(ignoreList.find(comp) == std::string::npos && alreadySeenList.find(comp) == std::string::npos))
+            bool isProfessionOrRidingSpell = false;
+            for (SkillLineAbilityMap::const_iterator skillIter = bounds.first; skillIter != bounds.second; ++skillIter) {
+                if (IsProfessionOrRidingSkill(skillIter->second->skillId) && skillIter->first == spellId) {
+                    isProfessionOrRidingSpell = true;
+                    break;
+                }
+            }
+            if (isProfessionOrRidingSpell)
                 continue;
 
-            alreadySeenList += pSpellInfo->SpellName[loc];
-            alreadySeenList += ",";
+            bool isIgnoredSpell = false;
+            for (uint i = 0; i < ignoredSpellsCount; ++i) {
+                if (spellId == ignoredSpells[i]) {
+                    isIgnoredSpell = true;
+                    break;
+                }
+            }
+            if (isIgnoredSpell)
+                continue;
 
-            if (IsPositiveSpell(spellId))
-                posOut << " |cffffffff|Hspell:" << spellId << "|h["
-                       << pSpellInfo->SpellName[loc] << "]|h|r";
-            else
-                negOut << " |cffffffff|Hspell:" << spellId << "|h["
-                       << pSpellInfo->SpellName[loc] << "]|h|r";
+            if (IsPositiveSpell(spellId)) {
+                if (posSpells.find(spellName) == posSpells.end())
+                    posSpells[spellName] = spellId;
+                else
+                if (posSpells[spellName] < spellId)
+                    posSpells[spellName] = spellId;
+            }
+            else {
+               if (negSpells.find(spellName) == negSpells.end())
+                   negSpells[spellName] = spellId;
+                else
+                if (negSpells[spellName] < spellId)
+                    negSpells[spellName] = spellId;
+            }
+        }
+
+        for (spellMap::const_iterator iter = posSpells.begin(); iter != posSpells.end(); ++iter) {
+            posOut << " |cffffffff|Hspell:" << iter->second << "|h["
+                   << iter->first << "]|h|r";
+        }
+
+        for (spellMap::const_iterator iter = negSpells.begin(); iter != negSpells.end(); ++iter) {
+            negOut << " |cffffffff|Hspell:" << iter->second << "|h["
+                   << iter->first << "]|h|r";
         }
 
         ChatHandler ch(&fromPlayer);
