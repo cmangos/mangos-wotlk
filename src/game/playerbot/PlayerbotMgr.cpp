@@ -310,7 +310,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     if(!group)
                          return;
 
-                    group->CountRollVote(bot->GetGUID(), Guid, NumberOfPlayers, RollVote(choice));
+                    group->CountRollVote(bot, Guid, NumberOfPlayers, RollVote(choice));
 
                     switch (choice)
                     {
