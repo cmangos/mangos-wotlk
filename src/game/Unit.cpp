@@ -479,7 +479,7 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage)
 
 void Unit::DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb)
 {
-    if (!pVictim->isAlive() || pVictim->isInFlight() || pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
+    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
     {
         if(absorb)
             *absorb += damage;
@@ -1288,7 +1288,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage *damageInfo, bool durabilityLoss)
     if(!this || !pVictim)
         return;
 
-    if (!pVictim->isAlive() || pVictim->isInFlight() || pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
+    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
         return;
 
     SpellEntry const *spellProto = sSpellStore.LookupEntry(damageInfo->SpellID);
@@ -1599,7 +1599,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
     if(!this || !pVictim)
         return;
 
-    if (!pVictim->isAlive() || pVictim->isInFlight() || pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
+    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
         return;
 
     //You don't lose health from damage taken from another player while in a sanctuary
@@ -4492,7 +4492,7 @@ void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
             if(!newPhase)
             {
                 RemoveSpellAuraHolder(iter->second);
-                m_spellAuraHolders.begin();
+                iter = m_spellAuraHolders.begin();
             }
             else
             {
@@ -4500,7 +4500,7 @@ void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
                 if(!caster || !caster->InSamePhase(newPhase))
                 {
                     RemoveSpellAuraHolder(iter->second);
-                    m_spellAuraHolders.begin();
+                    iter = m_spellAuraHolders.begin();
                 }
                 else
                     ++iter;
@@ -7504,7 +7504,7 @@ bool Unit::isTargetableForAttack(bool inverseAlive /*=false*/) const
     if (isAlive() == inverseAlive)
         return false;
 
-    return IsInWorld() && !hasUnitState(UNIT_STAT_DIED) && !isInFlight();
+    return IsInWorld() && !hasUnitState(UNIT_STAT_DIED) && !IsTaxiFlying();
 }
 
 int32 Unit::ModifyHealth(int32 dVal)
@@ -7616,7 +7616,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     }
 
     // different visible distance checks
-    if (u->isInFlight())                                    // what see player in flight
+    if (u->IsTaxiFlying())                                  // what see player in flight
     {
         // use object grey distance for all (only see objects any way)
         if (!IsWithinDistInMap(viewPoint,World::GetMaxVisibleDistanceInFlight()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), is3dDistance))
@@ -8961,7 +8961,7 @@ void Unit::SetPower(Powers power, uint32 val)
     data << GetPackGUID();
     data << uint8(power);
     data << uint32(val);
-    SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER ? true : false);
+    SendMessageToSet(&data, true);
 
     // group update
     if(GetTypeId() == TYPEID_PLAYER)
@@ -9519,15 +9519,22 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                             (spellProcEvent->spellFamilyMask2[i] & procSpell->SpellFamilyFlags2) == 0)
                             continue;
                     }
-                    else if (!spellProcEvent->schoolMask && !triggeredByAura->isAffectedOnSpell(procSpell))
+                    else if (!spellProcEvent->schoolMask && !triggeredByAura->CanProcFrom(procSpell))
                         continue;
                 }
-                else if (!triggeredByAura->isAffectedOnSpell(procSpell))
+                else if (!triggeredByAura->CanProcFrom(procSpell))
                     continue;
             }
 
-            if (!(*this.*AuraProcHandler[auraModifier->m_auraname])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown))
-                procSuccess = false;
+            SpellAuraProcResult procResult = (*this.*AuraProcHandler[auraModifier->m_auraname])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
+            switch (procResult)
+            {
+                case SPELL_AURA_PROC_CANT_TRIGGER:
+                    continue;
+                case SPELL_AURA_PROC_FAILED:
+                    procSuccess = false;
+                    break;
+            }
 
             anyAuraProc = true;
             triggeredByAura->SetInUse(false);
