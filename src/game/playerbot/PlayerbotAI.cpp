@@ -3163,7 +3163,55 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                   fromPlayer.SetSelection(oldSelectionGUID);
        }
 
+    else if (text == "pet spells")
+    {
+        Pet *pet = m_bot->GetPet();
+        if (!pet)
+        {
+            SendWhisper("I have no pet.", fromPlayer);
+            return;
+        }
 
+        int loc = GetMaster()->GetSession()->GetSessionDbcLocale();
+
+        std::ostringstream posOut;
+        std::ostringstream negOut;
+
+        for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
+        {
+            const uint32 spellId = itr->first;
+
+            if (itr->second.state == PETSPELL_REMOVED || IsPassiveSpell(spellId))
+                continue;
+
+            const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
+            if (!pSpellInfo)
+                continue;
+
+            std::string color;
+            switch (itr->second.active)
+            {
+                case ACT_ENABLED:
+                    color = "cff35d22d";
+                    break;
+                default:
+                    color = "cffffffff";
+            }
+
+            if (IsPositiveSpell(spellId))
+                posOut << " |" << color << "|Hspell:" << spellId << "|h["
+                       << pSpellInfo->SpellName[loc] << "]|h|r";
+            else
+                negOut << " |" << color << "|Hspell:" << spellId << "|h["
+                       << pSpellInfo->SpellName[loc] << "]|h|r";
+        }
+
+        ChatHandler ch(&fromPlayer);
+        SendWhisper("Here's my pet's non-attack spells:", fromPlayer);
+        ch.SendSysMessage(posOut.str().c_str());
+        SendWhisper("and here's my pet's attack spells:", fromPlayer);
+        ch.SendSysMessage(negOut.str().c_str());
+    }
 
     else if (text == "spells")
     {
