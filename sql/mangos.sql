@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_10219_01_mangos_spell_proc_event` bit(1) default NULL
+  `required_10244_01_mangos_command` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -766,6 +766,7 @@ INSERT INTO `command` VALUES
 ('server shutdown cancel',3,'Syntax: .server shutdown cancel\r\n\r\nCancel the restart/shutdown timer if any.'),
 ('setskill',3,'Syntax: .setskill #skill #level [#max]\r\n\r\nSet a skill of id #skill with a current skill value of #level and a maximum value of #max (or equal current maximum if not provide) for the selected character. If no character is selected, you learn the skill.'),
 ('showarea',3,'Syntax: .showarea #areaid\r\n\r\nReveal the area of #areaid to the selected character. If no character is selected, reveal this area to you.'),
+('stable',3,'Syntax: .stable\r\n\r\nShow your pet stable.'),
 ('start',0,'Syntax: .start\r\n\r\nTeleport you to the starting area of your character.'),
 ('taxicheat',1,'Syntax: .taxicheat on/off\r\n\r\nTemporary grant access or remove to all taxi routes for the selected character. If no character is selected, hide or reveal all routes to you.\r\n\r\nVisited taxi nodes sill accessible after removing access.'),
 ('tele',1,'Syntax: .tele #location\r\n\r\nTeleport player to a given location.'),
@@ -2200,7 +2201,7 @@ CREATE TABLE `item_template` (
   `displayid` mediumint(8) unsigned NOT NULL default '0',
   `Quality` tinyint(3) unsigned NOT NULL default '0',
   `Flags` int(10) unsigned NOT NULL default '0',
-  `Faction` int(11) UNSIGNED NOT NULL default '0',
+  `Flags2` int(11) unsigned NOT NULL default '0',
   `BuyCount` tinyint(3) unsigned NOT NULL default '1',
   `BuyPrice` int(10) unsigned NOT NULL default '0',
   `SellPrice` int(10) unsigned NOT NULL default '0',
@@ -10333,7 +10334,7 @@ INSERT INTO `playercreateinfo_action` VALUES
 (1,4,3,2764,0),
 (1,4,10,59752,0),
 (1,5,0,585,0),
-(1,5,1,2050,,0),
+(1,5,1,2050,0),
 (1,5,9,59752,0),
 (1,6,0,6603,0),
 (1,6,1,49576,0),
@@ -10413,7 +10414,7 @@ INSERT INTO `playercreateinfo_action` VALUES
 (3,5,0,585,0),
 (3,5,1,2050,0),
 (3,5,2,20594,0),
-(3,5,3,2481,0);
+(3,5,3,2481,0),
 (3,6,0,6603,0),
 (3,6,1,49576,0),
 (3,6,2,45477,0),
@@ -10802,7 +10803,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (1,2,58985,'Perception'),
 (1,2,59752,'Every Man for Himself'),
 (1,2,61437,'Opening'),
-(1 2,68398, 'Opening'),
+(1,2,68398,'Opening'),
 (1,4,81,'Dodge'),
 (1,4,203,'Unarmed'),
 (1,4,204,'Defense'),
@@ -14258,6 +14259,7 @@ INSERT INTO `spell_bonus_data` VALUES
 (8188,  0.1,    0,       0,     'Shaman - Magma Totam Passive'),
 (61295, 0.4,    0.18,    0,     'Shaman - Riptide'),
 (3606,  0.1667, 0,       0,     'Shaman - Searing Totem Attack'),
+(10444, 0,      0,       0,     'Shaman - Flametongue Attack'),
 /* Warlock */
 (17962, 0,      0,       0,     'Warlock - Conflagrate'),
 (172,   0,      0.2,     0,     'Warlock - Corruption'),
@@ -18284,7 +18286,8 @@ INSERT INTO `spell_proc_event` VALUES
 (67702, 0x7F,  0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000, 45),
 (67771, 0x7F,  0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000, 45),
 (70664, 0x00,  7, 0x00000010, 0x00000010, 0x00000010, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
-(70748, 0x00,  3, 0x00000000, 0x00000000, 0x00000000, 0x00200000, 0x00200000, 0x00200000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0);
+(70748, 0x00,  3, 0x00000000, 0x00000000, 0x00000000, 0x00200000, 0x00200000, 0x00200000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
+(71761, 0x00,  3, 0x00000000, 0x00000000, 0x00000000, 0x00100000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000100, 0.000000, 0.000000,  0);
 
 /*!40000 ALTER TABLE `spell_proc_event` ENABLE KEYS */;
 UNLOCK TABLES;
