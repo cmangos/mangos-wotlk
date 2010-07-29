@@ -85,6 +85,15 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
+    static ChatCommand auctionCommandTable[] =
+    {
+        { "alliance",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAuctionAllianceCommand,     "", NULL },
+        { "goblin",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAuctionGoblinCommand,       "", NULL },
+        { "horde",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAuctionHordeCommand,        "", NULL },
+        { "",               SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAuctionCommand,             "", NULL },
+        { NULL,             0,                  false, NULL,                                           "", NULL }
+    };
+
     static ChatCommand banCommandTable[] =
     {
         { "account",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleBanAccountCommand,          "", NULL },
@@ -480,6 +489,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "quest_template",              SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadQuestTemplateCommand,           "", NULL },
         { "reference_loot_template",     SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadLootTemplatesReferenceCommand,  "", NULL },
         { "reserved_name",               SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadReservedNameCommand,            "", NULL },
+        { "reputation_reward_rate",      SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadReputationRewardRateCommand,    "", NULL },
+        { "reputation_spillover_template",SEC_ADMINISTRATOR, true, &ChatHandler::HandleReloadReputationSpilloverTemplateCommand,"", NULL },
         { "skill_discovery_template",    SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSkillDiscoveryTemplateCommand,  "", NULL },
         { "skill_extra_item_template",   SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSkillExtraItemTemplateCommand,  "", NULL },
         { "skill_fishing_base_level",    SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSkillFishingBaseLevelCommand,   "", NULL },
@@ -620,6 +631,7 @@ ChatCommand * ChatHandler::getCommandTable()
     static ChatCommand commandTable[] =
     {
         { "account",        SEC_PLAYER,         true,  NULL,                                           "", accountCommandTable  },
+        { "auction",        SEC_ADMINISTRATOR,  false, NULL,                                           "", auctionCommandTable  },
         { "cast",           SEC_ADMINISTRATOR,  false, NULL,                                           "", castCommandTable     },
         { "character",      SEC_GAMEMASTER,     true,  NULL,                                           "", characterCommandTable},
         { "debug",          SEC_MODERATOR,      true,  NULL,                                           "", debugCommandTable    },
@@ -715,7 +727,7 @@ ChatCommand * ChatHandler::getCommandTable()
         load_command_table = false;
 
         // check hardcoded part integrity
-        CheckIntergrity(commandTable, NULL);
+        CheckIntegrity(commandTable, NULL);
 
         QueryResult *result = WorldDatabase.Query("SELECT name,security,help FROM command");
         if (result)
@@ -887,7 +899,7 @@ void ChatHandler::PSendSysMessage(const char *format, ...)
     SendSysMessage(str);
 }
 
-void ChatHandler::CheckIntergrity( ChatCommand *table, ChatCommand *parentCommand )
+void ChatHandler::CheckIntegrity( ChatCommand *table, ChatCommand *parentCommand )
 {
     for(uint32 i = 0; table[i].Name != NULL; ++i)
     {
@@ -902,10 +914,29 @@ void ChatHandler::CheckIntergrity( ChatCommand *table, ChatCommand *parentComman
 
         if (command->ChildCommands)
         {
+            if (command->Handler)
+            {
+                if (parentCommand)
+                    sLog.outError("Subcommand '%s' of command '%s' have handler and subcommands in same time, must be used '' subcommand for handler instead.",
+                        command->Name, parentCommand->Name);
+                else
+                    sLog.outError("First level command '%s' have handler and subcommands in same time, must be used '' subcommand for handler instead.",
+                        command->Name);
+            }
+
             if (parentCommand && strlen(command->Name)==0)
                 sLog.outError("Subcommand '' of command '%s' have subcommands", parentCommand->Name);
 
-            CheckIntergrity(command->ChildCommands, command);
+            CheckIntegrity(command->ChildCommands, command);
+        }
+        else if (!command->Handler)
+        {
+            if (parentCommand)
+                sLog.outError("Subcommand '%s' of command '%s' not have handler and subcommands in same time. Must have some from its!",
+                    command->Name, parentCommand->Name);
+            else
+                sLog.outError("First level command '%s' not have handler and subcommands in same time. Must have some from its!",
+                    command->Name);
         }
     }
 }
@@ -1157,7 +1188,11 @@ bool ChatHandler::SetDataForCommandInTable(ChatCommand *commandTable, const char
         }
         case CHAT_COMMAND_UNKNOWN_SUBCOMMAND:
         {
-            sLog.outErrorDb("Table `command` have unexpected subcommand '%s' in command '%s', skip.", cmdName.c_str(), fullcommand.c_str());
+            // command have subcommands, but not '' subcommand and then any data in `command` useless for it.
+            if (cmdName.empty())
+                sLog.outErrorDb("Table `command` have command '%s' that only used with some subcommand selection, it can't have help or overwritten access level, skip.", cmdName.c_str(), fullcommand.c_str());
+            else
+                sLog.outErrorDb("Table `command` have unexpected subcommand '%s' in command '%s', skip.", cmdName.c_str(), fullcommand.c_str());
             return false;
         }
         case CHAT_COMMAND_UNKNOWN:

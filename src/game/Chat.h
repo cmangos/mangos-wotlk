@@ -105,7 +105,7 @@ class ChatHandler
         bool ShowHelpForSubCommands(ChatCommand *table, char const* cmd);
         ChatCommandSearchResult FindCommand(ChatCommand* table, char const*& text, ChatCommand*& command, ChatCommand** parentCommand = NULL, std::string* cmdNamePtr = NULL, bool allAvailable = false);
 
-        void CheckIntergrity(ChatCommand *table, ChatCommand *parentCommand);
+        void CheckIntegrity(ChatCommand *table, ChatCommand *parentCommand);
         ChatCommand* getCommandTable();
 
         bool HandleAccountCommand(const char* args);
@@ -118,6 +118,11 @@ class ChatHandler
         bool HandleAccountSetAddonCommand(const char* args);
         bool HandleAccountSetGmLevelCommand(const char* args);
         bool HandleAccountSetPasswordCommand(const char* args);
+
+        bool HandleAuctionAllianceCommand(const char* args);
+        bool HandleAuctionGoblinCommand(const char* args);
+        bool HandleAuctionHordeCommand(const char* args);
+        bool HandleAuctionCommand(const char* args);
 
         bool HandleBanAccountCommand(const char* args);
         bool HandleBanCharacterCommand(const char* args);
@@ -400,6 +405,8 @@ class ChatHandler
         bool HandleReloadQuestStartScriptsCommand(const char* args);
         bool HandleReloadQuestTemplateCommand(const char* args);
         bool HandleReloadReservedNameCommand(const char*);
+        bool HandleReloadReputationRewardRateCommand(const char* args);
+        bool HandleReloadReputationSpilloverTemplateCommand(const char* args);
         bool HandleReloadSkillDiscoveryTemplateCommand(const char* args);
         bool HandleReloadSkillExtraItemTemplateCommand(const char* args);
         bool HandleReloadSkillFishingBaseLevelCommand(const char* args);
