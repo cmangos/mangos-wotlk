@@ -898,7 +898,7 @@ Item* PlayerbotAI::FindMount(uint32 matchingRidingSkill) const
         if (pItem)
         {
             const ItemPrototype* const pItemProto = pItem->GetProto();
-            if (!pItemProto || !m_bot->CanUseItem(pItemProto) || pItemProto->RequiredSkill != SKILL_RIDING)
+            if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK || pItemProto->RequiredSkill != SKILL_RIDING)
                 continue;
 
             if (pItemProto->RequiredSkillRank == matchingRidingSkill)
@@ -921,7 +921,7 @@ Item* PlayerbotAI::FindMount(uint32 matchingRidingSkill) const
                 if (pItem)
                 {
                     const ItemPrototype* const pItemProto = pItem->GetProto();
-                    if (!pItemProto || !m_bot->CanUseItem(pItemProto) || pItemProto->RequiredSkill != SKILL_RIDING)
+                    if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK || pItemProto->RequiredSkill != SKILL_RIDING)
                         continue;
 
                     if (pItemProto->RequiredSkillRank == matchingRidingSkill)
@@ -945,7 +945,7 @@ Item* PlayerbotAI::FindFood() const
         if (pItem)
         {
             const ItemPrototype* const pItemProto = pItem->GetProto();
-            if (!pItemProto || !m_bot->CanUseItem(pItemProto))
+            if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
                 continue;
 
             if (pItemProto->Class == ITEM_CLASS_CONSUMABLE && pItemProto->SubClass == ITEM_SUBCLASS_FOOD)
@@ -971,7 +971,7 @@ Item* PlayerbotAI::FindFood() const
                 {
                     const ItemPrototype* const pItemProto = pItem->GetProto();
 
-                    if (!pItemProto || !m_bot->CanUseItem(pItemProto))
+                    if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
                         continue;
 
                     // this enum is no longer defined in mangos. Is it no longer valid?
@@ -1002,7 +1002,7 @@ Item* PlayerbotAI::FindDrink() const
         {
             const ItemPrototype* const pItemProto = pItem->GetProto();
 
-            if (!pItemProto || !m_bot->CanUseItem(pItemProto))
+            if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
                 continue;
 
             if (pItemProto->Class == ITEM_CLASS_CONSUMABLE && pItemProto->SubClass == ITEM_SUBCLASS_FOOD)
@@ -1030,7 +1030,7 @@ Item* PlayerbotAI::FindDrink() const
                 {
                     const ItemPrototype* const pItemProto = pItem->GetProto();
 
-                    if (!pItemProto || !m_bot->CanUseItem(pItemProto))
+                    if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
                         continue;
 
                     if (pItemProto->Class == ITEM_CLASS_CONSUMABLE && pItemProto->SubClass == ITEM_SUBCLASS_FOOD)
@@ -1059,7 +1059,7 @@ Item* PlayerbotAI::FindBandage() const
         {
             const ItemPrototype* const pItemProto = pItem->GetProto();
 
-            if (!pItemProto || !m_bot->CanUseItem(pItemProto))
+            if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
                 continue;
 
             if (pItemProto->Class == ITEM_CLASS_CONSUMABLE && pItemProto->SubClass == ITEM_SUBCLASS_BANDAGE)
@@ -1079,7 +1079,7 @@ Item* PlayerbotAI::FindBandage() const
                 {
                     const ItemPrototype* const pItemProto = pItem->GetProto();
 
-                    if (!pItemProto || !m_bot->CanUseItem(pItemProto))
+                    if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
                         continue;
 
                     if (pItemProto->Class == ITEM_CLASS_CONSUMABLE && pItemProto->SubClass == ITEM_SUBCLASS_BANDAGE)
@@ -1101,7 +1101,7 @@ Item* PlayerbotAI::FindPoison() const
         {
             const ItemPrototype* const pItemProto = pItem->GetProto();
 
-            if (!pItemProto || !m_bot->CanUseItem(pItemProto))
+            if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
                 continue;
 
             if (pItemProto->Class == ITEM_CLASS_CONSUMABLE && pItemProto->SubClass == 6)
@@ -1121,7 +1121,7 @@ Item* PlayerbotAI::FindPoison() const
                 {
                     const ItemPrototype* const pItemProto = pItem->GetProto();
 
-                    if (!pItemProto || !m_bot->CanUseItem(pItemProto))
+                    if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
                         continue;
 
                     if (pItemProto->Class == ITEM_CLASS_CONSUMABLE && pItemProto->SubClass == 6)
