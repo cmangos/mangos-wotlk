@@ -2285,6 +2285,61 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     return true;
 }
 
+bool PlayerbotAI::CastPetSpell(uint32 spellId, Unit* target)
+{
+    if (spellId == 0)
+        return false;
+
+    Pet* pet = m_bot->GetPet();
+    if (!pet)
+        return false;
+
+    if (pet->HasSpellCooldown(spellId))
+        return false;
+
+    const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
+    if (!pSpellInfo)
+    {
+        TellMaster("Missing spell entry in CastPetSpell()");
+        return false;
+    }
+
+    // set target
+    Unit* pTarget;
+    if (!target)
+    {
+        uint64 targetGUID = m_bot->GetSelection();
+        pTarget = ObjectAccessor::GetUnit(*m_bot, targetGUID);
+    }
+    else
+        pTarget = target;
+
+    if (IsPositiveSpell(spellId))
+    {
+        if (pTarget && !m_bot->IsFriendlyTo(pTarget))
+            pTarget = m_bot;
+    }
+    else
+    {
+        if (pTarget && m_bot->IsFriendlyTo(pTarget))
+            return false;
+
+        if (!pet->isInFrontInMap(pTarget, 10)) // distance probably should be calculated
+        {
+            pet->SetInFront(pTarget);
+            MovementUpdate();
+        }
+    }
+
+    pet->CastSpell(pTarget, pSpellInfo, false);
+
+    Spell* const pSpell = pet->FindCurrentSpellBySpellId(spellId);
+    if (!pSpell)
+        return false;
+
+    return true;
+}
+
 Item* PlayerbotAI::FindItem(uint32 ItemId)
 {
      // list out items in main backpack
@@ -3315,6 +3370,43 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                         pet->ToggleAutocast(spellId, true);
                     }
                 }
+            }
+        }
+    }
+
+    // handle 'pet cast' command
+    else if (text.size() > 9 && text.substr(0, 9) == "pet cast ")
+    {
+        Pet *pet = m_bot->GetPet();
+        if (!pet)
+        {
+            SendWhisper("I have no pet.", fromPlayer);
+            return;
+        }
+        else
+        {
+            std::string spellStr = text.substr(9);
+            uint32 spellId = (uint32) atol(spellStr.c_str());
+
+            if (spellId == 0)
+            {
+                spellId = getPetSpellId(spellStr.c_str());
+
+                if (spellId == 0)
+                    extractSpellId(text, spellId);
+            }
+
+            if (spellId != 0 && pet->HasSpell(spellId))
+            {
+                if(pet->HasAura(spellId))
+                {
+                   pet->RemoveAurasByCasterSpell(spellId,pet->GetGUID());
+                   return;
+                }
+
+                uint64 castOnGuid = fromPlayer.GetSelection();
+                Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, castOnGuid);
+                CastPetSpell(spellId, pTarget);
             }
         }
     }

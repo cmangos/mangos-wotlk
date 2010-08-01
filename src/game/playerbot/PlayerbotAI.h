@@ -182,6 +182,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         bool CastSpell(const char* args);
         bool CastSpell(uint32 spellId);
         bool CastSpell(uint32 spellId, Unit& target);
+        bool CastPetSpell(uint32 spellId, Unit* target = NULL);
         void UseItem(Item& item);
         void EquipItem(Item& item);
         //void Stay();
