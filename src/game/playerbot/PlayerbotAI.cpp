@@ -884,7 +884,7 @@ uint8 PlayerbotAI::GetBaseManaPercent(const Unit& target) const
     if (target.GetPower(POWER_MANA) >= target.GetCreateMana())
         return (100);
     else
-        return (static_cast<float> (target.GetPower(POWER_MANA)) / target.GetMaxPower(POWER_MANA)) * 100;
+        return (static_cast<float> (target.GetPower(POWER_MANA)) / target.GetCreateMana()) * 100;
 }
 
 uint8 PlayerbotAI::GetBaseManaPercent() const
