@@ -765,7 +765,7 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
     }
     else if (cmdStr == "co" || cmdStr == "combatorder")
     {
-        Unit *target = 0;
+        Unit *target = NULL;
         char *orderChar = strtok( NULL, " " );
         if(!orderChar)
         {
@@ -784,9 +784,9 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
                 SetSentErrorMessage(true);
                 return false;
             }
-            std::string targetStr = targetChar;
             if(targetChar)
             {
+                std::string targetStr = targetChar;
                 targetGUID = sObjectMgr.GetPlayerGUIDByName( targetStr.c_str() );
             }
             target = ObjectAccessor::GetUnit( *m_session->GetPlayer(), targetGUID );

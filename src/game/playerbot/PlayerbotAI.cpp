@@ -3207,7 +3207,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 continue;
 
             bool isIgnoredSpell = false;
-            for (uint i = 0; i < ignoredSpellsCount; ++i) {
+            for (uint8 i = 0; i < ignoredSpellsCount; ++i) {
                 if (spellId == ignoredSpells[i]) {
                     isIgnoredSpell = true;
                     break;
