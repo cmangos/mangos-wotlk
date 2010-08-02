@@ -3410,6 +3410,44 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             }
         }
     }
+    // Handle all pet related commands here
+    else if (text.size() > 4 && text.substr(0, 4) == "pet ")
+    {
+        Pet * pet = m_bot->GetPet();
+        if (!pet)
+        {
+            SendWhisper("I have no pet.", fromPlayer);
+            return;
+        }
+
+        std::string part = text.substr(4); // Truncate `pet` part
+        std::string subcommand = part.substr(0, part.find(" "));
+        std::string argument;
+        bool argumentFound = false;
+
+        if (part.find(" ") != std::string::npos)
+        {
+            argument = part.substr(part.find(" ") + 1);
+            if (argument.length() > 0)
+                argumentFound = true;
+        }
+
+        if (subcommand == "react" && argumentFound)
+        {
+            if (argument == "a" || argument == "aggressive")
+            {
+                pet->GetCharmInfo()->SetReactState(REACT_AGGRESSIVE);
+            }
+            else if (argument == "d" || argument == "defensive")
+            {
+                pet->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
+            }
+            else if (argument == "p" || argument == "passive")
+            {
+                pet->GetCharmInfo()->SetReactState(REACT_PASSIVE);
+            }
+        }
+    }
 
     else if (text == "spells")
     {
