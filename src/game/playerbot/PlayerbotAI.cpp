@@ -3447,6 +3447,21 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 pet->GetCharmInfo()->SetReactState(REACT_PASSIVE);
             }
         }
+        if (subcommand == "state" && !argumentFound)
+        {
+            std::string state;
+            switch (pet->GetCharmInfo()->GetReactState())
+            {
+                case REACT_AGGRESSIVE:
+                    SendWhisper("My pet is aggressive.", fromPlayer);
+                    break;
+                case REACT_DEFENSIVE:
+                    SendWhisper("My pet is defensive.", fromPlayer);
+                    break;
+                case REACT_PASSIVE:
+                    SendWhisper("My pet is passive.", fromPlayer);
+            }
+        }
     }
 
     else if (text == "spells")
