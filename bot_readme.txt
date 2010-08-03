@@ -21,18 +21,24 @@ Commands:
 /t BOTNAME stay
 /t BOTNAME assist (you'll need to be attacking something and the bot only does melee atm)
 /t BOTNAME spells (replies with all spells known to bot)
-/t BOTNAME cast <SPELLID>
-/t BOTNAME cast <SPELL SUBSTRING>
+/t BOTNAME cast <SPELLID | (part of) SPELLNAME | SPELLLINK>
 /t BOTNAME use <ITEM LINK>
 /t BOTNAME equip <ITEM LINK>
 /t BOTNAME reset (will reset states, orders and loot list)
 /t BOTNAME report (bot reports all items needed to finish quests)
-/t BOTNAME point (bot will attack selected target)
 /t BOTNAME stats (bot shows available money, free inventory space and estimated item repair costs)
 /t BOTNAME survey (bot shows all available gameobjects, within a local perimeter around the bot)
 /t BOTNAME find <GAMEOBJECT LINK> (bot will travel to the gameobject location and then wait)
 /t BOTNAME get <GAMEOBJECT LINK> (bot will fetch the selected gameobject and then return to the player)
-
+/t BOTNAME quests (List bot's current quests)
+/t BOTNAME drop <QUESTLINK> (Drop a quest)
+/t BOTNAME orders (Shows bot's combat orders)
+/t BOTNAME pet spells (Shows spells known to bot's pet. Autocast spells will be shown in green)
+/t BOTNAME pet cast <SPELLID | (part of) SPELLNAME | SPELLLINK> 
+/t BOTNAME pet toggle <SPELLID | (part of) SPELLNAME | SPELLLINK> (Toggle autocast for a given spell)
+/t BOTNAME pet state (Shows current react mode of bot's pet)
+/t BOTNAME pet react <(a)ggressive | (d)efensive | (p)assive> (Set bot's pet reaction mode)
+ 
 Shortcuts:
 c = cast
 e = equip
