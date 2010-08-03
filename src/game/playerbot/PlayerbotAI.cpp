@@ -3282,134 +3282,6 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                   fromPlayer.SetSelection(oldSelectionGUID);
        }
 
-    else if (text == "pet spells")
-    {
-        Pet *pet = m_bot->GetPet();
-        if (!pet)
-        {
-            SendWhisper("I have no pet.", fromPlayer);
-            return;
-        }
-
-        int loc = GetMaster()->GetSession()->GetSessionDbcLocale();
-
-        std::ostringstream posOut;
-        std::ostringstream negOut;
-
-        for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
-        {
-            const uint32 spellId = itr->first;
-
-            if (itr->second.state == PETSPELL_REMOVED || IsPassiveSpell(spellId))
-                continue;
-
-            const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
-            if (!pSpellInfo)
-                continue;
-
-            std::string color;
-            switch (itr->second.active)
-            {
-                case ACT_ENABLED:
-                    color = "cff35d22d";
-                    break;
-                default:
-                    color = "cffffffff";
-            }
-
-            if (IsPositiveSpell(spellId))
-                posOut << " |" << color << "|Hspell:" << spellId << "|h["
-                       << pSpellInfo->SpellName[loc] << "]|h|r";
-            else
-                negOut << " |" << color << "|Hspell:" << spellId << "|h["
-                       << pSpellInfo->SpellName[loc] << "]|h|r";
-        }
-
-        ChatHandler ch(&fromPlayer);
-        SendWhisper("Here's my pet's non-attack spells:", fromPlayer);
-        ch.SendSysMessage(posOut.str().c_str());
-        SendWhisper("and here's my pet's attack spells:", fromPlayer);
-        ch.SendSysMessage(negOut.str().c_str());
-    }
-
-    //handle pet spell toggle
-    else if (text.size() > 11 && text.substr(0, 11) == "pet toggle ")
-    {
-        Pet *pet = m_bot->GetPet();
-        if (!pet)
-        {
-            SendWhisper("I have no pet.", fromPlayer);
-            return;
-        }
-        else
-        {
-            std::string spellStr = text.substr(11);
-            uint32 spellId = (uint32) atol(spellStr.c_str());
-
-            // try and get spell ID by name
-            if (spellId == 0)
-                spellId = getPetSpellId(spellStr.c_str());
-
-            // try link if text NOT (spellid OR spellname)
-            if (spellId == 0)
-                extractSpellId(text, spellId);
-
-            if (spellId != 0 && pet->HasSpell(spellId))
-            {
-                PetSpellMap::iterator itr = pet->m_spells.find(spellId);
-                if (itr != pet->m_spells.end())
-                {
-                    if (itr->second.active == ACT_ENABLED)
-                    {
-                        pet->ToggleAutocast(spellId, false);
-                        if (pet->HasAura(spellId))
-                            pet->RemoveAurasByCasterSpell(spellId,pet->GetGUID());
-                    }
-                    else
-                    {
-                        pet->ToggleAutocast(spellId, true);
-                    }
-                }
-            }
-        }
-    }
-
-    // handle 'pet cast' command
-    else if (text.size() > 9 && text.substr(0, 9) == "pet cast ")
-    {
-        Pet *pet = m_bot->GetPet();
-        if (!pet)
-        {
-            SendWhisper("I have no pet.", fromPlayer);
-            return;
-        }
-        else
-        {
-            std::string spellStr = text.substr(9);
-            uint32 spellId = (uint32) atol(spellStr.c_str());
-
-            if (spellId == 0)
-            {
-                spellId = getPetSpellId(spellStr.c_str());
-
-                if (spellId == 0)
-                    extractSpellId(text, spellId);
-            }
-
-            if (spellId != 0 && pet->HasSpell(spellId))
-            {
-                if(pet->HasAura(spellId))
-                {
-                   pet->RemoveAurasByCasterSpell(spellId,pet->GetGUID());
-                   return;
-                }
-
-                uint64 castOnGuid = fromPlayer.GetSelection();
-                Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, castOnGuid);
-                CastPetSpell(spellId, pTarget);
-            }
-        }
-    }
     // Handle all pet related commands here
     else if (text.size() > 4 && text.substr(0, 4) == "pet ")
     {
@@ -3447,7 +3319,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 pet->GetCharmInfo()->SetReactState(REACT_PASSIVE);
             }
         }
-        if (subcommand == "state" && !argumentFound)
+        else if (subcommand == "state" && !argumentFound)
         {
             std::string state;
             switch (pet->GetCharmInfo()->GetReactState())
@@ -3461,6 +3333,101 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 case REACT_PASSIVE:
                     SendWhisper("My pet is passive.", fromPlayer);
             }
+        }
+        else if (subcommand == "cast" && argumentFound)
+        {
+            uint32 spellId = (uint32) atol(argument.c_str());
+
+            if (spellId == 0)
+            {
+                spellId = getPetSpellId(argument.c_str());
+                if (spellId == 0)
+                    extractSpellId(argument, spellId);
+            }
+
+            if (spellId != 0 && pet->HasSpell(spellId))
+            {
+                if(pet->HasAura(spellId))
+                {
+                   pet->RemoveAurasByCasterSpell(spellId,pet->GetGUID());
+                   return;
+                }
+
+                uint64 castOnGuid = fromPlayer.GetSelection();
+                Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, castOnGuid);
+                CastPetSpell(spellId, pTarget);
+            }
+        }
+        else if (subcommand == "toggle" && argumentFound)
+        {
+            uint32 spellId = (uint32) atol(argument.c_str());
+
+            if (spellId == 0)
+            {
+                spellId = getPetSpellId(argument.c_str());
+                if (spellId == 0)
+                    extractSpellId(argument, spellId);
+            }
+
+            if (spellId != 0 && pet->HasSpell(spellId))
+            {
+                PetSpellMap::iterator itr = pet->m_spells.find(spellId);
+                if (itr != pet->m_spells.end())
+                {
+                    if (itr->second.active == ACT_ENABLED)
+                    {
+                        pet->ToggleAutocast(spellId, false);
+                        if (pet->HasAura(spellId))
+                            pet->RemoveAurasByCasterSpell(spellId,pet->GetGUID());
+                    }
+                    else
+                    {
+                        pet->ToggleAutocast(spellId, true);
+                    }
+                }
+            }
+        }
+        else if (subcommand == "spells" && !argumentFound)
+        {
+            int loc = GetMaster()->GetSession()->GetSessionDbcLocale();
+
+            std::ostringstream posOut;
+            std::ostringstream negOut;
+
+            for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
+            {
+                const uint32 spellId = itr->first;
+
+                if (itr->second.state == PETSPELL_REMOVED || IsPassiveSpell(spellId))
+                    continue;
+
+                const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
+                if (!pSpellInfo)
+                    continue;
+
+                std::string color;
+                switch (itr->second.active)
+                {
+                    case ACT_ENABLED:
+                        color = "cff35d22d"; // Some flavor of green
+                        break;
+                    default:
+                        color = "cffffffff";
+                }
+
+                if (IsPositiveSpell(spellId))
+                    posOut << " |" << color << "|Hspell:" << spellId << "|h["
+                           << pSpellInfo->SpellName[loc] << "]|h|r";
+                else
+                    negOut << " |" << color << "|Hspell:" << spellId << "|h["
+                           << pSpellInfo->SpellName[loc] << "]|h|r";
+            }
+
+            ChatHandler ch(&fromPlayer);
+            SendWhisper("Here's my pet's non-attack spells:", fromPlayer);
+            ch.SendSysMessage(posOut.str().c_str());
+            SendWhisper("and here's my pet's attack spells:", fromPlayer);
+            ch.SendSysMessage(negOut.str().c_str());
         }
     }
 
