@@ -284,6 +284,31 @@ uint32 PlayerbotAI::getPetSpellId(const char* args) const
     return foundSpellId;
 }
 
+
+uint32 PlayerbotAI::getMaxKnownRankSpellId(uint32 spellId)
+{
+    // Check if bot knows this spell
+    if (!m_bot->HasSpell(spellId))
+        return 0;
+
+    uint32 next = 0;
+    SpellChainMapNext const& nextMap = sSpellMgr.GetSpellChainNext();
+    for(SpellChainMapNext::const_iterator itr = nextMap.lower_bound(spellId); itr != nextMap.upper_bound(spellId); ++itr)
+    {
+        SpellChainNode const* node = sSpellMgr.GetSpellChainNode(itr->second);
+        // If next spell is a requirement for this one then skip it
+        if (node->req == spellId)
+            continue;
+        if (node->prev == spellId)
+        {
+            next = getMaxKnownRankSpellId(itr->second);
+            break;
+        }
+    }
+    sLog.outDebug("Found spellid: %u next: %u", spellId, next);
+    return (next == 0) ? spellId : next;
+}
+
 /*
  * Send a list of equipment that is in bot's inventor that is currently unequipped.
  * This is called when the master is inspecting the bot.
