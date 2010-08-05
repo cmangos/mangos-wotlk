@@ -5,58 +5,57 @@ class PlayerbotAI;
 PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, PlayerbotAI* const ai): PlayerbotClassAI(master, bot, ai)
 {
     // DESTRUCTION
-    SHADOW_BOLT           = ai->getSpellId("shadow bolt");
-    IMMOLATE              = ai->getSpellId("immolate");
-    INCINERATE            = ai->getSpellId("incinerate");
-    SEARING_PAIN          = ai->getSpellId("searing pain");
-    CONFLAGRATE           = ai->getSpellId("conflagrate");
-    SHADOWFURY            = ai->getSpellId("shadowfury");
-    CHAOS_BOLT            = ai->getSpellId("chaos bolt");
-    SHADOWFLAME           = ai->getSpellId("shadowflame");
-    HELLFIRE              = ai->getSpellId("hellfire");
-    RAIN_OF_FIRE          = ai->getSpellId("rain of fire");
-    SOUL_FIRE             = ai->getSpellId("soul fire"); // soul shard spells
-    SHADOWBURN            = ai->getSpellId("shadowburn");
+    SHADOW_BOLT           = ai->initSpell(SHADOW_BOLT_1);
+    IMMOLATE              = ai->initSpell(IMMOLATE_1);
+    INCINERATE            = ai->initSpell(INCINERATE_1);
+    SEARING_PAIN          = ai->initSpell(SEARING_PAIN_1);
+    CONFLAGRATE           = ai->initSpell(CONFLAGRATE_1);
+    SHADOWFURY            = ai->initSpell(SHADOWFURY_1);
+    CHAOS_BOLT            = ai->initSpell(CHAOS_BOLT_1);
+    SHADOWFLAME           = ai->initSpell(SHADOWFLAME_1);
+    HELLFIRE              = ai->initSpell(HELLFIRE_1);
+    RAIN_OF_FIRE          = ai->initSpell(RAIN_OF_FIRE_1);
+    SOUL_FIRE             = ai->initSpell(SOUL_FIRE_1); // soul shard spells
+    SHADOWBURN            = ai->initSpell(SHADOWBURN_1);
     // CURSE
-    CURSE_OF_WEAKNESS     = ai->getSpellId("curse of weakness");
-    CURSE_OF_THE_ELEMENTS = ai->getSpellId("curse of the elements");
-    CURSE_OF_AGONY        = ai->getSpellId("curse of agony");
-    CURSE_OF_EXHAUSTION   = ai->getSpellId("curse of exhaustion");
-    CURSE_OF_TONGUES      = ai->getSpellId("curse of tongues");
-    CURSE_OF_DOOM         = ai->getSpellId("curse of doom");
+    CURSE_OF_WEAKNESS     = ai->initSpell(CURSE_OF_WEAKNESS_1);
+    CURSE_OF_THE_ELEMENTS = ai->initSpell(CURSE_OF_THE_ELEMENTS_1);
+    CURSE_OF_AGONY        = ai->initSpell(CURSE_OF_AGONY_1);
+    CURSE_OF_EXHAUSTION   = ai->initSpell(CURSE_OF_EXHAUSTION_1);
+    CURSE_OF_TONGUES      = ai->initSpell(CURSE_OF_TONGUES_1);
+    CURSE_OF_DOOM         = ai->initSpell(CURSE_OF_DOOM_1);
     // AFFLICTION
-    CORRUPTION            = ai->getSpellId("corruption");
-    DRAIN_SOUL            = ai->getSpellId("drain soul");
-    DRAIN_LIFE            = ai->getSpellId("drain life");
-    DRAIN_MANA            = ai->getSpellId("drain mana");
-    LIFE_TAP              = ai->getSpellId("life tap");
-    UNSTABLE_AFFLICTION   = ai->getSpellId("unstable affliction");
-    HAUNT                 = ai->getSpellId("haunt");
-    ATROCITY              = ai->getSpellId("atrocity");
-    SEED_OF_CORRUPTION    = ai->getSpellId("seed of corruption");
-    DARK_PACT             = ai->getSpellId("dark pact");
-    HOWL_OF_TERROR        = ai->getSpellId("howl of terror");
-    FEAR                  = ai->getSpellId("fear");
+    CORRUPTION            = ai->initSpell(CORRUPTION_1);
+    DRAIN_SOUL            = ai->initSpell(DRAIN_SOUL_1);
+    DRAIN_LIFE            = ai->initSpell(DRAIN_LIFE_1);
+    DRAIN_MANA            = ai->initSpell(DRAIN_MANA_1);
+    LIFE_TAP              = ai->initSpell(LIFE_TAP_1);
+    UNSTABLE_AFFLICTION   = ai->initSpell(UNSTABLE_AFFLICTION_1);
+    HAUNT                 = ai->initSpell(HAUNT_1);
+    SEED_OF_CORRUPTION    = ai->initSpell(SEED_OF_CORRUPTION_1);
+    DARK_PACT             = ai->initSpell(DARK_PACT_1);
+    HOWL_OF_TERROR        = ai->initSpell(HOWL_OF_TERROR_1);
+    FEAR                  = ai->initSpell(FEAR_1);
     // DEMONOLOGY
-    DEMON_SKIN            = ai->getSpellId("demon skin");
-    DEMON_ARMOR           = ai->getSpellId("demon armor");
-    FEL_ARMOR             = ai->getSpellId("fel armor");
-    SHADOW_WARD           = ai->getSpellId("shadow ward");
-    SOULSHATTER           = ai->getSpellId("soulshatter");
-    SOUL_LINK             = ai->getSpellId("soul link");
+    DEMON_SKIN            = ai->initSpell(DEMON_SKIN_1);
+    DEMON_ARMOR           = ai->initSpell(DEMON_ARMOR_1);
+    FEL_ARMOR             = ai->initSpell(FEL_ARMOR_1);
+    SHADOW_WARD           = ai->initSpell(SHADOW_WARD_1);
+    SOULSHATTER           = ai->initSpell(SOULSHATTER_1);
+    SOUL_LINK             = ai->initSpell(SOUL_LINK_1);
     SOUL_LINK_AURA        = 25228; // dummy aura applied, after spell SOUL_LINK
-    HEALTH_FUNNEL         = ai->getSpellId("health funnel");
-    DETECT_INVISIBILITY   = ai->getSpellId("detect invisibility");
+    HEALTH_FUNNEL         = ai->initSpell(HEALTH_FUNNEL_1);
+    DETECT_INVISIBILITY   = ai->initSpell(DETECT_INVISIBILITY_1);
     // demon summon
-    SUMMON_IMP            = ai->getSpellId("summon imp");
-    SUMMON_VOIDWALKER     = ai->getSpellId("summon voidwalker");
-    SUMMON_SUCCUBUS       = ai->getSpellId("summon succubus");
-    SUMMON_FELHUNTER      = ai->getSpellId("summon felhunter");
-    SUMMON_FELGUARD       = ai->getSpellId("summon felguard");
-    // demon skills
-    BLOOD_PACT            = ai->getSpellId("blood pact"); // imp skill
-    CONSUME_SHADOWS       = ai->getSpellId("consume shadows"); // voidwalker skill
-    FEL_INTELLIGENCE      = ai->getSpellId("fel intelligence"); // felhunter skill
+    SUMMON_IMP            = ai->initSpell(SUMMON_IMP_1);
+    SUMMON_VOIDWALKER     = ai->initSpell(SUMMON_VOIDWALKER_1);
+    SUMMON_SUCCUBUS       = ai->initSpell(SUMMON_SUCCUBUS_1);
+    SUMMON_FELHUNTER      = ai->initSpell(SUMMON_FELHUNTER_1);
+    SUMMON_FELGUARD       = ai->initSpell(SUMMON_FELGUARD_1);
+    // demon skills should be initialized on demons
+    BLOOD_PACT            = 0; //ai->getSpellId("blood pact"); // imp skill
+    CONSUME_SHADOWS       = 0; //ai->getSpellId("consume shadows"); // voidwalker skill
+    FEL_INTELLIGENCE      = 0; //ai->getSpellId("fel intelligence"); // felhunter skill
 
     RECENTLY_BANDAGED     = 11196; // first aid check
 
@@ -189,13 +188,6 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
              else if (HAUNT > 0 && LastSpellAffliction < 7 && !pTarget->HasAura(HAUNT, EFFECT_INDEX_0) && ai->GetManaPercent() >= 12)
              {
                  ai->CastSpell(HAUNT, *pTarget);
-                 SpellSequence = SPELL_DESTRUCTION;
-                 LastSpellAffliction = LastSpellAffliction +1;
-                 break;
-             }
-             else if (ATROCITY > 0 && !pTarget->HasAura(ATROCITY, EFFECT_INDEX_0) && LastSpellAffliction < 8 && ai->GetManaPercent() >= 21)
-             {
-                 ai->CastSpell(ATROCITY, *pTarget);
                  SpellSequence = SPELL_DESTRUCTION;
                  LastSpellAffliction = LastSpellAffliction +1;
                  break;
