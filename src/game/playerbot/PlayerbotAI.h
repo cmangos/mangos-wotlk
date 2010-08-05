@@ -738,7 +738,8 @@ class MANGOS_DLL_SPEC PlayerbotAI
         // in priority of full text match, spells not taking reagents, and highest rank
         uint32 getSpellId(const char* args, bool master = false) const;
         uint32 getPetSpellId(const char* args) const;
-        uint32 getMaxKnownRankSpellId(uint32 spellId);
+        // Initialize spell using rank 1 spell id
+        uint32 initSpell(uint32 spellId);
 
         // extracts item ids from links
         void extractItemIds(const std::string& text, std::list<uint32>& itemIds) const;

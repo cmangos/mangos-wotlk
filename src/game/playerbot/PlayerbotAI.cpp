@@ -285,7 +285,7 @@ uint32 PlayerbotAI::getPetSpellId(const char* args) const
 }
 
 
-uint32 PlayerbotAI::getMaxKnownRankSpellId(uint32 spellId)
+uint32 PlayerbotAI::initSpell(uint32 spellId)
 {
     // Check if bot knows this spell
     if (!m_bot->HasSpell(spellId))
@@ -301,7 +301,7 @@ uint32 PlayerbotAI::getMaxKnownRankSpellId(uint32 spellId)
             continue;
         if (node->prev == spellId)
         {
-            next = getMaxKnownRankSpellId(itr->second);
+            next = initSpell(itr->second);
             break;
         }
     }
