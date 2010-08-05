@@ -2255,7 +2255,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
     if (!pSpellInfo)
     {
-        TellMaster("missing spell entry in CastSpell.");
+        TellMaster("missing spell entry in CastSpell for spellid %u.", spellId);
         return false;
     }
 
