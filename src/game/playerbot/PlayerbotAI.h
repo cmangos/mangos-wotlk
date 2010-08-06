@@ -627,7 +627,28 @@ enum RankOneSpellId
     THUNDER_CLAP_1                  = 6343,
     VICTORY_RUSH_1                  = 34428,
     VIGILANCE_1                     = 50720,
-    WHIRLWIND_1                     = 1680
+    WHIRLWIND_1                     = 1680,
+
+    //Racial Traits
+    ARCANE_TORRENT_MANA_CLASSES    = 28730,
+    ARCANE_TORRENT_DEATH_KNIGHT    = 50613,
+    ARCANE_TORRENT_ROGUE           = 25046,
+    BLOOD_FURY_MELEE_CLASSES       = 20572,
+    BLOOD_FURY_WARLOCK             = 33702,
+    BLOOD_FURY_SHAMAN              = 33697,
+    ESCAPE_ARTIST_ALL              = 20589,
+    EVERY_MAN_FOR_HIMSELF_ALL      = 59752,
+    GIFT_OF_THE_NAARU_DEATH_KNIGHT = 59545,
+    GIFT_OF_THE_NAARU_HUNTER       = 59543,
+    GIFT_OF_THE_NAARU_MAGE         = 59548,
+    GIFT_OF_THE_NAARU_PALADIN      = 59542,
+    GIFT_OF_THE_NAARU_PRIEST       = 59544,
+    GIFT_OF_THE_NAARU_SHAMAN       = 59547,
+    GIFT_OF_THE_NAARU_WARRIOR      = 28880,
+    STONEFORM_ALL                  = 20594,
+    WAR_STOMP_ALL                  = 20549,
+    WILL_OF_THE_FORSAKEN_ALL       = 7744
+
 };
 
 class MANGOS_DLL_SPEC PlayerbotAI
