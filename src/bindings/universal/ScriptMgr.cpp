@@ -279,7 +279,7 @@ bool GOChooseReward( Player *player, GameObject *_GO, Quest *_Quest, uint32 opt 
 }
 
 MANGOS_DLL_EXPORT
-bool AreaTrigger      ( Player *player, AreaTriggerEntry* atEntry )
+bool AreaTrigger(Player *player, AreaTriggerEntry const* atEntry)
 {
     Script *tmpscript = m_scripts[GetAreaTriggerScriptId(atEntry->id)];
     if (!tmpscript || !tmpscript->pAreaTrigger)
@@ -289,14 +289,14 @@ bool AreaTrigger      ( Player *player, AreaTriggerEntry* atEntry )
 }
 
 MANGOS_DLL_EXPORT
-bool ProcessEventId(uint32 eventId, Object* source, Object* target, bool data)
+bool ProcessEventId(uint32 eventId, Object* source, Object* target, bool isStart)
 {
     Script *tmpscript = m_scripts[GetEventIdScriptId(eventId)];
     if (!tmpscript || !tmpscript->pProcessEventId)
         return false;
 
-    // data normally false, true for taxi event id where it's a departure
-    return tmpscript->pProcessEventId(eventId, source, target, data);
+    // isStart are normally true. For taxi event id at arrival, it's false
+    return tmpscript->pProcessEventId(eventId, source, target, isStart);
 }
 
 MANGOS_DLL_EXPORT

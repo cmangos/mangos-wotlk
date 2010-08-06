@@ -37,9 +37,11 @@
 #include "GameEventMgr.h"
 
 // Supported shift-links (client generated and server side)
-// |color|Hachievement:achievement_id:player_guid:0:0:0:0:0:0:0:0|h[name]|h|r
+// |color|Hachievement:achievement_id:player_guid_hex:completed_0_1:mm:dd:yy_from_2000:criteriaMask1:criteriaMask2:criteriaMask3:criteriaMask4|h[name]|h|r
 //                                                                        - client, item icon shift click, not used in server currently
 // |color|Harea:area_id|h[name]|h|r
+// |color|Hareatrigger:id|h[name]|h|r
+// |color|Hareatrigger_target:id|h[name]|h|r                
 // |color|Hcreature:creature_guid|h[name]|h|r
 // |color|Hcreature_entry:creature_id|h[name]|h|r
 // |color|Henchant:recipe_spell_id|h[prof_name: recipe_name]|h|r          - client, at shift click in recipes list dialog
@@ -50,7 +52,7 @@
 // |color|Hitem:item_id:perm_ench_id:gem1:gem2:gem3:0:0:0:0:reporter_level|h[name]|h|r
 //                                                                        - client, item icon shift click
 // |color|Hitemset:itemset_id|h[name]|h|r
-// |color|Hplayer:name|h[name]|h|r                                        - client, in some messages, at click copy only name instead link
+// |color|Hplayer:name|h[name]|h|r                                        - client, in some messages, at click copy only name instead link, so no way generate it in client string send to server
 // |color|Hquest:quest_id:quest_level|h[name]|h|r                         - client, quest list name shift-click
 // |color|Hskill:skill_id|h[name]|h|r
 // |color|Hspell:spell_id|h[name]|h|r                                     - client, spellbook spell icon shift-click
@@ -139,6 +141,7 @@ ChatCommand * ChatHandler::getCommandTable()
 
     static ChatCommand characterCommandTable[] =
     {
+        { "achievements",   SEC_GAMEMASTER,     true,  &ChatHandler::HandleCharacterAchievementsCommand,"",NULL },
         { "customize",      SEC_GAMEMASTER,     true,  &ChatHandler::HandleCharacterCustomizeCommand,  "", NULL },
         { "deleted",        SEC_GAMEMASTER,     true,  NULL,                                           "", characterDeletedCommandTable},
         { "erase",          SEC_CONSOLE,        true,  &ChatHandler::HandleCharacterEraseCommand,      "", NULL },
@@ -190,7 +193,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "setitemvalue",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetItemValueCommand,        "", NULL },
         { "setvalue",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetValueCommand,            "", NULL },
         { "spellcheck",     SEC_CONSOLE,        true,  &ChatHandler::HandleDebugSpellCheckCommand,          "", NULL },
-        { "spawnvehicle",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSpawnVehicle,               "", NULL },
+        { "spawnvehicle",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSpawnVehicleCommand,        "", NULL },
         { "uws",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugUpdateWorldStateCommand,    "", NULL },
         { "update",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugUpdateCommand,              "", NULL },
         { NULL,             0,                  false, NULL,                                                "", NULL }
@@ -315,6 +318,7 @@ ChatCommand * ChatHandler::getCommandTable()
     static ChatCommand lookupCommandTable[] =
     {
         { "account",        SEC_GAMEMASTER,     true,  NULL,                                           "", lookupAccountCommandTable },
+        { "achievement",    SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleLookupAchievementCommand,   "", NULL },
         { "area",           SEC_MODERATOR,      true,  &ChatHandler::HandleLookupAreaCommand,          "", NULL },
         { "creature",       SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleLookupCreatureCommand,      "", NULL },
         { "event",          SEC_GAMEMASTER,     true,  &ChatHandler::HandleLookupEventCommand,         "", NULL },
@@ -409,9 +413,9 @@ ChatCommand * ChatHandler::getCommandTable()
 
     static ChatCommand questCommandTable[] =
     {
-        { "add",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleQuestAdd,                   "", NULL },
-        { "complete",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleQuestComplete,              "", NULL },
-        { "remove",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleQuestRemove,                "", NULL },
+        { "add",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleQuestAddCommand,            "", NULL },
+        { "complete",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleQuestCompleteCommand,       "", NULL },
+        { "remove",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleQuestRemoveCommand,         "", NULL },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
@@ -610,6 +614,14 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
+    static ChatCommand triggerCommandTable[] =
+    {
+        { "active",         SEC_GAMEMASTER,     false, &ChatHandler::HandleTriggerActiveCommand,       "", NULL },
+        { "near",           SEC_GAMEMASTER,     false, &ChatHandler::HandleTriggerNearCommand,         "", NULL },
+        { "",               SEC_GAMEMASTER,     true,  &ChatHandler::HandleTriggerCommand,             "", NULL },
+        { NULL,             0,                  false, NULL,                                           "", NULL }
+    };
+
     static ChatCommand unbanCommandTable[] =
     {
         { "account",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleUnBanAccountCommand,      "", NULL },
@@ -654,6 +666,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "server",         SEC_PLAYER,         true,  NULL,                                           "", serverCommandTable   },
         { "tele",           SEC_MODERATOR,      true,  NULL,                                           "", teleCommandTable     },
         { "titles",         SEC_GAMEMASTER,     false, NULL,                                           "", titlesCommandTable   },
+        { "trigger",        SEC_GAMEMASTER,     false, NULL,                                           "", triggerCommandTable  },
         { "wp",             SEC_GAMEMASTER,     false, NULL,                                           "", wpCommandTable       },
 
         { "aura",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAuraCommand,                "", NULL },
@@ -695,7 +708,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "additem",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAddItemCommand,             "", NULL },
         { "additemset",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAddItemSetCommand,          "", NULL },
         { "bank",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleBankCommand,                "", NULL },
-        { "wchange",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleChangeWeather,              "", NULL },
+        { "wchange",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleChangeWeatherCommand,       "", NULL },
         { "ticket",         SEC_GAMEMASTER,     true,  &ChatHandler::HandleTicketCommand,              "", NULL },
         { "delticket",      SEC_GAMEMASTER,     true,  &ChatHandler::HandleDelTicketCommand,           "", NULL },
         { "maxskill",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMaxSkillCommand,            "", NULL },
@@ -1101,7 +1114,7 @@ void ChatHandler::ExecuteCommand(const char* text)
         case CHAT_COMMAND_OK:
         {
             SetSentErrorMessage(false);
-            if ((this->*(command->Handler))(text))
+            if ((this->*(command->Handler))((char*)text))   // text content destroyed at call
             {
                 if (command->SecurityLevel > SEC_PLAYER)
                 {
@@ -1994,6 +2007,281 @@ Creature* ChatHandler::getSelectedCreature()
     return m_session->GetPlayer()->GetMap()->GetCreatureOrPetOrVehicle(m_session->GetPlayer()->GetSelection());
 }
 
+/**
+ * Function skip all whitespaces in args string
+ *
+ * @param args variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ *             allowed NULL string pointer stored in *args
+ */
+void ChatHandler::SkipWhiteSpaces(char** args)
+{
+    if(!*args)
+        return;
+
+    while(isWhiteSpace(**args))
+        ++(*args);
+}
+
+/**
+ * Function extract to val arg signed integer value or fail
+ *
+ * @param args variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ * @param val  return extracted value if function success, in fail case original value unmodified
+ * @return     true if value extraction successful
+ */
+bool  ChatHandler::ExtractInt32(char** args, int32& val)
+{
+    if (!*args || !**args)
+        return false;
+
+    char* tail = *args;
+
+    long valRaw = strtol(*args, &tail, 10);
+
+    if (tail != *args && isWhiteSpace(*tail))
+        *(tail++) = '\0';
+    else if (tail && *tail)                                 // some not whitespace symbol
+        return false;                                       // args not modified and can be re-parsed
+
+    if (valRaw < std::numeric_limits<int32>::min() || valRaw > std::numeric_limits<int32>::max())
+        return false;
+
+    // value successfully extracted
+    val = int32(valRaw);
+    *args = tail;
+    return true;
+}
+
+/**
+ * Function extract to val arg unsigned integer value or fail
+ *
+ * @param args variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ * @param val  return extracted value if function success, in fail case original value unmodified
+ * @return     true if value extraction successful
+ */
+bool  ChatHandler::ExtractUInt32(char** args, uint32& val)
+{
+    if (!*args || !**args)
+        return false;
+
+    char* tail = *args;
+
+    unsigned long valRaw = strtoul(*args, &tail, 10);
+
+    if (tail != *args && isWhiteSpace(*tail))
+        *(tail++) = '\0';
+    else if (tail && *tail)                                 // some not whitespace symbol
+        return false;                                       // args not modified and can be re-parsed
+
+    if (valRaw > std::numeric_limits<uint32>::max())
+        return false;
+
+    // value successfully extracted
+    val = uint32(valRaw);
+    *args = tail;
+    return true;
+}
+
+/**
+ * Function extract to val arg float value or fail
+ *
+ * @param args variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ * @param val  return extracted value if function success, in fail case original value unmodified
+ * @return     true if value extraction successful
+ */
+bool  ChatHandler::ExtractFloat(char** args, float& val)
+{
+    if (!*args || !**args)
+        return false;
+
+    char* tail = *args;
+
+    double valRaw = strtod(*args, &tail);
+
+    if (tail != *args && isWhiteSpace(*tail))
+        *(tail++) = '\0';
+    else if (tail && *tail)                                 // some not whitespace symbol
+        return false;                                       // args not modified and can be re-parsed
+
+    // value successfully extracted
+    val = float(valRaw);
+    *args = tail;
+    return true;
+}
+
+/**
+ * Function extract name-like string (from non-numeric or special symbol until whitespace)
+ *
+ * @param args variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ * @return     name-like string without whitespaces, or NULL if args empty or not appropriate content.
+ */
+char* ChatHandler::ExtractLiteralArg(char** args)
+{
+    if (!*args || !**args)
+        return NULL;
+
+    if ((*args)[0] == '[' || (*args)[0] == '\'' || (*args)[0] == '"' || (*args)[0] == '|')
+        return NULL;
+
+    char* name = strtok(*args, " ");
+
+    *args = strtok(NULL, "");
+
+    return name;
+}
+
+/**
+ * Function extract quote-like string (any characters guarded by some special character, in our cases ['")
+ *
+ * @param args variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ * @return     quote-like string, or NULL if args empty or not appropriate content.
+ */
+char* ChatHandler::ExtractQuotedArg( char** args )
+{
+    if (!*args || !**args)
+        return NULL;
+
+    if (**args != '\'' && **args != '"' && **args != '[')
+        return NULL;
+
+    char guard[2] = " ";                                    // guard[1] == '\0'
+
+    guard[0] = (*args)[0];
+
+    if (guard[0] == '[')
+        guard[0] = ']';
+
+    char* str = strtok((*args)+1, guard);                   // skip start guard symbol
+
+    *args = strtok(NULL, "");
+
+    SkipWhiteSpaces(args);
+
+    return str;
+}
+
+/**
+ * Function extract shift-link-like string (any characters guarded by | and |h|r with some additional internal structure check)
+ *
+ * @param args variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ * @return     shift-link-like string, or NULL if args empty or not appropriate content.
+ */
+char* ChatHandler::ExtractLinkArg( char** args )
+{
+    if (!*args || !**args)
+        return NULL;
+
+    if (**args != '|')
+        return NULL;
+
+    // |color|Hkey:data|h[name]|h|r
+
+    char* head = *args;
+    char* tail = (*args)+1;                                 // skip |
+
+    while (*tail && *tail != '|')                           // skip color part
+        ++tail;
+
+    if (!*tail)
+        return NULL;
+
+    // |Hkey:data|h[name]|h|r
+
+    ++tail;                                                 // skip |
+
+    if (*tail != 'H')
+        return NULL;
+
+    while (*tail && (*tail != '|' || *(tail+1) != 'h'))     // skip key/data part
+        ++tail;
+
+    if (!*tail)
+        return NULL;
+
+    tail += 2;
+
+    // [name]|h|r
+    if (!*tail || *tail != '[')
+        return NULL;
+
+    while (*tail && (*tail != ']' || *(tail+1) != '|'))     // skip name part
+        ++tail;
+
+    tail += 2;
+
+    // h|r
+    if (!*tail || *tail != 'h'  || *(tail+1) != '|')
+        return NULL;
+
+    tail += 2;
+
+    // r
+    if (!*tail || *tail != 'r' || *(tail+1) && !isWhiteSpace(*(tail+1)))
+        return NULL;
+
+    ++tail;
+
+    if (*tail)
+    {
+        *(tail++) = '\0';
+    }
+
+    *args = tail;
+
+    SkipWhiteSpaces(args);
+
+    return head;
+}
+
+/**
+ * Function extract nmae/number/quote/shift-link-like string
+ *
+ * @param args variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ * @return     extaractd arg string, or NULL if args empty or not appropriate content.
+ */
+char* ChatHandler::ExtractArg( char** args )
+{
+    if (!*args || !**args)
+        return NULL;
+
+    switch (**args)
+    {
+        case '|' :
+            return ExtractLinkArg(args);
+        case '\'' : case '"' : case '[' :
+            return ExtractQuotedArg(args);
+        default:
+        {
+            char* name = strtok(*args, " ");
+
+            *args = strtok(NULL, "");
+
+            return name;
+        }
+    }
+}
+
+/**
+ * Function extract name/quote/number/shift-link-like string, and return it if args have more non-whitespace data
+ *
+ * @param args variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ *             if args gave only single arg then args still pointing to this arg (unmodified pointer)
+ * @return     extracted string, or NULL if args empty or not appropriate content or have single arg totally.
+ */
+char* ChatHandler::ExtractOptArg(char** args)
+{
+    char* arg = ExtractArg(args);
+
+    // have more data
+    if (*args && **args)
+        return arg;
+
+    // optional name not found
+    *args = arg;
+
+    return NULL;
+}
+
 char* ChatHandler::extractKeyFromLink(char* text, char const* linkType, char** something1)
 {
     // skip empty
@@ -2287,7 +2575,9 @@ enum LocationLinkType
     LOCATION_LINK_CREATURE          = 3,
     LOCATION_LINK_GAMEOBJECT        = 4,
     LOCATION_LINK_CREATURE_ENTRY    = 5,
-    LOCATION_LINK_GAMEOBJECT_ENTRY  = 6
+    LOCATION_LINK_GAMEOBJECT_ENTRY  = 6,
+    LOCATION_LINK_AREATRIGGER       = 7,
+    LOCATION_LINK_AREATRIGGER_TARGET= 8,
 };
 
 static char const* const locationKeys[] =
@@ -2299,6 +2589,8 @@ static char const* const locationKeys[] =
     "Hgameobject",
     "Hcreature_entry",
     "Hgameobject_entry",
+    "Hareatrigger",
+    "Hareatrigger_target",
     NULL
 };
 
@@ -2313,6 +2605,8 @@ bool ChatHandler::extractLocationFromLink(char* text, uint32& mapid, float& x, f
     // |color|Hgameobject:go_guid|h[name]|h|r
     // |color|Hcreature_entry:creature_id|h[name]|h|r
     // |color|Hgameobject_entry:go_id|h[name]|h|r
+    // |color|Hareatrigger:id|h[name]|h|r
+    // |color|Hareatrigger_target:id|h[name]|h|r
     char* idS = extractKeyFromLink(text,locationKeys,&type);
     if(!idS)
         return false;
@@ -2451,6 +2745,49 @@ bool ChatHandler::extractLocationFromLink(char* text, uint32& mapid, float& x, f
             else
                 return false;
         }
+        case LOCATION_LINK_AREATRIGGER:
+        {
+            uint32 id = (uint32)atol(idS);
+
+            AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(id);
+            if (!atEntry)
+            {
+                PSendSysMessage(LANG_COMMAND_GOAREATRNOTFOUND, id);
+                SetSentErrorMessage(true);
+                return false;
+            }
+
+            mapid = atEntry->mapid;
+            x = atEntry->x;
+            y = atEntry->y;
+            z = atEntry->z;
+            return true;
+        }
+        case LOCATION_LINK_AREATRIGGER_TARGET:
+        {
+            uint32 id = (uint32)atol(idS);
+
+            if (!sAreaTriggerStore.LookupEntry(id))
+            {
+                PSendSysMessage(LANG_COMMAND_GOAREATRNOTFOUND, id);
+                SetSentErrorMessage(true);
+                return false;
+            }
+
+            AreaTrigger const* at = sObjectMgr.GetAreaTrigger(id);
+            if(!at)
+            {
+                PSendSysMessage(LANG_AREATRIGER_NOT_HAS_TARGET, id);
+                SetSentErrorMessage(true);
+                return false;
+            }
+
+            mapid = at->target_mapId;
+            x = at->target_X;
+            y = at->target_Y;
+            z = at->target_Z;
+            return true;
+        }
     }
 
     // unknown type?
@@ -2522,40 +2859,6 @@ bool ChatHandler::extractPlayerTarget(char* args, Player** player, uint64* playe
     }
 
     return true;
-}
-
-void ChatHandler::extractOptFirstArg(char* args, char** arg1, char** arg2)
-{
-    char* p1 = strtok(args, " ");
-    char* p2 = strtok(NULL, " ");
-
-    if(!p2)
-    {
-        p2 = p1;
-        p1 = NULL;
-    }
-
-    if(arg1)
-        *arg1 = p1;
-
-    if(arg2)
-        *arg2 = p2;
-}
-
-char* ChatHandler::extractQuotedArg( char* args )
-{
-    if(!*args)
-        return NULL;
-
-    if(*args=='"')
-        return strtok(args+1, "\"");
-    else
-    {
-        char* space = strtok(args, "\"");
-        if(!space)
-            return NULL;
-        return strtok(NULL, "\"");
-    }
 }
 
 uint32 ChatHandler::extractAccountId(char* args, std::string* accountName /*= NULL*/, Player** targetIfNullArg /*= NULL*/)

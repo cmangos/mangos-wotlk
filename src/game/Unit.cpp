@@ -1726,29 +1726,29 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
 }
 
 
-void Unit::HandleEmoteCommand(uint32 anim_id)
+void Unit::HandleEmoteCommand(uint32 emote_id)
 {
     WorldPacket data( SMSG_EMOTE, 4 + 8 );
-    data << uint32(anim_id);
+    data << uint32(emote_id);
     data << uint64(GetGUID());
     SendMessageToSet(&data, true);
 }
 
-void Unit::HandleEmoteState(uint32 anim_id)
+void Unit::HandleEmoteState(uint32 emote_id)
 {
-    SetUInt32Value(UNIT_NPC_EMOTESTATE, anim_id);
+    SetUInt32Value(UNIT_NPC_EMOTESTATE, emote_id);
 }
 
-void Unit::HandleEmote(uint32 anim_id)
+void Unit::HandleEmote(uint32 emote_id)
 {
-    if (!anim_id)
+    if (!emote_id)
         HandleEmoteState(0);
-    else if (EmotesEntry const* emoteEntry = sEmotesStore.LookupEntry(anim_id))
+    else if (EmotesEntry const* emoteEntry = sEmotesStore.LookupEntry(emote_id))
     {
         if (emoteEntry->EmoteType)                          // 1,2 states, 0 command
-            HandleEmoteState(anim_id);
+            HandleEmoteState(emote_id);
         else
-            HandleEmoteCommand(anim_id);
+            HandleEmoteCommand(emote_id);
     }
 }
 
@@ -3892,7 +3892,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder *holder)
 
             bool stop = false;
 
-            for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            for (int32 i = 0; i < MAX_EFFECT_INDEX && !stop; ++i)
             {
                 // no need to check non stacking auras that weren't/won't be applied on this target
                 if (!foundHolder->m_auras[i] || !holder->m_auras[i])
@@ -4572,7 +4572,10 @@ void Unit::RemoveSpellAuraHolder(SpellAuraHolder *holder, AuraRemoveMode mode)
     // If holder in use (removed from code that plan access to it data after return)
     // store it in holder list with delayed deletion
     if (holder->IsInUse())
+    {
+        holder->SetDeleted();
         m_deletedHolders.push_back(holder);
+    }
     else
         delete holder;
 

@@ -375,7 +375,7 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBas
 m_spellmod(NULL),
 m_timeCla(1000), m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
 m_effIndex(eff), m_spellAuraHolder(holder), m_isPersistent(false),
-m_positive(false), m_isPeriodic(false), m_isAreaAura(false), m_in_use(0), m_deleted(false)
+m_positive(false), m_isPeriodic(false), m_isAreaAura(false), m_in_use(0)
 {
     ASSERT(target);
 
@@ -7735,12 +7735,9 @@ void SpellAuraHolder::RemoveAura(SpellEffectIndex index)
 
 void SpellAuraHolder::ApplyAuraModifiers(bool apply, bool real)
 {
-    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-    {
-        Aura *aur = GetAuraByEffectIndex(SpellEffectIndex(i));
-        if (aur)
+    for (int32 i = 0; i < MAX_EFFECT_INDEX && !IsDeleted(); ++i)
+        if (Aura *aur = GetAuraByEffectIndex(SpellEffectIndex(i)))
             aur->ApplyModifier(apply, real);
-    }
 }
 
 void SpellAuraHolder::_AddSpellAuraHolder()
@@ -8717,11 +8714,11 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         if (spellId1)
             m_target->CastSpell(m_target, spellId1, true, NULL, NULL, GetCasterGUID());
         if (spellId2 && !IsDeleted())
-            m_target->CastSpell(m_target, spellId1, true, NULL, NULL, GetCasterGUID());
+            m_target->CastSpell(m_target, spellId2, true, NULL, NULL, GetCasterGUID());
         if (spellId3 && !IsDeleted())
-            m_target->CastSpell(m_target, spellId1, true, NULL, NULL, GetCasterGUID());
+            m_target->CastSpell(m_target, spellId3, true, NULL, NULL, GetCasterGUID());
         if (spellId4 && !IsDeleted())
-            m_target->CastSpell(m_target, spellId1, true, NULL, NULL, GetCasterGUID());
+            m_target->CastSpell(m_target, spellId4, true, NULL, NULL, GetCasterGUID());
     }
     else
     {
