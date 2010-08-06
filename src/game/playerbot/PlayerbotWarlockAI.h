@@ -29,7 +29,7 @@ enum WarlockSpells
     CURSE_OF_TONGUES_1              = 1714,
     CURSE_OF_WEAKNESS_1             = 702,
     DARK_PACT_1                     = 18220,
-    DEATH_COIL_1                    = 6789,
+    DEATH_COIL_WARLOCK_1            = 6789,
     DEMON_ARMOR_1                   = 706,
     DEMON_CHARGE_1                  = 54785,
     DEMON_SKIN_1                    = 687,

@@ -9,7 +9,7 @@ PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* con
 
     PLAGUE_STRIKE     = ai->initSpell(PLAGUE_STRIKE_1); // Unholy
     DEATH_GRIP        = ai->initSpell(DEATH_GRIP_1);
-    DEATH_COIL        = ai->initSpell(DEATH_COIL_1);
+    DEATH_COIL        = ai->initSpell(DEATH_COIL_DEATH_KNIGHT_1);
     DEATH_STRIKE      = ai->initSpell(DEATH_STRIKE_1);
     UNHOLY_BLIGHT     = 0; // Passive
     SCOURGE_STRIKE    = ai->initSpell(SCOURGE_STRIKE_1);

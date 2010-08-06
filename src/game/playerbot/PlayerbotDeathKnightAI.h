@@ -25,7 +25,7 @@ enum DeathKnightSpells
     DANCING_RUNE_WEAPON_1           = 49028,
     DARK_COMMAND_1                  = 56222,
     DEATH_AND_DECAY_1               = 43265,
-    DEATH_COIL_1                    = 47541,
+    DEATH_COIL_DEATH_KNIGHT_1       = 47541,
     DEATH_GRIP_1                    = 49576,
     DEATH_PACT_1                    = 48743,
     DEATH_STRIKE_1                  = 49998,

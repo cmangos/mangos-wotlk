@@ -55,7 +55,7 @@ enum
     MANA_SPRING_TOTEM_1             = 5675,
     MANA_TIDE_TOTEM_1               = 16190,
     NATURE_RESISTANCE_TOTEM_1       = 10595,
-    NATURES_SWIFTNESS_1             = 16188,
+    NATURES_SWIFTNESS_SHAMAN_1      = 16188,
     PURGE_1                         = 370,
     RIPTIDE_1                       = 61295,
     ROCKBITER_WEAPON_1              = 8017,

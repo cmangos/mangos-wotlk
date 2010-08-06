@@ -60,7 +60,7 @@ enum MageSpells
     MOLTEN_ARMOR_1                  = 30482,
     PRESENCE_OF_MIND_1              = 12043,
     PYROBLAST_1                     = 11366,
-    REMOVE_CURSE_1                  = 475,
+    REMOVE_CURSE_MAGE_1             = 475,
     RITUAL_OF_REFRESHMENT_1         = 43987,
     SCORCH_1                        = 2948,
     SLOW_1                          = 31589,
