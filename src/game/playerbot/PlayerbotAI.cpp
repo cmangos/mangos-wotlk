@@ -305,7 +305,8 @@ uint32 PlayerbotAI::initSpell(uint32 spellId)
             break;
         }
     }
-    sLog.outDebug("Found spellid: %u next: %u", spellId, next);
+    if (next == 0)
+        sLog.outDebug("initSpell: Found spellid: %u", spellId);
     return (next == 0) ? spellId : next;
 }
 
