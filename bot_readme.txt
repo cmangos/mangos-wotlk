@@ -34,11 +34,11 @@ Commands:
 /t BOTNAME drop <QUESTLINK> (Drop a quest)
 /t BOTNAME orders (Shows bot's combat orders)
 /t BOTNAME pet spells (Shows spells known to bot's pet. Autocast spells will be shown in green)
-/t BOTNAME pet cast <SPELLID | (part of) SPELLNAME | SPELLLINK> 
+/t BOTNAME pet cast <SPELLID | (part of) SPELLNAME | SPELLLINK>
 /t BOTNAME pet toggle <SPELLID | (part of) SPELLNAME | SPELLLINK> (Toggle autocast for a given spell)
 /t BOTNAME pet state (Shows current react mode of bot's pet)
 /t BOTNAME pet react <(a)ggressive | (d)efensive | (p)assive> (Set bot's pet reaction mode)
- 
+
 Shortcuts:
 c = cast
 e = equip
