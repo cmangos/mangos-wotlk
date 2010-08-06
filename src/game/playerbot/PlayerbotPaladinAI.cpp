@@ -12,64 +12,64 @@ class PlayerbotAI;
 
 PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, PlayerbotAI* const ai): PlayerbotClassAI(master, bot, ai)
 {
+    RETRIBUTION_AURA              = ai->initSpell(RETRIBUTION_AURA_1);
+    CRUSADER_AURA                 = ai->initSpell(CRUSADER_AURA_1);
+    CRUSADER_STRIKE               = ai->initSpell(CRUSADER_STRIKE_1);
+    SEAL_OF_COMMAND               = ai->initSpell(SEAL_OF_COMMAND_1);
+    JUDGEMENT_OF_LIGHT            = ai->initSpell(JUDGEMENT_OF_LIGHT_1);
+    JUDGEMENT_OF_WISDOM           = ai->initSpell(JUDGEMENT_OF_WISDOM_1);
+    JUDGEMENT_OF_JUSTICE          = ai->initSpell(JUDGEMENT_OF_JUSTICE_1);
+    DIVINE_STORM                  = ai->initSpell(DIVINE_STORM_1);
+    BLESSING_OF_MIGHT             = ai->initSpell(BLESSING_OF_MIGHT_1);
+    GREATER_BLESSING_OF_MIGHT     = ai->initSpell(GREATER_BLESSING_OF_MIGHT_1);
+    HAMMER_OF_WRATH               = ai->initSpell(HAMMER_OF_WRATH_1);
+    FLASH_OF_LIGHT                = ai->initSpell(FLASH_OF_LIGHT_1); // Holy
+    HOLY_LIGHT                    = ai->initSpell(HOLY_LIGHT_1);
+    HOLY_SHOCK                    = ai->initSpell(HOLY_SHOCK_1);
+    HOLY_WRATH                    = ai->initSpell(HOLY_WRATH_1);
+    DIVINE_FAVOR                  = ai->initSpell(DIVINE_FAVOR_1);
+    CONCENTRATION_AURA            = ai->initSpell(CONCENTRATION_AURA_1);
+    BLESSING_OF_WISDOM            = ai->initSpell(BLESSING_OF_WISDOM_1);
+    GREATER_BLESSING_OF_WISDOM    = ai->initSpell(GREATER_BLESSING_OF_WISDOM_1);
+    CONSECRATION                  = ai->initSpell(CONSECRATION_1);
+    AVENGING_WRATH                = ai->initSpell(AVENGING_WRATH_1);
+    LAY_ON_HANDS                  = ai->initSpell(LAY_ON_HANDS_1);
+    EXORCISM                      = ai->initSpell(EXORCISM_1);
+    SACRED_SHIELD                 = ai->initSpell(SACRED_SHIELD_1);
+    DIVINE_PLEA                   = ai->initSpell(DIVINE_PLEA_1);
+    BLESSING_OF_KINGS             = ai->initSpell(BLESSING_OF_KINGS_1); // Protection
+    GREATER_BLESSING_OF_KINGS     = ai->initSpell(GREATER_BLESSING_OF_KINGS_1);
+    GREATER_BLESSING_OF_SANCTUARY = ai->initSpell(GREATER_BLESSING_OF_SANCTUARY_1);
+    HAMMER_OF_JUSTICE             = ai->initSpell(HAMMER_OF_JUSTICE_1);
+    RIGHTEOUS_FURY                = ai->initSpell(RIGHTEOUS_FURY_1);
+    RIGHTEOUS_DEFENSE             = ai->initSpell(RIGHTEOUS_DEFENSE_1);
+    SHADOW_RESISTANCE_AURA        = ai->initSpell(SHADOW_RESISTANCE_AURA_1);
+    DEVOTION_AURA                 = ai->initSpell(DEVOTION_AURA_1);
+    FIRE_RESISTANCE_AURA          = ai->initSpell(FIRE_RESISTANCE_AURA_1);
+    FROST_RESISTANCE_AURA         = ai->initSpell(FROST_RESISTANCE_AURA_1);
+    HAND_OF_PROTECTION            = ai->initSpell(HAND_OF_PROTECTION_1);
+    DIVINE_PROTECTION             = ai->initSpell(DIVINE_PROTECTION_1);
+    DIVINE_INTERVENTION           = ai->initSpell(DIVINE_INTERVENTION_1);
+    DIVINE_SACRIFICE              = ai->initSpell(DIVINE_SACRIFICE_1);
+    DIVINE_SHIELD                 = ai->initSpell(DIVINE_SHIELD_1);
+    HOLY_SHIELD                   = ai->initSpell(HOLY_SHIELD_1);
+    AVENGERS_SHIELD               = ai->initSpell(AVENGERS_SHIELD_1);
+    HAND_OF_SACRIFICE             = ai->initSpell(HAND_OF_SACRIFICE_1);
+    SHIELD_OF_RIGHTEOUSNESS       = ai->initSpell(SHIELD_OF_RIGHTEOUSNESS_1);
+    // Warrior auras
+    DEFENSIVE_STANCE              = 71;   //Def Stance
+    BERSERKER_STANCE              = 2458; //Ber Stance
+    BATTLE_STANCE                 = 2457; //Bat Stance
 
-    RETRIBUTION_AURA             = ai->getSpellId("retribution aura");// Retribution
-    CRUSADER_AURA                = ai->getSpellId("crusader aura");
-    CRUSADER_STRIKE              = ai->getSpellId("crusader strike");
-    SEAL_OF_COMMAND              = ai->getSpellId("command");
-    JUDGEMENT_OF_LIGHT           = ai->getSpellId("judgement of light");
-    JUDGEMENT_OF_WISDOM          = ai->getSpellId("judgement of wisdom");
-    JUDGEMENT_OF_JUSTICE         = ai->getSpellId("judgement of justice");
-    DIVINE_STORM                 = ai->getSpellId("divine storm");
-    BLESSING_OF_MIGHT            = ai->getSpellId("blessing of might");
-    GREATER_BLESSING_OF_MIGHT    = ai->getSpellId("greater blessing of might");
-    HAMMER_OF_WRATH              = ai->getSpellId("hammer of wrath");
-    FLASH_OF_LIGHT               = ai->getSpellId("flash of light"); // Holy
-    HOLY_LIGHT                   = ai->getSpellId("holy light");
-    HOLY_SHOCK                   = ai->getSpellId("shock");
-    HOLY_WRATH                   = ai->getSpellId("wrath");
-    DIVINE_FAVOR                 = ai->getSpellId("divine favor");
-    CONCENTRATION_AURA           = ai->getSpellId("concentration aura");
-    BLESSING_OF_WISDOM           = ai->getSpellId("blessing of wisdom");
-    GREATER_BLESSING_OF_WISDOM   = ai->getSpellId("greater blessing of wisdom");
-    CONSECRATION                 = ai->getSpellId("consecration");
-    AVENGING_WRATH               = ai->getSpellId("avenging wrath");
-    LAY_ON_HANDS                 = ai->getSpellId("lay on hands");
-    EXORCISM                     = ai->getSpellId("exorcism");
-    SACRED_SHIELD                = ai->getSpellId("sacred shield");
-    DIVINE_PLEA                  = ai->getSpellId("divine plea");
-    BLESSING_OF_KINGS            = ai->getSpellId("blessing of kings"); // Protection
-    GREATER_BLESSING_OF_KINGS    = ai->getSpellId("greater blessing of kings");
-    GREATER_BLESSING_OF_SANCTUARY= ai->getSpellId("greater blessing of sanctuary");
-    HAMMER_OF_JUSTICE            = ai->getSpellId("hammer of justice");
-    RIGHTEOUS_FURY               = ai->getSpellId("righteous fury");
-    RIGHTEOUS_DEFENSE            = ai->getSpellId("righteous defense");
-    SHADOW_RESISTANCE_AURA       = ai->getSpellId("shadow resistance aura");
-    DEVOTION_AURA                = ai->getSpellId("devotion aura");
-    FIRE_RESISTANCE_AURA         = ai->getSpellId("fire resistance aura");
-    FROST_RESISTANCE_AURA        = ai->getSpellId("frost resistance aura");
-    HAND_OF_PROTECTION           = ai->getSpellId("hand of protection");
-    DIVINE_PROTECTION            = ai->getSpellId("divine protection");
-    DIVINE_INTERVENTION          = ai->getSpellId("divine intervention");
-    DIVINE_SACRIFICE             = ai->getSpellId("divine");
-    DIVINE_SHIELD                = ai->getSpellId("divine shield");
-    HOLY_SHIELD                  = ai->getSpellId("holy shield");
-    AVENGERS_SHIELD              = ai->getSpellId("avenger's shield");
-    HAND_OF_SACRIFICE            = ai->getSpellId("hand of sacrifice");
-    SHIELD_OF_RIGHTEOUSNESS      = ai->getSpellId("shield of righteousness");
-    DEFENSIVE_STANCE             = 71; //Def Stance
-    BERSERKER_STANCE             = 2458; //Ber Stance
-    BATTLE_STANCE                = 2457; //Bat Stance
+    FORBEARANCE                   = 25771; // cannot be protected
 
-    FORBEARANCE                  = 25771; // cannot be protected
+    RECENTLY_BANDAGED             = 11196; // first aid check
 
-    RECENTLY_BANDAGED            = 11196; // first aid check
-
-	// racial
-    ARCANE_TORRENT               = ai->getSpellId("arcane torrent"); // blood elf
-    GIFT_OF_THE_NAARU            = ai->getSpellId("gift of the naaru"); // draenei
-    STONEFORM                    = ai->getSpellId("stoneform"); // dwarf
-    EVERY_MAN_FOR_HIMSELF        = ai->getSpellId("every man for himself"); // human
+    // racial
+    ARCANE_TORRENT                = ai->initSpell(ARCANE_TORRENT_MANA_CLASSES);
+    GIFT_OF_THE_NAARU             = ai->initSpell(GIFT_OF_THE_NAARU_PALADIN); // draenei
+    STONEFORM                     = ai->initSpell(STONEFORM_ALL); // dwarf
+    EVERY_MAN_FOR_HIMSELF         = ai->initSpell(EVERY_MAN_FOR_HIMSELF_ALL); // human
 }
 
 PlayerbotPaladinAI::~PlayerbotPaladinAI() {}
