@@ -5,67 +5,67 @@ class PlayerbotAI;
 PlayerbotShamanAI::PlayerbotShamanAI(Player* const master, Player* const bot, PlayerbotAI* const ai): PlayerbotClassAI(master, bot, ai)
 {
     // restoration
-    CHAIN_HEAL               = ai->getSpellId("chain heal");
-    HEALING_WAVE             = ai->getSpellId("healing wave");
-    LESSER_HEALING_WAVE      = ai->getSpellId("lesser healing wave");
-    RIPTIDE                  = ai->getSpellId("riptide");
-    ANCESTRAL_SPIRIT         = ai->getSpellId("ancestral spirit");
-    EARTH_SHIELD             = ai->getSpellId("earth shield");
-    WATER_SHIELD             = ai->getSpellId("water shield");
-    EARTHLIVING_WEAPON       = ai->getSpellId("earthliving weapon");
-    TREMOR_TOTEM             = ai->getSpellId("tremor totem"); // totems
-    HEALING_STREAM_TOTEM     = ai->getSpellId("healing stream totem");
-    MANA_SPRING_TOTEM        = ai->getSpellId("mana spring totem");
-    MANA_TIDE_TOTEM          = ai->getSpellId("mana tide totem");
+    CHAIN_HEAL               = ai->initSpell(CHAIN_HEAL_1);
+    HEALING_WAVE             = ai->initSpell(HEALING_WAVE_1);
+    LESSER_HEALING_WAVE      = ai->initSpell(LESSER_HEALING_WAVE_1);
+    RIPTIDE                  = ai->initSpell(RIPTIDE_1);
+    ANCESTRAL_SPIRIT         = ai->initSpell(ANCESTRAL_SPIRIT_1);
+    EARTH_SHIELD             = ai->initSpell(EARTH_SHIELD_1);
+    WATER_SHIELD             = ai->initSpell(WATER_SHIELD_1);
+    EARTHLIVING_WEAPON       = ai->initSpell(EARTHLIVING_WEAPON_1);
+    TREMOR_TOTEM             = ai->initSpell(TREMOR_TOTEM_1); // totems
+    HEALING_STREAM_TOTEM     = ai->initSpell(HEALING_STREAM_TOTEM_1);
+    MANA_SPRING_TOTEM        = ai->initSpell(MANA_SPRING_TOTEM_1);
+    MANA_TIDE_TOTEM          = ai->initSpell(MANA_TIDE_TOTEM_1);
     // enhancement
-    FOCUSED                  = ai->getSpellId("focused");
-    STORMSTRIKE              = ai->getSpellId("stormstrike");
-    LAVA_LASH                = ai->getSpellId("lava lash");
-    SHAMANISTIC_RAGE         = ai->getSpellId("shamanistic rage");
-    BLOODLUST                = ai->getSpellId("bloodlust");
-    HEROISM                  = ai->getSpellId("heroism");
-    FERAL_SPIRIT             = ai->getSpellId("feral spirit");
-    LIGHTNING_SHIELD         = ai->getSpellId("lightning");
-    ROCKBITER_WEAPON         = ai->getSpellId("rockbiter");
-    FLAMETONGUE_WEAPON       = ai->getSpellId("flametongue weapon");
-    FROSTBRAND_WEAPON        = ai->getSpellId("frostbrand weapon");
-    WINDFURY_WEAPON          = ai->getSpellId("windfury weapon");
-    STONESKIN_TOTEM          = ai->getSpellId("stoneskin totem"); // totems
-    STRENGTH_OF_EARTH_TOTEM  = ai->getSpellId("strength of earth totem");
-    FROST_RESISTANCE_TOTEM   = ai->getSpellId("frost resistance totem");
-    FLAMETONGUE_TOTEM        = ai->getSpellId("flametongue totem");
-    FIRE_RESISTANCE_TOTEM    = ai->getSpellId("fire resistance totem");
-    GROUNDING_TOTEM          = ai->getSpellId("grounding totem");
-    NATURE_RESISTANCE_TOTEM  = ai->getSpellId("nature resistance totem");
-    WIND_FURY_TOTEM          = ai->getSpellId("wind fury totem");
-    STONESKIN_TOTEM          = ai->getSpellId("stoneskin totem");
-    WRATH_OF_AIR_TOTEM       = ai->getSpellId("wrath of air totem");
-    EARTH_ELEMENTAL_TOTEM    = ai->getSpellId("earth elemental totem");
+    FOCUSED                  = 0; // Focused what?
+    STORMSTRIKE              = ai->initSpell(STORMSTRIKE_1);
+    LAVA_LASH                = ai->initSpell(LAVA_LASH_1);
+    SHAMANISTIC_RAGE         = ai->initSpell(SHAMANISTIC_RAGE_1);
+    BLOODLUST                = ai->initSpell(BLOODLUST_1);
+    HEROISM                  = ai->initSpell(HEROISM_1);
+    FERAL_SPIRIT             = ai->initSpell(FERAL_SPIRIT_1);
+    LIGHTNING_SHIELD         = ai->initSpell(LIGHTNING_SHIELD_1);
+    ROCKBITER_WEAPON         = ai->initSpell(ROCKBITER_WEAPON_1);
+    FLAMETONGUE_WEAPON       = ai->initSpell(FLAMETONGUE_WEAPON_1);
+    FROSTBRAND_WEAPON        = ai->initSpell(FROSTBRAND_WEAPON_1);
+    WINDFURY_WEAPON          = ai->initSpell(WINDFURY_WEAPON_1);
+    STONESKIN_TOTEM          = ai->initSpell(STONESKIN_TOTEM_1); // totems
+    STRENGTH_OF_EARTH_TOTEM  = ai->initSpell(STRENGTH_OF_EARTH_TOTEM_1);
+    FROST_RESISTANCE_TOTEM   = ai->initSpell(FROST_RESISTANCE_TOTEM_1);
+    FLAMETONGUE_TOTEM        = ai->initSpell(FLAMETONGUE_TOTEM_1);
+    FIRE_RESISTANCE_TOTEM    = ai->initSpell(FIRE_RESISTANCE_TOTEM_1);
+    GROUNDING_TOTEM          = ai->initSpell(GROUNDING_TOTEM_1);
+    NATURE_RESISTANCE_TOTEM  = ai->initSpell(NATURE_RESISTANCE_TOTEM_1);
+    WIND_FURY_TOTEM          = ai->initSpell(WINDFURY_TOTEM_1);
+    STONESKIN_TOTEM          = ai->initSpell(STONESKIN_TOTEM_1);
+    WRATH_OF_AIR_TOTEM       = ai->initSpell(WRATH_OF_AIR_TOTEM_1);
+    EARTH_ELEMENTAL_TOTEM    = ai->initSpell(EARTH_ELEMENTAL_TOTEM_1);
     // elemental
-    LIGHTNING_BOLT           = ai->getSpellId("lightning bolt");
-    EARTH_SHOCK              = ai->getSpellId("earth shock");
-    FLAME_SHOCK              = ai->getSpellId("flame shock");
-    PURGE                    = ai->getSpellId("purge");
-    WIND_SHOCK               = ai->getSpellId("wind shock");
-    FROST_SHOCK              = ai->getSpellId("frost shock");
-    CHAIN_LIGHTNING          = ai->getSpellId("chain lightning");
-    LAVA_BURST               = ai->getSpellId("lava burst");
-    HEX                      = ai->getSpellId("hex");
-    STONECLAW_TOTEM          = ai->getSpellId("stoneclaw totem"); // totems
-    SEARING_TOTEM            = ai->getSpellId("searing totem");
-    FIRE_NOVA_TOTEM          = ai->getSpellId("fire nova totem");
-    MAGMA_TOTEM              = ai->getSpellId("magma totem");
-    EARTHBIND_TOTEM          = ai->getSpellId("earthbind totem");
-    TOTEM_OF_WRATH           = ai->getSpellId("totem of wrath");
-    FIRE_ELEMENTAL_TOTEM     = ai->getSpellId("fire elemental totem");
+    LIGHTNING_BOLT           = ai->initSpell(LIGHTNING_BOLT_1);
+    EARTH_SHOCK              = ai->initSpell(EARTH_SHOCK_1);
+    FLAME_SHOCK              = ai->initSpell(FLAME_SHOCK_1);
+    PURGE                    = ai->initSpell(PURGE_1);
+    WIND_SHOCK               = 0; //NPC spell
+    FROST_SHOCK              = ai->initSpell(FROST_SHOCK_1);
+    CHAIN_LIGHTNING          = ai->initSpell(CHAIN_LIGHTNING_1);
+    LAVA_BURST               = ai->initSpell(LAVA_BURST_1);
+    HEX                      = ai->initSpell(HEX_1);
+    STONECLAW_TOTEM          = ai->initSpell(STONECLAW_TOTEM_1); // totems
+    SEARING_TOTEM            = ai->initSpell(SEARING_TOTEM_1);
+    FIRE_NOVA_TOTEM          = 0; // NPC only spell, check FIRE_NOVA_1
+    MAGMA_TOTEM              = ai->initSpell(MAGMA_TOTEM_1);
+    EARTHBIND_TOTEM          = ai->initSpell(EARTHBIND_TOTEM_1);
+    TOTEM_OF_WRATH           = ai->initSpell(TOTEM_OF_WRATH_1);
+    FIRE_ELEMENTAL_TOTEM     = ai->initSpell(FIRE_ELEMENTAL_TOTEM_1);
 
     RECENTLY_BANDAGED        = 11196; // first aid check
 
     // racial
-    GIFT_OF_THE_NAARU        = ai->getSpellId("gift of the naaru"); // draenei
-    BLOOD_FURY               = ai->getSpellId("blood fury"); // orc
-    WAR_STOMP                = ai->getSpellId("war stomp"); // tauren
-    BERSERKING               = ai->getSpellId("berserking"); // troll
+    GIFT_OF_THE_NAARU        = ai->initSpell(GIFT_OF_THE_NAARU_SHAMAN); // draenei
+    BLOOD_FURY               = ai->initSpell(BLOOD_FURY_SHAMAN); // orc
+    WAR_STOMP                = ai->initSpell(WAR_STOMP_ALL); // tauren
+    BERSERKING               = ai->initSpell(BERSERKING_ALL); // troll
 }
 
 PlayerbotShamanAI::~PlayerbotShamanAI() {}
