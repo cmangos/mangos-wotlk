@@ -7,66 +7,64 @@ class PlayerbotAI;
 PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* const bot, PlayerbotAI* const ai): PlayerbotClassAI(master, bot, ai)
 {
 
-    PLAGUE_STRIKE     = ai->getSpellId("plague strike"); // Unholy
-    DEATH_GRIP        = ai->getSpellId("death grip");
-    DEATH_COIL        = ai->getSpellId("death coil");
-    DEATH_STRIKE      = ai->getSpellId("death strike");
-    UNHOLY_BLIGHT     = ai->getSpellId("unholy blight");
-    SCOURGE_STRIKE    = ai->getSpellId("scourge strike");
-    DEATH_AND_DECAY   = ai->getSpellId("death and decay");
-    CORPSE_EXPLOSION  = ai->getSpellId("corpse explosion");
-    BONE_SHIELD		  = ai->getSpellId("shield"); // buffs
-    ANTI_MAGIC_SHELL  = ai->getSpellId("anti-magic shell");
-    ANTI_MAGIC_ZONE   = ai->getSpellId("anti-magic");
-    GHOUL_FRENZY      = ai->getSpellId("ghoul frenzy");
-    RAISE_DEAD        = ai->getSpellId("raise dead"); // pets
-    SUMMON_GARGOYLE   = ai->getSpellId("summon gargoyle");
-    ARMY_OF_THE_DEAD  = ai->getSpellId("army of the dead");
-    ICY_TOUCH         = ai->getSpellId("icy touch"); // Frost
-    OBLITERATE        = ai->getSpellId("obliterate");
-    HOWLING_BLAST     = ai->getSpellId("howling blast");
-    FROST_STRIKE      = ai->getSpellId("frost strike");
-    CHAINS_OF_ICE     = ai->getSpellId("chains of ice");
-    RUNE_STRIKE       = ai->getSpellId("rune strike");
-    ICY_CLUTCH        = ai->getSpellId("icy clutch");
-    MIND_FREEZE       = ai->getSpellId("mind freeze");
-    HUNGERING_COLD    = ai->getSpellId("hungering cold");
-    KILLING_MACHINE   = ai->getSpellId("killing machine"); // buffs
-    DEATHCHILL        = ai->getSpellId("deathchill");
-    HORN_OF_WINTER    = ai->getSpellId("horn of winter");
-    ICEBOUND_FORTITUDE= ai->getSpellId("icebound fortitude");
-    EMPOWER_WEAPON    = ai->getSpellId("empower rune weapon");
-    UNBREAKABLE_ARMOR = ai->getSpellId("unbreakable armor");
-    BLOOD_STRIKE      = ai->getSpellId("blood strike"); // Blood
-    PESTILENCE        = ai->getSpellId("pestilence");
-    STRANGULATE       = ai->getSpellId("strangulate");
-    BLOOD_BOIL        = ai->getSpellId("blood boil");
-    HEART_STRIKE      = ai->getSpellId("heart strike");
-    DANCING_WEAPON    = ai->getSpellId("dancing rune weapon");
-    DARK_COMMAND      = ai->getSpellId("dark command");
-    MARK_OF_BLOOD     = ai->getSpellId("mark of blood"); // buffs
-    RUNE_TAP		  = ai->getSpellId("rune tap");
-    VAMPIRIC_BLOOD    = ai->getSpellId("vampiric blood");
-    DEATH_PACT        = ai->getSpellId("death pact");
-    DEATH_RUNE_MASTERY= ai->getSpellId("death rune mastery");
-    HYSTERIA          = ai->getSpellId("hysteria");
-    UNHOLY_PRESENCE   = ai->getSpellId("unholy presence"); // presence (TODO: better spell == presence)
-    FROST_PRESENCE    = ai->getSpellId("frost presence");
-    BLOOD_PRESENCE    = ai->getSpellId("blood presence");
+    PLAGUE_STRIKE     = ai->initSpell(PLAGUE_STRIKE_1); // Unholy
+    DEATH_GRIP        = ai->initSpell(DEATH_GRIP_1);
+    DEATH_COIL        = ai->initSpell(DEATH_COIL_1);
+    DEATH_STRIKE      = ai->initSpell(DEATH_STRIKE_1);
+    UNHOLY_BLIGHT     = 0; // Passive
+    SCOURGE_STRIKE    = ai->initSpell(SCOURGE_STRIKE_1);
+    DEATH_AND_DECAY   = ai->initSpell(DEATH_AND_DECAY_1);
+    CORPSE_EXPLOSION  = ai->initSpell(CORPSE_EXPLOSION_1);
+    BONE_SHIELD		  = ai->initSpell(BONE_SHIELD_1); // buffs
+    ANTI_MAGIC_SHELL  = ai->initSpell(ANTI_MAGIC_SHELL_1);
+    ANTI_MAGIC_ZONE   = ai->initSpell(ANTI_MAGIC_ZONE_1);
+    GHOUL_FRENZY      = ai->initSpell(GHOUL_FRENZY_1);
+    RAISE_DEAD        = ai->initSpell(RAISE_DEAD_1); // pets
+    SUMMON_GARGOYLE   = ai->initSpell(SUMMON_GARGOYLE_1);
+    ARMY_OF_THE_DEAD  = ai->initSpell(ARMY_OF_THE_DEAD_1);
+    ICY_TOUCH         = ai->initSpell(ICY_TOUCH_1); // Frost
+    OBLITERATE        = ai->initSpell(OBLITERATE_1);
+    HOWLING_BLAST     = ai->initSpell(HOWLING_BLAST_1);
+    FROST_STRIKE      = ai->initSpell(FROST_STRIKE_1);
+    CHAINS_OF_ICE     = ai->initSpell(CHAINS_OF_ICE_1);
+    RUNE_STRIKE       = ai->initSpell(RUNE_STRIKE_1);
+    ICY_CLUTCH        = 0; // No such spell
+    MIND_FREEZE       = ai->initSpell(MIND_FREEZE_1);
+    HUNGERING_COLD    = ai->initSpell(HUNGERING_COLD_1);
+    KILLING_MACHINE   = 0; // Passive
+    DEATHCHILL        = ai->initSpell(DEATHCHILL_1);
+    HORN_OF_WINTER    = ai->initSpell(HORN_OF_WINTER_1);
+    ICEBOUND_FORTITUDE= ai->initSpell(ICEBOUND_FORTITUDE_1);
+    EMPOWER_WEAPON    = ai->initSpell(EMPOWER_RUNE_WEAPON_1);
+    UNBREAKABLE_ARMOR = ai->initSpell(UNBREAKABLE_ARMOR_1);
+    BLOOD_STRIKE      = ai->initSpell(BLOOD_STRIKE_1); // Blood
+    PESTILENCE        = ai->initSpell(PESTILENCE_1);
+    STRANGULATE       = ai->initSpell(STRANGULATE_1);
+    BLOOD_BOIL        = ai->initSpell(BLOOD_BOIL_1);
+    HEART_STRIKE      = ai->initSpell(HEART_STRIKE_1);
+    DANCING_WEAPON    = ai->initSpell(DANCING_RUNE_WEAPON_1);
+    DARK_COMMAND      = ai->initSpell(DARK_COMMAND_1);
+    MARK_OF_BLOOD     = ai->initSpell(MARK_OF_BLOOD_1); // buffs
+    RUNE_TAP		  = ai->initSpell(RUNE_TAP_1);
+    VAMPIRIC_BLOOD    = ai->initSpell(VAMPIRIC_BLOOD_1);
+    DEATH_PACT        = ai->initSpell(DEATH_PACT_1);
+    HYSTERIA          = ai->initSpell(HYSTERIA_1);
+    UNHOLY_PRESENCE   = ai->initSpell(UNHOLY_PRESENCE_1); // presence (TODO: better spell == presence)
+    FROST_PRESENCE    = ai->initSpell(FROST_PRESENCE_1);
+    BLOOD_PRESENCE    = ai->initSpell(BLOOD_PRESENCE_1);
 
     RECENTLY_BANDAGED = 11196; // first aid check
 
 	// racial
-    ARCANE_TORRENT          = ai->getSpellId("arcane torrent"); // blood elf
-    GIFT_OF_THE_NAARU       = ai->getSpellId("gift of the naaru"); // draenei
-    STONEFORM               = ai->getSpellId("stoneform"); // dwarf
-    ESCAPE_ARTIST           = ai->getSpellId("escape artist"); // gnome
-    EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
-    SHADOWMELD              = ai->getSpellId("shadowmeld"); // night elf
-    BLOOD_FURY              = ai->getSpellId("blood fury"); // orc
-    WAR_STOMP               = ai->getSpellId("war stomp"); // tauren
-    BERSERKING              = ai->getSpellId("berserking"); // troll
-    WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
+    ARCANE_TORRENT          = ai->initSpell(ARCANE_TORRENT_DEATH_KNIGHT); // blood elf
+    GIFT_OF_THE_NAARU       = ai->initSpell(GIFT_OF_THE_NAARU_DEATH_KNIGHT); // draenei
+    STONEFORM               = ai->initSpell(STONEFORM_ALL); // dwarf
+    ESCAPE_ARTIST           = ai->initSpell(ESCAPE_ARTIST_ALL); // gnome
+    EVERY_MAN_FOR_HIMSELF   = ai->initSpell(EVERY_MAN_FOR_HIMSELF_ALL); // human
+    BLOOD_FURY              = ai->initSpell(BLOOD_FURY_MELEE_CLASSES); // orc
+    WAR_STOMP               = ai->initSpell(WAR_STOMP_ALL); // tauren
+    BERSERKING              = ai->initSpell(BERSERKING_ALL); // troll
+    WILL_OF_THE_FORSAKEN    = ai->initSpell(WILL_OF_THE_FORSAKEN_ALL); // undead
 }
 
 PlayerbotDeathKnightAI::~PlayerbotDeathKnightAI() {}

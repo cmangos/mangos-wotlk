@@ -12,8 +12,8 @@ enum
 
 enum DeathKnightSpells
 {
-    ANTIMAGIC_SHELL_1               = 48707,
-    ANTIMAGIC_ZONE_1                = 51052,
+    ANTI_MAGIC_SHELL_1              = 48707,
+    ANTI_MAGIC_ZONE_1               = 51052,
     ARMY_OF_THE_DEAD_1              = 42650,
     BLOOD_BOIL_1                    = 48721,
     BLOOD_PRESENCE_1                = 48266,
