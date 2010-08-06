@@ -34,6 +34,7 @@ enum RacialTraits
     GIFT_OF_THE_NAARU_PRIEST       = 59544,
     GIFT_OF_THE_NAARU_SHAMAN       = 59547,
     GIFT_OF_THE_NAARU_WARRIOR      = 28880,
+    SHADOWMELD_ALL                 = 58984,
     STONEFORM_ALL                  = 20594,
     WAR_STOMP_ALL                  = 20549,
     WILL_OF_THE_FORSAKEN_ALL       = 7744
