@@ -5,68 +5,58 @@ class PlayerbotAI;
 
 PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, PlayerbotAI* const ai): PlayerbotClassAI(master, bot, ai)
 {
-    RENEW              = ai->getSpellId("renew");
-    if((HEAL = ai->getSpellId ("greater heal"))>0)
-        HEAL           = ai->getSpellId("greater heal");
-    else if((HEAL = ai->getSpellId ("heal"))>0 && (HEAL = ai->getSpellId ("greater heal"))==0)
-        HEAL           = ai->getSpellId("heal");
-    else if((HEAL = ai->getSpellId ("greater heal"))==0 && (HEAL = ai->getSpellId ("heal"))==0)
-        HEAL           = ai->getSpellId("lesser heal");
+    RENEW                         = ai->initSpell(RENEW_1);
+    HEAL                          = ai->initSpell(HEAL_1);
+    LESSER_HEAL                   = ai->initSpell(LESSER_HEAL_1);
+    GREATER_HEAL                  = ai->initSpell(GREATER_HEAL_1);
+    FLASH_HEAL                    = ai->initSpell(FLASH_HEAL_1);
+    RESURRECTION                  = ai->initSpell(RESURRECTION_1);
+    SMITE                         = ai->initSpell(SMITE_1);
+    MANA_BURN                     = ai->initSpell(MANA_BURN_1);
+    HOLY_NOVA                     = ai->initSpell(HOLY_NOVA_1);
+    HOLY_FIRE                     = ai->initSpell(HOLY_FIRE_1);
+    DESPERATE_PRAYER              = ai->initSpell(DESPERATE_PRAYER_1);
+    PRAYER_OF_HEALING             = ai->initSpell(PRAYER_OF_HEALING_1);
+    CIRCLE_OF_HEALING             = ai->initSpell(CIRCLE_OF_HEALING_1);
+    BINDING_HEAL                  = ai->initSpell(BINDING_HEAL_1);
+    PRAYER_OF_MENDING             = ai->initSpell(PRAYER_OF_MENDING_1);
 
-    GREAT_HEAL         = ai->getSpellId("great heal");
-    FLASH_HEAL         = ai->getSpellId("flash heal");
-    REZZ               = ai->getSpellId("resurrection");
-    SMITE              = ai->getSpellId("smite");
-    MANA_BURN          = ai->getSpellId("mana burn");
-    HOLY_NOVA          = ai->getSpellId("holy nova");
-    HOLY_FIRE          = ai->getSpellId("holy fire");
-    DESPERATE_PRAYER   = ai->getSpellId("desperate prayer");
-    PRAYER_OF_HEALING  = ai->getSpellId("prayer of healing");
-    CIRCLE_OF_HEALING  = ai->getSpellId("circle of healing");
-    BINDING_HEAL       = ai->getSpellId("binding heal");
-    PRAYER_OF_MENDING  = ai->getSpellId("prayer of mending");
-    //SHADOWMAGIC
-    FADE               = ai->getSpellId("fade");
-    PAIN               = ai->getSpellId("shadow word: pain");
-    MIND_BLAST         = ai->getSpellId("mind blast");
-    SCREAM             = ai->getSpellId("psychic scream");
-    MIND_FLAY          = ai->getSpellId("mind flay");
-    DEVOURING_PLAGUE   = ai->getSpellId("devouring plague");
-    SHADOW_PROTECTION  = ai->getSpellId("shadow protection");
-    VAMPIRIC_TOUCH     = ai->getSpellId("vampiric touch");
-    PRAYER_OF_SHADOW_PROTECTION = ai->getSpellId("prayer of shadow protection");
-    SHADOWFIEND        = ai->getSpellId("shadowfiend");
-    MIND_SEAR          = ai->getSpellId("mind sear");
-    //DISCIPLINE
-    PENANCE         = ai->getSpellId("penance");
-    INNER_FIRE         = ai->getSpellId("inner fire");
-    PWS                = ai->getSpellId("power word: shield");
-    if((FORTITUDE = ai->getSpellId ("prayer of fortitude"))>0)
-        FORTITUDE      = ai->getSpellId("prayer of fortitude");
-    if((FORTITUDE = ai->getSpellId ("power word: fortitude"))>0 && (FORTITUDE = ai->getSpellId ("prayer of fortitude"))==0)
-        FORTITUDE      = ai->getSpellId("power word: fortitude");
+    // SHADOW
+    FADE                          = ai->initSpell(FADE_1);
+    SHADOW_WORD_PAIN              = ai->initSpell(SHADOW_WORD_PAIN_1);
+    MIND_BLAST                    = ai->initSpell(MIND_BLAST_1);
+    SCREAM                        = ai->initSpell(PSYCHIC_SCREAM_1);
+    MIND_FLAY                     = ai->initSpell(MIND_FLAY_1);
+    DEVOURING_PLAGUE              = ai->initSpell(DEVOURING_PLAGUE_1);
+    SHADOW_PROTECTION             = ai->initSpell(SHADOW_PROTECTION_1);
+    VAMPIRIC_TOUCH                = ai->initSpell(VAMPIRIC_TOUCH_1);
+    PRAYER_OF_SHADOW_PROTECTION   = ai->initSpell(PRAYER_OF_SHADOW_PROTECTION_1);
+    SHADOWFIEND                   = ai->initSpell(SHADOWFIEND_1);
+    MIND_SEAR                     = ai->initSpell(MIND_SEAR_1);
 
-    FEAR_WARD          = ai->getSpellId("fear ward");
-    if((DSPIRIT = ai->getSpellId ("prayer of spirit"))>0)
-        DSPIRIT        = ai->getSpellId("prayer of spirit");
-    if((DSPIRIT = ai->getSpellId ("divine spirit"))>0 && (DSPIRIT = ai->getSpellId ("prayer of spirit"))==0)
-        DSPIRIT        = ai->getSpellId("divine spirit");
-
-    MASS_DISPEL        = ai->getSpellId("mass dispel");
-    POWER_INFUSION     = ai->getSpellId("power infusion");
-    DIVINE_SPIRIT      = ai->getSpellId("divine spirit");
-    INNER_FOCUS        = ai->getSpellId("inner focus");
+    // DISCIPLINE
+    PENANCE                       = ai->initSpell(PENANCE_1);
+    INNER_FIRE                    = ai->initSpell(INNER_FIRE_1);
+    POWER_WORD_SHIELD             = ai->initSpell(POWER_WORD_SHIELD_1);
+    POWER_WORD_FORTITUDE          = ai->initSpell(POWER_WORD_FORTITUDE_1);
+    PRAYER_OF_FORTITUDE           = ai->initSpell(PRAYER_OF_FORTITUDE_1);
+    FEAR_WARD                     = ai->initSpell(FEAR_WARD_1);
+    DIVINE_SPIRIT                 = ai->initSpell(DIVINE_SPIRIT_1);
+    PRAYER_OF_SPIRIT              = ai->initSpell(PRAYER_OF_SPIRIT_1);
+    MASS_DISPEL                   = ai->initSpell(MASS_DISPEL_1);
+    POWER_INFUSION                = ai->initSpell(POWER_INFUSION_1);
+    INNER_FOCUS                   = ai->initSpell(INNER_FOCUS_1);
 
     RECENTLY_BANDAGED  = 11196; // first aid check
 
     // racial
-    ARCANE_TORRENT          = ai->getSpellId("arcane torrent"); // blood elf
-    GIFT_OF_THE_NAARU       = ai->getSpellId("gift of the naaru"); // draenei
-    STONEFORM               = ai->getSpellId("stoneform"); // dwarf
-    EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
-    SHADOWMELD              = ai->getSpellId("shadowmeld"); // night elf
-    BERSERKING              = ai->getSpellId("berserking"); // troll
-    WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
+    ARCANE_TORRENT                = ai->initSpell(ARCANE_TORRENT_MANA_CLASSES);
+    GIFT_OF_THE_NAARU             = ai->initSpell(GIFT_OF_THE_NAARU_PRIEST); // draenei
+    STONEFORM                     = ai->initSpell(STONEFORM_ALL); // dwarf
+    EVERY_MAN_FOR_HIMSELF         = ai->initSpell(EVERY_MAN_FOR_HIMSELF_ALL); // human
+    SHADOWMELD                    = ai->initSpell(SHADOWMELD_ALL);
+    BERSERKING                    = ai->initSpell(BERSERKING_ALL); // troll
+    WILL_OF_THE_FORSAKEN          = ai->initSpell(WILL_OF_THE_FORSAKEN_ALL); // undead
 }
 
 PlayerbotPriestAI::~PlayerbotPriestAI() {}
@@ -84,10 +74,10 @@ void PlayerbotPriestAI::HealTarget(Unit &target, uint8 hp)
         ai->TellMaster("I'm casting flash heal.");
         ai->CastSpell(FLASH_HEAL, target);
     }
-    else if (hp < 30 && GREAT_HEAL > 0 && ai->GetManaPercent() >= 36)
+    else if (hp < 30 && GREATER_HEAL > 0 && ai->GetManaPercent() >= 36)
     {
         ai->TellMaster("I'm casting one of the sorted heal spells.");
-        ai->CastSpell(GREAT_HEAL, target);
+        ai->CastSpell(GREATER_HEAL, target);
     }
     else if (hp < 33 && BINDING_HEAL > 0 && ai->GetManaPercent() >= 27)
     {
@@ -128,11 +118,11 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     {
         case PlayerbotAI::SCENARIO_DUEL:
             (ai->HasAura(SCREAM,*pTarget) && ai->GetHealthPercent() < 60 && ai->CastSpell(HEAL)) ||
-                ai->CastSpell(PAIN) ||
+                ai->CastSpell(SHADOW_WORD_PAIN) ||
                 (ai->GetHealthPercent() < 80 && ai->CastSpell(RENEW)) ||
                 (ai->GetPlayerBot()->GetDistance(pTarget) <= 5 && ai->CastSpell(SCREAM)) ||
                 ai->CastSpell(MIND_BLAST) ||
-                (ai->GetHealthPercent() < 20 && ai->CastSpell(GREAT_HEAL)) ||
+                (ai->GetHealthPercent() < 20 && ai->CastSpell(GREATER_HEAL)) ||
                 ai->CastSpell(SMITE);
             return;
     }
@@ -150,10 +140,10 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
         ai->TellMaster("I'm casting fade.");
         ai->CastSpell(FADE, *m_bot);
     }
-    else if (ai->GetHealthPercent() < 25 && PWS > 0 && !m_bot->HasAura(PWS, EFFECT_INDEX_0))
+    else if (ai->GetHealthPercent() < 25 && POWER_WORD_SHIELD > 0 && !m_bot->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0))
     {
         ai->TellMaster("I'm casting pws on myself.");
-        ai->CastSpell(PWS);
+        ai->CastSpell(POWER_WORD_SHIELD);
     }
     else if (ai->GetHealthPercent() < 35 && DESPERATE_PRAYER > 0)
     {
@@ -167,8 +157,8 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     uint32 masterHP = GetMaster()->GetHealth()*100 / GetMaster()->GetMaxHealth();
     if (GetMaster()->isAlive())
     {
-        if (masterHP < 25 && PWS > 0 && !GetMaster()->HasAura(PWS, EFFECT_INDEX_0))
-                ai->CastSpell(PWS, *(GetMaster()));
+        if (masterHP < 25 && POWER_WORD_SHIELD > 0 && !GetMaster()->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0))
+                ai->CastSpell(POWER_WORD_SHIELD, *(GetMaster()));
         else if (masterHP < 80)
             HealTarget (*GetMaster(), masterHP);
     }
@@ -247,10 +237,10 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
              //break;
 
         case SPELL_SHADOWMAGIC:
-            if (PAIN > 0 && LastSpellShadowMagic <1 && !pTarget->HasAura(PAIN, EFFECT_INDEX_0) && ai->GetManaPercent() >= 25)
+            if (SHADOW_WORD_PAIN > 0 && LastSpellShadowMagic <1 && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && ai->GetManaPercent() >= 25)
             {
                 //ai->TellMaster("I'm casting pain.");
-                ai->CastSpell(PAIN, *pTarget);
+                ai->CastSpell(SHADOW_WORD_PAIN, *pTarget);
                 SpellSequence = SPELL_DISCIPLINE;
                 LastSpellShadowMagic = LastSpellShadowMagic +1;
                 break;
@@ -392,15 +382,15 @@ void PlayerbotPriestAI::DoNonCombatActions()
     SpellSequence = SPELL_HOLY;
 
     // buff myself
-    if (FORTITUDE > 0)
-        (!m_bot->HasAura(FORTITUDE, EFFECT_INDEX_0) && ai->CastSpell (FORTITUDE, *m_bot));
+    if (POWER_WORD_FORTITUDE > 0)
+        (!m_bot->HasAura(POWER_WORD_FORTITUDE, EFFECT_INDEX_0) && ai->CastSpell (POWER_WORD_FORTITUDE, *m_bot));
 
     if (INNER_FIRE > 0)
         (!m_bot->HasAura(INNER_FIRE, EFFECT_INDEX_0) && ai->CastSpell (INNER_FIRE, *m_bot));
 
     // buff master
-    if (FORTITUDE > 0)
-        (!GetMaster()->HasAura(FORTITUDE, EFFECT_INDEX_0) && ai->CastSpell(FORTITUDE,*(GetMaster())) );
+    if (POWER_WORD_FORTITUDE > 0)
+        (!GetMaster()->HasAura(POWER_WORD_FORTITUDE, EFFECT_INDEX_0) && ai->CastSpell(POWER_WORD_FORTITUDE,*(GetMaster())) );
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
@@ -451,17 +441,17 @@ void PlayerbotPriestAI::DoNonCombatActions()
             // first rezz em
             if ( !tPlayer->isAlive() && !tPlayer->GetPlayerbotAI() )
             {
-                std::string msg = "rezzing ";
+                std::string msg = "Resurrecting ";
                 msg += tPlayer->GetName();
                 GetPlayerBot()->Say(msg, LANG_UNIVERSAL);
-                ai->CastSpell(REZZ, *tPlayer);
+                ai->CastSpell(RESURRECTION, *tPlayer);
                 // rez is only 10 sec, but give time for lag
                 ai->SetIgnoreUpdateTime(17);
             }
             else if( tPlayer->isAlive() )
             {
                 // buff and heal
-                (!tPlayer->HasAura(FORTITUDE, EFFECT_INDEX_0) && ai->CastSpell (FORTITUDE, *tPlayer));
+                (!tPlayer->HasAura(POWER_WORD_FORTITUDE, EFFECT_INDEX_0) && ai->CastSpell (POWER_WORD_FORTITUDE, *tPlayer));
                 (HealTarget(*tPlayer, tPlayer->GetHealth()*100 / tPlayer->GetMaxHealth()));
             }
         }
@@ -470,5 +460,5 @@ void PlayerbotPriestAI::DoNonCombatActions()
 
 void PlayerbotPriestAI::BuffPlayer(Player* target)
 {
-    GetAI()->CastSpell(FORTITUDE, *target);
+    GetAI()->CastSpell(POWER_WORD_FORTITUDE, *target);
 }

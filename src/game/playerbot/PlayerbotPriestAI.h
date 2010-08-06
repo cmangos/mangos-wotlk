@@ -92,19 +92,62 @@ class MANGOS_DLL_SPEC PlayerbotPriestAI : PlayerbotClassAI
         void HealTarget (Unit& target, uint8 hp);
 
         // holy
-        uint32 GREAT_HEAL, RENEW, HEAL, FLASH_HEAL, REZZ, SMITE, CLEARCASTING, HOLY_NOVA, HOLY_FIRE, DESPERATE_PRAYER, PRAYER_OF_HEALING, CIRCLE_OF_HEALING, BINDING_HEAL, PRAYER_OF_MENDING, MANA_BURN;
+        uint32 BINDING_HEAL,
+               CIRCLE_OF_HEALING,
+               CLEARCASTING,
+               DESPERATE_PRAYER,
+               FLASH_HEAL,
+               GREATER_HEAL,
+               HEAL,
+               HOLY_FIRE,
+               HOLY_NOVA,
+               LESSER_HEAL,
+               MANA_BURN,
+               PRAYER_OF_HEALING,
+               PRAYER_OF_MENDING,
+               RENEW,
+               RESURRECTION,
+               SMITE;
 
         // shadowmagic
-        uint32 FADE, PAIN, MIND_BLAST, SCREAM, MIND_FLAY, DEVOURING_PLAGUE, SHADOW_PROTECTION, VAMPIRIC_TOUCH, PRAYER_OF_SHADOW_PROTECTION, SHADOWFIEND, MIND_SEAR;
+        uint32 FADE,
+               SHADOW_WORD_PAIN,
+               MIND_BLAST,
+               SCREAM,
+               MIND_FLAY,
+               DEVOURING_PLAGUE,
+               SHADOW_PROTECTION,
+               VAMPIRIC_TOUCH,
+               PRAYER_OF_SHADOW_PROTECTION,
+               SHADOWFIEND,
+               MIND_SEAR;
 
         // discipline
-        uint32 PWS, INNER_FIRE, FORTITUDE, TOUCH_OF_WEAKNESS, FEAR_WARD, DSPIRIT, POWER_INFUSION, MASS_DISPEL, PENANCE, DIVINE_SPIRIT, INNER_FOCUS;
+        uint32 POWER_WORD_SHIELD,
+               INNER_FIRE,
+               POWER_WORD_FORTITUDE,
+               PRAYER_OF_FORTITUDE,
+               FEAR_WARD,
+               POWER_INFUSION,
+               MASS_DISPEL,
+               PENANCE,
+               DIVINE_SPIRIT,
+               PRAYER_OF_SPIRIT,
+               INNER_FOCUS;
 
         // first aid
         uint32 RECENTLY_BANDAGED;
 
         // racial
-        uint32 ARCANE_TORRENT, GIFT_OF_THE_NAARU, STONEFORM, ESCAPE_ARTIST, EVERY_MAN_FOR_HIMSELF, SHADOWMELD, BLOOD_FURY, WAR_STOMP, BERSERKING, WILL_OF_THE_FORSAKEN;
+        uint32 ARCANE_TORRENT,
+               GIFT_OF_THE_NAARU,
+               STONEFORM,
+               ESCAPE_ARTIST,
+               EVERY_MAN_FOR_HIMSELF,
+               SHADOWMELD,
+               WAR_STOMP,
+               BERSERKING,
+               WILL_OF_THE_FORSAKEN;
 
         uint32 SpellSequence, LastSpellHoly, LastSpellShadowMagic, LastSpellDiscipline;
 };
