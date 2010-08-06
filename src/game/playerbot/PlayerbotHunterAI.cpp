@@ -8,10 +8,10 @@ class PlayerbotAI;
 PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, PlayerbotAI* const ai): PlayerbotClassAI(master, bot, ai)
 {
     // PET CTRL
-    PET_SUMMON                    = ai->initSpell(PET_SUMMON_1);
-    PET_DISMISS                   = ai->initSpell(PET_DISMISS_1);
-    PET_REVIVE                    = ai->initSpell(PET_REVIVE_1);
-    PET_MEND                      = ai->initSpell(PET_MEND_1);
+    PET_SUMMON                    = ai->initSpell(CALL_PET_1);
+    PET_DISMISS                   = ai->initSpell(DISMISS_PET_1);
+    PET_REVIVE                    = ai->initSpell(REVIVE_PET_1);
+    PET_MEND                      = ai->initSpell(MEND_PET_1);
     PET_FEED                      = 1539;
 
     INTIMIDATION                  = ai->initSpell(INTIMIDATION_1); // (generic)
