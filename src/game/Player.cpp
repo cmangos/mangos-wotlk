@@ -13069,7 +13069,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                         }
                 }
                 delete resultchar;
-		
+
                 QueryResult *resultlvl = CharacterDatabase.PQuery("SELECT level,name FROM characters WHERE guid = '%u'", guidlo);
                 if(resultlvl)
                 {
