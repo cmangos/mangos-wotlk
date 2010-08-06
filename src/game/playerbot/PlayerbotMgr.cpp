@@ -19,8 +19,6 @@ PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master)
 {
     // load config variables
     m_confMaxNumBots = botConfig.GetIntDefault( "PlayerbotAI.MaxNumBots", 9 );
-    m_confRestrictBotLevel = botConfig.GetIntDefault( "PlayerbotAI.RestrictBotLevel", 80 );
-    m_confDisableBots = botConfig.GetBoolDefault( "PlayerbotAI.DisableBots", false );
     m_confDebugWhisper = botConfig.GetBoolDefault( "PlayerbotAI.DebugWhisper", false );
     m_confFollowDistance[0] = botConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 0.5f );
     m_confFollowDistance[1] = botConfig.GetFloatDefault( "PlayerbotAI.FollowDistanceMin", 1.0f );
@@ -707,15 +705,16 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
         m_session->GetPlayer()->SetPlayerbotMgr(mgr);
     }
 
-    QueryResult *resultchar = CharacterDatabase.PQuery("SELECT Count(*) FROM characters WHERE online = 1 AND account = '%u'", m_session->GetAccountId());
+    QueryResult *resultchar = CharacterDatabase.PQuery("SELECT COUNT(*) FROM characters WHERE online = '1' AND account = '%u'", m_session->GetAccountId());
     if(resultchar)
     {
         Field *fields=resultchar->Fetch();
         int acctcharcount = fields[0].GetUInt32();
+        int maxnum = botConfig.GetIntDefault("PlayerbotAI.MaxNumBots", 9);
         if(!(m_session->GetSecurity() > SEC_PLAYER))
-            if((acctcharcount > botConfig.GetIntDefault("PlayerbotAI.MaxNumBots", 9)) && (cmdStr == "add" || cmdStr == "login"))
+            if(acctcharcount > maxnum && (cmdStr == "add" || cmdStr == "login"))
             {
-                PSendSysMessage("|cffff0000You cannot summon anymore bots, for this account.");
+                PSendSysMessage("|cffff0000You cannot summon anymore bots.(Current Max: |cffffffff%u)",maxnum);
                 SetSentErrorMessage(true);
                 delete resultchar;
                 return false;
@@ -728,10 +727,11 @@ bool ChatHandler::HandlePlayerbotCommand(const char* args)
     {
         Field *fields=resultlvl->Fetch();
         int charlvl = fields[0].GetUInt32();
+        int maxlvl = botConfig.GetIntDefault("PlayerbotAI.RestrictBotLevel", 80);
         if(!(m_session->GetSecurity() > SEC_PLAYER))
-            if(charlvl > botConfig.GetIntDefault("PlayerbotAI.RestrictBotLevel", 80))
+            if(charlvl > maxlvl)
             {
-                PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high.",fields[1].GetString());
+                PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high.(Current Max:lvl |cffffffff%u)",fields[1].GetString(),maxlvl);
                 SetSentErrorMessage(true);
                 delete resultlvl;
                 return false;

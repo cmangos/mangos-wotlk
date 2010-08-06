@@ -487,17 +487,9 @@ void WorldSession::LogoutPlayer(bool Save)
         WorldPacket data( SMSG_LOGOUT_COMPLETE, 0 );
         SendPacket( &data );
 
-        ///- Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
-        //No SQL injection as AccountId is uint32
-        //CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE account = '%u'",
-        //    GetAccountId());
-
         // Playerbot mod: commented out above and do this one instead
         CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE guid = '%u'", guid);
 
-        sLog.outDebug( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
-        CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE account = '%u'",
-            GetAccountId());
         DEBUG_LOG( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
     }
 
