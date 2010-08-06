@@ -21,6 +21,7 @@ enum RacialTraits
     ARCANE_TORRENT_MANA_CLASSES    = 28730,
     ARCANE_TORRENT_DEATH_KNIGHT    = 50613,
     ARCANE_TORRENT_ROGUE           = 25046,
+    BERSERKING_ALL                 = 26297,
     BLOOD_FURY_MELEE_CLASSES       = 20572,
     BLOOD_FURY_WARLOCK             = 33702,
     BLOOD_FURY_SHAMAN              = 33697,

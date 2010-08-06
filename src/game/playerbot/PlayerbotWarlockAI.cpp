@@ -53,18 +53,18 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     SUMMON_FELHUNTER      = ai->initSpell(SUMMON_FELHUNTER_1);
     SUMMON_FELGUARD       = ai->initSpell(SUMMON_FELGUARD_1);
     // demon skills should be initialized on demons
-    BLOOD_PACT            = 0; //ai->getSpellId("blood pact"); // imp skill
-    CONSUME_SHADOWS       = 0; //ai->getSpellId("consume shadows"); // voidwalker skill
-    FEL_INTELLIGENCE      = 0; //ai->getSpellId("fel intelligence"); // felhunter skill
+    BLOOD_PACT            = 0; // imp skill
+    CONSUME_SHADOWS       = 0; // voidwalker skill
+    FEL_INTELLIGENCE      = 0; // felhunter skill
 
     RECENTLY_BANDAGED     = 11196; // first aid check
 
     // racial
-    ARCANE_TORRENT        = ai->getSpellId("arcane torrent"); // blood elf
-    ESCAPE_ARTIST         = ai->getSpellId("escape artist"); // gnome
-    EVERY_MAN_FOR_HIMSELF = ai->getSpellId("every man for himself"); // human
-    BLOOD_FURY            = ai->getSpellId("blood fury"); // orc
-    WILL_OF_THE_FORSAKEN  = ai->getSpellId("will of the forsaken"); // undead
+    ARCANE_TORRENT        = ai->initSpell(ARCANE_TORRENT_MANA_CLASSES); // blood elf
+    ESCAPE_ARTIST         = ai->initSpell(ESCAPE_ARTIST_ALL); // gnome
+    EVERY_MAN_FOR_HIMSELF = ai->initSpell(EVERY_MAN_FOR_HIMSELF_ALL); // human
+    BLOOD_FURY            = ai->initSpell(BLOOD_FURY_WARLOCK); // orc
+    WILL_OF_THE_FORSAKEN  = ai->initSpell(WILL_OF_THE_FORSAKEN_ALL); // undead
 
     m_demonSummonFailed = false;
 }

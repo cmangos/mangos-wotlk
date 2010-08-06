@@ -53,12 +53,12 @@ PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, Player
     RECENTLY_BANDAGED       = 11196; // first aid check
 
     // racial
-    ARCANE_TORRENT          = ai->getSpellId("arcane torrent"); // blood elf
-    GIFT_OF_THE_NAARU       = ai->getSpellId("gift of the naaru"); // draenei
-    ESCAPE_ARTIST           = ai->getSpellId("escape artist"); // gnome
-    EVERY_MAN_FOR_HIMSELF   = ai->getSpellId("every man for himself"); // human
-    BERSERKING              = ai->getSpellId("berserking"); // troll
-    WILL_OF_THE_FORSAKEN    = ai->getSpellId("will of the forsaken"); // undead
+    ARCANE_TORRENT          = ai->initSpell(ARCANE_TORRENT_MANA_CLASSES); // blood elf
+    GIFT_OF_THE_NAARU       = ai->initSpell(GIFT_OF_THE_NAARU_MAGE); // draenei
+    ESCAPE_ARTIST           = ai->initSpell(ESCAPE_ARTIST_ALL); // gnome
+    EVERY_MAN_FOR_HIMSELF   = ai->initSpell(EVERY_MAN_FOR_HIMSELF_ALL); // human
+    BERSERKING              = ai->initSpell(BERSERKING_ALL); // troll
+    WILL_OF_THE_FORSAKEN    = ai->initSpell(WILL_OF_THE_FORSAKEN_ALL); // undead
 }
 
 PlayerbotMageAI::~PlayerbotMageAI() {}
