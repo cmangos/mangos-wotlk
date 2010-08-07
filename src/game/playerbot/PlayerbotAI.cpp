@@ -72,10 +72,10 @@ class PlayerbotChatHandler: protected ChatHandler
 {
 public:
     explicit PlayerbotChatHandler(Player* pMasterPlayer) : ChatHandler(pMasterPlayer) {}
-    bool revive(const Player& botPlayer) { return HandleReviveCommand(botPlayer.GetName()); }
-    bool teleport(const Player& botPlayer) { return HandleNamegoCommand(botPlayer.GetName()); }
+    bool revive(Player& botPlayer) { return HandleReviveCommand((char*)botPlayer.GetName()); }
+    bool teleport(Player& botPlayer) { return HandleNamegoCommand((char*)botPlayer.GetName()); }
     void sysmessage(const char *str) { SendSysMessage(str); }
-    bool dropQuest(const char *str) { return HandleQuestRemove(str); }
+    bool dropQuest(char *str) { return HandleQuestRemoveCommand(str); }
 };
 
 PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
@@ -3276,7 +3276,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                   fromPlayer.SetSelection(m_bot->GetGUID());
             }
             PlayerbotChatHandler ch(GetMaster());
-            if (! ch.dropQuest(text.substr(5).c_str()))
+            if (! ch.dropQuest((char*)text.substr(5).c_str()))
                   ch.sysmessage("ERROR: could not drop quest");
             if (oldSelectionGUID)
                   fromPlayer.SetSelection(oldSelectionGUID);

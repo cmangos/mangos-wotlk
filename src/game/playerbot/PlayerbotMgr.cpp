@@ -642,7 +642,7 @@ bool Player::requiredQuests(const char* pQuestIdString)
     return false;
 }
 
-bool ChatHandler::HandlePlayerbotCommand(const char* args)
+bool ChatHandler::HandlePlayerbotCommand(char* args)
 {
     if(!(m_session->GetSecurity() > SEC_PLAYER))
         if(botConfig.GetBoolDefault("PlayerbotAI.DisableBots", false))
