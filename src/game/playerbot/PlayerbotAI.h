@@ -199,6 +199,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         Item* FindPoison() const;
         Item* FindMount(uint32 matchingRidingSkill) const;
         Item* FindItem(uint32 ItemId);
+        Item* FindConsumable(uint32 displayId) const;
 
         // ******* Actions ****************************************
         // Your handlers can call these actions to make the bot do things.

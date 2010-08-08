@@ -1223,6 +1223,48 @@ Item* PlayerbotAI::FindPoison() const
     return NULL;
 }
 
+Item* PlayerbotAI::FindConsumable(uint32 displayId) const
+{
+    // list out items in main backpack
+    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
+    {
+        Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if (pItem)
+        {
+            const ItemPrototype* const pItemProto = pItem->GetProto();
+
+            if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
+                continue;
+
+            if (pItemProto->Class == ITEM_CLASS_CONSUMABLE && pItemProto->DisplayInfoID == displayId)
+                return pItem;
+        }
+    }
+    // list out items in other removable backpacks
+    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
+    {
+        const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+        if (pBag)
+        {
+            for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
+            {
+                Item* const pItem = m_bot->GetItemByPos(bag, slot);
+                if (pItem)
+                {
+                    const ItemPrototype* const pItemProto = pItem->GetProto();
+
+                    if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
+                        continue;
+
+                    if (pItemProto->Class == ITEM_CLASS_CONSUMABLE && pItemProto->DisplayInfoID == displayId)
+                        return pItem;
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
 void PlayerbotAI::InterruptCurrentCastingSpell()
 {
     //TellMaster("I'm interrupting my current spell!");
