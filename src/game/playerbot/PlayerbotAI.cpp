@@ -1930,22 +1930,26 @@ void PlayerbotAI::SetCombatOrderByStr( std::string str, Unit *target ) {
 }
 
 void PlayerbotAI::SetCombatOrder( CombatOrderType co, Unit *target ) {
-	if( (co == ORDERS_ASSIST || co == ORDERS_PROTECT) && !target )
-		return;
-	if( co == ORDERS_RESET ) {
-		m_combatOrder = ORDERS_NONE;
-		m_targetAssist = 0;
-		m_targetProtect = 0;
-		return;
-	}
-	if( co == ORDERS_PROTECT )
-		m_targetProtect = target;
-	else if( co == ORDERS_ASSIST )
-		m_targetAssist = target;
-	if( (co&ORDERS_PRIMARY) )
-		m_combatOrder = (CombatOrderType)(((uint32)m_combatOrder&(uint32)ORDERS_SECONDARY)|(uint32)co);
-	else
-		m_combatOrder = (CombatOrderType)(((uint32)m_combatOrder&(uint32)ORDERS_PRIMARY)|(uint32)co);
+    if( (co == ORDERS_ASSIST || co == ORDERS_PROTECT) && !target ){
+        TellMaster("Erf, you forget to target assist/protect characters!");
+        return;
+    }
+    if( co == ORDERS_RESET ) {
+        m_combatOrder = ORDERS_NONE;
+        m_targetAssist = 0;
+        m_targetProtect = 0;
+        TellMaster("Orders are cleaned!");
+        return;
+    }
+    if( co == ORDERS_PROTECT )
+        m_targetProtect = target;
+    else if( co == ORDERS_ASSIST )
+        m_targetAssist = target;
+    if( (co&ORDERS_PRIMARY) )
+        m_combatOrder = (CombatOrderType)(((uint32)m_combatOrder&(uint32)ORDERS_SECONDARY)|(uint32)co);
+    else
+        m_combatOrder = (CombatOrderType)(((uint32)m_combatOrder&(uint32)ORDERS_PRIMARY)|(uint32)co);
+    SendOrders( *GetMaster() );
 }
 
 void PlayerbotAI::SetMovementOrder( MovementOrderType mo, Unit *followTarget ) {
