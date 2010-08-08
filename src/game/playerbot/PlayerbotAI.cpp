@@ -2237,6 +2237,10 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     // set target
     uint64 targetGUID = m_bot->GetSelection();
     Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, m_bot->GetSelection());
+
+    if (!pTarget)
+        pTarget = m_bot;
+
     if (IsPositiveSpell(spellId))
     {
         if (pTarget && !m_bot->IsFriendlyTo(pTarget))
