@@ -2777,26 +2777,43 @@ void PlayerbotAI::findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<
 }
 
 // submits packet to use an item
-void PlayerbotAI::UseItem(Item& item)
+void PlayerbotAI::UseItem(Item& item, uint8 targetSlot)
 {
-    uint8 bagIndex = item.GetBagSlot();
-    uint8 slot = item.GetSlot();
-    uint8 cast_count = 1;
-    uint32 spellid = 0; // only used in combat
+    uint8  bagIndex = item.GetBagSlot();
+    uint8  slot = item.GetSlot();
+    uint8  cast_count = 1;
+    uint32 spellid;
     uint64 item_guid = item.GetGUID();
     uint32 glyphIndex = 0; // ??
-    uint8 unk_flags = 0; // not 0x02
+    uint8  unk_flags = 0; // not 0x02
+    uint32 targetFlag;
+
+    WorldPacket* packet;
 
     // create target data
     // note other targets are possible but not supported at the moment
     // see SpellCastTargets::read in Spell.cpp to see other options
     // for setting target
 
-    uint32 target = TARGET_FLAG_SELF;
+    if (targetSlot < EQUIPMENT_SLOT_END)
+    {
+        targetFlag = TARGET_FLAG_ITEM;
+        Item* const targetItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, targetSlot);
+        PackedGuid targetGUID = targetItem->GetObjectGuid().WriteAsPacked();
+        spellid = item.GetProto()->Spells[0].SpellId;
+        packet = new WorldPacket(CMSG_USE_ITEM, 1 + 1 + 1 + 4 + 8 + 4 + 1 + 8);
+        *packet << bagIndex << slot << cast_count << spellid << item_guid
+                << glyphIndex << unk_flags << targetFlag << targetGUID;
+    }
+    else
+    {
+        targetFlag = TARGET_FLAG_SELF;
+        spellid = 0;
+        packet = new WorldPacket(CMSG_USE_ITEM, 1 + 1 + 1 + 4 + 8 + 4 + 1);
+        *packet << bagIndex << slot << cast_count << spellid << item_guid
+                << glyphIndex << unk_flags << targetFlag;
+    }
 
-    WorldPacket* const packet = new WorldPacket(CMSG_USE_ITEM, 1 + 1 + 1 + 4 + 8 + 4 + 1);
-    *packet << bagIndex << slot << cast_count << spellid << item_guid
-            << glyphIndex << unk_flags << target;
     m_bot->GetSession()->QueuePacket(packet); // queue the packet to get around race condition
 
     // certain items cause player to sit (food,drink)
