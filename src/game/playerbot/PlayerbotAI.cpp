@@ -2848,7 +2848,7 @@ bool PlayerbotAI::FollowCheckTeleport( WorldObject &obj )
 {
     // if bot has strayed too far from the master, teleport bot
 
-    if (!m_bot->IsWithinDistInMap( &obj, 50, true ) && GetMaster()->isAlive())
+    if (!m_bot->IsWithinDistInMap( &obj, 50, true ) && GetMaster()->isAlive() && !GetMaster()->IsTaxiFlying())
     {
         m_ignoreAIUpdatesUntilTime = time(0) + 6;
         PlayerbotChatHandler ch(GetMaster());
