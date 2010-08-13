@@ -3480,7 +3480,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         std::string spellName;
 
         uint32 ignoredSpells[] = {1843, 5019, 2479, 6603, 3365, 8386, 21651, 21652, 6233, 6246, 6247,
-                                  61437, 22810, 22027, 45927, 7266, 7267, 6477, 6478, 7355};
+                                  61437, 22810, 22027, 45927, 7266, 7267, 6477, 6478, 7355, 68398};
         uint32 ignoredSpellsCount = sizeof(ignoredSpells)/sizeof(uint32);
 
         for (PlayerSpellMap::iterator itr = m_bot->GetSpellMap().begin(); itr != m_bot->GetSpellMap().end(); ++itr) {
