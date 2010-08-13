@@ -2183,7 +2183,7 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
             MovementReset();
 
         // do class specific non combat actions
-        else if (GetClassAI())
+        else if (GetClassAI() && !m_bot->IsMounted())
             (GetClassAI())->DoNonCombatActions();
     }
 }
