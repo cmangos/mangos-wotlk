@@ -690,7 +690,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             data << pVictim->GetObjectGuid();              //victim
 
             if (group_tap)
-                group_tap->BroadcastPacket(&data, false, group_tap->GetMemberGroup(player_tap->GetGUID()),player_tap->GetGUID());
+                group_tap->BroadcastPacket(&data, false, group_tap->GetMemberGroup(player_tap->GetObjectGuid()),player_tap->GetObjectGuid());
 
             player_tap->SendDirectMessage(&data);
         }
@@ -3404,7 +3404,7 @@ void Unit::_UpdateAutoRepeatSpell()
         }
 
         // we want to shoot
-        Spell* spell = new Spell(this, m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo, true, 0);
+        Spell* spell = new Spell(this, m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo, true);
         spell->prepare(&(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_targets));
 
         // all went good, reset attack

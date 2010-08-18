@@ -109,6 +109,7 @@ enum EventAI_ActionType
     ACTION_T_SET_SHEATH                 = 40,               // Sheath (0-passive,1-melee,2-ranged)
     ACTION_T_FORCE_DESPAWN              = 41,               // No Params
     ACTION_T_SET_INVINCIBILITY_HP_LEVEL = 42,               // MinHpValue, format(0-flat,1-percent from max health)
+    ACTION_T_MOUNT_TO_ENTRY_OR_MODEL    = 43,               // Creature_template entry(param1) OR ModelId (param2) (or 0 for both to unmount)
     ACTION_T_END,
 };
 
@@ -141,14 +142,15 @@ enum Target
 
 enum EventFlags
 {
-    EFLAG_REPEATABLE            = 0x01,                     //Event repeats
-    EFLAG_DIFFICULTY_0          = 0x02,                     //Event only occurs in instance difficulty 0
-    EFLAG_DIFFICULTY_1          = 0x04,                     //Event only occurs in instance difficulty 1
-    EFLAG_DIFFICULTY_2          = 0x08,                     //Event only occurs in instance difficulty 2
-    EFLAG_DIFFICULTY_3          = 0x10,                     //Event only occurs in instance difficulty 3
-    EFLAG_RESERVED_5            = 0x20,
-    EFLAG_RESERVED_6            = 0x40,
-    EFLAG_DEBUG_ONLY            = 0x80,                     //Event only occurs in debug build
+    EFLAG_REPEATABLE            = 0x0001,                   //Event repeats
+    EFLAG_DIFFICULTY_0          = 0x0002,                   //Event only occurs in instance difficulty 0
+    EFLAG_DIFFICULTY_1          = 0x0004,                   //Event only occurs in instance difficulty 1
+    EFLAG_DIFFICULTY_2          = 0x0008,                   //Event only occurs in instance difficulty 2
+    EFLAG_DIFFICULTY_3          = 0x0010,                   //Event only occurs in instance difficulty 3
+    EFLAG_RESERVED_5            = 0x0020,
+    EFLAG_RESERVED_6            = 0x0040,
+    EFLAG_DEBUG_ONLY            = 0x0080,                   //Event only occurs in debug build
+    EFLAG_RANDOM_ACTION         = 0x0100,                   //Event only execute one from existed actions instead each action.
 
     EFLAG_DIFFICULTY_ALL        = (EFLAG_DIFFICULTY_0|EFLAG_DIFFICULTY_1|EFLAG_DIFFICULTY_2|EFLAG_DIFFICULTY_3)
 };
@@ -377,6 +379,12 @@ struct CreatureEventAI_Action
             uint32 hp_level;
             uint32 is_percent;
         } invincibility_hp_level;
+        // ACTION_T_MOUNT_TO_ENTRY_OR_MODEL                 = 43
+        struct
+        {
+            uint32 creatureId;                              // set one from fields (or 0 for both to dismount)
+            uint32 modelId;
+        } mount;
         // RAW
         struct
         {
