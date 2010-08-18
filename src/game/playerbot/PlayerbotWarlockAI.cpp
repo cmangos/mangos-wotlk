@@ -46,6 +46,7 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     SOUL_LINK_AURA        = 25228; // dummy aura applied, after spell SOUL_LINK
     HEALTH_FUNNEL         = ai->initSpell(HEALTH_FUNNEL_1);
     DETECT_INVISIBILITY   = ai->initSpell(DETECT_INVISIBILITY_1);
+    CREATE_FIRESTONE      = ai->initSpell(CREATE_FIRESTONE_1);
     // demon summon
     SUMMON_IMP            = ai->initSpell(SUMMON_IMP_1);
     SUMMON_VOIDWALKER     = ai->initSpell(SUMMON_VOIDWALKER_1);
@@ -353,6 +354,26 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         (!m_bot->HasAura(DETECT_INVISIBILITY, EFFECT_INDEX_0) && ai->GetManaPercent() >= 2 && ai->CastSpell(DETECT_INVISIBILITY, *m_bot));
     if (DETECT_INVISIBILITY > 0)
         (!GetMaster()->HasAura(DETECT_INVISIBILITY, EFFECT_INDEX_0) && ai->GetManaPercent() >= 2 && ai->CastSpell(DETECT_INVISIBILITY, *GetMaster()));
+
+    // firestone creation and use - proof of concept for updated UseItem method.
+    Item* const weapon = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+    if (weapon && weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
+    {
+        Item* const stone = ai->FindConsumable(FIRESTONE_DISPLAYID);
+        if (!stone)
+        {
+            if (CREATE_FIRESTONE > 0 && m_bot->HasItemCount(SOUL_SHARD, 1, false))
+            {
+                ai->CastSpell(CREATE_FIRESTONE);
+                ai->SetIgnoreUpdateTime(5);
+            }
+        }
+        else
+        {
+            ai->UseItem(*stone, EQUIPMENT_SLOT_MAINHAND);
+            ai->SetIgnoreUpdateTime(5);
+        }
+    }
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)

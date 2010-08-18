@@ -3,12 +3,21 @@
 
 #include "PlayerbotClassAI.h"
 
+#define SOUL_SHARD 6265
+
 enum
 {
     SPELL_CURSES,
     SPELL_AFFLICTION,
     SPELL_DESTRUCTION,
     SPELL_DEMONOLOGY
+};
+
+enum StoneDisplayId
+{
+    FIRESTONE_DISPLAYID  = 7409,
+    SPELLSTONE_DISPLAYID = 13291,
+    SOULSTONE_DISPLAYID  = 6009
 };
 
 enum WarlockSpells
@@ -80,6 +89,7 @@ enum WarlockSpells
     UNENDING_BREATH_1               = 5697,
     UNSTABLE_AFFLICTION_1           = 30108
 };
+
 //class Player;
 class MANGOS_DLL_SPEC PlayerbotWarlockAI : PlayerbotClassAI
 {
@@ -101,28 +111,78 @@ class MANGOS_DLL_SPEC PlayerbotWarlockAI : PlayerbotClassAI
         bool m_demonSummonFailed;
 
         // CURSES
-        uint32 CURSE_OF_WEAKNESS, CURSE_OF_AGONY, CURSE_OF_EXHAUSTION, CURSE_OF_TONGUES, CURSE_OF_THE_ELEMENTS, CURSE_OF_DOOM;
+        uint32 CURSE_OF_WEAKNESS,
+               CURSE_OF_AGONY,
+               CURSE_OF_EXHAUSTION,
+               CURSE_OF_TONGUES,
+               CURSE_OF_THE_ELEMENTS,
+               CURSE_OF_DOOM,
 
         // AFFLICTION
-        uint32 CORRUPTION, DRAIN_SOUL, DRAIN_LIFE, DRAIN_MANA, LIFE_TAP, UNSTABLE_AFFLICTION, HAUNT, SEED_OF_CORRUPTION, DARK_PACT, HOWL_OF_TERROR, FEAR;
+        uint32 CORRUPTION,
+               DRAIN_SOUL,
+               DRAIN_LIFE,
+               DRAIN_MANA,
+               LIFE_TAP,
+               UNSTABLE_AFFLICTION,
+               HAUNT,
+               SEED_OF_CORRUPTION,
+               DARK_PACT,
+               HOWL_OF_TERROR,
+               FEAR;
 
         // DESTRUCTION
-        uint32 SHADOW_BOLT, IMMOLATE, INCINERATE, SEARING_PAIN, CONFLAGRATE, SOUL_FIRE, SHADOWFURY, CHAOS_BOLT, SHADOWFLAME, HELLFIRE, RAIN_OF_FIRE, SHADOWBURN;
+        uint32 SHADOW_BOLT,
+               IMMOLATE,
+               INCINERATE,
+               SEARING_PAIN,
+               CONFLAGRATE,
+               SOUL_FIRE,
+               SHADOWFURY,
+               CHAOS_BOLT,
+               SHADOWFLAME,
+               HELLFIRE,
+               RAIN_OF_FIRE,
+               SHADOWBURN;
 
         // DEMONOLOGY
-        uint32 DEMON_SKIN, DEMON_ARMOR, SHADOW_WARD, FEL_ARMOR, SOULSHATTER, SOUL_LINK, SOUL_LINK_AURA, HEALTH_FUNNEL, DETECT_INVISIBILITY;
+        uint32 DEMON_SKIN,
+               DEMON_ARMOR,
+               SHADOW_WARD,
+               FEL_ARMOR,
+               SOULSHATTER,
+               SOUL_LINK,
+               SOUL_LINK_AURA,
+               HEALTH_FUNNEL,
+               DETECT_INVISIBILITY,
+               CREATE_FIRESTONE;
 
         // DEMON SUMMON
-        uint32 SUMMON_IMP, SUMMON_VOIDWALKER, SUMMON_SUCCUBUS, SUMMON_FELHUNTER, SUMMON_FELGUARD;
+        uint32 SUMMON_IMP,
+               SUMMON_VOIDWALKER,
+               SUMMON_SUCCUBUS,
+               SUMMON_FELHUNTER,
+               SUMMON_FELGUARD;
 
         // DEMON SKILLS
-        uint32 BLOOD_PACT, CONSUME_SHADOWS, FEL_INTELLIGENCE;
+        uint32 BLOOD_PACT,
+               CONSUME_SHADOWS,
+               FEL_INTELLIGENCE;
 
         // first aid
         uint32 RECENTLY_BANDAGED;
 
         // racial
-        uint32 ARCANE_TORRENT, GIFT_OF_THE_NAARU, STONEFORM, ESCAPE_ARTIST, EVERY_MAN_FOR_HIMSELF, SHADOWMELD, BLOOD_FURY, WAR_STOMP, BERSERKING, WILL_OF_THE_FORSAKEN;
+        uint32 ARCANE_TORRENT,
+               GIFT_OF_THE_NAARU,
+               STONEFORM,
+               ESCAPE_ARTIST,
+               EVERY_MAN_FOR_HIMSELF,
+               SHADOWMELD,
+               BLOOD_FURY,
+               WAR_STOMP,
+               BERSERKING,
+               WILL_OF_THE_FORSAKEN;
 
         uint32 SpellSequence, LastSpellCurse, LastSpellAffliction, LastSpellDestruction;
 };
