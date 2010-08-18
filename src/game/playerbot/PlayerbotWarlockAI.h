@@ -116,7 +116,7 @@ class MANGOS_DLL_SPEC PlayerbotWarlockAI : PlayerbotClassAI
                CURSE_OF_EXHAUSTION,
                CURSE_OF_TONGUES,
                CURSE_OF_THE_ELEMENTS,
-               CURSE_OF_DOOM,
+               CURSE_OF_DOOM;
 
         // AFFLICTION
         uint32 CORRUPTION,
