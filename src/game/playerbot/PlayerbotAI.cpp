@@ -702,7 +702,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 if (!grp)
                     return;
 
-                Player* const inviter = sObjectMgr.GetPlayer(grp->GetLeaderGUID());
+                Player* const inviter = sObjectMgr.GetPlayer(grp->GetLeaderGuid());
                 if (!inviter)
                     return;
 

@@ -518,7 +518,7 @@ void PlayerbotShamanAI::DoNonCombatActions()
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
-            Player *tPlayer = sObjectMgr.GetPlayer(uint64 (itr->guid));
+            Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
             if( !tPlayer || !tPlayer->isAlive() )
                 continue;
 
