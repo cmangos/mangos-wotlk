@@ -4204,7 +4204,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
     // remove from guild
     if (uint32 guildId = GetGuildIdFromDB(playerguid))
         if (Guild* guild = sObjectMgr.GetGuildById(guildId))
-            guild->DelMember(playerguid.GetRawValue());
+            guild->DelMember(playerguid);
 
     // remove from arena teams
     LeaveAllArenaTeams(playerguid);
@@ -6649,10 +6649,10 @@ uint32 Player::GetRankFromDB(uint64 guid)
         return 0;
 }
 
-uint32 Player::GetArenaTeamIdFromDB(uint64 guid, uint8 type)
+uint32 Player::GetArenaTeamIdFromDB(ObjectGuid guid, uint8 type)
 {
-    QueryResult *result = CharacterDatabase.PQuery("SELECT arena_team_member.arenateamid FROM arena_team_member JOIN arena_team ON arena_team_member.arenateamid = arena_team.arenateamid WHERE guid='%u' AND type='%u' LIMIT 1", GUID_LOPART(guid), type);
-    if(!result)
+    QueryResult *result = CharacterDatabase.PQuery("SELECT arena_team_member.arenateamid FROM arena_team_member JOIN arena_team ON arena_team_member.arenateamid = arena_team.arenateamid WHERE guid='%u' AND type='%u' LIMIT 1", guid.GetCounter(), type);
+    if (!result)
         return 0;
 
     uint32 id = (*result)[0].GetUInt32();
@@ -15000,7 +15000,7 @@ void Player::_LoadArenaTeamInfo(QueryResult *result)
 
         SetArenaTeamInfoField(arenaSlot, ARENA_TEAM_ID, arenateamid);
         SetArenaTeamInfoField(arenaSlot, ARENA_TEAM_TYPE, aTeam->GetType());
-        SetArenaTeamInfoField(arenaSlot, ARENA_TEAM_MEMBER, (aTeam->GetCaptain() == GetGUID()) ? 0 : 1);
+        SetArenaTeamInfoField(arenaSlot, ARENA_TEAM_MEMBER, (aTeam->GetCaptainGuid() == GetObjectGuid()) ? 0 : 1);
         SetArenaTeamInfoField(arenaSlot, ARENA_TEAM_GAMES_WEEK, played_week);
         SetArenaTeamInfoField(arenaSlot, ARENA_TEAM_GAMES_SEASON, played_season);
         SetArenaTeamInfoField(arenaSlot, ARENA_TEAM_WINS_SEASON, wons_season);
@@ -15237,11 +15237,11 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     for(uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
     {
         uint32 arena_team_id = GetArenaTeamId(arena_slot);
-        if(!arena_team_id)
+        if (!arena_team_id)
             continue;
 
-        if(ArenaTeam * at = sObjectMgr.GetArenaTeamById(arena_team_id))
-            if(at->HaveMember(GetGUID()))
+        if (ArenaTeam * at = sObjectMgr.GetArenaTeamById(arena_team_id))
+            if (at->HaveMember(GetObjectGuid()))
                 continue;
 
         // arena team not exist or not member, cleanup fields
@@ -18208,13 +18208,10 @@ void Player::LeaveAllArenaTeams(ObjectGuid guid)
     do
     {
         Field *fields = result->Fetch();
-        uint32 at_id = fields[0].GetUInt32();
-        if(at_id != 0)
-        {
-            ArenaTeam * at = sObjectMgr.GetArenaTeamById(at_id);
-            if(at)
-                at->DelMember(guid.GetRawValue());
-        }
+        if (uint32 at_id = fields[0].GetUInt32())
+            if (ArenaTeam * at = sObjectMgr.GetArenaTeamById(at_id))
+                at->DelMember(guid);
+
     } while (result->NextRow());
 
     delete result;
