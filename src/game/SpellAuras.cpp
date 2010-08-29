@@ -940,10 +940,6 @@ bool Aura::CanProcFrom(SpellEntry const *spell, uint32 EventProcEx, uint32 procE
     }
     else
     {
-        // Check family name
-        if (spell->SpellFamilyName != GetSpellProto()->SpellFamilyName)
-            return false;
-
         if (((uint64*)ptr)[0] & spell->SpellFamilyFlags)
             return true;
 
@@ -2779,39 +2775,18 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             modelid = ssEntry->modelID_A;
         else
         {
-            // players are a bit difficult since the dbc has seldomly an horde modelid
-            // so we add hacks here to set the right model
-            if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                modelid = ssEntry->modelID_A;
-            else                                            // 3.2.3 only the moonkin form has this information
-                modelid = ssEntry->modelID_H;
-
-            // no model found, if player is horde we look here for our hardcoded modelids
-            if (!modelid && Player::TeamForRace(target->getRace()) == HORDE)
+            // players are a bit different since the dbc has seldomly an horde modelid
+            if (Player::TeamForRace(target->getRace()) == HORDE)
             {
-
-                switch(form)
-                {
-                    case FORM_CAT:
-                        modelid = 8571;
-                        break;
-                    case FORM_BEAR:
-                    case FORM_DIREBEAR:
-                        modelid = 2289;
-                        break;
-                    case FORM_FLIGHT:
-                        modelid = 20872;
-                        break;
-                    case FORM_FLIGHT_EPIC:
-                        modelid = 21244;
-                        break;
-                    // per default use alliance modelid
-                    // mostly horde and alliance share the same
-                    default:
-                        modelid = ssEntry->modelID_A;
-                        break;
-                }
+                if (ssEntry->modelID_H)
+                    modelid = ssEntry->modelID_H;           // 3.2.3 only the moonkin form has this information
+                else                                        // get model for race
+                    modelid = sObjectMgr.GetModelForRace(ssEntry->modelID_A, target->getRaceMask());
             }
+
+            // nothing found in above, so use default
+            if (!modelid)
+                modelid = ssEntry->modelID_A;
         }
     }
 
@@ -3919,7 +3894,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
                     if (Aura* aura = target->GetAura(58427, EFFECT_INDEX_0))
                     {
                         aura->SetAuraMaxDuration(20*IN_MILLISECONDS);
-                        GetHolder()->RefreshHolder();
+                        aura->GetHolder()->RefreshHolder();
                     }
                 }
             }

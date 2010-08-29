@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_10365_01_mangos_creature_ai_scripts` bit(1) default NULL
+  `required_10419_01_mangos_spell_chain` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -956,7 +956,6 @@ CREATE TABLE `creature_model_info` (
   `gender` tinyint(3) unsigned NOT NULL default '2',
   `modelid_other_gender` mediumint(8) unsigned NOT NULL default '0',
   `modelid_alternative` mediumint(8) unsigned NOT NULL default '0',
-  `modelid_other_team` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`modelid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Creature System (Model related info)';
 
@@ -967,28 +966,50 @@ CREATE TABLE `creature_model_info` (
 LOCK TABLES `creature_model_info` WRITE;
 /*!40000 ALTER TABLE `creature_model_info` DISABLE KEYS */;
 INSERT INTO `creature_model_info` VALUES
-(49, 0.3060, 1.5, 0, 50, 0, 0),
-(50, 0.2080, 1.5, 1, 49, 0, 0),
-(51, 0.3720, 1.5, 0, 52, 0, 0),
-(52, 0.2360, 1.5, 1, 51, 0, 0),
-(53, 0.3470, 1.5, 0, 54, 0, 0),
-(54, 0.3470, 1.5, 1, 53, 0, 0),
-(55, 0.3890, 1.5, 0, 56, 0, 0),
-(56, 0.3060, 1.5, 1, 55, 0, 0),
-(57, 0.3830, 1.5, 0, 58, 0, 0),
-(58, 0.3830, 1.5, 1, 57, 0, 0),
-(59, 0.9747, 1.5, 0, 60, 0, 0),
-(60, 0.8725, 1.5, 1, 59, 0, 0),
-(1478, 0.3060, 1.5, 0, 1479, 0, 0),
-(1479, 0.3060, 1.5, 1, 1478, 0, 0),
-(1563, 0.3519, 1.5, 0, 1564, 0, 0),
-(1564, 0.3519, 1.5, 1, 1563, 0, 0),
-(10045, 1.0000, 1.5, 2, 0, 0, 0),
-(15475, 0.3830, 1.5, 1, 15476, 0, 0),
-(15476, 0.3830, 1.5, 0, 15475, 0, 0),
-(16125, 1.0000, 1.5, 0, 16126, 0, 0),
-(16126, 1.0000, 1.5, 1, 16125, 0, 0);
+(49, 0.3060, 1.5, 0, 50, 0),
+(50, 0.2080, 1.5, 1, 49, 0),
+(51, 0.3720, 1.5, 0, 52, 0),
+(52, 0.2360, 1.5, 1, 51, 0),
+(53, 0.3470, 1.5, 0, 54, 0),
+(54, 0.3470, 1.5, 1, 53, 0),
+(55, 0.3890, 1.5, 0, 56, 0),
+(56, 0.3060, 1.5, 1, 55, 0),
+(57, 0.3830, 1.5, 0, 58, 0),
+(58, 0.3830, 1.5, 1, 57, 0),
+(59, 0.9747, 1.5, 0, 60, 0),
+(60, 0.8725, 1.5, 1, 59, 0),
+(1478, 0.3060, 1.5, 0, 1479, 0),
+(1479, 0.3060, 1.5, 1, 1478, 0),
+(1563, 0.3519, 1.5, 0, 1564, 0),
+(1564, 0.3519, 1.5, 1, 1563, 0),
+(10045, 1.0000, 1.5, 2, 0, 0),
+(15475, 0.3830, 1.5, 1, 15476, 0),
+(15476, 0.3830, 1.5, 0, 15475, 0),
+(16125, 1.0000, 1.5, 0, 16126, 0),
+(16126, 1.0000, 1.5, 1, 16125, 0);
 /*!40000 ALTER TABLE `creature_model_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `creature_model_race`
+--
+
+DROP TABLE IF EXISTS `creature_model_race`;
+CREATE TABLE `creature_model_race` (
+  `modelid` mediumint(8) unsigned NOT NULL default '0',
+  `racemask` mediumint(8) unsigned NOT NULL default '0',
+  `creature_entry` mediumint(8) unsigned NOT NULL default '0' COMMENT 'option 1, modelid_N from creature_template',
+  `modelid_racial` mediumint(8) unsigned NOT NULL default '0' COMMENT 'option 2, explicit modelid',
+  PRIMARY KEY  (`modelid`,`racemask`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Model system';
+
+--
+-- Dumping data for table `creature_model_race`
+--
+
+LOCK TABLES `creature_model_race` WRITE;
+/*!40000 ALTER TABLE `creature_model_race` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_model_race` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -3776,6 +3797,7 @@ INSERT INTO `mangos_string` VALUES
 (1162,' [counter]',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1163,'Achievement %u doesn\'t exist.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1164,'Achievement criteria %u doesn\'t exist.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1165,'Spell %u not have auras.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1200,'You try to view cinemitic %u but it doesn\'t exist.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1201,'You try to view movie %u but it doesn\'t exist.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `mangos_string` ENABLE KEYS */;
@@ -14528,6 +14550,9 @@ INSERT INTO spell_chain VALUES
 (58700,25530,3606,8,0),
 (58701,58700,3606,9,0),
 (58702,58701,3606,10,0),
+/*Shadowflame Triggered DoT*/
+(47960,0,47960,1,0),
+(61291,47960,47960,2,0),
 /* Wound Poison */
 (13218,0,13218,1,0),
 (13222,13218,13218,2,0),
@@ -16763,8 +16788,6 @@ INSERT INTO spell_chain VALUES
 (9885,9884,1126,7,0),
 (26990,9885,1126,8,0),
 (48469,26990,1126,9,0),
-/*Nourish*/
-(50464,0,50464,1,0),
 /*Rebirth*/
 (20484,0,20484,1,0),
 (20739,20484,20484,2,0),
@@ -16818,6 +16841,14 @@ INSERT INTO spell_chain VALUES
 (26983,9863,740,5,0),
 (48446,26983,740,6,0),
 (48447,48446,740,7,0),
+/*Tranquility Triggered*/
+(44203,    0,44203,1,0),
+(44205,44203,44203,2,0),
+(44206,44205,44203,3,0),
+(44207,44206,44203,4,0),
+(44208,44207,44203,5,0),
+(48444,44208,44203,6,0),
+(48445,48444,44203,7,0),
 /*Wild Growth*/
 (48438,0,48438,1,0),
 (53248,48438,48438,2,0),
@@ -16854,6 +16885,12 @@ INSERT INTO spell_chain VALUES
 (17402,17401,16914,3,0),
 (27012,17402,16914,4,0),
 (48467,27012,16914,5,0),
+/*Hurricane Triggered*/
+(42231,    0,42231,1,0),
+(42232,42231,42231,2,0),
+(42233,42232,42231,3,0),
+(42230,42233,42231,4,0),
+(48466,42230,42231,5,0),
 /*Insect Swarm*/
 (5570,0,5570,1,0),
 (24974,5570,5570,2,0),
@@ -17531,27 +17568,7 @@ INSERT INTO spell_chain VALUES
 (61195,61194,61193,3,0),
 (61196,61195,61193,4,0),
 (61197,61196,61193,5,0),
-(61198,61197,61193,6,0),
-/*------------------
---(-) Not listed in skill abilities
-------------------*/
-/*Hurricane*/
-(42231,    0,42231,1,0),
-(42232,42231,42231,2,0),
-(42233,42232,42231,3,0),
-(42230,42233,42231,4,0),
-(48466,42230,42231,5,0),
-/*Shadowflame Triggered DoT*/
-(47960,0,47960,1,0),
-(61291,47960,47960,2,0),
-/*Tranquility*/
-(44203,    0,44203,1,0),
-(44205,44203,44203,2,0),
-(44206,44205,44203,3,0),
-(44207,44206,44203,4,0),
-(44208,44207,44203,5,0),
-(48444,44208,44203,6,0),
-(48445,48444,44203,7,0);
+(61198,61197,61193,6,0);
 /*!40000 ALTER TABLE `spell_chain` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -18244,6 +18261,7 @@ INSERT INTO `spell_proc_event` VALUES
 (47263, 0x20,  5, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002, 0.000000, 0.000000, 20),
 (47264, 0x20,  5, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002, 0.000000, 0.000000, 20),
 (47265, 0x20,  5, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002, 0.000000, 0.000000, 20),
+(47230, 0x7F,  5, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
 (47509, 0x7F,  0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002, 0.000000, 0.000000,  0),
 (47516, 0x00,  6, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
 (47569, 0x00,  6, 0x00004000, 0x00004000, 0x00004000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00004000, 0x00000000, 0.000000, 0.000000,  0),
@@ -18445,6 +18463,7 @@ INSERT INTO `spell_proc_event` VALUES
 (70748, 0x00,  3, 0x00000000, 0x00000000, 0x00000000, 0x00200000, 0x00200000, 0x00200000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
 (71406, 0x00,  0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000,45.000000,  0),
 (71545, 0x00,  0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000,45.000000,  0),
+(71611, 0x7F,  0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
 (71761, 0x00,  3, 0x00000000, 0x00000000, 0x00000000, 0x00100000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000100, 0.000000, 0.000000,  0);
 
 /*!40000 ALTER TABLE `spell_proc_event` ENABLE KEYS */;
