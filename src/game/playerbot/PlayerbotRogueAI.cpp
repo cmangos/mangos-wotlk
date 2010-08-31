@@ -279,21 +279,21 @@ void PlayerbotRogueAI::DoNonCombatActions()
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    Item* pItem = GetAI()->FindFood();
-    Item* fItem = GetAI()->FindBandage();
+    Item* pItem = ai->FindFood();
+    Item* fItem = ai->FindBandage();
 
-    if (pItem != NULL && GetAI()->GetHealthPercent() < 30)
+    if (pItem != NULL && ai->GetHealthPercent() < 30)
     {
-        GetAI()->TellMaster("I could use some food.");
-        GetAI()->UseItem(*pItem);
-        GetAI()->SetIgnoreUpdateTime(30);
+        ai->TellMaster("I could use some food.");
+        ai->UseItem(*pItem);
+        ai->SetIgnoreUpdateTime(30);
         return;
     }
-    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && GetAI()->GetHealthPercent() < 70)
+    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && ai->GetHealthPercent() < 70)
     {
-        GetAI()->TellMaster("I could use first aid.");
-        GetAI()->UseItem(*fItem);
-        GetAI()->SetIgnoreUpdateTime(8);
+        ai->TellMaster("I could use first aid.");
+        ai->UseItem(*fItem);
+        ai->SetIgnoreUpdateTime(8);
         return;
     }
 
