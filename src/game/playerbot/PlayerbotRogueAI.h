@@ -12,6 +12,13 @@ enum
     RogueStealth
 };
 
+enum RoguePoisonDisplayId
+{
+    DEADLY_POISON_DISPLAYID  = 13707,
+    INSTANT_POISON_DISPLAYID = 13710,
+    WOUND_POISON_DISPLAYID   = 37278
+};
+
 enum RogueSpells
 {
     ADRENALINE_RUSH_1               = 13750,

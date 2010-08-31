@@ -15,9 +15,6 @@ PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, Play
     KICK                     = ai->initSpell(KICK_1);
     FEINT                    = ai->initSpell(FEINT_1);
     FAN_OF_KNIVES            = ai->initSpell(FAN_OF_KNIVES_1);
-    DEADLY_POISON            = 25351; //SpellID
-    CRIPPLING_POISON         = 3408;  //SpellID
-    MIND_NUMBING_POISON      = 5761;  //SpellID
     GOUGE                    = ai->initSpell(GOUGE_1);
     SPRINT                   = ai->initSpell(SPRINT_1);
 
@@ -266,6 +263,10 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
 
 void PlayerbotRogueAI::DoNonCombatActions()
 {
+    PlayerbotAI *ai = GetAI();
+    if (!ai)
+        return;
+
     Player * m_bot = GetPlayerBot();
     if (!m_bot)
         return;
@@ -295,50 +296,39 @@ void PlayerbotRogueAI::DoNonCombatActions()
         GetAI()->SetIgnoreUpdateTime(8);
         return;
     }
-/*
-    // Poison check //Not working needs some mor testing...i think need to tell the bott where "slot" to apply poison.
 
-    enum EquipmentSlots                                         // 19 slots
+    // Search and apply poisons to weapons
+    // Mainhand ...
+    Item * poison, * weapon;
+    weapon = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+    if (weapon && weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
     {
-        EQUIPMENT_SLOT_START        = 0,
-        EQUIPMENT_SLOT_HEAD         = 0,
-        EQUIPMENT_SLOT_NECK         = 1,
-        EQUIPMENT_SLOT_SHOULDERS    = 2,
-        EQUIPMENT_SLOT_BODY         = 3,
-        EQUIPMENT_SLOT_CHEST        = 4,
-        EQUIPMENT_SLOT_WAIST        = 5,
-        EQUIPMENT_SLOT_LEGS         = 6,
-        EQUIPMENT_SLOT_FEET         = 7,
-        EQUIPMENT_SLOT_WRISTS       = 8,
-        EQUIPMENT_SLOT_HANDS        = 9,
-        EQUIPMENT_SLOT_FINGER1      = 10,
-        EQUIPMENT_SLOT_FINGER2      = 11,
-        EQUIPMENT_SLOT_TRINKET1     = 12,
-        EQUIPMENT_SLOT_TRINKET2     = 13,
-        EQUIPMENT_SLOT_BACK         = 14,
-        EQUIPMENT_SLOT_MAINHAND     = 15,
-        EQUIPMENT_SLOT_OFFHAND      = 16,
-        EQUIPMENT_SLOT_RANGED       = 17,
-        EQUIPMENT_SLOT_TABARD       = 18,
-        EQUIPMENT_SLOT_END          = 19
-    };
-
-//thi is only a guess, dont get how to apply temp enchant on weapons.
-    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
-        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
-
-    pItem = GetAI()->FindPoison();
-    Item* item = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-
-    if (pItem != NULL)
-    {
-        GetAI()->TellMaster("I could use some poison.");
-//        GetAI()->UseItem(*pItem);
-        m_bot->ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,true);
-        GetAI()->SetIgnoreUpdateTime(10);
-        return;
+        poison = ai->FindConsumable(INSTANT_POISON_DISPLAYID);
+        if (!poison)
+            poison = ai->FindConsumable(WOUND_POISON_DISPLAYID);
+        if (!poison)
+            poison = ai->FindConsumable(DEADLY_POISON_DISPLAYID);
+        if (poison)
+        {
+            ai->UseItem(*poison, EQUIPMENT_SLOT_MAINHAND);
+            ai->SetIgnoreUpdateTime(5);
+        }
     }
-*/
+    //... and offhand
+    weapon = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+    if (weapon && weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
+    {
+        poison = ai->FindConsumable(DEADLY_POISON_DISPLAYID);
+        if (!poison)
+            poison = ai->FindConsumable(WOUND_POISON_DISPLAYID);
+        if (!poison)
+            poison = ai->FindConsumable(INSTANT_POISON_DISPLAYID);
+        if (poison)
+        {
+            ai->UseItem(*poison, EQUIPMENT_SLOT_OFFHAND);
+            ai->SetIgnoreUpdateTime(5);
+        }
+    }
 
 } // end DoNonCombatActions
 
