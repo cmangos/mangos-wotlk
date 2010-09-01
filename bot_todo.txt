@@ -16,7 +16,7 @@ Combat order TANK
 Combat order HEAL
 
 ///---Temporary item enchantments---///
-Rogue	: Poison
+[DONE] Rogue	: Poison
 Warrior	: Sharpening Stone, Rune of Warding, Rune of Shielding.
 
 //---After fear bot's lose target---///
@@ -26,4 +26,4 @@ Needs some fix.
 Rogue	: some abilitys require Rogue to be stealthed and behind target.
 
 ///---Implement locale independet way of getting spellIDs---///
-Hardcode lowest rank spellID, use function to get highest rank
+[DONE] Hardcode lowest rank spellID, use function to get highest rank
