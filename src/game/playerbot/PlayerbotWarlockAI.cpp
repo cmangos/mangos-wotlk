@@ -337,6 +337,12 @@ void PlayerbotWarlockAI::DoNonCombatActions()
     if (!m_bot)
         return;
 
+    // Destroy extra soul shards
+    uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
+    uint8 freeSpace = ai->GetFreeBagSpace();
+    if (shardCount > MAX_SHARD_COUNT || (freeSpace == 0 && shardCount > 1))
+        m_bot->DestroyItemCount(SOUL_SHARD, shardCount > MAX_SHARD_COUNT ? shardCount - MAX_SHARD_COUNT : 1, true, false);
+
     SpellSequence = SPELL_CURSES;
 
     Pet *pet = m_bot->GetPet();

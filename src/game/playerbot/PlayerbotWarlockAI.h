@@ -4,6 +4,7 @@
 #include "PlayerbotClassAI.h"
 
 #define SOUL_SHARD 6265
+#define MAX_SHARD_COUNT 4 // Maximum soul shard count bot should keep
 
 enum
 {
