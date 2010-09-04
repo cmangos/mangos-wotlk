@@ -260,6 +260,8 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void ItemLocalization(std::string& itemName, const uint32 itemID) const;
         void QuestLocalization(std::string& questTitle, const uint32 questID) const;
 
+        uint8 GetFreeBagSpace() const;
+
     private:
         // ****** Closed Actions ********************************
         // These actions may only be called at special times.

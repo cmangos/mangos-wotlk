@@ -1511,6 +1511,24 @@ void PlayerbotAI::SetState( BotState state )
     m_botState = state;
 }
 
+uint8 PlayerbotAI::GetFreeBagSpace() const
+{
+    uint8 space = 0;
+    for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        Item *pItem = m_bot->GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if (!pItem)
+            ++space;
+    }
+    for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        Bag* pBag = (Bag*)m_bot->GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if (pBag && pBag->GetProto()->BagFamily == BAG_FAMILY_MASK_NONE)
+            space += pBag->GetFreeSlots();
+    }
+    return space;
+}
+
 void PlayerbotAI::DoLoot()
 {
     if( !m_lootCurrent && m_lootCreature.empty() )
