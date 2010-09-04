@@ -16,14 +16,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Common.h"
+#include "Creature.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "World.h"
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "SpellMgr.h"
-#include "Creature.h"
 #include "QuestDef.h"
 #include "GossipDef.h"
 #include "Player.h"
@@ -561,14 +560,12 @@ void Creature::Update(uint32 diff)
         }
         case DEAD_FALLING:
         {
-            if (!FallGround())
-                setDeathState(JUST_DIED);
+            setDeathState(CORPSE);
         }
         default:
             break;
     }
 }
-
 
 void Creature::StartGroupLoot( Group* group, uint32 timer )
 {
@@ -688,7 +685,7 @@ bool Creature::AIM_Initialize()
 
 bool Creature::Create(uint32 guidlow, Map *map, uint32 phaseMask, uint32 Entry, uint32 team, const CreatureData *data)
 {
-    ASSERT(map);
+    MANGOS_ASSERT(map);
     SetMap(map);
     SetPhaseMask(phaseMask,false);
 
@@ -1379,13 +1376,8 @@ void Creature::setDeathState(DeathState s)
         // always save boss respawn time at death to prevent crash cheating
         if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATLY) || isWorldBoss())
             SaveRespawnTime();
-
-        if (canFly() && FallGround())
-            return;
-
-        if (!IsStopped())
-            StopMoving();
     }
+
     Unit::setDeathState(s);
 
     if (s == JUST_DIED)
@@ -1393,17 +1385,19 @@ void Creature::setDeathState(DeathState s)
         SetTargetGUID(0);                                   // remove target selection in any cases (can be set at aura remove in Unit::setDeathState)
         SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
-        if (canFly() && FallGround())
-            return;
-
         if (HasSearchedAssistance())
         {
             SetNoSearchAssistance(false);
             UpdateSpeed(MOVE_RUN, false);
         }
 
+        // return, since we promote to DEAD_FALLING. DEAD_FALLING is promoted to CORPSE at next update.
+        if (canFly() && FallGround())
+            return;
+
         Unit::setDeathState(CORPSE);
     }
+
     if (s == JUST_ALIVED)
     {
         SetHealth(GetMaxHealth());
@@ -1423,20 +1417,44 @@ void Creature::setDeathState(DeathState s)
 
 bool Creature::FallGround()
 {
-    // Let's abort after we called this function one time
-    if (getDeathState() == DEAD_FALLING)
+    // Only if state is JUST_DIED. DEAD_FALLING is set below and promoted to CORPSE later
+    if (getDeathState() != JUST_DIED)
         return false;
 
     // use larger distance for vmap height search than in most other cases
     float tz = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ(), true, MAX_FALL_DISTANCE);
+
+    if (tz < INVALID_HEIGHT)
+    {
+        DEBUG_LOG("FallGround: creature %u at map %u (x: %f, y: %f, z: %f), not able to retrive a proper GetHeight (z: %f).",
+            GetEntry(), GetMap()->GetId(), GetPositionX(), GetPositionX(), GetPositionZ(), tz);
+    }
 
     // Abort too if the ground is very near
     if (fabs(GetPositionZ() - tz) < 0.1f)
         return false;
 
     Unit::setDeathState(DEAD_FALLING);
-    GetMotionMaster()->MovePoint(0, GetPositionX(), GetPositionY(), tz);
-    Relocate(GetPositionX(), GetPositionY(), tz);
+
+    float dz = tz - GetPositionZ();
+    float distance = sqrt(dz*dz);
+
+    // flight speed * 2 explicit, not verified though but result looks proper
+    double speed = GetSpeed(MOVE_FLIGHT) * 2;
+
+    speed *= 0.001;                                         // to milliseconds
+
+    uint32 travelTime = uint32(distance/speed);
+
+    DEBUG_LOG("FallGround: traveltime: %u, distance: %f, speed: %f, from %f to %f", travelTime, distance, speed, GetPositionZ(), tz);
+
+    // For creatures that are moving towards target and dies, the visual effect is not nice.
+    // It is possibly caused by a xyz mismatch in DestinationHolder's GetLocationNow and the location
+    // of the mob in client. For mob that are already reached target or dies while not moving
+    // the visual appear to be fairly close to the expected.
+
+    GetMap()->CreatureRelocation(this, GetPositionX(), GetPositionY(), tz, GetOrientation());
+    SendMonsterMove(GetPositionX(), GetPositionY(), tz, SPLINETYPE_NORMAL, SPLINEFLAG_FALLING, travelTime);
     return true;
 }
 

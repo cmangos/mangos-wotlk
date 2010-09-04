@@ -1439,6 +1439,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                     // triggered_spell_id in spell data
                     break;
                 }
+                // Glyph of Prayer of Healing
+                case 55680:
+                {
+                    basepoints[0] = int32(damage * triggerAmount  / 200);   // 10% each tick
+                    triggered_spell_id = 56161;
+                    break;
+                }
             }
             break;
         }
@@ -1633,8 +1640,10 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                     SpellEntry const *spellProto = (*itr)->GetSpellProto();
                     if (spellProto->SpellFamilyName == SPELLFAMILY_ROGUE &&
                         (spellProto->SpellFamilyFlags & UI64LIT(0x0000000000040000)))
+                    {
                         (*itr)->GetHolder()->RefreshHolder();
                         return SPELL_AURA_PROC_OK;
+                    }
                 }
                 return SPELL_AURA_PROC_FAILED;
             }

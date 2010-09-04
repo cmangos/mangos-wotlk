@@ -389,7 +389,7 @@ struct Runes
 struct EnchantDuration
 {
     EnchantDuration() : item(NULL), slot(MAX_ENCHANTMENT_SLOT), leftduration(0) {};
-    EnchantDuration(Item * _item, EnchantmentSlot _slot, uint32 _leftduration) : item(_item), slot(_slot), leftduration(_leftduration) { ASSERT(item); };
+    EnchantDuration(Item * _item, EnchantmentSlot _slot, uint32 _leftduration) : item(_item), slot(_slot), leftduration(_leftduration) { MANGOS_ASSERT(item); };
 
     Item * item;
     EnchantmentSlot slot;
@@ -1629,7 +1629,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void AddMItem(Item* it)
         {
-            ASSERT( it );
+            MANGOS_ASSERT( it );
             //ASSERT deleted, because items can be added before loading
             mMitems[it->GetGUIDLow()] = it;
         }
@@ -1652,7 +1652,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsNeedCastPassiveSpellAtLearn(SpellEntry const* spellInfo) const;
         bool IsImmunedToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const;
 
-        void SendProficiency(uint8 pr1, uint32 pr2);
+        void SendProficiency(ItemClass itemClass, uint32 itemSubclassMask);
         void SendInitialSpells();
         bool addSpell(uint32 spell_id, bool active, bool learning, bool dependent, bool disabled);
         void learnSpell(uint32 spell_id, bool dependent);
