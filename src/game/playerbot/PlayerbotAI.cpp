@@ -2233,9 +2233,13 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
         {
             SetState( BOTSTATE_LOOTING );
             m_attackerInfo.clear();
+            m_ignoreAIUpdatesUntilTime = time(0);
         }
         else if (m_botState == BOTSTATE_LOOTING)
+        {
             DoLoot();
+            m_ignoreAIUpdatesUntilTime = time(0);
+        }
 /*
         // are we sitting, if so feast if possible
         else if (m_bot->getStandState() == UNIT_STAND_STATE_SIT)
