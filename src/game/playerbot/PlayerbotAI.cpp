@@ -541,14 +541,17 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         case SMSG_SPELL_FAILURE:
         {
             WorldPacket p(packet);
-            uint64 casterGuid = extractGuid(p);
+            uint8 castCount;
+            uint32 spellId;
+
+            uint64 casterGuid = p.readPackGUID();
             if (casterGuid != m_bot->GetGUID())
                 return;
-            uint32 spellId;
-            p >> spellId;
+
+            p >> castCount >> spellId;
             if (m_CurrentlyCastingSpellId == spellId)
             {
-                m_ignoreAIUpdatesUntilTime = time(0) + 1;
+                m_ignoreAIUpdatesUntilTime = time(0);
                 m_CurrentlyCastingSpellId = 0;
             }
             return;
