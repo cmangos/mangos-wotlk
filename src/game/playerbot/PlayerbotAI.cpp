@@ -541,14 +541,17 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         case SMSG_SPELL_FAILURE:
         {
             WorldPacket p(packet);
-            uint64 casterGuid = extractGuid(p);
+            uint8 castCount;
+            uint32 spellId;
+
+            uint64 casterGuid = p.readPackGUID();
             if (casterGuid != m_bot->GetGUID())
                 return;
-            uint32 spellId;
-            p >> spellId;
+
+            p >> castCount >> spellId;
             if (m_CurrentlyCastingSpellId == spellId)
             {
-                m_ignoreAIUpdatesUntilTime = time(0) + 1;
+                m_ignoreAIUpdatesUntilTime = time(0);
                 m_CurrentlyCastingSpellId = 0;
             }
             return;
@@ -2230,9 +2233,13 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
         {
             SetState( BOTSTATE_LOOTING );
             m_attackerInfo.clear();
+            m_ignoreAIUpdatesUntilTime = time(0);
         }
         else if (m_botState == BOTSTATE_LOOTING)
+        {
             DoLoot();
+            m_ignoreAIUpdatesUntilTime = time(0);
+        }
 /*
         // are we sitting, if so feast if possible
         else if (m_bot->getStandState() == UNIT_STAND_STATE_SIT)
