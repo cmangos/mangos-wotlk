@@ -360,7 +360,6 @@ void PlayerbotAI::SendNotEquipList(Player& player)
     {
         const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
         if (pBag)
-        {
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
                 Item* const pItem = m_bot->GetItemByPos(bag, slot);
@@ -381,7 +380,6 @@ void PlayerbotAI::SendNotEquipList(Player& player)
                 std::list<Item*>* itemListForEqSlot = equip[equipSlot];
                 itemListForEqSlot->push_back(pItem);
             }
-        }
     }
 
     TellMaster("Here's all the items in my inventory that I can equip.");
@@ -610,14 +608,12 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                             }
                             else if ((pSpellInfo->EffectApplyAuraName[2] == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
                                      && (pSpellInfo->EffectApplyAuraName[1] == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED))
-                            {
                                 if ((pSpellInfo->EffectBasePoints[2] == master_speed2)
                                     && (pSpellInfo->EffectBasePoints[1] == master_speed1))
                                 {
                                     spellMount = spellId;
                                     break;
                                 }
-                            }
                         }
                     }
                     if (spellMount > 0) m_bot->CastSpell(m_bot, spellMount, false);
@@ -691,10 +687,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             p >> result;
             p.clear();
             if (operation == PARTY_OP_LEAVE)
-            {
                 if (member == GetMaster()->GetName())
                     m_bot->GetSession()->HandleGroupDisbandOpcode(p);  // packet not used updated code
-            }
             return;
         }
 
@@ -778,7 +772,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 {
                     const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
                     if (pBag)
-                    {
                         for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
                         {
                             const Item* const pItem = m_bot->GetItemByPos(bag, slot);
@@ -798,7 +791,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                                     out << "x" << pItem->GetCount() << ' ';
                             }
                         }
-                    }
                 }
 
                 // calculate how much money bot has
@@ -1009,7 +1001,6 @@ Item* PlayerbotAI::FindMount(uint32 matchingRidingSkill) const
     {
         const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
         if (pBag)
-        {
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
                 Item* const pItem = m_bot->GetItemByPos(bag, slot);
@@ -1026,7 +1017,6 @@ Item* PlayerbotAI::FindMount(uint32 matchingRidingSkill) const
                         partialMatch = pItem;
                 }
             }
-        }
     }
     return partialMatch;
 }
@@ -1044,13 +1034,11 @@ Item* PlayerbotAI::FindFood() const
                 continue;
 
             if (pItemProto->Class == ITEM_CLASS_CONSUMABLE && pItemProto->SubClass == ITEM_SUBCLASS_FOOD)
-            {
                 // if is FOOD
                 // this enum is no longer defined in mangos. Is it no longer valid?
                 // according to google it was 11
                 if (pItemProto->Spells[0].SpellCategory == 11)
                     return pItem;
-            }
         }
     }
     // list out items in other removable backpacks
@@ -1058,7 +1046,6 @@ Item* PlayerbotAI::FindFood() const
     {
         const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
         if (pBag)
-        {
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
                 Item* const pItem = m_bot->GetItemByPos(bag, slot);
@@ -1072,17 +1059,14 @@ Item* PlayerbotAI::FindFood() const
                     // this enum is no longer defined in mangos. Is it no longer valid?
                     // according to google it was 11
                     if (pItemProto->Class == ITEM_CLASS_CONSUMABLE && pItemProto->SubClass == ITEM_SUBCLASS_FOOD)
-                    {
                         // if is FOOD
                         // this enum is no longer defined in mangos. Is it no longer valid?
                         // according to google it was 11
                         // if (pItemProto->Spells[0].SpellCategory == SPELL_CATEGORY_FOOD)
                         if (pItemProto->Spells[0].SpellCategory == 11)
                             return pItem;
-                    }
                 }
             }
-        }
     }
     return NULL;
 }
@@ -1101,7 +1085,6 @@ Item* PlayerbotAI::FindDrink() const
                 continue;
 
             if (pItemProto->Class == ITEM_CLASS_CONSUMABLE && pItemProto->SubClass == ITEM_SUBCLASS_FOOD)
-            {
                 // if (pItemProto->Spells[0].SpellCategory == SPELL_CATEGORY_DRINK)
 
                 // this enum is no longer defined in mangos. Is it no longer valid?
@@ -1109,7 +1092,6 @@ Item* PlayerbotAI::FindDrink() const
                 // if (pItemProto->Spells[0].SpellCategory == 59)
                 if (pItemProto->Spells[0].SpellCategory == 59)
                     return pItem;
-            }
         }
     }
     // list out items in other removable backpacks
@@ -1117,7 +1099,6 @@ Item* PlayerbotAI::FindDrink() const
     {
         const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
         if (pBag)
-        {
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
                 Item* const pItem = m_bot->GetItemByPos(bag, slot);
@@ -1129,17 +1110,14 @@ Item* PlayerbotAI::FindDrink() const
                         continue;
 
                     if (pItemProto->Class == ITEM_CLASS_CONSUMABLE && pItemProto->SubClass == ITEM_SUBCLASS_FOOD)
-                    {
                         // if is WATER
                         // SPELL_CATEGORY_DRINK is no longer defined in an enum in mangos
                         // google says the valus is 59. Is this still valid?
                         // if (pItemProto->Spells[0].SpellCategory == SPELL_CATEGORY_DRINK)
                         if (pItemProto->Spells[0].SpellCategory == 59)
                             return pItem;
-                    }
                 }
             }
-        }
     }
     return NULL;
 }
@@ -1166,7 +1144,6 @@ Item* PlayerbotAI::FindBandage() const
     {
         const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
         if (pBag)
-        {
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
                 Item* const pItem = m_bot->GetItemByPos(bag, slot);
@@ -1181,7 +1158,6 @@ Item* PlayerbotAI::FindBandage() const
                         return pItem;
                 }
             }
-        }
     }
     return NULL;
 }
@@ -1208,7 +1184,6 @@ Item* PlayerbotAI::FindPoison() const
     {
         const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
         if (pBag)
-        {
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
                 Item* const pItem = m_bot->GetItemByPos(bag, slot);
@@ -1223,7 +1198,6 @@ Item* PlayerbotAI::FindPoison() const
                         return pItem;
                 }
             }
-        }
     }
     return NULL;
 }
@@ -1250,7 +1224,6 @@ Item* PlayerbotAI::FindConsumable(uint32 displayId) const
     {
         const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
         if (pBag)
-        {
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
                 Item* const pItem = m_bot->GetItemByPos(bag, slot);
@@ -1265,7 +1238,6 @@ Item* PlayerbotAI::FindConsumable(uint32 displayId) const
                         return pItem;
                 }
             }
-        }
     }
     return NULL;
 }
@@ -1467,21 +1439,16 @@ void PlayerbotAI::DoCombatMovement()
     float targetDist = m_bot->GetDistance(m_targetCombat);
 
     if (m_combatStyle == COMBAT_MELEE && !m_bot->hasUnitState(UNIT_STAT_CHASE) && ((m_movementOrder == MOVEMENT_STAY && targetDist <= ATTACK_DISTANCE) || (m_movementOrder != MOVEMENT_STAY)))
-    {
         // melee combat - chase target if in range or if we are not forced to stay
         m_bot->GetMotionMaster()->MoveChase(m_targetCombat);
-    }
     else if (m_combatStyle == COMBAT_RANGED && m_movementOrder != MOVEMENT_STAY)
     {
         // ranged combat - just move within spell range
         // TODO: just follow in spell range! how to determine bots spell range?
-        if (targetDist > 25.0f) {
+        if (targetDist > 25.0f)
             m_bot->GetMotionMaster()->MoveChase(m_targetCombat);
-        }
         else
-        {
             MovementClear();
-        }
     }
 }
 
@@ -1727,9 +1694,7 @@ void PlayerbotAI::TurnInQuests(WorldObject *questgiver)
                             out << "Quest complete: |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
                         }
                         else
-                        {
                             out << "|cffff0000Unable to turn quest in:|r |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
-                        }
                     }
 
                     // auto reward quest if one item as reward
@@ -1752,13 +1717,11 @@ void PlayerbotAI::TurnInQuests(WorldObject *questgiver)
                                 << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
                         }
                         else
-                        {
                             out << "|cffff0000Unable to turn quest in:|r "
                                 << "|cff808080|Hquest:" << questID << ':'
                                 << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r"
                                 << " reward: |cffffffff|Hitem:"
                                 << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
-                        }
                     }
 
                     // else multiple rewards - let master pick
@@ -1777,15 +1740,13 @@ void PlayerbotAI::TurnInQuests(WorldObject *questgiver)
                 }
             }
 
-            else if (status == QUEST_STATUS_INCOMPLETE) {
+            else if (status == QUEST_STATUS_INCOMPLETE)
                 out << "|cffff0000Quest incomplete:|r "
                     << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
-            }
 
-            else if (status == QUEST_STATUS_AVAILABLE) {
+            else if (status == QUEST_STATUS_AVAILABLE)
                 out << "|cff00ff00Quest available:|r "
                     << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
-            }
 
             if (!out.str().empty())
                 TellMaster(out.str());
@@ -2078,10 +2039,7 @@ void PlayerbotAI::MovementReset()
             {
                 if (!FollowCheckTeleport(*((Player*) m_followTarget)->GetCorpse())) return;
             }
-            else
-            {
-                if (!FollowCheckTeleport(*m_followTarget)) return;
-            }
+            else if (!FollowCheckTeleport(*m_followTarget)) return;
         }
 
         if (m_bot->isAlive())
@@ -2191,11 +2149,9 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
             // get bot's corpse
             Corpse *corpse = m_bot->GetCorpse();
             if (!corpse)
-            {
                 //sLog.outDebug( "[PlayerbotAI]: %s has no corpse!", m_bot->GetName() );
                 return;
-            }
-            // teleport ghost from graveyard to corpse
+             // teleport ghost from graveyard to corpse
             //sLog.outDebug( "[PlayerbotAI]: Teleport %s to corpse...", m_bot->GetName() );
             FollowCheckTeleport(*corpse);
             // check if we are allowed to resurrect now
@@ -2482,7 +2438,6 @@ Item* PlayerbotAI::FindItem(uint32 ItemId)
     {
         const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);   // 255, 20 to 23
         if (pBag)
-        {
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
                 sLog.outDebug("[%s's]bag[%u] slot = %u", m_bot->GetName(), bag, slot);  // 1 to bagsize = ?
@@ -2497,7 +2452,6 @@ Item* PlayerbotAI::FindItem(uint32 ItemId)
                         return pItem;
                 }
             }
-        }
     }
     return NULL;
 }
@@ -2556,7 +2510,6 @@ bool PlayerbotAI::HasPick()
     {
         const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag); // 255, 20 to 23
         if (pBag)
-        {
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
                 // sLog.outDebug("[%s's]bag[%u] slot = %u",m_bot->GetName(),bag,slot); // 1 to bagsize = ?
@@ -2578,7 +2531,6 @@ bool PlayerbotAI::HasPick()
                     }
                 }
             }
-        }
     }
     std::ostringstream out;
     out << "|cffffffffI do not have a pick!";
@@ -2895,13 +2847,11 @@ bool PlayerbotAI::TradeItem(const Item& item, int8 slot)
     if ((slot >= 0 && slot < TRADE_SLOT_COUNT) && pTrade->GetTraderData()->GetItem(TradeSlots(slot)) == NULL)
         tradeSlot = slot;
     else
-    {
         for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT && tradeSlot == -1; i++)
         {
             if (pTrade->GetTraderData()->GetItem(TradeSlots(i)) == NULL)
                 tradeSlot = i;
         }
-    }
 
     if (tradeSlot == -1) return false;
 
@@ -3010,14 +2960,12 @@ void PlayerbotAI::ItemLocalization(std::string& itemName, const uint32 itemID) c
 
     ItemLocale const *pItemInfo = sObjectMgr.GetItemLocale(itemID);
     if (pItemInfo)
-    {
         if (pItemInfo->Name.size() > loc && !pItemInfo->Name[loc].empty())
         {
             const std::string name = pItemInfo->Name[loc];
             if (Utf8FitTo(name, wnamepart))
                 itemName = name.c_str();
         }
-    }
 }
 
 void PlayerbotAI::QuestLocalization(std::string& questTitle, const uint32 questID) const
@@ -3027,14 +2975,12 @@ void PlayerbotAI::QuestLocalization(std::string& questTitle, const uint32 questI
 
     QuestLocale const *pQuestInfo = sObjectMgr.GetQuestLocale(questID);
     if (pQuestInfo)
-    {
         if (pQuestInfo->Title.size() > loc && !pQuestInfo->Title[loc].empty())
         {
             const std::string title = pQuestInfo->Title[loc];
             if (Utf8FitTo(title, wnamepart))
                 questTitle = title.c_str();
         }
-    }
 }
 
 // handle commands sent through chat channels
@@ -3240,7 +3186,6 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 uint32 lockId = go->GetGOInfo()->GetLockId();
                 LockEntry const *lockInfo = sLockStore.LookupEntry(lockId);
                 if (lockInfo)
-                {
                     for (int i = 0; i < 8; ++i)
                     {
                         uint32 skillId = SkillByLockType(LockType(lockInfo->Index[i]));
@@ -3260,7 +3205,6 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                             break;
                         }
                     }
-                }
             }
             for (uint32 l = 0; l < lootNum; l++)
             {
@@ -3440,17 +3384,11 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         if (subcommand == "react" && argumentFound)
         {
             if (argument == "a" || argument == "aggressive")
-            {
                 pet->GetCharmInfo()->SetReactState(REACT_AGGRESSIVE);
-            }
             else if (argument == "d" || argument == "defensive")
-            {
                 pet->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
-            }
             else if (argument == "p" || argument == "passive")
-            {
                 pet->GetCharmInfo()->SetReactState(REACT_PASSIVE);
-            }
         }
         else if (subcommand == "state" && !argumentFound)
         {
@@ -3514,9 +3452,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                             pet->RemoveAurasByCasterSpell(spellId, pet->GetGUID());
                     }
                     else
-                    {
                         pet->ToggleAutocast(spellId, true);
-                    }
                 }
             }
         }
@@ -3794,7 +3730,6 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                     !m_bot->GetQuestRewardStatus(questID) &&
                     pQuest->GetRewChoiceItemsCount() > 1 &&
                     m_bot->CanRewardQuest(pQuest, false))
-                {
                     for (uint8 rewardIdx = 0; !wasRewarded && rewardIdx < pQuest->GetRewChoiceItemsCount(); ++rewardIdx)
                     {
                         ItemPrototype const * const pRewardItem = sObjectMgr.GetItemPrototype(pQuest->RewChoiceItemId[rewardIdx]);
@@ -3813,7 +3748,6 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                             wasRewarded = true;
                         }
                     }
-                }
             }
 
         }

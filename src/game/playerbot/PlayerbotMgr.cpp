@@ -163,13 +163,11 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     if (bot)
                         bot->GetPlayerbotAI()->SetMovementOrder(PlayerbotAI::MOVEMENT_STAY);
                     else
-                    {
                         for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
                         {
                             Player* const bot = it->second;
                             bot->GetPlayerbotAI()->SetMovementOrder(PlayerbotAI::MOVEMENT_STAY);
                         }
-                    }
                     return;
                 }
 
@@ -182,13 +180,11 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     if (bot)
                         bot->GetPlayerbotAI()->SetMovementOrder(PlayerbotAI::MOVEMENT_FOLLOW, m_master);
                     else
-                    {
                         for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
                         {
                             Player* const bot = it->second;
                             bot->GetPlayerbotAI()->SetMovementOrder(PlayerbotAI::MOVEMENT_FOLLOW, m_master);
                         }
-                    }
                     return;
                 }
             }
@@ -211,10 +207,8 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 Player* const bot = it->second;
 
                 if (obj->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
-                {
                     bot->GetPlayerbotAI()->TurnInQuests(obj);
-                }
-                // add other go types here, i.e.:
+                 // add other go types here, i.e.:
                 // GAMEOBJECT_TYPE_CHEST - loot quest items of chest
             }
         }
@@ -253,7 +247,6 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             p >> guid >> quest;
             Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest);
             if (qInfo)
-            {
                 for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
                 {
                     Player* const bot = it->second;
@@ -279,7 +272,6 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                         bot->GetPlayerbotAI()->TellMaster("Got the quest.");
                     }
                 }
-            }
             return;
         }
         case CMSG_LOOT_ROLL:

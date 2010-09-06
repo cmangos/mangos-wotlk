@@ -108,13 +108,9 @@ void PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
 
     // Heal myself
     if (ai->GetHealthPercent() < 30 && ai->GetManaPercent() >= 32)
-    {
         ai->CastSpell(HEALING_WAVE);
-    }
     else if (ai->GetHealthPercent() < 50 && ai->GetManaPercent() >= 19)
-    {
         ai->CastSpell(LESSER_HEALING_WAVE);
-    }
     else if (ai->GetHealthPercent() < 70)
         HealTarget (*m_bot, ai->GetHealthPercent());
 

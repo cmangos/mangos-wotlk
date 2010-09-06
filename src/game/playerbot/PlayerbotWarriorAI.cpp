@@ -313,20 +313,14 @@ void PlayerbotWarriorAI::DoNonCombatActions()
     if (((COMMANDING_SHOUT > 0 && !m_bot->HasAura(COMMANDING_SHOUT, EFFECT_INDEX_0)) ||
          (BATTLE_SHOUT > 0 && !m_bot->HasAura(BATTLE_SHOUT, EFFECT_INDEX_0))) &&
         ai->GetRageAmount() < 10 && BLOODRAGE > 0 && !m_bot->HasAura(BLOODRAGE, EFFECT_INDEX_0))
-    {
         // we do have a useful shout, no rage coming but can cast bloodrage... do it
         ai->CastSpell(BLOODRAGE, *m_bot);
-    }
     else if (COMMANDING_SHOUT > 0 && !m_bot->HasAura(COMMANDING_SHOUT, EFFECT_INDEX_0))
-    {
         // use commanding shout now
         ai->CastSpell(COMMANDING_SHOUT, *m_bot);
-    }
     else if (BATTLE_SHOUT > 0 && !m_bot->HasAura(BATTLE_SHOUT, EFFECT_INDEX_0) && !m_bot->HasAura(COMMANDING_SHOUT, EFFECT_INDEX_0))
-    {
         // use battle shout
         ai->CastSpell(BATTLE_SHOUT, *m_bot);
-    }
 
     // buff master with VIGILANCE
     if (VIGILANCE > 0)

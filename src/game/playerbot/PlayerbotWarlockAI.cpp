@@ -440,7 +440,6 @@ void PlayerbotWarlockAI::DoNonCombatActions()
 
     // check for demon
     if (SUMMON_FELGUARD > 0 || SUMMON_FELHUNTER > 0 || SUMMON_SUCCUBUS > 0 || SUMMON_VOIDWALKER > 0 || SUMMON_IMP > 0 && !m_demonSummonFailed)
-    {
         if (!pet)
         {
             // summon demon
@@ -455,30 +454,21 @@ void PlayerbotWarlockAI::DoNonCombatActions()
             else if (SUMMON_IMP > 0 && ai->GetManaPercent() >= 64 && ai->CastSpell(SUMMON_IMP, *m_bot))
                 ai->TellMaster("summoning imp.");
             else
-            {
                 m_demonSummonFailed = true;
                 //ai->TellMaster( "summon demon failed!" );
-            }
         }
-    }
 
     // check for buffs with demon
     if ((pet)
         && (SOUL_LINK > 0 && !m_bot->HasAura(SOUL_LINK_AURA, EFFECT_INDEX_0) && ai->GetBaseManaPercent() >= 16 && ai->CastSpell(SOUL_LINK, *m_bot)))
-    {
         //ai->TellMaster( "casting soul link." );
         return;
-    }
     else if ((pet)
              && (BLOOD_PACT > 0 && !m_bot->HasAura(BLOOD_PACT, EFFECT_INDEX_0) && ai->CastSpell(BLOOD_PACT, *m_bot)))
-    {
         //ai->TellMaster( "casting blood pact." );
         return;
-    }
     else if ((pet)
              && (FEL_INTELLIGENCE > 0 && !m_bot->HasAura(FEL_INTELLIGENCE, EFFECT_INDEX_0) && ai->CastSpell(FEL_INTELLIGENCE, *m_bot)))
-    {
         //ai->TellMaster( "casting fel intelligence." );
         return;
-    }
 } // end DoNonCombatActions

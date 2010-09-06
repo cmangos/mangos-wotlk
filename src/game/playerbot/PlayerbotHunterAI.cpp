@@ -122,22 +122,16 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
     }
     else if ((pet)
              && (INTIMIDATION > 0 && pVictim == pet && !pet->HasAura(INTIMIDATION, EFFECT_INDEX_0) && ai->CastSpell(INTIMIDATION, *m_bot)))
-    {
         //ai->TellMaster( "casting intimidation." ); // if pet has aggro :)
         return;
-    }
 
     // racial traits
     if (m_bot->getRace() == RACE_ORC && !m_bot->HasAura(BLOOD_FURY, EFFECT_INDEX_0))
-    {
         ai->CastSpell(BLOOD_FURY, *m_bot);
         //ai->TellMaster( "Blood Fury." );
-    }
     else if (m_bot->getRace() == RACE_TROLL && !m_bot->HasAura(BERSERKING, EFFECT_INDEX_0))
-    {
         ai->CastSpell(BERSERKING, *m_bot);
         //ai->TellMaster( "Berserking." );
-    }
 
     // check if ranged combat is possible (set m_rangedCombat and switch auras
     float dist = m_bot->GetDistance(pTarget);
@@ -158,27 +152,19 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
         (ASPECT_OF_THE_HAWK > 0 && !m_bot->HasAura(ASPECT_OF_THE_HAWK, EFFECT_INDEX_0) && ai->CastSpell(ASPECT_OF_THE_HAWK, *m_bot));
     }
     else if (m_rangedCombat && !m_bot->HasAura(ASPECT_OF_THE_HAWK, EFFECT_INDEX_0))
-    {
         // check if we have hawk aspect in ranged combat
         (ASPECT_OF_THE_HAWK > 0 && ai->CastSpell(ASPECT_OF_THE_HAWK, *m_bot));
-    }
     else if (!m_rangedCombat && !m_bot->HasAura(ASPECT_OF_THE_MONKEY, EFFECT_INDEX_0))
-    {
         // check if we have monkey aspect in melee combat
         (ASPECT_OF_THE_MONKEY > 0 && ai->CastSpell(ASPECT_OF_THE_MONKEY, *m_bot));
-    }
 
     // activate auto shot
     if (AUTO_SHOT > 0 && m_rangedCombat && !m_bot->FindCurrentSpellBySpellId(AUTO_SHOT))
-    {
         ai->CastSpell(AUTO_SHOT, *pTarget);
         //ai->TellMaster( "started auto shot." );
-    }
     else if (AUTO_SHOT > 0 && m_bot->FindCurrentSpellBySpellId(AUTO_SHOT))
-    {
         m_bot->InterruptNonMeleeSpells(true, AUTO_SHOT);
         //ai->TellMaster( "stopped auto shot." );
-    }
 
     // damage spells
     std::ostringstream out;
@@ -387,7 +373,6 @@ void PlayerbotHunterAI::DoNonCombatActions()
             {
                 const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
                 if (pBag)
-                {
                     for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
                     {
                         Item* const pItem = m_bot->GetItemByPos(bag, slot);
@@ -411,7 +396,6 @@ void PlayerbotHunterAI::DoNonCombatActions()
                             }
                         }
                     }
-                }
             }
             if (pet->HasAura(PET_MEND, EFFECT_INDEX_0) && !pet->HasAura(PET_FEED, EFFECT_INDEX_0))
                 ai->TellMaster("..no pet food!");

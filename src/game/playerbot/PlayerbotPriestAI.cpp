@@ -100,10 +100,8 @@ void PlayerbotPriestAI::HealTarget(Unit &target, uint8 hp)
         ai->CastSpell(HEAL, target);
     }
     else if (hp < 80 && RENEW > 0 && ai->GetManaPercent() >= 19)
-    {
         //ai->TellMaster("I'm casting renew.");
         ai->CastSpell(RENEW, target);
-    }
 
 } // end HealTarget
 

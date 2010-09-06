@@ -139,26 +139,16 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
                     pVictim->Attack(pTarget, true);
             }
             if (m_bot->HasAura(CAT_FORM, EFFECT_INDEX_0))
-            {
                 m_bot->RemoveAurasDueToSpell(768);
                 //ai->TellMaster("FormClearCat");
-            }
             if (MOONKIN_FORM > 0 && !m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0))
-            {
                 ai->CastSpell (MOONKIN_FORM);
-            }
             else if (DIRE_BEAR_FORM > 0 && !m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0) && !m_bot->HasAura(DIRE_BEAR_FORM, EFFECT_INDEX_0))
-            {
                 ai->CastSpell (DIRE_BEAR_FORM);
-            }
             else if (BEAR_FORM > 0 && !m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0) && !m_bot->HasAura(DIRE_BEAR_FORM, EFFECT_INDEX_0) && !m_bot->HasAura(BEAR_FORM, EFFECT_INDEX_0))
-            {
                 ai->CastSpell (BEAR_FORM);
-            }
             else if (DEMORALIZING_ROAR > 0 && (m_bot->HasAura(DIRE_BEAR_FORM, EFFECT_INDEX_0) || m_bot->HasAura(BEAR_FORM, EFFECT_INDEX_0)) && !m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0) && !pTarget->HasAura(DEMORALIZING_ROAR, EFFECT_INDEX_0) && ai->GetRageAmount() >= 10)
-            {
                 ai->CastSpell(DEMORALIZING_ROAR, *pTarget);
-            }
             if (FAERIE_FIRE > 0 && DruidSpellCombat < 1 && !pTarget->HasAura(FAERIE_FIRE, EFFECT_INDEX_0))
             {
                 ai->CastSpell(FAERIE_FIRE, *pTarget);
@@ -507,60 +497,38 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
             if (m_bot->GetComboPoints() == 5)
             {
                 if (RIP > 0 && pTarget->getClass() == CLASS_ROGUE && ai->GetEnergyAmount() >= 30)
-                {
                     ai->CastSpell(RIP, *pTarget);
                     //ai->TellMaster("Rogue Rip");
-                }
                 else if (MAIM > 0 && pTarget->getClass() == CLASS_DRUID && ai->GetEnergyAmount() >= 35)
-                {
                     ai->CastSpell(MAIM, *pTarget);
                     //ai->TellMaster("Druid Maim");
-                }
                 else if (MAIM > 0 && pTarget->getClass() == CLASS_SHAMAN && ai->GetEnergyAmount() >= 35)
-                {
                     ai->CastSpell(MAIM, *pTarget);
                     //ai->TellMaster("Shaman Maim");
-                }
                 else if (MAIM > 0 && pTarget->getClass() == CLASS_WARLOCK && ai->GetEnergyAmount() >= 35)
-                {
                     ai->CastSpell(MAIM, *pTarget);
                     //ai->TellMaster("Warlock Maim");
-                }
                 else if (FEROCIOUS_BITE > 0 && pTarget->getClass() == CLASS_HUNTER && ai->GetEnergyAmount() >= 35)
-                {
                     ai->CastSpell(FEROCIOUS_BITE, *pTarget);
                     //ai->TellMaster("Hunter Ferocious Bite");
-                }
                 else if (FEROCIOUS_BITE > 0 && pTarget->getClass() == CLASS_WARRIOR && ai->GetEnergyAmount() >= 35)
-                {
                     ai->CastSpell(FEROCIOUS_BITE, *pTarget);
                     //ai->TellMaster("Warrior Ferocious Bite");
-                }
                 else if (FEROCIOUS_BITE > 0 && pTarget->getClass() == CLASS_PALADIN && ai->GetEnergyAmount() >= 35)
-                {
                     ai->CastSpell(FEROCIOUS_BITE, *pTarget);
                     //ai->TellMaster("Paladin Ferocious Bite");
-                }
                 else if (FEROCIOUS_BITE > 0 && pTarget->getClass() == CLASS_DEATH_KNIGHT && ai->GetEnergyAmount() >= 25)
-                {
                     ai->CastSpell(FEROCIOUS_BITE, *pTarget);
                     //ai->TellMaster("DK Ferocious Bite");
-                }
                 else if (MAIM > 0 && pTarget->getClass() == CLASS_MAGE && ai->GetEnergyAmount() >= 35)
-                {
                     ai->CastSpell(MAIM, *pTarget);
                     //ai->TellMaster("Mage Maim");
-                }
                 else if (MAIM > 0 && pTarget->getClass() == CLASS_PRIEST && ai->GetEnergyAmount() >= 35)
-                {
                     ai->CastSpell(MAIM, *pTarget);
                     //ai->TellMaster("Priest Maim");
-                }
                 else if (MAIM > 0 && ai->GetEnergyAmount() >= 35)
-                {
                     ai->CastSpell(MAIM, *pTarget);
                     //ai->TellMaster("Else Maim");
-                }
                 break;
             }
             else
@@ -581,26 +549,18 @@ void PlayerbotDruidAI::DoNonCombatActions()
     PlayerbotAI* ai = GetAI();
 
     if (m_bot->HasAura(CAT_FORM, EFFECT_INDEX_0))
-    {
         m_bot->RemoveAurasDueToSpell(768);
         //ai->TellMaster("FormClearCat");
-    }
     if (m_bot->HasAura(BEAR_FORM, EFFECT_INDEX_0))
-    {
         m_bot->RemoveAurasDueToSpell(5487);
         //ai->TellMaster("FormClearBear");
-    }
     if (m_bot->HasAura(DIRE_BEAR_FORM, EFFECT_INDEX_0))
-    {
         m_bot->RemoveAurasDueToSpell(9634);
         //ai->TellMaster("FormClearDireBear");
-    }
     if (m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0))
-    {
         m_bot->RemoveAurasDueToSpell(24858);
         //ai->TellMaster("FormClearMoonkin");
-    }
-    // buff myself with MARK_OF_THE_WILD
+     // buff myself with MARK_OF_THE_WILD
     if (MARK_OF_THE_WILD > 0 && !m_bot->HasAura(MARK_OF_THE_WILD, EFFECT_INDEX_0))
         ai->CastSpell (MARK_OF_THE_WILD, *m_bot);
 
