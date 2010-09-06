@@ -52,7 +52,8 @@ public:
         SCENARIO_PVPHARD
     };
 
-    enum CombatStyle {
+    enum CombatStyle
+    {
         COMBAT_MELEE                = 0x01,             // class melee attacker
         COMBAT_RANGED               = 0x02              // class is ranged attacker
     };

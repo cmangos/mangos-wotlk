@@ -83,7 +83,8 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     m_combatOrder(ORDERS_NONE), m_ScenarioType(SCENARIO_PVEEASY),
     m_TimeDoneEating(0), m_TimeDoneDrinking(0),
     m_CurrentlyCastingSpellId(0), m_spellIdCommand(0),
-    m_targetGuidCommand(0), m_classAI(0) {
+    m_targetGuidCommand(0), m_classAI(0)
+{
 
     // set bot state and needed item list
     m_botState = BOTSTATE_NORMAL;
@@ -399,7 +400,8 @@ void PlayerbotAI::SendNotEquipList(Player& player)
         std::list<Item*>* itemListForEqSlot = equip[equipSlot];
         std::ostringstream out;
         out << descr[equipSlot] << ": ";
-        for (std::list<Item*>::iterator it = itemListForEqSlot->begin(); it != itemListForEqSlot->end(); ++it) {
+        for (std::list<Item*>::iterator it = itemListForEqSlot->begin(); it != itemListForEqSlot->end(); ++it)
+        {
             const ItemPrototype* const pItemProto = (*it)->GetProto();
 
             std::string itemName = pItemProto->Name1;
@@ -1356,7 +1358,8 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
             if (m_mgr->m_confDebugWhisper)
                 TellMaster("Changing target to %s to protect %s", forcedTarget->GetName(), m_targetProtect->GetName());
         }
-    } else if (forcedTarget)
+    }
+    else if (forcedTarget)
     {
         if (m_mgr->m_confDebugWhisper)
             TellMaster("Changing target to %s by force!", forcedTarget->GetName());
@@ -1457,7 +1460,8 @@ void PlayerbotAI::DoNextCombatManeuver()
         (GetClassAI())->DoNextCombatManeuver(m_targetCombat);
 }
 
-void PlayerbotAI::DoCombatMovement() {
+void PlayerbotAI::DoCombatMovement()
+{
     if (!m_targetCombat) return;
 
     float targetDist = m_bot->GetDistance(m_targetCombat);
@@ -1473,7 +1477,9 @@ void PlayerbotAI::DoCombatMovement() {
         // TODO: just follow in spell range! how to determine bots spell range?
         if (targetDist > 25.0f) {
             m_bot->GetMotionMaster()->MoveChase(m_targetCombat);
-        } else {
+        }
+        else
+        {
             MovementClear();
         }
     }
@@ -1756,7 +1762,8 @@ void PlayerbotAI::TurnInQuests(WorldObject *questgiver)
                     }
 
                     // else multiple rewards - let master pick
-                    else {
+                    else
+                    {
                         out << "What reward should I take for |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel()
                             << "|h[" << questTitle << "]|h|r? ";
                         for (uint8 i = 0; i < pQuest->GetRewChoiceItemsCount(); ++i)
@@ -2008,17 +2015,20 @@ Unit *PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
     return a;
 }
 
-void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit *target) {
+void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit *target)
+{
     CombatOrderType co;
     if (str == "tank") co = ORDERS_TANK;
     else if (str == "assist") co = ORDERS_ASSIST;
     else if (str == "heal") co = ORDERS_HEAL;
     else if (str == "protect") co = ORDERS_PROTECT;
-    else co = ORDERS_RESET;
+    else
+        co = ORDERS_RESET;
     SetCombatOrder(co, target);
 }
 
-void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target) {
+void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
+{
     if ((co == ORDERS_ASSIST || co == ORDERS_PROTECT) && !target) {
         TellMaster("Erf, you forget to target assist/protect characters!");
         return;
@@ -2041,13 +2051,15 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target) {
     SendOrders(*GetMaster());
 }
 
-void PlayerbotAI::SetMovementOrder(MovementOrderType mo, Unit *followTarget) {
+void PlayerbotAI::SetMovementOrder(MovementOrderType mo, Unit *followTarget)
+{
     m_movementOrder = mo;
     m_followTarget = followTarget;
     MovementReset();
 }
 
-void PlayerbotAI::MovementReset() {
+void PlayerbotAI::MovementReset()
+{
     // stop moving...
     MovementClear();
 
@@ -2735,7 +2747,8 @@ uint32 PlayerbotAI::extractMoney(const std::string& text) const
 // also removes found item IDs from itemIdSearchList when found
 void PlayerbotAI::findItemsInEquip(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const
 {
-    for (uint8 slot = EQUIPMENT_SLOT_START; itemIdSearchList.size() > 0 && slot < EQUIPMENT_SLOT_END; slot++) {
+    for (uint8 slot = EQUIPMENT_SLOT_START; itemIdSearchList.size() > 0 && slot < EQUIPMENT_SLOT_END; slot++)
+    {
         Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
         if (!pItem)
             continue;
@@ -3372,7 +3385,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                     hasCompleteQuests = true;
                     comout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
                 }
-                else {
+                else
+                {
                     hasIncompleteQuests = true;
                     incomout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" <<  questTitle << "]|h|r";
                 }
@@ -3567,7 +3581,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                                   61437, 22810, 22027, 45927, 7266, 7267, 6477, 6478, 7355, 68398};
         uint32 ignoredSpellsCount = sizeof(ignoredSpells) / sizeof(uint32);
 
-        for (PlayerSpellMap::iterator itr = m_bot->GetSpellMap().begin(); itr != m_bot->GetSpellMap().end(); ++itr) {
+        for (PlayerSpellMap::iterator itr = m_bot->GetSpellMap().begin(); itr != m_bot->GetSpellMap().end(); ++itr)
+        {
             const uint32 spellId = itr->first;
 
             if (itr->second.state == PLAYERSPELL_REMOVED || itr->second.disabled || IsPassiveSpell(spellId))
@@ -3582,7 +3597,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             SkillLineAbilityMapBounds const bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellId);
 
             bool isProfessionOrRidingSpell = false;
-            for (SkillLineAbilityMap::const_iterator skillIter = bounds.first; skillIter != bounds.second; ++skillIter) {
+            for (SkillLineAbilityMap::const_iterator skillIter = bounds.first; skillIter != bounds.second; ++skillIter)
+            {
                 if (IsProfessionOrRidingSkill(skillIter->second->skillId) && skillIter->first == spellId) {
                     isProfessionOrRidingSpell = true;
                     break;
@@ -3592,7 +3608,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 continue;
 
             bool isIgnoredSpell = false;
-            for (uint8 i = 0; i < ignoredSpellsCount; ++i) {
+            for (uint8 i = 0; i < ignoredSpellsCount; ++i)
+            {
                 if (spellId == ignoredSpells[i]) {
                     isIgnoredSpell = true;
                     break;
@@ -3608,7 +3625,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 if (posSpells[spellName] < spellId)
                     posSpells[spellName] = spellId;
             }
-            else {
+            else
+            {
                 if (negSpells.find(spellName) == negSpells.end())
                     negSpells[spellName] = spellId;
                 else
@@ -3617,12 +3635,14 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             }
         }
 
-        for (spellMap::const_iterator iter = posSpells.begin(); iter != posSpells.end(); ++iter) {
+        for (spellMap::const_iterator iter = posSpells.begin(); iter != posSpells.end(); ++iter)
+        {
             posOut << " |cffffffff|Hspell:" << iter->second << "|h["
                    << iter->first << "]|h|r";
         }
 
-        for (spellMap::const_iterator iter = negSpells.begin(); iter != negSpells.end(); ++iter) {
+        for (spellMap::const_iterator iter = negSpells.begin(); iter != negSpells.end(); ++iter)
+        {
             negOut << " |cffffffff|Hspell:" << iter->second << "|h["
                    << iter->first << "]|h|r";
         }
@@ -3797,7 +3817,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             }
 
         }
-        else {
+        else
+        {
             std::string msg = "What? follow, stay, (c)ast <spellname>, spells, (e)quip <itemlink>, (u)se <itemlink>, drop <questlink>, report, quests, stats";
             SendWhisper(msg, fromPlayer);
             m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
