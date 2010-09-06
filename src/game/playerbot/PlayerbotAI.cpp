@@ -1906,14 +1906,14 @@ uint32 PlayerbotAI::EstRepairAll()
     uint32 TotalCost = 0;
     // equipped, backpack, bags itself
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
-        TotalCost += EstRepair(((INVENTORY_SLOT_BAG_0 << 8) | i ));
+        TotalCost += EstRepair(((INVENTORY_SLOT_BAG_0 << 8) | i));
 
     // bank, buyback and keys not repaired
 
     // items in inventory bags
     for (int j = INVENTORY_SLOT_BAG_START; j < INVENTORY_SLOT_BAG_END; ++j)
         for (int i = 0; i < MAX_BAG_SIZE; ++i)
-            TotalCost += EstRepair(((j << 8) | i ));
+            TotalCost += EstRepair(((j << 8) | i));
     return TotalCost;
 }
 
@@ -1972,7 +1972,7 @@ Unit *PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
     if (!ait)
         return (m_attackerInfo.begin())->second.attacker;
 
-    float t = ((ait & AIT_HIGHESTTHREAT) ? 0.00 : 9999.00 );
+    float t = ((ait & AIT_HIGHESTTHREAT) ? 0.00 : 9999.00);
     Unit *a = 0;
     AttackerInfoList::iterator itr = m_attackerInfo.begin();
     for (; itr != m_attackerInfo.end(); ++itr)

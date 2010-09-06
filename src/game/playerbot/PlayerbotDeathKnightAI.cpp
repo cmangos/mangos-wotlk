@@ -206,7 +206,7 @@ void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
                 LastSpellUnholyDK = LastSpellUnholyDK + 1;
                 break;
             }
-            else if (( !pet )
+            else if ((!pet)
                      && (RAISE_DEAD > 0 && !m_bot->HasAura(ARMY_OF_THE_DEAD, EFFECT_INDEX_0) && LastSpellUnholyDK < 13))
             {
                 ai->CastSpell(RAISE_DEAD);
@@ -215,7 +215,7 @@ void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
                 LastSpellUnholyDK = LastSpellUnholyDK + 1;
                 break;
             }
-            else if (( pet )
+            else if ((pet)
                      && (GHOUL_FRENZY > 0 && pVictim == pet && !pet->HasAura(GHOUL_FRENZY, EFFECT_INDEX_0) && LastSpellUnholyDK < 14))
             {
                 ai->CastSpell(GHOUL_FRENZY, *pet);
@@ -439,7 +439,7 @@ void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
                 LastSpellBloodDK = LastSpellBloodDK + 1;
                 break;
             }
-            else if (( pet )
+            else if ((pet)
                      && (DEATH_PACT > 0 && ai->GetHealthPercent() < 50 && LastSpellBloodDK < 12 && ai->GetRunicPower() >= 40))
             {
                 ai->CastSpell(DEATH_PACT, *pet);

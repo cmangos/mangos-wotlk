@@ -113,15 +113,15 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
 
     // check for pet and heal if neccessary
     Pet *pet = m_bot->GetPet();
-    if (( pet )
-        && (((float) pet->GetHealth() / (float) pet->GetMaxHealth()) < 0.5f )
-        && ( PET_MEND > 0 && !pet->getDeathState() != ALIVE && pVictim != m_bot && !pet->HasAura(PET_MEND, EFFECT_INDEX_0) && ai->GetManaPercent() >= 13 && ai->CastSpell(PET_MEND, *m_bot)))
+    if ((pet)
+        && (((float) pet->GetHealth() / (float) pet->GetMaxHealth()) < 0.5f)
+        && (PET_MEND > 0 && !pet->getDeathState() != ALIVE && pVictim != m_bot && !pet->HasAura(PET_MEND, EFFECT_INDEX_0) && ai->GetManaPercent() >= 13 && ai->CastSpell(PET_MEND, *m_bot)))
     {
         ai->TellMaster("healing pet.");
         return;
     }
-    else if (( pet )
-             && ( INTIMIDATION > 0 && pVictim == pet && !pet->HasAura(INTIMIDATION, EFFECT_INDEX_0) && ai->CastSpell(INTIMIDATION, *m_bot)))
+    else if ((pet)
+             && (INTIMIDATION > 0 && pVictim == pet && !pet->HasAura(INTIMIDATION, EFFECT_INDEX_0) && ai->CastSpell(INTIMIDATION, *m_bot)))
     {
         //ai->TellMaster( "casting intimidation." ); // if pet has aggro :)
         return;
@@ -148,24 +148,24 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
         if (!m_bot->GetUInt32Value(PLAYER_AMMO_ID))
             ai->TellMaster("Out of ammo!");
         // become monkey (increases dodge chance)...
-        ( ASPECT_OF_THE_MONKEY > 0 && !m_bot->HasAura(ASPECT_OF_THE_MONKEY, EFFECT_INDEX_0) && ai->CastSpell(ASPECT_OF_THE_MONKEY, *m_bot));
+        (ASPECT_OF_THE_MONKEY > 0 && !m_bot->HasAura(ASPECT_OF_THE_MONKEY, EFFECT_INDEX_0) && ai->CastSpell(ASPECT_OF_THE_MONKEY, *m_bot));
     }
     else if (dist > ATTACK_DISTANCE && !m_rangedCombat)
     {
         // switch to ranged combat
         m_rangedCombat = true;
         // increase ranged attack power...
-        ( ASPECT_OF_THE_HAWK > 0 && !m_bot->HasAura(ASPECT_OF_THE_HAWK, EFFECT_INDEX_0) && ai->CastSpell(ASPECT_OF_THE_HAWK, *m_bot));
+        (ASPECT_OF_THE_HAWK > 0 && !m_bot->HasAura(ASPECT_OF_THE_HAWK, EFFECT_INDEX_0) && ai->CastSpell(ASPECT_OF_THE_HAWK, *m_bot));
     }
     else if (m_rangedCombat && !m_bot->HasAura(ASPECT_OF_THE_HAWK, EFFECT_INDEX_0))
     {
         // check if we have hawk aspect in ranged combat
-        ( ASPECT_OF_THE_HAWK > 0 && ai->CastSpell(ASPECT_OF_THE_HAWK, *m_bot));
+        (ASPECT_OF_THE_HAWK > 0 && ai->CastSpell(ASPECT_OF_THE_HAWK, *m_bot));
     }
     else if (!m_rangedCombat && !m_bot->HasAura(ASPECT_OF_THE_MONKEY, EFFECT_INDEX_0))
     {
         // check if we have monkey aspect in melee combat
-        ( ASPECT_OF_THE_MONKEY > 0 && ai->CastSpell(ASPECT_OF_THE_MONKEY, *m_bot));
+        (ASPECT_OF_THE_MONKEY > 0 && ai->CastSpell(ASPECT_OF_THE_MONKEY, *m_bot));
     }
 
     // activate auto shot
@@ -247,8 +247,8 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
             out << " > Shadowmeld";
         else if (m_bot->getRace() == RACE_DRAENEI && ai->GetHealthPercent() < 25 && !m_bot->HasAura(GIFT_OF_THE_NAARU, EFFECT_INDEX_0) && ai->CastSpell(GIFT_OF_THE_NAARU, *m_bot))
             out << " > Gift of the Naaru";
-        else if (( pet && !pet->getDeathState() != ALIVE)
-                 && ( MISDIRECTION > 0 && pVictim == m_bot && !m_bot->HasAura(MISDIRECTION, EFFECT_INDEX_0) && ai->GetManaPercent() >= 9 && ai->CastSpell(MISDIRECTION, *pet)))
+        else if ((pet && !pet->getDeathState() != ALIVE)
+                 && (MISDIRECTION > 0 && pVictim == m_bot && !m_bot->HasAura(MISDIRECTION, EFFECT_INDEX_0) && ai->GetManaPercent() >= 9 && ai->CastSpell(MISDIRECTION, *pet)))
             out << " > Misdirection";  // give threat to pet
         /*else if( FREEZING_TRAP>0 && ai->GetManaPercent()>=5 && !pTarget->HasAura(FREEZING_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(ARCANE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(EXPLOSIVE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(BEAR_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(IMMOLATION_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(FROST_TRAP, EFFECT_INDEX_0) && ai->CastSpell(FREEZING_TRAP,*pTarget) )
             out << " > Freezing Trap"; // this can trap your bots too
