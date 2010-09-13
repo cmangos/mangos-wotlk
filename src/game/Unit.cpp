@@ -797,7 +797,10 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 cVictim->DeleteThreatList();
                 // only lootable if it has loot or can drop gold
                 cVictim->PrepareBodyLootState();
+                // may have no loot, so update death timer if allowed
+                cVictim->AllLootRemovedFromCorpse();
             }
+
             // Call creature just died function
             if (cVictim->AI())
                 cVictim->AI()->JustDied(this);
@@ -1581,7 +1584,7 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
 
         // Calculate absorb & resists
         uint32 absorb_affected_damage = CalcNotIgnoreAbsorbDamage(damageInfo->damage,damageInfo->damageSchoolMask);
-        damageInfo->target->CalculateAbsorbAndResist(this, damageInfo->damageSchoolMask, DIRECT_DAMAGE, absorb_affected_damage, &damageInfo->absorb, &damageInfo->resist, true);
+        damageInfo->target->CalculateDamageAbsorbAndResist(this, damageInfo->damageSchoolMask, DIRECT_DAMAGE, absorb_affected_damage, &damageInfo->absorb, &damageInfo->resist, true);
         damageInfo->damage-=damageInfo->absorb + damageInfo->resist;
         if (damageInfo->absorb)
         {
@@ -1819,7 +1822,7 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
     return (newdamage > 1) ? newdamage : 1;
 }
 
-void Unit::CalculateAbsorbAndResist(Unit *pCaster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, bool canReflect)
+void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, bool canReflect)
 {
     if(!pCaster || !isAlive() || !damage)
         return;
@@ -2002,14 +2005,18 @@ void Unit::CalculateAbsorbAndResist(Unit *pCaster, SpellSchoolMask schoolMask, D
             case SPELLFAMILY_ROGUE:
             {
                 // Cheat Death (make less prio with Guardian Spirit case)
-                if (!preventDeathSpell && spellProto->SpellIconID == 2109 &&
-                    GetTypeId()==TYPEID_PLAYER &&           // Only players
-                    !((Player*)this)->HasSpellCooldown(31231) &&
-                                                            // Only if no cooldown
-                    roll_chance_i((*i)->GetModifier()->m_amount))
-                                                            // Only if roll
+                if (spellProto->SpellIconID == 2109)
                 {
-                    preventDeathSpell = (*i)->GetSpellProto();
+                    if (!preventDeathSpell &&
+                        GetTypeId()==TYPEID_PLAYER &&           // Only players
+                        !((Player*)this)->HasSpellCooldown(31231) &&
+                                                                // Only if no cooldown
+                        roll_chance_i((*i)->GetModifier()->m_amount))
+                                                                // Only if roll
+                    {
+                        preventDeathSpell = (*i)->GetSpellProto();
+                    }
+                    // always skip this spell in charge dropping, absorb amount calculation since it has chance as m_amount and doesn't need to absorb any damage
                     continue;
                 }
                 break;
@@ -2351,8 +2358,69 @@ void Unit::CalculateAbsorbResistBlock(Unit *pCaster, SpellNonMeleeDamage *damage
     }
 
     uint32 absorb_affected_damage = pCaster->CalcNotIgnoreAbsorbDamage(damageInfo->damage,GetSpellSchoolMask(spellProto),spellProto);
-    CalculateAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, absorb_affected_damage, &damageInfo->absorb, &damageInfo->resist, !(spellProto->AttributesEx2 & SPELL_ATTR_EX2_CANT_REFLECTED));
+    CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, absorb_affected_damage, &damageInfo->absorb, &damageInfo->resist, !(spellProto->AttributesEx2 & SPELL_ATTR_EX2_CANT_REFLECTED));
     damageInfo->damage-= damageInfo->absorb + damageInfo->resist;
+}
+
+void Unit::CalculateHealAbsorb(const uint32 heal, uint32 *absorb)
+{
+    if (!isAlive() || !heal)
+        return;
+
+    int32 RemainingHeal = heal;
+
+    // Need remove expired auras after
+    bool existExpired = false;
+
+    // absorb
+    AuraList const& vHealAbsorb = GetAurasByType(SPELL_AURA_HEAL_ABSORB);
+    for(AuraList::const_iterator i = vHealAbsorb.begin(); i != vHealAbsorb.end() && RemainingHeal > 0; ++i)
+    {
+        Modifier* mod = (*i)->GetModifier();
+        SpellEntry const* spellProto = (*i)->GetSpellProto();
+
+        // Max Amount can be absorbed by this aura
+        int32  currentAbsorb = mod->m_amount;
+
+        // Found empty aura (impossible but..)
+        if (currentAbsorb <=0)
+        {
+            existExpired = true;
+            continue;
+        }
+
+        // currentAbsorb - heal can be absorbed
+        // If need absorb less heal
+        if (RemainingHeal < currentAbsorb)
+            currentAbsorb = RemainingHeal;
+
+        RemainingHeal -= currentAbsorb;
+
+        // Reduce aura amount
+        mod->m_amount -= currentAbsorb;
+        if ((*i)->GetHolder()->DropAuraCharge())
+            mod->m_amount = 0;
+        // Need remove it later
+        if (mod->m_amount<=0)
+            existExpired = true;
+    }
+
+    // Remove all expired absorb auras
+    if (existExpired)
+    {
+        for(AuraList::const_iterator i = vHealAbsorb.begin(); i != vHealAbsorb.end();)
+        {
+            if ((*i)->GetModifier()->m_amount<=0)
+            {
+                RemoveAurasDueToSpell((*i)->GetId(), NULL, AURA_REMOVE_BY_SHIELD_BREAK);
+                i = vHealAbsorb.begin();
+            }
+            else
+                ++i;
+        }
+    }
+
+    *absorb = heal - RemainingHeal;
 }
 
 void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool extra )
@@ -3841,7 +3909,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder *holder)
     }
 
     // passive and persistent auras can stack with themselves any number of times
-    if (!holder->IsPassive() && !holder->IsPersistent())
+    if (!holder->IsPassive() && !holder->IsPersistent() || holder->IsAreaAura())
     {
         SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(aurSpellInfo->Id);
 
@@ -3945,39 +4013,34 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder *holder)
     }
 
     // update single target auras list (before aura add to aura list, to prevent unexpected remove recently added aura)
-    if (holder->IsSingleTarget() && holder->GetTarget())
+    if (holder->IsSingleTarget())
     {
-        // caster pointer can be deleted in time aura remove, find it by guid at each iteration
-        for(;;)
+        if (Unit* caster = holder->GetCaster())             // caster not in world
         {
-            Unit* caster = holder->GetCaster();
-            if(!caster)                                     // caster deleted and not required adding scAura
-                break;
-
-            bool restart = false;
-            SpellAuraHolderList& scAuras = caster->GetSingleCastSpellAuraHolders();
-            for(SpellAuraHolderList::const_iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
+            SingleCastSpellTargetMap& scTargets = caster->GetSingleCastSpellTargets();
+            for(SingleCastSpellTargetMap::iterator itr = scTargets.begin(); itr != scTargets.end();)
             {
-                if( (*itr)->GetTarget() != holder->GetTarget() &&
-                    IsSingleTargetSpells((*itr)->GetSpellProto(),aurSpellInfo) )
+                SpellEntry const* itr_spellEntry = itr->first;
+                ObjectGuid itr_targetGuid = itr->second;
+
+                if (itr_targetGuid != GetObjectGuid() &&
+                    IsSingleTargetSpells(itr_spellEntry, aurSpellInfo))
                 {
-                    if ((*itr)->IsInUse())
-                    {
-                        sLog.outError("Holder (Spell %u) is in process but attempt removed at aura (Spell %u) adding, need add stack rule for IsSingleTargetSpell", (*itr)->GetId(), holder->GetId());
-                        continue;
-                    }
-                    (*itr)->GetTarget()->RemoveSpellAuraHolder((*itr));
-                    restart = true;
-                    break;
+                    scTargets.erase(itr);                   // remove for caster in any case
+
+                    // remove from target if target found
+                    if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
+                        itr_target->RemoveAurasDueToSpell(itr_spellEntry->Id);
+
+                    itr = scTargets.begin();                // list can be chnaged at remove aura
+                    continue;
                 }
+
+                ++itr;
             }
 
-            if(!restart)
-            {
-                // done
-                scAuras.push_back(holder);
-                break;
-            }
+            // register spell holder single target
+            scTargets[aurSpellInfo] = GetObjectGuid();
         }
     }
 
@@ -4392,7 +4455,7 @@ void Unit::RemoveAurasDueToSpellByCancel(uint32 spellId)
     }
 }
 
-void Unit::RemoveAurasWithDispelType( DispelType type )
+void Unit::RemoveAurasWithDispelType( DispelType type, uint64 casterGUID )
 {
     // Create dispel mask by dispel type
     uint32 dispelMask = GetDispellMask(type);
@@ -4401,7 +4464,7 @@ void Unit::RemoveAurasWithDispelType( DispelType type )
     for(SpellAuraHolderMap::iterator itr = auras.begin(); itr != auras.end(); )
     {
         SpellEntry const* spell = itr->second->GetSpellProto();
-        if( (1<<spell->Dispel) & dispelMask )
+        if( ((1<<spell->Dispel) & dispelMask) && (!casterGUID || casterGUID == itr->second->GetCasterGUID()))
         {
             // Dispel aura
             RemoveAurasDueToSpell(spell->Id);
@@ -4493,12 +4556,13 @@ void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
     // single target auras from other casters
     for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end(); )
     {
-        if (iter->second->GetCasterGUID()!=GetGUID() && IsSingleTargetSpell(iter->second->GetSpellProto()))
+        if (iter->second->GetCasterGUID() != GetGUID() && iter->second->IsSingleTarget())
         {
             if(!newPhase)
             {
                 RemoveSpellAuraHolder(iter->second);
                 iter = m_spellAuraHolders.begin();
+                continue;
             }
             else
             {
@@ -4507,29 +4571,52 @@ void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
                 {
                     RemoveSpellAuraHolder(iter->second);
                     iter = m_spellAuraHolders.begin();
+                    continue;
                 }
-                else
-                    ++iter;
             }
         }
-        else
-            ++iter;
+
+        ++iter;
     }
 
-    // single cast!!
     // single target auras at other targets
-    SpellAuraHolderList& scAuras = GetSingleCastSpellAuraHolders();
-    for (SpellAuraHolderList::iterator iter = scAuras.begin(); iter != scAuras.end(); )
+    SingleCastSpellTargetMap& scTargets = GetSingleCastSpellTargets();
+    for (SingleCastSpellTargetMap::iterator itr = scTargets.begin(); itr != scTargets.end(); )
     {
-        SpellAuraHolder* holder = *iter;
-        if (holder->GetTarget() != this && !holder->GetTarget()->InSamePhase(newPhase))
+        SpellEntry const* itr_spellEntry = itr->first;
+        ObjectGuid itr_targetGuid = itr->second;
+
+        if (itr_targetGuid != GetObjectGuid())
         {
-            scAuras.erase(iter);                            // explicitly remove, instead waiting remove in RemoveSpellAuraHolder
-            holder->GetTarget()->RemoveSpellAuraHolder(holder);
-            iter = scAuras.begin();
+            if(!newPhase)
+            {
+                scTargets.erase(itr);                       // remove for caster in any case
+
+                // remove from target if target found
+                if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
+                    itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, GetGUID());
+
+                itr = scTargets.begin();                    // list can be changed at remove aura
+                continue;
+            }
+            else
+            {
+                Unit* itr_target = GetMap()->GetUnit(itr_targetGuid);
+                if(!itr_target || !itr_target->InSamePhase(newPhase))
+                {
+                    scTargets.erase(itr);                   // remove for caster in any case
+
+                    // remove from target if target found
+                    if (itr_target)
+                        itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, GetGUID());
+
+                    itr = scTargets.begin();                // list can be changed at remove aura
+                    continue;
+                }
+            }
         }
-        else
-            ++iter;
+
+        ++itr;
     }
 
 }
@@ -4990,6 +5077,7 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo *pInfo)
         case SPELL_AURA_OBS_MOD_HEALTH:
             data << uint32(pInfo->damage);                  // damage
             data << uint32(pInfo->overDamage);              // overheal?
+            data << uint32(pInfo->absorb);                  // absorb
             data << uint8(pInfo->critical ? 1 : 0);         // new 3.1.2 critical flag
             break;
         case SPELL_AURA_OBS_MOD_MANA:
@@ -5844,7 +5932,7 @@ void Unit::UnsummonAllTotems()
             totem->UnSummon();
 }
 
-int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellProto, bool critical)
+int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellProto, bool critical, uint32 absorb)
 {
     int32 gain = pVictim->ModifyHealth(int32(addhealth));
 
@@ -5856,7 +5944,7 @@ int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellPro
     if (unit->GetTypeId()==TYPEID_PLAYER)
     {
         // overheal = addhealth - gain
-        unit->SendHealSpellLog(pVictim, spellProto->Id, addhealth, addhealth - gain, critical);
+        unit->SendHealSpellLog(pVictim, spellProto->Id, addhealth, addhealth - gain, critical, absorb);
 
         if (BattleGround *bg = ((Player*)unit)->GetBattleGround())
             bg->UpdatePlayerScore((Player*)unit, SCORE_HEALING_DONE, gain);
@@ -5905,7 +5993,7 @@ Unit* Unit::SelectMagnetTarget(Unit *victim, SpellEntry const *spellInfo)
     return victim;
 }
 
-void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, uint32 OverHeal, bool critical)
+void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, uint32 OverHeal, bool critical, uint32 absorb)
 {
     // we guess size
     WorldPacket data(SMSG_SPELLHEALLOG, (8+8+4+4+1));
@@ -5914,6 +6002,7 @@ void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, uint32
     data << uint32(SpellID);
     data << uint32(Damage);
     data << uint32(OverHeal);
+    data << uint32(absorb);
     data << uint8(critical ? 1 : 0);
     data << uint8(0);                                       // unused in client?
     SendMessageToSet(&data, true);
@@ -6347,9 +6436,9 @@ uint32 Unit::SpellDamageBonusTaken(Unit *pCaster, SpellEntry const *spellProto, 
     // Mod damage taken from AoE spells
     if(IsAreaOfEffectSpell(spellProto))
     {
-        AuraList const& avoidAuras = GetAurasByType(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE);
-        for(AuraList::const_iterator itr = avoidAuras.begin(); itr != avoidAuras.end(); ++itr)
-            TakenTotalMod *= ((*itr)->GetModifier()->m_amount + 100.0f) / 100.0f;
+        TakenTotalMod *= GetTotalAuraMultiplier(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE);
+        if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
+            TakenTotalMod *= GetTotalAuraMultiplier(SPELL_AURA_MOD_PET_AOE_DAMAGE_AVOIDANCE);
     }
 
     // Taken fixed damage bonus auras
@@ -7273,8 +7362,11 @@ uint32 Unit::MeleeDamageBonusTaken(Unit *pCaster, uint32 pdamage,WeaponAttackTyp
 
     // ..taken pct (aoe avoidance)
     if(spellProto && IsAreaOfEffectSpell(spellProto))
+    {
         TakenPercent *= GetTotalAuraMultiplier(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE);
-
+        if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
+            TakenPercent *= GetTotalAuraMultiplier(SPELL_AURA_MOD_PET_AOE_DAMAGE_AVOIDANCE);
+    }
 
     // special dummys/class scripts and other effects
     // =============================================
