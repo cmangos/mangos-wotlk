@@ -316,6 +316,8 @@ class MANGOS_DLL_SPEC PlayerbotAI
         Unit *m_targetProtect;	// check
 
         Unit *m_followTarget;	// whom to follow in non combat situation?
+
+        std::map<uint32, float> m_spellRangeMap;
 };
 
 #endif
