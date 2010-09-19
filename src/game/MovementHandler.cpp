@@ -168,7 +168,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->ProcessDelayedOperations();
 }
 
-void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
+void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("MSG_MOVE_TELEPORT_ACK");
 
@@ -240,6 +240,10 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     recv_data >> guid.ReadAsPacked();
     recv_data >> movementInfo;
     /*----------------*/
+
+    // ignore wrong guid (player attempt cheating own session for not own guid possible...)
+    if (guid != mover->GetObjectGuid())
+        return;
 
     if (!MaNGOS::IsValidMapCoord(movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z, movementInfo.GetPos()->o))
     {
@@ -358,7 +362,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     }
 }
 
-void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
+void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket &recv_data)
 {
     uint32 opcode = recv_data.GetOpcode();
     DEBUG_LOG("WORLD: Recvd %s (%u, 0x%X) opcode", LookupOpcodeName(opcode), opcode, opcode);
@@ -445,7 +449,7 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
     }
 }
 
-void WorldSession::HandleMoveNotActiveMover(WorldPacket &recv_data)
+void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket &recv_data)
 {
     DEBUG_LOG("WORLD: Recvd CMSG_MOVE_NOT_ACTIVE_MOVER");
     recv_data.hexlike();
