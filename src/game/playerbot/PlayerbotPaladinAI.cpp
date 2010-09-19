@@ -1,16 +1,16 @@
-    /*
-    Name    : PlayerbotPaladinAI.cpp
-    Complete: maybe around 27% :D
-    Author  : Natsukawa
-    Version : 0.35
-    */
+/*
+   Name    : PlayerbotPaladinAI.cpp
+   Complete: maybe around 27% :D
+   Author  : Natsukawa
+   Version : 0.35
+ */
 
 #include "PlayerbotPaladinAI.h"
 #include "PlayerbotMgr.h"
 
 class PlayerbotAI;
 
-PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, PlayerbotAI* const ai): PlayerbotClassAI(master, bot, ai)
+PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
 {
     RETRIBUTION_AURA              = ai->initSpell(RETRIBUTION_AURA_1);
     CRUSADER_AURA                 = ai->initSpell(CRUSADER_AURA_1);
@@ -78,23 +78,23 @@ void PlayerbotPaladinAI::HealTarget(Unit &target, uint8 hp)
 {
     PlayerbotAI* ai = GetAI();
 
-	if (hp < 40 && HOLY_LIGHT > 0 && ai->GetManaPercent() >= 34)
+    if (hp < 40 && HOLY_LIGHT > 0 && ai->GetManaPercent() >= 34)
         ai->CastSpell(HOLY_LIGHT, target);
 
-	if (hp < 35 && HOLY_SHOCK > 0 && ai->GetManaPercent() >= 21)
+    if (hp < 35 && HOLY_SHOCK > 0 && ai->GetManaPercent() >= 21)
         ai->CastSpell(HOLY_SHOCK, target);
 
-	if (hp < 30 && FLASH_OF_LIGHT > 0 && ai->GetManaPercent() >= 8)
+    if (hp < 30 && FLASH_OF_LIGHT > 0 && ai->GetManaPercent() >= 8)
         ai->CastSpell(FLASH_OF_LIGHT, target);
 
-	if (hp < 25 && LAY_ON_HANDS > 0 && ai->GetHealthPercent() > 30 && ai->GetManaPercent() >= 8)
+    if (hp < 25 && LAY_ON_HANDS > 0 && ai->GetHealthPercent() > 30 && ai->GetManaPercent() >= 8)
         ai->CastSpell(LAY_ON_HANDS, target);
 
 } // end HealTarget
 
 void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
 {
-	Unit* pVictim = pTarget->getVictim();
+    Unit* pVictim = pTarget->getVictim();
     PlayerbotAI* ai = GetAI();
     if (!ai)
         return;
@@ -108,36 +108,36 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     }
 
     // damage spells
-    ai->SetInFront( pTarget );
+    ai->SetInFront(pTarget);
     Player *m_bot = GetPlayerBot();
     Group *m_group = m_bot->GetGroup();
-    float dist = m_bot->GetDistance( pTarget );
+    float dist = m_bot->GetDistance(pTarget);
     std::ostringstream out;
 
     //Shield master if low hp.
-    uint32 masterHP = GetMaster()->GetHealth()*100 / GetMaster()->GetMaxHealth();
+    uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
 
     if (GetMaster()->isAlive())
         if (masterHP < 25 && HAND_OF_PROTECTION > 0 && !GetMaster()->HasAura(FORBEARANCE, EFFECT_INDEX_0) && !GetMaster()->HasAura(HAND_OF_PROTECTION, EFFECT_INDEX_0) && !GetMaster()->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0) && !GetMaster()->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0))
-              ai->CastSpell(HAND_OF_PROTECTION, *GetMaster());
+            ai->CastSpell(HAND_OF_PROTECTION, *GetMaster());
 
-	// heal group inside combat, but do not heal if tank
-    if( m_group && pVictim != m_bot ) // possible tank
+    // heal group inside combat, but do not heal if tank
+    if (m_group && pVictim != m_bot)  // possible tank
     {
         Group::MemberSlotList const& groupSlot = m_group->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
-            Player *m_groupMember = sObjectMgr.GetPlayer( itr->guid );
-            if( !m_groupMember || !m_groupMember->isAlive() )
+            Player *m_groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (!m_groupMember || !m_groupMember->isAlive())
                 continue;
 
-            uint32 memberHP = m_groupMember->GetHealth()*100 / m_groupMember->GetMaxHealth();
-            if( memberHP < 40 && ai->GetManaPercent() >= 40 ) // do not heal bots without plenty of mana for master & self
-                HealTarget( *m_groupMember, memberHP );
+            uint32 memberHP = m_groupMember->GetHealth() * 100 / m_groupMember->GetMaxHealth();
+            if (memberHP < 40 && ai->GetManaPercent() >= 40)  // do not heal bots without plenty of mana for master & self
+                HealTarget(*m_groupMember, memberHP);
         }
     }
 
-	if (RIGHTEOUS_FURY > 0 && !m_bot->HasAura(RIGHTEOUS_FURY, EFFECT_INDEX_0))
+    if (RIGHTEOUS_FURY > 0 && !m_bot->HasAura(RIGHTEOUS_FURY, EFFECT_INDEX_0))
         ai->CastSpell (RIGHTEOUS_FURY, *m_bot);
 
     if (SHADOW_RESISTANCE_AURA > 0 && !m_bot->HasAura(SHADOW_RESISTANCE_AURA, EFFECT_INDEX_0) && pTarget->getClass() == CLASS_WARLOCK)
@@ -161,7 +161,7 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     if (DEVOTION_AURA > 0 && !m_bot->HasAura(DEVOTION_AURA, EFFECT_INDEX_0) && pTarget->getClass() == CLASS_PALADIN)
         ai->CastSpell (DEVOTION_AURA, *m_bot);
 
-    if (ai->GetHealthPercent() <= 40 || GetMaster()->GetHealth() <= GetMaster()->GetMaxHealth()*0.4)
+    if (ai->GetHealthPercent() <= 40 || GetMaster()->GetHealth() <= GetMaster()->GetMaxHealth() * 0.4)
         SpellSequence = Healing;
     else
         SpellSequence = Combat;
@@ -169,7 +169,7 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     switch (SpellSequence)
     {
         case Combat:
-            if (JUDGEMENT_OF_LIGHT > 0 && !pTarget->HasAura(JUDGEMENT_OF_LIGHT, EFFECT_INDEX_0) && CombatCounter < 1 && ai->GetManaPercent() >=5)
+            if (JUDGEMENT_OF_LIGHT > 0 && !pTarget->HasAura(JUDGEMENT_OF_LIGHT, EFFECT_INDEX_0) && CombatCounter < 1 && ai->GetManaPercent() >= 5)
             {
                 ai->CastSpell (JUDGEMENT_OF_LIGHT, *pTarget);
                 out << " Judgement of Light";
@@ -183,63 +183,63 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
                 CombatCounter++;
                 break;
             }
-            else if (HAMMER_OF_JUSTICE > 0 && !pTarget->HasAura(HAMMER_OF_JUSTICE, EFFECT_INDEX_0) && CombatCounter < 3 && ai->GetManaPercent() >=3)
+            else if (HAMMER_OF_JUSTICE > 0 && !pTarget->HasAura(HAMMER_OF_JUSTICE, EFFECT_INDEX_0) && CombatCounter < 3 && ai->GetManaPercent() >= 3)
             {
                 ai->CastSpell (HAMMER_OF_JUSTICE, *pTarget);
                 out << " Hammer of Justice";
                 CombatCounter++;
                 break;
             }
-            else if (CRUSADER_STRIKE > 0 && CombatCounter < 4 && ai->GetManaPercent() >=5)
+            else if (CRUSADER_STRIKE > 0 && CombatCounter < 4 && ai->GetManaPercent() >= 5)
             {
                 ai->CastSpell (CRUSADER_STRIKE, *pTarget);
                 out << " Crusader Strike";
                 CombatCounter++;
                 break;
             }
-            else if (AVENGING_WRATH > 0 && CombatCounter < 5 && !m_bot->HasAura(AVENGING_WRATH, EFFECT_INDEX_0) && ai->GetManaPercent() >=8)
+            else if (AVENGING_WRATH > 0 && CombatCounter < 5 && !m_bot->HasAura(AVENGING_WRATH, EFFECT_INDEX_0) && ai->GetManaPercent() >= 8)
             {
                 ai->CastSpell (AVENGING_WRATH, *m_bot);
                 out << " Avenging Wrath";
                 CombatCounter++;
                 break;
             }
-            else if (SACRED_SHIELD > 0 && CombatCounter < 6 && pVictim == m_bot && ai->GetHealthPercent() < 70 && !m_bot->HasAura(SACRED_SHIELD, EFFECT_INDEX_0) && ai->GetManaPercent() >=12)
+            else if (SACRED_SHIELD > 0 && CombatCounter < 6 && pVictim == m_bot && ai->GetHealthPercent() < 70 && !m_bot->HasAura(SACRED_SHIELD, EFFECT_INDEX_0) && ai->GetManaPercent() >= 12)
             {
                 ai->CastSpell (SACRED_SHIELD, *m_bot);
                 out << " Sacred Shield";
                 CombatCounter++;
                 break;
             }
-            else if (DIVINE_STORM > 0 && CombatCounter < 7 && ai->GetAttackerCount()>=3 && dist <= ATTACK_DISTANCE && ai->GetManaPercent() >=12)
+            else if (DIVINE_STORM > 0 && CombatCounter < 7 && ai->GetAttackerCount() >= 3 && dist <= ATTACK_DISTANCE && ai->GetManaPercent() >= 12)
             {
                 ai->CastSpell (DIVINE_STORM, *pTarget);
                 out << " Divine Storm";
                 CombatCounter++;
                 break;
             }
-            else if (HAMMER_OF_WRATH > 0 && CombatCounter < 8 && pTarget->GetHealth() < pTarget->GetMaxHealth()*0.20 && ai->GetManaPercent() >=14)
+            else if (HAMMER_OF_WRATH > 0 && CombatCounter < 8 && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.20 && ai->GetManaPercent() >= 14)
             {
                 ai->CastSpell (HAMMER_OF_WRATH, *pTarget);
                 out << " Hammer of Wrath";
                 CombatCounter++;
                 break;
             }
-            else if (HOLY_WRATH > 0 && CombatCounter < 9 && ai->GetAttackerCount()>=3 && dist <= ATTACK_DISTANCE && ai->GetManaPercent() >=24)
+            else if (HOLY_WRATH > 0 && CombatCounter < 9 && ai->GetAttackerCount() >= 3 && dist <= ATTACK_DISTANCE && ai->GetManaPercent() >= 24)
             {
                 ai->CastSpell (HOLY_WRATH, *pTarget);
                 out << " Holy Wrath";
                 CombatCounter++;
                 break;
             }
-            else if (HAND_OF_SACRIFICE > 0 && pVictim == GetMaster() && !GetMaster()->HasAura(HAND_OF_SACRIFICE, EFFECT_INDEX_0) && CombatCounter < 10 && ai->GetManaPercent() >=6)
+            else if (HAND_OF_SACRIFICE > 0 && pVictim == GetMaster() && !GetMaster()->HasAura(HAND_OF_SACRIFICE, EFFECT_INDEX_0) && CombatCounter < 10 && ai->GetManaPercent() >= 6)
             {
                 ai->CastSpell (HAND_OF_SACRIFICE, *GetMaster());
                 out << " Hand of Sacrifice";
                 CombatCounter++;
                 break;
             }
-            else if (DIVINE_PROTECTION > 0 && pVictim == m_bot && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && ai->GetHealthPercent() < 30 && CombatCounter < 11 && ai->GetManaPercent() >=3)
+            else if (DIVINE_PROTECTION > 0 && pVictim == m_bot && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && ai->GetHealthPercent() < 30 && CombatCounter < 11 && ai->GetManaPercent() >= 3)
             {
                 ai->CastSpell (DIVINE_PROTECTION, *m_bot);
                 out << " Divine Protection";
@@ -300,8 +300,8 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
                 break;
             }
     }
-    if( ai->GetManager()->m_confDebugWhisper )
-        ai->TellMaster( out.str().c_str() );
+    if (ai->GetManager()->m_confDebugWhisper)
+        ai->TellMaster(out.str().c_str());
 
     if (AVENGING_WRATH > 0 && !m_bot->HasAura(AVENGING_WRATH, EFFECT_INDEX_0) && ai->GetManaPercent() >= 8)
         ai->CastSpell(AVENGING_WRATH, *m_bot);
@@ -321,17 +321,17 @@ void PlayerbotPaladinAI::DoNonCombatActions()
         return;
 
     // buff myself
-	if (GREATER_BLESSING_OF_MIGHT > 0 && !m_bot->HasAura(GREATER_BLESSING_OF_MIGHT, EFFECT_INDEX_0))
+    if (GREATER_BLESSING_OF_MIGHT > 0 && !m_bot->HasAura(GREATER_BLESSING_OF_MIGHT, EFFECT_INDEX_0))
         ai->CastSpell (GREATER_BLESSING_OF_MIGHT, *m_bot);
     else if (BLESSING_OF_MIGHT > 0 && !m_bot->HasAura(GREATER_BLESSING_OF_MIGHT, EFFECT_INDEX_0) && !m_bot->HasAura(BLESSING_OF_MIGHT, EFFECT_INDEX_0))
         ai->CastSpell (BLESSING_OF_MIGHT, *m_bot);
 
     if (DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && ai->GetManaPercent() >= 3)
-        ai->CastSpell(DIVINE_FAVOR , *m_bot);
+        ai->CastSpell(DIVINE_FAVOR, *m_bot);
 /*
     if (SEAL_OF_COMMAND > 0)
         ai->CastSpell (SEAL_OF_COMMAND, *m_bot); // interferes with drinking/eating
-*/
+ */
     //Select Class buff seq.
     ///Process Who is my master --> get the player class --> aura already present if not then proced --> cast the spell
     //Priest
@@ -394,7 +394,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     Item* pItem = ai->FindDrink();
-	Item* fItem = ai->FindBandage();
+    Item* fItem = ai->FindBandage();
 
     if (pItem != NULL && ai->GetManaPercent() < 40)
     {
@@ -432,11 +432,11 @@ void PlayerbotPaladinAI::DoNonCombatActions()
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
-            if( !tPlayer || !tPlayer->isAlive() )
+            if (!tPlayer || !tPlayer->isAlive())
                 continue;
 
-             // heal player
-             (HealTarget(*tPlayer, tPlayer->GetHealth()*100 / tPlayer->GetMaxHealth()));
+            // heal player
+            (HealTarget(*tPlayer, tPlayer->GetHealth() * 100 / tPlayer->GetMaxHealth()));
         }
     }
 }
