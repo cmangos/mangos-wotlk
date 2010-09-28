@@ -2310,6 +2310,9 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     uint64 targetGUID = m_bot->GetSelection();
     Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, m_bot->GetSelection());
 
+    if (!pTarget)
+        pTarget = m_bot;
+
     // Check spell range
     std::map<uint32, float>::iterator it = m_spellRangeMap.find(spellId);
     if (it != m_spellRangeMap.end() && (int)it->second != 0)
@@ -2319,8 +2322,9 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
             return false;
     }
 
-    if (!pTarget)
-        pTarget = m_bot;
+    // Check line of sight
+    if (!m_bot->IsWithinLOSInMap(pTarget))
+        return false;
 
     if (IsPositiveSpell(spellId))
     {
