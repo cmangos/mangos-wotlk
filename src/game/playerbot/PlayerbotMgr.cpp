@@ -191,7 +191,8 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             return;
         } /* EMOTE ends here */
 
-        case CMSG_GAMEOBJ_USE:
+        case CMSG_GAMEOBJ_USE: // not sure if we still need this one
+        case CMSG_GAMEOBJ_REPORT_USE:
         {
             WorldPacket p(packet);
             p.rpos(0);     // reset reader
