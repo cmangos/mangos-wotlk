@@ -7720,16 +7720,49 @@ void ObjectMgr::LoadGameObjectForQuests()
 
         switch(goInfo->type)
         {
-            // scan GO chest with loot including quest items
-            case GAMEOBJECT_TYPE_CHEST:
+            case GAMEOBJECT_TYPE_QUESTGIVER:
             {
-                uint32 loot_id = goInfo->GetLootId();
-
-                // find quest loot for GO
-                if(LootTemplates_Gameobject.HaveQuestLootFor(loot_id))
+                if (mGOQuestRelations.find(go_entry) != mGOQuestRelations.end())
                 {
                     mGameObjectForQuestSet.insert(go_entry);
                     ++count;
+                }
+                else if (mGOQuestInvolvedRelations.find(go_entry) != mGOQuestInvolvedRelations.end())
+                {
+                    mGameObjectForQuestSet.insert(go_entry);
+                    ++count;
+                }
+
+                break;
+            }
+            case GAMEOBJECT_TYPE_CHEST:
+            {
+                // scan GO chest with loot including quest items
+                uint32 loot_id = goInfo->GetLootId();
+
+                // always activate to quest, GO may not have loot, OR find if GO has loot for quest.
+                if (goInfo->chest.questId || LootTemplates_Gameobject.HaveQuestLootFor(loot_id))
+                {
+                    mGameObjectForQuestSet.insert(go_entry);
+                    ++count;
+                }
+                break;
+            }
+            case GAMEOBJECT_TYPE_GENERIC:
+            {
+                if (goInfo->_generic.questID)               // quest related objects, has visual effects
+                {
+                    mGameObjectForQuestSet.insert(go_entry);
+                    count++;
+                }
+                break;
+            }
+            case GAMEOBJECT_TYPE_SPELL_FOCUS:
+            {
+                if (goInfo->spellFocus.questID)             // quest related objects, has visual effect
+                {
+                    mGameObjectForQuestSet.insert(go_entry);
+                    count++;
                 }
                 break;
             }

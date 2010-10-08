@@ -101,6 +101,10 @@ pkgdata_DATA = \
 	10503_02_characters_gameobject_respawn.sql \
 	10503_03_mangos_creature_respawn.sql \
 	10503_04_mangos_gameobject_respawn.sql \
+	10537_01_mangos_command.sql \
+	10551_01_mangos_spell_proc_event.sql \
+	10568_01_characters_character_tutorial.sql \
+	10582_01_mangos_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -182,4 +186,8 @@ EXTRA_DIST = \
 	10503_02_characters_gameobject_respawn.sql \
 	10503_03_mangos_creature_respawn.sql \
 	10503_04_mangos_gameobject_respawn.sql \
+	10537_01_mangos_command.sql \
+	10551_01_mangos_spell_proc_event.sql \
+	10568_01_characters_character_tutorial.sql \
+	10582_01_mangos_spell_proc_event.sql \
 	README

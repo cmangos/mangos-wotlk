@@ -682,19 +682,39 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
             if( updateMask->GetBit( index ) )
             {
                 // send in current format (float as float, uint32 as uint32)
-                if ( index == GAMEOBJECT_DYNAMIC )
+                if (index == GAMEOBJECT_DYNAMIC)
                 {
-                    if(IsActivateToQuest )
+                    // GAMEOBJECT_TYPE_DUNGEON_DIFFICULTY can have lo flag = 2
+                    //      most likely related to "can enter map" and then should be 0 if can not enter
+
+                    // GO_DYNFLAG_ACTIVATE      = 0x01
+                    // GO_DYNFLAG_ANIMATE       = 0x02
+                    // GO_DYNFLAG_NO_INTERACT   = 0x04
+                    // GO_DYNFLAG_SPARKLE       = 0x08
+
+                    if (IsActivateToQuest)
                     {
                         switch(((GameObject*)this)->GetGoType())
                         {
+                            case GAMEOBJECT_TYPE_QUESTGIVER:
+                                *data << uint16(1);
+                                *data << uint16(-1);
+                                break;
                             case GAMEOBJECT_TYPE_CHEST:
                                 // enable quest object. Represent 9, but 1 for client before 2.3.0
                                 *data << uint16(9);
                                 *data << uint16(-1);
                                 break;
+                            case GAMEOBJECT_TYPE_GENERIC:
+                                *data << uint16(8);         // unclear if 0x01 should be added
+                                *data << uint16(-1);
+                                break;
+                            case GAMEOBJECT_TYPE_SPELL_FOCUS:
+                                *data << uint16(9);
+                                *data << uint16(-1);
+                                break;
                             case GAMEOBJECT_TYPE_GOOBER:
-                                *data << uint16(1);
+                                *data << uint16(9);
                                 *data << uint16(-1);
                                 break;
                             default:
@@ -1704,7 +1724,7 @@ void WorldObject::AddObjectToRemoveList()
     GetMap()->AddObjectToRemoveList(this);
 }
 
-Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime)
+Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime, bool asActiveObject)
 {
     TemporarySummon* pCreature = new TemporarySummon(GetObjectGuid());
 
@@ -1730,6 +1750,9 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
         delete pCreature;
         return NULL;
     }
+
+    // Active state set before added to map
+    pCreature->SetActiveObjectState(asActiveObject);
 
     pCreature->Summon(spwtype, despwtime);
 
