@@ -65,9 +65,19 @@ bool PlayerbotRogueAI::DoFirstCombatManeuver(Unit *pTarget)
     {
         if (ai->GetManager()->m_confDebugWhisper)
             ai->TellMaster("First > Stealth (%d)", STEALTH);
+
+        ai->SetIgnoreUpdateTime(10);
+
+        return true;
+    }
+    else if (STEALTH > 0 && m_bot->HasAura(STEALTH))
+    {
+        float x,y,z;
+        pTarget->GetContactPoint(m_bot, x, y, z, ATTACK_DISTANCE);
+        m_bot->Relocate(x, y, z);
+
         return false;
     }
-
     return false;
 }
 
