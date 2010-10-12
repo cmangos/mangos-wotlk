@@ -30,6 +30,7 @@ PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, Play
     DISTRACT                 = ai->initSpell(DISTRACT_1);
     PREPARATION              = ai->initSpell(PREPARATION_1);
     PREMEDITATION            = ai->initSpell(PREMEDITATION_1);
+    PICK_POCKET              = ai->initSpell(PICK_POCKET_1);
 
     EVISCERATE               = ai->initSpell(EVISCERATE_1);
     KIDNEY_SHOT              = ai->initSpell(KIDNEY_SHOT_1);
@@ -61,21 +62,19 @@ bool PlayerbotRogueAI::DoFirstCombatManeuver(Unit *pTarget)
     PlayerbotAI* ai = GetAI();
     Player * m_bot = GetPlayerBot();
 
-    if (STEALTH > 0 && !m_bot->HasAura(STEALTH) && ai->CastSpell(STEALTH, *m_bot))
+    if (STEALTH > 0 && !m_bot->HasAura(STEALTH, EFFECT_INDEX_0) && ai->CastSpell(STEALTH, *m_bot))
     {
+
         if (ai->GetManager()->m_confDebugWhisper)
             ai->TellMaster("First > Stealth (%d)", STEALTH);
 
-        ai->SetIgnoreUpdateTime(10);
+        m_bot->addUnitState(UNIT_STAT_CHASE); // ensure that the bot does not use MoveChase(), as this doesn't seem to work with STEALTH
 
         return true;
     }
-    else if (STEALTH > 0 && m_bot->HasAura(STEALTH))
+    else if (m_bot->HasAura(STEALTH, EFFECT_INDEX_0))
     {
-        float x,y,z;
-        pTarget->GetContactPoint(m_bot, x, y, z, ATTACK_DISTANCE);
-        m_bot->Relocate(x, y, z);
-
+        m_bot->GetMotionMaster()->MoveFollow(pTarget, 4.5f, m_bot->GetOrientation());
         return false;
     }
     return false;
@@ -95,7 +94,7 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
         case PlayerbotAI::SCENARIO_DUEL:
             if (SINISTER_STRIKE > 0)
                 ai->CastSpell(SINISTER_STRIKE);
-            return;
+	    return;
     }
 
     ai->SetInFront(pTarget);
@@ -135,8 +134,8 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
             ai->TellMaster("CoS!");
         return;
     }
-    else if (m_bot->HasAura(STEALTH))
-        SpellSequence = RogueStealth;
+    else if (m_bot->HasAura(STEALTH, EFFECT_INDEX_0))
+	SpellSequence = RogueStealth;
     else if (pTarget->IsNonMeleeSpellCasted(true))
         SpellSequence = RogueSpellPreventing;
     else if (pVictim == m_bot && ai->GetHealthPercent() < 40)
@@ -152,8 +151,10 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     switch (SpellSequence)
     {
         case RogueStealth:
-            out << "Case Stealth";
-            if (PREMEDITATION > 0 && ai->CastSpell(PREMEDITATION, *pTarget))
+	    out << "Case Stealth";
+            if (PICK_POCKET > 0 && ai->CastSpell(PICK_POCKET, *pTarget) && ai->PickPocket(pTarget))
+                out << "First > Pick Pocket"; // Should never display, as PickPocket will always return false
+	    else if (PREMEDITATION > 0 && ai->CastSpell(PREMEDITATION, *pTarget))
                 out << " > Premeditation";
             else if (AMBUSH > 0 && ai->GetEnergyAmount() >= 60 && ai->CastSpell(AMBUSH, *pTarget))
                 out << " > Ambush";
@@ -162,8 +163,8 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
             else if (GARROTE > 0 && ai->GetEnergyAmount() >= 50 && ai->CastSpell(GARROTE, *pTarget))
                 out << " > Garrote";
             else
-                out << " NONE!";
-            break;
+                m_bot->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+	    break;
         case RogueThreat:
             out << "Case Threat";
             if (GOUGE > 0 && ai->GetEnergyAmount() >= 45 && !pTarget->HasAura(GOUGE, EFFECT_INDEX_0) && ai->CastSpell(GOUGE, *pTarget))

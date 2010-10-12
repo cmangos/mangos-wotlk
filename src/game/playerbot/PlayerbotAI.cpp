@@ -2480,6 +2480,67 @@ Item* PlayerbotAI::FindItem(uint32 ItemId)
     return NULL;
 }
 
+bool PlayerbotAI::PickPocket(Unit* pTarget)
+{
+            bool looted = false;
+
+	    ObjectGuid markGuid = pTarget->GetObjectGuid();
+            Creature *c = m_bot->GetMap()->GetCreature(markGuid);
+            m_bot->SendLoot(markGuid, LOOT_PICKPOCKETING);
+            Loot *loot = &c->loot;
+            uint32 lootNum = loot->GetMaxSlotInLootFor(m_bot);
+
+            if (m_mgr->m_confDebugWhisper)
+            {
+                std::ostringstream out;
+
+                // calculate how much money bot loots
+                uint32 copper = loot->gold;
+                uint32 gold = uint32(copper / 10000);
+                copper -= (gold * 10000);
+                uint32 silver = uint32(copper / 100);
+                copper -= (silver * 100);
+
+                out << "|r|cff009900" << m_bot->GetName() << " loots: " << "|h|cffffffff[|r|cff00ff00" << gold
+                << "|r|cfffffc00g|r|cff00ff00" << silver
+                << "|r|cffcdcdcds|r|cff00ff00" << copper
+                << "|r|cff993300c"
+                << "|h|cffffffff]";
+
+                TellMaster(out.str().c_str());
+            }
+
+            if (loot->gold)
+            {
+                m_bot->ModifyMoney( loot->gold );
+                m_bot->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, loot->gold);
+                loot->gold = 0;
+                loot->NotifyMoneyRemoved();
+            }
+
+            for (uint32 l = 0; l < lootNum; l++)
+            {
+                QuestItem *qitem = 0, *ffaitem = 0, *conditem = 0;
+                LootItem *item = loot->LootItemInSlot(l, m_bot, &qitem, &ffaitem, &conditem);
+                if (!item)
+                    continue;
+
+                ItemPosCountVec dest;
+                if (m_bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item->itemid, item->count) == EQUIP_ERR_OK)
+                {
+                    Item* pItem = m_bot->StoreNewItem (dest, item->itemid, true, item->randomPropertyId);
+                    m_bot->SendNewItem(pItem, uint32(item->count), false, false, true);
+                    --loot->unlootedCount;
+                    looted = true;
+                }
+            }
+            // release loot
+            if (looted)
+	        m_bot->GetSession()->DoLootRelease(markGuid);
+
+            return false; // ensures that the rogue only pick pockets target once
+}
+
 bool PlayerbotAI::HasPick()
 {
     QueryResult *result;
