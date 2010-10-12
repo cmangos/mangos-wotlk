@@ -2868,13 +2868,17 @@ bool PlayerbotAI::TradeItem(const Item& item, int8 slot)
     int8 tradeSlot = -1;
 
     TradeData* pTrade = m_bot->GetTradeData();
-    if ((slot >= 0 && slot < TRADE_SLOT_COUNT) && pTrade->GetTraderData()->GetItem(TradeSlots(slot)) == NULL)
+    if ((slot >= 0 && slot < TRADE_SLOT_COUNT) && pTrade->GetItem(TradeSlots(slot)) == NULL)
         tradeSlot = slot;
     else
         for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT && tradeSlot == -1; i++)
         {
-            if (pTrade->GetTraderData()->GetItem(TradeSlots(i)) == NULL)
+            if (pTrade->GetItem(TradeSlots(i)) == NULL)
+            {
                 tradeSlot = i;
+                // reserve trade slot to allow multiple items to be traded
+                pTrade->SetItem(TradeSlots(i), const_cast<Item*>(&item));
+            }
         }
 
     if (tradeSlot == -1) return false;
