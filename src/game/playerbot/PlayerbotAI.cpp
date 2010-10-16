@@ -32,39 +32,6 @@ float rand_float(float low, float high)
     return (rand() / (static_cast<float> (RAND_MAX) + 1.0)) * (high - low) + low;
 }
 
-/*
- * Packets often compress the GUID (global unique identifier)
- * This function extracts the guid from the packet and decompresses it.
- * The first word (8 bits) in the packet represents how many words in the following packet(s) are part of
- * the guid and what weight they hold. I call it the mask. For example) if mask is 01001001,
- * there will be only 3 words. The first word is shifted to the left 0 times,
- * the second is shifted 3 times, and the third is shifted 6.
- *
- * Possibly use ByteBuffer::readPackGUID?
- */
-uint64 extractGuid(WorldPacket& packet)
-{
-    uint8 mask;
-    packet >> mask;
-    uint64 guid = 0;
-    uint8 bit = 0;
-    uint8 testMask = 1;
-    while (true)
-    {
-        if (mask & testMask)
-        {
-            uint8 word;
-            packet >> word;
-            guid += (word << bit);
-        }
-        if (bit == 7)
-            break;
-        ++bit;
-        testMask <<= 1;
-    }
-    return guid;
-}
-
 // ChatHandler already implements some useful commands the master can call on bots
 // These commands are protected inside the ChatHandler class so this class provides access to the commands
 // we'd like to call on our bots
