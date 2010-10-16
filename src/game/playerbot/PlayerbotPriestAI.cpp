@@ -388,7 +388,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
 
     // buff master
     if (POWER_WORD_FORTITUDE > 0)
-        (!GetMaster()->HasAura(POWER_WORD_FORTITUDE, EFFECT_INDEX_0) && ai->CastSpell(POWER_WORD_FORTITUDE, *(GetMaster())));
+        (!GetMaster()->HasAura(POWER_WORD_FORTITUDE, EFFECT_INDEX_0) && GetMaster()->isAlive() && ai->CastSpell(POWER_WORD_FORTITUDE, *(GetMaster())));
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
