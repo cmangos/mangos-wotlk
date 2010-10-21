@@ -140,8 +140,9 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 // emote to attack selected target
                 case TEXTEMOTE_POINT:
                 {
-                    uint64 attackOnGuid = m_master->GetSelection();
-                    if (!attackOnGuid) return;
+                    ObjectGuid attackOnGuid = m_master->GetSelectionGuid();
+                    if (attackOnGuid.IsEmpty())
+                        return;
 
                     Unit* thingToAttack = ObjectAccessor::GetUnit(*m_master, attackOnGuid);
                     if (!thingToAttack) return;
@@ -159,7 +160,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 // emote to stay
                 case TEXTEMOTE_STAND:
                 {
-                    Player* const bot = GetPlayerBot(m_master->GetSelection());
+                    Player* const bot = GetPlayerBot(m_master->GetSelectionGuid().GetRawValue());
                     if (bot)
                         bot->GetPlayerbotAI()->SetMovementOrder(PlayerbotAI::MOVEMENT_STAY);
                     else
@@ -176,7 +177,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 case 324:
                 case TEXTEMOTE_WAVE:
                 {
-                    Player* const bot = GetPlayerBot(m_master->GetSelection());
+                    Player* const bot = GetPlayerBot(m_master->GetSelectionGuid().GetRawValue());
                     if (bot)
                         bot->GetPlayerbotAI()->SetMovementOrder(PlayerbotAI::MOVEMENT_FOLLOW, m_master);
                     else
@@ -770,8 +771,8 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
         if (orderStr == "protect" || orderStr == "assist")
         {
             char *targetChar = strtok(NULL, " ");
-            uint64 targetGUID = m_session->GetPlayer()->GetSelection();
-            if (!targetChar && !targetGUID)
+            ObjectGuid targetGUID = m_session->GetPlayer()->GetSelectionGuid();
+            if (!targetChar && targetGUID.IsEmpty())
             {
                 PSendSysMessage("|cffff0000Combat orders protect and assist expect a target either by selection or by giving target player in command string!");
                 SetSentErrorMessage(true);
@@ -780,7 +781,7 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
             if (targetChar)
             {
                 std::string targetStr = targetChar;
-                targetGUID = sObjectMgr.GetPlayerGUIDByName(targetStr.c_str());
+                targetGUID.Set(sObjectMgr.GetPlayerGUIDByName(targetStr.c_str()));
             }
             target = ObjectAccessor::GetUnit(*m_session->GetPlayer(), targetGUID);
             if (!target)
