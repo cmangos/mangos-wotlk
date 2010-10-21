@@ -437,14 +437,14 @@ void PlayerbotPriestAI::DoNonCombatActions()
                 continue;
 
             // first rezz em
-            if (!tPlayer->isAlive() && !tPlayer->GetPlayerbotAI())
+            if (!tPlayer->isAlive())
             {
                 std::string msg = "Resurrecting ";
                 msg += tPlayer->GetName();
                 GetPlayerBot()->Say(msg, LANG_UNIVERSAL);
                 ai->CastSpell(RESURRECTION, *tPlayer);
                 // rez is only 10 sec, but give time for lag
-                ai->SetIgnoreUpdateTime(17);
+                ai->SetIgnoreUpdateTime(12);
             }
             else if (tPlayer->isAlive())
             {
