@@ -260,7 +260,7 @@ void Spell::EffectResurrectNew(SpellEffectIndex eff_idx)
 
     uint32 health = damage;
     uint32 mana = m_spellInfo->EffectMiscValue[eff_idx];
-    pTarget->setResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest(pTarget);
 }
 
@@ -7239,7 +7239,7 @@ void Spell::EffectResurrect(SpellEffectIndex /*eff_idx*/)
     uint32 health = pTarget->GetMaxHealth() * damage / 100;
     uint32 mana   = pTarget->GetMaxPower(POWER_MANA) * damage / 100;
 
-    pTarget->setResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest(pTarget);
 }
 
@@ -7621,11 +7621,14 @@ void Spell::EffectDestroyAllTotems(SpellEffectIndex /*eff_idx*/)
     {
         if (Totem* totem = m_caster->GetTotem(TotemSlot(slot)))
         {
-            uint32 spell_id = totem->GetUInt32Value(UNIT_CREATED_BY_SPELL);
-            if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id))
+            if (damage)
             {
-                uint32 manacost = m_caster->GetCreateMana() * spellInfo->ManaCostPercentage / 100;
-                mana += manacost * damage / 100;
+                uint32 spell_id = totem->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+                if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id))
+                {
+                    uint32 manacost = spellInfo->manaCost + m_caster->GetCreateMana() * spellInfo->ManaCostPercentage / 100;
+                    mana += manacost * damage / 100;
+                }
             }
             totem->UnSummon();
         }
