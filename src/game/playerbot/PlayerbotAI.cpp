@@ -827,6 +827,27 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             return;
         }
 
+        // if someone tries to resurrect, then accept
+        case SMSG_RESURRECT_REQUEST:
+        {
+            if (!m_bot->isAlive())
+            {
+                WorldPacket p(packet);
+                ObjectGuid guid;
+                p >> guid;
+
+                WorldPacket* const packet = new WorldPacket(CMSG_RESURRECT_RESPONSE, 8+1);
+                *packet << guid;
+                *packet << uint8(1);                        // accept
+                m_bot->GetSession()->QueuePacket(packet);   // queue the packet to get around race condition
+
+                // set back to normal
+                SetState(BOTSTATE_NORMAL);
+                SetIgnoreUpdateTime(0);
+            }
+            return;
+        }
+
             /* uncomment this and your bots will tell you all their outgoing packet opcode names
                case SMSG_MONSTER_MOVE:
                case SMSG_UPDATE_WORLD_STATE:
