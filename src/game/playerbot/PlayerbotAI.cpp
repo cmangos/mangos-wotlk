@@ -2330,9 +2330,6 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         }
     }
 
-    if (HasAura(spellId, *pTarget))
-        return false;
-
     // stop movement to prevent cancel spell casting
     SpellCastTimesEntry const * castTimeEntry = sSpellCastTimesStore.LookupEntry(pSpellInfo->CastingTimeIndex);
     if (castTimeEntry && castTimeEntry->CastTime)
