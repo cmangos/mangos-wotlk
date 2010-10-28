@@ -2334,8 +2334,11 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         return false;
 
     // stop movement to prevent cancel spell casting
-    sLog.outDebug("Bot movement reset for casting %s (%u)", pSpellInfo->SpellName[0], spellId);
-    MovementClear();
+    if (sSpellCastTimesStore.LookupEntry(pSpellInfo->CastingTimeIndex)->CastTime)
+    {
+        sLog.outDebug("Bot movement reset for casting %s (%u)", pSpellInfo->SpellName[0], spellId);
+        MovementClear();
+    }
 
     // actually cast spell
     m_bot->CastSpell(pTarget, pSpellInfo, false);
