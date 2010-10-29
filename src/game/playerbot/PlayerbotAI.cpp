@@ -2532,80 +2532,9 @@ bool PlayerbotAI::PickPocket(Unit* pTarget)
 
 bool PlayerbotAI::HasPick()
 {
-    QueryResult *result;
+    if (m_bot->HasItemTotemCategory(TC_MINING_PICK))
+        return true;
 
-    // list out equiped items
-    for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)
-    {
-        Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
-        if (pItem)
-        {
-            const ItemPrototype* const pItemProto = pItem->GetProto();
-            if (!pItemProto)
-                continue;
-
-            result = WorldDatabase.PQuery("SELECT TotemCategory FROM item_template WHERE entry = '%i'", pItemProto->ItemId);
-            if (result)
-            {
-                Field *fields = result->Fetch();
-                uint32 tc = fields[0].GetUInt32();
-                // sLog.outDebug("HasPick %u",tc);
-                if (tc ==  165 || tc == 167) // pick = 165, hammer = 162 or hammer pick = 167
-                    return true;
-            }
-        }
-    }
-
-    // list out items in backpack
-    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
-    {
-        // sLog.outDebug("[%s's]backpack slot = %u",m_bot->GetName(),slot); // 23 to 38 = 16
-        Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot); // 255, 23 to 38
-        if (pItem)
-        {
-            const ItemPrototype* const pItemProto = pItem->GetProto();
-            if (!pItemProto)
-                continue;
-
-            result = WorldDatabase.PQuery("SELECT TotemCategory FROM item_template WHERE entry = '%i'", pItemProto->ItemId);
-            if (result)
-            {
-                Field *fields = result->Fetch();
-                uint32 tc = fields[0].GetUInt32();
-                // sLog.outDebug("HasPick %u",tc);
-                if (tc ==  165 || tc == 167) // pick = 165, hammer = 162 or hammer pick = 167
-                    return true;
-            }
-        }
-    }
-
-    // list out items in other removable backpacks
-    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag) // 20 to 23 = 4
-    {
-        const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag); // 255, 20 to 23
-        if (pBag)
-            for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
-            {
-                // sLog.outDebug("[%s's]bag[%u] slot = %u",m_bot->GetName(),bag,slot); // 1 to bagsize = ?
-                Item* const pItem = m_bot->GetItemByPos(bag, slot); // 20 to 23, 1 to bagsize
-                if (pItem)
-                {
-                    const ItemPrototype* const pItemProto = pItem->GetProto();
-                    if (!pItemProto)
-                        continue;
-
-                    result = WorldDatabase.PQuery("SELECT TotemCategory FROM item_template WHERE entry = '%i'", pItemProto->ItemId);
-                    if (result)
-                    {
-                        Field *fields = result->Fetch();
-                        uint32 tc = fields[0].GetUInt32();
-                        // sLog.outDebug("HasPick %u",tc);
-                        if (tc ==  165 || tc == 167)
-                            return true;
-                    }
-                }
-            }
-    }
     std::ostringstream out;
     out << "|cffffffffI do not have a pick!";
     TellMaster(out.str().c_str());
