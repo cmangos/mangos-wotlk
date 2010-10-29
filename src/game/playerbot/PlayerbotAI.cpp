@@ -2334,7 +2334,8 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         return false;
 
     // stop movement to prevent cancel spell casting
-    if (sSpellCastTimesStore.LookupEntry(pSpellInfo->CastingTimeIndex)->CastTime)
+    SpellCastTimesEntry const * castTimeEntry = sSpellCastTimesStore.LookupEntry(pSpellInfo->CastingTimeIndex);
+    if (castTimeEntry && castTimeEntry->CastTime)
     {
         sLog.outDebug("Bot movement reset for casting %s (%u)", pSpellInfo->SpellName[0], spellId);
         MovementClear();
