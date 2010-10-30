@@ -2532,7 +2532,7 @@ bool PlayerbotAI::PickPocket(Unit* pTarget)
 
 bool PlayerbotAI::HasPick()
 {
-    if (m_bot->HasItemTotemCategory(TC_MINING_PICK))
+    if (m_bot->HasItemTotemCategory(TC_MINING_PICK || TC_HAMMER_PICK || TC_BLADED_PICKAXE))
         return true;
 
     std::ostringstream out;
