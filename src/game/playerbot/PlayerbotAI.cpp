@@ -2420,6 +2420,77 @@ bool PlayerbotAI::CastPetSpell(uint32 spellId, Unit* target)
     return true;
 }
 
+// Perform sanity checks and cast spell
+bool PlayerbotAI::Buff(uint32 spellId, Unit* target)
+{
+    if (spellId == 0)
+        return false;
+
+    SpellEntry const * spellProto = sSpellStore.LookupEntry(spellId);
+
+    if (!spellProto)
+        return false;
+
+    // Select appropriate spell rank for target's level
+    spellProto = sSpellMgr.SelectAuraRankForLevel(spellProto, target->getLevel());
+
+    if (!spellProto)
+    {
+        TellMaster("No spell rank found for target %s", target->GetName());
+        return false;
+    }
+
+    // Check if spell will boost one of already existent auras
+    bool willBenefitFromSpell = false;
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (spellProto->EffectApplyAuraName[i] == SPELL_AURA_NONE)
+            break;
+
+        bool sameOrBetterAuraFound = false;
+        uint32 bonus = m_bot->CalculateSpellDamage(target, spellProto, SpellEffectIndex(i));
+        Unit::AuraList const& auras = target->GetAurasByType(AuraType(spellProto->EffectApplyAuraName[i]));
+        for (Unit::AuraList::const_iterator it = auras.begin(); it != auras.end(); ++it)
+            if ((*it)->GetModifier()->m_miscvalue == spellProto->EffectMiscValue[i] && (*it)->GetModifier()->m_amount >= bonus)
+            {
+                sameOrBetterAuraFound = true;
+                break;
+            }
+        willBenefitFromSpell = willBenefitFromSpell || !sameOrBetterAuraFound;
+    }
+
+    if (!willBenefitFromSpell)
+        return false;
+
+    return CastSpell(spellProto->Id, *target);
+}
+
+// Can be used for personal buffs like Mage Armor and Inner Fire
+bool PlayerbotAI::SelfBuff(uint32 spellId)
+{
+    if (spellId == 0)
+        return false;
+
+    if (m_bot->HasAura(spellId))
+        return false;
+
+    return CastSpell(spellId, *m_bot);
+}
+
+// Checks if spell is single per target per caster and will make any effect on target
+bool PlayerbotAI::CanReceiveSpecificSpell(SpellSpecific spec, Unit* target) const
+{
+    if (IsSingleFromSpellSpecificPerTargetPerCaster(spec, spec))
+    {
+        Unit::SpellAuraHolderMap holders = target->GetSpellAuraHolderMap();
+        Unit::SpellAuraHolderMap::iterator it;
+        for (it = holders.begin(); it != holders.end(); ++it)
+            if ((*it).second->GetCasterGUID() == m_bot->GetGUID() && GetSpellSpecific((*it).second->GetId()) == spec)
+                return false;
+    }
+    return true;
+}
+
 Item* PlayerbotAI::FindItem(uint32 ItemId)
 {
     // list out items in main backpack
