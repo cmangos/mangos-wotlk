@@ -37,9 +37,10 @@ PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, 
     EXORCISM                      = ai->initSpell(EXORCISM_1);
     SACRED_SHIELD                 = ai->initSpell(SACRED_SHIELD_1);
     DIVINE_PLEA                   = ai->initSpell(DIVINE_PLEA_1);
-    BLESSING_OF_KINGS             = ai->initSpell(BLESSING_OF_KINGS_1); // Protection
-    GREATER_BLESSING_OF_KINGS     = ai->initSpell(GREATER_BLESSING_OF_KINGS_1);
-    GREATER_BLESSING_OF_SANCTUARY = ai->initSpell(GREATER_BLESSING_OF_SANCTUARY_1);
+    BLESSING_OF_KINGS             = BLESSING_OF_KINGS_1;
+    GREATER_BLESSING_OF_KINGS     = GREATER_BLESSING_OF_KINGS_1;
+    BLESSING_OF_SANCTUARY         = BLESSING_OF_SANCTUARY_1;
+    GREATER_BLESSING_OF_SANCTUARY = GREATER_BLESSING_OF_SANCTUARY_1;
     HAMMER_OF_JUSTICE             = ai->initSpell(HAMMER_OF_JUSTICE_1);
     RIGHTEOUS_FURY                = ai->initSpell(RIGHTEOUS_FURY_1);
     RIGHTEOUS_DEFENSE             = ai->initSpell(RIGHTEOUS_DEFENSE_1);
@@ -320,74 +321,13 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     if (!m_bot)
         return;
 
-    // buff myself
-    if (GREATER_BLESSING_OF_MIGHT > 0 && !m_bot->HasAura(GREATER_BLESSING_OF_MIGHT, EFFECT_INDEX_0))
-        ai->CastSpell (GREATER_BLESSING_OF_MIGHT, *m_bot);
-    else if (BLESSING_OF_MIGHT > 0 && !m_bot->HasAura(GREATER_BLESSING_OF_MIGHT, EFFECT_INDEX_0) && !m_bot->HasAura(BLESSING_OF_MIGHT, EFFECT_INDEX_0))
-        ai->CastSpell (BLESSING_OF_MIGHT, *m_bot);
+    // Buff myself
+    if (ai->GetCombatOrder() == ai->ORDERS_TANK)
+        ai->SelfBuff(RIGHTEOUS_FURY);
+    BuffPlayer(m_bot);
 
-    if (DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && ai->GetManaPercent() >= 3)
-        ai->CastSpell(DIVINE_FAVOR, *m_bot);
-/*
-    if (SEAL_OF_COMMAND > 0)
-        ai->CastSpell (SEAL_OF_COMMAND, *m_bot); // interferes with drinking/eating
- */
-    //Select Class buff seq.
-    ///Process Who is my master --> get the player class --> aura already present if not then proced --> cast the spell
-    //Priest
-    if (BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_PRIEST && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, EFFECT_INDEX_0) && !GetMaster()->HasAura(BLESSING_OF_WISDOM, EFFECT_INDEX_0))
-        ai->CastSpell (BLESSING_OF_WISDOM, *(GetMaster()));
-
-    if (GREATER_BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_PRIEST && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, EFFECT_INDEX_0))
-        ai->CastSpell (GREATER_BLESSING_OF_WISDOM, *(GetMaster()));
-
-    //Mage
-    if (BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_MAGE && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, EFFECT_INDEX_0) && !GetMaster()->HasAura(BLESSING_OF_WISDOM, EFFECT_INDEX_0))
-        ai->CastSpell (BLESSING_OF_WISDOM, *(GetMaster()));
-
-    if (GREATER_BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_MAGE && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, EFFECT_INDEX_0))
-        ai->CastSpell (GREATER_BLESSING_OF_WISDOM, *(GetMaster()));
-
-    //Paladin
-    if (BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_PALADIN && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, EFFECT_INDEX_0) && !GetMaster()->HasAura(BLESSING_OF_WISDOM, EFFECT_INDEX_0))
-        ai->CastSpell (BLESSING_OF_WISDOM, *(GetMaster()));
-
-    if (GREATER_BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_PALADIN && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, EFFECT_INDEX_0))
-        ai->CastSpell (GREATER_BLESSING_OF_WISDOM, *(GetMaster()));
-
-    //Warlock
-    if (BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_WARLOCK && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, EFFECT_INDEX_0) && !GetMaster()->HasAura(BLESSING_OF_WISDOM, EFFECT_INDEX_0))
-        ai->CastSpell (BLESSING_OF_WISDOM, *(GetMaster()));
-
-    if (GREATER_BLESSING_OF_WISDOM > 0 && GetMaster()->getClass() == CLASS_WARLOCK && !GetMaster()->HasAura(GREATER_BLESSING_OF_WISDOM, EFFECT_INDEX_0))
-        ai->CastSpell (GREATER_BLESSING_OF_WISDOM, *(GetMaster()));
-
-    //Warrior
-    if (BLESSING_OF_MIGHT > 0 && GetMaster()->getClass() == CLASS_WARRIOR && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, EFFECT_INDEX_0) && !GetMaster()->HasAura(BLESSING_OF_MIGHT, EFFECT_INDEX_0) && !GetMaster()->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0))
-        ai->CastSpell (BLESSING_OF_MIGHT, *(GetMaster()));
-
-    if (GREATER_BLESSING_OF_MIGHT > 0 && GetMaster()->getClass() == CLASS_WARRIOR && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, EFFECT_INDEX_0) && !GetMaster()->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0))
-        ai->CastSpell (GREATER_BLESSING_OF_MIGHT, *(GetMaster()));
-
-    if (BLESSING_OF_KINGS > 0 && GetMaster()->getClass() == CLASS_WARRIOR && !GetMaster()->HasAura(GREATER_BLESSING_OF_KINGS, EFFECT_INDEX_0) && !GetMaster()->HasAura(BLESSING_OF_KINGS, EFFECT_INDEX_0) && !GetMaster()->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0) && !GetMaster()->HasAura(BATTLE_STANCE, EFFECT_INDEX_0))
-        ai->CastSpell (BLESSING_OF_KINGS, *(GetMaster()));
-
-    if (GREATER_BLESSING_OF_KINGS > 0 && GetMaster()->getClass() == CLASS_WARRIOR && !GetMaster()->HasAura(GREATER_BLESSING_OF_KINGS, EFFECT_INDEX_0) && !GetMaster()->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0) && !GetMaster()->HasAura(BATTLE_STANCE, EFFECT_INDEX_0))
-        ai->CastSpell (GREATER_BLESSING_OF_KINGS, *(GetMaster()));
-
-    //Rogue
-    if (BLESSING_OF_MIGHT > 0 && GetMaster()->getClass() == CLASS_ROGUE && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, EFFECT_INDEX_0) && !GetMaster()->HasAura(BLESSING_OF_MIGHT, EFFECT_INDEX_0))
-        ai->CastSpell (BLESSING_OF_MIGHT, *(GetMaster()));
-
-    if (GREATER_BLESSING_OF_MIGHT > 0 && GetMaster()->getClass() == CLASS_ROGUE && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, EFFECT_INDEX_0))
-        ai->CastSpell (GREATER_BLESSING_OF_MIGHT, *(GetMaster()));
-
-    //Shaman
-    if (BLESSING_OF_MIGHT > 0 && GetMaster()->getClass() == CLASS_SHAMAN && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, EFFECT_INDEX_0) && !GetMaster()->HasAura(BLESSING_OF_MIGHT, EFFECT_INDEX_0))
-        ai->CastSpell (BLESSING_OF_MIGHT, *(GetMaster()));
-
-    if (GREATER_BLESSING_OF_MIGHT > 0 && GetMaster()->getClass() == CLASS_SHAMAN && !GetMaster()->HasAura(GREATER_BLESSING_OF_MIGHT, EFFECT_INDEX_0))
-        ai->CastSpell (GREATER_BLESSING_OF_MIGHT, *(GetMaster()));
+    // Buff master
+    BuffPlayer(ai->GetMaster());
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
@@ -425,7 +365,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
         return;
     }
 
-    // heal group
+    // heal and buff group
     if (GetMaster()->GetGroup())
     {
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
@@ -435,13 +375,58 @@ void PlayerbotPaladinAI::DoNonCombatActions()
             if (!tPlayer || !tPlayer->isAlive())
                 continue;
 
-            // heal player
-            (HealTarget(*tPlayer, tPlayer->GetHealth() * 100 / tPlayer->GetMaxHealth()));
+            HealTarget(*tPlayer, tPlayer->GetHealth() * 100 / tPlayer->GetMaxHealth());
+            if (tPlayer != m_bot && tPlayer != GetMaster())
+                BuffPlayer(tPlayer);
         }
     }
 }
 
 void PlayerbotPaladinAI::BuffPlayer(Player* target)
 {
-    GetAI()->CastSpell(BLESSING_OF_MIGHT, *target);
+    PlayerbotAI * ai = GetAI();
+    Pet * pet = target->GetPet();
+
+    // Check if target already has my blessing
+    if (!ai->CanReceiveSpecificSpell(SPELL_BLESSING, target))
+        return;
+
+    switch (target->getClass())
+    {
+        case CLASS_DRUID:
+        case CLASS_SHAMAN:
+        case CLASS_PALADIN:
+            if (ai->Buff(BLESSING_OF_MIGHT, target))
+                break;
+            else if (ai->Buff(BLESSING_OF_KINGS, target))
+                break;
+            else if (ai->Buff(BLESSING_OF_WISDOM, target))
+                break;
+            else
+                ai->Buff(BLESSING_OF_SANCTUARY, target);
+                break;
+        case CLASS_DEATH_KNIGHT:
+        case CLASS_HUNTER:
+            if (pet)
+                if (!ai->Buff(BLESSING_OF_MIGHT, target))
+                    ai->Buff(BLESSING_OF_KINGS, target);
+        case CLASS_ROGUE:
+        case CLASS_WARRIOR:
+            if (ai->Buff(BLESSING_OF_MIGHT, target))
+                break;
+            else if (ai->Buff(BLESSING_OF_KINGS, target))
+                break;
+            else
+                ai->Buff(BLESSING_OF_SANCTUARY, target);
+                break;
+        case CLASS_PRIEST:
+        case CLASS_MAGE:
+        case CLASS_WARLOCK:
+            if (ai->Buff(BLESSING_OF_WISDOM, target))
+                break;
+            else if (ai->Buff(BLESSING_OF_KINGS, target))
+                break;
+            else
+                ai->Buff(BLESSING_OF_SANCTUARY, target);
+    }
 }
