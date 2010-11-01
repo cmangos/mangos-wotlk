@@ -386,6 +386,7 @@ void PlayerbotPaladinAI::BuffPlayer(Player* target)
 {
     PlayerbotAI * ai = GetAI();
     Pet * pet = target->GetPet();
+    uint8 SPELL_BLESSING = 2; // See SpellSpecific enum in SpellMgr.h
 
     // Check if target already has my blessing
     if (!ai->CanReceiveSpecificSpell(SPELL_BLESSING, target))

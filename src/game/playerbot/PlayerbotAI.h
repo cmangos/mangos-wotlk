@@ -4,7 +4,6 @@
 #include "Common.h"
 #include "../QuestDef.h"
 #include "../GameEventMgr.h"
-#include "../SpellMgr.h"
 
 class WorldPacket;
 class WorldObject;
@@ -180,7 +179,7 @@ public:
     bool HasAura(const char* spellName, const Unit& player) const;
     bool HasAura(const char* spellName) const;
 
-    bool CanReceiveSpecificSpell(SpellSpecific spec, Unit* target) const;
+    bool CanReceiveSpecificSpell(uint8 spec, Unit* target) const;
 
     bool PickPocket(Unit* pTarget);
     bool HasPick();
