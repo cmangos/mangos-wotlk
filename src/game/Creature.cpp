@@ -325,7 +325,9 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data, 
 
     SetUInt32Value(UNIT_FIELD_FLAGS, unitFlags);
 
-    SetUInt32Value(UNIT_DYNAMIC_FLAGS,GetCreatureInfo()->dynamicflags);
+    // preserve all current dynamic flags if exist
+    uint32 dynFlags = GetUInt32Value(UNIT_DYNAMIC_FLAGS);
+    SetUInt32Value(UNIT_DYNAMIC_FLAGS, dynFlags ? dynFlags : GetCreatureInfo()->dynamicflags);
 
     SetModifierValue(UNIT_MOD_ARMOR,             BASE_VALUE, float(GetCreatureInfo()->armor));
     SetModifierValue(UNIT_MOD_RESISTANCE_HOLY,   BASE_VALUE, float(GetCreatureInfo()->resistance1));
@@ -404,7 +406,7 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo *cinfo, const CreatureData *
     return display_id;
 }
 
-void Creature::Update(uint32 diff)
+void Creature::Update(uint32 update_diff, uint32 tick_diff)
 {
     if (m_needNotify)
     {
@@ -465,7 +467,7 @@ void Creature::Update(uint32 diff)
             if (m_isDeadByDefault)
                 break;
 
-            if (m_corpseDecayTimer <= diff)
+            if (m_corpseDecayTimer <= update_diff)
             {
                 // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
                 uint16 poolid = GetDBTableGUIDLow() ? sPoolMgr.IsPartOfAPool<Creature>(GetDBTableGUIDLow()) : 0;
@@ -480,11 +482,11 @@ void Creature::Update(uint32 diff)
             }
             else
             {
-                m_corpseDecayTimer -= diff;
+                m_corpseDecayTimer -= update_diff;
                 if (m_groupLootId)
                 {
-                    if(diff < m_groupLootTimer)
-                        m_groupLootTimer -= diff;
+                    if(update_diff < m_groupLootTimer)
+                        m_groupLootTimer -= update_diff;
                     else
                         StopGroupLoot();
                 }
@@ -496,7 +498,7 @@ void Creature::Update(uint32 diff)
         {
             if (m_isDeadByDefault)
             {
-                if (m_corpseDecayTimer <= diff)
+                if (m_corpseDecayTimer <= update_diff)
                 {
                     // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
                     uint16 poolid = GetDBTableGUIDLow() ? sPoolMgr.IsPartOfAPool<Creature>(GetDBTableGUIDLow()) : 0;
@@ -514,11 +516,11 @@ void Creature::Update(uint32 diff)
                 }
                 else
                 {
-                    m_corpseDecayTimer -= diff;
+                    m_corpseDecayTimer -= update_diff;
                 }
             }
 
-            Unit::Update( diff );
+            Unit::Update(update_diff, tick_diff);
 
             // creature can be dead after Unit::Update call
             // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
@@ -529,7 +531,7 @@ void Creature::Update(uint32 diff)
             {
                 // do not allow the AI to be changed during update
                 m_AI_locked = true;
-                i_AI->UpdateAI(diff);
+                i_AI->UpdateAI(tick_diff);                  // AI not react good at real update delays (while freeze in non-active part of map)
                 m_AI_locked = false;
             }
 
@@ -539,10 +541,10 @@ void Creature::Update(uint32 diff)
                 break;
             if(m_regenTimer > 0)
             {
-                if(diff >= m_regenTimer)
+                if(update_diff >= m_regenTimer)
                     m_regenTimer = 0;
                 else
-                    m_regenTimer -= diff;
+                    m_regenTimer -= update_diff;
             }
             if (m_regenTimer != 0)
                 break;
@@ -593,7 +595,7 @@ void Creature::RegenerateMana()
     uint32 addvalue = 0;
 
     // Combat and any controlled creature
-    if (isInCombat() || GetCharmerOrOwnerGUID())
+    if (isInCombat() || !GetCharmerOrOwnerGuid().IsEmpty())
     {
         if(!IsUnderLastManaUseEffect())
         {
@@ -623,7 +625,7 @@ void Creature::RegenerateHealth()
     uint32 addvalue = 0;
 
     // Not only pet, but any controlled creature
-    if(GetCharmerOrOwnerGUID())
+    if (!GetCharmerOrOwnerGuid().IsEmpty())
     {
         float HealthIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_HEALTH);
         float Spirit = GetStat(STAT_SPIRIT);
@@ -1732,7 +1734,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
         return false;
 
     // only free creature
-    if (GetCharmerOrOwnerGUID())
+    if (!GetCharmerOrOwnerGuid().IsEmpty())
         return false;
 
     // only from same creature faction
@@ -1851,7 +1853,7 @@ bool Creature::LoadCreatureAddon(bool reload)
         // 3 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
 
         SetByteValue(UNIT_FIELD_BYTES_2, 0, uint8(cainfo->bytes2 & 0xFF));
-        //SetByteValue(UNIT_FIELD_BYTES_2, 1, uint8((cainfo->bytes2 >> 8) & 0xFF));
+        SetByteValue(UNIT_FIELD_BYTES_2, 1, uint8((cainfo->bytes2 >> 8) & 0xFF));
         //SetByteValue(UNIT_FIELD_BYTES_2, 2, uint8((cainfo->bytes2 >> 16) & 0xFF));
         SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
         //SetByteValue(UNIT_FIELD_BYTES_2, 3, uint8((cainfo->bytes2 >> 24) & 0xFF));

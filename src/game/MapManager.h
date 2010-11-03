@@ -67,7 +67,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         }
 
         void Initialize(void);
-        void Update(uint32);
+        void Update(const uint32 time, const uint32 diff);
 
         void SetGridCleanUpDelay(uint32 t)
         {
@@ -138,8 +138,6 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         TransportMap m_TransportsByMap;
 
         bool CanPlayerEnter(uint32 mapid, Player* player);
-        uint32 GenerateInstanceId() { return ++i_MaxInstanceId; }
-        void InitMaxInstanceId();
         void InitializeVisibilityDistanceInfo();
 
         /* statistics */
@@ -174,8 +172,6 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         uint32 i_gridCleanUpDelay;
         MapMapType i_maps;
         IntervalTimer i_timer;
-
-        uint32 i_MaxInstanceId;
 };
 
 #define sMapMgr MapManager::Instance()

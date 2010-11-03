@@ -163,7 +163,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
         {
             _player->AddQuest( qInfo, pObject );
 
-            if (qInfo->HasFlag(QUEST_FLAGS_PARTY_ACCEPT))
+            if (qInfo->HasQuestFlag(QUEST_FLAGS_PARTY_ACCEPT))
             {
                 if (Group* pGroup = _player->GetGroup())
                 {
@@ -385,7 +385,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 
             if (const Quest *pQuest = sObjectMgr.GetQuestTemplate(quest))
             {
-                if (pQuest->HasFlag(QUEST_MANGOS_FLAGS_TIMED))
+                if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAG_TIMED))
                     _player->RemoveTimedQuest(quest);
             }
 
@@ -407,7 +407,7 @@ void WorldSession::HandleQuestConfirmAccept(WorldPacket& recv_data)
 
     if (const Quest* pQuest = sObjectMgr.GetQuestTemplate(quest))
     {
-        if (!pQuest->HasFlag(QUEST_FLAGS_PARTY_ACCEPT))
+        if (!pQuest->HasQuestFlag(QUEST_FLAGS_PARTY_ACCEPT))
             return;
 
         Player* pOriginalPlayer = ObjectAccessor::FindPlayer(_player->GetDivider());
@@ -583,7 +583,7 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
         uint32 quest_id = itr->second;
         Quest const *pQuest = sObjectMgr.GetQuestTemplate(quest_id);
 
-        if (!pQuest)
+        if (!pQuest || !pQuest->IsActive())
             continue;
 
         QuestStatus status = pPlayer->GetQuestStatus(quest_id);
@@ -609,7 +609,7 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
         uint32 quest_id = itr->second;
         Quest const *pQuest = sObjectMgr.GetQuestTemplate(quest_id);
 
-        if (!pQuest)
+        if (!pQuest || !pQuest->IsActive())
             continue;
 
         QuestStatus status = pPlayer->GetQuestStatus(quest_id);
@@ -626,7 +626,7 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
                     }
                     else if (pPlayer->getLevel() <= pPlayer->GetQuestLevelForPlayer(pQuest) + sWorld.getConfig(CONFIG_UINT32_QUEST_LOW_LEVEL_HIDE_DIFF))
                     {
-                        if (pQuest->HasFlag(QUEST_FLAGS_DAILY) || pQuest->HasFlag(QUEST_FLAGS_WEEKLY))
+                        if (pQuest->HasQuestFlag(QUEST_FLAGS_DAILY) || pQuest->HasQuestFlag(QUEST_FLAGS_WEEKLY))
                             dialogStatusNew = DIALOG_STATUS_AVAILABLE_REP;
                         else
                             dialogStatusNew = DIALOG_STATUS_AVAILABLE;

@@ -55,7 +55,6 @@ void
 MapManager::Initialize()
 {
     InitStateMachine();
-    InitMaxInstanceId();
 }
 
 void MapManager::InitStateMachine()
@@ -129,7 +128,7 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
 Map* MapManager::CreateBgMap(uint32 mapid, BattleGround* bg)
 {
     Map *m = _createBaseMap(mapid);
-    ((MapInstanced*)m)->CreateBattleGroundMap(sMapMgr.GenerateInstanceId(), bg);
+    ((MapInstanced*)m)->CreateBattleGroundMap(sObjectMgr.GenerateLowGuid(HIGHGUID_INSTANCE), bg);
     return m;
 }
 
@@ -240,17 +239,17 @@ void MapManager::DeleteInstance(uint32 mapid, uint32 instanceId)
 }
 
 void
-MapManager::Update(uint32 diff)
+MapManager::Update(const uint32 time_, const uint32 diff)
 {
     i_timer.Update(diff);
     if( !i_timer.Passed() )
         return;
 
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
-        iter->second->Update((uint32)i_timer.GetCurrent());
+        iter->second->Update(time_, (uint32)i_timer.GetCurrent());
 
     for (TransportSet::iterator iter = m_Transports.begin(); iter != m_Transports.end(); ++iter)
-        (*iter)->Update((uint32)i_timer.GetCurrent());
+        (*iter)->UpdateCall(time_, (uint32)i_timer.GetCurrent());
 
     i_timer.SetCurrent(0);
 }
@@ -287,18 +286,6 @@ void MapManager::UnloadAll()
     {
         delete i_maps.begin()->second;
         i_maps.erase(i_maps.begin());
-    }
-}
-
-void MapManager::InitMaxInstanceId()
-{
-    i_MaxInstanceId = 0;
-
-    QueryResult *result = CharacterDatabase.Query( "SELECT MAX(id) FROM instance" );
-    if( result )
-    {
-        i_MaxInstanceId = result->Fetch()[0].GetUInt32();
-        delete result;
     }
 }
 
