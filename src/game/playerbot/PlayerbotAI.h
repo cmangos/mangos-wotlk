@@ -183,6 +183,7 @@ public:
 
     bool PickPocket(Unit* pTarget);
     bool HasPick();
+    bool HasSpellReagents(uint32 spellId);
 
     uint8 GetHealthPercent(const Unit& target) const;
     uint8 GetHealthPercent() const;

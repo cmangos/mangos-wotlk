@@ -2609,6 +2609,30 @@ bool PlayerbotAI::HasPick()
     return false;
 }
 
+bool PlayerbotAI::HasSpellReagents(uint32 spellId)
+{
+    const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
+    if (!pSpellInfo)
+        return false;
+
+    if (m_bot->CanNoReagentCast(pSpellInfo))
+        return true;
+
+    for (uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
+    {
+        if(pSpellInfo->Reagent[i] <= 0)
+            continue;
+
+        uint32 itemid = pSpellInfo->Reagent[i];
+        uint32 count = pSpellInfo->ReagentCount[i];
+
+        if (!m_bot->HasItemCount(itemid, count))
+            return false;
+    }
+
+    return true;
+}
+
 // extracts all item ids in format below
 // I decided to roll my own extractor rather then use the one in ChatHandler
 // because this one works on a const string, and it handles multiple links
