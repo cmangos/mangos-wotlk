@@ -456,7 +456,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
     }
 } // end DoNonCombatActions
 
-void PlayerbotPriestAI::BuffPlayer(Player* target)
+bool PlayerbotPriestAI::BuffPlayer(Player* target)
 {
-    GetAI()->CastSpell(POWER_WORD_FORTITUDE, *target);
+    return GetAI()->CastSpell(POWER_WORD_FORTITUDE, *target);
 }

@@ -377,12 +377,13 @@ void PlayerbotPaladinAI::DoNonCombatActions()
 
             HealTarget(*tPlayer, tPlayer->GetHealth() * 100 / tPlayer->GetMaxHealth());
             if (tPlayer != m_bot && tPlayer != GetMaster())
-                BuffPlayer(tPlayer);
+                if (BuffPlayer(tPlayer))
+                    return;
         }
     }
 }
 
-void PlayerbotPaladinAI::BuffPlayer(Player* target)
+bool PlayerbotPaladinAI::BuffPlayer(Player* target)
 {
     PlayerbotAI * ai = GetAI();
     Pet * pet = target->GetPet();
@@ -390,7 +391,7 @@ void PlayerbotPaladinAI::BuffPlayer(Player* target)
 
     // Check if target already has my blessing
     if (!ai->CanReceiveSpecificSpell(SPELL_BLESSING, target))
-        return;
+        return false;
 
     switch (target->getClass())
     {
@@ -398,36 +399,42 @@ void PlayerbotPaladinAI::BuffPlayer(Player* target)
         case CLASS_SHAMAN:
         case CLASS_PALADIN:
             if (ai->Buff(BLESSING_OF_MIGHT, target))
-                break;
+                return true;
             else if (ai->Buff(BLESSING_OF_KINGS, target))
-                break;
+                return true;
             else if (ai->Buff(BLESSING_OF_WISDOM, target))
-                break;
+                return true;
+            else if (ai->Buff(BLESSING_OF_SANCTUARY, target))
+                return true;
             else
-                ai->Buff(BLESSING_OF_SANCTUARY, target);
-                break;
+                return false;
         case CLASS_DEATH_KNIGHT:
         case CLASS_HUNTER:
             if (pet)
-                if (!ai->Buff(BLESSING_OF_MIGHT, target))
-                    ai->Buff(BLESSING_OF_KINGS, target);
+                if (ai->Buff(BLESSING_OF_MIGHT, target))
+                    return true;
+                else if (ai->Buff(BLESSING_OF_KINGS, target))
+                    return true;
         case CLASS_ROGUE:
         case CLASS_WARRIOR:
             if (ai->Buff(BLESSING_OF_MIGHT, target))
-                break;
+                return true;
             else if (ai->Buff(BLESSING_OF_KINGS, target))
-                break;
+                return true;
+            else if (ai->Buff(BLESSING_OF_SANCTUARY, target))
+                return true;
             else
-                ai->Buff(BLESSING_OF_SANCTUARY, target);
-                break;
+                return false;
         case CLASS_PRIEST:
         case CLASS_MAGE:
         case CLASS_WARLOCK:
             if (ai->Buff(BLESSING_OF_WISDOM, target))
-                break;
+                return true;
             else if (ai->Buff(BLESSING_OF_KINGS, target))
-                break;
+                return true;
+            else if (ai->Buff(BLESSING_OF_SANCTUARY, target))
+                return true;
             else
-                ai->Buff(BLESSING_OF_SANCTUARY, target);
+                return false;
     }
 }

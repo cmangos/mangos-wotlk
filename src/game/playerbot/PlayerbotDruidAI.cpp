@@ -634,7 +634,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
     }
 } // end DoNonCombatActions
 
-void PlayerbotDruidAI::BuffPlayer(Player* target)
+bool PlayerbotDruidAI::BuffPlayer(Player* target)
 {
     GetAI()->CastSpell(MARK_OF_THE_WILD, *target);
 }

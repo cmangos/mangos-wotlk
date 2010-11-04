@@ -81,9 +81,6 @@ public:
     // all non combat actions go here, ex buffs, heals, rezzes
     void DoNonCombatActions();
 
-    // buff a specific player, usually a real PC who is not in group
-    void BuffPlayer(Player *target);
-
 private:
     // ARMS
     uint32 BATTLE_STANCE, CHARGE, HEROIC_STRIKE, REND, THUNDER_CLAP, HAMSTRING, MOCKING_BLOW, RETALIATION, SWEEPING_STRIKES, MORTAL_STRIKE, BLADESTORM, HEROIC_THROW, SHATTERING_THROW;

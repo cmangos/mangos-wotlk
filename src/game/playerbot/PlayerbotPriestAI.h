@@ -85,7 +85,7 @@ public:
     void DoNonCombatActions();
 
     // buff a specific player, usually a real PC who is not in group
-    void BuffPlayer(Player *target);
+    bool BuffPlayer(Player *target);
 
 private:
     // Heals the target based off its hps

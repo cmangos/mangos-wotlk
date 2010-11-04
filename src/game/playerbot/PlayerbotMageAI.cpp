@@ -435,7 +435,12 @@ void PlayerbotMageAI::DoNonCombatActions()
 
 } // end DoNonCombatActions
 
-void PlayerbotMageAI::BuffPlayer(Player* target)
+bool PlayerbotMageAI::BuffPlayer(Player* target)
 {
-    GetAI()->CastSpell(ARCANE_INTELLECT, *target);
+    if (DALARAN_INTELLECT)
+        return GetAI()->Buff(DALARAN_INTELLECT, target);
+    else if (ARCANE_INTELLECT)
+        return GetAI()->Buff(ARCANE_INTELLECT, target);
+    else
+        return false;
 }

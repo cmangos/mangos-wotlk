@@ -342,5 +342,3 @@ void PlayerbotRogueAI::DoNonCombatActions()
     }
 
 } // end DoNonCombatActions
-
-void PlayerbotRogueAI::BuffPlayer(Player* target) {}
