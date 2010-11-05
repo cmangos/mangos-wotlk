@@ -458,8 +458,6 @@ bool PlayerbotPriestAI::BuffPlayer(Player* target)
     if (ai->Buff(POWER_WORD_FORTITUDE, target))
         return true;
 
-    ai->TellMaster("Divine Spirit is %u %s", DIVINE_SPIRIT, sSpellStore.LookupEntry(DIVINE_SPIRIT)->SpellName[0]);
-
     if (target->getPowerType() == POWER_MANA && ai->Buff(DIVINE_SPIRIT, target))
         return true;
 
