@@ -401,7 +401,7 @@ void PlayerbotMageAI::DoNonCombatActions()
     // There is no group, buff master
     else
     {
-        if (BuffPlayer(master))
+        if (master->isAlive() && BuffPlayer(master))
             return;
     }
 
