@@ -89,7 +89,7 @@ public:
 
 private:
     // Heals the target based off its hps
-    void HealTarget (Unit& target, uint8 hp);
+    bool HealTarget (Unit* target);
 
     // holy
     uint32 BINDING_HEAL,
