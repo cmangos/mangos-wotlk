@@ -263,6 +263,10 @@ uint32 PlayerbotAI::initSpell(uint32 spellId)
     SpellChainMapNext const& nextMap = sSpellMgr.GetSpellChainNext();
     for (SpellChainMapNext::const_iterator itr = nextMap.lower_bound(spellId); itr != nextMap.upper_bound(spellId); ++itr)
     {
+        // Work around buggy chains
+        if (sSpellStore.LookupEntry(spellId)->SpellIconID != sSpellStore.LookupEntry(itr->second)->SpellIconID)
+            continue;
+
         SpellChainNode const* node = sSpellMgr.GetSpellChainNode(itr->second);
         // If next spell is a requirement for this one then skip it
         if (node->req == spellId)
