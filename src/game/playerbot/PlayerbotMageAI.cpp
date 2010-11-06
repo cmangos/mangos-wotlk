@@ -465,6 +465,12 @@ void PlayerbotMageAI::DoNonCombatActions()
 
 bool PlayerbotMageAI::BuffPlayer(Player* target)
 {
+    PlayerbotAI * ai = GetAI();
+    Pet * pet = target->GetPet();
+
+    if (pet && pet->getPowerType() == POWER_MANA && ai->Buff(ARCANE_INTELLECT, pet))
+        return true;
+
     if (DALARAN_INTELLECT)
         return GetAI()->Buff(DALARAN_INTELLECT, target);
     else if (ARCANE_INTELLECT)

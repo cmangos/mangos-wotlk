@@ -66,6 +66,9 @@ bool PlayerbotPriestAI::HealTarget(Unit* target)
     PlayerbotAI* ai = GetAI();
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
 
+    if (hp >= 80)
+        return false;
+
     if (hp < 25 && FLASH_HEAL && ai->CastSpell(FLASH_HEAL, *target))
         return true;
     else if (hp < 30 && GREATER_HEAL > 0 && ai->CastSpell(GREATER_HEAL, *target))
@@ -403,11 +406,14 @@ void PlayerbotPriestAI::DoNonCombatActions()
     if (master->GetGroup())
     {
         // Buff master with group buffs
-        if (PRAYER_OF_FORTITUDE && ai->HasSpellReagents(PRAYER_OF_FORTITUDE) && ai->Buff(PRAYER_OF_FORTITUDE, master))
-            return;
+        if (master->isAlive())
+        {
+            if (PRAYER_OF_FORTITUDE && ai->HasSpellReagents(PRAYER_OF_FORTITUDE) && ai->Buff(PRAYER_OF_FORTITUDE, master))
+                return;
 
-        if (PRAYER_OF_SPIRIT && ai->HasSpellReagents(PRAYER_OF_SPIRIT) && ai->Buff(PRAYER_OF_SPIRIT, master))
-            return;
+            if (PRAYER_OF_SPIRIT && ai->HasSpellReagents(PRAYER_OF_SPIRIT) && ai->Buff(PRAYER_OF_SPIRIT, master))
+                return;
+        }
 
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
@@ -421,7 +427,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
             {
                 std::string msg = "Resurrecting ";
                 msg += tPlayer->GetName();
-                GetPlayerBot()->Say(msg, LANG_UNIVERSAL);
+                m_bot->Say(msg, LANG_UNIVERSAL);
                 ai->CastSpell(RESURRECTION, *tPlayer);
             }
             else if (tPlayer->isAlive())
@@ -455,10 +461,15 @@ void PlayerbotPriestAI::DoNonCombatActions()
 bool PlayerbotPriestAI::BuffPlayer(Player* target)
 {
     PlayerbotAI * ai = GetAI();
+    Pet * pet = target->GetPet();
+
+    if (pet && ai->Buff(POWER_WORD_FORTITUDE, pet))
+        return true;
+
     if (ai->Buff(POWER_WORD_FORTITUDE, target))
         return true;
 
-    if (target->getPowerType() == POWER_MANA && ai->Buff(DIVINE_SPIRIT, target))
+    if ((target->getClass() == CLASS_DRUID || target->getPowerType() == POWER_MANA) && ai->Buff(DIVINE_SPIRIT, target))
         return true;
 
     return false;
