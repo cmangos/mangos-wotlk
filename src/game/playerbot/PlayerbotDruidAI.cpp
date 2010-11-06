@@ -19,10 +19,10 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
     FORCE_OF_NATURE               = ai->initSpell(FORCE_OF_NATURE_1);
     HURRICANE                     = ai->initSpell(HURRICANE_1);
     MARK_OF_THE_WILD              = ai->initSpell(MARK_OF_THE_WILD_1); // buffs
+    GIFT_OF_THE_WILD              = ai->initSpell(GIFT_OF_THE_WILD_1);
     THORNS                        = ai->initSpell(THORNS_1);
     BARKSKIN                      = ai->initSpell(BARKSKIN_1);
     INNERVATE                     = ai->initSpell(INNERVATE_1);
-    MANA_REJUVENATION             = 0; // Who on earth put it here?
     FAERIE_FIRE                   = ai->initSpell(FAERIE_FIRE_1); // debuffs
     REJUVENATION                  = ai->initSpell(REJUVENATION_1); // heals
     REGROWTH                      = ai->initSpell(REGROWTH_1);
@@ -32,12 +32,14 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
     HEALING_TOUCH                 = ai->initSpell(HEALING_TOUCH_1);
     SWIFTMEND                     = ai->initSpell(SWIFTMEND_1);
     TRANQUILITY                   = ai->initSpell(TRANQUILITY_1);
+    REVIVE                        = ai->initSpell(REVIVE_1);
     // Druid Forms
     MOONKIN_FORM                  = ai->initSpell(MOONKIN_FORM_1);
     DIRE_BEAR_FORM                = ai->initSpell(DIRE_BEAR_FORM_1);
     BEAR_FORM                     = ai->initSpell(BEAR_FORM_1);
     CAT_FORM                      = ai->initSpell(CAT_FORM_1);
     TREE_OF_LIFE                  = ai->initSpell(TREE_OF_LIFE_1);
+    TRAVEL_FORM                   = ai->initSpell(TRAVEL_FORM_1);
     // Cat Attack type's
     RAKE                          = ai->initSpell(RAKE_1);
     CLAW                          = ai->initSpell(CLAW_1); // 45
@@ -66,31 +68,39 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
 
 PlayerbotDruidAI::~PlayerbotDruidAI() {}
 
-void PlayerbotDruidAI::HealTarget(Unit &target, uint8 hp)
+bool PlayerbotDruidAI::HealTarget(Unit *target)
 {
     PlayerbotAI* ai = GetAI();
-    Player *m_bot = GetPlayerBot();
+    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
 
-    if (hp < 70 && REJUVENATION > 0 && !target.HasAura(REJUVENATION, EFFECT_INDEX_0) && !target.HasAura(REGROWTH, EFFECT_INDEX_0) && ai->GetManaPercent() >= 21)
-        ai->CastSpell(REJUVENATION, target);
+    if (hp >= 70)
+        return false;
 
-    if (hp < 60 && LIFEBLOOM > 0 && !target.HasAura(LIFEBLOOM, EFFECT_INDEX_0) && ai->GetManaPercent() >= 28)
-        ai->CastSpell(LIFEBLOOM, target);
+    // Reset form if needed
+    GoBuffForm(GetPlayerBot());
 
-    if (hp < 55 && REGROWTH > 0 && !target.HasAura(REGROWTH, EFFECT_INDEX_0) && !target.HasAura(REJUVENATION, EFFECT_INDEX_0) && ai->GetManaPercent() >= 33)
-        ai->CastSpell(REGROWTH, target);
+    if (hp < 70 && REJUVENATION > 0 && !target->HasAura(REJUVENATION) && ai->CastSpell(REJUVENATION, *target))
+        return true;
 
-    if (hp < 50 && SWIFTMEND > 0 && target.HasAura(REJUVENATION, EFFECT_INDEX_0) || target.HasAura(REGROWTH, EFFECT_INDEX_0) && ai->GetManaPercent() >= 16)
-        ai->CastSpell(SWIFTMEND, target);
+    if (hp < 60 && LIFEBLOOM > 0 && !target->HasAura(LIFEBLOOM) && ai->CastSpell(LIFEBLOOM,*target))
+        return true;
 
-    if (hp < 45 && WILD_GROWTH > 0 && !target.HasAura(WILD_GROWTH, EFFECT_INDEX_0) && ai->GetManaPercent() >= 26)
-        ai->CastSpell(WILD_GROWTH, target);
+    if (hp < 55 && REGROWTH > 0 && !target->HasAura(REGROWTH) && ai->CastSpell(REGROWTH, *target))
+        return true;
 
-    if (hp < 30 && NOURISH > 0 && ai->GetManaPercent() >= 18)
-        ai->CastSpell(NOURISH, target);
+    if (hp < 50 && SWIFTMEND > 0 && (target->HasAura(REJUVENATION) || target->HasAura(REGROWTH)) && ai->CastSpell(SWIFTMEND, *target))
+        return true;
 
-    if (hp < 25 && HEALING_TOUCH > 0 && ai->GetManaPercent() >= 38)
-        ai->CastSpell(HEALING_TOUCH, target);
+    if (hp < 45 && WILD_GROWTH > 0 && !target->HasAura(WILD_GROWTH) && ai->CastSpell(WILD_GROWTH, *target))
+        return true;
+
+    if (hp < 30 && NOURISH > 0 && ai->CastSpell(NOURISH, *target))
+        return true;
+
+    if (hp < 25 && HEALING_TOUCH > 0 && ai->CastSpell(HEALING_TOUCH, *target))
+        return true;
+
+    return false;
 } // end HealTarget
 
 void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
@@ -215,12 +225,6 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
             else if (INNERVATE > 0 && m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0) && ai->GetManaPercent() < 50 && DruidSpellCombat < 11 && !m_bot->HasAura(INNERVATE, EFFECT_INDEX_0))
             {
                 ai->CastSpell(INNERVATE, *m_bot);
-                DruidSpellCombat++;
-                break;
-            }
-            else if (MANA_REJUVENATION > 0 && m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0) && ai->GetManaPercent() < 50 && !m_bot->HasAura(INNERVATE, EFFECT_INDEX_0) && DruidSpellCombat < 12 && !m_bot->HasAura(MANA_REJUVENATION, EFFECT_INDEX_0))
-            {
-                ai->CastSpell(MANA_REJUVENATION, *m_bot);
                 DruidSpellCombat++;
                 break;
             }
@@ -367,12 +371,6 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
                 DruidSpellCombat++;
                 break;
             }
-            else if (MANA_REJUVENATION > 0 && ai->GetManaPercent() < 50 && DruidSpellCombat < 12 && !m_bot->HasAura(INNERVATE, EFFECT_INDEX_0) && !m_bot->HasAura(MANA_REJUVENATION, EFFECT_INDEX_0))
-            {
-                ai->CastSpell(MANA_REJUVENATION, *m_bot);
-                DruidSpellCombat++;
-                break;
-            }
             else if (DruidSpellCombat > 13)
             {
                 DruidSpellCombat = 0;
@@ -413,12 +411,12 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
             }
             if (ai->GetHealthPercent() <= 40)
             {
-                HealTarget (*m_bot, ai->GetHealthPercent());
+                HealTarget (m_bot);
                 break;
             }
             if (masterHP <= 40)
             {
-                HealTarget (*GetMaster(), masterHP);
+                HealTarget (GetMaster());
                 break;
             }
             else
@@ -543,30 +541,11 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 void PlayerbotDruidAI::DoNonCombatActions()
 {
     Player * m_bot = GetPlayerBot();
-    if (!m_bot)
+    Player * master = GetMaster();
+    if (!m_bot || !master)
         return;
 
     PlayerbotAI* ai = GetAI();
-
-    if (m_bot->HasAura(CAT_FORM, EFFECT_INDEX_0))
-        m_bot->RemoveAurasDueToSpell(768);
-        //ai->TellMaster("FormClearCat");
-    if (m_bot->HasAura(BEAR_FORM, EFFECT_INDEX_0))
-        m_bot->RemoveAurasDueToSpell(5487);
-        //ai->TellMaster("FormClearBear");
-    if (m_bot->HasAura(DIRE_BEAR_FORM, EFFECT_INDEX_0))
-        m_bot->RemoveAurasDueToSpell(9634);
-        //ai->TellMaster("FormClearDireBear");
-    if (m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0))
-        m_bot->RemoveAurasDueToSpell(24858);
-        //ai->TellMaster("FormClearMoonkin");
-     // buff myself with MARK_OF_THE_WILD
-    if (MARK_OF_THE_WILD > 0 && !m_bot->HasAura(MARK_OF_THE_WILD, EFFECT_INDEX_0))
-        ai->CastSpell (MARK_OF_THE_WILD, *m_bot);
-
-    // Thorns generates aggro for moonkin
-    if (THORNS > 0 && !m_bot->HasAura(THORNS, EFFECT_INDEX_0))
-        ai->CastSpell (THORNS, *m_bot);
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
@@ -582,18 +561,8 @@ void PlayerbotDruidAI::DoNonCombatActions()
         ai->SetIgnoreUpdateTime(30);
         return;
     }
-    else if (pItem == NULL && INNERVATE > 0 && !m_bot->HasAura(INNERVATE, EFFECT_INDEX_0) && ai->GetManaPercent() <= 70)
-    {
-        ai->CastSpell(INNERVATE, *m_bot);
-        //ai->TellMaster("casting innervate.");
+    else if (!pItem && INNERVATE > 0 && !m_bot->HasAura(INNERVATE) && ai->GetManaPercent() <= 20 && ai->CastSpell(INNERVATE, *m_bot))
         return;
-    }
-    else if (pItem == NULL && MANA_REJUVENATION > 0 && !m_bot->HasAura(INNERVATE, EFFECT_INDEX_0) && !m_bot->HasAura(MANA_REJUVENATION, EFFECT_INDEX_0) && ai->GetManaPercent() <= 70)
-    {
-        ai->CastSpell(MANA_REJUVENATION, *m_bot);
-        //ai->TellMaster("casting mana rejuvenation.");
-        return;
-    }
 
     // hp check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
@@ -617,24 +586,88 @@ void PlayerbotDruidAI::DoNonCombatActions()
     }
 
     // buff and heal master's group
-    if (GetMaster()->GetGroup())
+    if (master->GetGroup())
     {
+        // Buff master with group buff
+       if (master->isAlive() && GIFT_OF_THE_WILD && ai->HasSpellReagents(GIFT_OF_THE_WILD) && ai->Buff(GIFT_OF_THE_WILD, master))
+           return;
+
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
-            if (!tPlayer || !tPlayer->isAlive())
+            if (!tPlayer || tPlayer == m_bot)
                 continue;
 
-            // buff and heal
-            (!tPlayer->HasAura(MARK_OF_THE_WILD, EFFECT_INDEX_0) && ai->CastSpell (MARK_OF_THE_WILD, *tPlayer));
-            //(!tPlayer->HasAura(THORNS, EFFECT_INDEX_0) && ai->CastSpell (THORNS, *tPlayer));
-            (HealTarget(*tPlayer, tPlayer->GetHealth() * 100 / tPlayer->GetMaxHealth()));
+            // Resurrect member if needed
+            if (!tPlayer->isAlive())
+            {
+                std::string msg = "Resurrecting ";
+                msg += tPlayer->GetName();
+                m_bot->Say(msg, LANG_UNIVERSAL);
+                ai->CastSpell(REVIVE, *tPlayer);
+            }
+            else if (tPlayer->isAlive())
+            {
+                // buff and heal
+                if (BuffPlayer(tPlayer))
+                    return;
+
+                if (HealTarget(tPlayer))
+                    return;
+            }
         }
     }
+    else
+    {
+        if (master->isAlive())
+        {
+            if (BuffPlayer(master))
+                return;
+            if (HealTarget(master))
+                return;
+        }
+        else
+            if (ai->CastSpell(REVIVE, *master))
+                ai->TellMaster("Resurrecting you, Master.");
+    }
+
+    BuffPlayer(m_bot);
 } // end DoNonCombatActions
 
 bool PlayerbotDruidAI::BuffPlayer(Player* target)
 {
-    GetAI()->CastSpell(MARK_OF_THE_WILD, *target);
+    PlayerbotAI * ai = GetAI();
+
+    Pet * pet = target->GetPet();
+    if (pet)
+    {
+        if (ai->Buff(MARK_OF_THE_WILD, pet, &(PlayerbotDruidAI::GoBuffForm)))
+            return true;
+        else if (ai->Buff(THORNS, pet, &(PlayerbotDruidAI::GoBuffForm)))
+            return true;
+    }
+
+    if (ai->Buff(MARK_OF_THE_WILD, target, &(PlayerbotDruidAI::GoBuffForm)))
+        return true;
+    else if (ai->Buff(THORNS, target, &(PlayerbotDruidAI::GoBuffForm)))
+        return true;
+    else
+        return false;
+}
+
+void PlayerbotDruidAI::GoBuffForm(Player *self)
+{
+    // RANK_1 spell ids used because this is a static method which does not have access to instance.
+    // There is only one rank for these spells anyway.
+    if (self->HasAura(CAT_FORM_1))
+        self->RemoveAurasDueToSpell(CAT_FORM_1);
+    if (self->HasAura(BEAR_FORM_1))
+        self->RemoveAurasDueToSpell(BEAR_FORM_1);
+    if (self->HasAura(DIRE_BEAR_FORM_1))
+        self->RemoveAurasDueToSpell(DIRE_BEAR_FORM_1);
+    if (self->HasAura(MOONKIN_FORM_1))
+        self->RemoveAurasDueToSpell(MOONKIN_FORM_1);
+    if (self->HasAura(TRAVEL_FORM_1))
+        self->RemoveAurasDueToSpell(TRAVEL_FORM_1);
 }
