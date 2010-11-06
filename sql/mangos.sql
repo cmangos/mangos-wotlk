@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_10660_01_mangos_game_event_quest` bit(1) default NULL
+  `required_10682_01_mangos_item_convert` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -1251,6 +1251,7 @@ CREATE TABLE `creature_template` (
   `movementId` int(11) UNSIGNED DEFAULT '0' NOT NULL,
   `RegenHealth` tinyint(3) unsigned NOT NULL default '1',
   `equipment_id` mediumint(8) unsigned NOT NULL default '0',
+  `vendor_id` mediumint(8) unsigned NOT NULL default '0',
   `mechanic_immune_mask` int(10) unsigned NOT NULL default '0',
   `flags_extra` int(10) unsigned NOT NULL default '0',
   `ScriptName` char(64) NOT NULL default '',
@@ -1264,7 +1265,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,0,0,0,0,0,10045,0,0,0,'Waypoint(Only GM can see it)','Visual',NULL,0,1,1,64,64,0,0,5,35,35,0,0.91,1.14286,1,0,2,3,0,10,1,2000,2200,8,4096,0,0,0,0,0,0,1,2,100,8,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,1,1,0,0,0,0,0,0,0,0,1,0,0,130,'');
+(1,0,0,0,0,0,10045,0,0,0,'Waypoint(Only GM can see it)','Visual',NULL,0,1,1,64,64,0,0,5,35,35,0,0.91,1.14286,1,0,2,3,0,10,1,2000,2200,8,4096,0,0,0,0,0,0,1,2,100,8,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,1,1,0,0,0,0,0,0,0,0,1,0,0,0,130,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2140,6 +2141,26 @@ CREATE TABLE `instance_template` (
 LOCK TABLES `instance_template` WRITE;
 /*!40000 ALTER TABLE `instance_template` DISABLE KEYS */;
 /*!40000 ALTER TABLE `instance_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `item_convert`
+--
+
+DROP TABLE IF EXISTS `item_convert`;
+CREATE TABLE `item_convert` (
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `item` mediumint(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Npc System';
+
+--
+-- Dumping data for table `item_convert`
+--
+
+LOCK TABLES `item_convert` WRITE;
+/*!40000 ALTER TABLE `item_convert` DISABLE KEYS */;
+/*!40000 ALTER TABLE `item_convert` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -3988,6 +4009,29 @@ CREATE TABLE `npc_vendor` (
 LOCK TABLES `npc_vendor` WRITE;
 /*!40000 ALTER TABLE `npc_vendor` DISABLE KEYS */;
 /*!40000 ALTER TABLE `npc_vendor` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `npc_vendor_template`
+--
+
+DROP TABLE IF EXISTS `npc_vendor_template`;
+CREATE TABLE `npc_vendor_template` (
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `item` mediumint(8) unsigned NOT NULL default '0',
+  `maxcount` tinyint(3) unsigned NOT NULL default '0',
+  `incrtime` int(10) unsigned NOT NULL default '0',
+  `ExtendedCost` mediumint(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`,`item`,`ExtendedCost`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Npc System';
+
+--
+-- Dumping data for table `npc_vendor_template`
+--
+
+LOCK TABLES `npc_vendor_template` WRITE;
+/*!40000 ALTER TABLE `npc_vendor_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE `npc_vendor_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

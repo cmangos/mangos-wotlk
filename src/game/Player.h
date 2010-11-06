@@ -1127,6 +1127,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool Create( uint32 guidlow, const std::string& name, uint8 race, uint8 class_, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair, uint8 outfitId );
 
+        void Update( uint32 time );
+
         static bool BuildEnumData( QueryResult * result,  WorldPacket * p_data );
 
         void SetInWater(bool apply);
@@ -2419,7 +2421,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetBotDeathTimer() { m_deathTimer = 0; }
 
     protected:
-        void Update(uint32 update_diff, uint32 tick_diff);  // overwrite Unit::Update
 
         uint32 m_contestedPvPTimer;
 

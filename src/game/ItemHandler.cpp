@@ -742,8 +742,9 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
         pCreature->StopMoving();
 
     VendorItemData const* vItems = pCreature->GetVendorItems();
+    VendorItemData const* tItems = pCreature->GetVendorTemplateItems();
 
-    if (!vItems)
+    if (!vItems && !tItems)
     {
         WorldPacket data( SMSG_LIST_INVENTORY, (8+1+1) );
         data << ObjectGuid(vendorguid);
@@ -753,7 +754,9 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
         return;
     }
 
-    uint8 numitems = vItems->GetItemCount();
+    uint8 customitems = vItems ? vItems->GetItemCount() : 0;
+    uint8 numitems = customitems + (tItems ? tItems->GetItemCount() : 0);
+
     uint8 count = 0;
 
     WorldPacket data( SMSG_LIST_INVENTORY, (8+1+numitems*8*4) );
@@ -766,9 +769,13 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
 
     for(uint8 vendorslot = 0; vendorslot < numitems; ++vendorslot )
     {
-        if (VendorItem const* crItem = vItems->GetItem(vendorslot))
+        VendorItem const* crItem = vendorslot < customitems ? vItems->GetItem(vendorslot) : tItems->GetItem(vendorslot - customitems);
+
+        if (crItem)
         {
-            if (ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(crItem->item))
+            uint32 itemId = crItem->item;
+            ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemId);
+            if (pProto)
             {
                 if (!_player->isGameMaster())
                 {
@@ -787,13 +794,25 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                         continue;
                 }
 
+                // possible item coverting for BoA case
+                if (pProto->Flags & ITEM_FLAG_BOA)
+                {
+                    // convert if can use and then buy
+                    if (pProto->RequiredReputationFaction && uint32(_player->GetReputationRank(pProto->RequiredReputationFaction)) >= pProto->RequiredReputationRank)
+                    {
+                        itemId = sObjectMgr.GetItemConvert(itemId, _player->getRaceMask());
+                        // checked at convert data loading as existed
+                        pProto = ObjectMgr::GetItemPrototype(itemId);
+                    }
+                }
+
                 ++count;
 
                 // reputation discount
                 uint32 price = (crItem->ExtendedCost == 0 || pProto->Flags2 & ITEM_FLAG2_EXT_COST_REQUIRES_GOLD) ? uint32(floor(pProto->BuyPrice * discountMod)) : 0;
 
                 data << uint32(vendorslot +1);              // client size expected counting from 1
-                data << uint32(crItem->item);
+                data << uint32(itemId);
                 data << uint32(pProto->DisplayInfoID);
                 data << uint32(crItem->maxcount <= 0 ? 0xFFFFFFFF : pCreature->GetVendorItemCurrentCount(crItem));
                 data << uint32(price);

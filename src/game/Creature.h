@@ -129,6 +129,7 @@ struct CreatureInfo
     uint32  movementId;
     bool    RegenHealth;
     uint32  equipmentId;
+    uint32  vendorId;
     uint32  MechanicImmuneMask;
     uint32  flags_extra;
     uint32  ScriptID;
@@ -401,6 +402,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
         char const* GetSubName() const { return GetCreatureInfo()->SubName; }
 
+        void Update(uint32 time);                           // overwrite Unit::Update
         void GetRespawnCoord(float &x, float &y, float &z, float* ori = NULL, float* dist =NULL) const;
         uint32 GetEquipmentId() const { return m_equipmentId; }
 
@@ -508,6 +510,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         float GetSpellDamageMod(int32 Rank);
 
         VendorItemData const* GetVendorItems() const;
+        VendorItemData const* GetVendorTemplateItems() const;
         uint32 GetVendorItemCurrentCount(VendorItem const* vItem);
         uint32 UpdateVendorItemCurrentCount(VendorItem const* vItem, uint32 used_count);
 
@@ -639,7 +642,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SendAreaSpiritHealerQueryOpcode(Player *pl);
 
     protected:
-        void Update(uint32 update_diff, uint32 tick_diff);  // overwrite Unit::Update
         bool CreateFromProto(uint32 guidlow,uint32 Entry,uint32 team, const CreatureData *data = NULL);
         bool InitEntry(uint32 entry, uint32 team=ALLIANCE, const CreatureData* data=NULL);
         void RelocationNotify();
