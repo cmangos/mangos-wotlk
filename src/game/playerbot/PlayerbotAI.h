@@ -215,7 +215,7 @@ public:
     bool CastSpell(uint32 spellId);
     bool CastSpell(uint32 spellId, Unit& target);
     bool CastPetSpell(uint32 spellId, Unit* target = NULL);
-    bool Buff(uint32 spellId, Unit* target);
+    bool Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player *) = NULL);
     bool SelfBuff(uint32 spellId);
     void UseItem(Item& item, uint8 targetSlot = 255);
     void EquipItem(Item& item);

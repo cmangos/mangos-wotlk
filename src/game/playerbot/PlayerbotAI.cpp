@@ -279,10 +279,10 @@ uint32 PlayerbotAI::initSpell(uint32 spellId)
     }
     if (next == 0)
     {
-        sLog.outDebug("initSpell: Found spellid: %u", spellId);
+        const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
+        sLog.outDebug("Playerbot spell init: %s is %u", pSpellInfo->SpellName[0], spellId);
 
         // Add spell to spellrange map
-        const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
         Spell *spell = new Spell(m_bot, pSpellInfo, false);
         SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(pSpellInfo->rangeIndex);
         float range = GetSpellMaxRange(srange, IsPositiveSpell(spellId));
@@ -2425,7 +2425,7 @@ bool PlayerbotAI::CastPetSpell(uint32 spellId, Unit* target)
 }
 
 // Perform sanity checks and cast spell
-bool PlayerbotAI::Buff(uint32 spellId, Unit* target)
+bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player *))
 {
     if (spellId == 0)
         return false;
@@ -2465,6 +2465,10 @@ bool PlayerbotAI::Buff(uint32 spellId, Unit* target)
 
     if (!willBenefitFromSpell)
         return false;
+
+    // Druids may need to shapeshift before casting
+    if (beforeCast)
+        (*beforeCast)(m_bot);
 
     return CastSpell(spellProto->Id, *target);
 }
