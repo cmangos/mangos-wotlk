@@ -37,10 +37,10 @@ PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, 
     EXORCISM                      = ai->initSpell(EXORCISM_1);
     SACRED_SHIELD                 = ai->initSpell(SACRED_SHIELD_1);
     DIVINE_PLEA                   = ai->initSpell(DIVINE_PLEA_1);
-    BLESSING_OF_KINGS             = BLESSING_OF_KINGS_1;
-    GREATER_BLESSING_OF_KINGS     = GREATER_BLESSING_OF_KINGS_1;
-    BLESSING_OF_SANCTUARY         = BLESSING_OF_SANCTUARY_1;
-    GREATER_BLESSING_OF_SANCTUARY = GREATER_BLESSING_OF_SANCTUARY_1;
+    BLESSING_OF_KINGS             = ai->initSpell(BLESSING_OF_KINGS_1);
+    GREATER_BLESSING_OF_KINGS     = ai->initSpell(GREATER_BLESSING_OF_KINGS_1);
+    BLESSING_OF_SANCTUARY         = ai->initSpell(BLESSING_OF_SANCTUARY_1);
+    GREATER_BLESSING_OF_SANCTUARY = ai->initSpell(GREATER_BLESSING_OF_SANCTUARY_1);
     HAMMER_OF_JUSTICE             = ai->initSpell(HAMMER_OF_JUSTICE_1);
     RIGHTEOUS_FURY                = ai->initSpell(RIGHTEOUS_FURY_1);
     RIGHTEOUS_DEFENSE             = ai->initSpell(RIGHTEOUS_DEFENSE_1);

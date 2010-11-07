@@ -2437,12 +2437,8 @@ bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player *
 
     // Select appropriate spell rank for target's level
     spellProto = sSpellMgr.SelectAuraRankForLevel(spellProto, target->getLevel());
-
     if (!spellProto)
-    {
-        TellMaster("No spell rank found for target %s", target->GetName());
         return false;
-    }
 
     // Check if spell will boost one of already existent auras
     bool willBenefitFromSpell = false;
