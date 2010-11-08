@@ -371,18 +371,10 @@ void PlayerbotMageAI::DoNonCombatActions()
     if (master->GetGroup())
     {
         // Buff master with group buff...
-        if ((DALARAN_BRILLIANCE || ARCANE_BRILLIANCE) && ai->HasSpellReagents(ARCANE_BRILLIANCE))
+        if (ARCANE_BRILLIANCE && ai->HasSpellReagents(ARCANE_BRILLIANCE))
         {
-            if (DALARAN_BRILLIANCE)
-            {
-                if (ai->Buff(DALARAN_BRILLIANCE, master))
-                    return;
-            }
-            else
-            {
-                if (ai->Buff(ARCANE_BRILLIANCE, master))
-                    return;
-            }
+            if (ai->Buff(ARCANE_BRILLIANCE, master))
+                return;
         }
 
         // ...and check group for new members joined or resurrected, or just buff everyone if no group buff available
@@ -471,10 +463,8 @@ bool PlayerbotMageAI::BuffPlayer(Player* target)
     if (pet && pet->getPowerType() == POWER_MANA && ai->Buff(ARCANE_INTELLECT, pet))
         return true;
 
-    if (DALARAN_INTELLECT)
-        return GetAI()->Buff(DALARAN_INTELLECT, target);
-    else if (ARCANE_INTELLECT)
-        return GetAI()->Buff(ARCANE_INTELLECT, target);
+    if (ARCANE_INTELLECT)
+        return ai->Buff(ARCANE_INTELLECT, target);
     else
         return false;
 }
