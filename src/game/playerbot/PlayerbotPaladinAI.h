@@ -96,8 +96,8 @@ public:
 private:
     // Heals the target based off its hps
     void HealTarget (Unit& target, uint8 hp);
-    // Cast on of the blessings on target using list.
-    void BuffBlessing(Unit* target, uint8 listSize, ...);
+    // Bless target using greater blessing if possible
+    bool Bless(uint32 spellId, Unit *target);
 
     // Retribution
     uint32 RETRIBUTION_AURA,

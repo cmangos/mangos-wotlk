@@ -386,11 +386,14 @@ void PlayerbotPaladinAI::DoNonCombatActions()
 bool PlayerbotPaladinAI::BuffPlayer(Player* target)
 {
     PlayerbotAI * ai = GetAI();
-    Pet * pet = target->GetPet();
     uint8 SPELL_BLESSING = 2; // See SpellSpecific enum in SpellMgr.h
 
-    // Check if target already has my blessing
-    if (!ai->CanReceiveSpecificSpell(SPELL_BLESSING, target))
+    Pet * pet = target->GetPet();
+    bool petCanBeBlessed = false;
+    if (pet)
+        petCanBeBlessed = ai->CanReceiveSpecificSpell(SPELL_BLESSING, pet);
+
+    if (!ai->CanReceiveSpecificSpell(SPELL_BLESSING, target) && !petCanBeBlessed)
         return false;
 
     switch (target->getClass())
@@ -398,43 +401,102 @@ bool PlayerbotPaladinAI::BuffPlayer(Player* target)
         case CLASS_DRUID:
         case CLASS_SHAMAN:
         case CLASS_PALADIN:
-            if (ai->Buff(BLESSING_OF_MIGHT, target))
+            if (Bless(BLESSING_OF_MIGHT, target))
                 return true;
-            else if (ai->Buff(BLESSING_OF_KINGS, target))
+            if (Bless(BLESSING_OF_KINGS, target))
                 return true;
-            else if (ai->Buff(BLESSING_OF_WISDOM, target))
+            if (Bless(BLESSING_OF_WISDOM, target))
                 return true;
-            else if (ai->Buff(BLESSING_OF_SANCTUARY, target))
+            if (Bless(BLESSING_OF_SANCTUARY, target))
                 return true;
             else
                 return false;
         case CLASS_DEATH_KNIGHT:
         case CLASS_HUNTER:
-            if (pet)
-                if (ai->Buff(BLESSING_OF_MIGHT, target))
+            if (petCanBeBlessed)
+                if (Bless(BLESSING_OF_MIGHT, pet))
                     return true;
-                else if (ai->Buff(BLESSING_OF_KINGS, target))
+                if (Bless(BLESSING_OF_KINGS, pet))
+                    return true;
+                if (Bless(BLESSING_OF_SANCTUARY, pet))
                     return true;
         case CLASS_ROGUE:
         case CLASS_WARRIOR:
-            if (ai->Buff(BLESSING_OF_MIGHT, target))
+            if (Bless(BLESSING_OF_MIGHT, target))
                 return true;
-            else if (ai->Buff(BLESSING_OF_KINGS, target))
+            if (Bless(BLESSING_OF_KINGS, target))
                 return true;
-            else if (ai->Buff(BLESSING_OF_SANCTUARY, target))
+            if (Bless(BLESSING_OF_SANCTUARY, target))
                 return true;
             else
                 return false;
+        case CLASS_WARLOCK:
+            if (petCanBeBlessed)
+            {
+                if (pet->getPowerType() == POWER_MANA)
+                {
+                    if (Bless(BLESSING_OF_WISDOM, pet))
+                        return true;
+                }
+                else
+                {
+                    if (Bless(BLESSING_OF_MIGHT, pet))
+                        return true;
+                }
+                if (Bless(BLESSING_OF_KINGS, pet))
+                    return true;
+                if (Bless(BLESSING_OF_SANCTUARY, pet))
+                    return true;
+            }
         case CLASS_PRIEST:
         case CLASS_MAGE:
-        case CLASS_WARLOCK:
-            if (ai->Buff(BLESSING_OF_WISDOM, target))
+            if (Bless(BLESSING_OF_WISDOM, target))
                 return true;
-            else if (ai->Buff(BLESSING_OF_KINGS, target))
+            if (Bless(BLESSING_OF_KINGS, target))
                 return true;
-            else if (ai->Buff(BLESSING_OF_SANCTUARY, target))
+            if (Bless(BLESSING_OF_SANCTUARY, target))
                 return true;
             else
                 return false;
     }
+}
+
+bool PlayerbotPaladinAI::Bless(uint32 spellId, Unit *target)
+{
+    if (spellId == 0)
+        return false;
+
+    PlayerbotAI * ai = GetAI();
+
+    if (spellId == BLESSING_OF_MIGHT)
+    {
+        if (GREATER_BLESSING_OF_MIGHT && ai->HasSpellReagents(GREATER_BLESSING_OF_MIGHT) && ai->Buff(GREATER_BLESSING_OF_MIGHT, target))
+            return true;
+        else
+            return ai->Buff(spellId, target);
+    }
+    else if (spellId == BLESSING_OF_WISDOM)
+    {
+        if (GREATER_BLESSING_OF_WISDOM && ai->HasSpellReagents(GREATER_BLESSING_OF_WISDOM) && ai->Buff(GREATER_BLESSING_OF_WISDOM, target))
+            return true;
+        else
+            return ai->Buff(spellId, target);
+    }
+    else if (spellId == BLESSING_OF_KINGS)
+    {
+        if (GREATER_BLESSING_OF_KINGS && ai->HasSpellReagents(GREATER_BLESSING_OF_KINGS) && ai->Buff(GREATER_BLESSING_OF_KINGS, target))
+            return true;
+        else
+            return ai->Buff(spellId, target);
+    }
+    else if (spellId == BLESSING_OF_SANCTUARY)
+    {
+        if (GREATER_BLESSING_OF_SANCTUARY && ai->HasSpellReagents(GREATER_BLESSING_OF_SANCTUARY) && ai->Buff(GREATER_BLESSING_OF_SANCTUARY, target))
+            return true;
+        else
+            return ai->Buff(spellId, target);
+    }
+
+    // Should not happen, but let it be here
+    return false;
 }
