@@ -602,12 +602,17 @@ void PlayerbotDruidAI::DoNonCombatActions()
             // Resurrect member if needed
             if (!tPlayer->isAlive())
             {
-                std::string msg = "Resurrecting ";
-                msg += tPlayer->GetName();
-                m_bot->Say(msg, LANG_UNIVERSAL);
-                ai->CastSpell(REVIVE, *tPlayer);
+                if (ai->CastSpell(REVIVE, *tPlayer))
+                {
+                    std::string msg = "Resurrecting ";
+                    msg += tPlayer->GetName();
+                    m_bot->Say(msg, LANG_UNIVERSAL);
+                    return;
+                }
+                else
+                    continue;
             }
-            else if (tPlayer->isAlive())
+            else
             {
                 // buff and heal
                 if (BuffPlayer(tPlayer))

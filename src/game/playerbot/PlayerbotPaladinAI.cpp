@@ -57,6 +57,8 @@ PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, 
     AVENGERS_SHIELD               = ai->initSpell(AVENGERS_SHIELD_1);
     HAND_OF_SACRIFICE             = ai->initSpell(HAND_OF_SACRIFICE_1);
     SHIELD_OF_RIGHTEOUSNESS       = ai->initSpell(SHIELD_OF_RIGHTEOUSNESS_1);
+    REDEMPTION                    = ai->initSpell(REDEMPTION_1);
+
     // Warrior auras
     DEFENSIVE_STANCE              = 71;   //Def Stance
     BERSERKER_STANCE              = 2458; //Ber Stance
@@ -372,8 +374,21 @@ void PlayerbotPaladinAI::DoNonCombatActions()
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
-            if (!tPlayer || !tPlayer->isAlive())
+            if (!tPlayer)
                 continue;
+
+            if (!tPlayer->isAlive())
+            {
+                if (ai->CastSpell(REDEMPTION, *tPlayer))
+                {
+                    std::string msg = "Resurrecting ";
+                    msg += tPlayer->GetName();
+                    m_bot->Say(msg, LANG_UNIVERSAL);
+                    return;
+                }
+                else
+                    continue;
+            }
 
             HealTarget(*tPlayer, tPlayer->GetHealth() * 100 / tPlayer->GetMaxHealth());
             if (tPlayer != m_bot && tPlayer != GetMaster())

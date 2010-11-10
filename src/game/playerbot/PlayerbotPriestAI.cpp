@@ -425,12 +425,17 @@ void PlayerbotPriestAI::DoNonCombatActions()
             // first rezz em
             if (!tPlayer->isAlive())
             {
-                std::string msg = "Resurrecting ";
-                msg += tPlayer->GetName();
-                m_bot->Say(msg, LANG_UNIVERSAL);
-                ai->CastSpell(RESURRECTION, *tPlayer);
+                if (ai->CastSpell(RESURRECTION, *tPlayer))
+                {
+                    std::string msg = "Resurrecting ";
+                    msg += tPlayer->GetName();
+                    m_bot->Say(msg, LANG_UNIVERSAL);
+                    return;
+                }
+                else
+                    continue;
             }
-            else if (tPlayer->isAlive())
+            else
             {
                 // buff and heal
                 if (BuffPlayer(tPlayer))

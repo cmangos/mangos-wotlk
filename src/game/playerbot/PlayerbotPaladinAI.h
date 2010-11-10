@@ -129,6 +129,7 @@ private:
            HOLY_WRATH,
            LAY_ON_HANDS,
            EXORCISM,
+           REDEMPTION,
            DIVINE_PLEA;
 
     // Protection
