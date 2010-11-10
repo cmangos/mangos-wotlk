@@ -77,22 +77,24 @@ PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, 
 
 PlayerbotPaladinAI::~PlayerbotPaladinAI() {}
 
-void PlayerbotPaladinAI::HealTarget(Unit &target, uint8 hp)
+bool PlayerbotPaladinAI::HealTarget(Unit *target)
 {
     PlayerbotAI* ai = GetAI();
+    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
 
-    if (hp < 40 && HOLY_LIGHT > 0 && ai->GetManaPercent() >= 34)
-        ai->CastSpell(HOLY_LIGHT, target);
+    if (hp < 25 && ai->CastSpell(LAY_ON_HANDS, *target))
+        return true;
 
-    if (hp < 35 && HOLY_SHOCK > 0 && ai->GetManaPercent() >= 21)
-        ai->CastSpell(HOLY_SHOCK, target);
+    if (hp < 30 && ai->CastSpell(FLASH_OF_LIGHT, *target))
+        return true;
 
-    if (hp < 30 && FLASH_OF_LIGHT > 0 && ai->GetManaPercent() >= 8)
-        ai->CastSpell(FLASH_OF_LIGHT, target);
+    if (hp < 35 && ai->CastSpell(HOLY_SHOCK, *target))
+        return true;
 
-    if (hp < 25 && LAY_ON_HANDS > 0 && ai->GetHealthPercent() > 30 && ai->GetManaPercent() >= 8)
-        ai->CastSpell(LAY_ON_HANDS, target);
+    if (hp < 40 && ai->CastSpell(HOLY_LIGHT, *target))
+        return true;
 
+    return false;
 } // end HealTarget
 
 void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
@@ -136,7 +138,8 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
 
             uint32 memberHP = m_groupMember->GetHealth() * 100 / m_groupMember->GetMaxHealth();
             if (memberHP < 40 && ai->GetManaPercent() >= 40)  // do not heal bots without plenty of mana for master & self
-                HealTarget(*m_groupMember, memberHP);
+                if (HealTarget(m_groupMember));
+                    return;
         }
     }
 
@@ -286,13 +289,13 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
         case Healing:
             if (ai->GetHealthPercent() <= 40)
             {
-                HealTarget (*m_bot, ai->GetHealthPercent());
+                HealTarget (m_bot);
                 out << " ...healing bot";
                 break;
             }
             if (masterHP <= 40)
             {
-                HealTarget (*GetMaster(), masterHP);
+                HealTarget (GetMaster());
                 out << " ...healing master";
                 break;
             }
@@ -390,7 +393,9 @@ void PlayerbotPaladinAI::DoNonCombatActions()
                     continue;
             }
 
-            HealTarget(*tPlayer, tPlayer->GetHealth() * 100 / tPlayer->GetMaxHealth());
+            if (HealTarget(tPlayer))
+                return;
+
             if (tPlayer != m_bot && tPlayer != GetMaster())
                 if (BuffPlayer(tPlayer))
                     return;
