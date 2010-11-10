@@ -208,8 +208,8 @@ bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
     // difficulties for dungeons/battleground ordered in normal way
     // and if more high version not exist must be used lesser version
     // for raid order different:
-    // 10 man normal version must be used instead not existed 10 man heroic version
-    // 25 man normal version must be used instead not existed 25 man heroic version
+    // 10 man normal version must be used instead nonexistent 10 man heroic version
+    // 25 man normal version must be used instead nonexistent 25 man heroic version
     CreatureInfo const *cinfo = normalInfo;
     for (uint8 diff = uint8(GetMap()->GetDifficulty()); diff > 0;)
     {
@@ -406,7 +406,7 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo *cinfo, const CreatureData *
     return display_id;
 }
 
-void Creature::Update(uint32 diff)
+void Creature::Update(uint32 update_diff, uint32 tick_diff)
 {
     if (m_needNotify)
     {
@@ -467,7 +467,7 @@ void Creature::Update(uint32 diff)
             if (m_isDeadByDefault)
                 break;
 
-            if (m_corpseDecayTimer <= diff)
+            if (m_corpseDecayTimer <= update_diff)
             {
                 // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
                 uint16 poolid = GetDBTableGUIDLow() ? sPoolMgr.IsPartOfAPool<Creature>(GetDBTableGUIDLow()) : 0;
@@ -482,11 +482,11 @@ void Creature::Update(uint32 diff)
             }
             else
             {
-                m_corpseDecayTimer -= diff;
+                m_corpseDecayTimer -= update_diff;
                 if (m_groupLootId)
                 {
-                    if(diff < m_groupLootTimer)
-                        m_groupLootTimer -= diff;
+                    if(update_diff < m_groupLootTimer)
+                        m_groupLootTimer -= update_diff;
                     else
                         StopGroupLoot();
                 }
@@ -498,7 +498,7 @@ void Creature::Update(uint32 diff)
         {
             if (m_isDeadByDefault)
             {
-                if (m_corpseDecayTimer <= diff)
+                if (m_corpseDecayTimer <= update_diff)
                 {
                     // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
                     uint16 poolid = GetDBTableGUIDLow() ? sPoolMgr.IsPartOfAPool<Creature>(GetDBTableGUIDLow()) : 0;
@@ -516,11 +516,11 @@ void Creature::Update(uint32 diff)
                 }
                 else
                 {
-                    m_corpseDecayTimer -= diff;
+                    m_corpseDecayTimer -= update_diff;
                 }
             }
 
-            Unit::Update( diff );
+            Unit::Update(update_diff, tick_diff);
 
             // creature can be dead after Unit::Update call
             // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
@@ -531,7 +531,7 @@ void Creature::Update(uint32 diff)
             {
                 // do not allow the AI to be changed during update
                 m_AI_locked = true;
-                i_AI->UpdateAI(diff);
+                i_AI->UpdateAI(tick_diff);                  // AI not react good at real update delays (while freeze in non-active part of map)
                 m_AI_locked = false;
             }
 
@@ -541,10 +541,10 @@ void Creature::Update(uint32 diff)
                 break;
             if(m_regenTimer > 0)
             {
-                if(diff >= m_regenTimer)
+                if(update_diff >= m_regenTimer)
                     m_regenTimer = 0;
                 else
-                    m_regenTimer -= diff;
+                    m_regenTimer -= update_diff;
             }
             if (m_regenTimer != 0)
                 break;
@@ -557,7 +557,7 @@ void Creature::Update(uint32 diff)
             m_regenTimer = REGEN_TIME_FULL;
             break;
         }
-        case DEAD_FALLING:
+        case CORPSE_FALLING:
         {
             SetDeathState(CORPSE);
         }
@@ -864,7 +864,7 @@ void Creature::PrepareBodyLootState()
             // have normal loot
             if (GetCreatureInfo()->maxgold > 0 || GetCreatureInfo()->lootid ||
                 // ... or can have skinning after
-                GetCreatureInfo()->SkinLootId && sWorld.getConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW))
+                (GetCreatureInfo()->SkinLootId && sWorld.getConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW)))
             {
                 SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                 return;
@@ -1396,7 +1396,7 @@ void Creature::SetDeathState(DeathState s)
             UpdateSpeed(MOVE_RUN, false);
         }
 
-        // return, since we promote to DEAD_FALLING. DEAD_FALLING is promoted to CORPSE at next update.
+        // return, since we promote to CORPSE_FALLING. CORPSE_FALLING is promoted to CORPSE at next update.
         if (CanFly() && FallGround())
             return;
 
@@ -1422,7 +1422,7 @@ void Creature::SetDeathState(DeathState s)
 
 bool Creature::FallGround()
 {
-    // Only if state is JUST_DIED. DEAD_FALLING is set below and promoted to CORPSE later
+    // Only if state is JUST_DIED. CORPSE_FALLING is set below and promoted to CORPSE later
     if (getDeathState() != JUST_DIED)
         return false;
 
@@ -1439,7 +1439,7 @@ bool Creature::FallGround()
     if (fabs(GetPositionZ() - tz) < 0.1f)
         return false;
 
-    Unit::SetDeathState(DEAD_FALLING);
+    Unit::SetDeathState(CORPSE_FALLING);
 
     float dz = tz - GetPositionZ();
     float distance = sqrt(dz*dz);
@@ -1474,7 +1474,7 @@ void Creature::Respawn()
     SetVisibility(currentVis);                              // restore visibility state
     UpdateObjectVisibility();
 
-    if(getDeathState() == DEAD)
+    if (IsDespawned())
     {
         if (m_DBTableGuid)
             sObjectMgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(), 0);
