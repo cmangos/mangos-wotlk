@@ -1495,9 +1495,9 @@ void Player::Update( uint32 p_time )
 
 	    // Playerbot mod
     if (m_playerbotAI)
-        m_playerbotAI->UpdateAI(update_diff);
+        m_playerbotAI->UpdateAI(p_time);
     else if (m_playerbotMgr)
-        m_playerbotMgr->UpdateAI(update_diff);
+        m_playerbotMgr->UpdateAI(p_time);
 }
 
 void Player::SetDeathState(DeathState s)
