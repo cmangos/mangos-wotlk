@@ -354,5 +354,3 @@ void PlayerbotWarriorAI::DoNonCombatActions()
         return;
     }
 } // end DoNonCombatActions
-
-void PlayerbotWarriorAI::BuffPlayer(Player* target) {}

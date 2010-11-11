@@ -337,49 +337,69 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
 void PlayerbotMageAI::DoNonCombatActions()
 {
     Player * m_bot = GetPlayerBot();
-    if (!m_bot)
+    Player * master = GetMaster();
+
+    if (!m_bot || !master)
         return;
 
     SpellSequence = SPELL_FROST;
     PlayerbotAI* ai = GetAI();
 
-    // buff master
-    if (DALARAN_BRILLIANCE > 0)
-        (!GetMaster()->HasAura(DALARAN_BRILLIANCE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 81 && ai->CastSpell (DALARAN_BRILLIANCE, *GetMaster()));
-    else if (ARCANE_BRILLIANCE > 0)
-        (!GetMaster()->HasAura(ARCANE_BRILLIANCE, EFFECT_INDEX_0) && !GetMaster()->HasAura(DALARAN_BRILLIANCE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 97 && ai->CastSpell (ARCANE_BRILLIANCE, *GetMaster()));
-
-    // buff myself
-    if (DALARAN_INTELLECT > 0)
-        (!m_bot->HasAura(DALARAN_INTELLECT, EFFECT_INDEX_0) && !m_bot->HasAura(DALARAN_BRILLIANCE, EFFECT_INDEX_0) && !m_bot->HasAura(ARCANE_BRILLIANCE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 31 && ai->CastSpell (DALARAN_INTELLECT, *m_bot));
-    else if (ARCANE_INTELLECT > 0)
-        (!m_bot->HasAura(ARCANE_INTELLECT, EFFECT_INDEX_0) && !m_bot->HasAura(DALARAN_BRILLIANCE, EFFECT_INDEX_0) && !m_bot->HasAura(ARCANE_BRILLIANCE, EFFECT_INDEX_0) && !m_bot->HasAura(DALARAN_INTELLECT, EFFECT_INDEX_0) && ai->GetManaPercent() >= 37 && ai->CastSpell (ARCANE_INTELLECT, *m_bot));
-
-    if (MOLTEN_ARMOR > 0)
-        (!m_bot->HasAura(MOLTEN_ARMOR, EFFECT_INDEX_0) && !m_bot->HasAura(MAGE_ARMOR, EFFECT_INDEX_0) && ai->GetManaPercent() >= 31 && ai->CastSpell (MOLTEN_ARMOR, *m_bot));
-    else if (MAGE_ARMOR > 0)
-        (!m_bot->HasAura(MAGE_ARMOR, EFFECT_INDEX_0) && !m_bot->HasAura(MOLTEN_ARMOR, EFFECT_INDEX_0) && ai->GetManaPercent() >= 31 && ai->CastSpell (MAGE_ARMOR, *m_bot));
-    else if (ICE_ARMOR > 0)
-        (!m_bot->HasAura(ICE_ARMOR, EFFECT_INDEX_0) && !m_bot->HasAura(MOLTEN_ARMOR, EFFECT_INDEX_0) && !m_bot->HasAura(MAGE_ARMOR, EFFECT_INDEX_0) && ai->GetManaPercent() >= 34 && ai->CastSpell (ICE_ARMOR, *m_bot));
-    else if (FROST_ARMOR > 0)
-        (!m_bot->HasAura(FROST_ARMOR, EFFECT_INDEX_0) && !m_bot->HasAura(MOLTEN_ARMOR, EFFECT_INDEX_0) && !m_bot->HasAura(MAGE_ARMOR, EFFECT_INDEX_0) && !m_bot->HasAura(ICE_ARMOR, EFFECT_INDEX_0) && ai->GetManaPercent() >= 34 && ai->CastSpell (FROST_ARMOR, *m_bot));
+    // Buff armor
+    if (MOLTEN_ARMOR)
+    {
+        if (ai->SelfBuff(MOLTEN_ARMOR))
+            return;
+    }
+    else if (MAGE_ARMOR)
+    {
+        if (ai->SelfBuff(MAGE_ARMOR))
+            return;
+    }
+    else if (ICE_ARMOR)
+    {
+        if (ai->SelfBuff(ICE_ARMOR))
+            return;
+    }
+    else if (FROST_ARMOR)
+    {
+        if (ai->SelfBuff(FROST_ARMOR))
+            return;
+    }
 
     // buff master's group
-    if (GetMaster()->GetGroup())
+    if (master->GetGroup())
     {
+        // Buff master with group buff...
+        if (ARCANE_BRILLIANCE && ai->HasSpellReagents(ARCANE_BRILLIANCE))
+        {
+            if (ai->Buff(ARCANE_BRILLIANCE, master))
+                return;
+        }
+
+        // ...and check group for new members joined or resurrected, or just buff everyone if no group buff available
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
-            if (!tPlayer || !tPlayer->isAlive())
+            if (!tPlayer || !tPlayer->isAlive() || tPlayer == m_bot)
                 continue;
             // buff
-            (!tPlayer->HasAura(ARCANE_INTELLECT, EFFECT_INDEX_0) && !tPlayer->HasAura(DALARAN_BRILLIANCE, EFFECT_INDEX_0) && !tPlayer->HasAura(ARCANE_BRILLIANCE, EFFECT_INDEX_0) && !tPlayer->HasAura(DALARAN_INTELLECT, EFFECT_INDEX_0) && ai->GetManaPercent() >= 37 && ai->CastSpell (ARCANE_INTELLECT, *tPlayer));
-            (!tPlayer->HasAura(DALARAN_INTELLECT, EFFECT_INDEX_0) && !tPlayer->HasAura(DALARAN_BRILLIANCE, EFFECT_INDEX_0) && !tPlayer->HasAura(ARCANE_BRILLIANCE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 31 && ai->CastSpell (DALARAN_INTELLECT, *tPlayer));
-            (!tPlayer->HasAura(DAMPEN_MAGIC, EFFECT_INDEX_0) && !tPlayer->HasAura(AMPLIFY_MAGIC, EFFECT_INDEX_0) && ai->GetManaPercent() >= 32 && ai->CastSpell (DAMPEN_MAGIC, *tPlayer));
-            (!tPlayer->HasAura(AMPLIFY_MAGIC, EFFECT_INDEX_0) && !tPlayer->HasAura(DAMPEN_MAGIC, EFFECT_INDEX_0) && ai->GetManaPercent() >= 32 && ai->CastSpell (AMPLIFY_MAGIC, *tPlayer));
+            if (BuffPlayer(tPlayer))
+                return;
         }
+
     }
+    // There is no group, buff master
+    else
+    {
+        if (master->isAlive() && BuffPlayer(master))
+            return;
+    }
+
+    // Buff self finally
+    if (BuffPlayer(m_bot))
+        return;
 
     // conjure food & water
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
@@ -435,7 +455,16 @@ void PlayerbotMageAI::DoNonCombatActions()
 
 } // end DoNonCombatActions
 
-void PlayerbotMageAI::BuffPlayer(Player* target)
+bool PlayerbotMageAI::BuffPlayer(Player* target)
 {
-    GetAI()->CastSpell(ARCANE_INTELLECT, *target);
+    PlayerbotAI * ai = GetAI();
+    Pet * pet = target->GetPet();
+
+    if (pet && pet->getPowerType() == POWER_MANA && ai->Buff(ARCANE_INTELLECT, pet))
+        return true;
+
+    if (ARCANE_INTELLECT)
+        return ai->Buff(ARCANE_INTELLECT, target);
+    else
+        return false;
 }

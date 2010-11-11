@@ -263,6 +263,10 @@ uint32 PlayerbotAI::initSpell(uint32 spellId)
     SpellChainMapNext const& nextMap = sSpellMgr.GetSpellChainNext();
     for (SpellChainMapNext::const_iterator itr = nextMap.lower_bound(spellId); itr != nextMap.upper_bound(spellId); ++itr)
     {
+        // Work around buggy chains
+        if (sSpellStore.LookupEntry(spellId)->SpellIconID != sSpellStore.LookupEntry(itr->second)->SpellIconID)
+            continue;
+
         SpellChainNode const* node = sSpellMgr.GetSpellChainNode(itr->second);
         // If next spell is a requirement for this one then skip it
         if (node->req == spellId)
@@ -275,10 +279,10 @@ uint32 PlayerbotAI::initSpell(uint32 spellId)
     }
     if (next == 0)
     {
-        sLog.outDebug("initSpell: Found spellid: %u", spellId);
+        const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
+        sLog.outDebug("Playerbot spell init: %s is %u", pSpellInfo->SpellName[0], spellId);
 
         // Add spell to spellrange map
-        const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
         Spell *spell = new Spell(m_bot, pSpellInfo, false);
         SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(pSpellInfo->rangeIndex);
         float range = GetSpellMaxRange(srange, IsPositiveSpell(spellId));
@@ -2330,9 +2334,6 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         }
     }
 
-    if (HasAura(spellId, *pTarget))
-        return false;
-
     // stop movement to prevent cancel spell casting
     SpellCastTimesEntry const * castTimeEntry = sSpellCastTimesStore.LookupEntry(pSpellInfo->CastingTimeIndex);
     if (castTimeEntry && castTimeEntry->CastTime)
@@ -2420,6 +2421,77 @@ bool PlayerbotAI::CastPetSpell(uint32 spellId, Unit* target)
     if (!pSpell)
         return false;
 
+    return true;
+}
+
+// Perform sanity checks and cast spell
+bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player *))
+{
+    if (spellId == 0)
+        return false;
+
+    SpellEntry const * spellProto = sSpellStore.LookupEntry(spellId);
+
+    if (!spellProto)
+        return false;
+
+    // Select appropriate spell rank for target's level
+    spellProto = sSpellMgr.SelectAuraRankForLevel(spellProto, target->getLevel());
+    if (!spellProto)
+        return false;
+
+    // Check if spell will boost one of already existent auras
+    bool willBenefitFromSpell = false;
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (spellProto->EffectApplyAuraName[i] == SPELL_AURA_NONE)
+            break;
+
+        bool sameOrBetterAuraFound = false;
+        uint32 bonus = m_bot->CalculateSpellDamage(target, spellProto, SpellEffectIndex(i));
+        Unit::AuraList const& auras = target->GetAurasByType(AuraType(spellProto->EffectApplyAuraName[i]));
+        for (Unit::AuraList::const_iterator it = auras.begin(); it != auras.end(); ++it)
+            if ((*it)->GetModifier()->m_miscvalue == spellProto->EffectMiscValue[i] && (*it)->GetModifier()->m_amount >= bonus)
+            {
+                sameOrBetterAuraFound = true;
+                break;
+            }
+        willBenefitFromSpell = willBenefitFromSpell || !sameOrBetterAuraFound;
+    }
+
+    if (!willBenefitFromSpell)
+        return false;
+
+    // Druids may need to shapeshift before casting
+    if (beforeCast)
+        (*beforeCast)(m_bot);
+
+    return CastSpell(spellProto->Id, *target);
+}
+
+// Can be used for personal buffs like Mage Armor and Inner Fire
+bool PlayerbotAI::SelfBuff(uint32 spellId)
+{
+    if (spellId == 0)
+        return false;
+
+    if (m_bot->HasAura(spellId))
+        return false;
+
+    return CastSpell(spellId, *m_bot);
+}
+
+// Checks if spell is single per target per caster and will make any effect on target
+bool PlayerbotAI::CanReceiveSpecificSpell(uint8 spec, Unit* target) const
+{
+    if (IsSingleFromSpellSpecificPerTargetPerCaster(SpellSpecific(spec), SpellSpecific(spec)))
+    {
+        Unit::SpellAuraHolderMap holders = target->GetSpellAuraHolderMap();
+        Unit::SpellAuraHolderMap::iterator it;
+        for (it = holders.begin(); it != holders.end(); ++it)
+            if ((*it).second->GetCasterGUID() == m_bot->GetGUID() && GetSpellSpecific((*it).second->GetId()) == SpellSpecific(spec))
+                return false;
+    }
     return true;
 }
 
@@ -2539,6 +2611,30 @@ bool PlayerbotAI::HasPick()
     out << "|cffffffffI do not have a pick!";
     TellMaster(out.str().c_str());
     return false;
+}
+
+bool PlayerbotAI::HasSpellReagents(uint32 spellId)
+{
+    const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
+    if (!pSpellInfo)
+        return false;
+
+    if (m_bot->CanNoReagentCast(pSpellInfo))
+        return true;
+
+    for (uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
+    {
+        if(pSpellInfo->Reagent[i] <= 0)
+            continue;
+
+        uint32 itemid = pSpellInfo->Reagent[i];
+        uint32 count = pSpellInfo->ReagentCount[i];
+
+        if (!m_bot->HasItemCount(itemid, count))
+            return false;
+    }
+
+    return true;
 }
 
 // extracts all item ids in format below

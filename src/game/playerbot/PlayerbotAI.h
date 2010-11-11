@@ -179,8 +179,11 @@ public:
     bool HasAura(const char* spellName, const Unit& player) const;
     bool HasAura(const char* spellName) const;
 
+    bool CanReceiveSpecificSpell(uint8 spec, Unit* target) const;
+
     bool PickPocket(Unit* pTarget);
     bool HasPick();
+    bool HasSpellReagents(uint32 spellId);
 
     uint8 GetHealthPercent(const Unit& target) const;
     uint8 GetHealthPercent() const;
@@ -212,6 +215,8 @@ public:
     bool CastSpell(uint32 spellId);
     bool CastSpell(uint32 spellId, Unit& target);
     bool CastPetSpell(uint32 spellId, Unit* target = NULL);
+    bool Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player *) = NULL);
+    bool SelfBuff(uint32 spellId);
     void UseItem(Item& item, uint8 targetSlot = 255);
     void EquipItem(Item& item);
     //void Stay();

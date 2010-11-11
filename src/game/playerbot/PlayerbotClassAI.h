@@ -28,7 +28,7 @@ public:
     virtual void DoNonCombatActions();
 
     // buff a specific player, usually a real PC who is not in group
-    virtual void BuffPlayer(Player* target);
+    virtual bool BuffPlayer(Player* target);
 
     // Utilities
     Player* GetMaster () {return m_master; }

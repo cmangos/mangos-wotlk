@@ -523,5 +523,3 @@ void PlayerbotShamanAI::DoNonCombatActions()
         }
     }
 } // end DoNonCombatActions
-
-void PlayerbotShamanAI::BuffPlayer(Player* target) {}

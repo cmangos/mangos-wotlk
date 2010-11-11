@@ -61,48 +61,30 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
 
 PlayerbotPriestAI::~PlayerbotPriestAI() {}
 
-void PlayerbotPriestAI::HealTarget(Unit &target, uint8 hp)
+bool PlayerbotPriestAI::HealTarget(Unit* target)
 {
     PlayerbotAI* ai = GetAI();
+    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
 
-//    return ((hp < 80 && !target.HasAura(RENEW, EFFECT_INDEX_0) &&  ai->CastSpell(RENEW, target)) ||
-//        (hp < 60 && ai->CastSpell(HEAL, target)) ||
-//        (hp < 30 && ai->CastSpell(FLASH_HEAL, target)) );
+    if (hp >= 80)
+        return false;
 
-    if (hp < 25 && FLASH_HEAL > 0 && ai->GetManaPercent() >= 20)
-    {
-        ai->TellMaster("I'm casting flash heal.");
-        ai->CastSpell(FLASH_HEAL, target);
-    }
-    else if (hp < 30 && GREATER_HEAL > 0 && ai->GetManaPercent() >= 36)
-    {
-        ai->TellMaster("I'm casting one of the sorted heal spells.");
-        ai->CastSpell(GREATER_HEAL, target);
-    }
-    else if (hp < 33 && BINDING_HEAL > 0 && ai->GetManaPercent() >= 27)
-    {
-        ai->TellMaster("I'm casting binding heal.");
-        ai->CastSpell(BINDING_HEAL, target);
-    }
-    else if (hp < 40 && PRAYER_OF_HEALING > 0 && ai->GetManaPercent() >= 54)
-    {
-        ai->TellMaster("I'm casting prayer of healing.");
-        ai->CastSpell(PRAYER_OF_HEALING, target);
-    }
-    else if (hp < 50 && CIRCLE_OF_HEALING > 0 && ai->GetManaPercent() >= 24)
-    {
-        ai->TellMaster("I'm casting circle of healing.");
-        ai->CastSpell(CIRCLE_OF_HEALING, target);
-    }
-    else if (hp < 60 && HEAL > 0 && ai->GetManaPercent() >= 36)
-    {
-        ai->TellMaster("I'm casting one of the sorted heal spells.");
-        ai->CastSpell(HEAL, target);
-    }
-    else if (hp < 80 && RENEW > 0 && ai->GetManaPercent() >= 19)
-        //ai->TellMaster("I'm casting renew.");
-        ai->CastSpell(RENEW, target);
-
+    if (hp < 25 && FLASH_HEAL && ai->CastSpell(FLASH_HEAL, *target))
+        return true;
+    else if (hp < 30 && GREATER_HEAL > 0 && ai->CastSpell(GREATER_HEAL, *target))
+        return true;
+    else if (hp < 33 && BINDING_HEAL > 0 && ai->CastSpell(BINDING_HEAL, *target))
+        return true;
+    else if (hp < 40 && PRAYER_OF_HEALING > 0 && ai->CastSpell(PRAYER_OF_HEALING, *target))
+        return true;
+    else if (hp < 50 && CIRCLE_OF_HEALING > 0 && ai->CastSpell(CIRCLE_OF_HEALING, *target))
+        return true;
+    else if (hp < 60 && HEAL > 0 && ai->CastSpell(HEAL, *target))
+        return true;
+    else if (hp < 80 && RENEW > 0 && ai->CastSpell(RENEW, *target))
+        return true;
+    else
+        return false;
 } // end HealTarget
 
 void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
@@ -149,7 +131,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
         ai->CastSpell(DESPERATE_PRAYER, *m_bot);
     }
     else if (ai->GetHealthPercent() < 80)
-        HealTarget (*m_bot, ai->GetHealthPercent());
+        HealTarget (m_bot);
 
     // Heal master
     uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
@@ -158,7 +140,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
         if (masterHP < 25 && POWER_WORD_SHIELD > 0 && !GetMaster()->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0))
             ai->CastSpell(POWER_WORD_SHIELD, *(GetMaster()));
         else if (masterHP < 80)
-            HealTarget (*GetMaster(), masterHP);
+            HealTarget (GetMaster());
     }
 
     // Heal group
@@ -173,7 +155,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 
             uint32 memberHP = m_groupMember->GetHealth() * 100 / m_groupMember->GetMaxHealth();
             if (memberHP < 25)
-                HealTarget(*m_groupMember, memberHP);
+                HealTarget(m_groupMember);
         }
     }
 
@@ -374,21 +356,15 @@ void PlayerbotPriestAI::DoNonCombatActions()
 {
     PlayerbotAI* ai = GetAI();
     Player * m_bot = GetPlayerBot();
-    if (!m_bot)
+    Player * master = GetMaster();
+    if (!m_bot || !master)
         return;
 
     SpellSequence = SPELL_HOLY;
 
-    // buff myself
-    if (POWER_WORD_FORTITUDE > 0)
-        (!m_bot->HasAura(POWER_WORD_FORTITUDE, EFFECT_INDEX_0) && ai->CastSpell (POWER_WORD_FORTITUDE, *m_bot));
-
-    if (INNER_FIRE > 0)
-        (!m_bot->HasAura(INNER_FIRE, EFFECT_INDEX_0) && ai->CastSpell (INNER_FIRE, *m_bot));
-
-    // buff master
-    if (POWER_WORD_FORTITUDE > 0)
-        (!GetMaster()->HasAura(POWER_WORD_FORTITUDE, EFFECT_INDEX_0) && GetMaster()->isAlive() && ai->CastSpell(POWER_WORD_FORTITUDE, *(GetMaster())));
+    // selfbuff goes first
+    if (ai->SelfBuff(INNER_FIRE))
+        return;
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
@@ -427,36 +403,79 @@ void PlayerbotPriestAI::DoNonCombatActions()
     }
 
     // buff and heal master's group
-    if (GetMaster()->GetGroup())
+    if (master->GetGroup())
     {
+        // Buff master with group buffs
+        if (master->isAlive())
+        {
+            if (PRAYER_OF_FORTITUDE && ai->HasSpellReagents(PRAYER_OF_FORTITUDE) && ai->Buff(PRAYER_OF_FORTITUDE, master))
+                return;
+
+            if (PRAYER_OF_SPIRIT && ai->HasSpellReagents(PRAYER_OF_SPIRIT) && ai->Buff(PRAYER_OF_SPIRIT, master))
+                return;
+        }
+
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
-            if (!tPlayer)
+            if (!tPlayer || tPlayer == m_bot)
                 continue;
 
             // first rezz em
             if (!tPlayer->isAlive())
             {
-                std::string msg = "Resurrecting ";
-                msg += tPlayer->GetName();
-                GetPlayerBot()->Say(msg, LANG_UNIVERSAL);
-                ai->CastSpell(RESURRECTION, *tPlayer);
-                // rez is only 10 sec, but give time for lag
-                ai->SetIgnoreUpdateTime(12);
+                if (ai->CastSpell(RESURRECTION, *tPlayer))
+                {
+                    std::string msg = "Resurrecting ";
+                    msg += tPlayer->GetName();
+                    m_bot->Say(msg, LANG_UNIVERSAL);
+                    return;
+                }
+                else
+                    continue;
             }
-            else if (tPlayer->isAlive())
+            else
             {
                 // buff and heal
-                (!tPlayer->HasAura(POWER_WORD_FORTITUDE, EFFECT_INDEX_0) && ai->CastSpell (POWER_WORD_FORTITUDE, *tPlayer));
-                (HealTarget(*tPlayer, tPlayer->GetHealth() * 100 / tPlayer->GetMaxHealth()));
+                if (BuffPlayer(tPlayer))
+                    return;
+
+                if (HealTarget(tPlayer))
+                    return;
             }
         }
     }
+    else
+    {
+        if (master->isAlive())
+        {
+            if (BuffPlayer(master))
+                return;
+            if (HealTarget(master))
+                return;
+        }
+        else
+            if (ai->CastSpell(RESURRECTION, *master))
+                ai->TellMaster("Resurrecting you, Master.");
+    }
+
+    BuffPlayer(m_bot);
 } // end DoNonCombatActions
 
-void PlayerbotPriestAI::BuffPlayer(Player* target)
+bool PlayerbotPriestAI::BuffPlayer(Player* target)
 {
-    GetAI()->CastSpell(POWER_WORD_FORTITUDE, *target);
+    PlayerbotAI * ai = GetAI();
+    Pet * pet = target->GetPet();
+
+    if (pet && ai->Buff(POWER_WORD_FORTITUDE, pet))
+        return true;
+
+    if (ai->Buff(POWER_WORD_FORTITUDE, target))
+        return true;
+
+    if ((target->getClass() == CLASS_DRUID || target->getPowerType() == POWER_MANA) && ai->Buff(DIVINE_SPIRIT, target))
+        return true;
+
+    return false;
 }
