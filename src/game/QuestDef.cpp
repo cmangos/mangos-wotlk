@@ -19,6 +19,7 @@
 #include "QuestDef.h"
 #include "Player.h"
 #include "World.h"
+#include "DBCStores.h"
 
 Quest::Quest(Field * questRecord)
 {
@@ -40,8 +41,8 @@ Quest::Quest(Field * questRecord)
     RequiredMaxRepValue = questRecord[15].GetInt32();
     SuggestedPlayers = questRecord[16].GetUInt32();
     LimitTime = questRecord[17].GetUInt32();
-    QuestFlags = questRecord[18].GetUInt16();
-    uint32 SpecialFlags = questRecord[19].GetUInt16();
+    m_QuestFlags = questRecord[18].GetUInt16();
+    m_SpecialFlags = questRecord[19].GetUInt16();
     CharTitleId = questRecord[20].GetUInt32();
     PlayersSlain = questRecord[21].GetUInt32();
     BonusTalents = questRecord[22].GetUInt32();
@@ -137,7 +138,7 @@ Quest::Quest(Field * questRecord)
     QuestStartScript = questRecord[139].GetUInt32();
     QuestCompleteScript = questRecord[140].GetUInt32();
 
-    QuestFlags |= SpecialFlags << 24;
+    m_isActive = true;
 
     m_reqitemscount = 0;
     m_reqCreatureOrGOcount = 0;
@@ -270,4 +271,24 @@ bool Quest::IsAllowedInRaid() const
         return true;
 
     return sWorld.getConfig(CONFIG_BOOL_QUEST_IGNORE_RAID);
+}
+
+uint32 Quest::CalculateRewardHonor(uint32 level) const
+{
+    if (level > GT_MAX_LEVEL)
+        level = GT_MAX_LEVEL;
+
+    uint32 honor = 0;
+
+    if(GetRewHonorAddition() > 0 || GetRewHonorMultiplier() > 0.0f)
+    {
+        // values stored from 0.. for 1...
+        TeamContributionPoints const* tc = sTeamContributionPoints.LookupEntry(level-1);
+        if(!tc)
+            return 0;
+        uint32 i_honor = uint32(tc->Value * GetRewHonorMultiplier() * 0.1000000014901161);
+        honor = i_honor + GetRewHonorAddition();
+    }
+
+    return honor;
 }

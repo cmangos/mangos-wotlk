@@ -109,6 +109,15 @@ pkgdata_DATA = \
 	10621_01_mangos_quest_template.sql \
 	10628_01_mangos_mangos_string.sql \
 	10629_01_mangos_mangos_string.sql \
+	10654_01_mangos_game_event_creature_quest.sql \
+	10655_01_characters_character_queststatus_monthly.sql \
+	10660_01_mangos_game_event_quest.sql \
+	10662_01_characters_item_loot.sql \
+	10664_01_characters_arena_team_stats.sql \
+	10679_01_mangos_npc_vendor_template.sql \
+	10679_02_mangos_creature_template.sql \
+	10682_01_mangos_item_convert.sql \
+	10704_01_mangos_gossip_menu_option.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -198,4 +207,13 @@ EXTRA_DIST = \
 	10621_01_mangos_quest_template.sql \
 	10628_01_mangos_mangos_string.sql \
 	10629_01_mangos_mangos_string.sql \
+	10654_01_mangos_game_event_creature_quest.sql \
+	10655_01_characters_character_queststatus_monthly.sql \
+	10660_01_mangos_game_event_quest.sql \
+	10662_01_characters_item_loot.sql \
+	10664_01_characters_arena_team_stats.sql \
+	10679_01_mangos_npc_vendor_template.sql \
+	10679_02_mangos_creature_template.sql \
+	10682_01_mangos_item_convert.sql \
+	10704_01_mangos_gossip_menu_option.sql \
 	README

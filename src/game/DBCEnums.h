@@ -125,7 +125,7 @@ enum AchievementCriteriaTypes
     // TODO: the archievements 1162 and 1163 requires a special rating which can't be found in the dbc
     ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA = 37,
     ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_TEAM_RATING = 38,
-    ACHIEVEMENT_CRITERIA_TYPE_REACH_TEAM_RATING = 39,
+    ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_PERSONAL_RATING = 39,
     ACHIEVEMENT_CRITERIA_TYPE_LEARN_SKILL_LEVEL = 40,
     ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM = 41,
     ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM= 42,
@@ -206,8 +206,9 @@ enum AchievementCriteriaTypes
     // 122
     // 123
     // 0..123 => 124 criteria types total
-    ACHIEVEMENT_CRITERIA_TYPE_TOTAL = 124,
 };
+
+#define ACHIEVEMENT_CRITERIA_TYPE_TOTAL 124
 
 enum AreaFlags
 {
@@ -402,8 +403,8 @@ enum SpellCastTargetFlags
     TARGET_FLAG_UNUSED2         = 0x00000004,               // not used in any spells as of 3.0.3 (can be set dynamically)
     TARGET_FLAG_UNUSED3         = 0x00000008,               // not used in any spells as of 3.0.3 (can be set dynamically)
     TARGET_FLAG_ITEM            = 0x00000010,               // pguid
-    TARGET_FLAG_SOURCE_LOCATION = 0x00000020,               // 3 float
-    TARGET_FLAG_DEST_LOCATION   = 0x00000040,               // 3 float
+    TARGET_FLAG_SOURCE_LOCATION = 0x00000020,               // pguid + 3 float
+    TARGET_FLAG_DEST_LOCATION   = 0x00000040,               // pguid + 3 float
     TARGET_FLAG_OBJECT_UNK      = 0x00000080,               // used in 7 spells only
     TARGET_FLAG_UNIT_UNK        = 0x00000100,               // looks like self target (480 spells)
     TARGET_FLAG_PVP_CORPSE      = 0x00000200,               // pguid

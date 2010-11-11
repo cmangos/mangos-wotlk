@@ -253,12 +253,12 @@ struct AchievementCriteriaEntry
             uint32  teamtype;                               // 3 {2,3,5}
         } highest_team_rating;
 
-        // ACHIEVEMENT_CRITERIA_TYPE_REACH_TEAM_RATING      = 39
+        // ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_PERSONAL_RATING= 39
         struct
         {
             uint32  teamtype;                               // 3 {2,3,5}
             uint32  teamrating;                             // 4
-        } reach_team_rating;
+        } highest_personal_rating;
 
         // ACHIEVEMENT_CRITERIA_TYPE_LEARN_SKILL_LEVEL      = 40
         struct
@@ -821,6 +821,20 @@ struct FactionEntry
                                                             // 39 string flags
     //char*     description[16];                            // 40-55    m_description_lang
                                                             // 56 string flags
+
+    // helpers
+
+    int GetIndexFitTo(uint32 raceMask, uint32 classMask) const
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            if ((BaseRepRaceMask[i] == 0 || (BaseRepRaceMask[i] & raceMask)) &&
+                (BaseRepClassMask[i] == 0 || (BaseRepClassMask[i] & classMask)))
+                return i;
+        }
+
+        return -1;
+    }
 };
 
 struct FactionTemplateEntry
@@ -1387,7 +1401,7 @@ struct SpellEntry
     uint32    AttributesEx4;                                // 8        m_attributesExD
     uint32    AttributesEx5;                                // 9        m_attributesExE
     uint32    AttributesEx6;                                // 10       m_attributesExF
-    // uint32 unk_320_1;                                    // 11       3.2.0 (0x20 - totems, 0x4 - paladin auras, etc...)
+    uint32    AttributesEx7;                                // 11       m_attributesExG (0x20 - totems, 0x4 - paladin auras, etc...)
     uint32    Stances;                                      // 12       m_shapeshiftMask
     // uint32 unk_320_2;                                    // 13       3.2.0
     uint32    StancesNot;                                   // 14       m_shapeshiftExclude
@@ -1421,7 +1435,7 @@ struct SpellEntry
     uint32    manaCost;                                     // 42       m_manaCost
     uint32    manaCostPerlevel;                             // 43       m_manaCostPerLevel
     uint32    manaPerSecond;                                // 44       m_manaPerSecond
-    uint32    manaPerSecondPerLevel;                        // 45       m_manaPerSecondPerLeve
+    uint32    manaPerSecondPerLevel;                        // 45       m_manaPerSecondPerLevel
     uint32    rangeIndex;                                   // 46       m_rangeIndex
     float     speed;                                        // 47       m_speed
     //uint32    modalNextSpell;                             // 48       m_modalNextSpell not used
@@ -1457,13 +1471,13 @@ struct SpellEntry
     uint32    activeIconID;                                 // 134      m_activeIconID
     //uint32    spellPriority;                              // 135      m_spellPriority not used
     char*     SpellName[16];                                // 136-151  m_name_lang
-    //uint32    SpellNameFlag;                              // 152 not used
+    //uint32    SpellNameFlag;                              // 152      m_name_flag not used
     char*     Rank[16];                                     // 153-168  m_nameSubtext_lang
-    //uint32    RankFlags;                                  // 169 not used
+    //uint32    RankFlags;                                  // 169      m_nameSubtext_flag not used
     //char*     Description[16];                            // 170-185  m_description_lang not used
-    //uint32    DescriptionFlags;                           // 186 not used
+    //uint32    DescriptionFlags;                           // 186      m_description_flag not used
     //char*     ToolTip[16];                                // 187-202  m_auraDescription_lang not used
-    //uint32    ToolTipFlags;                               // 203 not used
+    //uint32    ToolTipFlags;                               // 203      m_auraDescription_flag not used
     uint32    ManaCostPercentage;                           // 204      m_manaCostPct
     uint32    StartRecoveryCategory;                        // 205      m_startRecoveryCategory
     uint32    StartRecoveryTime;                            // 206      m_startRecoveryTime
@@ -1484,9 +1498,9 @@ struct SpellEntry
     uint32    SchoolMask;                                   // 225      m_schoolMask
     uint32    runeCostID;                                   // 226      m_runeCostID
     //uint32    spellMissileID;                             // 227      m_spellMissileID not used
-    //uint32  PowerDisplayId;                               // 228 PowerDisplay.dbc, new in 3.1
+    //uint32  PowerDisplayId;                               // 228      m_powerDisplayID - id from PowerDisplay.dbc, new in 3.1
     //float   unk_320_4[3];                                 // 229-231  3.2.0
-    //uint32  spellDescriptionVariableID;                   // 232      3.2.0
+    //uint32  spellDescriptionVariableID;                   // 232      m_spellDescriptionVariableID, 3.2.0
     uint32  SpellDifficultyId;                              // 233      m_spellDifficultyID - id from SpellDifficulty.dbc
 
     // helpers
@@ -1688,6 +1702,12 @@ struct TaxiPathNodeEntry
     uint32    delay;                                        // 8        m_delay
     uint32    arrivalEventID;                               // 9        m_arrivalEventID
     uint32    departureEventID;                             // 10       m_departureEventID
+};
+
+struct TeamContributionPoints
+{
+    //uint32    Entry;                                      // 0
+    float     Value;                                        // 1 (???)
 };
 
 struct TotemCategoryEntry

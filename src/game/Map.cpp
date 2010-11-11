@@ -430,7 +430,6 @@ void Map::MessageBroadcast(Player *player, WorldPacket *msg, bool to_self)
     }
 
     Cell cell(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
 
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
@@ -452,7 +451,6 @@ void Map::MessageBroadcast(WorldObject *obj, WorldPacket *msg)
     }
 
     Cell cell(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
 
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
@@ -476,7 +474,6 @@ void Map::MessageDistBroadcast(Player *player, WorldPacket *msg, float dist, boo
     }
 
     Cell cell(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
 
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
@@ -498,7 +495,6 @@ void Map::MessageDistBroadcast(WorldObject *obj, WorldPacket *msg, float dist)
     }
 
     Cell cell(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
 
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
@@ -539,25 +535,15 @@ void Map::Update(const uint32 &t_diff)
     {
         Player* plr = m_mapRefIter->getSource();
 
-        if(!plr->IsInWorld())
+        if (!plr->IsInWorld() || !plr->IsPositionValid())
             continue;
 
-        CellPair standing_cell(MaNGOS::ComputeCellPair(plr->GetPositionX(), plr->GetPositionY()));
-
-        // Check for correctness of standing_cell, it also avoids problems with update_cell
-        if (standing_cell.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || standing_cell.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
-            continue;
-
-        // the overloaded operators handle range checking
-        // so ther's no need for range checking inside the loop
-        CellPair begin_cell(standing_cell), end_cell(standing_cell);
         //lets update mobs/objects in ALL visible cells around player!
-        CellArea area = Cell::CalculateCellArea(*plr, GetVisibilityDistance());
-        area.ResizeBorders(begin_cell, end_cell);
+        CellArea area = Cell::CalculateCellArea(plr->GetPositionX(), plr->GetPositionY(), GetVisibilityDistance());
 
-        for(uint32 x = begin_cell.x_coord; x <= end_cell.x_coord; ++x)
+        for(uint32 x = area.low_bound.x_coord; x <= area.high_bound.x_coord; ++x)
         {
-            for(uint32 y = begin_cell.y_coord; y <= end_cell.y_coord; ++y)
+            for(uint32 y = area.low_bound.y_coord; y <= area.high_bound.y_coord; ++y)
             {
                 // marked cells are those that have been visited
                 // don't visit the same cell twice
@@ -567,10 +553,9 @@ void Map::Update(const uint32 &t_diff)
                     markCell(cell_id);
                     CellPair pair(x,y);
                     Cell cell(pair);
-                    cell.data.Part.reserved = CENTER_DISTRICT;
                     cell.SetNoCreate();
-                    cell.Visit(pair, grid_object_update,  *this);
-                    cell.Visit(pair, world_object_update, *this);
+                    Visit(cell, grid_object_update);
+                    Visit(cell, world_object_update);
                 }
             }
         }
@@ -588,24 +573,15 @@ void Map::Update(const uint32 &t_diff)
             // step to next-next, and if we step to end() then newly added objects can wait next update.
             ++m_activeNonPlayersIter;
 
-            if(!obj->IsInWorld())
+            if (!obj->IsInWorld() || !obj->IsPositionValid())
                 continue;
 
-            CellPair standing_cell(MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY()));
+            //lets update mobs/objects in ALL visible cells around player!
+            CellArea area = Cell::CalculateCellArea(obj->GetPositionX(), obj->GetPositionY(), GetVisibilityDistance());
 
-            // Check for correctness of standing_cell, it also avoids problems with update_cell
-            if (standing_cell.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || standing_cell.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
-                continue;
-
-            // the overloaded operators handle range checking
-            // so ther's no need for range checking inside the loop
-            CellPair begin_cell(standing_cell), end_cell(standing_cell);
-            begin_cell << 1; begin_cell -= 1;               // upper left
-            end_cell >> 1; end_cell += 1;                   // lower right
-
-            for(uint32 x = begin_cell.x_coord; x <= end_cell.x_coord; ++x)
+            for(uint32 x = area.low_bound.x_coord; x <= area.high_bound.x_coord; ++x)
             {
-                for(uint32 y = begin_cell.y_coord; y <= end_cell.y_coord; ++y)
+                for(uint32 y = area.low_bound.y_coord; y <= area.high_bound.y_coord; ++y)
                 {
                     // marked cells are those that have been visited
                     // don't visit the same cell twice
@@ -615,10 +591,9 @@ void Map::Update(const uint32 &t_diff)
                         markCell(cell_id);
                         CellPair pair(x,y);
                         Cell cell(pair);
-                        cell.data.Part.reserved = CENTER_DISTRICT;
                         cell.SetNoCreate();
-                        cell.Visit(pair, grid_object_update,  *this);
-                        cell.Visit(pair, world_object_update, *this);
+                        Visit(cell, grid_object_update);
+                        Visit(cell, world_object_update);
                     }
                 }
             }
@@ -723,7 +698,7 @@ Map::Remove(T *obj, bool remove)
     else
         obj->RemoveFromWorld();
 
-    UpdateObjectVisibility(obj,cell,p); // i think will be better to call this function while object still in grid, this changes nothing but logically is better(as for me)
+    UpdateObjectVisibility(obj,cell,p);                     // i think will be better to call this function while object still in grid, this changes nothing but logically is better(as for me)
     RemoveFromGrid(obj,grid,cell);
 
     obj->ResetMap();
@@ -746,7 +721,6 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
 
     Cell old_cell(old_val);
     Cell new_cell(new_val);
-    new_cell |= old_cell;
     bool same_cell = (new_cell == old_cell);
 
     player->Relocate(x, y, z, orientation);
@@ -1151,7 +1125,8 @@ uint16 Map::GetAreaFlag(float x, float y, float z, bool *isOutdoors) const
     if(GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))
     {
         haveAreaInfo = true;
-        if(wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId))
+        wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId);
+        if (wmoEntry)
             atEntry = GetAreaEntryByAreaID(wmoEntry->areaId);
     }
 
@@ -1364,7 +1339,6 @@ const char* Map::GetMapName() const
 
 void Map::UpdateObjectVisibility( WorldObject* obj, Cell cell, CellPair cellpair)
 {
-    cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
     MaNGOS::VisibleChangesNotifier notifier(*obj);
     TypeContainerVisitor<MaNGOS::VisibleChangesNotifier, WorldTypeMapContainer > player_notifier(notifier);
@@ -1374,7 +1348,6 @@ void Map::UpdateObjectVisibility( WorldObject* obj, Cell cell, CellPair cellpair
 void Map::PlayerRelocationNotify( Player* player, Cell cell, CellPair cellpair )
 {
     MaNGOS::PlayerRelocationNotifier relocationNotifier(*player);
-    cell.data.Part.reserved = ALL_DISTRICT;
 
     TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, GridTypeMapContainer >  p2grid_relocation(relocationNotifier);
     TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, WorldTypeMapContainer > p2world_relocation(relocationNotifier);
@@ -1740,7 +1713,7 @@ bool InstanceMap::Add(Player *player)
         if (IsDungeon())
         {
             // check for existing instance binds
-            InstancePlayerBind *playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
+            InstancePlayerBind *playerBind = player->GetBoundInstance(GetId(), GetDifficulty());
             if (playerBind && playerBind->perm)
             {
                 // cannot enter other instances if bound permanently
@@ -1778,8 +1751,11 @@ bool InstanceMap::Add(Player *player)
                                 pGroup->GetId(),
                                 groupBind->save->GetMapId(), groupBind->save->GetInstanceId(), groupBind->save->GetDifficulty(),
                                 groupBind->save->GetPlayerCount(), groupBind->save->GetGroupCount(), groupBind->save->CanReset());
-                        MANGOS_ASSERT(false);
+
+                        // no reason crash if we can fix state
+                        player->UnbindInstance(GetId(), GetDifficulty());
                     }
+
                     // bind to the group or keep using the group save
                     if (!groupBind)
                         pGroup->BindToInstance(GetInstanceSave(), false);
@@ -1922,7 +1898,7 @@ void InstanceMap::CreateInstanceData(bool load)
 /*
     Returns true if there are no players in the instance
 */
-bool InstanceMap::Reset(uint8 method)
+bool InstanceMap::Reset(InstanceResetMethod method)
 {
     // note: since the map may not be loaded when the instance needs to be reset
     // the instance must be deleted from the DB by InstanceSaveManager

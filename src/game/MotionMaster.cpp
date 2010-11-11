@@ -128,7 +128,7 @@ void MotionMaster::DelayedClean(bool reset, bool all)
     else
         m_cleanFlag &= ~MMCF_RESET;
 
-    if (empty() || !all && size() == 1)
+    if (empty() || (!all && size() == 1))
         return;
 
     if (!m_expList)
@@ -232,12 +232,12 @@ void MotionMaster::MoveTargetedHome()
 
     Clear(false);
 
-    if (m_owner->GetTypeId() == TYPEID_UNIT && !((Creature*)m_owner)->GetCharmerOrOwnerGUID())
+    if (m_owner->GetTypeId() == TYPEID_UNIT && ((Creature*)m_owner)->GetCharmerOrOwnerGuid().IsEmpty())
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted home", m_owner->GetObjectGuid().GetString().c_str());
         Mutate(new HomeMovementGenerator<Creature>());
     }
-    else if (m_owner->GetTypeId() == TYPEID_UNIT && ((Creature*)m_owner)->GetCharmerOrOwnerGUID())
+    else if (m_owner->GetTypeId() == TYPEID_UNIT && !((Creature*)m_owner)->GetCharmerOrOwnerGuid().IsEmpty())
     {
         if (Unit *target = ((Creature*)m_owner)->GetCharmerOrOwner())
         {
