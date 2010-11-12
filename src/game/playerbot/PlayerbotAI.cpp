@@ -2057,7 +2057,7 @@ void PlayerbotAI::MovementReset()
 void PlayerbotAI::MovementUpdate()
 {
     // send heartbeats to world
-    m_bot->SendHeartBeat(false);
+    // m_bot->SendHeartBeat(false);
 
     // call set position (updates states, exploration, etc.)
     m_bot->SetPosition(m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(), m_bot->GetOrientation(), false);
