@@ -3094,7 +3094,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         text.find("X-Perl") != std::wstring::npos ||
         text.find("HealBot") != std::wstring::npos ||
         text.find("LOOT_OPENED") != std::wstring::npos ||
-        text.find("CTRA") != std::wstring::npos)
+        text.find("CTRA") != std::wstring::npos ||
+        text.find("GathX") == 0) // Gatherer
         return;
 
     // if message is not from a player in the masters account auto reply and ignore
@@ -3853,7 +3854,6 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                         }
                     }
             }
-
         }
         else
         {
