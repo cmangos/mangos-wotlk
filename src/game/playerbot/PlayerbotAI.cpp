@@ -2082,9 +2082,20 @@ bool PlayerbotAI::IsMoving()
 
 void PlayerbotAI::SetInFront(const Unit* obj)
 {
-    // removed SendUpdateToPlayer (is not updating movement/orientation)
-    if (!m_bot->HasInArc(M_PI_F, obj))
-        m_bot->SetInFront(obj);
+    m_bot->SetInFront(obj);
+
+    // TODO: Schmoozerd wrote a patch which adds MovementInfo::ChangeOrientation()
+    // and added a call to it inside WorldObject::SetOrientation. Check if it is
+    // merged to the core.
+    // http://getmangos.com/community/viewtopic.php?pid=128003
+    float ori = m_bot->GetAngle(obj);
+    float x, y, z;
+    x = m_bot->m_movementInfo.GetPos()->x;
+    y = m_bot->m_movementInfo.GetPos()->y;
+    z = m_bot->m_movementInfo.GetPos()->z;
+    m_bot->m_movementInfo.ChangePosition(x,y,z,ori);
+
+    m_bot->SendHeartBeat(false);
 }
 
 // some possible things to use in AI
@@ -2326,12 +2337,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         if (pTarget && m_bot->IsFriendlyTo(pTarget))
             return false;
 
-        // search for Creature::reachWithSpellAttack to also see some examples of spell distance usage
-        if (!m_bot->isInFrontInMap(pTarget, 10))
-        {
-            m_bot->SetInFront(pTarget);
-            MovementUpdate();
-        }
+        SetInFront(pTarget);
     }
 
     // stop movement to prevent cancel spell casting
