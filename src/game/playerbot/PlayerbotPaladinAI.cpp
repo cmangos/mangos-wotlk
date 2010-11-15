@@ -138,7 +138,7 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
 
             uint32 memberHP = m_groupMember->GetHealth() * 100 / m_groupMember->GetMaxHealth();
             if (memberHP < 40 && ai->GetManaPercent() >= 40)  // do not heal bots without plenty of mana for master & self
-                if (HealTarget(m_groupMember));
+                if (HealTarget(m_groupMember))
                     return;
         }
     }
@@ -479,6 +479,7 @@ bool PlayerbotPaladinAI::BuffPlayer(Player* target)
             else
                 return false;
     }
+    return false;
 }
 
 bool PlayerbotPaladinAI::Bless(uint32 spellId, Unit *target)

@@ -2454,7 +2454,7 @@ bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player *
             break;
 
         bool sameOrBetterAuraFound = false;
-        uint32 bonus = m_bot->CalculateSpellDamage(target, spellProto, SpellEffectIndex(i));
+        int32 bonus = m_bot->CalculateSpellDamage(target, spellProto, SpellEffectIndex(i));
         Unit::AuraList const& auras = target->GetAurasByType(AuraType(spellProto->EffectApplyAuraName[i]));
         for (Unit::AuraList::const_iterator it = auras.begin(); it != auras.end(); ++it)
             if ((*it)->GetModifier()->m_miscvalue == spellProto->EffectMiscValue[i] && (*it)->GetModifier()->m_amount >= bonus)

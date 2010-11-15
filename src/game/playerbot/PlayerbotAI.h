@@ -140,10 +140,10 @@ public:
     void HandleTeleportAck();
 
     // Returns what kind of situation we are in so the ai can react accordingly
-    ScenarioType GetScenarioType() {return m_ScenarioType; }
+    ScenarioType GetScenarioType() { return m_ScenarioType; }
 
-    PlayerbotClassAI* GetClassAI() {return m_classAI; }
-    PlayerbotMgr* const GetManager() {return m_mgr; }
+    PlayerbotClassAI* GetClassAI() { return m_classAI; }
+    PlayerbotMgr* const GetManager() { return m_mgr; }
 
     // finds spell ID for matching substring args
     // in priority of full text match, spells not taking reagents, and highest rank
@@ -228,10 +228,10 @@ public:
     Unit *GetCurrentTarget() { return m_targetCombat; };
     void DoNextCombatManeuver();
     void DoCombatMovement();
-    void SetIgnoreUpdateTime(uint8 t) {m_ignoreAIUpdatesUntilTime = time(0) + t; };
+    void SetIgnoreUpdateTime(uint8 t) { m_ignoreAIUpdatesUntilTime = time(0) + t; };
 
-    Player *GetPlayerBot() const {return m_bot; }
-    Player *GetPlayer() const {return m_bot; }
+    Player *GetPlayerBot() const { return m_bot; }
+    Player *GetPlayer() const { return m_bot; }
     Player *GetMaster() const;
 
     BotState GetState() { return m_botState; };
