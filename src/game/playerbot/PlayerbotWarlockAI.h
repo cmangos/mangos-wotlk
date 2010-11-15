@@ -109,8 +109,6 @@ public:
 
 private:
 
-    bool m_demonSummonFailed;
-
     // CURSES
     uint32 CURSE_OF_WEAKNESS,
            CURSE_OF_AGONY,

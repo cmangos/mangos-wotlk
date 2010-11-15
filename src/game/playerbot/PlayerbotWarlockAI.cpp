@@ -66,8 +66,6 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     EVERY_MAN_FOR_HIMSELF = ai->initSpell(EVERY_MAN_FOR_HIMSELF_ALL); // human
     BLOOD_FURY            = ai->initSpell(BLOOD_FURY_WARLOCK); // orc
     WILL_OF_THE_FORSAKEN  = ai->initSpell(WILL_OF_THE_FORSAKEN_ALL); // undead
-
-    m_demonSummonFailed = false;
 }
 
 PlayerbotWarlockAI::~PlayerbotWarlockAI() {}
@@ -438,25 +436,20 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         return;
     }
 
-    // check for demon
-    if (SUMMON_FELGUARD > 0 || SUMMON_FELHUNTER > 0 || SUMMON_SUCCUBUS > 0 || SUMMON_VOIDWALKER > 0 || SUMMON_IMP > 0 && !m_demonSummonFailed)
-        if (!pet)
-        {
-            // summon demon
-            if (SUMMON_FELGUARD > 0 && ai->CastSpell(SUMMON_FELGUARD, *m_bot))
-                ai->TellMaster("summoning felguard.");
-            else if (SUMMON_FELHUNTER > 0 && ai->CastSpell(SUMMON_FELHUNTER, *m_bot))
-                ai->TellMaster("summoning felhunter.");
-            else if (SUMMON_SUCCUBUS > 0 && ai->CastSpell(SUMMON_SUCCUBUS, *m_bot))
-                ai->TellMaster("summoning succubus.");
-            else if (SUMMON_VOIDWALKER > 0 && ai->CastSpell(SUMMON_VOIDWALKER, *m_bot))
-                ai->TellMaster("summoning voidwalker.");
-            else if (SUMMON_IMP > 0 && ai->GetManaPercent() >= 64 && ai->CastSpell(SUMMON_IMP, *m_bot))
-                ai->TellMaster("summoning imp.");
-            else
-                m_demonSummonFailed = true;
-                //ai->TellMaster( "summon demon failed!" );
-        }
+    // Summon demon
+    if (!pet)
+    {
+        if (SUMMON_FELGUARD && ai->CastSpell(SUMMON_FELGUARD))
+            ai->TellMaster("Summoning Felguard.");
+        else if (SUMMON_FELHUNTER && ai->CastSpell(SUMMON_FELHUNTER))
+            ai->TellMaster("Summoning Felhunter.");
+        else if (SUMMON_SUCCUBUS && ai->CastSpell(SUMMON_SUCCUBUS))
+            ai->TellMaster("Summoning Succubus.");
+        else if (SUMMON_VOIDWALKER && ai->CastSpell(SUMMON_VOIDWALKER))
+            ai->TellMaster("Summoning Voidwalker.");
+        else if (SUMMON_IMP && ai->CastSpell(SUMMON_IMP))
+            ai->TellMaster("Summoning Imp.");
+    }
 
     // check for buffs with demon
     if ((pet)
