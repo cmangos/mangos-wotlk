@@ -3464,7 +3464,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             fromPlayer.SetSelectionGuid(oldSelectionGUID);
         }
         PlayerbotChatHandler ch(GetMaster());
-        if (!ch.dropQuest((char*) text.substr(5).c_str()))
+        int8 linkStart = text.find("|");
+        if (linkStart < 0 || !ch.dropQuest((char*) text.substr(linkStart).c_str()))
             ch.sysmessage("ERROR: could not drop quest");
         if (!oldSelectionGUID.IsEmpty())
             fromPlayer.SetSelectionGuid(oldSelectionGUID);
