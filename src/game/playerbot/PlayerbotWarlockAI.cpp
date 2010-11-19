@@ -47,6 +47,8 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     HEALTH_FUNNEL         = ai->initSpell(HEALTH_FUNNEL_1);
     DETECT_INVISIBILITY   = ai->initSpell(DETECT_INVISIBILITY_1);
     CREATE_FIRESTONE      = ai->initSpell(CREATE_FIRESTONE_1);
+    CREATE_HEALTHSTONE    = ai->initSpell(CREATE_HEALTHSTONE_1);
+    CREATE_SOULSTONE      = ai->initSpell(CREATE_SOULSTONE_1);
     // demon summon
     SUMMON_IMP            = ai->initSpell(SUMMON_IMP_1);
     SUMMON_VOIDWALKER     = ai->initSpell(SUMMON_VOIDWALKER_1);
@@ -66,6 +68,8 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     EVERY_MAN_FOR_HIMSELF = ai->initSpell(EVERY_MAN_FOR_HIMSELF_ALL); // human
     BLOOD_FURY            = ai->initSpell(BLOOD_FURY_WARLOCK); // orc
     WILL_OF_THE_FORSAKEN  = ai->initSpell(WILL_OF_THE_FORSAKEN_ALL); // undead
+
+    m_lastDemon = 0;
 }
 
 PlayerbotWarlockAI::~PlayerbotWarlockAI() {}
@@ -93,9 +97,21 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     Unit* pVictim = pTarget->getVictim();
     Pet *pet = m_bot->GetPet();
 
-    // Damage Spells
-    ai->SetInFront(pTarget);
+    // Empower demon
+    if (pet && DEMONIC_EMPOWERMENT)
+        ai->CastSpell(DEMONIC_EMPOWERMENT);
 
+    // TODO (Playerbot): Use voidwalker sacrifice on low health if possible
+
+    // Use healthstone
+    if (ai->GetHealthPercent() < 30)
+    {
+        Item* healthStone = ai->FindConsumable(HEALTHSTONE_DISPLAYID);
+        if (healthStone)
+            ai->UseItem(healthStone);
+    }
+
+    // Damage Spells
     switch (SpellSequence)
     {
         case SPELL_CURSES:
@@ -327,13 +343,20 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 
 void PlayerbotWarlockAI::DoNonCombatActions()
 {
+    SpellSequence = SPELL_CURSES;
+
     PlayerbotAI *ai = GetAI();
-    if (!ai)
+    Player * m_bot = GetPlayerBot();
+    if (!ai || !m_bot)
         return;
 
-    Player * m_bot = GetPlayerBot();
-    if (!m_bot)
-        return;
+    Pet *pet = m_bot->GetPet();
+
+    if (pet && pet->GetEntry() != m_lastDemon)
+    {
+        // TODO (Playerbot): Init pet spells
+        m_lastDemon = pet->GetEntry();
+    }
 
     // Destroy extra soul shards
     uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
@@ -341,93 +364,128 @@ void PlayerbotWarlockAI::DoNonCombatActions()
     if (shardCount > MAX_SHARD_COUNT || (freeSpace == 0 && shardCount > 1))
         m_bot->DestroyItemCount(SOUL_SHARD, shardCount > MAX_SHARD_COUNT ? shardCount - MAX_SHARD_COUNT : 1, true, false);
 
-    SpellSequence = SPELL_CURSES;
-
-    Pet *pet = m_bot->GetPet();
-
     // buff myself DEMON_SKIN, DEMON_ARMOR, FEL_ARMOR
-    if (FEL_ARMOR > 0)
-        (!m_bot->HasAura(FEL_ARMOR, EFFECT_INDEX_0) && ai->CastSpell(FEL_ARMOR, *m_bot));
-    else if (DEMON_ARMOR > 0)
-        (!m_bot->HasAura(DEMON_ARMOR, EFFECT_INDEX_0) && !m_bot->HasAura(FEL_ARMOR, EFFECT_INDEX_0) && ai->CastSpell(DEMON_ARMOR, *m_bot));
-    else if (DEMON_SKIN > 0)
-        (!m_bot->HasAura(DEMON_SKIN, EFFECT_INDEX_0) && !m_bot->HasAura(FEL_ARMOR, EFFECT_INDEX_0) && !m_bot->HasAura(DEMON_ARMOR, EFFECT_INDEX_0) && ai->CastSpell(DEMON_SKIN, *m_bot));
+    if (FEL_ARMOR)
+    {
+        if (ai->SelfBuff(FEL_ARMOR))
+            return;
+    }
+    else if (DEMON_ARMOR)
+    {
+        if (ai->SelfBuff(DEMON_ARMOR))
+            return;
+    }
+    else if (DEMON_SKIN)
+    {
+        if (ai->SelfBuff(DEMON_SKIN))
+            return;
+    }
 
-    // buff myself & master DETECT_INVISIBILITY
-    if (DETECT_INVISIBILITY > 0)
-        (!m_bot->HasAura(DETECT_INVISIBILITY, EFFECT_INDEX_0) && ai->GetManaPercent() >= 2 && ai->CastSpell(DETECT_INVISIBILITY, *m_bot));
-    if (DETECT_INVISIBILITY > 0)
-        (!GetMaster()->HasAura(DETECT_INVISIBILITY, EFFECT_INDEX_0) && ai->GetManaPercent() >= 2 && ai->CastSpell(DETECT_INVISIBILITY, *GetMaster()));
+    // healthstone creation
+    if (CREATE_HEALTHSTONE)
+    {
+        Item* const healthStone = ai->FindConsumable(HEALTHSTONE_DISPLAYID);
+        if (!healthStone && ai->CastSpell(CREATE_HEALTHSTONE))
+            ai->SetIgnoreUpdateTime(5);
+    }
 
-    // firestone creation and use - proof of concept for updated UseItem method.
+    // soulstone creation and use
+    if (CREATE_SOULSTONE)
+    {
+        Item* soulStone = ai->FindConsumable(SOULSTONE_DISPLAYID);
+        if (!soulStone)
+        {
+            if (!m_bot->HasSpellCooldown(CREATE_SOULSTONE) && ai->CastSpell(CREATE_SOULSTONE))
+                return;
+        }
+        else
+        {
+            uint32 soulStoneSpell = soulStone->GetProto()->Spells[0].SpellId;
+            Player * master = GetMaster();
+            if (!master->HasAura(soulStoneSpell))
+            {
+                ai->UseItem(soulStone, master);
+            }
+            else
+            {
+                // TODO (Playerbot): soulstone non-bot group members
+            }
+        }
+    }
+
+    // firestone creation and use
     Item* const weapon = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
     if (weapon && weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
     {
         Item* const stone = ai->FindConsumable(FIRESTONE_DISPLAYID);
         if (!stone)
         {
-            if (CREATE_FIRESTONE > 0 && m_bot->HasItemCount(SOUL_SHARD, 1, false))
-            {
-                ai->CastSpell(CREATE_FIRESTONE);
+            if (CREATE_FIRESTONE && m_bot->HasItemCount(SOUL_SHARD, 1, false) && ai->CastSpell(CREATE_FIRESTONE))
                 ai->SetIgnoreUpdateTime(5);
-            }
         }
         else
         {
-            ai->UseItem(*stone, EQUIPMENT_SLOT_MAINHAND);
+            ai->UseItem(stone, EQUIPMENT_SLOT_MAINHAND);
             ai->SetIgnoreUpdateTime(5);
         }
     }
 
-    // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    Item* pItem = ai->FindDrink();
-    Item* fItem = ai->FindBandage();
+    // mana check
+    if (pet && DARK_PACT && pet->GetPower(POWER_MANA) > 0 && ai->GetManaPercent() <= 50)
+    {
+        if (ai->CastSpell(DARK_PACT, *m_bot))
+            return;
+    }
 
-    if (pItem != NULL && ai->GetManaPercent() < 25)
+    if (LIFE_TAP && ai->GetManaPercent() <= 50 && ai->GetHealthPercent() > 50)
     {
-        ai->TellMaster("I could use a drink.");
-        ai->UseItem(*pItem);
-        ai->SetIgnoreUpdateTime(30);
-        return;
+        if (ai->CastSpell(LIFE_TAP, *m_bot))
+            return;
     }
-    else if ((pet)
-             && (pItem == NULL && DARK_PACT > 0 && ai->GetManaPercent() <= 50 && pet->GetPower(POWER_MANA) > 0))
+
+    if (ai->GetManaPercent() < 25)
     {
-        ai->CastSpell(DARK_PACT, *m_bot);
-        //ai->TellMaster("casting dark pact.");
-        return;
-    }
-    else if ((!pet)
-             && (pItem == NULL && LIFE_TAP > 0 && ai->GetManaPercent() <= 50 && ai->GetHealthPercent() > 25))
-    {
-        ai->CastSpell(LIFE_TAP, *m_bot);
-        //ai->TellMaster("casting life tap.");
-        return;
+        Item* pItem = ai->FindDrink();
+        if (pItem)
+        {
+            ai->TellMaster("I could use a drink.");
+            ai->UseItem(pItem);
+            // TODO (Playerbot): Get exact drinking time
+            ai->SetIgnoreUpdateTime(30);
+            return;
+        }
     }
 
     // hp check
-    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
-        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
-
-    pItem = ai->FindFood();
-
-    if (pItem != NULL && ai->GetHealthPercent() < 30)
+    if (ai->GetHealthPercent() < 30)
     {
-        ai->TellMaster("I could use some food.");
-        ai->UseItem(*pItem);
-        ai->SetIgnoreUpdateTime(30);
-        return;
+        Item* pItem = ai->FindFood();
+        if (pItem)
+        {
+            ai->TellMaster("I could use some food.");
+            ai->UseItem(pItem);
+            // TODO (Playerbot): Get exact eating time
+            ai->SetIgnoreUpdateTime(30);
+            return;
+        }
     }
-    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && ai->GetHealthPercent() < 70)
+
+    if (ai->GetHealthPercent() < 50 && !m_bot->HasAura(RECENTLY_BANDAGED))
     {
-        ai->TellMaster("I could use first aid.");
-        ai->UseItem(*fItem);
-        ai->SetIgnoreUpdateTime(8);
-        return;
+        Item* fItem = ai->FindBandage();
+        if (fItem)
+        {
+            ai->TellMaster("I could use first aid.");
+            ai->UseItem(fItem);
+            ai->SetIgnoreUpdateTime(8);
+            return;
+        }
     }
+
+    /* TODO (Playerbot): Heal Voidwalker
     else if ((pet)
              && (pItem == NULL && fItem == NULL && CONSUME_SHADOWS > 0 && !m_bot->HasAura(CONSUME_SHADOWS, EFFECT_INDEX_0) && ai->GetHealthPercent() < 75))
     {
@@ -435,8 +493,9 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         //ai->TellMaster("casting consume shadows.");
         return;
     }
-
+    */
     // Summon demon
+    // TODO (Playerbot): Remember last demon and resummon him if possible
     if (!pet)
     {
         if (SUMMON_FELGUARD && ai->CastSpell(SUMMON_FELGUARD))
@@ -451,12 +510,13 @@ void PlayerbotWarlockAI::DoNonCombatActions()
             ai->TellMaster("Summoning Imp.");
     }
 
-    // check for buffs with demon
-    if ((pet)
-        && (SOUL_LINK > 0 && !m_bot->HasAura(SOUL_LINK_AURA, EFFECT_INDEX_0) && ai->GetBaseManaPercent() >= 16 && ai->CastSpell(SOUL_LINK, *m_bot)))
-        //ai->TellMaster( "casting soul link." );
+    // Soul link demon
+    if (pet && SOUL_LINK && !m_bot->HasAura(SOUL_LINK_AURA) && ai->CastSpell(SOUL_LINK, *m_bot))
         return;
-    else if ((pet)
+
+    // check for buffs with demon
+    // TODO (Playerbot): Fix pet buffs
+    if ((pet)
              && (BLOOD_PACT > 0 && !m_bot->HasAura(BLOOD_PACT, EFFECT_INDEX_0) && ai->CastSpell(BLOOD_PACT, *m_bot)))
         //ai->TellMaster( "casting blood pact." );
         return;

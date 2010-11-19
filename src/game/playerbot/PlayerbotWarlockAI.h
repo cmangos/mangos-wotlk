@@ -16,9 +16,19 @@ enum
 
 enum StoneDisplayId
 {
-    FIRESTONE_DISPLAYID  = 7409,
-    SPELLSTONE_DISPLAYID = 13291,
-    SOULSTONE_DISPLAYID  = 6009
+    FIRESTONE_DISPLAYID   = 7409,
+    SPELLSTONE_DISPLAYID  = 13291,
+    SOULSTONE_DISPLAYID   = 6009,
+    HEALTHSTONE_DISPLAYID = 8026
+};
+
+enum DemonEntry
+{
+    DEMON_IMP        = 416,
+    DEMON_VOIDWALKER = 1860,
+    DEMON_SUCCUBUS   = 1863,
+    DEMON_FELHUNTER  = 417,
+    DEMON_FELGUARD   = 17252
 };
 
 enum WarlockSpells
@@ -147,6 +157,7 @@ private:
     // DEMONOLOGY
     uint32 DEMON_SKIN,
            DEMON_ARMOR,
+           DEMONIC_EMPOWERMENT,
            SHADOW_WARD,
            FEL_ARMOR,
            SOULSHATTER,
@@ -154,7 +165,9 @@ private:
            SOUL_LINK_AURA,
            HEALTH_FUNNEL,
            DETECT_INVISIBILITY,
-           CREATE_FIRESTONE;
+           CREATE_FIRESTONE,
+           CREATE_SOULSTONE,
+           CREATE_HEALTHSTONE;
 
     // DEMON SUMMON
     uint32 SUMMON_IMP,
@@ -183,7 +196,12 @@ private:
            BERSERKING,
            WILL_OF_THE_FORSAKEN;
 
-    uint32 SpellSequence, LastSpellCurse, LastSpellAffliction, LastSpellDestruction;
+    uint32 SpellSequence,
+           LastSpellCurse,
+           LastSpellAffliction,
+           LastSpellDestruction;
+
+    uint32 m_lastDemon;
 };
 
 #endif
