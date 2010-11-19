@@ -2871,6 +2871,58 @@ void PlayerbotAI::findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<
     }
 }
 
+// use item on self
+void PlayerbotAI::UseItem(Item *item)
+{
+    UseItem(item, TARGET_FLAG_SELF, ObjectGuid());
+}
+
+// use item on equipped item
+void PlayerbotAI::UseItem(Item *item, uint8 targetInventorySlot)
+{
+    if (targetInventorySlot >= EQUIPMENT_SLOT_END)
+        return;
+
+    Item* const targetItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, targetInventorySlot);
+    if (!targetItem)
+        return;
+
+    UseItem(item, TARGET_FLAG_ITEM, targetItem->GetObjectGuid());
+}
+
+// use item on unit
+void PlayerbotAI::UseItem(Item *item, Unit *target)
+{
+    if (!target)
+        return;
+
+    UseItem(item, TARGET_FLAG_UNIT, target->GetObjectGuid());
+}
+
+// generic item use method
+void PlayerbotAI::UseItem(Item *item, uint32 targetFlag, ObjectGuid targetGUID)
+{
+    if (!item)
+        return;
+
+    uint8 bagIndex = item->GetBagSlot();
+    uint8 slot = item->GetSlot();
+    uint8 cast_count = 1;
+    uint32 spellid = item->GetProto()->Spells[0].SpellId;
+    ObjectGuid item_guid = item->GetObjectGuid();
+    uint32 glyphIndex = 0;
+    uint8 unk_flags = 0;
+
+    WorldPacket *packet = new WorldPacket(CMSG_USE_ITEM, 28);
+    *packet << bagIndex << slot << cast_count << spellid << item_guid
+           << glyphIndex << unk_flags << targetFlag;
+
+    if (targetFlag & (TARGET_FLAG_UNIT | TARGET_FLAG_ITEM))
+        *packet << targetGUID.WriteAsPacked();
+
+    m_bot->GetSession()->QueuePacket(packet);
+}
+
 // submits packet to use an item
 void PlayerbotAI::UseItem(Item& item, uint8 targetSlot)
 {
