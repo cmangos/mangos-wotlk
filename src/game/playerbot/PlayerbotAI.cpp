@@ -293,6 +293,35 @@ uint32 PlayerbotAI::initSpell(uint32 spellId)
     return (next == 0) ? spellId : next;
 }
 
+
+// Pet spells do not form chains like player spells.
+// One of the options to initialize a spell is to use spell icon id
+uint32 PlayerbotAI::initPetSpell(uint32 spellIconId)
+{
+    Pet * pet = m_bot->GetPet();
+
+    if (!pet)
+        return 0;
+
+    for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
+    {
+        const uint32 spellId = itr->first;
+
+        if (itr->second.state == PETSPELL_REMOVED || IsPassiveSpell(spellId))
+            continue;
+
+        const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
+        if (!pSpellInfo)
+            continue;
+
+        if (pSpellInfo->SpellIconID == spellIconId)
+            return spellId;
+    }
+
+    // Nothing found
+    return 0;
+}
+
 /*
  * Send a list of equipment that is in bot's inventor that is currently unequipped.
  * This is called when the master is inspecting the bot.

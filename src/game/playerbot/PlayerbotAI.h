@@ -152,6 +152,7 @@ public:
     uint32 getPetSpellId(const char* args) const;
     // Initialize spell using rank 1 spell id
     uint32 initSpell(uint32 spellId);
+    uint32 initPetSpell(uint32 spellIconId);
 
     // extracts item ids from links
     void extractItemIds(const std::string& text, std::list<uint32>& itemIds) const;
