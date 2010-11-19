@@ -39,6 +39,7 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     // DEMONOLOGY
     DEMON_SKIN            = ai->initSpell(DEMON_SKIN_1);
     DEMON_ARMOR           = ai->initSpell(DEMON_ARMOR_1);
+    DEMONIC_EMPOWERMENT   = ai->initSpell(DEMONIC_EMPOWERMENT_1);
     FEL_ARMOR             = ai->initSpell(FEL_ARMOR_1);
     SHADOW_WARD           = ai->initSpell(SHADOW_WARD_1);
     SOULSHATTER           = ai->initSpell(SOULSHATTER_1);
@@ -98,10 +99,15 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     Pet *pet = m_bot->GetPet();
 
     // Empower demon
-    if (pet && DEMONIC_EMPOWERMENT)
+    if (pet && DEMONIC_EMPOWERMENT && !m_bot->HasSpellCooldown(DEMONIC_EMPOWERMENT))
         ai->CastSpell(DEMONIC_EMPOWERMENT);
 
     // TODO (Playerbot): Use voidwalker sacrifice on low health if possible
+    if (ai->GetHealthPercent() < 50)
+    {
+        if (pet && pet->GetEntry() == DEMON_VOIDWALKER && SACRIFICE && !m_bot->HasAura(SACRIFICE))
+            ai->CastPetSpell(SACRIFICE);
+    }
 
     // Use healthstone
     if (ai->GetHealthPercent() < 30)
@@ -352,9 +358,50 @@ void PlayerbotWarlockAI::DoNonCombatActions()
 
     Pet *pet = m_bot->GetPet();
 
+    // Initialize pet spells
     if (pet && pet->GetEntry() != m_lastDemon)
     {
-        // TODO (Playerbot): Init pet spells
+        switch (pet->GetEntry())
+        {
+            case DEMON_IMP:
+            {
+                BLOOD_PACT       = ai->initPetSpell(BLOOD_PACT_ICON);
+                FIREBOLT         = ai->initPetSpell(FIREBOLT_ICON);
+                FIRE_SHIELD      = ai->initPetSpell(FIRE_SHIELD_ICON);
+                break;
+            }
+            case DEMON_VOIDWALKER:
+            {
+                CONSUME_SHADOWS  = ai->initPetSpell(CONSUME_SHADOWS_ICON);
+                SACRIFICE        = ai->initPetSpell(SACRIFICE_ICON);
+                SUFFERING        = ai->initPetSpell(SUFFERING_ICON);
+                TORMENT          = ai->initPetSpell(TORMENT_ICON);
+                break;
+            }
+            case DEMON_SUCCUBUS:
+            {
+                LASH_OF_PAIN     = ai->initPetSpell(LASH_OF_PAIN_ICON);
+                SEDUCTION        = ai->initPetSpell(SEDUCTION_ICON);
+                SOOTHING_KISS    = ai->initPetSpell(SOOTHING_KISS_ICON);
+                break;
+            }
+            case DEMON_FELHUNTER:
+            {
+                DEVOUR_MAGIC     = ai->initPetSpell(DEVOUR_MAGIC_ICON);
+                FEL_INTELLIGENCE = ai->initPetSpell(FEL_INTELLIGENCE_ICON);
+                SHADOW_BITE      = ai->initPetSpell(SHADOW_BITE_ICON);
+                SPELL_LOCK       = ai->initPetSpell(SPELL_LOCK_ICON);
+                break;
+            }
+            case DEMON_FELGUARD:
+            {
+                ANGUISH          = ai->initPetSpell(ANGUISH_ICON);
+                CLEAVE           = ai->initPetSpell(CLEAVE_ICON);
+                INTERCEPT        = ai->initPetSpell(INTERCEPT_ICON);
+                break;
+            }
+        }
+
         m_lastDemon = pet->GetEntry();
     }
 
@@ -402,7 +449,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         {
             uint32 soulStoneSpell = soulStone->GetProto()->Spells[0].SpellId;
             Player * master = GetMaster();
-            if (!master->HasAura(soulStoneSpell))
+            if (!master->HasAura(soulStoneSpell) && !m_bot->HasSpellCooldown(soulStoneSpell))
             {
                 ai->UseItem(soulStone, master);
             }
@@ -485,15 +532,10 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         }
     }
 
-    /* TODO (Playerbot): Heal Voidwalker
-    else if ((pet)
-             && (pItem == NULL && fItem == NULL && CONSUME_SHADOWS > 0 && !m_bot->HasAura(CONSUME_SHADOWS, EFFECT_INDEX_0) && ai->GetHealthPercent() < 75))
-    {
-        ai->CastSpell(CONSUME_SHADOWS, *m_bot);
-        //ai->TellMaster("casting consume shadows.");
-        return;
-    }
-    */
+    //Heal Voidwalker
+    if (pet && pet->GetEntry() == DEMON_VOIDWALKER && CONSUME_SHADOWS && pet->GetHealthPercent() < 75 && !pet->HasAura(CONSUME_SHADOWS))
+        ai->CastPetSpell(CONSUME_SHADOWS);
+
     // Summon demon
     // TODO (Playerbot): Remember last demon and resummon him if possible
     if (!pet)
@@ -514,14 +556,11 @@ void PlayerbotWarlockAI::DoNonCombatActions()
     if (pet && SOUL_LINK && !m_bot->HasAura(SOUL_LINK_AURA) && ai->CastSpell(SOUL_LINK, *m_bot))
         return;
 
-    // check for buffs with demon
-    // TODO (Playerbot): Fix pet buffs
-    if ((pet)
-             && (BLOOD_PACT > 0 && !m_bot->HasAura(BLOOD_PACT, EFFECT_INDEX_0) && ai->CastSpell(BLOOD_PACT, *m_bot)))
-        //ai->TellMaster( "casting blood pact." );
+    // Check demon buffs
+    if (pet && pet->GetEntry() == DEMON_IMP && BLOOD_PACT && !m_bot->HasAura(BLOOD_PACT) && ai->CastPetSpell(BLOOD_PACT))
         return;
-    else if ((pet)
-             && (FEL_INTELLIGENCE > 0 && !m_bot->HasAura(FEL_INTELLIGENCE, EFFECT_INDEX_0) && ai->CastSpell(FEL_INTELLIGENCE, *m_bot)))
-        //ai->TellMaster( "casting fel intelligence." );
+
+    if (pet && pet->GetEntry() == DEMON_FELHUNTER && FEL_INTELLIGENCE && !m_bot->HasAura(FEL_INTELLIGENCE) && ai->CastPetSpell(FEL_INTELLIGENCE))
         return;
+
 } // end DoNonCombatActions

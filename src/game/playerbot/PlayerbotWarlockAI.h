@@ -31,6 +31,32 @@ enum DemonEntry
     DEMON_FELGUARD   = 17252
 };
 
+enum DemonSpellIconIds
+{
+    // Imp
+    BLOOD_PACT_ICON       = 541,
+    FIREBOLT_ICON         = 18,
+    FIRE_SHIELD_ICON      = 16,
+    // Felguard
+    ANGUISH_ICON          = 173,
+    CLEAVE_ICON           = 277,
+    INTERCEPT_ICON        = 516,
+    // Felhunter
+    DEVOUR_MAGIC_ICON     = 47,
+    FEL_INTELLIGENCE_ICON = 1940,
+    SHADOW_BITE_ICON      = 2027,
+    SPELL_LOCK_ICON       = 77,
+    // Succubus
+    LASH_OF_PAIN_ICON     = 596,
+    SEDUCTION_ICON        = 48,
+    SOOTHING_KISS_ICON    = 694,
+    // Voidwalker
+    CONSUME_SHADOWS_ICON  = 207,
+    SACRIFICE_ICON        = 693,
+    SUFFERING_ICON        = 9,
+    TORMENT_ICON          = 173
+};
+
 enum WarlockSpells
 {
     BANISH_1                        = 710,
@@ -178,8 +204,22 @@ private:
 
     // DEMON SKILLS
     uint32 BLOOD_PACT,
+           FIREBOLT,
+           FIRE_SHIELD,
+           ANGUISH,
+           CLEAVE,
+           INTERCEPT,
+           DEVOUR_MAGIC,
+           FEL_INTELLIGENCE,
+           SHADOW_BITE,
+           SPELL_LOCK,
+           LASH_OF_PAIN,
+           SEDUCTION,
+           SOOTHING_KISS,
            CONSUME_SHADOWS,
-           FEL_INTELLIGENCE;
+           SACRIFICE,
+           SUFFERING,
+           TORMENT;
 
     // first aid
     uint32 RECENTLY_BANDAGED;
