@@ -558,7 +558,6 @@ void PlayerbotDruidAI::DoNonCombatActions()
     {
         ai->TellMaster("I could use a drink.");
         ai->UseItem(pItem);
-        ai->SetIgnoreUpdateTime(30);
         return;
     }
     else if (!pItem && INNERVATE > 0 && !m_bot->HasAura(INNERVATE) && ai->GetManaPercent() <= 20 && ai->CastSpell(INNERVATE, *m_bot))
@@ -574,14 +573,12 @@ void PlayerbotDruidAI::DoNonCombatActions()
     {
         ai->TellMaster("I could use some food.");
         ai->UseItem(pItem);
-        ai->SetIgnoreUpdateTime(30);
         return;
     }
     else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && ai->GetHealthPercent() < 70)
     {
         ai->TellMaster("I could use first aid.");
         ai->UseItem(fItem);
-        ai->SetIgnoreUpdateTime(8);
         return;
     }
 

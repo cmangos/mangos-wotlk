@@ -2937,19 +2937,53 @@ void PlayerbotAI::UseItem(Item *item, uint32 targetFlag, ObjectGuid targetGUID)
     uint8 bagIndex = item->GetBagSlot();
     uint8 slot = item->GetSlot();
     uint8 cast_count = 1;
-    uint32 spellid = item->GetProto()->Spells[0].SpellId;
     ObjectGuid item_guid = item->GetObjectGuid();
     uint32 glyphIndex = 0;
     uint8 unk_flags = 0;
 
+    uint32 spellId = 0;
+    for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+    {
+        if (item->GetProto()->Spells[i].SpellId > 0)
+        {
+            spellId = item->GetProto()->Spells[i].SpellId;
+            break;
+        }
+    }
+
     WorldPacket *packet = new WorldPacket(CMSG_USE_ITEM, 28);
-    *packet << bagIndex << slot << cast_count << spellid << item_guid
+    *packet << bagIndex << slot << cast_count << spellId << item_guid
            << glyphIndex << unk_flags << targetFlag;
 
     if (targetFlag & (TARGET_FLAG_UNIT | TARGET_FLAG_ITEM))
         *packet << targetGUID.WriteAsPacked();
 
     m_bot->GetSession()->QueuePacket(packet);
+
+    SpellEntry const * spellInfo = sSpellStore.LookupEntry(spellId);
+    if (!spellInfo)
+    {
+        TellMaster("Can't find spell entry for spell %u on item %u", spellId, item->GetEntry());
+        return;
+    }
+
+    SpellCastTimesEntry const * castingTimeEntry = sSpellCastTimesStore.LookupEntry(spellInfo->CastingTimeIndex);
+    if (!castingTimeEntry)
+    {
+        TellMaster("Can't find casting time entry for spell %u with index %u", spellId, spellInfo->CastingTimeIndex);
+        return;
+    }
+
+    uint8 duration, castTime;
+    castTime = (uint8)((float)castingTimeEntry->CastTime / 1000.0f);
+
+    if (item->GetProto()->Class == ITEM_CLASS_CONSUMABLE && item->GetProto()->SubClass == ITEM_SUBCLASS_FOOD)
+    {
+        duration = (uint8)((float)GetSpellDuration(spellInfo) / 1000.0f);
+        SetIgnoreUpdateTime(castTime + duration);
+    }
+    else
+        SetIgnoreUpdateTime(castTime);
 }
 
 // submits packet to use an item

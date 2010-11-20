@@ -102,7 +102,7 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     if (pet && DEMONIC_EMPOWERMENT && !m_bot->HasSpellCooldown(DEMONIC_EMPOWERMENT))
         ai->CastSpell(DEMONIC_EMPOWERMENT);
 
-    // TODO (Playerbot): Use voidwalker sacrifice on low health if possible
+    // Use voidwalker sacrifice on low health if possible
     if (ai->GetHealthPercent() < 50)
     {
         if (pet && pet->GetEntry() == DEMON_VOIDWALKER && SACRIFICE && !m_bot->HasAura(SACRIFICE))
@@ -473,7 +473,6 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         else
         {
             ai->UseItem(stone, EQUIPMENT_SLOT_MAINHAND);
-            ai->SetIgnoreUpdateTime(5);
         }
     }
 
@@ -500,8 +499,6 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         {
             ai->TellMaster("I could use a drink.");
             ai->UseItem(pItem);
-            // TODO (Playerbot): Get exact drinking time
-            ai->SetIgnoreUpdateTime(30);
             return;
         }
     }
@@ -514,8 +511,6 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         {
             ai->TellMaster("I could use some food.");
             ai->UseItem(pItem);
-            // TODO (Playerbot): Get exact eating time
-            ai->SetIgnoreUpdateTime(30);
             return;
         }
     }
@@ -527,7 +522,6 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         {
             ai->TellMaster("I could use first aid.");
             ai->UseItem(fItem);
-            ai->SetIgnoreUpdateTime(8);
             return;
         }
     }
