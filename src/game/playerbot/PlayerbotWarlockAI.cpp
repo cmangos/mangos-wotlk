@@ -71,6 +71,8 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     WILL_OF_THE_FORSAKEN  = ai->initSpell(WILL_OF_THE_FORSAKEN_ALL); // undead
 
     m_lastDemon = 0;
+    m_demonOfChoice = DEMON_IMP;
+    m_isTempImp = false;
 }
 
 PlayerbotWarlockAI::~PlayerbotWarlockAI() {}
@@ -388,6 +390,9 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         }
 
         m_lastDemon = pet->GetEntry();
+
+        if (!m_isTempImp)
+            m_demonOfChoice = pet->GetEntry();
     }
 
     // Destroy extra soul shards
@@ -414,11 +419,11 @@ void PlayerbotWarlockAI::DoNonCombatActions()
     }
 
     // healthstone creation
-    if (CREATE_HEALTHSTONE)
+    if (CREATE_HEALTHSTONE && shardCount > 0)
     {
         Item* const healthStone = ai->FindConsumable(HEALTHSTONE_DISPLAYID);
         if (!healthStone && ai->CastSpell(CREATE_HEALTHSTONE))
-            ai->SetIgnoreUpdateTime(5);
+            return;
     }
 
     // soulstone creation and use
@@ -427,7 +432,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         Item* soulStone = ai->FindConsumable(SOULSTONE_DISPLAYID);
         if (!soulStone)
         {
-            if (!m_bot->HasSpellCooldown(CREATE_SOULSTONE) && ai->CastSpell(CREATE_SOULSTONE))
+            if (shardCount > 0 && !m_bot->HasSpellCooldown(CREATE_SOULSTONE) && ai->CastSpell(CREATE_SOULSTONE))
                 return;
         }
         else
@@ -439,10 +444,6 @@ void PlayerbotWarlockAI::DoNonCombatActions()
                 ai->UseItem(soulStone, master);
                 return;
             }
-            else
-            {
-                // TODO (Playerbot): soulstone non-bot group members
-            }
         }
     }
 
@@ -453,7 +454,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         Item* const stone = ai->FindConsumable(FIRESTONE_DISPLAYID);
         if (!stone)
         {
-            if (CREATE_FIRESTONE && m_bot->HasItemCount(SOUL_SHARD, 1, false) && ai->CastSpell(CREATE_FIRESTONE))
+            if (CREATE_FIRESTONE && shardCount > 0 && ai->CastSpell(CREATE_FIRESTONE))
                 return;
         }
         else
@@ -518,19 +519,46 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         ai->CastPetSpell(CONSUME_SHADOWS);
 
     // Summon demon
-    // TODO (Playerbot): Remember last demon and resummon him if possible
-    if (!pet)
+    if (!pet || m_isTempImp)
     {
-        if (SUMMON_FELGUARD && ai->CastSpell(SUMMON_FELGUARD))
-            ai->TellMaster("Summoning Felguard.");
-        else if (SUMMON_FELHUNTER && ai->CastSpell(SUMMON_FELHUNTER))
-            ai->TellMaster("Summoning Felhunter.");
-        else if (SUMMON_SUCCUBUS && ai->CastSpell(SUMMON_SUCCUBUS))
-            ai->TellMaster("Summoning Succubus.");
-        else if (SUMMON_VOIDWALKER && ai->CastSpell(SUMMON_VOIDWALKER))
-            ai->TellMaster("Summoning Voidwalker.");
-        else if (SUMMON_IMP && ai->CastSpell(SUMMON_IMP))
-            ai->TellMaster("Summoning Imp.");
+        uint32 summonSpellId;
+        if (m_demonOfChoice != DEMON_IMP && shardCount > 0)
+        {
+            switch (m_demonOfChoice)
+            {
+                case DEMON_VOIDWALKER:
+                    summonSpellId = SUMMON_VOIDWALKER;
+                    break;
+                case DEMON_FELGUARD:
+                    summonSpellId = SUMMON_FELGUARD;
+                    break;
+                case DEMON_FELHUNTER:
+                    summonSpellId = SUMMON_FELHUNTER;
+                    break;
+                case DEMON_SUCCUBUS:
+                    summonSpellId = SUMMON_SUCCUBUS;
+                    break;
+                default:
+                    summonSpellId = 0;
+            }
+            if (ai->CastSpell(summonSpellId))
+            {
+                ai->TellMaster("Summoning favorite demon...");
+                m_isTempImp = false;
+                return;
+            }
+        }
+        else
+        {
+            if (!pet && SUMMON_IMP && ai->CastSpell(SUMMON_IMP))
+            {
+                if (m_demonOfChoice != DEMON_IMP)
+                    m_isTempImp = true;
+
+                ai->TellMaster("Summoning Imp...");
+                return;
+            }
+        }
     }
 
     // Soul link demon
