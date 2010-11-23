@@ -2228,8 +2228,12 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
 
         // handle combat (either self/master/group in combat, or combat state and valid target)
         else if (IsInCombat() || (m_botState == BOTSTATE_COMBAT && m_targetCombat))
-            DoNextCombatManeuver();
-
+        {
+            if (!pSpell || !pSpell->IsChannelActive())
+                DoNextCombatManeuver();
+            else
+                SetIgnoreUpdateTime(1); // It's better to update AI more frequently during combat
+        }
         // bot was in combat recently - loot now
         else if (m_botState == BOTSTATE_COMBAT)
         {
