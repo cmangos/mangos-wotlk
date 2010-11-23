@@ -1788,8 +1788,12 @@ void PlayerbotAI::TurnInQuests(WorldObject *questgiver)
 
 bool PlayerbotAI::IsInCombat()
 {
+    Pet *pet;
     bool inCombat = false;
     inCombat |= m_bot->isInCombat();
+    pet = m_bot->GetPet();
+    if (pet)
+        inCombat |= pet->isInCombat();
     inCombat |= GetMaster()->isInCombat();
     if (m_bot->GetGroup())
     {
@@ -1797,10 +1801,29 @@ bool PlayerbotAI::IsInCombat()
         while (ref)
         {
             inCombat |= ref->getSource()->isInCombat();
+            pet = ref->getSource()->GetPet();
+            if (pet)
+                inCombat |= pet->isInCombat();
             ref = ref->next();
         }
     }
     return inCombat;
+}
+
+void PlayerbotAI::UpdateAttackersForTarget(Unit *victim)
+{
+    HostileReference *ref = victim->getHostileRefManager().getFirst();
+    while (ref)
+    {
+        ThreatManager *target = ref->getSource();
+        uint64 guid = target->getOwner()->GetGUID();
+        m_attackerInfo[guid].attacker = target->getOwner();
+        m_attackerInfo[guid].victim = target->getOwner()->getVictim();
+        m_attackerInfo[guid].threat = target->getThreat(victim);
+        m_attackerInfo[guid].count = 1;
+        //m_attackerInfo[guid].source = 1; // source is not used so far.
+        ref = ref->next();
+    }
 }
 
 void PlayerbotAI::UpdateAttackerInfo()
@@ -1809,36 +1832,16 @@ void PlayerbotAI::UpdateAttackerInfo()
     m_attackerInfo.clear();
 
     // check own attackers
-    HostileReference *ref = m_bot->getHostileRefManager().getFirst();
-    while (ref)
-    {
-        ThreatManager *target = ref->getSource();
-        uint64 guid = target->getOwner()->GetGUID();
-        m_attackerInfo[guid].attacker = target->getOwner();
-        m_attackerInfo[guid].victim = target->getOwner()->getVictim();
-        m_attackerInfo[guid].threat = target->getThreat(m_bot);
-        m_attackerInfo[guid].count = 1;
-        m_attackerInfo[guid].source = 1;
-        ref = ref->next();
-    }
+    UpdateAttackersForTarget(m_bot);
+    Pet *pet = m_bot->GetPet();
+    if (pet)
+        UpdateAttackersForTarget(pet);
 
     // check master's attackers
-    ref = GetMaster()->getHostileRefManager().getFirst();
-    while (ref)
-    {
-        ThreatManager *target = ref->getSource();
-        uint64 guid = target->getOwner()->GetGUID();
-        if (m_attackerInfo.find(guid) == m_attackerInfo.end())
-        {
-            m_attackerInfo[guid].attacker = target->getOwner();
-            m_attackerInfo[guid].victim = target->getOwner()->getVictim();
-            m_attackerInfo[guid].count = 0;
-            m_attackerInfo[guid].source = 2;
-        }
-        m_attackerInfo[guid].threat = target->getThreat(m_bot);
-        m_attackerInfo[guid].count++;
-        ref = ref->next();
-    }
+    UpdateAttackersForTarget(GetMaster());
+    pet = GetMaster()->GetPet();
+    if (pet)
+        UpdateAttackersForTarget(pet);
 
     // check all group members now
     if (m_bot->GetGroup())
@@ -1851,22 +1854,12 @@ void PlayerbotAI::UpdateAttackerInfo()
                 gref = gref->next();
                 continue;
             }
-            ref = gref->getSource()->getHostileRefManager().getFirst();
-            while (ref)
-            {
-                ThreatManager *target = ref->getSource();
-                uint64 guid = target->getOwner()->GetGUID();
-                if (m_attackerInfo.find(guid) == m_attackerInfo.end())
-                {
-                    m_attackerInfo[guid].attacker = target->getOwner();
-                    m_attackerInfo[guid].victim = target->getOwner()->getVictim();
-                    m_attackerInfo[guid].count = 0;
-                    m_attackerInfo[guid].source = 3;
-                }
-                m_attackerInfo[guid].threat = target->getThreat(m_bot);
-                m_attackerInfo[guid].count++;
-                ref = ref->next();
-            }
+
+            UpdateAttackersForTarget(gref->getSource());
+            pet = gref->getSource()->GetPet();
+            if (pet)
+                UpdateAttackersForTarget(pet);
+
             gref = gref->next();
         }
     }
@@ -2227,7 +2220,7 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
         else if (m_spellIdCommand != 0)
         {
             Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, m_targetGuidCommand);
-            if (pTarget != NULL)
+            if (pTarget)
                 CastSpell(m_spellIdCommand, *pTarget);
             m_spellIdCommand = 0;
             m_targetGuidCommand = 0;
@@ -2242,12 +2235,12 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
         {
             SetState(BOTSTATE_LOOTING);
             m_attackerInfo.clear();
-            m_ignoreAIUpdatesUntilTime = time(0);
+            SetIgnoreUpdateTime();
         }
         else if (m_botState == BOTSTATE_LOOTING)
         {
             DoLoot();
-            m_ignoreAIUpdatesUntilTime = time(0);
+            SetIgnoreUpdateTime();
         }
 /*
         // are we sitting, if so feast if possible

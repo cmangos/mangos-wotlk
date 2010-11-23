@@ -235,7 +235,7 @@ public:
     Unit *GetCurrentTarget() { return m_targetCombat; };
     void DoNextCombatManeuver();
     void DoCombatMovement();
-    void SetIgnoreUpdateTime(uint8 t) { m_ignoreAIUpdatesUntilTime = time(0) + t; };
+    void SetIgnoreUpdateTime(uint8 t = 0) { m_ignoreAIUpdatesUntilTime = time(0) + t; };
 
     Player *GetPlayerBot() const { return m_bot; }
     Player *GetPlayer() const { return m_bot; }
@@ -283,6 +283,9 @@ private:
     // and are only called from within HandleCommand.
     bool TradeItem(const Item& item, int8 slot = -1);
     bool TradeCopper(uint32 copper);
+
+    // Helper routines not needed by class AIs.
+    void UpdateAttackersForTarget(Unit *victim);
 
     // it is safe to keep these back reference pointers because m_bot
     // owns the "this" object and m_master owns m_bot. The owner always cleans up.
