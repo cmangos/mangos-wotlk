@@ -265,7 +265,6 @@ public:
     void SetMovementOrder(MovementOrderType mo, Unit *followTarget = 0);
     MovementOrderType GetMovementOrder() { return this->m_movementOrder; }
     void MovementReset();
-    void MovementUpdate();
     void MovementClear();
     bool IsMoving();
 
