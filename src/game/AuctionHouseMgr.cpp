@@ -318,7 +318,7 @@ void AuctionHouseMgr::LoadAuctionItems()
 
         Item *item = NewItemOrBag(proto);
 
-        if(!item->LoadFromDB(item_guid,0, fields))
+        if(!item->LoadFromDB(item_guid, fields))
         {
             delete item;
             continue;
@@ -626,7 +626,7 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
         if (inventoryType != 0xffffffff && proto->InventoryType != inventoryType)
             continue;
 
-        if (quality != 0xffffffff && proto->Quality != quality)
+        if (quality != 0xffffffff && proto->Quality < quality)
             continue;
 
         if (levelmin != 0x00 && (proto->RequiredLevel < levelmin || (levelmax != 0x00 && proto->RequiredLevel > levelmax)))

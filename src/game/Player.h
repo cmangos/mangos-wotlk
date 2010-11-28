@@ -986,7 +986,7 @@ class MANGOS_DLL_SPEC PlayerTaxi
         void AppendTaximaskTo(ByteBuffer& data, bool all);
 
         // Destinations
-        bool LoadTaxiDestinationsFromString(const std::string& values, uint32 team);
+        bool LoadTaxiDestinationsFromString(const std::string& values, Team team);
         std::string SaveTaxiDestinationsToString();
 
         void ClearTaxiDestinations() { m_TaxiDestinations.clear(); }
@@ -1013,7 +1013,7 @@ std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
 struct BGData
 {
     BGData() : bgInstanceID(0), bgTypeID(BATTLEGROUND_TYPE_NONE), bgAfkReportedCount(0), bgAfkReportedTimer(0),
-        bgTeam(0), mountSpell(0) { ClearTaxiPath(); }
+        bgTeam(TEAM_NONE), mountSpell(0) { ClearTaxiPath(); }
 
 
     uint32 bgInstanceID;                                    ///< This variable is set to bg->m_InstanceID,
@@ -1024,7 +1024,7 @@ struct BGData
     uint8              bgAfkReportedCount;
     time_t             bgAfkReportedTimer;
 
-    uint32 bgTeam;                                          ///< What side the player will be added to
+    Team bgTeam;                                            ///< What side the player will be added to
 
 
     uint32 mountSpell;
@@ -1218,16 +1218,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateInnerTime (time_t time) { time_inn_enter = time; }
 
         void RemovePet(PetSaveMode mode);
-        void RemoveMiniPet();
-        Pet* GetMiniPet() const;
-
-        // use only in Pet::Unsummon/Spell::DoSummon
-        void _SetMiniPet(Pet* pet) { m_miniPetGuid = pet ? pet->GetObjectGuid() : ObjectGuid(); }
-
-        template<typename Func>
-        void CallForAllControlledUnits(Func const& func, bool withTotems, bool withGuardians, bool withCharms, bool withMiniPet);
-        template<typename Func>
-        bool CheckAllControlledUnits(Func const& func, bool withTotems, bool withGuardians, bool withCharms, bool withMiniPet) const;
 
         uint32 GetPhaseMaskForSpawn() const;                // used for proper set phase for DB at GM-mode creature/GO spawn
 
@@ -1785,8 +1775,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateZone(uint32 newZone,uint32 newArea);
         void UpdateArea(uint32 newArea);
 
-        void UpdateZoneDependentAuras( uint32 zone_id );    // zones
-        void UpdateAreaDependentAuras( uint32 area_id );    // subzones
+        void UpdateZoneDependentAuras();
+        void UpdateAreaDependentAuras();                    // subzones
+        void UpdateZoneDependentPets();
 
         void UpdateAfkReport(time_t currTime);
         void UpdatePvPFlag(time_t currTime);
@@ -1886,7 +1877,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         float GetSpellCritFromIntellect();
         float OCTRegenHPPerSpirit();
         float OCTRegenMPPerSpirit();
-        float GetRatingCoefficient(CombatRating cr) const;
+        float GetRatingMultiplier(CombatRating cr) const;
         float GetRatingBonusValue(CombatRating cr) const;
         uint32 GetBaseSpellPowerBonus() { return m_baseSpellPower; }
 
@@ -2001,8 +1992,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void CheckAreaExploreAndOutdoor(void);
 
-        static uint32 TeamForRace(uint8 race);
-        uint32 GetTeam() const { return m_team; }
+        static Team TeamForRace(uint8 race);
+        Team GetTeam() const { return m_team; }
         static uint32 getFactionForRace(uint8 race);
         void setFactionForRace(uint8 race);
 
@@ -2200,8 +2191,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         WorldLocation const& GetBattleGroundEntryPoint() const { return m_bgData.joinPos; }
         void SetBattleGroundEntryPoint();
 
-        void SetBGTeam(uint32 team) { m_bgData.bgTeam = team; }
-        uint32 GetBGTeam() const { return m_bgData.bgTeam ? m_bgData.bgTeam : GetTeam(); }
+        void SetBGTeam(Team team) { m_bgData.bgTeam = team; }
+        Team GetBGTeam() const { return m_bgData.bgTeam ? m_bgData.bgTeam : GetTeam(); }
 
         void LeaveBattleground(bool teleportToEntryPoint = true);
         bool CanJoinToBattleground() const;
@@ -2524,7 +2515,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void outDebugStatsValues() const;
         ObjectGuid m_lootGuid;
 
-        uint32 m_team;
+        Team m_team;
         uint32 m_nextSave;
         time_t m_speakTime;
         uint32 m_speakCount;
@@ -2643,8 +2634,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         Group *m_groupInvite;
         uint32 m_groupUpdateMask;
         uint64 m_auraUpdateMask;
-
-        ObjectGuid m_miniPetGuid;
 
         // Player summoning
         time_t m_summon_expire;
@@ -2785,27 +2774,6 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
     float diff = (float)basevalue*(float)totalpct/100.0f + (float)totalflat;
     basevalue = T((float)basevalue + diff);
     return T(diff);
-}
-
-template<typename Func>
-void Player::CallForAllControlledUnits(Func const& func, bool withTotems, bool withGuardians, bool withCharms, bool withMiniPet)
-{
-    if (withMiniPet)
-        if(Unit* mini = GetMiniPet())
-            func(mini);
-
-    Unit::CallForAllControlledUnits(func,withTotems,withGuardians,withCharms);
-}
-
-template<typename Func>
-bool Player::CheckAllControlledUnits(Func const& func, bool withTotems, bool withGuardians, bool withCharms, bool withMiniPet) const
-{
-    if (withMiniPet)
-        if(Unit const* mini = GetMiniPet())
-            if (func(mini))
-                return true;
-
-    return Unit::CheckAllControlledUnits(func,withTotems,withGuardians,withCharms);
 }
 
 #endif

@@ -42,12 +42,12 @@ mangos_worldd_SOURCES = \
 mangos_worldd_LDADD = \
 	../bindings/universal/libmangosscript.la \
 	../game/libmangosgame.a \
+	../game/vmap/libmangosvmaps.a \
 	../shared/Database/libmangosdatabase.a \
 	../shared/Config/libmangosconfig.a \
 	../game/playerbot/libmangosbot.a \
 	../shared/Auth/libmangosauth.a \
 	../shared/libmangosshared.a \
-	../shared/vmap/libmangosvmaps.a \
 	../framework/libmangosframework.a \
 	../../dep/src/g3dlite/libg3dlite.a \
 	../../dep/src/gsoap/libgsoap.a
