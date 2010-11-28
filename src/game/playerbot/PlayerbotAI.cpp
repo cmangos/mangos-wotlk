@@ -25,6 +25,7 @@
 #include "../SharedDefines.h"
 #include "Log.h"
 #include "../GossipDef.h"
+#include "../MotionMaster.h"
 
 // returns a float in range of..
 float rand_float(float low, float high)
@@ -1424,8 +1425,6 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
     // add thingToAttack to loot list
     m_lootCreature.push_back(m_targetCombat->GetGUID());
 
-    // set movement generators for combat movement
-    MovementClear();
     return;
 }
 
@@ -2104,6 +2103,9 @@ bool PlayerbotAI::IsMoving()
 
 void PlayerbotAI::SetInFront(const Unit* obj)
 {
+    if (IsMoving())
+        return;
+
     m_bot->SetInFront(obj);
 
     // TODO: Schmoozerd wrote a patch which adds MovementInfo::ChangeOrientation()
@@ -2133,6 +2135,21 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
 {
     if (m_bot->IsBeingTeleported() || m_bot->GetTrader())
         return;
+
+    // Send updates to world if chasing target or moving to point
+    MovementGeneratorType movementType = m_bot->GetMotionMaster()->GetCurrentMovementGeneratorType();
+    if (movementType == CHASE_MOTION_TYPE || movementType == POINT_MOTION_TYPE)
+    {
+        float x, y, z;
+        m_bot->GetMotionMaster()->GetDestination(x, y, z);
+        if (x != m_destX || y != m_destY || z != m_destZ)
+        {
+            m_bot->SendMonsterMoveWithSpeed(x, y, z);
+            m_destX = x;
+            m_destY = y;
+            m_destZ = z;
+        }
+    }
 
     time_t currentTime = time(0);
     if (currentTime < m_ignoreAIUpdatesUntilTime)

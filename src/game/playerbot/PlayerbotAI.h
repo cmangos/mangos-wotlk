@@ -335,6 +335,8 @@ private:
     Unit *m_followTarget;       // whom to follow in non combat situation?
 
     std::map<uint32, float> m_spellRangeMap;
+
+    float m_destX, m_destY, m_destZ; // latest coordinates for chase and point movement types
 };
 
 #endif
