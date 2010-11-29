@@ -17,8 +17,7 @@
 ## Process this file with automake to produce Makefile.in
 
 ## Sub-directories to parse
-SUBDIRS = playerbot
-SUBDIRS = vmap
+SUBDIRS = playerbot vmap
 
 ## CPP flags for includes, defines, etc.
 AM_CPPFLAGS = $(MANGOS_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared -I$(srcdir)/vmap -I$(srcdir)/../realmd -I$(srcdir)/../../dep/include/g3dlite -DSYSCONFDIR=\"$(sysconfdir)/\"

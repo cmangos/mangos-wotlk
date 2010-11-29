@@ -18,7 +18,7 @@
 #include "../Player.h"
 #include "../ObjectMgr.h"
 #include "../Chat.h"
-#include "../WorldPacket.h"
+#include "WorldPacket.h"
 #include "../Spell.h"
 #include "../Unit.h"
 #include "../SpellAuras.h"

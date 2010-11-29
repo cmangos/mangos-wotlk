@@ -6,7 +6,7 @@
 #include "../SpellMgr.h"
 #include "../Player.h"
 #include "../ObjectMgr.h"
-#include "../WorldPacket.h"
+#include "WorldPacket.h"
 #include "../Unit.h"
 #include "../SharedDefines.h"
 #include "PlayerbotAI.h"
