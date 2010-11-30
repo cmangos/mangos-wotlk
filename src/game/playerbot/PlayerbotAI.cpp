@@ -1488,8 +1488,6 @@ void PlayerbotAI::SetQuestNeedItems()
 {
     // reset values first
     m_needItemList.clear();
-    m_lootCreature.clear();
-    m_lootCurrent = 0;
 
     // run through accepted quests, get quest infoand data
     for (QuestStatusMap::iterator iter = m_bot->getQuestStatusMap().begin(); iter != m_bot->getQuestStatusMap().end(); ++iter)
@@ -1630,6 +1628,7 @@ void PlayerbotAI::DoLoot()
             // release loot
             // if( uint64 lguid = m_bot->GetLootGUID() && m_bot->GetSession() )
             m_bot->GetSession()->DoLootRelease(m_lootCurrent);
+            m_lootCurrent = 0;
             //else if( !m_bot->GetSession() )
             //    sLog.outDebug( "[PlayerbotAI]: %s has no session. Cannot release loot!", m_bot->GetName() );
 
@@ -2239,6 +2238,7 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
         {
             SetState(BOTSTATE_LOOTING);
             m_attackerInfo.clear();
+            m_lootCreature.unique();
             SetIgnoreUpdateTime();
         }
         else if (m_botState == BOTSTATE_LOOTING)

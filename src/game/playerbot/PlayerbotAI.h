@@ -15,7 +15,7 @@ class Item;
 class PlayerbotClassAI;
 class PlayerbotMgr;
 
-#define BOTLOOT_DISTANCE 25.0f
+#define BOTLOOT_DISTANCE 75.0f
 
 enum RacialTraits
 {
