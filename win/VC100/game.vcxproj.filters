@@ -897,7 +897,6 @@
     <ClInclude Include="..\..\src\game\Camera.h">
       <Filter>Object</Filter>
     </ClInclude>
-<<<<<<< HEAD
     <ClInclude Include="..\..\src\game\playerbot\PlayerbotAI.h">
       <Filter>World/Handlers</Filter>
     </ClInclude>
@@ -936,7 +935,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\playerbot\PlayerbotWarriorAI.h">
       <Filter>World/Handlers</Filter>
-=======
     <ClInclude Include="..\..\src\game\vmap\BIH.h">
       <Filter>vmaps</Filter>
     </ClInclude>
@@ -966,7 +964,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\vmap\WorldModel.h">
       <Filter>vmaps</Filter>
->>>>>>> a1c4e1dd990a26256e1bb80bbabcecc723a016a6
     </ClInclude>
   </ItemGroup>
 </Project>
