@@ -164,7 +164,7 @@ public:
     uint32 extractMoney(const std::string& text) const;
 
     // extracts gameobject info from link
-    bool extractGOinfo(const std::string& text, uint32 &guid,  uint32 &entry, int &mapid, float &x, float &y, float &z) const;
+    void extractGOinfo(const std::string& text, std::list<uint64>& m_lootTargets) const;
 
     // finds items in bots equipment and adds them to foundItemList, removes found items from itemIdSearchList
     void findItemsInEquip(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const;
@@ -310,8 +310,8 @@ private:
     BotNeedItem m_needItemList;
 
     // list of creatures we recently attacked and want to loot
-    BotLootCreature m_lootCreature;      // list of creatures
-    uint64 m_lootCurrent;                // current remains of interest
+    BotLootCreature m_lootTargets;      // list of creatures
+    ObjectGuid m_lootCurrent;          // current remains of interest
 
     time_t m_TimeDoneEating;
     time_t m_TimeDoneDrinking;
