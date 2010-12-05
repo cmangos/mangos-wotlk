@@ -1343,7 +1343,6 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
     {
         SetState(BOTSTATE_COMBAT);
         SetQuestNeedItems();
-        m_lootTargets.clear();
         m_lootCurrent = ObjectGuid();
         m_targetCombat = 0;
     }
@@ -1513,7 +1512,7 @@ void PlayerbotAI::SetQuestNeedItems()
 
 void PlayerbotAI::SetState(BotState state)
 {
-    sLog.outDebug( "[PlayerbotAI]: %s switch state %d to %d", m_bot->GetName(), m_botState, state );
+    // sLog.outDebug( "[PlayerbotAI]: %s switch state %d to %d", m_bot->GetName(), m_botState, state );
     m_botState = state;
 }
 
@@ -1541,7 +1540,7 @@ void PlayerbotAI::DoLoot()
 
     if (m_lootCurrent.IsEmpty() && m_lootTargets.empty())
     {
-        sLog.outDebug( "[PlayerbotAI]: %s reset loot list / go back to idle", m_bot->GetName() );
+        // sLog.outDebug( "[PlayerbotAI]: %s reset loot list / go back to idle", m_bot->GetName() );
         SetState(BOTSTATE_NORMAL);
         m_bot->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
         SetQuestNeedItems();
