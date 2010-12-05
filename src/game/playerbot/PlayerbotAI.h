@@ -41,6 +41,39 @@ enum RacialTraits
     WILL_OF_THE_FORSAKEN_ALL       = 7744
 };
 
+enum ProfessionSpells
+{
+    ALCHEMY_1                      = 2259,
+    BLACKSMITHING_1                = 2018,
+    COOKING_1                      = 2550,
+    ENCHANTING_1                   = 7411,
+    ENGINEERING_1                  = 4036,
+    FIRST_AID_1                    = 3273,
+    FISHING_1                      = 7620,
+    HERB_GATHERING_1               = 2366,
+    INSCRIPTION_1                  = 45357,
+    JEWELCRAFTING_1                = 25229,
+    MINING_1                       = 2575,
+    SKINNING_1                     = 8613,
+    TAILORING_1                    = 3908
+};
+
+enum NotableItems
+{
+    // Skeleton Keys
+    SILVER_SKELETON_KEY = 15869,
+    GOLDEN_SKELETON_KEY = 15870,
+    TRUESILVER_SKELETON_KEY = 15871,
+    ARCANITE_SKELETON_KEY = 15872,
+    TITANIUM_SKELETON_KEY = 43853,
+    COBALT_SKELETON_KEY = 43854,
+    // Lock Charges
+    SMALL_SEAFORIUM_CHARGE = 4367,
+    LARGE_SEAFORIUM_CHARGE = 4398,
+    POWERFUL_SEAFORIUM_CHARGE = 18594,
+    ELEMENTAL_SEAFORIUM_CHARGE = 23819
+};
+
 class MANGOS_DLL_SPEC PlayerbotAI
 {
 public:
@@ -206,6 +239,8 @@ public:
     Item* FindPoison() const;
     Item* FindMount(uint32 matchingRidingSkill) const;
     Item* FindItem(uint32 ItemId);
+    Item* FindKeyForLockValue(uint32 reqSkillValue);
+    Item* FindBombForLockValue(uint32 reqSkillValue);
     Item* FindConsumable(uint32 displayId) const;
 
     // ******* Actions ****************************************
@@ -335,6 +370,11 @@ private:
     Unit *m_followTarget;       // whom to follow in non combat situation?
 
     std::map<uint32, float> m_spellRangeMap;
+
+    uint32  FISHING,
+            HERB_GATHERING,
+            MINING,
+            SKINNING;
 };
 
 #endif

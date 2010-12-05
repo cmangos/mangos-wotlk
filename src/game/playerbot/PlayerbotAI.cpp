@@ -111,6 +111,10 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
             m_classAI = (PlayerbotClassAI*) new PlayerbotDeathKnightAI(GetMaster(), m_bot, this);
             break;
     }
+
+    HERB_GATHERING      = initSpell(HERB_GATHERING_1);
+    MINING              = initSpell(MINING_1);
+    SKINNING            = initSpell(SKINNING_1);
 }
 
 PlayerbotAI::~PlayerbotAI()
@@ -824,6 +828,28 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             return;
         }
 
+        case SMSG_SPELL_START:
+        {
+            WorldPacket p(packet);
+            uint64 castItemGuid = p.readPackGUID();
+            uint64 casterGuid = p.readPackGUID();
+            if (casterGuid != m_bot->GetGUID())
+                return;
+
+            uint8 castCount;
+            p >> castCount;
+            uint32 spellId;
+            p >> spellId;
+            uint32 castFlags;
+            p >> castFlags;
+            uint32 msTime;
+            p >> msTime;
+
+            m_ignoreAIUpdatesUntilTime = time(0) + (msTime / 1000) + 1;
+
+            return;
+        }
+
         case SMSG_SPELL_GO:
         {
             WorldPacket p(packet);
@@ -878,6 +904,96 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 SetState(BOTSTATE_NORMAL);
                 SetIgnoreUpdateTime(0);
             }
+            return;
+        }
+
+        case SMSG_LOOT_RESPONSE:
+        {
+            WorldPacket p(packet);
+            ObjectGuid guid;
+            uint8 loot_type;
+            uint32 gold;
+            uint8 items;
+
+            p >> guid;
+            p >> loot_type;
+            p >> gold;
+            p >> items;
+
+            if (gold > 0)
+            {
+                WorldPacket* const packet = new WorldPacket(CMSG_LOOT_MONEY, 0);
+                m_bot->GetSession()->QueuePacket(packet);
+            }
+
+            if (loot_type == LOOT_SKINNING)     // skin loot type sent by server for EffectOpenLock
+            {
+                for (uint8 i = 0; i < items; ++i)
+                {
+                    // just auto loot everything for getting object
+                    WorldPacket* const packet = new WorldPacket(CMSG_AUTOSTORE_LOOT_ITEM, 1);
+                    *packet << i;
+                    m_bot->GetSession()->QueuePacket(packet);
+                }
+            }
+            else if (loot_type == LOOT_CORPSE)  // loot from a creature
+            {
+                for (uint8 i = 0; i < items; ++i)
+                {
+                    // look for through items on corpse and loot them
+                    uint32 itemid;
+                    uint32 itemcount;
+                    uint8 lootslot_type;
+                    uint8 itemindex;
+                    bool grab = false;
+
+                    p >> itemindex;
+                    p >> itemid;
+                    p >> itemcount;
+                    p.read_skip<uint32>();  // display id
+                    p.read_skip<uint32>();  // randomSuffix
+                    p.read_skip<uint32>();  // randomPropertyId
+                    p >> lootslot_type;     // 0 = can get, 1 = look only, 2 = master get
+
+                    ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid);
+                    if (pProto)
+                    {
+                        if (!m_bot->HasItemCount(itemid, pProto->MaxCount, true))    // already have the max of it
+                        {
+                            if (m_needItemList[itemid] > 0)
+                                grab = true;    // item is in need list, just grab it
+                            else    // run some other checks in case item is of interest
+                            {
+                                if (pProto->StartQuest > 0 || pProto->Class == ITEM_CLASS_QUEST)
+                                    grab = true;
+                                // TODO: add items that bot is told to collect here, use CLASS and SUBCLASS?
+                            }
+                        }
+                    }
+
+                    if (grab)
+                    {
+                        sLog.outDebug( "[PlayerbotAI]: Loot item index %u item id %u", itemindex, itemid);
+                        WorldPacket* const packet = new WorldPacket(CMSG_AUTOSTORE_LOOT_ITEM, 1);
+                        *packet << itemindex;
+                        m_bot->GetSession()->QueuePacket(packet);
+                    }
+                }
+            }
+
+            // release loot
+            WorldPacket* const packet = new WorldPacket(CMSG_LOOT_RELEASE, 8);
+            *packet << guid;
+            m_bot->GetSession()->QueuePacket(packet);
+
+            // TODO: add creature skinnable check to not clear unless skinned
+            // clear current target
+            m_lootCurrent = ObjectGuid();
+            // clear movement
+            m_bot->GetMotionMaster()->Clear();
+            m_bot->GetMotionMaster()->MoveIdle();
+            SetQuestNeedItems();
+
             return;
         }
 
@@ -1560,22 +1676,26 @@ void PlayerbotAI::DoLoot()
         {
             if (!go)
             {
-		m_lootCurrent = ObjectGuid();
+                m_lootCurrent = ObjectGuid();
                 return;
             }
         }
 
-       if(c)
-       {
+        if(c)
+        {
             m_bot->GetMotionMaster()->MovePoint(c->GetMapId(), c->GetPositionX(), c->GetPositionY(), c->GetPositionZ());
             //sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s' deathState=%d", m_bot->GetName(), c->GetName(), c->getDeathState() );
-       }
-
-       if(go)
-       {
-           m_bot->GetMotionMaster()->MovePoint(go->GetMapId(), go->GetPositionX(), go->GetPositionY(), go->GetPositionZ());
-           //sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s'", m_bot->GetName(), go->GetGOInfo()->name);
         }
+
+        if(go)
+        {
+            m_bot->GetMotionMaster()->MovePoint(go->GetMapId(), go->GetPositionX(), go->GetPositionY(), go->GetPositionZ());
+            //sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s'", m_bot->GetName(), go->GetGOInfo()->name);
+        }
+
+        // TEMP HACK: attempt to fix duplicate loot attempt (shows when getting ores occasionally)
+        // give time to move to point before trying again
+        m_ignoreAIUpdatesUntilTime = time(0) + 1;
     }
     else
     {
@@ -1591,122 +1711,167 @@ void PlayerbotAI::DoLoot()
         }
         if (m_bot->IsWithinDistInMap(c, INTERACTION_DISTANCE) || m_bot->IsWithinDistInMap(go, INTERACTION_DISTANCE))
         {
-
-            // check for needed items
-            uint32 lootNum = 0;
-            Loot *loot;
-
-            if(go)
+            if (c)  // creature
             {
-                m_bot->SendLoot(m_lootCurrent, LOOT_CORPSE);
-                loot = &go->loot;
-                lootNum = loot->GetMaxSlotInLootFor(m_bot);
+                // TODO: add skinnable check in this block
+                WorldPacket* const packet = new WorldPacket(CMSG_LOOT, 8);
+                *packet << m_lootCurrent;
+                m_bot->GetSession()->QueuePacket(packet);
+                return;     // m_lootCurrent is reset in SMSG_LOOT_RESPONSE
             }
-            else
-            {
-                m_bot->SendLoot(m_lootCurrent, LOOT_CORPSE);
-                loot = &c->loot;
-                lootNum = loot->GetMaxSlotInLootFor(m_bot);
-            }
-            // sLog.outDebug( "[PlayerbotAI]: %s looting: '%s' got %d items", m_bot->GetName(), c->GetName(), loot->GetMaxSlotInLootFor( m_bot ) );
-            for (uint32 l = 0; l < lootNum; l++)
-            {
-                QuestItem *qitem = 0, *ffaitem = 0, *conditem = 0;
-                LootItem *item = loot->LootItemInSlot(l, m_bot, &qitem, &ffaitem, &conditem);
-                if (!item)
-                    continue;
 
-                if (!qitem && item->is_blocked)
+            if (go) // object
+            {
+                uint32 skillId = 0;
+                uint32 reqItem = 0;
+                uint32 reqSkillValue = 0;
+                uint32 SkillValue = 0;
+                bool keyFailed = false;
+                bool skillFailed = false;
+                bool forceFailed = false;
+
+                // check skill or lock on object
+                uint32 lockId = go->GetGOInfo()->GetLockId();
+                LockEntry const *lockInfo = sLockStore.LookupEntry(lockId);
+                if (lockInfo)
                 {
-                    m_bot->SendLootRelease(m_bot->GetLootGUID());
-                    continue;
+                    for (int i = 0; i < 8; ++i)
+                    {
+                        switch(lockInfo->Type[i])
+                        {
+                            case LOCK_KEY_ITEM:
+                                if (lockInfo->Index[i] > 0)
+                                    reqItem = lockInfo->Index[i];
+                                break;
+                            case LOCK_KEY_SKILL:
+                                if (SkillByLockType(LockType(lockInfo->Index[i])) > 0)
+                                {
+                                    skillId = SkillByLockType(LockType(lockInfo->Index[i]));
+                                    reqSkillValue = lockInfo->Skill[i];
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                 }
 
-                if (m_needItemList[item->itemid] > 0)
+                // use key on object if available
+                if (reqItem > 0 && m_bot->HasItemCount(reqItem,1))
                 {
-                    //sLog.outDebug( "[PlayerbotAI]: %s looting: needed item '%s'", m_bot->GetName(), sObjectMgr.GetItemLocale(item->itemid)->Name );
-                    ItemPosCountVec dest;
-                    if (m_bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item->itemid, item->count) == EQUIP_ERR_OK)
-                    {
-                        Item * newitem = m_bot->StoreNewItem(dest, item->itemid, true, item->randomPropertyId);
+                    UseItem(m_bot->GetItemByEntry(reqItem), TARGET_FLAG_OBJECT, m_lootCurrent);
+                    m_lootCurrent = ObjectGuid();
+                    return;
+                }
+                else
+                    keyFailed = true;
 
-                        if (qitem)
+                // determine bot's skill value for object's required skill
+                if (skillId != SKILL_NONE)
+                    SkillValue = m_bot->GetPureSkillValue(skillId);
+
+                // bot has the specific skill or object requires no skill at all
+                if ((m_bot->HasSkill(skillId) && skillId != SKILL_NONE) || skillId == SKILL_NONE)
+                {
+                    if (SkillValue >= reqSkillValue)
+                    {
+                        switch(skillId)
                         {
-                            qitem->is_looted = true;
-                            if (item->freeforall || loot->GetPlayerQuestItems().size() == 1)
-                                m_bot->SendNotifyLootItemRemoved(l);
-                            else
-                                loot->NotifyQuestItemRemoved(qitem->index);
+                            case SKILL_MINING:
+                                if (HasPick() && CastSpell(MINING))
+                                    return;
+                                else
+                                    skillFailed = true;
+                                break;
+                            case SKILL_HERBALISM:
+                                if (CastSpell(HERB_GATHERING))
+                                    return;
+                                else
+                                    skillFailed = true;
+                                break;
+                            case SKILL_LOCKPICKING:
+                                if (CastSpell(PICK_LOCK_1))
+                                    return;
+                                else
+                                    skillFailed = true;
+                                break;
+                            case SKILL_NONE:
+                                if (CastSpell(3365)) //Spell 3365 = Opening?
+                                    return;
+                                else
+                                    skillFailed = true;
+                                break;
+                            default:
+                                TellMaster("I'm not sure how to get that.");
+                                skillFailed = true;
+                                sLog.outDebug( "[PlayerbotAI]:DoLoot Skill %u is not implemented", skillId);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        TellMaster("My skill is not high enough. It requires %u, but mine is %u.",
+                            reqSkillValue, SkillValue);
+                        skillFailed = true;
+                    }
+                }
+                else
+                {
+                    TellMaster("I do not have the required skill.");
+                    skillFailed = true;
+                }
+
+                // if pickable, check if a forcible item is available for the bot
+                if (skillId == SKILL_LOCKPICKING && (m_bot->HasSkill(SKILL_BLACKSMITHING) ||
+                    m_bot->HasSkill(SKILL_ENGINEERING)))
+                {
+                    // check for skeleton keys appropriate for lock value
+                    if (m_bot->HasSkill(SKILL_BLACKSMITHING))
+                    {
+                        Item *kItem = FindKeyForLockValue(reqSkillValue);
+                        if (kItem)
+                        {
+                            TellMaster("I have a skeleton key that can open it!");
+                            UseItem(kItem, TARGET_FLAG_OBJECT, m_lootCurrent);
+                            return;
                         }
                         else
                         {
-                            if (ffaitem)
-                            {
-                                ffaitem->is_looted = true;
-                                m_bot->SendNotifyLootItemRemoved(l);
-                            }
-                            else
-                            {
-                                if (conditem)
-                                    conditem->is_looted = true;
-                                loot->NotifyItemRemoved(l);
-                            }
+                            TellMaster("I have no skeleton keys that can open that lock.");
+                            forceFailed = true;
                         }
-                        if (!item->freeforall)
-                            item->is_looted = true;
-                        --loot->unlootedCount;
-                        m_bot->SendNewItem(newitem, uint32(item->count), false, false, true);
-                        m_bot->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count);
+                    }
+
+                    // check for a charge that can blast it open
+                    if (m_bot->HasSkill(SKILL_ENGINEERING))
+                    {
+                        Item *bItem = FindBombForLockValue(reqSkillValue);
+                        if (bItem)
+                        {
+                            TellMaster("I can blast it open!");
+                            UseItem(bItem, TARGET_FLAG_OBJECT, m_lootCurrent);
+                            return;
+                        }
+                        else
+                        {
+                            TellMaster("I have nothing to blast it open with.");
+                            forceFailed = true;
+                        }
                     }
                 }
+                else
+                    forceFailed = true;
 
-                if (go)
+                // if all attempts failed in some way then clear because it won't get SMSG_LOOT_RESPONSE
+                if (keyFailed && skillFailed && forceFailed)
                 {
-                    uint32 lockId = go->GetGOInfo()->GetLockId();
-                    LockEntry const *lockInfo = sLockStore.LookupEntry(lockId);
-                    if (lockInfo)
-                    {
-                        uint32 skillId = 0;
-                        uint32 reqSkillValue = 0;
-                        for (int i = 0; i < 8; ++i)
-                        {
-                            skillId = SkillByLockType(LockType(lockInfo->Index[i]));
-                            if (skillId > 0)
-                            {
-                                reqSkillValue = lockInfo->Skill[i];
-                                break;
-                            }
-                        }
-
-                        if (m_bot->HasSkill(skillId) || skillId == SKILL_NONE) // Has skill or skill not required
-                        {
-                            if ((skillId == SKILL_MINING) && !HasPick())
-                                continue;
-
-                            ItemPosCountVec dest;
-                            if (m_bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item->itemid, item->count) == EQUIP_ERR_OK)
-                            {
-                                Item* pItem = m_bot->StoreNewItem (dest, item->itemid, true, item->randomPropertyId);
-                                uint32 SkillValue = m_bot->GetPureSkillValue(skillId);
-                                if (SkillValue >= reqSkillValue)
-                                {
-                                    m_bot->SendNewItem(pItem, uint32(item->count), false, false, true);
-                                    m_bot->UpdateGatherSkill(skillId, SkillValue, reqSkillValue);
-                                    --loot->unlootedCount;
-                                }
-                            }
-                        }
-                    }
+                    sLog.outDebug( "[PlayerbotAI]: DoLoot attempts failed on [%s]", go->GetGOInfo()->name);
+                    m_lootCurrent = ObjectGuid();
+                    // clear movement target, take next target on next update
+                    m_bot->GetMotionMaster()->Clear();
+                    m_bot->GetMotionMaster()->MoveIdle();
                 }
             }
-            // release loot
-            m_bot->GetSession()->DoLootRelease(m_lootCurrent);
-            m_lootCurrent = ObjectGuid();
-            // clear movement target, take next target on next update
-            m_bot->GetMotionMaster()->Clear();
-            m_bot->GetMotionMaster()->MoveIdle();
-            SetQuestNeedItems();
-            // sLog.outDebug( "[PlayerbotAI]: exit doloot %s looted target 0x%08X", m_bot->GetName(), m_lootCurrent );
         }
     }
 }
@@ -2444,8 +2609,28 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         MovementClear();
     }
 
-    // actually cast spell
-    m_bot->CastSpell(pTarget, pSpellInfo, false);
+    // for spells of this type send packet with TARGET_FLAG_OBJECT
+    if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK)
+    {
+        if (!m_lootCurrent.IsEmpty())
+        {
+            WorldPacket* const packet = new WorldPacket(CMSG_CAST_SPELL, 1+4+1+4+8);
+            *packet << uint8(0);                            // spells cast count;
+            *packet << spellId;
+            *packet << uint8(0);                            // unk_flags
+            *packet << uint32(TARGET_FLAG_OBJECT);
+            *packet << m_lootCurrent.WriteAsPacked();
+            m_bot->GetSession()->QueuePacket(packet);       // queue the packet to get around race condition
+
+            WorldPacket* const packetgouse = new WorldPacket(CMSG_GAMEOBJ_REPORT_USE, 8);
+            *packetgouse << uint64(m_lootCurrent.GetRawValue());
+            m_bot->GetSession()->QueuePacket(packetgouse);  // queue the packet to get around race condition
+        }
+        else
+            return false;
+    }
+    else
+        m_bot->CastSpell(pTarget, pSpellInfo, false);       // actually cast spell
 
     Spell* const pSpell = m_bot->FindCurrentSpellBySpellId(spellId);
     if (!pSpell)
@@ -2640,6 +2825,38 @@ Item* PlayerbotAI::FindItem(uint32 ItemId)
                 }
             }
     }
+    return NULL;
+}
+
+Item* PlayerbotAI::FindKeyForLockValue(uint32 reqSkillValue)
+{
+    if (reqSkillValue <= 25 && m_bot->HasItemCount(SILVER_SKELETON_KEY,1))
+        return m_bot->GetItemByEntry(SILVER_SKELETON_KEY);
+    if (reqSkillValue <= 125 && m_bot->HasItemCount(GOLDEN_SKELETON_KEY,1))
+        return m_bot->GetItemByEntry(GOLDEN_SKELETON_KEY);
+    if (reqSkillValue <= 200 && m_bot->HasItemCount(TRUESILVER_SKELETON_KEY,1))
+        return m_bot->GetItemByEntry(TRUESILVER_SKELETON_KEY);
+    if (reqSkillValue <= 300 && m_bot->HasItemCount(ARCANITE_SKELETON_KEY,1))
+        return m_bot->GetItemByEntry(ARCANITE_SKELETON_KEY);
+    if (reqSkillValue <= 375 && m_bot->HasItemCount(TITANIUM_SKELETON_KEY,1))
+        return m_bot->GetItemByEntry(TITANIUM_SKELETON_KEY);
+    if (reqSkillValue <= 400 && m_bot->HasItemCount(COBALT_SKELETON_KEY,1))
+        return m_bot->GetItemByEntry(COBALT_SKELETON_KEY);
+
+    return NULL;
+}
+
+Item* PlayerbotAI::FindBombForLockValue(uint32 reqSkillValue)
+{
+    if (reqSkillValue <= 150 && m_bot->HasItemCount(SMALL_SEAFORIUM_CHARGE,1))
+        return m_bot->GetItemByEntry(SMALL_SEAFORIUM_CHARGE);
+    if (reqSkillValue <= 250 && m_bot->HasItemCount(LARGE_SEAFORIUM_CHARGE,1))
+        return m_bot->GetItemByEntry(LARGE_SEAFORIUM_CHARGE);
+    if (reqSkillValue <= 300 && m_bot->HasItemCount(POWERFUL_SEAFORIUM_CHARGE,1))
+        return m_bot->GetItemByEntry(POWERFUL_SEAFORIUM_CHARGE);
+    if (reqSkillValue <= 350 && m_bot->HasItemCount(ELEMENTAL_SEAFORIUM_CHARGE,1))
+        return m_bot->GetItemByEntry(ELEMENTAL_SEAFORIUM_CHARGE);
+
     return NULL;
 }
 
@@ -2991,7 +3208,7 @@ void PlayerbotAI::UseItem(Item *item, uint32 targetFlag, ObjectGuid targetGUID)
     *packet << bagIndex << slot << cast_count << spellId << item_guid
            << glyphIndex << unk_flags << targetFlag;
 
-    if (targetFlag & (TARGET_FLAG_UNIT | TARGET_FLAG_ITEM))
+    if (targetFlag & (TARGET_FLAG_UNIT | TARGET_FLAG_ITEM | TARGET_FLAG_OBJECT))
         *packet << targetGUID.WriteAsPacked();
 
     m_bot->GetSession()->QueuePacket(packet);
