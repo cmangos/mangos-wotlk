@@ -550,8 +550,40 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
         case SMSG_INVENTORY_CHANGE_FAILURE:
         {
-            TellMaster("I can't use that.");
-            return;
+            WorldPacket p(packet);
+            uint8 err;
+            p >> err;
+            if (err != EQUIP_ERR_OK)
+            {
+                switch (err)
+                {
+                    case EQUIP_ERR_MISSING_REAGENT:
+                        TellMaster("I'm missing some reagents for that.");
+                        return;
+                    case EQUIP_ERR_ITEM_LOCKED:
+                        TellMaster("That item is locked.");
+                        return;
+                    case EQUIP_ERR_ALREADY_LOOTED:
+                        TellMaster("That is already looted.");
+                        return;
+                    case EQUIP_ERR_INVENTORY_FULL:
+                        TellMaster("My inventory is full.");
+                        return;
+                    case EQUIP_ERR_NOT_IN_COMBAT:
+                        TellMaster("I can't use that in combat.");
+                        return;
+                    case EQUIP_ERR_LOOT_CANT_LOOT_THAT_NOW:
+                        TellMaster("I can't get that now.");
+                        return;
+                    case EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE:
+                        TellMaster("I can only have one of those equipped.");
+                        return;
+                    default:
+                        TellMaster("I can't use that.");
+                        sLog.outDebug("[PlayerbotAI]: SMSG_INVENTORY_CHANGE_FAILURE: %u", err);
+                        return;
+                }
+            }
         }
         case SMSG_SPELL_FAILURE:
         {
