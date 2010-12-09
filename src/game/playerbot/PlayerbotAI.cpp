@@ -994,19 +994,116 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     p.read_skip<uint32>();  // randomPropertyId
                     p >> lootslot_type;     // 0 = can get, 1 = look only, 2 = master get
 
+                    if (lootslot_type != 0)
+                        continue;
+
                     ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid);
-                    if (pProto)
+                    if (!pProto)
+                        continue;
+
+                    uint32 max = pProto->MaxCount;
+                    // do we already have the max allowed of item if more than zero?
+                    if (max > 0 && m_bot->HasItemCount(itemid, max, true))
+                        continue;
+
+                    // grab quest related items
+                    if (pProto->StartQuest > 0)
+                        grab = true;
+
+                    if (m_needItemList[itemid] > 0)
+                        grab = true;    // item is in need list, just grab without further processing
+                    else    // if not in need list, run other checks
                     {
-                        if (!m_bot->HasItemCount(itemid, pProto->MaxCount, true))    // already have the max of it
+                        switch (pProto->Class)
                         {
-                            if (m_needItemList[itemid] > 0)
-                                grab = true;    // item is in need list, just grab it
-                            else    // run some other checks in case item is of interest
+                            case ITEM_CLASS_QUEST:
+                            case ITEM_CLASS_KEY:
+                                grab = true;
+                                break;
+                            case ITEM_CLASS_TRADE_GOODS:    // bot loots based on skills
+                                switch (pProto->SubClass)
+                                {
+                                    case ITEM_SUBCLASS_PARTS:
+                                    case ITEM_SUBCLASS_EXPLOSIVES:
+                                    case ITEM_SUBCLASS_DEVICES:
+                                        grab = m_bot->HasSkill(SKILL_ENGINEERING);
+                                        break;
+                                    case ITEM_SUBCLASS_JEWELCRAFTING:
+                                        grab = m_bot->HasSkill(SKILL_JEWELCRAFTING);
+                                        break;
+                                    case ITEM_SUBCLASS_CLOTH:
+                                        grab = m_bot->HasSkill(SKILL_TAILORING);
+                                        break;
+                                    case ITEM_SUBCLASS_LEATHER:
+                                        grab = m_bot->HasSkill(SKILL_LEATHERWORKING);
+                                        break;
+                                    case ITEM_SUBCLASS_METAL_STONE:
+                                        grab = (m_bot->HasSkill(SKILL_BLACKSMITHING) ||
+                                            m_bot->HasSkill(SKILL_ENGINEERING) ||
+                                            m_bot->HasSkill(SKILL_MINING));
+                                        break;
+                                    case ITEM_SUBCLASS_MEAT:
+                                        grab = m_bot->HasSkill(SKILL_COOKING);
+                                        break;
+                                    case ITEM_SUBCLASS_HERB:
+                                        grab = (m_bot->HasSkill(SKILL_HERBALISM) ||
+                                            m_bot->HasSkill(SKILL_ALCHEMY) ||
+                                            m_bot->HasSkill(SKILL_INSCRIPTION));
+                                        break;
+                                    case ITEM_SUBCLASS_ELEMENTAL:
+                                        grab = true;    // pretty much every profession uses these a bit
+                                        break;
+                                    case ITEM_SUBCLASS_ENCHANTING:
+                                        grab = m_bot->HasSkill(SKILL_ENCHANTING);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                break;
+                            case ITEM_CLASS_RECIPE:     // bot will loot unknown recipes
                             {
-                                if (pProto->StartQuest > 0 || pProto->Class == ITEM_CLASS_QUEST)
-                                    grab = true;
-                                // TODO: add items that bot is told to collect here, use CLASS and SUBCLASS?
+                                // skip recipes that we have
+                                if (m_bot->HasSpell(pProto->Spells[2].SpellId))
+                                    continue;
+
+                                switch (pProto->SubClass)
+                                {
+                                    case ITEM_SUBCLASS_LEATHERWORKING_PATTERN:
+                                        grab = m_bot->HasSkill(SKILL_LEATHERWORKING);
+                                        break;
+                                    case ITEM_SUBCLASS_TAILORING_PATTERN:
+                                        grab = m_bot->HasSkill(SKILL_TAILORING);
+                                        break;
+                                    case ITEM_SUBCLASS_ENGINEERING_SCHEMATIC:
+                                        grab = m_bot->HasSkill(SKILL_ENGINEERING);
+                                        break;
+                                    case ITEM_SUBCLASS_BLACKSMITHING:
+                                        grab = m_bot->HasSkill(SKILL_BLACKSMITHING);
+                                        break;
+                                    case ITEM_SUBCLASS_COOKING_RECIPE:
+                                        grab = m_bot->HasSkill(SKILL_COOKING);
+                                        break;
+                                    case ITEM_SUBCLASS_ALCHEMY_RECIPE:
+                                        grab = m_bot->HasSkill(SKILL_ALCHEMY);
+                                        break;
+                                    case ITEM_SUBCLASS_FIRST_AID_MANUAL:
+                                        grab = m_bot->HasSkill(SKILL_FIRST_AID);
+                                        break;
+                                    case ITEM_SUBCLASS_ENCHANTING_FORMULA:
+                                        grab = m_bot->HasSkill(SKILL_ENCHANTING);
+                                        break;
+                                    case ITEM_SUBCLASS_FISHING_MANUAL:
+                                        grab = m_bot->HasSkill(SKILL_FISHING);
+                                        break;
+                                    case ITEM_SUBCLASS_JEWELCRAFTING_RECIPE:
+                                        grab = m_bot->HasSkill(SKILL_JEWELCRAFTING);
+                                        break;
+                                    default:
+                                        break;
+                                }
                             }
+                            default:
+                                break;
                         }
                     }
 
