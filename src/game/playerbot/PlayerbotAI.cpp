@@ -1849,11 +1849,24 @@ void PlayerbotAI::DoLoot()
         {
             if (c)  // creature
             {
+                if (c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE))
+                {
+                    // loot the creature
+                    WorldPacket* const packet = new WorldPacket(CMSG_LOOT, 8);
+                    *packet << m_lootCurrent;
+                    m_bot->GetSession()->QueuePacket(packet);
+                    return; // no further processing is needed
+                    // m_lootCurrent is reset in SMSG_LOOT_RESPONSE
+                }
+                else    // not a lootable creature, clear it
+                {
+                    m_lootCurrent = ObjectGuid();
+                    // clear movement target, take next target on next update
+                    m_bot->GetMotionMaster()->Clear();
+                    m_bot->GetMotionMaster()->MoveIdle();
+                    return;
+                }
                 // TODO: add skinnable check in this block
-                WorldPacket* const packet = new WorldPacket(CMSG_LOOT, 8);
-                *packet << m_lootCurrent;
-                m_bot->GetSession()->QueuePacket(packet);
-                return;     // m_lootCurrent is reset in SMSG_LOOT_RESPONSE
             }
 
             if (go) // object
