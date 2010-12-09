@@ -877,6 +877,13 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             uint32 msTime;
             p >> msTime;
 
+            const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
+            if (!pSpellInfo)
+                return;
+
+            if (pSpellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
+                return;
+
             m_ignoreAIUpdatesUntilTime = time(0) + (msTime / 1000) + 1;
 
             return;
