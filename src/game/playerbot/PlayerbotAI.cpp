@@ -3741,6 +3741,30 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         extractGOinfo(text, m_lootTargets);
         SetState(BOTSTATE_LOOTING);
     }
+    else if (text == "g" || text == "get") // get a selected lootable corpse
+    {
+        ObjectGuid getOnGuid = fromPlayer.GetSelectionGuid();
+        if (!getOnGuid.IsEmpty())
+        {
+            Creature *c = m_bot->GetMap()->GetCreature(getOnGuid);
+            if (!c)
+                return;
+
+            if (c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE) || c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE))
+            {
+                m_lootTargets.push_back(getOnGuid.GetRawValue());
+                SetState(BOTSTATE_LOOTING);
+            }
+            else
+                TellMaster("Target is not lootable.");
+        }
+        else
+        {
+            TellMaster("No target is selected.");
+            m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+        }
+        return;
+    }
 
     else if (text == "quests")
     {
