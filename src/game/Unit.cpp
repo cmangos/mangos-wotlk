@@ -198,7 +198,6 @@ Unit::Unit()
     m_extraAttacks = 0;
 
     m_state = 0;
-    m_form = FORM_NONE;
     m_deathState = ALIVE;
 
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
@@ -223,7 +222,6 @@ Unit::Unit()
     m_detectInvisibilityMask = 0;
     m_invisibilityMask = 0;
     m_transform = 0;
-    m_ShapeShiftFormSpellId = 0;
     m_canModifyStats = false;
 
     for (int i = 0; i < MAX_SPELL_IMMUNITY; ++i)
@@ -456,21 +454,26 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
 
 void Unit::RemoveSpellsCausingAura(AuraType auraType)
 {
-    if (auraType >= TOTAL_AURAS) return;
-    AuraList::const_iterator iter, next;
-    for (iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end(); iter = next)
+    for (AuraList::const_iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
     {
-        next = iter;
-        ++next;
+        RemoveAurasDueToSpell((*iter)->GetId());
+        iter = m_modAuras[auraType].begin();
+    }
+}
 
-        if (*iter)
+void Unit::RemoveSpellsCausingAura(AuraType auraType, SpellAuraHolder* except)
+{
+    for (AuraList::const_iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
+    {
+        // skip `except` aura
+        if ((*iter)->GetHolder() == except)
         {
-            RemoveAurasDueToSpell((*iter)->GetId());
-            if (!m_modAuras[auraType].empty())
-                next = m_modAuras[auraType].begin();
-            else
-                return;
+            ++iter;
+            continue;
         }
+
+        RemoveAurasDueToSpell((*iter)->GetId(), except);
+        iter = m_modAuras[auraType].begin();
     }
 }
 
@@ -2065,7 +2068,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, SpellSchoolMask schoolM
                 if (spellProto->SpellIconID == 2253)
                 {
                     //reduces all damage taken while Stunned and in Cat Form
-                    if (m_form == FORM_CAT && (unitflag & UNIT_FLAG_STUNNED))
+                    if (GetShapeshiftForm() == FORM_CAT && (unitflag & UNIT_FLAG_STUNNED))
                         RemainingDamage -= RemainingDamage * currentAbsorb / 100;
                     continue;
                 }
@@ -2864,7 +2867,7 @@ bool Unit::IsSpellBlocked(Unit *pCaster, SpellEntry const *spellEntry, WeaponAtt
 
     float blockChance = GetUnitBlockChance();
     blockChance += (int32(pCaster->GetWeaponSkillValue(attackType)) - int32(GetMaxSkillValueForLevel()))*0.04f;
-    
+
     return roll_chance_f(blockChance);
 }
 
@@ -4896,19 +4899,14 @@ Aura* Unit::GetAura(uint32 spellId, SpellEffectIndex effindex)
     return NULL;
 }
 
-Aura* Unit::GetAura(AuraType type, uint32 family, uint64 familyFlag, uint32 familyFlag2, uint64 casterGUID)
+Aura* Unit::GetAura(AuraType type, SpellFamily family, uint64 familyFlag, uint32 familyFlag2, ObjectGuid casterGuid)
 {
     AuraList const& auras = GetAurasByType(type);
     for(AuraList::const_iterator i = auras.begin();i != auras.end(); ++i)
-    {
-        SpellEntry const *spell = (*i)->GetSpellProto();
-        if (spell->SpellFamilyName == family && (spell->SpellFamilyFlags & familyFlag || spell->SpellFamilyFlags2 & familyFlag2))
-        {
-            if (casterGUID && (*i)->GetCasterGUID()!=casterGUID)
-                continue;
-            return (*i);
-        }
-    }
+        if ((*i)->GetSpellProto()->IsFitToFamily(family, familyFlag, familyFlag2) &&
+            (casterGuid.IsEmpty() || (*i)->GetCasterGuid() == casterGuid))
+            return *i;
+
     return NULL;
 }
 
@@ -6065,29 +6063,49 @@ int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellPro
     return gain;
 }
 
-Unit* Unit::SelectMagnetTarget(Unit *victim, SpellEntry const *spellInfo)
+Unit* Unit::SelectMagnetTarget(Unit *victim, Spell* spell, SpellEffectIndex eff)
 {
     if(!victim)
         return NULL;
 
     // Magic case
-    if(spellInfo && (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC))
+    if (spell && (spell->m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE || spell->m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC))
     {
         Unit::AuraList const& magnetAuras = victim->GetAurasByType(SPELL_AURA_SPELL_MAGNET);
         for(Unit::AuraList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
-            if(Unit* magnet = (*itr)->GetCaster())
-                if(magnet->IsWithinLOSInMap(this) && magnet->isAlive())
+        {
+            if (Unit* magnet = (*itr)->GetCaster())
+            {
+                if (magnet->isAlive() && magnet->IsWithinLOSInMap(this) && spell->CheckTarget(magnet, eff))
+                {
+                    if (SpellAuraHolder *holder = (*itr)->GetHolder())
+                        if (holder->DropAuraCharge())
+                            victim->RemoveSpellAuraHolder(holder);
                     return magnet;
+                }
+            }
+        }
     }
     // Melee && ranged case
     else
     {
         AuraList const& hitTriggerAuras = victim->GetAurasByType(SPELL_AURA_ADD_CASTER_HIT_TRIGGER);
         for(AuraList::const_iterator i = hitTriggerAuras.begin(); i != hitTriggerAuras.end(); ++i)
-            if(Unit* magnet = (*i)->GetCaster())
-                if(magnet->isAlive() && magnet->IsWithinLOSInMap(this))
-                    if(roll_chance_i((*i)->GetModifier()->m_amount))
+        {
+            if (Unit* magnet = (*i)->GetCaster())
+            {
+                if (magnet->isAlive() && magnet->IsWithinLOSInMap(this) && (!spell || spell->CheckTarget(magnet, eff)))
+                {
+                    if (roll_chance_i((*i)->GetModifier()->m_amount))
+                    {
+                        if (SpellAuraHolder *holder = (*i)->GetHolder())
+                            if (holder->DropAuraCharge())
+                                victim->RemoveSpellAuraHolder(holder);
                         return magnet;
+                    }
+                }
+            }
+        }
     }
 
     return victim;
@@ -6310,7 +6328,7 @@ uint32 Unit::SpellDamageBonusDone(Unit *pVictim, SpellEntry const *spellProto, u
                 else // Tundra Stalker
                 {
                     // Frost Fever (target debuff)
-                    if (pVictim->GetAura(SPELL_AURA_MOD_HASTE, SPELLFAMILY_DEATHKNIGHT, UI64LIT(0x0000000000000000), 0x00000002))
+                    if (pVictim->GetAura(SPELL_AURA_MOD_MELEE_HASTE, SPELLFAMILY_DEATHKNIGHT, UI64LIT(0x0000000000000000), 0x00000002))
                         DoneTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
                     break;
                 }
@@ -7286,7 +7304,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit *pVictim, uint32 pdamage,WeaponAttackType
                     else // Tundra Stalker
                     {
                         // Frost Fever (target debuff)
-                        if (pVictim->GetAura(SPELL_AURA_MOD_HASTE, SPELLFAMILY_DEATHKNIGHT, UI64LIT(0x0000000000000000), 0x00000002))
+                        if (pVictim->GetAura(SPELL_AURA_MOD_MELEE_HASTE, SPELLFAMILY_DEATHKNIGHT, UI64LIT(0x0000000000000000), 0x00000002))
                             DonePercent *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
                         break;
                     }
@@ -8908,7 +8926,7 @@ uint32 Unit::GetCreatureType() const
 {
     if(GetTypeId() == TYPEID_PLAYER)
     {
-        SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(m_form);
+        SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(GetShapeshiftForm());
         if(ssEntry && ssEntry->creatureType > 0)
             return ssEntry->creatureType;
         else
@@ -9767,11 +9785,11 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                             (spellProcEvent->spellFamilyMask2[i] & procSpell->SpellFamilyFlags2) == 0)
                             continue;
                     }
-                    // don't check FamilyFlags if schoolMask exists
-                    else if (!spellProcEvent->schoolMask && !triggeredByAura->CanProcFrom(procSpell, spellProcEvent->procEx, procExtra, damage != 0))
+                    // don't check dbc FamilyFlags if schoolMask exists
+                    else if (!triggeredByAura->CanProcFrom(procSpell, spellProcEvent->procEx, procExtra, damage != 0, !spellProcEvent->schoolMask))
                         continue;
                 }
-                else if (!triggeredByAura->CanProcFrom(procSpell, PROC_EX_NONE, procExtra, damage != 0))
+                else if (!triggeredByAura->CanProcFrom(procSpell, PROC_EX_NONE, procExtra, damage != 0, true))
                     continue;
             }
 
