@@ -217,7 +217,7 @@ public:
     bool CanReceiveSpecificSpell(uint8 spec, Unit* target) const;
 
     bool PickPocket(Unit* pTarget);
-    bool HasPick();
+    bool HasTool(uint32 TC);
     bool HasSpellReagents(uint32 spellId);
 
     uint8 GetHealthPercent(const Unit& target) const;

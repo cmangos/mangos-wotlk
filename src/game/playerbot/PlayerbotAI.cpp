@@ -1927,7 +1927,7 @@ void PlayerbotAI::DoLoot()
                         switch(skillId)
                         {
                             case SKILL_MINING:
-                                if (HasPick() && CastSpell(MINING))
+                                if (HasTool(TC_MINING_PICK) && CastSpell(MINING))
                                     return;
                                 else
                                     skillFailed = true;
@@ -3070,13 +3070,30 @@ bool PlayerbotAI::PickPocket(Unit* pTarget)
     return false; // ensures that the rogue only pick pockets target once
 }
 
-bool PlayerbotAI::HasPick()
+bool PlayerbotAI::HasTool(uint32 TC)
 {
-    if (m_bot->HasItemTotemCategory(TC_MINING_PICK))
-        return true;
-
     std::ostringstream out;
-    out << "|cffffffffI do not have a pick!";
+
+    switch(TC)
+    {
+        case TC_MINING_PICK:
+
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffffffffI do not have a pick!";
+            break;
+
+        case TC_SKINNING_KNIFE:
+
+            if (m_bot->HasItemTotemCategory(TC))
+               return true;
+            else
+                out << "|cffffffffI do not have a skinning knife!";
+            break;
+        default:
+            out << "|cffffffffI do not know what tool that needs!";
+    }
     TellMaster(out.str().c_str());
     return false;
 }
