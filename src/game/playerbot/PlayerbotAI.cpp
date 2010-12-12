@@ -1854,6 +1854,13 @@ void PlayerbotAI::DoLoot()
     }
     else
     {
+        uint32 skillId = 0;
+        uint32 reqSkillValue = 0;
+        uint32 SkillValue = 0;
+        bool keyFailed = false;
+        bool skillFailed = false;
+        bool forceFailed = false;
+
         Creature *c = m_bot->GetMap()->GetCreature(m_lootCurrent);
         GameObject *go = m_bot->GetMap()->GetGameObject(m_lootCurrent);
         if (!c || c->getDeathState() != CORPSE || GetMaster()->GetDistance(c) > BOTLOOT_DISTANCE)
@@ -1886,17 +1893,15 @@ void PlayerbotAI::DoLoot()
                     return;
                 }
                 // TODO: add skinnable check in this block
+
+                // creatures cannot be unlocked or forced open
+                keyFailed = true;
+                forceFailed = true;
             }
 
             if (go) // object
             {
-                uint32 skillId = 0;
                 uint32 reqItem = 0;
-                uint32 reqSkillValue = 0;
-                uint32 SkillValue = 0;
-                bool keyFailed = false;
-                bool skillFailed = false;
-                bool forceFailed = false;
 
                 // check skill or lock on object
                 uint32 lockId = go->GetGOInfo()->GetLockId();
@@ -1933,62 +1938,66 @@ void PlayerbotAI::DoLoot()
                 }
                 else
                     keyFailed = true;
+            }
 
-                // determine bot's skill value for object's required skill
-                if (skillId != SKILL_NONE)
-                    SkillValue = m_bot->GetPureSkillValue(skillId);
+            // determine bot's skill value for object's required skill
+            if (skillId != SKILL_NONE)
+                SkillValue = uint32(m_bot->GetPureSkillValue(skillId));
 
-                // bot has the specific skill or object requires no skill at all
-                if ((m_bot->HasSkill(skillId) && skillId != SKILL_NONE) || skillId == SKILL_NONE)
+            // bot has the specific skill or object requires no skill at all
+            if ((m_bot->HasSkill(skillId) && skillId != SKILL_NONE) || (skillId == SKILL_NONE && go))
+            {
+                if (SkillValue >= reqSkillValue)
                 {
-                    if (SkillValue >= reqSkillValue)
+                    switch(skillId)
                     {
-                        switch(skillId)
-                        {
-                            case SKILL_MINING:
-                                if (HasTool(TC_MINING_PICK) && CastSpell(MINING))
-                                    return;
-                                else
-                                    skillFailed = true;
-                                break;
-                            case SKILL_HERBALISM:
-                                if (CastSpell(HERB_GATHERING))
-                                    return;
-                                else
-                                    skillFailed = true;
-                                break;
-                            case SKILL_LOCKPICKING:
-                                if (CastSpell(PICK_LOCK_1))
-                                    return;
-                                else
-                                    skillFailed = true;
-                                break;
-                            case SKILL_NONE:
-                                if (CastSpell(3365)) //Spell 3365 = Opening?
-                                    return;
-                                else
-                                    skillFailed = true;
-                                break;
-                            default:
-                                TellMaster("I'm not sure how to get that.");
+                        case SKILL_MINING:
+                            if (HasTool(TC_MINING_PICK) && CastSpell(MINING))
+                                return;
+                            else
                                 skillFailed = true;
-                                sLog.outDebug( "[PlayerbotAI]:DoLoot Skill %u is not implemented", skillId);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        TellMaster("My skill is not high enough. It requires %u, but mine is %u.",
-                            reqSkillValue, SkillValue);
-                        skillFailed = true;
+                            break;
+                        case SKILL_HERBALISM:
+                            if (CastSpell(HERB_GATHERING))
+                                return;
+                            else
+                                skillFailed = true;
+                            break;
+                        case SKILL_LOCKPICKING:
+                            if (CastSpell(PICK_LOCK_1))
+                                return;
+                            else
+                                skillFailed = true;
+                            break;
+                        case SKILL_NONE:
+                            if (CastSpell(3365)) //Spell 3365 = Opening?
+                                return;
+                            else
+                                skillFailed = true;
+                            break;
+                        default:
+                            TellMaster("I'm not sure how to get that.");
+                            skillFailed = true;
+                            sLog.outDebug( "[PlayerbotAI]:DoLoot Skill %u is not implemented", skillId);
+                            break;
                     }
                 }
                 else
                 {
                     TellMaster("I do not have the required skill.");
+                    TellMaster("My skill is not high enough. It requires %u, but mine is %u.",
+                        reqSkillValue, SkillValue);
                     skillFailed = true;
                 }
+            }
+            else
+            {
+                TellMaster("I do not have the required skill.");
+                skillFailed = true;
+            }
 
+            if (go) // only go's can be forced
+            {
                 // if pickable, check if a forcible item is available for the bot
                 if (skillId == SKILL_LOCKPICKING && (m_bot->HasSkill(SKILL_BLACKSMITHING) ||
                     m_bot->HasSkill(SKILL_ENGINEERING)))
@@ -2029,16 +2038,17 @@ void PlayerbotAI::DoLoot()
                 }
                 else
                     forceFailed = true;
+            }
 
-                // if all attempts failed in some way then clear because it won't get SMSG_LOOT_RESPONSE
-                if (keyFailed && skillFailed && forceFailed)
-                {
-                    sLog.outDebug( "[PlayerbotAI]: DoLoot attempts failed on [%s]", go->GetGOInfo()->name);
-                    m_lootCurrent = ObjectGuid();
-                    // clear movement target, take next target on next update
-                    m_bot->GetMotionMaster()->Clear();
-                    m_bot->GetMotionMaster()->MoveIdle();
-                }
+            // if all attempts failed in some way then clear because it won't get SMSG_LOOT_RESPONSE
+            if (keyFailed && skillFailed && forceFailed)
+            {
+                sLog.outDebug( "[PlayerbotAI]: DoLoot attempts failed on [%s]",
+                    go ? go->GetGOInfo()->name : c->GetCreatureInfo()->Name);
+                m_lootCurrent = ObjectGuid();
+                // clear movement target, take next target on next update
+                m_bot->GetMotionMaster()->Clear();
+                m_bot->GetMotionMaster()->MoveIdle();
             }
         }
     }
