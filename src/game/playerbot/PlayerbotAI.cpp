@@ -558,6 +558,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             {
                 switch (err)
                 {
+                    case EQUIP_ERR_CANT_CARRY_MORE_OF_THIS:
+                        TellMaster("I can't carry anymore of those.");
+                        return;
                     case EQUIP_ERR_MISSING_REAGENT:
                         TellMaster("I'm missing some reagents for that.");
                         return;
