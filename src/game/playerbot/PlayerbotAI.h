@@ -121,6 +121,15 @@ public:
         BOTSTATE_LOOTING            // looting mode, used just after combat
     };
 
+    enum CollectionFlags
+    {
+        COLLECT_FLAG_NOTHING    = 0x00,     // skip looting of anything
+        COLLECT_FLAG_COMBAT     = 0x01,     // loot after combat
+        COLLECT_FLAG_QUEST      = 0x02,     // quest and needed items
+        COLLECT_FLAG_PROFESSION = 0x04,     // items related to skills
+        COLLECT_FLAG_LOOT       = 0x08,     // all loot on corpses
+    };
+
     enum MovementOrderType
     {
         MOVEMENT_NONE               = 0x00,
@@ -284,6 +293,13 @@ public:
     bool FollowCheckTeleport(WorldObject &obj);
     void DoLoot();
 
+    bool HasCollectFlag(uint8 flag) { return m_collectionFlags & flag; }
+    void SetCollectFlag(uint8 flag)
+    {
+        if(HasCollectFlag(flag)) m_collectionFlags &= ~flag;
+        else m_collectionFlags |= flag;
+    }
+
     uint32 EstRepairAll();
     uint32 EstRepair(uint16 pos);
 
@@ -346,7 +362,9 @@ private:
 
     // list of creatures we recently attacked and want to loot
     BotLootCreature m_lootTargets;      // list of creatures
-    ObjectGuid m_lootCurrent;          // current remains of interest
+    ObjectGuid m_lootCurrent;           // current remains of interest
+
+    uint8 m_collectionFlags;            // what the bot should look for to loot
 
     time_t m_TimeDoneEating;
     time_t m_TimeDoneDrinking;

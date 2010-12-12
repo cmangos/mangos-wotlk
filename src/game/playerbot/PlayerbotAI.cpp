@@ -63,6 +63,7 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     m_targetCombat = 0;
     m_targetAssist = 0;
     m_targetProtect = 0;
+    m_collectionFlags = 0x07;   // default to collect after combat for quest and profession
 
     // start following master (will also teleport bot to master)
     SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
@@ -965,7 +966,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 m_bot->GetSession()->QueuePacket(packet);
             }
 
-            if (loot_type == LOOT_SKINNING)     // skin loot type sent by server for EffectOpenLock
+            if (loot_type == LOOT_SKINNING || HasCollectFlag(COLLECT_FLAG_LOOT))
             {
                 for (uint8 i = 0; i < items; ++i)
                 {
@@ -1007,7 +1008,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         continue;
 
                     // grab quest related items
-                    if (pProto->StartQuest > 0)
+                    if (pProto->StartQuest > 0 && HasCollectFlag(COLLECT_FLAG_QUEST))
                         grab = true;
 
                     if (m_needItemList[itemid] > 0)
@@ -1017,10 +1018,15 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         switch (pProto->Class)
                         {
                             case ITEM_CLASS_QUEST:
+                                if (!HasCollectFlag(COLLECT_FLAG_QUEST) && !HasCollectFlag(COLLECT_FLAG_LOOT))
+                                    break;
                             case ITEM_CLASS_KEY:
                                 grab = true;
                                 break;
-                            case ITEM_CLASS_TRADE_GOODS:    // bot loots based on skills
+                            case ITEM_CLASS_TRADE_GOODS:
+                                if (!HasCollectFlag(COLLECT_FLAG_PROFESSION) && !HasCollectFlag(COLLECT_FLAG_LOOT))
+                                    break;
+
                                 switch (pProto->SubClass)
                                 {
                                     case ITEM_SUBCLASS_PARTS:
@@ -1060,11 +1066,14 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                                         break;
                                 }
                                 break;
-                            case ITEM_CLASS_RECIPE:     // bot will loot unknown recipes
+                            case ITEM_CLASS_RECIPE:
                             {
+                                if (!HasCollectFlag(COLLECT_FLAG_PROFESSION) && !HasCollectFlag(COLLECT_FLAG_LOOT))
+                                    break;
+
                                 // skip recipes that we have
                                 if (m_bot->HasSpell(pProto->Spells[2].SpellId))
-                                    continue;
+                                    break;
 
                                 switch (pProto->SubClass)
                                 {
@@ -1106,6 +1115,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                                 break;
                         }
                     }
+
+                    // TODO: check for items that the bot has been told to collect
 
                     if (grab)
                     {
@@ -1819,6 +1830,11 @@ void PlayerbotAI::DoLoot()
 
         if(c)
         {
+            if (m_collectionFlags == COLLECT_FLAG_NOTHING)
+            {
+                m_lootCurrent = ObjectGuid();   // told to loot nothing
+                return;
+            }
             m_bot->GetMotionMaster()->MovePoint(c->GetMapId(), c->GetPositionX(), c->GetPositionY(), c->GetPositionZ());
             //sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s' deathState=%d", m_bot->GetName(), c->GetName(), c->getDeathState() );
         }
@@ -2622,7 +2638,10 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
         {
             SetState(BOTSTATE_LOOTING);
             m_attackerInfo.clear();
-            m_lootTargets.unique();
+            if (HasCollectFlag(COLLECT_FLAG_COMBAT))
+                m_lootTargets.unique();
+            else
+                m_lootTargets.clear();
             SetIgnoreUpdateTime();
         }
         else if (m_botState == BOTSTATE_LOOTING)
@@ -3783,6 +3802,65 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         return;
     }
 
+    // Handle all collection related commands here
+    else if (text.size() >= 7 && text.substr(0, 7) == "collect")
+    {
+        std::string part = "";
+        std::string subcommand = "";
+
+        if (text.size() > 7 && text.substr(0, 8) == "collect ")
+            part = text.substr(8); // Truncate 'collect ' part
+
+        while (true)
+        {
+            if (part.find(" ") > 0)
+            {
+                subcommand = part.substr(0, part.find(" "));
+                if (part.size() > subcommand.size())
+                part = part.substr(subcommand.size() + 1);
+            }
+            else
+                subcommand = part;
+
+            if (subcommand == "combat")
+                SetCollectFlag(COLLECT_FLAG_COMBAT);
+            else if (subcommand == "loot")
+                SetCollectFlag(COLLECT_FLAG_LOOT);
+            else if (subcommand == "quest")
+                SetCollectFlag(COLLECT_FLAG_QUEST);
+            else if (subcommand == "profession" || subcommand == "skill")
+                SetCollectFlag(COLLECT_FLAG_PROFESSION);
+            else if (subcommand == "none" || subcommand == "nothing")
+                m_collectionFlags = 0;
+            else
+            {
+                std::string collout = "";
+                // TODO: add commands for skills
+                TellMaster("Collect <what>?: none, combat, loot, quest, profession" + collout);
+                break;
+            }
+            if (part == subcommand)
+                break;
+        }
+
+        std::string collset = "";
+        if (HasCollectFlag(COLLECT_FLAG_LOOT))
+            collset += ", all loot";
+        if (HasCollectFlag(COLLECT_FLAG_PROFESSION))
+            collset += ", profession";
+        if (HasCollectFlag(COLLECT_FLAG_QUEST))
+            collset += ", quest";
+        if (HasCollectFlag(COLLECT_FLAG_COMBAT))
+            collset += " items after combat";
+        else
+            collset += " items";
+
+        if (collset.length() > 1)
+            TellMaster("I'm collecting " + collset.substr(2));
+        else
+            TellMaster("I'm collecting nothing.");
+    }
+
     else if (text == "quests")
     {
         bool hasIncompleteQuests = false;
@@ -4225,7 +4303,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         }
         else
         {
-            std::string msg = "What? follow, stay, (c)ast <spellname>, spells, (e)quip <itemlink>, (u)se <itemlink>, drop <questlink>, report, quests, stats";
+            std::string msg = "What? follow, stay, (c)ast <spellname>, spells, (e)quip <itemlink>, (u)se <itemlink>, drop <questlink>, report, quests, stats, collect";
             SendWhisper(msg, fromPlayer);
             m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
         }
