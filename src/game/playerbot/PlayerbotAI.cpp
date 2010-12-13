@@ -1136,13 +1136,55 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             *packet << guid;
             m_bot->GetSession()->QueuePacket(packet);
 
-            // TODO: add creature skinnable check to not clear unless skinned
-            // clear current target
-            m_lootCurrent = ObjectGuid();
-            // clear movement
-            m_bot->GetMotionMaster()->Clear();
-            m_bot->GetMotionMaster()->MoveIdle();
             SetQuestNeedItems();
+
+            return;
+        }
+
+        case SMSG_LOOT_RELEASE_RESPONSE:
+        {
+            WorldPacket p(packet);
+            ObjectGuid guid;
+
+            p >> guid;
+
+            if (guid == m_lootCurrent)
+            {
+                Creature *c = m_bot->GetMap()->GetCreature(m_lootCurrent);
+
+                if (c && c->GetCreatureInfo()->SkinLootId && !c->lootForSkin)
+                {
+                    uint32 reqSkill = c->GetCreatureInfo()->GetRequiredLootSkill();
+                    // check if it is a leather skin and if it is to be collected (could be ore or herb)
+                    if (m_bot->HasSkill(reqSkill) && ((reqSkill != SKILL_SKINNING) ||
+                        (HasCollectFlag(COLLECT_FLAG_SKIN) && reqSkill == SKILL_SKINNING)))
+                    {
+                        // calculate skill requirement
+                        uint32 skillValue = m_bot->GetPureSkillValue(reqSkill);
+                        uint32 targetLevel = c->getLevel();
+                        uint32 reqSkillValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel-10)*10 : targetLevel*5;
+                        if (skillValue >= reqSkillValue)
+                        {
+                            if (m_lootCurrent != m_lootPrev)    // if this wasn't previous loot try again
+                            {
+                                m_lootPrev = m_lootCurrent;
+                                return; // so that the DoLoot function is called again to get skin
+                            }
+                        }
+                        else
+                            TellMaster("My skill is %u but it requires %u", skillValue, reqSkillValue);
+                    }
+                }
+
+                // if previous is current, clear
+                if (m_lootPrev == m_lootCurrent)
+                    m_lootPrev = ObjectGuid();
+                // clear current target
+                m_lootCurrent = ObjectGuid();
+                // clear movement
+                m_bot->GetMotionMaster()->Clear();
+                m_bot->GetMotionMaster()->MoveIdle();
+            }
 
             return;
         }
@@ -1882,7 +1924,19 @@ void PlayerbotAI::DoLoot()
                     *packet << m_lootCurrent;
                     m_bot->GetSession()->QueuePacket(packet);
                     return; // no further processing is needed
-                    // m_lootCurrent is reset in SMSG_LOOT_RESPONSE
+                    // m_lootCurrent is reset in SMSG_LOOT_RELEASE_RESPONSE after checking for skinloot
+                }
+                else if (c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
+                {
+                    skillId = c->GetCreatureInfo()->GetRequiredLootSkill();
+                    // not all creature skins are leather, some are ore or herb
+                    if (m_bot->HasSkill(skillId) && ((skillId != SKILL_SKINNING) ||
+                        (HasCollectFlag(COLLECT_FLAG_SKIN) && skillId == SKILL_SKINNING)))
+                    {
+                        // calculate skinning skill requirement
+                        uint32 targetLevel = c->getLevel();
+                        reqSkillValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel-10)*10 : targetLevel*5;
+                    }
                 }
                 else    // not a lootable creature, clear it
                 {
@@ -1892,7 +1946,6 @@ void PlayerbotAI::DoLoot()
                     m_bot->GetMotionMaster()->MoveIdle();
                     return;
                 }
-                // TODO: add skinnable check in this block
 
                 // creatures cannot be unlocked or forced open
                 keyFailed = true;
@@ -1963,6 +2016,13 @@ void PlayerbotAI::DoLoot()
                             else
                                 skillFailed = true;
                             break;
+                        case SKILL_SKINNING:
+                            if (c && HasCollectFlag(COLLECT_FLAG_SKIN) &&
+                                HasTool(TC_SKINNING_KNIFE) && CastSpell(SKINNING, *c))
+                                return;
+                            else
+                                skillFailed = true;
+                            break;
                         case SKILL_LOCKPICKING:
                             if (CastSpell(PICK_LOCK_1))
                                 return;
@@ -1984,7 +2044,6 @@ void PlayerbotAI::DoLoot()
                 }
                 else
                 {
-                    TellMaster("I do not have the required skill.");
                     TellMaster("My skill is not high enough. It requires %u, but mine is %u.",
                         reqSkillValue, SkillValue);
                     skillFailed = true;
@@ -2790,8 +2849,13 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         MovementClear();
     }
 
-    // for spells of this type send packet with TARGET_FLAG_OBJECT
+    uint32 target_type = TARGET_FLAG_UNIT;
+
     if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK)
+        target_type = TARGET_FLAG_OBJECT;
+    
+    if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK ||
+        pSpellInfo->Effect[0] == SPELL_EFFECT_SKINNING)
     {
         if (!m_lootCurrent.IsEmpty())
         {
@@ -2799,13 +2863,16 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
             *packet << uint8(0);                            // spells cast count;
             *packet << spellId;
             *packet << uint8(0);                            // unk_flags
-            *packet << uint32(TARGET_FLAG_OBJECT);
+            *packet << uint32(target_type);
             *packet << m_lootCurrent.WriteAsPacked();
             m_bot->GetSession()->QueuePacket(packet);       // queue the packet to get around race condition
 
-            WorldPacket* const packetgouse = new WorldPacket(CMSG_GAMEOBJ_REPORT_USE, 8);
-            *packetgouse << uint64(m_lootCurrent.GetRawValue());
-            m_bot->GetSession()->QueuePacket(packetgouse);  // queue the packet to get around race condition
+            if (target_type == TARGET_FLAG_OBJECT)
+            {
+                WorldPacket* const packetgouse = new WorldPacket(CMSG_GAMEOBJ_REPORT_USE, 8);
+                *packetgouse << uint64(m_lootCurrent.GetRawValue());
+                m_bot->GetSession()->QueuePacket(packetgouse);  // queue the packet to get around race condition
+            }
         }
         else
             return false;
@@ -3843,12 +3910,16 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 SetCollectFlag(COLLECT_FLAG_QUEST);
             else if (subcommand == "profession" || subcommand == "skill")
                 SetCollectFlag(COLLECT_FLAG_PROFESSION);
+            else if (subcommand == "skin" && m_bot->HasSkill(SKILL_SKINNING))
+                SetCollectFlag(COLLECT_FLAG_SKIN);
             else if (subcommand == "none" || subcommand == "nothing")
                 m_collectionFlags = 0;
             else
             {
                 std::string collout = "";
                 // TODO: add commands for skills
+                if (m_bot->HasSkill(SKILL_SKINNING))
+                    collout += ", skin";
                 TellMaster("Collect <what>?: none, combat, loot, quest, profession" + collout);
                 break;
             }
@@ -3863,6 +3934,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             collset += ", profession";
         if (HasCollectFlag(COLLECT_FLAG_QUEST))
             collset += ", quest";
+        if (HasCollectFlag(COLLECT_FLAG_SKIN))
+            collset += ", skin";
         if (HasCollectFlag(COLLECT_FLAG_COMBAT))
             collset += " items after combat";
         else

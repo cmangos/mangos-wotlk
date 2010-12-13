@@ -128,6 +128,7 @@ public:
         COLLECT_FLAG_QUEST      = 0x02,     // quest and needed items
         COLLECT_FLAG_PROFESSION = 0x04,     // items related to skills
         COLLECT_FLAG_LOOT       = 0x08,     // all loot on corpses
+        COLLECT_FLAG_SKIN       = 0x10,     // skin creatures if available
     };
 
     enum MovementOrderType
@@ -363,6 +364,7 @@ private:
     // list of creatures we recently attacked and want to loot
     BotLootCreature m_lootTargets;      // list of creatures
     ObjectGuid m_lootCurrent;           // current remains of interest
+    ObjectGuid m_lootPrev;              // previous loot
 
     uint8 m_collectionFlags;            // what the bot should look for to loot
 
