@@ -1022,16 +1022,32 @@ void ObjectMgr::LoadCreatureModelInfo()
             const_cast<CreatureModelInfo*>(minfo)->gender = GENDER_MALE;
         }
 
-        if (minfo->modelid_other_gender && !sCreatureDisplayInfoStore.LookupEntry(minfo->modelid_other_gender))
+        if (minfo->modelid_other_gender)
         {
-            sLog.outErrorDb("Table `creature_model_info` has nonexistent modelid_other_gender model (%u) defined for model id %u.", minfo->modelid_other_gender, minfo->modelid);
-            const_cast<CreatureModelInfo*>(minfo)->modelid_other_gender = 0;
+            if (minfo->modelid_other_gender == minfo->modelid)
+            {
+                sLog.outErrorDb("Table `creature_model_info` has redundant modelid_other_gender model (%u) defined for model id %u.", minfo->modelid_other_gender, minfo->modelid);
+                const_cast<CreatureModelInfo*>(minfo)->modelid_other_gender = 0;
+            }
+            else if (!sCreatureDisplayInfoStore.LookupEntry(minfo->modelid_other_gender))
+            {
+                sLog.outErrorDb("Table `creature_model_info` has nonexistent modelid_other_gender model (%u) defined for model id %u.", minfo->modelid_other_gender, minfo->modelid);
+                const_cast<CreatureModelInfo*>(minfo)->modelid_other_gender = 0;
+            }
         }
 
-        if (minfo->modelid_alternative && !sCreatureDisplayInfoStore.LookupEntry(minfo->modelid_alternative))
+        if (minfo->modelid_alternative)
         {
-            sLog.outErrorDb("Table `creature_model_info` has nonexistent modelid_alternative model (%u) defined for model id %u.", minfo->modelid_alternative, minfo->modelid);
-            const_cast<CreatureModelInfo*>(minfo)->modelid_alternative = 0;
+            if (minfo->modelid_alternative == minfo->modelid)
+            {
+                sLog.outErrorDb("Table `creature_model_info` has redundant modelid_alternative model (%u) defined for model id %u.", minfo->modelid_alternative, minfo->modelid);
+                const_cast<CreatureModelInfo*>(minfo)->modelid_alternative = 0;
+            }
+            else if (!sCreatureDisplayInfoStore.LookupEntry(minfo->modelid_alternative))
+            {
+                sLog.outErrorDb("Table `creature_model_info` has nonexistent modelid_alternative model (%u) defined for model id %u.", minfo->modelid_alternative, minfo->modelid);
+                const_cast<CreatureModelInfo*>(minfo)->modelid_alternative = 0;
+            }
         }
     }
 
@@ -5508,25 +5524,31 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
 
                 delete resultItems;
             }
-            //if it is mail from AH, it shouldn't be returned, but deleted
-            if (m->messageType != MAIL_NORMAL || m->messageType == MAIL_AUCTION || (m->checked & (MAIL_CHECK_MASK_COD_PAYMENT | MAIL_CHECK_MASK_RETURNED)))
+            // if it is mail from non-player, or if it's already return mail, it shouldn't be returned, but deleted
+            if (m->messageType != MAIL_NORMAL || (m->checked & (MAIL_CHECK_MASK_COD_PAYMENT | MAIL_CHECK_MASK_RETURNED)))
             {
                 // mail open and then not returned
-                for(std::vector<MailItemInfo>::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
+                for(MailItemInfoVec::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
                     CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = '%u'", itr2->item_guid);
             }
             else
             {
-                //mail will be returned:
+                // mail will be returned:
                 CharacterDatabase.PExecute("UPDATE mail SET sender = '%u', receiver = '%u', expire_time = '" UI64FMTD "', deliver_time = '" UI64FMTD "',cod = '0', checked = '%u' WHERE id = '%u'",
                     m->receiverGuid.GetCounter(), m->sender, (uint64)(basetime + 30*DAY), (uint64)basetime, MAIL_CHECK_MASK_RETURNED, m->messageID);
+                for (MailItemInfoVec::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
+                {
+                    // update receiver in mail items for its proper delivery, and in instance_item for avoid lost item at sender delete
+                    CharacterDatabase.PExecute("UPDATE mail_items SET receiver = %u WHERE item_guid = '%u'", m->sender, itr2->item_guid);
+                    CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid = %u WHERE guid = '%u'", m->sender, itr2->item_guid);
+                }
                 delete m;
                 continue;
             }
         }
 
-        //deletemail = true;
-        //delmails << m->messageID << ", ";
+        // deletemail = true;
+        // delmails << m->messageID << ", ";
         CharacterDatabase.PExecute("DELETE FROM mail WHERE id = '%u'", m->messageID);
         delete m;
         ++count;
@@ -8819,29 +8841,31 @@ void ObjectMgr::LoadMailLevelRewards()
     sLog.outString( ">> Loaded %u level dependent mail rewards,", count );
 }
 
-void ObjectMgr::LoadTrainerSpell()
+void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
 {
+    CacheTrainerSpellMap& trainerList = isTemplates ? m_mCacheTrainerTemplateSpellMap : m_mCacheTrainerSpellMap;
+
     // For reload case
-    for (CacheTrainerSpellMap::iterator itr = m_mCacheTrainerSpellMap.begin(); itr != m_mCacheTrainerSpellMap.end(); ++itr)
+    for (CacheTrainerSpellMap::iterator itr = trainerList.begin(); itr != trainerList.end(); ++itr)
         itr->second.Clear();
-    m_mCacheTrainerSpellMap.clear();
+    trainerList.clear();
 
     std::set<uint32> skip_trainers;
 
-    QueryResult *result = WorldDatabase.Query("SELECT entry, spell,spellcost,reqskill,reqskillvalue,reqlevel FROM npc_trainer");
+    QueryResult *result = WorldDatabase.PQuery("SELECT entry, spell,spellcost,reqskill,reqskillvalue,reqlevel FROM %s", tableName);
 
-    if( !result )
+    if (!result)
     {
-        barGoLink bar( 1 );
+        barGoLink bar(1);
 
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded `npc_trainer`, table is empty!");
+        sLog.outString(">> Loaded `%s`, table is empty!", tableName);
         return;
     }
 
-    barGoLink bar( (int)result->GetRowCount() );
+    barGoLink bar((int)result->GetRowCount());
 
     std::set<uint32> talentIds;
 
@@ -8855,48 +8879,60 @@ void ObjectMgr::LoadTrainerSpell()
         uint32 entry  = fields[0].GetUInt32();
         uint32 spell  = fields[1].GetUInt32();
 
-        CreatureInfo const* cInfo = GetCreatureTemplate(entry);
-
-        if(!cInfo)
-        {
-            sLog.outErrorDb("Table `npc_trainer` have entry for nonexistent creature template (Entry: %u), ignore", entry);
-            continue;
-        }
-
-        if(!(cInfo->npcflag & UNIT_NPC_FLAG_TRAINER))
-        {
-            if (skip_trainers.find(entry) == skip_trainers.end())
-            {
-                sLog.outErrorDb("Table `npc_trainer` have data for creature (Entry: %u) without trainer flag, ignore", entry);
-                skip_trainers.insert(entry);
-            }
-            continue;
-        }
-
         SpellEntry const *spellinfo = sSpellStore.LookupEntry(spell);
-        if(!spellinfo)
+        if (!spellinfo)
         {
-            sLog.outErrorDb("Table `npc_trainer` for Trainer (Entry: %u ) has non existing spell %u, ignore", entry,spell);
+            sLog.outErrorDb("Table `%s` for trainer (Entry: %u ) has non existing spell %u, ignore", tableName, entry, spell);
             continue;
         }
 
-        if(!SpellMgr::IsSpellValid(spellinfo))
+        if (!SpellMgr::IsSpellValid(spellinfo))
         {
-            sLog.outErrorDb("Table `npc_trainer` for Trainer (Entry: %u) has broken learning spell %u, ignore", entry, spell);
+            sLog.outErrorDb("Table `%s` for trainer (Entry: %u) has broken learning spell %u, ignore", tableName, entry, spell);
             continue;
         }
 
-        if(GetTalentSpellCost(spell))
+        if (GetTalentSpellCost(spell))
         {
             if (talentIds.find(spell) == talentIds.end())
             {
-                sLog.outErrorDb("Table `npc_trainer` has talent as learning spell %u, ignore", spell);
+                sLog.outErrorDb("Table `%s` has talent as learning spell %u, ignore", tableName, spell);
                 talentIds.insert(spell);
             }
             continue;
         }
 
-        TrainerSpellData& data = m_mCacheTrainerSpellMap[entry];
+        if (!isTemplates)
+        {
+            CreatureInfo const* cInfo = GetCreatureTemplate(entry);
+
+            if (!cInfo)
+            {
+                sLog.outErrorDb("Table `%s` have entry for nonexistent creature template (Entry: %u), ignore", tableName, entry);
+                continue;
+            }
+
+            if (!(cInfo->npcflag & UNIT_NPC_FLAG_TRAINER))
+            {
+                if (skip_trainers.find(entry) == skip_trainers.end())
+                {
+                    sLog.outErrorDb("Table `%s` have data for creature (Entry: %u) without trainer flag, ignore", tableName, entry);
+                    skip_trainers.insert(entry);
+                }
+                continue;
+            }
+
+            if (TrainerSpellData const* tSpells = cInfo->trainerId ? GetNpcTrainerTemplateSpells(cInfo->trainerId) : NULL)
+            {
+                if (tSpells->spellList.find(spell) != tSpells->spellList.end())
+                {
+                    sLog.outErrorDb("Table `%s` for trainer (Entry: %u) has spell %u listed in trainer template %u, ignore", tableName, entry, spell);
+                    continue;
+                }
+            }
+        }
+
+        TrainerSpellData& data = trainerList[entry];
 
         TrainerSpell& trainerSpell = data.spellList[spell];
         trainerSpell.spell         = spell;
@@ -8921,7 +8957,7 @@ void ObjectMgr::LoadTrainerSpell()
             }
         }
 
-        if(SpellMgr::IsProfessionSpell(trainerSpell.learnedSpell))
+        if (SpellMgr::IsProfessionSpell(trainerSpell.learnedSpell))
             data.trainerType = 2;
 
         ++count;
@@ -8930,7 +8966,35 @@ void ObjectMgr::LoadTrainerSpell()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %d Trainers", count );
+    sLog.outString( ">> Loaded %d trainer %sspells", count, isTemplates ? "template " : "" );
+}
+
+void ObjectMgr::LoadTrainerTemplates()
+{
+    LoadTrainers("npc_trainer_template", true);
+
+    // post loading check
+    std::set<uint32> trainer_ids;
+
+    for(CacheTrainerSpellMap::const_iterator tItr = m_mCacheTrainerTemplateSpellMap.begin(); tItr != m_mCacheTrainerTemplateSpellMap.end(); ++tItr)
+        trainer_ids.insert(tItr->first);
+
+    for(uint32 i = 1; i < sCreatureStorage.MaxEntry; ++i)
+    {
+        if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
+        {
+            if (cInfo->trainerId)
+            {
+                if (trainer_ids.count(cInfo->trainerId) > 0)
+                    trainer_ids.erase(cInfo->trainerId);
+                else
+                    sLog.outErrorDb("Creature (Entry: %u) has trainer_id = %u for nonexistent trainer template", cInfo->Entry, cInfo->trainerId);
+            }
+        }
+    }
+
+    for(std::set<uint32>::const_iterator tItr = trainer_ids.begin(); tItr != trainer_ids.end(); ++tItr)
+        sLog.outErrorDb("Table `npc_trainer_template` has trainer template %u not used by any trainers ", *tItr);
 }
 
 void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
@@ -8982,7 +9046,7 @@ void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u vendor items", count);
+    sLog.outString( ">> Loaded %u vendor %sitems", count, isTemplates ? "template " : "");
 }
 
 
@@ -9198,6 +9262,14 @@ void ObjectMgr::LoadGossipMenuItems()
     for(ScriptMapMap::const_iterator itr = sGossipScripts.begin(); itr != sGossipScripts.end(); ++itr)
         gossipScriptSet.insert(itr->first);
 
+    // prepare menuid -> CreatureInfo map for fast access
+    typedef  std::multimap<uint32, const CreatureInfo*> Menu2CInfoMap;
+    Menu2CInfoMap menu2CInfoMap;
+    for(uint32 i = 1;  i < sCreatureStorage.MaxEntry; ++i)
+        if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
+            if (cInfo->GossipMenuId)
+                menu2CInfoMap.insert(Menu2CInfoMap::value_type(cInfo->GossipMenuId, cInfo));
+
     do
     {
         bar.step();
@@ -9278,23 +9350,21 @@ void ObjectMgr::LoadGossipMenuItems()
         {
             bool found_menu_uses = false;
             bool found_flags_uses = false;
-            for(uint32 i = 1; !found_flags_uses && i < sCreatureStorage.MaxEntry; ++i)
+
+            std::pair<Menu2CInfoMap::const_iterator, Menu2CInfoMap::const_iterator> tm_bounds = menu2CInfoMap.equal_range(gMenuItem.menu_id);
+            for (Menu2CInfoMap::const_iterator it2 = tm_bounds.first; !found_flags_uses && it2 != tm_bounds.second; ++it2)
             {
-                if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
-                {
-                    if (cInfo->GossipMenuId == gMenuItem.menu_id)
-                    {
-                        found_menu_uses = true;
+                CreatureInfo const* cInfo = it2->second;
 
-                        // some from creatures with gossip menu can use gossip option base at npc_flags
-                        if (gMenuItem.npc_option_npcflag & cInfo->npcflag)
-                            found_flags_uses = true;
+                found_menu_uses = true;
 
-                        // unused check data preparing part
-                        if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK))
-                            menu_ids.erase(cInfo->GossipMenuId);
-                    }
-                }
+                // some from creatures with gossip menu can use gossip option base at npc_flags
+                if (gMenuItem.npc_option_npcflag & cInfo->npcflag)
+                    found_flags_uses = true;
+
+                // unused check data preparing part
+                if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK))
+                    menu_ids.erase(gMenuItem.menu_id);
             }
 
             if (found_menu_uses && !found_flags_uses)
