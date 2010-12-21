@@ -566,6 +566,14 @@ bool ChatHandler::HandleReloadSpellAreaCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadSpellBonusesCommand(char* /*args*/)
+{
+    sLog.outString( "Re-Loading Spell Bonus Data..." );
+    sSpellMgr.LoadSpellBonuses();
+    SendGlobalSysMessage("DB table `spell_bonus_data` (spell damage/healing coefficients) reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadSpellChainCommand(char* /*args*/)
 {
     sLog.outString( "Re-Loading Spell Chain Data... " );
@@ -595,14 +603,6 @@ bool ChatHandler::HandleReloadSpellProcEventCommand(char* /*args*/)
     sLog.outString( "Re-Loading Spell Proc Event conditions..." );
     sSpellMgr.LoadSpellProcEvents();
     SendGlobalSysMessage("DB table `spell_proc_event` (spell proc trigger requirements) reloaded.");
-    return true;
-}
-
-bool ChatHandler::HandleReloadSpellBonusesCommand(char* /*args*/)
-{
-    sLog.outString( "Re-Loading Spell Bonus Data..." );
-    sSpellMgr.LoadSpellBonuses();
-    SendGlobalSysMessage("DB table `spell_bonus_data` (spell damage/healing coefficients) reloaded.");
     return true;
 }
 
@@ -3543,7 +3543,7 @@ bool ChatHandler::HandleGuildInviteCommand(char *args)
     char* nameStr = ExtractOptNotLastArg(&args);
 
     // if not guild name only (in "") then player name
-    uint64 target_guid;
+    ObjectGuid target_guid;
     if (!ExtractPlayerTarget(&nameStr, NULL, &target_guid))
         return false;
 
@@ -3566,7 +3566,7 @@ bool ChatHandler::HandleGuildInviteCommand(char *args)
 bool ChatHandler::HandleGuildUninviteCommand(char *args)
 {
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     if (!ExtractPlayerTarget(&args, &target, &target_guid))
         return false;
 
@@ -3587,7 +3587,7 @@ bool ChatHandler::HandleGuildRankCommand(char *args)
     char* nameStr = ExtractOptNotLastArg(&args);
 
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     std::string target_name;
     if (!ExtractPlayerTarget(&nameStr, &target, &target_guid, &target_name))
         return false;
@@ -3682,7 +3682,7 @@ bool ChatHandler::HandleDieCommand(char* /*args*/)
 
     if(target->GetTypeId()==TYPEID_PLAYER)
     {
-        if(HasLowerSecurity((Player*)target,0,false))
+        if (HasLowerSecurity((Player*)target, ObjectGuid(), false))
             return false;
     }
 
@@ -3796,7 +3796,7 @@ bool ChatHandler::HandleModifyArenaCommand(char* args)
 bool ChatHandler::HandleReviveCommand(char* args)
 {
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     if (!ExtractPlayerTarget(&args, &target, &target_guid))
         return false;
 
@@ -4231,7 +4231,7 @@ bool ChatHandler::HandleHoverCommand(char* args)
     return true;
 }
 
-void ChatHandler::HandleCharacterLevel(Player* player, uint64 player_guid, uint32 oldlevel, uint32 newlevel)
+void ChatHandler::HandleCharacterLevel(Player* player, ObjectGuid player_guid, uint32 oldlevel, uint32 newlevel)
 {
     if(player)
     {
@@ -4252,7 +4252,7 @@ void ChatHandler::HandleCharacterLevel(Player* player, uint64 player_guid, uint3
     else
     {
         // update level and XP at level, all other will be updated at loading
-        CharacterDatabase.PExecute("UPDATE characters SET level = '%u', xp = 0 WHERE guid = '%u'", newlevel, GUID_LOPART(player_guid));
+        CharacterDatabase.PExecute("UPDATE characters SET level = '%u', xp = 0 WHERE guid = '%u'", newlevel, player_guid.GetCounter());
     }
 }
 
@@ -4278,7 +4278,7 @@ bool ChatHandler::HandleCharacterLevelCommand(char* args)
     }
 
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     std::string target_name;
     if (!ExtractPlayerTarget(&nameStr, &target, &target_guid, &target_name))
         return false;
@@ -4324,7 +4324,7 @@ bool ChatHandler::HandleLevelUpCommand(char* args)
     }
 
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     std::string target_name;
     if (!ExtractPlayerTarget(&nameStr, &target, &target_guid, &target_name))
         return false;
@@ -4338,7 +4338,7 @@ bool ChatHandler::HandleLevelUpCommand(char* args)
     if (newlevel > STRONG_MAX_LEVEL)                        // hardcoded maximum level
         newlevel = STRONG_MAX_LEVEL;
 
-    HandleCharacterLevel(target,target_guid,oldlevel,newlevel);
+    HandleCharacterLevel(target, target_guid, oldlevel, newlevel);
 
     if (!m_session || m_session->GetPlayer() != target)     // including chr==NULL
     {
@@ -4677,14 +4677,14 @@ bool ChatHandler::HandleListTalentsCommand(char* /*args*/)
 bool ChatHandler::HandleResetAchievementsCommand(char* args)
 {
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     if (!ExtractPlayerTarget(&args, &target, &target_guid))
         return false;
 
     if(target)
         target->GetAchievementMgr().Reset();
     else
-        AchievementMgr::DeleteFromDB(GUID_LOPART(target_guid));
+        AchievementMgr::DeleteFromDB(target_guid);
 
     return true;
 }
@@ -4717,22 +4717,21 @@ static bool HandleResetStatsOrLevelHelper(Player* player)
     uint8 powertype = cEntry->powerType;
 
     // reset m_form if no aura
-    if(!player->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
-        player->m_form = FORM_NONE;
+    if (!player->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
+        player->SetShapeshiftForm(FORM_NONE);
 
     player->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, DEFAULT_WORLD_OBJECT_SIZE );
     player->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
 
     player->setFactionForRace(player->getRace());
 
-    player->SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( player->getRace() ) | ( player->getClass() << 8 ) | ( player->getGender() << 16 ) | ( powertype << 24 ) ) );
+    player->SetByteValue(UNIT_FIELD_BYTES_0, 3, powertype);
 
     // reset only if player not in some form;
-    if(player->m_form==FORM_NONE)
+    if (player->GetShapeshiftForm() == FORM_NONE)
         player->InitDisplayIds();
 
     player->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_PVP );
-    player->SetByteValue(UNIT_FIELD_BYTES_2, 3, player->m_form);
 
     player->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
 
@@ -4797,7 +4796,7 @@ bool ChatHandler::HandleResetStatsCommand(char* args)
 bool ChatHandler::HandleResetSpellsCommand(char* args)
 {
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     std::string target_name;
     if (!ExtractPlayerTarget(&args, &target, &target_guid, &target_name))
         return false;
@@ -4812,7 +4811,7 @@ bool ChatHandler::HandleResetSpellsCommand(char* args)
     }
     else
     {
-        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'",uint32(AT_LOGIN_RESET_SPELLS), GUID_LOPART(target_guid));
+        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'",uint32(AT_LOGIN_RESET_SPELLS), target_guid.GetCounter());
         PSendSysMessage(LANG_RESET_SPELLS_OFFLINE,target_name.c_str());
     }
 
@@ -4822,7 +4821,7 @@ bool ChatHandler::HandleResetSpellsCommand(char* args)
 bool ChatHandler::HandleResetSpecsCommand(char* args)
 {
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     std::string target_name;
     if (!ExtractPlayerTarget(&args, &target, &target_guid, &target_name))
         return false;
@@ -4841,10 +4840,10 @@ bool ChatHandler::HandleResetSpecsCommand(char* args)
             target->SendTalentsInfoData(true);
         return true;
     }
-    else if (target_guid)
+    else if (!target_guid.IsEmpty())
     {
         uint32 at_flags = AT_LOGIN_RESET_TALENTS | AT_LOGIN_RESET_PET_TALENTS;
-        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'", at_flags, GUID_LOPART(target_guid) );
+        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'", at_flags, target_guid.GetCounter());
         std::string nameLink = playerLink(target_name);
         PSendSysMessage(LANG_RESET_TALENTS_OFFLINE, nameLink.c_str());
         return true;
@@ -4961,7 +4960,7 @@ bool ChatHandler::HandleServerShutDownCommand(char* args)
     // Exit code should be in range of 0-125, 126-255 is used
     // in many shells for their own return codes and code > 255
     // is not supported in many others
-    if (exitcode < 0 || exitcode > 125)
+    if (exitcode > 125)
         return false;
 
     sWorld.ShutdownServ (delay, 0, exitcode);
@@ -4981,7 +4980,7 @@ bool ChatHandler::HandleServerRestartCommand(char* args)
     // Exit code should be in range of 0-125, 126-255 is used
     // in many shells for their own return codes and code > 255
     // is not supported in many others
-    if (exitcode < 0 || exitcode > 125)
+    if (exitcode > 125)
         return false;
 
     sWorld.ShutdownServ(delay, SHUTDOWN_MASK_RESTART, exitcode);
@@ -5001,7 +5000,7 @@ bool ChatHandler::HandleServerIdleRestartCommand(char* args)
     // Exit code should be in range of 0-125, 126-255 is used
     // in many shells for their own return codes and code > 255
     // is not supported in many others
-    if (exitcode < 0 || exitcode > 125)
+    if (exitcode > 125)
         return false;
 
     sWorld.ShutdownServ(delay, SHUTDOWN_MASK_RESTART|SHUTDOWN_MASK_IDLE, exitcode);
@@ -5021,7 +5020,7 @@ bool ChatHandler::HandleServerIdleShutDownCommand(char* args)
     // Exit code should be in range of 0-125, 126-255 is used
     // in many shells for their own return codes and code > 255
     // is not supported in many others
-    if (exitcode < 0 || exitcode > 125)
+    if (exitcode > 125)
         return false;
 
     sWorld.ShutdownServ(delay, SHUTDOWN_MASK_IDLE, exitcode);
@@ -5379,7 +5378,7 @@ bool ChatHandler::HandleBanInfoAccountCommand(char* args)
 bool ChatHandler::HandleBanInfoCharacterCommand(char* args)
 {
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     if (!ExtractPlayerTarget(&args, &target, &target_guid))
         return false;
 
@@ -6474,7 +6473,7 @@ bool ChatHandler::HandleSendItemsCommand(char* args)
 {
     // format: name "subject text" "mail text" item1[:count1] item2[:count2] ... item12[:count12]
     Player* receiver;
-    uint64 receiver_guid;
+    ObjectGuid receiver_guid;
     std::string receiver_name;
     if (!ExtractPlayerTarget(&args, &receiver, &receiver_guid, &receiver_name))
         return false;
@@ -6545,7 +6544,7 @@ bool ChatHandler::HandleSendItemsCommand(char* args)
     }
 
     // from console show nonexistent sender
-    MailSender sender(MAIL_NORMAL,m_session ? m_session->GetPlayer()->GetGUIDLow() : 0, MAIL_STATIONERY_GM);
+    MailSender sender(MAIL_NORMAL, m_session ? m_session->GetPlayer()->GetObjectGuid().GetCounter() : 0, MAIL_STATIONERY_GM);
 
     // fill mail
     MailDraft draft(subject, text);
@@ -6559,7 +6558,7 @@ bool ChatHandler::HandleSendItemsCommand(char* args)
         }
     }
 
-    draft.SendMailTo(MailReceiver(receiver,GUID_LOPART(receiver_guid)), sender);
+    draft.SendMailTo(MailReceiver(receiver, receiver_guid), sender);
 
     std::string nameLink = playerLink(receiver_name);
     PSendSysMessage(LANG_MAIL_SENT, nameLink.c_str());
@@ -6572,7 +6571,7 @@ bool ChatHandler::HandleSendMoneyCommand(char* args)
     /// format: name "subject text" "mail text" money
 
     Player* receiver;
-    uint64 receiver_guid;
+    ObjectGuid receiver_guid;
     std::string receiver_name;
     if (!ExtractPlayerTarget(&args, &receiver, &receiver_guid, &receiver_name))
         return false;
@@ -6597,11 +6596,11 @@ bool ChatHandler::HandleSendMoneyCommand(char* args)
     std::string text    = msgText;
 
     // from console show nonexistent sender
-    MailSender sender(MAIL_NORMAL,m_session ? m_session->GetPlayer()->GetGUIDLow() : 0, MAIL_STATIONERY_GM);
+    MailSender sender(MAIL_NORMAL, m_session ? m_session->GetPlayer()->GetObjectGuid().GetCounter() : 0, MAIL_STATIONERY_GM);
 
     MailDraft(subject, text)
         .AddMoney(money)
-        .SendMailTo(MailReceiver(receiver,GUID_LOPART(receiver_guid)),sender);
+        .SendMailTo(MailReceiver(receiver, receiver_guid),sender);
 
     std::string nameLink = playerLink(receiver_name);
     PSendSysMessage(LANG_MAIL_SENT, nameLink.c_str());
@@ -6691,7 +6690,7 @@ bool ChatHandler::HandleModifyGenderCommand(char *args)
 
     // Set gender
     player->SetByteValue(UNIT_FIELD_BYTES_0, 2, gender);
-    player->SetByteValue(PLAYER_BYTES_3, 0, gender);
+    player->SetUInt16Value(PLAYER_BYTES_3, 0, uint16(gender) | (player->GetDrunkValue() & 0xFFFE));
 
     // Change display ID
     player->InitDisplayIds();

@@ -323,7 +323,8 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
             sLog.outDebug("PlayerbotMgr: CMSG_REPAIR_ITEM");
 
-            uint64 npcGUID, itemGUID;
+            ObjectGuid npcGUID;
+            uint64 itemGUID;
             uint8 guildBank;
 
             p.rpos(0);    //reset packet pointer
@@ -345,7 +346,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 Creature *unit = bot->GetNPCIfCanInteractWith(npcGUID, UNIT_NPC_FLAG_REPAIR);
                 if (!unit)     // Check if NPC can repair bot or not
                 {
-                    sLog.outDebug("PlayerbotMgr: HandleRepairItemOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(npcGUID)));
+                    sLog.outDebug("PlayerbotMgr: HandleRepairItemOpcode - Unit (GUID: %s) not found or you can't interact with him.", npcGUID.GetString().c_str());
                     return;
                 }
 
@@ -364,7 +365,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 }
                 else      // Handle feature (repair all items) for bot
                 {
-                    sLog.outDebug("ITEM: Repair all items, npcGUID = %u", GUID_LOPART(npcGUID));
+                    sLog.outDebug("ITEM: Repair all items, npcGUID = %s", npcGUID.GetString().c_str());
 
                     TotalCost = bot->DurabilityRepairAll(true, discountMod, guildBank > 0 ? true : false);
                 }

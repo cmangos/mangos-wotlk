@@ -171,7 +171,7 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS]=
     &Unit::HandleNULLProc,                                  //135 SPELL_AURA_MOD_HEALING_DONE
     &Unit::HandleNULLProc,                                  //136 SPELL_AURA_MOD_HEALING_DONE_PERCENT
     &Unit::HandleNULLProc,                                  //137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE
-    &Unit::HandleHasteAuraProc,                             //138 SPELL_AURA_MOD_HASTE
+    &Unit::HandleHasteAuraProc,                             //138 SPELL_AURA_MOD_MELEE_HASTE
     &Unit::HandleNULLProc,                                  //139 SPELL_AURA_FORCE_REACTION
     &Unit::HandleNULLProc,                                  //140 SPELL_AURA_MOD_RANGED_HASTE
     &Unit::HandleNULLProc,                                  //141 SPELL_AURA_MOD_RANGED_AMMO_HASTE
@@ -437,8 +437,8 @@ SpellAuraProcResult Unit::HandleHasteAuraProc(Unit *pVictim, uint32 damage, Aura
 {
     SpellEntry const *hasteSpell = triggeredByAura->GetSpellProto();
 
-    Item* castItem = triggeredByAura->GetCastItemGUID() && GetTypeId()==TYPEID_PLAYER
-        ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID()) : NULL;
+    Item* castItem = !triggeredByAura->GetCastItemGuid().IsEmpty() && GetTypeId()==TYPEID_PLAYER
+        ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGuid()) : NULL;
 
     uint32 triggered_spell_id = 0;
     Unit* target = pVictim;
@@ -503,8 +503,8 @@ SpellAuraProcResult Unit::HandleSpellCritChanceAuraProc(Unit *pVictim, uint32 /*
 
     SpellEntry const *triggeredByAuraSpell = triggeredByAura->GetSpellProto();
 
-    Item* castItem = triggeredByAura->GetCastItemGUID() && GetTypeId()==TYPEID_PLAYER
-        ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID()) : NULL;
+    Item* castItem = !triggeredByAura->GetCastItemGuid().IsEmpty() && GetTypeId()==TYPEID_PLAYER
+        ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGuid()) : NULL;
 
     uint32 triggered_spell_id = 0;
     Unit* target = pVictim;
@@ -567,8 +567,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
     SpellEffectIndex effIndex = triggeredByAura->GetEffIndex();
     int32  triggerAmount = triggeredByAura->GetModifier()->m_amount;
 
-    Item* castItem = triggeredByAura->GetCastItemGUID() && GetTypeId()==TYPEID_PLAYER
-        ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID()) : NULL;
+    Item* castItem = !triggeredByAura->GetCastItemGuid().IsEmpty() && GetTypeId()==TYPEID_PLAYER
+        ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGuid()) : NULL;
 
     // some dummy spells have trigger spell in spell data already (from 3.0.3)
     uint32 triggered_spell_id = dummySpell->EffectApplyAuraName[effIndex] == SPELL_AURA_DUMMY ? dummySpell->EffectTriggerSpell[effIndex] : 0;
@@ -1653,7 +1653,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
             {
                 // "refresh your Slice and Dice duration to its 5 combo point maximum"
                 // lookup Slice and Dice
-                AuraList const& sd = GetAurasByType(SPELL_AURA_MOD_HASTE);
+                AuraList const& sd = GetAurasByType(SPELL_AURA_MOD_MELEE_HASTE);
                 for(AuraList::const_iterator itr = sd.begin(); itr != sd.end(); ++itr)
                 {
                     SpellEntry const *spellProto = (*itr)->GetSpellProto();
@@ -2695,8 +2695,8 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, uint32 d
     if(triggeredByAura->GetModifier()->m_auraname == SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE)
         basepoints[0] = triggerAmount;
 
-    Item* castItem = triggeredByAura->GetCastItemGUID() && GetTypeId()==TYPEID_PLAYER
-        ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID()) : NULL;
+    Item* castItem = !triggeredByAura->GetCastItemGuid().IsEmpty() && GetTypeId()==TYPEID_PLAYER
+        ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGuid()) : NULL;
 
     // Try handle unknown trigger spells
     // Custom requirements (not listed in procEx) Warning! damage dealing after this
@@ -3014,7 +3014,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, uint32 d
             // Druid Forms Trinket
             if (auraSpellInfo->Id==37336)
             {
-                switch(m_form)
+                switch(GetShapeshiftForm())
                 {
                     case FORM_NONE:     trigger_spell_id = 37344;break;
                     case FORM_CAT:      trigger_spell_id = 37341;break;
@@ -3029,7 +3029,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, uint32 d
             // Druid T9 Feral Relic (Lacerate, Swipe, Mangle, and Shred)
             else if (auraSpellInfo->Id==67353)
             {
-                switch(m_form)
+                switch(GetShapeshiftForm())
                 {
                     case FORM_CAT:      trigger_spell_id = 67355; break;
                     case FORM_BEAR:
@@ -3504,8 +3504,8 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, uint3
     if(!pVictim || !pVictim->isAlive())
         return SPELL_AURA_PROC_FAILED;
 
-    Item* castItem = triggeredByAura->GetCastItemGUID() && GetTypeId()==TYPEID_PLAYER
-        ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID()) : NULL;
+    Item* castItem = !triggeredByAura->GetCastItemGuid().IsEmpty() && GetTypeId()==TYPEID_PLAYER
+        ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGuid()) : NULL;
 
     // Basepoints of trigger aura
     int32 triggerAmount = triggeredByAura->GetModifier()->m_amount;
@@ -3704,8 +3704,8 @@ SpellAuraProcResult Unit::HandleMaelstromWeaponAuraProc(Unit* /*pVictim*/, uint3
 SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* /*pVictim*/, uint32 /*damage*/, Aura* triggeredByAura, SpellEntry const *procSpell, uint32 /*procFlag*/, uint32 procEx, uint32 /*cooldown*/)
 {
     SpellEntry const *spellInfo = triggeredByAura->GetSpellProto();
-    Item* castItem = triggeredByAura->GetCastItemGUID() && GetTypeId()==TYPEID_PLAYER
-    ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID()) : NULL;
+    Item* castItem = !triggeredByAura->GetCastItemGuid().IsEmpty() && GetTypeId()==TYPEID_PLAYER
+    ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGuid()) : NULL;
 
     switch(spellInfo->SpellFamilyName)
     {
@@ -3749,8 +3749,8 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* /*pVictim*/, uint32
 SpellAuraProcResult Unit::HandleModDamagePercentDoneAuraProc(Unit* /*pVictim*/, uint32 /*damage*/, Aura* triggeredByAura, SpellEntry const *procSpell, uint32 /*procFlag*/, uint32 procEx, uint32 cooldown)
 {
     SpellEntry const *spellInfo = triggeredByAura->GetSpellProto();
-    Item* castItem = triggeredByAura->GetCastItemGUID() && GetTypeId()==TYPEID_PLAYER
-    ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID()) : NULL;
+    Item* castItem = !triggeredByAura->GetCastItemGuid().IsEmpty() && GetTypeId()==TYPEID_PLAYER
+    ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGuid()) : NULL;
 
     // Aspect of the Viper
     if (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && spellInfo->SpellFamilyFlags & UI64LIT(0x4000000000000))

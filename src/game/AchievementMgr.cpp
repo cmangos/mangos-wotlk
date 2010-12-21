@@ -398,7 +398,7 @@ void AchievementMgr::Reset()
 
     m_completedAchievements.clear();
     m_criteriaProgress.clear();
-    DeleteFromDB(m_player->GetGUIDLow());
+    DeleteFromDB(m_player->GetObjectGuid());
 
     // re-fill data
     CheckAllAchievementCriteria();
@@ -443,11 +443,12 @@ void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uin
     }
 }
 
-void AchievementMgr::DeleteFromDB(uint32 lowguid)
+void AchievementMgr::DeleteFromDB(ObjectGuid guid)
 {
+    uint32 lowguid = guid.GetCounter();
     CharacterDatabase.BeginTransaction ();
-    CharacterDatabase.PExecute("DELETE FROM character_achievement WHERE guid = %u",lowguid);
-    CharacterDatabase.PExecute("DELETE FROM character_achievement_progress WHERE guid = %u",lowguid);
+    CharacterDatabase.PExecute("DELETE FROM character_achievement WHERE guid = %u", lowguid);
+    CharacterDatabase.PExecute("DELETE FROM character_achievement_progress WHERE guid = %u", lowguid);
     CharacterDatabase.CommitTransaction ();
 }
 
@@ -1224,11 +1225,11 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         continue;
                 }
 
-                // exist many achievements with this criteria, use at this moment hardcoded check to skil simple case
+                // exist many achievements with this criteria, use at this moment hardcoded check to skip simple case
                 switch(achievement->ID)
                 {
                     case 31:
-                    //case 1275: // these timed achievements have to be "started" on Quest Accecpt
+                    //case 1275: // these timed achievements have to be "started" on Quest Accept
                     //case 1276:
                     //case 1277:
                     case 1282:
@@ -2368,9 +2369,9 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
                 switch(achievement->ID)
                 {
                     case 31:
-                    case 1275:
-                    case 1276:
-                    case 1277:
+                    //case 1275: // these timed achievements are "started" on Quest Accept, and simple ended on quest-complete
+                    //case 1276:
+                    //case 1277:
                     case 1282:
                     case 1789:
                         break;

@@ -1196,6 +1196,15 @@ struct MovieEntry
     //uint32      unk2;                                     // 2 always 100
 };
 
+#define MAX_OVERRIDE_SPELLS     10
+
+struct OverrideSpellDataEntry
+{
+    uint32      Id;                                         // 0 index
+    uint32      Spells[MAX_OVERRIDE_SPELLS];                // 1-10 spells
+    //uint32      unk2;                                     // 11 possibly flag
+};
+
 struct PvPDifficultyEntry
 {
     //uint32      id;                                       // 0        m_ID
@@ -1515,6 +1524,16 @@ struct SpellEntry
     uint32 const* GetEffectSpellClassMask(SpellEffectIndex effect) const
     {
         return EffectSpellClassMaskA + effect * 3;
+    }
+
+    bool IsFitToFamilyMask(uint64 familyFlags, uint32 familyFlags2 = 0) const
+    {
+        return (SpellFamilyFlags & familyFlags) || (SpellFamilyFlags2 & familyFlags2);
+    }
+
+    bool IsFitToFamily(SpellFamily family, uint64 familyFlags, uint32 familyFlags2 = 0) const
+    {
+        return SpellFamily(SpellFamilyName) == family && IsFitToFamilyMask(familyFlags, familyFlags2);
     }
 
     private:
