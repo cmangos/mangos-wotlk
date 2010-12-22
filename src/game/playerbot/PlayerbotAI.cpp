@@ -2346,7 +2346,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         pTarget = m_bot;
 
     // Check spell range
-    std::map<uint32, float>::iterator it = m_spellRangeMap.find(spellId);
+    SpellRanges::iterator it = m_spellRangeMap.find(spellId);
     if (it != m_spellRangeMap.end() && (int)it->second != 0)
     {
         float dist = m_bot->GetCombatDistance(pTarget);
