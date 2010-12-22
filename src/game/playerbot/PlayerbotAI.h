@@ -129,6 +129,7 @@ public:
         COLLECT_FLAG_PROFESSION = 0x04,     // items related to skills
         COLLECT_FLAG_LOOT       = 0x08,     // all loot on corpses
         COLLECT_FLAG_SKIN       = 0x10,     // skin creatures if available
+        COLLECT_FLAG_NEAROBJECT = 0x20      // collect specified nearby object
     };
 
     enum MovementOrderType
@@ -140,6 +141,7 @@ public:
 
     typedef std::map<uint32, uint32> BotNeedItem;
     typedef std::list<uint64> BotLootCreature;
+    typedef std::list<uint32> BotLootEntry;
 
     // attacker query used in PlayerbotAI::FindAttacker()
     enum ATTACKERINFOTYPE
@@ -213,6 +215,8 @@ public:
     void findItemsInEquip(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const;
     // finds items in bots inventory and adds them to foundItemList, removes found items from itemIdSearchList
     void findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const;
+    // finds nearby game objects that are specified in m_collectObjects then adds them to the m_lootTargets list
+    void findNearbyGO();
 
     // currently bots only obey commands from the master
     bool canObeyCommandFrom(const Player& player) const;
@@ -365,6 +369,7 @@ private:
     BotLootCreature m_lootTargets;      // list of creatures
     ObjectGuid m_lootCurrent;           // current remains of interest
     ObjectGuid m_lootPrev;              // previous loot
+    BotLootEntry m_collectObjects;      // object entries searched for in findNearbyGO
 
     uint8 m_collectionFlags;            // what the bot should look for to loot
 

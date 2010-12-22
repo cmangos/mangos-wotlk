@@ -3,6 +3,7 @@
 #include "../ItemPrototype.h"
 #include "../World.h"
 #include "../SpellMgr.h"
+#include "../GridNotifiers.h"
 #include "PlayerbotAI.h"
 #include "PlayerbotMgr.h"
 #include "PlayerbotDeathKnightAI.h"
@@ -2002,6 +2003,13 @@ void PlayerbotAI::DoLoot()
             {
                 if (SkillValue >= reqSkillValue)
                 {
+                    // add this GO to our collection list if active and is chest/ore/herb
+                    if (go && HasCollectFlag(COLLECT_FLAG_NEAROBJECT) && go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
+                    {
+                        m_collectObjects.push_back(go->GetEntry());
+                        m_collectObjects.unique();
+                    }
+
                     switch(skillId)
                     {
                         case SKILL_MINING:
@@ -2732,7 +2740,18 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
 
         // do class specific non combat actions
         else if (GetClassAI() && !m_bot->IsMounted())
+        {
             (GetClassAI())->DoNonCombatActions();
+
+            // have we been told to collect GOs
+            if (HasCollectFlag(COLLECT_FLAG_NEAROBJECT))
+            {
+                findNearbyGO();
+                // start looting if have targets
+                if (!m_lootTargets.empty())
+                    SetState(BOTSTATE_LOOTING);
+            }
+        }
     }
 }
 
@@ -3421,6 +3440,37 @@ void PlayerbotAI::findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<
     }
 }
 
+void PlayerbotAI::findNearbyGO()
+{
+    if (m_collectObjects.empty())
+        return;
+
+    std::list<GameObject*> tempTargetGOList;
+    float radius = 20.0f;
+
+    for (BotLootEntry::iterator itr = m_collectObjects.begin(); itr != m_collectObjects.end(); ++itr)
+    {
+        uint32 entry = *(itr);
+
+        // search for GOs with entry, within range of m_bot
+        MaNGOS::GameObjectEntryInPosRangeCheck go_check(*m_bot, entry, m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(), radius);
+        MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectEntryInPosRangeCheck> checker(tempTargetGOList, go_check);
+        Cell::VisitGridObjects(m_bot, checker, radius);
+
+        // no objects found, continue to next entry
+        if (tempTargetGOList.empty())
+            continue;
+
+        // add any objects found to our lootTargets
+        for(std::list<GameObject*>::iterator iter = tempTargetGOList.begin(); iter != tempTargetGOList.end(); ++iter)
+        {
+            GameObject* go = (*iter);
+            if (go->isSpawned())
+                m_lootTargets.push_back(go->GetObjectGuid().GetRawValue());
+        }
+    }
+}
+
 // use item on self
 void PlayerbotAI::UseItem(Item *item)
 {
@@ -3915,15 +3965,24 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 SetCollectFlag(COLLECT_FLAG_PROFESSION);
             else if (subcommand == "skin" && m_bot->HasSkill(SKILL_SKINNING))
                 SetCollectFlag(COLLECT_FLAG_SKIN);
+            else if (subcommand == "objects" || subcommand == "nearby")
+            {
+                SetCollectFlag(COLLECT_FLAG_NEAROBJECT);
+                if (!HasCollectFlag(COLLECT_FLAG_NEAROBJECT))
+                    m_collectObjects.clear();
+            }
             else if (subcommand == "none" || subcommand == "nothing")
+            {
                 m_collectionFlags = 0;
+                m_collectObjects.clear();
+            }
             else
             {
                 std::string collout = "";
-                // TODO: add commands for skills
                 if (m_bot->HasSkill(SKILL_SKINNING))
                     collout += ", skin";
-                TellMaster("Collect <what>?: none, combat, loot, quest, profession" + collout);
+                // TODO: perhaps change the command syntax, this way may be lacking in ease of use
+                TellMaster("Collect <what>?: none, combat, loot, quest, profession, objects" + collout);
                 break;
             }
             if (part == subcommand)
@@ -3943,6 +4002,28 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             collset += " items after combat";
         else
             collset += " items";
+
+        if (HasCollectFlag(COLLECT_FLAG_NEAROBJECT))
+        {
+            collset += " and nearby objects (";
+            if (!m_collectObjects.empty())
+            {
+                std::string strobjects = "";
+                for (BotLootEntry::iterator itr = m_collectObjects.begin(); itr != m_collectObjects.end();++itr)
+                {
+                    uint32 objectentry = *(itr);
+                    // TODO: look up GO entry for name instead of just listing entry id
+                    strobjects += ", ";
+                    char c[10];
+                    itoa(objectentry,c,10);
+                    strobjects += c;
+                }
+                collset += strobjects.substr(2);
+            }
+            else
+                collset += "use survey and get to set";
+            collset += ")";
+        }
 
         if (collset.length() > 1)
             TellMaster("I'm collecting " + collset.substr(2));
