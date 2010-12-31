@@ -3831,7 +3831,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         SendWhisper(detectout.str().c_str(), fromPlayer);
     }
 
-    // stats project: 10:00 19/04/10 rev.1 display bot statistics
+    // stats project: 11:30 15/12/10 rev.2 display bot statistics
     else if (text == "stats")
     {
         std::ostringstream out;
@@ -3848,7 +3848,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         // list out items in other removable backpacks
         for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
         {
-            const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+            const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
             if (pBag)
             {
                 ItemPrototype const* pBagProto = pBag->GetProto();
@@ -3858,29 +3858,34 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
         }
 
-        // calculate how much money bot has
-        uint32 copper = m_bot->GetMoney();
+        // estimate how much item damage the bot has
+        uint32 copper = EstRepairAll();
         uint32 gold = uint32(copper / 10000);
         copper -= (gold * 10000);
         uint32 silver = uint32(copper / 100);
         copper -= (silver * 100);
 
-        out << "|cffffffff[|h|cff00ffff" << m_bot->GetName() << "|h|cffffffff]" << " has |r|cff00ff00" << gold
-            << "|r|cfffffc00g|r|cff00ff00" << silver
-            << "|r|cffcdcdcds|r|cff00ff00" << copper
-            << "|r|cffffd333c" << "|h|cffffffff bag slots |h|cff00ff00" << totalfree;
+        out << "|cffffffff[|h|cff00ffff" << m_bot->GetName() << "|h|cffffffff] has |cff00ff00";
+        out << totalfree << " |h|cffffffff bag slots,|h" << " |cff00ff00";
+        if (gold > 0)
+            out << "|r|cff00ff00" << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+        if (silver > 0)
+            out << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+        out << copper <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
 
-        // estimate how much item damage the bot has
-        copper = EstRepairAll();
+        // calculate how much money bot has
+        copper = m_bot->GetMoney();
         gold = uint32(copper / 10000);
         copper -= (gold * 10000);
         silver = uint32(copper / 100);
         copper -= (silver * 100);
 
-        out << "|h|cffffffff & item damage cost " << "|r|cff00ff00" << gold
-            << "|r|cfffffc00g|r|cff00ff00" << silver
-            << "|r|cffcdcdcds|r|cff00ff00" << copper
-            << "|r|cffffd333c";
+        out << "|h|cffffffff item damage & has " << "|r|cff00ff00";
+        if (gold > 0)
+            out << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+        if (silver > 0)
+            out << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+        out << copper <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
         ChatHandler ch(&fromPlayer);
         ch.SendSysMessage(out.str().c_str());
     }
