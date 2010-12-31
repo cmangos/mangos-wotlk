@@ -97,6 +97,7 @@ public:
 
     typedef std::map<uint32, uint32> BotNeedItem;
     typedef std::list<uint64> BotLootCreature;
+    typedef std::list<uint32> BotSpellList;
 
     // attacker query used in PlayerbotAI::FindAttacker()
     enum ATTACKERINFOTYPE
@@ -159,7 +160,10 @@ public:
     void extractItemIds(const std::string& text, std::list<uint32>& itemIds) const;
 
     // extract spellid from links
-    bool extractSpellId(const std::string& text, uint32 &spellId) const;
+    void extractSpellId(const std::string& text, uint32 &spellId) const;
+
+    // extract spellids from links to list
+    void extractSpellIdList(const std::string& text, BotSpellList& m_spellsToLearn) const;
 
     // extracts currency from a string as #g#s#c and returns the total in copper
     uint32 extractMoney(const std::string& text) const;
@@ -171,6 +175,8 @@ public:
     void findItemsInEquip(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const;
     // finds items in bots inventory and adds them to foundItemList, removes found items from itemIdSearchList
     void findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const;
+
+    void MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out, Player* player = NULL);
 
     // currently bots only obey commands from the master
     bool canObeyCommandFrom(const Player& player) const;
@@ -311,6 +317,7 @@ private:
 
     // list of creatures we recently attacked and want to loot
     BotLootCreature m_lootCreature;      // list of creatures
+    BotSpellList m_spellsToLearn;       // list of spells
     uint64 m_lootCurrent;                // current remains of interest
 
     time_t m_TimeDoneEating;

@@ -579,6 +579,19 @@ void Creature::LoadBotMenu(Player *pPlayer)
     delete result;
 }
 
+void Player::skill(std::list<uint32>& m_spellsToLearn)
+{
+    for( SkillStatusMap::const_iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end();++itr)
+    {
+        if(itr->second.uState == SKILL_DELETED)
+            continue;
+
+        uint32 pskill = itr->first;
+
+        m_spellsToLearn.push_back(pskill);
+    }
+}
+
 void Player::chompAndTrim(std::string& str)
 {
     while (str.length() > 0)

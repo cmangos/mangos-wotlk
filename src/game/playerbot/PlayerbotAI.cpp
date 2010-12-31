@@ -2698,7 +2698,16 @@ void PlayerbotAI::extractItemIds(const std::string& text, std::list<uint32>& ite
     }
 }
 
-bool PlayerbotAI::extractSpellId(const std::string& text, uint32 &spellId) const
+// Build an hlink for spells
+void PlayerbotAI::MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out, Player *player)
+{
+	LocaleConstant loc = LOCALE_enUS;
+	if (player)
+		loc = player->GetSession()->GetSessionDbcLocale();
+	out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[loc] << "]|h|r";
+}
+
+void PlayerbotAI::extractSpellId(const std::string& text, uint32 &spellId) const
 {
 
     //   Link format
@@ -2711,19 +2720,50 @@ bool PlayerbotAI::extractSpellId(const std::string& text, uint32 &spellId) const
 
     int i = text.find("Hspell:", pos);
     if (i == -1)
-        return false;
+        return;
 
     // DEBUG_LOG("extractSpellId first pos %u i %u",pos,i);
     pos = i + 7;     // start of window in text 16 + 7 = 23
     int endPos = text.find('|', pos);
     if (endPos == -1)
-        return false;
+        return;
 
     // DEBUG_LOG("extractSpellId second endpos : %u pos : %u",endPos,pos);
     std::string idC = text.substr(pos, endPos - pos);     // 26 - 23
     spellId = atol(idC.c_str());
     pos = endPos;     // end
-    return true;
+}
+
+void PlayerbotAI::extractSpellIdList(const std::string& text, BotSpellList& m_spellsToLearn) const
+{
+
+    //   Link format
+    //   |cffffffff|Hspell:" << spellId << ":" << "|h[" << pSpellInfo->SpellName[loc] << "]|h|r";
+    //   cast |cff71d5ff|Hspell:686|h[Shadow Bolt]|h|r";
+    //   012345678901234567890123456
+    //        base = 16 >|  +7 >|
+
+    uint8 pos = 0;
+    while(true)
+    {
+        int i = text.find("Hspell:", pos);
+        if (i == -1)
+            break;
+
+        // DEBUG_LOG("extractSpellIdList first pos %u i %u",pos,i);
+        pos = i + 7;     // start of window in text 16 + 7 = 23
+        int endPos = text.find('|', pos);
+        if (endPos == -1)
+            break;
+
+        // DEBUG_LOG("extractSpellIdList second endpos : %u pos : %u",endPos,pos);
+        std::string idC = text.substr(pos, endPos - pos);     // 26 - 23
+        uint32 spellId = atol(idC.c_str());
+        pos = endPos;     // end
+
+        if(spellId)
+            m_spellsToLearn.push_back(spellId);
+    }
 }
 
 bool PlayerbotAI::extractGOinfo(const std::string& text, uint32 &guid, uint32 &entry, int &mapid, float &x, float &y, float &z) const
@@ -3829,6 +3869,278 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             delete result;
         }
         SendWhisper(detectout.str().c_str(), fromPlayer);
+    }
+
+    // Handle class & professions training:
+    // skill                           -- Lists bot(s) Primary profession skills.
+    // skill train                     -- List available class or profession (Primary or Secondary) skills & spells, from selected trainer.
+    // skill learn [HLINK][HLINK] ..   -- Learn selected skill and spells, from selected trainer ([HLINK] from skill train).
+    // skill unlearn [HLINK][HLINK] .. -- Unlearn selected primary profession skill(s) and all associated spells ([HLINK] from skill)
+    else if (text.size() >= 5 && text.substr(0, 5) == "skill")
+    {
+        uint32 rank[8] = {0,75,150,225,300,375,450,525};
+
+        std::ostringstream msg;
+
+        std::string part = "";
+        std::string subcommand = "";
+
+        if (text.size() > 5 && text.substr(0, 6) == "skill ")
+            part = text.substr(6); // Truncate 'skill ' part
+
+        if (part.find(" ") > 0)
+        {
+            subcommand = part.substr(0, part.find(" "));
+            if (part.size() > subcommand.size())
+            part = part.substr(subcommand.size() + 1);
+        }
+        else
+            subcommand = part;
+
+        if (subcommand == "train" || subcommand == "learn")
+        {
+            uint32 totalCost = 0;
+
+            Unit* unit = ObjectAccessor::GetUnit(*m_bot, fromPlayer.GetSelectionGuid());
+            if (!unit)
+            {
+                SendWhisper("Please select the trainer!", fromPlayer);
+                return;
+            }
+
+            if (!unit->isTrainer())
+            {
+                SendWhisper("This is not a trainer!", fromPlayer);
+                return;
+            }
+
+            Creature *creature =  m_bot->GetMap()->GetCreature(fromPlayer.GetSelectionGuid());
+            if(!creature)
+                return;
+
+            if(!creature->IsTrainerOf(m_bot, false))
+            {
+                SendWhisper("This trainer can not teach me anything!", fromPlayer);
+                return;
+            }
+
+            // check present spell in trainer spell list
+            TrainerSpellData const* cSpells = creature->GetTrainerSpells();
+            TrainerSpellData const* tSpells = creature->GetTrainerTemplateSpells();
+            if (!cSpells && !tSpells)
+            {
+                SendWhisper("No spells can be learnt from this trainer", fromPlayer);
+                return;
+            }
+
+            // reputation discount
+            float fDiscountMod =  m_bot->GetReputationPriceDiscount(creature);
+
+            // Handle: Learning class or profession (primary or secondary) skill & spell(s) for selected trainer, skill learn [HLINK][HLINK][HLINK].. ([HLINK] from skill train)
+            if(subcommand == "learn")
+            {
+                msg << "I have learnt the following spells:\r";
+                uint32 totalSpellLearnt = 0;
+                m_spellsToLearn.clear();
+                extractSpellIdList(part, m_spellsToLearn);
+                for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); advance(it,1))
+                {
+                    uint32 spellId = *it;
+
+                    if(!spellId)
+                        break;
+
+                    TrainerSpell const* trainer_spell = cSpells->Find(spellId);
+                    if (!trainer_spell)
+                        trainer_spell = tSpells->Find(spellId);
+
+                    if (!trainer_spell || !trainer_spell->learnedSpell)
+                        continue;
+
+                    // apply reputation discount
+                    uint32 cost = uint32(floor(trainer_spell->spellCost * fDiscountMod));
+                    // check money requirement
+                    if(m_bot->GetMoney() < cost )
+                        continue;
+
+                    m_bot->ModifyMoney(-int32(cost));
+                    // learn explicitly or cast explicitly
+                    if(trainer_spell->IsCastable())
+                        m_bot->CastSpell(m_bot, trainer_spell->spell, true);
+                    else
+                        m_bot->learnSpell(spellId, false);
+                    ++totalSpellLearnt;
+                    totalCost += cost;
+                    const SpellEntry *const pSpellInfo =  sSpellStore.LookupEntry(spellId);
+                    if (!pSpellInfo)
+                        continue;
+
+                    MakeSpellLink(pSpellInfo, msg, &fromPlayer);
+                    uint32 gold = uint32(cost / 10000);
+                    cost -= (gold * 10000);
+                    uint32 silver = uint32(cost / 100);
+                    cost -= (silver * 100);
+                    msg << " ";
+                    if (gold > 0)
+                        msg << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+                    if (silver > 0)
+                        msg << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+                    msg << cost <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\r";
+                }
+                uint32 gold = uint32(totalCost / 10000);
+                totalCost -= (gold * 10000);
+                uint32 silver = uint32(totalCost / 100);
+                totalCost -= (silver * 100);
+                msg << "Total of " << totalSpellLearnt << " spell";
+                if (totalSpellLearnt != 1) msg << "s";
+                    msg << " learnt, ";
+                if (gold > 0)
+                    msg << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+                if (silver > 0)
+                    msg << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+                msg << totalCost <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t spent.";
+            }
+            // Handle: List class or profession skill & spells for selected trainer, skill train
+            else
+            if(subcommand == "train")
+            {
+                msg << "The spells I can learn and their cost:\r";
+
+                TrainerSpellData const* trainer_spells = cSpells;
+                if (!trainer_spells)
+                    trainer_spells = tSpells;
+
+                for (TrainerSpellMap::const_iterator itr =  trainer_spells->spellList.begin(); itr !=  trainer_spells->spellList.end(); ++itr)
+                {
+                    TrainerSpell const* tSpell = &itr->second;
+
+                    if(!tSpell)
+                        break;
+
+                    if (!tSpell->learnedSpell && !m_bot->IsSpellFitByClassAndRace(tSpell->learnedSpell))
+                        continue;
+
+                    if  (sSpellMgr.IsPrimaryProfessionFirstRankSpell(tSpell->learnedSpell) && m_bot->HasSpell(tSpell->learnedSpell))
+                        continue;
+
+                    TrainerSpellState state =  m_bot->GetTrainerSpellState(tSpell);
+                    if (state != TRAINER_SPELL_GREEN)
+                        continue;
+
+                    uint32 spellId = tSpell->spell;
+                    const SpellEntry *const pSpellInfo =  sSpellStore.LookupEntry(spellId);
+                    if (!pSpellInfo)
+                        continue;
+                    uint32 cost = uint32(floor(tSpell->spellCost *  fDiscountMod));
+                    totalCost += cost;
+
+                    uint32 gold = uint32(cost / 10000);
+                    cost -= (gold * 10000);
+                    uint32 silver = uint32(cost / 100);
+                    cost -= (silver * 100);
+                    MakeSpellLink(pSpellInfo, msg, &fromPlayer);
+                    msg << " ";
+                    if (gold > 0)
+                        msg << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+                    if (silver > 0)
+                        msg << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+                    msg << cost <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\r";
+                }
+                uint32 moneyDiff = m_bot->GetMoney() - totalCost;
+                if (moneyDiff >= 0)
+                {
+                    // calculate how much money bot has
+                    uint32 gold = uint32(moneyDiff / 10000);
+                    moneyDiff -= (gold * 10000);
+                    uint32 silver = uint32(moneyDiff / 100);
+                    moneyDiff -= (silver * 100);
+                    msg << " ";
+                    if (gold > 0)
+                        msg << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+                    if (silver > 0)
+                        msg << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+                    msg << moneyDiff <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t left.";
+                }
+                else
+                {
+                    moneyDiff *= -1;
+                    uint32 gold = uint32(moneyDiff / 10000);
+                    moneyDiff -= (gold * 10000);
+                    uint32 silver = uint32(moneyDiff / 100);
+                    moneyDiff -= (silver * 100);
+                    msg << "I need ";
+                    if (gold > 0)
+                        msg << " " << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+                    if (silver > 0)
+                        msg << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+                    msg << moneyDiff <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t more to learn all the  spells!";
+                }
+            }
+        }
+        // Handle: Unlearning selected primary profession skill(s) and all associated spells, skill unlearn [HLINK][HLINK].. ([HLINK] from skill)
+        else
+        if (subcommand == "unlearn")
+        {
+            m_spellsToLearn.clear();
+            extractSpellIdList(part, m_spellsToLearn);
+        }
+        // Handle: Lists bot(s) primary profession skills, skill.
+        else
+        {
+            m_spellsToLearn.clear();
+            m_bot->skill(m_spellsToLearn);
+            msg << "My Primary Professions are: ";
+        }
+
+        for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
+        {
+            if(sSpellMgr.IsPrimaryProfessionSpell(*it) && subcommand != "learn")
+            {
+                SpellLearnSkillNode const* spellLearnSkill = sSpellMgr.GetSpellLearnSkill(*it);
+
+                uint32 prev_spell = sSpellMgr.GetPrevSpellInChain(*it);
+                if(!prev_spell)                                     // first rank, remove skill
+                    GetPlayer()->SetSkill(spellLearnSkill->skill, 0, 0);
+                else
+                {
+                    // search prev. skill setting by spell ranks chain
+                    SpellLearnSkillNode const* prevSkill = sSpellMgr.GetSpellLearnSkill(prev_spell);
+                    while(!prevSkill && prev_spell)
+                    {
+			prev_spell = sSpellMgr.GetPrevSpellInChain(prev_spell);
+                        prevSkill = sSpellMgr.GetSpellLearnSkill(sSpellMgr.GetFirstSpellInChain(prev_spell));
+                    }
+                    if (!prevSkill)                                 // not found prev skill setting, remove skill
+                        GetPlayer()->SetSkill(spellLearnSkill->skill, 0, 0);
+                }
+            }
+            else
+            if(IsPrimaryProfessionSkill(*it))
+                for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+                {
+                    SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
+                    if (!skillLine)
+                        continue;
+
+                    // has skill
+                    if (skillLine->skillId == *it && skillLine->learnOnGetSkill == 0 )
+                    {
+                        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+                        if (!spellInfo)
+                            continue;
+
+                        if(m_bot->GetSkillValue(*it) <= rank[sSpellMgr.GetSpellRank(skillLine->spellId)] && m_bot->HasSpell(skillLine->spellId))
+                        {
+                            // sLog.outDebug("(%u)(%u)(%u):",skillLine->spellId, rank[sSpellMgr.GetSpellRank(skillLine->spellId)], m_bot->GetSkillValue(*it));
+                            MakeSpellLink(spellInfo, msg, &fromPlayer);
+                            break;
+                        }
+                    }
+                }
+        }
+        SendWhisper(msg.str(), fromPlayer);
+        m_spellsToLearn.clear();
+        m_bot->GetPlayerbotAI()->GetClassAI();
     }
 
     // stats project: 11:30 15/12/10 rev.2 display bot statistics
