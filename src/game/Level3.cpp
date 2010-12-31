@@ -33,7 +33,7 @@
 #include "Guild.h"
 #include "ObjectAccessor.h"
 #include "MapManager.h"
-#include "ScriptCalls.h"
+#include "ScriptMgr.h"
 #include "Language.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
@@ -297,7 +297,7 @@ bool ChatHandler::HandleReloadGossipScriptsCommand(char* args)
     if (*args!='a')
         sLog.outString( "Re-Loading Scripts from `gossip_scripts`...");
 
-    sObjectMgr.LoadGossipScripts();
+    sScriptMgr.LoadGossipScripts();
 
     if (*args!='a')
         SendGlobalSysMessage("DB table `gossip_scripts` reloaded.");
@@ -460,8 +460,16 @@ bool ChatHandler::HandleReloadMangosStringCommand(char* /*args*/)
 bool ChatHandler::HandleReloadNpcGossipCommand(char* /*args*/)
 {
     sLog.outString( "Re-Loading `npc_gossip` Table!" );
-    sObjectMgr.LoadNpcTextId();
+    sObjectMgr.LoadNpcGossips();
     SendGlobalSysMessage("DB table `npc_gossip` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadNpcTextCommand(char* /*args*/)
+{
+    sLog.outString( "Re-Loading `npc_text` Table!" );
+    sObjectMgr.LoadGossipText();
+    SendGlobalSysMessage("DB table `npc_text` reloaded.");
     return true;
 }
 
@@ -702,7 +710,7 @@ bool ChatHandler::HandleReloadGameObjectScriptsCommand(char* args)
     if (*args!='a')
         sLog.outString( "Re-Loading Scripts from `gameobject_scripts`...");
 
-    sObjectMgr.LoadGameObjectScripts();
+    sScriptMgr.LoadGameObjectScripts();
 
     if (*args!='a')
         SendGlobalSysMessage("DB table `gameobject_scripts` reloaded.");
@@ -722,7 +730,7 @@ bool ChatHandler::HandleReloadEventScriptsCommand(char* args)
     if (*args!='a')
         sLog.outString( "Re-Loading Scripts from `event_scripts`...");
 
-    sObjectMgr.LoadEventScripts();
+    sScriptMgr.LoadEventScripts();
 
     if (*args!='a')
         SendGlobalSysMessage("DB table `event_scripts` reloaded.");
@@ -767,7 +775,7 @@ bool ChatHandler::HandleReloadQuestEndScriptsCommand(char* args)
     if (*args != 'a')
         sLog.outString( "Re-Loading Scripts from `quest_end_scripts`...");
 
-    sObjectMgr.LoadQuestEndScripts();
+    sScriptMgr.LoadQuestEndScripts();
 
     if (*args != 'a')
         SendGlobalSysMessage("DB table `quest_end_scripts` reloaded.");
@@ -787,7 +795,7 @@ bool ChatHandler::HandleReloadQuestStartScriptsCommand(char* args)
     if (*args != 'a')
         sLog.outString( "Re-Loading Scripts from `quest_start_scripts`...");
 
-    sObjectMgr.LoadQuestStartScripts();
+    sScriptMgr.LoadQuestStartScripts();
 
     if (*args != 'a')
         SendGlobalSysMessage("DB table `quest_start_scripts` reloaded.");
@@ -807,7 +815,7 @@ bool ChatHandler::HandleReloadSpellScriptsCommand(char* args)
     if (*args != 'a')
         sLog.outString( "Re-Loading Scripts from `spell_scripts`...");
 
-    sObjectMgr.LoadSpellScripts();
+    sScriptMgr.LoadSpellScripts();
 
     if (*args != 'a')
         SendGlobalSysMessage("DB table `spell_scripts` reloaded.");
@@ -818,7 +826,7 @@ bool ChatHandler::HandleReloadSpellScriptsCommand(char* args)
 bool ChatHandler::HandleReloadDbScriptStringCommand(char* /*args*/)
 {
     sLog.outString( "Re-Loading Script strings from `db_script_string`...");
-    sObjectMgr.LoadDbScriptStrings();
+    sScriptMgr.LoadDbScriptStrings();
     SendGlobalSysMessage("DB table `db_script_string` reloaded.");
     return true;
 }
@@ -888,7 +896,7 @@ bool ChatHandler::HandleReloadLocalesItemCommand(char* /*args*/)
 bool ChatHandler::HandleReloadLocalesNpcTextCommand(char* /*args*/)
 {
     sLog.outString( "Re-Loading Locales NPC Text ... ");
-    sObjectMgr.LoadNpcTextLocales();
+    sObjectMgr.LoadGossipTextLocales();
     SendGlobalSysMessage("DB table `locales_npc_text` reloaded.");
     return true;
 }
@@ -927,7 +935,10 @@ bool ChatHandler::HandleReloadMailLevelRewardCommand(char* /*args*/)
 
 bool ChatHandler::HandleLoadScriptsCommand(char* args)
 {
-    if (!LoadScriptingModule(args))
+    if (!*args)
+        return false;
+
+    if (!sScriptMgr.LoadScriptLibrary(args))
         return true;
 
     sWorld.SendWorldText(LANG_SCRIPTS_RELOADED);
@@ -3833,7 +3844,7 @@ bool ChatHandler::HandleAuraCommand(char* args)
     if (!spellInfo)
         return false;
 
-    if (!IsSpellAppliesAura(spellInfo, (1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)) &&
+    if (!IsSpellAppliesAura(spellInfo) &&
         !IsSpellHaveEffect(spellInfo, SPELL_EFFECT_PERSISTENT_AREA_AURA))
     {
         PSendSysMessage(LANG_SPELL_NO_HAVE_AURAS, spellID);

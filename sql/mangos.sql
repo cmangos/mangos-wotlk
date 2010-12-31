@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_10883_01_mangos_spell_proc_event` bit(1) default NULL
+  `required_10932_01_mangos_game_event_creature_data` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -1650,6 +1650,31 @@ LOCK TABLES `game_event_creature` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `game_event_creature_data`
+--
+
+DROP TABLE IF EXISTS `game_event_creature_data`;
+CREATE TABLE `game_event_creature_data` (
+  `guid` int(10) unsigned NOT NULL default '0',
+  `entry_id` mediumint(8) unsigned NOT NULL default '0',
+  `modelid` mediumint(8) unsigned NOT NULL default '0',
+  `equipment_id` mediumint(8) unsigned NOT NULL default '0',
+  `spell_start` mediumint(8) unsigned NOT NULL default '0',
+  `spell_end` mediumint(8) unsigned NOT NULL default '0',
+  `event` smallint(5) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`guid`,`event`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `game_event_creature_data`
+--
+
+LOCK TABLES `game_event_creature_data` WRITE;
+/*!40000 ALTER TABLE `game_event_creature_data` DISABLE KEYS */;
+/*!40000 ALTER TABLE `game_event_creature_data` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `game_event_gameobject`
 --
 
@@ -1667,28 +1692,6 @@ CREATE TABLE `game_event_gameobject` (
 LOCK TABLES `game_event_gameobject` WRITE;
 /*!40000 ALTER TABLE `game_event_gameobject` DISABLE KEYS */;
 /*!40000 ALTER TABLE `game_event_gameobject` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `game_event_model_equip`
---
-
-DROP TABLE IF EXISTS `game_event_model_equip`;
-CREATE TABLE `game_event_model_equip` (
-  `guid` int(10) unsigned NOT NULL default '0',
-  `modelid` mediumint(8) unsigned NOT NULL default '0',
-  `equipment_id` mediumint(8) unsigned NOT NULL default '0',
-  `event` smallint(5) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`guid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `game_event_model_equip`
---
-
-LOCK TABLES `game_event_model_equip` WRITE;
-/*!40000 ALTER TABLE `game_event_model_equip` DISABLE KEYS */;
-/*!40000 ALTER TABLE `game_event_model_equip` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -14402,7 +14405,7 @@ INSERT INTO `spell_bonus_data` VALUES
 (47633, 0,      0,       0.15,  0,     'Death Knight - Death Coil Heal'),
 (48743, 0,      0,       0,     0,     'Death Knight - Death Pact'),
 (55095, 0,      0,       0,     0.06325,'Death Knight - Frost Fever'),
-(49184, 0,      0,       0.1,   0,     'Death Knight - Howling Blast'),
+(49184, 0,      0,       0.2,   0,     'Death Knight - Howling Blast'),
 (45477, 0,      0,       0.1,   0,     'Death Knight - Icy Touch'),
 (56903, 0,      0,       0,     0,     'Death Knight - Lichflame'),
 (50842, 0,      0,       0.04,  0,     'Death Knight - Pestilence'),
@@ -14497,6 +14500,7 @@ INSERT INTO `spell_bonus_data` VALUES
 (379,   0,      0,       0,     0,     'Shaman - Earth Shield Triggered'),
 (8042,  0.3858, 0,       0,     0,     'Shaman - Earth Shock'),
 (8050,  0.2142, 0.1,     0,     0,     'Shaman - Flame Shock'),
+(10444, 0,      0,       0,     0,     'Shaman - Flametongue Attack'),
 (8026,  0.1,    0,       0,     0,     'Shaman - Flametongue Weapon Proc'),
 (8056,  0.3858, 0,       0,     0,     'Shaman - Frost Shock'),
 (8034,  0.1,    0,       0,     0,     'Shaman - Frostbrand Attack Rank 1'),
@@ -14507,7 +14511,6 @@ INSERT INTO `spell_bonus_data` VALUES
 (8188,  0.1,    0,       0,     0,     'Shaman - Magma Totam Passive'),
 (61295, 0.4,    0.18,    0,     0,     'Shaman - Riptide'),
 (3606,  0.1667, 0,       0,     0,     'Shaman - Searing Totem Attack'),
-(10444, 0,      0,       0,     0,     'Shaman - Flametongue Attack'),
 /* Warlock */
 (17962, 0,      0,       0,     0,     'Warlock - Conflagrate'),
 (172,   0,      0.2,     0,     0,     'Warlock - Corruption'),
@@ -17414,6 +17417,7 @@ INSERT INTO `spell_proc_event` VALUES
 (63251, 0x7F,  0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000, 45),
 (63280, 0x00, 11, 0x20000000, 0x20000000, 0x20000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
 (63320, 0x00,  5, 0x00040000, 0x00040000, 0x00040000, 0x00000000, 0x00000000, 0x00000000, 0x00008000, 0x00008000, 0x00008000, 0x00004000, 0x00000001, 0.000000, 0.000000,  0),
+(63335, 0x00, 15, 0x00000000, 0x00000000, 0x00000000, 0x00000002, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
 (63373, 0x00, 11, 0x80000000, 0x80000000, 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00010000, 0x00000000, 0.000000, 0.000000,  0),
 (63534, 0x00,  6, 0x00000040, 0x00000040, 0x00000040, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00004000, 0x00000000, 0.000000, 0.000000,  0),
 (64952, 0x00,  7, 0x00000000, 0x00000000, 0x00000000, 0x00000440, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0.000000, 0.000000,  0),
