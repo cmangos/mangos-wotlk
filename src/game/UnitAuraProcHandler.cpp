@@ -28,7 +28,6 @@
 #include "Creature.h"
 #include "Formulas.h"
 #include "CreatureAI.h"
-#include "ScriptCalls.h"
 #include "Util.h"
 
 pAuraProcHandler AuraProcHandler[TOTAL_AURAS]=
@@ -951,6 +950,16 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                 // Glyph of Life Tap
                 case 63320:
                     triggered_spell_id = 63321;
+                    break;
+                // Shiny Shard of the Scale - Equip Effect
+                case 69739:
+                    // Cauterizing Heal or Searing Flame
+                    triggered_spell_id = (procFlag & PROC_FLAG_SUCCESSFUL_POSITIVE_SPELL) ? 69734 : 69730;
+                    break;
+                // Purified Shard of the Scale - Equip Effect
+                case 69755:
+                    // Cauterizing Heal or Searing Flame
+                    triggered_spell_id = (procFlag & PROC_FLAG_SUCCESSFUL_POSITIVE_SPELL) ? 69733 : 69729;
                     break;
                 // Item - Shadowmourne Legendary
                 case 71903:
@@ -2062,6 +2071,38 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                     else
                         triggered_spell_id = 71432;
 
+                    break;
+                }
+                // Heartpierce, Item - Icecrown 25 Normal Dagger Proc
+                case 71880:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    switch (this->getPowerType())
+                    {
+                        case POWER_ENERGY: triggered_spell_id = 71882; break;
+                        case POWER_RAGE:   triggered_spell_id = 71883; break;
+                        case POWER_MANA:   triggered_spell_id = 71881; break;
+                        default:
+                            return SPELL_AURA_PROC_FAILED;
+                    }
+                    break;
+                }
+                // Heartpierce, Item - Icecrown 25 Heroic Dagger Proc
+                case 71892:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    switch (this->getPowerType())
+                    {
+                        case POWER_ENERGY: triggered_spell_id = 71887; break;
+                        case POWER_RAGE:   triggered_spell_id = 71886; break;
+                        case POWER_MANA:   triggered_spell_id = 71888; break;
+                        default:
+                            return SPELL_AURA_PROC_FAILED;
+                    }
                     break;
                 }
             }

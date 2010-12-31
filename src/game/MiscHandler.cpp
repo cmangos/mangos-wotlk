@@ -32,7 +32,7 @@
 #include "UpdateData.h"
 #include "LootMgr.h"
 #include "Chat.h"
-#include "ScriptCalls.h"
+#include "ScriptMgr.h"
 #include <zlib/zlib.h>
 #include "ObjectAccessor.h"
 #include "Object.h"
@@ -709,7 +709,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if(Script->scriptAreaTrigger(pl, atEntry))
+    if (sScriptMgr.OnAreaTrigger(pl, atEntry))
         return;
 
     uint32 quest_id = sObjectMgr.GetQuestForAreaTrigger( Trigger_ID );
@@ -957,7 +957,7 @@ void WorldSession::HandleNextCinematicCamera( WorldPacket & /*recv_data*/ )
 
 void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 {
-    /*  WorldSession::Update( getMSTime() );*/
+    /*  WorldSession::Update( WorldTimer::getMSTime() );*/
     DEBUG_LOG( "WORLD: Time Lag/Synchronization Resent/Update" );
 
     ObjectGuid guid;
@@ -1339,7 +1339,7 @@ void WorldSession::HandleTimeSyncResp( WorldPacket & recv_data )
 
     DEBUG_LOG("Time sync received: counter %u, client ticks %u, time since last sync %u", counter, clientTicks, clientTicks - _player->m_timeSyncClient);
 
-    uint32 ourTicks = clientTicks + (getMSTime() - _player->m_timeSyncServer);
+    uint32 ourTicks = clientTicks + (WorldTimer::getMSTime() - _player->m_timeSyncServer);
 
     // diff should be small
     DEBUG_LOG("Our ticks: %u, diff %u, latency %u", ourTicks, ourTicks - clientTicks, GetLatency());

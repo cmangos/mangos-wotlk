@@ -34,10 +34,10 @@
 #include "Database/DatabaseEnv.h"
 #include "CliRunnable.h"
 #include "RASocket.h"
-#include "ScriptCalls.h"
 #include "Util.h"
 #include "revision_sql.h"
 #include "MaNGOSsoap.h"
+#include "DBCStores.h"
 
 #include <ace/OS_NS_signal.h>
 #include <ace/TP_Reactor.h>
@@ -73,7 +73,7 @@ public:
         {
             ACE_Based::Thread::Sleep(1000);
 
-            uint32 curtime = getMSTime();
+            uint32 curtime = WorldTimer::getMSTime();
             //DEBUG_LOG("anti-freeze: time=%u, counters=[%u; %u]",curtime,Master::m_masterLoopCounter,World::m_worldLoopCounter);
 
             // normal work
@@ -83,7 +83,7 @@ public:
                 w_loops = World::m_worldLoopCounter;
             }
             // possible freeze
-            else if (getMSTimeDiff(w_lastchange, curtime) > _delaytime)
+            else if (WorldTimer::getMSTimeDiff(w_lastchange, curtime) > _delaytime)
             {
                 sLog.outError("World Thread hangs, kicking out server!");
                 *((uint32 volatile*)NULL) = 0;              // bang crash
@@ -285,7 +285,7 @@ int Master::Run()
 
 
     uint32 realCurrTime, realPrevTime;
-    realCurrTime = realPrevTime = getMSTime();
+    realCurrTime = realPrevTime = WorldTimer::getMSTime();
 
     ///- Start up freeze catcher thread
     ACE_Based::Thread* freeze_thread = NULL;
@@ -402,10 +402,6 @@ int Master::Run()
 
         delete cliThread;
     }
-
-    // for some unknown reason, unloading scripts here and not in worldrunnable
-    // fixes a memory leak related to detaching threads from the module
-    UnloadScriptingModule();
 
     ///- Exit the process with specified return value
     return World::GetExitCode();

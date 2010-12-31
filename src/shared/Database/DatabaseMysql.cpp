@@ -186,7 +186,7 @@ bool DatabaseMysql::_Query(const char *sql, MYSQL_RES **pResult, MYSQL_FIELD **p
         // guarded block for thread-safe mySQL request
         ACE_Guard<ACE_Thread_Mutex> query_connection_guard(mMutex);
 
-        uint32 _s = getMSTime();
+        uint32 _s = WorldTimer::getMSTime();
 
         if(mysql_query(mMysql, sql))
         {
@@ -196,7 +196,7 @@ bool DatabaseMysql::_Query(const char *sql, MYSQL_RES **pResult, MYSQL_FIELD **p
         }
         else
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", getMSTimeDiff(_s,getMSTime()), sql );
+            DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", WorldTimer::getMSTimeDiff(_s,WorldTimer::getMSTime()), sql );
         }
 
         *pResult = mysql_store_result(mMysql);
@@ -264,6 +264,8 @@ bool DatabaseMysql::Execute(const char *sql)
     // don't use queued execution if it has not been initialized
     if (!m_threadBody) return DirectExecute(sql);
 
+    ACE_Guard<ACE_Thread_Mutex> _lock(nMutex);
+
     tranThread = ACE_Based::Thread::current();              // owner of this transaction
     TransactionQueues::iterator i = m_tranQueues.find(tranThread);
     if (i != m_tranQueues.end() && i->second != NULL)
@@ -288,7 +290,7 @@ bool DatabaseMysql::DirectExecute(const char* sql)
         // guarded block for thread-safe mySQL request
         ACE_Guard<ACE_Thread_Mutex> query_connection_guard(mMutex);
 
-        uint32 _s = getMSTime();
+        uint32 _s = WorldTimer::getMSTime();
 
         if(mysql_query(mMysql, sql))
         {
@@ -298,7 +300,7 @@ bool DatabaseMysql::DirectExecute(const char* sql)
         }
         else
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", getMSTimeDiff(_s,getMSTime()), sql );
+            DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", WorldTimer::getMSTimeDiff(_s,WorldTimer::getMSTime()), sql );
         }
         // end guarded block
     }
@@ -341,6 +343,8 @@ bool DatabaseMysql::BeginTransaction()
         return true;                                        // transaction started
     }
 
+    ACE_Guard<ACE_Thread_Mutex> _lock(nMutex);
+
     tranThread = ACE_Based::Thread::current();              // owner of this transaction
     TransactionQueues::iterator i = m_tranQueues.find(tranThread);
     if (i != m_tranQueues.end() && i->second != NULL)
@@ -369,16 +373,18 @@ bool DatabaseMysql::CommitTransaction()
         return _res;
     }
 
+    ACE_Guard<ACE_Thread_Mutex> _lock(nMutex);
+
     tranThread = ACE_Based::Thread::current();
     TransactionQueues::iterator i = m_tranQueues.find(tranThread);
     if (i != m_tranQueues.end() && i->second != NULL)
     {
         m_threadBody->Delay(i->second);
-        i->second = NULL;
+        m_tranQueues.erase(i);
         return true;
     }
-    else
-        return false;
+
+    return false;
 }
 
 bool DatabaseMysql::RollbackTransaction()
@@ -397,13 +403,16 @@ bool DatabaseMysql::RollbackTransaction()
         return _res;
     }
 
+    ACE_Guard<ACE_Thread_Mutex> _lock(nMutex);
+
     tranThread = ACE_Based::Thread::current();
     TransactionQueues::iterator i = m_tranQueues.find(tranThread);
     if (i != m_tranQueues.end() && i->second != NULL)
     {
         delete i->second;
-        i->second = NULL;
+        m_tranQueues.erase(i);
     }
+
     return true;
 }
 

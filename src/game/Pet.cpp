@@ -481,7 +481,7 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
     }
 }
 
-void Pet::Update(uint32 diff)
+void Pet::Update(uint32 update_diff, uint32 diff)
 {
     if(m_removed)                                           // pet already removed, just wait in remove queue, no updates
         return;
@@ -490,7 +490,7 @@ void Pet::Update(uint32 diff)
     {
         case CORPSE:
         {
-            if (m_corpseDecayTimer <= diff)
+            if (m_corpseDecayTimer <= update_diff)
             {
                 MANGOS_ASSERT(getPetType()!=SUMMON_PET && "Must be already removed.");
                 Unsummon(PET_SAVE_NOT_IN_SLOT);             //hunters' pets never get removed because of death, NEVER!
@@ -519,8 +519,8 @@ void Pet::Update(uint32 diff)
 
             if (m_duration > 0)
             {
-                if(m_duration > (int32)diff)
-                    m_duration -= (int32)diff;
+                if(m_duration > (int32)update_diff)
+                    m_duration -= (int32)update_diff;
                 else
                 {
                     Unsummon(getPetType() != SUMMON_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT, owner);
@@ -529,7 +529,7 @@ void Pet::Update(uint32 diff)
             }
 
             //regenerate focus for hunter pets or energy for deathknight's ghoul
-            if(m_regenTimer <= diff)
+            if(m_regenTimer <= update_diff)
             {
                 switch (getPowerType())
                 {
@@ -543,25 +543,26 @@ void Pet::Update(uint32 diff)
                 m_regenTimer = 4000;
             }
             else
-                m_regenTimer -= diff;
+                m_regenTimer -= update_diff;
 
             if(getPetType() != HUNTER_PET)
                 break;
 
-            if(m_happinessTimer <= diff)
+            if(m_happinessTimer <= update_diff)
             {
                 LooseHappiness();
                 m_happinessTimer = 7500;
             }
             else
-                m_happinessTimer -= diff;
+                m_happinessTimer -= update_diff;
 
             break;
         }
         default:
             break;
     }
-    Creature::Update(diff);
+
+    Creature::Update(update_diff, diff);
 }
 
 void Pet::Regenerate(Powers power)
@@ -752,39 +753,39 @@ void Pet::GivePetXP(uint32 xp)
         return;
 
     uint32 level = getLevel();
+    uint32 maxlevel = std::min(sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL), GetOwner()->getLevel());
 
-    // XP to money conversion processed in Player::RewardQuest
-    if(level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    // pet not receive xp for level equal to owner level
+    if (level >= maxlevel)
         return;
 
-    uint32 curXP = GetUInt32Value(UNIT_FIELD_PETEXPERIENCE);
     uint32 nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
+    uint32 curXP = GetUInt32Value(UNIT_FIELD_PETEXPERIENCE);
     uint32 newXP = curXP + xp;
 
-    if(newXP >= nextLvlXP && level+1 > GetOwner()->getLevel())
-    {
-        SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, nextLvlXP-1);
-        return;
-    }
-
-    while( newXP >= nextLvlXP && level < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL) )
+    while( newXP >= nextLvlXP && level < maxlevel)
     {
         newXP -= nextLvlXP;
+        ++level;
 
-        GivePetLevel(level+1);
-        SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(level+1));
+        GivePetLevel(level);                              // also update UNIT_FIELD_PETNEXTLEVELEXP and UNIT_FIELD_PETEXPERIENCE to level start
 
-        level = getLevel();
         nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
     }
 
-    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, newXP);
+    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, level < maxlevel ? newXP : 0);
 }
 
 void Pet::GivePetLevel(uint32 level)
 {
-    if(!level)
+    if (!level || level == getLevel())
         return;
+
+    if (getPetType()==HUNTER_PET)
+    {
+        SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
+        SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(level));
+    }
 
     InitStatsForLevel(level);
     InitLevelupSpellsForLevel();
@@ -2022,12 +2023,10 @@ void Pet::SynchronizeLevelWithOwner()
             break;
         // can't be greater owner level
         case HUNTER_PET:
-            if(getLevel() > owner->getLevel())
-            {
+            if (getLevel() > owner->getLevel())
                 GivePetLevel(owner->getLevel());
-                SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(owner->getLevel()));
-                SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP)-1);
-            }
+            else if (getLevel() + 5 < owner->getLevel())
+                GivePetLevel(owner->getLevel() - 5);
             break;
         default:
             break;

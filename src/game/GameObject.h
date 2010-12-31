@@ -588,7 +588,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void RemoveFromWorld();
 
         bool Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMask, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint8 animprogress, GOState go_state);
-        void Update(uint32 p_time);
+        void Update(uint32 update_diff, uint32 p_time);
         GameObjectInfo const* GetGOInfo() const;
 
         bool IsTransport() const;
@@ -695,7 +695,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         bool IsFriendlyTo(Unit const* unit) const;
 
         void SummonLinkedTrapIfAny();
-        void TriggeringLinkedGameObject( uint32 trapEntry, Unit* target);
+        void TriggerLinkedGameObject(Unit* target);
 
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const;
 

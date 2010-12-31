@@ -24,6 +24,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"
 #include "playerbot/config.h"
+#include "Platform/Define.h"
 #include "SystemConfig.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -45,7 +46,7 @@
 #include "LootMgr.h"
 #include "ItemEnchantmentMgr.h"
 #include "MapManager.h"
-#include "ScriptCalls.h"
+#include "ScriptMgr.h"
 #include "CreatureAIRegistry.h"
 #include "Policies/SingletonImp.h"
 #include "BattleGroundMgr.h"
@@ -536,9 +537,6 @@ void World::LoadConfigSettings(bool reload)
     if (configNoReload(reload, CONFIG_UINT32_PORT_WORLD, "WorldServerPort", DEFAULT_WORLDSERVER_PORT))
         setConfig(CONFIG_UINT32_PORT_WORLD, "WorldServerPort", DEFAULT_WORLDSERVER_PORT);
 
-    if (configNoReload(reload, CONFIG_UINT32_SOCKET_SELECTTIME, "SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME))
-        setConfig(CONFIG_UINT32_SOCKET_SELECTTIME, "SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME);
-
     if (configNoReload(reload, CONFIG_UINT32_GAME_TYPE, "GameType", 0))
         setConfig(CONFIG_UINT32_GAME_TYPE, "GameType", 0);
 
@@ -880,7 +878,7 @@ void World::SetInitialWorldSettings()
     srand((unsigned int)time(NULL));
 
     ///- Time server startup
-    uint32 uStartTime = getMSTime();
+    uint32 uStartTime = WorldTimer::getMSTime();
 
     ///- Initialize config settings
     LoadConfigSettings();
@@ -928,7 +926,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.SetDBCLocaleIndex(GetDefaultDbcLocale());    // Get once for all the locale index of DBC language (console/broadcasts)
 
     sLog.outString( "Loading Script Names...");
-    sObjectMgr.LoadScriptNames();
+    sScriptMgr.LoadScriptNames();
 
     sLog.outString( "Loading InstanceTemplate..." );
     sObjectMgr.LoadInstanceTemplate();
@@ -1086,10 +1084,10 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadTavernAreaTriggers();
 
     sLog.outString( "Loading AreaTrigger script names..." );
-    sObjectMgr.LoadAreaTriggerScripts();
+    sScriptMgr.LoadAreaTriggerScripts();
 
     sLog.outString( "Loading event id script names..." );
-    sObjectMgr.LoadEventIdScripts();
+    sScriptMgr.LoadEventIdScripts();
 
     sLog.outString( "Loading Graveyard-zone links...");
     sObjectMgr.LoadGraveyardZones();
@@ -1153,10 +1151,10 @@ void World::SetInitialWorldSettings()
     sLog.outString();
 
     sLog.outString( "Loading Npc Text Id..." );
-    sObjectMgr.LoadNpcTextId();                             // must be after load Creature and LoadGossipText
+    sObjectMgr.LoadNpcGossips();                            // must be after load Creature and LoadGossipText
 
     sLog.outString( "Loading Gossip scripts..." );
-    sObjectMgr.LoadGossipScripts();                         // must be before gossip menu options
+    sScriptMgr.LoadGossipScripts();                         // must be before gossip menu options
 
     sLog.outString( "Loading Gossip menus..." );
     sObjectMgr.LoadGossipMenu();
@@ -1169,10 +1167,11 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadVendors();                               // must be after load CreatureTemplate, VendorTemplate, and ItemTemplate
 
     sLog.outString( "Loading Trainers..." );
-    sObjectMgr.LoadTrainerSpell();                          // must be after load CreatureTemplate
+    sObjectMgr.LoadTrainerTemplates();                      // must be after load CreatureTemplate
+    sObjectMgr.LoadTrainers();                              // must be after load CreatureTemplate, TrainerTemplate
 
     sLog.outString( "Loading Waypoint scripts..." );        // before loading from creature_movement
-    sObjectMgr.LoadCreatureMovementScripts();
+    sScriptMgr.LoadCreatureMovementScripts();
 
     sLog.outString( "Loading Waypoints..." );
     sLog.outString();
@@ -1184,7 +1183,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadGameObjectLocales();                     // must be after GameobjectInfo loading
     sObjectMgr.LoadItemLocales();                           // must be after ItemPrototypes loading
     sObjectMgr.LoadQuestLocales();                          // must be after QuestTemplates loading
-    sObjectMgr.LoadNpcTextLocales();                        // must be after LoadGossipText
+    sObjectMgr.LoadGossipTextLocales();                     // must be after LoadGossipText
     sObjectMgr.LoadPageTextLocales();                       // must be after PageText loading
     sObjectMgr.LoadGossipMenuItemsLocales();                // must be after gossip menu items loading
     sObjectMgr.LoadPointOfInterestLocales();                // must be after POI loading
@@ -1233,16 +1232,16 @@ void World::SetInitialWorldSettings()
     ///- Load and initialize scripts
     sLog.outString( "Loading Scripts..." );
     sLog.outString();
-    sObjectMgr.LoadQuestStartScripts();                         // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
-    sObjectMgr.LoadQuestEndScripts();                           // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
-    sObjectMgr.LoadSpellScripts();                              // must be after load Creature/Gameobject(Template/Data)
-    sObjectMgr.LoadGameObjectScripts();                         // must be after load Creature/Gameobject(Template/Data)
-    sObjectMgr.LoadEventScripts();                              // must be after load Creature/Gameobject(Template/Data)
+    sScriptMgr.LoadQuestStartScripts();                         // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
+    sScriptMgr.LoadQuestEndScripts();                           // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
+    sScriptMgr.LoadSpellScripts();                              // must be after load Creature/Gameobject(Template/Data)
+    sScriptMgr.LoadGameObjectScripts();                         // must be after load Creature/Gameobject(Template/Data)
+    sScriptMgr.LoadEventScripts();                              // must be after load Creature/Gameobject(Template/Data)
     sLog.outString( ">>> Scripts loaded" );
     sLog.outString();
 
     sLog.outString( "Loading Scripts text locales..." );    // must be after Load*Scripts calls
-    sObjectMgr.LoadDbScriptStrings();
+    sScriptMgr.LoadDbScriptStrings();
 
     sLog.outString( "Loading CreatureEventAI Texts...");
     sEventAIMgr.LoadCreatureEventAI_Texts(false);       // false, will checked in LoadCreatureEventAI_Scripts
@@ -1254,11 +1253,7 @@ void World::SetInitialWorldSettings()
     sEventAIMgr.LoadCreatureEventAI_Scripts();
 
     sLog.outString( "Initializing Scripts..." );
-    if(!LoadScriptingModule())
-    {
-        Log::WaitBeforeContinueIfNeed();
-        exit(1);                                            // Error message displayed in function already
-    }
+    sScriptMgr.LoadScriptLibrary(MANGOS_SCRIPT_NAME);
 
     ///- Initialize game time and timers
     sLog.outString( "DEBUG:: Initialize game time and timers" );
@@ -1344,7 +1339,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "WORLD: World initialized" );
 
-    uint32 uStartInterval = getMSTimeDiff(uStartTime, getMSTime());
+    uint32 uStartInterval = WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime());
     sLog.outString( "SERVER STARTUP TIME: %i minutes %i seconds", uStartInterval / 60000, (uStartInterval % 60000) / 1000 );
 }
 
