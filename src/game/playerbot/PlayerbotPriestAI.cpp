@@ -453,8 +453,8 @@ void PlayerbotPriestAI::DoNonCombatActions()
                 return;
         }
         else
-            if (ai->CastSpell(RESURRECTION, *master))
-                ai->TellMaster("Resurrecting you, Master.");
+        if (ai->CastSpell(RESURRECTION, *master))
+            ai->TellMaster("Resurrecting you, Master.");
     }
 
     BuffPlayer(m_bot);

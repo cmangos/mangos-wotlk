@@ -433,10 +433,10 @@ bool PlayerbotPaladinAI::BuffPlayer(Player* target)
             if (petCanBeBlessed)
                 if (Bless(BLESSING_OF_MIGHT, pet))
                     return true;
-                if (Bless(BLESSING_OF_KINGS, pet))
-                    return true;
-                if (Bless(BLESSING_OF_SANCTUARY, pet))
-                    return true;
+            if (Bless(BLESSING_OF_KINGS, pet))
+                return true;
+            if (Bless(BLESSING_OF_SANCTUARY, pet))
+                return true;
         case CLASS_ROGUE:
         case CLASS_WARRIOR:
             if (Bless(BLESSING_OF_MIGHT, target))
@@ -455,11 +455,8 @@ bool PlayerbotPaladinAI::BuffPlayer(Player* target)
                     if (Bless(BLESSING_OF_WISDOM, pet))
                         return true;
                 }
-                else
-                {
-                    if (Bless(BLESSING_OF_MIGHT, pet))
-                        return true;
-                }
+                else if (Bless(BLESSING_OF_MIGHT, pet))
+                    return true;
                 if (Bless(BLESSING_OF_KINGS, pet))
                     return true;
                 if (Bless(BLESSING_OF_SANCTUARY, pet))

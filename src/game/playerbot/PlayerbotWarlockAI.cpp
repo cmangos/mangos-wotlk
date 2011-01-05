@@ -106,10 +106,8 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 
     // Use voidwalker sacrifice on low health if possible
     if (ai->GetHealthPercent() < 50)
-    {
         if (pet && pet->GetEntry() == DEMON_VOIDWALKER && SACRIFICE && !m_bot->HasAura(SACRIFICE))
             ai->CastPetSpell(SACRIFICE);
-    }
 
     // Use healthstone
     if (ai->GetHealthPercent() < 30)
@@ -413,10 +411,8 @@ void PlayerbotWarlockAI::DoNonCombatActions()
             return;
     }
     else if (DEMON_SKIN)
-    {
         if (ai->SelfBuff(DEMON_SKIN))
             return;
-    }
 
     // healthstone creation
     if (CREATE_HEALTHSTONE && shardCount > 0)
@@ -469,16 +465,12 @@ void PlayerbotWarlockAI::DoNonCombatActions()
 
     // mana check
     if (pet && DARK_PACT && pet->GetPower(POWER_MANA) > 0 && ai->GetManaPercent() <= 50)
-    {
         if (ai->CastSpell(DARK_PACT, *m_bot))
             return;
-    }
 
     if (LIFE_TAP && ai->GetManaPercent() <= 50 && ai->GetHealthPercent() > 50)
-    {
         if (ai->CastSpell(LIFE_TAP, *m_bot))
             return;
-    }
 
     if (ai->GetManaPercent() < 25)
     {
@@ -548,16 +540,13 @@ void PlayerbotWarlockAI::DoNonCombatActions()
                 return;
             }
         }
-        else
+        else if (!pet && SUMMON_IMP && ai->CastSpell(SUMMON_IMP))
         {
-            if (!pet && SUMMON_IMP && ai->CastSpell(SUMMON_IMP))
-            {
-                if (m_demonOfChoice != DEMON_IMP)
-                    m_isTempImp = true;
+            if (m_demonOfChoice != DEMON_IMP)
+                m_isTempImp = true;
 
-                ai->TellMaster("Summoning Imp...");
-                return;
-            }
+            ai->TellMaster("Summoning Imp...");
+            return;
         }
     }
 

@@ -362,20 +362,16 @@ void PlayerbotMageAI::DoNonCombatActions()
             return;
     }
     else if (FROST_ARMOR)
-    {
         if (ai->SelfBuff(FROST_ARMOR))
             return;
-    }
 
     // buff master's group
     if (master->GetGroup())
     {
         // Buff master with group buff...
         if (ARCANE_BRILLIANCE && ai->HasSpellReagents(ARCANE_BRILLIANCE))
-        {
             if (ai->Buff(ARCANE_BRILLIANCE, master))
                 return;
-        }
 
         // ...and check group for new members joined or resurrected, or just buff everyone if no group buff available
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
@@ -391,11 +387,8 @@ void PlayerbotMageAI::DoNonCombatActions()
 
     }
     // There is no group, buff master
-    else
-    {
-        if (master->isAlive() && BuffPlayer(master))
-            return;
-    }
+    else if (master->isAlive() && BuffPlayer(master))
+        return;
 
     // Buff self finally
     if (BuffPlayer(m_bot))

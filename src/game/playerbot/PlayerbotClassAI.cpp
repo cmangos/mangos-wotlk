@@ -13,4 +13,6 @@ void PlayerbotClassAI::DoNextCombatManeuver(Unit *) {}
 
 void PlayerbotClassAI::DoNonCombatActions(){}
 
-bool PlayerbotClassAI::BuffPlayer(Player* target) { return false; }
+bool PlayerbotClassAI::BuffPlayer(Player* target) {
+    return false;
+}

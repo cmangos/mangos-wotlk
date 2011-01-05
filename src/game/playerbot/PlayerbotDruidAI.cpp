@@ -82,7 +82,7 @@ bool PlayerbotDruidAI::HealTarget(Unit *target)
     if (hp < 70 && REJUVENATION > 0 && !target->HasAura(REJUVENATION) && ai->CastSpell(REJUVENATION, *target))
         return true;
 
-    if (hp < 60 && LIFEBLOOM > 0 && !target->HasAura(LIFEBLOOM) && ai->CastSpell(LIFEBLOOM,*target))
+    if (hp < 60 && LIFEBLOOM > 0 && !target->HasAura(LIFEBLOOM) && ai->CastSpell(LIFEBLOOM, *target))
         return true;
 
     if (hp < 55 && REGROWTH > 0 && !target->HasAura(REGROWTH) && ai->CastSpell(REGROWTH, *target))
@@ -150,7 +150,7 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
             }
             if (m_bot->HasAura(CAT_FORM, EFFECT_INDEX_0))
                 m_bot->RemoveAurasDueToSpell(768);
-                //ai->TellMaster("FormClearCat");
+            //ai->TellMaster("FormClearCat");
             if (MOONKIN_FORM > 0 && !m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0))
                 ai->CastSpell (MOONKIN_FORM);
             else if (DIRE_BEAR_FORM > 0 && !m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0) && !m_bot->HasAura(DIRE_BEAR_FORM, EFFECT_INDEX_0))
@@ -496,37 +496,37 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
             {
                 if (RIP > 0 && pTarget->getClass() == CLASS_ROGUE && ai->GetEnergyAmount() >= 30)
                     ai->CastSpell(RIP, *pTarget);
-                    //ai->TellMaster("Rogue Rip");
+                //ai->TellMaster("Rogue Rip");
                 else if (MAIM > 0 && pTarget->getClass() == CLASS_DRUID && ai->GetEnergyAmount() >= 35)
                     ai->CastSpell(MAIM, *pTarget);
-                    //ai->TellMaster("Druid Maim");
+                //ai->TellMaster("Druid Maim");
                 else if (MAIM > 0 && pTarget->getClass() == CLASS_SHAMAN && ai->GetEnergyAmount() >= 35)
                     ai->CastSpell(MAIM, *pTarget);
-                    //ai->TellMaster("Shaman Maim");
+                //ai->TellMaster("Shaman Maim");
                 else if (MAIM > 0 && pTarget->getClass() == CLASS_WARLOCK && ai->GetEnergyAmount() >= 35)
                     ai->CastSpell(MAIM, *pTarget);
-                    //ai->TellMaster("Warlock Maim");
+                //ai->TellMaster("Warlock Maim");
                 else if (FEROCIOUS_BITE > 0 && pTarget->getClass() == CLASS_HUNTER && ai->GetEnergyAmount() >= 35)
                     ai->CastSpell(FEROCIOUS_BITE, *pTarget);
-                    //ai->TellMaster("Hunter Ferocious Bite");
+                //ai->TellMaster("Hunter Ferocious Bite");
                 else if (FEROCIOUS_BITE > 0 && pTarget->getClass() == CLASS_WARRIOR && ai->GetEnergyAmount() >= 35)
                     ai->CastSpell(FEROCIOUS_BITE, *pTarget);
-                    //ai->TellMaster("Warrior Ferocious Bite");
+                //ai->TellMaster("Warrior Ferocious Bite");
                 else if (FEROCIOUS_BITE > 0 && pTarget->getClass() == CLASS_PALADIN && ai->GetEnergyAmount() >= 35)
                     ai->CastSpell(FEROCIOUS_BITE, *pTarget);
-                    //ai->TellMaster("Paladin Ferocious Bite");
+                //ai->TellMaster("Paladin Ferocious Bite");
                 else if (FEROCIOUS_BITE > 0 && pTarget->getClass() == CLASS_DEATH_KNIGHT && ai->GetEnergyAmount() >= 25)
                     ai->CastSpell(FEROCIOUS_BITE, *pTarget);
-                    //ai->TellMaster("DK Ferocious Bite");
+                //ai->TellMaster("DK Ferocious Bite");
                 else if (MAIM > 0 && pTarget->getClass() == CLASS_MAGE && ai->GetEnergyAmount() >= 35)
                     ai->CastSpell(MAIM, *pTarget);
-                    //ai->TellMaster("Mage Maim");
+                //ai->TellMaster("Mage Maim");
                 else if (MAIM > 0 && pTarget->getClass() == CLASS_PRIEST && ai->GetEnergyAmount() >= 35)
                     ai->CastSpell(MAIM, *pTarget);
-                    //ai->TellMaster("Priest Maim");
+                //ai->TellMaster("Priest Maim");
                 else if (MAIM > 0 && ai->GetEnergyAmount() >= 35)
                     ai->CastSpell(MAIM, *pTarget);
-                    //ai->TellMaster("Else Maim");
+                //ai->TellMaster("Else Maim");
                 break;
             }
             else
@@ -586,8 +586,8 @@ void PlayerbotDruidAI::DoNonCombatActions()
     if (master->GetGroup())
     {
         // Buff master with group buff
-       if (master->isAlive() && GIFT_OF_THE_WILD && ai->HasSpellReagents(GIFT_OF_THE_WILD) && ai->Buff(GIFT_OF_THE_WILD, master))
-           return;
+        if (master->isAlive() && GIFT_OF_THE_WILD && ai->HasSpellReagents(GIFT_OF_THE_WILD) && ai->Buff(GIFT_OF_THE_WILD, master))
+            return;
 
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
@@ -630,8 +630,8 @@ void PlayerbotDruidAI::DoNonCombatActions()
                 return;
         }
         else
-            if (ai->CastSpell(REVIVE, *master))
-                ai->TellMaster("Resurrecting you, Master.");
+        if (ai->CastSpell(REVIVE, *master))
+            ai->TellMaster("Resurrecting you, Master.");
     }
 
     BuffPlayer(m_bot);

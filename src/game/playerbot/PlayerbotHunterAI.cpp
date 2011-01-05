@@ -128,10 +128,10 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
     // racial traits
     if (m_bot->getRace() == RACE_ORC && !m_bot->HasAura(BLOOD_FURY, EFFECT_INDEX_0))
         ai->CastSpell(BLOOD_FURY, *m_bot);
-        //ai->TellMaster( "Blood Fury." );
+    //ai->TellMaster( "Blood Fury." );
     else if (m_bot->getRace() == RACE_TROLL && !m_bot->HasAura(BERSERKING, EFFECT_INDEX_0))
         ai->CastSpell(BERSERKING, *m_bot);
-        //ai->TellMaster( "Berserking." );
+    //ai->TellMaster( "Berserking." );
 
     // check if ranged combat is possible (set m_rangedCombat and switch auras
     float dist = m_bot->GetDistance(pTarget);
@@ -161,10 +161,10 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
     // activate auto shot
     if (AUTO_SHOT > 0 && m_rangedCombat && !m_bot->FindCurrentSpellBySpellId(AUTO_SHOT))
         ai->CastSpell(AUTO_SHOT, *pTarget);
-        //ai->TellMaster( "started auto shot." );
+    //ai->TellMaster( "started auto shot." );
     else if (AUTO_SHOT > 0 && m_bot->FindCurrentSpellBySpellId(AUTO_SHOT))
         m_bot->InterruptNonMeleeSpells(true, AUTO_SHOT);
-        //ai->TellMaster( "stopped auto shot." );
+    //ai->TellMaster( "stopped auto shot." );
 
     // damage spells
     std::ostringstream out;
@@ -340,7 +340,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
         }
         else if (pet->GetHappinessState() != HAPPY) // if pet is hungry
         {
-            Unit *caster = (Unit*) m_bot;
+            Unit *caster = (Unit *) m_bot;
             // list out items in main backpack
             for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
             {
@@ -368,7 +368,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
             // list out items in other removable backpacks
             for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
             {
-                const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+                const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
                 if (pBag)
                     for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
                     {

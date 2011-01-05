@@ -210,7 +210,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
                 if (obj->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
                     bot->GetPlayerbotAI()->TurnInQuests(obj);
-                 // add other go types here, i.e.:
+                // add other go types here, i.e.:
                 // GAMEOBJECT_TYPE_CHEST - loot quest items of chest
             }
         }
@@ -579,6 +579,19 @@ void Creature::LoadBotMenu(Player *pPlayer)
     delete result;
 }
 
+void Player::skill(std::list<uint32>& m_spellsToLearn)
+{
+    for (SkillStatusMap::const_iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
+    {
+        if (itr->second.uState == SKILL_DELETED)
+            continue;
+
+        uint32 pskill = itr->first;
+
+        m_spellsToLearn.push_back(pskill);
+    }
+}
+
 void Player::chompAndTrim(std::string& str)
 {
     while (str.length() > 0)
@@ -661,7 +674,7 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
         return false;
     }
 
-    char *cmd = strtok ((char*) args, " ");
+    char *cmd = strtok ((char *) args, " ");
     char *charname = strtok (NULL, " ");
     if (!cmd || !charname)
     {

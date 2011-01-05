@@ -142,6 +142,7 @@ public:
     typedef std::map<uint32, uint32> BotNeedItem;
     typedef std::list<uint64> BotLootCreature;
     typedef std::list<uint32> BotLootEntry;
+    typedef std::list<uint32> BotSpellList;
 
     // attacker query used in PlayerbotAI::FindAttacker()
     enum ATTACKERINFOTYPE
@@ -204,7 +205,10 @@ public:
     void extractItemIds(const std::string& text, std::list<uint32>& itemIds) const;
 
     // extract spellid from links
-    bool extractSpellId(const std::string& text, uint32 &spellId) const;
+    void extractSpellId(const std::string& text, uint32 &spellId) const;
+
+    // extract spellids from links to list
+    void extractSpellIdList(const std::string& text, BotSpellList& m_spellsToLearn) const;
 
     // extracts currency from a string as #g#s#c and returns the total in copper
     uint32 extractMoney(const std::string& text) const;
@@ -218,6 +222,8 @@ public:
     void findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const;
     // finds nearby game objects that are specified in m_collectObjects then adds them to the m_lootTargets list
     void findNearbyGO();
+
+    void MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out, Player* player = NULL);
 
     // currently bots only obey commands from the master
     bool canObeyCommandFrom(const Player& player) const;
@@ -267,7 +273,7 @@ public:
     bool CastSpell(uint32 spellId);
     bool CastSpell(uint32 spellId, Unit& target);
     bool CastPetSpell(uint32 spellId, Unit* target = NULL);
-    bool Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player *) = NULL);
+    bool Buff(uint32 spellId, Unit * target, void (*beforeCast)(Player *) = NULL);
     bool SelfBuff(uint32 spellId);
 
     void UseItem(Item *item, uint32 targetFlag, ObjectGuid targetGUID);
@@ -302,7 +308,7 @@ public:
     bool HasCollectFlag(uint8 flag) { return m_collectionFlags & flag; }
     void SetCollectFlag(uint8 flag)
     {
-        if(HasCollectFlag(flag)) m_collectionFlags &= ~flag;
+        if (HasCollectFlag(flag)) m_collectionFlags &= ~flag;
         else m_collectionFlags |= flag;
     }
 
@@ -367,6 +373,7 @@ private:
 
     // list of creatures we recently attacked and want to loot
     BotLootCreature m_lootTargets;      // list of creatures
+    BotSpellList m_spellsToLearn;       // list of spells
     ObjectGuid m_lootCurrent;           // current remains of interest
     ObjectGuid m_lootPrev;              // previous loot
     BotLootEntry m_collectObjects;      // object entries searched for in findNearbyGO
@@ -394,10 +401,10 @@ private:
 
     Unit *m_followTarget;       // whom to follow in non combat situation?
 
-    uint32  FISHING,
-            HERB_GATHERING,
-            MINING,
-            SKINNING;
+    uint32 FISHING,
+           HERB_GATHERING,
+           MINING,
+           SKINNING;
 
     SpellRanges m_spellRangeMap;
 

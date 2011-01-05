@@ -94,7 +94,7 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
         case PlayerbotAI::SCENARIO_DUEL:
             if (SINISTER_STRIKE > 0)
                 ai->CastSpell(SINISTER_STRIKE);
-	    return;
+            return;
     }
 
     ai->SetInFront(pTarget);
@@ -135,7 +135,7 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
         return;
     }
     else if (m_bot->HasAura(STEALTH, EFFECT_INDEX_0))
-	SpellSequence = RogueStealth;
+        SpellSequence = RogueStealth;
     else if (pTarget->IsNonMeleeSpellCasted(true))
         SpellSequence = RogueSpellPreventing;
     else if (pVictim == m_bot && ai->GetHealthPercent() < 40)
@@ -151,10 +151,10 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     switch (SpellSequence)
     {
         case RogueStealth:
-	    out << "Case Stealth";
+            out << "Case Stealth";
             if (PICK_POCKET > 0 && ai->CastSpell(PICK_POCKET, *pTarget) && ai->PickPocket(pTarget))
-                out << "First > Pick Pocket"; // Should never display, as PickPocket will always return false
-	    else if (PREMEDITATION > 0 && ai->CastSpell(PREMEDITATION, *pTarget))
+                out << "First > Pick Pocket";  // Should never display, as PickPocket will always return false
+            else if (PREMEDITATION > 0 && ai->CastSpell(PREMEDITATION, *pTarget))
                 out << " > Premeditation";
             else if (AMBUSH > 0 && ai->GetEnergyAmount() >= 60 && ai->CastSpell(AMBUSH, *pTarget))
                 out << " > Ambush";
@@ -164,7 +164,7 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
                 out << " > Garrote";
             else
                 m_bot->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-	    break;
+            break;
         case RogueThreat:
             out << "Case Threat";
             if (GOUGE > 0 && ai->GetEnergyAmount() >= 45 && !pTarget->HasAura(GOUGE, EFFECT_INDEX_0) && ai->CastSpell(GOUGE, *pTarget))
