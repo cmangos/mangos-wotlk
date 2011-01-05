@@ -4014,11 +4014,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 for (BotLootEntry::iterator itr = m_collectObjects.begin(); itr != m_collectObjects.end();++itr)
                 {
                     uint32 objectentry = *(itr);
-                    // TODO: look up GO entry for name instead of just listing entry id
+                    GameObjectInfo const * gInfo = ObjectMgr::GetGameObjectInfo(objectentry);
                     strobjects += ", ";
-                    char c[10];
-                    itoa(objectentry,c,10);
-                    strobjects += c;
+                    strobjects += gInfo->name;
                 }
                 collset += strobjects.substr(2);
             }
