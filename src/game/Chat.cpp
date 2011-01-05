@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -3020,7 +3020,7 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
             if (!ExtractUInt32(&idS, id))
                 return false;
 
-            if (sObjectMgr.GetCreatureTemplate(id))
+            if (ObjectMgr::GetCreatureTemplate(id))
             {
                 FindCreatureData worker(id, m_session ? m_session->GetPlayer() : NULL);
 
@@ -3046,7 +3046,7 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
             if (!ExtractUInt32(&idS, id))
                 return false;
 
-            if (sObjectMgr.GetGameObjectInfo(id))
+            if (ObjectMgr::GetGameObjectInfo(id))
             {
                 FindGOData worker(id, m_session ? m_session->GetPlayer() : NULL);
 

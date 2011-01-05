@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -983,7 +983,7 @@ uint32 ObjectMgr::GetModelForRace(uint32 sourceModelId, uint32 racemask)
 
         if (itr->second.creature_entry)
         {
-            const CreatureInfo *cInfo = sObjectMgr.GetCreatureTemplate(itr->second.creature_entry);
+            const CreatureInfo *cInfo = GetCreatureTemplate(itr->second.creature_entry);
             modelId = Creature::ChooseDisplayId(cInfo);
         }
         else
@@ -8084,7 +8084,7 @@ void ObjectMgr::LoadMailLevelRewards()
             continue;
         }
 
-        if(!GetCreatureTemplateStore(senderEntry))
+        if(!GetCreatureTemplate(senderEntry))
         {
             sLog.outErrorDb("Table `mail_level_reward` have nonexistent sender creature entry (%u) for level %u that invalid not include any player races, ignoring.",senderEntry,level);
             continue;

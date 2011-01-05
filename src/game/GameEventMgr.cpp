@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -401,7 +401,7 @@ void GameEventMgr::LoadFromDB()
                 newData.equipment_id = 0;
             }
 
-            if (newData.entry_id && !sObjectMgr.GetCreatureTemplate(newData.entry_id))
+            if (newData.entry_id && !ObjectMgr::GetCreatureTemplate(newData.entry_id))
             {
                 sLog.outErrorDb("Table `game_event_creature_data` have creature (Guid: %u) with event time entry %u not found in table `creature_template`, set to no 0.", guid, newData.entry_id);
                 newData.entry_id = 0;

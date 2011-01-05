@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #include "ObjectMgr.h"
 #include "WaypointManager.h"
 #include "World.h"
+
+#include "revision_nr.h"
 
 ScriptMapMap sQuestEndScripts;
 ScriptMapMap sQuestStartScripts;
@@ -330,7 +332,7 @@ void ScriptMgr::LoadScripts(ScriptMapMap& scripts, const char* tablename)
                         tablename, tmp.castSpell.spellId, tmp.id);
                     continue;
                 }
-                if (tmp.castSpell.flags & ~0x3)             // 2 bits
+                if (tmp.castSpell.flags & ~0x7)             // 3 bits
                 {
                     sLog.outErrorDb("Table `%s` using unknown flags in datalong2 (%u)i n SCRIPT_COMMAND_CAST_SPELL for script id %u",
                         tablename, tmp.castSpell.flags, tmp.id);
@@ -1032,7 +1034,7 @@ bool ScriptMgr::OnAuraDummy(Aura const* pAura, bool apply)
     return m_pOnAuraDummy != NULL && m_pOnAuraDummy(pAura, apply);
 }
 
-bool ScriptMgr::LoadScriptLibrary(const char* libName)
+ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
 {
     UnloadScriptLibrary();
 
@@ -1042,36 +1044,55 @@ bool ScriptMgr::LoadScriptLibrary(const char* libName)
     m_hScriptLib = MANGOS_LOAD_LIBRARY(name.c_str());
 
     if (!m_hScriptLib)
-        return false;
+        return SCRIPT_LOAD_ERR_NOT_FOUND;
 
-    GetScriptHookPtr(m_pOnInitScriptLibrary,        "InitScriptLibrary");
-    GetScriptHookPtr(m_pOnFreeScriptLibrary,        "FreeScriptLibrary");
-    GetScriptHookPtr(m_pGetScriptLibraryVersion,    "GetScriptLibraryVersion");
+#   define GET_SCRIPT_HOOK_PTR(P,N)             \
+        GetScriptHookPtr((P), (N));             \
+        if (!(P))                               \
+        {                                       \
+            MANGOS_CLOSE_LIBRARY(m_hScriptLib); \
+            m_hScriptLib = NULL;                \
+            return SCRIPT_LOAD_ERR_WRONG_API;   \
+        }
 
-    GetScriptHookPtr(m_pGetCreatureAI,              "GetCreatureAI");
-    GetScriptHookPtr(m_pCreateInstanceData,         "CreateInstanceData");
+    // let check used mangosd revision for build library (unsafe use with different revision because changes in inline functions, define and etc)
+    char const* (MANGOS_IMPORT* pGetMangosRevStr) ();
 
-    GetScriptHookPtr(m_pOnGossipHello,              "GossipHello");
-    GetScriptHookPtr(m_pOnGOGossipHello,            "GOGossipHello");
-    GetScriptHookPtr(m_pOnGossipSelect,             "GossipSelect");
-    GetScriptHookPtr(m_pOnGOGossipSelect,           "GOGossipSelect");
-    GetScriptHookPtr(m_pOnGossipSelectWithCode,     "GossipSelectWithCode");
-    GetScriptHookPtr(m_pOnGOGossipSelectWithCode,   "GOGossipSelectWithCode");
-    GetScriptHookPtr(m_pOnQuestAccept,              "QuestAccept");
-    GetScriptHookPtr(m_pOnGOQuestAccept,            "GOQuestAccept");
-    GetScriptHookPtr(m_pOnItemQuestAccept,          "ItemQuestAccept");
-    GetScriptHookPtr(m_pOnQuestRewarded,            "QuestRewarded");
-    GetScriptHookPtr(m_pOnGOQuestRewarded,          "GOQuestRewarded");
-    GetScriptHookPtr(m_pGetNPCDialogStatus,         "GetNPCDialogStatus");
-    GetScriptHookPtr(m_pGetGODialogStatus,          "GetGODialogStatus");
-    GetScriptHookPtr(m_pOnGOUse,                    "GOUse");
-    GetScriptHookPtr(m_pOnItemUse,                  "ItemUse");
-    GetScriptHookPtr(m_pOnAreaTrigger,              "AreaTrigger");
-    GetScriptHookPtr(m_pOnProcessEvent,             "ProcessEvent");
-    GetScriptHookPtr(m_pOnEffectDummyCreature,      "EffectDummyCreature");
-    GetScriptHookPtr(m_pOnEffectDummyGO,            "EffectDummyGameObject");
-    GetScriptHookPtr(m_pOnEffectDummyItem,          "EffectDummyItem");
-    GetScriptHookPtr(m_pOnAuraDummy,                "AuraDummy");
+    GET_SCRIPT_HOOK_PTR(pGetMangosRevStr,              "GetMangosRevStr");
+
+    GET_SCRIPT_HOOK_PTR(m_pOnInitScriptLibrary,        "InitScriptLibrary");
+    GET_SCRIPT_HOOK_PTR(m_pOnFreeScriptLibrary,        "FreeScriptLibrary");
+    GET_SCRIPT_HOOK_PTR(m_pGetScriptLibraryVersion,    "GetScriptLibraryVersion");
+
+    GET_SCRIPT_HOOK_PTR(m_pGetCreatureAI,              "GetCreatureAI");
+    GET_SCRIPT_HOOK_PTR(m_pCreateInstanceData,         "CreateInstanceData");
+
+    GET_SCRIPT_HOOK_PTR(m_pOnGossipHello,              "GossipHello");
+    GET_SCRIPT_HOOK_PTR(m_pOnGOGossipHello,            "GOGossipHello");
+    GET_SCRIPT_HOOK_PTR(m_pOnGossipSelect,             "GossipSelect");
+    GET_SCRIPT_HOOK_PTR(m_pOnGOGossipSelect,           "GOGossipSelect");
+    GET_SCRIPT_HOOK_PTR(m_pOnGossipSelectWithCode,     "GossipSelectWithCode");
+    GET_SCRIPT_HOOK_PTR(m_pOnGOGossipSelectWithCode,   "GOGossipSelectWithCode");
+    GET_SCRIPT_HOOK_PTR(m_pOnQuestAccept,              "QuestAccept");
+    GET_SCRIPT_HOOK_PTR(m_pOnGOQuestAccept,            "GOQuestAccept");
+    GET_SCRIPT_HOOK_PTR(m_pOnItemQuestAccept,          "ItemQuestAccept");
+    GET_SCRIPT_HOOK_PTR(m_pOnQuestRewarded,            "QuestRewarded");
+    GET_SCRIPT_HOOK_PTR(m_pOnGOQuestRewarded,          "GOQuestRewarded");
+    GET_SCRIPT_HOOK_PTR(m_pGetNPCDialogStatus,         "GetNPCDialogStatus");
+    GET_SCRIPT_HOOK_PTR(m_pGetGODialogStatus,          "GetGODialogStatus");
+    GET_SCRIPT_HOOK_PTR(m_pOnGOUse,                    "GOUse");
+    GET_SCRIPT_HOOK_PTR(m_pOnItemUse,                  "ItemUse");
+    GET_SCRIPT_HOOK_PTR(m_pOnAreaTrigger,              "AreaTrigger");
+    GET_SCRIPT_HOOK_PTR(m_pOnProcessEvent,             "ProcessEvent");
+    GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyCreature,      "EffectDummyCreature");
+    GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyGO,            "EffectDummyGameObject");
+    GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyItem,          "EffectDummyItem");
+    GET_SCRIPT_HOOK_PTR(m_pOnAuraDummy,                "AuraDummy");
+
+#   undef GET_SCRIPT_HOOK_PTR
+
+    if (strcmp(pGetMangosRevStr(), REVISION_NR) != 0)
+        return SCRIPT_LOAD_ERR_OUTDATED;
 
     if (m_pOnInitScriptLibrary)
         m_pOnInitScriptLibrary();
@@ -1079,7 +1100,7 @@ bool ScriptMgr::LoadScriptLibrary(const char* libName)
     if (m_pGetScriptLibraryVersion)
         sWorld.SetScriptsVersion(m_pGetScriptLibraryVersion());
 
-    return true;
+    return SCRIPT_LOAD_OK;
 }
 
 void ScriptMgr::UnloadScriptLibrary()
