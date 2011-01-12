@@ -1775,6 +1775,14 @@ void PlayerbotAI::DoCombatMovement()
 
     float targetDist = m_bot->GetDistance(m_targetCombat);
 
+    // if m_bot has it's back to the attacker, turn
+    if(!m_bot->HasInArc(M_PI_F,m_targetCombat))
+    {
+        // TellMaster("%s is facing the wrong way!", m_bot->GetName());
+        m_bot->GetMotionMaster()->Clear(true);
+        m_bot->SetOrientation(m_bot->GetAngle(m_targetCombat));
+    }
+
     if (m_combatStyle == COMBAT_MELEE && !m_bot->hasUnitState(UNIT_STAT_CHASE) && ((m_movementOrder == MOVEMENT_STAY && targetDist <= ATTACK_DISTANCE) || (m_movementOrder != MOVEMENT_STAY)))
         // melee combat - chase target if in range or if we are not forced to stay
         m_bot->GetMotionMaster()->MoveChase(m_targetCombat);
