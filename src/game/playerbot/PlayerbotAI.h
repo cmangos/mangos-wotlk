@@ -118,7 +118,8 @@ public:
         BOTSTATE_COMBAT,            // bot is in combat
         BOTSTATE_DEAD,              // we are dead and wait for becoming ghost
         BOTSTATE_DEADRELEASED,      // we released as ghost and wait to revive
-        BOTSTATE_LOOTING            // looting mode, used just after combat
+        BOTSTATE_LOOTING,            // looting mode, used just after combat
+        BOTSTATE_FLYING              // bot is flying
     };
 
     enum CollectionFlags
@@ -143,6 +144,7 @@ public:
     typedef std::list<uint64> BotLootCreature;
     typedef std::list<uint32> BotLootEntry;
     typedef std::list<uint32> BotSpellList;
+    typedef std::vector<uint32> BotTaxiNode;
 
     // attacker query used in PlayerbotAI::FindAttacker()
     enum ATTACKERINFOTYPE
@@ -304,6 +306,8 @@ public:
     void SendOrders(Player& player);
     bool FollowCheckTeleport(WorldObject &obj);
     void DoLoot();
+    void DoFlight();
+    void GetTaxi(ObjectGuid guid, std::vector<uint32>& nodes);
 
     bool HasCollectFlag(uint8 flag) { return m_collectionFlags & flag; }
     void SetCollectFlag(uint8 flag)
@@ -377,6 +381,7 @@ private:
     ObjectGuid m_lootCurrent;           // current remains of interest
     ObjectGuid m_lootPrev;              // previous loot
     BotLootEntry m_collectObjects;      // object entries searched for in findNearbyGO
+    BotTaxiNode m_taxiNodes;            // flight node chain;
 
     uint8 m_collectionFlags;            // what the bot should look for to loot
 
@@ -389,6 +394,7 @@ private:
     // can do it
     uint32 m_spellIdCommand;
     uint64 m_targetGuidCommand;
+    ObjectGuid m_taxiMaster;
 
     AttackerInfoList m_attackerInfo;
 

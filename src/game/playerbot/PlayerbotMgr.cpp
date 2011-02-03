@@ -9,6 +9,7 @@
 #include "../Chat.h"
 #include "../Language.h"
 #include "../Guild.h"
+#include "../WaypointMovementGenerator.h"
 
 class LoginQueryHolder;
 class CharacterHandler;
@@ -35,6 +36,182 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 {
     switch (packet.GetOpcode())
     {
+
+        case CMSG_ACTIVATETAXI:
+        {
+            WorldPacket p(packet);
+            p.rpos(0); // reset reader
+
+            ObjectGuid guid;
+            std::vector<uint32> nodes;
+            nodes.resize(2);
+            uint8 delay = 12;
+
+            p >> guid >> nodes[0] >> nodes[1];
+
+            DEBUG_LOG("WORLD: Received CMSG_ACTIVATETAXI from %d to %d" ,nodes[0],nodes[1]);
+
+            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+
+                delay = delay + 3;
+                Player* const bot = it->second;
+                if (!bot)
+                    return;
+
+                Group* group = bot->GetGroup();
+                if (!group)
+                    continue;
+
+                Unit *target = ObjectAccessor::GetUnit(*bot, guid);
+
+                bot->GetPlayerbotAI()->SetIgnoreUpdateTime(delay);
+
+                bot->GetMotionMaster()->Clear(true);
+                bot->GetMotionMaster()->MoveFollow(target,INTERACTION_DISTANCE,bot->GetOrientation());
+                bot->GetPlayerbotAI()->GetTaxi(guid,nodes);
+            }
+            return;
+        }
+
+        case CMSG_ACTIVATETAXIEXPRESS:
+        {
+            WorldPacket p(packet);
+            p.rpos(0); // reset reader
+
+            ObjectGuid guid;
+            uint32 node_count;
+            uint8 delay = 12;
+
+            p >> guid >> node_count;
+
+            std::vector<uint32> nodes;
+
+            for(uint32 i = 0; i < node_count; ++i)
+            {
+                uint32 node;
+                p >> node;
+                nodes.push_back(node);
+            }
+
+            if(nodes.empty())
+                return;
+
+            DEBUG_LOG( "WORLD: Received CMSG_ACTIVATETAXIEXPRESS from %d to %d" ,nodes.front(),nodes.back());
+
+            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+
+                delay = delay + 3;
+                Player* const bot = it->second;
+                if (!bot)
+                    return;
+
+                Group* group = bot->GetGroup();
+                if (!group)
+                    continue;
+
+                Unit *target = ObjectAccessor::GetUnit(*bot, guid);
+
+                bot->GetPlayerbotAI()->SetIgnoreUpdateTime(delay);
+
+                bot->GetMotionMaster()->Clear(true);
+                bot->GetMotionMaster()->MoveFollow(target,INTERACTION_DISTANCE,bot->GetOrientation());
+                bot->GetPlayerbotAI()->GetTaxi(guid,nodes);
+            }
+            return;
+        }
+
+        case CMSG_MOVE_SPLINE_DONE:
+        {
+            DEBUG_LOG( "WORLD: Received CMSG_MOVE_SPLINE_DONE" );
+
+            WorldPacket p(packet);
+            p.rpos(0); // reset reader
+
+            ObjectGuid guid;                                        // used only for proper packet read
+            MovementInfo movementInfo;                              // used only for proper packet read
+
+            p >> guid.ReadAsPacked();
+            p >> movementInfo;
+            p >> Unused<uint32>();                          // unk
+
+            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+
+                Player* const bot = it->second;
+                if (!bot)
+                    return;
+
+                // in taxi flight packet received in 2 case:
+                // 1) end taxi path in far (multi-node) flight
+                // 2) switch from one map to other in case multi-map taxi path
+                // we need process only (1)
+                uint32 curDest = bot->m_taxi.GetTaxiDestination();
+                if(!curDest)
+                    return;
+
+                TaxiNodesEntry const* curDestNode = sTaxiNodesStore.LookupEntry(curDest);
+
+                // far teleport case
+                if(curDestNode && curDestNode->map_id != bot->GetMapId())
+                {
+                    if(bot->GetMotionMaster()->GetCurrentMovementGeneratorType()==FLIGHT_MOTION_TYPE)
+                    {
+                        // short preparations to continue flight
+                        FlightPathMovementGenerator* flight = (FlightPathMovementGenerator*)(bot->GetMotionMaster()->top());
+
+                        flight->Interrupt(*bot);                // will reset at map landing
+
+                        flight->SetCurrentNodeAfterTeleport();
+                        TaxiPathNodeEntry const& node = flight->GetPath()[flight->GetCurrentNode()];
+                        flight->SkipCurrentNode();
+
+                        bot->TeleportTo(curDestNode->map_id,node.x,node.y,node.z,bot->GetOrientation());
+                    }
+                    return;
+                }
+
+                uint32 destinationnode = bot->m_taxi.NextTaxiDestination();
+                if ( destinationnode > 0 )                              // if more destinations to go
+                {
+                    // current source node for next destination
+                    uint32 sourcenode = bot->m_taxi.GetTaxiSource();
+
+                    // Add to taximask middle hubs in taxicheat mode (to prevent having player with disabled taxicheat and not having back flight path)
+                    if (bot->isTaxiCheater())
+                    {
+                        if(bot->m_taxi.SetTaximaskNode(sourcenode))
+                        {
+                            WorldPacket data(SMSG_NEW_TAXI_PATH, 0);
+                            bot->GetSession()->SendPacket( &data );
+                        }
+                    }
+
+                    DEBUG_LOG( "WORLD: Taxi has to go from %u to %u", sourcenode, destinationnode );
+
+                    uint32 mountDisplayId = sObjectMgr.GetTaxiMountDisplayId(sourcenode, bot->GetTeam());
+
+                    uint32 path, cost;
+                    sObjectMgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
+
+                    if(path && mountDisplayId)
+                        bot->GetSession()->SendDoFlight( mountDisplayId, path, 1 );        // skip start fly node
+                    else
+                        bot->m_taxi.ClearTaxiDestinations();    // clear problematic path and next
+                }
+                else
+                {
+                    /* std::ostringstream out;
+                    out << "Destination reached" << bot->GetName();
+                    ChatHandler ch(m_master);
+                    ch.SendSysMessage(out.str().c_str()); */
+                    bot->m_taxi.ClearTaxiDestinations();        // Destination, clear source node
+                }
+            }
+            return;
+        }
+
         // if master is logging out, log out all bots
         case CMSG_LOGOUT_REQUEST:
         {
@@ -577,6 +754,18 @@ void Creature::LoadBotMenu(Player *pPlayer)
     }
     while (result->NextRow());
     delete result;
+}
+
+void PlayerbotAI::GetTaxi(ObjectGuid guid, std::vector<uint32>& nodes)
+{
+      DEBUG_LOG("GetTaxi %s node[0] %d node[1] %d",m_bot->GetName(),nodes[0],nodes[1]);
+
+      if(m_bot->GetPlayerbotAI()->GetMovementOrder() != MOVEMENT_STAY)
+      {
+          m_taxiNodes = nodes;
+          m_taxiMaster = guid;
+          SetState(BOTSTATE_FLYING);
+      }
 }
 
 void Player::skill(std::list<uint32>& m_spellsToLearn)

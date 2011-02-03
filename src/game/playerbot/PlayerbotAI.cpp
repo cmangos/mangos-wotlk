@@ -53,7 +53,8 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     m_combatOrder(ORDERS_NONE), m_ScenarioType(SCENARIO_PVEEASY),
     m_TimeDoneEating(0), m_TimeDoneDrinking(0),
     m_CurrentlyCastingSpellId(0), m_spellIdCommand(0),
-    m_targetGuidCommand(0), m_classAI(0)
+    m_targetGuidCommand(0), m_classAI(0),
+    m_taxiMaster(ObjectGuid())
 {
 
     // set bot state and needed item list
@@ -486,6 +487,8 @@ void PlayerbotAI::SendOrders(Player& player)
             out << "RELEASED";
         else if (m_botState == BOTSTATE_LOOTING)
             out << "LOOTING";
+        else if (m_botState == BOTSTATE_FLYING)
+            out << "FLYING";
         out << ". Movement order is ";
         if (m_movementOrder == MOVEMENT_NONE)
             out << "NONE";
@@ -1848,6 +1851,20 @@ uint8 PlayerbotAI::GetFreeBagSpace() const
     return space;
 }
 
+void PlayerbotAI::DoFlight()
+{
+    DEBUG_LOG("DoFlight %s : %s",m_bot->GetName(),m_taxiMaster.GetString().c_str());
+
+    Creature *npc = m_bot->GetNPCIfCanInteractWith(m_taxiMaster, UNIT_NPC_FLAG_FLIGHTMASTER);
+    if (!npc)
+    {
+        DEBUG_LOG("WORLD: HandleActivateTaxiOpcode - %s not found or you can't interact with it.", m_taxiMaster.GetString().c_str());
+        return;
+    }
+
+    m_bot->ActivateTaxiPathTo(m_taxiNodes, npc);
+}
+
 void PlayerbotAI::DoLoot()
 {
     bool looted = false;
@@ -2730,6 +2747,15 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
         else if (m_botState == BOTSTATE_LOOTING)
         {
             DoLoot();
+            SetIgnoreUpdateTime();
+        }
+        else if(m_botState == BOTSTATE_FLYING)
+        {
+            /* std::ostringstream out;
+            out << "Taxi: " << m_bot->GetName() << m_ignoreAIUpdatesUntilTime;
+            TellMaster(out.str().c_str()); */
+            DoFlight();
+            SetState(BOTSTATE_NORMAL);
             SetIgnoreUpdateTime();
         }
 /*
