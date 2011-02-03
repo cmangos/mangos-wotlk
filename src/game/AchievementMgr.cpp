@@ -319,7 +319,7 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
         case ACHIEVEMENT_CRITERIA_REQUIRE_S_DRUNK:
             return (uint32)Player::GetDrunkenstateByValue(source->GetDrunkValue()) >= drunk.state;
         case ACHIEVEMENT_CRITERIA_REQUIRE_HOLIDAY:
-            return IsHolidayActive(HolidayIds(holiday.id));
+            return sGameEventMgr.IsActiveHoliday(HolidayIds(holiday.id));
         case ACHIEVEMENT_CRITERIA_REQUIRE_BG_LOSS_TEAM_SCORE:
         {
             BattleGround* bg = source->GetBattleGround();
@@ -844,9 +844,9 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
         return;
 
     AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type);
-    for(AchievementCriteriaEntryList::const_iterator i = achievementCriteriaList.begin(); i!=achievementCriteriaList.end(); ++i)
+    for(AchievementCriteriaEntryList::const_iterator itr = achievementCriteriaList.begin(); itr != achievementCriteriaList.end(); ++itr)
     {
-        AchievementCriteriaEntry const *achievementCriteria = (*i);
+        AchievementCriteriaEntry const *achievementCriteria = *itr;
 
         AchievementEntry const *achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
         if (!achievement)
