@@ -66,7 +66,20 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     m_targetCombat = 0;
     m_targetAssist = 0;
     m_targetProtect = 0;
-    m_collectionFlags = 0x07;   // default to collect after combat for quest and profession
+
+    // set collection options
+    if (m_mgr->m_confCollectCombat)
+        SetCollectFlag(COLLECT_FLAG_COMBAT);
+    if (m_mgr->m_confCollectQuest)
+        SetCollectFlag(COLLECT_FLAG_QUEST);
+    if (m_mgr->m_confCollectProfession)
+        SetCollectFlag(COLLECT_FLAG_PROFESSION);
+    if (m_mgr->m_confCollectLoot)
+        SetCollectFlag(COLLECT_FLAG_LOOT);
+    if (m_mgr->m_confCollectSkin)
+        SetCollectFlag(COLLECT_FLAG_SKIN);
+    if (m_mgr->m_confCollectObjects)
+        SetCollectFlag(COLLECT_FLAG_NEAROBJECT);
 
     // start following master (will also teleport bot to master)
     SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
