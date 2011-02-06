@@ -1184,6 +1184,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 // clear movement
                 m_bot->GetMotionMaster()->Clear();
                 m_bot->GetMotionMaster()->MoveIdle();
+                SetIgnoreUpdateTime();
             }
 
             return;
@@ -1850,270 +1851,264 @@ uint8 PlayerbotAI::GetFreeBagSpace() const
 
 void PlayerbotAI::DoLoot()
 {
-    bool looted = false;
-
+    // clear BOTSTATE_LOOTING if no more loot targets
     if (m_lootCurrent.IsEmpty() && m_lootTargets.empty())
     {
         // sLog.outDebug( "[PlayerbotAI]: %s reset loot list / go back to idle", m_bot->GetName() );
         SetState(BOTSTATE_NORMAL);
         m_bot->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
         SetQuestNeedItems();
+        SetIgnoreUpdateTime();
         return;
     }
 
+    // set first in list to current
     if (m_lootCurrent.IsEmpty())
     {
         m_lootCurrent = m_lootTargets.front();
         m_lootTargets.pop_front();
+    }
 
-        GameObject *go = m_bot->GetMap()->GetGameObject(m_lootCurrent);
-        Creature *c = m_bot->GetMap()->GetCreature(m_lootCurrent);
+    WorldObject *wo = m_bot->GetMap()->GetWorldObject(m_lootCurrent);
 
-        // check if we got a creature and if it is still a corpse, otherwise bot runs to spawn point
-        if (!c || c->getDeathState() != CORPSE || GetMaster()->GetDistance(c) > BOTLOOT_DISTANCE)
-            if (!go)
-            {
-                m_lootCurrent = ObjectGuid();
-                return;
-            }
+    // clear invalid object or object that is too far from master
+    if (!wo || GetMaster()->GetDistance(wo) > BOTLOOT_DISTANCE)
+    {
+        m_lootCurrent = ObjectGuid();
+        return;
+    }
 
-        if (c)
+    Creature *c = m_bot->GetMap()->GetCreature(m_lootCurrent);
+    GameObject *go = m_bot->GetMap()->GetGameObject(m_lootCurrent);
+
+    uint32 skillId = 0;
+
+    if (c)
+    {
+        if (c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
+            skillId = c->GetCreatureInfo()->GetRequiredLootSkill();
+
+        // not a lootable creature, clear it
+        if (!c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE) &&
+            (!c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE) ||
+            (c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE) && !m_bot->HasSkill(skillId))))
         {
-            if (m_collectionFlags == COLLECT_FLAG_NOTHING)
-            {
-                m_lootCurrent = ObjectGuid();   // told to loot nothing
-                return;
-            }
-            m_bot->GetMotionMaster()->MovePoint(c->GetMapId(), c->GetPositionX(), c->GetPositionY(), c->GetPositionZ());
-            //sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s' deathState=%d", m_bot->GetName(), c->GetName(), c->getDeathState() );
+            m_lootCurrent = ObjectGuid();
+            // clear movement target, take next target on next update
+            m_bot->GetMotionMaster()->Clear();
+            m_bot->GetMotionMaster()->MoveIdle();
+            return;
         }
+    }
 
-        if (go)
-            m_bot->GetMotionMaster()->MovePoint(go->GetMapId(), go->GetPositionX(), go->GetPositionY(), go->GetPositionZ());
-            //sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s'", m_bot->GetName(), go->GetGOInfo()->name);
-
-        // TEMP HACK: attempt to fix duplicate loot attempt (shows when getting ores occasionally)
+    if (m_bot->GetDistance(wo) > CONTACT_DISTANCE + wo->GetObjectBoundingRadius())
+    {
+        float x, y, z;
+        wo->GetContactPoint(m_bot, x, y, z, 0.1f);
+        m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z);
         // give time to move to point before trying again
-        m_ignoreAIUpdatesUntilTime = time(0) + 1;
+        SetIgnoreUpdateTime(1);
     }
     else
     {
-        uint32 skillId = 0;
         uint32 reqSkillValue = 0;
         uint32 SkillValue = 0;
         bool keyFailed = false;
         bool skillFailed = false;
         bool forceFailed = false;
 
-        Creature *c = m_bot->GetMap()->GetCreature(m_lootCurrent);
-        GameObject *go = m_bot->GetMap()->GetGameObject(m_lootCurrent);
-        if (!c || c->getDeathState() != CORPSE || GetMaster()->GetDistance(c) > BOTLOOT_DISTANCE)
-            if (!go)
+        if (c)  // creature
+        {
+            if (c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE))
             {
+                // loot the creature
+                WorldPacket* const packet = new WorldPacket(CMSG_LOOT, 8);
+                *packet << m_lootCurrent;
+                m_bot->GetSession()->QueuePacket(packet);
+                return; // no further processing is needed
+                // m_lootCurrent is reset in SMSG_LOOT_RELEASE_RESPONSE after checking for skinloot
+            }
+            else if (c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
+            {
+                // not all creature skins are leather, some are ore or herb
+                if (m_bot->HasSkill(skillId) && ((skillId != SKILL_SKINNING) ||
+                    (HasCollectFlag(COLLECT_FLAG_SKIN) && skillId == SKILL_SKINNING)))
+                {
+                    // calculate skinning skill requirement
+                    uint32 targetLevel = c->getLevel();
+                    reqSkillValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel-10)*10 : targetLevel*5;
+                }
+            }
+
+            // creatures cannot be unlocked or forced open
+            keyFailed = true;
+            forceFailed = true;
+        }
+
+        if (go) // object
+        {
+            uint32 reqItem = 0;
+
+            // check skill or lock on object
+            uint32 lockId = go->GetGOInfo()->GetLockId();
+            LockEntry const *lockInfo = sLockStore.LookupEntry(lockId);
+            if (lockInfo)
+            {
+                for (int i = 0; i < 8; ++i)
+                {
+                    switch(lockInfo->Type[i])
+                    {
+                        case LOCK_KEY_ITEM:
+                            if (lockInfo->Index[i] > 0)
+                                reqItem = lockInfo->Index[i];
+                            break;
+                        case LOCK_KEY_SKILL:
+                            if (SkillByLockType(LockType(lockInfo->Index[i])) > 0)
+                            {
+                                skillId = SkillByLockType(LockType(lockInfo->Index[i]));
+                                reqSkillValue = lockInfo->Skill[i];
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            // use key on object if available
+            if (reqItem > 0 && m_bot->HasItemCount(reqItem,1))
+            {
+                UseItem(m_bot->GetItemByEntry(reqItem), TARGET_FLAG_OBJECT, m_lootCurrent);
                 m_lootCurrent = ObjectGuid();
                 return;
             }
-        if (m_bot->IsWithinDistInMap(c, INTERACTION_DISTANCE) || m_bot->IsWithinDistInMap(go, INTERACTION_DISTANCE))
-        {
-            if (c)  // creature
-            {
-                if (c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE))
-                {
-                    // loot the creature
-                    WorldPacket* const packet = new WorldPacket(CMSG_LOOT, 8);
-                    *packet << m_lootCurrent;
-                    m_bot->GetSession()->QueuePacket(packet);
-                    return; // no further processing is needed
-                    // m_lootCurrent is reset in SMSG_LOOT_RELEASE_RESPONSE after checking for skinloot
-                }
-                else if (c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
-                {
-                    skillId = c->GetCreatureInfo()->GetRequiredLootSkill();
-                    // not all creature skins are leather, some are ore or herb
-                    if (m_bot->HasSkill(skillId) && ((skillId != SKILL_SKINNING) ||
-                                                     (HasCollectFlag(COLLECT_FLAG_SKIN) && skillId == SKILL_SKINNING)))
-                    {
-                        // calculate skinning skill requirement
-                        uint32 targetLevel = c->getLevel();
-                        reqSkillValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel - 10) * 10 : targetLevel * 5;
-                    }
-                }
-                else    // not a lootable creature, clear it
-                {
-                    m_lootCurrent = ObjectGuid();
-                    // clear movement target, take next target on next update
-                    m_bot->GetMotionMaster()->Clear();
-                    m_bot->GetMotionMaster()->MoveIdle();
-                    return;
-                }
-
-                // creatures cannot be unlocked or forced open
+            else
                 keyFailed = true;
-                forceFailed = true;
-            }
+        }
 
-            if (go) // object
+        // determine bot's skill value for object's required skill
+        if (skillId != SKILL_NONE)
+            SkillValue = uint32(m_bot->GetPureSkillValue(skillId));
+
+        // bot has the specific skill or object requires no skill at all
+        if ((m_bot->HasSkill(skillId) && skillId != SKILL_NONE) || (skillId == SKILL_NONE && go))
+        {
+            if (SkillValue >= reqSkillValue)
             {
-                uint32 reqItem = 0;
-
-                // check skill or lock on object
-                uint32 lockId = go->GetGOInfo()->GetLockId();
-                LockEntry const *lockInfo = sLockStore.LookupEntry(lockId);
-                if (lockInfo)
-                    for (int i = 0; i < 8; ++i)
-                    {
-                        switch (lockInfo->Type[i])
-                        {
-                            case LOCK_KEY_ITEM:
-                                if (lockInfo->Index[i] > 0)
-                                    reqItem = lockInfo->Index[i];
-                                break;
-                            case LOCK_KEY_SKILL:
-                                if (SkillByLockType(LockType(lockInfo->Index[i])) > 0)
-                                {
-                                    skillId = SkillByLockType(LockType(lockInfo->Index[i]));
-                                    reqSkillValue = lockInfo->Skill[i];
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-
-                // use key on object if available
-                if (reqItem > 0 && m_bot->HasItemCount(reqItem, 1))
+                // add this GO to our collection list if active and is chest/ore/herb
+                if (go && HasCollectFlag(COLLECT_FLAG_NEAROBJECT) && go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
                 {
-                    UseItem(m_bot->GetItemByEntry(reqItem), TARGET_FLAG_OBJECT, m_lootCurrent);
-                    m_lootCurrent = ObjectGuid();
-                    return;
+                    m_collectObjects.push_back(go->GetEntry());
+                    m_collectObjects.sort();
+                    m_collectObjects.unique();
                 }
-                else
-                    keyFailed = true;
-            }
 
-            // determine bot's skill value for object's required skill
-            if (skillId != SKILL_NONE)
-                SkillValue = uint32(m_bot->GetPureSkillValue(skillId));
-
-            // bot has the specific skill or object requires no skill at all
-            if ((m_bot->HasSkill(skillId) && skillId != SKILL_NONE) || (skillId == SKILL_NONE && go))
-            {
-                if (SkillValue >= reqSkillValue)
+                switch(skillId)
                 {
-                    // add this GO to our collection list if active and is chest/ore/herb
-                    if (go && HasCollectFlag(COLLECT_FLAG_NEAROBJECT) && go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
-                    {
-                        m_collectObjects.push_back(go->GetEntry());
-                        m_collectObjects.unique();
-                    }
-
-                    switch (skillId)
-                    {
-                        case SKILL_MINING:
-                            if (HasTool(TC_MINING_PICK) && CastSpell(MINING))
-                                return;
-                            else
-                                skillFailed = true;
-                            break;
-                        case SKILL_HERBALISM:
-                            if (CastSpell(HERB_GATHERING))
-                                return;
-                            else
-                                skillFailed = true;
-                            break;
-                        case SKILL_SKINNING:
-                            if (c && HasCollectFlag(COLLECT_FLAG_SKIN) &&
-                                HasTool(TC_SKINNING_KNIFE) && CastSpell(SKINNING, *c))
-                                return;
-                            else
-                                skillFailed = true;
-                            break;
-                        case SKILL_LOCKPICKING:
-                            if (CastSpell(PICK_LOCK_1))
-                                return;
-                            else
-                                skillFailed = true;
-                            break;
-                        case SKILL_NONE:
-                            if (CastSpell(3365)) //Spell 3365 = Opening?
-                                return;
-                            else
-                                skillFailed = true;
-                            break;
-                        default:
-                            TellMaster("I'm not sure how to get that.");
+                    case SKILL_MINING:
+                        if (HasTool(TC_MINING_PICK) && CastSpell(MINING))
+                            return;
+                        else
                             skillFailed = true;
-                            sLog.outDebug("[PlayerbotAI]:DoLoot Skill %u is not implemented", skillId);
-                            break;
-                    }
-                }
-                else
-                {
-                    TellMaster("My skill is not high enough. It requires %u, but mine is %u.",
-                               reqSkillValue, SkillValue);
-                    skillFailed = true;
+                        break;
+                    case SKILL_HERBALISM:
+                        if (CastSpell(HERB_GATHERING))
+                            return;
+                        else
+                            skillFailed = true;
+                        break;
+                    case SKILL_SKINNING:
+                        if (c && HasCollectFlag(COLLECT_FLAG_SKIN) &&
+                            HasTool(TC_SKINNING_KNIFE) && CastSpell(SKINNING, *c))
+                            return;
+                        else
+                            skillFailed = true;
+                        break;
+                    case SKILL_LOCKPICKING:
+                        if (CastSpell(PICK_LOCK_1))
+                            return;
+                        else
+                            skillFailed = true;
+                        break;
+                    case SKILL_NONE:
+                        if (CastSpell(3365)) //Spell 3365 = Opening?
+                            return;
+                        else
+                            skillFailed = true;
+                        break;
+                    default:
+                        TellMaster("I'm not sure how to get that.");
+                        skillFailed = true;
+                        sLog.outDebug( "[PlayerbotAI]:DoLoot Skill %u is not implemented", skillId);
+                        break;
                 }
             }
             else
             {
-                TellMaster("I do not have the required skill.");
+                TellMaster("My skill is not high enough. It requires %u, but mine is %u.",
+                    reqSkillValue, SkillValue);
                 skillFailed = true;
             }
+        }
+        else
+        {
+            TellMaster("I do not have the required skill.");
+            skillFailed = true;
+        }
 
-            if (go) // only go's can be forced
+        if (go) // only go's can be forced
+        {
+            // if pickable, check if a forcible item is available for the bot
+            if (skillId == SKILL_LOCKPICKING && (m_bot->HasSkill(SKILL_BLACKSMITHING) ||
+                m_bot->HasSkill(SKILL_ENGINEERING)))
             {
-                // if pickable, check if a forcible item is available for the bot
-                if (skillId == SKILL_LOCKPICKING && (m_bot->HasSkill(SKILL_BLACKSMITHING) ||
-                                                     m_bot->HasSkill(SKILL_ENGINEERING)))
+                // check for skeleton keys appropriate for lock value
+                if (m_bot->HasSkill(SKILL_BLACKSMITHING))
                 {
-                    // check for skeleton keys appropriate for lock value
-                    if (m_bot->HasSkill(SKILL_BLACKSMITHING))
+                    Item *kItem = FindKeyForLockValue(reqSkillValue);
+                    if (kItem)
                     {
-                        Item *kItem = FindKeyForLockValue(reqSkillValue);
-                        if (kItem)
-                        {
-                            TellMaster("I have a skeleton key that can open it!");
-                            UseItem(kItem, TARGET_FLAG_OBJECT, m_lootCurrent);
-                            return;
-                        }
-                        else
-                        {
-                            TellMaster("I have no skeleton keys that can open that lock.");
-                            forceFailed = true;
-                        }
+                        TellMaster("I have a skeleton key that can open it!");
+                        UseItem(kItem, TARGET_FLAG_OBJECT, m_lootCurrent);
+                        return;
                     }
-
-                    // check for a charge that can blast it open
-                    if (m_bot->HasSkill(SKILL_ENGINEERING))
+                    else
                     {
-                        Item *bItem = FindBombForLockValue(reqSkillValue);
-                        if (bItem)
-                        {
-                            TellMaster("I can blast it open!");
-                            UseItem(bItem, TARGET_FLAG_OBJECT, m_lootCurrent);
-                            return;
-                        }
-                        else
-                        {
-                            TellMaster("I have nothing to blast it open with.");
-                            forceFailed = true;
-                        }
+                        TellMaster("I have no skeleton keys that can open that lock.");
+                        forceFailed = true;
                     }
                 }
-                else
-                    forceFailed = true;
-            }
 
-            // if all attempts failed in some way then clear because it won't get SMSG_LOOT_RESPONSE
-            if (keyFailed && skillFailed && forceFailed)
-            {
-                sLog.outDebug("[PlayerbotAI]: DoLoot attempts failed on [%s]",
-                              go ? go->GetGOInfo()->name : c->GetCreatureInfo()->Name);
-                m_lootCurrent = ObjectGuid();
-                // clear movement target, take next target on next update
-                m_bot->GetMotionMaster()->Clear();
-                m_bot->GetMotionMaster()->MoveIdle();
+                // check for a charge that can blast it open
+                if (m_bot->HasSkill(SKILL_ENGINEERING))
+                {
+                    Item *bItem = FindBombForLockValue(reqSkillValue);
+                    if (bItem)
+                    {
+                        TellMaster("I can blast it open!");
+                        UseItem(bItem, TARGET_FLAG_OBJECT, m_lootCurrent);
+                        return;
+                    }
+                    else
+                    {
+                        TellMaster("I have nothing to blast it open with.");
+                        forceFailed = true;
+                    }
+                }
             }
+            else
+                forceFailed = true;
+        }
+
+        // if all attempts failed in some way then clear because it won't get SMSG_LOOT_RESPONSE
+        if (keyFailed && skillFailed && forceFailed)
+        {
+            sLog.outDebug( "[PlayerbotAI]: DoLoot attempts failed on [%s]",
+                go ? go->GetGOInfo()->name : c->GetCreatureInfo()->Name);
+            m_lootCurrent = ObjectGuid();
+            // clear movement target, take next target on next update
+            m_bot->GetMotionMaster()->Clear();
+            m_bot->GetMotionMaster()->MoveIdle();
         }
     }
 }
@@ -2730,7 +2725,6 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
         else if (m_botState == BOTSTATE_LOOTING)
         {
             DoLoot();
-            SetIgnoreUpdateTime();
         }
 /*
         // are we sitting, if so feast if possible
@@ -3959,13 +3953,18 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             if (!c)
                 return;
 
-            if (c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE) || c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE))
+            uint32 skillId = 0;
+            if (c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
+                skillId = c->GetCreatureInfo()->GetRequiredLootSkill();
+
+            if (c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE) ||
+                (c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE) && m_bot->HasSkill(skillId)))
             {
                 m_lootTargets.push_back(getOnGuid.GetRawValue());
                 SetState(BOTSTATE_LOOTING);
             }
             else
-                TellMaster("Target is not lootable.");
+                TellMaster("Target is not lootable by me.");
         }
         else
         {
