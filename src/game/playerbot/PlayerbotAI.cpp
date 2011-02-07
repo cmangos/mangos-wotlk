@@ -76,7 +76,7 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
         SetCollectFlag(COLLECT_FLAG_PROFESSION);
     if (m_mgr->m_confCollectLoot)
         SetCollectFlag(COLLECT_FLAG_LOOT);
-    if (m_mgr->m_confCollectSkin)
+    if (m_mgr->m_confCollectSkin && m_bot->HasSkill(SKILL_SKINNING))
         SetCollectFlag(COLLECT_FLAG_SKIN);
     if (m_mgr->m_confCollectObjects)
         SetCollectFlag(COLLECT_FLAG_NEAROBJECT);
