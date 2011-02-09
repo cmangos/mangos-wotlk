@@ -1894,6 +1894,13 @@ void PlayerbotAI::DoLoot()
     Creature *c = m_bot->GetMap()->GetCreature(m_lootCurrent);
     GameObject *go = m_bot->GetMap()->GetGameObject(m_lootCurrent);
 
+    // clear creature or object that is not spawned or if not creature or object
+    if ((c && c->IsDespawned()) || (go && !go->isSpawned()) || (!c && !go))
+    {
+        m_lootCurrent = ObjectGuid();
+        return;
+    }
+
     uint32 skillId = 0;
 
     if (c)
