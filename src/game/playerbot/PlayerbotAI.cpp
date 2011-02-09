@@ -4050,14 +4050,21 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             collset += ", quest";
         if (HasCollectFlag(COLLECT_FLAG_SKIN))
             collset += ", skin";
-        if (HasCollectFlag(COLLECT_FLAG_COMBAT))
-            collset += " items after combat";
-        else
-            collset += " items";
+        if (collset.length() > 1)
+        {
+            if (HasCollectFlag(COLLECT_FLAG_COMBAT))
+                collset += " items after combat";
+            else
+                collset += " items";
+        }
 
         if (HasCollectFlag(COLLECT_FLAG_NEAROBJECT))
         {
-            collset += " and nearby objects (";
+            if (collset.length() > 1)
+                collset += " and ";
+            else
+                collset += "  ";    // padding for substr
+            collset += "nearby objects (";
             if (!m_collectObjects.empty())
             {
                 std::string strobjects = "";
