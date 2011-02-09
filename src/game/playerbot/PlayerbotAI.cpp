@@ -1922,7 +1922,8 @@ void PlayerbotAI::DoLoot()
         // give time to move to point before trying again
         SetIgnoreUpdateTime(1);
     }
-    else
+
+    if (m_bot->GetDistance(wo) < INTERACTION_DISTANCE)
     {
         uint32 reqSkillValue = 0;
         uint32 SkillValue = 0;
