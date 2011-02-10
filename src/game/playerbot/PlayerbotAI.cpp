@@ -68,6 +68,7 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     m_targetProtect = 0;
 
     // set collection options
+    m_collectionFlags = 0;
     if (m_mgr->m_confCollectCombat)
         SetCollectFlag(COLLECT_FLAG_COMBAT);
     if (m_mgr->m_confCollectQuest)
