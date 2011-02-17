@@ -58,7 +58,7 @@
 #include "Database/DatabaseImpl.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
-#include "InstanceSaveMgr.h"
+#include "MapPersistentStateMgr.h"
 #include "WaypointManager.h"
 #include "GMTicketMgr.h"
 #include "Util.h"
@@ -595,6 +595,8 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_BOOL_CAST_UNSTUCK, "CastUnstuck", true);
     setConfig(CONFIG_UINT32_MAX_SPELL_CASTS_IN_CHAIN, "MaxSpellCastsInChain", 10);
+    setConfig(CONFIG_UINT32_BIRTHDAY_TIME, "BirthdayTime", 1125180000);
+
     setConfig(CONFIG_UINT32_INSTANCE_RESET_TIME_HOUR, "Instance.ResetTimeHour", 4);
     setConfig(CONFIG_UINT32_INSTANCE_UNLOAD_DELAY,    "Instance.UnloadDelay", 30 * MINUTE * IN_MILLISECONDS);
 
@@ -934,6 +936,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Script Names...");
     sScriptMgr.LoadScriptNames();
 
+    sLog.outString( "Loading WorldTemplate..." );
+    sObjectMgr.LoadWorldTemplate();
+
     sLog.outString( "Loading InstanceTemplate..." );
     sObjectMgr.LoadInstanceTemplate();
 
@@ -942,10 +947,10 @@ void World::SetInitialWorldSettings()
 
     ///- Clean up and pack instances
     sLog.outString( "Cleaning up instances..." );
-    sInstanceSaveMgr.CleanupInstances();                    // must be called before `creature_respawn`/`gameobject_respawn` tables
+    sMapPersistentStateMgr.CleanupInstances();              // must be called before `creature_respawn`/`gameobject_respawn` tables
 
     sLog.outString( "Packing instances..." );
-    sInstanceSaveMgr.PackInstances();
+    sMapPersistentStateMgr.PackInstances();
 
     sLog.outString( "Packing groups..." );
     sObjectMgr.PackGroupIds();                              // must be after CleanupInstances
@@ -1041,14 +1046,8 @@ void World::SetInitialWorldSettings()
     sLog.outString( ">>> Creature Addon Data loaded" );
     sLog.outString();
 
-    sLog.outString( "Loading Creature Respawn Data..." );   // must be after PackInstances()
-    sObjectMgr.LoadCreatureRespawnTimes();
-
     sLog.outString( "Loading Gameobject Data..." );
     sObjectMgr.LoadGameobjects();
-
-    sLog.outString( "Loading Gameobject Respawn Data..." ); // must be after PackInstances()
-    sObjectMgr.LoadGameobjectRespawnTimes();
 
     sLog.outString( "Loading Objects Pooling Data...");
     sPoolMgr.LoadFromDB();
@@ -1073,6 +1072,12 @@ void World::SetInitialWorldSettings()
     sGameEventMgr.LoadFromDB();
     sLog.outString( ">>> Game Event Data loaded" );
     sLog.outString();
+
+    sLog.outString( "Loading Creature Respawn Data..." );   // must be after PackInstances(), LoadCreatures(), sPoolMgr.LoadFromDB(), sGameEventMgr.LoadFromDB();
+    sMapPersistentStateMgr.LoadCreatureRespawnTimes();
+
+    sLog.outString( "Loading Gameobject Respawn Data..." ); // must be after PackInstances(), LoadGameobjects(), sPoolMgr.LoadFromDB(), sGameEventMgr.LoadFromDB();
+    sMapPersistentStateMgr.LoadGameobjectRespawnTimes();
 
     sLog.outString( "Loading UNIT_NPC_FLAG_SPELLCLICK Data..." );
     sObjectMgr.LoadNPCSpellClickSpells();
@@ -1337,9 +1342,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Calculate next monthly quest reset time..." );
     SetMonthlyQuestResetTime();
 
-    sLog.outString("Starting objects Pooling system..." );
-    sPoolMgr.Initialize();
-
     sLog.outString("Starting Game Event system..." );
     uint32 nextGameEvent = sGameEventMgr.Initialize();
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    //depend on next event
@@ -1534,7 +1536,7 @@ void World::Update(uint32 diff)
     sMapMgr.RemoveAllObjectsInRemoveList();
 
     // update the instance reset times
-    sInstanceSaveMgr.Update();
+    sMapPersistentStateMgr.Update();
 
     // And last, but not least handle the issued cli commands
     ProcessCliCommands();

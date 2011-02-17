@@ -476,7 +476,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     recv_data >> hairStyle >> hairColor >> facialHair >> outfitId;
 
     Player *pNewChar = new Player(this);
-    if(!pNewChar->Create( sObjectMgr.GenerateLowGuid(HIGHGUID_PLAYER), name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, outfitId ))
+    if (!pNewChar->Create(sObjectMgr.GeneratePlayerLowGuid(), name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, outfitId))
     {
         // Player not create (race/class problem?)
         delete pNewChar;
@@ -843,6 +843,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
         pCurrChar->SetStandState(UNIT_STAND_STATE_STAND);
 
     m_playerLoading = false;
+
+    // Handle Login-Achievements (should be handled after loading)
+    pCurrChar->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ON_LOGIN, 1);
+
     delete holder;
 }
 

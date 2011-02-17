@@ -509,6 +509,22 @@ void Spell::FillTargetMap()
                     case TARGET_EFFECT_SELECT:
                         SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
                         break;
+                    // dest point setup required
+                    case TARGET_AREAEFFECT_INSTANT:
+                    case TARGET_AREAEFFECT_CUSTOM:
+                    case TARGET_ALL_ENEMY_IN_AREA:
+                    case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
+                    case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
+                    case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
+                    case TARGET_AREAEFFECT_GO_AROUND_DEST:
+                    case TARGET_RANDOM_NEARBY_DEST:
+                        // triggered spells get dest point from default target set, ignore it
+                        if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) || m_IsTriggeredSpell)
+                            if (WorldObject* castObject = GetAffectiveCasterObject())
+                                m_targets.setDestination(castObject->GetPositionX(), castObject->GetPositionY(), castObject->GetPositionZ());
+                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
+                        break;
+                    // target pre-selection required
                     case TARGET_INNKEEPER_COORDINATES:
                     case TARGET_TABLE_X_Y_Z_COORDINATES:
                     case TARGET_CASTER_COORDINATES:
@@ -524,7 +540,6 @@ void Spell::FillTargetMap()
                     case TARGET_POINT_AT_NW:
                     case TARGET_POINT_AT_SE:
                     case TARGET_POINT_AT_SW:
-                    case TARGET_RANDOM_NEARBY_DEST:
                         // need some target for processing
                         SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
                         SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
@@ -994,6 +1009,23 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     {
         if (target->reflectResult == SPELL_MISS_NONE)       // If reflected spell hit caster -> do all effect on him
             DoSpellHitOnUnit(m_caster, mask);
+    }
+    else if(missInfo == SPELL_MISS_MISS || missInfo == SPELL_MISS_RESIST)
+    {
+        if(real_caster && real_caster != unit)
+        {
+            // can cause back attack (if detected)
+            if (!(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !IsPositiveSpell(m_spellInfo->Id) &&
+                m_caster->isVisibleForOrDetect(unit, unit, false))
+            {
+                if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
+                    ((Creature*)unit)->AI()->AttackedBy(real_caster);
+
+                unit->AddThreat(real_caster);
+                unit->SetInCombatWith(real_caster);
+                real_caster->SetInCombatWith(unit);
+            }
+        }
     }
 
     // All calculated do it!
@@ -5587,8 +5619,25 @@ SpellCastResult Spell::CheckCasterAuras() const
     SpellCastResult prevented_reason = SPELL_CAST_OK;
     // Have to check if there is a stun aura. Otherwise will have problems with ghost aura apply while logging out
     uint32 unitflag = m_caster->GetUInt32Value(UNIT_FIELD_FLAGS);     // Get unit state
-    if (unitflag & UNIT_FLAG_STUNNED && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_STUNNED))
-        prevented_reason = SPELL_FAILED_STUNNED;
+    if (unitflag & UNIT_FLAG_STUNNED)
+    {
+        // spell is usable while stunned, check if caster has only mechanic stun auras, another stun types must prevent cast spell
+        if (m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_STUNNED)
+        {
+            bool is_stun_mechanic = true;
+            Unit::AuraList const& stunAuras = m_caster->GetAurasByType(SPELL_AURA_MOD_STUN);
+            for (Unit::AuraList::const_iterator itr = stunAuras.begin(); itr != stunAuras.end(); ++itr)
+                if (!(*itr)->HasMechanic(MECHANIC_STUN))
+                {
+                    is_stun_mechanic = false;
+                    break;
+                }
+            if (!is_stun_mechanic)
+                prevented_reason = SPELL_FAILED_STUNNED;
+        }
+        else
+            prevented_reason = SPELL_FAILED_STUNNED;
+    }
     else if (unitflag & UNIT_FLAG_CONFUSED && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED))
         prevented_reason = SPELL_FAILED_CONFUSED;
     else if (unitflag & UNIT_FLAG_FLEEING && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_FEARED))
@@ -5637,7 +5686,7 @@ SpellCastResult Spell::CheckCasterAuras() const
                         switch(aura->GetModifier()->m_auraname)
                         {
                             case SPELL_AURA_MOD_STUN:
-                                if (!(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_STUNNED))
+                                if (!(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_STUNNED) || !aura->HasMechanic(MECHANIC_STUN))
                                     return SPELL_FAILED_STUNNED;
                                 break;
                             case SPELL_AURA_MOD_CONFUSE:
@@ -5727,8 +5776,13 @@ SpellCastResult Spell::CheckRange(bool strict)
                 if (target == m_caster)
                     return SPELL_CAST_OK;
 
+                float range_mod = strict ? 0.0f : 5.0f;
+                float base = ATTACK_DISTANCE;
+                if (Player* modOwner = m_caster->GetSpellModOwner())
+                    range_mod += modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, base, this);
+
                 // with additional 5 dist for non stricted case (some melee spells have delay in apply
-                return m_caster->CanReachWithMeleeAttack(target, strict ? 0.0f : 5.0f) ? SPELL_CAST_OK : SPELL_FAILED_OUT_OF_RANGE;
+                return m_caster->CanReachWithMeleeAttack(target, range_mod) ? SPELL_CAST_OK : SPELL_FAILED_OUT_OF_RANGE;
             }
             break;                                          // let continue in generic way for no target
         }
