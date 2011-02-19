@@ -760,6 +760,19 @@ void PlayerbotAI::GetTaxi(ObjectGuid guid, std::vector<uint32>& nodes)
 {
       DEBUG_LOG("GetTaxi %s node[0] %d node[1] %d",m_bot->GetName(),nodes[0],nodes[1]);
 
+      Creature *unit = m_bot->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_FLIGHTMASTER);
+      if (!unit)
+      {
+          DEBUG_LOG("WORLD: HandleActivateTaxiOpcode - %s not found or you can't interact with it.", guid.GetString().c_str());
+          return;
+      }
+
+      if(m_bot->m_taxi.IsTaximaskNodeKnown(nodes[0]) ? 0 : 1)
+          m_bot->GetSession()->SendLearnNewTaxiNode(unit);
+
+      if(m_bot->m_taxi.IsTaximaskNodeKnown(nodes[1]) ? 0 : 1)
+          return;
+
       if(m_bot->GetPlayerbotAI()->GetMovementOrder() != MOVEMENT_STAY)
       {
           m_taxiNodes = nodes;
