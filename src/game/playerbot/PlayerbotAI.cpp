@@ -4,6 +4,7 @@
 #include "../World.h"
 #include "../SpellMgr.h"
 #include "../GridNotifiers.h"
+#include "../GridNotifiersImpl.h"
 #include "../CellImpl.h"
 #include "PlayerbotAI.h"
 #include "PlayerbotMgr.h"

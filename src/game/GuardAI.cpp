@@ -20,7 +20,6 @@
 #include "Errors.h"
 #include "Creature.h"
 #include "Player.h"
-#include "ObjectAccessor.h"
 #include "World.h"
 
 int GuardAI::Permissible(const Creature *creature)
@@ -113,14 +112,7 @@ void GuardAI::UpdateAI(const uint32 /*diff*/)
 
     i_victimGuid = m_creature->getVictim()->GetGUID();
 
-    if (m_creature->isAttackReady())
-    {
-        if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
-        {
-            m_creature->AttackerStateUpdate(m_creature->getVictim());
-            m_creature->resetAttackTimer();
-        }
-    }
+    DoMeleeAttackIfReady();
 }
 
 bool GuardAI::IsVisible(Unit *pl) const
