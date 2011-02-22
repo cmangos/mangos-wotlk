@@ -1183,6 +1183,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                             if (m_lootCurrent != m_lootPrev)    // if this wasn't previous loot try again
                             {
                                 m_lootPrev = m_lootCurrent;
+                                SetIgnoreUpdateTime();
                                 return; // so that the DoLoot function is called again to get skin
                             }
                         }
@@ -1970,6 +1971,14 @@ void PlayerbotAI::DoLoot()
 
         if (go) // object
         {
+            // add this GO to our collection list if active and is chest/ore/herb
+            if (go && HasCollectFlag(COLLECT_FLAG_NEAROBJECT) && go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
+            {
+                m_collectObjects.push_back(go->GetEntry());
+                m_collectObjects.sort();
+                m_collectObjects.unique();
+            }
+
             uint32 reqItem = 0;
 
             // check skill or lock on object
@@ -1979,21 +1988,67 @@ void PlayerbotAI::DoLoot()
             {
                 for (int i = 0; i < 8; ++i)
                 {
-                    switch(lockInfo->Type[i])
+                    if (lockInfo->Type[i] == LOCK_KEY_ITEM)
                     {
-                        case LOCK_KEY_ITEM:
-                            if (lockInfo->Index[i] > 0)
-                                reqItem = lockInfo->Index[i];
-                            break;
-                        case LOCK_KEY_SKILL:
-                            if (SkillByLockType(LockType(lockInfo->Index[i])) > 0)
-                            {
-                                skillId = SkillByLockType(LockType(lockInfo->Index[i]));
-                                reqSkillValue = lockInfo->Skill[i];
-                            }
-                            break;
-                        default:
-                            break;
+                        if (lockInfo->Index[i] > 0)
+                        {
+                            reqItem = lockInfo->Index[i];
+                            if (m_bot->HasItemCount(reqItem,1))
+                                break;
+                            continue;
+                        }
+                    }
+                    else if (lockInfo->Type[i] == LOCK_KEY_SKILL)
+                    {
+                        switch(LockType(lockInfo->Index[i]))
+                        {
+                            case LOCKTYPE_OPEN:
+                                if (CastSpell(3365))    // Opening
+                                    return;
+                                break;
+                            case LOCKTYPE_CLOSE:
+                                if (CastSpell(6233))    // Closing
+                                    return;
+                                break;
+                            case LOCKTYPE_QUICK_OPEN:
+                                if (CastSpell(6247))    // Opening
+                                    return;
+                                break;
+                            case LOCKTYPE_QUICK_CLOSE:
+                                if (CastSpell(6247))    // Closing
+                                    return;
+                                break;
+                            case LOCKTYPE_OPEN_TINKERING:
+                                if (CastSpell(6477))    // Opening
+                                    return;
+                                break;
+                            case LOCKTYPE_OPEN_KNEELING:
+                                if (CastSpell(6478))    // Opening; listed with 17667 and 22810
+                                    return;
+                                break;
+                            case LOCKTYPE_OPEN_ATTACKING:
+                                if (CastSpell(8386))    // Attacking
+                                    return;
+                                break;
+                            case LOCKTYPE_SLOW_OPEN:
+                                if (CastSpell(21651))   // Opening; also had 26868
+                                    return;
+                                break;
+                            case LOCKTYPE_SLOW_CLOSE:
+                                if (CastSpell(21652))   // Closing
+                                    return;
+                                break;
+                            case LOCKTYPE_OPEN_FROM_VEHICLE:
+                                if (CastSpell(61437))   // Opening
+                                    return;
+                                break;
+                            default:
+                                if (SkillByLockType(LockType(lockInfo->Index[i])) > 0)
+                                {
+                                    skillId = SkillByLockType(LockType(lockInfo->Index[i]));
+                                    reqSkillValue = lockInfo->Skill[i];
+                                }
+                        }
                     }
                 }
             }
@@ -2018,14 +2073,6 @@ void PlayerbotAI::DoLoot()
         {
             if (SkillValue >= reqSkillValue)
             {
-                // add this GO to our collection list if active and is chest/ore/herb
-                if (go && HasCollectFlag(COLLECT_FLAG_NEAROBJECT) && go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
-                {
-                    m_collectObjects.push_back(go->GetEntry());
-                    m_collectObjects.sort();
-                    m_collectObjects.unique();
-                }
-
                 switch(skillId)
                 {
                     case SKILL_MINING:
