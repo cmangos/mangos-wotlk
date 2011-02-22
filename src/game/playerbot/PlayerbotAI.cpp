@@ -469,6 +469,18 @@ void PlayerbotAI::SendQuestItemList(Player& player)
     TellMaster(out.str().c_str());
 }
 
+bool PlayerbotAI::IsInQuestItemList(uint32 itemid)
+{
+    for (BotNeedItem::iterator itr = m_needItemList.begin(); itr != m_needItemList.end(); ++itr)
+    {
+        const ItemPrototype * pItemProto = sObjectMgr.GetItemPrototype(itr->first);
+
+        if(itemid == pItemProto->ItemId)
+            return true;
+    }
+    return false;
+}
+
 void PlayerbotAI::SendOrders(Player& player)
 {
     std::ostringstream out;
@@ -1030,7 +1042,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     if (pProto->StartQuest > 0 && HasCollectFlag(COLLECT_FLAG_QUEST))
                         grab = true;
 
-                    if (m_needItemList[itemid] > 0)
+                    if (IsInQuestItemList(itemid))
                         grab = true;    // item is in need list, just grab without further processing
                     else    // if not in need list, run other checks
                     {
@@ -3555,6 +3567,25 @@ void PlayerbotAI::findNearbyGO()
     for (BotLootEntry::iterator itr = m_collectObjects.begin(); itr != m_collectObjects.end(); ++itr)
     {
         uint32 entry = *(itr);
+        GameObjectInfo const * gInfo = ObjectMgr::GetGameObjectInfo(entry);
+        bool questGO = false;
+        uint8 needCount = 0;
+
+        for (uint32 i = 0; i < 6; ++i)
+        {
+            if (gInfo->questItems[i] != 0)  // check whether the gameobject contains quest items
+            {
+                questGO = true;
+                if (IsInQuestItemList(gInfo->questItems[i]))    // quest item needed
+                    needCount++;
+            }
+        }
+
+        if (questGO && needCount == 0)
+        {
+            m_collectObjects.remove(entry); // remove gameobject from collect list
+            return;
+        }
 
         // search for GOs with entry, within range of m_bot
         MaNGOS::GameObjectEntryInPosRangeCheck go_check(*m_bot, entry, m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(), radius);
