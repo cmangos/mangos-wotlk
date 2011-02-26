@@ -49,7 +49,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
             p >> guid >> nodes[0] >> nodes[1];
 
-            DEBUG_LOG("WORLD: Received CMSG_ACTIVATETAXI from %d to %d" ,nodes[0],nodes[1]);
+            DEBUG_LOG("PlayerbotMgr: Received CMSG_ACTIVATETAXI from %d to %d" ,nodes[0],nodes[1]);
 
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
@@ -97,7 +97,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             if(nodes.empty())
                 return;
 
-            DEBUG_LOG( "WORLD: Received CMSG_ACTIVATETAXIEXPRESS from %d to %d" ,nodes.front(),nodes.back());
+            DEBUG_LOG( "PlayerbotMgr: Received CMSG_ACTIVATETAXIEXPRESS from %d to %d" ,nodes.front(),nodes.back());
 
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
@@ -124,7 +124,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
         case CMSG_MOVE_SPLINE_DONE:
         {
-            DEBUG_LOG( "WORLD: Received CMSG_MOVE_SPLINE_DONE" );
+            DEBUG_LOG( "PlayerbotMgr: Received CMSG_MOVE_SPLINE_DONE" );
 
             WorldPacket p(packet);
             p.rpos(0); // reset reader
@@ -188,7 +188,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                         }
                     }
 
-                    DEBUG_LOG( "WORLD: Taxi has to go from %u to %u", sourcenode, destinationnode );
+                    DEBUG_LOG( "PlayerbotMgr: Taxi has to go from %u to %u", sourcenode, destinationnode );
 
                     uint32 mountDisplayId = sObjectMgr.GetTaxiMountDisplayId(sourcenode, bot->GetTeam());
 
@@ -758,19 +758,19 @@ void Creature::LoadBotMenu(Player *pPlayer)
 
 void PlayerbotAI::GetTaxi(ObjectGuid guid, std::vector<uint32>& nodes)
 {
-      DEBUG_LOG("GetTaxi %s node[0] %d node[1] %d",m_bot->GetName(),nodes[0],nodes[1]);
+      DEBUG_LOG("PlayerbotAI: GetTaxi %s node[0] %d node[1] %d",m_bot->GetName(),nodes[0],nodes[1]);
 
       Creature *unit = m_bot->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_FLIGHTMASTER);
       if (!unit)
       {
-          DEBUG_LOG("WORLD: HandleActivateTaxiOpcode - %s not found or you can't interact with it.", guid.GetString().c_str());
+          DEBUG_LOG("PlayerbotAI: GetTaxi - %s not found or you can't interact with it.", guid.GetString().c_str());
           return;
       }
 
       if(m_bot->m_taxi.IsTaximaskNodeKnown(nodes[0]) ? 0 : 1)
           m_bot->GetSession()->SendLearnNewTaxiNode(unit);
 
-      if(m_bot->m_taxi.IsTaximaskNodeKnown(nodes[1]) ? 0 : 1)
+      if(m_bot->m_taxi.IsTaximaskNodeKnown(nodes[nodes.size()-1]) ? 0 : 1)
           return;
 
       if(m_bot->GetPlayerbotAI()->GetMovementOrder() != MOVEMENT_STAY)
