@@ -68,7 +68,7 @@ enum PaladinSpells
     SEAL_OF_CORRUPTION              = 53736,
     SEAL_OF_JUSTICE_1               = 20164,
     SEAL_OF_LIGHT_1                 = 20165,
-    SEAL_OF_RIGHTEOUSNESS_1         = 20154,
+    SEAL_OF_RIGHTEOUSNESS_1         = 21084,
     SEAL_OF_VENGEANCE               = 31801,
     SEAL_OF_WISDOM_1                = 20166,
     SENSE_UNDEAD_1                  = 5502,
