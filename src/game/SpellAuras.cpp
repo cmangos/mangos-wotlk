@@ -8101,9 +8101,7 @@ void Aura::HandlePhase(bool apply, bool Real)
     else
         target->SetPhaseMask(apply ? GetMiscValue() : PHASEMASK_NORMAL, false);
 
-    // need triggering visibility update base at phase update of not GM invisible (other GMs anyway see in any phases)
-    if(target->GetVisibility() != VISIBILITY_OFF)
-        target->SetVisibility(target->GetVisibility());
+    target->UpdateVisibilityAndView();
 }
 
 void Aura::HandleAuraSafeFall( bool Apply, bool Real )
@@ -9003,6 +9001,8 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             // Barkskin
             if (GetId()==22812 && m_target->HasAura(63057)) // Glyph of Barkskin
                 spellId1 = 63058;                           // Glyph - Barkskin 01
+            else if (!apply && GetId() == 5229)             // Enrage (Druid Bear)
+                spellId1 = 51185;                           // King of the Jungle (Enrage damage aura)
             else
                 return;
             break;
