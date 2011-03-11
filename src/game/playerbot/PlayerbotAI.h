@@ -337,6 +337,7 @@ public:
     void QuestLocalization(std::string& questTitle, const uint32 questID) const;
 
     uint8 GetFreeBagSpace() const;
+    void Garbage(std::ostringstream &report, std::ostringstream &canSell, uint32 &TotalCost, uint32 &TotalSold);
 
 private:
     // ****** Closed Actions ********************************
@@ -348,6 +349,10 @@ private:
 
     // Helper routines not needed by class AIs.
     void UpdateAttackersForTarget(Unit *victim);
+
+    void _doSellItem(Item* const item, std::ostringstream &report, std::ostringstream &canSell, uint32 &TotalCost, uint32 &TotalSold);
+    void MakeItemLink(const Item *item, std::ostringstream &out, bool IncludeQuantity = true);
+    void MakeItemLink(const ItemPrototype *item, std::ostringstream &out);
 
     // it is safe to keep these back reference pointers because m_bot
     // owns the "this" object and m_master owns m_bot. The owner always cleans up.

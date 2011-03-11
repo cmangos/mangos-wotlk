@@ -3277,6 +3277,102 @@ void PlayerbotAI::MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out
     out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[loc] << "]|h|r";
 }
 
+// Builds a hlink for an item, but since its
+// only a ItemPrototype, we cant fill in everything
+void PlayerbotAI::MakeItemLink(const ItemPrototype *item, std::ostringstream &out)
+{
+    // Color
+    out << "|c";
+    switch(item->Quality)
+    {
+        case ITEM_QUALITY_POOR:     out << "ff9d9d9d"; break;  //GREY
+        case ITEM_QUALITY_NORMAL:   out << "ffffffff"; break;  //WHITE
+        case ITEM_QUALITY_UNCOMMON: out << "ff1eff00"; break;  //GREEN
+        case ITEM_QUALITY_RARE:     out << "ff0070dd"; break;  //BLUE
+        case ITEM_QUALITY_EPIC:     out << "ffa335ee"; break;  //PURPLE
+        case ITEM_QUALITY_LEGENDARY:out << "ffff8000"; break;  //ORANGE
+        case ITEM_QUALITY_ARTIFACT: out << "ffe6cc80"; break;  //LIGHT YELLOW
+        case ITEM_QUALITY_HEIRLOOM: out << "ffe6cc80"; break;  //LIGHT YELLOW
+        default:                    out << "ffff0000"; break;  //Don't know color, so red?
+    }
+    out << "|Hitem:";
+
+    // Item Id
+    out << item->ItemId << ":";
+
+    // Permanent enchantment, gems, 4 unknowns, and reporter_level
+    // ->new items wont have enchantments or gems so..
+    out << "0:0:0:0:0:0:0:0:0";
+
+    // Name
+    std::string name = item->Name1;
+    ItemLocalization(name, item->ItemId);
+    out << "|h[" << name << "]|h|r";
+}
+
+// Builds a hlink for an item, includes everything
+// |color|Hitem:item_id:perm_ench_id:gem1:gem2:gem3:0:0:0:0:reporter_level|h[name]|h|r
+void PlayerbotAI::MakeItemLink(const Item *item, std::ostringstream &out, bool IncludeQuantity /*= true*/)
+{
+    const ItemPrototype *proto = item->GetProto();
+    // Color
+    out << "|c";
+    switch(proto->Quality)
+    {
+        case ITEM_QUALITY_POOR:     out << "ff9d9d9d"; break;  //GREY
+        case ITEM_QUALITY_NORMAL:   out << "ffffffff"; break;  //WHITE
+        case ITEM_QUALITY_UNCOMMON: out << "ff1eff00"; break;  //GREEN
+        case ITEM_QUALITY_RARE:     out << "ff0070dd"; break;  //BLUE
+        case ITEM_QUALITY_EPIC:     out << "ffa335ee"; break;  //PURPLE
+        case ITEM_QUALITY_LEGENDARY:out << "ffff8000"; break;  //ORANGE
+        case ITEM_QUALITY_ARTIFACT: out << "ffe6cc80"; break;  //LIGHT YELLOW
+        case ITEM_QUALITY_HEIRLOOM: out << "ffe6cc80"; break;  //LIGHT YELLOW
+        default:                    out << "ffff0000"; break;  //Don't know color, so red?
+    }
+    out << "|Hitem:";
+
+    // Item Id
+    out << proto->ItemId << ":";
+
+    // Permanent enchantment
+    out << item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT) << ":";
+
+    // Gems
+    uint32 g1 = 0, g2 = 0, g3 = 0;
+    for(uint32 slot = SOCK_ENCHANTMENT_SLOT; slot < SOCK_ENCHANTMENT_SLOT+MAX_GEM_SOCKETS; ++slot)
+    {
+        uint32 eId = item->GetEnchantmentId(EnchantmentSlot(slot));
+        if (!eId) continue;
+
+        SpellItemEnchantmentEntry const* entry = sSpellItemEnchantmentStore.LookupEntry(eId);
+        if (!entry) continue;
+
+        switch(slot-SOCK_ENCHANTMENT_SLOT)
+        {
+            case 1: g1 = entry->GemID; break;
+            case 2: g2 = entry->GemID; break;
+            case 3: g3 = entry->GemID; break;
+        }
+    }
+    out << g1 << ":" << g2 << ":" << g3 << ":";
+
+    // Temp enchantment, Bonus Enchantment, Prismatic Enchantment?
+    // Other stuff, don't know what it is
+    out << "0:0:0:0:";
+
+    // Reporter Level
+    out << "0";
+
+    // Name
+    std::string name = proto->Name1;
+    ItemLocalization(name, proto->ItemId);
+    out << "|h[" << name << "]|h|r";
+
+    // Stacked items
+    if (item->GetCount() > 1 && IncludeQuantity)
+        out << "x" << item->GetCount() << ' ';
+}
+
 void PlayerbotAI::extractSpellId(const std::string& text, uint32 &spellId) const
 {
 
@@ -3769,6 +3865,71 @@ void PlayerbotAI::QuestLocalization(std::string& questTitle, const uint32 questI
             if (Utf8FitTo(title, wnamepart))
                 questTitle = title.c_str();
         }
+}
+
+// Helper function for automatically selling poor quality items to the vendor
+void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std::ostringstream &canSell, uint32 &TotalCost, uint32 &TotalSold)
+{
+    if (!item)
+        return;
+
+    if (item->CanBeTraded() && item->GetProto()->Quality == ITEM_QUALITY_POOR)
+    {
+        uint32 cost = item->GetCount() * item->GetProto()->SellPrice;
+        m_bot->ModifyMoney(cost);
+        m_bot->MoveItemFromInventory(item->GetBagSlot(), item->GetSlot(), true);
+        m_bot->AddItemToBuyBackSlot(item);
+
+        ++TotalSold;
+        TotalCost += cost;
+
+        report << "Sold ";
+        MakeItemLink(item, report);
+        report << " for ";
+
+        uint32 gold = uint32(cost / 10000);
+        cost -= (gold * 10000);
+        uint32 silver = uint32(cost / 100);
+        cost -= (silver * 100);
+
+        if (gold > 0)
+            report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+        if (silver > 0)
+            report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+        report << cost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\n";
+    }
+    else if (item->GetProto()->SellPrice > 0)
+    {
+        MakeItemLink(item, canSell, false);
+        canSell << "nothing to sell";
+    }
+}
+
+void PlayerbotAI::Garbage(std::ostringstream &report, std::ostringstream &canSell, uint32 &TotalCost, uint32 &TotalSold)
+{
+    // list out items in main backpack
+    for(uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
+    {
+        Item* const item = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if(item)
+            _doSellItem(item, report, canSell, TotalCost, TotalSold);
+    }
+
+    // and each of our other packs
+    for(uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
+    {
+        const Bag* const pBag = static_cast<Bag *>(m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag));
+        if (pBag)
+        {
+            for(uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
+            {
+                Item* const item = m_bot->GetItemByPos(bag, slot);
+                if(item)
+                    _doSellItem(item, report, canSell, TotalCost, TotalSold);
+            }
+        }
+    }
+    return;
 }
 
 // handle commands sent through chat channels

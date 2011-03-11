@@ -396,6 +396,59 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             }
             return;
         }
+        case CMSG_LIST_INVENTORY:
+        {
+            if (!botConfig.GetBoolDefault("PlayerbotAI.SellGarbage", true))
+                return;
+
+            WorldPacket p(packet);
+            p.rpos(0);  // reset reader
+            ObjectGuid npcGUID;
+            p >> npcGUID;
+
+            Object* const pNpc = (WorldObject*) m_master->GetObjectByTypeMask(npcGUID, TYPEMASK_CREATURE_OR_GAMEOBJECT);
+            if (!pNpc)
+                return;
+
+            // for all master's bots
+            for(PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+                Player* const bot = it->second;
+                if (!bot->IsInMap(static_cast<WorldObject *>(pNpc)))
+                {
+                    bot->GetPlayerbotAI()->TellMaster("I'm too far away to sell items!");
+                    continue;
+                }
+                else
+                {
+                    uint32 TotalCost = 0;
+                    uint32 TotalSold = 0;
+                    std::ostringstream report, canSell;
+                    canSell << "Items that are not trash and can be sold: ";
+
+                    bot->GetPlayerbotAI()->Garbage(report, canSell, TotalCost, TotalSold);
+
+                    if (TotalSold > 0)
+                    {
+                        report << "Sold total " << TotalSold << " item(s) for ";
+                        uint32 gold = uint32(TotalCost / 10000);
+                        TotalCost -= (gold * 10000);
+                        uint32 silver = uint32(TotalCost / 100);
+                        TotalCost -= (silver * 100);
+
+                        if (gold > 0)
+                            report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+                        if (silver > 0)
+                            report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+                        report << TotalCost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+
+                        bot->GetPlayerbotAI()->TellMaster(report.str());
+                    }
+                    bot->GetPlayerbotAI()->TellMaster(canSell.str());
+                }
+            }
+            return;
+        }
 
             /*
                case CMSG_NAME_QUERY:
