@@ -530,33 +530,39 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     {
                         case GOSSIP_OPTION_TAXIVENDOR:
                         {
-                            bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_TAXIVENDOR");
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_TAXIVENDOR");
                             bot->GetSession()->SendLearnNewTaxiNode(pCreature);
+                            break;
+                        }
+                        case GOSSIP_OPTION_QUESTGIVER:
+                        {
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_QUESTGIVER");
+                            bot->GetPlayerbotAI()->TurnInQuests(pCreature);		
                             break;
                         }
                         case GOSSIP_OPTION_VENDOR:
                         {
-                            bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_VENDOR");
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_VENDOR");
                             break;
                         }
                         case GOSSIP_OPTION_STABLEPET:
                         {
-                            bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_STABLEPET");
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_STABLEPET");
                             break;
                         }
                         case GOSSIP_OPTION_AUCTIONEER:
                         {
-                            bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_AUCTIONEER");
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_AUCTIONEER");
                             break;
                         }
                         case GOSSIP_OPTION_BANKER:
                         {
-                            bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_BANKER");
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_BANKER");
                             break;
                         }
                         case GOSSIP_OPTION_INNKEEPER:
                         {
-                            bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_INNKEEPER");
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_INNKEEPER");
                             break;
                         }
                     }
