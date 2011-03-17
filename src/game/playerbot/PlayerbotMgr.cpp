@@ -393,13 +393,11 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
         }
         break;
 
-        // if master talks to an NPC
-        case CMSG_GOSSIP_HELLO:
         case CMSG_QUESTGIVER_HELLO:
         {
             WorldPacket p(packet);
             p.rpos(0);    // reset reader
-            uint64 npcGUID;
+            ObjectGuid npcGUID;
             p >> npcGUID;
 
             WorldObject* pNpc = m_master->GetMap()->GetWorldObject(npcGUID);
@@ -421,9 +419,13 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
         {
             WorldPacket p(packet);
             p.rpos(0);    // reset reader
-            uint64 guid;
+            ObjectGuid guid;
             uint32 quest;
-            p >> guid >> quest;
+            uint32 unk1;
+            p >> guid >> quest >> unk1;
+
+            DEBUG_LOG("PlayerbotMgr: Received CMSG_QUESTGIVER_ACCEPT_QUEST npc = %s, quest = %u, unk1 = %u", guid.GetString().c_str(), quest, unk1 );
+
             Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest);
             if (qInfo)
                 for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
@@ -493,6 +495,76 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             }
             return;
         }
+        // Handle GOSSIP activate actions, prior to GOSSIP select menu actions
+        case CMSG_GOSSIP_HELLO:
+        {
+            DEBUG_LOG("PlayerbotMgr: Received CMSG_GOSSIP_HELLO");
+
+            WorldPacket p(packet);    //WorldPacket packet for CMSG_GOSSIP_HELLO, (8)
+            ObjectGuid guid;
+            p.rpos(0);                //reset packet pointer
+            p >> guid;
+
+            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+                Player* const bot = it->second;
+                if (!bot)
+                    return;
+
+                Creature *pCreature = bot->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
+                if (!pCreature)
+                {
+                    DEBUG_LOG("PlayerbotMgr: HandleGossipHelloOpcode - %s not found or you can't interact with him.", guid.GetString().c_str());
+                    return;
+                }
+
+                GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(pCreature->GetCreatureInfo()->GossipMenuId);
+                for(GossipMenuItemsMap::const_iterator itr = pMenuItemBounds.first; itr != pMenuItemBounds.second; ++itr)
+                {
+                    uint32 npcflags = pCreature->GetUInt32Value(UNIT_NPC_FLAGS);
+
+                    if (!(itr->second.npc_option_npcflag & npcflags))
+                        continue;
+
+                    switch(itr->second.option_id)
+                    {
+                        case GOSSIP_OPTION_TAXIVENDOR:
+                        {
+                            bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_TAXIVENDOR");
+                            bot->GetSession()->SendLearnNewTaxiNode(pCreature);
+                            break;
+                        }
+                        case GOSSIP_OPTION_VENDOR:
+                        {
+                            bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_VENDOR");
+                            break;
+                        }
+                        case GOSSIP_OPTION_STABLEPET:
+                        {
+                            bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_STABLEPET");
+                            break;
+                        }
+                        case GOSSIP_OPTION_AUCTIONEER:
+                        {
+                            bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_AUCTIONEER");
+                            break;
+                        }
+                        case GOSSIP_OPTION_BANKER:
+                        {
+                            bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_BANKER");
+                            break;
+                        }
+                        case GOSSIP_OPTION_INNKEEPER:
+                        {
+                            bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_INNKEEPER");
+                            break;
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
         case CMSG_REPAIR_ITEM:
         {
 
@@ -768,7 +840,7 @@ void PlayerbotAI::GetTaxi(ObjectGuid guid, std::vector<uint32>& nodes)
       }
 
       if(m_bot->m_taxi.IsTaximaskNodeKnown(nodes[0]) ? 0 : 1)
-          m_bot->GetSession()->SendLearnNewTaxiNode(unit);
+          return;
 
       if(m_bot->m_taxi.IsTaximaskNodeKnown(nodes[nodes.size()-1]) ? 0 : 1)
           return;
