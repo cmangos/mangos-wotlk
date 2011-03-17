@@ -956,16 +956,16 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
         case SMSG_LOOT_RESPONSE:
         {
-            WorldPacket p(packet);
+            WorldPacket p(packet); // (8+1+4+1+1+4+4+4+4+4+1)
             ObjectGuid guid;
             uint8 loot_type;
             uint32 gold;
             uint8 items;
 
-            p >> guid;
-            p >> loot_type;
-            p >> gold;
-            p >> items;
+            p >> guid;      // 8 corpse guid
+            p >> loot_type; // 1 loot type
+            p >> gold;      // 4 money on corpse
+            p >> items;     // 1 number of items on corpse
 
             if (gold > 0)
             {
@@ -976,9 +976,23 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             if (loot_type == LOOT_SKINNING || HasCollectFlag(COLLECT_FLAG_LOOT))
                 for (uint8 i = 0; i < items; ++i)
                 {
+                    uint32 itemid;
+                    uint32 itemcount;
+                    uint8 lootslot_type;
+                    uint8 itemindex;
+
+                    p >> itemindex;         // 1 counter
+                    p >> itemid;            // 4 itemid
+                    p >> itemcount;         // 4 item stack count
+                    p.read_skip<uint32>();  // 4 item model
+                    p.read_skip<uint32>();  // 4 randomSuffix
+                    p.read_skip<uint32>();  // 4 randomPropertyId
+                    p >> lootslot_type;     // 1 slot 0 = can get, 1 = look only, 2 = master get
+                    // TellMaster("[%s]: loots : (%u) itemindex : (%u)",m_bot->GetName(), itemid, itemindex);
+
                     // just auto loot everything for getting object
                     WorldPacket* const packet = new WorldPacket(CMSG_AUTOSTORE_LOOT_ITEM, 1);
-                    *packet << i;
+                    *packet << itemindex;
                     m_bot->GetSession()->QueuePacket(packet);
                 }
             else if (loot_type == LOOT_CORPSE)  // loot from a creature
