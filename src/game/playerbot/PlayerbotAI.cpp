@@ -3463,6 +3463,9 @@ void PlayerbotAI::findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<
             if (pItem->GetProto()->ItemId != *it)
                 continue;
 
+            if (m_bot->GetTrader() && m_bot->GetTradeData()->HasItem(pItem->GetObjectGuid()))
+                continue;
+
             foundItemList.push_back(pItem);
             itemIdSearchList.erase(it);
             break;
@@ -3485,6 +3488,9 @@ void PlayerbotAI::findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<
             for (std::list<uint32>::iterator it = itemIdSearchList.begin(); it != itemIdSearchList.end(); ++it)
             {
                 if (pItem->GetProto()->ItemId != *it)
+                    continue;
+
+                if (m_bot->GetTrader() && m_bot->GetTradeData()->HasItem(pItem->GetObjectGuid()))
                     continue;
 
                 foundItemList.push_back(pItem);
