@@ -805,6 +805,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 // list out items available for trade
                 std::ostringstream out;
 
+                out << "In my main backpack:";
                 // list out items in main backpack
                 for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
                 {
@@ -819,14 +820,25 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         out << " |cffffffff|Hitem:" << pItemProto->ItemId
                             << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
                         if (pItem->GetCount() > 1)
-                            out << "x" << pItem->GetCount() << ' ';
+                            out << "x" << pItem->GetCount();
                     }
                 }
+                ChatHandler ch(m_bot->GetTrader());
+                ch.SendSysMessage(out.str().c_str());
+
                 // list out items in other removable backpacks
                 for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
                 {
                     const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
                     if (pBag)
+                    {
+                        std::ostringstream outbag;
+                        outbag << "In my ";
+                        const ItemPrototype* const pBagProto = pBag->GetProto();
+                        std::string bagName = pBagProto->Name1;
+                        ItemLocalization(bagName, pBagProto->ItemId);
+                        outbag << bagName << ":";
+
                         for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
                         {
                             const Item* const pItem = m_bot->GetItemByPos(bag, slot);
@@ -839,13 +851,15 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
                                 // item link format: http://www.wowwiki.com/ItemString
                                 // itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId
-                                out << " |cffffffff|Hitem:" << pItemProto->ItemId
+                                outbag << " |cffffffff|Hitem:" << pItemProto->ItemId
                                     << ":0:0:0:0:0:0:0" << "|h[" << itemName
                                     << "]|h|r";
                                 if (pItem->GetCount() > 1)
-                                    out << "x" << pItem->GetCount() << ' ';
+                                    outbag << "x" << pItem->GetCount();
                             }
                         }
+                        ch.SendSysMessage(outbag.str().c_str());
+                    }
                 }
 
                 // calculate how much money bot has
@@ -860,10 +874,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 whisper << "I have |cff00ff00" << gold
                         << "|r|cfffffc00g|r|cff00ff00" << silver
                         << "|r|cffcdcdcds|r|cff00ff00" << copper
-                        << "|r|cffffd333c|r" << " and the following items:";
+                        << "|r|cffffd333c|r";
                 SendWhisper(whisper.str().c_str(), *(m_bot->GetTrader()));
-                ChatHandler ch(m_bot->GetTrader());
-                ch.SendSysMessage(out.str().c_str());
             }
             return;
         }
