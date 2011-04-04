@@ -852,8 +852,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                                 // item link format: http://www.wowwiki.com/ItemString
                                 // itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId
                                 outbag << " |cffffffff|Hitem:" << pItemProto->ItemId
-                                    << ":0:0:0:0:0:0:0" << "|h[" << itemName
-                                    << "]|h|r";
+                                       << ":0:0:0:0:0:0:0" << "|h[" << itemName
+                                       << "]|h|r";
                                 if (pItem->GetCount() > 1)
                                     outbag << "x" << pItem->GetCount();
                             }
@@ -1803,7 +1803,7 @@ void PlayerbotAI::DoCombatMovement()
     float targetDist = m_bot->GetDistance(m_targetCombat);
 
     // if m_bot has it's back to the attacker, turn
-    if(!m_bot->HasInArc(M_PI_F,m_targetCombat))
+    if (!m_bot->HasInArc(M_PI_F, m_targetCombat))
     {
         // TellMaster("%s is facing the wrong way!", m_bot->GetName());
         m_bot->GetMotionMaster()->Clear(true);
@@ -1917,7 +1917,7 @@ void PlayerbotAI::DoLoot()
 
         if (go)
             m_bot->GetMotionMaster()->MovePoint(go->GetMapId(), go->GetPositionX(), go->GetPositionY(), go->GetPositionZ());
-            //sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s'", m_bot->GetName(), go->GetGOInfo()->name);
+        //sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s'", m_bot->GetName(), go->GetGOInfo()->name);
 
         // TEMP HACK: attempt to fix duplicate loot attempt (shows when getting ores occasionally)
         // give time to move to point before trying again
@@ -2458,7 +2458,7 @@ uint32 PlayerbotAI::EstRepair(uint16 pos)
     return TotalCost;
 }
 
-Unit *PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
+Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
 {
     // list empty? why are we here?
     if (m_attackerInfo.empty())
