@@ -1779,7 +1779,7 @@ void PlayerbotAI::DoCombatMovement()
     float targetDist = m_bot->GetDistance(m_targetCombat);
 
     // if m_bot has it's back to the attacker, turn
-    if(!m_bot->HasInArc(M_PI_F,m_targetCombat))
+    if (!m_bot->HasInArc(M_PI_F, m_targetCombat))
     {
         // TellMaster("%s is facing the wrong way!", m_bot->GetName());
         m_bot->GetMotionMaster()->Clear(true);
@@ -1853,12 +1853,12 @@ uint8 PlayerbotAI::GetFreeBagSpace() const
 
 void PlayerbotAI::DoFlight()
 {
-    DEBUG_LOG("DoFlight %s : %s",m_bot->GetName(),m_taxiMaster.GetString().c_str());
+    DEBUG_LOG("DoFlight %s : %s", m_bot->GetName(), m_taxiMaster.GetString().c_str());
 
     Creature *npc = m_bot->GetNPCIfCanInteractWith(m_taxiMaster, UNIT_NPC_FLAG_FLIGHTMASTER);
     if (!npc)
     {
-        DEBUG_LOG("WORLD: HandleActivateTaxiOpcode - %s not found or you can't interact with it.", m_taxiMaster.GetString().c_str());
+        DEBUG_LOG("PlayerbotAI: DoFlight - %s not found or you can't interact with it.", m_taxiMaster.GetString().c_str());
         return;
     }
 
@@ -1907,7 +1907,7 @@ void PlayerbotAI::DoLoot()
 
         if (go)
             m_bot->GetMotionMaster()->MovePoint(go->GetMapId(), go->GetPositionX(), go->GetPositionY(), go->GetPositionZ());
-            //sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s'", m_bot->GetName(), go->GetGOInfo()->name);
+        //sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s'", m_bot->GetName(), go->GetGOInfo()->name);
 
         // TEMP HACK: attempt to fix duplicate loot attempt (shows when getting ores occasionally)
         // give time to move to point before trying again
@@ -2749,11 +2749,11 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
             DoLoot();
             SetIgnoreUpdateTime();
         }
-        else if(m_botState == BOTSTATE_FLYING)
+        else if (m_botState == BOTSTATE_FLYING)
         {
             /* std::ostringstream out;
-            out << "Taxi: " << m_bot->GetName() << m_ignoreAIUpdatesUntilTime;
-            TellMaster(out.str().c_str()); */
+               out << "Taxi: " << m_bot->GetName() << m_ignoreAIUpdatesUntilTime;
+               TellMaster(out.str().c_str()); */
             DoFlight();
             SetState(BOTSTATE_NORMAL);
             SetIgnoreUpdateTime();
@@ -3794,6 +3794,31 @@ void PlayerbotAI::QuestLocalization(std::string& questTitle, const uint32 questI
             if (Utf8FitTo(title, wnamepart))
                 questTitle = title.c_str();
         }
+}
+
+void PlayerbotAI::GetTaxi(ObjectGuid guid, BotTaxiNode& nodes)
+{
+    DEBUG_LOG("PlayerbotAI: GetTaxi %s node[0] %d node[1] %d", m_bot->GetName(), nodes[0], nodes[1]);
+
+    Creature *unit = m_bot->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_FLIGHTMASTER);
+    if (!unit)
+    {
+        DEBUG_LOG("PlayerbotAI: GetTaxi - %s not found or you can't interact with it.", guid.GetString().c_str());
+        return;
+    }
+
+    if (m_bot->m_taxi.IsTaximaskNodeKnown(nodes[0]) ? 0 : 1)
+        return;
+
+    if (m_bot->m_taxi.IsTaximaskNodeKnown(nodes[nodes.size() - 1]) ? 0 : 1)
+        return;
+
+    if (m_bot->GetPlayerbotAI()->GetMovementOrder() != MOVEMENT_STAY)
+    {
+        m_taxiNodes = nodes;
+        m_taxiMaster = guid;
+        SetState(BOTSTATE_FLYING);
+    }
 }
 
 // handle commands sent through chat channels

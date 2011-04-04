@@ -118,8 +118,8 @@ public:
         BOTSTATE_COMBAT,            // bot is in combat
         BOTSTATE_DEAD,              // we are dead and wait for becoming ghost
         BOTSTATE_DEADRELEASED,      // we released as ghost and wait to revive
-        BOTSTATE_LOOTING,            // looting mode, used just after combat
-        BOTSTATE_FLYING              // bot is flying
+        BOTSTATE_LOOTING,           // looting mode, used just after combat
+        BOTSTATE_FLYING             // bot is flying
     };
 
     enum CollectionFlags
@@ -307,7 +307,7 @@ public:
     bool FollowCheckTeleport(WorldObject &obj);
     void DoLoot();
     void DoFlight();
-    void GetTaxi(ObjectGuid guid, std::vector<uint32>& nodes);
+    void GetTaxi(ObjectGuid guid, BotTaxiNode& nodes);
 
     bool HasCollectFlag(uint8 flag) { return m_collectionFlags & flag; }
     void SetCollectFlag(uint8 flag)
