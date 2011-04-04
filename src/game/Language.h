@@ -366,7 +366,31 @@ enum MangosStrings
     LANG_COMMAND_TICKETRESPONSE         = 373,
     LANG_COMMAND_TICKETCOUNT_CONSOLE    = 374,
     LANG_COMMAND_TICKETNOTEXIST_NAME    = 375,
-    // Room for more level 2              376-399 not used
+    LANG_POOL_ENTRY_LIST_CHAT           = 376,
+    LANG_NO_POOL_FOR_MAP                = 377,
+    LANG_POOL_LIST_NON_INSTANCE         = 378,
+    LANG_POOL_SPAWNS_NON_INSTANCE       = 379,
+    LANG_POOL_CHANCE_CREATURE_LIST_CHAT = 380,
+    LANG_POOL_CHANCE_CREATURE_LIST_CONSOLE = 381,
+    LANG_POOL_CREATURE_LIST_CHAT        = 382,
+    LANG_POOL_CREATURE_LIST_CONSOLE     = 383,
+    LANG_POOL_CHANCE_GO_LIST_CHAT       = 384,
+    LANG_POOL_CHANCE_GO_LIST_CONSOLE    = 385,
+    LANG_POOL_GO_LIST_CHAT              = 386,
+    LANG_POOL_GO_LIST_CONSOLE           = 387,
+    LANG_POOL_CHANCE_CREATURE_LIST_HEADER = 388,
+    LANG_POOL_CREATURE_LIST_HEADER      = 389,
+    LANG_POOL_CHANCE_GO_LIST_HEADER     = 390,
+    LANG_POOL_GO_LIST_HEADER            = 391,
+    LANG_POOL_INFO_HEADER_CHAT          = 392,
+    LANG_POOL_INFO_HEADER_CONSOLE       = 393,
+    LANG_POOL_INFO_HEADER               = 394,
+    LANG_NO_POOL                        = 395,
+    LANG_POOL_ENTRY_LIST_CONSOLE        = 396,
+    LANG_POOL_CHANCE_POOL_LIST_HEADER   = 397,
+    LANG_POOL_POOL_LIST_HEADER          = 398,
+    LANG_POOL_CHANCE_POOL_LIST_CHAT     = 399,
+    // End Level 2 list, continued at 1500
 
     // level 3 chat
     LANG_SCRIPTS_RELOADED_ANNOUNCE      = 400,
@@ -896,13 +920,25 @@ enum MangosStrings
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
     LANG_MOVIE_NOT_EXIST                = 1201,
-    // Room for more debug                1202-1299 not used
+    LANG_SPELLCOEFS                     = 1202,
+    LANG_DIRECT_HEAL                    = 1203,
+    LANG_DIRECT_DAMAGE                  = 1204,
+    LANG_DOT_HEAL                       = 1205,
+    LANG_DOT_DAMAGE                     = 1206,
+    // Room for more debug                1207-1299 not used
 
     // Reserved for old client release branches specific strings
     // Room for old clients 2.x           1300-1399 not used
     // Room for old clients 1.x           1400-1499 not used
 
-    // FREE IDS                           1500-9999
+    // Level 2 (continue)
+    LANG_POOL_CHANCE_POOL_LIST_CONSOLE  = 1500,
+    LANG_POOL_POOL_LIST_CHAT            = 1501,
+    LANG_POOL_POOL_LIST_CONSOLE         = 1502,
+    LANG_NO_FREE_STATIC_GUID_FOR_SPAWN  = 1503,
+    // Room for more Level 2              1504-1599 not used
+
+    // FREE IDS                           1600-9999
 
     // Use for not-in-offcial-sources patches
     //                                    10000-10999

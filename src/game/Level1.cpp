@@ -30,7 +30,7 @@
 #include "ObjectAccessor.h"
 #include "Language.h"
 #include "CellImpl.h"
-#include "InstanceSaveMgr.h"
+#include "MapPersistentStateMgr.h"
 #include "Mail.h"
 #include "Util.h"
 #ifdef _DEBUG_VMAPS
@@ -553,14 +553,13 @@ bool ChatHandler::HandleGonameCommand(char* args)
                 // if no bind exists, create a solo bind
                 if (!gBind)
                 {
-                    if (InstanceSave *save = target->GetMap()->GetInstanceSave())
-                    {
-                        // if player is group leader then we need add group bind
-                        if (group && group->IsLeader(_player->GetObjectGuid()))
-                            group->BindToInstance(save, !save->CanReset());
-                        else
-                            _player->BindToInstance(save, !save->CanReset());
-                    }
+                    DungeonPersistentState *save = ((DungeonMap*)target->GetMap())->GetPersistanceState();
+
+                    // if player is group leader then we need add group bind
+                    if (group && group->IsLeader(_player->GetObjectGuid()))
+                        group->BindToInstance(save, !save->CanReset());
+                    else
+                        _player->BindToInstance(save, !save->CanReset());
                 }
             }
 
@@ -2238,6 +2237,20 @@ bool ChatHandler::HandleModifyDrunkCommand(char* args)
     uint16 drunkMod = drunklevel * 0xFFFF / 100;
 
     m_session->GetPlayer()->SetDrunkValue(drunkMod);
+
+    return true;
+}
+
+bool ChatHandler::HandleSetViewCommand(char* /*args*/)
+{
+    if (Unit* unit = getSelectedUnit())
+        m_session->GetPlayer()->GetCamera().SetView(unit);
+    else
+    {
+        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     return true;
 }
