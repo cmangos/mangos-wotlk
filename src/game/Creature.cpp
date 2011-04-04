@@ -118,6 +118,35 @@ bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     return true;
 }
 
+void CreatureCreatePos::SelectFinalPoint(Creature* cr)
+{
+    // if object provided then selected point at specific dist/angle from object forward look
+    if (m_closeObject)
+    {
+        if (m_dist == 0.0f)
+        {
+            m_pos.x = m_closeObject->GetPositionX();
+            m_pos.y = m_closeObject->GetPositionY();
+            m_pos.z = m_closeObject->GetPositionZ();
+        }
+        else
+            m_closeObject->GetClosePoint(m_pos.x, m_pos.y, m_pos.z, cr->GetObjectBoundingRadius(), m_dist, m_angle);
+    }
+}
+
+bool CreatureCreatePos::Relocate(Creature* cr) const
+{
+    cr->Relocate(m_pos.x, m_pos.y, m_pos.z, m_pos.o);
+
+    if (!cr->IsPositionValid())
+    {
+        sLog.outError("%s not created. Suggested coordinates isn't valid (X: %f Y: %f)", cr->GetGuidStr().c_str(), cr->GetPositionX(), cr->GetPositionY());
+        return false;
+    }
+
+    return true;
+}
+
 Creature::Creature(CreatureSubtype subtype) :
 Unit(), i_AI(NULL),
 lootForPickPocketed(false), lootForBody(false), lootForSkin(false), m_groupLootTimer(0), m_groupLootId(0),
@@ -699,45 +728,47 @@ bool Creature::AIM_Initialize()
     return true;
 }
 
-bool Creature::Create(uint32 guidlow, Map *map, uint32 phaseMask, uint32 Entry, Team team /*= TEAM_NONE*/, const CreatureData *data /*= NULL*/, GameEventCreatureData const* eventData /*= NULL*/)
+bool Creature::Create(uint32 guidlow, CreatureCreatePos& cPos, uint32 Entry, Team team /*= TEAM_NONE*/, const CreatureData *data /*= NULL*/, GameEventCreatureData const* eventData /*= NULL*/)
 {
-    MANGOS_ASSERT(map);
-    SetMap(map);
-    SetPhaseMask(phaseMask,false);
+    SetMap(cPos.GetMap());
+    SetPhaseMask(cPos.GetPhaseMask(), false);
 
-    //oX = x;     oY = y;    dX = x;    dY = y;    m_moveTime = 0;    m_startMove = 0;
-    const bool bResult = CreateFromProto(guidlow, Entry, team, data, eventData);
+    if (!CreateFromProto(guidlow, Entry, team, data, eventData))
+        return false;
 
-    if (bResult)
+    cPos.SelectFinalPoint(this);
+
+    if (!cPos.Relocate(this))
+        return false;
+
+    //Notify the map's instance data.
+    //Only works if you create the object in it, not if it is moves to that map.
+    //Normally non-players do not teleport to other maps.
+    if (InstanceData* iData = GetMap()->GetInstanceData())
+        iData->OnCreatureCreate(this);
+
+    switch (GetCreatureInfo()->rank)
     {
-        //Notify the map's instance data.
-        //Only works if you create the object in it, not if it is moves to that map.
-        //Normally non-players do not teleport to other maps.
-        if (InstanceData* iData = map->GetInstanceData())
-            iData->OnCreatureCreate(this);
-
-        switch (GetCreatureInfo()->rank)
-        {
-            case CREATURE_ELITE_RARE:
-                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_RARE);
-                break;
-            case CREATURE_ELITE_ELITE:
-                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_ELITE);
-                break;
-            case CREATURE_ELITE_RAREELITE:
-                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_RAREELITE);
-                break;
-            case CREATURE_ELITE_WORLDBOSS:
-                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_WORLDBOSS);
-                break;
-            default:
-                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_NORMAL);
-                break;
-        }
-        LoadCreatureAddon();
+        case CREATURE_ELITE_RARE:
+            m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_RARE);
+            break;
+        case CREATURE_ELITE_ELITE:
+            m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_ELITE);
+            break;
+        case CREATURE_ELITE_RAREELITE:
+            m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_RAREELITE);
+            break;
+        case CREATURE_ELITE_WORLDBOSS:
+            m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_WORLDBOSS);
+            break;
+        default:
+            m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_NORMAL);
+            break;
     }
 
-    return bResult;
+    LoadCreatureAddon();
+
+    return true;
 }
 
 bool Creature::IsTrainerOf(Player* pPlayer, bool msg) const
@@ -798,6 +829,13 @@ bool Creature::IsTrainerOf(Player* pPlayer, bool msg) const
         case TRAINER_TYPE_MOUNTS:
             if (GetCreatureInfo()->trainer_race && pPlayer->getRace() != GetCreatureInfo()->trainer_race)
             {
+                // Allowed to train if exalted
+                if (FactionTemplateEntry const* faction_template = getFactionTemplateEntry())
+                {
+                    if (pPlayer->GetReputationRank(faction_template->faction) == REP_EXALTED)
+                        return true;
+                }
+
                 if (msg)
                 {
                     pPlayer->PlayerTalkClass->ClearMenus();
@@ -1230,16 +1268,10 @@ bool Creature::LoadFromDB(uint32 guidlow, Map *map)
     if (map->GetCreature(ObjectGuid(HIGHGUID_UNIT, data->id, guidlow)))
         return false;
 
-    if (!Create(guidlow, map, data->phaseMask, data->id, TEAM_NONE, data, eventData))
-        return false;
+    CreatureCreatePos pos(map, data->posX, data->posY, data->posZ, data->orientation, data->phaseMask);
 
-    Relocate(data->posX, data->posY, data->posZ, data->orientation);
-
-    if(!IsPositionValid())
-    {
-        sLog.outError("Creature (guidlow %d, entry %d) not loaded. Suggested coordinates isn't valid (X: %f Y: %f)", GetGUIDLow(), GetEntry(), GetPositionX(), GetPositionY());
+    if (!Create(guidlow, pos, data->id, TEAM_NONE, data, eventData))
         return false;
-    }
 
     m_respawnradius = data->spawndist;
 
@@ -1292,8 +1324,8 @@ void Creature::LoadEquipment(uint32 equip_entry, bool force)
     {
         if (force)
         {
-            for (uint8 i = 0; i < 3; ++i)
-                SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + i, 0);
+            for (uint8 i = 0; i < MAX_VIRTUAL_ITEM_SLOT; ++i)
+                SetVirtualItem(VirtualItemSlot(i), 0);
             m_equipmentId = 0;
         }
         return;
@@ -1304,8 +1336,8 @@ void Creature::LoadEquipment(uint32 equip_entry, bool force)
         return;
 
     m_equipmentId = equip_entry;
-    for (uint8 i = 0; i < 3; ++i)
-        SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + i, einfo->equipentry[i]);
+    for (uint8 i = 0; i < MAX_VIRTUAL_ITEM_SLOT; ++i)
+        SetVirtualItem(VirtualItemSlot(i), einfo->equipentry[i]);
 }
 
 bool Creature::HasQuest(uint32 quest_id) const
@@ -1839,7 +1871,7 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     float ThreatRadius = sWorld.getConfig(CONFIG_FLOAT_THREAT_RADIUS);
 
     //Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and out of combat every update tick.
-    return !pVictim->IsWithinDist3d(CombatStartX, CombatStartY, CombatStartZ,
+    return !pVictim->IsWithinDist3d(m_combatStartX, m_combatStartY, m_combatStartZ,
         ThreatRadius > AttackDist ? ThreatRadius : AttackDist);
 }
 
@@ -1907,37 +1939,15 @@ bool Creature::LoadCreatureAddon(bool reload)
                 continue;
             }
 
-            // skip already applied aura
-            if(HasAura(cAura->spell_id,cAura->effect_idx))
+            if (HasAura(cAura->spell_id))
             {
                 if(!reload)
-                    sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has duplicate aura (spell %u effect %u) in `auras` field.",GetGUIDLow(),GetEntry(),cAura->spell_id,cAura->effect_idx);
+                    sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u) has duplicate spell %u in `auras` field.", GetGUIDLow(), GetEntry(), cAura->spell_id);
 
                 continue;
             }
 
-            SpellAuraHolder *holder = GetSpellAuraHolder(cAura->spell_id, GetGUID());
-
-            bool addedToExisting = true;
-            if (!holder)
-            {
-                holder = CreateSpellAuraHolder(AdditionalSpellInfo, this, this);
-                addedToExisting = false;
-            }
-            Aura* AdditionalAura = CreateAura(AdditionalSpellInfo, cAura->effect_idx, NULL, holder, this, this, 0);
-            holder->AddAura(AdditionalAura, cAura->effect_idx);
-
-            if (addedToExisting)
-            {
-                AddAuraToModList(AdditionalAura);
-                holder->SetInUse(true);
-                AdditionalAura->ApplyModifier(true,true);
-                holder->SetInUse(false);
-            }
-            else
-                AddSpellAuraHolder(holder);
-
-            DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell: %u - Aura %u added to creature (GUIDLow: %u Entry: %u )", cAura->spell_id, AdditionalSpellInfo->EffectApplyAuraName[EFFECT_INDEX_0],GetGUIDLow(),GetEntry());
+            CastSpell(this, AdditionalSpellInfo, true);
         }
     }
     return true;

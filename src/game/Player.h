@@ -1586,7 +1586,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         ObjectGuid const& GetSelectionGuid( ) const { return m_curSelectionGuid; }
         void SetSelectionGuid(ObjectGuid guid) { m_curSelectionGuid = guid; SetTargetGuid(guid); }
 
-        uint8 GetComboPoints() { return m_comboPoints; }
+        uint8 GetComboPoints() const { return m_comboPoints; }
         ObjectGuid const& GetComboTargetGuid() const { return m_comboTargetGuid; }
 
         void AddComboPoints(Unit* target, int8 count);
@@ -1753,14 +1753,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool isRessurectRequested() const { return !m_resurrectGuid.IsEmpty(); }
         void ResurectUsingRequestData();
 
-        int getCinematic()
-        {
-            return m_cinematic;
-        }
-        void setCinematic(int cine)
-        {
-            m_cinematic = cine;
-        }
+        uint32 getCinematic() { return m_cinematic; }
+        void setCinematic(uint32 cine) { m_cinematic = cine; }
 
         static bool IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Player* player, bool msg = true);
         ActionButton* addActionButton(uint8 spec, uint8 button, uint32 action, uint8 type);
@@ -2586,7 +2580,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         typedef std::list<Channel*> JoinedChannelsList;
         JoinedChannelsList m_channels;
 
-        int m_cinematic;
+        uint32 m_cinematic;
 
         TradeData* m_trade;
 

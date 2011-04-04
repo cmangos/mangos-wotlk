@@ -735,7 +735,7 @@ enum SpellEffects
     SPELL_EFFECT_TALENT_SPEC_COUNT         = 161,
     SPELL_EFFECT_TALENT_SPEC_SELECT        = 162,
     SPELL_EFFECT_163                       = 163,
-    SPELL_EFFECT_164                       = 164,
+    SPELL_EFFECT_CANCEL_AURA               = 164,
     TOTAL_SPELL_EFFECTS                    = 165
 };
 
@@ -1248,8 +1248,6 @@ enum GameobjectTypes
 };
 
 #define MAX_GAMEOBJECT_TYPE                  36             // sending to client this or greater value can crash client.
-
-#define GAMEOBJECT_FISHINGNODE_ENTRY        35591           // Better to define it somewhere instead of hardcoding everywhere
 
 enum GameObjectFlags
 {

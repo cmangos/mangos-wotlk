@@ -141,8 +141,8 @@ template uint32 IdGenerator<uint32>::Generate();
 template uint64 IdGenerator<uint64>::Generate();
 
 ObjectMgr::ObjectMgr() :
-    m_CreatureFirstGuid(1),
-    m_GameObjectFirstGuid(1),
+    m_FirstTemporaryCreatureGuid(1),
+    m_FirstTemporaryGameObjectGuid(1),
 
     m_ArenaTeamIds("Arena team ids"),
     m_AuctionIds("Auction ids"),
@@ -753,7 +753,7 @@ void ObjectMgr::LoadCreatureTemplates()
 
 void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* table, char const* guidEntryStr)
 {
-    // Now add the auras, format "spellid effectindex spellid effectindex..."
+    // Now add the auras, format "spell1 spell2 ..."
     char *p,*s;
     std::vector<int> val;
     s=p=(char*)reinterpret_cast<char const*>(addon->auras);
@@ -773,14 +773,6 @@ void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* 
 
         // free char* loaded memory
         delete[] (char*)reinterpret_cast<char const*>(addon->auras);
-
-        // wrong list
-        if (val.size()%2)
-        {
-            addon->auras = NULL;
-            sLog.outErrorDb("Creature (%s: %u) has wrong `auras` data in `%s`.",guidEntryStr,addon->guidOrEntry,table);
-            return;
-        }
     }
 
     // empty list
@@ -791,29 +783,18 @@ void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* 
     }
 
     // replace by new structures array
-    const_cast<CreatureDataAddonAura*&>(addon->auras) = new CreatureDataAddonAura[val.size()/2+1];
+    const_cast<CreatureDataAddonAura*&>(addon->auras) = new CreatureDataAddonAura[val.size()+1];
 
-    uint32 i=0;
-    for(uint32 j = 0; j < val.size()/2; ++j)
+    uint32 i = 0;
+    for(uint32 j = 0; j < val.size(); ++j)
     {
         CreatureDataAddonAura& cAura = const_cast<CreatureDataAddonAura&>(addon->auras[i]);
-        cAura.spell_id = uint32(val[2*j+0]);
-        cAura.effect_idx  = SpellEffectIndex(val[2*j+1]);
-        if (cAura.effect_idx >= MAX_EFFECT_INDEX)
-        {
-            sLog.outErrorDb("Creature (%s: %u) has wrong effect %u for spell %u in `auras` field in `%s`.",guidEntryStr,addon->guidOrEntry,cAura.effect_idx,cAura.spell_id,table);
-            continue;
-        }
+        cAura.spell_id = uint32(val[j]);
+
         SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(cAura.spell_id);
         if (!AdditionalSpellInfo)
         {
             sLog.outErrorDb("Creature (%s: %u) has wrong spell %u defined in `auras` field in `%s`.",guidEntryStr,addon->guidOrEntry,cAura.spell_id,table);
-            continue;
-        }
-
-        if (!AdditionalSpellInfo->Effect[cAura.effect_idx] || !AdditionalSpellInfo->EffectApplyAuraName[cAura.effect_idx])
-        {
-            sLog.outErrorDb("Creature (%s: %u) has not aura effect %u of spell %u defined in `auras` field in `%s`.",guidEntryStr,addon->guidOrEntry,cAura.effect_idx,cAura.spell_id,table);
             continue;
         }
 
@@ -822,8 +803,7 @@ void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* 
 
     // fill terminator element (after last added)
     CreatureDataAddonAura& endAura = const_cast<CreatureDataAddonAura&>(addon->auras[i]);
-    endAura.spell_id   = 0;
-    endAura.effect_idx = EFFECT_INDEX_0;
+    endAura.spell_id = 0;
 }
 
 void ObjectMgr::LoadCreatureAddons(SQLStorage& creatureaddons, char const* entryName, char const* comment)
@@ -2384,7 +2364,7 @@ void ObjectMgr::LoadItemPrototypes()
 
 void ObjectMgr::LoadItemConverts()
 {
-    m_ItemRequiredTarget.clear();                           // needed for reload case
+    m_ItemConvert.clear();                                  // needed for reload case
 
     uint32 count = 0;
 
@@ -4103,7 +4083,8 @@ void ObjectMgr::LoadQuests()
             }
         }
 
-        for(int j = 0; j < QUEST_REWARD_CHOICES_COUNT; ++j )
+        bool choice_found = false;
+        for(int j = QUEST_REWARD_CHOICES_COUNT-1; j >=0; --j )
         {
             if (uint32 id = qinfo->RewChoiceItemId[j])
             {
@@ -4113,6 +4094,8 @@ void ObjectMgr::LoadQuests()
                         qinfo->GetQuestId(),j+1,id,id);
                     qinfo->RewChoiceItemId[j] = 0;          // no changes, quest will not reward this
                 }
+                else
+                    choice_found = true;
 
                 if (!qinfo->RewChoiceItemCount[j])
                 {
@@ -4120,6 +4103,14 @@ void ObjectMgr::LoadQuests()
                         qinfo->GetQuestId(),j+1,id,j+1);
                     // no changes, quest can't be done
                 }
+            }
+            else if (choice_found)                          // client crash if have gap in item reward choices
+            {
+                sLog.outErrorDb("Quest %u has `RewChoiceItemId%d` = 0 but `RewChoiceItemId%d` = %u, client can crash at like data.",
+                    qinfo->GetQuestId(),j+1,j+2,qinfo->RewChoiceItemId[j+1]);
+                // fill gap by clone later filled choice
+                qinfo->RewChoiceItemId[j] = qinfo->RewChoiceItemId[j+1];
+                qinfo->RewChoiceItemCount[j] = qinfo->RewChoiceItemCount[j+1];
             }
             else if (qinfo->RewChoiceItemCount[j]>0)
             {
@@ -5615,7 +5606,7 @@ void ObjectMgr::SetHighestGuids()
     result = WorldDatabase.Query( "SELECT MAX(guid) FROM creature" );
     if( result )
     {
-        m_CreatureFirstGuid = (*result)[0].GetUInt32()+1;
+        m_FirstTemporaryCreatureGuid = (*result)[0].GetUInt32()+1;
         delete result;
     }
 
@@ -5644,7 +5635,7 @@ void ObjectMgr::SetHighestGuids()
     result = WorldDatabase.Query("SELECT MAX(guid) FROM gameobject" );
     if( result )
     {
-        m_GameObjectFirstGuid = (*result)[0].GetUInt32()+1;
+        m_FirstTemporaryGameObjectGuid = (*result)[0].GetUInt32()+1;
         delete result;
     }
 
@@ -5696,6 +5687,13 @@ void ObjectMgr::SetHighestGuids()
         m_GroupIds.Set((*result)[0].GetUInt32()+1);
         delete result;
     }
+
+    // setup reserved ranges for static guids spawn
+    m_StaticCreatureGuids.Set(m_FirstTemporaryCreatureGuid);
+    m_FirstTemporaryCreatureGuid += sWorld.getConfig(CONFIG_UINT32_GUID_RESERVE_SIZE_CREATURE);
+
+    m_StaticGamebjectGuids.Set(m_FirstTemporaryGameObjectGuid);
+    m_FirstTemporaryGameObjectGuid += sWorld.getConfig(CONFIG_UINT32_GUID_RESERVE_SIZE_GAMEOBJECT);
 }
 
 void ObjectMgr::LoadGameObjectLocales()
@@ -8178,7 +8176,7 @@ void ObjectMgr::LoadTrainerTemplates()
         {
             if (cInfo->trainerId)
             {
-                if (trainer_ids.count(cInfo->trainerId) > 0)
+                if (m_mCacheTrainerTemplateSpellMap.find(cInfo->trainerId) != m_mCacheTrainerTemplateSpellMap.end())
                     trainer_ids.erase(cInfo->trainerId);
                 else
                     sLog.outErrorDb("Creature (Entry: %u) has trainer_id = %u for nonexistent trainer template", cInfo->Entry, cInfo->trainerId);

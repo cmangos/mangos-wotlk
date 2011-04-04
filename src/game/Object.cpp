@@ -1653,24 +1653,18 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     if (GetTypeId()==TYPEID_PLAYER)
         team = ((Player*)this)->GetTeam();
 
-    if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), GetMap(), GetPhaseMask(), id, team))
-    {
-        delete pCreature;
-        return NULL;
-    }
+    CreatureCreatePos pos(GetMap(), x, y, z, ang, GetPhaseMask());
 
     if (x == 0.0f && y == 0.0f && z == 0.0f)
-        GetClosePoint(x, y, z, pCreature->GetObjectBoundingRadius());
+        pos = CreatureCreatePos(this, GetOrientation(), CONTACT_DISTANCE, ang);
 
-    pCreature->Relocate(x, y, z, ang);
-    pCreature->SetSummonPoint(x, y, z, ang);
-
-    if(!pCreature->IsPositionValid())
+    if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, id, team))
     {
-        sLog.outError("Creature (guidlow %d, entry %d) not summoned. Suggested coordinates isn't valid (X: %f Y: %f)",pCreature->GetGUIDLow(),pCreature->GetEntry(),pCreature->GetPositionX(),pCreature->GetPositionY());
         delete pCreature;
         return NULL;
     }
+
+    pCreature->SetSummonPoint(pos);
 
     // Active state set before added to map
     pCreature->SetActiveObjectState(asActiveObject);
@@ -1708,9 +1702,9 @@ namespace MaNGOS
                 {
                     x = c->GetPositionX();
                     y = c->GetPositionY();
-                }
 
-                add(c,x,y);
+                    add(c,x,y);
+                }
             }
 
             template<class T>

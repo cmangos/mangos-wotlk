@@ -77,9 +77,19 @@ void MapPersistentState::SaveCreatureRespawnTime(uint32 loguid, time_t t)
         return;
 
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM creature_respawn WHERE guid = '%u' AND instance = '%u'", loguid, m_instanceid);
+
+    static SqlStatementID delSpawnTime ;
+    static SqlStatementID insSpawnTime ;
+
+    SqlStatement stmt = CharacterDatabase.CreateStatement(delSpawnTime, "DELETE FROM creature_respawn WHERE guid = ? AND instance = ?");
+    stmt.PExecute(loguid, m_instanceid);
+
     if(t > sWorld.GetGameTime())
-        CharacterDatabase.PExecute("INSERT INTO creature_respawn VALUES ( '%u', '" UI64FMTD "', '%u' )", loguid, uint64(t), m_instanceid);
+    {
+        stmt = CharacterDatabase.CreateStatement(insSpawnTime, "INSERT INTO creature_respawn VALUES ( ?, ?, ? )");
+        stmt.PExecute(loguid, uint64(t), m_instanceid);
+    }
+
     CharacterDatabase.CommitTransaction();
 }
 
@@ -92,9 +102,19 @@ void MapPersistentState::SaveGORespawnTime(uint32 loguid, time_t t)
         return;
 
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM gameobject_respawn WHERE guid = '%u' AND instance = '%u'", loguid, m_instanceid);
+
+    static SqlStatementID delSpawnTime ;
+    static SqlStatementID insSpawnTime ;
+
+    SqlStatement stmt = CharacterDatabase.CreateStatement(delSpawnTime, "DELETE FROM gameobject_respawn WHERE guid = ? AND instance = ?");
+    stmt.PExecute(loguid, m_instanceid);
+
     if(t > sWorld.GetGameTime())
-        CharacterDatabase.PExecute("INSERT INTO gameobject_respawn VALUES ( '%u', '" UI64FMTD "', '%u' )", loguid, uint64(t), m_instanceid);
+    {
+        stmt = CharacterDatabase.CreateStatement(insSpawnTime, "INSERT INTO gameobject_respawn VALUES ( ?, ?, ? )");
+        stmt.PExecute(loguid, uint64(t), m_instanceid);
+    }
+
     CharacterDatabase.CommitTransaction();
 }
 
@@ -313,11 +333,20 @@ void DungeonResetScheduler::LoadResetTimes()
     {
         do
         {
-            if(time_t resettime = time_t((*result)[3].GetUInt64()))
+            if (time_t resettime = time_t((*result)[3].GetUInt64()))
             {
                 uint32 id = (*result)[0].GetUInt32();
                 uint32 mapid = (*result)[1].GetUInt32();
                 uint32 difficulty = (*result)[2].GetUInt32();
+
+                MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
+
+                if (!mapEntry || !mapEntry->IsDungeon() || !GetMapDifficultyData(mapid, Difficulty(difficulty)))
+                {
+                    sMapPersistentStateMgr.DeleteInstanceFromDB(id);
+                    continue;
+                }
+
                 instResetTime[id] = ResetTimeMapDiffType(MAKE_PAIR32(mapid,difficulty), resettime);
             }
         }
@@ -362,8 +391,9 @@ void DungeonResetScheduler::LoadResetTimes()
             Difficulty difficulty = Difficulty(fields[1].GetUInt32());
             uint64 oldresettime = fields[2].GetUInt64();
 
-            MapDifficulty const* mapDiff = GetMapDifficultyData(mapid,difficulty);
-            if(!mapDiff)
+            MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
+
+            if (!mapEntry || !mapEntry->IsDungeon() || !GetMapDifficultyData(mapid,difficulty))
             {
                 sLog.outError("MapPersistentStateManager::LoadResetTimes: invalid mapid(%u)/difficulty(%u) pair in instance_reset!", mapid, difficulty);
                 CharacterDatabase.DirectPExecute("DELETE FROM instance_reset WHERE mapid = '%u' AND difficulty = '%u'", mapid,difficulty);
@@ -395,6 +425,10 @@ void DungeonResetScheduler::LoadResetTimes()
 
         // skip mapDiff without global reset time
         if (!mapDiff->resetTime)
+            continue;
+
+        MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
+        if (!mapEntry || !mapEntry->IsDungeon())
             continue;
 
         uint32 period = GetMaxResetTimeFor(mapDiff);
