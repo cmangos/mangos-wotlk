@@ -4,6 +4,7 @@
 #include "../World.h"
 #include "../SpellMgr.h"
 #include "../GridNotifiers.h"
+#include "../GridNotifiersImpl.h"
 #include "../CellImpl.h"
 #include "PlayerbotAI.h"
 #include "PlayerbotMgr.h"
@@ -807,6 +808,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 // list out items available for trade
                 std::ostringstream out;
 
+                out << "In my main backpack:";
                 // list out items in main backpack
                 for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
                 {
@@ -821,14 +823,25 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         out << " |cffffffff|Hitem:" << pItemProto->ItemId
                             << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
                         if (pItem->GetCount() > 1)
-                            out << "x" << pItem->GetCount() << ' ';
+                            out << "x" << pItem->GetCount();
                     }
                 }
+                ChatHandler ch(m_bot->GetTrader());
+                ch.SendSysMessage(out.str().c_str());
+
                 // list out items in other removable backpacks
                 for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
                 {
                     const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
                     if (pBag)
+                    {
+                        std::ostringstream outbag;
+                        outbag << "In my ";
+                        const ItemPrototype* const pBagProto = pBag->GetProto();
+                        std::string bagName = pBagProto->Name1;
+                        ItemLocalization(bagName, pBagProto->ItemId);
+                        outbag << bagName << ":";
+
                         for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
                         {
                             const Item* const pItem = m_bot->GetItemByPos(bag, slot);
@@ -841,13 +854,15 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
                                 // item link format: http://www.wowwiki.com/ItemString
                                 // itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId
-                                out << " |cffffffff|Hitem:" << pItemProto->ItemId
-                                    << ":0:0:0:0:0:0:0" << "|h[" << itemName
-                                    << "]|h|r";
+                                outbag << " |cffffffff|Hitem:" << pItemProto->ItemId
+                                       << ":0:0:0:0:0:0:0" << "|h[" << itemName
+                                       << "]|h|r";
                                 if (pItem->GetCount() > 1)
-                                    out << "x" << pItem->GetCount() << ' ';
+                                    outbag << "x" << pItem->GetCount();
                             }
                         }
+                        ch.SendSysMessage(outbag.str().c_str());
+                    }
                 }
 
                 // calculate how much money bot has
@@ -862,10 +877,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 whisper << "I have |cff00ff00" << gold
                         << "|r|cfffffc00g|r|cff00ff00" << silver
                         << "|r|cffcdcdcds|r|cff00ff00" << copper
-                        << "|r|cffffd333c|r" << " and the following items:";
+                        << "|r|cffffd333c|r";
                 SendWhisper(whisper.str().c_str(), *(m_bot->GetTrader()));
-                ChatHandler ch(m_bot->GetTrader());
-                ch.SendSysMessage(out.str().c_str());
             }
             return;
         }
@@ -958,16 +971,16 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
         case SMSG_LOOT_RESPONSE:
         {
-            WorldPacket p(packet);
+            WorldPacket p(packet); // (8+1+4+1+1+4+4+4+4+4+1)
             ObjectGuid guid;
             uint8 loot_type;
             uint32 gold;
             uint8 items;
 
-            p >> guid;
-            p >> loot_type;
-            p >> gold;
-            p >> items;
+            p >> guid;      // 8 corpse guid
+            p >> loot_type; // 1 loot type
+            p >> gold;      // 4 money on corpse
+            p >> items;     // 1 number of items on corpse
 
             if (gold > 0)
             {
@@ -978,9 +991,23 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             if (loot_type == LOOT_SKINNING || HasCollectFlag(COLLECT_FLAG_LOOT))
                 for (uint8 i = 0; i < items; ++i)
                 {
+                    uint32 itemid;
+                    uint32 itemcount;
+                    uint8 lootslot_type;
+                    uint8 itemindex;
+
+                    p >> itemindex;         // 1 counter
+                    p >> itemid;            // 4 itemid
+                    p >> itemcount;         // 4 item stack count
+                    p.read_skip<uint32>();  // 4 item model
+                    p.read_skip<uint32>();  // 4 randomSuffix
+                    p.read_skip<uint32>();  // 4 randomPropertyId
+                    p >> lootslot_type;     // 1 slot 0 = can get, 1 = look only, 2 = master get
+                    // TellMaster("[%s]: loots : (%u) itemindex : (%u)",m_bot->GetName(), itemid, itemindex);
+
                     // just auto loot everything for getting object
                     WorldPacket* const packet = new WorldPacket(CMSG_AUTOSTORE_LOOT_ITEM, 1);
-                    *packet << i;
+                    *packet << itemindex;
                     m_bot->GetSession()->QueuePacket(packet);
                 }
             else if (loot_type == LOOT_CORPSE)  // loot from a creature
@@ -2448,7 +2475,7 @@ uint32 PlayerbotAI::EstRepair(uint16 pos)
     return TotalCost;
 }
 
-Unit *PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
+Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
 {
     // list empty? why are we here?
     if (m_attackerInfo.empty())
@@ -3474,6 +3501,9 @@ void PlayerbotAI::findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<
             if (pItem->GetProto()->ItemId != *it)
                 continue;
 
+            if (m_bot->GetTrader() && m_bot->GetTradeData()->HasItem(pItem->GetObjectGuid()))
+                continue;
+
             foundItemList.push_back(pItem);
             itemIdSearchList.erase(it);
             break;
@@ -3496,6 +3526,9 @@ void PlayerbotAI::findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<
             for (std::list<uint32>::iterator it = itemIdSearchList.begin(); it != itemIdSearchList.end(); ++it)
             {
                 if (pItem->GetProto()->ItemId != *it)
+                    continue;
+
+                if (m_bot->GetTrader() && m_bot->GetTradeData()->HasItem(pItem->GetObjectGuid()))
                     continue;
 
                 foundItemList.push_back(pItem);
