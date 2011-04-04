@@ -2752,13 +2752,24 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
             m_targetGuidCommand = 0;
         }
 
+        //if master is unmounted, unmount the bot
+        else if (!GetMaster()->IsMounted() && m_bot->IsMounted())
+        {
+            WorldPacket emptyPacket;
+            m_bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
+        }
+
         // handle combat (either self/master/group in combat, or combat state and valid target)
         else if (IsInCombat() || (m_botState == BOTSTATE_COMBAT && m_targetCombat))
         {
-            if (!pSpell || !pSpell->IsChannelActive())
-                DoNextCombatManeuver();
-            else
-                SetIgnoreUpdateTime(1);  // It's better to update AI more frequently during combat
+           //check if the bot is Mounted
+           if (!m_bot->IsMounted())
+           {
+                if (!pSpell || !pSpell->IsChannelActive())
+                    DoNextCombatManeuver();
+                else
+                    SetIgnoreUpdateTime(1);  // It's better to update AI more frequently during combat
+            }
         }
         // bot was in combat recently - loot now
         else if (m_botState == BOTSTATE_COMBAT)
