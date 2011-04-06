@@ -451,6 +451,30 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 }
             return;
         }
+
+        case CMSG_QUESTGIVER_COMPLETE_QUEST:
+	{
+            WorldPacket p(packet);
+            p.rpos(0);    // reset reader
+            uint32 quest;
+            ObjectGuid npcGUID;
+            p >> npcGUID >> quest;
+
+            DEBUG_LOG("PlayerbotMgr: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %s, quest = %u", npcGUID.GetString().c_str(), quest);
+
+            WorldObject* pNpc = m_master->GetMap()->GetWorldObject(npcGUID);
+            if (!pNpc)
+                return;
+
+            // for all master's bots
+            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+                Player* const bot = it->second;
+                bot->GetPlayerbotAI()->TurnInQuests(pNpc);
+            }
+            return;
+        }
+
         case CMSG_LOOT_ROLL:
         {
 

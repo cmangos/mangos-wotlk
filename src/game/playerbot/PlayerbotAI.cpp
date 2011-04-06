@@ -2785,7 +2785,6 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
         else if (m_botState == BOTSTATE_LOOTING)
         {
             DoLoot();
-            SetIgnoreUpdateTime();
         }
         else if (m_botState == BOTSTATE_FLYING)
         {
