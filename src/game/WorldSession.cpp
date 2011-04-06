@@ -240,10 +240,10 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 
                     // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
 
-					// playerbot mod
-					if (_player && _player->GetPlayerbotMgr())
-						_player->GetPlayerbotMgr()->HandleMasterIncomingPacket(*packet);
-					// playerbot mod end
+                    // playerbot mod
+                    if (_player && _player->GetPlayerbotMgr())
+                        _player->GetPlayerbotMgr()->HandleMasterIncomingPacket(*packet);
+                    // playerbot mod end
                     break;
                 case STATUS_LOGGEDIN_OR_RECENTLY_LOGGEDOUT:
                     if(!_player && !m_playerRecentlyLogout)
@@ -467,8 +467,13 @@ void WorldSession::LogoutPlayer(bool Save)
         ///- Reset the online field in the account table
         // no point resetting online in character table here as Player::SaveToDB() will set it to 1 since player has not been removed from world at this stage
         // No SQL injection as AccountID is uint32
+        static SqlStatementID id;
+
         if (! _player->GetPlayerbotAI())
-            LoginDatabase.PExecute("UPDATE account SET active_realm_id = 0 WHERE id = '%u'", GetAccountId());
+        {
+            SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
+            stmt.PExecute(uint32(0), GetAccountId());
+        }
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
         if (Guild *guild = sObjectMgr.GetGuildById(_player->GetGuildId()))
@@ -543,8 +548,11 @@ void WorldSession::LogoutPlayer(bool Save)
         WorldPacket data( SMSG_LOGOUT_COMPLETE, 0 );
         SendPacket( &data );
 
+        static SqlStatementID updChars;
+
         // Playerbot mod: commented out above and do this one instead
-        CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE guid = '%u'", guid);
+        SqlStatement stmt = CharacterDatabase.CreateStatement(updChars, "UPDATE characters SET online = 0 WHERE guid = ?");
+        stmt.PExecute(guid);
 
         DEBUG_LOG( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
     }
@@ -724,11 +732,17 @@ void WorldSession::SetAccountData(AccountDataType type, time_t time_, std::strin
     {
         uint32 acc = GetAccountId();
 
+        static SqlStatementID delId;
+        static SqlStatementID insId;
+
         CharacterDatabase.BeginTransaction ();
-        CharacterDatabase.PExecute("DELETE FROM account_data WHERE account='%u' AND type='%u'", acc, type);
-        std::string safe_data = data;
-        CharacterDatabase.escape_string(safe_data);
-        CharacterDatabase.PExecute("INSERT INTO account_data VALUES ('%u','%u','" UI64FMTD "','%s')", acc, type, uint64(time_), safe_data.c_str());
+
+        SqlStatement stmt = CharacterDatabase.CreateStatement(delId, "DELETE FROM account_data WHERE account=? AND type=?");
+        stmt.PExecute(acc, uint32(type));
+
+        stmt = CharacterDatabase.CreateStatement(insId, "INSERT INTO account_data VALUES (?,?,?,?)");
+        stmt.PExecute(acc, uint32(type), uint64(time_), data.c_str());
+
         CharacterDatabase.CommitTransaction ();
     }
     else
@@ -737,11 +751,17 @@ void WorldSession::SetAccountData(AccountDataType type, time_t time_, std::strin
         if(!m_GUIDLow)
             return;
 
+        static SqlStatementID delId;
+        static SqlStatementID insId;
+
         CharacterDatabase.BeginTransaction ();
-        CharacterDatabase.PExecute("DELETE FROM character_account_data WHERE guid='%u' AND type='%u'", m_GUIDLow, type);
-        std::string safe_data = data;
-        CharacterDatabase.escape_string(safe_data);
-        CharacterDatabase.PExecute("INSERT INTO character_account_data VALUES ('%u','%u','" UI64FMTD "','%s')", m_GUIDLow, type, uint64(time_), safe_data.c_str());
+
+        SqlStatement stmt = CharacterDatabase.CreateStatement(delId, "DELETE FROM character_account_data WHERE guid=? AND type=?");
+        stmt.PExecute(m_GUIDLow, uint32(type));
+
+        stmt = CharacterDatabase.CreateStatement(insId, "INSERT INTO character_account_data VALUES (?,?,?,?)");
+        stmt.PExecute(m_GUIDLow, uint32(type), uint64(time_), data.c_str());
+
         CharacterDatabase.CommitTransaction ();
     }
 

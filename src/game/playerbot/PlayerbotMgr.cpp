@@ -453,7 +453,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
         }
 
         case CMSG_QUESTGIVER_COMPLETE_QUEST:
-	{
+        {
             WorldPacket p(packet);
             p.rpos(0);    // reset reader
             uint32 quest;
@@ -486,7 +486,6 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             p >> Guid;    //guid of the item rolled
             p >> NumberOfPlayers;    //number of players invited to roll
             p >> rollType;    //need,greed or pass on roll
-
 
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {

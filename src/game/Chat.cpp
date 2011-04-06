@@ -61,7 +61,7 @@
 // |color|Htaxinode:id|h[name]|h|r
 // |color|Htele:id|h[name]|h|r
 // |color|Htitle:id|h[name]|h|r
-// |color|Htrade:spell_id,cur_value,max_value,unk3int,unk3str|h[name]|h|r - client, spellbook profession icon shift-click
+// |color|Htrade:spell_id:cur_value:max_value:unk3int:unk3str|h[name]|h|r - client, spellbook profession icon shift-click
 
 bool ChatHandler::load_command_table = true;
 
@@ -1532,7 +1532,7 @@ valid examples:
                 {
                     char c;
                     reader >> c;
-                    if(!c)
+                    if (!c)
                     {
                         DEBUG_LOG("ChatHandler::isValidChatMessage got \\0 while reading color in |c command");
                         return false;
@@ -1540,12 +1540,12 @@ valid examples:
 
                     color <<= 4;
                     // check for hex char
-                    if(c >= '0' && c <='9')
+                    if (c >= '0' && c <='9')
                     {
                         color |= c-'0';
                         continue;
                     }
-                    if(c >= 'a' && c <='f')
+                    if (c >= 'a' && c <='f')
                     {
                         color |= 10+c-'a';
                         continue;
@@ -1557,11 +1557,15 @@ valid examples:
             case 'H':
                 // read chars up to colon  = link type
                 reader.getline(buffer, 256, ':');
+                if (reader.eof())                           // : must be
+                    return false;
 
                 if (strcmp(buffer, "item") == 0)
                 {
                     // read item entry
                     reader.getline(buffer, 256, ':');
+                    if (reader.eof())                       // : must be
+                        return false;
 
                     linkedItem = ObjectMgr::GetItemPrototype(atoi(buffer));
                     if(!linkedItem)
@@ -1585,13 +1589,13 @@ valid examples:
                     int32 propertyId = 0;
                     bool negativeNumber = false;
                     char c;
-                    for(uint8 i=0; i<randomPropertyPosition; ++i)
+                    for(uint8 i=0; i < randomPropertyPosition; ++i)
                     {
                         propertyId = 0;
                         negativeNumber = false;
-                        while((c = reader.get())!=':')
+                        while((c = reader.get()) != ':')
                         {
-                            if(c >='0' && c<='9')
+                            if (c >='0' && c<='9')
                             {
                                 propertyId*=10;
                                 propertyId += c-'0';
@@ -1610,7 +1614,7 @@ valid examples:
                         if (!itemProperty)
                             return false;
                     }
-                    else if(propertyId < 0)
+                    else if (propertyId < 0)
                     {
                         itemSuffix = sItemRandomSuffixStore.LookupEntry(-propertyId);
                         if (!itemSuffix)
@@ -1624,7 +1628,7 @@ valid examples:
                         c = reader.peek();
                     }
                 }
-                else if(strcmp(buffer, "quest") == 0)
+                else if (strcmp(buffer, "quest") == 0)
                 {
                     // no color check for questlinks, each client will adapt it anyway
                     uint32 questid= 0;
@@ -1640,17 +1644,40 @@ valid examples:
 
                     linkedQuest = sObjectMgr.GetQuestTemplate(questid);
 
-                    if(!linkedQuest)
+                    if (!linkedQuest)
                     {
                         DEBUG_LOG("ChatHandler::isValidChatMessage Questtemplate %u not found", questid);
                         return false;
                     }
+
+                    if (c !=':')
+                    {
+                        DEBUG_LOG("ChatHandler::isValidChatMessage Invalid quest link structure");
+                        return false;
+                    }
+
+                    reader.ignore(1);
                     c = reader.peek();
                     // level
-                    while(c !='|' && c!='\0')
+                    uint32 questlevel = 0;
+                    while(c >='0' && c<='9')
                     {
                         reader.ignore(1);
+                        questlevel *= 10;
+                        questlevel += c-'0';
                         c = reader.peek();
+                    }
+
+                    if (questlevel >= STRONG_MAX_LEVEL)
+                    {
+                        DEBUG_LOG("ChatHandler::isValidChatMessage Quest level %u too big", questlevel);
+                        return false;
+                    }
+
+                    if (c !='|')
+                    {
+                        DEBUG_LOG("ChatHandler::isValidChatMessage Invalid quest link structure");
+                        return false;
                     }
                 }
                 else if(strcmp(buffer, "trade") == 0)
@@ -1660,8 +1687,11 @@ valid examples:
 
                     // read spell entry
                     reader.getline(buffer, 256, ':');
+                    if (reader.eof())                       // : must be
+                        return false;
+
                     linkedSpell = sSpellStore.LookupEntry(atoi(buffer));
-                    if(!linkedSpell)
+                    if (!linkedSpell)
                         return false;
 
                     char c = reader.peek();
@@ -1680,12 +1710,15 @@ valid examples:
 
                     // read talent entry
                     reader.getline(buffer, 256, ':');
+                    if (reader.eof())                       // : must be
+                        return false;
+
                     TalentEntry const *talentInfo = sTalentStore.LookupEntry(atoi(buffer));
-                    if(!talentInfo)
+                    if (!talentInfo)
                         return false;
 
                     linkedSpell = sSpellStore.LookupEntry(talentInfo->RankID[0]);
-                    if(!linkedSpell)
+                    if (!linkedSpell)
                         return false;
 
                     char c = reader.peek();
@@ -1698,7 +1731,7 @@ valid examples:
                 }
                 else if(strcmp(buffer, "spell") == 0)
                 {
-                    if(color != CHAT_LINK_COLOR_SPELL)
+                    if (color != CHAT_LINK_COLOR_SPELL)
                         return false;
 
                     uint32 spellid = 0;
@@ -1712,12 +1745,12 @@ valid examples:
                         c = reader.peek();
                     }
                     linkedSpell = sSpellStore.LookupEntry(spellid);
-                    if(!linkedSpell)
+                    if (!linkedSpell)
                         return false;
                 }
                 else if(strcmp(buffer, "enchant") == 0)
                 {
-                    if(color != CHAT_LINK_COLOR_ENCHANT)
+                    if (color != CHAT_LINK_COLOR_ENCHANT)
                         return false;
 
                     uint32 spellid = 0;
@@ -1731,23 +1764,27 @@ valid examples:
                         c = reader.peek();
                     }
                     linkedSpell = sSpellStore.LookupEntry(spellid);
-                    if(!linkedSpell)
+                    if (!linkedSpell)
                         return false;
                 }
                 else if(strcmp(buffer, "achievement") == 0)
                 {
-                    if(color != CHAT_LINK_COLOR_ACHIEVEMENT)
+                    if (color != CHAT_LINK_COLOR_ACHIEVEMENT)
                         return false;
+
                     reader.getline(buffer, 256, ':');
+                    if (reader.eof())                       // : must be
+                        return false;
+
                     uint32 achievementId = atoi(buffer);
                     linkedAchievement = sAchievementStore.LookupEntry(achievementId);
 
-                    if(!linkedAchievement)
+                    if (!linkedAchievement)
                         return false;
 
                     char c = reader.peek();
                     // skip progress
-                    while(c !='|' && c!='\0')
+                    while(c !='|' && c != '\0')
                     {
                         reader.ignore(1);
                         c = reader.peek();
@@ -1760,6 +1797,9 @@ valid examples:
 
                     // first id is slot, drop it
                     reader.getline(buffer, 256, ':');
+                    if (reader.eof())                       // : must be
+                        return false;
+
                     uint32 glyphId = 0;
                     char c = reader.peek();
                     while(c>='0' && c <='9')
@@ -1795,6 +1835,8 @@ valid examples:
                         return false;
                     }
                     reader.getline(buffer, 256, ']');
+                    if (reader.eof())                       // ] must be
+                        return false;
 
                     // verify the link name
                     if (linkedSpell)
