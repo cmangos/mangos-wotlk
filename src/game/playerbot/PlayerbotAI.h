@@ -5,6 +5,7 @@
 #include "../QuestDef.h"
 #include "../GameEventMgr.h"
 #include "../ObjectGuid.h"
+#include "../Unit.h"
 
 class WorldPacket;
 class WorldObject;
@@ -139,6 +140,8 @@ public:
         MOVEMENT_STAY               = 0x02
     };
 
+    typedef std::pair<enum NPCFlags, uint32> itemPair;
+    typedef std::list<itemPair> BotItemList;
     typedef std::map<uint32, uint32> BotNeedItem;
     typedef std::list<uint64> BotLootCreature;
     typedef std::list<uint32> BotLootEntry;
@@ -222,6 +225,8 @@ public:
     void findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const;
     // finds nearby game objects that are specified in m_collectObjects then adds them to the m_lootTargets list
     void findNearbyGO();
+    // finds nearby creatures, whose UNIT_NPC_FLAGS match the flags specified in item list m_itemIds
+    void findNearbyCreature();
 
     void MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out, Player* player = NULL);
 
@@ -337,7 +342,8 @@ public:
     void QuestLocalization(std::string& questTitle, const uint32 questID) const;
 
     uint8 GetFreeBagSpace() const;
-    void Garbage(std::ostringstream &report, std::ostringstream &canSell, uint32 &TotalCost, uint32 &TotalSold);
+    void SellGarbage(bool verbose = true);
+    void Vend(enum NPCFlags npcflags, std::list<uint32>& itemIds);
 
 private:
     // ****** Closed Actions ********************************
@@ -377,6 +383,7 @@ private:
     BotNeedItem m_needItemList;
 
     // list of creatures we recently attacked and want to loot
+    BotItemList m_itemIds;              // list of items
     BotLootCreature m_lootTargets;      // list of creatures
     BotSpellList m_spellsToLearn;       // list of spells
     ObjectGuid m_lootCurrent;           // current remains of interest

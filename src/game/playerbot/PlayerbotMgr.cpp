@@ -420,32 +420,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     continue;
                 }
                 else
-                {
-                    uint32 TotalCost = 0;
-                    uint32 TotalSold = 0;
-                    std::ostringstream report, canSell;
-                    canSell << "Items that are not trash and can be sold: ";
-
-                    bot->GetPlayerbotAI()->Garbage(report, canSell, TotalCost, TotalSold);
-
-                    if (TotalSold > 0)
-                    {
-                        report << "Sold total " << TotalSold << " item(s) for ";
-                        uint32 gold = uint32(TotalCost / 10000);
-                        TotalCost -= (gold * 10000);
-                        uint32 silver = uint32(TotalCost / 100);
-                        TotalCost -= (silver * 100);
-
-                        if (gold > 0)
-                            report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
-                        if (silver > 0)
-                            report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-                        report << TotalCost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
-
-                        bot->GetPlayerbotAI()->TellMaster(report.str());
-                    }
-                    bot->GetPlayerbotAI()->TellMaster(canSell.str());
-                }
+                    bot->GetPlayerbotAI()->SellGarbage();
             }
             return;
         }

@@ -2693,6 +2693,9 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
     }
     else
     {
+        if(!m_itemIds.empty())
+            findNearbyCreature();
+
         // if we are casting a spell then interrupt it
         // make sure any actions that cast a spell set a proper m_ignoreAIUpdatesUntilTime!
         Spell* const pSpell = GetCurrentSpell();
@@ -3608,6 +3611,70 @@ void PlayerbotAI::findNearbyGO()
     }
 }
 
+void PlayerbotAI::findNearbyCreature()
+{
+    std::list<Creature*> creatureList;
+    float radius = 20.0f;
+
+    CellPair pair(MaNGOS::ComputeCellPair( m_bot->GetPositionX(), m_bot->GetPositionY()) );
+    Cell cell(pair);
+
+    MaNGOS::AnyUnitInObjectRangeCheck go_check(m_bot, radius);
+    MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> go_search(creatureList, go_check);
+    TypeContainerVisitor<MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck>, GridTypeMapContainer> go_visit(go_search);
+
+    // Get Creatures
+    cell.Visit(pair, go_visit, *(m_bot->GetMap()), *(m_bot), radius);
+
+    // if (!creatureList.empty())
+    //    TellMaster("Found %i Creatures.", creatureList.size());
+
+    for (std::list<Creature*>::iterator iter = creatureList.begin(); iter != creatureList.end(); ++iter)
+    {
+        Creature* currCreature = *iter;
+
+        for(std::list<itemPair>::iterator itr = m_itemIds.begin(); itr != m_itemIds.end(); ++itr)
+        {
+            uint32 npcflags = currCreature->GetUInt32Value(UNIT_NPC_FLAGS);
+
+            if(!(itr->first & npcflags))
+                continue;
+
+            WorldObject *wo = m_bot->GetMap()->GetWorldObject(currCreature->GetObjectGuid());
+
+            if (m_bot->GetDistance(wo) > CONTACT_DISTANCE + wo->GetObjectBoundingRadius())
+            {
+                float x, y, z;
+                wo->GetContactPoint(m_bot, x, y, z, 0.1f);
+                m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z);
+                // give time to move to point before trying again
+                SetIgnoreUpdateTime(1);
+            }
+
+            if (m_bot->GetDistance(wo) < INTERACTION_DISTANCE)
+            {
+
+                GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(currCreature->GetCreatureInfo()->GossipMenuId);
+                for(GossipMenuItemsMap::const_iterator it = pMenuItemBounds.first; it != pMenuItemBounds.second; ++it)
+                {
+
+                    if (!(it->second.npc_option_npcflag & npcflags))
+                        continue;
+
+                    switch(it->second.option_id)
+                    {
+                        case GOSSIP_OPTION_VENDOR:
+                        {
+                            // TellMaster("Found %s",currCreature->GetCreatureInfo()->SubName);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 // use item on self
 void PlayerbotAI::UseItem(Item *item)
 {
@@ -3905,31 +3972,71 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
     }
 }
 
-void PlayerbotAI::Garbage(std::ostringstream &report, std::ostringstream &canSell, uint32 &TotalCost, uint32 &TotalSold)
+void PlayerbotAI::SellGarbage(bool verbose)
 {
+    uint32 TotalCost = 0;
+    uint32 TotalSold = 0;
+    std::ostringstream report, goods;
+
+    goods << "Items that are not trash and can be sold: \n";
+    goods << "In my main backpack:";
     // list out items in main backpack
     for(uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
     {
         Item* const item = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
         if(item)
-            _doSellItem(item, report, canSell, TotalCost, TotalSold);
+            _doSellItem(item, report, goods, TotalCost, TotalSold);
     }
+    if(verbose)
+        TellMaster(goods.str());
 
     // and each of our other packs
     for(uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
     {
+        std::ostringstream goods;
         const Bag* const pBag = static_cast<Bag *>(m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag));
         if (pBag)
         {
+            goods << "\nIn my ";
+            const ItemPrototype* const pBagProto = pBag->GetProto();
+            std::string bagName = pBagProto->Name1;
+            ItemLocalization(bagName, pBagProto->ItemId);
+            goods << bagName << ":";
+
             for(uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
                 Item* const item = m_bot->GetItemByPos(bag, slot);
                 if(item)
-                    _doSellItem(item, report, canSell, TotalCost, TotalSold);
+                    _doSellItem(item, report, goods, TotalCost, TotalSold);
             }
+            if(verbose)
+                TellMaster(goods.str());
         }
     }
+
+    if (TotalSold > 0)
+    {
+        report << "Sold total " << TotalSold << " item(s) for ";
+        uint32 gold = uint32(TotalCost / 10000);
+        TotalCost -= (gold * 10000);
+        uint32 silver = uint32(TotalCost / 100);
+        TotalCost -= (silver * 100);
+
+        if (gold > 0)
+            report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+        if (silver > 0)
+            report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+        report << TotalCost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+
+        TellMaster(report.str());
+    }
     return;
+}
+
+void PlayerbotAI::Vend(enum NPCFlags npcflags, std::list<uint32>& itemIds)
+{
+     for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+         m_itemIds.push_back(std::pair<enum NPCFlags,uint32>(npcflags, *it));
 }
 
 // handle commands sent through chat channels
