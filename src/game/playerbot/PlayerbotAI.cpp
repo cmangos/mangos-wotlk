@@ -3666,6 +3666,12 @@ void PlayerbotAI::findNearbyCreature()
                         case GOSSIP_OPTION_VENDOR:
                         {
                             // TellMaster("Found %s",currCreature->GetCreatureInfo()->SubName);
+                            if(m_bot->GetPlayerbotAI()->Sell(itr->second))
+                            {
+                                itr = m_itemIds.erase(itr);
+                                m_bot->GetMotionMaster()->Clear();
+                                m_bot->GetMotionMaster()->MoveIdle();
+                            )
                             break;
                         }
                     }
@@ -3972,6 +3978,51 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
     }
 }
 
+bool PlayerbotAI::Sell(const uint32 itemid)
+{
+    if(m_itemIds.empty())
+        return false;
+
+    uint32 TotalCost = 0;
+    uint32 TotalSold = 0;
+    std::ostringstream report;
+    bool sale = false;
+
+    Item* pItem = FindItem(itemid);
+    if(pItem)
+    {
+        sale = true;
+        uint32 cost = pItem->GetCount() * pItem->GetProto()->SellPrice;
+        m_bot->ModifyMoney(cost);
+        m_bot->MoveItemFromInventory(pItem->GetBagSlot(), pItem->GetSlot(), true);
+        m_bot->AddItemToBuyBackSlot(pItem);
+
+        ++TotalSold;
+        TotalCost += cost;
+
+        report << "Sold ";
+        MakeItemLink(pItem, report);
+        report << " for ";
+
+        uint32 gold = uint32(cost / 10000);
+        cost -= (gold * 10000);
+        uint32 silver = uint32(cost / 100);
+        cost -= (silver * 100);
+
+        if (gold > 0)
+            report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+        if (silver > 0)
+            report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+        report << cost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\n";
+    }
+    else
+        return true; // remove items that do not exist in bot inventory
+
+    if(sale)
+       TellMaster(report.str());
+    return sale;
+}
+
 void PlayerbotAI::SellGarbage(bool verbose)
 {
     uint32 TotalCost = 0;
@@ -4167,6 +4218,19 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             m_targetGuidCommand = castOnGuid.GetRawValue();
         }
 
+    }
+
+    else if (text.size() > 5 && text.substr(0, 5) == "sell ")
+    {
+        enum NPCFlags VENDOR_MASK = (enum NPCFlags) (UNIT_NPC_FLAG_VENDOR
+			 | UNIT_NPC_FLAG_VENDOR_AMMO
+			 | UNIT_NPC_FLAG_VENDOR_FOOD
+			 | UNIT_NPC_FLAG_VENDOR_POISON
+			 | UNIT_NPC_FLAG_VENDOR_REAGENT);
+
+        std::list<uint32> itemIds;
+        extractItemIds(text, itemIds);
+        Vend(VENDOR_MASK, itemIds);
     }
 
     // use items

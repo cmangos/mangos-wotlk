@@ -344,6 +344,7 @@ public:
     uint8 GetFreeBagSpace() const;
     void SellGarbage(bool verbose = true);
     void Vend(enum NPCFlags npcflags, std::list<uint32>& itemIds);
+    bool Sell(const uint32 itemid);
 
 private:
     // ****** Closed Actions ********************************

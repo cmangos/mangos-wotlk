@@ -38,6 +38,7 @@ Commands:
 /t BOTNAME pet toggle <SPELLID | (part of) SPELLNAME | SPELLLINK> (Toggle autocast for a given spell)
 /t BOTNAME pet state (Shows current react mode of bot's pet)
 /t BOTNAME pet react <(a)ggressive | (d)efensive | (p)assive> (Set bot's pet reaction mode)
+/t BOTNAME sell <ITEM LINK> (bot will add item to it's m_itemIds, for later sale)
 
 Shortcuts:
 c = cast
@@ -67,6 +68,26 @@ Gameobject interaction with bots:
 
   Using the gameobject list information, it is possible to locate and/or fetch each of the gameobjects. To select
   a <GAMEOBJECT LINK>, hold down the shift key and click on the relevant link with your mouse.
+
+Creature interaction with bots:
+===============================
+
+  The bot(s) can now interact directly with creatures. This will enable bot(s) to independantly contact NPCs, without
+  the need for player's selection. This opens up new possiblities for bot/NPC commerce.
+
+  Each bot will maintain it's own item list (m_itemIds - This a list of paired data). The first component (UNIT_NPC_FLAG)
+  dictates what is to done with the second component (itemid).
+
+  While(m_itemIds not empty)
+  {
+      bot will scan for surrounding creatures (findNearbyCreature()) who can service m_itemIds
+      if(found)
+          Search is carried out for all itemids that can be processed by this creature.
+          if(processed successfully)
+              This instance of the data pair (npcflag,itemid) will be removed from m_itemIds
+  }
+
+  Please note that bot(s) m_itemIds are emptied, when bot(s) are dismissed.
 
 Repair with bots:
 =================
