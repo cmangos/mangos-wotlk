@@ -3671,7 +3671,7 @@ void PlayerbotAI::findNearbyCreature()
                                 itr = m_itemIds.erase(itr);
                                 m_bot->GetMotionMaster()->Clear();
                                 m_bot->GetMotionMaster()->MoveIdle();
-                            )
+                            }
                             break;
                         }
                     }
