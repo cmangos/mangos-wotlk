@@ -3983,22 +3983,15 @@ bool PlayerbotAI::Sell(const uint32 itemid)
     if(m_itemIds.empty())
         return false;
 
-    uint32 TotalCost = 0;
-    uint32 TotalSold = 0;
-    std::ostringstream report;
-    bool sale = false;
-
     Item* pItem = FindItem(itemid);
     if(pItem)
     {
-        sale = true;
+        std::ostringstream report;
+
         uint32 cost = pItem->GetCount() * pItem->GetProto()->SellPrice;
         m_bot->ModifyMoney(cost);
         m_bot->MoveItemFromInventory(pItem->GetBagSlot(), pItem->GetSlot(), true);
         m_bot->AddItemToBuyBackSlot(pItem);
-
-        ++TotalSold;
-        TotalCost += cost;
 
         report << "Sold ";
         MakeItemLink(pItem, report);
@@ -4014,13 +4007,14 @@ bool PlayerbotAI::Sell(const uint32 itemid)
         if (silver > 0)
             report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
         report << cost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\n";
-    }
-    else
-        return true; // remove items that do not exist in bot inventory
 
-    if(sale)
-       TellMaster(report.str());
-    return sale;
+        if(pItem->IsInBag())
+            return false;
+        else
+	    TellMaster(report.str());
+    }
+
+    return true; // item either sold or not in bot inventory
 }
 
 void PlayerbotAI::SellGarbage(bool verbose)
