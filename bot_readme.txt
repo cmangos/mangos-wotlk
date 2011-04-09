@@ -39,6 +39,7 @@ Commands:
 /t BOTNAME pet state (Shows current react mode of bot's pet)
 /t BOTNAME pet react <(a)ggressive | (d)efensive | (p)assive> (Set bot's pet reaction mode)
 /t BOTNAME sell <ITEM LINK> (bot will add item to it's m_itemIds, for later sale)
+/t BOTANME auction <ITEM LINK> (bot will add item to it's m_itemIds, for later auction)
 
 Shortcuts:
 c = cast

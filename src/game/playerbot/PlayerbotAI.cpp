@@ -553,6 +553,52 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             return;
         }
 
+        case SMSG_AUCTION_COMMAND_RESULT:
+        {
+            uint32 auctionId, Action, ErrorCode;
+            std::string action[3] = {"Creating","Cancelling","Bidding"};
+            std::ostringstream out;
+
+            WorldPacket p(packet);
+            p >> auctionId;
+            p >> Action;
+            p >> ErrorCode;
+            p.resize(12);
+
+            switch (ErrorCode)
+            {
+                case AUCTION_OK:
+                {
+                    out << "|cff1eff00|h" << action[Action] << " was successful|h|r";
+                    // Saving auction into database
+                    CharacterDatabase.PExecute("UPDATE auction WHERE id = '%u'", auctionId);
+                    break;
+                }
+                case AUCTION_INTERNAL_ERROR:
+                {
+                    out << "|cffff0000|hWhile " << action[Action] << ", an internal error occured|h|r";
+                    break;
+                }
+                case AUCTION_NOT_ENOUGHT_MONEY:
+                {
+                    out << "|cffff0000|hWhile " << action[Action] << ", I didn't have enough money|h|r";
+                    break;
+                }
+                case AUCTION_ITEM_NOT_FOUND:
+                {
+                    out << "|cffff0000|hItem was not found!|h|r";
+                    break;
+                }
+                case CANNOT_BID_YOUR_AUCTION_ERROR:
+                {
+                    out << "|cffff0000|hI cannot bid on my own auctions!|h|r";
+                    break;
+                }
+	    }
+            TellMaster(out.str().c_str());
+            return;
+        }
+
         case SMSG_INVENTORY_CHANGE_FAILURE:
         {
             WorldPacket p(packet);
@@ -3666,7 +3712,18 @@ void PlayerbotAI::findNearbyCreature()
                         case GOSSIP_OPTION_VENDOR:
                         {
                             // TellMaster("Found %s",currCreature->GetCreatureInfo()->SubName);
-                            if(m_bot->GetPlayerbotAI()->Sell(itr->second))
+                            if(Sell(itr->second))
+                            {
+                                itr = m_itemIds.erase(itr);
+                                m_bot->GetMotionMaster()->Clear();
+                                m_bot->GetMotionMaster()->MoveIdle();
+                            }
+                            break;
+                        }
+                        case GOSSIP_OPTION_AUCTIONEER:
+                        {
+                            // TellMaster("Found %s",currCreature->GetCreatureInfo()->SubName);
+                            if(Auction(itr->second, currCreature))
                             {
                                 itr = m_itemIds.erase(itr);
                                 m_bot->GetMotionMaster()->Clear();
@@ -3978,6 +4035,44 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
     }
 }
 
+bool PlayerbotAI::Auction(const uint32 itemid, Creature* aCreature)
+{
+    DEBUG_LOG("PlayerbotAI: Auction");
+
+    if (m_itemIds.empty())
+        return false;                                             // check for cheaters
+
+    Item* aItem = FindItem(itemid);
+    if(aItem)
+    {
+        std::ostringstream out;
+        srand(time(NULL));
+        uint32 duration[3] = { 720, 1440 ,2880 };  // 720 = 12hrs, 1440 = 24hrs, 2880 = 48hrs
+        uint32 etime = duration[rand() % 3];
+
+        uint32 min = urand(aItem->GetProto()->SellPrice * aItem->GetCount(),aItem->GetProto()->BuyPrice * aItem->GetCount()) * (aItem->GetProto()->Quality + 1);
+        uint32 max = urand(aItem->GetProto()->BuyPrice * aItem->GetCount(),aItem->GetProto()->BuyPrice * aItem->GetCount()) * (aItem->GetProto()->Quality + 1);
+
+        out << "Auctioning ";
+        MakeItemLink(aItem,out);
+        out << " with " << aCreature->GetCreatureInfo()->Name;
+        TellMaster(out.str().c_str());
+
+        WorldPacket* const packet = new WorldPacket(CMSG_AUCTION_SELL_ITEM, 8+4+8+4+4+4+4 );
+        *packet << aCreature->GetObjectGuid();     // auctioneer guid
+        *packet << uint32(1);                      // const 1
+        *packet << aItem->GetObjectGuid();         // item guid
+        *packet << aItem->GetCount();      // stacksize
+        *packet << uint32((min < max) ? min : max);  // starting bid
+        *packet << uint32((max > min) ? max : min);  // buyout
+        *packet << uint32(etime);  // auction duration
+
+        m_bot->GetSession()->QueuePacket(packet);  // queue the packet to get around race condition
+    }
+
+    return true; // item either sold or not in bot inventory
+}
+
 bool PlayerbotAI::Sell(const uint32 itemid)
 {
     if(m_itemIds.empty())
@@ -4225,6 +4320,13 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         std::list<uint32> itemIds;
         extractItemIds(text, itemIds);
         Vend(VENDOR_MASK, itemIds);
+    }
+
+    else if (text.size() > 8 && text.substr(0, 8) == "auction ")
+    {
+        std::list<uint32> itemIds;
+        extractItemIds(text, itemIds);
+        Vend(UNIT_NPC_FLAG_AUCTIONEER, itemIds);
     }
 
     // use items

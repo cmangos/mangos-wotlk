@@ -345,6 +345,7 @@ public:
     void SellGarbage(bool verbose = true);
     void Vend(enum NPCFlags npcflags, std::list<uint32>& itemIds);
     bool Sell(const uint32 itemid);
+    bool Auction(const uint32 itemid, Creature* aCreature);
 
 private:
     // ****** Closed Actions ********************************
