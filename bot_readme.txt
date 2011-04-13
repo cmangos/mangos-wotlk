@@ -39,7 +39,9 @@ Commands:
 /t BOTNAME pet state (Shows current react mode of bot's pet)
 /t BOTNAME pet react <(a)ggressive | (d)efensive | (p)assive> (Set bot's pet reaction mode)
 /t BOTNAME sell <ITEM LINK> (bot will add item to it's m_itemIds, for later sale)
-/t BOTANME auction <ITEM LINK> (bot will add item to it's m_itemIds, for later auction)
+/t BOTNAME auction (bot will display all it's active owned auctions. Auction info will include an <AUCTION LINK> )
+/t BOTNAME auction add <ITEM LINK> (bot will add item to it's m_itemIds, for later auction)
+/t BOTNAME auction remove <AUCTION LINK> (bot will add auctionid to it's m_auctions, for later auction cancellation)
 
 Shortcuts:
 c = cast
@@ -76,8 +78,11 @@ Creature interaction with bots:
   The bot(s) can now interact directly with creatures. This will enable bot(s) to independantly contact NPCs, without
   the need for player's selection. This opens up new possiblities for bot/NPC commerce.
 
-  Each bot will maintain it's own item list (m_itemIds - This a list of paired data). The first component (UNIT_NPC_FLAG)
+  Each bot will maintain it's own item list (m_itemIds - This is a list of paired data). The first component (UNIT_NPC_FLAG)
   dictates what is to done with the second component (itemid).
+
+  Each bot will also maintain it's own active auction list (m_auctions - This is a list of paired data). The first component
+  (ActionFlags) dictates the action to be performed on the second component (auctionid).
 
   While(m_itemIds not empty)
   {
@@ -86,9 +91,11 @@ Creature interaction with bots:
           Search is carried out for all itemids that can be processed by this creature.
           if(processed successfully)
               This instance of the data pair (npcflag,itemid) will be removed from m_itemIds
+              While(m_auctions not empty)
+                  process contained auctionids according to ActionFlag & then update m_auctions
   }
 
-  Please note that bot(s) m_itemIds are emptied, when bot(s) are dismissed.
+  Please note that bot(s) m_itemIds & m_auctions will be emptied, when bot(s) are dismissed.
 
 Repair with bots:
 =================

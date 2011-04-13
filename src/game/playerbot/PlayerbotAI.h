@@ -140,8 +140,17 @@ public:
         MOVEMENT_STAY               = 0x02
     };
 
+    enum ActionFlags
+    {
+        NONE                        = 0x00,
+        LIST                        = 0x01,
+        REMOVE                      = 0x02
+    };
+
     typedef std::pair<enum NPCFlags, uint32> itemPair;
+    typedef std::pair<enum ActionFlags, uint32> auctionPair;
     typedef std::list<itemPair> BotItemList;
+    typedef std::list<auctionPair> BotAuctionList;
     typedef std::map<uint32, uint32> BotNeedItem;
     typedef std::list<uint64> BotLootCreature;
     typedef std::list<uint32> BotLootEntry;
@@ -203,6 +212,9 @@ public:
     // Initialize spell using rank 1 spell id
     uint32 initSpell(uint32 spellId);
     uint32 initPetSpell(uint32 spellIconId);
+
+    // extract auction ids from links
+    void extractAuctionIds(const std::string& text, std::list<uint32>& auctionIds) const;
 
     // extracts item ids from links
     void extractItemIds(const std::string& text, std::list<uint32>& itemIds) const;
@@ -345,7 +357,9 @@ public:
     void SellGarbage(bool verbose = true);
     void Vend(enum NPCFlags npcflags, std::list<uint32>& itemIds);
     bool Sell(const uint32 itemid);
-    bool Auction(const uint32 itemid, Creature* aCreature);
+    bool AddAuction(const uint32 itemid, Creature* aCreature);
+    bool ListAuctions();
+    bool RemoveAuction(const uint32 auctionid);
 
 private:
     // ****** Closed Actions ********************************
@@ -386,6 +400,7 @@ private:
 
     // list of creatures we recently attacked and want to loot
     BotItemList m_itemIds;              // list of items
+    BotAuctionList m_auctions;          // list of active auctions
     BotLootCreature m_lootTargets;      // list of creatures
     BotSpellList m_spellsToLearn;       // list of spells
     ObjectGuid m_lootCurrent;           // current remains of interest

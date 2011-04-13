@@ -29,6 +29,8 @@
 #include "Log.h"
 #include "../GossipDef.h"
 #include "../MotionMaster.h"
+#include "../AuctionHouseMgr.h"
+#include "../Mail.h"
 
 // returns a float in range of..
 float rand_float(float low, float high)
@@ -570,13 +572,11 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 case AUCTION_OK:
                 {
                     out << "|cff1eff00|h" << action[Action] << " was successful|h|r";
-                    // Saving auction into database
-                    CharacterDatabase.PExecute("UPDATE auction WHERE id = '%u'", auctionId);
                     break;
                 }
                 case AUCTION_INTERNAL_ERROR:
                 {
-                    out << "|cffff0000|hWhile " << action[Action] << ", an internal error occured|h|r";
+                    out << "|cffff0000|hWhile" << action[Action] << ", an internal error occured|h|r";
                     break;
                 }
                 case AUCTION_NOT_ENOUGHT_MONEY:
@@ -594,7 +594,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     out << "|cffff0000|hI cannot bid on my own auctions!|h|r";
                     break;
                 }
-	    }
+            }
             TellMaster(out.str().c_str());
             return;
         }
@@ -3422,6 +3422,26 @@ void PlayerbotAI::MakeItemLink(const Item *item, std::ostringstream &out, bool I
         out << "x" << item->GetCount() << ' ';
 }
 
+void PlayerbotAI::extractAuctionIds(const std::string& text, std::list<uint32>& auctionIds) const
+{
+    uint8 pos = 0;
+    while (true)
+    {
+        int i = text.find("Htitle:", pos);
+        if (i == -1)
+            break;
+        pos = i + 7;
+        int endPos = text.find('|', pos);
+        if (endPos == -1)
+            break;
+        std::string idC = text.substr(pos, endPos - pos);
+        uint32 id = atol(idC.c_str());
+        pos = endPos;
+        if (id)
+            auctionIds.push_back(id);
+    }
+}
+
 void PlayerbotAI::extractSpellId(const std::string& text, uint32 &spellId) const
 {
 
@@ -3711,7 +3731,6 @@ void PlayerbotAI::findNearbyCreature()
                     {
                         case GOSSIP_OPTION_VENDOR:
                         {
-                            // TellMaster("Found %s",currCreature->GetCreatureInfo()->SubName);
                             if(Sell(itr->second))
                             {
                                 itr = m_itemIds.erase(itr);
@@ -3722,13 +3741,36 @@ void PlayerbotAI::findNearbyCreature()
                         }
                         case GOSSIP_OPTION_AUCTIONEER:
                         {
-                            // TellMaster("Found %s",currCreature->GetCreatureInfo()->SubName);
-                            if(Auction(itr->second, currCreature))
+
+                            // Add new auction items
+                            if(AddAuction(itr->second, currCreature))
                             {
                                 itr = m_itemIds.erase(itr);
                                 m_bot->GetMotionMaster()->Clear();
                                 m_bot->GetMotionMaster()->MoveIdle();
                             }
+
+                            // Manage auction items
+                            if(!m_auctions.empty())
+                            {
+                                for(std::list<auctionPair>::iterator ait = m_auctions.begin(); ait != m_auctions.end(); ++ait)
+                                {
+                                    switch(ait->first)
+                                    {
+                                        case REMOVE:
+                                        {
+                                            if(RemoveAuction(ait->second))
+                                            {
+                                                ait = m_auctions.erase(ait);
+                                                m_bot->GetMotionMaster()->Clear();
+                                                m_bot->GetMotionMaster()->MoveIdle();
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            ListAuctions();
                             break;
                         }
                     }
@@ -4029,15 +4071,147 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
         report << cost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\n";
     }
     else if (item->GetProto()->SellPrice > 0)
-    {
         MakeItemLink(item, canSell, false);
-        canSell << "nothing to sell";
-    }
 }
 
-bool PlayerbotAI::Auction(const uint32 itemid, Creature* aCreature)
+bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
 {
-    DEBUG_LOG("PlayerbotAI: Auction");
+    DEBUG_LOG("PlayerbotAI: RemoveAuction");
+
+    QueryResult *result = CharacterDatabase.PQuery(
+    "SELECT houseid,itemguid,item_template,itemowner,buyoutprice,time,buyguid,lastbid,startbid,deposit FROM auction WHERE id = '%u'",auctionid);
+
+    AuctionEntry *auction;
+
+    if(result)
+    {
+        Field *fields = result->Fetch();
+
+        auction = new AuctionEntry;
+        auction->Id = auctionid;
+        uint32 houseid  = fields[0].GetUInt32();
+        auction->item_guidlow = fields[1].GetUInt32();
+        auction->item_template = fields[2].GetUInt32();
+        auction->owner = fields[3].GetUInt32();
+        auction->buyout = fields[4].GetUInt32();
+        auction->expire_time = fields[5].GetUInt32();
+        auction->bidder = fields[6].GetUInt32();
+        auction->bid = fields[7].GetUInt32();
+        auction->startbid = fields[8].GetUInt32();
+        auction->deposit = fields[9].GetUInt32();
+        auction->auctionHouseEntry = NULL;                  // init later
+
+        // check if sold item exists for guid
+        // and item_template in fact (GetAItem will fail if problematic in result check in AuctionHouseMgr::LoadAuctionItems)
+        Item* pItem = sAuctionMgr.GetAItem(auction->item_guidlow);
+        if (!pItem)
+        {
+            auction->DeleteFromDB();
+            sLog.outError("Auction %u has not a existing item : %u, deleted", auction->Id, auction->item_guidlow);
+            delete auction;
+            delete result;
+            return true;
+        }
+
+        auction->auctionHouseEntry = sAuctionHouseStore.LookupEntry(houseid);
+
+        // Attempt send item back to owner
+        std::ostringstream msgAuctionCanceledOwner;
+        msgAuctionCanceledOwner << auction->item_template << ":0:" << AUCTION_CANCELED << ":0:0";
+
+        // item will deleted or added to received mail list
+        MailDraft(msgAuctionCanceledOwner.str(), "")    // TODO: fix body
+            .AddItem(pItem)
+            .SendMailTo(MailReceiver(ObjectGuid(HIGHGUID_PLAYER, auction->owner)), auction, MAIL_CHECK_MASK_COPIED);
+
+        if(sAuctionMgr.RemoveAItem(auction->item_guidlow))
+            m_bot->GetSession()->SendAuctionCommandResult(auction->Id, AUCTION_CANCEL, AUCTION_OK);
+
+        auction->DeleteFromDB();
+
+        delete auction;
+        delete result;
+    }
+
+    return true; // remove auction item from list m_auction;
+}
+
+
+bool PlayerbotAI::ListAuctions()
+{
+    DEBUG_LOG("PlayerbotAI: ListAuctions");
+
+    std::ostringstream report;
+
+    QueryResult *result = CharacterDatabase.PQuery(
+    "SELECT id,itemguid,item_template,time,buyguid,lastbid FROM auction WHERE itemowner = '%u'",m_bot->GetGUID());
+    if(result)
+    {
+        report << "My active auctions are: \n";
+        do
+        {
+            Field *fields = result->Fetch();
+
+            uint32 Id = fields[0].GetUInt32();
+            uint32 item_guidlow = fields[1].GetUInt32();
+            uint32 item_template = fields[2].GetUInt32();
+            time_t exptime = fields[3].GetUInt32();
+            uint32 bidder = fields[4].GetUInt32();
+            uint32 bid = fields[5].GetUInt32();
+
+            // current time
+            time_t currtime = time(NULL);
+            time_t remtime = exptime - currtime;
+
+            tm* aTm = gmtime(&remtime);
+
+            Item* aItem = sAuctionMgr.GetAItem(item_guidlow);
+            if(aItem)
+            {
+                // Name
+                uint32 count = aItem->GetCount();
+                std::string name = aItem->GetProto()->Name1;
+                ItemLocalization(name, item_template);
+                report << "\n|cffffffff|Htitle:" << Id << "|h[" << name;
+                if(count > 1)
+                    report << "|cff00ff00x" << count << "|cffffffff" << "]|h|r";
+                else
+                    report << "]|h|r";
+            }
+
+            if(bidder)
+            {
+                ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, bidder);
+                std::string bidder_name;
+                if(sObjectMgr.GetPlayerNameByGUID(guid, bidder_name))
+                report << " " << bidder_name << ": ";
+
+                uint32 gold = uint32(bid / 10000);
+                bid -= (gold * 10000);
+                uint32 silver = uint32(bid / 100);
+                bid -= (silver * 100);
+
+                if (gold > 0)
+                    report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+                if (silver > 0)
+                    report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+                report << bid << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+            }
+            if(aItem)
+                report << " ends: " << aTm->tm_hour << "|cff0070dd|hH|h|r " << aTm->tm_min << "|cff0070dd|hmin|h|r";
+
+        } while (result->NextRow());
+
+        delete result;
+        TellMaster(report.str().c_str());
+    }
+
+    return true; // auction either finished or does not exit
+}
+
+bool PlayerbotAI::AddAuction(const uint32 itemid, Creature* aCreature)
+{
+    DEBUG_LOG("PlayerbotAI: AddAuction");
 
     if (m_itemIds.empty())
         return false;                                             // check for cheaters
@@ -4051,7 +4225,7 @@ bool PlayerbotAI::Auction(const uint32 itemid, Creature* aCreature)
         uint32 etime = duration[rand() % 3];
 
         uint32 min = urand(aItem->GetProto()->SellPrice * aItem->GetCount(),aItem->GetProto()->BuyPrice * aItem->GetCount()) * (aItem->GetProto()->Quality + 1);
-        uint32 max = urand(aItem->GetProto()->BuyPrice * aItem->GetCount(),aItem->GetProto()->BuyPrice * aItem->GetCount()) * (aItem->GetProto()->Quality + 1);
+        uint32 max = urand(aItem->GetProto()->SellPrice * aItem->GetCount(),aItem->GetProto()->BuyPrice * aItem->GetCount()) * (aItem->GetProto()->Quality + 1);
 
         out << "Auctioning ";
         MakeItemLink(aItem,out);
@@ -4101,7 +4275,7 @@ bool PlayerbotAI::Sell(const uint32 itemid)
             report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
         if (silver > 0)
             report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-        report << cost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\n";
+        report << cost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
 
         if(pItem->IsInBag())
             return false;
@@ -4309,6 +4483,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
     }
 
+    // Handle selling items
+    // sell [Item Link][Item Link] .. -- Sells bot(s) items from inventory
     else if (text.size() > 5 && text.substr(0, 5) == "sell ")
     {
         enum NPCFlags VENDOR_MASK = (enum NPCFlags) (UNIT_NPC_FLAG_VENDOR
@@ -4322,11 +4498,51 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         Vend(VENDOR_MASK, itemIds);
     }
 
-    else if (text.size() > 8 && text.substr(0, 8) == "auction ")
+    // Handle auctions:
+    // auction                                        -- Lists bot(s) active auctions.
+    // auction add [Item Link][Item Link] ..          -- Create bot(s) active auction.
+    // auction remove [Auction Link][Auction Link] .. -- Cancel bot(s) active auction. ([Auction Link] from auction)
+    else if (text.size() >= 7 && text.substr(0, 7) == "auction")
     {
-        std::list<uint32> itemIds;
-        extractItemIds(text, itemIds);
-        Vend(UNIT_NPC_FLAG_AUCTIONEER, itemIds);
+        std::string part = "";
+        std::string subcommand = "";
+
+        if (text.size() > 7 && text.substr(0, 8) == "auction ")
+            part = text.substr(8);  // Truncate 'auction ' part
+
+        if (part.find(" ") > 0)
+        {
+            subcommand = part.substr(0, part.find(" "));
+            if (part.size() > subcommand.size())
+                part = part.substr(subcommand.size() + 1);
+        }
+        else
+            subcommand = part;
+
+        if (subcommand == "add" || subcommand == "remove")
+        {
+            if(subcommand == "add")
+            {
+                std::list<uint32> itemIds;
+                extractItemIds(part, itemIds);
+                Vend(UNIT_NPC_FLAG_AUCTIONEER, itemIds);
+            }
+
+            if(subcommand == "remove")
+            {
+                std::list<uint32> auctionIds;
+                extractAuctionIds(part, auctionIds);
+                for (std::list<uint32>::iterator it = auctionIds.begin(); it != auctionIds.end(); ++it)
+                    m_auctions.push_back(std::pair<enum ActionFlags,uint32>(REMOVE, *it));
+                // add dumby item to m_itemIds, to seek out auctioneer.
+                m_itemIds.push_back(std::pair<enum NPCFlags,uint32>(UNIT_NPC_FLAG_AUCTIONEER, 0));
+            }
+        }
+        else // list all bot auctions
+        {
+            // add dumby item to m_itemIds, to seek out auctioneer.
+            m_itemIds.push_back(std::pair<enum NPCFlags,uint32>(UNIT_NPC_FLAG_AUCTIONEER, 0));
+        }
     }
 
     // use items
