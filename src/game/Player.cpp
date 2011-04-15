@@ -1911,7 +1911,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             if (!GetSession()->PlayerLogout())
             {
-                // send transfer packets
+                // send transfer packet to display load screen
                 WorldPacket data(SMSG_TRANSFER_PENDING, (4+4+4));
                 data << uint32(mapid);
                 if (m_transport)
@@ -1920,26 +1920,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                     data << uint32(GetMapId());
                 }
                 GetSession()->SendPacket(&data);
-
-                data.Initialize(SMSG_NEW_WORLD, (20));
-                if (m_transport)
-                {
-                    data << uint32(mapid);
-                    data << float(m_movementInfo.GetTransportPos()->x);
-                    data << float(m_movementInfo.GetTransportPos()->y);
-                    data << float(m_movementInfo.GetTransportPos()->z);
-                    data << float(m_movementInfo.GetTransportPos()->o);
-                }
-                else
-                {
-                    data << uint32(mapid);
-                    data << float(x);
-                    data << float(y);
-                    data << float(z);
-                    data << float(orientation);
-                }
-                GetSession()->SendPacket( &data );
-                SendSavedInstances();
             }
 
             // remove from old map now
@@ -1968,6 +1948,30 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // move packet sent by client always after far teleport
             // code for finish transfer to new map called in WorldSession::HandleMoveWorldportAckOpcode at client packet
             SetSemaphoreTeleportFar(true);
+
+            if (!GetSession()->PlayerLogout())
+            {
+                // transfer finished, inform client to start load
+                WorldPacket data(SMSG_NEW_WORLD, (20));
+                data << uint32(mapid);
+                if (m_transport)
+                {
+                    data << float(m_movementInfo.GetTransportPos()->x);
+                    data << float(m_movementInfo.GetTransportPos()->y);
+                    data << float(m_movementInfo.GetTransportPos()->z);
+                    data << float(m_movementInfo.GetTransportPos()->o);
+                }
+                else
+                {
+                    data << float(final_x);
+                    data << float(final_y);
+                    data << float(final_z);
+                    data << float(final_o);
+                }
+
+                GetSession()->SendPacket( &data );
+                SendSavedInstances();
+            }
         }
         else
             return false;
@@ -4592,7 +4596,7 @@ void Player::KillPlayer()
     SetDeathState(CORPSE);
     //SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP );
 
-    SetFlag(UNIT_DYNAMIC_FLAGS, 0x00);
+    SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
     ApplyModByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER, !sMapStore.LookupEntry(GetMapId())->Instanceable());
 
     // 6 minutes until repop at graveyard
@@ -6725,7 +6729,7 @@ uint32 Player::GetRankFromDB(ObjectGuid guid)
         return 0;
 }
 
-uint32 Player::GetArenaTeamIdFromDB(ObjectGuid guid, uint8 type)
+uint32 Player::GetArenaTeamIdFromDB(ObjectGuid guid, ArenaType type)
 {
     QueryResult *result = CharacterDatabase.PQuery("SELECT arena_team_member.arenateamid FROM arena_team_member JOIN arena_team ON arena_team_member.arenateamid = arena_team.arenateamid WHERE guid='%u' AND type='%u' LIMIT 1", guid.GetCounter(), type);
     if (!result)
@@ -14701,9 +14705,8 @@ void Player::ItemAddedQuestCheck( uint32 entry, uint32 count )
                 {
                     uint32 additemcount = ( curitemcount + count <= reqitemcount ? count : reqitemcount - curitemcount);
                     q_status.m_itemcount[j] += additemcount;
-                    if (q_status.uState != QUEST_NEW) q_status.uState = QUEST_CHANGED;
-
-                    SendQuestUpdateAddItem( qInfo, j, additemcount );
+                    if (q_status.uState != QUEST_NEW)
+                        q_status.uState = QUEST_CHANGED;
                 }
                 if ( CanCompleteQuest( questid ) )
                     CompleteQuest( questid );
@@ -15169,15 +15172,6 @@ void Player::SendPushToPartyResponse( Player *pPlayer, uint32 msg )
         GetSession()->SendPacket( &data );
         DEBUG_LOG("WORLD: Sent MSG_QUEST_PUSH_RESULT");
     }
-}
-
-void Player::SendQuestUpdateAddItem( Quest const* /*pQuest*/, uint32 /*item_idx*/, uint32 /*count*/ )
-{
-    WorldPacket data( SMSG_QUESTUPDATE_ADD_ITEM, 0 );
-    DEBUG_LOG( "WORLD: Sent SMSG_QUESTUPDATE_ADD_ITEM" );
-    //data << pQuest->ReqItemId[item_idx];
-    //data << count;
-    GetSession()->SendPacket( &data );
 }
 
 void Player::SendQuestUpdateAddCreatureOrGo( Quest const* pQuest, ObjectGuid guid, uint32 creatureOrGO_idx, uint32 count)
@@ -22393,7 +22387,7 @@ void Player::BuildPetTalentsInfoData(WorldPacket *data)
 
 void Player::SendTalentsInfoData(bool pet)
 {
-    WorldPacket data(SMSG_TALENTS_INFO, 50);
+    WorldPacket data(SMSG_TALENT_UPDATE, 50);
     data << uint8(pet ? 1 : 0);
     if(pet)
         BuildPetTalentsInfoData(&data);
@@ -22448,7 +22442,7 @@ void Player::BuildEnchantmentsInfoData(WorldPacket *data)
 void Player::SendEquipmentSetList()
 {
     uint32 count = 0;
-    WorldPacket data(SMSG_EQUIPMENT_SET_LIST, 4);
+    WorldPacket data(SMSG_LOAD_EQUIPMENT_SET, 4);
     size_t count_pos = data.wpos();
     data << uint32(count);                                  // count placeholder
     for(EquipmentSets::iterator itr = m_EquipmentSets.begin(); itr != m_EquipmentSets.end(); ++itr)
@@ -22500,7 +22494,7 @@ void Player::SetEquipmentSet(uint32 index, EquipmentSet eqset)
     {
         eqslot.Guid = sObjectMgr.GenerateEquipmentSetGuid();
 
-        WorldPacket data(SMSG_EQUIPMENT_SET_SAVED, 4 + 1);
+        WorldPacket data(SMSG_EQUIPMENT_SET_ID, 4 + 1);
         data << uint32(index);
         data.appendPackGUID(eqslot.Guid);
         GetSession()->SendPacket(&data);
@@ -22530,8 +22524,8 @@ void Player::_SaveEquipmentSets()
                     "item5=?, item6=?, item7=?, item8=?, item9=?, item10=?, item11=?, item12=?, item13=?, item14=?, "
                     "item15=?, item16=?, item17=?, item18=? WHERE guid=? AND setguid=? AND setindex=?");
 
-                stmt.addString(eqset.IconName);
                 stmt.addString(eqset.Name);
+                stmt.addString(eqset.IconName);
 
                 for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
                     stmt.addUInt32(eqset.Items[i]);

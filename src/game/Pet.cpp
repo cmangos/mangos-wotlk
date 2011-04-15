@@ -117,6 +117,15 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
         return false;
     }
 
+    CreatureInfo const *creatureInfo = ObjectMgr::GetCreatureTemplate(petentry);
+    if (!creatureInfo)
+    {
+        sLog.outError("Pet entry %u does not exist but used at pet load (owner: %s).", petentry, owner->GetGuidStr().c_str());
+        delete result;
+        return false;
+    }
+
+
     uint32 summon_spell_id = fields[17].GetUInt32();
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
 
@@ -132,8 +141,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     PetType pet_type = PetType(fields[18].GetUInt8());
     if(pet_type == HUNTER_PET)
     {
-        CreatureInfo const* creatureInfo = ObjectMgr::GetCreatureTemplate(petentry);
-        if(!creatureInfo || !creatureInfo->isTameable(owner->CanTameExoticPets()))
+        if (!creatureInfo->isTameable(owner->CanTameExoticPets()))
         {
             delete result;
             return false;
@@ -154,7 +162,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     CreatureCreatePos pos(owner, owner->GetOrientation(), PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
 
     uint32 guid = pos.GetMap()->GenerateLocalLowGuid(HIGHGUID_PET);
-    if (!Create(guid, pos, petentry, pet_number))
+    if (!Create(guid, pos, creatureInfo, pet_number))
     {
         delete result;
         return false;
@@ -164,6 +172,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     setFaction(owner->getFaction());
     SetUInt32Value(UNIT_CREATED_BY_SPELL, summon_spell_id);
 
+    // reget for sure use real creature info selected for Pet at load/creating
     CreatureInfo const *cinfo = GetCreatureInfo();
     if (cinfo->type == CREATURE_TYPE_CRITTER)
     {
@@ -494,8 +503,8 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
         else
         {
             // pet corpse non lootable and non skinnable
-            SetUInt32Value( UNIT_DYNAMIC_FLAGS, 0x00 );
-            RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+            SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
+            RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
             //lose happiness when died and not in BG/Arena
             MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
@@ -558,35 +567,6 @@ void Pet::Update(uint32 update_diff, uint32 diff)
                     return;
                 }
             }
-
-            //regenerate focus for hunter pets or energy for deathknight's ghoul
-            if(m_regenTimer <= update_diff)
-            {
-                switch (getPowerType())
-                {
-                    case POWER_FOCUS:
-                    case POWER_ENERGY:
-                        Regenerate(getPowerType());
-                        break;
-                    default:
-                        break;
-                }
-                m_regenTimer = 4000;
-            }
-            else
-                m_regenTimer -= update_diff;
-
-            if(getPetType() != HUNTER_PET)
-                break;
-
-            if(m_happinessTimer <= update_diff)
-            {
-                LooseHappiness();
-                m_happinessTimer = 7500;
-            }
-            else
-                m_happinessTimer -= update_diff;
-
             break;
         }
         default:
@@ -595,6 +575,44 @@ void Pet::Update(uint32 update_diff, uint32 diff)
 
     Creature::Update(update_diff, diff);
 }
+
+void Pet::RegenerateAll( uint32 update_diff )
+{
+    //regenerate focus for hunter pets or energy for deathknight's ghoul
+    if (m_regenTimer <= update_diff)
+    {
+        switch (getPowerType())
+        {
+            case POWER_FOCUS:
+            case POWER_ENERGY:
+                Regenerate(getPowerType());
+                break;
+            default:
+                break;
+        }
+
+        if (!isInCombat() || IsPolymorphed())
+            RegenerateHealth();
+
+        RegenerateMana();
+
+        m_regenTimer = 4000;
+    }
+    else
+        m_regenTimer -= update_diff;
+
+    if (getPetType() != HUNTER_PET)
+        return;
+
+    if(m_happinessTimer <= update_diff)
+    {
+        LooseHappiness();
+        m_happinessTimer = 7500;
+    }
+    else
+        m_happinessTimer -= update_diff;
+}
+
 
 void Pet::Regenerate(Powers power)
 {
@@ -837,7 +855,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 
     BASIC_LOG("Create pet");
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
-    if (!Create(guid, pos, creature->GetEntry(), pet_number))
+    if (!Create(guid, pos, creature->GetCreatureInfo(), pet_number))
         return false;
 
     CreatureInfo const *cinfo = GetCreatureInfo();
@@ -1980,16 +1998,16 @@ bool Pet::IsPermanentPetFor(Player* owner)
     }
 }
 
-bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, uint32 Entry, uint32 pet_number)
+bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, uint32 pet_number)
 {
     SetMap(cPos.GetMap());
     SetPhaseMask(cPos.GetPhaseMask(), false);
 
     Object::_Create(guidlow, pet_number, HIGHGUID_PET);
 
-    m_originalEntry = Entry;
+    m_originalEntry = cinfo->Entry;
 
-    if (!InitEntry(Entry))
+    if (!InitEntry(cinfo->Entry))
         return false;
 
     cPos.SelectFinalPoint(this);
@@ -1999,7 +2017,7 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, uint32 Entry, uint32 p
 
     SetSheath(SHEATH_STATE_MELEE);
 
-    if(getPetType() == MINI_PET)                            // always non-attackable
+    if (getPetType() == MINI_PET)                           // always non-attackable
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
     return true;

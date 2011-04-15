@@ -1192,6 +1192,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 32146:                                 // Liquid Fire
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    ((Player*)m_caster)->KilledMonsterCredit(unitTarget->GetEntry(), unitTarget->GetObjectGuid());
+                    ((Creature*)unitTarget)->ForcedDespawn();
+                    return;
+                }
                 case 33060:                                 // Make a Wish
                 {
                     if (m_caster->GetTypeId()!=TYPEID_PLAYER)
@@ -1231,14 +1240,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     int32 basepoints0 = 100;
                     m_caster->CastCustomSpell(unitTarget, 37675, &basepoints0, NULL, NULL, true);
-                    return;
-                }
-                case 38194:                                 // Blink
-                {
-                    // Blink
-                    if (unitTarget)
-                        m_caster->CastSpell(unitTarget, 38203, true);
-
                     return;
                 }
                 case 39189:                                 // Sha'tari Torch
@@ -2304,6 +2305,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         };
                         unitTarget->CastSpell( unitTarget, spell_list[urand(0, 5)], true);
                     }
+                    return;
+                }
+                case 38194:                                 // Blink
+                {
+                    // Blink
+                    if (unitTarget)
+                        m_caster->CastSpell(unitTarget, 38203, true);
+
                     return;
                 }
             }
@@ -3995,9 +4004,8 @@ void Spell::EffectPersistentAA(SpellEffectIndex eff_idx)
     if (Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
 
-    int32 duration = GetSpellDuration(m_spellInfo);
     DynamicObject* dynObj = new DynamicObject;
-    if (!dynObj->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, eff_idx, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, radius))
+    if (!dynObj->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, eff_idx, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_duration, radius))
     {
         delete dynObj;
         return;
@@ -4511,10 +4519,16 @@ void Spell::DoSummon(SpellEffectIndex eff_idx)
     uint32 pet_entry = m_spellInfo->EffectMiscValue[eff_idx];
     if (!pet_entry)
         return;
+
+    CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(pet_entry);
+    if (!cInfo)
+    {
+        sLog.outErrorDb("Spell::DoSummon: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->Id);
+        return;
+    }
+
     uint32 level = m_caster->getLevel();
     Pet* spawnCreature = new Pet(SUMMON_PET);
-
-    int32 duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
     if (m_caster->GetTypeId()==TYPEID_PLAYER && spawnCreature->LoadPetFromDB((Player*)m_caster,pet_entry))
     {
@@ -4522,11 +4536,9 @@ void Spell::DoSummon(SpellEffectIndex eff_idx)
         if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
             spawnCreature->Relocate(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, -m_caster->GetOrientation());
 
-
-
         // set timer for unsummon
-        if (duration > 0)
-            spawnCreature->SetDuration(duration);
+        if (m_duration > 0)
+            spawnCreature->SetDuration(m_duration);
 
         return;
     }
@@ -4539,9 +4551,9 @@ void Spell::DoSummon(SpellEffectIndex eff_idx)
 
     Map *map = m_caster->GetMap();
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
-    if (!spawnCreature->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), pos, m_spellInfo->EffectMiscValue[eff_idx], pet_number))
+    if (!spawnCreature->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, pet_number))
     {
-        sLog.outErrorDb("Spell::EffectSummon: no such creature entry %u",m_spellInfo->EffectMiscValue[eff_idx]);
+        sLog.outErrorDb("Spell::EffectSummon: can't create creature with entry %u for spell %u", cInfo->Entry, m_spellInfo->Id);
         delete spawnCreature;
         return;
     }
@@ -4549,8 +4561,8 @@ void Spell::DoSummon(SpellEffectIndex eff_idx)
     spawnCreature->SetSummonPoint(pos);
 
     // set timer for unsummon
-    if (duration > 0)
-        spawnCreature->SetDuration(duration);
+    if (m_duration > 0)
+        spawnCreature->SetDuration(m_duration);
 
     spawnCreature->SetOwnerGuid(m_caster->GetObjectGuid());
     spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
@@ -4921,6 +4933,13 @@ void Spell::DoSummonGuardian(SpellEffectIndex eff_idx, uint32 forceFaction)
     if (!propEntry)
         return;
 
+    CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(pet_entry);
+    if (!cInfo)
+    {
+        sLog.outErrorDb("Spell::DoSummonGuardian: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->Id);
+        return;
+    }
+
     PetType petType = propEntry->Title == UNITNAME_SUMMON_TITLE_COMPANION ? PROTECTOR_PET : GUARDIAN_PET;
 
     // second direct cast unsummon guardian(s) (guardians without like functionality have cooldown > spawn time)
@@ -4966,7 +4985,6 @@ void Spell::DoSummonGuardian(SpellEffectIndex eff_idx, uint32 forceFaction)
     float center_z = m_targets.m_destZ;
 
     float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
-    int32 duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
     int32 amount = damage > 0 ? damage : 1;
 
@@ -4994,17 +5012,17 @@ void Spell::DoSummonGuardian(SpellEffectIndex eff_idx, uint32 forceFaction)
 
         Map *map = m_caster->GetMap();
         uint32 pet_number = sObjectMgr.GeneratePetNumber();
-        if (!spawnCreature->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), pos, m_spellInfo->EffectMiscValue[eff_idx], pet_number))
+        if (!spawnCreature->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, pet_number))
         {
-            sLog.outError("no such creature entry %u", m_spellInfo->EffectMiscValue[eff_idx]);
+            sLog.outError("Spell::DoSummonGuardian: can't create creature entry %u for spell %u.", pet_entry, m_spellInfo->Id);
             delete spawnCreature;
             return;
         }
 
         spawnCreature->SetSummonPoint(pos);
 
-        if (duration > 0)
-            spawnCreature->SetDuration(duration);
+        if (m_duration > 0)
+            spawnCreature->SetDuration(m_duration);
 
         //spawnCreature->SetName("");                       // generated by client
         spawnCreature->SetOwnerGuid(m_caster->GetObjectGuid());
@@ -5432,10 +5450,19 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
             return;
     }
 
+    CreatureInfo const* cInfo = petentry ? sCreatureStorage.LookupEntry<CreatureInfo>(petentry) : NULL;
+
+    // == 0 in case call current pet, check only real summon case
+    if (petentry && !cInfo)
+    {
+        sLog.outErrorDb("EffectSummonPet: creature entry %u not found for spell %u.", petentry, m_spellInfo->Id);
+        return;
+    }
+
     Pet* NewSummon = new Pet;
 
     // petentry==0 for hunter "call pet" (current pet summoned if any)
-    if(m_caster->GetTypeId() == TYPEID_PLAYER && NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
         return;
 
     // not error in case fail hunter call pet
@@ -5445,24 +5472,17 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         return;
     }
 
-    CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(petentry);
-
-    if(!cInfo)
-    {
-        sLog.outError("EffectSummonPet: creature entry %u not found.", petentry);
-        delete NewSummon;
-        return;
-    }
-
     CreatureCreatePos pos(m_caster, m_caster->GetOrientation());
 
     Map *map = m_caster->GetMap();
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
-    if (!NewSummon->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), pos, petentry, pet_number))
+    if (!NewSummon->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, pet_number))
     {
         delete NewSummon;
         return;
     }
+
+    NewSummon->SetSummonPoint(pos);
 
     uint32 petlevel = m_caster->getLevel();
     NewSummon->setPetType(SUMMON_PET);
@@ -6541,9 +6561,9 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    if (unitTarget->GetAreaId() == 4156)
+                    if (unitTarget->GetAreaId() == 4157)
                         unitTarget->CastSpell(unitTarget, 47324, true);
-                    else if (unitTarget->GetAreaId() == 4157)
+                    else if (unitTarget->GetAreaId() == 4156)
                         unitTarget->CastSpell(unitTarget, 47325, true);
 
                     break;
@@ -7620,9 +7640,16 @@ void Spell::DoSummonTotem(SpellEffectIndex eff_idx, uint8 slot_dbc)
 
     CreatureCreatePos pos(m_caster, m_caster->GetOrientation(), 2.0f, angle);
 
+    CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(m_spellInfo->EffectMiscValue[eff_idx]);
+    if (!cinfo)
+    {
+        sLog.outErrorDb("Creature entry %u does not exist but used in spell %u totem summon.", m_spellInfo->Id, m_spellInfo->EffectMiscValue[eff_idx]);
+        return;
+    }
+
     Totem* pTotem = new Totem;
 
-    if (!pTotem->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, m_spellInfo->EffectMiscValue[eff_idx], m_caster))
+    if (!pTotem->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, cinfo, m_caster))
     {
         delete pTotem;
         return;
@@ -7637,8 +7664,7 @@ void Spell::DoSummonTotem(SpellEffectIndex eff_idx, uint8 slot_dbc)
     pTotem->SetOwner(m_caster);
     pTotem->SetTypeBySummonSpell(m_spellInfo);              // must be after Create call where m_spells initialized
 
-    int32 duration = CalculateSpellDuration(m_spellInfo, m_caster);
-    pTotem->SetDuration(duration);
+    pTotem->SetDuration(m_duration);
 
     if (damage)                                             // if not spell info, DB values used
     {
@@ -7664,7 +7690,7 @@ void Spell::DoSummonTotem(SpellEffectIndex eff_idx, uint8 slot_dbc)
         WorldPacket data(SMSG_TOTEM_CREATED, 1 + 8 + 4 + 4);
         data << uint8(slot);
         data << pTotem->GetObjectGuid();
-        data << uint32(duration);
+        data << uint32(m_duration);
         data << uint32(m_spellInfo->Id);
         ((Player*)m_caster)->SendDirectMessage(&data);
     }
@@ -8107,6 +8133,13 @@ void Spell::DoSummonCritter(SpellEffectIndex eff_idx, uint32 forceFaction)
     if(!pet_entry)
         return;
 
+    CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(pet_entry);
+    if (!cInfo)
+    {
+        sLog.outErrorDb("Spell::DoSummonCritter: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->Id);
+        return;
+    }
+
     Pet* old_critter = m_caster->GetMiniPet();
 
     // for same pet just despawn (player unsummon command)
@@ -8129,7 +8162,7 @@ void Spell::DoSummonCritter(SpellEffectIndex eff_idx, uint32 forceFaction)
 
     Map *map = m_caster->GetMap();
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
-    if (!critter->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), pos, pet_entry, pet_number))
+    if (!critter->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, pet_number))
     {
         sLog.outError("Spell::EffectSummonCritter, spellid %u: no such creature entry %u", m_spellInfo->Id, pet_entry);
         delete critter;
@@ -8229,8 +8262,9 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
         return;
     if(damage < 0)
         return;
-    pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
-    pet->RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+
+    pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
+    pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
     pet->SetDeathState( ALIVE );
     pet->clearUnitState(UNIT_STAT_ALL_STATE);
     pet->SetHealth( uint32(pet->GetMaxHealth()*(float(damage)/100)));

@@ -49,6 +49,13 @@
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
 
+
+HighGuid CreatureData::GetHighGuid() const
+{
+    // info existence checked at loading
+    return ObjectMgr::GetCreatureTemplate(id)->GetHighGuid();
+}
+
 TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
 {
     TrainerSpellMap::const_iterator itr = spellList.find(spell_id);
@@ -488,7 +495,7 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                 CreatureInfo const *cinfo = GetCreatureInfo();
 
                 SelectLevel(cinfo);
-                SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
+                SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
                 if (m_isDeadByDefault)
                 {
                     SetDeathState(JUST_DIED);
@@ -585,22 +592,7 @@ void Creature::Update(uint32 update_diff, uint32 diff)
             // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
             if(!isAlive())
                 break;
-            if(m_regenTimer > 0)
-            {
-                if(update_diff >= m_regenTimer)
-                    m_regenTimer = 0;
-                else
-                    m_regenTimer -= update_diff;
-            }
-            if (m_regenTimer != 0)
-                break;
-
-            if (!isInCombat() || IsPolymorphed())
-                RegenerateHealth();
-
-            RegenerateMana();
-
-            m_regenTimer = REGEN_TIME_FULL;
+            RegenerateAll(update_diff);
             break;
         }
         case CORPSE_FALLING:
@@ -628,6 +620,26 @@ void Creature::StopGroupLoot()
 
     m_groupLootTimer = 0;
     m_groupLootId = 0;
+}
+
+void Creature::RegenerateAll(uint32 update_diff)
+{
+    if (m_regenTimer > 0)
+    {
+        if(update_diff >= m_regenTimer)
+            m_regenTimer = 0;
+        else
+            m_regenTimer -= update_diff;
+    }
+    if (m_regenTimer != 0)
+        return;
+
+    if (!isInCombat() || IsPolymorphed())
+        RegenerateHealth();
+
+    RegenerateMana();
+
+    m_regenTimer = REGEN_TIME_FULL;
 }
 
 void Creature::RegenerateMana()
@@ -728,12 +740,12 @@ bool Creature::AIM_Initialize()
     return true;
 }
 
-bool Creature::Create(uint32 guidlow, CreatureCreatePos& cPos, uint32 Entry, Team team /*= TEAM_NONE*/, const CreatureData *data /*= NULL*/, GameEventCreatureData const* eventData /*= NULL*/)
+bool Creature::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, Team team /*= TEAM_NONE*/, const CreatureData *data /*= NULL*/, GameEventCreatureData const* eventData /*= NULL*/)
 {
     SetMap(cPos.GetMap());
     SetPhaseMask(cPos.GetPhaseMask(), false);
 
-    if (!CreateFromProto(guidlow, Entry, team, data, eventData))
+    if (!CreateFromProto(guidlow, cinfo, team, data, eventData))
         return false;
 
     cPos.SelectFinalPoint(this);
@@ -1234,19 +1246,13 @@ float Creature::GetSpellDamageMod(int32 Rank)
     }
 }
 
-bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, Team team, const CreatureData *data /*=NULL*/, GameEventCreatureData const* eventData /*=NULL*/)
+bool Creature::CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, Team team, const CreatureData *data /*=NULL*/, GameEventCreatureData const* eventData /*=NULL*/)
 {
-    CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(Entry);
-    if(!cinfo)
-    {
-        sLog.outErrorDb("Creature entry %u does not exist.", Entry);
-        return false;
-    }
-    m_originalEntry = Entry;
+    m_originalEntry = cinfo->Entry;
 
-    Object::_Create(guidlow, Entry, HIGHGUID_UNIT);
+    Object::_Create(guidlow, cinfo->Entry, cinfo->GetHighGuid());
 
-    if (!UpdateEntry(Entry, team, data, eventData, false))
+    if (!UpdateEntry(cinfo->Entry, team, data, eventData, false))
         return false;
 
     return true;
@@ -1262,15 +1268,22 @@ bool Creature::LoadFromDB(uint32 guidlow, Map *map)
         return false;
     }
 
+    CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(data->id);
+    if(!cinfo)
+    {
+        sLog.outErrorDb("Creature (Entry: %u) not found in table `creature_template`, can't load. ", data->id);
+        return false;
+    }
+
     GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(guidlow);
 
     // Creature can be loaded already in map if grid has been unloaded while creature walk to another grid
-    if (map->GetCreature(ObjectGuid(HIGHGUID_UNIT, data->id, guidlow)))
+    if (map->GetCreature(data->GetObjectGuid(guidlow)))
         return false;
 
     CreatureCreatePos pos(map, data->posX, data->posY, data->posZ, data->orientation, data->phaseMask);
 
-    if (!Create(guidlow, pos, data->id, TEAM_NONE, data, eventData))
+    if (!Create(guidlow, pos, cinfo, TEAM_NONE, data, eventData))
         return false;
 
     m_respawnradius = data->spawndist;
@@ -1377,24 +1390,30 @@ struct CreatureRespawnDeleteWorker
 
 void Creature::DeleteFromDB()
 {
-    if (!HasStaticDBSpawnData())
+    CreatureData const* data = sObjectMgr.GetCreatureData(GetGUIDLow());
+    if (!data)
     {
         DEBUG_LOG("Trying to delete not saved creature!");
         return;
     }
 
-    CreatureRespawnDeleteWorker worker (GetGUIDLow());
-    sMapPersistentStateMgr.DoForAllStatesWithMapId(GetMapId(), worker);
+    DeleteFromDB(GetGUIDLow(), data);
+}
 
-    sObjectMgr.DeleteCreatureData(GetGUIDLow());
+void Creature::DeleteFromDB(uint32 lowguid, CreatureData const* data)
+{
+    CreatureRespawnDeleteWorker worker (lowguid);
+    sMapPersistentStateMgr.DoForAllStatesWithMapId(data->mapid, worker);
+
+    sObjectMgr.DeleteCreatureData(lowguid);
 
     WorldDatabase.BeginTransaction();
-    WorldDatabase.PExecuteLog("DELETE FROM creature WHERE guid=%u", GetGUIDLow());
-    WorldDatabase.PExecuteLog("DELETE FROM creature_addon WHERE guid=%u", GetGUIDLow());
-    WorldDatabase.PExecuteLog("DELETE FROM creature_movement WHERE id=%u", GetGUIDLow());
-    WorldDatabase.PExecuteLog("DELETE FROM game_event_creature WHERE guid=%u", GetGUIDLow());
-    WorldDatabase.PExecuteLog("DELETE FROM game_event_creature_data WHERE guid=%u", GetGUIDLow());
-    WorldDatabase.PExecuteLog("DELETE FROM creature_battleground WHERE guid=%u", GetGUIDLow());
+    WorldDatabase.PExecuteLog("DELETE FROM creature WHERE guid=%u", lowguid);
+    WorldDatabase.PExecuteLog("DELETE FROM creature_addon WHERE guid=%u", lowguid);
+    WorldDatabase.PExecuteLog("DELETE FROM creature_movement WHERE id=%u", lowguid);
+    WorldDatabase.PExecuteLog("DELETE FROM game_event_creature WHERE guid=%u", lowguid);
+    WorldDatabase.PExecuteLog("DELETE FROM game_event_creature_data WHERE guid=%u", lowguid);
+    WorldDatabase.PExecuteLog("DELETE FROM creature_battleground WHERE guid=%u", lowguid);
     WorldDatabase.CommitTransaction();
 }
 
@@ -1470,13 +1489,12 @@ void Creature::SetDeathState(DeathState s)
 
     if (s == JUST_ALIVED)
     {
+        CreatureInfo const *cinfo = GetCreatureInfo();
+
         SetHealth(GetMaxHealth());
         SetLootRecipient(NULL);
-        CreatureInfo const *cinfo = GetCreatureInfo();
-        SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
-        RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+
         AddSplineFlag(SPLINEFLAG_WALKMODE);
-        SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
 
         if (GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_RESPAWN)
             ClearTemporaryFaction();
@@ -1485,8 +1503,18 @@ void Creature::SetDeathState(DeathState s)
 
         clearUnitState(UNIT_STAT_ALL_STATE);
         i_motionMaster.Clear();
+
         SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
+
+        // Dynamic flags may be adjusted by spells. Clear them
+        // first and let spell from *addon apply where needed.
+        SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
         LoadCreatureAddon(true);
+
+        // Flags after LoadCreatureAddon. Any spell in *addon
+        // will not be able to adjust these.
+        SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
     }
 }
 
@@ -1935,19 +1963,19 @@ bool Creature::LoadCreatureAddon(bool reload)
 
     if(cainfo->auras)
     {
-        for (CreatureDataAddonAura const* cAura = cainfo->auras; cAura->spell_id; ++cAura)
+        for (uint32 const* cAura = cainfo->auras; *cAura; ++cAura)
         {
-            SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(cAura->spell_id);
+            SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(*cAura);
             if (!AdditionalSpellInfo)
             {
-                sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong spell %u defined in `auras` field.",GetGUIDLow(),GetEntry(),cAura->spell_id);
+                sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong spell %u defined in `auras` field.",GetGUIDLow(),GetEntry(), *cAura);
                 continue;
             }
 
-            if (HasAura(cAura->spell_id))
+            if (HasAura(*cAura))
             {
-                if(!reload)
-                    sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u) has duplicate spell %u in `auras` field.", GetGUIDLow(), GetEntry(), cAura->spell_id);
+                if (!reload)
+                    sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u) has duplicate spell %u in `auras` field.", GetGUIDLow(), GetEntry(), *cAura);
 
                 continue;
             }
@@ -2134,11 +2162,7 @@ void Creature::GetRespawnCoord( float &x, float &y, float &z, float* ori, float*
     }
 
     //lets check if our creatures have valid spawn coordinates
-    if(!MaNGOS::IsValidMapCoord(x, y, z))
-    {
-        sLog.outError("Creature with invalid respawn coordinates: mapid = %u, guid = %u, x = %f, y = %f, z = %f", GetMapId(), GetGUIDLow(), x, y, z);
-        MANGOS_ASSERT(false);
-    }
+    MANGOS_ASSERT(MaNGOS::IsValidMapCoord(x, y, z) || PrintCoordinatesError(x, y, z, "respawn"));
 }
 
 void Creature::AllLootRemovedFromCorpse()
@@ -2427,7 +2451,7 @@ struct AddCreatureToRemoveListInMapsWorker
 
 void Creature::AddToRemoveListInMaps(uint32 db_guid, CreatureData const* data)
 {
-    AddCreatureToRemoveListInMapsWorker worker(ObjectGuid(HIGHGUID_UNIT, data->id, db_guid));
+    AddCreatureToRemoveListInMapsWorker worker(data->GetObjectGuid(db_guid));
     sMapMgr.DoForAllMapsWithMapId(data->mapid, worker);
 }
 
