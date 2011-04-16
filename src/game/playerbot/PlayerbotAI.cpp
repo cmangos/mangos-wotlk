@@ -3751,6 +3751,19 @@ void PlayerbotAI::findNearbyCreature()
                                             }
                                             break;
                                         }
+                                        // repair items
+                                        case REPAIR:
+                                        {
+                                            // TellMaster("Repairing items");
+                                            if(Repair(ait->second, currCreature))
+                                            {
+                                                ait = m_tasks.erase(ait);
+                                                itr= m_findNPC.erase(itr);
+                                                m_bot->GetMotionMaster()->Clear();
+                                                m_bot->GetMotionMaster()->MoveIdle();
+                                            }
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -4089,6 +4102,21 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
     }
     else if (item->GetProto()->SellPrice > 0)
         MakeItemLink(item, canSell, false);
+}
+
+bool PlayerbotAI::Repair(const uint32 itemid, Creature* rCreature)
+{
+    Item* rItem = FindItem(itemid); // if item equipped or in bags
+    uint8 IsInGuild = (m_bot->GetGuildId() != 0) ? uint8(1) : uint8(0);
+    ObjectGuid itemGuid = (rItem) ? rItem->GetObjectGuid() : ObjectGuid();
+
+    WorldPacket* const packet = new WorldPacket(CMSG_REPAIR_ITEM, 8+8+1);
+    *packet << rCreature->GetObjectGuid();  // repair npc guid
+    *packet << itemGuid; // if item specified then repair this, else repair all
+    *packet << IsInGuild;  // guildbank yes=1 no=0
+    m_bot->GetSession()->QueuePacket(packet);  // queue the packet to get around race condition
+
+    return true;
 }
 
 bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
@@ -4504,6 +4532,34 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
             m_tasks.push_back(std::pair<enum TaskFlags,uint32>(ADD, *it));
         m_findNPC.push_back(VENDOR_MASK);
+    }
+
+    // Handle repair items
+    // repair  all                      -- repair all bot(s) items
+    // repair [Item Link][Item Link] .. -- repair select bot(s) items
+    else if (text.size() >= 6 && text.substr(0, 6) == "repair")
+    {
+        std::string part = "";
+        std::string subcommand = "";
+
+        if (text.size() > 6 && text.substr(0, 7) == "repair ")
+            part = text.substr(7);  // Truncate 'repair ' part
+
+        if (part.find(" ") > 0)
+            subcommand = part.substr(0, part.find(" "));
+
+        std::list<uint32> itemIds;
+        extractItemIds(part, itemIds);
+        for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+        {
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR, *it));
+            m_findNPC.push_back(UNIT_NPC_FLAG_REPAIR);
+        }
+        if(itemIds.empty() && subcommand == "all")
+        {
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR, 0));
+            m_findNPC.push_back(UNIT_NPC_FLAG_REPAIR);
+        }
     }
 
     // Handle auctions:

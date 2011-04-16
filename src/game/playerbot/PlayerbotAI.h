@@ -145,7 +145,8 @@ public:
         NONE                        = 0x00,
         LIST                        = 0x01,
         REMOVE                      = 0x02,
-        ADD                         = 0x04
+        ADD                         = 0x04,
+        REPAIR                      = 0x08
     };
 
     typedef std::pair<enum TaskFlags, uint32> taskPair;
@@ -359,6 +360,7 @@ public:
     bool AddAuction(const uint32 itemid, Creature* aCreature);
     bool ListAuctions();
     bool RemoveAuction(const uint32 auctionid);
+    bool Repair(const uint32 itemid, Creature* rCreature);
 
 private:
     // ****** Closed Actions ********************************
