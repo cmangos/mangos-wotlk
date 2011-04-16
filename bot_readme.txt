@@ -42,6 +42,8 @@ Commands:
 /t BOTNAME auction (bot will display all it's active owned auctions. Auction info will include an <AUCTION LINK> )
 /t BOTNAME auction add <ITEM LINK> (bot will add item to it's m_itemIds, for later auction)
 /t BOTNAME auction remove <AUCTION LINK> (bot will add auctionid to it's m_auctions, for later auction cancellation)
+/t BOTNAME repair <ITEM LINK> (bot will seek out armourer and repair selected items specified by <ITEM LINK> )
+/t BOTNAME repair all (bot(s) will seek out armourer and repair all damaged items equipped, or in bags )
 
 Shortcuts:
 c = cast
@@ -99,14 +101,9 @@ Creature interaction with bots:
 
 Repair with bots:
 =================
-
-  The bot(s) can now be repaired, as the player repairs. You can decide whether you wish the bot(s) to pay for
-  their own repair or if available, use the guild bank. Choose the appropriate repair 'Anvil' at your local
-  NPC. Only group bot(s) members can be repaired. If you wish to exclude certain bot(s) from repair, then
-  temporarily uninvite bot(s) from the group.
-
-  Limitations: Bot(s) cannot repair individual items.
-               If the player does not require repair, you cannot repair bot(s).
+  
+  bot(s) can now repair <all or selected> items, either equipped or in bags. If the bot(s) is a member of a guild, then they pay
+  else the bot(s) pays. If the bot(s) cannot pay for the repair, they remain damaged.
 
   The new 'stats' command provides useful information to help in the repair decision.
 
