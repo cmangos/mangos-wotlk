@@ -2739,7 +2739,7 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
     }
     else
     {
-        if(!m_itemIds.empty())
+        if(!m_findNPC.empty())
             findNearbyCreature();
 
         // if we are casting a spell then interrupt it
@@ -3104,11 +3104,11 @@ bool PlayerbotAI::CanReceiveSpecificSpell(uint8 spec, Unit* target) const
 
 Item* PlayerbotAI::FindItem(uint32 ItemId)
 {
-    // list out items in main backpack
+    // list out items equipped & in main backpack
     //INVENTORY_SLOT_ITEM_START = 23
     //INVENTORY_SLOT_ITEM_END = 39
 
-    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
+    for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
     {
         // sLog.outDebug("[%s's]backpack slot = %u",m_bot->GetName(),slot); // 23 to 38 = 16
         Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);  // 255, 23 to 38
@@ -3699,11 +3699,11 @@ void PlayerbotAI::findNearbyCreature()
     {
         Creature* currCreature = *iter;
 
-        for(std::list<itemPair>::iterator itr = m_itemIds.begin(); itr != m_itemIds.end(); ++itr)
+        for(std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end(); ++itr)
         {
             uint32 npcflags = currCreature->GetUInt32Value(UNIT_NPC_FLAGS);
 
-            if(!(itr->first & npcflags))
+            if(!(*itr & npcflags))
                 continue;
 
             WorldObject *wo = m_bot->GetMap()->GetWorldObject(currCreature->GetObjectGuid());
@@ -3731,37 +3731,21 @@ void PlayerbotAI::findNearbyCreature()
                     {
                         case GOSSIP_OPTION_VENDOR:
                         {
-                            if(Sell(itr->second))
+                            // Manage vendor actions
+                            if(!m_tasks.empty())
                             {
-                                itr = m_itemIds.erase(itr);
-                                m_bot->GetMotionMaster()->Clear();
-                                m_bot->GetMotionMaster()->MoveIdle();
-                            }
-                            break;
-                        }
-                        case GOSSIP_OPTION_AUCTIONEER:
-                        {
-
-                            // Add new auction items
-                            if(AddAuction(itr->second, currCreature))
-                            {
-                                itr = m_itemIds.erase(itr);
-                                m_bot->GetMotionMaster()->Clear();
-                                m_bot->GetMotionMaster()->MoveIdle();
-                            }
-
-                            // Manage auction items
-                            if(!m_auctions.empty())
-                            {
-                                for(std::list<auctionPair>::iterator ait = m_auctions.begin(); ait != m_auctions.end(); ++ait)
+                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ++ait)
                                 {
                                     switch(ait->first)
                                     {
-                                        case REMOVE:
+                                        // sell items
+                                        case ADD:
                                         {
-                                            if(RemoveAuction(ait->second))
+                                            // TellMaster("Selling items");
+                                            if(Sell(ait->second))
                                             {
-                                                ait = m_auctions.erase(ait);
+                                                ait = m_tasks.erase(ait);
+                                                itr = m_findNPC.erase(itr);
                                                 m_bot->GetMotionMaster()->Clear();
                                                 m_bot->GetMotionMaster()->MoveIdle();
                                             }
@@ -3770,7 +3754,40 @@ void PlayerbotAI::findNearbyCreature()
                                     }
                                 }
                             }
+                            break;
+                        }
+                        case GOSSIP_OPTION_AUCTIONEER:
+                        {
+                            // Manage auctioneer actions
+                            if(!m_tasks.empty())
+                            {
+                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ++ait)
+                                {
+                                    switch(ait->first)
+                                    {
+                                        // add new auction item
+                                        case ADD:
+                                        {
+                                            // TellMaster("Creating auction");
+                                            if(AddAuction(ait->second, currCreature))
+                                                ait = m_tasks.erase(ait);
+                                            break;
+                                        }
+                                        // cancel active auction
+                                        case REMOVE:
+                                        {
+                                            // TellMaster("Cancelling auction");
+                                            if(RemoveAuction(ait->second))
+                                                ait = m_tasks.erase(ait);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
                             ListAuctions();
+                            itr= m_findNPC.erase(itr);
+                            m_bot->GetMotionMaster()->Clear();
+                            m_bot->GetMotionMaster()->MoveIdle();
                             break;
                         }
                     }
@@ -4136,7 +4153,6 @@ bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
     return true; // remove auction item from list m_auction;
 }
 
-
 bool PlayerbotAI::ListAuctions()
 {
     DEBUG_LOG("PlayerbotAI: ListAuctions");
@@ -4165,41 +4181,43 @@ bool PlayerbotAI::ListAuctions()
 
             tm* aTm = gmtime(&remtime);
 
-            Item* aItem = sAuctionMgr.GetAItem(item_guidlow);
-            if(aItem)
+            if(exptime > currtime)
             {
-                // Name
-                uint32 count = aItem->GetCount();
-                std::string name = aItem->GetProto()->Name1;
-                ItemLocalization(name, item_template);
-                report << "\n|cffffffff|Htitle:" << Id << "|h[" << name;
-                if(count > 1)
-                    report << "|cff00ff00x" << count << "|cffffffff" << "]|h|r";
-                else
-                    report << "]|h|r";
+                Item* aItem = sAuctionMgr.GetAItem(item_guidlow);
+                if(aItem)
+                {
+                    // Name
+                    uint32 count = aItem->GetCount();
+                    std::string name = aItem->GetProto()->Name1;
+                    ItemLocalization(name, item_template);
+                    report << "\n|cffffffff|Htitle:" << Id << "|h[" << name;
+                    if(count > 1)
+                        report << "|cff00ff00x" << count << "|cffffffff" << "]|h|r";
+                    else
+                        report << "]|h|r";
+                }
+
+                if(bidder)
+                {
+                    ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, bidder);
+                    std::string bidder_name;
+                    if(sObjectMgr.GetPlayerNameByGUID(guid, bidder_name))
+                    report << " " << bidder_name << ": ";
+
+                    uint32 gold = uint32(bid / 10000);
+                    bid -= (gold * 10000);
+                    uint32 silver = uint32(bid / 100);
+                    bid -= (silver * 100);
+
+                    if (gold > 0)
+                        report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+                    if (silver > 0)
+                        report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+                    report << bid << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+                }
+                if(aItem)
+                    report << " ends: " << aTm->tm_hour << "|cff0070dd|hH|h|r " << aTm->tm_min << "|cff0070dd|hmin|h|r";
             }
-
-            if(bidder)
-            {
-                ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, bidder);
-                std::string bidder_name;
-                if(sObjectMgr.GetPlayerNameByGUID(guid, bidder_name))
-                report << " " << bidder_name << ": ";
-
-                uint32 gold = uint32(bid / 10000);
-                bid -= (gold * 10000);
-                uint32 silver = uint32(bid / 100);
-                bid -= (silver * 100);
-
-                if (gold > 0)
-                    report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
-                if (silver > 0)
-                    report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-                report << bid << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
-            }
-            if(aItem)
-                report << " ends: " << aTm->tm_hour << "|cff0070dd|hH|h|r " << aTm->tm_min << "|cff0070dd|hmin|h|r";
-
         } while (result->NextRow());
 
         delete result;
@@ -4212,9 +4230,6 @@ bool PlayerbotAI::ListAuctions()
 bool PlayerbotAI::AddAuction(const uint32 itemid, Creature* aCreature)
 {
     DEBUG_LOG("PlayerbotAI: AddAuction");
-
-    if (m_itemIds.empty())
-        return false;                                             // check for cheaters
 
     Item* aItem = FindItem(itemid);
     if(aItem)
@@ -4249,9 +4264,6 @@ bool PlayerbotAI::AddAuction(const uint32 itemid, Creature* aCreature)
 
 bool PlayerbotAI::Sell(const uint32 itemid)
 {
-    if(m_itemIds.empty())
-        return false;
-
     Item* pItem = FindItem(itemid);
     if(pItem)
     {
@@ -4345,12 +4357,6 @@ void PlayerbotAI::SellGarbage(bool verbose)
         TellMaster(report.str());
     }
     return;
-}
-
-void PlayerbotAI::Vend(enum NPCFlags npcflags, std::list<uint32>& itemIds)
-{
-     for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-         m_itemIds.push_back(std::pair<enum NPCFlags,uint32>(npcflags, *it));
 }
 
 // handle commands sent through chat channels
@@ -4495,7 +4501,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
         std::list<uint32> itemIds;
         extractItemIds(text, itemIds);
-        Vend(VENDOR_MASK, itemIds);
+        for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(ADD, *it));
+        m_findNPC.push_back(VENDOR_MASK);
     }
 
     // Handle auctions:
@@ -4525,7 +4533,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             {
                 std::list<uint32> itemIds;
                 extractItemIds(part, itemIds);
-                Vend(UNIT_NPC_FLAG_AUCTIONEER, itemIds);
+                for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(ADD, *it));
+                m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
             }
 
             if(subcommand == "remove")
@@ -4533,16 +4543,12 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 std::list<uint32> auctionIds;
                 extractAuctionIds(part, auctionIds);
                 for (std::list<uint32>::iterator it = auctionIds.begin(); it != auctionIds.end(); ++it)
-                    m_auctions.push_back(std::pair<enum ActionFlags,uint32>(REMOVE, *it));
-                // add dumby item to m_itemIds, to seek out auctioneer.
-                m_itemIds.push_back(std::pair<enum NPCFlags,uint32>(UNIT_NPC_FLAG_AUCTIONEER, 0));
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REMOVE, *it));
+                m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
             }
         }
         else // list all bot auctions
-        {
-            // add dumby item to m_itemIds, to seek out auctioneer.
-            m_itemIds.push_back(std::pair<enum NPCFlags,uint32>(UNIT_NPC_FLAG_AUCTIONEER, 0));
-        }
+            m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
     }
 
     // use items

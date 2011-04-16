@@ -140,17 +140,17 @@ public:
         MOVEMENT_STAY               = 0x02
     };
 
-    enum ActionFlags
+    enum TaskFlags
     {
         NONE                        = 0x00,
         LIST                        = 0x01,
-        REMOVE                      = 0x02
+        REMOVE                      = 0x02,
+        ADD                         = 0x04
     };
 
-    typedef std::pair<enum NPCFlags, uint32> itemPair;
-    typedef std::pair<enum ActionFlags, uint32> auctionPair;
-    typedef std::list<itemPair> BotItemList;
-    typedef std::list<auctionPair> BotAuctionList;
+    typedef std::pair<enum TaskFlags, uint32> taskPair;
+    typedef std::list<taskPair> BotTaskList;
+    typedef std::list<enum NPCFlags> BotNPCList;
     typedef std::map<uint32, uint32> BotNeedItem;
     typedef std::list<uint64> BotLootCreature;
     typedef std::list<uint32> BotLootEntry;
@@ -355,7 +355,6 @@ public:
 
     uint8 GetFreeBagSpace() const;
     void SellGarbage(bool verbose = true);
-    void Vend(enum NPCFlags npcflags, std::list<uint32>& itemIds);
     bool Sell(const uint32 itemid);
     bool AddAuction(const uint32 itemid, Creature* aCreature);
     bool ListAuctions();
@@ -399,8 +398,8 @@ private:
     BotNeedItem m_needItemList;
 
     // list of creatures we recently attacked and want to loot
-    BotItemList m_itemIds;              // list of items
-    BotAuctionList m_auctions;          // list of active auctions
+    BotNPCList m_findNPC;               // list of NPCs
+    BotTaskList m_tasks;                // list of tasks
     BotLootCreature m_lootTargets;      // list of creatures
     BotSpellList m_spellsToLearn;       // list of spells
     ObjectGuid m_lootCurrent;           // current remains of interest
