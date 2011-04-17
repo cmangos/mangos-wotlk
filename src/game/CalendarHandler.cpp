@@ -26,19 +26,19 @@
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_GET_CALENDAR");     // empty
+    DEBUG_LOG("WORLD: CMSG_CALENDAR_GET_CALENDAR");         // empty
 
     time_t cur_time = time(NULL);
 
-    WorldPacket data(SMSG_CALENDAR_SEND_CALENDAR,4+4*0+4+4*0+4+4);
+    WorldPacket data(SMSG_CALENDAR_SEND_CALENDAR, 4+4*0+4+4*0+4+4);
 
     // TODO: calendar invite event output
-    data << (uint32) 0;                                     //invite node count
+    data << (uint32) 0;                                     // invite node count
     // TODO: calendar event output
-    data << (uint32) 0;                                     //event count
+    data << (uint32) 0;                                     // event count
 
-    data << (uint32) 0;                                     //wtf??
-    data << (uint32) secsToTimeBitFields(cur_time);         // current time
+    data << (uint32) 0;                                     // Current Unix Time?
+    data << (uint32) secsToTimeBitFields(cur_time);         // current packed time
 
     uint32 counter = 0;
     size_t p_counter = data.wpos();
@@ -61,9 +61,30 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
     }
     data.put<uint32>(p_counter,counter);
 
-    data << (uint32) 1135753200;                            //wtf?? (28.12.2005 12:00)
-    data << (uint32) 0;                                     //  unk counter 4
-    data << (uint32) 0;                                     // unk counter 5
+    data << (uint32) 1135753200;                            // base date (28.12.2005 12:00)
+    data << (uint32) 0;                                     // raid reset count
+    data << (uint32) 0;                                     // holidays count
+/*
+    for(uint32 i = 0; i < holidays_count; ++i)
+    {
+        data << uint32(0);                                  // Holidays.dbc ID
+        data << uint32(0);                                  // Holidays.dbc region
+        data << uint32(0);                                  // Holidays.dbc looping
+        data << uint32(0);                                  // Holidays.dbc priority
+        data << uint32(0);                                  // Holidays.dbc calendarFilterType
+
+        for(uint32 j = 0; j < 26; j++)
+            data << uint32(0);                              // Holidays.dbc date
+
+        for(uint32 j = 0; j < 10; j++)
+            data << uint32(0);                              // Holidays.dbc duration
+
+        for(uint32 j = 0; j < 10; j++)
+            data << uint32(0);                              // Holidays.dbc calendarFlags
+
+        data << "";                                         // Holidays.dbc textureFilename
+    }
+*/
     //DEBUG_LOG("Sending calendar");
     //data.hexlike();
     SendPacket(&data);
@@ -194,7 +215,6 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket &recv_data)
     //recv_data >> uint64
     //recv_data >> uint64
     //recv_data >> uint32
-
 }
 
 void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket &recv_data)
@@ -248,7 +268,7 @@ void WorldSession::HandleCalendarComplain(WorldPacket &recv_data)
 
 void WorldSession::HandleCalendarGetNumPending(WorldPacket & /*recv_data*/)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_GET_NUM_PENDING");  // empty
+    DEBUG_LOG("WORLD: CMSG_CALENDAR_GET_NUM_PENDING");      // empty
 
     WorldPacket data(SMSG_CALENDAR_SEND_NUM_PENDING, 4);
     data << uint32(0);                                      // 0 - no pending invites, 1 - some pending invites

@@ -101,7 +101,7 @@ Creature interaction with bots:
 
 Repair with bots:
 =================
-  
+
   bot(s) can now repair <all or selected> items, either equipped or in bags. If the bot(s) is a member of a guild, then they pay
   else the bot(s) pays. If the bot(s) cannot pay for the repair, they remain damaged.
 
