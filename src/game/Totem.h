@@ -33,6 +33,7 @@ class Totem : public Creature
     public:
         explicit Totem();
         virtual ~Totem(){};
+        bool Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, Unit* owner);
         void Update(uint32 update_diff,  uint32 time );
         void Summon(Unit* owner);
         void UnSummon();

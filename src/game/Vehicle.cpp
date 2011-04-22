@@ -61,13 +61,19 @@ void Vehicle::Update( uint32 update_diff, uint32 diff)
     Creature::Update(update_diff, diff);
 }
 
-bool Vehicle::Create(uint32 guidlow, Map *map, uint32 Entry, uint32 vehicleId, Team team)
+bool Vehicle::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, uint32 vehicleId, Team team)
 {
-    SetMap(map);
+    SetMap(cPos.GetMap());
+    SetPhaseMask(cPos.GetPhaseMask(), false);
 
-    Object::_Create(guidlow, Entry, HIGHGUID_VEHICLE);
+    Object::_Create(guidlow, cinfo->Entry, HIGHGUID_VEHICLE);
 
-    if(!InitEntry(Entry))
+    if (!InitEntry(cinfo->Entry))
+        return false;
+
+    cPos.SelectFinalPoint(this);
+
+    if (!cPos.Relocate(this))
         return false;
 
     m_defaultMovementType = IDLE_MOTION_TYPE;

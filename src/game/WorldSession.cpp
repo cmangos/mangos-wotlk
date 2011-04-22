@@ -240,10 +240,10 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 
                     // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
 
-					// playerbot mod
-					if (_player && _player->GetPlayerbotMgr())
-						_player->GetPlayerbotMgr()->HandleMasterIncomingPacket(*packet);
-					// playerbot mod end
+                    // playerbot mod
+                    if (_player && _player->GetPlayerbotMgr())
+                        _player->GetPlayerbotMgr()->HandleMasterIncomingPacket(*packet);
+                    // playerbot mod end
                     break;
                 case STATUS_LOGGEDIN_OR_RECENTLY_LOGGEDOUT:
                     if(!_player && !m_playerRecentlyLogout)
@@ -467,8 +467,13 @@ void WorldSession::LogoutPlayer(bool Save)
         ///- Reset the online field in the account table
         // no point resetting online in character table here as Player::SaveToDB() will set it to 1 since player has not been removed from world at this stage
         // No SQL injection as AccountID is uint32
+        static SqlStatementID id;
+
         if (! _player->GetPlayerbotAI())
-            LoginDatabase.PExecute("UPDATE account SET active_realm_id = 0 WHERE id = '%u'", GetAccountId());
+        {
+            SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
+            stmt.PExecute(uint32(0), GetAccountId());
+        }
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
         if (Guild *guild = sObjectMgr.GetGuildById(_player->GetGuildId()))
@@ -543,8 +548,11 @@ void WorldSession::LogoutPlayer(bool Save)
         WorldPacket data( SMSG_LOGOUT_COMPLETE, 0 );
         SendPacket( &data );
 
+        static SqlStatementID updChars;
+
         // Playerbot mod: commented out above and do this one instead
-        CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE guid = '%u'", guid);
+        SqlStatement stmt = CharacterDatabase.CreateStatement(updChars, "UPDATE characters SET online = 0 WHERE guid = ?");
+        stmt.PExecute(guid);
 
         DEBUG_LOG( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
     }
@@ -724,11 +732,17 @@ void WorldSession::SetAccountData(AccountDataType type, time_t time_, std::strin
     {
         uint32 acc = GetAccountId();
 
+        static SqlStatementID delId;
+        static SqlStatementID insId;
+
         CharacterDatabase.BeginTransaction ();
-        CharacterDatabase.PExecute("DELETE FROM account_data WHERE account='%u' AND type='%u'", acc, type);
-        std::string safe_data = data;
-        CharacterDatabase.escape_string(safe_data);
-        CharacterDatabase.PExecute("INSERT INTO account_data VALUES ('%u','%u','" UI64FMTD "','%s')", acc, type, uint64(time_), safe_data.c_str());
+
+        SqlStatement stmt = CharacterDatabase.CreateStatement(delId, "DELETE FROM account_data WHERE account=? AND type=?");
+        stmt.PExecute(acc, uint32(type));
+
+        stmt = CharacterDatabase.CreateStatement(insId, "INSERT INTO account_data VALUES (?,?,?,?)");
+        stmt.PExecute(acc, uint32(type), uint64(time_), data.c_str());
+
         CharacterDatabase.CommitTransaction ();
     }
     else
@@ -737,11 +751,17 @@ void WorldSession::SetAccountData(AccountDataType type, time_t time_, std::strin
         if(!m_GUIDLow)
             return;
 
+        static SqlStatementID delId;
+        static SqlStatementID insId;
+
         CharacterDatabase.BeginTransaction ();
-        CharacterDatabase.PExecute("DELETE FROM character_account_data WHERE guid='%u' AND type='%u'", m_GUIDLow, type);
-        std::string safe_data = data;
-        CharacterDatabase.escape_string(safe_data);
-        CharacterDatabase.PExecute("INSERT INTO character_account_data VALUES ('%u','%u','" UI64FMTD "','%s')", m_GUIDLow, type, uint64(time_), safe_data.c_str());
+
+        SqlStatement stmt = CharacterDatabase.CreateStatement(delId, "DELETE FROM character_account_data WHERE guid=? AND type=?");
+        stmt.PExecute(m_GUIDLow, uint32(type));
+
+        stmt = CharacterDatabase.CreateStatement(insId, "INSERT INTO character_account_data VALUES (?,?,?,?)");
+        stmt.PExecute(m_GUIDLow, uint32(type), uint64(time_), data.c_str());
+
         CharacterDatabase.CommitTransaction ();
     }
 
@@ -798,15 +818,32 @@ void WorldSession::SendTutorialsData()
 
 void WorldSession::SaveTutorialsData()
 {
+    static SqlStatementID updTutorial ;
+    static SqlStatementID insTutorial ;
+
     switch(m_tutorialState)
     {
         case TUTORIALDATA_CHANGED:
-            CharacterDatabase.PExecute("UPDATE character_tutorial SET tut0='%u', tut1='%u', tut2='%u', tut3='%u', tut4='%u', tut5='%u', tut6='%u', tut7='%u' WHERE account = '%u'",
-                m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7], GetAccountId());
+            {
+                SqlStatement stmt = CharacterDatabase.CreateStatement(updTutorial, "UPDATE character_tutorial SET tut0=?, tut1=?, tut2=?, tut3=?, tut4=?, tut5=?, tut6=?, tut7=? WHERE account = ?");
+                for (int i = 0; i < 8; ++i)
+                    stmt.addUInt32(m_Tutorials[i]);
+
+                stmt.addUInt32(GetAccountId());
+                stmt.Execute();
+            }
             break;
+
         case TUTORIALDATA_NEW:
-            CharacterDatabase.PExecute("INSERT INTO character_tutorial (account,tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
-                GetAccountId(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
+            {
+                SqlStatement stmt = CharacterDatabase.CreateStatement(insTutorial, "INSERT INTO character_tutorial (account,tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+                stmt.addUInt32(GetAccountId());
+                for (int i = 0; i < 8; ++i)
+                    stmt.addUInt32(m_Tutorials[i]);
+
+                stmt.Execute();
+            }
             break;
         case TUTORIALDATA_UNCHANGED:
             break;
@@ -951,7 +988,7 @@ void WorldSession::SetPlayer( Player *plr )
 void WorldSession::SendRedirectClient(std::string& ip, uint16 port)
 {
     uint32 ip2 = ACE_OS::inet_addr(ip.c_str());
-    WorldPacket pkt(SMSG_REDIRECT_CLIENT, 4 + 2 + 4 + 20);
+    WorldPacket pkt(SMSG_CONNECT_TO, 4 + 2 + 4 + 20);
 
     pkt << uint32(ip2);                                     // inet_addr(ipstr)
     pkt << uint16(port);                                    // port
