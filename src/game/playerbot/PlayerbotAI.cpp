@@ -3811,12 +3811,7 @@ void PlayerbotAI::findNearbyCreature()
                                         {
                                             // TellMaster("Selling items");
                                             if(Sell(ait->second))
-                                            {
                                                 ait = m_tasks.erase(ait);
-                                                itr = m_findNPC.erase(itr);
-                                                m_bot->GetMotionMaster()->Clear();
-                                                m_bot->GetMotionMaster()->MoveIdle();
-                                            }
                                             break;
                                         }
                                         // repair items
@@ -3824,16 +3819,14 @@ void PlayerbotAI::findNearbyCreature()
                                         {
                                             // TellMaster("Repairing items");
                                             if(Repair(ait->second, currCreature))
-                                            {
                                                 ait = m_tasks.erase(ait);
-                                                itr= m_findNPC.erase(itr);
-                                                m_bot->GetMotionMaster()->Clear();
-                                                m_bot->GetMotionMaster()->MoveIdle();
-                                            }
                                             break;
                                         }
                                     }
                                 }
+                                itr = m_findNPC.erase(itr); // all done lets go home
+                                m_bot->GetMotionMaster()->Clear();
+                                m_bot->GetMotionMaster()->MoveIdle();
                             }
                             break;
                         }
@@ -3866,7 +3859,7 @@ void PlayerbotAI::findNearbyCreature()
                                 }
                             }
                             ListAuctions();
-                            itr= m_findNPC.erase(itr);
+                            itr= m_findNPC.erase(itr); // all done lets go home
                             m_bot->GetMotionMaster()->Clear();
                             m_bot->GetMotionMaster()->MoveIdle();
                             break;
@@ -4385,10 +4378,7 @@ bool PlayerbotAI::Sell(const uint32 itemid)
             report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
         report << cost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
 
-        if(pItem->IsInBag())
-            return false;
-        else
-	    TellMaster(report.str());
+        TellMaster(report.str());
     }
 
     return true; // item either sold or not in bot inventory
