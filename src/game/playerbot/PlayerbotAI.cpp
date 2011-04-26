@@ -4270,7 +4270,7 @@ bool PlayerbotAI::ListAuctions()
 
             tm* aTm = gmtime(&remtime);
 
-            if(exptime > currtime)
+            if(expireTime > currtime)
             {
                 Item* aItem = sAuctionMgr.GetAItem(itemGuidLow);
                 if(aItem)
