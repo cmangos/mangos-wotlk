@@ -577,22 +577,22 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     out << "|cff1eff00|h" << action[Action] << " was successful|h|r";
                     break;
                 }
-                case AUCTION_INTERNAL_ERROR:
+                case AUCTION_ERR_DATABASE:
                 {
                     out << "|cffff0000|hWhile" << action[Action] << ", an internal error occured|h|r";
                     break;
                 }
-                case AUCTION_NOT_ENOUGHT_MONEY:
+                case AUCTION_ERR_NOT_ENOUGH_MONEY:
                 {
                     out << "|cffff0000|hWhile " << action[Action] << ", I didn't have enough money|h|r";
                     break;
                 }
-                case AUCTION_ITEM_NOT_FOUND:
+                case AUCTION_ERR_ITEM_NOT_FOUND:
                 {
                     out << "|cffff0000|hItem was not found!|h|r";
                     break;
                 }
-                case CANNOT_BID_YOUR_AUCTION_ERROR:
+                case AUCTION_ERR_BID_OWN:
                 {
                     out << "|cffff0000|hI cannot bid on my own auctions!|h|r";
                     break;
@@ -4196,11 +4196,11 @@ bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
         auction = new AuctionEntry;
         auction->Id = auctionid;
         uint32 houseid  = fields[0].GetUInt32();
-        auction->item_guidlow = fields[1].GetUInt32();
-        auction->item_template = fields[2].GetUInt32();
+        auction->itemGuidLow = fields[1].GetUInt32();
+        auction->itemTemplate = fields[2].GetUInt32();
         auction->owner = fields[3].GetUInt32();
         auction->buyout = fields[4].GetUInt32();
-        auction->expire_time = fields[5].GetUInt32();
+        auction->expireTime = fields[5].GetUInt32();
         auction->bidder = fields[6].GetUInt32();
         auction->bid = fields[7].GetUInt32();
         auction->startbid = fields[8].GetUInt32();
@@ -4209,11 +4209,11 @@ bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
 
         // check if sold item exists for guid
         // and item_template in fact (GetAItem will fail if problematic in result check in AuctionHouseMgr::LoadAuctionItems)
-        Item* pItem = sAuctionMgr.GetAItem(auction->item_guidlow);
+        Item* pItem = sAuctionMgr.GetAItem(auction->itemGuidLow);
         if (!pItem)
         {
             auction->DeleteFromDB();
-            sLog.outError("Auction %u has not a existing item : %u, deleted", auction->Id, auction->item_guidlow);
+            sLog.outError("Auction %u has not a existing item : %u, deleted", auction->Id, auction->itemGuidLow);
             delete auction;
             delete result;
             return true;
@@ -4223,15 +4223,15 @@ bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
 
         // Attempt send item back to owner
         std::ostringstream msgAuctionCanceledOwner;
-        msgAuctionCanceledOwner << auction->item_template << ":0:" << AUCTION_CANCELED << ":0:0";
+        msgAuctionCanceledOwner << auction->itemTemplate << ":0:" << AUCTION_CANCELED << ":0:0";
 
         // item will deleted or added to received mail list
         MailDraft(msgAuctionCanceledOwner.str(), "")    // TODO: fix body
             .AddItem(pItem)
             .SendMailTo(MailReceiver(ObjectGuid(HIGHGUID_PLAYER, auction->owner)), auction, MAIL_CHECK_MASK_COPIED);
 
-        if(sAuctionMgr.RemoveAItem(auction->item_guidlow))
-            m_bot->GetSession()->SendAuctionCommandResult(auction->Id, AUCTION_CANCEL, AUCTION_OK);
+        if(sAuctionMgr.RemoveAItem(auction->itemGuidLow))
+            m_bot->GetSession()->SendAuctionCommandResult(auction, AUCTION_REMOVED, AUCTION_OK);
 
         auction->DeleteFromDB();
 
@@ -4258,27 +4258,27 @@ bool PlayerbotAI::ListAuctions()
             Field *fields = result->Fetch();
 
             uint32 Id = fields[0].GetUInt32();
-            uint32 item_guidlow = fields[1].GetUInt32();
-            uint32 item_template = fields[2].GetUInt32();
-            time_t exptime = fields[3].GetUInt32();
+            uint32 itemGuidLow = fields[1].GetUInt32();
+            uint32 itemTemplate = fields[2].GetUInt32();
+            time_t expireTime = fields[3].GetUInt32();
             uint32 bidder = fields[4].GetUInt32();
             uint32 bid = fields[5].GetUInt32();
 
             // current time
             time_t currtime = time(NULL);
-            time_t remtime = exptime - currtime;
+            time_t remtime = expireTime - currtime;
 
             tm* aTm = gmtime(&remtime);
 
             if(exptime > currtime)
             {
-                Item* aItem = sAuctionMgr.GetAItem(item_guidlow);
+                Item* aItem = sAuctionMgr.GetAItem(itemGuidLow);
                 if(aItem)
                 {
                     // Name
                     uint32 count = aItem->GetCount();
                     std::string name = aItem->GetProto()->Name1;
-                    ItemLocalization(name, item_template);
+                    ItemLocalization(name, itemTemplate);
                     report << "\n|cffffffff|Htitle:" << Id << "|h[" << name;
                     if(count > 1)
                         report << "|cff00ff00x" << count << "|cffffffff" << "]|h|r";
