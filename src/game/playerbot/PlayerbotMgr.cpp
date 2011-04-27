@@ -458,6 +458,20 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             return;
         }
 
+        case CMSG_AREATRIGGER:
+        {
+            WorldPacket p(packet);
+
+            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+                Player* const bot = it->second;
+
+                p.rpos(0);         // reset reader
+                bot->GetSession()->HandleAreaTriggerOpcode(p);
+            }
+            return;
+        }
+
         case CMSG_QUESTGIVER_COMPLETE_QUEST:
         {
             WorldPacket p(packet);
