@@ -44,6 +44,9 @@ Commands:
 /t BOTNAME auction remove <AUCTION LINK> (bot will add auctionid to it's m_auctions, for later auction cancellation)
 /t BOTNAME repair <ITEM LINK> (bot will seek out armourer and repair selected items specified by <ITEM LINK> )
 /t BOTNAME repair all (bot(s) will seek out armourer and repair all damaged items equipped, or in bags )
+/t BOTNAME talent (Lists bot(s) active talents [TALENT LINK] & glyphs [GLYPH LINK], unspent talent points & cost to reset all talents)
+/t BOTNAME talent learn [TALENT LINK] .. (Learn selected talent from bot client 'inspect' dialog -> 'talent' tab or from talent command (shift click icon or link))
+/t BOTNAME talent reset (Resets all talents)
 
 Shortcuts:
 c = cast

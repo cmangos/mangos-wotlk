@@ -842,6 +842,72 @@ void Player::skill(std::list<uint32>& m_spellsToLearn)
     }
 }
 
+void Player::MakeTalentGlyphLink(std::ostringstream &out)
+{
+
+    // |cff4e96f7|Htalent:1396:4|h[Unleashed Fury]|h|r
+    // |cff66bbff|Hglyph:23:460|h[Glyph of Fortitude]|h|r
+
+    if(m_specsCount)
+    {
+        // loop through all specs (only 1 for now)
+        for(uint32 specIdx = 0; specIdx < m_specsCount; ++specIdx)
+        {
+            // find class talent tabs (all players have 3 talent tabs)
+            uint32 const* talentTabIds = GetTalentTabPages(getClass());
+
+            out << "\n" << "Active Talents ";
+
+            for(uint32 i = 0; i < 3; ++i)
+            {
+                uint32 talentTabId = talentTabIds[i];
+                for(PlayerTalentMap::iterator iter = m_talents[specIdx].begin(); iter != m_talents[specIdx].end(); ++iter)
+                {
+                    PlayerTalent talent = (*iter).second;
+
+                    if (talent.state == PLAYERSPELL_REMOVED)
+                        continue;
+
+                    // skip another tab talents
+                    if(talent.m_talentEntry->TalentTab != talentTabId)
+                        continue;
+
+                    TalentEntry const *talentInfo = sTalentStore.LookupEntry( talent.m_talentEntry->TalentID );
+
+                    SpellEntry const* spell_entry = sSpellStore.LookupEntry(talentInfo->RankID[talent.currentRank]);
+
+                    out << "|cff4e96f7|Htalent:" << talent.m_talentEntry->TalentID << ":" << talent.currentRank
+                    << " |h[" << spell_entry->SpellName[GetSession()->GetSessionDbcLocale()] << "]|h|r";
+                }
+            }
+
+            uint32 freepoints = 0;
+
+            out << " Unspent points : ";
+
+            if((freepoints = GetFreeTalentPoints()) > 0)
+                out << "|h|cff00ff00" << freepoints << "|h|r";
+            else
+                out << "|h|cffff0000" << freepoints << "|h|r";
+
+            out << "\n" << "Active Glyphs ";
+            // GlyphProperties.dbc
+            for(uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
+            {
+                GlyphPropertiesEntry const* glyph = sGlyphPropertiesStore.LookupEntry(m_glyphs[specIdx][i].GetId());
+                if(!glyph)
+                    continue;
+
+                SpellEntry const* spell_entry = sSpellStore.LookupEntry(glyph->SpellId);
+
+                out << "|cff66bbff|Hglyph:" << GetGlyphSlot(i) << ":" << m_glyphs[specIdx][i].GetId()
+                << " |h[" << spell_entry->SpellName[GetSession()->GetSessionDbcLocale()] << "]|h|r";
+
+            }
+        }
+    }
+}
+
 void Player::chompAndTrim(std::string& str)
 {
     while (str.length() > 0)

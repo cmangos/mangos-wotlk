@@ -3563,6 +3563,44 @@ void PlayerbotAI::extractSpellIdList(const std::string& text, BotSpellList& m_sp
     }
 }
 
+void PlayerbotAI::extractTalentIds(const std::string &text, std::list<talentPair> &talentIds) const
+{
+    // Link format:
+    // |color|Htalent:talent_id:rank|h[name]|h|r
+    // |cff4e96f7|Htalent:1396:4|h[Unleashed Fury]|h|r
+
+    uint8 pos = 0;
+    while(true)
+    {
+        int i = text.find("Htalent:", pos);
+        if (i == -1)
+           break;
+        pos = i + 8;
+        // DEBUG_LOG("extractTalentIds first pos %u i %u",pos,i);
+        // extract talent_id
+        int endPos = text.find(':', pos);
+        if (endPos == -1)
+           break;
+        // DEBUG_LOG("extractTalentId second endpos : %u pos : %u",endPos,pos);
+        std::string idC = text.substr(pos, endPos - pos);
+        uint32 id = atol(idC.c_str());
+        pos = endPos + 1;
+        // extract rank
+        endPos = text.find('|', pos);
+        if (endPos == -1)
+           break;
+        // DEBUG_LOG("extractTalentId third endpos : %u pos : %u",endPos,pos);
+        std::string rankC = text.substr(pos, endPos - pos);
+        uint32 rank = atol(rankC.c_str());
+        pos = endPos + 1;
+
+        // DEBUG_LOG("extractTalentId second id : %u  rank : %u",id,rank);
+
+        if (id)
+            talentIds.push_back(std::pair<uint32 ,uint32>(id, rank));
+    }
+}
+
 void PlayerbotAI::extractGOinfo(const std::string& text, std::list<uint64>& m_lootTargets) const
 {
 
@@ -3774,6 +3812,9 @@ void PlayerbotAI::findNearbyCreature()
             if(!(*itr & npcflags))
                 continue;
 
+            if((*itr == UNIT_NPC_FLAG_TRAINER_CLASS) && !currCreature->CanTrainAndResetTalentsOf(m_bot))
+                continue;
+
             WorldObject *wo = m_bot->GetMap()->GetWorldObject(currCreature->GetObjectGuid());
 
             if (m_bot->GetDistance(wo) > CONTACT_DISTANCE + wo->GetObjectBoundingRadius())
@@ -3797,6 +3838,32 @@ void PlayerbotAI::findNearbyCreature()
 
                     switch(it->second.option_id)
                     {
+                        case GOSSIP_OPTION_UNLEARNTALENTS:
+                        {
+                            // Manage class trainer actions
+                            if(!m_tasks.empty())
+                            {
+                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ++ait)
+                                {
+                                    switch(ait->first)
+                                    {
+                                        // reset talents
+                                        case RESET:
+                                        {
+                                            // TellMaster("Reset all talents");
+                                            if(Talent(currCreature))
+                                                InspectUpdate();
+                                            ait = m_tasks.erase(ait);
+                                            break;
+                                        }
+                                    }
+                                }
+                                itr = m_findNPC.erase(itr); // all done lets go home
+                                m_bot->GetMotionMaster()->Clear();
+                                m_bot->GetMotionMaster()->MoveIdle();
+                            }
+                            break;
+                        }
                         case GOSSIP_OPTION_VENDOR:
                         {
                             // Manage vendor actions
@@ -3807,7 +3874,7 @@ void PlayerbotAI::findNearbyCreature()
                                     switch(ait->first)
                                     {
                                         // sell items
-                                        case ADD:
+                                        case SELL:
                                         {
                                             // TellMaster("Selling items");
                                             if(Sell(ait->second))
@@ -4163,6 +4230,31 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
     }
     else if (item->GetProto()->SellPrice > 0)
         MakeItemLink(item, canSell, false);
+}
+
+bool PlayerbotAI::Talent(Creature* trainer)
+{
+    if (!(m_bot->resetTalents()))
+    {
+        WorldPacket* const packet = new WorldPacket( MSG_TALENT_WIPE_CONFIRM, 8+4);    //you do not have any talent
+        *packet << uint64(0);
+        *packet << uint32(0);
+        m_bot->GetSession()->QueuePacket(packet);
+        return false;
+    }
+
+    m_bot->SendTalentsInfoData(false);
+    trainer->CastSpell(m_bot, 14867, true);                  //spell: "Untalent Visual Effect"
+    return true;
+}
+
+void PlayerbotAI::InspectUpdate()
+{
+    WorldPacket packet(SMSG_INSPECT_RESULTS, 50);
+    packet << m_bot->GetPackGUID();
+    m_bot->BuildPlayerTalentsInfoData(&packet);
+    m_bot->BuildEnchantmentsInfoData(&packet);
+    GetMaster()->GetSession()->SendPacket(&packet);
 }
 
 bool PlayerbotAI::Repair(const uint32 itemid, Creature* rCreature)
@@ -4613,7 +4705,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         std::list<uint32> itemIds;
         extractItemIds(text, itemIds);
         for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(ADD, *it));
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(SELL, *it));
         m_findNPC.push_back(VENDOR_MASK);
     }
 
@@ -4688,6 +4780,69 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         }
         else // list all bot auctions
             m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
+    }
+
+    // Handle talents & glyphs:
+    // talent                           -- Lists bot(s) active talents [TALENT LINK] & glyphs [GLYPH LINK], unspent points & cost to reset
+    // talent learn [TALENT LINK] ..    -- Learn selected talent from bot client 'inspect' dialog -> 'talent' tab or from talent command (shift click icon/link)
+    // talent reset                     -- Resets all talents
+    else if (text.size() >= 6 && text.substr(0, 6) == "talent")
+    {
+        std::ostringstream out;
+        std::string part = "";
+        std::string subcommand = "";
+
+        if (text.size() > 6 && text.substr(0, 7) == "talent ")
+            part = text.substr(7);  // Truncate 'talent ' part
+
+        if (part.find(" ") > 0)
+        {
+            subcommand = part.substr(0, part.find(" "));
+            if (part.size() > subcommand.size())
+                part = part.substr(subcommand.size() + 1);
+        }
+        else
+            subcommand = part;
+
+        if (subcommand == "learn" || subcommand == "reset")
+        {
+            if(subcommand == "learn")
+            {
+                std::list<talentPair>talents;
+                extractTalentIds(part, talents);
+
+                for(std::list<talentPair>::iterator itr = talents.begin(); itr != talents.end(); ++itr)
+                {
+                    uint32 talentid;
+                    uint32 rank;
+
+                    talentid = itr->first;
+                    rank = itr->second;
+
+                    m_bot->LearnTalent(talentid, ++rank);
+                    m_bot->SendTalentsInfoData(false);
+                    InspectUpdate();
+                }
+                m_bot->MakeTalentGlyphLink(out);
+                SendWhisper(out.str(), fromPlayer);
+
+            }
+            else if(subcommand == "reset")
+            {
+                m_tasks.push_back(std::pair<enum TaskFlags,uint32>(RESET, 0));
+                m_findNPC.push_back(UNIT_NPC_FLAG_TRAINER_CLASS);
+            }
+        }
+        else
+        {
+            uint32 gold = uint32(m_bot->resetTalentsCost()/ 10000);
+
+            if (gold > 0)
+                out << "Cost to reset all Talents is " << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+
+            m_bot->MakeTalentGlyphLink(out);
+            SendWhisper(out.str(), fromPlayer);
+        }
     }
 
     // use items

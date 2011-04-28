@@ -144,16 +144,18 @@ public:
     enum TaskFlags
     {
         NONE                        = 0x00,
-        LIST                        = 0x01,
-        REMOVE                      = 0x02,
-        ADD                         = 0x04,
-        REPAIR                      = 0x08
+        SELL                        = 0x01,  // sell items
+        REPAIR                      = 0x02,  // repair items
+        ADD                         = 0x04,  // add auction
+        REMOVE                      = 0x08,  // remove auction
+        RESET                       = 0x10   // reset all talents
     };
 
     typedef std::pair<enum TaskFlags, uint32> taskPair;
     typedef std::list<taskPair> BotTaskList;
     typedef std::list<enum NPCFlags> BotNPCList;
     typedef std::map<uint32, uint32> BotNeedItem;
+    typedef std::pair<uint32,uint32>talentPair;
     typedef std::list<uint64> BotLootCreature;
     typedef std::list<uint32> BotLootEntry;
     typedef std::list<uint32> BotSpellList;
@@ -218,6 +220,9 @@ public:
 
     // extract auction ids from links
     void extractAuctionIds(const std::string& text, std::list<uint32>& auctionIds) const;
+
+    // extracts talent ids to list
+    void extractTalentIds(const std::string& text, std::list<talentPair>& talentIds) const;
 
     // extracts item ids from links
     void extractItemIds(const std::string& text, std::list<uint32>& itemIds) const;
@@ -365,6 +370,8 @@ public:
     bool ListAuctions();
     bool RemoveAuction(const uint32 auctionid);
     bool Repair(const uint32 itemid, Creature* rCreature);
+    bool Talent(Creature* tCreature);
+    void InspectUpdate();
 
 private:
     // ****** Closed Actions ********************************
