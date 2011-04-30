@@ -47,6 +47,9 @@ Commands:
 /t BOTNAME talent (Lists bot(s) active talents [TALENT LINK] & glyphs [GLYPH LINK], unspent talent points & cost to reset all talents)
 /t BOTNAME talent learn [TALENT LINK] .. (Learn selected talent from bot client 'inspect' dialog -> 'talent' tab or from talent command (shift click icon or link))
 /t BOTNAME talent reset (Resets all talents)
+/t BOTNAME bank  (Lists bot(s) bank balance)
+/t BOTNAME bank deposit [Item Link][Item Link] .. (Deposit item(s) in bank)
+/t BOTNAME bank withdraw [Item Link][Item Link] ..  (Withdraw item(s) from bank. ([Item Link] from bank))
 
 Shortcuts:
 c = cast
