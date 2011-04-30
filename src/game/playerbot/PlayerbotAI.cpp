@@ -3187,6 +3187,48 @@ Item* PlayerbotAI::FindItem(uint32 ItemId)
     return NULL;
 }
 
+Item* PlayerbotAI::FindItemInBank(uint32 ItemId)
+{
+    // list out items in bank item slots
+
+    for (uint8 slot = BANK_SLOT_ITEM_START; slot < BANK_SLOT_ITEM_END; slot++)
+    {
+        // sLog.outDebug("[%s's]backpack slot = %u",m_bot->GetName(),slot);
+        Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if (pItem)
+        {
+            const ItemPrototype* const pItemProto = pItem->GetProto();
+            if (!pItemProto)
+                continue;
+
+            if (pItemProto->ItemId == ItemId)   // have required item
+                return pItem;
+        }
+    }
+    // list out items in bank bag slots
+
+    for (uint8 bag = BANK_SLOT_BAG_START; bag < BANK_SLOT_BAG_END; ++bag)
+    {
+        const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+        if (pBag)
+            for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
+            {
+                // sLog.outDebug("[%s's]bag[%u] slot = %u", m_bot->GetName(), bag, slot);
+                Item* const pItem = m_bot->GetItemByPos(bag, slot);
+                if (pItem)
+                {
+                    const ItemPrototype* const pItemProto = pItem->GetProto();
+                    if (!pItemProto)
+                        continue;
+
+                    if (pItemProto->ItemId == ItemId)        // have required item
+                        return pItem;
+                }
+            }
+    }
+    return NULL;
+}
+
 Item* PlayerbotAI::FindKeyForLockValue(uint32 reqSkillValue)
 {
     if (reqSkillValue <= 25 && m_bot->HasItemCount(SILVER_SKELETON_KEY, 1))
@@ -3815,6 +3857,40 @@ void PlayerbotAI::findNearbyCreature()
 
                     switch(it->second.option_id)
                     {
+                        case GOSSIP_OPTION_BANKER:
+                        {
+                            // Manage banking actions
+                            if(!m_tasks.empty())
+                            {
+                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ++ait)
+                                {
+                                    switch(ait->first)
+                                    {
+                                        // withdraw items
+                                        case WITHDRAW:
+                                        {
+                                            // TellMaster("Withdraw items");
+                                            if(Withdraw(ait->second))
+                                                ait = m_tasks.erase(ait);
+                                            break;
+                                        }
+                                        // deposit items
+                                        case DEPOSIT:
+                                        {
+                                            // TellMaster("Deposit items");
+                                            if(Deposit(ait->second))
+                                                ait = m_tasks.erase(ait);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            BankBalance();
+                            itr = m_findNPC.erase(itr); // all done lets go home
+                            m_bot->GetMotionMaster()->Clear();
+                            m_bot->GetMotionMaster()->MoveIdle();
+                            break;
+                        }
                         case GOSSIP_OPTION_UNLEARNTALENTS:
                         {
                             // Manage class trainer actions
@@ -3835,10 +3911,10 @@ void PlayerbotAI::findNearbyCreature()
                                         }
                                     }
                                 }
-                                itr = m_findNPC.erase(itr); // all done lets go home
-                                m_bot->GetMotionMaster()->Clear();
-                                m_bot->GetMotionMaster()->MoveIdle();
                             }
+                            itr = m_findNPC.erase(itr); // all done lets go home
+                            m_bot->GetMotionMaster()->Clear();
+                            m_bot->GetMotionMaster()->MoveIdle();
                             break;
                         }
                         case GOSSIP_OPTION_VENDOR:
@@ -3868,10 +3944,10 @@ void PlayerbotAI::findNearbyCreature()
                                         }
                                     }
                                 }
-                                itr = m_findNPC.erase(itr); // all done lets go home
-                                m_bot->GetMotionMaster()->Clear();
-                                m_bot->GetMotionMaster()->MoveIdle();
                             }
+                            itr = m_findNPC.erase(itr); // all done lets go home
+                            m_bot->GetMotionMaster()->Clear();
+                            m_bot->GetMotionMaster()->MoveIdle();
                             break;
                         }
                         case GOSSIP_OPTION_AUCTIONEER:
@@ -4207,6 +4283,101 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
     }
     else if (item->GetProto()->SellPrice > 0)
         MakeItemLink(item, canSell, true);
+}
+
+bool PlayerbotAI::Withdraw(const uint32 itemid)
+{
+    Item* pItem = FindItemInBank(itemid);
+    if(pItem)
+    {
+        std::ostringstream report;
+
+        ItemPosCountVec dest;
+        InventoryResult msg = m_bot->CanStoreItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
+        if( msg != EQUIP_ERR_OK )
+        {
+            m_bot->SendEquipError( msg, pItem, NULL );
+            return true;
+        }
+
+        m_bot->RemoveItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
+        m_bot->StoreItem( dest, pItem, true );
+
+        report << "Withdrawn ";
+        MakeItemLink(pItem, report, true);
+
+        TellMaster(report.str());
+    }
+
+    return true; // item either withdrawn or not in bot bank
+}
+
+bool PlayerbotAI::Deposit(const uint32 itemid)
+{
+    Item* pItem = FindItem(itemid);
+    if(pItem)
+    {
+        std::ostringstream report;
+
+        ItemPosCountVec dest;
+        InventoryResult msg = m_bot->CanBankItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
+        if( msg != EQUIP_ERR_OK )
+        {
+            m_bot->SendEquipError( msg, pItem, NULL );
+            return true;
+        }
+
+        m_bot->RemoveItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
+        m_bot->BankItem( dest, pItem, true );
+
+        report << "Deposited ";
+        MakeItemLink(pItem, report, true);
+
+        TellMaster(report.str());
+    }
+
+    return true; // item either deposited or not in bot inventory
+}
+
+void PlayerbotAI::BankBalance()
+{
+    DEBUG_LOG("PlayerbotAI: BankBalance");
+
+    std::ostringstream report;
+
+    report << "In my bank\n ";
+    report << "My item slots: ";
+
+    for(uint8 slot = BANK_SLOT_ITEM_START; slot < BANK_SLOT_ITEM_END; ++slot)
+    {
+        Item* const item = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if(item)
+            MakeItemLink(item, report, true);
+    }
+    TellMaster(report.str());
+
+    // and each of my bank bags
+    for(uint8 bag = BANK_SLOT_BAG_START; bag < BANK_SLOT_BAG_END; ++bag)
+    {
+        std::ostringstream goods;
+        const Bag* const pBag = static_cast<Bag *>(m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag));
+        if (pBag)
+        {
+            goods << "\nMy ";
+            const ItemPrototype* const pBagProto = pBag->GetProto();
+            std::string bagName = pBagProto->Name1;
+            ItemLocalization(bagName, pBagProto->ItemId);
+            goods << bagName << " slot: ";
+
+            for(uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
+            {
+                Item* const item = m_bot->GetItemByPos(bag, slot);
+                if(item)
+                    MakeItemLink(item, goods, true);
+            }
+            TellMaster(goods.str());
+        }
+    }
 }
 
 bool PlayerbotAI::Talent(Creature* trainer)
@@ -4757,6 +4928,51 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         }
         else // list all bot auctions
             m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
+    }
+
+    // Handle bank:
+    // bank                                        -- Lists bot(s) bank balance.
+    // bank deposit [Item Link][Item Link] ..      -- Deposit item(s) in bank.
+    // bank withdraw [Item Link][Item Link] ..     -- Withdraw item(s) from bank. ([Item Link] from bank)
+    else if (text.size() >= 4 && text.substr(0, 4) == "bank")
+    {
+        std::string part = "";
+        std::string subcommand = "";
+
+        if (text.size() > 4 && text.substr(0, 5) == "bank ")
+            part = text.substr(5);  // Truncate 'bank ' part
+
+        if (part.find(" ") > 0)
+        {
+            subcommand = part.substr(0, part.find(" "));
+            if (part.size() > subcommand.size())
+                part = part.substr(subcommand.size() + 1);
+        }
+        else
+            subcommand = part;
+
+        if (subcommand == "deposit" || subcommand == "withdraw")
+        {
+            if(subcommand == "deposit")
+            {
+                std::list<uint32> itemIds;
+                extractItemIds(part, itemIds);
+                for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(DEPOSIT, *it));
+                m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
+            }
+
+            if(subcommand == "withdraw")
+            {
+                std::list<uint32> itemIds;
+                extractItemIds(part, itemIds);
+                for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(WITHDRAW, *it));
+                m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
+            }
+        }
+        else // list all bot balance
+            m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
     }
 
     // Handle talents & glyphs:

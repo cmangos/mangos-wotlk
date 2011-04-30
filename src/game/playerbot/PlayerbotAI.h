@@ -148,7 +148,9 @@ public:
         REPAIR                      = 0x02,  // repair items
         ADD                         = 0x04,  // add auction
         REMOVE                      = 0x08,  // remove auction
-        RESET                       = 0x10   // reset all talents
+        RESET                       = 0x10,  // reset all talents
+        WITHDRAW                    = 0x11,  // withdraw item from bank
+	DEPOSIT                     = 0x12   // deposit item in bank
     };
 
     typedef std::pair<enum TaskFlags, uint32> taskPair;
@@ -285,6 +287,7 @@ public:
     Item* FindPoison() const;
     Item* FindMount(uint32 matchingRidingSkill) const;
     Item* FindItem(uint32 ItemId);
+    Item* FindItemInBank(uint32 ItemId);
     Item* FindKeyForLockValue(uint32 reqSkillValue);
     Item* FindBombForLockValue(uint32 reqSkillValue);
     Item* FindConsumable(uint32 displayId) const;
@@ -372,6 +375,9 @@ public:
     bool Repair(const uint32 itemid, Creature* rCreature);
     bool Talent(Creature* tCreature);
     void InspectUpdate();
+    bool Withdraw(const uint32 itemid);
+    bool Deposit(const uint32 itemid);
+    void BankBalance();
 
 private:
     // ****** Closed Actions ********************************
