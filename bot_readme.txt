@@ -80,7 +80,7 @@ Gameobject interaction with bots:
 Creature interaction with bots:
 ===============================
 
-  The bot(s) can now interact directly with creatures. This will enable bot(s) to independantly contact NPCs, without
+  The bot(s) can now interact directly with creatures. This will enable bot(s) to independently contact NPCs, without
   the need for player's selection. This opens up new possiblities for bot/NPC commerce.
 
   Each bot will maintain it's own item list (m_itemIds - This is a list of paired data). The first component (UNIT_NPC_FLAG)

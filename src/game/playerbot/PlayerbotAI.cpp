@@ -859,18 +859,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
                 {
                     const Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
-                    if (pItem && pItem->CanBeTraded())
-                    {
-                        const ItemPrototype* const pItemProto = pItem->GetProto();
-
-                        std::string itemName = pItemProto->Name1;
-                        ItemLocalization(itemName, pItemProto->ItemId);
-
-                        out << " |cffffffff|Hitem:" << pItemProto->ItemId
-                            << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
-                        if (pItem->GetCount() > 1)
-                            out << "x" << pItem->GetCount();
-                    }
+                    if (pItem)
+                        MakeItemLink(pItem, out, true);
                 }
                 ChatHandler ch(m_bot->GetTrader());
                 ch.SendSysMessage(out.str().c_str());
@@ -891,21 +881,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
                         {
                             const Item* const pItem = m_bot->GetItemByPos(bag, slot);
-                            if (pItem && pItem->CanBeTraded())
-                            {
-                                const ItemPrototype* const pItemProto = pItem->GetProto();
-
-                                std::string itemName = pItemProto->Name1;
-                                ItemLocalization(itemName, pItemProto->ItemId);
-
-                                // item link format: http://www.wowwiki.com/ItemString
-                                // itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId
-                                outbag << " |cffffffff|Hitem:" << pItemProto->ItemId
-                                       << ":0:0:0:0:0:0:0" << "|h[" << itemName
-                                       << "]|h|r";
-                                if (pItem->GetCount() > 1)
-                                    outbag << "x" << pItem->GetCount();
-                            }
+                            if (pItem)
+                                MakeItemLink(pItem, outbag, true);
                         }
                         ch.SendSysMessage(outbag.str().c_str());
                     }
@@ -4214,7 +4191,7 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
         TotalCost += cost;
 
         report << "Sold ";
-        MakeItemLink(item, report);
+        MakeItemLink(item, report, true);
         report << " for ";
 
         uint32 gold = uint32(cost / 10000);
@@ -4229,7 +4206,7 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
         report << cost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\n";
     }
     else if (item->GetProto()->SellPrice > 0)
-        MakeItemLink(item, canSell, false);
+        MakeItemLink(item, canSell, true);
 }
 
 bool PlayerbotAI::Talent(Creature* trainer)
@@ -4424,7 +4401,7 @@ bool PlayerbotAI::AddAuction(const uint32 itemid, Creature* aCreature)
         uint32 max = urand(aItem->GetProto()->SellPrice * aItem->GetCount(),aItem->GetProto()->BuyPrice * aItem->GetCount()) * (aItem->GetProto()->Quality + 1);
 
         out << "Auctioning ";
-        MakeItemLink(aItem,out);
+        MakeItemLink(aItem, out, true);
         out << " with " << aCreature->GetCreatureInfo()->Name;
         TellMaster(out.str().c_str());
 
@@ -4456,7 +4433,7 @@ bool PlayerbotAI::Sell(const uint32 itemid)
         m_bot->AddItemToBuyBackSlot(pItem);
 
         report << "Sold ";
-        MakeItemLink(pItem, report);
+        MakeItemLink(pItem, report, true);
         report << " for ";
 
         uint32 gold = uint32(cost / 10000);
