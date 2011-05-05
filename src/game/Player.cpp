@@ -1501,7 +1501,7 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     if (IsHasDelayedTeleport())
         TeleportTo(m_teleport_dest, m_teleport_options);
 
-	    // Playerbot mod
+    // Playerbot mod
     if (m_playerbotAI)
         m_playerbotAI->UpdateAI(p_time);
     else if (m_playerbotMgr)
