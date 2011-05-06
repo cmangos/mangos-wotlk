@@ -635,6 +635,15 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     case EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE:
                         TellMaster("I can only have one of those equipped.");
                         return;
+                    case EQUIP_ERR_BANK_FULL:
+                        TellMaster("My bank is full.");
+                        return;
+                    case EQUIP_ERR_ITEM_NOT_FOUND:
+                        TellMaster("I can't find the item.");
+                        return;
+                    case EQUIP_ERR_TOO_FAR_AWAY_FROM_BANK:
+                        TellMaster("I'm too far from the bank.");
+                        return;
                     default:
                         TellMaster("I can't use that.");
                         sLog.outDebug("[PlayerbotAI]: SMSG_INVENTORY_CHANGE_FAILURE: %u", err);
@@ -3839,7 +3848,7 @@ void PlayerbotAI::findNearbyCreature()
             if (m_bot->GetDistance(wo) > CONTACT_DISTANCE + wo->GetObjectBoundingRadius())
             {
                 float x, y, z;
-                wo->GetContactPoint(m_bot, x, y, z, 0.1f);
+                wo->GetContactPoint(m_bot, x, y, z, 1.0f);
                 m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z);
                 // give time to move to point before trying again
                 SetIgnoreUpdateTime(1);
@@ -3985,6 +3994,7 @@ void PlayerbotAI::findNearbyCreature()
                             break;
                         }
                     }
+                    m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
                 }
             }
         }
