@@ -49,7 +49,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
             p >> guid >> nodes[0] >> nodes[1];
 
-            DEBUG_LOG("PlayerbotMgr: Received CMSG_ACTIVATETAXI from %d to %d", nodes[0], nodes[1]);
+            DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_ACTIVATETAXI from %d to %d", nodes[0], nodes[1]);
 
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
@@ -97,7 +97,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             if (nodes.empty())
                 return;
 
-            DEBUG_LOG("PlayerbotMgr: Received CMSG_ACTIVATETAXIEXPRESS from %d to %d", nodes.front(), nodes.back());
+            DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_ACTIVATETAXIEXPRESS from %d to %d", nodes.front(), nodes.back());
 
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
@@ -124,7 +124,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
         case CMSG_MOVE_SPLINE_DONE:
         {
-            DEBUG_LOG("PlayerbotMgr: Received CMSG_MOVE_SPLINE_DONE");
+            DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_MOVE_SPLINE_DONE");
 
             WorldPacket p(packet);
             p.rpos(0); // reset reader
@@ -186,7 +186,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                             bot->GetSession()->SendPacket(&data);
                         }
 
-                    DEBUG_LOG("PlayerbotMgr: Taxi has to go from %u to %u", sourcenode, destinationnode);
+                    DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_MOVE_SPLINE_DONE Taxi has to go from %u to %u", sourcenode, destinationnode);
 
                     uint32 mountDisplayId = sObjectMgr.GetTaxiMountDisplayId(sourcenode, bot->GetTeam());
 
@@ -420,7 +420,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             uint32 unk1;
             p >> guid >> quest >> unk1;
 
-            DEBUG_LOG("PlayerbotMgr: Received CMSG_QUESTGIVER_ACCEPT_QUEST npc = %s, quest = %u, unk1 = %u", guid.GetString().c_str(), quest, unk1);
+            DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_QUESTGIVER_ACCEPT_QUEST npc = %s, quest = %u, unk1 = %u", guid.GetString().c_str(), quest, unk1);
 
             Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest);
             if (qInfo)
@@ -474,7 +474,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             ObjectGuid npcGUID;
             p >> npcGUID >> quest;
 
-            DEBUG_LOG("PlayerbotMgr: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %s, quest = %u", npcGUID.GetString().c_str(), quest);
+            DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %s, quest = %u", npcGUID.GetString().c_str(), quest);
 
             WorldObject* pNpc = m_master->GetMap()->GetWorldObject(npcGUID);
             if (!pNpc)
@@ -531,7 +531,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
         // Handle GOSSIP activate actions, prior to GOSSIP select menu actions
         case CMSG_GOSSIP_HELLO:
         {
-            DEBUG_LOG("PlayerbotMgr: Received CMSG_GOSSIP_HELLO");
+            DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_GOSSIP_HELLO");
 
             WorldPacket p(packet);    //WorldPacket packet for CMSG_GOSSIP_HELLO, (8)
             ObjectGuid guid;
@@ -547,7 +547,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 Creature *pCreature = bot->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
                 if (!pCreature)
                 {
-                    DEBUG_LOG("PlayerbotMgr: HandleGossipHelloOpcode - %s not found or you can't interact with him.", guid.GetString().c_str());
+                    DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received  CMSG_GOSSIP_HELLO %s not found or you can't interact with him.", guid.GetString().c_str());
                     return;
                 }
 
@@ -606,7 +606,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
         case CMSG_SPIRIT_HEALER_ACTIVATE:
         {
-            // sLog.outDebug("SpiritHealer is resurrecting the Player %s",m_master->GetName());
+            // DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_SPIRIT_HEALER_ACTIVATE SpiritHealer is resurrecting the Player %s",m_master->GetName());
             for (PlayerBotMap::iterator itr = m_playerBots.begin(); itr != m_playerBots.end(); ++itr)
             {
                 Player* const bot = itr->second;
