@@ -479,7 +479,7 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
     SpellAuraHolder *holder = _player->GetSpellAuraHolder(spellId);
 
     // not own area auras can't be cancelled (note: maybe need to check for aura on holder and not general on spell)
-    if (holder && holder->GetCasterGUID() != _player->GetGUID() && HasAreaAuraEffect(holder->GetSpellProto()))
+    if (holder && holder->GetCasterGuid() != _player->GetObjectGuid() && HasAreaAuraEffect(holder->GetSpellProto()))
         return;
 
     // non channeled case
@@ -608,4 +608,90 @@ void WorldSession::HandleSpellClick( WorldPacket & recv_data )
             caster->CastSpell(target, itr->second.spellId, true);
         }
     }
+}
+
+void WorldSession::HandleGetMirrorimageData(WorldPacket& recv_data)
+{
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: CMSG_GET_MIRRORIMAGE_DATA");
+
+    ObjectGuid guid;
+    recv_data >> guid;
+
+    Creature* pCreature = _player->GetMap()->GetAnyTypeCreature(guid);
+
+    if (!pCreature)
+        return;
+
+    Unit::AuraList const& images = pCreature->GetAurasByType(SPELL_AURA_MIRROR_IMAGE);
+
+    if (images.empty())
+        return;
+
+    Unit* pCaster = images.front()->GetCaster();
+
+    WorldPacket data(SMSG_MIRRORIMAGE_DATA, 68);
+
+    data << guid;
+    data << (uint32)pCreature->GetDisplayId();
+
+    data << (uint8)pCreature->getRace();
+    data << (uint8)pCreature->getGender();
+    data << (uint8)pCreature->getClass();
+
+    if (pCaster && pCaster->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player* pPlayer = (Player*)pCaster;
+
+        // skin, face, hair, haircolor
+        data << (uint8)pPlayer->GetByteValue(PLAYER_BYTES, 0);
+        data << (uint8)pPlayer->GetByteValue(PLAYER_BYTES, 1);
+        data << (uint8)pPlayer->GetByteValue(PLAYER_BYTES, 2);
+        data << (uint8)pPlayer->GetByteValue(PLAYER_BYTES, 3);
+
+        // facial hair
+        data << (uint8)pPlayer->GetByteValue(PLAYER_BYTES_2, 0);
+
+        // guild id
+        data << (uint32)pPlayer->GetGuildId();
+
+        if (pPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
+            data << (uint32)0;
+        else
+            data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HEAD);
+
+        data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_SHOULDERS);
+        data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_BODY);
+        data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_CHEST);
+        data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_WAIST);
+        data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_LEGS);
+        data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_FEET);
+        data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_WRISTS);
+        data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HANDS);
+
+        if (pPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
+            data << (uint32)0;
+        else
+            data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_BACK);
+
+        data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_TABARD);
+    }
+    else
+    {
+        // pCaster may have been NULL (usually not expected, but may happen at disconnect, etc)
+        // OR
+        // pCaster is not player, data is taken from CreatureDisplayInfoExtraEntry by model already
+        data << (uint8)0;
+        data << (uint8)0;
+        data << (uint8)0;
+        data << (uint8)0;
+
+        data << (uint8)0;
+
+        data << (uint32)0;
+
+        for (int i = 0; i < 11; ++i)
+            data << (uint32)0;
+    }
+
+    SendPacket(&data);
 }
