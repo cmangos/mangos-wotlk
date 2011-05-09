@@ -1829,24 +1829,28 @@ void PlayerbotAI::SetQuestNeedItems()
     // reset values first
     m_needItemList.clear();
 
-    // run through accepted quests, get quest infoand data
-    for (QuestStatusMap::iterator iter = m_bot->getQuestStatusMap().begin(); iter != m_bot->getQuestStatusMap().end(); ++iter)
+    // run through accepted quests, get quest info and data
+    for(int qs = 0; qs < MAX_QUEST_LOG_SIZE; ++qs)
     {
-        const Quest *qInfo = sObjectMgr.GetQuestTemplate(iter->first);
+        uint32 questid = m_bot->GetQuestSlotQuestId(qs);
+        if (questid == 0)
+            continue;
+
+        QuestStatusData &qData = m_bot->getQuestStatusMap()[questid];
+        // only check quest if it is incomplete
+        if (qData.m_status != QUEST_STATUS_INCOMPLETE)
+            continue;
+
+        Quest const* qInfo = sObjectMgr.GetQuestTemplate(questid);
         if (!qInfo)
             continue;
 
-        QuestStatusData *qData = &iter->second;
-        // only check quest if it is incomplete
-        if (qData->m_status != QUEST_STATUS_INCOMPLETE)
-            continue;
-
         // check for items we not have enough of
-        for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+        for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; i++)
         {
-            if (!qInfo->ReqItemCount[i] || (qInfo->ReqItemCount[i] - qData->m_itemcount[i]) <= 0)
+            if (!qInfo->ReqItemCount[i] || (qInfo->ReqItemCount[i] - qData.m_itemcount[i]) <= 0)
                 continue;
-            m_needItemList[qInfo->ReqItemId[i]] = (qInfo->ReqItemCount[i] - qData->m_itemcount[i]);
+            m_needItemList[qInfo->ReqItemId[i]] = (qInfo->ReqItemCount[i] - qData.m_itemcount[i]);
         }
     }
 }
