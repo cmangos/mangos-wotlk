@@ -60,9 +60,8 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     m_taxiMaster(ObjectGuid())
 {
 
-    // set bot state and needed item list
+    // set bot state
     m_botState = BOTSTATE_NORMAL;
-    SetQuestNeedItems();
 
     // reset some pointers
     m_targetChanged = false;
@@ -85,6 +84,9 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
         SetCollectFlag(COLLECT_FLAG_SKIN);
     if (m_mgr->m_confCollectObjects)
         SetCollectFlag(COLLECT_FLAG_NEAROBJECT);
+
+    // set needed item list
+    SetQuestNeedItems();
 
     // start following master (will also teleport bot to master)
     SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
@@ -1928,6 +1930,41 @@ void PlayerbotAI::SetQuestNeedItems()
             if (!qInfo->ReqItemCount[i] || (qInfo->ReqItemCount[i] - qData.m_itemcount[i]) <= 0)
                 continue;
             m_needItemList[qInfo->ReqItemId[i]] = (qInfo->ReqItemCount[i] - qData.m_itemcount[i]);
+
+            // collect flags not set to gather quest objects skip remaining section
+            if (!HasCollectFlag(COLLECT_FLAG_NEAROBJECT) && !HasCollectFlag(COLLECT_FLAG_QUEST))
+                continue;
+
+            // TODO: find faster way to handle this look up instead of using SQL lookup for each item
+            QueryResult *result;
+            // determine if GOs are needed
+            result = WorldDatabase.PQuery("SELECT entry FROM gameobject_template WHERE questitem1='%u' "
+                "OR questitem2='%u' OR questitem3='%u' OR questitem4='%u' OR questitem5='%u' OR questitem6='%u'",
+                qInfo->ReqItemId[i], qInfo->ReqItemId[i], qInfo->ReqItemId[i], qInfo->ReqItemId[i],
+                qInfo->ReqItemId[i], qInfo->ReqItemId[i]);
+
+            if (result)
+            {
+                do
+                {
+                    Field *fields = result->Fetch();
+                    uint32 entry = fields[0].GetUInt32();
+
+                    GameObjectInfo const * gInfo = ObjectMgr::GetGameObjectInfo(entry);
+                    if (!gInfo)
+                        continue;
+
+                    // add this GO to our collection list if is chest/ore/herb
+                    if (gInfo->type == GAMEOBJECT_TYPE_CHEST)
+                    {
+                        m_collectObjects.push_back(entry);
+                        m_collectObjects.sort();
+                        m_collectObjects.unique();
+                    }
+                } while (result->NextRow());
+
+                delete result;
+            }
         }
     }
 }
