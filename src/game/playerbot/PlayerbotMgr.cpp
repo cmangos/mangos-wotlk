@@ -448,6 +448,14 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                         p.rpos(0);         // reset reader
                         bot->GetSession()->HandleQuestgiverAcceptQuestOpcode(p);
                         bot->GetPlayerbotAI()->TellMaster("Got the quest.");
+
+                        // build needed items if quest contains any
+                        for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; i++)
+                            if (qInfo->ReqItemCount[i]>0)
+                            {
+                                bot->GetPlayerbotAI()->SetQuestNeedItems();
+                                break;
+                            }
                     }
                 }
             return;

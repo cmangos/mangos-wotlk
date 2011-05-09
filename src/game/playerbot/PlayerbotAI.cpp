@@ -1166,8 +1166,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             *packet << guid;
             m_bot->GetSession()->QueuePacket(packet);
 
-            SetQuestNeedItems();
-
             return;
         }
 
@@ -1214,6 +1212,39 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 // clear movement
                 m_bot->GetMotionMaster()->Clear();
                 m_bot->GetMotionMaster()->MoveIdle();
+            }
+
+            return;
+        }
+
+        case SMSG_ITEM_PUSH_RESULT:
+        {
+            WorldPacket p(packet);  // (8+4+4+4+1+4+4+4+4+4+4)
+            ObjectGuid guid;
+
+            p >> guid;              // 8 player guid
+            if (m_bot->GetObjectGuid() != guid)
+                return;
+
+            uint8 bagslot;
+            uint32 itemslot, itemid, count, totalcount;
+
+            p.read_skip<uint32>();  // 4 0=looted, 1=from npc
+            p.read_skip<uint32>();  // 4 0=received, 1=created
+            p.read_skip<uint32>();  // 4 IsShowChatMessage
+            p >> bagslot;           // 1 bagslot
+            p >> itemslot;          // 4 item slot, but when added to stack: 0xFFFFFFFF
+            p >> itemid;            // 4 item entry id
+            p.read_skip<uint32>();  // 4 SuffixFactor
+            p.read_skip<uint32>();  // 4 random item property id
+            p >> count;             // 4 count of items
+            p >> totalcount;        // 4 count of items in inventory
+
+            if (IsInQuestItemList(itemid))
+            {
+                m_needItemList[itemid] = (m_needItemList[itemid] - count);
+                if (m_needItemList[itemid] <= 0)
+                    m_needItemList.erase(itemid);
             }
 
             return;
@@ -1677,7 +1708,6 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
     if (m_botState != BOTSTATE_COMBAT)
     {
         SetState(BOTSTATE_COMBAT);
-        SetQuestNeedItems();
         m_lootCurrent = ObjectGuid();
         m_targetCombat = 0;
     }
@@ -1899,10 +1929,9 @@ void PlayerbotAI::DoLoot()
 
     if (m_lootCurrent.IsEmpty() && m_lootTargets.empty())
     {
-        // DEBUG_LOG ("[PlayerbotAI]: DoLoot - %s reset loot list / go back to idle", m_bot->GetName() );
+        // DEBUG_LOG ("[PlayerbotAI]: DoLoot - %s is going back to idle", m_bot->GetName() );
         SetState(BOTSTATE_NORMAL);
         m_bot->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
-        SetQuestNeedItems();
         return;
     }
 
@@ -2197,6 +2226,14 @@ void PlayerbotAI::AcceptQuest(Quest const *qInfo, Player *pGiver)
 
         if (m_bot->CanCompleteQuest(quest))
             m_bot->CompleteQuest(quest);
+
+        // build needed items if quest contains any
+        for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; i++)
+            if (qInfo->ReqItemCount[i]>0)
+            {
+                m_bot->GetPlayerbotAI()->SetQuestNeedItems();
+                break;
+            }
 
         // Runsttren: did not add typeid switch from WorldSession::HandleQuestgiverAcceptQuestOpcode!
         // I think it's not needed, cause typeid should be TYPEID_PLAYER - and this one is not handled
