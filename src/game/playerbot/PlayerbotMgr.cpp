@@ -9,6 +9,7 @@
 #include "../Chat.h"
 #include "../Language.h"
 #include "../Guild.h"
+#include "../GuildMgr.h"
 #include "../WaypointMovementGenerator.h"
 
 class LoginQueryHolder;
@@ -662,7 +663,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     uint32 GuildId = bot->GetGuildId();
                     if (!GuildId)
                         return;
-                    Guild *pGuild = sObjectMgr.GetGuildById(GuildId);
+                    Guild *pGuild = sGuildMgr.GetGuildById(GuildId);
                     if (!pGuild)
                         return;
                     pGuild->LogBankEvent(GUILD_BANK_LOG_REPAIR_MONEY, 0, bot->GetGUIDLow(), TotalCost);
