@@ -2202,22 +2202,22 @@ void PlayerbotAI::AcceptQuest(Quest const *qInfo, Player *pGiver)
     if (!pGiver->CanShareQuest(qInfo->GetQuestId()))
     {
         // giver can't share quest
-        m_bot->SetDivider(0);
+        m_bot->ClearDividerGuid();
         return;
     }
 
     if (!m_bot->CanTakeQuest(qInfo, false))
     {
         // can't take quest
-        m_bot->SetDivider(0);
+        m_bot->ClearDividerGuid();
         return;
     }
 
-    if (m_bot->GetDivider() != 0)
+    if (!m_bot->GetDividerGuid().IsEmpty())
     {
         // send msg to quest giving player
         pGiver->SendPushToPartyResponse(m_bot, QUEST_PARTY_MSG_ACCEPT_QUEST);
-        m_bot->SetDivider(0);
+        m_bot->ClearDividerGuid();
     }
 
     if (m_bot->CanAddQuest(qInfo, false))
@@ -3142,7 +3142,7 @@ bool PlayerbotAI::CanReceiveSpecificSpell(uint8 spec, Unit* target) const
         Unit::SpellAuraHolderMap holders = target->GetSpellAuraHolderMap();
         Unit::SpellAuraHolderMap::iterator it;
         for (it = holders.begin(); it != holders.end(); ++it)
-            if ((*it).second->GetCasterGUID() == m_bot->GetGUID() && GetSpellSpecific((*it).second->GetId()) == SpellSpecific(spec))
+            if ((*it).second->GetCasterGuid() == m_bot->GetObjectGuid() && GetSpellSpecific((*it).second->GetId()) == SpellSpecific(spec))
                 return false;
     }
     return true;

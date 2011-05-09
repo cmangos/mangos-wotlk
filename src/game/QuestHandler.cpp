@@ -481,7 +481,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
                     continue;
                 }
 
-                pPlayer->SetDivider(_player->GetGUID());
+                pPlayer->SetDividerGuid(_player->GetObjectGuid());
 
                 if (pPlayer->GetPlayerbotAI())
                     pPlayer->GetPlayerbotAI()->AcceptQuest( pQuest, _player );
