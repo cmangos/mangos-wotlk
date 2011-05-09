@@ -377,6 +377,9 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
         AH->itemGuidLow = newItem->GetObjectGuid().GetCounter();
         AH->itemTemplate = newItem->GetEntry();
         AH->owner = pl->GetGUIDLow();
+
+        Utf8toWStr(pl->GetName(), AH->ownerName);
+
         AH->startbid = bid;
         AH->bidder = 0;
         AH->bid = 0;
@@ -451,14 +454,23 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket & recv_data)
     }
 
     // cheating
-    if (price <= auction->bid || price < auction->startbid)
+    if (price < auction->startbid)
         return;
+
+    // cheating or client lags
+    if (price <= auction->bid)
+    {
+        // client test but possible in result lags
+        SendAuctionCommandResult(auction, AUCTION_BID_PLACED, AUCTION_ERR_HIGHER_BID);
+        return;
+    }
 
     // price too low for next bid if not buyout
     if ((price < auction->buyout || auction->buyout == 0) &&
         price < auction->bid + auction->GetAuctionOutBid())
     {
-        // auction has already higher bid, client tests it!
+        // client test but possible in result lags
+        SendAuctionCommandResult(auction, AUCTION_BID_PLACED, AUCTION_ERR_BID_INCREMENT);
         return;
     }
 
@@ -739,7 +751,7 @@ void WorldSession::HandleAuctionListItems(WorldPacket & recv_data)
     std::list<AuctionEntry*> auctions;
     for (AuctionHouseObject::AuctionEntryMap::const_iterator itr = aucs->begin(); itr != aucs->end(); ++itr)
         auctions.push_back(itr->second);
-    AuctionSorter sorter(Sort);
+    AuctionSorter sorter(Sort, GetPlayer());
     auctions.sort(sorter);
 
     // remove fake death

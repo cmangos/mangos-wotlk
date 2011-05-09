@@ -2349,6 +2349,25 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 target->RemoveAurasDueToSpell(41105);
                 return;
             }
+            case 42454:                                     // Captured Totem
+            {
+                if (m_removeMode == AURA_REMOVE_BY_DEFAULT)
+                {
+                    if (target->getDeathState() != CORPSE)
+                        return;
+
+                    Unit* pCaster = GetCaster();
+
+                    if (!pCaster)
+                        return;
+
+                    // Captured Totem Test Credit
+                    if (Player* pPlayer = pCaster->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        pPlayer->CastSpell(pPlayer, 42455, true);
+                }
+
+                return;
+            }
             case 42517:                                     // Beam to Zelfrax
             {
                 // expecting target to be a dummy creature
@@ -2563,7 +2582,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 case 29266:                                 // Permanent Feign Death
                 case 31261:                                 // Permanent Feign Death (Root)
                 case 37493:                                 // Feign Death
-                case 51329:                                 // Feign Death
                 case 52593:                                 // Bloated Abomination Feign Death
                 case 55795:                                 // Falling Dragon Feign Death
                 case 57626:                                 // Feign Death
@@ -2590,12 +2608,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 case 35356:                                 // Spawn Feign Death
                 case 35357:                                 // Spawn Feign Death
                 case 42557:                                 // Feign Death
+                case 51329:                                 // Feign Death
                 {
                     if (target->GetTypeId() == TYPEID_UNIT)
                     {
-                        // Flags not set like it's done in SetFeignDeath() and apparently always applied at spawn of creature
-                        // All three does however have SPELL_EFFECT_SPAWN(46) as effect1
-                        // It is possible this effect will remove some flags, and then the three here can be handled "normally"
+                        // Flags not set like it's done in SetFeignDeath()
+                        // UNIT_DYNFLAG_DEAD does not appear with these spells.
+                        // All of the spells appear to be present at spawn and not used to feign in combat or similar.
                         if (apply)
                         {
                             target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);

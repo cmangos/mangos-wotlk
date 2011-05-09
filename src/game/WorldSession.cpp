@@ -31,6 +31,7 @@
 #include "ObjectMgr.h"
 #include "Group.h"
 #include "Guild.h"
+#include "GuildMgr.h"
 #include "World.h"
 #include "BattleGroundMgr.h"
 #include "MapManager.h"
@@ -209,7 +210,7 @@ void WorldSession::LogUnprocessedTail(WorldPacket *packet)
 }
 
 /// Update the WorldSession (triggered by World update)
-bool WorldSession::Update(uint32 diff, PacketFilter& updater)
+bool WorldSession::Update(PacketFilter& updater)
 {
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not process packets if socket already closed
@@ -475,7 +476,7 @@ void WorldSession::LogoutPlayer(bool Save)
         }
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
-        if (Guild *guild = sObjectMgr.GetGuildById(_player->GetGuildId()))
+        if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
         {
             if (MemberSlot* slot = guild->GetMemberSlot(_player->GetObjectGuid()))
             {
@@ -523,7 +524,7 @@ void WorldSession::LogoutPlayer(bool Save)
         sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetObjectGuid(), true);
         sSocialMgr.RemovePlayerSocial (_player->GetGUIDLow ());
 
-		// Playerbot - remember player GUID for update SQL below
+        // Playerbot - remember player GUID for update SQL below
         uint32 guid = _player->GetGUIDLow();
 
         ///- Remove the player from the world

@@ -141,6 +141,9 @@
     <ClCompile Include="..\..\src\game\GuildHandler.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\GuildMgr.cpp">
+      <Filter>World/Handlers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\InstanceData.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
@@ -492,6 +495,7 @@
     </ClCompile>
     <ClCompile Include="..\..\src\game\playerbot\PlayerbotWarriorAI.cpp">
       <Filter>World/Handlers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\vmap\BIH.cpp">
       <Filter>vmaps</Filter>
     </ClCompile>
@@ -603,6 +607,9 @@
       <Filter>World/Handlers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\Group.h">
+      <Filter>World/Handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\GuildMgr.h">
       <Filter>World/Handlers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\InstanceData.h">
@@ -947,6 +954,7 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\playerbot\PlayerbotWarriorAI.h">
       <Filter>World/Handlers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\game\vmap\BIH.h">
       <Filter>vmaps</Filter>
     </ClInclude>
