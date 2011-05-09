@@ -9,6 +9,7 @@
 #include "../Chat.h"
 #include "../Language.h"
 #include "../Guild.h"
+#include "../GuildMgr.h"
 #include "../WaypointMovementGenerator.h"
 
 class LoginQueryHolder;
