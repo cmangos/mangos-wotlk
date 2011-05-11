@@ -13285,11 +13285,11 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
             if (!GetPlayerbotMgr())
                 SetPlayerbotMgr(new PlayerbotMgr(this));
 
-            if(GetPlayerbotMgr()->GetPlayerBot(guidlo) != NULL)
+            if(GetPlayerbotMgr()->GetPlayerBot(ObjectGuid(HIGHGUID_PLAYER,guidlo)) != NULL)
             {
-                GetPlayerbotMgr()->LogoutPlayerBot(guidlo);
+                GetPlayerbotMgr()->LogoutPlayerBot(ObjectGuid(HIGHGUID_PLAYER,guidlo));
             }
-            else if(GetPlayerbotMgr()->GetPlayerBot(guidlo) == NULL)
+            else if(GetPlayerbotMgr()->GetPlayerBot(ObjectGuid(HIGHGUID_PLAYER,guidlo)) == NULL)
             {
                 QueryResult *resultchar = CharacterDatabase.PQuery("SELECT COUNT(*) FROM characters WHERE online = '1' AND account = '%u'", m_session->GetAccountId());
                 if(resultchar)
@@ -13323,7 +13323,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                 }
                 delete resultlvl;
 
-                GetPlayerbotMgr()->AddPlayerBot(guidlo);
+                GetPlayerbotMgr()->AddPlayerBot(ObjectGuid(HIGHGUID_PLAYER,guidlo));
                 this->ModifyMoney(-(int32)cost);
             }
             break;

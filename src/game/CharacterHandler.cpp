@@ -600,7 +600,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
 // Playerbot mod. Can't easily reuse HandlePlayerLoginOpcode for logging in bots because it assumes
 // a WorldSession exists for the bot. The WorldSession for a bot is created after the character is loaded.
-void PlayerbotMgr::AddPlayerBot(uint64 playerGuid)
+void PlayerbotMgr::AddPlayerBot(ObjectGuid playerGuid)
 {
     // has bot already been added?
     if (sObjectMgr.GetPlayer(playerGuid))
