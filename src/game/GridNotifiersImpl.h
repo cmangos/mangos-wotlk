@@ -34,7 +34,7 @@ inline void MaNGOS::VisibleNotifier::Visit(GridRefManager<T> &m)
     for(typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
         i_camera.UpdateVisibilityOf(iter->getSource(), i_data, i_visibleNow);
-        i_clientGUIDs.erase(iter->getSource()->GetGUID());
+        i_clientGUIDs.erase(iter->getSource()->GetObjectGuid());
     }
 }
 
@@ -545,6 +545,15 @@ void MaNGOS::PlayerSearcher<Check>::Visit(PlayerMapType &m)
             return;
         }
     }
+}
+
+template<class Check>
+void MaNGOS::PlayerListSearcher<Check>::Visit(PlayerMapType &m)
+{
+    for(PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+        if (itr->getSource()->InSamePhase(i_phaseMask))
+            if (i_check(itr->getSource()))
+                i_objects.push_back(itr->getSource());
 }
 
 template<class Builder>

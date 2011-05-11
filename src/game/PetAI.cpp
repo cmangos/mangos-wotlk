@@ -252,7 +252,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 bool spellUsed = false;
                 for (AllySet::const_iterator tar = m_AllySet.begin(); tar != m_AllySet.end(); ++tar)
                 {
-                    Unit* Target = ObjectAccessor::GetUnit(*m_creature,*tar);
+                    Unit* Target = m_creature->GetMap()->GetUnit(*tar);
 
                     //only buff targets that are in combat, unless the spell can only be cast while out of combat
                     if (!Target)
@@ -335,14 +335,14 @@ void PetAI::UpdateAllies()
     {
         for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
         {
-            Player* Target = itr->getSource();
-            if (!Target || !pGroup->SameSubGroup((Player*)owner, Target))
+            Player* target = itr->getSource();
+            if (!target || !pGroup->SameSubGroup((Player*)owner, target))
                 continue;
 
-            if (Target->GetGUID() == owner->GetGUID())
+            if (target->GetObjectGuid() == owner->GetObjectGuid())
                 continue;
 
-            m_AllySet.insert(Target->GetObjectGuid());
+            m_AllySet.insert(target->GetObjectGuid());
         }
     }
     else                                                    //remove group
