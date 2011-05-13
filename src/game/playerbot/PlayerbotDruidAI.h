@@ -111,6 +111,8 @@ private:
     bool HealTarget (Unit *target);
     // Callback method to reset shapeshift forms blocking buffs and heals
     static void GoBuffForm(Player *self);
+    // Has the ability to change to animal form
+    bool IsFeral();
 
     // druid cat/bear/dire bear/moonkin/tree of life forms
     uint32 CAT_FORM,

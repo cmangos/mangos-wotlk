@@ -103,6 +103,20 @@ bool PlayerbotDruidAI::HealTarget(Unit *target)
     return false;
 } // end HealTarget
 
+bool PlayerbotDruidAI::IsFeral()
+{
+    if(MOONKIN_FORM > 0)
+        return true;
+    else if(DIRE_BEAR_FORM > 0)
+        return true;
+    else if(BEAR_FORM > 0)
+        return true;
+    else if(CAT_FORM > 0)
+        return true;
+    else
+        return false;
+}
+
 void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();
@@ -122,20 +136,14 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
     Player *m_bot = GetPlayerBot();
     Unit* pVictim = pTarget->getVictim();
 
-    if (pVictim && ai->GetHealthPercent() >= 40 && GetMaster()->GetHealth() >= GetMaster()->GetMaxHealth() * 0.4)
-    {
-        if (pVictim == m_bot)
-            SpellSequence = DruidTank;
-    }
-    else if (pTarget->GetHealth() > pTarget->GetMaxHealth() * 0.8 && pVictim)
-    {
-        if (pVictim != m_bot)
-            SpellSequence = DruidSpell;
-    }
-    else if (ai->GetHealthPercent() <= 40 || GetMaster()->GetHealth() <= GetMaster()->GetMaxHealth() * 0.4)
+    if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_HEAL) // && ai->GetMovementOrder() == PlayerbotAI::MOVEMENT_STAY)
         SpellSequence = DruidHeal;
-    else
+    else if (IsFeral() && ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST) // && ai->GetMovementOrder() == PlayerbotAI::MOVEMENT_STAY)
         SpellSequence = DruidCombat;
+    else if (IsFeral() && ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK)
+        SpellSequence = DruidTank;
+    else
+        SpellSequence = DruidSpell;
 
     switch (SpellSequence)
     {
