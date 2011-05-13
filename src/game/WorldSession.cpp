@@ -20,7 +20,7 @@
     \ingroup u2w
 */
 
-#include "WorldSocket.h"                                   // must be first to make ACE happy with ACE includes in it
+#include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
@@ -541,7 +541,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
         static SqlStatementID updChars;
 
-        // Playerbot mod: commented out above and do this one instead
+        // Playerbot mod: set for only character instead of accountid
         SqlStatement stmt = CharacterDatabase.CreateStatement(updChars, "UPDATE characters SET online = 0 WHERE guid = ?");
         stmt.PExecute(guid);
 

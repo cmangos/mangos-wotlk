@@ -32,7 +32,7 @@
 #include "WorldSession.h"
 #include "Pet.h"
 #include "MapReference.h"
-#include "Util.h"                                          // for Tokens typedef
+#include "Util.h"                                           // for Tokens typedef
 #include "AchievementMgr.h"
 #include "ReputationMgr.h"
 #include "BattleGround.h"
@@ -1456,6 +1456,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddTimedQuest( uint32 quest_id ) { m_timedquests.insert(quest_id); }
         void RemoveTimedQuest( uint32 quest_id ) { m_timedquests.erase(quest_id); }
 
+        // Playerbot mod
         void chompAndTrim(std::string& str);
         bool getNextQuestId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId);
         void skill(std::list<uint32>& m_spellsToLearn);

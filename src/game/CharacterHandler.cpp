@@ -1361,6 +1361,6 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket &recv_data)
     }
 
     WorldPacket data(SMSG_USE_EQUIPMENT_SET_RESULT, 1);
-    data << uint8(0);   // 4 - equipment swap failed - inventory is full
+    data << uint8(0);                                       // 4 - equipment swap failed - inventory is full
     SendPacket(&data);
 }

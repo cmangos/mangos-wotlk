@@ -549,7 +549,7 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
 
     m_stableSlots = 0;
 
-    /////////////////// Instance System ////////////////////
+    /////////////////// Instance System /////////////////////
 
     m_HomebindTimer = 0;
     m_InstanceValid = true;
