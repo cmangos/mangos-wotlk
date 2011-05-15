@@ -53,6 +53,7 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_INVISIBLE       = 0x00000080,       // creature is always invisible for player (mostly trigger creatures)
     CREATURE_FLAG_EXTRA_NOT_TAUNTABLE   = 0x00000100,       // creature is immune to taunt auras and effect attack me
     CREATURE_FLAG_EXTRA_AGGRO_ZONE      = 0x00000200,       // creature sets itself in combat with zone on aggro
+    CREATURE_FLAG_EXTRA_GUARD           = 0x00000400,       // creature is a guard
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
@@ -182,7 +183,7 @@ struct EquipmentInfo
 // from `creature` table
 struct CreatureData
 {
-    uint32 id;                                            // entry in creature_template
+    uint32 id;                                              // entry in creature_template
     uint16 mapid;
     uint16 phaseMask;
     uint32 modelid_override;                                // overrides any model defined in creature_template
@@ -475,6 +476,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool IsCivilian() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
+        bool IsGuard() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_GUARD; }
+
         bool CanWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
         bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
         bool CanFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }

@@ -332,7 +332,7 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
 
     GossipText const* pGossip = sObjectMgr.GetGossipText(textID);
 
-    WorldPacket data( SMSG_NPC_TEXT_UPDATE, 100 );         // guess size
+    WorldPacket data( SMSG_NPC_TEXT_UPDATE, 100 );          // guess size
     data << textID;
 
     if (!pGossip)

@@ -773,7 +773,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 return;
             }
 
-            pInst->SetData64(action.set_inst_data64.field, target->GetGUID());
+            pInst->SetData64(action.set_inst_data64.field, target->GetObjectGuid().GetRawValue());
             break;
         }
         case ACTION_T_UPDATE_TEMPLATE:
@@ -931,7 +931,7 @@ void CreatureEventAI::JustDied(Unit* killer)
 {
     Reset();
 
-    if (m_creature->isGuard())
+    if (m_creature->IsGuard())
     {
         //Send Zone Under Attack message to the LocalDefense and WorldDefense Channels
         if (Player* pKiller = killer->GetCharmerOrOwnerPlayerOrPlayerItself())

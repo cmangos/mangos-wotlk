@@ -80,7 +80,7 @@ bool LoginQueryHolder::Initialize()
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES,  "SELECT id, permanent, map, difficulty, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADAURAS,           "SELECT caster_guid,item_guid,spell,stackcount,remaincharges,basepoints0,basepoints1,basepoints2,periodictime0,periodictime1,periodictime2,maxduration,remaintime,effIndexMask FROM character_aura WHERE guid = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLS,          "SELECT spell,active,disabled FROM character_spell WHERE guid = '%u'", m_guid.GetCounter());
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADQUESTSTATUS,     "SELECT quest,status,rewarded,explored,timer,mobcount1,mobcount2,mobcount3,mobcount4,itemcount1,itemcount2,itemcount3,itemcount4 FROM character_queststatus WHERE guid = '%u'", m_guid.GetCounter());
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADQUESTSTATUS,     "SELECT quest,status,rewarded,explored,timer,mobcount1,mobcount2,mobcount3,mobcount4,itemcount1,itemcount2,itemcount3,itemcount4,itemcount5,itemcount6 FROM character_queststatus WHERE guid = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS,"SELECT quest FROM character_queststatus_daily WHERE guid = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADWEEKLYQUESTSTATUS,"SELECT quest FROM character_queststatus_weekly WHERE guid = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADMONTHLYQUESTSTATUS,"SELECT quest FROM character_queststatus_monthly WHERE guid = '%u'", m_guid.GetCounter());
@@ -314,7 +314,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if (sObjectMgr.GetPlayerGUIDByName(name))
+    if (!sObjectMgr.GetPlayerGuidByName(name).IsEmpty())
     {
         data << (uint8)CHAR_CREATE_NAME_IN_USE;
         SendPacket( &data );
@@ -600,7 +600,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
 // Playerbot mod. Can't easily reuse HandlePlayerLoginOpcode for logging in bots because it assumes
 // a WorldSession exists for the bot. The WorldSession for a bot is created after the character is loaded.
-void PlayerbotMgr::AddPlayerBot(uint64 playerGuid)
+void PlayerbotMgr::AddPlayerBot(ObjectGuid playerGuid)
 {
     // has bot already been added?
     if (sObjectMgr.GetPlayer(playerGuid))
@@ -1231,7 +1231,7 @@ void WorldSession::HandleCharCustomizeOpcode(WorldPacket& recv_data)
     }
 
     // character with this name already exist
-    ObjectGuid newguid = sObjectMgr.GetPlayerGUIDByName(newname);
+    ObjectGuid newguid = sObjectMgr.GetPlayerGuidByName(newname);
     if (!newguid.IsEmpty() && newguid != guid)
     {
         WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
@@ -1361,6 +1361,6 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket &recv_data)
     }
 
     WorldPacket data(SMSG_USE_EQUIPMENT_SET_RESULT, 1);
-    data << uint8(0);   // 4 - equipment swap failed - inventory is full
+    data << uint8(0);                                       // 4 - equipment swap failed - inventory is full
     SendPacket(&data);
 }

@@ -1198,8 +1198,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             *packet << guid;
             m_bot->GetSession()->QueuePacket(packet);
 
-            SetQuestNeedItems();
-
             return;
         }
 
@@ -1246,6 +1244,39 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 // clear movement
                 m_bot->GetMotionMaster()->Clear();
                 m_bot->GetMotionMaster()->MoveIdle();
+            }
+
+            return;
+        }
+
+        case SMSG_ITEM_PUSH_RESULT:
+        {
+            WorldPacket p(packet);  // (8+4+4+4+1+4+4+4+4+4+4)
+            ObjectGuid guid;
+
+            p >> guid;              // 8 player guid
+            if (m_bot->GetObjectGuid() != guid)
+                return;
+
+            uint8 bagslot;
+            uint32 itemslot, itemid, count, totalcount;
+
+            p.read_skip<uint32>();  // 4 0=looted, 1=from npc
+            p.read_skip<uint32>();  // 4 0=received, 1=created
+            p.read_skip<uint32>();  // 4 IsShowChatMessage
+            p >> bagslot;           // 1 bagslot
+            p >> itemslot;          // 4 item slot, but when added to stack: 0xFFFFFFFF
+            p >> itemid;            // 4 item entry id
+            p.read_skip<uint32>();  // 4 SuffixFactor
+            p.read_skip<uint32>();  // 4 random item property id
+            p >> count;             // 4 count of items
+            p >> totalcount;        // 4 count of items in inventory
+
+            if (IsInQuestItemList(itemid))
+            {
+                m_needItemList[itemid] = (m_needItemList[itemid] - count);
+                if (m_needItemList[itemid] <= 0)
+                    m_needItemList.erase(itemid);
             }
 
             return;
@@ -1709,7 +1740,6 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
     if (m_botState != BOTSTATE_COMBAT)
     {
         SetState(BOTSTATE_COMBAT);
-        SetQuestNeedItems();
         m_lootCurrent = ObjectGuid();
         m_targetCombat = 0;
     }
@@ -1861,24 +1891,28 @@ void PlayerbotAI::SetQuestNeedItems()
     // reset values first
     m_needItemList.clear();
 
-    // run through accepted quests, get quest infoand data
-    for (QuestStatusMap::iterator iter = m_bot->getQuestStatusMap().begin(); iter != m_bot->getQuestStatusMap().end(); ++iter)
+    // run through accepted quests, get quest info and data
+    for(int qs = 0; qs < MAX_QUEST_LOG_SIZE; ++qs)
     {
-        const Quest *qInfo = sObjectMgr.GetQuestTemplate(iter->first);
+        uint32 questid = m_bot->GetQuestSlotQuestId(qs);
+        if (questid == 0)
+            continue;
+
+        QuestStatusData &qData = m_bot->getQuestStatusMap()[questid];
+        // only check quest if it is incomplete
+        if (qData.m_status != QUEST_STATUS_INCOMPLETE)
+            continue;
+
+        Quest const* qInfo = sObjectMgr.GetQuestTemplate(questid);
         if (!qInfo)
             continue;
 
-        QuestStatusData *qData = &iter->second;
-        // only check quest if it is incomplete
-        if (qData->m_status != QUEST_STATUS_INCOMPLETE)
-            continue;
-
         // check for items we not have enough of
-        for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+        for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; i++)
         {
-            if (!qInfo->ReqItemCount[i] || (qInfo->ReqItemCount[i] - qData->m_itemcount[i]) <= 0)
+            if (!qInfo->ReqItemCount[i] || (qInfo->ReqItemCount[i] - qData.m_itemcount[i]) <= 0)
                 continue;
-            m_needItemList[qInfo->ReqItemId[i]] = (qInfo->ReqItemCount[i] - qData->m_itemcount[i]);
+            m_needItemList[qInfo->ReqItemId[i]] = (qInfo->ReqItemCount[i] - qData.m_itemcount[i]);
         }
     }
 }
@@ -1927,10 +1961,9 @@ void PlayerbotAI::DoLoot()
 
     if (m_lootCurrent.IsEmpty() && m_lootTargets.empty())
     {
-        // DEBUG_LOG ("[PlayerbotAI]: DoLoot - %s reset loot list / go back to idle", m_bot->GetName() );
+        // DEBUG_LOG ("[PlayerbotAI]: DoLoot - %s is going back to idle", m_bot->GetName() );
         SetState(BOTSTATE_NORMAL);
         m_bot->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
-        SetQuestNeedItems();
         return;
     }
 
@@ -2201,22 +2234,22 @@ void PlayerbotAI::AcceptQuest(Quest const *qInfo, Player *pGiver)
     if (!pGiver->CanShareQuest(qInfo->GetQuestId()))
     {
         // giver can't share quest
-        m_bot->SetDivider(0);
+        m_bot->ClearDividerGuid();
         return;
     }
 
     if (!m_bot->CanTakeQuest(qInfo, false))
     {
         // can't take quest
-        m_bot->SetDivider(0);
+        m_bot->ClearDividerGuid();
         return;
     }
 
-    if (m_bot->GetDivider() != 0)
+    if (!m_bot->GetDividerGuid().IsEmpty())
     {
         // send msg to quest giving player
         pGiver->SendPushToPartyResponse(m_bot, QUEST_PARTY_MSG_ACCEPT_QUEST);
-        m_bot->SetDivider(0);
+        m_bot->ClearDividerGuid();
     }
 
     if (m_bot->CanAddQuest(qInfo, false))
@@ -2225,6 +2258,14 @@ void PlayerbotAI::AcceptQuest(Quest const *qInfo, Player *pGiver)
 
         if (m_bot->CanCompleteQuest(quest))
             m_bot->CompleteQuest(quest);
+
+        // build needed items if quest contains any
+        for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; i++)
+            if (qInfo->ReqItemCount[i]>0)
+            {
+                m_bot->GetPlayerbotAI()->SetQuestNeedItems();
+                break;
+            }
 
         // Runsttren: did not add typeid switch from WorldSession::HandleQuestgiverAcceptQuestOpcode!
         // I think it's not needed, cause typeid should be TYPEID_PLAYER - and this one is not handled
@@ -3136,7 +3177,7 @@ bool PlayerbotAI::CanReceiveSpecificSpell(uint8 spec, Unit* target) const
         Unit::SpellAuraHolderMap holders = target->GetSpellAuraHolderMap();
         Unit::SpellAuraHolderMap::iterator it;
         for (it = holders.begin(); it != holders.end(); ++it)
-            if ((*it).second->GetCasterGUID() == m_bot->GetGUID() && GetSpellSpecific((*it).second->GetId()) == SpellSpecific(spec))
+            if ((*it).second->GetCasterGuid() == m_bot->GetObjectGuid() && GetSpellSpecific((*it).second->GetId()) == SpellSpecific(spec))
                 return false;
     }
     return true;
@@ -5203,6 +5244,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 }
                 else
                 {
+                    Item* qitem = FindItem(pQuest->GetSrcItemId());
+                    if(qitem)
+                        incomout << " use " << "|cffffffff|Hitem:" << qitem->GetProto()->ItemId << ":0:0:0:0:0:0:0" << "|h[" << qitem->GetProto()->Name1 << "]|h|r" << " on ";
                     hasIncompleteQuests = true;
                     incomout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" <<  questTitle << "]|h|r";
                 }

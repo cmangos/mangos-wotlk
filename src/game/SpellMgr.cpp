@@ -707,6 +707,7 @@ bool IsPositiveEffect(SpellEntry const *spellproto, SpellEffectIndex effIndex)
                     }
                 }   break;
                 case SPELL_AURA_MOD_DAMAGE_DONE:            // dependent from base point sign (negative -> negative)
+                case SPELL_AURA_MOD_RESISTANCE:
                 case SPELL_AURA_MOD_STAT:
                 case SPELL_AURA_MOD_SKILL:
                 case SPELL_AURA_MOD_DODGE_PERCENT:
@@ -740,7 +741,7 @@ bool IsPositiveEffect(SpellEntry const *spellproto, SpellEffectIndex effIndex)
                             {
                                 // if non-positive trigger cast targeted to positive target this main cast is non-positive
                                 // this will place this spell auras as debuffs
-                                if (IsPositiveTarget(spellTriggeredProto->EffectImplicitTargetA[effIndex], spellTriggeredProto->EffectImplicitTargetB[effIndex]) &&
+                                if (IsPositiveTarget(spellTriggeredProto->EffectImplicitTargetA[i], spellTriggeredProto->EffectImplicitTargetB[i]) &&
                                     !IsPositiveEffect(spellTriggeredProto, SpellEffectIndex(i)))
                                     return false;
                             }
@@ -993,7 +994,7 @@ void SpellMgr::LoadSpellTargetPositions()
         bar.step();
 
         sLog.outString();
-        sLog.outString( ">> Loaded %u spell target coordinates", count );
+        sLog.outString(">> Loaded %u spell target destination coordinates", count);
         return;
     }
 
@@ -1069,7 +1070,7 @@ void SpellMgr::LoadSpellTargetPositions()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u spell teleport coordinates", count );
+    sLog.outString(">> Loaded %u spell target destination coordinates", count);
 }
 
 template <typename EntryType, typename WorkerType, typename StorageType>
@@ -2044,6 +2045,16 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     ((spellInfo_2->SpellIconID == 313 || spellInfo_2->SpellIconID == 2039) && (spellInfo_1->SpellIconID == 544  || spellInfo_1->SpellIconID == 91)))
                     return false;
 
+                // Shadowflame and Curse of Agony
+                if( spellInfo_1->SpellIconID == 544 && spellInfo_2->SpellIconID == 3317 ||
+                    spellInfo_2->SpellIconID == 544 && spellInfo_1->SpellIconID == 3317 )
+                    return false;
+
+                // Shadowflame and Curse of Doom
+                if( spellInfo_1->SpellIconID == 91 && spellInfo_2->SpellIconID == 3317 ||
+                    spellInfo_2->SpellIconID == 91 && spellInfo_1->SpellIconID == 3317 )
+                    return false;
+
                 // Metamorphosis, diff effects
                 if (spellInfo_1->SpellIconID == 3314 && spellInfo_2->SpellIconID == 3314)
                     return false;
@@ -2448,6 +2459,7 @@ SpellEntry const* SpellMgr::SelectAuraRankForLevel(SpellEntry const* spellInfo, 
             break;
 
         // if found appropriate level
+        // partial Playerbot mod: fix for core bug (commit 073cdd0e...)
         if (level + 10 >= nextSpellInfo->spellLevel)
             return nextSpellInfo;
 
