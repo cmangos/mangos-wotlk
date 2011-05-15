@@ -54,7 +54,7 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     m_combatOrder(ORDERS_NONE), m_ScenarioType(SCENARIO_PVEEASY),
     m_TimeDoneEating(0), m_TimeDoneDrinking(0),
     m_CurrentlyCastingSpellId(0), m_spellIdCommand(0),
-    m_targetGuidCommand(0), m_classAI(0),
+    m_targetGuidCommand(ObjectGuid()), m_classAI(0),
     m_taxiMaster(ObjectGuid())
 {
 
@@ -530,9 +530,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         {
             m_ignoreAIUpdatesUntilTime = 0;
             WorldPacket p(packet);
-            uint64 flagGuid;
+            ObjectGuid flagGuid;
             p >> flagGuid;
-            uint64 playerGuid;
+            ObjectGuid playerGuid;
             p >> playerGuid;
             Player* const pPlayer = ObjectAccessor::FindPlayer(playerGuid);
             if (canObeyCommandFrom(*pPlayer))
@@ -602,8 +602,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             uint8 castCount;
             uint32 spellId;
 
-            uint64 casterGuid = p.readPackGUID();
-            if (casterGuid != m_bot->GetGUID())
+            ObjectGuid casterGuid = p.readPackGUID();
+            if (casterGuid != m_bot->GetObjectGuid())
                 return;
 
             p >> castCount >> spellId;
@@ -620,8 +620,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         case SMSG_FORCE_RUN_SPEED_CHANGE:
         {
             WorldPacket p(packet);
-            uint64 guid = p.readPackGUID();
-            if (guid != GetMaster()->GetGUID())
+            ObjectGuid guid = p.readPackGUID();
+            if (guid != GetMaster()->GetObjectGuid())
                 return;
             if (GetMaster()->IsMounted() && !m_bot->IsMounted())
             {
@@ -689,8 +689,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         case SMSG_MOVE_SET_CAN_FLY:
         {
             WorldPacket p(packet);
-            uint64 guid = p.readPackGUID();
-            if (guid != m_bot->GetGUID())
+            ObjectGuid guid = p.readPackGUID();
+            if (guid != m_bot->GetObjectGuid())
                 return;
             m_bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
             //m_bot->SetSpeed(MOVE_RUN, GetMaster()->GetSpeed(MOVE_FLIGHT) +0.1f, true);
@@ -701,8 +701,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         case SMSG_MOVE_UNSET_CAN_FLY:
         {
             WorldPacket p(packet);
-            uint64 guid = p.readPackGUID();
-            if (guid != m_bot->GetGUID())
+            ObjectGuid guid = p.readPackGUID();
+            if (guid != m_bot->GetObjectGuid())
                 return;
             m_bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING);
             //m_bot->SetSpeed(MOVE_RUN,GetMaster()->GetSpeedRate(MOVE_RUN),true);
@@ -718,10 +718,10 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             p >> name;
             if (m_bot->GetGroup() && name == m_bot->GetName())
             {
-                if (m_bot->GetGroup()->IsMember(GetMaster()->GetGUID()))
+                if (m_bot->GetGroup()->IsMember(GetMaster()->GetObjectGuid()))
                 {
                     p.resize(8);
-                    p << GetMaster()->GetGUID();
+                    p << GetMaster()->GetObjectGuid();
                     m_bot->GetSession()->HandleGroupSetLeaderOpcode(p);
                 }
                 else
@@ -886,9 +886,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         case SMSG_SPELL_START:
         {
             WorldPacket p(packet);
-            uint64 castItemGuid = p.readPackGUID();
-            uint64 casterGuid = p.readPackGUID();
-            if (casterGuid != m_bot->GetGUID())
+            ObjectGuid castItemGuid = p.readPackGUID();
+            ObjectGuid casterGuid = p.readPackGUID();
+            if (casterGuid != m_bot->GetObjectGuid())
                 return;
 
             uint8 castCount;
@@ -915,9 +915,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         case SMSG_SPELL_GO:
         {
             WorldPacket p(packet);
-            uint64 castItemGuid = p.readPackGUID();
-            uint64 casterGuid = p.readPackGUID();
-            if (casterGuid != m_bot->GetGUID())
+            ObjectGuid castItemGuid = p.readPackGUID();
+            ObjectGuid casterGuid = p.readPackGUID();
+            if (casterGuid != m_bot->GetObjectGuid())
                 return;
 
             uint32 spellId;
@@ -1786,7 +1786,7 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
     m_bot->Attack(m_targetCombat, true);
 
     // add thingToAttack to loot list
-    m_lootTargets.push_back(m_targetCombat->GetGUID());
+    m_lootTargets.push_back(m_targetCombat->GetObjectGuid());
 
     return;
 }
@@ -1927,7 +1927,7 @@ void PlayerbotAI::DoLoot()
 {
     bool looted = false;
 
-    if (m_lootCurrent.IsEmpty() && m_lootTargets.empty())
+    if (!m_lootCurrent && m_lootTargets.empty())
     {
         // DEBUG_LOG ("[PlayerbotAI]: DoLoot - %s is going back to idle", m_bot->GetName() );
         SetState(BOTSTATE_NORMAL);
@@ -1935,7 +1935,7 @@ void PlayerbotAI::DoLoot()
         return;
     }
 
-    if (m_lootCurrent.IsEmpty())
+    if (!m_lootCurrent)
     {
         m_lootCurrent = m_lootTargets.front();
         m_lootTargets.pop_front();
@@ -2213,7 +2213,7 @@ void PlayerbotAI::AcceptQuest(Quest const *qInfo, Player *pGiver)
         return;
     }
 
-    if (!m_bot->GetDividerGuid().IsEmpty())
+    if (m_bot->GetDividerGuid())
     {
         // send msg to quest giving player
         pGiver->SendPushToPartyResponse(m_bot, QUEST_PARTY_MSG_ACCEPT_QUEST);
@@ -2374,7 +2374,7 @@ void PlayerbotAI::UpdateAttackersForTarget(Unit *victim)
     while (ref)
     {
         ThreatManager *target = ref->getSource();
-        uint64 guid = target->getOwner()->GetGUID();
+        ObjectGuid guid = target->getOwner()->GetObjectGuid();
         m_attackerInfo[guid].attacker = target->getOwner();
         m_attackerInfo[guid].victim = target->getOwner()->getVictim();
         m_attackerInfo[guid].threat = target->getThreat(victim);
@@ -2787,7 +2787,7 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
             if (pTarget)
                 CastSpell(m_spellIdCommand, *pTarget);
             m_spellIdCommand = 0;
-            m_targetGuidCommand = 0;
+            m_targetGuidCommand = ObjectGuid();
         }
 
         //if master is unmounted, unmount the bot
@@ -2975,7 +2975,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK ||
         pSpellInfo->Effect[0] == SPELL_EFFECT_SKINNING)
     {
-        if (!m_lootCurrent.IsEmpty())
+        if (m_lootCurrent)
         {
             WorldPacket* const packet = new WorldPacket(CMSG_CAST_SPELL, 1 + 4 + 1 + 4 + 8);
             *packet << uint8(0);                            // spells cast count;
@@ -2988,7 +2988,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
             if (target_type == TARGET_FLAG_OBJECT)
             {
                 WorldPacket* const packetgouse = new WorldPacket(CMSG_GAMEOBJ_REPORT_USE, 8);
-                *packetgouse << uint64(m_lootCurrent.GetRawValue());
+                *packetgouse << m_lootCurrent;
                 m_bot->GetSession()->QueuePacket(packetgouse);  // queue the packet to get around race condition
             }
         }
@@ -3431,7 +3431,7 @@ void PlayerbotAI::extractSpellIdList(const std::string& text, BotSpellList& m_sp
     }
 }
 
-void PlayerbotAI::extractGOinfo(const std::string& text, std::list<uint64>& m_lootTargets) const
+void PlayerbotAI::extractGOinfo(const std::string& text, BotLootTarget& m_lootTargets) const
 {
 
     //    Link format
@@ -3808,7 +3808,7 @@ void PlayerbotAI::HandleTeleportAck()
     if (m_bot->IsBeingTeleportedNear())
     {
         WorldPacket p = WorldPacket(MSG_MOVE_TELEPORT_ACK, 8 + 4 + 4);
-        p.appendPackGUID(m_bot->GetGUID());
+        p.appendPackGUID(m_bot->GetObjectGuid());
         p << (uint32) 0; // supposed to be flags? not used currently
         p << (uint32) time(0); // time - not currently used
         m_bot->GetSession()->HandleMoveTeleportAckOpcode(p);
@@ -3895,7 +3895,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     }
 
     // if in the middle of a trade, and player asks for an item/money
-    else if (m_bot->GetTrader() && m_bot->GetTrader()->GetGUID() == fromPlayer.GetGUID())
+    else if (m_bot->GetTrader() && m_bot->GetTrader()->GetObjectGuid() == fromPlayer.GetObjectGuid())
     {
         uint32 copper = extractMoney(text);
         if (copper > 0)
@@ -3952,7 +3952,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (text == "attack")
     {
         ObjectGuid attackOnGuid = fromPlayer.GetSelectionGuid();
-        if (!attackOnGuid.IsEmpty())
+        if (attackOnGuid)
         {
             if (Unit* thingToAttack = ObjectAccessor::GetUnit(*m_bot, attackOnGuid))
                 if (!m_bot->IsFriendlyTo(thingToAttack) && m_bot->IsWithinLOSInMap(thingToAttack))
@@ -3985,15 +3985,15 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
         if (m_bot->HasAura(spellId))
         {
-            m_bot->RemoveAurasByCasterSpell(spellId, m_bot->GetGUID());
+            m_bot->RemoveAurasByCasterSpell(spellId, m_bot->GetObjectGuid());
             return;
         }
 
         ObjectGuid castOnGuid = fromPlayer.GetSelectionGuid();
-        if (spellId != 0 && !castOnGuid.IsEmpty() && m_bot->HasSpell(spellId))
+        if (spellId != 0 && castOnGuid && m_bot->HasSpell(spellId))
         {
             m_spellIdCommand = spellId;
-            m_targetGuidCommand = castOnGuid.GetRawValue();
+            m_targetGuidCommand = castOnGuid;
         }
 
     }
@@ -4051,7 +4051,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (text == "g" || text == "get") // get a selected lootable corpse
     {
         ObjectGuid getOnGuid = fromPlayer.GetSelectionGuid();
-        if (!getOnGuid.IsEmpty())
+        if (getOnGuid)
         {
             Creature *c = m_bot->GetMap()->GetCreature(getOnGuid);
             if (!c)
@@ -4219,7 +4219,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         int8 linkStart = text.find("|");
         if (linkStart < 0 || !ch.dropQuest((char *) text.substr(linkStart).c_str()))
             ch.sysmessage("ERROR: could not drop quest");
-        if (!oldSelectionGUID.IsEmpty())
+        if (oldSelectionGUID)
             fromPlayer.SetSelectionGuid(oldSelectionGUID);
     }
 
@@ -4284,7 +4284,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             {
                 if (pet->HasAura(spellId))
                 {
-                    pet->RemoveAurasByCasterSpell(spellId, pet->GetGUID());
+                    pet->RemoveAurasByCasterSpell(spellId, pet->GetObjectGuid());
                     return;
                 }
 
@@ -4313,7 +4313,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                     {
                         pet->ToggleAutocast(spellId, false);
                         if (pet->HasAura(spellId))
-                            pet->RemoveAurasByCasterSpell(spellId, pet->GetGUID());
+                            pet->RemoveAurasByCasterSpell(spellId, pet->GetObjectGuid());
                     }
                     else
                         pet->ToggleAutocast(spellId, true);

@@ -222,7 +222,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
         {
             WorldPacket p(packet);
             p.rpos(0); // reset reader
-            uint64 guid;
+            ObjectGuid guid;
             p >> guid;
             Player* const bot = GetPlayerBot(guid);
             if (bot) bot->GetPlayerbotAI()->SendNotEquipList(*bot);
@@ -315,7 +315,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 case TEXTEMOTE_POINT:
                 {
                     ObjectGuid attackOnGuid = m_master->GetSelectionGuid();
-                    if (attackOnGuid.IsEmpty())
+                    if (!attackOnGuid)
                         return;
 
                     Unit* thingToAttack = ObjectAccessor::GetUnit(*m_master, attackOnGuid);
@@ -371,7 +371,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
         {
             WorldPacket p(packet);
             p.rpos(0);     // reset reader
-            uint64 objGUID;
+            ObjectGuid objGUID;
             p >> objGUID;
 
             GameObject *obj = m_master->GetMap()->GetGameObject(objGUID);
@@ -502,7 +502,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
         {
 
             WorldPacket p(packet);    //WorldPacket packet for CMSG_LOOT_ROLL, (8+4+1)
-            uint64 Guid;
+            ObjectGuid Guid;
             uint32 NumberOfPlayers;
             uint8 rollType;
             p.rpos(0);    //reset packet pointer
@@ -621,7 +621,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received  CMSG_REPAIR_ITEM");
 
             ObjectGuid npcGUID;
-            uint64 itemGUID;
+            ObjectGuid itemGUID;
             uint8 guildBank;
 
             p.rpos(0);    //reset packet pointer
@@ -689,7 +689,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 Player* const bot = itr->second;
                 Group *grp = bot->GetGroup();
                 if (grp)
-                    grp->RemoveMember(bot->GetGUID(), 1);
+                    grp->RemoveMember(bot->GetObjectGuid(), 1);
             }
             return;
         }
@@ -763,7 +763,7 @@ void PlayerbotMgr::LogoutAllBots()
         PlayerBotMap::const_iterator itr = GetPlayerBotsBegin();
         if (itr == GetPlayerBotsEnd()) break;
         Player* bot = itr->second;
-        LogoutPlayerBot(bot->GetGUID());
+        LogoutPlayerBot(bot->GetObjectGuid());
     }
 }
 
@@ -806,17 +806,17 @@ void PlayerbotMgr::OnBotLogin(Player * const bot)
     bot->SetPlayerbotAI(ai);
 
     // tell the world session that they now manage this new bot
-    m_playerBots[bot->GetGUID()] = bot;
+    m_playerBots[bot->GetObjectGuid()] = bot;
 
     // if bot is in a group and master is not in group then
     // have bot leave their group
     if (bot->GetGroup() &&
         (m_master->GetGroup() == NULL ||
-         m_master->GetGroup()->IsMember(bot->GetGUID()) == false))
+         m_master->GetGroup()->IsMember(bot->GetObjectGuid()) == false))
         bot->RemoveFromGroup();
 
     // sometimes master can lose leadership, pass leadership to master check
-    const uint64 masterGuid = m_master->GetGUID();
+    const ObjectGuid masterGuid = m_master->GetObjectGuid();
     if (m_master->GetGroup() &&
         !m_master->GetGroup()->IsLeader(masterGuid))
         m_master->GetGroup()->ChangeLeader(masterGuid);
@@ -828,7 +828,7 @@ void PlayerbotMgr::RemoveAllBotsFromGroup()
     {
         Player* const bot = it->second;
         if (bot->IsInSameGroupWith(m_master))
-            m_master->GetGroup()->RemoveMember(bot->GetGUID(), 0);
+            m_master->GetGroup()->RemoveMember(bot->GetObjectGuid(), 0);
     }
 }
 
@@ -836,17 +836,17 @@ void Creature::LoadBotMenu(Player *pPlayer)
 {
 
     if (pPlayer->GetPlayerbotAI()) return;
-    uint64 guid = pPlayer->GetGUID();
+    ObjectGuid guid = pPlayer->GetObjectGuid();
     uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guid);
     QueryResult *result = CharacterDatabase.PQuery("SELECT guid, name FROM characters WHERE account='%d'", accountId);
     do
     {
         Field *fields = result->Fetch();
-        uint64 guidlo = fields[0].GetUInt64();
+        ObjectGuid guidlo = fields[0].GetUInt64();
         std::string name = fields[1].GetString();
         std::string word = "";
 
-        if ((guid == 0) || (guid == guidlo))
+        if ((guid == ObjectGuid()) || (guid == guidlo))
         {
             //not found or himself
         }
@@ -1083,7 +1083,7 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
         {
             char *targetChar = strtok(NULL, " ");
             ObjectGuid targetGUID = m_session->GetPlayer()->GetSelectionGuid();
-            if (!targetChar && targetGUID.IsEmpty())
+            if (!targetChar && !targetGUID)
             {
                 PSendSysMessage("|cffff0000Combat orders protect and assist expect a target either by selection or by giving target player in command string!");
                 SetSentErrorMessage(true);
