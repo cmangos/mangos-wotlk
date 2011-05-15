@@ -876,14 +876,14 @@ void Player::MakeTalentGlyphLink(std::ostringstream &out)
                         continue;
 
                     // skip another tab talents
-                    if(talent.m_talentEntry->TalentTab != talentTabId)
+                    if(talent.talentEntry->TalentTab != talentTabId)
                         continue;
 
-                    TalentEntry const *talentInfo = sTalentStore.LookupEntry( talent.m_talentEntry->TalentID );
+                    TalentEntry const *talentInfo = sTalentStore.LookupEntry( talent.talentEntry->TalentID );
 
                     SpellEntry const* spell_entry = sSpellStore.LookupEntry(talentInfo->RankID[talent.currentRank]);
 
-                    out << "|cff4e96f7|Htalent:" << talent.m_talentEntry->TalentID << ":" << talent.currentRank
+                    out << "|cff4e96f7|Htalent:" << talent.talentEntry->TalentID << ":" << talent.currentRank
                     << " |h[" << spell_entry->SpellName[GetSession()->GetSessionDbcLocale()] << "]|h|r";
                 }
             }
