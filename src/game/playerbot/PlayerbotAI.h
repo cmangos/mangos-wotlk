@@ -158,7 +158,7 @@ public:
     typedef std::list<enum NPCFlags> BotNPCList;
     typedef std::map<uint32, uint32> BotNeedItem;
     typedef std::pair<uint32,uint32>talentPair;
-    typedef std::list<uint64> BotLootCreature;
+    typedef std::list<ObjectGuid> BotLootTarget;
     typedef std::list<uint32> BotLootEntry;
     typedef std::list<uint32> BotSpellList;
     typedef std::vector<uint32> BotTaxiNode;
@@ -181,7 +181,7 @@ public:
         uint32 count;                 // number of units attacking
         uint32 source;                // 1=bot, 2=master, 3=group
     };
-    typedef std::map<uint64, AttackerInfo> AttackerInfoList;
+    typedef std::map<ObjectGuid, AttackerInfo> AttackerInfoList;
     typedef std::map<uint32, float> SpellRanges;
 
 public:
@@ -239,7 +239,7 @@ public:
     uint32 extractMoney(const std::string& text) const;
 
     // extracts gameobject info from link
-    void extractGOinfo(const std::string& text, std::list<uint64>& m_lootTargets) const;
+    void extractGOinfo(const std::string& text, BotLootTarget& m_lootTargets) const;
 
     // finds items in bots equipment and adds them to foundItemList, removes found items from itemIdSearchList
     void findItemsInEquip(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const;
@@ -420,7 +420,7 @@ private:
     // list of creatures we recently attacked and want to loot
     BotNPCList m_findNPC;               // list of NPCs
     BotTaskList m_tasks;                // list of tasks
-    BotLootCreature m_lootTargets;      // list of creatures
+    BotLootTarget m_lootTargets;        // list of targets
     BotSpellList m_spellsToLearn;       // list of spells
     ObjectGuid m_lootCurrent;           // current remains of interest
     ObjectGuid m_lootPrev;              // previous loot
@@ -437,7 +437,7 @@ private:
     // if master commands bot to do something, store here until updateAI
     // can do it
     uint32 m_spellIdCommand;
-    uint64 m_targetGuidCommand;
+    ObjectGuid m_targetGuidCommand;
     ObjectGuid m_taxiMaster;
 
     AttackerInfoList m_attackerInfo;
