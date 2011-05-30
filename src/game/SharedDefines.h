@@ -1258,7 +1258,7 @@ enum GameObjectFlags
     GO_FLAG_LOCKED          = 0x00000002,                   //require key, spell, event, etc to be opened. Makes "Locked" appear in tooltip
     GO_FLAG_INTERACT_COND   = 0x00000004,                   //cannot interact (condition to interact)
     GO_FLAG_TRANSPORT       = 0x00000008,                   //any kind of transport? Object can transport (elevator, boat, car)
-    GO_FLAG_UNK1            = 0x00000010,                   //
+    GO_FLAG_NO_INTERACT     = 0x00000010,                   //players cannot interact with this go (often need to remove flag in event)
     GO_FLAG_NODESPAWN       = 0x00000020,                   //never despawn, typically for doors, they just change state
     GO_FLAG_TRIGGERED       = 0x00000040,                   //typically, summoned objects. Triggered by spell or other events
     GO_FLAG_UNK_8           = 0x00000080,
@@ -1994,7 +1994,7 @@ enum CreatureTypeFlags
     CREATURE_TYPEFLAGS_UNK21            = 0x00100000,       // no idea, but it used by client, may be related to rendering
     CREATURE_TYPEFLAGS_UNK22            = 0x00200000,       // may be has something to do with animation (disable animation?)
     CREATURE_TYPEFLAGS_UNK23            = 0x00400000,       // this one probably controls some creature visual
-    CREATURE_TYPEFLAGS_UNK24            = 0x00800000,       // ? First seen in 3.2.2. Related to banner/backpack of creature/companion, used in CanInteract function by client
+    CREATURE_TYPEFLAGS_SQUIRE           = 0x00800000,       // First seen in 3.2.2. Related to banner/backpack of creature/companion, used in CanInteract function by client
     CREATURE_TYPEFLAGS_UNK25            = 0x01000000,       // pet sounds related?
     CREATURE_TYPEFLAGS_UNK26            = 0x02000000,       // this one probably controls some creature visual
     CREATURE_TYPEFLAGS_UNK27            = 0x04000000,       // creature has no type, or forces creature to be considered as in party, may be related to creature assistance

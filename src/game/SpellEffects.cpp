@@ -508,14 +508,14 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                             continue;
 
                         // Immolate
-                        if ((*i)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000004))
+                        if ((*i)->GetSpellProto()->IsFitToFamilyMask(UI64LIT(0x0000000000000004)))
                         {
                             aura = *i;                      // it selected always if exist
                             break;
                         }
 
                         // Shadowflame
-                        if ((*i)->GetSpellProto()->SpellFamilyFlags2 & 0x00000002)
+                        if ((*i)->GetSpellProto()->IsFitToFamilyMask(UI64LIT(0x0000000000000000), 0x00000002))
                             aura = *i;                      // remember but wait possible Immolate as primary priority
                     }
 
@@ -2681,7 +2681,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
         case SPELLFAMILY_DRUID:
         {
             // Starfall
-            if (m_spellInfo->SpellFamilyFlags2 & 0x00000100)
+            if (m_spellInfo->IsFitToFamilyMask(UI64LIT(0x0000000000000000), 0x00000100))
             {
                 //Shapeshifting into an animal form or mounting cancels the effect.
                 if(m_caster->GetCreatureType() == CREATURE_TYPE_BEAST || m_caster->IsMounted())
@@ -2767,6 +2767,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 31231:                                 // Cheat Death
                 {
+                    // Cheating Death
                     m_caster->CastSpell(m_caster, 45182, true);
                     return;
                 }
@@ -3068,7 +3069,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 return;
             }
             // Lava Lash
-            if (m_spellInfo->SpellFamilyFlags2 & 0x00000004)
+            if (m_spellInfo->IsFitToFamilyMask(UI64LIT(0x0000000000000000), 0x00000004))
             {
                 if (m_caster->GetTypeId()!=TYPEID_PLAYER)
                     return;
@@ -4318,7 +4319,7 @@ void Spell::EffectEnergisePct(SpellEffectIndex eff_idx)
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, gain, power);
 }
 
-void Spell::SendLoot(ObjectGuid guid, LootType loottype)
+void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
 {
     if (gameObjTarget)
     {
@@ -4337,8 +4338,16 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype)
                 // Don't return, let loots been taken
                 break;
 
+            case GAMEOBJECT_TYPE_TRAP:
+                if (lockType == LOCKTYPE_DISARM_TRAP)
+                {
+                    gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
+                    return;
+                }
+                sLog.outError("Spell::SendLoot unhandled locktype %u for GameObject trap (entry %u) for spell %u.", lockType, gameObjTarget->GetEntry(), m_spellInfo->Id);
+                return;
             default:
-                sLog.outError("Spell::SendLoot unhandled GameObject type %u (entry %u).", gameObjTarget->GetGoType(), gameObjTarget->GetEntry());
+                sLog.outError("Spell::SendLoot unhandled GameObject type %u (entry %u).", gameObjTarget->GetGoType(), gameObjTarget->GetEntry(), m_spellInfo->Id);
                 return;
         }
     }
@@ -4421,7 +4430,7 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
     if (itemTarget)
         itemTarget->SetFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_UNLOCKED);
 
-    SendLoot(guid, LOOT_SKINNING);
+    SendLoot(guid, LOOT_SKINNING, LockType(m_spellInfo->EffectMiscValue[eff_idx]));
 
     // not allow use skill grow at item base open
     if (!m_CastItem && skillId != SKILL_NONE)
@@ -6325,6 +6334,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 24320:                                 // Poisonous Blood
+                {
+                    unitTarget->CastSpell(unitTarget, 24321, true, NULL, NULL, m_caster->GetObjectGuid());
+                    return;
+                }
                 case 24590:                                 // Brittle Armor - need remove one 24575 Brittle Armor aura
                     unitTarget->RemoveAuraHolderFromStack(24575);
                     return;
@@ -6899,6 +6913,52 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, spellId, true);
                     return;
                 }
+                case 48810:                                 // Death's Door
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // Spell effect order will summon creature first and then apply invisibility to caster.
+                    // This result in that summoner/summoned can not see each other and that is not expected.
+                    // Aura from 48814 can be used as a hack from creature_addon, but we can not get the
+                    // summoned to cast this from this spell effect since we have no way to get pointer to creature.
+                    // Most proper would be to summon to same visibility mask as summoner, and not use spell at all.
+
+                    // Binding Life
+                    m_caster->CastSpell(m_caster, 48809, true);
+
+                    // After (after: meaning creature does not have auras at creation)
+                    // creature is summoned and visible for player in map, it is expected to
+                    // gain two auras. First from 29266(aura slot0) and then from 48808(aura slot1).
+                    // We have no pointer to summoned, so only 48808 is possible from this spell effect.
+
+                    // Binding Death
+                    m_caster->CastSpell(m_caster, 48808, true);
+                    return;
+                }
+                case 48811:                                 // Despawn Forgotten Soul
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    if (!((Creature*)unitTarget)->IsTemporarySummon())
+                        return;
+
+                    TemporarySummon* pSummon = (TemporarySummon*)unitTarget;
+
+                    Unit::AuraList const& images = unitTarget->GetAurasByType(SPELL_AURA_MIRROR_IMAGE);
+
+                    if (images.empty())
+                        return;
+
+                    Unit* pCaster = images.front()->GetCaster();
+                    Unit* pSummoner = unitTarget->GetMap()->GetUnit(pSummon->GetSummonerGuid());
+
+                    if (pSummoner && pSummoner == pCaster)
+                        pSummon->UnSummon();
+
+                    return;
+                }
                 case 48917:                                 // Who Are They: Cast from Questgiver
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -7238,6 +7298,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 66747, true);
                     return;
                 }
+                case 68861:                                 // Consume Soul (ICC FoS: Bronjahm)
+                    if (unitTarget)
+                        unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
                 case 69377:                                 // Fortitude
                 {
                     if (!unitTarget)
@@ -7260,6 +7324,13 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     m_caster->CastSpell(unitTarget, 72588, true);
+                    return;
+                }
+                case 72034:                                 // Whiteout
+                case 72096:                                 // Whiteout (heroic)
+                {
+                    // cast Whiteout visual
+                    m_caster->CastSpell(unitTarget, 72036, true);
                     return;
                 }
             }
@@ -7707,27 +7778,19 @@ void Spell::EffectDuel(SpellEffectIndex eff_idx)
     Player *target = (Player*)unitTarget;
 
     // caster or target already have requested duel
-    if( caster->duel || target->duel || !target->GetSocial() || target->GetSocial()->HasIgnore(caster->GetObjectGuid()) )
+    if (caster->duel || target->duel || !target->GetSocial() || target->GetSocial()->HasIgnore(caster->GetObjectGuid()))
         return;
 
     // Players can only fight a duel with each other outside (=not inside dungeons and not in capital cities)
-    // Don't have to check the target's map since you cannot challenge someone across maps
-    uint32 mapid = caster->GetMapId();
-    if( mapid != 0 && mapid != 1 && mapid != 530 && mapid != 571 && mapid != 609)
+    AreaTableEntry const* casterAreaEntry = GetAreaEntryByAreaID(caster->GetAreaId());
+    if (casterAreaEntry && !(casterAreaEntry->flags & AREA_FLAG_DUEL))
     {
         SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
         return;
     }
 
-    AreaTableEntry const* casterAreaEntry = GetAreaEntryByAreaID(caster->GetZoneId());
-    if(casterAreaEntry && (casterAreaEntry->flags & AREA_FLAG_CAPITAL) )
-    {
-        SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
-        return;
-    }
-
-    AreaTableEntry const* targetAreaEntry = GetAreaEntryByAreaID(target->GetZoneId());
-    if(targetAreaEntry && (targetAreaEntry->flags & AREA_FLAG_CAPITAL) )
+    AreaTableEntry const* targetAreaEntry = GetAreaEntryByAreaID(target->GetAreaId());
+    if (targetAreaEntry && !(targetAreaEntry->flags & AREA_FLAG_DUEL))
     {
         SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
         return;
@@ -7942,8 +8005,7 @@ void Spell::DoSummonTotem(SpellEffectIndex eff_idx, uint8 slot_dbc)
     if (m_caster->IsFFAPvP())
         pTotem->SetFFAPvP(true);
 
-    pTotem->Summon(m_caster);
-
+    // sending SMSG_TOTEM_CREATED before add to map (done in Summon)
     if (slot < MAX_TOTEM_SLOT && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         WorldPacket data(SMSG_TOTEM_CREATED, 1 + 8 + 4 + 4);
@@ -7953,6 +8015,8 @@ void Spell::DoSummonTotem(SpellEffectIndex eff_idx, uint8 slot_dbc)
         data << uint32(m_spellInfo->Id);
         ((Player*)m_caster)->SendDirectMessage(&data);
     }
+
+    pTotem->Summon(m_caster);
 }
 
 void Spell::EffectEnchantHeldItem(SpellEffectIndex eff_idx)

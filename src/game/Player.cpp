@@ -1345,9 +1345,8 @@ void Player::Update( uint32 update_diff, uint32 p_time )
                 }
             }
 
-            Unit *owner = pVictim->GetOwner();
-            Unit *u = owner ? owner : pVictim;
-            if (u->IsPvP() && (!duel || duel->opponent != u))
+            Player *vOwner = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (vOwner && vOwner->IsPvP() && !IsInDuelWith(vOwner))
             {
                 UpdatePvP(true);
                 RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
@@ -1420,7 +1419,7 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     if (isAlive())
     {
         // if no longer casting, set regen power as soon as it is up.
-        if (!IsUnderLastManaUseEffect())
+        if (!IsUnderLastManaUseEffect() && !HasAuraType(SPELL_AURA_STOP_NATURAL_MANA_REGEN))
             SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
 
         if (!m_regenTimer)
@@ -2136,6 +2135,8 @@ void Player::Regenerate(Powers power, uint32 diff)
     {
         case POWER_MANA:
         {
+            if (HasAuraType(SPELL_AURA_STOP_NATURAL_MANA_REGEN))
+                break;
             bool recentCast = IsUnderLastManaUseEffect();
             float ManaIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_MANA);
             if (recentCast)
@@ -4206,8 +4207,16 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
 
     // remove from guild
     if (uint32 guildId = GetGuildIdFromDB(playerguid))
+    {
         if (Guild* guild = sGuildMgr.GetGuildById(guildId))
-            guild->DelMember(playerguid);
+        {
+            if (guild->DelMember(playerguid))
+            {
+                guild->Disband();
+                delete guild;
+            }
+        }
+    }
 
     // remove from arena teams
     LeaveAllArenaTeams(playerguid);
@@ -5638,8 +5647,11 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, bool de
     if(lvldif < 3)
         lvldif = 3;
 
-    uint32 skilldif = 5 * plevel - (defence ? GetBaseDefenseSkillValue() : GetBaseWeaponSkillValue(attType));
-    if(skilldif <= 0)
+    int32 skilldif = 5 * plevel - (defence ? GetBaseDefenseSkillValue() : GetBaseWeaponSkillValue(attType));
+
+    // Max skill reached for level.
+    // Can in some cases be less than 0: having max skill and then .level -1 as example.
+    if (skilldif <= 0)
         return;
 
     float chance = float(3 * lvldif * skilldif) / plevel;
@@ -6811,6 +6823,9 @@ void Player::UpdateArea(uint32 newArea)
 
     if (area)
     {
+        // check leave duel allowed area
+        CheckDuelArea(area);
+
         // Dalaran restricted flight zone
         if ((area->flags & AREA_FLAG_CANNOT_FLY) && IsFreeFlying() && !isGameMaster() && !HasAura(58600))
             CastSpell(this, 58600, true);                   // Restricted Flight Area
@@ -6917,6 +6932,15 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     UpdateZoneDependentPets();
 }
 
+void Player::CheckDuelArea(AreaTableEntry const* areaEntry)
+{
+    if (!duel)
+        return;
+
+    if (!(areaEntry->flags & AREA_FLAG_DUEL))
+        DuelComplete(DUEL_FLED);
+}
+
 //If players are too far way of duel flag... then player loose the duel
 void Player::CheckDuelDistance(time_t currTime)
 {
@@ -6924,8 +6948,12 @@ void Player::CheckDuelDistance(time_t currTime)
         return;
 
     GameObject* obj = GetMap()->GetGameObject(GetGuidValue(PLAYER_DUEL_ARBITER));
-    if(!obj)
+    if (!obj)
+    {
+        // player not at duel start map
+        DuelComplete(DUEL_FLED);
         return;
+    }
 
     if (duel->outOfBound == 0)
     {
@@ -6956,7 +6984,7 @@ void Player::CheckDuelDistance(time_t currTime)
 void Player::DuelComplete(DuelCompleteType type)
 {
     // duel not requested
-    if(!duel)
+    if (!duel)
         return;
 
     WorldPacket data(SMSG_DUEL_COMPLETE, (1));
@@ -6964,7 +6992,7 @@ void Player::DuelComplete(DuelCompleteType type)
     GetSession()->SendPacket(&data);
     duel->opponent->GetSession()->SendPacket(&data);
 
-    if(type != DUEL_INTERUPTED)
+    if (type != DUEL_INTERUPTED)
     {
         data.Initialize(SMSG_DUEL_WINNER, (1+20));          // we guess size
         data << (uint8)((type==DUEL_WON) ? 0 : 1);          // 0 = just won; 1 = fled
@@ -13829,31 +13857,6 @@ void Player::AddQuest( Quest const *pQuest, Object *questGiver )
             questStatusData.m_creatureOrGOcount[i] = 0;
     }
 
-    // remove start item if not need
-    if (questGiver && questGiver->isType(TYPEMASK_ITEM))
-    {
-        // destroy not required for quest finish quest starting item
-        bool notRequiredItem = true;
-        for(int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
-        {
-            if (pQuest->ReqItemId[i] == questGiver->GetEntry())
-            {
-                notRequiredItem = false;
-                break;
-            }
-        }
-
-        if (pQuest->GetSrcItemId() == questGiver->GetEntry())
-            notRequiredItem = false;
-
-        if (notRequiredItem)
-            DestroyItem(((Item*)questGiver)->GetBagSlot(), ((Item*)questGiver)->GetSlot(), true);
-    }
-
-    GiveQuestSourceItemIfNeed(pQuest);
-
-    AdjustQuestReqItemCount( pQuest, questStatusData );
-
     if( pQuest->GetRepObjectiveFaction() )
         if(FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->GetRepObjectiveFaction()))
             GetReputationMgr().SetVisible(factionEntry);
@@ -13879,9 +13882,53 @@ void Player::AddQuest( Quest const *pQuest, Object *questGiver )
     if (questStatusData.uState != QUEST_NEW)
         questStatusData.uState = QUEST_CHANGED;
 
-    //starting initial quest script
-    if(questGiver && pQuest->GetQuestStartScript()!=0)
-        GetMap()->ScriptsStart(sQuestStartScripts, pQuest->GetQuestStartScript(), questGiver, this);
+    // quest accept scripts
+    if (questGiver)
+    {
+        switch (questGiver->GetTypeId())
+        {
+            case TYPEID_UNIT:
+                sScriptMgr.OnQuestAccept(this, (Creature*)questGiver, pQuest);
+                break;
+            case TYPEID_ITEM:
+            case TYPEID_CONTAINER:
+                sScriptMgr.OnQuestAccept(this, (Item*)questGiver, pQuest);
+                break;
+            case TYPEID_GAMEOBJECT:
+                sScriptMgr.OnQuestAccept(this, (GameObject*)questGiver, pQuest);
+                break;
+        }
+
+        // starting initial DB quest script
+        if (pQuest->GetQuestStartScript() != 0)
+            GetMap()->ScriptsStart(sQuestStartScripts, pQuest->GetQuestStartScript(), questGiver, this);
+
+    }
+
+    // remove start item if not need
+    if (questGiver && questGiver->isType(TYPEMASK_ITEM))
+    {
+        // destroy not required for quest finish quest starting item
+        bool notRequiredItem = true;
+        for(int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
+        {
+            if (pQuest->ReqItemId[i] == questGiver->GetEntry())
+            {
+                notRequiredItem = false;
+                break;
+            }
+        }
+
+        if (pQuest->GetSrcItemId() == questGiver->GetEntry())
+            notRequiredItem = false;
+
+        if (notRequiredItem)
+            DestroyItem(((Item*)questGiver)->GetBagSlot(), ((Item*)questGiver)->GetSlot(), true);
+    }
+
+    GiveQuestSourceItemIfNeed(pQuest);
+
+    AdjustQuestReqItemCount( pQuest, questStatusData );
 
     // Some spells applied at quest activation
     SpellAreaForQuestMapBounds saBounds = sSpellMgr.GetSpellAreaForQuestMapBounds(quest_id,true);
@@ -18167,7 +18214,7 @@ void Player::SendAttackSwingBadFacingAttack()
 void Player::SendAutoRepeatCancel(Unit *target)
 {
     WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, target->GetPackGUID().size());
-    data << target->GetPackGUID();                          // may be it's target guid
+    data << target->GetPackGUID();
     GetSession()->SendPacket( &data );
 }
 
@@ -20054,6 +20101,20 @@ template void Player::UpdateVisibilityOf(WorldObject const* viewPoint, Corpse*  
 template void Player::UpdateVisibilityOf(WorldObject const* viewPoint, GameObject*    target, UpdateData& data, std::set<WorldObject*>& visibleNow);
 template void Player::UpdateVisibilityOf(WorldObject const* viewPoint, DynamicObject* target, UpdateData& data, std::set<WorldObject*>& visibleNow);
 
+void Player::SetPhaseMask(uint32 newPhaseMask, bool update)
+{
+    // GM-mode have mask PHASEMASK_ANYWHERE always
+    if (isGameMaster())
+        newPhaseMask = PHASEMASK_ANYWHERE;
+
+    // phase auras normally not expected at BG but anyway better check
+    if (BattleGround *bg = GetBattleGround())
+        bg->EventPlayerDroppedFlag(this);
+
+    Unit::SetPhaseMask(newPhaseMask, update);
+    GetSession()->SendSetPhaseShift(GetPhaseMask());
+}
+
 void Player::InitPrimaryProfessions()
 {
     SetFreePrimaryProfessions(sWorld.getConfig(CONFIG_UINT32_MAX_PRIMARY_TRADE_SKILL));
@@ -20069,6 +20130,13 @@ void Player::SendComboPoints()
         data << uint8(m_comboPoints);
         GetSession()->SendPacket(&data);
     }
+    /*else
+    {
+        // can be NULL, and then points=0. Use unknown; to reset points of some sort?
+        data << PackedGuid();
+        data << uint8(0);
+        GetSession()->SendPacket(&data);
+    }*/
 }
 
 void Player::AddComboPoints(Unit* target, int8 count)
@@ -22853,6 +22921,8 @@ Object* Player::GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask)
         case HIGHGUID_CORPSE:
         case HIGHGUID_MO_TRANSPORT:
         case HIGHGUID_INSTANCE:
+        case HIGHGUID_GROUP:
+        default:
             break;
     }
 

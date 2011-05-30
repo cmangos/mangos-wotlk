@@ -148,8 +148,7 @@ ObjectMgr::ObjectMgr() :
     m_EquipmentSetIds("Equipment set ids"),
     m_GuildIds("Guild ids"),
     m_MailIds("Mail ids"),
-    m_PetNumbers("Pet numbers"),
-    m_GroupIds("Group ids")
+    m_PetNumbers("Pet numbers")
 {
     // Only zero condition left, others will be added while loading DB tables
     mConditions.resize(1);
@@ -1513,6 +1512,18 @@ void ObjectMgr::LoadGameobjects()
         int16 gameEvent     = fields[16].GetInt16();
         int16 GuidPoolId    = fields[17].GetInt16();
         int16 EntryPoolId   = fields[18].GetInt16();
+
+        if (data.rotation0 < -1.0f || data.rotation0 > 1.0f)
+        {
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation0 (%f) value, skip", guid, data.id, data.rotation0);
+            continue;
+        }
+
+        if (data.rotation1 < -1.0f || data.rotation1 > 1.0f)
+        {
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation1 (%f) value, skip", guid, data.id, data.rotation1);
+            continue;
+        }
 
         if (data.rotation2 < -1.0f || data.rotation2 > 1.0f)
         {
@@ -5476,8 +5487,6 @@ void ObjectMgr::PackGroupIds()
         bar.step();
     }
 
-    m_GroupIds.Set(groupId);
-
     sLog.outString( ">> Group Ids remapped, next group id is %u", groupId );
     sLog.outString();
 }
@@ -5572,7 +5581,7 @@ void ObjectMgr::SetHighestGuids()
     result = CharacterDatabase.Query( "SELECT MAX(groupId) FROM groups" );
     if (result)
     {
-        m_GroupIds.Set((*result)[0].GetUInt32()+1);
+        m_GroupGuids.Set((*result)[0].GetUInt32()+1);
         delete result;
     }
 
