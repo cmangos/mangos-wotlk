@@ -2906,6 +2906,57 @@ void Map::ScriptsProcess()
                         pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                 }
             }
+            case SCRIPT_COMMAND_STAND_STATE:
+            {
+                if (!source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_STAND_STATE (script id %u) call for NULL source.", step.script->id);
+                    break;
+                }
+
+                if (!source->isType(TYPEMASK_WORLDOBJECT))
+                {
+                    sLog.outError("SCRIPT_COMMAND_STAND_STATE (script id %u) call for non-worldobject (TypeId: %u), skipping.", step.script->id, source->GetTypeId());
+                    break;
+                }
+                // When creatureEntry is not defined, GameObject can not be source
+                else if (!step.script->standState.creatureEntry)
+                {
+                    if (!source->isType(TYPEMASK_UNIT))
+                    {
+                        sLog.outError("SCRIPT_COMMAND_STAND_STATE (script id %u) are missing datalong2 (creature entry). Unsupported call for non-unit (TypeId: %u), skipping.", step.script->id, source->GetTypeId());
+                        break;
+                    }
+                }
+
+                WorldObject* pSource = (WorldObject*)source;
+                Creature* pBuddy = NULL;
+
+                // flag_target_as_source            0x01
+
+                // If target is Unit* and should change it's stand state (or should be source of searcher below)
+                if (target && target->isType(TYPEMASK_UNIT) && step.script->standState.flags & 0x01)
+                    pSource = (WorldObject*)target;
+
+                // If step has a buddy entry defined, search for it.
+                if (step.script->standState.creatureEntry)
+                {
+                    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSource, step.script->standState.creatureEntry, true, step.script->standState.searchRadius);
+                    MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pBuddy, u_check);
+
+                    Cell::VisitGridObjects(pSource, searcher, step.script->standState.searchRadius);
+
+                    // If buddy found, then use it or break (break since we must assume pBuddy was defined for a reason)
+                    if (pBuddy)
+                        pSource = (WorldObject*)pBuddy;
+                    else
+                        break;
+                }
+
+                // Must be safe cast to Unit* here
+                ((Unit*)pSource)->SetStandState(step.script->standState.stand_state);
+                break;
+            }
             default:
                 sLog.outError("Unknown SCRIPT_COMMAND_ %u called for script id %u.",step.script->command, step.script->id);
                 break;
@@ -3087,4 +3138,112 @@ uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
 
     MANGOS_ASSERT(0);
     return 0;
+}
+
+/**
+ * Helper structure for building static chat information
+ *
+ */
+class StaticMonsterChatBuilder
+{
+    public:
+        StaticMonsterChatBuilder(CreatureInfo const* cInfo, ChatMsg msgtype, int32 textId, uint32 language, Unit* target, uint32 senderLowGuid = 0)
+            : i_cInfo(cInfo), i_msgtype(msgtype), i_textId(textId), i_language(language), i_target(target)
+        {
+            // 0 lowguid not used in core, but accepted fine in this case by client
+            i_senderGuid = i_cInfo->GetObjectGuid(senderLowGuid);
+        }
+        void operator()(WorldPacket& data, int32 loc_idx)
+        {
+            char const* text = sObjectMgr.GetMangosString(i_textId,loc_idx);
+
+            std::string nameForLocale = "";
+            if (loc_idx >= 0)
+            {
+                CreatureLocale const *cl = sObjectMgr.GetCreatureLocale(i_cInfo->Entry);
+                if (cl)
+                {
+                    if (cl->Name.size() > (size_t)loc_idx && !cl->Name[loc_idx].empty())
+                        nameForLocale = cl->Name[loc_idx];
+                }
+            }
+
+            if (nameForLocale.empty())
+                nameForLocale = i_cInfo->Name;
+
+            WorldObject::BuildMonsterChat(&data, i_senderGuid, i_msgtype, text, i_language, nameForLocale.c_str(), i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
+        }
+
+    private:
+        ObjectGuid i_senderGuid;
+        CreatureInfo const* i_cInfo;
+        ChatMsg i_msgtype;
+        int32 i_textId;
+        uint32 i_language;
+        Unit* i_target;
+};
+
+
+/**
+ * Function simulates yell of creature
+ *
+ * @param guid must be creature guid of whom to Simulate the yell, non-creature guids not supported at this moment
+ * @param textId Id of the simulated text
+ * @param language language of the text
+ * @param target, can be NULL
+ */
+void Map::MonsterYellToMap(ObjectGuid guid, int32 textId, uint32 language, Unit* target)
+{
+    if (guid.IsAnyTypeCreature())
+    {
+        CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(guid.GetEntry());
+        if (!cInfo)
+        {
+            sLog.outError("Map::MonsterYellToMap: Called for nonexistent creature entry in guid: %s", guid.GetString().c_str());
+            return;
+        }
+
+        MonsterYellToMap(cInfo, textId, language, target, guid.GetCounter());
+    }
+    else
+    {
+        sLog.outError("Map::MonsterYellToMap: Called for non creature guid: %s", guid.GetString().c_str());
+        return;
+    }
+}
+
+
+/**
+ * Function simulates yell of creature
+ *
+ * @param cinfo must be entry of Creature of whom to Simulate the yell
+ * @param textId Id of the simulated text
+ * @param language language of the text
+ * @param target, can be NULL
+ * @param senderLowGuid provide way proper show yell for near spawned creature with known lowguid,
+ *        0 accepted by client else if this not important
+ */
+void Map::MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, uint32 language, Unit* target, uint32 senderLowGuid /*= 0*/)
+{
+    StaticMonsterChatBuilder say_build(cinfo, CHAT_MSG_MONSTER_YELL, textId, language, target, senderLowGuid);
+    MaNGOS::LocalizedPacketDo<StaticMonsterChatBuilder> say_do(say_build);
+
+    Map::PlayerList const& pList = GetPlayers();
+    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+        say_do(itr->getSource());
+}
+
+/**
+ * Function to play sound to all players in map
+ *
+ * @param soundId Played Sound
+ */
+void Map::PlayDirectSoundToMap(uint32 soundId)
+{
+    WorldPacket data(SMSG_PLAY_SOUND, 4);
+    data << uint32(soundId);
+
+    Map::PlayerList const& pList = GetPlayers();
+    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+        itr->getSource()->SendDirectMessage(&data);
 }

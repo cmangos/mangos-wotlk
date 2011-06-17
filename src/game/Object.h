@@ -128,7 +128,7 @@ class MANGOS_DLL_SPEC Object
             m_inWorld = true;
 
             // synchronize values mirror with values array (changes will send in updatecreate opcode any way
-            ClearUpdateMask(false);                         // false - we can't have update dat in update queue before adding to world
+            ClearUpdateMask(false);                         // false - we can't have update data in update queue before adding to world
         }
         virtual void RemoveFromWorld()
         {
@@ -138,7 +138,6 @@ class MANGOS_DLL_SPEC Object
         }
 
         ObjectGuid const& GetObjectGuid() const { return GetGuidValue(OBJECT_FIELD_GUID); }
-        const uint64& GetGUID() const { return GetUInt64Value(OBJECT_FIELD_GUID); } // DEPRECATED, not use, will removed soon
         uint32 GetGUIDLow() const { return GetObjectGuid().GetCounter(); }
         PackedGuid const& GetPackGUID() const { return m_PackGUID; }
         std::string GetGuidStr() const { return GetObjectGuid().GetString(); }
@@ -432,7 +431,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         virtual ~WorldObject ( ) {}
 
-        virtual void Update ( uint32 /*update_diff*/, uint32 /*time_diff*/ ) {}
+        virtual void Update(uint32 /*update_diff*/, uint32 /*time_diff*/) {}
 
         void _Create( uint32 guidlow, HighGuid guidhigh, uint32 phaseMask);
 
@@ -542,7 +541,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void MonsterTextEmote(int32 textId, Unit* target, bool IsBossEmote = false);
         void MonsterWhisper(int32 textId, Unit* receiver, bool IsBossWhisper = false);
         void MonsterYellToZone(int32 textId, uint32 language, Unit* target);
-        void BuildMonsterChat(WorldPacket *data, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName) const;
+        static void BuildMonsterChat(WorldPacket *data, ObjectGuid senderGuid, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName);
 
         void PlayDistanceSound(uint32 sound_id, Player* target = NULL);
         void PlayDirectSound(uint32 sound_id, Player* target = NULL);
