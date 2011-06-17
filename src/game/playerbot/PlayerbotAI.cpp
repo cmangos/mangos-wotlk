@@ -622,8 +622,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         {
             WorldPacket p(packet);
             ObjectGuid guid;
-  
-	    p >> guid.ReadAsPacked();
+
+            p >> guid.ReadAsPacked();
             if (guid != GetMaster()->GetObjectGuid())
                 return;
             if (GetMaster()->IsMounted() && !m_bot->IsMounted())
@@ -693,8 +693,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         {
             WorldPacket p(packet);
             ObjectGuid guid;
-	    
-	    p >> guid.ReadAsPacked();
+
+            p >> guid.ReadAsPacked();
             if (guid != m_bot->GetObjectGuid())
                 return;
             m_bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
@@ -707,8 +707,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         {
             WorldPacket p(packet);
             ObjectGuid guid;
-	    
-	    p >> guid.ReadAsPacked();
+
+            p >> guid.ReadAsPacked();
             if (guid != m_bot->GetObjectGuid())
                 return;
             m_bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING);
@@ -895,8 +895,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             WorldPacket p(packet);
 
             ObjectGuid castItemGuid;
-	    p >> castItemGuid.ReadAsPacked();
-	    ObjectGuid casterGuid;
+            p >> castItemGuid.ReadAsPacked();
+            ObjectGuid casterGuid;
             p >> casterGuid.ReadAsPacked();
             if (casterGuid != m_bot->GetObjectGuid())
                 return;
@@ -927,9 +927,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             WorldPacket p(packet);
 
             ObjectGuid castItemGuid;
-	    p >> castItemGuid.ReadAsPacked();
+            p >> castItemGuid.ReadAsPacked();
             ObjectGuid casterGuid;
-	    p >> casterGuid.ReadAsPacked();
+            p >> casterGuid.ReadAsPacked();
             if (casterGuid != m_bot->GetObjectGuid())
                 return;
 
