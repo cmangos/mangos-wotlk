@@ -619,7 +619,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 Player* const bot = itr->second;
                 Group *grp = bot->GetGroup();
                 if (grp)
-                    grp->RemoveMember(bot->GetGUID(), 1);
+                    grp->RemoveMember(bot->GetObjectGuid(), 1);
             }
             return;
         }
