@@ -601,8 +601,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             WorldPacket p(packet);
             uint8 castCount;
             uint32 spellId;
+            ObjectGuid casterGuid;
 
-            ObjectGuid casterGuid = p.readPackGUID();
+            p >> casterGuid.ReadAsPacked();
             if (casterGuid != m_bot->GetObjectGuid())
                 return;
 
@@ -620,7 +621,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         case SMSG_FORCE_RUN_SPEED_CHANGE:
         {
             WorldPacket p(packet);
-            ObjectGuid guid = p.readPackGUID();
+            ObjectGuid guid;
+  
+	    p >> guid.ReadAsPacked();
             if (guid != GetMaster()->GetObjectGuid())
                 return;
             if (GetMaster()->IsMounted() && !m_bot->IsMounted())
@@ -689,7 +692,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         case SMSG_MOVE_SET_CAN_FLY:
         {
             WorldPacket p(packet);
-            ObjectGuid guid = p.readPackGUID();
+            ObjectGuid guid;
+	    
+	    p >> guid.ReadAsPacked();
             if (guid != m_bot->GetObjectGuid())
                 return;
             m_bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
@@ -701,7 +706,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         case SMSG_MOVE_UNSET_CAN_FLY:
         {
             WorldPacket p(packet);
-            ObjectGuid guid = p.readPackGUID();
+            ObjectGuid guid;
+	    
+	    p >> guid.ReadAsPacked();
             if (guid != m_bot->GetObjectGuid())
                 return;
             m_bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING);
@@ -886,8 +893,11 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         case SMSG_SPELL_START:
         {
             WorldPacket p(packet);
-            ObjectGuid castItemGuid = p.readPackGUID();
-            ObjectGuid casterGuid = p.readPackGUID();
+
+            ObjectGuid castItemGuid;
+	    p >> castItemGuid.ReadAsPacked();
+	    ObjectGuid casterGuid;
+            p >> casterGuid.ReadAsPacked();
             if (casterGuid != m_bot->GetObjectGuid())
                 return;
 
@@ -915,8 +925,11 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         case SMSG_SPELL_GO:
         {
             WorldPacket p(packet);
-            ObjectGuid castItemGuid = p.readPackGUID();
-            ObjectGuid casterGuid = p.readPackGUID();
+
+            ObjectGuid castItemGuid;
+	    p >> castItemGuid.ReadAsPacked();
+            ObjectGuid casterGuid;
+	    p >> casterGuid.ReadAsPacked();
             if (casterGuid != m_bot->GetObjectGuid())
                 return;
 
@@ -2255,7 +2268,7 @@ void PlayerbotAI::TurnInQuests(WorldObject *questgiver)
         m_bot->SetSelectionGuid(giverGUID);
 
         // auto complete every completed quest this NPC has
-        m_bot->PrepareQuestMenu(giverGUID.GetRawValue());
+        m_bot->PrepareQuestMenu(giverGUID);
         QuestMenu& questMenu = m_bot->PlayerTalkClass->GetQuestMenu();
         for (uint32 iI = 0; iI < questMenu.MenuItemCount(); ++iI)
         {
@@ -3465,7 +3478,7 @@ void PlayerbotAI::extractGOinfo(const std::string& text, BotLootTarget& m_lootTa
         ObjectGuid lootCurrent = ObjectGuid(HIGHGUID_GAMEOBJECT, entry, guid);
 
         if (guid)
-            m_lootTargets.push_back(lootCurrent.GetRawValue());
+            m_lootTargets.push_back(lootCurrent);
     }
 }
 
@@ -3608,7 +3621,7 @@ void PlayerbotAI::findNearbyGO()
         {
             GameObject* go = (*iter);
             if (go->isSpawned())
-                m_lootTargets.push_back(go->GetObjectGuid().GetRawValue());
+                m_lootTargets.push_back(go->GetObjectGuid());
         }
     }
 }
@@ -4059,7 +4072,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
             if (c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE) || c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE))
             {
-                m_lootTargets.push_back(getOnGuid.GetRawValue());
+                m_lootTargets.push_back(getOnGuid);
                 SetState(BOTSTATE_LOOTING);
             }
             else

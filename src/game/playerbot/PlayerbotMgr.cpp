@@ -334,7 +334,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 // emote to stay
                 case TEXTEMOTE_STAND:
                 {
-                    Player* const bot = GetPlayerBot(m_master->GetSelectionGuid().GetRawValue());
+                    Player* const bot = GetPlayerBot(m_master->GetSelectionGuid());
                     if (bot)
                         bot->GetPlayerbotAI()->SetMovementOrder(PlayerbotAI::MOVEMENT_STAY);
                     else
@@ -351,7 +351,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 case 324:
                 case TEXTEMOTE_WAVE:
                 {
-                    Player* const bot = GetPlayerBot(m_master->GetSelectionGuid().GetRawValue());
+                    Player* const bot = GetPlayerBot(m_master->GetSelectionGuid());
                     if (bot)
                         bot->GetPlayerbotAI()->SetMovementOrder(PlayerbotAI::MOVEMENT_FOLLOW, m_master);
                     else
@@ -842,7 +842,7 @@ void Creature::LoadBotMenu(Player *pPlayer)
     do
     {
         Field *fields = result->Fetch();
-        ObjectGuid guidlo = fields[0].GetUInt64();
+        ObjectGuid guidlo = ObjectGuid(fields[0].GetUInt64());
         std::string name = fields[1].GetString();
         std::string word = "";
 
