@@ -4135,7 +4135,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             if (c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE) ||
                 (c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE) && m_bot->HasSkill(skillId)))
             {
-                m_lootTargets.push_back(getOnGuid.GetRawValue());
+                m_lootTargets.push_back(getOnGuid);
                 SetState(BOTSTATE_LOOTING);
             }
             else
