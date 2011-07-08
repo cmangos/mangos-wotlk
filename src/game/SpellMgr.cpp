@@ -257,6 +257,18 @@ uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo)
     return 6;
 }
 
+uint16 GetSpellAuraMaxTicks(uint32 spellId)
+{
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+    if (!spellInfo)
+    {
+        sLog.outError("GetSpellAuraMaxTicks: Spell %u not exist!", spellId);
+        return 1;
+    }
+
+    return GetSpellAuraMaxTicks(spellInfo);
+}
+
 float CalculateDefaultCoefficient(SpellEntry const *spellProto, DamageEffectType const damagetype)
 {
     // Damage over Time spells bonus calculation
@@ -1915,6 +1927,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     if (spellInfo_1->SpellIconID == 2834 && spellInfo_2->SpellIconID == 2834)
                         return false;
 
+                    // Unstable Sphere Timer and Unstable Sphere Passive
+                    if ((spellInfo_1->Id == 50758 && spellInfo_2->Id == 50756) ||
+                        (spellInfo_2->Id == 50758 && spellInfo_1->Id == 50756))
+                        return false;
+
                     break;
                 }
                 case SPELLFAMILY_MAGE:
@@ -2226,6 +2243,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 
                 // Bestial Wrath
                 if (spellInfo_1->SpellIconID == 1680 && spellInfo_2->SpellIconID == 1680)
+                    return false;
+
+                // Aspect of the Viper & Vicious Viper
+                if (spellInfo_1->SpellIconID == 2227 && spellInfo_2->SpellIconID == 2227)
                     return false;
             }
 
@@ -3934,6 +3955,16 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
             BattleGround* bg = player->GetBattleGround();
             return bg && bg->GetStatus()==STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_ONLY_IN_ARENA;
         }
+        case 74410:                                         // Arena - Dampening
+            return player && player->InArena() ? SPELL_CAST_OK : SPELL_FAILED_ONLY_IN_ARENA;
+        case 74411:                                         // Battleground - Dampening
+        {
+            if (!player)
+                return SPELL_FAILED_ONLY_BATTLEGROUNDS;
+
+            BattleGround* bg = player->GetBattleGround();
+            return bg && !bg->isArena() ? SPELL_CAST_OK : SPELL_FAILED_ONLY_BATTLEGROUNDS;
+        }
     }
 
     return SPELL_CAST_OK;
@@ -4261,10 +4292,10 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         case SPELLFAMILY_ROGUE:
         {
             // Blind
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x00001000000))
+            if (spellproto->IsFitToFamilyMask(UI64LIT(0x00001000000)))
                 return DIMINISHING_FEAR_CHARM_BLIND;
             // Cheap Shot
-            else if (spellproto->SpellFamilyFlags & UI64LIT(0x00000000400))
+            else if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000000400)))
                 return DIMINISHING_CHEAPSHOT_POUNCE;
             // Crippling poison - Limit to 10 seconds in PvP (No SpellFamilyFlags)
             else if (spellproto->SpellIconID == 163)
@@ -4281,27 +4312,34 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         case SPELLFAMILY_WARLOCK:
         {
             // Curses/etc
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x00080000000))
+            if (spellproto->IsFitToFamilyMask(UI64LIT(0x00080000000)))
+                return DIMINISHING_LIMITONLY;
+            break;
+        }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Judgement of Justice - Limit to 10 seconds in PvP
+            if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000100000)))
                 return DIMINISHING_LIMITONLY;
             break;
         }
         case SPELLFAMILY_DRUID:
         {
             // Cyclone
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x02000000000))
+            if (spellproto->IsFitToFamilyMask(UI64LIT(0x02000000000)))
                 return DIMINISHING_CYCLONE;
             // Pounce
-            else if (spellproto->SpellFamilyFlags & UI64LIT(0x00000020000))
+            else if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000020000)))
                 return DIMINISHING_CHEAPSHOT_POUNCE;
             // Faerie Fire
-            else if (spellproto->SpellFamilyFlags & UI64LIT(0x00000000400))
+            else if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000000400)))
                 return DIMINISHING_LIMITONLY;
             break;
         }
         case SPELLFAMILY_WARRIOR:
         {
             // Hamstring - limit duration to 10s in PvP
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x00000000002))
+            if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000000002)))
                 return DIMINISHING_LIMITONLY;
             break;
         }
@@ -4336,7 +4374,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         return DIMINISHING_DISORIENT;
     if (mechanic & (1<<(MECHANIC_ROOT-1)))
         return triggered ? DIMINISHING_TRIGGER_ROOT : DIMINISHING_CONTROL_ROOT;
-    if (mechanic & ((1<<(MECHANIC_FEAR-1))|(1<<(MECHANIC_CHARM-1))))
+    if (mechanic & ((1<<(MECHANIC_FEAR-1))|(1<<(MECHANIC_CHARM-1))|(1<<(MECHANIC_TURN-1))))
         return DIMINISHING_FEAR_CHARM_BLIND;
     if (mechanic & ((1<<(MECHANIC_SILENCE-1))|(1<<(MECHANIC_INTERRUPT-1))))
         return DIMINISHING_SILENCE;
@@ -4497,7 +4535,7 @@ SpellEntry const* GetSpellEntryByDifficulty(uint32 id, Difficulty difficulty, bo
     for (Difficulty diff = difficulty; diff >= REGULAR_DIFFICULTY; diff = GetPrevDifficulty(diff, isRaid))
     {
         if (spellDiff->spellId[diff])
-            return sSpellStore.LookupEntry(spellDiff->spellId[difficulty]);
+            return sSpellStore.LookupEntry(spellDiff->spellId[diff]);
     }
 
     return NULL;

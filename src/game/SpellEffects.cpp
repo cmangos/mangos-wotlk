@@ -1977,6 +1977,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 51336:                                 // Magic Pull
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 50770, true);
+                    return;
+                }
                 case 51420:                                 // Digging for Treasure Ping
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
@@ -2061,7 +2069,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         if (unitTarget->hasUnitState(UNIT_STAT_FOLLOW | UNIT_STAT_FOLLOW_MOVE))
                             unitTarget->GetMotionMaster()->MovementExpired();
 
-                        unitTarget->MonsterMove(pTargetDummy->GetPositionX(), pTargetDummy->GetPositionY(), pTargetDummy->GetPositionZ(), IN_MILLISECONDS);
+                        unitTarget->MonsterMoveWithSpeed(pTargetDummy->GetPositionX(), pTargetDummy->GetPositionY(), pTargetDummy->GetPositionZ(), 24.f);
 
                         // Add state to temporarily prevent follow
                         unitTarget->addUnitState(UNIT_STAT_ROOT);
@@ -2348,7 +2356,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 64385:                                 // Spinning (from Unusual Compass)
                 {
-                    m_caster->SetFacingTo(frand(0, M_PI_F*2), true);
+                    m_caster->SetFacingTo(frand(0, M_PI_F*2));
                     return;
                 }
                 case 64981:                                 // Summon Random Vanquished Tentacle
@@ -3294,21 +3302,21 @@ void Spell::EffectClearQuest(SpellEffectIndex eff_idx)
 
 void Spell::EffectForceCast(SpellEffectIndex eff_idx)
 {
-    if( !unitTarget )
+    if (!unitTarget)
         return;
 
     uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[eff_idx];
 
     // normal case
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry( triggered_spell_id );
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(triggered_spell_id);
 
-    if(!spellInfo)
+    if (!spellInfo)
     {
-        sLog.outError("EffectForceCast of spell %u: triggering unknown spell id %i", m_spellInfo->Id,triggered_spell_id);
+        sLog.outError("EffectForceCast of spell %u: triggering unknown spell id %i", m_spellInfo->Id, triggered_spell_id);
         return;
     }
 
-    unitTarget->CastSpell(unitTarget, spellInfo, true, NULL, NULL, m_originalCasterGUID);
+    unitTarget->CastSpell(unitTarget, spellInfo, true, NULL, NULL, m_originalCasterGUID, m_spellInfo);
 }
 
 void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
@@ -3332,6 +3340,17 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
             unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
             unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
             unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_STALKED);
+
+            // if this spell is given to NPC it must handle rest by it's own AI
+            if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            uint32 spellId = 1784;
+            // reset cooldown on it if needed
+            if (((Player*)unitTarget)->HasSpellCooldown(spellId))
+                ((Player*)unitTarget)->RemoveSpellCooldown(spellId);
+
+            m_caster->CastSpell(unitTarget, spellId, true);
             return;
         }
         // just skip
@@ -4467,73 +4486,12 @@ void Spell::EffectSummonChangeItem(SpellEffectIndex eff_idx)
     if (!newitemid)
         return;
 
-    uint16 pos = m_CastItem->GetPos();
+    Item* oldItem = m_CastItem;
 
-    Item *pNewItem = Item::CreateItem( newitemid, 1, player);
-    if (!pNewItem)
-        return;
+    // prevent crash at access and unexpected charges counting with item update queue corrupt
+    ClearCastItem();
 
-    for(uint8 j= PERM_ENCHANTMENT_SLOT; j<=TEMP_ENCHANTMENT_SLOT; ++j)
-    {
-        if (m_CastItem->GetEnchantmentId(EnchantmentSlot(j)))
-            pNewItem->SetEnchantment(EnchantmentSlot(j), m_CastItem->GetEnchantmentId(EnchantmentSlot(j)), m_CastItem->GetEnchantmentDuration(EnchantmentSlot(j)), m_CastItem->GetEnchantmentCharges(EnchantmentSlot(j)));
-    }
-
-    if (m_CastItem->GetUInt32Value(ITEM_FIELD_DURABILITY) < m_CastItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
-    {
-        double loosePercent = 1 - m_CastItem->GetUInt32Value(ITEM_FIELD_DURABILITY) / double(m_CastItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY));
-        player->DurabilityLoss(pNewItem, loosePercent);
-    }
-
-    if (player->IsInventoryPos(pos))
-    {
-        ItemPosCountVec dest;
-        uint8 msg = player->CanStoreItem( m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), dest, pNewItem, true );
-        if (msg == EQUIP_ERR_OK)
-        {
-            player->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), true);
-
-            // prevent crash at access and unexpected charges counting with item update queue corrupt
-            ClearCastItem();
-
-            player->StoreItem( dest, pNewItem, true);
-            return;
-        }
-    }
-    else if (player->IsBankPos (pos))
-    {
-        ItemPosCountVec dest;
-        uint8 msg = player->CanBankItem( m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), dest, pNewItem, true );
-        if (msg == EQUIP_ERR_OK)
-        {
-            player->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), true);
-
-            // prevent crash at access and unexpected charges counting with item update queue corrupt
-            ClearCastItem();
-
-            player->BankItem( dest, pNewItem, true);
-            return;
-        }
-    }
-    else if (player->IsEquipmentPos (pos))
-    {
-        uint16 dest;
-        uint8 msg = player->CanEquipItem( m_CastItem->GetSlot(), dest, pNewItem, true );
-        if (msg == EQUIP_ERR_OK)
-        {
-            player->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), true);
-
-            // prevent crash at access and unexpected charges counting with item update queue corrupt
-            ClearCastItem();
-
-            player->EquipItem( dest, pNewItem, true);
-            player->AutoUnequipOffhandIfNeed();
-            return;
-        }
-    }
-
-    // fail
-    delete pNewItem;
+    player->ConvertItem(oldItem, newitemid);
 }
 
 void Spell::EffectProficiency(SpellEffectIndex /*eff_idx*/)
@@ -4761,8 +4719,6 @@ void Spell::DoSummon(SpellEffectIndex eff_idx)
 
     spawnCreature->GetCharmInfo()->SetPetNumber(pet_number, false);
 
-    spawnCreature->UpdateWalkMode(m_caster);
-
     spawnCreature->AIM_Initialize();
     spawnCreature->InitPetCreateSpells();
     spawnCreature->InitLevelupSpellsForLevel();
@@ -4963,11 +4919,8 @@ void Spell::EffectDistract(SpellEffectIndex /*eff_idx*/)
     if (unitTarget->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
         return;
 
-    float angle = unitTarget->GetAngle(m_targets.m_destX, m_targets.m_destY);
-
+    unitTarget->SetFacingTo(unitTarget->GetAngle(m_targets.m_destX, m_targets.m_destY));
     unitTarget->clearUnitState(UNIT_STAT_MOVING);
-    unitTarget->SetOrientation(angle);
-    unitTarget->SendMonsterMove(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), SPLINETYPE_FACINGANGLE, SPLINEFLAG_WALKMODE, 0, NULL, angle);
 
     if (unitTarget->GetTypeId() == TYPEID_UNIT)
         unitTarget->GetMotionMaster()->MoveDistract(damage * IN_MILLISECONDS);
@@ -5685,8 +5638,6 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
     NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
-    NewSummon->UpdateWalkMode(m_caster);
-
     NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
     // this enables pet details window (Shift+P)
 
@@ -5701,14 +5652,15 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     NewSummon->InitLevelupSpellsForLevel();
     NewSummon->InitTalentForLevel();
 
-    if(NewSummon->getPetType() == SUMMON_PET)
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && NewSummon->getPetType() == SUMMON_PET)
     {
         // generate new name for summon pet
         std::string new_name = sObjectMgr.GeneratePetName(petentry);
-        if(!new_name.empty())
+        if (!new_name.empty())
             NewSummon->SetName(new_name);
     }
-    else if(NewSummon->getPetType() == HUNTER_PET)
+
+    if (NewSummon->getPetType() == HUNTER_PET)
     {
         NewSummon->RemoveByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED);
         NewSummon->SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_ABANDONED);
@@ -6506,6 +6458,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 28560:                                 // Summon Blizzard
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->SummonCreature(16474, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000);
+                    return;
+                }
                 case 29830:                                 // Mirren's Drinking Hat
                 {
                     uint32 item = 0;
@@ -7250,6 +7210,47 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     // learn random explicit discovery recipe (if any)
                     if (uint32 discoveredSpell = GetExplicitDiscoverySpell(m_spellInfo->Id, (Player*)m_caster))
                         ((Player*)m_caster)->learnSpell(discoveredSpell, false);
+
+                    return;
+                }
+                case 62524:                                 // Attuned to Nature 2 Dose Reduction
+                case 62525:                                 // Attuned to Nature 10 Dose Reduction
+                case 62521:                                 // Attuned to Nature 25 Dose Reduction
+                {
+                    if (!unitTarget)
+                        return;
+
+                    uint32 numStacks = 0;
+
+                    switch(m_spellInfo->Id)
+                    {
+                        case 62524: numStacks = 2;  break;
+                        case 62525: numStacks = 10; break;
+                        case 62521: numStacks = 25; break;
+                    };
+
+                    uint32 spellId = m_spellInfo->CalculateSimpleValue(eff_idx);
+                    unitTarget->RemoveAuraHolderFromStack(spellId, numStacks);
+                    return;
+                }
+                case 62678:                                 // Summon Allies of Nature
+                {
+                    const uint32 randSpells[] =
+                    {
+                        62685,  // Summon Wave - 1 Mob
+                        62686,  // Summon Wave - 3 Mob
+                        62688,  // Summon Wave - 10 Mob
+                    };
+
+                    m_caster->CastSpell(m_caster, randSpells[urand(0, countof(randSpells)-1)], true);
+                    return;
+                }
+                case 62688:                                 // Summon Wave - 10 Mob
+                {
+                    uint32 spellId = m_spellInfo->CalculateSimpleValue(eff_idx);
+
+                    for (uint32 i = 0; i < 10; ++i)
+                        m_caster->CastSpell(m_caster, spellId, true);
 
                     return;
                 }
@@ -8420,7 +8421,7 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
         ((Creature *)unitTarget)->StopMoving();
 
     // Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
-    m_caster->MonsterMove(x, y, z, 1);
+    m_caster->MonsterMoveWithSpeed(x, y, z, 24.f);
 
     // not all charge effects used in negative spells
     if (unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->Id))
@@ -8445,7 +8446,7 @@ void Spell::EffectCharge2(SpellEffectIndex /*eff_idx*/)
         return;
 
     // Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
-    m_caster->MonsterMove(x, y, z, 1);
+    m_caster->MonsterMoveWithSpeed(x, y, z, 24.f);
 
     // not all charge effects used in negative spells
     if (unitTarget && unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->Id))

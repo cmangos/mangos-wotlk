@@ -22,6 +22,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/vmap
   ${CMAKE_CURRENT_SOURCE_DIR}/playerbot
+  ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
   ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
   ${CMAKE_SOURCE_DIR}/dep/include
   ${CMAKE_SOURCE_DIR}/src/shared
@@ -42,7 +43,7 @@ source_group("World/Handlers"
 )
 
 source_group("Motion generators"
-  REGULAR_EXPRESSION Movement|Holder|Motion|Traveller
+  REGULAR_EXPRESSION Generator|MotionMaster
 )
 
 source_group("Server"
@@ -63,6 +64,13 @@ source_group("Tool"
 
 source_group("References"
   REGULAR_EXPRESSION Reference|RefManager|ThreatManager
+)
+
+source_group("Movement"
+  REGULAR_EXPRESSION spline|Spline|packet_builder
+  FILES
+    movement/typedefs.h
+    movement/util.cpp
 )
 
 if(PCH)
