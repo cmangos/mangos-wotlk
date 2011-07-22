@@ -1845,13 +1845,7 @@ void PlayerbotAI::DoCombatMovement()
 
     float targetDist = m_bot->GetDistance(m_targetCombat);
 
-    // if m_bot has it's back to the attacker, turn
-    if (!m_bot->HasInArc(M_PI_F, m_targetCombat))
-    {
-        // TellMaster("%s is facing the wrong way!", m_bot->GetName());
-        m_bot->GetMotionMaster()->Clear(true);
-        m_bot->SetOrientation(m_bot->GetAngle(m_targetCombat));
-    }
+    m_bot->SetFacingTo(m_bot->GetAngle(m_targetCombat));
 
     if (m_combatStyle == COMBAT_MELEE && !m_bot->hasUnitState(UNIT_STAT_CHASE) && ((m_movementOrder == MOVEMENT_STAY && targetDist <= ATTACK_DISTANCE) || (m_movementOrder != MOVEMENT_STAY)))
         // melee combat - chase target if in range or if we are not forced to stay
@@ -2698,21 +2692,6 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
 {
     if (m_bot->IsBeingTeleported() || m_bot->GetTrader())
         return;
-
-    // Send updates to world if chasing target or moving to point
-    MovementGeneratorType movementType = m_bot->GetMotionMaster()->GetCurrentMovementGeneratorType();
-    if (movementType == CHASE_MOTION_TYPE || movementType == POINT_MOTION_TYPE)
-    {
-        float x, y, z;
-        m_bot->GetMotionMaster()->GetDestination(x, y, z);
-        if (x != m_destX || y != m_destY || z != m_destZ)
-        {
-            m_bot->MonsterMoveWithSpeed(x, y, z, 0.0);
-            m_destX = x;
-            m_destY = y;
-            m_destZ = z;
-        }
-    }
 
     time_t currentTime = time(0);
     if (currentTime < m_ignoreAIUpdatesUntilTime)
