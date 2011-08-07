@@ -210,7 +210,7 @@ public:
     ScenarioType GetScenarioType() { return m_ScenarioType; }
 
     PlayerbotClassAI* GetClassAI() { return m_classAI; }
-    PlayerbotMgr* const GetManager() { return m_mgr; }
+    PlayerbotMgr* GetManager() { return m_mgr; }
 
     // finds spell ID for matching substring args
     // in priority of full text match, spells not taking reagents, and highest rank

@@ -52,11 +52,11 @@ public:
 };
 
 PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
-    m_mgr(mgr), m_bot(bot), m_ignoreAIUpdatesUntilTime(0),
+    m_mgr(mgr), m_bot(bot), m_classAI(0), m_ignoreAIUpdatesUntilTime(0),
     m_combatOrder(ORDERS_NONE), m_ScenarioType(SCENARIO_PVEEASY),
     m_TimeDoneEating(0), m_TimeDoneDrinking(0),
     m_CurrentlyCastingSpellId(0), m_spellIdCommand(0),
-    m_targetGuidCommand(ObjectGuid()), m_classAI(0),
+    m_targetGuidCommand(ObjectGuid()),
     m_taxiMaster(ObjectGuid())
 {
 
@@ -353,7 +353,7 @@ uint32 PlayerbotAI::initPetSpell(uint32 spellIconId)
  * This is called when the master is inspecting the bot.
  */
 
-void PlayerbotAI::SendNotEquipList(Player& player)
+void PlayerbotAI::SendNotEquipList(Player& /*player*/)
 {
     // find all unequipped items and put them in
     // a vector of dynamically created lists where the vector index is from 0-18
@@ -380,7 +380,7 @@ void PlayerbotAI::SendNotEquipList(Player& player)
 
         // the dest looks like it includes the old loc in the 8 higher bits
         // so casting it to a uint8 strips them
-        uint8 equipSlot = uint8(dest);
+        int8 equipSlot = uint8(dest);
         if (!(equipSlot >= 0 && equipSlot < 19))
             continue;
 
@@ -403,10 +403,12 @@ void PlayerbotAI::SendNotEquipList(Player& player)
                 if (!pItem)
                     continue;
 
-                uint16 equipSlot;
-                uint8 msg = m_bot->CanEquipItem(NULL_SLOT, equipSlot, pItem, !pItem->IsBag());
+                uint16 dest;
+                uint8 msg = m_bot->CanEquipItem(NULL_SLOT, dest, pItem, !pItem->IsBag());
                 if (msg != EQUIP_ERR_OK)
                     continue;
+
+                int8 equipSlot = uint8(dest);
                 if (!(equipSlot >= 0 && equipSlot < 19))
                     continue;
 
@@ -452,7 +454,7 @@ void PlayerbotAI::SendNotEquipList(Player& player)
     }
 }
 
-void PlayerbotAI::SendQuestItemList(Player& player)
+void PlayerbotAI::SendQuestItemList(Player& /*player*/)
 {
     std::ostringstream out;
 
@@ -605,7 +607,7 @@ bool PlayerbotAI::IsItemUseful(uint32 itemid)
     return false;
 }
 
-void PlayerbotAI::SendOrders(Player& player)
+void PlayerbotAI::SendOrders(Player& /*player*/)
 {
     std::ostringstream out;
 
@@ -2772,7 +2774,7 @@ void PlayerbotAI::SetInFront(const Unit* obj)
 // hasUnitState(FLAG) FLAG like: UNIT_STAT_ROOT, UNIT_STAT_CONFUSED, UNIT_STAT_STUNNED
 // hasAuraType
 
-void PlayerbotAI::UpdateAI(const uint32 p_time)
+void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
 {
     if (m_bot->IsBeingTeleported() || m_bot->GetTrader())
         return;
@@ -2952,7 +2954,7 @@ void PlayerbotAI::TellMaster(const char *fmt, ...) const
     char temp_buf[1024];
     va_list ap;
     va_start(ap, fmt);
-    size_t temp_len = vsnprintf(temp_buf, 1024, fmt, ap);
+    (void) vsnprintf(temp_buf, 1024, fmt, ap);
     va_end(ap);
     std::string str = temp_buf;
     TellMaster(str);
@@ -3987,6 +3989,8 @@ void PlayerbotAI::findNearbyCreature()
                                                 ait = m_tasks.erase(ait);
                                             break;
                                         }
+                                        default:
+                                            break;
                                     }
                                 }
                             }
@@ -4014,7 +4018,9 @@ void PlayerbotAI::findNearbyCreature()
                                             ait = m_tasks.erase(ait);
                                             break;
                                         }
-                                    }
+                                        default:
+                                            break;
+                                   }
                                 }
                             }
                             itr = m_findNPC.erase(itr); // all done lets go home
@@ -4047,7 +4053,9 @@ void PlayerbotAI::findNearbyCreature()
                                                 ait = m_tasks.erase(ait);
                                             break;
                                         }
-                                    }
+                                        default:
+                                            break;
+                                   }
                                 }
                             }
                             itr = m_findNPC.erase(itr); // all done lets go home
@@ -4080,7 +4088,9 @@ void PlayerbotAI::findNearbyCreature()
                                                 ait = m_tasks.erase(ait);
                                             break;
                                         }
-                                    }
+                                        default:
+                                            break;
+                                   }
                                 }
                             }
                             ListAuctions();
@@ -4571,7 +4581,7 @@ bool PlayerbotAI::ListAuctions()
     std::ostringstream report;
 
     QueryResult *result = CharacterDatabase.PQuery(
-    "SELECT id,itemguid,item_template,time,buyguid,lastbid FROM auction WHERE itemowner = '%u'",m_bot->GetObjectGuid());
+    "SELECT id,itemguid,item_template,time,buyguid,lastbid FROM auction WHERE itemowner = '%u'",m_bot->GetObjectGuid().GetCounter());
     if(result)
     {
         report << "My active auctions are: \n";
@@ -4885,7 +4895,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     }
 
     // handle cast command
-    else if (text.size() > 2 && text.substr(0, 2) == "c " || text.size() > 5 && text.substr(0, 5) == "cast ")
+    else if ((text.size() > 2 && text.substr(0, 2) == "c ") || (text.size() > 5 && text.substr(0, 5) == "cast "))
     {
         // sLog.outErrorDb("Selected link : %s", text.c_str());
 
@@ -5116,7 +5126,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     }
 
     // use items
-    else if (text.size() > 2 && text.substr(0, 2) == "u " || text.size() > 4 && text.substr(0, 4) == "use ")
+    else if ((text.size() > 2 && text.substr(0, 2) == "u ") || (text.size() > 4 && text.substr(0, 4) == "use "))
     {
         std::list<uint32> itemIds;
         std::list<Item*> itemList;
@@ -5127,7 +5137,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     }
 
     // equip items
-    else if (text.size() > 2 && text.substr(0, 2) == "e " || text.size() > 6 && text.substr(0, 6) == "equip ")
+    else if ((text.size() > 2 && text.substr(0, 2) == "e ") || (text.size() > 6 && text.substr(0, 6) == "equip "))
     {
         std::list<uint32> itemIds;
         std::list<Item*> itemList;
@@ -5138,7 +5148,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     }
 
     // find project: 20:50 02/12/10 rev.4 item in world and wait until ordered to follow
-    else if (text.size() > 2 && text.substr(0, 2) == "f " || text.size() > 5 && text.substr(0, 5) == "find ")
+    else if ((text.size() > 2 && text.substr(0, 2) == "f ") || (text.size() > 5 && text.substr(0, 5) == "find "))
     {
         extractGOinfo(text, m_lootTargets);
 
@@ -5160,7 +5170,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     }
 
     // get project: 20:50 02/12/10 rev.4 compact edition, handles multiple linked gameobject & improves visuals
-    else if (text.size() > 2 && text.substr(0, 2) == "g " || text.size() > 4 && text.substr(0, 4) == "get ")
+    else if ((text.size() > 2 && text.substr(0, 2) == "g ") || (text.size() > 4 && text.substr(0, 4) == "get "))
     {
         extractGOinfo(text, m_lootTargets);
         SetState(BOTSTATE_LOOTING);
@@ -5814,7 +5824,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                         msg << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
                     msg << cost <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\r";
                 }
-                uint32 moneyDiff = m_bot->GetMoney() - totalCost;
+                int32 moneyDiff = m_bot->GetMoney() - totalCost;
                 if (moneyDiff >= 0)
                 {
                     // calculate how much money bot has

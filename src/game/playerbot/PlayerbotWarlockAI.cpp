@@ -86,9 +86,13 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     switch (ai->GetScenarioType())
     {
         case PlayerbotAI::SCENARIO_DUEL:
+        {
             if (SHADOW_BOLT > 0)
                 ai->CastSpell(SHADOW_BOLT);
             return;
+        }
+        default:
+            break;
     }
 
     // ------- Non Duel combat ----------
