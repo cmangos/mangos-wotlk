@@ -7,7 +7,7 @@ This was taken from the Trinity site, and modified slightly by me to get some of
 
 Bots will only use abilities that they have - for example, a priest will only use the renew spell if it has been trained. Also, bot's equipment will lose durability like any other character. So every so often you'll need to log in and repair and train your bot.
 
-For Mangos 7800+
+For MaNGOS 10816+
 
 Commands:
 =========
@@ -38,6 +38,8 @@ Commands:
 /t BOTNAME pet toggle <SPELLID | (part of) SPELLNAME | SPELLLINK> (Toggle autocast for a given spell)
 /t BOTNAME pet state (Shows current react mode of bot's pet)
 /t BOTNAME pet react <(a)ggressive | (d)efensive | (p)assive> (Set bot's pet reaction mode)
+/t BOTNAME collect (shows collect subcommand options and current collect status)
+/t BOTNAME collect <subcommand(s)> (subcommands can be alone or together [none combat loot objects profession quest])
 
 Shortcuts:
 c = cast
@@ -47,10 +49,23 @@ u = use
 Gameobject interaction with bots:
 =================================
 
-  The bot(s) can now interact with gameobjects. This is particularly useful, in order to complete 'gather' type
-  quests (e.g Milly's harvest in Northshire). The bot(s) can also now, harvest 'ore deposits' and 'herbs'
+  The bot(s) can interact with gameobjects. This is particularly useful, in order to complete 'gather' type
+  quests (e.g Milly's harvest in Northshire). The bot(s) can also harvest 'ore deposits' and 'herbs'
 
-  Three new commands have been introduced 'survey, 'find' & 'get', to facilitate this new feature.
+  Four commands have been introduced 'collect', 'survey, 'find' & 'get', to facilitate this feature.
+
+  The 'collect' command provides a way to have a bot automatically get loot or objects in the world.
+  The command by itself gives you a display of what settings the bots have. Defaults are stored in
+  the playerbot.conf. The subcommands do the actual work:
+    combat - bot will loot after combat for the options that are set
+    loot - bot will grab all loot available from corpse
+    quest - bot will grab all quest items on corpse
+    profession - bot will grab any profession related item that the bot has from corpse
+    skin - if you have skinning, and corpse has been looted, bot will skin corpse. Most of
+        the time you may want this option and the loot option enabled, but if you are grabbing
+        the stuff as you are going around, the bot will skin afterwards.
+    objects - bot will collect things that are specified by the survey and get <shift-click> commands
+    none - removes any collect options that have been set
 
   The 'survey' command provides the means for bot(s) to detect gameobjects in the world. It can be used to detect
   available gameobjects local to a single bot, or more effectively (wider area) those for a party of bots.
