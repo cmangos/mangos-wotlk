@@ -3,7 +3,7 @@
 #####################################
 
 [PlayerbotConf]
-ConfVersion=2011020601
+ConfVersion=2011031001
 
 ###################################################################################################################
 # PLAYERBOTAI CONFIGURATION
@@ -52,6 +52,11 @@ ConfVersion=2011020601
 #                 0 - off
 #        Default: 1 - on
 #
+#    PlayerbotAI.SellGarbage
+#        Allow bots to automatically sell all [GRAY|POOR] quality items as the player activates vendor
+#        Default: 0 - off
+#                 1 - on
+#
 ###################################################################################################################
 
 PlayerbotAI.DisableBots = 0
@@ -68,3 +73,4 @@ PlayerbotAI.Collect.Profession = 1
 PlayerbotAI.Collect.Loot = 1
 PlayerbotAI.Collect.Skin = 1
 PlayerbotAI.Collect.Objects = 1
+PlayerbotAI.SellGarbage = 0

@@ -8,8 +8,6 @@
 #include "../GossipDef.h"
 #include "../Chat.h"
 #include "../Language.h"
-#include "../Guild.h"
-#include "../GuildMgr.h"
 #include "../WaypointMovementGenerator.h"
 
 class LoginQueryHolder;
@@ -619,74 +617,6 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             return;
         }
 
-        case CMSG_REPAIR_ITEM:
-        {
-
-            WorldPacket p(packet);    // WorldPacket packet for CMSG_REPAIR_ITEM, (8+8+1)
-
-            DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received  CMSG_REPAIR_ITEM");
-
-            ObjectGuid npcGUID;
-            ObjectGuid itemGUID;
-            uint8 guildBank;
-
-            p.rpos(0);    //reset packet pointer
-            p >> npcGUID;
-            p >> itemGUID;     // Not used for bot but necessary opcode data retrieval
-            p >> guildBank;    // Flagged if guild repair selected
-
-            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
-            {
-
-                Player* const bot = it->second;
-                if (!bot)
-                    return;
-
-                Group* group = bot->GetGroup();      // check if bot is a member of group
-                if (!group)
-                    return;
-
-                Creature *unit = bot->GetNPCIfCanInteractWith(npcGUID, UNIT_NPC_FLAG_REPAIR);
-                if (!unit)     // Check if NPC can repair bot or not
-                {
-                    DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_REPAIR_ITEM Unit (GUID: %s) not found or you can't interact with him.", npcGUID.GetString().c_str());
-                    return;
-                }
-
-                // remove fake death
-                if (bot->hasUnitState(UNIT_STAT_DIED))
-                    bot->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
-
-                // reputation discount
-                float discountMod = bot->GetReputationPriceDiscount(unit);
-
-                uint32 TotalCost = 0;
-                if (itemGUID)     // Handle redundant feature (repair individual item) for bot
-                {
-                    DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_REPAIR_ITEM Repair single item is not applicable for %s", bot->GetName());
-                    continue;
-                }
-                else      // Handle feature (repair all items) for bot
-                {
-                    DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_REPAIR_ITEM Repair all items, npcGUID = %s", npcGUID.GetString().c_str());
-
-                    TotalCost = bot->DurabilityRepairAll(true, discountMod, guildBank > 0 ? true : false);
-                }
-                if (guildBank)     // Handle guild repair
-                {
-                    uint32 GuildId = bot->GetGuildId();
-                    if (!GuildId)
-                        return;
-                    Guild *pGuild = sGuildMgr.GetGuildById(GuildId);
-                    if (!pGuild)
-                        return;
-                    pGuild->LogBankEvent(GUILD_BANK_LOG_REPAIR_MONEY, 0, bot->GetGUIDLow(), TotalCost);
-                    pGuild->SendMoneyInfo(bot->GetSession(), bot->GetGUIDLow());
-                }
-
-            }
-            return;
-        }
         case CMSG_SPIRIT_HEALER_ACTIVATE:
         {
             // DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_SPIRIT_HEALER_ACTIVATE SpiritHealer is resurrecting the Player %s",m_master->GetName());
@@ -696,6 +626,35 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 Group *grp = bot->GetGroup();
                 if (grp)
                     grp->RemoveMember(bot->GetObjectGuid(), 1);
+            }
+            return;
+        }
+
+        case CMSG_LIST_INVENTORY:
+        {
+            if (!botConfig.GetBoolDefault("PlayerbotAI.SellGarbage", true))
+                return;
+
+            WorldPacket p(packet);
+            p.rpos(0);  // reset reader
+            ObjectGuid npcGUID;
+            p >> npcGUID;
+
+            Object* const pNpc = (WorldObject*) m_master->GetObjectByTypeMask(npcGUID, TYPEMASK_CREATURE_OR_GAMEOBJECT);
+            if (!pNpc)
+                return;
+
+            // for all master's bots
+            for(PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+                Player* const bot = it->second;
+                if (!bot->IsInMap(static_cast<WorldObject *>(pNpc)))
+                {
+                    bot->GetPlayerbotAI()->TellMaster("I'm too far away to sell items!");
+                    continue;
+                }
+                else
+                    bot->GetPlayerbotAI()->SellGarbage();
             }
             return;
         }
@@ -731,6 +690,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
              */
     }
 }
+
 void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& packet)
 {
     /*
@@ -892,6 +852,72 @@ void Player::skill(std::list<uint32>& m_spellsToLearn)
         uint32 pskill = itr->first;
 
         m_spellsToLearn.push_back(pskill);
+    }
+}
+
+void Player::MakeTalentGlyphLink(std::ostringstream &out)
+{
+
+    // |cff4e96f7|Htalent:1396:4|h[Unleashed Fury]|h|r
+    // |cff66bbff|Hglyph:23:460|h[Glyph of Fortitude]|h|r
+
+    if(m_specsCount)
+    {
+        // loop through all specs (only 1 for now)
+        for(uint32 specIdx = 0; specIdx < m_specsCount; ++specIdx)
+        {
+            // find class talent tabs (all players have 3 talent tabs)
+            uint32 const* talentTabIds = GetTalentTabPages(getClass());
+
+            out << "\n" << "Active Talents ";
+
+            for(uint32 i = 0; i < 3; ++i)
+            {
+                uint32 talentTabId = talentTabIds[i];
+                for(PlayerTalentMap::iterator iter = m_talents[specIdx].begin(); iter != m_talents[specIdx].end(); ++iter)
+                {
+                    PlayerTalent talent = (*iter).second;
+
+                    if (talent.state == PLAYERSPELL_REMOVED)
+                        continue;
+
+                    // skip another tab talents
+                    if(talent.talentEntry->TalentTab != talentTabId)
+                        continue;
+
+                    TalentEntry const *talentInfo = sTalentStore.LookupEntry( talent.talentEntry->TalentID );
+
+                    SpellEntry const* spell_entry = sSpellStore.LookupEntry(talentInfo->RankID[talent.currentRank]);
+
+                    out << "|cff4e96f7|Htalent:" << talent.talentEntry->TalentID << ":" << talent.currentRank
+                    << " |h[" << spell_entry->SpellName[GetSession()->GetSessionDbcLocale()] << "]|h|r";
+                }
+            }
+
+            uint32 freepoints = 0;
+
+            out << " Unspent points : ";
+
+            if((freepoints = GetFreeTalentPoints()) > 0)
+                out << "|h|cff00ff00" << freepoints << "|h|r";
+            else
+                out << "|h|cffff0000" << freepoints << "|h|r";
+
+            out << "\n" << "Active Glyphs ";
+            // GlyphProperties.dbc
+            for(uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
+            {
+                GlyphPropertiesEntry const* glyph = sGlyphPropertiesStore.LookupEntry(m_glyphs[specIdx][i].GetId());
+                if(!glyph)
+                    continue;
+
+                SpellEntry const* spell_entry = sSpellStore.LookupEntry(glyph->SpellId);
+
+                out << "|cff66bbff|Hglyph:" << GetGlyphSlot(i) << ":" << m_glyphs[specIdx][i].GetId()
+                << " |h[" << spell_entry->SpellName[GetSession()->GetSessionDbcLocale()] << "]|h|r";
+
+            }
+        }
     }
 }
 

@@ -40,6 +40,18 @@ Commands:
 /t BOTNAME pet react <(a)ggressive | (d)efensive | (p)assive> (Set bot's pet reaction mode)
 /t BOTNAME collect (shows collect subcommand options and current collect status)
 /t BOTNAME collect <subcommand(s)> (subcommands can be alone or together [none combat loot objects profession quest])
+/t BOTNAME sell <ITEM LINK> (bot will add item to it's m_itemIds, for later sale)
+/t BOTNAME auction (bot will display all it's active owned auctions. Auction info will include an <AUCTION LINK> )
+/t BOTNAME auction add <ITEM LINK> (bot will add item to it's m_itemIds, for later auction)
+/t BOTNAME auction remove <AUCTION LINK> (bot will add auctionid to it's m_auctions, for later auction cancellation)
+/t BOTNAME repair <ITEM LINK> (bot will seek out armourer and repair selected items specified by <ITEM LINK> )
+/t BOTNAME repair all (bot(s) will seek out armourer and repair all damaged items equipped, or in bags )
+/t BOTNAME talent (Lists bot(s) active talents [TALENT LINK] & glyphs [GLYPH LINK], unspent talent points & cost to reset all talents)
+/t BOTNAME talent learn [TALENT LINK] .. (Learn selected talent from bot client 'inspect' dialog -> 'talent' tab or from talent command (shift click icon or link))
+/t BOTNAME talent reset (Resets all talents)
+/t BOTNAME bank  (Lists bot(s) bank balance)
+/t BOTNAME bank deposit [Item Link][Item Link] .. (Deposit item(s) in bank)
+/t BOTNAME bank withdraw [Item Link][Item Link] ..  (Withdraw item(s) from bank. ([Item Link] from bank))
 
 Shortcuts:
 c = cast
@@ -83,16 +95,36 @@ Gameobject interaction with bots:
   Using the gameobject list information, it is possible to locate and/or fetch each of the gameobjects. To select
   a <GAMEOBJECT LINK>, hold down the shift key and click on the relevant link with your mouse.
 
+Creature interaction with bots:
+===============================
+
+  The bot(s) can now interact directly with creatures. This will enable bot(s) to independently contact NPCs, without
+  the need for player's selection. This opens up new possiblities for bot/NPC commerce.
+
+  Each bot will maintain it's own item list (m_itemIds - This is a list of paired data). The first component (UNIT_NPC_FLAG)
+  dictates what is to done with the second component (itemid).
+
+  Each bot will also maintain it's own active auction list (m_auctions - This is a list of paired data). The first component
+  (ActionFlags) dictates the action to be performed on the second component (auctionid).
+
+  While(m_itemIds not empty)
+  {
+      bot will scan for surrounding creatures (findNearbyCreature()) who can service m_itemIds
+      if(found)
+          Search is carried out for all itemids that can be processed by this creature.
+          if(processed successfully)
+              This instance of the data pair (npcflag,itemid) will be removed from m_itemIds
+              While(m_auctions not empty)
+                  process contained auctionids according to ActionFlag & then update m_auctions
+  }
+
+  Please note that bot(s) m_itemIds & m_auctions will be emptied, when bot(s) are dismissed.
+
 Repair with bots:
 =================
 
-  The bot(s) can now be repaired, as the player repairs. You can decide whether you wish the bot(s) to pay for
-  their own repair or if available, use the guild bank. Choose the appropriate repair 'Anvil' at your local
-  NPC. Only group bot(s) members can be repaired. If you wish to exclude certain bot(s) from repair, then
-  temporarily uninvite bot(s) from the group.
-
-  Limitations: Bot(s) cannot repair individual items.
-               If the player does not require repair, you cannot repair bot(s).
+  bot(s) can now repair <all or selected> items, either equipped or in bags. If the bot(s) is a member of a guild, then they pay
+  else the bot(s) pays. If the bot(s) cannot pay for the repair, they remain damaged.
 
   The new 'stats' command provides useful information to help in the repair decision.
 

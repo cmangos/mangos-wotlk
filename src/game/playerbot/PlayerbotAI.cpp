@@ -29,6 +29,8 @@
 #include "Log.h"
 #include "../GossipDef.h"
 #include "../MotionMaster.h"
+#include "../AuctionHouseMgr.h"
+#include "../Mail.h"
 
 // returns a float in range of..
 float rand_float(float low, float high)
@@ -703,6 +705,50 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             return;
         }
 
+        case SMSG_AUCTION_COMMAND_RESULT:
+        {
+            uint32 auctionId, Action, ErrorCode;
+            std::string action[3] = {"Creating","Cancelling","Bidding"};
+            std::ostringstream out;
+
+            WorldPacket p(packet);
+            p >> auctionId;
+            p >> Action;
+            p >> ErrorCode;
+            p.resize(12);
+
+            switch (ErrorCode)
+            {
+                case AUCTION_OK:
+                {
+                    out << "|cff1eff00|h" << action[Action] << " was successful|h|r";
+                    break;
+                }
+                case AUCTION_ERR_DATABASE:
+                {
+                    out << "|cffff0000|hWhile" << action[Action] << ", an internal error occured|h|r";
+                    break;
+                }
+                case AUCTION_ERR_NOT_ENOUGH_MONEY:
+                {
+                    out << "|cffff0000|hWhile " << action[Action] << ", I didn't have enough money|h|r";
+                    break;
+                }
+                case AUCTION_ERR_ITEM_NOT_FOUND:
+                {
+                    out << "|cffff0000|hItem was not found!|h|r";
+                    break;
+                }
+                case AUCTION_ERR_BID_OWN:
+                {
+                    out << "|cffff0000|hI cannot bid on my own auctions!|h|r";
+                    break;
+                }
+            }
+            TellMaster(out.str().c_str());
+            return;
+        }
+
         case SMSG_INVENTORY_CHANGE_FAILURE:
         {
             WorldPacket p(packet);
@@ -735,6 +781,15 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         return;
                     case EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE:
                         TellMaster("I can only have one of those equipped.");
+                        return;
+                    case EQUIP_ERR_BANK_FULL:
+                        TellMaster("My bank is full.");
+                        return;
+                    case EQUIP_ERR_ITEM_NOT_FOUND:
+                        TellMaster("I can't find the item.");
+                        return;
+                    case EQUIP_ERR_TOO_FAR_AWAY_FROM_BANK:
+                        TellMaster("I'm too far from the bank.");
                         return;
                     default:
                         TellMaster("I can't use that.");
@@ -968,17 +1023,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 {
                     const Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
                     if (pItem)
-                    {
-                        const ItemPrototype* const pItemProto = pItem->GetProto();
-
-                        std::string itemName = pItemProto->Name1;
-                        ItemLocalization(itemName, pItemProto->ItemId);
-
-                        out << " |cffffffff|Hitem:" << pItemProto->ItemId
-                            << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
-                        if (pItem->GetCount() > 1)
-                            out << "x" << pItem->GetCount();
-                    }
+                        MakeItemLink(pItem, out, true);
                 }
                 ChatHandler ch(m_bot->GetTrader());
                 ch.SendSysMessage(out.str().c_str());
@@ -1000,20 +1045,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         {
                             const Item* const pItem = m_bot->GetItemByPos(bag, slot);
                             if (pItem)
-                            {
-                                const ItemPrototype* const pItemProto = pItem->GetProto();
-
-                                std::string itemName = pItemProto->Name1;
-                                ItemLocalization(itemName, pItemProto->ItemId);
-
-                                // item link format: http://www.wowwiki.com/ItemString
-                                // itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId
-                                outbag << " |cffffffff|Hitem:" << pItemProto->ItemId
-                                       << ":0:0:0:0:0:0:0" << "|h[" << itemName
-                                       << "]|h|r";
-                                if (pItem->GetCount() > 1)
-                                    outbag << "x" << pItem->GetCount();
-                            }
+                                MakeItemLink(pItem, outbag, true);
                         }
                         ch.SendSysMessage(outbag.str().c_str());
                     }
@@ -2818,6 +2850,9 @@ void PlayerbotAI::UpdateAI(const uint32 p_time)
     }
     else
     {
+        if(!m_findNPC.empty())
+            findNearbyCreature();
+
         // if we are casting a spell then interrupt it
         // make sure any actions that cast a spell set a proper m_ignoreAIUpdatesUntilTime!
         Spell* const pSpell = GetCurrentSpell();
@@ -3194,11 +3229,11 @@ bool PlayerbotAI::CanReceiveSpecificSpell(uint8 spec, Unit* target) const
 
 Item* PlayerbotAI::FindItem(uint32 ItemId)
 {
-    // list out items in main backpack
+    // list out items equipped & in main backpack
     //INVENTORY_SLOT_ITEM_START = 23
     //INVENTORY_SLOT_ITEM_END = 39
 
-    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
+    for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
     {
         // DEBUG_LOG ("[PlayerbotAI]: FindItem - [%s's]backpack slot = %u",m_bot->GetName(),slot); // 23 to 38 = 16
         Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);  // 255, 23 to 38
@@ -3224,6 +3259,48 @@ Item* PlayerbotAI::FindItem(uint32 ItemId)
             {
                 DEBUG_LOG ("[PlayerbotAI]: FindItem - [%s's]bag[%u] slot = %u", m_bot->GetName(), bag, slot);  // 1 to bagsize = ?
                 Item* const pItem = m_bot->GetItemByPos(bag, slot); // 20 to 23, 1 to bagsize
+                if (pItem)
+                {
+                    const ItemPrototype* const pItemProto = pItem->GetProto();
+                    if (!pItemProto)
+                        continue;
+
+                    if (pItemProto->ItemId == ItemId)        // have required item
+                        return pItem;
+                }
+            }
+    }
+    return NULL;
+}
+
+Item* PlayerbotAI::FindItemInBank(uint32 ItemId)
+{
+    // list out items in bank item slots
+
+    for (uint8 slot = BANK_SLOT_ITEM_START; slot < BANK_SLOT_ITEM_END; slot++)
+    {
+        // sLog.outDebug("[%s's]backpack slot = %u",m_bot->GetName(),slot);
+        Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if (pItem)
+        {
+            const ItemPrototype* const pItemProto = pItem->GetProto();
+            if (!pItemProto)
+                continue;
+
+            if (pItemProto->ItemId == ItemId)   // have required item
+                return pItem;
+        }
+    }
+    // list out items in bank bag slots
+
+    for (uint8 bag = BANK_SLOT_BAG_START; bag < BANK_SLOT_BAG_END; ++bag)
+    {
+        const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+        if (pBag)
+            for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
+            {
+                // sLog.outDebug("[%s's]bag[%u] slot = %u", m_bot->GetName(), bag, slot);
+                Item* const pItem = m_bot->GetItemByPos(bag, slot);
                 if (pItem)
                 {
                     const ItemPrototype* const pItemProto = pItem->GetProto();
@@ -3416,6 +3493,122 @@ void PlayerbotAI::MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out
     out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[loc] << "]|h|r";
 }
 
+// Builds a hlink for an item, but since its
+// only a ItemPrototype, we cant fill in everything
+void PlayerbotAI::MakeItemLink(const ItemPrototype *item, std::ostringstream &out)
+{
+    // Color
+    out << "|c";
+    switch(item->Quality)
+    {
+        case ITEM_QUALITY_POOR:     out << "ff9d9d9d"; break;  //GREY
+        case ITEM_QUALITY_NORMAL:   out << "ffffffff"; break;  //WHITE
+        case ITEM_QUALITY_UNCOMMON: out << "ff1eff00"; break;  //GREEN
+        case ITEM_QUALITY_RARE:     out << "ff0070dd"; break;  //BLUE
+        case ITEM_QUALITY_EPIC:     out << "ffa335ee"; break;  //PURPLE
+        case ITEM_QUALITY_LEGENDARY:out << "ffff8000"; break;  //ORANGE
+        case ITEM_QUALITY_ARTIFACT: out << "ffe6cc80"; break;  //LIGHT YELLOW
+        case ITEM_QUALITY_HEIRLOOM: out << "ffe6cc80"; break;  //LIGHT YELLOW
+        default:                    out << "ffff0000"; break;  //Don't know color, so red?
+    }
+    out << "|Hitem:";
+
+    // Item Id
+    out << item->ItemId << ":";
+
+    // Permanent enchantment, gems, 4 unknowns, and reporter_level
+    // ->new items wont have enchantments or gems so..
+    out << "0:0:0:0:0:0:0:0:0";
+
+    // Name
+    std::string name = item->Name1;
+    ItemLocalization(name, item->ItemId);
+    out << "|h[" << name << "]|h|r";
+}
+
+// Builds a hlink for an item, includes everything
+// |color|Hitem:item_id:perm_ench_id:gem1:gem2:gem3:0:0:0:0:reporter_level|h[name]|h|r
+void PlayerbotAI::MakeItemLink(const Item *item, std::ostringstream &out, bool IncludeQuantity /*= true*/)
+{
+    const ItemPrototype *proto = item->GetProto();
+    // Color
+    out << "|c";
+    switch(proto->Quality)
+    {
+        case ITEM_QUALITY_POOR:     out << "ff9d9d9d"; break;  //GREY
+        case ITEM_QUALITY_NORMAL:   out << "ffffffff"; break;  //WHITE
+        case ITEM_QUALITY_UNCOMMON: out << "ff1eff00"; break;  //GREEN
+        case ITEM_QUALITY_RARE:     out << "ff0070dd"; break;  //BLUE
+        case ITEM_QUALITY_EPIC:     out << "ffa335ee"; break;  //PURPLE
+        case ITEM_QUALITY_LEGENDARY:out << "ffff8000"; break;  //ORANGE
+        case ITEM_QUALITY_ARTIFACT: out << "ffe6cc80"; break;  //LIGHT YELLOW
+        case ITEM_QUALITY_HEIRLOOM: out << "ffe6cc80"; break;  //LIGHT YELLOW
+        default:                    out << "ffff0000"; break;  //Don't know color, so red?
+    }
+    out << "|Hitem:";
+
+    // Item Id
+    out << proto->ItemId << ":";
+
+    // Permanent enchantment
+    out << item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT) << ":";
+
+    // Gems
+    uint32 g1 = 0, g2 = 0, g3 = 0;
+    for(uint32 slot = SOCK_ENCHANTMENT_SLOT; slot < SOCK_ENCHANTMENT_SLOT+MAX_GEM_SOCKETS; ++slot)
+    {
+        uint32 eId = item->GetEnchantmentId(EnchantmentSlot(slot));
+        if (!eId) continue;
+
+        SpellItemEnchantmentEntry const* entry = sSpellItemEnchantmentStore.LookupEntry(eId);
+        if (!entry) continue;
+
+        switch(slot-SOCK_ENCHANTMENT_SLOT)
+        {
+            case 1: g1 = entry->GemID; break;
+            case 2: g2 = entry->GemID; break;
+            case 3: g3 = entry->GemID; break;
+        }
+    }
+    out << g1 << ":" << g2 << ":" << g3 << ":";
+
+    // Temp enchantment, Bonus Enchantment, Prismatic Enchantment?
+    // Other stuff, don't know what it is
+    out << "0:0:0:0:";
+
+    // Reporter Level
+    out << "0";
+
+    // Name
+    std::string name = proto->Name1;
+    ItemLocalization(name, proto->ItemId);
+    out << "|h[" << name << "]|h|r";
+
+    // Stacked items
+    if (item->GetCount() > 1 && IncludeQuantity)
+        out << "x" << item->GetCount() << ' ';
+}
+
+void PlayerbotAI::extractAuctionIds(const std::string& text, std::list<uint32>& auctionIds) const
+{
+    uint8 pos = 0;
+    while (true)
+    {
+        int i = text.find("Htitle:", pos);
+        if (i == -1)
+            break;
+        pos = i + 7;
+        int endPos = text.find('|', pos);
+        if (endPos == -1)
+            break;
+        std::string idC = text.substr(pos, endPos - pos);
+        uint32 id = atol(idC.c_str());
+        pos = endPos;
+        if (id)
+            auctionIds.push_back(id);
+    }
+}
+
 void PlayerbotAI::extractSpellId(const std::string& text, uint32 &spellId) const
 {
 
@@ -3472,6 +3665,44 @@ void PlayerbotAI::extractSpellIdList(const std::string& text, BotSpellList& m_sp
 
         if (spellId)
             m_spellsToLearn.push_back(spellId);
+    }
+}
+
+void PlayerbotAI::extractTalentIds(const std::string &text, std::list<talentPair> &talentIds) const
+{
+    // Link format:
+    // |color|Htalent:talent_id:rank|h[name]|h|r
+    // |cff4e96f7|Htalent:1396:4|h[Unleashed Fury]|h|r
+
+    uint8 pos = 0;
+    while(true)
+    {
+        int i = text.find("Htalent:", pos);
+        if (i == -1)
+           break;
+        pos = i + 8;
+        // DEBUG_LOG("extractTalentIds first pos %u i %u",pos,i);
+        // extract talent_id
+        int endPos = text.find(':', pos);
+        if (endPos == -1)
+           break;
+        // DEBUG_LOG("extractTalentId second endpos : %u pos : %u",endPos,pos);
+        std::string idC = text.substr(pos, endPos - pos);
+        uint32 id = atol(idC.c_str());
+        pos = endPos + 1;
+        // extract rank
+        endPos = text.find('|', pos);
+        if (endPos == -1)
+           break;
+        // DEBUG_LOG("extractTalentId third endpos : %u pos : %u",endPos,pos);
+        std::string rankC = text.substr(pos, endPos - pos);
+        uint32 rank = atol(rankC.c_str());
+        pos = endPos + 1;
+
+        // DEBUG_LOG("extractTalentId second id : %u  rank : %u",id,rank);
+
+        if (id)
+            talentIds.push_back(std::pair<uint32 ,uint32>(id, rank));
     }
 }
 
@@ -3672,6 +3903,196 @@ void PlayerbotAI::findNearbyGO()
             GameObject* go = (*iter);
             if (go->isSpawned())
                 m_lootTargets.push_back(go->GetObjectGuid());
+        }
+    }
+}
+
+void PlayerbotAI::findNearbyCreature()
+{
+    std::list<Creature*> creatureList;
+    float radius = 20.0f;
+
+    CellPair pair(MaNGOS::ComputeCellPair( m_bot->GetPositionX(), m_bot->GetPositionY()) );
+    Cell cell(pair);
+
+    MaNGOS::AnyUnitInObjectRangeCheck go_check(m_bot, radius);
+    MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> go_search(creatureList, go_check);
+    TypeContainerVisitor<MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck>, GridTypeMapContainer> go_visit(go_search);
+
+    // Get Creatures
+    cell.Visit(pair, go_visit, *(m_bot->GetMap()), *(m_bot), radius);
+
+    // if (!creatureList.empty())
+    //    TellMaster("Found %i Creatures.", creatureList.size());
+
+    for (std::list<Creature*>::iterator iter = creatureList.begin(); iter != creatureList.end(); ++iter)
+    {
+        Creature* currCreature = *iter;
+
+        for(std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end(); ++itr)
+        {
+            uint32 npcflags = currCreature->GetUInt32Value(UNIT_NPC_FLAGS);
+
+            if(!(*itr & npcflags))
+                continue;
+
+            if((*itr == UNIT_NPC_FLAG_TRAINER_CLASS) && !currCreature->CanTrainAndResetTalentsOf(m_bot))
+                continue;
+
+            WorldObject *wo = m_bot->GetMap()->GetWorldObject(currCreature->GetObjectGuid());
+
+            if (m_bot->GetDistance(wo) > CONTACT_DISTANCE + wo->GetObjectBoundingRadius())
+            {
+                float x, y, z;
+                wo->GetContactPoint(m_bot, x, y, z, 1.0f);
+                m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z);
+                // give time to move to point before trying again
+                SetIgnoreUpdateTime(1);
+            }
+
+            if (m_bot->GetDistance(wo) < INTERACTION_DISTANCE)
+            {
+
+                GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(currCreature->GetCreatureInfo()->GossipMenuId);
+                for(GossipMenuItemsMap::const_iterator it = pMenuItemBounds.first; it != pMenuItemBounds.second; ++it)
+                {
+
+                    if (!(it->second.npc_option_npcflag & npcflags))
+                        continue;
+
+                    switch(it->second.option_id)
+                    {
+                        case GOSSIP_OPTION_BANKER:
+                        {
+                            // Manage banking actions
+                            if(!m_tasks.empty())
+                            {
+                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ++ait)
+                                {
+                                    switch(ait->first)
+                                    {
+                                        // withdraw items
+                                        case WITHDRAW:
+                                        {
+                                            // TellMaster("Withdraw items");
+                                            if(Withdraw(ait->second))
+                                                ait = m_tasks.erase(ait);
+                                            break;
+                                        }
+                                        // deposit items
+                                        case DEPOSIT:
+                                        {
+                                            // TellMaster("Deposit items");
+                                            if(Deposit(ait->second))
+                                                ait = m_tasks.erase(ait);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            BankBalance();
+                            itr = m_findNPC.erase(itr); // all done lets go home
+                            m_bot->GetMotionMaster()->Clear();
+                            m_bot->GetMotionMaster()->MoveIdle();
+                            break;
+                        }
+                        case GOSSIP_OPTION_UNLEARNTALENTS:
+                        {
+                            // Manage class trainer actions
+                            if(!m_tasks.empty())
+                            {
+                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ++ait)
+                                {
+                                    switch(ait->first)
+                                    {
+                                        // reset talents
+                                        case RESET:
+                                        {
+                                            // TellMaster("Reset all talents");
+                                            if(Talent(currCreature))
+                                                InspectUpdate();
+                                            ait = m_tasks.erase(ait);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            itr = m_findNPC.erase(itr); // all done lets go home
+                            m_bot->GetMotionMaster()->Clear();
+                            m_bot->GetMotionMaster()->MoveIdle();
+                            break;
+                        }
+                        case GOSSIP_OPTION_VENDOR:
+                        {
+                            // Manage vendor actions
+                            if(!m_tasks.empty())
+                            {
+                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ++ait)
+                                {
+                                    switch(ait->first)
+                                    {
+                                        // sell items
+                                        case SELL:
+                                        {
+                                            // TellMaster("Selling items");
+                                            if(Sell(ait->second))
+                                                ait = m_tasks.erase(ait);
+                                            break;
+                                        }
+                                        // repair items
+                                        case REPAIR:
+                                        {
+                                            // TellMaster("Repairing items");
+                                            if(Repair(ait->second, currCreature))
+                                                ait = m_tasks.erase(ait);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            itr = m_findNPC.erase(itr); // all done lets go home
+                            m_bot->GetMotionMaster()->Clear();
+                            m_bot->GetMotionMaster()->MoveIdle();
+                            break;
+                        }
+                        case GOSSIP_OPTION_AUCTIONEER:
+                        {
+                            // Manage auctioneer actions
+                            if(!m_tasks.empty())
+                            {
+                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ++ait)
+                                {
+                                    switch(ait->first)
+                                    {
+                                        // add new auction item
+                                        case ADD:
+                                        {
+                                            // TellMaster("Creating auction");
+                                            if(AddAuction(ait->second, currCreature))
+                                                ait = m_tasks.erase(ait);
+                                            break;
+                                        }
+                                        // cancel active auction
+                                        case REMOVE:
+                                        {
+                                            // TellMaster("Cancelling auction");
+                                            if(RemoveAuction(ait->second))
+                                                ait = m_tasks.erase(ait);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            ListAuctions();
+                            itr= m_findNPC.erase(itr); // all done lets go home
+                            m_bot->GetMotionMaster()->Clear();
+                            m_bot->GetMotionMaster()->MoveIdle();
+                            break;
+                        }
+                    }
+                    m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+                }
+            }
         }
     }
 }
@@ -3911,6 +4332,441 @@ void PlayerbotAI::QuestLocalization(std::string& questTitle, const uint32 questI
         }
 }
 
+// Helper function for automatically selling poor quality items to the vendor
+void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std::ostringstream &canSell, uint32 &TotalCost, uint32 &TotalSold)
+{
+    if (!item)
+        return;
+
+    if (item->CanBeTraded() && item->GetProto()->Quality == ITEM_QUALITY_POOR)
+    {
+        uint32 cost = item->GetCount() * item->GetProto()->SellPrice;
+        m_bot->ModifyMoney(cost);
+        m_bot->MoveItemFromInventory(item->GetBagSlot(), item->GetSlot(), true);
+        m_bot->AddItemToBuyBackSlot(item);
+
+        ++TotalSold;
+        TotalCost += cost;
+
+        report << "Sold ";
+        MakeItemLink(item, report, true);
+        report << " for ";
+
+        uint32 gold = uint32(cost / 10000);
+        cost -= (gold * 10000);
+        uint32 silver = uint32(cost / 100);
+        cost -= (silver * 100);
+
+        if (gold > 0)
+            report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+        if (silver > 0)
+            report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+        report << cost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\n";
+    }
+    else if (item->GetProto()->SellPrice > 0)
+        MakeItemLink(item, canSell, true);
+}
+
+bool PlayerbotAI::Withdraw(const uint32 itemid)
+{
+    Item* pItem = FindItemInBank(itemid);
+    if(pItem)
+    {
+        std::ostringstream report;
+
+        ItemPosCountVec dest;
+        InventoryResult msg = m_bot->CanStoreItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
+        if( msg != EQUIP_ERR_OK )
+        {
+            m_bot->SendEquipError( msg, pItem, NULL );
+            return true;
+        }
+
+        m_bot->RemoveItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
+        m_bot->StoreItem( dest, pItem, true );
+
+        report << "Withdrawn ";
+        MakeItemLink(pItem, report, true);
+
+        TellMaster(report.str());
+    }
+
+    return true; // item either withdrawn or not in bot bank
+}
+
+bool PlayerbotAI::Deposit(const uint32 itemid)
+{
+    Item* pItem = FindItem(itemid);
+    if(pItem)
+    {
+        std::ostringstream report;
+
+        ItemPosCountVec dest;
+        InventoryResult msg = m_bot->CanBankItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
+        if( msg != EQUIP_ERR_OK )
+        {
+            m_bot->SendEquipError( msg, pItem, NULL );
+            return true;
+        }
+
+        m_bot->RemoveItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
+        m_bot->BankItem( dest, pItem, true );
+
+        report << "Deposited ";
+        MakeItemLink(pItem, report, true);
+
+        TellMaster(report.str());
+    }
+
+    return true; // item either deposited or not in bot inventory
+}
+
+void PlayerbotAI::BankBalance()
+{
+    DEBUG_LOG("PlayerbotAI: BankBalance");
+
+    std::ostringstream report;
+
+    report << "In my bank\n ";
+    report << "My item slots: ";
+
+    for(uint8 slot = BANK_SLOT_ITEM_START; slot < BANK_SLOT_ITEM_END; ++slot)
+    {
+        Item* const item = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if(item)
+            MakeItemLink(item, report, true);
+    }
+    TellMaster(report.str());
+
+    // and each of my bank bags
+    for(uint8 bag = BANK_SLOT_BAG_START; bag < BANK_SLOT_BAG_END; ++bag)
+    {
+        std::ostringstream goods;
+        const Bag* const pBag = static_cast<Bag *>(m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag));
+        if (pBag)
+        {
+            goods << "\nMy ";
+            const ItemPrototype* const pBagProto = pBag->GetProto();
+            std::string bagName = pBagProto->Name1;
+            ItemLocalization(bagName, pBagProto->ItemId);
+            goods << bagName << " slot: ";
+
+            for(uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
+            {
+                Item* const item = m_bot->GetItemByPos(bag, slot);
+                if(item)
+                    MakeItemLink(item, goods, true);
+            }
+            TellMaster(goods.str());
+        }
+    }
+}
+
+bool PlayerbotAI::Talent(Creature* trainer)
+{
+    if (!(m_bot->resetTalents()))
+    {
+        WorldPacket* const packet = new WorldPacket( MSG_TALENT_WIPE_CONFIRM, 8+4);    //you do not have any talent
+        *packet << uint64(0);
+        *packet << uint32(0);
+        m_bot->GetSession()->QueuePacket(packet);
+        return false;
+    }
+
+    m_bot->SendTalentsInfoData(false);
+    trainer->CastSpell(m_bot, 14867, true);                  //spell: "Untalent Visual Effect"
+    return true;
+}
+
+void PlayerbotAI::InspectUpdate()
+{
+    WorldPacket packet(SMSG_INSPECT_RESULTS, 50);
+    packet << m_bot->GetPackGUID();
+    m_bot->BuildPlayerTalentsInfoData(&packet);
+    m_bot->BuildEnchantmentsInfoData(&packet);
+    GetMaster()->GetSession()->SendPacket(&packet);
+}
+
+bool PlayerbotAI::Repair(const uint32 itemid, Creature* rCreature)
+{
+    Item* rItem = FindItem(itemid); // if item equipped or in bags
+    uint8 IsInGuild = (m_bot->GetGuildId() != 0) ? uint8(1) : uint8(0);
+    ObjectGuid itemGuid = (rItem) ? rItem->GetObjectGuid() : ObjectGuid();
+
+    WorldPacket* const packet = new WorldPacket(CMSG_REPAIR_ITEM, 8+8+1);
+    *packet << rCreature->GetObjectGuid();  // repair npc guid
+    *packet << itemGuid; // if item specified then repair this, else repair all
+    *packet << IsInGuild;  // guildbank yes=1 no=0
+    m_bot->GetSession()->QueuePacket(packet);  // queue the packet to get around race condition
+
+    return true;
+}
+
+bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
+{
+    DEBUG_LOG("PlayerbotAI: RemoveAuction");
+
+    QueryResult *result = CharacterDatabase.PQuery(
+    "SELECT houseid,itemguid,item_template,itemowner,buyoutprice,time,buyguid,lastbid,startbid,deposit FROM auction WHERE id = '%u'",auctionid);
+
+    AuctionEntry *auction;
+
+    if(result)
+    {
+        Field *fields = result->Fetch();
+
+        auction = new AuctionEntry;
+        auction->Id = auctionid;
+        uint32 houseid  = fields[0].GetUInt32();
+        auction->itemGuidLow = fields[1].GetUInt32();
+        auction->itemTemplate = fields[2].GetUInt32();
+        auction->owner = fields[3].GetUInt32();
+        auction->buyout = fields[4].GetUInt32();
+        auction->expireTime = fields[5].GetUInt32();
+        auction->bidder = fields[6].GetUInt32();
+        auction->bid = fields[7].GetUInt32();
+        auction->startbid = fields[8].GetUInt32();
+        auction->deposit = fields[9].GetUInt32();
+        auction->auctionHouseEntry = NULL;                  // init later
+
+        // check if sold item exists for guid
+        // and item_template in fact (GetAItem will fail if problematic in result check in AuctionHouseMgr::LoadAuctionItems)
+        Item* pItem = sAuctionMgr.GetAItem(auction->itemGuidLow);
+        if (!pItem)
+        {
+            auction->DeleteFromDB();
+            sLog.outError("Auction %u has not a existing item : %u, deleted", auction->Id, auction->itemGuidLow);
+            delete auction;
+            delete result;
+            return true;
+        }
+
+        auction->auctionHouseEntry = sAuctionHouseStore.LookupEntry(houseid);
+
+        // Attempt send item back to owner
+        std::ostringstream msgAuctionCanceledOwner;
+        msgAuctionCanceledOwner << auction->itemTemplate << ":0:" << AUCTION_CANCELED << ":0:0";
+
+        // item will deleted or added to received mail list
+        MailDraft(msgAuctionCanceledOwner.str(), "")    // TODO: fix body
+            .AddItem(pItem)
+            .SendMailTo(MailReceiver(ObjectGuid(HIGHGUID_PLAYER, auction->owner)), auction, MAIL_CHECK_MASK_COPIED);
+
+        if(sAuctionMgr.RemoveAItem(auction->itemGuidLow))
+            m_bot->GetSession()->SendAuctionCommandResult(auction, AUCTION_REMOVED, AUCTION_OK);
+
+        auction->DeleteFromDB();
+
+        delete auction;
+        delete result;
+    }
+
+    return true; // remove auction item from list m_auction;
+}
+
+bool PlayerbotAI::ListAuctions()
+{
+    DEBUG_LOG("PlayerbotAI: ListAuctions");
+
+    std::ostringstream report;
+
+    QueryResult *result = CharacterDatabase.PQuery(
+    "SELECT id,itemguid,item_template,time,buyguid,lastbid FROM auction WHERE itemowner = '%u'",m_bot->GetObjectGuid());
+    if(result)
+    {
+        report << "My active auctions are: \n";
+        do
+        {
+            Field *fields = result->Fetch();
+
+            uint32 Id = fields[0].GetUInt32();
+            uint32 itemGuidLow = fields[1].GetUInt32();
+            uint32 itemTemplate = fields[2].GetUInt32();
+            time_t expireTime = fields[3].GetUInt32();
+            uint32 bidder = fields[4].GetUInt32();
+            uint32 bid = fields[5].GetUInt32();
+
+            // current time
+            time_t currtime = time(NULL);
+            time_t remtime = expireTime - currtime;
+
+            tm* aTm = gmtime(&remtime);
+
+            if(expireTime > currtime)
+            {
+                Item* aItem = sAuctionMgr.GetAItem(itemGuidLow);
+                if(aItem)
+                {
+                    // Name
+                    uint32 count = aItem->GetCount();
+                    std::string name = aItem->GetProto()->Name1;
+                    ItemLocalization(name, itemTemplate);
+                    report << "\n|cffffffff|Htitle:" << Id << "|h[" << name;
+                    if(count > 1)
+                        report << "|cff00ff00x" << count << "|cffffffff" << "]|h|r";
+                    else
+                        report << "]|h|r";
+                }
+
+                if(bidder)
+                {
+                    ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, bidder);
+                    std::string bidder_name;
+                    if(sObjectMgr.GetPlayerNameByGUID(guid, bidder_name))
+                    report << " " << bidder_name << ": ";
+
+                    uint32 gold = uint32(bid / 10000);
+                    bid -= (gold * 10000);
+                    uint32 silver = uint32(bid / 100);
+                    bid -= (silver * 100);
+
+                    if (gold > 0)
+                        report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+                    if (silver > 0)
+                        report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+                    report << bid << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+                }
+                if(aItem)
+                    report << " ends: " << aTm->tm_hour << "|cff0070dd|hH|h|r " << aTm->tm_min << "|cff0070dd|hmin|h|r";
+            }
+        } while (result->NextRow());
+
+        delete result;
+        TellMaster(report.str().c_str());
+    }
+
+    return true; // auction either finished or does not exit
+}
+
+bool PlayerbotAI::AddAuction(const uint32 itemid, Creature* aCreature)
+{
+    DEBUG_LOG("PlayerbotAI: AddAuction");
+
+    Item* aItem = FindItem(itemid);
+    if(aItem)
+    {
+        std::ostringstream out;
+        srand(time(NULL));
+        uint32 duration[3] = { 720, 1440 ,2880 };  // 720 = 12hrs, 1440 = 24hrs, 2880 = 48hrs
+        uint32 etime = duration[rand() % 3];
+
+        uint32 min = urand(aItem->GetProto()->SellPrice * aItem->GetCount(),aItem->GetProto()->BuyPrice * aItem->GetCount()) * (aItem->GetProto()->Quality + 1);
+        uint32 max = urand(aItem->GetProto()->SellPrice * aItem->GetCount(),aItem->GetProto()->BuyPrice * aItem->GetCount()) * (aItem->GetProto()->Quality + 1);
+
+        out << "Auctioning ";
+        MakeItemLink(aItem, out, true);
+        out << " with " << aCreature->GetCreatureInfo()->Name;
+        TellMaster(out.str().c_str());
+
+        WorldPacket* const packet = new WorldPacket(CMSG_AUCTION_SELL_ITEM, 8+4+8+4+4+4+4 );
+        *packet << aCreature->GetObjectGuid();     // auctioneer guid
+        *packet << uint32(1);                      // const 1
+        *packet << aItem->GetObjectGuid();         // item guid
+        *packet << aItem->GetCount();      // stacksize
+        *packet << uint32((min < max) ? min : max);  // starting bid
+        *packet << uint32((max > min) ? max : min);  // buyout
+        *packet << uint32(etime);  // auction duration
+
+        m_bot->GetSession()->QueuePacket(packet);  // queue the packet to get around race condition
+    }
+
+    return true; // item either sold or not in bot inventory
+}
+
+bool PlayerbotAI::Sell(const uint32 itemid)
+{
+    Item* pItem = FindItem(itemid);
+    if(pItem)
+    {
+        std::ostringstream report;
+
+        uint32 cost = pItem->GetCount() * pItem->GetProto()->SellPrice;
+        m_bot->ModifyMoney(cost);
+        m_bot->MoveItemFromInventory(pItem->GetBagSlot(), pItem->GetSlot(), true);
+        m_bot->AddItemToBuyBackSlot(pItem);
+
+        report << "Sold ";
+        MakeItemLink(pItem, report, true);
+        report << " for ";
+
+        uint32 gold = uint32(cost / 10000);
+        cost -= (gold * 10000);
+        uint32 silver = uint32(cost / 100);
+        cost -= (silver * 100);
+
+        if (gold > 0)
+            report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+        if (silver > 0)
+            report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+        report << cost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+
+        TellMaster(report.str());
+    }
+
+    return true; // item either sold or not in bot inventory
+}
+
+void PlayerbotAI::SellGarbage(bool verbose)
+{
+    uint32 TotalCost = 0;
+    uint32 TotalSold = 0;
+    std::ostringstream report, goods;
+
+    goods << "Items that are not trash and can be sold: \n";
+    goods << "In my main backpack:";
+    // list out items in main backpack
+    for(uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
+    {
+        Item* const item = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if(item)
+            _doSellItem(item, report, goods, TotalCost, TotalSold);
+    }
+    if(verbose)
+        TellMaster(goods.str());
+
+    // and each of our other packs
+    for(uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
+    {
+        std::ostringstream goods;
+        const Bag* const pBag = static_cast<Bag *>(m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag));
+        if (pBag)
+        {
+            goods << "\nIn my ";
+            const ItemPrototype* const pBagProto = pBag->GetProto();
+            std::string bagName = pBagProto->Name1;
+            ItemLocalization(bagName, pBagProto->ItemId);
+            goods << bagName << ":";
+
+            for(uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
+            {
+                Item* const item = m_bot->GetItemByPos(bag, slot);
+                if(item)
+                    _doSellItem(item, report, goods, TotalCost, TotalSold);
+            }
+            if(verbose)
+                TellMaster(goods.str());
+        }
+    }
+
+    if (TotalSold > 0)
+    {
+        report << "Sold total " << TotalSold << " item(s) for ";
+        uint32 gold = uint32(TotalCost / 10000);
+        TotalCost -= (gold * 10000);
+        uint32 silver = uint32(TotalCost / 100);
+        TotalCost -= (silver * 100);
+
+        if (gold > 0)
+            report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+        if (silver > 0)
+            report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+        report << TotalCost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+
+        TellMaster(report.str());
+    }
+    return;
+}
+
 void PlayerbotAI::GetTaxi(ObjectGuid guid, BotTaxiNode& nodes)
 {
     DEBUG_LOG("[PlayerbotAI]: GetTaxi - %s node[0] %d node[1] %d", m_bot->GetName(), nodes[0], nodes[1]);
@@ -4059,6 +4915,204 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             m_targetGuidCommand = castOnGuid;
         }
 
+    }
+
+    // Handle selling items
+    // sell [Item Link][Item Link] .. -- Sells bot(s) items from inventory
+    else if (text.size() > 5 && text.substr(0, 5) == "sell ")
+    {
+        enum NPCFlags VENDOR_MASK = (enum NPCFlags) (UNIT_NPC_FLAG_VENDOR
+			 | UNIT_NPC_FLAG_VENDOR_AMMO
+			 | UNIT_NPC_FLAG_VENDOR_FOOD
+			 | UNIT_NPC_FLAG_VENDOR_POISON
+			 | UNIT_NPC_FLAG_VENDOR_REAGENT);
+
+        std::list<uint32> itemIds;
+        extractItemIds(text, itemIds);
+        for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(SELL, *it));
+        m_findNPC.push_back(VENDOR_MASK);
+    }
+
+    // Handle repair items
+    // repair  all                      -- repair all bot(s) items
+    // repair [Item Link][Item Link] .. -- repair select bot(s) items
+    else if (text.size() >= 6 && text.substr(0, 6) == "repair")
+    {
+        std::string part = "";
+        std::string subcommand = "";
+
+        if (text.size() > 6 && text.substr(0, 7) == "repair ")
+            part = text.substr(7);  // Truncate 'repair ' part
+
+        if (part.find(" ") > 0)
+            subcommand = part.substr(0, part.find(" "));
+
+        std::list<uint32> itemIds;
+        extractItemIds(part, itemIds);
+        for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+        {
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR, *it));
+            m_findNPC.push_back(UNIT_NPC_FLAG_REPAIR);
+        }
+        if(itemIds.empty() && subcommand == "all")
+        {
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR, 0));
+            m_findNPC.push_back(UNIT_NPC_FLAG_REPAIR);
+        }
+    }
+
+    // Handle auctions:
+    // auction                                        -- Lists bot(s) active auctions.
+    // auction add [Item Link][Item Link] ..          -- Create bot(s) active auction.
+    // auction remove [Auction Link][Auction Link] .. -- Cancel bot(s) active auction. ([Auction Link] from auction)
+    else if (text.size() >= 7 && text.substr(0, 7) == "auction")
+    {
+        std::string part = "";
+        std::string subcommand = "";
+
+        if (text.size() > 7 && text.substr(0, 8) == "auction ")
+            part = text.substr(8);  // Truncate 'auction ' part
+
+        if (part.find(" ") > 0)
+        {
+            subcommand = part.substr(0, part.find(" "));
+            if (part.size() > subcommand.size())
+                part = part.substr(subcommand.size() + 1);
+        }
+        else
+            subcommand = part;
+
+        if (subcommand == "add" || subcommand == "remove")
+        {
+            if(subcommand == "add")
+            {
+                std::list<uint32> itemIds;
+                extractItemIds(part, itemIds);
+                for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(ADD, *it));
+                m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
+            }
+
+            if(subcommand == "remove")
+            {
+                std::list<uint32> auctionIds;
+                extractAuctionIds(part, auctionIds);
+                for (std::list<uint32>::iterator it = auctionIds.begin(); it != auctionIds.end(); ++it)
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REMOVE, *it));
+                m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
+            }
+        }
+        else // list all bot auctions
+            m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
+    }
+
+    // Handle bank:
+    // bank                                        -- Lists bot(s) bank balance.
+    // bank deposit [Item Link][Item Link] ..      -- Deposit item(s) in bank.
+    // bank withdraw [Item Link][Item Link] ..     -- Withdraw item(s) from bank. ([Item Link] from bank)
+    else if (text.size() >= 4 && text.substr(0, 4) == "bank")
+    {
+        std::string part = "";
+        std::string subcommand = "";
+
+        if (text.size() > 4 && text.substr(0, 5) == "bank ")
+            part = text.substr(5);  // Truncate 'bank ' part
+
+        if (part.find(" ") > 0)
+        {
+            subcommand = part.substr(0, part.find(" "));
+            if (part.size() > subcommand.size())
+                part = part.substr(subcommand.size() + 1);
+        }
+        else
+            subcommand = part;
+
+        if (subcommand == "deposit" || subcommand == "withdraw")
+        {
+            if(subcommand == "deposit")
+            {
+                std::list<uint32> itemIds;
+                extractItemIds(part, itemIds);
+                for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(DEPOSIT, *it));
+                m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
+            }
+
+            if(subcommand == "withdraw")
+            {
+                std::list<uint32> itemIds;
+                extractItemIds(part, itemIds);
+                for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(WITHDRAW, *it));
+                m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
+            }
+        }
+        else // list all bot balance
+            m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
+    }
+
+    // Handle talents & glyphs:
+    // talent                           -- Lists bot(s) active talents [TALENT LINK] & glyphs [GLYPH LINK], unspent points & cost to reset
+    // talent learn [TALENT LINK] ..    -- Learn selected talent from bot client 'inspect' dialog -> 'talent' tab or from talent command (shift click icon/link)
+    // talent reset                     -- Resets all talents
+    else if (text.size() >= 6 && text.substr(0, 6) == "talent")
+    {
+        std::ostringstream out;
+        std::string part = "";
+        std::string subcommand = "";
+
+        if (text.size() > 6 && text.substr(0, 7) == "talent ")
+            part = text.substr(7);  // Truncate 'talent ' part
+
+        if (part.find(" ") > 0)
+        {
+            subcommand = part.substr(0, part.find(" "));
+            if (part.size() > subcommand.size())
+                part = part.substr(subcommand.size() + 1);
+        }
+        else
+            subcommand = part;
+
+        if (subcommand == "learn" || subcommand == "reset")
+        {
+            if(subcommand == "learn")
+            {
+                std::list<talentPair>talents;
+                extractTalentIds(part, talents);
+
+                for(std::list<talentPair>::iterator itr = talents.begin(); itr != talents.end(); ++itr)
+                {
+                    uint32 talentid;
+                    uint32 rank;
+
+                    talentid = itr->first;
+                    rank = itr->second;
+
+                    m_bot->LearnTalent(talentid, ++rank);
+                    m_bot->SendTalentsInfoData(false);
+                    InspectUpdate();
+                }
+                m_bot->MakeTalentGlyphLink(out);
+                SendWhisper(out.str(), fromPlayer);
+
+            }
+            else if(subcommand == "reset")
+            {
+                m_tasks.push_back(std::pair<enum TaskFlags,uint32>(RESET, 0));
+                m_findNPC.push_back(UNIT_NPC_FLAG_TRAINER_CLASS);
+            }
+        }
+        else
+        {
+            uint32 gold = uint32(m_bot->resetTalentsCost()/ 10000);
+
+            if (gold > 0)
+                out << "Cost to reset all Talents is " << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+
+            m_bot->MakeTalentGlyphLink(out);
+            SendWhisper(out.str(), fromPlayer);
+        }
     }
 
     // use items
