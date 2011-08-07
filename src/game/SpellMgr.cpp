@@ -1404,6 +1404,41 @@ void SpellMgr::LoadSpellProcItemEnchant()
     sLog.outString( ">> Loaded %u proc item enchant definitions", count );
 }
 
+bool IsCastEndProcModifierAura(SpellEntry const *spellInfo, SpellEffectIndex effecIdx, SpellEntry const *procSpell)
+{
+    // modifier auras that can proc on cast end
+    switch (AuraType(spellInfo->EffectApplyAuraName[effecIdx]))
+    {
+        case SPELL_AURA_ADD_FLAT_MODIFIER:
+        case SPELL_AURA_ADD_PCT_MODIFIER:
+        {
+            switch (spellInfo->EffectMiscValue[effecIdx])
+            {
+                case SPELLMOD_RANGE:
+                case SPELLMOD_RADIUS:
+                case SPELLMOD_NOT_LOSE_CASTING_TIME:
+                case SPELLMOD_CASTING_TIME:
+                case SPELLMOD_COOLDOWN:
+                case SPELLMOD_COST:
+                case SPELLMOD_GLOBAL_COOLDOWN:
+                    return true;
+                default:
+                    break;
+            }
+        }
+        case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
+        {
+            for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                if (IsEffectHandledOnDelayedSpellLaunch(procSpell, SpellEffectIndex(i)))
+                    return true;
+
+            return false;
+        }
+        default:
+            return false;
+    }
+}
+
 struct DoSpellBonuses
 {
     DoSpellBonuses(SpellBonusMap& _spellBonusMap, SpellBonusEntry const& _spellBonus) : spellBonusMap(_spellBonusMap), spellBonus(_spellBonus) {}
@@ -1614,8 +1649,8 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const * spellP
         if (EventProcFlag & (PROC_FLAG_ON_DO_PERIODIC | PROC_FLAG_ON_TAKE_PERIODIC) && (procExtra & PROC_EX_PERIODIC_POSITIVE))
             return false;
 
-        // No extra req, so can trigger for (damage/healing present) and hit/crit
-        if(procExtra & (PROC_EX_NORMAL_HIT|PROC_EX_CRITICAL_HIT))
+        // No extra req, so can trigger for (damage/healing present) and cast end/hit/crit
+        if (procExtra & (PROC_EX_CAST_END|PROC_EX_NORMAL_HIT|PROC_EX_CRITICAL_HIT))
             return true;
     }
     else // all spells hits here only if resist/reflect/immune/evade

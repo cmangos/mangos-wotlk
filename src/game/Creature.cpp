@@ -1542,7 +1542,7 @@ bool Creature::FallGround()
 
     // hacky solution: by some reason died creatures not updated, that's why need finalize movement state
     GetMap()->CreatureRelocation(this, GetPositionX(), GetPositionY(), tz, GetOrientation());
-    movespline->_Finalize();
+    DisableSpline();
     return true;
 }
 
@@ -2330,17 +2330,9 @@ TrainerSpellData const* Creature::GetTrainerSpells() const
 // overwrite WorldObject function for proper name localization
 const char* Creature::GetNameForLocaleIdx(int32 loc_idx) const
 {
-    if (loc_idx >= 0)
-    {
-        CreatureLocale const *cl = sObjectMgr.GetCreatureLocale(GetEntry());
-        if (cl)
-        {
-            if (cl->Name.size() > (size_t)loc_idx && !cl->Name[loc_idx].empty())
-                return cl->Name[loc_idx].c_str();
-        }
-    }
-
-    return GetName();
+    char const* name = GetName();
+    sObjectMgr.GetCreatureLocaleStrings(GetEntry(), loc_idx, &name);
+    return name;
 }
 
 void Creature::SetFactionTemporary(uint32 factionId, uint32 tempFactionFlags)

@@ -64,6 +64,13 @@ enum SpellCastFlags
     CAST_FLAG_IMMUNITY          = 0x04000000                // spell cast school imminity info
 };
 
+enum SpellFlags
+{
+    SPELL_FLAG_NORMAL       = 0x00,
+    SPELL_FLAG_REFLECTED    = 0x01,     // reflected spell
+    SPELL_FLAG_REDIRECTED   = 0x02      // redirected spell
+};
+
 enum SpellNotifyPushType
 {
     PUSH_IN_FRONT,
@@ -201,12 +208,10 @@ inline ByteBuffer& operator>> (ByteBuffer& buf, SpellCastTargetsReader const& ta
 
 enum SpellState
 {
-    SPELL_STATE_NULL      = 0,
-    SPELL_STATE_PREPARING = 1,
-    SPELL_STATE_CASTING   = 2,
-    SPELL_STATE_FINISHED  = 3,
-    SPELL_STATE_IDLE      = 4,
-    SPELL_STATE_DELAYED   = 5
+    SPELL_STATE_PREPARING = 0,                              // cast time delay period, non channeled spell
+    SPELL_STATE_CASTING   = 1,                              // channeled time period spell casting state
+    SPELL_STATE_FINISHED  = 2,                              // cast finished to success or fail
+    SPELL_STATE_DELAYED   = 3                               // spell casted but need time to hit target(s)
 };
 
 enum SpellTargets
@@ -516,6 +521,7 @@ class Spell
         int32 m_casttime;                                   // Calculated spell cast time initialized only in Spell::prepare
         int32 m_duration;
         bool m_canReflect;                                  // can reflect this spell?
+        uint8 m_spellFlags;                                 // for spells whose target was changed in cast i.e. due to reflect
         bool m_autoRepeat;
         uint8 m_runesState;
 
@@ -617,7 +623,7 @@ class Spell
         void HandleDelayedSpellLaunch(TargetInfo *target);
         void InitializeDamageMultipliers();
         void ResetEffectDamageAndHeal();
-        void DoSpellHitOnUnit(Unit *unit, uint32 effectMask, bool isReflected = false);
+        void DoSpellHitOnUnit(Unit *unit, uint32 effectMask);
         void DoAllEffectOnTarget(GOTargetInfo *target);
         void DoAllEffectOnTarget(ItemTargetInfo *target);
         bool IsAliveUnitPresentInTargetList();

@@ -37,7 +37,6 @@ class Player;
 class Spell;
 class Unit;
 struct CreatureInfo;
-struct SpellModifier;
 
 // only used in code
 enum SpellCategories
@@ -164,6 +163,8 @@ inline bool IsPeriodicRegenerateEffect(SpellEntry const *spellInfo, SpellEffectI
             return false;
     }
 }
+
+bool IsCastEndProcModifierAura(SpellEntry const *spellInfo, SpellEffectIndex effecIdx, SpellEntry const *procSpell);
 
 inline bool IsSpellHaveAura(SpellEntry const *spellInfo, AuraType aura)
 {
@@ -596,6 +597,13 @@ enum ProcFlags
                                PROC_FLAG_SUCCESSFUL_NEGATIVE_SPELL_HIT | \
                                PROC_FLAG_TAKEN_NEGATIVE_SPELL_HIT)
 
+#define SPELL_CAST_TRIGGER_MASK (PROC_FLAG_SUCCESSFUL_MELEE_SPELL_HIT    | \
+                                 PROC_FLAG_SUCCESSFUL_RANGED_HIT         | \
+                                 PROC_FLAG_SUCCESSFUL_RANGED_SPELL_HIT   | \
+                                 PROC_FLAG_SUCCESSFUL_POSITIVE_AOE_HIT   | \
+                                 PROC_FLAG_SUCCESSFUL_AOE_SPELL_HIT      | \
+                                 PROC_FLAG_SUCCESSFUL_POSITIVE_SPELL     | \
+                                 PROC_FLAG_SUCCESSFUL_NEGATIVE_SPELL_HIT)
 enum ProcFlagsEx
 {
     PROC_EX_NONE                = 0x0000000,                // If none can tigger on Hit/Crit only (passive spells MUST defined by SpellFamily flag)
@@ -617,7 +625,8 @@ enum ProcFlagsEx
     PROC_EX_RESERVED3           = 0x0008000,
     PROC_EX_EX_TRIGGER_ALWAYS   = 0x0010000,                // If set trigger always ( no matter another flags) used for drop charges
     PROC_EX_EX_ONE_TIME_TRIGGER = 0x0020000,                // If set trigger always but only one time (not used)
-    PROC_EX_PERIODIC_POSITIVE   = 0x0040000                 // For periodic heal
+    PROC_EX_PERIODIC_POSITIVE   = 0x0040000,                // For periodic heal
+    PROC_EX_CAST_END            = 0x0080000                 // procs on end of cast            
 };
 
 struct SpellProcEventEntry

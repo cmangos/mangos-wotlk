@@ -63,7 +63,7 @@ ConfVersion=2010102201
 #    AuctionHouseBot.ItemsPerCycle.Boost
 #        This value is used to fill DB faster than normal when there is more than this value missed items.
 #        Normaly this value is used only first start of the server with empty auction table.
-#    Default 1000
+#    Default 75
 #
 #    AuctionHouseBot.ItemsPerCycle.Normal
 #        This value is used to fill DB normal way with less cpu/db using.
@@ -76,15 +76,15 @@ ConfVersion=2010102201
 #
 #    AuctionHouseBot.Alliance.Price.Ratio
 #        Define the price of selled item here for the Alliance Auction House
-#    Default 100
+#    Default 200
 #
 #    AuctionHouseBot.Horde.Price.Ratio
 #        Define the price of selled item here for the Horde Auction House
-#    Default 100
+#    Default 200
 #
-#    AuctionHouseBot.Alliance.Price.Ratio
+#    AuctionHouseBot.Neutral.Price.Ratio
 #        Define the price of selled item here for the Neutral Auction House
-#    Default 100
+#    Default 200
 #
 #    AuctionHouseBot.Items.ItemLevel.*
 #        Prevent seller from listing items below/above this item level
@@ -104,7 +104,7 @@ ConfVersion=2010102201
 #        items will be show on Auction House
 #    Default 0, 2000, 2500, 1500, 1000, 0, 0 (grey, white, green, blue, purple, orange, yellow)
 #
-#    AustionHouseBot.Class.*
+#    AuctionHouseBot.Class.*
 #        Here you can set the class of items you prefer to be show on AH
 #        These value is preference value, it's not percentage. So the maximum is 10.
 #        The minimum is 0 (disabled).
@@ -172,7 +172,7 @@ AuctionHouseBot.Bind.Use = 1
 AuctionHouseBot.Bind.Quest = 0
 AuctionHouseBot.LockBox.Enabled = 0
 
-AuctionHouseBot.ItemsPerCycle.Boost = 1000
+AuctionHouseBot.ItemsPerCycle.Boost = 75
 AuctionHouseBot.ItemsPerCycle.Normal = 20
 AuctionHouseBot.BuyPrice.Seller = 1
 AuctionHouseBot.Alliance.Price.Ratio = 200
@@ -240,7 +240,7 @@ AuctionHouseBot.forceExcludeItems = ""
 #    AuctionHouseBot.Buyer.FACTION.Enabled
 #        Enable or disable buyer independently by faction
 #
-#    AuctionHouseBot.BuyPrice.Buyer
+#    AuctionHouseBot.Buyer.BuyPrice
 #        Should the Buyer use BuyPrice or SellPrice to determine Bid Prices
 #    Default 0 (use SellPrice)
 #
@@ -266,7 +266,7 @@ AuctionHouseBot.Buyer.Alliance.Enabled = 1
 AuctionHouseBot.Buyer.Horde.Enabled = 1
 AuctionHouseBot.Buyer.Neutral.Enabled = 1
 
-AuctionHouseBot.Buyer.Buyprice = 1
+AuctionHouseBot.Buyer.BuyPrice = 0
 
 AuctionHouseBot.Buyer.Recheck.Interval = 20
 
