@@ -1114,14 +1114,14 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             if (casterGuid != m_bot->GetObjectGuid())
                 return;
 
+            uint8 castCount;
+            p >> castCount;
             uint32 spellId;
             p >> spellId;
-            uint16 castFlags;
+            uint32 castFlags;
             p >> castFlags;
             uint32 msTime;
             p >> msTime;
-            uint8 numHit;
-            p >> numHit;
 
             if (m_CurrentlyCastingSpellId == spellId)
             {
@@ -1129,8 +1129,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 if (!pSpell)
                     return;
 
+                uint32 CastingTime = !IsChanneledSpell(pSpell->m_spellInfo) ? GetSpellCastTime(pSpell->m_spellInfo) : GetSpellDuration(pSpell->m_spellInfo);
                 if (pSpell->IsChannelActive() || pSpell->IsAutoRepeat())
-                    m_ignoreAIUpdatesUntilTime = time(0) + (GetSpellDuration(pSpell->m_spellInfo) / 1000) + 1;
+                    m_ignoreAIUpdatesUntilTime = time(0) + (CastingTime / 1000) + 1;
                 else if (pSpell->IsAutoRepeat())
                     m_ignoreAIUpdatesUntilTime = time(0) + 6;
                 else
@@ -3053,6 +3054,11 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK)
         target_type = TARGET_FLAG_OBJECT;
 
+    uint32 CastingTime = !IsChanneledSpell(pSpellInfo) ? GetSpellCastTime(pSpellInfo) : GetSpellDuration(pSpellInfo);
+
+    m_CurrentlyCastingSpellId = spellId;
+    m_ignoreAIUpdatesUntilTime = time(0) + ( CastingTime / 1000) + 1;
+
     if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK ||
         pSpellInfo->Effect[0] == SPELL_EFFECT_SKINNING)
     {
@@ -3078,13 +3084,6 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     }
     else
         m_bot->CastSpell(pTarget, pSpellInfo, false);       // actually cast spell
-
-    Spell* const pSpell = m_bot->FindCurrentSpellBySpellId(spellId);
-    if (!pSpell)
-        return false;
-
-    m_CurrentlyCastingSpellId = spellId;
-    m_ignoreAIUpdatesUntilTime = time(0) + (int32) ((float) pSpell->GetCastTime() / 1000.0f) + 1;
 
     // if this caused the caster to move (blink) update the position
     // I think this is normally done on the client
