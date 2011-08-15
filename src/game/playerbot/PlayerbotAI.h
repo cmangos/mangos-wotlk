@@ -309,7 +309,7 @@ public:
     void UseItem(Item *item, Unit *target);
     void UseItem(Item *item);
 
-    void EquipItem(Item& item);
+    void EquipItem(Item* src_Item);
     //void Stay();
     //bool Follow(Player& player);
     void SendNotEquipList(Player& player);

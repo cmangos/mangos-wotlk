@@ -4212,14 +4212,75 @@ void PlayerbotAI::UseItem(Item *item, uint32 targetFlag, ObjectGuid targetGUID)
 }
 
 // submits packet to use an item
-void PlayerbotAI::EquipItem(Item& item)
+void PlayerbotAI::EquipItem(Item* src_Item)
 {
-    uint8 bagIndex = item.GetBagSlot();
-    uint8 slot = item.GetSlot();
+    uint8 src_bagIndex = src_Item->GetBagSlot();
+    uint8 src_slot = src_Item->GetSlot();
 
-    WorldPacket* const packet = new WorldPacket(CMSG_AUTOEQUIP_ITEM, 2);
-    *packet << bagIndex << slot;
-    m_bot->GetSession()->QueuePacket(packet);
+    DEBUG_LOG("PlayerbotAI::EquipItem: %s in srcbag = %u, srcslot = %u",src_Item->GetProto()->Name1, src_bagIndex, src_slot);
+
+    uint16 dest;
+    InventoryResult msg = m_bot->CanEquipItem(NULL_SLOT, dest, src_Item, !src_Item->IsBag());
+    if( msg != EQUIP_ERR_OK )
+    {
+        m_bot->SendEquipError( msg, src_Item, NULL );
+        return;
+    }
+
+    uint16 src = src_Item->GetPos();
+    if(dest == src)                                         // prevent equip in same slot, only at cheat
+        return;
+
+    Item *dest_Item = m_bot->GetItemByPos( dest );
+    if( !dest_Item )                                         // empty slot, simple case
+    {
+        m_bot->RemoveItem(src_bagIndex, src_slot, true);
+        m_bot->EquipItem(dest, src_Item, true);
+        m_bot->AutoUnequipOffhandIfNeed();
+    }
+    else                                                    // have currently equipped item, not simple case
+    {
+        uint8 dest_bagIndex = dest_Item->GetBagSlot();
+        uint8 dest_slot = dest_Item->GetSlot();
+
+        msg = m_bot->CanUnequipItem( dest, false );
+        if( msg != EQUIP_ERR_OK )
+        {
+            m_bot->SendEquipError( msg, dest_Item, NULL );
+            return;
+        }
+
+        // check dest->src move possibility
+        ItemPosCountVec sSrc;
+        uint16 eSrc = 0;
+        if( m_bot->IsInventoryPos( src ) )
+        {
+            msg = m_bot->CanStoreItem( src_bagIndex, src_slot, sSrc, dest_Item, true );
+            if( msg != EQUIP_ERR_OK )
+                msg = m_bot->CanStoreItem( src_bagIndex, NULL_SLOT, sSrc, dest_Item, true );
+            if( msg != EQUIP_ERR_OK )
+                msg = m_bot->CanStoreItem( NULL_BAG, NULL_SLOT, sSrc, dest_Item, true );
+        }
+
+        if( msg != EQUIP_ERR_OK )
+        {
+            m_bot->SendEquipError( msg, dest_Item, src_Item );
+            return;
+        }
+
+        // now do moves, remove...
+        m_bot->RemoveItem(dest_bagIndex, dest_slot, false);
+        m_bot->RemoveItem(src_bagIndex, src_slot, false);
+
+        // add to dest
+        m_bot->EquipItem(dest, src_Item, true);
+
+        // add to src
+        if( m_bot->IsInventoryPos( src ) )
+            m_bot->StoreItem(sSrc, dest_Item, true);
+
+        m_bot->AutoUnequipOffhandIfNeed();
+    }
 }
 
 // submits packet to trade an item (trade window must already be open)
@@ -5143,7 +5204,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         extractItemIds(text, itemIds);
         findItemsInInv(itemIds, itemList);
         for (std::list<Item*>::iterator it = itemList.begin(); it != itemList.end(); ++it)
-            EquipItem(**it);
+            EquipItem(*it);
+        InspectUpdate();
+        SendNotEquipList(*m_bot);
     }
 
     // find project: 20:50 02/12/10 rev.4 item in world and wait until ordered to follow
