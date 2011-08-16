@@ -7925,6 +7925,28 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
+                case 52479:                                 // Gift of the Harvester
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER || !unitTarget)
+                        return;
+
+                    uint32 summonedGhouls = 0;
+                    // Each ghoul casts 52500 onto player, so use number of auras as check
+                    Unit::SpellAuraHolderConstBounds bonds = m_caster->GetSpellAuraHolderBounds(52500);
+                    for (Unit::SpellAuraHolderMap::const_iterator iter = bonds.first; iter != bonds.second; ++iter)
+                        ++summonedGhouls;
+
+                    m_caster->CastSpell(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), urand(0, 2) || summonedGhouls >= 5 ? 52505 : 52490, true);
+                    return;
+                }
+                case 52555:                                 // Dispel Scarlet Ghoul Credit Counter
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasByCasterSpell(m_spellInfo->CalculateSimpleValue(eff_idx), m_caster->GetObjectGuid());
+                    return;
+                }
                 case 52694:                                 // Recall Eye of Acherus
                 {
                     if (!m_caster || m_caster->GetTypeId() != TYPEID_UNIT)
@@ -7954,6 +7976,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
                     possessed->SetCharmerGuid(ObjectGuid());
                     possessed->ForcedDespawn();
+
+                    return;
                 }
                 case 52751:                                 // Death Gate
                 {
