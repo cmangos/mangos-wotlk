@@ -7901,6 +7901,17 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 51864, true);
                     return;
                 }
+                case 51904:                                 // Summon Ghouls On Scarlet Crusade
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // cast Summon Ghouls On Scarlet Crusade
+                    float x, y, z;
+                    m_targets.getDestination(x, y, z);
+                    unitTarget->CastSpell(x, y, z, 54522, true, NULL, NULL, m_originalCasterGUID);
+                    return;
+                }
                 case 51910:                                 // Kickin' Nass: Quest Completion
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -7913,6 +7924,36 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                             pPet->Unsummon(PET_SAVE_AS_DELETED, m_caster);
                     }
                     return;
+                }
+                case 52694:                                 // Recall Eye of Acherus
+                {
+                    if (!m_caster || m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    Unit* charmer = m_caster->GetCharmer();
+                    if (!charmer || charmer->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    charmer->RemoveAurasDueToSpell(51923);
+
+                    // HACK ALERT
+                    // Replace with Spell Interrupting, when casting spells properly is possible in mangos
+                    //charmer->InterruptNonMeleeSpells(true);
+
+                    Player* player = (Player*)charmer;
+                    Creature* possessed = (Creature*)m_caster;
+                    player->RemoveAurasDueToSpell(51852);
+
+                    player->SetCharm(NULL);
+                    player->SetClientControl(possessed, 0);
+                    player->SetMover(NULL);
+                    player->GetCamera().ResetView();
+                    player->RemovePetActionBar();
+
+                    possessed->clearUnitState(UNIT_STAT_CONTROLLED);
+                    possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+                    possessed->SetCharmerGuid(ObjectGuid());
+                    possessed->ForcedDespawn();
                 }
                 case 52751:                                 // Death Gate
                 {
