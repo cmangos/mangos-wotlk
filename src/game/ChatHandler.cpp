@@ -626,7 +626,7 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
     //DEBUG_LOG("WORLD: Received CMSG_CHAT_IGNORED");
 
     recv_data >> iguid;
-    recv_data >> unk;                                     // probably related to spam reporting
+    recv_data >> unk;                                       // probably related to spam reporting
 
     Player *player = sObjectMgr.GetPlayer(iguid);
     if(!player || !player->GetSession())

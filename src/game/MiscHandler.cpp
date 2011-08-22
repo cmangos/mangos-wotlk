@@ -264,8 +264,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & /*recv_data*/ )
 {
     DEBUG_LOG( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message, security - %u", GetSecurity() );
 
-    ObjectGuid lootGuid = GetPlayer()->GetLootGuid();
-    if (!lootGuid.IsEmpty())
+    if (ObjectGuid lootGuid = GetPlayer()->GetLootGuid())
         DoLootRelease(lootGuid);
 
     //Can not logout if...
@@ -293,7 +292,9 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & /*recv_data*/ )
     // not set flags if player can't free move to prevent lost state at logout cancel
     if(GetPlayer()->CanFreeMove())
     {
-        GetPlayer()->SetStandState(UNIT_STAND_STATE_SIT);
+        float height = GetPlayer()->GetTerrain()->GetHeight(GetPlayer()->GetPositionX(), GetPlayer()->GetPositionY(), GetPlayer()->GetPositionZ());
+        if ((GetPlayer()->GetPositionZ() < height + 0.1f) && !(GetPlayer()->IsInWater()))
+            GetPlayer()->SetStandState(UNIT_STAND_STATE_SIT);
 
         WorldPacket data( SMSG_FORCE_MOVE_ROOT, (8+4) );    // guess size
         data << GetPlayer()->GetPackGUID();
@@ -472,7 +473,7 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult *result, uint32 acc
         return;
 
     FriendsResult friendResult = FRIEND_NOT_FOUND;
-    if (!friendGuid.IsEmpty())
+    if (friendGuid)
     {
         if (friendGuid == session->GetPlayer()->GetObjectGuid())
             friendResult = FRIEND_SELF;
@@ -552,7 +553,7 @@ void WorldSession::HandleAddIgnoreOpcodeCallBack(QueryResult *result, uint32 acc
         return;
 
     FriendsResult ignoreResult = FRIEND_IGNORE_NOT_FOUND;
-    if (!ignoreGuid.IsEmpty())
+    if (ignoreGuid)
     {
         if (ignoreGuid == session->GetPlayer()->GetObjectGuid())
             ignoreResult = FRIEND_IGNORE_SELF;
@@ -784,8 +785,13 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
             // need find areatrigger to inner dungeon for landing point
             if (at->target_mapId != corpseMapId)
+            {
                 if (AreaTrigger const* corpseAt = sObjectMgr.GetMapEntranceTrigger(corpseMapId))
+                {
                     at = corpseAt;
+                    targetMapEntry = sMapStore.LookupEntry(at->target_mapId);
+                }
+            }
 
             // now we can resurrect player, and then check teleport requirements
             pl->ResurrectPlayer(0.5f);

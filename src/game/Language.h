@@ -916,7 +916,29 @@ enum MangosStrings
     LANG_SCRIPTS_RELOADED_OK            = 1168,
     LANG_SCRIPTS_OUTDATED               = 1169,
     LANG_NPCINFO_CHAR_DIFFICULTY        = 1170,
-    // Room for more level 3              1171-1199 not used
+    LANG_AHBOT_RELOAD_OK                = 1171,
+    LANG_AHBOT_RELOAD_FAIL              = 1172,
+    LANG_AHBOT_STATUS_BAR_CONSOLE       = 1173,
+    LANG_AHBOT_STATUS_MIDBAR_CONSOLE    = 1174,
+    LANG_AHBOT_STATUS_TITLE1_CONSOLE    = 1175,
+    LANG_AHBOT_STATUS_TITLE1_CHAT       = 1176,
+    LANG_AHBOT_STATUS_FORMAT_CONSOLE    = 1177,
+    LANG_AHBOT_STATUS_FORMAT_CHAT       = 1178,
+    LANG_AHBOT_STATUS_ITEM_COUNT        = 1179,
+    LANG_AHBOT_STATUS_ITEM_RATIO        = 1180,
+    LANG_AHBOT_STATUS_TITLE2_CONSOLE    = 1181,
+    LANG_AHBOT_STATUS_TITLE2_CHAT       = 1182,
+    LANG_AHBOT_QUALITY_GREY             = 1183,
+    LANG_AHBOT_QUALITY_WHITE            = 1184,
+    LANG_AHBOT_QUALITY_GREEN            = 1185,
+    LANG_AHBOT_QUALITY_BLUE             = 1186,
+    LANG_AHBOT_QUALITY_PURPLE           = 1187,
+    LANG_AHBOT_QUALITY_ORANGE           = 1188,
+    LANG_AHBOT_QUALITY_YELLOW           = 1189,
+    LANG_AHBOT_ITEMS_AMOUNT             = 1190,
+    LANG_AHBOT_ITEMS_RATIO              = 1191,
+    LANG_MOVEGENS_EFFECT                = 1192,
+    // Room for more level 3              1193-1199 not used
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
@@ -937,7 +959,12 @@ enum MangosStrings
     LANG_POOL_POOL_LIST_CHAT            = 1501,
     LANG_POOL_POOL_LIST_CONSOLE         = 1502,
     LANG_NO_FREE_STATIC_GUID_FOR_SPAWN  = 1503,
-    // Room for more Level 2              1504-1599 not used
+    LANG_NPC_AI_HEADER                  = 1504,
+    LANG_NPC_AI_NAMES                   = 1505,
+    LANG_NPC_EVENTAI_PHASE              = 1506,
+    LANG_NPC_EVENTAI_MOVE               = 1507,
+    LANG_NPC_EVENTAI_COMBAT             = 1508,
+    // Room for more Level 2              1509-1599 not used
 
     // FREE IDS                           1600-9999
 

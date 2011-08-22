@@ -22,8 +22,14 @@
     <Filter Include="References">
       <UniqueIdentifier>{64bb42b8-e7ba-4247-b337-492f644daeeb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AhBot">
+      <UniqueIdentifier>{481ad376-5cba-439d-af8c-2ef73de2ed8b}</UniqueIdentifier>
+    </Filter>
     <Filter Include="vmaps">
       <UniqueIdentifier>{948284d3-9d89-4609-8cdd-28a213edb53e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Movement">
+      <UniqueIdentifier>{0ac140f9-89c1-4830-b673-514c5e8b4d37}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -159,6 +165,9 @@
     <ClCompile Include="..\..\src\game\Mail.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\MailHandler.cpp">
+      <Filter>World/Handlers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\Map.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
@@ -250,9 +259,6 @@
       <Filter>World/Handlers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\ConfusedMovementGenerator.cpp">
-      <Filter>Motion generators</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\DestinationHolder.cpp">
       <Filter>Motion generators</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\FleeingMovementGenerator.cpp">
@@ -496,6 +502,9 @@
     <ClCompile Include="..\..\src\game\playerbot\PlayerbotWarriorAI.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\AuctionHouseBot\AuctionHouseBot.cpp">
+      <Filter>AhBot</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\vmap\BIH.cpp">
       <Filter>vmaps</Filter>
     </ClCompile>
@@ -516,6 +525,21 @@
     </ClCompile>
     <ClCompile Include="..\..\src\game\vmap\WorldModel.cpp">
       <Filter>vmaps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\movement\MoveSplineInit.cpp">
+      <Filter>Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\movement\packet_builder.cpp">
+      <Filter>Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\movement\spline.cpp">
+      <Filter>Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\movement\util.cpp">
+      <Filter>Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\movement\MoveSpline.cpp">
+      <Filter>Movement</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -681,12 +705,6 @@
     <ClInclude Include="..\..\src\game\ConfusedMovementGenerator.h">
       <Filter>Motion generators</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\DestinationHolder.h">
-      <Filter>Motion generators</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\DestinationHolderImp.h">
-      <Filter>Motion generators</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\game\FleeingMovementGenerator.h">
       <Filter>Motion generators</Filter>
     </ClInclude>
@@ -709,9 +727,6 @@
       <Filter>Motion generators</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\TargetedMovementGenerator.h">
-      <Filter>Motion generators</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\Traveller.h">
       <Filter>Motion generators</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\WaypointMovementGenerator.h">
@@ -955,6 +970,9 @@
     <ClInclude Include="..\..\src\game\playerbot\PlayerbotWarriorAI.h">
       <Filter>World/Handlers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\game\AuctionHouseBot\AuctionHouseBot.h">
+      <Filter>AhBot</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\game\vmap\BIH.h">
       <Filter>vmaps</Filter>
     </ClInclude>
@@ -984,6 +1002,30 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\vmap\WorldModel.h">
       <Filter>vmaps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\movement\MoveSpline.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\movement\MoveSplineFlag.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\movement\MoveSplineInit.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\movement\MoveSplineInitArgs.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\movement\packet_builder.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\movement\spline.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\movement\spline.impl.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\movement\typedefs.h">
+      <Filter>Movement</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

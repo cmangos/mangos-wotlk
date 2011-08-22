@@ -359,6 +359,7 @@
     <ClCompile Include="..\..\src\game\AggressorAI.cpp" />
     <ClCompile Include="..\..\src\game\ArenaTeam.cpp" />
     <ClCompile Include="..\..\src\game\ArenaTeamHandler.cpp" />
+    <ClCompile Include="..\..\src\game\AuctionHouseBot\AuctionHouseBot.cpp" />
     <ClCompile Include="..\..\src\game\AuctionHouseHandler.cpp" />
     <ClCompile Include="..\..\src\game\AuctionHouseMgr.cpp" />
     <ClCompile Include="..\..\src\game\Bag.cpp" />
@@ -399,7 +400,6 @@
     <ClCompile Include="..\..\src\game\CreatureEventAIMgr.cpp" />
     <ClCompile Include="..\..\src\game\DBCStores.cpp" />
     <ClCompile Include="..\..\src\game\debugcmds.cpp" />
-    <ClCompile Include="..\..\src\game\DestinationHolder.cpp" />
     <ClCompile Include="..\..\src\game\DuelHandler.cpp" />
     <ClCompile Include="..\..\src\game\DynamicObject.cpp" />
     <ClCompile Include="..\..\src\game\FleeingMovementGenerator.cpp" />
@@ -434,6 +434,7 @@
     <ClCompile Include="..\..\src\game\LootHandler.cpp" />
     <ClCompile Include="..\..\src\game\LootMgr.cpp" />
     <ClCompile Include="..\..\src\game\Mail.cpp" />
+    <ClCompile Include="..\..\src\game\MailHandler.cpp" />
     <ClCompile Include="..\..\src\game\Map.cpp" />
     <ClCompile Include="..\..\src\game\MapManager.cpp" />
     <ClCompile Include="..\..\src\game\MapPersistentStateMgr.cpp" />
@@ -442,6 +443,11 @@
     <ClCompile Include="..\..\src\game\MotionMaster.cpp" />
     <ClCompile Include="..\..\src\game\MovementGenerator.cpp" />
     <ClCompile Include="..\..\src\game\MovementHandler.cpp" />
+    <ClCompile Include="..\..\src\game\movement\MoveSpline.cpp" />
+    <ClCompile Include="..\..\src\game\movement\MoveSplineInit.cpp" />
+    <ClCompile Include="..\..\src\game\movement\packet_builder.cpp" />
+    <ClCompile Include="..\..\src\game\movement\spline.cpp" />
+    <ClCompile Include="..\..\src\game\movement\util.cpp" />
     <ClCompile Include="..\..\src\game\NPCHandler.cpp" />
     <ClCompile Include="..\..\src\game\NullCreatureAI.cpp" />
     <ClCompile Include="..\..\src\game\Object.cpp" />
@@ -533,6 +539,7 @@
     <ClInclude Include="..\..\src\game\AchievementMgr.h" />
     <ClInclude Include="..\..\src\game\AggressorAI.h" />
     <ClInclude Include="..\..\src\game\ArenaTeam.h" />
+    <ClInclude Include="..\..\src\game\AuctionHouseBot\AuctionHouseBot.h" />
     <ClInclude Include="..\..\src\game\AuctionHouseMgr.h" />
     <ClInclude Include="..\..\src\game\Bag.h" />
     <ClInclude Include="..\..\src\game\BattleGround.h" />
@@ -571,8 +578,6 @@
     <ClInclude Include="..\..\src\game\DBCfmt.h" />
     <ClInclude Include="..\..\src\game\DBCStores.h" />
     <ClInclude Include="..\..\src\game\DBCStructure.h" />
-    <ClInclude Include="..\..\src\game\DestinationHolder.h" />
-    <ClInclude Include="..\..\src\game\DestinationHolderImp.h" />
     <ClInclude Include="..\..\src\game\DynamicObject.h" />
     <ClInclude Include="..\..\src\game\FleeingMovementGenerator.h" />
     <ClInclude Include="..\..\src\game\FollowerReference.h" />
@@ -611,6 +616,14 @@
     <ClInclude Include="..\..\src\game\MassMailMgr.h" />
     <ClInclude Include="..\..\src\game\MotionMaster.h" />
     <ClInclude Include="..\..\src\game\MovementGenerator.h" />
+    <ClInclude Include="..\..\src\game\movement\MoveSpline.h" />
+    <ClInclude Include="..\..\src\game\movement\MoveSplineFlag.h" />
+    <ClInclude Include="..\..\src\game\movement\MoveSplineInit.h" />
+    <ClInclude Include="..\..\src\game\movement\MoveSplineInitArgs.h" />
+    <ClInclude Include="..\..\src\game\movement\packet_builder.h" />
+    <ClInclude Include="..\..\src\game\movement\spline.h" />
+    <ClInclude Include="..\..\src\game\movement\spline.impl.h" />
+    <ClInclude Include="..\..\src\game\movement\typedefs.h" />
     <ClInclude Include="..\..\src\game\NPCHandler.h" />
     <ClInclude Include="..\..\src\game\NullCreatureAI.h" />
     <ClInclude Include="..\..\src\game\Object.h" />
@@ -661,7 +674,6 @@
     <ClInclude Include="..\..\src\game\Totem.h" />
     <ClInclude Include="..\..\src\game\TotemAI.h" />
     <ClInclude Include="..\..\src\game\Transports.h" />
-    <ClInclude Include="..\..\src\game\Traveller.h" />
     <ClInclude Include="..\..\src\game\Unit.h" />
     <ClInclude Include="..\..\src\game\UnitEvents.h" />
     <ClInclude Include="..\..\src\game\UpdateData.h" />

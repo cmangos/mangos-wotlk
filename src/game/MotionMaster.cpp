@@ -19,8 +19,6 @@
 #include "MotionMaster.h"
 #include "CreatureAISelector.h"
 #include "Creature.h"
-#include "Traveller.h"
-
 #include "ConfusedMovementGenerator.h"
 #include "FleeingMovementGenerator.h"
 #include "HomeMovementGenerator.h"
@@ -29,6 +27,8 @@
 #include "TargetedMovementGenerator.h"
 #include "WaypointMovementGenerator.h"
 #include "RandomMovementGenerator.h"
+#include "movement/MoveSpline.h"
+#include "movement/MoveSplineInit.h"
 
 #include <cassert>
 
@@ -235,12 +235,12 @@ void MotionMaster::MoveTargetedHome()
 
     Clear(false);
 
-    if (m_owner->GetTypeId() == TYPEID_UNIT && ((Creature*)m_owner)->GetCharmerOrOwnerGuid().IsEmpty())
+    if (m_owner->GetTypeId() == TYPEID_UNIT && !((Creature*)m_owner)->GetCharmerOrOwnerGuid())
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted home", m_owner->GetGuidStr().c_str());
         Mutate(new HomeMovementGenerator<Creature>());
     }
-    else if (m_owner->GetTypeId() == TYPEID_UNIT && !((Creature*)m_owner)->GetCharmerOrOwnerGuid().IsEmpty())
+    else if (m_owner->GetTypeId() == TYPEID_UNIT && ((Creature*)m_owner)->GetCharmerOrOwnerGuid())
     {
         if (Unit *target = ((Creature*)m_owner)->GetCharmerOrOwner())
         {
@@ -416,6 +416,7 @@ void MotionMaster::Mutate(MovementGenerator *m)
             case HOME_MOTION_TYPE:
             // DistractMovement interrupted by any other movement
             case DISTRACT_MOTION_TYPE:
+            case EFFECT_MOTION_TYPE:
                 MovementExpired(false);
             default:
                 break;
@@ -448,14 +449,28 @@ MovementGeneratorType MotionMaster::GetCurrentMovementGeneratorType() const
 
 bool MotionMaster::GetDestination(float &x, float &y, float &z)
 {
-    if (empty())
+    if (m_owner->movespline->Finalized())
         return false;
 
-    return top()->GetDestination(x,y,z);
+    const G3D::Vector3& dest = m_owner->movespline->FinalDestination();
+    x = dest.x;
+    y = dest.y;
+    z = dest.z;
+    return true;
 }
 
 void MotionMaster::UpdateFinalDistanceToTarget(float fDistance)
 {
     if (!empty())
         top()->UpdateFinalDistance(fDistance);
+}
+
+void MotionMaster::MoveJump(float x, float y, float z, float horizontalSpeed, float max_height, uint32 id)
+{
+    Movement::MoveSplineInit init(*m_owner);
+    init.MoveTo(x,y,z);
+    init.SetParabolic(max_height,0,false);
+    init.SetVelocity(horizontalSpeed);
+    init.Launch();
+    Mutate(new EffectMovementGenerator(id));
 }

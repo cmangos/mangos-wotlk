@@ -53,6 +53,7 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_INVISIBLE       = 0x00000080,       // creature is always invisible for player (mostly trigger creatures)
     CREATURE_FLAG_EXTRA_NOT_TAUNTABLE   = 0x00000100,       // creature is immune to taunt auras and effect attack me
     CREATURE_FLAG_EXTRA_AGGRO_ZONE      = 0x00000200,       // creature sets itself in combat with zone on aggro
+    CREATURE_FLAG_EXTRA_GUARD           = 0x00000400,       // creature is a guard
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
@@ -146,6 +147,8 @@ struct CreatureInfo
         return vehicleId ? HIGHGUID_VEHICLE : HIGHGUID_UNIT;
     }
 
+    ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(GetHighGuid(), Entry, lowguid); }
+
     SkillType GetRequiredLootSkill() const
     {
         if(type_flags & CREATURE_TYPEFLAGS_HERBLOOT)
@@ -201,8 +204,7 @@ struct CreatureData
     uint8 spawnMask;
 
     // helper function
-    HighGuid GetHighGuid() const;
-    ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(GetHighGuid(), id, lowguid); }
+    ObjectGuid GetObjectGuid(uint32 lowguid) const;
 };
 
 // from `creature_addon` and `creature_template_addon`tables
@@ -456,7 +458,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         char const* GetSubName() const { return GetCreatureInfo()->SubName; }
 
-        void Update(uint32 update_diff, uint32 time);       // overwrite Unit::Update
+        void Update(uint32 update_diff, uint32 time) override;  // overwrite Unit::Update
 
         virtual void RegenerateAll(uint32 update_diff);
         void GetRespawnCoord(float &x, float &y, float &z, float* ori = NULL, float* dist =NULL) const;
@@ -475,6 +477,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool IsCivilian() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
+        bool IsGuard() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_GUARD; }
+
         bool CanWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
         bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
         bool CanFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
@@ -515,31 +519,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         CreatureAI* AI() { return i_AI; }
 
-        void AddSplineFlag(SplineFlags f)
-        {
-            bool need_walk_sync = (f & SPLINEFLAG_WALKMODE) != (m_splineFlags & SPLINEFLAG_WALKMODE);
-            m_splineFlags = SplineFlags(m_splineFlags | f);
-            if (need_walk_sync)
-                UpdateWalkMode(this, false);
-        }
-        void RemoveSplineFlag(SplineFlags f)
-        {
-            bool need_walk_sync = (f & SPLINEFLAG_WALKMODE) != (m_splineFlags & SPLINEFLAG_WALKMODE);
-            m_splineFlags = SplineFlags(m_splineFlags & ~f);
-            if (need_walk_sync)
-                UpdateWalkMode(this, false);
-        }
-        bool HasSplineFlag(SplineFlags f) const { return m_splineFlags & f; }
-        SplineFlags GetSplineFlags() const { return m_splineFlags; }
-        void SetSplineFlags(SplineFlags f)
-        {
-            bool need_walk_sync = (f & SPLINEFLAG_WALKMODE) != (m_splineFlags & SPLINEFLAG_WALKMODE);
-            m_splineFlags = f;                              // need set before
-            if (need_walk_sync)
-                UpdateWalkMode(this, false);
-        }
-
-        void SendMonsterMoveWithSpeedToCurrentDestination(Player* player = NULL);
+        void SetWalk(bool enable);
+        void SetLevitate(bool enable);
 
         uint32 GetShieldBlockValue() const                  // dunno mob block value
         {
@@ -611,7 +592,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 GetLootGroupRecipientId() const { return m_lootGroupRecipientId; }
         Player* GetLootRecipient() const;                   // use group cases as prefered
         Group* GetGroupLootRecipient() const;
-        bool HasLootRecipient() const { return m_lootGroupRecipientId || !m_lootRecipientGuid.IsEmpty(); }
+        bool HasLootRecipient() const { return m_lootGroupRecipientId || m_lootRecipientGuid; }
         bool IsGroupLootRecipient() const { return m_lootGroupRecipientId; }
         void SetLootRecipient(Unit* unit);
         void AllLootRemovedFromCorpse();
@@ -761,7 +742,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
     private:
         GridReference<Creature> m_gridRef;
         CreatureInfo const* m_creatureInfo;                 // in difficulty mode > 0 can different from ObjMgr::GetCreatureTemplate(GetEntry())
-        SplineFlags m_splineFlags;
 };
 
 class AssistDelayEvent : public BasicEvent

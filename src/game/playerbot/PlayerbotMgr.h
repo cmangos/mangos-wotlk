@@ -49,6 +49,12 @@ public:
     bool m_confDisableBots;
     bool m_confDebugWhisper;
     float m_confFollowDistance[2];
+    bool m_confCollectCombat;
+    bool m_confCollectQuest;
+    bool m_confCollectProfession;
+    bool m_confCollectLoot;
+    bool m_confCollectSkin;
+    bool m_confCollectObjects;
 
 private:
     Player* const m_master;

@@ -157,7 +157,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 
         if( _player->CanAddQuest( qInfo, true ) )
         {
-            _player->AddQuest( qInfo, pObject );
+            _player->AddQuest( qInfo, pObject );            // pObject (if it item) can be destroyed at call
 
             if (qInfo->HasQuestFlag(QUEST_FLAGS_PARTY_ACCEPT))
             {
@@ -188,19 +188,6 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 
             _player->GetAchievementMgr().StartTimedAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST, quest);
 
-            switch(pObject->GetTypeId())
-            {
-                case TYPEID_UNIT:
-                    sScriptMgr.OnQuestAccept(_player, (Creature*)pObject, qInfo);
-                    break;
-                case TYPEID_ITEM:
-                case TYPEID_CONTAINER:
-                    sScriptMgr.OnQuestAccept(_player, (Item*)pObject, qInfo);
-                    break;
-                case TYPEID_GAMEOBJECT:
-                    sScriptMgr.OnQuestAccept(_player, (GameObject*)pObject, qInfo);
-                    break;
-            }
             _player->PlayerTalkClass->CloseGossip();
 
             if( qInfo->GetSrcSpell() > 0 )
@@ -475,7 +462,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
                     continue;
                 }
 
-                if (!pPlayer->GetDividerGuid().IsEmpty())
+                if (pPlayer->GetDividerGuid())
                 {
                     _player->SendPushToPartyResponse(pPlayer, QUEST_PARTY_MSG_BUSY);
                     continue;
@@ -587,7 +574,7 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
                     {
                         dialogStatusNew = DIALOG_STATUS_REWARD_REP;
                     }
-                    else if (pPlayer->getLevel() <= pPlayer->GetQuestLevelForPlayer(pQuest) + sWorld.getConfig(CONFIG_UINT32_QUEST_LOW_LEVEL_HIDE_DIFF))
+                    else if (int32(pPlayer->getLevel()) <= int32(pPlayer->GetQuestLevelForPlayer(pQuest)) + sWorld.getConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF))
                     {
                         if (pQuest->HasQuestFlag(QUEST_FLAGS_DAILY) || pQuest->HasQuestFlag(QUEST_FLAGS_WEEKLY))
                             dialogStatusNew = DIALOG_STATUS_AVAILABLE_REP;

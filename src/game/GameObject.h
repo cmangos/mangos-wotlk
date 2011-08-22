@@ -599,14 +599,18 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void RemoveFromWorld();
 
         bool Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMask, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint8 animprogress, GOState go_state);
-        void Update(uint32 update_diff, uint32 p_time);
+        void Update(uint32 update_diff, uint32 p_time) override;
         GameObjectInfo const* GetGOInfo() const;
 
         bool IsTransport() const;
 
         bool HasStaticDBSpawnData() const;                  // listed in `gameobject` table and have fixed in DB guid
 
-        void UpdateRotationFields(float rotation2 = 0.0f, float rotation3 = 0.0f);
+        // z_rot, y_rot, x_rot - rotation angles around z, y and x axes
+        void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot);
+        void SetWorldRotation(float qx, float qy, float qz, float qw);   
+        void SetTransportPathRotation(float qx, float qy, float qz, float qw);      // transforms(rotates) transport's path
+        int64 GetRotation() const { return m_rotation; }
 
         // overwrite WorldObject function for proper name localization
         const char* GetNameForLocaleIdx(int32 locale_idx) const;
@@ -721,7 +725,6 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         GridReference<GameObject> &GetGridRef() { return m_gridRef; }
 
-        uint64 GetRotation() const { return m_rotation; }
     protected:
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
@@ -743,7 +746,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         GameObjectInfo const* m_goInfo;
         GameObjectDisplayInfoEntry const* m_displayInfo;
-        uint64 m_rotation;
+        int64 m_rotation;
+        float m_quatX, m_quatY, m_quatZ, m_quatW;
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);
 

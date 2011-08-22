@@ -23,7 +23,7 @@
 
 // Format is YYYYMMDDRR where RR is the change in the conf file
 // for that day.
-#define PLAYERBOT_CONF_VERSION    2010062001
+#define PLAYERBOT_CONF_VERSION    2011031001
 
 #if PLATFORM == PLATFORM_WINDOWS
   #define _PLAYERBOT_CONFIG  "playerbot.conf"

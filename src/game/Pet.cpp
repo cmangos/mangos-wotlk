@@ -283,8 +283,6 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
         SetPower(POWER_MANA, savedmana > GetMaxPower(POWER_MANA) ? GetMaxPower(POWER_MANA) : savedmana);
     }
 
-    UpdateWalkMode(owner);
-
     AIM_Initialize();
     map->Add((Creature*)this);
 
@@ -531,7 +529,9 @@ void Pet::Update(uint32 update_diff, uint32 diff)
         {
             // unsummon pet that lost owner
             Unit* owner = GetOwner();
-            if (!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && (!owner->GetCharmGuid().IsEmpty() && (owner->GetCharmGuid() != GetObjectGuid()))) || (isControlled() && owner->GetPetGuid().IsEmpty()))
+            if (!owner ||
+                (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && (owner->GetCharmGuid() && (owner->GetCharmGuid() != GetObjectGuid()))) ||
+                (isControlled() && !owner->GetPetGuid()))
             {
                 Unsummon(PET_SAVE_REAGENTS);
                 return;
@@ -1319,13 +1319,7 @@ void Pet::_LoadAuras(uint32 timediff)
             }
 
             // prevent wrong values of remaincharges
-            uint32 procCharges = spellproto->procCharges;
-            if (procCharges)
-            {
-                if (remaincharges <= 0 || remaincharges > procCharges)
-                    remaincharges = procCharges;
-            }
-            else
+            if (spellproto->procCharges == 0)
                 remaincharges = 0;
 
             if (!spellproto->StackAmount)

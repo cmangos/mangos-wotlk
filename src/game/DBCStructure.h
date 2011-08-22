@@ -1060,6 +1060,15 @@ struct ItemBagFamilyEntry
     //                                                      // 17       name flags
 };
 
+struct ItemClassEntry
+{
+    uint32   ID;                                            // 0        m_ID
+    //uint32   unk1;                                        // 1
+    //uint32   unk2;                                        // 2        only weapon have 1 in field, other 0
+    char*    name[16];                                      // 3-19     m_name_lang
+    //                                                      // 20       name flags
+};
+
 struct ItemDisplayInfoEntry
 {
     uint32      ID;                                         // 0        m_ID
@@ -1434,17 +1443,17 @@ struct ScalingStatValuesEntry
     uint32    displayOrder;                                 // 19       m_sortIndex
 };*/
 
-/*struct SkillRaceClassInfoEntry
+struct SkillRaceClassInfoEntry
 {
-    uint32    id;                                           // 0        m_ID
+    //uint32    id;                                         // 0        m_ID
     uint32    skillId;                                      // 1        m_skillID
     uint32    raceMask;                                     // 2        m_raceMask
     uint32    classMask;                                    // 3        m_classMask
     uint32    flags;                                        // 4        m_flags
     uint32    reqLevel;                                     // 5        m_minLevel
-    uint32    skillTierId;                                  // 6        m_skillTierID
-    uint32    skillCostID;                                  // 7        m_skillCostIndex
-};*/
+    //uint32    skillTierId;                                // 6        m_skillTierID
+    //uint32    skillCostID;                                // 7        m_skillCostIndex
+};
 
 /*struct SkillTiersEntry{
     uint32    id;                                           // 0        m_ID
@@ -1498,6 +1507,42 @@ struct SoundEntriesEntry
                                                             // 27       m_distanceCutoff
                                                             // 28       m_EAXDef
                                                             // 29       m_soundEntriesAdvancedID
+};
+
+
+struct ClassFamilyMask
+{
+    uint64 Flags;
+    uint32 Flags2;
+
+    ClassFamilyMask() : Flags(0), Flags2(0) {}
+    explicit ClassFamilyMask(uint64 familyFlags, uint32 familyFlags2 = 0) : Flags(familyFlags), Flags2(familyFlags2) {}
+
+    bool Empty() const { return Flags == 0 && Flags2 == 0; }
+    bool operator! () const { return Empty(); }
+    operator void const* () const { return Empty() ? NULL : this; }// for allow normal use in if(mask)
+
+    bool IsFitToFamilyMask(uint64 familyFlags, uint32 familyFlags2 = 0) const
+    {
+        return (Flags & familyFlags) || (Flags2 & familyFlags2);
+    }
+
+    bool IsFitToFamilyMask(ClassFamilyMask const& mask) const
+    {
+        return (Flags & mask.Flags) || (Flags2 & mask.Flags2);
+    }
+
+    uint64 operator& (uint64 mask) const                     // possible will removed at finish convertion code use IsFitToFamilyMask
+    {
+        return Flags & mask;
+    }
+
+    ClassFamilyMask& operator|= (ClassFamilyMask const& mask)
+    {
+        Flags |= mask.Flags;
+        Flags2 |= mask.Flags2;
+        return *this;
+    }
 };
 
 #define MAX_SPELL_REAGENTS 8
@@ -1579,9 +1624,7 @@ struct SpellEntry
     int32     EffectMiscValueB[MAX_EFFECT_INDEX];           // 113-115  m_effectMiscValueB
     uint32    EffectTriggerSpell[MAX_EFFECT_INDEX];         // 116-118  m_effectTriggerSpell
     float     EffectPointsPerComboPoint[MAX_EFFECT_INDEX];  // 119-121  m_effectPointsPerCombo
-    uint32    EffectSpellClassMaskA[3];                     // 122-124  m_effectSpellClassMaskA, effect 0
-    uint32    EffectSpellClassMaskB[3];                     // 125-127  m_effectSpellClassMaskB, effect 1
-    uint32    EffectSpellClassMaskC[3];                     // 128-130  m_effectSpellClassMaskC, effect 2
+    ClassFamilyMask EffectSpellClassMask[MAX_EFFECT_INDEX]; // 122-130  m_effectSpellClassMaskA/B/C, effect 0/1/2
     uint32    SpellVisual[2];                               // 131-132  m_spellVisualID
     uint32    SpellIconID;                                  // 133      m_spellIconID
     uint32    activeIconID;                                 // 134      m_activeIconID
@@ -1599,8 +1642,7 @@ struct SpellEntry
     uint32    StartRecoveryTime;                            // 206      m_startRecoveryTime
     uint32    MaxTargetLevel;                               // 207      m_maxTargetLevel
     uint32    SpellFamilyName;                              // 208      m_spellClassSet
-    uint64    SpellFamilyFlags;                             // 209-210  m_spellClassMask NOTE: size is 12 bytes!!!
-    uint32    SpellFamilyFlags2;                            // 211      addition to m_spellClassMask
+    ClassFamilyMask SpellFamilyFlags;                       // 209-211  m_spellClassMask NOTE: size is 12 bytes!!!
     uint32    MaxAffectedTargets;                           // 212      m_maxTargets
     uint32    DmgClass;                                     // 213      m_defenseType
     uint32    PreventionType;                               // 214      m_preventionType
@@ -1621,14 +1663,14 @@ struct SpellEntry
 
     // helpers
     int32 CalculateSimpleValue(SpellEffectIndex eff) const { return EffectBasePoints[eff] + int32(1); }
-    uint32 const* GetEffectSpellClassMask(SpellEffectIndex effect) const
+    ClassFamilyMask const& GetEffectSpellClassMask(SpellEffectIndex effect) const
     {
-        return EffectSpellClassMaskA + effect * 3;
+        return EffectSpellClassMask[effect];
     }
 
     bool IsFitToFamilyMask(uint64 familyFlags, uint32 familyFlags2 = 0) const
     {
-        return (SpellFamilyFlags & familyFlags) || (SpellFamilyFlags2 & familyFlags2);
+        return SpellFamilyFlags.IsFitToFamilyMask(familyFlags, familyFlags2);
     }
 
     bool IsFitToFamily(SpellFamily family, uint64 familyFlags, uint32 familyFlags2 = 0) const
@@ -1636,9 +1678,23 @@ struct SpellEntry
         return SpellFamily(SpellFamilyName) == family && IsFitToFamilyMask(familyFlags, familyFlags2);
     }
 
+    bool IsFitToFamilyMask(ClassFamilyMask const& mask) const
+    {
+        return SpellFamilyFlags.IsFitToFamilyMask(mask);
+    }
+
+    bool IsFitToFamily(SpellFamily family, ClassFamilyMask const& mask) const
+    {
+        return SpellFamily(SpellFamilyName) == family && IsFitToFamilyMask(mask);
+    }
+
     private:
         // prevent creating custom entries (copy data from original in fact)
         SpellEntry(SpellEntry const&);                      // DON'T must have implementation
+
+        // catch wrong uses
+        template<typename T>
+        bool IsFitToFamilyMask(SpellFamily family, T t) const;
 };
 
 struct SpellCastTimesEntry

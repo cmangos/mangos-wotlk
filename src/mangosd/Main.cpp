@@ -27,6 +27,7 @@
 #include "Log.h"
 #include "Master.h"
 #include "SystemConfig.h"
+#include "AuctionHouseBot/AuctionHouseBot.h"
 #include "revision.h"
 #include "revision_nr.h"
 #include <openssl/opensslv.h>
@@ -46,6 +47,8 @@ char serviceDescription[] = "Massive Network Game Object Server";
  *  2 - paused
  */
 int m_ServiceStatus = -1;
+#else
+#include "PosixDaemon.h"
 #endif
 
 DatabaseType WorldDatabase;                                 ///< Accessor to the world database
@@ -60,11 +63,16 @@ void usage(const char *prog)
     sLog.outString("Usage: \n %s [<options>]\n"
         "    -v, --version            print version and exist\n\r"
         "    -c config_file           use config_file as configuration file\n\r"
+        "    -a, --ahbot config_file  use config_file as ahbot configuration file\n\r"
         #ifdef WIN32
         "    Running as service functions:\n\r"
         "    -s run                   run as service\n\r"
         "    -s install               install service\n\r"
         "    -s uninstall             uninstall service\n\r"
+        #else
+        "    Running as daemon functions:\n\r"
+        "    -s run                   run as daemon\n\r"
+        "    -s stop                  stop daemon\n\r"
         #endif
         ,prog);
 }
@@ -75,45 +83,44 @@ extern int main(int argc, char **argv)
     ///- Command line parsing
     char const* cfg_file = _MANGOSD_CONFIG;
 
-#ifdef WIN32
-    char const *options = ":c:s:";
-#else
-    char const *options = ":c:";
-#endif
+
+    char const *options = ":a:c:s:";
 
     ACE_Get_Opt cmd_opts(argc, argv, options);
-    cmd_opts.long_option("version", 'v');
+    cmd_opts.long_option("version", 'v', ACE_Get_Opt::NO_ARG);
+    cmd_opts.long_option("ahbot", 'a', ACE_Get_Opt::ARG_REQUIRED);
+
+    char serviceDaemonMode = '\0';
 
     int option;
     while ((option = cmd_opts()) != EOF)
     {
         switch (option)
         {
+            case 'a':
+                sAuctionBotConfig.SetConfigFileName(cmd_opts.opt_arg());
+                break;
             case 'c':
                 cfg_file = cmd_opts.opt_arg();
                 break;
             case 'v':
                 printf("%s\n", _FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_NR,REVISION_ID));
                 return 0;
-#ifdef WIN32
             case 's':
             {
                 const char *mode = cmd_opts.opt_arg();
 
-                if (!strcmp(mode, "install"))
-                {
-                    if (WinServiceInstall())
-                        sLog.outString("Installing service");
-                    return 1;
-                }
+                if (!strcmp(mode, "run"))
+                    serviceDaemonMode = 'r';
+#ifdef WIN32
+                else if (!strcmp(mode, "install"))
+                    serviceDaemonMode = 'i';
                 else if (!strcmp(mode, "uninstall"))
-                {
-                    if (WinServiceUninstall())
-                        sLog.outString("Uninstalling service");
-                    return 1;
-                }
-                else if (!strcmp(mode, "run"))
-                    WinServiceRun();
+                    serviceDaemonMode = 'u';
+#else
+                else if (!strcmp(mode, "stop"))
+                    serviceDaemonMode = 's';
+#endif
                 else
                 {
                     sLog.outError("Runtime-Error: -%c unsupported argument %s", cmd_opts.opt_opt(), mode);
@@ -123,7 +130,6 @@ extern int main(int argc, char **argv)
                 }
                 break;
             }
-#endif
             case ':':
                 sLog.outError("Runtime-Error: -%c option requires an input argument", cmd_opts.opt_opt());
                 usage(argv[0]);
@@ -137,6 +143,23 @@ extern int main(int argc, char **argv)
         }
     }
 
+#ifdef WIN32                                                // windows service command need execute before config read
+    switch (serviceDaemonMode)
+    {
+        case 'i':
+            if (WinServiceInstall())
+                sLog.outString("Installing service");
+            return 1;
+        case 'u':
+            if (WinServiceUninstall())
+                sLog.outString("Uninstalling service");
+            return 1;
+        case 'r':
+            WinServiceRun();
+            break;
+    }
+#endif
+
     if (!sConfig.SetSource(cfg_file))
     {
         sLog.outError("Could not find configuration file %s.", cfg_file);
@@ -144,21 +167,32 @@ extern int main(int argc, char **argv)
         return 1;
     }
 
+#ifndef WIN32                                               // posix daemon commands need apply after config read
+    switch (serviceDaemonMode)
+    {
+    case 'r':
+        startDaemon();
+        break;
+    case 's':
+        stopDaemon();
+        break;
+    }
+#endif
+
     sLog.outString( "%s [world-daemon]", _FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_NR,REVISION_ID) );
-    sLog.outString( "<Ctrl-C> to stop.\n\n" );
-
-    sLog.outTitle( "MM   MM         MM   MM  MMMMM   MMMM   MMMMM");
-    sLog.outTitle( "MM   MM         MM   MM MMM MMM MM  MM MMM MMM");
-    sLog.outTitle( "MMM MMM         MMM  MM MMM MMM MM  MM MMM");
-    sLog.outTitle( "MM M MM         MMMM MM MMM     MM  MM  MMM");
-    sLog.outTitle( "MM M MM  MMMMM  MM MMMM MMM     MM  MM   MMM");
-    sLog.outTitle( "MM M MM M   MMM MM  MMM MMMMMMM MM  MM    MMM");
-    sLog.outTitle( "MM   MM     MMM MM   MM MM  MMM MM  MM     MMM");
-    sLog.outTitle( "MM   MM MMMMMMM MM   MM MMM MMM MM  MM MMM MMM");
-    sLog.outTitle( "MM   MM MM  MMM MM   MM  MMMMMM  MMMM   MMMMM");
-    sLog.outTitle( "        MM  MMM http://getmangos.com");
-    sLog.outTitle( "        MMMMMM\n\n");
-
+    sLog.outString( "<Ctrl-C> to stop." );
+    sLog.outString("\n\n"
+        "MM   MM         MM   MM  MMMMM   MMMM   MMMMM\n"
+        "MM   MM         MM   MM MMM MMM MM  MM MMM MMM\n"
+        "MMM MMM         MMM  MM MMM MMM MM  MM MMM\n"
+        "MM M MM         MMMM MM MMM     MM  MM  MMM\n"
+        "MM M MM  MMMMM  MM MMMM MMM     MM  MM   MMM\n"
+        "MM M MM M   MMM MM  MMM MMMMMMM MM  MM    MMM\n"
+        "MM   MM     MMM MM   MM MM  MMM MM  MM     MMM\n"
+        "MM   MM MMMMMMM MM   MM MMM MMM MM  MM MMM MMM\n"
+        "MM   MM MM  MMM MM   MM  MMMMMM  MMMM   MMMMM\n"
+        "        MM  MMM http://getmangos.com\n"
+        "        MMMMMM\n\n");
     sLog.outString("Using configuration file %s.", cfg_file);
 
     DETAIL_LOG("%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
@@ -171,7 +205,7 @@ extern int main(int argc, char **argv)
     DETAIL_LOG("Using ACE: %s", ACE_VERSION);
 
     ///- Set progress bars show mode
-    barGoLink::SetOutputState(sConfig.GetBoolDefault("ShowProgressBars", true));
+    BarGoLink::SetOutputState(sConfig.GetBoolDefault("ShowProgressBars", true));
 
     ///- and run the 'Master'
     /// \todo Why do we need this 'Master'? Can't all of this be in the Main as for Realmd?

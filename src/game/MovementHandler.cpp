@@ -286,10 +286,6 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     if (plMover)
         plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
-    // after move info set
-    if (opcode == MSG_MOVE_SET_WALK_MODE || opcode == MSG_MOVE_SET_RUN_MODE)
-        mover->UpdateWalkMode(mover, false);
-
     WorldPacket data(opcode, recv_data.size());
     data << mover->GetPackGUID();             // write guid
     movementInfo.Write(data);                               // write data
@@ -419,8 +415,7 @@ void WorldSession::HandleDismissControlledVehicle(WorldPacket &recv_data)
     recv_data >> mi;
 
     ObjectGuid vehicleGUID = _player->GetCharmGuid();
-
-    if (vehicleGUID.IsEmpty())                              // something wrong here...
+    if (!vehicleGUID)                                       // something wrong here...
         return;
 
     _player->m_movementInfo = mi;

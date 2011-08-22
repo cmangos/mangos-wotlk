@@ -39,10 +39,9 @@
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
-
 #include "ObjectPosSelector.h"
-
 #include "TemporarySummon.h"
+#include "movement/packet_builder.h"
 
 Object::Object( )
 {
@@ -106,6 +105,25 @@ void Object::_Create(uint32 guidlow, uint32 entry, HighGuid guidhigh)
 void Object::SetObjectScale(float newScale)
 {
     SetFloatValue(OBJECT_FIELD_SCALE_X, newScale);
+}
+
+void Object::SendForcedObjectUpdate()
+{
+    if (!m_inWorld || !m_objectUpdated)
+        return;
+
+    UpdateDataMapType update_players;
+
+    BuildUpdateData(update_players);
+    RemoveFromClientUpdateList();
+
+    WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
+    for(UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
+    {
+        iter->second.BuildPacket(&packet);
+        iter->first->GetSession()->SendPacket(&packet);
+        packet.clear();                                     // clean the string
+    }
 }
 
 void Object::BuildMovementUpdateBlock(UpdateData * data, uint16 flags ) const
@@ -237,57 +255,13 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
     {
         Unit *unit = ((Unit*)this);
 
-        switch(GetTypeId())
+        if (GetTypeId() == TYPEID_PLAYER)
         {
-            case TYPEID_UNIT:
-            {
-                unit->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
-
-                // disabled, makes them run-in-same-place before movement generator updated once.
-                /*if (((Creature*)unit)->hasUnitState(UNIT_STAT_MOVING))
-                    unit->m_movementInfo.SetMovementFlags(MOVEFLAG_FORWARD);*/
-
-                if (((Creature*)unit)->CanFly())
-                {
-                    // (ok) most seem to have this
-                    unit->m_movementInfo.AddMovementFlag(MOVEFLAG_LEVITATING);
-
-                    /*if (!((Creature*)unit)->hasUnitState(UNIT_STAT_MOVING))
-                    {
-                        // (ok) possibly some "hover" mode
-                        unit->m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
-                    }
-                    else*/
-                    {
-                        if (((Creature*)unit)->IsMounted())
-                        {
-                            // seems to be often when mounted
-                            unit->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
-                        }
-                    }
-                }
-            }
-            break;
-            case TYPEID_PLAYER:
-            {
-                Player *player = ((Player*)unit);
-
-                if(player->GetTransport())
-                    player->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
-                else
-                    player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
-
-                // remove unknown, unused etc flags for now
-                player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_SPLINE_ENABLED);
-
-                if(player->IsTaxiFlying())
-                {
-                    MANGOS_ASSERT(player->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE);
-                    player->m_movementInfo.AddMovementFlag(MOVEFLAG_FORWARD);
-                    player->m_movementInfo.AddMovementFlag(MOVEFLAG_SPLINE_ENABLED);
-                }
-            }
-            break;
+            Player *player = ((Player*)unit);
+            if(player->GetTransport())
+                player->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
+            else
+                player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
         }
 
         // Update movement info time
@@ -307,86 +281,8 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
         *data << float(unit->GetSpeed(MOVE_PITCH_RATE));
 
         // 0x08000000
-        if(unit->m_movementInfo.GetMovementFlags() & MOVEFLAG_SPLINE_ENABLED)
-        {
-            if(GetTypeId() != TYPEID_PLAYER)
-            {
-                DEBUG_LOG("_BuildMovementUpdate: MOVEFLAG_SPLINE_ENABLED for non-player");
-                return;
-            }
-
-            Player *player = ((Player*)unit);
-
-            if(!player->IsTaxiFlying())
-            {
-                DEBUG_LOG("_BuildMovementUpdate: MOVEFLAG_SPLINE_ENABLED but not in flight");
-                return;
-            }
-
-            MANGOS_ASSERT(player->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE);
-
-            FlightPathMovementGenerator *fmg = (FlightPathMovementGenerator*)(player->GetMotionMaster()->top());
-
-            uint32 flags3 = SPLINEFLAG_WALKMODE | SPLINEFLAG_FLYING;
-
-            *data << uint32(flags3);                        // splines flag?
-
-            if(flags3 & SPLINEFLAG_FINALFACING)             // may be orientation
-            {
-                *data << float(0);
-            }
-            else
-            {
-                if(flags3 & SPLINEFLAG_FINALTARGET)         // probably guid there
-                {
-                    *data << uint64(0);
-                }
-                else
-                {
-                    if(flags3 & SPLINEFLAG_FINALPOINT)      // probably x,y,z coords there
-                    {
-                        *data << float(0);
-                        *data << float(0);
-                        *data << float(0);
-                    }
-                }
-            }
-
-            TaxiPathNodeList const& path = fmg->GetPath();
-
-            float x, y, z;
-            player->GetPosition(x, y, z);
-
-            uint32 inflighttime = uint32(path.GetPassedLength(fmg->GetCurrentNode(), x, y, z) * 32);
-            uint32 traveltime = uint32(path.GetTotalLength() * 32);
-
-            *data << uint32(inflighttime);                  // passed move time?
-            *data << uint32(traveltime);                    // full move time?
-            *data << uint32(0);                             // sequenceId
-
-            *data << float(0);                              // added in 3.1
-            *data << float(0);                              // added in 3.1
-
-            // data as in SMSG_MONSTER_MOVE with flag SPLINEFLAG_TRAJECTORY
-            *data << float(0);                              // parabolic speed, added in 3.1
-            *data << uint32(0);                             // parabolic time, added in 3.1
-
-            uint32 poscount = uint32(path.size());
-            *data << uint32(poscount);                      // points count
-
-            for(uint32 i = 0; i < poscount; ++i)
-            {
-                *data << float(path[i].x);
-                *data << float(path[i].y);
-                *data << float(path[i].z);
-            }
-
-            *data << uint8(0);                              // splineMode
-
-            *data << float(path[poscount-1].x);
-            *data << float(path[poscount-1].y);
-            *data << float(path[poscount-1].z);
-        }
+        if (unit->m_movementInfo.GetMovementFlags() & MOVEFLAG_SPLINE_ENABLED)
+            Movement::PacketBuilder::WriteCreate(*unit->movespline, *data);
     }
     else
     {
@@ -511,7 +407,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
     // 0x200
     if(updateFlags & UPDATEFLAG_ROTATION)
     {
-        *data << uint64(((GameObject*)this)->GetRotation());
+        *data << int64(((GameObject*)this)->GetRotation());
     }
 }
 
@@ -575,8 +471,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
             {
                 if (index == UNIT_NPC_FLAGS)
                 {
-                    // remove custom flag before sending
-                    uint32 appendValue = m_uint32Values[index] & ~UNIT_NPC_FLAG_GUARD;
+                    uint32 appendValue = m_uint32Values[index];
 
                     if (GetTypeId() == TYPEID_UNIT)
                     {
@@ -1453,21 +1348,21 @@ bool WorldObject::IsPositionValid() const
 void WorldObject::MonsterSay(const char* text, uint32 language, Unit* target)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, CHAT_MSG_MONSTER_SAY, text, language, GetName(), target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
+    BuildMonsterChat(&data, GetObjectGuid(), CHAT_MSG_MONSTER_SAY, text, language, GetName(), target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
     SendMessageToSetInRange(&data,sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY),true);
 }
 
 void WorldObject::MonsterYell(const char* text, uint32 language, Unit* target)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, CHAT_MSG_MONSTER_YELL, text, language, GetName(), target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
+    BuildMonsterChat(&data, GetObjectGuid(), CHAT_MSG_MONSTER_YELL, text, language, GetName(), target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
     SendMessageToSetInRange(&data,sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL),true);
 }
 
 void WorldObject::MonsterTextEmote(const char* text, Unit* target, bool IsBossEmote)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, text, LANG_UNIVERSAL,
+    BuildMonsterChat(&data, GetObjectGuid(), IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, text, LANG_UNIVERSAL,
         GetName(), target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
     SendMessageToSetInRange(&data, sWorld.getConfig(IsBossEmote ? CONFIG_FLOAT_LISTEN_RANGE_YELL : CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE), true);
 }
@@ -1478,7 +1373,7 @@ void WorldObject::MonsterWhisper(const char* text, Unit* target, bool IsBossWhis
         return;
 
     WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL,
+    BuildMonsterChat(&data, GetObjectGuid(), IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL,
         GetName(), target->GetObjectGuid(), target->GetName());
     ((Player*)target)->GetSession()->SendPacket(&data);
 }
@@ -1494,7 +1389,7 @@ namespace MaNGOS
             {
                 char const* text = sObjectMgr.GetMangosString(i_textId,loc_idx);
 
-                i_object.BuildMonsterChat(&data, i_msgtype, text, i_language, i_object.GetNameForLocaleIdx(loc_idx), i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
+                WorldObject::BuildMonsterChat(&data, i_object.GetObjectGuid(), i_msgtype, text, i_language, i_object.GetNameForLocaleIdx(loc_idx), i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
             }
 
         private:
@@ -1556,22 +1451,22 @@ void WorldObject::MonsterWhisper(int32 textId, Unit* target, bool IsBossWhisper)
     char const* text = sObjectMgr.GetMangosString(textId, loc_idx);
 
     WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL,
+    BuildMonsterChat(&data, GetObjectGuid(), IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL,
         GetNameForLocaleIdx(loc_idx), target->GetObjectGuid(), "");
 
     ((Player*)target)->GetSession()->SendPacket(&data);
 }
 
-void WorldObject::BuildMonsterChat(WorldPacket *data, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName) const
+void WorldObject::BuildMonsterChat(WorldPacket *data, ObjectGuid senderGuid, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName)
 {
     *data << uint8(msgtype);
     *data << uint32(language);
-    *data << ObjectGuid(GetObjectGuid());
+    *data << ObjectGuid(senderGuid);
     *data << uint32(0);                                     // 2.1.0
     *data << uint32(strlen(name)+1);
     *data << name;
     *data << ObjectGuid(targetGuid);                        // Unit Target
-    if (!targetGuid.IsEmpty() && !targetGuid.IsPlayer())
+    if (targetGuid && !targetGuid.IsPlayer())
     {
         *data << uint32(strlen(targetName)+1);              // target name length
         *data << targetName;                                // target name
@@ -1685,8 +1580,8 @@ namespace MaNGOS
     class NearUsedPosDo
     {
         public:
-            NearUsedPosDo(WorldObject const& obj, WorldObject const* searcher, float angle, ObjectPosSelector& selector)
-                : i_object(obj), i_searcher(searcher), i_angle(angle), i_selector(selector) {}
+            NearUsedPosDo(WorldObject const& obj, WorldObject const* searcher, float absAngle, ObjectPosSelector& selector)
+                : i_object(obj), i_searcher(searcher), i_absAngle(absAngle), i_selector(selector) {}
 
             void operator()(Corpse*) const {}
             void operator()(DynamicObject*) const {}
@@ -1694,26 +1589,25 @@ namespace MaNGOS
             void operator()(Creature* c) const
             {
                 // skip self or target
-                if(c==i_searcher || c==&i_object)
+                if (c == i_searcher || c == &i_object)
                     return;
 
-                float x,y,z;
+                float x, y, z;
 
-                if( !c->isAlive() || c->hasUnitState(UNIT_STAT_NOT_MOVE) ||
-                    !c->GetMotionMaster()->GetDestination(x,y,z) )
+                if (c->IsStopped() || !c->GetMotionMaster()->GetDestination(x, y, z))
                 {
                     x = c->GetPositionX();
                     y = c->GetPositionY();
-
-                    add(c,x,y);
                 }
+
+                add(c,x,y);
             }
 
             template<class T>
-                void operator()(T* u) const
+            void operator()(T* u) const
             {
                 // skip self or target
-                if(u==i_searcher || u==&i_object)
+                if (u == i_searcher || u == &i_object)
                     return;
 
                 float x,y;
@@ -1727,26 +1621,32 @@ namespace MaNGOS
             // we must add used pos that can fill places around center
             void add(WorldObject* u, float x, float y) const
             {
+                // dist include size of u and i_object
+                float dx = i_object.GetPositionX() - x;
+                float dy = i_object.GetPositionY() - y;
+                float dist2d = sqrt((dx * dx) + (dy * dy));
+
+                float delta = i_selector.m_searcherSize + u->GetObjectBoundingRadius();
+
                 // u is too nearest/far away to i_object
-                if(!i_object.IsInRange2d(x,y,i_selector.m_dist - i_selector.m_size,i_selector.m_dist + i_selector.m_size))
+                if (dist2d < i_selector.m_searcherDist - delta ||
+                    dist2d >= i_selector.m_searcherDist + delta)
                     return;
 
-                float angle = i_object.GetAngle(u)-i_angle;
+                float angle = i_object.GetAngle(u) - i_absAngle;
 
                 // move angle to range -pi ... +pi
-                while( angle > M_PI_F)
+                while (angle > M_PI_F)
                     angle -= 2.0f * M_PI_F;
-                while(angle < -M_PI_F)
+                while (angle < -M_PI_F)
                     angle += 2.0f * M_PI_F;
 
-                // dist include size of u
-                float dist2d = i_object.GetDistance2d(x,y);
-                i_selector.AddUsedPos(u->GetObjectBoundingRadius(), angle, dist2d + i_object.GetObjectBoundingRadius());
+                i_selector.AddUsedArea(u->GetObjectBoundingRadius(), angle, dist2d);
             }
         private:
             WorldObject const& i_object;
             WorldObject const* i_searcher;
-            float              i_angle;
+            float              i_absAngle;
             ObjectPosSelector& i_selector;
     };
 }                                                           // namespace MaNGOS
@@ -1764,16 +1664,16 @@ void WorldObject::GetNearPoint2D(float &x, float &y, float distance2d, float abs
 
 void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, float &z, float searcher_bounding_radius, float distance2d, float absAngle) const
 {
-    GetNearPoint2D(x, y, distance2d+searcher_bounding_radius, absAngle);
+    GetNearPoint2D(x, y, distance2d + searcher_bounding_radius, absAngle);
     z = GetPositionZ();
 
     // if detection disabled, return first point
     if(!sWorld.getConfig(CONFIG_BOOL_DETECT_POS_COLLISION))
     {
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x,y,z);        // update to LOS height if available
+            searcher->UpdateAllowedPositionZ(x, y, z);      // update to LOS height if available
         else
-            UpdateGroundPositionZ(x,y,z);
+            UpdateGroundPositionZ(x, y, z);
         return;
     }
 
@@ -1783,113 +1683,79 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     bool first_los_conflict = false;                        // first point LOS problems
 
     // prepare selector for work
-    ObjectPosSelector selector(GetPositionX(), GetPositionY(), GetObjectBoundingRadius(), distance2d+searcher_bounding_radius);
+    ObjectPosSelector selector(GetPositionX(), GetPositionY(), distance2d + searcher_bounding_radius + GetObjectBoundingRadius(), searcher_bounding_radius);
 
     // adding used positions around object
     {
-        MaNGOS::NearUsedPosDo u_do(*this,searcher,absAngle,selector);
-        MaNGOS::WorldObjectWorker<MaNGOS::NearUsedPosDo> worker(this,u_do);
+        MaNGOS::NearUsedPosDo u_do(*this, searcher, absAngle, selector);
+        MaNGOS::WorldObjectWorker<MaNGOS::NearUsedPosDo> worker(this, u_do);
 
-        Cell::VisitAllObjects(this, worker, distance2d);
+        Cell::VisitAllObjects(this, worker, distance2d + searcher_bounding_radius);
     }
 
     // maybe can just place in primary position
-    if( selector.CheckOriginal() )
+    if (selector.CheckOriginalAngle())
     {
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x,y,z);        // update to LOS height if available
+            searcher->UpdateAllowedPositionZ(x, y, z);      // update to LOS height if available
         else
-            UpdateGroundPositionZ(x,y,z);
+            UpdateGroundPositionZ(x, y, z);
 
-        if(IsWithinLOS(x,y,z))
+        if (IsWithinLOS(x, y, z))
             return;
 
         first_los_conflict = true;                          // first point have LOS problems
     }
 
-    float angle;                                            // candidate of angle for free pos
-
-    // special case when one from list empty and then empty side preferred
-    if(selector.FirstAngle(angle))
-    {
-        GetNearPoint2D(x,y,distance2d,absAngle+angle);
-        z = GetPositionZ();
-
-        if (searcher)
-            searcher->UpdateAllowedPositionZ(x,y,z);        // update to LOS height if available
-        else
-            UpdateGroundPositionZ(x,y,z);
-
-        if(IsWithinLOS(x,y,z))
-            return;
-    }
-
     // set first used pos in lists
     selector.InitializeAngle();
 
+    float angle;                                            // candidate of angle for free pos
+
     // select in positions after current nodes (selection one by one)
-    while(selector.NextAngle(angle))                        // angle for free pos
+    while (selector.NextAngle(angle))                        // angle for free pos
     {
-        GetNearPoint2D(x,y,distance2d,absAngle+angle);
+        GetNearPoint2D(x, y, distance2d + searcher_bounding_radius, absAngle + angle);
         z = GetPositionZ();
 
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x,y,z);        // update to LOS height if available
+            searcher->UpdateAllowedPositionZ(x, y, z);      // update to LOS height if available
         else
-            UpdateGroundPositionZ(x,y,z);
+            UpdateGroundPositionZ(x, y, z);
 
-        if(IsWithinLOS(x,y,z))
+        if (IsWithinLOS(x, y, z))
             return;
     }
 
     // BAD NEWS: not free pos (or used or have LOS problems)
     // Attempt find _used_ pos without LOS problem
-
-    if(!first_los_conflict)
+    if (!first_los_conflict)
     {
         x = first_x;
         y = first_y;
 
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x,y,z);        // update to LOS height if available
+            searcher->UpdateAllowedPositionZ(x, y, z);      // update to LOS height if available
         else
-            UpdateGroundPositionZ(x,y,z);
+            UpdateGroundPositionZ(x, y, z);
         return;
-    }
-
-    // special case when one from list empty and then empty side preferred
-    if( selector.IsNonBalanced() )
-    {
-        if(!selector.FirstAngle(angle))                     // _used_ pos
-        {
-            GetNearPoint2D(x,y,distance2d,absAngle+angle);
-            z = GetPositionZ();
-
-            if (searcher)
-                searcher->UpdateAllowedPositionZ(x,y,z);        // update to LOS height if available
-            else
-                UpdateGroundPositionZ(x,y,z);
-
-            if(IsWithinLOS(x,y,z))
-                return;
-        }
     }
 
     // set first used pos in lists
     selector.InitializeAngle();
 
     // select in positions after current nodes (selection one by one)
-    while(selector.NextUsedAngle(angle))                    // angle for used pos but maybe without LOS problem
+    while (selector.NextUsedAngle(angle))                   // angle for used pos but maybe without LOS problem
     {
-        GetNearPoint2D(x,y,distance2d,absAngle+angle);
+        GetNearPoint2D(x, y, distance2d + searcher_bounding_radius, absAngle + angle);
         z = GetPositionZ();
 
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x,y,z);        // update to LOS height if available
+            searcher->UpdateAllowedPositionZ(x, y, z);      // update to LOS height if available
         else
-            UpdateGroundPositionZ(x,y,z);
+            UpdateGroundPositionZ(x, y, z);
 
-        if(IsWithinLOS(x,y,z))
+        if (IsWithinLOS(x, y, z))
             return;
     }
 
@@ -1898,9 +1764,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     y = first_y;
 
     if (searcher)
-        searcher->UpdateAllowedPositionZ(x,y,z);            // update to LOS height if available
+        searcher->UpdateAllowedPositionZ(x, y, z);          // update to LOS height if available
     else
-        UpdateGroundPositionZ(x,y,z);
+        UpdateGroundPositionZ(x, y, z);
 }
 
 void WorldObject::SetPhaseMask(uint32 newPhaseMask, bool update)

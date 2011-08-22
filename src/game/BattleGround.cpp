@@ -940,13 +940,11 @@ void BattleGround::SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count)
         // save new item before send
         markItem->SaveToDB();                               // save for prevent lost at next mail load, if send fail then item will deleted
 
+        int loc_idx = plr->GetSession()->GetSessionDbLocaleIndex();
+
         // subject: item name
         std::string subject = markProto->Name1;
-        int loc_idx = plr->GetSession()->GetSessionDbLocaleIndex();
-        if (loc_idx >= 0 )
-            if (ItemLocale const *il = sObjectMgr.GetItemLocale(markProto->ItemId))
-                if (il->Name.size() > size_t(loc_idx) && !il->Name[loc_idx].empty())
-                    subject = il->Name[loc_idx];
+        sObjectMgr.GetItemLocaleStrings(markProto->ItemId, loc_idx, &subject);
 
         // text
         std::string textFormat = plr->GetSession()->GetMangosString(LANG_BG_MARK_BY_MAIL);
@@ -1011,14 +1009,19 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
 
     Player *plr = sObjectMgr.GetPlayer(guid);
 
-    // should remove spirit of redemption
-    if (plr && plr->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
-        plr->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
-
-    if(plr && !plr->isAlive())                              // resurrect on exit
+    if (plr)
     {
-        plr->ResurrectPlayer(1.0f);
-        plr->SpawnCorpseBones();
+        // should remove spirit of redemption
+        if (plr->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
+            plr->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
+
+        plr->RemoveAurasDueToSpell(isArena() ? SPELL_ARENA_DAMPENING : SPELL_BATTLEGROUND_DAMPENING);
+
+        if (!plr->isAlive())                                // resurrect on exit
+        {
+            plr->ResurrectPlayer(1.0f);
+            plr->SpawnCorpseBones();
+        }
     }
 
     RemovePlayer(plr, guid);                                // BG subclass specific code
@@ -1211,17 +1214,16 @@ void BattleGround::AddPlayer(Player *plr)
         plr->UnsummonPetTemporaryIfAny();
 
         if(GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
-        {
             plr->CastSpell(plr, SPELL_ARENA_PREPARATION, true);
 
-            plr->SetHealth(plr->GetMaxHealth());
-            plr->SetPower(POWER_MANA, plr->GetMaxPower(POWER_MANA));
-        }
+        plr->CastSpell(plr, SPELL_ARENA_DAMPENING, true);
     }
     else
     {
         if(GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
             plr->CastSpell(plr, SPELL_PREPARATION, true);   // reduces all mana cost of spells.
+
+        plr->CastSpell(plr, SPELL_BATTLEGROUND_DAMPENING, true);
     }
 
     plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());
@@ -1592,7 +1594,7 @@ void BattleGround::SpawnBGCreature(ObjectGuid guid, uint32 respawntime)
 
 bool BattleGround::DelObject(uint32 type)
 {
-    if (m_BgObjects[type].IsEmpty())
+    if (!m_BgObjects[type])
         return true;
 
     GameObject *obj = GetBgMap()->GetGameObject(m_BgObjects[type]);

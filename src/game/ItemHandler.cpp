@@ -286,31 +286,22 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 
     DETAIL_LOG("STORAGE: Item Query = %u", item);
 
-    ItemPrototype const *pProto = ObjectMgr::GetItemPrototype( item );
-    if( pProto )
+    ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(item);
+    if (pProto)
     {
-        std::string Name        = pProto->Name1;
-        std::string Description = pProto->Description;
-
         int loc_idx = GetSessionDbLocaleIndex();
-        if ( loc_idx >= 0 )
-        {
-            ItemLocale const *il = sObjectMgr.GetItemLocale(pProto->ItemId);
-            if (il)
-            {
-                if (il->Name.size() > size_t(loc_idx) && !il->Name[loc_idx].empty())
-                    Name = il->Name[loc_idx];
-                if (il->Description.size() > size_t(loc_idx) && !il->Description[loc_idx].empty())
-                    Description = il->Description[loc_idx];
-            }
-        }
+
+        std::string name = pProto->Name1;
+        std::string description = pProto->Description;
+        sObjectMgr.GetItemLocaleStrings(pProto->ItemId, loc_idx, &name, &description);
+
                                                             // guess size
         WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600);
         data << pProto->ItemId;
         data << pProto->Class;
         data << pProto->SubClass;
         data << int32(pProto->Unk0);                        // new 2.0.3, not exist in wdb cache?
-        data << Name;
+        data << name;
         data << uint8(0x00);                                //pProto->Name2; // blizz not send name there, just uint8(0x00); <-- \0 = empty string = empty name...
         data << uint8(0x00);                                //pProto->Name3; // blizz not send name there, just uint8(0x00);
         data << uint8(0x00);                                //pProto->Name4; // blizz not send name there, just uint8(0x00);
@@ -400,7 +391,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
             }
         }
         data << pProto->Bonding;
-        data << Description;
+        data << description;
         data << pProto->PageText;
         data << pProto->LanguageID;
         data << pProto->PageMaterial;
@@ -497,7 +488,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
     recv_data >> itemGuid;
     recv_data >> count;
 
-    if (itemGuid.IsEmpty())
+    if (!itemGuid)
         return;
 
     Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(vendorGuid, UNIT_NPC_FLAG_VENDOR);
@@ -801,9 +792,9 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                     // convert if can use and then buy
                     if (pProto->RequiredReputationFaction && uint32(_player->GetReputationRank(pProto->RequiredReputationFaction)) >= pProto->RequiredReputationRank)
                     {
-                        itemId = sObjectMgr.GetItemConvert(itemId, _player->getRaceMask());
                         // checked at convert data loading as existed
-                        pProto = ObjectMgr::GetItemPrototype(itemId);
+                        if (uint32 newItemId = sObjectMgr.GetItemConvert(itemId, _player->getRaceMask()))
+                            pProto = ObjectMgr::GetItemPrototype(newItemId);
                     }
                 }
 
@@ -1078,26 +1069,16 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
     recv_data.read_skip<uint64>();                          // guid
 
     DEBUG_LOG("WORLD: CMSG_ITEM_NAME_QUERY %u", itemid);
-    ItemPrototype const *pProto = ObjectMgr::GetItemPrototype( itemid );
-    if( pProto )
+    if (ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid))
     {
-        std::string Name;
-        Name = pProto->Name1;
-
         int loc_idx = GetSessionDbLocaleIndex();
-        if (loc_idx >= 0)
-        {
-            ItemLocale const *il = sObjectMgr.GetItemLocale(pProto->ItemId);
-            if (il)
-            {
-                if (il->Name.size() > size_t(loc_idx) && !il->Name[loc_idx].empty())
-                    Name = il->Name[loc_idx];
-            }
-        }
+
+        std::string name = pProto->Name1;
+        sObjectMgr.GetItemLocaleStrings(pProto->ItemId, loc_idx, &name);
                                                             // guess size
         WorldPacket data(SMSG_ITEM_NAME_QUERY_RESPONSE, (4+10));
         data << uint32(pProto->ItemId);
-        data << Name;
+        data << name;
         data << uint32(pProto->InventoryType);
         SendPacket(&data);
         return;
@@ -1158,7 +1139,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!item->GetGuidValue(ITEM_FIELD_GIFTCREATOR).IsEmpty())// HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_WRAPPED);
+    if (item->GetGuidValue(ITEM_FIELD_GIFTCREATOR))         // HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_WRAPPED);
     {
         _player->SendEquipError( EQUIP_ERR_WRAPPED_CANT_BE_WRAPPED, item, NULL );
         return;
@@ -1235,7 +1216,10 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     //cheat -> tried to socket same gem multiple times
     for(int i = 0; i < MAX_GEM_SOCKETS; ++i)
     {
-        ObjectGuid gemGuid = gemGuids[0];
+        ObjectGuid gemGuid = gemGuids[i];
+        if (!gemGuid)
+            continue;
+
         if (!gemGuid.IsItem())
             return;
 
@@ -1257,7 +1241,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 
     Item *Gems[MAX_GEM_SOCKETS];
     for(int i = 0; i < MAX_GEM_SOCKETS; ++i)
-        Gems[i] = !gemGuids[i].IsEmpty() ? _player->GetItemByGuid(gemGuids[i]) : NULL;
+        Gems[i] = gemGuids[i] ? _player->GetItemByGuid(gemGuids[i]) : NULL;
 
     GemPropertiesEntry const *GemProps[MAX_GEM_SOCKETS];
     for(int i = 0; i < MAX_GEM_SOCKETS; ++i)                //get geminfo from dbc storage
@@ -1407,7 +1391,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
         if (GemEnchants[i])
         {
             itemTarget->SetEnchantment(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT + i), GemEnchants[i], 0, 0);
-            if(Item* guidItem = !gemGuids[i].IsEmpty() ? _player->GetItemByGuid(gemGuids[i]) : NULL)
+            if (Item* guidItem = gemGuids[i] ? _player->GetItemByGuid(gemGuids[i]) : NULL)
                 _player->DestroyItem(guidItem->GetBagSlot(), guidItem->GetSlot(), true );
         }
     }
