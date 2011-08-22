@@ -607,6 +607,53 @@ bool PlayerbotAI::IsItemUseful(uint32 itemid)
     return false;
 }
 
+void PlayerbotAI::ReloadAI()
+{
+    switch (m_bot->getClass())
+    {
+        case CLASS_PRIEST:
+            if (m_classAI) delete m_classAI;
+            m_classAI = (PlayerbotClassAI *) new PlayerbotPriestAI(GetMaster(), m_bot, this);
+            break;
+        case CLASS_MAGE:
+            if (m_classAI) delete m_classAI;
+            m_classAI = (PlayerbotClassAI *) new PlayerbotMageAI(GetMaster(), m_bot, this);
+            break;
+        case CLASS_WARLOCK:
+            if (m_classAI) delete m_classAI;
+            m_classAI = (PlayerbotClassAI *) new PlayerbotWarlockAI(GetMaster(), m_bot, this);
+            break;
+        case CLASS_WARRIOR:
+            if (m_classAI) delete m_classAI;
+            m_classAI = (PlayerbotClassAI *) new PlayerbotWarriorAI(GetMaster(), m_bot, this);
+            break;
+        case CLASS_SHAMAN:
+            if (m_classAI) delete m_classAI;
+            m_classAI = (PlayerbotClassAI *) new PlayerbotShamanAI(GetMaster(), m_bot, this);
+            break;
+        case CLASS_PALADIN:
+            if (m_classAI) delete m_classAI;
+            m_classAI = (PlayerbotClassAI *) new PlayerbotPaladinAI(GetMaster(), m_bot, this);
+            break;
+        case CLASS_ROGUE:
+            if (m_classAI) delete m_classAI;
+            m_classAI = (PlayerbotClassAI *) new PlayerbotRogueAI(GetMaster(), m_bot, this);
+            break;
+        case CLASS_DRUID:
+            if (m_classAI) delete m_classAI;
+            m_classAI = (PlayerbotClassAI *) new PlayerbotDruidAI(GetMaster(), m_bot, this);
+            break;
+        case CLASS_HUNTER:
+            if (m_classAI) delete m_classAI;
+            m_classAI = (PlayerbotClassAI *) new PlayerbotHunterAI(GetMaster(), m_bot, this);
+            break;
+        case CLASS_DEATH_KNIGHT:
+            if (m_classAI) delete m_classAI;
+            m_classAI = (PlayerbotClassAI *) new PlayerbotDeathKnightAI(GetMaster(), m_bot, this);
+            break;
+    }
+}
+
 void PlayerbotAI::SendOrders(Player& /*player*/)
 {
     std::ostringstream out;
@@ -800,6 +847,34 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 }
             }
         }
+
+        case SMSG_CAST_FAILED:
+        {
+            WorldPacket p(packet);
+            uint32 spellId;
+            uint8 result;
+            uint8 castCount;
+
+            p >> spellId >> castCount >> result;
+
+            if (result != SPELL_CAST_OK)
+            {
+                switch (result)
+                {
+                    case SPELL_FAILED_INTERRUPTED:
+                    //TellMaster("spell interrupted (%u)",result);
+                    //DEBUG_LOG("spell interrupted (%u)",result);
+                    return;
+
+                    default:
+                        //TellMaster("Spell failed (%u)",result);
+                        //DEBUG_LOG ("[PlayerbotAI]: HandleBotOutgoingPacket - SMSG_CAST_FAIL: %u", result);
+                        return;
+                }
+            }
+            return;
+        }
+
         case SMSG_SPELL_FAILURE:
         {
             WorldPacket p(packet);
@@ -1123,23 +1198,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             uint32 msTime;
             p >> msTime;
 
-            if (m_CurrentlyCastingSpellId == spellId)
-            {
-                Spell* const pSpell = m_bot->FindCurrentSpellBySpellId(spellId);
-                if (!pSpell)
-                    return;
-
-                uint32 CastingTime = !IsChanneledSpell(pSpell->m_spellInfo) ? GetSpellCastTime(pSpell->m_spellInfo) : GetSpellDuration(pSpell->m_spellInfo);
-                if (pSpell->IsChannelActive() || pSpell->IsAutoRepeat())
-                    m_ignoreAIUpdatesUntilTime = time(0) + (CastingTime / 1000) + 1;
-                else if (pSpell->IsAutoRepeat())
-                    m_ignoreAIUpdatesUntilTime = time(0) + 6;
-                else
-                {
-                    m_ignoreAIUpdatesUntilTime = time(0) + 1;
-                    m_CurrentlyCastingSpellId = 0;
-                }
-            }
             return;
         }
 
@@ -1883,7 +1941,7 @@ void PlayerbotAI::DoCombatMovement()
 {
     if (!m_targetCombat) return;
 
-    float targetDist = m_bot->GetDistance(m_targetCombat);
+    float targetDist = m_bot->GetCombatDistance(m_targetCombat);
 
     m_bot->SetFacingTo(m_bot->GetAngle(m_targetCombat));
 
@@ -2973,6 +3031,27 @@ bool PlayerbotAI::canObeyCommandFrom(const Player& player) const
     return player.GetSession()->GetAccountId() == GetMaster()->GetSession()->GetAccountId();
 }
 
+bool PlayerbotAI::IsInRange(Unit* Target, uint32 spellId)
+{
+    const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
+    if (!pSpellInfo)
+        return false;
+
+    SpellRangeEntry const *TempRange = NULL;
+
+    TempRange = GetSpellRangeStore()->LookupEntry(pSpellInfo->rangeIndex);
+
+    //Spell has invalid range store so we can't use it
+    if (!TempRange)
+        return false;
+
+    //Unit is out of range of this spell
+    if (!m_bot->IsInRange(Target,TempRange->minRange,TempRange->maxRange))
+        return false;
+
+    return true;
+}
+
 bool PlayerbotAI::CastSpell(const char* args)
 {
     uint32 spellId = getSpellId(args);
@@ -3016,13 +3095,8 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         pTarget = m_bot;
 
     // Check spell range
-    SpellRanges::iterator it = m_spellRangeMap.find(spellId);
-    if (it != m_spellRangeMap.end() && (int) it->second != 0)
-    {
-        float dist = m_bot->GetCombatDistance(pTarget);
-        if (dist > it->second + 1.25) // See Spell::CheckRange for modifier value
-            return false;
-    }
+    if(!IsInRange(pTarget,spellId))
+        return false;
 
     // Check line of sight
     if (!m_bot->IsWithinLOSInMap(pTarget))
@@ -3038,15 +3112,18 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         if (pTarget && m_bot->IsFriendlyTo(pTarget))
             return false;
 
-        SetInFront(pTarget);
+        m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
     }
+
+    float CastTime = 0.0f;
 
     // stop movement to prevent cancel spell casting
     SpellCastTimesEntry const * castTimeEntry = sSpellCastTimesStore.LookupEntry(pSpellInfo->CastingTimeIndex);
     if (castTimeEntry && castTimeEntry->CastTime)
     {
+        CastTime = (castTimeEntry->CastTime / 1000);
         DEBUG_LOG ("[PLayerbotAI]: CastSpell - Bot movement reset for casting %s (%u)", pSpellInfo->SpellName[0], spellId);
-        MovementClear();
+        m_bot->StopMoving();
     }
 
     uint32 target_type = TARGET_FLAG_UNIT;
@@ -3054,10 +3131,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK)
         target_type = TARGET_FLAG_OBJECT;
 
-    uint32 CastingTime = !IsChanneledSpell(pSpellInfo) ? GetSpellCastTime(pSpellInfo) : GetSpellDuration(pSpellInfo);
-
     m_CurrentlyCastingSpellId = spellId;
-    m_ignoreAIUpdatesUntilTime = time(0) + ( CastingTime / 1000) + 1;
 
     if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK ||
         pSpellInfo->Effect[0] == SPELL_EFFECT_SKINNING)
@@ -3078,12 +3152,24 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
                 *packetgouse << m_lootCurrent;
                 m_bot->GetSession()->QueuePacket(packetgouse);  // queue the packet to get around race condition
             }
+            m_ignoreAIUpdatesUntilTime = time(0) + 1;
+            m_CurrentlyCastingSpellId = 0;
+            return true;
         }
         else
             return false;
     }
     else
-        m_bot->CastSpell(pTarget, pSpellInfo, false);       // actually cast spell
+        m_bot->CastSpell(pTarget, pSpellInfo, true);       // actually cast spell
+
+    if (IsChanneledSpell(pSpellInfo))
+        m_ignoreAIUpdatesUntilTime = time(0) + CastTime + 1;
+    else if (IsAutoRepeatRangedSpell(pSpellInfo))
+        m_ignoreAIUpdatesUntilTime = time(0) + 2;
+    else
+        m_ignoreAIUpdatesUntilTime = time(0) + 2;
+
+    m_CurrentlyCastingSpellId = 0;
 
     // if this caused the caster to move (blink) update the position
     // I think this is normally done on the client
@@ -3142,7 +3228,7 @@ bool PlayerbotAI::CastPetSpell(uint32 spellId, Unit* target)
             return false;
 
         if (!pet->isInFrontInMap(pTarget, 10)) // distance probably should be calculated
-            pet->SetInFront(pTarget);
+            m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
     }
 
     pet->CastSpell(pTarget, pSpellInfo, false);
@@ -5827,6 +5913,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                         msg << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
                     msg << cost <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\r";
                 }
+                ReloadAI();
                 uint32 gold = uint32(totalCost / 10000);
                 totalCost -= (gold * 10000);
                 uint32 silver = uint32(totalCost / 100);

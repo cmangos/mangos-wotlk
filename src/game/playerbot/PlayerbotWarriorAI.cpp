@@ -82,7 +82,7 @@ bool PlayerbotWarriorAI::DoFirstCombatManeuver(Unit *pTarget)
     Player *m_bot = GetPlayerBot();
     PlayerbotAI *ai = GetAI();
     PlayerbotAI::CombatOrderType co = ai->GetCombatOrder();
-    float fTargetDist = m_bot->GetDistance(pTarget);
+    float fTargetDist = m_bot->GetCombatDistance(pTarget);
 
     if ((co & PlayerbotAI::ORDERS_TANK) && DEFENSIVE_STANCE > 0 && !m_bot->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0) && ai->CastSpell(DEFENSIVE_STANCE))
     {
@@ -138,14 +138,11 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
     }
     // ------- Non Duel combat ----------
 
-    //ai->SetMovementOrder( PlayerbotAI::MOVEMENT_FOLLOW, GetMaster() ); // dont want to melee mob
-
     // Damage Attacks
 
-    ai->SetInFront(pTarget);
     Player *m_bot = GetPlayerBot();
     Unit* pVictim = pTarget->getVictim();
-    float fTargetDist = m_bot->GetDistance(pTarget);
+    float fTargetDist = m_bot->GetCombatDistance(pTarget);
     PlayerbotAI::CombatOrderType co = ai->GetCombatOrder();
 
     // decide what stance to use

@@ -223,9 +223,3 @@ Also see src/mangosd/mangosd.conf.dist for configuration variables!
     PlayerbotAI.FollowDistanceMax
         Min. and max. follow distance for bots
         Default: 0.5 / 1.0
-
-
-Some Problems:
-==============
-
-The bots don't always face in the right direction. Sometimes when a bot makes the kill, the corpse is not lootable. The mage bot sometimes get stuck when he begins to cast a spell (but this is corrected the next time he enters combat).

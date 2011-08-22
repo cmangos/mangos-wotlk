@@ -97,9 +97,6 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 
     // ------- Non Duel combat ----------
 
-    //ai->SetMovementOrder( PlayerbotAI::MOVEMENT_FOLLOW, GetMaster() ); // dont want to melee mob
-
-    ai->SetInFront(pTarget);
     Player *m_bot = GetPlayerBot();
     Unit* pVictim = pTarget->getVictim();
     Pet *pet = m_bot->GetPet();

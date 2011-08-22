@@ -211,6 +211,7 @@ public:
 
     PlayerbotClassAI* GetClassAI() { return m_classAI; }
     PlayerbotMgr* GetManager() { return m_mgr; }
+    void ReloadAI();
 
     // finds spell ID for matching substring args
     // in priority of full text match, spells not taking reagents, and highest rank
@@ -303,6 +304,7 @@ public:
     bool CastPetSpell(uint32 spellId, Unit* target = NULL);
     bool Buff(uint32 spellId, Unit * target, void (*beforeCast)(Player *) = NULL);
     bool SelfBuff(uint32 spellId);
+    bool IsInRange(Unit* Target, uint32 spellId);
 
     void UseItem(Item *item, uint32 targetFlag, ObjectGuid targetGUID);
     void UseItem(Item *item, uint8 targetInventorySlot);

@@ -79,13 +79,10 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
 
     // ------- Non Duel combat ----------
 
-    //ai->SetMovementOrder( PlayerbotAI::MOVEMENT_FOLLOW, GetMaster() ); // dont want to melee mob
-
     // Damage Spells (primitive example)
-    ai->SetInFront(pTarget);
     Player *m_bot = GetPlayerBot();
     Unit* pVictim = pTarget->getVictim();
-    float dist = m_bot->GetDistance(pTarget);
+    float dist = m_bot->GetCombatDistance(pTarget);
 
     switch (SpellSequence)
     {

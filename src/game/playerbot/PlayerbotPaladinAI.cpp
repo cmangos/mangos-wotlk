@@ -113,10 +113,9 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     }
 
     // damage spells
-    ai->SetInFront(pTarget);
     Player *m_bot = GetPlayerBot();
     Group *m_group = m_bot->GetGroup();
-    float dist = m_bot->GetDistance(pTarget);
+    float dist = m_bot->GetCombatDistance(pTarget);
     std::ostringstream out;
 
     //Shield master if low hp.

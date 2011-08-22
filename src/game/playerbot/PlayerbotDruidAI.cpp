@@ -132,7 +132,6 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 
     uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
 
-    ai->SetInFront(pTarget);
     Player *m_bot = GetPlayerBot();
     Unit* pVictim = pTarget->getVictim();
 
@@ -152,7 +151,7 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 
             if (!m_bot->HasInArc(M_PI_F, pTarget))
             {
-                m_bot->SetInFront(pTarget);
+                m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
                 if (pVictim)
                     pVictim->Attack(pTarget, true);
             }
@@ -438,7 +437,7 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
             //ai->TellMaster("DruidCombat");
             if (!m_bot->HasInArc(M_PI_F, pTarget))
             {
-                m_bot->SetInFront(pTarget);
+                m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
                 if (pVictim)
                     pVictim->Attack(pTarget, true);
             }
