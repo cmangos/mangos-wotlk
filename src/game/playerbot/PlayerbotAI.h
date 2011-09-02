@@ -146,11 +146,20 @@ public:
         NONE                        = 0x00,
         SELL                        = 0x01,  // sell items
         REPAIR                      = 0x02,  // repair items
-        ADD                         = 0x04,  // add auction
+        ADD                         = 0x04,  // add auction/quest
         REMOVE                      = 0x08,  // remove auction
         RESET                       = 0x10,  // reset all talents
         WITHDRAW                    = 0x11,  // withdraw item from bank
-	DEPOSIT                     = 0x12   // deposit item in bank
+        DEPOSIT                     = 0x12,  // deposit item in bank
+        LIST                        = 0x14,  // list quests
+        END                         = 0x18   // turn in quests
+    };
+
+    enum AnnounceFlags
+    {
+        NOTHING                     = 0x00,
+        INVENTORY_FULL              = 0x01,
+        CANT_AFFORD                 = 0x02
     };
 
     typedef std::pair<enum TaskFlags, uint32> taskPair;
@@ -220,6 +229,9 @@ public:
     // Initialize spell using rank 1 spell id
     uint32 initSpell(uint32 spellId);
     uint32 initPetSpell(uint32 spellIconId);
+
+    // extract quest ids from links
+    void extractQuestIds(const std::string& text, std::list<uint32>& questIds) const;
 
     // extract auction ids from links
     void extractAuctionIds(const std::string& text, std::list<uint32>& auctionIds) const;
@@ -311,6 +323,9 @@ public:
     void UseItem(Item *item, Unit *target);
     void UseItem(Item *item);
 
+    void PlaySound(uint32 soundid);
+    void Announce(AnnounceFlags msg);
+
     void EquipItem(Item* src_Item);
     //void Stay();
     //bool Follow(Player& player);
@@ -330,8 +345,10 @@ public:
     BotState GetState() { return m_botState; };
     void SetState(BotState state);
     void SetQuestNeedItems();
-    void SendQuestItemList(Player& player);
+    void SetQuestNeedCreatures();
+    void SendQuestNeedList(Player& player);
     bool IsInQuestItemList(uint32 itemid) { return m_needItemList.find(itemid) != m_needItemList.end(); };
+    bool IsInQuestCreatureList(uint32 id) { return m_needCreatureOrGOList.find(id) != m_needCreatureOrGOList.end(); };
     bool IsItemUseful(uint32 itemid);
     void SendOrders(Player& player);
     bool FollowCheckTeleport(WorldObject &obj);
@@ -351,6 +368,8 @@ public:
 
     void AcceptQuest(Quest const *qInfo, Player *pGiver);
     void TurnInQuests(WorldObject *questgiver);
+    bool ListQuests(WorldObject* questgiver);
+    bool AddQuest(const uint32 entry, WorldObject* questgiver);
 
     bool IsInCombat();
     void UpdateAttackerInfo();
@@ -369,14 +388,16 @@ public:
 
     void ItemLocalization(std::string& itemName, const uint32 itemID) const;
     void QuestLocalization(std::string& questTitle, const uint32 questID) const;
+    void CreatureLocalization(std::string& creatureName, const uint32 entry) const;
+    void GameObjectLocalization(std::string& gameobjectName, const uint32 entry) const;
 
     uint8 GetFreeBagSpace() const;
     void SellGarbage(bool verbose = true);
-    bool Sell(const uint32 itemid);
-    bool AddAuction(const uint32 itemid, Creature* aCreature);
-    bool ListAuctions();
+    void Sell(const uint32 itemid);
+    void AddAuction(const uint32 itemid, Creature* aCreature);
+    void ListAuctions();
     bool RemoveAuction(const uint32 auctionid);
-    bool Repair(const uint32 itemid, Creature* rCreature);
+    void Repair(const uint32 itemid, Creature* rCreature);
     bool Talent(Creature* tCreature);
     void InspectUpdate();
     bool Withdraw(const uint32 itemid);
@@ -417,8 +438,9 @@ private:
     // defines the state of behaviour of the bot
     BotState m_botState;
 
-    // list of items needed to fullfill quests
+    // list of items, creatures or gameobjects needed to fullfill quests
     BotNeedItem m_needItemList;
+    BotNeedItem m_needCreatureOrGOList;
 
     // list of creatures we recently attacked and want to loot
     BotNPCList m_findNPC;               // list of NPCs
@@ -431,6 +453,7 @@ private:
     BotTaxiNode m_taxiNodes;            // flight node chain;
 
     uint8 m_collectionFlags;            // what the bot should look for to loot
+    bool m_inventory_full;
 
     time_t m_TimeDoneEating;
     time_t m_TimeDoneDrinking;

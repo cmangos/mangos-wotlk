@@ -460,6 +460,14 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                                 bot->GetPlayerbotAI()->SetQuestNeedItems();
                                 break;
                             }
+
+                        // build needed creatures if quest contains any
+                        for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+                            if (qInfo->ReqCreatureOrGOCount[i]>0)
+                            {
+                                bot->GetPlayerbotAI()->SetQuestNeedCreatures();
+                                break;
+                            }
                     }
                 }
             return;
