@@ -6,10 +6,13 @@ class PlayerbotAI;
 PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
 {
     RENEW                         = ai->initSpell(RENEW_1);
-    HEAL                          = ai->initSpell(HEAL_1);
     LESSER_HEAL                   = ai->initSpell(LESSER_HEAL_1);
-    GREATER_HEAL                  = ai->initSpell(GREATER_HEAL_1);
     FLASH_HEAL                    = ai->initSpell(FLASH_HEAL_1);
+    (FLASH_HEAL > 0) ? FLASH_HEAL : FLASH_HEAL = LESSER_HEAL;
+    HEAL                          = ai->initSpell(HEAL_1);
+    (HEAL > 0) ? HEAL : HEAL = FLASH_HEAL;
+    GREATER_HEAL                  = ai->initSpell(GREATER_HEAL_1);
+    (GREATER_HEAL > 0) ? GREATER_HEAL : GREATER_HEAL = HEAL;
     RESURRECTION                  = ai->initSpell(RESURRECTION_1);
     SMITE                         = ai->initSpell(SMITE_1);
     MANA_BURN                     = ai->initSpell(MANA_BURN_1);
@@ -69,7 +72,7 @@ bool PlayerbotPriestAI::HealTarget(Unit* target)
     if (hp >= 80)
         return false;
 
-    if (hp < 25 && FLASH_HEAL && ai->CastSpell(FLASH_HEAL, *target))
+    if (hp < 25 && FLASH_HEAL > 0 && ai->CastSpell(FLASH_HEAL, *target))
         return true;
     else if (hp < 30 && GREATER_HEAL > 0 && ai->CastSpell(GREATER_HEAL, *target))
         return true;

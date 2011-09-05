@@ -378,18 +378,31 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             ObjectGuid objGUID;
             p >> objGUID;
 
-            GameObject *obj = m_master->GetMap()->GetGameObject(objGUID);
-            if (!obj)
-                return;
-
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
                 Player* const bot = it->second;
 
-                if (obj->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
-                    bot->GetPlayerbotAI()->TurnInQuests(obj);
+                GameObject *obj = m_master->GetMap()->GetGameObject(objGUID);
+                if (!obj)
+                    return;
+
                 // add other go types here, i.e.:
                 // GAMEOBJECT_TYPE_CHEST - loot quest items of chest
+                if (obj->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
+                {
+                    bot->GetPlayerbotAI()->TurnInQuests(obj);
+
+                    // auto accept every available quest this NPC has
+                    bot->PrepareQuestMenu(objGUID);
+                    QuestMenu& questMenu = bot->PlayerTalkClass->GetQuestMenu();
+                    for (uint32 iI = 0; iI < questMenu.MenuItemCount(); ++iI)
+                    {
+                        QuestMenuItem const& qItem = questMenu.GetItem(iI);
+                        uint32 questID = qItem.m_qId;
+                        if(!bot->GetPlayerbotAI()->AddQuest(questID,obj))
+                            DEBUG_LOG("Couldn't take quest");
+                    }
+                }
             }
         }
         break;
@@ -525,7 +538,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
 
-                uint32 choice = urand(0, 3);    //returns 0,1,2 or 3
+                uint32 choice;
 
                 Player* const bot = it->second;
                 if (!bot)
@@ -534,6 +547,8 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 Group* group = bot->GetGroup();
                 if (!group)
                     return;
+
+                (bot->GetPlayerbotAI()->CanStore()) ? choice = urand(0, 3) : choice = 0;  // pass = 0, need = 1, greed = 2, disenchant = 3
 
                 group->CountRollVote(bot, Guid, NumberOfPlayers, RollVote(choice));
 

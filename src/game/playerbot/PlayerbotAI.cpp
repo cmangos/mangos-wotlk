@@ -3288,6 +3288,31 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
                 WorldPacket* const packetgouse = new WorldPacket(CMSG_GAMEOBJ_REPORT_USE, 8);
                 *packetgouse << m_lootCurrent;
                 m_bot->GetSession()->QueuePacket(packetgouse);  // queue the packet to get around race condition
+
+                GameObject *obj = m_bot->GetMap()->GetGameObject(m_lootCurrent);
+                if (!obj)
+                    return false;
+
+                // add other go types here, i.e.:
+                // GAMEOBJECT_TYPE_CHEST - loot quest items of chest
+                if (obj->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
+                {
+                    TurnInQuests(obj);
+
+                    // auto accept every available quest this NPC has
+                    m_bot->PrepareQuestMenu(m_lootCurrent);
+                    QuestMenu& questMenu = m_bot->PlayerTalkClass->GetQuestMenu();
+                    for (uint32 iI = 0; iI < questMenu.MenuItemCount(); ++iI)
+                    {
+                        QuestMenuItem const& qItem = questMenu.GetItem(iI);
+                        uint32 questID = qItem.m_qId;
+                        if(!AddQuest(questID,obj))
+                            TellMaster("Couldn't take quest");
+                    }
+                    m_lootCurrent = ObjectGuid();
+                    m_bot->GetMotionMaster()->Clear();
+                    m_bot->GetMotionMaster()->MoveIdle();
+                }
             }
             return true;
         }
@@ -3304,7 +3329,6 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         if (!m_bot->IsWithinLOSInMap(pTarget))
             return false;
 
-        DEBUG_LOG("CastSpell 4");
         m_bot->CastSpell(pTarget, pSpellInfo, true);       // actually cast spell
     }
 
@@ -3372,7 +3396,7 @@ bool PlayerbotAI::CastPetSpell(uint32 spellId, Unit* target)
             return false;
 
         if (!pet->isInFrontInMap(pTarget, 10)) // distance probably should be calculated
-            m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
+            pet->SetFacingTo(pet->GetAngle(pTarget));
     }
 
     pet->CastSpell(pTarget, pSpellInfo, false);
@@ -4221,94 +4245,6 @@ void PlayerbotAI::findNearbyCreature()
 
                     switch(it->second.option_id)
                     {
-                        case GOSSIP_OPTION_INNKEEPER:
-                        {
-                            // has submenu
-                            if((UNIT_NPC_FLAG_QUESTGIVER & npcflags))
-                            {
-                                // Manage questgiver actions
-                                if(!m_tasks.empty())
-                                {
-                                    for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end();)
-                                    {
-                                        switch(ait->first)
-                                        {
-                                            // add new auction item
-                                            case ADD:
-                                            {
-                                                // TellMaster("Accepting quest");
-                                                if(!AddQuest(ait->second,wo))
-                                                    DEBUG_LOG("AddQuest: Couldn't add quest (%u)",ait->second);
-                                                break;
-                                            }
-                                            // list quests
-                                            case LIST:
-                                            {
-                                                // TellMaster("Show available quests");
-                                                if(!ListQuests(wo))
-                                                    ;
-                                                break;
-                                            }
-                                            // end quests
-                                            case END:
-                                            {
-                                                // TellMaster("Turn in available quests");
-                                                TurnInQuests(wo);
-                                                break;
-                                            }
-                                            default:
-                                                break;
-                                        }
-                                        ait = m_tasks.erase(ait);
-                                    }
-                                }
-                            }
-                            break;
-                        }
-                        case GOSSIP_OPTION_TRAINER:
-                        {
-                            // has submenu
-                            if((UNIT_NPC_FLAG_QUESTGIVER & npcflags) && canSeeQuests)
-                            {
-                                // Manage questgiver actions
-                                if(!m_tasks.empty())
-                                {
-                                    for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end();)
-                                    {
-                                        switch(ait->first)
-                                        {
-                                            // add new auction item
-                                            case ADD:
-                                            {
-                                                // TellMaster("Accepting quest");
-                                                if(!AddQuest(ait->second,wo))
-                                                    DEBUG_LOG("AddQuest: Couldn't add quest (%u)",ait->second);
-                                                break;
-                                            }
-                                            // list quests
-                                            case LIST:
-                                            {
-                                                // TellMaster("Show available quests");
-                                                if(!ListQuests(wo))
-                                                    ;
-                                                break;
-                                            }
-                                            // end quests
-                                            case END:
-                                            {
-                                                // TellMaster("Turn in available quests");
-                                                TurnInQuests(wo);
-                                                break;
-                                            }
-                                            default:
-                                                break;
-                                        }
-                                        ait = m_tasks.erase(ait);
-                                    }
-                                }
-                            }
-                            break;
-                        }
                         case GOSSIP_OPTION_BANKER:
                         {
                             // Manage banking actions
@@ -4343,9 +4279,13 @@ void PlayerbotAI::findNearbyCreature()
                             BankBalance();
                             break;
                         }
+                        case GOSSIP_OPTION_INNKEEPER:
+                        case GOSSIP_OPTION_TRAINER:
+                        case GOSSIP_OPTION_QUESTGIVER:
+                        case GOSSIP_OPTION_VENDOR:
                         case GOSSIP_OPTION_UNLEARNTALENTS:
                         {
-                            // Manage class trainer actions
+                            // Manage questgiver, trainer, innkeeper & vendor actions
                             if(!m_tasks.empty())
                             {
                                 for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end();)
@@ -4360,23 +4300,29 @@ void PlayerbotAI::findNearbyCreature()
                                                 InspectUpdate();
                                             break;
                                         }
-                                        default:
+                                        // take new quests
+                                        case TAKE:
+                                            {
+                                            // TellMaster("Accepting quest");
+                                            if(!AddQuest(ait->second,wo))
+                                                DEBUG_LOG("AddQuest: Couldn't add quest (%u)",ait->second);
                                             break;
-                                    }
-                                    ait = m_tasks.erase(ait);
-                                }
-                            }
-                            break;
-                        }
-                        case GOSSIP_OPTION_VENDOR:
-                        {
-                            // Manage vendor actions
-                            if(!m_tasks.empty())
-                            {
-                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end();)
-                                {
-                                    switch(ait->first)
-                                    {
+                                        }
+                                        // list quests
+                                        case LIST:
+                                        {
+                                            // TellMaster("Show available quests");
+                                            if(!ListQuests(wo))
+                                                ;
+                                            break;
+                                        }
+                                        // end quests
+                                        case END:
+                                        {
+                                            // TellMaster("Turn in available quests");
+                                            TurnInQuests(wo);
+                                            break;
+                                        }
                                         // sell items
                                         case SELL:
                                         {
@@ -4432,46 +4378,6 @@ void PlayerbotAI::findNearbyCreature()
                             ListAuctions();
                             break;
                         }
-                        case GOSSIP_OPTION_QUESTGIVER:
-                        {
-                            // Manage questgiver actions
-                            if(!m_tasks.empty())
-                            {
-                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end();)
-                                {
-                                    switch(ait->first)
-                                    {
-                                        // add new quest
-                                        case ADD:
-                                        {
-                                            // TellMaster("Accepting quest");
-                                            if(!AddQuest(ait->second,wo))
-                                                DEBUG_LOG("AddQuest: Couldn't add quest (%u)",ait->second);
-                                            break;
-                                        }
-                                        // list quests
-                                        case LIST:
-                                        {
-                                            // TellMaster("Show available quests");
-                                            if(ListQuests(wo))
-                                                ;
-                                            break;
-                                        }
-                                        // end quests
-                                        case END:
-                                        {
-                                            // TellMaster("Turn in available quests");
-                                            TurnInQuests(wo);
-                                            break;
-                                        }
-                                        default:
-                                            break;
-                                    }
-                                    ait = m_tasks.erase(ait);
-                                }
-                            }
-                            break;
-                        }
                         default:
                             break;
                     }
@@ -4483,6 +4389,31 @@ void PlayerbotAI::findNearbyCreature()
             m_bot->GetMotionMaster()->MoveIdle();
         }
     }
+}
+
+bool PlayerbotAI::CanStore()
+{
+    uint32 totalused = 0;
+    // list out items in main backpack
+    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
+    {
+        const Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if (pItem)
+            totalused++;
+    }
+    uint32 totalfree = 16 - totalused;
+    // list out items in other removable backpacks
+    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
+    {
+        const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+        if (pBag)
+        {
+            ItemPrototype const* pBagProto = pBag->GetProto();
+            if (pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass == ITEM_SUBCLASS_CONTAINER)
+                totalfree =  totalfree + pBag->GetFreeSlots();
+        }
+    }
+    return totalfree;
 }
 
 // use item on self
@@ -5890,7 +5821,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             std::list<uint32> questIds;
             extractQuestIds(part, questIds);
             for (std::list<uint32>::iterator it = questIds.begin(); it != questIds.end(); it++)
-                m_tasks.push_back(std::pair<enum TaskFlags,uint32>(ADD, *it));
+                m_tasks.push_back(std::pair<enum TaskFlags,uint32>(TAKE, *it));
             m_findNPC.push_back(UNIT_NPC_FLAG_QUESTGIVER);
         }
         else if(subcommand == "d" || subcommand == "drop")
