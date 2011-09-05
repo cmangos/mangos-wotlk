@@ -60,6 +60,7 @@
 #include "SocialMgr.h"
 #include "AchievementMgr.h"
 #include "Mail.h"
+#include "SpellAuras.h"
 
 // Playerbot mod:
 #include "playerbot/PlayerbotAI.h"
@@ -2374,7 +2375,7 @@ struct SetGameMasterOffHelper
 
 void Player::SetGameMaster(bool on)
 {
-    if(on)
+    if (on)
     {
         m_ExtraFlags |= PLAYER_EXTRA_GM_ON;
         setFaction(35);
@@ -2392,13 +2393,13 @@ void Player::SetGameMaster(bool on)
     }
     else
     {
-        // restore phase
-        AuraList const& phases = GetAurasByType(SPELL_AURA_PHASE);
-        SetPhaseMask(!phases.empty() ? phases.front()->GetMiscValue() : PHASEMASK_NORMAL,false);
-
         m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON;
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+
+        // restore phase
+        AuraList const& phases = GetAurasByType(SPELL_AURA_PHASE);
+        SetPhaseMask(!phases.empty() ? phases.front()->GetMiscValue() : PHASEMASK_NORMAL,false);
 
         CallForAllControlledUnits(SetGameMasterOffHelper(getFaction()), CONTROLLED_PET|CONTROLLED_TOTEMS|CONTROLLED_GUARDIANS|CONTROLLED_CHARM);
 
@@ -18720,6 +18721,49 @@ void Player::AddSpellMod(Aura* aura, bool apply)
     else
         m_spellMods[mod->m_miscvalue].remove(aura);
 }
+
+template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell const* spell)
+{
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+    if (!spellInfo)
+        return 0;
+
+    int32 totalpct = 0;
+    int32 totalflat = 0;
+    for (AuraList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
+    {
+        Aura *aura = *itr;
+
+        Modifier const* mod = aura->GetModifier();
+
+        if (!aura->isAffectedOnSpell(spellInfo))
+            continue;
+
+        if (mod->m_auraname == SPELL_AURA_ADD_FLAT_MODIFIER)
+            totalflat += mod->m_amount;
+        else
+        {
+            // skip percent mods for null basevalue (most important for spell mods with charges )
+            if (basevalue == T(0))
+                continue;
+
+            // special case (skip >10sec spell casts for instant cast setting)
+            if (mod->m_miscvalue == SPELLMOD_CASTING_TIME
+                && basevalue >= T(10*IN_MILLISECONDS) && mod->m_amount <= -100)
+                continue;
+
+            totalpct += mod->m_amount;
+        }
+    }
+
+    float diff = (float)basevalue*(float)totalpct/100.0f + (float)totalflat;
+    basevalue = T((float)basevalue + diff);
+    return T(diff);
+}
+
+template int32 Player::ApplySpellMod<int32>(uint32 spellId, SpellModOp op, int32 &basevalue, Spell const* spell);
+template uint32 Player::ApplySpellMod<uint32>(uint32 spellId, SpellModOp op, uint32 &basevalue, Spell const* spell);
+template float Player::ApplySpellMod<float>(uint32 spellId, SpellModOp op, float &basevalue, Spell const* spell);
 
 // send Proficiency
 void Player::SendProficiency(ItemClass itemClass, uint32 itemSubclassMask)
