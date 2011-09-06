@@ -334,13 +334,13 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     // Buff myself
     if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK) ai->SelfBuff(RIGHTEOUS_FURY);
     if (SEAL_OF_WISDOM > 0 && !m_bot->HasAura(SEAL_OF_WISDOM, EFFECT_INDEX_0) && ai->GetManaPercent() <= 30)
-        ai->CastSpell(SEAL_OF_WISDOM,*m_bot);
+        ai->CastSpell(SEAL_OF_WISDOM, *m_bot);
     else if (m_bot->HasAura(SEAL_OF_WISDOM, EFFECT_INDEX_0) && ai->GetManaPercent() < 85)
-        { }
+    { }
     else if (SEAL_OF_LIGHT > 0 && !m_bot->HasAura(SEAL_OF_LIGHT, EFFECT_INDEX_0) && ai->GetHealthPercent() < 40)
-        ai->CastSpell(SEAL_OF_LIGHT,*m_bot);
+        ai->CastSpell(SEAL_OF_LIGHT, *m_bot);
     else if (SEAL_OF_RIGHTEOUSNESS > 0 && !m_bot->HasAura(SEAL_OF_RIGHTEOUSNESS, EFFECT_INDEX_0))
-        ai->CastSpell(SEAL_OF_RIGHTEOUSNESS,*m_bot);
+        ai->CastSpell(SEAL_OF_RIGHTEOUSNESS, *m_bot);
     BuffPlayer(m_bot);
 
     // Buff master

@@ -160,9 +160,9 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
         }
     }
 
-    if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_HEAL ) // && ai->GetMovementOrder() == PlayerbotAI::MOVEMENT_STAY)
+    if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_HEAL)  // && ai->GetMovementOrder() == PlayerbotAI::MOVEMENT_STAY)
         SpellSequence = SPELL_HOLY;
-    else if( ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST ) // && ai->GetMovementOrder() == PlayerbotAI::MOVEMENT_STAY)
+    else if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST)  // && ai->GetMovementOrder() == PlayerbotAI::MOVEMENT_STAY)
         SpellSequence = SPELL_SHADOWMAGIC;
     else
         SpellSequence = SPELL_HOLY;
@@ -206,7 +206,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             else
                 LastSpellHoly = 0;
 
-            if(ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE)
+            if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE)
                 SpellSequence = SPELL_SHADOWMAGIC;
             break;
 
@@ -265,7 +265,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             else
                 LastSpellShadowMagic = 0;
 
-            if(ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE || ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST)
+            if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE || ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST)
                 SpellSequence = SPELL_DISCIPLINE;
             break;
 
@@ -303,9 +303,9 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             else
                 LastSpellDiscipline = 0;
 
-            if(ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE)
+            if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE)
                 SpellSequence = SPELL_HOLY;
-            else if(ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST)
+            else if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST)
                 SpellSequence = SPELL_SHADOWMAGIC;
             break;
     }

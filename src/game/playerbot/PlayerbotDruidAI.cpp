@@ -105,13 +105,13 @@ bool PlayerbotDruidAI::HealTarget(Unit *target)
 
 bool PlayerbotDruidAI::IsFeral()
 {
-    if(MOONKIN_FORM > 0)
+    if (MOONKIN_FORM > 0)
         return true;
-    else if(DIRE_BEAR_FORM > 0)
+    else if (DIRE_BEAR_FORM > 0)
         return true;
-    else if(BEAR_FORM > 0)
+    else if (BEAR_FORM > 0)
         return true;
-    else if(CAT_FORM > 0)
+    else if (CAT_FORM > 0)
         return true;
     else
         return false;

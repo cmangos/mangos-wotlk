@@ -167,7 +167,7 @@ public:
     typedef std::list<taskPair> BotTaskList;
     typedef std::list<enum NPCFlags> BotNPCList;
     typedef std::map<uint32, uint32> BotNeedItem;
-    typedef std::pair<uint32,uint32>talentPair;
+    typedef std::pair<uint32, uint32>talentPair;
     typedef std::list<ObjectGuid> BotLootTarget;
     typedef std::list<uint32> BotLootEntry;
     typedef std::list<uint32> BotSpellList;
@@ -370,7 +370,7 @@ public:
 
     void AcceptQuest(Quest const *qInfo, Player *pGiver);
     void TurnInQuests(WorldObject *questgiver);
-    bool ListQuests(WorldObject* questgiver);
+    void ListQuests(WorldObject* questgiver);
     bool AddQuest(const uint32 entry, WorldObject* questgiver);
 
     bool IsInCombat();
