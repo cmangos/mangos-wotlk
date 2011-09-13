@@ -16,8 +16,6 @@ class Item;
 class PlayerbotClassAI;
 class PlayerbotMgr;
 
-#define BOTLOOT_DISTANCE 75.0f
-
 enum RacialTraits
 {
     ARCANE_TORRENT_MANA_CLASSES    = 28730,
@@ -429,6 +427,7 @@ private:
     BotTaxiNode m_taxiNodes;            // flight node chain;
 
     uint8 m_collectionFlags;            // what the bot should look for to loot
+    uint32 m_collectDist;               // distance to collect objects
 
     time_t m_TimeDoneEating;
     time_t m_TimeDoneDrinking;

@@ -72,6 +72,7 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
 
     // set collection options
     m_collectionFlags = 0;
+    m_collectDist = m_mgr->m_confCollectDistance;
     if (m_mgr->m_confCollectCombat)
         SetCollectFlag(COLLECT_FLAG_COMBAT);
     if (m_mgr->m_confCollectQuest)
@@ -2028,7 +2029,7 @@ void PlayerbotAI::DoLoot()
     WorldObject *wo = m_bot->GetMap()->GetWorldObject(m_lootCurrent);
 
     // clear invalid object or object that is too far from master
-    if (!wo || GetMaster()->GetDistance(wo) > BOTLOOT_DISTANCE)
+    if (!wo || GetMaster()->GetDistance(wo) > float(m_mgr->m_confCollectDistanceMax))
     {
         m_lootCurrent = ObjectGuid();
         return;
@@ -3901,7 +3902,6 @@ void PlayerbotAI::findNearbyGO()
         return;
 
     std::list<GameObject*> tempTargetGOList;
-    float radius = 20.0f;
 
     for (BotLootEntry::iterator itr = m_collectObjects.begin(); itr != m_collectObjects.end(); ++itr)
     {
@@ -3927,9 +3927,9 @@ void PlayerbotAI::findNearbyGO()
         }
 
         // search for GOs with entry, within range of m_bot
-        MaNGOS::GameObjectEntryInPosRangeCheck go_check(*m_bot, entry, m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(), radius);
+        MaNGOS::GameObjectEntryInPosRangeCheck go_check(*m_bot, entry, m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(), float(m_collectDist));
         MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectEntryInPosRangeCheck> checker(tempTargetGOList, go_check);
-        Cell::VisitGridObjects(m_bot, checker, radius);
+        Cell::VisitGridObjects(m_bot, checker, float(m_collectDist));
 
         // no objects found, continue to next entry
         if (tempTargetGOList.empty())
@@ -5345,13 +5345,27 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 m_collectionFlags = 0;
                 m_collectObjects.clear();
             }
+            else if (subcommand.find("distance:") != std::wstring::npos)
+            {
+                uint32 distance;
+                sscanf(subcommand.c_str(), "distance:%u", &distance);
+                if (distance > 0 && distance <= m_mgr->m_confCollectDistanceMax)
+                {
+                    m_collectDist = distance;
+                    TellMaster("Object search distance now set to %u.", m_collectDist);
+                }
+                else
+                    TellMaster("The distance of %u is not allowed. Max distance is %u",
+                        distance, m_mgr->m_confCollectDistanceMax);
+            }
             else
             {
                 std::string collout = "";
                 if (m_bot->HasSkill(SKILL_SKINNING))
                     collout += ", skin";
                 // TODO: perhaps change the command syntax, this way may be lacking in ease of use
-                TellMaster("Collect <what>?: none, combat, loot, quest, profession, objects" + collout);
+                TellMaster("Collect <what>?: distance:<1-%u>, none, combat, loot, quest, profession, objects%s",
+                    m_mgr->m_confCollectDistanceMax, collout.c_str());
                 break;
             }
             if (part == subcommand)

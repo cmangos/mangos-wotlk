@@ -77,6 +77,7 @@ Gameobject interaction with bots:
         the time you may want this option and the loot option enabled, but if you are grabbing
         the stuff as you are going around, the bot will skin afterwards.
     objects - bot will collect things that are specified by the survey and get <shift-click> commands
+    distance:<value> - bot will loot objects in the specified distance value
     none - removes any collect options that have been set
 
   The 'survey' command provides the means for bot(s) to detect gameobjects in the world. It can be used to detect
