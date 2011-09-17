@@ -3645,7 +3645,7 @@ bool PlayerbotAI::PickPocket(Unit* pTarget)
 {
     if(!pTarget)
         return false;
-	
+
     bool looted = false;
 
     ObjectGuid markGuid = pTarget->GetObjectGuid();
