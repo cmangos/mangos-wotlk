@@ -83,6 +83,11 @@ PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, 
 
 PlayerbotPaladinAI::~PlayerbotPaladinAI() {}
 
+bool PlayerbotPaladinAI::DoFirstCombatManeuver(Unit *pTarget)
+{
+    return false;
+}
+
 bool PlayerbotPaladinAI::HealTarget(Unit *target)
 {
     PlayerbotAI* ai = GetAI();
@@ -344,7 +349,8 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     BuffPlayer(m_bot);
 
     // Buff master
-    BuffPlayer(ai->GetMaster());
+    if(!ai->IsInDuel(GetMaster()))
+        BuffPlayer(GetMaster());
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
@@ -387,6 +393,9 @@ void PlayerbotPaladinAI::DoNonCombatActions()
         {
             Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
             if (!tPlayer)
+                continue;
+
+            if (tPlayer->IsInDuelWith(GetMaster()))
                 continue;
 
             if (!tPlayer->isAlive())

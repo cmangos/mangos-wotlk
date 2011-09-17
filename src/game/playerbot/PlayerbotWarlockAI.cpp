@@ -77,6 +77,11 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
 
 PlayerbotWarlockAI::~PlayerbotWarlockAI() {}
 
+bool PlayerbotWarlockAI::DoFirstCombatManeuver(Unit *pTarget)
+{
+    return false;
+}
+
 void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();

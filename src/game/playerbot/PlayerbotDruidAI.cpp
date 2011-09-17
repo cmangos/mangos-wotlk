@@ -68,6 +68,11 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
 
 PlayerbotDruidAI::~PlayerbotDruidAI() {}
 
+bool PlayerbotDruidAI::DoFirstCombatManeuver(Unit *pTarget)
+{
+    return false;
+}
+
 bool PlayerbotDruidAI::HealTarget(Unit *target)
 {
     PlayerbotAI* ai = GetAI();
@@ -593,14 +598,18 @@ void PlayerbotDruidAI::DoNonCombatActions()
     if (master->GetGroup())
     {
         // Buff master with group buff
-        if (master->isAlive() && GIFT_OF_THE_WILD && ai->HasSpellReagents(GIFT_OF_THE_WILD) && ai->Buff(GIFT_OF_THE_WILD, master))
-            return;
+        if (!ai->IsInDuel(master))
+            if (master->isAlive() && GIFT_OF_THE_WILD && ai->HasSpellReagents(GIFT_OF_THE_WILD) && ai->Buff(GIFT_OF_THE_WILD, master))
+                return;
 
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
             if (!tPlayer || tPlayer == m_bot)
+                continue;
+
+            if (tPlayer->IsInDuelWith(master))
                 continue;
 
             // Resurrect member if needed
@@ -629,6 +638,9 @@ void PlayerbotDruidAI::DoNonCombatActions()
     }
     else
     {
+        if (ai->IsInDuel(master))
+            return;
+
         if (master->isAlive())
         {
             if (BuffPlayer(master))

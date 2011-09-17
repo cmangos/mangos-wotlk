@@ -456,37 +456,43 @@ void PlayerbotAI::SendNotEquipList(Player& /*player*/)
     }
 }
 
-void PlayerbotAI::SendQuestNeedList(Player& /*player*/)
+void PlayerbotAI::SendQuestNeedList()
 {
     std::ostringstream out;
 
     for (BotNeedItem::iterator itr = m_needItemList.begin(); itr != m_needItemList.end(); ++itr)
     {
-        const ItemPrototype * pItemProto = sObjectMgr.GetItemPrototype(itr->first);
+        ItemPrototype const* pItemProto = sObjectMgr.GetItemPrototype(itr->first);
+        if(pItemProto)
+        {
+            std::string itemName = pItemProto->Name1;
+            ItemLocalization(itemName, pItemProto->ItemId);
 
-        std::string itemName = pItemProto->Name1;
-        ItemLocalization(itemName, pItemProto->ItemId);
-
-        out << " " << itr->second << "x|cffffffff|Hitem:" << pItemProto->ItemId
-            << ":0:0:0:0:0:0:0" << "|h[" << itemName
-            << "]|h|r";
+            out << " " << itr->second << "x|cffffffff|Hitem:" << pItemProto->ItemId
+                << ":0:0:0:0:0:0:0" << "|h[" << itemName
+                << "]|h|r";
+        }
     }
 
-    for (BotNeedItem::iterator itr = m_needCreatureOrGOList.begin(); itr != m_needCreatureOrGOList.end(); itr++)
+    for (BotNeedItem::iterator itr = m_needCreatureOrGOList.begin(); itr != m_needCreatureOrGOList.end(); ++itr)
     {
         CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(itr->first);
-        std::string creatureName = cInfo->Name;
-        CreatureLocalization(creatureName, cInfo->Entry);
         if (cInfo)
+        {
+            std::string creatureName = cInfo->Name;
+            CreatureLocalization(creatureName, cInfo->Entry);
             out << " " << itr->second << "x|cFFFFFF00|Hcreature_entry:" << itr->first << "|h[" << creatureName << "]|h|r";
+        }
 
         if (m_bot->HasQuestForGO(itr->first))
         {
             GameObjectInfo const* gInfo = ObjectMgr::GetGameObjectInfo(itr->first);
-            std::string gameobjectName = gInfo->name;
-            GameObjectLocalization(gameobjectName, gInfo->id);
             if (gInfo)
+            {
+                std::string gameobjectName = gInfo->name;
+                GameObjectLocalization(gameobjectName, gInfo->id);
                 out << " " << itr->second << "x|cFFFFFF00|Hgameobject_entry:" << itr->first << "|h[" << gameobjectName << "]|h|r";
+            }
         }
     }
 
@@ -634,42 +640,52 @@ void PlayerbotAI::ReloadAI()
     {
         case CLASS_PRIEST:
             if (m_classAI) delete m_classAI;
+            m_combatStyle = COMBAT_RANGED;
             m_classAI = (PlayerbotClassAI *) new PlayerbotPriestAI(GetMaster(), m_bot, this);
             break;
         case CLASS_MAGE:
             if (m_classAI) delete m_classAI;
+            m_combatStyle = COMBAT_RANGED;
             m_classAI = (PlayerbotClassAI *) new PlayerbotMageAI(GetMaster(), m_bot, this);
             break;
         case CLASS_WARLOCK:
             if (m_classAI) delete m_classAI;
+            m_combatStyle = COMBAT_RANGED;
             m_classAI = (PlayerbotClassAI *) new PlayerbotWarlockAI(GetMaster(), m_bot, this);
             break;
         case CLASS_WARRIOR:
             if (m_classAI) delete m_classAI;
+            m_combatStyle = COMBAT_MELEE;
             m_classAI = (PlayerbotClassAI *) new PlayerbotWarriorAI(GetMaster(), m_bot, this);
             break;
         case CLASS_SHAMAN:
             if (m_classAI) delete m_classAI;
+            m_combatStyle = COMBAT_MELEE;
             m_classAI = (PlayerbotClassAI *) new PlayerbotShamanAI(GetMaster(), m_bot, this);
             break;
         case CLASS_PALADIN:
             if (m_classAI) delete m_classAI;
+            m_combatStyle = COMBAT_MELEE;
             m_classAI = (PlayerbotClassAI *) new PlayerbotPaladinAI(GetMaster(), m_bot, this);
             break;
         case CLASS_ROGUE:
             if (m_classAI) delete m_classAI;
+            m_combatStyle = COMBAT_MELEE;
             m_classAI = (PlayerbotClassAI *) new PlayerbotRogueAI(GetMaster(), m_bot, this);
             break;
         case CLASS_DRUID:
             if (m_classAI) delete m_classAI;
+            m_combatStyle = COMBAT_MELEE;
             m_classAI = (PlayerbotClassAI *) new PlayerbotDruidAI(GetMaster(), m_bot, this);
             break;
         case CLASS_HUNTER:
             if (m_classAI) delete m_classAI;
+            m_combatStyle = COMBAT_RANGED;
             m_classAI = (PlayerbotClassAI *) new PlayerbotHunterAI(GetMaster(), m_bot, this);
             break;
         case CLASS_DEATH_KNIGHT:
             if (m_classAI) delete m_classAI;
+            m_combatStyle = COMBAT_MELEE;
             m_classAI = (PlayerbotClassAI *) new PlayerbotDeathKnightAI(GetMaster(), m_bot, this);
             break;
     }
@@ -737,6 +753,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         {
             m_ignoreAIUpdatesUntilTime = time(0) + 4;
             m_ScenarioType = SCENARIO_PVEEASY;
+            ReloadAI();
             m_bot->GetMotionMaster()->Clear(true);
             return;
         }
@@ -1929,10 +1946,38 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
     return;
 }
 
+bool PlayerbotAI::IsInDuel(Player* dTarget)
+{
+    if(!dTarget)
+        return false;
+
+    if (dTarget->duel->startTime != 0)
+        return true;
+
+    return false;
+}
+
+void PlayerbotAI::GetDuelTarget(Unit* forcedTarget)
+{
+    // set combat state, and clear looting, etc...
+    if (m_botState != BOTSTATE_COMBAT)
+    {
+        SetState(BOTSTATE_COMBAT);
+        m_targetChanged = true;
+        m_targetCombat = forcedTarget;
+        m_targetType = TARGET_THREATEN;
+        m_combatStyle = COMBAT_MELEE;
+    }
+    m_bot->Attack(m_targetCombat, true);
+}
+
 void PlayerbotAI::DoNextCombatManeuver()
 {
     // check for new targets
-    GetCombatTarget();
+    if (m_ScenarioType == SCENARIO_DUEL)
+        GetDuelTarget(GetMaster());
+    else
+        GetCombatTarget();
     // check if we have a target - fixes crash reported by rrtn (kill hunter's pet bug)
     // if current target for attacks doesn't make sense anymore
     // clear our orders so we can get orders in next update
@@ -3078,7 +3123,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
         }
 
         // handle combat (either self/master/group in combat, or combat state and valid target)
-        else if (IsInCombat() || (m_botState == BOTSTATE_COMBAT && m_targetCombat))
+        else if (IsInCombat() || (m_botState == BOTSTATE_COMBAT && m_targetCombat) ||  m_ScenarioType == SCENARIO_DUEL)
         {
             //check if the bot is Mounted
             if (!m_bot->IsMounted())
@@ -5044,6 +5089,7 @@ bool PlayerbotAI::AddQuest(const uint32 entry, WorldObject * questgiver)
         TellMaster(out.str());
         return true;
     }
+    return false;
 }
 
 void PlayerbotAI::ListAuctions()
@@ -5337,7 +5383,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         m_targetCombat = 0;
     }
     else if (text == "report")
-        SendQuestNeedList(*GetMaster());
+        SendQuestNeedList();
     else if (text == "orders")
         SendOrders(*GetMaster());
     else if (text == "follow" || text == "come")

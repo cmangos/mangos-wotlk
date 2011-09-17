@@ -69,6 +69,11 @@ PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* con
 
 PlayerbotDeathKnightAI::~PlayerbotDeathKnightAI() {}
 
+bool PlayerbotDeathKnightAI::DoFirstCombatManeuver(Unit *pTarget)
+{
+    return false;
+}
+
 void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();

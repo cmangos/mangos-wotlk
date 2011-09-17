@@ -64,6 +64,11 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
 
 PlayerbotPriestAI::~PlayerbotPriestAI() {}
 
+bool PlayerbotPriestAI::DoFirstCombatManeuver(Unit *pTarget)
+{
+    return false;
+}
+
 bool PlayerbotPriestAI::HealTarget(Unit* target)
 {
     PlayerbotAI* ai = GetAI();
@@ -362,20 +367,24 @@ void PlayerbotPriestAI::DoNonCombatActions()
     if (master->GetGroup())
     {
         // Buff master with group buffs
-        if (master->isAlive())
-        {
-            if (PRAYER_OF_FORTITUDE && ai->HasSpellReagents(PRAYER_OF_FORTITUDE) && ai->Buff(PRAYER_OF_FORTITUDE, master))
-                return;
+        if (!ai->IsInDuel(master))
+            if (master->isAlive())
+            {
+                if (PRAYER_OF_FORTITUDE && ai->HasSpellReagents(PRAYER_OF_FORTITUDE) && ai->Buff(PRAYER_OF_FORTITUDE, master))
+                    return;
 
-            if (PRAYER_OF_SPIRIT && ai->HasSpellReagents(PRAYER_OF_SPIRIT) && ai->Buff(PRAYER_OF_SPIRIT, master))
-                return;
-        }
+                if (PRAYER_OF_SPIRIT && ai->HasSpellReagents(PRAYER_OF_SPIRIT) && ai->Buff(PRAYER_OF_SPIRIT, master))
+                    return;
+            }
 
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
             if (!tPlayer || tPlayer == m_bot)
+                continue;
+
+            if (tPlayer->IsInDuelWith(master))
                 continue;
 
             // first rezz em
@@ -404,7 +413,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
     }
     else
     {
-        if (master->isAlive())
+        if (master->isAlive() && !ai->IsInDuel(master))
         {
             if (BuffPlayer(master))
                 return;

@@ -146,14 +146,14 @@ public:
         NONE                        = 0x00,  // do nothing
         SELL                        = 0x01,  // sell items
         REPAIR                      = 0x02,  // repair items
-        ADD                         = 0x04,  // add auction
-        REMOVE                      = 0x08,  // remove auction
-        RESET                       = 0x10,  // reset all talents
-        WITHDRAW                    = 0x11,  // withdraw item from bank
-        DEPOSIT                     = 0x12,  // deposit item in bank
-        LIST                        = 0x14,  // list quests
-        END                         = 0x18,  // turn in quests
-        TAKE                        = 0x20   // take quest
+        ADD                         = 0x03,  // add auction
+        REMOVE                      = 0x04,  // remove auction
+        RESET                       = 0x05,  // reset all talents
+        WITHDRAW                    = 0x06,  // withdraw item from bank
+        DEPOSIT                     = 0x07,  // deposit item in bank
+        LIST                        = 0x08,  // list quests
+        END                         = 0x09,  // turn in quests
+        TAKE                        = 0x0A   // take quest
     };
 
     enum AnnounceFlags
@@ -335,6 +335,8 @@ public:
     void Feast();
     void InterruptCurrentCastingSpell();
     void GetCombatTarget(Unit* forcedTarged = 0);
+    void GetDuelTarget(Unit* forcedTarget);
+    bool IsInDuel(Player* dTarget);
     Unit *GetCurrentTarget() { return m_targetCombat; };
     void DoNextCombatManeuver();
     void DoCombatMovement();
@@ -348,7 +350,7 @@ public:
     void SetState(BotState state);
     void SetQuestNeedItems();
     void SetQuestNeedCreatures();
-    void SendQuestNeedList(Player& player);
+    void SendQuestNeedList();
     bool IsInQuestItemList(uint32 itemid) { return m_needItemList.find(itemid) != m_needItemList.end(); };
     bool IsInQuestCreatureList(uint32 id) { return m_needCreatureOrGOList.find(id) != m_needCreatureOrGOList.end(); };
     bool IsItemUseful(uint32 itemid);

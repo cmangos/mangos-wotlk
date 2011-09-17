@@ -70,6 +70,11 @@ PlayerbotShamanAI::PlayerbotShamanAI(Player* const master, Player* const bot, Pl
 
 PlayerbotShamanAI::~PlayerbotShamanAI() {}
 
+bool PlayerbotShamanAI::DoFirstCombatManeuver(Unit *pTarget)
+{
+    return false;
+}
+
 void PlayerbotShamanAI::HealTarget(Unit &target, uint8 hp)
 {
     PlayerbotAI* ai = GetAI();
@@ -510,6 +515,9 @@ void PlayerbotShamanAI::DoNonCombatActions()
         {
             Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
             if (!tPlayer || !tPlayer->isAlive())
+                continue;
+
+            if (tPlayer->IsInDuelWith(GetMaster()))
                 continue;
 
             // heal

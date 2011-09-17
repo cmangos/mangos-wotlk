@@ -63,6 +63,11 @@ PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, Player
 
 PlayerbotMageAI::~PlayerbotMageAI() {}
 
+bool PlayerbotMageAI::DoFirstCombatManeuver(Unit *pTarget)
+{
+    return false;
+}
+
 void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();
@@ -366,9 +371,10 @@ void PlayerbotMageAI::DoNonCombatActions()
     if (master->GetGroup())
     {
         // Buff master with group buff...
-        if (ARCANE_BRILLIANCE && ai->HasSpellReagents(ARCANE_BRILLIANCE))
-            if (ai->Buff(ARCANE_BRILLIANCE, master))
-                return;
+        if (!ai->IsInDuel(master))
+            if (ARCANE_BRILLIANCE && ai->HasSpellReagents(ARCANE_BRILLIANCE))
+                if (ai->Buff(ARCANE_BRILLIANCE, master))
+                    return;
 
         // ...and check group for new members joined or resurrected, or just buff everyone if no group buff available
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
@@ -377,6 +383,10 @@ void PlayerbotMageAI::DoNonCombatActions()
             Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
             if (!tPlayer || !tPlayer->isAlive() || tPlayer == m_bot)
                 continue;
+
+            if (tPlayer->IsInDuelWith(master))
+                continue;
+
             // buff
             if (BuffPlayer(tPlayer))
                 return;
@@ -384,8 +394,9 @@ void PlayerbotMageAI::DoNonCombatActions()
 
     }
     // There is no group, buff master
-    else if (master->isAlive() && BuffPlayer(master))
-        return;
+    else if (master->isAlive() && !ai->IsInDuel(master))
+        if (BuffPlayer(master))
+            return;
 
     // Buff self finally
     if (BuffPlayer(m_bot))
