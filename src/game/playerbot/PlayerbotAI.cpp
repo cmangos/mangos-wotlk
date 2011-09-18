@@ -1946,17 +1946,6 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
     return;
 }
 
-bool PlayerbotAI::IsInDuel(Player* dTarget)
-{
-    if(!dTarget)
-        return false;
-
-    if (dTarget->duel->startTime != 0)
-        return true;
-
-    return false;
-}
-
 void PlayerbotAI::GetDuelTarget(Unit* forcedTarget)
 {
     // set combat state, and clear looting, etc...

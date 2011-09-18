@@ -336,7 +336,6 @@ public:
     void InterruptCurrentCastingSpell();
     void GetCombatTarget(Unit* forcedTarged = 0);
     void GetDuelTarget(Unit* forcedTarget);
-    bool IsInDuel(Player* dTarget);
     Unit *GetCurrentTarget() { return m_targetCombat; };
     void DoNextCombatManeuver();
     void DoCombatMovement();

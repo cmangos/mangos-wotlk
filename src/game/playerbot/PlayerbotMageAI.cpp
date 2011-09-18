@@ -371,7 +371,7 @@ void PlayerbotMageAI::DoNonCombatActions()
     if (master->GetGroup())
     {
         // Buff master with group buff...
-        if (!ai->IsInDuel(master))
+        if (!master->IsInDuel(master))
             if (ARCANE_BRILLIANCE && ai->HasSpellReagents(ARCANE_BRILLIANCE))
                 if (ai->Buff(ARCANE_BRILLIANCE, master))
                     return;
@@ -394,7 +394,7 @@ void PlayerbotMageAI::DoNonCombatActions()
 
     }
     // There is no group, buff master
-    else if (master->isAlive() && !ai->IsInDuel(master))
+    else if (master->isAlive() && !master->IsInDuel(master))
         if (BuffPlayer(master))
             return;
 
