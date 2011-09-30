@@ -2719,7 +2719,7 @@ void PlayerbotAI::MovementReset()
             else if (!FollowCheckTeleport(*m_followTarget)) return;
         }
 
-        if (m_bot->isAlive())
+        if (m_bot->isAlive() && !m_bot->IsBeingTeleported())
         {
             float angle = rand_float(0, M_PI_F);
             float dist = rand_float(m_mgr->m_confFollowDistance[0], m_mgr->m_confFollowDistance[1]);
