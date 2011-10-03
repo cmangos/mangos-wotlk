@@ -332,7 +332,7 @@ public:
     bool IsInQuestItemList(uint32 itemid) { return m_needItemList.find(itemid) != m_needItemList.end(); };
     bool IsItemUseful(uint32 itemid);
     void SendOrders(Player& player);
-    bool FollowCheckTeleport(WorldObject &obj);
+    bool DoTeleport(WorldObject &obj);
     void DoLoot();
     void DoFlight();
     void GetTaxi(ObjectGuid guid, BotTaxiNode& nodes);
