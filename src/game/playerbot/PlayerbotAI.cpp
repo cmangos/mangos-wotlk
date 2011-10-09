@@ -2317,6 +2317,11 @@ void PlayerbotAI::DoLoot()
             DEBUG_LOG ( "[PlayerbotAI]: DoLoot attempts failed on [%s]",
                 go ? go->GetGOInfo()->name : c->GetCreatureInfo()->Name);
             m_lootCurrent = ObjectGuid();
+
+            // remove this GO from our list using the same settings that it was added with earlier
+            if (go && HasCollectFlag(COLLECT_FLAG_NEAROBJECT) && go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
+                m_collectObjects.remove(go->GetEntry());
+
             // clear movement target, take next target on next update
             m_bot->GetMotionMaster()->Clear();
             m_bot->GetMotionMaster()->MoveIdle();
