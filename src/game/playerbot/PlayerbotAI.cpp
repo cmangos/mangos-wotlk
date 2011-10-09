@@ -2207,7 +2207,7 @@ void PlayerbotAI::DoLoot()
 
         // determine bot's skill value for object's required skill
         if (skillId != SKILL_NONE)
-            SkillValue = uint32(m_bot->GetPureSkillValue(skillId));
+            SkillValue = uint32(m_bot->GetSkillValue(skillId));
 
         // bot has the specific skill or object requires no skill at all
         if ((m_bot->HasSkill(skillId) && skillId != SKILL_NONE) || (skillId == SKILL_NONE && go))
