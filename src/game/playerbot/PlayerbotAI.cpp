@@ -3792,12 +3792,17 @@ void PlayerbotAI::extractQuestIds(const std::string& text, std::list<uint32>& qu
     }
 }
 
-// Build an hlink for spells
-void PlayerbotAI::MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out, Player *player)
+// Build an hlink for Weapon skills in Aqua
+void PlayerbotAI::MakeWeaponSkillLink(const SpellEntry *sInfo, std::ostringstream &out, uint32 skillid)
 {
-    LocaleConstant loc = LOCALE_enUS;
-    if (player)
-        loc = player->GetSession()->GetSessionDbcLocale();
+    int loc = GetMaster()->GetSession()->GetSessionDbcLocale();
+    out << "|cff00ffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[loc] << " : " << m_bot->GetSkillValue(skillid) << " /" << m_bot->GetMaxSkillValue(skillid) << "]|h|r";
+}
+
+// Build an hlink for spells in White
+void PlayerbotAI::MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out)
+{
+    int    loc = GetMaster()->GetSession()->GetSessionDbcLocale();
     out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[loc] << "]|h|r";
 }
 
@@ -6325,7 +6330,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                     data << uint32(spellId);                                // should be same as in packet from client
                     GetMaster()->GetSession()->SendPacket(&data);
 
-                    MakeSpellLink(pSpellInfo, msg, &fromPlayer);
+                    MakeSpellLink(pSpellInfo, msg);
                     uint32 gold = uint32(cost / 10000);
                     cost -= (gold * 10000);
                     uint32 silver = uint32(cost / 100);
@@ -6389,7 +6394,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                     cost -= (gold * 10000);
                     uint32 silver = uint32(cost / 100);
                     cost -= (silver * 100);
-                    MakeSpellLink(pSpellInfo, msg, &fromPlayer);
+                    MakeSpellLink(pSpellInfo, msg);
                     msg << " ";
                     if (gold > 0)
                         msg << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
@@ -6484,11 +6489,34 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                         if (m_bot->GetSkillValue(*it) <= rank[sSpellMgr.GetSpellRank(skillLine->spellId)] && m_bot->HasSpell(skillLine->spellId))
                         {
                             // DEBUG_LOG ("[PlayerbotAI]: HandleCommand - skill (%u)(%u)(%u):",skillLine->spellId, rank[sSpellMgr.GetSpellRank(skillLine->spellId)], m_bot->GetSkillValue(*it));
-                            MakeSpellLink(spellInfo, msg, &fromPlayer);
+                            MakeSpellLink(spellInfo, msg);
                             break;
                         }
                     }
                 }
+        }
+
+        msg << "\nMy Weapon skills:";
+        for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
+        {
+            SkillLineEntry const *SkillLine = sSkillLineStore.LookupEntry(*it);
+            // has weapon skill
+            if (SkillLine->categoryId == SKILL_CATEGORY_WEAPON)
+            {
+                for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+                {
+                    SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
+                    if (!skillLine)
+                        continue;
+
+                    SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+                    if (!spellInfo)
+                        continue;
+
+                    if (skillLine->skillId == *it && spellInfo->Effect[0] == SPELL_EFFECT_WEAPON)
+                        MakeWeaponSkillLink(spellInfo,msg,*it);
+                }
+            }
         }
         SendWhisper(msg.str(), fromPlayer);
         m_spellsToLearn.clear();

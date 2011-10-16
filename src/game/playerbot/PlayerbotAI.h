@@ -264,7 +264,8 @@ public:
     // finds nearby creatures, whose UNIT_NPC_FLAGS match the flags specified in item list m_itemIds
     void findNearbyCreature();
 
-    void MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out, Player* player = NULL);
+    void MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out);
+    void MakeWeaponSkillLink(const SpellEntry *sInfo, std::ostringstream &out, uint32 skillid);
 
     // currently bots only obey commands from the master
     bool canObeyCommandFrom(const Player& player) const;
