@@ -6204,7 +6204,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     }
 
     // Handle class & professions training:
-    // skill                           -- Lists bot(s) Primary profession skills.
+    // skill                           -- Lists bot(s) Primary profession skills & weapon skills
     // skill train                     -- List available class or profession (Primary or Secondary) skills & spells, from selected trainer.
     // skill learn [HLINK][HLINK] ..   -- Learn selected skill and spells, from selected trainer ([HLINK] from skill train).
     // skill unlearn [HLINK][HLINK] .. -- Unlearn selected primary profession skill(s) and all associated spells ([HLINK] from skill)
@@ -6440,81 +6440,82 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         {
             m_spellsToLearn.clear();
             extractSpellIdList(part, m_spellsToLearn);
+            for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
+            {
+                if (sSpellMgr.IsPrimaryProfessionSpell(*it) && subcommand != "learn")
+                {
+                    SpellLearnSkillNode const* spellLearnSkill = sSpellMgr.GetSpellLearnSkill(*it);
+
+                    uint32 prev_spell = sSpellMgr.GetPrevSpellInChain(*it);
+                    if (!prev_spell)                                    // first rank, remove skill
+                        GetPlayer()->SetSkill(spellLearnSkill->skill, 0, 0);
+                    else
+                    {
+                        // search prev. skill setting by spell ranks chain
+                        SpellLearnSkillNode const* prevSkill = sSpellMgr.GetSpellLearnSkill(prev_spell);
+                        while (!prevSkill && prev_spell)
+                        {
+                            prev_spell = sSpellMgr.GetPrevSpellInChain(prev_spell);
+                            prevSkill = sSpellMgr.GetSpellLearnSkill(sSpellMgr.GetFirstSpellInChain(prev_spell));
+                        }
+                        if (!prevSkill)                                 // not found prev skill setting, remove skill
+                            GetPlayer()->SetSkill(spellLearnSkill->skill, 0, 0);
+                    }
+                }
+            }
         }
-        // Handle: Lists bot(s) primary profession skills, skill.
+        // Handle: Lists bot(s) primary profession skills & weapon skills.
         else
         {
             m_spellsToLearn.clear();
             m_bot->skill(m_spellsToLearn);
-            msg << "My Primary Professions are: ";
-        }
-
-        for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
-        {
-            if (sSpellMgr.IsPrimaryProfessionSpell(*it) && subcommand != "learn")
+            msg << "My Primary Professions: ";
+            for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
             {
-                SpellLearnSkillNode const* spellLearnSkill = sSpellMgr.GetSpellLearnSkill(*it);
-
-                uint32 prev_spell = sSpellMgr.GetPrevSpellInChain(*it);
-                if (!prev_spell)                                    // first rank, remove skill
-                    GetPlayer()->SetSkill(spellLearnSkill->skill, 0, 0);
-                else
-                {
-                    // search prev. skill setting by spell ranks chain
-                    SpellLearnSkillNode const* prevSkill = sSpellMgr.GetSpellLearnSkill(prev_spell);
-                    while (!prevSkill && prev_spell)
+                if (IsPrimaryProfessionSkill(*it))
+                    for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
                     {
-                        prev_spell = sSpellMgr.GetPrevSpellInChain(prev_spell);
-                        prevSkill = sSpellMgr.GetSpellLearnSkill(sSpellMgr.GetFirstSpellInChain(prev_spell));
+                        SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
+                        if (!skillLine)
+                            continue;
+
+                        // has skill
+                        if (skillLine->skillId == *it && skillLine->learnOnGetSkill == 0)
+                        {
+                            SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+                            if (!spellInfo)
+                                continue;
+
+                            if (m_bot->GetSkillValue(*it) <= rank[sSpellMgr.GetSpellRank(skillLine->spellId)] && m_bot->HasSpell(skillLine->spellId))
+                            {
+                                // DEBUG_LOG ("[PlayerbotAI]: HandleCommand - skill (%u)(%u)(%u):",skillLine->spellId, rank[sSpellMgr.GetSpellRank(skillLine->spellId)], m_bot->GetSkillValue(*it));
+                                MakeSpellLink(spellInfo, msg);
+                                break;
+                            }
+                        }
                     }
-                    if (!prevSkill)                                 // not found prev skill setting, remove skill
-                        GetPlayer()->SetSkill(spellLearnSkill->skill, 0, 0);
-                }
             }
-            else
-            if (IsPrimaryProfessionSkill(*it))
-                for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
-                {
-                    SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
-                    if (!skillLine)
-                        continue;
 
-                    // has skill
-                    if (skillLine->skillId == *it && skillLine->learnOnGetSkill == 0)
+            msg << "\nMy Weapon skills: ";
+            for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
+            {
+                SkillLineEntry const *SkillLine = sSkillLineStore.LookupEntry(*it);
+                // has weapon skill
+                if (SkillLine->categoryId == SKILL_CATEGORY_WEAPON)
+                {
+                    for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
                     {
+                        SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
+                        if (!skillLine)
+                            continue;
+
                         SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
                         if (!spellInfo)
                             continue;
 
-                        if (m_bot->GetSkillValue(*it) <= rank[sSpellMgr.GetSpellRank(skillLine->spellId)] && m_bot->HasSpell(skillLine->spellId))
-                        {
-                            // DEBUG_LOG ("[PlayerbotAI]: HandleCommand - skill (%u)(%u)(%u):",skillLine->spellId, rank[sSpellMgr.GetSpellRank(skillLine->spellId)], m_bot->GetSkillValue(*it));
-                            MakeSpellLink(spellInfo, msg);
-                            break;
-                        }
+                        if (skillLine->skillId == *it && spellInfo->Effect[0] == SPELL_EFFECT_WEAPON)
+                            MakeWeaponSkillLink(spellInfo,msg,*it);
                     }
-                }
-        }
-
-        msg << "\nMy Weapon skills:";
-        for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
-        {
-            SkillLineEntry const *SkillLine = sSkillLineStore.LookupEntry(*it);
-            // has weapon skill
-            if (SkillLine->categoryId == SKILL_CATEGORY_WEAPON)
-            {
-                for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
-                {
-                    SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
-                    if (!skillLine)
-                        continue;
-
-                    SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
-                    if (!spellInfo)
-                        continue;
-
-                    if (skillLine->skillId == *it && spellInfo->Effect[0] == SPELL_EFFECT_WEAPON)
-                        MakeWeaponSkillLink(spellInfo,msg,*it);
                 }
             }
         }
