@@ -3865,9 +3865,9 @@ void PlayerbotAI::findNearbyGO()
 void PlayerbotAI::findNearbyCreature()
 {
     std::list<Creature*> creatureList;
-    float radius = 20.0f;
+    float radius = INTERACTION_DISTANCE;
 
-    CellPair pair(MaNGOS::ComputeCellPair( m_bot->GetPositionX(), m_bot->GetPositionY()) );
+    CellPair pair(MaNGOS::ComputeCellPair(m_bot->GetPositionX(), m_bot->GetPositionY()));
     Cell cell(pair);
 
     MaNGOS::AnyUnitInObjectRangeCheck go_check(m_bot, radius);
@@ -3880,18 +3880,18 @@ void PlayerbotAI::findNearbyCreature()
     // if (!creatureList.empty())
     //    TellMaster("Found %i Creatures.", creatureList.size());
 
-    for (std::list<Creature*>::iterator iter = creatureList.begin(); iter != creatureList.end(); ++iter)
+    for (std::list<Creature*>::iterator iter = creatureList.begin(); iter != creatureList.end(); iter++)
     {
         Creature* currCreature = *iter;
 
-        for(std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end(); ++itr)
+        for (std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end(); itr = m_findNPC.erase(itr))
         {
             uint32 npcflags = currCreature->GetUInt32Value(UNIT_NPC_FLAGS);
 
-            if(!(*itr & npcflags))
+            if (!(*itr & npcflags))
                 continue;
 
-            if((*itr == UNIT_NPC_FLAG_TRAINER_CLASS) && !currCreature->CanTrainAndResetTalentsOf(m_bot))
+            if ((*itr == UNIT_NPC_FLAG_TRAINER_CLASS) && !currCreature->CanTrainAndResetTalentsOf(m_bot))
                 continue;
 
             WorldObject *wo = m_bot->GetMap()->GetWorldObject(currCreature->GetObjectGuid());
@@ -3908,154 +3908,132 @@ void PlayerbotAI::findNearbyCreature()
             if (m_bot->GetDistance(wo) < INTERACTION_DISTANCE)
             {
 
+                // DEBUG_LOG("%s is interacting with (%s)",m_bot->GetName(),currCreature->GetCreatureInfo()->Name);
                 GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(currCreature->GetCreatureInfo()->GossipMenuId);
-                for(GossipMenuItemsMap::const_iterator it = pMenuItemBounds.first; it != pMenuItemBounds.second; ++it)
-                {
 
+                // prepares quest menu when true
+                bool canSeeQuests = currCreature->GetCreatureInfo()->GossipMenuId == m_bot->GetDefaultGossipMenuForSource(wo);
+
+                // if canSeeQuests (the default, top level menu) and no menu options exist for this, use options from default options
+                if (pMenuItemBounds.first == pMenuItemBounds.second && canSeeQuests)
+                    pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(0);
+
+                for (GossipMenuItemsMap::const_iterator it = pMenuItemBounds.first; it != pMenuItemBounds.second; it++)
+                {
                     if (!(it->second.npc_option_npcflag & npcflags))
                         continue;
 
-                    switch(it->second.option_id)
+                    switch (it->second.option_id)
                     {
                         case GOSSIP_OPTION_BANKER:
                         {
                             // Manage banking actions
-                            if(!m_tasks.empty())
-                            {
-                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ++ait)
+                            if (!m_tasks.empty())
+                                for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
-                                    switch(ait->first)
+                                    switch (ait->first)
                                     {
                                         // withdraw items
                                         case WITHDRAW:
                                         {
                                             // TellMaster("Withdraw items");
-                                            if(Withdraw(ait->second))
-                                                ait = m_tasks.erase(ait);
+                                            if (!Withdraw(ait->second))
+                                                DEBUG_LOG("Withdraw: Couldn't withdraw (%u)", ait->second);
                                             break;
                                         }
                                         // deposit items
                                         case DEPOSIT:
                                         {
                                             // TellMaster("Deposit items");
-                                            if(Deposit(ait->second))
-                                                ait = m_tasks.erase(ait);
+                                            if (!Deposit(ait->second))
+                                                DEBUG_LOG("Deposit: Couldn't deposit (%u)", ait->second);
                                             break;
                                         }
                                         default:
                                             break;
                                     }
                                 }
-                            }
                             BankBalance();
-                            itr = m_findNPC.erase(itr); // all done lets go home
-                            m_bot->GetMotionMaster()->Clear();
-                            m_bot->GetMotionMaster()->MoveIdle();
                             break;
                         }
+                        case GOSSIP_OPTION_INNKEEPER:
+                        case GOSSIP_OPTION_TRAINER:
+                        case GOSSIP_OPTION_QUESTGIVER:
+                        case GOSSIP_OPTION_VENDOR:
                         case GOSSIP_OPTION_UNLEARNTALENTS:
                         {
-                            // Manage class trainer actions
-                            if(!m_tasks.empty())
-                            {
-                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ++ait)
+                            // Manage questgiver, trainer, innkeeper & vendor actions
+                            if (!m_tasks.empty())
+                                for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
-                                    switch(ait->first)
+                                    switch (ait->first)
                                     {
                                         // reset talents
                                         case RESET:
                                         {
                                             // TellMaster("Reset all talents");
-                                            if(Talent(currCreature))
+                                            if (Talent(currCreature))
                                                 InspectUpdate();
-                                            ait = m_tasks.erase(ait);
                                             break;
                                         }
-                                        default:
-                                            break;
-                                   }
-                                }
-                            }
-                            itr = m_findNPC.erase(itr); // all done lets go home
-                            m_bot->GetMotionMaster()->Clear();
-                            m_bot->GetMotionMaster()->MoveIdle();
-                            break;
-                        }
-                        case GOSSIP_OPTION_VENDOR:
-                        {
-                            // Manage vendor actions
-                            if(!m_tasks.empty())
-                            {
-                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ++ait)
-                                {
-                                    switch(ait->first)
-                                    {
                                         // sell items
                                         case SELL:
                                         {
                                             // TellMaster("Selling items");
-                                            if(Sell(ait->second))
-                                                ait = m_tasks.erase(ait);
+                                            Sell(ait->second);
                                             break;
                                         }
                                         // repair items
                                         case REPAIR:
                                         {
                                             // TellMaster("Repairing items");
-                                            if(Repair(ait->second, currCreature))
-                                                ait = m_tasks.erase(ait);
+                                            Repair(ait->second, currCreature);
                                             break;
                                         }
                                         default:
                                             break;
-                                   }
+                                    }
                                 }
-                            }
-                            itr = m_findNPC.erase(itr); // all done lets go home
-                            m_bot->GetMotionMaster()->Clear();
-                            m_bot->GetMotionMaster()->MoveIdle();
                             break;
                         }
                         case GOSSIP_OPTION_AUCTIONEER:
                         {
                             // Manage auctioneer actions
-                            if(!m_tasks.empty())
-                            {
-                                for(std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ++ait)
+                            if (!m_tasks.empty())
+                                for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
-                                    switch(ait->first)
+                                    switch (ait->first)
                                     {
                                         // add new auction item
                                         case ADD:
                                         {
                                             // TellMaster("Creating auction");
-                                            if(AddAuction(ait->second, currCreature))
-                                                ait = m_tasks.erase(ait);
+                                            AddAuction(ait->second, currCreature);
                                             break;
                                         }
                                         // cancel active auction
                                         case REMOVE:
                                         {
                                             // TellMaster("Cancelling auction");
-                                            if(RemoveAuction(ait->second))
-                                                ait = m_tasks.erase(ait);
+                                            if (!RemoveAuction(ait->second))
+                                                DEBUG_LOG("RemoveAuction: Couldn't remove auction (%u)", ait->second);
                                             break;
                                         }
                                         default:
                                             break;
-                                   }
+                                    }
                                 }
-                            }
                             ListAuctions();
-                            itr= m_findNPC.erase(itr); // all done lets go home
-                            m_bot->GetMotionMaster()->Clear();
-                            m_bot->GetMotionMaster()->MoveIdle();
                             break;
                         }
+                        default:
+                            break;
                     }
                     m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
                 }
             }
+            m_bot->GetMotionMaster()->Clear();
+            m_bot->GetMotionMaster()->MoveIdle();
         }
     }
 }
