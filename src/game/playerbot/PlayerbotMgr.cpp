@@ -785,7 +785,18 @@ void PlayerbotMgr::OnBotLogin(Player * const bot)
     const ObjectGuid masterGuid = m_master->GetObjectGuid();
     if (m_master->GetGroup() &&
         !m_master->GetGroup()->IsLeader(masterGuid))
-        m_master->GetGroup()->ChangeLeader(masterGuid);
+        {
+                // But only do so if one of the master's bots is leader
+                for (PlayerBotMap::const_iterator itr = GetPlayerBotsBegin(); itr != GetPlayerBotsEnd(); itr++)
+                {
+                        Player* bot = itr->second;
+                        if ( m_master->GetGroup()->IsLeader(bot->GetObjectGuid()) )
+                        {
+                                m_master->GetGroup()->ChangeLeader(masterGuid);
+                                break;
+                        }
+                }
+        }
 }
 
 void PlayerbotMgr::RemoveAllBotsFromGroup()
