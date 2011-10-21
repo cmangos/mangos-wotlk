@@ -5096,7 +5096,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             }
             else if(subcommand == "reset")
             {
-                m_tasks.push_back(std::pair<enum TaskFlags,uint32>(RESET, 0));
+                m_tasks.push_back(std::pair<enum TaskFlags,uint32>(RESET_TALENTS, 0));
                 m_findNPC.push_back(UNIT_NPC_FLAG_TRAINER_CLASS);
             }
         }
