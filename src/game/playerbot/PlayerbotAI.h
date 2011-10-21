@@ -150,7 +150,7 @@ public:
         REMOVE_AUCTION              = 0x04,  // remove auction
         RESET_TALENTS               = 0x05,  // reset all talents
         BANK_WITHDRAW               = 0x06,  // withdraw item from bank
-        BANK_DEPOSIT                = 0x07   // deposit item in bank
+        BANK_DEPOSIT                = 0x07,  // deposit item in bank
         LIST_QUEST                  = 0x08,  // list quests
         END_QUEST                   = 0x09,  // turn in quests
         TAKE_QUEST                  = 0x0A   // take quest
