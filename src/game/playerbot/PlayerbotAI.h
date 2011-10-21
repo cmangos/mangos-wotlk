@@ -144,13 +144,13 @@ public:
     enum TaskFlags
     {
         NONE                        = 0x00,
-        SELL                        = 0x01,  // sell items
-        REPAIR                      = 0x02,  // repair items
-        ADD                         = 0x04,  // add auction
-        REMOVE                      = 0x08,  // remove auction
-        RESET                       = 0x10,  // reset all talents
-        WITHDRAW                    = 0x11,  // withdraw item from bank
-	DEPOSIT                     = 0x12   // deposit item in bank
+        SELL_ITEMS                  = 0x01,  // sell items
+        REPAIR_ITEMS                = 0x02,  // repair items
+        ADD_AUCTION                 = 0x04,  // add auction
+        REMOVE_AUCTION              = 0x08,  // remove auction
+        RESET_TALENTS               = 0x10,  // reset all talents
+        BANK_WITHDRAW               = 0x11,  // withdraw item from bank
+        BANK_DEPOSIT                = 0x12   // deposit item in bank
     };
 
     typedef std::pair<enum TaskFlags, uint32> taskPair;

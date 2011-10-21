@@ -3934,7 +3934,7 @@ void PlayerbotAI::findNearbyCreature()
                                     switch (ait->first)
                                     {
                                         // withdraw items
-                                        case WITHDRAW:
+                                        case BANK_WITHDRAW:
                                         {
                                             // TellMaster("Withdraw items");
                                             if (!Withdraw(ait->second))
@@ -3942,7 +3942,7 @@ void PlayerbotAI::findNearbyCreature()
                                             break;
                                         }
                                         // deposit items
-                                        case DEPOSIT:
+                                        case BANK_DEPOSIT:
                                         {
                                             // TellMaster("Deposit items");
                                             if (!Deposit(ait->second))
@@ -3969,7 +3969,7 @@ void PlayerbotAI::findNearbyCreature()
                                     switch (ait->first)
                                     {
                                         // reset talents
-                                        case RESET:
+                                        case RESET_TALENTS:
                                         {
                                             // TellMaster("Reset all talents");
                                             if (Talent(currCreature))
@@ -3977,14 +3977,14 @@ void PlayerbotAI::findNearbyCreature()
                                             break;
                                         }
                                         // sell items
-                                        case SELL:
+                                        case SELL_ITEMS:
                                         {
                                             // TellMaster("Selling items");
                                             Sell(ait->second);
                                             break;
                                         }
                                         // repair items
-                                        case REPAIR:
+                                        case REPAIR_ITEMS:
                                         {
                                             // TellMaster("Repairing items");
                                             Repair(ait->second, currCreature);
@@ -4005,14 +4005,14 @@ void PlayerbotAI::findNearbyCreature()
                                     switch (ait->first)
                                     {
                                         // add new auction item
-                                        case ADD:
+                                        case ADD_AUCTION:
                                         {
                                             // TellMaster("Creating auction");
                                             AddAuction(ait->second, currCreature);
                                             break;
                                         }
                                         // cancel active auction
-                                        case REMOVE:
+                                        case REMOVE_AUCTION:
                                         {
                                             // TellMaster("Cancelling auction");
                                             if (!RemoveAuction(ait->second))
@@ -4927,7 +4927,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         std::list<uint32> itemIds;
         extractItemIds(text, itemIds);
         for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(SELL, *it));
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(SELL_ITEMS, *it));
         m_findNPC.push_back(VENDOR_MASK);
     }
 
@@ -4949,12 +4949,12 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         extractItemIds(part, itemIds);
         for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
         {
-            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR, *it));
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR_ITEMS, *it));
             m_findNPC.push_back(UNIT_NPC_FLAG_REPAIR);
         }
         if(itemIds.empty() && subcommand == "all")
         {
-            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR, 0));
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR_ITEMS, 0));
             m_findNPC.push_back(UNIT_NPC_FLAG_REPAIR);
         }
     }
@@ -4987,7 +4987,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 std::list<uint32> itemIds;
                 extractItemIds(part, itemIds);
                 for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(ADD, *it));
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(ADD_AUCTION, *it));
                 m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
             }
 
@@ -4996,7 +4996,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 std::list<uint32> auctionIds;
                 extractAuctionIds(part, auctionIds);
                 for (std::list<uint32>::iterator it = auctionIds.begin(); it != auctionIds.end(); ++it)
-                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REMOVE, *it));
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REMOVE_AUCTION, *it));
                 m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
             }
         }
@@ -5032,7 +5032,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 std::list<uint32> itemIds;
                 extractItemIds(part, itemIds);
                 for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(DEPOSIT, *it));
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(BANK_DEPOSIT, *it));
                 m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
             }
 
@@ -5041,7 +5041,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 std::list<uint32> itemIds;
                 extractItemIds(part, itemIds);
                 for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(WITHDRAW, *it));
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(BANK_WITHDRAW, *it));
                 m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
             }
         }
