@@ -61,94 +61,94 @@ enum ProfessionSpells
 
 enum TalentsDeathKnight  // 0x020
 {
-        DEATHKNIGHT_BUTCHERY                        = 1939,  // TabId = 398, Tab = 0, Row = 0, Column = 0
-        DEATHKNIGHT_SUBVERSION                      = 1945,  // TabId = 398, Tab = 0, Row = 0, Column = 1
-        DEATHKNIGHT_BLADE_BARRIER                   = 2017,  // TabId = 398, Tab = 0, Row = 0, Column = 2
-        DEATHKNIGHT_BLADED_ARMOR                    = 1938,  // TabId = 398, Tab = 0, Row = 1, Column = 0
-        DEATHKNIGHT_SCENT_OF_BLOOD                  = 1948,  // TabId = 398, Tab = 0, Row = 1, Column = 1
-        DEATHKNIGHT_TWOHANDED_WEAPON_SPECIALIZATION = 2217,  // TabId = 398, Tab = 0, Row = 1, Column = 2
-        DEATHKNIGHT_RUNE_TAP                        = 1941,  // TabId = 398, Tab = 0, Row = 2, Column = 0
-        DEATHKNIGHT_DARK_CONVICTION                 = 1943,  // TabId = 398, Tab = 0, Row = 2, Column = 1
-        DEATHKNIGHT_DEATH_RUNE_MASTERY              = 2086,  // TabId = 398, Tab = 0, Row = 2, Column = 2
-        DEATHKNIGHT_IMPROVED_RUNE_TAP               = 1942,  // TabId = 398, Tab = 0, Row = 3, Column = 0
-        DEATHKNIGHT_SPELL_DEFLECTION                = 2018,  // TabId = 398, Tab = 0, Row = 3, Column = 2
-        DEATHKNIGHT_VENDETTA                        = 1953,  // TabId = 398, Tab = 0, Row = 3, Column = 3
-        DEATHKNIGHT_BLOODY_STRIKES                  = 2015,  // TabId = 398, Tab = 0, Row = 4, Column = 0
-        DEATHKNIGHT_VETERAN_OF_THE_THIRD_WAR        = 1950,  // TabId = 398, Tab = 0, Row = 4, Column = 2
-        DEATHKNIGHT_MARK_OF_BLOOD                   = 1949,  // TabId = 398, Tab = 0, Row = 4, Column = 3
-        DEATHKNIGHT_BLOODY_VENGEANCE                = 1944,  // TabId = 398, Tab = 0, Row = 5, Column = 1
-        DEATHKNIGHT_ABOMINATIONS_MIGHT              = 2105,  // TabId = 398, Tab = 0, Row = 5, Column = 2
-        DEATHKNIGHT_BLOOD_WORMS                     = 1960,  // TabId = 398, Tab = 0, Row = 6, Column = 0
-        DEATHKNIGHT_HYSTERIA                        = 1954,  // TabId = 398, Tab = 0, Row = 6, Column = 1
-        DEATHKNIGHT_IMPROVED_BLOOD_PRESENCE         = 1936,  // TabId = 398, Tab = 0, Row = 6, Column = 2
-        DEATHKNIGHT_IMPROVED_DEATH_STRIKE           = 2259,  // TabId = 398, Tab = 0, Row = 7, Column = 0
-        DEATHKNIGHT_SUDDEN_DOOM                     = 1955,  // TabId = 398, Tab = 0, Row = 7, Column = 1
-        DEATHKNIGHT_VAMPIRIC_BLOOD                  = 2019,  // TabId = 398, Tab = 0, Row = 7, Column = 2
-        DEATHKNIGHT_WILL_OF_THE_NECROPOLIS          = 1959,  // TabId = 398, Tab = 0, Row = 8, Column = 0
-        DEATHKNIGHT_HEART_STRIKE                    = 1957,  // TabId = 398, Tab = 0, Row = 8, Column = 1
-        DEATHKNIGHT_MIGHT_OF_MOGRAINE               = 1958,  // TabId = 398, Tab = 0, Row = 8, Column = 2
-        DEATHKNIGHT_BLOOD_GORGED                    = 2034,  // TabId = 398, Tab = 0, Row = 9, Column = 1
-        DEATHKNIGHT_DANCING_RUNE_WEAPON             = 1961,  // TabId = 398, Tab = 0, Row = 10, Column = 1
-        DEATHKNIGHT_IMPROVED_ICY_TOUCH              = 2031,  // TabId = 399, Tab = 1, Row = 0, Column = 0
-        DEATHKNIGHT_RUNIC_POWER_MASTERY             = 2020,  // TabId = 399, Tab = 1, Row = 0, Column = 1
-        DEATHKNIGHT_TOUGHNESS                       = 1968,  // TabId = 399, Tab = 1, Row = 0, Column = 2
-        DEATHKNIGHT_ICY_REACH                       = 2035,  // TabId = 399, Tab = 1, Row = 1, Column = 1
-        DEATHKNIGHT_BLACK_ICE                       = 1973,  // TabId = 399, Tab = 1, Row = 1, Column = 2
-        DEATHKNIGHT_NERVES_OF_COLD_STEEL            = 2022,  // TabId = 399, Tab = 1, Row = 1, Column = 3
-        DEATHKNIGHT_ICY_TALONS                      = 2042,  // TabId = 399, Tab = 1, Row = 2, Column = 0
-        DEATHKNIGHT_LICHBORNE                       = 2215,  // TabId = 399, Tab = 1, Row = 2, Column = 1
-        DEATHKNIGHT_ANNIHILATION                    = 2048,  // TabId = 399, Tab = 1, Row = 2, Column = 2
-        DEATHKNIGHT_KILLING_MACHINE                 = 2044,  // TabId = 399, Tab = 1, Row = 3, Column = 1
-        DEATHKNIGHT_CHILL_OF_THE_GRAVE              = 1981,  // TabId = 399, Tab = 1, Row = 3, Column = 2
-        DEATHKNIGHT_ENDLESS_WINTER                  = 1971,  // TabId = 399, Tab = 1, Row = 3, Column = 3
-        DEATHKNIGHT_FRIGID_DREADPLATE               = 1990,  // TabId = 399, Tab = 1, Row = 4, Column = 1
-        DEATHKNIGHT_GLACIER_ROT                     = 2030,  // TabId = 399, Tab = 1, Row = 4, Column = 2
-        DEATHKNIGHT_DEATHCHILL                      = 1980,  // TabId = 399, Tab = 1, Row = 4, Column = 3
-        DEATHKNIGHT_IMPROVED_ICY_TALONS             = 2223,  // TabId = 399, Tab = 1, Row = 5, Column = 0
-        DEATHKNIGHT_MERCILESS_COMBAT                = 1993,  // TabId = 399, Tab = 1, Row = 5, Column = 1
-        DEATHKNIGHT_RIME                            = 1992,  // TabId = 399, Tab = 1, Row = 5, Column = 2
-        DEATHKNIGHT_CHILLBLAINS                     = 2260,  // TabId = 399, Tab = 1, Row = 6, Column = 0
-        DEATHKNIGHT_HUNGERING_COLD                  = 1999,  // TabId = 399, Tab = 1, Row = 6, Column = 1
-        DEATHKNIGHT_IMPROVED_FROST_PRESENCE         = 2029,  // TabId = 399, Tab = 1, Row = 6, Column = 2
-        DEATHKNIGHT_THREAT_OF_THASSARIAN            = 2284,  // TabId = 399, Tab = 1, Row = 7, Column = 0
-        DEATHKNIGHT_BLOOD_OF_THE_NORTH              = 2210,  // TabId = 399, Tab = 1, Row = 7, Column = 1
-        DEATHKNIGHT_UNBREAKABLE_ARMOR               = 1979,  // TabId = 399, Tab = 1, Row = 7, Column = 2
-        DEATHKNIGHT_ACCLIMATION                     = 1997,  // TabId = 399, Tab = 1, Row = 8, Column = 0
-        DEATHKNIGHT_FROST_STRIKE                    = 1975,  // TabId = 399, Tab = 1, Row = 8, Column = 1
-        DEATHKNIGHT_GUILE_OF_GOREFIEND              = 2040,  // TabId = 399, Tab = 1, Row = 8, Column = 2
-        DEATHKNIGHT_TUNDRA_STALKER                  = 1998,  // TabId = 399, Tab = 1, Row = 9, Column = 1
-        DEATHKNIGHT_HOWLING_BLAST                   = 1989,  // TabId = 399, Tab = 1, Row = 10, Column = 1
-        DEATHKNIGHT_VICIOUS_STRIKES                 = 2082,  // TabId = 400, Tab = 2, Row = 0, Column = 0
-        DEATHKNIGHT_VIRULENCE                       = 1932,  // TabId = 400, Tab = 2, Row = 0, Column = 1
-        DEATHKNIGHT_ANTICIPATION                    = 2218,  // TabId = 400, Tab = 2, Row = 0, Column = 2
-        DEATHKNIGHT_EPIDEMIC                        = 1963,  // TabId = 400, Tab = 2, Row = 1, Column = 0
-        DEATHKNIGHT_MORBIDITY                       = 1933,  // TabId = 400, Tab = 2, Row = 1, Column = 1
-        DEATHKNIGHT_UNHOLY_COMMAND                  = 2025,  // TabId = 400, Tab = 2, Row = 1, Column = 2
-        DEATHKNIGHT_RAVENOUS_DEAD                   = 1934,  // TabId = 400, Tab = 2, Row = 1, Column = 3
-        DEATHKNIGHT_OUTBREAK                        = 2008,  // TabId = 400, Tab = 2, Row = 2, Column = 0
-        DEATHKNIGHT_NECROSIS                        = 2047,  // TabId = 400, Tab = 2, Row = 2, Column = 1
-        DEATHKNIGHT_CORPSE_EXPLOSION                = 1985,  // TabId = 400, Tab = 2, Row = 2, Column = 2
-        DEATHKNIGHT_ON_A_PALE_HORSE                 = 2039,  // TabId = 400, Tab = 2, Row = 3, Column = 1
-        DEATHKNIGHT_BLOODCAKED_BLADE                = 2004,  // TabId = 400, Tab = 2, Row = 3, Column = 2
-        DEATHKNIGHT_NIGHT_OF_THE_DEAD               = 2225,  // TabId = 400, Tab = 2, Row = 3, Column = 3
-        DEATHKNIGHT_UNHOLY_BLIGHT                   = 1996,  // TabId = 400, Tab = 2, Row = 4, Column = 0
-        DEATHKNIGHT_IMPURITY                        = 2005,  // TabId = 400, Tab = 2, Row = 4, Column = 1
-        DEATHKNIGHT_DIRGE                           = 2011,  // TabId = 400, Tab = 2, Row = 4, Column = 2
-        DEATHKNIGHT_DESECRATION                     = 2226,  // TabId = 400, Tab = 2, Row = 5, Column = 0
-        DEATHKNIGHT_MAGIC_SUPPRESSION               = 2009,  // TabId = 400, Tab = 2, Row = 5, Column = 1
-        DEATHKNIGHT_REAPING                         = 2001,  // TabId = 400, Tab = 2, Row = 5, Column = 2
-        DEATHKNIGHT_MASTER_OF_GHOULS                = 1984,  // TabId = 400, Tab = 2, Row = 5, Column = 3
-        DEATHKNIGHT_DESOLATION                      = 2285,  // TabId = 400, Tab = 2, Row = 6, Column = 0
-        DEATHKNIGHT_ANTIMAGIC_ZONE                  = 2221,  // TabId = 400, Tab = 2, Row = 6, Column = 1
-        DEATHKNIGHT_IMPROVED_UNHOLY_PRESENCE        = 2013,  // TabId = 400, Tab = 2, Row = 6, Column = 2
-        DEATHKNIGHT_GHOUL_FRENZY                    = 2085,  // TabId = 400, Tab = 2, Row = 6, Column = 3
-        DEATHKNIGHT_CRYPT_FEVER                     = 1962,  // TabId = 400, Tab = 2, Row = 7, Column = 1
-        DEATHKNIGHT_BONE_SHIELD                     = 2007,  // TabId = 400, Tab = 2, Row = 7, Column = 2
-        DEATHKNIGHT_WANDERING_PLAGUE                = 2003,  // TabId = 400, Tab = 2, Row = 8, Column = 0
-        DEATHKNIGHT_EBON_PLAGUEBRINGER              = 2043,  // TabId = 400, Tab = 2, Row = 8, Column = 1
-        DEATHKNIGHT_SCOURGE_STRIKE                  = 2216,  // TabId = 400, Tab = 2, Row = 8, Column = 2
-        DEATHKNIGHT_RAGE_OF_RIVENDARE               = 2036,  // TabId = 400, Tab = 2, Row = 9, Column = 1
-        DEATHKNIGHT_SUMMON_GARGOYLE                 = 2000   // TabId = 400, Tab = 2, Row = 10, Column = 1
+    DEATHKNIGHT_BUTCHERY                        = 1939,  // TabId = 398, Tab = 0, Row = 0, Column = 0
+    DEATHKNIGHT_SUBVERSION                      = 1945,  // TabId = 398, Tab = 0, Row = 0, Column = 1
+    DEATHKNIGHT_BLADE_BARRIER                   = 2017,  // TabId = 398, Tab = 0, Row = 0, Column = 2
+    DEATHKNIGHT_BLADED_ARMOR                    = 1938,  // TabId = 398, Tab = 0, Row = 1, Column = 0
+    DEATHKNIGHT_SCENT_OF_BLOOD                  = 1948,  // TabId = 398, Tab = 0, Row = 1, Column = 1
+    DEATHKNIGHT_TWOHANDED_WEAPON_SPECIALIZATION = 2217,  // TabId = 398, Tab = 0, Row = 1, Column = 2
+    DEATHKNIGHT_RUNE_TAP                        = 1941,  // TabId = 398, Tab = 0, Row = 2, Column = 0
+    DEATHKNIGHT_DARK_CONVICTION                 = 1943,  // TabId = 398, Tab = 0, Row = 2, Column = 1
+    DEATHKNIGHT_DEATH_RUNE_MASTERY              = 2086,  // TabId = 398, Tab = 0, Row = 2, Column = 2
+    DEATHKNIGHT_IMPROVED_RUNE_TAP               = 1942,  // TabId = 398, Tab = 0, Row = 3, Column = 0
+    DEATHKNIGHT_SPELL_DEFLECTION                = 2018,  // TabId = 398, Tab = 0, Row = 3, Column = 2
+    DEATHKNIGHT_VENDETTA                        = 1953,  // TabId = 398, Tab = 0, Row = 3, Column = 3
+    DEATHKNIGHT_BLOODY_STRIKES                  = 2015,  // TabId = 398, Tab = 0, Row = 4, Column = 0
+    DEATHKNIGHT_VETERAN_OF_THE_THIRD_WAR        = 1950,  // TabId = 398, Tab = 0, Row = 4, Column = 2
+    DEATHKNIGHT_MARK_OF_BLOOD                   = 1949,  // TabId = 398, Tab = 0, Row = 4, Column = 3
+    DEATHKNIGHT_BLOODY_VENGEANCE                = 1944,  // TabId = 398, Tab = 0, Row = 5, Column = 1
+    DEATHKNIGHT_ABOMINATIONS_MIGHT              = 2105,  // TabId = 398, Tab = 0, Row = 5, Column = 2
+    DEATHKNIGHT_BLOOD_WORMS                     = 1960,  // TabId = 398, Tab = 0, Row = 6, Column = 0
+    DEATHKNIGHT_HYSTERIA                        = 1954,  // TabId = 398, Tab = 0, Row = 6, Column = 1
+    DEATHKNIGHT_IMPROVED_BLOOD_PRESENCE         = 1936,  // TabId = 398, Tab = 0, Row = 6, Column = 2
+    DEATHKNIGHT_IMPROVED_DEATH_STRIKE           = 2259,  // TabId = 398, Tab = 0, Row = 7, Column = 0
+    DEATHKNIGHT_SUDDEN_DOOM                     = 1955,  // TabId = 398, Tab = 0, Row = 7, Column = 1
+    DEATHKNIGHT_VAMPIRIC_BLOOD                  = 2019,  // TabId = 398, Tab = 0, Row = 7, Column = 2
+    DEATHKNIGHT_WILL_OF_THE_NECROPOLIS          = 1959,  // TabId = 398, Tab = 0, Row = 8, Column = 0
+    DEATHKNIGHT_HEART_STRIKE                    = 1957,  // TabId = 398, Tab = 0, Row = 8, Column = 1
+    DEATHKNIGHT_MIGHT_OF_MOGRAINE               = 1958,  // TabId = 398, Tab = 0, Row = 8, Column = 2
+    DEATHKNIGHT_BLOOD_GORGED                    = 2034,  // TabId = 398, Tab = 0, Row = 9, Column = 1
+    DEATHKNIGHT_DANCING_RUNE_WEAPON             = 1961,  // TabId = 398, Tab = 0, Row = 10, Column = 1
+    DEATHKNIGHT_IMPROVED_ICY_TOUCH              = 2031,  // TabId = 399, Tab = 1, Row = 0, Column = 0
+    DEATHKNIGHT_RUNIC_POWER_MASTERY             = 2020,  // TabId = 399, Tab = 1, Row = 0, Column = 1
+    DEATHKNIGHT_TOUGHNESS                       = 1968,  // TabId = 399, Tab = 1, Row = 0, Column = 2
+    DEATHKNIGHT_ICY_REACH                       = 2035,  // TabId = 399, Tab = 1, Row = 1, Column = 1
+    DEATHKNIGHT_BLACK_ICE                       = 1973,  // TabId = 399, Tab = 1, Row = 1, Column = 2
+    DEATHKNIGHT_NERVES_OF_COLD_STEEL            = 2022,  // TabId = 399, Tab = 1, Row = 1, Column = 3
+    DEATHKNIGHT_ICY_TALONS                      = 2042,  // TabId = 399, Tab = 1, Row = 2, Column = 0
+    DEATHKNIGHT_LICHBORNE                       = 2215,  // TabId = 399, Tab = 1, Row = 2, Column = 1
+    DEATHKNIGHT_ANNIHILATION                    = 2048,  // TabId = 399, Tab = 1, Row = 2, Column = 2
+    DEATHKNIGHT_KILLING_MACHINE                 = 2044,  // TabId = 399, Tab = 1, Row = 3, Column = 1
+    DEATHKNIGHT_CHILL_OF_THE_GRAVE              = 1981,  // TabId = 399, Tab = 1, Row = 3, Column = 2
+    DEATHKNIGHT_ENDLESS_WINTER                  = 1971,  // TabId = 399, Tab = 1, Row = 3, Column = 3
+    DEATHKNIGHT_FRIGID_DREADPLATE               = 1990,  // TabId = 399, Tab = 1, Row = 4, Column = 1
+    DEATHKNIGHT_GLACIER_ROT                     = 2030,  // TabId = 399, Tab = 1, Row = 4, Column = 2
+    DEATHKNIGHT_DEATHCHILL                      = 1980,  // TabId = 399, Tab = 1, Row = 4, Column = 3
+    DEATHKNIGHT_IMPROVED_ICY_TALONS             = 2223,  // TabId = 399, Tab = 1, Row = 5, Column = 0
+    DEATHKNIGHT_MERCILESS_COMBAT                = 1993,  // TabId = 399, Tab = 1, Row = 5, Column = 1
+    DEATHKNIGHT_RIME                            = 1992,  // TabId = 399, Tab = 1, Row = 5, Column = 2
+    DEATHKNIGHT_CHILLBLAINS                     = 2260,  // TabId = 399, Tab = 1, Row = 6, Column = 0
+    DEATHKNIGHT_HUNGERING_COLD                  = 1999,  // TabId = 399, Tab = 1, Row = 6, Column = 1
+    DEATHKNIGHT_IMPROVED_FROST_PRESENCE         = 2029,  // TabId = 399, Tab = 1, Row = 6, Column = 2
+    DEATHKNIGHT_THREAT_OF_THASSARIAN            = 2284,  // TabId = 399, Tab = 1, Row = 7, Column = 0
+    DEATHKNIGHT_BLOOD_OF_THE_NORTH              = 2210,  // TabId = 399, Tab = 1, Row = 7, Column = 1
+    DEATHKNIGHT_UNBREAKABLE_ARMOR               = 1979,  // TabId = 399, Tab = 1, Row = 7, Column = 2
+    DEATHKNIGHT_ACCLIMATION                     = 1997,  // TabId = 399, Tab = 1, Row = 8, Column = 0
+    DEATHKNIGHT_FROST_STRIKE                    = 1975,  // TabId = 399, Tab = 1, Row = 8, Column = 1
+    DEATHKNIGHT_GUILE_OF_GOREFIEND              = 2040,  // TabId = 399, Tab = 1, Row = 8, Column = 2
+    DEATHKNIGHT_TUNDRA_STALKER                  = 1998,  // TabId = 399, Tab = 1, Row = 9, Column = 1
+    DEATHKNIGHT_HOWLING_BLAST                   = 1989,  // TabId = 399, Tab = 1, Row = 10, Column = 1
+    DEATHKNIGHT_VICIOUS_STRIKES                 = 2082,  // TabId = 400, Tab = 2, Row = 0, Column = 0
+    DEATHKNIGHT_VIRULENCE                       = 1932,  // TabId = 400, Tab = 2, Row = 0, Column = 1
+    DEATHKNIGHT_ANTICIPATION                    = 2218,  // TabId = 400, Tab = 2, Row = 0, Column = 2
+    DEATHKNIGHT_EPIDEMIC                        = 1963,  // TabId = 400, Tab = 2, Row = 1, Column = 0
+    DEATHKNIGHT_MORBIDITY                       = 1933,  // TabId = 400, Tab = 2, Row = 1, Column = 1
+    DEATHKNIGHT_UNHOLY_COMMAND                  = 2025,  // TabId = 400, Tab = 2, Row = 1, Column = 2
+    DEATHKNIGHT_RAVENOUS_DEAD                   = 1934,  // TabId = 400, Tab = 2, Row = 1, Column = 3
+    DEATHKNIGHT_OUTBREAK                        = 2008,  // TabId = 400, Tab = 2, Row = 2, Column = 0
+    DEATHKNIGHT_NECROSIS                        = 2047,  // TabId = 400, Tab = 2, Row = 2, Column = 1
+    DEATHKNIGHT_CORPSE_EXPLOSION                = 1985,  // TabId = 400, Tab = 2, Row = 2, Column = 2
+    DEATHKNIGHT_ON_A_PALE_HORSE                 = 2039,  // TabId = 400, Tab = 2, Row = 3, Column = 1
+    DEATHKNIGHT_BLOODCAKED_BLADE                = 2004,  // TabId = 400, Tab = 2, Row = 3, Column = 2
+    DEATHKNIGHT_NIGHT_OF_THE_DEAD               = 2225,  // TabId = 400, Tab = 2, Row = 3, Column = 3
+    DEATHKNIGHT_UNHOLY_BLIGHT                   = 1996,  // TabId = 400, Tab = 2, Row = 4, Column = 0
+    DEATHKNIGHT_IMPURITY                        = 2005,  // TabId = 400, Tab = 2, Row = 4, Column = 1
+    DEATHKNIGHT_DIRGE                           = 2011,  // TabId = 400, Tab = 2, Row = 4, Column = 2
+    DEATHKNIGHT_DESECRATION                     = 2226,  // TabId = 400, Tab = 2, Row = 5, Column = 0
+    DEATHKNIGHT_MAGIC_SUPPRESSION               = 2009,  // TabId = 400, Tab = 2, Row = 5, Column = 1
+    DEATHKNIGHT_REAPING                         = 2001,  // TabId = 400, Tab = 2, Row = 5, Column = 2
+    DEATHKNIGHT_MASTER_OF_GHOULS                = 1984,  // TabId = 400, Tab = 2, Row = 5, Column = 3
+    DEATHKNIGHT_DESOLATION                      = 2285,  // TabId = 400, Tab = 2, Row = 6, Column = 0
+    DEATHKNIGHT_ANTIMAGIC_ZONE                  = 2221,  // TabId = 400, Tab = 2, Row = 6, Column = 1
+    DEATHKNIGHT_IMPROVED_UNHOLY_PRESENCE        = 2013,  // TabId = 400, Tab = 2, Row = 6, Column = 2
+    DEATHKNIGHT_GHOUL_FRENZY                    = 2085,  // TabId = 400, Tab = 2, Row = 6, Column = 3
+    DEATHKNIGHT_CRYPT_FEVER                     = 1962,  // TabId = 400, Tab = 2, Row = 7, Column = 1
+    DEATHKNIGHT_BONE_SHIELD                     = 2007,  // TabId = 400, Tab = 2, Row = 7, Column = 2
+    DEATHKNIGHT_WANDERING_PLAGUE                = 2003,  // TabId = 400, Tab = 2, Row = 8, Column = 0
+    DEATHKNIGHT_EBON_PLAGUEBRINGER              = 2043,  // TabId = 400, Tab = 2, Row = 8, Column = 1
+    DEATHKNIGHT_SCOURGE_STRIKE                  = 2216,  // TabId = 400, Tab = 2, Row = 8, Column = 2
+    DEATHKNIGHT_RAGE_OF_RIVENDARE               = 2036,  // TabId = 400, Tab = 2, Row = 9, Column = 1
+    DEATHKNIGHT_SUMMON_GARGOYLE                 = 2000   // TabId = 400, Tab = 2, Row = 10, Column = 1
 };
 
 enum TalentsDruid  // 0x400
@@ -951,7 +951,7 @@ enum TalentsPet  // 0x000
     PET_TENACITY_SILVERBACK                     = 2258,  // TabId = 409, Tab = 0, Row = 5, Column = 1
     PET_TENACITY_WILD_HUNT                      = 2255,  // TabId = 409, Tab = 0, Row = 5, Column = 2
     PET_FEROCITY_COBRA_REFLEXES                 = 2107,  // TabId = 410, Tab = 0, Row = 0, Column = 0
-        // TODO: same spell, one for flying pets other for land pets. Figure out which is which if it ever matters.
+    // TODO: same spell, one for flying pets other for land pets. Figure out which is which if it ever matters.
     PET_FEROCITY_DASHDIVE1                      = 2109,  // TabId = 410, Tab = 0, Row = 0, Column = 1
     PET_FEROCITY_DASHDIVE2                      = 2203,  // TabId = 410, Tab = 0, Row = 0, Column = 1
     PET_FEROCITY_GREAT_STAMINA                  = 2112,  // TabId = 410, Tab = 0, Row = 0, Column = 2
@@ -962,7 +962,7 @@ enum TalentsPet  // 0x000
     PET_FEROCITY_BOARS_SPEED                    = 2151,  // TabId = 410, Tab = 0, Row = 1, Column = 3
     PET_FEROCITY_CULLING_THE_HERD               = 2106,  // TabId = 410, Tab = 0, Row = 2, Column = 0
     PET_FEROCITY_LIONHEARTED                    = 2152,  // TabId = 410, Tab = 0, Row = 2, Column = 2
-        // TODO: same spell, one for flying pets other for land pets. Figure out which is which if it ever matters.
+    // TODO: same spell, one for flying pets other for land pets. Figure out which is which if it ever matters.
     PET_FEROCITY_CHARGESWOOP1                   = 2111,  // TabId = 410, Tab = 0, Row = 2, Column = 3
     PET_FEROCITY_CHARGESWOOP2                   = 2219,  // TabId = 410, Tab = 0, Row = 2, Column = 3
     PET_FEROCITY_HEART_OF_THE_PHOENIX           = 2156,  // TabId = 410, Tab = 0, Row = 3, Column = 1
@@ -974,13 +974,13 @@ enum TalentsPet  // 0x000
     PET_FEROCITY_SHARK_ATTACK                   = 2254,  // TabId = 410, Tab = 0, Row = 5, Column = 0
     PET_FEROCITY_WILD_HUNT                      = 2253,  // TabId = 410, Tab = 0, Row = 5, Column = 2
     PET_CUNNING_COBRA_REFLEXES                  = 2118,  // TabId = 411, Tab = 0, Row = 0, Column = 0
-        // TODO: same spell, one for flying pets other for land pets. Figure out which is which if it ever matters.
+    // TODO: same spell, one for flying pets other for land pets. Figure out which is which if it ever matters.
     PET_CUNNING_DASHDIVE1                       = 2119,  // TabId = 411, Tab = 0, Row = 0, Column = 1
     PET_CUNNING_DASHDIVE2                       = 2201,  // TabId = 411, Tab = 0, Row = 0, Column = 1
     PET_CUNNING_GREAT_STAMINA                   = 2120,  // TabId = 411, Tab = 0, Row = 0, Column = 2
     PET_CUNNING_NATURAL_ARMOR                   = 2121,  // TabId = 411, Tab = 0, Row = 0, Column = 3
     PET_CUNNING_BOARS_SPEED                     = 2165,  // TabId = 411, Tab = 0, Row = 1, Column = 0
-        // TODO: Frankly, not sure what the difference is. Presumably one for land, one for air? Because they require Dash or Dive.
+    // TODO: Frankly, not sure what the difference is. Presumably one for land, one for air? Because they require Dash or Dive.
     PET_CUNNING_MOBILITY1                       = 2207,  // TabId = 411, Tab = 0, Row = 1, Column = 1
     PET_CUNNING_MOBILITY2                       = 2208,  // TabId = 411, Tab = 0, Row = 1, Column = 1
     PET_CUNNING_OWLS_FOCUS                      = 2182,  // TabId = 411, Tab = 0, Row = 1, Column = 2
@@ -1001,378 +1001,378 @@ enum TalentsPet  // 0x000
 
 enum Glyphs
 {
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_DARK_COMMAND         = 511,   // Level 55  Spell ID: 58613
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_ANTIMAGIC_SHELL      = 512,   // Level 55  Spell ID: 58623
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_HEART_STRIKE         = 513,   // Unknown   Spell ID: 58616
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_BONE_SHIELD          = 515,   // Level 55  Spell ID: 58673
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_CHAINS_OF_ICE        = 516,   // Level 55  Spell ID: 58620
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_DEATH_GRIP           = 519,   // Level 55  Spell ID: 62259
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_DEATH_AND_DECAY      = 520,   // Level 55  Spell ID: 58629
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_FROST_STRIKE         = 521,   // Level 55  Spell ID: 58647
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_ICEBOUND_FORTITUDE   = 523,   // Level 55  Spell ID: 58625
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_ICY_TOUCH            = 524,   // Level 55  Spell ID: 58631
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_OBLITERATE           = 525,   // Level 55  Spell ID: 58671
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_PLAGUE_STRIKE        = 526,   // Level 55  Spell ID: 58657
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_THE_GHOUL            = 527,   // Level 55  Spell ID: 58686
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_RUNE_STRIKE          = 528,   // Level 55  Spell ID: 58669
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_SCOURGE_STRIKE       = 529,   // Level 55  Spell ID: 58642
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_STRANGULATE          = 530,   // Level 55  Spell ID: 58618
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_UNBREAKABLE_ARMOR    = 531,   // Level 55  Spell ID: 58635
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_VAMPIRIC_BLOOD       = 532,   // Level 55  Spell ID: 58676
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_RUNE_TAP             = 556,   // Level 55  Spell ID: 59327
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_BLOOD_STRIKE         = 557,   // Level 55  Spell ID: 59332
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_DEATH_STRIKE         = 558,   // Level 55  Spell ID: 59336
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_DANCING_RUNE_WEAPON  = 768,   // Level 60  Spell ID: 63330
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_HUNGERING_COLD       = 769,   // Level 60  Spell ID: 63331
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_UNHOLY_BLIGHT        = 770,   // Level 60  Spell ID: 63332
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_DARK_DEATH           = 771,   // Level 55  Spell ID: 63333
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_DISEASE              = 772,   // Level 55  Spell ID: 63334
-        DEATH_KNIGHT_MAJOR_GLYPH_OF_HOWLING_BLAST        = 773,   // Level 60  Spell ID: 63335
-        DEATH_KNIGHT_MINOR_GLYPH_OF_BLOOD_TAP            = 514,   // Level 55  Spell ID: 58640
-        DEATH_KNIGHT_MINOR_GLYPH_OF_DEATHS_EMBRACE       = 518,   // Level 55  Spell ID: 58677
-        DEATH_KNIGHT_MINOR_GLYPH_OF_HORN_OF_WINTER       = 522,   // Level 55  Spell ID: 58680
-        DEATH_KNIGHT_MINOR_GLYPH_OF_PESTILENCE           = 553,   // Level 55  Spell ID: 59309
-        DEATH_KNIGHT_MINOR_GLYPH_OF_CORPSE_EXPLOSION     = 554,   // Level 55  Spell ID: 59307
-        // TODO: Hmm, this looks suspiciously alike... yet not. What's up?
-        DEATH_KNIGHT_MINOR_GLYPH_OF_RAISE_DEAD           = 555,   // Level 55  Spell ID: 60200
-        DEATH_KNIGHT_MINOR_GLYPH_OF_RAISE_DEAD2          = 571,   // Level 55  Spell ID: 60200
-        DRUID_MAJOR_GLYPH_OF_FRENZIED_REGENERATION       = 161,   // Level 36  Spell ID: 54810
-        DRUID_MAJOR_GLYPH_OF_MAUL                        = 162,   // Level 15  Spell ID: 54811
-        DRUID_MAJOR_GLYPH_OF_MANGLE                      = 164,   // Level 50  Spell ID: 54813
-        DRUID_MAJOR_GLYPH_OF_SHRED                       = 165,   // Level 22  Spell ID: 54815
-        DRUID_MAJOR_GLYPH_OF_RIP                         = 166,   // Level 20  Spell ID: 54818
-        DRUID_MAJOR_GLYPH_OF_RAKE                        = 167,   // Level 24  Spell ID: 54821
-        DRUID_MAJOR_GLYPH_OF_SWIFTMEND                   = 168,   // Level 40  Spell ID: 54824
-        DRUID_MAJOR_GLYPH_OF_INNERVATE                   = 169,   // Level 40  Spell ID: 54832
-        DRUID_MAJOR_GLYPH_OF_REBIRTH                     = 170,   // Level 20  Spell ID: 54733
-        DRUID_MAJOR_GLYPH_OF_REGROWTH                    = 171,   // Level 15  Spell ID: 54743
-        DRUID_MAJOR_GLYPH_OF_REJUVENATION                = 172,   // Level 15  Spell ID: 54754
-        DRUID_MAJOR_GLYPH_OF_HEALING_TOUCH               = 173,   // Level 15  Spell ID: 54825
-        DRUID_MAJOR_GLYPH_OF_LIFEBLOOM                   = 174,   // Level 64  Spell ID: 54826
-        DRUID_MAJOR_GLYPH_OF_STARFIRE                    = 175,   // Level 20  Spell ID: 54845
-        DRUID_MAJOR_GLYPH_OF_INSECT_SWARM                = 176,   // Level 20  Spell ID: 54830
-        DRUID_MAJOR_GLYPH_OF_HURRICANE                   = 177,   // Level 40  Spell ID: 54831
-        DRUID_MAJOR_GLYPH_OF_STARFALL                    = 178,   // Level 60  Spell ID: 54828
-        DRUID_MAJOR_GLYPH_OF_WRATH                       = 179,   // Level 15  Spell ID: 54756
-        DRUID_MAJOR_GLYPH_OF_MOONFIRE                    = 180,   // Level 15  Spell ID: 54829
-        DRUID_MAJOR_GLYPH_OF_ENTANGLING_ROOTS            = 181,   // Level 15  Spell ID: 54760
-        DRUID_MAJOR_GLYPH_OF_FOCUS                       = 631,   // Level 70  Spell ID: 62080
-        DRUID_MAJOR_GLYPH_OF_BERSERK                     = 671,   // Level 60  Spell ID: 62969
-        DRUID_MAJOR_GLYPH_OF_WILD_GROWTH                 = 672,   // Level 60  Spell ID: 62970
-        DRUID_MAJOR_GLYPH_OF_NOURISH                     = 673,   // Level 80  Spell ID: 62971
-        DRUID_MAJOR_GLYPH_OF_SAVAGE_ROAR                 = 674,   // Level 75  Spell ID: 63055
-        DRUID_MAJOR_GLYPH_OF_MONSOON                     = 675,   // Level 50  Spell ID: 63056
-        DRUID_MAJOR_GLYPH_OF_BARKSKIN                    = 676,   // Level 44  Spell ID: 63057
-        DRUID_MAJOR_GLYPH_OF_SURVIVAL_INSTINCTS          = 811,   // Level 20  Spell ID: 65243
-        DRUID_MAJOR_GLYPH_OF_CLAW                        = 831,   // Level 20  Spell ID: 67598
-        DRUID_MAJOR_GLYPH_OF_RAPID_REJUVENATION          = 891,   // Level 15  Spell ID: 71013
-        DRUID_MINOR_GLYPH_OF_AQUATIC_FORM                = 431,   // Level 16  Spell ID: 57856
-        DRUID_MINOR_GLYPH_OF_CHALLENGING_ROAR            = 432,   // Level 28  Spell ID: 57858
-        DRUID_MINOR_GLYPH_OF_THE_WILD                    = 433,   // Level 15  Spell ID: 57855
-        DRUID_MINOR_GLYPH_OF_UNBURDENED_REBIRTH          = 434,   // Level 20  Spell ID: 57857
-        DRUID_MINOR_GLYPH_OF_THORNS                      = 435,   // Level 15  Spell ID: 57862
-        DRUID_MINOR_GLYPH_OF_DASH                        = 551,   // Level 16  Spell ID: 59219
-        DRUID_MINOR_GLYPH_OF_TYPHOON                     = 613,   // Level 70  Spell ID: 62135
-        HUNTER_MAJOR_GLYPH_OF_AIMED_SHOT                 = 351,   // Level 20  Spell ID: 56824
-        HUNTER_MAJOR_GLYPH_OF_ARCANE_SHOT                = 352,   // Level 15  Spell ID: 56841
-        HUNTER_MAJOR_GLYPH_OF_THE_BEAST                  = 353,   // Level 30  Spell ID: 56857
-        HUNTER_MAJOR_GLYPH_OF_MENDING                    = 354,   // Level 15  Spell ID: 56833
-        HUNTER_MAJOR_GLYPH_OF_ASPECT_OF_THE_VIPER        = 355,   // Level 20  Spell ID: 56851
-        HUNTER_MAJOR_GLYPH_OF_BESTIAL_WRATH              = 356,   // Level 40  Spell ID: 56830
-        HUNTER_MAJOR_GLYPH_OF_DETERRENCE                 = 357,   // Level 20  Spell ID: 56850
-        HUNTER_MAJOR_GLYPH_OF_DISENGAGE                  = 358,   // Level 20  Spell ID: 56844
-        HUNTER_MAJOR_GLYPH_OF_FREEZING_TRAP              = 359,   // Level 20  Spell ID: 56845
-        HUNTER_MAJOR_GLYPH_OF_FROST_TRAP                 = 360,   // Level 28  Spell ID: 56847
-        HUNTER_MAJOR_GLYPH_OF_HUNTERS_MARK               = 361,   // Level 15  Spell ID: 56829
-        HUNTER_MAJOR_GLYPH_OF_IMMOLATION_TRAP            = 362,   // Level 16  Spell ID: 56846
-        HUNTER_MAJOR_GLYPH_OF_MULTISHOT                  = 364,   // Level 18  Spell ID: 56836
-        HUNTER_MAJOR_GLYPH_OF_RAPID_FIRE                 = 365,   // Level 26  Spell ID: 56828
-        HUNTER_MAJOR_GLYPH_OF_SERPENT_STING              = 366,   // Level 15  Spell ID: 56832
-        HUNTER_MAJOR_GLYPH_OF_SNAKE_TRAP                 = 367,   // Level 68  Spell ID: 56849
-        HUNTER_MAJOR_GLYPH_OF_STEADY_SHOT                = 368,   // Level 62  Spell ID: 56826
-        HUNTER_MAJOR_GLYPH_OF_TRUESHOT_AURA              = 369,   // Level 40  Spell ID: 56842
-        HUNTER_MAJOR_GLYPH_OF_VOLLEY                     = 370,   // Level 40  Spell ID: 56838
-        HUNTER_MAJOR_GLYPH_OF_WYVERN_STING               = 371,   // Level 40  Spell ID: 56848
-        HUNTER_MAJOR_GLYPH_OF_CHIMERA_SHOT               = 677,   // Level 60  Spell ID: 63065
-        HUNTER_MAJOR_GLYPH_OF_EXPLOSIVE_SHOT             = 691,   // Level 60  Spell ID: 63066
-        HUNTER_MAJOR_GLYPH_OF_KILL_SHOT                  = 692,   // Level 71  Spell ID: 63067
-        HUNTER_MAJOR_GLYPH_OF_EXPLOSIVE_TRAP             = 693,   // Level 34  Spell ID: 63068
-        HUNTER_MAJOR_GLYPH_OF_SCATTER_SHOT               = 694,   // Level 20  Spell ID: 63069
-        HUNTER_MAJOR_GLYPH_OF_RAPTOR_STRIKE              = 695,   // Level 15  Spell ID: 63086
-        HUNTER_MINOR_GLYPH_OF_REVIVE_PET                 = 439,   // Level 15  Spell ID: 57866
-        HUNTER_MINOR_GLYPH_OF_MEND_PET                   = 440,   // Level 15  Spell ID: 57870
-        HUNTER_MINOR_GLYPH_OF_FEIGN_DEATH                = 441,   // Level 30  Spell ID: 57903
-        HUNTER_MINOR_GLYPH_OF_SCARE_BEAST                = 442,   // Level 15  Spell ID: 57902
-        HUNTER_MINOR_GLYPH_OF_THE_PACK                   = 443,   // Level 40  Spell ID: 57904
-        HUNTER_MINOR_GLYPH_OF_POSSESSED_STRENGTH         = 444,   // Level 15  Spell ID: 57900
-        MAGE_MAJOR_GLYPH_OF_ARCANE_EXPLOSION             = 311,   // Level 15  Spell ID: 56360
-        MAGE_MAJOR_GLYPH_OF_ARCANE_MISSILES              = 312,   // Level 15  Spell ID: 56363
-        MAGE_MAJOR_GLYPH_OF_ARCANE_POWER                 = 313,   // Level 40  Spell ID: 56381
-        MAGE_MAJOR_GLYPH_OF_BLINK                        = 314,   // Level 20  Spell ID: 56365
-        MAGE_MAJOR_GLYPH_OF_EVOCATION                    = 315,   // Level 20  Spell ID: 56380
-        MAGE_MAJOR_GLYPH_OF_FIREBALL                     = 316,   // Level 15  Spell ID: 56368
-        MAGE_MAJOR_GLYPH_OF_FIRE_BLAST                   = 317,   // Level 15  Spell ID: 56369
-        MAGE_MAJOR_GLYPH_OF_FROST_NOVA                   = 318,   // Level 15  Spell ID: 56376
-        MAGE_MAJOR_GLYPH_OF_FROSTBOLT                    = 319,   // Level 15  Spell ID: 56370
-        MAGE_MAJOR_GLYPH_OF_ICE_ARMOR                    = 320,   // Level 15  Spell ID: 56384
-        MAGE_MAJOR_GLYPH_OF_ICE_BLOCK                    = 321,   // Level 30  Spell ID: 56372
-        MAGE_MAJOR_GLYPH_OF_ICE_LANCE                    = 322,   // Level 66  Spell ID: 56377
-        MAGE_MAJOR_GLYPH_OF_ICY_VEINS                    = 323,   // Level 20  Spell ID: 56374
-        MAGE_MAJOR_GLYPH_OF_SCORCH                       = 324,   // Level 20  Spell ID: 56371
-        MAGE_MAJOR_GLYPH_OF_INVISIBILITY                 = 325,   // Level 68  Spell ID: 56366
-        MAGE_MAJOR_GLYPH_OF_MAGE_ARMOR                   = 326,   // Level 34  Spell ID: 56383
-        MAGE_MAJOR_GLYPH_OF_MANA_GEM                     = 327,   // Level 30  Spell ID: 56367
-        MAGE_MAJOR_GLYPH_OF_MOLTEN_ARMOR                 = 328,   // Level 62  Spell ID: 56382
-        MAGE_MAJOR_GLYPH_OF_POLYMORPH                    = 329,   // Level 15  Spell ID: 56375
-        MAGE_MAJOR_GLYPH_OF_REMOVE_CURSE                 = 330,   // Level 18  Spell ID: 56364
-        MAGE_MAJOR_GLYPH_OF_WATER_ELEMENTAL              = 331,   // Level 50  Spell ID: 56373
-        MAGE_MAJOR_GLYPH_OF_FROSTFIRE                    = 591,   // Level 75  Spell ID: 61205
-        MAGE_MAJOR_GLYPH_OF_ARCANE_BLAST                 = 651,   // Level 64  Spell ID: 62210
-        MAGE_MAJOR_GLYPH_OF_DEEP_FREEZE                  = 696,   // Level 60  Spell ID: 63090
-        MAGE_MAJOR_GLYPH_OF_LIVING_BOMB                  = 697,   // Level 60  Spell ID: 63091
-        MAGE_MAJOR_GLYPH_OF_ARCANE_BARRAGE               = 698,   // Level 60  Spell ID: 63092
-        MAGE_MAJOR_GLYPH_OF_MIRROR_IMAGE                 = 699,   // Level 80  Spell ID: 63093
-        MAGE_MAJOR_GLYPH_OF_ICE_BARRIER                  = 700,   // Level 46  Spell ID: 63095
-        MAGE_MAJOR_GLYPH_OF_ETERNAL_WATER                = 871,   // Level 50  Spell ID: 70937
-        MAGE_MINOR_GLYPH_OF_ARCANE_INTELLECT             = 445,   // Level 15  Spell ID: 57924
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_DARK_COMMAND         = 511,   // Level 55  Spell ID: 58613
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_ANTIMAGIC_SHELL      = 512,   // Level 55  Spell ID: 58623
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_HEART_STRIKE         = 513,   // Unknown   Spell ID: 58616
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_BONE_SHIELD          = 515,   // Level 55  Spell ID: 58673
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_CHAINS_OF_ICE        = 516,   // Level 55  Spell ID: 58620
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_DEATH_GRIP           = 519,   // Level 55  Spell ID: 62259
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_DEATH_AND_DECAY      = 520,   // Level 55  Spell ID: 58629
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_FROST_STRIKE         = 521,   // Level 55  Spell ID: 58647
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_ICEBOUND_FORTITUDE   = 523,   // Level 55  Spell ID: 58625
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_ICY_TOUCH            = 524,   // Level 55  Spell ID: 58631
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_OBLITERATE           = 525,   // Level 55  Spell ID: 58671
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_PLAGUE_STRIKE        = 526,   // Level 55  Spell ID: 58657
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_THE_GHOUL            = 527,   // Level 55  Spell ID: 58686
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_RUNE_STRIKE          = 528,   // Level 55  Spell ID: 58669
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_SCOURGE_STRIKE       = 529,   // Level 55  Spell ID: 58642
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_STRANGULATE          = 530,   // Level 55  Spell ID: 58618
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_UNBREAKABLE_ARMOR    = 531,   // Level 55  Spell ID: 58635
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_VAMPIRIC_BLOOD       = 532,   // Level 55  Spell ID: 58676
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_RUNE_TAP             = 556,   // Level 55  Spell ID: 59327
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_BLOOD_STRIKE         = 557,   // Level 55  Spell ID: 59332
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_DEATH_STRIKE         = 558,   // Level 55  Spell ID: 59336
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_DANCING_RUNE_WEAPON  = 768,   // Level 60  Spell ID: 63330
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_HUNGERING_COLD       = 769,   // Level 60  Spell ID: 63331
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_UNHOLY_BLIGHT        = 770,   // Level 60  Spell ID: 63332
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_DARK_DEATH           = 771,   // Level 55  Spell ID: 63333
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_DISEASE              = 772,   // Level 55  Spell ID: 63334
+    DEATH_KNIGHT_MAJOR_GLYPH_OF_HOWLING_BLAST        = 773,   // Level 60  Spell ID: 63335
+    DEATH_KNIGHT_MINOR_GLYPH_OF_BLOOD_TAP            = 514,   // Level 55  Spell ID: 58640
+    DEATH_KNIGHT_MINOR_GLYPH_OF_DEATHS_EMBRACE       = 518,   // Level 55  Spell ID: 58677
+    DEATH_KNIGHT_MINOR_GLYPH_OF_HORN_OF_WINTER       = 522,   // Level 55  Spell ID: 58680
+    DEATH_KNIGHT_MINOR_GLYPH_OF_PESTILENCE           = 553,   // Level 55  Spell ID: 59309
+    DEATH_KNIGHT_MINOR_GLYPH_OF_CORPSE_EXPLOSION     = 554,   // Level 55  Spell ID: 59307
+    // TODO: Hmm, this looks suspiciously alike... yet not. What's up?
+    DEATH_KNIGHT_MINOR_GLYPH_OF_RAISE_DEAD           = 555,   // Level 55  Spell ID: 60200
+    DEATH_KNIGHT_MINOR_GLYPH_OF_RAISE_DEAD2          = 571,   // Level 55  Spell ID: 60200
+    DRUID_MAJOR_GLYPH_OF_FRENZIED_REGENERATION       = 161,   // Level 36  Spell ID: 54810
+    DRUID_MAJOR_GLYPH_OF_MAUL                        = 162,   // Level 15  Spell ID: 54811
+    DRUID_MAJOR_GLYPH_OF_MANGLE                      = 164,   // Level 50  Spell ID: 54813
+    DRUID_MAJOR_GLYPH_OF_SHRED                       = 165,   // Level 22  Spell ID: 54815
+    DRUID_MAJOR_GLYPH_OF_RIP                         = 166,   // Level 20  Spell ID: 54818
+    DRUID_MAJOR_GLYPH_OF_RAKE                        = 167,   // Level 24  Spell ID: 54821
+    DRUID_MAJOR_GLYPH_OF_SWIFTMEND                   = 168,   // Level 40  Spell ID: 54824
+    DRUID_MAJOR_GLYPH_OF_INNERVATE                   = 169,   // Level 40  Spell ID: 54832
+    DRUID_MAJOR_GLYPH_OF_REBIRTH                     = 170,   // Level 20  Spell ID: 54733
+    DRUID_MAJOR_GLYPH_OF_REGROWTH                    = 171,   // Level 15  Spell ID: 54743
+    DRUID_MAJOR_GLYPH_OF_REJUVENATION                = 172,   // Level 15  Spell ID: 54754
+    DRUID_MAJOR_GLYPH_OF_HEALING_TOUCH               = 173,   // Level 15  Spell ID: 54825
+    DRUID_MAJOR_GLYPH_OF_LIFEBLOOM                   = 174,   // Level 64  Spell ID: 54826
+    DRUID_MAJOR_GLYPH_OF_STARFIRE                    = 175,   // Level 20  Spell ID: 54845
+    DRUID_MAJOR_GLYPH_OF_INSECT_SWARM                = 176,   // Level 20  Spell ID: 54830
+    DRUID_MAJOR_GLYPH_OF_HURRICANE                   = 177,   // Level 40  Spell ID: 54831
+    DRUID_MAJOR_GLYPH_OF_STARFALL                    = 178,   // Level 60  Spell ID: 54828
+    DRUID_MAJOR_GLYPH_OF_WRATH                       = 179,   // Level 15  Spell ID: 54756
+    DRUID_MAJOR_GLYPH_OF_MOONFIRE                    = 180,   // Level 15  Spell ID: 54829
+    DRUID_MAJOR_GLYPH_OF_ENTANGLING_ROOTS            = 181,   // Level 15  Spell ID: 54760
+    DRUID_MAJOR_GLYPH_OF_FOCUS                       = 631,   // Level 70  Spell ID: 62080
+    DRUID_MAJOR_GLYPH_OF_BERSERK                     = 671,   // Level 60  Spell ID: 62969
+    DRUID_MAJOR_GLYPH_OF_WILD_GROWTH                 = 672,   // Level 60  Spell ID: 62970
+    DRUID_MAJOR_GLYPH_OF_NOURISH                     = 673,   // Level 80  Spell ID: 62971
+    DRUID_MAJOR_GLYPH_OF_SAVAGE_ROAR                 = 674,   // Level 75  Spell ID: 63055
+    DRUID_MAJOR_GLYPH_OF_MONSOON                     = 675,   // Level 50  Spell ID: 63056
+    DRUID_MAJOR_GLYPH_OF_BARKSKIN                    = 676,   // Level 44  Spell ID: 63057
+    DRUID_MAJOR_GLYPH_OF_SURVIVAL_INSTINCTS          = 811,   // Level 20  Spell ID: 65243
+    DRUID_MAJOR_GLYPH_OF_CLAW                        = 831,   // Level 20  Spell ID: 67598
+    DRUID_MAJOR_GLYPH_OF_RAPID_REJUVENATION          = 891,   // Level 15  Spell ID: 71013
+    DRUID_MINOR_GLYPH_OF_AQUATIC_FORM                = 431,   // Level 16  Spell ID: 57856
+    DRUID_MINOR_GLYPH_OF_CHALLENGING_ROAR            = 432,   // Level 28  Spell ID: 57858
+    DRUID_MINOR_GLYPH_OF_THE_WILD                    = 433,   // Level 15  Spell ID: 57855
+    DRUID_MINOR_GLYPH_OF_UNBURDENED_REBIRTH          = 434,   // Level 20  Spell ID: 57857
+    DRUID_MINOR_GLYPH_OF_THORNS                      = 435,   // Level 15  Spell ID: 57862
+    DRUID_MINOR_GLYPH_OF_DASH                        = 551,   // Level 16  Spell ID: 59219
+    DRUID_MINOR_GLYPH_OF_TYPHOON                     = 613,   // Level 70  Spell ID: 62135
+    HUNTER_MAJOR_GLYPH_OF_AIMED_SHOT                 = 351,   // Level 20  Spell ID: 56824
+    HUNTER_MAJOR_GLYPH_OF_ARCANE_SHOT                = 352,   // Level 15  Spell ID: 56841
+    HUNTER_MAJOR_GLYPH_OF_THE_BEAST                  = 353,   // Level 30  Spell ID: 56857
+    HUNTER_MAJOR_GLYPH_OF_MENDING                    = 354,   // Level 15  Spell ID: 56833
+    HUNTER_MAJOR_GLYPH_OF_ASPECT_OF_THE_VIPER        = 355,   // Level 20  Spell ID: 56851
+    HUNTER_MAJOR_GLYPH_OF_BESTIAL_WRATH              = 356,   // Level 40  Spell ID: 56830
+    HUNTER_MAJOR_GLYPH_OF_DETERRENCE                 = 357,   // Level 20  Spell ID: 56850
+    HUNTER_MAJOR_GLYPH_OF_DISENGAGE                  = 358,   // Level 20  Spell ID: 56844
+    HUNTER_MAJOR_GLYPH_OF_FREEZING_TRAP              = 359,   // Level 20  Spell ID: 56845
+    HUNTER_MAJOR_GLYPH_OF_FROST_TRAP                 = 360,   // Level 28  Spell ID: 56847
+    HUNTER_MAJOR_GLYPH_OF_HUNTERS_MARK               = 361,   // Level 15  Spell ID: 56829
+    HUNTER_MAJOR_GLYPH_OF_IMMOLATION_TRAP            = 362,   // Level 16  Spell ID: 56846
+    HUNTER_MAJOR_GLYPH_OF_MULTISHOT                  = 364,   // Level 18  Spell ID: 56836
+    HUNTER_MAJOR_GLYPH_OF_RAPID_FIRE                 = 365,   // Level 26  Spell ID: 56828
+    HUNTER_MAJOR_GLYPH_OF_SERPENT_STING              = 366,   // Level 15  Spell ID: 56832
+    HUNTER_MAJOR_GLYPH_OF_SNAKE_TRAP                 = 367,   // Level 68  Spell ID: 56849
+    HUNTER_MAJOR_GLYPH_OF_STEADY_SHOT                = 368,   // Level 62  Spell ID: 56826
+    HUNTER_MAJOR_GLYPH_OF_TRUESHOT_AURA              = 369,   // Level 40  Spell ID: 56842
+    HUNTER_MAJOR_GLYPH_OF_VOLLEY                     = 370,   // Level 40  Spell ID: 56838
+    HUNTER_MAJOR_GLYPH_OF_WYVERN_STING               = 371,   // Level 40  Spell ID: 56848
+    HUNTER_MAJOR_GLYPH_OF_CHIMERA_SHOT               = 677,   // Level 60  Spell ID: 63065
+    HUNTER_MAJOR_GLYPH_OF_EXPLOSIVE_SHOT             = 691,   // Level 60  Spell ID: 63066
+    HUNTER_MAJOR_GLYPH_OF_KILL_SHOT                  = 692,   // Level 71  Spell ID: 63067
+    HUNTER_MAJOR_GLYPH_OF_EXPLOSIVE_TRAP             = 693,   // Level 34  Spell ID: 63068
+    HUNTER_MAJOR_GLYPH_OF_SCATTER_SHOT               = 694,   // Level 20  Spell ID: 63069
+    HUNTER_MAJOR_GLYPH_OF_RAPTOR_STRIKE              = 695,   // Level 15  Spell ID: 63086
+    HUNTER_MINOR_GLYPH_OF_REVIVE_PET                 = 439,   // Level 15  Spell ID: 57866
+    HUNTER_MINOR_GLYPH_OF_MEND_PET                   = 440,   // Level 15  Spell ID: 57870
+    HUNTER_MINOR_GLYPH_OF_FEIGN_DEATH                = 441,   // Level 30  Spell ID: 57903
+    HUNTER_MINOR_GLYPH_OF_SCARE_BEAST                = 442,   // Level 15  Spell ID: 57902
+    HUNTER_MINOR_GLYPH_OF_THE_PACK                   = 443,   // Level 40  Spell ID: 57904
+    HUNTER_MINOR_GLYPH_OF_POSSESSED_STRENGTH         = 444,   // Level 15  Spell ID: 57900
+    MAGE_MAJOR_GLYPH_OF_ARCANE_EXPLOSION             = 311,   // Level 15  Spell ID: 56360
+    MAGE_MAJOR_GLYPH_OF_ARCANE_MISSILES              = 312,   // Level 15  Spell ID: 56363
+    MAGE_MAJOR_GLYPH_OF_ARCANE_POWER                 = 313,   // Level 40  Spell ID: 56381
+    MAGE_MAJOR_GLYPH_OF_BLINK                        = 314,   // Level 20  Spell ID: 56365
+    MAGE_MAJOR_GLYPH_OF_EVOCATION                    = 315,   // Level 20  Spell ID: 56380
+    MAGE_MAJOR_GLYPH_OF_FIREBALL                     = 316,   // Level 15  Spell ID: 56368
+    MAGE_MAJOR_GLYPH_OF_FIRE_BLAST                   = 317,   // Level 15  Spell ID: 56369
+    MAGE_MAJOR_GLYPH_OF_FROST_NOVA                   = 318,   // Level 15  Spell ID: 56376
+    MAGE_MAJOR_GLYPH_OF_FROSTBOLT                    = 319,   // Level 15  Spell ID: 56370
+    MAGE_MAJOR_GLYPH_OF_ICE_ARMOR                    = 320,   // Level 15  Spell ID: 56384
+    MAGE_MAJOR_GLYPH_OF_ICE_BLOCK                    = 321,   // Level 30  Spell ID: 56372
+    MAGE_MAJOR_GLYPH_OF_ICE_LANCE                    = 322,   // Level 66  Spell ID: 56377
+    MAGE_MAJOR_GLYPH_OF_ICY_VEINS                    = 323,   // Level 20  Spell ID: 56374
+    MAGE_MAJOR_GLYPH_OF_SCORCH                       = 324,   // Level 20  Spell ID: 56371
+    MAGE_MAJOR_GLYPH_OF_INVISIBILITY                 = 325,   // Level 68  Spell ID: 56366
+    MAGE_MAJOR_GLYPH_OF_MAGE_ARMOR                   = 326,   // Level 34  Spell ID: 56383
+    MAGE_MAJOR_GLYPH_OF_MANA_GEM                     = 327,   // Level 30  Spell ID: 56367
+    MAGE_MAJOR_GLYPH_OF_MOLTEN_ARMOR                 = 328,   // Level 62  Spell ID: 56382
+    MAGE_MAJOR_GLYPH_OF_POLYMORPH                    = 329,   // Level 15  Spell ID: 56375
+    MAGE_MAJOR_GLYPH_OF_REMOVE_CURSE                 = 330,   // Level 18  Spell ID: 56364
+    MAGE_MAJOR_GLYPH_OF_WATER_ELEMENTAL              = 331,   // Level 50  Spell ID: 56373
+    MAGE_MAJOR_GLYPH_OF_FROSTFIRE                    = 591,   // Level 75  Spell ID: 61205
+    MAGE_MAJOR_GLYPH_OF_ARCANE_BLAST                 = 651,   // Level 64  Spell ID: 62210
+    MAGE_MAJOR_GLYPH_OF_DEEP_FREEZE                  = 696,   // Level 60  Spell ID: 63090
+    MAGE_MAJOR_GLYPH_OF_LIVING_BOMB                  = 697,   // Level 60  Spell ID: 63091
+    MAGE_MAJOR_GLYPH_OF_ARCANE_BARRAGE               = 698,   // Level 60  Spell ID: 63092
+    MAGE_MAJOR_GLYPH_OF_MIRROR_IMAGE                 = 699,   // Level 80  Spell ID: 63093
+    MAGE_MAJOR_GLYPH_OF_ICE_BARRIER                  = 700,   // Level 46  Spell ID: 63095
+    MAGE_MAJOR_GLYPH_OF_ETERNAL_WATER                = 871,   // Level 50  Spell ID: 70937
+    MAGE_MINOR_GLYPH_OF_ARCANE_INTELLECT             = 445,   // Level 15  Spell ID: 57924
     MAGE_MINOR_GLYPH_OF_BLAST_WAVE                   = 611,   // Level 70  Spell ID: 62126
-        MAGE_MINOR_GLYPH_OF_FIRE_WARD                    = 446,   // Level 20  Spell ID: 57926
-        MAGE_MINOR_GLYPH_OF_FROST_WARD                   = 447,   // Level 22  Spell ID: 57927
-        MAGE_MINOR_GLYPH_OF_FROST_ARMOR                  = 448,   // Level 15  Spell ID: 57928
-        MAGE_MINOR_GLYPH_OF_THE_PENGUIN                  = 450,   // Level 15  Spell ID: 52648
-        MAGE_MINOR_GLYPH_OF_SLOW_FALL                    = 451,   // Level 15  Spell ID: 57925
-        PALADIN_MAJOR_GLYPH_OF_JUDGEMENT                 = 183,   // Level 15  Spell ID: 54922
-        PALADIN_MAJOR_GLYPH_OF_SEAL_OF_COMMAND           = 184,   // Level 20  Spell ID: 54925
-        PALADIN_MAJOR_GLYPH_OF_HAMMER_OF_JUSTICE         = 185,   // Level 15  Spell ID: 54923
-        PALADIN_MAJOR_GLYPH_OF_SPIRITUAL_ATTUNEMENT      = 186,   // Level 18  Spell ID: 54924
-        PALADIN_MAJOR_GLYPH_OF_HAMMER_OF_WRATH           = 187,   // Level 44  Spell ID: 54926
-        PALADIN_MAJOR_GLYPH_OF_CRUSADER_STRIKE           = 188,   // Level 20  Spell ID: 54927
-        PALADIN_MAJOR_GLYPH_OF_CONSECRATION              = 189,   // Level 20  Spell ID: 54928
-        PALADIN_MAJOR_GLYPH_OF_RIGHTEOUS_DEFENSE         = 190,   // Level 15  Spell ID: 54929
-        PALADIN_MAJOR_GLYPH_OF_AVENGERS_SHIELD           = 191,   // Level 50  Spell ID: 54930
-        PALADIN_MAJOR_GLYPH_OF_TURN_EVIL                 = 192,   // Level 24  Spell ID: 54931
-        PALADIN_MAJOR_GLYPH_OF_EXORCISM                  = 193,   // Level 20  Spell ID: 54934
-        PALADIN_MAJOR_GLYPH_OF_CLEANSING                 = 194,   // Level 35  Spell ID: 54935
-        PALADIN_MAJOR_GLYPH_OF_FLASH_OF_LIGHT            = 195,   // Level 20  Spell ID: 54936
-        PALADIN_MAJOR_GLYPH_OF_HOLY_LIGHT                = 196,   // Level 15  Spell ID: 54937
-        PALADIN_MAJOR_GLYPH_OF_AVENGING_WRATH            = 197,   // Level 70  Spell ID: 54938
-        PALADIN_MAJOR_GLYPH_OF_DIVINITY                  = 198,   // Level 15  Spell ID: 54939
-        PALADIN_MAJOR_GLYPH_OF_SEAL_OF_WISDOM            = 199,   // Level 38  Spell ID: 54940
-        PALADIN_MAJOR_GLYPH_OF_SEAL_OF_LIGHT             = 200,   // Level 30  Spell ID: 54943
-        PALADIN_MAJOR_GLYPH_OF_HOLY_WRATH                = 559,   // Unknown   Spell ID: 56420
-        PALADIN_MAJOR_GLYPH_OF_SEAL_OF_RIGHTEOUSNESS     = 560,   // Level 50  Spell ID: 56414
-        PALADIN_MAJOR_GLYPH_OF_SEAL_OF_VENGEANCE         = 561,   // Level 50  Spell ID: 56416
-        PALADIN_MAJOR_GLYPH_OF_BEACON_OF_LIGHT           = 701,   // Level 60  Spell ID: 63218
-        PALADIN_MAJOR_GLYPH_OF_HAMMER_OF_THE_RIGHTEOUS   = 702,   // Level 60  Spell ID: 63219
-        PALADIN_MAJOR_GLYPH_OF_DIVINE_STORM              = 703,   // Level 60  Spell ID: 63220
-        PALADIN_MAJOR_GLYPH_OF_SHIELD_OF_RIGHTEOUSNESS   = 704,   // Level 75  Spell ID: 63222
-        PALADIN_MAJOR_GLYPH_OF_DIVINE_PLEA               = 705,   // Level 71  Spell ID: 63223
-        PALADIN_MAJOR_GLYPH_OF_HOLY_SHOCK                = 706,   // Level 40  Spell ID: 63224
-        PALADIN_MAJOR_GLYPH_OF_SALVATION                 = 707,   // Level 26  Spell ID: 63225
-        PALADIN_MINOR_GLYPH_OF_BLESSING_OF_KINGS         = 452,   // Level 20  Spell ID: 57937
-        PALADIN_MINOR_GLYPH_OF_BLESSING_OF_MIGHT         = 453,   // Level 15  Spell ID: 57958
-        PALADIN_MINOR_GLYPH_OF_BLESSING_OF_WISDOM        = 454,   // Level 15  Spell ID: 57979
-        PALADIN_MINOR_GLYPH_OF_LAY_ON_HANDS              = 455,   // Level 15  Spell ID: 57955
-        PALADIN_MINOR_GLYPH_OF_SENSE_UNDEAD              = 456,   // Level 20  Spell ID: 57947
-        PALADIN_MINOR_GLYPH_OF_THE_WISE                  = 457,   // Level 15  Spell ID: 57954
-        PRIEST_MAJOR_GLYPH_OF_CIRCLE_OF_HEALING          = 251,   // Level 50  Spell ID: 55675
-        PRIEST_MAJOR_GLYPH_OF_DISPEL_MAGIC               = 252,   // Level 18  Spell ID: 55677
-        PRIEST_MAJOR_GLYPH_OF_FADE                       = 253,   // Level 15  Spell ID: 55684
-        PRIEST_MAJOR_GLYPH_OF_FEAR_WARD                  = 254,   // Level 20  Spell ID: 55678
-        PRIEST_MAJOR_GLYPH_OF_FLASH_HEAL                 = 255,   // Level 20  Spell ID: 55679
-        PRIEST_MAJOR_GLYPH_OF_HOLY_NOVA                  = 256,   // Level 20  Spell ID: 55683
-        PRIEST_MAJOR_GLYPH_OF_INNER_FIRE                 = 257,   // Level 15  Spell ID: 55686
-        PRIEST_MAJOR_GLYPH_OF_LIGHTWELL                  = 258,   // Level 40  Spell ID: 55673
-        PRIEST_MAJOR_GLYPH_OF_MASS_DISPEL                = 259,   // Level 70  Spell ID: 55691
-        PRIEST_MAJOR_GLYPH_OF_MIND_CONTROL               = 260,   // Level 30  Spell ID: 55688
-        PRIEST_MAJOR_GLYPH_OF_SHADOW_WORD_PAIN           = 261,   // Level 15  Spell ID: 55681
-        PRIEST_MAJOR_GLYPH_OF_SHADOW                     = 262,   // Level 20  Spell ID: 55689
-        PRIEST_MAJOR_GLYPH_OF_POWER_WORD_SHIELD          = 263,   // Level 15  Spell ID: 55672
-        PRIEST_MAJOR_GLYPH_OF_PRAYER_OF_HEALING          = 264,   // Level 30  Spell ID: 55680
-        PRIEST_MAJOR_GLYPH_OF_PSYCHIC_SCREAM             = 265,   // Level 15  Spell ID: 55676
-        PRIEST_MAJOR_GLYPH_OF_RENEW                      = 266,   // Level 15  Spell ID: 55674
-        PRIEST_MAJOR_GLYPH_OF_SCOURGE_IMPRISONMENT       = 267,   // Level 20  Spell ID: 55690
-        PRIEST_MAJOR_GLYPH_OF_SHADOW_WORD_DEATH          = 268,   // Level 62  Spell ID: 55682
-        PRIEST_MAJOR_GLYPH_OF_MIND_FLAY                  = 269,   // Level 20  Spell ID: 55687
-        PRIEST_MAJOR_GLYPH_OF_SMITE                      = 270,   // Level 15  Spell ID: 55692
-        PRIEST_MAJOR_GLYPH_OF_SPIRIT_OF_REDEMPTION       = 271,   // Level 30  Spell ID: 55685
-        PRIEST_MAJOR_GLYPH_OF_DISPERSION                 = 708,   // Level 60  Spell ID: 63229
-        PRIEST_MAJOR_GLYPH_OF_GUARDIAN_SPIRIT            = 709,   // Level 60  Spell ID: 63231
-        PRIEST_MAJOR_GLYPH_OF_PENANCE                    = 710,   // Level 60  Spell ID: 63235
-        PRIEST_MAJOR_GLYPH_OF_MIND_SEAR                  = 711,   // Level 75  Spell ID: 63237
-        PRIEST_MAJOR_GLYPH_OF_HYMN_OF_HOPE               = 712,   // Level 60  Spell ID: 63246
-        PRIEST_MAJOR_GLYPH_OF_PAIN_SUPPRESSION           = 713,   // Level 50  Spell ID: 63248
-        PRIEST_MINOR_GLYPH_OF_FADING                     = 458,   // Level 15  Spell ID: 57985
-        PRIEST_MINOR_GLYPH_OF_LEVITATE                   = 459,   // Level 34  Spell ID: 57987
-        PRIEST_MINOR_GLYPH_OF_FORTITUDE                  = 460,   // Level 15  Spell ID: 58009
-        PRIEST_MINOR_GLYPH_OF_SHACKLE_UNDEAD             = 461,   // Level 20  Spell ID: 57986
-        PRIEST_MINOR_GLYPH_OF_SHADOW_PROTECTION          = 462,   // Level 30  Spell ID: 58015
-        PRIEST_MINOR_GLYPH_OF_SHADOWFIEND                = 463,   // Level 66  Spell ID: 58228
-        ROGUE_MAJOR_GLYPH_OF_ADRENALINE_RUSH             = 391,   // Level 40  Spell ID: 56808
-        ROGUE_MAJOR_GLYPH_OF_AMBUSH                      = 392,   // Level 18  Spell ID: 56813
-        ROGUE_MAJOR_GLYPH_OF_BACKSTAB                    = 393,   // Level 15  Spell ID: 56800
-        ROGUE_MAJOR_GLYPH_OF_BLADE_FLURRY                = 394,   // Level 30  Spell ID: 56818
-        ROGUE_MAJOR_GLYPH_OF_CRIPPLING_POISON            = 395,   // Level 20  Spell ID: 56820
-        ROGUE_MAJOR_GLYPH_OF_DEADLY_THROW                = 396,   // Level 64  Spell ID: 56806
-        ROGUE_MAJOR_GLYPH_OF_EVASION                     = 397,   // Level 15  Spell ID: 56799
-        ROGUE_MAJOR_GLYPH_OF_EVISCERATE                  = 398,   // Level 15  Spell ID: 56802
-        ROGUE_MAJOR_GLYPH_OF_EXPOSE_ARMOR                = 399,   // Level 15  Spell ID: 56803
-        ROGUE_MAJOR_GLYPH_OF_FEINT                       = 400,   // Level 16  Spell ID: 56804
-        ROGUE_MAJOR_GLYPH_OF_GARROTE                     = 401,   // Level 15  Spell ID: 56812
-        ROGUE_MAJOR_GLYPH_OF_GHOSTLY_STRIKE              = 402,   // Level 20  Spell ID: 56814
-        ROGUE_MAJOR_GLYPH_OF_GOUGE                       = 403,   // Level 15  Spell ID: 56809
-        ROGUE_MAJOR_GLYPH_OF_HEMORRHAGE                  = 404,   // Level 30  Spell ID: 56807
-        ROGUE_MAJOR_GLYPH_OF_PREPARATION                 = 405,   // Level 30  Spell ID: 56819
-        ROGUE_MAJOR_GLYPH_OF_RUPTURE                     = 406,   // Level 20  Spell ID: 56801
-        ROGUE_MAJOR_GLYPH_OF_SAP                         = 407,   // Level 15  Spell ID: 56798
-        ROGUE_MAJOR_GLYPH_OF_VIGOR                       = 408,   // Level 70  Spell ID: 56805
-        ROGUE_MAJOR_GLYPH_OF_SINISTER_STRIKE             = 409,   // Level 15  Spell ID: 56821
-        ROGUE_MAJOR_GLYPH_OF_SLICE_AND_DICE              = 410,   // Level 15  Spell ID: 56810
-        ROGUE_MAJOR_GLYPH_OF_SPRINT                      = 411,   // Level 15  Spell ID: 56811
-        ROGUE_MAJOR_GLYPH_OF_HUNGER_FOR_BLOOD            = 714,   // Level 60  Spell ID: 63249
-        ROGUE_MAJOR_GLYPH_OF_KILLING_SPREE               = 715,   // Level 60  Spell ID: 63252
-        ROGUE_MAJOR_GLYPH_OF_SHADOW_DANCE                = 716,   // Level 60  Spell ID: 63253
-        ROGUE_MAJOR_GLYPH_OF_FAN_OF_KNIVES               = 731,   // Level 80  Spell ID: 63254
-        ROGUE_MAJOR_GLYPH_OF_TRICKS_OF_THE_TRADE         = 732,   // Level 75  Spell ID: 63256
-        ROGUE_MAJOR_GLYPH_OF_MUTILATE                    = 733,   // Level 50  Spell ID: 63268
-        ROGUE_MAJOR_GLYPH_OF_CLOAK_OF_SHADOWS            = 734,   // Level 66  Spell ID: 63269
-        ROGUE_MINOR_GLYPH_OF_DISTRACT                    = 464,   // Level 22  Spell ID: 58032
-        ROGUE_MINOR_GLYPH_OF_PICK_LOCK                   = 465,   // Level 16  Spell ID: 58027
-        ROGUE_MINOR_GLYPH_OF_PICK_POCKET                 = 466,   // Level 15  Spell ID: 58017
-        ROGUE_MINOR_GLYPH_OF_SAFE_FALL                   = 467,   // Level 40  Spell ID: 58033
-        ROGUE_MINOR_GLYPH_OF_BLURRED_SPEED               = 468,   // Level 15  Spell ID: 58039
-        ROGUE_MINOR_GLYPH_OF_VANISH                      = 469,   // Level 22  Spell ID: 58038
-        SHAMAN_MAJOR_GLYPH_OF_WATER_MASTERY              = 211,   // Level 20  Spell ID: 55436
-        SHAMAN_MAJOR_GLYPH_OF_CHAIN_HEAL                 = 212,   // Level 40  Spell ID: 55437
-        SHAMAN_MAJOR_GLYPH_OF_CHAIN_LIGHTNING            = 213,   // Level 32  Spell ID: 55449
-        SHAMAN_MAJOR_GLYPH_OF_LAVA                       = 214,   // Level 66  Spell ID: 55454
-        SHAMAN_MAJOR_GLYPH_OF_SHOCKING                   = 215,   // Unknown   Spell ID: 55442
-        SHAMAN_MAJOR_GLYPH_OF_EARTHLIVING_WEAPON         = 216,   // Level 30  Spell ID: 55439
-        SHAMAN_MAJOR_GLYPH_OF_FIRE_ELEMENTAL_TOTEM       = 217,   // Level 68  Spell ID: 55455
-        SHAMAN_MAJOR_GLYPH_OF_FIRE_NOVA                  = 218,   // Level 15  Spell ID: 55450
-        SHAMAN_MAJOR_GLYPH_OF_FLAME_SHOCK                = 219,   // Level 15  Spell ID: 55447
-        SHAMAN_MAJOR_GLYPH_OF_FLAMETONGUE_WEAPON         = 220,   // Level 15  Spell ID: 55451
-        SHAMAN_MAJOR_GLYPH_OF_FROST_SHOCK                = 221,   // Level 20  Spell ID: 55443
-        SHAMAN_MAJOR_GLYPH_OF_HEALING_STREAM_TOTEM       = 222,   // Level 20  Spell ID: 55456
-        SHAMAN_MAJOR_GLYPH_OF_HEALING_WAVE               = 223,   // Level 15  Spell ID: 55440
-        SHAMAN_MAJOR_GLYPH_OF_LESSER_HEALING_WAVE        = 224,   // Level 20  Spell ID: 55438
-        SHAMAN_MAJOR_GLYPH_OF_LIGHTNING_SHIELD           = 225,   // Level 15  Spell ID: 55448
-        SHAMAN_MAJOR_GLYPH_OF_LIGHTNING_BOLT             = 226,   // Level 15  Spell ID: 55453
-        SHAMAN_MAJOR_GLYPH_OF_STORMSTRIKE                = 228,   // Level 40  Spell ID: 55446
-        SHAMAN_MAJOR_GLYPH_OF_LAVA_LASH                  = 229,   // Level 15  Spell ID: 55444
-        SHAMAN_MAJOR_GLYPH_OF_ELEMENTAL_MASTERY          = 230,   // Level 50  Spell ID: 55452
-        SHAMAN_MAJOR_GLYPH_OF_WINDFURY_WEAPON            = 231,   // Level 30  Spell ID: 55445
-        SHAMAN_MAJOR_GLYPH_OF_THUNDER                    = 735,   // Level 60  Spell ID: 63270
-        SHAMAN_MAJOR_GLYPH_OF_FERAL_SPIRIT               = 736,   // Level 60  Spell ID: 63271
-        SHAMAN_MAJOR_GLYPH_OF_RIPTIDE                    = 737,   // Level 60  Spell ID: 63273
-        SHAMAN_MAJOR_GLYPH_OF_EARTH_SHIELD               = 751,   // Level 50  Spell ID: 63279
-        SHAMAN_MAJOR_GLYPH_OF_TOTEM_OF_WRATH             = 752,   // Level 50  Spell ID: 63280
-        SHAMAN_MAJOR_GLYPH_OF_HEX                        = 753,   // Level 80  Spell ID: 63291
-        SHAMAN_MAJOR_GLYPH_OF_STONECLAW_TOTEM            = 754,   // Level 15  Spell ID: 63298
-        SHAMAN_MINOR_GLYPH_OF_ASTRAL_RECALL              = 470,   // Level 30  Spell ID: 58058
-        SHAMAN_MINOR_GLYPH_OF_RENEWED_LIFE               = 473,   // Level 30  Spell ID: 58059
-        SHAMAN_MINOR_GLYPH_OF_WATER_BREATHING            = 474,   // Level 22  Spell ID: 58055
-        SHAMAN_MINOR_GLYPH_OF_WATER_SHIELD               = 475,   // Level 20  Spell ID: 58063
-        SHAMAN_MINOR_GLYPH_OF_WATER_WALKING              = 476,   // Level 28  Spell ID: 58057
-        SHAMAN_MINOR_GLYPH_OF_GHOST_WOLF                 = 552,   // Level 16  Spell ID: 59289
-        SHAMAN_MINOR_GLYPH_OF_THUNDERSTORM               = 612,   // Level 70  Spell ID: 62132
-        WARLOCK_MAJOR_GLYPH_OF_INCINERATE                = 272,   // Unknown   Spell ID: 56242
-        WARLOCK_MAJOR_GLYPH_OF_CONFLAGRATE               = 273,   // Level 40  Spell ID: 56235
-        WARLOCK_MAJOR_GLYPH_OF_CORRUPTION                = 274,   // Level 15  Spell ID: 56218
-        WARLOCK_MAJOR_GLYPH_OF_CURSE_OF_AGONY            = 275,   // Level 15  Spell ID: 56241
-        WARLOCK_MAJOR_GLYPH_OF_DEATH_COIL                = 276,   // Level 42  Spell ID: 56232
-        WARLOCK_MAJOR_GLYPH_OF_FEAR                      = 277,   // Level 15  Spell ID: 56244
-        WARLOCK_MAJOR_GLYPH_OF_FELGUARD                  = 278,   // Level 50  Spell ID: 56246
-        WARLOCK_MAJOR_GLYPH_OF_FELHUNTER                 = 279,   // Level 30  Spell ID: 56249
-        WARLOCK_MAJOR_GLYPH_OF_HEALTH_FUNNEL             = 280,   // Level 15  Spell ID: 56238
-        WARLOCK_MAJOR_GLYPH_OF_HEALTHSTONE               = 281,   // Level 15  Spell ID: 56224
-        WARLOCK_MAJOR_GLYPH_OF_HOWL_OF_TERROR            = 282,   // Level 40  Spell ID: 56217
-        WARLOCK_MAJOR_GLYPH_OF_IMMOLATE                  = 283,   // Level 15  Spell ID: 56228
-        WARLOCK_MAJOR_GLYPH_OF_IMP                       = 284,   // Level 15  Spell ID: 56248
-        WARLOCK_MAJOR_GLYPH_OF_SEARING_PAIN              = 285,   // Level 18  Spell ID: 56226
-        WARLOCK_MAJOR_GLYPH_OF_SHADOW_BOLT               = 286,   // Level 15  Spell ID: 56240
-        WARLOCK_MAJOR_GLYPH_OF_SHADOWBURN                = 287,   // Level 20  Spell ID: 56229
-        WARLOCK_MAJOR_GLYPH_OF_SIPHON_LIFE               = 288,   // Level 30  Spell ID: 56216
-        WARLOCK_MAJOR_GLYPH_OF_SOULSTONE                 = 289,   // Level 18  Spell ID: 56231
-        WARLOCK_MAJOR_GLYPH_OF_SUCCUBUS                  = 290,   // Level 26  Spell ID: 56250
-        WARLOCK_MAJOR_GLYPH_OF_UNSTABLE_AFFLICTION       = 291,   // Level 50  Spell ID: 56233
-        WARLOCK_MAJOR_GLYPH_OF_VOIDWALKER                = 292,   // Level 15  Spell ID: 56247
-        WARLOCK_MAJOR_GLYPH_OF_HAUNT                     = 755,   // Level 60  Spell ID: 63302
-        WARLOCK_MAJOR_GLYPH_OF_METAMORPHOSIS             = 756,   // Level 60  Spell ID: 63303
-        WARLOCK_MAJOR_GLYPH_OF_CHAOS_BOLT                = 757,   // Level 60  Spell ID: 63304
-        WARLOCK_MAJOR_GLYPH_OF_DEMONIC_CIRCLE            = 758,   // Level 80  Spell ID: 63309
-        WARLOCK_MAJOR_GLYPH_OF_SHADOWFLAME               = 759,   // Level 75  Spell ID: 63310
-        WARLOCK_MAJOR_GLYPH_OF_LIFE_TAP                  = 760,   // Level 15  Spell ID: 63320
-        WARLOCK_MAJOR_GLYPH_OF_SOUL_LINK                 = 761,   // Level 20  Spell ID: 63312
-        WARLOCK_MAJOR_GLYPH_OF_QUICK_DECAY               = 911,   // Level 15  Spell ID: 70947
-        WARLOCK_MINOR_GLYPH_OF_UNENDING_BREATH           = 477,   // Level 15  Spell ID: 58079
-        WARLOCK_MINOR_GLYPH_OF_DRAIN_SOUL                = 478,   // Level 15  Spell ID: 58070
-        WARLOCK_MINOR_GLYPH_OF_KILROGG                   = 479,   // Level 22  Spell ID: 58081
-        WARLOCK_MINOR_GLYPH_OF_ENSLAVE_DEMON             = 481,   // Level 30  Spell ID: 58107
-        WARLOCK_MINOR_GLYPH_OF_SOULS                     = 482,   // Level 68  Spell ID: 58094
-        WARRIOR_MAJOR_GLYPH_OF_MORTAL_STRIKE             = 489,   // Level 40  Spell ID: 58368
-        WARRIOR_MAJOR_GLYPH_OF_BLOODTHIRST               = 490,   // Level 40  Spell ID: 58369
-        WARRIOR_MAJOR_GLYPH_OF_RAPID_CHARGE              = 491,   // Level 15  Spell ID: 58355
-        WARRIOR_MAJOR_GLYPH_OF_CLEAVING                  = 492,   // Level 20  Spell ID: 58366
-        WARRIOR_MAJOR_GLYPH_OF_DEVASTATE                 = 493,   // Level 40  Spell ID: 58388
-        WARRIOR_MAJOR_GLYPH_OF_EXECUTION                 = 494,   // Level 24  Spell ID: 58367
-        WARRIOR_MAJOR_GLYPH_OF_HAMSTRING                 = 495,   // Level 15  Spell ID: 58372
-        WARRIOR_MAJOR_GLYPH_OF_HEROIC_STRIKE             = 496,   // Level 15  Spell ID: 58357
-        WARRIOR_MAJOR_GLYPH_OF_INTERVENE                 = 497,   // Level 70  Spell ID: 58377
-        WARRIOR_MAJOR_GLYPH_OF_BARBARIC_INSULTS          = 498,   // Level 16  Spell ID: 58365
-        WARRIOR_MAJOR_GLYPH_OF_OVERPOWER                 = 499,   // Level 15  Spell ID: 58386
-        WARRIOR_MAJOR_GLYPH_OF_RENDING                   = 500,   // Level 15  Spell ID: 58385
-        WARRIOR_MAJOR_GLYPH_OF_REVENGE                   = 501,   // Level 15  Spell ID: 58364
-        WARRIOR_MAJOR_GLYPH_OF_BLOCKING                  = 502,   // Level 40  Spell ID: 58375
-        WARRIOR_MAJOR_GLYPH_OF_LAST_STAND                = 503,   // Level 20  Spell ID: 58376
-        WARRIOR_MAJOR_GLYPH_OF_SUNDER_ARMOR              = 504,   // Level 15  Spell ID: 58387
-        WARRIOR_MAJOR_GLYPH_OF_SWEEPING_STRIKES          = 505,   // Level 30  Spell ID: 58384
-        WARRIOR_MAJOR_GLYPH_OF_TAUNT                     = 506,   // Level 15  Spell ID: 58353
-        WARRIOR_MAJOR_GLYPH_OF_RESONATING_POWER          = 507,   // Level 15  Spell ID: 58356
-        WARRIOR_MAJOR_GLYPH_OF_VICTORY_RUSH              = 508,   // Level 62  Spell ID: 58382
-        WARRIOR_MAJOR_GLYPH_OF_WHIRLWIND                 = 509,   // Level 36  Spell ID: 58370
-        WARRIOR_MAJOR_GLYPH_OF_BLADESTORM                = 762,   // Level 60  Spell ID: 63324
-        WARRIOR_MAJOR_GLYPH_OF_SHOCKWAVE                 = 763,   // Level 60  Spell ID: 63325
-        WARRIOR_MAJOR_GLYPH_OF_VIGILANCE                 = 764,   // Level 40  Spell ID: 63326
-        WARRIOR_MAJOR_GLYPH_OF_ENRAGED_REGENERATION      = 765,   // Level 75  Spell ID: 63327
-        WARRIOR_MAJOR_GLYPH_OF_SPELL_REFLECTION          = 766,   // Level 64  Spell ID: 63328
-        WARRIOR_MAJOR_GLYPH_OF_SHIELD_WALL               = 767,   // Level 28  Spell ID: 63329
-        WARRIOR_MINOR_GLYPH_OF_BATTLE                    = 483,   // Level 15  Spell ID: 58095
-        WARRIOR_MINOR_GLYPH_OF_BLOODRAGE                 = 484,   // Level 15  Spell ID: 58096
-        WARRIOR_MINOR_GLYPH_OF_CHARGE                    = 485,   // Level 15  Spell ID: 58097
-        WARRIOR_MINOR_GLYPH_OF_MOCKING_BLOW              = 486,   // Level 16  Spell ID: 58099
-        WARRIOR_MINOR_GLYPH_OF_THUNDER_CLAP              = 487,   // Level 15  Spell ID: 58098
-        WARRIOR_MINOR_GLYPH_OF_ENDURING_VICTORY          = 488,   // Level 62  Spell ID: 58104
-        WARRIOR_MINOR_GLYPH_OF_COMMAND                   = 851,   // Level 68  Spell ID: 68164
+    MAGE_MINOR_GLYPH_OF_FIRE_WARD                    = 446,   // Level 20  Spell ID: 57926
+    MAGE_MINOR_GLYPH_OF_FROST_WARD                   = 447,   // Level 22  Spell ID: 57927
+    MAGE_MINOR_GLYPH_OF_FROST_ARMOR                  = 448,   // Level 15  Spell ID: 57928
+    MAGE_MINOR_GLYPH_OF_THE_PENGUIN                  = 450,   // Level 15  Spell ID: 52648
+    MAGE_MINOR_GLYPH_OF_SLOW_FALL                    = 451,   // Level 15  Spell ID: 57925
+    PALADIN_MAJOR_GLYPH_OF_JUDGEMENT                 = 183,   // Level 15  Spell ID: 54922
+    PALADIN_MAJOR_GLYPH_OF_SEAL_OF_COMMAND           = 184,   // Level 20  Spell ID: 54925
+    PALADIN_MAJOR_GLYPH_OF_HAMMER_OF_JUSTICE         = 185,   // Level 15  Spell ID: 54923
+    PALADIN_MAJOR_GLYPH_OF_SPIRITUAL_ATTUNEMENT      = 186,   // Level 18  Spell ID: 54924
+    PALADIN_MAJOR_GLYPH_OF_HAMMER_OF_WRATH           = 187,   // Level 44  Spell ID: 54926
+    PALADIN_MAJOR_GLYPH_OF_CRUSADER_STRIKE           = 188,   // Level 20  Spell ID: 54927
+    PALADIN_MAJOR_GLYPH_OF_CONSECRATION              = 189,   // Level 20  Spell ID: 54928
+    PALADIN_MAJOR_GLYPH_OF_RIGHTEOUS_DEFENSE         = 190,   // Level 15  Spell ID: 54929
+    PALADIN_MAJOR_GLYPH_OF_AVENGERS_SHIELD           = 191,   // Level 50  Spell ID: 54930
+    PALADIN_MAJOR_GLYPH_OF_TURN_EVIL                 = 192,   // Level 24  Spell ID: 54931
+    PALADIN_MAJOR_GLYPH_OF_EXORCISM                  = 193,   // Level 20  Spell ID: 54934
+    PALADIN_MAJOR_GLYPH_OF_CLEANSING                 = 194,   // Level 35  Spell ID: 54935
+    PALADIN_MAJOR_GLYPH_OF_FLASH_OF_LIGHT            = 195,   // Level 20  Spell ID: 54936
+    PALADIN_MAJOR_GLYPH_OF_HOLY_LIGHT                = 196,   // Level 15  Spell ID: 54937
+    PALADIN_MAJOR_GLYPH_OF_AVENGING_WRATH            = 197,   // Level 70  Spell ID: 54938
+    PALADIN_MAJOR_GLYPH_OF_DIVINITY                  = 198,   // Level 15  Spell ID: 54939
+    PALADIN_MAJOR_GLYPH_OF_SEAL_OF_WISDOM            = 199,   // Level 38  Spell ID: 54940
+    PALADIN_MAJOR_GLYPH_OF_SEAL_OF_LIGHT             = 200,   // Level 30  Spell ID: 54943
+    PALADIN_MAJOR_GLYPH_OF_HOLY_WRATH                = 559,   // Unknown   Spell ID: 56420
+    PALADIN_MAJOR_GLYPH_OF_SEAL_OF_RIGHTEOUSNESS     = 560,   // Level 50  Spell ID: 56414
+    PALADIN_MAJOR_GLYPH_OF_SEAL_OF_VENGEANCE         = 561,   // Level 50  Spell ID: 56416
+    PALADIN_MAJOR_GLYPH_OF_BEACON_OF_LIGHT           = 701,   // Level 60  Spell ID: 63218
+    PALADIN_MAJOR_GLYPH_OF_HAMMER_OF_THE_RIGHTEOUS   = 702,   // Level 60  Spell ID: 63219
+    PALADIN_MAJOR_GLYPH_OF_DIVINE_STORM              = 703,   // Level 60  Spell ID: 63220
+    PALADIN_MAJOR_GLYPH_OF_SHIELD_OF_RIGHTEOUSNESS   = 704,   // Level 75  Spell ID: 63222
+    PALADIN_MAJOR_GLYPH_OF_DIVINE_PLEA               = 705,   // Level 71  Spell ID: 63223
+    PALADIN_MAJOR_GLYPH_OF_HOLY_SHOCK                = 706,   // Level 40  Spell ID: 63224
+    PALADIN_MAJOR_GLYPH_OF_SALVATION                 = 707,   // Level 26  Spell ID: 63225
+    PALADIN_MINOR_GLYPH_OF_BLESSING_OF_KINGS         = 452,   // Level 20  Spell ID: 57937
+    PALADIN_MINOR_GLYPH_OF_BLESSING_OF_MIGHT         = 453,   // Level 15  Spell ID: 57958
+    PALADIN_MINOR_GLYPH_OF_BLESSING_OF_WISDOM        = 454,   // Level 15  Spell ID: 57979
+    PALADIN_MINOR_GLYPH_OF_LAY_ON_HANDS              = 455,   // Level 15  Spell ID: 57955
+    PALADIN_MINOR_GLYPH_OF_SENSE_UNDEAD              = 456,   // Level 20  Spell ID: 57947
+    PALADIN_MINOR_GLYPH_OF_THE_WISE                  = 457,   // Level 15  Spell ID: 57954
+    PRIEST_MAJOR_GLYPH_OF_CIRCLE_OF_HEALING          = 251,   // Level 50  Spell ID: 55675
+    PRIEST_MAJOR_GLYPH_OF_DISPEL_MAGIC               = 252,   // Level 18  Spell ID: 55677
+    PRIEST_MAJOR_GLYPH_OF_FADE                       = 253,   // Level 15  Spell ID: 55684
+    PRIEST_MAJOR_GLYPH_OF_FEAR_WARD                  = 254,   // Level 20  Spell ID: 55678
+    PRIEST_MAJOR_GLYPH_OF_FLASH_HEAL                 = 255,   // Level 20  Spell ID: 55679
+    PRIEST_MAJOR_GLYPH_OF_HOLY_NOVA                  = 256,   // Level 20  Spell ID: 55683
+    PRIEST_MAJOR_GLYPH_OF_INNER_FIRE                 = 257,   // Level 15  Spell ID: 55686
+    PRIEST_MAJOR_GLYPH_OF_LIGHTWELL                  = 258,   // Level 40  Spell ID: 55673
+    PRIEST_MAJOR_GLYPH_OF_MASS_DISPEL                = 259,   // Level 70  Spell ID: 55691
+    PRIEST_MAJOR_GLYPH_OF_MIND_CONTROL               = 260,   // Level 30  Spell ID: 55688
+    PRIEST_MAJOR_GLYPH_OF_SHADOW_WORD_PAIN           = 261,   // Level 15  Spell ID: 55681
+    PRIEST_MAJOR_GLYPH_OF_SHADOW                     = 262,   // Level 20  Spell ID: 55689
+    PRIEST_MAJOR_GLYPH_OF_POWER_WORD_SHIELD          = 263,   // Level 15  Spell ID: 55672
+    PRIEST_MAJOR_GLYPH_OF_PRAYER_OF_HEALING          = 264,   // Level 30  Spell ID: 55680
+    PRIEST_MAJOR_GLYPH_OF_PSYCHIC_SCREAM             = 265,   // Level 15  Spell ID: 55676
+    PRIEST_MAJOR_GLYPH_OF_RENEW                      = 266,   // Level 15  Spell ID: 55674
+    PRIEST_MAJOR_GLYPH_OF_SCOURGE_IMPRISONMENT       = 267,   // Level 20  Spell ID: 55690
+    PRIEST_MAJOR_GLYPH_OF_SHADOW_WORD_DEATH          = 268,   // Level 62  Spell ID: 55682
+    PRIEST_MAJOR_GLYPH_OF_MIND_FLAY                  = 269,   // Level 20  Spell ID: 55687
+    PRIEST_MAJOR_GLYPH_OF_SMITE                      = 270,   // Level 15  Spell ID: 55692
+    PRIEST_MAJOR_GLYPH_OF_SPIRIT_OF_REDEMPTION       = 271,   // Level 30  Spell ID: 55685
+    PRIEST_MAJOR_GLYPH_OF_DISPERSION                 = 708,   // Level 60  Spell ID: 63229
+    PRIEST_MAJOR_GLYPH_OF_GUARDIAN_SPIRIT            = 709,   // Level 60  Spell ID: 63231
+    PRIEST_MAJOR_GLYPH_OF_PENANCE                    = 710,   // Level 60  Spell ID: 63235
+    PRIEST_MAJOR_GLYPH_OF_MIND_SEAR                  = 711,   // Level 75  Spell ID: 63237
+    PRIEST_MAJOR_GLYPH_OF_HYMN_OF_HOPE               = 712,   // Level 60  Spell ID: 63246
+    PRIEST_MAJOR_GLYPH_OF_PAIN_SUPPRESSION           = 713,   // Level 50  Spell ID: 63248
+    PRIEST_MINOR_GLYPH_OF_FADING                     = 458,   // Level 15  Spell ID: 57985
+    PRIEST_MINOR_GLYPH_OF_LEVITATE                   = 459,   // Level 34  Spell ID: 57987
+    PRIEST_MINOR_GLYPH_OF_FORTITUDE                  = 460,   // Level 15  Spell ID: 58009
+    PRIEST_MINOR_GLYPH_OF_SHACKLE_UNDEAD             = 461,   // Level 20  Spell ID: 57986
+    PRIEST_MINOR_GLYPH_OF_SHADOW_PROTECTION          = 462,   // Level 30  Spell ID: 58015
+    PRIEST_MINOR_GLYPH_OF_SHADOWFIEND                = 463,   // Level 66  Spell ID: 58228
+    ROGUE_MAJOR_GLYPH_OF_ADRENALINE_RUSH             = 391,   // Level 40  Spell ID: 56808
+    ROGUE_MAJOR_GLYPH_OF_AMBUSH                      = 392,   // Level 18  Spell ID: 56813
+    ROGUE_MAJOR_GLYPH_OF_BACKSTAB                    = 393,   // Level 15  Spell ID: 56800
+    ROGUE_MAJOR_GLYPH_OF_BLADE_FLURRY                = 394,   // Level 30  Spell ID: 56818
+    ROGUE_MAJOR_GLYPH_OF_CRIPPLING_POISON            = 395,   // Level 20  Spell ID: 56820
+    ROGUE_MAJOR_GLYPH_OF_DEADLY_THROW                = 396,   // Level 64  Spell ID: 56806
+    ROGUE_MAJOR_GLYPH_OF_EVASION                     = 397,   // Level 15  Spell ID: 56799
+    ROGUE_MAJOR_GLYPH_OF_EVISCERATE                  = 398,   // Level 15  Spell ID: 56802
+    ROGUE_MAJOR_GLYPH_OF_EXPOSE_ARMOR                = 399,   // Level 15  Spell ID: 56803
+    ROGUE_MAJOR_GLYPH_OF_FEINT                       = 400,   // Level 16  Spell ID: 56804
+    ROGUE_MAJOR_GLYPH_OF_GARROTE                     = 401,   // Level 15  Spell ID: 56812
+    ROGUE_MAJOR_GLYPH_OF_GHOSTLY_STRIKE              = 402,   // Level 20  Spell ID: 56814
+    ROGUE_MAJOR_GLYPH_OF_GOUGE                       = 403,   // Level 15  Spell ID: 56809
+    ROGUE_MAJOR_GLYPH_OF_HEMORRHAGE                  = 404,   // Level 30  Spell ID: 56807
+    ROGUE_MAJOR_GLYPH_OF_PREPARATION                 = 405,   // Level 30  Spell ID: 56819
+    ROGUE_MAJOR_GLYPH_OF_RUPTURE                     = 406,   // Level 20  Spell ID: 56801
+    ROGUE_MAJOR_GLYPH_OF_SAP                         = 407,   // Level 15  Spell ID: 56798
+    ROGUE_MAJOR_GLYPH_OF_VIGOR                       = 408,   // Level 70  Spell ID: 56805
+    ROGUE_MAJOR_GLYPH_OF_SINISTER_STRIKE             = 409,   // Level 15  Spell ID: 56821
+    ROGUE_MAJOR_GLYPH_OF_SLICE_AND_DICE              = 410,   // Level 15  Spell ID: 56810
+    ROGUE_MAJOR_GLYPH_OF_SPRINT                      = 411,   // Level 15  Spell ID: 56811
+    ROGUE_MAJOR_GLYPH_OF_HUNGER_FOR_BLOOD            = 714,   // Level 60  Spell ID: 63249
+    ROGUE_MAJOR_GLYPH_OF_KILLING_SPREE               = 715,   // Level 60  Spell ID: 63252
+    ROGUE_MAJOR_GLYPH_OF_SHADOW_DANCE                = 716,   // Level 60  Spell ID: 63253
+    ROGUE_MAJOR_GLYPH_OF_FAN_OF_KNIVES               = 731,   // Level 80  Spell ID: 63254
+    ROGUE_MAJOR_GLYPH_OF_TRICKS_OF_THE_TRADE         = 732,   // Level 75  Spell ID: 63256
+    ROGUE_MAJOR_GLYPH_OF_MUTILATE                    = 733,   // Level 50  Spell ID: 63268
+    ROGUE_MAJOR_GLYPH_OF_CLOAK_OF_SHADOWS            = 734,   // Level 66  Spell ID: 63269
+    ROGUE_MINOR_GLYPH_OF_DISTRACT                    = 464,   // Level 22  Spell ID: 58032
+    ROGUE_MINOR_GLYPH_OF_PICK_LOCK                   = 465,   // Level 16  Spell ID: 58027
+    ROGUE_MINOR_GLYPH_OF_PICK_POCKET                 = 466,   // Level 15  Spell ID: 58017
+    ROGUE_MINOR_GLYPH_OF_SAFE_FALL                   = 467,   // Level 40  Spell ID: 58033
+    ROGUE_MINOR_GLYPH_OF_BLURRED_SPEED               = 468,   // Level 15  Spell ID: 58039
+    ROGUE_MINOR_GLYPH_OF_VANISH                      = 469,   // Level 22  Spell ID: 58038
+    SHAMAN_MAJOR_GLYPH_OF_WATER_MASTERY              = 211,   // Level 20  Spell ID: 55436
+    SHAMAN_MAJOR_GLYPH_OF_CHAIN_HEAL                 = 212,   // Level 40  Spell ID: 55437
+    SHAMAN_MAJOR_GLYPH_OF_CHAIN_LIGHTNING            = 213,   // Level 32  Spell ID: 55449
+    SHAMAN_MAJOR_GLYPH_OF_LAVA                       = 214,   // Level 66  Spell ID: 55454
+    SHAMAN_MAJOR_GLYPH_OF_SHOCKING                   = 215,   // Unknown   Spell ID: 55442
+    SHAMAN_MAJOR_GLYPH_OF_EARTHLIVING_WEAPON         = 216,   // Level 30  Spell ID: 55439
+    SHAMAN_MAJOR_GLYPH_OF_FIRE_ELEMENTAL_TOTEM       = 217,   // Level 68  Spell ID: 55455
+    SHAMAN_MAJOR_GLYPH_OF_FIRE_NOVA                  = 218,   // Level 15  Spell ID: 55450
+    SHAMAN_MAJOR_GLYPH_OF_FLAME_SHOCK                = 219,   // Level 15  Spell ID: 55447
+    SHAMAN_MAJOR_GLYPH_OF_FLAMETONGUE_WEAPON         = 220,   // Level 15  Spell ID: 55451
+    SHAMAN_MAJOR_GLYPH_OF_FROST_SHOCK                = 221,   // Level 20  Spell ID: 55443
+    SHAMAN_MAJOR_GLYPH_OF_HEALING_STREAM_TOTEM       = 222,   // Level 20  Spell ID: 55456
+    SHAMAN_MAJOR_GLYPH_OF_HEALING_WAVE               = 223,   // Level 15  Spell ID: 55440
+    SHAMAN_MAJOR_GLYPH_OF_LESSER_HEALING_WAVE        = 224,   // Level 20  Spell ID: 55438
+    SHAMAN_MAJOR_GLYPH_OF_LIGHTNING_SHIELD           = 225,   // Level 15  Spell ID: 55448
+    SHAMAN_MAJOR_GLYPH_OF_LIGHTNING_BOLT             = 226,   // Level 15  Spell ID: 55453
+    SHAMAN_MAJOR_GLYPH_OF_STORMSTRIKE                = 228,   // Level 40  Spell ID: 55446
+    SHAMAN_MAJOR_GLYPH_OF_LAVA_LASH                  = 229,   // Level 15  Spell ID: 55444
+    SHAMAN_MAJOR_GLYPH_OF_ELEMENTAL_MASTERY          = 230,   // Level 50  Spell ID: 55452
+    SHAMAN_MAJOR_GLYPH_OF_WINDFURY_WEAPON            = 231,   // Level 30  Spell ID: 55445
+    SHAMAN_MAJOR_GLYPH_OF_THUNDER                    = 735,   // Level 60  Spell ID: 63270
+    SHAMAN_MAJOR_GLYPH_OF_FERAL_SPIRIT               = 736,   // Level 60  Spell ID: 63271
+    SHAMAN_MAJOR_GLYPH_OF_RIPTIDE                    = 737,   // Level 60  Spell ID: 63273
+    SHAMAN_MAJOR_GLYPH_OF_EARTH_SHIELD               = 751,   // Level 50  Spell ID: 63279
+    SHAMAN_MAJOR_GLYPH_OF_TOTEM_OF_WRATH             = 752,   // Level 50  Spell ID: 63280
+    SHAMAN_MAJOR_GLYPH_OF_HEX                        = 753,   // Level 80  Spell ID: 63291
+    SHAMAN_MAJOR_GLYPH_OF_STONECLAW_TOTEM            = 754,   // Level 15  Spell ID: 63298
+    SHAMAN_MINOR_GLYPH_OF_ASTRAL_RECALL              = 470,   // Level 30  Spell ID: 58058
+    SHAMAN_MINOR_GLYPH_OF_RENEWED_LIFE               = 473,   // Level 30  Spell ID: 58059
+    SHAMAN_MINOR_GLYPH_OF_WATER_BREATHING            = 474,   // Level 22  Spell ID: 58055
+    SHAMAN_MINOR_GLYPH_OF_WATER_SHIELD               = 475,   // Level 20  Spell ID: 58063
+    SHAMAN_MINOR_GLYPH_OF_WATER_WALKING              = 476,   // Level 28  Spell ID: 58057
+    SHAMAN_MINOR_GLYPH_OF_GHOST_WOLF                 = 552,   // Level 16  Spell ID: 59289
+    SHAMAN_MINOR_GLYPH_OF_THUNDERSTORM               = 612,   // Level 70  Spell ID: 62132
+    WARLOCK_MAJOR_GLYPH_OF_INCINERATE                = 272,   // Unknown   Spell ID: 56242
+    WARLOCK_MAJOR_GLYPH_OF_CONFLAGRATE               = 273,   // Level 40  Spell ID: 56235
+    WARLOCK_MAJOR_GLYPH_OF_CORRUPTION                = 274,   // Level 15  Spell ID: 56218
+    WARLOCK_MAJOR_GLYPH_OF_CURSE_OF_AGONY            = 275,   // Level 15  Spell ID: 56241
+    WARLOCK_MAJOR_GLYPH_OF_DEATH_COIL                = 276,   // Level 42  Spell ID: 56232
+    WARLOCK_MAJOR_GLYPH_OF_FEAR                      = 277,   // Level 15  Spell ID: 56244
+    WARLOCK_MAJOR_GLYPH_OF_FELGUARD                  = 278,   // Level 50  Spell ID: 56246
+    WARLOCK_MAJOR_GLYPH_OF_FELHUNTER                 = 279,   // Level 30  Spell ID: 56249
+    WARLOCK_MAJOR_GLYPH_OF_HEALTH_FUNNEL             = 280,   // Level 15  Spell ID: 56238
+    WARLOCK_MAJOR_GLYPH_OF_HEALTHSTONE               = 281,   // Level 15  Spell ID: 56224
+    WARLOCK_MAJOR_GLYPH_OF_HOWL_OF_TERROR            = 282,   // Level 40  Spell ID: 56217
+    WARLOCK_MAJOR_GLYPH_OF_IMMOLATE                  = 283,   // Level 15  Spell ID: 56228
+    WARLOCK_MAJOR_GLYPH_OF_IMP                       = 284,   // Level 15  Spell ID: 56248
+    WARLOCK_MAJOR_GLYPH_OF_SEARING_PAIN              = 285,   // Level 18  Spell ID: 56226
+    WARLOCK_MAJOR_GLYPH_OF_SHADOW_BOLT               = 286,   // Level 15  Spell ID: 56240
+    WARLOCK_MAJOR_GLYPH_OF_SHADOWBURN                = 287,   // Level 20  Spell ID: 56229
+    WARLOCK_MAJOR_GLYPH_OF_SIPHON_LIFE               = 288,   // Level 30  Spell ID: 56216
+    WARLOCK_MAJOR_GLYPH_OF_SOULSTONE                 = 289,   // Level 18  Spell ID: 56231
+    WARLOCK_MAJOR_GLYPH_OF_SUCCUBUS                  = 290,   // Level 26  Spell ID: 56250
+    WARLOCK_MAJOR_GLYPH_OF_UNSTABLE_AFFLICTION       = 291,   // Level 50  Spell ID: 56233
+    WARLOCK_MAJOR_GLYPH_OF_VOIDWALKER                = 292,   // Level 15  Spell ID: 56247
+    WARLOCK_MAJOR_GLYPH_OF_HAUNT                     = 755,   // Level 60  Spell ID: 63302
+    WARLOCK_MAJOR_GLYPH_OF_METAMORPHOSIS             = 756,   // Level 60  Spell ID: 63303
+    WARLOCK_MAJOR_GLYPH_OF_CHAOS_BOLT                = 757,   // Level 60  Spell ID: 63304
+    WARLOCK_MAJOR_GLYPH_OF_DEMONIC_CIRCLE            = 758,   // Level 80  Spell ID: 63309
+    WARLOCK_MAJOR_GLYPH_OF_SHADOWFLAME               = 759,   // Level 75  Spell ID: 63310
+    WARLOCK_MAJOR_GLYPH_OF_LIFE_TAP                  = 760,   // Level 15  Spell ID: 63320
+    WARLOCK_MAJOR_GLYPH_OF_SOUL_LINK                 = 761,   // Level 20  Spell ID: 63312
+    WARLOCK_MAJOR_GLYPH_OF_QUICK_DECAY               = 911,   // Level 15  Spell ID: 70947
+    WARLOCK_MINOR_GLYPH_OF_UNENDING_BREATH           = 477,   // Level 15  Spell ID: 58079
+    WARLOCK_MINOR_GLYPH_OF_DRAIN_SOUL                = 478,   // Level 15  Spell ID: 58070
+    WARLOCK_MINOR_GLYPH_OF_KILROGG                   = 479,   // Level 22  Spell ID: 58081
+    WARLOCK_MINOR_GLYPH_OF_ENSLAVE_DEMON             = 481,   // Level 30  Spell ID: 58107
+    WARLOCK_MINOR_GLYPH_OF_SOULS                     = 482,   // Level 68  Spell ID: 58094
+    WARRIOR_MAJOR_GLYPH_OF_MORTAL_STRIKE             = 489,   // Level 40  Spell ID: 58368
+    WARRIOR_MAJOR_GLYPH_OF_BLOODTHIRST               = 490,   // Level 40  Spell ID: 58369
+    WARRIOR_MAJOR_GLYPH_OF_RAPID_CHARGE              = 491,   // Level 15  Spell ID: 58355
+    WARRIOR_MAJOR_GLYPH_OF_CLEAVING                  = 492,   // Level 20  Spell ID: 58366
+    WARRIOR_MAJOR_GLYPH_OF_DEVASTATE                 = 493,   // Level 40  Spell ID: 58388
+    WARRIOR_MAJOR_GLYPH_OF_EXECUTION                 = 494,   // Level 24  Spell ID: 58367
+    WARRIOR_MAJOR_GLYPH_OF_HAMSTRING                 = 495,   // Level 15  Spell ID: 58372
+    WARRIOR_MAJOR_GLYPH_OF_HEROIC_STRIKE             = 496,   // Level 15  Spell ID: 58357
+    WARRIOR_MAJOR_GLYPH_OF_INTERVENE                 = 497,   // Level 70  Spell ID: 58377
+    WARRIOR_MAJOR_GLYPH_OF_BARBARIC_INSULTS          = 498,   // Level 16  Spell ID: 58365
+    WARRIOR_MAJOR_GLYPH_OF_OVERPOWER                 = 499,   // Level 15  Spell ID: 58386
+    WARRIOR_MAJOR_GLYPH_OF_RENDING                   = 500,   // Level 15  Spell ID: 58385
+    WARRIOR_MAJOR_GLYPH_OF_REVENGE                   = 501,   // Level 15  Spell ID: 58364
+    WARRIOR_MAJOR_GLYPH_OF_BLOCKING                  = 502,   // Level 40  Spell ID: 58375
+    WARRIOR_MAJOR_GLYPH_OF_LAST_STAND                = 503,   // Level 20  Spell ID: 58376
+    WARRIOR_MAJOR_GLYPH_OF_SUNDER_ARMOR              = 504,   // Level 15  Spell ID: 58387
+    WARRIOR_MAJOR_GLYPH_OF_SWEEPING_STRIKES          = 505,   // Level 30  Spell ID: 58384
+    WARRIOR_MAJOR_GLYPH_OF_TAUNT                     = 506,   // Level 15  Spell ID: 58353
+    WARRIOR_MAJOR_GLYPH_OF_RESONATING_POWER          = 507,   // Level 15  Spell ID: 58356
+    WARRIOR_MAJOR_GLYPH_OF_VICTORY_RUSH              = 508,   // Level 62  Spell ID: 58382
+    WARRIOR_MAJOR_GLYPH_OF_WHIRLWIND                 = 509,   // Level 36  Spell ID: 58370
+    WARRIOR_MAJOR_GLYPH_OF_BLADESTORM                = 762,   // Level 60  Spell ID: 63324
+    WARRIOR_MAJOR_GLYPH_OF_SHOCKWAVE                 = 763,   // Level 60  Spell ID: 63325
+    WARRIOR_MAJOR_GLYPH_OF_VIGILANCE                 = 764,   // Level 40  Spell ID: 63326
+    WARRIOR_MAJOR_GLYPH_OF_ENRAGED_REGENERATION      = 765,   // Level 75  Spell ID: 63327
+    WARRIOR_MAJOR_GLYPH_OF_SPELL_REFLECTION          = 766,   // Level 64  Spell ID: 63328
+    WARRIOR_MAJOR_GLYPH_OF_SHIELD_WALL               = 767,   // Level 28  Spell ID: 63329
+    WARRIOR_MINOR_GLYPH_OF_BATTLE                    = 483,   // Level 15  Spell ID: 58095
+    WARRIOR_MINOR_GLYPH_OF_BLOODRAGE                 = 484,   // Level 15  Spell ID: 58096
+    WARRIOR_MINOR_GLYPH_OF_CHARGE                    = 485,   // Level 15  Spell ID: 58097
+    WARRIOR_MINOR_GLYPH_OF_MOCKING_BLOW              = 486,   // Level 16  Spell ID: 58099
+    WARRIOR_MINOR_GLYPH_OF_THUNDER_CLAP              = 487,   // Level 15  Spell ID: 58098
+    WARRIOR_MINOR_GLYPH_OF_ENDURING_VICTORY          = 488,   // Level 62  Spell ID: 58104
+    WARRIOR_MINOR_GLYPH_OF_COMMAND                   = 851,   // Level 68  Spell ID: 68164
 };
 
 /**
 * So they're kept track of somewhere... but let's comment them out.
 enum GlyphsUnknown
 {
-        UNKNOWN_MAJOR_GLYPH_OF_NATURAL_FORCE             = 2,     // Unknown   Spell ID: 52084
-        UNKNOWN_UNKNOWN_GLYPH_CRUELTY                    = 21,    // Unknown   Spell ID: 12320
-        UNKNOWN_UNKNOWN_GLYPH_ANTICIPATION               = 22,    // Unknown   Spell ID: 12297
-        UNKNOWN_UNKNOWN_GLYPH_VENOMOUS_MANA              = 61,    // Unknown   Spell ID: 46831
-        UNKNOWN_MINOR_GLYPH_OF_NATURAL_FORCE             = 81,    // Unknown   Spell ID: 52084
-        UNKNOWN_UNKNOWN_GLYPH_GLYPH_OF_MOONFIRE          = 82,    // Unknown   Spell ID: 52085
-        UNKNOWN_MAJOR_                                   = 101,   // Unknown   Spell ID: NULL
-        UNKNOWN_UNKNOWN_GLYPH_COPY_OF_HOLY_BOLT          = 121,   // Unknown   Spell ID: 46487
-        UNKNOWN_MINOR_GLYPH_OF_THE_WHITE_BEAR            = 141,   // Unknown   Spell ID: 54292
-        UNKNOWN_MAJOR_GLYPH_OF_GROWLING                  = 163,   // Unknown   Spell ID: 54812
-        UNKNOWN_MINOR_GLYPH_OF_THE_RED_LYNX              = 182,   // Unknown   Spell ID: 54912
-        UNKNOWN_MAJOR_GLYPH_OF_LAVA                      = 214,   // Unknown   Spell ID: 55454
-        UNKNOWN_MAJOR_GLYPH_OF_MANA_TIDE                 = 227,   // Unknown   Spell ID: 55441
-        UNKNOWN_MAJOR_GLYPH_OF_MOLTEN_ARMOR              = 328,   // Unknown   Spell ID: 56382
-        UNKNOWN_MAJOR_GLYPH_OF_THE_HAWK                  = 363,   // Unknown   Spell ID: 56856
-        UNKNOWN_MINOR_GLYPH_OF_THE_FOREST_LYNX           = 436,   // Unknown   Spell ID: 58133
-        UNKNOWN_MINOR_GLYPH_OF_THE_BLACK_BEAR            = 438,   // Unknown   Spell ID: 58132
-        UNKNOWN_MINOR_GLYPH_OF_THE_BEAR_CUB              = 449,   // Unknown   Spell ID: 58136
-        UNKNOWN_MINOR_GLYPH_OF_THE_ARCTIC_WOLF           = 471,   // Unknown   Spell ID: 58135
-        UNKNOWN_MINOR_GLYPH_OF_THE_BLACK_WOLF            = 472,   // Unknown   Spell ID: 58134
-        UNKNOWN_MINOR_GLYPH_OF_CURSE_OF_EXHAUSION        = 480,   // Unknown   Spell ID: 58080
-        UNKNOWN_MINOR_GLYPH_OF_BLAST_WAVE                = 611,   // Unknown   Spell ID: 62126
-        UNKNOWN_MAJOR_GLYPH_OF_ENVENOM                   = 791,   // Unknown   Spell ID: 64199
+    UNKNOWN_MAJOR_GLYPH_OF_NATURAL_FORCE             = 2,     // Unknown   Spell ID: 52084
+    UNKNOWN_UNKNOWN_GLYPH_CRUELTY                    = 21,    // Unknown   Spell ID: 12320
+    UNKNOWN_UNKNOWN_GLYPH_ANTICIPATION               = 22,    // Unknown   Spell ID: 12297
+    UNKNOWN_UNKNOWN_GLYPH_VENOMOUS_MANA              = 61,    // Unknown   Spell ID: 46831
+    UNKNOWN_MINOR_GLYPH_OF_NATURAL_FORCE             = 81,    // Unknown   Spell ID: 52084
+    UNKNOWN_UNKNOWN_GLYPH_GLYPH_OF_MOONFIRE          = 82,    // Unknown   Spell ID: 52085
+    UNKNOWN_MAJOR_                                   = 101,   // Unknown   Spell ID: NULL
+    UNKNOWN_UNKNOWN_GLYPH_COPY_OF_HOLY_BOLT          = 121,   // Unknown   Spell ID: 46487
+    UNKNOWN_MINOR_GLYPH_OF_THE_WHITE_BEAR            = 141,   // Unknown   Spell ID: 54292
+    UNKNOWN_MAJOR_GLYPH_OF_GROWLING                  = 163,   // Unknown   Spell ID: 54812
+    UNKNOWN_MINOR_GLYPH_OF_THE_RED_LYNX              = 182,   // Unknown   Spell ID: 54912
+    UNKNOWN_MAJOR_GLYPH_OF_LAVA                      = 214,   // Unknown   Spell ID: 55454
+    UNKNOWN_MAJOR_GLYPH_OF_MANA_TIDE                 = 227,   // Unknown   Spell ID: 55441
+    UNKNOWN_MAJOR_GLYPH_OF_MOLTEN_ARMOR              = 328,   // Unknown   Spell ID: 56382
+    UNKNOWN_MAJOR_GLYPH_OF_THE_HAWK                  = 363,   // Unknown   Spell ID: 56856
+    UNKNOWN_MINOR_GLYPH_OF_THE_FOREST_LYNX           = 436,   // Unknown   Spell ID: 58133
+    UNKNOWN_MINOR_GLYPH_OF_THE_BLACK_BEAR            = 438,   // Unknown   Spell ID: 58132
+    UNKNOWN_MINOR_GLYPH_OF_THE_BEAR_CUB              = 449,   // Unknown   Spell ID: 58136
+    UNKNOWN_MINOR_GLYPH_OF_THE_ARCTIC_WOLF           = 471,   // Unknown   Spell ID: 58135
+    UNKNOWN_MINOR_GLYPH_OF_THE_BLACK_WOLF            = 472,   // Unknown   Spell ID: 58134
+    UNKNOWN_MINOR_GLYPH_OF_CURSE_OF_EXHAUSION        = 480,   // Unknown   Spell ID: 58080
+    UNKNOWN_MINOR_GLYPH_OF_BLAST_WAVE                = 611,   // Unknown   Spell ID: 62126
+    UNKNOWN_MAJOR_GLYPH_OF_ENVENOM                   = 791,   // Unknown   Spell ID: 64199
 };*/
 
 // TODO: replace this with mangos data... I mean this has GOT to be out there somewhere already
@@ -1380,38 +1380,38 @@ enum GlyphsUnknown
 // But in the meantime, value + 412 = TabId.
 enum ClassesCombatPets
 {
-        CLASS_PET_CUNNING  = -1,
-        CLASS_PET_FEROCITY = -2,
-        CLASS_PET_TENACITY = -3
+    CLASS_PET_CUNNING  = -1,
+    CLASS_PET_FEROCITY = -2,
+    CLASS_PET_TENACITY = -3
 };
 
 enum TalentSpecPurpose
 {
-        TSP_NONE                        = 0x00000000,  // should probably error out?
-        TSP_PVE_TANK                    = 0x00000001,
-        TSP_PVE_DPS                     = 0x00000002,
-        TSP_PVE_LEVELING                = 0x00000004,
-        TSP_PVE_HEALING                 = 0x00000008,
-        TSP_PVE_INSTANCING              = 0x00000010,
-        TSP_PVE_RAID                    = 0x00000020,
-        TSP_PVE_ALL                     = 0x0000FFFF,  // Highly recommend AGAINST using this
-        TSP_PVP_TANK                    = 0x00010000,
-        TSP_PVP_DPS                     = 0x00020000,
-        TSP_PVP_LEVELING                = 0x00040000,
-        TSP_PVP_TWINK                   = 0x00080000,
-        TSP_PVP_HEALING                 = 0x00100000,
-        TSP_PVP_ARENA                   = 0x00200000,
-        TSP_PVP_ALL                     = 0xFFFF0000   // Highly recommend AGAINST using this
+    TSP_NONE                        = 0x00000000,  // should probably error out?
+    TSP_PVE_TANK                    = 0x00000001,
+    TSP_PVE_DPS                     = 0x00000002,
+    TSP_PVE_LEVELING                = 0x00000004,
+    TSP_PVE_HEALING                 = 0x00000008,
+    TSP_PVE_INSTANCING              = 0x00000010,
+    TSP_PVE_RAID                    = 0x00000020,
+    TSP_PVE_ALL                     = 0x0000FFFF,  // Highly recommend AGAINST using this
+    TSP_PVP_TANK                    = 0x00010000,
+    TSP_PVP_DPS                     = 0x00020000,
+    TSP_PVP_LEVELING                = 0x00040000,
+    TSP_PVP_TWINK                   = 0x00080000,
+    TSP_PVP_HEALING                 = 0x00100000,
+    TSP_PVP_ARENA                   = 0x00200000,
+    TSP_PVP_ALL                     = 0xFFFF0000   // Highly recommend AGAINST using this
 };
 
 struct TalentSpec
 {
-        std::string specName;
-        short specClass;
-        TalentSpecPurpose specPurpose;
-        uint16 talentId[71];
-        uint16 glyphIdMajor[3];
-        uint16 glyphIdMinor[3];
+    std::string specName;
+    short specClass;
+    TalentSpecPurpose specPurpose;
+    uint16 talentId[71];
+    uint16 glyphIdMajor[3];
+    uint16 glyphIdMinor[3];
 };
 
 enum NotableItems
@@ -1505,7 +1505,7 @@ public:
         REMOVE_AUCTION              = 0x08,  // remove auction
         RESET_TALENTS               = 0x10,  // reset all talents
         BANK_WITHDRAW               = 0x11,  // withdraw item from bank
-	    BANK_DEPOSIT                = 0x12   // deposit item in bank
+        BANK_DEPOSIT                = 0x12   // deposit item in bank
     };
 
     typedef std::pair<enum TaskFlags, uint32> taskPair;
