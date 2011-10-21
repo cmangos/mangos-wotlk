@@ -6,6 +6,8 @@
 #include "../GridNotifiers.h"
 #include "../GridNotifiersImpl.h"
 #include "../CellImpl.h"
+#include "ProgressBar.h"
+#include "../Chat.h"
 #include "PlayerbotAI.h"
 #include "PlayerbotMgr.h"
 #include "PlayerbotDeathKnightAI.h"
@@ -3019,7 +3021,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
     if (!pSpellInfo)
     {
-        TellMaster("missing spell entry in CastSpell for spellid %u.", spellId);
+        TellMaster("Missing spell entry in CastSpell for spellid %u.", spellId);
         return false;
     }
 
@@ -3060,7 +3062,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     SpellCastTimesEntry const * castTimeEntry = sSpellCastTimesStore.LookupEntry(pSpellInfo->CastingTimeIndex);
     if (castTimeEntry && castTimeEntry->CastTime)
     {
-        DEBUG_LOG ("[PLayerbotAI]: CastSpell - Bot movement reset for casting %s (%u)", pSpellInfo->SpellName[0], spellId);
+        DEBUG_LOG ("[PlayerbotAI]: CastSpell - Bot movement reset for casting %s (%u)", pSpellInfo->SpellName[0], spellId);
         MovementClear();
     }
 
@@ -3437,6 +3439,500 @@ void PlayerbotAI::extractItemIds(const std::string& text, std::list<uint32>& ite
         if (id)
             itemIds.push_back(id);
     }
+}
+
+/**
+* Checks whether the TalentSpec database contains any obvious errors
+*
+* return 0  -> all ok
+* return x  -> return the talentspec_id of the first talentspec that errors out
+*/
+
+// TODO: the way this is built is just begging for a memory leak (by adding a return case and forgetting to delete result)
+uint32 PlayerbotAI::TalentSpecDBContainsError()
+{
+        QueryResult *result = CharacterDatabase.Query("SELECT * FROM playerbot_talentspec ORDER BY class ASC");
+
+    if( !result )
+    {
+                // Do you really need a progress bar? No, but all the other kids jumped off the bridge too...
+        BarGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outString(">> Loaded `playerbot_talentspec`, table is empty.");
+
+        return 0;   // Because, well, no specs means none contain errors...
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        bar.step();
+
+                /* 0			talentspec_id
+                   1			name
+                   2			class
+                   3			purpose
+                   4 to 74		talent_10 to 71
+                   75 to 80		major_glyph_15, 30, 80, minor_glyph_15, 50, 70
+                */
+        Field* fields = result->Fetch();
+
+        uint32 ts_id = fields[0].GetUInt32();
+        if (!ts_id)    // Nice bit of paranoia: ts_id is a non-zero NOT NULL AUTO_INCREMENT value
+            continue;  // Of course, if the impossible ever does happen, we can't very well identify a TalentSpec without an ID...
+
+                std::string ts_name = fields[1].GetCppString();
+                /*	Commented out? Because it's only required if you assume only players (not the server) pick talentspecs
+                if (0 == ts_name.size())
+                {
+                        TellMaster("TalentSpec ID: %u does not have a name.", ts_id);
+
+                        delete result;
+                        return ts_id;
+                }
+                */
+
+                long ts_class = fields[2].GetInt32();
+                if (ts_class != CLASS_DEATH_KNIGHT && ts_class != CLASS_DRUID && ts_class != CLASS_HUNTER && ts_class != CLASS_MAGE && ts_class != CLASS_PALADIN && ts_class != CLASS_PRIEST && ts_class != CLASS_ROGUE && ts_class != CLASS_SHAMAN && ts_class != CLASS_WARLOCK && ts_class != CLASS_WARRIOR &&
+                        ts_class != CLASS_PET_CUNNING && ts_class != CLASS_PET_FEROCITY && ts_class != CLASS_PET_TENACITY)
+                {
+                        TellMaster("TalentSpec: %u. \"%s\" contains an invalid class: %i.", ts_id, ts_name.c_str(), ts_class);
+
+                        delete result;
+                        return ts_id;	// invalid class
+                }
+
+                // Can't really be error checked, can it?
+                // uint32 ts_purpose = fields[3].GetUInt32();
+
+                // check all talents
+                for (uint8 i = 0; i < 71; i++)
+                {
+                        uint8 fieldLoc = i+4;
+                        if (fields[fieldLoc].GetUInt16() == 0)
+                        {
+                                for (uint8 j = (i + 1); j < 71; j++)
+                                {
+                                        fieldLoc = j+4;
+                                        if (fields[fieldLoc].GetUInt16() != 0)
+                                        {
+                                                TellMaster("TalentSpec: %u. \"%s\" contains an empty talent for level: %u while a talent for level: %u exists.", ts_id, ts_name.c_str(), (i+10), (j+10));
+
+                                                delete result;
+                                                return ts_id;
+                                        }
+                                }
+                                break;
+                        }
+                        else if (!ValidateTalent(fields[fieldLoc].GetUInt16(), ts_class))
+                        {
+                                TellMaster("TalentSpec: %u. \"%s\" (class: %i) contains an invalid talent for level %u: %u", ts_id, ts_name.c_str(), ts_class, (i+10), fields[fieldLoc].GetUInt16());
+
+                                delete result;
+                                return ts_id;	// invalid talent
+                        }
+                }
+
+                for (uint8 i=75; i < 78; i++)  // as in, the 3 major glyphs
+                {
+                        if (fields[i].GetUInt16() != 0 && !ValidateMajorGlyph(fields[i].GetUInt16(), ts_class))
+                        {
+                                TellMaster("TalentSpec: %u. \"%s\" contains an invalid Major glyph %u: %u", ts_id, ts_name.c_str(), (i-74), fields[i].GetUInt16());
+                                if(!ValidateGlyph(fields[i].GetUInt16(), ts_class))
+                                        TellMaster("In fact, according to our records, it's no glyph at all");
+
+                                delete result;
+                                return ts_id;
+                        }
+                }
+                for (uint8 i=78; i < 81; i++)  // as in, the 3 minor glyphs
+                {
+                        if (fields[i].GetUInt16() != 0 && !ValidateMinorGlyph(fields[i].GetUInt16(), ts_class))
+                        {
+                                TellMaster("TalentSpec: %u. \"%s\" contains an invalid Minor glyph %u: %u", ts_id, ts_name.c_str(), (i-77), fields[i].GetUInt16());
+                                if(!ValidateGlyph(fields[i].GetUInt16(), ts_class))
+                                        TellMaster("In fact, according to our records, it's no glyph at all");
+
+                                delete result;
+                                return ts_id;
+                        }
+                }
+    } while (result->NextRow());
+
+        delete result;
+        return 0;
+}
+
+uint32 PlayerbotAI::GetTalentSpecsAmount()
+{
+        QueryResult *result = CharacterDatabase.Query("SELECT COUNT(*) FROM playerbot_talentspec");
+
+    if( !result )
+    {
+        sLog.outString();
+        sLog.outString(">> Loaded `playerbot_talentspec`, table is empty.");
+
+        return 0;
+    }
+
+    Field* fields = result->Fetch();
+
+    uint32 count = fields[0].GetUInt32();
+
+        delete result;
+        return count;
+}
+
+uint32 PlayerbotAI::GetTalentSpecsAmount(long specClass)
+{
+        std::string query = "SELECT COUNT(*) FROM playerbot_talentspec WHERE class = " + specClass;
+    QueryResult *result = CharacterDatabase.Query(query.c_str());
+
+    if( !result )
+    {
+        sLog.outString();
+        sLog.outString(">> Loaded `playerbot_talentspec`, found no talentspecs for class %i.", specClass);
+
+        return 0;
+    }
+
+    Field* fields = result->Fetch();
+
+    uint32 count = fields[0].GetUInt32();
+
+        delete result;
+        return count;
+}
+
+/**
+* GetTalentSpecs queries DB for the talentspecs (for a class), returning them in a list of TS structures
+*
+* *** for the most part, GetTalentSpecs assumes ALL SPECS ARE VALID ***
+*/
+std::list<TalentSpec> PlayerbotAI::GetTalentSpecs(long specClass)
+{
+        TalentSpec ts;
+        std::list<TalentSpec> tsList;
+    std::ostringstream query;
+        query << "SELECT * FROM playerbot_talentspec WHERE class = " << specClass << " ORDER BY talentspec_id ASC";
+
+        QueryResult *result = CharacterDatabase.Query(query.str().c_str());
+
+    if( !result )
+    {
+        sLog.outString();
+        sLog.outString(">> Loaded `playerbot_talentspec`, found no talentspecs for class %i.", specClass);
+
+        return tsList; // empty
+    }
+
+    do
+    {
+                /* 0			talentspec_id
+                   1			name
+                   2			class
+                   3			purpose
+                   4 to 74		talent_10 to 71
+                   75 to 80		major_glyph_15, 30, 80, minor_glyph_15, 50, 70
+                */
+        Field* fields = result->Fetch();
+
+        /* ts_id = fields[0].GetUInt32(); // not used
+        if (!ts_id)    // Nice bit of paranoia: ts_id is an AUTO_INCREMENT value
+            continue;  // Of course, if the impossible ever does happen, we can't very well identify a TalentSpec without an ID...
+                */
+
+                ts.specName = fields[1].GetCppString();
+                ts.specClass = fields[2].GetInt16();
+                if (ts.specClass != CLASS_DEATH_KNIGHT && ts.specClass != CLASS_DRUID && ts.specClass != CLASS_HUNTER && ts.specClass != CLASS_MAGE && ts.specClass != CLASS_PALADIN && ts.specClass != CLASS_PRIEST && ts.specClass != CLASS_ROGUE && ts.specClass != CLASS_SHAMAN && ts.specClass != CLASS_WARLOCK && ts.specClass != CLASS_WARRIOR &&
+                        ts.specClass != CLASS_PET_CUNNING && ts.specClass != CLASS_PET_FEROCITY && ts.specClass != CLASS_PET_TENACITY)
+                {
+                        TellMaster("TalentSpec: %u. \"%s\" contains an invalid class.", fields[0].GetUInt32(), ts.specName.c_str());
+
+                        continue;	// this spec is clearly broken, the next may or may not be
+                }
+
+                ts.specPurpose = (TalentSpecPurpose)fields[3].GetUInt32();
+
+                // check all talents
+                for (uint8 i = 0; i < 71; i++)
+                {
+                        ts.talentId[i] = fields[i+4].GetUInt16();
+                }
+
+                for (uint8 i=0; i < 3; i++)  // as in, the 3 major glyphs
+                {
+                        ts.glyphIdMajor[i] = fields[i+75].GetUInt16();
+                }
+                for (uint8 i=0; i < 3; i++)  // as in, the 3 minor glyphs
+                {
+                        ts.glyphIdMajor[i] = fields[i+78].GetUInt16();
+                }
+
+                tsList.push_back(ts);
+    } while (result->NextRow());
+
+        delete result;
+        return tsList;
+}
+
+/**
+* ValidateTalent tests a talent against class to see if it belongs to that class
+*
+* uint16 talent:		talent ID
+* long charClass:	member of the Classes enum or ClassesCombatPets enum
+*
+* return true  -> ok
+* return false -> not a valid talent for that class
+*/
+bool PlayerbotAI::ValidateTalent(uint16 talent, long charClass)
+{
+        if (charClass == CLASS_DEATH_KNIGHT)
+        {
+                // this looong 'if' is to see if any talent is not a Death Knight talent when the class clearly is
+                if (DEATHKNIGHT_BUTCHERY != talent && DEATHKNIGHT_SUBVERSION != talent && DEATHKNIGHT_BLADE_BARRIER != talent && DEATHKNIGHT_BLADED_ARMOR != talent && DEATHKNIGHT_SCENT_OF_BLOOD != talent && DEATHKNIGHT_TWOHANDED_WEAPON_SPECIALIZATION != talent && DEATHKNIGHT_RUNE_TAP != talent && DEATHKNIGHT_DARK_CONVICTION != talent && DEATHKNIGHT_DEATH_RUNE_MASTERY != talent && DEATHKNIGHT_IMPROVED_RUNE_TAP != talent && DEATHKNIGHT_SPELL_DEFLECTION != talent && DEATHKNIGHT_VENDETTA != talent && DEATHKNIGHT_BLOODY_STRIKES != talent && DEATHKNIGHT_VETERAN_OF_THE_THIRD_WAR != talent && DEATHKNIGHT_MARK_OF_BLOOD != talent && DEATHKNIGHT_BLOODY_VENGEANCE != talent && DEATHKNIGHT_ABOMINATIONS_MIGHT != talent && DEATHKNIGHT_BLOOD_WORMS != talent && DEATHKNIGHT_HYSTERIA != talent && DEATHKNIGHT_IMPROVED_BLOOD_PRESENCE != talent && DEATHKNIGHT_IMPROVED_DEATH_STRIKE != talent && DEATHKNIGHT_SUDDEN_DOOM != talent && DEATHKNIGHT_VAMPIRIC_BLOOD != talent && DEATHKNIGHT_WILL_OF_THE_NECROPOLIS != talent && DEATHKNIGHT_HEART_STRIKE != talent && DEATHKNIGHT_MIGHT_OF_MOGRAINE != talent && DEATHKNIGHT_BLOOD_GORGED != talent && DEATHKNIGHT_DANCING_RUNE_WEAPON != talent && DEATHKNIGHT_IMPROVED_ICY_TOUCH != talent && DEATHKNIGHT_RUNIC_POWER_MASTERY != talent && DEATHKNIGHT_TOUGHNESS != talent && DEATHKNIGHT_ICY_REACH != talent && DEATHKNIGHT_BLACK_ICE != talent && DEATHKNIGHT_NERVES_OF_COLD_STEEL != talent && DEATHKNIGHT_ICY_TALONS != talent && DEATHKNIGHT_LICHBORNE != talent && DEATHKNIGHT_ANNIHILATION != talent && DEATHKNIGHT_KILLING_MACHINE != talent && DEATHKNIGHT_CHILL_OF_THE_GRAVE != talent && DEATHKNIGHT_ENDLESS_WINTER != talent && DEATHKNIGHT_FRIGID_DREADPLATE != talent && DEATHKNIGHT_GLACIER_ROT != talent && DEATHKNIGHT_DEATHCHILL != talent && DEATHKNIGHT_IMPROVED_ICY_TALONS != talent && DEATHKNIGHT_MERCILESS_COMBAT != talent && DEATHKNIGHT_RIME != talent && DEATHKNIGHT_CHILLBLAINS != talent && DEATHKNIGHT_HUNGERING_COLD != talent && DEATHKNIGHT_IMPROVED_FROST_PRESENCE != talent && DEATHKNIGHT_THREAT_OF_THASSARIAN != talent && DEATHKNIGHT_BLOOD_OF_THE_NORTH != talent && DEATHKNIGHT_UNBREAKABLE_ARMOR != talent && DEATHKNIGHT_ACCLIMATION != talent && DEATHKNIGHT_FROST_STRIKE != talent && DEATHKNIGHT_GUILE_OF_GOREFIEND != talent && DEATHKNIGHT_TUNDRA_STALKER != talent && DEATHKNIGHT_HOWLING_BLAST != talent && DEATHKNIGHT_VICIOUS_STRIKES != talent && DEATHKNIGHT_VIRULENCE != talent && DEATHKNIGHT_ANTICIPATION != talent && DEATHKNIGHT_EPIDEMIC != talent && DEATHKNIGHT_MORBIDITY != talent && DEATHKNIGHT_UNHOLY_COMMAND != talent && DEATHKNIGHT_RAVENOUS_DEAD != talent && DEATHKNIGHT_OUTBREAK != talent && DEATHKNIGHT_NECROSIS != talent && DEATHKNIGHT_CORPSE_EXPLOSION != talent && DEATHKNIGHT_ON_A_PALE_HORSE != talent && DEATHKNIGHT_BLOODCAKED_BLADE != talent && DEATHKNIGHT_NIGHT_OF_THE_DEAD != talent && DEATHKNIGHT_UNHOLY_BLIGHT != talent && DEATHKNIGHT_IMPURITY != talent && DEATHKNIGHT_DIRGE != talent && DEATHKNIGHT_DESECRATION != talent && DEATHKNIGHT_MAGIC_SUPPRESSION != talent && DEATHKNIGHT_REAPING != talent && DEATHKNIGHT_MASTER_OF_GHOULS != talent && DEATHKNIGHT_DESOLATION != talent && DEATHKNIGHT_ANTIMAGIC_ZONE != talent && DEATHKNIGHT_IMPROVED_UNHOLY_PRESENCE != talent && DEATHKNIGHT_GHOUL_FRENZY != talent && DEATHKNIGHT_CRYPT_FEVER != talent && DEATHKNIGHT_BONE_SHIELD != talent && DEATHKNIGHT_WANDERING_PLAGUE != talent && DEATHKNIGHT_EBON_PLAGUEBRINGER != talent && DEATHKNIGHT_SCOURGE_STRIKE != talent && DEATHKNIGHT_RAGE_OF_RIVENDARE != talent && DEATHKNIGHT_SUMMON_GARGOYLE != talent)
+                        return false;
+        }
+        else if (charClass == CLASS_DRUID)
+        {
+                if (DRUID_FEROCITY != talent && DRUID_FERAL_AGGRESSION != talent && DRUID_FERAL_INSTINCT != talent && DRUID_SAVAGE_FURY != talent && DRUID_THICK_HIDE != talent && DRUID_FERAL_SWIFTNESS != talent && DRUID_SURVIVAL_INSTINCTS != talent && DRUID_SHARPENED_CLAWS != talent && DRUID_SHREDDING_ATTACKS != talent && DRUID_PREDATORY_STRIKES != talent && DRUID_PRIMAL_FURY != talent && DRUID_PRIMAL_PRECISION != talent && DRUID_BRUTAL_IMPACT != talent && DRUID_FERAL_CHARGE != talent && DRUID_NURTURING_INSTINCT != talent && DRUID_NATURAL_REACTION != talent && DRUID_HEART_OF_THE_WILD != talent && DRUID_SURVIVAL_OF_THE_FITTEST != talent && DRUID_LEADER_OF_THE_PACK != talent && DRUID_IMPROVED_LEADER_OF_THE_PACK != talent && DRUID_PRIMAL_TENACITY != talent && DRUID_PROTECTOR_OF_THE_PACK != talent && DRUID_PREDATORY_INSTINCTS != talent && DRUID_INFECTED_WOUNDS != talent && DRUID_KING_OF_THE_JUNGLE != talent && DRUID_MANGLE != talent && DRUID_IMPROVED_MANGLE != talent && DRUID_REND_AND_TEAR != talent && DRUID_PRIMAL_GORE != talent && DRUID_BERSERK != talent && DRUID_IMPROVED_MARK_OF_THE_WILD != talent && DRUID_NATURES_FOCUS != talent && DRUID_FUROR != talent && DRUID_NATURALIST != talent && DRUID_SUBTLETY != talent && DRUID_NATURAL_SHAPESHIFTER != talent && DRUID_INTENSITY != talent && DRUID_OMEN_OF_CLARITY != talent && DRUID_MASTER_SHAPESHIFTER != talent && DRUID_TRANQUIL_SPIRIT != talent && DRUID_IMPROVED_REJUVENATION != talent && DRUID_NATURES_SWIFTNESS != talent && DRUID_GIFT_OF_NATURE != talent && DRUID_IMPROVED_TRANQUILITY != talent && DRUID_EMPOWERED_TOUCH != talent && DRUID_NATURES_BOUNTY != talent && DRUID_LIVING_SPIRIT != talent && DRUID_SWIFTMEND != talent && DRUID_NATURAL_PERFECTION != talent && DRUID_EMPOWERED_REJUVENATION != talent && DRUID_LIVING_SEED != talent && DRUID_REVITALIZE != talent && DRUID_TREE_OF_LIFE != talent && DRUID_IMPROVED_TREE_OF_LIFE != talent && DRUID_IMPROVED_BARKSKIN != talent && DRUID_GIFT_OF_THE_EARTHMOTHER != talent && DRUID_WILD_GROWTH != talent && DRUID_STARLIGHT_WRATH != talent && DRUID_GENESIS != talent && DRUID_MOONGLOW != talent && DRUID_NATURES_MAJESTY != talent && DRUID_IMPROVED_MOONFIRE != talent && DRUID_BRAMBLES != talent && DRUID_NATURES_GRACE != talent && DRUID_NATURES_SPLENDOR != talent && DRUID_NATURES_REACH != talent && DRUID_VENGEANCE != talent && DRUID_CELESTIAL_FOCUS != talent && DRUID_LUNAR_GUIDANCE != talent && DRUID_INSECT_SWARM != talent && DRUID_IMPROVED_INSECT_SWARM != talent && DRUID_DREAMSTATE != talent && DRUID_MOONFURY != talent && DRUID_BALANCE_OF_POWER != talent && DRUID_MOONKIN_FORM != talent && DRUID_IMPROVED_MOONKIN_FORM != talent && DRUID_IMPROVED_FAERIE_FIRE != talent && DRUID_OWLKIN_FRENZY != talent && DRUID_WRATH_OF_CENARIUS != talent && DRUID_ECLIPSE != talent && DRUID_TYPHOON != talent && DRUID_FORCE_OF_NATURE != talent && DRUID_GALE_WINDS != talent && DRUID_EARTH_AND_MOON != talent && DRUID_STARFALL != talent)
+                        return false;
+        }
+        else if (charClass == CLASS_HUNTER)
+        {
+                if (HUNTER_IMPROVED_ASPECT_OF_THE_HAWK != talent && HUNTER_ENDURANCE_TRAINING != talent && HUNTER_FOCUSED_FIRE != talent && HUNTER_IMPROVED_ASPECT_OF_THE_MONKEY != talent && HUNTER_THICK_HIDE != talent && HUNTER_IMPROVED_REVIVE_PET != talent && HUNTER_PATHFINDING != talent && HUNTER_ASPECT_MASTERY != talent && HUNTER_UNLEASHED_FURY != talent && HUNTER_IMPROVED_MEND_PET != talent && HUNTER_FEROCITY != talent && HUNTER_SPIRIT_BOND != talent && HUNTER_INTIMIDATION != talent && HUNTER_BESTIAL_DISCIPLINE != talent && HUNTER_ANIMAL_HANDLER != talent && HUNTER_FRENZY != talent && HUNTER_FEROCIOUS_INSPIRATION != talent && HUNTER_BESTIAL_WRATH != talent && HUNTER_CATLIKE_REFLEXES != talent && HUNTER_INVIGORATION != talent && HUNTER_SERPENTS_SWIFTNESS != talent && HUNTER_LONGEVITY != talent && HUNTER_THE_BEAST_WITHIN != talent && HUNTER_COBRA_STRIKES != talent && HUNTER_KINDRED_SPIRITS != talent && HUNTER_BEAST_MASTERY != talent && HUNTER_IMPROVED_TRACKING != talent && HUNTER_HAWK_EYE != talent && HUNTER_SAVAGE_STRIKES != talent && HUNTER_SUREFOOTED != talent && HUNTER_ENTRAPMENT != talent && HUNTER_TRAP_MASTERY != talent && HUNTER_SURVIVAL_INSTINCTS != talent && HUNTER_SURVIVALIST != talent && HUNTER_SCATTER_SHOT != talent && HUNTER_DEFLECTION != talent && HUNTER_SURVIVAL_TACTICS != talent && HUNTER_TNT != talent && HUNTER_LOCK_AND_LOAD != talent && HUNTER_HUNTER_VS_WILD != talent && HUNTER_KILLER_INSTINCT != talent && HUNTER_COUNTERATTACK != talent && HUNTER_LIGHTNING_REFLEXES != talent && HUNTER_RESOURCEFULNESS != talent && HUNTER_EXPOSE_WEAKNESS != talent && HUNTER_WYVERN_STING != talent && HUNTER_THRILL_OF_THE_HUNT != talent && HUNTER_MASTER_TACTICIAN != talent && HUNTER_NOXIOUS_STINGS != talent && HUNTER_POINT_OF_NO_ESCAPE != talent && HUNTER_BLACK_ARROW != talent && HUNTER_SNIPER_TRAINING != talent && HUNTER_HUNTING_PARTY != talent && HUNTER_EXPLOSIVE_SHOT != talent && HUNTER_IMPROVED_CONCUSSIVE_SHOT != talent && HUNTER_FOCUSED_AIM != talent && HUNTER_LETHAL_SHOTS != talent && HUNTER_CAREFUL_AIM != talent && HUNTER_IMPROVED_HUNTERS_MARK != talent && HUNTER_MORTAL_SHOTS != talent && HUNTER_GO_FOR_THE_THROAT != talent && HUNTER_IMPROVED_ARCANE_SHOT != talent && HUNTER_AIMED_SHOT != talent && HUNTER_RAPID_KILLING != talent && HUNTER_IMPROVED_STINGS != talent && HUNTER_EFFICIENCY != talent && HUNTER_CONCUSSIVE_BARRAGE != talent && HUNTER_READINESS != talent && HUNTER_BARRAGE != talent && HUNTER_COMBAT_EXPERIENCE != talent && HUNTER_RANGED_WEAPON_SPECIALIZATION != talent && HUNTER_PIERCING_SHOTS != talent && HUNTER_TRUESHOT_AURA != talent && HUNTER_IMPROVED_BARRAGE != talent && HUNTER_MASTER_MARKSMAN != talent && HUNTER_RAPID_RECUPERATION != talent && HUNTER_WILD_QUIVER != talent && HUNTER_SILENCING_SHOT != talent && HUNTER_IMPROVED_STEADY_SHOT != talent && HUNTER_MARKED_FOR_DEATH != talent && HUNTER_CHIMERA_SHOT != talent)
+                        return false;
+        }
+        else if (charClass == CLASS_MAGE)
+        {
+                if (MAGE_IMPROVED_FIRE_BLAST != talent && MAGE_INCINERATION != talent && MAGE_IMPROVED_FIREBALL != talent && MAGE_IGNITE != talent && MAGE_BURNING_DETERMINATION != talent && MAGE_WORLD_IN_FLAMES != talent && MAGE_FLAME_THROWING != talent && MAGE_IMPACT != talent && MAGE_PYROBLAST != talent && MAGE_BURNING_SOUL != talent && MAGE_IMPROVED_SCORCH != talent && MAGE_MOLTEN_SHIELDS != talent && MAGE_MASTER_OF_ELEMENTS != talent && MAGE_PLAYING_WITH_FIRE != talent && MAGE_CRITICAL_MASS != talent && MAGE_BLAST_WAVE != talent && MAGE_BLAZING_SPEED != talent && MAGE_FIRE_POWER != talent && MAGE_PYROMANIAC != talent && MAGE_COMBUSTION != talent && MAGE_MOLTEN_FURY != talent && MAGE_FIERY_PAYBACK != talent && MAGE_EMPOWERED_FIRE != talent && MAGE_FIRESTARTER != talent && MAGE_DRAGONS_BREATH != talent && MAGE_HOT_STREAK != talent && MAGE_BURNOUT != talent && MAGE_LIVING_BOMB != talent && MAGE_FROSTBITE != talent && MAGE_IMPROVED_FROSTBOLT != talent && MAGE_ICE_FLOES != talent && MAGE_ICE_SHARDS != talent && MAGE_FROST_WARDING != talent && MAGE_PRECISION != talent && MAGE_PERMAFROST != talent && MAGE_PIERCING_ICE != talent && MAGE_ICY_VEINS != talent && MAGE_IMPROVED_BLIZZARD != talent && MAGE_ARCTIC_REACH != talent && MAGE_FROST_CHANNELING != talent && MAGE_SHATTER != talent && MAGE_COLD_SNAP != talent && MAGE_IMPROVED_CONE_OF_COLD != talent && MAGE_FROZEN_CORE != talent && MAGE_COLD_AS_ICE != talent && MAGE_WINTERS_CHILL != talent && MAGE_SHATTERED_BARRIER != talent && MAGE_ICE_BARRIER != talent && MAGE_ARCTIC_WINDS != talent && MAGE_EMPOWERED_FROSTBOLT != talent && MAGE_FINGERS_OF_FROST != talent && MAGE_BRAIN_FREEZE != talent && MAGE_SUMMON_WATER_ELEMENTAL != talent && MAGE_ENDURING_WINTER != talent && MAGE_CHILLD_TO_THE_BONE != talent && MAGE_DEEP_FREEZE != talent && MAGE_ARCANE_SUBTLETY != talent && MAGE_ARCANE_FOCUS != talent && MAGE_ARCANE_STABILITY != talent && MAGE_ARCANE_FORTITUDE != talent && MAGE_MAGIC_ABSORPTION != talent && MAGE_ARCANE_CONCENTRATION != talent && MAGE_MAGIC_ATTUNEMENT != talent && MAGE_SPELL_IMPACT != talent && MAGE_STUDENT_OF_THE_MIND != talent && MAGE_FOCUS_MAGIC != talent && MAGE_ARCANE_SHIELDING != talent && MAGE_IMPROVED_COUNTERSPELL != talent && MAGE_ARCANE_MEDITATION != talent && MAGE_TORMENT_THE_WEAK != talent && MAGE_IMPROVED_BLINK != talent && MAGE_PRESENCE_OF_MIND != talent && MAGE_ARCANE_MIND != talent && MAGE_PRISMATIC_CLOAK != talent && MAGE_ARCANE_INSTABILITY != talent && MAGE_ARCANE_POTENCY != talent && MAGE_ARCANE_EMPOWERMENT != talent && MAGE_ARCANE_POWER != talent && MAGE_INCANTERS_ABSORPTION != talent && MAGE_ARCANE_FLOWS != talent && MAGE_MIND_MASTERY != talent && MAGE_SLOW != talent && MAGE_MISSILE_BARRAGE != talent && MAGE_NETHERWIND_PRESENCE != talent && MAGE_SPELL_POWER != talent && MAGE_ARCANE_BARRAGE != talent)
+                        return false;
+        }
+        else if (charClass == CLASS_PALADIN)
+        {
+                if (PALADIN_DEFLECTION != talent && PALADIN_BENEDICTION != talent && PALADIN_IMPROVED_JUDGEMENTS != talent && PALADIN_HEART_OF_THE_CRUSADER != talent && PALADIN_IMPROVED_BLESSING_OF_MIGHT != talent && PALADIN_VINDICATION != talent && PALADIN_CONVICTION != talent && PALADIN_SEAL_OF_COMMAND != talent && PALADIN_PURSUIT_OF_JUSTICE != talent && PALADIN_EYE_FOR_AN_EYE != talent && PALADIN_SANCTITY_OF_BATTLE != talent && PALADIN_CRUSADE != talent && PALADIN_TWOHANDED_WEAPON_SPECIALIZATION != talent && PALADIN_SANCTIFIED_RETRIBUTION != talent && PALADIN_VENGEANCE != talent && PALADIN_DIVINE_PURPOSE != talent && PALADIN_THE_ART_OF_WAR != talent && PALADIN_REPENTANCE != talent && PALADIN_JUDGEMENTS_OF_THE_WISE != talent && PALADIN_FANATICISM != talent && PALADIN_SANCTIFIED_WRATH != talent && PALADIN_SWIFT_RETRIBUTION != talent && PALADIN_CRUSADER_STRIKE != talent && PALADIN_SHEATH_OF_LIGHT != talent && PALADIN_RIGHTEOUS_VENGEANCE != talent && PALADIN_DIVINE_STORM != talent && PALADIN_SPIRITUAL_FOCUS != talent && PALADIN_SEALS_OF_THE_PURE != talent && PALADIN_HEALING_LIGHT != talent && PALADIN_DIVINE_INTELLECT != talent && PALADIN_UNYIELDING_FAITH != talent && PALADIN_AURA_MASTERY != talent && PALADIN_ILLUMINATION != talent && PALADIN_IMPROVED_LAY_ON_HANDS != talent && PALADIN_IMPROVED_CONCENTRATION_AURA != talent && PALADIN_IMPROVED_BLESSING_OF_WISDOM != talent && PALADIN_BLESSED_HANDS != talent && PALADIN_PURE_OF_HEART != talent && PALADIN_DIVINE_FAVOR != talent && PALADIN_SANCTIFIED_LIGHT != talent && PALADIN_PURIFYING_POWER != talent && PALADIN_HOLY_POWER != talent && PALADIN_LIGHTS_GRACE != talent && PALADIN_HOLY_SHOCK != talent && PALADIN_BLESSED_LIFE != talent && PALADIN_SACRED_CLEANSING != talent && PALADIN_HOLY_GUIDANCE != talent && PALADIN_DIVINE_ILLUMINATION != talent && PALADIN_JUDGEMENTS_OF_THE_PURE != talent && PALADIN_INFUSION_OF_LIGHT != talent && PALADIN_ENLIGHTENED_JUDGEMENTS != talent && PALADIN_BEACON_OF_LIGHT != talent && PALADIN_DIVINITY != talent && PALADIN_DIVINE_STRENGTH != talent && PALADIN_STOICISM != talent && PALADIN_GUARDIANS_FAVOR != talent && PALADIN_ANTICIPATION != talent && PALADIN_DIVINE_SACRIFICE != talent && PALADIN_IMPROVED_RIGHTEOUS_FURY != talent && PALADIN_TOUGHNESS != talent && PALADIN_DIVINE_GUARDIAN != talent && PALADIN_IMPROVED_HAMMER_OF_JUSTICE != talent && PALADIN_IMPROVED_DEVOTION_AURA != talent && PALADIN_BLESSING_OF_SANCTUARY != talent && PALADIN_RECKONING != talent && PALADIN_SACRED_DUTY != talent && PALADIN_ONEHANDED_WEAPON_SPECIALIZATION != talent && PALADIN_SPIRITUAL_ATTUNEMENT != talent && PALADIN_HOLY_SHIELD != talent && PALADIN_ARDENT_DEFENDER != talent && PALADIN_REDOUBT != talent && PALADIN_COMBAT_EXPERTISE != talent && PALADIN_TOUCHER_BY_THE_LIGHT != talent && PALADIN_AVENGERS_SHIELD != talent && PALADIN_GUARDED_BY_THE_LIGHT != talent && PALADIN_SHIELD_OF_THE_TEMPLAR != talent && PALADIN_JUDGEMENT_OF_THE_JUST != talent && PALADIN_HAMMER_OF_THE_RIGHTEOUS != talent)
+                        return false;
+        }
+        else if (charClass == CLASS_PRIEST)
+        {
+                if (PRIEST_UNBREAKABLE_WILL != talent && PRIEST_TWIN_DISCIPLINES != talent && PRIEST_SILENT_RESOLVE != talent && PRIEST_IMPROVED_INNER_FIRE != talent && PRIEST_IMPROVED_POWER_WORD_FORTITUDE != talent && PRIEST_MARTYRDOM != talent && PRIEST_MEDITATION != talent && PRIEST_INNER_FOCUS != talent && PRIEST_IMPROVED_POWER_WORD_SHIELD != talent && PRIEST_ABSOLUTION != talent && PRIEST_MENTAL_AGILITY != talent && PRIEST_IMPROVED_MANA_BURN != talent && PRIEST_REFLECTIVE_SHIELD != talent && PRIEST_MENTAL_STRENGTH != talent && PRIEST_SOUL_WARDING != talent && PRIEST_FOCUSED_POWER != talent && PRIEST_ENLIGHTENMENT != talent && PRIEST_FOCUSED_WILL != talent && PRIEST_POWER_INFUSION != talent && PRIEST_IMPROVED_FLASH_HEAL != talent && PRIEST_RENEWED_HOPE != talent && PRIEST_RAPTURE != talent && PRIEST_ASPIRATION != talent && PRIEST_DIVINE_AEGIS != talent && PRIEST_PAIN_SUPPRESSION != talent && PRIEST_GRACE != talent && PRIEST_BORROWED_TIME != talent && PRIEST_PENANCE != talent && PRIEST_HEALING_FOCUS != talent && PRIEST_IMPROVED_RENEW != talent && PRIEST_HOLY_SPECIALIZATION != talent && PRIEST_SPELL_WARDING != talent && PRIEST_DIVINE_FURY != talent && PRIEST_DESPERATE_PRAYER != talent && PRIEST_BLESSED_RECOVERY != talent && PRIEST_INSPIRATION != talent && PRIEST_HOLY_REACH != talent && PRIEST_IMPROVED_HEALIN != talent && PRIEST_SEARING_LIGHT != talent && PRIEST_HEALING_PRAYERS != talent && PRIEST_SPIRIT_OF_REDEMPTION != talent && PRIEST_SPIRITUAL_GUIDANCE != talent && PRIEST_SURGE_OF_LIGHT != talent && PRIEST_SPIRITUAL_HEALING != talent && PRIEST_HOLY_CONCENTRATION != talent && PRIEST_LIGHTWELL != talent && PRIEST_BLESSED_RESILIENCE != talent && PRIEST_BODY_AND_SOUL != talent && PRIEST_EMPOWERED_HEALING != talent && PRIEST_SERENDIPITY != talent && PRIEST_EMPOWERED_RENEW != talent && PRIEST_CIRCLE_OF_HEALING != talent && PRIEST_TEST_OF_FAITH != talent && PRIEST_DIVINE_PROVIDENCE != talent && PRIEST_GUARDIAN_SPIRIT != talent && PRIEST_SPIRIT_TAP != talent && PRIEST_IMPROVED_SPIRIT_TAP != talent && PRIEST_DARKNESS != talent && PRIEST_SHADOW_AFFINITY != talent && PRIEST_IMPROVED_SHADOW_WORD_PAIN != talent && PRIEST_SHADOW_FOCUS != talent && PRIEST_IMPROVED_PSYCHIC_SCREAM != talent && PRIEST_IMPROVED_MIND_BLAST != talent && PRIEST_MIND_FLAY != talent && PRIEST_VEILED_SHADOWS != talent && PRIEST_SHADOW_REACH != talent && PRIEST_SHADOW_WEAVING != talent && PRIEST_SILENCE != talent && PRIEST_VAMPIRIC_EMBRACE != talent && PRIEST_IMPROVED_VAMPIRIC_EMBRACE != talent && PRIEST_FOCUSED_MIND != talent && PRIEST_MIND_MELT != talent && PRIEST_IMPROVED_DEVOURING_PLAGUE != talent && PRIEST_SHADOWFORM != talent && PRIEST_SHADOW_POWER != talent && PRIEST_IMPROVED_SHADOWFORM != talent && PRIEST_MISERY != talent && PRIEST_PSYCHIC_HORROR != talent && PRIEST_VAMPIRIC_TOUCH != talent && PRIEST_PAIN_AND_SUFFERING != talent && PRIEST_TWISTED_FAITH != talent && PRIEST_DISPERSION != talent)
+                        return false;
+        }
+        else if (charClass == CLASS_ROGUE)
+        {
+                if (ROGUE_IMPROVED_GOUGE != talent && ROGUE_IMPROVED_SINISTER_STRIKE != talent && ROGUE_DUAL_WIELD_SPECIALIZATION != talent && ROGUE_IMPROVED_SLICE_AND_DICE != talent && ROGUE_DEFLECTION != talent && ROGUE_PRECISION != talent && ROGUE_ENDURANCE != talent && ROGUE_RIPOSTE != talent && ROGUE_CLOSE_QUARTERS_COMBAT != talent && ROGUE_IMPROVED_KICK != talent && ROGUE_IMPROVED_SPRINT != talent && ROGUE_LIGHTNING_REFLEXES != talent && ROGUE_AGGRESSION != talent && ROGUE_MACE_SPECIALIZATION != talent && ROGUE_BLADE_FLURRY != talent && ROGUE_HACK_AND_SLASH != talent && ROGUE_WEAPON_EXPERTISE != talent && ROGUE_BLADE_TWISTING != talent && ROGUE_VITALITY != talent && ROGUE_ADRENALINE_RUSH != talent && ROGUE_NERVES_OF_STEEL != talent && ROGUE_THROWING_SPECIALIZATION != talent && ROGUE_COMBAT_POTENCY != talent && ROGUE_UNFAIR_ADVANTAGE != talent && ROGUE_SURPRISE_ATTACKS != talent && ROGUE_SAVAGE_COMBAT != talent && ROGUE_PREY_ON_THE_WEAK != talent && ROGUE_KILLING_SPREE != talent && ROGUE_IMPROVED_EVISCERATE != talent && ROGUE_REMORSELESS_ATTACKS != talent && ROGUE_MALICE != talent && ROGUE_RUTHLESSNESS != talent && ROGUE_BLOOD_SPATTER != talent && ROGUE_PUNCTURING_WOUNDS != talent && ROGUE_VIGOR != talent && ROGUE_IMPROVED_EXPOSE_ARMOR != talent && ROGUE_LETHALITY != talent && ROGUE_VILE_POISONS != talent && ROGUE_IMPROVED_POISONS != talent && ROGUE_FLEET_FOOTED != talent && ROGUE_COLD_BLOOD != talent && ROGUE_IMPROVED_KIDNEY_SHOT != talent && ROGUE_QUICK_RECOVERY != talent && ROGUE_SEAL_FATE != talent && ROGUE_MURDER != talent && ROGUE_DEADLY_BREW != talent && ROGUE_OVERKILL != talent && ROGUE_DEADENED_NERVES != talent && ROGUE_FOCUSED_ATTACKS != talent && ROGUE_FIND_WEAKNESS != talent && ROGUE_MASTER_POISONER != talent && ROGUE_MUTILATE != talent && ROGUE_TURN_THE_TABLES != talent && ROGUE_CUT_TO_THE_CHASE != talent && ROGUE_HUNGER_FOR_BLOOD != talent && ROGUE_RELENTLESS_STRIKES != talent && ROGUE_MASTER_OF_DECEPTION != talent && ROGUE_OPPORTUNITY != talent && ROGUE_SLEIGHT_OF_HAND != talent && ROGUE_DIRTY_TRICKS != talent && ROGUE_CAMOUFLAGE != talent && ROGUE_ELUSIVENESS != talent && ROGUE_GHOSTLY_STRIKE != talent && ROGUE_SERRATED_BLADES != talent && ROGUE_SETUP != talent && ROGUE_INITIATIVE != talent && ROGUE_IMPROVED_AMBUSH != talent && ROGUE_HEIGHTENED_SENSES != talent && ROGUE_PREPARATION != talent && ROGUE_DIRTY_DEEDS != talent && ROGUE_HEMORRHAGE != talent && ROGUE_MASTER_OF_SUBTLETY != talent && ROGUE_DEADLINESS != talent && ROGUE_ENVELOPING_SHADOWS != talent && ROGUE_PREMEDITATION != talent && ROGUE_CHEAT_DEATH != talent && ROGUE_SINISTER_CALLING != talent && ROGUE_WAYLAY != talent && ROGUE_HONOR_AMONG_THIEVES != talent && ROGUE_SHADOWSTEP != talent && ROGUE_FILTHY_TRICKS != talent && ROGUE_SLAUGHTER_FROM_THE_SHADOWS != talent && ROGUE_SHADOW_DANCE != talent)
+                        return false;
+        }
+        else if (charClass == CLASS_SHAMAN)
+        {
+                if (SHAMAN_CONVECTION != talent && SHAMAN_CONCUSSION != talent && SHAMAN_CALL_OF_FLAME != talent && SHAMAN_ELEMENTAL_WARDING != talent && SHAMAN_ELEMENTAL_DEVASTATION != talent && SHAMAN_REVERBERATION != talent && SHAMAN_ELEMENTAL_FOCUS != talent && SHAMAN_ELEMENTAL_FURY != talent && SHAMAN_IMPROVED_FIRE_NOVA != talent && SHAMAN_EYE_OF_THE_STORM != talent && SHAMAN_ELEMENTAL_REACH != talent && SHAMAN_CALL_OF_THUNDER != talent && SHAMAN_UNRELENTING_STORM != talent && SHAMAN_ELEMENTAL_PRECISION != talent && SHAMAN_LIGHTNING_MASTERY != talent && SHAMAN_ELEMENTAL_MASTERY != talent && SHAMAN_STORM_EARTH_AND_FIRE != talent && SHAMAN_BOOMING_ECHOES != talent && SHAMAN_ELEMENTAL_OATH != talent && SHAMAN_LIGHTNING_OVERLOAD != talent && SHAMAN_ASTRAL_SHIFT != talent && SHAMAN_TOTEM_OF_WRATH != talent && SHAMAN_LAVA_FLOWS != talent && SHAMAN_SHAMANISM != talent && SHAMAN_THUNDERSTORM != talent && SHAMAN_IMPROVED_HEALING_WAVE != talent && SHAMAN_TOTEMIC_FOCUS != talent && SHAMAN_IMPROVED_REINCARNATION != talent && SHAMAN_HEALING_GRACE != talent && SHAMAN_TIDAL_FOCUS != talent && SHAMAN_IMPROVED_WATER_SHIELD != talent && SHAMAN_HEALING_FOCUS != talent && SHAMAN_TIDAL_FORCE != talent && SHAMAN_ANCESTRAL_HEALING != talent && SHAMAN_RESTORATIVE_TOTEMS != talent && SHAMAN_TIDAL_MASTERY != talent && SHAMAN_HEALING_WAY != talent && SHAMAN_NATURES_SWIFTNESS != talent && SHAMAN_FOCUSED_MIND != talent && SHAMAN_PURIFICATION != talent && SHAMAN_NATURES_GUARDIAN != talent && SHAMAN_MANA_TIDE_TOTEM != talent && SHAMAN_CLEANSE_SPIRIT != talent && SHAMAN_BLESSING_OF_THE_ETERNALS != talent && SHAMAN_IMPROVED_CHAIN_HEAL != talent && SHAMAN_NATURES_BLESSING != talent && SHAMAN_ANCESTRAL_AWAKENING != talent && SHAMAN_EARTH_SHIELD != talent && SHAMAN_IMPROVED_EARTH_SHIELD != talent && SHAMAN_TIDAL_WAVES != talent && SHAMAN_RIPTIDE != talent && SHAMAN_ENHANCING_TOTEMS != talent && SHAMAN_EARTHS_GRASP != talent && SHAMAN_ANCESTRAL_KNOWLEDGE != talent && SHAMAN_GUARDIAN_TOTEMS != talent && SHAMAN_THUNDERING_STRIKES != talent && SHAMAN_IMPROVED_GHOST_WOLF != talent && SHAMAN_IMPROVED_SHIELDS != talent && SHAMAN_ELEMENTAL_WEAPONS != talent && SHAMAN_SHAMANISTIC_FOCUS != talent && SHAMAN_ANTICIPATION != talent && SHAMAN_FLURRY != talent && SHAMAN_TOUGHNESS != talent && SHAMAN_IMPROVED_WINDFURY_TOTEM != talent && SHAMAN_SPIRIT_WEAPONS != talent && SHAMAN_MENTAL_DEXTERITY != talent && SHAMAN_UNLEASHED_RAGE != talent && SHAMAN_WEAPON_MASTERY != talent && SHAMAN_FROZEN_POWER != talent && SHAMAN_DUAL_WIELD_SPECIALIZATION != talent && SHAMAN_DUAL_WIELD != talent && SHAMAN_STORMSTRIKE != talent && SHAMAN_STATIC_SHOCK != talent && SHAMAN_LAVA_LASH != talent && SHAMAN_IMPROVED_STORMSTRIKE != talent && SHAMAN_MENTAL_QUICKNESS != talent && SHAMAN_SHAMANISTIC_RAGE != talent && SHAMAN_EARTHEN_POWER != talent && SHAMAN_MAELSTROM_WEAPON != talent && SHAMAN_FERAL_SPIRIT != talent)
+                        return false;
+        }
+        else if (charClass == CLASS_WARLOCK)
+        {
+                if (WARLOCK_IMPROVED_SHADOW_BOLT != talent && WARLOCK_BANE != talent && WARLOCK_AFTERMATH != talent && WARLOCK_MOLTEN_SKIN != talent && WARLOCK_CATACLYSM != talent && WARLOCK_DEMONIC_POWER != talent && WARLOCK_SHADOWBURN != talent && WARLOCK_RUIN != talent && WARLOCK_INTENSITY != talent && WARLOCK_DESTRUCTIVE_REACH != talent && WARLOCK_IMPROVED_SEARING_PAIN != talent && WARLOCK_BACKLASH != talent && WARLOCK_IMPROVED_IMMOLATE != talent && WARLOCK_DEVASTATION != talent && WARLOCK_NETHER_PROTECTION != talent && WARLOCK_EMBERSTORM != talent && WARLOCK_CONFLAGRATE != talent && WARLOCK_SOUL_LEECH != talent && WARLOCK_PYROCLASM != talent && WARLOCK_SHADOW_AND_FLAME != talent && WARLOCK_IMPROVED_SOUL_LEECH != talent && WARLOCK_BACKDRAFT != talent && WARLOCK_SHADOWFURY != talent && WARLOCK_EMPOWERED_IMP != talent && WARLOCK_FIRE_AND_BRIMSTONE != talent && WARLOCK_CHAOS_BOLT != talent && WARLOCK_IMPROVED_CURSE_OF_AGONY != talent && WARLOCK_SUPPRESSION != talent && WARLOCK_IMPROVED_CORRUPTION != talent && WARLOCK_IMPROVED_CURSE_OF_WEAKNESS != talent && WARLOCK_IMPROVED_DRAIN_SOUL != talent && WARLOCK_IMPROVED_LIFE_TAP != talent && WARLOCK_SOUL_SIPHON != talent && WARLOCK_IMPROVED_FEAR != talent && WARLOCK_FEL_CONCENTRATION != talent && WARLOCK_AMPLIFY_CURSE != talent && WARLOCK_GRIM_REACH != talent && WARLOCK_NIGHTFALL != talent && WARLOCK_EMPOWERED_CORRUPTION != talent && WARLOCK_SHADOW_EMBRACE != talent && WARLOCK_SIPHON_LIFE != talent && WARLOCK_CURSE_OF_EXHAUSTION != talent && WARLOCK_IMPROVED_FELHUNTER != talent && WARLOCK_SHADOW_MASTERY != talent && WARLOCK_ERADICATION != talent && WARLOCK_CONTAGION != talent && WARLOCK_DARK_PACT != talent && WARLOCK_IMPROVED_HOWL_OF_TERROR != talent && WARLOCK_MALEDICTION != talent && WARLOCK_DEATHS_EMBRACE != talent && WARLOCK_UNSTABLE_AFFLICTION != talent && WARLOCK_PANDEMIC != talent && WARLOCK_EVERLASTING_AFFLICTION != talent && WARLOCK_HAUNT != talent && WARLOCK_IMPROVED_HEALTHSTONE != talent && WARLOCK_IMPROVED_IMP != talent && WARLOCK_DEMONIC_EMBRACE != talent && WARLOCK_FEL_SYNERGY != talent && WARLOCK_IMPROVED_HEALTH_FUNNEL != talent && WARLOCK_DEMONIC_BRUTALITY != talent && WARLOCK_FEL_VITALITY != talent && WARLOCK_IMPROVED_SUCCUBUS != talent && WARLOCK_SOUL_LINK != talent && WARLOCK_FEL_DOMINATION != talent && WARLOCK_DEMONIC_AEGIS != talent && WARLOCK_UNHOLY_POWER != talent && WARLOCK_MASTER_SUMMONER != talent && WARLOCK_MANA_FEED != talent && WARLOCK_MASTER_CONJURER != talent && WARLOCK_MASTER_DEMONOLOGIST != talent && WARLOCK_MOLTEN_CORE != talent && WARLOCK_DEMONIC_RESILIENCE != talent && WARLOCK_DEMONIC_EMPOWERMENT != talent && WARLOCK_DEMONIC_KNOWLEDGE != talent && WARLOCK_DEMONIC_TACTICS != talent && WARLOCK_DECIMATION != talent && WARLOCK_IMPROVED_DEMONIC_TACTICS != talent && WARLOCK_SUMMON_FELGUARD != talent && WARLOCK_NEMESIS != talent && WARLOCK_DEMONIC_PACT != talent && WARLOCK_METAMORPHOSIS != talent)
+                        return false;
+        }
+        else if (charClass == CLASS_WARRIOR)
+        {
+                if (WARRIOR_IMPROVED_HEROIC_STRIKE != talent && WARRIOR_DEFLECTION != talent && WARRIOR_IMPROVED_REND != talent && WARRIOR_IMPROVED_CHARGE != talent && WARRIOR_IRON_WILL != talent && WARRIOR_TACTICAL_MASTERY != talent && WARRIOR_IMPROVED_OVERPOWER != talent && WARRIOR_ANGER_MANAGEMENT != talent && WARRIOR_IMPALE != talent && WARRIOR_DEEP_WOUNDS != talent && WARRIOR_TWOHANDED_WEAPON_SPECIALIZATION != talent && WARRIOR_TASTE_FOR_BLOOD != talent && WARRIOR_POLEAXE_SPECIALIZATION != talent && WARRIOR_SWEEPING_STRIKES != talent && WARRIOR_MACE_SPECIALIZATION != talent && WARRIOR_SWORD_SPECIALIZATION != talent && WARRIOR_WEAPON_MASTERY != talent && WARRIOR_IMPROVED_HAMSTRING != talent && WARRIOR_TRAUMA != talent && WARRIOR_SECOND_WIND != talent && WARRIOR_MORTAL_STRIKE != talent && WARRIOR_STRENGTH_OF_ARMS != talent && WARRIOR_IMPROVED_SLAM != talent && WARRIOR_JUGGERNAUT != talent && WARRIOR_IMPROVED_MORTAL_STRIKE != talent && WARRIOR_UNRELENTING_ASSAULT != talent && WARRIOR_SUDDEN_DEATH != talent && WARRIOR_ENDLESS_RAGE != talent && WARRIOR_BLOOD_FRENZY != talent && WARRIOR_WRECKING_CREW != talent && WARRIOR_BLADESTORM != talent && WARRIOR_IMPROVED_BLOODRAGE != talent && WARRIOR_SHIELD_SPECIALIZATION != talent && WARRIOR_IMPROVED_THUNDER_CLAP != talent && WARRIOR_INCITE != talent && WARRIOR_ANTICIPATION != talent && WARRIOR_LAST_STAND != talent && WARRIOR_IMPROVED_REVENGE != talent && WARRIOR_SHIELD_MASTERY != talent && WARRIOR_TOUGHNESS != talent && WARRIOR_IMPROVED_SPELL_REFLECTION != talent && WARRIOR_IMPROVED_DISARM != talent && WARRIOR_PUNCTURE != talent && WARRIOR_IMPROVED_DISCIPLINES != talent && WARRIOR_CONCUSSION_BLOW != talent && WARRIOR_GAG_ORDER != talent && WARRIOR_ONEHANDED_WEAPON_SPECIALIZATION != talent && WARRIOR_IMPROVED_DEFENSIVE_STANCE != talent && WARRIOR_VIGILANCE != talent && WARRIOR_FOCUSED_RAGE != talent && WARRIOR_VITALITY != talent && WARRIOR_SAFEGUARD != talent && WARRIOR_WARBRINGER != talent && WARRIOR_DEVASTATE != talent && WARRIOR_CRITICAL_BLOCK != talent && WARRIOR_SWORD_AND_BOARD != talent && WARRIOR_DAMAGE_SHIELD != talent && WARRIOR_SHOCKWAVE != talent && WARRIOR_ARMORED_TO_THE_TEETH != talent && WARRIOR_BOOMING_VOICE != talent && WARRIOR_CRUELTY != talent && WARRIOR_IMPROVED_DEMORALIZING_SHOUT != talent && WARRIOR_UNBRIDLED_WRATH != talent && WARRIOR_IMPROVED_CLEAVE != talent && WARRIOR_PIERCING_HOWL != talent && WARRIOR_BLOOD_CRAZE != talent && WARRIOR_COMMANDING_PRESENCE != talent && WARRIOR_DUAL_WIELD_SPECIALIZATION != talent && WARRIOR_IMPROVED_EXECUTE != talent && WARRIOR_ENRAGE != talent && WARRIOR_PRECISION != talent && WARRIOR_DEATH_WISH != talent && WARRIOR_IMPROVED_INTERCEPT != talent && WARRIOR_IMPROVED_BERSERKER_RAGE != talent && WARRIOR_FLURRY != talent && WARRIOR_INTENSIFY_RAGE != talent && WARRIOR_BLOODTHIRST != talent && WARRIOR_IMPROVED_WHIRLWIND != talent && WARRIOR_FURIOUS_ATTACKS != talent && WARRIOR_IMPROVED_BERSERKER_STANCE != talent && WARRIOR_HEROIC_FURY != talent && WARRIOR_RAMPAGE != talent && WARRIOR_BLOODSURGE != talent && WARRIOR_UNENDING_FURY != talent && WARRIOR_TITANS_GRIP != talent)
+                        return false;
+        }
+        else if (charClass == CLASS_PET_CUNNING)
+        {
+                if (PET_CUNNING_COBRA_REFLEXES != talent && PET_CUNNING_DASHDIVE1 != talent && PET_CUNNING_DASHDIVE2 != talent && PET_CUNNING_GREAT_STAMINA != talent && PET_CUNNING_NATURAL_ARMOR != talent && PET_CUNNING_BOARS_SPEED != talent && PET_CUNNING_MOBILITY1 != talent && PET_CUNNING_MOBILITY2 != talent && PET_CUNNING_OWLS_FOCUS != talent && PET_CUNNING_SPIKED_COLLAR != talent && PET_CUNNING_CULLING_THE_HERD != talent && PET_CUNNING_LIONHEARTED != talent && PET_CUNNING_CARRION_FEEDER != talent && PET_CUNNING_GREAT_RESISTANCE != talent && PET_CUNNING_CORNERED != talent && PET_CUNNING_FEEDING_FRENZY != talent && PET_CUNNING_WOLVERINE_BITE != talent && PET_CUNNING_ROAR_OF_RECOVERY != talent && PET_CUNNING_BULLHEADED != talent && PET_CUNNING_GRACE_OF_THE_MANTIS != talent && PET_CUNNING_WILD_HUNT != talent && PET_CUNNING_ROAR_OF_SACRIFICE != talent)
+                        return false;
+        }
+        else if (charClass == CLASS_PET_FEROCITY)
+        {
+                if (PET_FEROCITY_COBRA_REFLEXES != talent && PET_FEROCITY_DASHDIVE1 != talent && PET_FEROCITY_DASHDIVE2 != talent && PET_FEROCITY_GREAT_STAMINA != talent && PET_FEROCITY_NATURAL_ARMOR != talent && PET_FEROCITY_IMPROVED_COWER != talent && PET_FEROCITY_BLOODTHIRSTY != talent && PET_FEROCITY_SPIKED_COLLAR != talent && PET_FEROCITY_BOARS_SPEED != talent && PET_FEROCITY_CULLING_THE_HERD != talent && PET_FEROCITY_LIONHEARTED != talent && PET_FEROCITY_CHARGESWOOP1 != talent && PET_FEROCITY_CHARGESWOOP2 != talent && PET_FEROCITY_HEART_OF_THE_PHOENIX != talent && PET_FEROCITY_SPIDERS_BITE != talent && PET_FEROCITY_GREAT_RESISTANCE != talent && PET_FEROCITY_RABID != talent && PET_FEROCITY_LICK_YOUR_WOUNDS != talent && PET_FEROCITY_CALL_OF_THE_WILD != talent && PET_FEROCITY_SHARK_ATTACK != talent && PET_FEROCITY_WILD_HUNT != talent)
+                        return false;
+        }
+        else if (charClass == CLASS_PET_TENACITY)
+        {
+                if (PET_TENACITY_COBRA_REFLEXES != talent && PET_TENACITY_CHARGE != talent && PET_TENACITY_GREAT_STAMINA != talent && PET_TENACITY_NATURAL_ARMOR != talent && PET_TENACITY_SPIKED_COLLAR != talent && PET_TENACITY_BOARS_SPEED != talent && PET_TENACITY_BLOOD_OF_THE_RHINO != talent && PET_TENACITY_PET_BARDING != talent && PET_TENACITY_CULLING_THE_HERD != talent && PET_TENACITY_GUARD_DOG != talent && PET_TENACITY_LIONHEARTED != talent && PET_TENACITY_THUNDERSTOMP != talent && PET_TENACITY_GRACE_OF_THE_MANTIS != talent && PET_TENACITY_GREAT_RESISTANCE != talent && PET_TENACITY_LAST_STAND != talent && PET_TENACITY_TAUNT != talent && PET_TENACITY_ROAR_OF_SACRIFICE != talent && PET_TENACITY_INTERVENE != talent && PET_TENACITY_SILVERBACK != talent && PET_TENACITY_WILD_HUNT != talent)
+                        return false;
+        }
+        else // charClass unknown
+        {
+                DEBUG_LOG ("[PlayerbotAI]: Someone was naughty and supplied an invalid class to ValidateTalent: %u", (uint32)charClass);
+                return false;
+        }
+
+        return true;
+}
+
+/**
+* ValidateGlyph tests a glyph against class to see if it belongs to that class - accepts both Major and Minor glyphs
+*
+* uint16 glyph:		glyph ID
+* long charClass:	member of the Classes enum or ClassesCombatPets enum
+*
+* return true  -> ok
+* return false -> not a valid glyph for that class
+*/
+bool PlayerbotAI::ValidateGlyph(uint16 glyph, long charClass)
+{
+        // XOR the two helper functions. Both true (supposedly impossible) or both false -> false
+        return ValidateMajorGlyph(glyph, charClass) ^ ValidateMinorGlyph(glyph, charClass);
+}
+
+/**
+* ValidateMajorGlyph tests a glyph against class to see if it belongs to that class - only accepts Major glyphs
+*
+* uint16 glyph:		glyph ID
+* long charClass:	member of the Classes enum or ClassesCombatPets enum
+*
+* return true  -> ok
+* return false -> not a valid major glyph for that class
+*/
+bool PlayerbotAI::ValidateMajorGlyph(uint16 glyph, long charClass)
+{
+        if (charClass == CLASS_DEATH_KNIGHT)
+        {
+                // this looong 'if' is to see if any glyph is not a Death Knight glyph when the class clearly is
+                if (DEATH_KNIGHT_MAJOR_GLYPH_OF_DARK_COMMAND != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_ANTIMAGIC_SHELL != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_HEART_STRIKE != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_BONE_SHIELD != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_CHAINS_OF_ICE != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_DEATH_GRIP != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_DEATH_AND_DECAY != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_FROST_STRIKE != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_ICEBOUND_FORTITUDE != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_ICY_TOUCH != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_OBLITERATE != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_PLAGUE_STRIKE != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_THE_GHOUL != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_RUNE_STRIKE != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_SCOURGE_STRIKE != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_STRANGULATE != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_UNBREAKABLE_ARMOR != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_VAMPIRIC_BLOOD != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_RUNE_TAP != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_BLOOD_STRIKE != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_DEATH_STRIKE != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_DANCING_RUNE_WEAPON != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_HUNGERING_COLD != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_UNHOLY_BLIGHT != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_DARK_DEATH != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_DISEASE != glyph && DEATH_KNIGHT_MAJOR_GLYPH_OF_HOWLING_BLAST != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_DRUID)
+        {
+                if (DRUID_MAJOR_GLYPH_OF_FRENZIED_REGENERATION != glyph && DRUID_MAJOR_GLYPH_OF_MAUL != glyph && DRUID_MAJOR_GLYPH_OF_MANGLE != glyph && DRUID_MAJOR_GLYPH_OF_SHRED != glyph && DRUID_MAJOR_GLYPH_OF_RIP != glyph && DRUID_MAJOR_GLYPH_OF_RAKE != glyph && DRUID_MAJOR_GLYPH_OF_SWIFTMEND != glyph && DRUID_MAJOR_GLYPH_OF_INNERVATE != glyph && DRUID_MAJOR_GLYPH_OF_REBIRTH != glyph && DRUID_MAJOR_GLYPH_OF_REGROWTH != glyph && DRUID_MAJOR_GLYPH_OF_REJUVENATION != glyph && DRUID_MAJOR_GLYPH_OF_HEALING_TOUCH != glyph && DRUID_MAJOR_GLYPH_OF_LIFEBLOOM != glyph && DRUID_MAJOR_GLYPH_OF_STARFIRE != glyph && DRUID_MAJOR_GLYPH_OF_INSECT_SWARM != glyph && DRUID_MAJOR_GLYPH_OF_HURRICANE != glyph && DRUID_MAJOR_GLYPH_OF_STARFALL != glyph && DRUID_MAJOR_GLYPH_OF_WRATH != glyph && DRUID_MAJOR_GLYPH_OF_MOONFIRE != glyph && DRUID_MAJOR_GLYPH_OF_ENTANGLING_ROOTS != glyph && DRUID_MAJOR_GLYPH_OF_FOCUS != glyph && DRUID_MAJOR_GLYPH_OF_BERSERK != glyph && DRUID_MAJOR_GLYPH_OF_WILD_GROWTH != glyph && DRUID_MAJOR_GLYPH_OF_NOURISH != glyph && DRUID_MAJOR_GLYPH_OF_SAVAGE_ROAR != glyph && DRUID_MAJOR_GLYPH_OF_MONSOON != glyph && DRUID_MAJOR_GLYPH_OF_BARKSKIN != glyph && DRUID_MAJOR_GLYPH_OF_SURVIVAL_INSTINCTS != glyph && DRUID_MAJOR_GLYPH_OF_CLAW != glyph && DRUID_MAJOR_GLYPH_OF_RAPID_REJUVENATION != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_HUNTER)
+        {
+                if (HUNTER_MAJOR_GLYPH_OF_AIMED_SHOT != glyph && HUNTER_MAJOR_GLYPH_OF_ARCANE_SHOT != glyph && HUNTER_MAJOR_GLYPH_OF_THE_BEAST != glyph && HUNTER_MAJOR_GLYPH_OF_MENDING != glyph && HUNTER_MAJOR_GLYPH_OF_ASPECT_OF_THE_VIPER != glyph && HUNTER_MAJOR_GLYPH_OF_BESTIAL_WRATH != glyph && HUNTER_MAJOR_GLYPH_OF_DETERRENCE != glyph && HUNTER_MAJOR_GLYPH_OF_DISENGAGE != glyph && HUNTER_MAJOR_GLYPH_OF_FREEZING_TRAP != glyph && HUNTER_MAJOR_GLYPH_OF_FROST_TRAP != glyph && HUNTER_MAJOR_GLYPH_OF_HUNTERS_MARK != glyph && HUNTER_MAJOR_GLYPH_OF_IMMOLATION_TRAP != glyph && HUNTER_MAJOR_GLYPH_OF_MULTISHOT != glyph && HUNTER_MAJOR_GLYPH_OF_RAPID_FIRE != glyph && HUNTER_MAJOR_GLYPH_OF_SERPENT_STING != glyph && HUNTER_MAJOR_GLYPH_OF_SNAKE_TRAP != glyph && HUNTER_MAJOR_GLYPH_OF_STEADY_SHOT != glyph && HUNTER_MAJOR_GLYPH_OF_TRUESHOT_AURA != glyph && HUNTER_MAJOR_GLYPH_OF_VOLLEY != glyph && HUNTER_MAJOR_GLYPH_OF_WYVERN_STING != glyph && HUNTER_MAJOR_GLYPH_OF_CHIMERA_SHOT != glyph && HUNTER_MAJOR_GLYPH_OF_EXPLOSIVE_SHOT != glyph && HUNTER_MAJOR_GLYPH_OF_KILL_SHOT != glyph && HUNTER_MAJOR_GLYPH_OF_EXPLOSIVE_TRAP != glyph && HUNTER_MAJOR_GLYPH_OF_SCATTER_SHOT != glyph && HUNTER_MAJOR_GLYPH_OF_RAPTOR_STRIKE != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_MAGE)
+        {
+                if (MAGE_MAJOR_GLYPH_OF_ARCANE_EXPLOSION != glyph && MAGE_MAJOR_GLYPH_OF_ARCANE_MISSILES != glyph && MAGE_MAJOR_GLYPH_OF_ARCANE_POWER != glyph && MAGE_MAJOR_GLYPH_OF_BLINK != glyph && MAGE_MAJOR_GLYPH_OF_EVOCATION != glyph && MAGE_MAJOR_GLYPH_OF_FIREBALL != glyph && MAGE_MAJOR_GLYPH_OF_FIRE_BLAST != glyph && MAGE_MAJOR_GLYPH_OF_FROST_NOVA != glyph && MAGE_MAJOR_GLYPH_OF_FROSTBOLT != glyph && MAGE_MAJOR_GLYPH_OF_ICE_ARMOR != glyph && MAGE_MAJOR_GLYPH_OF_ICE_BLOCK != glyph && MAGE_MAJOR_GLYPH_OF_ICE_LANCE != glyph && MAGE_MAJOR_GLYPH_OF_ICY_VEINS != glyph && MAGE_MAJOR_GLYPH_OF_SCORCH != glyph && MAGE_MAJOR_GLYPH_OF_INVISIBILITY != glyph && MAGE_MAJOR_GLYPH_OF_MAGE_ARMOR != glyph && MAGE_MAJOR_GLYPH_OF_MANA_GEM != glyph && MAGE_MAJOR_GLYPH_OF_MOLTEN_ARMOR != glyph && MAGE_MAJOR_GLYPH_OF_POLYMORPH != glyph && MAGE_MAJOR_GLYPH_OF_REMOVE_CURSE != glyph && MAGE_MAJOR_GLYPH_OF_WATER_ELEMENTAL != glyph && MAGE_MAJOR_GLYPH_OF_FROSTFIRE != glyph && MAGE_MAJOR_GLYPH_OF_ARCANE_BLAST != glyph && MAGE_MAJOR_GLYPH_OF_DEEP_FREEZE != glyph && MAGE_MAJOR_GLYPH_OF_LIVING_BOMB != glyph && MAGE_MAJOR_GLYPH_OF_ARCANE_BARRAGE != glyph && MAGE_MAJOR_GLYPH_OF_MIRROR_IMAGE != glyph && MAGE_MAJOR_GLYPH_OF_ICE_BARRIER != glyph && MAGE_MAJOR_GLYPH_OF_ETERNAL_WATER != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_PALADIN)
+        {
+                if (PALADIN_MAJOR_GLYPH_OF_JUDGEMENT != glyph && PALADIN_MAJOR_GLYPH_OF_SEAL_OF_COMMAND != glyph && PALADIN_MAJOR_GLYPH_OF_HAMMER_OF_JUSTICE != glyph && PALADIN_MAJOR_GLYPH_OF_SPIRITUAL_ATTUNEMENT != glyph && PALADIN_MAJOR_GLYPH_OF_HAMMER_OF_WRATH != glyph && PALADIN_MAJOR_GLYPH_OF_CRUSADER_STRIKE != glyph && PALADIN_MAJOR_GLYPH_OF_CONSECRATION != glyph && PALADIN_MAJOR_GLYPH_OF_RIGHTEOUS_DEFENSE != glyph && PALADIN_MAJOR_GLYPH_OF_AVENGERS_SHIELD != glyph && PALADIN_MAJOR_GLYPH_OF_TURN_EVIL != glyph && PALADIN_MAJOR_GLYPH_OF_EXORCISM != glyph && PALADIN_MAJOR_GLYPH_OF_CLEANSING != glyph && PALADIN_MAJOR_GLYPH_OF_FLASH_OF_LIGHT != glyph && PALADIN_MAJOR_GLYPH_OF_HOLY_LIGHT != glyph && PALADIN_MAJOR_GLYPH_OF_AVENGING_WRATH != glyph && PALADIN_MAJOR_GLYPH_OF_DIVINITY != glyph && PALADIN_MAJOR_GLYPH_OF_SEAL_OF_WISDOM != glyph && PALADIN_MAJOR_GLYPH_OF_SEAL_OF_LIGHT != glyph && PALADIN_MAJOR_GLYPH_OF_HOLY_WRATH != glyph && PALADIN_MAJOR_GLYPH_OF_SEAL_OF_RIGHTEOUSNESS != glyph && PALADIN_MAJOR_GLYPH_OF_SEAL_OF_VENGEANCE != glyph && PALADIN_MAJOR_GLYPH_OF_BEACON_OF_LIGHT != glyph && PALADIN_MAJOR_GLYPH_OF_HAMMER_OF_THE_RIGHTEOUS != glyph && PALADIN_MAJOR_GLYPH_OF_DIVINE_STORM != glyph && PALADIN_MAJOR_GLYPH_OF_SHIELD_OF_RIGHTEOUSNESS != glyph && PALADIN_MAJOR_GLYPH_OF_DIVINE_PLEA != glyph && PALADIN_MAJOR_GLYPH_OF_HOLY_SHOCK != glyph && PALADIN_MAJOR_GLYPH_OF_SALVATION != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_PRIEST)
+        {
+                if (PRIEST_MAJOR_GLYPH_OF_CIRCLE_OF_HEALING != glyph && PRIEST_MAJOR_GLYPH_OF_DISPEL_MAGIC != glyph && PRIEST_MAJOR_GLYPH_OF_FADE != glyph && PRIEST_MAJOR_GLYPH_OF_FEAR_WARD != glyph && PRIEST_MAJOR_GLYPH_OF_FLASH_HEAL != glyph && PRIEST_MAJOR_GLYPH_OF_HOLY_NOVA != glyph && PRIEST_MAJOR_GLYPH_OF_INNER_FIRE != glyph && PRIEST_MAJOR_GLYPH_OF_LIGHTWELL != glyph && PRIEST_MAJOR_GLYPH_OF_MASS_DISPEL != glyph && PRIEST_MAJOR_GLYPH_OF_MIND_CONTROL != glyph && PRIEST_MAJOR_GLYPH_OF_SHADOW_WORD_PAIN != glyph && PRIEST_MAJOR_GLYPH_OF_SHADOW != glyph && PRIEST_MAJOR_GLYPH_OF_POWER_WORD_SHIELD != glyph && PRIEST_MAJOR_GLYPH_OF_PRAYER_OF_HEALING != glyph && PRIEST_MAJOR_GLYPH_OF_PSYCHIC_SCREAM != glyph && PRIEST_MAJOR_GLYPH_OF_RENEW != glyph && PRIEST_MAJOR_GLYPH_OF_SCOURGE_IMPRISONMENT != glyph && PRIEST_MAJOR_GLYPH_OF_SHADOW_WORD_DEATH != glyph && PRIEST_MAJOR_GLYPH_OF_MIND_FLAY != glyph && PRIEST_MAJOR_GLYPH_OF_SMITE != glyph && PRIEST_MAJOR_GLYPH_OF_SPIRIT_OF_REDEMPTION != glyph && PRIEST_MAJOR_GLYPH_OF_DISPERSION != glyph && PRIEST_MAJOR_GLYPH_OF_GUARDIAN_SPIRIT != glyph && PRIEST_MAJOR_GLYPH_OF_PENANCE != glyph && PRIEST_MAJOR_GLYPH_OF_MIND_SEAR != glyph && PRIEST_MAJOR_GLYPH_OF_HYMN_OF_HOPE != glyph && PRIEST_MAJOR_GLYPH_OF_PAIN_SUPPRESSION != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_ROGUE)
+        {
+                if (ROGUE_MAJOR_GLYPH_OF_ADRENALINE_RUSH != glyph && ROGUE_MAJOR_GLYPH_OF_AMBUSH != glyph && ROGUE_MAJOR_GLYPH_OF_BACKSTAB != glyph && ROGUE_MAJOR_GLYPH_OF_BLADE_FLURRY != glyph && ROGUE_MAJOR_GLYPH_OF_CRIPPLING_POISON != glyph && ROGUE_MAJOR_GLYPH_OF_DEADLY_THROW != glyph && ROGUE_MAJOR_GLYPH_OF_EVASION != glyph && ROGUE_MAJOR_GLYPH_OF_EVISCERATE != glyph && ROGUE_MAJOR_GLYPH_OF_EXPOSE_ARMOR != glyph && ROGUE_MAJOR_GLYPH_OF_FEINT != glyph && ROGUE_MAJOR_GLYPH_OF_GARROTE != glyph && ROGUE_MAJOR_GLYPH_OF_GHOSTLY_STRIKE != glyph && ROGUE_MAJOR_GLYPH_OF_GOUGE != glyph && ROGUE_MAJOR_GLYPH_OF_HEMORRHAGE != glyph && ROGUE_MAJOR_GLYPH_OF_PREPARATION != glyph && ROGUE_MAJOR_GLYPH_OF_RUPTURE != glyph && ROGUE_MAJOR_GLYPH_OF_SAP != glyph && ROGUE_MAJOR_GLYPH_OF_VIGOR != glyph && ROGUE_MAJOR_GLYPH_OF_SINISTER_STRIKE != glyph && ROGUE_MAJOR_GLYPH_OF_SLICE_AND_DICE != glyph && ROGUE_MAJOR_GLYPH_OF_SPRINT != glyph && ROGUE_MAJOR_GLYPH_OF_HUNGER_FOR_BLOOD != glyph && ROGUE_MAJOR_GLYPH_OF_KILLING_SPREE != glyph && ROGUE_MAJOR_GLYPH_OF_SHADOW_DANCE != glyph && ROGUE_MAJOR_GLYPH_OF_FAN_OF_KNIVES != glyph && ROGUE_MAJOR_GLYPH_OF_TRICKS_OF_THE_TRADE != glyph && ROGUE_MAJOR_GLYPH_OF_MUTILATE != glyph && ROGUE_MAJOR_GLYPH_OF_CLOAK_OF_SHADOWS != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_SHAMAN)
+        {
+                if (SHAMAN_MAJOR_GLYPH_OF_WATER_MASTERY != glyph && SHAMAN_MAJOR_GLYPH_OF_CHAIN_HEAL != glyph && SHAMAN_MAJOR_GLYPH_OF_CHAIN_LIGHTNING != glyph && SHAMAN_MAJOR_GLYPH_OF_LAVA != glyph && SHAMAN_MAJOR_GLYPH_OF_SHOCKING != glyph && SHAMAN_MAJOR_GLYPH_OF_EARTHLIVING_WEAPON != glyph && SHAMAN_MAJOR_GLYPH_OF_FIRE_ELEMENTAL_TOTEM != glyph && SHAMAN_MAJOR_GLYPH_OF_FIRE_NOVA != glyph && SHAMAN_MAJOR_GLYPH_OF_FLAME_SHOCK != glyph && SHAMAN_MAJOR_GLYPH_OF_FLAMETONGUE_WEAPON != glyph && SHAMAN_MAJOR_GLYPH_OF_FROST_SHOCK != glyph && SHAMAN_MAJOR_GLYPH_OF_HEALING_STREAM_TOTEM != glyph && SHAMAN_MAJOR_GLYPH_OF_HEALING_WAVE != glyph && SHAMAN_MAJOR_GLYPH_OF_LESSER_HEALING_WAVE != glyph && SHAMAN_MAJOR_GLYPH_OF_LIGHTNING_SHIELD != glyph && SHAMAN_MAJOR_GLYPH_OF_LIGHTNING_BOLT != glyph && SHAMAN_MAJOR_GLYPH_OF_STORMSTRIKE != glyph && SHAMAN_MAJOR_GLYPH_OF_LAVA_LASH != glyph && SHAMAN_MAJOR_GLYPH_OF_ELEMENTAL_MASTERY != glyph && SHAMAN_MAJOR_GLYPH_OF_WINDFURY_WEAPON != glyph && SHAMAN_MAJOR_GLYPH_OF_THUNDER != glyph && SHAMAN_MAJOR_GLYPH_OF_FERAL_SPIRIT != glyph && SHAMAN_MAJOR_GLYPH_OF_RIPTIDE != glyph && SHAMAN_MAJOR_GLYPH_OF_EARTH_SHIELD != glyph && SHAMAN_MAJOR_GLYPH_OF_TOTEM_OF_WRATH != glyph && SHAMAN_MAJOR_GLYPH_OF_HEX != glyph && SHAMAN_MAJOR_GLYPH_OF_STONECLAW_TOTEM != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_WARLOCK)
+        {
+                if (WARLOCK_MAJOR_GLYPH_OF_INCINERATE != glyph && WARLOCK_MAJOR_GLYPH_OF_CONFLAGRATE != glyph && WARLOCK_MAJOR_GLYPH_OF_CORRUPTION != glyph && WARLOCK_MAJOR_GLYPH_OF_CURSE_OF_AGONY != glyph && WARLOCK_MAJOR_GLYPH_OF_DEATH_COIL != glyph && WARLOCK_MAJOR_GLYPH_OF_FEAR != glyph && WARLOCK_MAJOR_GLYPH_OF_FELGUARD != glyph && WARLOCK_MAJOR_GLYPH_OF_FELHUNTER != glyph && WARLOCK_MAJOR_GLYPH_OF_HEALTH_FUNNEL != glyph && WARLOCK_MAJOR_GLYPH_OF_HEALTHSTONE != glyph && WARLOCK_MAJOR_GLYPH_OF_HOWL_OF_TERROR != glyph && WARLOCK_MAJOR_GLYPH_OF_IMMOLATE != glyph && WARLOCK_MAJOR_GLYPH_OF_IMP != glyph && WARLOCK_MAJOR_GLYPH_OF_SEARING_PAIN != glyph && WARLOCK_MAJOR_GLYPH_OF_SHADOW_BOLT != glyph && WARLOCK_MAJOR_GLYPH_OF_SHADOWBURN != glyph && WARLOCK_MAJOR_GLYPH_OF_SIPHON_LIFE != glyph && WARLOCK_MAJOR_GLYPH_OF_SOULSTONE != glyph && WARLOCK_MAJOR_GLYPH_OF_SUCCUBUS != glyph && WARLOCK_MAJOR_GLYPH_OF_UNSTABLE_AFFLICTION != glyph && WARLOCK_MAJOR_GLYPH_OF_VOIDWALKER != glyph && WARLOCK_MAJOR_GLYPH_OF_HAUNT != glyph && WARLOCK_MAJOR_GLYPH_OF_METAMORPHOSIS != glyph && WARLOCK_MAJOR_GLYPH_OF_CHAOS_BOLT != glyph && WARLOCK_MAJOR_GLYPH_OF_DEMONIC_CIRCLE != glyph && WARLOCK_MAJOR_GLYPH_OF_SHADOWFLAME != glyph && WARLOCK_MAJOR_GLYPH_OF_LIFE_TAP != glyph && WARLOCK_MAJOR_GLYPH_OF_SOUL_LINK != glyph && WARLOCK_MAJOR_GLYPH_OF_QUICK_DECAY != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_WARRIOR)
+        {
+                if (WARRIOR_MAJOR_GLYPH_OF_MORTAL_STRIKE != glyph && WARRIOR_MAJOR_GLYPH_OF_BLOODTHIRST != glyph && WARRIOR_MAJOR_GLYPH_OF_RAPID_CHARGE != glyph && WARRIOR_MAJOR_GLYPH_OF_CLEAVING != glyph && WARRIOR_MAJOR_GLYPH_OF_DEVASTATE != glyph && WARRIOR_MAJOR_GLYPH_OF_EXECUTION != glyph && WARRIOR_MAJOR_GLYPH_OF_HAMSTRING != glyph && WARRIOR_MAJOR_GLYPH_OF_HEROIC_STRIKE != glyph && WARRIOR_MAJOR_GLYPH_OF_INTERVENE != glyph && WARRIOR_MAJOR_GLYPH_OF_BARBARIC_INSULTS != glyph && WARRIOR_MAJOR_GLYPH_OF_OVERPOWER != glyph && WARRIOR_MAJOR_GLYPH_OF_RENDING != glyph && WARRIOR_MAJOR_GLYPH_OF_REVENGE != glyph && WARRIOR_MAJOR_GLYPH_OF_BLOCKING != glyph && WARRIOR_MAJOR_GLYPH_OF_LAST_STAND != glyph && WARRIOR_MAJOR_GLYPH_OF_SUNDER_ARMOR != glyph && WARRIOR_MAJOR_GLYPH_OF_SWEEPING_STRIKES != glyph && WARRIOR_MAJOR_GLYPH_OF_TAUNT != glyph && WARRIOR_MAJOR_GLYPH_OF_RESONATING_POWER != glyph && WARRIOR_MAJOR_GLYPH_OF_VICTORY_RUSH != glyph && WARRIOR_MAJOR_GLYPH_OF_WHIRLWIND != glyph && WARRIOR_MAJOR_GLYPH_OF_BLADESTORM != glyph && WARRIOR_MAJOR_GLYPH_OF_SHOCKWAVE != glyph && WARRIOR_MAJOR_GLYPH_OF_VIGILANCE != glyph && WARRIOR_MAJOR_GLYPH_OF_ENRAGED_REGENERATION != glyph && WARRIOR_MAJOR_GLYPH_OF_SPELL_REFLECTION != glyph && WARRIOR_MAJOR_GLYPH_OF_SHIELD_WALL != glyph)
+                        return false;
+        }
+        // pets don't have glyphs... yet
+        else if (charClass == CLASS_PET_CUNNING || charClass == CLASS_PET_FEROCITY || charClass == CLASS_PET_TENACITY)
+        {
+                DEBUG_LOG ("[PlayerbotAI]: Someone tried to validate a glyph for a pet... ValidateMajorGlyph: %u", (uint32)charClass);
+                return false;
+        }
+        else // charClass unknown
+        {
+                DEBUG_LOG ("[PlayerbotAI]: Someone was naughty and supplied an invalid class to ValidateMajorGlyph: %u", (uint32)charClass);
+                return false;
+        }
+
+        return true;
+}
+
+/**
+* ValidateMinorGlyph tests a glyph against class to see if it belongs to that class - only accepts Minor glyphs
+*
+* uint16 glyph:		glyph ID
+* long charClass:	member of the Classes enum or ClassesCombatPets enum
+*
+* return true  -> ok
+* return false -> not a valid minor glyph for that class
+*/
+bool PlayerbotAI::ValidateMinorGlyph(uint16 glyph, long charClass)
+{
+        if (charClass == CLASS_DEATH_KNIGHT)
+        {
+                // this looong 'if' is to see if any glyph is not a Death Knight glyph when the class clearly is
+                if (DEATH_KNIGHT_MINOR_GLYPH_OF_BLOOD_TAP != glyph && DEATH_KNIGHT_MINOR_GLYPH_OF_DEATHS_EMBRACE != glyph && DEATH_KNIGHT_MINOR_GLYPH_OF_HORN_OF_WINTER != glyph && DEATH_KNIGHT_MINOR_GLYPH_OF_PESTILENCE != glyph && DEATH_KNIGHT_MINOR_GLYPH_OF_CORPSE_EXPLOSION != glyph && DEATH_KNIGHT_MINOR_GLYPH_OF_RAISE_DEAD != glyph && DEATH_KNIGHT_MINOR_GLYPH_OF_RAISE_DEAD2 != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_DRUID)
+        {
+                if (DRUID_MINOR_GLYPH_OF_AQUATIC_FORM != glyph && DRUID_MINOR_GLYPH_OF_CHALLENGING_ROAR != glyph && DRUID_MINOR_GLYPH_OF_THE_WILD != glyph && DRUID_MINOR_GLYPH_OF_UNBURDENED_REBIRTH != glyph && DRUID_MINOR_GLYPH_OF_THORNS != glyph && DRUID_MINOR_GLYPH_OF_DASH != glyph && DRUID_MINOR_GLYPH_OF_TYPHOON != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_HUNTER)
+        {
+                if (HUNTER_MINOR_GLYPH_OF_REVIVE_PET != glyph && HUNTER_MINOR_GLYPH_OF_MEND_PET != glyph && HUNTER_MINOR_GLYPH_OF_FEIGN_DEATH != glyph && HUNTER_MINOR_GLYPH_OF_SCARE_BEAST != glyph && HUNTER_MINOR_GLYPH_OF_THE_PACK != glyph && HUNTER_MINOR_GLYPH_OF_POSSESSED_STRENGTH != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_MAGE)
+        {
+                if (MAGE_MINOR_GLYPH_OF_ARCANE_INTELLECT != glyph && MAGE_MINOR_GLYPH_OF_BLAST_WAVE != glyph && MAGE_MINOR_GLYPH_OF_FIRE_WARD != glyph && MAGE_MINOR_GLYPH_OF_FROST_WARD != glyph && MAGE_MINOR_GLYPH_OF_FROST_ARMOR != glyph && MAGE_MINOR_GLYPH_OF_THE_PENGUIN != glyph && MAGE_MINOR_GLYPH_OF_SLOW_FALL != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_PALADIN)
+        {
+                if (PALADIN_MINOR_GLYPH_OF_BLESSING_OF_KINGS != glyph && PALADIN_MINOR_GLYPH_OF_BLESSING_OF_MIGHT != glyph && PALADIN_MINOR_GLYPH_OF_BLESSING_OF_WISDOM != glyph && PALADIN_MINOR_GLYPH_OF_LAY_ON_HANDS != glyph && PALADIN_MINOR_GLYPH_OF_SENSE_UNDEAD != glyph && PALADIN_MINOR_GLYPH_OF_THE_WISE != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_PRIEST)
+        {
+                if (PRIEST_MINOR_GLYPH_OF_FADING != glyph && PRIEST_MINOR_GLYPH_OF_LEVITATE != glyph && PRIEST_MINOR_GLYPH_OF_FORTITUDE != glyph && PRIEST_MINOR_GLYPH_OF_SHACKLE_UNDEAD != glyph && PRIEST_MINOR_GLYPH_OF_SHADOW_PROTECTION != glyph && PRIEST_MINOR_GLYPH_OF_SHADOWFIEND != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_ROGUE)
+        {
+                if (ROGUE_MINOR_GLYPH_OF_DISTRACT != glyph && ROGUE_MINOR_GLYPH_OF_PICK_LOCK != glyph && ROGUE_MINOR_GLYPH_OF_PICK_POCKET != glyph && ROGUE_MINOR_GLYPH_OF_SAFE_FALL != glyph && ROGUE_MINOR_GLYPH_OF_BLURRED_SPEED != glyph && ROGUE_MINOR_GLYPH_OF_VANISH != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_SHAMAN)
+        {
+                if (SHAMAN_MINOR_GLYPH_OF_ASTRAL_RECALL != glyph && SHAMAN_MINOR_GLYPH_OF_RENEWED_LIFE != glyph && SHAMAN_MINOR_GLYPH_OF_WATER_BREATHING != glyph && SHAMAN_MINOR_GLYPH_OF_WATER_SHIELD != glyph && SHAMAN_MINOR_GLYPH_OF_WATER_WALKING != glyph && SHAMAN_MINOR_GLYPH_OF_GHOST_WOLF != glyph && SHAMAN_MINOR_GLYPH_OF_THUNDERSTORM != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_WARLOCK)
+        {
+                if (WARLOCK_MINOR_GLYPH_OF_UNENDING_BREATH != glyph && WARLOCK_MINOR_GLYPH_OF_DRAIN_SOUL != glyph && WARLOCK_MINOR_GLYPH_OF_KILROGG != glyph && WARLOCK_MINOR_GLYPH_OF_ENSLAVE_DEMON != glyph && WARLOCK_MINOR_GLYPH_OF_SOULS != glyph)
+                        return false;
+        }
+        else if (charClass == CLASS_WARRIOR)
+        {
+                if (WARRIOR_MINOR_GLYPH_OF_BATTLE != glyph && WARRIOR_MINOR_GLYPH_OF_BLOODRAGE != glyph && WARRIOR_MINOR_GLYPH_OF_CHARGE != glyph && WARRIOR_MINOR_GLYPH_OF_MOCKING_BLOW != glyph && WARRIOR_MINOR_GLYPH_OF_THUNDER_CLAP != glyph && WARRIOR_MINOR_GLYPH_OF_ENDURING_VICTORY != glyph && WARRIOR_MINOR_GLYPH_OF_COMMAND != glyph)
+                        return false;
+        }
+        // pets don't have glyphs... yet
+        else if (charClass == CLASS_PET_CUNNING || charClass == CLASS_PET_FEROCITY || charClass == CLASS_PET_TENACITY)
+        {
+                DEBUG_LOG ("[PlayerbotAI]: Someone tried to validate a glyph for a pet... ValidateMinorGlyph: %u", (uint32)charClass);
+                return false;
+        }
+        else // charClass unknown
+        {
+                DEBUG_LOG ("[PlayerbotAI]: Someone was naughty and supplied an invalid class to ValidateMinorGlyph: %u", (uint32)charClass);
+                return false;
+        }
+
+        return true;
 }
 
 // Build an hlink for spells
@@ -3934,7 +4430,7 @@ void PlayerbotAI::findNearbyCreature()
                                     switch (ait->first)
                                     {
                                         // withdraw items
-                                        case WITHDRAW:
+                                        case BANK_WITHDRAW:
                                         {
                                             // TellMaster("Withdraw items");
                                             if (!Withdraw(ait->second))
@@ -3942,7 +4438,7 @@ void PlayerbotAI::findNearbyCreature()
                                             break;
                                         }
                                         // deposit items
-                                        case DEPOSIT:
+                                        case BANK_DEPOSIT:
                                         {
                                             // TellMaster("Deposit items");
                                             if (!Deposit(ait->second))
@@ -3969,7 +4465,7 @@ void PlayerbotAI::findNearbyCreature()
                                     switch (ait->first)
                                     {
                                         // reset talents
-                                        case RESET:
+                                        case RESET_TALENTS:
                                         {
                                             // TellMaster("Reset all talents");
                                             if (Talent(currCreature))
@@ -3977,14 +4473,14 @@ void PlayerbotAI::findNearbyCreature()
                                             break;
                                         }
                                         // sell items
-                                        case SELL:
+                                        case SELL_ITEMS:
                                         {
                                             // TellMaster("Selling items");
                                             Sell(ait->second);
                                             break;
                                         }
                                         // repair items
-                                        case REPAIR:
+                                        case REPAIR_ITEMS:
                                         {
                                             // TellMaster("Repairing items");
                                             Repair(ait->second, currCreature);
@@ -4005,14 +4501,14 @@ void PlayerbotAI::findNearbyCreature()
                                     switch (ait->first)
                                     {
                                         // add new auction item
-                                        case ADD:
+                                        case ADD_AUCTION:
                                         {
                                             // TellMaster("Creating auction");
                                             AddAuction(ait->second, currCreature);
                                             break;
                                         }
                                         // cancel active auction
-                                        case REMOVE:
+                                        case REMOVE_AUCTION:
                                         {
                                             // TellMaster("Cancelling auction");
                                             if (!RemoveAuction(ait->second))
@@ -4927,7 +5423,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         std::list<uint32> itemIds;
         extractItemIds(text, itemIds);
         for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(SELL, *it));
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(SELL_ITEMS, *it));
         m_findNPC.push_back(VENDOR_MASK);
     }
 
@@ -4949,12 +5445,12 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         extractItemIds(part, itemIds);
         for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
         {
-            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR, *it));
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR_ITEMS, *it));
             m_findNPC.push_back(UNIT_NPC_FLAG_REPAIR);
         }
         if(itemIds.empty() && subcommand == "all")
         {
-            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR, 0));
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR_ITEMS, 0));
             m_findNPC.push_back(UNIT_NPC_FLAG_REPAIR);
         }
     }
@@ -4987,7 +5483,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 std::list<uint32> itemIds;
                 extractItemIds(part, itemIds);
                 for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(ADD, *it));
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(ADD_AUCTION, *it));
                 m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
             }
 
@@ -4996,7 +5492,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 std::list<uint32> auctionIds;
                 extractAuctionIds(part, auctionIds);
                 for (std::list<uint32>::iterator it = auctionIds.begin(); it != auctionIds.end(); ++it)
-                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REMOVE, *it));
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REMOVE_AUCTION, *it));
                 m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
             }
         }
@@ -5032,7 +5528,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 std::list<uint32> itemIds;
                 extractItemIds(part, itemIds);
                 for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(DEPOSIT, *it));
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(BANK_DEPOSIT, *it));
                 m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
             }
 
@@ -5041,7 +5537,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 std::list<uint32> itemIds;
                 extractItemIds(part, itemIds);
                 for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(WITHDRAW, *it));
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(BANK_WITHDRAW, *it));
                 m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
             }
         }
@@ -5053,6 +5549,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     // talent                           -- Lists bot(s) active talents [TALENT LINK] & glyphs [GLYPH LINK], unspent points & cost to reset
     // talent learn [TALENT LINK] ..    -- Learn selected talent from bot client 'inspect' dialog -> 'talent' tab or from talent command (shift click icon/link)
     // talent reset                     -- Resets all talents
+    // talent spec                      -- Lists various talentspecs for this bot's class
+    // talent spec #                    -- Sets talent spec # as active talentspec
+    // talent spec errorcheck           -- Checks TalentSpec database for errors - works only for GMs (Tip: '.gm on')
     else if (text.size() >= 6 && text.substr(0, 6) == "talent")
     {
         std::ostringstream out;
@@ -5067,39 +5566,124 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             subcommand = part.substr(0, part.find(" "));
             if (part.size() > subcommand.size())
                 part = part.substr(subcommand.size() + 1);
+			else
+				part = "";
         }
         else
+		{
             subcommand = part;
+			part = "";
+		}
 
-        if (subcommand == "learn" || subcommand == "reset")
+        if (subcommand == "learn")
         {
-            if(subcommand == "learn")
+            std::list<talentPair>talents;
+            extractTalentIds(part, talents);
+
+            for (std::list<talentPair>::iterator itr = talents.begin(); itr != talents.end(); itr++)
             {
-                std::list<talentPair>talents;
-                extractTalentIds(part, talents);
+                uint32 talentid;
+                uint32 rank;
 
-                for(std::list<talentPair>::iterator itr = talents.begin(); itr != talents.end(); ++itr)
-                {
-                    uint32 talentid;
-                    uint32 rank;
+                talentid = itr->first;
+                rank = itr->second;
 
-                    talentid = itr->first;
-                    rank = itr->second;
-
-                    m_bot->LearnTalent(talentid, ++rank);
-                    m_bot->SendTalentsInfoData(false);
-                    InspectUpdate();
-                }
-                m_bot->MakeTalentGlyphLink(out);
-                SendWhisper(out.str(), fromPlayer);
-
+                m_bot->LearnTalent(talentid, ++rank);
+                m_bot->SendTalentsInfoData(false);
+                InspectUpdate();
             }
-            else if(subcommand == "reset")
+
+			m_bot->MakeTalentGlyphLink(out);
+            SendWhisper(out.str(), fromPlayer);
+        }
+        else if (subcommand == "reset")
+        {
+            m_tasks.push_back(std::pair<enum TaskFlags, uint32>(RESET_TALENTS, 0));
+            m_findNPC.push_back(UNIT_NPC_FLAG_TRAINER_CLASS);
+        }
+		else if (subcommand == "spec")
+        {
+            std::string sub2command = "";
+
+            if (part.find(" ") > 0)  // 'talent spec sub2command rest'
             {
-                m_tasks.push_back(std::pair<enum TaskFlags,uint32>(RESET, 0));
-                m_findNPC.push_back(UNIT_NPC_FLAG_TRAINER_CLASS);
+				sub2command = part.substr(0, part.find(" "));
+				if (part.size() > sub2command.size()) // paranoia: always true (part has at least a space character more)
+					part = part.substr(sub2command.size() + 1);
+				else
+					part = "";
+			}
+			else
+			{
+				sub2command = part;
+				part = "";
+			}
+
+			if (0 == GetTalentSpecsAmount())
+			{
+				TellMaster("Database does not contain any Talent Specs (for any classes).");
+			}
+			else
+			{
+				if (0 >= sub2command.size()) // no spec chosen nor other subcommand
+				{
+					std::list<TalentSpec> classSpecs = GetTalentSpecs((long)m_bot->getClass());
+					std::list<TalentSpec>::iterator it;
+					int count = 0;
+
+					TellMaster("Please select a talent spec to activate (reply 'talent spec #'):");
+					for (it = classSpecs.begin(); it != classSpecs.end(); it++)
+					{
+						count++;
+						// Oops, TellMaster makes bots subject to whisper anti-spam measures
+						//TellMaster("%u. %s", count, it->specName);
+						std::ostringstream oss; // TODO: not very efficient, just not sure how else to clear an ostringstream
+						oss << count << ". " << it->specName;
+						SendWhisper(oss.str(), fromPlayer);
+					}
+					if (count == 0)
+					{
+						TellMaster("Error: No TalentSpecs listed. Specs retrieved from DB for this class: %u", m_bot->getClass());
+					}
+				}
+				else if (sub2command == "errorcheck" && fromPlayer.isGameMaster())
+				{
+					// Creates some (no doubt negligible) strain on system, plus it's server maintenance, only allow GMs or higher. Tip: ".gm on"
+					uint32 tsDBError = TalentSpecDBContainsError();
+					if (0 != tsDBError)
+					{
+						out << "Error found in TalentSpec: " << tsDBError;
+						SendWhisper(out.str(), fromPlayer);
+					}
+					else
+					{
+						out << "No errors found. High five!";
+						SendWhisper(out.str(), fromPlayer);
+					}
+				}
+				else
+				{
+					uint32 chosenSpec = strtoul(sub2command.c_str(),NULL,0); // non-int returns 0; too big returns UINT MAX (or somesuch)
+/*\ REMOVE ME \*/
+std::ostringstream oss;
+oss << "chosenSpec: " << chosenSpec << "; sub2c: " << sub2command << "; part: " << part << "; TSAmt(class= '" << (long)m_bot->getClass() << "' ): " << GetTalentSpecsAmount((long)m_bot->getClass());
+SendWhisper(oss.str(), fromPlayer);
+/*\ REMOVE ME \*/
+
+					if (0 >= chosenSpec || chosenSpec > GetTalentSpecsAmount((long)m_bot->getClass()))
+					{
+						TellMaster("The talent spec you have chosen is invalid. Please select one from the valid range (reply 'talent spec' for options).");
+					}
+					else
+					{
+						TellMaster("At this point the TalentSpec should activate. We just haven't gotten around to coding that part yet.");
+						// big TODO: actually implement this
+						// m_activeTalentSpec = GetTalentSpecs().at(chosenSpec); ... or at least something like that.
+					}
+                }
             }
         }
+        // no valid subcommand found for command 'talent'
         else
         {
             uint32 gold = uint32(m_bot->resetTalentsCost()/ 10000);

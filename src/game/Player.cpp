@@ -13408,7 +13408,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                     if(!(m_session->GetSecurity() > SEC_PLAYER))
                         if(acctcharcount > maxnum)
                         {
-                            ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon anymore bots.(Current Max: |cffffffff%u)",maxnum);
+                            ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon anymore bots. (Current Max: |cffffffff%u|cffff0000)",maxnum);
                             delete resultchar;
                             break;
                         }
@@ -13424,7 +13424,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                     if(!(m_session->GetSecurity() > SEC_PLAYER))
                         if(charlvl > maxlvl)
                         {
-                            ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high.(Current Max:lvl |cffffffff%u)",fields[1].GetString(),maxlvl);
+                            ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high. (Current Max:lvl |cffffffff%u|cffff0000)",fields[1].GetString(),maxlvl);
                             delete resultlvl;
                             break;
                         }

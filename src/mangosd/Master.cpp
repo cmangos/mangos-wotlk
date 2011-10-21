@@ -477,6 +477,14 @@ bool Master::_StartDB()
         return false;
     }
 
+    if(!CharacterDatabase.CheckRequiredField("playerbotai_db_version",REVISION_DB_PLAYERBOTAI))
+    {
+        ///- Wait for already started DB delay threads to end
+        WorldDatabase.HaltDelayThread();
+        CharacterDatabase.HaltDelayThread();
+        return false;
+    }
+
     ///- Get login database info from configuration file
     dbstring = sConfig.GetStringDefault("LoginDatabaseInfo", "");
     nConnections = sConfig.GetIntDefault("LoginDatabaseConnections", 1);

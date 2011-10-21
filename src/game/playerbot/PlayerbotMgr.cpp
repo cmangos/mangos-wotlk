@@ -6,7 +6,6 @@
 #include "../Chat.h"
 #include "../ObjectMgr.h"
 #include "../GossipDef.h"
-#include "../Chat.h"
 #include "../Language.h"
 #include "../WaypointMovementGenerator.h"
 
@@ -541,6 +540,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             }
             return;
         }
+
         // Handle GOSSIP activate actions, prior to GOSSIP select menu actions
         case CMSG_GOSSIP_HELLO:
         {
@@ -733,8 +733,6 @@ void PlayerbotMgr::LogoutAllBots()
     }
 }
 
-
-
 void PlayerbotMgr::Stay()
 {
     for (PlayerBotMap::const_iterator itr = GetPlayerBotsBegin(); itr != GetPlayerBotsEnd(); ++itr)
@@ -743,7 +741,6 @@ void PlayerbotMgr::Stay()
         bot->GetMotionMaster()->Clear();
     }
 }
-
 
 // Playerbot mod: logs out a Playerbot.
 void PlayerbotMgr::LogoutPlayerBot(ObjectGuid guid)
@@ -896,7 +893,7 @@ void Player::MakeTalentGlyphLink(std::ostringstream &out)
                     if(talent.talentEntry->TalentTab != talentTabId)
                         continue;
 
-                    TalentEntry const *talentInfo = sTalentStore.LookupEntry( talent.talentEntry->TalentID );
+                    TalentEntry const* talentInfo = sTalentStore.LookupEntry(talent.talentEntry->TalentID);
 
                     SpellEntry const* spell_entry = sSpellStore.LookupEntry(talentInfo->RankID[talent.currentRank]);
 
@@ -941,15 +938,15 @@ void Player::chompAndTrim(std::string& str)
             str = str.substr(0, str.length() - 1);
         else
             break;
-        while (str.length() > 0)
-        {
-            char lc = str[0];
-            if (lc == ' ' || lc == '"' || lc == '\'')
-                str = str.substr(1, str.length() - 1);
-            else
-                break;
-        }
     }
+	while (str.length() > 0)
+	{
+		char lc = str[0];
+		if (lc == ' ' || lc == '"' || lc == '\'')
+			str = str.substr(1, str.length() - 1);
+		else
+			break;
+	}
 }
 
 bool Player::getNextQuestId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId)
