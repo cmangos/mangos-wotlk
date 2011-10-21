@@ -564,6 +564,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             }
             return;
         }
+
         // Handle GOSSIP activate actions, prior to GOSSIP select menu actions
         case CMSG_GOSSIP_HELLO:
         {
@@ -756,8 +757,6 @@ void PlayerbotMgr::LogoutAllBots()
     }
 }
 
-
-
 void PlayerbotMgr::Stay()
 {
     for (PlayerBotMap::const_iterator itr = GetPlayerBotsBegin(); itr != GetPlayerBotsEnd(); ++itr)
@@ -766,7 +765,6 @@ void PlayerbotMgr::Stay()
         bot->GetMotionMaster()->Clear();
     }
 }
-
 
 // Playerbot mod: logs out a Playerbot.
 void PlayerbotMgr::LogoutPlayerBot(ObjectGuid guid)
@@ -808,7 +806,18 @@ void PlayerbotMgr::OnBotLogin(Player * const bot)
     const ObjectGuid masterGuid = m_master->GetObjectGuid();
     if (m_master->GetGroup() &&
         !m_master->GetGroup()->IsLeader(masterGuid))
-        m_master->GetGroup()->ChangeLeader(masterGuid);
+        {
+                // But only do so if one of the master's bots is leader
+                for (PlayerBotMap::const_iterator itr = GetPlayerBotsBegin(); itr != GetPlayerBotsEnd(); itr++)
+                {
+                        Player* bot = itr->second;
+                        if ( m_master->GetGroup()->IsLeader(bot->GetObjectGuid()) )
+                        {
+                                m_master->GetGroup()->ChangeLeader(masterGuid);
+                                break;
+                        }
+                }
+        }
 }
 
 void PlayerbotMgr::RemoveAllBotsFromGroup()
@@ -880,7 +889,6 @@ void Player::skill(std::list<uint32>& m_spellsToLearn)
 
 void Player::MakeTalentGlyphLink(std::ostringstream &out)
 {
-
     // |cff4e96f7|Htalent:1396:4|h[Unleashed Fury]|h|r
     // |cff66bbff|Hglyph:23:460|h[Glyph of Fortitude]|h|r
 
@@ -907,7 +915,7 @@ void Player::MakeTalentGlyphLink(std::ostringstream &out)
                     if (talent.talentEntry->TalentTab != talentTabId)
                         continue;
 
-                    TalentEntry const *talentInfo = sTalentStore.LookupEntry(talent.talentEntry->TalentID);
+                    TalentEntry const* talentInfo = sTalentStore.LookupEntry( talent.talentEntry->TalentID );
 
                     SpellEntry const* spell_entry = sSpellStore.LookupEntry(talentInfo->RankID[talent.currentRank]);
 
@@ -951,14 +959,15 @@ void Player::chompAndTrim(std::string& str)
             str = str.substr(0, str.length() - 1);
         else
             break;
-        while (str.length() > 0)
-        {
-            char lc = str[0];
-            if (lc == ' ' || lc == '"' || lc == '\'')
-                str = str.substr(1, str.length() - 1);
-            else
-                break;
-        }
+    }
+
+    while (str.length() > 0)
+    {
+        char lc = str[0];
+        if (lc == ' ' || lc == '"' || lc == '\'')
+            str = str.substr(1, str.length() - 1);
+        else
+            break;
     }
 }
 

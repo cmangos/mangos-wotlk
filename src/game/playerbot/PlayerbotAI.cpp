@@ -2859,23 +2859,38 @@ void PlayerbotAI::MovementReset()
 
     if (m_movementOrder == MOVEMENT_FOLLOW)
     {
-        if (!m_followTarget) return;
-
-        // target player is teleporting...
-        if (m_followTarget->GetTypeId() == TYPEID_PLAYER && ((Player *) m_followTarget)->IsBeingTeleported())
+        if (!m_followTarget)
             return;
 
-        // check if bot needs to teleport to reach target...
-        if (!m_bot->isInCombat())
+        WorldObject* distTarget = m_followTarget;   // target to distance check
+
+        // don't follow while in combat
+        if (m_bot->isInCombat())
+            return;
+
+        Player* pTarget;                            // target is player
+        if (m_followTarget->GetTypeId() == TYPEID_PLAYER)
+            pTarget = ((Player*) m_followTarget);
+
+        if (pTarget)
         {
-            if (m_followTarget->GetTypeId() == TYPEID_PLAYER && ((Player *) m_followTarget)->GetCorpse())
-            {
-                if (!FollowCheckTeleport(*((Player *) m_followTarget)->GetCorpse())) return;
-            }
-            else if (!FollowCheckTeleport(*m_followTarget)) return;
+            // check player for follow situations
+            if (pTarget->IsBeingTeleported() || pTarget->IsTaxiFlying())
+                return;
+
+            // use player's corpse as distance check target
+            if (pTarget->GetCorpse())
+                distTarget = pTarget->GetCorpse();
         }
 
-        if (m_bot->isAlive())
+        // is bot too far from the follow target
+        if (!m_bot->IsWithinDistInMap(distTarget, 50))
+        {
+            DoTeleport(*m_followTarget);
+            return;
+        }
+
+        if (m_bot->isAlive() && !m_bot->IsBeingTeleported())
         {
             float angle = rand_float(0, M_PI_F);
             float dist = rand_float(m_mgr->m_confFollowDistance[0], m_mgr->m_confFollowDistance[1]);
@@ -3062,7 +3077,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
                 return;
             // teleport ghost from graveyard to corpse
             // DEBUG_LOG ("[PlayerbotAI]: UpdateAI - Teleport %s to corpse...", m_bot->GetName() );
-            FollowCheckTeleport(*corpse);
+            DoTeleport(*corpse);
             // check if we are allowed to resurrect now
             if (corpse->GetGhostTime() + m_bot->GetCorpseReclaimDelay(corpse->GetType() == CORPSE_RESURRECTABLE_PVP) > time(0))
             {
@@ -3256,7 +3271,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
     if (!pSpellInfo)
     {
-        TellMaster("missing spell entry in CastSpell for spellid %u.", spellId);
+        TellMaster("Missing spell entry in CastSpell for spellid %u.", spellId);
         return false;
     }
 
@@ -3287,7 +3302,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     if (castTimeEntry && castTimeEntry->CastTime)
     {
         CastTime = (castTimeEntry->CastTime / 1000);
-        DEBUG_LOG ("[PLayerbotAI]: CastSpell - Bot movement reset for casting %s (%u)", pSpellInfo->SpellName[0], spellId);
+        DEBUG_LOG ("[PlayerbotAI]: CastSpell - Bot movement reset for casting %s (%u)", pSpellInfo->SpellName[0], spellId);
         m_bot->StopMoving();
     }
 
@@ -3628,72 +3643,6 @@ Item* PlayerbotAI::FindBombForLockValue(uint32 reqSkillValue)
         return m_bot->GetItemByEntry(ELEMENTAL_SEAFORIUM_CHARGE);
 
     return NULL;
-}
-
-bool PlayerbotAI::PickPocket(Unit* pTarget)
-{
-    if(!pTarget)
-        return false;
-
-    bool looted = false;
-
-    ObjectGuid markGuid = pTarget->GetObjectGuid();
-    Creature *c = m_bot->GetMap()->GetCreature(markGuid);
-    if(c)
-    {
-        m_bot->SendLoot(markGuid, LOOT_PICKPOCKETING);
-        Loot *loot = &c->loot;
-        uint32 lootNum = loot->GetMaxSlotInLootFor(m_bot);
-
-        if (m_mgr->m_confDebugWhisper)
-        {
-            std::ostringstream out;
-
-            // calculate how much money bot loots
-            uint32 copper = loot->gold;
-            uint32 gold = uint32(copper / 10000);
-            copper -= (gold * 10000);
-            uint32 silver = uint32(copper / 100);
-            copper -= (silver * 100);
-
-            out << "|r|cff009900" << m_bot->GetName() << " loots: " << "|h|cffffffff[|r|cff00ff00" << gold
-                << "|r|cfffffc00g|r|cff00ff00" << silver
-                << "|r|cffcdcdcds|r|cff00ff00" << copper
-                << "|r|cff993300c"
-                << "|h|cffffffff]";
-
-            TellMaster(out.str().c_str());
-        }
-
-        if (loot->gold)
-        {
-            m_bot->ModifyMoney(loot->gold);
-            m_bot->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, loot->gold);
-            loot->gold = 0;
-            loot->NotifyMoneyRemoved();
-        }
-
-        for (uint32 l = 0; l < lootNum; l++)
-        {
-            QuestItem *qitem = 0, *ffaitem = 0, *conditem = 0;
-            LootItem *item = loot->LootItemInSlot(l, m_bot, &qitem, &ffaitem, &conditem);
-            if (!item)
-                continue;
-
-            ItemPosCountVec dest;
-            if (m_bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item->itemid, item->count) == EQUIP_ERR_OK)
-            {
-                Item* pItem = m_bot->StoreNewItem (dest, item->itemid, true, item->randomPropertyId);
-                m_bot->SendNewItem(pItem, uint32(item->count), false, false, true);
-                --loot->unlootedCount;
-                looted = true;
-            }
-        }
-        // release loot
-        if (looted)
-            m_bot->GetSession()->DoLootRelease(markGuid);
-    }
-    return false; // ensures that the rogue only pick pockets target once
 }
 
 bool PlayerbotAI::HasTool(uint32 TC)
@@ -4242,7 +4191,7 @@ void PlayerbotAI::findNearbyCreature()
     {
         Creature* currCreature = *iter;
 
-        for (std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end(); itr++)
+        for (std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end(); itr = m_findNPC.erase(itr))
         {
             uint32 npcflags = currCreature->GetUInt32Value(UNIT_NPC_FLAGS);
 
@@ -4287,12 +4236,12 @@ void PlayerbotAI::findNearbyCreature()
                         {
                             // Manage banking actions
                             if (!m_tasks.empty())
-                                for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); )
+                                for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
                                     switch (ait->first)
                                     {
                                         // withdraw items
-                                        case WITHDRAW:
+                                        case BANK_WITHDRAW:
                                         {
                                             // TellMaster("Withdraw items");
                                             if (!Withdraw(ait->second))
@@ -4300,7 +4249,7 @@ void PlayerbotAI::findNearbyCreature()
                                             break;
                                         }
                                         // deposit items
-                                        case DEPOSIT:
+                                        case BANK_DEPOSIT:
                                         {
                                             // TellMaster("Deposit items");
                                             if (!Deposit(ait->second))
@@ -4310,7 +4259,6 @@ void PlayerbotAI::findNearbyCreature()
                                         default:
                                             break;
                                     }
-                                    ait = m_tasks.erase(ait);
                                 }
                             BankBalance();
                             break;
@@ -4323,12 +4271,12 @@ void PlayerbotAI::findNearbyCreature()
                         {
                             // Manage questgiver, trainer, innkeeper & vendor actions
                             if (!m_tasks.empty())
-                                for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); )
+                                for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
                                     switch (ait->first)
                                     {
                                         // reset talents
-                                        case RESET:
+                                        case RESET_TALENTS:
                                         {
                                             // TellMaster("Reset all talents");
                                             if (Talent(currCreature))
@@ -4336,7 +4284,7 @@ void PlayerbotAI::findNearbyCreature()
                                             break;
                                         }
                                         // take new quests
-                                        case TAKE:
+                                        case TAKE_QUEST:
                                         {
                                             // TellMaster("Accepting quest");
                                             if (!AddQuest(ait->second, wo))
@@ -4344,28 +4292,28 @@ void PlayerbotAI::findNearbyCreature()
                                             break;
                                         }
                                         // list npc quests
-                                        case LIST:
+                                        case LIST_QUEST:
                                         {
                                             // TellMaster("Show available npc quests");
                                             ListQuests(wo);
                                             break;
                                         }
                                         // end quests
-                                        case END:
+                                        case END_QUEST:
                                         {
                                             // TellMaster("Turn in available quests");
                                             TurnInQuests(wo);
                                             break;
                                         }
                                         // sell items
-                                        case SELL:
+                                        case SELL_ITEMS:
                                         {
                                             // TellMaster("Selling items");
                                             Sell(ait->second);
                                             break;
                                         }
                                         // repair items
-                                        case REPAIR:
+                                        case REPAIR_ITEMS:
                                         {
                                             // TellMaster("Repairing items");
                                             Repair(ait->second, currCreature);
@@ -4374,7 +4322,6 @@ void PlayerbotAI::findNearbyCreature()
                                         default:
                                             break;
                                     }
-                                    ait = m_tasks.erase(ait);
                                 }
                             break;
                         }
@@ -4382,19 +4329,19 @@ void PlayerbotAI::findNearbyCreature()
                         {
                             // Manage auctioneer actions
                             if (!m_tasks.empty())
-                                for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); )
+                                for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
                                     switch (ait->first)
                                     {
                                         // add new auction item
-                                        case ADD:
+                                        case ADD_AUCTION:
                                         {
                                             // TellMaster("Creating auction");
                                             AddAuction(ait->second, currCreature);
                                             break;
                                         }
                                         // cancel active auction
-                                        case REMOVE:
+                                        case REMOVE_AUCTION:
                                         {
                                             // TellMaster("Cancelling auction");
                                             if (!RemoveAuction(ait->second))
@@ -4404,7 +4351,6 @@ void PlayerbotAI::findNearbyCreature()
                                         default:
                                             break;
                                     }
-                                    ait = m_tasks.erase(ait);
                                 }
                             ListAuctions();
                             break;
@@ -4415,7 +4361,6 @@ void PlayerbotAI::findNearbyCreature()
                     m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
                 }
             }
-            itr = m_findNPC.erase(itr); // all done lets go home
             m_bot->GetMotionMaster()->Clear();
             m_bot->GetMotionMaster()->MoveIdle();
         }
@@ -4678,20 +4623,15 @@ bool PlayerbotAI::TradeCopper(uint32 copper)
     return false;
 }
 
-bool PlayerbotAI::FollowCheckTeleport(WorldObject &obj)
+bool PlayerbotAI::DoTeleport(WorldObject &obj)
 {
-    // if bot has strayed too far from the master, teleport bot
-
-    if (!m_bot->IsWithinDistInMap(&obj, 50, true) && GetMaster()->isAlive() && !GetMaster()->IsTaxiFlying())
+    m_ignoreAIUpdatesUntilTime = time(0) + 6;
+    PlayerbotChatHandler ch(GetMaster());
+    if (!ch.teleport(*m_bot))
     {
-        m_ignoreAIUpdatesUntilTime = time(0) + 6;
-        PlayerbotChatHandler ch(GetMaster());
-        if (!ch.teleport(*m_bot))
-        {
-            ch.sysmessage(".. could not be teleported ..");
-            // DEBUG_LOG ("[PlayerbotAI]: FollowCheckTeleport - %s failed to teleport", m_bot->GetName() );
-            return false;
-        }
+        ch.sysmessage(".. could not be teleported ..");
+        // DEBUG_LOG ("[PlayerbotAI]: DoTeleport - %s failed to teleport", m_bot->GetName() );
+        return false;
     }
     return true;
 }
@@ -5445,8 +5385,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
         std::list<uint32> itemIds;
         extractItemIds(text, itemIds);
-        for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); it++)
-            m_tasks.push_back(std::pair<enum TaskFlags, uint32>(SELL, *it));
+        for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(SELL_ITEMS, *it));
         m_findNPC.push_back(VENDOR_MASK);
     }
 
@@ -5468,12 +5408,12 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         extractItemIds(part, itemIds);
         for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); it++)
         {
-            m_tasks.push_back(std::pair<enum TaskFlags, uint32>(REPAIR, *it));
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR_ITEMS, *it));
             m_findNPC.push_back(UNIT_NPC_FLAG_REPAIR);
         }
         if (itemIds.empty() && subcommand == "all")
         {
-            m_tasks.push_back(std::pair<enum TaskFlags, uint32>(REPAIR, 0));
+            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR_ITEMS, 0));
             m_findNPC.push_back(UNIT_NPC_FLAG_REPAIR);
         }
     }
@@ -5505,8 +5445,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             {
                 std::list<uint32> itemIds;
                 extractItemIds(part, itemIds);
-                for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); it++)
-                    m_tasks.push_back(std::pair<enum TaskFlags, uint32>(ADD, *it));
+                for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(ADD_AUCTION, *it));
                 m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
             }
 
@@ -5514,8 +5454,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             {
                 std::list<uint32> auctionIds;
                 extractAuctionIds(part, auctionIds);
-                for (std::list<uint32>::iterator it = auctionIds.begin(); it != auctionIds.end(); it++)
-                    m_tasks.push_back(std::pair<enum TaskFlags, uint32>(REMOVE, *it));
+                for (std::list<uint32>::iterator it = auctionIds.begin(); it != auctionIds.end(); ++it)
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REMOVE_AUCTION, *it));
                 m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
             }
         }
@@ -5550,8 +5490,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             {
                 std::list<uint32> itemIds;
                 extractItemIds(part, itemIds);
-                for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); it++)
-                    m_tasks.push_back(std::pair<enum TaskFlags, uint32>(DEPOSIT, *it));
+                for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(BANK_DEPOSIT, *it));
                 m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
             }
 
@@ -5559,8 +5499,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             {
                 std::list<uint32> itemIds;
                 extractItemIds(part, itemIds);
-                for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); it++)
-                    m_tasks.push_back(std::pair<enum TaskFlags, uint32>(WITHDRAW, *it));
+                for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+                    m_tasks.push_back(std::pair<enum TaskFlags,uint32>(BANK_WITHDRAW, *it));
                 m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
             }
         }
@@ -5615,7 +5555,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             }
             else if (subcommand == "reset")
             {
-                m_tasks.push_back(std::pair<enum TaskFlags, uint32>(RESET, 0));
+                m_tasks.push_back(std::pair<enum TaskFlags,uint32>(RESET_TALENTS, 0));
                 m_findNPC.push_back(UNIT_NPC_FLAG_TRAINER_CLASS);
             }
         }
@@ -5848,7 +5788,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             std::list<uint32> questIds;
             extractQuestIds(part, questIds);
             for (std::list<uint32>::iterator it = questIds.begin(); it != questIds.end(); it++)
-                m_tasks.push_back(std::pair<enum TaskFlags, uint32>(TAKE, *it));
+                m_tasks.push_back(std::pair<enum TaskFlags, uint32>(TAKE_QUEST, *it));
             m_findNPC.push_back(UNIT_NPC_FLAG_QUESTGIVER);
         }
         else if (subcommand == "d" || subcommand == "drop")
@@ -5867,12 +5807,12 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         }
         else if (subcommand == "l" || subcommand == "list")
         {
-            m_tasks.push_back(std::pair<enum TaskFlags, uint32>(LIST, 0));
+            m_tasks.push_back(std::pair<enum TaskFlags, uint32>(LIST_QUEST, 0));
             m_findNPC.push_back(UNIT_NPC_FLAG_QUESTGIVER);
         }
         else if (subcommand == "e" || subcommand == "end")
         {
-            m_tasks.push_back(std::pair<enum TaskFlags, uint32>(END, 0));
+            m_tasks.push_back(std::pair<enum TaskFlags, uint32>(END_QUEST, 0));
             m_findNPC.push_back(UNIT_NPC_FLAG_QUESTGIVER);
         }
         else

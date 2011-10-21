@@ -155,8 +155,9 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     {
         case RogueStealth:
             out << "Case Stealth";
-            if (PICK_POCKET > 0 && ai->CastSpell(PICK_POCKET, *pTarget) && ai->PickPocket(pTarget))
-                out << "First > Pick Pocket";  // Should never display, as PickPocket will always return false
+            if (PICK_POCKET > 0 && (pTarget->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) != 0 &&
+                !((Creature*)pTarget)->lootForPickPocketed && ai->CastSpell(PICK_POCKET, *pTarget))
+                out << " > Pick Pocket";
             else if (PREMEDITATION > 0 && ai->CastSpell(PREMEDITATION, *pTarget))
                 out << " > Premeditation";
             else if (AMBUSH > 0 && ai->GetEnergyAmount() >= 60 && ai->CastSpell(AMBUSH, *pTarget))

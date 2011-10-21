@@ -31,9 +31,9 @@ public:
     virtual bool BuffPlayer(Player* target);
 
     // Utilities
-    Player* GetMaster () { return m_master; }
+    Player* GetMaster() { return m_master; }
     Player* GetPlayerBot() { return m_bot; }
-    PlayerbotAI* GetAI (){ return m_ai; };
+    PlayerbotAI* GetAI() { return m_ai; };
 
 
 private:

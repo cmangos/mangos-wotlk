@@ -93,7 +93,7 @@ public:
         COMBAT_RANGED               = 0x02              // class is ranged attacker
     };
 
-    // masters orders that should be obeyed by the AI during the updteAI routine
+    // masters orders that should be obeyed by the AI during the updateAI routine
     // the master will auto set the target of the bot
     enum CombatOrderType
     {
@@ -144,16 +144,16 @@ public:
     enum TaskFlags
     {
         NONE                        = 0x00,  // do nothing
-        SELL                        = 0x01,  // sell items
-        REPAIR                      = 0x02,  // repair items
-        ADD                         = 0x03,  // add auction
-        REMOVE                      = 0x04,  // remove auction
-        RESET                       = 0x05,  // reset all talents
-        WITHDRAW                    = 0x06,  // withdraw item from bank
-        DEPOSIT                     = 0x07,  // deposit item in bank
-        LIST                        = 0x08,  // list quests
-        END                         = 0x09,  // turn in quests
-        TAKE                        = 0x0A   // take quest
+        SELL_ITEMS                  = 0x01,  // sell items
+        REPAIR_ITEMS                = 0x02,  // repair items
+        ADD_AUCTION                 = 0x03,  // add auction
+        REMOVE_AUCTION              = 0x04,  // remove auction
+        RESET_TALENTS               = 0x05,  // reset all talents
+        BANK_WITHDRAW               = 0x06,  // withdraw item from bank
+        BANK_DEPOSIT                = 0x07   // deposit item in bank
+        LIST_QUEST                  = 0x08,  // list quests
+        END_QUEST                   = 0x09,  // turn in quests
+        TAKE_QUEST                  = 0x0A   // take quest
     };
 
     enum AnnounceFlags
@@ -279,7 +279,6 @@ public:
 
     bool CanReceiveSpecificSpell(uint8 spec, Unit* target) const;
 
-    bool PickPocket(Unit* pTarget);
     bool HasTool(uint32 TC);
     bool HasSpellReagents(uint32 spellId);
 
@@ -355,7 +354,7 @@ public:
     bool IsInQuestCreatureList(uint32 id) { return m_needCreatureOrGOList.find(id) != m_needCreatureOrGOList.end(); };
     bool IsItemUseful(uint32 itemid);
     void SendOrders(Player& player);
-    bool FollowCheckTeleport(WorldObject &obj);
+    bool DoTeleport(WorldObject &obj);
     void DoLoot();
     void DoFlight();
     void GetTaxi(ObjectGuid guid, BotTaxiNode& nodes);

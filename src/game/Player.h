@@ -1064,13 +1064,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         Creature* GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask);
         GameObject* GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameobject_type = MAX_GAMEOBJECT_TYPE) const;
 
-        bool ToggleAFK();
-        bool ToggleDND();
+        void ToggleAFK();
+        void ToggleDND();
         bool isAFK() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK); }
         bool isDND() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND); }
         uint8 chatTag() const;
-        std::string afkMsg;
-        std::string dndMsg;
+        std::string autoReplyMsg;
 
         uint32 GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 newfacialhair);
 
@@ -1303,6 +1302,10 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_stableSlots;
 
+        uint32 GetEquipGearScore(bool withBags = true, bool withBank = false);
+        void ResetCachedGearScore() { m_cachedGS = 0; }
+        typedef std::vector<uint32/*item level*/> GearScoreVec;
+
         /*********************************************************/
         /***                    GOSSIP SYSTEM                  ***/
         /*********************************************************/
@@ -1325,7 +1328,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         void PrepareQuestMenu(ObjectGuid guid );
         void SendPreparedQuest(ObjectGuid guid);
         bool IsActiveQuest( uint32 quest_id ) const;        // can be taken or taken
-        bool IsCurrentQuest( uint32 quest_id ) const;       // taken and not yet rewarded
+
+        // Quest is taken and not yet rewarded
+        // if completed_or_not = 0 (or any other value except 1 or 2) - returns true, if quest is taken and doesn't depend if quest is completed or not
+        // if completed_or_not = 1 - returns true, if quest is taken but not completed
+        // if completed_or_not = 2 - returns true, if quest is taken and already completed
+        bool IsCurrentQuest(uint32 quest_id, uint8 completed_or_not = 0) const; // taken and not yet rewarded
+
         Quest const *GetNextQuest(ObjectGuid guid, Quest const *pQuest );
         bool CanSeeStartQuest( Quest const *pQuest ) const;
         bool CanTakeQuest( Quest const *pQuest, bool msg ) const;
@@ -1827,6 +1836,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void DestroyForPlayer( Player *target, bool anim = false ) const;
         void SendLogXPGain(uint32 GivenXP,Unit* victim,uint32 RestXP);
 
+        uint8 LastSwingErrorMsg() const { return m_swingErrorMsg; }
+        void SwingErrorMsg(uint8 val) { m_swingErrorMsg = val; }
+
         // notifiers
         void SendAttackSwingCantAttack();
         void SendAttackSwingCancelAttack();
@@ -2003,7 +2015,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CastItemUseSpell(Item *item,SpellCastTargets const& targets,uint8 cast_count, uint32 glyphIndex);
 
         void ApplyItemOnStoreSpell(Item *item, bool apply);
-        void DestroyItemWithOnStoreSpell(Item* item);
+        void DestroyItemWithOnStoreSpell(Item* item, uint32 spellId);
 
         void SendEquipmentSetList();
         void SetEquipmentSet(uint32 index, EquipmentSet eqset);
@@ -2604,6 +2616,8 @@ class MANGOS_DLL_SPEC Player : public Unit
                 m_DelayedOperations |= operation;
         }
 
+        void _fillGearScoreData(Item* item, GearScoreVec* gearScore, uint32& twoHandScore);
+
         Unit *m_mover;
         Camera m_camera;
 
@@ -2652,6 +2666,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_timeSyncTimer;
         uint32 m_timeSyncClient;
         uint32 m_timeSyncServer;
+
+        uint32 m_cachedGS;
 };
 
 void AddItemsSetItem(Player*player,Item *item);
