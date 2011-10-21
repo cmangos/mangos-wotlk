@@ -683,6 +683,7 @@ bool IsPositiveEffect(SpellEntry const *spellproto, SpellEffectIndex effIndex)
         case SPELL_EFFECT_SKILL_STEP:
         case SPELL_EFFECT_HEAL_PCT:
         case SPELL_EFFECT_ENERGIZE_PCT:
+        case SPELL_EFFECT_QUEST_COMPLETE:
             return true;
 
             // non-positive aura use
@@ -1914,6 +1915,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Personalized Weather (thunder effect should overwrite rainy aura)
                     if (spellInfo_1->SpellIconID == 2606 && spellInfo_2->SpellIconID == 2606)
                         return false;
+
+                    // Mirrored Soul (FoS - Devourer) - and other Boss spells
+                    if (spellInfo_1->SpellIconID == 3176 && spellInfo_2->SpellIconID == 3176)
+                        return false;
+
 
                     // Brood Affliction: Bronze
                     if ((spellInfo_1->Id == 23170 && spellInfo_2->Id == 23171) ||
