@@ -938,14 +938,15 @@ void Player::chompAndTrim(std::string& str)
             str = str.substr(0, str.length() - 1);
         else
             break;
-        while (str.length() > 0)
-        {
-            char lc = str[0];
-            if (lc == ' ' || lc == '"' || lc == '\'')
-                str = str.substr(1, str.length() - 1);
-            else
-                break;
-        }
+    }
+
+	while (str.length() > 0)
+    {
+        char lc = str[0];
+        if (lc == ' ' || lc == '"' || lc == '\'')
+            str = str.substr(1, str.length() - 1);
+        else
+            break;
     }
 }
 
