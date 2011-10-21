@@ -93,7 +93,7 @@ public:
         COMBAT_RANGED               = 0x02              // class is ranged attacker
     };
 
-    // masters orders that should be obeyed by the AI during the updteAI routine
+    // masters orders that should be obeyed by the AI during the updateAI routine
     // the master will auto set the target of the bot
     enum CombatOrderType
     {
@@ -157,7 +157,7 @@ public:
     typedef std::list<taskPair> BotTaskList;
     typedef std::list<enum NPCFlags> BotNPCList;
     typedef std::map<uint32, uint32> BotNeedItem;
-    typedef std::pair<uint32,uint32>talentPair;
+    typedef std::pair<uint32,uint32> talentPair;
     typedef std::list<ObjectGuid> BotLootTarget;
     typedef std::list<uint32> BotLootEntry;
     typedef std::list<uint32> BotSpellList;

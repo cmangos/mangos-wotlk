@@ -3019,7 +3019,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
     if (!pSpellInfo)
     {
-        TellMaster("missing spell entry in CastSpell for spellid %u.", spellId);
+        TellMaster("Missing spell entry in CastSpell for spellid %u.", spellId);
         return false;
     }
 
@@ -3060,7 +3060,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     SpellCastTimesEntry const * castTimeEntry = sSpellCastTimesStore.LookupEntry(pSpellInfo->CastingTimeIndex);
     if (castTimeEntry && castTimeEntry->CastTime)
     {
-        DEBUG_LOG ("[PLayerbotAI]: CastSpell - Bot movement reset for casting %s (%u)", pSpellInfo->SpellName[0], spellId);
+        DEBUG_LOG ("[PlayerbotAI]: CastSpell - Bot movement reset for casting %s (%u)", pSpellInfo->SpellName[0], spellId);
         MovementClear();
     }
 

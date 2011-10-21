@@ -31,7 +31,7 @@ public:
 
     void AddPlayerBot(ObjectGuid guid);
     void LogoutPlayerBot(ObjectGuid guid);
-    Player* GetPlayerBot (ObjectGuid guid) const;
+    Player* GetPlayerBot(ObjectGuid guid) const;
     Player* GetMaster() const { return m_master; };
     PlayerBotMap::const_iterator GetPlayerBotsBegin() const { return m_playerBots.begin(); }
     PlayerBotMap::const_iterator GetPlayerBotsEnd()   const { return m_playerBots.end();   }
