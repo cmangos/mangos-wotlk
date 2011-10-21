@@ -1612,6 +1612,9 @@ public:
     uint32 GetTalentSpecsAmount();
     uint32 GetTalentSpecsAmount(long specClass);
     std::list<TalentSpec> GetTalentSpecs(long specClass);
+    TalentSpec GetTalentSpec(long specClass, long choice);
+    TalentSpec GetActiveTalentSpec() { return m_activeTalentSpec; }
+    void SetActiveTalentSpec(TalentSpec ts) { m_activeTalentSpec = ts; }
 
     void MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out, Player* player = NULL);
 
@@ -1777,6 +1780,8 @@ private:
     CombatStyle m_combatStyle;
     CombatOrderType m_combatOrder;
     MovementOrderType m_movementOrder;
+
+    TalentSpec m_activeTalentSpec;
 
     ScenarioType m_ScenarioType;
 

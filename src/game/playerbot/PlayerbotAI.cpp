@@ -3631,52 +3631,148 @@ std::list<TalentSpec> PlayerbotAI::GetTalentSpecs(long specClass)
 
     do
     {
-                /* 0			talentspec_id
-                   1			name
-                   2			class
-                   3			purpose
-                   4 to 74		talent_10 to 71
-                   75 to 80		major_glyph_15, 30, 80, minor_glyph_15, 50, 70
-                */
+        /* 0			talentspec_id
+        1			name
+        2			class
+        3			purpose
+        4 to 74		talent_10 to 71
+        75 to 80		major_glyph_15, 30, 80, minor_glyph_15, 50, 70
+        */
         Field* fields = result->Fetch();
 
         /* ts_id = fields[0].GetUInt32(); // not used
         if (!ts_id)    // Nice bit of paranoia: ts_id is an AUTO_INCREMENT value
-            continue;  // Of course, if the impossible ever does happen, we can't very well identify a TalentSpec without an ID...
-                */
+        continue;  // Of course, if the impossible ever does happen, we can't very well identify a TalentSpec without an ID...
+        */
 
-                ts.specName = fields[1].GetCppString();
-                ts.specClass = fields[2].GetInt16();
-                if (ts.specClass != CLASS_DEATH_KNIGHT && ts.specClass != CLASS_DRUID && ts.specClass != CLASS_HUNTER && ts.specClass != CLASS_MAGE && ts.specClass != CLASS_PALADIN && ts.specClass != CLASS_PRIEST && ts.specClass != CLASS_ROGUE && ts.specClass != CLASS_SHAMAN && ts.specClass != CLASS_WARLOCK && ts.specClass != CLASS_WARRIOR &&
-                        ts.specClass != CLASS_PET_CUNNING && ts.specClass != CLASS_PET_FEROCITY && ts.specClass != CLASS_PET_TENACITY)
-                {
-                        TellMaster("TalentSpec: %u. \"%s\" contains an invalid class.", fields[0].GetUInt32(), ts.specName.c_str());
+        ts.specName = fields[1].GetCppString();
+        ts.specClass = fields[2].GetInt16();
+        if (ts.specClass != CLASS_DEATH_KNIGHT && ts.specClass != CLASS_DRUID && ts.specClass != CLASS_HUNTER && ts.specClass != CLASS_MAGE && ts.specClass != CLASS_PALADIN && ts.specClass != CLASS_PRIEST && ts.specClass != CLASS_ROGUE && ts.specClass != CLASS_SHAMAN && ts.specClass != CLASS_WARLOCK && ts.specClass != CLASS_WARRIOR &&
+            ts.specClass != CLASS_PET_CUNNING && ts.specClass != CLASS_PET_FEROCITY && ts.specClass != CLASS_PET_TENACITY)
+        {
+            TellMaster("TalentSpec: %u. \"%s\" contains an invalid class.", fields[0].GetUInt32(), ts.specName.c_str());
 
-                        continue;	// this spec is clearly broken, the next may or may not be
-                }
+            continue;	// this spec is clearly broken, the next may or may not be
+        }
 
-                ts.specPurpose = (TalentSpecPurpose)fields[3].GetUInt32();
+        ts.specPurpose = (TalentSpecPurpose)fields[3].GetUInt32();
 
-                // check all talents
-                for (uint8 i = 0; i < 71; i++)
-                {
-                        ts.talentId[i] = fields[i+4].GetUInt16();
-                }
+        // check all talents
+        for (uint8 i = 0; i < 71; i++)
+        {
+            ts.talentId[i] = fields[i+4].GetUInt16();
+        }
 
-                for (uint8 i=0; i < 3; i++)  // as in, the 3 major glyphs
-                {
-                        ts.glyphIdMajor[i] = fields[i+75].GetUInt16();
-                }
-                for (uint8 i=0; i < 3; i++)  // as in, the 3 minor glyphs
-                {
-                        ts.glyphIdMajor[i] = fields[i+78].GetUInt16();
-                }
+        for (uint8 i=0; i < 3; i++)  // as in, the 3 major glyphs
+        {
+            ts.glyphIdMajor[i] = fields[i+75].GetUInt16();
+        }
+        for (uint8 i=0; i < 3; i++)  // as in, the 3 minor glyphs
+        {
+            ts.glyphIdMajor[i] = fields[i+78].GetUInt16();
+        }
 
-                tsList.push_back(ts);
+        tsList.push_back(ts);
     } while (result->NextRow());
 
+    delete result;
+    return tsList;
+}
+
+/**
+* GetTalentSpec queries DB for a talentspec given a class and a choice.
+* The choice applies to the results for that class only, and is volatile.
+*
+* *** for the most part, GetTalentSpec assumes ALL SPECS ARE VALID ***
+*/
+TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
+{
+    TalentSpec ts;
+    // Let's zero it out to be safe
+    ts.specName = "";
+    ts.specClass = 0;
+    ts.specPurpose = TSP_NONE;
+    for (int i=0; i<71; i++) ts.talentId[i] = 0;
+    for (int i=0; i<3; i++) ts.glyphIdMajor[i] = 0;
+    for (int i=0; i<3; i++) ts.glyphIdMinor[i] = 0;
+
+    // Weed out invalid choice - ts has been zero'd out anyway
+    if (0 >= choice || GetTalentSpecsAmount(specClass) < choice) return ts;
+
+    std::ostringstream query;
+    query << "SELECT * FROM playerbot_talentspec WHERE class = " << specClass << " ORDER BY talentspec_id ASC";
+
+    QueryResult *result = CharacterDatabase.Query(query.str().c_str());
+
+    if( !result )
+    {
+        sLog.outString();
+        sLog.outString(">> Loaded `playerbot_talentspec`, found no talentspecs for class %i.", specClass);
+
         delete result;
-        return tsList;
+        return ts; // empty
+    }
+
+    for (int i=1; i<=GetTalentSpecsAmount(specClass); i++)
+    {
+
+        if (i == choice)
+        {
+            /*
+            0			talentspec_id
+            1			name
+            2			class
+            3			purpose
+            4 to 74	talent_10 to 71
+            75 to 80    major_glyph_15, 30, 80, minor_glyph_15, 50, 70
+            */
+            Field* fields = result->Fetch();
+
+            /* ts_id = fields[0].GetUInt32(); // not used
+            if (!ts_id)    // Nice bit of paranoia: ts_id is an AUTO_INCREMENT value
+            continue;  // Of course, if the impossible ever does happen, we can't very well identify a TalentSpec without an ID...
+            */
+
+            ts.specName = fields[1].GetCppString();
+            ts.specClass = fields[2].GetInt16();
+            if (ts.specClass != CLASS_DEATH_KNIGHT && ts.specClass != CLASS_DRUID && ts.specClass != CLASS_HUNTER && ts.specClass != CLASS_MAGE && ts.specClass != CLASS_PALADIN && ts.specClass != CLASS_PRIEST && ts.specClass != CLASS_ROGUE && ts.specClass != CLASS_SHAMAN && ts.specClass != CLASS_WARLOCK && ts.specClass != CLASS_WARRIOR &&
+                ts.specClass != CLASS_PET_CUNNING && ts.specClass != CLASS_PET_FEROCITY && ts.specClass != CLASS_PET_TENACITY)
+            {
+                TellMaster("TalentSpec: %u. \"%s\" contains an invalid class.", fields[0].GetUInt32(), ts.specName.c_str());
+
+                ts.specName = "";
+                ts.specClass = 0;
+                delete result;
+                return ts;
+            }
+
+            ts.specPurpose = (TalentSpecPurpose)fields[3].GetUInt32();
+
+            // check all talents
+            for (uint8 i = 0; i < 71; i++)
+            {
+                ts.talentId[i] = fields[i+4].GetUInt16();
+            }
+
+            for (uint8 i=0; i < 3; i++)  // as in, the 3 major glyphs
+            {
+                ts.glyphIdMajor[i] = fields[i+75].GetUInt16();
+            }
+            for (uint8 i=0; i < 3; i++)  // as in, the 3 minor glyphs
+            {
+                ts.glyphIdMajor[i] = fields[i+78].GetUInt16();
+            }
+
+            delete result;
+            return ts;
+        }
+
+        // TODO: okay, this won't bog down the system, but it's still a waste. Figure out a better way.
+        result->NextRow();
+    }
+
+    delete result;
+    return ts;
 }
 
 /**
