@@ -3589,8 +3589,7 @@ uint32 PlayerbotAI::GetTalentSpecsAmount()
 
 uint32 PlayerbotAI::GetTalentSpecsAmount(long specClass)
 {
-        std::string query = "SELECT COUNT(*) FROM playerbot_talentspec WHERE class = " + specClass;
-    QueryResult *result = CharacterDatabase.Query(query.c_str());
+	QueryResult *result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM playerbot_talentspec WHERE class = '%i'",specClass);
 
     if( !result )
     {
