@@ -1615,6 +1615,7 @@ public:
     TalentSpec GetTalentSpec(long specClass, long choice);
     TalentSpec GetActiveTalentSpec() { return m_activeTalentSpec; }
     void SetActiveTalentSpec(TalentSpec ts) { m_activeTalentSpec = ts; }
+    bool ApplyActiveTalentSpec();
 
     void MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out, Player* player = NULL);
 

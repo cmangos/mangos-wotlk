@@ -3776,6 +3776,84 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
 }
 
 /**
+* ApplyActiveTalentSpec takes the active talent spec and attempts to apply it
+*
+* return true  -> ok, talentspec applied as fully as possible
+* return false -> talentspec was not or only partially applied
+*/
+bool PlayerbotAI::ApplyActiveTalentSpec()
+{
+    std::vector<uint16> talentsToLearn;
+    talentsToLearn.reserve(71);
+    for (int i=0; i<71; i++)
+    {
+        talentsToLearn.push_back(m_activeTalentSpec.talentId[i]);
+    }
+
+    PlayerTalentMap ptm = m_bot->GetTalents(m_bot->GetActiveSpec());
+    // First do a check as to whether all known talents are in the talent spec
+    for (PlayerTalentMap::iterator iter = ptm.begin(); iter != ptm.end(); iter++)
+    {
+        PlayerTalent talent = (*iter).second;
+
+        // WARNING: There may be more than 71 'talents' in the PTM - unlearned talents are simply set as disabled - not removed
+        if (talent.state == PLAYERSPELL_REMOVED)
+            continue;
+
+        // currentRank = 0 to (MAX_RANK-1) not 1 to MAX_RANK
+        for (int i=0; i<=talent.currentRank; i++)
+        {
+            int j = 0; // why 0 and not -1? Because if talentsToCheck (no TalentSpec) is empty and talents have been learned -> NOK
+            for (std::vector<uint16>::iterator it = talentsToLearn.begin(); it != talentsToLearn.end(); it++)
+            {
+                if (talentsToLearn.at(j) == talent.talentEntry->TalentID)
+                {
+                    talentsToLearn.erase(it);
+                    j = -1; // So j = -1 -> learned talent found in talentspec
+                    break;
+                }
+                j++;
+            }
+
+            // j == -1 signifies talent has been found in talent spec
+            if (-1 != j)
+            {
+                TellMaster("I've learned talents that are not in my talent spec. If you want me to learn the talent spec anyway you should have me reset my talents.");
+                return false;
+            }
+        }
+    }
+
+    int x = 0;
+    for (std::vector<uint16>::iterator iter = talentsToLearn.begin(); iter != talentsToLearn.end(); iter++)
+    {
+        // find current talent rank
+        uint32 learnTalentRank = 0;
+        if (PlayerTalent const* talent = m_bot->GetKnownTalentById(talentsToLearn.at(x)))
+            learnTalentRank = talent->currentRank + 1;
+        // else -> not known -> to learn = 0
+
+        // check if we have enough talent points
+        uint32 freeTalentPointsBefore = m_bot->GetFreeTalentPoints();
+        if (0 == freeTalentPointsBefore)
+            return true;
+
+        m_bot->LearnTalent(talentsToLearn.at(x), learnTalentRank);
+        if (freeTalentPointsBefore == m_bot->GetFreeTalentPoints())
+        {
+            // Do not tell master - error is logged server side, master gets generic failure warning from calling function.
+            //TellMaster("Failed to learn talent - Class: %i; TalentId: %i; TalentRank: %i. This error has been logged.", m_bot->getClass(), talentsToLearn.at(x), learnTalentRank);
+            DEBUG_LOG("[PlayerbotAI]: ApplyActiveTalentSpec failure - Class: %i; TalentId: %i; TalentRank: %i.", m_bot->getClass(), talentsToLearn.at(x), learnTalentRank);
+            return false;
+        }
+
+        x++;
+    }
+
+    return true;
+}
+
+/**
 * ValidateTalent tests a talent against class to see if it belongs to that class
 *
 * uint16 talent:		talent ID
@@ -5774,11 +5852,16 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                             out << "Activated talent spec: " << chosenSpec << ". " << ts.specName;
                             SendWhisper(out.str(), fromPlayer);
                             SetActiveTalentSpec(ts);
+                            if (!ApplyActiveTalentSpec())
+                            {
+                                TellMaster("The talent spec has been set active but could not be applied. It appears something has gone awry.");
+                                //DEBUG_LOG ("[PlayerbotAI]: Could set TalentSpec but could not apply it - 'talent spec #': Class: %i; chosenSpec: %i", (long)m_bot->getClass(), chosenSpec);
+                            }
                         }
                         else
                         {
                             TellMaster("An error has occured. Please let a Game Master know. This error has been logged.");
-                            DEBUG_LOG ("[PlayerbotAI]: HandleCommand - 'talent spec #': Class: %i; chosenSpec: %i", (long)m_bot->getClass(), chosenSpec);
+                            DEBUG_LOG ("[PlayerbotAI]: Could not GetTalentSpec to set & apply - 'talent spec #': Class: %i; chosenSpec: %i", (long)m_bot->getClass(), chosenSpec);
                         }
                     }
                 }
