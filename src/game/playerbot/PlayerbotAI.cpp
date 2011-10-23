@@ -3783,11 +3783,20 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
 */
 bool PlayerbotAI::ApplyActiveTalentSpec()
 {
+    // empty talent spec -> nothing to apply -> fully applied
+    if (m_activeTalentSpec.specClass == 0 || m_activeTalentSpec.specPurpose == TSP_NONE)
+        return true;
+
+    // Some basic error checking just in case
+    if (m_activeTalentSpec.specClass != m_bot->getClass())
+        return false;
+
     std::vector<uint16> talentsToLearn;
     talentsToLearn.reserve(71);
     for (int i=0; i<71; i++)
     {
-        talentsToLearn.push_back(m_activeTalentSpec.talentId[i]);
+        if (m_activeTalentSpec.talentId[i] != 0)
+            talentsToLearn.push_back(m_activeTalentSpec.talentId[i]);
     }
 
     PlayerTalentMap ptm = m_bot->GetTalents(m_bot->GetActiveSpec());
@@ -5838,7 +5847,13 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 {
                     uint32 chosenSpec = strtoul(sub2command.c_str(),NULL,0); // non-int returns 0; too big returns UINT MAX (or somesuch)
 
-                    if (0 >= chosenSpec || chosenSpec > GetTalentSpecsAmount((long)m_bot->getClass()))
+                    // Warning: also catches non-int sub2command's - e.g. 'talent spec foobar'
+                    if (0 == chosenSpec)
+                    {
+                        ClearActiveTalentSpec();
+                        TellMaster("The talent spec has been cleared.");
+                    }
+                    else if (0 > chosenSpec || chosenSpec > GetTalentSpecsAmount((long)m_bot->getClass()))
                     {
                         TellMaster("The talent spec you have chosen is invalid. Please select one from the valid range (reply 'talent spec' for options).");
                     }

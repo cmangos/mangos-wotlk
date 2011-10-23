@@ -1614,6 +1614,7 @@ public:
     std::list<TalentSpec> GetTalentSpecs(long specClass);
     TalentSpec GetTalentSpec(long specClass, long choice);
     TalentSpec GetActiveTalentSpec() { return m_activeTalentSpec; }
+    void ClearActiveTalentSpec() { m_activeTalentSpec.specName = ""; m_activeTalentSpec.specClass = 0; m_activeTalentSpec.specPurpose = TSP_NONE; for (int i=0; i<71; i++) m_activeTalentSpec.talentId[i] = 0; for (int i=0; i<3; i++) { m_activeTalentSpec.glyphIdMajor[i] = 0; m_activeTalentSpec.glyphIdMinor[i] = 0; } }
     void SetActiveTalentSpec(TalentSpec ts) { m_activeTalentSpec = ts; }
     bool ApplyActiveTalentSpec();
 
