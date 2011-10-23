@@ -139,6 +139,8 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     HERB_GATHERING      = initSpell(HERB_GATHERING_1);
     MINING              = initSpell(MINING_1);
     SKINNING            = initSpell(SKINNING_1);
+
+    ClearActiveTalentSpec();
 }
 
 PlayerbotAI::~PlayerbotAI()
@@ -4714,6 +4716,16 @@ void PlayerbotAI::findNearbyCreature()
             m_bot->GetMotionMaster()->MoveIdle();
         }
     }
+}
+
+/**
+* GiveLevel sets the bot's level to 'level'
+* Not the clearest of function names, we're just mirroring Player.cpp's function name
+*/
+void PlayerbotAI::GiveLevel(uint32 level)
+{
+    // Talent function in Player::GetLevel take care of resetting talents in case level < getLevel()
+    ApplyActiveTalentSpec();
 }
 
 // use item on self

@@ -1605,6 +1605,8 @@ public:
     // finds nearby creatures, whose UNIT_NPC_FLAGS match the flags specified in item list m_itemIds
     void findNearbyCreature();
 
+    void GiveLevel(uint32 level);
+
     // Error check the TS DB. Should only be used when admins want to verify their new TS input
     uint32 TalentSpecDBContainsError();
 
