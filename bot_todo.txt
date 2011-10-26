@@ -23,7 +23,7 @@ Warrior	: Sharpening Stone, Rune of Warding, Rune of Shielding.
 Needs some fix.
 
 ///---Move behind target---///
-Rogue	: some abilitys require Rogue to be stealthed and behind target.
+[DONE] Rogue	: some abilitys require Rogue to be stealthed and behind target.
 
 ///---Implement locale independet way of getting spellIDs---///
 [DONE] Hardcode lowest rank spellID, use function to get highest rank

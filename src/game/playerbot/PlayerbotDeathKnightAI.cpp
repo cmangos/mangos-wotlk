@@ -69,6 +69,11 @@ PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* con
 
 PlayerbotDeathKnightAI::~PlayerbotDeathKnightAI() {}
 
+bool PlayerbotDeathKnightAI::DoFirstCombatManeuver(Unit *pTarget)
+{
+    return false;
+}
+
 void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();
@@ -84,16 +89,13 @@ void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
 
     // ------- Non Duel combat ----------
 
-    //ai->SetMovementOrder( PlayerbotAI::MOVEMENT_FOLLOW, GetMaster() ); // dont want to melee mob
-
     // DK Attacks: Unholy, Frost & Blood
 
     // damage spells
-    ai->SetInFront(pTarget);  //<---
     Player *m_bot = GetPlayerBot();
     Unit* pVictim = pTarget->getVictim();
     Pet *pet = m_bot->GetPet();
-    float dist = m_bot->GetDistance(pTarget);
+    float dist = m_bot->GetCombatDistance(pTarget);
     std::ostringstream out;
 
     switch (SpellSequence)

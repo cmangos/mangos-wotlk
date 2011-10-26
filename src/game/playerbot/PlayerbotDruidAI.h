@@ -98,6 +98,7 @@ public:
     virtual ~PlayerbotDruidAI();
 
     // all combat actions go here
+    bool DoFirstCombatManeuver(Unit*);
     void DoNextCombatManeuver(Unit*);
 
     // all non combat actions go here, ex buffs, heals, rezzes
@@ -111,6 +112,8 @@ private:
     bool HealTarget (Unit *target);
     // Callback method to reset shapeshift forms blocking buffs and heals
     static void GoBuffForm(Player *self);
+    // Has the ability to change to animal form
+    bool IsFeral();
 
     // druid cat/bear/dire bear/moonkin/tree of life forms
     uint32 CAT_FORM,

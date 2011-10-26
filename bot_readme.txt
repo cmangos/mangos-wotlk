@@ -21,33 +21,36 @@ Commands:
 /t BOTNAME stay
 /t BOTNAME assist (you'll need to be attacking something and the bot only does melee atm)
 /t BOTNAME spells (replies with all spells known to bot)
-/t BOTNAME cast <SPELLID | (part of) SPELLNAME | SPELLLINK>
-/t BOTNAME use <ITEM LINK>
-/t BOTNAME equip <ITEM LINK>
+/t BOTNAME cast <SPELLID | (part of) SPELLNAME | [SPELLLINK]>
+/t BOTNAME use [ITEM LINK]
+/t BOTNAME equip [ITEM LINK]
 /t BOTNAME reset (will reset states, orders and loot list)
-/t BOTNAME report (bot reports all items needed to finish quests)
+/t BOTNAME report (bot reports all items, creatures or gameobjects needed to finish quests)
 /t BOTNAME stats (bot shows available money, free inventory space and estimated item repair costs)
 /t BOTNAME survey (bot shows all available gameobjects, within a local perimeter around the bot)
-/t BOTNAME find <GAMEOBJECT LINK> (bot will travel to the gameobject location and then wait)
-/t BOTNAME get <GAMEOBJECT LINK> (bot will fetch the selected gameobject and then return to the player)
-/t BOTNAME quests (List bot's current quests)
-/t BOTNAME drop <QUESTLINK> (Drop a quest)
+/t BOTNAME find [GAMEOBJECT LINK] (bot will travel to the gameobject location and then wait)
+/t BOTNAME get [GAMEOBJECT LINK] (bot will fetch the selected gameobject and then return to the player)
+/t BOTNAME quest (Shows bot's current quests)
+/t BOTNAME quest <(a)dd> [QUESTLINK] (Adds a quest)
+/t BOTNAME quest <(d)rop> [QUESTLINK] (Drop a quest)
+/t BOTNAME quest <(e)nd> (Turns in a completed quest)
+/t BOTNAME quest <(l)ist> (Shows new quests offered by questgiver)
 /t BOTNAME orders (Shows bot's combat orders)
 /t BOTNAME pet spells (Shows spells known to bot's pet. Autocast spells will be shown in green)
-/t BOTNAME pet cast <SPELLID | (part of) SPELLNAME | SPELLLINK>
-/t BOTNAME pet toggle <SPELLID | (part of) SPELLNAME | SPELLLINK> (Toggle autocast for a given spell)
+/t BOTNAME pet cast <SPELLID | (part of) SPELLNAME | [SPELLLINK]>
+/t BOTNAME pet toggle <SPELLID | (part of) SPELLNAME | [SPELLLINK]> (Toggle autocast for a given spell)
 /t BOTNAME pet state (Shows current react mode of bot's pet)
 /t BOTNAME pet react <(a)ggressive | (d)efensive | (p)assive> (Set bot's pet reaction mode)
 /t BOTNAME collect (shows collect subcommand options and current collect status)
 /t BOTNAME collect <subcommand(s)> (subcommands can be alone or together [none combat loot objects profession quest])
-/t BOTNAME sell <ITEM LINK> (bot will add item to it's m_itemIds, for later sale)
-/t BOTNAME auction (bot will display all it's active owned auctions. Auction info will include an <AUCTION LINK> )
-/t BOTNAME auction add <ITEM LINK> (bot will add item to it's m_itemIds, for later auction)
-/t BOTNAME auction remove <AUCTION LINK> (bot will add auctionid to it's m_auctions, for later auction cancellation)
-/t BOTNAME repair <ITEM LINK> (bot will seek out armourer and repair selected items specified by <ITEM LINK> )
+/t BOTNAME sell [ITEM LINK] (bot will add item to it's m_itemIds, for later sale)
+/t BOTNAME auction (bot will display all it's active owned auctions. Auction info will include an [AUCTION LINK] )
+/t BOTNAME auction add [ITEM LINK] (bot will add item to it's m_itemIds, for later auction)
+/t BOTNAME auction remove [AUCTION LINK] (bot will add auctionid to it's m_auctions, for later auction cancellation)
+/t BOTNAME repair [ITEM LINK] (bot will seek out armourer and repair selected items specified by [ITEM LINK] )
 /t BOTNAME repair all (bot(s) will seek out armourer and repair all damaged items equipped, or in bags )
 /t BOTNAME talent (Lists bot(s) active talents [TALENT LINK] & glyphs [GLYPH LINK], unspent talent points & cost to reset all talents)
-/t BOTNAME talent learn [TALENT LINK] .. (Learn selected talent from bot client 'inspect' dialog -> 'talent' tab or from talent command (shift click icon or link))
+/t BOTNAME talent learn [TALENT LINK} .. (Learn selected talent from bot client 'inspect' dialog -> 'talent' tab or from talent command (shift click icon or link))
 /t BOTNAME talent reset (Resets all talents)
 /t BOTNAME talent spec (Lists talent specs available to this bot's class, with #, to use below)
 /t BOTNAME talent spec # (If valid, uses this # talent spec for this bot (see # from talent spec above))
@@ -55,6 +58,10 @@ Commands:
 /t BOTNAME bank  (Lists bot(s) bank balance)
 /t BOTNAME bank deposit [Item Link][Item Link] .. (Deposit item(s) in bank)
 /t BOTNAME bank withdraw [Item Link][Item Link] ..  (Withdraw item(s) from bank. ([Item Link] from bank))
+/t BOTNAME skill (lists all [PROFESSION LINK] bot Primary profession skills)
+/t BOTNAME skill train (lists [TRAINING LINK] available class, weapon & profession (Primary or Secondary) skills & spells, from selected trainer)
+/t BOTANME skill learn [TRAINING LINK] (learn selected skill or spell, from selected trainer)
+/t BOTNAME skill unlearn [PROFESSION LINK] (unlearn selected primary profession skill & all associated spells)
 
 Shortcuts:
 c = cast
@@ -88,7 +95,7 @@ Gameobject interaction with bots:
   Suggestion: setup the 'survey' command as an assigned macro button, on the client (e.g /p survey). You can
   then quickly refresh the gameobject list.
 
-  Gameobject list <GAMEOBJECT LINK> (Currently bots can only interact with ore, herb and needed quest items)
+  Gameobject list [GAMEOBJECT LINK] (Currently bots can only interact with ore, herb and needed quest items)
   ---------------
 
   [Copper Vein][Silverleaf][Earthroot][Milly's Harvest][Battered Chest][Food Crate]
@@ -96,7 +103,7 @@ Gameobject interaction with bots:
   Then, use the 'find' or 'get' commands to interect with the gameobject.
 
   Using the gameobject list information, it is possible to locate and/or fetch each of the gameobjects. To select
-  a <GAMEOBJECT LINK>, hold down the shift key and click on the relevant link with your mouse.
+  a [GAMEOBJECT LINK], hold down the shift key and click on the relevant link with your mouse.
 
 Creature interaction with bots:
 ===============================
@@ -184,11 +191,11 @@ Also all commands can be broadcast to the party. For example:
 /p spells
 
 To use or equip items for your bot say:
-/w BOTNAME use <ITEMLINK1> <ITEMLINK2>
-/w BOTNAME equip <ITEMLINK1> <ITEMLINK2>
+/w BOTNAME use [ITEMLINK1][ITEMLINK2]
+/w BOTNAME equip [ITEMLINK1][ITEMLINK2]
 - OR -
-/w BOTNAME u <ITEMLINK1> <ITEMLINK2>
-/w BOTNAME e <ITEMLINK1> <ITEMLINK2>
+/w BOTNAME u [ITEMLINK1][ITEMLINK2]
+/w BOTNAME e [ITEMLINK1] [ITEMLINK2]
 
 If you inspect your bot, your bot will tell you what items you have in your inventory that you can equip. To create a link in the chat window, hold the shift key and press the left mouse button when clicking the link.
 
@@ -226,9 +233,3 @@ Also see src/mangosd/mangosd.conf.dist for configuration variables!
     PlayerbotAI.FollowDistanceMax
         Min. and max. follow distance for bots
         Default: 0.5 / 1.0
-
-
-Some Problems:
-==============
-
-The bots don't always face in the right direction. Sometimes when a bot makes the kill, the corpse is not lootable. The mage bot sometimes get stuck when he begins to cast a spell (but this is corrected the next time he enters combat).

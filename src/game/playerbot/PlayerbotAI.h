@@ -1498,14 +1498,24 @@ public:
 
     enum TaskFlags
     {
-        NONE                        = 0x00,
+        NONE                        = 0x00,  // do nothing
         SELL_ITEMS                  = 0x01,  // sell items
         REPAIR_ITEMS                = 0x02,  // repair items
-        ADD_AUCTION                 = 0x04,  // add auction
-        REMOVE_AUCTION              = 0x08,  // remove auction
-        RESET_TALENTS               = 0x10,  // reset all talents
-        BANK_WITHDRAW               = 0x11,  // withdraw item from bank
-        BANK_DEPOSIT                = 0x12   // deposit item in bank
+        ADD_AUCTION                 = 0x03,  // add auction
+        REMOVE_AUCTION              = 0x04,  // remove auction
+        RESET_TALENTS               = 0x05,  // reset all talents
+        BANK_WITHDRAW               = 0x06,  // withdraw item from bank
+        BANK_DEPOSIT                = 0x07,  // deposit item in bank
+        LIST_QUEST                  = 0x08,  // list quests
+        END_QUEST                   = 0x09,  // turn in quests
+        TAKE_QUEST                  = 0x0A   // take quest
+    };
+
+    enum AnnounceFlags
+    {
+        NOTHING                     = 0x00,
+        INVENTORY_FULL              = 0x01,
+        CANT_AFFORD                 = 0x02
     };
 
     typedef std::pair<enum TaskFlags, uint32> taskPair;
@@ -1566,6 +1576,7 @@ public:
 
     PlayerbotClassAI* GetClassAI() { return m_classAI; }
     PlayerbotMgr* GetManager() { return m_mgr; }
+    void ReloadAI();
 
     // finds spell ID for matching substring args
     // in priority of full text match, spells not taking reagents, and highest rank
@@ -1574,6 +1585,9 @@ public:
     // Initialize spell using rank 1 spell id
     uint32 initSpell(uint32 spellId);
     uint32 initPetSpell(uint32 spellIconId);
+
+    // extract quest ids from links
+    void extractQuestIds(const std::string& text, std::list<uint32>& questIds) const;
 
     // extract auction ids from links
     void extractAuctionIds(const std::string& text, std::list<uint32>& auctionIds) const;
@@ -1620,7 +1634,8 @@ public:
     void SetActiveTalentSpec(TalentSpec ts) { m_activeTalentSpec = ts; }
     bool ApplyActiveTalentSpec();
 
-    void MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out, Player* player = NULL);
+    void MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out);
+    void MakeWeaponSkillLink(const SpellEntry *sInfo, std::ostringstream &out, uint32 skillid);
 
     // currently bots only obey commands from the master
     bool canObeyCommandFrom(const Player& player) const;
@@ -1660,6 +1675,7 @@ public:
     Item* FindKeyForLockValue(uint32 reqSkillValue);
     Item* FindBombForLockValue(uint32 reqSkillValue);
     Item* FindConsumable(uint32 displayId) const;
+    bool CanStore();
 
     // ******* Actions ****************************************
     // Your handlers can call these actions to make the bot do things.
@@ -1672,11 +1688,15 @@ public:
     bool CastPetSpell(uint32 spellId, Unit* target = NULL);
     bool Buff(uint32 spellId, Unit * target, void (*beforeCast)(Player *) = NULL);
     bool SelfBuff(uint32 spellId);
+    bool IsInRange(Unit* Target, uint32 spellId);
 
     void UseItem(Item *item, uint32 targetFlag, ObjectGuid targetGUID);
     void UseItem(Item *item, uint8 targetInventorySlot);
     void UseItem(Item *item, Unit *target);
     void UseItem(Item *item);
+
+    void PlaySound(uint32 soundid);
+    void Announce(AnnounceFlags msg);
 
     void EquipItem(Item* src_Item);
     //void Stay();
@@ -1685,6 +1705,7 @@ public:
     void Feast();
     void InterruptCurrentCastingSpell();
     void GetCombatTarget(Unit* forcedTarged = 0);
+    void GetDuelTarget(Unit* forcedTarget);
     Unit *GetCurrentTarget() { return m_targetCombat; };
     void DoNextCombatManeuver();
     void DoCombatMovement();
@@ -1697,8 +1718,10 @@ public:
     BotState GetState() { return m_botState; };
     void SetState(BotState state);
     void SetQuestNeedItems();
-    void SendQuestItemList(Player& player);
+    void SetQuestNeedCreatures();
+    void SendQuestNeedList();
     bool IsInQuestItemList(uint32 itemid) { return m_needItemList.find(itemid) != m_needItemList.end(); };
+    bool IsInQuestCreatureList(uint32 id) { return m_needCreatureOrGOList.find(id) != m_needCreatureOrGOList.end(); };
     bool IsItemUseful(uint32 itemid);
     void SendOrders(Player& player);
     bool DoTeleport(WorldObject &obj);
@@ -1718,6 +1741,8 @@ public:
 
     void AcceptQuest(Quest const *qInfo, Player *pGiver);
     void TurnInQuests(WorldObject *questgiver);
+    void ListQuests(WorldObject* questgiver);
+    bool AddQuest(const uint32 entry, WorldObject* questgiver);
 
     bool IsInCombat();
     void UpdateAttackerInfo();
@@ -1736,14 +1761,16 @@ public:
 
     void ItemLocalization(std::string& itemName, const uint32 itemID) const;
     void QuestLocalization(std::string& questTitle, const uint32 questID) const;
+    void CreatureLocalization(std::string& creatureName, const uint32 entry) const;
+    void GameObjectLocalization(std::string& gameobjectName, const uint32 entry) const;
 
     uint8 GetFreeBagSpace() const;
     void SellGarbage(bool verbose = true);
-    bool Sell(const uint32 itemid);
-    bool AddAuction(const uint32 itemid, Creature* aCreature);
-    bool ListAuctions();
+    void Sell(const uint32 itemid);
+    void AddAuction(const uint32 itemid, Creature* aCreature);
+    void ListAuctions();
     bool RemoveAuction(const uint32 auctionid);
-    bool Repair(const uint32 itemid, Creature* rCreature);
+    void Repair(const uint32 itemid, Creature* rCreature);
     bool Talent(Creature* tCreature);
     void InspectUpdate();
     bool Withdraw(const uint32 itemid);
@@ -1792,8 +1819,9 @@ private:
     // defines the state of behaviour of the bot
     BotState m_botState;
 
-    // list of items needed to fullfill quests
+    // list of items, creatures or gameobjects needed to fullfill quests
     BotNeedItem m_needItemList;
+    BotNeedItem m_needCreatureOrGOList;
 
     // list of creatures we recently attacked and want to loot
     BotNPCList m_findNPC;               // list of NPCs
@@ -1806,6 +1834,7 @@ private:
     BotTaxiNode m_taxiNodes;            // flight node chain;
 
     uint8 m_collectionFlags;            // what the bot should look for to loot
+    bool m_inventory_full;
 
     time_t m_TimeDoneEating;
     time_t m_TimeDoneDrinking;

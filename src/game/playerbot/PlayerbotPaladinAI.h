@@ -65,11 +65,11 @@ enum PaladinSpells
     RIGHTEOUS_FURY_1                = 25780,
     SACRED_SHIELD_1                 = 53601,
     SEAL_OF_COMMAND_1               = 20375,
-    SEAL_OF_CORRUPTION              = 53736,
+    SEAL_OF_CORRUPTION_1            = 53736,
     SEAL_OF_JUSTICE_1               = 20164,
     SEAL_OF_LIGHT_1                 = 20165,
     SEAL_OF_RIGHTEOUSNESS_1         = 21084,
-    SEAL_OF_VENGEANCE               = 31801,
+    SEAL_OF_VENGEANCE_1             = 31801,
     SEAL_OF_WISDOM_1                = 20166,
     SENSE_UNDEAD_1                  = 5502,
     SHADOW_RESISTANCE_AURA_1        = 19876,
@@ -85,6 +85,7 @@ public:
     virtual ~PlayerbotPaladinAI();
 
     // all combat actions go here
+    bool DoFirstCombatManeuver(Unit*);
     void DoNextCombatManeuver(Unit*);
 
     // all non combat actions go here, ex buffs, heals, rezzes
@@ -130,7 +131,13 @@ private:
            LAY_ON_HANDS,
            EXORCISM,
            REDEMPTION,
-           DIVINE_PLEA;
+           DIVINE_PLEA,
+           SEAL_OF_CORRUPTION,
+           SEAL_OF_JUSTICE,
+           SEAL_OF_LIGHT,
+           SEAL_OF_RIGHTEOUSNESS,
+           SEAL_OF_VENGEANCE,
+           SEAL_OF_WISDOM;
 
     // Protection
     uint32 GREATER_BLESSING_OF_KINGS,

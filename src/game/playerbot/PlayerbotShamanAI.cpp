@@ -70,6 +70,11 @@ PlayerbotShamanAI::PlayerbotShamanAI(Player* const master, Player* const bot, Pl
 
 PlayerbotShamanAI::~PlayerbotShamanAI() {}
 
+bool PlayerbotShamanAI::DoFirstCombatManeuver(Unit *pTarget)
+{
+    return false;
+}
+
 void PlayerbotShamanAI::HealTarget(Unit &target, uint8 hp)
 {
     PlayerbotAI* ai = GetAI();
@@ -100,8 +105,6 @@ void PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
     }
 
     // ------- Non Duel combat ----------
-
-    ai->SetMovementOrder(PlayerbotAI::MOVEMENT_FOLLOW, GetMaster());   // dont want to melee mob <----changed
 
     Player *m_bot = GetPlayerBot();
     Group *m_group = m_bot->GetGroup();
@@ -141,7 +144,6 @@ void PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
     }
 
     // Damage Spells
-    ai->SetInFront(pTarget);
 
     switch (SpellSequence)
     {
@@ -513,6 +515,9 @@ void PlayerbotShamanAI::DoNonCombatActions()
         {
             Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
             if (!tPlayer || !tPlayer->isAlive())
+                continue;
+
+            if (tPlayer->IsInDuelWith(GetMaster()))
                 continue;
 
             // heal
