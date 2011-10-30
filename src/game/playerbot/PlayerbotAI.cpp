@@ -5849,10 +5849,10 @@ void PlayerbotAI::Sell(const uint32 itemid)
     }
 }
 
-void PlayerbotAI::SellGarbage(bool verbose)
+void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bVerbose)
 {
-    uint32 TotalCost = 0;
-    uint32 TotalSold = 0;
+    uint32 SoldCost = 0;
+    uint32 SoldQuantity = 0;
     std::ostringstream report, goods;
 
     // list out items in main backpack
@@ -5860,7 +5860,7 @@ void PlayerbotAI::SellGarbage(bool verbose)
     {
         Item* const item = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
         if (item)
-            _doSellItem(item, report, goods, TotalCost, TotalSold);
+            _doSellItem(item, report, goods, SoldCost, SoldQuantity);
     }
 
     // and each of our other packs
@@ -5880,34 +5880,50 @@ void PlayerbotAI::SellGarbage(bool verbose)
             {
                 Item* const item = m_bot->GetItemByPos(bag, slot);
                 if (item)
-                    _doSellItem(item, report, goods, TotalCost, TotalSold);
+                    _doSellItem(item, report, goods, SoldCost, SoldQuantity);
             }
         }
     }
 
-    // For all bags, non-gray sellable items
-    if (verbose && goods.str().size() > 0)
-        TellMaster("Items that are not trash and can be sold: %s", goods.str().c_str());
+    if (!bDetailTrashSold)
+        report.str(""); // clear ostringstream
 
-    if (TotalSold > 0)
+    if (SoldCost > 0)
     {
-        report << "Sold total " << TotalSold << " item(s) for ";
-        uint32 gold = uint32(TotalCost / 10000);
-        TotalCost -= (gold * 10000);
-        uint32 silver = uint32(TotalCost / 100);
-        TotalCost -= (silver * 100);
+        if (bDetailTrashSold)
+            report << "Sold total " << SoldQuantity << " item(s) for ";
+        else
+            report << "Sold " << SoldQuantity << " trash item(s) for ";
+        uint32 gold = uint32(SoldCost / 10000);
+        SoldCost -= (gold * 10000);
+        uint32 silver = uint32(SoldCost / 100);
+        SoldCost -= (silver * 100);
 
         if (gold > 0)
             report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
         if (silver > 0)
             report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-        report << TotalCost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+        report << SoldCost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
 
-        if (verbose)
+        if (bVerbose)
             TellMaster(report.str());
     }
-    else if (verbose && goods.str().size() == 0)
-        TellMaster("No items to sell, trash or otherwise.");
+
+    // For all bags, non-gray sellable items
+    if (bVerbose)
+    {
+        if (bListNonTrash && goods.str().size() > 0)
+        {
+            if (SoldQuantity)
+                TellMaster("I could also sell: %s", goods.str().c_str());
+            else
+                TellMaster("I could sell: %s", goods.str().c_str());
+        }
+        else if (SoldQuantity == 0 && goods.str().size() == 0)
+        {
+            TellMaster("No items to sell, trash or otherwise.");
+        }
+    }
 }
 
 void PlayerbotAI::GetTaxi(ObjectGuid guid, BotTaxiNode& nodes)

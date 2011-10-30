@@ -1765,7 +1765,7 @@ public:
     void GameObjectLocalization(std::string& gameobjectName, const uint32 entry) const;
 
     uint8 GetFreeBagSpace() const;
-    void SellGarbage(bool verbose = true);
+    void SellGarbage(bool listNonTrash = true, bool bDetailTrashSold = false, bool verbose = true);
     void Sell(const uint32 itemid);
     void AddAuction(const uint32 itemid, Creature* aCreature);
     void ListAuctions();
