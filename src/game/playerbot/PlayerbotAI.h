@@ -1784,6 +1784,31 @@ protected:
     bool ValidateMinorGlyph(uint16 glyph, long charClass);
 
 private:
+    // outsource commands for code clarity
+    void _HandleCommandReset(std::string &text, Player &fromPlayer);
+    void _HandleCommandReport(std::string &text, Player &fromPlayer);
+    void _HandleCommandOrders(std::string &text, Player &fromPlayer);
+    void _HandleCommandFollow(std::string &text, Player &fromPlayer);
+    void _HandleCommandStay(std::string &text, Player &fromPlayer);
+    void _HandleCommandAttack(std::string &text, Player &fromPlayer);
+    void _HandleCommandCast(std::string &text, Player &fromPlayer);
+    void _HandleCommandSell(std::string &text, Player &fromPlayer);
+    void _HandleCommandRepair(std::string &text, Player &fromPlayer);
+    void _HandleCommandAuction(std::string &text, Player &fromPlayer);
+    void _HandleCommandBank(std::string &text, Player &fromPlayer);
+    void _HandleCommandTalent(std::string &text, Player &fromPlayer);
+    void _HandleCommandUse(std::string &text, Player &fromPlayer);
+    void _HandleCommandEquip(std::string &text, Player &fromPlayer);
+    void _HandleCommandFind(std::string &text, Player &fromPlayer);
+    void _HandleCommandGet(std::string &text, Player &fromPlayer);
+    void _HandleCommandCollect(std::string &text, Player &fromPlayer);
+    void _HandleCommandQuest(std::string &text, Player &fromPlayer);
+    void _HandleCommandPet(std::string &text, Player &fromPlayer);
+    void _HandleCommandSpells(std::string &text, Player &fromPlayer);
+    void _HandleCommandSurvey(std::string &text, Player &fromPlayer);
+    void _HandleCommandSkill(std::string &text, Player &fromPlayer);
+    void _HandleCommandStats(std::string &text, Player &fromPlayer);
+
     // ****** Closed Actions ********************************
     // These actions may only be called at special times.
     // Trade methods are only applicable when the trade window is open
