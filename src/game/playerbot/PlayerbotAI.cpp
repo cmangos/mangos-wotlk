@@ -5855,8 +5855,6 @@ void PlayerbotAI::SellGarbage(bool verbose)
     uint32 TotalSold = 0;
     std::ostringstream report, goods;
 
-    goods << "Items that are not trash and can be sold: \n";
-    goods << "In my main backpack:";
     // list out items in main backpack
     for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
     {
@@ -5864,8 +5862,6 @@ void PlayerbotAI::SellGarbage(bool verbose)
         if (item)
             _doSellItem(item, report, goods, TotalCost, TotalSold);
     }
-    if (verbose)
-        TellMaster(goods.str());
 
     // and each of our other packs
     for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
@@ -5874,11 +5870,11 @@ void PlayerbotAI::SellGarbage(bool verbose)
         const Bag* const pBag = static_cast<Bag *>(m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag));
         if (pBag)
         {
-            goods << "\nIn my ";
-            const ItemPrototype* const pBagProto = pBag->GetProto();
-            std::string bagName = pBagProto->Name1;
-            ItemLocalization(bagName, pBagProto->ItemId);
-            goods << bagName << ":";
+            // Very nice, but who cares what bag it's in?
+            //const ItemPrototype* const pBagProto = pBag->GetProto();
+            //std::string bagName = pBagProto->Name1;
+            //ItemLocalization(bagName, pBagProto->ItemId);
+            //goods << "\nIn my " << bagName << ":";
 
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
@@ -5886,10 +5882,12 @@ void PlayerbotAI::SellGarbage(bool verbose)
                 if (item)
                     _doSellItem(item, report, goods, TotalCost, TotalSold);
             }
-            if (verbose)
-                TellMaster(goods.str());
         }
     }
+
+    // For all bags, non-gray sellable items
+    if (verbose && goods.str().size() > 0)
+        TellMaster("Items that are not trash and can be sold: %s", goods.str().c_str());
 
     if (TotalSold > 0)
     {
@@ -5905,8 +5903,11 @@ void PlayerbotAI::SellGarbage(bool verbose)
             report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
         report << TotalCost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
 
-        TellMaster(report.str());
+        if (verbose)
+            TellMaster(report.str());
     }
+    else if (verbose && goods.str().size() == 0)
+        TellMaster("No items to sell, trash or otherwise.");
 }
 
 void PlayerbotAI::GetTaxi(ObjectGuid guid, BotTaxiNode& nodes)
