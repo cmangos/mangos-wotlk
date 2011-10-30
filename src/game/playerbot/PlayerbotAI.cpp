@@ -5967,9 +5967,6 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         text.find("GathX") == 0) // Gatherer
         return;
 
-    // TODO: because of helper functions (to be improved soon)
-    std::string input = text.c_str();
-
     // if message is not from a player in the masters account auto reply and ignore
     if (!canObeyCommandFrom(fromPlayer))
     {
@@ -5977,10 +5974,15 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         msg += GetMaster()->GetName();
         SendWhisper(msg, fromPlayer);
         m_bot->HandleEmoteCommand(EMOTE_ONESHOT_NO);
+        return;
     }
 
+    // Passed along to ExtractCommand, if (sub)command is found "input" will only contain the rest of the string (or "")
+    std::string input = text.c_str();
+
     // if in the middle of a trade, and player asks for an item/money
-    else if (m_bot->GetTrader() && m_bot->GetTrader()->GetObjectGuid() == fromPlayer.GetObjectGuid())
+    // WARNING: This makes it so you can't use any other commands during a trade!
+    if (m_bot->GetTrader() && m_bot->GetTrader()->GetObjectGuid() == fromPlayer.GetObjectGuid())
     {
         uint32 copper = extractMoney(text);
         if (copper > 0)
@@ -6013,6 +6015,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 TradeItem(**it);
         }
     }
+
+    else if (ExtractCommand("help", input))
+        _HandleCommandHelp(input, fromPlayer);
 
     else if (text == "reset")
         _HandleCommandReset(input, fromPlayer);
@@ -6144,6 +6149,50 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
         }
     }
+}
+
+/**
+* ExtractCommand looks for a command in a text string
+* sLookingFor       - string you're looking for (e.g. "help")
+* text              - string which may or may not start with sLookingFor
+* bUseShort         - does this command accept the shorthand command? If true, "help" would ALSO look for "h"
+*
+* returns true if the string has been found
+* returns false if the string has not been found
+*/
+bool PlayerbotAI::ExtractCommand(const std::string sLookingFor, std::string &text, bool bUseShort)
+{
+    // ("help" + " ") < "help X"  AND  text's start (as big as sLookingFor) == sLookingFor
+    // Recommend AGAINST adapting this for non-space situations (thinking MangosZero)
+    // - unknown would risk being (short for "use") 'u' + "nknown"
+    if (sLookingFor.size() + 1 < text.size() && text.at(sLookingFor.size()) == ' '
+        && 0 == text.substr(0, sLookingFor.size()).compare(sLookingFor))
+    {
+        text = text.substr(sLookingFor.size());
+        return true;
+    }
+
+    if (0 == text.compare(sLookingFor))
+    {
+        text = "";
+        return true;
+    }
+
+    if (bUseShort)
+    {
+        if (text.size() > 1 && sLookingFor.at(0) == text.at(0) && text.at(1) == ' ')
+        {
+            text = text.substr(2);
+            return true;
+        }
+        else if(text.size() == 1 && sLookingFor.at(0) == text.at(0))
+        {
+            text = "";
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void PlayerbotAI::_HandleCommandReset(std::string &text, Player &fromPlayer)
@@ -7460,4 +7509,9 @@ void PlayerbotAI::_HandleCommandStats(std::string &text, Player &fromPlayer)
     out << copper <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
     ChatHandler ch(&fromPlayer);
     ch.SendSysMessage(out.str().c_str());
+}
+
+void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
+{
+    SendWhisper("Help is under construction, oh impatient one.", fromPlayer);
 }
