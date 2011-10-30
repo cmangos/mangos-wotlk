@@ -6011,8 +6011,6 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         }
     }
 
-    // if we are turning in a quest
-
     else if (text == "reset")
     {
         SetState(BOTSTATE_NORMAL);
@@ -6292,7 +6290,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
             if (0 == GetTalentSpecsAmount())
             {
-                TellMaster("Database does not contain any Talent Specs (for any classes).");
+                SendWhisper("Database does not contain any Talent Specs (for any classes).", fromPlayer);
             }
             else
             {
@@ -6302,19 +6300,20 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                     std::list<TalentSpec>::iterator it;
                     int count = 0;
 
-                    TellMaster("Please select a talent spec to activate (reply 'talent spec #'):");
+                    SendWhisper("Please select a talent spec to activate (reply 'talent spec #'):", fromPlayer);
                     for (it = classSpecs.begin(); it != classSpecs.end(); it++)
                     {
                         count++;
-                        // Oops, TellMaster makes bots subject to whisper anti-spam measures
-                        //TellMaster("%u. %s", count, it->specName);
-                        std::ostringstream oss; // TODO: not very efficient, just not sure how else to clear an ostringstream
+
+                        std::ostringstream oss;
                         oss << count << ". " << it->specName;
                         SendWhisper(oss.str(), fromPlayer);
                     }
                     if (count == 0)
                     {
-                        TellMaster("Error: No TalentSpecs listed. Specs retrieved from DB for this class: %u", m_bot->getClass());
+                        std::stringstream oss;
+                        oss << "Error: No TalentSpecs listed. Specs retrieved from DB for this class: %u" << m_bot->getClass();
+                        SendWhisper(oss.str(), fromPlayer);
                     }
                 }
                 else if (sub2command == "errorcheck" && fromPlayer.isGameMaster())
@@ -6340,11 +6339,11 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                     if (0 == chosenSpec)
                     {
                         ClearActiveTalentSpec();
-                        TellMaster("The talent spec has been cleared.");
+                        SendWhisper("The talent spec has been cleared.", fromPlayer);
                     }
                     else if (0 > chosenSpec || chosenSpec > GetTalentSpecsAmount((long)m_bot->getClass()))
                     {
-                        TellMaster("The talent spec you have chosen is invalid. Please select one from the valid range (reply 'talent spec' for options).");
+                        SendWhisper("The talent spec you have chosen is invalid. Please select one from the valid range (reply 'talent spec' for options).", fromPlayer);
                     }
                     else
                     {
@@ -6358,13 +6357,13 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                             SetActiveTalentSpec(ts);
                             if (!ApplyActiveTalentSpec())
                             {
-                                TellMaster("The talent spec has been set active but could not be applied. It appears something has gone awry.");
+                                SendWhisper("The talent spec has been set active but could not be applied. It appears something has gone awry.", fromPlayer);
                                 //DEBUG_LOG ("[PlayerbotAI]: Could set TalentSpec but could not apply it - 'talent spec #': Class: %i; chosenSpec: %i", (long)m_bot->getClass(), chosenSpec);
                             }
                         }
                         else
                         {
-                            TellMaster("An error has occured. Please let a Game Master know. This error has been logged.");
+                            SendWhisper("An error has occured. Please let a Game Master know. This error has been logged.", fromPlayer);
                             DEBUG_LOG ("[PlayerbotAI]: Could not GetTalentSpec to set & apply - 'talent spec #': Class: %i; chosenSpec: %i", (long)m_bot->getClass(), chosenSpec);
                         }
                     }
@@ -6464,11 +6463,11 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 SetState(BOTSTATE_LOOTING);
             }
             else
-                TellMaster("Target is not lootable by me.");
+                SendWhisper("Target is not lootable by me.", fromPlayer);
         }
         else
         {
-            TellMaster("No target is selected.");
+            SendWhisper("No target is selected.", fromPlayer);
             m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
         }
         return;
@@ -6521,7 +6520,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                 if (m_bot->HasSkill(SKILL_SKINNING))
                     collout += ", skin";
                 // TODO: perhaps change the command syntax, this way may be lacking in ease of use
-                TellMaster("Collect <what>?: none, combat, loot, quest, profession, objects" + collout);
+                SendWhisper("Collect <what>?: none, combat, loot, quest, profession, objects" + collout, fromPlayer);
                 break;
             }
             if (part == subcommand)
@@ -6570,9 +6569,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         }
 
         if (collset.length() > 1)
-            TellMaster("I'm collecting " + collset.substr(2));
+            SendWhisper("I'm collecting " + collset.substr(2), fromPlayer);
         else
-            TellMaster("I'm collecting nothing.");
+            SendWhisper("I'm collecting nothing.", fromPlayer);
     }
 
     // Handle bot quests
