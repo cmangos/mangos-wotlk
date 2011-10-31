@@ -6483,6 +6483,7 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
                 SendWhisper(oss.str(), fromPlayer);
             }
         }
+        // Reminder: if you change "fromPlayer.isGameMaster", don't forget _HandleCommandHelp()
         else if (fromPlayer.isGameMaster() && ExtractCommand("errorcheck", text))
         {
             // Creates some (no doubt negligible) strain on system, plus it's server maintenance, only allow GMs or higher. Tip: ".gm on"
@@ -7462,5 +7463,285 @@ void PlayerbotAI::_HandleCommandStats(std::string &text, Player &fromPlayer)
 
 void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 {
-    SendWhisper("Help is under construction, oh impatient one.", fromPlayer);
+    // "help help"? Seriously?
+    if (ExtractCommand("help", text))
+    {
+        SendWhisper("'help': Lists all the things you can order me to do... But it's up to me whether to follow your orders... Or not.", fromPlayer);
+        return;
+    }
+
+    bool bMainHelp = (text == "") ? true : false;
+    const std::string sInvalidSubcommand = "That's not a valid subcommand.";
+    std::string msg = "";
+    // All of these must containt the 'bMainHelp' clause -> help lists all major commands
+    // Further indented 'ExtractCommand("subcommand")' conditionals make sure these aren't printed for basic "help"
+    if (bMainHelp || ExtractCommand("attack", text))
+    {
+        msg = "'attack': Attack the selected target. Which would, of course, require a valid target.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("follow", text))
+    {
+        msg = "'follow': I will follow you - this also revives me if dead and teleports me if I'm far away.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("stay", text))
+    {
+        msg = "'stay': I will stay put until told otherwise.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("assist", text))
+    {
+        msg = "'assist <CHARACTER>': I will assist the character listed, attacking as they attack.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("spells", text))
+    {
+        msg = "'spells': I will list all the spells I know.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("cast", text))
+    {
+        msg = "'cast <SPELLID | (part of) SPELLNAME | [SPELLLINK]>': I will cast the spell listed.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("use", text))
+    {
+        msg = "'use [ITEM LINK]': I will use the linked item.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("equip", text))
+    {
+        msg = "'equip [ITEM LINK]': I will equip the linked item.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("reset", text))
+    {
+        msg = "'reset [ITEM LINK]': I will reset all my states, orders, loot list, talent spec, ... Hey, that's kind of like memory loss.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("report", text))
+    {
+        msg = "'report': This will give you a full report of all the items, creatures or gameobjects needed to finish my quests.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("stats", text))
+    {
+        msg = "'stats': This will inform you of my wealth, free bag slots and estimated equipment repair costs.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("survey", text))
+    {
+        msg = "'survey': Lists all available game objects near me.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("find", text))
+    {
+        msg = "'find [GAMEOBJECT]': I will find said game object, walk right up to it, and wait.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("get", text))
+    {
+        msg = "'get [GAMEOBJECT]': I will get said game object and return to your side.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("quest", text))
+    {
+        msg = "'quest': Lists my current quests.";
+        SendWhisper(msg, fromPlayer);
+
+        SendWhisper("'quest add [QUEST]': Adds this quest to my quest log.", fromPlayer);
+        SendWhisper("'quest drop [QUEST]': Removes this quest from my quest log.", fromPlayer);
+        SendWhisper("'quest end': Turns in my completed quests.", fromPlayer);
+        SendWhisper("'quest list': Lists the quests offered to me by this target.", fromPlayer);
+
+        // Catches all valid subcommands, also placeholders for potential future sub-subcommands
+        if (ExtractCommand("add", text, true)) {}
+        else if(ExtractCommand("drop", text, true)) {}
+        else if(ExtractCommand("end", text, true)) {}
+        else if (ExtractCommand("list", text, true)) {}
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("orders", text))
+    {
+        msg = "'orders': Shows you my orders. Free will is overrated, right?";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("pet", text))
+    {
+        if (!bMainHelp && text == "")
+            SendWhisper("'pet': This by itself is not a valid command. Just so you know. To be used with a subcommand, such as...", fromPlayer);
+
+        SendWhisper("'pet spells': Shows you the spells my pet knows.", fromPlayer);
+        SendWhisper("'pet cast <SPELLID | (part of) SPELLNAME | [SPELLLINK]>': Has my pet cast this spell. May require a treat. Or at least ask nicely.", fromPlayer);
+        SendWhisper("'pet toggle <SPELLID | (part of) SPELLNAME | [SPELLLINK]>': Toggles autocast for this spell.", fromPlayer);
+        SendWhisper("'pet state': Shows my pet's aggro mode.", fromPlayer);
+        SendWhisper("'pet react <(a)ggressive | (d)efensive | (p)assive>': Sets my pet's aggro mode.", fromPlayer);
+
+        // Catches all valid subcommands, also placeholders for potential future sub-subcommands
+        if (ExtractCommand("spells", text)) {}
+        else if(ExtractCommand("cast", text)) {}
+        else if(ExtractCommand("toggle", text)) {}
+        else if (ExtractCommand("state", text)) {}
+        else if (ExtractCommand("react", text))
+        {
+            SendWhisper("'pet react' has three modes.", fromPlayer);
+            SendWhisper("'aggressive' sets it so my precious attacks everything in sight.", fromPlayer);
+            SendWhisper("'defensive' sets it so it automatically attacks anything that attacks me, or anything I attack.", fromPlayer);
+            SendWhisper("'passive' makes it so my pet won't attack anything unless directly told to.", fromPlayer);
+
+            // Catches all valid subcommands, also placeholders for potential future sub-subcommands
+            if (ExtractCommand("aggressive", text, true)) {}
+            else if (ExtractCommand("defensive", text, true)) {}
+            else if (ExtractCommand("passive", text, true)) {}
+            if (text != "")
+                SendWhisper("That's not a valid subcommand", fromPlayer);
+        }
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("collect", text))
+    {
+        msg = "'collect': Tells you what my current collect status is. Also lists possible options.";
+        SendWhisper(msg, fromPlayer);
+        msg = "'collect <option> <option> ..': Sets what I collect. Obviously the 'none' option should be used alone, but all the others can be mixed.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("sell", text))
+    {
+        msg = "'sell [ITEM]': Adds this to my 'for sale' list.";
+        SendWhisper(msg, fromPlayer);
+
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("auction", text))
+    {
+        msg = "'auction [ITEM]': Lists all my active auctions. With pretty little links and such. Hi hi hi... I'm gonna be sooo rich!";
+        SendWhisper(msg, fromPlayer);
+
+        SendWhisper("'auction add [ITEM]': Adds the item to my 'auction off later' list. I have a lot of lists, you see...", fromPlayer);
+        SendWhisper("'auction remove [AUCTION]': Adds the item to my 'Don't auction after all' list. Hope it hasn't sold by then!", fromPlayer);
+
+        // Catches all valid subcommands, also placeholders for potential future sub-subcommands
+        if (ExtractCommand("add", text, true)) {}
+        else if(ExtractCommand("remove", text, true)) {}
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("repair", text))
+    {
+        if (!bMainHelp && text == "")
+            SendWhisper("'repair': This by itself is not a valid command. Just so you know. To be used with a subcommand, such as...", fromPlayer);
+
+        SendWhisper("'repair [ITEM]': Has me find an armorer and repair the items you listed.", fromPlayer);
+        SendWhisper("'repair all': Has me find an armorer and repair all my items, be they equipped or just taking up bagspace.", fromPlayer);
+
+        // Catches all valid subcommands, also placeholders for potential future sub-subcommands
+        if (ExtractCommand("all", text)) {}
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("talent", text))
+    {
+        msg = "'talent': Lists my talents, glyphs, unspent talent points and the cost to reset all talents.";
+        SendWhisper(msg, fromPlayer);
+
+        SendWhisper("'talent learn [TALENT]': Has me learn the linked talent.", fromPlayer);
+        SendWhisper("'talent reset': Resets my talents. Assuming I have the appropriate amount of sparkly gold, shiny silver, and... unrusted copper.", fromPlayer);
+        SendWhisper("'talent spec': Lists all talent specs I can use.", fromPlayer);
+        SendWhisper("'talent spec #': I will follow this talent spec. Well, I will if you picked a talent spec that exists.", fromPlayer);
+        if (fromPlayer.isGameMaster())
+            SendWhisper("'talent spec errorcheck': Does a validity check on all talentspecs in the database. Only works for GMs in GM mode which you are right now.", fromPlayer);
+
+        // Catches all valid subcommands, also placeholders for potential future sub-subcommands
+        if (fromPlayer.isGameMaster() && ExtractCommand("errorcheck", text)) {}
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("bank", text))
+    {
+        msg = "'bank': Gives you my bank balance. I thought that was private.";
+        SendWhisper(msg, fromPlayer);
+
+        SendWhisper("'bank deposit [ITEM] [ITEM] ..': Deposits the listed items in my bank.", fromPlayer);
+        SendWhisper("'bank withdraw [ITEM] [ITEM] ..': Withdraw the listed items from my bank.", fromPlayer);
+
+        // Catches all valid subcommands, also placeholders for potential future sub-subcommands
+        if (ExtractCommand("deposit", text)) {}
+        else if (ExtractCommand("withdraw", text)) {}
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+    else if (bMainHelp || ExtractCommand("skill", text))
+    {
+        msg = "'skill': Lists my primary professions.";
+        SendWhisper(msg, fromPlayer);
+
+        SendWhisper("'skill train': Lists the things this trainer can teach me. If you've targeted a trainer, that is.", fromPlayer);
+        SendWhisper("'skill learn [SKILL]': Have me learn this skill from the selected trainer.", fromPlayer);
+        SendWhisper("'skill unlearn [PROFESSION]': Unlearn the linked (primary) profession and everything that goes with it.", fromPlayer);
+
+        // Catches all valid subcommands, also placeholders for potential future sub-subcommands
+        if (ExtractCommand("train", text)) {}
+        else if (ExtractCommand("learn", text)) {}
+        else if (ExtractCommand("unlearn", text)) {}
+        if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+        if (!bMainHelp) return;
+    }
+
+    if (bMainHelp)
+        SendWhisper("'help': Gives you this listing of main commands... But then, you know that already don't you.", fromPlayer);
+
+    if(text != "")
+        SendWhisper("Either that is not a valid command, or someone forgot to add it to my help journal. I mean seriously, they can't expect me to remember *all* this stuff, can they?", fromPlayer);
 }
