@@ -60,8 +60,9 @@ Commands:
 /t BOTNAME bank withdraw [Item Link][Item Link] ..  (Withdraw item(s) from bank. ([Item Link] from bank))
 /t BOTNAME skill (lists all [PROFESSION LINK] bot Primary profession skills)
 /t BOTNAME skill train (lists [TRAINING LINK] available class, weapon & profession (Primary or Secondary) skills & spells, from selected trainer)
-/t BOTANME skill learn [TRAINING LINK] (learn selected skill or spell, from selected trainer)
+/t BOTNAME skill learn [TRAINING LINK] (learn selected skill or spell, from selected trainer)
 /t BOTNAME skill unlearn [PROFESSION LINK] (unlearn selected primary profession skill & all associated spells)
+/t BOTNAME help (lists all the commands above and how they work. Except for the ".bot command" ones.)
 
 Shortcuts:
 c = cast
