@@ -6083,7 +6083,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
     // Handle class & professions training:
     else if (ExtractCommand("skill", input))
-        _HandleCommandStats(input, fromPlayer);
+        _HandleCommandSkill(input, fromPlayer);
 
     // stats project: 11:30 15/12/10 rev.2 display bot statistics
     else if (ExtractCommand("stats", input))
@@ -6163,7 +6163,7 @@ bool PlayerbotAI::ExtractCommand(const std::string sLookingFor, std::string &tex
     if (sLookingFor.size() + 1 < text.size() && text.at(sLookingFor.size()) == ' '
         && 0 == text.substr(0, sLookingFor.size()).compare(sLookingFor))
     {
-        text = text.substr(sLookingFor.size());
+        text = text.substr(sLookingFor.size()+1);
         return true;
     }
 
