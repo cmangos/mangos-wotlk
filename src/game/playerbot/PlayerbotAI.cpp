@@ -7483,7 +7483,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("follow", text))
+    if (bMainHelp || ExtractCommand("follow", text))
     {
         msg = "'follow': I will follow you - this also revives me if dead and teleports me if I'm far away.";
         SendWhisper(msg, fromPlayer);
@@ -7491,7 +7491,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("stay", text))
+    if (bMainHelp || ExtractCommand("stay", text))
     {
         msg = "'stay': I will stay put until told otherwise.";
         SendWhisper(msg, fromPlayer);
@@ -7499,7 +7499,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("assist", text))
+    if (bMainHelp || ExtractCommand("assist", text))
     {
         msg = "'assist <CHARACTER>': I will assist the character listed, attacking as they attack.";
         SendWhisper(msg, fromPlayer);
@@ -7507,7 +7507,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("spells", text))
+    if (bMainHelp || ExtractCommand("spells", text))
     {
         msg = "'spells': I will list all the spells I know.";
         SendWhisper(msg, fromPlayer);
@@ -7515,7 +7515,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("cast", text))
+    if (bMainHelp || ExtractCommand("cast", text))
     {
         msg = "'cast <SPELLID | (part of) SPELLNAME | [SPELLLINK]>': I will cast the spell listed.";
         SendWhisper(msg, fromPlayer);
@@ -7523,7 +7523,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("use", text))
+    if (bMainHelp || ExtractCommand("use", text))
     {
         msg = "'use [ITEM LINK]': I will use the linked item.";
         SendWhisper(msg, fromPlayer);
@@ -7531,7 +7531,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("equip", text))
+    if (bMainHelp || ExtractCommand("equip", text))
     {
         msg = "'equip [ITEM LINK]': I will equip the linked item.";
         SendWhisper(msg, fromPlayer);
@@ -7539,7 +7539,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("reset", text))
+    if (bMainHelp || ExtractCommand("reset", text))
     {
         msg = "'reset [ITEM LINK]': I will reset all my states, orders, loot list, talent spec, ... Hey, that's kind of like memory loss.";
         SendWhisper(msg, fromPlayer);
@@ -7547,7 +7547,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("report", text))
+    if (bMainHelp || ExtractCommand("report", text))
     {
         msg = "'report': This will give you a full report of all the items, creatures or gameobjects needed to finish my quests.";
         SendWhisper(msg, fromPlayer);
@@ -7555,7 +7555,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("stats", text))
+    if (bMainHelp || ExtractCommand("stats", text))
     {
         msg = "'stats': This will inform you of my wealth, free bag slots and estimated equipment repair costs.";
         SendWhisper(msg, fromPlayer);
@@ -7563,7 +7563,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("survey", text))
+    if (bMainHelp || ExtractCommand("survey", text))
     {
         msg = "'survey': Lists all available game objects near me.";
         SendWhisper(msg, fromPlayer);
@@ -7571,7 +7571,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("find", text))
+    if (bMainHelp || ExtractCommand("find", text))
     {
         msg = "'find [GAMEOBJECT]': I will find said game object, walk right up to it, and wait.";
         SendWhisper(msg, fromPlayer);
@@ -7579,7 +7579,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("get", text))
+    if (bMainHelp || ExtractCommand("get", text))
     {
         msg = "'get [GAMEOBJECT]': I will get said game object and return to your side.";
         SendWhisper(msg, fromPlayer);
@@ -7587,7 +7587,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("quest", text))
+    if (bMainHelp || ExtractCommand("quest", text))
     {
         msg = "'quest': Lists my current quests.";
         SendWhisper(msg, fromPlayer);
@@ -7605,7 +7605,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("orders", text))
+    if (bMainHelp || ExtractCommand("orders", text))
     {
         msg = "'orders': Shows you my orders. Free will is overrated, right?";
         SendWhisper(msg, fromPlayer);
@@ -7613,7 +7613,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("pet", text))
+    if (bMainHelp || ExtractCommand("pet", text))
     {
         if (!bMainHelp && text == "")
             SendWhisper("'pet': This by itself is not a valid command. Just so you know. To be used with a subcommand, such as...", fromPlayer);
@@ -7646,7 +7646,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("collect", text))
+    if (bMainHelp || ExtractCommand("collect", text))
     {
         msg = "'collect': Tells you what my current collect status is. Also lists possible options.";
         SendWhisper(msg, fromPlayer);
@@ -7656,7 +7656,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("sell", text))
+    if (bMainHelp || ExtractCommand("sell", text))
     {
         msg = "'sell [ITEM]': Adds this to my 'for sale' list.";
         SendWhisper(msg, fromPlayer);
@@ -7664,7 +7664,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("auction", text))
+    if (bMainHelp || ExtractCommand("auction", text))
     {
         msg = "'auction [ITEM]': Lists all my active auctions. With pretty little links and such. Hi hi hi... I'm gonna be sooo rich!";
         SendWhisper(msg, fromPlayer);
@@ -7678,7 +7678,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("repair", text))
+    if (bMainHelp || ExtractCommand("repair", text))
     {
         if (!bMainHelp && text == "")
             SendWhisper("'repair': This by itself is not a valid command. Just so you know. To be used with a subcommand, such as...", fromPlayer);
@@ -7691,7 +7691,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("talent", text))
+    if (bMainHelp || ExtractCommand("talent", text))
     {
         msg = "'talent': Lists my talents, glyphs, unspent talent points and the cost to reset all talents.";
         SendWhisper(msg, fromPlayer);
@@ -7708,7 +7708,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("bank", text))
+    if (bMainHelp || ExtractCommand("bank", text))
     {
         msg = "'bank': Gives you my bank balance. I thought that was private.";
         SendWhisper(msg, fromPlayer);
@@ -7722,7 +7722,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
         if (!bMainHelp) return;
     }
-    else if (bMainHelp || ExtractCommand("skill", text))
+    if (bMainHelp || ExtractCommand("skill", text))
     {
         msg = "'skill': Lists my primary professions.";
         SendWhisper(msg, fromPlayer);
