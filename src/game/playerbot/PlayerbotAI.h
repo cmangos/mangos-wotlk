@@ -1784,6 +1784,7 @@ public:
     uint8 GetFreeBagSpace() const;
     void SellGarbage(bool listNonTrash = true, bool bDetailTrashSold = false, bool verbose = true);
     void Sell(const uint32 itemid);
+    std::string DropItem(const uint32 itemid);
     void AddAuction(const uint32 itemid, Creature* aCreature);
     void ListAuctions();
     bool RemoveAuction(const uint32 auctionid);
@@ -1811,6 +1812,7 @@ private:
     void _HandleCommandAttack(std::string &text, Player &fromPlayer);
     void _HandleCommandCast(std::string &text, Player &fromPlayer);
     void _HandleCommandSell(std::string &text, Player &fromPlayer);
+    void _HandleCommandDrop(std::string &text, Player &fromPlayer);
     void _HandleCommandRepair(std::string &text, Player &fromPlayer);
     void _HandleCommandAuction(std::string &text, Player &fromPlayer);
     void _HandleCommandBank(std::string &text, Player &fromPlayer);
@@ -1842,6 +1844,7 @@ private:
 
     void _doSellItem(Item* const item, std::ostringstream &report, std::ostringstream &canSell, uint32 &TotalCost, uint32 &TotalSold);
     void MakeItemLink(const Item *item, std::ostringstream &out, bool IncludeQuantity = true);
+    void MakeItemText(const Item *item, std::ostringstream &out, bool IncludeQuantity = true);
     void MakeItemLink(const ItemPrototype *item, std::ostringstream &out);
 
     // it is safe to keep these back reference pointers because m_bot

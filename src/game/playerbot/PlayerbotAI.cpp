@@ -4532,6 +4532,35 @@ void PlayerbotAI::MakeItemLink(const Item *item, std::ostringstream &out, bool I
         out << "x" << item->GetCount() << ' ';
 }
 
+// Builds a string for an item   |color[name]|r
+void PlayerbotAI::MakeItemText(const Item *item, std::ostringstream &out, bool IncludeQuantity /*= true*/)
+{
+    const ItemPrototype *proto = item->GetProto();
+    // Color
+    out << "|c";
+    switch (proto->Quality)
+    {
+        case ITEM_QUALITY_POOR:     out << "ff9d9d9d"; break;  //GREY
+        case ITEM_QUALITY_NORMAL:   out << "ffffffff"; break;  //WHITE
+        case ITEM_QUALITY_UNCOMMON: out << "ff1eff00"; break;  //GREEN
+        case ITEM_QUALITY_RARE:     out << "ff0070dd"; break;  //BLUE
+        case ITEM_QUALITY_EPIC:     out << "ffa335ee"; break;  //PURPLE
+        case ITEM_QUALITY_LEGENDARY: out << "ffff8000"; break;  //ORANGE
+        case ITEM_QUALITY_ARTIFACT: out << "ffe6cc80"; break;  //LIGHT YELLOW
+        case ITEM_QUALITY_HEIRLOOM: out << "ffe6cc80"; break;  //LIGHT YELLOW
+        default:                    out << "ffff0000"; break;  //Don't know color, so red?
+    }
+
+    // Name
+    std::string name = proto->Name1;
+    ItemLocalization(name, proto->ItemId);
+    out << "[" << name << "]|r";
+
+    // Stacked items
+    if (item->GetCount() > 1 && IncludeQuantity)
+        out << "x" << item->GetCount() << ' ';
+}
+
 void PlayerbotAI::extractAuctionIds(const std::string& text, std::list<uint32>& auctionIds) const
 {
     uint8 pos = 0;
@@ -5926,6 +5955,24 @@ void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bV
     }
 }
 
+std::string PlayerbotAI::DropItem(const uint32 itemid)
+{
+    Item* pItem = FindItem(itemid);
+    if (pItem)
+    {
+        std::ostringstream report;
+
+        // Yea, that's right, get the item info BEFORE you destroy it :)
+        MakeItemText(pItem, report, true);
+
+        m_bot->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
+
+        return report.str();
+    }
+
+    return "";
+}
+
 void PlayerbotAI::GetTaxi(ObjectGuid guid, BotTaxiNode& nodes)
 {
     // DEBUG_LOG("[PlayerbotAI]: GetTaxi - %s node[0] %d node[1] %d", m_bot->GetName(), nodes[0], nodes[1]);
@@ -6037,6 +6084,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
     else if (ExtractCommand("sell", input))
         _HandleCommandSell(input, fromPlayer);
+
+    else if (ExtractCommand("drop", input))
+        _HandleCommandDrop(input, fromPlayer);
 
     else if (ExtractCommand("repair", input))
         _HandleCommandRepair(input, fromPlayer);
@@ -6325,6 +6375,33 @@ void PlayerbotAI::_HandleCommandSell(std::string &text, Player &fromPlayer)
     for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
         m_tasks.push_back(std::pair<enum TaskFlags,uint32>(SELL_ITEMS, *it));
     m_findNPC.push_back(VENDOR_MASK);
+}
+
+// _HandleCommandDrop: Handle dropping items
+// drop [Item Link][Item Link] .. -- Drops item(s) from bot's inventory
+void PlayerbotAI::_HandleCommandDrop(std::string &text, Player &fromPlayer)
+{
+    if (text == "")
+    {
+        SendWhisper("drop must be used with one or more item links (shift + click the item).", fromPlayer);
+        return;
+    }
+
+    std::ostringstream report;
+    std::list<uint32> itemIds;
+    extractItemIds(text, itemIds);
+    report << "Dropped ";
+    for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+        report << DropItem(*it);
+
+    if (report.str() == "Dropped ")
+    {
+        SendWhisper("No items were dropped. It would appear something has gone hinky.", fromPlayer);
+        return;
+    }
+
+    report << ".";
+    SendWhisper(report.str(), fromPlayer);
 }
 
 // _HandleCommandRepair: Handle repair items
@@ -7698,7 +7775,17 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     }
     if (bMainHelp || ExtractCommand("sell", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("sell", "Adds this to my 'for sale' list.", HL_ITEM), fromPlayer);
+        SendWhisper(_HandleCommandHelpHelper("sell", "Adds this to my 'for sale' list.", HL_ITEM, true), fromPlayer);
+
+        if (!bMainHelp)
+        {
+            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            return;
+        }
+    }
+    if (bMainHelp || ExtractCommand("drop", text))
+    {
+        SendWhisper(_HandleCommandHelpHelper("drop", "Drops the linked item(s). Permanently.", HL_ITEM, true), fromPlayer);
 
         if (!bMainHelp)
         {

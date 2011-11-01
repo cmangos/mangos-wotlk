@@ -44,6 +44,7 @@ Commands:
 /t BOTNAME collect (shows collect subcommand options and current collect status)
 /t BOTNAME collect <subcommand(s)> (subcommands can be alone or together [none combat loot objects profession quest])
 /t BOTNAME sell [ITEM LINK] (bot will add item to it's m_itemIds, for later sale)
+/t BOTNAME drop [ITEM LINK] (bot will drop item immediately, permanently destroying it)
 /t BOTNAME auction (bot will display all it's active owned auctions. Auction info will include an [AUCTION LINK] )
 /t BOTNAME auction add [ITEM LINK] (bot will add item to it's m_itemIds, for later auction)
 /t BOTNAME auction remove [AUCTION LINK] (bot will add auctionid to it's m_auctions, for later auction cancellation)
