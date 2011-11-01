@@ -1549,6 +1549,23 @@ public:
     typedef std::map<ObjectGuid, AttackerInfo> AttackerInfoList;
     typedef std::map<uint32, float> SpellRanges;
 
+    enum HELPERLINKABLES
+    {
+        HL_NONE,
+        HL_PROFESSION,
+        HL_ITEM,
+        HL_TALENT,
+        HL_SKILL,
+        HL_OPTION,
+        HL_PETAGGRO,
+        HL_QUEST,
+        HL_GAMEOBJECT,
+        HL_SPELL,
+        HL_TARGET,
+        HL_NAME,
+        HL_AUCTION
+    };
+
 public:
     PlayerbotAI(PlayerbotMgr * const mgr, Player * const bot);
     virtual ~PlayerbotAI();
@@ -1811,6 +1828,7 @@ private:
     void _HandleCommandStats(std::string &text, Player &fromPlayer);
     void _HandleCommandHelp(std::string &text, Player &fromPlayer);
     void _HandleCommandHelp(const char* szText, Player &fromPlayer) { std::string text = szText; _HandleCommandHelp(text, fromPlayer); }
+    std::string _HandleCommandHelpHelper(std::string sCommand, std::string sExplain, bool bCommandShort = false, HELPERLINKABLES reqLink = HL_NONE, bool bReqLinkMultiples = false);
 
     // ****** Closed Actions ********************************
     // These actions may only be called at special times.

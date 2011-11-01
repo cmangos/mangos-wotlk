@@ -7477,8 +7477,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     // Further indented 'ExtractCommand("subcommand")' conditionals make sure these aren't printed for basic "help"
     if (bMainHelp || ExtractCommand("attack", text))
     {
-        msg = "'attack': Attack the selected target. Which would, of course, require a valid target.";
-        SendWhisper(msg, fromPlayer);
+        SendWhisper(_HandleCommandHelpHelper("attack", "Attack the selected target. Which would, of course, require a valid target.", false, HL_TARGET), fromPlayer);
 
         if (!bMainHelp)
         {
@@ -7543,7 +7542,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     }
     if (bMainHelp || ExtractCommand("use", text))
     {
-        msg = "'use [ITEM LINK]': I will use the linked item.";
+        msg = "'use [ITEM]': I will use the linked item.";
         SendWhisper(msg, fromPlayer);
 
         if (!bMainHelp)
@@ -7554,7 +7553,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     }
     if (bMainHelp || ExtractCommand("equip", text))
     {
-        msg = "'equip [ITEM LINK]': I will equip the linked item.";
+        msg = "'equip [ITEM]': I will equip the linked item.";
         SendWhisper(msg, fromPlayer);
 
         if (!bMainHelp)
@@ -7826,4 +7825,107 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 
     if(text != "")
         SendWhisper("Either that is not a valid command, or someone forgot to add it to my help journal. I mean seriously, they can't expect me to remember *all* this stuff, can they?", fromPlayer);
+}
+
+std::string PlayerbotAI::_HandleCommandHelpHelper(std::string sCommand, std::string sExplain, bool bCommandShort, HELPERLINKABLES reqLink, bool bReqLinkMultiples)
+{
+    if (sCommand == "")
+    {
+        DEBUG_LOG("[PlayerbotAI] _HandleCommandHelpHelper called with an empty sCommand. Ignoring call.");
+        return "";
+    }
+
+    std::ostringstream oss;
+    oss << "'|cffffffff";
+    if (bCommandShort)
+        oss << "(" << sCommand.at(0) << ")" << sCommand.substr(1);
+    else
+        oss << sCommand;
+
+    if (reqLink != HL_NONE)
+    {
+        if (reqLink == HL_PROFESSION)
+        {
+            oss << " [PROFESSION]";
+            if (bReqLinkMultiples)
+                oss << " [PROFESSION] ..";
+        }
+        else if (reqLink == HL_ITEM)
+        {
+            oss << " [ITEM]";
+            if (bReqLinkMultiples)
+                oss << " [ITEM] ..";
+        }
+         else if (reqLink == HL_TALENT)
+        {
+            oss << " [TALENT]";
+            if (bReqLinkMultiples)
+                oss << " [TALENT] ..";
+        }
+        else if (reqLink == HL_SKILL)
+        {
+            oss << " [SKILL]";
+            if (bReqLinkMultiples)
+                oss << " [SKILL] ..";
+        }
+        else if (reqLink == HL_OPTION)
+        {
+            oss << " <OPTION>";
+            if (bReqLinkMultiples)
+                oss << " <OPTION> ..";
+        }
+        else if (reqLink == HL_PETAGGRO)
+        {
+            oss << " <(a)ggressive | (d)efensive | (p)assive>";
+            if (bReqLinkMultiples)
+                DEBUG_LOG("[PlayerbotAI] _HandleCommandHelpHelper: sCommand \"pet\" with bReqLinkMultiples \"true\". ... Why? Bug, surely.");
+        }
+        else if (reqLink == HL_QUEST)
+        {
+            oss << " [QUEST]";
+            if (bReqLinkMultiples)
+                oss << " [QUEST] ..";
+        }
+        else if (reqLink == HL_GAMEOBJECT)
+        {
+            oss << " [GAMEOBJECT]";
+            if (bReqLinkMultiples)
+                oss << " [GAMEOBJECT] ..";
+        }
+        else if (reqLink == HL_SPELL)
+        {
+            oss << " <Id# | (part of) name | [SPELL]>";
+            if (bReqLinkMultiples)
+                oss << " <Id# | (part of) name | [SPELL]> ..";
+        }
+        else if (reqLink == HL_TARGET)
+        {
+            oss << " (TARGET)";
+            if (bReqLinkMultiples)
+                oss << " (TARGET) ..";
+        }
+        else if (reqLink == HL_NAME)
+        {
+            oss << " <NAME>";
+            if (bReqLinkMultiples)
+                oss << " <NAME> ..";
+        }
+        else if (reqLink == HL_AUCTION)
+        {
+            oss << " [AUCTION]";
+            if (bReqLinkMultiples)
+                oss << " [AUCTION] ..";
+        }
+        else
+        {
+            oss << " {unknown}";
+            if (bReqLinkMultiples)
+                oss << " {unknown} ..";
+            DEBUG_LOG("[PlayerbotAI]: _HandleCommandHelpHelper - Uncaught case");
+            }
+    }
+
+    oss << "|r': " << sExplain;
+
+    return oss.str();
 }
