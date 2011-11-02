@@ -6784,13 +6784,16 @@ void PlayerbotAI::_HandleCommandCollect(std::string &text, Player &fromPlayer)
             if (distance > 0 && distance <= m_mgr->m_confCollectDistanceMax)
             {
                 m_collectDist = distance;
-                SendWhisper("I will now collect items within %u yards.", m_collectDist);
+                std::ostringstream oss;
+                oss << "I will now collect items within " << m_collectDist << " yards.";
+                SendWhisper(oss.str(), fromPlayer);
             }
             else
             {
 				m_collectDist = m_mgr->m_confCollectDistanceMax;
-                SendWhisper("I will now collect items within %u yards. %u yards is just too far away.",
-                    m_mgr->m_confCollectDistanceMax, distance);
+                std::stringstream oss;
+                oss << "I will now collect items within " << m_mgr->m_confCollectDistanceMax << " yards. " << distance << " yards is just too far away.",
+                SendWhisper(oss.str(), fromPlayer);
             }
         }
         else if (ExtractCommand("none", text) || ExtractCommand("nothing", text))
@@ -6806,7 +6809,6 @@ void PlayerbotAI::_HandleCommandCollect(std::string &text, Player &fromPlayer)
             if (m_bot->HasSkill(SKILL_SKINNING))
                 oss << ", skin";
             // TODO: perhaps change the command syntax, this way may be lacking in ease of use
-			distance:<1-%u>
             SendWhisper(oss.str(), fromPlayer);
             break;
         }
