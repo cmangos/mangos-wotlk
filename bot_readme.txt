@@ -19,7 +19,7 @@ Commands:
 /s .bot co|combatorder BOTNAME COMBATORDER [TARGET]
 /invite BOTNAME (bot will auto accept invite)
 
-For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '/t BOTNAME auction remove'.
+For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '/t BOTNAME help auction remove'.
 
 /t BOTNAME attack (bot will attack selected target, similar to the way a pet can attack)
 /t BOTNAME follow (orders bot to follow player; will also revive bot if dead or teleport bot if far away)
