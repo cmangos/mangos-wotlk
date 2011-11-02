@@ -175,7 +175,7 @@ Trading with bots:
 
 To trade items/money with your bot simply initiate a trade and the bot will tell you how much money and items are available. To request an item simple whisper the bot and shift click the link of the item you would like. You can link multiple items on the same line. You can also request money in the following manner when the trade window is open:
 /w BOTNAME 10g <-- request that the bot give you 10 gold
-/w BOTNAME 6g500s25c <-- request 6 gold, 500 silver, and 25 cooper
+/w BOTNAME 6g500s25c <-- request 6 gold, 500 silver, and 25 copper
 
 A bot is also able to show an item in its 'Will not be traded' slot. The item can be either
 in its bags or be equipped and even be soulbound. Using this you can cast spells/enchantments
