@@ -63,10 +63,8 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     m_taxiMaster(ObjectGuid())
 {
 
-    // set bot state and needed item list
+    // set bot state
     m_botState = BOTSTATE_NORMAL;
-    SetQuestNeedItems();
-    SetQuestNeedCreatures();
 
     // reset some pointers
     m_targetChanged = false;
@@ -77,6 +75,7 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
 
     // set collection options
     m_collectionFlags = 0;
+    m_collectDist = m_mgr->m_confCollectDistance;
     if (m_mgr->m_confCollectCombat)
         SetCollectFlag(COLLECT_FLAG_COMBAT);
     if (m_mgr->m_confCollectQuest)
@@ -89,6 +88,10 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
         SetCollectFlag(COLLECT_FLAG_SKIN);
     if (m_mgr->m_confCollectObjects)
         SetCollectFlag(COLLECT_FLAG_NEAROBJECT);
+
+    // set needed item list
+    SetQuestNeedItems();
+    SetQuestNeedCreatures();
 
     // start following master (will also teleport bot to master)
     SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
@@ -2083,6 +2086,41 @@ void PlayerbotAI::SetQuestNeedItems()
             if (!qInfo->ReqItemCount[i] || (qInfo->ReqItemCount[i] - qData.m_itemcount[i]) <= 0)
                 continue;
             m_needItemList[qInfo->ReqItemId[i]] = (qInfo->ReqItemCount[i] - qData.m_itemcount[i]);
+
+            // collect flags not set to gather quest objects skip remaining section
+            if (!HasCollectFlag(COLLECT_FLAG_NEAROBJECT) && !HasCollectFlag(COLLECT_FLAG_QUEST))
+                continue;
+
+            // TODO: find faster way to handle this look up instead of using SQL lookup for each item
+            QueryResult *result;
+            // determine if GOs are needed
+            result = WorldDatabase.PQuery("SELECT entry FROM gameobject_template WHERE questitem1='%u' "
+                "OR questitem2='%u' OR questitem3='%u' OR questitem4='%u' OR questitem5='%u' OR questitem6='%u'",
+                qInfo->ReqItemId[i], qInfo->ReqItemId[i], qInfo->ReqItemId[i], qInfo->ReqItemId[i],
+                qInfo->ReqItemId[i], qInfo->ReqItemId[i]);
+
+            if (result)
+            {
+                do
+                {
+                    Field *fields = result->Fetch();
+                    uint32 entry = fields[0].GetUInt32();
+
+                    GameObjectInfo const * gInfo = ObjectMgr::GetGameObjectInfo(entry);
+                    if (!gInfo)
+                        continue;
+
+                    // add this GO to our collection list if is chest/ore/herb
+                    if (gInfo->type == GAMEOBJECT_TYPE_CHEST)
+                    {
+                        m_collectObjects.push_back(entry);
+                        m_collectObjects.sort();
+                        m_collectObjects.unique();
+                    }
+                } while (result->NextRow());
+
+                delete result;
+            }
         }
     }
 }
@@ -2147,7 +2185,7 @@ void PlayerbotAI::DoLoot()
     WorldObject *wo = m_bot->GetMap()->GetWorldObject(m_lootCurrent);
 
     // clear invalid object or object that is too far from master
-    if (!wo || GetMaster()->GetDistance(wo) > BOTLOOT_DISTANCE)
+    if (!wo || GetMaster()->GetDistance(wo) > float(m_mgr->m_confCollectDistanceMax))
     {
         m_lootCurrent = ObjectGuid();
         return;
@@ -2321,7 +2359,7 @@ void PlayerbotAI::DoLoot()
 
         // determine bot's skill value for object's required skill
         if (skillId != SKILL_NONE)
-            SkillValue = uint32(m_bot->GetPureSkillValue(skillId));
+            SkillValue = uint32(m_bot->GetSkillValue(skillId));
 
         // bot has the specific skill or object requires no skill at all
         if ((m_bot->HasSkill(skillId) && skillId != SKILL_NONE) || (skillId == SKILL_NONE && go))
@@ -2431,6 +2469,11 @@ void PlayerbotAI::DoLoot()
             DEBUG_LOG ("[PlayerbotAI]: DoLoot attempts failed on [%s]",
                        go ? go->GetGOInfo()->name : c->GetCreatureInfo()->Name);
             m_lootCurrent = ObjectGuid();
+
+            // remove this GO from our list using the same settings that it was added with earlier
+            if (go && HasCollectFlag(COLLECT_FLAG_NEAROBJECT) && go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
+                m_collectObjects.remove(go->GetEntry());
+
             // clear movement target, take next target on next update
             m_bot->GetMotionMaster()->Clear();
             m_bot->GetMotionMaster()->MoveIdle();
@@ -3757,12 +3800,12 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
     {
         bar.step();
 
-        /* 0			talentspec_id
-        1			name
-        2			class
-        3			purpose
-        4 to 74		talent_10 to 71
-        75 to 80		major_glyph_15, 30, 80, minor_glyph_15, 50, 70
+        /* 0            talentspec_id
+        1            name
+        2            class
+        3            purpose
+        4 to 74        talent_10 to 71
+        75 to 80        major_glyph_15, 30, 80, minor_glyph_15, 50, 70
         */
         Field* fields = result->Fetch();
 
@@ -3771,7 +3814,7 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
             continue;  // Of course, if the impossible ever does happen, we can't very well identify a TalentSpec without an ID...
 
         std::string ts_name = fields[1].GetCppString();
-        /*	Commented out? Because it's only required if you assume only players (not the server) pick talentspecs
+        /*    Commented out? Because it's only required if you assume only players (not the server) pick talentspecs
         if (0 == ts_name.size())
         {
         TellMaster("TalentSpec ID: %u does not have a name.", ts_id);
@@ -3788,7 +3831,7 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
             TellMaster("TalentSpec: %u. \"%s\" contains an invalid class: %i.", ts_id, ts_name.c_str(), ts_class);
 
             delete result;
-            return ts_id;	// invalid class
+            return ts_id;    // invalid class
         }
 
         // Can't really be error checked, can it?
@@ -3818,7 +3861,7 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
                 TellMaster("TalentSpec: %u. \"%s\" (class: %i) contains an invalid talent for level %u: %u", ts_id, ts_name.c_str(), ts_class, (i+10), fields[fieldLoc].GetUInt16());
 
                 delete result;
-                return ts_id;	// invalid talent
+                return ts_id;    // invalid talent
             }
         }
 
@@ -3916,12 +3959,12 @@ std::list<TalentSpec> PlayerbotAI::GetTalentSpecs(long specClass)
 
     do
     {
-        /* 0			talentspec_id
-        1			name
-        2			class
-        3			purpose
-        4 to 74		talent_10 to 71
-        75 to 80		major_glyph_15, 30, 80, minor_glyph_15, 50, 70
+        /* 0            talentspec_id
+        1            name
+        2            class
+        3            purpose
+        4 to 74        talent_10 to 71
+        75 to 80        major_glyph_15, 30, 80, minor_glyph_15, 50, 70
         */
         Field* fields = result->Fetch();
 
@@ -3937,7 +3980,7 @@ std::list<TalentSpec> PlayerbotAI::GetTalentSpecs(long specClass)
         {
             TellMaster("TalentSpec: %u. \"%s\" contains an invalid class.", fields[0].GetUInt32(), ts.specName.c_str());
 
-            continue;	// this spec is clearly broken, the next may or may not be
+            continue;    // this spec is clearly broken, the next may or may not be
         }
 
         ts.specPurpose = (TalentSpecPurpose)fields[3].GetUInt32();
@@ -4004,11 +4047,11 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
         if (i == choice)
         {
             /*
-            0			talentspec_id
-            1			name
-            2			class
-            3			purpose
-            4 to 74	talent_10 to 71
+            0            talentspec_id
+            1            name
+            2            class
+            3            purpose
+            4 to 74    talent_10 to 71
             75 to 80    major_glyph_15, 30, 80, minor_glyph_15, 50, 70
             */
             Field* fields = result->Fetch();
@@ -4150,8 +4193,8 @@ bool PlayerbotAI::ApplyActiveTalentSpec()
 /**
 * ValidateTalent tests a talent against class to see if it belongs to that class
 *
-* uint16 talent:		talent ID
-* long charClass:	member of the Classes enum or ClassesCombatPets enum
+* uint16 talent:        talent ID
+* long charClass:    member of the Classes enum or ClassesCombatPets enum
 *
 * return true  -> ok
 * return false -> not a valid talent for that class
@@ -4236,8 +4279,8 @@ bool PlayerbotAI::ValidateTalent(uint16 talent, long charClass)
 /**
 * ValidateGlyph tests a glyph against class to see if it belongs to that class - accepts both Major and Minor glyphs
 *
-* uint16 glyph:		glyph ID
-* long charClass:	member of the Classes enum or ClassesCombatPets enum
+* uint16 glyph:        glyph ID
+* long charClass:    member of the Classes enum or ClassesCombatPets enum
 *
 * return true  -> ok
 * return false -> not a valid glyph for that class
@@ -4251,8 +4294,8 @@ bool PlayerbotAI::ValidateGlyph(uint16 glyph, long charClass)
 /**
 * ValidateMajorGlyph tests a glyph against class to see if it belongs to that class - only accepts Major glyphs
 *
-* uint16 glyph:		glyph ID
-* long charClass:	member of the Classes enum or ClassesCombatPets enum
+* uint16 glyph:        glyph ID
+* long charClass:    member of the Classes enum or ClassesCombatPets enum
 *
 * return true  -> ok
 * return false -> not a valid major glyph for that class
@@ -4328,8 +4371,8 @@ bool PlayerbotAI::ValidateMajorGlyph(uint16 glyph, long charClass)
 /**
 * ValidateMinorGlyph tests a glyph against class to see if it belongs to that class - only accepts Minor glyphs
 *
-* uint16 glyph:		glyph ID
-* long charClass:	member of the Classes enum or ClassesCombatPets enum
+* uint16 glyph:        glyph ID
+* long charClass:    member of the Classes enum or ClassesCombatPets enum
 *
 * return true  -> ok
 * return false -> not a valid minor glyph for that class
@@ -4835,7 +4878,6 @@ void PlayerbotAI::findNearbyGO()
         return;
 
     std::list<GameObject*> tempTargetGOList;
-    float radius = 20.0f;
 
     for (BotLootEntry::iterator itr = m_collectObjects.begin(); itr != m_collectObjects.end(); itr++)
     {
@@ -4861,9 +4903,9 @@ void PlayerbotAI::findNearbyGO()
         }
 
         // search for GOs with entry, within range of m_bot
-        MaNGOS::GameObjectEntryInPosRangeCheck go_check(*m_bot, entry, m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(), radius);
+        MaNGOS::GameObjectEntryInPosRangeCheck go_check(*m_bot, entry, m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(), float(m_collectDist));
         MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectEntryInPosRangeCheck> checker(tempTargetGOList, go_check);
-        Cell::VisitGridObjects(m_bot, checker, radius);
+        Cell::VisitGridObjects(m_bot, checker, float(m_collectDist));
 
         // no objects found, continue to next entry
         if (tempTargetGOList.empty())
@@ -6735,6 +6777,22 @@ void PlayerbotAI::_HandleCommandCollect(std::string &text, Player &fromPlayer)
             if (!HasCollectFlag(COLLECT_FLAG_NEAROBJECT))
                 m_collectObjects.clear();
         }
+        else if (ExtractCommand("distance:", text))
+        {
+            uint32 distance;
+            sscanf(text.c_str(), "distance:%u", &distance);
+            if (distance > 0 && distance <= m_mgr->m_confCollectDistanceMax)
+            {
+                m_collectDist = distance;
+                SendWhisper("I will now collect items within %u yards.", m_collectDist);
+            }
+            else
+            {
+				m_collectDist = m_mgr->m_confCollectDistanceMax;
+                SendWhisper("I will now collect items within %u yards. %u yards is just too far away.",
+                    m_mgr->m_confCollectDistanceMax, distance);
+            }
+        }
         else if (ExtractCommand("none", text) || ExtractCommand("nothing", text))
         {
             m_collectionFlags = 0;
@@ -6743,11 +6801,13 @@ void PlayerbotAI::_HandleCommandCollect(std::string &text, Player &fromPlayer)
         }
         else
         {
-            std::string collout = "";
+            std::ostringstream oss;
+			oss << "Collect <collectable(s)>: none | distance:<1-" << m_mgr->m_confCollectDistanceMax << ">, combat, loot, quest, profession, objects";
             if (m_bot->HasSkill(SKILL_SKINNING))
-                collout += ", skin";
+                oss << ", skin";
             // TODO: perhaps change the command syntax, this way may be lacking in ease of use
-            SendWhisper("Collect <collectable(s)>: none, combat, loot, quest, profession, objects" + collout, fromPlayer);
+			distance:<1-%u>
+            SendWhisper(oss.str(), fromPlayer);
             break;
         }
     }

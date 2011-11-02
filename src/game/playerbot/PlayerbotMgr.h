@@ -55,6 +55,8 @@ public:
     bool m_confCollectLoot;
     bool m_confCollectSkin;
     bool m_confCollectObjects;
+    uint32 m_confCollectDistance;
+    uint32 m_confCollectDistanceMax;
 
 private:
     Player* const m_master;
