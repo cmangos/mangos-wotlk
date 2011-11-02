@@ -1,13 +1,15 @@
 What it is:
 ===========
 
-Playerbot lets you add another character from your account as a bot that you can control and which will hopefully help you. Only characters from your account can be used, so you can have a maximum of 9 bots at one time.
+Playerbot lets you add another character from your account as a bot that you can command. Only characters from your account can be used, so you can have a maximum of 9 bots at one time per account.
 
-This was taken from the Trinity site, and modified slightly by me to get some of the kinks out. I reworked the priest class and also added a mage class and a warrior class, which are still in crude form. Any class can be used as a bot - just don't expect much in the way of spells or abilities until someone writes the code for them.
+This was taken from the Trinity site, and modified slightly by me to get some of the kinks out.
 
-Bots will only use abilities that they have - for example, a priest will only use the renew spell if it has been trained. Also, bot's equipment will lose durability like any other character. So every so often you'll need to log in and repair and train your bot.
+Bots will only use abilities that they have - for example, a priest will only use the renew spell if it has been trained. A bot's equipment will lose durability like any other character.
 
-For MaNGOS 10816+
+All help is welcome be it through code development, reports from play testing or just discussion. Meet us in the MaNGOS forum thread.
+
+For MaNGOS 11834+
 
 Commands:
 =========
@@ -16,6 +18,9 @@ Commands:
 /s .bot remove BOTNAME
 /s .bot co|combatorder BOTNAME COMBATORDER [TARGET]
 /invite BOTNAME (bot will auto accept invite)
+
+For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '/t BOTNAME auction remove'.
+
 /t BOTNAME attack (bot will attack selected target, similar to the way a pet can attack)
 /t BOTNAME follow (orders bot to follow player; will also revive bot if dead or teleport bot if far away)
 /t BOTNAME stay
@@ -135,8 +140,9 @@ Creature interaction with bots:
 Repair with bots:
 =================
 
-  bot(s) can now repair <all or selected> items, either equipped or in bags. If the bot(s) is a member of a guild, then they pay
-  else the bot(s) pays. If the bot(s) cannot pay for the repair, they remain damaged.
+  Bot can now repair <all or selected> items - equipped or in bags. If the bot is 
+  a member of a guild, then the guild fund is used for repairs. If not, the bots own 
+  gold supply is used. If the bot cannot pay for the repair, they remain damaged.
 
   The new 'stats' command provides useful information to help in the repair decision.
 
@@ -172,9 +178,9 @@ To trade items/money with your bot simply initiate a trade and the bot will tell
 /w BOTNAME 6g500s25c <-- request 6 gold, 500 silver, and 25 cooper
 
 A bot is also able to show an item in its 'Will not be traded' slot. The item can be either
-in its bags or be equipped and even be soulbound. By this you can cast spells/enchantments
+in its bags or be equipped and even be soulbound. Using this you can cast spells/enchantments
 on soulbound items ('nt' stands for 'not trading').
-/w BOTNAME nt [Powerful Soulbound Item]
+/w BOTNAME nt [Enchantable Soulbound Item]
 
 More Information:
 =================
@@ -202,36 +208,13 @@ To use or equip items for your bot say:
 If you inspect your bot, your bot will tell you what items you have in your inventory that you can equip. To create a link in the chat window, hold the shift key and press the left mouse button when clicking the link.
 
 
-Changes from Trinity to Mangos:
-===============================
+Installation:
+=============
+Merge PlayerbotAI code with your favorite core/mods, or simply compile. Follow Mangos Core installation steps.
 
-I added the following in SharedDefines.h.
+Copy src/game/playerbot/playerbot.conf.dist.in for configuration variables!
+Install appropriate files from sql/playerbotai
 
-enum SpellCategory
-{
-	SPELL_CATEGORY_FOOD             = 11,
-	SPELL_CATEGORY_DRINK            = 59
-};
-
-I also had to add the following to Player.h:
-
-enum PlayerStateType
-{
-	PLAYER_STATE_NONE              = 0,
-	PLAYER_STATE_SIT               = 1
-};
-
-
-Configuration variables:
-========================
-Also see src/mangosd/mangosd.conf.dist for configuration variables!
-
-    PlayerbotAI.DebugWhisper
-        Enable debug output by whispering master
-        Default: 0 - off
-                 1 - on
-
-    PlayerbotAI.FollowDistanceMin
-    PlayerbotAI.FollowDistanceMax
-        Min. and max. follow distance for bots
-        Default: 0.5 / 1.0
+History:
+========
+This project was ported from a Trinity mod.
