@@ -4025,7 +4025,7 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
     for (int i=0; i<3; i++) ts.glyphIdMinor[i] = 0;
 
     // Weed out invalid choice - ts has been zero'd out anyway
-    if (0 >= choice || GetTalentSpecsAmount(specClass) < choice) return ts;
+    if (0 >= choice || (long)GetTalentSpecsAmount(specClass) < choice) return ts;
 
     std::ostringstream query;
     query << "SELECT * FROM playerbot_talentspec WHERE class = " << specClass << " ORDER BY talentspec_id ASC";
@@ -4041,7 +4041,7 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
         return ts; // empty
     }
 
-    for (int i=1; i<=GetTalentSpecsAmount(specClass); i++)
+    for (int i=1; i<=(int)GetTalentSpecsAmount(specClass); i++)
     {
 
         if (i == choice)
@@ -4138,7 +4138,7 @@ bool PlayerbotAI::ApplyActiveTalentSpec()
             continue;
 
         // currentRank = 0 to (MAX_RANK-1) not 1 to MAX_RANK
-        for (int i=0; i<=talent.currentRank; i++)
+        for (int i=0; i<=(int)talent.currentRank; i++)
         {
             int j = 0; // why 0 and not -1? Because if talentsToCheck (no TalentSpec) is empty and talents have been learned -> NOK
             for (std::vector<uint16>::iterator it = talentsToLearn.begin(); it != talentsToLearn.end(); it++)
