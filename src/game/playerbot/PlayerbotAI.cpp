@@ -3944,10 +3944,8 @@ std::list<TalentSpec> PlayerbotAI::GetTalentSpecs(long specClass)
 {
     TalentSpec ts;
     std::list<TalentSpec> tsList;
-    std::ostringstream query;
-    query << "SELECT * FROM playerbot_talentspec WHERE class = " << specClass << " ORDER BY talentspec_id ASC";
 
-    QueryResult *result = CharacterDatabase.Query(query.str().c_str());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT * FROM playerbot_talentspec WHERE class = %i ORDER BY talentspec_id ASC", specClass);
 
     if( !result )
     {
@@ -4027,10 +4025,7 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
     // Weed out invalid choice - ts has been zero'd out anyway
     if (0 >= choice || (long)GetTalentSpecsAmount(specClass) < choice) return ts;
 
-    std::ostringstream query;
-    query << "SELECT * FROM playerbot_talentspec WHERE class = " << specClass << " ORDER BY talentspec_id ASC";
-
-    QueryResult *result = CharacterDatabase.Query(query.str().c_str());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT * FROM playerbot_talentspec WHERE class = %i ORDER BY talentspec_id ASC", specClass);
 
     if( !result )
     {
