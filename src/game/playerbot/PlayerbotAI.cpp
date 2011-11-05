@@ -6247,6 +6247,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (ExtractCommand("help", input))
         _HandleCommandHelp(input, fromPlayer);
 
+    else if (fromPlayer.GetSession()->GetSecurity() > SEC_PLAYER && ExtractCommand("gm", input))
+        _HandleCommandGM(input, fromPlayer);
+
     else if (ExtractCommand("reset", input))
         _HandleCommandReset(input, fromPlayer);
     else if (ExtractCommand("report", input))
@@ -6709,7 +6712,6 @@ void PlayerbotAI::_HandleCommandBank(std::string &text, Player &fromPlayer)
 // talent reset                     -- Resets all talents
 // talent spec                      -- Lists various talentspecs for this bot's class
 // talent spec #                    -- Sets talent spec # as active talentspec
-// talent spec errorcheck           -- Checks TalentSpec database for errors - works only for GMs (Tip: '.gm on')
 void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
 {
     std::ostringstream out;
@@ -6766,22 +6768,6 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
                 std::ostringstream oss;
                 oss << "Error: No TalentSpecs listed. Specs retrieved from DB for this class: %u" << m_bot->getClass();
                 SendWhisper(oss.str(), fromPlayer);
-            }
-        }
-        // Reminder: if you change "fromPlayer.isGameMaster", don't forget _HandleCommandHelp()
-        else if (fromPlayer.isGameMaster() && ExtractCommand("errorcheck", text))
-        {
-            // Creates some (no doubt negligible) strain on system, plus it's server maintenance, only allow GMs or higher. Tip: ".gm on"
-            uint32 tsDBError = TalentSpecDBContainsError();
-            if (0 != tsDBError)
-            {
-                out << "Error found in TalentSpec: " << tsDBError;
-                SendWhisper(out.str(), fromPlayer);
-            }
-            else
-            {
-                out << "No errors found. High five!";
-                SendWhisper(out.str(), fromPlayer);
             }
         }
         else
@@ -7766,6 +7752,47 @@ void PlayerbotAI::_HandleCommandStats(std::string &text, Player &fromPlayer)
     ch.SendSysMessage(out.str().c_str());
 }
 
+void PlayerbotAI::_HandleCommandGM(std::string &text, Player &fromPlayer)
+{
+    // Check should happen OUTSIDE this function, but this is account security we're talking about, so let's be doubly sure
+    if (fromPlayer.GetSession()->GetSecurity() > SEC_PLAYER)
+        return; // no excuses, no warning
+
+    if (text == "")
+    {
+        SendWhisper("gm must have a subcommand.", fromPlayer);
+        return;
+    }
+    else if (ExtractCommand("check", text))
+    {
+        if (ExtractCommand("talent", text))
+        {
+            if (ExtractCommand("spec", text))
+            {
+                uint32 tsDBError = TalentSpecDBContainsError();
+                if (0 != tsDBError)
+                {
+                    std::ostringstream oss;
+                    oss << "Error found in TalentSpec: " << tsDBError;
+                    SendWhisper(oss.str(), fromPlayer);
+                }
+                else
+                {
+                    SendWhisper("No errors found. High five!", fromPlayer);
+                }
+            }
+        }
+        else
+        {
+            SendWhisper("'gm check' does not have that subcommand.", fromPlayer);
+        }
+    }
+    else
+    {
+        SendWhisper("'gm' does not have that subcommand.", fromPlayer);
+    }
+}
+
 void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 {
     // "help help"? Seriously?
@@ -8076,11 +8103,6 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             SendWhisper(_HandleCommandHelpHelper("talent reset", "Resets my talents. Assuming I have the appropriate amount of sparkly gold, shiny silver, and... unrusted copper."), fromPlayer);
             SendWhisper(_HandleCommandHelpHelper("talent spec", "Lists all talent specs I can use."), fromPlayer);
             SendWhisper(_HandleCommandHelpHelper("talent spec #", "I will follow this talent spec. Well, I will if you picked a talent spec that exists."), fromPlayer);
-            if (fromPlayer.isGameMaster())
-                SendWhisper(_HandleCommandHelpHelper("talent spec errorcheck", "Does a validity check on all talentspecs in the database. Only works for GMs in GM mode which you are right now."), fromPlayer);
-
-            // Catches all valid subcommands, also placeholders for potential future sub-subcommands
-            if (fromPlayer.isGameMaster() && ExtractCommand("errorcheck", text)) {}
 
             if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
@@ -8119,6 +8141,38 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             if (ExtractCommand("train", text)) {}
             else if (ExtractCommand("learn", text)) {}
             else if (ExtractCommand("unlearn", text)) {}
+
+            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            return;
+        }
+    }
+    if (fromPlayer.GetSession()->GetSecurity() > SEC_PLAYER && (bMainHelp || ExtractCommand("gm", text)))
+    {
+        msg = _HandleCommandHelpHelper("gm", "Lists actions available to GM account level and up.");
+        SendWhisper(msg, fromPlayer);
+
+        if (!bMainHelp)
+        {
+            SendWhisper(_HandleCommandHelpHelper("gm check", "Lists the things you can run a check on."), fromPlayer);
+
+            // Catches all valid subcommands, also placeholders for potential future sub-subcommands
+            if (ExtractCommand("check", text))
+            {
+                SendWhisper(_HandleCommandHelpHelper("gm check talent", "Lists talent mechanics you can run a check on.");
+
+                if (ExtractCommand("talent", text))
+                {
+                    SendWhisper(_HandleCommandHelpHelper("gm check talent spec", "Checks the talent spec database for various errors. Only the first error (if any) is returned.");
+
+                    if (ExtractCommand("spec", text)) {}
+
+                    if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+                    return;
+                }
+
+                if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+                return;
+            }
 
             if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
             return;

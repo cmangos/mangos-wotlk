@@ -61,7 +61,6 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME talent reset (Resets all talents)
 /t BOTNAME talent spec (Lists talent specs available to this bot's class, with #, to use below)
 /t BOTNAME talent spec # (If valid, uses this # talent spec for this bot (see # from talent spec above))
-/t BOTNAME talent spec errorcheck (Does a validity check on all talentspecs in the database, only works for GMs (Tip: '.gm on'))
 /t BOTNAME bank  (Lists bot(s) bank balance)
 /t BOTNAME bank deposit [Item Link][Item Link] .. (Deposit item(s) in bank)
 /t BOTNAME bank withdraw [Item Link][Item Link] ..  (Withdraw item(s) from bank. ([Item Link] from bank))
@@ -70,6 +69,7 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME skill learn [TRAINING LINK] (learn selected skill or spell, from selected trainer)
 /t BOTNAME skill unlearn [PROFESSION LINK] (unlearn selected primary profession skill & all associated spells)
 /t BOTNAME help (lists all the commands above and how they work. Except for the ".bot command" ones.)
+/t BOTNAME gm check talent spec (Does a validity check on all talentspecs in the database, only works for GMs or higher)
 
 Shortcuts:
 c = cast
