@@ -217,6 +217,24 @@ Merge PlayerbotAI code with your favorite core/mods, or simply compile. Follow M
 Copy src/game/playerbot/playerbot.conf.dist.in for configuration variables!
 Install appropriate files from sql/playerbotai
 
+Developers:
+===========
+When updating the playerbot.conf version, keep in mind the following locations (YYYYMMDDVV = Year, Month, Day, Version (version starting at 01, counting up as releases happen on the same day)):
+* src/game/playerbot/config.h
+define PLAYERBOT_CONF_VERSION    YYYYMMDDVV
+* src/game/playerbot/config.h.in
+define PLAYERBOT_CONF_VERSION    YYYYMMDDVV
+* src/game/playerbot/playerbot.conf.dist.in
+ConfVersion=YYYYMMDDVV
+* Of course don't forget to update your server's playerbot.conf.
+
+When updating the sql file(s), keep in mind the following locations:
+* sql/playerbotai
+Place your SQL files here.
+* src/shared/revision_sql.h
+#define REVISION_DB_PLAYERBOTAI "required_1_playerbotai_talentspecs"
+NOTE: This string should be an exact copy of your SQL file's second field name in the `playerbotai_db_version` table.
+
 History:
 ========
 This project was ported from a Trinity mod.
