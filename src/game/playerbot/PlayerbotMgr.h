@@ -13,6 +13,10 @@ typedef UNORDERED_MAP<ObjectGuid, Player*> PlayerBotMap;
 
 class MANGOS_DLL_SPEC PlayerbotMgr
 {
+    // static functions, available without a PlayerbotMgr instance
+public:
+    static void SetInitialWorldSettings();
+
 public:
     PlayerbotMgr(Player * const master);
     virtual ~PlayerbotMgr();
