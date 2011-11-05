@@ -1782,6 +1782,7 @@ public:
     uint8 GetFreeBagSpace() const;
     void SellGarbage(bool listNonTrash = true, bool bDetailTrashSold = false, bool verbose = true);
     void Sell(const uint32 itemid);
+    void Buy(ObjectGuid vendorguid, const uint32 itemid);
     std::string DropItem(const uint32 itemid);
     void AddAuction(const uint32 itemid, Creature* aCreature);
     void ListAuctions();
@@ -1810,6 +1811,7 @@ private:
     void _HandleCommandAttack(std::string &text, Player &fromPlayer);
     void _HandleCommandCast(std::string &text, Player &fromPlayer);
     void _HandleCommandSell(std::string &text, Player &fromPlayer);
+    void _HandleCommandBuy(std::string &text, Player &fromPlayer);
     void _HandleCommandDrop(std::string &text, Player &fromPlayer);
     void _HandleCommandRepair(std::string &text, Player &fromPlayer);
     void _HandleCommandAuction(std::string &text, Player &fromPlayer);

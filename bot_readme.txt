@@ -48,7 +48,8 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME pet react <(a)ggressive | (d)efensive | (p)assive> (Set bot's pet reaction mode)
 /t BOTNAME collect (shows collect subcommand options and current collect status)
 /t BOTNAME collect <subcommand(s)> (subcommands can be alone or together [none combat loot objects profession quest])
-/t BOTNAME sell [ITEM LINK] (bot will add item to it's m_itemIds, for later sale)
+/t BOTNAME sell [ITEM LINK] (bot will sell item(s) with nearest vendor)
+/t BOTNAME buy [ITEM LINK] (bot buy item(s) from selected vendor)
 /t BOTNAME drop [ITEM LINK] (bot will drop item immediately, permanently destroying it)
 /t BOTNAME auction (bot will display all it's active owned auctions. Auction info will include an [AUCTION LINK] )
 /t BOTNAME auction add [ITEM LINK] (bot will add item to it's m_itemIds, for later auction)
@@ -141,8 +142,8 @@ Creature interaction with bots:
 Repair with bots:
 =================
 
-  Bot can now repair <all or selected> items - equipped or in bags. If the bot is 
-  a member of a guild, then the guild fund is used for repairs. If not, the bots own 
+  Bot can now repair <all or selected> items - equipped or in bags. If the bot is
+  a member of a guild, then the guild fund is used for repairs. If not, the bots own
   gold supply is used. If the bot cannot pay for the repair, they remain damaged.
 
   The new 'stats' command provides useful information to help in the repair decision.

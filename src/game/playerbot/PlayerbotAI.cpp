@@ -799,6 +799,47 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             return;
         }
 
+        case SMSG_BUY_FAILED:
+        {
+            WorldPacket p(packet); // 8+4+4+1
+            ObjectGuid vendorguid;
+            p >> vendorguid;
+            uint32 itemid;
+            p >> itemid;
+            uint8 msg;
+            p >> msg; // error msg
+            p.resize(13);
+
+            switch(msg)
+            {
+                case BUY_ERR_CANT_FIND_ITEM:
+                    break;
+                case BUY_ERR_ITEM_ALREADY_SOLD:
+                    break;
+                case BUY_ERR_NOT_ENOUGHT_MONEY:
+                {
+                    Announce(CANT_AFFORD);
+                    break;
+                }
+                case BUY_ERR_SELLER_DONT_LIKE_YOU:
+                    break;
+                case BUY_ERR_DISTANCE_TOO_FAR:
+                    break;
+                case BUY_ERR_ITEM_SOLD_OUT:
+                    break;
+                case BUY_ERR_CANT_CARRY_MORE:
+                {
+                    Announce(INVENTORY_FULL);
+                    break;
+                }
+                case BUY_ERR_RANK_REQUIRE:
+                    break;
+                case BUY_ERR_REPUTATION_REQUIRE:
+                    break;
+            }
+            return;
+        }
+
         case SMSG_AUCTION_COMMAND_RESULT:
         {
             uint32 auctionId, Action, ErrorCode;
@@ -1376,6 +1417,46 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 SetIgnoreUpdateTime();
             }
 
+            return;
+        }
+
+        case SMSG_BUY_ITEM:
+        {
+            WorldPacket p(packet);  // (8+4+4+4
+            ObjectGuid vguid;
+            p >> vguid;
+            uint32 vendorslot;
+            p >> vendorslot;
+            p.resize(20);
+
+            vendorslot = vendorslot - 1;
+            Creature *pCreature = m_bot->GetNPCIfCanInteractWith(vguid, UNIT_NPC_FLAG_VENDOR);
+            if (!pCreature)
+                return;
+
+            VendorItemData const* vItems = pCreature->GetVendorItems();
+            VendorItemData const* tItems = pCreature->GetVendorTemplateItems();
+            if ((!vItems || vItems->Empty()) && (!tItems || tItems->Empty()))
+                return;
+
+            uint32 vCount = vItems ? vItems->GetItemCount() : 0;
+            uint32 tCount = tItems ? tItems->GetItemCount() : 0;
+
+            if (vendorslot >= vCount+tCount)
+                return;
+
+            VendorItem const* crItem = vendorslot < vCount ? vItems->GetItem(vendorslot) : tItems->GetItem(vendorslot - vCount);
+            if (!crItem)
+                return;
+
+            ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(crItem->item);
+            if(pProto)
+            {
+                std::ostringstream out;
+                out << "|cff009900" << "I received item: |r";
+                MakeItemLink(pProto,out);
+                TellMaster(out.str().c_str());
+            }
             return;
         }
 
@@ -4505,6 +4586,12 @@ void PlayerbotAI::MakeItemLink(const ItemPrototype *item, std::ostringstream &ou
     std::string name = item->Name1;
     ItemLocalization(name, item->ItemId);
     out << "|h[" << name << "]|h|r";
+
+    // Stacked items
+    if (item->BuyCount > 1)
+        out << "|cff009900x" << item->BuyCount << ".|r";
+    else
+        out << "|cff009900.|r";
 }
 
 // Builds a hlink for an item, includes everything
@@ -5884,6 +5971,63 @@ void PlayerbotAI::AddAuction(const uint32 itemid, Creature* aCreature)
     }
 }
 
+void PlayerbotAI::Buy(ObjectGuid vendorguid, const uint32 itemid)
+{
+    Creature *pCreature = m_bot->GetNPCIfCanInteractWith(vendorguid, UNIT_NPC_FLAG_VENDOR);
+
+    if (!pCreature)
+        return;
+
+    VendorItemData const* vItems = pCreature->GetVendorItems();
+    VendorItemData const* tItems = pCreature->GetVendorTemplateItems();
+
+    uint8 customitems = vItems ? vItems->GetItemCount() : 0;
+    uint8 numitems = customitems + (tItems ? tItems->GetItemCount() : 0);
+
+    for(uint8 vendorslot = 0; vendorslot < numitems; ++vendorslot )
+    {
+        VendorItem const* crItem = vendorslot < customitems ? vItems->GetItem(vendorslot) : tItems->GetItem(vendorslot - customitems);
+
+        if (crItem)
+        {
+        if (itemid != crItem->item)
+                continue;
+
+            ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid);
+            if (pProto)
+            {
+                // class wrong item skip only for bindable case
+                if ((pProto->AllowableClass & m_bot->getClassMask()) == 0 && pProto->Bonding == BIND_WHEN_PICKED_UP)
+                    continue;
+
+                // race wrong item skip always
+                if ((pProto->Flags2 & ITEM_FLAG2_HORDE_ONLY) && m_bot->GetTeam() != HORDE)
+                    continue;
+
+                if ((pProto->Flags2 & ITEM_FLAG2_ALLIANCE_ONLY) && m_bot->GetTeam() != ALLIANCE)
+                    continue;
+
+                if ((pProto->AllowableRace & m_bot->getRaceMask()) == 0)
+                    continue;
+
+                // possible item coverting for BoA case
+                if (pProto->Flags & ITEM_FLAG_BOA)
+                {
+                    // convert if can use and then buy
+                    if (pProto->RequiredReputationFaction && uint32(m_bot->GetReputationRank(pProto->RequiredReputationFaction)) >= pProto->RequiredReputationRank)
+                    {
+                        // checked at convert data loading as existed
+                        if (uint32 newItemId = sObjectMgr.GetItemConvert(itemid, m_bot->getRaceMask()))
+                            pProto = ObjectMgr::GetItemPrototype(newItemId);
+                    }
+                }
+                m_bot->BuyItemFromVendorSlot(vendorguid, vendorslot, itemid, 1, NULL_BAG, NULL_SLOT);
+                return;
+            }
+        }
+    }
+}
+
 void PlayerbotAI::Sell(const uint32 itemid)
 {
     Item* pItem = FindItem(itemid);
@@ -6121,6 +6265,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
     else if (ExtractCommand("sell", input))
         _HandleCommandSell(input, fromPlayer);
+
+    else if (ExtractCommand("buy", input))
+        _HandleCommandBuy(input, fromPlayer);
 
     else if (ExtractCommand("drop", input))
         _HandleCommandDrop(input, fromPlayer);
@@ -6412,6 +6559,30 @@ void PlayerbotAI::_HandleCommandSell(std::string &text, Player &fromPlayer)
     for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
         m_tasks.push_back(std::pair<enum TaskFlags,uint32>(SELL_ITEMS, *it));
     m_findNPC.push_back(VENDOR_MASK);
+}
+
+// _HandleCommandBuy: Handle buying items
+// buy [Item Link][Item Link] .. -- Buys items from vendor
+void PlayerbotAI::_HandleCommandBuy(std::string &text, Player &fromPlayer)
+{
+    if (text == "")
+    {
+        SendWhisper("buy must be used with one or more item links (shift + click the item).", fromPlayer);
+        return;
+    }
+
+    ObjectGuid vendorguid = fromPlayer.GetSelectionGuid();
+    if (!vendorguid)
+    {
+        SendWhisper("No vendor is selected.", fromPlayer);
+        m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+        return;
+    }
+
+    std::list<uint32> itemIds;
+    extractItemIds(text, itemIds);
+    for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
+       Buy(vendorguid, *it);
 }
 
 // _HandleCommandDrop: Handle dropping items
@@ -7833,6 +8004,16 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     if (bMainHelp || ExtractCommand("sell", text))
     {
         SendWhisper(_HandleCommandHelpHelper("sell", "Adds this to my 'for sale' list.", HL_ITEM, true), fromPlayer);
+
+        if (!bMainHelp)
+        {
+            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            return;
+        }
+    }
+    if (bMainHelp || ExtractCommand("buy", text))
+    {
+        SendWhisper(_HandleCommandHelpHelper("buy", "Adds this to my 'purchase' list.", HL_ITEM, true), fromPlayer);
 
         if (!bMainHelp)
         {
