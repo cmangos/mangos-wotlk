@@ -6305,8 +6305,6 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
     else if (ExtractCommand("reset", input))
         _HandleCommandReset(input, fromPlayer);
-    else if (ExtractCommand("report", input))
-        _HandleCommandReport(input, fromPlayer);
     else if (ExtractCommand("orders", input))
         _HandleCommandOrders(input, fromPlayer);
     else if (ExtractCommand("follow", input) || ExtractCommand("come", input))
@@ -6496,16 +6494,6 @@ void PlayerbotAI::_HandleCommandReset(std::string &text, Player &fromPlayer)
     m_lootCurrent = ObjectGuid();
     m_targetCombat = 0;
     ClearActiveTalentSpec();
-}
-
-void PlayerbotAI::_HandleCommandReport(std::string &text, Player &fromPlayer)
-{
-    if (text != "")
-    {
-        SendWhisper("report cannot have a subcommand.", fromPlayer);
-        return;
-    }
-    SendQuestNeedList();
 }
 
 void PlayerbotAI::_HandleCommandOrders(std::string &text, Player &fromPlayer)
@@ -7096,6 +7084,10 @@ void PlayerbotAI::_HandleCommandQuest(std::string &text, Player &fromPlayer)
     {
         m_tasks.push_back(std::pair<enum TaskFlags, uint32>(LIST_QUEST, 0));
         m_findNPC.push_back(UNIT_NPC_FLAG_QUESTGIVER);
+    }
+    else if (ExtractCommand("report", text))
+    {
+        SendQuestNeedList();
     }
     else if (ExtractCommand("end", text, true)) // true -> "quest end" OR "quest e"
     {
@@ -7950,16 +7942,6 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             return;
         }
     }
-    if (bMainHelp || ExtractCommand("report", text))
-    {
-        SendWhisper(_HandleCommandHelpHelper("report", "This will give you a full report of all the items, creatures or gameobjects needed to finish my quests."), fromPlayer);
-
-        if (!bMainHelp)
-        {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
-            return;
-        }
-    }
     if (bMainHelp || ExtractCommand("stats", text))
     {
         SendWhisper(_HandleCommandHelpHelper("stats", "This will inform you of my wealth, free bag slots and estimated equipment repair costs."), fromPlayer);
@@ -8010,12 +7992,14 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             SendWhisper(_HandleCommandHelpHelper("quest drop", "Removes this quest from my quest log.", HL_QUEST), fromPlayer);
             SendWhisper(_HandleCommandHelpHelper("quest end", "Turns in my completed quests."), fromPlayer);
             SendWhisper(_HandleCommandHelpHelper("quest list", "Lists the quests offered to me by this target."), fromPlayer);
+            SendWhisper(_HandleCommandHelpHelper("quest report", "This will give you a full report of all the items, creatures or gameobjects I still need to finish my quests.", HL_QUEST), fromPlayer);
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("add", text, true)) {}
             else if(ExtractCommand("drop", text, true)) {}
             else if(ExtractCommand("end", text, true)) {}
             else if (ExtractCommand("list", text, true)) {}
+            else if (ExtractCommand("report", text, true)) {}
 
             if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
             return;

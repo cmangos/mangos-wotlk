@@ -1804,7 +1804,6 @@ private:
     bool ExtractCommand(const std::string sLookingFor, std::string &text, bool bUseShort = false);
     // outsource commands for code clarity
     void _HandleCommandReset(std::string &text, Player &fromPlayer);
-    void _HandleCommandReport(std::string &text, Player &fromPlayer);
     void _HandleCommandOrders(std::string &text, Player &fromPlayer);
     void _HandleCommandFollow(std::string &text, Player &fromPlayer);
     void _HandleCommandStay(std::string &text, Player &fromPlayer);
