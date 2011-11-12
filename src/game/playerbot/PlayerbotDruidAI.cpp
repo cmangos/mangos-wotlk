@@ -163,6 +163,7 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
             if (m_bot->HasAura(CAT_FORM, EFFECT_INDEX_0))
                 m_bot->RemoveAurasDueToSpell(768);
             //ai->TellMaster("FormClearCat");
+            // TODO: Wut? Moonkin is *DPS SPELLFORM*, right? Why is it *first* choice for tanking, or even a choice at all?
             if (MOONKIN_FORM > 0 && !m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0))
                 ai->CastSpell (MOONKIN_FORM);
             else if (DIRE_BEAR_FORM > 0 && !m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0) && !m_bot->HasAura(DIRE_BEAR_FORM, EFFECT_INDEX_0))
@@ -508,37 +509,21 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
             {
                 if (RIP > 0 && pTarget->getClass() == CLASS_ROGUE && ai->GetEnergyAmount() >= 30)
                     ai->CastSpell(RIP, *pTarget);
-                //ai->TellMaster("Rogue Rip");
-                else if (MAIM > 0 && pTarget->getClass() == CLASS_DRUID && ai->GetEnergyAmount() >= 35)
-                    ai->CastSpell(MAIM, *pTarget);
-                //ai->TellMaster("Druid Maim");
-                else if (MAIM > 0 && pTarget->getClass() == CLASS_SHAMAN && ai->GetEnergyAmount() >= 35)
-                    ai->CastSpell(MAIM, *pTarget);
-                //ai->TellMaster("Shaman Maim");
-                else if (MAIM > 0 && pTarget->getClass() == CLASS_WARLOCK && ai->GetEnergyAmount() >= 35)
-                    ai->CastSpell(MAIM, *pTarget);
-                //ai->TellMaster("Warlock Maim");
-                else if (FEROCIOUS_BITE > 0 && pTarget->getClass() == CLASS_HUNTER && ai->GetEnergyAmount() >= 35)
+                else if (FEROCIOUS_BITE > 0 && ai->GetEnergyAmount() >= 35 &&
+                         (pTarget->getClass() == CLASS_HUNTER || pTarget->getClass() == CLASS_WARRIOR ||
+                          pTarget->getClass() == CLASS_PALADIN || pTarget->getClass() == CLASS_DEATH_KNIGHT) )
                     ai->CastSpell(FEROCIOUS_BITE, *pTarget);
-                //ai->TellMaster("Hunter Ferocious Bite");
-                else if (FEROCIOUS_BITE > 0 && pTarget->getClass() == CLASS_WARRIOR && ai->GetEnergyAmount() >= 35)
-                    ai->CastSpell(FEROCIOUS_BITE, *pTarget);
-                //ai->TellMaster("Warrior Ferocious Bite");
-                else if (FEROCIOUS_BITE > 0 && pTarget->getClass() == CLASS_PALADIN && ai->GetEnergyAmount() >= 35)
-                    ai->CastSpell(FEROCIOUS_BITE, *pTarget);
-                //ai->TellMaster("Paladin Ferocious Bite");
-                else if (FEROCIOUS_BITE > 0 && pTarget->getClass() == CLASS_DEATH_KNIGHT && ai->GetEnergyAmount() >= 25)
-                    ai->CastSpell(FEROCIOUS_BITE, *pTarget);
-                //ai->TellMaster("DK Ferocious Bite");
-                else if (MAIM > 0 && pTarget->getClass() == CLASS_MAGE && ai->GetEnergyAmount() >= 35)
-                    ai->CastSpell(MAIM, *pTarget);
-                //ai->TellMaster("Mage Maim");
-                else if (MAIM > 0 && pTarget->getClass() == CLASS_PRIEST && ai->GetEnergyAmount() >= 35)
-                    ai->CastSpell(MAIM, *pTarget);
-                //ai->TellMaster("Priest Maim");
-                else if (MAIM > 0 && ai->GetEnergyAmount() >= 35)
-                    ai->CastSpell(MAIM, *pTarget);
-                //ai->TellMaster("Else Maim");
+                else if (ai->GetEnergyAmount() >= 35)
+                {
+                    //ai->TellMaster("Else Maim, Ferocious Bite or Rip.");
+                    // MAIM must be first check, best option against other classes
+                    if (MAIM > 0)
+                        ai->CastSpell(MAIM, *pTarget);
+                    else if (FEROCIOUS_BITE > 0)
+                        ai->CastSpell(FEROCIOUS_BITE, *pTarget);
+                    else if (RIP > 0) // Fair enough, only needs 30 energy... but that means 35 is plenty
+                        ai->CastSpell(RIP, *pTarget);
+                }
                 break;
             }
             else
