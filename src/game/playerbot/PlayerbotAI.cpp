@@ -1196,8 +1196,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 std::list<std::string> lsItemsTradable;
                 std::list<std::string> lsItemsUntradable;
 
-DEBUG_LOG("1");
-
                 // list out items in main backpack
                 for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
                 {
@@ -1212,7 +1210,6 @@ DEBUG_LOG("1");
                         out.str("");
                     }
                 }
-DEBUG_LOG("2");
 
                 // list out items in other removable backpacks
                 for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
@@ -1245,52 +1242,38 @@ DEBUG_LOG("2");
                 out.str("");
                 out << "Items I have but cannot trade:";
                 uint32 count = 0;
-DEBUG_LOG("3");
                 for (std::list<std::string>::iterator iter = lsItemsUntradable.begin(); iter != lsItemsUntradable.end(); iter++)
                 {
-DEBUG_LOG("3.1");
                     out << (*iter);
                     // Why this roundabout way of posting max 20 items per whisper? To keep the list scrollable.
                     count++;
-DEBUG_LOG("3.2");
                     if (count % 20 == 0)
                     {
                         ch.SendSysMessage(out.str().c_str());
-DEBUG_LOG("3.2.1");
                         out.str("");
                     }
-DEBUG_LOG("3.3");
                 }
-DEBUG_LOG("3.4");
                 if (count > 0)
                     ch.SendSysMessage(out.str().c_str());
-DEBUG_LOG("3.5");
 
                 out.str("");
                 out << "I could give you:";
                 count = 0;
-DEBUG_LOG("3.6");
                 for (std::list<std::string>::iterator iter = lsItemsTradable.begin(); iter != lsItemsTradable.end(); iter++)
                 {
-DEBUG_LOG("3.6.1");
                     out << (*iter);
                     // Why this roundabout way of posting max 20 items per whisper? To keep the list scrollable.
                     count++;
-DEBUG_LOG("3.6.2");
                     if (count % 20 == 0)
                     {
                         ch.SendSysMessage(out.str().c_str());
                         out.str("");
-DEBUG_LOG("3.6.2.1");
                     }
-DEBUG_LOG("3.6.3");
                 }
-DEBUG_LOG("3.7");
                 if (count > 0)
                     ch.SendSysMessage(out.str().c_str());
                 else
                     ch.SendSysMessage("I have nothing to give you.");
-DEBUG_LOG("3.8");
 
                 // calculate how much money bot has
                 uint32 copper = m_bot->GetMoney();
@@ -1299,7 +1282,6 @@ DEBUG_LOG("3.8");
                 uint32 silver = uint32(copper / 100);
                 copper -= (silver * 100);
 
-DEBUG_LOG("3.9");
                 // send bot the message
                 out.str("");
                 out << "I have |cff00ff00" << gold
@@ -1307,7 +1289,6 @@ DEBUG_LOG("3.9");
                     << "|r|cffcdcdcds|r|cff00ff00" << copper
                     << "|r|cffffd333c|r";
                 SendWhisper(out.str().c_str(), *(m_bot->GetTrader()));
-DEBUG_LOG("3.10");
             }
             return;
         }
