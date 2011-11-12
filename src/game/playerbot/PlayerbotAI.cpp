@@ -429,8 +429,8 @@ void PlayerbotAI::SendNotEquipList(Player& /*player*/)
             }
     }
 
-    TellMaster("Here's all the items in my inventory that I can equip.");
     ChatHandler ch(GetMaster());
+    bool bAnyEquippable = false;
 
     const std::string descr[] = { "head", "neck", "shoulders", "body", "chest",
                                   "waist", "legs", "feet", "wrists", "hands", "finger1", "finger2",
@@ -442,24 +442,32 @@ void PlayerbotAI::SendNotEquipList(Player& /*player*/)
     {
         if (equip[equipSlot] == NULL)
             continue;
+
+        if (!bAnyEquippable)
+        {
+            TellMaster("Here's all the items in my inventory that I can equip:");
+            bAnyEquippable = true;
+        }
+
         std::list<Item*>* itemListForEqSlot = equip[equipSlot];
         std::ostringstream out;
         out << descr[equipSlot] << ": ";
         for (std::list<Item*>::iterator it = itemListForEqSlot->begin(); it != itemListForEqSlot->end(); ++it)
         {
-            const ItemPrototype* const pItemProto = (*it)->GetProto();
-
-            std::string itemName = pItemProto->Name1;
-            ItemLocalization(itemName, pItemProto->ItemId);
-
-            out << " |cffffffff|Hitem:" << pItemProto->ItemId
-                << ":0:0:0:0:0:0:0" << "|h[" << itemName
-                << "]|h|r";
+            if ((*it))
+                MakeItemLink((*it), out, true);
+            //const ItemPrototype* const pItemProto = (*it)->GetProto();
+            //std::string itemName = pItemProto->Name1;
+            //ItemLocalization(itemName, pItemProto->ItemId);
+            //out << " |cffffffff|Hitem:" << pItemProto->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
         }
         ch.SendSysMessage(out.str().c_str());
 
         delete itemListForEqSlot; // delete list of Item*
     }
+
+    if (!bAnyEquippable)
+        TellMaster("There are no items in my inventory that I can equip.");
 }
 
 void PlayerbotAI::SendQuestNeedList()
