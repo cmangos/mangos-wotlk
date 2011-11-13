@@ -1,13 +1,15 @@
 What it is:
 ===========
 
-Playerbot lets you add another character from your account as a bot that you can control and which will hopefully help you. Only characters from your account can be used, so you can have a maximum of 9 bots at one time.
+Playerbot lets you add another character from your account as a bot that you can command. Only characters from your account can be used, so you can have a maximum of 9 bots at one time per account.
 
-This was taken from the Trinity site, and modified slightly by me to get some of the kinks out. I reworked the priest class and also added a mage class and a warrior class, which are still in crude form. Any class can be used as a bot - just don't expect much in the way of spells or abilities until someone writes the code for them.
+This was taken from the Trinity site, and modified slightly by me to get some of the kinks out.
 
-Bots will only use abilities that they have - for example, a priest will only use the renew spell if it has been trained. Also, bot's equipment will lose durability like any other character. So every so often you'll need to log in and repair and train your bot.
+Bots will only use abilities that they have - for example, a priest will only use the renew spell if it has been trained. A bot's equipment will lose durability like any other character.
 
-For MaNGOS 10816+
+All help is welcome be it through code development, reports from play testing or just discussion. Meet us in the MaNGOS forum thread.
+
+For MaNGOS 11834+
 
 Commands:
 =========
@@ -16,6 +18,9 @@ Commands:
 /s .bot remove BOTNAME
 /s .bot co|combatorder BOTNAME COMBATORDER [TARGET]
 /invite BOTNAME (bot will auto accept invite)
+
+For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '/t BOTNAME help auction remove'.
+
 /t BOTNAME attack (bot will attack selected target, similar to the way a pet can attack)
 /t BOTNAME follow (orders bot to follow player; will also revive bot if dead or teleport bot if far away)
 /t BOTNAME stay
@@ -43,7 +48,9 @@ Commands:
 /t BOTNAME pet react <(a)ggressive | (d)efensive | (p)assive> (Set bot's pet reaction mode)
 /t BOTNAME collect (shows collect subcommand options and current collect status)
 /t BOTNAME collect <subcommand(s)> (subcommands can be alone or together [none combat loot objects profession quest])
-/t BOTNAME sell [ITEM LINK] (bot will add item to it's m_itemIds, for later sale)
+/t BOTNAME sell [ITEM LINK] (bot will sell item(s) with nearest vendor)
+/t BOTNAME buy [ITEM LINK] (bot buy item(s) from selected vendor)
+/t BOTNAME drop [ITEM LINK] (bot will drop item immediately, permanently destroying it)
 /t BOTNAME auction (bot will display all it's active owned auctions. Auction info will include an [AUCTION LINK] )
 /t BOTNAME auction add [ITEM LINK] (bot will add item to it's m_itemIds, for later auction)
 /t BOTNAME auction remove [AUCTION LINK] (bot will add auctionid to it's m_auctions, for later auction cancellation)
@@ -52,13 +59,17 @@ Commands:
 /t BOTNAME talent (Lists bot(s) active talents [TALENT LINK] & glyphs [GLYPH LINK], unspent talent points & cost to reset all talents)
 /t BOTNAME talent learn [TALENT LINK} .. (Learn selected talent from bot client 'inspect' dialog -> 'talent' tab or from talent command (shift click icon or link))
 /t BOTNAME talent reset (Resets all talents)
+/t BOTNAME talent spec (Lists talent specs available to this bot's class, with #, to use below)
+/t BOTNAME talent spec # (If valid, uses this # talent spec for this bot (see # from talent spec above))
 /t BOTNAME bank  (Lists bot(s) bank balance)
 /t BOTNAME bank deposit [Item Link][Item Link] .. (Deposit item(s) in bank)
 /t BOTNAME bank withdraw [Item Link][Item Link] ..  (Withdraw item(s) from bank. ([Item Link] from bank))
 /t BOTNAME skill (lists all [PROFESSION LINK] bot Primary profession skills)
 /t BOTNAME skill train (lists [TRAINING LINK] available class, weapon & profession (Primary or Secondary) skills & spells, from selected trainer)
-/t BOTANME skill learn [TRAINING LINK] (learn selected skill or spell, from selected trainer)
+/t BOTNAME skill learn [TRAINING LINK] (learn selected skill or spell, from selected trainer)
 /t BOTNAME skill unlearn [PROFESSION LINK] (unlearn selected primary profession skill & all associated spells)
+/t BOTNAME help (lists all the commands above and how they work. Except for the ".bot command" ones.)
+/t BOTNAME gm check talent spec (Does a validity check on all talentspecs in the database, only works for GMs or higher)
 
 Shortcuts:
 c = cast
@@ -84,6 +95,7 @@ Gameobject interaction with bots:
         the time you may want this option and the loot option enabled, but if you are grabbing
         the stuff as you are going around, the bot will skin afterwards.
     objects - bot will collect things that are specified by the survey and get <shift-click> commands
+    distance:<value> - bot will loot objects in the specified distance value
     none - removes any collect options that have been set
 
   The 'survey' command provides the means for bot(s) to detect gameobjects in the world. It can be used to detect
@@ -130,8 +142,9 @@ Creature interaction with bots:
 Repair with bots:
 =================
 
-  bot(s) can now repair <all or selected> items, either equipped or in bags. If the bot(s) is a member of a guild, then they pay
-  else the bot(s) pays. If the bot(s) cannot pay for the repair, they remain damaged.
+  Bot can now repair <all or selected> items - equipped or in bags. If the bot is
+  a member of a guild, then the guild fund is used for repairs. If not, the bots own
+  gold supply is used. If the bot cannot pay for the repair, they remain damaged.
 
   The new 'stats' command provides useful information to help in the repair decision.
 
@@ -164,12 +177,12 @@ Trading with bots:
 
 To trade items/money with your bot simply initiate a trade and the bot will tell you how much money and items are available. To request an item simple whisper the bot and shift click the link of the item you would like. You can link multiple items on the same line. You can also request money in the following manner when the trade window is open:
 /w BOTNAME 10g <-- request that the bot give you 10 gold
-/w BOTNAME 6g500s25c <-- request 6 gold, 500 silver, and 25 cooper
+/w BOTNAME 6g500s25c <-- request 6 gold, 500 silver, and 25 copper
 
 A bot is also able to show an item in its 'Will not be traded' slot. The item can be either
-in its bags or be equipped and even be soulbound. By this you can cast spells/enchantments
+in its bags or be equipped and even be soulbound. Using this you can cast spells/enchantments
 on soulbound items ('nt' stands for 'not trading').
-/w BOTNAME nt [Powerful Soulbound Item]
+/w BOTNAME nt [Enchantable Soulbound Item]
 
 More Information:
 =================
@@ -197,36 +210,31 @@ To use or equip items for your bot say:
 If you inspect your bot, your bot will tell you what items you have in your inventory that you can equip. To create a link in the chat window, hold the shift key and press the left mouse button when clicking the link.
 
 
-Changes from Trinity to Mangos:
-===============================
+Installation:
+=============
+Merge PlayerbotAI code with your favorite core/mods, or simply compile. Follow Mangos Core installation steps.
 
-I added the following in SharedDefines.h.
+Copy src/game/playerbot/playerbot.conf.dist.in for configuration variables!
+Install appropriate files from sql/playerbotai
 
-enum SpellCategory
-{
-	SPELL_CATEGORY_FOOD             = 11,
-	SPELL_CATEGORY_DRINK            = 59
-};
+Developers:
+===========
+When updating the playerbot.conf version, keep in mind the following locations (YYYYMMDDVV = Year, Month, Day, Version (version starting at 01, counting up as releases happen on the same day)):
+* src/game/playerbot/config.h
+define PLAYERBOT_CONF_VERSION    YYYYMMDDVV
+* src/game/playerbot/config.h.in
+define PLAYERBOT_CONF_VERSION    YYYYMMDDVV
+* src/game/playerbot/playerbot.conf.dist.in
+ConfVersion=YYYYMMDDVV
+* Of course don't forget to update your server's playerbot.conf.
 
-I also had to add the following to Player.h:
+When updating the sql file(s), keep in mind the following locations:
+* sql/playerbotai
+Place your SQL files here.
+* src/shared/revision_sql.h
+#define REVISION_DB_PLAYERBOTAI "required_1_playerbotai_talentspecs"
+NOTE: This string should be an exact copy of your SQL file's second field name in the `playerbotai_db_version` table.
 
-enum PlayerStateType
-{
-	PLAYER_STATE_NONE              = 0,
-	PLAYER_STATE_SIT               = 1
-};
-
-
-Configuration variables:
-========================
-Also see src/mangosd/mangosd.conf.dist for configuration variables!
-
-    PlayerbotAI.DebugWhisper
-        Enable debug output by whispering master
-        Default: 0 - off
-                 1 - on
-
-    PlayerbotAI.FollowDistanceMin
-    PlayerbotAI.FollowDistanceMax
-        Min. and max. follow distance for bots
-        Default: 0.5 / 1.0
+History:
+========
+This project was ported from a Trinity mod.

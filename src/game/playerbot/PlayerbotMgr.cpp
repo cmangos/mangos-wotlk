@@ -1,4 +1,5 @@
 #include "Config/Config.h"
+#include "config.h"
 #include "../Player.h"
 #include "PlayerbotAI.h"
 #include "PlayerbotMgr.h"
@@ -6,7 +7,6 @@
 #include "../Chat.h"
 #include "../ObjectMgr.h"
 #include "../GossipDef.h"
-#include "../Chat.h"
 #include "../Language.h"
 #include "../WaypointMovementGenerator.h"
 
@@ -14,6 +14,19 @@ class LoginQueryHolder;
 class CharacterHandler;
 
 Config botConfig;
+
+void PlayerbotMgr::SetInitialWorldSettings()
+{
+    //Get playerbot configuration file
+    if (!botConfig.SetSource(_PLAYERBOT_CONFIG))
+        sLog.outError("Playerbot: Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
+    else
+        sLog.outString("Playerbot: Using configuration file %s",_PLAYERBOT_CONFIG);
+
+    //Check playerbot config file version
+    if (botConfig.GetIntDefault("ConfVersion", 0) != PLAYERBOT_CONF_VERSION)
+        sLog.outError("Playerbot: Configuration file version doesn't match expected version. Some config variables may be wrong or missing.");
+}
 
 PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master)
 {
@@ -28,6 +41,18 @@ PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master)
     m_confCollectLoot = botConfig.GetBoolDefault("PlayerbotAI.Collect.Loot", true);
     m_confCollectSkin = botConfig.GetBoolDefault("PlayerbotAI.Collect.Skin", true);
     m_confCollectObjects = botConfig.GetBoolDefault("PlayerbotAI.Collect.Objects", true);
+    m_confCollectDistanceMax = botConfig.GetIntDefault("PlayerbotAI.Collect.DistanceMax", 50);
+    if (m_confCollectDistanceMax > 100)
+    {
+        sLog.outError("Playerbot: PlayerbotAI.Collect.DistanceMax higher than allowed. Using 100");
+        m_confCollectDistanceMax = 100;
+    }
+    m_confCollectDistance = botConfig.GetIntDefault("PlayerbotAI.Collect.Distance", 25);
+    if (m_confCollectDistance > m_confCollectDistanceMax)
+    {
+        sLog.outError("Playerbot: PlayerbotAI.Collect.Distance higher than PlayerbotAI.Collect.DistanceMax. Using DistanceMax value");
+        m_confCollectDistance = m_confCollectDistanceMax;
+    }
 }
 
 PlayerbotMgr::~PlayerbotMgr()
@@ -915,7 +940,7 @@ void Player::MakeTalentGlyphLink(std::ostringstream &out)
                     if (talent.talentEntry->TalentTab != talentTabId)
                         continue;
 
-                    TalentEntry const* talentInfo = sTalentStore.LookupEntry( talent.talentEntry->TalentID );
+                    TalentEntry const* talentInfo = sTalentStore.LookupEntry(talent.talentEntry->TalentID);
 
                     SpellEntry const* spell_entry = sSpellStore.LookupEntry(talentInfo->RankID[talent.currentRank]);
 
@@ -961,14 +986,14 @@ void Player::chompAndTrim(std::string& str)
             break;
     }
 
-    while (str.length() > 0)
-    {
-        char lc = str[0];
-        if (lc == ' ' || lc == '"' || lc == '\'')
-            str = str.substr(1, str.length() - 1);
-        else
-            break;
-    }
+	while (str.length() > 0)
+	{
+		char lc = str[0];
+		if (lc == ' ' || lc == '"' || lc == '\'')
+			str = str.substr(1, str.length() - 1);
+		else
+			break;
+	}
 }
 
 bool Player::getNextQuestId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId)

@@ -466,13 +466,13 @@ bool Database::CheckRequiredField( char const* table_name, char const* required_
         return true;
     }
 
-    // check fail, prepare readabale error message
+    // check fail, prepare readable error message
 
     // search current required_* field in DB
     const char* db_name;
     if(!strcmp(table_name, "db_version"))
         db_name = "WORLD";
-    else if(!strcmp(table_name, "character_db_version"))
+    else if(!strcmp(table_name, "character_db_version") || !strcmp(table_name, "playerbotai_db_version"))
         db_name = "CHARACTER";
     else if(!strcmp(table_name, "realmd_db_version"))
         db_name = "REALMD";
