@@ -456,7 +456,7 @@ void PlayerbotDruidAI::_DoNextPVECombatManeuverMeleeDPS(Unit* pTarget)
         //ai->TellMaster("Mangle");
         return;
     }
-    else if (CLAW > 0 && m_bot->GetComboPoints() < 5 && ai->GetEnergyAmount() >= 45)
+    if (CLAW > 0 && m_bot->GetComboPoints() < 5 && ai->GetEnergyAmount() >= 45)
     {
         ai->CastSpell(CLAW, *pTarget);
         //ai->TellMaster("Claw");
