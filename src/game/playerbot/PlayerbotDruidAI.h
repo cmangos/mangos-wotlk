@@ -108,12 +108,16 @@ public:
     bool BuffPlayer(Player *target);
 
 private:
+    // Combat Maneuver helper functions
+    void _DoNextPVECombatManeuverBear(Unit* pTarget);
+    void _DoNextPVECombatManeuverSpellDPS(Unit* pTarget);
+    void _DoNextPVECombatManeuverMeleeDPS(Unit* pTarget);
+    void _DoNextPVECombatManeuverHeal(Unit* pTarget);
+
     // Heals the target based off its hps
     bool HealTarget (Unit *target);
     // Callback method to reset shapeshift forms blocking buffs and heals
     static void GoBuffForm(Player *self);
-    // Has the ability to change to animal form
-    bool IsFeral();
 
     // druid cat/bear/dire bear/moonkin/tree of life forms
     uint32 CAT_FORM,
@@ -140,9 +144,10 @@ private:
            DEMORALIZING_ROAR,
            CHALLENGING_ROAR,
            GROWL,
-           ENRAGE;
+           ENRAGE,
+           FAERIE_FIRE_FERAL;
 
-    // druid attacks & debuffs
+    // druid caster DPS attacks & debuffs
     uint32 MOONFIRE,
            ROOTS,
            WRATH,
