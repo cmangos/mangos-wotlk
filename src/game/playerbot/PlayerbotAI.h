@@ -1793,6 +1793,7 @@ public:
     bool Withdraw(const uint32 itemid);
     bool Deposit(const uint32 itemid);
     void BankBalance();
+    std::string Cash(uint32 copper);
 
 protected:
     bool ValidateTalent(uint16 talent, long charClass);

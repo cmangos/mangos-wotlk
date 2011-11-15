@@ -271,6 +271,14 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             for(GroupReference* itr = group->GetFirstMember(); itr != NULL; itr=itr->next())
             {
                 Player* player = itr->getSource();
+                if (player && (msg.find("help",0) != -1))
+                {
+                    player->GetPlayerbotAI()->HandleCommand(msg, *GetPlayer());
+                    GetPlayer()->m_speakTime = 0;
+                    GetPlayer()->m_speakCount = 0;
+                    break;
+                }
+
                 if (player && player->GetPlayerbotAI())
                 {
                     player->GetPlayerbotAI()->HandleCommand(msg, *GetPlayer());
