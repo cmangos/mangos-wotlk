@@ -1278,18 +1278,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     ch.SendSysMessage("I have nothing to give you.");
 
                 // calculate how much money bot has
-                uint32 copper = m_bot->GetMoney();
-                uint32 gold = uint32(copper / 10000);
-                copper -= (gold * 10000);
-                uint32 silver = uint32(copper / 100);
-                copper -= (silver * 100);
-
                 // send bot the message
                 out.str("");
-                out << "I have |cff00ff00" << gold
-                    << "|r|cfffffc00g|r|cff00ff00" << silver
-                    << "|r|cffcdcdcds|r|cff00ff00" << copper
-                    << "|r|cffffd333c|r";
+                out << "I have |cff00ff00" << Cash(copper) << "|r";
                 SendWhisper(out.str().c_str(), *(m_bot->GetTrader()));
             }
             return;
