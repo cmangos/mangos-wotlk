@@ -1279,6 +1279,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
                 // calculate how much money bot has
                 // send bot the message
+                uint32 copper = m_bot->GetMoney();
                 out.str("");
                 out << "I have |cff00ff00" << Cash(copper) << "|r";
                 SendWhisper(out.str().c_str(), *(m_bot->GetTrader()));
