@@ -34,6 +34,8 @@
 #include "../AuctionHouseMgr.h"
 #include "../Mail.h"
 #include "../Language.h"
+#include <iomanip>
+#include <iostream>
 
 // returns a float in range of..
 float rand_float(float low, float high)
@@ -1276,18 +1278,10 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     ch.SendSysMessage("I have nothing to give you.");
 
                 // calculate how much money bot has
-                uint32 copper = m_bot->GetMoney();
-                uint32 gold = uint32(copper / 10000);
-                copper -= (gold * 10000);
-                uint32 silver = uint32(copper / 100);
-                copper -= (silver * 100);
-
                 // send bot the message
+                uint32 copper = m_bot->GetMoney();
                 out.str("");
-                out << "I have |cff00ff00" << gold
-                    << "|r|cfffffc00g|r|cff00ff00" << silver
-                    << "|r|cffcdcdcds|r|cff00ff00" << copper
-                    << "|r|cffffd333c|r";
+                out << "I have |cff00ff00" << Cash(copper) << "|r";
                 SendWhisper(out.str().c_str(), *(m_bot->GetTrader()));
             }
             return;
@@ -3380,10 +3374,10 @@ void PlayerbotAI::TellMaster(const std::string& text) const
 
 void PlayerbotAI::TellMaster(const char *fmt, ...) const
 {
-    char temp_buf[1024];
+    char temp_buf[2048];
     va_list ap;
     va_start(ap, fmt);
-    (void) vsnprintf(temp_buf, 1024, fmt, ap);
+    vsnprintf(temp_buf, 2048, fmt, ap);
     va_end(ap);
     std::string str = temp_buf;
     TellMaster(str);
@@ -5632,16 +5626,7 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
         MakeItemLink(item, report, true);
         report << " for ";
 
-        uint32 gold = uint32(cost / 10000);
-        cost -= (gold * 10000);
-        uint32 silver = uint32(cost / 100);
-        cost -= (silver * 100);
-
-        if (gold > 0)
-            report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
-        if (silver > 0)
-            report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-        report << cost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\n";
+        report << Cash(cost);
     }
     else if (item->GetProto()->SellPrice > 0)
         MakeItemLink(item, canSell, true);
@@ -5835,6 +5820,25 @@ bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
     return true;
 }
 
+std::string PlayerbotAI::Cash(uint32 copper)
+{
+    using namespace std;
+    std::ostringstream change;
+
+    uint32 gold = uint32(copper / 10000);
+    copper -= (gold * 10000);
+    uint32 silver = uint32(copper / 100);
+    copper -= (silver * 100);
+
+    if (gold > 0)
+        change << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+    if (silver > 0)
+        change << std::setfill(' ') << std::setw(2) << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+    change << std::setfill(' ') << std::setw(2) << copper << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+
+    return change.str();
+}
+
 void PlayerbotAI::ListQuests(WorldObject * questgiver)
 {
     if (!questgiver)
@@ -5974,16 +5978,7 @@ void PlayerbotAI::ListAuctions()
                     if (sObjectMgr.GetPlayerNameByGUID(guid, bidder_name))
                         report << " " << bidder_name << ": ";
 
-                    uint32 gold = uint32(bid / 10000);
-                    bid -= (gold * 10000);
-                    uint32 silver = uint32(bid / 100);
-                    bid -= (silver * 100);
-
-                    if (gold > 0)
-                        report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
-                    if (silver > 0)
-                        report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-                    report << bid << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+                    report << Cash(bid);
                 }
                 if (aItem)
                     report << " ends: " << aTm->tm_hour << "|cff0070dd|hH|h|r " << aTm->tm_min << "|cff0070dd|hmin|h|r";
@@ -6099,16 +6094,7 @@ void PlayerbotAI::Sell(const uint32 itemid)
         MakeItemLink(pItem, report, true);
         report << " for ";
 
-        uint32 gold = uint32(cost / 10000);
-        cost -= (gold * 10000);
-        uint32 silver = uint32(cost / 100);
-        cost -= (silver * 100);
-
-        if (gold > 0)
-            report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
-        if (silver > 0)
-            report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-        report << cost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+        report << Cash(cost);
 
         TellMaster(report.str());
     }
@@ -6159,16 +6145,7 @@ void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bV
             report << "Sold total " << SoldQuantity << " item(s) for ";
         else
             report << "Sold " << SoldQuantity << " trash item(s) for ";
-        uint32 gold = uint32(SoldCost / 10000);
-        SoldCost -= (gold * 10000);
-        uint32 silver = uint32(SoldCost / 100);
-        SoldCost -= (silver * 100);
-
-        if (gold > 0)
-            report << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
-        if (silver > 0)
-            report << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-        report << SoldCost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+        report << Cash(SoldCost);
 
         if (bVerbose)
             TellMaster(report.str());
@@ -7544,30 +7521,14 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                 GetMaster()->GetSession()->SendPacket(&data);
 
                 MakeSpellLink(pSpellInfo, msg);
-                uint32 gold = uint32(cost / 10000);
-                cost -= (gold * 10000);
-                uint32 silver = uint32(cost / 100);
-                cost -= (silver * 100);
                 msg << " ";
-                if (gold > 0)
-                    msg << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
-                if (silver > 0)
-                    msg << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-                msg << cost <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\r";
+                msg << Cash(cost) << "\n";
             }
             ReloadAI();
-            uint32 gold = uint32(totalCost / 10000);
-            totalCost -= (gold * 10000);
-            uint32 silver = uint32(totalCost / 100);
-            totalCost -= (silver * 100);
             msg << "Total of " << totalSpellLearnt << " spell";
             if (totalSpellLearnt != 1) msg << "s";
             msg << " learnt, ";
-            if (gold > 0)
-                msg << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
-            if (silver > 0)
-                msg << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-            msg << totalCost <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t spent.";
+            msg << Cash(totalCost) << " spent.";
         }
         // Handle: List class or profession skills, spells & abilities for selected trainer
         else
@@ -7601,48 +7562,23 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                     continue;
                 uint32 cost = uint32(floor(tSpell->spellCost *  fDiscountMod));
                 totalCost += cost;
-
-                uint32 gold = uint32(cost / 10000);
-                cost -= (gold * 10000);
-                uint32 silver = uint32(cost / 100);
-                cost -= (silver * 100);
                 MakeSpellLink(pSpellInfo, msg);
                 msg << " ";
-                if (gold > 0)
-                    msg << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
-                if (silver > 0)
-                    msg << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-                msg << cost <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t\r";
+                msg << Cash(cost) << "\n";
             }
             int32 moneyDiff = m_bot->GetMoney() - totalCost;
             if (moneyDiff >= 0)
             {
                 // calculate how much money bot has
-                uint32 gold = uint32(moneyDiff / 10000);
-                moneyDiff -= (gold * 10000);
-                uint32 silver = uint32(moneyDiff / 100);
-                moneyDiff -= (silver * 100);
                 msg << " ";
-                if (gold > 0)
-                    msg << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
-                if (silver > 0)
-                    msg << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-                msg << moneyDiff <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t left.";
+                msg << Cash(moneyDiff) << " left.";
             }
             else
             {
                 Announce(CANT_AFFORD);
                 moneyDiff *= -1;
-                uint32 gold = uint32(moneyDiff / 10000);
-                moneyDiff -= (gold * 10000);
-                uint32 silver = uint32(moneyDiff / 100);
-                moneyDiff -= (silver * 100);
                 msg << "I need ";
-                if (gold > 0)
-                    msg << " " << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
-                if (silver > 0)
-                    msg << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-                msg << moneyDiff <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t more to learn all the spells!";
+                msg << Cash(moneyDiff) << " more to learn all the spells!";
             }
         }
     }
@@ -7768,33 +7704,14 @@ void PlayerbotAI::_HandleCommandStats(std::string &text, Player &fromPlayer)
     }
 
     // estimate how much item damage the bot has
-    uint32 copper = EstRepairAll();
-    uint32 gold = uint32(copper / 10000);
-    copper -= (gold * 10000);
-    uint32 silver = uint32(copper / 100);
-    copper -= (silver * 100);
-
     out << "|cffffffff[|h|cff00ffff" << m_bot->GetName() << "|h|cffffffff] has |cff00ff00";
     out << totalfree << " |h|cffffffff bag slots,|h" << " |cff00ff00";
-    if (gold > 0)
-        out << "|r|cff00ff00" << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
-    if (silver > 0)
-        out << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-    out << copper <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+    out << Cash(EstRepairAll());
 
     // calculate how much money bot has
-    copper = m_bot->GetMoney();
-    gold = uint32(copper / 10000);
-    copper -= (gold * 10000);
-    silver = uint32(copper / 100);
-    copper -= (silver * 100);
-
+    uint32 copper = m_bot->GetMoney();
     out << "|h|cffffffff item damage & has " << "|r|cff00ff00";
-    if (gold > 0)
-        out << gold <<  " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
-    if (silver > 0)
-        out << silver <<  " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
-    out << copper <<  " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+    out << Cash(copper);
     ChatHandler ch(&fromPlayer);
     ch.SendSysMessage(out.str().c_str());
 }
@@ -7842,10 +7759,12 @@ void PlayerbotAI::_HandleCommandGM(std::string &text, Player &fromPlayer)
 
 void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 {
+    ChatHandler ch(&fromPlayer);
+
     // "help help"? Seriously?
     if (ExtractCommand("help", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("help", "Lists all the things you can order me to do... But it's up to me whether to follow your orders... Or not."), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("help", "Lists all the things you can order me to do... But it's up to me whether to follow your orders... Or not.").c_str());
         return;
     }
 
@@ -7856,145 +7775,145 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     // Further indented 'ExtractCommand("subcommand")' conditionals make sure these aren't printed for basic "help"
     if (bMainHelp || ExtractCommand("attack", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("attack", "Attack the selected target. Which would, of course, require a valid target.", HL_TARGET), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("attack", "Attack the selected target. Which would, of course, require a valid target.", HL_TARGET).c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("follow", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("follow", "I will follow you - this also revives me if dead and teleports me if I'm far away."), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("follow", "I will follow you - this also revives me if dead and teleports me if I'm far away.").c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("stay", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("stay", "I will stay put until told otherwise."), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("stay", "I will stay put until told otherwise.").c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("assist", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("assist", "I will assist the character listed, attacking as they attack.", HL_NAME), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("assist", "I will assist the character listed, attacking as they attack.", HL_NAME).c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("spells", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("spells", "I will list all the spells I know."), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("spells", "I will list all the spells I know.").c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("cast", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("cast", "I will cast the spell or ability listed.", HL_SPELL), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("cast", "I will cast the spell or ability listed.", HL_SPELL).c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("use", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("use", "I will use the linked item.", HL_ITEM), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("use", "I will use the linked item.", HL_ITEM).c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("equip", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("equip", "I will equip the linked item(s).", HL_ITEM, true), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("equip", "I will equip the linked item(s).", HL_ITEM, true).c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("reset", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("reset", "I will reset all my states, orders, loot list, talent spec, ... Hey, that's kind of like memory loss."), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("reset", "I will reset all my states, orders, loot list, talent spec, ... Hey, that's kind of like memory loss.").c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("stats", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("stats", "This will inform you of my wealth, free bag slots and estimated equipment repair costs."), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("stats", "This will inform you of my wealth, free bag slots and estimated equipment repair costs.").c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("survey", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("survey", "Lists all available game objects near me."), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("survey", "Lists all available game objects near me.").c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("find", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("find", "I will find said game object, walk right up to it, and wait.", HL_GAMEOBJECT), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("find", "I will find said game object, walk right up to it, and wait.", HL_GAMEOBJECT).c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("get", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("get", "I will get said game object and return to your side.", HL_GAMEOBJECT), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("get", "I will get said game object and return to your side.", HL_GAMEOBJECT).c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("quest", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("quest", "Lists my current quests."), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("quest", "Lists my current quests.").c_str());
 
         if (!bMainHelp)
         {
-            SendWhisper(_HandleCommandHelpHelper("quest add", "Adds this quest to my quest log.", HL_QUEST), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("quest drop", "Removes this quest from my quest log.", HL_QUEST), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("quest end", "Turns in my completed quests."), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("quest list", "Lists the quests offered to me by this target."), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("quest report", "This will give you a full report of all the items, creatures or gameobjects I still need to finish my quests.", HL_QUEST), fromPlayer);
+            ch.SendSysMessage(_HandleCommandHelpHelper("quest add", "Adds this quest to my quest log.", HL_QUEST).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("quest drop", "Removes this quest from my quest log.", HL_QUEST).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("quest end", "Turns in my completed quests.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("quest list", "Lists the quests offered to me by this target.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("quest report", "This will give you a full report of all the items, creatures or gameobjects I still need to finish my quests.", HL_QUEST).c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("add", text, true)) {}
@@ -8003,34 +7922,34 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             else if (ExtractCommand("list", text, true)) {}
             else if (ExtractCommand("report", text, true)) {}
 
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("orders", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("orders", "Shows you my orders. Free will is overrated, right?"), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("orders", "Shows you my orders. Free will is overrated, right?").c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("pet", text))
     {
         if (bMainHelp)
-            SendWhisper(_HandleCommandHelpHelper("pet", "Helps command my pet. Must always be used with a subcommand."), fromPlayer);
+            ch.SendSysMessage(_HandleCommandHelpHelper("pet", "Helps command my pet. Must always be used with a subcommand.").c_str());
         else if (text == "") // not "help" AND "help pet"
-            SendWhisper(_HandleCommandHelpHelper("pet", "This by itself is not a valid command. Just so you know. To be used with a subcommand, such as..."), fromPlayer);
+            ch.SendSysMessage(_HandleCommandHelpHelper("pet", "This by itself is not a valid command. Just so you know. To be used with a subcommand, such as...").c_str());
 
         if (!bMainHelp)
         {
-            SendWhisper(_HandleCommandHelpHelper("pet spells", "Shows you the spells my pet knows."), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("pet cast", "Has my pet cast this spell. May require a treat. Or at least ask nicely.", HL_SPELL), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("pet toggle", "Toggles autocast for this spell.", HL_SPELL), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("pet state", "Shows my pet's aggro mode."), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("pet react", "Sets my pet's aggro mode.", HL_PETAGGRO), fromPlayer);
+            ch.SendSysMessage(_HandleCommandHelpHelper("pet spells", "Shows you the spells my pet knows.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("pet cast", "Has my pet cast this spell. May require a treat. Or at least ask nicely.", HL_SPELL).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("pet toggle", "Toggles autocast for this spell.", HL_SPELL).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("pet state", "Shows my pet's aggro mode.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("pet react", "Sets my pet's aggro mode.", HL_PETAGGRO).c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("spells", text)) {}
@@ -8039,190 +7958,189 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             else if (ExtractCommand("state", text)) {}
             else if (ExtractCommand("react", text))
             {
-                SendWhisper(_HandleCommandHelpHelper("pet react", "has three modes."), fromPlayer);
-                SendWhisper(_HandleCommandHelpHelper("aggressive", "sets it so my precious attacks everything in sight.", HL_NONE, false, true), fromPlayer);
-                SendWhisper(_HandleCommandHelpHelper("defensive", "sets it so it automatically attacks anything that attacks me, or anything I attack.", HL_NONE, false, true), fromPlayer);
-                SendWhisper(_HandleCommandHelpHelper("passive", "makes it so my pet won't attack anything unless directly told to.", HL_NONE, false, true), fromPlayer);
+                ch.SendSysMessage(_HandleCommandHelpHelper("pet react", "has three modes.").c_str());
+                ch.SendSysMessage(_HandleCommandHelpHelper("aggressive", "sets it so my precious attacks everything in sight.", HL_NONE, false, true).c_str());
+                ch.SendSysMessage(_HandleCommandHelpHelper("defensive", "sets it so it automatically attacks anything that attacks me, or anything I attack.", HL_NONE, false, true).c_str());
+                ch.SendSysMessage(_HandleCommandHelpHelper("passive", "makes it so my pet won't attack anything unless directly told to.", HL_NONE, false, true).c_str());
 
                 // Catches all valid subcommands, also placeholders for potential future sub-subcommands
                 if (ExtractCommand("aggressive", text, true)) {}
                 else if (ExtractCommand("defensive", text, true)) {}
                 else if (ExtractCommand("passive", text, true)) {}
                 if (text != "")
-                    SendWhisper(sInvalidSubcommand, fromPlayer);
+                    ch.SendSysMessage(sInvalidSubcommand.c_str());
             }
 
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("collect", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("collect", "Tells you what my current collect status is. Also lists possible options."), fromPlayer);
-        SendWhisper(_HandleCommandHelpHelper("collect", "Sets what I collect. Obviously the 'none' option should be used alone, but all the others can be mixed.", HL_OPTION, true), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("collect", "Tells you what my current collect status is. Also lists possible options.").c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("collect", "Sets what I collect. Obviously the 'none' option should be used alone, but all the others can be mixed.", HL_OPTION, true).c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("sell", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("sell", "Adds this to my 'for sale' list.", HL_ITEM, true), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("sell", "Adds this to my 'for sale' list.", HL_ITEM, true).c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("buy", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("buy", "Adds this to my 'purchase' list.", HL_ITEM, true), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("buy", "Adds this to my 'purchase' list.", HL_ITEM, true).c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("drop", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("drop", "Drops the linked item(s). Permanently.", HL_ITEM, true), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("drop", "Drops the linked item(s). Permanently.", HL_ITEM, true).c_str());
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("auction", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("auction", "Lists all my active auctions. With pretty little links and such. Hi hi hi... I'm gonna be sooo rich!"), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("auction", "Lists all my active auctions. With pretty little links and such. Hi hi hi... I'm gonna be sooo rich!").c_str());
 
         if (!bMainHelp)
         {
-            SendWhisper(_HandleCommandHelpHelper("auction add", "Adds the item to my 'auction off later' list. I have a lot of lists, you see...", HL_ITEM), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("auction remove", "Adds the item to my 'Don't auction after all' list. Hope it hasn't sold by then!", HL_AUCTION), fromPlayer);
+            ch.SendSysMessage(_HandleCommandHelpHelper("auction add", "Adds the item to my 'auction off later' list. I have a lot of lists, you see...", HL_ITEM).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("auction remove", "Adds the item to my 'Don't auction after all' list. Hope it hasn't sold by then!", HL_AUCTION).c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("add", text, true)) {}
             else if(ExtractCommand("remove", text, true)) {}
 
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("repair", text))
     {
         if (!bMainHelp && text == "")
-            SendWhisper(_HandleCommandHelpHelper("repair", "This by itself is not a valid command. Just so you know. To be used with a subcommand, such as..."), fromPlayer);
+            ch.SendSysMessage(_HandleCommandHelpHelper("repair", "This by itself is not a valid command. Just so you know. To be used with a subcommand, such as...").c_str());
 
         if (!bMainHelp)
         {
-            SendWhisper(_HandleCommandHelpHelper("repair", "Has me find an armorer and repair the items you listed.", HL_ITEM), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("repair all", "Has me find an armorer and repair all my items, be they equipped or just taking up bagspace."), fromPlayer);
+            ch.SendSysMessage(_HandleCommandHelpHelper("repair", "Has me find an armorer and repair the items you listed.", HL_ITEM).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("repair all", "Has me find an armorer and repair all my items, be they equipped or just taking up bagspace.").c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("all", text)) {}
 
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("talent", text))
     {
         msg = _HandleCommandHelpHelper("talent", "Lists my talents, glyphs, unspent talent points and the cost to reset all talents.");
-        SendWhisper(msg, fromPlayer);
+        ch.SendSysMessage(msg.c_str());
 
         if (!bMainHelp)
         {
-            SendWhisper(_HandleCommandHelpHelper("talent learn", "Has me learn the linked talent.", HL_TALENT), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("talent reset", "Resets my talents. Assuming I have the appropriate amount of sparkly gold, shiny silver, and... unrusted copper."), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("talent spec", "Lists all talent specs I can use."), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("talent spec #", "I will follow this talent spec. Well, I will if you picked a talent spec that exists."), fromPlayer);
+            ch.SendSysMessage(_HandleCommandHelpHelper("talent learn", "Has me learn the linked talent.", HL_TALENT).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("talent reset", "Resets my talents. Assuming I have the appropriate amount of sparkly gold, shiny silver, and... unrusted copper.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("talent spec", "Lists all talent specs I can use.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("talent spec #", "I will follow this talent spec. Well, I will if you picked a talent spec that exists.").c_str());
 
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
         if (!bMainHelp) return;
     }
     if (bMainHelp || ExtractCommand("bank", text))
     {
-        SendWhisper(_HandleCommandHelpHelper("bank", "Gives you my bank balance. I thought that was private."), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("bank", "Gives you my bank balance. I thought that was private.").c_str());
 
         if (!bMainHelp)
         {
-            SendWhisper(_HandleCommandHelpHelper("bank deposit", "Deposits the listed items in my bank.", HL_ITEM, true), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("bank withdraw", "Withdraw the listed items from my bank.", HL_ITEM, true), fromPlayer);
+            ch.SendSysMessage(_HandleCommandHelpHelper("bank deposit", "Deposits the listed items in my bank.", HL_ITEM, true).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("bank withdraw", "Withdraw the listed items from my bank.", HL_ITEM, true).c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("deposit", text)) {}
             else if (ExtractCommand("withdraw", text)) {}
 
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (bMainHelp || ExtractCommand("skill", text))
     {
         msg = _HandleCommandHelpHelper("skill", "Lists my primary professions.");
-        SendWhisper(msg, fromPlayer);
+        ch.SendSysMessage(msg.c_str());
 
         if (!bMainHelp)
         {
-            SendWhisper(_HandleCommandHelpHelper("skill train", "Lists the things this trainer can teach me. If you've targeted a trainer, that is."), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("skill learn", "Have me learn this skill from the selected trainer.", HL_SKILL), fromPlayer);
-            SendWhisper(_HandleCommandHelpHelper("skill unlearn", "Unlearn the linked (primary) profession and everything that goes with it.", HL_PROFESSION), fromPlayer);
+            ch.SendSysMessage(_HandleCommandHelpHelper("skill learn", "Lists the things this trainer can teach me. If you've targeted a trainer, that is.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("skill learn", "Have me learn this skill from the selected trainer.", HL_SKILL).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("skill unlearn", "Unlearn the linked (primary) profession and everything that goes with it.", HL_PROFESSION).c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
-            if (ExtractCommand("train", text)) {}
-            else if (ExtractCommand("learn", text)) {}
+            if (ExtractCommand("learn", text)) {}
             else if (ExtractCommand("unlearn", text)) {}
 
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
     if (fromPlayer.GetSession()->GetSecurity() > SEC_PLAYER && (bMainHelp || ExtractCommand("gm", text)))
     {
         msg = _HandleCommandHelpHelper("gm", "Lists actions available to GM account level and up.");
-        SendWhisper(msg, fromPlayer);
+        ch.SendSysMessage(msg.c_str());
 
         if (!bMainHelp)
         {
-            SendWhisper(_HandleCommandHelpHelper("gm check", "Lists the things you can run a check on."), fromPlayer);
+            ch.SendSysMessage(_HandleCommandHelpHelper("gm check", "Lists the things you can run a check on.").c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("check", text))
             {
-                SendWhisper(_HandleCommandHelpHelper("gm check talent", "Lists talent mechanics you can run a check on."), fromPlayer);
+                ch.SendSysMessage(_HandleCommandHelpHelper("gm check talent", "Lists talent mechanics you can run a check on.").c_str());
 
                 if (ExtractCommand("talent", text))
                 {
-                    SendWhisper(_HandleCommandHelpHelper("gm check talent spec", "Checks the talent spec database for various errors. Only the first error (if any) is returned."), fromPlayer);
+                    ch.SendSysMessage(_HandleCommandHelpHelper("gm check talent spec", "Checks the talent spec database for various errors. Only the first error (if any) is returned.").c_str());
 
                     if (ExtractCommand("spec", text)) {}
 
-                    if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+                    if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
                     return;
                 }
 
-                if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+                if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
                 return;
             }
 
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
 
     if (bMainHelp)
-        SendWhisper(_HandleCommandHelpHelper("help", "Gives you this listing of main commands... But then, you know that already don't you."), fromPlayer);
+        ch.SendSysMessage(_HandleCommandHelpHelper("help", "Gives you this listing of main commands... But then, you know that already don't you.").c_str());
 
     if(text != "")
-        SendWhisper("Either that is not a valid command, or someone forgot to add it to my help journal. I mean seriously, they can't expect me to remember *all* this stuff, can they?", fromPlayer);
+        ch.SendSysMessage("Either that is not a valid command, or someone forgot to add it to my help journal. I mean seriously, they can't expect me to remember *all* this stuff, can they?");
 }
 
 std::string PlayerbotAI::_HandleCommandHelpHelper(std::string sCommand, std::string sExplain, HELPERLINKABLES reqLink, bool bReqLinkMultiples, bool bCommandShort)

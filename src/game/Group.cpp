@@ -31,8 +31,12 @@
 #include "MapManager.h"
 #include "MapPersistentStateMgr.h"
 #include "Util.h"
-#include "playerbot/PlayerbotMgr.h"
 #include "LootMgr.h"
+
+// Playerbot mod:
+#include "playerbot/PlayerbotMgr.h"
+#include "Config/Config.h"
+extern Config botConfig;
 
 #define LOOT_ROLL_TIMEOUT  (1*MINUTE*IN_MILLISECONDS)
 
@@ -348,6 +352,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
 uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
 {
     //Playerbot mod - if master leaves group, all bots leave group
+    if (!botConfig.GetBoolDefault("PlayerbotAI.DisableBots", false))
     {
         Player* const player = sObjectMgr.GetPlayer(guid);
         if (player && player->GetPlayerbotMgr())
