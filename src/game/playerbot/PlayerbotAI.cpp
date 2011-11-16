@@ -3105,6 +3105,7 @@ void PlayerbotAI::Announce(AnnounceFlags msg)
             {
                 case CANT_AFFORD: m_bot->getGender() == GENDER_MALE ? PlaySound(1908) : PlaySound(2032); break;
                 case INVENTORY_FULL: m_bot->getGender() == GENDER_MALE ? PlaySound(1875) : PlaySound(1999); break;
+                case CANT_USE_TOO_FAR: m_bot->getGender() == GENDER_MALE ? PlaySound(1924) : PlaySound(2048); break;
                 default: break;
             }
             break;
@@ -3113,6 +3114,7 @@ void PlayerbotAI::Announce(AnnounceFlags msg)
             {
                 case CANT_AFFORD: m_bot->getGender() == GENDER_MALE ? PlaySound(2319) : PlaySound(2374); break;
                 case INVENTORY_FULL: m_bot->getGender() == GENDER_MALE ? PlaySound(2284) : PlaySound(2341); break;
+                case CANT_USE_TOO_FAR: m_bot->getGender() == GENDER_MALE ? PlaySound(2335) : PlaySound(2390); break;
                 default: break;
             }
             break;
@@ -3121,6 +3123,7 @@ void PlayerbotAI::Announce(AnnounceFlags msg)
             {
                 case CANT_AFFORD: m_bot->getGender() == GENDER_MALE ? PlaySound(1630) : PlaySound(1686); break;
                 case INVENTORY_FULL: m_bot->getGender() == GENDER_MALE ? PlaySound(1581) : PlaySound(1654); break;
+                case CANT_USE_TOO_FAR: m_bot->getGender() == GENDER_MALE ? PlaySound(1636) : PlaySound(1702); break;
                 default: break;
             }
             break;
@@ -3129,6 +3132,7 @@ void PlayerbotAI::Announce(AnnounceFlags msg)
             {
                 case CANT_AFFORD: m_bot->getGender() == GENDER_MALE ? PlaySound(2151) : PlaySound(2262); break;
                 case INVENTORY_FULL: m_bot->getGender() == GENDER_MALE ? PlaySound(2118) : PlaySound(2229); break;
+                case CANT_USE_TOO_FAR: m_bot->getGender() == GENDER_MALE ? PlaySound(2167) : PlaySound(2278); break;
                 default: break;
             }
             break;
@@ -3137,6 +3141,7 @@ void PlayerbotAI::Announce(AnnounceFlags msg)
             {
                 case CANT_AFFORD: m_bot->getGender() == GENDER_MALE ? PlaySound(2096) : PlaySound(2207); break;
                 case INVENTORY_FULL: m_bot->getGender() == GENDER_MALE ? PlaySound(2054) : PlaySound(2173); break;
+                case CANT_USE_TOO_FAR: m_bot->getGender() == GENDER_MALE ? PlaySound(2112) : PlaySound(2223); break;
                 default: break;
             }
             break;
@@ -3145,6 +3150,7 @@ void PlayerbotAI::Announce(AnnounceFlags msg)
             {
                 case CANT_AFFORD: m_bot->getGender() == GENDER_MALE ? PlaySound(2463) : PlaySound(2462); break;
                 case INVENTORY_FULL: m_bot->getGender() == GENDER_MALE ? PlaySound(2396) : PlaySound(2397); break;
+                case CANT_USE_TOO_FAR: m_bot->getGender() == GENDER_MALE ? PlaySound(2495) : PlaySound(2494); break;
                 default: break;
             }
             break;
@@ -3153,6 +3159,7 @@ void PlayerbotAI::Announce(AnnounceFlags msg)
             {
                 case CANT_AFFORD: m_bot->getGender() == GENDER_MALE ? PlaySound(1743) : PlaySound(1798); break;
                 case INVENTORY_FULL: m_bot->getGender() == GENDER_MALE ? PlaySound(1708) : PlaySound(1709); break;
+                case CANT_USE_TOO_FAR: m_bot->getGender() == GENDER_MALE ? PlaySound(1759) : PlaySound(1814); break;
                 default: break;
             }
             break;
@@ -3161,6 +3168,7 @@ void PlayerbotAI::Announce(AnnounceFlags msg)
             {
                 case CANT_AFFORD: m_bot->getGender() == GENDER_MALE ? PlaySound(1853) : PlaySound(1963); break;
                 case INVENTORY_FULL: m_bot->getGender() == GENDER_MALE ? PlaySound(1820) : PlaySound(1930); break;
+                case CANT_USE_TOO_FAR: m_bot->getGender() == GENDER_MALE ? PlaySound(1869) : PlaySound(1993); break;
                 default: break;
             }
             break;
@@ -3169,6 +3177,7 @@ void PlayerbotAI::Announce(AnnounceFlags msg)
             {
                 case CANT_AFFORD: m_bot->getGender() == GENDER_MALE ? PlaySound(9583) : PlaySound(9584); break;
                 case INVENTORY_FULL: m_bot->getGender() == GENDER_MALE ? PlaySound(9549) : PlaySound(9550); break;
+                case CANT_USE_TOO_FAR: m_bot->getGender() == GENDER_MALE ? PlaySound(9565) : PlaySound(9566); break;
                 default: break;
             }
             break;
@@ -3177,6 +3186,7 @@ void PlayerbotAI::Announce(AnnounceFlags msg)
             {
                 case CANT_AFFORD: m_bot->getGender() == GENDER_MALE ? PlaySound(9498) : PlaySound(9499); break;
                 case INVENTORY_FULL: m_bot->getGender() == GENDER_MALE ? PlaySound(9465) : PlaySound(9466); break;
+                case CANT_USE_TOO_FAR: m_bot->getGender() == GENDER_MALE ? PlaySound(9481) : PlaySound(9482); break;
                 default: break;
             }
             break;
@@ -3898,6 +3908,25 @@ void PlayerbotAI::extractItemIds(const std::string& text, std::list<uint32>& ite
     }
 }
 
+void PlayerbotAI::extractMailIds(const std::string& text, std::list<uint32>& mailIds) const
+{
+    uint8 pos = 0;
+    while (true)
+    {
+        int i = text.find("Hmail:", pos);
+        if (i == -1)
+            break;
+        pos = i + 6;
+        int endPos = text.find('|', pos);
+        if (endPos == -1)
+            break;
+        std::string idC = text.substr(pos, endPos - pos);
+        uint32 id = atol(idC.c_str());
+        pos = endPos;
+        if (id)
+            mailIds.push_back(id);
+    }
+}
 
 /**
 * Checks whether the TalentSpec database contains any obvious errors
@@ -5820,6 +5849,80 @@ bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
     return true;
 }
 
+// Subject - 9360:0:2
+// Subject - item:0:MailAuctionAnswer
+// Body - 0:2650:2650:120:132
+// Body - 0:High Bid:Buyout:Deposit:AuctionHouse Cut
+
+std::string PlayerbotAI::AuctionResult(std::string subject, std::string body)
+{
+    std::ostringstream out;
+    std::string winner;
+    int pos;
+
+    subject.append(":");
+    if (body.size() > 0)
+    {
+        pos = body.find_first_not_of(" ");
+        subject.append(body,pos,body.size()-pos);
+        subject.append(":");
+    }
+
+    DEBUG_LOG("Auctions string (%s)",subject.c_str());
+    pos = 0;
+    int sublen = subject.size()/2;
+    uint32 a_info[sublen];
+    for(int i=0;i < sublen;i++)
+    {
+        int endpos = subject.find(':',pos);
+        std::string idc = subject.substr(pos,endpos - pos);
+        a_info[i] = atol(idc.c_str());
+        DEBUG_LOG("a_info[%d] = (%u)",i,a_info[i]);
+        pos = endpos + 1;
+    }
+
+    if (a_info[4] != a_info[5])
+        winner =  "High Bidder";
+    else
+        winner =  "Buyout";
+
+    ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(a_info[0]);
+    if (!pProto)
+        return out.str();
+
+    switch(a_info[2])
+    {
+        case AUCTION_OUTBIDDED:           //= 0,
+            out << "Subject: Outbid on: " << pProto->Name1;
+            break;
+        case AUCTION_WON:                 //= 1,
+            out << "Subject: Auction won: " << pProto->Name1 << "\n";
+            out << "Item Purchased: " << pProto->Name1 << "\n";
+            break;
+        case AUCTION_SUCCESSFUL:          //= 2,
+        {
+            out << "Subject: Auction successful: " << pProto->Name1 << "\n";
+            out << "Item Sold: " << pProto->Name1 << "\n";
+            out << "\n[" << winner << " Sale: " << Cash(a_info[4]) << "]";
+            out << "\n( |cff1eff00Deposit:|cffccffff " << Cash(a_info[6]) << " |cffff0000- Tax:|cffccffff " << Cash(a_info[7]) << " ) |cff1eff00+|cffccffff";
+            break;
+        }
+        case AUCTION_EXPIRED:             //= 3,
+            out << "Subject: Auction expired: " << pProto->Name1;
+            break;
+        case AUCTION_CANCELLED_TO_BIDDER: //= 4,
+            out << "Subject: Auction cancelled to bidder: " << pProto->Name1;
+            break;
+        case AUCTION_CANCELED:            //= 5,
+            out << "Subject: Auction cancelled: " << pProto->Name1;
+            break;
+        case AUCTION_SALE_PENDING:        //= 6
+            out << "Subject: Auction sale pending: " << pProto->Name1;
+            break;
+    }
+    return out.str();
+}
+
 std::string PlayerbotAI::Cash(uint32 copper)
 {
     using namespace std;
@@ -6311,6 +6414,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (ExtractCommand("auction", input))
         _HandleCommandAuction(input, fromPlayer);
 
+    else if (ExtractCommand("mail", input))
+        _HandleCommandMail(input, fromPlayer);
+
     else if (ExtractCommand("bank", input))
         _HandleCommandBank(input, fromPlayer);
 
@@ -6691,6 +6797,291 @@ void PlayerbotAI::_HandleCommandAuction(std::string &text, Player &fromPlayer)
     else
     {
         SendWhisper("I don't understand what you're trying to do", fromPlayer);
+    }
+}
+
+void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
+{
+    ChatHandler ch(&fromPlayer);
+
+    if (text == "")
+    {
+        ch.SendSysMessage("Syntax: mail <inbox [Mailbox] | getcash [mailid].. | getitem [mailid].. | delete [mailid]..>");
+        return;
+    }
+    else if (ExtractCommand("inbox",text))
+    {
+        uint32 mail_count = 0;
+        extractGOinfo(text, m_lootTargets);
+
+        if (m_lootTargets.empty())
+        {
+           ch.SendSysMessage("Syntax: mail <inbox [Mailbox]>");
+           return;
+        }
+
+        ObjectGuid m_mailboxGuid = m_lootTargets.front();
+        m_lootTargets.pop_front();
+        m_lootTargets.clear();
+
+        if (!m_bot->GetGameObjectIfCanInteractWith(m_mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
+        {
+            Announce(CANT_USE_TOO_FAR);
+            return;
+        }
+
+        TellMaster("Inbox:\n");
+
+	for(PlayerMails::reverse_iterator itr = m_bot->GetMailRBegin(); itr != m_bot->GetMailREnd(); ++itr)
+        {
+            std::ostringstream msg;
+            ++mail_count;
+
+            msg  << "|cffffcccc|Hmail:" << (*itr)->messageID << "|h[" << (*itr)->messageID << "]|h|r ";
+
+            switch((*itr)->messageType)
+            {
+                case MAIL_NORMAL:
+                {
+                    msg << "|cffffffff"; // white
+                    if ((*itr)->subject != "")
+                        msg << "Subject: " << (*itr)->subject << "\n";
+
+                    if ((*itr)->body != "")
+                        msg << (*itr)->body << "\n";
+                    break;
+                }
+                case MAIL_CREATURE:
+                    msg << "|cffccffccMAIL_CREATURE\n"; // green
+                    break;
+                case MAIL_GAMEOBJECT:
+                    msg << "|cffccffccMAIL_GAMEOBJECT\n"; // green
+                    break;
+                case MAIL_AUCTION:
+                {
+                    msg << "|cffccffff"; // blue
+                    msg << AuctionResult((*itr)->subject,(*itr)->body) << "\n";
+                    break;
+                }
+                case MAIL_ITEM:
+                    msg << "|cffccffccMAIL_ITEM\n"; // green
+                    break;
+            }
+
+            if ((*itr)->money)
+                msg << "[To Collect: " << Cash((*itr)->money) << " ]\n";
+
+            uint8 item_count = (*itr)->items.size(); // max count is MAX_MAIL_ITEMS (12)
+            if (item_count > 0)
+            {
+                msg << "Items: ";
+                for(uint8 i = 0; i < item_count; ++i)
+                {
+                    Item *item = m_bot->GetMItem((*itr)->items[i].item_guid);
+                    if (item)
+                        MakeItemLink(item, msg, true);
+                }
+            }
+            msg << "\n";
+            ch.SendSysMessage(msg.str().c_str());
+        }
+
+        if (mail_count == 0)
+            ch.SendSysMessage("|cff009900My inbox is empty.");
+    }
+    else if (ExtractCommand("getcash",text))
+    {
+        std::ostringstream msg;
+        std::list<uint32> mailIds;
+        extractMailIds(text,mailIds);
+        uint32 total = 0;
+
+        if (mailIds.empty())
+        {
+           ch.SendSysMessage("Syntax: mail <getcash [mailId]..>");
+           return;
+        }
+
+        for (std::list<uint32>::iterator it = mailIds.begin(); it != mailIds.end(); ++it)
+        {
+            Mail* m = m_bot->GetMail(*it);
+            if(!m || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
+            {
+                m_bot->SendMailResult(*it, MAIL_MONEY_TAKEN, MAIL_ERR_INTERNAL_ERROR);
+                return;
+            }
+
+            m_bot->SendMailResult(*it, MAIL_MONEY_TAKEN, MAIL_OK);
+            m_bot->ModifyMoney(m->money);
+            total += m->money;
+            m->money = 0;
+            m->state = MAIL_STATE_CHANGED;
+            m_bot->m_mailsUpdated = true;
+            m_bot->UpdateMail();
+        }
+        if (total > 0)
+        {
+            msg << "|cff009900" << "I received: |r" << Cash(total);
+            ch.SendSysMessage(msg.str().c_str());
+        }
+    }
+    else if (ExtractCommand("getitem",text))
+    {
+        std::list<uint32> mailIds;
+        extractMailIds(text,mailIds);
+
+        if (mailIds.empty())
+        {
+            ch.SendSysMessage("Syntax: mail <getitem [mailId]..>");
+            return;
+        }
+
+        for (std::list<uint32>::iterator it = mailIds.begin(); it != mailIds.end(); it++)
+        {
+            Mail* m = m_bot->GetMail(*it);
+            if(!m || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
+            {
+                m_bot->SendMailResult(*it, MAIL_ITEM_TAKEN, MAIL_ERR_INTERNAL_ERROR);
+                return;
+            }
+
+            // prevent cheating with skip client money check
+            if(m_bot->GetMoney() < m->COD)
+            {
+                m_bot->SendMailResult(*it, MAIL_ITEM_TAKEN, MAIL_ERR_NOT_ENOUGH_MONEY);
+                return;
+            }
+
+            if (m->HasItems())
+            {
+                bool has_items = true;
+                std::ostringstream msg;
+
+                msg << "|cff009900" << "I received item: |r";
+                for(MailItemInfoVec::const_iterator itr = m->items.begin(); itr != m->items.end();)
+                {
+                    has_items = true;
+                    Item *item = m_bot->GetMItem(itr->item_guid);
+                    if (!item)
+                    {
+                        ch.SendSysMessage("item not found");
+                        return;
+                    }
+
+                    ItemPosCountVec dest;
+
+                    InventoryResult res = m_bot->CanStoreItem( NULL_BAG, NULL_SLOT, dest, item, false );
+                    if (res == EQUIP_ERR_OK)
+                    {
+                        m->removedItems.push_back(itr->item_guid);
+
+                        if (m->COD > 0)  // if there is COD, take COD money from player and send them to sender by mail
+                        {
+                            ObjectGuid sender_guid = ObjectGuid(HIGHGUID_PLAYER, m->sender);
+                            Player *sender = sObjectMgr.GetPlayer(sender_guid);
+
+                            uint32 sender_accId = 0;
+
+                            if( GetMaster()->GetSession()->GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_BOOL_GM_LOG_TRADE) )
+                            {
+                                std::string sender_name;
+                                if(sender)
+                                {
+                                    sender_accId = sender->GetSession()->GetAccountId();
+                                    sender_name = sender->GetName();
+                                }
+                                else if (sender_guid)
+                                {
+                                    // can be calculated early
+                                    sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
+
+                                    if(!sObjectMgr.GetPlayerNameByGUID(sender_guid, sender_name))
+                                        sender_name = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
+                                }
+                                sLog.outCommand(GetMaster()->GetSession()->GetAccountId(), "GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
+                                GetMaster()->GetSession()->GetPlayerName(), GetMaster()->GetSession()->GetAccountId(), item->GetProto()->Name1, item->GetEntry(), item->GetCount(), m->COD, sender_name.c_str(), sender_accId);
+                            }
+                            else if (!sender)
+                                sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
+
+                            // check player existence
+                            if(sender || sender_accId)
+                            {
+                                MailDraft(m->subject, "")
+                                .SetMoney(m->COD)
+                                .SendMailTo(MailReceiver(sender, sender_guid), m_bot, MAIL_CHECK_MASK_COD_PAYMENT);
+                            }
+
+                            m_bot->ModifyMoney( -int32(m->COD) );
+                        }
+                        m->COD = 0;
+                        m->state = MAIL_STATE_CHANGED;
+                        m_bot->m_mailsUpdated = true;
+                        m_bot->RemoveMItem(item->GetGUIDLow());
+
+                        uint32 count = item->GetCount(); // save counts before store and possible merge with deleting
+                        m_bot->MoveItemToInventory(dest, item, true);
+                        m_bot->UpdateMail();
+                        m_bot->SendMailResult(*it, MAIL_ITEM_TAKEN, MAIL_OK, 0, itr->item_guid, count);
+                        if (m->RemoveItem(itr->item_guid))
+                        {
+                            MakeItemLink(item,msg,true);
+                            has_items = false;
+                        }
+                    }
+                    else
+                        m_bot->SendMailResult(*it, MAIL_ITEM_TAKEN, MAIL_ERR_EQUIP_ERROR, res);
+                }
+
+                if (!has_items)
+                {
+                    CharacterDatabase.BeginTransaction();
+                    CharacterDatabase.PExecute("UPDATE mail SET has_items = 0 WHERE id = %u", *it);
+                    CharacterDatabase.CommitTransaction();
+                }
+                msg << "\n";
+                ch.SendSysMessage(msg.str().c_str());
+            }
+        }
+    }
+    else if (ExtractCommand("delete",text))
+    {
+        std::ostringstream msg;
+        std::list<uint32> mailIds;
+        extractMailIds(text,mailIds);
+
+        if (mailIds.empty())
+        {
+            ch.SendSysMessage("Syntax: mail <delete [mailId]..>");
+            return;
+        }
+
+        msg << "|cff009900Mail ";
+        for (std::list<uint32>::iterator it = mailIds.begin(); it != mailIds.end(); ++it)
+        {
+            m_bot->m_mailsUpdated = true;
+
+            if (Mail *m = m_bot->GetMail(*it))
+            {
+                // delete shouldn't show up for COD mails
+                if (m->COD)
+                {
+                    m_bot->SendMailResult(*it, MAIL_DELETED, MAIL_ERR_INTERNAL_ERROR);
+                    return;
+                }
+                m->state = MAIL_STATE_DELETED;
+            }
+
+            m_bot->SendMailResult(*it, MAIL_DELETED, MAIL_OK);
+            CharacterDatabase.BeginTransaction();
+            CharacterDatabase.PExecute("DELETE FROM mail WHERE id = '%u'", *it);
+            CharacterDatabase.PExecute("DELETE FROM mail_items WHERE mail_id = '%u'", *it);
+            CharacterDatabase.CommitTransaction();
+            m_bot->RemoveMail(*it);
+            msg << "|cffffcccc|h[" << *it << "]|h|r";
+        }
+        msg << "|cff009900 has been deleted..";
+        ch.SendSysMessage(msg.str().c_str());
     }
 }
 
@@ -8135,6 +8526,26 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             return;
         }
     }
+    if (bMainHelp || ExtractCommand("mail", text))
+    {
+        ch.SendSysMessage(_HandleCommandHelpHelper("mail inbox |cFFFFFF00|h[Mailbox]|h|r", "Lists all bot mail from selected [Mailbox]").c_str());
+
+        if (!bMainHelp)
+        {
+            ch.SendSysMessage(_HandleCommandHelpHelper("mail getcash", "Gets money from all selected [Mailid]..", HL_MAIL,true).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("mail getitem", "Gets items from all selected [Mailid]..", HL_MAIL,true).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("mail delete", "Delete all selected [Mailid]..", HL_MAIL,true).c_str());
+
+            // Catches all valid subcommands, also placeholders for potential future sub-subcommands
+            if (ExtractCommand("inbox", text, true)) {}
+            else if(ExtractCommand("getcash", text, true)) {}
+            else if(ExtractCommand("getitem", text, true)) {}
+            else if (ExtractCommand("delete", text, true)) {}
+
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+            return;
+        }
+    }
 
     if (bMainHelp)
         ch.SendSysMessage(_HandleCommandHelpHelper("help", "Gives you this listing of main commands... But then, you know that already don't you.").c_str());
@@ -8231,6 +8642,12 @@ std::string PlayerbotAI::_HandleCommandHelpHelper(std::string sCommand, std::str
             oss << " [AUCTION]";
             if (bReqLinkMultiples)
                 oss << " [AUCTION] ..";
+        }
+        else if (reqLink == HL_MAIL)
+        {
+            oss << " [MAILID]";
+            if (bReqLinkMultiples)
+                oss << " [MAILID] ..";
         }
         else
         {

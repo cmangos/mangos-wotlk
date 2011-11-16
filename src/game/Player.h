@@ -1452,6 +1452,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void skill(std::list<uint32>& m_spellsToLearn);
         void MakeTalentGlyphLink(std::ostringstream &out);
         bool requiredQuests(const char* pQuestIdString);
+        PlayerMails::reverse_iterator GetMailRBegin() { return m_mail.rbegin();}
+        PlayerMails::reverse_iterator GetMailREnd() { return m_mail.rend();}
+        void UpdateMail();
 
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/

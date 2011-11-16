@@ -1513,7 +1513,8 @@ public:
     {
         NOTHING                     = 0x00,
         INVENTORY_FULL              = 0x01,
-        CANT_AFFORD                 = 0x02
+        CANT_AFFORD                 = 0x02,
+        CANT_USE_TOO_FAR            = 0x03
     };
 
     typedef std::pair<enum TaskFlags, uint32> taskPair;
@@ -1561,7 +1562,8 @@ public:
         HL_SPELL,
         HL_TARGET,
         HL_NAME,
-        HL_AUCTION
+        HL_AUCTION,
+        HL_MAIL
     };
 
 public:
@@ -1600,6 +1602,9 @@ public:
     // Initialize spell using rank 1 spell id
     uint32 initSpell(uint32 spellId);
     uint32 initPetSpell(uint32 spellIconId);
+
+    // extract mail ids from links
+    void extractMailIds(const std::string& text, std::list<uint32>& mailIds) const;
 
     // extract quest ids from links
     void extractQuestIds(const std::string& text, std::list<uint32>& questIds) const;
@@ -1794,6 +1799,7 @@ public:
     bool Deposit(const uint32 itemid);
     void BankBalance();
     std::string Cash(uint32 copper);
+    std::string AuctionResult(std::string subject, std::string body);
 
 protected:
     bool ValidateTalent(uint16 talent, long charClass);
@@ -1815,6 +1821,7 @@ private:
     void _HandleCommandDrop(std::string &text, Player &fromPlayer);
     void _HandleCommandRepair(std::string &text, Player &fromPlayer);
     void _HandleCommandAuction(std::string &text, Player &fromPlayer);
+    void _HandleCommandMail(std::string &text, Player &fromPlayer);
     void _HandleCommandBank(std::string &text, Player &fromPlayer);
     void _HandleCommandTalent(std::string &text, Player &fromPlayer);
     void _HandleCommandUse(std::string &text, Player &fromPlayer);

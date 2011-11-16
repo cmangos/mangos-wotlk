@@ -1035,6 +1035,16 @@ bool Player::requiredQuests(const char* pQuestIdString)
     return false;
 }
 
+void Player::UpdateMail()
+{
+     // save money,items and mail to prevent cheating
+    CharacterDatabase.BeginTransaction();
+    this->SaveGoldToDB();
+    this->SaveInventoryAndGoldToDB();
+    this->_SaveMail();
+    CharacterDatabase.CommitTransaction();
+}
+
 bool ChatHandler::HandlePlayerbotCommand(char* args)
 {
     if (!(m_session->GetSecurity() > SEC_PLAYER))
