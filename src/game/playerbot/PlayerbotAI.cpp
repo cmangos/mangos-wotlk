@@ -5871,7 +5871,7 @@ std::string PlayerbotAI::AuctionResult(std::string subject, std::string body)
     DEBUG_LOG("Auctions string (%s)",subject.c_str());
     pos = 0;
     int sublen = subject.size()/2;
-    uint32 a_info[sublen];
+    uint32 a_info[15];
     for(int i=0;i < sublen;i++)
     {
         int endpos = subject.find(':',pos);
