@@ -129,10 +129,9 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 
     if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_HEAL)
         SpellSequence = DruidHeal;
-    // No check for Dire Bear here: requires Bear form.
     else if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST && CAT_FORM > 0)
         SpellSequence = DruidCombat;
-    // No check for Dire Bear here: requires Bear form.
+    // No check for Dire Bear here: you must have Bear form to get Dire Bear form.
     else if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK && BEAR_FORM > 0)
         SpellSequence = DruidTank;
     else
