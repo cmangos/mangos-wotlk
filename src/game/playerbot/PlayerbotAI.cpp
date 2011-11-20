@@ -4823,7 +4823,7 @@ void PlayerbotAI::extractSpellId(const std::string& text, uint32 &spellId) const
     pos = endPos;     // end
 }
 
-void PlayerbotAI::extractSpellIdList(const std::string& text, BotSpellList& m_spellsToLearn) const
+void PlayerbotAI::extractSpellIdList(const std::string& text, BotEntryList& m_spellsToLearn) const
 {
 
     //   Link format
@@ -4893,7 +4893,7 @@ void PlayerbotAI::extractTalentIds(const std::string &text, std::list<talentPair
     }
 }
 
-void PlayerbotAI::extractGOinfo(const std::string& text, BotLootTarget& m_lootTargets) const
+void PlayerbotAI::extractGOinfo(const std::string& text, BotObjectList& m_lootTargets) const
 {
 
     //    Link format
@@ -5051,7 +5051,7 @@ void PlayerbotAI::findNearbyGO()
 
     std::list<GameObject*> tempTargetGOList;
 
-    for (BotLootEntry::iterator itr = m_collectObjects.begin(); itr != m_collectObjects.end(); itr++)
+    for (BotEntryList::iterator itr = m_collectObjects.begin(); itr != m_collectObjects.end(); itr++)
     {
         uint32 entry = *(itr);
         GameObjectInfo const * gInfo = ObjectMgr::GetGameObjectInfo(entry);
@@ -7056,7 +7056,7 @@ void PlayerbotAI::_HandleCommandCollect(std::string &text, Player &fromPlayer)
         if (!m_collectObjects.empty())
         {
             std::string strobjects = "";
-            for (BotLootEntry::iterator itr = m_collectObjects.begin(); itr != m_collectObjects.end(); ++itr)
+            for (BotEntryList::iterator itr = m_collectObjects.begin(); itr != m_collectObjects.end(); ++itr)
             {
                 uint32 objectentry = *(itr);
                 GameObjectInfo const * gInfo = ObjectMgr::GetGameObjectInfo(objectentry);

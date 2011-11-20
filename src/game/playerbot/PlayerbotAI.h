@@ -1521,9 +1521,8 @@ public:
     typedef std::list<enum NPCFlags> BotNPCList;
     typedef std::map<uint32, uint32> BotNeedItem;
     typedef std::pair<uint32,uint32> talentPair;
-    typedef std::list<ObjectGuid> BotLootTarget;
-    typedef std::list<uint32> BotLootEntry;
-    typedef std::list<uint32> BotSpellList;
+    typedef std::list<ObjectGuid> BotObjectList;
+    typedef std::list<uint32> BotEntryList;
     typedef std::vector<uint32> BotTaxiNode;
 
     // attacker query used in PlayerbotAI::FindAttacker()
@@ -1617,13 +1616,13 @@ public:
     void extractSpellId(const std::string& text, uint32 &spellId) const;
 
     // extract spellids from links to list
-    void extractSpellIdList(const std::string& text, BotSpellList& m_spellsToLearn) const;
+    void extractSpellIdList(const std::string& text, BotEntryList& m_spellsToLearn) const;
 
     // extracts currency from a string as #g#s#c and returns the total in copper
     uint32 extractMoney(const std::string& text) const;
 
     // extracts gameobject info from link
-    void extractGOinfo(const std::string& text, BotLootTarget& m_lootTargets) const;
+    void extractGOinfo(const std::string& text, BotObjectList& m_lootTargets) const;
 
     // finds items in bots equipment and adds them to foundItemList, removes found items from itemIdSearchList
     void findItemsInEquip(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const;
@@ -1876,11 +1875,11 @@ private:
     // list of creatures we recently attacked and want to loot
     BotNPCList m_findNPC;               // list of NPCs
     BotTaskList m_tasks;                // list of tasks
-    BotLootTarget m_lootTargets;        // list of targets
-    BotSpellList m_spellsToLearn;       // list of spells
+    BotObjectList m_lootTargets;        // list of targets
+    BotEntryList m_spellsToLearn;       // list of spells
     ObjectGuid m_lootCurrent;           // current remains of interest
     ObjectGuid m_lootPrev;              // previous loot
-    BotLootEntry m_collectObjects;      // object entries searched for in findNearbyGO
+    BotEntryList m_collectObjects;      // object entries searched for in findNearbyGO
     BotTaxiNode m_taxiNodes;            // flight node chain;
 
     uint8 m_collectionFlags;            // what the bot should look for to loot
