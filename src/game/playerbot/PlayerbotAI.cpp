@@ -984,11 +984,11 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         case SMSG_CAST_FAILED:
         {
             WorldPacket p(packet);
+            uint8 castCount;
             uint32 spellId;
             uint8 result;
-            uint8 castCount;
 
-            p >> spellId >> castCount >> result;
+            p >> castCount >> spellId >> result;
 
             if (result != SPELL_CAST_OK)
             {
