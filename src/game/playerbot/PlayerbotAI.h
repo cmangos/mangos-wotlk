@@ -1524,6 +1524,7 @@ public:
     typedef std::list<ObjectGuid> BotObjectList;
     typedef std::list<uint32> BotEntryList;
     typedef std::vector<uint32> BotTaxiNode;
+    typedef std::set<ObjectGuid> BotObjectSet;
 
     // attacker query used in PlayerbotAI::FindAttacker()
     enum ATTACKERINFOTYPE
@@ -1896,6 +1897,8 @@ private:
     uint32 m_spellIdCommand;
     ObjectGuid m_targetGuidCommand;
     ObjectGuid m_taxiMaster;
+
+    BotObjectSet m_ignorePlayersChat;  // list of players that the bot will not respond to
 
     AttackerInfoList m_attackerInfo;
 
