@@ -28,6 +28,7 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME spells (replies with all spells known to bot)
 /t BOTNAME cast <SPELLID | (part of) SPELLNAME | [SPELLLINK]>
 /t BOTNAME use [ITEM LINK]
+/t BOTNAME use [ITEM LINK] on [EQUIPPED ITEM LINK]
 /t BOTNAME equip [ITEM LINK]
 /t BOTNAME reset (will reset states, orders and loot list)
 /t BOTNAME report (bot reports all items, creatures or gameobjects needed to finish quests)

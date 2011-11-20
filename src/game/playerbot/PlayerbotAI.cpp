@@ -3347,6 +3347,12 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             m_targetGuidCommand = ObjectGuid();
         }
 
+        else if( m_botState == BOTSTATE_ENCHANT)
+        {
+            SetState(BOTSTATE_NORMAL);
+            InspectUpdate();
+        }
+
         //if master is unmounted, unmount the bot
         else if (!GetMaster()->IsMounted() && m_bot->IsMounted())
         {
@@ -3751,6 +3757,52 @@ bool PlayerbotAI::CanReceiveSpecificSpell(uint8 spec, Unit* target) const
                 return false;
     }
     return true;
+}
+
+uint8 PlayerbotAI::_findItemSlot(Item* target)
+{
+    // list out items equipped & in main backpack
+    //INVENTORY_SLOT_ITEM_START = 23
+    //INVENTORY_SLOT_ITEM_END = 39
+
+    for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
+    {
+        // DEBUG_LOG ("[PlayerbotAI]: FindItem - [%s's]backpack slot = %u",m_bot->GetName(),slot); // 23 to 38 = 16
+        Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);  // 255, 23 to 38
+        if (pItem)
+        {
+            const ItemPrototype* const pItemProto = pItem->GetProto();
+            if (!pItemProto)
+                continue;
+
+            if (pItemProto->ItemId == target->GetProto()->ItemId)   // have required item
+                return slot;
+        }
+    }
+    // list out items in other removable backpacks
+    //INVENTORY_SLOT_BAG_START = 19
+    //INVENTORY_SLOT_BAG_END = 23
+
+    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)  // 20 to 23 = 4
+    {
+        const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);   // 255, 20 to 23
+        if (pBag)
+            for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
+            {
+                DEBUG_LOG ("[PlayerbotAI]: FindItem - [%s's]bag[%u] slot = %u", m_bot->GetName(), bag, slot);  // 1 to bagsize = ?
+                Item* const pItem = m_bot->GetItemByPos(bag, slot); // 20 to 23, 1 to bagsize
+                if (pItem)
+                {
+                    const ItemPrototype* const pItemProto = pItem->GetProto();
+                    if (!pItemProto)
+                        continue;
+
+                    if (pItemProto->ItemId == target->GetProto()->ItemId)        // have required item
+                        return slot;
+                }
+            }
+    }
+    return 0;
 }
 
 Item* PlayerbotAI::FindItem(uint32 ItemId)
@@ -7281,6 +7333,28 @@ void PlayerbotAI::_HandleCommandUse(std::string &text, Player &fromPlayer)
     std::list<Item*> itemList;
     extractItemIds(text, itemIds);
     findItemsInInv(itemIds, itemList);
+
+    // use item on an equipped item e.g. armourkit or weapon enhancement
+    if (text.find("on",0) != -1)
+    {
+        Item* tool = itemList.back();
+        itemList.pop_back();
+        if (tool)
+        {
+            findItemsInEquip(itemIds, itemList);
+            //DEBUG_LOG("tool (%s)",tool->GetProto()->Name1);
+            Item* target = itemList.back();
+            if (target)
+            {
+                //DEBUG_LOG("target (%s)",target->GetProto()->Name1);
+                UseItem(tool, _findItemSlot(target));
+                SetState(BOTSTATE_ENCHANT);
+                SetIgnoreUpdateTime(1);
+            }
+        }
+        return;
+    }
+
     // set target
     Unit* unit = ObjectAccessor::GetUnit(*m_bot, fromPlayer.GetSelectionGuid());
 
@@ -8273,6 +8347,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 
         if (!bMainHelp)
         {
+            ch.SendSysMessage(_HandleCommandHelpHelper("use [ITEM] on", "I will use the first linked item 'on' an equipped linked item.", HL_ITEM).c_str());
+
             if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
