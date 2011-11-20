@@ -519,6 +519,20 @@ void PlayerbotAI::SendQuestNeedList()
 
 bool PlayerbotAI::IsItemUseful(uint32 itemid)
 {
+    const static uint32 item_weapon_skills[MAX_ITEM_SUBCLASS_WEAPON] =
+    {
+        SKILL_AXES,     SKILL_2H_AXES,  SKILL_BOWS,          SKILL_GUNS,      SKILL_MACES,
+        SKILL_2H_MACES, SKILL_POLEARMS, SKILL_SWORDS,        SKILL_2H_SWORDS, 0,
+        SKILL_STAVES,   0,              0,                   SKILL_UNARMED,   0,
+        SKILL_DAGGERS,  SKILL_THROWN,   SKILL_ASSASSINATION, SKILL_CROSSBOWS, SKILL_WANDS,
+        SKILL_FISHING
+    };
+
+    const static uint32 item_armor_skills[MAX_ITEM_SUBCLASS_ARMOR] =
+    {
+        0, SKILL_CLOTH, SKILL_LEATHER, SKILL_MAIL, SKILL_PLATE_MAIL, 0, SKILL_SHIELD, 0, 0, 0, 0
+    };
+
     ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid);
     if (!pProto || pProto->Quality < ITEM_QUALITY_NORMAL)
         return false;
@@ -533,11 +547,29 @@ bool PlayerbotAI::IsItemUseful(uint32 itemid)
 
     switch (pProto->Class)
     {
+        case ITEM_CLASS_WEAPON:
+            if (pProto->SubClass >= MAX_ITEM_SUBCLASS_WEAPON)
+                return false;
+            else
+                return m_bot->HasSkill(item_weapon_skills[pProto->SubClass]);
+                break;
+        case ITEM_CLASS_ARMOR:
+            if (pProto->SubClass >= MAX_ITEM_SUBCLASS_ARMOR)
+                return false;
+            else
+                return m_bot->HasSkill(item_armor_skills[pProto->SubClass]);
+                break;
         case ITEM_CLASS_QUEST:
             if (!HasCollectFlag(COLLECT_FLAG_QUEST))
                 break;
         case ITEM_CLASS_KEY:
             return true;
+        case ITEM_CLASS_GEM:
+            if ((m_bot->HasSkill(SKILL_BLACKSMITHING) ||
+                 m_bot->HasSkill(SKILL_ENGINEERING) ||
+                 m_bot->HasSkill(SKILL_JEWELCRAFTING)))
+                return true;
+                break;
         case ITEM_CLASS_TRADE_GOODS:
             if (!HasCollectFlag(COLLECT_FLAG_PROFESSION))
                 break;
@@ -963,13 +995,19 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 switch (result)
                 {
                     case SPELL_FAILED_INTERRUPTED:
-                        //TellMaster("spell interrupted (%u)",result);
                         //DEBUG_LOG("spell interrupted (%u)",result);
                         return;
 
+                    case SPELL_FAILED_BAD_TARGETS:
+                    {
+                        // DEBUG_LOG("[%s]bad target (%u) for spellId (%u) & m_CurrentlyCastingSpellId (%u)",m_bot->GetName(),result,spellId,m_CurrentlyCastingSpellId);
+                        Spell* const pSpell = GetCurrentSpell();
+                        if (pSpell)
+                            pSpell->cancel();
+                        return;
+                    }
                     default:
-                        //TellMaster("Spell failed (%u)",result);
-                        //DEBUG_LOG ("[PlayerbotAI]: HandleBotOutgoingPacket - SMSG_CAST_FAIL: %u", result);
+                        //DEBUG_LOG ("[%s] SMSG_CAST_FAIL: unknown (%u)",m_bot->GetName(),result);
                         return;
                 }
             }
@@ -1179,7 +1217,10 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
             //4 == TRADE_STATUS_TRADE_ACCEPT
             if (status == 4)
+            {
                 m_bot->GetSession()->HandleAcceptTradeOpcode(p);  // packet not used
+                SetQuestNeedItems();
+            }
 
             //1 == TRADE_STATUS_BEGIN_TRADE
             else if (status == 1)
@@ -5119,7 +5160,7 @@ void PlayerbotAI::findNearbyCreature()
             {
                 float x, y, z;
                 wo->GetContactPoint(m_bot, x, y, z, 1.0f);
-                m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z);
+                m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z, false);
                 // give time to move to point before trying again
                 SetIgnoreUpdateTime(1);
             }
@@ -5175,6 +5216,8 @@ void PlayerbotAI::findNearbyCreature()
                             BankBalance();
                             break;
                         }
+                        case GOSSIP_OPTION_TAXIVENDOR:
+                        case GOSSIP_OPTION_GOSSIP:
                         case GOSSIP_OPTION_INNKEEPER:
                         case GOSSIP_OPTION_TRAINER:
                         case GOSSIP_OPTION_QUESTGIVER:
