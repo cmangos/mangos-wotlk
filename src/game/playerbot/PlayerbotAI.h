@@ -1473,7 +1473,8 @@ public:
         BOTSTATE_DEAD,              // we are dead and wait for becoming ghost
         BOTSTATE_DEADRELEASED,      // we released as ghost and wait to revive
         BOTSTATE_LOOTING,           // looting mode, used just after combat
-        BOTSTATE_FLYING             // bot is flying
+        BOTSTATE_FLYING,            // bot is flying
+        BOTSTATE_ENCHANT            // bot is enchanting
     };
 
     enum CollectionFlags
@@ -1695,6 +1696,7 @@ public:
     Item* FindKeyForLockValue(uint32 reqSkillValue);
     Item* FindBombForLockValue(uint32 reqSkillValue);
     Item* FindConsumable(uint32 displayId) const;
+    uint8 _findItemSlot(Item* target);
     bool CanStore();
 
     // ******* Actions ****************************************
