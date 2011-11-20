@@ -550,20 +550,26 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
         case CMSG_LOOT_ROLL:
         {
-
             WorldPacket p(packet);    //WorldPacket packet for CMSG_LOOT_ROLL, (8+4+1)
             ObjectGuid Guid;
-            uint32 NumberOfPlayers;
+            uint32 itemSlot;
             uint8 rollType;
-            p.rpos(0);    //reset packet pointer
-            p >> Guid;    //guid of the item rolled
-            p >> NumberOfPlayers;    //number of players invited to roll
+            p.rpos(0);        //reset packet pointer
+            p >> Guid;        //guid of the lootable target
+            p >> itemSlot;    //number of players invited to roll
             p >> rollType;    //need,greed or pass on roll
+
+            Creature *c = m_master->GetMap()->GetCreature(Guid);
+            if (!c)
+                return;
+
+            Loot *loot = &c->loot;
+
+            LootItem& lootItem = loot->items[itemSlot];
 
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
-
-                uint32 choice;
+                uint32 choice = 0;
 
                 Player* const bot = it->second;
                 if (!bot)
@@ -573,9 +579,23 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 if (!group)
                     return;
 
-                (bot->GetPlayerbotAI()->CanStore()) ? choice = urand(0, 3) : choice = 0;  // pass = 0, need = 1, greed = 2, disenchant = 3
+                ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(lootItem.itemid);
+                if (!pProto)
+                    return;
 
-                group->CountRollVote(bot, Guid, NumberOfPlayers, RollVote(choice));
+                if (bot->GetPlayerbotAI()->CanStore())
+                {
+                    if (bot->CanUseItem(pProto) == EQUIP_ERR_OK && bot->GetPlayerbotAI()->IsItemUseful(lootItem.itemid))
+                        choice = 1; // Need
+                    else if (bot->HasSkill(SKILL_ENCHANTING))
+                        choice = 3; // Disenchant
+                    else
+                        choice = 2; // Greed
+                }
+                else
+                    choice = 0; // Pass
+
+                group->CountRollVote(bot, Guid, itemSlot, RollVote(choice));
 
                 switch (choice)
                 {
