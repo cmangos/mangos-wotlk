@@ -646,7 +646,7 @@ bool PlayerbotDruidAI::BuffPlayer(Player* target)
     PlayerbotAI * ai = GetAI();
 
     Pet * pet = target->GetPet();
-    if (pet)
+    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
     {
         if (ai->Buff(MARK_OF_THE_WILD, pet, &(PlayerbotDruidAI::GoBuffForm)))
             return true;

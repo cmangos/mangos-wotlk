@@ -471,7 +471,7 @@ bool PlayerbotPaladinAI::BuffPlayer(Player* target)
             else
                 return false;
         case CLASS_WARLOCK:
-            if (petCanBeBlessed)
+            if (petCanBeBlessed && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
             {
                 if (pet->getPowerType() == POWER_MANA)
                 {

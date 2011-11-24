@@ -433,7 +433,7 @@ bool PlayerbotPriestAI::BuffPlayer(Player* target)
     PlayerbotAI * ai = GetAI();
     Pet * pet = target->GetPet();
 
-    if (pet && ai->Buff(POWER_WORD_FORTITUDE, pet))
+    if ((pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE)) && ai->Buff(POWER_WORD_FORTITUDE, pet))
         return true;
 
     if (ai->Buff(POWER_WORD_FORTITUDE, target))
