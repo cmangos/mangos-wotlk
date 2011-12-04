@@ -7337,37 +7337,51 @@ void PlayerbotAI::_HandleCommandUse(std::string &text, Player &fromPlayer)
     extractItemIds(text, itemIds);
     findItemsInInv(itemIds, itemList);
 
-    // use item on an equipped item e.g. armourkit or weapon enhancement
-    if (text.find("on",0) != -1)
+    Item* tool = itemList.back();
+    itemList.pop_back();
+    if (tool)
     {
-        Item* tool = itemList.back();
-        itemList.pop_back();
-        if (tool)
+        // set target
+        Unit* unit = ObjectAccessor::GetUnit(*m_bot, fromPlayer.GetSelectionGuid());
+        findItemsInEquip(itemIds, itemList);
+        extractGOinfo(text, m_lootTargets);
+        // DEBUG_LOG("tool (%s)",tool->GetProto()->Name1);
+
+        if (!itemList.empty())
         {
-            findItemsInEquip(itemIds, itemList);
-            //DEBUG_LOG("tool (%s)",tool->GetProto()->Name1);
-            Item* target = itemList.back();
-            if (target)
+            Item* itarget = itemList.back();
+            if (itarget)
             {
-                //DEBUG_LOG("target (%s)",target->GetProto()->Name1);
-                UseItem(tool, _findItemSlot(target));
+                // DEBUG_LOG("target (%s)",itarget->GetProto()->Name1);
+                UseItem(tool, _findItemSlot(itarget)); // on equipped item
                 SetState(BOTSTATE_ENCHANT);
                 SetIgnoreUpdateTime(1);
             }
         }
-        return;
-    }
+        else if (!m_lootTargets.empty())
+        {
+            ObjectGuid gotarget = m_lootTargets.front();
+            m_lootTargets.pop_front();
 
-    // set target
-    Unit* unit = ObjectAccessor::GetUnit(*m_bot, fromPlayer.GetSelectionGuid());
-
-    for (std::list<Item*>::iterator it = itemList.begin(); it != itemList.end(); ++it)
-    {
-        if (unit)
-            UseItem(*it, unit);
+            GameObject *go = m_bot->GetMap()->GetGameObject(gotarget);
+            if (go)
+            {
+                // DEBUG_LOG("tool (%s) on target gameobject (%s)",tool->GetProto()->Name1,go->GetGOInfo()->name);
+                UseItem(tool, TARGET_FLAG_OBJECT, gotarget); // on gameobject
+            }
+        }
+        else if (unit)
+        {
+            // DEBUG_LOG("tool (%s) on selected target unit",tool->GetProto()->Name1);
+            UseItem(tool, unit); // on unit
+        }
         else
-            UseItem(*it);
+        {
+            // DEBUG_LOG("tool (%s) on self",tool->GetProto()->Name1);
+            UseItem(tool); // on self
+        }
     }
+    return;
 }
 
 void PlayerbotAI::_HandleCommandEquip(std::string &text, Player &fromPlayer)
