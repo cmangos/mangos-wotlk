@@ -458,7 +458,7 @@ bool PlayerbotMageAI::BuffPlayer(Player* target)
     PlayerbotAI * ai = GetAI();
     Pet * pet = target->GetPet();
 
-    if (pet && pet->getPowerType() == POWER_MANA && ai->Buff(ARCANE_INTELLECT, pet))
+    if ((pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE)) && pet->getPowerType() == POWER_MANA && ai->Buff(ARCANE_INTELLECT, pet))
         return true;
 
     if (ARCANE_INTELLECT)
