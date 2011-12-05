@@ -27,8 +27,23 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME assist (you'll need to be attacking something and the bot only does melee atm)
 /t BOTNAME spells (replies with all spells known to bot)
 /t BOTNAME cast <SPELLID | (part of) SPELLNAME | [SPELLLINK]>
-/t BOTNAME use [ITEM LINK]
-/t BOTNAME use [ITEM LINK] on [EQUIPPED ITEM LINK]
+/t BOTNAME craft < alchemy | a >                  (List all learnt alchemy [RECIPE]..)
+                 < blacksmithing | b >            (List all learnt blacksmith [RECIPE]..)
+                 < cooking | c >                  (List all learnt cooking [RECIPE]..)
+                 < engineering | e >              (List all learnt engineering [RECIPE]..)
+                 < firstaid | f >                 (List all learnt firstaid [RECIPE]..)
+                 < inscription | i >              (List all learnt inscription [RECIPE]..)
+                 < jewelcrafting | j >            (List all learnt jewelcrafting [RECIPE]..)
+                 < leatherworking | l >           (List all learnt leatherworking [RECIPE]..)
+                 < magic | m >                    (List all learnt enchanting [RECIPE]..)
+                 < smelting | s >                 (List all learnt mining [RECIPE]..)
+                 < tailoring | t >                (List all learnt tailoring [RECIPE]..)
+/t BOTNAME craft [RECIPE] (craft any recipe that consumes reagents)
+/t BOTNAME craft [RECIPE] all (craft all instances of a particular recipe, indicated by it's [charge])
+/t BOTNAME use [ITEM LINK] (use item on self)
+/t BOTNAME use [ITEM LINK] TARGET (use item on selected unit)
+/t BOTNAME use [ITEM LINK][EQUIPPED ITEM LINK] (use item on equipped item)
+/t BOTNAME use [ITEM LINK][GAMEOBJECT LINK] (use item on gameobject )
 /t BOTNAME equip [ITEM LINK]
 /t BOTNAME reset (will reset states, orders and loot list)
 /t BOTNAME report (bot reports all items, creatures or gameobjects needed to finish quests)

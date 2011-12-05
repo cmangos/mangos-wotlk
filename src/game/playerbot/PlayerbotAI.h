@@ -1474,7 +1474,8 @@ public:
         BOTSTATE_DEADRELEASED,      // we released as ghost and wait to revive
         BOTSTATE_LOOTING,           // looting mode, used just after combat
         BOTSTATE_FLYING,            // bot is flying
-        BOTSTATE_ENCHANT            // bot is enchanting
+        BOTSTATE_ENCHANT,           // bot is enchanting
+        BOTSTATE_CRAFT              // bot is crafting
     };
 
     enum CollectionFlags
@@ -1564,7 +1565,8 @@ public:
         HL_TARGET,
         HL_NAME,
         HL_AUCTION,
-        HL_MAIL
+        HL_MAIL,
+        HL_RECIPE
     };
 
 public:
@@ -1672,6 +1674,8 @@ public:
 
     bool HasTool(uint32 TC);
     bool HasSpellReagents(uint32 spellId);
+    void ItemCountInInv(uint32 itemid, uint32 &count);
+    uint32 GetSpellCharges(uint32 spellId);
 
     uint8 GetHealthPercent(const Unit& target) const;
     uint8 GetHealthPercent() const;
@@ -1832,6 +1836,7 @@ private:
     void _HandleCommandGet(std::string &text, Player &fromPlayer);
     void _HandleCommandCollect(std::string &text, Player &fromPlayer);
     void _HandleCommandQuest(std::string &text, Player &fromPlayer);
+    void _HandleCommandCraft(std::string &text, Player &fromPlayer);
     void _HandleCommandPet(std::string &text, Player &fromPlayer);
     void _HandleCommandSpells(std::string &text, Player &fromPlayer);
     void _HandleCommandSurvey(std::string &text, Player &fromPlayer);
@@ -1891,6 +1896,7 @@ private:
     ObjectGuid m_lootPrev;              // previous loot
     BotEntryList m_collectObjects;      // object entries searched for in findNearbyGO
     BotTaxiNode m_taxiNodes;            // flight node chain;
+    BotEntryList m_noToolList;          // list of required tools
 
     uint8 m_collectionFlags;            // what the bot should look for to loot
     uint32 m_collectDist;               // distance to collect objects

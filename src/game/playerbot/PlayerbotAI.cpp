@@ -1006,6 +1006,34 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                             pSpell->cancel();
                         return;
                     }
+                    case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
+                    {
+                        std::ostringstream out;
+
+                        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+                        if (!spellInfo)
+                            return;
+
+                        switch(spellInfo->RequiresSpellFocus) // SpellFocusObject.dbc id
+                        {
+                            case 1 : // need an anvil
+                                out << "|cffff0000I Require an Anvil";
+                                break;
+                            case 2 : // need a loom
+                                out << "|cffff0000I Require a Loom";
+                                break;
+                            case 3 : // need forge
+                                out << "|cffff0000I Require a Forge";
+                                break;
+                            case 4 : // need cooking fire
+                                out << "|cffff0000I Require a Cooking Fire";
+                                break;
+                            default:
+                                out << "|cffff0000I Require Spell Focus on " << spellInfo->RequiresSpellFocus;
+                        }
+                        TellMaster(out.str().c_str());
+                        break;
+                    }
                     default:
                         //DEBUG_LOG ("[%s] SMSG_CAST_FAIL: unknown (%u)",m_bot->GetName(),result);
                         return;
@@ -3347,10 +3375,33 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             m_targetGuidCommand = ObjectGuid();
         }
 
-        else if( m_botState == BOTSTATE_ENCHANT)
+        else if ( m_botState == BOTSTATE_ENCHANT)
         {
             SetState(BOTSTATE_NORMAL);
             InspectUpdate();
+        }
+
+        else if ( m_botState == BOTSTATE_CRAFT)
+        {
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(m_CurrentlyCastingSpellId);
+            if (!spellInfo)
+                return;
+
+            Spell *spell = new Spell(m_bot, spellInfo, false);
+            if (!spell)
+                return;
+
+            if (GetSpellCharges(m_CurrentlyCastingSpellId) == 0 || !CanStore() || spell->CheckCast(true) != SPELL_CAST_OK)
+            {
+                SetState(BOTSTATE_NORMAL);
+                SetIgnoreUpdateTime(0);
+            }
+            else
+            {
+                SpellCastTargets targets;
+                spell->prepare(&targets);
+                SetIgnoreUpdateTime(3);
+            }
         }
 
         //if master is unmounted, unmount the bot
@@ -3931,23 +3982,117 @@ bool PlayerbotAI::HasTool(uint32 TC)
 
     switch (TC)
     {
-        case TC_MINING_PICK:
+        case TC_MINING_PICK:                //  = 165
 
             if (m_bot->HasItemTotemCategory(TC))
                 return true;
             else
-                out << "|cffffffffI do not have a pick!";
+                out << "|cffff0000I do not have a MINING PICK!";
             break;
 
-        case TC_SKINNING_KNIFE:
+        case TC_ARCLIGHT_SPANNER:          //  = 14
 
             if (m_bot->HasItemTotemCategory(TC))
                 return true;
             else
-                out << "|cffffffffI do not have a skinning knife!";
+                out << "|cffff0000I do not have an ARCLIGHT SPANNER!";
+            break;
+
+        case TC_BLACKSMITH_HAMMER:         //  = 162
+
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a BLACKSMITH's HAMMER!";
+            break;
+
+        case TC_SKINNING_KNIFE:            //  = 166
+
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a SKINNING KNIFE!";
+            break;
+
+        case TC_COPPER_ROD:                //  = 6,
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a RUNED COPPER ROD!";
+            break;
+
+        case TC_SILVER_ROD:                //  = 7,
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a RUNED SILVER ROD!";
+            break;
+
+        case TC_GOLDEN_ROD:                //  = 8,
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a RUNED GOLDEN ROD!";
+            break;
+
+        case TC_TRUESILVER_ROD:            //  = 9,
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a RUNED TRUESILVER ROD!";
+            break;
+
+        case TC_ARCANITE_ROD:              //  = 10,
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a RUNED ARCANITE ROD!";
+            break;
+
+        case TC_FEL_IRON_ROD:              //  = 41,
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a RUNED FEL IRON ROD!";
+            break;
+
+        case TC_ADAMANTITE_ROD:            //  = 62,
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a RUNED ADAMANTITE ROD!";
+            break;
+
+        case TC_ETERNIUM_ROD:              //  = 63,
+             if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a RUNED ETERNIUM ROD!";
+            break;
+
+       case TC_RUNED_AZURITE_ROD:         //  = 101,
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a RUNED AZURITE ROD!";
+            break;
+
+        case TC_RUNED_COBALT_ROD:          //  = 189,
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a RUNED COBALT ROD!";
+            break;
+
+        case TC_RUNED_TITANIUM_ROD:        //  = 190,
+
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a RUNED TITANIUM ROD!";
             break;
         default:
-            out << "|cffffffffI do not know what tool that needs!";
+            out << "|cffffffffI do not know what tool that needs! TC (" << TC << ")";
     }
     TellMaster(out.str().c_str());
     return false;
@@ -3975,6 +4120,75 @@ bool PlayerbotAI::HasSpellReagents(uint32 spellId)
     }
 
     return true;
+}
+
+uint32 PlayerbotAI::GetSpellCharges(uint32 spellId)
+{
+    const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
+    if (!pSpellInfo)
+        return 0;
+
+    if (m_bot->CanNoReagentCast(pSpellInfo))
+        return 0;
+
+    uint32 charges = 0;
+    std::list<uint32> chargeList;
+    for (uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
+    {
+        if (pSpellInfo->Reagent[i] <= 0)
+            continue;
+
+        uint32 totalcount = 0;
+        uint32 itemid = pSpellInfo->Reagent[i];
+        uint32 count = pSpellInfo->ReagentCount[i];
+        ItemCountInInv(itemid, totalcount);
+        chargeList.push_back((totalcount / count));
+    }
+
+    for (uint32 i = 0; i < MAX_SPELL_TOTEM_CATEGORIES; ++i)
+    {
+        if (pSpellInfo->TotemCategory[i] == 0)
+            continue;
+
+        if (!m_bot->HasItemTotemCategory(pSpellInfo->TotemCategory[i]))
+        {
+            m_noToolList.push_back(pSpellInfo->TotemCategory[i]);
+            return 0;
+        }
+    }
+
+    if (!chargeList.empty())
+    {
+        charges = chargeList.front();
+        chargeList.pop_front();
+        for (std::list<uint32>::iterator it = chargeList.begin(); it != chargeList.end(); ++it)
+            if (*it < charges)
+                charges = *it;
+    }
+    return charges;
+}
+
+void PlayerbotAI::ItemCountInInv(uint32 itemid, uint32 &count)
+{
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        Item *pItem = m_bot->GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if (pItem && pItem->GetEntry() == itemid && !pItem->IsInTrade())
+            count += pItem->GetCount();
+    }
+
+    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Bag* pBag = (Bag*)m_bot->GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+        {
+            for(uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
+                Item* pItem = m_bot->GetItemByPos( i, j );
+                if (pItem && pItem->GetEntry() == itemid && !pItem->IsInTrade())
+                    count += pItem->GetCount();
+            }
+        }
+    }
 }
 
 // extracts all item ids in format below
@@ -6541,6 +6755,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (ExtractCommand("quest", input))
         _HandleCommandQuest(input, fromPlayer);
 
+    else if (ExtractCommand("craft", input))
+        _HandleCommandCraft(input, fromPlayer);
+
     else if (ExtractCommand("pet", input))
         _HandleCommandPet(input, fromPlayer);
 
@@ -7305,14 +7522,14 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
                     if (!ApplyActiveTalentSpec())
                     {
                         SendWhisper("The talent spec has been set active but could not be applied. It appears something has gone awry.", fromPlayer);
-                        //DEBUG_LOG ("[PlayerbotAI]: Could set TalentSpec but could not apply it - 'talent spec #': Class: %i; chosenSpec: %li", (long)m_bot->getClass(), chosenSpec);
+                        //DEBUG_LOG ("[PlayerbotAI]: Could set TalentSpec but could not apply it - 'talent spec #': Class: %li; chosenSpec: %u", (long)m_bot->getClass(), chosenSpec);
                     }
                     InspectUpdate();
                 }
                 else
                 {
                     SendWhisper("An error has occured. Please let a Game Master know. This error has been logged.", fromPlayer);
-                    DEBUG_LOG ("[PlayerbotAI]: Could not GetTalentSpec to set & apply - 'talent spec #': Class: %i; chosenSpec: %li", (long)m_bot->getClass(), chosenSpec);
+                    DEBUG_LOG ("[PlayerbotAI]: Could not GetTalentSpec to set & apply - 'talent spec #': Class: %li; chosenSpec: %u", (long)m_bot->getClass(), chosenSpec);
                 }
             }
         }
@@ -7556,6 +7773,196 @@ void PlayerbotAI::_HandleCommandCollect(std::string &text, Player &fromPlayer)
         SendWhisper("I'm collecting " + collset.substr(2), fromPlayer);
     else
         SendWhisper("I'm collecting nothing.", fromPlayer);
+}
+
+void PlayerbotAI::_HandleCommandCraft(std::string &text, Player &fromPlayer)
+{
+    DEBUG_LOG("Craft (%s)",text.c_str());
+
+    std::ostringstream msg;
+    uint32 charges;
+    uint32 skill;
+    int32 category;
+    uint32 linkcount = 0;
+
+    if (ExtractCommand("alchemy", text, true)) // true -> "craft alchemy" OR "craft a"
+    {
+        if (m_bot->HasSkill(SKILL_ALCHEMY))
+        {
+            skill = SKILL_ALCHEMY;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else if (ExtractCommand("blacksmithing", text, true)) // true -> "craft blacksmithing" OR "craft b"
+    {
+        if (m_bot->HasSkill(SKILL_BLACKSMITHING))
+        {
+            skill = SKILL_BLACKSMITHING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else if (ExtractCommand("cooking", text, true)) // true -> "craft cooking" OR "craft c"
+    {
+        if (m_bot->HasSkill(SKILL_COOKING))
+        {
+            skill = SKILL_COOKING;
+            category = SKILL_CATEGORY_SECONDARY;
+        }
+        else
+            return;
+    }
+    else if (ExtractCommand("engineering", text, true)) // true -> "craft engineering" OR "craft e"
+    {
+        if (m_bot->HasSkill(SKILL_ENGINEERING))
+        {
+            skill = SKILL_ENGINEERING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else if (ExtractCommand("firstaid", text, true)) // true -> "craft firstaid" OR "craft f"
+    {
+        if (m_bot->HasSkill(SKILL_FIRST_AID))
+        {
+            skill = SKILL_FIRST_AID;
+            category = SKILL_CATEGORY_SECONDARY;
+        }
+        else
+            return;
+    }
+    else if (ExtractCommand("inscription", text, true)) // true -> "craft inscription" OR "craft i"
+    {
+        if (m_bot->HasSkill(SKILL_INSCRIPTION))
+        {
+            skill = SKILL_INSCRIPTION;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else if (ExtractCommand("jewelcrafting", text, true)) // true -> "craft jewelcrafting" OR "craft j"
+    {
+        if (m_bot->HasSkill(SKILL_JEWELCRAFTING))
+        {
+            skill = SKILL_JEWELCRAFTING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else if (ExtractCommand("leatherworking", text, true)) // true -> "craft leatherworking" OR "craft l"
+    {
+        if (m_bot->HasSkill(SKILL_LEATHERWORKING))
+        {
+            skill = SKILL_LEATHERWORKING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else if (ExtractCommand("magic", text, true)) // true -> "craft magic" OR "craft m"
+    {
+        if (m_bot->HasSkill(SKILL_ENCHANTING))
+        {
+            skill = SKILL_ENCHANTING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else if (ExtractCommand("smelting", text, true)) // true -> "craft smelting" OR "craft s"
+    {
+        if (m_bot->HasSkill(SKILL_MINING))
+        {
+            skill = SKILL_MINING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else if (ExtractCommand("tailoring", text, true)) // true -> "craft tailoring" OR "craft t"
+    {
+        if (m_bot->HasSkill(SKILL_TAILORING))
+        {
+            skill = SKILL_TAILORING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else
+    {
+        uint32 spellId;
+        extractSpellId(text, spellId);
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+        if (!spellInfo)
+            return;
+
+        if (text.find("all",0) != std::string::npos)
+        {
+            m_CurrentlyCastingSpellId = spellId;
+            SetState(BOTSTATE_CRAFT);
+        }
+        else
+        {
+            SpellCastTargets targets;
+            Spell *spell = new Spell(m_bot, spellInfo, false);
+            spell->prepare(&targets);
+        }
+        return;
+    }
+
+    m_spellsToLearn.clear();
+    m_bot->skill(m_spellsToLearn);
+    SendWhisper("I can create:\n", fromPlayer);
+    ChatHandler ch(&fromPlayer);
+    for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
+    {
+        SkillLineEntry const *SkillLine = sSkillLineStore.LookupEntry(*it);
+
+        if (SkillLine->categoryId == category && *it == skill)
+        {
+            for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+            {
+                SkillLineAbilityEntry const *SkillAbility = sSkillLineAbilityStore.LookupEntry(j);
+                if (!SkillAbility)
+                    continue;
+
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(SkillAbility->spellId);
+                if (!spellInfo)
+                    continue;
+
+                if (IsPrimaryProfessionSkill(*it) && spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_CREATE_ITEM)
+                    continue;
+
+                if (SkillAbility->skillId == *it && m_bot->HasSpell(SkillAbility->spellId) && SkillAbility->forward_spellid == 0 && ((SkillAbility->classmask & m_bot->getClassMask()) == 0))
+                {
+                    MakeSpellLink(spellInfo, msg);
+                    ++linkcount;
+                    if ((charges = GetSpellCharges(SkillAbility->spellId)) > 0)
+                        msg << "[" << charges << "]";
+                    if (linkcount >= 20)
+                    {
+                        ch.SendSysMessage(msg.str().c_str());
+                        linkcount = 0;
+                        msg.str("");
+                    }
+                }
+            }
+        }
+    }
+    m_noToolList.unique();
+    for (std::list<uint32>::iterator it = m_noToolList.begin(); it != m_noToolList.end(); it++)
+        HasTool(*it);
+    ch.SendSysMessage(msg.str().c_str());
+    m_noToolList.clear();
+    m_spellsToLearn.clear();
 }
 
 void PlayerbotAI::_HandleCommandQuest(std::string &text, Player &fromPlayer)
@@ -8350,6 +8757,28 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             return;
         }
     }
+    if (bMainHelp || ExtractCommand("craft", text))
+    {
+        ch.SendSysMessage(_HandleCommandHelpHelper("craft ", "I will create a single specified recipe", HL_RECIPE).c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("craft [RECIPE] all", "I will create all specified recipes").c_str());
+
+        if (!bMainHelp)
+        {
+            ch.SendSysMessage(_HandleCommandHelpHelper("craft < alchemy | a >", "List all learnt alchemy recipes").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("craft < blacksmithing | b >", "List all learnt blacksmith recipes").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("craft < cooking | c >", "List all learnt cooking recipes").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("craft < engineering | e >", "List all learnt engineering recipes").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("craft < firstaid | f >", "List all learnt firstaid recipes").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("craft < inscription | i >", "List all learnt inscription recipes").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("craft < jewelcrafting | j >", "List all learnt jewelcrafting recipes").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("craft < leatherworking | l >", "List all learnt leatherworking recipes").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("craft < magic | m >", "List all learnt enchanting recipes").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("craft < smelting | s >", "List all learnt mining recipes").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("craft < tailoring | t >", "List all learnt tailoring recipes").c_str());
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+            return;
+        }
+    }
     if (bMainHelp || ExtractCommand("cast", text))
     {
         ch.SendSysMessage(_HandleCommandHelpHelper("cast", "I will cast the spell or ability listed.", HL_SPELL).c_str());
@@ -8780,6 +9209,12 @@ std::string PlayerbotAI::_HandleCommandHelpHelper(std::string sCommand, std::str
             oss << " [AUCTION]";
             if (bReqLinkMultiples)
                 oss << " [AUCTION] ..";
+        }
+        else if (reqLink == HL_RECIPE)
+        {
+            oss << " [RECIPE]";
+            if (bReqLinkMultiples)
+                oss << " [RECIPE] ..";
         }
         else if (reqLink == HL_MAIL)
         {
