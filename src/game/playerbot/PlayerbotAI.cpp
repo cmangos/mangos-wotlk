@@ -5131,7 +5131,7 @@ void PlayerbotAI::findNearbyCreature()
             {
                 float x, y, z;
                 wo->GetContactPoint(m_bot, x, y, z, 1.0f);
-                m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z, false);
+                m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z);
                 // give time to move to point before trying again
                 SetIgnoreUpdateTime(1);
             }
@@ -7603,7 +7603,7 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
 
                 reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
 
-                TrainerSpellState state =  m_bot->GetTrainerSpellState(tSpell,reqlevel);
+                TrainerSpellState state =  m_bot->GetTrainerSpellState(tSpell,reqLevel);
                 if (state != TRAINER_SPELL_GREEN)
                     continue;
 
