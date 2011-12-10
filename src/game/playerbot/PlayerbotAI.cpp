@@ -5426,7 +5426,7 @@ void PlayerbotAI::findNearbyCreature()
             {
                 float x, y, z;
                 wo->GetContactPoint(m_bot, x, y, z, 1.0f);
-                m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z, false);
+                m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z);
                 // give time to move to point before trying again
                 SetIgnoreUpdateTime(1);
             }
@@ -8480,13 +8480,16 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                 if (!tSpell)
                     break;
 
-                if (!tSpell->learnedSpell && !m_bot->IsSpellFitByClassAndRace(tSpell->learnedSpell))
+                uint32 reqLevel = 0;
+                if (!tSpell->learnedSpell && !m_bot->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
                     continue;
 
-                if  (sSpellMgr.IsPrimaryProfessionFirstRankSpell(tSpell->learnedSpell) && m_bot->HasSpell(tSpell->learnedSpell))
+                if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(tSpell->learnedSpell) && m_bot->HasSpell(tSpell->learnedSpell))
                     continue;
 
-                TrainerSpellState state =  m_bot->GetTrainerSpellState(tSpell);
+                reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
+
+                TrainerSpellState state =  m_bot->GetTrainerSpellState(tSpell,reqLevel);
                 if (state != TRAINER_SPELL_GREEN)
                     continue;
 
