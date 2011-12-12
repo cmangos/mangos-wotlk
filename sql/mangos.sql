@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_11831_02_mangos_command` bit(1) default NULL
+  `required_11852_01_mangos_gossip_menu` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -2115,13 +2115,14 @@ DROP TABLE IF EXISTS gossip_menu;
 CREATE TABLE gossip_menu (
   entry smallint(6) unsigned NOT NULL default '0',
   text_id mediumint(8) unsigned NOT NULL default '0',
+  script_id mediumint(8) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'script in `gossip_scripts` - will be executed on GossipHello',
   cond_1 tinyint(3) unsigned NOT NULL default '0',
   cond_1_val_1 mediumint(8) unsigned NOT NULL default '0',
   cond_1_val_2 mediumint(8) unsigned NOT NULL default '0',
   cond_2 tinyint(3) unsigned NOT NULL default '0',
   cond_2_val_1 mediumint(8) unsigned NOT NULL default '0',
   cond_2_val_2 mediumint(8) unsigned NOT NULL default '0',
-  PRIMARY KEY (entry, text_id)
+  PRIMARY KEY (entry, text_id, script_id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -3845,6 +3846,7 @@ INSERT INTO `mangos_string` VALUES
 (813,'Veteran',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (814,'Member',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (815,'Initiate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(816,'Your body is too exhausted to travel to the Spectral Realm.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1000,'Exiting daemon...',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1001,'Account deleted: %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1002,'Account %s NOT deleted (probably sql file format was updated)',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),

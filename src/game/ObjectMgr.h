@@ -263,6 +263,7 @@ struct GossipMenus
 {
     uint32          entry;
     uint32          text_id;
+    uint32          script_id;
     uint16          cond_1;
     uint16          cond_2;
 };
@@ -367,6 +368,9 @@ enum ConditionType
                                                             // True when player can learn ability (using min skill value from SkillLineAbility).
                                                             // Item_id can be defined in addition, to check if player has one (1) item in inventory or bank.
                                                             // When player has spell or has item (when defined), condition return false.
+    CONDITION_SKILL_BELOW           = 29,                   // skill_id     skill_value
+                                                            // True if player has skill skill_id and skill less than (and not equal) skill_value (for skill_value > 1)
+                                                            // If skill_value == 1, then true if player has not skill skill_id
 };
 
 struct PlayerCondition
@@ -702,8 +706,7 @@ class ObjectMgr
 
         void LoadNpcGossips();
 
-        void LoadGossipMenu();
-        void LoadGossipMenuItems();
+        void LoadGossipMenus();
 
         void LoadVendorTemplates();
         void LoadVendors() { LoadVendors("npc_vendor", false); }
@@ -1153,6 +1156,9 @@ class ObjectMgr
         void LoadQuestRelationsHelper(QuestRelationsMap& map, char const* table);
         void LoadVendors(char const* tableName, bool isTemplates);
         void LoadTrainers(char const* tableName, bool isTemplates);
+
+        void LoadGossipMenu(std::set<uint32>& gossipScriptSet);
+        void LoadGossipMenuItems(std::set<uint32>& gossipScriptSet);
 
         MailLevelRewardMap m_mailLevelRewardMap;
 

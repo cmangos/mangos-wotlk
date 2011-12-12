@@ -7654,6 +7654,11 @@ bool PlayerCondition::Meets(Player const * player) const
 
             return false;
         }
+        case CONDITION_SKILL_BELOW:
+            if (value2 == 1)
+                return !player->HasSkill(value1);
+            else
+                return player->HasSkill(value1) && player->GetBaseSkillValue(value1) < value2;
         default:
             return false;
     }
@@ -7744,6 +7749,7 @@ bool PlayerCondition::IsValid(ConditionType condition, uint32 value1, uint32 val
             break;
         }
         case CONDITION_SKILL:
+        case CONDITION_SKILL_BELOW:
         {
             SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(value1);
             if (!pSkill)
@@ -8056,22 +8062,27 @@ bool ObjectMgr::AddGameTele(GameTele& tele)
 {
     // find max id
     uint32 new_id = 0;
-    for(GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
-        if(itr->first > new_id)
+    for (GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
+        if (itr->first > new_id)
             new_id = itr->first;
 
     // use next
     ++new_id;
 
-    if(!Utf8toWStr(tele.name,tele.wnameLow))
+    if (!Utf8toWStr(tele.name, tele.wnameLow))
         return false;
 
-    wstrToLower( tele.wnameLow );
+    wstrToLower(tele.wnameLow);
 
     m_GameTeleMap[new_id] = tele;
+    std::string safeName(tele.name);
+    WorldDatabase.escape_string(safeName);
 
-    return WorldDatabase.PExecuteLog("INSERT INTO game_tele (id,position_x,position_y,position_z,orientation,map,name) VALUES (%u,%f,%f,%f,%f,%u,'%s')",
-        new_id, tele.position_x, tele.position_y, tele.position_z, tele.orientation, tele.mapId, tele.name.c_str());
+    return WorldDatabase.PExecuteLog("INSERT INTO game_tele "
+        "(id,position_x,position_y,position_z,orientation,map,name) "
+        "VALUES (%u,%f,%f,%f,%f,%u,'%s')",
+        new_id, tele.position_x, tele.position_y, tele.position_z,
+        tele.orientation, tele.mapId, safeName.c_str());
 }
 
 bool ObjectMgr::DeleteGameTele(const std::string& name)
@@ -8263,6 +8274,8 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
         trainerSpell.reqSkillValue = fields[4].GetUInt32();
         trainerSpell.reqLevel      = fields[5].GetUInt32();
 
+        trainerSpell.isProvidedReqLevel = trainerSpell.reqLevel > 0;
+
         // calculate learned spell for profession case when stored cast-spell
         trainerSpell.learnedSpell = spell;
         for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -8284,7 +8297,7 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
         }
 
         // already checked as valid spell so exist.
-        SpellEntry const *learnSpellinfo = sSpellStore.LookupEntry(trainerSpell.learnedSpell);
+        SpellEntry const* learnSpellinfo = sSpellStore.LookupEntry(trainerSpell.learnedSpell);
         if (SpellMgr::IsProfessionSpell(trainerSpell.learnedSpell))
         {
             data.trainerType = 2;
@@ -8481,11 +8494,12 @@ void ObjectMgr::LoadNpcGossips()
     sLog.outString( ">> Loaded %d NpcTextId ", count );
 }
 
-void ObjectMgr::LoadGossipMenu()
+void ObjectMgr::LoadGossipMenu(std::set<uint32>& gossipScriptSet)
 {
     m_mGossipMenusMap.clear();
-
-    QueryResult* result = WorldDatabase.Query("SELECT entry, text_id, "
+    //                                                0      1        2
+    QueryResult* result = WorldDatabase.Query("SELECT entry, text_id, script_id, "
+    //   3       4             5             6       7             8
         "cond_1, cond_1_val_1, cond_1_val_2, cond_2, cond_2_val_1, cond_2_val_2 FROM gossip_menu");
 
     if (!result)
@@ -8513,18 +8527,32 @@ void ObjectMgr::LoadGossipMenu()
 
         gMenu.entry             = fields[0].GetUInt32();
         gMenu.text_id           = fields[1].GetUInt32();
+        gMenu.script_id         = fields[2].GetUInt32();
 
-        ConditionType cond_1    = (ConditionType)fields[2].GetUInt32();
-        uint32 cond_1_val_1     = fields[3].GetUInt32();
-        uint32 cond_1_val_2     = fields[4].GetUInt32();
-        ConditionType cond_2    = (ConditionType)fields[5].GetUInt32();
-        uint32 cond_2_val_1     = fields[6].GetUInt32();
-        uint32 cond_2_val_2     = fields[7].GetUInt32();
+        ConditionType cond_1    = (ConditionType)fields[3].GetUInt32();
+        uint32 cond_1_val_1     = fields[4].GetUInt32();
+        uint32 cond_1_val_2     = fields[5].GetUInt32();
+        ConditionType cond_2    = (ConditionType)fields[6].GetUInt32();
+        uint32 cond_2_val_1     = fields[7].GetUInt32();
+        uint32 cond_2_val_2     = fields[8].GetUInt32();
 
         if (!GetGossipText(gMenu.text_id))
         {
             sLog.outErrorDb("Table gossip_menu entry %u are using non-existing text_id %u", gMenu.entry, gMenu.text_id);
             continue;
+        }
+
+        // Check script-id
+        if (gMenu.script_id)
+        {
+            if (sGossipScripts.find(gMenu.script_id) == sGossipScripts.end())
+            {
+                sLog.outErrorDb("Table gossip_menu for menu %u, text-id %u have script_id %u that does not exist in `gossip_scripts`, ignoring", gMenu.entry, gMenu.text_id, gMenu.script_id);
+                continue;
+            }
+
+            // Remove used script id
+            gossipScriptSet.erase(gMenu.script_id);
         }
 
         if (!PlayerCondition::IsValid(cond_1, cond_1_val_1, cond_1_val_2))
@@ -8567,7 +8595,7 @@ void ObjectMgr::LoadGossipMenu()
                     ERROR_DB_STRICT_LOG("Gameobject (Entry: %u) has gossip_menu_id = %u for nonexistent menu", gInfo->id, menuid);
 }
 
-void ObjectMgr::LoadGossipMenuItems()
+void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
 {
     m_mGossipMenuItemsMap.clear();
 
@@ -8608,11 +8636,6 @@ void ObjectMgr::LoadGossipMenuItems()
     BarGoLink bar(result->GetRowCount());
 
     uint32 count = 0;
-
-    std::set<uint32> gossipScriptSet;
-
-    for(ScriptMapMap::const_iterator itr = sGossipScripts.begin(); itr != sGossipScripts.end(); ++itr)
-        gossipScriptSet.insert(itr->first);
 
     // prepare menuid -> CreatureInfo map for fast access
     typedef  std::multimap<uint32, const CreatureInfo*> Menu2CInfoMap;
@@ -8743,6 +8766,7 @@ void ObjectMgr::LoadGossipMenuItems()
                 continue;
             }
 
+            // Remove used script id
             gossipScriptSet.erase(gMenuItem.action_script_id);
         }
 
@@ -8759,9 +8783,6 @@ void ObjectMgr::LoadGossipMenuItems()
 
     delete result;
 
-    for(std::set<uint32>::const_iterator itr = gossipScriptSet.begin(); itr != gossipScriptSet.end(); ++itr)
-        sLog.outErrorDb("Table `gossip_scripts` contain unused script, id %u.", *itr);
-
     if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK))
     {
         for(std::set<uint32>::const_iterator itr = menu_ids.begin(); itr != menu_ids.end(); ++itr)
@@ -8770,6 +8791,23 @@ void ObjectMgr::LoadGossipMenuItems()
 
     sLog.outString();
     sLog.outString(">> Loaded %u gossip_menu_option entries", count);
+}
+
+void ObjectMgr::LoadGossipMenus()
+{
+    // Check which script-ids in gossip_scripts are not used
+    std::set<uint32> gossipScriptSet;
+    for (ScriptMapMap::const_iterator itr = sGossipScripts.begin(); itr != sGossipScripts.end(); ++itr)
+        gossipScriptSet.insert(itr->first);
+
+    // Load gossip_menu and gossip_menu_option data
+    sLog.outString( "(Re)Loading Gossip menus..." );
+    LoadGossipMenu(gossipScriptSet);
+    sLog.outString( "(Re)Loading Gossip menu options..." );
+    LoadGossipMenuItems(gossipScriptSet);
+
+    for (std::set<uint32>::const_iterator itr = gossipScriptSet.begin(); itr != gossipScriptSet.end(); ++itr)
+        sLog.outErrorDb("Table `gossip_scripts` contains unused script, id %u.", *itr);
 }
 
 void ObjectMgr::AddVendorItem( uint32 entry,uint32 item, uint32 maxcount, uint32 incrtime, uint32 extendedcost )
