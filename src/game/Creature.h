@@ -54,6 +54,7 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NOT_TAUNTABLE   = 0x00000100,       // creature is immune to taunt auras and effect attack me
     CREATURE_FLAG_EXTRA_AGGRO_ZONE      = 0x00000200,       // creature sets itself in combat with zone on aggro
     CREATURE_FLAG_EXTRA_GUARD           = 0x00000400,       // creature is a guard
+    CREATURE_FLAG_EXTRA_NO_TALKTO_CREDIT= 0x00000800,       // creature doesn't give quest-credits when talked to (temporarily flag)
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
@@ -298,13 +299,14 @@ enum AttackingTarget
 
 enum SelectFlags
 {
-    SELECT_FLAG_IN_LOS          = 0x001,                    // Default Selection Requirement for Spell-targets
-    SELECT_FLAG_PLAYER          = 0x002,
-    SELECT_FLAG_POWER_MANA      = 0x004,                    // For Energy based spells, like manaburn
-    SELECT_FLAG_POWER_RAGE      = 0x008,
-    SELECT_FLAG_POWER_ENERGY    = 0x010,
-    SELECT_FLAG_POWER_RUNIC     = 0x020,
-    SELECT_FLAG_IN_MELEE_RANGE  = 0x040,
+    SELECT_FLAG_IN_LOS              = 0x001,                // Default Selection Requirement for Spell-targets
+    SELECT_FLAG_PLAYER              = 0x002,
+    SELECT_FLAG_POWER_MANA          = 0x004,                // For Energy based spells, like manaburn
+    SELECT_FLAG_POWER_RAGE          = 0x008,
+    SELECT_FLAG_POWER_ENERGY        = 0x010,
+    SELECT_FLAG_POWER_RUNIC         = 0x020,
+    SELECT_FLAG_IN_MELEE_RANGE      = 0x040,
+    SELECT_FLAG_NOT_IN_MELEE_RANGE  = 0x080,
 };
 
 // Vendors
@@ -360,10 +362,10 @@ typedef std::list<VendorItemCount> VendorItemCounts;
 
 struct TrainerSpell
 {
-    TrainerSpell() : spell(0), spellCost(0), reqSkill(0), reqSkillValue(0), reqLevel(0), learnedSpell(0) {}
+    TrainerSpell() : spell(0), spellCost(0), reqSkill(0), reqSkillValue(0), reqLevel(0), learnedSpell(0), isProvidedReqLevel(false) {}
 
-    TrainerSpell(uint32 _spell, uint32 _spellCost, uint32 _reqSkill, uint32 _reqSkillValue, uint32 _reqLevel, uint32 _learnedspell)
-        : spell(_spell), spellCost(_spellCost), reqSkill(_reqSkill), reqSkillValue(_reqSkillValue), reqLevel(_reqLevel), learnedSpell(_learnedspell)
+    TrainerSpell(uint32 _spell, uint32 _spellCost, uint32 _reqSkill, uint32 _reqSkillValue, uint32 _reqLevel, uint32 _learnedspell, bool _isProvidedReqLevel)
+        : spell(_spell), spellCost(_spellCost), reqSkill(_reqSkill), reqSkillValue(_reqSkillValue), reqLevel(_reqLevel), learnedSpell(_learnedspell), isProvidedReqLevel(_isProvidedReqLevel)
     {}
 
     uint32 spell;
@@ -372,6 +374,7 @@ struct TrainerSpell
     uint32 reqSkillValue;
     uint32 reqLevel;
     uint32 learnedSpell;
+    bool isProvidedReqLevel;
 
     // helpers
     bool IsCastable() const { return learnedSpell != spell; }

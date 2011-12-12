@@ -4038,7 +4038,7 @@ bool Player::HasActiveSpell(uint32 spell) const
         itr->second.active && !itr->second.disabled);
 }
 
-TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell) const
+TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell, uint32 reqLevel) const
 {
     if (!trainer_spell)
         return TRAINER_SPELL_RED;
@@ -4058,7 +4058,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
 
     // check level requirement
     if (!prof || GetSession()->GetSecurity() < AccountTypes(sWorld.getConfig(CONFIG_UINT32_TRADE_SKILL_GMIGNORE_LEVEL)))
-        if (getLevel() < trainer_spell->reqLevel)
+        if (getLevel() < reqLevel)
             return TRAINER_SPELL_RED;
 
     if(SpellChainNode const* spell_chain = sSpellMgr.GetSpellChainNode(trainer_spell->learnedSpell))
@@ -13122,7 +13122,7 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 menuId)
 
     if (canTalkToCredit)
     {
-        if (pSource->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
+        if (pSource->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && !(((Creature*)pSource)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_TALKTO_CREDIT))
             TalkedToCreature(pSource->GetEntry(), pSource->GetObjectGuid());
     }
 
@@ -13173,7 +13173,7 @@ void Player::SendPreparedGossip(WorldObject *pSource)
     uint32 textId = GetGossipTextId(pSource);
 
     if (uint32 menuId = PlayerTalkClass->GetGossipMenu().GetMenuId())
-        textId = GetGossipTextId(menuId);
+        textId = GetGossipTextId(menuId, pSource);
 
     PlayerTalkClass->SendGossipMenu(textId, pSource->GetObjectGuid());
 }
@@ -13375,7 +13375,7 @@ uint32 Player::GetGossipTextId(WorldObject *pSource)
     return DEFAULT_GOSSIP_MESSAGE;
 }
 
-uint32 Player::GetGossipTextId(uint32 menuId)
+uint32 Player::GetGossipTextId(uint32 menuId, WorldObject* pSource)
 {
     uint32 textId = DEFAULT_GOSSIP_MESSAGE;
 
@@ -13389,6 +13389,10 @@ uint32 Player::GetGossipTextId(uint32 menuId)
         if (sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_1) && sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_2))
         {
             textId = itr->second.text_id;
+
+            // Start related script
+            if (itr->second.script_id)
+                GetMap()->ScriptsStart(sGossipScripts, itr->second.script_id, this, pSource);
             break;
         }
     }
