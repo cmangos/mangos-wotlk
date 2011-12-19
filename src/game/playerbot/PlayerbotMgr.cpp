@@ -518,9 +518,14 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
                 Player* const bot = it->second;
+                if (!bot)
+                    continue;
 
-                p.rpos(0);         // reset reader
-                bot->GetSession()->HandleAreaTriggerOpcode(p);
+                if (bot->IsWithinDistInMap(GetMaster(), 50))
+                {
+                    p.rpos(0);         // reset reader
+                    bot->GetSession()->HandleAreaTriggerOpcode(p);
+                }
             }
             return;
         }
