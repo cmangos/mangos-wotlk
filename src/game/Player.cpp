@@ -13214,12 +13214,12 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
         }
     }
 
-    GossipMenuItemData pMenuData = gossipmenu.GetItemData(gossipListId);
-
     switch (gossipOptionId)
     {
         case GOSSIP_OPTION_GOSSIP:
         {
+            GossipMenuItemData pMenuData = gossipmenu.GetItemData(gossipListId);
+
             if (pMenuData.m_gAction_poi)
                 PlayerTalkClass->SendPointOfInterest(pMenuData.m_gAction_poi);
 
@@ -13331,7 +13331,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                         {
                             ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon anymore bots. (Current Max: |cffffffff%u|cffff0000)",maxnum);
                             delete resultchar;
-                            break;
+                            return;
                         }
                 }
                 delete resultchar;
@@ -13347,7 +13347,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                         {
                             ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high. (Current Max:lvl |cffffffff%u|cffff0000)",fields[1].GetString(),maxlvl);
                             delete resultlvl;
-                            break;
+                            return;
                         }
                 }
                 delete resultlvl;
@@ -13355,9 +13355,11 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                 GetPlayerbotMgr()->AddPlayerBot(ObjectGuid(HIGHGUID_PLAYER,guidlo));
                 this->ModifyMoney(-(int32)cost);
             }
-            break;
+            return;
         }
     }
+
+    GossipMenuItemData pMenuData = gossipmenu.GetItemData(gossipListId);
 
     if (pMenuData.m_gAction_script)
     {
