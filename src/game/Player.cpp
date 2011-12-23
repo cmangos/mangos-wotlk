@@ -13049,6 +13049,7 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 menuId)
                 case GOSSIP_OPTION_PETITIONER:
                 case GOSSIP_OPTION_TABARDDESIGNER:
                 case GOSSIP_OPTION_AUCTIONEER:
+                case GOSSIP_OPTION_MAILBOX:
                     break;                                  // no checks
                 case GOSSIP_OPTION_BOT:
                 {
@@ -13213,7 +13214,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
         }
     }
 
-    switch(gossipOptionId)
+    switch (gossipOptionId)
     {
         case GOSSIP_OPTION_GOSSIP:
         {
@@ -13233,15 +13234,6 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                 PlayerTalkClass->CloseGossip();
                 TalkedToCreature(pSource->GetEntry(), pSource->GetObjectGuid());
             }
-
-            if (pMenuData.m_gAction_script)
-            {
-                if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
-                    GetMap()->ScriptsStart(sGossipScripts, pMenuData.m_gAction_script, this, pSource);
-                else if (pSource->GetTypeId() == TYPEID_UNIT)
-                    GetMap()->ScriptsStart(sGossipScripts, pMenuData.m_gAction_script, pSource, this);
-            }
-
             break;
         }
         case GOSSIP_OPTION_SPIRITHEALER:
@@ -13291,6 +13283,10 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
         case GOSSIP_OPTION_AUCTIONEER:
             GetSession()->SendAuctionHello(((Creature*)pSource));
             break;
+        case GOSSIP_OPTION_MAILBOX:
+            PlayerTalkClass->CloseGossip();
+            GetSession()->SendShowMailBox(guid);
+            break;
         case GOSSIP_OPTION_SPIRITGUIDE:
             PrepareGossipMenu(pSource);
             SendPreparedGossip(pSource);
@@ -13335,7 +13331,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                         {
                             ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon anymore bots. (Current Max: |cffffffff%u|cffff0000)",maxnum);
                             delete resultchar;
-                            break;
+                            return;
                         }
                 }
                 delete resultchar;
@@ -13351,7 +13347,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                         {
                             ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high. (Current Max:lvl |cffffffff%u|cffff0000)",fields[1].GetString(),maxlvl);
                             delete resultlvl;
-                            break;
+                            return;
                         }
                 }
                 delete resultlvl;
@@ -13359,8 +13355,18 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                 GetPlayerbotMgr()->AddPlayerBot(ObjectGuid(HIGHGUID_PLAYER,guidlo));
                 this->ModifyMoney(-(int32)cost);
             }
-            break;
+            return;
         }
+    }
+
+    GossipMenuItemData pMenuData = gossipmenu.GetItemData(gossipListId);
+
+    if (pMenuData.m_gAction_script)
+    {
+        if (pSource->GetTypeId() == TYPEID_UNIT)
+            GetMap()->ScriptsStart(sGossipScripts, pMenuData.m_gAction_script, pSource, this);
+        else if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
+            GetMap()->ScriptsStart(sGossipScripts, pMenuData.m_gAction_script, this, pSource);
     }
 }
 

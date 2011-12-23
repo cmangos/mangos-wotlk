@@ -1062,10 +1062,12 @@ void Aura::TriggerSpell()
     // generic casting code with custom spells and target/caster customs
     uint32 trigger_spell_id = GetSpellProto()->EffectTriggerSpell[m_effIndex];
 
-    SpellEntry const *triggeredSpellInfo = sSpellStore.LookupEntry(trigger_spell_id);
-    SpellEntry const *auraSpellInfo = GetSpellProto();
+    SpellEntry const* triggeredSpellInfo = sSpellStore.LookupEntry(trigger_spell_id);
+    SpellEntry const* auraSpellInfo = GetSpellProto();
     uint32 auraId = auraSpellInfo->Id;
     Unit* target = GetTarget();
+    Unit* triggerCaster = triggerTarget;
+    WorldObject* triggerTargetObject = NULL;
 
     // specific code for cases with no trigger spell provided in field
     if (triggeredSpellInfo == NULL)
@@ -1841,22 +1843,46 @@ void Aura::TriggerSpell()
         // Reget trigger spell proto
         triggeredSpellInfo = sSpellStore.LookupEntry(trigger_spell_id);
     }
-    else
+    else                                                    // initial triggeredSpellInfo != NULL
     {
+        // for channeled spell cast applied from aura owner to channel target (persistent aura affects already applied to true target)
+        // come periodic casts applied to targets, so need seelct proper caster (ex. 15790)
+        if (IsChanneledSpell(GetSpellProto()) && GetSpellProto()->Effect[GetEffIndex()] != SPELL_EFFECT_PERSISTENT_AREA_AURA)
+        {
+            // interesting 2 cases: periodic aura at caster of channeled spell
+            if (target->GetObjectGuid() == casterGUID)
+            {
+                triggerCaster = target;
+
+                if (WorldObject* channelTarget = target->GetMap()->GetWorldObject(target->GetChannelObjectGuid()))
+                {
+                    if (channelTarget->isType(TYPEMASK_UNIT))
+                        triggerTarget = (Unit*)channelTarget;
+                    else
+                        triggerTargetObject = channelTarget;
+                }
+            }
+            // or periodic aura at caster channel target
+            else if (Unit* caster = GetCaster())
+            {
+                if (target->GetObjectGuid() == caster->GetChannelObjectGuid())
+                {
+                    triggerCaster = caster;
+                    triggerTarget = target;
+                }
+            }
+        }
+
         // Spell exist but require custom code
         switch(auraId)
         {
             case 9347:                                      // Mortal Strike
             {
-                // expected selection current fight target
-                triggerTarget = GetTarget()->getVictim();
-                if (!triggerTarget)
+                if (target->GetTypeId() != TYPEID_UNIT)
                     return;
-
-                // avoid triggering for far target
-                SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(triggeredSpellInfo->rangeIndex);
-                float max_range = GetSpellMaxRange(srange);
-                if (!triggerTarget->IsWithinDist(GetTarget(),max_range))
+                // expected selection current fight target
+                triggerTarget = ((Creature*)target)->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, triggeredSpellInfo);
+                if (!triggerTarget)
                     return;
 
                 break;
@@ -1910,6 +1936,12 @@ void Aura::TriggerSpell()
                     caster->CastSpell(triggerTarget, trigger_spell_id, true, NULL, this);
                 return;
             }
+            case 44883:                                     // Encapsulate
+            {
+                // Self cast spell, hence overwrite caster (only channeled spell where the triggered spell deals dmg to SELF)
+                triggerCaster = triggerTarget;
+                break;
+            }
             case 53563:                                     // Beacon of Light
                 // original caster must be target (beacon)
                 target->CastSpell(target, trigger_spell_id, true, NULL, this, target->GetObjectGuid());
@@ -1920,37 +1952,6 @@ void Aura::TriggerSpell()
                 int32 mana = target->GetMaxPower(POWER_MANA) * m_modifier.m_amount / 100;
                 triggerTarget->CastCustomSpell(triggerTarget, trigger_spell_id, &mana, NULL, NULL, true, NULL, this);
                 return;
-            }
-        }
-    }
-
-    Unit* triggerCaster = triggerTarget;
-    WorldObject* triggerTargetObject = NULL;
-
-    // for channeled spell cast applied from aura owner to channel target (persistent aura affects already applied to true target)
-    // come periodic casts applied to targets, so need seelct proper caster (ex. 15790)
-    if (IsChanneledSpell(GetSpellProto()) && GetSpellProto()->Effect[GetEffIndex()] != SPELL_EFFECT_PERSISTENT_AREA_AURA)
-    {
-        // interesting 2 cases: periodic aura at caster of channeled spell
-        if (target->GetObjectGuid() == casterGUID)
-        {
-            triggerCaster = target;
-
-            if (WorldObject* channelTarget = target->GetMap()->GetWorldObject(target->GetChannelObjectGuid()))
-            {
-                if (channelTarget->isType(TYPEMASK_UNIT))
-                    triggerTarget = (Unit*)channelTarget;
-                else
-                    triggerTargetObject = channelTarget;
-            }
-        }
-        // or periodic aura at caster channel target
-        else if (Unit* caster = GetCaster())
-        {
-            if (target->GetObjectGuid() == caster->GetChannelObjectGuid())
-            {
-                triggerCaster = caster;
-                triggerTarget = target;
             }
         }
     }
@@ -2507,6 +2508,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 if (pSummon && pCaster)
                     pSummon->GetMotionMaster()->MovePoint(0, pCaster->GetPositionX(), pCaster->GetPositionY(), pCaster->GetPositionZ());
 
+                return;
+            }
+            case 43681:                                     // Inactive
+            {
+                if (m_removeMode == AURA_REMOVE_BY_EXPIRE && target->GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)target)->ToggleAFK();
                 return;
             }
             case 43969:                                     // Feathered Charm
@@ -7801,7 +7808,19 @@ void Aura::PeriodicDummyTick()
 //              case 49313: break; // Proximity Mine Area Aura
 //              // Mole Machine Portal Schedule
 //              case 49466: break;
-//              case 49555: break; // Corpse Explode
+                case 49555:                                 // Corpse Explode (Drak'tharon Keep - Trollgore)
+                case 59807:                                 // Corpse Explode (heroic)
+                {
+                    if (GetAuraTicks() == 3 && target->GetTypeId() == TYPEID_UNIT)
+                        ((Creature*)target)->ForcedDespawn();
+                    if (GetAuraTicks() != 2)
+                        return;
+
+                    if (Unit* pCaster = GetCaster())
+                        pCaster->CastSpell(target, spell->Id == 49555 ? 49618 : 59809, true);
+
+                    return;
+                }
 //              case 49592: break; // Temporal Rift
 //              case 49957: break; // Cutting Laser
 //              case 50085: break; // Slow Fall
