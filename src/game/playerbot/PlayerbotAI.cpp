@@ -931,11 +931,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             uint8 err;
             p >> err;
 
-            if (m_inventory_full)
-                return;
-
-            m_inventory_full = true;
-
             if (err != EQUIP_ERR_OK)
             {
                 switch (err)
@@ -953,8 +948,14 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         TellMaster("That is already looted.");
                         return;
                     case EQUIP_ERR_INVENTORY_FULL:
+                    {
+                        if (m_inventory_full)
+                            return;
+
                         TellMaster("My inventory is full.");
+                        m_inventory_full = true;
                         return;
+                    }
                     case EQUIP_ERR_NOT_IN_COMBAT:
                         TellMaster("I can't use that in combat.");
                         return;
@@ -987,6 +988,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             uint8 castCount;
             uint32 spellId;
             uint8 result;
+            std::ostringstream out;
 
             p >> castCount >> spellId >> result;
 
@@ -994,11 +996,11 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             {
                 switch (result)
                 {
-                    case SPELL_FAILED_INTERRUPTED:
+                    case SPELL_FAILED_INTERRUPTED:  // 40
                         //DEBUG_LOG("spell interrupted (%u)",result);
                         return;
 
-                    case SPELL_FAILED_BAD_TARGETS:
+                    case SPELL_FAILED_BAD_TARGETS:  // 12
                     {
                         // DEBUG_LOG("[%s]bad target (%u) for spellId (%u) & m_CurrentlyCastingSpellId (%u)",m_bot->GetName(),result,spellId,m_CurrentlyCastingSpellId);
                         Spell* const pSpell = GetCurrentSpell();
@@ -1006,10 +1008,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                             pSpell->cancel();
                         return;
                     }
-                    case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
+                    case SPELL_FAILED_REQUIRES_SPELL_FOCUS: // 102
                     {
-                        std::ostringstream out;
-
                         SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
                         if (!spellInfo)
                             return;
@@ -1017,28 +1017,62 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         switch(spellInfo->RequiresSpellFocus) // SpellFocusObject.dbc id
                         {
                             case 1 : // need an anvil
-                                out << "|cffff0000I Require an Anvil";
+                                out << "|cffff0000I Require an Anvil.";
                                 break;
                             case 2 : // need a loom
-                                out << "|cffff0000I Require a Loom";
+                                out << "|cffff0000I Require a Loom.";
                                 break;
                             case 3 : // need forge
-                                out << "|cffff0000I Require a Forge";
+                                out << "|cffff0000I Require a Forge.";
                                 break;
                             case 4 : // need cooking fire
-                                out << "|cffff0000I Require a Cooking Fire";
+                                out << "|cffff0000I Require a Cooking Fire.";
                                 break;
                             default:
                                 out << "|cffff0000I Require Spell Focus on " << spellInfo->RequiresSpellFocus;
                         }
-                        TellMaster(out.str().c_str());
+                        break;
+                    }
+                    case SPELL_FAILED_CANT_BE_DISENCHANTED:  // 14
+                    {
+                        out << "|cffff0000Item cannot be disenchanted.";
+                        break;
+                    }
+                    case SPELL_FAILED_CANT_BE_MILLED:  // 16
+                    {
+                        out << "|cffff0000I cannot mill that.";
+                        break;
+                    }
+                    case SPELL_FAILED_CANT_BE_PROSPECTED:  // 17
+                    {
+                        out << "|cffff0000There are no gems in this.";
+                        break;
+                    }
+                    case SPELL_FAILED_EQUIPPED_ITEM_CLASS:  // 29
+                    {
+                        out << "|cffff0000That item is not a valid target.";
+                        break;
+                    }
+                    case SPELL_FAILED_NEED_MORE_ITEMS:  // 55
+                    {
+                        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+                        if (!spellInfo)
+                            return;
+
+                        ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(m_itemTarget);
+                        if (!pProto)
+                            return;
+
+                        out << "|cffff0000Requires 5 " << pProto->Name1 << ".";
+                        m_itemTarget = 0;
                         break;
                     }
                     default:
-                        //DEBUG_LOG ("[%s] SMSG_CAST_FAIL: unknown (%u)",m_bot->GetName(),result);
+                        DEBUG_LOG ("[%s] SMSG_CAST_FAIL: unknown (%u)",m_bot->GetName(),result);
                         return;
                 }
             }
+            TellMaster(out.str().c_str());
             return;
         }
 
@@ -1566,16 +1600,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             VendorItem const* crItem = vendorslot < vCount ? vItems->GetItem(vendorslot) : tItems->GetItem(vendorslot - vCount);
             if (!crItem)
                 return;
-
-            ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(crItem->item);
-            if(pProto)
-            {
-                std::ostringstream out;
-                out << "|cff009900" << "I received item: |r";
-                MakeItemLink(pProto,out);
-                TellMaster(out.str().c_str());
-            }
-            return;
         }
 
         case SMSG_ITEM_PUSH_RESULT:
@@ -1588,10 +1612,10 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 return;
 
             uint8 bagslot;
-            uint32 itemslot, itemid, count, totalcount;
+            uint32 itemslot, itemid, count, totalcount, received, created;
 
-            p.read_skip<uint32>();  // 4 0=looted, 1=from npc
-            p.read_skip<uint32>();  // 4 0=received, 1=created
+            p >> received;          // 4 0=looted, 1=from npc
+            p >> created;           // 4 0=received, 1=created
             p.read_skip<uint32>();  // 4 IsShowChatMessage
             p >> bagslot;           // 1 bagslot
             p >> itemslot;          // 4 item slot, but when added to stack: 0xFFFFFFFF
@@ -1600,6 +1624,21 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             p.read_skip<uint32>();  // 4 random item property id
             p >> count;             // 4 count of items
             p >> totalcount;        // 4 count of items in inventory
+
+            ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid);
+            if(pProto)
+            {
+                std::ostringstream out;
+                if (received == 1)
+                {
+                    if( created == 1)
+                        out << "|cff009900" << "I created item: |r";
+                    else
+                        out << "|cff009900" << "I received item: |r";
+                    MakeItemLink(pProto,out);
+                    TellMaster(out.str().c_str());
+                }
+            }
 
             if (IsInQuestItemList(itemid))
             {
@@ -3391,7 +3430,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             if (!spell)
                 return;
 
-            if (GetSpellCharges(m_CurrentlyCastingSpellId) == 0 || !CanStore() || spell->CheckCast(true) != SPELL_CAST_OK)
+            if (GetSpellCharges(m_CurrentlyCastingSpellId) == 0 || spell->CheckCast(true) != SPELL_CAST_OK)
             {
                 SetState(BOTSTATE_NORMAL);
                 SetIgnoreUpdateTime(0);
@@ -4070,11 +4109,18 @@ bool PlayerbotAI::HasTool(uint32 TC)
                 out << "|cffff0000I do not have a RUNED ETERNIUM ROD!";
             break;
 
-       case TC_RUNED_AZURITE_ROD:         //  = 101,
+       case TC_RUNED_AZURITE_ROD:          //  = 101,
             if (m_bot->HasItemTotemCategory(TC))
                 return true;
             else
                 out << "|cffff0000I do not have a RUNED AZURITE ROD!";
+            break;
+
+       case TC_VIRTUOSO_INKING_SET:        //  = 121,
+            if (m_bot->HasItemTotemCategory(TC))
+                return true;
+            else
+                out << "|cffff0000I do not have a VIRTUOSO INKING SET!";
             break;
 
         case TC_RUNED_COBALT_ROD:          //  = 189,
@@ -6624,8 +6670,11 @@ void PlayerbotAI::GetTaxi(ObjectGuid guid, BotTaxiNode& nodes)
 void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 {
     // prevent bot task spam
+    m_inventory_full = false;
     m_tasks.unique();
     m_findNPC.unique();
+
+    // DEBUG_LOG("chat(%s)",text.c_str());
 
     // ignore any messages from Addons
     if (text.empty() ||
@@ -6757,6 +6806,12 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
     else if (ExtractCommand("craft", input))
         _HandleCommandCraft(input, fromPlayer);
+
+    else if (ExtractCommand("enchant", input))
+        _HandleCommandEnchant(input, fromPlayer);
+
+    else if (ExtractCommand("process", input))
+        _HandleCommandProcess(input, fromPlayer);
 
     else if (ExtractCommand("pet", input))
         _HandleCommandPet(input, fromPlayer);
@@ -7547,6 +7602,70 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
     }
 }
 
+void PlayerbotAI::_HandleCommandProcess(std::string &text, Player &fromPlayer)
+{
+    uint32 spellId;
+
+    if (ExtractCommand("disenchant", text, true)) // true -> "process disenchant" OR "process d"
+    {
+        if (m_bot->HasSkill(SKILL_ENCHANTING))
+        {
+            spellId = DISENCHANTING_1;
+        }
+        else
+        {
+            SendWhisper("|cffff0000I can't disenchant, I don't have the skill\n", fromPlayer);
+            return;
+        }
+    }
+    else if (ExtractCommand("mill", text, true)) // true -> "process mill" OR "process m"
+    {
+        if (m_bot->HasSkill(SKILL_INSCRIPTION))
+        {
+            spellId = MILLING_1;
+        }
+        else
+        {
+            SendWhisper("|cffff0000I can't mill, I don't have the skill\n", fromPlayer);
+            return;
+        }
+    }
+    else if (ExtractCommand("prospect", text, true)) // true -> "process prospect" OR "process p"
+    {
+        if (m_bot->HasSkill(SKILL_JEWELCRAFTING) && m_bot->GetPureSkillValue(SKILL_JEWELCRAFTING) >= 20)
+        {
+            spellId = PROSPECTING_1;
+        }
+        else
+        {
+            SendWhisper("|cffff0000I can't prospect, I don't have the skill\n", fromPlayer);
+            return;
+        }
+    }
+    else
+        return;
+
+    std::list<uint32> itemIds;
+    std::list<Item*> itemList;
+    extractItemIds(text, itemIds);
+    findItemsInInv(itemIds, itemList);
+    Item* reagent = itemList.back();
+    itemList.pop_back();
+
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+    if (!spellInfo)
+       return;
+
+    if (reagent)
+    {
+        SpellCastTargets targets;
+        m_itemTarget = reagent->GetProto()->ItemId;
+        targets.setItemTarget(reagent);
+        Spell *spell = new Spell(m_bot, spellInfo, false);
+        spell->prepare(&targets);
+    }
+}
+
 void PlayerbotAI::_HandleCommandUse(std::string &text, Player &fromPlayer)
 {
     std::list<uint32> itemIds;
@@ -7775,9 +7894,101 @@ void PlayerbotAI::_HandleCommandCollect(std::string &text, Player &fromPlayer)
         SendWhisper("I'm collecting nothing.", fromPlayer);
 }
 
+void PlayerbotAI::_HandleCommandEnchant(std::string &text, Player &fromPlayer)
+{
+    // DEBUG_LOG("Enchant (%s)",text.c_str());
+
+    if (!m_bot->HasSkill(SKILL_ENCHANTING))
+    {
+        SendWhisper("|cffff0000I can't enchant, I don't have the skill\n", fromPlayer);
+        return;
+    }
+
+    if (text.size() > 0)
+    {
+        uint32 spellId;
+        extractSpellId(text, spellId);
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+        if (!spellInfo)
+            return;
+
+        std::list<uint32> itemIds;
+        std::list<Item*> itemList;
+        extractItemIds(text, itemIds);
+        findItemsInEquip(itemIds, itemList);
+        findItemsInInv(itemIds, itemList);
+        Item* iTarget = itemList.back();
+        itemList.pop_back();
+
+        if (iTarget)
+        {
+            SpellCastTargets targets;
+            targets.setItemTarget(iTarget);
+            Spell *spell = new Spell(m_bot, spellInfo, false);
+            spell->prepare(&targets);
+            SetState(BOTSTATE_ENCHANT);
+            SetIgnoreUpdateTime(1);
+        }
+        return;
+    }
+    else
+    {
+        std::ostringstream msg;
+        uint32 charges;
+        uint32 linkcount = 0;
+
+        m_spellsToLearn.clear();
+        m_bot->skill(m_spellsToLearn);
+        SendWhisper("I can enchant:\n", fromPlayer);
+        ChatHandler ch(&fromPlayer);
+        for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
+        {
+            SkillLineEntry const *SkillLine = sSkillLineStore.LookupEntry(*it);
+
+            if (SkillLine->categoryId == SKILL_CATEGORY_PROFESSION && *it == SKILL_ENCHANTING)
+            {
+                for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+                {
+                    SkillLineAbilityEntry const *SkillAbility = sSkillLineAbilityStore.LookupEntry(j);
+                    if (!SkillAbility)
+                        continue;
+
+                    SpellEntry const* spellInfo = sSpellStore.LookupEntry(SkillAbility->spellId);
+                    if (!spellInfo)
+                        continue;
+
+                    if (IsPrimaryProfessionSkill(*it) && spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_ENCHANT_ITEM)
+                        continue;
+
+                    if (SkillAbility->skillId == *it && m_bot->HasSpell(SkillAbility->spellId) && SkillAbility->forward_spellid == 0 && ((SkillAbility->classmask & m_bot->getClassMask()) == 0))
+                    {
+                        MakeSpellLink(spellInfo, msg);
+                        ++linkcount;
+                        if ((charges = GetSpellCharges(SkillAbility->spellId)) > 0)
+                            msg << "[" << charges << "]";
+                        if (linkcount >= 10)
+                        {
+                            ch.SendSysMessage(msg.str().c_str());
+                            linkcount = 0;
+                            msg.str("");
+                        }
+                    }
+                }
+            }
+        }
+        m_noToolList.unique();
+        for (std::list<uint32>::iterator it = m_noToolList.begin(); it != m_noToolList.end(); it++)
+            HasTool(*it);
+        ch.SendSysMessage(msg.str().c_str());
+        m_noToolList.clear();
+        m_spellsToLearn.clear();
+    }
+}
+
 void PlayerbotAI::_HandleCommandCraft(std::string &text, Player &fromPlayer)
 {
-    DEBUG_LOG("Craft (%s)",text.c_str());
+    // DEBUG_LOG("Craft (%s)",text.c_str());
 
     std::ostringstream msg;
     uint32 charges;
@@ -7947,7 +8158,7 @@ void PlayerbotAI::_HandleCommandCraft(std::string &text, Player &fromPlayer)
                     ++linkcount;
                     if ((charges = GetSpellCharges(SkillAbility->spellId)) > 0)
                         msg << "[" << charges << "]";
-                    if (linkcount >= 20)
+                    if (linkcount >= 10)
                     {
                         ch.SendSysMessage(msg.str().c_str());
                         linkcount = 0;
@@ -8762,7 +8973,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     }
     if (bMainHelp || ExtractCommand("craft", text))
     {
-        ch.SendSysMessage(_HandleCommandHelpHelper("craft ", "I will create a single specified recipe", HL_RECIPE).c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("craft", "I will create a single specified recipe", HL_RECIPE).c_str());
         ch.SendSysMessage(_HandleCommandHelpHelper("craft [RECIPE] all", "I will create all specified recipes").c_str());
 
         if (!bMainHelp)
@@ -8778,6 +8989,29 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             ch.SendSysMessage(_HandleCommandHelpHelper("craft < magic | m >", "List all learnt enchanting recipes").c_str());
             ch.SendSysMessage(_HandleCommandHelpHelper("craft < smelting | s >", "List all learnt mining recipes").c_str());
             ch.SendSysMessage(_HandleCommandHelpHelper("craft < tailoring | t >", "List all learnt tailoring recipes").c_str());
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+            return;
+        }
+    }
+    if (bMainHelp || ExtractCommand("process", text))
+    {
+        ch.SendSysMessage(_HandleCommandHelpHelper("process < disenchant | d >", "Disenchants a green coloured [ITEM] or better", HL_ITEM).c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("process < mill | m >", "Grinds 5 herbs [ITEM] to produce pigments",HL_ITEM).c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("process < prospect | p >", "Searches 5 metal ore [ITEM] for precious gems",HL_ITEM).c_str());
+
+        if (!bMainHelp)
+        {
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+            return;
+        }
+    }
+    if (bMainHelp || ExtractCommand("enchant", text))
+    {
+        ch.SendSysMessage(_HandleCommandHelpHelper("enchant", "Lists all enchantments [SPELL] learnt by the bot").c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("enchant [SPELL]", "Enchants selected tradable [ITEM] either equipped or in bag", HL_ITEM).c_str());
+
+        if (!bMainHelp)
+        {
             if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
@@ -8798,7 +9032,9 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 
         if (!bMainHelp)
         {
-            ch.SendSysMessage(_HandleCommandHelpHelper("use [ITEM] on", "I will use the first linked item 'on' an equipped linked item.", HL_ITEM).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("use [ITEM]", "I will use the first linked item on a selected TARGET.", HL_TARGET).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("use [ITEM]", "I will use the first linked item on an equipped linked item.", HL_ITEM).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("use [ITEM]", "I will use the first linked item on a linked gameobject.", HL_GAMEOBJECT).c_str());
 
             if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
@@ -9047,7 +9283,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     }
     if (bMainHelp || ExtractCommand("skill", text))
     {
-        msg = _HandleCommandHelpHelper("skill", "Lists my primary professions.");
+        msg = _HandleCommandHelpHelper("skill", "Lists my primary professions & weapon skills.");
         ch.SendSysMessage(msg.c_str());
 
         if (!bMainHelp)

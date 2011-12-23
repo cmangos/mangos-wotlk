@@ -54,7 +54,10 @@ enum ProfessionSpells
     JEWELCRAFTING_1                = 25229,
     MINING_1                       = 2575,
     SKINNING_1                     = 8613,
-    TAILORING_1                    = 3908
+    TAILORING_1                    = 3908,
+    MILLING_1                      = 51005,
+    DISENCHANTING_1                = 13262,
+    PROSPECTING_1                  = 31252
 };
 
 enum TalentsDeathKnight  // 0x020
@@ -1837,6 +1840,8 @@ private:
     void _HandleCommandCollect(std::string &text, Player &fromPlayer);
     void _HandleCommandQuest(std::string &text, Player &fromPlayer);
     void _HandleCommandCraft(std::string &text, Player &fromPlayer);
+    void _HandleCommandEnchant(std::string &text, Player &fromPlayer);
+    void _HandleCommandProcess(std::string &text, Player &fromPlayer);
     void _HandleCommandPet(std::string &text, Player &fromPlayer);
     void _HandleCommandSpells(std::string &text, Player &fromPlayer);
     void _HandleCommandSurvey(std::string &text, Player &fromPlayer);
@@ -1901,6 +1906,7 @@ private:
     uint8 m_collectionFlags;            // what the bot should look for to loot
     uint32 m_collectDist;               // distance to collect objects
     bool m_inventory_full;
+    uint32 m_itemTarget;
 
     time_t m_TimeDoneEating;
     time_t m_TimeDoneDrinking;
