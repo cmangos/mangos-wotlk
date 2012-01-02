@@ -1017,16 +1017,16 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         switch(spellInfo->RequiresSpellFocus) // SpellFocusObject.dbc id
                         {
                             case 1 : // need an anvil
-                                out << "|cffff0000I Require an Anvil.";
+                                out << "|cffff0000I require an anvil.";
                                 break;
                             case 2 : // need a loom
-                                out << "|cffff0000I Require a Loom.";
+                                out << "|cffff0000I require a loom.";
                                 break;
                             case 3 : // need forge
-                                out << "|cffff0000I Require a Forge.";
+                                out << "|cffff0000I require a forge.";
                                 break;
                             case 4 : // need cooking fire
-                                out << "|cffff0000I Require a Cooking Fire.";
+                                out << "|cffff0000I require a cooking fire.";
                                 break;
                             default:
                                 out << "|cffff0000I Require Spell Focus on " << spellInfo->RequiresSpellFocus;
@@ -1065,6 +1065,11 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
                         out << "|cffff0000Requires 5 " << pProto->Name1 << ".";
                         m_itemTarget = 0;
+                        break;
+                    }
+                    case SPELL_FAILED_REAGENTS:
+                    {
+                        out << "|cffff0000I don't have the reagents";
                         break;
                     }
                     default:
@@ -1632,9 +1637,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 if (received == 1)
                 {
                     if( created == 1)
-                        out << "|cff009900" << "I created item: |r";
+                        out << "|cff009900" << "I created: |r";
                     else
-                        out << "|cff009900" << "I received item: |r";
+                        out << "|cff009900" << "I received: |r";
                     MakeItemLink(pProto,out);
                     TellMaster(out.str().c_str());
                 }
@@ -7029,10 +7034,13 @@ void PlayerbotAI::_HandleCommandCast(std::string &text, Player &fromPlayer)
     }
 
     ObjectGuid castOnGuid = fromPlayer.GetSelectionGuid();
-    if (spellId != 0 && castOnGuid && m_bot->HasSpell(spellId))
+    if (spellId != 0 && m_bot->HasSpell(spellId))
     {
         m_spellIdCommand = spellId;
-        m_targetGuidCommand = castOnGuid;
+        if (castOnGuid)
+            m_targetGuidCommand = castOnGuid;
+        else
+            m_targetGuidCommand = m_bot->GetObjectGuid();
     }
 }
 
@@ -7614,7 +7622,7 @@ void PlayerbotAI::_HandleCommandProcess(std::string &text, Player &fromPlayer)
         }
         else
         {
-            SendWhisper("|cffff0000I can't disenchant, I don't have the skill\n", fromPlayer);
+            SendWhisper("|cffff0000I can't disenchant, I don't have the skill.", fromPlayer);
             return;
         }
     }
@@ -7626,7 +7634,7 @@ void PlayerbotAI::_HandleCommandProcess(std::string &text, Player &fromPlayer)
         }
         else
         {
-            SendWhisper("|cffff0000I can't mill, I don't have the skill\n", fromPlayer);
+            SendWhisper("|cffff0000I can't mill, I don't have the skill.", fromPlayer);
             return;
         }
     }
@@ -7638,7 +7646,7 @@ void PlayerbotAI::_HandleCommandProcess(std::string &text, Player &fromPlayer)
         }
         else
         {
-            SendWhisper("|cffff0000I can't prospect, I don't have the skill\n", fromPlayer);
+            SendWhisper("|cffff0000I can't prospect, I don't have the skill.", fromPlayer);
             return;
         }
     }
@@ -7649,6 +7657,13 @@ void PlayerbotAI::_HandleCommandProcess(std::string &text, Player &fromPlayer)
     std::list<Item*> itemList;
     extractItemIds(text, itemIds);
     findItemsInInv(itemIds, itemList);
+
+    if(itemList.empty())
+    {
+        SendWhisper("|cffff0000I can't process that!", fromPlayer);
+        return;
+    }
+
     Item* reagent = itemList.back();
     itemList.pop_back();
 
@@ -7672,6 +7687,12 @@ void PlayerbotAI::_HandleCommandUse(std::string &text, Player &fromPlayer)
     std::list<Item*> itemList;
     extractItemIds(text, itemIds);
     findItemsInInv(itemIds, itemList);
+
+    if(itemList.empty())
+    {
+        SendWhisper("|cffff0000I can't use that!", fromPlayer);
+        return;
+    }
 
     Item* tool = itemList.back();
     itemList.pop_back();
@@ -7900,7 +7921,7 @@ void PlayerbotAI::_HandleCommandEnchant(std::string &text, Player &fromPlayer)
 
     if (!m_bot->HasSkill(SKILL_ENCHANTING))
     {
-        SendWhisper("|cffff0000I can't enchant, I don't have the skill\n", fromPlayer);
+        SendWhisper("|cffff0000I can't enchant, I don't have the skill.", fromPlayer);
         return;
     }
 
@@ -7918,6 +7939,13 @@ void PlayerbotAI::_HandleCommandEnchant(std::string &text, Player &fromPlayer)
         extractItemIds(text, itemIds);
         findItemsInEquip(itemIds, itemList);
         findItemsInInv(itemIds, itemList);
+
+        if(itemList.empty())
+        {
+            SendWhisper("|cffff0000I can't enchant that!", fromPlayer);
+            return;
+        }
+
         Item* iTarget = itemList.back();
         itemList.pop_back();
 
@@ -8111,21 +8139,34 @@ void PlayerbotAI::_HandleCommandCraft(std::string &text, Player &fromPlayer)
         uint32 spellId;
         extractSpellId(text, spellId);
 
+        if (!m_bot->HasSpell(spellId))
+        {
+            SendWhisper("|cffff0000I don't have that spell.", fromPlayer);
+            return;
+        }
+
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
         if (!spellInfo)
             return;
 
+        SpellCastTargets targets;
+        Spell *spell = new Spell(m_bot, spellInfo, false);
+
         if (text.find("all",0) != std::string::npos)
         {
-            m_CurrentlyCastingSpellId = spellId;
-            SetState(BOTSTATE_CRAFT);
+            SpellCastResult result = spell->CheckCast(true);
+
+            if (result != SPELL_CAST_OK)
+                spell->SendCastResult(result);
+            else
+            {
+                spell->prepare(&targets);
+                m_CurrentlyCastingSpellId = spellId;
+                SetState(BOTSTATE_CRAFT);
+            }
         }
         else
-        {
-            SpellCastTargets targets;
-            Spell *spell = new Spell(m_bot, spellInfo, false);
             spell->prepare(&targets);
-        }
         return;
     }
 
