@@ -557,7 +557,7 @@ bool PlayerbotAI::IsItemUseful(uint32 itemid)
             if (pProto->SubClass >= MAX_ITEM_SUBCLASS_ARMOR)
                 return false;
             else
-                return m_bot->HasSkill(item_armor_skills[pProto->SubClass]);
+                return (m_bot->HasSkill(item_armor_skills[pProto->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProto->SubClass+1]));
                 break;
         case ITEM_CLASS_QUEST:
             if (!HasCollectFlag(COLLECT_FLAG_QUEST))
