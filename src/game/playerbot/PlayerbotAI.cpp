@@ -8635,7 +8635,12 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
         // check present spell in trainer spell list
         TrainerSpellData const* cSpells = creature->GetTrainerSpells();
         TrainerSpellData const* tSpells = creature->GetTrainerTemplateSpells();
-        if (!cSpells && !tSpells)
+
+        TrainerSpellData const* all_trainer_spells = cSpells;
+        if (!all_trainer_spells)
+           all_trainer_spells = tSpells;
+
+	if (!all_trainer_spells)
         {
             SendWhisper("No spells can be learnt from this trainer", fromPlayer);
             return;
@@ -8659,10 +8664,7 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                 if (!spellId)
                     break;
 
-                TrainerSpell const* trainer_spell = cSpells->Find(spellId);
-                if (!trainer_spell)
-                    trainer_spell = tSpells->Find(spellId);
-
+                TrainerSpell const* trainer_spell = all_trainer_spells->Find(spellId);
                 if (!trainer_spell || !trainer_spell->learnedSpell)
                     continue;
 
@@ -8721,11 +8723,7 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
         {
             msg << "The spells I can learn and their cost:\r";
 
-            TrainerSpellData const* trainer_spells = cSpells;
-            if (!trainer_spells)
-                trainer_spells = tSpells;
-
-            for (TrainerSpellMap::const_iterator itr =  trainer_spells->spellList.begin(); itr !=  trainer_spells->spellList.end(); ++itr)
+            for (TrainerSpellMap::const_iterator itr =  all_trainer_spells->spellList.begin(); itr !=  all_trainer_spells->spellList.end(); ++itr)
             {
                 TrainerSpell const* tSpell = &itr->second;
 
