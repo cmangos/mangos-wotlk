@@ -45,7 +45,7 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME process < prospect | p > [ITEM LINK] (searches 5 metal ore [ITEM LINK] for precious gems)
 /t BOTANME enchant (lists all enchantments [SPELLLINK] learnt by the bot)
 /t BOTANME enchant [SPELLLINK][ITEM LINK] (enchants selected tradable [ITEM LINK] either equipped or in bag)
-/t BOTNAME use [ITEM LINK] (use item on self)
+/t BOTNAME use [ITEM LINK] (use item on self. If item hold quest, it will be accepted. If inventory item is lootable, it will be looted)
 /t BOTNAME use [ITEM LINK] TARGET (use item on selected unit)
 /t BOTNAME use [ITEM LINK][EQUIPPED ITEM LINK] (use item on equipped item)
 /t BOTNAME use [ITEM LINK][GAMEOBJECT LINK] (use item on gameobject )
@@ -62,6 +62,8 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME quest < end | e > (Turns in a completed quest)
 /t BOTNAME quest < report | r > (bot reports all items, creatures or gameobjects needed to finish quests)
 /t BOTNAME orders (Shows bot's combat orders)
+/t BOTNAME pet abandon (abandon current active hunter pet)
+/t BOTNAME pet tame TARGET (tame selected creature, if bot has 'tame beast' spell in spellbook)
 /t BOTNAME pet spells (Shows spells known to bot's pet. Autocast spells will be shown in green)
 /t BOTNAME pet cast <SPELLID | (part of) SPELLNAME | [SPELLLINK]>
 /t BOTNAME pet toggle <SPELLID | (part of) SPELLNAME | [SPELLLINK]> (Toggle autocast for a given spell)

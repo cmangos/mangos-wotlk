@@ -1457,6 +1457,7 @@ public:
         ORDERS_TANK                 = 0x01,             // bind attackers by gaining threat
         ORDERS_ASSIST               = 0x02,             // assist someone (dps type)
         ORDERS_HEAL                 = 0x04,             // concentrate on healing (no attacks, only self defense)
+        ORDERS_PASSIVE              = 0x08,             // bots do nothing
         ORDERS_PROTECT              = 0x10,             // combinable state: check if protectee is attacked
         ORDERS_PRIMARY              = 0x0F,
         ORDERS_SECONDARY            = 0xF0,
@@ -1478,7 +1479,8 @@ public:
         BOTSTATE_LOOTING,           // looting mode, used just after combat
         BOTSTATE_FLYING,            // bot is flying
         BOTSTATE_ENCHANT,           // bot is enchanting
-        BOTSTATE_CRAFT              // bot is crafting
+        BOTSTATE_CRAFT,             // bot is crafting
+        BOTSTATE_TAME               // bot hunter taming
     };
 
     enum CollectionFlags
