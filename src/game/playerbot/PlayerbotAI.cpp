@@ -5744,6 +5744,16 @@ void PlayerbotAI::UseItem(Item *item, uint32 targetFlag, ObjectGuid targetGUID)
         }
     }
 
+    if (item->GetProto()->Class == ITEM_CLASS_QUEST && spellId == 0)
+    {
+        // Open quest item in inventory, containing related items (e.g Gnarlpine necklace, containing Tallonkai's Jewel)
+        WorldPacket* const packet = new WorldPacket(CMSG_OPEN_ITEM, 2);
+        *packet << item->GetBagSlot();
+        *packet << item->GetSlot();
+        m_bot->GetSession()->QueuePacket(packet); // queue the packet to get around race condition
+        return;
+    }
+
     WorldPacket *packet = new WorldPacket(CMSG_USE_ITEM, 28);
     *packet << bagIndex << slot << cast_count << spellId << item_guid
             << glyphIndex << unk_flags << targetFlag;
