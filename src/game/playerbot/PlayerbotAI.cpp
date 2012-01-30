@@ -136,6 +136,7 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
         case CLASS_HUNTER:
             m_combatStyle = COMBAT_RANGED;
             m_classAI = (PlayerbotClassAI *) new PlayerbotHunterAI(GetMaster(), m_bot, this);
+            ASPECT_OF_THE_MONKEY = initSpell(ASPECT_OF_THE_MONKEY_1);
             break;
         case CLASS_DEATH_KNIGHT:
             m_combatStyle = COMBAT_MELEE;
@@ -8430,6 +8431,8 @@ void PlayerbotAI::_HandleCommandPet(std::string &text, Player &fromPlayer)
         ObjectGuid castOnGuid = fromPlayer.GetSelectionGuid();
         if (castOnGuid && m_bot->HasSpell(TAME_BEAST_1))
         {
+            if (ASPECT_OF_THE_MONKEY > 0 && !m_bot->HasAura(ASPECT_OF_THE_MONKEY, EFFECT_INDEX_0))
+                CastSpell(ASPECT_OF_THE_MONKEY, *m_bot);
             m_targetGuidCommand = castOnGuid;
             SetState(BOTSTATE_TAME);
         }

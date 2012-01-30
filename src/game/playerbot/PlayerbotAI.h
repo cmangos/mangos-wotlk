@@ -1937,7 +1937,8 @@ private:
     uint32 FISHING,
            HERB_GATHERING,
            MINING,
-           SKINNING;
+           SKINNING,
+           ASPECT_OF_THE_MONKEY;
 
     SpellRanges m_spellRangeMap;
 
