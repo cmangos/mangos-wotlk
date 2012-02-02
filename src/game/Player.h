@@ -1452,6 +1452,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void skill(std::list<uint32>& m_spellsToLearn);
         void MakeTalentGlyphLink(std::ostringstream &out);
         bool requiredQuests(const char* pQuestIdString);
+		uint32 GetSpec();
 
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
