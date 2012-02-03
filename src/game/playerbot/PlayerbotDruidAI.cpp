@@ -35,6 +35,7 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
     TRANQUILITY                   = ai->initSpell(TRANQUILITY_1);
     REVIVE                        = ai->initSpell(REVIVE_1);
 	REMOVE_CURSE				  = ai->initSpell(REMOVE_CURSE_DRUID_1);
+	ABOLISH_POISON				  = ai->initSpell(ABOLISH_POISON_1);
     // Druid Forms
     MOONKIN_FORM                  = ai->initSpell(MOONKIN_FORM_1);
     DIRE_BEAR_FORM                = ai->initSpell(DIRE_BEAR_FORM_1);
@@ -79,18 +80,31 @@ bool PlayerbotDruidAI::HealTarget(Unit *target)
 {
     PlayerbotAI* ai = GetAI();
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
-
-	if (REMOVE_CURSE > 0 && ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
+	
+	//If spell exists and orders say we should be dispelling
+	if ((REMOVE_CURSE > 0 || ABOLISH_POISON > 0) && ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
 	{
+		//This does something important(lol)
 		uint32 dispelMask  = GetDispellMask(DISPEL_CURSE);
+		uint32 dispelMask2  = GetDispellMask(DISPEL_POISON);
+		//Get a list of all the targets auras(spells affecting target)
 		Unit::SpellAuraHolderMap const& auras = target->GetSpellAuraHolderMap();
+		//Iterate through the auras
 		for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
 		{
 			SpellAuraHolder *holder = itr->second;
+			//I dont know what this does but it doesn't work without it
 			if ((1<<holder->GetSpellProto()->Dispel) & dispelMask)
 			{	
-				if(holder->GetSpellProto()->Dispel == DISPEL_CURSE)
+				//If the spell is dispellable and we can dispel it, do so
+				if((holder->GetSpellProto()->Dispel == DISPEL_CURSE) & (REMOVE_CURSE > 0))
 					ai->CastSpell(REMOVE_CURSE, *target);
+					return false;
+			}
+			else if ((1<<holder->GetSpellProto()->Dispel) & dispelMask2)
+			{	
+				if((holder->GetSpellProto()->Dispel == DISPEL_POISON) & (ABOLISH_POISON > 0))
+					ai->CastSpell(ABOLISH_POISON, *target);
 					return false;
 			}
 		}

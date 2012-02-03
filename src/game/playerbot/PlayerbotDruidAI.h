@@ -170,7 +170,8 @@ private:
            SWIFTMEND,
            TRANQUILITY,
            REVIVE,
-		   REMOVE_CURSE;
+		   REMOVE_CURSE,
+		   ABOLISH_POISON;
 
     // first aid
     uint32 RECENTLY_BANDAGED;

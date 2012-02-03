@@ -91,11 +91,12 @@ void PlayerbotShamanAI::HealTarget(Unit &target, uint8 hp)
         ai->CastSpell(RIPTIDE, target);
     else if (hp < 70 && CHAIN_HEAL > 0 && ai->GetManaPercent() >= 24)
         ai->CastSpell(CHAIN_HEAL, target);
-	//else if (CLEANSE_SPIRIT > 0)
-	//	ai->CastSpell(CLEANSE_SPIRIT, target);
 	if (CURE_TOXINS > 0 && ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
 	{
+		uint32 DISPEL = CLEANSE_SPIRIT > 0 ? CLEANSE_SPIRIT : CURE_TOXINS; 
 		uint32 dispelMask  = GetDispellMask(DISPEL_POISON);
+		uint32 dispelMask2  = GetDispellMask(DISPEL_DISEASE);
+		uint32 dispelMask3  = GetDispellMask(DISPEL_CURSE);
 		Unit::SpellAuraHolderMap const& auras = target.GetSpellAuraHolderMap();
 		for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
 		{
@@ -103,7 +104,17 @@ void PlayerbotShamanAI::HealTarget(Unit &target, uint8 hp)
 			if ((1<<holder->GetSpellProto()->Dispel) & dispelMask)
 			{	
 				if(holder->GetSpellProto()->Dispel == DISPEL_POISON)
-					ai->CastSpell(CURE_TOXINS, target);
+					ai->CastSpell(DISPEL, target);
+			}
+			else if ((1<<holder->GetSpellProto()->Dispel) & dispelMask2)
+			{	
+				if(holder->GetSpellProto()->Dispel == DISPEL_DISEASE)
+					ai->CastSpell(DISPEL, target);
+			}
+			else if ((1<<holder->GetSpellProto()->Dispel) & dispelMask3 & (DISPEL == CLEANSE_SPIRIT))
+			{	
+				if(holder->GetSpellProto()->Dispel == DISPEL_CURSE)
+					ai->CastSpell(DISPEL, target);
 			}
 		}
 	}

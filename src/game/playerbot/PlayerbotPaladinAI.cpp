@@ -110,16 +110,30 @@ bool PlayerbotPaladinAI::HealTarget(Unit *target)
 
 	if (PURIFY > 0 && ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
 	{
+		uint32 DISPEL = CLEANSE > 0 ? CLEANSE : PURIFY;
 		uint32 dispelMask  = GetDispellMask(DISPEL_DISEASE);
 		uint32 dispelMask2 = GetDispellMask(DISPEL_POISON);
+		uint32 dispelMask3 = GetDispellMask(DISPEL_MAGIC);
 		Unit::SpellAuraHolderMap const& auras = target->GetSpellAuraHolderMap();
 		for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
 		{
 			SpellAuraHolder *holder = itr->second;
-			if ((1<<holder->GetSpellProto()->Dispel) & (dispelMask || dispelMask2))
+			if ((1<<holder->GetSpellProto()->Dispel) & dispelMask)
 			{	
-				if(holder->GetSpellProto()->Dispel == (DISPEL_DISEASE || DISPEL_POISON))
-					ai->CastSpell(PURIFY, *target);
+				if(holder->GetSpellProto()->Dispel == DISPEL_DISEASE)
+					ai->CastSpell(DISPEL, *target);
+					return false;
+			}
+			else if ((1<<holder->GetSpellProto()->Dispel) & dispelMask2)
+			{	
+				if(holder->GetSpellProto()->Dispel == DISPEL_POISON)
+					ai->CastSpell(DISPEL, *target);
+					return false;
+			}
+			else if ((1<<holder->GetSpellProto()->Dispel) & dispelMask3 & (DISPEL == CLEANSE))
+			{	
+				if(holder->GetSpellProto()->Dispel == DISPEL_MAGIC)
+					ai->CastSpell(DISPEL, *target);
 					return false;
 			}
 		}
