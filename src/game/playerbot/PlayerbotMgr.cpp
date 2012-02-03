@@ -21,7 +21,7 @@ void PlayerbotMgr::SetInitialWorldSettings()
     if (!botConfig.SetSource(_PLAYERBOT_CONFIG))
         sLog.outError("Playerbot: Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
     else
-        sLog.outString("Playerbot: Using configuration file %s",_PLAYERBOT_CONFIG);
+        sLog.outString("Playerbot: Using configuration file %s", _PLAYERBOT_CONFIG);
 
     //Check playerbot config file version
     if (botConfig.GetIntDefault("ConfVersion", 0) != PLAYERBOT_CONF_VERSION)
@@ -591,14 +591,14 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 if (bot->GetPlayerbotAI()->CanStore())
                 {
                     if (bot->CanUseItem(pProto) == EQUIP_ERR_OK && bot->GetPlayerbotAI()->IsItemUseful(lootItem.itemid))
-                        choice = 1; // Need
+                        choice = 1;  // Need
                     else if (bot->HasSkill(SKILL_ENCHANTING))
-                        choice = 3; // Disenchant
+                        choice = 3;  // Disenchant
                     else
-                        choice = 2; // Greed
+                        choice = 2;  // Greed
                 }
                 else
-                    choice = 0; // Pass
+                    choice = 0;  // Pass
 
                 group->CountRollVote(bot, Guid, itemSlot, RollVote(choice));
 
@@ -857,17 +857,15 @@ void PlayerbotMgr::OnBotLogin(Player * const bot)
     const ObjectGuid masterGuid = m_master->GetObjectGuid();
     if (m_master->GetGroup() &&
         !m_master->GetGroup()->IsLeader(masterGuid))
+        // But only do so if one of the master's bots is leader
+        for (PlayerBotMap::const_iterator itr = GetPlayerBotsBegin(); itr != GetPlayerBotsEnd(); itr++)
         {
-                // But only do so if one of the master's bots is leader
-                for (PlayerBotMap::const_iterator itr = GetPlayerBotsBegin(); itr != GetPlayerBotsEnd(); itr++)
-                {
-                        Player* bot = itr->second;
-                        if ( m_master->GetGroup()->IsLeader(bot->GetObjectGuid()) )
-                        {
-                                m_master->GetGroup()->ChangeLeader(masterGuid);
-                                break;
-                        }
-                }
+            Player* bot = itr->second;
+            if (m_master->GetGroup()->IsLeader(bot->GetObjectGuid()))
+            {
+                m_master->GetGroup()->ChangeLeader(masterGuid);
+                break;
+            }
         }
 }
 
@@ -1012,14 +1010,14 @@ void Player::chompAndTrim(std::string& str)
             break;
     }
 
-	while (str.length() > 0)
-	{
-		char lc = str[0];
-		if (lc == ' ' || lc == '"' || lc == '\'')
-			str = str.substr(1, str.length() - 1);
-		else
-			break;
-	}
+    while (str.length() > 0)
+    {
+        char lc = str[0];
+        if (lc == ' ' || lc == '"' || lc == '\'')
+            str = str.substr(1, str.length() - 1);
+        else
+            break;
+    }
 }
 
 bool Player::getNextQuestId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId)
@@ -1062,7 +1060,7 @@ bool Player::requiredQuests(const char* pQuestIdString)
 
 void Player::UpdateMail()
 {
-     // save money,items and mail to prevent cheating
+    // save money,items and mail to prevent cheating
     CharacterDatabase.BeginTransaction();
     this->SaveGoldToDB();
     this->SaveInventoryAndGoldToDB();

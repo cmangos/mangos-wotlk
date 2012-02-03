@@ -175,10 +175,8 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
             ai->TellMaster("Pre > Demoralizing Shout");
     }
     else if (BATTLE_SHOUT > 0 && ai->GetRageAmount() >= 10 && !m_bot->HasAura(BATTLE_SHOUT, EFFECT_INDEX_0) && ai->CastSpell(BATTLE_SHOUT))
-    {
         if (ai->GetManager()->m_confDebugWhisper)
             ai->TellMaster("Pre > Battle Shout");
-    }
 
     std::ostringstream out;
     switch (SpellSequence)

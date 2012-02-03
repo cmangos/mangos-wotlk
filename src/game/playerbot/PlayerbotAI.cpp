@@ -226,7 +226,6 @@ uint32 PlayerbotAI::getSpellId(const char* args, bool master) const
     return foundSpellId;
 }
 
-
 uint32 PlayerbotAI::getPetSpellId(const char* args) const
 {
     if (!*args)
@@ -290,7 +289,6 @@ uint32 PlayerbotAI::getPetSpellId(const char* args) const
     return foundSpellId;
 }
 
-
 uint32 PlayerbotAI::initSpell(uint32 spellId)
 {
     // Check if bot knows this spell
@@ -330,7 +328,6 @@ uint32 PlayerbotAI::initSpell(uint32 spellId)
     }
     return (next == 0) ? spellId : next;
 }
-
 
 // Pet spells do not form chains like player spells.
 // One of the options to initialize a spell is to use spell icon id
@@ -480,7 +477,7 @@ void PlayerbotAI::SendQuestNeedList()
     for (BotNeedItem::iterator itr = m_needItemList.begin(); itr != m_needItemList.end(); ++itr)
     {
         ItemPrototype const* pItemProto = sObjectMgr.GetItemPrototype(itr->first);
-        if(pItemProto)
+        if (pItemProto)
         {
             std::string itemName = pItemProto->Name1;
             ItemLocalization(itemName, pItemProto->ItemId);
@@ -553,13 +550,13 @@ bool PlayerbotAI::IsItemUseful(uint32 itemid)
                 return false;
             else
                 return m_bot->HasSkill(item_weapon_skills[pProto->SubClass]);
-                break;
+            break;
         case ITEM_CLASS_ARMOR:
             if (pProto->SubClass >= MAX_ITEM_SUBCLASS_ARMOR)
                 return false;
             else
-                return (m_bot->HasSkill(item_armor_skills[pProto->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProto->SubClass+1]));
-                break;
+                return (m_bot->HasSkill(item_armor_skills[pProto->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProto->SubClass + 1]));
+            break;
         case ITEM_CLASS_QUEST:
             if (!HasCollectFlag(COLLECT_FLAG_QUEST))
                 break;
@@ -570,7 +567,7 @@ bool PlayerbotAI::IsItemUseful(uint32 itemid)
                  m_bot->HasSkill(SKILL_ENGINEERING) ||
                  m_bot->HasSkill(SKILL_JEWELCRAFTING)))
                 return true;
-                break;
+            break;
         case ITEM_CLASS_TRADE_GOODS:
             if (!HasCollectFlag(COLLECT_FLAG_PROFESSION))
                 break;
@@ -852,8 +849,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             uint8 reason;
             p >> reason;
 
-           switch(reason)
-           {
+            switch (reason)
+            {
                 case PETTAME_INVALIDCREATURE:           // = 1,
                     DEBUG_LOG("Invalid Creature");
                     break;
@@ -893,9 +890,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 case PETTAME_UNKNOWNERROR:              // = 13
                     DEBUG_LOG("Unknown error");
                     break;
-           }
-           return;
-       }
+            }
+            return;
+        }
 
         case SMSG_BUY_FAILED:
         {
@@ -908,7 +905,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             p >> msg; // error msg
             p.resize(13);
 
-            switch(msg)
+            switch (msg)
             {
                 case BUY_ERR_CANT_FIND_ITEM:
                     break;
@@ -1074,18 +1071,18 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         if (!spellInfo)
                             return;
 
-                        switch(spellInfo->RequiresSpellFocus) // SpellFocusObject.dbc id
+                        switch (spellInfo->RequiresSpellFocus) // SpellFocusObject.dbc id
                         {
-                            case 1 : // need an anvil
+                            case 1:  // need an anvil
                                 out << "|cffff0000I require an anvil.";
                                 break;
-                            case 2 : // need a loom
+                            case 2:  // need a loom
                                 out << "|cffff0000I require a loom.";
                                 break;
-                            case 3 : // need forge
+                            case 3:  // need forge
                                 out << "|cffff0000I require a forge.";
                                 break;
-                            case 4 : // need cooking fire
+                            case 4:  // need cooking fire
                                 out << "|cffff0000I require a cooking fire.";
                                 break;
                             default:
@@ -1133,7 +1130,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         break;
                     }
                     default:
-                        DEBUG_LOG ("[%s] SMSG_CAST_FAIL: unknown (%u)",m_bot->GetName(),result);
+                        DEBUG_LOG ("[%s] SMSG_CAST_FAIL: unknown (%u)", m_bot->GetName(), result);
                         return;
                 }
             }
@@ -1386,7 +1383,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 {
                     const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
                     if (pBag)
-                    {
                         // Very cool, but unnecessary
                         //const ItemPrototype* const pBagProto = pBag->GetProto();
                         //std::string bagName = pBagProto->Name1;
@@ -1405,7 +1401,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                                 out.str("");
                             }
                         }
-                    }
                 }
 
                 ChatHandler ch(m_bot->GetTrader());
@@ -1659,7 +1654,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             uint32 vCount = vItems ? vItems->GetItemCount() : 0;
             uint32 tCount = tItems ? tItems->GetItemCount() : 0;
 
-            if (vendorslot >= vCount+tCount)
+            if (vendorslot >= vCount + tCount)
                 return;
 
             VendorItem const* crItem = vendorslot < vCount ? vItems->GetItem(vendorslot) : tItems->GetItem(vendorslot - vCount);
@@ -1691,16 +1686,16 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             p >> totalcount;        // 4 count of items in inventory
 
             ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid);
-            if(pProto)
+            if (pProto)
             {
                 std::ostringstream out;
                 if (received == 1)
                 {
-                    if( created == 1)
+                    if (created == 1)
                         out << "|cff009900" << "I created: |r";
                     else
                         out << "|cff009900" << "I received: |r";
-                    MakeItemLink(pProto,out);
+                    MakeItemLink(pProto, out);
                     TellMaster(out.str().c_str());
                 }
             }
@@ -2401,9 +2396,9 @@ void PlayerbotAI::SetQuestNeedItems()
             QueryResult *result;
             // determine if GOs are needed
             result = WorldDatabase.PQuery("SELECT entry FROM gameobject_template WHERE questitem1='%u' "
-                "OR questitem2='%u' OR questitem3='%u' OR questitem4='%u' OR questitem5='%u' OR questitem6='%u'",
-                qInfo->ReqItemId[i], qInfo->ReqItemId[i], qInfo->ReqItemId[i], qInfo->ReqItemId[i],
-                qInfo->ReqItemId[i], qInfo->ReqItemId[i]);
+                                          "OR questitem2='%u' OR questitem3='%u' OR questitem4='%u' OR questitem5='%u' OR questitem6='%u'",
+                                          qInfo->ReqItemId[i], qInfo->ReqItemId[i], qInfo->ReqItemId[i], qInfo->ReqItemId[i],
+                                          qInfo->ReqItemId[i], qInfo->ReqItemId[i]);
 
             if (result)
             {
@@ -3224,7 +3219,7 @@ void PlayerbotAI::MovementReset()
 
         Player* pTarget;                            // target is player
         if (m_followTarget->GetTypeId() == TYPEID_PLAYER)
-            pTarget = ((Player*) m_followTarget);
+            pTarget = ((Player *) m_followTarget);
 
         if (pTarget)
         {
@@ -3499,7 +3494,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
                 return;
 
             if (m_bot->GetPetGuid() || spell->CheckCast(true) != SPELL_CAST_OK || !pTarget ||
-                pTarget->isDead() || !m_bot->IsInMap(pTarget) || !(((Creature*)pTarget)->GetCreatureInfo()->type_flags & CREATURE_TYPEFLAGS_TAMEABLE))
+                pTarget->isDead() || !m_bot->IsInMap(pTarget) || !(((Creature *) pTarget)->GetCreatureInfo()->type_flags & CREATURE_TYPEFLAGS_TAMEABLE))
             {
                 MovementReset();
                 m_bot->SetSelectionGuid(ObjectGuid());
@@ -3527,13 +3522,13 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             m_targetGuidCommand = ObjectGuid();
         }
 
-        else if ( m_botState == BOTSTATE_ENCHANT)
+        else if (m_botState == BOTSTATE_ENCHANT)
         {
             SetState(BOTSTATE_NORMAL);
             InspectUpdate();
         }
 
-        else if ( m_botState == BOTSTATE_CRAFT)
+        else if (m_botState == BOTSTATE_CRAFT)
         {
             SpellEntry const* spellInfo = sSpellStore.LookupEntry(m_CurrentlyCastingSpellId);
             if (!spellInfo)
@@ -4216,20 +4211,20 @@ bool PlayerbotAI::HasTool(uint32 TC)
             break;
 
         case TC_ETERNIUM_ROD:              //  = 63,
-             if (m_bot->HasItemTotemCategory(TC))
+            if (m_bot->HasItemTotemCategory(TC))
                 return true;
             else
                 out << "|cffff0000I do not have a RUNED ETERNIUM ROD!";
             break;
 
-       case TC_RUNED_AZURITE_ROD:          //  = 101,
+        case TC_RUNED_AZURITE_ROD:         //  = 101,
             if (m_bot->HasItemTotemCategory(TC))
                 return true;
             else
                 out << "|cffff0000I do not have a RUNED AZURITE ROD!";
             break;
 
-       case TC_VIRTUOSO_INKING_SET:        //  = 121,
+        case TC_VIRTUOSO_INKING_SET:       //  = 121,
             if (m_bot->HasItemTotemCategory(TC))
                 return true;
             else
@@ -4329,24 +4324,22 @@ uint32 PlayerbotAI::GetSpellCharges(uint32 spellId)
 
 void PlayerbotAI::ItemCountInInv(uint32 itemid, uint32 &count)
 {
-    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
     {
-        Item *pItem = m_bot->GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        Item *pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
         if (pItem && pItem->GetEntry() == itemid && !pItem->IsInTrade())
             count += pItem->GetCount();
     }
 
-    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
     {
-        if (Bag* pBag = (Bag*)m_bot->GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
-        {
-            for(uint32 j = 0; j < pBag->GetBagSize(); ++j)
+        if (Bag * pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
             {
-                Item* pItem = m_bot->GetItemByPos( i, j );
+                Item* pItem = m_bot->GetItemByPos(i, j);
                 if (pItem && pItem->GetEntry() == itemid && !pItem->IsInTrade())
                     count += pItem->GetCount();
             }
-        }
     }
 }
 
@@ -4395,18 +4388,18 @@ void PlayerbotAI::extractMailIds(const std::string& text, std::list<uint32>& mai
 }
 
 /**
-* Checks whether the TalentSpec database contains any obvious errors
-*
-* return 0  -> all ok
-* return x  -> return the talentspec_id of the first talentspec that errors out
-*/
+ * Checks whether the TalentSpec database contains any obvious errors
+ *
+ * return 0  -> all ok
+ * return x  -> return the talentspec_id of the first talentspec that errors out
+ */
 
 // TODO: the way this is built is just begging for a memory leak (by adding a return case and forgetting to delete result)
 uint32 PlayerbotAI::TalentSpecDBContainsError()
 {
     QueryResult *result = CharacterDatabase.Query("SELECT * FROM playerbot_talentspec ORDER BY class ASC");
 
-    if( !result )
+    if (!result)
     {
         // Do you really need a progress bar? No, but all the other kids jumped off the bridge too...
         BarGoLink bar(1);
@@ -4426,12 +4419,12 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
         bar.step();
 
         /* 0            talentspec_id
-        1            name
-        2            class
-        3            purpose
-        4 to 74        talent_10 to 71
-        75 to 80        major_glyph_15, 30, 80, minor_glyph_15, 50, 70
-        */
+           1            name
+           2            class
+           3            purpose
+           4 to 74        talent_10 to 71
+           75 to 80        major_glyph_15, 30, 80, minor_glyph_15, 50, 70
+         */
         Field* fields = result->Fetch();
 
         uint32 ts_id = fields[0].GetUInt32();
@@ -4440,14 +4433,14 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
 
         std::string ts_name = fields[1].GetCppString();
         /*    Commented out? Because it's only required if you assume only players (not the server) pick talentspecs
-        if (0 == ts_name.size())
-        {
-        TellMaster("TalentSpec ID: %u does not have a name.", ts_id);
+           if (0 == ts_name.size())
+           {
+           TellMaster("TalentSpec ID: %u does not have a name.", ts_id);
 
-        delete result;
-        return ts_id;
-        }
-        */
+           delete result;
+           return ts_id;
+           }
+         */
 
         long ts_class = fields[2].GetInt32();
         if (ts_class != CLASS_DEATH_KNIGHT && ts_class != CLASS_DRUID && ts_class != CLASS_HUNTER && ts_class != CLASS_MAGE && ts_class != CLASS_PALADIN && ts_class != CLASS_PRIEST && ts_class != CLASS_ROGUE && ts_class != CLASS_SHAMAN && ts_class != CLASS_WARLOCK && ts_class != CLASS_WARRIOR &&
@@ -4465,15 +4458,15 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
         // check all talents
         for (uint8 i = 0; i < 71; i++)
         {
-            uint8 fieldLoc = i+4;
+            uint8 fieldLoc = i + 4;
             if (fields[fieldLoc].GetUInt16() == 0)
             {
                 for (uint8 j = (i + 1); j < 71; j++)
                 {
-                    fieldLoc = j+4;
+                    fieldLoc = j + 4;
                     if (fields[fieldLoc].GetUInt16() != 0)
                     {
-                        TellMaster("TalentSpec: %u. \"%s\" contains an empty talent for level: %u while a talent for level: %u exists.", ts_id, ts_name.c_str(), (i+10), (j+10));
+                        TellMaster("TalentSpec: %u. \"%s\" contains an empty talent for level: %u while a talent for level: %u exists.", ts_id, ts_name.c_str(), (i + 10), (j + 10));
 
                         delete result;
                         return ts_id;
@@ -4483,31 +4476,31 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
             }
             else if (!ValidateTalent(fields[fieldLoc].GetUInt16(), ts_class))
             {
-                TellMaster("TalentSpec: %u. \"%s\" (class: %i) contains an invalid talent for level %u: %u", ts_id, ts_name.c_str(), ts_class, (i+10), fields[fieldLoc].GetUInt16());
+                TellMaster("TalentSpec: %u. \"%s\" (class: %i) contains an invalid talent for level %u: %u", ts_id, ts_name.c_str(), ts_class, (i + 10), fields[fieldLoc].GetUInt16());
 
                 delete result;
                 return ts_id;    // invalid talent
             }
         }
 
-        for (uint8 i=75; i < 78; i++)  // as in, the 3 major glyphs
+        for (uint8 i = 75; i < 78; i++)  // as in, the 3 major glyphs
         {
             if (fields[i].GetUInt16() != 0 && !ValidateMajorGlyph(fields[i].GetUInt16(), ts_class))
             {
-                TellMaster("TalentSpec: %u. \"%s\" contains an invalid Major glyph %u: %u", ts_id, ts_name.c_str(), (i-74), fields[i].GetUInt16());
-                if(!ValidateGlyph(fields[i].GetUInt16(), ts_class))
+                TellMaster("TalentSpec: %u. \"%s\" contains an invalid Major glyph %u: %u", ts_id, ts_name.c_str(), (i - 74), fields[i].GetUInt16());
+                if (!ValidateGlyph(fields[i].GetUInt16(), ts_class))
                     TellMaster("In fact, according to our records, it's no glyph at all");
 
                 delete result;
                 return ts_id;
             }
         }
-        for (uint8 i=78; i < 81; i++)  // as in, the 3 minor glyphs
+        for (uint8 i = 78; i < 81; i++)  // as in, the 3 minor glyphs
         {
             if (fields[i].GetUInt16() != 0 && !ValidateMinorGlyph(fields[i].GetUInt16(), ts_class))
             {
-                TellMaster("TalentSpec: %u. \"%s\" contains an invalid Minor glyph %u: %u", ts_id, ts_name.c_str(), (i-77), fields[i].GetUInt16());
-                if(!ValidateGlyph(fields[i].GetUInt16(), ts_class))
+                TellMaster("TalentSpec: %u. \"%s\" contains an invalid Minor glyph %u: %u", ts_id, ts_name.c_str(), (i - 77), fields[i].GetUInt16());
+                if (!ValidateGlyph(fields[i].GetUInt16(), ts_class))
                     TellMaster("In fact, according to our records, it's no glyph at all");
 
                 delete result;
@@ -4524,7 +4517,7 @@ uint32 PlayerbotAI::GetTalentSpecsAmount()
 {
     QueryResult *result = CharacterDatabase.Query("SELECT COUNT(*) FROM playerbot_talentspec");
 
-    if( !result )
+    if (!result)
     {
         sLog.outString();
         sLog.outString(">> Loaded `playerbot_talentspec`, table is empty.");
@@ -4542,9 +4535,9 @@ uint32 PlayerbotAI::GetTalentSpecsAmount()
 
 uint32 PlayerbotAI::GetTalentSpecsAmount(long specClass)
 {
-    QueryResult *result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM playerbot_talentspec WHERE class = '%li'",specClass);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM playerbot_talentspec WHERE class = '%li'", specClass);
 
-    if( !result )
+    if (!result)
     {
         sLog.outString();
         sLog.outString(">> Loaded `playerbot_talentspec`, found no talentspecs for class %li.", specClass);
@@ -4561,10 +4554,10 @@ uint32 PlayerbotAI::GetTalentSpecsAmount(long specClass)
 }
 
 /**
-* GetTalentSpecs queries DB for the talentspecs (for a class), returning them in a list of TS structures
-*
-* *** for the most part, GetTalentSpecs assumes ALL SPECS ARE VALID ***
-*/
+ * GetTalentSpecs queries DB for the talentspecs (for a class), returning them in a list of TS structures
+ *
+ * *** for the most part, GetTalentSpecs assumes ALL SPECS ARE VALID ***
+ */
 std::list<TalentSpec> PlayerbotAI::GetTalentSpecs(long specClass)
 {
     TalentSpec ts;
@@ -4572,7 +4565,7 @@ std::list<TalentSpec> PlayerbotAI::GetTalentSpecs(long specClass)
 
     QueryResult *result = CharacterDatabase.PQuery("SELECT * FROM playerbot_talentspec WHERE class = %li ORDER BY talentspec_id ASC", specClass);
 
-    if( !result )
+    if (!result)
     {
         sLog.outString();
         sLog.outString(">> Loaded `playerbot_talentspec`, found no talentspecs for class %li.", specClass);
@@ -4583,18 +4576,18 @@ std::list<TalentSpec> PlayerbotAI::GetTalentSpecs(long specClass)
     do
     {
         /* 0            talentspec_id
-        1            name
-        2            class
-        3            purpose
-        4 to 74        talent_10 to 71
-        75 to 80        major_glyph_15, 30, 80, minor_glyph_15, 50, 70
-        */
+           1            name
+           2            class
+           3            purpose
+           4 to 74        talent_10 to 71
+           75 to 80        major_glyph_15, 30, 80, minor_glyph_15, 50, 70
+         */
         Field* fields = result->Fetch();
 
         /* ts_id = fields[0].GetUInt32(); // not used
-        if (!ts_id)    // Nice bit of paranoia: ts_id is an AUTO_INCREMENT value
-        continue;  // Of course, if the impossible ever does happen, we can't very well identify a TalentSpec without an ID...
-        */
+           if (!ts_id)    // Nice bit of paranoia: ts_id is an AUTO_INCREMENT value
+           continue;  // Of course, if the impossible ever does happen, we can't very well identify a TalentSpec without an ID...
+         */
 
         ts.specName = fields[1].GetCppString();
         ts.specClass = fields[2].GetInt16();
@@ -4606,21 +4599,21 @@ std::list<TalentSpec> PlayerbotAI::GetTalentSpecs(long specClass)
             continue;    // this spec is clearly broken, the next may or may not be
         }
 
-        ts.specPurpose = (TalentSpecPurpose)fields[3].GetUInt32();
+        ts.specPurpose = (TalentSpecPurpose) fields[3].GetUInt32();
 
         // check all talents
         for (uint8 i = 0; i < 71; i++)
         {
-            ts.talentId[i] = fields[i+4].GetUInt16();
+            ts.talentId[i] = fields[i + 4].GetUInt16();
         }
 
-        for (uint8 i=0; i < 3; i++)  // as in, the 3 major glyphs
+        for (uint8 i = 0; i < 3; i++)  // as in, the 3 major glyphs
         {
-            ts.glyphIdMajor[i] = fields[i+75].GetUInt16();
+            ts.glyphIdMajor[i] = fields[i + 75].GetUInt16();
         }
-        for (uint8 i=0; i < 3; i++)  // as in, the 3 minor glyphs
+        for (uint8 i = 0; i < 3; i++)  // as in, the 3 minor glyphs
         {
-            ts.glyphIdMajor[i] = fields[i+78].GetUInt16();
+            ts.glyphIdMajor[i] = fields[i + 78].GetUInt16();
         }
 
         tsList.push_back(ts);
@@ -4631,11 +4624,11 @@ std::list<TalentSpec> PlayerbotAI::GetTalentSpecs(long specClass)
 }
 
 /**
-* GetTalentSpec queries DB for a talentspec given a class and a choice.
-* The choice applies to the results for that class only, and is volatile.
-*
-* *** for the most part, GetTalentSpec assumes ALL SPECS ARE VALID ***
-*/
+ * GetTalentSpec queries DB for a talentspec given a class and a choice.
+ * The choice applies to the results for that class only, and is volatile.
+ *
+ * *** for the most part, GetTalentSpec assumes ALL SPECS ARE VALID ***
+ */
 TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
 {
     TalentSpec ts;
@@ -4643,16 +4636,16 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
     ts.specName = "";
     ts.specClass = 0;
     ts.specPurpose = TSP_NONE;
-    for (int i=0; i<71; i++) ts.talentId[i] = 0;
-    for (int i=0; i<3; i++) ts.glyphIdMajor[i] = 0;
-    for (int i=0; i<3; i++) ts.glyphIdMinor[i] = 0;
+    for (int i = 0; i < 71; i++) ts.talentId[i] = 0;
+    for (int i = 0; i < 3; i++) ts.glyphIdMajor[i] = 0;
+    for (int i = 0; i < 3; i++) ts.glyphIdMinor[i] = 0;
 
     // Weed out invalid choice - ts has been zero'd out anyway
-    if (0 >= choice || (long)GetTalentSpecsAmount(specClass) < choice) return ts;
+    if (0 >= choice || (long) GetTalentSpecsAmount(specClass) < choice) return ts;
 
     QueryResult *result = CharacterDatabase.PQuery("SELECT * FROM playerbot_talentspec WHERE class = %li ORDER BY talentspec_id ASC", specClass);
 
-    if( !result )
+    if (!result)
     {
         sLog.outString();
         sLog.outString(">> Loaded `playerbot_talentspec`, found no talentspecs for class %li.", specClass);
@@ -4661,25 +4654,25 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
         return ts; // empty
     }
 
-    for (int i=1; i<=(int)GetTalentSpecsAmount(specClass); i++)
+    for (int i = 1; i <= (int) GetTalentSpecsAmount(specClass); i++)
     {
 
         if (i == choice)
         {
             /*
-            0            talentspec_id
-            1            name
-            2            class
-            3            purpose
-            4 to 74    talent_10 to 71
-            75 to 80    major_glyph_15, 30, 80, minor_glyph_15, 50, 70
-            */
+               0            talentspec_id
+               1            name
+               2            class
+               3            purpose
+               4 to 74    talent_10 to 71
+               75 to 80    major_glyph_15, 30, 80, minor_glyph_15, 50, 70
+             */
             Field* fields = result->Fetch();
 
             /* ts_id = fields[0].GetUInt32(); // not used
-            if (!ts_id)    // Nice bit of paranoia: ts_id is an AUTO_INCREMENT value
-            continue;  // Of course, if the impossible ever does happen, we can't very well identify a TalentSpec without an ID...
-            */
+               if (!ts_id)    // Nice bit of paranoia: ts_id is an AUTO_INCREMENT value
+               continue;  // Of course, if the impossible ever does happen, we can't very well identify a TalentSpec without an ID...
+             */
 
             ts.specName = fields[1].GetCppString();
             ts.specClass = fields[2].GetInt16();
@@ -4694,21 +4687,21 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
                 return ts;
             }
 
-            ts.specPurpose = (TalentSpecPurpose)fields[3].GetUInt32();
+            ts.specPurpose = (TalentSpecPurpose) fields[3].GetUInt32();
 
             // check all talents
             for (uint8 i = 0; i < 71; i++)
             {
-                ts.talentId[i] = fields[i+4].GetUInt16();
+                ts.talentId[i] = fields[i + 4].GetUInt16();
             }
 
-            for (uint8 i=0; i < 3; i++)  // as in, the 3 major glyphs
+            for (uint8 i = 0; i < 3; i++)  // as in, the 3 major glyphs
             {
-                ts.glyphIdMajor[i] = fields[i+75].GetUInt16();
+                ts.glyphIdMajor[i] = fields[i + 75].GetUInt16();
             }
-            for (uint8 i=0; i < 3; i++)  // as in, the 3 minor glyphs
+            for (uint8 i = 0; i < 3; i++)  // as in, the 3 minor glyphs
             {
-                ts.glyphIdMajor[i] = fields[i+78].GetUInt16();
+                ts.glyphIdMajor[i] = fields[i + 78].GetUInt16();
             }
 
             delete result;
@@ -4724,11 +4717,11 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
 }
 
 /**
-* ApplyActiveTalentSpec takes the active talent spec and attempts to apply it
-*
-* return true  -> ok, talentspec applied as fully as possible
-* return false -> talentspec was not or only partially applied
-*/
+ * ApplyActiveTalentSpec takes the active talent spec and attempts to apply it
+ *
+ * return true  -> ok, talentspec applied as fully as possible
+ * return false -> talentspec was not or only partially applied
+ */
 bool PlayerbotAI::ApplyActiveTalentSpec()
 {
     // empty talent spec -> nothing to apply -> fully applied
@@ -4741,7 +4734,7 @@ bool PlayerbotAI::ApplyActiveTalentSpec()
 
     std::vector<uint16> talentsToLearn;
     talentsToLearn.reserve(71);
-    for (int i=0; i<71; i++)
+    for (int i = 0; i < 71; i++)
     {
         if (m_activeTalentSpec.talentId[i] != 0)
             talentsToLearn.push_back(m_activeTalentSpec.talentId[i]);
@@ -4758,7 +4751,7 @@ bool PlayerbotAI::ApplyActiveTalentSpec()
             continue;
 
         // currentRank = 0 to (MAX_RANK-1) not 1 to MAX_RANK
-        for (int i=0; i<=(int)talent.currentRank; i++)
+        for (int i = 0; i <= (int) talent.currentRank; i++)
         {
             int j = 0; // why 0 and not -1? Because if talentsToCheck (no TalentSpec) is empty and talents have been learned -> NOK
             for (std::vector<uint16>::iterator it = talentsToLearn.begin(); it != talentsToLearn.end(); it++)
@@ -4811,14 +4804,14 @@ bool PlayerbotAI::ApplyActiveTalentSpec()
 }
 
 /**
-* ValidateTalent tests a talent against class to see if it belongs to that class
-*
-* uint16 talent:        talent ID
-* long charClass:    member of the Classes enum or ClassesCombatPets enum
-*
-* return true  -> ok
-* return false -> not a valid talent for that class
-*/
+ * ValidateTalent tests a talent against class to see if it belongs to that class
+ *
+ * uint16 talent:        talent ID
+ * long charClass:    member of the Classes enum or ClassesCombatPets enum
+ *
+ * return true  -> ok
+ * return false -> not a valid talent for that class
+ */
 bool PlayerbotAI::ValidateTalent(uint16 talent, long charClass)
 {
     if (charClass == CLASS_DEATH_KNIGHT)
@@ -4889,7 +4882,7 @@ bool PlayerbotAI::ValidateTalent(uint16 talent, long charClass)
     }
     else // charClass unknown
     {
-        DEBUG_LOG ("[PlayerbotAI]: Someone was naughty and supplied an invalid class to ValidateTalent: %u", (uint32)charClass);
+        DEBUG_LOG ("[PlayerbotAI]: Someone was naughty and supplied an invalid class to ValidateTalent: %u", (uint32) charClass);
         return false;
     }
 
@@ -4897,14 +4890,14 @@ bool PlayerbotAI::ValidateTalent(uint16 talent, long charClass)
 }
 
 /**
-* ValidateGlyph tests a glyph against class to see if it belongs to that class - accepts both Major and Minor glyphs
-*
-* uint16 glyph:        glyph ID
-* long charClass:    member of the Classes enum or ClassesCombatPets enum
-*
-* return true  -> ok
-* return false -> not a valid glyph for that class
-*/
+ * ValidateGlyph tests a glyph against class to see if it belongs to that class - accepts both Major and Minor glyphs
+ *
+ * uint16 glyph:        glyph ID
+ * long charClass:    member of the Classes enum or ClassesCombatPets enum
+ *
+ * return true  -> ok
+ * return false -> not a valid glyph for that class
+ */
 bool PlayerbotAI::ValidateGlyph(uint16 glyph, long charClass)
 {
     // XOR the two helper functions. Both true (supposedly impossible) or both false -> false
@@ -4912,14 +4905,14 @@ bool PlayerbotAI::ValidateGlyph(uint16 glyph, long charClass)
 }
 
 /**
-* ValidateMajorGlyph tests a glyph against class to see if it belongs to that class - only accepts Major glyphs
-*
-* uint16 glyph:        glyph ID
-* long charClass:    member of the Classes enum or ClassesCombatPets enum
-*
-* return true  -> ok
-* return false -> not a valid major glyph for that class
-*/
+ * ValidateMajorGlyph tests a glyph against class to see if it belongs to that class - only accepts Major glyphs
+ *
+ * uint16 glyph:        glyph ID
+ * long charClass:    member of the Classes enum or ClassesCombatPets enum
+ *
+ * return true  -> ok
+ * return false -> not a valid major glyph for that class
+ */
 bool PlayerbotAI::ValidateMajorGlyph(uint16 glyph, long charClass)
 {
     if (charClass == CLASS_DEATH_KNIGHT)
@@ -4976,12 +4969,12 @@ bool PlayerbotAI::ValidateMajorGlyph(uint16 glyph, long charClass)
     // pets don't have glyphs... yet
     else if (charClass == CLASS_PET_CUNNING || charClass == CLASS_PET_FEROCITY || charClass == CLASS_PET_TENACITY)
     {
-        DEBUG_LOG ("[PlayerbotAI]: Someone tried to validate a glyph for a pet... ValidateMajorGlyph: %u", (uint32)charClass);
+        DEBUG_LOG ("[PlayerbotAI]: Someone tried to validate a glyph for a pet... ValidateMajorGlyph: %u", (uint32) charClass);
         return false;
     }
     else // charClass unknown
     {
-        DEBUG_LOG ("[PlayerbotAI]: Someone was naughty and supplied an invalid class to ValidateMajorGlyph: %u", (uint32)charClass);
+        DEBUG_LOG ("[PlayerbotAI]: Someone was naughty and supplied an invalid class to ValidateMajorGlyph: %u", (uint32) charClass);
         return false;
     }
 
@@ -4989,14 +4982,14 @@ bool PlayerbotAI::ValidateMajorGlyph(uint16 glyph, long charClass)
 }
 
 /**
-* ValidateMinorGlyph tests a glyph against class to see if it belongs to that class - only accepts Minor glyphs
-*
-* uint16 glyph:        glyph ID
-* long charClass:    member of the Classes enum or ClassesCombatPets enum
-*
-* return true  -> ok
-* return false -> not a valid minor glyph for that class
-*/
+ * ValidateMinorGlyph tests a glyph against class to see if it belongs to that class - only accepts Minor glyphs
+ *
+ * uint16 glyph:        glyph ID
+ * long charClass:    member of the Classes enum or ClassesCombatPets enum
+ *
+ * return true  -> ok
+ * return false -> not a valid minor glyph for that class
+ */
 bool PlayerbotAI::ValidateMinorGlyph(uint16 glyph, long charClass)
 {
     if (charClass == CLASS_DEATH_KNIGHT)
@@ -5053,12 +5046,12 @@ bool PlayerbotAI::ValidateMinorGlyph(uint16 glyph, long charClass)
     // pets don't have glyphs... yet
     else if (charClass == CLASS_PET_CUNNING || charClass == CLASS_PET_FEROCITY || charClass == CLASS_PET_TENACITY)
     {
-        DEBUG_LOG ("[PlayerbotAI]: Someone tried to validate a glyph for a pet... ValidateMinorGlyph: %u", (uint32)charClass);
+        DEBUG_LOG ("[PlayerbotAI]: Someone tried to validate a glyph for a pet... ValidateMinorGlyph: %u", (uint32) charClass);
         return false;
     }
     else // charClass unknown
     {
-        DEBUG_LOG ("[PlayerbotAI]: Someone was naughty and supplied an invalid class to ValidateMinorGlyph: %u", (uint32)charClass);
+        DEBUG_LOG ("[PlayerbotAI]: Someone was naughty and supplied an invalid class to ValidateMinorGlyph: %u", (uint32) charClass);
         return false;
     }
 
@@ -5095,7 +5088,7 @@ void PlayerbotAI::MakeWeaponSkillLink(const SpellEntry *sInfo, std::ostringstrea
 // Build an hlink for spells in White
 void PlayerbotAI::MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out)
 {
-    int    loc = GetMaster()->GetSession()->GetSessionDbcLocale();
+    int loc = GetMaster()->GetSession()->GetSessionDbcLocale();
     out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[loc] << "]|h|r";
 }
 
@@ -5748,9 +5741,9 @@ void PlayerbotAI::findNearbyCreature()
 }
 
 /**
-* GiveLevel sets the bot's level to 'level'
-* Not the clearest of function names, we're just mirroring Player.cpp's function name
-*/
+ * GiveLevel sets the bot's level to 'level'
+ * Not the clearest of function names, we're just mirroring Player.cpp's function name
+ */
 void PlayerbotAI::GiveLevel(uint32 level)
 {
     // Talent function in Player::GetLevel take care of resetting talents in case level < getLevel()
@@ -6341,20 +6334,20 @@ std::string PlayerbotAI::AuctionResult(std::string subject, std::string body)
     if (body.size() > 0)
     {
         pos = body.find_first_not_of(" ");
-        subject.append(body,pos,body.size()-pos);
+        subject.append(body, pos, body.size() - pos);
         subject.append(":");
     }
 
-    DEBUG_LOG("Auctions string (%s)",subject.c_str());
+    DEBUG_LOG("Auctions string (%s)", subject.c_str());
     pos = 0;
-    int sublen = subject.size()/2;
+    int sublen = subject.size() / 2;
     uint32 a_info[15];
-    for(int i=0;i < sublen;i++)
+    for (int i = 0; i < sublen; i++)
     {
-        int endpos = subject.find(':',pos);
-        std::string idc = subject.substr(pos,endpos - pos);
+        int endpos = subject.find(':', pos);
+        std::string idc = subject.substr(pos, endpos - pos);
         a_info[i] = atol(idc.c_str());
-        DEBUG_LOG("a_info[%d] = (%u)",i,a_info[i]);
+        DEBUG_LOG("a_info[%d] = (%u)", i, a_info[i]);
         pos = endpos + 1;
     }
 
@@ -6367,7 +6360,7 @@ std::string PlayerbotAI::AuctionResult(std::string subject, std::string body)
     if (!pProto)
         return out.str();
 
-    switch(a_info[2])
+    switch (a_info[2])
     {
         case AUCTION_OUTBIDDED:           //= 0,
             out << "Subject: Outbid on: " << pProto->Name1;
@@ -6612,13 +6605,13 @@ void PlayerbotAI::Buy(ObjectGuid vendorguid, const uint32 itemid)
     uint8 customitems = vItems ? vItems->GetItemCount() : 0;
     uint8 numitems = customitems + (tItems ? tItems->GetItemCount() : 0);
 
-    for(uint8 vendorslot = 0; vendorslot < numitems; ++vendorslot )
+    for (uint8 vendorslot = 0; vendorslot < numitems; ++vendorslot)
     {
         VendorItem const* crItem = vendorslot < customitems ? vItems->GetItem(vendorslot) : tItems->GetItem(vendorslot - customitems);
 
         if (crItem)
         {
-        if (itemid != crItem->item)
+            if (itemid != crItem->item)
                 continue;
 
             ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid);
@@ -6640,15 +6633,11 @@ void PlayerbotAI::Buy(ObjectGuid vendorguid, const uint32 itemid)
 
                 // possible item coverting for BoA case
                 if (pProto->Flags & ITEM_FLAG_BOA)
-                {
                     // convert if can use and then buy
                     if (pProto->RequiredReputationFaction && uint32(m_bot->GetReputationRank(pProto->RequiredReputationFaction)) >= pProto->RequiredReputationRank)
-                    {
                         // checked at convert data loading as existed
                         if (uint32 newItemId = sObjectMgr.GetItemConvert(itemid, m_bot->getRaceMask()))
                             pProto = ObjectMgr::GetItemPrototype(newItemId);
-                    }
-                }
                 m_bot->BuyItemFromVendorSlot(vendorguid, vendorslot, itemid, 1, NULL_BAG, NULL_SLOT);
                 return;
             }
@@ -6698,7 +6687,6 @@ void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bV
         std::ostringstream goods;
         const Bag* const pBag = static_cast<Bag *>(m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag));
         if (pBag)
-        {
             // Very nice, but who cares what bag it's in?
             //const ItemPrototype* const pBagProto = pBag->GetProto();
             //std::string bagName = pBagProto->Name1;
@@ -6711,11 +6699,10 @@ void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bV
                 if (item)
                     _doSellItem(item, report, goods, SoldCost, SoldQuantity);
             }
-        }
     }
 
     if (!bDetailTrashSold)
-        report.str(""); // clear ostringstream
+        report.str("");  // clear ostringstream
 
     if (SoldCost > 0)
     {
@@ -6740,9 +6727,7 @@ void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bV
                 TellMaster("I could sell: %s", goods.str().c_str());
         }
         else if (SoldQuantity == 0 && goods.str().size() == 0)
-        {
             TellMaster("No items to sell, trash or otherwise.");
-        }
     }
 }
 
@@ -7012,14 +6997,14 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 }
 
 /**
-* ExtractCommand looks for a command in a text string
-* sLookingFor       - string you're looking for (e.g. "help")
-* text              - string which may or may not start with sLookingFor
-* bUseShort         - does this command accept the shorthand command? If true, "help" would ALSO look for "h"
-*
-* returns true if the string has been found
-* returns false if the string has not been found
-*/
+ * ExtractCommand looks for a command in a text string
+ * sLookingFor       - string you're looking for (e.g. "help")
+ * text              - string which may or may not start with sLookingFor
+ * bUseShort         - does this command accept the shorthand command? If true, "help" would ALSO look for "h"
+ *
+ * returns true if the string has been found
+ * returns false if the string has not been found
+ */
 bool PlayerbotAI::ExtractCommand(const std::string sLookingFor, std::string &text, bool bUseShort)
 {
     // ("help" + " ") < "help X"  AND  text's start (as big as sLookingFor) == sLookingFor
@@ -7028,7 +7013,7 @@ bool PlayerbotAI::ExtractCommand(const std::string sLookingFor, std::string &tex
     if (sLookingFor.size() + 1 < text.size() && text.at(sLookingFor.size()) == ' '
         && 0 == text.substr(0, sLookingFor.size()).compare(sLookingFor))
     {
-        text = text.substr(sLookingFor.size()+1);
+        text = text.substr(sLookingFor.size() + 1);
         return true;
     }
 
@@ -7045,7 +7030,7 @@ bool PlayerbotAI::ExtractCommand(const std::string sLookingFor, std::string &tex
             text = text.substr(2);
             return true;
         }
-        else if(text.size() == 1 && sLookingFor.at(0) == text.at(0))
+        else if (text.size() == 1 && sLookingFor.at(0) == text.at(0))
         {
             text = "";
             return true;
@@ -7173,15 +7158,15 @@ void PlayerbotAI::_HandleCommandSell(std::string &text, Player &fromPlayer)
     }
 
     enum NPCFlags VENDOR_MASK = (enum NPCFlags) (UNIT_NPC_FLAG_VENDOR
-                                                    | UNIT_NPC_FLAG_VENDOR_AMMO
-                                                    | UNIT_NPC_FLAG_VENDOR_FOOD
-                                                    | UNIT_NPC_FLAG_VENDOR_POISON
-                                                    | UNIT_NPC_FLAG_VENDOR_REAGENT);
+                                                 | UNIT_NPC_FLAG_VENDOR_AMMO
+                                                 | UNIT_NPC_FLAG_VENDOR_FOOD
+                                                 | UNIT_NPC_FLAG_VENDOR_POISON
+                                                 | UNIT_NPC_FLAG_VENDOR_REAGENT);
 
     std::list<uint32> itemIds;
     extractItemIds(text, itemIds);
     for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-        m_tasks.push_back(std::pair<enum TaskFlags,uint32>(SELL_ITEMS, *it));
+        m_tasks.push_back(std::pair<enum TaskFlags, uint32>(SELL_ITEMS, *it));
     m_findNPC.push_back(VENDOR_MASK);
 }
 
@@ -7206,7 +7191,7 @@ void PlayerbotAI::_HandleCommandBuy(std::string &text, Player &fromPlayer)
     std::list<uint32> itemIds;
     extractItemIds(text, itemIds);
     for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-       Buy(vendorguid, *it);
+        Buy(vendorguid, *it);
 }
 
 // _HandleCommandDrop: Handle dropping items
@@ -7248,7 +7233,7 @@ void PlayerbotAI::_HandleCommandRepair(std::string &text, Player &fromPlayer)
             SendWhisper("Invalid subcommand for 'repair all'", fromPlayer);
             return;
         }
-        m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR_ITEMS, 0));
+        m_tasks.push_back(std::pair<enum TaskFlags, uint32>(REPAIR_ITEMS, 0));
         m_findNPC.push_back(UNIT_NPC_FLAG_REPAIR);
         return;
     }
@@ -7258,7 +7243,7 @@ void PlayerbotAI::_HandleCommandRepair(std::string &text, Player &fromPlayer)
 
     for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); it++)
     {
-        m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REPAIR_ITEMS, *it));
+        m_tasks.push_back(std::pair<enum TaskFlags, uint32>(REPAIR_ITEMS, *it));
         m_findNPC.push_back(UNIT_NPC_FLAG_REPAIR);
     }
 }
@@ -7270,29 +7255,25 @@ void PlayerbotAI::_HandleCommandRepair(std::string &text, Player &fromPlayer)
 void PlayerbotAI::_HandleCommandAuction(std::string &text, Player &fromPlayer)
 {
     if (text == "")
-    {
         m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER); // list all bot auctions
-    }
-    else if (ExtractCommand("add",text))
+    else if (ExtractCommand("add", text))
     {
         std::list<uint32> itemIds;
         extractItemIds(text, itemIds);
         for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(ADD_AUCTION, *it));
+            m_tasks.push_back(std::pair<enum TaskFlags, uint32>(ADD_AUCTION, *it));
         m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
     }
-    else if (ExtractCommand("remove",text))
+    else if (ExtractCommand("remove", text))
     {
         std::list<uint32> auctionIds;
         extractAuctionIds(text, auctionIds);
         for (std::list<uint32>::iterator it = auctionIds.begin(); it != auctionIds.end(); ++it)
-            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(REMOVE_AUCTION, *it));
+            m_tasks.push_back(std::pair<enum TaskFlags, uint32>(REMOVE_AUCTION, *it));
         m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);
     }
     else
-    {
         SendWhisper("I don't understand what you're trying to do", fromPlayer);
-    }
 }
 
 void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
@@ -7304,15 +7285,15 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
         ch.SendSysMessage("Syntax: mail <inbox [Mailbox] | getcash [mailid].. | getitem [mailid].. | delete [mailid]..>");
         return;
     }
-    else if (ExtractCommand("inbox",text))
+    else if (ExtractCommand("inbox", text))
     {
         uint32 mail_count = 0;
         extractGOinfo(text, m_lootTargets);
 
         if (m_lootTargets.empty())
         {
-           ch.SendSysMessage("Syntax: mail <inbox [Mailbox]>");
-           return;
+            ch.SendSysMessage("Syntax: mail <inbox [Mailbox]>");
+            return;
         }
 
         ObjectGuid m_mailboxGuid = m_lootTargets.front();
@@ -7327,14 +7308,14 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
 
         TellMaster("Inbox:\n");
 
-	for(PlayerMails::reverse_iterator itr = m_bot->GetMailRBegin(); itr != m_bot->GetMailREnd(); ++itr)
+        for (PlayerMails::reverse_iterator itr = m_bot->GetMailRBegin(); itr != m_bot->GetMailREnd(); ++itr)
         {
             std::ostringstream msg;
             ++mail_count;
 
-            msg  << "|cffffcccc|Hmail:" << (*itr)->messageID << "|h[" << (*itr)->messageID << "]|h|r ";
+            msg << "|cffffcccc|Hmail:" << (*itr)->messageID << "|h[" << (*itr)->messageID << "]|h|r ";
 
-            switch((*itr)->messageType)
+            switch ((*itr)->messageType)
             {
                 case MAIL_NORMAL:
                 {
@@ -7355,7 +7336,7 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
                 case MAIL_AUCTION:
                 {
                     msg << "|cffccffff"; // blue
-                    msg << AuctionResult((*itr)->subject,(*itr)->body) << "\n";
+                    msg << AuctionResult((*itr)->subject, (*itr)->body) << "\n";
                     break;
                 }
                 case MAIL_ITEM:
@@ -7370,7 +7351,7 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
             if (item_count > 0)
             {
                 msg << "Items: ";
-                for(uint8 i = 0; i < item_count; ++i)
+                for (uint8 i = 0; i < item_count; ++i)
                 {
                     Item *item = m_bot->GetMItem((*itr)->items[i].item_guid);
                     if (item)
@@ -7384,23 +7365,23 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
         if (mail_count == 0)
             ch.SendSysMessage("|cff009900My inbox is empty.");
     }
-    else if (ExtractCommand("getcash",text))
+    else if (ExtractCommand("getcash", text))
     {
         std::ostringstream msg;
         std::list<uint32> mailIds;
-        extractMailIds(text,mailIds);
+        extractMailIds(text, mailIds);
         uint32 total = 0;
 
         if (mailIds.empty())
         {
-           ch.SendSysMessage("Syntax: mail <getcash [mailId]..>");
-           return;
+            ch.SendSysMessage("Syntax: mail <getcash [mailId]..>");
+            return;
         }
 
         for (std::list<uint32>::iterator it = mailIds.begin(); it != mailIds.end(); ++it)
         {
             Mail* m = m_bot->GetMail(*it);
-            if(!m || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
+            if (!m || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
             {
                 m_bot->SendMailResult(*it, MAIL_MONEY_TAKEN, MAIL_ERR_INTERNAL_ERROR);
                 return;
@@ -7420,10 +7401,10 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
             ch.SendSysMessage(msg.str().c_str());
         }
     }
-    else if (ExtractCommand("getitem",text))
+    else if (ExtractCommand("getitem", text))
     {
         std::list<uint32> mailIds;
-        extractMailIds(text,mailIds);
+        extractMailIds(text, mailIds);
 
         if (mailIds.empty())
         {
@@ -7434,14 +7415,14 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
         for (std::list<uint32>::iterator it = mailIds.begin(); it != mailIds.end(); it++)
         {
             Mail* m = m_bot->GetMail(*it);
-            if(!m || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
+            if (!m || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
             {
                 m_bot->SendMailResult(*it, MAIL_ITEM_TAKEN, MAIL_ERR_INTERNAL_ERROR);
                 return;
             }
 
             // prevent cheating with skip client money check
-            if(m_bot->GetMoney() < m->COD)
+            if (m_bot->GetMoney() < m->COD)
             {
                 m_bot->SendMailResult(*it, MAIL_ITEM_TAKEN, MAIL_ERR_NOT_ENOUGH_MONEY);
                 return;
@@ -7453,7 +7434,7 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
                 std::ostringstream msg;
 
                 msg << "|cff009900" << "I received item: |r";
-                for(MailItemInfoVec::const_iterator itr = m->items.begin(); itr != m->items.end();)
+                for (MailItemInfoVec::const_iterator itr = m->items.begin(); itr != m->items.end(); )
                 {
                     has_items = true;
                     Item *item = m_bot->GetMItem(itr->item_guid);
@@ -7465,7 +7446,7 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
 
                     ItemPosCountVec dest;
 
-                    InventoryResult res = m_bot->CanStoreItem( NULL_BAG, NULL_SLOT, dest, item, false );
+                    InventoryResult res = m_bot->CanStoreItem(NULL_BAG, NULL_SLOT, dest, item, false);
                     if (res == EQUIP_ERR_OK)
                     {
                         m->removedItems.push_back(itr->item_guid);
@@ -7477,10 +7458,10 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
 
                             uint32 sender_accId = 0;
 
-                            if( GetMaster()->GetSession()->GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_BOOL_GM_LOG_TRADE) )
+                            if (GetMaster()->GetSession()->GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_BOOL_GM_LOG_TRADE))
                             {
                                 std::string sender_name;
-                                if(sender)
+                                if (sender)
                                 {
                                     sender_accId = sender->GetSession()->GetAccountId();
                                     sender_name = sender->GetName();
@@ -7490,24 +7471,22 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
                                     // can be calculated early
                                     sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
 
-                                    if(!sObjectMgr.GetPlayerNameByGUID(sender_guid, sender_name))
+                                    if (!sObjectMgr.GetPlayerNameByGUID(sender_guid, sender_name))
                                         sender_name = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
                                 }
                                 sLog.outCommand(GetMaster()->GetSession()->GetAccountId(), "GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
-                                GetMaster()->GetSession()->GetPlayerName(), GetMaster()->GetSession()->GetAccountId(), item->GetProto()->Name1, item->GetEntry(), item->GetCount(), m->COD, sender_name.c_str(), sender_accId);
+                                                GetMaster()->GetSession()->GetPlayerName(), GetMaster()->GetSession()->GetAccountId(), item->GetProto()->Name1, item->GetEntry(), item->GetCount(), m->COD, sender_name.c_str(), sender_accId);
                             }
                             else if (!sender)
                                 sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
 
                             // check player existence
-                            if(sender || sender_accId)
-                            {
+                            if (sender || sender_accId)
                                 MailDraft(m->subject, "")
                                 .SetMoney(m->COD)
                                 .SendMailTo(MailReceiver(sender, sender_guid), m_bot, MAIL_CHECK_MASK_COD_PAYMENT);
-                            }
 
-                            m_bot->ModifyMoney( -int32(m->COD) );
+                            m_bot->ModifyMoney(-int32(m->COD));
                         }
                         m->COD = 0;
                         m->state = MAIL_STATE_CHANGED;
@@ -7520,7 +7499,7 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
                         m_bot->SendMailResult(*it, MAIL_ITEM_TAKEN, MAIL_OK, 0, itr->item_guid, count);
                         if (m->RemoveItem(itr->item_guid))
                         {
-                            MakeItemLink(item,msg,true);
+                            MakeItemLink(item, msg, true);
                             has_items = false;
                         }
                     }
@@ -7539,11 +7518,11 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
             }
         }
     }
-    else if (ExtractCommand("delete",text))
+    else if (ExtractCommand("delete", text))
     {
         std::ostringstream msg;
         std::list<uint32> mailIds;
-        extractMailIds(text,mailIds);
+        extractMailIds(text, mailIds);
 
         if (mailIds.empty())
         {
@@ -7556,7 +7535,7 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
         {
             m_bot->m_mailsUpdated = true;
 
-            if (Mail *m = m_bot->GetMail(*it))
+            if (Mail * m = m_bot->GetMail(*it))
             {
                 // delete shouldn't show up for COD mails
                 if (m->COD)
@@ -7587,15 +7566,13 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
 void PlayerbotAI::_HandleCommandBank(std::string &text, Player &fromPlayer)
 {
     if (text == "")
-    {
         m_findNPC.push_back(UNIT_NPC_FLAG_BANKER); // list all bot balance
-    }
     else if (ExtractCommand("deposit", text))
     {
         std::list<uint32> itemIds;
         extractItemIds(text, itemIds);
         for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(BANK_DEPOSIT, *it));
+            m_tasks.push_back(std::pair<enum TaskFlags, uint32>(BANK_DEPOSIT, *it));
         m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
     }
     else if (ExtractCommand("withdraw", text))
@@ -7603,13 +7580,11 @@ void PlayerbotAI::_HandleCommandBank(std::string &text, Player &fromPlayer)
         std::list<uint32> itemIds;
         extractItemIds(text, itemIds);
         for (std::list<uint32>::iterator it = itemIds.begin(); it != itemIds.end(); ++it)
-            m_tasks.push_back(std::pair<enum TaskFlags,uint32>(BANK_WITHDRAW, *it));
+            m_tasks.push_back(std::pair<enum TaskFlags, uint32>(BANK_WITHDRAW, *it));
         m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);
     }
     else
-    {
         SendWhisper("I don't understand what you're trying to do", fromPlayer);
-    }
 }
 
 // _HandleCommandTalent: Handle talents & glyphs:
@@ -7639,7 +7614,7 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
             InspectUpdate();
         }
 
-                m_bot->MakeTalentGlyphLink(out);
+        m_bot->MakeTalentGlyphLink(out);
         SendWhisper(out.str(), fromPlayer);
     }
     else if (ExtractCommand("reset", text))
@@ -7656,7 +7631,7 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
         }
         if (text.size() == 0) // no spec chosen nor other subcommand
         {
-            std::list<TalentSpec> classSpecs = GetTalentSpecs((long)m_bot->getClass());
+            std::list<TalentSpec> classSpecs = GetTalentSpecs((long) m_bot->getClass());
             std::list<TalentSpec>::iterator it;
             int count = 0;
 
@@ -7678,7 +7653,7 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
         }
         else
         {
-            uint32 chosenSpec = strtoul(text.c_str(),NULL,0); // non-int returns 0; too big returns UINT MAX (or somesuch)
+            uint32 chosenSpec = strtoul(text.c_str(), NULL, 0); // non-int returns 0; too big returns UINT MAX (or somesuch)
 
             // Warning: also catches non-int sub2command's - e.g. 'talent spec foobar'
             if (0 == chosenSpec)
@@ -7686,13 +7661,11 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
                 ClearActiveTalentSpec();
                 SendWhisper("The talent spec has been cleared.", fromPlayer);
             }
-            else if (chosenSpec > GetTalentSpecsAmount((long)m_bot->getClass()))
-            {
+            else if (chosenSpec > GetTalentSpecsAmount((long) m_bot->getClass()))
                 SendWhisper("The talent spec you have chosen is invalid. Please select one from the valid range (reply 'talent spec' for options).", fromPlayer);
-            }
             else
             {
-                TalentSpec ts = GetTalentSpec((long)m_bot->getClass(), chosenSpec);
+                TalentSpec ts = GetTalentSpec((long) m_bot->getClass(), chosenSpec);
 
                 // no use setting it to an invalid (and probably - hopefully - empty) TalentSpec
                 if (0 != ts.specClass && TSP_NONE != ts.specPurpose)
@@ -7701,16 +7674,14 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
                     SendWhisper(out.str(), fromPlayer);
                     SetActiveTalentSpec(ts);
                     if (!ApplyActiveTalentSpec())
-                    {
                         SendWhisper("The talent spec has been set active but could not be applied. It appears something has gone awry.", fromPlayer);
                         //DEBUG_LOG ("[PlayerbotAI]: Could set TalentSpec but could not apply it - 'talent spec #': Class: %li; chosenSpec: %u", (long)m_bot->getClass(), chosenSpec);
-                    }
                     InspectUpdate();
                 }
                 else
                 {
                     SendWhisper("An error has occured. Please let a Game Master know. This error has been logged.", fromPlayer);
-                    DEBUG_LOG ("[PlayerbotAI]: Could not GetTalentSpec to set & apply - 'talent spec #': Class: %li; chosenSpec: %u", (long)m_bot->getClass(), chosenSpec);
+                    DEBUG_LOG ("[PlayerbotAI]: Could not GetTalentSpec to set & apply - 'talent spec #': Class: %li; chosenSpec: %u", (long) m_bot->getClass(), chosenSpec);
                 }
             }
         }
@@ -7735,9 +7706,7 @@ void PlayerbotAI::_HandleCommandProcess(std::string &text, Player &fromPlayer)
     if (ExtractCommand("disenchant", text, true)) // true -> "process disenchant" OR "process d"
     {
         if (m_bot->HasSkill(SKILL_ENCHANTING))
-        {
             spellId = DISENCHANTING_1;
-        }
         else
         {
             SendWhisper("|cffff0000I can't disenchant, I don't have the skill.", fromPlayer);
@@ -7747,9 +7716,7 @@ void PlayerbotAI::_HandleCommandProcess(std::string &text, Player &fromPlayer)
     else if (ExtractCommand("mill", text, true)) // true -> "process mill" OR "process m"
     {
         if (m_bot->HasSkill(SKILL_INSCRIPTION))
-        {
             spellId = MILLING_1;
-        }
         else
         {
             SendWhisper("|cffff0000I can't mill, I don't have the skill.", fromPlayer);
@@ -7759,9 +7726,7 @@ void PlayerbotAI::_HandleCommandProcess(std::string &text, Player &fromPlayer)
     else if (ExtractCommand("prospect", text, true)) // true -> "process prospect" OR "process p"
     {
         if (m_bot->HasSkill(SKILL_JEWELCRAFTING) && m_bot->GetPureSkillValue(SKILL_JEWELCRAFTING) >= 20)
-        {
             spellId = PROSPECTING_1;
-        }
         else
         {
             SendWhisper("|cffff0000I can't prospect, I don't have the skill.", fromPlayer);
@@ -7776,7 +7741,7 @@ void PlayerbotAI::_HandleCommandProcess(std::string &text, Player &fromPlayer)
     extractItemIds(text, itemIds);
     findItemsInInv(itemIds, itemList);
 
-    if(itemList.empty())
+    if (itemList.empty())
     {
         SendWhisper("|cffff0000I can't process that!", fromPlayer);
         return;
@@ -7787,7 +7752,7 @@ void PlayerbotAI::_HandleCommandProcess(std::string &text, Player &fromPlayer)
 
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
-       return;
+        return;
 
     if (reagent)
     {
@@ -7806,7 +7771,7 @@ void PlayerbotAI::_HandleCommandUse(std::string &text, Player &fromPlayer)
     extractItemIds(text, itemIds);
     findItemsInInv(itemIds, itemList);
 
-    if(itemList.empty())
+    if (itemList.empty())
     {
         SendWhisper("|cffff0000I can't use that!", fromPlayer);
         return;
@@ -7840,21 +7805,15 @@ void PlayerbotAI::_HandleCommandUse(std::string &text, Player &fromPlayer)
 
             GameObject *go = m_bot->GetMap()->GetGameObject(gotarget);
             if (go)
-            {
                 // DEBUG_LOG("tool (%s) on target gameobject (%s)",tool->GetProto()->Name1,go->GetGOInfo()->name);
                 UseItem(tool, TARGET_FLAG_OBJECT, gotarget); // on gameobject
-            }
         }
         else if (unit)
-        {
             // DEBUG_LOG("tool (%s) on selected target unit",tool->GetProto()->Name1);
             UseItem(tool, unit); // on unit
-        }
         else
-        {
             // DEBUG_LOG("tool (%s) on self",tool->GetProto()->Name1);
             UseItem(tool); // on self
-        }
     }
     return;
 }
@@ -7962,7 +7921,7 @@ void PlayerbotAI::_HandleCommandCollect(std::string &text, Player &fromPlayer)
             }
             else
             {
-                                m_collectDist = m_mgr->m_confCollectDistanceMax;
+                m_collectDist = m_mgr->m_confCollectDistanceMax;
                 std::stringstream oss;
                 oss << "I will now collect items within " << m_mgr->m_confCollectDistanceMax << " yards. " << distance << " yards is just too far away.",
                 SendWhisper(oss.str(), fromPlayer);
@@ -7977,7 +7936,7 @@ void PlayerbotAI::_HandleCommandCollect(std::string &text, Player &fromPlayer)
         else
         {
             std::ostringstream oss;
-                        oss << "Collect <collectable(s)>: none | distance:<1-" << m_mgr->m_confCollectDistanceMax << ">, combat, loot, quest, profession, objects";
+            oss << "Collect <collectable(s)>: none | distance:<1-" << m_mgr->m_confCollectDistanceMax << ">, combat, loot, quest, profession, objects";
             if (m_bot->HasSkill(SKILL_SKINNING))
                 oss << ", skin";
             // TODO: perhaps change the command syntax, this way may be lacking in ease of use
@@ -8058,7 +8017,7 @@ void PlayerbotAI::_HandleCommandEnchant(std::string &text, Player &fromPlayer)
         findItemsInEquip(itemIds, itemList);
         findItemsInInv(itemIds, itemList);
 
-        if(itemList.empty())
+        if (itemList.empty())
         {
             SendWhisper("|cffff0000I can't enchant that!", fromPlayer);
             return;
@@ -8093,7 +8052,6 @@ void PlayerbotAI::_HandleCommandEnchant(std::string &text, Player &fromPlayer)
             SkillLineEntry const *SkillLine = sSkillLineStore.LookupEntry(*it);
 
             if (SkillLine->categoryId == SKILL_CATEGORY_PROFESSION && *it == SKILL_ENCHANTING)
-            {
                 for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
                 {
                     SkillLineAbilityEntry const *SkillAbility = sSkillLineAbilityStore.LookupEntry(j);
@@ -8121,7 +8079,6 @@ void PlayerbotAI::_HandleCommandEnchant(std::string &text, Player &fromPlayer)
                         }
                     }
                 }
-            }
         }
         m_noToolList.unique();
         for (std::list<uint32>::iterator it = m_noToolList.begin(); it != m_noToolList.end(); it++)
@@ -8270,7 +8227,7 @@ void PlayerbotAI::_HandleCommandCraft(std::string &text, Player &fromPlayer)
         SpellCastTargets targets;
         Spell *spell = new Spell(m_bot, spellInfo, false);
 
-        if (text.find("all",0) != std::string::npos)
+        if (text.find("all", 0) != std::string::npos)
         {
             SpellCastResult result = spell->CheckCast(true);
 
@@ -8297,7 +8254,6 @@ void PlayerbotAI::_HandleCommandCraft(std::string &text, Player &fromPlayer)
         SkillLineEntry const *SkillLine = sSkillLineStore.LookupEntry(*it);
 
         if (SkillLine->categoryId == category && *it == skill)
-        {
             for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
             {
                 SkillLineAbilityEntry const *SkillAbility = sSkillLineAbilityStore.LookupEntry(j);
@@ -8325,7 +8281,6 @@ void PlayerbotAI::_HandleCommandCraft(std::string &text, Player &fromPlayer)
                     }
                 }
             }
-        }
     }
     m_noToolList.unique();
     for (std::list<uint32>::iterator it = m_noToolList.begin(); it != m_noToolList.end(); it++)
@@ -8369,9 +8324,7 @@ void PlayerbotAI::_HandleCommandQuest(std::string &text, Player &fromPlayer)
         m_findNPC.push_back(UNIT_NPC_FLAG_QUESTGIVER);
     }
     else if (ExtractCommand("report", text))
-    {
         SendQuestNeedList();
-    }
     else if (ExtractCommand("end", text, true)) // true -> "quest end" OR "quest e"
     {
         m_tasks.push_back(std::pair<enum TaskFlags, uint32>(END_QUEST, 0));
@@ -8587,10 +8540,10 @@ void PlayerbotAI::_HandleCommandPet(std::string &text, Player &fromPlayer)
 
             if (IsPositiveSpell(spellId))
                 posOut << " |" << color << "|Hspell:" << spellId << "|h["
-                        << pSpellInfo->SpellName[loc] << "]|h|r";
+                       << pSpellInfo->SpellName[loc] << "]|h|r";
             else
                 negOut << " |" << color << "|Hspell:" << spellId << "|h["
-                        << pSpellInfo->SpellName[loc] << "]|h|r";
+                       << pSpellInfo->SpellName[loc] << "]|h|r";
         }
 
         ChatHandler ch(&fromPlayer);
@@ -8614,7 +8567,7 @@ void PlayerbotAI::_HandleCommandSpells(std::string &text, Player &fromPlayer)
     std::string spellName;
 
     uint32 ignoredSpells[] = {1843, 5019, 2479, 6603, 3365, 8386, 21651, 21652, 6233, 6246, 6247,
-                                61437, 22810, 22027, 45927, 7266, 7267, 6477, 6478, 7355, 68398};
+                              61437, 22810, 22027, 45927, 7266, 7267, 6477, 6478, 7355, 68398};
     uint32 ignoredSpellsCount = sizeof(ignoredSpells) / sizeof(uint32);
 
     for (PlayerSpellMap::iterator itr = m_bot->GetSpellMap().begin(); itr != m_bot->GetSpellMap().end(); ++itr)
@@ -8713,9 +8666,9 @@ void PlayerbotAI::_HandleCommandSurvey(std::string &text, Player &fromPlayer)
         eventFilter << ")";
 
     result = WorldDatabase.PQuery("SELECT gameobject.guid, id, position_x, position_y, position_z, map, "
-                                    "(POW(position_x - %f, 2) + POW(position_y - %f, 2) + POW(position_z - %f, 2)) AS order_ FROM gameobject "
-                                    "LEFT OUTER JOIN game_event_gameobject on gameobject.guid=game_event_gameobject.guid WHERE map = '%i' %s ORDER BY order_ ASC LIMIT 10",
-                                    m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(), m_bot->GetMapId(), eventFilter.str().c_str());
+                                  "(POW(position_x - %f, 2) + POW(position_y - %f, 2) + POW(position_z - %f, 2)) AS order_ FROM gameobject "
+                                  "LEFT OUTER JOIN game_event_gameobject on gameobject.guid=game_event_gameobject.guid WHERE map = '%i' %s ORDER BY order_ ASC LIMIT 10",
+                                  m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(), m_bot->GetMapId(), eventFilter.str().c_str());
 
     if (result)
     {
@@ -8785,9 +8738,9 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
 
         TrainerSpellData const* all_trainer_spells = cSpells;
         if (!all_trainer_spells)
-           all_trainer_spells = tSpells;
+            all_trainer_spells = tSpells;
 
-	if (!all_trainer_spells)
+        if (!all_trainer_spells)
         {
             SendWhisper("No spells can be learnt from this trainer", fromPlayer);
             return;
@@ -8886,7 +8839,7 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
 
                 reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
 
-                TrainerSpellState state =  m_bot->GetTrainerSpellState(tSpell,reqLevel);
+                TrainerSpellState state =  m_bot->GetTrainerSpellState(tSpell, reqLevel);
                 if (state != TRAINER_SPELL_GREEN)
                     continue;
 
@@ -8983,7 +8936,6 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
             SkillLineEntry const *SkillLine = sSkillLineStore.LookupEntry(*it);
             // has weapon skill
             if (SkillLine->categoryId == SKILL_CATEGORY_WEAPON)
-            {
                 for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
                 {
                     SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
@@ -8995,9 +8947,8 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                         continue;
 
                     if (skillLine->skillId == *it && spellInfo->Effect[0] == SPELL_EFFECT_WEAPON)
-                        MakeWeaponSkillLink(spellInfo,msg,*it);
+                        MakeWeaponSkillLink(spellInfo, msg, *it);
                 }
-            }
         }
     }
     SendWhisper(msg.str(), fromPlayer);
@@ -9054,7 +9005,7 @@ void PlayerbotAI::_HandleCommandGM(std::string &text, Player &fromPlayer)
 {
     // Check should happen OUTSIDE this function, but this is account security we're talking about, so let's be doubly sure
     if (fromPlayer.GetSession()->GetSecurity() > SEC_PLAYER)
-        return; // no excuses, no warning
+        return;  // no excuses, no warning
 
     if (text == "")
     {
@@ -9075,20 +9026,14 @@ void PlayerbotAI::_HandleCommandGM(std::string &text, Player &fromPlayer)
                     SendWhisper(oss.str(), fromPlayer);
                 }
                 else
-                {
                     SendWhisper("No errors found. High five!", fromPlayer);
-                }
             }
         }
         else
-        {
             SendWhisper("'gm check' does not have that subcommand.", fromPlayer);
-        }
     }
     else
-    {
         SendWhisper("'gm' does not have that subcommand.", fromPlayer);
-    }
 }
 
 void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
@@ -9182,8 +9127,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     if (bMainHelp || ExtractCommand("process", text))
     {
         ch.SendSysMessage(_HandleCommandHelpHelper("process < disenchant | d >", "Disenchants a green coloured [ITEM] or better", HL_ITEM).c_str());
-        ch.SendSysMessage(_HandleCommandHelpHelper("process < mill | m >", "Grinds 5 herbs [ITEM] to produce pigments",HL_ITEM).c_str());
-        ch.SendSysMessage(_HandleCommandHelpHelper("process < prospect | p >", "Searches 5 metal ore [ITEM] for precious gems",HL_ITEM).c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("process < mill | m >", "Grinds 5 herbs [ITEM] to produce pigments", HL_ITEM).c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("process < prospect | p >", "Searches 5 metal ore [ITEM] for precious gems", HL_ITEM).c_str());
 
         if (!bMainHelp)
         {
@@ -9300,8 +9245,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("add", text, true)) {}
-            else if(ExtractCommand("drop", text, true)) {}
-            else if(ExtractCommand("end", text, true)) {}
+            else if (ExtractCommand("drop", text, true)) {}
+            else if (ExtractCommand("end", text, true)) {}
             else if (ExtractCommand("list", text, true)) {}
             else if (ExtractCommand("report", text, true)) {}
 
@@ -9338,10 +9283,10 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("spells", text)) {}
-            else if(ExtractCommand("tame", text)) {}
-            else if(ExtractCommand("abandon", text)) {}
-            else if(ExtractCommand("cast", text)) {}
-            else if(ExtractCommand("toggle", text)) {}
+            else if (ExtractCommand("tame", text)) {}
+            else if (ExtractCommand("abandon", text)) {}
+            else if (ExtractCommand("cast", text)) {}
+            else if (ExtractCommand("toggle", text)) {}
             else if (ExtractCommand("state", text)) {}
             else if (ExtractCommand("react", text))
             {
@@ -9414,7 +9359,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("add", text, true)) {}
-            else if(ExtractCommand("remove", text, true)) {}
+            else if (ExtractCommand("remove", text, true)) {}
 
             if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
@@ -9528,14 +9473,14 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 
         if (!bMainHelp)
         {
-            ch.SendSysMessage(_HandleCommandHelpHelper("mail getcash", "Gets money from all selected [Mailid]..", HL_MAIL,true).c_str());
-            ch.SendSysMessage(_HandleCommandHelpHelper("mail getitem", "Gets items from all selected [Mailid]..", HL_MAIL,true).c_str());
-            ch.SendSysMessage(_HandleCommandHelpHelper("mail delete", "Delete all selected [Mailid]..", HL_MAIL,true).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("mail getcash", "Gets money from all selected [Mailid]..", HL_MAIL, true).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("mail getitem", "Gets items from all selected [Mailid]..", HL_MAIL, true).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("mail delete", "Delete all selected [Mailid]..", HL_MAIL, true).c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("inbox", text, true)) {}
-            else if(ExtractCommand("getcash", text, true)) {}
-            else if(ExtractCommand("getitem", text, true)) {}
+            else if (ExtractCommand("getcash", text, true)) {}
+            else if (ExtractCommand("getitem", text, true)) {}
             else if (ExtractCommand("delete", text, true)) {}
 
             if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
@@ -9546,7 +9491,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     if (bMainHelp)
         ch.SendSysMessage(_HandleCommandHelpHelper("help", "Gives you this listing of main commands... But then, you know that already don't you.").c_str());
 
-    if(text != "")
+    if (text != "")
         ch.SendSysMessage("Either that is not a valid command, or someone forgot to add it to my help journal. I mean seriously, they can't expect me to remember *all* this stuff, can they?");
 }
 
@@ -9579,7 +9524,7 @@ std::string PlayerbotAI::_HandleCommandHelpHelper(std::string sCommand, std::str
             if (bReqLinkMultiples)
                 oss << " [ITEM] ..";
         }
-         else if (reqLink == HL_TALENT)
+        else if (reqLink == HL_TALENT)
         {
             oss << " [TALENT]";
             if (bReqLinkMultiples)

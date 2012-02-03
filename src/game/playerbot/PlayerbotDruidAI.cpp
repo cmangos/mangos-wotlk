@@ -190,9 +190,7 @@ void PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
 
     // entire tank spell sequence is predicated on being in [dire] bear form. If not in it, exit (*before* going out of other forms)
     if (!m_bot->HasAura(DIRE_BEAR_FORM) && !m_bot->HasAura(BEAR_FORM))
-    {
         return _DoNextPVECombatManeuverMeleeDPS(pTarget); // bear = melee so...
-    }
 
     // Impossible due to check above
     // If still in cat/moonkin/tree form, go out of it
@@ -216,7 +214,7 @@ void PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
         return;
     }
 
-    DruidSpellCombat ++;
+    DruidSpellCombat++;
     if (SWIPE > 0 && DruidSpellCombat < 3 && ai->GetRageAmount() >= 20)
     {
         ai->CastSpell(SWIPE, *pTarget);
@@ -224,7 +222,7 @@ void PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
         return;
     }
 
-    DruidSpellCombat ++;
+    DruidSpellCombat++;
     if (MAUL > 0 && DruidSpellCombat < 4 && ai->GetRageAmount() >= 15)
     {
         ai->CastSpell(MAUL, *pTarget);
@@ -232,7 +230,7 @@ void PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
         return;
     }
 
-    DruidSpellCombat ++;
+    DruidSpellCombat++;
     if (BASH > 0 && !pTarget->HasAura(BASH, EFFECT_INDEX_0) && DruidSpellCombat < 5 && ai->GetRageAmount() >= 10)
     {
         ai->CastSpell(BASH, *pTarget);
@@ -240,7 +238,7 @@ void PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
         return;
     }
 
-    DruidSpellCombat ++;
+    DruidSpellCombat++;
     if (CHALLENGING_ROAR > 0 && pVictim != m_bot && DruidSpellCombat < 6 && !pTarget->HasAura(CHALLENGING_ROAR, EFFECT_INDEX_0) && !pTarget->HasAura(GROWL, EFFECT_INDEX_0) && ai->GetRageAmount() >= 15)
     {
         ai->CastSpell(CHALLENGING_ROAR, *pTarget);
@@ -248,7 +246,7 @@ void PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
         return;
     }
 
-    DruidSpellCombat ++;
+    DruidSpellCombat++;
     if (GROWL > 0 && pVictim != m_bot && DruidSpellCombat < 7 && !pTarget->HasAura(CHALLENGING_ROAR, EFFECT_INDEX_0) && !pTarget->HasAura(GROWL, EFFECT_INDEX_0))
     {
         ai->CastSpell(GROWL, *pTarget);
@@ -381,11 +379,9 @@ void PlayerbotDruidAI::_DoNextPVECombatManeuverMeleeDPS(Unit* pTarget)
 
     // True, bear form is set up for tanking but even then it's better DPS for levels 10-19 than humanoid form
     if (CAT_FORM == 0 && BEAR_FORM > 0)
-    {
         // but only go there if you can get into bear form. else stay here.
         if (ai->CastSpell(BEAR_FORM))
             return _DoNextPVECombatManeuverBear(pTarget);
-    }
 
     //uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
 
@@ -400,15 +396,13 @@ void PlayerbotDruidAI::_DoNextPVECombatManeuverMeleeDPS(Unit* pTarget)
     }
 
     if (CAT_FORM > 0 && !m_bot->HasAura(CAT_FORM, EFFECT_INDEX_0))
-    {
         if (!ai->CastSpell(CAT_FORM))
         {
-            if(ai->GetManaPercent() < 30) // TODO: tweak this value. Pretty sure bear form mana Req is way less than 30% of base mana, let alone total mana
-                return; // conserve mana
+            if (ai->GetManaPercent() < 30) // TODO: tweak this value. Pretty sure bear form mana Req is way less than 30% of base mana, let alone total mana
+                return;  // conserve mana
             else
                 _DoNextPVECombatManeuverSpellDPS(pTarget);
         }
-    }
 
     // Commented out: Above should take care of it
     //// Technically bear form is better than no form for melee druids levels 10-19.
@@ -467,8 +461,8 @@ void PlayerbotDruidAI::_DoNextPVECombatManeuverMeleeDPS(Unit* pTarget)
         if (RIP > 0 && pTarget->getClass() == CLASS_ROGUE && ai->GetEnergyAmount() >= 30)
             ai->CastSpell(RIP, *pTarget);
         else if (FEROCIOUS_BITE > 0 && ai->GetEnergyAmount() >= 35 &&
-                    (pTarget->getClass() == CLASS_HUNTER || pTarget->getClass() == CLASS_WARRIOR ||
-                    pTarget->getClass() == CLASS_PALADIN || pTarget->getClass() == CLASS_DEATH_KNIGHT) )
+                 (pTarget->getClass() == CLASS_HUNTER || pTarget->getClass() == CLASS_WARRIOR ||
+                  pTarget->getClass() == CLASS_PALADIN || pTarget->getClass() == CLASS_DEATH_KNIGHT))
             ai->CastSpell(FEROCIOUS_BITE, *pTarget);
         else if (ai->GetEnergyAmount() >= 35)
         {

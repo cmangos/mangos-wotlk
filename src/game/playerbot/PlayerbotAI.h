@@ -1348,9 +1348,9 @@ enum Glyphs
 };
 
 /**
-* So they're kept track of somewhere... but let's comment them out.
-enum GlyphsUnknown
-{
+ * So they're kept track of somewhere... but let's comment them out.
+   enum GlyphsUnknown
+   {
     UNKNOWN_MAJOR_GLYPH_OF_NATURAL_FORCE             = 2,     // Unknown   Spell ID: 52084
     UNKNOWN_UNKNOWN_GLYPH_CRUELTY                    = 21,    // Unknown   Spell ID: 12320
     UNKNOWN_UNKNOWN_GLYPH_ANTICIPATION               = 22,    // Unknown   Spell ID: 12297
@@ -1374,7 +1374,7 @@ enum GlyphsUnknown
     UNKNOWN_MINOR_GLYPH_OF_CURSE_OF_EXHAUSION        = 480,   // Unknown   Spell ID: 58080
     UNKNOWN_MINOR_GLYPH_OF_BLAST_WAVE                = 611,   // Unknown   Spell ID: 62126
     UNKNOWN_MAJOR_GLYPH_OF_ENVENOM                   = 791,   // Unknown   Spell ID: 64199
-};*/
+   };*/
 
 // TODO: replace this with mangos data... I mean this has GOT to be out there somewhere already
 //       and when you do, don't forget to change everywhere (including the sql file)
@@ -1528,7 +1528,7 @@ public:
     typedef std::list<taskPair> BotTaskList;
     typedef std::list<enum NPCFlags> BotNPCList;
     typedef std::map<uint32, uint32> BotNeedItem;
-    typedef std::pair<uint32,uint32> talentPair;
+    typedef std::pair<uint32, uint32> talentPair;
     typedef std::list<ObjectGuid> BotObjectList;
     typedef std::list<uint32> BotEntryList;
     typedef std::vector<uint32> BotTaxiNode;
@@ -1658,7 +1658,7 @@ public:
     std::list<TalentSpec> GetTalentSpecs(long specClass);
     TalentSpec GetTalentSpec(long specClass, long choice);
     TalentSpec GetActiveTalentSpec() { return m_activeTalentSpec; }
-    void ClearActiveTalentSpec() { m_activeTalentSpec.specName = ""; m_activeTalentSpec.specClass = 0; m_activeTalentSpec.specPurpose = TSP_NONE; for (int i=0; i<71; i++) m_activeTalentSpec.talentId[i] = 0; for (int i=0; i<3; i++) { m_activeTalentSpec.glyphIdMajor[i] = 0; m_activeTalentSpec.glyphIdMinor[i] = 0; } }
+    void ClearActiveTalentSpec() { m_activeTalentSpec.specName = ""; m_activeTalentSpec.specClass = 0; m_activeTalentSpec.specPurpose = TSP_NONE; for (int i = 0; i < 71; i++) m_activeTalentSpec.talentId[i] = 0; for (int i = 0; i < 3; i++) { m_activeTalentSpec.glyphIdMajor[i] = 0; m_activeTalentSpec.glyphIdMinor[i] = 0; } }
     void SetActiveTalentSpec(TalentSpec ts) { m_activeTalentSpec = ts; }
     bool ApplyActiveTalentSpec();
 
