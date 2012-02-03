@@ -1345,9 +1345,9 @@ enum Glyphs
 };
 
 /**
-* So they're kept track of somewhere... but let's comment them out.
-enum GlyphsUnknown
-{
+ * So they're kept track of somewhere... but let's comment them out.
+   enum GlyphsUnknown
+   {
     UNKNOWN_MAJOR_GLYPH_OF_NATURAL_FORCE             = 2,     // Unknown   Spell ID: 52084
     UNKNOWN_UNKNOWN_GLYPH_CRUELTY                    = 21,    // Unknown   Spell ID: 12320
     UNKNOWN_UNKNOWN_GLYPH_ANTICIPATION               = 22,    // Unknown   Spell ID: 12297
@@ -1371,7 +1371,7 @@ enum GlyphsUnknown
     UNKNOWN_MINOR_GLYPH_OF_CURSE_OF_EXHAUSION        = 480,   // Unknown   Spell ID: 58080
     UNKNOWN_MINOR_GLYPH_OF_BLAST_WAVE                = 611,   // Unknown   Spell ID: 62126
     UNKNOWN_MAJOR_GLYPH_OF_ENVENOM                   = 791,   // Unknown   Spell ID: 64199
-};*/
+   };*/
 
 // TODO: replace this with mangos data... I mean this has GOT to be out there somewhere already
 //       and when you do, don't forget to change everywhere (including the sql file)
@@ -1404,36 +1404,36 @@ enum TalentSpecPurpose
 
 enum MainSpec
 {
-	MAGE_SPEC_FIRE				= 41,
-	MAGE_SPEC_FROST				= 61,
-	MAGE_SPEC_ARCANE			= 81,
-	WARRIOR_SPEC_ARMS			= 161,
-	WARRIOR_APEC_PROTECTION		= 163,
-	WARRIOR_SPEC_FURY			= 164,
-	ROGUE_SPEC_COMBAT			= 181,
-	ROGUE_SPEC_ASSASSINATION	= 182,
-	ROGUE_SPEC_SUBTELTY			= 183,
-	PRIEST_SPEC_DISCIPLINE		= 201,
-	PRIEST_SPEC_HOLY			= 202,
-	PRIEST_SPEC_SHADOW			= 203,
-	SHAMAN_SPEC_ELEMENTAL		= 261,
-	SHAMAN_SPEC_RESTORATION		= 262,
-	SHAMAN_SPEC_ENHANCEMENT		= 263,
-	DRUID_SPEC_FERAL			= 281,
-	DRUID_SPEC_RESTORATION		= 282,
-	DRUID_SPEC_BALANCE			= 283,
-	WARLOCK_SPEC_DESTRUCTION	= 301,
-	WARLOCK_SPEC_AFFLICTION		= 302,
-	WARLOCK_SPEC_DEMONOLOGY		= 303,
-	HUNTER_SPEC_BEASTMASTERY	= 361,
-	HUNTER_SPEC_SURVIVAL		= 362,
-	HUNTER_SPEC_MARKSMANSHIP	= 363,
-	PALADIN_SPEC_RETRIBUTION	= 381,
-	PALADIN_SPEC_HOLY			= 382,
-	PALADIN_SPEC_PROTECTION		= 383,
-	DEATHKNIGHT_SPEC_BLOOD		= 398,
-	DEATHKNIGHT_SPEC_FROST		= 399,
-	DEATHKNIGHT_SPEC_UNHOLY		= 400
+    MAGE_SPEC_FIRE              = 41,
+    MAGE_SPEC_FROST             = 61,
+    MAGE_SPEC_ARCANE            = 81,
+    WARRIOR_SPEC_ARMS           = 161,
+    WARRIOR_APEC_PROTECTION     = 163,
+    WARRIOR_SPEC_FURY           = 164,
+    ROGUE_SPEC_COMBAT           = 181,
+    ROGUE_SPEC_ASSASSINATION    = 182,
+    ROGUE_SPEC_SUBTELTY         = 183,
+    PRIEST_SPEC_DISCIPLINE      = 201,
+    PRIEST_SPEC_HOLY            = 202,
+    PRIEST_SPEC_SHADOW          = 203,
+    SHAMAN_SPEC_ELEMENTAL       = 261,
+    SHAMAN_SPEC_RESTORATION     = 262,
+    SHAMAN_SPEC_ENHANCEMENT     = 263,
+    DRUID_SPEC_FERAL            = 281,
+    DRUID_SPEC_RESTORATION      = 282,
+    DRUID_SPEC_BALANCE          = 283,
+    WARLOCK_SPEC_DESTRUCTION    = 301,
+    WARLOCK_SPEC_AFFLICTION     = 302,
+    WARLOCK_SPEC_DEMONOLOGY     = 303,
+    HUNTER_SPEC_BEASTMASTERY    = 361,
+    HUNTER_SPEC_SURVIVAL        = 362,
+    HUNTER_SPEC_MARKSMANSHIP    = 363,
+    PALADIN_SPEC_RETRIBUTION    = 381,
+    PALADIN_SPEC_HOLY           = 382,
+    PALADIN_SPEC_PROTECTION     = 383,
+    DEATHKNIGHT_SPEC_BLOOD      = 398,
+    DEATHKNIGHT_SPEC_FROST      = 399,
+    DEATHKNIGHT_SPEC_UNHOLY     = 400
 };
 
 struct TalentSpec
@@ -1487,8 +1487,8 @@ public:
         ORDERS_NONE                 = 0x00,             // no special orders given
         ORDERS_TANK                 = 0x01,             // bind attackers by gaining threat
         ORDERS_ASSIST               = 0x02,             // assist someone (dps type)
-        ORDERS_HEAL                 = 0x04,				// concentrate on healing (no attacks, only self defense)
-		ORDERS_NODISPEL				= 0x08,
+        ORDERS_HEAL                 = 0x04,             // concentrate on healing (no attacks, only self defense)
+        ORDERS_NODISPEL             = 0x08,
         ORDERS_PROTECT              = 0x10,             // combinable state: check if protectee is attacked
         ORDERS_PRIMARY              = 0x0F,
         ORDERS_SECONDARY            = 0xF0,
@@ -1555,7 +1555,7 @@ public:
     typedef std::list<taskPair> BotTaskList;
     typedef std::list<enum NPCFlags> BotNPCList;
     typedef std::map<uint32, uint32> BotNeedItem;
-    typedef std::pair<uint32,uint32> talentPair;
+    typedef std::pair<uint32, uint32> talentPair;
     typedef std::list<ObjectGuid> BotObjectList;
     typedef std::list<uint32> BotEntryList;
     typedef std::vector<uint32> BotTaxiNode;
@@ -1680,9 +1680,9 @@ public:
     std::list<TalentSpec> GetTalentSpecs(long specClass);
     TalentSpec GetTalentSpec(long specClass, long choice);
     TalentSpec GetActiveTalentSpec() { return m_activeTalentSpec; }
-    void ClearActiveTalentSpec() { m_activeTalentSpec.specName = ""; m_activeTalentSpec.specClass = 0; m_activeTalentSpec.specPurpose = TSP_NONE; for (int i=0; i<71; i++) m_activeTalentSpec.talentId[i] = 0; for (int i=0; i<3; i++) { m_activeTalentSpec.glyphIdMajor[i] = 0; m_activeTalentSpec.glyphIdMinor[i] = 0; } }
+    void ClearActiveTalentSpec() { m_activeTalentSpec.specName = ""; m_activeTalentSpec.specClass = 0; m_activeTalentSpec.specPurpose = TSP_NONE; for (int i = 0; i < 71; i++) m_activeTalentSpec.talentId[i] = 0; for (int i = 0; i < 3; i++) { m_activeTalentSpec.glyphIdMajor[i] = 0; m_activeTalentSpec.glyphIdMinor[i] = 0; } }
     void SetActiveTalentSpec(TalentSpec ts) { m_activeTalentSpec = ts; }
-    bool ApplyActiveTalentSpec();	
+    bool ApplyActiveTalentSpec();
 
     void MakeSpellLink(const SpellEntry *sInfo, std::ostringstream &out);
     void MakeWeaponSkillLink(const SpellEntry *sInfo, std::ostringstream &out, uint32 skillid);

@@ -109,7 +109,7 @@ private:
            RENEW,
            RESURRECTION,
            SMITE,
-		   CURE_DISEASE;
+           CURE_DISEASE;
 
     // shadowmagic
     uint32 FADE,

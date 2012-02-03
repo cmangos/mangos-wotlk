@@ -1,4 +1,3 @@
-
 #include "PlayerbotMageAI.h"
 
 class PlayerbotAI;

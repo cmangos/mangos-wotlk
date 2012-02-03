@@ -1,5 +1,4 @@
 // a simple DK class by rrtn :)
-
 #include "PlayerbotDeathKnightAI.h"
 #include "PlayerbotMgr.h"
 
