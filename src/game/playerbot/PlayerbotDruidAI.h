@@ -169,7 +169,8 @@ private:
            WILD_GROWTH,
            SWIFTMEND,
            TRANQUILITY,
-           REVIVE;
+           REVIVE,
+		   REMOVE_CURSE;
 
     // first aid
     uint32 RECENTLY_BANDAGED;

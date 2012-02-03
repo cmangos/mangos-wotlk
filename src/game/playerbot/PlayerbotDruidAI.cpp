@@ -5,6 +5,7 @@
     Version : 0.42
  */
 #include "PlayerbotDruidAI.h"
+#include "../SpellAuras.h"
 
 class PlayerbotAI;
 
@@ -33,6 +34,7 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
     SWIFTMEND                     = ai->initSpell(SWIFTMEND_1);
     TRANQUILITY                   = ai->initSpell(TRANQUILITY_1);
     REVIVE                        = ai->initSpell(REVIVE_1);
+	REMOVE_CURSE				  = ai->initSpell(REMOVE_CURSE_DRUID_1);
     // Druid Forms
     MOONKIN_FORM                  = ai->initSpell(MOONKIN_FORM_1);
     DIRE_BEAR_FORM                = ai->initSpell(DIRE_BEAR_FORM_1);
@@ -77,6 +79,22 @@ bool PlayerbotDruidAI::HealTarget(Unit *target)
 {
     PlayerbotAI* ai = GetAI();
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
+
+	if (REMOVE_CURSE > 0 && ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
+	{
+		uint32 dispelMask  = GetDispellMask(DISPEL_CURSE);
+		Unit::SpellAuraHolderMap const& auras = target->GetSpellAuraHolderMap();
+		for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+		{
+			SpellAuraHolder *holder = itr->second;
+			if ((1<<holder->GetSpellProto()->Dispel) & dispelMask)
+			{	
+				if(holder->GetSpellProto()->Dispel == DISPEL_CURSE)
+					ai->CastSpell(REMOVE_CURSE, *target);
+					return false;
+			}
+		}
+	}
 
     if (hp >= 70)
         return false;
