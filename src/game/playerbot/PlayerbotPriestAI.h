@@ -108,7 +108,8 @@ private:
            PRAYER_OF_MENDING,
            RENEW,
            RESURRECTION,
-           SMITE;
+           SMITE,
+           CURE_DISEASE;
 
     // shadowmagic
     uint32 FADE,

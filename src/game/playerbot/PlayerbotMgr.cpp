@@ -79,7 +79,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
             p >> guid >> nodes[0] >> nodes[1];
 
-            DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_ACTIVATETAXI from %d to %d", nodes[0], nodes[1]);
+            // DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_ACTIVATETAXI from %d to %d", nodes[0], nodes[1]);
 
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
@@ -127,7 +127,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             if (nodes.empty())
                 return;
 
-            DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_ACTIVATETAXIEXPRESS from %d to %d", nodes.front(), nodes.back());
+            // DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_ACTIVATETAXIEXPRESS from %d to %d", nodes.front(), nodes.back());
 
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
@@ -154,7 +154,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
         case CMSG_MOVE_SPLINE_DONE:
         {
-            DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_MOVE_SPLINE_DONE");
+            // DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_MOVE_SPLINE_DONE");
 
             WorldPacket p(packet);
             p.rpos(0); // reset reader
@@ -216,7 +216,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                             bot->GetSession()->SendPacket(&data);
                         }
 
-                    DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_MOVE_SPLINE_DONE Taxi has to go from %u to %u", sourcenode, destinationnode);
+                    // DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_MOVE_SPLINE_DONE Taxi has to go from %u to %u", sourcenode, destinationnode);
 
                     uint32 mountDisplayId = sObjectMgr.GetTaxiMountDisplayId(sourcenode, bot->GetTeam());
 
@@ -463,7 +463,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             uint32 unk1;
             p >> guid >> quest >> unk1;
 
-            DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_QUESTGIVER_ACCEPT_QUEST npc = %s, quest = %u, unk1 = %u", guid.GetString().c_str(), quest, unk1);
+            // DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_QUESTGIVER_ACCEPT_QUEST npc = %s, quest = %u, unk1 = %u", guid.GetString().c_str(), quest, unk1);
 
             Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest);
             if (qInfo)
@@ -538,7 +538,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             ObjectGuid npcGUID;
             p >> npcGUID >> quest;
 
-            DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %s, quest = %u", npcGUID.GetString().c_str(), quest);
+            // DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %s, quest = %u", npcGUID.GetString().c_str(), quest);
 
             WorldObject* pNpc = m_master->GetMap()->GetWorldObject(npcGUID);
             if (!pNpc)
@@ -618,7 +618,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
         // Handle GOSSIP activate actions, prior to GOSSIP select menu actions
         case CMSG_GOSSIP_HELLO:
         {
-            DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_GOSSIP_HELLO");
+            // DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_GOSSIP_HELLO");
 
             WorldPacket p(packet);    //WorldPacket packet for CMSG_GOSSIP_HELLO, (8)
             ObjectGuid guid;
@@ -1066,6 +1066,32 @@ void Player::UpdateMail()
     this->SaveInventoryAndGoldToDB();
     this->_SaveMail();
     CharacterDatabase.CommitTransaction();
+}
+
+//See MainSpec enum in PlayerbotAI.h for details on class return values
+uint32 Player::GetSpec()
+{
+    uint32 row = 0, spec = 0;
+
+    //Iterate through the 3 talent trees
+    for (uint32 i = 0; i < 3; ++i)
+    {
+        for (PlayerTalentMap::iterator iter = m_talents[m_activeSpec].begin(); iter != m_talents[m_activeSpec].end(); ++iter)
+        {
+            PlayerTalent talent = (*iter).second;
+
+            //If current talent is deeper into a tree, that is our new max talent
+            if (talent.talentEntry->Row > row) {
+                row = talent.talentEntry->Row;
+
+                //Set the tree the deepest talent is on
+                spec = talent.talentEntry->TalentTab;
+            }
+        }
+    }
+
+    //Return the tree with the deepest talent
+    return spec;
 }
 
 bool ChatHandler::HandlePlayerbotCommand(char* args)

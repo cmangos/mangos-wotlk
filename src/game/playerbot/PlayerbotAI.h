@@ -1405,6 +1405,40 @@ enum TalentSpecPurpose
     TSP_PVP_ALL                     = 0xFFFF0000   // Highly recommend AGAINST using this
 };
 
+enum MainSpec
+{
+    MAGE_SPEC_FIRE              = 41,
+    MAGE_SPEC_FROST             = 61,
+    MAGE_SPEC_ARCANE            = 81,
+    WARRIOR_SPEC_ARMS           = 161,
+    WARRIOR_APEC_PROTECTION     = 163,
+    WARRIOR_SPEC_FURY           = 164,
+    ROGUE_SPEC_COMBAT           = 181,
+    ROGUE_SPEC_ASSASSINATION    = 182,
+    ROGUE_SPEC_SUBTELTY         = 183,
+    PRIEST_SPEC_DISCIPLINE      = 201,
+    PRIEST_SPEC_HOLY            = 202,
+    PRIEST_SPEC_SHADOW          = 203,
+    SHAMAN_SPEC_ELEMENTAL       = 261,
+    SHAMAN_SPEC_RESTORATION     = 262,
+    SHAMAN_SPEC_ENHANCEMENT     = 263,
+    DRUID_SPEC_FERAL            = 281,
+    DRUID_SPEC_RESTORATION      = 282,
+    DRUID_SPEC_BALANCE          = 283,
+    WARLOCK_SPEC_DESTRUCTION    = 301,
+    WARLOCK_SPEC_AFFLICTION     = 302,
+    WARLOCK_SPEC_DEMONOLOGY     = 303,
+    HUNTER_SPEC_BEASTMASTERY    = 361,
+    HUNTER_SPEC_SURVIVAL        = 362,
+    HUNTER_SPEC_MARKSMANSHIP    = 363,
+    PALADIN_SPEC_RETRIBUTION    = 381,
+    PALADIN_SPEC_HOLY           = 382,
+    PALADIN_SPEC_PROTECTION     = 383,
+    DEATHKNIGHT_SPEC_BLOOD      = 398,
+    DEATHKNIGHT_SPEC_FROST      = 399,
+    DEATHKNIGHT_SPEC_UNHOLY     = 400
+};
+
 struct TalentSpec
 {
     std::string specName;
@@ -1457,8 +1491,9 @@ public:
         ORDERS_TANK                 = 0x01,             // bind attackers by gaining threat
         ORDERS_ASSIST               = 0x02,             // assist someone (dps type)
         ORDERS_HEAL                 = 0x04,             // concentrate on healing (no attacks, only self defense)
-        ORDERS_PASSIVE              = 0x08,             // bots do nothing
+        ORDERS_NODISPEL             = 0x08,
         ORDERS_PROTECT              = 0x10,             // combinable state: check if protectee is attacked
+        ORDERS_PASSIVE              = 0x20,             // bots do nothing
         ORDERS_PRIMARY              = 0x0F,
         ORDERS_SECONDARY            = 0xF0,
         ORDERS_RESET                = 0xFF

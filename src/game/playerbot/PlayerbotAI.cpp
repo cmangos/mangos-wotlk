@@ -22,7 +22,6 @@
 #include "PlayerbotWarriorAI.h"
 #include "../Player.h"
 #include "../ObjectMgr.h"
-#include "../Chat.h"
 #include "WorldPacket.h"
 #include "../Spell.h"
 #include "../Unit.h"
@@ -118,7 +117,10 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
             m_classAI = (PlayerbotClassAI *) new PlayerbotWarriorAI(GetMaster(), m_bot, this);
             break;
         case CLASS_SHAMAN:
-            m_combatStyle = COMBAT_MELEE;
+            if (m_bot->GetSpec() == SHAMAN_SPEC_ENHANCEMENT)
+                m_combatStyle = COMBAT_MELEE;
+            else
+                m_combatStyle = COMBAT_RANGED;
             m_classAI = (PlayerbotClassAI *) new PlayerbotShamanAI(GetMaster(), m_bot, this);
             break;
         case CLASS_PALADIN:
@@ -130,7 +132,10 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
             m_classAI = (PlayerbotClassAI *) new PlayerbotRogueAI(GetMaster(), m_bot, this);
             break;
         case CLASS_DRUID:
-            m_combatStyle = COMBAT_MELEE;
+            if (m_bot->GetSpec() == DRUID_SPEC_FERAL)
+                m_combatStyle = COMBAT_MELEE;
+            else
+                m_combatStyle = COMBAT_RANGED;
             m_classAI = (PlayerbotClassAI *) new PlayerbotDruidAI(GetMaster(), m_bot, this);
             break;
         case CLASS_HUNTER:
@@ -316,7 +321,7 @@ uint32 PlayerbotAI::initSpell(uint32 spellId)
     if (next == 0)
     {
         const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
-        DEBUG_LOG ("[PlayerbotAI]: initSpell - Playerbot spell init: %s is %u", pSpellInfo->SpellName[0], spellId);
+        // DEBUG_LOG ("[PlayerbotAI]: initSpell - Playerbot spell init: %s is %u", pSpellInfo->SpellName[0], spellId);
 
         // Add spell to spellrange map
         Spell *spell = new Spell(m_bot, pSpellInfo, false);
@@ -706,7 +711,10 @@ void PlayerbotAI::ReloadAI()
             break;
         case CLASS_SHAMAN:
             if (m_classAI) delete m_classAI;
-            m_combatStyle = COMBAT_MELEE;
+            if (m_bot->GetSpec() == SHAMAN_SPEC_ENHANCEMENT)
+                m_combatStyle = COMBAT_MELEE;
+            else
+                m_combatStyle = COMBAT_RANGED;
             m_classAI = (PlayerbotClassAI *) new PlayerbotShamanAI(GetMaster(), m_bot, this);
             break;
         case CLASS_PALADIN:
@@ -721,7 +729,10 @@ void PlayerbotAI::ReloadAI()
             break;
         case CLASS_DRUID:
             if (m_classAI) delete m_classAI;
-            m_combatStyle = COMBAT_MELEE;
+            if (m_bot->GetSpec() == DRUID_SPEC_FERAL)
+                m_combatStyle = COMBAT_MELEE;
+            else
+                m_combatStyle = COMBAT_RANGED;
             m_classAI = (PlayerbotClassAI *) new PlayerbotDruidAI(GetMaster(), m_bot, this);
             break;
         case CLASS_HUNTER:
@@ -748,7 +759,9 @@ void PlayerbotAI::SendOrders(Player& /*player*/)
     else if (m_combatOrder & ORDERS_ASSIST)
         out << "I ASSIST " << (m_targetAssist ? m_targetAssist->GetName() : "unknown");
     else if (m_combatOrder & ORDERS_HEAL)
-        out << "I HEAL";
+        out << "I HEAL and DISPEL";
+    else if (m_combatOrder & ORDERS_NODISPEL)
+        out << "I HEAL and WON'T DISPEL";
     else if (m_combatOrder & ORDERS_PASSIVE)
         out << "I'M PASSIVE";
     if ((m_combatOrder & ORDERS_PRIMARY) && (m_combatOrder & ORDERS_SECONDARY))
@@ -1660,6 +1673,16 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             VendorItem const* crItem = vendorslot < vCount ? vItems->GetItem(vendorslot) : tItems->GetItem(vendorslot - vCount);
             if (!crItem)
                 return;
+
+            ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(crItem->item);
+            if (pProto)
+            {
+                std::ostringstream out;
+                out << "|cff009900" << "I received item: |r";
+                MakeItemLink(pProto, out);
+                TellMaster(out.str().c_str());
+            }
+            return;
         }
 
         case SMSG_ITEM_PUSH_RESULT:
@@ -3165,6 +3188,7 @@ void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit *target)
     else if (str == "heal") co = ORDERS_HEAL;
     else if (str == "protect") co = ORDERS_PROTECT;
     else if (str == "passive") co = ORDERS_PASSIVE;
+    else if (str == "nodispel") co = ORDERS_NODISPEL;
     else
         co = ORDERS_RESET;
     SetCombatOrder(co, target);
@@ -4033,7 +4057,7 @@ Item* PlayerbotAI::FindItem(uint32 ItemId)
         if (pBag)
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
-                DEBUG_LOG ("[PlayerbotAI]: FindItem - [%s's]bag[%u] slot = %u", m_bot->GetName(), bag, slot);  // 1 to bagsize = ?
+                // DEBUG_LOG ("[PlayerbotAI]: FindItem - [%s's]bag[%u] slot = %u", m_bot->GetName(), bag, slot);  // 1 to bagsize = ?
                 Item* const pItem = m_bot->GetItemByPos(bag, slot); // 20 to 23, 1 to bagsize
                 if (pItem)
                 {
@@ -5896,7 +5920,7 @@ void PlayerbotAI::EquipItem(Item* src_Item)
     uint8 src_bagIndex = src_Item->GetBagSlot();
     uint8 src_slot = src_Item->GetSlot();
 
-    DEBUG_LOG("PlayerbotAI::EquipItem: %s in srcbag = %u, srcslot = %u", src_Item->GetProto()->Name1, src_bagIndex, src_slot);
+    // DEBUG_LOG("PlayerbotAI::EquipItem: %s in srcbag = %u, srcslot = %u", src_Item->GetProto()->Name1, src_bagIndex, src_slot);
 
     uint16 dest;
     InventoryResult msg = m_bot->CanEquipItem(NULL_SLOT, dest, src_Item, !src_Item->IsBag());
@@ -7675,14 +7699,14 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
                     SetActiveTalentSpec(ts);
                     if (!ApplyActiveTalentSpec())
                         SendWhisper("The talent spec has been set active but could not be applied. It appears something has gone awry.", fromPlayer);
-                        //DEBUG_LOG ("[PlayerbotAI]: Could set TalentSpec but could not apply it - 'talent spec #': Class: %li; chosenSpec: %u", (long)m_bot->getClass(), chosenSpec);
-                    InspectUpdate();
+<<<                     //DEBUG_LOG ("[PlayerbotAI]: Could set TalentSpec but could not apply it - 'talent spec #': Class: %i; chosenSpec: %li", (long)m_bot->getClass(), chosenSpec);
+>>>                 InspectUpdate();
                 }
                 else
                 {
                     SendWhisper("An error has occured. Please let a Game Master know. This error has been logged.", fromPlayer);
-                    DEBUG_LOG ("[PlayerbotAI]: Could not GetTalentSpec to set & apply - 'talent spec #': Class: %li; chosenSpec: %u", (long) m_bot->getClass(), chosenSpec);
-                }
+<<<                 DEBUG_LOG ("[PlayerbotAI]: Could not GetTalentSpec to set & apply - 'talent spec #': Class: %i; chosenSpec: %li", (long) m_bot->getClass(), chosenSpec);
+>>>             }
             }
         }
     }
@@ -9283,9 +9307,9 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("spells", text)) {}
-            else if (ExtractCommand("tame", text)) {}
+<<<         else if (ExtractCommand("tame", text)) {}
             else if (ExtractCommand("abandon", text)) {}
-            else if (ExtractCommand("cast", text)) {}
+===         else if (ExtractCommand("cast", text)) {}
             else if (ExtractCommand("toggle", text)) {}
             else if (ExtractCommand("state", text)) {}
             else if (ExtractCommand("react", text))

@@ -4,9 +4,9 @@
    Author  : Natsukawa
    Version : 0.35
  */
-
 #include "PlayerbotPaladinAI.h"
 #include "PlayerbotMgr.h"
+#include "../SpellAuras.h"
 
 class PlayerbotAI;
 
@@ -64,6 +64,8 @@ PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, 
     HAND_OF_SACRIFICE             = ai->initSpell(HAND_OF_SACRIFICE_1);
     SHIELD_OF_RIGHTEOUSNESS       = ai->initSpell(SHIELD_OF_RIGHTEOUSNESS_1);
     REDEMPTION                    = ai->initSpell(REDEMPTION_1);
+    PURIFY                        = ai->initSpell(PURIFY_1);
+    CLEANSE                       = ai->initSpell(CLEANSE_1);
 
     // Warrior auras
     DEFENSIVE_STANCE              = 71;   //Def Stance
@@ -104,6 +106,37 @@ bool PlayerbotPaladinAI::HealTarget(Unit *target)
 
     if (hp < 40 && ai->CastSpell(HOLY_LIGHT, *target))
         return true;
+
+    if (PURIFY > 0 && ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
+    {
+        uint32 DISPEL = CLEANSE > 0 ? CLEANSE : PURIFY;
+        uint32 dispelMask  = GetDispellMask(DISPEL_DISEASE);
+        uint32 dispelMask2 = GetDispellMask(DISPEL_POISON);
+        uint32 dispelMask3 = GetDispellMask(DISPEL_MAGIC);
+        Unit::SpellAuraHolderMap const& auras = target->GetSpellAuraHolderMap();
+        for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+        {
+            SpellAuraHolder *holder = itr->second;
+            if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
+            {
+                if (holder->GetSpellProto()->Dispel == DISPEL_DISEASE)
+                    ai->CastSpell(DISPEL, *target);
+                return false;
+            }
+            else if ((1 << holder->GetSpellProto()->Dispel) & dispelMask2)
+            {
+                if (holder->GetSpellProto()->Dispel == DISPEL_POISON)
+                    ai->CastSpell(DISPEL, *target);
+                return false;
+            }
+            else if ((1 << holder->GetSpellProto()->Dispel) & dispelMask3 & (DISPEL == CLEANSE))
+            {
+                if (holder->GetSpellProto()->Dispel == DISPEL_MAGIC)
+                    ai->CastSpell(DISPEL, *target);
+                return false;
+            }
+        }
+    }
 
     return false;
 } // end HealTarget
@@ -153,7 +186,7 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
         }
     }
 
-    if (RIGHTEOUS_FURY > 0 && !m_bot->HasAura(RIGHTEOUS_FURY, EFFECT_INDEX_0))
+    if (RIGHTEOUS_FURY > 0 && !m_bot->HasAura(RIGHTEOUS_FURY, EFFECT_INDEX_0) && ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK)
         ai->CastSpell (RIGHTEOUS_FURY, *m_bot);
 
     if (SHADOW_RESISTANCE_AURA > 0 && !m_bot->HasAura(SHADOW_RESISTANCE_AURA, EFFECT_INDEX_0) && pTarget->getClass() == CLASS_WARLOCK)

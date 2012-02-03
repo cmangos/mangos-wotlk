@@ -137,7 +137,9 @@ private:
            SEAL_OF_LIGHT,
            SEAL_OF_RIGHTEOUSNESS,
            SEAL_OF_VENGEANCE,
-           SEAL_OF_WISDOM;
+           SEAL_OF_WISDOM,
+           PURIFY,
+           CLEANSE;
 
     // Protection
     uint32 GREATER_BLESSING_OF_KINGS,
