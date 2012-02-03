@@ -1,5 +1,6 @@
 
 #include "PlayerbotShamanAI.h"
+#include "../SpellAuras.h"
 
 class PlayerbotAI;
 PlayerbotShamanAI::PlayerbotShamanAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
@@ -17,6 +18,8 @@ PlayerbotShamanAI::PlayerbotShamanAI(Player* const master, Player* const bot, Pl
     HEALING_STREAM_TOTEM     = ai->initSpell(HEALING_STREAM_TOTEM_1);
     MANA_SPRING_TOTEM        = ai->initSpell(MANA_SPRING_TOTEM_1);
     MANA_TIDE_TOTEM          = ai->initSpell(MANA_TIDE_TOTEM_1);
+	CURE_TOXINS				 = ai->initSpell(CURE_TOXINS_1);
+	CLEANSE_SPIRIT			 = ai->initSpell(CLEANSE_SPIRIT_1);
     // enhancement
     FOCUSED                  = 0; // Focused what?
     STORMSTRIKE              = ai->initSpell(STORMSTRIKE_1);
@@ -88,6 +91,22 @@ void PlayerbotShamanAI::HealTarget(Unit &target, uint8 hp)
         ai->CastSpell(RIPTIDE, target);
     else if (hp < 70 && CHAIN_HEAL > 0 && ai->GetManaPercent() >= 24)
         ai->CastSpell(CHAIN_HEAL, target);
+	//else if (CLEANSE_SPIRIT > 0)
+	//	ai->CastSpell(CLEANSE_SPIRIT, target);
+	if (CURE_TOXINS > 0 && ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
+	{
+		uint32 dispelMask  = GetDispellMask(DISPEL_POISON);
+		Unit::SpellAuraHolderMap const& auras = target.GetSpellAuraHolderMap();
+		for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+		{
+			SpellAuraHolder *holder = itr->second;
+			if ((1<<holder->GetSpellProto()->Dispel) & dispelMask)
+			{	
+				if(holder->GetSpellProto()->Dispel == DISPEL_POISON)
+					ai->CastSpell(CURE_TOXINS, target);
+			}
+		}
+	}
     // end HealTarget
 }
 

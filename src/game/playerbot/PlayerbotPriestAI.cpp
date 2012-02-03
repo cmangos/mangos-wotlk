@@ -1,5 +1,6 @@
 
 #include "PlayerbotPriestAI.h"
+#include "../SpellAuras.h"
 
 class PlayerbotAI;
 
@@ -23,6 +24,7 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     CIRCLE_OF_HEALING             = ai->initSpell(CIRCLE_OF_HEALING_1);
     BINDING_HEAL                  = ai->initSpell(BINDING_HEAL_1);
     PRAYER_OF_MENDING             = ai->initSpell(PRAYER_OF_MENDING_1);
+	CURE_DISEASE				  = ai->initSpell(CURE_DISEASE_1);
 
     // SHADOW
     FADE                          = ai->initSpell(FADE_1);
@@ -73,6 +75,22 @@ bool PlayerbotPriestAI::HealTarget(Unit* target)
 {
     PlayerbotAI* ai = GetAI();
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
+
+	if (CURE_DISEASE > 0 && ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
+	{
+		uint32 dispelMask  = GetDispellMask(DISPEL_DISEASE);
+		Unit::SpellAuraHolderMap const& auras = target->GetSpellAuraHolderMap();
+		for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+		{
+			SpellAuraHolder *holder = itr->second;
+			if ((1<<holder->GetSpellProto()->Dispel) & dispelMask)
+			{	
+				if(holder->GetSpellProto()->Dispel == DISPEL_DISEASE)
+					ai->CastSpell(CURE_DISEASE, *target);
+					return false;
+			}
+		}
+	}
 
     if (hp >= 80)
         return false;
@@ -375,6 +393,9 @@ void PlayerbotPriestAI::DoNonCombatActions()
 
                 if (PRAYER_OF_SPIRIT && ai->HasSpellReagents(PRAYER_OF_SPIRIT) && ai->Buff(PRAYER_OF_SPIRIT, master))
                     return;
+				
+				if (PRAYER_OF_SHADOW_PROTECTION && ai->HasSpellReagents(PRAYER_OF_SHADOW_PROTECTION) && ai->Buff(PRAYER_OF_SHADOW_PROTECTION, master))
+					return;
             }
 
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();

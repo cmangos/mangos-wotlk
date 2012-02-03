@@ -118,7 +118,7 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
             m_classAI = (PlayerbotClassAI *) new PlayerbotWarriorAI(GetMaster(), m_bot, this);
             break;
         case CLASS_SHAMAN:{
-			if (m_bot->GetSpec() == 263) {
+			if (m_bot->GetSpec() == SHAMAN_SPEC_ENHANCEMENT) {
 				m_combatStyle = COMBAT_MELEE;
 				}
 			else
@@ -135,7 +135,7 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
             m_classAI = (PlayerbotClassAI *) new PlayerbotRogueAI(GetMaster(), m_bot, this);
             break;
         case CLASS_DRUID:
-            if (m_bot->GetSpec() == 281) {
+            if (m_bot->GetSpec() == DRUID_SPEC_FERAL) {
 				m_combatStyle = COMBAT_MELEE;
 				}
 			else
@@ -717,7 +717,7 @@ void PlayerbotAI::ReloadAI()
             break;
         case CLASS_SHAMAN:
             if (m_classAI) delete m_classAI;
-            if (m_bot->GetSpec() == 263) {
+            if (m_bot->GetSpec() == SHAMAN_SPEC_ENHANCEMENT) {
 				m_combatStyle = COMBAT_MELEE;
 				}
 			else
@@ -736,7 +736,7 @@ void PlayerbotAI::ReloadAI()
             break;
         case CLASS_DRUID:
             if (m_classAI) delete m_classAI;
-            if (m_bot->GetSpec() == 281) {
+            if (m_bot->GetSpec() == DRUID_SPEC_FERAL) {
 				m_combatStyle = COMBAT_MELEE;
 				}
 			else
@@ -767,7 +767,9 @@ void PlayerbotAI::SendOrders(Player& /*player*/)
     else if (m_combatOrder & ORDERS_ASSIST)
         out << "I ASSIST " << (m_targetAssist ? m_targetAssist->GetName() : "unknown");
     else if (m_combatOrder & ORDERS_HEAL)
-        out << "I HEAL";
+        out << "I HEAL and DISPEL";
+	else if (m_combatOrder & ORDERS_NODISPEL)
+		out << "I HEAL and WON'T DISPEL";
     if ((m_combatOrder & ORDERS_PRIMARY) && (m_combatOrder & ORDERS_SECONDARY))
         out << " and ";
     if (m_combatOrder & ORDERS_PROTECT)
@@ -3051,6 +3053,7 @@ void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit *target)
     else if (str == "assist") co = ORDERS_ASSIST;
     else if (str == "heal") co = ORDERS_HEAL;
     else if (str == "protect") co = ORDERS_PROTECT;
+	else if (str == "nodispel") co = ORDERS_NODISPEL;
     else
         co = ORDERS_RESET;
     SetCombatOrder(co, target);
@@ -8312,18 +8315,7 @@ std::string PlayerbotAI::_HandleCommandHelpHelper(std::string sCommand, std::str
     return oss.str();
 }
 
-//Cass Spec numbers for testing/whatever (temporary, will update each class with enums or something)
-
-//WARRIOR: 161 ARMS, 163 PROTECTION, 164 FURY
-//PRIEST: 201 DISCIPLINE, 202 HOLY, 203 SHADOW
-//SHAMAN: 261 ELEMENTAL, 262 RESTORATION, 263 ENHANCEMENT
-//DRUID: 281 FERAL, 282 RESTORATION, 283 BALANCE
-//MAGE: 41 FIRE, 61 FROST, 81 ARCANE
-//DEATH KNIGHT: 398 BLOOD, 399 FROST, 400 UNHOLY
-//HUNTER: 361 BEASTMASTERY, 362 SURVIVAL, 363 MARKSMANSHIP
-//WARLOCK: 301 DESTRUCTION, 302 AFFLICTION, 303 DEMONOLOGY
-//PALADIN: 381 RETRIBUTION, 382 HOLY, 383 PROTECTION
-//ROGUE 181 COMBAT, 182 ASSASSINATION, 183 SUBTELTY
+//See MainSpec enum in PlayerbotAI.h for details on class return values
 uint32 Player::GetSpec()
 {
 	uint32 row = 0,spec = 0;
