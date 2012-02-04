@@ -7699,14 +7699,14 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
                     SetActiveTalentSpec(ts);
                     if (!ApplyActiveTalentSpec())
                         SendWhisper("The talent spec has been set active but could not be applied. It appears something has gone awry.", fromPlayer);
-<<<                     //DEBUG_LOG ("[PlayerbotAI]: Could set TalentSpec but could not apply it - 'talent spec #': Class: %i; chosenSpec: %li", (long)m_bot->getClass(), chosenSpec);
->>>                 InspectUpdate();
+                    //DEBUG_LOG ("[PlayerbotAI]: Could set TalentSpec but could not apply it - 'talent spec #': Class: %i; chosenSpec: %li", (long)m_bot->getClass(), chosenSpec);
+                    InspectUpdate();
                 }
                 else
                 {
                     SendWhisper("An error has occured. Please let a Game Master know. This error has been logged.", fromPlayer);
-<<<                 DEBUG_LOG ("[PlayerbotAI]: Could not GetTalentSpec to set & apply - 'talent spec #': Class: %i; chosenSpec: %li", (long) m_bot->getClass(), chosenSpec);
->>>             }
+                    DEBUG_LOG ("[PlayerbotAI]: Could not GetTalentSpec to set & apply - 'talent spec #': Class: %i; chosenSpec: %li", (long) m_bot->getClass(), chosenSpec);
+                }
             }
         }
     }
@@ -9307,9 +9307,9 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("spells", text)) {}
-<<<         else if (ExtractCommand("tame", text)) {}
+            else if (ExtractCommand("tame", text)) {}
             else if (ExtractCommand("abandon", text)) {}
-===         else if (ExtractCommand("cast", text)) {}
+            else if (ExtractCommand("cast", text)) {}
             else if (ExtractCommand("toggle", text)) {}
             else if (ExtractCommand("state", text)) {}
             else if (ExtractCommand("react", text))
