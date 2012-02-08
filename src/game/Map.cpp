@@ -35,6 +35,7 @@
 #include "DBCEnums.h"
 #include "MapPersistentStateMgr.h"
 #include "VMapFactory.h"
+#include "MoveMap.h"
 #include "BattleGroundMgr.h"
 
 Map::~Map()
@@ -52,6 +53,9 @@ Map::~Map()
         delete i_data;
         i_data = NULL;
     }
+
+    // unload instance specific navigation data
+    MMAP::MMapFactory::createOrGetMMapManager()->unloadMapInstance(m_TerrainData->GetMapId(), GetInstanceId());
 
     //release reference count
     if(m_TerrainData->Release())
@@ -3211,11 +3215,9 @@ uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
         case HIGHGUID_VEHICLE:
             return m_VehicleGuids.Generate();
         default:
-            MANGOS_ASSERT(0);
+            MANGOS_ASSERT(false);
+            return 0;
     }
-
-    MANGOS_ASSERT(0);
-    return 0;
 }
 
 /**

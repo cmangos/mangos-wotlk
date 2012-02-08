@@ -315,7 +315,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
 
     SendUpdate();
 
-    if (Player *player = sObjectMgr.GetPlayer(guid))
+    if (Player* player = sObjectMgr.GetPlayer(guid))
     {
         if (!IsLeader(player->GetObjectGuid()) && !isBGGroup())
         {
@@ -1169,19 +1169,26 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant)
 
 bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint8 group)
 {
-    if(IsFull())
+    if (IsFull())
         return false;
 
     if (!guid)
         return false;
 
-    Player *player = sObjectMgr.GetPlayer(guid);
+    Player* player = sObjectMgr.GetPlayer(guid, false);
+
+    uint32 lastMap = 0;
+    if (player && player->IsInWorld())
+        lastMap = player->GetMapId();
+    else if (player && player->IsBeingTeleported())
+        lastMap = player->GetTeleportDest().mapid;
 
     MemberSlot member;
     member.guid      = guid;
     member.name      = name;
     member.group     = group;
     member.assistant = isAssistant;
+    member.lastMap   = lastMap;
     m_memberSlots.push_back(member);
 
     SubGroupCounterIncrease(group);
@@ -1193,16 +1200,19 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
         if (player->GetGroup() && isBGGroup())
             player->SetBattleGroundRaid(this, group);
         //if player is in bg raid and we are adding him to normal group, then call SetOriginalGroup()
-        else if ( player->GetGroup() )
+        else if (player->GetGroup())
             player->SetOriginalGroup(this, group);
         //if player is not in group, then call set group
         else
             player->SetGroup(this, group);
 
-        // if the same group invites the player back, cancel the homebind timer
-        if (InstanceGroupBind *bind = GetBoundInstance(player->GetMapId(), player))
-            if (bind->state->GetInstanceId() == player->GetInstanceId())
-                player->m_InstanceValid = true;
+        if (player->IsInWorld())
+        {
+            // if the same group invites the player back, cancel the homebind timer
+            if (InstanceGroupBind* bind = GetBoundInstance(player->GetMapId(), player))
+                if (bind->state->GetInstanceId() == player->GetInstanceId())
+                    player->m_InstanceValid = true;
+        }
     }
 
     if (!isRaidGroup())                                     // reset targetIcons for non-raid-groups
@@ -1681,9 +1691,21 @@ bool Group::InCombatToInstance(uint32 instanceId)
     return false;
 }
 
+bool Group::SetPlayerMap(const ObjectGuid guid, uint32 mapid)
+{
+    member_witerator slot = _getMemberWSlot(guid);
+    if (slot != m_memberSlots.end())
+    {
+        slot->lastMap = mapid;
+        DEBUG_LOG("Group::SetPlayerMap> map is updated");
+        return true;
+    }
+    return false;
+}
+
 void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* SendMsgTo)
 {
-    if(isBGGroup())
+    if (isBGGroup())
         return;
 
     // method can be INSTANCE_RESET_ALL, INSTANCE_RESET_CHANGE_DIFFICULTY, INSTANCE_RESET_GROUP_DISBAND
@@ -1691,17 +1713,30 @@ void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* Send
     // we assume that when the difficulty changes, all instances that can be reset will be
     Difficulty diff = GetDifficulty(isRaid);
 
-    for(BoundInstancesMap::iterator itr = m_boundInstances[diff].begin(); itr != m_boundInstances[diff].end();)
+    typedef std::set<uint32> OfflineMapSet;
+    OfflineMapSet mapsWithOfflinePlayer;                    // to store map of offline players
+
+    if (method != INSTANCE_RESET_GROUP_DISBAND)
     {
-        DungeonPersistentState *state = itr->second.state;
-        const MapEntry *entry = sMapStore.LookupEntry(itr->first);
+        // Store maps in which are offline members for instance reset check.
+        for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+        {
+            if (!ObjectAccessor::FindPlayer(itr->guid))
+                mapsWithOfflinePlayer.insert(itr->lastMap); // add last map from offline player
+        }
+    }
+
+    for (BoundInstancesMap::iterator itr = m_boundInstances[diff].begin(); itr != m_boundInstances[diff].end();)
+    {
+        DungeonPersistentState* state = itr->second.state;
+        const MapEntry* entry = sMapStore.LookupEntry(itr->first);
         if (!entry || entry->IsRaid() != isRaid || (!state->CanReset() && method != INSTANCE_RESET_GROUP_DISBAND))
         {
             ++itr;
             continue;
         }
 
-        if(method == INSTANCE_RESET_ALL)
+        if (method == INSTANCE_RESET_ALL)
         {
             // the "reset all instances" method can only reset normal maps
             if (entry->map_type == MAP_RAID || diff == DUNGEON_DIFFICULTY_HEROIC)
@@ -1712,9 +1747,13 @@ void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* Send
         }
 
         bool isEmpty = true;
-        // if the map is loaded, reset it
-        if (Map *map = sMapMgr.FindMap(state->GetMapId(), state->GetInstanceId()))
-            if (map->IsDungeon() && !(method == INSTANCE_RESET_GROUP_DISBAND && !state->CanReset()))
+        // check if there are offline members on the map
+        if (method != INSTANCE_RESET_GROUP_DISBAND && mapsWithOfflinePlayer.find(state->GetMapId()) != mapsWithOfflinePlayer.end())
+            isEmpty = false;
+
+        // if the map is loaded, reset it if can
+        if (isEmpty && entry->IsDungeon() && !(method == INSTANCE_RESET_GROUP_DISBAND && !state->CanReset()))
+            if (Map* map = sMapMgr.FindMap(state->GetMapId(), state->GetInstanceId()))
                 isEmpty = ((DungeonMap*)map)->Reset(method);
 
         if (SendMsgTo)
@@ -1725,6 +1764,7 @@ void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* Send
                 SendMsgTo->SendResetInstanceFailed(0, state->GetMapId());
         }
 
+        // TODO - Adapt here when clear how difficulty changes must be handled
         if (isEmpty || method == INSTANCE_RESET_GROUP_DISBAND || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
         {
             // do not reset the instance, just unbind if others are permanently bound to it
