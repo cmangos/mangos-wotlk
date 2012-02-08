@@ -7279,7 +7279,7 @@ void PlayerbotAI::_HandleCommandRepair(std::string &text, Player &fromPlayer)
 void PlayerbotAI::_HandleCommandAuction(std::string &text, Player &fromPlayer)
 {
     if (text == "")
-        m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER); // list all bot auctions
+        m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);  // list all bot auctions
     else if (ExtractCommand("add", text))
     {
         std::list<uint32> itemIds;
@@ -7590,7 +7590,7 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
 void PlayerbotAI::_HandleCommandBank(std::string &text, Player &fromPlayer)
 {
     if (text == "")
-        m_findNPC.push_back(UNIT_NPC_FLAG_BANKER); // list all bot balance
+        m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);  // list all bot balance
     else if (ExtractCommand("deposit", text))
     {
         std::list<uint32> itemIds;
@@ -7830,14 +7830,14 @@ void PlayerbotAI::_HandleCommandUse(std::string &text, Player &fromPlayer)
             GameObject *go = m_bot->GetMap()->GetGameObject(gotarget);
             if (go)
                 // DEBUG_LOG("tool (%s) on target gameobject (%s)",tool->GetProto()->Name1,go->GetGOInfo()->name);
-                UseItem(tool, TARGET_FLAG_OBJECT, gotarget); // on gameobject
+                UseItem(tool, TARGET_FLAG_OBJECT, gotarget);  // on gameobject
         }
         else if (unit)
             // DEBUG_LOG("tool (%s) on selected target unit",tool->GetProto()->Name1);
-            UseItem(tool, unit); // on unit
+            UseItem(tool, unit);  // on unit
         else
             // DEBUG_LOG("tool (%s) on self",tool->GetProto()->Name1);
-            UseItem(tool); // on self
+            UseItem(tool);  // on self
     }
     return;
 }

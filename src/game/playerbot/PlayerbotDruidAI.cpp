@@ -222,7 +222,7 @@ void PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
 
     // entire tank spell sequence is predicated on being in [dire] bear form. If not in it, exit (*before* going out of other forms)
     if (!m_bot->HasAura(DIRE_BEAR_FORM) && !m_bot->HasAura(BEAR_FORM))
-        return _DoNextPVECombatManeuverMeleeDPS(pTarget); // bear = melee so...
+        return _DoNextPVECombatManeuverMeleeDPS(pTarget);  // bear = melee so...
 
     // Impossible due to check above
     // If still in cat/moonkin/tree form, go out of it
