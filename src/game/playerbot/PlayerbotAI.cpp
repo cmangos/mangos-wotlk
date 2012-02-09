@@ -475,6 +475,1202 @@ void PlayerbotAI::SendNotEquipList(Player& /*player*/)
         TellMaster("There are no items in my inventory that I can equip.");
 }
 
+void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
+{
+	ChatHandler ch(GetMaster());
+	std::ostringstream out;
+	std::ostringstream msg;
+	uint32 calc = .10;
+	if (AutoEquipPlug != 1)
+		if (AutoEquipPlug == 2)
+			AutoEquipPlug = 0;
+		else
+			return;
+
+	// check equipped items for anything that is worn and UNequip them first if possible
+	for (uint8 eqslot = EQUIPMENT_SLOT_START; eqslot < EQUIPMENT_SLOT_END; eqslot++)
+	{
+		Item* const eqitem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, eqslot);
+		if (!eqitem)
+			continue;
+		// if item durability is less than 10% of max durability, UNequip it.
+		if (eqitem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && eqitem->GetUInt32Value(ITEM_FIELD_DURABILITY) <= (calc * eqitem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY)))
+		{
+			ItemPosCountVec sDest;
+			InventoryResult msg = m_bot->CanStoreItem( NULL_BAG, NULL_SLOT, sDest, eqitem, false );
+			if(msg == EQUIP_ERR_OK)
+			{
+				m_bot->RemoveItem(INVENTORY_SLOT_BAG_0, eqslot, true);
+				m_bot->StoreItem( sDest, eqitem, true );
+			}
+			else
+			{
+				m_bot->SendEquipError(msg, eqitem, NULL);
+			}
+		}
+	}
+
+	// Find equippable items in main backpack one at a time
+	for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
+	{
+		Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+		if (!pItem)
+			continue;
+		// if item durability is less than 10% of max durability, ignore it..
+		if (pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && pItem->GetUInt32Value(ITEM_FIELD_DURABILITY) <= (calc * pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY)))
+		{
+			MakeItemLink(pItem, out, true);
+			continue;
+		}
+		uint16 dest;
+		uint8 msg = m_bot->CanEquipItem(NULL_SLOT, dest, pItem, !pItem->IsBag());
+		if (msg != EQUIP_ERR_OK)
+			continue;
+
+		int8 equipSlot = uint8(dest);
+		if (!(equipSlot >= 0 && equipSlot < 19))
+			continue;
+
+		Item* const pItem2 = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, equipSlot); // do we have anything equipped of this type?
+		if (!pItem2)// no item to compare to see if has stats useful for this bots class/style so check for stats and equip if possible
+		{
+			ItemPrototype const *pProto2 = pItem->GetProto();
+			if (!ItemStatComparison(pProto2, pProto2))
+				continue; 
+
+			EquipItem(pItem); //no item equipped so equip new one and go to next item.
+			continue;
+		}
+
+		// we have an equippable item, ..now lets send it to the comparison function to see if its better than we have on.
+		AutoEquipComparison(pItem, pItem2); //pItem is new item, pItem2 is equipped item.
+	}
+
+	// list out items in other removable backpacks
+	for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
+	{
+		const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+		if (pBag)
+			for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
+			{
+				Item* const pItem = m_bot->GetItemByPos(bag, slot);
+				if (!pItem)
+					continue;
+				// if item durability is less than 10% of max durability, ignore it..
+				if (pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && pItem->GetUInt32Value(ITEM_FIELD_DURABILITY) <= (calc * pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY)))
+				{
+					MakeItemLink(pItem, out, true);
+					continue;
+				}
+				uint16 dest;
+				uint8 msg = m_bot->CanEquipItem(NULL_SLOT, dest, pItem, !pItem->IsBag());
+				if (msg != EQUIP_ERR_OK)
+					continue;
+
+				int8 equipSlot = uint8(dest);
+				if (!(equipSlot >= 0 && equipSlot < 19))
+					continue;
+				Item* const pItem2 = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, equipSlot); // do we have anything equipped of this type?
+				if (!pItem2)
+				{
+					ItemPrototype const *pProto2 = pItem->GetProto();
+					if (!ItemStatComparison(pProto2, pProto2))
+						continue; 
+
+					EquipItem(pItem); //no item equipped so equip new one if useable stats and go to next item.
+					continue;
+				}
+				// we have an equippable item, but something else is equipped..now lets send it to the comparison function to see if its better than we have on.
+				AutoEquipComparison(pItem, pItem2); //pItem is new item, pItem2 is equipped item.
+
+			}
+	}
+	if (out.str().size() != 0)
+	{
+		std::ostringstream tmp;
+		tmp << "|h|cff00ffff _______________________________________ ";
+		ch.SendSysMessage(tmp.str().c_str());
+		ch.SendSysMessage(out.str().c_str());
+		ch.SendSysMessage(tmp.str().c_str());
+		TellMaster("These items are worn too badly to use.");// check inventory items.. we'll deal with equipped items elsewhere
+	}
+	InspectUpdate();
+}
+
+void PlayerbotAI::AutoEquipComparison(Item *pItem, Item *pItem2)
+{
+	const static uint32 item_armor_skills[MAX_ITEM_SUBCLASS_ARMOR] =
+	{
+		0, SKILL_CLOTH, SKILL_LEATHER, SKILL_MAIL, SKILL_PLATE_MAIL, 0, SKILL_SHIELD, 0, 0, 0, 0
+	};
+
+	ItemPrototype const *pProto = pItem2->GetProto(); // equipped item if any
+	ItemPrototype const *pProto2 = pItem->GetProto(); // new item to compare
+	
+	// First check to see if this item has stats, and if the bot REALLY wants to lose its old item
+	if (pProto2->StatsCount > 0)
+	{
+		if (!ItemStatComparison(pProto, pProto2))
+		return; // stats on equipped item are better, OR stats are not useful for this bots class/style
+	}
+	
+
+	// DEBUG_LOG("Item Class (%s)",(pProto->Class == ITEM_CLASS_WEAPON ? "Weapon" : "Not Weapon"));
+	switch (pProto->Class)
+	{
+	case ITEM_CLASS_WEAPON:
+		{
+			// DEBUG_LOG("Current Item DPS (%f) Equippable Item DPS (%f)",pProto->getDPS(),pProto2->getDPS());
+			// m_bot->GetSkillValue(pProto->RequiredSkill) < m_bot->GetSkillValue(pProto2->RequiredSkill)
+			if (pProto->getDPS() < pProto2->getDPS())   // if new item has a better DPS
+			{
+				EquipItem(pItem);
+				pProto = pProto2; // ensure that the item with the highest DPS is equipped
+			}
+			break;
+		}
+	case ITEM_CLASS_ARMOR:
+		{
+
+			if (pProto->ItemLevel < pProto2->ItemLevel && pProto->Armor <= pProto2->Armor && m_bot->HasSkill(item_armor_skills[pProto2->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProto2->SubClass + 1])) // itemlevel + armour + armour class
+				EquipItem(pItem);
+
+			// now in case they are same itemlevel, but one is better than the other..
+			if (pProto->ItemLevel == pProto2->ItemLevel && pProto->Quality < pProto2->Quality && pProto->Armor <= pProto2->Armor &&
+				m_bot->HasSkill(item_armor_skills[pProto2->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProto2->SubClass + 1])) // itemlevel + armour + armour class
+				EquipItem(pItem);        
+			break;
+		}
+	}
+	InspectUpdate();
+
+}
+bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemPrototype *pProto2)
+{
+	uint8 isclass = 0; // 1= caster 2 = hybrid 3 = melee
+	uint8 ishybrid = 0;
+	uint8 swap = 0;
+	uint8 itemscore = 0;
+	uint8 itemscore2 = 0;
+	uint8 score = 0;
+	
+
+	// get class and style to make it easier to compare later
+
+	
+	switch (m_bot->getClass())
+	{
+	case CLASS_SHAMAN:
+		{
+		isclass = 2;
+		ishybrid = 1; // hybrid caster
+		break;
+		}
+	case CLASS_PRIEST:
+		{
+		isclass = 1;
+		break;
+		}
+	case CLASS_MAGE:
+		{
+		isclass = 1;
+		break;
+		}
+	case CLASS_WARLOCK:
+		{
+		isclass = 1;
+		break;
+		}
+	case CLASS_DRUID:
+		{
+		ishybrid = 1;
+		isclass = 2; // caster
+		break;
+		}
+	}
+	switch (m_bot->getClass())
+	{
+	case CLASS_WARRIOR:
+	case CLASS_ROGUE:
+		isclass = 3; // melee
+		break;
+	}
+	switch (m_bot->getClass())
+	{
+	case CLASS_HUNTER:
+	case CLASS_PALADIN:
+	case CLASS_DEATH_KNIGHT:
+		isclass = 2; // hybrid melee
+		ishybrid = 1;
+		break;
+	}
+	
+
+	for (int i = 0; i < MAX_ITEM_PROTO_STATS; ++i) // item can only have 10 stats. We check each stat slot available for stat and type.
+	{
+		
+
+
+		uint32 itemmod = pProto->ItemStat[i].ItemStatType; // what stat type is in this slot
+
+		if (!itemmod) // if no stat type in this slot, continue to next slot
+			continue;
+		switch (itemmod)
+		{
+		case ITEM_MOD_MANA:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				//score = (score - 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HEALTH:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				//score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_AGILITY:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_STRENGTH:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				//score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_INTELLECT:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				//score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_SPIRIT:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				//score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_STAMINA:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_DEFENSE_SKILL_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				//score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_DODGE_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_PARRY_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				//score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_BLOCK_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				//score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HIT_MELEE_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				//score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HIT_RANGED_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				//score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				//score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HIT_SPELL_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				//score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_CRIT_MELEE_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				//score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_CRIT_RANGED_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_CRIT_SPELL_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				//score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HIT_TAKEN_MELEE_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				//score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HIT_TAKEN_RANGED_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				//score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HIT_TAKEN_SPELL_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_CRIT_TAKEN_MELEE_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_CRIT_TAKEN_RANGED_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_CRIT_TAKEN_SPELL_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HASTE_MELEE_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HASTE_RANGED_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HASTE_SPELL_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HIT_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_CRIT_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HIT_TAKEN_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_CRIT_TAKEN_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_RESILIENCE_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HASTE_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_EXPERTISE_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_ATTACK_POWER:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_RANGED_ATTACK_POWER:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_FERAL_ATTACK_POWER:            // deprecated
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_SPELL_HEALING_DONE:           // deprecated
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_SPELL_DAMAGE_DONE:                // deprecated
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_MANA_REGENERATION:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_ARMOR_PENETRATION_RATING:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_SPELL_POWER:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				//score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_HEALTH_REGEN:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+				score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_SPELL_PENETRATION:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			default:
+				break;
+			}
+		case ITEM_MOD_BLOCK_VALUE:
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+			//	score = (score + 1);
+				break;
+				}
+			case 2:
+				{
+				score = (score + 1);
+				break;
+				}
+			case 3:
+				{
+					score = (score + 1);
+					break;
+				}
+			default:
+				break;
+			}
+
+		}
+		if (swap == 0)
+		{
+			if (pProto != pProto2)
+			{
+				if ( i == MAX_ITEM_PROTO_STATS)
+				{
+					i = 0;
+					swap = 1;
+					pProto = pProto2;
+					itemscore = score;
+				}
+			}
+		}
+
+	}
+
+
+
+	itemscore2 = score;
+	swap = 0;
+	if (itemscore <= itemscore2)
+		return true;
+
+
+	return false;
+
+}
+
 void PlayerbotAI::SendQuestNeedList()
 {
     std::ostringstream out;
@@ -1357,6 +2553,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             {
                 m_bot->GetSession()->HandleAcceptTradeOpcode(p);  // packet not used
                 SetQuestNeedItems();
+				Player* const bot = GetPlayerBot();
+				AutoUpgradeEquipment(*bot);
             }
 
             //1 == TRADE_STATUS_BEGIN_TRADE
@@ -1720,6 +2918,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         out << "|cff009900" << "I received: |r";
                     MakeItemLink(pProto, out);
                     TellMaster(out.str().c_str());
+					Player* const bot = GetPlayerBot();
+					AutoUpgradeEquipment(*bot);
                 }
             }
 
@@ -2191,7 +3391,9 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
     if (m_botState != BOTSTATE_COMBAT)
     {
         SetState(BOTSTATE_COMBAT);
-        m_lootCurrent = ObjectGuid();
+        // m_lootCurrent = ObjectGuid(); This was clearing loot target, causing bots to leave corpses unlooted if interupted by combat. Needs testing.
+		// using this caused bot to remove current loot target, and add this new threat to the loot list.  Now it remembers the loot target and adds a new one.
+		// Bot will still clear the target if the master gets too far away from it.
         m_targetCombat = 0;
     }
 
@@ -2496,6 +3698,8 @@ void PlayerbotAI::DoLoot()
         SetState(BOTSTATE_NORMAL);
         m_bot->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
         m_inventory_full = false;
+		Player* const bot = GetPlayerBot();
+		AutoUpgradeEquipment(*bot);
         return;
     }
 
@@ -2962,6 +4166,8 @@ void PlayerbotAI::TurnInQuests(WorldObject *questgiver)
             if (!out.str().empty())
                 TellMaster(out.str());
         }
+		Player* const bot = GetPlayerBot();
+		AutoUpgradeEquipment(*bot);
     }
 }
 
@@ -6135,7 +7341,34 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
     if (!item)
         return;
 
-    if (item->CanBeTraded() && item->GetProto()->Quality == ITEM_QUALITY_POOR)
+    uint8 autosell = 0;
+	
+		std::ostringstream mout;
+		if (item->CanBeTraded() && item->GetProto()->Quality == ITEM_QUALITY_POOR) // trash sells automatically.
+			autosell = 1;
+		if (SellWhite == 1) // set this with the command 'sell all'
+		{
+			// here we'll do some checks for other items that are safe to automatically sell such as
+			// white items that are a number of levels lower than anything we could possibly use.
+			// We'll check to make sure its not a tradeskill tool, quest item etc, things that we don't want to lose.
+			if (item->GetProto()->SellPrice > 0 && item->GetProto()->Quality == ITEM_QUALITY_NORMAL && item->GetProto()->SubClass != ITEM_SUBCLASS_QUEST)
+			{
+				ItemPrototype const *pProto = item->GetProto();
+				if (pProto->RequiredLevel < (m_bot->getLevel() - 10) && pProto->SubClass != ITEM_SUBCLASS_WEAPON_MISC && pProto->FoodType == 0)
+				{
+					if (pProto->Class == ITEM_CLASS_WEAPON)
+						autosell = 1;
+					if (pProto->Class == ITEM_CLASS_ARMOR)
+						autosell = 1;
+				}
+				if (pProto->SubClass == ITEM_SUBCLASS_FOOD && (pProto->RequiredLevel < (m_bot->getLevel() - 10)))
+				{
+					autosell = 1;
+				}
+			}
+		}
+
+	if (autosell == 1) // set this switch above and this item gets sold automatically. Only set this for automatic sales e.g junk etc.
     {
         uint32 cost = item->GetCount() * item->GetProto()->SellPrice;
         m_bot->ModifyMoney(cost);
@@ -6691,11 +7924,12 @@ void PlayerbotAI::Sell(const uint32 itemid)
     }
 }
 
-void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bVerbose)
+void PlayerbotAI::SellGarbage(Player& /*player*/, bool bListNonTrash, bool bDetailTrashSold, bool bVerbose)
 {
     uint32 SoldCost = 0;
     uint32 SoldQuantity = 0;
     std::ostringstream report, goods;
+	ChatHandler ch(GetMaster());
 
     // list out items in main backpack
     for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
@@ -6705,12 +7939,33 @@ void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bV
             _doSellItem(item, report, goods, SoldCost, SoldQuantity);
     }
 
-    // and each of our other packs
-    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
+   uint8 notempty = 0;
+	if (goods.str().size() != 0)
+	{
+		notempty = 1;
+		TellMaster("Heres a list of items I can sell:");
+	}
+	// and each of our other packs
+    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag) // check for extra bags
     {
-        std::ostringstream goods;
+		// we want to output the item list to links one bag at a time and clear it, to prevent the list from overloading
+		if (goods.str().size() != 0) // This will be one bag behind in the check. if the previous bag listed anything, llist that now and clear the list
+		{
+			if (notempty == 0)
+			{
+				TellMaster("Heres a list of items I can sell:");
+				notempty = 1; // at least one bag must have had something in it, used at end of this function
+			}
+			else
+			{
+				ch.SendSysMessage(goods.str().c_str()); // previous bags list contents, including main backpack first.
+				goods.str(""); // clear the list for next bag
+			}
+		}
+		
         const Bag* const pBag = static_cast<Bag *>(m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag));
         if (pBag)
+		{
             // Very nice, but who cares what bag it's in?
             //const ItemPrototype* const pBagProto = pBag->GetProto();
             //std::string bagName = pBagProto->Name1;
@@ -6723,10 +7978,20 @@ void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bV
                 if (item)
                     _doSellItem(item, report, goods, SoldCost, SoldQuantity);
             }
+		}
     }
 
-    if (!bDetailTrashSold)
-        report.str("");  // clear ostringstream
+   if (goods.str().size() != 0) // This will make sure items in the last bag were output to links
+		{
+			ch.SendSysMessage(goods.str().c_str()); 
+			goods.str(""); // clear the list 
+			notempty = 1; // at least one bag must have had something in it, used at end of this function
+		}
+	if (notempty == 1)
+		TellMaster("All of the above items could be sold"); // links are complete, notify master
+
+    if (!bDetailTrashSold) // no trash got sold
+        report.str(""); // clear ostringstream
 
     if (SoldCost > 0)
     {
@@ -6738,19 +8003,14 @@ void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bV
 
         if (bVerbose)
             TellMaster(report.str());
+		if (SellWhite == 1)
+			SellWhite = 0;
     }
 
     // For all bags, non-gray sellable items
     if (bVerbose)
     {
-        if (bListNonTrash && goods.str().size() > 0)
-        {
-            if (SoldQuantity)
-                TellMaster("I could also sell: %s", goods.str().c_str());
-            else
-                TellMaster("I could sell: %s", goods.str().c_str());
-        }
-        else if (SoldQuantity == 0 && goods.str().size() == 0)
+        if (SoldQuantity == 0 && notempty == 0)
             TellMaster("No items to sell, trash or otherwise.");
     }
 }
@@ -6920,6 +8180,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
     else if (ExtractCommand("equip", input, true)) // true -> "equip" OR "e"
         _HandleCommandEquip(input, fromPlayer);
+
+	else if (ExtractCommand("autoequip", input, true)) // switches autoequip on or off if on already
+		_HandleCommandAutoEquip(input, fromPlayer);
 
     // find project: 20:50 02/12/10 rev.4 item in world and wait until ordered to follow
     else if (ExtractCommand("find", input, true)) // true -> "find" OR "f"
@@ -7175,6 +8438,19 @@ void PlayerbotAI::_HandleCommandCast(std::string &text, Player &fromPlayer)
 // sell [Item Link][Item Link] .. -- Sells bot(s) items from inventory
 void PlayerbotAI::_HandleCommandSell(std::string &text, Player &fromPlayer)
 {
+	if (ExtractCommand("all", text)) // switch to auto sell low level white items
+	{
+		if (text != "")
+		{
+			SendWhisper("Invalid subcommand for 'sell all'", fromPlayer);
+			return;
+		}
+		SellWhite = 1; // this gets reset once sale is complete.  for testing purposes
+		std::ostringstream msg;
+		 msg << "I will sell all my low level normal items the next time you sell.";
+	   SendWhisper(msg.str(),fromPlayer);
+		return;
+	}
     if (text == "")
     {
         SendWhisper("sell must be used with one or more item links (shift + click the item).", fromPlayer);
@@ -7841,7 +9117,40 @@ void PlayerbotAI::_HandleCommandUse(std::string &text, Player &fromPlayer)
     }
     return;
 }
-
+void PlayerbotAI::_HandleCommandAutoEquip(std::string &text, Player &fromPlayer)
+{
+	std::ostringstream msg;
+	if (ExtractCommand("now", text, true)) // run autoequip cycle right now
+    {
+	   msg << "Running Auto Equip cycle One time. My current setting is" << (AutoEquipPlug ? "ON" : "OFF");
+	   SendWhisper(msg.str(),fromPlayer);
+	   if (AutoEquipPlug == 0)
+		   AutoEquipPlug = 2;
+	   Player* const bot = GetPlayerBot();
+	   AutoUpgradeEquipment(*bot);
+            return;
+    }
+	else if (ExtractCommand("on", text, true)) // true -> "autoequip on"
+    {
+       AutoEquipPlug = 1;
+	   msg << "AutoEquip is now ON";
+	   SendWhisper(msg.str(),fromPlayer);
+            return;
+    }
+    else if (ExtractCommand("off", text, true)) // true -> "autoequip off"
+    {
+       AutoEquipPlug = 0;
+	   msg << "AutoEquip is now OFF";
+	   SendWhisper(msg.str(),fromPlayer);
+            return;
+    }
+    if (AutoEquipPlug != 1)
+        AutoEquipPlug = 1;
+    else
+        AutoEquipPlug = 0;
+    msg << "AutoEquip is now " << (AutoEquipPlug ? "ON" : "OFF");
+    SendWhisper(msg.str(),fromPlayer);
+}
 void PlayerbotAI::_HandleCommandEquip(std::string &text, Player &fromPlayer)
 {
     std::list<uint32> itemIds;
@@ -9106,6 +10415,19 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             return;
         }
     }
+	if (bMainHelp || ExtractCommand("autoequip", text))
+    {
+		ch.SendSysMessage(_HandleCommandHelpHelper("autoequip", "Used with no parameter: Toggles Auto Equipping for one or all bots to ON or OFF depending on their current setting.").c_str());
+		
+        if (!bMainHelp)
+        {
+			ch.SendSysMessage(_HandleCommandHelpHelper("autoequip < on >", "Turns Auto equipping ON for one, or all bots in group").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("autoequip < off >", "Turns Auto equipping OFF for one, or all bots in group").c_str());
+			ch.SendSysMessage(_HandleCommandHelpHelper("autoequip < now >", "Ignores current autoequip setting, Runs the auto equip cycle ONCE for one or all bots (/t or /p)").c_str());
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+            return;
+        }
+    }
     if (bMainHelp || ExtractCommand("assist", text))
     {
         ch.SendSysMessage(_HandleCommandHelpHelper("assist", "I will assist the character listed, attacking as they attack.", HL_NAME).c_str());
@@ -9345,7 +10667,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     if (bMainHelp || ExtractCommand("sell", text))
     {
         ch.SendSysMessage(_HandleCommandHelpHelper("sell", "Adds this to my 'for sale' list.", HL_ITEM, true).c_str());
-
+		ch.SendSysMessage(_HandleCommandHelpHelper("sell all", "The next time you sell, I'll sell all my low level white items.").c_str());
+		ch.SendSysMessage(_HandleCommandHelpHelper("sell all", "This command must be called each time before you sell, OR I won't auto sell white items.").c_str());
         if (!bMainHelp)
         {
             if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());

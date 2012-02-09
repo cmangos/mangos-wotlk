@@ -728,7 +728,8 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     continue;
                 }
                 else
-                    bot->GetPlayerbotAI()->SellGarbage();
+                    // changed the SellGarbage() function to support ch.SendSysMessaage()
+                     bot->GetPlayerbotAI()->SellGarbage(*bot);
             }
             return;
         }

@@ -1768,6 +1768,12 @@ public:
     //void Stay();
     //bool Follow(Player& player);
     void SendNotEquipList(Player& player);
+	uint32 AutoEquipPlug;               //switch for autoequip
+	uint32 SellWhite;					//switch for white item auto sell
+	void _HandleCommandAutoEquip(std::string &text, Player &fromPlayer);
+	void AutoUpgradeEquipment(Player& player);
+	void AutoEquipComparison(Item *pItem, Item *pItem2);
+	bool ItemStatComparison(const ItemPrototype *pProto, const ItemPrototype *pProto2);
     void Feast();
     void InterruptCurrentCastingSpell();
     void GetCombatTarget(Unit* forcedTarged = 0);
@@ -1831,7 +1837,7 @@ public:
     void GameObjectLocalization(std::string& gameobjectName, const uint32 entry) const;
 
     uint8 GetFreeBagSpace() const;
-    void SellGarbage(bool listNonTrash = true, bool bDetailTrashSold = false, bool verbose = true);
+    void SellGarbage(Player& player, bool listNonTrash = true, bool bDetailTrashSold = false, bool verbose = true);
     void Sell(const uint32 itemid);
     void Buy(ObjectGuid vendorguid, const uint32 itemid);
     std::string DropItem(const uint32 itemid);
