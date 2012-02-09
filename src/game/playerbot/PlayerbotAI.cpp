@@ -474,7 +474,6 @@ void PlayerbotAI::SendNotEquipList(Player& /*player*/)
     if (!bAnyEquippable)
         TellMaster("There are no items in my inventory that I can equip.");
 }
-
 void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
 {
 	ChatHandler ch(GetMaster());
@@ -486,7 +485,6 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
 			AutoEquipPlug = 0;
 		else
 			return;
-
 	// check equipped items for anything that is worn and UNequip them first if possible
 	for (uint8 eqslot = EQUIPMENT_SLOT_START; eqslot < EQUIPMENT_SLOT_END; eqslot++)
 	{
@@ -509,7 +507,6 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
 			}
 		}
 	}
-
 	// Find equippable items in main backpack one at a time
 	for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
 	{
@@ -526,26 +523,21 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
 		uint8 msg = m_bot->CanEquipItem(NULL_SLOT, dest, pItem, !pItem->IsBag());
 		if (msg != EQUIP_ERR_OK)
 			continue;
-
 		int8 equipSlot = uint8(dest);
 		if (!(equipSlot >= 0 && equipSlot < 19))
 			continue;
-
 		Item* const pItem2 = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, equipSlot); // do we have anything equipped of this type?
 		if (!pItem2)// no item to compare to see if has stats useful for this bots class/style so check for stats and equip if possible
 		{
 			ItemPrototype const *pProto2 = pItem->GetProto();
 			if (!ItemStatComparison(pProto2, pProto2))
-				continue; 
-
+				continue;
 			EquipItem(pItem); //no item equipped so equip new one and go to next item.
 			continue;
 		}
-
 		// we have an equippable item, ..now lets send it to the comparison function to see if its better than we have on.
 		AutoEquipComparison(pItem, pItem2); //pItem is new item, pItem2 is equipped item.
 	}
-
 	// list out items in other removable backpacks
 	for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
 	{
@@ -566,7 +558,6 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
 				uint8 msg = m_bot->CanEquipItem(NULL_SLOT, dest, pItem, !pItem->IsBag());
 				if (msg != EQUIP_ERR_OK)
 					continue;
-
 				int8 equipSlot = uint8(dest);
 				if (!(equipSlot >= 0 && equipSlot < 19))
 					continue;
@@ -575,14 +566,12 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
 				{
 					ItemPrototype const *pProto2 = pItem->GetProto();
 					if (!ItemStatComparison(pProto2, pProto2))
-						continue; 
-
+						continue;
 					EquipItem(pItem); //no item equipped so equip new one if useable stats and go to next item.
 					continue;
 				}
 				// we have an equippable item, but something else is equipped..now lets send it to the comparison function to see if its better than we have on.
 				AutoEquipComparison(pItem, pItem2); //pItem is new item, pItem2 is equipped item.
-
 			}
 	}
 	if (out.str().size() != 0)
@@ -596,25 +585,20 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
 	}
 	InspectUpdate();
 }
-
 void PlayerbotAI::AutoEquipComparison(Item *pItem, Item *pItem2)
 {
 	const static uint32 item_armor_skills[MAX_ITEM_SUBCLASS_ARMOR] =
 	{
 		0, SKILL_CLOTH, SKILL_LEATHER, SKILL_MAIL, SKILL_PLATE_MAIL, 0, SKILL_SHIELD, 0, 0, 0, 0
 	};
-
 	ItemPrototype const *pProto = pItem2->GetProto(); // equipped item if any
 	ItemPrototype const *pProto2 = pItem->GetProto(); // new item to compare
-	
 	// First check to see if this item has stats, and if the bot REALLY wants to lose its old item
 	if (pProto2->StatsCount > 0)
 	{
 		if (!ItemStatComparison(pProto, pProto2))
-		return; // stats on equipped item are better, OR stats are not useful for this bots class/style
+			return; // stats on equipped item are better, OR stats are not useful for this bots class/style
 	}
-	
-
 	// DEBUG_LOG("Item Class (%s)",(pProto->Class == ITEM_CLASS_WEAPON ? "Weapon" : "Not Weapon"));
 	switch (pProto->Class)
 	{
@@ -631,19 +615,16 @@ void PlayerbotAI::AutoEquipComparison(Item *pItem, Item *pItem2)
 		}
 	case ITEM_CLASS_ARMOR:
 		{
-
 			if (pProto->ItemLevel < pProto2->ItemLevel && pProto->Armor <= pProto2->Armor && m_bot->HasSkill(item_armor_skills[pProto2->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProto2->SubClass + 1])) // itemlevel + armour + armour class
 				EquipItem(pItem);
-
 			// now in case they are same itemlevel, but one is better than the other..
 			if (pProto->ItemLevel == pProto2->ItemLevel && pProto->Quality < pProto2->Quality && pProto->Armor <= pProto2->Armor &&
 				m_bot->HasSkill(item_armor_skills[pProto2->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProto2->SubClass + 1])) // itemlevel + armour + armour class
-				EquipItem(pItem);        
+				EquipItem(pItem);
 			break;
 		}
 	}
 	InspectUpdate();
-
 }
 bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemPrototype *pProto2)
 {
@@ -653,39 +634,35 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
 	uint8 itemscore = 0;
 	uint8 itemscore2 = 0;
 	uint8 score = 0;
-	
-
 	// get class and style to make it easier to compare later
-
-	
 	switch (m_bot->getClass())
 	{
 	case CLASS_SHAMAN:
 		{
-		isclass = 2;
-		ishybrid = 1; // hybrid caster
-		break;
+			isclass = 2;
+			ishybrid = 1; // hybrid caster
+			break;
 		}
 	case CLASS_PRIEST:
 		{
-		isclass = 1;
-		break;
+			isclass = 1;
+			break;
 		}
 	case CLASS_MAGE:
 		{
-		isclass = 1;
-		break;
+			isclass = 1;
+			break;
 		}
 	case CLASS_WARLOCK:
 		{
-		isclass = 1;
-		break;
+			isclass = 1;
+			break;
 		}
 	case CLASS_DRUID:
 		{
-		ishybrid = 1;
-		isclass = 2; // caster
-		break;
+			ishybrid = 1;
+			isclass = 2; // caster
+			break;
 		}
 	}
 	switch (m_bot->getClass())
@@ -704,934 +681,53 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
 		ishybrid = 1;
 		break;
 	}
-	
-
 	for (int i = 0; i < MAX_ITEM_PROTO_STATS; ++i) // item can only have 10 stats. We check each stat slot available for stat and type.
 	{
-		
-
-
 		uint32 itemmod = pProto->ItemStat[i].ItemStatType; // what stat type is in this slot
-
 		if (!itemmod) // if no stat type in this slot, continue to next slot
 			continue;
-		switch (itemmod)
+		// caster stats
+		if (itemmod == ITEM_MOD_MANA || itemmod == ITEM_MOD_INTELLECT || itemmod == ITEM_MOD_SPIRIT || itemmod == ITEM_MOD_HIT_SPELL_RATING ||
+			itemmod == ITEM_MOD_CRIT_SPELL_RATING || itemmod == ITEM_MOD_HASTE_SPELL_RATING || itemmod == ITEM_MOD_SPELL_DAMAGE_DONE ||
+			itemmod == ITEM_MOD_MANA_REGENERATION || itemmod == ITEM_MOD_SPELL_POWER || itemmod == ITEM_MOD_SPELL_PENETRATION)
 		{
-		case ITEM_MOD_MANA:
 			switch (isclass) // 1 caster, 2 hybrid, 3 melee
 			{
 			case 1:
 				{
-				score = (score + 1);
-				break;
+					score = (score + 1);
+					break;
 				}
 			case 2:
 				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				//score = (score - 1);
-				break;
-				}
+					score = (score + 1);
+					break;
+				}  // pure melee need nothing from this list.
 			default:
 				break;
 			}
-		case ITEM_MOD_HEALTH:
+		}
+		// melee only stats (warrior/rogue) or stats that only apply to melee style combat
+		if (itemmod == ITEM_MOD_HEALTH || itemmod == ITEM_MOD_AGILITY || itemmod == ITEM_MOD_STRENGTH ||
+			itemmod == ITEM_MOD_DEFENSE_SKILL_RATING || itemmod == ITEM_MOD_DODGE_RATING || itemmod == ITEM_MOD_PARRY_RATING ||
+			itemmod == ITEM_MOD_BLOCK_RATING ||	itemmod == ITEM_MOD_HIT_MELEE_RATING || itemmod == ITEM_MOD_CRIT_MELEE_RATING ||
+			itemmod == ITEM_MOD_HIT_TAKEN_MELEE_RATING || itemmod == ITEM_MOD_HIT_TAKEN_RANGED_RATING ||itemmod == ITEM_MOD_HIT_TAKEN_SPELL_RATING ||
+			itemmod == ITEM_MOD_CRIT_TAKEN_MELEE_RATING || itemmod == ITEM_MOD_CRIT_TAKEN_RANGED_RATING ||
+			itemmod == ITEM_MOD_CRIT_TAKEN_SPELL_RATING || itemmod == ITEM_MOD_HASTE_MELEE_RATING ||
+			itemmod == ITEM_MOD_HIT_TAKEN_RATING || itemmod == ITEM_MOD_CRIT_TAKEN_RATING || itemmod == ITEM_MOD_ATTACK_POWER ||
+			itemmod == ITEM_MOD_BLOCK_VALUE)
+		{
 			switch (isclass) // 1 caster, 2 hybrid, 3 melee
 			{
 			case 1:
 				{
-				//score = (score + 1);
-				break;
+					//score = (score + 1);
+					break;
 				}
 			case 2:
 				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_AGILITY:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_STRENGTH:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				//score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_INTELLECT:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				//score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_SPIRIT:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				//score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_STAMINA:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_DEFENSE_SKILL_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				//score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_DODGE_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_PARRY_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				//score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_BLOCK_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				//score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_HIT_MELEE_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				//score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_HIT_RANGED_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				//score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				//score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_HIT_SPELL_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				//score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_CRIT_MELEE_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				//score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_CRIT_RANGED_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_CRIT_SPELL_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				//score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_HIT_TAKEN_MELEE_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				//score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_HIT_TAKEN_RANGED_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				//score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_HIT_TAKEN_SPELL_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_CRIT_TAKEN_MELEE_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_CRIT_TAKEN_RANGED_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_CRIT_TAKEN_SPELL_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_HASTE_MELEE_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_HASTE_RANGED_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_HASTE_SPELL_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_HIT_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_CRIT_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_HIT_TAKEN_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_CRIT_TAKEN_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_RESILIENCE_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_HASTE_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_EXPERTISE_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_ATTACK_POWER:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_RANGED_ATTACK_POWER:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_FERAL_ATTACK_POWER:            // deprecated
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_SPELL_HEALING_DONE:           // deprecated
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_SPELL_DAMAGE_DONE:                // deprecated
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_MANA_REGENERATION:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_ARMOR_PENETRATION_RATING:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_SPELL_POWER:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				//score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_HEALTH_REGEN:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-				score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_SPELL_PENETRATION:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
-				}
-			case 3:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			default:
-				break;
-			}
-		case ITEM_MOD_BLOCK_VALUE:
-			switch (isclass) // 1 caster, 2 hybrid, 3 melee
-			{
-			case 1:
-				{
-			//	score = (score + 1);
-				break;
-				}
-			case 2:
-				{
-				score = (score + 1);
-				break;
+					score = (score + 1); // we'll break this down more later for druids/shaman/paladins etc..
+					break;
 				}
 			case 3:
 				{
@@ -1641,7 +737,47 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
 			default:
 				break;
 			}
-
+		}
+		// stats which aren't strictly caster or melee (hybrid perhaps or style dependant)
+		if (itemmod == ITEM_MOD_HIT_RATING || itemmod == ITEM_MOD_CRIT_RATING ||
+			itemmod == ITEM_MOD_RESILIENCE_RATING || itemmod == ITEM_MOD_HASTE_RATING || itemmod == ITEM_MOD_EXPERTISE_RATING ||
+			itemmod == ITEM_MOD_ARMOR_PENETRATION_RATING || itemmod == ITEM_MOD_HEALTH_REGEN ||	itemmod == ITEM_MOD_STAMINA)
+		{
+			switch (isclass) // 1 caster, 2 hybrid, 3 melee
+			{
+			case 1:
+				{
+					score = (score + 1);
+					break;
+				}
+			case 2:
+				{
+					score = (score + 1);
+					break;
+				}
+			case 3:
+				{
+					score = (score + 1);
+					break;
+				}
+			default:
+				break;
+			}
+		}
+		// stats relating to ranged only
+		if (itemmod == ITEM_MOD_HIT_RANGED_RATING || itemmod == ITEM_MOD_CRIT_RANGED_RATING || itemmod == ITEM_MOD_HASTE_RANGED_RATING ||
+			itemmod == ITEM_MOD_RANGED_ATTACK_POWER)
+		{
+			switch (m_bot->getClass())
+			{
+			case CLASS_HUNTER:
+				{
+					score = (score + 1);
+					break;
+				}
+			default:
+				break;
+			}
 		}
 		if (swap == 0)
 		{
@@ -1656,21 +792,13 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
 				}
 			}
 		}
-
 	}
-
-
-
 	itemscore2 = score;
 	swap = 0;
 	if (itemscore <= itemscore2)
 		return true;
-
-
 	return false;
-
 }
-
 void PlayerbotAI::SendQuestNeedList()
 {
     std::ostringstream out;
