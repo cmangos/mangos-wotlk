@@ -50,6 +50,8 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME use [ITEM LINK][EQUIPPED ITEM LINK] (use item on equipped item)
 /t BOTNAME use [ITEM LINK][GAMEOBJECT LINK] (use item on gameobject )
 /t BOTNAME equip [ITEM LINK]
+/t BOTNAME autoequip (*toggle switch* bot(s) will auto equip items they receive based on usefulness. type .help for options)
+/t BOTNAME autoequip on/off/now (explicitly sets bot to ON/OFF and 'autoequip now' runs the process one time regardless of setting)
 /t BOTNAME reset (will reset states, orders and loot list)
 /t BOTNAME stats (bot shows available money, free inventory space and estimated item repair costs)
 /t BOTNAME survey (bot shows all available gameobjects, within a local perimeter around the bot)
@@ -72,6 +74,7 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME collect (shows collect subcommand options and current collect status)
 /t BOTNAME collect <subcommand(s)> (subcommands can be alone or together [none combat loot objects profession quest])
 /t BOTNAME sell [ITEM LINK] (bot will sell item(s) with nearest vendor)
+/t BOTNAME sell all (causes bot(s) to sell all normal(white) useless items. type .help for details (based on a number of comparisons)
 /t BOTNAME buy [ITEM LINK] (bot buy item(s) from selected vendor)
 /t BOTNAME drop [ITEM LINK] (bot will drop item immediately, permanently destroying it)
 /t BOTNAME auction (bot will display all it's active owned auctions. Auction info will include an [AUCTION LINK] )
@@ -168,6 +171,9 @@ Creature interaction with bots:
 
 Repair with bots:
 =================
+	
+  Bots will now automatically unequip worn items before they break, and will 
+  notify the master of worn items.  They will not equip worn items (less than 10% of max durability)
 
   Bot can now repair <all or selected> items - equipped or in bags. If the bot is
   a member of a guild, then the guild fund is used for repairs. If not, the bots own
