@@ -33,7 +33,7 @@
 // Playerbot mod:
 #include "playerbot/PlayerbotAI.h"
 
-void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
+void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket & recv_data)
 {
     ObjectGuid guid;
     recv_data >> guid;
@@ -47,7 +47,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
         return;
     }
 
-    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_STATUS_QUERY for %s", guid.GetString().c_str());
+    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_STATUS_QUERY - for %s to %s", _player->GetGuidStr().c_str(), guid.GetString().c_str());
 
     switch(questgiver->GetTypeId())
     {
@@ -88,13 +88,12 @@ void WorldSession::HandleQuestgiverHelloOpcode(WorldPacket & recv_data)
     ObjectGuid guid;
     recv_data >> guid;
 
-    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_HELLO npc: %s", guid.GetString().c_str());
+    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_HELLO - for %s to %s", _player->GetGuidStr().c_str(), guid.GetString().c_str());
 
-    Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
-
+    Creature* pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
     if (!pCreature)
     {
-        DEBUG_LOG ("WORLD: HandleQuestgiverHelloOpcode - %s not found or you can't interact with him.", guid.GetString().c_str());
+        DEBUG_LOG ("WORLD: HandleQuestgiverHelloOpcode - for %s to %s not found or you can't interact with him.", _player->GetGuidStr().c_str(), guid.GetString().c_str());
         return;
     }
 
@@ -113,17 +112,17 @@ void WorldSession::HandleQuestgiverHelloOpcode(WorldPacket & recv_data)
     _player->SendPreparedGossip(pCreature);
 }
 
-void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
+void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket & recv_data)
 {
     ObjectGuid guid;
     uint32 quest;
     uint32 unk1;
     recv_data >> guid >> quest >> unk1;
 
-    if (!GetPlayer()->isAlive())
+    if (!CanInteractWithQuestGiver(guid, "CMSG_QUESTGIVER_ACCEPT_QUEST"))
         return;
 
-    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_ACCEPT_QUEST npc = %s, quest = %u, unk1 = %u", guid.GetString().c_str(), quest, unk1 );
+    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_ACCEPT_QUEST - for %s to %s, quest = %u, unk1 = %u", _player->GetGuidStr().c_str(), guid.GetString().c_str(), quest, unk1 );
 
     Object* pObject = _player->GetObjectByTypeMask(guid, TYPEMASK_CREATURE_GAMEOBJECT_PLAYER_OR_ITEM);
 
@@ -207,7 +206,7 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode( WorldPacket & recv_data )
     uint8 unk1;
     recv_data >> guid >> quest >> unk1;
 
-    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_QUERY_QUEST npc = %s, quest = %u, unk1 = %u", guid.GetString().c_str(), quest, unk1 );
+    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_QUERY_QUEST - for %s to %s, quest = %u, unk1 = %u", _player->GetGuidStr().c_str(), guid.GetString().c_str(), quest, unk1);
 
     // Verify that the guid is valid and is a questgiver or involved in the requested quest
     Object* pObject = _player->GetObjectByTypeMask(guid, TYPEMASK_CREATURE_GAMEOBJECT_OR_ITEM);
@@ -234,7 +233,7 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
     }
 }
 
-void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
+void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket & recv_data)
 {
     uint32 quest, reward;
     ObjectGuid guid;
@@ -242,14 +241,14 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
 
     if(reward >= QUEST_REWARD_CHOICES_COUNT)
     {
-        sLog.outError("Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player %s (guid %d) tried to get invalid reward (%u) (probably packet hacking)", _player->GetName(), _player->GetGUIDLow(), reward);
+        sLog.outError("Error in CMSG_QUESTGIVER_CHOOSE_REWARD - %s tried to get invalid reward (%u) (probably packet hacking)", _player->GetGuidStr().c_str(), _player->GetGUIDLow(), reward);
         return;
     }
 
-    if(!GetPlayer()->isAlive())
+    if (!CanInteractWithQuestGiver(guid, "CMSG_QUESTGIVER_CHOOSE_REWARD"))
         return;
 
-    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_CHOOSE_REWARD npc = %s, quest = %u, reward = %u", guid.GetString().c_str(), quest, reward);
+    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_CHOOSE_REWARD - for %s to %s, quest = %u, reward = %u", _player->GetGuidStr().c_str(), guid.GetString().c_str(), quest, reward);
 
     Object* pObject = _player->GetObjectByTypeMask(guid, TYPEMASK_CREATURE_OR_GAMEOBJECT);
     if(!pObject)
@@ -280,10 +279,10 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
     ObjectGuid guid;
     recv_data >> guid >> quest;
 
-    if (!GetPlayer()->isAlive())
+    if (!CanInteractWithQuestGiver(guid, "CMSG_QUESTGIVER_REQUEST_REWARD"))
         return;
 
-    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_REQUEST_REWARD npc = %s, quest = %u", guid.GetString().c_str(), quest);
+    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_REQUEST_REWARD - for %s to %s, quest = %u", _player->GetGuidStr().c_str(), guid.GetString().c_str(), quest);
 
     Object* pObject = _player->GetObjectByTypeMask(guid, TYPEMASK_CREATURE_OR_GAMEOBJECT);
     if (!pObject||!pObject->HasInvolvedQuest(quest))
@@ -389,19 +388,20 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recv_data)
     ObjectGuid guid;
     recv_data >> guid >> quest;
 
-    if (!GetPlayer()->isAlive())
+    if (!CanInteractWithQuestGiver(guid, "CMSG_QUESTGIVER_COMPLETE_QUEST"))
         return;
 
-    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %s, quest = %u", guid.GetString().c_str(), quest);
+    // All ok, continue
+    DEBUG_LOG("WORLD: Received CMSG_QUESTGIVER_COMPLETE_QUEST - for %s to %s, quest = %u", _player->GetGuidStr().c_str(), guid.GetString().c_str(), quest);
 
-    if (Quest const *pQuest = sObjectMgr.GetQuestTemplate(quest))
+    if (Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest))
     {
-        if (_player->GetQuestStatus( quest ) != QUEST_STATUS_COMPLETE)
+        if (_player->GetQuestStatus(quest) != QUEST_STATUS_COMPLETE)
         {
             if (pQuest->IsRepeatable())
                 _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanCompleteRepeatableQuest(pQuest), false);
             else
-                _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanRewardQuest(pQuest,false), false);
+                _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanRewardQuest(pQuest, false), false);
         }
         else
         {
@@ -652,4 +652,33 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
 
     data.put<uint32>(0, count);                             // write real count
     SendPacket(&data);
+}
+
+bool WorldSession::CanInteractWithQuestGiver(ObjectGuid& guid, char const* descr)
+{
+    if (guid.IsCreatureOrVehicle())
+    {
+        Creature* pCreature = _player->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_QUESTGIVER);
+        if (!pCreature)
+        {
+            DEBUG_LOG("WORLD: %s - %s cannot interact with %s.", descr, _player->GetGuidStr().c_str(), guid.GetString().c_str());
+            return false;
+        }
+    }
+    else if (guid.IsGameObject())
+    {
+        GameObject* pGo = _player->GetGameObjectIfCanInteractWith(guid, GAMEOBJECT_TYPE_QUESTGIVER);
+        if (!pGo)
+        {
+            DEBUG_LOG("WORLD: %s - %s cannot interact with %s.", descr, _player->GetGuidStr().c_str(), guid.GetString().c_str());
+            return false;
+        }
+    }
+    else if (!_player->isAlive())
+    {
+        DEBUG_LOG("WORLD: %s - %s is dead, requested guid was %s", descr, _player->GetGuidStr().c_str(), guid.GetString().c_str());
+        return false;
+    }
+
+    return true;
 }
