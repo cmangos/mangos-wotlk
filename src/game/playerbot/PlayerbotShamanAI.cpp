@@ -71,8 +71,29 @@ PlayerbotShamanAI::PlayerbotShamanAI(Player* const master, Player* const bot, Pl
     WAR_STOMP                = ai->initSpell(WAR_STOMP_ALL); // tauren
     BERSERKING               = ai->initSpell(BERSERKING_ALL); // troll
 
-	//Buffs that don't stack with totems
-	IMPROVED_ICY_TALONS		 = ai->initSpell(IMPROVED_ICY_TALONS_1);
+	// totem buffs
+	STRENGTH_OF_EARTH_EFFECT	= ai->initSpell(STRENGTH_OF_EARTH_EFFECT_1);
+	FLAMETONGUE_EFFECT			= ai->initSpell(FLAMETONGUE_EFFECT_1);
+	MAGMA_TOTEM_EFFECT			= ai->initSpell(MAGMA_TOTEM_EFFECT_1);
+	STONECLAW_EFFECT			= ai->initSpell(STONECLAW_EFFECT_1);
+	FIRE_RESISTANCE_EFFECT		= ai->initSpell(FIRE_RESISTANCE_EFFECT_1);
+	FROST_RESISTANCE_EFFECT		= ai->initSpell(FROST_RESISTANCE_EFFECT_1);
+	GROUDNING_EFFECT			= ai->initSpell(GROUDNING_EFFECT_1);
+	NATURE_RESISTANCE_EFFECT	= ai->initSpell(NATURE_RESISTANCE_EFFECT_1);
+	STONESKIN_EFFECT			= ai->initSpell(STONESKIN_EFFECT_1);
+	WINDFURY_EFFECT				= ai->initSpell(WINDFURY_EFFECT_1);
+	WRATH_OF_AIR_EFFECT			= ai->initSpell(WRATH_OF_AIR_EFFECT_1);
+	CLEANSING_TOTEM_EFFECT		= ai->initSpell(CLEANSING_TOTEM_EFFECT_1);
+	HEALING_STREAM_EFFECT		= ai->initSpell(HEALING_STREAM_EFFECT_1);
+	MANA_SPRING_EFFECT			= ai->initSpell(MANA_SPRING_EFFECT_1);
+	TREMOR_TOTEM_EFFECT			= ai->initSpell(TREMOR_TOTEM_EFFECT_1);
+	TOTEM_OF_WRATH_EFFECT		= ai->initSpell(TOTEM_OF_WRATH_EFFECT_1);
+	STONECLAW_EFFECT			= ai->initSpell(STONECLAW_EFFECT_1);
+	EARTHBIND_EFFECT			= ai->initSpell(EARTHBIND_EFFECT_1);
+
+	// Buffs that don't stack with totems
+	IMPROVED_ICY_TALONS		= ai->initSpell(IMPROVED_ICY_TALONS_1);
+	HORN_OF_WINTER			= ai->initSpell(HORN_OF_WINTER_1);
 }
 
 PlayerbotShamanAI::~PlayerbotShamanAI() {}
@@ -137,15 +158,15 @@ void PlayerbotShamanAI::DropTotems()
 	switch (spec)
 	{
 	case SHAMAN_SPEC_ENHANCEMENT:
-		if (STRENGTH_OF_EARTH_TOTEM > 0 && ((earth == NULL) ||( m_bot->GetDistance(earth) > 30)) && ai->GetManaPercent() >= 13)
+		if (STRENGTH_OF_EARTH_TOTEM > 0 && ((earth == NULL) ||(m_bot->GetDistance(earth) > 30)) /*&& !m_bot->HasAura(HORN_OF_WINTER)*/ && ai->GetManaPercent() >= 13)
             {
-                ai->CastSpell(STRENGTH_OF_EARTH_TOTEM);
+				ai->CastSpell(STRENGTH_OF_EARTH_TOTEM);
             }
 		if (FLAMETONGUE_TOTEM > 0 && ((fire == NULL) ||( m_bot->GetDistance(fire) > 30)) && ai->GetManaPercent() >= 14)
             {
                 ai->CastSpell(FLAMETONGUE_TOTEM);
             }
-		if (WIND_FURY_TOTEM > 0 && ((air == NULL) ||( m_bot->GetDistance(air) > 30)) && ai->GetManaPercent() >= 11)
+		if (WIND_FURY_TOTEM > 0 && ((air == NULL) ||( m_bot->GetDistance(air) > 30)) /*&& !m_bot->HasAura(IMPROVED_ICY_TALONS)*/ && ai->GetManaPercent() >= 11)
             {
                 ai->CastSpell(WIND_FURY_TOTEM);
             }
@@ -519,6 +540,8 @@ void PlayerbotShamanAI::DoNonCombatActions()
     Player * m_bot = GetPlayerBot();
     if (!m_bot)
         return;
+	
+	uint32 spec = m_bot->GetSpec();
 
     SpellSequence = SPELL_ENHANCEMENT;
 
@@ -527,10 +550,10 @@ void PlayerbotShamanAI::DoNonCombatActions()
         (!GetMaster()->HasAura(EARTH_SHIELD, EFFECT_INDEX_0) && ai->CastSpell(EARTH_SHIELD, *(GetMaster())));
 
     // buff myself with WATER_SHIELD, LIGHTNING_SHIELD
-    if (WATER_SHIELD > 0)
-        (!m_bot->HasAura(WATER_SHIELD, EFFECT_INDEX_0) && !m_bot->HasAura(LIGHTNING_SHIELD, EFFECT_INDEX_0) && ai->CastSpell(WATER_SHIELD, *m_bot));
+    if (WATER_SHIELD > 0 && (spec == SHAMAN_SPEC_ELEMENTAL || spec == SHAMAN_SPEC_RESTORATION))
+        (!m_bot->HasAura(WATER_SHIELD, EFFECT_INDEX_0) && ai->CastSpell(WATER_SHIELD, *m_bot));
     else if (LIGHTNING_SHIELD > 0)
-        (!m_bot->HasAura(LIGHTNING_SHIELD, EFFECT_INDEX_0) && !m_bot->HasAura(WATER_SHIELD, EFFECT_INDEX_0) && ai->CastSpell(LIGHTNING_SHIELD, *m_bot));
+        (!m_bot->HasAura(LIGHTNING_SHIELD, EFFECT_INDEX_0) && ai->CastSpell(LIGHTNING_SHIELD, *m_bot));
 /*
        // buff myself weapon
        if (ROCKBITER_WEAPON > 0)
@@ -544,6 +567,29 @@ void PlayerbotShamanAI::DoNonCombatActions()
        else if (FROSTBRAND_WEAPON > 0)
             (!m_bot->HasAura(FROSTBRAND_WEAPON, EFFECT_INDEX_0) && !m_bot->HasAura(EARTHLIVING_WEAPON, EFFECT_INDEX_0) && !m_bot->HasAura(WINDFURY_WEAPON, EFFECT_INDEX_0) && !m_bot->HasAura(FLAMETONGUE_WEAPON, EFFECT_INDEX_0) && !m_bot->HasAura(ROCKBITER_WEAPON, EFFECT_INDEX_0) && ai->CastSpell(FROSTBRAND_WEAPON,*m_bot) );
  */
+    // Mainhand
+    Item * weapon;
+    weapon = m_bot->GetItemByPos(EQUIPMENT_SLOT_MAINHAND);
+    if (weapon && (weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0) && spec == SHAMAN_SPEC_RESTORATION)
+    {
+		ai->CastSpell(EARTHLIVING_WEAPON, *m_bot);
+    }
+	else if (weapon && (weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0) && spec == SHAMAN_SPEC_ELEMENTAL)
+    {
+		ai->CastSpell(FLAMETONGUE_WEAPON, *m_bot);
+    }
+	else if (weapon && (weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0) && spec == SHAMAN_SPEC_ENHANCEMENT)
+    {
+		ai->CastSpell(WINDFURY_WEAPON, *m_bot);
+    }
+
+    //... and offhand
+    weapon = m_bot->GetItemByPos(EQUIPMENT_SLOT_OFFHAND);
+    if (weapon && (weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0) && spec == SHAMAN_SPEC_ENHANCEMENT)
+    {
+		ai->CastSpell(FLAMETONGUE_WEAPON, *m_bot);
+    }
+
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
