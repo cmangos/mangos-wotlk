@@ -3596,13 +3596,42 @@ void PlayerbotAI::MovementReset()
             DoTeleport(*m_followTarget);
             return;
         }
+		if (m_bot->GetPositionZ() > (pTarget->GetPositionZ() + INTERACTION_DISTANCE) || (m_bot->GetPositionZ() + INTERACTION_DISTANCE) < pTarget->GetPositionZ())
+		{
+			DoTeleport(*m_followTarget);
+			return;
+		}
 
-        if (m_bot->isAlive() && !m_bot->IsBeingTeleported())
-        {
-            float angle = rand_float(0, M_PI_F);
-            float dist = rand_float(m_mgr->m_confFollowDistance[0], m_mgr->m_confFollowDistance[1]);
-            m_bot->GetMotionMaster()->MoveFollow(m_followTarget, dist, angle);
-        }
+		if (m_bot->isAlive() && !m_bot->IsBeingTeleported())
+		{
+			if (DistOverRide != 0)
+			{
+				if (IsUpOrDown < DistOverRide)
+				{
+					IsUpOrDown = DistOverRide;
+					gTempDist = (gTempDist + 1.0);
+					gTempDist2 = (gTempDist2 + 1.0);
+				}
+				if (IsUpOrDown > DistOverRide)
+				{
+					if (IsUpOrDown >= 2)
+					{
+						IsUpOrDown = DistOverRide;
+						gTempDist = (gTempDist - 1.0);
+						gTempDist2 = (gTempDist2 - 1.0);
+					}
+				}
+				gDist[0] = gTempDist;
+				gDist[1] = gTempDist2;
+			}
+			float dist = rand_float(m_mgr->m_confFollowDistance[0], m_mgr->m_confFollowDistance[1]);
+			float bdist = rand_float(gDist[0], gDist[1]);
+			float angle = rand_float(0, M_PI_F);
+			if (DistOverRide != 0)
+				m_bot->GetMotionMaster()->MoveFollow(m_followTarget, bdist, angle);
+			else
+				m_bot->GetMotionMaster()->MoveFollow(m_followTarget, dist, angle);
+		}
     }
 }
 
@@ -7485,22 +7514,77 @@ void PlayerbotAI::_HandleCommandOrders(std::string &text, Player &fromPlayer)
 
 void PlayerbotAI::_HandleCommandFollow(std::string &text, Player &fromPlayer)
 {
-    if (text != "")
-    {
-        SendWhisper("follow cannot have a subcommand.", fromPlayer);
-        return;
-    }
-    SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
+	if (ExtractCommand("reset", text)) // switch to reset follow distance
+	{
+		if (text != "")
+		{
+			SendWhisper("Invalid subcommand for 'follow'", fromPlayer);
+			return;
+		}
+		DistOverRide = 0; // this resets follow distance to config default
+		IsUpOrDown = 0;
+		std::ostringstream msg;
+		gTempDist = 0;
+		gTempDist2 = 1;
+		msg << "My follow distance is now Normal";
+		SendWhisper(msg.str(),fromPlayer);
+		SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
+		return;
+	}
+	if (ExtractCommand("far", text)) // switch to increment follow distance
+	{
+		if (text != "")
+		{
+			SendWhisper("Invalid subcommand for 'follow'", fromPlayer);
+			return;
+		}
+		DistOverRide = (DistOverRide + 1); // this increments follow distance
+		std::ostringstream msg;
+		msg << "Increasing My follow distance";
+		SendWhisper(msg.str(),fromPlayer);
+		SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
+		return;
+	}
+	if (ExtractCommand("near", text)) // switch to increment follow distance
+	{
+		if (text != "")
+		{
+			SendWhisper("Invalid subcommand for 'follow'", fromPlayer);
+			return;
+		}
+		if (DistOverRide > 0)
+			DistOverRide = (DistOverRide - 1); // this increments follow distance,
+
+		std::ostringstream msg;
+		if (DistOverRide == 0)
+		{
+			DistOverRide = 0;
+			gTempDist = 0;
+			gTempDist2 = 1;
+			msg << "My follow distance is now Normal";
+		}
+		if (DistOverRide != 0)
+			msg << "Decreasing My follow distance";
+		SendWhisper(msg.str(),fromPlayer);
+		SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
+		return;
+	}
+	if (text != "")
+	{
+		SendWhisper("see help for details on using follow.", fromPlayer);
+		return;
+	}
+
 }
 
 void PlayerbotAI::_HandleCommandStay(std::string &text, Player &fromPlayer)
 {
-    if (text != "")
-    {
-        SendWhisper("stay cannot have a subcommand.", fromPlayer);
-        return;
-    }
-    SetMovementOrder(MOVEMENT_STAY);
+	if (text != "")
+	{
+		SendWhisper("stay cannot have a subcommand.", fromPlayer);
+		return;
+	}
+	SetMovementOrder(MOVEMENT_STAY);
 }
 
 void PlayerbotAI::_HandleCommandAttack(std::string &text, Player &fromPlayer)
@@ -9384,6 +9468,7 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                         if (m_bot->GetSkillValue(*it) <= rank[sSpellMgr.GetSpellRank(skillLine->spellId)] && m_bot->HasSpell(skillLine->spellId))
                         {
                             // DEBUG_LOG ("[PlayerbotAI]: HandleCommand - skill (%u)(%u)(%u):",skillLine->spellId, rank[sSpellMgr.GetSpellRank(skillLine->spellId)], m_bot->GetSkillValue(*it));
+							msg << "\n[" << m_bot->GetSkillValue(*it) << " / " << rank[sSpellMgr.GetSpellRank(skillLine->spellId)] << "]: ";
                             MakeSpellLink(spellInfo, msg);
                             break;
                         }
@@ -9523,16 +9608,18 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             return;
         }
     }
-    if (bMainHelp || ExtractCommand("follow", text))
-    {
-        ch.SendSysMessage(_HandleCommandHelpHelper("follow", "I will follow you - this also revives me if dead and teleports me if I'm far away.").c_str());
-
-        if (!bMainHelp)
-        {
-            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
-            return;
-        }
-    }
+	if (bMainHelp || ExtractCommand("follow", text))
+	{
+		ch.SendSysMessage(_HandleCommandHelpHelper("follow", "I will follow you - this also revives me if dead and teleports me if I'm far away.").c_str());
+		ch.SendSysMessage(_HandleCommandHelpHelper("follow far", "I will follow at a father distance away from you.").c_str());
+		ch.SendSysMessage(_HandleCommandHelpHelper("follow near", "I will follow at a closer distance to you.").c_str());
+		ch.SendSysMessage(_HandleCommandHelpHelper("follow reset", "I will reset my follow distance to its original state.").c_str());
+		if (!bMainHelp)
+		{
+			if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+			return;
+		}
+	}
     if (bMainHelp || ExtractCommand("stay", text))
     {
         ch.SendSysMessage(_HandleCommandHelpHelper("stay", "I will stay put until told otherwise.").c_str());

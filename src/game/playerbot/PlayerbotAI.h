@@ -1770,6 +1770,11 @@ public:
     void SendNotEquipList(Player& player);
 	uint32 AutoEquipPlug;               //switch for autoequip
 	uint32 SellWhite;					//switch for white item auto sell
+	uint8 DistOverRide;
+	float gDist[2]; //gDist, gTemp vars are used for variable follow distance
+	float gTempDist;
+	float gTempDist2;
+	uint8 IsUpOrDown; //tracks variable follow distance
 	void _HandleCommandAutoEquip(std::string &text, Player &fromPlayer);
 	void AutoUpgradeEquipment(Player& player);
 	void AutoEquipComparison(Item *pItem, Item *pItem2);
