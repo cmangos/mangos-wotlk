@@ -6499,7 +6499,7 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
         return;
 
     uint8 autosell = 0;
-	
+
 		std::ostringstream mout;
 		if (item->CanBeTraded() && item->GetProto()->Quality == ITEM_QUALITY_POOR) // trash sells automatically.
 			autosell = 1;
@@ -7119,7 +7119,7 @@ void PlayerbotAI::SellGarbage(Player& /*player*/, bool bListNonTrash, bool bDeta
 				goods.str(""); // clear the list for next bag
 			}
 		}
-		
+
         const Bag* const pBag = static_cast<Bag *>(m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag));
         if (pBag)
 		{
@@ -7140,8 +7140,8 @@ void PlayerbotAI::SellGarbage(Player& /*player*/, bool bListNonTrash, bool bDeta
 
    if (goods.str().size() != 0) // This will make sure items in the last bag were output to links
 		{
-			ch.SendSysMessage(goods.str().c_str()); 
-			goods.str(""); // clear the list 
+			ch.SendSysMessage(goods.str().c_str());
+			goods.str(""); // clear the list
 			notempty = 1; // at least one bag must have had something in it, used at end of this function
 		}
 	if (notempty == 1)
@@ -9633,7 +9633,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 	if (bMainHelp || ExtractCommand("autoequip", text))
     {
 		ch.SendSysMessage(_HandleCommandHelpHelper("autoequip", "Used with no parameter: Toggles Auto Equipping for one or all bots to ON or OFF depending on their current setting.").c_str());
-		
+
         if (!bMainHelp)
         {
 			ch.SendSysMessage(_HandleCommandHelpHelper("autoequip < on >", "Turns Auto equipping ON for one, or all bots in group").c_str());
