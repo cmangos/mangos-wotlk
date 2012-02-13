@@ -78,7 +78,6 @@ enum
     WINDFURY_TOTEM_1                = 8512,
     WINDFURY_WEAPON_1               = 8232,
     WRATH_OF_AIR_TOTEM_1            = 3738,
-<<<<<<< HEAD
 
 	//Totem Buffs
 	STRENGTH_OF_EARTH_EFFECT_1		= 8076,
@@ -101,6 +100,9 @@ enum
 	// FIRE_ELEMENTAL_TOTEM uses spell effect index 2
 	// SEARING_TOTEM uses spell effect index 0
 	// EARTH_ELEMENTAL_TOTEM uses spell effect indexes 1 and 2
+
+	//Spec buffs
+	MAELSTROM_WEAPON_1				= 51532, //This is the final rank only, the spell family thing doesn't work so I decided to go with max only
 
 	// Buffs that don't stack with totems
 	//IMPROVED_ICY_TALONS_1			= 55610,
@@ -125,6 +127,8 @@ private:
     // Heals the target based off its hps
     void HealTarget (Unit& target, uint8 hp);
     void DropTotems();
+	void CheckShields();
+	void UseCooldowns();
 
     // ENHANCEMENT
     uint32 ROCKBITER_WEAPON,
@@ -148,7 +152,8 @@ private:
            EARTH_ELEMENTAL_TOTEM,
            BLOODLUST,
            HEROISM,
-           FERAL_SPIRIT;
+           FERAL_SPIRIT,
+		   MAELSTROM_WEAPON;
 
     // RESTORATION
     uint32 HEALING_WAVE,
@@ -164,7 +169,9 @@ private:
            EARTHLIVING_WEAPON,
            RIPTIDE,
            CURE_TOXINS,
-           CLEANSE_SPIRIT;
+           CLEANSE_SPIRIT,
+		   NATURES_SWIFTNESS_SHAMAN,
+		   TIDAL_FORCE;
 
     // ELEMENTAL
     uint32 LIGHTNING_BOLT,
@@ -182,7 +189,9 @@ private:
            FIRE_ELEMENTAL_TOTEM,
            LAVA_BURST,
            EARTHBIND_TOTEM,
-           HEX;
+           HEX,
+		   ELEMENTAL_MASTERY,
+		   THUNDERSTORM;
 
     // first aid
     uint32 RECENTLY_BANDAGED;
