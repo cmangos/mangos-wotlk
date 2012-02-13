@@ -95,6 +95,9 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     SetQuestNeedCreatures();
 
     // start following master (will also teleport bot to master)
+	DistOverRide = 0; //set initial adjustable follow settings
+	gTempDist = 1;
+	gTempDist2 = 2;
     SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
 
     // get class specific ai
@@ -7524,8 +7527,8 @@ void PlayerbotAI::_HandleCommandFollow(std::string &text, Player &fromPlayer)
 		DistOverRide = 0; // this resets follow distance to config default
 		IsUpOrDown = 0;
 		std::ostringstream msg;
-		gTempDist = 0;
-		gTempDist2 = 1;
+		gTempDist = 1;
+		gTempDist2 = 2;
 		msg << "My follow distance is now Normal";
 		SendWhisper(msg.str(),fromPlayer);
 		SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
@@ -7559,9 +7562,9 @@ void PlayerbotAI::_HandleCommandFollow(std::string &text, Player &fromPlayer)
 		if (DistOverRide == 0)
 		{
 			DistOverRide = 0;
-			gTempDist = 0;
-			gTempDist2 = 1;
-			msg << "My follow distance is now Normal";
+			gTempDist = 1;
+			gTempDist2 = 2;
+			msg << "I'm NOT getting any closer than this";
 		}
 		if (DistOverRide != 0)
 			msg << "Decreasing My follow distance";
@@ -7574,6 +7577,7 @@ void PlayerbotAI::_HandleCommandFollow(std::string &text, Player &fromPlayer)
 		SendWhisper("see help for details on using follow.", fromPlayer);
 		return;
 	}
+	SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
 
 }
 
