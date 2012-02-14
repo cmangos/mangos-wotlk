@@ -663,6 +663,10 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                         case GOSSIP_OPTION_VENDOR:
                         {
                             // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_VENDOR");
+                            if (!botConfig.GetBoolDefault("PlayerbotAI.SellGarbage", true))
+                                return;
+
+                            bot->GetPlayerbotAI()->SellGarbage();
                             break;
                         }
                         case GOSSIP_OPTION_STABLEPET:
