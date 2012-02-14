@@ -53,6 +53,7 @@ public:
     bool m_confDisableBots;
     bool m_confDebugWhisper;
     float m_confFollowDistance[2];
+    uint32 gConfigSellLevelDiff;
     bool m_confCollectCombat;
     bool m_confCollectQuest;
     bool m_confCollectProfession;

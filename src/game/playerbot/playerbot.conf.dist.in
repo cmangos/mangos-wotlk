@@ -3,7 +3,7 @@
 #####################################
 
 [PlayerbotConf]
-ConfVersion=2011091201
+ConfVersion=2012021401
 
 ###################################################################################################################
 # PLAYERBOTAI CONFIGURATION
@@ -66,6 +66,10 @@ ConfVersion=2011091201
 #        Allow bots to automatically sell all [GRAY|POOR] quality items as the player activates vendor
 #        Default: 0 - off
 #                 1 - on
+#    PlayerbotAI.SellAll.LevelDiff
+#         If 'sell all' command is given prior to selling, bots will sell all low level white items.. this number is the number
+#         of levels LOWER than the bots level the Item must be before bot will sell it.
+#         Default: 10 (10 levels lower than the bot) Don't set to 0 or they'll sell everything! *SellGarbage must be set to 1 to use this*
 #
 ###################################################################################################################
 
@@ -86,3 +90,4 @@ PlayerbotAI.Collect.Objects = 1
 PlayerbotAI.Collect.DistanceMax = 50
 PlayerbotAI.Collect.Distance = 25
 PlayerbotAI.SellGarbage = 0
+PlayerbotAI.SellAll.LevelDiff = 10
