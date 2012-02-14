@@ -2010,47 +2010,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             return;
         }
 
-    case SMSG_BUY_ITEM:
-        {
-            WorldPacket p(packet);  // (8+4+4+4
-            ObjectGuid vguid;
-            p >> vguid;
-            uint32 vendorslot;
-            p >> vendorslot;
-            p.resize(20);
-
-            vendorslot = vendorslot - 1;
-            Creature *pCreature = m_bot->GetNPCIfCanInteractWith(vguid, UNIT_NPC_FLAG_VENDOR);
-            if (!pCreature)
-                return;
-
-            VendorItemData const* vItems = pCreature->GetVendorItems();
-            VendorItemData const* tItems = pCreature->GetVendorTemplateItems();
-            if ((!vItems || vItems->Empty()) && (!tItems || tItems->Empty()))
-                return;
-
-            uint32 vCount = vItems ? vItems->GetItemCount() : 0;
-            uint32 tCount = tItems ? tItems->GetItemCount() : 0;
-
-            if (vendorslot >= vCount + tCount)
-                return;
-
-            VendorItem const* crItem = vendorslot < vCount ? vItems->GetItem(vendorslot) : tItems->GetItem(vendorslot - vCount);
-            if (!crItem)
-                return;
-
-            ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(crItem->item);
-            if (pProto)
-            {
-                std::ostringstream out;
-                out << "|cff009900" << "I received item: |r";
-                MakeItemLink(pProto, out);
-                TellMaster(out.str().c_str());
-            }
-            return;
-        }
-
-    case SMSG_ITEM_PUSH_RESULT:
+        case SMSG_ITEM_PUSH_RESULT:
         {
             WorldPacket p(packet);  // (8+4+4+4+1+4+4+4+4+4+4)
             ObjectGuid guid;
@@ -3569,6 +3529,14 @@ void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit *target)
 
 void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
 {
+    // reset m_combatOrder after ORDERS_PASSIVE
+    if (m_combatOrder == ORDERS_PASSIVE)
+    {
+        m_combatOrder = ORDERS_NONE;
+        m_targetAssist = 0;
+        m_targetProtect = 0;
+    }
+
     if ((co == ORDERS_ASSIST || co == ORDERS_PROTECT) && !target) {
         TellMaster("Erf, you forget to target assist/protect characters!");
         return;
@@ -3578,6 +3546,12 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
         m_targetAssist = 0;
         m_targetProtect = 0;
         TellMaster("Orders are cleaned!");
+        return;
+    }
+    if (co == ORDERS_PASSIVE)
+    {
+        m_combatOrder = ORDERS_PASSIVE;
+        SendOrders(*GetMaster());
         return;
     }
     if (co == ORDERS_PROTECT)
