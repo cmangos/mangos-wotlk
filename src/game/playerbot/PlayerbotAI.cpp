@@ -1702,7 +1702,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             }
             return;
         }
-
         // Handle when another player opens the trade window with the bot
         // also sends list of tradable items bot can trade if bot is allowed to obey commands from
     case SMSG_TRADE_STATUS:
@@ -7612,7 +7611,13 @@ void PlayerbotAI::_HandleCommandAttack(std::string &text, Player &fromPlayer)
     if (attackOnGuid)
     {
         if (Unit * thingToAttack = ObjectAccessor::GetUnit(*m_bot, attackOnGuid))
-            if (!m_bot->IsFriendlyTo(thingToAttack) && m_bot->IsWithinLOSInMap(thingToAttack))
+            if (!m_bot->IsFriendlyTo(thingToAttack) && !m_bot->IsWithinLOSInMap(thingToAttack))
+            {
+                DoTeleport(*m_followTarget);
+                if (m_bot->IsWithinLOSInMap(thingToAttack))
+                    GetCombatTarget(thingToAttack);
+            }
+            else if (!m_bot->IsFriendlyTo(thingToAttack) && m_bot->IsWithinLOSInMap(thingToAttack))
                 GetCombatTarget(thingToAttack);
     }
     else
