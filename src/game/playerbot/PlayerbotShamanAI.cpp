@@ -142,8 +142,10 @@ void PlayerbotShamanAI::HealTarget(Unit &target, uint8 hp)
                     ai->CastSpell(DISPEL, target);
             }
             else if ((1 << holder->GetSpellProto()->Dispel) & dispelMask3 & (DISPEL == CLEANSE_SPIRIT))
+			{
                 if (holder->GetSpellProto()->Dispel == DISPEL_CURSE)
                     ai->CastSpell(DISPEL, target);
+			}
         }
     }
     // end HealTarget
@@ -163,38 +165,68 @@ void PlayerbotShamanAI::DropTotems()
 	switch (spec)
 	{
 		case SHAMAN_SPEC_ENHANCEMENT:
-			if (STRENGTH_OF_EARTH_TOTEM > 0 && ((earth == NULL) ||(m_bot->GetDistance(earth) > 30)) && !GetMaster()->HasAura(HORN_OF_WINTER) && ai->GetManaPercent() >= 13)
+			// Earth Totems 
+			if (STRENGTH_OF_EARTH_TOTEM > 0 && ((earth == NULL) ||(m_bot->GetDistance(earth) > 30)) && ai->GetManaPercent() >= 13)
 				ai->CastSpell(STRENGTH_OF_EARTH_TOTEM);
-			if (FLAMETONGUE_TOTEM > 0 && ((fire == NULL) ||( m_bot->GetDistance(fire) > 30)) && ai->GetManaPercent() >= 14)
+			// Fire Totems
+			if (ai->GetResistType() == PlayerbotAI::SCHOOL_FROST && FROST_RESISTANCE_TOTEM > 0 && ((fire == NULL) ||(m_bot->GetDistance(fire) > 30)) && ai->GetManaPercent() >= 10)
+				ai->CastSpell(FROST_RESISTANCE_TOTEM);
+			else if (FLAMETONGUE_TOTEM > 0 && ((fire == NULL) ||( m_bot->GetDistance(fire) > 30)) && ai->GetManaPercent() >= 14)
                 ai->CastSpell(FLAMETONGUE_TOTEM);
-			if (WIND_FURY_TOTEM > 0 && ((air == NULL) ||( m_bot->GetDistance(air) > 30)) /*&& !m_bot->HasAura(IMPROVED_ICY_TALONS)*/ && ai->GetManaPercent() >= 11)
+			// Air totems
+			if (ai->GetResistType() == PlayerbotAI::SCHOOL_NATURE && NATURE_RESISTANCE_TOTEM > 0 && ((air == NULL) ||(m_bot->GetDistance(air) > 30)) && ai->GetManaPercent() >= 10)
+				ai->CastSpell(NATURE_RESISTANCE_TOTEM);
+			else if (WIND_FURY_TOTEM > 0 && ((air == NULL) ||( m_bot->GetDistance(air) > 30)) /*&& !m_bot->HasAura(IMPROVED_ICY_TALONS)*/ && ai->GetManaPercent() >= 11)
                 ai->CastSpell(WIND_FURY_TOTEM);
-			 if (MANA_SPRING_TOTEM > 0 && ((water == NULL) || (m_bot->GetDistance(water) > 30)) && ai->GetManaPercent() >= 5)
+			// Water Totems
+			if (ai->GetResistType() == PlayerbotAI::SCHOOL_FIRE && FIRE_RESISTANCE_TOTEM > 0 && ((water == NULL) ||(m_bot->GetDistance(water) > 30)) && ai->GetManaPercent() >= 10)
+				ai->CastSpell(FIRE_RESISTANCE_TOTEM);
+			else if (MANA_SPRING_TOTEM > 0 && ((water == NULL) || (m_bot->GetDistance(water) > 30)) && ai->GetManaPercent() >= 5)
 				ai->CastSpell(MANA_SPRING_TOTEM);
             break;
 
         case SHAMAN_SPEC_RESTORATION:
+			// Earth Totems 
             if (STRENGTH_OF_EARTH_TOTEM > 0 && ((earth == NULL) || (m_bot->GetDistance(earth) > 30)) && ai->GetManaPercent() >= 13)
                 ai->CastSpell(STRENGTH_OF_EARTH_TOTEM);
-            if (FLAMETONGUE_TOTEM > 0 && ((fire == NULL) || (m_bot->GetDistance(fire) > 30)) && ai->GetManaPercent() >= 14)
+			// Fire Totems
+			if (ai->GetResistType() == PlayerbotAI::SCHOOL_FROST && FROST_RESISTANCE_TOTEM > 0 && ((fire == NULL) ||(m_bot->GetDistance(fire) > 30)) && ai->GetManaPercent() >= 10)
+				ai->CastSpell(FROST_RESISTANCE_TOTEM);
+            else if (FLAMETONGUE_TOTEM > 0 && ((fire == NULL) || (m_bot->GetDistance(fire) > 30)) && ai->GetManaPercent() >= 14)
                 ai->CastSpell(FLAMETONGUE_TOTEM);
-            if (WRATH_OF_AIR_TOTEM > 0 && ((air == NULL) || (m_bot->GetDistance(air) > 30)) && ai->GetManaPercent() >= 11)
+			// Air totems
+			if (ai->GetResistType() == PlayerbotAI::SCHOOL_NATURE && NATURE_RESISTANCE_TOTEM > 0 && ((air == NULL) ||(m_bot->GetDistance(air) > 30)) && ai->GetManaPercent() >= 10)
+				ai->CastSpell(NATURE_RESISTANCE_TOTEM);
+            else if (WRATH_OF_AIR_TOTEM > 0 && ((air == NULL) || (m_bot->GetDistance(air) > 30)) && ai->GetManaPercent() >= 11)
                 ai->CastSpell(WRATH_OF_AIR_TOTEM);
-            if (MANA_SPRING_TOTEM > 0 && ((water == NULL) || (m_bot->GetDistance(water) > 30)) && ai->GetManaPercent() >= 5)
+			// Water Totems
+			if (ai->GetResistType() == PlayerbotAI::SCHOOL_FIRE && FIRE_RESISTANCE_TOTEM > 0 && ((water == NULL) ||(m_bot->GetDistance(water) > 30)) && ai->GetManaPercent() >= 10)
+				ai->CastSpell(FIRE_RESISTANCE_TOTEM);
+            else if (MANA_SPRING_TOTEM > 0 && ((water == NULL) || (m_bot->GetDistance(water) > 30)) && ai->GetManaPercent() >= 5)
                 ai->CastSpell(MANA_SPRING_TOTEM);
             break;
 
         case SHAMAN_SPEC_ELEMENTAL:
+			// Earth Totems 
             if (STRENGTH_OF_EARTH_TOTEM > 0 && ((earth == NULL) || (m_bot->GetDistance(earth) > 30)) && ai->GetManaPercent() >= 13)
                 ai->CastSpell(STRENGTH_OF_EARTH_TOTEM);
-            if (TOTEM_OF_WRATH > 0 && ((fire == NULL) || (m_bot->GetDistance(fire) > 30)) && ai->GetManaPercent() >= 5)
+			// Fire Totems
+			if (ai->GetResistType() == PlayerbotAI::SCHOOL_FROST && FROST_RESISTANCE_TOTEM > 0 && ((fire == NULL) ||(m_bot->GetDistance(fire) > 30)) && ai->GetManaPercent() >= 10)
+				ai->CastSpell(FROST_RESISTANCE_TOTEM);
+            else if (TOTEM_OF_WRATH > 0 && ((fire == NULL) || (m_bot->GetDistance(fire) > 30)) && ai->GetManaPercent() >= 5)
                 ai->CastSpell(TOTEM_OF_WRATH);
-             //If the spec didn't take totem of wrath, use flametongue
+             // If the spec didn't take totem of wrath, use flametongue
             else if (TOTEM_OF_WRATH == 0 && ((fire == NULL) || (m_bot->GetDistance(fire) > 30)) && ai->GetManaPercent() >= 14)
                 ai->CastSpell(FLAMETONGUE_TOTEM);
-            if (WRATH_OF_AIR_TOTEM > 0 && ((air == NULL) || (m_bot->GetDistance(air) > 30)) && ai->GetManaPercent() >= 11)
+			// Air totems
+			if (ai->GetResistType() == PlayerbotAI::SCHOOL_NATURE && NATURE_RESISTANCE_TOTEM > 0 && ((air == NULL) ||(m_bot->GetDistance(air) > 30)) && ai->GetManaPercent() >= 10)
+				ai->CastSpell(NATURE_RESISTANCE_TOTEM);
+            else if (WRATH_OF_AIR_TOTEM > 0 && ((air == NULL) || (m_bot->GetDistance(air) > 30)) && ai->GetManaPercent() >= 11)
                 ai->CastSpell(WRATH_OF_AIR_TOTEM);
-            if (MANA_SPRING_TOTEM > 0 && ((water == NULL) || (m_bot->GetDistance(water) > 30)) && ai->GetManaPercent() >= 5)
+			// Water Totems
+			if (ai->GetResistType() == PlayerbotAI::SCHOOL_FIRE && FIRE_RESISTANCE_TOTEM > 0 && ((water == NULL) ||(m_bot->GetDistance(water) > 30)) && ai->GetManaPercent() >= 10)
+				ai->CastSpell(FIRE_RESISTANCE_TOTEM);
+            else if (MANA_SPRING_TOTEM > 0 && ((water == NULL) || (m_bot->GetDistance(water) > 30)) && ai->GetManaPercent() >= 5)
                 ai->CastSpell(MANA_SPRING_TOTEM);
             break;
     };
@@ -345,20 +377,6 @@ void PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
                 LastSpellEnhancement = LastSpellEnhancement + 1;
                 break;
                }*/
-            /*else if (FROST_RESISTANCE_TOTEM > 0 && LastSpellEnhancement == 10 && (!m_bot->HasAura(FROST_RESISTANCE_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(TOTEM_OF_WRATH, EFFECT_INDEX_0)) && (!m_bot->HasAura(FLAMETONGUE_TOTEM, EFFECT_INDEX_0)) && ai->GetManaPercent() >= 10)
-               {
-                ai->CastSpell(FROST_RESISTANCE_TOTEM);
-                SpellSequence = SPELL_RESTORATION;
-                LastSpellEnhancement = LastSpellEnhancement + 1;
-                break;
-               }*/
-            /* else if (FIRE_RESISTANCE_TOTEM > 0 && LastSpellEnhancement == 20 && (!m_bot->HasAura(FIRE_RESISTANCE_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(HEALING_STREAM_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(MANA_SPRING_TOTEM, EFFECT_INDEX_0)) && ai->GetManaPercent() >= 10)
-               {
-                 ai->CastSpell(FIRE_RESISTANCE_TOTEM);
-                 SpellSequence = SPELL_RESTORATION;
-                 LastSpellEnhancement = LastSpellEnhancement + 1;
-                 break;
-               }*/
             /* else if (GROUNDING_TOTEM > 0 && LastSpellEnhancement == 25 && (!m_bot->HasAura(GROUNDING_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(WRATH_OF_AIR_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(WIND_FURY_TOTEM, EFFECT_INDEX_0)) && ai->GetManaPercent() >= 5)
                {
                  ai->CastSpell(GROUNDING_TOTEM);
@@ -366,13 +384,7 @@ void PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
                  LastSpellEnhancement = LastSpellEnhancement + 1;
                  break;
                }*/
-            /*else if (NATURE_RESISTANCE_TOTEM > 0 && LastSpellEnhancement == 30 && (!m_bot->HasAura(NATURE_RESISTANCE_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(WRATH_OF_AIR_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(GROUNDING_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(WIND_FURY_TOTEM, EFFECT_INDEX_0)) && ai->GetManaPercent() >= 10)
-               {
-                ai->CastSpell(NATURE_RESISTANCE_TOTEM);
-                SpellSequence = SPELL_RESTORATION;
-                LastSpellEnhancement = LastSpellEnhancement + 1;
-                break;
-               }*/
+
             /*else*/ 
 			if (STORMSTRIKE > 0 && (LastSpellEnhancement == 0 || LastSpellEnhancement == 4) /*&& (!pTarget->HasAura(STORMSTRIKE, EFFECT_INDEX_0))*/ && ai->GetManaPercent() >= 8)
             {

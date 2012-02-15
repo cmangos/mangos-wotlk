@@ -1491,13 +1491,23 @@ public:
         ORDERS_TANK                 = 0x01,             // bind attackers by gaining threat
         ORDERS_ASSIST               = 0x02,             // assist someone (dps type)
         ORDERS_HEAL                 = 0x04,             // concentrate on healing (no attacks, only self defense)
-        ORDERS_NODISPEL             = 0x08,
+        ORDERS_NODISPEL             = 0x08,				// Dont dispel anything
         ORDERS_PROTECT              = 0x10,             // combinable state: check if protectee is attacked
         ORDERS_PASSIVE              = 0x20,             // bots do nothing
+		ORDERS_RESIST				= 0x40,				// resist a magic school(see below for types)
         ORDERS_PRIMARY              = 0x0F,
         ORDERS_SECONDARY            = 0xF0,
         ORDERS_RESET                = 0xFF
     };
+
+	enum ResistType
+	{
+		SCHOOL_NONE		= 0,
+		SCHOOL_FIRE		= 1,
+		SCHOOL_NATURE	= 2,
+		SCHOOL_FROST	= 3,
+		SCHOOL_SHADOW	= 4
+	};
 
     enum CombatTargetType
     {
@@ -1828,6 +1838,7 @@ public:
     void SetCombatOrderByStr(std::string str, Unit *target = 0);
     void SetCombatOrder(CombatOrderType co, Unit *target = 0);
     CombatOrderType GetCombatOrder() { return this->m_combatOrder; }
+	ResistType GetResistType() { return this->m_resistType; }
     void SetMovementOrder(MovementOrderType mo, Unit *followTarget = 0);
     MovementOrderType GetMovementOrder() { return this->m_movementOrder; }
     void MovementReset();
@@ -1927,6 +1938,7 @@ private:
 
     CombatStyle m_combatStyle;
     CombatOrderType m_combatOrder;
+	ResistType m_resistType;
     MovementOrderType m_movementOrder;
 
     TalentSpec m_activeTalentSpec;
