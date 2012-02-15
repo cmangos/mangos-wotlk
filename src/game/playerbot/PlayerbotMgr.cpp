@@ -355,7 +355,13 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     for (PlayerBotMap::iterator itr = m_playerBots.begin(); itr != m_playerBots.end(); ++itr)
                     {
                         bot = itr->second;
-                        if (!bot->IsFriendlyTo(thingToAttack) && bot->IsWithinLOSInMap(thingToAttack))
+                        if (!bot->IsFriendlyTo(thingToAttack) && !bot->IsWithinLOSInMap(thingToAttack))
+                        {
+                            bot->GetPlayerbotAI()->DoTeleport(*m_followTarget);
+                            if (bot->IsWithinLOSInMap(thingToAttack))
+                                bot->GetPlayerbotAI()->GetCombatTarget(thingToAttack);
+                        }
+                        else if (!bot->IsFriendlyTo(thingToAttack) && bot->IsWithinLOSInMap(thingToAttack))
                             bot->GetPlayerbotAI()->GetCombatTarget(thingToAttack);
                     }
                     return;
