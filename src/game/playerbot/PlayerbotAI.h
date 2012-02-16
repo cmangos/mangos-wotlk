@@ -1643,6 +1643,8 @@ public:
 
     // Returns what kind of situation we are in so the ai can react accordingly
     ScenarioType GetScenarioType() { return m_ScenarioType; }
+    CombatStyle GetCombatStyle() { return m_combatStyle; }
+    void SetCombatStyle(CombatStyle cs) { m_combatStyle = cs; }
 
     PlayerbotClassAI* GetClassAI() { return m_classAI; }
     PlayerbotMgr* GetManager() { return m_mgr; }

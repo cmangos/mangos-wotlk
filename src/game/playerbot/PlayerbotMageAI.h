@@ -63,6 +63,7 @@ enum MageSpells
     REMOVE_CURSE_MAGE_1             = 475,
     RITUAL_OF_REFRESHMENT_1         = 43987,
     SCORCH_1                        = 2948,
+    SHOOT_2                                          = 5019,
     SLOW_1                          = 31589,
     SLOW_FALL_1                     = 130,
     SPELLSTEAL_1                    = 30449,
@@ -96,6 +97,8 @@ private:
            ARCANE_BLAST,
            MIRROR_IMAGE,
            ARCANE_POWER;
+    // ranged
+    uint32 SHOOT;
 
     // FIRE
     uint32 FIREBALL,

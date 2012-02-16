@@ -522,6 +522,39 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
             MakeItemLink(pItem, out, true);
             continue;
         }
+        uint32 spellId = 0;
+        for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+        {
+            if (pItem->GetProto()->Spells[i].SpellId > 0)
+            {
+                spellId = pItem->GetProto()->Spells[i].SpellId;
+                break;
+            }
+        }
+        if (pItem->GetProto()->Flags & ITEM_FLAG_LOOTABLE && spellId == 0)
+        {
+            std::string oops = "Oh.. Look!! Theres something Inside this!!!";
+            m_bot->Say(oops, LANG_UNIVERSAL);
+            UseItem(pItem);
+            continue;
+        }
+        if (uint32 questid = pItem->GetProto()->StartQuest)
+        {
+            Quest const* qInfo = sObjectMgr.GetQuestTemplate(questid);
+            if (m_bot->GetQuestStatus(questid) == QUEST_STATUS_COMPLETE)
+            {
+                std::string oops = "Oh.. Like I needed another of these..";
+                m_bot->Say(oops, LANG_UNIVERSAL);
+                continue;
+            }
+            else if (!m_bot->CanTakeQuest(qInfo, false))
+            {
+                    std::string oops = "Great..more junk..can I get rid of this please?";
+                    m_bot->Say(oops, LANG_UNIVERSAL);
+                    continue;
+            }
+            UseItem(pItem);
+        }
         uint16 dest;
         uint8 msg = m_bot->CanEquipItem(NULL_SLOT, dest, pItem, !pItem->IsBag());
         if (msg != EQUIP_ERR_OK)
@@ -6539,7 +6572,7 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
         // here we'll do some checks for other items that are safe to automatically sell such as
         // white items that are a number of levels lower than anything we could possibly use.
         // We'll check to make sure its not a tradeskill tool, quest item etc, things that we don't want to lose.
-        if (item->GetProto()->SellPrice > 0 && item->GetProto()->Quality == ITEM_QUALITY_NORMAL && item->GetProto()->SubClass != ITEM_SUBCLASS_QUEST)
+        if (item->GetProto()->SellPrice > 0 && (item->GetProto()->Quality == ITEM_QUALITY_NORMAL || item->GetProto()->Quality == ITEM_QUALITY_UNCOMMON) && item->GetProto()->SubClass != ITEM_SUBCLASS_QUEST)
         {
             ItemPrototype const *pProto = item->GetProto();
             if (pProto->RequiredLevel < (m_bot->getLevel() - m_mgr->gConfigSellLevelDiff) && pProto->SubClass != ITEM_SUBCLASS_WEAPON_MISC && pProto->FoodType == 0)
