@@ -542,11 +542,7 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
         {
             Quest const* qInfo = sObjectMgr.GetQuestTemplate(questid);
             if (m_bot->GetQuestStatus(questid) == QUEST_STATUS_COMPLETE)
-            {
-                std::string oops = "Oh.. Like I needed another of these..";
-                m_bot->Say(oops, LANG_UNIVERSAL);
                 continue;
-            }
             else if (!m_bot->CanTakeQuest(qInfo, false))
             {
                     std::string oops = "Great..more junk..can I get rid of this please?";
@@ -629,12 +625,6 @@ void PlayerbotAI::AutoEquipComparison(Item *pItem, Item *pItem2)
     };
     ItemPrototype const *pProto = pItem2->GetProto(); // equipped item if any
     ItemPrototype const *pProto2 = pItem->GetProto(); // new item to compare
-    // First check to see if this item has stats, and if the bot REALLY wants to lose its old item
-    if (pProto2->StatsCount > 0)
-    {
-        if (!ItemStatComparison(pProto, pProto2))
-            return; // stats on equipped item are better, OR stats are not useful for this bots class/style
-    }
     // DEBUG_LOG("Item Class (%s)",(pProto->Class == ITEM_CLASS_WEAPON ? "Weapon" : "Not Weapon"));
     switch (pProto->Class)
     {
@@ -651,13 +641,43 @@ void PlayerbotAI::AutoEquipComparison(Item *pItem, Item *pItem2)
         }
     case ITEM_CLASS_ARMOR:
         {
-            if (pProto->ItemLevel < pProto2->ItemLevel && pProto->Armor <= pProto2->Armor && m_bot->HasSkill(item_armor_skills[pProto2->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProto2->SubClass + 1])) // itemlevel + armour + armour class
+            if (pProto->ItemLevel < pProto2->ItemLevel && pProto->Armor <= pProto2->Armor && m_bot->HasSkill(item_armor_skills[pProto2->SubClass]) &&
+                !m_bot->HasSkill(item_armor_skills[pProto2->SubClass + 1])) // itemlevel + armour + armour class
+            {
+                // First check to see if this item has stats, and if the bot REALLY wants to lose its old item
+                if (pProto2->StatsCount > 0)
+                {
+                    if (!ItemStatComparison(pProto, pProto2))
+                        return; // stats on equipped item are better, OR stats are not useful for this bots class/style
+                }
                 EquipItem(pItem);
+                break;
+            }
             // now in case they are same itemlevel, but one is better than the other..
             if (pProto->ItemLevel == pProto2->ItemLevel && pProto->Quality < pProto2->Quality && pProto->Armor <= pProto2->Armor &&
                 m_bot->HasSkill(item_armor_skills[pProto2->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProto2->SubClass + 1])) // itemlevel + armour + armour class
+            {
+                // First check to see if this item has stats, and if the bot REALLY wants to lose its old item
+                if (pProto2->StatsCount > 0)
+                {
+                    if (!ItemStatComparison(pProto, pProto2))
+                        return; // stats on equipped item are better, OR stats are not useful for this bots class/style
+                }
                 EquipItem(pItem);
-            break;
+                break;
+            }
+            if (pProto->ItemLevel <= pProto2->ItemLevel && pProto->Quality < pProto2->Quality && pProto->Armor > pProto2->Armor &&
+                m_bot->HasSkill(item_armor_skills[pProto2->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProto2->SubClass + 1])) // itemlevel + armour + armour class
+            {
+                // First check to see if this item has stats, and if the bot REALLY wants to lose its old item
+                if (pProto2->StatsCount > 0)
+                {
+                    if (!ItemStatComparison(pProto, pProto2))
+                        return; // stats on equipped item are better, OR stats are not useful for this bots class/style
+                }
+                EquipItem(pItem);
+                break;
+            }
         }
     }
     InspectUpdate();
@@ -666,10 +686,8 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
 {
     uint8 isclass = 0; // 1= caster 2 = hybrid 3 = melee
     uint8 ishybrid = 0;
-    uint8 swap = 0;
-    uint8 itemscore = 0;
-    uint8 itemscore2 = 0;
-    uint8 score = 0;
+    uint8 olditemscore = 0;
+    uint8 newitemscore = 0;
     // get class and style to make it easier to compare later
     switch (m_bot->getClass())
     {
@@ -721,36 +739,105 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
     }
     for (int i = 0; i < MAX_ITEM_PROTO_STATS; ++i) // item can only have 10 stats. We check each stat slot available for stat and type.
     {
-        uint32 itemmod = pProto->ItemStat[i].ItemStatType; // what stat type is in this slot
-        if (!itemmod) // if no stat type in this slot, continue to next slot
-            continue;
+            uint32 itemmod = pProto->ItemStat[i].ItemStatType; // equipped item stats if any
+            uint32 itemmod2 = pProto2->ItemStat[i].ItemStatType; // newitem stats
+        //if (!itemmod) // if no stat type in this slot, continue to next slot
+        //   continue;
         // caster stats
         if (itemmod == ITEM_MOD_MANA || itemmod == ITEM_MOD_INTELLECT || itemmod == ITEM_MOD_SPIRIT || itemmod == ITEM_MOD_HIT_SPELL_RATING ||
             itemmod == ITEM_MOD_CRIT_SPELL_RATING || itemmod == ITEM_MOD_HASTE_SPELL_RATING || itemmod == ITEM_MOD_SPELL_DAMAGE_DONE ||
-            itemmod == ITEM_MOD_MANA_REGENERATION || itemmod == ITEM_MOD_SPELL_POWER || itemmod == ITEM_MOD_SPELL_PENETRATION)
+            itemmod == ITEM_MOD_MANA_REGENERATION || itemmod == ITEM_MOD_SPELL_POWER || itemmod == ITEM_MOD_SPELL_PENETRATION ||
+            itemmod2 == ITEM_MOD_MANA || itemmod2 == ITEM_MOD_INTELLECT || itemmod2 == ITEM_MOD_SPIRIT || itemmod2 == ITEM_MOD_HIT_SPELL_RATING ||
+            itemmod2 == ITEM_MOD_CRIT_SPELL_RATING || itemmod2 == ITEM_MOD_HASTE_SPELL_RATING || itemmod2 == ITEM_MOD_SPELL_DAMAGE_DONE ||
+            itemmod2 == ITEM_MOD_MANA_REGENERATION || itemmod2 == ITEM_MOD_SPELL_POWER || itemmod2 == ITEM_MOD_SPELL_PENETRATION)
         {
             switch (isclass) // 1 caster, 2 hybrid, 3 melee
             {
             case 1:
                 {
-                    score = (score + 2);
+                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                    if (itemmod == itemmod2) //same stat type
+                    {
+                        if (itemmodval < itemmodval2) // which one has the most
+                        {
+                            if (olditemscore > 0)
+                                olditemscore = (olditemscore - 1);
+                            newitemscore = (newitemscore + 1);
+                        }
+                        else
+                        {
+                            if (newitemscore > 0)
+                                newitemscore = (newitemscore - 1);
+                            olditemscore = (olditemscore + 1);
+                        }
+                    }
+                    else
+                    {
+                        if (itemmod)
+                            olditemscore = (olditemscore + 1);
+                        if (itemmod2)
+                            newitemscore = (newitemscore + 1);
+                    }
+
                     break;
                 }
             case 2:
                 {
+                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (ishybrid != 2) //not a hunter
-                        score = (score + 1);
+                    {
+                        if (itemmod == itemmod2) //same stat type
+                        {
+                            if (itemmodval < itemmodval2) // which one has the most
+                            {
+                                if (olditemscore > 0)
+                                    olditemscore = (olditemscore - 1);
+                                newitemscore = (newitemscore + 1);
+                            }
+                            else
+                            {
+                                if (newitemscore > 0)
+                                    newitemscore = (newitemscore - 1);
+                                olditemscore = (olditemscore + 1);
+                            }
+                        }
+                        else
+                        {
+                            if (itemmod)
+                                olditemscore = (olditemscore + 1);
+                            if (itemmod2)
+                                newitemscore = (newitemscore + 1);
+                        }
+                    }
                     else //is a hunter
                     {
-                        if (score > 0) //we dont want any negative returns
-                            score = (score - 1);
+                        if (itemmod)
+                        {
+                            if (olditemscore > 0) //we dont want any negative returns
+                                olditemscore = (olditemscore - 1);
+                        }
+                        if (itemmod2)
+                        {
+                            if (newitemscore > 0) //we dont want any negative returns
+                                newitemscore = (newitemscore - 1);
+                        }
                     }
                     break;
                 }  // pure melee need nothing from this list.
             case 3:
                 {
-                    if (score > 0)
-                        score = (score - 1);
+                    if (itemmod)
+                    {
+                        if (olditemscore > 0) //we dont want any negative returns
+                            olditemscore = (olditemscore - 1);
+                    }
+                    if (itemmod2)
+                    {
+                        if (newitemscore > 0) //we dont want any negative returns
+                            newitemscore = (newitemscore - 1);
+                    }
                     break;
                 }
             default:
@@ -771,18 +858,73 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
             {
             case 1:
                 {
-                    if (score > 0)
-                        score = (score - 1);
+                    if (itemmod)
+                    {
+                        if (olditemscore > 0) //we dont want any negative returns
+                            olditemscore = (olditemscore - 1);
+                    }
+                    if (itemmod2)
+                    {
+                        if (newitemscore > 0) //we dont want any negative returns
+                            newitemscore = (newitemscore - 1);
+                    }
                     break;
                 }
             case 2:
                 {
-                    score = (score + 1); // we'll break this down more later for druids/shaman/paladins etc..
+                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                    if (itemmod == itemmod2) //same stat type
+                    {
+                        if (itemmodval < itemmodval2) // which one has the most
+                        {
+                            if (olditemscore > 0)
+                                olditemscore = (olditemscore - 1);
+                            newitemscore = (newitemscore + 1);
+                        }
+                        else
+                        {
+                            if (newitemscore > 0)
+                                newitemscore = (newitemscore - 1);
+                            olditemscore = (olditemscore + 1);
+                        }
+                    }
+                    else
+                    {
+                        if (itemmod)
+                            olditemscore = (olditemscore + 1);
+                        if (itemmod2)
+                            newitemscore = (newitemscore + 1);
+                    }
                     break;
                 }
             case 3:
                 {
-                    score = (score + 2);
+                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                    if (itemmod == itemmod2) //same stat type
+                    {
+                        if (itemmodval < itemmodval2) // which one has the most
+                        {
+                            if (olditemscore > 0)
+                                olditemscore = (olditemscore - 1);
+                            newitemscore = (newitemscore + 1);
+                        }
+                        else
+                        {
+                            if (newitemscore > 0)
+                                newitemscore = (newitemscore - 1);
+                            olditemscore = (olditemscore + 1);
+                        }
+                    }
+                    else
+                    {
+                        if (itemmod)
+                            olditemscore = (olditemscore + 1);
+                        if (itemmod2)
+                            newitemscore = (newitemscore + 1);
+                    }
+
                     break;
                 }
             default:
@@ -798,17 +940,86 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
             {
             case 1:
                 {
-                    score = (score + 1);
+                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                    if (itemmod == itemmod2) //same stat type
+                    {
+                        if (itemmodval < itemmodval2) // which one has the most
+                        {
+                            if (olditemscore > 0)
+                                olditemscore = (olditemscore - 1);
+                            newitemscore = (newitemscore + 1);
+                        }
+                        else
+                        {
+                            if (newitemscore > 0)
+                                newitemscore = (newitemscore - 1);
+                            olditemscore = (olditemscore + 1);
+                        }
+                    }
+                    else
+                    {
+                        if (itemmod)
+                            olditemscore = (olditemscore + 1);
+                        if (itemmod2)
+                            newitemscore = (newitemscore + 1);
+                    }
                     break;
                 }
             case 2:
                 {
-                    score = (score + 2);
+                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                    if (itemmod == itemmod2) //same stat type
+                    {
+                        if (itemmodval < itemmodval2) // which one has the most
+                        {
+                            if (olditemscore > 0)
+                                olditemscore = (olditemscore - 1);
+                            newitemscore = (newitemscore + 1);
+                        }
+                        else
+                        {
+                            if (newitemscore > 0)
+                                newitemscore = (newitemscore - 1);
+                            olditemscore = (olditemscore + 1);
+                        }
+                    }
+                    else
+                    {
+                        if (itemmod)
+                            olditemscore = (olditemscore + 1);
+                        if (itemmod2)
+                            newitemscore = (newitemscore + 1);
+                    }
                     break;
                 }
             case 3:
                 {
-                    score = (score + 2);
+                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                    if (itemmod == itemmod2) //same stat type
+                    {
+                        if (itemmodval < itemmodval2) // which one has the most
+                        {
+                            if (olditemscore > 0)
+                                olditemscore = (olditemscore - 1);
+                            newitemscore = (newitemscore + 1);
+                        }
+                        else
+                        {
+                            if (newitemscore > 0)
+                                newitemscore = (newitemscore - 1);
+                            olditemscore = (olditemscore + 1);
+                        }
+                    }
+                    else
+                    {
+                        if (itemmod)
+                            olditemscore = (olditemscore + 1);
+                        if (itemmod2)
+                            newitemscore = (newitemscore + 1);
+                    }
                     break;
                 }
             default:
@@ -823,53 +1034,85 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
             {
             case 1:
                 {
-                    if (score > 0) //we dont want any negative returns
-                        score = (score - 1);
+                    if (itemmod)
+                    {
+                        if (olditemscore > 0) //we dont want any negative returns
+                            olditemscore = (olditemscore - 1);
+                    }
+                    if (itemmod2)
+                    {
+                        if (newitemscore > 0) //we dont want any negative returns
+                            newitemscore = (newitemscore - 1);
+                    }
                     break;
                 }
             case 2:
                 {
                     if (ishybrid != 2) //not a hunter
                     {
-                        if (score > 0) //we dont want any negative returns
-                            score = (score - 1);
-                        else //is a hunter
+                        if (itemmod)
                         {
-                            if (score > 0)
-                                score = (score + 2);
+                            if (olditemscore > 0) //we dont want any negative returns
+                                olditemscore = (olditemscore - 1);
+                        }
+                        if (itemmod2)
+                        {
+                            if (newitemscore > 0) //we dont want any negative returns
+                                newitemscore = (newitemscore - 1);
+                        }
+                    }
+                    else //is a hunter
+                    {
+                            uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                            uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                        if (itemmod == itemmod2) //same stat type
+                        {
+                            if (itemmodval < itemmodval2) // which one has the most
+                            {
+                                if (olditemscore > 0)
+                                    olditemscore = (olditemscore - 1);
+                                newitemscore = (newitemscore + 1);
+                            }
+                            else
+                            {
+                                if (newitemscore > 0)
+                                    newitemscore = (newitemscore - 1);
+                                olditemscore = (olditemscore + 1);
+                            }
+                        }
+                        else
+                        {
+                            if (itemmod)
+                                olditemscore = (olditemscore + 1);
+                            if (itemmod2)
+                                newitemscore = (newitemscore + 1);
                         }
                     }
                     break;
                 }
             case 3:
                 {
-                    if (score > 0)
-                        score = (score - 1);
+                    if (itemmod)
+                    {
+                        if (olditemscore > 0) //we dont want any negative returns
+                            olditemscore = (olditemscore - 1);
+                    }
+                    if (itemmod2)
+                    {
+                        if (newitemscore > 0) //we dont want any negative returns
+                            newitemscore = (newitemscore - 1);
+                    }
                     break;
                 }
             default:
                 break;
             }
         }
-        if (swap == 0)
-        {
-            if (pProto != pProto2)
-            {
-                if ( i == MAX_ITEM_PROTO_STATS)
-                {
-                    i = 0;
-                    swap = 1;
-                    pProto = pProto2;
-                    itemscore = score;
-                }
-            }
-        }
     }
-    itemscore2 = score;
-    swap = 0;
-    if (itemscore <= itemscore2)
+    if (olditemscore <= newitemscore)
         return true;
-    return false;
+    else
+        return false;
 }
 void PlayerbotAI::SendQuestNeedList()
 {
@@ -3053,53 +3296,50 @@ void PlayerbotAI::DoLoot()
         // bot has the specific skill or object requires no skill at all
         if ((m_bot->HasSkill(skillId) && skillId != SKILL_NONE) || (skillId == SKILL_NONE && go))
         {
-            if (SkillValue >= reqSkillValue)
-            {
-                switch (skillId)
-                {
-                case SKILL_MINING:
-                    if (HasTool(TC_MINING_PICK) && CastSpell(MINING))
-                        return;
-                    else
-                        skillFailed = true;
-                    break;
-                case SKILL_HERBALISM:
-                    if (CastSpell(HERB_GATHERING))
-                        return;
-                    else
-                        skillFailed = true;
-                    break;
-                case SKILL_SKINNING:
-                    if (c && HasCollectFlag(COLLECT_FLAG_SKIN) &&
-                        HasTool(TC_SKINNING_KNIFE) && CastSpell(SKINNING, *c))
-                        return;
-                    else
-                        skillFailed = true;
-                    break;
-                case SKILL_LOCKPICKING:
-                    if (CastSpell(PICK_LOCK_1))
-                        return;
-                    else
-                        skillFailed = true;
-                    break;
-                case SKILL_NONE:
-                    if (CastSpell(3365)) //Spell 3365 = Opening?
-                        return;
-                    else
-                        skillFailed = true;
-                    break;
-                default:
-                    TellMaster("I'm not sure how to get that.");
-                    skillFailed = true;
-                    DEBUG_LOG ("[PlayerbotAI]:DoLoot Skill %u is not implemented", skillId);
-                    break;
-                }
-            }
-            else
+            if (SkillValue < reqSkillValue)
             {
                 TellMaster("My skill is not high enough. It requires %u, but mine is %u.",
                     reqSkillValue, SkillValue);
                 skillFailed = true;
+            }
+            switch (skillId)
+            {
+            case SKILL_MINING:
+                if (HasTool(TC_MINING_PICK) && CastSpell(MINING))
+                    return;
+                else
+                    skillFailed = true;
+                break;
+            case SKILL_HERBALISM:
+                if (CastSpell(HERB_GATHERING))
+                    return;
+                else
+                    skillFailed = true;
+                break;
+            case SKILL_SKINNING:
+                if (c && HasCollectFlag(COLLECT_FLAG_SKIN) &&
+                    HasTool(TC_SKINNING_KNIFE) && CastSpell(SKINNING, *c))
+                    return;
+                else
+                    skillFailed = true;
+                break;
+            case SKILL_LOCKPICKING:
+                if (CastSpell(PICK_LOCK_1))
+                    return;
+                else
+                    skillFailed = true;
+                break;
+            case SKILL_NONE:
+                if (CastSpell(3365)) //Spell 3365 = Opening?
+                    return;
+                else
+                    skillFailed = true;
+                break;
+            default:
+                TellMaster("I'm not sure how to get that.");
+                skillFailed = true;
+                DEBUG_LOG ("[PlayerbotAI]:DoLoot Skill %u is not implemented", skillId);
+                break;
             }
         }
         else
@@ -9381,7 +9621,20 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                     break;
 
                 TrainerSpell const* trainer_spell = all_trainer_spells->Find(spellId);
-                if (!trainer_spell || !trainer_spell->learnedSpell)
+                if (!trainer_spell)
+                    continue;
+
+                uint32 reqLevel = 0;
+                if (!trainer_spell->learnedSpell && !m_bot->IsSpellFitByClassAndRace(trainer_spell->learnedSpell, &reqLevel))
+                    continue;
+
+                if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(trainer_spell->learnedSpell) && m_bot->HasSpell(trainer_spell->learnedSpell))
+                    continue;
+
+                reqLevel = trainer_spell->isProvidedReqLevel ? trainer_spell->reqLevel : std::max(reqLevel, trainer_spell->reqLevel);
+
+                TrainerSpellState state =  m_bot->GetTrainerSpellState(trainer_spell, reqLevel);
+                if (state != TRAINER_SPELL_GREEN)
                     continue;
 
                 // apply reputation discount
@@ -9710,16 +9963,6 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             ch.SendSysMessage(_HandleCommandHelpHelper("autoequip < on >", "Turns Auto equipping ON for one, or all bots in group").c_str());
             ch.SendSysMessage(_HandleCommandHelpHelper("autoequip < off >", "Turns Auto equipping OFF for one, or all bots in group").c_str());
             ch.SendSysMessage(_HandleCommandHelpHelper("autoequip < now >", "Ignores current autoequip setting, Runs the auto equip cycle ONCE for one or all bots (/t or /p)").c_str());
-            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
-            return;
-        }
-    }
-    if (bMainHelp || ExtractCommand("banter", text))
-    {
-        ch.SendSysMessage(_HandleCommandHelpHelper("banter", "turns bot chatter on or off").c_str());
-
-        if (!bMainHelp)
-        {
             if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
