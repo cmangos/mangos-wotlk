@@ -9002,7 +9002,7 @@ void PlayerbotAI::_HandleCommandStats(std::string &text, Player &fromPlayer)
 void PlayerbotAI::_HandleCommandGM(std::string &text, Player &fromPlayer)
 {
     // Check should happen OUTSIDE this function, but this is account security we're talking about, so let's be doubly sure
-    if (fromPlayer.GetSession()->GetSecurity() > SEC_PLAYER)
+    if (fromPlayer.GetSession()->GetSecurity() <= SEC_PLAYER)
         return;  // no excuses, no warning
 
     if (text == "")
