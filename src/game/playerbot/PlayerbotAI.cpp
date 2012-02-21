@@ -477,6 +477,84 @@ void PlayerbotAI::SendNotEquipList(Player& /*player*/)
     if (!bAnyEquippable)
         TellMaster("There are no items in my inventory that I can equip.");
 }
+
+void PlayerbotAI::AutoInventoryCheck(Player& /*player*/)
+{
+    //ChatHandler ch(GetMaster()); //leaving these declarations as they may be used later
+    //std::ostringstream out;
+    //std::ostringstream msg;
+
+    // Find  items in main backpack one at a time
+    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
+    {
+        Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if (!pItem)
+            continue;
+        if (AutoCrafting == 1)
+        {
+            if (pItem->GetProto()->Class == ITEM_CLASS_TRADE_GOODS)
+            {
+                uint32 goclass = pItem->GetProto()->SubClass;
+                if (m_bot->HasSkill(goclass))
+                {
+                    AutoCraftClass = goclass;
+                    Player* const bot = GetPlayerBot();
+                    AutoCraft(*bot);
+                }
+
+            }
+        }
+
+        uint16 dest;
+        uint8 msg = m_bot->CanEquipItem(NULL_SLOT, dest, pItem, !pItem->IsBag());
+
+        if (msg != EQUIP_ERR_OK)
+            continue;
+
+        int8 equipSlot = uint8(dest);
+        if (!(equipSlot >= 0 && equipSlot < 19))
+            continue;
+    }
+    // list out items in other removable backpacks
+    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
+    {
+        const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+        if (pBag)
+        {
+            for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
+            {
+                Item* const pItem = m_bot->GetItemByPos(bag, slot);
+                if (!pItem)
+                    continue;
+                if (AutoCrafting == 1)
+                {
+                    if (pItem->GetProto()->Class == ITEM_CLASS_TRADE_GOODS)
+                    {
+                        uint32 goclass = pItem->GetProto()->SubClass;
+                        if (m_bot->HasSkill(goclass))
+                        {
+                            AutoCraftClass = goclass;
+                            Player* const bot = GetPlayerBot();
+                            AutoCraft(*bot);
+                        }
+
+                    }
+                }
+                uint16 dest;
+                uint8 msg = m_bot->CanEquipItem(NULL_SLOT, dest, pItem, !pItem->IsBag());
+
+                if (msg != EQUIP_ERR_OK)
+                    continue;
+
+                int8 equipSlot = uint8(dest);
+                if (!(equipSlot >= 0 && equipSlot < 19))
+                    continue;
+
+            }
+        }
+    }
+}
+
 void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
 {
     ChatHandler ch(GetMaster());
@@ -545,9 +623,9 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
                 continue;
             else if (!m_bot->CanTakeQuest(qInfo, false))
             {
-                    std::string oops = "Great..more junk..can I get rid of this please?";
-                    m_bot->Say(oops, LANG_UNIVERSAL);
-                    continue;
+                std::string oops = "Great..more junk..can I get rid of this please?";
+                m_bot->Say(oops, LANG_UNIVERSAL);
+                continue;
             }
             UseItem(pItem);
         }
@@ -739,8 +817,8 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
     }
     for (int i = 0; i < MAX_ITEM_PROTO_STATS; ++i) // item can only have 10 stats. We check each stat slot available for stat and type.
     {
-            uint32 itemmod = pProto->ItemStat[i].ItemStatType; // equipped item stats if any
-            uint32 itemmod2 = pProto2->ItemStat[i].ItemStatType; // newitem stats
+        uint32 itemmod = pProto->ItemStat[i].ItemStatType; // equipped item stats if any
+        uint32 itemmod2 = pProto2->ItemStat[i].ItemStatType; // newitem stats
         //if (!itemmod) // if no stat type in this slot, continue to next slot
         //   continue;
         // caster stats
@@ -755,8 +833,8 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
             {
             case 1:
                 {
-                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
-                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                    uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                    uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (itemmod == itemmod2) //same stat type
                     {
                         if (itemmodval < itemmodval2) // which one has the most
@@ -784,8 +862,8 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                 }
             case 2:
                 {
-                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
-                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                    uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                    uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (ishybrid != 2) //not a hunter
                     {
                         if (itemmod == itemmod2) //same stat type
@@ -872,8 +950,8 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                 }
             case 2:
                 {
-                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
-                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                    uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                    uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (itemmod == itemmod2) //same stat type
                     {
                         if (itemmodval < itemmodval2) // which one has the most
@@ -900,8 +978,8 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                 }
             case 3:
                 {
-                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
-                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                    uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                    uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (itemmod == itemmod2) //same stat type
                     {
                         if (itemmodval < itemmodval2) // which one has the most
@@ -940,8 +1018,8 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
             {
             case 1:
                 {
-                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
-                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                    uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                    uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (itemmod == itemmod2) //same stat type
                     {
                         if (itemmodval < itemmodval2) // which one has the most
@@ -968,8 +1046,8 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                 }
             case 2:
                 {
-                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
-                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                    uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                    uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (itemmod == itemmod2) //same stat type
                     {
                         if (itemmodval < itemmodval2) // which one has the most
@@ -996,8 +1074,8 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                 }
             case 3:
                 {
-                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
-                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                    uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                    uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (itemmod == itemmod2) //same stat type
                     {
                         if (itemmodval < itemmodval2) // which one has the most
@@ -1063,8 +1141,8 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     }
                     else //is a hunter
                     {
-                            uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
-                            uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
+                        uint32 itemmodval = pProto->ItemStat[i].ItemStatValue; // equipped item stats if any
+                        uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                         if (itemmod == itemmod2) //same stat type
                         {
                             if (itemmodval < itemmodval2) // which one has the most
@@ -1114,6 +1192,155 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
     else
         return false;
 }
+
+void PlayerbotAI::AutoCraft(Player& /*player*/)
+{
+
+    std::ostringstream msg;
+    uint32 charges;
+    uint32 skill;
+    int32 category;
+    uint32 linkcount = 0;
+
+    skill = AutoCraftClass;
+
+    if (skill == ITEM_SUBCLASS_HERB)
+    {
+
+        if (m_bot->HasSkill(SKILL_INSCRIPTION))
+        {
+            skill = SKILL_INSCRIPTION;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else if (m_bot->HasSkill(SKILL_ALCHEMY))
+        {
+            skill = SKILL_ALCHEMY;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else if (skill == ITEM_SUBCLASS_METAL_STONE)
+    {
+        if (m_bot->HasSkill(SKILL_MINING))
+        {
+            skill = SKILL_MINING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else if (m_bot->HasSkill(SKILL_ENGINEERING))
+        {
+            skill = SKILL_ENGINEERING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else if (m_bot->HasSkill(SKILL_BLACKSMITHING))
+        {
+            skill = SKILL_BLACKSMITHING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else if (skill == ITEM_SUBCLASS_MEAT)
+    {
+        if (m_bot->HasSkill(SKILL_COOKING))
+        {
+            skill = SKILL_COOKING;
+            category = SKILL_CATEGORY_SECONDARY;
+        }
+        else
+            return;
+    }
+    else if (skill == ITEM_SUBCLASS_CLOTH)
+    {
+        if (m_bot->HasSkill(SKILL_FIRST_AID))
+        {
+            skill = SKILL_FIRST_AID;
+            category = SKILL_CATEGORY_SECONDARY;
+        }
+        else if (m_bot->HasSkill(SKILL_TAILORING))
+        {
+            skill = SKILL_TAILORING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else if (skill == ITEM_SUBCLASS_JEWELCRAFTING)
+    {
+        if (m_bot->HasSkill(SKILL_JEWELCRAFTING))
+        {
+            skill = SKILL_JEWELCRAFTING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else if (skill == ITEM_SUBCLASS_LEATHER)
+    {
+        if (m_bot->HasSkill(SKILL_LEATHERWORKING))
+        {
+            skill = SKILL_LEATHERWORKING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    else if (skill == ITEM_SUBCLASS_ENCHANTING)
+    {
+        if (m_bot->HasSkill(SKILL_ENCHANTING))
+        {
+            skill = SKILL_ENCHANTING;
+            category = SKILL_CATEGORY_PROFESSION;
+        }
+        else
+            return;
+    }
+    m_spellsToLearn.clear();
+    m_bot->skill(m_spellsToLearn);
+    for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
+    {
+        SkillLineEntry const *SkillLine = sSkillLineStore.LookupEntry(*it);
+        if (SkillLine->categoryId == category && *it == skill)
+        {
+            for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+            {
+                SkillLineAbilityEntry const *SkillAbility = sSkillLineAbilityStore.LookupEntry(j);
+                if (!SkillAbility)
+                    continue;
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(SkillAbility->spellId);
+                if (!spellInfo)
+                    continue;
+                if (IsPrimaryProfessionSkill(*it) && spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_CREATE_ITEM)
+                    continue;
+                if (SkillAbility->skillId == *it && m_bot->HasSpell(SkillAbility->spellId) && SkillAbility->forward_spellid == 0 && ((SkillAbility->classmask & m_bot->getClassMask()) == 0))
+                {
+                    if ((charges = GetSpellCharges(SkillAbility->spellId)) > 0)
+                    {
+                        SpellCastTargets targets;
+                        Spell *spell = new Spell(m_bot, spellInfo, false);
+                        SpellCastResult result = spell->CheckCast(true);
+                        if (result != SPELL_CAST_OK)
+                        {
+                            spell->SendCastResult(result);
+                        }
+                        else
+                        {
+                            spell->prepare(&targets);
+                            m_CurrentlyCastingSpellId = SkillAbility->spellId;
+                            SetState(BOTSTATE_CRAFT);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    m_noToolList.unique();
+    for (std::list<uint32>::iterator it = m_noToolList.begin(); it != m_noToolList.end(); it++)
+        HasTool(*it);
+    m_noToolList.clear();
+    m_spellsToLearn.clear();
+}
+
 void PlayerbotAI::SendQuestNeedList()
 {
     std::ostringstream out;
@@ -1407,8 +1634,8 @@ void PlayerbotAI::SendOrders(Player& /*player*/)
         out << " and ";
     if (m_combatOrder & ORDERS_PROTECT)
         out << "I PROTECT " << (m_targetProtect ? m_targetProtect->GetName() : "unknown");
-	else if (m_combatOrder & ORDERS_RESIST)
-		out << "I RESIST " << m_resistType;
+    else if (m_combatOrder & ORDERS_RESIST)
+        out << "I RESIST " << m_resistType;
     out << ".";
 
     if (m_mgr->m_confDebugWhisper)
@@ -2287,7 +2514,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             return;
         }
 
-        case SMSG_ITEM_PUSH_RESULT:
+    case SMSG_ITEM_PUSH_RESULT:
         {
             WorldPacket p(packet);  // (8+4+4+4+1+4+4+4+4+4+4)
             ObjectGuid guid;
@@ -3796,22 +4023,22 @@ void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit *target)
     else if (str == "protect") co = ORDERS_PROTECT;
     else if (str == "passive") co = ORDERS_PASSIVE;
     else if (str == "nodispel") co = ORDERS_NODISPEL;
-	else if (str == "resistfrost") {
-		co = ORDERS_RESIST; 
-		m_resistType = SCHOOL_FROST;
-	}
-	else if (str == "resistnature") {
-		co = ORDERS_RESIST;
-		m_resistType = SCHOOL_NATURE;
-	}
-	else if (str == "resistfire") {
-		co = ORDERS_RESIST;
-		m_resistType = SCHOOL_FIRE;
-	}
-	else if (str == "resistshadow") {
-		co = ORDERS_RESIST;
-		m_resistType = SCHOOL_SHADOW;
-	}
+    else if (str == "resistfrost") {
+        co = ORDERS_RESIST;
+        m_resistType = SCHOOL_FROST;
+    }
+    else if (str == "resistnature") {
+        co = ORDERS_RESIST;
+        m_resistType = SCHOOL_NATURE;
+    }
+    else if (str == "resistfire") {
+        co = ORDERS_RESIST;
+        m_resistType = SCHOOL_FIRE;
+    }
+    else if (str == "resistshadow") {
+        co = ORDERS_RESIST;
+        m_resistType = SCHOOL_SHADOW;
+    }
     else
         co = ORDERS_RESET;
     SetCombatOrder(co, target);
@@ -3835,7 +4062,7 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
         m_combatOrder = ORDERS_NONE;
         m_targetAssist = 0;
         m_targetProtect = 0;
-		m_resistType = SCHOOL_NONE;
+        m_resistType = SCHOOL_NONE;
         TellMaster("Orders are cleaned!");
         return;
     }
@@ -4480,7 +4707,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
                     m_bot->GetMotionMaster()->MoveIdle();
                 }
             }
-            return true;
+            // return true;
         }
         else
             return false;
@@ -7662,6 +7889,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (ExtractCommand("craft", input))
         _HandleCommandCraft(input, fromPlayer);
 
+    else if (ExtractCommand("autocraft", input))
+        _HandleCommandAutoInventoryCheck(input, fromPlayer);
+
     else if (ExtractCommand("enchant", input))
         _HandleCommandEnchant(input, fromPlayer);
 
@@ -8674,6 +8904,14 @@ void PlayerbotAI::_HandleCommandAutoEquip(std::string &text, Player &fromPlayer)
     msg << "AutoEquip is now " << (AutoEquipPlug ? "ON" : "OFF");
     SendWhisper(msg.str(),fromPlayer);
 }
+void PlayerbotAI::_HandleCommandAutoInventoryCheck(std::string &text, Player &fromPlayer)
+{
+    std::ostringstream msg;
+    //if (AutoCrafting == 0)
+    AutoCrafting = 1;
+    Player* const bot = GetPlayerBot();
+    AutoInventoryCheck(*bot);
+}
 void PlayerbotAI::_HandleCommandEquip(std::string &text, Player &fromPlayer)
 {
     std::list<uint32> itemIds;
@@ -9676,7 +9914,6 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                 data << ObjectGuid(fromPlayer.GetSelectionGuid());
                 data << uint32(spellId);                                // should be same as in packet from client
                 GetMaster()->GetSession()->SendPacket(&data);
-
                 MakeSpellLink(pSpellInfo, msg);
                 msg << " ";
                 msg << Cash(cost) << "\n";
@@ -9686,6 +9923,7 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
             if (totalSpellLearnt != 1) msg << "s";
             msg << " learnt, ";
             msg << Cash(totalCost) << " spent.";
+            SKINNING            = initSpell(SKINNING_1);
         }
         // Handle: List class or profession skills, spells & abilities for selected trainer
         else
