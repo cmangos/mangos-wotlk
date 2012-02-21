@@ -77,7 +77,6 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             std::vector<uint32> nodes;
             nodes.resize(2);
             uint8 delay = 9;
-
             p >> guid >> nodes[0] >> nodes[1];
 
             // DEBUG_LOG ("[PlayerbotMgr]: HandleMasterIncomingPacket - Received CMSG_ACTIVATETAXI from %d to %d", nodes[0], nodes[1]);
@@ -93,7 +92,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 Group* group = bot->GetGroup();
                 if (!group)
                     continue;
-
+                bot->GetPlayerbotAI()->FollowAutoReset(*bot);
                 Unit *target = ObjectAccessor::GetUnit(*bot, guid);
 
                 bot->GetPlayerbotAI()->SetIgnoreUpdateTime(delay);
@@ -113,7 +112,6 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             ObjectGuid guid;
             uint32 node_count;
             uint8 delay = 9;
-
             p >> guid >> node_count;
 
             std::vector<uint32> nodes;
@@ -141,7 +139,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 Group* group = bot->GetGroup();
                 if (!group)
                     continue;
-
+                bot->GetPlayerbotAI()->FollowAutoReset(*bot);
                 Unit *target = ObjectAccessor::GetUnit(*bot, guid);
 
                 bot->GetPlayerbotAI()->SetIgnoreUpdateTime(delay);
@@ -409,11 +407,10 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             p.rpos(0);     // reset reader
             ObjectGuid objGUID;
             p >> objGUID;
-
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
                 Player* const bot = it->second;
-
+                bot->GetPlayerbotAI()->FollowAutoReset(*bot);
                 GameObject *obj = m_master->GetMap()->GetGameObject(objGUID);
                 if (!obj)
                     return;
@@ -445,7 +442,6 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             p.rpos(0);    // reset reader
             ObjectGuid npcGUID;
             p >> npcGUID;
-
             WorldObject* pNpc = m_master->GetMap()->GetWorldObject(npcGUID);
             if (!pNpc)
                 return;
@@ -454,6 +450,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
                 Player* const bot = it->second;
+                bot->GetPlayerbotAI()->FollowAutoReset(*bot);
                 bot->GetPlayerbotAI()->TurnInQuests(pNpc);
             }
 
@@ -477,7 +474,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
                 {
                     Player* const bot = it->second;
-
+                    bot->GetPlayerbotAI()->FollowAutoReset(*bot);
                     if (bot->GetQuestStatus(quest) == QUEST_STATUS_COMPLETE)
                         bot->GetPlayerbotAI()->TellMaster("I already completed that quest.");
                     else if (!bot->CanTakeQuest(qInfo, false))
@@ -555,6 +552,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
                 Player* const bot = it->second;
+                bot->GetPlayerbotAI()->FollowAutoReset(*bot);
                 bot->GetPlayerbotAI()->TurnInQuests(pNpc);
             }
             return;
@@ -631,13 +629,12 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             ObjectGuid guid;
             p.rpos(0);                //reset packet pointer
             p >> guid;
-
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
                 Player* const bot = it->second;
                 if (!bot)
                     return;
-
+                bot->GetPlayerbotAI()->FollowAutoReset(*bot);
                 Creature *pCreature = bot->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
                 if (!pCreature)
                 {
@@ -725,7 +722,6 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             p.rpos(0);  // reset reader
             ObjectGuid npcGUID;
             p >> npcGUID;
-
             Object* const pNpc = (WorldObject *) m_master->GetObjectByTypeMask(npcGUID, TYPEMASK_CREATURE_OR_GAMEOBJECT);
             if (!pNpc)
                 return;
@@ -740,8 +736,11 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     continue;
                 }
                 else
+                {
                     // changed the SellGarbage() function to support ch.SendSysMessaage()
+                    bot->GetPlayerbotAI()->FollowAutoReset(*bot);
                     bot->GetPlayerbotAI()->SellGarbage(*bot);
+                }
             }
             return;
         }

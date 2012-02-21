@@ -1789,10 +1789,12 @@ public:
     float gDist[2]; //gDist, gTemp vars are used for variable follow distance
     float gTempDist;
     float gTempDist2;
+    uint8 FollowAutoGo;
     uint8 IsUpOrDown; //tracks variable follow distance
     void _HandleCommandAutoEquip(std::string &text, Player &fromPlayer);
     void _HandleCommandAutoInventoryCheck(std::string &text, Player &fromPlayer);
     void AutoUpgradeEquipment(Player& player);
+    void FollowAutoReset(Player& player);
     void AutoInventoryCheck(Player& player);
     void AutoEquipComparison(Item *pItem, Item *pItem2);
     void AutoCraft(Player& player);

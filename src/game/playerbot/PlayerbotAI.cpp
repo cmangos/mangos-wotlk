@@ -555,6 +555,21 @@ void PlayerbotAI::AutoInventoryCheck(Player& /*player*/)
     }
 }
 
+void PlayerbotAI::FollowAutoReset(Player& /*player*/)
+{
+    if (FollowAutoGo != 0)
+    {
+        DistOverRide = 0; // this resets follow distance to config default
+        IsUpOrDown = 0;
+        std::ostringstream msg;
+        gTempDist = 1;
+        gTempDist2 = 2;
+        FollowAutoGo = 1; // want to reset this now so bots will resume distance after interaction
+        SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
+    }
+    return;
+}
+
 void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
 {
     ChatHandler ch(GetMaster());
@@ -1612,6 +1627,11 @@ void PlayerbotAI::ReloadAI()
         m_classAI = (PlayerbotClassAI *) new PlayerbotDeathKnightAI(GetMaster(), m_bot, this);
         break;
     }
+
+    HERB_GATHERING    = initSpell(HERB_GATHERING_1);
+    MINING                   = initSpell(MINING_1);
+    SKINNING                        = initSpell(SKINNING_1);
+
 }
 
 void PlayerbotAI::SendOrders(Player& /*player*/)
@@ -4042,6 +4062,7 @@ void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit *target)
     else
         co = ORDERS_RESET;
     SetCombatOrder(co, target);
+    FollowAutoGo = 1;
 }
 
 void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
@@ -4137,19 +4158,37 @@ void PlayerbotAI::MovementReset()
         {
             if (DistOverRide != 0)
             {
-                if (IsUpOrDown < DistOverRide)
+                if (FollowAutoGo == 0)
                 {
-                    IsUpOrDown = DistOverRide;
-                    gTempDist = (gTempDist + 1.0);
-                    gTempDist2 = (gTempDist2 + 1.0);
-                }
-                if (IsUpOrDown > DistOverRide)
-                {
-                    if (IsUpOrDown >= 2)
+                    if (IsUpOrDown < DistOverRide)
                     {
                         IsUpOrDown = DistOverRide;
-                        gTempDist = (gTempDist - 1.0);
-                        gTempDist2 = (gTempDist2 - 1.0);
+                        gTempDist = (gTempDist + 1.0);
+                        gTempDist2 = (gTempDist2 + 1.0);
+                    }
+                    if (IsUpOrDown > DistOverRide)
+                    {
+                        if (IsUpOrDown >= 2)
+                        {
+                            IsUpOrDown = DistOverRide;
+                            gTempDist = (gTempDist - 1.0);
+                            gTempDist2 = (gTempDist2 - 1.0);
+                        }
+                    }
+                }
+                else
+                {
+                    if (IsUpOrDown < DistOverRide)
+                    {
+                        gTempDist = 1.0;
+                        gTempDist2 = 2.0;
+                        IsUpOrDown = 0;
+                        for (IsUpOrDown = 0; IsUpOrDown < DistOverRide; ++IsUpOrDown)
+                        {
+                            gTempDist = (gTempDist + 1.0);
+                            gTempDist2 = (gTempDist2 + 1.0);
+                        }
+                        IsUpOrDown = DistOverRide;
                     }
                 }
                 gDist[0] = gTempDist;
@@ -4310,7 +4349,19 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
 
     // default updates occur every two seconds
     m_ignoreAIUpdatesUntilTime = time(NULL) + 2;
-
+    if (FollowAutoGo == 1)
+    {
+        if (m_combatOrder & ORDERS_TANK)
+            DistOverRide = 1;
+        else if (m_combatOrder & ORDERS_ASSIST)
+            DistOverRide = 2;
+        else if (m_combatOrder & ORDERS_HEAL)
+            DistOverRide = 3;
+        else if (m_combatOrder & ORDERS_PROTECT)
+            DistOverRide = 3;
+        SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
+        FollowAutoGo = 2;
+    }
     if (!m_bot->isAlive())
     {
         if (m_botState != BOTSTATE_DEAD && m_botState != BOTSTATE_DEADRELEASED)
@@ -8047,6 +8098,35 @@ void PlayerbotAI::_HandleCommandOrders(std::string &text, Player &fromPlayer)
 
 void PlayerbotAI::_HandleCommandFollow(std::string &text, Player &fromPlayer)
 {
+if (ExtractCommand("auto", text)) // switch to automatic follow distance
+    {
+        if (text != "")
+        {
+            SendWhisper("Invalid subcommand for 'follow'", fromPlayer);
+            return;
+        }
+        DistOverRide = 0; // this resets follow distance to config default
+        IsUpOrDown = 0;
+        std::ostringstream msg;
+        gTempDist = 1;
+        gTempDist2 = 2;
+
+        if (FollowAutoGo != 2)
+        {
+            FollowAutoGo = 1;
+            msg << "Automatic Follow Distance is now ON";
+            SendWhisper(msg.str(),fromPlayer);
+            return;
+        }
+        else
+        {
+            FollowAutoGo = 0;
+            msg << "Automatic Follow Distance is now OFF";
+            SendWhisper(msg.str(),fromPlayer);
+        }
+        SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
+        return;
+    }
     if (ExtractCommand("reset", text)) // switch to reset follow distance
     {
         if (text != "")
@@ -9923,7 +10003,6 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
             if (totalSpellLearnt != 1) msg << "s";
             msg << " learnt, ";
             msg << Cash(totalCost) << " spent.";
-            SKINNING            = initSpell(SKINNING_1);
         }
         // Handle: List class or profession skills, spells & abilities for selected trainer
         else
