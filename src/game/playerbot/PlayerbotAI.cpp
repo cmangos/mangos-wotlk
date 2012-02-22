@@ -746,6 +746,10 @@ void PlayerbotAI::ReloadAI()
             m_classAI = (PlayerbotClassAI *) new PlayerbotDeathKnightAI(GetMaster(), m_bot, this);
             break;
     }
+
+    HERB_GATHERING      = initSpell(HERB_GATHERING_1);
+    MINING              = initSpell(MINING_1);
+    SKINNING            = initSpell(SKINNING_1);
 }
 
 void PlayerbotAI::SendOrders(Player& /*player*/)
