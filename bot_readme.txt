@@ -25,7 +25,8 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME follow (orders bot to follow player; will also revive bot if dead or teleport bot if far away)
 /t BOTNAME follow far (increases the bots follow distance from the player)
 /t BOTNAME follow near (decreases the bots follow distance from the player)
-/t BOTNAME follow reset (resets the bots follow distance to the config default setting)
+/t BOTNAME follow reset (resets the bots follow distance to the config default setting. this commmand will be phased out)
+/t BOTNAME follow auto (turns off auto variable follow distance which is ON by default)
 /t BOTNAME stay
 /t BOTNAME assist (you'll need to be attacking something and the bot only does melee atm)
 /t BOTNAME spells (replies with all spells known to bot)
