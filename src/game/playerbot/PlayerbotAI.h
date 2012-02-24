@@ -1780,9 +1780,6 @@ public:
     //void Stay();
     //bool Follow(Player& player);
     void SendNotEquipList(Player& player);
-    uint32 AutoCrafting; //switch for bot auto tradeskills
-    uint32 AutoCraftClass;
-    uint32 AutoCraftCategory;
     uint32 AutoEquipPlug;               //switch for autoequip
     uint32 SellWhite;					//switch for white item auto sell
     uint8 DistOverRide;
@@ -1792,12 +1789,9 @@ public:
     uint8 FollowAutoGo;
     uint8 IsUpOrDown; //tracks variable follow distance
     void _HandleCommandAutoEquip(std::string &text, Player &fromPlayer);
-    void _HandleCommandAutoInventoryCheck(std::string &text, Player &fromPlayer);
     void AutoUpgradeEquipment(Player& player);
     void FollowAutoReset(Player& player);
-    void AutoInventoryCheck(Player& player);
     void AutoEquipComparison(Item *pItem, Item *pItem2);
-    void AutoCraft(Player& player);
     bool ItemStatComparison(const ItemPrototype *pProto, const ItemPrototype *pProto2);
     void Feast();
     void InterruptCurrentCastingSpell();

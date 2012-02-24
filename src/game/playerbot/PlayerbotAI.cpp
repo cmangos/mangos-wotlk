@@ -95,9 +95,11 @@ m_taxiMaster(ObjectGuid())
     SetQuestNeedCreatures();
 
     // start following master (will also teleport bot to master)
+    FollowAutoGo = 5; //turn on bot auto follow distance can be turned off by player
     DistOverRide = 0; //set initial adjustable follow settings
-    gTempDist = 1;
-    gTempDist2 = 2;
+    IsUpOrDown = 0;
+    gTempDist = 0.5f;
+    gTempDist2 = 1.0f;
     SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
 
     // get class specific ai
@@ -478,96 +480,13 @@ void PlayerbotAI::SendNotEquipList(Player& /*player*/)
         TellMaster("There are no items in my inventory that I can equip.");
 }
 
-void PlayerbotAI::AutoInventoryCheck(Player& /*player*/)
-{
-    //ChatHandler ch(GetMaster()); //leaving these declarations as they may be used later
-    //std::ostringstream out;
-    //std::ostringstream msg;
-
-    // Find  items in main backpack one at a time
-    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
-    {
-        Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
-        if (!pItem)
-            continue;
-        if (AutoCrafting == 1)
-        {
-            if (pItem->GetProto()->Class == ITEM_CLASS_TRADE_GOODS)
-            {
-                uint32 goclass = pItem->GetProto()->SubClass;
-                if (m_bot->HasSkill(goclass))
-                {
-                    AutoCraftClass = goclass;
-                    Player* const bot = GetPlayerBot();
-                    AutoCraft(*bot);
-                }
-
-            }
-        }
-
-        uint16 dest;
-        uint8 msg = m_bot->CanEquipItem(NULL_SLOT, dest, pItem, !pItem->IsBag());
-
-        if (msg != EQUIP_ERR_OK)
-            continue;
-
-        int8 equipSlot = uint8(dest);
-        if (!(equipSlot >= 0 && equipSlot < 19))
-            continue;
-    }
-    // list out items in other removable backpacks
-    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
-    {
-        const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
-        if (pBag)
-        {
-            for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
-            {
-                Item* const pItem = m_bot->GetItemByPos(bag, slot);
-                if (!pItem)
-                    continue;
-                if (AutoCrafting == 1)
-                {
-                    if (pItem->GetProto()->Class == ITEM_CLASS_TRADE_GOODS)
-                    {
-                        uint32 goclass = pItem->GetProto()->SubClass;
-                        if (m_bot->HasSkill(goclass))
-                        {
-                            AutoCraftClass = goclass;
-                            Player* const bot = GetPlayerBot();
-                            AutoCraft(*bot);
-                        }
-
-                    }
-                }
-                uint16 dest;
-                uint8 msg = m_bot->CanEquipItem(NULL_SLOT, dest, pItem, !pItem->IsBag());
-
-                if (msg != EQUIP_ERR_OK)
-                    continue;
-
-                int8 equipSlot = uint8(dest);
-                if (!(equipSlot >= 0 && equipSlot < 19))
-                    continue;
-
-            }
-        }
-    }
-}
-
 void PlayerbotAI::FollowAutoReset(Player& /*player*/)
 {
     if (FollowAutoGo != 0)
     {
-        DistOverRide = 0; // this resets follow distance to config default
-        IsUpOrDown = 0;
-        std::ostringstream msg;
-        gTempDist = 1;
-        gTempDist2 = 2;
-        FollowAutoGo = 1; // want to reset this now so bots will resume distance after interaction
+        FollowAutoGo = 3;
         SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
     }
-    return;
 }
 
 void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
@@ -1206,154 +1125,6 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
         return true;
     else
         return false;
-}
-
-void PlayerbotAI::AutoCraft(Player& /*player*/)
-{
-
-    std::ostringstream msg;
-    uint32 charges;
-    uint32 skill;
-    int32 category;
-    uint32 linkcount = 0;
-
-    skill = AutoCraftClass;
-
-    if (skill == ITEM_SUBCLASS_HERB)
-    {
-
-        if (m_bot->HasSkill(SKILL_INSCRIPTION))
-        {
-            skill = SKILL_INSCRIPTION;
-            category = SKILL_CATEGORY_PROFESSION;
-        }
-        else if (m_bot->HasSkill(SKILL_ALCHEMY))
-        {
-            skill = SKILL_ALCHEMY;
-            category = SKILL_CATEGORY_PROFESSION;
-        }
-        else
-            return;
-    }
-    else if (skill == ITEM_SUBCLASS_METAL_STONE)
-    {
-        if (m_bot->HasSkill(SKILL_MINING))
-        {
-            skill = SKILL_MINING;
-            category = SKILL_CATEGORY_PROFESSION;
-        }
-        else if (m_bot->HasSkill(SKILL_ENGINEERING))
-        {
-            skill = SKILL_ENGINEERING;
-            category = SKILL_CATEGORY_PROFESSION;
-        }
-        else if (m_bot->HasSkill(SKILL_BLACKSMITHING))
-        {
-            skill = SKILL_BLACKSMITHING;
-            category = SKILL_CATEGORY_PROFESSION;
-        }
-        else
-            return;
-    }
-    else if (skill == ITEM_SUBCLASS_MEAT)
-    {
-        if (m_bot->HasSkill(SKILL_COOKING))
-        {
-            skill = SKILL_COOKING;
-            category = SKILL_CATEGORY_SECONDARY;
-        }
-        else
-            return;
-    }
-    else if (skill == ITEM_SUBCLASS_CLOTH)
-    {
-        if (m_bot->HasSkill(SKILL_FIRST_AID))
-        {
-            skill = SKILL_FIRST_AID;
-            category = SKILL_CATEGORY_SECONDARY;
-        }
-        else if (m_bot->HasSkill(SKILL_TAILORING))
-        {
-            skill = SKILL_TAILORING;
-            category = SKILL_CATEGORY_PROFESSION;
-        }
-        else
-            return;
-    }
-    else if (skill == ITEM_SUBCLASS_JEWELCRAFTING)
-    {
-        if (m_bot->HasSkill(SKILL_JEWELCRAFTING))
-        {
-            skill = SKILL_JEWELCRAFTING;
-            category = SKILL_CATEGORY_PROFESSION;
-        }
-        else
-            return;
-    }
-    else if (skill == ITEM_SUBCLASS_LEATHER)
-    {
-        if (m_bot->HasSkill(SKILL_LEATHERWORKING))
-        {
-            skill = SKILL_LEATHERWORKING;
-            category = SKILL_CATEGORY_PROFESSION;
-        }
-        else
-            return;
-    }
-    else if (skill == ITEM_SUBCLASS_ENCHANTING)
-    {
-        if (m_bot->HasSkill(SKILL_ENCHANTING))
-        {
-            skill = SKILL_ENCHANTING;
-            category = SKILL_CATEGORY_PROFESSION;
-        }
-        else
-            return;
-    }
-    m_spellsToLearn.clear();
-    m_bot->skill(m_spellsToLearn);
-    for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
-    {
-        SkillLineEntry const *SkillLine = sSkillLineStore.LookupEntry(*it);
-        if (SkillLine->categoryId == category && *it == skill)
-        {
-            for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
-            {
-                SkillLineAbilityEntry const *SkillAbility = sSkillLineAbilityStore.LookupEntry(j);
-                if (!SkillAbility)
-                    continue;
-                SpellEntry const* spellInfo = sSpellStore.LookupEntry(SkillAbility->spellId);
-                if (!spellInfo)
-                    continue;
-                if (IsPrimaryProfessionSkill(*it) && spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_CREATE_ITEM)
-                    continue;
-                if (SkillAbility->skillId == *it && m_bot->HasSpell(SkillAbility->spellId) && SkillAbility->forward_spellid == 0 && ((SkillAbility->classmask & m_bot->getClassMask()) == 0))
-                {
-                    if ((charges = GetSpellCharges(SkillAbility->spellId)) > 0)
-                    {
-                        SpellCastTargets targets;
-                        Spell *spell = new Spell(m_bot, spellInfo, false);
-                        SpellCastResult result = spell->CheckCast(true);
-                        if (result != SPELL_CAST_OK)
-                        {
-                            spell->SendCastResult(result);
-                        }
-                        else
-                        {
-                            spell->prepare(&targets);
-                            m_CurrentlyCastingSpellId = SkillAbility->spellId;
-                            SetState(BOTSTATE_CRAFT);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    m_noToolList.unique();
-    for (std::list<uint32>::iterator it = m_noToolList.begin(); it != m_noToolList.end(); it++)
-        HasTool(*it);
-    m_noToolList.clear();
-    m_spellsToLearn.clear();
 }
 
 void PlayerbotAI::SendQuestNeedList()
@@ -4062,7 +3833,8 @@ void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit *target)
     else
         co = ORDERS_RESET;
     SetCombatOrder(co, target);
-    FollowAutoGo = 1;
+    if (FollowAutoGo != 0)
+        FollowAutoGo = 1;
 }
 
 void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
@@ -4115,7 +3887,6 @@ void PlayerbotAI::MovementReset()
 {
     // stop moving...
     MovementClear();
-
     if (m_movementOrder == MOVEMENT_FOLLOW)
     {
         if (!m_followTarget)
@@ -4190,17 +3961,49 @@ void PlayerbotAI::MovementReset()
                         }
                         IsUpOrDown = DistOverRide;
                     }
+                    else if (IsUpOrDown > DistOverRide)
+                    {
+                        uint8 getdowndist = (IsUpOrDown - DistOverRide);
+                        for (uint8 getdowndistb = 0; getdowndistb < getdowndist; ++getdowndistb)
+                        {
+                            gTempDist = (gTempDist - 1.0);
+                            gTempDist2 = (gTempDist2 - 1.0);
+                        }
+                        IsUpOrDown = DistOverRide;
+                    }
                 }
-                gDist[0] = gTempDist;
-                gDist[1] = gTempDist2;
+                if (FollowAutoGo != 3)
+                {
+                    gDist[0] = gTempDist;
+                    gDist[1] = gTempDist2;
+                }
+                else
+                {
+                    gDist[0] = 0.5f;
+                    gDist[1] = 1.0f;
+                    m_ignoreAIUpdatesUntilTime = time(NULL) + 3;
+                    FollowAutoGo = 1;
+                }
             }
             float dist = rand_float(m_mgr->m_confFollowDistance[0], m_mgr->m_confFollowDistance[1]);
             float bdist = rand_float(gDist[0], gDist[1]);
             float angle = rand_float(0, M_PI_F);
+            float bangle = rand_float(2.8f, 3.6f); // angle is based on radians
+            float TankAngle = 3.1f;
+            float AssistAngle = 2.8f;
             if (DistOverRide != 0)
-                m_bot->GetMotionMaster()->MoveFollow(m_followTarget, bdist, angle);
+            {
+                if (m_combatOrder & ORDERS_TANK)
+                    m_bot->GetMotionMaster()->MoveFollow(m_followTarget, bdist, TankAngle);
+                else if (m_combatOrder & ORDERS_ASSIST)
+                    m_bot->GetMotionMaster()->MoveFollow(m_followTarget, bdist, AssistAngle);
+                else
+                    m_bot->GetMotionMaster()->MoveFollow(m_followTarget, bdist, bangle);
+            }
             else
                 m_bot->GetMotionMaster()->MoveFollow(m_followTarget, dist, angle);
+            if (FollowAutoGo == 5)
+                FollowAutoGo = 1;
         }
     }
 }
@@ -4354,13 +4157,11 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
         if (m_combatOrder & ORDERS_TANK)
             DistOverRide = 1;
         else if (m_combatOrder & ORDERS_ASSIST)
-            DistOverRide = 2;
-        else if (m_combatOrder & ORDERS_HEAL)
             DistOverRide = 3;
-        else if (m_combatOrder & ORDERS_PROTECT)
-            DistOverRide = 3;
-        SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
+        else
+            DistOverRide = 4;
         FollowAutoGo = 2;
+        SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
     }
     if (!m_bot->isAlive())
     {
@@ -7940,9 +7741,6 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (ExtractCommand("craft", input))
         _HandleCommandCraft(input, fromPlayer);
 
-    else if (ExtractCommand("autocraft", input))
-        _HandleCommandAutoInventoryCheck(input, fromPlayer);
-
     else if (ExtractCommand("enchant", input))
         _HandleCommandEnchant(input, fromPlayer);
 
@@ -8984,14 +8782,7 @@ void PlayerbotAI::_HandleCommandAutoEquip(std::string &text, Player &fromPlayer)
     msg << "AutoEquip is now " << (AutoEquipPlug ? "ON" : "OFF");
     SendWhisper(msg.str(),fromPlayer);
 }
-void PlayerbotAI::_HandleCommandAutoInventoryCheck(std::string &text, Player &fromPlayer)
-{
-    std::ostringstream msg;
-    //if (AutoCrafting == 0)
-    AutoCrafting = 1;
-    Player* const bot = GetPlayerBot();
-    AutoInventoryCheck(*bot);
-}
+
 void PlayerbotAI::_HandleCommandEquip(std::string &text, Player &fromPlayer)
 {
     std::list<uint32> itemIds;
