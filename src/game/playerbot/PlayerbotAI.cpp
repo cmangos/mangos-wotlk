@@ -574,8 +574,11 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
         if (!pItem2)// no item to compare to see if has stats useful for this bots class/style so check for stats and equip if possible
         {
             ItemPrototype const *pProto2 = pItem->GetProto();
-            if (!ItemStatComparison(pProto2, pProto2))
-                continue;
+            if (pProto2->StatsCount > 0)
+            {
+                if (!ItemStatComparison(pProto2, pProto2))
+                    continue;
+            }
             EquipItem(pItem); //no item equipped so equip new one and go to next item.
             continue;
         }
@@ -609,8 +612,11 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
                 if (!pItem2)
                 {
                     ItemPrototype const *pProto2 = pItem->GetProto();
-                    if (!ItemStatComparison(pProto2, pProto2))
-                        continue;
+                    if (pProto2->StatsCount > 0)
+                    {
+                        if (!ItemStatComparison(pProto2, pProto2))
+                            continue;
+                    }
                     EquipItem(pItem); //no item equipped so equip new one if useable stats and go to next item.
                     continue;
                 }
@@ -8196,6 +8202,8 @@ void PlayerbotAI::_HandleCommandRepair(std::string &text, Player &fromPlayer)
 // auction remove [Auction Link][Auction Link] .. -- Cancel bot(s) active auction. ([Auction Link] from auction)
 void PlayerbotAI::_HandleCommandAuction(std::string &text, Player &fromPlayer)
 {
+    Player* const bot = GetPlayerBot();
+    FollowAutoReset(*bot);
     if (text == "")
         m_findNPC.push_back(UNIT_NPC_FLAG_AUCTIONEER);  // list all bot auctions
     else if (ExtractCommand("add", text))
@@ -8507,6 +8515,8 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
 // bank withdraw [Item Link][Item Link] ..     -- Withdraw item(s) from bank. ([Item Link] from bank)
 void PlayerbotAI::_HandleCommandBank(std::string &text, Player &fromPlayer)
 {
+    Player* const bot = GetPlayerBot();
+    FollowAutoReset(*bot);
     if (text == "")
         m_findNPC.push_back(UNIT_NPC_FLAG_BANKER);  // list all bot balance
     else if (ExtractCommand("deposit", text))
@@ -9269,6 +9279,8 @@ void PlayerbotAI::_HandleCommandCraft(std::string &text, Player &fromPlayer)
 void PlayerbotAI::_HandleCommandQuest(std::string &text, Player &fromPlayer)
 {
     std::ostringstream msg;
+    Player* const bot = GetPlayerBot();
+    FollowAutoReset(*bot);
 
     if (ExtractCommand("add", text, true)) // true -> "quest add" OR "quest a"
     {
@@ -9680,6 +9692,8 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
     uint32 rank[8] = {0, 75, 150, 225, 300, 375, 450, 525};
 
     std::ostringstream msg;
+    Player* const bot = GetPlayerBot();
+    FollowAutoReset(*bot);
 
     if (ExtractCommand("learn", text))
     {
