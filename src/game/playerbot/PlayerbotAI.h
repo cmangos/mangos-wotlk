@@ -1780,6 +1780,11 @@ public:
     //void Stay();
     //bool Follow(Player& player);
     void SendNotEquipList(Player& player);
+    Unit *gPrimtarget;
+    Unit *gSectarget;
+    uint32 gQuestFetch;
+    uint8 gPrimOrder;
+    uint8 gSecOrder;
     uint32 AutoEquipPlug;               //switch for autoequip
     uint32 SellWhite;					//switch for white item auto sell
     uint8 DistOverRide;
@@ -1788,6 +1793,7 @@ public:
     float gTempDist2;
     uint8 FollowAutoGo;
     uint8 IsUpOrDown; //tracks variable follow distance
+    void CombatOrderRestore(uint8 Prim, uint8 Sec);
     void _HandleCommandAutoEquip(std::string &text, Player &fromPlayer);
     void AutoUpgradeEquipment(Player& player);
     void FollowAutoReset(Player& player);

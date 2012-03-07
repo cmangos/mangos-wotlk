@@ -137,6 +137,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     Player *m_bot = GetPlayerBot();
     Group *m_group = m_bot->GetGroup();
     float dist = m_bot->GetCombatDistance(pTarget);
+
     if (dist > ATTACK_DISTANCE && ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED)
     {
         // switch to ranged combat
@@ -213,10 +214,9 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
         SpellSequence = SPELL_HOLY;
 
     // Damage Spells
-
     switch (SpellSequence)
     {
-        case SPELL_HOLY:
+    case SPELL_HOLY:
             if (SMITE > 0 && LastSpellHoly < 1 && !pTarget->HasAura(SMITE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 17)
             {
                 ai->CastSpell(SMITE, *pTarget);
