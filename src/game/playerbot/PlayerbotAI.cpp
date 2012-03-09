@@ -100,7 +100,6 @@ m_taxiMaster(ObjectGuid())
     IsUpOrDown = 0;
     gTempDist = 0.5f;
     gTempDist2 = 1.0f;
-    //CombatOrderRestore(gPrimOrder, gSecOrder); //set orders from save if any before setting follow orders
     SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
 
     // get class specific ai
@@ -4466,7 +4465,18 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             if (!m_bot->IsMounted())
             {
                 if (!pSpell || !pSpell->IsChannelActive())
+                {
+                    if (gDelayAttackInit != 1)
+                    {
+                        gDelayAttackInit = 1;
+                        if (gDelayAttack > 0)
+                        {
+                            SetIgnoreUpdateTime(gDelayAttack);
+                            return;
+                        }
+                    }
                     DoNextCombatManeuver();
+                }
                 else
                     SetIgnoreUpdateTime(1);  // It's better to update AI more frequently during combat
             }
@@ -4474,6 +4484,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
         // bot was in combat recently - loot now
         else if (m_botState == BOTSTATE_COMBAT)
         {
+            gDelayAttackInit = 0;
             SetState(BOTSTATE_LOOTING);
             m_attackerInfo.clear();
             if (HasCollectFlag(COLLECT_FLAG_COMBAT))
@@ -7684,8 +7695,6 @@ void PlayerbotAI::SellGarbage(Player& /*player*/, bool bListNonTrash, bool bDeta
 
         if (bVerbose)
             TellMaster(report.str());
-        if (SellWhite == 1)
-            SellWhite = 0;
     }
 
     // For all bags, non-gray sellable items
@@ -7834,6 +7843,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
     else if (ExtractCommand("sell", input))
         _HandleCommandSell(input, fromPlayer);
+    else if (ExtractCommand("combat", input))
+        _HandleCommandCombat(input, fromPlayer);
 
     else if (ExtractCommand("buy", input))
         _HandleCommandBuy(input, fromPlayer);
@@ -8028,6 +8039,26 @@ void PlayerbotAI::_HandleCommandReset(std::string &text, Player &fromPlayer)
     ClearActiveTalentSpec();
 }
 
+void PlayerbotAI::_HandleCommandCombat(std::string &text, Player &fromPlayer)
+{
+    if (ExtractCommand("delay", text))
+    {
+        uint32 gdelay;
+        sscanf(text.c_str(), "%d", &gdelay);
+        if (gdelay >= 0 && gdelay <= 10)
+        {
+            gDelayAttack = gdelay;
+            TellMaster("Combat delay is now '%u' ", gDelayAttack);
+            return;
+        }
+        else
+            TellMaster("Invalid delay. choose a number between 0 and 10");
+        return;
+    }
+    SendWhisper("Valid sub commands for 'combat' are 'delay:<0 thru 10>", fromPlayer);
+    return;
+}
+
 void PlayerbotAI::_HandleCommandOrders(std::string &text, Player &fromPlayer)
 {
     if (text != "")
@@ -8215,14 +8246,22 @@ void PlayerbotAI::_HandleCommandSell(std::string &text, Player &fromPlayer)
 {
     if (ExtractCommand("all", text)) // switch to auto sell low level white items
     {
+        std::ostringstream msg;
         if (text != "")
         {
             SendWhisper("Invalid subcommand for 'sell all'", fromPlayer);
             return;
         }
-        SellWhite = 1; // this gets reset once sale is complete.  for testing purposes
-        std::ostringstream msg;
-        msg << "I will sell all my low level normal items the next time you sell.";
+        if ( SellWhite == 0)
+        {
+            SellWhite = 1;
+            msg << "I will sell all my low level normal items when you sell.";
+        }
+        else if (SellWhite == 1)
+        {
+            SellWhite = 0;
+            msg << "I will no longer sell my low level normal items when you sell.";
+        }
         SendWhisper(msg.str(),fromPlayer);
         return;
     }

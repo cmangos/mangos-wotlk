@@ -1780,6 +1780,8 @@ public:
     //void Stay();
     //bool Follow(Player& player);
     void SendNotEquipList(Player& player);
+    uint8 gDelayAttack;
+    uint8 gDelayAttackInit;
     Unit *gPrimtarget;
     Unit *gSectarget;
     uint32 gQuestFetch;
@@ -1889,6 +1891,7 @@ private:
     bool ExtractCommand(const std::string sLookingFor, std::string &text, bool bUseShort = false);
     // outsource commands for code clarity
     void _HandleCommandReset(std::string &text, Player &fromPlayer);
+    void _HandleCommandCombat(std::string &text, Player &fromPlayer);
     void _HandleCommandOrders(std::string &text, Player &fromPlayer);
     void _HandleCommandFollow(std::string &text, Player &fromPlayer);
     void _HandleCommandStay(std::string &text, Player &fromPlayer);
