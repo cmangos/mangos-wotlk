@@ -486,6 +486,14 @@ void PlayerbotAI::FollowAutoReset(Player& /*player*/)
     {
         FollowAutoGo = 3;
         SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
+        WorldObject* distTarget = m_followTarget;
+        for (uint8 i = 0; i < 1; ++i)
+        {
+            if (m_bot->GetDistance(distTarget) < 3.0f)
+                i = 1;
+            else
+                i = 0;
+        }
     }
 }
 
@@ -759,8 +767,11 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
     {
         uint32 itemmod = pProto->ItemStat[i].ItemStatType; // equipped item stats if any
         uint32 itemmod2 = pProto2->ItemStat[i].ItemStatType; // newitem stats
-        //if (!itemmod) // if no stat type in this slot, continue to next slot
-        //   continue;
+        if (!itemmod) // if no stat type in this slot, continue to next slot
+        {
+            if (!itemmod2)
+                continue;
+        }
         // caster stats
         if (itemmod == ITEM_MOD_MANA || itemmod == ITEM_MOD_INTELLECT || itemmod == ITEM_MOD_SPIRIT || itemmod == ITEM_MOD_HIT_SPELL_RATING ||
             itemmod == ITEM_MOD_CRIT_SPELL_RATING || itemmod == ITEM_MOD_HASTE_SPELL_RATING || itemmod == ITEM_MOD_SPELL_DAMAGE_DONE ||
@@ -792,9 +803,9 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     }
                     else
                     {
-                        if (itemmod)
+                        if (itemmod > 0)
                             olditemscore = (olditemscore + 1);
-                        if (itemmod2)
+                        if (itemmod2 > 0)
                             newitemscore = (newitemscore + 1);
                     }
 
@@ -823,20 +834,20 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                         }
                         else
                         {
-                            if (itemmod)
+                            if (itemmod > 0)
                                 olditemscore = (olditemscore + 1);
-                            if (itemmod2)
+                            if (itemmod2 > 0)
                                 newitemscore = (newitemscore + 1);
                         }
                     }
                     else //is a hunter
                     {
-                        if (itemmod)
+                        if (itemmod > 0)
                         {
                             if (olditemscore > 0) //we dont want any negative returns
                                 olditemscore = (olditemscore - 1);
                         }
-                        if (itemmod2)
+                        if (itemmod2 > 0)
                         {
                             if (newitemscore > 0) //we dont want any negative returns
                                 newitemscore = (newitemscore - 1);
@@ -846,12 +857,12 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                 }  // pure melee need nothing from this list.
             case 3:
                 {
-                    if (itemmod)
+                    if (itemmod > 0)
                     {
                         if (olditemscore > 0) //we dont want any negative returns
                             olditemscore = (olditemscore - 1);
                     }
-                    if (itemmod2)
+                    if (itemmod2 > 0)
                     {
                         if (newitemscore > 0) //we dont want any negative returns
                             newitemscore = (newitemscore - 1);
@@ -883,12 +894,12 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
             {
             case 1:
                 {
-                    if (itemmod)
+                    if (itemmod > 0)
                     {
                         if (olditemscore > 0) //we dont want any negative returns
                             olditemscore = (olditemscore - 1);
                     }
-                    if (itemmod2)
+                    if (itemmod2 > 0)
                     {
                         if (newitemscore > 0) //we dont want any negative returns
                             newitemscore = (newitemscore - 1);
@@ -916,9 +927,9 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     }
                     else
                     {
-                        if (itemmod)
+                        if (itemmod > 0)
                             olditemscore = (olditemscore + 1);
-                        if (itemmod2)
+                        if (itemmod2 > 0)
                             newitemscore = (newitemscore + 1);
                     }
                     break;
@@ -944,9 +955,9 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     }
                     else
                     {
-                        if (itemmod)
+                        if (itemmod > 0)
                             olditemscore = (olditemscore + 1);
-                        if (itemmod2)
+                        if (itemmod2 > 0)
                             newitemscore = (newitemscore + 1);
                     }
 
@@ -987,9 +998,9 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     }
                     else
                     {
-                        if (itemmod)
+                        if (itemmod > 0)
                             olditemscore = (olditemscore + 1);
-                        if (itemmod2)
+                        if (itemmod2 > 0)
                             newitemscore = (newitemscore + 1);
                     }
                     break;
@@ -1015,9 +1026,9 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     }
                     else
                     {
-                        if (itemmod)
+                        if (itemmod > 0)
                             olditemscore = (olditemscore + 1);
-                        if (itemmod2)
+                        if (itemmod2 > 0)
                             newitemscore = (newitemscore + 1);
                     }
                     break;
@@ -1043,9 +1054,9 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     }
                     else
                     {
-                        if (itemmod)
+                        if (itemmod > 0)
                             olditemscore = (olditemscore + 1);
-                        if (itemmod2)
+                        if (itemmod2 > 0)
                             newitemscore = (newitemscore + 1);
                     }
                     break;
@@ -1063,12 +1074,12 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
             {
             case 1:
                 {
-                    if (itemmod)
+                    if (itemmod > 0)
                     {
                         if (olditemscore > 0) //we dont want any negative returns
                             olditemscore = (olditemscore - 1);
                     }
-                    if (itemmod2)
+                    if (itemmod2 > 0)
                     {
                         if (newitemscore > 0) //we dont want any negative returns
                             newitemscore = (newitemscore - 1);
@@ -1079,12 +1090,12 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                 {
                     if (ishybrid != 2) //not a hunter
                     {
-                        if (itemmod)
+                        if (itemmod > 0)
                         {
                             if (olditemscore > 0) //we dont want any negative returns
                                 olditemscore = (olditemscore - 1);
                         }
-                        if (itemmod2)
+                        if (itemmod2 > 0)
                         {
                             if (newitemscore > 0) //we dont want any negative returns
                                 newitemscore = (newitemscore - 1);
@@ -1111,9 +1122,9 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                         }
                         else
                         {
-                            if (itemmod)
+                            if (itemmod > 0)
                                 olditemscore = (olditemscore + 1);
-                            if (itemmod2)
+                            if (itemmod2 > 0)
                                 newitemscore = (newitemscore + 1);
                         }
                     }
@@ -1121,12 +1132,12 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                 }
             case 3:
                 {
-                    if (itemmod)
+                    if (itemmod > 0)
                     {
                         if (olditemscore > 0) //we dont want any negative returns
                             olditemscore = (olditemscore - 1);
                     }
-                    if (itemmod2)
+                    if (itemmod2 > 0)
                     {
                         if (newitemscore > 0) //we dont want any negative returns
                             newitemscore = (newitemscore - 1);
@@ -9866,7 +9877,124 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
     std::ostringstream msg;
     Player* const bot = GetPlayerBot();
     FollowAutoReset(*bot);
+    if (ExtractCommand("fetch", text)) //automatically learn skills from target npc
+    {
+        uint32 totalCost = 0;
 
+        Unit* unit = ObjectAccessor::GetUnit(*m_bot, fromPlayer.GetSelectionGuid());
+        if (!unit)
+        {
+            SendWhisper("Please select the trainer!", fromPlayer);
+            return;
+        }
+
+        if (!unit->isTrainer())
+        {
+            SendWhisper("This is not a trainer!", fromPlayer);
+            return;
+        }
+
+        Creature *creature =  m_bot->GetMap()->GetCreature(fromPlayer.GetSelectionGuid());
+        if (!creature)
+            return;
+
+        if (!creature->IsTrainerOf(m_bot, false))
+        {
+            SendWhisper("This trainer can not teach me anything!", fromPlayer);
+            return;
+        }
+
+        // check present spell in trainer spell list
+        TrainerSpellData const* cSpells = creature->GetTrainerSpells();
+        TrainerSpellData const* tSpells = creature->GetTrainerTemplateSpells();
+
+        TrainerSpellData const* all_trainer_spells = cSpells;
+        if (!all_trainer_spells)
+            all_trainer_spells = tSpells;
+
+        if (!all_trainer_spells)
+        {
+            SendWhisper("No spells can be learnt from this trainer", fromPlayer);
+            return;
+        }
+
+        // reputation discount
+        float fDiscountMod =  m_bot->GetReputationPriceDiscount(creature);
+        msg << "I have learned the following spells:\r";
+        uint32 totalSpellLearnt = 0;
+        bool visuals = true;
+        for (TrainerSpellMap::const_iterator itr =  all_trainer_spells->spellList.begin(); itr !=  all_trainer_spells->spellList.end(); ++itr)
+        {
+            TrainerSpell const* tSpell = &itr->second;
+
+            if (!tSpell)
+                break;
+
+            uint32 reqLevel = 0;
+            if (!tSpell->learnedSpell && !m_bot->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
+                continue;
+
+            if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(tSpell->learnedSpell) && m_bot->HasSpell(tSpell->learnedSpell))
+                continue;
+
+            reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
+
+            TrainerSpellState state =  m_bot->GetTrainerSpellState(tSpell, reqLevel);
+            if (state != TRAINER_SPELL_GREEN)
+                continue;
+
+            uint32 spellId = tSpell->spell;
+
+            if (!spellId)
+                break;
+            // apply reputation discount
+            uint32 cost = uint32(floor(tSpell->spellCost * fDiscountMod));
+            // check money requirement
+            if (m_bot->GetMoney() < cost)
+            {
+                Announce(CANT_AFFORD);
+                continue;
+            }
+            m_bot->ModifyMoney(-int32(cost));
+            // learn explicitly or cast explicitly
+            if (tSpell->IsCastable())
+                m_bot->CastSpell(m_bot, tSpell->spell, true);
+            else
+                m_bot->learnSpell(spellId, false);
+            ++totalSpellLearnt;
+            totalCost += cost;
+            const SpellEntry *const pSpellInfo =  sSpellStore.LookupEntry(spellId);
+            if (!pSpellInfo)
+                continue;
+
+            if (visuals)
+            {
+                visuals = false;
+                WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 12);           // visual effect on trainer
+                data << ObjectGuid(fromPlayer.GetSelectionGuid());
+                data << uint32(0xB3);                                   // index from SpellVisualKit.dbc
+                GetMaster()->GetSession()->SendPacket(&data);
+
+                data.Initialize(SMSG_PLAY_SPELL_IMPACT, 12);            // visual effect on player
+                data << m_bot->GetObjectGuid();
+                data << uint32(0x016A);                                 // index from SpellVisualKit.dbc
+                GetMaster()->GetSession()->SendPacket(&data);
+            }
+
+            WorldPacket data(SMSG_TRAINER_BUY_SUCCEEDED, 12);
+            data << ObjectGuid(fromPlayer.GetSelectionGuid());
+            data << uint32(spellId);                                // should be same as in packet from client
+            GetMaster()->GetSession()->SendPacket(&data);
+            MakeSpellLink(pSpellInfo, msg);
+            msg << " ";
+            msg << Cash(cost) << "\n";
+        }
+        ReloadAI();
+        msg << "Total of " << totalSpellLearnt << " spell";
+        if (totalSpellLearnt != 1) msg << "s";
+        msg << " learnt, ";
+        msg << Cash(totalCost) << " spent.";
+    }
     if (ExtractCommand("learn", text))
     {
         uint32 totalCost = 0;
