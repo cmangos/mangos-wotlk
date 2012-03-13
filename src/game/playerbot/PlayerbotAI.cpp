@@ -788,13 +788,19 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (itemmod == itemmod2) //same stat type
                     {
+                        if (pProto == pProto2) // same item
+                        {
+                            if (olditemscore > 0)
+                                olditemscore = (olditemscore - 1);
+                            newitemscore = (newitemscore + 1);
+                        }
                         if (itemmodval < itemmodval2) // which one has the most
                         {
                             if (olditemscore > 0)
                                 olditemscore = (olditemscore - 1);
                             newitemscore = (newitemscore + 1);
                         }
-                        else
+                        else if (itemmodval > itemmodval2)
                         {
                             if (newitemscore > 0)
                                 newitemscore = (newitemscore - 1);
@@ -819,13 +825,19 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     {
                         if (itemmod == itemmod2) //same stat type
                         {
+                            if (pProto == pProto2) // same item
+                            {
+                                if (olditemscore > 0)
+                                    olditemscore = (olditemscore - 1);
+                                newitemscore = (newitemscore + 1);
+                            }
                             if (itemmodval < itemmodval2) // which one has the most
                             {
                                 if (olditemscore > 0)
                                     olditemscore = (olditemscore - 1);
                                 newitemscore = (newitemscore + 1);
                             }
-                            else
+                            else if (itemmodval > itemmodval2)
                             {
                                 if (newitemscore > 0)
                                     newitemscore = (newitemscore - 1);
@@ -912,13 +924,19 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (itemmod == itemmod2) //same stat type
                     {
+                        if (pProto == pProto2) // same item
+                        {
+                            if (olditemscore > 0)
+                                olditemscore = (olditemscore - 1);
+                            newitemscore = (newitemscore + 1);
+                        }
                         if (itemmodval < itemmodval2) // which one has the most
                         {
                             if (olditemscore > 0)
                                 olditemscore = (olditemscore - 1);
                             newitemscore = (newitemscore + 1);
                         }
-                        else
+                        else if (itemmodval > itemmodval2)
                         {
                             if (newitemscore > 0)
                                 newitemscore = (newitemscore - 1);
@@ -940,13 +958,19 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (itemmod == itemmod2) //same stat type
                     {
+                        if (pProto == pProto2) // same item
+                        {
+                            if (olditemscore > 0)
+                                olditemscore = (olditemscore - 1);
+                            newitemscore = (newitemscore + 1);
+                        }
                         if (itemmodval < itemmodval2) // which one has the most
                         {
                             if (olditemscore > 0)
                                 olditemscore = (olditemscore - 1);
                             newitemscore = (newitemscore + 1);
                         }
-                        else
+                        else if (itemmodval > itemmodval2)
                         {
                             if (newitemscore > 0)
                                 newitemscore = (newitemscore - 1);
@@ -983,13 +1007,19 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (itemmod == itemmod2) //same stat type
                     {
+                        if (pProto == pProto2) // same item
+                        {
+                            if (olditemscore > 0)
+                                olditemscore = (olditemscore - 1);
+                            newitemscore = (newitemscore + 1);
+                        }
                         if (itemmodval < itemmodval2) // which one has the most
                         {
                             if (olditemscore > 0)
                                 olditemscore = (olditemscore - 1);
                             newitemscore = (newitemscore + 1);
                         }
-                        else
+                        else if (itemmodval > itemmodval2)
                         {
                             if (newitemscore > 0)
                                 newitemscore = (newitemscore - 1);
@@ -1011,13 +1041,19 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (itemmod == itemmod2) //same stat type
                     {
+                        if (pProto == pProto2) // same item
+                        {
+                            if (olditemscore > 0)
+                                olditemscore = (olditemscore - 1);
+                            newitemscore = (newitemscore + 1);
+                        }
                         if (itemmodval < itemmodval2) // which one has the most
                         {
                             if (olditemscore > 0)
                                 olditemscore = (olditemscore - 1);
                             newitemscore = (newitemscore + 1);
                         }
-                        else
+                        else if (itemmodval > itemmodval2)
                         {
                             if (newitemscore > 0)
                                 newitemscore = (newitemscore - 1);
@@ -1039,13 +1075,19 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                     uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                     if (itemmod == itemmod2) //same stat type
                     {
+                        if (pProto == pProto2) // same item
+                        {
+                            if (olditemscore > 0)
+                                olditemscore = (olditemscore - 1);
+                            newitemscore = (newitemscore + 1);
+                        }
                         if (itemmodval < itemmodval2) // which one has the most
                         {
                             if (olditemscore > 0)
                                 olditemscore = (olditemscore - 1);
                             newitemscore = (newitemscore + 1);
                         }
-                        else
+                        else if (itemmodval > itemmodval2)
                         {
                             if (newitemscore > 0)
                                 newitemscore = (newitemscore - 1);
@@ -1107,13 +1149,19 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                         uint32 itemmodval2 = pProto2->ItemStat[i].ItemStatValue;  // newitem stats
                         if (itemmod == itemmod2) //same stat type
                         {
+                            if (pProto == pProto2) // same item
+                            {
+                                if (olditemscore > 0)
+                                    olditemscore = (olditemscore - 1);
+                                newitemscore = (newitemscore + 1);
+                            }
                             if (itemmodval < itemmodval2) // which one has the most
                             {
                                 if (olditemscore > 0)
                                     olditemscore = (olditemscore - 1);
                                 newitemscore = (newitemscore + 1);
                             }
-                            else
+                            else if (itemmodval > itemmodval2)
                             {
                                 if (newitemscore > 0)
                                     newitemscore = (newitemscore - 1);
