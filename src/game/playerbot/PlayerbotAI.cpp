@@ -1535,6 +1535,7 @@ void PlayerbotAI::SendOrders(Player& /*player*/)
     }
 
     TellMaster(out.str().c_str());
+    TellMaster("My combat delay is '%u'", gDelayAttack);
 }
 
 // handle outgoing packets the server would send to the client
@@ -3883,7 +3884,7 @@ Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
 
 void PlayerbotAI::CombatOrderRestore(uint8 Prim, uint8 Sec)
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT bot_primary_order,bot_secondary_order,primary_target,secondary_target,pname,sname FROM playerbot_saved_data WHERE guid = '%li'", m_bot->GetGUIDLow());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT bot_primary_order,bot_secondary_order,primary_target,secondary_target,pname,sname,combat_delay FROM playerbot_saved_data WHERE guid = '%li'", m_bot->GetGUIDLow());
 
     if (!result)
     {
@@ -3901,6 +3902,7 @@ void PlayerbotAI::CombatOrderRestore(uint8 Prim, uint8 Sec)
         ObjectGuid SectargetGUID = ObjectGuid(fields[3].GetUInt64());
         std::string pname = fields[4].GetString();
         std::string sname = fields[5].GetString();
+        gDelayAttack = fields[6].GetUInt8();
         //if (gPrimtarget > 0)
             gPrimtarget = ObjectAccessor::GetUnit(*m_bot->GetMap()->GetWorldObject(PrimtargetGUID), PrimtargetGUID);
         //if (gSectarget > 0)
@@ -8108,6 +8110,7 @@ void PlayerbotAI::_HandleCommandCombat(std::string &text, Player &fromPlayer)
         {
             gDelayAttack = gdelay;
             TellMaster("Combat delay is now '%u' ", gDelayAttack);
+            CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_delay = '%u' WHERE guid = '%u'", gDelayAttack, m_bot->GetGUIDLow());
             return;
         }
         else
