@@ -27,6 +27,7 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME follow near (decreases the bots follow distance from the player)
 /t BOTNAME follow reset (resets the bots follow distance to the config default setting. this commmand will be phased out)
 /t BOTNAME follow auto (turns off auto variable follow distance which is ON by default)
+/t BOTNAME combat delay <0-10> (sets the amount of time the bot will wait before engaging your target in combat)
 /t BOTNAME stay
 /t BOTNAME assist (you'll need to be attacking something and the bot only does melee atm)
 /t BOTNAME spells (replies with all spells known to bot)
@@ -67,6 +68,7 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME quest < end | e > (Turns in a completed quest)
 /t BOTNAME quest < end | e > (Turns in a completed quest)
 /t BOTNAME quest < report | r > (bot reports all items, creatures or gameobjects needed to finish quests)
+/t BOTNAME quest fetch (bot will automatically check for and accept all acceptable quests from target questgiver)
 /t BOTNAME orders (Shows bot's combat orders)
 /t BOTNAME pet abandon (abandon current active hunter pet)
 /t BOTNAME pet tame TARGET (tame selected creature, if bot has 'tame beast' spell in spellbook)
@@ -102,8 +104,10 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME skill learn (lists [TRAINING LINK] available class, weapon & profession (Primary or Secondary) skills & spells, from selected trainer)
 /t BOTNAME skill learn [TRAINING LINK] (learn selected skill or spell, from selected trainer)
 /t BOTNAME skill unlearn [PROFESSION LINK] (unlearn selected primary profession skill & all associated spells)
+/t BOTNAME skill fetch (bot will automatically check for and learn all available skills/spells from the targeted trainer)
 /t BOTNAME help (lists all the commands above and how they work. Except for the ".bot command" ones.)
 /t BOTNAME gm check talent spec (Does a validity check on all talentspecs in the database, only works for GMs or higher)
+/t BOTNAME resumeorders (causes bot or party to restore previous combat orders)
 
 Shortcuts:
 c = cast
