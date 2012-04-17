@@ -224,8 +224,6 @@ enum SpellTargets
     SPELL_TARGETS_ALL
 };
 
-#define SPELL_SPELL_CHANNEL_UPDATE_INTERVAL (1*IN_MILLISECONDS)
-
 typedef std::multimap<uint64, uint64> SpellTargetTimeMap;
 
 class Spell
@@ -349,6 +347,7 @@ class Spell
         void EffectTeachTaxiNode(SpellEffectIndex eff_idx);
         void EffectTitanGrip(SpellEffectIndex eff_idx);
         void EffectEnchantItemPrismatic(SpellEffectIndex eff_idx);
+        void EffectPlaySound(SpellEffectIndex eff_idx);
         void EffectPlayMusic(SpellEffectIndex eff_idx);
         void EffectSpecCount(SpellEffectIndex eff_idx);
         void EffectActivateSpec(SpellEffectIndex eff_idx);

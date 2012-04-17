@@ -1475,10 +1475,9 @@ void PlayerbotAI::ReloadAI()
         break;
     }
 
-    HERB_GATHERING    = initSpell(HERB_GATHERING_1);
-    MINING                   = initSpell(MINING_1);
-    SKINNING                        = initSpell(SKINNING_1);
-
+    HERB_GATHERING      = initSpell(HERB_GATHERING_1);
+    MINING              = initSpell(MINING_1);
+    SKINNING            = initSpell(SKINNING_1);
 }
 
 void PlayerbotAI::SendOrders(Player& /*player*/)
@@ -4762,7 +4761,6 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
                     m_bot->GetMotionMaster()->MoveIdle();
                 }
             }
-            // return true;
         }
         else
             return false;
@@ -10358,7 +10356,7 @@ void PlayerbotAI::_HandleCommandStats(std::string &text, Player &fromPlayer)
 void PlayerbotAI::_HandleCommandGM(std::string &text, Player &fromPlayer)
 {
     // Check should happen OUTSIDE this function, but this is account security we're talking about, so let's be doubly sure
-    if (fromPlayer.GetSession()->GetSecurity() > SEC_PLAYER)
+    if (fromPlayer.GetSession()->GetSecurity() <= SEC_PLAYER)
         return;  // no excuses, no warning
 
     if (text == "")
