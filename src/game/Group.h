@@ -339,7 +339,7 @@ class MANGOS_DLL_SPEC Group
 
         void RewardGroupAtKill(Unit* pVictim, Player* player_tap);
 
-        bool SetPlayerMap(const ObjectGuid guid, uint32 mapid);
+        bool SetPlayerMap(ObjectGuid guid, uint32 mapid);
 
         /*********************************************************/
         /***                   LOOT SYSTEM                     ***/
@@ -353,7 +353,7 @@ class MANGOS_DLL_SPEC Group
         void NeedBeforeGreed(WorldObject* pSource, Loot* loot);
         void MasterLoot(WorldObject* pSource, Loot* loot);
         bool CountRollVote(Player* player, ObjectGuid const& lootedTarget, uint32 itemSlot, RollVote vote);
-        void StartLootRool(WorldObject* lootTarget, LootMethod method, Loot* loot, uint8 itemSlot, uint32 maxEnchantingSkill);
+        void StartLootRoll(WorldObject* lootTarget, LootMethod method, Loot* loot, uint8 itemSlot, uint32 maxEnchantingSkill);
         void EndRoll();
 
         void LinkMember(GroupReference *pRef) { m_memberMgr.insertFirst(pRef); }

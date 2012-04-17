@@ -746,6 +746,10 @@ void PlayerbotAI::ReloadAI()
             m_classAI = (PlayerbotClassAI *) new PlayerbotDeathKnightAI(GetMaster(), m_bot, this);
             break;
     }
+
+    HERB_GATHERING      = initSpell(HERB_GATHERING_1);
+    MINING              = initSpell(MINING_1);
+    SKINNING            = initSpell(SKINNING_1);
 }
 
 void PlayerbotAI::SendOrders(Player& /*player*/)
@@ -3806,7 +3810,6 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
                     m_bot->GetMotionMaster()->MoveIdle();
                 }
             }
-            return true;
         }
         else
             return false;
@@ -8782,7 +8785,20 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                     break;
 
                 TrainerSpell const* trainer_spell = all_trainer_spells->Find(spellId);
-                if (!trainer_spell || !trainer_spell->learnedSpell)
+                if (!trainer_spell)
+                    continue;
+
+                uint32 reqLevel = 0;
+                if (!trainer_spell->learnedSpell && !m_bot->IsSpellFitByClassAndRace(trainer_spell->learnedSpell, &reqLevel))
+                    continue;
+
+                if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(trainer_spell->learnedSpell) && m_bot->HasSpell(trainer_spell->learnedSpell))
+                    continue;
+
+                reqLevel = trainer_spell->isProvidedReqLevel ? trainer_spell->reqLevel : std::max(reqLevel, trainer_spell->reqLevel);
+
+                TrainerSpellState state =  m_bot->GetTrainerSpellState(trainer_spell, reqLevel);
+                if (state != TRAINER_SPELL_GREEN)
                     continue;
 
                 // apply reputation discount
@@ -9021,7 +9037,7 @@ void PlayerbotAI::_HandleCommandStats(std::string &text, Player &fromPlayer)
 void PlayerbotAI::_HandleCommandGM(std::string &text, Player &fromPlayer)
 {
     // Check should happen OUTSIDE this function, but this is account security we're talking about, so let's be doubly sure
-    if (fromPlayer.GetSession()->GetSecurity() > SEC_PLAYER)
+    if (fromPlayer.GetSession()->GetSecurity() <= SEC_PLAYER)
         return;  // no excuses, no warning
 
     if (text == "")
