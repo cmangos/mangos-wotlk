@@ -47,7 +47,7 @@ PlayerbotShamanAI::PlayerbotShamanAI(Player* const master, Player* const bot, Pl
     STONESKIN_TOTEM          = ai->initSpell(STONESKIN_TOTEM_1);
     WRATH_OF_AIR_TOTEM       = ai->initSpell(WRATH_OF_AIR_TOTEM_1);
     EARTH_ELEMENTAL_TOTEM    = ai->initSpell(EARTH_ELEMENTAL_TOTEM_1);
-	MAELSTROM_WEAPON			 = ai->initSpell(MAELSTROM_WEAPON_1);
+	MAELSTROM_WEAPON		 = ai->initSpell(MAELSTROM_WEAPON_1);
     // elemental
     LIGHTNING_BOLT           = ai->initSpell(LIGHTNING_BOLT_1);
     EARTH_SHOCK              = ai->initSpell(EARTH_SHOCK_1);
@@ -386,36 +386,29 @@ void PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
                }*/
 
             /*else*/ 
-			if (STORMSTRIKE > 0 && (LastSpellEnhancement == 0 || LastSpellEnhancement == 4) /*&& (!pTarget->HasAura(STORMSTRIKE, EFFECT_INDEX_0))*/ && ai->GetManaPercent() >= 8)
+			if (STORMSTRIKE > 0 && (!m_bot->HasSpellCooldown(STORMSTRIKE)) && ai->GetManaPercent() >= 8)
             {
                 ai->CastSpell(STORMSTRIKE, *pTarget);
-                LastSpellEnhancement = LastSpellEnhancement + 1;
                 break;
             }
-			else if (FLAME_SHOCK > 0 && LastSpellEnhancement == 1 /*&& (!pTarget->HasAura(FLAME_SHOCK, EFFECT_INDEX_0))*/ && ai->GetManaPercent() >= 22)
+			else if (FLAME_SHOCK > 0 && (!pTarget->HasAura(FLAME_SHOCK)) && ai->GetManaPercent() >= 22)
             {
                 ai->CastSpell(FLAME_SHOCK, *pTarget);
-                LastSpellEnhancement = LastSpellEnhancement + 1;
                 break;
             }
-			else if (EARTH_SHOCK > 0 && LastSpellEnhancement == 5 && ai->GetManaPercent() >= 23)
+			else if (EARTH_SHOCK > 0 && (!m_bot->HasSpellCooldown(EARTH_SHOCK)) && ai->GetManaPercent() >= 23)
             {
                 ai->CastSpell(EARTH_SHOCK, *pTarget);
-                LastSpellEnhancement = LastSpellEnhancement + 1;
                 break;
             }
-            else if (LAVA_LASH > 0 && (LastSpellEnhancement == 2 || LastSpellEnhancement == 6) && ai->GetManaPercent() >= 4)
+            else if (LAVA_LASH > 0 && (!m_bot->HasSpellCooldown(LAVA_LASH)) && ai->GetManaPercent() >= 4)
             {
                 ai->CastSpell(LAVA_LASH, *pTarget);
-                LastSpellEnhancement = LastSpellEnhancement + 1;
                 break;
             }
-			else if (MAELSTROM_WEAPON > 0 && LIGHTNING_BOLT > 0 && (LastSpellEnhancement == 3 || LastSpellEnhancement == 7) && m_bot->HasAura(MAELSTROM_WEAPON) && ai->GetManaPercent() >= 13)
+			else if (MAELSTROM_WEAPON > 0 && LIGHTNING_BOLT > 0 && m_bot->HasAura(MAELSTROM_WEAPON) && ai->GetManaPercent() >= 13)
             {
                 ai->CastSpell(LIGHTNING_BOLT, *pTarget);
-                LastSpellEnhancement = LastSpellEnhancement + 1;
-				if (LastSpellEnhancement == 8)
-					LastSpellEnhancement = 0;
                 break;
             }
             /*else if (EARTH_ELEMENTAL_TOTEM > 0 && LastSpellEnhancement == 45 && ai->GetManaPercent() >= 24)
@@ -449,18 +442,14 @@ void PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
                 ai->CastSpell(FLAME_SHOCK, *pTarget);
                 break;
             }
-			else if (LAVA_BURST > 0 && (LastSpellElemental == 0) && (pTarget->HasAura(FLAME_SHOCK)) && ai->GetManaPercent() >= 10)
+			else if (LAVA_BURST > 0 && (pTarget->HasAura(FLAME_SHOCK)) && (!m_bot->HasSpellCooldown(LAVA_BURST)) && ai->GetManaPercent() >= 10)
             {
                 ai->CastSpell(LAVA_BURST, *pTarget);
-				LastSpellElemental = LastSpellElemental + 1;
                 break;
             }
             else if (LIGHTNING_BOLT > 0 && ai->GetManaPercent() >= 13)
             {
                 ai->CastSpell(LIGHTNING_BOLT, *pTarget);
-				LastSpellElemental = LastSpellElemental + 1;
-				if (LastSpellElemental == 5)
-					LastSpellElemental = 0;
                 break;
             }
             /*else if (SEARING_TOTEM > 0 && LastSpellElemental == 2 && (!pTarget->HasAura(SEARING_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(TOTEM_OF_WRATH, EFFECT_INDEX_0)) && ai->GetManaPercent() >= 9)
