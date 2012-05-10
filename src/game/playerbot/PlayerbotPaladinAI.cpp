@@ -453,8 +453,13 @@ void PlayerbotPaladinAI::DoNonCombatActions()
 	CheckAuras();
 	CheckSeals();
 
-    //Put up RF if tank - Currently no way to disable it automatically
-    if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK) ai->SelfBuff(RIGHTEOUS_FURY);
+    //Put up RF if tank
+    if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK) 
+		ai->SelfBuff(RIGHTEOUS_FURY);
+	//Disable RF if not tank
+	else if (m_bot->HasAura(RIGHTEOUS_FURY) && !ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK)
+		m_bot->RemoveAurasDueToSpell(RIGHTEOUS_FURY);
+
  
 	BuffPlayer(m_bot);
 

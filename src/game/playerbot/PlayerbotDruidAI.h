@@ -86,7 +86,12 @@ enum DruidSpells
     TREE_OF_LIFE_1                  = 33891,
     TYPHOON_1                       = 50516,
     WILD_GROWTH_1                   = 48438,
-    WRATH_1                         = 5176
+    WRATH_1                         = 5176,
+	ECLIPSE_1						= 48525,
+
+	//Procs
+	ECLIPSE_SOLAR_1					= 48517,
+	ECLIPSE_LUNAR_1					= 48518
 };
 
 //class Player;
@@ -119,6 +124,9 @@ private:
     // Callback method to reset shapeshift forms blocking buffs and heals
     static void GoBuffForm(Player *self);
 
+	//Assumes form based on spec
+	void CheckForms();
+
     // druid cat/bear/dire bear/moonkin/tree of life forms
     uint32 CAT_FORM,
            BEAR_FORM,
@@ -135,7 +143,9 @@ private:
            RIP,
            FEROCIOUS_BITE,
            MAIM,
-           MANGLE;
+           MANGLE,
+		   MANGLE_CAT,
+		   SAVAGE_ROAR;
 
     // druid bear/dire bear attacks & buffs
     uint32 BASH,
@@ -145,7 +155,9 @@ private:
            CHALLENGING_ROAR,
            GROWL,
            ENRAGE,
-           FAERIE_FIRE_FERAL;
+           FAERIE_FIRE_FERAL,
+		   MANGLE_BEAR,
+		   LACERATE;
 
     // druid caster DPS attacks & debuffs
     uint32 MOONFIRE,
@@ -156,7 +168,10 @@ private:
            INSECT_SWARM,
            FAERIE_FIRE,
            FORCE_OF_NATURE,
-           HURRICANE;
+           HURRICANE,
+		   ECLIPSE_SOLAR,
+		   ECLIPSE_LUNAR,
+		   ECLIPSE;
 
     // druid buffs
     uint32 MARK_OF_THE_WILD,

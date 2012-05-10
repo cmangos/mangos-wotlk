@@ -1411,7 +1411,7 @@ enum MainSpec
     MAGE_SPEC_FROST             = 61,
     MAGE_SPEC_ARCANE            = 81,
     WARRIOR_SPEC_ARMS           = 161,
-    WARRIOR_APEC_PROTECTION     = 163,
+    WARRIOR_SPEC_PROTECTION     = 163,
     WARRIOR_SPEC_FURY           = 164,
     ROGUE_SPEC_COMBAT           = 181,
     ROGUE_SPEC_ASSASSINATION    = 182,
