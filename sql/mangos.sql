@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_11964_01_mangos_conditions` bit(1) default NULL
+  `required_11994_01_mangos_creature_linking` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -967,6 +967,28 @@ LOCK TABLES `creature_involvedrelation` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `creature_linking`
+--
+
+DROP TABLE IF EXISTS creature_linking;
+CREATE TABLE `creature_linking` (
+  `guid` int(10) UNSIGNED NOT NULL COMMENT 'creature.guid of the slave mob that is linked',
+  `master_guid` int(10) UNSIGNED NOT NULL COMMENT 'master to trigger events',
+  `flag` mediumint(8) UNSIGNED NOT NULL COMMENT 'flag - describing what should happen when',
+  PRIMARY KEY  (`guid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature Linking System';
+
+
+--
+-- Dumping data for table `creature_linking`
+--
+
+LOCK TABLES `creature_linking` WRITE;
+/*!40000 ALTER TABLE `creature_linking` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_linking` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `creature_linking_template`
 --
 
@@ -976,6 +998,7 @@ CREATE TABLE `creature_linking_template` (
   `map` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Id of map of the mobs',
   `master_entry` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'master to trigger events',
   `flag` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'flag - describing what should happen when',
+  `search_range` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'search_range - describing in which range (spawn-coords) master and slave are linked together',
   PRIMARY KEY  (`entry`,`map`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature Linking System';
 
@@ -2133,6 +2156,40 @@ LOCK TABLES `gameobject_template` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `gameobject_template_scripts`
+--
+
+DROP TABLE IF EXISTS `gameobject_template_scripts`;
+CREATE TABLE `gameobject_template_scripts` (
+  `id` mediumint(8) unsigned NOT NULL default '0',
+  `delay` int(10) unsigned NOT NULL default '0',
+  `command` mediumint(8) unsigned NOT NULL default '0',
+  `datalong` mediumint(8) unsigned NOT NULL default '0',
+  `datalong2` int(10) unsigned NOT NULL default '0',
+  `buddy_entry` int(10) unsigned NOT NULL default '0',
+  `search_radius` int(10) unsigned NOT NULL default '0',
+  `data_flags` tinyint(3) unsigned NOT NULL default '0',
+  `dataint` int(11) NOT NULL default '0',
+  `dataint2` int(11) NOT NULL default '0',
+  `dataint3` int(11) NOT NULL default '0',
+  `dataint4` int(11) NOT NULL default '0',
+  `x` float NOT NULL default '0',
+  `y` float NOT NULL default '0',
+  `z` float NOT NULL default '0',
+  `o` float NOT NULL default '0',
+  `comments` varchar(255) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `gameobject_template_scripts`
+--
+
+LOCK TABLES `gameobject_template_scripts` WRITE;
+/*!40000 ALTER TABLE `gameobject_template_scripts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `gameobject_template_scripts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `gossip_menu`
 --
 
@@ -2198,22 +2255,22 @@ CREATE TABLE gossip_menu_option (
 LOCK TABLES `gossip_menu_option` WRITE;
 /*!40000 ALTER TABLE `gossip_menu_option` DISABLE KEYS */;
 INSERT INTO gossip_menu_option VALUES
-(0, 0,0,'GOSSIP_OPTION_QUESTGIVER',       2,0x000002,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0, 1,1,'GOSSIP_OPTION_VENDOR',           3,0x000080,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0, 2,2,'GOSSIP_OPTION_TAXIVENDOR',       4,0x002000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0, 3,3,'GOSSIP_OPTION_TRAINER',          5,0x000010,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0, 4,4,'GOSSIP_OPTION_SPIRITHEALER',     6,0x004000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0, 5,4,'GOSSIP_OPTION_SPIRITGUIDE',      7,0x008000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0, 6,5,'GOSSIP_OPTION_INNKEEPER',        8,0x010000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0, 7,6,'GOSSIP_OPTION_BANKER',           9,0x020000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0, 8,7,'GOSSIP_OPTION_PETITIONER',      10,0x040000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0, 9,8,'GOSSIP_OPTION_TABARDDESIGNER',  11,0x080000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,10,9,'GOSSIP_OPTION_BATTLEFIELD',     12,0x100000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,11,6,'GOSSIP_OPTION_AUCTIONEER',      13,0x200000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,12,0,'GOSSIP_OPTION_STABLEPET',       14,0x400000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,13,1,'GOSSIP_OPTION_ARMORER',         15,0x001000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,14,0,'GOSSIP_OPTION_UNLEARNTALENTS',  16,0x000010,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,15,2,'GOSSIP_OPTION_UNLEARNPETSKILLS',17,0x000010,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0);
+(0, 0,0,'GOSSIP_OPTION_QUESTGIVER',       2,0x000002,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0, 1,1,'GOSSIP_OPTION_VENDOR',           3,0x000080,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0, 2,2,'GOSSIP_OPTION_TAXIVENDOR',       4,0x002000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0, 3,3,'GOSSIP_OPTION_TRAINER',          5,0x000010,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0, 4,4,'GOSSIP_OPTION_SPIRITHEALER',     6,0x004000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0, 5,4,'GOSSIP_OPTION_SPIRITGUIDE',      7,0x008000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0, 6,5,'GOSSIP_OPTION_INNKEEPER',        8,0x010000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0, 7,6,'GOSSIP_OPTION_BANKER',           9,0x020000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0, 8,7,'GOSSIP_OPTION_PETITIONER',      10,0x040000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0, 9,8,'GOSSIP_OPTION_TABARDDESIGNER',  11,0x080000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0,10,9,'GOSSIP_OPTION_BATTLEFIELD',     12,0x100000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0,11,6,'GOSSIP_OPTION_AUCTIONEER',      13,0x200000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0,12,0,'GOSSIP_OPTION_STABLEPET',       14,0x400000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0,13,1,'GOSSIP_OPTION_ARMORER',         15,0x001000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0,14,0,'GOSSIP_OPTION_UNLEARNTALENTS',  16,0x000010,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
+(0,15,2,'GOSSIP_OPTION_UNLEARNPETSKILLS',17,0x000010,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0);
 /*!40000 ALTER TABLE `gossip_menu_option` ENABLE KEYS */;
 UNLOCK TABLES;
 

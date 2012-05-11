@@ -441,7 +441,7 @@ void ObjectMgr::LoadPointOfInterestLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %lu points_of_interest locale strings", (unsigned long)mPointOfInterestLocaleMap.size() );
+    sLog.outString(">> Loaded " SIZEFMTD " points_of_interest locale strings", mPointOfInterestLocaleMap.size());
 }
 
 struct SQLCreatureLoader : public SQLStorageLoaderBase<SQLCreatureLoader>
@@ -850,10 +850,9 @@ void ObjectMgr::LoadEquipmentTemplates()
         for(uint8 j = 0; j < 3; ++j)
         {
             if (!eqInfo->equipentry[j])
-               continue;
+                continue;
 
             ItemEntry const *dbcitem = sItemStore.LookupEntry(eqInfo->equipentry[j]);
-
             if (!dbcitem)
             {
                 sLog.outErrorDb("Unknown item (entry=%u) in creature_equip_template.equipentry%u for entry = %u, forced to 0.", eqInfo->equipentry[j], j+1, i);
@@ -877,6 +876,7 @@ void ObjectMgr::LoadEquipmentTemplates()
             }
         }
     }
+
     sLog.outString( ">> Loaded %u equipment template", sEquipmentStorage.RecordCount );
     sLog.outString();
 }
@@ -3396,7 +3396,7 @@ void ObjectMgr::LoadArenaTeams()
 
     //                                                     0                      1    2           3    4               5
     QueryResult *result = CharacterDatabase.Query( "SELECT arena_team.arenateamid,name,captainguid,type,BackgroundColor,EmblemStyle,"
-    //   6           7           8            9      10         11         12              13            14
+    //   6           7           8            9      10         11        12           13          14
         "EmblemColor,BorderStyle,BorderColor, rating,games_week,wins_week,games_season,wins_season,rank "
         "FROM arena_team LEFT JOIN arena_team_stats ON arena_team.arenateamid = arena_team_stats.arenateamid ORDER BY arena_team.arenateamid ASC" );
 
@@ -5667,14 +5667,14 @@ void ObjectMgr::PackGroupIds()
 
 void ObjectMgr::SetHighestGuids()
 {
-    QueryResult *result = CharacterDatabase.Query( "SELECT MAX(guid) FROM characters" );
+    QueryResult *result = CharacterDatabase.Query("SELECT MAX(guid) FROM characters");
     if( result )
     {
         m_CharGuids.Set((*result)[0].GetUInt32()+1);
         delete result;
     }
 
-    result = WorldDatabase.Query( "SELECT MAX(guid) FROM creature" );
+    result = WorldDatabase.Query("SELECT MAX(guid) FROM creature");
     if( result )
     {
         m_FirstTemporaryCreatureGuid = (*result)[0].GetUInt32()+1;
@@ -7526,7 +7526,7 @@ bool PlayerCondition::Meets(Player const * player) const
         {
             Unit::SpellAuraHolderMap const& auras = player->GetSpellAuraHolderMap();
             for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-                if ((itr->second->GetSpellProto()->Attributes & 0x1000010) && itr->second->GetSpellProto()->SpellVisual[0]==3580)
+                if ((itr->second->GetSpellProto()->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_MOUNTED) || itr->second->GetSpellProto()->HasAttribute(SPELL_ATTR_UNK4)) && itr->second->GetSpellProto()->SpellVisual[0]==3580)
                     return true;
             return false;
         }
@@ -8681,7 +8681,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
             if (itr->first)
                 menu_ids.insert(itr->first);
 
-        for(uint32 i = 1; i < sGOStorage.MaxEntry; ++i)
+        for (uint32 i = 1; i < sGOStorage.MaxEntry; ++i)
             if (GameObjectInfo const* gInfo = sGOStorage.LookupEntry<GameObjectInfo>(i))
                 if (uint32 menuid = gInfo->GetGossipMenuId())
                     menu_ids.erase(menuid);
@@ -8695,10 +8695,16 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
     // prepare menuid -> CreatureInfo map for fast access
     typedef  std::multimap<uint32, const CreatureInfo*> Menu2CInfoMap;
     Menu2CInfoMap menu2CInfoMap;
-    for(uint32 i = 1;  i < sCreatureStorage.MaxEntry; ++i)
+    for (uint32 i = 1;  i < sCreatureStorage.MaxEntry; ++i)
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
             if (cInfo->GossipMenuId)
+            {
                 menu2CInfoMap.insert(Menu2CInfoMap::value_type(cInfo->GossipMenuId, cInfo));
+
+                // unused check data preparing part
+                if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK))
+                    menu_ids.erase(cInfo->GossipMenuId);
+            }
 
     do
     {
@@ -8777,7 +8783,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
         if (gMenuItem.option_id >= GOSSIP_OPTION_MAX)
             sLog.outErrorDb("Table gossip_menu_option for menu %u, id %u has unknown option id %u. Option will not be used", gMenuItem.menu_id, gMenuItem.id, gMenuItem.option_id);
 
-        if (gMenuItem.menu_id && (gMenuItem.npc_option_npcflag || !sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK)))
+        if (gMenuItem.menu_id && gMenuItem.npc_option_npcflag)
         {
             bool found_menu_uses = false;
             bool found_flags_uses = false;
@@ -8792,10 +8798,6 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
                 // some from creatures with gossip menu can use gossip option base at npc_flags
                 if (gMenuItem.npc_option_npcflag & cInfo->npcflag)
                     found_flags_uses = true;
-
-                // unused check data preparing part
-                if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK))
-                    menu_ids.erase(gMenuItem.menu_id);
             }
 
             if (found_menu_uses && !found_flags_uses)
