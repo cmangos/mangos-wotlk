@@ -50,12 +50,12 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
     COWER                         = ai->initSpell(COWER_1); // 20
     MANGLE                        = ai->initSpell(MANGLE_1); // 45
     TIGERS_FURY                   = ai->initSpell(TIGERS_FURY_1);
-	MANGLE_CAT					  = ai->initSpell(MANGLE_CAT_1);//40
+    MANGLE_CAT                    = ai->initSpell(MANGLE_CAT_1); //40
     // Cat Finishing Move's
     RIP                           = ai->initSpell(RIP_1); // 30
     FEROCIOUS_BITE                = ai->initSpell(FEROCIOUS_BITE_1); // 35
     MAIM                          = ai->initSpell(MAIM_1); // 35
-	SAVAGE_ROAR					  = ai->initSpell(SAVAGE_ROAR_1);//25
+    SAVAGE_ROAR                   = ai->initSpell(SAVAGE_ROAR_1); //25
     // Bear/Dire Bear Attacks & Buffs
     BASH                          = ai->initSpell(BASH_1);
     MAUL                          = ai->initSpell(MAUL_1); // 15
@@ -64,8 +64,8 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
     CHALLENGING_ROAR              = ai->initSpell(CHALLENGING_ROAR_1);
     ENRAGE                        = ai->initSpell(ENRAGE_1);
     GROWL                         = ai->initSpell(GROWL_1);
-	MANGLE_BEAR					  = ai->initSpell(MANGLE_BEAR_1);
-	LACERATE					  = ai->initSpell(LACERATE_1 );
+    MANGLE_BEAR                   = ai->initSpell(MANGLE_BEAR_1);
+    LACERATE                      = ai->initSpell(LACERATE_1);
 
     RECENTLY_BANDAGED             = 11196; // first aid check
 
@@ -73,10 +73,10 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
     SHADOWMELD                    = ai->initSpell(SHADOWMELD_ALL);
     WAR_STOMP                     = ai->initSpell(WAR_STOMP_ALL); // tauren
 
-	//Procs
-	ECLIPSE						  = ai->initSpell(ECLIPSE_1);
-	ECLIPSE_SOLAR				  = ai->initSpell(ECLIPSE_SOLAR_1);
-	ECLIPSE_LUNAR				  = ai->initSpell(ECLIPSE_LUNAR_1);
+    //Procs
+    ECLIPSE                       = ai->initSpell(ECLIPSE_1);
+    ECLIPSE_SOLAR                 = ai->initSpell(ECLIPSE_SOLAR_1);
+    ECLIPSE_LUNAR                 = ai->initSpell(ECLIPSE_LUNAR_1);
 }
 
 PlayerbotDruidAI::~PlayerbotDruidAI() {}
@@ -89,7 +89,7 @@ bool PlayerbotDruidAI::DoFirstCombatManeuver(Unit *pTarget)
 bool PlayerbotDruidAI::HealTarget(Unit *target)
 {
     PlayerbotAI* ai = GetAI();
-	Player *m_bot = GetPlayerBot();
+    Player *m_bot = GetPlayerBot();
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
 
     //If spell exists and orders say we should be dispelling
@@ -125,8 +125,8 @@ bool PlayerbotDruidAI::HealTarget(Unit *target)
         return false;
 
     // Reset form if needed
-	if (!m_bot->HasAura(TREE_OF_LIFE) || TREE_OF_LIFE == 0)
-		GoBuffForm(GetPlayerBot());
+    if (!m_bot->HasAura(TREE_OF_LIFE) || TREE_OF_LIFE == 0)
+        GoBuffForm(GetPlayerBot());
 
     if (hp < 70 && REJUVENATION > 0 && !target->HasAura(REJUVENATION) && ai->CastSpell(REJUVENATION, *target))
         return true;
@@ -169,224 +169,222 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 
     Player *m_bot = GetPlayerBot();
     Unit* pVictim = pTarget->getVictim();
-	uint32 spec = m_bot->GetSpec();
-	//Used to determine if this bot is highest on threat
-	Unit *newTarget = ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
-	//For lower levels who don't have starfire yet
-	uint32 SPELL = (STARFIRE > 0 ? STARFIRE : WRATH);
-	uint32 LastCastSpell = SPELL;
+    uint32 spec = m_bot->GetSpec();
+    //Used to determine if this bot is highest on threat
+    Unit *newTarget = ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
+    //For lower levels who don't have starfire yet
+    uint32 SPELL = (STARFIRE > 0 ? STARFIRE : WRATH);
+    uint32 LastCastSpell = SPELL;
 
     switch (spec)
     {
-		case DRUID_SPEC_RESTORATION:
+        case DRUID_SPEC_RESTORATION:
 
-		case DRUID_SPEC_BALANCE:
+        case DRUID_SPEC_BALANCE:
 
-			if (FAERIE_FIRE > 0 && !pTarget->HasAura(FAERIE_FIRE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 8)
-			{
-				ai->CastSpell(FAERIE_FIRE, *pTarget);
-				break;
-			}
-			else if (MOONFIRE > 0 && !pTarget->HasAura(MOONFIRE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 24)
-			{
-				ai->CastSpell(MOONFIRE, *pTarget);
-				break;
-			}
-			else if (INSECT_SWARM > 0 && !pTarget->HasAura(INSECT_SWARM, EFFECT_INDEX_0) && ai->GetManaPercent() >= 9)
-			{
-				ai->CastSpell(INSECT_SWARM, *pTarget);
-				break;
-			}
-			//These two don't work, I can't seem to nail the aura/effect index that would make this work properly
-			else if (ECLIPSE_SOLAR > 0 && WRATH > 0 && m_bot->HasAura(ECLIPSE_SOLAR) && ai->GetManaPercent() >= 13)
-			{
-				ai->CastSpell(WRATH, *pTarget);
-				break;
-			}
-			else if (ECLIPSE_LUNAR > 0 && STARFIRE > 0 && m_bot->HasAura(ECLIPSE_LUNAR) && ai->GetManaPercent() >= 18)
-			{
-				ai->CastSpell(STARFIRE, *pTarget);
-				break;
-			}
-			else if (FORCE_OF_NATURE > 0 && ai->GetManaPercent() >= 12)
-			{
-				ai->CastSpell(FORCE_OF_NATURE);
-				break;
-			}
-			else if (SPELL > 0 && ai->GetManaPercent() >= 18)
-			{
-				ai->CastSpell(SPELL, *pTarget);
-				LastCastSpell = SPELL;
-				break;
-			}
+            if (FAERIE_FIRE > 0 && !pTarget->HasAura(FAERIE_FIRE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 8)
+            {
+                ai->CastSpell(FAERIE_FIRE, *pTarget);
+                break;
+            }
+            else if (MOONFIRE > 0 && !pTarget->HasAura(MOONFIRE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 24)
+            {
+                ai->CastSpell(MOONFIRE, *pTarget);
+                break;
+            }
+            else if (INSECT_SWARM > 0 && !pTarget->HasAura(INSECT_SWARM, EFFECT_INDEX_0) && ai->GetManaPercent() >= 9)
+            {
+                ai->CastSpell(INSECT_SWARM, *pTarget);
+                break;
+            }
+            //These two don't work, I can't seem to nail the aura/effect index that would make this work properly
+            else if (ECLIPSE_SOLAR > 0 && WRATH > 0 && m_bot->HasAura(ECLIPSE_SOLAR) && ai->GetManaPercent() >= 13)
+            {
+                ai->CastSpell(WRATH, *pTarget);
+                break;
+            }
+            else if (ECLIPSE_LUNAR > 0 && STARFIRE > 0 && m_bot->HasAura(ECLIPSE_LUNAR) && ai->GetManaPercent() >= 18)
+            {
+                ai->CastSpell(STARFIRE, *pTarget);
+                break;
+            }
+            else if (FORCE_OF_NATURE > 0 && ai->GetManaPercent() >= 12)
+            {
+                ai->CastSpell(FORCE_OF_NATURE);
+                break;
+            }
+            else if (SPELL > 0 && ai->GetManaPercent() >= 18)
+            {
+                ai->CastSpell(SPELL, *pTarget);
+                LastCastSpell = SPELL;
+                break;
+            }
 
-		case DRUID_SPEC_FERAL:
+        case DRUID_SPEC_FERAL:
 
-			PlayerbotAI::CombatOrderType orders = ai->GetCombatOrder();
-			switch (orders)
-			{
-				
-				case PlayerbotAI::ORDERS_TANK:
-					
-					//This was in the original, seems like a good idea - makes tank face enemy
-					if (!m_bot->HasInArc(M_PI_F, pTarget))
-					{
-						m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
-						if (pVictim)
-							pVictim->Attack(pTarget, true);
-					}
-					//We can be sure we have tank orders since we are in bear form
-					if (!newTarget && GROWL > 0 && !m_bot->HasSpellCooldown(GROWL))
-					{
-						ai->CastSpell(GROWL, *pTarget);
-						break;
-					}
-					else if (FAERIE_FIRE_FERAL > 0 && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0))
-					{
-						ai->CastSpell(FAERIE_FIRE_FERAL, *pTarget);
-						break;
-					}
-					else if (ENRAGE > 0 && !m_bot->HasSpellCooldown(ENRAGE))
-					{
-						ai->CastSpell(ENRAGE, *m_bot);
-						break;
-					}
-					else if (DEMORALIZING_ROAR > 0 && !pTarget->HasAura(DEMORALIZING_ROAR, EFFECT_INDEX_0) && ai->GetRageAmount() >= 10)
-					{
-						ai->CastSpell(DEMORALIZING_ROAR, *pTarget);
-						break;
-					}
-					else if (MANGLE_BEAR > 0 && !pTarget->HasAura(MANGLE_BEAR) && ai->GetRageAmount() >= 15)
-					{
-						ai->CastSpell(MANGLE_BEAR, *pTarget);
-						break;
-					}
-					else if (LACERATE > 0 && !pTarget->HasAura(LACERATE, EFFECT_INDEX_0) && ai->GetRageAmount() >= 15)
-					{
-						ai->CastSpell(LACERATE, *pTarget);
-						break;
-					}
-					if (MAUL > 0 && ai->GetRageAmount() >= 10)
-					{
-						ai->CastSpell(MAUL, *pTarget);
-						break;
-					}
+            PlayerbotAI::CombatOrderType orders = ai->GetCombatOrder();
+            switch (orders)
+            {
 
-				case !PlayerbotAI::ORDERS_TANK:
+                case PlayerbotAI::ORDERS_TANK:
 
-					if (newTarget && COWER > 0 && !m_bot->HasSpellCooldown(COWER) && ai->GetEnergyAmount() >= 20)
-					{
-						ai->CastSpell(COWER, *pTarget);
-						break;
-					}
-					else if (FAERIE_FIRE_FERAL > 0 && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0))
-					{
-						ai->CastSpell(FAERIE_FIRE_FERAL, *pTarget);
-						break;
-					}
-					else if (TIGERS_FURY > 0 && !m_bot->HasSpellCooldown(TIGERS_FURY))
-					{
-						ai->CastSpell(TIGERS_FURY);
-						break;
-					}
-					else if (MANGLE_CAT > 0 && !pTarget->HasAura(MANGLE_CAT) && ai->GetEnergyAmount() >= 40)
-					{
-						ai->CastSpell(MANGLE_CAT);
-						break;
-					}
-					else if (RAKE > 0 && !pTarget->HasAura(RAKE) && ai->GetEnergyAmount() >= 40)
-					{
-						ai->CastSpell(RAKE, *pTarget);
-						break;
-					}
-					else if (CLAW > 0 && m_bot->GetComboPoints() < 5 && ai->GetEnergyAmount() >= 45)
-					{
-						ai->CastSpell(CLAW, *pTarget);
-						break;
-					}
-					else if (m_bot->GetComboPoints() == 5)
-					{
-						if (SAVAGE_ROAR > 0 && !m_bot->HasAura(SAVAGE_ROAR) && ai->GetEnergyAmount() >= 25)
-							ai->CastSpell(SAVAGE_ROAR, *pTarget);
-						else if (RIP > 0 && !pTarget->HasAura(RIP, EFFECT_INDEX_0) && ai->GetEnergyAmount() >= 30)
-							ai->CastSpell(RIP, *pTarget);
-						else if (FEROCIOUS_BITE > 0 && ai->GetEnergyAmount() >= 35)
-							ai->CastSpell(FEROCIOUS_BITE, *pTarget);
-					}
-			}
+                    //This was in the original, seems like a good idea - makes tank face enemy
+                    if (!m_bot->HasInArc(M_PI_F, pTarget))
+                    {
+                        m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
+                        if (pVictim)
+                            pVictim->Attack(pTarget, true);
+                    }
+                    //We can be sure we have tank orders since we are in bear form
+                    if (!newTarget && GROWL > 0 && !m_bot->HasSpellCooldown(GROWL))
+                    {
+                        ai->CastSpell(GROWL, *pTarget);
+                        break;
+                    }
+                    else if (FAERIE_FIRE_FERAL > 0 && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0))
+                    {
+                        ai->CastSpell(FAERIE_FIRE_FERAL, *pTarget);
+                        break;
+                    }
+                    else if (ENRAGE > 0 && !m_bot->HasSpellCooldown(ENRAGE))
+                    {
+                        ai->CastSpell(ENRAGE, *m_bot);
+                        break;
+                    }
+                    else if (DEMORALIZING_ROAR > 0 && !pTarget->HasAura(DEMORALIZING_ROAR, EFFECT_INDEX_0) && ai->GetRageAmount() >= 10)
+                    {
+                        ai->CastSpell(DEMORALIZING_ROAR, *pTarget);
+                        break;
+                    }
+                    else if (MANGLE_BEAR > 0 && !pTarget->HasAura(MANGLE_BEAR) && ai->GetRageAmount() >= 15)
+                    {
+                        ai->CastSpell(MANGLE_BEAR, *pTarget);
+                        break;
+                    }
+                    else if (LACERATE > 0 && !pTarget->HasAura(LACERATE, EFFECT_INDEX_0) && ai->GetRageAmount() >= 15)
+                    {
+                        ai->CastSpell(LACERATE, *pTarget);
+                        break;
+                    }
+                    if (MAUL > 0 && ai->GetRageAmount() >= 10)
+                    {
+                        ai->CastSpell(MAUL, *pTarget);
+                        break;
+                    }
 
-			/*DruidSpellCombat++;
-			if (SWIPE > 0 && DruidSpellCombat < 3 && ai->GetRageAmount() >= 20)
-			{
-				ai->CastSpell(SWIPE, *pTarget);
-				DruidSpellCombat += 2;
-				return;
-			}
+                case !PlayerbotAI::ORDERS_TANK:
 
-			DruidSpellCombat++;
-			if (BASH > 0 && !pTarget->HasAura(BASH, EFFECT_INDEX_0) && DruidSpellCombat < 5 && ai->GetRageAmount() >= 10)
-			{
-				ai->CastSpell(BASH, *pTarget);
-				DruidSpellCombat += 2;
-				return;
-			}
+                    if (newTarget && COWER > 0 && !m_bot->HasSpellCooldown(COWER) && ai->GetEnergyAmount() >= 20)
+                    {
+                        ai->CastSpell(COWER, *pTarget);
+                        break;
+                    }
+                    else if (FAERIE_FIRE_FERAL > 0 && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0))
+                    {
+                        ai->CastSpell(FAERIE_FIRE_FERAL, *pTarget);
+                        break;
+                    }
+                    else if (TIGERS_FURY > 0 && !m_bot->HasSpellCooldown(TIGERS_FURY))
+                    {
+                        ai->CastSpell(TIGERS_FURY);
+                        break;
+                    }
+                    else if (MANGLE_CAT > 0 && !pTarget->HasAura(MANGLE_CAT) && ai->GetEnergyAmount() >= 40)
+                    {
+                        ai->CastSpell(MANGLE_CAT);
+                        break;
+                    }
+                    else if (RAKE > 0 && !pTarget->HasAura(RAKE) && ai->GetEnergyAmount() >= 40)
+                    {
+                        ai->CastSpell(RAKE, *pTarget);
+                        break;
+                    }
+                    else if (CLAW > 0 && m_bot->GetComboPoints() < 5 && ai->GetEnergyAmount() >= 45)
+                    {
+                        ai->CastSpell(CLAW, *pTarget);
+                        break;
+                    }
+                    else if (m_bot->GetComboPoints() == 5)
+                    {
+                        if (SAVAGE_ROAR > 0 && !m_bot->HasAura(SAVAGE_ROAR) && ai->GetEnergyAmount() >= 25)
+                            ai->CastSpell(SAVAGE_ROAR, *pTarget);
+                        else if (RIP > 0 && !pTarget->HasAura(RIP, EFFECT_INDEX_0) && ai->GetEnergyAmount() >= 30)
+                            ai->CastSpell(RIP, *pTarget);
+                        else if (FEROCIOUS_BITE > 0 && ai->GetEnergyAmount() >= 35)
+                            ai->CastSpell(FEROCIOUS_BITE, *pTarget);
+                    }
+            }
 
-			DruidSpellCombat++;
-			if (CHALLENGING_ROAR > 0 && pVictim != m_bot && DruidSpellCombat < 6 && !pTarget->HasAura(CHALLENGING_ROAR, EFFECT_INDEX_0) && !pTarget->HasAura(GROWL, EFFECT_INDEX_0) && ai->GetRageAmount() >= 15)
-			{
-				ai->CastSpell(CHALLENGING_ROAR, *pTarget);
-				DruidSpellCombat += 2;
-				return;
-			}*/
-			/*if (ROOTS > 0 && DruidSpellCombat < 3 && !pTarget->HasAura(ROOTS, EFFECT_INDEX_0) && ai->GetManaPercent() >= 8)
-			{
-				ai->CastSpell(ROOTS, *pTarget);
-				return;
-			}
+            /*DruidSpellCombat++;
+               if (SWIPE > 0 && DruidSpellCombat < 3 && ai->GetRageAmount() >= 20)
+               {
+                ai->CastSpell(SWIPE, *pTarget);
+                DruidSpellCombat += 2;
+                return;
+               }
 
-			DruidSpellCombat++;
-			if (HURRICANE > 0 && ai->GetAttackerCount() >= 5 && DruidSpellCombat < 4 && ai->GetManaPercent() >= 91)
-			{
-				ai->CastSpell(HURRICANE, *pTarget);
-				ai->SetIgnoreUpdateTime(10);
-				return;
-			}
-			DruidSpellCombat++;
-			if (STARFALL > 0 && !m_bot->HasAura(STARFALL, EFFECT_INDEX_0) && ai->GetAttackerCount() >= 3 && DruidSpellCombat < 9 && ai->GetManaPercent() >= 39)
-			{
-				ai->CastSpell(STARFALL, *pTarget);
-				return;
-			}
+               DruidSpellCombat++;
+               if (BASH > 0 && !pTarget->HasAura(BASH, EFFECT_INDEX_0) && DruidSpellCombat < 5 && ai->GetRageAmount() >= 10)
+               {
+                ai->CastSpell(BASH, *pTarget);
+                DruidSpellCombat += 2;
+                return;
+               }
 
-			DruidSpellCombat++;
-			if (BARKSKIN > 0 && pVictim == m_bot && ai->GetHealthPercent() < 75 && DruidSpellCombat < 10 && !m_bot->HasAura(BARKSKIN, EFFECT_INDEX_0))
-			{
-				ai->CastSpell(BARKSKIN, *m_bot);
-				return;
-			}
+               DruidSpellCombat++;
+               if (CHALLENGING_ROAR > 0 && pVictim != m_bot && DruidSpellCombat < 6 && !pTarget->HasAura(CHALLENGING_ROAR, EFFECT_INDEX_0) && !pTarget->HasAura(GROWL, EFFECT_INDEX_0) && ai->GetRageAmount() >= 15)
+               {
+                ai->CastSpell(CHALLENGING_ROAR, *pTarget);
+                DruidSpellCombat += 2;
+                return;
+               }*/
+            /*if (ROOTS > 0 && DruidSpellCombat < 3 && !pTarget->HasAura(ROOTS, EFFECT_INDEX_0) && ai->GetManaPercent() >= 8)
+               {
+                ai->CastSpell(ROOTS, *pTarget);
+                return;
+               }
 
-			DruidSpellCombat++;
-			if (INNERVATE > 0 && ai->GetManaPercent() < 50 && DruidSpellCombat < 11 && !m_bot->HasAura(INNERVATE, EFFECT_INDEX_0))
-			{
-				ai->CastSpell(INNERVATE, *m_bot);
-				return;
-			}*/
-			//if (MAIM > 0 && m_bot->GetComboPoints() >= 1 && pTarget->IsNonMeleeSpellCasted(true))
-			//{
-			//	ai->CastSpell(MAIM, *pTarget);
-			//	//ai->TellMaster("SpellPreventing Maim");
-			//	return;
-			//}
+               DruidSpellCombat++;
+               if (HURRICANE > 0 && ai->GetAttackerCount() >= 5 && DruidSpellCombat < 4 && ai->GetManaPercent() >= 91)
+               {
+                ai->CastSpell(HURRICANE, *pTarget);
+                ai->SetIgnoreUpdateTime(10);
+                return;
+               }
+               DruidSpellCombat++;
+               if (STARFALL > 0 && !m_bot->HasAura(STARFALL, EFFECT_INDEX_0) && ai->GetAttackerCount() >= 3 && DruidSpellCombat < 9 && ai->GetManaPercent() >= 39)
+               {
+                ai->CastSpell(STARFALL, *pTarget);
+                return;
+               }
+
+               DruidSpellCombat++;
+               if (BARKSKIN > 0 && pVictim == m_bot && ai->GetHealthPercent() < 75 && DruidSpellCombat < 10 && !m_bot->HasAura(BARKSKIN, EFFECT_INDEX_0))
+               {
+                ai->CastSpell(BARKSKIN, *m_bot);
+                return;
+               }
+
+               DruidSpellCombat++;
+               if (INNERVATE > 0 && ai->GetManaPercent() < 50 && DruidSpellCombat < 11 && !m_bot->HasAura(INNERVATE, EFFECT_INDEX_0))
+               {
+                ai->CastSpell(INNERVATE, *m_bot);
+                return;
+               }*/
+            //if (MAIM > 0 && m_bot->GetComboPoints() >= 1 && pTarget->IsNonMeleeSpellCasted(true))
+            //{
+            //	ai->CastSpell(MAIM, *pTarget);
+            //	//ai->TellMaster("SpellPreventing Maim");
+            //	return;
+            //}
     }
 } // end DoNextCombatManeuver
 
 void PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
-{
-}
+{}
 
 void PlayerbotDruidAI::_DoNextPVECombatManeuverSpellDPS(Unit* pTarget)
-{
-}
+{}
 
 void PlayerbotDruidAI::_DoNextPVECombatManeuverMeleeDPS(Unit* pTarget)
 {
@@ -465,25 +463,25 @@ void PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarget)
 
 void PlayerbotDruidAI::CheckForms()
 {
-	PlayerbotAI* ai = GetAI();
-	Player* m_bot = GetPlayerBot();
+    PlayerbotAI* ai = GetAI();
+    Player* m_bot = GetPlayerBot();
     Player* master = GetMaster();
-	uint32 spec = m_bot->GetSpec();
-	uint32 BEAR = (DIRE_BEAR_FORM > 0 ? DIRE_BEAR_FORM : BEAR_FORM);
+    uint32 spec = m_bot->GetSpec();
+    uint32 BEAR = (DIRE_BEAR_FORM > 0 ? DIRE_BEAR_FORM : BEAR_FORM);
 
-	if (spec == DRUID_SPEC_BALANCE && MOONKIN_FORM && !m_bot->HasAura(MOONKIN_FORM))
-		ai->CastSpell (MOONKIN_FORM);
-	//Use Bear form only if we are told we're a tank and have thorns up
-	else if (spec == DRUID_SPEC_FERAL && BEAR > 0 && ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK && m_bot->HasAura(THORNS) && !m_bot->HasAura(BEAR))
-		ai->CastSpell(BEAR);
-	//If no tank orders assume we are kitty
-	else if (spec == DRUID_SPEC_FERAL && CAT_FORM > 0 && !ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK && !m_bot->HasAura(CAT_FORM))
-		ai->CastSpell(CAT_FORM);
-	//While we are feral but don't yet have cat form
-	else if (spec == DRUID_SPEC_FERAL && CAT_FORM == 0 && BEAR > 0 && !m_bot->HasAura(BEAR))
-		ai->CastSpell(BEAR);
-	else if (spec == DRUID_SPEC_RESTORATION && TREE_OF_LIFE > 0 && !m_bot->HasAura(TREE_OF_LIFE))
-		ai->CastSpell(TREE_OF_LIFE);
+    if (spec == DRUID_SPEC_BALANCE && MOONKIN_FORM && !m_bot->HasAura(MOONKIN_FORM))
+        ai->CastSpell (MOONKIN_FORM);
+    //Use Bear form only if we are told we're a tank and have thorns up
+    else if (spec == DRUID_SPEC_FERAL && BEAR > 0 && ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK && m_bot->HasAura(THORNS) && !m_bot->HasAura(BEAR))
+        ai->CastSpell(BEAR);
+    //If no tank orders assume we are kitty
+    else if (spec == DRUID_SPEC_FERAL && CAT_FORM > 0 && !ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK && !m_bot->HasAura(CAT_FORM))
+        ai->CastSpell(CAT_FORM);
+    //While we are feral but don't yet have cat form
+    else if (spec == DRUID_SPEC_FERAL && CAT_FORM == 0 && BEAR > 0 && !m_bot->HasAura(BEAR))
+        ai->CastSpell(BEAR);
+    else if (spec == DRUID_SPEC_RESTORATION && TREE_OF_LIFE > 0 && !m_bot->HasAura(TREE_OF_LIFE))
+        ai->CastSpell(TREE_OF_LIFE);
 
 }
 
@@ -592,7 +590,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
 
     BuffPlayer(m_bot);
 
-	CheckForms();
+    CheckForms();
 } // end DoNonCombatActions
 
 bool PlayerbotDruidAI::BuffPlayer(Player* target)

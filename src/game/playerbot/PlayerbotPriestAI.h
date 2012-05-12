@@ -123,8 +123,8 @@ private:
            PRAYER_OF_SHADOW_PROTECTION,
            SHADOWFIEND,
            MIND_SEAR,
-		   SHADOWFORM,
-		   VAMPIRIC_EMBRACE;
+           SHADOWFORM,
+           VAMPIRIC_EMBRACE;
 
     // discipline
     uint32 POWER_WORD_SHIELD,

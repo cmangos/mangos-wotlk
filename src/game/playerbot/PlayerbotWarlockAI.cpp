@@ -49,7 +49,7 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     CREATE_FIRESTONE      = ai->initSpell(CREATE_FIRESTONE_1);
     CREATE_HEALTHSTONE    = ai->initSpell(CREATE_HEALTHSTONE_1);
     CREATE_SOULSTONE      = ai->initSpell(CREATE_SOULSTONE_1);
-	CREATE_SPELLSTONE	  = ai->initSpell(CREATE_SPELLSTONE_1);
+    CREATE_SPELLSTONE     = ai->initSpell(CREATE_SPELLSTONE_1);
     // demon summon
     SUMMON_IMP            = ai->initSpell(SUMMON_IMP_1);
     SUMMON_VOIDWALKER     = ai->initSpell(SUMMON_VOIDWALKER_1);
@@ -105,11 +105,11 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     Player *m_bot = GetPlayerBot();
     Unit* pVictim = pTarget->getVictim();
     Pet *pet = m_bot->GetPet();
-	uint32 spec = m_bot->GetSpec();
-	uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
+    uint32 spec = m_bot->GetSpec();
+    uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
 
-	//If we have UA it will replace immolate in our rotation
-	uint32 FIRE = (UNSTABLE_AFFLICTION > 0 ? UNSTABLE_AFFLICTION : IMMOLATE);
+    //If we have UA it will replace immolate in our rotation
+    uint32 FIRE = (UNSTABLE_AFFLICTION > 0 ? UNSTABLE_AFFLICTION : IMMOLATE);
 
     // Use voidwalker sacrifice on low health if possible
     if (ai->GetHealthPercent() < 50)
@@ -124,40 +124,38 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
             ai->UseItem(healthStone);
     }
 
-	//Used to determine if this bot is highest on threat
-	Unit *newTarget = ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
-	//Since locks will do damage now, they should probably watch their threat
-	if (newTarget && SOULSHATTER > 0 && shardCount > 0)
-    {
+    //Used to determine if this bot is highest on threat
+    Unit *newTarget = ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
+    //Since locks will do damage now, they should probably watch their threat
+    if (newTarget && SOULSHATTER > 0 && shardCount > 0)
         ai->CastSpell(SOULSHATTER, *m_bot);
-    }
 
     // Damage Spells
     switch (spec)
     {
         case WARLOCK_SPEC_AFFLICTION:
-			
+
             if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
             {
                 ai->CastSpell(CURSE_OF_AGONY, *pTarget);
                 break;
             }
-			else if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
+            else if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
             {
                 ai->CastSpell(CORRUPTION, *pTarget);
                 break;
             }
-			else if (FIRE && !pTarget->HasAura(FIRE))
+            else if (FIRE && !pTarget->HasAura(FIRE))
             {
                 ai->CastSpell(FIRE, *pTarget);
                 break;
             }
-			else if (HAUNT && !m_bot->HasSpellCooldown(HAUNT))
+            else if (HAUNT && !m_bot->HasSpellCooldown(HAUNT))
             {
                 ai->CastSpell(HAUNT, *pTarget);
                 break;
             }
-			else if (SHADOW_BOLT)
+            else if (SHADOW_BOLT)
             {
                 ai->CastSpell(SHADOW_BOLT, *pTarget);
                 break;
@@ -166,56 +164,56 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 
         case WARLOCK_SPEC_DEMONOLOGY:
 
-			if (pet && DEMONIC_EMPOWERMENT && !m_bot->HasSpellCooldown(DEMONIC_EMPOWERMENT))
-			{
-				ai->CastSpell(DEMONIC_EMPOWERMENT);
-				break;
-			}
-			else if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
+            if (pet && DEMONIC_EMPOWERMENT && !m_bot->HasSpellCooldown(DEMONIC_EMPOWERMENT))
+            {
+                ai->CastSpell(DEMONIC_EMPOWERMENT);
+                break;
+            }
+            else if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
             {
                 ai->CastSpell(CURSE_OF_AGONY, *pTarget);
                 break;
             }
-			else if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
+            else if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
             {
                 ai->CastSpell(CORRUPTION, *pTarget);
                 break;
             }
-			else if (FIRE && !pTarget->HasAura(FIRE))
+            else if (FIRE && !pTarget->HasAura(FIRE))
             {
                 ai->CastSpell(FIRE, *pTarget);
                 break;
             }
-			else if (INCINERATE && pTarget->HasAura(FIRE))
+            else if (INCINERATE && pTarget->HasAura(FIRE))
             {
                 ai->CastSpell(INCINERATE, *pTarget);
                 break;
             }
 
 
-		case WARLOCK_SPEC_DESTRUCTION:
+        case WARLOCK_SPEC_DESTRUCTION:
 
-			if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
+            if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
             {
                 ai->CastSpell(CURSE_OF_AGONY, *pTarget);
                 break;
             }
-			else if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
+            else if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
             {
                 ai->CastSpell(CORRUPTION, *pTarget);
                 break;
             }
-			else if (FIRE && !pTarget->HasAura(FIRE))
+            else if (FIRE && !pTarget->HasAura(FIRE))
             {
                 ai->CastSpell(FIRE, *pTarget);
                 break;
             }
-			else if (CONFLAGRATE && pTarget->HasAura(FIRE) && !m_bot->HasSpellCooldown(CONFLAGRATE))
+            else if (CONFLAGRATE && pTarget->HasAura(FIRE) && !m_bot->HasSpellCooldown(CONFLAGRATE))
             {
                 ai->CastSpell(CONFLAGRATE, *pTarget);
                 break;
             }
-			else if (CHAOS_BOLT && !m_bot->HasSpellCooldown(CHAOS_BOLT))
+            else if (CHAOS_BOLT && !m_bot->HasSpellCooldown(CHAOS_BOLT))
             {
                 ai->CastSpell(CHAOS_BOLT, *pTarget);
                 break;
@@ -225,7 +223,7 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
                 ai->CastSpell(INCINERATE, *pTarget);
                 break;
             }
-			else if (SHADOW_BOLT)
+            else if (SHADOW_BOLT)
             {
                 ai->CastSpell(SHADOW_BOLT, *pTarget);
                 break;
@@ -340,7 +338,7 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
             //    ++LastSpellDestruction;
             //    break;
             //}
-			            //else if (CURSE_OF_THE_ELEMENTS && !pTarget->HasAura(CURSE_OF_THE_ELEMENTS) && !pTarget->HasAura(SHADOWFLAME) && !pTarget->HasAura(CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_WEAKNESS) && LastSpellCurse < 2)
+            //else if (CURSE_OF_THE_ELEMENTS && !pTarget->HasAura(CURSE_OF_THE_ELEMENTS) && !pTarget->HasAura(SHADOWFLAME) && !pTarget->HasAura(CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_WEAKNESS) && LastSpellCurse < 2)
             //{
             //    ai->CastSpell(CURSE_OF_THE_ELEMENTS, *pTarget);
             //    SpellSequence = SPELL_AFFLICTION;
@@ -366,19 +364,19 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 
 void PlayerbotWarlockAI::CheckDemon()
 {
-	PlayerbotAI *ai = GetAI();
+    PlayerbotAI *ai = GetAI();
     Player * m_bot = GetPlayerBot();
-	uint32 spec = m_bot->GetSpec();
-	uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
-	Pet *pet = m_bot->GetPet();
+    uint32 spec = m_bot->GetSpec();
+    uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
+    Pet *pet = m_bot->GetPet();
 
-	//Assign demon of choice
-	if (spec == WARLOCK_SPEC_AFFLICTION)
-		m_demonOfChoice = DEMON_FELHUNTER;
-	else if (spec == WARLOCK_SPEC_DEMONOLOGY)
-		m_demonOfChoice = (DEMON_FELGUARD > 0 ? DEMON_FELGUARD : DEMON_SUCCUBUS);
-	else if (spec == WARLOCK_SPEC_DESTRUCTION)
-		m_demonOfChoice = DEMON_IMP;
+    //Assign demon of choice
+    if (spec == WARLOCK_SPEC_AFFLICTION)
+        m_demonOfChoice = DEMON_FELHUNTER;
+    else if (spec == WARLOCK_SPEC_DEMONOLOGY)
+        m_demonOfChoice = (DEMON_FELGUARD > 0 ? DEMON_FELGUARD : DEMON_SUCCUBUS);
+    else if (spec == WARLOCK_SPEC_DESTRUCTION)
+        m_demonOfChoice = DEMON_IMP;
 
     // Summon demon
     if (!pet || m_isTempImp || pet->GetEntry() != m_demonOfChoice)
@@ -426,7 +424,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
 
     PlayerbotAI *ai = GetAI();
     Player * m_bot = GetPlayerBot();
-	uint32 spec = m_bot->GetSpec();
+    uint32 spec = m_bot->GetSpec();
     if (!ai || !m_bot)
         return;
 
@@ -537,20 +535,20 @@ void PlayerbotWarlockAI::DoNonCombatActions()
     if (weapon && weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
     {
         Item* const stone = ai->FindConsumable(SPELLSTONE_DISPLAYID);
-		Item* const stone2 = ai->FindConsumable(FIRESTONE_DISPLAYID);
+        Item* const stone2 = ai->FindConsumable(FIRESTONE_DISPLAYID);
         if (!stone && !stone2)
         {
             if (CREATE_SPELLSTONE && shardCount > 0 && ai->CastSpell(CREATE_SPELLSTONE))
                 return;
-			else if(CREATE_SPELLSTONE == 0 && CREATE_FIRESTONE > 0 && shardCount > 0 && ai->CastSpell(CREATE_FIRESTONE))
-				return;
+            else if (CREATE_SPELLSTONE == 0 && CREATE_FIRESTONE > 0 && shardCount > 0 && ai->CastSpell(CREATE_FIRESTONE))
+                return;
         }
         else if (stone)
         {
             ai->UseItem(stone, EQUIPMENT_SLOT_MAINHAND);
             return;
         }
-		else
+        else
         {
             ai->UseItem(stone2, EQUIPMENT_SLOT_MAINHAND);
             return;
@@ -607,7 +605,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
     if (pet && pet->GetEntry() == DEMON_VOIDWALKER && CONSUME_SHADOWS && pet->GetHealthPercent() < 75 && !pet->HasAura(CONSUME_SHADOWS))
         ai->CastPetSpell(CONSUME_SHADOWS);
 
-	CheckDemon();
+    CheckDemon();
 
     // Soul link demon
     if (pet && SOUL_LINK && !m_bot->HasAura(SOUL_LINK_AURA) && ai->CastSpell(SOUL_LINK, *m_bot))

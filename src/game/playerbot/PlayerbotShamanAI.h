@@ -79,34 +79,34 @@ enum
     WINDFURY_WEAPON_1               = 8232,
     WRATH_OF_AIR_TOTEM_1            = 3738,
 
-	//Totem Buffs
-	STRENGTH_OF_EARTH_EFFECT_1		= 8076,
-	FLAMETONGUE_EFFECT_1			= 52109,
-	MAGMA_TOTEM_EFFECT_1			= 8188,
-	STONECLAW_EFFECT_1				= 5728,
-	FIRE_RESISTANCE_EFFECT_1		= 8185,
-	FROST_RESISTANCE_EFFECT_1		= 8182,
-	GROUDNING_EFFECT_1				= 8178,
-	NATURE_RESISTANCE_EFFECT_1		= 10596,
-	STONESKIN_EFFECT_1				= 8072,
-	WINDFURY_EFFECT_1				= 8515,
-	WRATH_OF_AIR_EFFECT_1			= 2895,
-	CLEANSING_TOTEM_EFFECT_1		= 8172,
-	HEALING_STREAM_EFFECT_1			= 52042,
-	MANA_SPRING_EFFECT_1			= 5677,
-	TREMOR_TOTEM_EFFECT_1			= 8145,
-	TOTEM_OF_WRATH_EFFECT_1			= 57658,
-	EARTHBIND_EFFECT_1				= 6474,
-	// FIRE_ELEMENTAL_TOTEM uses spell effect index 2
-	// SEARING_TOTEM uses spell effect index 0
-	// EARTH_ELEMENTAL_TOTEM uses spell effect indexes 1 and 2
+    //Totem Buffs
+    STRENGTH_OF_EARTH_EFFECT_1      = 8076,
+    FLAMETONGUE_EFFECT_1            = 52109,
+    MAGMA_TOTEM_EFFECT_1            = 8188,
+    STONECLAW_EFFECT_1              = 5728,
+    FIRE_RESISTANCE_EFFECT_1        = 8185,
+    FROST_RESISTANCE_EFFECT_1       = 8182,
+    GROUDNING_EFFECT_1              = 8178,
+    NATURE_RESISTANCE_EFFECT_1      = 10596,
+    STONESKIN_EFFECT_1              = 8072,
+    WINDFURY_EFFECT_1               = 8515,
+    WRATH_OF_AIR_EFFECT_1           = 2895,
+    CLEANSING_TOTEM_EFFECT_1        = 8172,
+    HEALING_STREAM_EFFECT_1         = 52042,
+    MANA_SPRING_EFFECT_1            = 5677,
+    TREMOR_TOTEM_EFFECT_1           = 8145,
+    TOTEM_OF_WRATH_EFFECT_1         = 57658,
+    EARTHBIND_EFFECT_1              = 6474,
+    // FIRE_ELEMENTAL_TOTEM uses spell effect index 2
+    // SEARING_TOTEM uses spell effect index 0
+    // EARTH_ELEMENTAL_TOTEM uses spell effect indexes 1 and 2
 
-	//Spec buffs
-	MAELSTROM_WEAPON_1				= 51532, //This is the final rank only, the spell family thing doesn't work so I decided to go with max only
+    //Spec buffs
+    MAELSTROM_WEAPON_1              = 51532, //This is the final rank only, the spell family thing doesn't work so I decided to go with max only
 
-	// Buffs that don't stack with totems
-	//IMPROVED_ICY_TALONS_1			= 55610,
-	//HORN_OF_WINTER_1				= 57330
+    // Buffs that don't stack with totems
+    //IMPROVED_ICY_TALONS_1			= 55610,
+    //HORN_OF_WINTER_1				= 57330
 };
 //class Player;
 
@@ -127,8 +127,8 @@ private:
     // Heals the target based off its hps
     void HealTarget (Unit& target, uint8 hp);
     void DropTotems();
-	void CheckShields();
-	void UseCooldowns();
+    void CheckShields();
+    void UseCooldowns();
 
     // ENHANCEMENT
     uint32 ROCKBITER_WEAPON,
@@ -153,7 +153,7 @@ private:
            BLOODLUST,
            HEROISM,
            FERAL_SPIRIT,
-		   MAELSTROM_WEAPON;
+           MAELSTROM_WEAPON;
 
     // RESTORATION
     uint32 HEALING_WAVE,
@@ -170,8 +170,8 @@ private:
            RIPTIDE,
            CURE_TOXINS,
            CLEANSE_SPIRIT,
-		   NATURES_SWIFTNESS_SHAMAN,
-		   TIDAL_FORCE;
+           NATURES_SWIFTNESS_SHAMAN,
+           TIDAL_FORCE;
 
     // ELEMENTAL
     uint32 LIGHTNING_BOLT,
@@ -190,8 +190,8 @@ private:
            LAVA_BURST,
            EARTHBIND_TOTEM,
            HEX,
-		   ELEMENTAL_MASTERY,
-		   THUNDERSTORM;
+           ELEMENTAL_MASTERY,
+           THUNDERSTORM;
 
     // first aid
     uint32 RECENTLY_BANDAGED;
@@ -208,28 +208,28 @@ private:
            BERSERKING,
            WILL_OF_THE_FORSAKEN;
 
-	// totem buffs
-	uint32 STRENGTH_OF_EARTH_EFFECT,
-		FLAMETONGUE_EFFECT,
-		MAGMA_TOTEM_EFFECT,
-		STONECLAW_EFFECT,
-		FIRE_RESISTANCE_EFFECT,
-		FROST_RESISTANCE_EFFECT,
-		GROUDNING_EFFECT,
-		NATURE_RESISTANCE_EFFECT,
-		STONESKIN_EFFECT,
-		WINDFURY_EFFECT,
-		WRATH_OF_AIR_EFFECT,
-		CLEANSING_TOTEM_EFFECT,
-		HEALING_STREAM_EFFECT,
-		MANA_SPRING_EFFECT,
-		TREMOR_TOTEM_EFFECT,
-		TOTEM_OF_WRATH_EFFECT,
-		EARTHBIND_EFFECT;
+    // totem buffs
+    uint32 STRENGTH_OF_EARTH_EFFECT,
+           FLAMETONGUE_EFFECT,
+           MAGMA_TOTEM_EFFECT,
+           STONECLAW_EFFECT,
+           FIRE_RESISTANCE_EFFECT,
+           FROST_RESISTANCE_EFFECT,
+           GROUDNING_EFFECT,
+           NATURE_RESISTANCE_EFFECT,
+           STONESKIN_EFFECT,
+           WINDFURY_EFFECT,
+           WRATH_OF_AIR_EFFECT,
+           CLEANSING_TOTEM_EFFECT,
+           HEALING_STREAM_EFFECT,
+           MANA_SPRING_EFFECT,
+           TREMOR_TOTEM_EFFECT,
+           TOTEM_OF_WRATH_EFFECT,
+           EARTHBIND_EFFECT;
 
-	// Buffs that dont stack with totems
-	uint32 IMPROVED_ICY_TALONS,
-		HORN_OF_WINTER;
+    // Buffs that dont stack with totems
+    uint32 IMPROVED_ICY_TALONS,
+           HORN_OF_WINTER;
 
     uint32 SpellSequence, LastSpellEnhancement, LastSpellRestoration, LastSpellElemental;
 };

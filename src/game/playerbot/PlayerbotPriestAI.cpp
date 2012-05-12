@@ -37,8 +37,8 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     PRAYER_OF_SHADOW_PROTECTION   = ai->initSpell(PRAYER_OF_SHADOW_PROTECTION_1);
     SHADOWFIEND                   = ai->initSpell(SHADOWFIEND_1);
     MIND_SEAR                     = ai->initSpell(MIND_SEAR_1);
-	SHADOWFORM					  = ai->initSpell(SHADOWFORM_1);
-	VAMPIRIC_EMBRACE			  = ai->initSpell(VAMPIRIC_EMBRACE_1);
+    SHADOWFORM                    = ai->initSpell(SHADOWFORM_1);
+    VAMPIRIC_EMBRACE              = ai->initSpell(VAMPIRIC_EMBRACE_1);
 
     // DISCIPLINE
     PENANCE                       = ai->initSpell(PENANCE_1);
@@ -136,7 +136,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 
     Player *m_bot = GetPlayerBot();
     Group *m_group = m_bot->GetGroup();
-	uint32 spec = m_bot->GetSpec();
+    uint32 spec = m_bot->GetSpec();
 
     // Fade has nothing to do with health and everything to do with having aggro/threat
     Unit *newTarget = ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
@@ -168,12 +168,10 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
         else if (masterHP < 25 || ((GetAI()->GetCombatOrder() & PlayerbotAI::ORDERS_HEAL) && masterHP < 80))
             HealTarget(GetMaster());
     }
-	
-	//Not sure where this should go
-	if (PRAYER_OF_MENDING > 0 && pVictim == GetMaster() && GetMaster()->GetHealth() <= GetMaster()->GetMaxHealth() * 0.7 && !GetMaster()->HasAura(PRAYER_OF_MENDING, EFFECT_INDEX_0) && ai->GetManaPercent() >= 15)
-    {
-		ai->CastSpell(PRAYER_OF_MENDING, *GetMaster());
-    }
+
+    //Not sure where this should go
+    if (PRAYER_OF_MENDING > 0 && pVictim == GetMaster() && GetMaster()->GetHealth() <= GetMaster()->GetMaxHealth() * 0.7 && !GetMaster()->HasAura(PRAYER_OF_MENDING, EFFECT_INDEX_0) && ai->GetManaPercent() >= 15)
+        ai->CastSpell(PRAYER_OF_MENDING, *GetMaster());
 
     // TODO: Prioritize group healing in some way. If 3 members (including master/self) should be healed, pick one of these:
     // Group heal. Not really useful until a group check is available?
@@ -207,78 +205,64 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     switch (spec)
     {
         case PRIEST_SPEC_HOLY:
-			if (HOLY_FIRE > 0 && !pTarget->HasAura(HOLY_FIRE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 13)
-            {
+            if (HOLY_FIRE > 0 && !pTarget->HasAura(HOLY_FIRE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 13)
                 ai->CastSpell(HOLY_FIRE, *pTarget);
-            }
             else if (SMITE > 0 && ai->GetManaPercent() >= 17)
-            {
                 ai->CastSpell(SMITE, *pTarget);
-            }
-            //else if (MANA_BURN > 0 && LastSpellHoly < 2 && pTarget->GetPower(POWER_MANA) > 0 && ai->GetManaPercent() < 70 && ai->GetManaPercent() >= 14)
-            //{
-            //    //ai->TellMaster("I'm casting mana burn.");
-            //    ai->CastSpell(MANA_BURN, *pTarget);
-            //    ai->SetIgnoreUpdateTime(3);
-            //    LastSpellHoly = LastSpellHoly + 1;
-            //}
-            //else if (HOLY_NOVA > 0 && LastSpellHoly < 3 && dist <= ATTACK_DISTANCE && ai->GetManaPercent() >= 22)
-            //{
-            //    //ai->TellMaster("I'm casting holy nova.");
-            //    ai->CastSpell(HOLY_NOVA);
-            //    LastSpellHoly = LastSpellHoly + 1;
-            //}
-            /*else
-                LastSpellHoly = 0;
+             //else if (MANA_BURN > 0 && LastSpellHoly < 2 && pTarget->GetPower(POWER_MANA) > 0 && ai->GetManaPercent() < 70 && ai->GetManaPercent() >= 14)
+        //{
+        //    //ai->TellMaster("I'm casting mana burn.");
+        //    ai->CastSpell(MANA_BURN, *pTarget);
+        //    ai->SetIgnoreUpdateTime(3);
+        //    LastSpellHoly = LastSpellHoly + 1;
+        //}
+        //else if (HOLY_NOVA > 0 && LastSpellHoly < 3 && dist <= ATTACK_DISTANCE && ai->GetManaPercent() >= 22)
+        //{
+        //    //ai->TellMaster("I'm casting holy nova.");
+        //    ai->CastSpell(HOLY_NOVA);
+        //    LastSpellHoly = LastSpellHoly + 1;
+        //}
+        /*else
+            LastSpellHoly = 0;
 
-            if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE)
-                SpellSequence = SPELL_SHADOWMAGIC;
-            break;*/
+           if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE)
+            SpellSequence = SPELL_SHADOWMAGIC;
+           break;*/
 
         case PRIEST_SPEC_SHADOW:
-			if (DEVOURING_PLAGUE > 0 && !pTarget->HasAura(DEVOURING_PLAGUE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 28)
-            {
+            if (DEVOURING_PLAGUE > 0 && !pTarget->HasAura(DEVOURING_PLAGUE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 28)
                 ai->CastSpell(DEVOURING_PLAGUE, *pTarget);
-            }
-			else if (VAMPIRIC_TOUCH > 0 && !pTarget->HasAura(VAMPIRIC_TOUCH, EFFECT_INDEX_0) && ai->GetManaPercent() >= 18)
-            {
+            else if (VAMPIRIC_TOUCH > 0 && !pTarget->HasAura(VAMPIRIC_TOUCH, EFFECT_INDEX_0) && ai->GetManaPercent() >= 18)
                 ai->CastSpell(VAMPIRIC_TOUCH, *pTarget);
-            }
             else if (SHADOW_WORD_PAIN > 0 && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && ai->GetManaPercent() >= 25)
-            {
                 ai->CastSpell(SHADOW_WORD_PAIN, *pTarget);
-            }
             else if (MIND_BLAST > 0 && (!m_bot->HasSpellCooldown(MIND_BLAST)) && ai->GetManaPercent() >= 19)
-            {
                 ai->CastSpell(MIND_BLAST, *pTarget);
-            }
-			else if (MIND_FLAY > 0 && ai->GetManaPercent() >= 10)
+            else if (MIND_FLAY > 0 && ai->GetManaPercent() >= 10)
             {
                 ai->CastSpell(MIND_FLAY, *pTarget);
                 ai->SetIgnoreUpdateTime(3);
             }
-			else if (SHADOWFIEND > 0)
-            {
+            else if (SHADOWFIEND > 0)
                 ai->CastSpell(SHADOWFIEND);
-            }
-            /*else if (SCREAM > 0 && LastSpellShadowMagic < 3 && ai->GetAttackerCount() >= 3 && ai->GetManaPercent() >= 15)
-            {
-                ai->TellMaster("I'm casting scream.");
-                ai->CastSpell(SCREAM);
-                LastSpellShadowMagic = LastSpellShadowMagic + 1;
-            }*/
-            /*else if (MIND_SEAR > 0 && LastSpellShadowMagic < 9 && ai->GetAttackerCount() >= 3 && ai->GetManaPercent() >= 28)
-            {
-                ai->CastSpell(MIND_SEAR, *pTarget);
-                ai->SetIgnoreUpdateTime(5);
-                LastSpellShadowMagic = LastSpellShadowMagic + 1;
-            }*/
-            /*else
-                LastSpellShadowMagic = 0;
+             /*else if (SCREAM > 0 && LastSpellShadowMagic < 3 && ai->GetAttackerCount() >= 3 && ai->GetManaPercent() >= 15)
+                {
+                 ai->TellMaster("I'm casting scream.");
+                 ai->CastSpell(SCREAM);
+                 LastSpellShadowMagic = LastSpellShadowMagic + 1;
+                }*/
+        /*else if (MIND_SEAR > 0 && LastSpellShadowMagic < 9 && ai->GetAttackerCount() >= 3 && ai->GetManaPercent() >= 28)
+           {
+            ai->CastSpell(MIND_SEAR, *pTarget);
+            ai->SetIgnoreUpdateTime(5);
+            LastSpellShadowMagic = LastSpellShadowMagic + 1;
+           }*/
+        /*else
+            LastSpellShadowMagic = 0;
 
-            if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE || ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST)
-                SpellSequence = SPELL_DISCIPLINE;
-            break;*/
+           if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE || ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST)
+            SpellSequence = SPELL_DISCIPLINE;
+           break;*/
 
         case PRIEST_SPEC_DISCIPLINE:
             //if (FEAR_WARD > 0 && LastSpellDiscipline < 1 && ai->GetManaPercent() >= 3)
@@ -288,31 +272,25 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             //    LastSpellDiscipline = LastSpellDiscipline + 1;
             //}
             /*else*/ if (POWER_INFUSION > 0 && ai->GetManaPercent() >= 16)
-            {
                 ai->CastSpell(POWER_INFUSION, *(GetMaster()));
-            }
-            //else if (MASS_DISPEL > 0 && LastSpellDiscipline < 3 && ai->GetManaPercent() >= 33)
+             //else if (MASS_DISPEL > 0 && LastSpellDiscipline < 3 && ai->GetManaPercent() >= 33)
             //{
             //    //ai->TellMaster("I'm casting mass dispel");
             //    ai->CastSpell(MASS_DISPEL);
             //    LastSpellDiscipline = LastSpellDiscipline + 1;
             //}
             else if (INNER_FOCUS > 0 && !m_bot->HasAura(INNER_FOCUS, EFFECT_INDEX_0))
-            {
                 ai->CastSpell(INNER_FOCUS, *m_bot);
-            }
             else if (PENANCE > 0 && ai->GetManaPercent() >= 16)
-            {
                 ai->CastSpell(PENANCE);
-            }
-            /*else
-                LastSpellDiscipline = 0;
+             /*else
+                 LastSpellDiscipline = 0;
 
-            if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE)
-                SpellSequence = SPELL_HOLY;
-            else if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST)
-                SpellSequence = SPELL_SHADOWMAGIC;
-            break;*/
+                if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE)
+                 SpellSequence = SPELL_HOLY;
+                else if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST)
+                 SpellSequence = SPELL_SHADOWMAGIC;
+                break;*/
     }
 } // end DoNextCombatManeuver
 
@@ -321,7 +299,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
     PlayerbotAI* ai = GetAI();
     Player * m_bot = GetPlayerBot();
     Player * master = GetMaster();
-	uint32 spec = m_bot->GetSpec();
+    uint32 spec = m_bot->GetSpec();
     if (!m_bot || !master)
         return;
 
@@ -330,10 +308,10 @@ void PlayerbotPriestAI::DoNonCombatActions()
     // selfbuff goes first
     if (ai->SelfBuff(INNER_FIRE))
         return;
-	if (spec == PRIEST_SPEC_SHADOW && SHADOWFORM > 0)
-		ai->SelfBuff(SHADOWFORM);
-	if (VAMPIRIC_EMBRACE > 0)
-		ai->SelfBuff(VAMPIRIC_EMBRACE);
+    if (spec == PRIEST_SPEC_SHADOW && SHADOWFORM > 0)
+        ai->SelfBuff(SHADOWFORM);
+    if (VAMPIRIC_EMBRACE > 0)
+        ai->SelfBuff(VAMPIRIC_EMBRACE);
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
