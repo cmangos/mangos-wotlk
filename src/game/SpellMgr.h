@@ -238,7 +238,7 @@ inline bool IsSpellRemoveAllMovementAndControlLossEffects(SpellEntry const* spel
         spellProto->EffectMiscValue[EFFECT_INDEX_0] == 1 &&
         spellProto->EffectApplyAuraName[EFFECT_INDEX_1] == 0 &&
         spellProto->EffectApplyAuraName[EFFECT_INDEX_2] == 0 &&
-        (spellProto->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)/* && -- all above selected spells have SPELL_ATTR_EX5_* mask
+        spellProto->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)/* && -- all above selected spells have SPELL_ATTR_EX5_* mask
         ((spellProto->AttributesEx5 &
             (SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED|SPELL_ATTR_EX5_USABLE_WHILE_FEARED|SPELL_ATTR_EX5_USABLE_WHILE_STUNNED)) ==
             (SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED|SPELL_ATTR_EX5_USABLE_WHILE_FEARED|SPELL_ATTR_EX5_USABLE_WHILE_STUNNED))*/;
@@ -246,18 +246,17 @@ inline bool IsSpellRemoveAllMovementAndControlLossEffects(SpellEntry const* spel
 
 inline bool IsDeathOnlySpell(SpellEntry const *spellInfo)
 {
-    return spellInfo->AttributesEx3 & SPELL_ATTR_EX3_CAST_ON_DEAD
-        || spellInfo->Id == 2584;
+    return spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD) || spellInfo->Id == 2584;
 }
 
 inline bool IsDeathPersistentSpell(SpellEntry const *spellInfo)
 {
-    return spellInfo->AttributesEx3 & SPELL_ATTR_EX3_DEATH_PERSISTENT;
+    return spellInfo->HasAttribute(SPELL_ATTR_EX3_DEATH_PERSISTENT);
 }
 
 inline bool IsNonCombatSpell(SpellEntry const *spellInfo)
 {
-    return (spellInfo->Attributes & SPELL_ATTR_CANT_USED_IN_COMBAT) != 0;
+    return spellInfo->HasAttribute(SPELL_ATTR_CANT_USED_IN_COMBAT);
 }
 
 bool IsPositiveSpell(uint32 spellId);
@@ -445,12 +444,12 @@ inline bool IsDispelSpell(SpellEntry const *spellInfo)
 
 inline bool isSpellBreakStealth(SpellEntry const* spellInfo)
 {
-    return !(spellInfo->AttributesEx & SPELL_ATTR_EX_NOT_BREAK_STEALTH);
+    return !spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH);
 }
 
 inline bool IsAutoRepeatRangedSpell(SpellEntry const* spellInfo)
 {
-    return (spellInfo->Attributes & SPELL_ATTR_RANGED) && (spellInfo->AttributesEx2 & SPELL_ATTR_EX2_AUTOREPEAT_FLAG);
+    return spellInfo->HasAttribute(SPELL_ATTR_RANGED) && spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG);
 }
 
 inline bool IsSpellRequiresRangedAP(SpellEntry const* spellInfo)
@@ -462,22 +461,22 @@ SpellCastResult GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 
 
 inline bool IsChanneledSpell(SpellEntry const* spellInfo)
 {
-    return (spellInfo->AttributesEx & (SPELL_ATTR_EX_CHANNELED_1 | SPELL_ATTR_EX_CHANNELED_2));
+    return spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNELED_1) || spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNELED_2);
 }
 
 inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftForm form)
 {
-    if (!(spellInfo->Attributes & (SPELL_ATTR_PASSIVE | SPELL_ATTR_UNK7)) || !form)
+    if ((!spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !spellInfo->HasAttribute(SPELL_ATTR_UNK7)) || !form)
         return false;
 
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
-    return (spellInfo->Stances & (1<<(form-1)) && !(spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT));
+    return (spellInfo->Stances & (1<<(form-1)) && !spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT));
 }
 
 
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)
 {
-    return (spellInfo->AttributesEx & (SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS | SPELL_ATTR_EX_REQ_COMBO_POINTS));
+    return spellInfo->HasAttribute(SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS) || spellInfo->HasAttribute(SPELL_ATTR_EX_REQ_COMBO_POINTS);
 }
 
 inline SpellSchoolMask GetSpellSchoolMask(SpellEntry const* spellInfo)

@@ -11,6 +11,7 @@ Copyright (C) 2010-2012 MaNGOS <http://getmangos.com/>
 creature_movement_scripts       DB project self defined id
 event_scripts                   Event id. Several sources: spell effect 61, taxi/transport nodes, gameobject_template data
 gameobject_scripts              Gameobject guid
+gameobject_template_scripts     Gameobject entry
 gossip_scripts                  DB project self defined id
 quest_end_scripts               DB project self defined id (generally quest entry)
 quest_start_scripts             DB project self defined id (generally quest entry)
@@ -90,6 +91,7 @@ event_scripts
                             Spell (effect 61)
                                 Source: caster. Target: Target
 gameobject_scripts
+gameobject_template_scripts
                             Gameobject use
                                 Source: user: Target: GO
 gossip_scripts
@@ -103,7 +105,9 @@ quest_start_scripts
                             `quest_template`
                                 Source: quest giver (creature/GO). Target: player
 spell_scripts
-                            Spell (effect 77)
+                            Spell (effect 77 - SCRIPT_EFFECT)
+                            Spell (effect  3 - DUMMY)
+                            Spell (effect 64 - TRIGGER_SPELL, with non-existing triggered spell)
                                 Source: caster: Target: target of spell (Unit)
 
 -- --------------------------
@@ -171,7 +175,7 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * datalong2 = distance or 0
 
  8 SCRIPT_COMMAND_KILL_CREDIT               source or target with Player
-                                            * datalong = creature entry
+                                            * datalong = creature entry, or 0; If 0 the entry of the creature source or target is used
                                             * datalong2 = bool (0=personal credit, 1=group credit)
 
  9 SCRIPT_COMMAND_RESPAWN_GAMEOBJECT        source = any, target = any
@@ -251,3 +255,5 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 29 SCRIPT_COMMAND_MODIFY_NPC_FLAGS          resultingSource = Creature
                                             * datalong=NPCFlags
                                             * datalong2= 0x00=toggle, 0x01=add, 0x02=remove
+30 SCRIPT_COMMAND_SEND_TAXI_PATH            resultingTarget or Source must be Player
+                                            * datalong = taxi path id

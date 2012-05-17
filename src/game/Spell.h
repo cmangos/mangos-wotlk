@@ -343,7 +343,6 @@ class Spell
         void EffectKillCreditGroup(SpellEffectIndex eff_idx);
         void EffectQuestFail(SpellEffectIndex eff_idx);
         void EffectActivateRune(SpellEffectIndex eff_idx);
-
         void EffectTeachTaxiNode(SpellEffectIndex eff_idx);
         void EffectTitanGrip(SpellEffectIndex eff_idx);
         void EffectEnchantItemPrismatic(SpellEffectIndex eff_idx);
@@ -447,11 +446,11 @@ class Spell
         void ReSetTimer() { m_timer = m_casttime > 0 ? m_casttime : 0; }
         bool IsNextMeleeSwingSpell() const
         {
-            return m_spellInfo->Attributes & (SPELL_ATTR_ON_NEXT_SWING_1|SPELL_ATTR_ON_NEXT_SWING_2);
+            return m_spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_1) || m_spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_2);
         }
         bool IsRangedSpell() const
         {
-            return  m_spellInfo->Attributes & SPELL_ATTR_RANGED;
+            return  m_spellInfo->HasAttribute(SPELL_ATTR_RANGED);
         }
         bool IsChannelActive() const { return m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != 0; }
         bool IsMeleeAttackResetSpell() const { return !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_AUTOATTACK);  }
@@ -496,6 +495,7 @@ class Spell
         void ClearCastItem();
 
         static void SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpell, uint32 spellId75, uint32 spellId150, uint32 spellId225, uint32 spellId300, uint32 spellIdSpecial);
+
     protected:
         bool HasGlobalCooldown();
         void TriggerGlobalCooldown();
@@ -659,7 +659,7 @@ enum ReplenishType
 
 namespace MaNGOS
 {
-    struct MANGOS_DLL_DECL SpellNotifierPlayer
+    struct MANGOS_DLL_DECL SpellNotifierPlayer              // Currently unused. When put to use this one requires handling for source-location (smilar to below)
     {
         Spell::UnitList &i_data;
         Spell &i_spell;
@@ -706,6 +706,7 @@ namespace MaNGOS
         bool i_playerControlled;
         float i_centerX;
         float i_centerY;
+        float i_centerZ;
 
         float GetCenterX() const { return i_centerX; }
         float GetCenterY() const { return i_centerY; }
@@ -734,8 +735,18 @@ namespace MaNGOS
                     }
                     break;
                 case PUSH_DEST_CENTER:
-                    i_centerX = i_spell.m_targets.m_destX;
-                    i_centerY = i_spell.m_targets.m_destY;
+                    if (i_spell.m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+                    {
+                        i_centerX = i_spell.m_targets.m_destX;
+                        i_centerY = i_spell.m_targets.m_destY;
+                        i_centerZ = i_spell.m_targets.m_destZ;
+                    }
+                    else
+                    {
+                        i_centerX = i_spell.m_targets.m_srcX;
+                        i_centerY = i_spell.m_targets.m_srcY;
+                        i_centerZ = i_spell.m_targets.m_srcZ;
+                    }
                     break;
                 case PUSH_TARGET_CENTER:
                     if (Unit* target = i_spell.m_targets.getUnitTarget())
@@ -760,7 +771,7 @@ namespace MaNGOS
             {
                 // there are still more spells which can be casted on dead, but
                 // they are no AOE and don't have such a nice SPELL_ATTR flag
-                if ( (i_TargetType != SPELL_TARGETS_ALL && !itr->getSource()->isTargetableForAttack(i_spell.m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_CAST_ON_DEAD))
+                if ((i_TargetType != SPELL_TARGETS_ALL && !itr->getSource()->isTargetableForAttack(i_spell.m_spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD)))
                     // mostly phase check
                     || !itr->getSource()->IsInMap(i_originalCaster))
                     continue;
@@ -833,7 +844,7 @@ namespace MaNGOS
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_DEST_CENTER:
-                        if (itr->getSource()->IsWithinDist3d(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ,i_radius))
+                        if (itr->getSource()->IsWithinDist3d(i_centerX, i_centerY, i_centerZ, i_radius))
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_TARGET_CENTER:

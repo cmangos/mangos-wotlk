@@ -26,6 +26,7 @@
 #include "ace/Atomic_Op.h"
 
 struct AreaTriggerEntry;
+struct SpellEntry;
 class Aura;
 class Creature;
 class CreatureAI;
@@ -47,14 +48,14 @@ enum ScriptCommand                                          // resSource, resTar
                                                             // dataint = text entry from db_script_string -table. dataint2-4 optional for random selected texts.
     SCRIPT_COMMAND_EMOTE                    = 1,            // resSource = Unit, resTarget = Unit/none
                                                             // datalong1 = emote_id
-    SCRIPT_COMMAND_FIELD_SET                = 2,            // source = any, datalong3 = field_id, datalong2 = value
+    SCRIPT_COMMAND_FIELD_SET                = 2,            // source = any, datalong = field_id, datalong2 = value
     SCRIPT_COMMAND_MOVE_TO                  = 3,            // resSource = Creature, datalong2 = travel_speed*100, x/y/z
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
-    SCRIPT_COMMAND_FLAG_SET                 = 4,            // source = any, datalong3 = field_id, datalong2 = bitmask
-    SCRIPT_COMMAND_FLAG_REMOVE              = 5,            // source = any, datalong3 = field_id, datalong2 = bitmask
+    SCRIPT_COMMAND_FLAG_SET                 = 4,            // source = any, datalong = field_id, datalong2 = bitmask
+    SCRIPT_COMMAND_FLAG_REMOVE              = 5,            // source = any, datalong = field_id, datalong2 = bitmask
     SCRIPT_COMMAND_TELEPORT_TO              = 6,            // source or target with Player, datalong2 = map_id, x/y/z
-    SCRIPT_COMMAND_QUEST_EXPLORED           = 7,            // one from source or target must be Player, another GO/Creature, datalong3=quest_id, datalong2=distance or 0
-    SCRIPT_COMMAND_KILL_CREDIT              = 8,            // source or target with Player, datalong3 = creature entry, datalong2 = bool (0=personal credit, 1=group credit)
+    SCRIPT_COMMAND_QUEST_EXPLORED           = 7,            // one from source or target must be Player, another GO/Creature, datalong=quest_id, datalong2=distance or 0
+    SCRIPT_COMMAND_KILL_CREDIT              = 8,            // source or target with Player, datalong = creature entry (or 0 for target-entry), datalong2 = bool (0=personal credit, 1=group credit)
     SCRIPT_COMMAND_RESPAWN_GAMEOBJECT       = 9,            // source = any, datalong=db_guid, datalong2=despawn_delay
     SCRIPT_COMMAND_TEMP_SUMMON_CREATURE     = 10,           // source = any, datalong=creature entry, datalong2=despawn_delay
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL = summon active
@@ -66,7 +67,7 @@ enum ScriptCommand                                          // resSource, resTar
                                                             // datalong=spellid
                                                             // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = cast triggered
     SCRIPT_COMMAND_PLAY_SOUND               = 16,           // resSource = WorldObject, target=any/player, datalong (sound_id), datalong2 (bitmask: 0/1=anyone/target, 0/2=with distance dependent, so 1|2 = 3 is target with distance dependent)
-    SCRIPT_COMMAND_CREATE_ITEM              = 17,           // source or target must be player, datalong3 = item entry, datalong2 = amount
+    SCRIPT_COMMAND_CREATE_ITEM              = 17,           // source or target must be player, datalong = item entry, datalong2 = amount
     SCRIPT_COMMAND_DESPAWN_SELF             = 18,           // resSource = Creature, datalong = despawn delay
     SCRIPT_COMMAND_PLAY_MOVIE               = 19,           // target can only be a player, datalog = movie id
     SCRIPT_COMMAND_MOVEMENT                 = 20,           // resSource = Creature. datalong = MovementType (0:idle, 1:random or 2:waypoint)
@@ -88,6 +89,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_MODIFY_NPC_FLAGS         = 29,           // resSource = Creature
                                                             // datalong=NPCFlags
                                                             // datalong2:0x00=toggle, 0x01=add, 0x02=remove
+    SCRIPT_COMMAND_SEND_TAXI_PATH           = 30,           // datalong = taxi path id (source or target must be player)
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
@@ -285,6 +287,12 @@ struct ScriptInfo
 
         struct
         {
+            uint32 taxiPathId;                              // datalong
+            uint32 empty;
+        } sendTaxiPath;
+
+        struct
+        {
             uint32 data[2];
         } raw;
     };
@@ -381,6 +389,7 @@ extern ScriptMapMapName sQuestEndScripts;
 extern ScriptMapMapName sQuestStartScripts;
 extern ScriptMapMapName sSpellScripts;
 extern ScriptMapMapName sGameObjectScripts;
+extern ScriptMapMapName sGameObjectTemplateScripts;
 extern ScriptMapMapName sEventScripts;
 extern ScriptMapMapName sGossipScripts;
 extern ScriptMapMapName sCreatureMovementScripts;
@@ -400,6 +409,7 @@ class ScriptMgr
         ~ScriptMgr();
 
         void LoadGameObjectScripts();
+        void LoadGameObjectTemplateScripts();
         void LoadQuestEndScripts();
         void LoadQuestStartScripts();
         void LoadEventScripts();
@@ -428,6 +438,7 @@ class ScriptMgr
         uint32 DecreaseScheduledScriptCount() { return (uint32)--m_scheduledScripts; }
         uint32 DecreaseScheduledScriptCount(size_t count) { return (uint32)(m_scheduledScripts -= count); }
         bool IsScriptScheduled() const { return m_scheduledScripts > 0; }
+        static bool CanSpellEffectStartDBScript(SpellEntry const* spellinfo, SpellEffectIndex effIdx);
 
         CreatureAI* GetCreatureAI(Creature* pCreature);
         InstanceData* CreateInstanceData(Map* pMap);

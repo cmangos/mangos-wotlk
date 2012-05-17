@@ -389,7 +389,7 @@ void WorldSession::HandleLootRoll( WorldPacket &recv_data )
     ObjectGuid lootedTarget;
     uint32 itemSlot;
     uint8  rollType;
-    recv_data >> lootedTarget;                                  //guid of the item rolled
+    recv_data >> lootedTarget;                              //guid of the item rolled
     recv_data >> itemSlot;
     recv_data >> rollType;
 
