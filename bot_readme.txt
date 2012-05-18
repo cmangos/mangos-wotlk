@@ -23,6 +23,11 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 
 /t BOTNAME attack (bot will attack selected target, similar to the way a pet can attack)
 /t BOTNAME follow (orders bot to follow player; will also revive bot if dead or teleport bot if far away)
+/t BOTNAME follow far (increases the bots follow distance from the player)
+/t BOTNAME follow near (decreases the bots follow distance from the player)
+/t BOTNAME follow reset (resets the bots follow distance to the config default setting. this commmand will be phased out)
+/t BOTNAME follow auto (turns off auto variable follow distance which is ON by default)
+/t BOTNAME combat delay <0-10> (sets the amount of time the bot will wait before engaging your target in combat)
 /t BOTNAME stay
 /t BOTNAME assist (you'll need to be attacking something and the bot only does melee atm)
 /t BOTNAME spells (replies with all spells known to bot)
@@ -50,6 +55,8 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME use [ITEM LINK][EQUIPPED ITEM LINK] (use item on equipped item)
 /t BOTNAME use [ITEM LINK][GAMEOBJECT LINK] (use item on gameobject )
 /t BOTNAME equip [ITEM LINK]
+/t BOTNAME autoequip (*toggle switch* bot(s) will auto equip items they receive based on usefulness. type .help for options)
+/t BOTNAME autoequip on/off/now (explicitly sets bot to ON/OFF and 'autoequip now' runs the process one time regardless of setting)
 /t BOTNAME reset (will reset states, orders and loot list)
 /t BOTNAME stats (bot shows available money, free inventory space and estimated item repair costs)
 /t BOTNAME survey (bot shows all available gameobjects, within a local perimeter around the bot)
@@ -61,6 +68,7 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME quest < end | e > (Turns in a completed quest)
 /t BOTNAME quest < end | e > (Turns in a completed quest)
 /t BOTNAME quest < report | r > (bot reports all items, creatures or gameobjects needed to finish quests)
+/t BOTNAME quest fetch (bot will automatically check for and accept all acceptable quests from target questgiver)
 /t BOTNAME orders (Shows bot's combat orders)
 /t BOTNAME pet abandon (abandon current active hunter pet)
 /t BOTNAME pet tame TARGET (tame selected creature, if bot has 'tame beast' spell in spellbook)
@@ -72,6 +80,7 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME collect (shows collect subcommand options and current collect status)
 /t BOTNAME collect <subcommand(s)> (subcommands can be alone or together [none combat loot objects profession quest])
 /t BOTNAME sell [ITEM LINK] (bot will sell item(s) with nearest vendor)
+/t BOTNAME sell all (causes bot(s) to sell all normal(white) useless items. type .help for details (based on a number of comparisons)
 /t BOTNAME buy [ITEM LINK] (bot buy item(s) from selected vendor)
 /t BOTNAME drop [ITEM LINK] (bot will drop item immediately, permanently destroying it)
 /t BOTNAME auction (bot will display all it's active owned auctions. Auction info will include an [AUCTION LINK] )
@@ -95,8 +104,10 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME skill learn (lists [TRAINING LINK] available class, weapon & profession (Primary or Secondary) skills & spells, from selected trainer)
 /t BOTNAME skill learn [TRAINING LINK] (learn selected skill or spell, from selected trainer)
 /t BOTNAME skill unlearn [PROFESSION LINK] (unlearn selected primary profession skill & all associated spells)
+/t BOTNAME skill fetch (bot will automatically check for and learn all available skills/spells from the targeted trainer)
 /t BOTNAME help (lists all the commands above and how they work. Except for the ".bot command" ones.)
 /t BOTNAME gm check talent spec (Does a validity check on all talentspecs in the database, only works for GMs or higher)
+/t BOTNAME resumeorders (causes bot or party to restore previous combat orders)
 
 Shortcuts:
 c = cast
@@ -168,6 +179,9 @@ Creature interaction with bots:
 
 Repair with bots:
 =================
+	
+  Bots will now automatically unequip worn items before they break, and will 
+  notify the master of worn items.  They will not equip worn items (less than 10% of max durability)
 
   Bot can now repair <all or selected> items - equipped or in bags. If the bot is
   a member of a guild, then the guild fund is used for repairs. If not, the bots own

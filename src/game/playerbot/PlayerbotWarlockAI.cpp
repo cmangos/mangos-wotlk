@@ -60,6 +60,9 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     BLOOD_PACT            = 0; // imp skill
     CONSUME_SHADOWS       = 0; // voidwalker skill
     FEL_INTELLIGENCE      = 0; // felhunter skill
+    // RANGED COMBAT
+    SHOOT                            = ai->initSpell(SHOOT_3);
+
 
     RECENTLY_BANDAGED     = 11196; // first aid check
 
@@ -123,6 +126,17 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
         if (healthStone)
             ai->UseItem(healthStone);
     }
+    float dist = m_bot->GetCombatDistance(pTarget);
+    if (dist > ATTACK_DISTANCE && ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED)
+    {
+        // switch to ranged combat
+        ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
+    }
+    if (SHOOT > 0 && ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT))
+        ai->CastSpell(SHOOT, *pTarget);
+    //ai->TellMaster( "started auto shot." );
+    else if (SHOOT > 0 && m_bot->FindCurrentSpellBySpellId(SHOOT))
+        m_bot->InterruptNonMeleeSpells(true, SHOOT);
 
     //Used to determine if this bot is highest on threat
     Unit *newTarget = ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);

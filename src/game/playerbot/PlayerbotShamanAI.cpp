@@ -121,25 +121,30 @@ void PlayerbotShamanAI::HealTarget(Unit &target, uint8 hp)
         ai->CastSpell(RIPTIDE, target);
     else if (hp < 70 && CHAIN_HEAL > 0 && ai->GetManaPercent() >= 24)
         ai->CastSpell(CHAIN_HEAL, target);
-    if (CURE_TOXINS > 0 && ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
+    if (CURE_TOXINS > 0 && (ai->GetCombatOrder() & PlayerbotAI::ORDERS_HEAL))
     {
         uint32 DISPEL = CLEANSE_SPIRIT > 0 ? CLEANSE_SPIRIT : CURE_TOXINS;
-        uint32 dispelMask  = GetDispellMask(DISPEL_POISON);
-        uint32 dispelMask2  = GetDispellMask(DISPEL_DISEASE);
-        uint32 dispelMask3  = GetDispellMask(DISPEL_CURSE);
         Unit::SpellAuraHolderMap const& auras = target.GetSpellAuraHolderMap();
         for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
         {
             SpellAuraHolder *holder = itr->second;
-            if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
+            if (!holder)
+                continue;
+            if ((1 << holder->GetSpellProto()->Dispel) & DISPEL_ALL_MASK)
             {
-                if (holder->GetSpellProto()->Dispel == DISPEL_POISON)
-                    ai->CastSpell(DISPEL, target);
-            }
-            else if ((1 << holder->GetSpellProto()->Dispel) & dispelMask2)
-            {
-                if (holder->GetSpellProto()->Dispel == DISPEL_DISEASE)
-                    ai->CastSpell(DISPEL, target);
+                if(holder->GetSpellProto()->Dispel == DISPEL_MAGIC)
+                {
+                    bool positive = true;
+                    if (!holder->IsPositive())
+                        positive = false;
+                    else
+                        positive = (holder->GetSpellProto()->AttributesEx & SPELL_ATTR_EX_NEGATIVE)==0;
+                    // do not remove positive auras if friendly target
+                    //                         negative auras if non-friendly target
+                    if (positive == target.IsFriendlyTo(holder->GetCaster()))
+                        continue;
+                }
+                ai->CastSpell(DISPEL, target);
             }
             else if ((1 << holder->GetSpellProto()->Dispel) & dispelMask3 & (DISPEL == CLEANSE_SPIRIT))
                 if (holder->GetSpellProto()->Dispel == DISPEL_CURSE)

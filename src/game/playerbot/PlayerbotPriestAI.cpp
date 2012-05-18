@@ -40,6 +40,9 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     SHADOWFORM                    = ai->initSpell(SHADOWFORM_1);
     VAMPIRIC_EMBRACE              = ai->initSpell(VAMPIRIC_EMBRACE_1);
 
+    // RANGED COMBAT
+    SHOOT                         = ai->initSpell(SHOOT_1);
+
     // DISCIPLINE
     PENANCE                       = ai->initSpell(PENANCE_1);
     INNER_FIRE                    = ai->initSpell(INNER_FIRE_1);
@@ -137,6 +140,18 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     Player *m_bot = GetPlayerBot();
     Group *m_group = m_bot->GetGroup();
     uint32 spec = m_bot->GetSpec();
+    float dist = m_bot->GetCombatDistance(pTarget);
+
+    if (dist > ATTACK_DISTANCE && ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED)
+    {
+        // switch to ranged combat
+        ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
+    }
+    if (SHOOT > 0 && ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT))
+        ai->CastSpell(SHOOT, *pTarget);
+    //ai->TellMaster( "started auto shot." );
+    else if (SHOOT > 0 && m_bot->FindCurrentSpellBySpellId(SHOOT))
+        m_bot->InterruptNonMeleeSpells(true, SHOOT);
 
     // Fade has nothing to do with health and everything to do with having aggro/threat
     Unit *newTarget = ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
@@ -200,8 +215,6 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     }
 
     // Damage Spells
-    float dist = m_bot->GetCombatDistance(pTarget);
-
     switch (spec)
     {
         case PRIEST_SPEC_HOLY:

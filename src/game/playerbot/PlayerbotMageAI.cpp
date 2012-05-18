@@ -49,6 +49,9 @@ PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, Player
     ICE_BLOCK               = ai->initSpell(ICE_BLOCK_1);
     COLD_SNAP               = ai->initSpell(COLD_SNAP_1);
 
+    // RANGED COMBAT
+    SHOOT                              = ai->initSpell(SHOOT_2);
+
     RECENTLY_BANDAGED       = 11196; // first aid check
 
     // racial
@@ -87,6 +90,17 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
     Player *m_bot = GetPlayerBot();
     Unit* pVictim = pTarget->getVictim();
     float dist = m_bot->GetCombatDistance(pTarget);
+
+    if (dist > ATTACK_DISTANCE && ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED)
+    {
+        // switch to ranged combat
+        ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
+    }
+    if (SHOOT > 0 && ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT))
+        ai->CastSpell(SHOOT, *pTarget);
+    //ai->TellMaster( "started auto shot." );
+    else if (SHOOT > 0 && m_bot->FindCurrentSpellBySpellId(SHOOT))
+        m_bot->InterruptNonMeleeSpells(true, SHOOT);
 
     switch (SpellSequence)
     {
