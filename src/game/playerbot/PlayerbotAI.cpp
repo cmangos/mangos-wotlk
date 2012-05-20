@@ -502,8 +502,8 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
     ChatHandler ch(GetMaster());
     std::ostringstream out;
     std::ostringstream msg;
-    uint32 calc = .10;
 
+    // What does this mean? Constants, please!
     if (AutoEquipPlug != 1)
         if (AutoEquipPlug == 2)
             AutoEquipPlug = 0;
@@ -552,17 +552,16 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
             UseItem(pItem);
         }
 
-        uint16 dest;
-        uint8 msg = m_bot->CanEquipItem(NULL_SLOT, dest, pItem, !pItem->IsBag());
+        uint16 equipSlot;
+        uint8 msg = m_bot->CanEquipItem(NULL_SLOT, equipSlot, pItem, !pItem->IsBag());
         if (msg != EQUIP_ERR_OK)
             continue;
 
-        int8 equipSlot = uint8(dest);
-        if (!(equipSlot >= EQUIPMENT_SLOT_START && equipSlot < EQUIPMENT_SLOT_END))
+        if (equipSlot >= EQUIPMENT_SLOT_END) // uint can't be less than EQUIPMENT_SLOT_START = 0
             continue;
 
         // do we have anything equipped of this type?
-        Item* const pItem2 = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, equipSlot);
+        Item* const pItem2 = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, (uint8)equipSlot);
         if (!pItem2) // no item to compare to see if has stats useful for this bots class/style so check for stats and equip if possible
         {
             ItemPrototype const *pProto2 = pItem->GetProto();
@@ -571,12 +570,12 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
                 if (!ItemStatComparison(pProto2, pProto2))
                     continue;
             }
-            EquipItem(pItem); //no item equipped so equip new one and go to next item.
+            EquipItem(pItem); // no item equipped so equip new one and go to next item.
             continue;
         }
 
         // we have an equippable item, so lets send it to the comparison function to see if it's better than we have on
-        AutoEquipComparison(pItem, pItem2); //pItem is new item, pItem2 is equipped item.
+        AutoEquipComparison(pItem, pItem2); // pItem is new item, pItem2 is equipped item.
     }
 
     // list out items in other removable backpacks
