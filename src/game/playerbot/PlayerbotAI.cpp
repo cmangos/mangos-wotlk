@@ -503,48 +503,23 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
     std::ostringstream out;
     std::ostringstream msg;
     uint32 calc = .10;
+
     if (AutoEquipPlug != 1)
         if (AutoEquipPlug == 2)
             AutoEquipPlug = 0;
         else
             return;
-    // check equipped items for anything that is worn and UNequip them first if possible
-    for (uint8 eqslot = EQUIPMENT_SLOT_START; eqslot < EQUIPMENT_SLOT_END; eqslot++)
-    {
-        Item* const eqitem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, eqslot);
-        if (!eqitem)
-            continue;
-        /** You never EVER unequip that legendary item you spent 3 months to get, risking it getting sold or deleted or even just unused
-        * You either just ignore losing the bonus stats for now, or you go fix it right away.
-        // if item durability is less than 10% of max durability, UNequip it.
-        if (eqitem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && eqitem->GetUInt32Value(ITEM_FIELD_DURABILITY) <= (calc * eqitem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY)))
-        {
-            ItemPosCountVec sDest;
-            InventoryResult msg = m_bot->CanStoreItem( NULL_BAG, NULL_SLOT, sDest, eqitem, false );
-            if(msg == EQUIP_ERR_OK)
-            {
-                m_bot->RemoveItem(INVENTORY_SLOT_BAG_0, eqslot, true);
-                m_bot->StoreItem( sDest, eqitem, true );
-            }
-            else
-            {
-                m_bot->SendEquipError(msg, eqitem, NULL);
-            }
-        }*/
-    }
+
     // Find equippable items in main backpack one at a time
     for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
     {
         Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+
         if (!pItem)
             continue;
-        // if item durability is less than 10% of max durability, ignore it..
-        if (pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && pItem->GetUInt32Value(ITEM_FIELD_DURABILITY) <= (calc * pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY)))
-        {
-            MakeItemLink(pItem, out, true);
-            continue;
-        }
+
         uint32 spellId = 0;
+
         for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
         {
             if (pItem->GetProto()->Spells[i].SpellId > 0)
@@ -553,13 +528,15 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
                 break;
             }
         }
+
         if (pItem->GetProto()->Flags & ITEM_FLAG_LOOTABLE && spellId == 0)
         {
-            std::string oops = "Oh.. Look!! Theres something Inside this!!!";
+            std::string oops = "Oh... Look! Theres something inside!!!";
             m_bot->Say(oops, LANG_UNIVERSAL);
             UseItem(pItem);
             continue;
         }
+
         if (uint32 questid = pItem->GetProto()->StartQuest)
         {
             Quest const* qInfo = sObjectMgr.GetQuestTemplate(questid);
@@ -567,21 +544,26 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
                 continue;
             else if (!m_bot->CanTakeQuest(qInfo, false))
             {
-                std::string oops = "Great..more junk..can I get rid of this please?";
+                std::string oops = "Great, more junk... Can I get rid of this please?";
                 m_bot->Say(oops, LANG_UNIVERSAL);
                 continue;
             }
+
             UseItem(pItem);
         }
+
         uint16 dest;
         uint8 msg = m_bot->CanEquipItem(NULL_SLOT, dest, pItem, !pItem->IsBag());
         if (msg != EQUIP_ERR_OK)
             continue;
+
         int8 equipSlot = uint8(dest);
-        if (!(equipSlot >= 0 && equipSlot < 19))
+        if (!(equipSlot >= EQUIPMENT_SLOT_START && equipSlot < EQUIPMENT_SLOT_END))
             continue;
-        Item* const pItem2 = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, equipSlot); // do we have anything equipped of this type?
-        if (!pItem2)// no item to compare to see if has stats useful for this bots class/style so check for stats and equip if possible
+
+        // do we have anything equipped of this type?
+        Item* const pItem2 = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, equipSlot);
+        if (!pItem2) // no item to compare to see if has stats useful for this bots class/style so check for stats and equip if possible
         {
             ItemPrototype const *pProto2 = pItem->GetProto();
             if (pProto2->StatsCount > 0)
@@ -592,9 +574,11 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
             EquipItem(pItem); //no item equipped so equip new one and go to next item.
             continue;
         }
-        // we have an equippable item, ..now lets send it to the comparison function to see if its better than we have on.
+
+        // we have an equippable item, so lets send it to the comparison function to see if it's better than we have on
         AutoEquipComparison(pItem, pItem2); //pItem is new item, pItem2 is equipped item.
     }
+
     // list out items in other removable backpacks
     for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
     {
@@ -605,19 +589,16 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
                 Item* const pItem = m_bot->GetItemByPos(bag, slot);
                 if (!pItem)
                     continue;
-                // if item durability is less than 10% of max durability, ignore it..
-                if (pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && pItem->GetUInt32Value(ITEM_FIELD_DURABILITY) <= (calc * pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY)))
-                {
-                    MakeItemLink(pItem, out, true);
-                    continue;
-                }
+
                 uint16 dest;
                 uint8 msg = m_bot->CanEquipItem(NULL_SLOT, dest, pItem, !pItem->IsBag());
                 if (msg != EQUIP_ERR_OK)
                     continue;
+
                 int8 equipSlot = uint8(dest);
-                if (!(equipSlot >= 0 && equipSlot < 19))
+                if (!(equipSlot >= EQUIPMENT_SLOT_START && equipSlot < EQUIPMENT_SLOT_END))
                     continue;
+
                 Item* const pItem2 = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, equipSlot); // do we have anything equipped of this type?
                 if (!pItem2)
                 {
@@ -627,22 +608,16 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
                         if (!ItemStatComparison(pProto2, pProto2))
                             continue;
                     }
+
                     EquipItem(pItem); //no item equipped so equip new one if useable stats and go to next item.
                     continue;
                 }
-                // we have an equippable item, but something else is equipped..now lets send it to the comparison function to see if its better than we have on.
+
+                // we have an equippable item but something else is equipped so lets send it to the comparison function to see if it's better than we have on
                 AutoEquipComparison(pItem, pItem2); //pItem is new item, pItem2 is equipped item.
             }
     }
-    if (out.str().size() != 0)
-    {
-        std::ostringstream tmp;
-        tmp << "|h|cff00ffff _______________________________________ ";
-        ch.SendSysMessage(tmp.str().c_str());
-        ch.SendSysMessage(out.str().c_str());
-        ch.SendSysMessage(tmp.str().c_str());
-        TellMaster("These items are worn too badly to use.");// check inventory items.. we'll deal with equipped items elsewhere
-    }
+
     InspectUpdate();
 }
 void PlayerbotAI::AutoEquipComparison(Item *pItem, Item *pItem2)
