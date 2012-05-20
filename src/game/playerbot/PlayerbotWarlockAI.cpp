@@ -103,20 +103,23 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     //}
 
     // ------- Non Duel combat ----------
-
     Player *m_bot = GetPlayerBot();
+    if (!m_bot)
+        return;
+
     Unit* pVictim = pTarget->getVictim();
     Pet *pet = m_bot->GetPet();
     uint32 spec = m_bot->GetSpec();
     uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
+    uint32 nextAction = 0;
+    bool nextActionTarget = true;
 
     //If we have UA it will replace immolate in our rotation
     uint32 FIRE = (UNSTABLE_AFFLICTION > 0 ? UNSTABLE_AFFLICTION : IMMOLATE);
 
-    // Use voidwalker sacrifice on low health if possible
-    if (ai->GetHealthPercent() < 50)
-        if (pet && pet->GetEntry() == DEMON_VOIDWALKER && SACRIFICE && !m_bot->HasAura(SACRIFICE))
-            ai->CastPetSpell(SACRIFICE);
+    // Voidwalker is near death - sacrifice it for a shield
+    if (pet && pet->GetEntry() == DEMON_VOIDWALKER && SACRIFICE && !m_bot->HasAura(SACRIFICE) && pet->GetHealthPercent() < 10)
+        ai->CastPetSpell(SACRIFICE);
 
     // Use healthstone
     if (ai->GetHealthPercent() < 30)
@@ -125,23 +128,41 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
         if (healthStone)
             ai->UseItem(healthStone);
     }
+
+    // Voidwalker sacrifice gives shield - but you lose the pet (and it's DPS/tank) - use only as last resort for your own health!
+    if (ai->GetHealthPercent() < 20 && pet && pet->GetEntry() == DEMON_VOIDWALKER && SACRIFICE && !m_bot->HasAura(SACRIFICE))
+        ai->CastPetSpell(SACRIFICE);
+
     float dist = m_bot->GetCombatDistance(pTarget);
-    if (dist > ATTACK_DISTANCE && ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED)
-    {
-        // switch to ranged combat
+    if (ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED && dist > ATTACK_DISTANCE)
         ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
-    }
-    if (SHOOT > 0 && ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT))
-        ai->CastSpell(SHOOT, *pTarget);
-    //ai->TellMaster( "started auto shot." );
-    else if (SHOOT > 0 && m_bot->FindCurrentSpellBySpellId(SHOOT))
-        m_bot->InterruptNonMeleeSpells(true, SHOOT);
+    // if in melee range OR can't shoot OR have no ranged (wand) equipped
+    else if(ai->GetCombatStyle() != PlayerbotAI::COMBAT_MELEE && (dist <= ATTACK_DISTANCE || SHOOT == 0 || !m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true)))
+        ai->SetCombatStyle(PlayerbotAI::COMBAT_MELEE);
 
     //Used to determine if this bot is highest on threat
     Unit *newTarget = ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
     //Since locks will do damage now, they should probably watch their threat
-    if (newTarget && SOULSHATTER > 0 && shardCount > 0)
-        ai->CastSpell(SOULSHATTER, *m_bot);
+    if (newTarget)
+    {
+        if (SOULSHATTER > 0 && shardCount > 0 && !m_bot->HasSpellCooldown(SOULSHATTER))
+            ai->CastSpell(SOULSHATTER, *m_bot);
+        else
+        {
+            // Have threat, can't quickly lower it. 3 options remain: Stop attacking, lowlevel damage (wand), keep on keeping on.
+            if (newTarget->GetHealthPercent() > 25)
+            {
+                // If elite, do nothing and pray tank gets aggro off you
+                // TODO: Is there an IsElite function? If so, find it and insert.
+                //if (newTarget->IsElite())
+                //    return;
+
+                // Not an elite. You could insert FEAR here but in any PvE situation that's 90-95% likely
+                // to worsen the situation for the group. ... So please don't.
+                nextAction = SHOOT;
+            }
+        }
+    }
 
     // Damage Spells
     switch (spec)
@@ -149,226 +170,203 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
         case WARLOCK_SPEC_AFFLICTION:
             if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
             {
-                ai->CastSpell(CURSE_OF_AGONY, *pTarget);
+                nextAction = CURSE_OF_AGONY;
                 break;
             }
             else if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
             {
-                ai->CastSpell(CORRUPTION, *pTarget);
+                nextAction = CORRUPTION;
                 break;
             }
             else if (FIRE && !pTarget->HasAura(FIRE))
             {
-                ai->CastSpell(FIRE, *pTarget);
+                nextAction = FIRE;
                 break;
             }
             else if (HAUNT && !m_bot->HasSpellCooldown(HAUNT))
             {
-                ai->CastSpell(HAUNT, *pTarget);
+                nextAction = HAUNT;
                 break;
             }
             else if (SHADOW_BOLT)
             {
-                ai->CastSpell(SHADOW_BOLT, *pTarget);
+                nextAction = SHADOW_BOLT;
                 break;
             }
 
         case WARLOCK_SPEC_DEMONOLOGY:
             if (pet && DEMONIC_EMPOWERMENT && !m_bot->HasSpellCooldown(DEMONIC_EMPOWERMENT))
             {
-                ai->CastSpell(DEMONIC_EMPOWERMENT);
+                nextAction = DEMONIC_EMPOWERMENT;
+                nextActionTarget = false;
                 break;
             }
             else if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
             {
-                ai->CastSpell(CURSE_OF_AGONY, *pTarget);
+                nextAction = CURSE_OF_AGONY;
                 break;
             }
             else if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
             {
-                ai->CastSpell(CORRUPTION, *pTarget);
+                nextAction = CORRUPTION;
                 break;
             }
             else if (FIRE && !pTarget->HasAura(FIRE))
             {
-                ai->CastSpell(FIRE, *pTarget);
+                nextAction = FIRE;
                 break;
             }
             else if (INCINERATE && pTarget->HasAura(FIRE))
             {
-                ai->CastSpell(INCINERATE, *pTarget);
+                nextAction = INCINERATE;
                 break;
             }
 
         case WARLOCK_SPEC_DESTRUCTION:
             if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
             {
-                ai->CastSpell(CURSE_OF_AGONY, *pTarget);
+                nextAction = CURSE_OF_AGONY;
                 break;
             }
             else if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
             {
-                ai->CastSpell(CORRUPTION, *pTarget);
+                nextAction = CORRUPTION;
                 break;
             }
             else if (FIRE && !pTarget->HasAura(FIRE))
             {
-                ai->CastSpell(FIRE, *pTarget);
+                nextAction = FIRE;
                 break;
             }
             else if (CONFLAGRATE && pTarget->HasAura(FIRE) && !m_bot->HasSpellCooldown(CONFLAGRATE))
             {
-                ai->CastSpell(CONFLAGRATE, *pTarget);
+                nextAction = CONFLAGRATE;
                 break;
             }
             else if (CHAOS_BOLT && !m_bot->HasSpellCooldown(CHAOS_BOLT))
             {
-                ai->CastSpell(CHAOS_BOLT, *pTarget);
+                nextAction = CHAOS_BOLT;
                 break;
             }
             else if (INCINERATE && pTarget->HasAura(FIRE))
             {
-                ai->CastSpell(INCINERATE, *pTarget);
+                nextAction = INCINERATE;
                 break;
             }
             else if (SHADOW_BOLT)
             {
-                ai->CastSpell(SHADOW_BOLT, *pTarget);
+                nextAction = SHADOW_BOLT;
                 break;
             }
+
             //if (LIFE_TAP && LastSpellAffliction < 1 && ai->GetManaPercent() <= 50 && ai->GetHealthPercent() > 50)
-            //{
             //    ai->CastSpell(LIFE_TAP, *m_bot);
             //    SpellSequence = SPELL_DESTRUCTION;
-            //    ++LastSpellAffliction;
-            //    break;
-            //}
             //else if (DRAIN_SOUL && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.40 && !pTarget->HasAura(DRAIN_SOUL) && LastSpellAffliction < 3)
-            //{
             //    ai->CastSpell(DRAIN_SOUL, *pTarget);
             //    //ai->SetIgnoreUpdateTime(15);
             //    SpellSequence = SPELL_DESTRUCTION;
-            //    ++LastSpellAffliction;
-            //    break;
-            //}
             //else if (DRAIN_LIFE && LastSpellAffliction < 4 && !pTarget->HasAura(DRAIN_SOUL) && !pTarget->HasAura(SEED_OF_CORRUPTION) && !pTarget->HasAura(DRAIN_LIFE) && !pTarget->HasAura(DRAIN_MANA) && ai->GetHealthPercent() <= 70)
-            //{
             //    ai->CastSpell(DRAIN_LIFE, *pTarget);
             //    //ai->SetIgnoreUpdateTime(5);
             //    SpellSequence = SPELL_DESTRUCTION;
-            //    ++LastSpellAffliction;
-            //    break;
-            //}
             //else if (SEED_OF_CORRUPTION && !pTarget->HasAura(SEED_OF_CORRUPTION) && LastSpellAffliction < 7)
-            //{
             //    ai->CastSpell(SEED_OF_CORRUPTION, *pTarget);
             //    SpellSequence = SPELL_DESTRUCTION;
-            //    ++LastSpellAffliction;
-            //    break;
-            //}
             //else if (HOWL_OF_TERROR && !pTarget->HasAura(HOWL_OF_TERROR) && ai->GetAttackerCount() > 3 && LastSpellAffliction < 8)
-            //{
             //    ai->CastSpell(HOWL_OF_TERROR, *pTarget);
             //    ai->TellMaster("casting howl of terror!");
             //    SpellSequence = SPELL_DESTRUCTION;
-            //    ++LastSpellAffliction;
-            //    break;
-            //}
             //else if (FEAR && !pTarget->HasAura(FEAR) && pVictim == m_bot && ai->GetAttackerCount() >= 2 && LastSpellAffliction < 9)
-            //{
             //    ai->CastSpell(FEAR, *pTarget);
             //    //ai->TellMaster("casting fear!");
             //    //ai->SetIgnoreUpdateTime(1.5);
             //    SpellSequence = SPELL_DESTRUCTION;
-            //    ++LastSpellAffliction;
-            //    break;
-            //}
-            //else if ((pet)
-            //         && (DARK_PACT > 0 && ai->GetManaPercent() <= 50 && LastSpellAffliction < 10 && pet->GetPower(POWER_MANA) > 0))
-            //{
+            //else if ((pet) && (DARK_PACT > 0 && ai->GetManaPercent() <= 50 && LastSpellAffliction < 10 && pet->GetPower(POWER_MANA) > 0))
             //    ai->CastSpell(DARK_PACT, *m_bot);
             //    SpellSequence = SPELL_DESTRUCTION;
-            //    ++LastSpellAffliction;
-            //    break;
-            //}
-            //LastSpellAffliction = 0;
             //if (SHADOWFURY && LastSpellDestruction < 1 && !pTarget->HasAura(SHADOWFURY))
-            //{
             //    ai->CastSpell(SHADOWFURY, *pTarget);
             //    SpellSequence = SPELL_CURSES;
-            //    ++LastSpellDestruction;
-            //    break;
-            //}
             //else if (RAIN_OF_FIRE && LastSpellDestruction < 3 && ai->GetAttackerCount() >= 3)
-            //{
             //    ai->CastSpell(RAIN_OF_FIRE, *pTarget);
             //    //ai->TellMaster("casting rain of fire!");
             //    //ai->SetIgnoreUpdateTime(8);
             //    SpellSequence = SPELL_CURSES;
-            //    ++LastSpellDestruction;
-            //    break;
-            //}
             //else if (SHADOWFLAME && !pTarget->HasAura(SHADOWFLAME) && LastSpellDestruction < 4)
-            //{
             //    ai->CastSpell(SHADOWFLAME, *pTarget);
             //    SpellSequence = SPELL_CURSES;
-            //    ++LastSpellDestruction;
-            //    break;
-            //}
             //else if (SEARING_PAIN && LastSpellDestruction < 8)
-            //{
             //    ai->CastSpell(SEARING_PAIN, *pTarget);
             //    SpellSequence = SPELL_CURSES;
-            //    ++LastSpellDestruction;
-            //    break;
-            //}
             //else if (SOUL_FIRE && LastSpellDestruction < 9)
-            //{
             //    ai->CastSpell(SOUL_FIRE, *pTarget);
             //    //ai->SetIgnoreUpdateTime(6);
             //    SpellSequence = SPELL_CURSES;
-            //    ++LastSpellDestruction;
-            //    break;
-            //}
             //else if (SHADOWBURN && LastSpellDestruction < 11 && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.20 && !pTarget->HasAura(SHADOWBURN))
-            //{
             //    ai->CastSpell(SHADOWBURN, *pTarget);
             //    SpellSequence = SPELL_CURSES;
-            //    ++LastSpellDestruction;
-            //    break;
-            //}
             //else if (HELLFIRE && LastSpellDestruction < 12 && !m_bot->HasAura(HELLFIRE) && ai->GetAttackerCount() >= 5 && ai->GetHealthPercent() >= 50)
-            //{
             //    ai->CastSpell(HELLFIRE);
             //    ai->TellMaster("casting hellfire!");
             //    //ai->SetIgnoreUpdateTime(15);
             //    SpellSequence = SPELL_CURSES;
-            //    ++LastSpellDestruction;
-            //    break;
-            //}
             //else if (CURSE_OF_THE_ELEMENTS && !pTarget->HasAura(CURSE_OF_THE_ELEMENTS) && !pTarget->HasAura(SHADOWFLAME) && !pTarget->HasAura(CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_WEAKNESS) && LastSpellCurse < 2)
-            //{
             //    ai->CastSpell(CURSE_OF_THE_ELEMENTS, *pTarget);
             //    SpellSequence = SPELL_AFFLICTION;
-            //    ++LastSpellCurse;
-            //    break;
-            //}
             //else if (CURSE_OF_WEAKNESS && !pTarget->HasAura(CURSE_OF_WEAKNESS) && !pTarget->HasAura(SHADOWFLAME) && !pTarget->HasAura(CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_THE_ELEMENTS) && LastSpellCurse < 3)
-            //{
             //    ai->CastSpell(CURSE_OF_WEAKNESS, *pTarget);
             //    SpellSequence = SPELL_AFFLICTION;
-            //    ++LastSpellCurse;
-            //    break;
-            //}
             //else if (CURSE_OF_TONGUES && !pTarget->HasAura(CURSE_OF_TONGUES) && !pTarget->HasAura(SHADOWFLAME) && !pTarget->HasAura(CURSE_OF_WEAKNESS) && !pTarget->HasAura(CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_THE_ELEMENTS) && LastSpellCurse < 4)
-            //{
             //    ai->CastSpell(CURSE_OF_TONGUES, *pTarget);
             //    SpellSequence = SPELL_AFFLICTION;
-            //    ++LastSpellCurse;
-            //    break;
-            //}
     }
+
+    if (SHOOT > 0 && m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
+    {
+        if (nextAction == SHOOT)
+            return;
+
+        m_bot->InterruptNonMeleeSpells(true, SHOOT);
+        ai->TellMaster("Interrupting auto shot.");
+    }
+
+    // We've stopped ranged (if applicable), if no nextAction just return
+    if (nextAction == 0)
+        return;
+
+    if (nextAction == SHOOT)
+    {
+        if (SHOOT > 0 && ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
+            ai->CastSpell(SHOOT, *pTarget);
+        else
+            // Do Melee attack
+            return;
+        ai->TellMaster("Starting auto shot.");
+    }
+
+    if (nextActionTarget)
+        ai->CastSpell(CURSE_OF_AGONY, *pTarget);
+    else
+        ai->CastSpell(nextAction);
 } // end DoNextCombatManeuver
+
+void PlayerbotWarlockAI::DoNextCombatNonSpell(Unit *pTarget)
+{
+    PlayerbotAI* ai = GetAI();
+    if (!ai)
+        return;
+
+    Player *m_bot = GetPlayerBot();
+    if (!m_bot)
+        return;
+
+    if (SHOOT > 0 && ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
+    {
+        ai->CastSpell(SHOOT, *pTarget);
+        ai->TellMaster("Starting auto shot.");
+    }
+}
 
 void PlayerbotWarlockAI::CheckDemon()
 {
