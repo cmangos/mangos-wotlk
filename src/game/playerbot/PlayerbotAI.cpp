@@ -514,6 +514,8 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
         Item* const eqitem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, eqslot);
         if (!eqitem)
             continue;
+        /** You never EVER unequip that legendary item you spent 3 months to get, risking it getting sold or deleted or even just unused
+        * You either just ignore losing the bonus stats for now, or you go fix it right away.
         // if item durability is less than 10% of max durability, UNequip it.
         if (eqitem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && eqitem->GetUInt32Value(ITEM_FIELD_DURABILITY) <= (calc * eqitem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY)))
         {
@@ -528,7 +530,7 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
             {
                 m_bot->SendEquipError(msg, eqitem, NULL);
             }
-        }
+        }*/
     }
     // Find equippable items in main backpack one at a time
     for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
