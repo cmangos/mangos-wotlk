@@ -115,7 +115,7 @@ enum WarlockSpells
     SHADOWBURN_1                    = 17877,
     SHADOWFLAME_1                   = 47897,
     SHADOWFURY_1                    = 30283,
-    SHOOT_3                                          = 5019,
+    SHOOT_3                         = 5019,
     SOUL_FIRE_1                     = 6353,
     SOUL_LINK_1                     = 19028,
     SOULSHATTER_1                   = 29858,
@@ -160,7 +160,7 @@ private:
 
     // AFFLICTION
     uint32 CORRUPTION,
-        DRAIN_SOUL,
+           DRAIN_SOUL,
            DRAIN_LIFE,
            DRAIN_MANA,
            LIFE_TAP,

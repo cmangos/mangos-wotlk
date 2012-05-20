@@ -61,8 +61,7 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     CONSUME_SHADOWS       = 0; // voidwalker skill
     FEL_INTELLIGENCE      = 0; // felhunter skill
     // RANGED COMBAT
-    SHOOT                            = ai->initSpell(SHOOT_3);
-
+    SHOOT                 = ai->initSpell(SHOOT_3);
 
     RECENTLY_BANDAGED     = 11196; // first aid check
 
@@ -73,9 +72,9 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     BLOOD_FURY            = ai->initSpell(BLOOD_FURY_WARLOCK); // orc
     WILL_OF_THE_FORSAKEN  = ai->initSpell(WILL_OF_THE_FORSAKEN_ALL); // undead
 
-    m_lastDemon = 0;
-    m_demonOfChoice = DEMON_IMP;
-    m_isTempImp = false;
+    m_lastDemon           = 0;
+    m_demonOfChoice       = DEMON_IMP;
+    m_isTempImp           = false;
 }
 
 PlayerbotWarlockAI::~PlayerbotWarlockAI() {}
@@ -148,7 +147,6 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     switch (spec)
     {
         case WARLOCK_SPEC_AFFLICTION:
-
             if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
             {
                 ai->CastSpell(CURSE_OF_AGONY, *pTarget);
@@ -175,9 +173,7 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
                 break;
             }
 
-
         case WARLOCK_SPEC_DEMONOLOGY:
-
             if (pet && DEMONIC_EMPOWERMENT && !m_bot->HasSpellCooldown(DEMONIC_EMPOWERMENT))
             {
                 ai->CastSpell(DEMONIC_EMPOWERMENT);
@@ -204,9 +200,7 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
                 break;
             }
 
-
         case WARLOCK_SPEC_DESTRUCTION:
-
             if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
             {
                 ai->CastSpell(CURSE_OF_AGONY, *pTarget);
@@ -403,18 +397,23 @@ void PlayerbotWarlockAI::CheckDemon()
                 case DEMON_VOIDWALKER:
                     summonSpellId = SUMMON_VOIDWALKER;
                     break;
+
                 case DEMON_FELGUARD:
                     summonSpellId = SUMMON_FELGUARD;
                     break;
+
                 case DEMON_FELHUNTER:
                     summonSpellId = SUMMON_FELHUNTER;
                     break;
+
                 case DEMON_SUCCUBUS:
                     summonSpellId = SUMMON_SUCCUBUS;
                     break;
+
                 default:
                     summonSpellId = 0;
             }
+
             if (ai->CastSpell(summonSpellId))
             {
                 //ai->TellMaster("Summoning favorite demon...");
@@ -435,7 +434,6 @@ void PlayerbotWarlockAI::CheckDemon()
 
 void PlayerbotWarlockAI::DoNonCombatActions()
 {
-
     PlayerbotAI *ai = GetAI();
     Player * m_bot = GetPlayerBot();
     uint32 spec = m_bot->GetSpec();
@@ -450,42 +448,36 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         switch (pet->GetEntry())
         {
             case DEMON_IMP:
-            {
                 BLOOD_PACT       = ai->initPetSpell(BLOOD_PACT_ICON);
                 FIREBOLT         = ai->initPetSpell(FIREBOLT_ICON);
                 FIRE_SHIELD      = ai->initPetSpell(FIRE_SHIELD_ICON);
                 break;
-            }
+
             case DEMON_VOIDWALKER:
-            {
                 CONSUME_SHADOWS  = ai->initPetSpell(CONSUME_SHADOWS_ICON);
                 SACRIFICE        = ai->initPetSpell(SACRIFICE_ICON);
                 SUFFERING        = ai->initPetSpell(SUFFERING_ICON);
                 TORMENT          = ai->initPetSpell(TORMENT_ICON);
                 break;
-            }
+
             case DEMON_SUCCUBUS:
-            {
                 LASH_OF_PAIN     = ai->initPetSpell(LASH_OF_PAIN_ICON);
                 SEDUCTION        = ai->initPetSpell(SEDUCTION_ICON);
                 SOOTHING_KISS    = ai->initPetSpell(SOOTHING_KISS_ICON);
                 break;
-            }
+
             case DEMON_FELHUNTER:
-            {
                 DEVOUR_MAGIC     = ai->initPetSpell(DEVOUR_MAGIC_ICON);
                 FEL_INTELLIGENCE = ai->initPetSpell(FEL_INTELLIGENCE_ICON);
                 SHADOW_BITE      = ai->initPetSpell(SHADOW_BITE_ICON);
                 SPELL_LOCK       = ai->initPetSpell(SPELL_LOCK_ICON);
                 break;
-            }
+
             case DEMON_FELGUARD:
-            {
                 ANGUISH          = ai->initPetSpell(ANGUISH_ICON);
                 CLEAVE           = ai->initPetSpell(CLEAVE_ICON);
                 INTERCEPT        = ai->initPetSpell(INTERCEPT_ICON);
                 break;
-            }
         }
 
         m_lastDemon = pet->GetEntry();
@@ -535,7 +527,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         else
         {
             uint32 soulStoneSpell = soulStone->GetProto()->Spells[0].SpellId;
-            Player * master = GetMaster();
+            Player* master = GetMaster();
             if (!master->HasAura(soulStoneSpell) && !m_bot->HasSpellCooldown(soulStoneSpell))
             {
                 ai->UseItem(soulStone, master);
@@ -631,5 +623,4 @@ void PlayerbotWarlockAI::DoNonCombatActions()
 
     if (pet && pet->GetEntry() == DEMON_FELHUNTER && FEL_INTELLIGENCE && !m_bot->HasAura(FEL_INTELLIGENCE) && ai->CastPetSpell(FEL_INTELLIGENCE))
         return;
-
 } // end DoNonCombatActions
