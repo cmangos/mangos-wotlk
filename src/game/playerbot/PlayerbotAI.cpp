@@ -4754,26 +4754,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         m_bot->CastSpell(pTarget, pSpellInfo, true);       // actually cast spell
     }
 
-    if (IsChanneledSpell(pSpellInfo))
-        m_ignoreAIUpdatesUntilTime = time(NULL) + CastTime + 1;
-    else
-        m_ignoreAIUpdatesUntilTime = time(NULL) + 2;
-
-    m_CurrentlyCastingSpellId = 0;
-
-    // if this caused the caster to move (blink) update the position
-    // I think this is normally done on the client
-    // this should be done on spell success
-    /*
-    if (name == "Blink") {
-    float x,y,z;
-    m_bot->GetPosition(x,y,z);
-    m_bot->GetNearPoint(m_bot, x, y, z, 1, 5, 0);
-    m_bot->Relocate(x,y,z);
-    m_bot->SendHeartBeat();
-
-    }
-    */
+    m_ignoreAIUpdatesUntilTime = time(NULL) + CastTime + 1;
 
     return true;
 }
