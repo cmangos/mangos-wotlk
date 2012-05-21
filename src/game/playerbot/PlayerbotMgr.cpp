@@ -559,16 +559,23 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             ObjectGuid Guid;
             uint32 itemSlot;
             uint8 rollType;
+            Loot *loot = NULL;
+
             p.rpos(0);        //reset packet pointer
             p >> Guid;        //guid of the lootable target
-            p >> itemSlot;    //number of players invited to roll
+            p >> itemSlot;    //loot index
             p >> rollType;    //need,greed or pass on roll
 
             Creature *c = m_master->GetMap()->GetCreature(Guid);
+            GameObject *go = m_master->GetMap()->GetGameObject(Guid);
             if (!c)
-                return;
+                if (!go)
+                    return;
 
-            Loot *loot = &c->loot;
+            if (c)
+                loot = &c->loot;
+            else
+                loot = &go->loot;
 
             LootItem& lootItem = loot->items[itemSlot];
 
@@ -608,6 +615,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                         bot->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_NEED, 1);
                         break;
                     case ROLL_GREED:
+                    case ROLL_DISENCHANT:
                         bot->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_GREED, 1);
                         break;
                 }
