@@ -346,27 +346,10 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     }
 
     if (nextActionTarget)
-        ai->CastSpell(CURSE_OF_AGONY, *pTarget);
+        ai->CastSpell(nextAction, *pTarget);
     else
         ai->CastSpell(nextAction);
 } // end DoNextCombatManeuver
-
-void PlayerbotWarlockAI::DoNextCombatNonSpell(Unit *pTarget)
-{
-    PlayerbotAI* ai = GetAI();
-    if (!ai)
-        return;
-
-    Player *m_bot = GetPlayerBot();
-    if (!m_bot)
-        return;
-
-    if (SHOOT > 0 && ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
-    {
-        ai->CastSpell(SHOOT, *pTarget);
-        ai->TellMaster("Starting auto shot.");
-    }
-}
 
 void PlayerbotWarlockAI::CheckDemon()
 {
