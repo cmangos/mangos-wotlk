@@ -205,4 +205,3 @@ CREATE TABLE `playerbot_saved_data` (
   `combat_delay` INT(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Persistent Playerbot settings per alt';
-

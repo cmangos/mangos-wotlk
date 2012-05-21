@@ -179,8 +179,8 @@ Creature interaction with bots:
 
 Repair with bots:
 =================
-	
-  Bots will now automatically unequip worn items before they break, and will 
+
+  Bots will now automatically unequip worn items before they break, and will
   notify the master of worn items.  They will not equip worn items (less than 10% of max durability)
 
   Bot can now repair <all or selected> items - equipped or in bags. If the bot is
