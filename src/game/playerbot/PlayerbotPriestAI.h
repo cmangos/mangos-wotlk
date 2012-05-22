@@ -90,6 +90,8 @@ public:
     bool BuffPlayer(Player *target);
 
 private:
+    void CastSpell(uint32 nextAction, Unit *pTarget = NULL);
+
     // Heals the target based off its hps
     bool HealTarget (Unit* target);
 
@@ -155,8 +157,6 @@ private:
            WAR_STOMP,
            BERSERKING,
            WILL_OF_THE_FORSAKEN;
-
-    uint32 SpellSequence, LastSpellHoly, LastSpellShadowMagic, LastSpellDiscipline;
 };
 
 #endif

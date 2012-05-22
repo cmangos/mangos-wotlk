@@ -78,6 +78,9 @@ bool PlayerbotPriestAI::DoFirstCombatManeuver(Unit *pTarget)
 bool PlayerbotPriestAI::HealTarget(Unit* target)
 {
     PlayerbotAI* ai = GetAI();
+    if (!ai)
+        return;
+
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
     uint8 hpSelf = GetAI()->GetHealthPercent();
 
@@ -91,6 +94,7 @@ bool PlayerbotPriestAI::HealTarget(Unit* target)
             if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
             {
                 if (holder->GetSpellProto()->Dispel == DISPEL_DISEASE)
+                {
                     ai->CastSpell(CURE_DISEASE, *target);
                 return false;
             }
@@ -117,76 +121,119 @@ bool PlayerbotPriestAI::HealTarget(Unit* target)
 
 void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 {
-    Unit* pVictim = pTarget->getVictim();
     PlayerbotAI* ai = GetAI();
     if (!ai)
         return;
 
+    Player *m_bot = GetPlayerBot();
+    if (!m_bot)
+        return;
+
+    Unit* pVictim = pTarget->getVictim();
+    float dist = m_bot->GetCombatDistance(pTarget);
+    uint32 spec = m_bot->GetSpec();
+
+    Group *m_group = m_bot->GetGroup();
+
     switch (ai->GetScenarioType())
     {
         case PlayerbotAI::SCENARIO_DUEL:
-            (ai->HasAura(SCREAM, *pTarget) && ai->GetHealthPercent() < 60 && ai->CastSpell(HEAL)) ||
-            ai->CastSpell(SHADOW_WORD_PAIN) ||
-            (ai->GetHealthPercent() < 80 && ai->CastSpell(RENEW)) ||
-            (ai->GetPlayerBot()->GetCombatDistance(pTarget) <= 5 && ai->CastSpell(SCREAM)) ||
-            ai->CastSpell(MIND_BLAST) ||
-            (ai->GetHealthPercent() < 20 && ai->CastSpell(GREATER_HEAL)) ||
-            ai->CastSpell(SMITE);
+            // TODO: Mana checks
+            // TODO: spec tweaking
+            if (ai->HasAura(SCREAM, *pTarget) && ai->GetHealthPercent() < 60 && HEAL)
+                return CastSpell(HEAL);
+
+            if (SHADOW_WORD_PAIN) // TODO: Check whether enemy has it active yet
+                return CastSpell(SHADOW_WORD_PAIN);
+
+            if (ai->GetHealthPercent() < 80 && RENEW) // TODO: Check whether you have renew active on you
+                return CastSpell(RENEW);
+
+            if (m_bot->GetCombatDistance(pTarget) <= 5 && SCREAM) // TODO: Check for cooldown
+                return CastSpell(SCREAM);
+
+            if (MIND_BLAST) // TODO: Check for cooldown
+                return CastSpell(MIND_BLAST);
+
+            if (ai->GetHealthPercent() < 20 && GREATER_HEAL) // really? Will you EVER get GREATER_HEAL off before they get your last 20%?
+                return CastSpell(GREATER_HEAL);
+
+            if (SMITE)
+                return CastSpell(SMITE);
+
+            ai->TellMaster("Couldn't find a spell to cast while dueling");
             return;
     }
 
     // ------- Non Duel combat ----------
-
-    Player *m_bot = GetPlayerBot();
-    Group *m_group = m_bot->GetGroup();
-    uint32 spec = m_bot->GetSpec();
-    float dist = m_bot->GetCombatDistance(pTarget);
-
-    if (dist > ATTACK_DISTANCE && ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED)
-    {
-        // switch to ranged combat
+    if (ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED && dist > ATTACK_DISTANCE)
         ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
-    }
-    if (SHOOT > 0 && ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT))
-        ai->CastSpell(SHOOT, *pTarget);
-    //ai->TellMaster( "started auto shot." );
-    else if (SHOOT > 0 && m_bot->FindCurrentSpellBySpellId(SHOOT))
-        m_bot->InterruptNonMeleeSpells(true, SHOOT);
+    // if in melee range OR can't shoot OR have no ranged (wand) equipped
+    else if(ai->GetCombatStyle() != PlayerbotAI::COMBAT_MELEE && (dist <= ATTACK_DISTANCE || SHOOT == 0 || !m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true)))
+        ai->SetCombatStyle(PlayerbotAI::COMBAT_MELEE);
 
-    // Fade has nothing to do with health and everything to do with having aggro/threat
+    //Used to determine if this bot is highest on threat
     Unit *newTarget = ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
-    if (newTarget && FADE > 0 && !m_bot->HasAura(FADE, EFFECT_INDEX_0))
+    if (newTarget) // TODO: && party has a tank
     {
-        ai->TellMaster("I'm casting fade.");
-        ai->CastSpell(FADE, *m_bot);
+        if (newTarget && FADE > 0 && !m_bot->HasAura(FADE, EFFECT_INDEX_0))
+        {
+            ai->TellMaster("I'm casting fade.");
+            return CastSpell(FADE, m_bot);
+        }
+
+        // Heal myself
+        // TODO: you forgot to check for the 'temporarily immune to PW:S because you only just got it cast on you' effect
+        //       - which is different effect from the actual shield.
+        if (ai->GetHealthPercent() < 25 && POWER_WORD_SHIELD > 0 && !m_bot->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0))
+        {
+            ai->TellMaster("I'm casting PW:S on myself.");
+            return CastSpell(POWER_WORD_SHIELD);
+        }
+        if (ai->GetHealthPercent() < 35 && DESPERATE_PRAYER > 0)
+        {
+            ai->TellMaster("I'm casting desperate prayer.");
+            return CastSpell(DESPERATE_PRAYER, m_bot);
+        }
+        if (ai->GetHealthPercent() < 60 || (BINDING_HEAL == 0 && ai->GetHealthPercent() < 80))
+        {
+            HealTarget(m_bot);
+            return;
+        }
+
+        // TODO: Heal tank if necessary
+
+        // Already healed self or tank. If healer, do nothing else to anger mob.
+        if (ai->IsHealer())
+            return;
+
+        // Have threat, can't quickly lower it. 3 options remain: Stop attacking, lowlevel damage (wand), keep on keeping on.
+        if (newTarget->GetHealthPercent() > 25)
+        {
+            // If elite, do nothing and pray tank gets aggro off you
+            // TODO: Is there an IsElite function? If so, find it and insert.
+            //if (newTarget->IsElite())
+            //    return;
+
+            // Not an elite. You could insert PSYCHIC SCREAM here but in any PvE situation that's 90-95% likely
+            // to worsen the situation for the group. ... So please don't.
+            return CastSpell(SHOOT, pTarget);
+        }
     }
-    // Heal myself
-    else if (ai->GetHealthPercent() < 25 && POWER_WORD_SHIELD > 0 && !m_bot->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0))
-    {
-        ai->TellMaster("I'm casting PW:S on myself.");
-        ai->CastSpell(POWER_WORD_SHIELD);
-    }
-    else if (ai->GetHealthPercent() < 35 && DESPERATE_PRAYER > 0)
-    {
-        ai->TellMaster("I'm casting desperate prayer.");
-        ai->CastSpell(DESPERATE_PRAYER, *m_bot);
-    }
-    else if (ai->GetHealthPercent() < 60 || (BINDING_HEAL == 0 && ai->GetHealthPercent() < 80))
-        HealTarget(m_bot);
 
     // Heal master
     uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
     if (GetMaster()->isAlive())
     {
         if (masterHP < 25 && POWER_WORD_SHIELD > 0 && !GetMaster()->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0))
-            ai->CastSpell(POWER_WORD_SHIELD, *(GetMaster()));
+            return CastSpell(POWER_WORD_SHIELD, GetMaster());
         else if (masterHP < 25 || ((GetAI()->GetCombatOrder() & PlayerbotAI::ORDERS_HEAL) && masterHP < 80))
             HealTarget(GetMaster());
     }
 
     //Not sure where this should go
     if (PRAYER_OF_MENDING > 0 && pVictim == GetMaster() && GetMaster()->GetHealth() <= GetMaster()->GetMaxHealth() * 0.7 && !GetMaster()->HasAura(PRAYER_OF_MENDING, EFFECT_INDEX_0) && ai->GetManaPercent() >= 15)
-        ai->CastSpell(PRAYER_OF_MENDING, *GetMaster());
+        return CastSpell(PRAYER_OF_MENDING, GetMaster());
 
     // TODO: Prioritize group healing in some way. If 3 members (including master/self) should be healed, pick one of these:
     // Group heal. Not really useful until a group check is available?
@@ -197,8 +244,9 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     //    return true;
 
     // Heal group
-    if (m_group)
+    if (m_group && !ai->IsTank())
     {
+        // TODO: optimize to heal healer(s) first, tank(s) second, self (if not a healer) third, lowest-HP other member fourth
         Group::MemberSlotList const& groupSlot = m_group->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
@@ -208,10 +256,19 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 
             uint32 memberHP = m_groupMember->GetHealth() * 100 / m_groupMember->GetMaxHealth();
             if (memberHP < 25 && POWER_WORD_SHIELD > 0 && !m_groupMember->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0))
-                ai->CastSpell(POWER_WORD_SHIELD, *(GetMaster()));
+                return CastSpell(POWER_WORD_SHIELD, m_groupMember);
             else if (memberHP < 25 || ((GetAI()->GetCombatOrder() & PlayerbotAI::ORDERS_HEAL) && memberHP < 80))
                 HealTarget(m_groupMember);
         }
+    }
+
+    // Do damage tweaking for healers here
+    if (ai->IsHealer())
+    {
+        //if (Any target is an Elite)
+        //    return;
+
+        return CastSpell(SHOOT, pTarget);
     }
 
     // Damage Spells
@@ -219,93 +276,100 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     {
         case PRIEST_SPEC_HOLY:
             if (HOLY_FIRE > 0 && !pTarget->HasAura(HOLY_FIRE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 13)
-                ai->CastSpell(HOLY_FIRE, *pTarget);
-            else if (SMITE > 0 && ai->GetManaPercent() >= 17)
-                ai->CastSpell(SMITE, *pTarget);
-             //else if (MANA_BURN > 0 && LastSpellHoly < 2 && pTarget->GetPower(POWER_MANA) > 0 && ai->GetManaPercent() < 70 && ai->GetManaPercent() >= 14)
-        //{
-        //    //ai->TellMaster("I'm casting mana burn.");
-        //    ai->CastSpell(MANA_BURN, *pTarget);
-        //    ai->SetIgnoreUpdateTime(3);
-        //    LastSpellHoly = LastSpellHoly + 1;
-        //}
-        //else if (HOLY_NOVA > 0 && LastSpellHoly < 3 && dist <= ATTACK_DISTANCE && ai->GetManaPercent() >= 22)
-        //{
-        //    //ai->TellMaster("I'm casting holy nova.");
-        //    ai->CastSpell(HOLY_NOVA);
-        //    LastSpellHoly = LastSpellHoly + 1;
-        //}
-        /*else
-            LastSpellHoly = 0;
-
-           if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE)
-            SpellSequence = SPELL_SHADOWMAGIC;
-           break;*/
+                return CastSpell(HOLY_FIRE, pTarget);
+            if (SMITE > 0 && ai->GetManaPercent() >= 17)
+                return CastSpell(SMITE, pTarget);
+            //if (HOLY_NOVA > 0 && LastSpellHoly < 3 && dist <= ATTACK_DISTANCE && ai->GetManaPercent() >= 22)
+            //{
+            //    //ai->TellMaster("I'm casting holy nova.");
+            //    ai->CastSpell(HOLY_NOVA);
+            //    LastSpellHoly = LastSpellHoly + 1;
+            //}
+            break;
 
         case PRIEST_SPEC_SHADOW:
             if (DEVOURING_PLAGUE > 0 && !pTarget->HasAura(DEVOURING_PLAGUE, EFFECT_INDEX_0) && ai->GetManaPercent() >= 28)
-                ai->CastSpell(DEVOURING_PLAGUE, *pTarget);
-            else if (VAMPIRIC_TOUCH > 0 && !pTarget->HasAura(VAMPIRIC_TOUCH, EFFECT_INDEX_0) && ai->GetManaPercent() >= 18)
-                ai->CastSpell(VAMPIRIC_TOUCH, *pTarget);
-            else if (SHADOW_WORD_PAIN > 0 && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && ai->GetManaPercent() >= 25)
-                ai->CastSpell(SHADOW_WORD_PAIN, *pTarget);
-            else if (MIND_BLAST > 0 && (!m_bot->HasSpellCooldown(MIND_BLAST)) && ai->GetManaPercent() >= 19)
-                ai->CastSpell(MIND_BLAST, *pTarget);
-            else if (MIND_FLAY > 0 && ai->GetManaPercent() >= 10)
+                return CastSpell(DEVOURING_PLAGUE, pTarget);
+            if (VAMPIRIC_TOUCH > 0 && !pTarget->HasAura(VAMPIRIC_TOUCH, EFFECT_INDEX_0) && ai->GetManaPercent() >= 18)
+                return CastSpell(VAMPIRIC_TOUCH, pTarget);
+            if (SHADOW_WORD_PAIN > 0 && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && ai->GetManaPercent() >= 25)
+                return CastSpell(SHADOW_WORD_PAIN, pTarget);
+            if (MIND_BLAST > 0 && (!m_bot->HasSpellCooldown(MIND_BLAST)) && ai->GetManaPercent() >= 19)
+                return CastSpell(MIND_BLAST, pTarget);
+            if (MIND_FLAY > 0 && ai->GetManaPercent() >= 10)
             {
-                ai->CastSpell(MIND_FLAY, *pTarget);
+                CastSpell(MIND_FLAY, pTarget);
                 ai->SetIgnoreUpdateTime(3);
+                return;
             }
-            else if (SHADOWFIEND > 0)
-                ai->CastSpell(SHADOWFIEND);
-             /*else if (SCREAM > 0 && LastSpellShadowMagic < 3 && ai->GetAttackerCount() >= 3 && ai->GetManaPercent() >= 15)
-                {
-                 ai->TellMaster("I'm casting scream.");
-                 ai->CastSpell(SCREAM);
-                 LastSpellShadowMagic = LastSpellShadowMagic + 1;
-                }*/
-        /*else if (MIND_SEAR > 0 && LastSpellShadowMagic < 9 && ai->GetAttackerCount() >= 3 && ai->GetManaPercent() >= 28)
-           {
-            ai->CastSpell(MIND_SEAR, *pTarget);
-            ai->SetIgnoreUpdateTime(5);
-            LastSpellShadowMagic = LastSpellShadowMagic + 1;
-           }*/
-        /*else
-            LastSpellShadowMagic = 0;
-
-           if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE || ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST)
-            SpellSequence = SPELL_DISCIPLINE;
-           break;*/
+            if (SHADOWFIEND > 0) // TODO: && mana && isn't active
+                return CastSpell(SHADOWFIEND);
+            /*else if (MIND_SEAR > 0 && ai->GetAttackerCount() >= 3 && ai->GetManaPercent() >= 28)
+            {
+                CastSpell(MIND_SEAR, pTarget);
+                ai->SetIgnoreUpdateTime(5);
+                return;
+            }*/
+            break;
 
         case PRIEST_SPEC_DISCIPLINE:
-            //if (FEAR_WARD > 0 && LastSpellDiscipline < 1 && ai->GetManaPercent() >= 3)
-            //{
-            //    //ai->TellMaster("I'm casting fear ward");
-            //    ai->CastSpell(FEAR_WARD, *(GetMaster()));
-            //    LastSpellDiscipline = LastSpellDiscipline + 1;
-            //}
-            /*else*/ if (POWER_INFUSION > 0 && ai->GetManaPercent() >= 16)
-                ai->CastSpell(POWER_INFUSION, *(GetMaster()));
-             //else if (MASS_DISPEL > 0 && LastSpellDiscipline < 3 && ai->GetManaPercent() >= 33)
+            if (POWER_INFUSION > 0 && ai->GetManaPercent() >= 16)
+                return CastSpell(POWER_INFUSION, GetMaster()); // TODO: just master?
+            //if (MASS_DISPEL > 0 && ai->GetManaPercent() >= 33)
             //{
             //    //ai->TellMaster("I'm casting mass dispel");
-            //    ai->CastSpell(MASS_DISPEL);
-            //    LastSpellDiscipline = LastSpellDiscipline + 1;
+            //    return CastSpell(MASS_DISPEL);
             //}
-            else if (INNER_FOCUS > 0 && !m_bot->HasAura(INNER_FOCUS, EFFECT_INDEX_0))
-                ai->CastSpell(INNER_FOCUS, *m_bot);
-            else if (PENANCE > 0 && ai->GetManaPercent() >= 16)
-                ai->CastSpell(PENANCE);
-             /*else
-                 LastSpellDiscipline = 0;
-
-                if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_NONE)
-                 SpellSequence = SPELL_HOLY;
-                else if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_ASSIST)
-                 SpellSequence = SPELL_SHADOWMAGIC;
-                break;*/
+            if (INNER_FOCUS > 0 && !m_bot->HasAura(INNER_FOCUS, EFFECT_INDEX_0))
+                return CastSpell(INNER_FOCUS, m_bot);
+            if (PENANCE > 0 && ai->GetManaPercent() >= 16)
+                return CastSpell(PENANCE);
+            break;
     }
+
+    ai->TellMaster("Couldn't find an appropriate spell.");
 } // end DoNextCombatManeuver
+
+void PlayerbotPriestAI::CastSpell(uint32 nextAction, Unit *pTarget)
+{
+    PlayerbotAI* ai = GetAI();
+    if (!ai)
+        return;
+
+    Player *m_bot = GetPlayerBot();
+    if (!m_bot)
+        return;
+
+    if (SHOOT > 0 && m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
+    {
+        if (nextAction == SHOOT)
+            // At this point we're already shooting and are asked to shoot. Don't cause a global cooldown by stopping to shoot! Leave it be.
+            return;
+
+        // We are shooting but wish to cast a spell. Stop 'casting' shoot.
+        m_bot->InterruptNonMeleeSpells(true, SHOOT);
+        // ai->TellMaster("Interrupting auto shot.");
+    }
+
+    // We've stopped ranged (if applicable), if no nextAction just return
+    if (nextAction == 0)
+        return;
+
+    if (nextAction == SHOOT)
+    {
+        if (SHOOT > 0 && ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
+            ai->CastSpell(SHOOT, *pTarget);
+        else
+            // Do Melee attack
+            return;
+        // ai->TellMaster("Starting auto shot.");
+    }
+
+    if (pTarget != NULL)
+        ai->CastSpell(nextAction, *pTarget);
+    else
+        ai->CastSpell(nextAction);
+}
 
 void PlayerbotPriestAI::DoNonCombatActions()
 {
@@ -315,8 +379,6 @@ void PlayerbotPriestAI::DoNonCombatActions()
     uint32 spec = m_bot->GetSpec();
     if (!m_bot || !master)
         return;
-
-    SpellSequence = SPELL_HOLY;
 
     // selfbuff goes first
     if (ai->SelfBuff(INNER_FIRE))
