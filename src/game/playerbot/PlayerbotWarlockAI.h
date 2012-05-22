@@ -244,11 +244,6 @@ private:
            BERSERKING,
            WILL_OF_THE_FORSAKEN;
 
-    uint32 SpellSequence,
-           LastSpellCurse,
-           LastSpellAffliction,
-           LastSpellDestruction;
-
     uint32 m_lastDemon;      // Last demon entry used for spell initialization
     uint32 m_demonOfChoice;  // Preferred demon entry
     bool m_isTempImp;        // True if imp summoned temporarily until soul shard acquired for demon of choice.

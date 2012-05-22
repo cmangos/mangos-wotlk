@@ -90,6 +90,16 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     if (!ai)
         return;
 
+    Player *m_bot = GetPlayerBot();
+    if (!m_bot)
+        return;
+
+    Unit* pVictim = pTarget->getVictim();
+    float dist = m_bot->GetCombatDistance(pTarget);
+    Pet *pet = m_bot->GetPet();
+    uint32 spec = m_bot->GetSpec();
+    uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
+
     //switch (ai->GetScenarioType())
     //{
     //    case PlayerbotAI::SCENARIO_DUEL:
@@ -103,16 +113,6 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     //}
 
     // ------- Non Duel combat ----------
-    Player *m_bot = GetPlayerBot();
-    if (!m_bot)
-        return;
-
-    Unit* pVictim = pTarget->getVictim();
-    float dist = m_bot->GetCombatDistance(pTarget);
-    Pet *pet = m_bot->GetPet();
-    uint32 spec = m_bot->GetSpec();
-    uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
-
     //If we have UA it will replace immolate in our rotation
     uint32 FIRE = (UNSTABLE_AFFLICTION > 0 ? UNSTABLE_AFFLICTION : IMMOLATE);
 
