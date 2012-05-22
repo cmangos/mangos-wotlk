@@ -88,6 +88,8 @@ public:
     bool BuffPlayer(Player *target);
 
 private:
+    void CastSpell(uint32 nextAction, Unit *pTarget = NULL);
+
     // ARCANE
     uint32 ARCANE_MISSILES,
            ARCANE_EXPLOSION,
