@@ -1850,6 +1850,8 @@ public:
     void SetCombatOrderByStr(std::string str, Unit *target = 0);
     void SetCombatOrder(CombatOrderType co, Unit *target = 0);
     CombatOrderType GetCombatOrder() { return this->m_combatOrder; }
+    bool IsTank() { return (m_combatOrder & ORDERS_TANK) ? true : false; }
+    bool IsHealer() { return (m_combatOrder & ORDERS_HEAL) ? true : false; }
     ResistType GetResistType() { return this->m_resistType; }
     void SetMovementOrder(MovementOrderType mo, Unit *followTarget = 0);
     MovementOrderType GetMovementOrder() { return this->m_movementOrder; }
