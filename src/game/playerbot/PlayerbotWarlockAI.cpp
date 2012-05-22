@@ -108,11 +108,10 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
         return;
 
     Unit* pVictim = pTarget->getVictim();
+    float dist = m_bot->GetCombatDistance(pTarget);
     Pet *pet = m_bot->GetPet();
     uint32 spec = m_bot->GetSpec();
     uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
-    uint32 nextAction = 0;
-    bool nextActionTarget = true;
 
     //If we have UA it will replace immolate in our rotation
     uint32 FIRE = (UNSTABLE_AFFLICTION > 0 ? UNSTABLE_AFFLICTION : IMMOLATE);
@@ -133,7 +132,6 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     if (ai->GetHealthPercent() < 20 && pet && pet->GetEntry() == DEMON_VOIDWALKER && SACRIFICE && !m_bot->HasAura(SACRIFICE))
         ai->CastPetSpell(SACRIFICE);
 
-    float dist = m_bot->GetCombatDistance(pTarget);
     if (ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED && dist > ATTACK_DISTANCE)
         ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
     // if in melee range OR can't shoot OR have no ranged (wand) equipped
@@ -142,11 +140,13 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 
     //Used to determine if this bot is highest on threat
     Unit *newTarget = ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
-    //Since locks will do damage now, they should probably watch their threat
-    if (newTarget)
+    if (newTarget) // TODO: && party has a tank
     {
         if (SOULSHATTER > 0 && shardCount > 0 && !m_bot->HasSpellCooldown(SOULSHATTER))
-            ai->CastSpell(SOULSHATTER, *m_bot);
+        {
+            CastSpell(SOULSHATTER, m_bot);
+            return;
+        }
         else
         {
             // Have threat, can't quickly lower it. 3 options remain: Stop attacking, lowlevel damage (wand), keep on keeping on.
@@ -159,105 +159,60 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 
                 // Not an elite. You could insert FEAR here but in any PvE situation that's 90-95% likely
                 // to worsen the situation for the group. ... So please don't.
-                nextAction = SHOOT;
+                CastSpell(SHOOT, pTarget);
+                return;
             }
         }
     }
 
+    // TODO: Mana checks (on BASE mana percent, please! - that means before stat bonuses AKA what spells require)
     // Damage Spells
     switch (spec)
     {
         case WARLOCK_SPEC_AFFLICTION:
             if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
-            {
-                nextAction = CURSE_OF_AGONY;
-                break;
-            }
-            else if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
-            {
-                nextAction = CORRUPTION;
-                break;
-            }
-            else if (FIRE && !pTarget->HasAura(FIRE))
-            {
-                nextAction = FIRE;
-                break;
-            }
-            else if (HAUNT && !m_bot->HasSpellCooldown(HAUNT))
-            {
-                nextAction = HAUNT;
-                break;
-            }
-            else if (SHADOW_BOLT)
-            {
-                nextAction = SHADOW_BOLT;
-                break;
-            }
+                return CastSpell(CURSE_OF_AGONY, pTarget);
+            if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
+                return CastSpell(CORRUPTION, pTarget);
+            if (FIRE && !pTarget->HasAura(FIRE))
+                return CastSpell(FIRE, pTarget);
+            if (HAUNT && !m_bot->HasSpellCooldown(HAUNT))
+                return CastSpell(HAUNT, pTarget);
+            if (SHADOW_BOLT)
+                return CastSpell(SHADOW_BOLT, pTarget);
+            break;
 
         case WARLOCK_SPEC_DEMONOLOGY:
             if (pet && DEMONIC_EMPOWERMENT && !m_bot->HasSpellCooldown(DEMONIC_EMPOWERMENT))
-            {
-                nextAction = DEMONIC_EMPOWERMENT;
-                nextActionTarget = false;
-                break;
-            }
-            else if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
-            {
-                nextAction = CURSE_OF_AGONY;
-                break;
-            }
-            else if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
-            {
-                nextAction = CORRUPTION;
-                break;
-            }
-            else if (FIRE && !pTarget->HasAura(FIRE))
-            {
-                nextAction = FIRE;
-                break;
-            }
-            else if (INCINERATE && pTarget->HasAura(FIRE))
-            {
-                nextAction = INCINERATE;
-                break;
-            }
+                return CastSpell(DEMONIC_EMPOWERMENT);
+            if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
+                return CastSpell(CURSE_OF_AGONY, pTarget);
+            if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
+                return CastSpell(CORRUPTION, pTarget);
+            if (FIRE && !pTarget->HasAura(FIRE))
+                return CastSpell(FIRE, pTarget);
+            if (INCINERATE && pTarget->HasAura(FIRE))
+                return CastSpell(INCINERATE, pTarget);
+            if (SHADOW_BOLT)
+                return CastSpell(SHADOW_BOLT, pTarget);
+            break;
 
         case WARLOCK_SPEC_DESTRUCTION:
             if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
-            {
-                nextAction = CURSE_OF_AGONY;
-                break;
-            }
-            else if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
-            {
-                nextAction = CORRUPTION;
-                break;
-            }
-            else if (FIRE && !pTarget->HasAura(FIRE))
-            {
-                nextAction = FIRE;
-                break;
-            }
-            else if (CONFLAGRATE && pTarget->HasAura(FIRE) && !m_bot->HasSpellCooldown(CONFLAGRATE))
-            {
-                nextAction = CONFLAGRATE;
-                break;
-            }
-            else if (CHAOS_BOLT && !m_bot->HasSpellCooldown(CHAOS_BOLT))
-            {
-                nextAction = CHAOS_BOLT;
-                break;
-            }
-            else if (INCINERATE && pTarget->HasAura(FIRE))
-            {
-                nextAction = INCINERATE;
-                break;
-            }
-            else if (SHADOW_BOLT)
-            {
-                nextAction = SHADOW_BOLT;
-                break;
-            }
+                return CastSpell(CURSE_OF_AGONY, pTarget);
+            if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
+                return CastSpell(CORRUPTION, pTarget);
+            if (FIRE && !pTarget->HasAura(FIRE))
+                return CastSpell(FIRE, pTarget);
+            if (CONFLAGRATE && pTarget->HasAura(FIRE) && !m_bot->HasSpellCooldown(CONFLAGRATE))
+                return CastSpell(CONFLAGRATE, pTarget);
+            if (CHAOS_BOLT && !m_bot->HasSpellCooldown(CHAOS_BOLT))
+                return CastSpell(CHAOS_BOLT, pTarget);
+            if (INCINERATE && pTarget->HasAura(FIRE))
+                return CastSpell(INCINERATE, pTarget);
+            if (SHADOW_BOLT)
+                return CastSpell(SHADOW_BOLT, pTarget);
+            break;
 
             //if (LIFE_TAP && LastSpellAffliction < 1 && ai->GetManaPercent() <= 50 && ai->GetHealthPercent() > 50)
             //    ai->CastSpell(LIFE_TAP, *m_bot);
@@ -322,13 +277,28 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
             //    SpellSequence = SPELL_AFFLICTION;
     }
 
+    ai->TellMaster("Couldn't find an appropriate spell.");
+} // end DoNextCombatManeuver
+
+void PlayerbotWarlockAI::CastSpell(uint32 nextAction, Unit *pTarget)
+{
+    PlayerbotAI* ai = GetAI();
+    if (!ai)
+        return;
+
+    Player *m_bot = GetPlayerBot();
+    if (!m_bot)
+        return;
+
     if (SHOOT > 0 && m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
     {
         if (nextAction == SHOOT)
+            // At this point we're already shooting and are asked to shoot. Don't cause a global cooldown by stopping to shoot! Leave it be.
             return;
 
+        // We are shooting but wish to cast a spell. Stop 'casting' shoot.
         m_bot->InterruptNonMeleeSpells(true, SHOOT);
-        ai->TellMaster("Interrupting auto shot.");
+        // ai->TellMaster("Interrupting auto shot.");
     }
 
     // We've stopped ranged (if applicable), if no nextAction just return
@@ -342,14 +312,14 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
         else
             // Do Melee attack
             return;
-        ai->TellMaster("Starting auto shot.");
+        // ai->TellMaster("Starting auto shot.");
     }
 
-    if (nextActionTarget)
+    if (pTarget != NULL)
         ai->CastSpell(nextAction, *pTarget);
     else
         ai->CastSpell(nextAction);
-} // end DoNextCombatManeuver
+}
 
 void PlayerbotWarlockAI::CheckDemon()
 {

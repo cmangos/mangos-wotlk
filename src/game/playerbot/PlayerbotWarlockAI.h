@@ -146,6 +146,8 @@ public:
     //void BuffPlayer(Player *target);
 
 private:
+    void CastSpell(uint32 nextAction, Unit *pTarget = NULL);
+
     void CheckDemon();
 
     // CURSES
