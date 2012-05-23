@@ -79,7 +79,7 @@ bool PlayerbotPriestAI::HealTarget(Unit* target)
 {
     PlayerbotAI* ai = GetAI();
     if (!ai)
-        return;
+        return false;
 
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
     uint8 hpSelf = GetAI()->GetHealthPercent();
@@ -94,7 +94,6 @@ bool PlayerbotPriestAI::HealTarget(Unit* target)
             if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
             {
                 if (holder->GetSpellProto()->Dispel == DISPEL_DISEASE)
-                {
                     ai->CastSpell(CURE_DISEASE, *target);
                 return false;
             }
