@@ -8911,13 +8911,17 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                     // has skill
                     if (skillLine->skillId == *it && skillLine->learnOnGetSkill == 0)
                     {
-                        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+                        uint32 SpellId;
+                        m_bot->HasSpell(skillLine->forward_spellid) ? SpellId = skillLine->forward_spellid : SpellId = skillLine->spellId;
+
+                        SpellEntry const* spellInfo = sSpellStore.LookupEntry(SpellId);
                         if (!spellInfo)
                             continue;
 
-                        if (m_bot->GetSkillValue(*it) <= rank[sSpellMgr.GetSpellRank(skillLine->spellId)] && m_bot->HasSpell(skillLine->spellId))
+                        if (m_bot->GetSkillValue(*it) <= rank[sSpellMgr.GetSpellRank(SpellId)] && m_bot->HasSpell(SpellId))
                         {
                             // DEBUG_LOG ("[PlayerbotAI]: HandleCommand - skill (%u)(%u)(%u):",skillLine->spellId, rank[sSpellMgr.GetSpellRank(skillLine->spellId)], m_bot->GetSkillValue(*it));
+                            msg << "\n[" << m_bot->GetSkillValue(*it) << " / " << rank[sSpellMgr.GetSpellRank(SpellId)] << "]: ";
                             MakeSpellLink(spellInfo, msg);
                             break;
                         }
