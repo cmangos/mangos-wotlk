@@ -125,7 +125,7 @@ private:
     static void GoBuffForm(Player *self);
 
     //Assumes form based on spec
-    void CheckForms();
+    bool CheckForms();
 
     // druid cat/bear/dire bear/moonkin/tree of life forms
     uint32 CAT_FORM,

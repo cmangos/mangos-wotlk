@@ -463,29 +463,72 @@ bool PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarget)
     return false;
 }
 
-void PlayerbotDruidAI::CheckForms()
+/**
+* CheckForms()
+*
+* Returns bool - Value indicates success - shape was shifted, already shifted, no need to shift.
+*/
+bool PlayerbotDruidAI::CheckForms()
 {
-    if (!m_ai)  return;
-    if (!m_bot) return;
+    if (!m_ai)  return false;
+    if (!m_bot) return false;
 
-    Player* master = GetMaster();
     uint32 spec = m_bot->GetSpec();
     uint32 BEAR = (DIRE_BEAR_FORM > 0 ? DIRE_BEAR_FORM : BEAR_FORM);
 
-    if (spec == DRUID_SPEC_BALANCE && MOONKIN_FORM && !m_bot->HasAura(MOONKIN_FORM))
-        m_ai->CastSpell (MOONKIN_FORM);
-    //Use Bear form only if we are told we're a tank and have thorns up
-    else if (spec == DRUID_SPEC_FERAL && BEAR > 0 && m_ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK && m_bot->HasAura(THORNS) && !m_bot->HasAura(BEAR))
-        m_ai->CastSpell(BEAR);
-    //If no tank orders assume we are kitty
-    else if (spec == DRUID_SPEC_FERAL && CAT_FORM > 0 && !m_ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK && !m_bot->HasAura(CAT_FORM))
-        m_ai->CastSpell(CAT_FORM);
-    //While we are feral but don't yet have cat form
-    else if (spec == DRUID_SPEC_FERAL && CAT_FORM == 0 && BEAR > 0 && !m_bot->HasAura(BEAR))
-        m_ai->CastSpell(BEAR);
-    else if (spec == DRUID_SPEC_RESTORATION && TREE_OF_LIFE > 0 && !m_bot->HasAura(TREE_OF_LIFE))
-        m_ai->CastSpell(TREE_OF_LIFE);
+    if (spec == DRUID_SPEC_BALANCE)
+    {
+        if (m_bot->HasAura(MOONKIN_FORM))
+            return true;
 
+        if (!MOONKIN_FORM)
+            return true;
+
+        return m_ai->CastSpell(MOONKIN_FORM);
+    }
+
+    if (spec == DRUID_SPEC_FERAL)
+    {
+        // Use Bear form only if we are told we're a tank and have thorns up
+        if (m_ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK)
+        {
+            if (m_bot->HasAura(BEAR))
+                return true;
+
+            if (BEAR > 0 && !m_bot->HasAura(THORNS))
+                return true; // Waiting on Thorns - working as intended
+            else if (BEAR > 0)
+                return m_ai->CastSpell(BEAR);
+        }
+        else // No tank orders - try to go kitty or at least bear
+        {
+            if (CAT_FORM > 0)
+            {
+                if(m_bot->HasAura(CAT_FORM))
+                    return true;
+
+                return m_ai->CastSpell(CAT_FORM);
+            }
+            else if (BEAR > 0)
+            {
+                if (m_bot->HasAura(BEAR))
+                    return true;
+
+                return m_ai->CastSpell(BEAR);
+            }
+        }
+    }
+
+    if (spec == DRUID_SPEC_RESTORATION)
+    {
+        if (m_bot->HasAura(TREE_OF_LIFE))
+            return true;
+
+        if (!TREE_OF_LIFE)
+            return true;
+
+        return m_ai->CastSpell(TREE_OF_LIFE);
+    }
 }
 
 void PlayerbotDruidAI::DoNonCombatActions()
