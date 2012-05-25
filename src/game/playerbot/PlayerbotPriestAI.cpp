@@ -118,15 +118,15 @@ bool PlayerbotPriestAI::HealTarget(Unit* target)
         return false;
 } // end HealTarget
 
-void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
+bool PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();
     if (!ai)
-        return;
+        return false;
 
     Player *m_bot = GetPlayerBot();
     if (!m_bot)
-        return;
+        return false;
 
     Unit* pVictim = pTarget->getVictim();
     float dist = m_bot->GetCombatDistance(pTarget);
@@ -161,7 +161,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 return CastSpell(SMITE);
 
             ai->TellMaster("Couldn't find a spell to cast while dueling");
-            return;
+            return false;
     }
 
     // ------- Non Duel combat ----------
@@ -195,16 +195,13 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             return CastSpell(DESPERATE_PRAYER, m_bot);
         }
         if (ai->GetHealthPercent() < 60 || (BINDING_HEAL == 0 && ai->GetHealthPercent() < 80))
-        {
-            HealTarget(m_bot);
-            return;
-        }
+            return HealTarget(m_bot);
 
         // TODO: Heal tank if necessary
 
         // Already healed self or tank. If healer, do nothing else to anger mob.
         if (ai->IsHealer())
-            return;
+            return true; // In a sense, mission accomplished.
 
         // Have threat, can't quickly lower it. 3 options remain: Stop attacking, lowlevel damage (wand), keep on keeping on.
         if (newTarget->GetHealthPercent() > 25)
@@ -297,9 +294,11 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 return CastSpell(MIND_BLAST, pTarget);
             if (MIND_FLAY > 0 && ai->GetManaPercent() >= 10)
             {
-                CastSpell(MIND_FLAY, pTarget);
-                ai->SetIgnoreUpdateTime(3);
-                return;
+                if (CastSpell(MIND_FLAY, pTarget))
+                {
+                    ai->SetIgnoreUpdateTime(3);
+                    return true;
+                }
             }
             if (SHADOWFIEND > 0) // TODO: && mana && isn't active
                 return CastSpell(SHADOWFIEND);
@@ -337,56 +336,17 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
         return CastSpell(SHADOW_WORD_PAIN, pTarget);
     if (MIND_FLAY > 0 && ai->GetManaPercent() >= 10)
     {
-        CastSpell(MIND_FLAY, pTarget);
-        ai->SetIgnoreUpdateTime(3);
-        return;
+        if (CastSpell(MIND_FLAY, pTarget))
+        {
+            ai->SetIgnoreUpdateTime(3);
+            return true;
+        }
     }
     if (SHADOWFORM == 0 && SMITE > 0 && ai->GetManaPercent() >= 17)
         return CastSpell(SMITE, pTarget);
 
     ai->TellMaster("Couldn't find an appropriate spell.");
 } // end DoNextCombatManeuver
-
-void PlayerbotPriestAI::CastSpell(uint32 nextAction, Unit *pTarget)
-{
-    PlayerbotAI* ai = GetAI();
-    if (!ai)
-        return;
-
-    Player *m_bot = GetPlayerBot();
-    if (!m_bot)
-        return;
-
-    if (SHOOT > 0 && m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
-    {
-        if (nextAction == SHOOT)
-            // At this point we're already shooting and are asked to shoot. Don't cause a global cooldown by stopping to shoot! Leave it be.
-            return;
-
-        // We are shooting but wish to cast a spell. Stop 'casting' shoot.
-        m_bot->InterruptNonMeleeSpells(true, SHOOT);
-        // ai->TellMaster("Interrupting auto shot.");
-    }
-
-    // We've stopped ranged (if applicable), if no nextAction just return
-    if (nextAction == 0)
-        return;
-
-    if (nextAction == SHOOT)
-    {
-        if (SHOOT > 0 && ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
-            ai->CastSpell(SHOOT, *pTarget);
-        else
-            // Do Melee attack
-            return;
-        // ai->TellMaster("Starting auto shot.");
-    }
-
-    if (pTarget != NULL)
-        ai->CastSpell(nextAction, *pTarget);
-    else
-        ai->CastSpell(nextAction);
-}
 
 void PlayerbotPriestAI::DoNonCombatActions()
 {

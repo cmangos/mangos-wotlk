@@ -73,17 +73,17 @@ bool PlayerbotDeathKnightAI::DoFirstCombatManeuver(Unit *pTarget)
     return false;
 }
 
-void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
+bool PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();
     if (!ai)
-        return;
+        return false;
 
     switch (ai->GetScenarioType())
     {
         case PlayerbotAI::SCENARIO_DUEL:
             ai->CastSpell(PLAGUE_STRIKE);
-            return;
+            return false;
     }
 
     // ------- Non Duel combat ----------
@@ -464,6 +464,7 @@ void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
     if (ai->GetManager()->m_confDebugWhisper)
         ai->TellMaster(out.str().c_str());
 
+    return false;
 } // end DoNextCombatManeuver
 
 void PlayerbotDeathKnightAI::DoNonCombatActions()

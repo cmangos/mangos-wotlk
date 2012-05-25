@@ -50,7 +50,7 @@ PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, Player
     COLD_SNAP               = ai->initSpell(COLD_SNAP_1);
 
     // RANGED COMBAT
-    SHOOT                              = ai->initSpell(SHOOT_2);
+    SHOOT                   = ai->initSpell(SHOOT_2);
 
     RECENTLY_BANDAGED       = 11196; // first aid check
 
@@ -70,15 +70,15 @@ bool PlayerbotMageAI::DoFirstCombatManeuver(Unit *pTarget)
     return false;
 }
 
-void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
+bool PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();
     if (!ai)
-        return;
+        return false;
 
     Player *m_bot = GetPlayerBot();
     if (!m_bot)
-        return;
+        return false;
 
     Unit* pVictim = pTarget->getVictim();
     float dist = m_bot->GetCombatDistance(pTarget);
@@ -89,7 +89,7 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
         case PlayerbotAI::SCENARIO_DUEL:
             if (FIREBALL > 0)
                 ai->CastSpell(FIREBALL);
-            return;
+            return true;
     }
 
     // ------- Non Duel combat ----------
@@ -116,7 +116,7 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
             // Not an elite. You could insert FEAR here but in any PvE situation that's 90-95% likely
             // to worsen the situation for the group. ... So please don't.
             CastSpell(SHOOT, pTarget);
-            return;
+            return true;
         }
     }
 
@@ -133,9 +133,11 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
                 return CastSpell(DEEP_FREEZE, pTarget);
             if (BLIZZARD > 0 && ai->GetAttackerCount() >= 5 && ai->GetManaPercent() >= 89)
             {
-                CastSpell(BLIZZARD, pTarget);
-                ai->SetIgnoreUpdateTime(8);
-                return;
+                if (CastSpell(BLIZZARD, pTarget))
+                {
+                    ai->SetIgnoreUpdateTime(8);
+                    return true;
+                }
             }
             if (CONE_OF_COLD > 0 && dist <= ATTACK_DISTANCE && !pTarget->HasAura(CONE_OF_COLD, EFFECT_INDEX_0) && ai->GetManaPercent() >= 35)
                 return CastSpell(CONE_OF_COLD, pTarget);
@@ -189,9 +191,11 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
                 return CastSpell(ARCANE_POWER, pTarget);
             if (ARCANE_MISSILES > 0 && ai->GetManaPercent() >= 37)
             {
-                CastSpell(ARCANE_MISSILES, pTarget);
-                ai->SetIgnoreUpdateTime(3);
-                return;
+                if (CastSpell(ARCANE_MISSILES, pTarget))
+                {
+                    ai->SetIgnoreUpdateTime(3);
+                    return true;
+                }
             }
             if (ARCANE_EXPLOSION > 0 && ai->GetAttackerCount() >= 3 && dist <= ATTACK_DISTANCE && ai->GetManaPercent() >= 27)
                 return CastSpell(ARCANE_EXPLOSION, pTarget);
@@ -221,47 +225,6 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
 
     ai->TellMaster("Couldn't find an appropriate spell.");
 } // end DoNextCombatManeuver
-
-void PlayerbotMageAI::CastSpell(uint32 nextAction, Unit *pTarget)
-{
-    PlayerbotAI* ai = GetAI();
-    if (!ai)
-        return;
-
-    Player *m_bot = GetPlayerBot();
-    if (!m_bot)
-        return;
-
-    if (SHOOT > 0 && m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
-    {
-        if (nextAction == SHOOT)
-            // At this point we're already shooting and are asked to shoot. Don't cause a global cooldown by stopping to shoot! Leave it be.
-            return;
-
-        // We are shooting but wish to cast a spell. Stop 'casting' shoot.
-        m_bot->InterruptNonMeleeSpells(true, SHOOT);
-        // ai->TellMaster("Interrupting auto shot.");
-    }
-
-    // We've stopped ranged (if applicable), if no nextAction just return
-    if (nextAction == 0)
-        return;
-
-    if (nextAction == SHOOT)
-    {
-        if (SHOOT > 0 && ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
-            ai->CastSpell(SHOOT, *pTarget);
-        else
-            // Do Melee attack
-            return;
-        // ai->TellMaster("Starting auto shot.");
-    }
-
-    if (pTarget != NULL)
-        ai->CastSpell(nextAction, *pTarget);
-    else
-        ai->CastSpell(nextAction);
-}
 
 void PlayerbotMageAI::DoNonCombatActions()
 {

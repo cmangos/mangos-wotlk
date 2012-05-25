@@ -289,17 +289,17 @@ void PlayerbotShamanAI::UseCooldowns()
     }
 }
 
-void PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
+bool PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();
     if (!ai)
-        return;
+        return false;
 
     switch (ai->GetScenarioType())
     {
         case PlayerbotAI::SCENARIO_DUEL:
             ai->CastSpell(LIGHTNING_BOLT);
-            return;
+            return false;
     }
 
     // ------- Non Duel combat ----------

@@ -137,7 +137,7 @@ public:
 
     // all combat actions go here
     bool DoFirstCombatManeuver(Unit*);
-    void DoNextCombatManeuver(Unit*);
+    bool DoNextCombatManeuver(Unit*);
 
     // all non combat actions go here, ex buffs, heals, rezzes
     void DoNonCombatActions();
@@ -146,7 +146,7 @@ public:
     //void BuffPlayer(Player *target);
 
 private:
-    void CastSpell(uint32 nextAction, Unit *pTarget = NULL);
+    bool CastSpell(uint32 nextAction, Unit *pTarget = NULL) { return CastSpellWand(nextAction, pTarget, SHOOT); }
 
     void CheckDemon();
 

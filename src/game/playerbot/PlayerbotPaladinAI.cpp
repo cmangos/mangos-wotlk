@@ -253,19 +253,22 @@ void PlayerbotPaladinAI::CheckSeals()
     }
 }
 
-void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
+bool PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
 {
     Unit* pVictim = pTarget->getVictim();
     PlayerbotAI* ai = GetAI();
     if (!ai)
-        return;
+        return false;
 
     switch (ai->GetScenarioType())
     {
         case PlayerbotAI::SCENARIO_DUEL:
             if (HAMMER_OF_JUSTICE > 0)
+            {
                 ai->CastSpell(HAMMER_OF_JUSTICE);
-            return;
+                return true;
+            }
+            return false;
     }
 
     // damage spells
@@ -295,7 +298,7 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
             uint32 memberHP = m_groupMember->GetHealth() * 100 / m_groupMember->GetMaxHealth();
             if (memberHP < 40 && ai->GetManaPercent() >= 40)  // do not heal bots without plenty of mana for master & self
                 if (HealTarget(m_groupMember))
-                    return;
+                    return true;
         }
     }
 

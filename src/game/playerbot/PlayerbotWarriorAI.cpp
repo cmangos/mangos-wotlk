@@ -159,11 +159,11 @@ void PlayerbotWarriorAI::CheckShouts()
         ai->CastSpell(BATTLE_SHOUT);
 }
 
-void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
+bool PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();
     if (!ai)
-        return;
+        return false;
 
     //switch (ai->GetScenarioType())
     //{

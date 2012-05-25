@@ -84,15 +84,15 @@ bool PlayerbotWarlockAI::DoFirstCombatManeuver(Unit *pTarget)
     return false;
 }
 
-void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
+bool PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();
     if (!ai)
-        return;
+        return false;
 
     Player *m_bot = GetPlayerBot();
     if (!m_bot)
-        return;
+        return false;
 
     Unit* pVictim = pTarget->getVictim();
     float dist = m_bot->GetCombatDistance(pTarget);
@@ -143,25 +143,21 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     if (newTarget) // TODO: && party has a tank
     {
         if (SOULSHATTER > 0 && shardCount > 0 && !m_bot->HasSpellCooldown(SOULSHATTER))
-        {
-            CastSpell(SOULSHATTER, m_bot);
-            return;
-        }
-        else
-        {
-            // Have threat, can't quickly lower it. 3 options remain: Stop attacking, lowlevel damage (wand), keep on keeping on.
-            if (newTarget->GetHealthPercent() > 25)
-            {
-                // If elite, do nothing and pray tank gets aggro off you
-                // TODO: Is there an IsElite function? If so, find it and insert.
-                //if (newTarget->IsElite())
-                //    return;
+            if (CastSpell(SOULSHATTER, m_bot))
+                return true;
 
-                // Not an elite. You could insert FEAR here but in any PvE situation that's 90-95% likely
-                // to worsen the situation for the group. ... So please don't.
-                CastSpell(SHOOT, pTarget);
-                return;
-            }
+        // Have threat, can't quickly lower it. 3 options remain: Stop attacking, lowlevel damage (wand), keep on keeping on.
+        if (newTarget->GetHealthPercent() > 25)
+        {
+            // If elite, do nothing and pray tank gets aggro off you
+            // TODO: Is there an IsElite function? If so, find it and insert.
+            //if (newTarget->IsElite())
+            //    return;
+
+            // Not an elite. You could insert FEAR here but in any PvE situation that's 90-95% likely
+            // to worsen the situation for the group. ... So please don't.
+            CastSpell(SHOOT, pTarget);
+            return true;
         }
     }
 
@@ -287,47 +283,6 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 
     ai->TellMaster("Couldn't find an appropriate spell.");
 } // end DoNextCombatManeuver
-
-void PlayerbotWarlockAI::CastSpell(uint32 nextAction, Unit *pTarget)
-{
-    PlayerbotAI* ai = GetAI();
-    if (!ai)
-        return;
-
-    Player *m_bot = GetPlayerBot();
-    if (!m_bot)
-        return;
-
-    if (SHOOT > 0 && m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
-    {
-        if (nextAction == SHOOT)
-            // At this point we're already shooting and are asked to shoot. Don't cause a global cooldown by stopping to shoot! Leave it be.
-            return;
-
-        // We are shooting but wish to cast a spell. Stop 'casting' shoot.
-        m_bot->InterruptNonMeleeSpells(true, SHOOT);
-        // ai->TellMaster("Interrupting auto shot.");
-    }
-
-    // We've stopped ranged (if applicable), if no nextAction just return
-    if (nextAction == 0)
-        return;
-
-    if (nextAction == SHOOT)
-    {
-        if (SHOOT > 0 && ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
-            ai->CastSpell(SHOOT, *pTarget);
-        else
-            // Do Melee attack
-            return;
-        // ai->TellMaster("Starting auto shot.");
-    }
-
-    if (pTarget != NULL)
-        ai->CastSpell(nextAction, *pTarget);
-    else
-        ai->CastSpell(nextAction);
-}
 
 void PlayerbotWarlockAI::CheckDemon()
 {

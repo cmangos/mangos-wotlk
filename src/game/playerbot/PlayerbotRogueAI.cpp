@@ -80,25 +80,27 @@ bool PlayerbotRogueAI::DoFirstCombatManeuver(Unit *pTarget)
     return false;
 }
 
-void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
+bool PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
 {
     if (!pTarget)
-        return;
+        return false;
 
     PlayerbotAI* ai = GetAI();
     if (!ai)
-        return;
+        return false;
 
     switch (ai->GetScenarioType())
     {
         case PlayerbotAI::SCENARIO_DUEL:
         {
             if (SINISTER_STRIKE > 0)
+            {
                 ai->CastSpell(SINISTER_STRIKE);
-            return;
+                return true;
+            }
+
+            return false;
         }
-        default:
-            break;
     }
 
     Player *m_bot = GetPlayerBot();
@@ -135,7 +137,7 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     {
         if (ai->GetManager()->m_confDebugWhisper)
             ai->TellMaster("CoS!");
-        return;
+        return true;
     }
     else if (m_bot->HasAura(STEALTH, EFFECT_INDEX_0))
         SpellSequence = RogueStealth;
@@ -148,7 +150,7 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
 
     // we fight in melee, target is not in range, skip the next part!
     if (fTargetDist > ATTACK_DISTANCE)
-        return;
+        return true;
 
     std::ostringstream out;
     switch (SpellSequence)

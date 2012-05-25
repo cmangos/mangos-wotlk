@@ -152,11 +152,11 @@ bool PlayerbotDruidAI::HealTarget(Unit *target)
     return false;
 } // end HealTarget
 
-void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
+bool PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();
     if (!ai)
-        return;
+        return false;
 
     //switch (ai->GetScenarioType())
     //{
@@ -178,7 +178,7 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 
     switch (spec)
     {
-        case DRUID_SPEC_RESTORATION:
+        case DRUID_SPEC_RESTORATION: // TODO: won't this interfere with Tree of Life transformation? (the balance damage spells below I mean)
 
         case DRUID_SPEC_BALANCE:
 
@@ -197,7 +197,7 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
                 ai->CastSpell(INSECT_SWARM, *pTarget);
                 break;
             }
-            //These two don't work, I can't seem to nail the aura/effect index that would make this work properly
+            // TODO: These two don't work, I can't seem to nail the aura/effect index that would make this work properly
             else if (ECLIPSE_SOLAR > 0 && WRATH > 0 && m_bot->HasAura(ECLIPSE_SOLAR) && ai->GetManaPercent() >= 13)
             {
                 ai->CastSpell(WRATH, *pTarget);
@@ -225,9 +225,7 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
             PlayerbotAI::CombatOrderType orders = ai->GetCombatOrder();
             switch (orders)
             {
-
                 case PlayerbotAI::ORDERS_TANK:
-
                     //This was in the original, seems like a good idea - makes tank face enemy
                     if (!m_bot->HasInArc(M_PI_F, pTarget))
                     {
@@ -235,7 +233,6 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
                         if (pVictim)
                             pVictim->Attack(pTarget, true);
                     }
-                    //We can be sure we have tank orders since we are in bear form
                     if (!newTarget && GROWL > 0 && !m_bot->HasSpellCooldown(GROWL))
                     {
                         ai->CastSpell(GROWL, *pTarget);
@@ -272,8 +269,7 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
                         break;
                     }
 
-                case !PlayerbotAI::ORDERS_TANK:
-
+                default:
                     if (newTarget && COWER > 0 && !m_bot->HasSpellCooldown(COWER) && ai->GetEnergyAmount() >= 20)
                     {
                         ai->CastSpell(COWER, *pTarget);
@@ -378,6 +374,8 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
             //	return;
             //}
     }
+
+    return false;
 } // end DoNextCombatManeuver
 
 void PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)

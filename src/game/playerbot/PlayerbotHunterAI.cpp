@@ -85,17 +85,17 @@ bool PlayerbotHunterAI::DoFirstCombatManeuver(Unit *pTarget)
     return false;
 }
 
-void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
+bool PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
 {
     PlayerbotAI* ai = GetAI();
     if (!ai)
-        return;
+        return false;
 
     switch (ai->GetScenarioType())
     {
         case PlayerbotAI::SCENARIO_DUEL:
             ai->CastSpell(RAPTOR_STRIKE);
-            return;
+            return true;
     }
 
     // ------- Non Duel combat ----------
@@ -111,12 +111,12 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
         && (PET_MEND > 0 && !pet->getDeathState() != ALIVE && pVictim != m_bot && !pet->HasAura(PET_MEND, EFFECT_INDEX_0) && ai->GetManaPercent() >= 13 && ai->CastSpell(PET_MEND, *m_bot)))
     {
         ai->TellMaster("healing pet.");
-        return;
+        return true;
     }
     else if ((pet)
              && (INTIMIDATION > 0 && pVictim == pet && !pet->HasAura(INTIMIDATION, EFFECT_INDEX_0) && ai->CastSpell(INTIMIDATION, *m_bot)))
         //ai->TellMaster( "casting intimidation." ); // if pet has aggro :)
-        return;
+        return true;
 
     // racial traits
     if (m_bot->getRace() == RACE_ORC && !m_bot->HasAura(BLOOD_FURY, EFFECT_INDEX_0))
@@ -240,6 +240,8 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
     }
     if (ai->GetManager()->m_confDebugWhisper)
         ai->TellMaster(out.str().c_str());
+
+    return false;
 } // end DoNextCombatManeuver
 
 void PlayerbotHunterAI::DoNonCombatActions()
