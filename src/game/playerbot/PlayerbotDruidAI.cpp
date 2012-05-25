@@ -419,7 +419,7 @@ bool PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarget)
 
     // (un)Shapeshifting is considered one step closer so will return true (and have the bot wait a bit for the GCD)
     if (TREE_OF_LIFE > 0 && !m_bot->HasAura(TREE_OF_LIFE, EFFECT_INDEX_0))
-        if (m_m_ai->CastSpell(TREE_OF_LIFE, *m_bot))
+        if (m_ai->CastSpell(TREE_OF_LIFE, *m_bot))
             return true;
 
     if (m_bot->HasAura(CAT_FORM, EFFECT_INDEX_0))
@@ -448,7 +448,7 @@ bool PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarget)
         return true;
     }
 
-    if (m_m_ai->GetHealthPercent() <= 60)
+    if (m_ai->GetHealthPercent() <= 60)
     {
         if (HealTarget(m_bot))
             return true;
@@ -465,8 +465,8 @@ bool PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarget)
 
 void PlayerbotDruidAI::CheckForms()
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!m_ai)  return;
+    if (!m_bot) return;
 
     Player* master = GetMaster();
     uint32 spec = m_bot->GetSpec();
