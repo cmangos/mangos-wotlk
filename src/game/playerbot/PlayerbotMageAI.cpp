@@ -83,8 +83,10 @@ bool PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
     {
         case PlayerbotAI::SCENARIO_DUEL:
             if (FIREBALL > 0)
-                m_ai->CastSpell(FIREBALL);
-            return true;
+                if (CastSpell(FIREBALL, pTarget))
+                    return true;
+
+            return false;
     }
 
     // ------- Non Duel combat ----------

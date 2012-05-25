@@ -36,7 +36,7 @@ public:
     PlayerbotAI* GetAI() { return m_ai; };
 
 protected:
-    bool CastSpellNoRanged(uint32 nextAction, Unit *pTarget, uint32 SHOOT);
+    bool CastSpellNoRanged(uint32 nextAction, Unit *pTarget);
     bool CastSpellWand(uint32 nextAction, Unit *pTarget, uint32 SHOOT);
     Player* m_master;
     Player* m_bot;
