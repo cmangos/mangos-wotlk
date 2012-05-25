@@ -1795,6 +1795,7 @@ public:
     float gTempDist2;
     uint8 FollowAutoGo;
     uint8 IsUpOrDown; //tracks variable follow distance
+    void CombatOrderRestore();
     void CombatOrderRestore(uint8 Prim, uint8 Sec);
     void _HandleCommandAutoEquip(std::string &text, Player &fromPlayer);
     void AutoUpgradeEquipment(Player& player);

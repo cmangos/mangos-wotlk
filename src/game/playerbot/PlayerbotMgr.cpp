@@ -1279,14 +1279,8 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
             }
             QueryResult *resultlvl = CharacterDatabase.PQuery("SELECT guid FROM playerbot_saved_data WHERE guid = '%u'", guid);
             if (resultlvl)
-            {
-                mgr->GetPlayerBot(guid)->GetPlayerbotAI()->SetCombatOrderByStr(orderStr, target);
-            }
-            else
-            {
                 CharacterDatabase.DirectPExecute("INSERT INTO playerbot_saved_data (guid,bot_primary_order,bot_secondary_order,primary_target,secondary_target,pname,sname) VALUES ('%u',0,0,0,0,'','')", guid);
-                mgr->GetPlayerBot(guid)->GetPlayerbotAI()->SetCombatOrderByStr(orderStr, target);
-            }
+            mgr->GetPlayerBot(guid)->GetPlayerbotAI()->SetCombatOrderByStr(orderStr, target);
         }
         return true;
 }
