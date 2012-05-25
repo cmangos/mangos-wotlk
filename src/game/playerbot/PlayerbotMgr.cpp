@@ -1097,6 +1097,8 @@ uint32 Player::GetSpec()
         for (PlayerTalentMap::iterator iter = m_talents[m_activeSpec].begin(); iter != m_talents[m_activeSpec].end(); ++iter)
         {
             PlayerTalent talent = (*iter).second;
+            if (row == 0 && spec == 0)
+                spec = talent.talentEntry->TalentTab;
 
             //If current talent is deeper into a tree, that is our new max talent
             if (talent.talentEntry->Row > row) {

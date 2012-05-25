@@ -309,6 +309,8 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 ai->SetIgnoreUpdateTime(5);
                 return;
             }*/
+            if (SHADOWFORM == 0 && MIND_FLAY == 0 && SMITE > 0 && ai->GetManaPercent() >= 17) // low levels
+                return CastSpell(SMITE, pTarget);
             break;
 
         case PRIEST_SPEC_DISCIPLINE:
@@ -323,8 +325,24 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 return CastSpell(INNER_FOCUS, m_bot);
             if (PENANCE > 0 && ai->GetManaPercent() >= 16)
                 return CastSpell(PENANCE);
+            if (SMITE > 0 && ai->GetManaPercent() >= 17)
+                return CastSpell(SMITE, pTarget);
             break;
     }
+
+    // No spec due to low level OR no spell found yet
+    if (MIND_BLAST > 0 && (!m_bot->HasSpellCooldown(MIND_BLAST)) && ai->GetManaPercent() >= 19)
+        return CastSpell(MIND_BLAST, pTarget);
+    if (SHADOW_WORD_PAIN > 0 && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && ai->GetManaPercent() >= 25)
+        return CastSpell(SHADOW_WORD_PAIN, pTarget);
+    if (MIND_FLAY > 0 && ai->GetManaPercent() >= 10)
+    {
+        CastSpell(MIND_FLAY, pTarget);
+        ai->SetIgnoreUpdateTime(3);
+        return;
+    }
+    if (SHADOWFORM == 0 && SMITE > 0 && ai->GetManaPercent() >= 17)
+        return CastSpell(SMITE, pTarget);
 
     ai->TellMaster("Couldn't find an appropriate spell.");
 } // end DoNextCombatManeuver

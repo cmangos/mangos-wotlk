@@ -277,6 +277,14 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
             //    SpellSequence = SPELL_AFFLICTION;
     }
 
+    // No spec due to low level OR no spell found yet
+    if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
+        return CastSpell(CORRUPTION, pTarget);
+    if (FIRE && !pTarget->HasAura(FIRE))
+        return CastSpell(FIRE, pTarget);
+    if (SHADOW_BOLT)
+        return CastSpell(SHADOW_BOLT, pTarget);
+
     ai->TellMaster("Couldn't find an appropriate spell.");
 } // end DoNextCombatManeuver
 

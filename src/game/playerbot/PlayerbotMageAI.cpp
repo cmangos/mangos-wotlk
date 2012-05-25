@@ -213,6 +213,12 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
             break;
     }
 
+    // No spec due to low level OR no spell found yet
+    if (FROSTBOLT > 0 && !pTarget->HasAura(FROSTBOLT, EFFECT_INDEX_0) && ai->GetManaPercent() >= 16)
+        return CastSpell(FROSTBOLT, pTarget);
+    if (FIREBALL > 0 && ai->GetManaPercent() >= 23) // Very low levels
+        return CastSpell(FIREBALL, pTarget);
+
     ai->TellMaster("Couldn't find an appropriate spell.");
 } // end DoNextCombatManeuver
 
