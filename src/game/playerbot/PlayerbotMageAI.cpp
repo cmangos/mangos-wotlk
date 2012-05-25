@@ -72,9 +72,6 @@ bool PlayerbotMageAI::DoFirstCombatManeuver(Unit *pTarget)
 
 bool PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
 {
-    //PlayerbotAI* m_ai = GetAI();  // WHY were these called EVERY combat maneuver? (why call them at all once initialized?)
-    //Player *m_bot = GetPlayerBot();
-
     if (!m_ai)  return false;
     if (!m_bot) return false;
 
@@ -345,7 +342,6 @@ void PlayerbotMageAI::DoNonCombatActions()
 
 bool PlayerbotMageAI::BuffPlayer(Player* target)
 {
-    PlayerbotAI * ai = GetAI();
     Pet * pet = target->GetPet();
 
     if ((pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE)) && pet->getPowerType() == POWER_MANA && m_ai->Buff(ARCANE_INTELLECT, pet))
