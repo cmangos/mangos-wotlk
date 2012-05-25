@@ -114,10 +114,10 @@ public:
 
 private:
     // Combat Maneuver helper functions
-    void _DoNextPVECombatManeuverBear(Unit* pTarget);
-    void _DoNextPVECombatManeuverSpellDPS(Unit* pTarget);
-    void _DoNextPVECombatManeuverMeleeDPS(Unit* pTarget);
-    void _DoNextPVECombatManeuverHeal(Unit* pTarget);
+    bool _DoNextPVECombatManeuverBear(Unit* pTarget);
+    bool _DoNextPVECombatManeuverSpellDPS(Unit* pTarget);
+    bool _DoNextPVECombatManeuverMeleeDPS(Unit* pTarget);
+    bool _DoNextPVECombatManeuverHeal(Unit* pTarget);
 
     // Heals the target based off its hps
     bool HealTarget (Unit *target);

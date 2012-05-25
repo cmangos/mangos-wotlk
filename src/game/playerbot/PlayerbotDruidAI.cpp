@@ -89,7 +89,6 @@ bool PlayerbotDruidAI::DoFirstCombatManeuver(Unit *pTarget)
 bool PlayerbotDruidAI::HealTarget(Unit *target)
 {
     PlayerbotAI* ai = GetAI();
-    Player *m_bot = GetPlayerBot();
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
 
     //If spell exists and orders say we should be dispelling
@@ -157,12 +156,15 @@ bool PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
     PlayerbotAI* ai = GetAI();
     if (!ai)
         return false;
+    if (!m_bot)
+        return false;
 
     //switch (ai->GetScenarioType())
     //{
     //    case PlayerbotAI::SCENARIO_DUEL:
-    //        ai->CastSpell(MOONFIRE);
-    //        return;
+    //        if (ai->CastSpell(MOONFIRE))
+    //            return true;
+    //        return false;
     //}
 
     uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
@@ -378,13 +380,15 @@ bool PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
     return false;
 } // end DoNextCombatManeuver
 
-void PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
-{}
+bool PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
+{
+}
 
-void PlayerbotDruidAI::_DoNextPVECombatManeuverSpellDPS(Unit* pTarget)
-{}
+bool PlayerbotDruidAI::_DoNextPVECombatManeuverSpellDPS(Unit* pTarget)
+{
+}
 
-void PlayerbotDruidAI::_DoNextPVECombatManeuverMeleeDPS(Unit* pTarget)
+bool PlayerbotDruidAI::_DoNextPVECombatManeuverMeleeDPS(Unit* pTarget)
 {
     //PlayerbotAI* ai = GetAI();
     //if (!ai)
@@ -404,59 +408,61 @@ void PlayerbotDruidAI::_DoNextPVECombatManeuverMeleeDPS(Unit* pTarget)
 
 }
 
-void PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarget)
+bool PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarget)
 {
     PlayerbotAI* ai = GetAI();
     if (!ai)
-        return;
+        return false;
 
     uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
 
     Player *m_bot = GetPlayerBot();
     Unit* pVictim = pTarget->getVictim();
 
+    // (un)Shapeshifting is considered one step closer so will return true (and have the bot wait a bit for the GCD)
     if (TREE_OF_LIFE > 0 && !m_bot->HasAura(TREE_OF_LIFE, EFFECT_INDEX_0))
-        ai->CastSpell(TREE_OF_LIFE, *m_bot);
+        if (ai->CastSpell(TREE_OF_LIFE, *m_bot))
+            return true;
 
     if (m_bot->HasAura(CAT_FORM, EFFECT_INDEX_0))
     {
         m_bot->RemoveAurasDueToSpell(CAT_FORM_1);
         //ai->TellMaster("FormClearCat");
-        return;
+        return true;
     }
     if (m_bot->HasAura(BEAR_FORM, EFFECT_INDEX_0))
     {
         m_bot->RemoveAurasDueToSpell(BEAR_FORM_1);
         //ai->TellMaster("FormClearBear");
-        return;
+        return true;
     }
     if (m_bot->HasAura(DIRE_BEAR_FORM, EFFECT_INDEX_0))
     {
         m_bot->RemoveAurasDueToSpell(DIRE_BEAR_FORM_1);
         //ai->TellMaster("FormClearDireBear");
-        return;
+        return true;
     }
     // spellcasting form, but disables healing spells so it's got to go
     if (m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0))
     {
         m_bot->RemoveAurasDueToSpell(MOONKIN_FORM_1);
         //ai->TellMaster("FormClearMoonkin");
-        return;
+        return true;
     }
 
     if (ai->GetHealthPercent() <= 60)
     {
-        HealTarget(m_bot);
-        return;
+        if (HealTarget(m_bot))
+            return true;
     }
     if (masterHP <= 50)
     {
-        HealTarget(GetMaster());
-        return;
+        if (HealTarget(GetMaster()))
+            return true;
     }
     // TODO: err... what about the other teammates?
 
-    DruidSpellCombat = 0;
+    return false;
 }
 
 void PlayerbotDruidAI::CheckForms()
