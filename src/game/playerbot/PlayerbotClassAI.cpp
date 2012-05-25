@@ -20,13 +20,8 @@ bool PlayerbotClassAI::BuffPlayer(Player* target)
 
 bool PlayerbotClassAI::CastSpellWand(uint32 nextAction, Unit *pTarget, uint32 SHOOT)
 {
-    PlayerbotAI* ai = GetAI();
-    if (!ai)
-        return false;
-
-    Player *m_bot = GetPlayerBot();
-    if (!m_bot)
-        return false;
+    if (!m_ai)  return false;
+    if (!m_bot) return false;
 
     if (SHOOT > 0 && m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
     {
@@ -45,8 +40,8 @@ bool PlayerbotClassAI::CastSpellWand(uint32 nextAction, Unit *pTarget, uint32 SH
 
     if (nextAction == SHOOT)
     {
-        if (SHOOT > 0 && ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
-            if (ai->CastSpell(SHOOT, *pTarget))
+        if (SHOOT > 0 && m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
+            if (m_ai->CastSpell(SHOOT, *pTarget))
                 return true;
         else
             // Do Melee attack
@@ -54,9 +49,9 @@ bool PlayerbotClassAI::CastSpellWand(uint32 nextAction, Unit *pTarget, uint32 SH
     }
 
     if (pTarget != NULL)
-        return ai->CastSpell(nextAction, *pTarget);
+        return m_ai->CastSpell(nextAction, *pTarget);
     else
-        return ai->CastSpell(nextAction);
+        return m_ai->CastSpell(nextAction);
 
     return false; // Can't ever get here because of if/else above. Safety first...
 }
