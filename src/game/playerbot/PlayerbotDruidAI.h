@@ -115,8 +115,8 @@ public:
 private:
     // Combat Maneuver helper functions
     bool _DoNextPVECombatManeuverBear(Unit* pTarget);
+    bool _DoNextPVECombatManeuverCat(Unit* pTarget);
     bool _DoNextPVECombatManeuverSpellDPS(Unit* pTarget);
-    bool _DoNextPVECombatManeuverMeleeDPS(Unit* pTarget);
     bool _DoNextPVECombatManeuverHeal(Unit* pTarget);
 
     // Heals the target based off its hps
@@ -125,7 +125,14 @@ private:
     static void GoBuffForm(Player *self);
 
     //Assumes form based on spec
-    bool CheckForms();
+    uint8 CheckForms();
+    enum CheckForms_ReturnValues {
+        RETURN_FAIL = 0,
+        RETURN_FAIL_WAITINGONSELFBUFF,
+        RETURN_OK_NOCHANGE,
+        RETURN_OK_SHIFTING,
+        RETURN_OK_CANNOTSHIFT
+    };
 
     // druid cat/bear/dire bear/moonkin/tree of life forms
     uint32 CAT_FORM,
