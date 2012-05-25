@@ -382,10 +382,12 @@ bool PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 
 bool PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
 {
+    return false;
 }
 
 bool PlayerbotDruidAI::_DoNextPVECombatManeuverSpellDPS(Unit* pTarget)
 {
+    return false;
 }
 
 bool PlayerbotDruidAI::_DoNextPVECombatManeuverMeleeDPS(Unit* pTarget)
@@ -406,6 +408,7 @@ bool PlayerbotDruidAI::_DoNextPVECombatManeuverMeleeDPS(Unit* pTarget)
     //        pVictim->Attack(pTarget, true);
     //}
 
+    return false;
 }
 
 bool PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarget)
