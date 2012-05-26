@@ -4524,7 +4524,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             {
                 if (!pSpell || !pSpell->IsChannelActive())
                 {
-                    if (m_DelayAttackInit + m_DelayAttack < time(NULL))
+                    if (m_DelayAttackInit + m_DelayAttack > time(NULL))
                         return SetIgnoreUpdateTime(1); // short bursts of delay
 
                     DoNextCombatManeuver();
