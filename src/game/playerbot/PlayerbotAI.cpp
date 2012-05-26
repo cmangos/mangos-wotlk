@@ -4547,7 +4547,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
                 m_lootTargets.unique();
             else
                 m_lootTargets.clear();
-            SetIgnoreUpdateTime(0); // Aren't we already - by default - not ignoring the bot AI?
+            return SetIgnoreUpdateTime(0); // Was set at the start of UpdateAI, make sure we don't unnecessarily wait
         }
         else if (m_botState == BOTSTATE_LOOTING)
             DoLoot();
