@@ -339,7 +339,14 @@ bool PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     if (SHADOWFORM == 0 && SMITE > 0 && m_ai->GetManaPercent() >= 17)
         return CastSpell(SMITE, pTarget);
 
-    m_ai->TellMaster("Couldn't find an appropriate spell.");
+    // definitely not out of mana yet
+    if (m_ai->GetManaPercent() >= 20)
+    {
+        m_ai->TellMaster("Couldn't find an appropriate spell.");
+        return false;
+    }
+
+    return false;
 } // end DoNextCombatManeuver
 
 void PlayerbotPriestAI::DoNonCombatActions()

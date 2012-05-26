@@ -1510,7 +1510,7 @@ void PlayerbotAI::SendOrders(Player& /*player*/)
     }
 
     TellMaster(out.str().c_str());
-    TellMaster("My combat delay is '%u'", gDelayAttack);
+    TellMaster("My combat delay is '%u'", m_DelayAttack);
 }
 
 // handle outgoing packets the server would send to the client
@@ -2869,6 +2869,7 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
         // using this caused bot to remove current loot target, and add this new threat to the loot list.  Now it remembers the loot target and adds a new one.
         // Bot will still clear the target if the master gets too far away from it.
         m_targetCombat = 0;
+        m_DelayAttackInit = time(NULL); // Combat started, new start time to check CombatDelay for.
     }
 
     // update attacker info now
@@ -2932,12 +2933,12 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
     // prevents bot from helping
     if (m_targetCombat->GetTypeId() == TYPEID_PLAYER && dynamic_cast<Player*> (m_targetCombat)->duel)
     {
-        m_ignoreAIUpdatesUntilTime = time(NULL) + 6;
+        SetIgnoreUpdateTime(6);
         return;
     }
 
     m_bot->SetSelectionGuid((m_targetCombat->GetObjectGuid()));
-    m_ignoreAIUpdatesUntilTime = time(NULL) + 1;
+    SetIgnoreUpdateTime(1);
 
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
@@ -3863,13 +3864,13 @@ void PlayerbotAI::CombatOrderRestore()
     {
         sLog.outString();
         sLog.outString(">> [CombatOrderRestore()] Loaded `playerbot_saved_data`, found no match for guid %li.", m_bot->GetGUIDLow());
-        gDelayAttack = 0;
+        m_DelayAttack = 0;
         return;
     }
     else
     {
         Field* fields = result->Fetch();
-        gDelayAttack = fields[0].GetUInt8();
+        m_DelayAttack = fields[0].GetUInt8();
         delete result;
     }
 }
@@ -3898,7 +3899,7 @@ void PlayerbotAI::CombatOrderRestore(uint8 Prim, uint8 Sec)
         ObjectGuid SectargetGUID = ObjectGuid(fields[3].GetUInt64());
         std::string pname = fields[4].GetString();
         std::string sname = fields[5].GetString();
-        gDelayAttack = fields[6].GetUInt8();
+        m_DelayAttack = fields[6].GetUInt8();
         //if (gPrimtarget > 0)
             gPrimtarget = ObjectAccessor::GetUnit(*m_bot->GetMap()->GetWorldObject(PrimtargetGUID), PrimtargetGUID);
         //if (gSectarget > 0)
@@ -4523,15 +4524,9 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             {
                 if (!pSpell || !pSpell->IsChannelActive())
                 {
-                    if (gDelayAttackInit != 1)
-                    {
-                        gDelayAttackInit = 1;
-                        if (gDelayAttack > 0)
-                        {
-                            SetIgnoreUpdateTime(gDelayAttack);
-                            return;
-                        }
-                    }
+                    if (m_DelayAttackInit + m_DelayAttack < time(NULL))
+                        return SetIgnoreUpdateTime(1); // short bursts of delay
+
                     DoNextCombatManeuver();
                 }
                 else
@@ -4541,14 +4536,13 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
         // bot was in combat recently - loot now
         else if (m_botState == BOTSTATE_COMBAT)
         {
-            gDelayAttackInit = 0;
             SetState(BOTSTATE_LOOTING);
             m_attackerInfo.clear();
             if (HasCollectFlag(COLLECT_FLAG_COMBAT))
                 m_lootTargets.unique();
             else
                 m_lootTargets.clear();
-            SetIgnoreUpdateTime(0);
+            SetIgnoreUpdateTime(0); // Aren't we already - by default - not ignoring the bot AI?
         }
         else if (m_botState == BOTSTATE_LOOTING)
             DoLoot();
@@ -8084,9 +8078,9 @@ void PlayerbotAI::_HandleCommandCombat(std::string &text, Player &fromPlayer)
         sscanf(text.c_str(), "%d", &gdelay);
         if (gdelay >= 0 && gdelay <= 10)
         {
-            gDelayAttack = gdelay;
-            TellMaster("Combat delay is now '%u' ", gDelayAttack);
-            CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_delay = '%u' WHERE guid = '%u'", gDelayAttack, m_bot->GetGUIDLow());
+            m_DelayAttack = gdelay;
+            TellMaster("Combat delay is now '%u' ", m_DelayAttack);
+            CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_delay = '%u' WHERE guid = '%u'", m_DelayAttack, m_bot->GetGUIDLow());
             return;
         }
         else

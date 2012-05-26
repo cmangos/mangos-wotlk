@@ -276,7 +276,14 @@ bool PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     if (SHADOW_BOLT)
         return CastSpell(SHADOW_BOLT, pTarget);
 
-    m_ai->TellMaster("Couldn't find an appropriate spell.");
+    // definitely not out of mana - TODO: someone removed all mana checks from the spells - shadowbolt uses less than 20% right?
+    if (m_ai->GetManaPercent() > 20)
+    {
+        m_ai->TellMaster("Couldn't find an appropriate spell.");
+        return false;
+    }
+
+    return false;
 } // end DoNextCombatManeuver
 
 void PlayerbotWarlockAI::CheckDemon()

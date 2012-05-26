@@ -413,6 +413,7 @@ bool PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
 
     }
 
+    return false;
 }
 
 void PlayerbotWarriorAI::DoNonCombatActions()

@@ -270,6 +270,8 @@ bool PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     }
     if (m_ai->GetManager()->m_confDebugWhisper)
         m_ai->TellMaster(out.str().c_str());
+
+    return false;
 }
 
 // end DoNextCombatManeuver

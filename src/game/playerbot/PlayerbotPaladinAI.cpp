@@ -440,6 +440,7 @@ bool PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
                 break;
                }*/
 
+        return false;
     }
 
 

@@ -1780,13 +1780,15 @@ public:
     //void Stay();
     //bool Follow(Player& player);
     void SendNotEquipList(Player& player);
-    uint8 gDelayAttack;
-    uint8 gDelayAttackInit;
+
+    uint8  m_DelayAttack;
+    time_t m_DelayAttackInit;
     Unit *gPrimtarget;
     Unit *gSectarget;
     uint32 gQuestFetch;
     uint8 gPrimOrder;
     uint8 gSecOrder;
+
     uint32 AutoEquipPlug;               //switch for autoequip
     uint32 SellWhite;					//switch for white item auto sell
     uint8 DistOverRide;
@@ -1809,7 +1811,7 @@ public:
     Unit *GetCurrentTarget() { return m_targetCombat; };
     void DoNextCombatManeuver();
     void DoCombatMovement();
-    void SetIgnoreUpdateTime(uint8 t = 0) { m_ignoreAIUpdatesUntilTime = time(0) + t; };
+    void SetIgnoreUpdateTime(uint8 t = 0) { m_ignoreAIUpdatesUntilTime = time(NULL) + t; };
 
     Player *GetPlayerBot() const { return m_bot; }
     Player *GetPlayer() const { return m_bot; }

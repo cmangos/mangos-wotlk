@@ -220,7 +220,14 @@ bool PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
     if (FIREBALL > 0 && m_ai->GetManaPercent() >= 23) // Very low levels
         return CastSpell(FIREBALL, pTarget);
 
-    m_ai->TellMaster("Couldn't find an appropriate spell.");
+    // definitely not OOM yet
+    if (m_ai->GetManaPercent() >= 25)
+    {
+        m_ai->TellMaster("Couldn't find an appropriate spell.");
+        return false;
+    }
+
+    return false;
 } // end DoNextCombatManeuver
 
 void PlayerbotMageAI::DoNonCombatActions()
