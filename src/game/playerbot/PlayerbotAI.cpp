@@ -101,6 +101,7 @@ m_taxiMaster(ObjectGuid())
     gTempDist2 = 1.0f;
     SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
     CombatOrderRestore();
+    m_DelayAttackInit = time(NULL);
 
     // get class specific ai
     switch (m_bot->getClass())
@@ -4020,6 +4021,8 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
         TellMaster("Orders are cleaned!");
         gPrimOrder = 0;
         gSecOrder = 0;
+        m_DelayAttackInit = time(NULL);
+        m_DelayAttack = 0;
         CharacterDatabase.PExecute("DELETE FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
         return;
     }
@@ -4339,7 +4342,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
         return;
 
     // default updates occur every two seconds
-    m_ignoreAIUpdatesUntilTime = time(NULL) + 2;
+    SetIgnoreUpdateTime(2);
     if (FollowAutoGo == 1)
     {
         if (m_combatOrder & ORDERS_TANK)
@@ -4365,7 +4368,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             // set state to dead
             SetState(BOTSTATE_DEAD);
             // wait 30sec
-            m_ignoreAIUpdatesUntilTime = time(NULL) + 30;
+            SetIgnoreUpdateTime(30);
         }
         else if (m_botState == BOTSTATE_DEAD)
         {
@@ -4404,7 +4407,9 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             }
             // resurrect now
             // DEBUG_LOG ("[PlayerbotAI]: UpdateAI - Reviving %s to corpse...", m_bot->GetName() );
-            m_ignoreAIUpdatesUntilTime = time(NULL) + 6;
+
+            SetIgnoreUpdateTime(6);
+
             PlayerbotChatHandler ch(GetMaster());
             if (!ch.revive(*m_bot))
             {
@@ -4415,7 +4420,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             SetState(BOTSTATE_NORMAL);
         }
     }
-    else
+    else // bot still alive
     {
         if (!m_findNPC.empty())
             findNearbyCreature();
