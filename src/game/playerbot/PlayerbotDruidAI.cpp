@@ -170,17 +170,17 @@ bool PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
     // TODO: do something to allow emergency heals for non-healers?
     switch (CheckForms())
     {
-        case CheckForms_ReturnValues::RETURN_OK_SHIFTING:
+        case RETURN_OK_SHIFTING:
             return true;
 
-        case CheckForms_ReturnValues::RETURN_FAIL:
-        case CheckForms_ReturnValues::RETURN_OK_CANNOTSHIFT:
+        case RETURN_FAIL:
+        case RETURN_OK_CANNOTSHIFT:
             if (spec == DRUID_SPEC_FERAL)
                 spec = DRUID_SPEC_BALANCE; // Can't shift, force spellcasting
             break; // rest functions without form
 
-        //case CheckForms_ReturnValues::RETURN_OK_NOCHANGE: // great!
-        //case CheckForms_ReturnValues::RETURN_FAIL_WAITINGONSELFBUFF: // This is war dammit! No time for silly buffs during combat...
+        //case RETURN_OK_NOCHANGE: // great!
+        //case RETURN_FAIL_WAITINGONSELFBUFF: // This is war dammit! No time for silly buffs during combat...
     }
 
     //switch (m_ai->GetScenarioType())
@@ -464,8 +464,8 @@ bool PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarget)
 */
 uint8 PlayerbotDruidAI::CheckForms()
 {
-    if (!m_ai)  return CheckForms_ReturnValues::RETURN_FAIL;
-    if (!m_bot) return CheckForms_ReturnValues::RETURN_FAIL;
+    if (!m_ai)  return RETURN_FAIL;
+    if (!m_bot) return RETURN_FAIL;
 
     uint32 spec = m_bot->GetSpec();
     uint32 BEAR = (DIRE_BEAR_FORM > 0 ? DIRE_BEAR_FORM : BEAR_FORM);
@@ -473,15 +473,15 @@ uint8 PlayerbotDruidAI::CheckForms()
     if (spec == DRUID_SPEC_BALANCE)
     {
         if (m_bot->HasAura(MOONKIN_FORM))
-            return CheckForms_ReturnValues::RETURN_OK_NOCHANGE;
+            return RETURN_OK_NOCHANGE;
 
         if (!MOONKIN_FORM)
-            return CheckForms_ReturnValues::RETURN_OK_CANNOTSHIFT;
+            return RETURN_OK_CANNOTSHIFT;
 
         if (CastSpell(MOONKIN_FORM))
-            return CheckForms_ReturnValues::RETURN_OK_SHIFTING;
+            return RETURN_OK_SHIFTING;
         else
-            return CheckForms_ReturnValues::RETURN_FAIL;
+            return RETURN_FAIL;
     }
 
     if (spec == DRUID_SPEC_FERAL)
@@ -490,63 +490,63 @@ uint8 PlayerbotDruidAI::CheckForms()
         if (m_ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK)
         {
             if (m_bot->HasAura(BEAR))
-                return CheckForms_ReturnValues::RETURN_OK_NOCHANGE;
+                return RETURN_OK_NOCHANGE;
 
             if (!BEAR)
-                return CheckForms_ReturnValues::RETURN_OK_CANNOTSHIFT;
+                return RETURN_OK_CANNOTSHIFT;
 
             if (!m_bot->HasAura(THORNS))
-                return CheckForms_ReturnValues::RETURN_FAIL_WAITINGONSELFBUFF;
+                return RETURN_FAIL_WAITINGONSELFBUFF;
 
             if (CastSpell(BEAR))
-                return CheckForms_ReturnValues::RETURN_OK_SHIFTING;
+                return RETURN_OK_SHIFTING;
             else
-                return CheckForms_ReturnValues::RETURN_FAIL;
+                return RETURN_FAIL;
         }
         else // No tank orders - try to go kitty or at least bear
         {
             if (CAT_FORM > 0)
             {
                 if (m_bot->HasAura(CAT_FORM))
-                    return CheckForms_ReturnValues::RETURN_OK_NOCHANGE;
+                    return RETURN_OK_NOCHANGE;
 
                 if (CastSpell(CAT_FORM))
-                    return CheckForms_ReturnValues::RETURN_OK_SHIFTING;
+                    return RETURN_OK_SHIFTING;
                 else
-                    return CheckForms_ReturnValues::RETURN_FAIL;
+                    return RETURN_FAIL;
             }
 
             if (BEAR > 0)
             {
                 if (m_bot->HasAura(BEAR))
-                    return CheckForms_ReturnValues::RETURN_OK_NOCHANGE;
+                    return RETURN_OK_NOCHANGE;
 
                 if (CastSpell(BEAR))
-                    return CheckForms_ReturnValues::RETURN_OK_SHIFTING;
+                    return RETURN_OK_SHIFTING;
                 else
-                    return CheckForms_ReturnValues::RETURN_FAIL;
+                    return RETURN_FAIL;
             }
 
-            return CheckForms_ReturnValues::RETURN_OK_CANNOTSHIFT;
+            return RETURN_OK_CANNOTSHIFT;
         }
     }
 
     if (spec == DRUID_SPEC_RESTORATION)
     {
         if (m_bot->HasAura(TREE_OF_LIFE))
-            return CheckForms_ReturnValues::RETURN_OK_NOCHANGE;
+            return RETURN_OK_NOCHANGE;
 
         if (!TREE_OF_LIFE)
-            return CheckForms_ReturnValues::RETURN_OK_CANNOTSHIFT;
+            return RETURN_OK_CANNOTSHIFT;
 
         if (CastSpell(TREE_OF_LIFE))
-            return CheckForms_ReturnValues::RETURN_OK_SHIFTING;
+            return RETURN_OK_SHIFTING;
         else
-            return CheckForms_ReturnValues::RETURN_FAIL;
+            return RETURN_FAIL;
     }
 
     // Unknown Spec
-    return CheckForms_ReturnValues::RETURN_FAIL;
+    return RETURN_FAIL;
 }
 
 void PlayerbotDruidAI::DoNonCombatActions()
