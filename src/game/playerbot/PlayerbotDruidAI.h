@@ -113,6 +113,8 @@ public:
     bool BuffPlayer(Player *target);
 
 private:
+    bool CastSpell(uint32 nextAction, Unit *pTarget = NULL) { return CastSpellNoRanged(nextAction, pTarget); }
+
     // Combat Maneuver helper functions
     bool _DoNextPVECombatManeuverBear(Unit* pTarget);
     bool _DoNextPVECombatManeuverCat(Unit* pTarget);
