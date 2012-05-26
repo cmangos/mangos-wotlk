@@ -3186,13 +3186,6 @@ void PlayerbotAI::DoLoot()
 
     WorldObject *wo = m_bot->GetMap()->GetWorldObject(m_lootCurrent);
 
-    // clear invalid object or object that is too far from master
-    if (!wo || GetMaster()->GetDistance(wo) > float(m_mgr->m_confCollectDistanceMax))
-    {
-        m_lootCurrent = ObjectGuid();
-        return;
-    }
-
     Creature *c = m_bot->GetMap()->GetCreature(m_lootCurrent);
     GameObject *go = m_bot->GetMap()->GetGameObject(m_lootCurrent);
 
