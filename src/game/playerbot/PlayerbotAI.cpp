@@ -3014,8 +3014,6 @@ void PlayerbotAI::DoCombatMovement()
 
     float targetDist = m_bot->GetCombatDistance(m_targetCombat);
 
-    m_bot->SetFacingTo(m_bot->GetAngle(m_targetCombat));
-
     if (m_combatStyle == COMBAT_MELEE && !m_bot->hasUnitState(UNIT_STAT_CHASE) && ((m_movementOrder == MOVEMENT_STAY && targetDist <= ATTACK_DISTANCE) || (m_movementOrder != MOVEMENT_STAY)))
         // melee combat - chase target if in range or if we are not forced to stay
         m_bot->GetMotionMaster()->MoveChase(m_targetCombat);
@@ -3220,9 +3218,7 @@ void PlayerbotAI::DoLoot()
 
     if (m_bot->GetDistance(wo) > CONTACT_DISTANCE + wo->GetObjectBoundingRadius())
     {
-        float x, y, z;
-        wo->GetContactPoint(m_bot, x, y, z, 0.1f);
-        m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z);
+        m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), wo->GetPositionX(), wo->GetPositionY(),wo->GetPositionZ());
         // give time to move to point before trying again
         SetIgnoreUpdateTime(1);
     }
@@ -6491,7 +6487,7 @@ void PlayerbotAI::findNearbyGO()
 void PlayerbotAI::findNearbyCreature()
 {
     std::list<Creature*> creatureList;
-    float radius = INTERACTION_DISTANCE;
+    float radius = 2.5;
 
     CellPair pair(MaNGOS::ComputeCellPair(m_bot->GetPositionX(), m_bot->GetPositionY()));
     Cell cell(pair);
@@ -6525,8 +6521,8 @@ void PlayerbotAI::findNearbyCreature()
             if (m_bot->GetDistance(wo) > CONTACT_DISTANCE + wo->GetObjectBoundingRadius())
             {
                 float x, y, z;
-                wo->GetContactPoint(m_bot, x, y, z, 1.0f);
-                m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z);
+                wo->GetContactPoint(m_bot, x, y, z, wo->GetObjectBoundingRadius());
+                m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z, false);
                 // give time to move to point before trying again
                 SetIgnoreUpdateTime(1);
             }
