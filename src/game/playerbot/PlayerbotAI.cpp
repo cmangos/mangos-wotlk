@@ -2976,6 +2976,7 @@ void PlayerbotAI::DoNextCombatManeuver()
         GetDuelTarget(GetMaster());
     else
         GetCombatTarget();
+
     // check if we have a target - fixes crash reported by rrtn (kill hunter's pet bug)
     // if current target for attacks doesn't make sense anymore
     // clear our orders so we can get orders in next update
@@ -4339,6 +4340,8 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
 
     // default updates occur every two seconds
     SetIgnoreUpdateTime(2);
+
+    // TODO: use enums rather than meaningless numbers
     if (FollowAutoGo == 1)
     {
         if (m_combatOrder & ORDERS_TANK)
@@ -4350,23 +4353,10 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
         FollowAutoGo = 2;
         SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
     }
+
     if (!m_bot->isAlive())
     {
-        if (m_botState != BOTSTATE_DEAD && m_botState != BOTSTATE_DEADRELEASED)
-        {
-            // DEBUG_LOG ("[PlayerbotAI]: UpdateAI - %s died and is not in correct state...", m_bot->GetName() );
-            // clear loot list on death
-            m_lootTargets.clear();
-            m_lootCurrent = ObjectGuid();
-            // clear combat orders
-            m_bot->SetSelectionGuid(ObjectGuid());
-            m_bot->GetMotionMaster()->Clear(true);
-            // set state to dead
-            SetState(BOTSTATE_DEAD);
-            // wait 30sec
-            SetIgnoreUpdateTime(30);
-        }
-        else if (m_botState == BOTSTATE_DEAD)
+        if (m_botState == BOTSTATE_DEAD)
         {
             // become ghost
             if (m_bot->GetCorpse()) {
@@ -4383,8 +4373,11 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             m_bot->TeleportTo(loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, m_bot->GetOrientation());
             // set state to released
             SetState(BOTSTATE_DEADRELEASED);
+
+            return;
         }
-        else if (m_botState == BOTSTATE_DEADRELEASED)
+
+        if (m_botState == BOTSTATE_DEADRELEASED)
         {
             // get bot's corpse
             Corpse *corpse = m_bot->GetCorpse();
@@ -4397,7 +4390,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             // check if we are allowed to resurrect now
             if ((corpse->GetGhostTime() + m_bot->GetCorpseReclaimDelay(corpse->GetType() == CORPSE_RESURRECTABLE_PVP)) > time(NULL))
             {
-                m_ignoreAIUpdatesUntilTime = corpse->GetGhostTime() + m_bot->GetCorpseReclaimDelay(corpse->GetType() == CORPSE_RESURRECTABLE_PVP);
+               SetIgnoreUpdateTime( corpse->GetGhostTime() + m_bot->GetCorpseReclaimDelay(corpse->GetType() == CORPSE_RESURRECTABLE_PVP) );
                 // DEBUG_LOG ("[PlayerbotAI]: UpdateAI - %s has to wait for %d seconds to revive...", m_bot->GetName(), m_ignoreAIUpdatesUntilTime-time(NULL) );
                 return;
             }
@@ -4414,166 +4407,205 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             }
             // set back to normal
             SetState(BOTSTATE_NORMAL);
-        }
-    }
-    else // bot still alive
-    {
-        if (!m_findNPC.empty())
-            findNearbyCreature();
 
-        // if we are casting a spell then interrupt it
-        // make sure any actions that cast a spell set a proper m_ignoreAIUpdatesUntilTime!
-        Spell* const pSpell = GetCurrentSpell();
-        if (pSpell && !(pSpell->IsChannelActive() || pSpell->IsAutoRepeat()))
-            InterruptCurrentCastingSpell();
-
-        else if (m_botState == BOTSTATE_TAME)
-        {
-            Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, m_targetGuidCommand);
-            if (!pTarget)
-                return;
-
-            m_bot->SetSelectionGuid(m_targetGuidCommand);
-
-            if (!IsInRange(pTarget, TAME_BEAST_1))
-                m_bot->clearUnitState(UNIT_STAT_CHASE);
-
-            if (!m_bot->hasUnitState(UNIT_STAT_CHASE))
-            {
-                m_bot->GetMotionMaster()->MoveChase(pTarget);
-                return;
-            }
-
-            SpellEntry const* spellInfo = sSpellStore.LookupEntry(TAME_BEAST_1);
-            if (!spellInfo)
-                return;
-
-            Spell *spell = new Spell(m_bot, spellInfo, false);
-            if (!spell)
-                return;
-
-            if (m_bot->GetPetGuid() || spell->CheckCast(true) != SPELL_CAST_OK || !pTarget ||
-                pTarget->isDead() || !m_bot->IsInMap(pTarget) || !(((Creature *) pTarget)->GetCreatureInfo()->type_flags & CREATURE_TYPEFLAGS_TAMEABLE))
-            {
-                MovementReset();
-                m_bot->SetSelectionGuid(ObjectGuid());
-                SetState(BOTSTATE_NORMAL);
-                SetIgnoreUpdateTime(0);
-            }
-            else if (!m_bot->HasAura(TAME_BEAST_1, EFFECT_INDEX_1))
-            {
-                m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
-                SpellCastTargets targets;
-                targets.setUnitTarget(pTarget);
-                spell->prepare(&targets);
-                SetIgnoreUpdateTime(10);
-            }
             return;
         }
 
-        // direct cast command from master
-        else if (m_spellIdCommand != 0)
+        // if (m_botState != BOTSTATE_DEAD && m_botState != BOTSTATE_DEADRELEASED)
+        // DEBUG_LOG ("[PlayerbotAI]: UpdateAI - %s died and is not in correct state...", m_bot->GetName() );
+        // clear loot list on death
+        m_lootTargets.clear();
+        m_lootCurrent = ObjectGuid();
+        // clear combat orders
+        m_bot->SetSelectionGuid(ObjectGuid());
+        m_bot->GetMotionMaster()->Clear(true);
+        // set state to dead
+        SetState(BOTSTATE_DEAD);
+        // wait 30sec
+        SetIgnoreUpdateTime(30);
+
+        return;
+    }
+
+    // bot still alive
+    if (!m_findNPC.empty())
+        findNearbyCreature();
+
+    // if we are casting a spell then interrupt it
+    // make sure any actions that cast a spell set a proper m_ignoreAIUpdatesUntilTime!
+    Spell* const pSpell = GetCurrentSpell();
+    if (pSpell && !(pSpell->IsChannelActive() || pSpell->IsAutoRepeat()))
+    {
+        InterruptCurrentCastingSpell();
+        return;
+    }
+
+    if (m_botState == BOTSTATE_TAME)
+    {
+        Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, m_targetGuidCommand);
+        if (!pTarget)
+            return;
+
+        m_bot->SetSelectionGuid(m_targetGuidCommand);
+
+        if (!IsInRange(pTarget, TAME_BEAST_1))
+            m_bot->clearUnitState(UNIT_STAT_CHASE);
+
+        if (!m_bot->hasUnitState(UNIT_STAT_CHASE))
         {
-            Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, m_targetGuidCommand);
-            if (pTarget)
-                CastSpell(m_spellIdCommand, *pTarget);
-            m_spellIdCommand = 0;
-            m_targetGuidCommand = ObjectGuid();
+            m_bot->GetMotionMaster()->MoveChase(pTarget);
+            return;
         }
 
-        else if (m_botState == BOTSTATE_ENCHANT)
-        {
-            SetState(BOTSTATE_NORMAL);
-            InspectUpdate();
-        }
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(TAME_BEAST_1);
+        if (!spellInfo)
+            return;
 
-        else if (m_botState == BOTSTATE_CRAFT)
-        {
-            SpellEntry const* spellInfo = sSpellStore.LookupEntry(m_CurrentlyCastingSpellId);
-            if (!spellInfo)
-                return;
+        Spell *spell = new Spell(m_bot, spellInfo, false);
+        if (!spell)
+            return;
 
-            Spell *spell = new Spell(m_bot, spellInfo, false);
-            if (!spell)
-                return;
-
-            if (GetSpellCharges(m_CurrentlyCastingSpellId) == 0 || spell->CheckCast(true) != SPELL_CAST_OK)
-            {
-                SetState(BOTSTATE_NORMAL);
-                SetIgnoreUpdateTime(0);
-            }
-            else
-            {
-                SpellCastTargets targets;
-                spell->prepare(&targets);
-                SetIgnoreUpdateTime(3);
-            }
-        }
-
-        //if master is unmounted, unmount the bot
-        else if (!GetMaster()->IsMounted() && m_bot->IsMounted())
+        if (m_bot->GetPetGuid() || spell->CheckCast(true) != SPELL_CAST_OK || !pTarget ||
+            pTarget->isDead() || !m_bot->IsInMap(pTarget) || !(((Creature *) pTarget)->GetCreatureInfo()->type_flags & CREATURE_TYPEFLAGS_TAMEABLE))
         {
-            WorldPacket emptyPacket;
-            m_bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
-        }
-
-        // handle combat (either self/master/group in combat, or combat state and valid target)
-        else if (IsInCombat() || (m_botState == BOTSTATE_COMBAT && m_targetCombat) ||  m_ScenarioType == SCENARIO_DUEL)
-        {
-            //check if the bot is Mounted
-            if (!m_bot->IsMounted())
-            {
-                if (!pSpell || !pSpell->IsChannelActive())
-                {
-                    if (m_DelayAttackInit + m_DelayAttack > time(NULL))
-                        return SetIgnoreUpdateTime(1); // short bursts of delay
-
-                    DoNextCombatManeuver();
-                }
-                else
-                    SetIgnoreUpdateTime(1);  // It's better to update AI more frequently during combat
-            }
-        }
-        // bot was in combat recently - loot now
-        else if (m_botState == BOTSTATE_COMBAT)
-        {
-            SetState(BOTSTATE_LOOTING);
-            m_attackerInfo.clear();
-            if (HasCollectFlag(COLLECT_FLAG_COMBAT))
-                m_lootTargets.unique();
-            else
-                m_lootTargets.clear();
-            return SetIgnoreUpdateTime(0); // Was set at the start of UpdateAI, make sure we don't unnecessarily wait
-        }
-        else if (m_botState == BOTSTATE_LOOTING)
-            DoLoot();
-        else if (m_botState == BOTSTATE_FLYING)
-        {
-            /* std::ostringstream out;
-            out << "Taxi: " << m_bot->GetName() << m_ignoreAIUpdatesUntilTime;
-            TellMaster(out.str().c_str()); */
-            DoFlight();
+            MovementReset();
+            m_bot->SetSelectionGuid(ObjectGuid());
             SetState(BOTSTATE_NORMAL);
             SetIgnoreUpdateTime(0);
         }
-        // if commanded to follow master and not already following master then follow master
-        else if (!m_bot->isInCombat() && !IsMoving())
-            MovementReset();
-
-        // do class specific non combat actions
-        else if (GetClassAI() && !m_bot->IsMounted())
+        else if (!m_bot->HasAura(TAME_BEAST_1, EFFECT_INDEX_1))
         {
-            (GetClassAI())->DoNonCombatActions();
-
-            // have we been told to collect GOs
-            if (HasCollectFlag(COLLECT_FLAG_NEAROBJECT))
-            {
-                findNearbyGO();
-                // start looting if have targets
-                if (!m_lootTargets.empty())
-                    SetState(BOTSTATE_LOOTING);
-            }
+            m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
+            SpellCastTargets targets;
+            targets.setUnitTarget(pTarget);
+            spell->prepare(&targets);
+            SetIgnoreUpdateTime(10);
         }
+
+        return;
+    }
+
+    // direct cast command from master
+    if (m_spellIdCommand != 0)
+    {
+        Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, m_targetGuidCommand);
+        if (pTarget)
+            CastSpell(m_spellIdCommand, *pTarget);
+        m_spellIdCommand = 0;
+        m_targetGuidCommand = ObjectGuid();
+
+        return;
+    }
+
+    if (m_botState == BOTSTATE_ENCHANT)
+    {
+        SetState(BOTSTATE_NORMAL);
+        InspectUpdate();
+
+        return;
+    }
+
+    if (m_botState == BOTSTATE_CRAFT)
+    {
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(m_CurrentlyCastingSpellId);
+        if (!spellInfo)
+            return;
+
+        Spell *spell = new Spell(m_bot, spellInfo, false);
+        if (!spell)
+            return;
+
+        if (GetSpellCharges(m_CurrentlyCastingSpellId) == 0 || spell->CheckCast(true) != SPELL_CAST_OK)
+        {
+            SetState(BOTSTATE_NORMAL);
+            SetIgnoreUpdateTime(0);
+        }
+        else
+        {
+            SpellCastTargets targets;
+            spell->prepare(&targets);
+            SetIgnoreUpdateTime(3);
+        }
+
+        return;
+    }
+
+    //if master is unmounted, unmount the bot
+    if (!GetMaster()->IsMounted() && m_bot->IsMounted())
+    {
+        WorldPacket emptyPacket;
+        m_bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
+
+        return;
+    }
+
+    // handle combat (either self/master/group in combat, or combat state and valid target)
+    if (IsInCombat() || (m_botState == BOTSTATE_COMBAT && m_targetCombat) ||  m_ScenarioType == SCENARIO_DUEL)
+    {
+        //check if the bot is Mounted
+        if (!m_bot->IsMounted())
+        {
+            if (!pSpell || !pSpell->IsChannelActive())
+            {
+                if (m_DelayAttackInit + m_DelayAttack > time(NULL))
+                    return SetIgnoreUpdateTime(1); // short bursts of delay
+
+                DoNextCombatManeuver();
+            }
+            else
+                SetIgnoreUpdateTime(1);  // It's better to update AI more frequently during combat
+        }
+
+        return;
+    }
+
+    // bot was in combat recently - loot now
+    if (m_botState == BOTSTATE_COMBAT)
+    {
+        SetState(BOTSTATE_LOOTING);
+        m_attackerInfo.clear();
+        if (HasCollectFlag(COLLECT_FLAG_COMBAT))
+            m_lootTargets.unique();
+        else
+            m_lootTargets.clear();
+
+        return SetIgnoreUpdateTime(0); // Was set at the start of UpdateAI, make sure we don't unnecessarily wait
+    }
+
+    if (m_botState == BOTSTATE_LOOTING)
+        return DoLoot();
+
+    if (m_botState == BOTSTATE_FLYING)
+    {
+        /* std::ostringstream out;
+        out << "Taxi: " << m_bot->GetName() << m_ignoreAIUpdatesUntilTime;
+        TellMaster(out.str().c_str()); */
+        DoFlight();
+        SetState(BOTSTATE_NORMAL);
+        SetIgnoreUpdateTime(0);
+
+        return;
+    }
+
+    // if commanded to follow master and not already following master then follow master
+    if (!m_bot->isInCombat() && !IsMoving())
+        return MovementReset();
+
+    // do class specific non combat actions
+    if (GetClassAI() && !m_bot->IsMounted())
+    {
+        GetClassAI()->DoNonCombatActions();
+
+        // have we been told to collect GOs
+        if (HasCollectFlag(COLLECT_FLAG_NEAROBJECT))
+        {
+            findNearbyGO();
+            // start looting if have targets
+            if (!m_lootTargets.empty())
+                SetState(BOTSTATE_LOOTING);
+        }
+
+        return;
     }
 }
 
