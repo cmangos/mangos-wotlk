@@ -91,9 +91,9 @@ PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, 
 
 PlayerbotPaladinAI::~PlayerbotPaladinAI() {}
 
-bool PlayerbotPaladinAI::DoFirstCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotPaladinAI::DoFirstCombatManeuver(Unit *pTarget)
 {
-    return false;
+    return RETURN_NO_ACTION_OK;
 }
 
 bool PlayerbotPaladinAI::HealTarget(Unit *target)
@@ -257,10 +257,10 @@ void PlayerbotPaladinAI::CheckSeals()
     }
 }
 
-bool PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     // TODO: Assumes valid pTarget
     Unit* pVictim = pTarget->getVictim();
@@ -271,9 +271,9 @@ bool PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
             if (HAMMER_OF_JUSTICE > 0)
             {
                 m_ai->CastSpell(HAMMER_OF_JUSTICE);
-                return true;
+                return RETURN_CONTINUE;
             }
-            return false;
+            return RETURN_NO_ACTION_UNKNOWN;
     }
 
     // damage spells
@@ -303,7 +303,7 @@ bool PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
             uint32 memberHP = m_groupMember->GetHealth() * 100 / m_groupMember->GetMaxHealth();
             if (memberHP < 40 && m_ai->GetManaPercent() >= 40)  // do not heal bots without plenty of mana for master & self
                 if (HealTarget(m_groupMember))
-                    return true;
+                    return RETURN_CONTINUE;
         }
     }
 
@@ -312,143 +312,127 @@ bool PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     switch (spec)
     {
         case PALADIN_SPEC_HOLY:
+            // if (HEALER & NO_DAMAGE MODE) return RETURN_NO_ACTION;
+            // else: DPS (retribution, NEVER protection)
+
+        case PALADIN_SPEC_RETRIBUTION:
+            if (HAMMER_OF_WRATH > 0 && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.20 && m_ai->GetManaPercent() >= 14)
+            {
+                m_ai->CastSpell (HAMMER_OF_WRATH, *pTarget);
+                return RETURN_CONTINUE;
+            }
+            else if (ART_OF_WAR > 0 && EXORCISM > 0 && !m_bot->HasSpellCooldown(EXORCISM) && m_bot->HasAura(ART_OF_WAR, EFFECT_INDEX_0))
+            {
+                m_ai->CastSpell (EXORCISM, *pTarget);
+                return RETURN_CONTINUE;
+            }
+            else if (CRUSADER_STRIKE > 0 && !m_bot->HasSpellCooldown(CRUSADER_STRIKE) && m_ai->GetManaPercent() >= 5)
+            {
+                m_ai->CastSpell (CRUSADER_STRIKE, *pTarget);
+                return RETURN_CONTINUE;
+            }
+            else if (DIVINE_STORM > 0 && /*m_ai->GetAttackerCount() >= 3 && dist <= ATTACK_DISTANCE*/ !m_bot->HasSpellCooldown(DIVINE_STORM) && m_ai->GetManaPercent() >= 12)
+            {
+                m_ai->CastSpell (DIVINE_STORM, *pTarget);
+                return RETURN_CONTINUE;
+            }
+            else if (JUDGEMENT_OF_LIGHT > 0 && m_ai->GetManaPercent() >= 5)
+            {
+                m_ai->CastSpell (JUDGEMENT_OF_LIGHT, *pTarget);
+                return RETURN_CONTINUE;
+            }
+            else if (AVENGING_WRATH > 0 && m_ai->GetManaPercent() >= 8)
+            {
+                m_ai->CastSpell (AVENGING_WRATH, *m_bot);
+                return RETURN_CONTINUE;
+            }
+            /*else if (HAMMER_OF_JUSTICE > 0 && !pTarget->HasAura(HAMMER_OF_JUSTICE, EFFECT_INDEX_0) && CombatCounter < 3 && m_ai->GetManaPercent() >= 3)
+               {
+                m_ai->CastSpell (HAMMER_OF_JUSTICE, *pTarget);
+                return RETURN_CONTINUE;
+               }*/
+            /*else if (SACRED_SHIELD > 0 && CombatCounter < 6 && pVictim == m_bot && m_ai->GetHealthPercent() < 70 && !m_bot->HasAura(SACRED_SHIELD, EFFECT_INDEX_0) && m_ai->GetManaPercent() >= 12)
+               {
+                m_ai->CastSpell (SACRED_SHIELD, *m_bot);
+                return RETURN_CONTINUE;
+               }*/
+            /* else if (HOLY_WRATH > 0 && CombatCounter < 9 && m_ai->GetAttackerCount() >= 3 && dist <= ATTACK_DISTANCE && m_ai->GetManaPercent() >= 24)
+               {
+                 m_ai->CastSpell (HOLY_WRATH, *pTarget);
+                return RETURN_CONTINUE;
+               }*/
+            /* else if (HAND_OF_SACRIFICE > 0 && pVictim == GetMaster() && !GetMaster()->HasAura(HAND_OF_SACRIFICE, EFFECT_INDEX_0) && CombatCounter < 10 && m_ai->GetManaPercent() >= 6)
+               {
+                 m_ai->CastSpell (HAND_OF_SACRIFICE, *GetMaster());
+                return RETURN_CONTINUE;
+               }*/
+            /*else if (DIVINE_PROTECTION > 0 && pVictim == m_bot && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 30 && CombatCounter < 11 && m_ai->GetManaPercent() >= 3)
+               {
+                m_ai->CastSpell (DIVINE_PROTECTION, *m_bot);
+                return RETURN_CONTINUE;
+               }*/
+            /*else if (RIGHTEOUS_DEFENSE > 0 && pVictim != m_bot && m_ai->GetHealthPercent() > 70 && CombatCounter < 12)
+               {
+                m_ai->CastSpell (RIGHTEOUS_DEFENSE, *pTarget);
+                return RETURN_CONTINUE;
+               }*/
+            /*else if (DIVINE_PLEA > 0 && !m_bot->HasAura(DIVINE_PLEA, EFFECT_INDEX_0) && m_ai->GetManaPercent() < 50 && CombatCounter < 13)
+               {
+                m_ai->CastSpell (DIVINE_PLEA, *m_bot);
+                return RETURN_CONTINUE;
+               }*/
+            /*else if (DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && CombatCounter < 14)
+               {
+                m_ai->CastSpell (DIVINE_FAVOR, *m_bot);
+                return RETURN_CONTINUE;
+               }*/
 
         case PALADIN_SPEC_PROTECTION:
             //Taunt if orders specify
             if (m_ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK && !newTarget && HAND_OF_RECKONING > 0 && !m_bot->HasSpellCooldown(HAND_OF_RECKONING))
             {
                 m_ai->CastSpell(HAND_OF_RECKONING, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
             else if (CONSECRATION > 0 && !m_bot->HasSpellCooldown(CONSECRATION))
             {
                 m_ai->CastSpell(CONSECRATION, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
             else if (HOLY_SHIELD > 0 && !m_bot->HasAura(HOLY_SHIELD))
             {
                 m_ai->CastSpell(HOLY_SHIELD, *m_bot);
-                break;
+                return RETURN_CONTINUE;
             }
             else if (AVENGERS_SHIELD > 0 && !m_bot->HasSpellCooldown(AVENGERS_SHIELD) && m_ai->GetManaPercent() >= 6)
             {
                 m_ai->CastSpell(AVENGERS_SHIELD, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
             else if (HAMMER_OF_THE_RIGHTEOUS > 0 && !m_bot->HasSpellCooldown(HAMMER_OF_THE_RIGHTEOUS) && m_ai->GetManaPercent() >= 10)
             {
                 m_ai->CastSpell(HAMMER_OF_THE_RIGHTEOUS, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
             else if (SHIELD_OF_RIGHTEOUSNESS > 0 && !m_bot->HasSpellCooldown(SHIELD_OF_RIGHTEOUSNESS) && m_ai->GetManaPercent() >= 10)
             {
                 m_ai->CastSpell(SHIELD_OF_RIGHTEOUSNESS, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
             else if (JUDGEMENT_OF_LIGHT > 0 && m_ai->GetManaPercent() >= 5)
             {
                 m_ai->CastSpell (JUDGEMENT_OF_LIGHT, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
-
-        case PALADIN_SPEC_RETRIBUTION:
-
-            if (HAMMER_OF_WRATH > 0 && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.20 && m_ai->GetManaPercent() >= 14)
-            {
-                m_ai->CastSpell (HAMMER_OF_WRATH, *pTarget);
-                break;
-            }
-            else if (ART_OF_WAR > 0 && EXORCISM > 0 && !m_bot->HasSpellCooldown(EXORCISM) && m_bot->HasAura(ART_OF_WAR, EFFECT_INDEX_0))
-            {
-                m_ai->CastSpell (EXORCISM, *pTarget);
-                break;
-            }
-            else if (CRUSADER_STRIKE > 0 && !m_bot->HasSpellCooldown(CRUSADER_STRIKE) && m_ai->GetManaPercent() >= 5)
-            {
-                m_ai->CastSpell (CRUSADER_STRIKE, *pTarget);
-                break;
-            }
-            else if (DIVINE_STORM > 0 && /*m_ai->GetAttackerCount() >= 3 && dist <= ATTACK_DISTANCE*/ !m_bot->HasSpellCooldown(DIVINE_STORM) && m_ai->GetManaPercent() >= 12)
-            {
-                m_ai->CastSpell (DIVINE_STORM, *pTarget);
-                break;
-            }
-            else if (JUDGEMENT_OF_LIGHT > 0 && m_ai->GetManaPercent() >= 5)
-            {
-                m_ai->CastSpell (JUDGEMENT_OF_LIGHT, *pTarget);
-                break;
-            }
-            else if (AVENGING_WRATH > 0 && m_ai->GetManaPercent() >= 8)
-            {
-                m_ai->CastSpell (AVENGING_WRATH, *m_bot);
-                break;
-            }
-            /*else if (HAMMER_OF_JUSTICE > 0 && !pTarget->HasAura(HAMMER_OF_JUSTICE, EFFECT_INDEX_0) && CombatCounter < 3 && m_ai->GetManaPercent() >= 3)
-               {
-                m_ai->CastSpell (HAMMER_OF_JUSTICE, *pTarget);
-                out << " Hammer of Justice";
-                CombatCounter++;
-                break;
-               }*/
-            /*else if (SACRED_SHIELD > 0 && CombatCounter < 6 && pVictim == m_bot && m_ai->GetHealthPercent() < 70 && !m_bot->HasAura(SACRED_SHIELD, EFFECT_INDEX_0) && m_ai->GetManaPercent() >= 12)
-               {
-                m_ai->CastSpell (SACRED_SHIELD, *m_bot);
-                out << " Sacred Shield";
-                CombatCounter++;
-                break;
-               }*/
-            /* else if (HOLY_WRATH > 0 && CombatCounter < 9 && m_ai->GetAttackerCount() >= 3 && dist <= ATTACK_DISTANCE && m_ai->GetManaPercent() >= 24)
-               {
-                 m_ai->CastSpell (HOLY_WRATH, *pTarget);
-                 out << " Holy Wrath";
-                 CombatCounter++;
-                 break;
-               }*/
-            /* else if (HAND_OF_SACRIFICE > 0 && pVictim == GetMaster() && !GetMaster()->HasAura(HAND_OF_SACRIFICE, EFFECT_INDEX_0) && CombatCounter < 10 && m_ai->GetManaPercent() >= 6)
-               {
-                 m_ai->CastSpell (HAND_OF_SACRIFICE, *GetMaster());
-                 out << " Hand of Sacrifice";
-                 CombatCounter++;
-                 break;
-               }*/
-            /*else if (DIVINE_PROTECTION > 0 && pVictim == m_bot && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 30 && CombatCounter < 11 && m_ai->GetManaPercent() >= 3)
-               {
-                m_ai->CastSpell (DIVINE_PROTECTION, *m_bot);
-                out << " Divine Protection";
-                CombatCounter++;
-                break;
-               }*/
-            /*else if (RIGHTEOUS_DEFENSE > 0 && pVictim != m_bot && m_ai->GetHealthPercent() > 70 && CombatCounter < 12)
-               {
-                m_ai->CastSpell (RIGHTEOUS_DEFENSE, *pTarget);
-                out << " Righteous Defense";
-                CombatCounter++;
-                break;
-               }*/
-            /*else if (DIVINE_PLEA > 0 && !m_bot->HasAura(DIVINE_PLEA, EFFECT_INDEX_0) && m_ai->GetManaPercent() < 50 && CombatCounter < 13)
-               {
-                m_ai->CastSpell (DIVINE_PLEA, *m_bot);
-                out << " Divine Plea";
-                CombatCounter++;
-                break;
-               }*/
-            /*else if (DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && CombatCounter < 14)
-               {
-                m_ai->CastSpell (DIVINE_FAVOR, *m_bot);
-                out << " Divine Favor";
-                CombatCounter++;
-                break;
-               }*/
-
-        return false;
     }
-
 
     //if (DIVINE_SHIELD > 0 && m_ai->GetHealthPercent() < 30 && pVictim == m_bot && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && !m_bot->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && m_ai->GetManaPercent() >= 3)
     //    m_ai->CastSpell(DIVINE_SHIELD, *m_bot);
 
     //if (DIVINE_SACRIFICE > 0 && m_ai->GetHealthPercent() > 50 && pVictim != m_bot && !m_bot->HasAura(DIVINE_SACRIFICE, EFFECT_INDEX_0))
     //    m_ai->CastSpell(DIVINE_SACRIFICE, *m_bot);
+
+    return RETURN_NO_ACTION_UNKNOWN;
 }
 
 void PlayerbotPaladinAI::DoNonCombatActions()

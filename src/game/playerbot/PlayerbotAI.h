@@ -1465,6 +1465,15 @@ enum NotableItems
     ELEMENTAL_SEAFORIUM_CHARGE = 23819
 };
 
+enum CombatManeuverReturns
+{
+    RETURN_NO_ACTION_OK,          // No action taken during this combat maneuver, as intended (just wait, etc...)
+    RETURN_NO_ACTION_UNKNOWN,     // No action taken during this combat maneuver, unknown reason
+    RETURN_NO_ACTION_ERROR,       // No action taken due to error
+    RETURN_FINISHED_FIRST_MOVES,  // Last action of first-combat-maneuver finished, continue onto next-combat-maneuver
+    RETURN_CONTINUE               // Continue first moves; normal return value for next-combat-maneuver
+};
+
 class MANGOS_DLL_SPEC PlayerbotAI
 {
 public:

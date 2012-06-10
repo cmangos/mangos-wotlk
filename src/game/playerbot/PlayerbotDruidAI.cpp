@@ -81,9 +81,9 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
 
 PlayerbotDruidAI::~PlayerbotDruidAI() {}
 
-bool PlayerbotDruidAI::DoFirstCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuver(Unit *pTarget)
 {
-    return false;
+    return RETURN_NO_ACTION_OK;
 }
 
 bool PlayerbotDruidAI::HealTarget(Unit *target)
@@ -153,10 +153,10 @@ bool PlayerbotDruidAI::HealTarget(Unit *target)
     return false;
 } // end HealTarget
 
-bool PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
 
@@ -171,7 +171,7 @@ bool PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
     switch (CheckForms())
     {
         case RETURN_OK_SHIFTING:
-            return true;
+            return RETURN_CONTINUE;
 
         case RETURN_FAIL:
         case RETURN_OK_CANNOTSHIFT:
@@ -204,7 +204,7 @@ bool PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
         case DRUID_SPEC_RESTORATION: // There is no Resto DAMAGE rotation. If you insist, go Balance...
         case DRUID_SPEC_BALANCE:
             if (m_bot->HasAura(BEAR) || m_bot->HasAura(CAT_FORM) || m_bot->HasAura(TREE_OF_LIFE))
-                return false;
+                return RETURN_NO_ACTION_UNKNOWN; // Didn't shift out of inappropriate form
 
             return _DoNextPVECombatManeuverSpellDPS(pTarget);
 
@@ -231,15 +231,15 @@ bool PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
         */
     }
 
-    return false;
+    return RETURN_NO_ACTION_UNKNOWN;
 } // end DoNextCombatManeuver
 
-bool PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
+CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    if (!m_bot->HasAura( (DIRE_BEAR_FORM > 0 ? DIRE_BEAR_FORM : BEAR_FORM) )) return false;
+    if (!m_bot->HasAura( (DIRE_BEAR_FORM > 0 ? DIRE_BEAR_FORM : BEAR_FORM) )) return RETURN_NO_ACTION_UNKNOWN;
 
     // Used to determine if this bot is highest on threat
     Unit *newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
@@ -255,11 +255,11 @@ bool PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
 
     if (PlayerbotAI::ORDERS_TANK == m_ai->GetCombatOrder() && !newTarget && GROWL > 0 && !m_bot->HasSpellCooldown(GROWL))
         if (CastSpell(GROWL, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     if (FAERIE_FIRE_FERAL > 0 && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0))
         if (CastSpell(FAERIE_FIRE_FERAL, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     // TODO: If 2 or more targets, swipe
     //if (SWIPE > 0 && TARGETCOUNT > 1)
@@ -268,33 +268,33 @@ bool PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
 
     if (ENRAGE > 0 && !m_bot->HasSpellCooldown(ENRAGE))
         if (CastSpell(ENRAGE, m_bot))
-            return true;
+            return RETURN_CONTINUE;
 
     if (DEMORALIZING_ROAR > 0 && !pTarget->HasAura(DEMORALIZING_ROAR, EFFECT_INDEX_0))
         if (m_ai->GetRageAmount() < 10 || CastSpell(DEMORALIZING_ROAR, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     if (MANGLE_BEAR > 0 && !pTarget->HasAura(MANGLE_BEAR))
         if (m_ai->GetRageAmount() < 15 || CastSpell(MANGLE_BEAR, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     if (LACERATE > 0 && !pTarget->HasAura(LACERATE, EFFECT_INDEX_0))
         if (m_ai->GetRageAmount() < 15 || CastSpell(LACERATE, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     if (MAUL > 0)
         if (m_ai->GetRageAmount() < 10 || CastSpell(MAUL, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
-    return false;
+    return RETURN_NO_ACTION_UNKNOWN;
 }
 
-bool PlayerbotDruidAI::_DoNextPVECombatManeuverCat(Unit* pTarget)
+CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverCat(Unit* pTarget)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    if (!m_bot->HasAura(CAT_FORM)) return false;
+    if (!m_bot->HasAura(CAT_FORM)) return RETURN_NO_ACTION_UNKNOWN;
 
     //Used to determine if this bot is highest on threat
     Unit *newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
@@ -314,80 +314,80 @@ bool PlayerbotDruidAI::_DoNextPVECombatManeuverCat(Unit* pTarget)
         // TODO: double-check - checking whether bot itself has SAVAGE_ROAR aura, but cast it on pTarget?
         if (SAVAGE_ROAR > 0 && !m_bot->HasAura(SAVAGE_ROAR))
             if (m_ai->GetEnergyAmount() < 25 || CastSpell(SAVAGE_ROAR, pTarget))
-                return true;
+                return RETURN_CONTINUE;
 
         if (RIP > 0 && !pTarget->HasAura(RIP, EFFECT_INDEX_0))
             if (m_ai->GetEnergyAmount() < 30 || CastSpell(RIP, pTarget))
-                return true;
+                return RETURN_CONTINUE;
 
         if (FEROCIOUS_BITE > 0)
             if (m_ai->GetEnergyAmount() < 35 || CastSpell(FEROCIOUS_BITE, pTarget))
-                return true;
+                return RETURN_CONTINUE;
     } // End 5 ComboPoints
 
     if (newTarget && COWER > 0 && !m_bot->HasSpellCooldown(COWER))
         if (m_ai->GetEnergyAmount() < 20 || CastSpell(COWER, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     if (FAERIE_FIRE_FERAL > 0 && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0))
         if (CastSpell(FAERIE_FIRE_FERAL, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     if (TIGERS_FURY > 0 && !m_bot->HasSpellCooldown(TIGERS_FURY))
         if (CastSpell(TIGERS_FURY))
-            return true;
+            return RETURN_CONTINUE;
 
     if (MANGLE_CAT > 0 && !pTarget->HasAura(MANGLE_CAT))
         if (m_ai->GetEnergyAmount() < 40 || CastSpell(MANGLE_CAT))
-            return true;
+            return RETURN_CONTINUE;
 
     if (RAKE > 0 && !pTarget->HasAura(RAKE))
         if (m_ai->GetEnergyAmount() < 40 || CastSpell(RAKE, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     if (CLAW > 0)
         if (m_ai->GetEnergyAmount() < 45 || CastSpell(CLAW, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
-    return false;
+    return RETURN_NO_ACTION_UNKNOWN;
 }
 
-bool PlayerbotDruidAI::_DoNextPVECombatManeuverSpellDPS(Unit* pTarget)
+CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverSpellDPS(Unit* pTarget)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     uint32 NATURE = (STARFIRE > 0 ? STARFIRE : WRATH);
 
     if (FAERIE_FIRE > 0 && !pTarget->HasAura(FAERIE_FIRE, EFFECT_INDEX_0))
         if (m_ai->GetManaPercent() < 8 || CastSpell(FAERIE_FIRE, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     if (MOONFIRE > 0 && !pTarget->HasAura(MOONFIRE, EFFECT_INDEX_0))
         if (m_ai->GetManaPercent() < 24 || CastSpell(MOONFIRE, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     if (INSECT_SWARM > 0 && !pTarget->HasAura(INSECT_SWARM, EFFECT_INDEX_0))
         if (m_ai->GetManaPercent() < 9 || CastSpell(INSECT_SWARM, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     // TODO: Doesn't work, I can't seem to nail the aura/effect index that would make this work properly
     if (ECLIPSE_SOLAR > 0 && WRATH > 0 && m_bot->HasAura(ECLIPSE_SOLAR))
         if (m_ai->GetManaPercent() < 13 || CastSpell(WRATH, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     // TODO: Doesn't work, I can't seem to nail the aura/effect index that would make this work properly
     if (ECLIPSE_LUNAR > 0 && STARFIRE > 0 && m_bot->HasAura(ECLIPSE_LUNAR))
         if (m_ai->GetManaPercent() < 18 || CastSpell(STARFIRE, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     if (FORCE_OF_NATURE > 0)
         if (m_ai->GetManaPercent() < 12 || CastSpell(FORCE_OF_NATURE))
-            return true;
+            return RETURN_CONTINUE;
 
     if (NATURE > 0)
         if (m_ai->GetManaPercent() < 18 || CastSpell(NATURE, pTarget))
-            return true;
+            return RETURN_CONTINUE;
 
     Unit* pVictim = pTarget->getVictim();
 
@@ -399,13 +399,13 @@ bool PlayerbotDruidAI::_DoNextPVECombatManeuverSpellDPS(Unit* pTarget)
             pVictim->Attack(pTarget, true);
     }
 
-    return false;
+    return RETURN_NO_ACTION_UNKNOWN;
 }
 
-bool PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarget)
+CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarget)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
 
@@ -414,47 +414,47 @@ bool PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarget)
     // (un)Shapeshifting is considered one step closer so will return true (and have the bot wait a bit for the GCD)
     if (TREE_OF_LIFE > 0 && !m_bot->HasAura(TREE_OF_LIFE, EFFECT_INDEX_0))
         if (CastSpell(TREE_OF_LIFE, m_bot))
-            return true;
+            return RETURN_CONTINUE;
 
     if (m_bot->HasAura(CAT_FORM, EFFECT_INDEX_0))
     {
         m_bot->RemoveAurasDueToSpell(CAT_FORM_1);
         //m_ai->TellMaster("FormClearCat");
-        return true;
+        return RETURN_CONTINUE;
     }
     if (m_bot->HasAura(BEAR_FORM, EFFECT_INDEX_0))
     {
         m_bot->RemoveAurasDueToSpell(BEAR_FORM_1);
         //m_ai->TellMaster("FormClearBear");
-        return true;
+        return RETURN_CONTINUE;
     }
     if (m_bot->HasAura(DIRE_BEAR_FORM, EFFECT_INDEX_0))
     {
         m_bot->RemoveAurasDueToSpell(DIRE_BEAR_FORM_1);
         //m_ai->TellMaster("FormClearDireBear");
-        return true;
+        return RETURN_CONTINUE;
     }
     // spellcasting form, but disables healing spells so it's got to go
     if (m_bot->HasAura(MOONKIN_FORM, EFFECT_INDEX_0))
     {
         m_bot->RemoveAurasDueToSpell(MOONKIN_FORM_1);
         //m_ai->TellMaster("FormClearMoonkin");
-        return true;
+        return RETURN_CONTINUE;
     }
 
     if (m_ai->GetHealthPercent() <= 60)
     {
         if (HealTarget(m_bot))
-            return true;
+            return RETURN_CONTINUE;
     }
     if (masterHP <= 50)
     {
         if (HealTarget(GetMaster()))
-            return true;
+            return RETURN_CONTINUE;
     }
     // TODO: err... what about the other teammates?
 
-    return false;
+    return RETURN_NO_ACTION_UNKNOWN;
 }
 
 /**

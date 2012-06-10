@@ -103,8 +103,8 @@ public:
     virtual ~PlayerbotDruidAI();
 
     // all combat actions go here
-    bool DoFirstCombatManeuver(Unit*);
-    bool DoNextCombatManeuver(Unit*);
+    CombatManeuverReturns DoFirstCombatManeuver(Unit*);
+    CombatManeuverReturns DoNextCombatManeuver(Unit*);
 
     // all non combat actions go here, ex buffs, heals, rezzes
     void DoNonCombatActions();
@@ -113,13 +113,13 @@ public:
     bool BuffPlayer(Player *target);
 
 private:
-    bool CastSpell(uint32 nextAction, Unit *pTarget = NULL) { return CastSpellNoRanged(nextAction, pTarget); }
+    CombatManeuverReturns CastSpell(uint32 nextAction, Unit *pTarget = NULL) { return CastSpellNoRanged(nextAction, pTarget); }
 
     // Combat Maneuver helper functions
-    bool _DoNextPVECombatManeuverBear(Unit* pTarget);
-    bool _DoNextPVECombatManeuverCat(Unit* pTarget);
-    bool _DoNextPVECombatManeuverSpellDPS(Unit* pTarget);
-    bool _DoNextPVECombatManeuverHeal(Unit* pTarget);
+    CombatManeuverReturns _DoNextPVECombatManeuverBear(Unit* pTarget);
+    CombatManeuverReturns _DoNextPVECombatManeuverCat(Unit* pTarget);
+    CombatManeuverReturns _DoNextPVECombatManeuverSpellDPS(Unit* pTarget);
+    CombatManeuverReturns _DoNextPVECombatManeuverHeal(Unit* pTarget);
 
     // Heals the target based off its hps
     bool HealTarget (Unit *target);

@@ -2968,6 +2968,9 @@ void PlayerbotAI::GetDuelTarget(Unit* forcedTarget)
 
 void PlayerbotAI::DoNextCombatManeuver()
 {
+    if (!GetClassAI())
+        return; // error, error...
+
     if (m_combatOrder == ORDERS_PASSIVE)
         return;
 
@@ -2996,17 +2999,43 @@ void PlayerbotAI::DoNextCombatManeuver()
     // do opening moves, if we changed target
     if (m_targetChanged)
     {
-        if (GetClassAI())
-            m_targetChanged = GetClassAI()->DoFirstCombatManeuver(m_targetCombat);
-        else
-            m_targetChanged = false;
+        switch (GetClassAI()->DoFirstCombatManeuver(m_targetCombat))
+        {
+            case RETURN_FINISHED_FIRST_MOVES:
+                m_targetChanged = false;
+                return DoCombatMovement();
+
+            case RETURN_CONTINUE:
+                // TODO: is there EVER a second 'first combat maneuver' that affects bot/target movement? If no, uncomment below
+                //return DoCombatMovement();
+                return;
+
+            case RETURN_NO_ACTION_ERROR:
+                TellMaster("FirstCombatManeuver: No action performed due to error. Heading onto NextCombatManeuver.");
+            case RETURN_NO_ACTION_UNKNOWN:
+            case RETURN_NO_ACTION_OK:
+            default: // assume no action -> no return
+                m_targetChanged = false;
+        }
     }
 
     // do normal combat movement
     DoCombatMovement();
 
-    if (GetClassAI() && !m_targetChanged)
-        (GetClassAI())->DoNextCombatManeuver(m_targetCombat);
+    switch (GetClassAI()->DoNextCombatManeuver(m_targetCombat))
+    {
+        case RETURN_NO_ACTION_UNKNOWN:
+        case RETURN_NO_ACTION_OK:
+            return;
+
+        case RETURN_CONTINUE:
+            return;
+
+        case RETURN_NO_ACTION_ERROR:
+        default:
+            // error, error...
+            return;
+    }
 }
 
 void PlayerbotAI::DoCombatMovement()

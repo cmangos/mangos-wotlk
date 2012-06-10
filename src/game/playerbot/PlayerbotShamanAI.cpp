@@ -103,9 +103,9 @@ PlayerbotShamanAI::PlayerbotShamanAI(Player* const master, Player* const bot, Pl
 
 PlayerbotShamanAI::~PlayerbotShamanAI() {}
 
-bool PlayerbotShamanAI::DoFirstCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotShamanAI::DoFirstCombatManeuver(Unit *pTarget)
 {
-    return false;
+    return RETURN_NO_ACTION_OK;
 }
 
 void PlayerbotShamanAI::HealTarget(Unit &target, uint8 hp)
@@ -292,16 +292,16 @@ void PlayerbotShamanAI::UseCooldowns()
     }
 }
 
-bool PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     switch (m_ai->GetScenarioType())
     {
         case PlayerbotAI::SCENARIO_DUEL:
             m_ai->CastSpell(LIGHTNING_BOLT);
-            return false;
+            return RETURN_CONTINUE;
     }
 
     // ------- Non Duel combat ----------
@@ -354,172 +354,136 @@ bool PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
             /*else if (STONESKIN_TOTEM > 0 && LastSpellEnhancement == 5 && (!m_bot->HasAura(STONESKIN_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(STRENGTH_OF_EARTH_TOTEM, EFFECT_INDEX_0)) && m_ai->GetManaPercent() >= 13)
                {
                 m_ai->CastSpell(STONESKIN_TOTEM);
-                SpellSequence = SPELL_RESTORATION;
-                LastSpellEnhancement = LastSpellEnhancement + 1;
-                break;
+                return RETURN_CONTINUE;
                }*/
             /*else if (FOCUSED > 0 && LastSpellEnhancement == 2)
                {
                 m_ai->CastSpell(FOCUSED, *pTarget);
-                SpellSequence = SPELL_RESTORATION;
-                LastSpellEnhancement = LastSpellEnhancement + 1;
-                break;
+                return RETURN_CONTINUE;
                }*/
             /* else if (GROUNDING_TOTEM > 0 && LastSpellEnhancement == 25 && (!m_bot->HasAura(GROUNDING_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(WRATH_OF_AIR_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(WIND_FURY_TOTEM, EFFECT_INDEX_0)) && m_ai->GetManaPercent() >= 5)
                {
                  m_ai->CastSpell(GROUNDING_TOTEM);
-                 SpellSequence = SPELL_RESTORATION;
-                 LastSpellEnhancement = LastSpellEnhancement + 1;
-                 break;
+                return RETURN_CONTINUE;
                }*/
 
-            /*else*/
             if (STORMSTRIKE > 0 && (!m_bot->HasSpellCooldown(STORMSTRIKE)) && m_ai->GetManaPercent() >= 8)
             {
                 m_ai->CastSpell(STORMSTRIKE, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
             else if (FLAME_SHOCK > 0 && (!pTarget->HasAura(FLAME_SHOCK)) && m_ai->GetManaPercent() >= 22)
             {
                 m_ai->CastSpell(FLAME_SHOCK, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
             else if (EARTH_SHOCK > 0 && (!m_bot->HasSpellCooldown(EARTH_SHOCK)) && m_ai->GetManaPercent() >= 23)
             {
                 m_ai->CastSpell(EARTH_SHOCK, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
             else if (LAVA_LASH > 0 && (!m_bot->HasSpellCooldown(LAVA_LASH)) && m_ai->GetManaPercent() >= 4)
             {
                 m_ai->CastSpell(LAVA_LASH, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
             else if (MAELSTROM_WEAPON > 0 && LIGHTNING_BOLT > 0 && m_bot->HasAura(MAELSTROM_WEAPON) && m_ai->GetManaPercent() >= 13)
             {
                 m_ai->CastSpell(LIGHTNING_BOLT, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
         /*else if (EARTH_ELEMENTAL_TOTEM > 0 && LastSpellEnhancement == 45 && m_ai->GetManaPercent() >= 24)
            {
             m_ai->CastSpell(EARTH_ELEMENTAL_TOTEM);
-            SpellSequence = SPELL_RESTORATION;
-            LastSpellEnhancement = LastSpellEnhancement + 1;
-            break;
+                return RETURN_CONTINUE;
            }*/
 
         case SHAMAN_SPEC_RESTORATION:
         /*if (HEALING_STREAM_TOTEM > 0 && LastSpellRestoration < 3 && m_ai->GetHealthPercent() < 50 && (!m_bot->HasAura(HEALING_STREAM_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(MANA_SPRING_TOTEM, EFFECT_INDEX_0)) && m_ai->GetManaPercent() >= 4)
            {
             m_ai->CastSpell(HEALING_STREAM_TOTEM);
-            SpellSequence = SPELL_ELEMENTAL;
-            LastSpellRestoration = LastSpellRestoration + 1;
-            break;
+                return RETURN_CONTINUE;
            }*/
-        /*else*/
         /*else if (TREMOR_TOTEM > 0 && LastSpellRestoration < 6 && (!m_bot->HasAura(STRENGTH_OF_EARTH_TOTEM, EFFECT_INDEX_0)) && m_ai->GetManaPercent() >= 2)
            {
             m_ai->CastSpell(TREMOR_TOTEM);
-            SpellSequence = SPELL_ELEMENTAL;
-            LastSpellRestoration = LastSpellRestoration +1;
-            break;
+                return RETURN_CONTINUE;
            }*/
 
         case SHAMAN_SPEC_ELEMENTAL:
             if (FLAME_SHOCK > 0 && (!pTarget->HasAura(FLAME_SHOCK)) && m_ai->GetManaPercent() >= 22)
             {
                 m_ai->CastSpell(FLAME_SHOCK, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
             else if (LAVA_BURST > 0 && (pTarget->HasAura(FLAME_SHOCK)) && (!m_bot->HasSpellCooldown(LAVA_BURST)) && m_ai->GetManaPercent() >= 10)
             {
                 m_ai->CastSpell(LAVA_BURST, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
             else if (LIGHTNING_BOLT > 0 && m_ai->GetManaPercent() >= 13)
             {
                 m_ai->CastSpell(LIGHTNING_BOLT, *pTarget);
-                break;
+                return RETURN_CONTINUE;
             }
             /*else if (SEARING_TOTEM > 0 && LastSpellElemental == 2 && (!pTarget->HasAura(SEARING_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(TOTEM_OF_WRATH, EFFECT_INDEX_0)) && m_ai->GetManaPercent() >= 9)
                {
                 m_ai->CastSpell(SEARING_TOTEM);
-                SpellSequence = SPELL_ENHANCEMENT;
-                LastSpellElemental = LastSpellElemental + 1;
-                break;
+                return RETURN_CONTINUE;
                }*/
             /*else if (STONECLAW_TOTEM > 0 && m_ai->GetHealthPercent() < 51 && LastSpellElemental == 3 && (!pTarget->HasAura(STONECLAW_TOTEM, EFFECT_INDEX_0)) && (!pTarget->HasAura(EARTHBIND_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(STRENGTH_OF_EARTH_TOTEM, EFFECT_INDEX_0)) && m_ai->GetManaPercent() >= 8)
                {
                 m_ai->CastSpell(STONECLAW_TOTEM);
-                SpellSequence = SPELL_ENHANCEMENT;
-                LastSpellElemental = LastSpellElemental + 1;
-                break;
+                return RETURN_CONTINUE;
                }*/
             /*else if (MAGMA_TOTEM > 0 && LastSpellElemental == 6 && (!m_bot->HasAura(TOTEM_OF_WRATH, EFFECT_INDEX_0)) && m_ai->GetManaPercent() >= 35)
                {
                 m_ai->CastSpell(MAGMA_TOTEM);
-                SpellSequence = SPELL_ENHANCEMENT;
-                LastSpellElemental = LastSpellElemental + 1;
-                break;
+                return RETURN_CONTINUE;
                }*/
             /*else if (EARTHBIND_TOTEM > 0 && LastSpellElemental == 7 && (!pTarget->HasAura(EARTHBIND_TOTEM, EFFECT_INDEX_0)) && (!m_bot->HasAura(STRENGTH_OF_EARTH_TOTEM, EFFECT_INDEX_0)) && m_ai->GetManaPercent() >= 5)
                {
                 m_ai->CastSpell(EARTHBIND_TOTEM);
-                SpellSequence = SPELL_ENHANCEMENT;
-                LastSpellElemental = LastSpellElemental + 1;
-                break;
+                return RETURN_CONTINUE;
                }*/
             //else if (PURGE > 0 && LastSpellElemental == 9 && m_ai->GetManaPercent() >= 8)
             //{
             //    m_ai->CastSpell(PURGE, *pTarget);
-            //    SpellSequence = SPELL_ENHANCEMENT;
-            //    LastSpellElemental = LastSpellElemental + 1;
-            //    break;
+            //    return RETURN_CONTINUE;
             //}
             //else if (WIND_SHOCK > 0 && LastSpellElemental == 10 && m_ai->GetManaPercent() >= 8)
             //{
             //    m_ai->CastSpell(WIND_SHOCK, *pTarget);
-            //    SpellSequence = SPELL_ENHANCEMENT;
-            //    LastSpellElemental = LastSpellElemental + 1;
-            //    break;
+            //    return RETURN_CONTINUE;
             //}
             /*else if (FIRE_NOVA_TOTEM > 0 && LastSpellElemental == 11 && m_ai->GetManaPercent() >= 33)
                {
                 m_ai->CastSpell(FIRE_NOVA_TOTEM);
-                SpellSequence = SPELL_ENHANCEMENT;
-                LastSpellElemental = LastSpellElemental + 1;
-                break;
+                return RETURN_CONTINUE;
                }*/
             /*else if (FROST_SHOCK > 0 && LastSpellElemental == 12 && (!pTarget->HasAura(FROST_SHOCK, EFFECT_INDEX_0)) && m_ai->GetManaPercent() >= 23)
                {
                 m_ai->CastSpell(FROST_SHOCK, *pTarget);
-                SpellSequence = SPELL_ENHANCEMENT;
-                LastSpellElemental = LastSpellElemental + 1;
-                break;
+                return RETURN_CONTINUE;
                }*/
             //else if (CHAIN_LIGHTNING > 0 && LastSpellElemental == 13 && m_ai->GetManaPercent() >= 33)
             //{
             //    m_ai->CastSpell(CHAIN_LIGHTNING, *pTarget);
-            //    SpellSequence = SPELL_ENHANCEMENT;
-            //    LastSpellElemental = LastSpellElemental + 1;
-            //    break;
+            //    return RETURN_CONTINUE;
             //}
             /*else if (FIRE_ELEMENTAL_TOTEM > 0 && LastSpellElemental == 15 && m_ai->GetManaPercent() >= 23)
                {
                 m_ai->CastSpell(FIRE_ELEMENTAL_TOTEM);
-                SpellSequence = SPELL_ENHANCEMENT;
-                LastSpellElemental = LastSpellElemental + 1;
-                break;
+                return RETURN_CONTINUE;
                }*/
             /*else if (HEX > 0 && LastSpellElemental == 16 && (!pTarget->HasAura(HEX, EFFECT_INDEX_0)) && m_ai->GetManaPercent() >= 3)
                {
                 m_ai->CastSpell(HEX);
-                SpellSequence = SPELL_ENHANCEMENT;
-                LastSpellElemental = LastSpellElemental + 1;
-                break;
+                return RETURN_CONTINUE;
                }*/
     }
 
-    return false;
+    return RETURN_NO_ACTION_UNKNOWN;
 } // end DoNextCombatManeuver
 
 void PlayerbotShamanAI::DoNonCombatActions()

@@ -78,8 +78,8 @@ public:
     virtual ~PlayerbotMageAI();
 
     // all combat actions go here
-    bool DoFirstCombatManeuver(Unit*);
-    bool DoNextCombatManeuver(Unit*);
+    CombatManeuverReturns DoFirstCombatManeuver(Unit*);
+    CombatManeuverReturns DoNextCombatManeuver(Unit*);
 
     // all non combat actions go here, ex buffs, heals, rezzes
     void DoNonCombatActions();
@@ -88,7 +88,7 @@ public:
     bool BuffPlayer(Player *target);
 
 private:
-    bool CastSpell(uint32 nextAction, Unit *pTarget = NULL) { return CastSpellWand(nextAction, pTarget, SHOOT); }
+    CombatManeuverReturns CastSpell(uint32 nextAction, Unit *pTarget = NULL) { return CastSpellWand(nextAction, pTarget, SHOOT); }
 
     // ARCANE
     uint32 ARCANE_MISSILES,

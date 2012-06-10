@@ -91,8 +91,8 @@ public:
     bool HasPet(Player* bot);
 
     // all combat actions go here
-    bool DoFirstCombatManeuver(Unit*);
-    bool DoNextCombatManeuver(Unit*);
+    CombatManeuverReturns DoFirstCombatManeuver(Unit*);
+    CombatManeuverReturns DoNextCombatManeuver(Unit*);
 
     // all non combat actions go here, ex buffs, heals, rezzes
     void DoNonCombatActions();

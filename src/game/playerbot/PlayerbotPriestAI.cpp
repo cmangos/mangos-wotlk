@@ -70,15 +70,15 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
 
 PlayerbotPriestAI::~PlayerbotPriestAI() {}
 
-bool PlayerbotPriestAI::DoFirstCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotPriestAI::DoFirstCombatManeuver(Unit *pTarget)
 {
-    return false;
+    return RETURN_NO_ACTION_OK;
 }
 
-bool PlayerbotPriestAI::HealTarget(Unit* target)
+CombatManeuverReturns PlayerbotPriestAI::HealTarget(Unit* target)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
     uint8 hpSelf = m_ai->GetHealthPercent();
@@ -93,34 +93,36 @@ bool PlayerbotPriestAI::HealTarget(Unit* target)
             if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
             {
                 if (holder->GetSpellProto()->Dispel == DISPEL_DISEASE)
+                {
                     m_ai->CastSpell(CURE_DISEASE, *target);
-                return false;
+                    return RETURN_CONTINUE;
+                }
             }
         }
     }
 
     if (hp >= 80)
-        return false;
+        return RETURN_NO_ACTION_OK;
 
     if (hp < 30 && FLASH_HEAL > 0 && m_ai->CastSpell(FLASH_HEAL, *target))
-        return true;
-    else if (hp < 40 && GREATER_HEAL > 0 && m_ai->CastSpell(GREATER_HEAL, *target))
-        return true;
+        return RETURN_CONTINUE;
+    if (hp < 40 && GREATER_HEAL > 0 && m_ai->CastSpell(GREATER_HEAL, *target))
+        return RETURN_CONTINUE;
     // Heals target AND self for equal amount
-    else if (hp < 60 && hpSelf < 80 && BINDING_HEAL > 0 && m_ai->CastSpell(BINDING_HEAL, *target))
-        return true;
-    else if (hp < 60 && HEAL > 0 && m_ai->CastSpell(HEAL, *target))
-        return true;
-    else if (hp < 80 && RENEW > 0 && !target->HasAura(RENEW) && m_ai->CastSpell(RENEW, *target))
-        return true;
-    else
-        return false;
+    if (hp < 60 && hpSelf < 80 && BINDING_HEAL > 0 && m_ai->CastSpell(BINDING_HEAL, *target))
+        return RETURN_CONTINUE;
+    if (hp < 60 && HEAL > 0 && m_ai->CastSpell(HEAL, *target))
+        return RETURN_CONTINUE;
+    if (hp < 80 && RENEW > 0 && !target->HasAura(RENEW) && m_ai->CastSpell(RENEW, *target))
+        return RETURN_CONTINUE;
+
+    return RETURN_NO_ACTION_UNKNOWN;
 } // end HealTarget
 
-bool PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     Unit* pVictim = pTarget->getVictim();
     float dist = m_bot->GetCombatDistance(pTarget);
@@ -155,7 +157,7 @@ bool PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 return CastSpell(SMITE);
 
             m_ai->TellMaster("Couldn't find a spell to cast while dueling");
-            return false;
+            return RETURN_NO_ACTION_UNKNOWN;
     }
 
     // ------- Non Duel combat ----------
@@ -195,7 +197,7 @@ bool PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 
         // Already healed self or tank. If healer, do nothing else to anger mob.
         if (m_ai->IsHealer())
-            return true; // In a sense, mission accomplished.
+            return RETURN_NO_ACTION_OK; // In a sense, mission accomplished.
 
         // Have threat, can't quickly lower it. 3 options remain: Stop attacking, lowlevel damage (wand), keep on keeping on.
         if (newTarget->GetHealthPercent() > 25)
@@ -218,7 +220,7 @@ bool PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
         if (masterHP < 25 && POWER_WORD_SHIELD > 0 && !GetMaster()->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0))
             return CastSpell(POWER_WORD_SHIELD, GetMaster());
         else if (masterHP < 25 || ((m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_HEAL) && masterHP < 80))
-            HealTarget(GetMaster());
+            return HealTarget(GetMaster());
     }
 
     //Not sure where this should go
@@ -248,7 +250,7 @@ bool PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             if (memberHP < 25 && POWER_WORD_SHIELD > 0 && !m_groupMember->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0))
                 return CastSpell(POWER_WORD_SHIELD, m_groupMember);
             else if (memberHP < 25 || ((m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_HEAL) && memberHP < 80))
-                HealTarget(m_groupMember);
+                return HealTarget(m_groupMember);
         }
     }
 
@@ -291,7 +293,7 @@ bool PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
                 if (CastSpell(MIND_FLAY, pTarget))
                 {
                     m_ai->SetIgnoreUpdateTime(3);
-                    return true;
+                    return RETURN_CONTINUE;
                 }
             }
             if (SHADOWFIEND > 0) // TODO: && mana && isn't active
@@ -333,7 +335,7 @@ bool PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
         if (CastSpell(MIND_FLAY, pTarget))
         {
             m_ai->SetIgnoreUpdateTime(3);
-            return true;
+            return RETURN_CONTINUE;
         }
     }
     if (SHADOWFORM == 0 && SMITE > 0 && m_ai->GetManaPercent() >= 17)
@@ -343,10 +345,10 @@ bool PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     if (m_ai->GetManaPercent() >= 20)
     {
         m_ai->TellMaster("Couldn't find an appropriate spell.");
-        return false;
+        return RETURN_NO_ACTION_UNKNOWN;
     }
 
-    return false;
+    return RETURN_NO_ACTION_UNKNOWN;
 } // end DoNextCombatManeuver
 
 void PlayerbotPriestAI::DoNonCombatActions()

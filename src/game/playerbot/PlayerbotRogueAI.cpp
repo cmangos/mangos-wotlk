@@ -57,10 +57,10 @@ PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, Play
 
 PlayerbotRogueAI::~PlayerbotRogueAI() {}
 
-bool PlayerbotRogueAI::DoFirstCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuver(Unit *pTarget)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     if (STEALTH > 0 && !m_bot->HasAura(STEALTH, EFFECT_INDEX_0) && m_ai->CastSpell(STEALTH, *m_bot))
     {
@@ -70,21 +70,21 @@ bool PlayerbotRogueAI::DoFirstCombatManeuver(Unit *pTarget)
 
         m_bot->addUnitState(UNIT_STAT_CHASE); // ensure that the bot does not use MoveChase(), as this doesn't seem to work with STEALTH
 
-        return true;
+        return RETURN_FINISHED_FIRST_MOVES;
     }
     else if (m_bot->HasAura(STEALTH, EFFECT_INDEX_0))
     {
-        m_bot->GetMotionMaster()->MoveFollow(pTarget, 4.5f, m_bot->GetOrientation());
-        return false;
+        m_bot->GetMotionMaster()->MoveFollow(pTarget, 4.5f, m_bot->GetOrientation()); // TODO: this isn't the place for movement code, is it?
+        return RETURN_NO_ACTION_UNKNOWN;
     }
-    return false;
+    return RETURN_NO_ACTION_OK;
 }
 
-bool PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
 {
-    if (!pTarget) return false;
-    if (!m_ai)    return false;
-    if (!m_bot)   return false;
+    if (!pTarget) return RETURN_NO_ACTION_ERROR;
+    if (!m_ai)    return RETURN_NO_ACTION_ERROR;
+    if (!m_bot)   return RETURN_NO_ACTION_ERROR;
 
     switch (m_ai->GetScenarioType())
     {
@@ -93,10 +93,10 @@ bool PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
             if (SINISTER_STRIKE > 0)
             {
                 m_ai->CastSpell(SINISTER_STRIKE);
-                return true;
+                return RETURN_CONTINUE;
             }
 
-            return false;
+            return RETURN_NO_ACTION_UNKNOWN;
         }
     }
 
@@ -133,7 +133,7 @@ bool PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     {
         if (m_ai->GetManager()->m_confDebugWhisper)
             m_ai->TellMaster("CoS!");
-        return true;
+        return RETURN_CONTINUE;
     }
     else if (m_bot->HasAura(STEALTH, EFFECT_INDEX_0))
         SpellSequence = RogueStealth;
@@ -146,132 +146,143 @@ bool PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
 
     // we fight in melee, target is not in range, skip the next part!
     if (fTargetDist > ATTACK_DISTANCE)
-        return true;
+        return RETURN_CONTINUE;
 
     std::ostringstream out;
     switch (SpellSequence)
     {
         case RogueStealth:
-            out << "Case Stealth";
             if (PICK_POCKET > 0 && (pTarget->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) != 0 &&
                 !((Creature *) pTarget)->lootForPickPocketed && m_ai->CastSpell(PICK_POCKET, *pTarget))
-                out << " > Pick Pocket";
+                return RETURN_CONTINUE;
             else if (PREMEDITATION > 0 && m_ai->CastSpell(PREMEDITATION, *pTarget))
-                out << " > Premeditation";
+                return RETURN_CONTINUE;
             else if (AMBUSH > 0 && m_ai->GetEnergyAmount() >= 60 && m_ai->CastSpell(AMBUSH, *pTarget))
-                out << " > Ambush";
+                return RETURN_CONTINUE;
             else if (CHEAP_SHOT > 0 && !pTarget->HasAura(CHEAP_SHOT, EFFECT_INDEX_0) && m_ai->GetEnergyAmount() >= 60 && m_ai->CastSpell(CHEAP_SHOT, *pTarget))
-                out << " > Cheap Shot";
+                return RETURN_CONTINUE;
             else if (GARROTE > 0 && m_ai->GetEnergyAmount() >= 50 && m_ai->CastSpell(GARROTE, *pTarget))
-                out << " > Garrote";
-            else
-                m_bot->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            break;
+                return RETURN_CONTINUE;
+
+            // No appropriate action found, remove stealth
+            m_bot->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            return RETURN_CONTINUE;
+
         case RogueThreat:
-            out << "Case Threat";
             if (GOUGE > 0 && m_ai->GetEnergyAmount() >= 45 && !pTarget->HasAura(GOUGE, EFFECT_INDEX_0) && m_ai->CastSpell(GOUGE, *pTarget))
-                out << " > Gouge";
+                return RETURN_CONTINUE;
             else if (EVASION > 0 && m_ai->GetHealthPercent() <= 35 && !m_bot->HasAura(EVASION, EFFECT_INDEX_0) && m_ai->CastSpell(EVASION))
-                out << " > Evasion";
+                return RETURN_CONTINUE;
             else if (BLIND > 0 && m_ai->GetHealthPercent() <= 30 && !pTarget->HasAura(BLIND, EFFECT_INDEX_0) && m_ai->GetEnergyAmount() >= 30 && m_ai->CastSpell(BLIND, *pTarget))
-                out << " > Blind";
+                return RETURN_CONTINUE;
             else if (FEINT > 0 && m_ai->GetHealthPercent() <= 25 && m_ai->GetEnergyAmount() >= 20 && m_ai->CastSpell(FEINT))
-                out << " > Feint";
+                return RETURN_CONTINUE;
             else if (VANISH > 0 && m_ai->GetHealthPercent() <= 20 && !m_bot->HasAura(FEINT, EFFECT_INDEX_0) && m_ai->CastSpell(VANISH))
-                out << " > Vanish";
+                return RETURN_CONTINUE;
             else if (PREPARATION > 0 && m_ai->CastSpell(PREPARATION))
-                out << " > Preparation";
+                return RETURN_CONTINUE;
             else if (m_bot->getRace() == RACE_NIGHTELF && m_ai->GetHealthPercent() <= 15 && !m_bot->HasAura(SHADOWMELD, EFFECT_INDEX_0) && m_ai->CastSpell(SHADOWMELD, *m_bot))
-                out << " > Shadowmeld";
-            else
-                out << " NONE!";
+                return RETURN_CONTINUE;
             break;
+
         case RogueSpellPreventing:
-            out << "Case Prevent";
             if (KIDNEY_SHOT > 0 && m_ai->GetEnergyAmount() >= 25 && m_bot->GetComboPoints() >= 2 && m_ai->CastSpell(KIDNEY_SHOT, *pTarget))
-                out << " > Kidney Shot";
+                return RETURN_CONTINUE;
             else if (KICK > 0 && m_ai->GetEnergyAmount() >= 25  && m_ai->CastSpell(KICK, *pTarget))
-                out << " > Kick";
-            else
-                out << " NONE!";
-            break;
+                return RETURN_CONTINUE;
+            // break; // No action? Go combat!
+
         case RogueCombat:
         default:
-            out << "Case Combat";
-            if (m_bot->GetComboPoints() <= 4)
+            if (m_bot->GetComboPoints() >= 5)
             {
-                if (SHADOW_DANCE > 0 && !m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && m_ai->CastSpell(SHADOW_DANCE, *m_bot))
-                    out << " > Shadow Dance";
-                else if (CHEAP_SHOT > 0 && m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && !pTarget->HasAura(CHEAP_SHOT, EFFECT_INDEX_0) && m_ai->GetEnergyAmount() >= 60 && m_ai->CastSpell(CHEAP_SHOT, *pTarget))
-                    out << " > Cheap Shot";
-                else if (AMBUSH > 0 && m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && m_ai->GetEnergyAmount() >= 60 && m_ai->CastSpell(AMBUSH, *pTarget))
-                    out << " > Ambush";
-                else if (GARROTE > 0 && m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && m_ai->GetEnergyAmount() >= 50 && m_ai->CastSpell(GARROTE, *pTarget))
-                    out << " > Garrote";
-                else if (BACKSTAB > 0 && pTarget->isInBackInMap(m_bot, 1) && m_ai->GetEnergyAmount() >= 60 && m_ai->CastSpell(BACKSTAB, *pTarget))
-                    out << " > Backstab";
-                else if (MUTILATE > 0 && m_ai->GetEnergyAmount() >= 60 && m_ai->CastSpell(MUTILATE, *pTarget))
-                    out << " > Mutilate";
-                else if (SINISTER_STRIKE > 0 && m_ai->GetEnergyAmount() >= 45 && m_ai->CastSpell(SINISTER_STRIKE, *pTarget))
-                    out << " > Sinister Strike";
-                else if (GHOSTLY_STRIKE > 0 && m_ai->GetEnergyAmount() >= 40 && m_ai->CastSpell(GHOSTLY_STRIKE, *pTarget))
-                    out << " > Ghostly Strike";
-                else if (HEMORRHAGE > 0 && m_ai->GetEnergyAmount() >= 35 && m_ai->CastSpell(HEMORRHAGE, *pTarget))
-                    out << " > Hemorrhage";
-                else if (DISMANTLE > 0 && !pTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED) && m_ai->GetEnergyAmount() >= 25 && m_ai->CastSpell(DISMANTLE, *pTarget))
-                    out << " > Dismantle";
-                else if (SHADOWSTEP > 0 && m_ai->GetEnergyAmount() >= 10 && m_ai->CastSpell(SHADOWSTEP, *pTarget))
-                    out << " > Shadowstep";
-                else if (m_bot->getRace() == RACE_BLOODELF && !pTarget->HasAura(ARCANE_TORRENT, EFFECT_INDEX_0) && m_ai->CastSpell(ARCANE_TORRENT, *pTarget))
-                    out << " > Arcane Torrent";
-                else if ((m_bot->getRace() == RACE_HUMAN && m_bot->hasUnitState(UNIT_STAT_STUNNED)) || m_bot->HasAuraType(SPELL_AURA_MOD_FEAR) || m_bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) || (m_bot->HasAuraType(SPELL_AURA_MOD_CHARM) && m_ai->CastSpell(EVERY_MAN_FOR_HIMSELF, *m_bot)))
-                    out << " > Every Man for Himself";
-                else if ((m_bot->getRace() == RACE_UNDEAD && m_bot->HasAuraType(SPELL_AURA_MOD_FEAR)) || (m_bot->HasAuraType(SPELL_AURA_MOD_CHARM) && m_ai->CastSpell(WILL_OF_THE_FORSAKEN, *m_bot)))
-                    out << " > Will of the Forsaken";
-                else if (m_bot->getRace() == RACE_DWARF && m_bot->HasAuraState(AURA_STATE_DEADLY_POISON) && m_ai->CastSpell(STONEFORM, *m_bot))
-                    out << " > Stoneform";
-                else if ((m_bot->getRace() == RACE_GNOME && m_bot->hasUnitState(UNIT_STAT_STUNNED)) || (m_bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) && m_ai->CastSpell(ESCAPE_ARTIST, *m_bot)))
-                    out << " > Escape Artist";
-                else if (m_bot->getRace() == RACE_ORC && !m_bot->HasAura(BLOOD_FURY, EFFECT_INDEX_0) && m_ai->CastSpell(BLOOD_FURY, *m_bot))
-                    out << " > Blood Fury";
-                else if (m_bot->getRace() == RACE_TROLL && !m_bot->HasAura(BERSERKING, EFFECT_INDEX_0) && m_ai->CastSpell(BERSERKING, *m_bot))
-                    out << " > Berserking";
-                else
-                    out << " NONE!";
+                // wait for energy
+                if ( (m_ai->GetEnergyAmount() < 25 && (KIDNEY_SHOT || SLICE_DICE || EXPOSE_ARMOR))
+                     || (m_ai->GetEnergyAmount() < 35 && EVISCERATE) )
+                    return RETURN_NO_ACTION_OK;
+
+                switch (pTarget->getClass())
+                {
+                case CLASS_SHAMAN:
+                    if (KIDNEY_SHOT > 0 && m_ai->CastSpell(KIDNEY_SHOT, *pTarget)) // 25 energy (checked above)
+                        return RETURN_CONTINUE;
+                    break;
+
+                case CLASS_WARLOCK:
+                case CLASS_HUNTER:
+                    if (SLICE_DICE > 0 && m_ai->CastSpell(SLICE_DICE, *pTarget)) // 25 energy (checked above)
+                       return RETURN_CONTINUE;
+                    break;
+
+                case CLASS_WARRIOR:
+                case CLASS_PALADIN:
+                case CLASS_DEATH_KNIGHT:
+                    if (EXPOSE_ARMOR > 0 && !pTarget->HasAura(EXPOSE_ARMOR, EFFECT_INDEX_0) && m_ai->CastSpell(EXPOSE_ARMOR, *pTarget)) // 25 energy (checked above)
+                        return RETURN_CONTINUE;
+                    break;
+
+
+                case CLASS_MAGE:
+                case CLASS_PRIEST:
+                    if (RUPTURE > 0 && m_ai->CastSpell(RUPTURE, *pTarget)) // 25 energy (checked above)
+                        return RETURN_CONTINUE;
+                    break;
+
+                case CLASS_ROGUE:
+                case CLASS_DRUID:
+                default:
+                    break; // fall through to below
+                }
+
+                // default combo action for rogue/druid or if other combo action is unavailable/failed
+                if (EVISCERATE > 0 && m_ai->CastSpell(EVISCERATE, *pTarget))
+                    return RETURN_CONTINUE;
+
+                // failed for some (non-energy related) reason, fall through to normal attacks to maximize DPS
             }
-            else
-            {
-                if (EVISCERATE > 0 && pTarget->getClass() == CLASS_ROGUE && m_ai->GetEnergyAmount() >= 35 && m_ai->CastSpell(EVISCERATE, *pTarget))
-                    out << " > Rogue Eviscerate";
-                else if (EVISCERATE > 0 && pTarget->getClass() == CLASS_DRUID && m_ai->GetEnergyAmount() >= 35 && m_ai->CastSpell(EVISCERATE, *pTarget))
-                    out << " > Druid Eviscerate";
-                else if (KIDNEY_SHOT > 0 && pTarget->getClass() == CLASS_SHAMAN && m_ai->GetEnergyAmount() >= 25 && m_ai->CastSpell(KIDNEY_SHOT, *pTarget))
-                    out << " > Shaman Kidney";
-                else if (SLICE_DICE > 0 && pTarget->getClass() == CLASS_WARLOCK && m_ai->GetEnergyAmount() >= 25 && m_ai->CastSpell(SLICE_DICE, *pTarget))
-                    out << " > Warlock Slice & Dice";
-                else if (SLICE_DICE > 0 && pTarget->getClass() == CLASS_HUNTER && m_ai->GetEnergyAmount() >= 25 && m_ai->CastSpell(SLICE_DICE, *pTarget))
-                    out << " > Hunter Slice & Dice";
-                else if (EXPOSE_ARMOR > 0 && pTarget->getClass() == CLASS_WARRIOR && !pTarget->HasAura(EXPOSE_ARMOR, EFFECT_INDEX_0) && m_ai->GetEnergyAmount() >= 25 && m_ai->CastSpell(EXPOSE_ARMOR, *pTarget))
-                    out << " > Warrior Expose Armor";
-                else if (EXPOSE_ARMOR > 0 && pTarget->getClass() == CLASS_PALADIN && !pTarget->HasAura(EXPOSE_ARMOR, EFFECT_INDEX_0) && m_ai->GetEnergyAmount() >= 25 && m_ai->CastSpell(EXPOSE_ARMOR, *pTarget))
-                    out << " > Paladin Expose Armor";
-                else if (EXPOSE_ARMOR > 0 && pTarget->getClass() == CLASS_DEATH_KNIGHT && !pTarget->HasAura(EXPOSE_ARMOR, EFFECT_INDEX_0) && m_ai->GetEnergyAmount() >= 25 && m_ai->CastSpell(EXPOSE_ARMOR, *pTarget))
-                    out << " > DK Expose Armor";
-                else if (RUPTURE > 0 && pTarget->getClass() == CLASS_MAGE && m_ai->GetEnergyAmount() >= 25 && m_ai->CastSpell(RUPTURE, *pTarget))
-                    out << " > Mage Rupture";
-                else if (RUPTURE > 0 && pTarget->getClass() == CLASS_PRIEST && m_ai->GetEnergyAmount() >= 25 && m_ai->CastSpell(RUPTURE, *pTarget))
-                    out << " > Priest Rupture";
-                else if (EVISCERATE > 0 && m_ai->GetEnergyAmount() >= 35 && m_ai->CastSpell(EVISCERATE, *pTarget))
-                    out << " > Eviscerate";
-                else
-                    out << " NONE!";
-            }
+
+            if (SHADOW_DANCE > 0 && !m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && m_ai->CastSpell(SHADOW_DANCE, *m_bot))
+                return RETURN_CONTINUE;
+            else if (CHEAP_SHOT > 0 && m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && !pTarget->HasAura(CHEAP_SHOT, EFFECT_INDEX_0) && m_ai->GetEnergyAmount() >= 60 && m_ai->CastSpell(CHEAP_SHOT, *pTarget))
+                return RETURN_CONTINUE;
+            else if (AMBUSH > 0 && m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && m_ai->GetEnergyAmount() >= 60 && m_ai->CastSpell(AMBUSH, *pTarget))
+                return RETURN_CONTINUE;
+            else if (GARROTE > 0 && m_bot->HasAura(SHADOW_DANCE, EFFECT_INDEX_0) && m_ai->GetEnergyAmount() >= 50 && m_ai->CastSpell(GARROTE, *pTarget))
+                return RETURN_CONTINUE;
+            else if (BACKSTAB > 0 && pTarget->isInBackInMap(m_bot, 1) && m_ai->GetEnergyAmount() >= 60 && m_ai->CastSpell(BACKSTAB, *pTarget))
+                return RETURN_CONTINUE;
+            else if (MUTILATE > 0 && m_ai->GetEnergyAmount() >= 60 && m_ai->CastSpell(MUTILATE, *pTarget))
+                return RETURN_CONTINUE;
+            else if (SINISTER_STRIKE > 0 && m_ai->GetEnergyAmount() >= 45 && m_ai->CastSpell(SINISTER_STRIKE, *pTarget))
+                return RETURN_CONTINUE;
+            else if (GHOSTLY_STRIKE > 0 && m_ai->GetEnergyAmount() >= 40 && m_ai->CastSpell(GHOSTLY_STRIKE, *pTarget))
+                return RETURN_CONTINUE;
+            else if (HEMORRHAGE > 0 && m_ai->GetEnergyAmount() >= 35 && m_ai->CastSpell(HEMORRHAGE, *pTarget))
+                return RETURN_CONTINUE;
+            else if (DISMANTLE > 0 && !pTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED) && m_ai->GetEnergyAmount() >= 25 && m_ai->CastSpell(DISMANTLE, *pTarget))
+                return RETURN_CONTINUE;
+            else if (SHADOWSTEP > 0 && m_ai->GetEnergyAmount() >= 10 && m_ai->CastSpell(SHADOWSTEP, *pTarget))
+                return RETURN_CONTINUE;
+            else if (m_bot->getRace() == RACE_BLOODELF && !pTarget->HasAura(ARCANE_TORRENT, EFFECT_INDEX_0) && m_ai->CastSpell(ARCANE_TORRENT, *pTarget))
+                return RETURN_CONTINUE;
+            else if ((m_bot->getRace() == RACE_HUMAN && m_bot->hasUnitState(UNIT_STAT_STUNNED)) || m_bot->HasAuraType(SPELL_AURA_MOD_FEAR) || m_bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) || (m_bot->HasAuraType(SPELL_AURA_MOD_CHARM) && m_ai->CastSpell(EVERY_MAN_FOR_HIMSELF, *m_bot)))
+                return RETURN_CONTINUE;
+            else if ((m_bot->getRace() == RACE_UNDEAD && m_bot->HasAuraType(SPELL_AURA_MOD_FEAR)) || (m_bot->HasAuraType(SPELL_AURA_MOD_CHARM) && m_ai->CastSpell(WILL_OF_THE_FORSAKEN, *m_bot)))
+                return RETURN_CONTINUE;
+            else if (m_bot->getRace() == RACE_DWARF && m_bot->HasAuraState(AURA_STATE_DEADLY_POISON) && m_ai->CastSpell(STONEFORM, *m_bot))
+                return RETURN_CONTINUE;
+            else if ((m_bot->getRace() == RACE_GNOME && m_bot->hasUnitState(UNIT_STAT_STUNNED)) || (m_bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) && m_ai->CastSpell(ESCAPE_ARTIST, *m_bot)))
+                return RETURN_CONTINUE;
+            else if (m_bot->getRace() == RACE_ORC && !m_bot->HasAura(BLOOD_FURY, EFFECT_INDEX_0) && m_ai->CastSpell(BLOOD_FURY, *m_bot))
+                return RETURN_CONTINUE;
+            else if (m_bot->getRace() == RACE_TROLL && !m_bot->HasAura(BERSERKING, EFFECT_INDEX_0) && m_ai->CastSpell(BERSERKING, *m_bot))
+                return RETURN_CONTINUE;
             break;
     }
     if (m_ai->GetManager()->m_confDebugWhisper)
         m_ai->TellMaster(out.str().c_str());
 
-    return false;
+    return RETURN_NO_ACTION_UNKNOWN;
 }
 
 // end DoNextCombatManeuver
