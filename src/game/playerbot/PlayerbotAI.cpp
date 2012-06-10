@@ -4579,10 +4579,10 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
                 if (m_DelayAttackInit + m_DelayAttack > time(NULL))
                     return SetIgnoreUpdateTime(1); // short bursts of delay
 
-                DoNextCombatManeuver();
+                return DoNextCombatManeuver();
             }
-            else
-                SetIgnoreUpdateTime(1);  // It's better to update AI more frequently during combat
+            else // channelling a spell
+                return SetIgnoreUpdateTime(1);  // It's better to update AI more frequently during combat
         }
 
         return;
