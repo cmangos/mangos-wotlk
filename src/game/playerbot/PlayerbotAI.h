@@ -1726,6 +1726,7 @@ public:
 
     // get current casting spell (will return NULL if no spell!)
     Spell* GetCurrentSpell() const;
+    uint32 GetCurrentSpellId() { return m_CurrentlyCastingSpellId; }
 
     bool HasAura(uint32 spellId, const Unit& player) const;
     bool HasAura(const char* spellName, const Unit& player) const;
