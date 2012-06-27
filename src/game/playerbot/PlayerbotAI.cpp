@@ -3888,12 +3888,12 @@ Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
 */
 void PlayerbotAI::CombatOrderRestore()
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT bot_primary_order,bot_secondary_order,primary_target,secondary_target,pname,sname,combat_delay FROM playerbot_saved_data WHERE guid = '%li'", m_bot->GetGUIDLow());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT combat_delay FROM playerbot_saved_data WHERE guid = '%lu'", m_bot->GetGUIDLow());
 
     if (!result)
     {
         sLog.outString();
-        sLog.outString(">> [CombatOrderRestore()] Loaded `playerbot_saved_data`, found no match for guid %li.", m_bot->GetGUIDLow());
+        sLog.outString(">> [CombatOrderRestore()] Loaded `playerbot_saved_data`, found no match for guid %lu.", m_bot->GetGUIDLow());
         m_DelayAttack = 0;
         return;
     }
@@ -3911,12 +3911,12 @@ void PlayerbotAI::CombatOrderRestore()
 */
 void PlayerbotAI::CombatOrderRestore(uint8 Prim, uint8 Sec)
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT bot_primary_order,bot_secondary_order,primary_target,secondary_target,pname,sname,combat_delay FROM playerbot_saved_data WHERE guid = '%li'", m_bot->GetGUIDLow());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT bot_primary_order,bot_secondary_order,primary_target,secondary_target,pname,sname,combat_delay FROM playerbot_saved_data WHERE guid = '%lu'", m_bot->GetGUIDLow());
 
     if (!result)
     {
         sLog.outString();
-        sLog.outString(">> [CombatOrderRestore(Prim, Sec)] Loaded `playerbot_saved_data`, found no match for guid %li.", m_bot->GetGUIDLow());
+        sLog.outString(">> [CombatOrderRestore(Prim, Sec)] Loaded `playerbot_saved_data`, found no match for guid %lu.", m_bot->GetGUIDLow());
         TellMaster("I have no orders");
         return;
     }
