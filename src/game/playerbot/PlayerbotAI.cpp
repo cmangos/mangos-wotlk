@@ -1782,9 +1782,12 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     //DEBUG_LOG("spell interrupted (%u)",result);
                     return;
 
+                case SPELL_FAILED_UNIT_NOT_INFRONT:  // 134
+                    if (m_targetCombat)
+                        m_bot->SetInFront(m_targetCombat);
                 case SPELL_FAILED_BAD_TARGETS:  // 12
                     {
-                        // DEBUG_LOG("[%s]bad target (%u) for spellId (%u) & m_CurrentlyCastingSpellId (%u)",m_bot->GetName(),result,spellId,m_CurrentlyCastingSpellId);
+                        // DEBUG_LOG("[%s]bad target / not in front(%u) for spellId (%u) & m_CurrentlyCastingSpellId (%u)",m_bot->GetName(),result,spellId,m_CurrentlyCastingSpellId);
                         Spell* const pSpell = GetCurrentSpell();
                         if (pSpell)
                             pSpell->cancel();
