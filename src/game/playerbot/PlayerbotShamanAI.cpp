@@ -108,19 +108,21 @@ CombatManeuverReturns PlayerbotShamanAI::DoFirstCombatManeuver(Unit *pTarget)
     return RETURN_NO_ACTION_OK;
 }
 
-void PlayerbotShamanAI::HealTarget(Unit &target, uint8 hp)
+void PlayerbotShamanAI::HealTarget(Unit &target)
 {
     if (!m_ai)  return;
     if (!m_bot) return;
+    if (!target.isAlive()) return;
 
-    if (hp < 30 && HEALING_WAVE > 0 && m_ai->GetManaPercent() >= 32)
+    if (target.GetHealthPercent() < 30 && HEALING_WAVE > 0 && m_ai->GetManaPercent() >= 32)
         m_ai->CastSpell(HEALING_WAVE, target);
-    else if (hp < 45 && LESSER_HEALING_WAVE > 0 && m_ai->GetManaPercent() >= 19)
+    else if (target.GetHealthPercent() < 45 && LESSER_HEALING_WAVE > 0 && m_ai->GetManaPercent() >= 19)
         m_ai->CastSpell(LESSER_HEALING_WAVE, target);
-    else if (hp < 55 && RIPTIDE > 0 && !target.HasAura(RIPTIDE, EFFECT_INDEX_0) && m_ai->GetManaPercent() >= 21)
+    else if (target.GetHealthPercent() < 55 && RIPTIDE > 0 && !target.HasAura(RIPTIDE, EFFECT_INDEX_0) && m_ai->GetManaPercent() >= 21)
         m_ai->CastSpell(RIPTIDE, target);
-    else if (hp < 70 && CHAIN_HEAL > 0 && m_ai->GetManaPercent() >= 24)
+    else if (target.GetHealthPercent() < 70 && CHAIN_HEAL > 0 && m_ai->GetManaPercent() >= 24)
         m_ai->CastSpell(CHAIN_HEAL, target);
+
     if (CURE_TOXINS > 0 && m_ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
     {
         uint32 DISPEL = CLEANSE_SPIRIT > 0 ? CLEANSE_SPIRIT : CURE_TOXINS;
@@ -148,8 +150,7 @@ void PlayerbotShamanAI::HealTarget(Unit &target, uint8 hp)
             }
         }
     }
-    // end HealTarget
-}
+} // end HealTarget
 
 void PlayerbotShamanAI::DropTotems()
 {
@@ -311,25 +312,15 @@ CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
     uint32 spec = m_bot->GetSpec();
 
     // Heal myself
-    if (m_ai->GetHealthPercent() < 30 && m_ai->GetManaPercent() >= 32)
-        m_ai->CastSpell(HEALING_WAVE);
-    else if (m_ai->GetHealthPercent() < 50 && m_ai->GetManaPercent() >= 19)
-        m_ai->CastSpell(LESSER_HEALING_WAVE);
-    else if (m_ai->GetHealthPercent() < 70)
-        HealTarget (*m_bot, m_ai->GetHealthPercent());
+    if (m_ai->GetHealthPercent() < 70)
+        HealTarget(*m_bot);
 
     // Heal master
-    uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
-    if (GetMaster()->isAlive())
-    {
-        if (masterHP < 30 && m_ai->GetManaPercent() >= 32)
-            m_ai->CastSpell(HEALING_WAVE, *(GetMaster()));
-        else if (masterHP < 70)
-            HealTarget (*GetMaster(), masterHP);
-    }
+    if (GetMaster()->GetHealthPercent() < 70 && m_ai->IsHealer())
+        HealTarget(*GetMaster());
 
     // Heal group
-    if (m_group)
+    if (m_group && m_ai->IsHealer())
     {
         Group::MemberSlotList const& groupSlot = m_group->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
@@ -338,9 +329,8 @@ CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
             if (!m_groupMember || !m_groupMember->isAlive())
                 continue;
 
-            uint32 memberHP = m_groupMember->GetHealth() * 100 / m_groupMember->GetMaxHealth();
-            if (memberHP < 30)
-                HealTarget(*m_groupMember, memberHP);
+            if (m_groupMember->GetHealthPercent() < 70)
+                HealTarget(*m_groupMember);
         }
     }
 
@@ -565,11 +555,11 @@ void PlayerbotShamanAI::DoNonCombatActions()
             if (!tPlayer || !tPlayer->isAlive())
                 continue;
 
-            if (tPlayer->IsInDuelWith(GetMaster()))
+            if (tPlayer->IsInDuel())
                 continue;
 
             // heal
-            (HealTarget(*tPlayer, tPlayer->GetHealth() * 100 / tPlayer->GetMaxHealth()));
+            HealTarget(*tPlayer);
         }
     }
 } // end DoNonCombatActions
