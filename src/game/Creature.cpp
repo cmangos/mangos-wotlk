@@ -2168,6 +2168,12 @@ bool Creature::HasSpellCooldown(uint32 spell_id) const
     return (itr != m_CreatureSpellCooldowns.end() && itr->second > time(NULL)) || HasCategoryCooldown(spell_id);
 }
 
+uint8 Creature::getRace() const
+{
+    uint8 race = Unit::getRace();
+    return race ? race : GetCreatureModelRace(GetNativeDisplayId());
+}
+
 bool Creature::IsInEvadeMode() const
 {
     return !i_motionMaster.empty() && i_motionMaster.GetCurrentMovementGeneratorType() == HOME_MOTION_TYPE;

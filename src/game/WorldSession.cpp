@@ -114,7 +114,7 @@ WorldSession::~WorldSession()
     }
 
     ///- empty incoming packet queue
-    WorldPacket* packet;
+    WorldPacket* packet = NULL;
     while(_recvQueue.next(packet))
         delete packet;
 }
@@ -214,7 +214,7 @@ bool WorldSession::Update(PacketFilter& updater)
 {
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not process packets if socket already closed
-    WorldPacket* packet;
+    WorldPacket* packet = NULL;
     while (m_Socket && !m_Socket->IsClosed() && _recvQueue.next(packet, updater))
     {
         /*#if 1
@@ -983,9 +983,9 @@ void WorldSession::SendRedirectClient(std::string& ip, uint16 port)
     pkt << uint32(ip2);                                     // inet_addr(ipstr)
     pkt << uint16(port);                                    // port
 
-    pkt << uint32(GetLatency());                            // latency-related?
+    pkt << uint32(0);                                       // unknown
 
-    HMACSHA1 sha1(20, m_Socket->GetSessionKey().AsByteArray());
+    HMACSHA1 sha1(40, m_Socket->GetSessionKey().AsByteArray());
     sha1.UpdateData((uint8*)&ip2, 4);
     sha1.UpdateData((uint8*)&port, 2);
     sha1.Finalize();
