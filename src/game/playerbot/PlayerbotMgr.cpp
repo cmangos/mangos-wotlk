@@ -566,16 +566,17 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             p >> itemSlot;    //loot index
             p >> rollType;    //need,greed or pass on roll
 
-            Creature *c = m_master->GetMap()->GetCreature(Guid);
-            GameObject *go = m_master->GetMap()->GetGameObject(Guid);
-            if (!c)
-                if (!go)
-                    return;
-
-            if (c)
+            if (Creature* c = m_master->GetMap()->GetCreature(Guid))
+            {
                 loot = &c->loot;
+            }
             else
-                loot = &go->loot;
+            {
+                if (GameObject* go = m_master->GetMap()->GetGameObject(Guid))
+                    loot = &go->loot;
+                else
+                    return;
+            }
 
             LootItem& lootItem = loot->items[itemSlot];
 
