@@ -355,7 +355,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //301 SPELL_AURA_HEAL_ABSORB 5 spells
     &Aura::HandleUnused,                                    //302 unused (3.2.2a)
     &Aura::HandleNULL,                                      //303 17 spells
-    &Aura::HandleNULL,                                      //304 2 spells (alcohol effect?)
+    &Aura::HandleAuraFakeInebriation,                       //304 SPELL_AURA_FAKE_INEBRIATE
     &Aura::HandleAuraModIncreaseSpeed,                      //305 SPELL_AURA_MOD_MINIMUM_SPEED
     &Aura::HandleNULL,                                      //306 1 spell
     &Aura::HandleNULL,                                      //307 absorb healing?
@@ -2087,6 +2087,30 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (Unit* caster = GetCaster())
                             caster->CastSpell(caster, 13138, true, NULL, this);
                         return;
+                    case 28832:                             // Mark of Korth'azz
+                    case 28833:                             // Mark of Blaumeux
+                    case 28834:                             // Mark of Rivendare
+                    case 28835:                             // Mark of Zeliek
+                    {
+                        int32 damage = 0;
+
+                        switch (GetStackAmount())
+                        {
+                            case 1:
+                                return;
+                            case 2: damage =   500; break;
+                            case 3: damage =  1500; break;
+                            case 4: damage =  4000; break;
+                            case 5: damage = 12500; break;
+                            default:
+                                damage = 14000 + 1000 * GetStackAmount();
+                                break;
+                        }
+
+                        if (Unit* caster = GetCaster())
+                            caster->CastCustomSpell(target, 28836, &damage, NULL, NULL, true, NULL, this);
+                        return;
+                    }
                     case 31606:                             // Stormcrow Amulet
                     {
                         CreatureInfo const * cInfo = ObjectMgr::GetCreatureTemplate(17970);
@@ -2105,6 +2129,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         // real time randomness is unclear, using max 30 seconds here
                         // see further down for expire of this aura
                         GetHolder()->SetAuraDuration(urand(1, 30)*IN_MILLISECONDS);
+                        return;
+                    }
+                    case 33326:                             // Stolen Soul Dispel
+                    {
+                        target->RemoveAurasDueToSpell(32346);
                         return;
                     }
                     // Gender spells
@@ -2601,6 +2630,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             {
                 // casted only at creatures at spawn
                 target->CastSpell(target, 47287, true, NULL, this);
+                return;
+            }
+            case 48385:                                     // Create Spirit Fount Beam
+            {
+                target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 48380 : 59320, true);
                 return;
             }
             case 50141:                                     // Blood Oath
@@ -3647,10 +3681,8 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                 case 65528:                                 // Gossip NPC Appearance - Pirates' Day
                 {
                     // expecting npc's using this spell to have models with race info.
-                    uint32 race = GetCreatureModelRace(target->GetNativeDisplayId());
-
                     // random gender, regardless of current gender
-                    switch(race)
+                    switch (target->getRace())
                     {
                         case RACE_HUMAN:
                             target->SetDisplayId(roll_chance_i(50) ? 25037 : 25048);
@@ -4828,6 +4860,25 @@ void Aura::HandleModTaunt(bool apply, bool Real)
         // When taunt aura fades out, mob will switch to previous target if current has less than 1.1 * secondthreat
         target->TauntFadeOut(caster);
     }
+}
+
+void Aura::HandleAuraFakeInebriation(bool apply, bool Real)
+{
+    // all applied/removed only at real aura add/remove
+    if (!Real)
+        return;
+
+    Unit* target = GetTarget();
+
+    if (target->GetTypeId() == TYPEID_PLAYER)
+    {
+        int32 point = target->GetInt32Value(PLAYER_FAKE_INEBRIATION);
+        point += (apply ? 1 : -1) * GetBasePoints();
+
+        target->SetInt32Value(PLAYER_FAKE_INEBRIATION, point);
+    }
+
+    target->UpdateObjectVisibility();
 }
 
 /*********************************************************/
@@ -8373,7 +8424,9 @@ void Aura::HandleAuraMirrorImage(bool apply, bool Real)
         // Caster can be player or creature, the unit who pCreature will become an clone of.
         Unit* caster = GetCaster();
 
-        pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 0, caster->getRace());
+        if (caster->GetTypeId() == TYPEID_PLAYER)           // TODO - Verify! Does it take a 'pseudo-race' (from display-id) for creature-mirroring, and what is sent in SMSG_MIRRORIMAGE_DATA
+            pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 0, caster->getRace());
+
         pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 1, caster->getClass());
         pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 2, caster->getGender());
         pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 3, caster->getPowerType());

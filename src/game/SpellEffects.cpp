@@ -210,7 +210,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectQuestFail,                                //147 SPELL_EFFECT_QUEST_FAIL               quest fail
     &Spell::EffectNULL,                                     //148 SPELL_EFFECT_148                      single spell: Inflicts Fire damage to an enemy.
     &Spell::EffectCharge2,                                  //149 SPELL_EFFECT_CHARGE2                  swoop
-    &Spell::EffectNULL,                                     //150 SPELL_EFFECT_150                      2 spells in 3.3.2
+    &Spell::EffectQuestOffer,                               //150 SPELL_EFFECT_QUEST_OFFER
     &Spell::EffectTriggerRitualOfSummoning,                 //151 SPELL_EFFECT_TRIGGER_SPELL_2
     &Spell::EffectNULL,                                     //152 SPELL_EFFECT_152                      summon Refer-a-Friend
     &Spell::EffectNULL,                                     //153 SPELL_EFFECT_CREATE_PET               misc value is creature entry
@@ -1199,6 +1199,27 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 29126:                                 // Cleansing Flames (Darnassus)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 29099, true);
+                    return;
+                }
+                case 29135:                                 // Cleansing Flames (Ironforge)
+                case 29136:                                 // Cleansing Flames (Orgrimmar)
+                case 29137:                                 // Cleansing Flames (Stormwind)
+                case 29138:                                 // Cleansing Flames (Thunder Bluff)
+                case 29139:                                 // Cleansing Flames (Undercity)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 spellIDs[] = {29102, 29130, 29101, 29132, 29133};
+                    unitTarget->CastSpell(unitTarget, spellIDs[m_spellInfo->Id - 29135], true);
+                    return;
+                }
                 case 29200:                                 // Purify Helboar Meat
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -1608,10 +1629,31 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 45685:                                 // Magnataur On Death 2
+                {
+                    m_caster->RemoveAurasDueToSpell(45673);
+                    m_caster->RemoveAurasDueToSpell(45672);
+                    m_caster->RemoveAurasDueToSpell(45677);
+                    m_caster->RemoveAurasDueToSpell(45681);
+                    m_caster->RemoveAurasDueToSpell(45683);
+                    return;
+                }
                 case 45958:                                 // Signal Alliance
                 {
                     m_caster->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
+                }
+                case 45976:                                 // Open Portal
+                case 46177:                                 // Open All Portals
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // portal visual
+                    unitTarget->CastSpell(unitTarget, 45977, true);
+
+                    // break in case additional procressing in scripting library required
+                    break;
                 }
                 case 45980:                                 // Re-Cursive Transmatter Injection
                 {
@@ -1628,27 +1670,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
 
                     return;
-                }
-                case 45685:                                 // Magnataur On Death 2
-                {
-                    m_caster->RemoveAurasDueToSpell(45673);
-                    m_caster->RemoveAurasDueToSpell(45672);
-                    m_caster->RemoveAurasDueToSpell(45677);
-                    m_caster->RemoveAurasDueToSpell(45681);
-                    m_caster->RemoveAurasDueToSpell(45683);
-                    return;
-                }
-                case 45976:                                 // Open Portal
-                case 46177:                                 // Open All Portals
-                {
-                    if (!unitTarget)
-                        return;
-
-                    // portal visual
-                    unitTarget->CastSpell(unitTarget, 45977, true);
-
-                    // break in case additional procressing in scripting library required
-                    break;
                 }
                 case 45989:                                 // Summon Void Sentinel Summoner Visual
                 {
@@ -1762,6 +1783,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, 43160, true);
                     unitTarget->SetDeathState(JUST_DIED);
                     unitTarget->SetHealth(0);
+                    return;
+                }
+                case 46671:                                 // Cleansing Flames (Exodar)
+                case 46672:                                 // Cleansing Flames (Silvermoon)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, m_spellInfo->Id == 46671 ? 46690 : 46689, true);
                     return;
                 }
                 case 46797:                                 // Quest - Borean Tundra - Set Explosives Cart
@@ -2374,6 +2404,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     // Cast Emerge summon
                     m_caster->CastSpell(m_caster, 54851, true);
+                    return;
+                }
+                case 54092:                                 // Monster Slayer's Kit
+                {
+                    if (!unitTarget)
+                        return;
+
+                    uint32 spellIds[] = {51853, 54063, 54071, 54086};
+                    m_caster->CastSpell(unitTarget, spellIds[urand(0, 3)], true);
                     return;
                 }
                 case 55004:                                 // Nitro Boosts
@@ -4490,7 +4529,7 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
                 sLog.outError("Spell::SendLoot unhandled locktype %u for GameObject trap (entry %u) for spell %u.", lockType, gameObjTarget->GetEntry(), m_spellInfo->Id);
                 return;
             default:
-                sLog.outError("Spell::SendLoot unhandled GameObject type %u (entry %u).", gameObjTarget->GetGoType(), gameObjTarget->GetEntry(), m_spellInfo->Id);
+                sLog.outError("Spell::SendLoot unhandled GameObject type %u (entry %u) for spell %u.", gameObjTarget->GetGoType(), gameObjTarget->GetEntry(), m_spellInfo->Id);
                 return;
         }
     }
@@ -6645,6 +6684,27 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->SummonCreature(16474, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000);
                     return;
                 }
+                case 28859:                                 // Cleansing Flames
+                case 29126:                                 // Cleansing Flames (Darnassus)
+                case 29135:                                 // Cleansing Flames (Ironforge)
+                case 29136:                                 // Cleansing Flames (Orgrimmar)
+                case 29137:                                 // Cleansing Flames (Stormwind)
+                case 29138:                                 // Cleansing Flames (Thunder Bluff)
+                case 29139:                                 // Cleansing Flames (Undercity)
+                case 46671:                                 // Cleansing Flames (Exodar)
+                case 46672:                                 // Cleansing Flames (Silvermoon)
+                {
+                    // Cleanse all magic, curse, disease and poison
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasWithDispelType(DISPEL_MAGIC);
+                    unitTarget->RemoveAurasWithDispelType(DISPEL_CURSE);
+                    unitTarget->RemoveAurasWithDispelType(DISPEL_DISEASE);
+                    unitTarget->RemoveAurasWithDispelType(DISPEL_POISON);
+
+                    return;
+                }
                 case 29395:                                 // Break Kaliri Egg
                 {
                     uint32 creature_id = 0;
@@ -6884,6 +6944,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAurasDueToSpell(46394);
                     return;
                 }
+                case 45204:                                 // Clone Me!
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
                 case 45206:                                 // Copy Off-hand Weapon
                 {
                     if (m_caster->GetTypeId() != TYPEID_UNIT || !unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -7093,6 +7161,28 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAurasDueToSpell(47636);
                     return;
                 }
+                case 47703:                                 // Unholy Union
+                {
+                    m_caster->CastSpell(m_caster, 50254, true);
+                    return;
+                }
+                case 47724:                                 // Frost Draw
+                {
+                    m_caster->CastSpell(m_caster, 50239, true);
+                    return;
+                }
+                case 48590:                                 // Avenging Spirits
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // Summon 4 spirits summoners
+                    unitTarget->CastSpell(unitTarget, 48586, true);
+                    unitTarget->CastSpell(unitTarget, 48587, true);
+                    unitTarget->CastSpell(unitTarget, 48588, true);
+                    unitTarget->CastSpell(unitTarget, 48589, true);
+                    return;
+                }
                 case 48603:                                 // High Executor's Branding Iron
                     // Torture the Torturer: High Executor's Branding Iron Impact
                     unitTarget->CastSpell(unitTarget, 48614, true);
@@ -7260,6 +7350,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 50252:                                 // Blood Draw
+                {
+                    m_caster->CastSpell(m_caster, 50250, true);
+                    return;
+                }
                 case 50439:                                 // Script Cast Summon Image of Drakuru 05
                 {
                     // TODO: check if summon already exist, if it does in this instance, return.
@@ -7292,6 +7387,33 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         }
                     }
 
+                    return;
+                }
+                case 51519:                                 // Death Knight Initiate Visual
+                {
+                    if (!unitTarget)
+                        return;
+
+                    uint32 spellId = 0;
+
+                    bool isMale = unitTarget->getGender() == GENDER_MALE;
+                    switch (unitTarget->getRace())
+                    {
+                        case RACE_HUMAN:    spellId = isMale ? 51520 : 51534; break;
+                        case RACE_DWARF:    spellId = isMale ? 51538 : 51537; break;
+                        case RACE_NIGHTELF: spellId = isMale ? 51535 : 51536; break;
+                        case RACE_GNOME:    spellId = isMale ? 51539 : 51540; break;
+                        case RACE_DRAENEI:  spellId = isMale ? 51541 : 51542; break;
+                        case RACE_ORC:      spellId = isMale ? 51543 : 51544; break;
+                        case RACE_UNDEAD:   spellId = isMale ? 51549 : 51550; break;
+                        case RACE_TAUREN:   spellId = isMale ? 51547 : 51548; break;
+                        case RACE_TROLL:    spellId = isMale ? 51546 : 51545; break;
+                        case RACE_BLOODELF: spellId = isMale ? 51551 : 51552; break;
+                        default:
+                            return;
+                    }
+
+                    unitTarget->CastSpell(unitTarget, spellId, true);
                     return;
                 }
                 case 51770:                                 // Emblazon Runeblade
@@ -7474,6 +7596,37 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }                                           // random spell learn instead placeholder
+                case 59789:                                 // Oracle Ablutions
+                {
+                    if (!unitTarget)
+                        return;
+
+                    switch (unitTarget->getPowerType())
+                    {
+                        case POWER_RUNIC_POWER:
+                        {
+                            unitTarget->CastSpell(unitTarget, 59812, true);
+                            break;
+                        }
+                        case POWER_MANA:
+                        {
+                            int32 manapool = unitTarget->GetMaxPower(POWER_MANA) * 0.05;
+                            unitTarget->CastCustomSpell(unitTarget, 59813, &manapool, NULL, NULL, true);
+                            break;
+                        }
+                        case POWER_RAGE:
+                        {
+                            unitTarget->CastSpell(unitTarget, 59814, true);
+                            break;
+                        }
+                        case POWER_ENERGY:
+                        {
+                            unitTarget->CastSpell(unitTarget, 59815, true);
+                            break;
+                        }
+                    }
+                    return;
+                }
                 case 60893:                                 // Northrend Alchemy Research
                 case 61177:                                 // Northrend Inscription Research
                 case 61288:                                 // Minor Inscription Research
@@ -8554,34 +8707,35 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
 
 void Spell::EffectResurrect(SpellEffectIndex /*eff_idx*/)
 {
-    if(!unitTarget)
-        return;
-    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if(unitTarget->isAlive())
-        return;
-    if(!unitTarget->IsInWorld())
+    if (unitTarget->isAlive() || !unitTarget->IsInWorld())
         return;
 
     switch (m_spellInfo->Id)
     {
-        // Defibrillate (Goblin Jumper Cables) have 33% chance on success
-        case 8342:
-            if (roll_chance_i(67))
+        case 8342:                                          // Defibrillate (Goblin Jumper Cables) has 33% chance on success
+        case 22999:                                         // Defibrillate (Goblin Jumper Cables XL) has 50% chance on success
+        case 54732:                                         // Defibrillate (Gnomish Army Knife) has 67% chance on success
+        {
+            uint32 failChance = 0;
+            uint32 failSpellId = 0;
+            switch (m_spellInfo->Id)
             {
-                m_caster->CastSpell(m_caster, 8338, true, m_CastItem);
+                case 8342:  failChance=67; failSpellId = 8338;  break;
+                case 22999: failChance=50; failSpellId = 23055; break;
+                case 54732: failChance=33; failSpellId = 0; break;
+            }
+
+            if (roll_chance_i(failChance))
+            {
+                if (failSpellId)
+                    m_caster->CastSpell(m_caster, failSpellId, true, m_CastItem);
                 return;
             }
             break;
-        // Defibrillate (Goblin Jumper Cables XL) have 50% chance on success
-        case 22999:
-            if (roll_chance_i(50))
-            {
-                m_caster->CastSpell(m_caster, 23055, true, m_CastItem);
-                return;
-            }
-            break;
+        }
         default:
             break;
     }
@@ -9512,10 +9666,8 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
 
 void Spell::EffectRestoreItemCharges( SpellEffectIndex eff_idx )
 {
-    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
-
-    Player* player = (Player*)unitTarget;
 
     ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(m_spellInfo->EffectItemType[eff_idx]);
     if (!itemProto)
@@ -9524,9 +9676,9 @@ void Spell::EffectRestoreItemCharges( SpellEffectIndex eff_idx )
     // In case item from limited category recharge any from category, is this valid checked early in spell checks
     Item* item;
     if (itemProto->ItemLimitCategory)
-        item = player->GetItemByLimitedCategory(itemProto->ItemLimitCategory);
+        item = ((Player*)unitTarget)->GetItemByLimitedCategory(itemProto->ItemLimitCategory);
     else
-        item = player->GetItemByEntry(m_spellInfo->EffectItemType[eff_idx]);
+        item = ((Player*)unitTarget)->GetItemByEntry(m_spellInfo->EffectItemType[eff_idx]);
 
     if (!item)
         return;
@@ -9548,14 +9700,14 @@ void Spell::EffectRedirectThreat(SpellEffectIndex eff_idx)
 
 void Spell::EffectTeachTaxiNode( SpellEffectIndex eff_idx )
 {
-    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
-
-    Player* player = (Player*)unitTarget;
 
     uint32 taxiNodeId = m_spellInfo->EffectMiscValue[eff_idx];
     if (!sTaxiNodesStore.LookupEntry(taxiNodeId))
         return;
+
+    Player* player = (Player*)unitTarget;
 
     if (player->m_taxi.SetTaximaskNode(taxiNodeId))
     {
@@ -9566,6 +9718,20 @@ void Spell::EffectTeachTaxiNode( SpellEffectIndex eff_idx )
         data << m_caster->GetObjectGuid();
         data << uint8( 1 );
         player->SendDirectMessage( &data );
+    }
+}
+
+void Spell::EffectQuestOffer(SpellEffectIndex eff_idx)
+{
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if (Quest const* quest = sObjectMgr.GetQuestTemplate(m_spellInfo->EffectMiscValue[eff_idx]))
+    {
+        Player* player = (Player*)unitTarget;
+
+        if (player->CanTakeQuest(quest, false))
+            player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, player->GetObjectGuid(), true);
     }
 }
 
