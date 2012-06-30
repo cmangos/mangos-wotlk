@@ -448,17 +448,8 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarg
         return RETURN_CONTINUE;
     }
 
-    if (m_ai->GetHealthPercent() <= 60)
-    {
-        if (HealTarget(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
-            return RETURN_CONTINUE;
-    }
-    if (masterHP <= 50)
-    {
-        if (HealTarget(GetMaster()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
-            return RETURN_CONTINUE;
-    }
-    // TODO: err... what about the other teammates?
+    if (HealTarget(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;
 }
@@ -560,8 +551,65 @@ void PlayerbotDruidAI::DoNonCombatActions()
     if (!m_ai)   return;
     if (!m_bot)  return;
 
-    Player* master = GetMaster();
-    if (!master) return;
+    if (!m_bot->isAlive() || m_bot->IsInDuel()) return;
+
+    // TODO: proper order: revive, heal, buff
+    // buff and heal group
+    if (m_bot->GetGroup())
+    {
+        // group buff
+        if (GIFT_OF_THE_WILD && m_ai->HasSpellReagents(GIFT_OF_THE_WILD) && m_ai->Buff(GIFT_OF_THE_WILD, m_bot))
+            return;
+
+        Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
+            if (!tPlayer || tPlayer->IsInDuel() || tPlayer == m_bot)
+                continue;
+
+            // Resurrect member if needed
+            if (!tPlayer->isAlive())
+            {
+                if (CastSpell(REVIVE, tPlayer))
+                {
+                    std::string msg = "Resurrecting ";
+                    msg += tPlayer->GetName();
+                    m_bot->Say(msg, LANG_UNIVERSAL);
+                    return;
+                }
+                else
+                    continue;
+            }
+            else
+            {
+                // buff
+                if (BuffPlayer(tPlayer))
+                    return;
+            }
+        }
+    }
+    else
+    {
+        if (m_master->IsInDuel())
+            return;
+        if (!m_master->isAlive())
+        {
+            if (CastSpell(REVIVE, m_master))
+                m_ai->TellMaster("Resurrecting you, Master.");
+            return;
+        }
+
+        if (BuffPlayer(m_master))
+            return;
+    }
+
+    if (HealTarget(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        return;
+
+    BuffPlayer(m_bot);
+
+    CheckForms();
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
@@ -597,69 +645,6 @@ void PlayerbotDruidAI::DoNonCombatActions()
         m_ai->UseItem(fItem);
         return;
     }
-
-    // buff and heal master's group
-    if (master->GetGroup())
-    {
-        // Buff master with group buff
-        if (!master->IsInDuel())
-            if (master->isAlive() && GIFT_OF_THE_WILD && m_ai->HasSpellReagents(GIFT_OF_THE_WILD) && m_ai->Buff(GIFT_OF_THE_WILD, master))
-                return;
-
-        Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
-        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
-        {
-            Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
-            if (!tPlayer || tPlayer == m_bot)
-                continue;
-
-            if (tPlayer->IsInDuelWith(master))
-                continue;
-
-            // Resurrect member if needed
-            if (!tPlayer->isAlive())
-            {
-                if (CastSpell(REVIVE, tPlayer))
-                {
-                    std::string msg = "Resurrecting ";
-                    msg += tPlayer->GetName();
-                    m_bot->Say(msg, LANG_UNIVERSAL);
-                    return;
-                }
-                else
-                    continue;
-            }
-            else
-            {
-                // buff and heal
-                if (BuffPlayer(tPlayer))
-                    return;
-
-                if (HealTarget(tPlayer) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
-                    return;
-            }
-        }
-    }
-    else
-    {
-        if (master->IsInDuel())
-            return;
-
-        if (master->isAlive())
-        {
-            if (BuffPlayer(master))
-                return;
-            if (HealTarget(master) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
-                return;
-        }
-        else
-        if (CastSpell(REVIVE, master))
-            m_ai->TellMaster("Resurrecting you, Master.");
-    }
-
-    BuffPlayer(m_bot);
-
-    CheckForms();
 } // end DoNonCombatActions
 
 bool PlayerbotDruidAI::BuffPlayer(Player* target)
