@@ -512,6 +512,25 @@ void PlayerbotShamanAI::DoNonCombatActions()
     if (weapon && (weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0) && spec == SHAMAN_SPEC_ENHANCEMENT)
         m_ai->CastSpell(FLAMETONGUE_WEAPON, *m_bot);
 
+    // heal master's group
+    if (GetMaster()->GetGroup())
+    {
+        Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
+            if (!tPlayer || !tPlayer->isAlive())
+                continue;
+
+            // TODO: should check for dueling with *anyone*
+            if (tPlayer->IsInDuelWith(GetMaster()))
+                continue;
+
+            // heal
+            HealTarget(*tPlayer);
+        }
+    }
+
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
@@ -543,24 +562,5 @@ void PlayerbotShamanAI::DoNonCombatActions()
         m_ai->TellMaster("I could use first aid.");
         m_ai->UseItem(fItem);
         return;
-    }
-
-    // heal master's group
-    if (GetMaster()->GetGroup())
-    {
-        Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
-        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
-        {
-            Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
-            if (!tPlayer || !tPlayer->isAlive())
-                continue;
-
-            // TODO: should check for dueling with *anyone*
-            if (tPlayer->IsInDuelWith(GetMaster()))
-                continue;
-
-            // heal
-            HealTarget(*tPlayer);
-        }
     }
 } // end DoNonCombatActions
