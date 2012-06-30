@@ -93,7 +93,7 @@ private:
     CombatManeuverReturns CastSpell(uint32 nextAction, Unit *pTarget = NULL) { return CastSpellWand(nextAction, pTarget, SHOOT); }
 
     // Heals the target based off its hps
-    CombatManeuverReturns HealTarget (Unit* target);
+    CombatManeuverReturns HealTarget(Unit* target);
 
     // holy
     uint32 BINDING_HEAL,

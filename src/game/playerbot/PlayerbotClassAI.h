@@ -38,6 +38,14 @@ public:
 protected:
     CombatManeuverReturns CastSpellNoRanged(uint32 nextAction, Unit *pTarget);
     CombatManeuverReturns CastSpellWand(uint32 nextAction, Unit *pTarget, uint32 SHOOT);
+    virtual Unit* GetHealTarget();
+
+    // These values are used in GetHealTarget and can be overridden per class (to accomodate healing spell health checks)
+    uint8 m_MinHealthPercentTank;
+    uint8 m_MinHealthPercentHealer;
+    uint8 m_MinHealthPercentDPS;
+    uint8 m_MinHealthPercentMaster;
+
     Player* m_master;
     Player* m_bot;
     PlayerbotAI* m_ai;
