@@ -94,6 +94,7 @@ private:
 
     // Heals the target based off its hps
     CombatManeuverReturns HealTarget(Unit* target);
+    Unit* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
 
     // holy
     uint32 BINDING_HEAL,

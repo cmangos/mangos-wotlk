@@ -123,6 +123,8 @@ private:
 
     // Heals the target based off its hps
     bool HealTarget (Unit *target);
+    Unit* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
+
     // Callback method to reset shapeshift forms blocking buffs and heals
     static void GoBuffForm(Player *self);
 

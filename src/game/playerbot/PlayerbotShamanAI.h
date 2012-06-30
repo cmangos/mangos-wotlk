@@ -126,6 +126,7 @@ public:
 private:
     // Heals the target based off its hps
     void HealTarget(Unit& target);
+    Unit* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
     void DropTotems();
     void CheckShields();
     void UseCooldowns();
