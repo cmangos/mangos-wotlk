@@ -96,24 +96,24 @@ CombatManeuverReturns PlayerbotPaladinAI::DoFirstCombatManeuver(Unit *pTarget)
     return RETURN_NO_ACTION_OK;
 }
 
-bool PlayerbotPaladinAI::HealTarget(Unit *target)
+CombatManeuverReturns PlayerbotPaladinAI::HealTarget(Unit *target)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
 
     if (hp < 25 && m_ai->CastSpell(LAY_ON_HANDS, *target))
-        return true;
+        return RETURN_CONTINUE;
 
     if (hp < 30 && m_ai->CastSpell(FLASH_OF_LIGHT, *target))
-        return true;
+        return RETURN_CONTINUE;
 
     if (hp < 35 && m_ai->CastSpell(HOLY_SHOCK, *target))
-        return true;
+        return RETURN_CONTINUE;
 
     if (hp < 40 && m_ai->CastSpell(HOLY_LIGHT, *target))
-        return true;
+        return RETURN_CONTINUE;
 
     if (PURIFY > 0 && m_ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
     {
@@ -128,25 +128,34 @@ bool PlayerbotPaladinAI::HealTarget(Unit *target)
             if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
             {
                 if (holder->GetSpellProto()->Dispel == DISPEL_DISEASE)
-                    m_ai->CastSpell(DISPEL, *target);
-                return false;
+                {
+                    if (m_ai->CastSpell(DISPEL, *target))
+                        return RETURN_CONTINUE;
+                    return RETURN_NO_ACTION_ERROR;
+                }
             }
             else if ((1 << holder->GetSpellProto()->Dispel) & dispelMask2)
             {
                 if (holder->GetSpellProto()->Dispel == DISPEL_POISON)
-                    m_ai->CastSpell(DISPEL, *target);
-                return false;
+                {
+                    if (m_ai->CastSpell(DISPEL, *target))
+                        return RETURN_CONTINUE;
+                    return RETURN_NO_ACTION_ERROR;
+                }
             }
             else if ((1 << holder->GetSpellProto()->Dispel) & dispelMask3 & (DISPEL == CLEANSE))
             {
                 if (holder->GetSpellProto()->Dispel == DISPEL_MAGIC)
-                    m_ai->CastSpell(DISPEL, *target);
-                return false;
+                {
+                    if (m_ai->CastSpell(DISPEL, *target))
+                        return RETURN_CONTINUE;
+                    return RETURN_NO_ACTION_ERROR;
+                }
             }
         }
     }
 
-    return false;
+    return RETURN_NO_ACTION_UNKNOWN;
 } // end HealTarget
 
 void PlayerbotPaladinAI::CheckAuras()
@@ -302,7 +311,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
 
             uint32 memberHP = m_groupMember->GetHealth() * 100 / m_groupMember->GetMaxHealth();
             if (memberHP < 40 && m_ai->GetManaPercent() >= 40)  // do not heal bots without plenty of mana for master & self
-                if (HealTarget(m_groupMember))
+                if (HealTarget(m_groupMember) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
                     return RETURN_CONTINUE;
         }
     }
@@ -518,7 +527,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
                     continue;
             }
 
-            if (HealTarget(tPlayer))
+            if (HealTarget(tPlayer) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
                 return;
 
             if (tPlayer != m_bot && tPlayer != GetMaster())

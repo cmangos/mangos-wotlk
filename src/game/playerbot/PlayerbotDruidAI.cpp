@@ -86,10 +86,10 @@ CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuver(Unit *pTarget)
     return RETURN_NO_ACTION_OK;
 }
 
-bool PlayerbotDruidAI::HealTarget(Unit *target)
+CombatManeuverReturns PlayerbotDruidAI::HealTarget(Unit* target)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
 
@@ -110,47 +110,53 @@ bool PlayerbotDruidAI::HealTarget(Unit *target)
             {
                 //If the spell is dispellable and we can dispel it, do so
                 if ((holder->GetSpellProto()->Dispel == DISPEL_CURSE) & (REMOVE_CURSE > 0))
-                    CastSpell(REMOVE_CURSE, target);
-                return false;
+                {
+                    if (CastSpell(REMOVE_CURSE, target))
+                        return RETURN_CONTINUE;
+                    return RETURN_NO_ACTION_ERROR;
+                }
             }
             else if ((1 << holder->GetSpellProto()->Dispel) & dispelMask2)
             {
                 if ((holder->GetSpellProto()->Dispel == DISPEL_POISON) & (ABOLISH_POISON > 0))
-                    CastSpell(ABOLISH_POISON, target);
-                return false;
+                {
+                    if (CastSpell(ABOLISH_POISON, target))
+                        return RETURN_CONTINUE;
+                    return RETURN_NO_ACTION_ERROR;
+                }
             }
         }
     }
 
     if (hp >= 70)
-        return false;
+        return RETURN_NO_ACTION_OK;
 
     // Reset form if needed
     if (!m_bot->HasAura(TREE_OF_LIFE) || TREE_OF_LIFE == 0)
         GoBuffForm(GetPlayerBot());
 
     if (hp < 70 && REJUVENATION > 0 && !target->HasAura(REJUVENATION) && CastSpell(REJUVENATION, target))
-        return true;
+        return RETURN_CONTINUE;
 
     if (hp < 60 && LIFEBLOOM > 0 && !target->HasAura(LIFEBLOOM) && CastSpell(LIFEBLOOM, target))
-        return true;
+        return RETURN_CONTINUE;
 
     if (hp < 55 && REGROWTH > 0 && !target->HasAura(REGROWTH) && CastSpell(REGROWTH, target))
-        return true;
+        return RETURN_CONTINUE;
 
     if (hp < 50 && SWIFTMEND > 0 && (target->HasAura(REJUVENATION) || target->HasAura(REGROWTH)) && CastSpell(SWIFTMEND, target))
-        return true;
+        return RETURN_CONTINUE;
 
     if (hp < 45 && WILD_GROWTH > 0 && !target->HasAura(WILD_GROWTH) && CastSpell(WILD_GROWTH, target))
-        return true;
+        return RETURN_CONTINUE;
 
     if (hp < 30 && NOURISH > 0 && CastSpell(NOURISH, target))
-        return true;
+        return RETURN_CONTINUE;
 
     if (hp < 25 && HEALING_TOUCH > 0 && CastSpell(HEALING_TOUCH, target))
-        return true;
+        return RETURN_CONTINUE;
 
-    return false;
+    return RETURN_NO_ACTION_UNKNOWN;
 } // end HealTarget
 
 CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
@@ -444,12 +450,12 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarg
 
     if (m_ai->GetHealthPercent() <= 60)
     {
-        if (HealTarget(m_bot))
+        if (HealTarget(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return RETURN_CONTINUE;
     }
     if (masterHP <= 50)
     {
-        if (HealTarget(GetMaster()))
+        if (HealTarget(GetMaster()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return RETURN_CONTINUE;
     }
     // TODO: err... what about the other teammates?
@@ -629,7 +635,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
                 if (BuffPlayer(tPlayer))
                     return;
 
-                if (HealTarget(tPlayer))
+                if (HealTarget(tPlayer) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
                     return;
             }
         }
@@ -643,7 +649,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
         {
             if (BuffPlayer(master))
                 return;
-            if (HealTarget(master))
+            if (HealTarget(master) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
                 return;
         }
         else
