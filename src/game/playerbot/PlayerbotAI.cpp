@@ -694,52 +694,31 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
     // get class and style to make it easier to compare later
     switch (m_bot->getClass())
     {
-    case CLASS_SHAMAN:
-        {
+        case CLASS_PRIEST:
+        case CLASS_MAGE:
+        case CLASS_WARLOCK:
+            isclass = 1;
+            break;
+
+        case CLASS_PALADIN:
+        case CLASS_DEATH_KNIGHT:
+        case CLASS_SHAMAN:
+        case CLASS_DRUID:
             isclass = 2;
-            ishybrid = 1; // hybrid caster
-            break;
-        }
-    case CLASS_PRIEST:
-        {
-            isclass = 1;
-            break;
-        }
-    case CLASS_MAGE:
-        {
-            isclass = 1;
-            break;
-        }
-    case CLASS_WARLOCK:
-        {
-            isclass = 1;
-            break;
-        }
-    case CLASS_DRUID:
-        {
             ishybrid = 1;
-            isclass = 2; // caster
             break;
-        }
+
+        case CLASS_WARRIOR:
+        case CLASS_ROGUE:
+            isclass = 3; // melee
+            break;
+
+        case CLASS_HUNTER:
+            isclass = 2;
+            ishybrid = 2;
+            break;
     }
-    switch (m_bot->getClass())
-    {
-    case CLASS_WARRIOR:
-    case CLASS_ROGUE:
-        isclass = 3; // melee
-        break;
-    }
-    switch (m_bot->getClass())
-    {
-    case CLASS_HUNTER:
-        isclass = 2;
-        ishybrid = 2;
-    case CLASS_PALADIN:
-    case CLASS_DEATH_KNIGHT:
-        isclass = 2; // hybrid melee
-        ishybrid = 1;
-        break;
-    }
+
     for (int i = 0; i < MAX_ITEM_PROTO_STATS; ++i) // item can only have 10 stats. We check each stat slot available for stat and type.
     {
         uint32 itemmod = pProto->ItemStat[i].ItemStatType; // equipped item stats if any
