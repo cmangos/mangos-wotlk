@@ -405,7 +405,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
     if (master->GetGroup())
     {
         // Buff master with group buffs
-        if (!master->IsInDuel(master) && master->isAlive())
+        if (!master->IsInDuel() && master->isAlive())
         {
             if (PRAYER_OF_FORTITUDE && m_ai->HasSpellReagents(PRAYER_OF_FORTITUDE) && m_ai->Buff(PRAYER_OF_FORTITUDE, master))
                 return;
@@ -453,7 +453,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
     }
     else
     {
-        if (master->isAlive() && !master->IsInDuel(master))
+        if (master->isAlive() && !master->IsInDuel())
         {
             if (BuffPlayer(master))
                 return;

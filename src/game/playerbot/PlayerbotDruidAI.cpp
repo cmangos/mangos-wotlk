@@ -596,7 +596,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
     if (master->GetGroup())
     {
         // Buff master with group buff
-        if (!master->IsInDuel(master))
+        if (!master->IsInDuel())
             if (master->isAlive() && GIFT_OF_THE_WILD && m_ai->HasSpellReagents(GIFT_OF_THE_WILD) && m_ai->Buff(GIFT_OF_THE_WILD, master))
                 return;
 
@@ -636,7 +636,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
     }
     else
     {
-        if (master->IsInDuel(master))
+        if (master->IsInDuel())
             return;
 
         if (master->isAlive())

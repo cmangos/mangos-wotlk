@@ -456,7 +456,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     BuffPlayer(m_bot);
 
     // Buff master
-    if (!GetMaster()->IsInDuel(GetMaster()))
+    if (!GetMaster()->IsInDuel())
         BuffPlayer(GetMaster());
 
     // mana check
