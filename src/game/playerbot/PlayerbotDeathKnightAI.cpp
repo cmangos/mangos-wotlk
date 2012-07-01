@@ -68,7 +68,7 @@ PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* con
 
 PlayerbotDeathKnightAI::~PlayerbotDeathKnightAI() {}
 
-CombatManeuverReturns PlayerbotDeathKnightAI::DoFirstCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotDeathKnightAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
 {
     return RETURN_NO_ACTION_OK;
 }
@@ -83,6 +83,8 @@ CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget
         case PlayerbotAI::SCENARIO_DUEL:
             m_ai->CastSpell(PLAGUE_STRIKE);
             return RETURN_CONTINUE;
+        default:
+            break;
     }
 
     // ------- Non Duel combat ----------

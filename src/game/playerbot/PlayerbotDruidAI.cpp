@@ -81,7 +81,7 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
 
 PlayerbotDruidAI::~PlayerbotDruidAI() {}
 
-CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
 {
     return RETURN_NO_ACTION_OK;
 }
@@ -193,8 +193,10 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
     //{
     //    case PlayerbotAI::SCENARIO_DUEL:
     //        if (CastSpell(MOONFIRE))
-    //            return true;
-    //        return false;
+    //            return RETURN_CONTINUE;
+    //        return RETURN_NO_ACTION_ERROR;
+    //    default:
+    //        break; 
     //}
 
 
@@ -408,14 +410,14 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverSpellDPS(Unit* p
     return RETURN_NO_ACTION_UNKNOWN;
 }
 
-CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* pTarget)
+CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* /*pTarget*/)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
+    //uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
 
-    Unit* pVictim = pTarget->getVictim();
+    //Unit* pVictim = pTarget->getVictim();
 
     // (un)Shapeshifting is considered one step closer so will return true (and have the bot wait a bit for the GCD)
     if (TREE_OF_LIFE > 0 && !m_bot->HasAura(TREE_OF_LIFE, EFFECT_INDEX_0))

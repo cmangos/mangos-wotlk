@@ -79,7 +79,7 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
 
 PlayerbotWarlockAI::~PlayerbotWarlockAI() {}
 
-CombatManeuverReturns PlayerbotWarlockAI::DoFirstCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotWarlockAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
 {
     return RETURN_NO_ACTION_OK;
 }
@@ -98,11 +98,9 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     //switch (m_ai->GetScenarioType())
     //{
     //    case PlayerbotAI::SCENARIO_DUEL:
-    //    {
     //        if (SHADOW_BOLT > 0)
     //            m_ai->CastSpell(SHADOW_BOLT);
     //        return;
-    //    }
     //    default:
     //        break;
     //}

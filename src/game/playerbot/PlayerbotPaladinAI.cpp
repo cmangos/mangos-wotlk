@@ -91,7 +91,7 @@ PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, 
 
 PlayerbotPaladinAI::~PlayerbotPaladinAI() {}
 
-CombatManeuverReturns PlayerbotPaladinAI::DoFirstCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotPaladinAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
 {
     return RETURN_NO_ACTION_OK;
 }
@@ -283,6 +283,8 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
                 return RETURN_CONTINUE;
             }
             return RETURN_NO_ACTION_UNKNOWN;
+        default:
+            break;
     }
 
     // damage spells

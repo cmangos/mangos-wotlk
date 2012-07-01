@@ -166,12 +166,14 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    //switch (m_ai->GetScenarioType())
+    //switch (ai->GetScenarioType())
     //{
     //    case PlayerbotAI::SCENARIO_DUEL:
     //        if (HEROIC_STRIKE > 0)
-    //            m_ai->CastSpell(HEROIC_STRIKE);
+    //            ai->CastSpell(HEROIC_STRIKE);
     //        return;
+    //    default:
+    //        break;
     //}
     // ------- Non Duel combat ----------
 
@@ -184,7 +186,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
     uint32 spec = m_bot->GetSpec();
 
     //If we have devastate it will replace SA in our rotation
-    uint32 SUNDER = (DEVASTATE > 0 ? DEVASTATE : SUNDER_ARMOR);
+    //uint32 SUNDER = (DEVASTATE > 0 ? DEVASTATE : SUNDER_ARMOR);
 
     //Used to determine if this bot is highest on threat
     Unit *newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);

@@ -6724,7 +6724,7 @@ void PlayerbotAI::findNearbyCreature()
 * GiveLevel sets the bot's level to 'level'
 * Not the clearest of function names, we're just mirroring Player.cpp's function name
 */
-void PlayerbotAI::GiveLevel(uint32 level)
+void PlayerbotAI::GiveLevel(uint32 /*level*/)
 {
     // Talent function in Player::GetLevel take care of resetting talents in case level < getLevel()
     ApplyActiveTalentSpec();
@@ -6995,7 +6995,7 @@ bool PlayerbotAI::TradeCopper(uint32 copper)
     return false;
 }
 
-bool PlayerbotAI::DoTeleport(WorldObject &obj)
+bool PlayerbotAI::DoTeleport(WorldObject& /*obj*/)
 {
     m_ignoreAIUpdatesUntilTime = time(NULL) + 6;
     PlayerbotChatHandler ch(GetMaster());
@@ -8862,13 +8862,13 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
                     SetActiveTalentSpec(ts);
                     if (!ApplyActiveTalentSpec())
                         SendWhisper("The talent spec has been set active but could not be applied. It appears something has gone awry.", fromPlayer);
-                    //DEBUG_LOG ("[PlayerbotAI]: Could set TalentSpec but could not apply it - 'talent spec #': Class: %i; chosenSpec: %li", (long)m_bot->getClass(), chosenSpec);
+                    DEBUG_LOG ("[PlayerbotAI]: Could set TalentSpec but could not apply it - 'talent spec #': Class: %u; chosenSpec: %u", m_bot->getClass(), chosenSpec);
                     InspectUpdate();
                 }
                 else
                 {
                     SendWhisper("An error has occured. Please let a Game Master know. This error has been logged.", fromPlayer);
-                    DEBUG_LOG ("[PlayerbotAI]: Could not GetTalentSpec to set & apply - 'talent spec #': Class: %i; chosenSpec: %li", (long) m_bot->getClass(), chosenSpec);
+                    DEBUG_LOG ("[PlayerbotAI]: Could not GetTalentSpec to set & apply - 'talent spec #': Class: %u; chosenSpec: %u", m_bot->getClass(), chosenSpec);
                 }
             }
         }
@@ -9039,7 +9039,7 @@ void PlayerbotAI::_HandleCommandAutoEquip(std::string &text, Player &fromPlayer)
     SendWhisper(msg.str(),fromPlayer);
 }
 
-void PlayerbotAI::_HandleCommandEquip(std::string &text, Player &fromPlayer)
+void PlayerbotAI::_HandleCommandEquip(std::string &text, Player& /*fromPlayer*/)
 {
     std::list<uint32> itemIds;
     std::list<Item*> itemList;
@@ -9051,7 +9051,7 @@ void PlayerbotAI::_HandleCommandEquip(std::string &text, Player &fromPlayer)
     SendNotEquipList(*m_bot);
 }
 
-void PlayerbotAI::_HandleCommandFind(std::string &text, Player &fromPlayer)
+void PlayerbotAI::_HandleCommandFind(std::string &text, Player& /*fromPlayer*/)
 {
     extractGOinfo(text, m_lootTargets);
 
@@ -9783,7 +9783,7 @@ void PlayerbotAI::_HandleCommandPet(std::string &text, Player &fromPlayer)
     }
 }
 
-void PlayerbotAI::_HandleCommandSpells(std::string &text, Player &fromPlayer)
+void PlayerbotAI::_HandleCommandSpells(std::string& /*text*/, Player &fromPlayer)
 {
     int loc = GetMaster()->GetSession()->GetSessionDbcLocale();
 
@@ -9868,7 +9868,7 @@ void PlayerbotAI::_HandleCommandSpells(std::string &text, Player &fromPlayer)
     ch.SendSysMessage(negOut.str().c_str());
 }
 
-void PlayerbotAI::_HandleCommandSurvey(std::string &text, Player &fromPlayer)
+void PlayerbotAI::_HandleCommandSurvey(std::string& /*text*/, Player &fromPlayer)
 {
     uint32 count = 0;
     std::ostringstream detectout;

@@ -65,7 +65,7 @@ PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, Player
 
 PlayerbotMageAI::~PlayerbotMageAI() {}
 
-CombatManeuverReturns PlayerbotMageAI::DoFirstCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotMageAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
 {
     return RETURN_NO_ACTION_OK;
 }
@@ -87,6 +87,8 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
                     return RETURN_CONTINUE;
 
             return RETURN_NO_ACTION_ERROR;
+        default:
+            break;
     }
 
     // ------- Non Duel combat ----------

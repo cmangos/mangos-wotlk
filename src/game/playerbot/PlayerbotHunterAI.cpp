@@ -80,7 +80,7 @@ PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, Pl
 
 PlayerbotHunterAI::~PlayerbotHunterAI() {}
 
-CombatManeuverReturns PlayerbotHunterAI::DoFirstCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotHunterAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
 {
     return RETURN_NO_ACTION_OK;
 }
@@ -95,6 +95,8 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
         case PlayerbotAI::SCENARIO_DUEL:
             m_ai->CastSpell(RAPTOR_STRIKE);
             return RETURN_CONTINUE;
+        default:
+            break;
     }
 
     // ------- Non Duel combat ----------

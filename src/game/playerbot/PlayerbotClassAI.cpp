@@ -19,7 +19,7 @@ CombatManeuverReturns PlayerbotClassAI::DoNextCombatManeuver(Unit *) { return RE
 
 void PlayerbotClassAI::DoNonCombatActions() {}
 
-bool PlayerbotClassAI::BuffPlayer(Player* target)
+bool PlayerbotClassAI::BuffPlayer(Player* /*target*/)
 {
     return false;
 }
