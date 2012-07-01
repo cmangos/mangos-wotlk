@@ -98,6 +98,8 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
 
             return RETURN_NO_ACTION_UNKNOWN;
         }
+        default:
+            break;
     }
 
     Unit* pVictim = pTarget->getVictim();

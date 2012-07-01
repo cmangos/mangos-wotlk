@@ -182,9 +182,9 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
     // Damage Attacks
 
     Player *m_bot = GetPlayerBot();
-    Unit* pVictim = pTarget->getVictim();
-    float fTargetDist = m_bot->GetCombatDistance(pTarget);
-    PlayerbotAI::CombatOrderType co = m_ai->GetCombatOrder();
+    //Unit* pVictim = pTarget->getVictim();
+    //float fTargetDist = m_bot->GetCombatDistance(pTarget);
+    //PlayerbotAI::CombatOrderType co = m_ai->GetCombatOrder();
     uint32 spec = m_bot->GetSpec();
 
     //If we have devastate it will replace SA in our rotation

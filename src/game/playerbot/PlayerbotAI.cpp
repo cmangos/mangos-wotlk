@@ -506,10 +506,12 @@ void PlayerbotAI::AutoUpgradeEquipment(Player& /*player*/) // test for autoequip
 
     // What does this mean? Constants, please!
     if (AutoEquipPlug != 1)
+    {
         if (AutoEquipPlug == 2)
             AutoEquipPlug = 0;
         else
             return;
+    }
 
     // Find equippable items in main backpack one at a time
     for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
@@ -3867,12 +3869,12 @@ Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
 */
 void PlayerbotAI::CombatDelayRestore()
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT combat_delay FROM playerbot_saved_data WHERE guid = '%lu'", m_bot->GetGUIDLow());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT combat_delay FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
 
     if (!result)
     {
         sLog.outString();
-        sLog.outString(">> [CombatDelayRestore()] Loaded `playerbot_saved_data`, found no match for guid %lu.", m_bot->GetGUIDLow());
+        sLog.outString(">> [CombatDelayRestore()] Loaded `playerbot_saved_data`, found no match for guid %u.", m_bot->GetGUIDLow());
         m_DelayAttack = 0;
         return;
     }
@@ -3890,12 +3892,12 @@ void PlayerbotAI::CombatDelayRestore()
 */
 void PlayerbotAI::CombatOrderRestore()
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT bot_primary_order,bot_secondary_order,primary_target,secondary_target,pname,sname,combat_delay FROM playerbot_saved_data WHERE guid = '%lu'", m_bot->GetGUIDLow());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT bot_primary_order,bot_secondary_order,primary_target,secondary_target,pname,sname,combat_delay FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
 
     if (!result)
     {
         sLog.outString();
-        sLog.outString(">> [CombatOrderRestore()] Loaded `playerbot_saved_data`, found no match for guid %lu.", m_bot->GetGUIDLow());
+        sLog.outString(">> [CombatOrderRestore()] Loaded `playerbot_saved_data`, found no match for guid %u.", m_bot->GetGUIDLow());
         TellMaster("I have no orders");
         return;
     }
@@ -7684,7 +7686,7 @@ void PlayerbotAI::Sell(const uint32 itemid)
     }
 }
 
-void PlayerbotAI::SellGarbage(Player& /*player*/, bool bListNonTrash, bool bDetailTrashSold, bool bVerbose)
+void PlayerbotAI::SellGarbage(Player& /*player*/, bool /*bListNonTrash*/, bool bDetailTrashSold, bool bVerbose)
 {
     uint32 SoldCost = 0;
     uint32 SoldQuantity = 0;
@@ -8113,7 +8115,7 @@ void PlayerbotAI::_HandleCommandCombat(std::string &text, Player &fromPlayer)
     {
         uint32 gdelay;
         sscanf(text.c_str(), "%d", &gdelay);
-        if (gdelay >= 0 && gdelay <= 10)
+        if (gdelay <= 10)
         {
             m_DelayAttack = gdelay;
             TellMaster("Combat delay is now '%u' ", m_DelayAttack);
@@ -8255,6 +8257,7 @@ void PlayerbotAI::_HandleCommandAttack(std::string &text, Player &fromPlayer)
     if (attackOnGuid)
     {
         if (Unit * thingToAttack = ObjectAccessor::GetUnit(*m_bot, attackOnGuid))
+        {
             if (!m_bot->IsFriendlyTo(thingToAttack) && !m_bot->IsWithinLOSInMap(thingToAttack))
             {
                 DoTeleport(*m_followTarget);
@@ -8263,6 +8266,7 @@ void PlayerbotAI::_HandleCommandAttack(std::string &text, Player &fromPlayer)
             }
             else if (!m_bot->IsFriendlyTo(thingToAttack) && m_bot->IsWithinLOSInMap(thingToAttack))
                 GetCombatTarget(thingToAttack);
+        }
     }
     else
     {

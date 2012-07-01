@@ -49,7 +49,7 @@ public:
 protected:
     CombatManeuverReturns CastSpellNoRanged(uint32 nextAction, Unit *pTarget);
     CombatManeuverReturns CastSpellWand(uint32 nextAction, Unit *pTarget, uint32 SHOOT);
-    virtual CombatManeuverReturns HealTarget(Unit* target) { return RETURN_NO_ACTION_UNKNOWN; }
+    virtual CombatManeuverReturns HealTarget(Unit* /*target*/) { return RETURN_NO_ACTION_UNKNOWN; }
     virtual Unit* GetHealTarget();
 
     // These values are used in GetHealTarget and can be overridden per class (to accomodate healing spell health checks)

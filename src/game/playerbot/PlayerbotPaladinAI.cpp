@@ -205,7 +205,8 @@ void PlayerbotPaladinAI::CheckAuras()
                 m_ai->CastSpell(SHADOW_RESISTANCE_AURA);
                 break;
             }
-
+        default:
+            break;
     }
     //If we have no resist orders, adjust aura based on spec
     if (!resist && spec == PALADIN_SPEC_HOLY && CONCENTRATION_AURA > 0 && !m_bot->HasAura(CONCENTRATION_AURA))
@@ -291,7 +292,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     Player *m_bot = GetPlayerBot();
     Group *m_group = m_bot->GetGroup();
     uint32 spec = m_bot->GetSpec();
-    float dist = m_bot->GetCombatDistance(pTarget);
+    //float dist = m_bot->GetCombatDistance(pTarget);
     std::ostringstream out;
 
     //Shield master if low hp.
@@ -451,7 +452,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     if (!m_ai)  return;
     if (!m_bot) return;
 
-    uint32 spec = m_bot->GetSpec();
+    //uint32 spec = m_bot->GetSpec();
 
     CheckAuras();
     CheckSeals();
