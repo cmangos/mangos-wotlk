@@ -68,7 +68,7 @@ PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* con
 
 PlayerbotDeathKnightAI::~PlayerbotDeathKnightAI() {}
 
-bool PlayerbotDeathKnightAI::DoFirstCombatManeuver(Unit *pTarget)
+bool PlayerbotDeathKnightAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
 {
     return false;
 }
@@ -83,6 +83,7 @@ void PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
     {
         case PlayerbotAI::SCENARIO_DUEL:
             ai->CastSpell(PLAGUE_STRIKE);
+        default:
             return;
     }
 

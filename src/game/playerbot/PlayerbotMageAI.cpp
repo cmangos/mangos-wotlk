@@ -62,7 +62,7 @@ PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, Player
 
 PlayerbotMageAI::~PlayerbotMageAI() {}
 
-bool PlayerbotMageAI::DoFirstCombatManeuver(Unit *pTarget)
+bool PlayerbotMageAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
 {
     return false;
 }
@@ -78,6 +78,7 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget)
         case PlayerbotAI::SCENARIO_DUEL:
             if (FIREBALL > 0)
                 ai->CastSpell(FIREBALL);
+        default:
             return;
     }
 

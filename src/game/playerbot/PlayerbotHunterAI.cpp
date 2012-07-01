@@ -80,7 +80,7 @@ PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, Pl
 
 PlayerbotHunterAI::~PlayerbotHunterAI() {}
 
-bool PlayerbotHunterAI::DoFirstCombatManeuver(Unit *pTarget)
+bool PlayerbotHunterAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
 {
     return false;
 }
@@ -95,6 +95,7 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
     {
         case PlayerbotAI::SCENARIO_DUEL:
             ai->CastSpell(RAPTOR_STRIKE);
+        default:
             return;
     }
 

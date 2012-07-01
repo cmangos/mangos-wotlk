@@ -85,7 +85,7 @@ PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, 
 
 PlayerbotPaladinAI::~PlayerbotPaladinAI() {}
 
-bool PlayerbotPaladinAI::DoFirstCombatManeuver(Unit *pTarget)
+bool PlayerbotPaladinAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
 {
     return false;
 }
@@ -153,6 +153,7 @@ void PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
         case PlayerbotAI::SCENARIO_DUEL:
             if (HAMMER_OF_JUSTICE > 0)
                 ai->CastSpell(HAMMER_OF_JUSTICE);
+        default:
             return;
     }
 

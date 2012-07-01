@@ -65,7 +65,7 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
 
 PlayerbotPriestAI::~PlayerbotPriestAI() {}
 
-bool PlayerbotPriestAI::DoFirstCombatManeuver(Unit *pTarget)
+bool PlayerbotPriestAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
 {
     return false;
 }
@@ -127,6 +127,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             ai->CastSpell(MIND_BLAST) ||
             (ai->GetHealthPercent() < 20 && ai->CastSpell(GREATER_HEAL)) ||
             ai->CastSpell(SMITE);
+        default:
             return;
     }
 

@@ -76,7 +76,7 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
 
 PlayerbotWarlockAI::~PlayerbotWarlockAI() {}
 
-bool PlayerbotWarlockAI::DoFirstCombatManeuver(Unit *pTarget)
+bool PlayerbotWarlockAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
 {
     return false;
 }
