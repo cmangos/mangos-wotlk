@@ -95,8 +95,9 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
     {
         case PlayerbotAI::SCENARIO_DUEL:
             ai->CastSpell(RAPTOR_STRIKE);
-        default:
             return;
+        default:
+            break;
     }
 
     // ------- Non Duel combat ----------

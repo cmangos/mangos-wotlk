@@ -127,8 +127,9 @@ void PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
     {
         case PlayerbotAI::SCENARIO_DUEL:
             ai->CastSpell(LIGHTNING_BOLT);
-        default:
             return;
+        default:
+            break;
     }
 
     // ------- Non Duel combat ----------

@@ -127,8 +127,9 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             ai->CastSpell(MIND_BLAST) ||
             (ai->GetHealthPercent() < 20 && ai->CastSpell(GREATER_HEAL)) ||
             ai->CastSpell(SMITE);
-        default:
             return;
+        default:
+            break;
     }
 
     // ------- Non Duel combat ----------
