@@ -151,8 +151,9 @@ void PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
     {
         case PlayerbotAI::SCENARIO_DUEL:
             ai->CastSpell(MOONFIRE);
-        default:
             return;
+        default:
+            break;
     }
 
     if (ai->GetCombatOrder() == PlayerbotAI::ORDERS_HEAL)
