@@ -170,8 +170,10 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
     //{
     //    case PlayerbotAI::SCENARIO_DUEL:
     //        if (HEROIC_STRIKE > 0)
-    //            m_ai->CastSpell(HEROIC_STRIKE);
-    //        return;
+    //            if (m_ai->CastSpell(HEROIC_STRIKE, *pTarget))
+    //                return RETURN_CONTINUE;;
+    //
+    //        return RETURN_NO_ACTION_ERROR;
     //    default:
     //        break;
     //}
