@@ -8861,8 +8861,10 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
                     SendWhisper(out.str(), fromPlayer);
                     SetActiveTalentSpec(ts);
                     if (!ApplyActiveTalentSpec())
+                    {
                         SendWhisper("The talent spec has been set active but could not be applied. It appears something has gone awry.", fromPlayer);
-                    DEBUG_LOG ("[PlayerbotAI]: Could set TalentSpec but could not apply it - 'talent spec #': Class: %u; chosenSpec: %u", m_bot->getClass(), chosenSpec);
+                        DEBUG_LOG ("[PlayerbotAI]: Could set TalentSpec but could not apply it - 'talent spec #': Class: %u; chosenSpec: %u", m_bot->getClass(), chosenSpec);
+                    }
                     InspectUpdate();
                 }
                 else
