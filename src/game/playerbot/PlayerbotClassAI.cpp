@@ -50,17 +50,6 @@ Unit* PlayerbotClassAI::GetHealTarget()
         TYPE_DPS
     };
 
-    struct heal_priority
-    {
-        Player* p;
-        uint8 hp;
-        uint8 type;
-        heal_priority(Player* pin, uint8 hpin) : p(pin), hp(hpin), type(0) {}
-        heal_priority(Player* pin, uint8 hpin, uint8 t) : p(pin), hp(hpin), type(t) {}
-        // overriding the operator like this is not recommended for general use - however we won't use this struct for anything else
-        bool operator<(const heal_priority& a) const { return type < a.type; }
-    };
-
     std::vector<heal_priority> targets;
 
     // First, fill the list of targets
