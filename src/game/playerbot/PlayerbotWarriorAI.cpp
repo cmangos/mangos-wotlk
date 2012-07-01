@@ -166,12 +166,14 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    //switch (ai->GetScenarioType())
+    //switch (m_ai->GetScenarioType())
     //{
     //    case PlayerbotAI::SCENARIO_DUEL:
     //        if (HEROIC_STRIKE > 0)
-    //            ai->CastSpell(HEROIC_STRIKE);
-    //        return;
+    //            if (m_ai->CastSpell(HEROIC_STRIKE, *pTarget))
+    //                return RETURN_CONTINUE;;
+    //
+    //        return RETURN_NO_ACTION_ERROR;
     //    default:
     //        break;
     //}
