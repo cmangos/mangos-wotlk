@@ -201,13 +201,9 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
     switch (spec)
     {
         case WARRIOR_SPEC_ARMS:
-            if (EXECUTE > 0 && (pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.20) && m_ai->GetRageAmount() >= 15)
-            {
-                m_ai->CastSpell (EXECUTE, *pTarget);
-                return RETURN_CONTINUE;
-            }
+            // Execute doesn't scale too well with extra rage and uses up *all* rage preventing use of other skills
             //Haven't found a way to make sudden death work yet, either wrong spell or it needs an effect index(probably)
-            else if (EXECUTE > 0 && m_bot->HasAura(SUDDEN_DEATH))
+            if (EXECUTE > 0 && (pTarget->GetHealthPercent() < 20 || m_bot->HasAura(SUDDEN_DEATH)) && m_ai->GetRageAmount() >= 15 && m_ai->GetRageAmount() < 30)
             {
                 m_ai->CastSpell (EXECUTE, *pTarget);
                 return RETURN_CONTINUE;
@@ -246,7 +242,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
             else if (SLAM > 0 && m_ai->GetRageAmount() >= 15)
             {
                 m_ai->CastSpell(SLAM, *pTarget);
-                m_ai->SetIgnoreUpdateTime(1.5); // TODO: SetIgnoreUpdateTime takes a uin8 - how will 1.5 work as a value?
+                m_ai->SetIgnoreUpdateTime(1.5); // TODO: SetIgnoreUpdateTime takes a uint8 - how will 1.5 work as a value?
                 return RETURN_CONTINUE;
             }
 
@@ -324,18 +320,11 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
             //	m_ai->CastSpell(SUNDER, *pTarget);
             //    return RETURN_CONTINUE;
             //}
-            //Devastate seems to be broken in current build
-            //else if (DEVASTATE > 0 && m_ai->GetRageAmount() >= 15)
-            //{
-            //	 m_ai->CastSpell(DEVASTATE, *pTarget);
-            //    return RETURN_CONTINUE;
-            //}
             else if (HEROIC_STRIKE > 0 && m_ai->GetRageAmount() >= 60)
             {
                 m_ai->CastSpell(HEROIC_STRIKE, *pTarget);
                 return RETURN_CONTINUE;
             }
-
 
             /*case WarriorSpellPreventing:
                 out << "Case Prevent";
