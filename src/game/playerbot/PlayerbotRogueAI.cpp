@@ -70,7 +70,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuver(Unit *pTarget)
 
         m_bot->addUnitState(UNIT_STAT_CHASE); // ensure that the bot does not use MoveChase(), as this doesn't seem to work with STEALTH
 
-        return RETURN_FINISHED_FIRST_MOVES;
+        return  RETURN_CONTINUE; // RETURN_FINISHED_FIRST_MOVES;
     }
     else if (m_bot->HasAura(STEALTH, EFFECT_INDEX_0))
     {
