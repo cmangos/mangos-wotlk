@@ -291,7 +291,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 ChatHandler ch(m_master);
                 {
                 std::ostringstream out;
-                out << "time(0): " << time(0)
+                out << "CurrentTime: " << CurrentTime()
                 << " m_ignoreAIUpdatesUntilTime: " << pBot->m_ignoreAIUpdatesUntilTime;
                 ch.SendSysMessage(out.str().c_str());
                 }
