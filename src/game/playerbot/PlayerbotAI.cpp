@@ -3462,6 +3462,10 @@ void PlayerbotAI::DoLoot()
                 forceFailed = true;
         }
 
+        // DEBUG_LOG ("[PlayerbotAI]%s: keyFailed [%s]", m_bot->GetName(), keyFailed ? "true" : "false");
+        // DEBUG_LOG ("[PlayerbotAI]%s: skillFailed [%s]", m_bot->GetName(), skillFailed ? "true" : "false");
+        // DEBUG_LOG ("[PlayerbotAI]%s: forceFailed [%s]", m_bot->GetName(), forceFailed ? "true" : "false");
+
         // if all attempts failed in some way then clear because it won't get SMSG_LOOT_RESPONSE
         if (keyFailed && skillFailed && forceFailed)
         {
@@ -4669,6 +4673,41 @@ bool PlayerbotAI::IsInRange(Unit* Target, uint32 spellId)
     return true;
 }
 
+bool PlayerbotAI::CheckBotCast(const SpellEntry *sInfo )
+{
+    if (!sInfo)
+        return false;
+
+    // check DoLoot() spells before casting
+    Spell* tmp_spell = new Spell(m_bot, sInfo, false);
+    if (tmp_spell)
+    {
+        if (m_lootCurrent.IsCreature())
+        {
+            if (Creature* obj = m_bot->GetMap()->GetCreature(m_lootCurrent))
+                tmp_spell->m_targets.setUnitTarget(obj);
+        }
+        else if (m_lootCurrent.IsGameObject())
+        {
+            if (GameObject* obj = m_bot->GetMap()->GetGameObject(m_lootCurrent))
+                tmp_spell->m_targets.setGOTarget(obj);
+        }
+
+        SpellCastResult res = tmp_spell->CheckCast(false);
+        // DEBUG_LOG("CheckBotCast SpellCastResult(%u)",res);
+        switch(res)
+        {
+            case SPELL_CAST_OK:
+                return true;
+            case SPELL_FAILED_TRY_AGAIN:
+                return true;
+            default:
+                return false;
+        }
+    }
+    return false;
+}
+
 bool PlayerbotAI::CastSpell(const char* args)
 {
     uint32 spellId = getSpellId(args);
@@ -4747,6 +4786,9 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     {
         if (m_lootCurrent)
         {
+            if (!CheckBotCast(pSpellInfo))
+                return false;
+
             WorldPacket* const packet = new WorldPacket(CMSG_CAST_SPELL, 1 + 4 + 1 + 4 + 8);
             *packet << uint8(0);                            // spells cast count;
             *packet << spellId;

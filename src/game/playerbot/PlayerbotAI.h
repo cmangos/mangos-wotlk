@@ -1774,6 +1774,7 @@ public:
     bool CastSpell(const char* args);
     bool CastSpell(uint32 spellId);
     bool CastSpell(uint32 spellId, Unit& target);
+    bool CheckBotCast(const SpellEntry *sInfo );
     bool CastPetSpell(uint32 spellId, Unit* target = NULL);
     bool Buff(uint32 spellId, Unit * target, void (*beforeCast)(Player *) = NULL);
     bool SelfBuff(uint32 spellId);
