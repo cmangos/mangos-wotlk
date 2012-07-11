@@ -3140,22 +3140,29 @@ void PlayerbotAI::SetState(BotState state)
     m_botState = state;
 }
 
-uint8 PlayerbotAI::GetFreeBagSpace() const
+uint32 PlayerbotAI::GetFreeBagSpace() const
 {
-    uint8 space = 0;
-    for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    uint32 totalused = 0;
+    // list out items in main backpack
+    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
     {
-        Item *pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (!pItem)
-            ++space;
+        const Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if (pItem)
+            totalused++;
     }
-    for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    uint32 totalfree = 16 - totalused;
+    // list out items in other removable backpacks
+    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
     {
-        Bag* pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (pBag && pBag->GetProto()->BagFamily == BAG_FAMILY_MASK_NONE)
-            space += pBag->GetFreeSlots();
+        const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+        if (pBag)
+        {
+            ItemPrototype const* pBagProto = pBag->GetProto();
+            if (pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass == ITEM_SUBCLASS_CONTAINER)
+                totalfree =  totalfree + pBag->GetFreeSlots();
+        }
     }
-    return space;
+    return totalfree;
 }
 
 void PlayerbotAI::DoFlight()
@@ -10398,27 +10405,7 @@ void PlayerbotAI::_HandleCommandStats(std::string &text, Player &fromPlayer)
 
     std::ostringstream out;
 
-    uint32 totalused = 0;
-    // list out items in main backpack
-    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
-    {
-        const Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
-        if (pItem)
-            totalused++;
-    }
-    uint32 totalfree = 16 - totalused;
-    // list out items in other removable backpacks
-    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
-    {
-        const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
-        if (pBag)
-        {
-            ItemPrototype const* pBagProto = pBag->GetProto();
-            if (pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass == ITEM_SUBCLASS_CONTAINER)
-                totalfree =  totalfree + pBag->GetFreeSlots();
-        }
-
-    }
+    uint32 totalfree = GetFreeBagSpace();
 
     // estimate how much item damage the bot has
     out << "|cffffffff[|h|cff00ffff" << m_bot->GetName() << "|h|cffffffff] has |cff00ff00";

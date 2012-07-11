@@ -1882,7 +1882,7 @@ public:
     void CreatureLocalization(std::string& creatureName, const uint32 entry) const;
     void GameObjectLocalization(std::string& gameobjectName, const uint32 entry) const;
 
-    uint8 GetFreeBagSpace() const;
+    uint32 GetFreeBagSpace() const;
     void SellGarbage(Player& player, bool listNonTrash = true, bool bDetailTrashSold = false, bool verbose = true);
     void Sell(const uint32 itemid);
     void Buy(ObjectGuid vendorguid, const uint32 itemid);
