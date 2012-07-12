@@ -10453,12 +10453,6 @@ void PlayerbotAI::_HandleCommandGM(std::string &text, Player &fromPlayer)
     }
     else if (ExtractCommand("target", text))
     {
-        if (ExtractCommand("loot", text))
-        {
-            for (std::list<ObjectGuid>::iterator it = m_lootTargets.begin(); it != m_lootTargets.end(); ++it)
-                DEBUG_LOG("[Looter]:{ %s loots [%s] }",m_bot->GetName(), (*it).GetString().c_str());
-            DEBUG_LOG("[Looter]:{ }");
-        }
         if (ExtractCommand("combat", text))
         {
             for( AttackerInfoList::iterator i=m_attackerInfo.begin(); i!=m_attackerInfo.end(); ++i )
@@ -10469,6 +10463,12 @@ void PlayerbotAI::_HandleCommandGM(std::string &text, Player &fromPlayer)
                 i->second.threat2,
                 i->second.count);
             DEBUG_LOG( "[Attacker]:{ };" );
+        }
+        else if (ExtractCommand("loot", text))
+        {
+            for (std::list<ObjectGuid>::iterator it = m_lootTargets.begin(); it != m_lootTargets.end(); ++it)
+                DEBUG_LOG("[Looter]:{ %s loots [%s] }",m_bot->GetName(), (*it).GetString().c_str());
+            DEBUG_LOG("[Looter]:{ }");
         }
         else
             SendWhisper("'gm target' does not have that subcommand.", fromPlayer);
