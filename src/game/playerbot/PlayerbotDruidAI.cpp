@@ -91,6 +91,8 @@ CombatManeuverReturns PlayerbotDruidAI::HealTarget(Unit* target)
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
+    if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
+
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
 
     //If spell exists and orders say we should be dispelling
