@@ -10451,6 +10451,28 @@ void PlayerbotAI::_HandleCommandGM(std::string &text, Player &fromPlayer)
         else
             SendWhisper("'gm check' does not have that subcommand.", fromPlayer);
     }
+    else if (ExtractCommand("target", text))
+    {
+        if (ExtractCommand("loot", text))
+        {
+            for (std::list<ObjectGuid>::iterator it = m_lootTargets.begin(); it != m_lootTargets.end(); ++it)
+                DEBUG_LOG("[Looter]:{ %s loots [%s] }",m_bot->GetName(), (*it).GetString().c_str());
+            DEBUG_LOG("[Looter]:{ }");
+        }
+        if (ExtractCommand("combat", text))
+        {
+            for( AttackerInfoList::iterator i=m_attackerInfo.begin(); i!=m_attackerInfo.end(); ++i )
+                DEBUG_LOG( "[Attacker]:{ %s, victim:%s, threat:%.2f, highest-threat:%.2f, count:%d }",
+                i->second.attacker->GetName(),
+                i->second.victim->GetName(),
+                i->second.threat,
+                i->second.threat2,
+                i->second.count);
+            DEBUG_LOG( "[Attacker]:{ };" );
+        }
+        else
+            SendWhisper("'gm target' does not have that subcommand.", fromPlayer);
+    }
     else
         SendWhisper("'gm' does not have that subcommand.", fromPlayer);
 }
@@ -10878,6 +10900,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
         if (!bMainHelp)
         {
             ch.SendSysMessage(_HandleCommandHelpHelper("gm check", "Lists the things you can run a check on.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("gm target", "Lists target items that can be monitored.").c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("check", text))
@@ -10896,6 +10919,12 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 
                 if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
                 return;
+            }
+            // Catches all valid subcommands, also placeholders for potential future sub-subcommands
+            if (ExtractCommand("target", text))
+            {
+                ch.SendSysMessage(_HandleCommandHelpHelper("gm target combat", "Lists current attacking targets.").c_str());
+                ch.SendSysMessage(_HandleCommandHelpHelper("gm target loot", "Lists current lootable targets.").c_str());
             }
 
             if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
