@@ -193,7 +193,8 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             return CastSpell(DESPERATE_PRAYER, m_bot);
         }
         if (m_ai->GetHealthPercent() < 60 || (BINDING_HEAL == 0 && m_ai->GetHealthPercent() < 80))
-            return HealTarget(m_bot);
+            if (HealTarget(m_bot) == RETURN_CONTINUE)
+                return RETURN_CONTINUE;
 
         // TODO: Heal tank if necessary
 

@@ -210,6 +210,26 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
     //        break; 
     //}
 
+    //Used to determine if this bot is highest on threat
+    Unit *newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
+    if (newTarget) // TODO: && party has a tank
+    {
+        if (HealTarget(m_bot) == RETURN_CONTINUE)
+            return RETURN_CONTINUE;
+
+        // TODO: Heal tank
+
+        // We have aggro, don't need to heal self or tank, wait for aggro to subside
+        //if (m_ai->IsHealer()) // Commented out: not necessary because of below. Leave code here in case below ever changes.
+        //    return RETURN_NO_ACTION_OK;
+
+        // We have no shoot spell; Assume auto-attack is on
+        return RETURN_NO_ACTION_OK;
+    }
+
+    if (m_ai->IsHealer())
+       return HealTarget(GetHealTarget());
+
     switch (spec)
     {
         case DRUID_SPEC_FERAL:
