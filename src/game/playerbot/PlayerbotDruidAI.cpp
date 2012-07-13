@@ -140,7 +140,8 @@ CombatManeuverReturns PlayerbotDruidAI::HealTarget(Unit* target)
 
     // Start heals. Do lowest HP checks at the top
     // TODO: Add mana check
-    if (hp < 25 && HEALING_TOUCH > 0 && CastSpell(HEALING_TOUCH, target))
+    // TEST TEST TEST [If I forget, someone please rub my nose in this doo doo] 25 not 90
+    if (hp < 90 && HEALING_TOUCH > 0 && CastSpell(HEALING_TOUCH, target))
         return RETURN_CONTINUE;
 
     // TODO: Add mana check
@@ -228,7 +229,7 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
     }
 
     if (m_ai->IsHealer())
-       return HealTarget(GetHealTarget());
+       return _DoNextPVECombatManeuverHeal();
 
     switch (spec)
     {
@@ -440,7 +441,7 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverSpellDPS(Unit* p
     return RETURN_NO_ACTION_UNKNOWN;
 }
 
-CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverHeal(Unit* /*pTarget*/)
+CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverHeal()
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;

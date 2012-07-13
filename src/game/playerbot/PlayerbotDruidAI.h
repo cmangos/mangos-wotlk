@@ -119,7 +119,7 @@ private:
     CombatManeuverReturns _DoNextPVECombatManeuverBear(Unit* pTarget);
     CombatManeuverReturns _DoNextPVECombatManeuverCat(Unit* pTarget);
     CombatManeuverReturns _DoNextPVECombatManeuverSpellDPS(Unit* pTarget);
-    CombatManeuverReturns _DoNextPVECombatManeuverHeal(Unit* pTarget);
+    CombatManeuverReturns _DoNextPVECombatManeuverHeal();
 
     // Heals the target based off its hps
     CombatManeuverReturns HealTarget (Unit *target);
