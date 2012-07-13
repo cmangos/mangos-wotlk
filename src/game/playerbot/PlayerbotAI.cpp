@@ -32,6 +32,8 @@
 #include "../MotionMaster.h"
 #include "../AuctionHouseMgr.h"
 #include "../Mail.h"
+#include "../Guild.h"
+#include "../GuildMgr.h"
 #include "../Language.h"
 #include <iomanip>
 #include <iostream>
@@ -2035,6 +2037,25 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             }
             return;
         }
+
+        case SMSG_GUILD_INVITE:
+        {
+            Guild *guild = sGuildMgr.GetGuildById(m_bot->GetGuildIdInvited());
+            if (!guild || m_bot->GetGuildId())
+                return;
+
+            // not let enemies sign guild charter
+            if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GUILD) && m_bot->GetTeam() != sObjectMgr.GetPlayerTeamByGUID(guild->GetLeaderGuid()))
+                return;
+
+            if (!guild->AddMember(m_bot->GetObjectGuid(),guild->GetLowestRank()))
+                return;
+            // Put record into guild log
+            guild->LogGuildEvent(GUILD_EVENT_LOG_JOIN_GUILD, m_bot->GetObjectGuid());
+
+            guild->BroadcastEvent(GE_JOINED, m_bot->GetObjectGuid(), m_bot->GetName());
+        }
+
         // Handle when another player opens the trade window with the bot
         // also sends list of tradable items bot can trade if bot is allowed to obey commands from
     case SMSG_TRADE_STATUS:
@@ -3167,7 +3188,7 @@ uint32 PlayerbotAI::GetFreeBagSpace() const
 
 void PlayerbotAI::DoFlight()
 {
-    DEBUG_LOG("[PlayerbotAI]: DoFlight - %s : %s", m_bot->GetName(), m_taxiMaster.GetString().c_str());
+    // DEBUG_LOG("[PlayerbotAI]: DoFlight - %s : %s", m_bot->GetName(), m_taxiMaster.GetString().c_str());
 
     Creature *npc = m_bot->GetNPCIfCanInteractWith(m_taxiMaster, UNIT_NPC_FLAG_FLIGHTMASTER);
     if (!npc)
@@ -5016,7 +5037,7 @@ uint8 PlayerbotAI::_findItemSlot(Item* target)
         if (pBag)
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
-                DEBUG_LOG ("[PlayerbotAI]: FindItem - [%s's]bag[%u] slot = %u", m_bot->GetName(), bag, slot);  // 1 to bagsize = ?
+                // DEBUG_LOG ("[PlayerbotAI]: FindItem - [%s's]bag[%u] slot = %u", m_bot->GetName(), bag, slot);  // 1 to bagsize = ?
                 Item* const pItem = m_bot->GetItemByPos(bag, slot); // 20 to 23, 1 to bagsize
                 if (pItem)
                 {
@@ -6567,7 +6588,7 @@ void PlayerbotAI::findNearbyGO()
             TerrainInfo const *map = go->GetTerrain();
 
             float ground_z = map->GetHeight(go->GetPositionX(), go->GetPositionY(), go->GetPositionZ());
-            DEBUG_LOG("ground_z (%f) > INVALID_HEIGHT (%f)",ground_z,INVALID_HEIGHT);
+            // DEBUG_LOG("ground_z (%f) > INVALID_HEIGHT (%f)",ground_z,INVALID_HEIGHT);
             if ((ground_z > INVALID_HEIGHT) && go->isSpawned())
                 m_lootTargets.push_back(go->GetObjectGuid());
         }
@@ -7001,12 +7022,12 @@ void PlayerbotAI::EquipItem(Item* src_Item)
 // 'Will not be traded' slot.
 bool PlayerbotAI::TradeItem(const Item& item, int8 slot)
 {
-    DEBUG_LOG ("[PlayerbotAI]: TradeItem - slot=%d, hasTrader=%d, itemInTrade=%d, itemTradeable=%d",
-        slot,
-        (m_bot->GetTrader() ? 1 : 0),
-        (item.IsInTrade() ? 1 : 0),
-        (item.CanBeTraded() ? 1 : 0)
-        );
+    // DEBUG_LOG ("[PlayerbotAI]: TradeItem - slot=%d, hasTrader=%d, itemInTrade=%d, itemTradeable=%d",
+    //    slot,
+    //    (m_bot->GetTrader() ? 1 : 0),
+    //    (item.IsInTrade() ? 1 : 0),
+    //    (item.CanBeTraded() ? 1 : 0)
+    //    );
 
     if (!m_bot->GetTrader() || item.IsInTrade() || (!item.CanBeTraded() && slot != TRADE_SLOT_NONTRADED))
         return false;
@@ -7310,14 +7331,46 @@ void PlayerbotAI::InspectUpdate()
 
 void PlayerbotAI::Repair(const uint32 itemid, Creature* rCreature)
 {
+    uint32 cost = 0;
+    uint8 UseGuild = (m_bot->GetGuildId() != 0) ? uint8(1) : uint8(0);
     Item* rItem = FindItem(itemid); // if item equipped or in bags
-    uint8 IsInGuild = (m_bot->GetGuildId() != 0) ? uint8(1) : uint8(0);
+    if (rItem)
+        cost = EstRepair(rItem->GetPos());
+    else
+        cost = EstRepairAll();
+
+    Guild* pGuild = sGuildMgr.GetGuildById(m_bot->GetGuildId());
+
+    if (pGuild)
+    {
+        // Check whether bot can use the guildbank first
+        if (!pGuild->HasRankRight(m_bot->GetRank(), GR_RIGHT_WITHDRAW_REPAIR))
+        {
+            DEBUG_LOG("You do not have rights to withdraw for repairs");
+            UseGuild = 0;
+        }
+
+        if (pGuild->GetGuildBankMoney() < cost)
+        {
+            DEBUG_LOG("There is not enough money in the guild bank");
+            UseGuild = 0;
+        }
+    }
+
+    // If guildbank unavailable, check pockets
+    if (UseGuild == 0)
+        if (m_bot->GetMoney() < cost)
+        {
+            TellMaster("I do not have enough money to repair");
+            return;
+        }
+
     ObjectGuid itemGuid = (rItem) ? rItem->GetObjectGuid() : ObjectGuid();
 
     WorldPacket* const packet = new WorldPacket(CMSG_REPAIR_ITEM, 8 + 8 + 1);
     *packet << rCreature->GetObjectGuid();  // repair npc guid
     *packet << itemGuid; // if item specified then repair this, else repair all
-    *packet << IsInGuild;  // guildbank yes=1 no=0
+    *packet << UseGuild;  // guildbank yes=1 no=0
     m_bot->GetSession()->QueuePacket(packet);  // queue the packet to get around race condition
 }
 
@@ -7399,7 +7452,7 @@ std::string PlayerbotAI::AuctionResult(std::string subject, std::string body)
         subject.append(":");
     }
 
-    DEBUG_LOG("Auctions string (%s)", subject.c_str());
+    // DEBUG_LOG("Auctions string (%s)", subject.c_str());
     pos = 0;
     int sublen = subject.size() / 2;
     uint32 a_info[15];
@@ -7408,7 +7461,7 @@ std::string PlayerbotAI::AuctionResult(std::string subject, std::string body)
         int endpos = subject.find(':', pos);
         std::string idc = subject.substr(pos, endpos - pos);
         a_info[i] = atol(idc.c_str());
-        DEBUG_LOG("a_info[%d] = (%u)", i, a_info[i]);
+        // DEBUG_LOG("a_info[%d] = (%u)", i, a_info[i]);
         pos = endpos + 1;
     }
 

@@ -9,6 +9,7 @@
 #include "../GossipDef.h"
 #include "../Language.h"
 #include "../WaypointMovementGenerator.h"
+#include "../Guild.h"
 
 class LoginQueryHolder;
 class CharacterHandler;
@@ -67,6 +68,46 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 {
     switch (packet.GetOpcode())
     {
+        case CMSG_OFFER_PETITION:
+        {
+            WorldPacket p(packet);
+            p.rpos(0);    // reset reader
+            ObjectGuid petitionGuid;
+            ObjectGuid playerGuid;
+            uint32 junk;
+
+            p >> junk;                                      // this is not petition type!
+            p >> petitionGuid;                              // petition guid
+            p >> playerGuid;                                // player guid
+
+            Player* player = ObjectAccessor::FindPlayer(playerGuid);
+            if (!player)
+                return;
+
+            uint32 petitionLowGuid = petitionGuid.GetCounter();
+
+            QueryResult *result = CharacterDatabase.PQuery("SELECT * FROM petition_sign WHERE playerguid = '%u' AND petitionguid = '%u'", player->GetGUIDLow(), petitionLowGuid);
+
+            if(result)
+            {
+               ChatHandler(m_master).PSendSysMessage("%s has already signed the petition",player->GetName());
+               delete result;
+               return;
+            }
+
+            CharacterDatabase.PExecute("INSERT INTO petition_sign (ownerguid,petitionguid, playerguid, player_account) VALUES ('%u', '%u', '%u','%u')",
+            GetMaster()->GetGUIDLow(), petitionLowGuid, player->GetGUIDLow(), GetMaster()->GetSession()->GetAccountId());
+
+            p.Initialize(SMSG_PETITION_SIGN_RESULTS, (8+8+4));
+            p << ObjectGuid(petitionGuid);
+            p << ObjectGuid(playerGuid);
+            p << uint32(PETITION_SIGN_OK);
+
+            // close at signer side
+            GetMaster()->GetSession()->SendPacket(&p);
+
+            return;
+        }
 
     case CMSG_ACTIVATETAXI:
         {
