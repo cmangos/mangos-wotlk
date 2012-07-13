@@ -93,7 +93,7 @@ CombatManeuverReturns PlayerbotDruidAI::HealTarget(Unit* target)
 
     if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
 
-    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
+    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth(); // TODO: might be cleaner with 'target->GetHealthPercent()'. Do all Unit's have it though?
 
     //If spell exists and orders say we should be dispelling
     if ((REMOVE_CURSE > 0 || ABOLISH_POISON > 0) && m_ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
@@ -104,7 +104,7 @@ CombatManeuverReturns PlayerbotDruidAI::HealTarget(Unit* target)
         //Get a list of all the targets auras(spells affecting target)
         Unit::SpellAuraHolderMap const& auras = target->GetSpellAuraHolderMap();
         //Iterate through the auras
-        for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+        for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); itr++)
         {
             SpellAuraHolder *holder = itr->second;
             //I dont know what this does but it doesn't work without it
@@ -130,6 +130,7 @@ CombatManeuverReturns PlayerbotDruidAI::HealTarget(Unit* target)
         }
     }
 
+    // Everyone is healthy enough, return OK. MUST correlate to highest value below (should be last HP check)
     if (hp >= 70)
         return RETURN_NO_ACTION_OK;
 
@@ -137,25 +138,33 @@ CombatManeuverReturns PlayerbotDruidAI::HealTarget(Unit* target)
     if (!m_bot->HasAura(TREE_OF_LIFE) || TREE_OF_LIFE == 0)
         GoBuffForm(GetPlayerBot());
 
-    if (hp < 70 && REJUVENATION > 0 && !target->HasAura(REJUVENATION) && CastSpell(REJUVENATION, target))
+    // Start heals. Do lowest HP checks at the top
+    // TODO: Add mana check
+    if (hp < 25 && HEALING_TOUCH > 0 && CastSpell(HEALING_TOUCH, target))
         return RETURN_CONTINUE;
 
-    if (hp < 60 && LIFEBLOOM > 0 && !target->HasAura(LIFEBLOOM) && CastSpell(LIFEBLOOM, target))
-        return RETURN_CONTINUE;
-
-    if (hp < 55 && REGROWTH > 0 && !target->HasAura(REGROWTH) && CastSpell(REGROWTH, target))
-        return RETURN_CONTINUE;
-
-    if (hp < 50 && SWIFTMEND > 0 && (target->HasAura(REJUVENATION) || target->HasAura(REGROWTH)) && CastSpell(SWIFTMEND, target))
-        return RETURN_CONTINUE;
-
-    if (hp < 45 && WILD_GROWTH > 0 && !target->HasAura(WILD_GROWTH) && CastSpell(WILD_GROWTH, target))
-        return RETURN_CONTINUE;
-
+    // TODO: Add mana check
     if (hp < 30 && NOURISH > 0 && CastSpell(NOURISH, target))
         return RETURN_CONTINUE;
 
-    if (hp < 25 && HEALING_TOUCH > 0 && CastSpell(HEALING_TOUCH, target))
+    // TODO: Add mana check
+    if (hp < 45 && WILD_GROWTH > 0 && !target->HasAura(WILD_GROWTH) && CastSpell(WILD_GROWTH, target))
+        return RETURN_CONTINUE;
+
+    // TODO: Add mana check
+    if (hp < 50 && SWIFTMEND > 0 && (target->HasAura(REJUVENATION) || target->HasAura(REGROWTH)) && CastSpell(SWIFTMEND, target))
+        return RETURN_CONTINUE;
+
+    // TODO: Add mana check
+    if (hp < 55 && REGROWTH > 0 && !target->HasAura(REGROWTH) && CastSpell(REGROWTH, target))
+        return RETURN_CONTINUE;
+
+    // TODO: Add mana check
+    if (hp < 60 && LIFEBLOOM > 0 && !target->HasAura(LIFEBLOOM) && CastSpell(LIFEBLOOM, target))
+        return RETURN_CONTINUE;
+
+    // TODO: Add mana check
+    if (hp < 70 && REJUVENATION > 0 && !target->HasAura(REJUVENATION) && CastSpell(REJUVENATION, target))
         return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;
@@ -200,7 +209,6 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
     //    default:
     //        break; 
     //}
-
 
     switch (spec)
     {
