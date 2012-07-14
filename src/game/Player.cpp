@@ -693,7 +693,7 @@ bool Player::Create( uint32 guidlow, const std::string& name, uint8 race, uint8 
     SetByteValue(PLAYER_BYTES, 3, hairColor);
 
     SetByteValue(PLAYER_BYTES_2, 0, facialHair);
-    SetByteValue(PLAYER_BYTES_2, 3, 0x02);                  // rest state = normal
+    SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_NORMAL);
 
     SetUInt16Value(PLAYER_BYTES_3, 0, gender);              // only GENDER_MALE/GENDER_FEMALE (1 bit) allowed, drunk state = 0
     SetByteValue(PLAYER_BYTES_3, 3, 0);                     // BattlefieldArenaFaction (0 or 1)
@@ -1633,23 +1633,22 @@ void Player::ToggleDND()
     ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND);
 }
 
-uint8 Player::chatTag() const
+uint8 Player::GetChatTag() const
 {
-    // it's bitmask
-    // 0x1 - afk
-    // 0x2 - dnd
-    // 0x4 - gm
-    // 0x8 - ??
-
-    if (isGMChat())                                         // Always show GM icons if activated
-        return 4;
+    uint8 tag = CHAT_TAG_NONE;
 
     if (isAFK())
-        return 1;
+        tag |= CHAT_TAG_AFK;
     if (isDND())
-        return 3;
+        tag |= CHAT_TAG_DND;
+    if (isGMChat())
+        tag |= CHAT_TAG_GM;
+    if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_COMMENTATOR))
+        tag |= CHAT_TAG_COM;
+    if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER))
+        tag |= CHAT_TAG_DEV;
 
-    return 0;
+    return tag;
 }
 
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options)
@@ -18537,7 +18536,7 @@ void Player::BuildPlayerChat(WorldPacket *data, uint8 msgtype, const std::string
     *data << ObjectGuid(GetObjectGuid());
     *data << uint32(text.length()+1);
     *data << text;
-    *data << uint8(chatTag());
+    *data << uint8(GetChatTag());
 }
 
 void Player::Say(const std::string& text, const uint32 language)
@@ -18940,10 +18939,10 @@ void Player::SetRestBonus (float rest_bonus_new)
         m_rest_bonus = rest_bonus_new;
 
     // update data for client
-    if(m_rest_bonus>10)
-        SetByteValue(PLAYER_BYTES_2, 3, 0x01);              // Set Reststate = Rested
-    else if(m_rest_bonus<=1)
-        SetByteValue(PLAYER_BYTES_2, 3, 0x02);              // Set Reststate = Normal
+    if (m_rest_bonus > 10)
+        SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_RESTED);
+    else if (m_rest_bonus <= 1)
+        SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_NORMAL);
 
     //RestTickUpdate
     SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, uint32(m_rest_bonus));
@@ -20185,13 +20184,13 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
 }
 
 template<class T>
-inline void UpdateVisibilityOf_helper(ObjectGuidSet& s64, T* target)
+inline void UpdateVisibilityOf_helper(GuidSet& s64, T* target)
 {
     s64.insert(target->GetObjectGuid());
 }
 
 template<>
-inline void UpdateVisibilityOf_helper(ObjectGuidSet& s64, GameObject* target)
+inline void UpdateVisibilityOf_helper(GuidSet& s64, GameObject* target)
 {
     if(!target->IsTransport())
         s64.insert(target->GetObjectGuid());
@@ -20888,7 +20887,7 @@ void Player::UpdateForQuestWorldObjects()
 
     UpdateData udata;
     WorldPacket packet;
-    for(ObjectGuidSet::const_iterator itr=m_clientGUIDs.begin(); itr!=m_clientGUIDs.end(); ++itr)
+    for(GuidSet::const_iterator itr=m_clientGUIDs.begin(); itr!=m_clientGUIDs.end(); ++itr)
     {
         if (itr->IsGameObject())
         {
@@ -21608,35 +21607,40 @@ bool Player::CanCaptureTowerPoint()
            );
 }
 
-uint32 Player::GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 newfacialhair)
+uint32 Player::GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 newfacialhair, uint32 newskintone)
 {
     uint32 level = getLevel();
 
-    if(level > GT_MAX_LEVEL)
+    if (level > GT_MAX_LEVEL)
         level = GT_MAX_LEVEL;                               // max level in this dbc
 
     uint8 hairstyle = GetByteValue(PLAYER_BYTES, 2);
     uint8 haircolor = GetByteValue(PLAYER_BYTES, 3);
     uint8 facialhair = GetByteValue(PLAYER_BYTES_2, 0);
+    uint8 skintone = GetByteValue(PLAYER_BYTES, 0);
 
-    if((hairstyle == newhairstyle) && (haircolor == newhaircolor) && (facialhair == newfacialhair))
+    if (hairstyle == newhairstyle && haircolor == newhaircolor && facialhair == newfacialhair &&
+        (skintone == newskintone || newskintone == -1))
         return 0;
 
-    GtBarberShopCostBaseEntry const *bsc = sGtBarberShopCostBaseStore.LookupEntry(level - 1);
+    GtBarberShopCostBaseEntry const* bsc = sGtBarberShopCostBaseStore.LookupEntry(level - 1);
 
-    if(!bsc)                                                // shouldn't happen
+    if (!bsc)                                                // shouldn't happen
         return 0xFFFFFFFF;
 
     float cost = 0;
 
-    if(hairstyle != newhairstyle)
+    if (hairstyle != newhairstyle)
         cost += bsc->cost;                                  // full price
 
-    if((haircolor != newhaircolor) && (hairstyle == newhairstyle))
+    if (haircolor != newhaircolor && hairstyle == newhairstyle)
         cost += bsc->cost * 0.5f;                           // +1/2 of price
 
-    if(facialhair != newfacialhair)
+    if (facialhair != newfacialhair)
         cost += bsc->cost * 0.75f;                          // +3/4 of price
+
+    if (skintone != newskintone && newskintone != -1)
+        cost += bsc->cost * 0.5f;                           // +1/2 of price
 
     return uint32(cost);
 }
