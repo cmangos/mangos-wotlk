@@ -393,7 +393,7 @@ class Spell
         void setState(uint32 state) { m_spellState = state; }
 
         void DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype);
-        void DoSummon(SpellEffectIndex eff_idx);
+        void DoSummonPet(SpellEffectIndex eff_idx);
         void DoSummonWild(SpellEffectIndex eff_idx, uint32 forceFaction = 0);
         void DoSummonGuardian(SpellEffectIndex eff_idx, uint32 forceFaction = 0);
         void DoSummonTotem(SpellEffectIndex eff_idx, uint8 slot_dbc = 0);
@@ -736,17 +736,17 @@ namespace MaNGOS
                     }
                     break;
                 case PUSH_DEST_CENTER:
-                    if (i_spell.m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-                    {
-                        i_centerX = i_spell.m_targets.m_destX;
-                        i_centerY = i_spell.m_targets.m_destY;
-                        i_centerZ = i_spell.m_targets.m_destZ;
-                    }
-                    else
+                    if (i_spell.m_targets.m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
                     {
                         i_centerX = i_spell.m_targets.m_srcX;
                         i_centerY = i_spell.m_targets.m_srcY;
                         i_centerZ = i_spell.m_targets.m_srcZ;
+                    }
+                    else
+                    {
+                        i_centerX = i_spell.m_targets.m_destX;
+                        i_centerY = i_spell.m_targets.m_destY;
+                        i_centerZ = i_spell.m_targets.m_destZ;
                     }
                     break;
                 case PUSH_TARGET_CENTER:
