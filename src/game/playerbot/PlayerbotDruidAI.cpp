@@ -131,7 +131,7 @@ CombatManeuverReturns PlayerbotDruidAI::HealTarget(Unit* target)
     }
 
     // Everyone is healthy enough, return OK. MUST correlate to highest value below (should be last HP check)
-    if (hp >= 70)
+    if (hp >= 90)
         return RETURN_NO_ACTION_OK;
 
     // Reset form if needed
@@ -139,14 +139,17 @@ CombatManeuverReturns PlayerbotDruidAI::HealTarget(Unit* target)
         GoBuffForm(GetPlayerBot());
 
     // Start heals. Do lowest HP checks at the top
-    // TODO: Add mana check
-    // TEST TEST TEST [If I forget, someone please rub my nose in this doo doo] 25 not 90
-    if (hp < 90 && HEALING_TOUCH > 0 && CastSpell(HEALING_TOUCH, target))
-        return RETURN_CONTINUE;
+    if (hp < 30)
+    {
+        // TODO: Add mana check
+        // TODO: Use in conjunction with Nature's Swiftness
+        if (HEALING_TOUCH > 0 && (NOURISH == 0 /*|| CastSpell(NATURES_SWIFTNESS)*/ ) && CastSpell(HEALING_TOUCH, target))
+            return RETURN_CONTINUE;
 
-    // TODO: Add mana check
-    if (hp < 30 && NOURISH > 0 && CastSpell(NOURISH, target))
-        return RETURN_CONTINUE;
+        // TODO: Add mana check
+        if (NOURISH > 0 && CastSpell(NOURISH, target))
+            return RETURN_CONTINUE;
+    }
 
     // TODO: Add mana check
     if (hp < 45 && WILD_GROWTH > 0 && !target->HasAura(WILD_GROWTH) && CastSpell(WILD_GROWTH, target))
@@ -157,15 +160,15 @@ CombatManeuverReturns PlayerbotDruidAI::HealTarget(Unit* target)
         return RETURN_CONTINUE;
 
     // TODO: Add mana check
-    if (hp < 55 && REGROWTH > 0 && !target->HasAura(REGROWTH) && CastSpell(REGROWTH, target))
+    if (hp < 60 && REGROWTH > 0 && !target->HasAura(REGROWTH) && CastSpell(REGROWTH, target))
         return RETURN_CONTINUE;
 
     // TODO: Add mana check
-    if (hp < 60 && LIFEBLOOM > 0 && !target->HasAura(LIFEBLOOM) && CastSpell(LIFEBLOOM, target))
+    if (hp < 65 && LIFEBLOOM > 0 && !target->HasAura(LIFEBLOOM) && CastSpell(LIFEBLOOM, target))
         return RETURN_CONTINUE;
 
     // TODO: Add mana check
-    if (hp < 70 && REJUVENATION > 0 && !target->HasAura(REJUVENATION) && CastSpell(REJUVENATION, target))
+    if (hp < 90 && REJUVENATION > 0 && !target->HasAura(REJUVENATION) && CastSpell(REJUVENATION, target))
         return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;

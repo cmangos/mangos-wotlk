@@ -11,6 +11,9 @@ PlayerbotClassAI::PlayerbotClassAI(Player* const master, Player* const bot, Play
     m_MinHealthPercentHealer = 60;
     m_MinHealthPercentDPS    = 30;
     m_MinHealthPercentMaster = m_MinHealthPercentDPS;
+    m_MinHealthPercentAll    = 90;
+    // Ensure All is largest of itself and the four other values above.
+    m_MinHealthPercentAll = std::max( std::max(m_MinHealthPercentAll, std::max(m_MinHealthPercentTank, m_MinHealthPercentHealer) ), std::max(m_MinHealthPercentMaster, m_MinHealthPercentDPS) );
 }
 PlayerbotClassAI::~PlayerbotClassAI() {}
 
@@ -41,7 +44,7 @@ Unit* PlayerbotClassAI::GetHealTarget()
     if (!m_bot) return NULL;
     if (!m_bot->isAlive() || m_bot->IsInDuel()) return NULL;
 
-    // define seperately for sorting purposes
+    // define seperately for sorting purposes - DO NOT CHANGE ORDER!
     enum
     {
         TYPE_HEAL = 1,
@@ -55,8 +58,6 @@ Unit* PlayerbotClassAI::GetHealTarget()
     // First, fill the list of targets
     if (m_bot->GetGroup())
     {
-        // TODO: does this include the bot itself? If not, uncomment next line, if so, remove both comments
-        //targets.push_back( heal_priority(m_bot, m_bot->GetHealthPercent()) );
         Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
@@ -88,7 +89,7 @@ Unit* PlayerbotClassAI::GetHealTarget()
         }
         else // not a bot
         {
-            // TODO: figure out what to do with human players - i.e. figure out if they're tank, DPS or healer
+            // figure out what to do with human players - i.e. figure out if they're tank, DPS or healer
             uint8 uSpec = targets.at(i).p->GetSpec();
             // Keep in mind if the player IS healer, safe to assume he's bound to heal himself as well
             switch (targets.at(i).p->getClass())
@@ -138,6 +139,7 @@ Unit* PlayerbotClassAI::GetHealTarget()
     }
 
     // Now we have all the data required and can start to sort
+    // Sorts according to type: Healers first, tanks next, then master followed by DPS, thanks to the order of the TYPE enum
     std::sort(targets.begin(), targets.end());
 
     uint8 uCount = 0;
@@ -147,10 +149,12 @@ Unit* PlayerbotClassAI::GetHealTarget()
     // Try to find a healer in need of healing (if multiple, the lowest health one)
     while (true)
     {
-        if (uCount >= targets.size() || targets.at(uCount).type != TYPE_HEAL) break;
+        // This works because we sorted it above
+        if ( (uCount + i) >= targets.size() || targets.at(uCount).type != TYPE_HEAL) break;
         uCount++;
     }
 
+    // We have uCount healers in the targets, check if any qualify for priority healing
     for (; uCount > 0; uCount--, i++)
     {
         if (targets.at(i).hp <= m_MinHealthPercentHealer)
@@ -162,7 +166,7 @@ Unit* PlayerbotClassAI::GetHealTarget()
     // Try to find a tank in need of healing (if multiple, the lowest health one)
     while (true)
     {
-        if (uCount >= targets.size() || targets.at(uCount).type != TYPE_TANK) break;
+        if ( (uCount + i) >= targets.size() || targets.at(uCount).type != TYPE_TANK) break;
         uCount++;
     }
 
@@ -179,7 +183,7 @@ Unit* PlayerbotClassAI::GetHealTarget()
     {
         while (true)
         {
-            if (uCount >= targets.size() || targets.at(uCount).type != TYPE_MASTER) break;
+            if ( (uCount + i) >= targets.size() || targets.at(uCount).type != TYPE_MASTER) break;
             uCount++;
         }
 
@@ -195,14 +199,22 @@ Unit* PlayerbotClassAI::GetHealTarget()
     // Try to find anyone else in need of healing (lowest health one first)
     while (true)
     {
-        if (uCount >= targets.size() || targets.at(uCount).type != TYPE_DPS) break;
-        if (m_MinHealthPercentMaster == m_MinHealthPercentDPS && targets.at(uCount).type == TYPE_MASTER) break;
+        if ( (uCount + i) >= targets.size() ) break;
         uCount++;
     }
 
     for (; uCount > 0; uCount--, i++)
     {
         if (targets.at(i).hp <= m_MinHealthPercentDPS)
+            if (x == -1 || targets.at(x).hp > targets.at(i).hp)
+                x = i;
+    }
+    if (x > -1) return targets.at(x).p;
+
+    // Nobody is critical, find anyone marginally hurt
+    for (i = 0, uCount = targets.size(); uCount > 0; uCount--, i++)
+    {
+        if (targets.at(i).hp <= m_MinHealthPercentAll)
             if (x == -1 || targets.at(x).hp > targets.at(i).hp)
                 x = i;
     }
