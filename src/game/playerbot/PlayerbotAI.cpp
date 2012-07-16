@@ -10346,7 +10346,7 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
             {
                 // calculate how much money bot has
                 msg << " ";
-                msg << Cash(moneyDiff) << " left.";
+                msg << Cash(moneyDiff) << " left after learning all the spells.";
             }
             else
             {
