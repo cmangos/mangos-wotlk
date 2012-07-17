@@ -607,7 +607,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
             // Resurrect member if needed
             if (!tPlayer->isAlive())
             {
-                if (CastSpell(REVIVE, tPlayer))
+                if (REVIVE > 0 && CastSpell(REVIVE, tPlayer))
                 {
                     std::string msg = "Resurrecting ";
                     msg += tPlayer->GetName();
@@ -631,7 +631,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
             return;
         if (!m_master->isAlive())
         {
-            if (CastSpell(REVIVE, m_master))
+            if (REVIVE > 0 && CastSpell(REVIVE, m_master))
                 m_ai->TellMaster("Resurrecting you, Master.");
             return;
         }
