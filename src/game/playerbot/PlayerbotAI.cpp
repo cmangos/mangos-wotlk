@@ -4870,6 +4870,10 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         if (!m_bot->IsWithinLOSInMap(pTarget))
             return false;
 
+        // Power check (stolen from: CreatureAI.cpp - CreatureAI::CanCastSpell)
+        if (m_bot->GetPower((Powers)pSpellInfo->powerType) < Spell::CalculatePowerCost(pSpellInfo, m_bot))
+            return false;
+
         if (IsAutoRepeatRangedSpell(pSpellInfo))
             m_bot->CastSpell(pTarget, pSpellInfo, true);       // cast triggered spell
         else
