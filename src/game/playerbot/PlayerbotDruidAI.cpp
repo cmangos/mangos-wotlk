@@ -99,7 +99,7 @@ CombatManeuverReturns PlayerbotDruidAI::HealTarget(Unit* target)
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth(); // TODO: might be cleaner with 'target->GetHealthPercent()'. Do all Unit's have it though?
 
     //If spell exists and orders say we should be dispelling
-    if ((REMOVE_CURSE > 0 || ABOLISH_POISON > 0) && m_ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
+    if ((REMOVE_CURSE > 0 || ABOLISH_POISON > 0) && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
     {
         //This does something important(lol)
         uint32 dispelMask  = GetDispellMask(DISPEL_CURSE);

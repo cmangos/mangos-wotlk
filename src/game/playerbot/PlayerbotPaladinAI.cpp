@@ -101,21 +101,33 @@ CombatManeuverReturns PlayerbotPaladinAI::HealTarget(Unit *target)
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
+    if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
+
+    // TODO: find some clever way to integrate Revive/Resurrection instead
+    if (!target->isAlive()) return RETURN_NO_ACTION_ERROR;
+
+    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth(); // TODO: might be cleaner with 'target->GetHealthPercent()'. Do all Unit's have it though?
 
     if (hp < 25 && m_ai->CastSpell(LAY_ON_HANDS, *target))
         return RETURN_CONTINUE;
 
-    if (hp < 30 && m_ai->CastSpell(FLASH_OF_LIGHT, *target))
+    // TODO: You probably want to save this for tank/healer trouble
+    if (hp < 25 && HAND_OF_PROTECTION > 0 && !target->HasAura(FORBEARANCE, EFFECT_INDEX_0)
+        && !target->HasAura(HAND_OF_PROTECTION, EFFECT_INDEX_0) && !target->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0)
+        && !target->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && m_ai->CastSpell(HAND_OF_PROTECTION, *target))
         return RETURN_CONTINUE;
 
-    if (hp < 35 && m_ai->CastSpell(HOLY_SHOCK, *target))
+    // Isn't this more of a group heal spell?
+    if (hp < 40 && m_ai->CastSpell(FLASH_OF_LIGHT, *target))
         return RETURN_CONTINUE;
 
-    if (hp < 40 && m_ai->CastSpell(HOLY_LIGHT, *target))
+    if (hp < 60 && m_ai->CastSpell(HOLY_SHOCK, *target))
         return RETURN_CONTINUE;
 
-    if (PURIFY > 0 && m_ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
+    if (hp < 80 && m_ai->CastSpell(HOLY_LIGHT, *target))
+        return RETURN_CONTINUE;
+
+    if (PURIFY > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
     {
         uint32 DISPEL = CLEANSE > 0 ? CLEANSE : PURIFY;
         uint32 dispelMask  = GetDispellMask(DISPEL_DISEASE);
@@ -295,28 +307,18 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     //float dist = m_bot->GetCombatDistance(pTarget);
     std::ostringstream out;
 
-    //Shield master if low hp.
-    uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
-
-    if (GetMaster()->isAlive())
-        if (masterHP < 25 && HAND_OF_PROTECTION > 0 && !GetMaster()->HasAura(FORBEARANCE, EFFECT_INDEX_0) && !GetMaster()->HasAura(HAND_OF_PROTECTION, EFFECT_INDEX_0) && !GetMaster()->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0) && !GetMaster()->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0))
-            m_ai->CastSpell(HAND_OF_PROTECTION, *GetMaster());
-
-    // heal group inside combat, but do not heal if tank
-    if (m_group && pVictim != m_bot)  // possible tank
+    // Heal
+    if (m_ai->IsHealer())
     {
-        Group::MemberSlotList const& groupSlot = m_group->GetMemberSlots();
-        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
-        {
-            Player *m_groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (!m_groupMember || !m_groupMember->isAlive())
-                continue;
-
-            uint32 memberHP = m_groupMember->GetHealth() * 100 / m_groupMember->GetMaxHealth();
-            if (memberHP < 40 && m_ai->GetManaPercent() >= 40)  // do not heal bots without plenty of mana for master & self
-                if (HealTarget(m_groupMember) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
-                    return RETURN_CONTINUE;
-        }
+        if (HealTarget(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+            return RETURN_CONTINUE;
+    }
+    else
+    {
+        // Is this desirable? Debatable.
+        // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
+        if (HealTarget(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+            return RETURN_CONTINUE;
     }
 
     //Used to determine if this bot has highest threat
@@ -324,7 +326,8 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     switch (spec)
     {
         case PALADIN_SPEC_HOLY:
-            // if (HEALER & NO_DAMAGE MODE) return RETURN_NO_ACTION;
+            if (m_ai->IsHealer())
+                return RETURN_NO_ACTION_OK;
             // else: DPS (retribution, NEVER protection)
 
         case PALADIN_SPEC_RETRIBUTION:
@@ -504,6 +507,20 @@ void PlayerbotPaladinAI::DoNonCombatActions()
         return;
     }
 
+    // Heal
+    if (m_ai->IsHealer())
+    {
+        if (HealTarget(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+            return;// RETURN_CONTINUE;
+    }
+    else
+    {
+        // Is this desirable? Debatable.
+        // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
+        if (HealTarget(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+            return;// RETURN_CONTINUE;
+    }
+
     // heal and buff group
     if (GetMaster()->GetGroup())
     {
@@ -517,6 +534,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
             if (tPlayer->IsInDuelWith(GetMaster()))
                 continue;
 
+            // TODO: move this to HealTarget (remember the OOC clause, of course)
             if (!tPlayer->isAlive())
             {
                 if (m_ai->CastSpell(REDEMPTION, *tPlayer))
@@ -529,9 +547,6 @@ void PlayerbotPaladinAI::DoNonCombatActions()
                 else
                     continue;
             }
-
-            if (HealTarget(tPlayer) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
-                return;
 
             if (tPlayer != m_bot && tPlayer != GetMaster())
                 if (BuffPlayer(tPlayer))

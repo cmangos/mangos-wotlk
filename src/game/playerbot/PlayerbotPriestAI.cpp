@@ -83,7 +83,7 @@ CombatManeuverReturns PlayerbotPriestAI::HealTarget(Unit* target)
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
     uint8 hpSelf = m_ai->GetHealthPercent();
 
-    if (CURE_DISEASE > 0 && m_ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
+    if (CURE_DISEASE > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
     {
         uint32 dispelMask  = GetDispellMask(DISPEL_DISEASE);
         Unit::SpellAuraHolderMap const& auras = target->GetSpellAuraHolderMap();
