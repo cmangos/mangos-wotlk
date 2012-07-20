@@ -93,6 +93,9 @@ CombatManeuverReturns PlayerbotDruidAI::HealTarget(Unit* target)
 
     if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
 
+    // TODO: find some clever way to integrate Revive/Resurrection instead
+    if (!target->isAlive()) return RETURN_NO_ACTION_ERROR;
+
     uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth(); // TODO: might be cleaner with 'target->GetHealthPercent()'. Do all Unit's have it though?
 
     //If spell exists and orders say we should be dispelling
@@ -141,33 +144,26 @@ CombatManeuverReturns PlayerbotDruidAI::HealTarget(Unit* target)
     // Start heals. Do lowest HP checks at the top
     if (hp < 30)
     {
-        // TODO: Add mana check
         // TODO: Use in conjunction with Nature's Swiftness
         if (HEALING_TOUCH > 0 && (NOURISH == 0 /*|| CastSpell(NATURES_SWIFTNESS)*/ ) && CastSpell(HEALING_TOUCH, target))
             return RETURN_CONTINUE;
 
-        // TODO: Add mana check
         if (NOURISH > 0 && CastSpell(NOURISH, target))
             return RETURN_CONTINUE;
     }
 
-    // TODO: Add mana check
     if (hp < 45 && WILD_GROWTH > 0 && !target->HasAura(WILD_GROWTH) && CastSpell(WILD_GROWTH, target))
         return RETURN_CONTINUE;
 
-    // TODO: Add mana check
     if (hp < 50 && SWIFTMEND > 0 && (target->HasAura(REJUVENATION) || target->HasAura(REGROWTH)) && CastSpell(SWIFTMEND, target))
         return RETURN_CONTINUE;
 
-    // TODO: Add mana check
     if (hp < 60 && REGROWTH > 0 && !target->HasAura(REGROWTH) && CastSpell(REGROWTH, target))
         return RETURN_CONTINUE;
 
-    // TODO: Add mana check
     if (hp < 65 && LIFEBLOOM > 0 && !target->HasAura(LIFEBLOOM) && CastSpell(LIFEBLOOM, target))
         return RETURN_CONTINUE;
 
-    // TODO: Add mana check
     if (hp < 90 && REJUVENATION > 0 && !target->HasAura(REJUVENATION) && CastSpell(REJUVENATION, target))
         return RETURN_CONTINUE;
 
@@ -448,10 +444,6 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverHeal()
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
-
-    //uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
-
-    //Unit* pVictim = pTarget->getVictim();
 
     // (un)Shapeshifting is considered one step closer so will return true (and have the bot wait a bit for the GCD)
     if (TREE_OF_LIFE > 0 && !m_bot->HasAura(TREE_OF_LIFE, EFFECT_INDEX_0))
