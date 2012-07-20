@@ -112,18 +112,28 @@ CombatManeuverReturns PlayerbotShamanAI::HealTarget(Unit* target)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
+
+    if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
+
+    // TODO: find some clever way to integrate Revive/Resurrection instead
     if (!target->isAlive()) return RETURN_NO_ACTION_ERROR;
 
-    if (target->GetHealthPercent() < 30 && HEALING_WAVE > 0 && m_ai->GetManaPercent() >= 32 && m_ai->CastSpell(HEALING_WAVE, *target))
+    // Everyone is healthy enough, return OK. MUST correlate to highest value below (should be last HP check)
+    if (target->GetHealthPercent() >= 80)
+        return RETURN_NO_ACTION_OK;
+
+    // Technically the best rotation is CHAIN + LHW + LHW, or RIPTIDE + LHW + LHW (proc Tidal Waves then two short LHW), subbing in HW for trouble (bad mana efficiency)
+    if (target->GetHealthPercent() < 30 && HEALING_WAVE > 0 && m_ai->CastSpell(HEALING_WAVE, *target)) /*&& m_ai->GetManaPercent() >= 32*/
         return RETURN_CONTINUE;
-    else if (target->GetHealthPercent() < 45 && LESSER_HEALING_WAVE > 0 && m_ai->GetManaPercent() >= 19 && m_ai->CastSpell(LESSER_HEALING_WAVE, *target))
+    if (target->GetHealthPercent() < 50 && LESSER_HEALING_WAVE > 0 && m_ai->CastSpell(LESSER_HEALING_WAVE, *target)) /*&& m_ai->GetManaPercent() >= 19*/
         return RETURN_CONTINUE;
-    else if (target->GetHealthPercent() < 55 && RIPTIDE > 0 && !target->HasAura(RIPTIDE, EFFECT_INDEX_0) && m_ai->GetManaPercent() >= 21 && m_ai->CastSpell(RIPTIDE, *target))
+    if (target->GetHealthPercent() < 60 && RIPTIDE > 0 && !target->HasAura(RIPTIDE, EFFECT_INDEX_0) && m_ai->CastSpell(RIPTIDE, *target)) /*&& m_ai->GetManaPercent() >= 21*/
         return RETURN_CONTINUE;
-    else if (target->GetHealthPercent() < 70 && CHAIN_HEAL > 0 && m_ai->GetManaPercent() >= 24 && m_ai->CastSpell(CHAIN_HEAL, *target))
+    if (target->GetHealthPercent() < 80 && CHAIN_HEAL > 0 && m_ai->CastSpell(CHAIN_HEAL, *target)) /*&& m_ai->GetManaPercent() >= 24*/
         return RETURN_CONTINUE;
 
-    if (CURE_TOXINS > 0 && m_ai->GetCombatOrder() != PlayerbotAI::ORDERS_NODISPEL)
+    // Don't need to heal, dispel if necessary
+    if (CURE_TOXINS > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
     {
         uint32 DISPEL = CLEANSE_SPIRIT > 0 ? CLEANSE_SPIRIT : CURE_TOXINS;
         uint32 dispelMask  = GetDispellMask(DISPEL_POISON);
@@ -327,27 +337,18 @@ CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
     Group *m_group = m_bot->GetGroup();
     uint32 spec = m_bot->GetSpec();
 
-    // Heal myself
-    if (m_ai->GetHealthPercent() < 70)
-        HealTarget(m_bot);
-
-    // Heal master
-    if (GetMaster()->GetHealthPercent() < 70 && m_ai->IsHealer())
-        HealTarget(GetMaster());
-
-    // Heal group
-    if (m_group && m_ai->IsHealer())
+    // Heal
+    if (m_ai->IsHealer())
     {
-        Group::MemberSlotList const& groupSlot = m_group->GetMemberSlots();
-        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
-        {
-            Player *m_groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (!m_groupMember || !m_groupMember->isAlive())
-                continue;
-
-            if (m_groupMember->GetHealthPercent() < 70)
-                HealTarget(m_groupMember);
-        }
+        if (HealTarget(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+            return RETURN_CONTINUE;
+    }
+    else
+    {
+        // Is this desirable? Debatable.
+        // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
+        if (HealTarget(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+            return RETURN_CONTINUE;
     }
 
     // Damage Spells
@@ -528,23 +529,11 @@ void PlayerbotShamanAI::DoNonCombatActions()
     if (weapon && (weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0) && spec == SHAMAN_SPEC_ENHANCEMENT)
         m_ai->CastSpell(FLAMETONGUE_WEAPON, *m_bot);
 
-    // heal master's group
-    if (GetMaster()->GetGroup())
+    // heal
+    if (m_ai->IsHealer())
     {
-        Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
-        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
-        {
-            Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
-            if (!tPlayer || !tPlayer->isAlive())
-                continue;
-
-            // TODO: should check for dueling with *anyone*
-            if (tPlayer->IsInDuel())
-                continue;
-
-            // heal
-            HealTarget(tPlayer);
-        }
+        if (HealTarget(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+            return; // TODO: return RETURN_CONTINUE;
     }
 
     // mana check
@@ -556,6 +545,7 @@ void PlayerbotShamanAI::DoNonCombatActions()
 
     if (pItem != NULL && m_ai->GetManaPercent() < 30)
     {
+        // TODO: ignore non-combat actions for up to 30 seconds
         m_ai->TellMaster("I could use a drink.");
         m_ai->UseItem(pItem);
         return;
@@ -569,12 +559,14 @@ void PlayerbotShamanAI::DoNonCombatActions()
 
     if (pItem != NULL && m_ai->GetHealthPercent() < 30)
     {
+        // TODO: ignore non-combat actions for up to 30 seconds
         m_ai->TellMaster("I could use some food.");
         m_ai->UseItem(pItem);
         return;
     }
     else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 70)
     {
+        // TODO: Ignore non-combat actions for... 10 seconds, was it?
         m_ai->TellMaster("I could use first aid.");
         m_ai->UseItem(fItem);
         return;
