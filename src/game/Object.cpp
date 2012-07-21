@@ -43,7 +43,7 @@
 #include "TemporarySummon.h"
 #include "movement/packet_builder.h"
 
-Object::Object( )
+Object::Object()
 {
     m_objectTypeId      = TYPEID_OBJECT;
     m_objectType        = TYPEMASK_OBJECT;
@@ -56,22 +56,22 @@ Object::Object( )
     m_objectUpdated     = false;
 }
 
-Object::~Object( )
+Object::~Object()
 {
-    if(IsInWorld())
+    if (IsInWorld())
     {
         ///- Do NOT call RemoveFromWorld here, if the object is a player it will crash
         sLog.outError("Object::~Object (GUID: %u TypeId: %u) deleted but still in world!!", GetGUIDLow(), GetTypeId());
         MANGOS_ASSERT(false);
     }
 
-    if(m_objectUpdated)
+    if (m_objectUpdated)
     {
         sLog.outError("Object::~Object (GUID: %u TypeId: %u) deleted but still have updated status!!", GetGUIDLow(), GetTypeId());
         MANGOS_ASSERT(false);
     }
 
-    if(m_uint32Values)
+    if (m_uint32Values)
     {
         //DEBUG_LOG("Object desctr 1 check (%p)",(void*)this);
         delete [] m_uint32Values;
@@ -83,17 +83,17 @@ Object::~Object( )
 void Object::_InitValues()
 {
     m_uint32Values = new uint32[ m_valuesCount ];
-    memset(m_uint32Values, 0, m_valuesCount*sizeof(uint32));
+    memset(m_uint32Values, 0, m_valuesCount * sizeof(uint32));
 
     m_uint32Values_mirror = new uint32[ m_valuesCount ];
-    memset(m_uint32Values_mirror, 0, m_valuesCount*sizeof(uint32));
+    memset(m_uint32Values_mirror, 0, m_valuesCount * sizeof(uint32));
 
     m_objectUpdated = false;
 }
 
 void Object::_Create(uint32 guidlow, uint32 entry, HighGuid guidhigh)
 {
-    if(!m_uint32Values)
+    if (!m_uint32Values)
         _InitValues();
 
     ObjectGuid guid = ObjectGuid(guidhigh, entry, guidlow);
@@ -118,7 +118,7 @@ void Object::SendForcedObjectUpdate()
     RemoveFromClientUpdateList();
 
     WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
-    for(UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
+    for (UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
     {
         iter->second.BuildPacket(&packet);
         iter->first->GetSession()->SendPacket(&packet);
@@ -126,7 +126,7 @@ void Object::SendForcedObjectUpdate()
     }
 }
 
-void Object::BuildMovementUpdateBlock(UpdateData * data, uint16 flags ) const
+void Object::BuildMovementUpdateBlock(UpdateData* data, uint16 flags) const
 {
     ByteBuffer buf(500);
 
@@ -138,19 +138,19 @@ void Object::BuildMovementUpdateBlock(UpdateData * data, uint16 flags ) const
     data->AddUpdateBlock(buf);
 }
 
-void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const
+void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const
 {
-    if(!target)
+    if (!target)
         return;
 
     uint8  updatetype   = UPDATETYPE_CREATE_OBJECT;
     uint16 updateFlags  = m_updateFlag;
 
     /** lower flag1 **/
-    if(target == this)                                      // building packet for yourself
+    if (target == this)                                     // building packet for yourself
         updateFlags |= UPDATEFLAG_SELF;
 
-    if(updateFlags & UPDATEFLAG_HAS_POSITION)
+    if (updateFlags & UPDATEFLAG_HAS_POSITION)
     {
         // UPDATETYPE_CREATE_OBJECT2 dynamic objects, corpses...
         if (isType(TYPEMASK_DYNAMICOBJECT) || isType(TYPEMASK_CORPSE) || isType(TYPEMASK_PLAYER))
@@ -163,7 +163,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
         // UPDATETYPE_CREATE_OBJECT2 for some gameobject types...
         if (isType(TYPEMASK_GAMEOBJECT))
         {
-            switch(((GameObject*)this)->GetGoType())
+            switch (((GameObject*)this)->GetGoType())
             {
                 case GAMEOBJECT_TYPE_TRAP:
                 case GAMEOBJECT_TYPE_DUEL_ARBITER:
@@ -179,9 +179,9 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
             }
         }
 
-        if(isType(TYPEMASK_UNIT))
+        if (isType(TYPEMASK_UNIT))
         {
-            if(((Unit*)this)->getVictim())
+            if (((Unit*)this)->getVictim())
                 updateFlags |= UPDATEFLAG_HAS_ATTACKING_TARGET;
         }
     }
@@ -213,7 +213,7 @@ void Object::SendCreateUpdateToPlayer(Player* player)
     player->GetSession()->SendPacket(&packet);
 }
 
-void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) const
+void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) const
 {
     ByteBuffer buf(500);
 
@@ -229,12 +229,12 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) c
     data->AddUpdateBlock(buf);
 }
 
-void Object::BuildOutOfRangeUpdateBlock(UpdateData * data) const
+void Object::BuildOutOfRangeUpdateBlock(UpdateData* data) const
 {
     data->AddOutOfRangeGUID(GetObjectGuid());
 }
 
-void Object::DestroyForPlayer( Player *target, bool anim ) const
+void Object::DestroyForPlayer(Player* target, bool anim) const
 {
     MANGOS_ASSERT(target);
 
@@ -244,7 +244,7 @@ void Object::DestroyForPlayer( Player *target, bool anim ) const
     target->GetSession()->SendPacket(&data);
 }
 
-void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
+void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
 {
     //uint16 moveFlags2 = (isType(TYPEMASK_UNIT) ? ((Unit*)this)->m_movementInfo.GetMovementFlags2() : MOVEFLAG2_NONE);
 
@@ -253,12 +253,12 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
     // 0x20
     if (updateFlags & UPDATEFLAG_LIVING)
     {
-        Unit *unit = ((Unit*)this);
+        Unit* unit = ((Unit*)this);
 
         if (GetTypeId() == TYPEID_PLAYER)
         {
-            Player *player = ((Player*)unit);
-            if(player->GetTransport())
+            Player* player = ((Player*)unit);
+            if (player->GetTransport())
                 player->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
             else
                 player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
@@ -286,7 +286,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
     }
     else
     {
-        if(updateFlags & UPDATEFLAG_POSITION)
+        if (updateFlags & UPDATEFLAG_POSITION)
         {
             *data << uint8(0);                              // unk PGUID!
             *data << float(((WorldObject*)this)->GetPositionX());
@@ -297,7 +297,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
             *data << float(((WorldObject*)this)->GetPositionZ());
             *data << float(((WorldObject*)this)->GetOrientation());
 
-            if(GetTypeId() == TYPEID_CORPSE)
+            if (GetTypeId() == TYPEID_CORPSE)
                 *data << float(((WorldObject*)this)->GetOrientation());
             else
                 *data << float(0);
@@ -308,28 +308,28 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
             if (updateFlags & UPDATEFLAG_HAS_POSITION)
             {
                 // 0x02
-                if(updateFlags & UPDATEFLAG_TRANSPORT && ((GameObject*)this)->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT)
+                if (updateFlags & UPDATEFLAG_TRANSPORT && ((GameObject*)this)->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT)
                 {
                     *data << float(0);
                     *data << float(0);
                     *data << float(0);
-                    *data << float(((WorldObject *)this)->GetOrientation());
+                    *data << float(((WorldObject*)this)->GetOrientation());
                 }
                 else
                 {
-                    *data << float(((WorldObject *)this)->GetPositionX());
-                    *data << float(((WorldObject *)this)->GetPositionY());
-                    *data << float(((WorldObject *)this)->GetPositionZ());
-                    *data << float(((WorldObject *)this)->GetOrientation());
+                    *data << float(((WorldObject*)this)->GetPositionX());
+                    *data << float(((WorldObject*)this)->GetPositionY());
+                    *data << float(((WorldObject*)this)->GetPositionZ());
+                    *data << float(((WorldObject*)this)->GetOrientation());
                 }
             }
         }
     }
 
     // 0x8
-    if(updateFlags & UPDATEFLAG_LOWGUID)
+    if (updateFlags & UPDATEFLAG_LOWGUID)
     {
-        switch(GetTypeId())
+        switch (GetTypeId())
         {
             case TYPEID_OBJECT:
             case TYPEID_ITEM:
@@ -343,7 +343,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
                 *data << uint32(0x0000000B);                // unk, can be 0xB or 0xC
                 break;
             case TYPEID_PLAYER:
-                if(updateFlags & UPDATEFLAG_SELF)
+                if (updateFlags & UPDATEFLAG_SELF)
                     *data << uint32(0x0000002F);            // unk, can be 0x15 or 0x22
                 else
                     *data << uint32(0x00000008);            // unk, can be 0x7 or 0x8
@@ -355,9 +355,9 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
     }
 
     // 0x10
-    if(updateFlags & UPDATEFLAG_HIGHGUID)
+    if (updateFlags & UPDATEFLAG_HIGHGUID)
     {
-        switch(GetTypeId())
+        switch (GetTypeId())
         {
             case TYPEID_OBJECT:
             case TYPEID_ITEM:
@@ -371,7 +371,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
                 *data << uint32(0x0000000B);                // unk, can be 0xB or 0xC
                 break;
             case TYPEID_PLAYER:
-                if(updateFlags & UPDATEFLAG_SELF)
+                if (updateFlags & UPDATEFLAG_SELF)
                     *data << uint32(0x0000002F);            // unk, can be 0x15 or 0x22
                 else
                     *data << uint32(0x00000008);            // unk, can be 0x7 or 0x8
@@ -383,7 +383,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
     }
 
     // 0x4
-    if(updateFlags & UPDATEFLAG_HAS_ATTACKING_TARGET)       // packed guid (current target guid)
+    if (updateFlags & UPDATEFLAG_HAS_ATTACKING_TARGET)      // packed guid (current target guid)
     {
         if (((Unit*)this)->getVictim())
             *data << ((Unit*)this)->getVictim()->GetPackGUID();
@@ -392,7 +392,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
     }
 
     // 0x2
-    if(updateFlags & UPDATEFLAG_TRANSPORT)
+    if (updateFlags & UPDATEFLAG_TRANSPORT)
     {
         *data << uint32(WorldTimer::getMSTime());                       // ms time
     }
@@ -405,13 +405,13 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
     }
 
     // 0x200
-    if(updateFlags & UPDATEFLAG_ROTATION)
+    if (updateFlags & UPDATEFLAG_ROTATION)
     {
         *data << int64(((GameObject*)this)->GetPackedWorldRotation());
     }
 }
 
-void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *updateMask, Player *target) const
+void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* updateMask, Player* target) const
 {
     if (!target)
         return;
@@ -465,7 +465,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
     // 2 specialized loops for speed optimization in non-unit case
     if (isType(TYPEMASK_UNIT))                              // unit (creature/player) case
     {
-        for(uint16 index = 0; index < m_valuesCount; ++index)
+        for (uint16 index = 0; index < m_valuesCount; ++index)
         {
             if (updateMask->GetBit(index))
             {
@@ -501,7 +501,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
                         if (((Unit*)this)->HasAuraStateForCaster(AURA_STATE_CONFLAGRATE, target->GetObjectGuid()))
                             *data << m_uint32Values[index];
                         else
-                            *data << (m_uint32Values[index] & ~(1 << (AURA_STATE_CONFLAGRATE-1)));
+                            *data << (m_uint32Values[index] & ~(1 << (AURA_STATE_CONFLAGRATE - 1)));
                     }
                     else
                         *data << m_uint32Values[index];
@@ -515,9 +515,9 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
 
                 // there are some float values which may be negative or can't get negative due to other checks
                 else if ((index >= UNIT_FIELD_NEGSTAT0 && index <= UNIT_FIELD_NEGSTAT4) ||
-                    (index >= UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE  && index <= (UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE + 6)) ||
-                    (index >= UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE  && index <= (UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6)) ||
-                    (index >= UNIT_FIELD_POSSTAT0 && index <= UNIT_FIELD_POSSTAT4))
+                         (index >= UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE  && index <= (UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE + 6)) ||
+                         (index >= UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE  && index <= (UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6)) ||
+                         (index >= UNIT_FIELD_POSSTAT0 && index <= UNIT_FIELD_POSSTAT4))
                 {
                     *data << uint32(m_floatValues[index]);
                 }
@@ -551,7 +551,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
     }
     else if (isType(TYPEMASK_GAMEOBJECT))                   // gameobject case
     {
-        for(uint16 index = 0; index < m_valuesCount; ++index)
+        for (uint16 index = 0; index < m_valuesCount; ++index)
         {
             if (updateMask->GetBit(index))
             {
@@ -563,7 +563,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
 
                     if (IsActivateToQuest)
                     {
-                        switch(((GameObject*)this)->GetGoType())
+                        switch (((GameObject*)this)->GetGoType())
                         {
                             case GAMEOBJECT_TYPE_QUESTGIVER:
                                 // GO also seen with GO_DYNFLAG_LO_SPARKLE explicit, relation/reason unclear (192861)
@@ -598,7 +598,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
     }
     else                                                    // other objects case (no special index checks)
     {
-        for(uint16 index = 0; index < m_valuesCount; ++index)
+        for (uint16 index = 0; index < m_valuesCount; ++index)
         {
             if (updateMask->GetBit(index))
             {
@@ -611,18 +611,18 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
 
 void Object::ClearUpdateMask(bool remove)
 {
-    if(m_uint32Values)
+    if (m_uint32Values)
     {
-        for( uint16 index = 0; index < m_valuesCount; ++index )
+        for (uint16 index = 0; index < m_valuesCount; ++index)
         {
-            if(m_uint32Values_mirror[index]!= m_uint32Values[index])
+            if (m_uint32Values_mirror[index] != m_uint32Values[index])
                 m_uint32Values_mirror[index] = m_uint32Values[index];
         }
     }
 
-    if(m_objectUpdated)
+    if (m_objectUpdated)
     {
-        if(remove)
+        if (remove)
             RemoveFromClientUpdateList();
         m_objectUpdated = false;
     }
@@ -630,11 +630,11 @@ void Object::ClearUpdateMask(bool remove)
 
 bool Object::LoadValues(const char* data)
 {
-    if(!m_uint32Values) _InitValues();
+    if (!m_uint32Values) _InitValues();
 
     Tokens tokens = StrSplit(data, " ");
 
-    if(tokens.size() != m_valuesCount)
+    if (tokens.size() != m_valuesCount)
         return false;
 
     Tokens::iterator iter;
@@ -647,50 +647,50 @@ bool Object::LoadValues(const char* data)
     return true;
 }
 
-void Object::_SetUpdateBits(UpdateMask *updateMask, Player* /*target*/) const
+void Object::_SetUpdateBits(UpdateMask* updateMask, Player* /*target*/) const
 {
-    for( uint16 index = 0; index < m_valuesCount; ++index )
+    for (uint16 index = 0; index < m_valuesCount; ++index)
     {
-        if(m_uint32Values_mirror[index]!= m_uint32Values[index])
+        if (m_uint32Values_mirror[index] != m_uint32Values[index])
             updateMask->SetBit(index);
     }
 }
 
-void Object::_SetCreateBits(UpdateMask *updateMask, Player* /*target*/) const
+void Object::_SetCreateBits(UpdateMask* updateMask, Player* /*target*/) const
 {
-    for( uint16 index = 0; index < m_valuesCount; ++index )
+    for (uint16 index = 0; index < m_valuesCount; ++index)
     {
-        if(GetUInt32Value(index) != 0)
+        if (GetUInt32Value(index) != 0)
             updateMask->SetBit(index);
     }
 }
 
-void Object::SetInt32Value( uint16 index, int32 value )
+void Object::SetInt32Value(uint16 index, int32 value)
 {
-    MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
+    MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
 
-    if(m_int32Values[ index ] != value)
+    if (m_int32Values[ index ] != value)
     {
         m_int32Values[ index ] = value;
         MarkForClientUpdate();
     }
 }
 
-void Object::SetUInt32Value( uint16 index, uint32 value )
+void Object::SetUInt32Value(uint16 index, uint32 value)
 {
-    MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
+    MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
 
-    if(m_uint32Values[ index ] != value)
+    if (m_uint32Values[ index ] != value)
     {
         m_uint32Values[ index ] = value;
         MarkForClientUpdate();
     }
 }
 
-void Object::SetUInt64Value( uint16 index, const uint64 &value )
+void Object::SetUInt64Value(uint16 index, const uint64& value)
 {
-    MANGOS_ASSERT( index + 1 < m_valuesCount || PrintIndexError( index, true ) );
-    if(*((uint64*)&(m_uint32Values[ index ])) != value)
+    MANGOS_ASSERT(index + 1 < m_valuesCount || PrintIndexError(index, true));
+    if (*((uint64*) & (m_uint32Values[ index ])) != value)
     {
         m_uint32Values[ index ] = *((uint32*)&value);
         m_uint32Values[ index + 1 ] = *(((uint32*)&value) + 1);
@@ -698,28 +698,28 @@ void Object::SetUInt64Value( uint16 index, const uint64 &value )
     }
 }
 
-void Object::SetFloatValue( uint16 index, float value )
+void Object::SetFloatValue(uint16 index, float value)
 {
-    MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
+    MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
 
-    if(m_floatValues[ index ] != value)
+    if (m_floatValues[ index ] != value)
     {
         m_floatValues[ index ] = value;
         MarkForClientUpdate();
     }
 }
 
-void Object::SetByteValue( uint16 index, uint8 offset, uint8 value )
+void Object::SetByteValue(uint16 index, uint8 offset, uint8 value)
 {
-    MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
+    MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
 
-    if(offset > 4)
+    if (offset > 4)
     {
         sLog.outError("Object::SetByteValue: wrong offset %u", offset);
         return;
     }
 
-    if(uint8(m_uint32Values[ index ] >> (offset * 8)) != value)
+    if (uint8(m_uint32Values[ index ] >> (offset * 8)) != value)
     {
         m_uint32Values[ index ] &= ~uint32(uint32(0xFF) << (offset * 8));
         m_uint32Values[ index ] |= uint32(uint32(value) << (offset * 8));
@@ -727,17 +727,17 @@ void Object::SetByteValue( uint16 index, uint8 offset, uint8 value )
     }
 }
 
-void Object::SetUInt16Value( uint16 index, uint8 offset, uint16 value )
+void Object::SetUInt16Value(uint16 index, uint8 offset, uint16 value)
 {
-    MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
+    MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
 
-    if(offset > 2)
+    if (offset > 2)
     {
         sLog.outError("Object::SetUInt16Value: wrong offset %u", offset);
         return;
     }
 
-    if(uint16(m_uint32Values[ index ] >> (offset * 16)) != value)
+    if (uint16(m_uint32Values[ index ] >> (offset * 16)) != value)
     {
         m_uint32Values[ index ] &= ~uint32(uint32(0xFFFF) << (offset * 16));
         m_uint32Values[ index ] |= uint32(uint32(value) << (offset * 16));
@@ -745,17 +745,17 @@ void Object::SetUInt16Value( uint16 index, uint8 offset, uint16 value )
     }
 }
 
-void Object::SetStatFloatValue( uint16 index, float value)
+void Object::SetStatFloatValue(uint16 index, float value)
 {
-    if(value < 0)
+    if (value < 0)
         value = 0.0f;
 
     SetFloatValue(index, value);
 }
 
-void Object::SetStatInt32Value( uint16 index, int32 value)
+void Object::SetStatInt32Value(uint16 index, int32 value)
 {
-    if(value < 0)
+    if (value < 0)
         value = 0;
 
     SetUInt32Value(index, uint32(value));
@@ -765,7 +765,7 @@ void Object::ApplyModUInt32Value(uint16 index, int32 val, bool apply)
 {
     int32 cur = GetUInt32Value(index);
     cur += (apply ? val : -val);
-    if(cur < 0)
+    if (cur < 0)
         cur = 0;
     SetUInt32Value(index, cur);
 }
@@ -788,65 +788,65 @@ void Object::ApplyModPositiveFloatValue(uint16 index, float  val, bool apply)
 {
     float cur = GetFloatValue(index);
     cur += (apply ? val : -val);
-    if(cur < 0)
+    if (cur < 0)
         cur = 0;
     SetFloatValue(index, cur);
 }
 
-void Object::SetFlag( uint16 index, uint32 newFlag )
+void Object::SetFlag(uint16 index, uint32 newFlag)
 {
-    MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
+    MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
     uint32 oldval = m_uint32Values[ index ];
     uint32 newval = oldval | newFlag;
 
-    if(oldval != newval)
+    if (oldval != newval)
     {
         m_uint32Values[ index ] = newval;
         MarkForClientUpdate();
     }
 }
 
-void Object::RemoveFlag( uint16 index, uint32 oldFlag )
+void Object::RemoveFlag(uint16 index, uint32 oldFlag)
 {
-    MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
+    MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
     uint32 oldval = m_uint32Values[ index ];
     uint32 newval = oldval & ~oldFlag;
 
-    if(oldval != newval)
+    if (oldval != newval)
     {
         m_uint32Values[ index ] = newval;
         MarkForClientUpdate();
     }
 }
 
-void Object::SetByteFlag( uint16 index, uint8 offset, uint8 newFlag )
+void Object::SetByteFlag(uint16 index, uint8 offset, uint8 newFlag)
 {
-    MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
+    MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
 
-    if(offset > 4)
+    if (offset > 4)
     {
         sLog.outError("Object::SetByteFlag: wrong offset %u", offset);
         return;
     }
 
-    if(!(uint8(m_uint32Values[ index ] >> (offset * 8)) & newFlag))
+    if (!(uint8(m_uint32Values[ index ] >> (offset * 8)) & newFlag))
     {
         m_uint32Values[ index ] |= uint32(uint32(newFlag) << (offset * 8));
         MarkForClientUpdate();
     }
 }
 
-void Object::RemoveByteFlag( uint16 index, uint8 offset, uint8 oldFlag )
+void Object::RemoveByteFlag(uint16 index, uint8 offset, uint8 oldFlag)
 {
-    MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
+    MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
 
-    if(offset > 4)
+    if (offset > 4)
     {
         sLog.outError("Object::RemoveByteFlag: wrong offset %u", offset);
         return;
     }
 
-    if(uint8(m_uint32Values[ index ] >> (offset * 8)) & oldFlag)
+    if (uint8(m_uint32Values[ index ] >> (offset * 8)) & oldFlag)
     {
         m_uint32Values[ index ] &= ~uint32(uint32(oldFlag) << (offset * 8));
         MarkForClientUpdate();
@@ -877,7 +877,7 @@ void Object::RemoveShortFlag(uint16 index, bool highpart, uint16 oldFlag)
 
 bool Object::PrintIndexError(uint32 index, bool set) const
 {
-    sLog.outError("Attempt %s nonexistent value field: %u (count: %u) for object typeid: %u type mask: %u",(set ? "set value to" : "get value from"),index,m_valuesCount,GetTypeId(),m_objectType);
+    sLog.outError("Attempt %s nonexistent value field: %u (count: %u) for object typeid: %u type mask: %u", (set ? "set value to" : "get value from"), index, m_valuesCount, GetTypeId(), m_objectType);
 
     // ASSERT must fail after function call
     return false;
@@ -898,7 +898,7 @@ void Object::BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_play
 
     if (iter == update_players.end())
     {
-        std::pair<UpdateDataMapType::iterator, bool> p = update_players.insert( UpdateDataMapType::value_type(pl, UpdateData()) );
+        std::pair<UpdateDataMapType::iterator, bool> p = update_players.insert(UpdateDataMapType::value_type(pl, UpdateData()));
         MANGOS_ASSERT(p.second);
         iter = p.first;
     }
@@ -908,27 +908,27 @@ void Object::BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_play
 
 void Object::AddToClientUpdateList()
 {
-    sLog.outError("Unexpected call of Object::AddToClientUpdateList for object (TypeId: %u Update fields: %u)",GetTypeId(), m_valuesCount);
+    sLog.outError("Unexpected call of Object::AddToClientUpdateList for object (TypeId: %u Update fields: %u)", GetTypeId(), m_valuesCount);
     MANGOS_ASSERT(false);
 }
 
 void Object::RemoveFromClientUpdateList()
 {
-    sLog.outError("Unexpected call of Object::RemoveFromClientUpdateList for object (TypeId: %u Update fields: %u)",GetTypeId(), m_valuesCount);
+    sLog.outError("Unexpected call of Object::RemoveFromClientUpdateList for object (TypeId: %u Update fields: %u)", GetTypeId(), m_valuesCount);
     MANGOS_ASSERT(false);
 }
 
-void Object::BuildUpdateData( UpdateDataMapType& /*update_players */)
+void Object::BuildUpdateData(UpdateDataMapType& /*update_players */)
 {
-    sLog.outError("Unexpected call of Object::BuildUpdateData for object (TypeId: %u Update fields: %u)",GetTypeId(), m_valuesCount);
+    sLog.outError("Unexpected call of Object::BuildUpdateData for object (TypeId: %u Update fields: %u)", GetTypeId(), m_valuesCount);
     MANGOS_ASSERT(false);
 }
 
 void Object::MarkForClientUpdate()
 {
-    if(m_inWorld)
+    if (m_inWorld)
     {
-        if(!m_objectUpdated)
+        if (!m_objectUpdated)
         {
             AddToClientUpdateList();
             m_objectUpdated = true;
@@ -946,7 +946,7 @@ void WorldObject::CleanupsBeforeDelete()
     RemoveFromWorld();
 }
 
-void WorldObject::_Create( uint32 guidlow, HighGuid guidhigh, uint32 phaseMask )
+void WorldObject::_Create(uint32 guidlow, HighGuid guidhigh, uint32 phaseMask)
 {
     Object::_Create(guidlow, 0, guidhigh);
     m_phaseMask = phaseMask;
@@ -1001,15 +1001,15 @@ InstanceData* WorldObject::GetInstanceData() const
     return GetMap()->GetInstanceData();
 }
 
-                                                            //slow
+//slow
 float WorldObject::GetDistance(const WorldObject* obj) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
     float dz = GetPositionZ() - obj->GetPositionZ();
     float sizefactor = GetObjectBoundingRadius() + obj->GetObjectBoundingRadius();
-    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - sizefactor;
-    return ( dist > 0 ? dist : 0);
+    float dist = sqrt((dx * dx) + (dy * dy) + (dz * dz)) - sizefactor;
+    return (dist > 0 ? dist : 0);
 }
 
 float WorldObject::GetDistance2d(float x, float y) const
@@ -1017,8 +1017,8 @@ float WorldObject::GetDistance2d(float x, float y) const
     float dx = GetPositionX() - x;
     float dy = GetPositionY() - y;
     float sizefactor = GetObjectBoundingRadius();
-    float dist = sqrt((dx*dx) + (dy*dy)) - sizefactor;
-    return ( dist > 0 ? dist : 0);
+    float dist = sqrt((dx * dx) + (dy * dy)) - sizefactor;
+    return (dist > 0 ? dist : 0);
 }
 
 float WorldObject::GetDistance(float x, float y, float z) const
@@ -1027,8 +1027,8 @@ float WorldObject::GetDistance(float x, float y, float z) const
     float dy = GetPositionY() - y;
     float dz = GetPositionZ() - z;
     float sizefactor = GetObjectBoundingRadius();
-    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - sizefactor;
-    return ( dist > 0 ? dist : 0);
+    float dist = sqrt((dx * dx) + (dy * dy) + (dz * dz)) - sizefactor;
+    return (dist > 0 ? dist : 0);
 }
 
 float WorldObject::GetDistance2d(const WorldObject* obj) const
@@ -1036,8 +1036,8 @@ float WorldObject::GetDistance2d(const WorldObject* obj) const
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
     float sizefactor = GetObjectBoundingRadius() + obj->GetObjectBoundingRadius();
-    float dist = sqrt((dx*dx) + (dy*dy)) - sizefactor;
-    return ( dist > 0 ? dist : 0);
+    float dist = sqrt((dx * dx) + (dy * dy)) - sizefactor;
+    return (dist > 0 ? dist : 0);
 }
 
 float WorldObject::GetDistanceZ(const WorldObject* obj) const
@@ -1045,7 +1045,7 @@ float WorldObject::GetDistanceZ(const WorldObject* obj) const
     float dz = fabs(GetPositionZ() - obj->GetPositionZ());
     float sizefactor = GetObjectBoundingRadius() + obj->GetObjectBoundingRadius();
     float dist = dz - sizefactor;
-    return ( dist > 0 ? dist : 0);
+    return (dist > 0 ? dist : 0);
 }
 
 bool WorldObject::IsWithinDist3d(float x, float y, float z, float dist2compare) const
@@ -1053,7 +1053,7 @@ bool WorldObject::IsWithinDist3d(float x, float y, float z, float dist2compare) 
     float dx = GetPositionX() - x;
     float dy = GetPositionY() - y;
     float dz = GetPositionZ() - z;
-    float distsq = dx*dx + dy*dy + dz*dz;
+    float distsq = dx * dx + dy * dy + dz * dz;
 
     float sizefactor = GetObjectBoundingRadius();
     float maxdist = dist2compare + sizefactor;
@@ -1065,7 +1065,7 @@ bool WorldObject::IsWithinDist2d(float x, float y, float dist2compare) const
 {
     float dx = GetPositionX() - x;
     float dy = GetPositionY() - y;
-    float distsq = dx*dx + dy*dy;
+    float distsq = dx * dx + dy * dy;
 
     float sizefactor = GetObjectBoundingRadius();
     float maxdist = dist2compare + sizefactor;
@@ -1077,11 +1077,11 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
 {
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
-    float distsq = dx*dx + dy*dy;
-    if(is3D)
+    float distsq = dx * dx + dy * dy;
+    if (is3D)
     {
         float dz = GetPositionZ() - obj->GetPositionZ();
-        distsq += dz*dz;
+        distsq += dz * dz;
     }
     float sizefactor = GetObjectBoundingRadius() + obj->GetObjectBoundingRadius();
     float maxdist = dist2compare + sizefactor;
@@ -1092,36 +1092,36 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
 bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
 {
     if (!IsInMap(obj)) return false;
-    float ox,oy,oz;
-    obj->GetPosition(ox,oy,oz);
-    return(IsWithinLOS(ox, oy, oz ));
+    float ox, oy, oz;
+    obj->GetPosition(ox, oy, oz);
+    return(IsWithinLOS(ox, oy, oz));
 }
 
 bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
 {
-    float x,y,z;
-    GetPosition(x,y,z);
-    return GetMap()->IsInLineOfSight(x, y, z+2.0f, ox, oy, oz+2.0f);
+    float x, y, z;
+    GetPosition(x, y, z);
+    return GetMap()->IsInLineOfSight(x, y, z + 2.0f, ox, oy, oz + 2.0f);
 }
 
 bool WorldObject::GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D /* = true */) const
 {
     float dx1 = GetPositionX() - obj1->GetPositionX();
     float dy1 = GetPositionY() - obj1->GetPositionY();
-    float distsq1 = dx1*dx1 + dy1*dy1;
-    if(is3D)
+    float distsq1 = dx1 * dx1 + dy1 * dy1;
+    if (is3D)
     {
         float dz1 = GetPositionZ() - obj1->GetPositionZ();
-        distsq1 += dz1*dz1;
+        distsq1 += dz1 * dz1;
     }
 
     float dx2 = GetPositionX() - obj2->GetPositionX();
     float dy2 = GetPositionY() - obj2->GetPositionY();
-    float distsq2 = dx2*dx2 + dy2*dy2;
-    if(is3D)
+    float distsq2 = dx2 * dx2 + dy2 * dy2;
+    if (is3D)
     {
         float dz2 = GetPositionZ() - obj2->GetPositionZ();
-        distsq2 += dz2*dz2;
+        distsq2 += dz2 * dz2;
     }
 
     return distsq1 < distsq2;
@@ -1131,20 +1131,20 @@ bool WorldObject::IsInRange(WorldObject const* obj, float minRange, float maxRan
 {
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
-    float distsq = dx*dx + dy*dy;
-    if(is3D)
+    float distsq = dx * dx + dy * dy;
+    if (is3D)
     {
         float dz = GetPositionZ() - obj->GetPositionZ();
-        distsq += dz*dz;
+        distsq += dz * dz;
     }
 
     float sizefactor = GetObjectBoundingRadius() + obj->GetObjectBoundingRadius();
 
     // check only for real range
-    if(minRange > 0.0f)
+    if (minRange > 0.0f)
     {
         float mindist = minRange + sizefactor;
-        if(distsq < mindist * mindist)
+        if (distsq < mindist * mindist)
             return false;
     }
 
@@ -1156,15 +1156,15 @@ bool WorldObject::IsInRange2d(float x, float y, float minRange, float maxRange) 
 {
     float dx = GetPositionX() - x;
     float dy = GetPositionY() - y;
-    float distsq = dx*dx + dy*dy;
+    float distsq = dx * dx + dy * dy;
 
     float sizefactor = GetObjectBoundingRadius();
 
     // check only for real range
-    if(minRange > 0.0f)
+    if (minRange > 0.0f)
     {
         float mindist = minRange + sizefactor;
-        if(distsq < mindist * mindist)
+        if (distsq < mindist * mindist)
             return false;
     }
 
@@ -1177,15 +1177,15 @@ bool WorldObject::IsInRange3d(float x, float y, float z, float minRange, float m
     float dx = GetPositionX() - x;
     float dy = GetPositionY() - y;
     float dz = GetPositionZ() - z;
-    float distsq = dx*dx + dy*dy + dz*dz;
+    float distsq = dx * dx + dy * dy + dz * dz;
 
     float sizefactor = GetObjectBoundingRadius();
 
     // check only for real range
-    if(minRange > 0.0f)
+    if (minRange > 0.0f)
     {
         float mindist = minRange + sizefactor;
-        if(distsq < mindist * mindist)
+        if (distsq < mindist * mindist)
             return false;
     }
 
@@ -1236,36 +1236,36 @@ bool WorldObject::HasInArc(const float arcangle, const WorldObject* obj) const
     // move angle to range -pi ... +pi
     angle = MapManager::NormalizeOrientation(angle);
     if (angle > M_PI_F)
-        angle -= 2.0f*M_PI_F;
+        angle -= 2.0f * M_PI_F;
 
-    float lborder =  -1 * (arc/2.0f);                       // in range -pi..0
-    float rborder = (arc/2.0f);                             // in range 0..pi
-    return (( angle >= lborder ) && ( angle <= rborder ));
+    float lborder =  -1 * (arc / 2.0f);                     // in range -pi..0
+    float rborder = (arc / 2.0f);                           // in range 0..pi
+    return ((angle >= lborder) && (angle <= rborder));
 }
 
 bool WorldObject::isInFrontInMap(WorldObject const* target, float distance,  float arc) const
 {
-    return IsWithinDistInMap(target, distance) && HasInArc( arc, target );
+    return IsWithinDistInMap(target, distance) && HasInArc(arc, target);
 }
 
 bool WorldObject::isInBackInMap(WorldObject const* target, float distance, float arc) const
 {
-    return IsWithinDistInMap(target, distance) && !HasInArc( 2 * M_PI_F - arc, target );
+    return IsWithinDistInMap(target, distance) && !HasInArc(2 * M_PI_F - arc, target);
 }
 
 bool WorldObject::isInFront(WorldObject const* target, float distance,  float arc) const
 {
-    return IsWithinDist(target, distance) && HasInArc( arc, target );
+    return IsWithinDist(target, distance) && HasInArc(arc, target);
 }
 
 bool WorldObject::isInBack(WorldObject const* target, float distance, float arc) const
 {
-    return IsWithinDist(target, distance) && !HasInArc( 2 * M_PI_F - arc, target );
+    return IsWithinDist(target, distance) && !HasInArc(2 * M_PI_F - arc, target);
 }
 
-void WorldObject::GetRandomPoint( float x, float y, float z, float distance, float &rand_x, float &rand_y, float &rand_z) const
+void WorldObject::GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z) const
 {
-    if(distance == 0)
+    if (distance == 0)
     {
         rand_x = x;
         rand_y = y;
@@ -1274,8 +1274,8 @@ void WorldObject::GetRandomPoint( float x, float y, float z, float distance, flo
     }
 
     // angle to face `obj` to `this`
-    float angle = rand_norm_f()*2*M_PI_F;
-    float new_dist = rand_norm_f()*distance;
+    float angle = rand_norm_f() * 2 * M_PI_F;
+    float new_dist = rand_norm_f() * distance;
 
     rand_x = x + new_dist * cos(angle);
     rand_y = y + new_dist * sin(angle);
@@ -1283,17 +1283,17 @@ void WorldObject::GetRandomPoint( float x, float y, float z, float distance, flo
 
     MaNGOS::NormalizeMapCoord(rand_x);
     MaNGOS::NormalizeMapCoord(rand_y);
-    UpdateGroundPositionZ(rand_x,rand_y,rand_z);            // update to LOS height if available
+    UpdateGroundPositionZ(rand_x, rand_y, rand_z);          // update to LOS height if available
 }
 
-void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
+void WorldObject::UpdateGroundPositionZ(float x, float y, float& z) const
 {
-    float new_z = GetTerrain()->GetHeight(x,y,z,true);
-    if(new_z > INVALID_HEIGHT)
-        z = new_z+ 0.05f;                                   // just to be sure that we are not a few pixel under the surface
+    float new_z = GetTerrain()->GetHeight(x, y, z, true);
+    if (new_z > INVALID_HEIGHT)
+        z = new_z + 0.05f;                                  // just to be sure that we are not a few pixel under the surface
 }
 
-void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
+void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z) const
 {
     switch (GetTypeId())
     {
@@ -1306,8 +1306,8 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
                 bool canSwim = ((Creature const*)this)->CanSwim();
                 float ground_z = z;
                 float max_z = canSwim
-                    ? GetTerrain()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK))
-                    : ((ground_z = GetTerrain()->GetHeight(x, y, z, true)));
+                              ? GetTerrain()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK))
+                              : ((ground_z = GetTerrain()->GetHeight(x, y, z, true)));
                 if (max_z > INVALID_HEIGHT)
                 {
                     if (z > max_z)
@@ -1350,7 +1350,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
         default:
         {
             float ground_z = GetTerrain()->GetHeight(x, y, z, true);
-            if(ground_z > INVALID_HEIGHT)
+            if (ground_z > INVALID_HEIGHT)
                 z = ground_z;
             break;
         }
@@ -1359,28 +1359,28 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
 
 bool WorldObject::IsPositionValid() const
 {
-    return MaNGOS::IsValidMapCoord(m_position.x,m_position.y,m_position.z,m_position.o);
+    return MaNGOS::IsValidMapCoord(m_position.x, m_position.y, m_position.z, m_position.o);
 }
 
 void WorldObject::MonsterSay(const char* text, uint32 language, Unit* target)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildMonsterChat(&data, GetObjectGuid(), CHAT_MSG_MONSTER_SAY, text, language, GetName(), target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
-    SendMessageToSetInRange(&data,sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY),true);
+    SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY), true);
 }
 
 void WorldObject::MonsterYell(const char* text, uint32 language, Unit* target)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildMonsterChat(&data, GetObjectGuid(), CHAT_MSG_MONSTER_YELL, text, language, GetName(), target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
-    SendMessageToSetInRange(&data,sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL),true);
+    SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL), true);
 }
 
 void WorldObject::MonsterTextEmote(const char* text, Unit* target, bool IsBossEmote)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildMonsterChat(&data, GetObjectGuid(), IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, text, LANG_UNIVERSAL,
-        GetName(), target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
+                     GetName(), target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
     SendMessageToSetInRange(&data, sWorld.getConfig(IsBossEmote ? CONFIG_FLOAT_LISTEN_RANGE_YELL : CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE), true);
 }
 
@@ -1391,7 +1391,7 @@ void WorldObject::MonsterWhisper(const char* text, Unit* target, bool IsBossWhis
 
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildMonsterChat(&data, GetObjectGuid(), IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL,
-        GetName(), target->GetObjectGuid(), target->GetName());
+                     GetName(), target->GetObjectGuid(), target->GetName());
     ((Player*)target)->GetSession()->SendPacket(&data);
 }
 
@@ -1404,7 +1404,7 @@ namespace MaNGOS
                 : i_object(obj), i_msgtype(msgtype), i_textId(textId), i_language(language), i_target(target) {}
             void operator()(WorldPacket& data, int32 loc_idx)
             {
-                char const* text = sObjectMgr.GetMangosString(i_textId,loc_idx);
+                char const* text = sObjectMgr.GetMangosString(i_textId, loc_idx);
 
                 WorldObject::BuildMonsterChat(&data, i_object.GetObjectGuid(), i_msgtype, text, i_language, i_object.GetNameForLocaleIdx(loc_idx), i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
             }
@@ -1432,7 +1432,7 @@ void WorldObject::MonsterYell(int32 textId, uint32 language, Unit* target)
     float range = sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL);
     MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, textId, language, target);
     MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
-    MaNGOS::CameraDistWorker<MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> > say_worker(this,range,say_do);
+    MaNGOS::CameraDistWorker<MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> > say_worker(this, range, say_do);
     Cell::VisitWorldObjects(this, say_worker, range);
 }
 
@@ -1444,8 +1444,8 @@ void WorldObject::MonsterYellToZone(int32 textId, uint32 language, Unit* target)
     uint32 zoneid = GetZoneId();
 
     Map::PlayerList const& pList = GetMap()->GetPlayers();
-    for(Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-        if(itr->getSource()->GetZoneId()==zoneid)
+    for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+        if (itr->getSource()->GetZoneId() == zoneid)
             say_do(itr->getSource());
 }
 
@@ -1455,7 +1455,7 @@ void WorldObject::MonsterTextEmote(int32 textId, Unit* target, bool IsBossEmote)
 
     MaNGOS::MonsterChatBuilder say_build(*this, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, textId, LANG_UNIVERSAL, target);
     MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
-    MaNGOS::CameraDistWorker<MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> > say_worker(this,range,say_do);
+    MaNGOS::CameraDistWorker<MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> > say_worker(this, range, say_do);
     Cell::VisitWorldObjects(this, say_worker, range);
 }
 
@@ -1469,45 +1469,45 @@ void WorldObject::MonsterWhisper(int32 textId, Unit* target, bool IsBossWhisper)
 
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildMonsterChat(&data, GetObjectGuid(), IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL,
-        GetNameForLocaleIdx(loc_idx), target->GetObjectGuid(), "");
+                     GetNameForLocaleIdx(loc_idx), target->GetObjectGuid(), "");
 
     ((Player*)target)->GetSession()->SendPacket(&data);
 }
 
-void WorldObject::BuildMonsterChat(WorldPacket *data, ObjectGuid senderGuid, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName)
+void WorldObject::BuildMonsterChat(WorldPacket* data, ObjectGuid senderGuid, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName)
 {
     *data << uint8(msgtype);
     *data << uint32(language);
     *data << ObjectGuid(senderGuid);
     *data << uint32(0);                                     // 2.1.0
-    *data << uint32(strlen(name)+1);
+    *data << uint32(strlen(name) + 1);
     *data << name;
     *data << ObjectGuid(targetGuid);                        // Unit Target
     if (targetGuid && !targetGuid.IsPlayer())
     {
-        *data << uint32(strlen(targetName)+1);              // target name length
+        *data << uint32(strlen(targetName) + 1);            // target name length
         *data << targetName;                                // target name
     }
-    *data << uint32(strlen(text)+1);
+    *data << uint32(strlen(text) + 1);
     *data << text;
     *data << uint8(0);                                      // ChatTag
 }
 
-void WorldObject::SendMessageToSet(WorldPacket *data, bool /*bToSelf*/)
+void WorldObject::SendMessageToSet(WorldPacket* data, bool /*bToSelf*/)
 {
     //if object is in world, map for it already created!
     if (IsInWorld())
         GetMap()->MessageBroadcast(this, data);
 }
 
-void WorldObject::SendMessageToSetInRange(WorldPacket *data, float dist, bool /*bToSelf*/)
+void WorldObject::SendMessageToSetInRange(WorldPacket* data, float dist, bool /*bToSelf*/)
 {
     //if object is in world, map for it already created!
     if (IsInWorld())
         GetMap()->MessageDistBroadcast(this, data, dist);
 }
 
-void WorldObject::SendMessageToSetExcept(WorldPacket *data, Player const* skipped_receiver)
+void WorldObject::SendMessageToSetExcept(WorldPacket* data, Player const* skipped_receiver)
 {
     //if object is in world, map for it already created!
     if (IsInWorld())
@@ -1526,13 +1526,13 @@ void WorldObject::SendObjectDeSpawnAnim(ObjectGuid guid)
 
 void WorldObject::SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId /*= 0*/)
 {
-    WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM, 8+4);
+    WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM, 8 + 4);
     data << ObjectGuid(guid);
     data << uint32(animId);
     SendMessageToSet(&data, true);
 }
 
-void WorldObject::SetMap(Map * map)
+void WorldObject::SetMap(Map* map)
 {
     MANGOS_ASSERT(map);
     m_currMap = map;
@@ -1552,10 +1552,10 @@ void WorldObject::AddObjectToRemoveList()
     GetMap()->AddObjectToRemoveList(this);
 }
 
-Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime, bool asActiveObject)
+Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSummonType spwtype, uint32 despwtime, bool asActiveObject)
 {
-    CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(id);
-    if(!cinfo)
+    CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(id);
+    if (!cinfo)
     {
         sLog.outErrorDb("WorldObject::SummonCreature: Creature (Entry: %u) not existed for summoner: %s. ", id, GetGuidStr().c_str());
         return NULL;
@@ -1564,7 +1564,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     TemporarySummon* pCreature = new TemporarySummon(GetObjectGuid());
 
     Team team = TEAM_NONE;
-    if (GetTypeId()==TYPEID_PLAYER)
+    if (GetTypeId() == TYPEID_PLAYER)
         team = ((Player*)this)->GetTeam();
 
     CreatureCreatePos pos(GetMap(), x, y, z, ang, GetPhaseMask());
@@ -1585,7 +1585,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 
     pCreature->Summon(spwtype, despwtime);
 
-    if(GetTypeId()==TYPEID_UNIT && ((Creature*)this)->AI())
+    if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
         ((Creature*)this)->AI()->JustSummoned(pCreature);
 
     // return the creature therewith the summoner has access to it
@@ -1617,7 +1617,7 @@ namespace MaNGOS
                     y = c->GetPositionY();
                 }
 
-                add(c,x,y);
+                add(c, x, y);
             }
 
             template<class T>
@@ -1627,12 +1627,12 @@ namespace MaNGOS
                 if (u == i_searcher || u == &i_object)
                     return;
 
-                float x,y;
+                float x, y;
 
                 x = u->GetPositionX();
                 y = u->GetPositionY();
 
-                add(u,x,y);
+                add(u, x, y);
             }
 
             // we must add used pos that can fill places around center
@@ -1647,7 +1647,7 @@ namespace MaNGOS
 
                 // u is too nearest/far away to i_object
                 if (dist2d < i_selector.m_searcherDist - delta ||
-                    dist2d >= i_selector.m_searcherDist + delta)
+                        dist2d >= i_selector.m_searcherDist + delta)
                     return;
 
                 float angle = i_object.GetAngle(u) - i_absAngle;
@@ -1670,7 +1670,7 @@ namespace MaNGOS
 
 //===================================================================================================
 
-void WorldObject::GetNearPoint2D(float &x, float &y, float distance2d, float absAngle ) const
+void WorldObject::GetNearPoint2D(float& x, float& y, float distance2d, float absAngle) const
 {
     x = GetPositionX() + (GetObjectBoundingRadius() + distance2d) * cos(absAngle);
     y = GetPositionY() + (GetObjectBoundingRadius() + distance2d) * sin(absAngle);
@@ -1679,13 +1679,13 @@ void WorldObject::GetNearPoint2D(float &x, float &y, float distance2d, float abs
     MaNGOS::NormalizeMapCoord(y);
 }
 
-void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, float &z, float searcher_bounding_radius, float distance2d, float absAngle) const
+void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, float& z, float searcher_bounding_radius, float distance2d, float absAngle) const
 {
     GetNearPoint2D(x, y, distance2d + searcher_bounding_radius, absAngle);
     const float init_z = z = GetPositionZ();
 
     // if detection disabled, return first point
-    if(!sWorld.getConfig(CONFIG_BOOL_DETECT_POS_COLLISION))
+    if (!sWorld.getConfig(CONFIG_BOOL_DETECT_POS_COLLISION))
     {
         if (searcher)
             searcher->UpdateAllowedPositionZ(x, y, z);      // update to LOS height if available
@@ -1792,29 +1792,29 @@ void WorldObject::SetPhaseMask(uint32 newPhaseMask, bool update)
 {
     m_phaseMask = newPhaseMask;
 
-    if(update && IsInWorld())
+    if (update && IsInWorld())
         UpdateVisibilityAndView();
 }
 
-void WorldObject::PlayDistanceSound( uint32 sound_id, Player* target /*= NULL*/ )
+void WorldObject::PlayDistanceSound(uint32 sound_id, Player* target /*= NULL*/)
 {
-    WorldPacket data(SMSG_PLAY_OBJECT_SOUND,4+8);
+    WorldPacket data(SMSG_PLAY_OBJECT_SOUND, 4 + 8);
     data << uint32(sound_id);
     data << GetObjectGuid();
     if (target)
-        target->SendDirectMessage( &data );
+        target->SendDirectMessage(&data);
     else
-        SendMessageToSet( &data, true );
+        SendMessageToSet(&data, true);
 }
 
-void WorldObject::PlayDirectSound( uint32 sound_id, Player* target /*= NULL*/ )
+void WorldObject::PlayDirectSound(uint32 sound_id, Player* target /*= NULL*/)
 {
     WorldPacket data(SMSG_PLAY_SOUND, 4);
     data << uint32(sound_id);
     if (target)
-        target->SendDirectMessage( &data );
+        target->SendDirectMessage(&data);
     else
-        SendMessageToSet( &data, true );
+        SendMessageToSet(&data, true);
 }
 
 void WorldObject::UpdateVisibilityAndView()
@@ -1844,30 +1844,30 @@ void WorldObject::RemoveFromClientUpdateList()
 
 struct WorldObjectChangeAccumulator
 {
-    UpdateDataMapType &i_updateDatas;
-    WorldObject &i_object;
-    WorldObjectChangeAccumulator(WorldObject &obj, UpdateDataMapType &d) : i_updateDatas(d), i_object(obj)
+    UpdateDataMapType& i_updateDatas;
+    WorldObject& i_object;
+    WorldObjectChangeAccumulator(WorldObject& obj, UpdateDataMapType& d) : i_updateDatas(d), i_object(obj)
     {
         // send self fields changes in another way, otherwise
         // with new camera system when player's camera too far from player, camera wouldn't receive packets and changes from player
-        if(i_object.isType(TYPEMASK_PLAYER))
+        if (i_object.isType(TYPEMASK_PLAYER))
             i_object.BuildUpdateDataForPlayer((Player*)&i_object, i_updateDatas);
     }
 
-    void Visit(CameraMapType &m)
+    void Visit(CameraMapType& m)
     {
-        for(CameraMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+        for (CameraMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
         {
             Player* owner = iter->getSource()->GetOwner();
-            if(owner != &i_object && owner->HaveAtClient(&i_object))
+            if (owner != &i_object && owner->HaveAtClient(&i_object))
                 i_object.BuildUpdateDataForPlayer(owner, i_updateDatas);
         }
     }
 
-    template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
+    template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
 };
 
-void WorldObject::BuildUpdateData( UpdateDataMapType & update_players)
+void WorldObject::BuildUpdateData(UpdateDataMapType& update_players)
 {
     WorldObjectChangeAccumulator notifier(*this, update_players);
     Cell::VisitWorldObjects(this, notifier, GetMap()->GetVisibilityDistance());

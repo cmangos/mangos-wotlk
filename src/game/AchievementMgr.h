@@ -22,19 +22,21 @@
 #include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
 #include "DBCEnums.h"
-#include "DBCStores.h"
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
 
 #include <map>
 #include <string>
 
+struct AchievementEntry;
+struct AchievementCriteriaEntry;
+
 typedef std::list<AchievementCriteriaEntry const*> AchievementCriteriaEntryList;
 typedef std::list<AchievementEntry const*>         AchievementEntryList;
 
-typedef std::map<uint32,AchievementCriteriaEntryList> AchievementCriteriaListByAchievement;
-typedef std::map<uint32,AchievementEntryList>         AchievementListByReferencedId;
-typedef std::map<uint32,time_t>                       AchievementCriteriaFailTimeMap;
+typedef std::map<uint32, AchievementCriteriaEntryList> AchievementCriteriaListByAchievement;
+typedef std::map<uint32, AchievementEntryList>         AchievementListByReferencedId;
+typedef std::map<uint32, time_t>                       AchievementCriteriaFailTimeMap;
 
 struct CriteriaProgress
 {
@@ -45,11 +47,12 @@ struct CriteriaProgress
 };
 
 enum AchievementCriteriaRequirementType
-{                                                           // value1         value2        comment
+{
+    // value1         value2        comment
     ACHIEVEMENT_CRITERIA_REQUIRE_NONE                = 0,   // 0              0
     ACHIEVEMENT_CRITERIA_REQUIRE_T_CREATURE          = 1,   // creature_id    0
     ACHIEVEMENT_CRITERIA_REQUIRE_T_PLAYER_CLASS_RACE = 2,   // class_id       race_id
-    ACHIEVEMENT_CRITERIA_REQUIRE_T_PLAYER_LESS_HEALTH= 3,   // health_percent 0
+    ACHIEVEMENT_CRITERIA_REQUIRE_T_PLAYER_LESS_HEALTH = 3,  // health_percent 0
     ACHIEVEMENT_CRITERIA_REQUIRE_T_PLAYER_DEAD       = 4,   // own_team       0             not corpse (not released body), own_team==false if enemy team expected
     ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA              = 5,   // spell_id       effect_idx
     ACHIEVEMENT_CRITERIA_REQUIRE_S_AREA              = 6,   // area id        0
@@ -213,7 +216,7 @@ struct AchievementCriteriaRequirementSet
         Storage storage;
 };
 
-typedef std::map<uint32,AchievementCriteriaRequirementSet> AchievementCriteriaRequirementMap;
+typedef std::map<uint32, AchievementCriteriaRequirementSet> AchievementCriteriaRequirementMap;
 
 struct AchievementReward
 {
@@ -259,12 +262,12 @@ class AchievementMgr
 
         void Reset();
         static void DeleteFromDB(ObjectGuid guid);
-        void LoadFromDB(QueryResult *achievementResult, QueryResult *criteriaResult);
+        void LoadFromDB(QueryResult* achievementResult, QueryResult* criteriaResult);
         void SaveToDB();
-        void ResetAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1=0, uint32 miscvalue2=0);
+        void ResetAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0);
         void StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId, time_t startTime = 0);
         void DoFailedTimedAchievementCriterias();
-        void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1=0, uint32 miscvalue2=0, Unit *unit=NULL, uint32 time=0);
+        void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0, Unit* unit = NULL, uint32 time = 0);
         void CheckAllAchievementCriteria();
         void SendAllAchievementData();
         void SendRespondInspectAchievements(Player* player);
@@ -281,12 +284,7 @@ class AchievementMgr
         CompletedAchievementMap const& GetCompletedAchievements() const { return m_completedAchievements; }
         bool IsCompletedCriteria(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement) const;
 
-        uint32 GetCriteriaProgressCounter(AchievementCriteriaEntry const* entry) const
-        {
-            CriteriaProgressMap::const_iterator iter = m_criteriaProgress.find(entry->ID);
-            return iter != m_criteriaProgress.end() ? iter->second.counter : 0;
-        }
-
+        uint32 GetCriteriaProgressCounter(AchievementCriteriaEntry const* entry) const;
         static uint32 GetCriteriaProgressMaxCounter(AchievementCriteriaEntry const* entry, AchievementEntry const* achievement);
 
         // Use PROGRESS_SET only for reset/downgrade criteria progress
@@ -301,7 +299,7 @@ class AchievementMgr
         void IncompletedAchievement(AchievementEntry const* entry);
         bool IsCompletedAchievement(AchievementEntry const* entry);
         void CompleteAchievementsWithRefs(AchievementEntry const* entry);
-        void BuildAllDataPacket(WorldPacket *data);
+        void BuildAllDataPacket(WorldPacket* data);
 
         Player* m_player;
         CriteriaProgressMap m_criteriaProgress;
@@ -313,53 +311,14 @@ class AchievementGlobalMgr
 {
     public:
         AchievementCriteriaEntryList const& GetAchievementCriteriaByType(AchievementCriteriaTypes type);
-        AchievementCriteriaEntryList const* GetAchievementCriteriaByAchievement(uint32 id)
-        {
-            AchievementCriteriaListByAchievement::const_iterator itr = m_AchievementCriteriaListByAchievement.find(id);
-            return itr != m_AchievementCriteriaListByAchievement.end() ? &itr->second : NULL;
-        }
+        AchievementCriteriaEntryList const* GetAchievementCriteriaByAchievement(uint32 id);
+        AchievementEntryList const* GetAchievementByReferencedId(uint32 id) const;
+        AchievementReward const* GetAchievementReward(AchievementEntry const* achievement, uint8 gender) const;
+        AchievementRewardLocale const* GetAchievementRewardLocale(AchievementEntry const* achievement, uint8 gender) const;
+        AchievementCriteriaRequirementSet const* GetCriteriaRequirementSet(AchievementCriteriaEntry const* achievementCriteria);
 
-        AchievementEntryList const* GetAchievementByReferencedId(uint32 id) const
-        {
-            AchievementListByReferencedId::const_iterator itr = m_AchievementListByReferencedId.find(id);
-            return itr != m_AchievementListByReferencedId.end() ? &itr->second : NULL;
-        }
-
-        AchievementReward const* GetAchievementReward(AchievementEntry const* achievement, uint8 gender) const
-        {
-            AchievementRewardsMapBounds bounds = m_achievementRewards.equal_range(achievement->ID);
-            for (AchievementRewardsMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
-                if(iter->second.gender == GENDER_NONE || uint8(iter->second.gender) == gender)
-                    return &iter->second;
-
-            return NULL;
-        }
-
-        AchievementRewardLocale const* GetAchievementRewardLocale(AchievementEntry const* achievement, uint8 gender) const
-        {
-            AchievementRewardLocalesMapBounds bounds = m_achievementRewardLocales.equal_range(achievement->ID);
-            for (AchievementRewardLocalesMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
-                if(iter->second.gender == GENDER_NONE || uint8(iter->second.gender) == gender)
-                    return &iter->second;
-
-            return NULL;
-        }
-
-        AchievementCriteriaRequirementSet const* GetCriteriaRequirementSet(AchievementCriteriaEntry const *achievementCriteria)
-        {
-            AchievementCriteriaRequirementMap::const_iterator iter = m_criteriaRequirementMap.find(achievementCriteria->ID);
-            return iter!=m_criteriaRequirementMap.end() ? &iter->second : NULL;
-        }
-
-        bool IsRealmCompleted(AchievementEntry const* achievement) const
-        {
-            return m_allCompletedAchievements.find(achievement->ID) != m_allCompletedAchievements.end();
-        }
-
-        void SetRealmCompleted(AchievementEntry const* achievement)
-        {
-            m_allCompletedAchievements.insert(achievement->ID);
-        }
+        bool IsRealmCompleted(AchievementEntry const* achievement) const;
+        void SetRealmCompleted(AchievementEntry const* achievement);
 
         void LoadAchievementCriteriaList();
         void LoadAchievementCriteriaRequirements();
@@ -367,6 +326,7 @@ class AchievementGlobalMgr
         void LoadCompletedAchievements();
         void LoadRewards();
         void LoadRewardLocales();
+
     private:
         AchievementCriteriaRequirementMap m_criteriaRequirementMap;
 

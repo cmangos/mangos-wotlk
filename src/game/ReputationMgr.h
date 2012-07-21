@@ -47,10 +47,10 @@ struct FactionState
     bool needSave;
 };
 
-typedef std::map<RepListID,FactionState> FactionStateList;
-typedef std::pair<FactionStateList::const_iterator,FactionStateList::const_iterator> FactionStateListPair;
+typedef std::map<RepListID, FactionState> FactionStateList;
+typedef std::pair<FactionStateList::const_iterator, FactionStateList::const_iterator> FactionStateListPair;
 
-typedef std::map<uint32,ReputationRank> ForcedReactions;
+typedef std::map<uint32, ReputationRank> ForcedReactions;
 
 class Player;
 class QueryResult;
@@ -63,7 +63,7 @@ class ReputationMgr
         ~ReputationMgr() {}
 
         void SaveToDB();
-        void LoadFromDB(QueryResult *result);
+        void LoadFromDB(QueryResult* result);
     public:                                                 // statics
         static const int32 PointsInRank[MAX_REPUTATION_RANK];
         static const int32 Reputation_Cap    =  42999;
@@ -85,7 +85,7 @@ class ReputationMgr
 
         FactionState const* GetState(RepListID id) const
         {
-            FactionStateList::const_iterator repItr = m_factions.find (id);
+            FactionStateList::const_iterator repItr = m_factions.find(id);
             return repItr != m_factions.end() ? &repItr->second : NULL;
         }
 
@@ -117,7 +117,7 @@ class ReputationMgr
         void SetAtWar(RepListID repListID, bool on);
         void SetInactive(RepListID repListID, bool on);
 
-        void ApplyForceReaction(uint32 faction_id,ReputationRank rank,bool apply);
+        void ApplyForceReaction(uint32 faction_id, ReputationRank rank, bool apply);
 
     public:                                                 // senders
         void SendInitialReputations();
@@ -126,22 +126,22 @@ class ReputationMgr
 
     private:                                                // internal helper functions
         void Initialize();
-        uint32 GetDefaultStateFlags(const FactionEntry *factionEntry) const;
+        uint32 GetDefaultStateFlags(const FactionEntry* factionEntry) const;
         bool SetReputation(FactionEntry const* factionEntry, int32 standing, bool incremental);
         bool SetOneFactionReputation(FactionEntry const* factionEntry, int32 standing, bool incremental);
         void SetVisible(FactionState* faction);
         void SetAtWar(FactionState* faction, bool atWar);
         void SetInactive(FactionState* faction, bool inactive);
         void SendVisible(FactionState const* faction) const;
-        void UpdateRankCounters( ReputationRank old_rank, ReputationRank new_rank );
+        void UpdateRankCounters(ReputationRank old_rank, ReputationRank new_rank);
     private:
         Player* m_player;
         FactionStateList m_factions;
         ForcedReactions m_forcedReactions;
-        uint8 m_visibleFactionCount :8;
-        uint8 m_honoredFactionCount :8;
-        uint8 m_reveredFactionCount :8;
-        uint8 m_exaltedFactionCount :8;
+        uint8 m_visibleFactionCount : 8;
+        uint8 m_honoredFactionCount : 8;
+        uint8 m_reveredFactionCount : 8;
+        uint8 m_exaltedFactionCount : 8;
 };
 
 #endif

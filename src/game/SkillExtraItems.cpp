@@ -21,6 +21,8 @@
 #include "Log.h"
 #include "ProgressBar.h"
 #include "Player.h"
+#include "DBCStores.h"
+
 #include <map>
 
 // some type definitions
@@ -45,7 +47,7 @@ struct SkillExtraItemEntry
 };
 
 // map to store the extra item creation info, the key is the spellId of the creation spell, the mapped value is the assigned SkillExtraItemEntry
-typedef std::map<uint32,SkillExtraItemEntry> SkillExtraItemMap;
+typedef std::map<uint32, SkillExtraItemEntry> SkillExtraItemMap;
 
 SkillExtraItemMap SkillExtraItemStore;
 
@@ -57,7 +59,7 @@ void LoadSkillExtraItemTable()
     SkillExtraItemStore.clear();                            // need for reload
 
     //                                                 0        1                       2                       3
-    QueryResult *result = WorldDatabase.Query("SELECT spellId, requiredSpecialization, additionalCreateChance, additionalMaxNum FROM skill_extra_item_template");
+    QueryResult* result = WorldDatabase.Query("SELECT spellId, requiredSpecialization, additionalCreateChance, additionalMaxNum FROM skill_extra_item_template");
 
     if (result)
     {
@@ -65,7 +67,7 @@ void LoadSkillExtraItemTable()
 
         do
         {
-            Field *fields = result->Fetch();
+            Field* fields = result->Fetch();
             bar.step();
 
             uint32 spellId = fields[0].GetUInt32();
@@ -79,7 +81,7 @@ void LoadSkillExtraItemTable()
             uint32 requiredSpecialization = fields[1].GetUInt32();
             if (!sSpellStore.LookupEntry(requiredSpecialization))
             {
-                sLog.outError("Skill specialization %u have nonexistent required specialization spell id %u in `skill_extra_item_template`!", spellId,requiredSpecialization);
+                sLog.outError("Skill specialization %u have nonexistent required specialization spell id %u in `skill_extra_item_template`!", spellId, requiredSpecialization);
                 continue;
             }
 
@@ -104,7 +106,8 @@ void LoadSkillExtraItemTable()
             skillExtraItemEntry.additionalMaxNum       = additionalMaxNum;
 
             ++count;
-        } while (result->NextRow());
+        }
+        while (result->NextRow());
 
         delete result;
 
@@ -114,25 +117,25 @@ void LoadSkillExtraItemTable()
     else
     {
         sLog.outString();
-        sLog.outString( ">> Loaded 0 spell specialization definitions. DB table `skill_extra_item_template` is empty." );
+        sLog.outString(">> Loaded 0 spell specialization definitions. DB table `skill_extra_item_template` is empty.");
     }
 }
 
-bool canCreateExtraItems(Player * player, uint32 spellId, float &additionalChance, uint8 &additionalMax)
+bool canCreateExtraItems(Player* player, uint32 spellId, float& additionalChance, uint8& additionalMax)
 {
     // get the info for the specified spell
     SkillExtraItemMap::const_iterator ret = SkillExtraItemStore.find(spellId);
-    if(ret==SkillExtraItemStore.end())
+    if (ret == SkillExtraItemStore.end())
         return false;
 
     SkillExtraItemEntry const* specEntry = &ret->second;
 
     // if no entry, then no extra items can be created
-    if(!specEntry)
+    if (!specEntry)
         return false;
 
     // the player doesn't have the required specialization, return false
-    if(!player->HasSpell(specEntry->requiredSpecialization))
+    if (!player->HasSpell(specEntry->requiredSpecialization))
         return false;
 
     // set the arguments to the appropriate values

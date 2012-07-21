@@ -17,14 +17,13 @@
  */
 
 #include "SQLStorage.h"
-#include "SQLStorageImpl.h"
 
 void SQLStorage::EraseEntry(uint32 id)
 {
     uint32 offset = 0;
     for (uint32 x = 0; x < oNumFields; ++x)
     {
-        switch(dst_format[x])
+        switch (dst_format[x])
         {
             case FT_LOGIC:
                 offset += sizeof(bool);   break;
@@ -36,8 +35,8 @@ void SQLStorage::EraseEntry(uint32 id)
                 offset += sizeof(float);  break;
             case FT_STRING:
             {
-                if(pIndex[id])
-                    delete [] *(char**)((char*)(pIndex[id])+offset);
+                if (pIndex[id])
+                    delete [] *(char**)((char*)(pIndex[id]) + offset);
 
                 offset += sizeof(char*);
                 break;
@@ -63,12 +62,12 @@ void SQLStorage::EraseEntry(uint32 id)
     pIndex[id] = NULL;
 }
 
-void SQLStorage::Free ()
+void SQLStorage::Free()
 {
     uint32 offset = 0;
     for (uint32 x = 0; x < oNumFields; ++x)
     {
-        switch(dst_format[x])
+        switch (dst_format[x])
         {
             case FT_LOGIC:
                 offset += sizeof(bool);   break;
@@ -80,9 +79,9 @@ void SQLStorage::Free ()
                 offset += sizeof(float);  break;
             case FT_STRING:
             {
-                for(uint32 y = 0; y < MaxEntry; ++y)
-                    if(pIndex[y])
-                        delete [] *(char**)((char*)(pIndex[y])+offset);
+                for (uint32 y = 0; y < MaxEntry; ++y)
+                    if (pIndex[y])
+                        delete [] *(char**)((char*)(pIndex[y]) + offset);
 
                 offset += sizeof(char*);
                 break;
