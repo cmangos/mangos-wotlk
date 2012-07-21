@@ -24,6 +24,16 @@ bool PlayerbotClassAI::BuffPlayer(Player* /*target*/)
     return false;
 }
 
+CombatManeuverReturns PlayerbotClassAI::HealPlayer(Player* target) {
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
+
+    if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
+    if (target->IsInDuel()) return RETURN_NO_ACTION_INVALIDTARGET;
+
+    return RETURN_NO_ACTION_OK;
+}
+
 /**
  * GetHealTarget()
  * return Unit* Returns unit to be healed. First checks 'critical' Healer(s), next Tank(s), next Master (if different from:), next DPS.

@@ -57,7 +57,7 @@ public:
 protected:
     CombatManeuverReturns CastSpellNoRanged(uint32 nextAction, Unit *pTarget);
     CombatManeuverReturns CastSpellWand(uint32 nextAction, Unit *pTarget, uint32 SHOOT);
-    virtual CombatManeuverReturns HealPlayer(Player* /*target*/) { return RETURN_NO_ACTION_OK; }
+    virtual CombatManeuverReturns HealPlayer(Player* target);
     virtual Player* GetHealTarget(JOB_TYPE type = JOB_ALL);
     JOB_TYPE GetTargetJob(Player* target);
 

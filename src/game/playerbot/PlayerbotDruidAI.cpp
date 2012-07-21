@@ -88,10 +88,9 @@ CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
 
 CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
 {
-    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
-    if (!m_bot) return RETURN_NO_ACTION_ERROR;
-
-    if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
+    CombatManeuverReturns r = PlayerbotClassAI::HealPlayer(target);
+    if (r != RETURN_NO_ACTION_OK)
+        return r;
 
     // TODO: find some clever way to integrate Revive/Resurrection instead
     if (!target->isAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
