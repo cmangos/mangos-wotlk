@@ -1467,12 +1467,15 @@ enum NotableItems
 
 enum CombatManeuverReturns
 {
+    // TODO: RETURN_NO_ACTION_UNKNOWN is not part of ANY_OK or ANY_ERROR. It's also bad form and should be eliminated ASAP.
     RETURN_NO_ACTION_OK              = 0x01, // No action taken during this combat maneuver, as intended (just wait, etc...)
     RETURN_NO_ACTION_UNKNOWN         = 0x02, // No action taken during this combat maneuver, unknown reason
     RETURN_NO_ACTION_ERROR           = 0x04, // No action taken due to error
     RETURN_NO_ACTION_INVALIDTARGET   = 0x08, // No action taken - invalid target
     RETURN_FINISHED_FIRST_MOVES      = 0x10, // Last action of first-combat-maneuver finished, continue onto next-combat-maneuver
-    RETURN_CONTINUE                  = 0x20  // Continue first moves; normal return value for next-combat-maneuver
+    RETURN_CONTINUE                  = 0x20, // Continue first moves; normal return value for next-combat-maneuver
+    RETURN_ANY_OK                    = 0x31, // All the OK values bitwise OR'ed
+    RETURN_ANY_ERROR                 = 0x0C  // All the ERROR values bitwise OR'ed
 };
 
 class MANGOS_DLL_SPEC PlayerbotAI
