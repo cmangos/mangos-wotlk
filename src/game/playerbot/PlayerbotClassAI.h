@@ -66,7 +66,6 @@ protected:
     uint8 m_MinHealthPercentHealer;
     uint8 m_MinHealthPercentDPS;
     uint8 m_MinHealthPercentMaster;
-    uint8 m_MinHealthPercentAll;    // Must be equal to or over highest of all 4 above values
 
     Player* m_master;
     Player* m_bot;

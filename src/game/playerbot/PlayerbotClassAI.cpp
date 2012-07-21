@@ -11,9 +11,6 @@ PlayerbotClassAI::PlayerbotClassAI(Player* const master, Player* const bot, Play
     m_MinHealthPercentHealer = 60;
     m_MinHealthPercentDPS    = 30;
     m_MinHealthPercentMaster = m_MinHealthPercentDPS;
-    m_MinHealthPercentAll    = 90;
-    // Ensure All is largest of itself and the four other values above.
-    m_MinHealthPercentAll = std::max( std::max(m_MinHealthPercentAll, std::max(m_MinHealthPercentTank, m_MinHealthPercentHealer) ), std::max(m_MinHealthPercentMaster, m_MinHealthPercentDPS) );
 }
 PlayerbotClassAI::~PlayerbotClassAI() {}
 
@@ -140,10 +137,10 @@ Player* PlayerbotClassAI::GetHealTarget(JOB_TYPE type)
     }
     if (x > -1) return targets.at(x).p;
 
-    // Nobody is critical, find anyone marginally hurt
+    // Nobody is critical, find anyone hurt at all, return lowest (let the healer sort out if it's worth healing or not)
     for (i = 0, uCount = targets.size(); uCount > 0; uCount--, i++)
     {
-        if (targets.at(i).hp <= m_MinHealthPercentAll)
+        if (targets.at(i).hp < 100)
             if (x == -1 || targets.at(x).hp > targets.at(i).hp)
                 x = i;
     }
