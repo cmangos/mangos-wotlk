@@ -21,6 +21,8 @@ Commands:
 
 For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '/t BOTNAME help auction remove'.
 
+Note that these commands work both in whisper and in party chat (assuming the bot is in the party). Any command in party chat will be obeyed by all bots in the party (if applicable).
+
 /t BOTNAME attack (bot will attack selected target, similar to the way a pet can attack)
 /t BOTNAME follow (orders bot to follow player; will also revive bot if dead or teleport bot if far away)
 /t BOTNAME follow far (increases the bots follow distance from the player)
@@ -48,8 +50,8 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME process < disenchant | d > [ITEM LINK] (disenchants green [ITEM LINK] or better)
 /t BOTNAME process < mill | m > [ITEM LINK] (grinds 5 herbs [ITEM LINK] to produce pigments)
 /t BOTNAME process < prospect | p > [ITEM LINK] (searches 5 metal ore [ITEM LINK] for precious gems)
-/t BOTANME enchant (lists all enchantments [SPELLLINK] learnt by the bot)
-/t BOTANME enchant [SPELLLINK][ITEM LINK] (enchants selected tradable [ITEM LINK] either equipped or in bag)
+/t BOTNAME enchant (lists all enchantments [SPELLLINK] learnt by the bot)
+/t BOTNAME enchant [SPELLLINK][ITEM LINK] (enchants selected tradable [ITEM LINK] either equipped or in bag)
 /t BOTNAME use [ITEM LINK] (use item on self. If item hold quest, it will be accepted. If inventory item is lootable, it will be looted)
 /t BOTNAME use [ITEM LINK] TARGET (use item on selected unit)
 /t BOTNAME use [ITEM LINK][EQUIPPED ITEM LINK] (use item on equipped item)
@@ -86,7 +88,7 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME auction (bot will display all it's active owned auctions. Auction info will include an [AUCTION LINK] )
 /t BOTNAME auction add [ITEM LINK] (bot will add item to it's m_itemIds, for later auction)
 /t BOTNAME auction remove [AUCTION LINK] (bot will add auctionid to it's m_auctions, for later auction cancellation)
-/t BOTANME mail inbox [MAILBOX] (Lists all bot mail from selected [MAILBOX])
+/t BOTNAME mail inbox [MAILBOX] (Lists all bot mail from selected [MAILBOX])
 /t BOTNAME mail getcash [MAIL ID].. (gets all cash from selected [MAIL ID])
 /t BOTNAME mail getitem [MAIL ID].. (gets all items from selected [MAIL ID])
 /t BOTNAME mail delete [MAIL ID].. (delete all bot mail selected [MAIL ID])
