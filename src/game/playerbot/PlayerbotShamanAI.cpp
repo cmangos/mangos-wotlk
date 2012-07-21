@@ -116,7 +116,7 @@ CombatManeuverReturns PlayerbotShamanAI::HealPlayer(Player* target)
     if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
 
     // TODO: find some clever way to integrate Revive/Resurrection instead
-    if (!target->isAlive()) return RETURN_NO_ACTION_ERROR;
+    if (!target->isAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
 
     // Dispel if necessary
     if (CURE_TOXINS > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)

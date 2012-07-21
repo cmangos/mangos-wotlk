@@ -146,7 +146,7 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
         }
     }
 
-    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth(); // TODO: might be cleaner with 'target->GetHealthPercent()'. Do all Unit's have it though?
+    uint8 hp = target->GetHealthPercent();
 
     // Everyone is healthy enough, return OK. MUST correlate to highest value below (should be last HP check)
     if (hp >= 90)

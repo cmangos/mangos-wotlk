@@ -94,9 +94,7 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
     if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
 
     // TODO: find some clever way to integrate Revive/Resurrection instead
-    if (!target->isAlive()) return RETURN_NO_ACTION_ERROR;
-
-    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth(); // TODO: might be cleaner with 'target->GetHealthPercent()'. Do all Unit's have it though?
+    if (!target->isAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
 
     //If spell exists and orders say we should be dispelling
     if ((REMOVE_CURSE > 0 || ABOLISH_POISON > 0) && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
@@ -132,6 +130,8 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
             }
         }
     }
+
+    uint8 hp = target->GetHealthPercent();
 
     // Everyone is healthy enough, return OK. MUST correlate to highest value below (should be last HP check)
     if (hp >= 90)

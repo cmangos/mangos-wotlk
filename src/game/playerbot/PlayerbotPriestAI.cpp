@@ -115,7 +115,7 @@ CombatManeuverReturns PlayerbotPriestAI::HealPlayer(Player* target)
         }
     }
 
-    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
+    uint8 hp = target->GetHealthPercent();
     uint8 hpSelf = m_ai->GetHealthPercent();
 
     if (hp >= 90)
@@ -248,6 +248,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     else
     {
         // Is this desirable? Debatable.
+        // ... Certainly could be very detrimental to a shadow priest
         // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
         if (HealPlayer(m_bot) & RETURN_CONTINUE)
             return RETURN_CONTINUE;
