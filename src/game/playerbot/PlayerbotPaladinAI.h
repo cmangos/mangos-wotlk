@@ -93,21 +93,20 @@ public:
     // all non combat actions go here, ex buffs, heals, rezzes
     void DoNonCombatActions();
 
-    // buff a specific player, usually a real PC who is not in group
-    bool BuffPlayer(Player *target);
-
 private:
     // Heals the target based off its hps
     CombatManeuverReturns HealPlayer(Player* target);
     Player* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
 
-    // Bless target using greater blessing if possible
-    bool Bless(uint32 spellId, Unit *target);
     //Changes aura according to spec/orders
     void CheckAuras();
     //Changes Seal according to spec
     void CheckSeals();
 
+    static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target);
+
+    // make this public so the static function can access it. Either that or make an accessor function for each
+public:
     // Retribution
     uint32 RETRIBUTION_AURA,
            SEAL_OF_COMMAND,
@@ -195,6 +194,7 @@ private:
     //Non-Stacking buffs
     uint32 PRAYER_OF_SHADOW_PROTECTION;
 
+private:
     uint32 SpellSequence, CombatCounter, HealCounter;
 };
 

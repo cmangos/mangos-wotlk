@@ -19,11 +19,6 @@ CombatManeuverReturns PlayerbotClassAI::DoNextCombatManeuver(Unit *) { return RE
 
 void PlayerbotClassAI::DoNonCombatActions() {}
 
-bool PlayerbotClassAI::BuffPlayer(Player* /*target*/)
-{
-    return false;
-}
-
 CombatManeuverReturns PlayerbotClassAI::HealPlayer(Player* target) {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -34,15 +29,42 @@ CombatManeuverReturns PlayerbotClassAI::HealPlayer(Player* target) {
     return RETURN_NO_ACTION_OK;
 }
 
-Player* PlayerbotClassAI::GetTargetWithoutBuff(JOB_TYPE type)
+CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, uint32, Unit*), uint32 spellId, JOB_TYPE type, bool bMustBeOOC)
 {
-    if (!m_ai)  return NULL;
-    if (!m_bot) return NULL;
-    if (!m_bot->isAlive() || m_bot->IsInDuel() || m_bot->isInCombat()) return NULL;
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
+    if (!m_bot->isAlive() || m_bot->IsInDuel()) return RETURN_NO_ACTION_ERROR;
+    if (bMustBeOOC && m_bot->isInCombat()) return RETURN_NO_ACTION_ERROR;
 
-    // TODO: code actual function... obviously
+    if (spellId == 0) return RETURN_NO_ACTION_OK;
 
-    return NULL;
+    // First, fill the list of targets
+    if (m_bot->GetGroup())
+    {
+        Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel())
+                continue;
+            JOB_TYPE job = GetTargetJob(groupMember);
+            if (job & type)
+            {
+                if (BuffHelper(m_ai, spellId, groupMember))
+                    return RETURN_CONTINUE;
+            }
+        }
+    }
+    else
+    {
+        if (m_master && !m_master->IsInDuel())
+            if (BuffHelper(m_ai, spellId, m_master))
+                return RETURN_CONTINUE;
+        if (BuffHelper(m_ai, spellId, m_bot))
+            return RETURN_CONTINUE;
+    }
+
+    return RETURN_NO_ACTION_OK;
 }
 
 /**

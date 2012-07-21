@@ -46,9 +46,6 @@ public:
     // all non combat actions go here, ex buffs, heals, rezzes
     virtual void DoNonCombatActions();
 
-    // buff a specific player, usually a real PC who is not in group
-    virtual bool BuffPlayer(Player* target);
-
     // Utilities
     Player* GetMaster() { return m_master; }
     Player* GetPlayerBot() { return m_bot; }
@@ -58,7 +55,7 @@ protected:
     CombatManeuverReturns CastSpellNoRanged(uint32 nextAction, Unit *pTarget);
     CombatManeuverReturns CastSpellWand(uint32 nextAction, Unit *pTarget, uint32 SHOOT);
     virtual CombatManeuverReturns HealPlayer(Player* target);
-    Player* GetTargetWithoutBuff(JOB_TYPE type = JOB_ALL); // TODO: This will not do. Needs to take array of buffs to check for
+    CombatManeuverReturns Buff(bool (*BuffHelper)(PlayerbotAI*, uint32, Unit*), uint32 spellId, JOB_TYPE type = JOB_ALL, bool bMustBeOOC = true);
     Player* GetHealTarget(JOB_TYPE type = JOB_ALL);
     Player* GetResurrectionTarget(JOB_TYPE type = JOB_ALL, bool bMustBeOOC = true);
     JOB_TYPE GetTargetJob(Player* target);

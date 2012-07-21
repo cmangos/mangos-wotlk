@@ -702,16 +702,18 @@ bool PlayerbotDruidAI::BuffPlayer(Player* target)
     {
         if (m_ai->Buff(MARK_OF_THE_WILD, pet, &(PlayerbotDruidAI::GoBuffForm)))
             return true;
+        // TODO: Turn off if a tank is present in group
         else if (m_ai->Buff(THORNS, pet, &(PlayerbotDruidAI::GoBuffForm)))
             return true;
     }
 
     if (m_ai->Buff(MARK_OF_THE_WILD, target, &(PlayerbotDruidAI::GoBuffForm)))
         return true;
+    // TODO: Tank only if tank is present in group
     else if (m_ai->Buff(THORNS, target, &(PlayerbotDruidAI::GoBuffForm)))
         return true;
-    else
-        return false;
+
+    return false;
 }
 
 void PlayerbotDruidAI::GoBuffForm(Player *self)
