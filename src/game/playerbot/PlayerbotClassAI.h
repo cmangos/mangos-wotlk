@@ -14,13 +14,21 @@
 class Player;
 class PlayerbotAI;
 
+enum JOB_TYPE
+{
+    JOB_HEAL   = 0x01,
+    JOB_TANK   = 0x02,
+    JOB_MASTER = 0x04, // Not a fan of this distinction but user (or rather, admin) choice
+    JOB_DPS    = 0x08,
+    JOB_ALL    = 0x0F  // all of the above
+};
+
 struct heal_priority
 {
     Player* p;
     uint8 hp;
-    uint8 type;
-    heal_priority(Player* pin, uint8 hpin) : p(pin), hp(hpin), type(0) {}
-    heal_priority(Player* pin, uint8 hpin, uint8 t) : p(pin), hp(hpin), type(t) {}
+    JOB_TYPE type;
+    heal_priority(Player* pin, uint8 hpin, JOB_TYPE t) : p(pin), hp(hpin), type(t) {}
     // overriding the operator like this is not recommended for general use - however we won't use this struct for anything else
     bool operator<(const heal_priority& a) const { return type < a.type; }
 };
@@ -50,7 +58,8 @@ protected:
     CombatManeuverReturns CastSpellNoRanged(uint32 nextAction, Unit *pTarget);
     CombatManeuverReturns CastSpellWand(uint32 nextAction, Unit *pTarget, uint32 SHOOT);
     virtual CombatManeuverReturns HealTarget(Unit* /*target*/) { return RETURN_NO_ACTION_UNKNOWN; }
-    virtual Unit* GetHealTarget();
+    virtual Unit* GetHealTarget(JOB_TYPE type = JOB_ALL);
+    JOB_TYPE GetTargetJob(Player* target);
 
     // These values are used in GetHealTarget and can be overridden per class (to accomodate healing spell health checks)
     uint8 m_MinHealthPercentTank;
