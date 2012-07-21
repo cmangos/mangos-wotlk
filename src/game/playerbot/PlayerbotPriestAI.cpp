@@ -87,7 +87,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoFirstCombatManeuver(Unit* /*pTarget*/
     return RETURN_NO_ACTION_OK;
 }
 
-CombatManeuverReturns PlayerbotPriestAI::HealTarget(Unit* target)
+CombatManeuverReturns PlayerbotPriestAI::HealPlayer(Player* target)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -96,9 +96,6 @@ CombatManeuverReturns PlayerbotPriestAI::HealTarget(Unit* target)
 
     // TODO: find some clever way to integrate Revive/Resurrection instead
     if (!target->isAlive()) return RETURN_NO_ACTION_ERROR;
-
-    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
-    uint8 hpSelf = m_ai->GetHealthPercent();
 
     if (CURE_DISEASE > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
     {
@@ -117,6 +114,9 @@ CombatManeuverReturns PlayerbotPriestAI::HealTarget(Unit* target)
             }
         }
     }
+
+    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth();
+    uint8 hpSelf = m_ai->GetHealthPercent();
 
     if (hp >= 90)
         return RETURN_NO_ACTION_OK;
@@ -242,14 +242,14 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     // Heal
     if (m_ai->IsHealer())
     {
-        if (HealTarget(GetHealTarget()) & RETURN_CONTINUE)
+        if (HealPlayer(GetHealTarget()) & RETURN_CONTINUE)
             return RETURN_CONTINUE;
     }
     else
     {
         // Is this desirable? Debatable.
         // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
-        if (HealTarget(m_bot) & RETURN_CONTINUE)
+        if (HealPlayer(m_bot) & RETURN_CONTINUE)
             return RETURN_CONTINUE;
     }
 
@@ -402,14 +402,14 @@ void PlayerbotPriestAI::DoNonCombatActions()
     // Heal
     if (m_ai->IsHealer())
     {
-        if (HealTarget(GetHealTarget()) & RETURN_CONTINUE)
+        if (HealPlayer(GetHealTarget()) & RETURN_CONTINUE)
             return;// RETURN_CONTINUE;
     }
     else
     {
         // Is this desirable? Debatable.
         // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
-        if (HealTarget(m_bot) & RETURN_CONTINUE)
+        if (HealPlayer(m_bot) & RETURN_CONTINUE)
             return;// RETURN_CONTINUE;
     }
 

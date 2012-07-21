@@ -108,7 +108,7 @@ CombatManeuverReturns PlayerbotShamanAI::DoFirstCombatManeuver(Unit* /*pTarget*/
     return RETURN_NO_ACTION_OK;
 }
 
-CombatManeuverReturns PlayerbotShamanAI::HealTarget(Unit* target)
+CombatManeuverReturns PlayerbotShamanAI::HealPlayer(Player* target)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -118,21 +118,7 @@ CombatManeuverReturns PlayerbotShamanAI::HealTarget(Unit* target)
     // TODO: find some clever way to integrate Revive/Resurrection instead
     if (!target->isAlive()) return RETURN_NO_ACTION_ERROR;
 
-    // Everyone is healthy enough, return OK. MUST correlate to highest value below (should be last HP check)
-    if (target->GetHealthPercent() >= 80)
-        return RETURN_NO_ACTION_OK;
-
-    // Technically the best rotation is CHAIN + LHW + LHW, or RIPTIDE + LHW + LHW (proc Tidal Waves then two short LHW), subbing in HW for trouble (bad mana efficiency)
-    if (target->GetHealthPercent() < 30 && HEALING_WAVE > 0 && m_ai->CastSpell(HEALING_WAVE, *target)) /*&& m_ai->GetManaPercent() >= 32*/
-        return RETURN_CONTINUE;
-    if (target->GetHealthPercent() < 50 && LESSER_HEALING_WAVE > 0 && m_ai->CastSpell(LESSER_HEALING_WAVE, *target)) /*&& m_ai->GetManaPercent() >= 19*/
-        return RETURN_CONTINUE;
-    if (target->GetHealthPercent() < 60 && RIPTIDE > 0 && !target->HasAura(RIPTIDE, EFFECT_INDEX_0) && m_ai->CastSpell(RIPTIDE, *target)) /*&& m_ai->GetManaPercent() >= 21*/
-        return RETURN_CONTINUE;
-    if (target->GetHealthPercent() < 80 && CHAIN_HEAL > 0 && m_ai->CastSpell(CHAIN_HEAL, *target)) /*&& m_ai->GetManaPercent() >= 24*/
-        return RETURN_CONTINUE;
-
-    // Don't need to heal, dispel if necessary
+    // Dispel if necessary
     if (CURE_TOXINS > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
     {
         uint32 DISPEL = CLEANSE_SPIRIT > 0 ? CLEANSE_SPIRIT : CURE_TOXINS;
@@ -172,6 +158,20 @@ CombatManeuverReturns PlayerbotShamanAI::HealTarget(Unit* target)
             }
         }
     }
+
+    // Everyone is healthy enough, return OK. MUST correlate to highest value below (should be last HP check)
+    if (target->GetHealthPercent() >= 80)
+        return RETURN_NO_ACTION_OK;
+
+    // Technically the best rotation is CHAIN + LHW + LHW, or RIPTIDE + LHW + LHW (proc Tidal Waves then two short LHW), subbing in HW for trouble (bad mana efficiency)
+    if (target->GetHealthPercent() < 30 && HEALING_WAVE > 0 && m_ai->CastSpell(HEALING_WAVE, *target)) /*&& m_ai->GetManaPercent() >= 32*/
+        return RETURN_CONTINUE;
+    if (target->GetHealthPercent() < 50 && LESSER_HEALING_WAVE > 0 && m_ai->CastSpell(LESSER_HEALING_WAVE, *target)) /*&& m_ai->GetManaPercent() >= 19*/
+        return RETURN_CONTINUE;
+    if (target->GetHealthPercent() < 60 && RIPTIDE > 0 && !target->HasAura(RIPTIDE, EFFECT_INDEX_0) && m_ai->CastSpell(RIPTIDE, *target)) /*&& m_ai->GetManaPercent() >= 21*/
+        return RETURN_CONTINUE;
+    if (target->GetHealthPercent() < 80 && CHAIN_HEAL > 0 && m_ai->CastSpell(CHAIN_HEAL, *target)) /*&& m_ai->GetManaPercent() >= 24*/
+        return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;
 } // end HealTarget
@@ -340,14 +340,14 @@ CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
     // Heal
     if (m_ai->IsHealer())
     {
-        if (HealTarget(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        if (HealPlayer(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return RETURN_CONTINUE;
     }
     else
     {
         // Is this desirable? Debatable.
         // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
-        if (HealTarget(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        if (HealPlayer(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return RETURN_CONTINUE;
     }
 
@@ -532,7 +532,7 @@ void PlayerbotShamanAI::DoNonCombatActions()
     // heal
     if (m_ai->IsHealer())
     {
-        if (HealTarget(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        if (HealPlayer(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return; // TODO: return RETURN_CONTINUE;
     }
 

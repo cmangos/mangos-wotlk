@@ -96,7 +96,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoFirstCombatManeuver(Unit* /*pTarget*
     return RETURN_NO_ACTION_OK;
 }
 
-CombatManeuverReturns PlayerbotPaladinAI::HealTarget(Unit *target)
+CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -104,28 +104,7 @@ CombatManeuverReturns PlayerbotPaladinAI::HealTarget(Unit *target)
     if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
 
     // TODO: find some clever way to integrate Revive/Resurrection instead
-    if (!target->isAlive()) return RETURN_NO_ACTION_ERROR;
-
-    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth(); // TODO: might be cleaner with 'target->GetHealthPercent()'. Do all Unit's have it though?
-
-    if (hp < 25 && m_ai->CastSpell(LAY_ON_HANDS, *target))
-        return RETURN_CONTINUE;
-
-    // TODO: You probably want to save this for tank/healer trouble
-    if (hp < 25 && HAND_OF_PROTECTION > 0 && !target->HasAura(FORBEARANCE, EFFECT_INDEX_0)
-        && !target->HasAura(HAND_OF_PROTECTION, EFFECT_INDEX_0) && !target->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0)
-        && !target->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && m_ai->CastSpell(HAND_OF_PROTECTION, *target))
-        return RETURN_CONTINUE;
-
-    // Isn't this more of a group heal spell?
-    if (hp < 40 && m_ai->CastSpell(FLASH_OF_LIGHT, *target))
-        return RETURN_CONTINUE;
-
-    if (hp < 60 && m_ai->CastSpell(HOLY_SHOCK, *target))
-        return RETURN_CONTINUE;
-
-    if (hp < 80 && m_ai->CastSpell(HOLY_LIGHT, *target))
-        return RETURN_CONTINUE;
+    if (!target->isAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
 
     if (PURIFY > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
     {
@@ -166,6 +145,32 @@ CombatManeuverReturns PlayerbotPaladinAI::HealTarget(Unit *target)
             }
         }
     }
+
+    uint8 hp = target->GetHealth() * 100 / target->GetMaxHealth(); // TODO: might be cleaner with 'target->GetHealthPercent()'. Do all Unit's have it though?
+
+    // Everyone is healthy enough, return OK. MUST correlate to highest value below (should be last HP check)
+    if (hp >= 90)
+        return RETURN_NO_ACTION_OK;
+
+    if (hp < 25 && m_ai->CastSpell(LAY_ON_HANDS, *target))
+        return RETURN_CONTINUE;
+
+    // You probably want to save this for tank/healer trouble
+    if (hp < 30 && HAND_OF_PROTECTION > 0 && !target->HasAura(FORBEARANCE, EFFECT_INDEX_0)
+        && !target->HasAura(HAND_OF_PROTECTION, EFFECT_INDEX_0) && !target->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0)
+        && !target->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && (GetTargetJob(target) & (JOB_HEAL | JOB_TANK))
+        && m_ai->CastSpell(HAND_OF_PROTECTION, *target))
+        return RETURN_CONTINUE;
+
+    // Isn't this more of a group heal spell?
+    if (hp < 40 && m_ai->CastSpell(FLASH_OF_LIGHT, *target))
+        return RETURN_CONTINUE;
+
+    if (hp < 60 && m_ai->CastSpell(HOLY_SHOCK, *target))
+        return RETURN_CONTINUE;
+
+    if (hp < 90 && m_ai->CastSpell(HOLY_LIGHT, *target))
+        return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;
 } // end HealTarget
@@ -310,14 +315,14 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     // Heal
     if (m_ai->IsHealer())
     {
-        if (HealTarget(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        if (HealPlayer(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return RETURN_CONTINUE;
     }
     else
     {
         // Is this desirable? Debatable.
         // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
-        if (HealTarget(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        if (HealPlayer(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return RETURN_CONTINUE;
     }
 
@@ -510,14 +515,14 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     // Heal
     if (m_ai->IsHealer())
     {
-        if (HealTarget(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        if (HealPlayer(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return;// RETURN_CONTINUE;
     }
     else
     {
         // Is this desirable? Debatable.
         // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
-        if (HealTarget(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        if (HealPlayer(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return;// RETURN_CONTINUE;
     }
 

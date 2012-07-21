@@ -122,8 +122,8 @@ private:
     CombatManeuverReturns _DoNextPVECombatManeuverHeal();
 
     // Heals the target based off its hps
-    CombatManeuverReturns HealTarget (Unit *target);
-    Unit* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
+    CombatManeuverReturns HealPlayer (Player* target);
+    Player* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
 
     // Callback method to reset shapeshift forms blocking buffs and heals
     static void GoBuffForm(Player *self);

@@ -38,7 +38,7 @@ bool PlayerbotClassAI::BuffPlayer(Player* /*target*/)
  * Will need extensive re-write for co-operation amongst multiple healers. As it stands, multiple healers would all pick the same 'ideal'
  * healing target.
  */
-Unit* PlayerbotClassAI::GetHealTarget(JOB_TYPE type)
+Player* PlayerbotClassAI::GetHealTarget(JOB_TYPE type)
 {
     if (!m_ai)  return NULL;
     if (!m_bot) return NULL;

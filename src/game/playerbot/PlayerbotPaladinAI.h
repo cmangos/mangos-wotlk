@@ -98,8 +98,8 @@ public:
 
 private:
     // Heals the target based off its hps
-    CombatManeuverReturns HealTarget (Unit *target);
-    Unit* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
+    CombatManeuverReturns HealPlayer(Player* target);
+    Player* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
 
     // Bless target using greater blessing if possible
     bool Bless(uint32 spellId, Unit *target);

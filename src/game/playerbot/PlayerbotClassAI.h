@@ -57,8 +57,8 @@ public:
 protected:
     CombatManeuverReturns CastSpellNoRanged(uint32 nextAction, Unit *pTarget);
     CombatManeuverReturns CastSpellWand(uint32 nextAction, Unit *pTarget, uint32 SHOOT);
-    virtual CombatManeuverReturns HealTarget(Unit* /*target*/) { return RETURN_NO_ACTION_UNKNOWN; }
-    virtual Unit* GetHealTarget(JOB_TYPE type = JOB_ALL);
+    virtual CombatManeuverReturns HealPlayer(Player* /*target*/) { return RETURN_NO_ACTION_OK; }
+    virtual Player* GetHealTarget(JOB_TYPE type = JOB_ALL);
     JOB_TYPE GetTargetJob(Player* target);
 
     // These values are used in GetHealTarget and can be overridden per class (to accomodate healing spell health checks)
