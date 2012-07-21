@@ -34,6 +34,17 @@ CombatManeuverReturns PlayerbotClassAI::HealPlayer(Player* target) {
     return RETURN_NO_ACTION_OK;
 }
 
+Player* PlayerbotClassAI::GetTargetWithoutBuff(JOB_TYPE type)
+{
+    if (!m_ai)  return NULL;
+    if (!m_bot) return NULL;
+    if (!m_bot->isAlive() || m_bot->IsInDuel() || m_bot->isInCombat()) return NULL;
+
+    // TODO: code actual function... obviously
+
+    return NULL;
+}
+
 /**
  * GetHealTarget()
  * return Unit* Returns unit to be healed. First checks 'critical' Healer(s), next Tank(s), next Master (if different from:), next DPS.
@@ -155,6 +166,42 @@ Player* PlayerbotClassAI::GetHealTarget(JOB_TYPE type)
                 x = i;
     }
     if (x > -1) return targets.at(x).p;
+
+    return NULL;
+}
+
+Player* PlayerbotClassAI::GetResurrectionTarget(JOB_TYPE type, bool bMustBeOOC)
+{
+    if (!m_ai)  return NULL;
+    if (!m_bot) return NULL;
+    if (!m_bot->isAlive() || m_bot->IsInDuel()) return NULL;
+    if (bMustBeOOC && m_bot->isInCombat()) return NULL;
+
+    // First, fill the list of targets
+    if (m_bot->GetGroup())
+    {
+        // define seperately for sorting purposes - DO NOT CHANGE ORDER!
+        std::vector<heal_priority> targets;
+
+        Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (!groupMember || groupMember->isAlive())
+                continue;
+            JOB_TYPE job = GetTargetJob(groupMember);
+            if (job & type)
+                targets.push_back( heal_priority(groupMember, 0, job) );
+        }
+
+        // Sorts according to type: Healers first, tanks next, then master followed by DPS, thanks to the order of the TYPE enum
+        std::sort(targets.begin(), targets.end());
+
+        if (targets.size())
+            return targets.at(0).p;
+    }
+    else if (!m_master->isAlive())
+        return m_master;
 
     return NULL;
 }

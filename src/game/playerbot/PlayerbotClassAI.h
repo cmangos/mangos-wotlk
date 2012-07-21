@@ -58,7 +58,9 @@ protected:
     CombatManeuverReturns CastSpellNoRanged(uint32 nextAction, Unit *pTarget);
     CombatManeuverReturns CastSpellWand(uint32 nextAction, Unit *pTarget, uint32 SHOOT);
     virtual CombatManeuverReturns HealPlayer(Player* target);
-    virtual Player* GetHealTarget(JOB_TYPE type = JOB_ALL);
+    Player* GetTargetWithoutBuff(JOB_TYPE type = JOB_ALL); // TODO: This will not do. Needs to take array of buffs to check for
+    Player* GetHealTarget(JOB_TYPE type = JOB_ALL);
+    Player* GetResurrectionTarget(JOB_TYPE type = JOB_ALL, bool bMustBeOOC = true);
     JOB_TYPE GetTargetJob(Player* target);
 
     // These values are used in GetHealTarget and can be overridden per class (to accomodate healing spell health checks)
