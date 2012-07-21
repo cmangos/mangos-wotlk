@@ -53,10 +53,10 @@ For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '
 /t BOTNAME use [ITEM LINK] (use item on self. If item hold quest, it will be accepted. If inventory item is lootable, it will be looted)
 /t BOTNAME use [ITEM LINK] TARGET (use item on selected unit)
 /t BOTNAME use [ITEM LINK][EQUIPPED ITEM LINK] (use item on equipped item)
-/t BOTNAME use [ITEM LINK][GAMEOBJECT LINK] (use item on gameobject )
+/t BOTNAME use [ITEM LINK][GAMEOBJECT LINK] (use item on gameobject)
 /t BOTNAME equip [ITEM LINK]
-/t BOTNAME autoequip (*toggle switch* bot(s) will auto equip items they receive based on usefulness. type .help for options)
-/t BOTNAME autoequip on/off/now (explicitly sets bot to ON/OFF and 'autoequip now' runs the process one time regardless of setting)
+/t BOTNAME equip auto (*toggle* auto equip acquired items based on usefulness)
+/t BOTNAME equip auto <on | off | once> (explicitly turn auto equip ON or OFF, or run autoequip once after which it will turn off)
 /t BOTNAME reset (will reset states, orders and loot list)
 /t BOTNAME stats (bot shows available money, free inventory space and estimated item repair costs)
 /t BOTNAME survey (bot shows all available gameobjects, within a local perimeter around the bot)
