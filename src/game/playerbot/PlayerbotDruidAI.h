@@ -201,6 +201,7 @@ private:
            SWIFTMEND,
            TRANQUILITY,
            REVIVE,
+           REBIRTH,
            REMOVE_CURSE,
            ABOLISH_POISON;
 

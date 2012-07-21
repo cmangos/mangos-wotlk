@@ -102,8 +102,17 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
     if (r != RETURN_NO_ACTION_OK)
         return r;
 
-    // TODO: find some clever way to integrate Revive/Resurrection instead
-    if (!target->isAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
+    if (!target->isAlive())
+    {
+        if (REDEMPTION && m_ai->CastSpell(REDEMPTION, *target))
+        {
+            std::string msg = "Resurrecting ";
+            msg += target->GetName();
+            m_bot->Say(msg, LANG_UNIVERSAL);
+            return RETURN_CONTINUE;
+        }
+        return RETURN_NO_ACTION_ERROR; // not error per se - possibly just OOM
+    }
 
     if (PURIFY > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
     {
@@ -456,10 +465,10 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
 
 void PlayerbotPaladinAI::DoNonCombatActions()
 {
-    if (!m_ai)  return;
-    if (!m_bot) return;
+    if (!m_ai)   return;
+    if (!m_bot)  return;
 
-    //uint32 spec = m_bot->GetSpec();
+    if (!m_bot->isAlive() || m_bot->IsInDuel()) return;
 
     CheckAuras();
     CheckSeals();
@@ -468,9 +477,8 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     if (m_ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK)
         m_ai->SelfBuff(RIGHTEOUS_FURY);
     //Disable RF if not tank
-    else if (m_bot->HasAura(RIGHTEOUS_FURY) && !m_ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK)
+    else if (m_bot->HasAura(RIGHTEOUS_FURY))
         m_bot->RemoveAurasDueToSpell(RIGHTEOUS_FURY);
-
 
     BuffPlayer(m_bot);
 
@@ -511,21 +519,25 @@ void PlayerbotPaladinAI::DoNonCombatActions()
         return;
     }
 
+    // Revive
+    if (HealPlayer(GetResurrectionTarget()) & RETURN_CONTINUE)
+        return;
+
     // Heal
     if (m_ai->IsHealer())
     {
-        if (HealPlayer(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        if (HealPlayer(GetHealTarget()) & RETURN_CONTINUE)
             return;// RETURN_CONTINUE;
     }
     else
     {
         // Is this desirable? Debatable.
         // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
-        if (HealPlayer(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        if (HealPlayer(m_bot) & RETURN_CONTINUE)
             return;// RETURN_CONTINUE;
     }
 
-    // heal and buff group
+    // buff group
     if (GetMaster()->GetGroup())
     {
         Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
@@ -535,22 +547,8 @@ void PlayerbotPaladinAI::DoNonCombatActions()
             if (!tPlayer)
                 continue;
 
-            if (tPlayer->IsInDuelWith(GetMaster()))
+            if (tPlayer->IsInDuel())
                 continue;
-
-            // TODO: move this to HealTarget (remember the OOC clause, of course)
-            if (!tPlayer->isAlive())
-            {
-                if (m_ai->CastSpell(REDEMPTION, *tPlayer))
-                {
-                    std::string msg = "Resurrecting ";
-                    msg += tPlayer->GetName();
-                    m_bot->Say(msg, LANG_UNIVERSAL);
-                    return;
-                }
-                else
-                    continue;
-            }
 
             if (tPlayer != m_bot && tPlayer != GetMaster())
                 if (BuffPlayer(tPlayer))

@@ -114,8 +114,17 @@ CombatManeuverReturns PlayerbotShamanAI::HealPlayer(Player* target)
     if (r != RETURN_NO_ACTION_OK)
         return r;
 
-    // TODO: find some clever way to integrate Revive/Resurrection instead
-    if (!target->isAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
+    if (!target->isAlive())
+    {
+        if (ANCESTRAL_SPIRIT && m_ai->CastSpell(ANCESTRAL_SPIRIT, *target))
+        {
+            std::string msg = "Resurrecting ";
+            msg += target->GetName();
+            m_bot->Say(msg, LANG_UNIVERSAL);
+            return RETURN_CONTINUE;
+        }
+        return RETURN_NO_ACTION_ERROR; // not error per se - possibly just OOM
+    }
 
     // Dispel if necessary
     if (CURE_TOXINS > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
@@ -494,8 +503,10 @@ CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
 
 void PlayerbotShamanAI::DoNonCombatActions()
 {
-    if (!m_ai)  return;
-    if (!m_bot) return;
+    if (!m_ai)   return;
+    if (!m_bot)  return;
+
+    if (!m_bot->isAlive() || m_bot->IsInDuel()) return;
 
     uint32 spec = m_bot->GetSpec();
 
@@ -528,11 +539,22 @@ void PlayerbotShamanAI::DoNonCombatActions()
     if (weapon && (weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0) && spec == SHAMAN_SPEC_ENHANCEMENT)
         m_ai->CastSpell(FLAMETONGUE_WEAPON, *m_bot);
 
-    // heal
+    // Revive
+    if (HealPlayer(GetResurrectionTarget()) & RETURN_CONTINUE)
+        return;
+
+    // Heal
     if (m_ai->IsHealer())
     {
-        if (HealPlayer(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
-            return; // TODO: return RETURN_CONTINUE;
+        if (HealPlayer(GetHealTarget()) & RETURN_CONTINUE)
+            return;// RETURN_CONTINUE;
+    }
+    else
+    {
+        // Is this desirable? Debatable.
+        // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
+        if (HealPlayer(m_bot) & RETURN_CONTINUE)
+            return;// RETURN_CONTINUE;
     }
 
     // mana check

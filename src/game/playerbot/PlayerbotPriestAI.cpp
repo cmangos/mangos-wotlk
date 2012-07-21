@@ -93,8 +93,17 @@ CombatManeuverReturns PlayerbotPriestAI::HealPlayer(Player* target)
     if (r != RETURN_NO_ACTION_OK)
         return r;
 
-    // TODO: find some clever way to integrate Revive/Resurrection instead
-    if (!target->isAlive()) return RETURN_NO_ACTION_ERROR;
+    if (!target->isAlive())
+    {
+        if (RESURRECTION && m_ai->CastSpell(RESURRECTION, *target))
+        {
+            std::string msg = "Resurrecting ";
+            msg += target->GetName();
+            m_bot->Say(msg, LANG_UNIVERSAL);
+            return RETURN_CONTINUE;
+        }
+        return RETURN_NO_ACTION_ERROR; // not error per se - possibly just OOM
+    }
 
     if (CURE_DISEASE > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
     {
@@ -352,11 +361,12 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 
 void PlayerbotPriestAI::DoNonCombatActions()
 {
-    if (!m_ai)  return;
-    if (!m_bot) return;
+    if (!m_ai)   return;
+    if (!m_bot)  return;
+
+    if (!m_bot->isAlive() || m_bot->IsInDuel()) return;
 
     uint32 spec = m_bot->GetSpec();
-    if (!GetMaster()) return;
 
     // selfbuff goes first
     if (m_ai->SelfBuff(INNER_FIRE))
@@ -365,6 +375,57 @@ void PlayerbotPriestAI::DoNonCombatActions()
         m_ai->SelfBuff(SHADOWFORM);
     if (VAMPIRIC_EMBRACE > 0)
         m_ai->SelfBuff(VAMPIRIC_EMBRACE);
+
+    // Revive
+    if (HealPlayer(GetResurrectionTarget()) & RETURN_CONTINUE)
+        return;
+
+    // Heal
+    if (m_ai->IsHealer())
+    {
+        if (HealPlayer(GetHealTarget()) & RETURN_CONTINUE)
+            return;// RETURN_CONTINUE;
+    }
+    else
+    {
+        // Is this desirable? Debatable.
+        // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
+        if (HealPlayer(m_bot) & RETURN_CONTINUE)
+            return;// RETURN_CONTINUE;
+    }
+
+    // buff group or master+self
+    if (m_bot->GetGroup())
+    {
+        // Group buffs if available
+        if (PRAYER_OF_FORTITUDE && m_ai->HasSpellReagents(PRAYER_OF_FORTITUDE) && m_ai->Buff(PRAYER_OF_FORTITUDE, m_bot))
+            return;
+
+        if (PRAYER_OF_SPIRIT && m_ai->HasSpellReagents(PRAYER_OF_SPIRIT) && m_ai->Buff(PRAYER_OF_SPIRIT, m_bot))
+            return;
+
+        if (PRAYER_OF_SHADOW_PROTECTION && m_ai->HasSpellReagents(PRAYER_OF_SHADOW_PROTECTION) && m_ai->Buff(PRAYER_OF_SHADOW_PROTECTION, m_bot))
+            return;
+
+        Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
+            if (!tPlayer || tPlayer == m_bot)
+                continue;
+
+            if (tPlayer->IsInDuel())
+                continue;
+
+            if (tPlayer->isAlive() && BuffPlayer(tPlayer))
+                return;
+        }
+    }
+    // No group
+    else if (!GetMaster()->IsInDuel() && GetMaster()->isAlive() && BuffPlayer(GetMaster()))
+        return;
+
+    BuffPlayer(m_bot);
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
@@ -398,77 +459,6 @@ void PlayerbotPriestAI::DoNonCombatActions()
         m_ai->UseItem(fItem);
         return;
     }
-
-    // Heal
-    if (m_ai->IsHealer())
-    {
-        if (HealPlayer(GetHealTarget()) & RETURN_CONTINUE)
-            return;// RETURN_CONTINUE;
-    }
-    else
-    {
-        // Is this desirable? Debatable.
-        // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
-        if (HealPlayer(m_bot) & RETURN_CONTINUE)
-            return;// RETURN_CONTINUE;
-    }
-
-    // buff group or master+self
-    if (m_bot->GetGroup())
-    {
-        // Group buffs if available
-        if (!m_bot->IsInDuel() && m_bot->isAlive())
-        {
-            if (PRAYER_OF_FORTITUDE && m_ai->HasSpellReagents(PRAYER_OF_FORTITUDE) && m_ai->Buff(PRAYER_OF_FORTITUDE, m_bot))
-                return;
-
-            if (PRAYER_OF_SPIRIT && m_ai->HasSpellReagents(PRAYER_OF_SPIRIT) && m_ai->Buff(PRAYER_OF_SPIRIT, m_bot))
-                return;
-
-            if (PRAYER_OF_SHADOW_PROTECTION && m_ai->HasSpellReagents(PRAYER_OF_SHADOW_PROTECTION) && m_ai->Buff(PRAYER_OF_SHADOW_PROTECTION, m_bot))
-                return;
-        }
-
-        Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
-        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
-        {
-            Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
-            if (!tPlayer || tPlayer == m_bot)
-                continue;
-
-            if (tPlayer->IsInDuel())
-                continue;
-
-            // first rezz em
-            if (!tPlayer->isAlive())
-            {
-                if (m_ai->CastSpell(RESURRECTION, *tPlayer))
-                {
-                    std::string msg = "Resurrecting ";
-                    msg += tPlayer->GetName();
-                    m_bot->Say(msg, LANG_UNIVERSAL);
-                    return;
-                }
-                else
-                    continue;
-            }
-            else if (BuffPlayer(tPlayer))
-                return;
-        }
-    }
-    // No group
-    else if (!GetMaster()->IsInDuel())
-    {
-        if (GetMaster()->isAlive())
-        {
-            if (BuffPlayer(GetMaster()))
-                return;
-        }
-        else if (m_ai->CastSpell(RESURRECTION, *GetMaster()))
-            return m_ai->TellMaster("Resurrecting you, Master.");
-    }
-
-    BuffPlayer(m_bot);
 } // end DoNonCombatActions
 
 bool PlayerbotPriestAI::BuffPlayer(Player* target)
