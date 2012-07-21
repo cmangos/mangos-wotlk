@@ -126,8 +126,8 @@ enum ReputationRank
 enum MoneyConstants
 {
     COPPER = 1,
-    SILVER = COPPER*100,
-    GOLD   = SILVER*100
+    SILVER = COPPER * 100,
+    GOLD   = SILVER * 100
 };
 
 enum Stats
@@ -172,30 +172,30 @@ enum SpellSchoolMask
 {
     SPELL_SCHOOL_MASK_NONE    = 0x00,                       // not exist
     SPELL_SCHOOL_MASK_NORMAL  = (1 << SPELL_SCHOOL_NORMAL), // PHYSICAL (Armor)
-    SPELL_SCHOOL_MASK_HOLY    = (1 << SPELL_SCHOOL_HOLY  ),
-    SPELL_SCHOOL_MASK_FIRE    = (1 << SPELL_SCHOOL_FIRE  ),
+    SPELL_SCHOOL_MASK_HOLY    = (1 << SPELL_SCHOOL_HOLY),
+    SPELL_SCHOOL_MASK_FIRE    = (1 << SPELL_SCHOOL_FIRE),
     SPELL_SCHOOL_MASK_NATURE  = (1 << SPELL_SCHOOL_NATURE),
-    SPELL_SCHOOL_MASK_FROST   = (1 << SPELL_SCHOOL_FROST ),
+    SPELL_SCHOOL_MASK_FROST   = (1 << SPELL_SCHOOL_FROST),
     SPELL_SCHOOL_MASK_SHADOW  = (1 << SPELL_SCHOOL_SHADOW),
     SPELL_SCHOOL_MASK_ARCANE  = (1 << SPELL_SCHOOL_ARCANE),
 
     // unions
 
     // 124, not include normal and holy damage
-    SPELL_SCHOOL_MASK_SPELL   = ( SPELL_SCHOOL_MASK_FIRE   |
-                                  SPELL_SCHOOL_MASK_NATURE | SPELL_SCHOOL_MASK_FROST  |
-                                  SPELL_SCHOOL_MASK_SHADOW | SPELL_SCHOOL_MASK_ARCANE ),
+    SPELL_SCHOOL_MASK_SPELL   = (SPELL_SCHOOL_MASK_FIRE   |
+                                 SPELL_SCHOOL_MASK_NATURE | SPELL_SCHOOL_MASK_FROST  |
+                                 SPELL_SCHOOL_MASK_SHADOW | SPELL_SCHOOL_MASK_ARCANE),
     // 126
-    SPELL_SCHOOL_MASK_MAGIC   = ( SPELL_SCHOOL_MASK_HOLY | SPELL_SCHOOL_MASK_SPELL ),
+    SPELL_SCHOOL_MASK_MAGIC   = (SPELL_SCHOOL_MASK_HOLY | SPELL_SCHOOL_MASK_SPELL),
 
     // 127
-    SPELL_SCHOOL_MASK_ALL     = ( SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_MAGIC )
+    SPELL_SCHOOL_MASK_ALL     = (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_MAGIC)
 };
 
 inline SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
 {
-    for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)
-        if(mask & (1 << i))
+    for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
+        if (mask & (1 << i))
             return SpellSchools(i);
 
     return SPELL_SCHOOL_NORMAL;
@@ -215,7 +215,8 @@ enum ItemQualities
 
 #define MAX_ITEM_QUALITY                 8
 
-const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
+const uint32 ItemQualityColors[MAX_ITEM_QUALITY] =
+{
     0xff9d9d9d,        //GREY
     0xffffffff,        //WHITE
     0xff1eff00,        //GREEN
@@ -281,7 +282,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_NO_THREAT                    = 0x00000400,            // 10 no generates threat on cast 100%
     SPELL_ATTR_EX_UNK11                        = 0x00000800,            // 11
     SPELL_ATTR_EX_UNK12                        = 0x00001000,            // 12
-    SPELL_ATTR_EX_UNK13                        = 0x00002000,            // 13
+    SPELL_ATTR_EX_FARSIGHT                     = 0x00002000,            // 13 related to farsight
     SPELL_ATTR_EX_UNK14                        = 0x00004000,            // 14
     SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY     = 0x00008000,            // 15 remove auras on immunity
     SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE  = 0x00010000,            // 16 unaffected by school immunity
@@ -588,6 +589,8 @@ enum Language
 enum Team
 {
     TEAM_NONE           = 0,                                // used when team value unknown or not set, 0 is also meaning that can be used !team check
+    TEAM_BOTH_ALLOWED   = 0,                                // used when a check should evaluate true for both teams
+    TEAM_INVALID        = 1,                                // used to invalidate some team depending checks (means not for both teams)
     HORDE               = 67,
     ALLIANCE            = 469,
 };
@@ -637,7 +640,7 @@ enum SpellEffects
     SPELL_EFFECT_DUAL_WIELD                = 40,
     SPELL_EFFECT_JUMP                      = 41,
     SPELL_EFFECT_JUMP2                     = 42,
-    SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER= 43,
+    SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER = 43,
     SPELL_EFFECT_SKILL_STEP                = 44,
     SPELL_EFFECT_ADD_HONOR                 = 45,
     SPELL_EFFECT_SPAWN                     = 46,
@@ -1063,7 +1066,8 @@ enum SpellCastResultCustom
 
 // Spell aura states
 enum AuraState
-{   // (C) used in caster aura state     (T) used in target aura state
+{
+    // (C) used in caster aura state     (T) used in target aura state
     // (c) used in caster aura state-not (t) used in target aura state-not
     AURA_STATE_DEFENSE                      = 1,            // C   |
     AURA_STATE_HEALTHLESS_20_PERCENT        = 2,            // CcT |
@@ -1238,7 +1242,7 @@ enum Targets
     TARGET_AREAEFFECT_PARTY            = 37,
     TARGET_SCRIPT                      = 38,
     TARGET_SELF_FISHING                = 39,
-    TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT= 40,
+    TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT = 40,
     TARGET_TOTEM_EARTH                 = 41,
     TARGET_TOTEM_WATER                 = 42,
     TARGET_TOTEM_AIR                   = 43,
@@ -1901,7 +1905,7 @@ enum Anim
     ANIM_FLY                       = 0x87,
     ANIM_EMOTE_WORK_NO_SHEATHE     = 0x88,
     ANIM_EMOTE_STUN_NO_SHEATHE     = 0x89,
-    ANIM_EMOTE_USE_STANDING_NO_SHEATHE= 0x8A,
+    ANIM_EMOTE_USE_STANDING_NO_SHEATHE = 0x8A,
     ANIM_SPELL_SLEEP_DOWN          = 0x8B,
     ANIM_SPELL_KNEEL_START         = 0x8C,
     ANIM_SPELL_KNEEL_LOOP          = 0x8D,
@@ -2050,9 +2054,9 @@ enum CreatureType
     CREATURE_TYPE_GAS_CLOUD        = 13
 };
 
-uint32 const CREATURE_TYPEMASK_DEMON_OR_UNDEAD = (1 << (CREATURE_TYPE_DEMON-1)) | (1 << (CREATURE_TYPE_UNDEAD-1));
-uint32 const CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD = (1 << (CREATURE_TYPE_HUMANOID-1)) | (1 << (CREATURE_TYPE_UNDEAD-1));
-uint32 const CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL = (1 << (CREATURE_TYPE_MECHANICAL-1)) | (1 << (CREATURE_TYPE_ELEMENTAL-1));
+uint32 const CREATURE_TYPEMASK_DEMON_OR_UNDEAD = (1 << (CREATURE_TYPE_DEMON - 1)) | (1 << (CREATURE_TYPE_UNDEAD - 1));
+uint32 const CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD = (1 << (CREATURE_TYPE_HUMANOID - 1)) | (1 << (CREATURE_TYPE_UNDEAD - 1));
+uint32 const CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL = (1 << (CREATURE_TYPE_MECHANICAL - 1)) | (1 << (CREATURE_TYPE_ELEMENTAL - 1));
 
 // CreatureFamily.dbc
 enum CreatureFamily
@@ -2222,7 +2226,7 @@ enum QuestSort
 
 inline uint8 ClassByQuestSort(int32 QuestSort)
 {
-    switch(QuestSort)
+    switch (QuestSort)
     {
         case QUEST_SORT_WARLOCK:        return CLASS_WARLOCK;
         case QUEST_SORT_WARRIOR:        return CLASS_WARRIOR;
@@ -2398,7 +2402,7 @@ enum SkillType
 
 inline SkillType SkillByLockType(LockType locktype)
 {
-    switch(locktype)
+    switch (locktype)
     {
         case LOCKTYPE_PICKLOCK:    return SKILL_LOCKPICKING;
         case LOCKTYPE_HERBALISM:   return SKILL_HERBALISM;

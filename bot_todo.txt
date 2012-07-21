@@ -27,3 +27,11 @@ Needs some fix.
 
 ///---Implement locale independet way of getting spellIDs---///
 [DONE] Hardcode lowest rank spellID, use function to get highest rank
+
+///---Maintenance on portal repository--- 21/07/2012
+[DONE] git fsck --full
+//cd .git/objects/pack
+[DONE] git gc --aggressive
+[DONE] git verify-pack -v *.idx
+object pack files (*.idx) verified, no errors
+///---Maintenance on portal repository--- 21/07/2012
