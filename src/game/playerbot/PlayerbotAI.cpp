@@ -9068,17 +9068,17 @@ void PlayerbotAI::_HandleCommandEquip(std::string &text, Player& fromPlayer)
         }
 
         if (ExtractCommand("on", text))
-        {
             m_AutoEquipToggle = true;
-            AutoUpgradeEquipment();
-        }
         else if (ExtractCommand("off", text))
             m_AutoEquipToggle = false;
 
         // subcommand not found, assume toggle
         m_AutoEquipToggle = !m_AutoEquipToggle;
 
-        msg << "AutoEquip is " << (m_AutoEquipToggle ? "ON" : "OFF");
+        if (m_AutoEquipToggle)
+            AutoUpgradeEquipment();
+
+        msg << "Auto Equip " << (m_AutoEquipToggle ? "has run and is on." : "is off.");
         SendWhisper(msg.str(),fromPlayer);
         return;
     }
