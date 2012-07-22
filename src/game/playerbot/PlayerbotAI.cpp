@@ -63,7 +63,8 @@ m_combatOrder(ORDERS_NONE), m_ScenarioType(SCENARIO_PVEEASY),
 m_TimeDoneEating(0), m_TimeDoneDrinking(0),
 m_CurrentlyCastingSpellId(0), m_spellIdCommand(0),
 m_targetGuidCommand(ObjectGuid()),
-m_taxiMaster(ObjectGuid())
+m_taxiMaster(ObjectGuid()),
+m_AutoEquipToggle(false)
 {
     // set bot state
     m_botState = BOTSTATE_NORMAL;

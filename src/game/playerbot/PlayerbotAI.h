@@ -1812,7 +1812,7 @@ public:
     uint8 gPrimOrder;
     uint8 gSecOrder;
 
-    uint32 m_AutoEquipToggle;           //switch for autoequip
+    bool m_AutoEquipToggle;             //switch for autoequip
     uint32 SellWhite;					//switch for white item auto sell
     uint8 DistOverRide;
     float gDist[2]; //gDist, gTemp vars are used for variable follow distance
