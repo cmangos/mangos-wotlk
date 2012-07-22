@@ -10045,41 +10045,13 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                 {
                     TrainerSpell const* trainer_spell = &itr->second;
 
-                    //if (!tSpell)
-                    //    break;
-
-                    //uint32 reqLevel = 0;
-                    //if (!tSpell->learnedSpell && !m_bot->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
-                    //    continue;
-
-                    //if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(tSpell->learnedSpell) && m_bot->HasSpell(tSpell->learnedSpell))
-                    //    continue;
-
-                    //reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
-
-                    //TrainerSpellState state =  m_bot->GetTrainerSpellState(tSpell, reqLevel);
-                    //if (state != TRAINER_SPELL_GREEN)
-                    //    continue;
-
                     uint32 spellId = trainer_spell->spell;
 
                     if (!spellId)
                         break;
+
                     // apply reputation discount
                     uint32 cost = uint32(floor(trainer_spell->spellCost * fDiscountMod));
-                    //// check money requirement
-                    //if (m_bot->GetMoney() < cost)
-                    //{
-                    //    Announce(CANT_AFFORD);
-                    //    continue;
-                    //}
-                    //m_bot->ModifyMoney(-int32(cost));
-                    //// learn explicitly or cast explicitly
-                    //if (tSpell->IsCastable())
-                    //    m_bot->CastSpell(m_bot, tSpell->spell, true);
-                    //else
-                    //    m_bot->learnSpell(spellId, false);
-
                     if (!_HandleCommandSkillLearnHelper(trainer_spell, spellId, cost))
                         continue;
 
