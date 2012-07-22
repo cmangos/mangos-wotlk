@@ -201,7 +201,9 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     if (m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED && dist > ATTACK_DISTANCE)
         m_ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
     // if in melee range OR can't shoot OR have no ranged (wand) equipped
-    else if(m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_MELEE && (dist <= ATTACK_DISTANCE || SHOOT == 0 || !m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true)))
+    else if(m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_MELEE
+            && (/*dist <= ATTACK_DISTANCE || */SHOOT == 0 || !m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
+            && !m_ai->IsHealer())
         m_ai->SetCombatStyle(PlayerbotAI::COMBAT_MELEE);
 
     //Used to determine if this bot is highest on threat
