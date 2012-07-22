@@ -9972,6 +9972,7 @@ void PlayerbotAI::_HandleCommandSurvey(std::string& /*text*/, Player &fromPlayer
 // _HandleCommandSkill: Handle class & professions training:
 // skill                           -- Lists bot(s) Primary profession skills & weapon skills
 // skill learn                     -- List available class or profession (Primary or Secondary) skills, spells & abilities from selected trainer.
+// skill learn all                 -- Learn all skills and spells available from selected trainer.
 // skill learn [HLINK][HLINK] ..   -- Learn selected skill and spells, from selected trainer ([HLINK] from skill learn).
 // skill unlearn [HLINK][HLINK] .. -- Unlearn selected primary profession skill(s) and all associated spells ([HLINK] from skill)
 void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
@@ -9981,130 +9982,6 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
     std::ostringstream msg;
     Player* const bot = GetPlayerBot();
     FollowAutoReset(*bot);
-    if (ExtractCommand("fetch", text)) //automatically learn skills from target npc
-    {
-        uint32 totalCost = 0;
-
-        Unit* unit = ObjectAccessor::GetUnit(*m_bot, fromPlayer.GetSelectionGuid());
-        if (!unit)
-        {
-            SendWhisper("Please select the trainer!", fromPlayer);
-            return;
-        }
-
-        if (!unit->isTrainer())
-        {
-            SendWhisper("This is not a trainer!", fromPlayer);
-            return;
-        }
-
-        Creature *creature =  m_bot->GetMap()->GetCreature(fromPlayer.GetSelectionGuid());
-        if (!creature)
-            return;
-
-        if (!creature->IsTrainerOf(m_bot, false))
-        {
-            SendWhisper("This trainer can not teach me anything!", fromPlayer);
-            return;
-        }
-
-        // check present spell in trainer spell list
-        TrainerSpellData const* cSpells = creature->GetTrainerSpells();
-        TrainerSpellData const* tSpells = creature->GetTrainerTemplateSpells();
-        TrainerSpellMap allSpells;
-
-        if (cSpells && tSpells)
-        {
-            allSpells.insert(cSpells->spellList.begin(), cSpells->spellList.end());
-            allSpells.insert(tSpells->spellList.begin(), tSpells->spellList.end());
-        }
-        else if (cSpells)
-            allSpells.insert(cSpells->spellList.begin(), cSpells->spellList.end());
-        else if (tSpells)
-            allSpells.insert(tSpells->spellList.begin(), tSpells->spellList.end());
-        else
-        {
-            SendWhisper("No spells can be learnt from this trainer", fromPlayer);
-            return;
-        }
-
-        // reputation discount
-        float fDiscountMod =  m_bot->GetReputationPriceDiscount(creature);
-        msg << "I have learned the following spells:\r";
-        uint32 totalSpellLearnt = 0;
-        bool visuals = true;
-        for (TrainerSpellMap::const_iterator itr =  allSpells.begin(); itr !=  allSpells.end(); ++itr)
-        {
-            TrainerSpell const* tSpell = &itr->second;
-
-            if (!tSpell)
-                break;
-
-            uint32 reqLevel = 0;
-            if (!tSpell->learnedSpell && !m_bot->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
-                continue;
-
-            if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(tSpell->learnedSpell) && m_bot->HasSpell(tSpell->learnedSpell))
-                continue;
-
-            reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
-
-            TrainerSpellState state =  m_bot->GetTrainerSpellState(tSpell, reqLevel);
-            if (state != TRAINER_SPELL_GREEN)
-                continue;
-
-            uint32 spellId = tSpell->spell;
-
-            if (!spellId)
-                break;
-            // apply reputation discount
-            uint32 cost = uint32(floor(tSpell->spellCost * fDiscountMod));
-            // check money requirement
-            if (m_bot->GetMoney() < cost)
-            {
-                Announce(CANT_AFFORD);
-                continue;
-            }
-            m_bot->ModifyMoney(-int32(cost));
-            // learn explicitly or cast explicitly
-            if (tSpell->IsCastable())
-                m_bot->CastSpell(m_bot, tSpell->spell, true);
-            else
-                m_bot->learnSpell(spellId, false);
-            ++totalSpellLearnt;
-            totalCost += cost;
-            const SpellEntry *const pSpellInfo =  sSpellStore.LookupEntry(spellId);
-            if (!pSpellInfo)
-                continue;
-
-            if (visuals)
-            {
-                visuals = false;
-                WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 12);           // visual effect on trainer
-                data << ObjectGuid(fromPlayer.GetSelectionGuid());
-                data << uint32(0xB3);                                   // index from SpellVisualKit.dbc
-                GetMaster()->GetSession()->SendPacket(&data);
-
-                data.Initialize(SMSG_PLAY_SPELL_IMPACT, 12);            // visual effect on player
-                data << m_bot->GetObjectGuid();
-                data << uint32(0x016A);                                 // index from SpellVisualKit.dbc
-                GetMaster()->GetSession()->SendPacket(&data);
-            }
-
-            WorldPacket data(SMSG_TRAINER_BUY_SUCCEEDED, 12);
-            data << ObjectGuid(fromPlayer.GetSelectionGuid());
-            data << uint32(spellId);                                // should be same as in packet from client
-            GetMaster()->GetSession()->SendPacket(&data);
-            MakeSpellLink(pSpellInfo, msg);
-            msg << " ";
-            msg << Cash(cost) << "\n";
-        }
-        ReloadAI();
-        msg << "Total of " << totalSpellLearnt << " spell";
-        if (totalSpellLearnt != 1) msg << "s";
-        msg << " learnt, ";
-        msg << Cash(totalCost) << " spent.";
-    }
     if (ExtractCommand("learn", text))
     {
         uint32 totalCost = 0;
@@ -10158,86 +10035,139 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
         // Handle: Learning class or profession (primary or secondary) skill & spell(s) for selected trainer, skill learn [HLINK][HLINK][HLINK].. ([HLINK] from skill train)
         if (text.size() > 0)
         {
-            msg << "I have learned the following spells:\r";
+            msg << "I have learned the following spells:\n";
             uint32 totalSpellLearnt = 0;
             bool visuals = true;
             m_spellsToLearn.clear();
-            extractSpellIdList(text, m_spellsToLearn);
-            for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); it++)
+            if (ExtractCommand("all", text))
             {
-                uint32 spellId = *it;
-
-                if (!spellId)
-                    break;
-
-                // Try find spell in npc_trainer
-                TrainerSpell const* trainer_spell = cSpells ? cSpells->Find(spellId) : NULL;
-
-                // Not found, try find in npc_trainer_template
-                if (!trainer_spell && tSpells)
-                trainer_spell = tSpells->Find(spellId);
-
-                // Not found anywhere, cheating?
-                if (!trainer_spell)
-                    continue;
-
-                uint32 reqLevel = 0;
-                if (!trainer_spell->learnedSpell && !m_bot->IsSpellFitByClassAndRace(trainer_spell->learnedSpell, &reqLevel))
-                    continue;
-
-                if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(trainer_spell->learnedSpell) && m_bot->HasSpell(trainer_spell->learnedSpell))
-                    continue;
-
-                reqLevel = trainer_spell->isProvidedReqLevel ? trainer_spell->reqLevel : std::max(reqLevel, trainer_spell->reqLevel);
-
-                TrainerSpellState state =  m_bot->GetTrainerSpellState(trainer_spell, reqLevel);
-                if (state != TRAINER_SPELL_GREEN)
-                    continue;
-
-                // apply reputation discount
-                uint32 cost = uint32(floor(trainer_spell->spellCost * fDiscountMod));
-                // check money requirement
-                if (m_bot->GetMoney() < cost)
+                for (TrainerSpellMap::const_iterator itr =  allSpells.begin(); itr !=  allSpells.end(); ++itr)
                 {
-                    Announce(CANT_AFFORD);
-                    continue;
-                }
+                    TrainerSpell const* trainer_spell = &itr->second;
 
-                m_bot->ModifyMoney(-int32(cost));
-                // learn explicitly or cast explicitly
-                if (trainer_spell->IsCastable())
-                    m_bot->CastSpell(m_bot, trainer_spell->spell, true);
-                else
-                    m_bot->learnSpell(spellId, false);
-                ++totalSpellLearnt;
-                totalCost += cost;
-                const SpellEntry *const pSpellInfo =  sSpellStore.LookupEntry(spellId);
-                if (!pSpellInfo)
-                    continue;
+                    //if (!tSpell)
+                    //    break;
 
-                if (visuals)
-                {
-                    visuals = false;
-                    WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 12);           // visual effect on trainer
+                    //uint32 reqLevel = 0;
+                    //if (!tSpell->learnedSpell && !m_bot->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
+                    //    continue;
+
+                    //if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(tSpell->learnedSpell) && m_bot->HasSpell(tSpell->learnedSpell))
+                    //    continue;
+
+                    //reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
+
+                    //TrainerSpellState state =  m_bot->GetTrainerSpellState(tSpell, reqLevel);
+                    //if (state != TRAINER_SPELL_GREEN)
+                    //    continue;
+
+                    uint32 spellId = trainer_spell->spell;
+
+                    if (!spellId)
+                        break;
+                    // apply reputation discount
+                    uint32 cost = uint32(floor(trainer_spell->spellCost * fDiscountMod));
+                    //// check money requirement
+                    //if (m_bot->GetMoney() < cost)
+                    //{
+                    //    Announce(CANT_AFFORD);
+                    //    continue;
+                    //}
+                    //m_bot->ModifyMoney(-int32(cost));
+                    //// learn explicitly or cast explicitly
+                    //if (tSpell->IsCastable())
+                    //    m_bot->CastSpell(m_bot, tSpell->spell, true);
+                    //else
+                    //    m_bot->learnSpell(spellId, false);
+
+                    if (!_HandleCommandSkillLearnHelper(trainer_spell, spellId, cost))
+                        continue;
+
+                    ++totalSpellLearnt;
+                    totalCost += cost;
+                    const SpellEntry *const pSpellInfo =  sSpellStore.LookupEntry(spellId);
+                    if (!pSpellInfo)
+                        continue;
+
+                    if (visuals)
+                    {
+                        visuals = false;
+                        WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 12);           // visual effect on trainer
+                        data << ObjectGuid(fromPlayer.GetSelectionGuid());
+                        data << uint32(0xB3);                                   // index from SpellVisualKit.dbc
+                        GetMaster()->GetSession()->SendPacket(&data);
+
+                        data.Initialize(SMSG_PLAY_SPELL_IMPACT, 12);            // visual effect on player
+                        data << m_bot->GetObjectGuid();
+                        data << uint32(0x016A);                                 // index from SpellVisualKit.dbc
+                        GetMaster()->GetSession()->SendPacket(&data);
+                    }
+
+                    WorldPacket data(SMSG_TRAINER_BUY_SUCCEEDED, 12);
                     data << ObjectGuid(fromPlayer.GetSelectionGuid());
-                    data << uint32(0xB3);                                   // index from SpellVisualKit.dbc
+                    data << uint32(spellId);                                // should be same as in packet from client
                     GetMaster()->GetSession()->SendPacket(&data);
-
-                    data.Initialize(SMSG_PLAY_SPELL_IMPACT, 12);            // visual effect on player
-                    data << m_bot->GetObjectGuid();
-                    data << uint32(0x016A);                                 // index from SpellVisualKit.dbc
-                    GetMaster()->GetSession()->SendPacket(&data);
+                    MakeSpellLink(pSpellInfo, msg);
+                    msg << " ";
+                    msg << Cash(cost) << " ";
                 }
+            }
+            else
+            {
+                extractSpellIdList(text, m_spellsToLearn);
 
-                WorldPacket data(SMSG_TRAINER_BUY_SUCCEEDED, 12);
-                data << ObjectGuid(fromPlayer.GetSelectionGuid());
-                data << uint32(spellId);                                // should be same as in packet from client
-                GetMaster()->GetSession()->SendPacket(&data);
-                MakeSpellLink(pSpellInfo, msg);
-                msg << " ";
-                msg << Cash(cost) << "\n";
+                for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); it++)
+                {
+                    uint32 spellId = *it;
+
+                    if (!spellId)
+                        break;
+
+                    // Try find spell in npc_trainer
+                    TrainerSpell const* trainer_spell = cSpells ? cSpells->Find(spellId) : NULL;
+
+                    // Not found, try find in npc_trainer_template
+                    if (!trainer_spell && tSpells)
+                    trainer_spell = tSpells->Find(spellId);
+
+                    // apply reputation discount
+                    uint32 cost = uint32(floor(trainer_spell->spellCost * fDiscountMod));
+
+                    if (!_HandleCommandSkillLearnHelper(trainer_spell, spellId, cost))
+                        continue;
+
+                    ++totalSpellLearnt;
+                    totalCost += cost;
+                    const SpellEntry *const pSpellInfo =  sSpellStore.LookupEntry(spellId);
+                    if (!pSpellInfo)
+                        continue;
+
+                    if (visuals)
+                    {
+                        visuals = false;
+                        WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 12);           // visual effect on trainer
+                        data << ObjectGuid(fromPlayer.GetSelectionGuid());
+                        data << uint32(0xB3);                                   // index from SpellVisualKit.dbc
+                        GetMaster()->GetSession()->SendPacket(&data);
+
+                        data.Initialize(SMSG_PLAY_SPELL_IMPACT, 12);            // visual effect on player
+                        data << m_bot->GetObjectGuid();
+                        data << uint32(0x016A);                                 // index from SpellVisualKit.dbc
+                        GetMaster()->GetSession()->SendPacket(&data);
+                    }
+
+                    WorldPacket data(SMSG_TRAINER_BUY_SUCCEEDED, 12);
+                    data << ObjectGuid(fromPlayer.GetSelectionGuid());
+                    data << uint32(spellId);                                // should be same as in packet from client
+                    GetMaster()->GetSession()->SendPacket(&data);
+                    MakeSpellLink(pSpellInfo, msg);
+                    msg << " ";
+                    msg << Cash(cost) << " ";
+                }
             }
             ReloadAI();
+            if (totalSpellLearnt == 0) msg.clear();
+            else msg << "\n";
             msg << "Total of " << totalSpellLearnt << " spell";
             if (totalSpellLearnt != 1) msg << "s";
             msg << " learnt, ";
@@ -10276,21 +10206,25 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                 totalCost += cost;
                 MakeSpellLink(pSpellInfo, msg);
                 msg << " ";
-                msg << Cash(cost) << "\n";
+                msg << Cash(cost) << " ";
             }
-            int32 moneyDiff = m_bot->GetMoney() - totalCost;
-            if (moneyDiff >= 0)
+
+            if (totalCost == 0)
             {
-                // calculate how much money bot has
-                msg << " ";
-                msg << Cash(moneyDiff) << " left after learning all the spells.";
+                msg.clear();
+                msg << "I have learned all I can from this trainer. Perhaps I can learn more once I grow stronger.";
             }
             else
             {
-                Announce(CANT_AFFORD);
-                moneyDiff *= -1;
-                msg << "I need ";
-                msg << Cash(moneyDiff) << " more to learn all the spells!";
+                int32 moneyDiff = m_bot->GetMoney() - totalCost;
+                if (moneyDiff >= 0)
+                    msg << "\n" << Cash(moneyDiff) << " left after learning all the spells.";
+                else
+                {
+                    Announce(CANT_AFFORD);
+                    moneyDiff *= -1;
+                    msg << "\nI need " << Cash(moneyDiff) << " more to learn all the spells!";
+                }
             }
         }
     }
@@ -10383,6 +10317,42 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
     SendWhisper(msg.str(), fromPlayer);
     m_spellsToLearn.clear();
     m_bot->GetPlayerbotAI()->GetClassAI();
+}
+
+bool PlayerbotAI::_HandleCommandSkillLearnHelper(TrainerSpell const* tSpell, uint32 spellId, uint32 cost)
+{
+    // Not found anywhere, cheating?
+    if (!tSpell)
+        return false;
+
+    uint32 reqLevel = 0;
+    if (!tSpell->learnedSpell && !m_bot->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
+        return false;
+
+    if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(tSpell->learnedSpell) && m_bot->HasSpell(tSpell->learnedSpell))
+        return false;
+
+    reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
+
+    TrainerSpellState state =  m_bot->GetTrainerSpellState(tSpell, reqLevel);
+    if (state != TRAINER_SPELL_GREEN)
+        return false;
+
+    // check money requirement
+    if (m_bot->GetMoney() < cost)
+    {
+        Announce(CANT_AFFORD);
+        return false;
+    }
+
+    m_bot->ModifyMoney(-int32(cost));
+    // learn explicitly or cast explicitly
+    if (tSpell->IsCastable())
+        m_bot->CastSpell(m_bot, tSpell->spell, true);
+    else
+        m_bot->learnSpell(spellId, false);
+
+    return true;
 }
 
 void PlayerbotAI::_HandleCommandStats(std::string &text, Player &fromPlayer)

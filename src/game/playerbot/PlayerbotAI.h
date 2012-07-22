@@ -1946,6 +1946,7 @@ private:
     void _HandleCommandSpells(std::string &text, Player &fromPlayer);
     void _HandleCommandSurvey(std::string &text, Player &fromPlayer);
     void _HandleCommandSkill(std::string &text, Player &fromPlayer);
+    bool _HandleCommandSkillLearnHelper(TrainerSpell const* tSpell, uint32 spellId, uint32 cost);
     void _HandleCommandStats(std::string &text, Player &fromPlayer);
     void _HandleCommandHelp(std::string &text, Player &fromPlayer);
     void _HandleCommandHelp(const char* szText, Player &fromPlayer) { std::string text = szText; _HandleCommandHelp(text, fromPlayer); }
