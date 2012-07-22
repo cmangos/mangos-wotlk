@@ -7880,6 +7880,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     if (text.empty() ||
         text.find("X-Perl") != std::wstring::npos ||
         text.find("HealBot") != std::wstring::npos ||
+        text.find("HealComm") != std::wstring::npos ||      // "HealComm	99990094"
         text.find("LOOT_OPENED") != std::wstring::npos ||
         text.find("CTRA") != std::wstring::npos ||
         text.find("GathX") == 0) // Gatherer
@@ -8371,16 +8372,8 @@ void PlayerbotAI::_HandleCommandSell(std::string &text, Player &fromPlayer)
             SendWhisper("Invalid subcommand for 'sell all'", fromPlayer);
             return;
         }
-        if ( SellWhite == 0)
-        {
-            SellWhite = 1;
-            msg << "I will sell all my low level normal items when you sell.";
-        }
-        else if (SellWhite == 1)
-        {
-            SellWhite = 0;
-            msg << "I will no longer sell my low level normal items when you sell.";
-        }
+        SellWhite = !SellWhite;
+        msg << "I will " << (SellWhite ? "" : "no longer ") << "sell my low level normal items.";
         SendWhisper(msg.str(),fromPlayer);
         return;
     }
@@ -10414,9 +10407,9 @@ void PlayerbotAI::_HandleCommandGM(std::string &text, Player &fromPlayer)
     {
         m_bDebugCommandChat = !m_bDebugCommandChat;
         if (m_bDebugCommandChat)
-            SendWhisper("Bots will now output all commands received.", fromPlayer);
+            SendWhisper("I will now output all commands received.", fromPlayer);
         else
-            SendWhisper("Bots will no longer output commands received.", fromPlayer);
+            SendWhisper("I will no longer output commands received.", fromPlayer);
     }
     else
         SendWhisper("'gm' does not have that subcommand.", fromPlayer);
