@@ -9068,7 +9068,10 @@ void PlayerbotAI::_HandleCommandEquip(std::string &text, Player& fromPlayer)
         }
 
         if (ExtractCommand("on", text))
+        {
             m_AutoEquipToggle = true;
+            AutoUpgradeEquipment();
+        }
         else if (ExtractCommand("off", text))
             m_AutoEquipToggle = false;
 
