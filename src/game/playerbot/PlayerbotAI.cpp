@@ -10549,7 +10549,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     if (bMainHelp || ExtractCommand("equip", text))
     {
         ch.SendSysMessage(_HandleCommandHelpHelper("equip auto", "I will automatically equip items I acquire if they are better than what I'm wearing. Acts as toggle (ON/OFF) if used without subcommand. Fashion sense not included.", HL_ITEM, true).c_str());
-        ch.SendSysMessage(_HandleCommandHelpHelper("equip [ITEM]", "I will equip the linked item(s).", HL_ITEM, true).c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("equip", "I will equip the linked item(s).", HL_ITEM, true).c_str());
 
         if (!bMainHelp || ExtractCommand("auto", text))
         {
@@ -10809,12 +10809,16 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 
         if (!bMainHelp)
         {
-            ch.SendSysMessage(_HandleCommandHelpHelper("skill learn", "Lists the things this trainer can teach me. If you've targeted a trainer, that is.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("skill learn", "Lists the things this trainer can teach me. If you've targeted a trainer, that is.", HL_TARGET).c_str());
             ch.SendSysMessage(_HandleCommandHelpHelper("skill learn", "Have me learn this skill from the selected trainer.", HL_SKILL).c_str());
             ch.SendSysMessage(_HandleCommandHelpHelper("skill unlearn", "Unlearn the linked (primary) profession and everything that goes with it.", HL_PROFESSION).c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
-            if (ExtractCommand("learn", text)) {}
+            if (ExtractCommand("learn", text))
+            {
+                ch.SendSysMessage(_HandleCommandHelpHelper("skill learn all", "Learn everything this trainer can teach me.", HL_TARGET).c_str());
+                if (ExtractCommand("all", text)) {}
+            }
             else if (ExtractCommand("unlearn", text)) {}
 
             if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
