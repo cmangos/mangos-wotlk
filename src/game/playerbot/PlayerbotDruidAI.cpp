@@ -622,37 +622,11 @@ void PlayerbotDruidAI::DoNonCombatActions()
             return;// RETURN_CONTINUE;
     }
 
-    // buff and heal group
-    if (m_bot->GetGroup())
-    {
-        // group buff
-        if (GIFT_OF_THE_WILD && m_ai->HasSpellReagents(GIFT_OF_THE_WILD) && m_ai->Buff(GIFT_OF_THE_WILD, m_bot))
+    // Buff
+    if (m_bot->GetGroup() && GIFT_OF_THE_WILD && m_ai->HasSpellReagents(GIFT_OF_THE_WILD) && m_ai->Buff(GIFT_OF_THE_WILD, m_bot))
             return;
-
-        Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
-        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
-        {
-            Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
-            if (!tPlayer || tPlayer->IsInDuel() || tPlayer == m_bot)
-                continue;
-
-            if (tPlayer->isAlive())
-            {
-                if (BuffPlayer(tPlayer))
-                    return;
-            }
-        }
-    }
-    else
-    {
-        if (m_master->IsInDuel() || !m_master->isAlive())
-            return;
-
-        if (BuffPlayer(m_master))
-            return;
-    }
-
-    BuffPlayer(m_bot);
+    Buff(&PlayerbotDruidAI::BuffHelper, MARK_OF_THE_WILD);
+    Buff(&PlayerbotDruidAI::BuffHelper, THORNS, (m_bot->GetGroup() ? JOB_TANK : JOB_ALL));
 
     CheckForms();
 
@@ -692,25 +666,17 @@ void PlayerbotDruidAI::DoNonCombatActions()
     }
 } // end DoNonCombatActions
 
-bool PlayerbotDruidAI::BuffPlayer(Player* target)
+bool PlayerbotDruidAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!ai)          return false;
+    if (spellId == 0) return false;
+    if (!target)      return false;
 
     Pet * pet = target->GetPet();
-    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
-    {
-        if (m_ai->Buff(MARK_OF_THE_WILD, pet, &(PlayerbotDruidAI::GoBuffForm)))
-            return true;
-        // TODO: Turn off if a tank is present in group
-        else if (m_ai->Buff(THORNS, pet, &(PlayerbotDruidAI::GoBuffForm)))
-            return true;
-    }
-
-    if (m_ai->Buff(MARK_OF_THE_WILD, target, &(PlayerbotDruidAI::GoBuffForm)))
+    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(spellId, pet, &(PlayerbotDruidAI::GoBuffForm)))
         return true;
-    // TODO: Tank only if tank is present in group
-    else if (m_ai->Buff(THORNS, target, &(PlayerbotDruidAI::GoBuffForm)))
+
+    if (ai->Buff(spellId, target, &(PlayerbotDruidAI::GoBuffForm)))
         return true;
 
     return false;
