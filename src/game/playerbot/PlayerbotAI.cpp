@@ -10508,19 +10508,6 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             return;
         }
     }
-    if (bMainHelp || ExtractCommand("autoequip", text))
-    {
-        ch.SendSysMessage(_HandleCommandHelpHelper("autoequip", "Used with no parameter: Toggles Auto Equipping for one or all bots to ON or OFF depending on their current setting.").c_str());
-
-        if (!bMainHelp)
-        {
-            ch.SendSysMessage(_HandleCommandHelpHelper("autoequip < on >", "Turns Auto equipping ON for one, or all bots in group").c_str());
-            ch.SendSysMessage(_HandleCommandHelpHelper("autoequip < off >", "Turns Auto equipping OFF for one, or all bots in group").c_str());
-            ch.SendSysMessage(_HandleCommandHelpHelper("autoequip < now >", "Ignores current autoequip setting, Runs the auto equip cycle ONCE for one or all bots (/t or /p)").c_str());
-            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
-            return;
-        }
-    }
     if (bMainHelp || ExtractCommand("assist", text))
     {
         ch.SendSysMessage(_HandleCommandHelpHelper("assist", "I will assist the character listed, attacking as they attack.", HL_NAME).c_str());
@@ -10612,13 +10599,24 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     }
     if (bMainHelp || ExtractCommand("equip", text))
     {
-        ch.SendSysMessage(_HandleCommandHelpHelper("equip", "I will equip the linked item(s).", HL_ITEM, true).c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("equip auto", "I will automatically equip items I acquire.", HL_ITEM, true).c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("equip [ITEM]", "I will equip the linked item(s).", HL_ITEM, true).c_str());
 
-        if (!bMainHelp)
+        if (!bMainHelp || ExtractCommand("auto", text))
         {
-            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
-            return;
+            ch.SendSysMessage(_HandleCommandHelpHelper("equip auto", "Automatically equips gear that is better than what's being worn. Acts as toggle (ON/OFF) if used without subcommand").c_str());
+
+            if (!bMainHelp)
+            {
+                ch.SendSysMessage(_HandleCommandHelpHelper("equip auto on", "Turns auto equip ON, also does an immediate check (like once).").c_str());
+                ch.SendSysMessage(_HandleCommandHelpHelper("equip auto off", "Turns auto equip OFF.").c_str());
+                ch.SendSysMessage(_HandleCommandHelpHelper("equip auto once", "Runs auto equip once, then turns it off.").c_str());
+                if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+                return;
+            }
         }
+        if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+        return;
     }
     if (bMainHelp || ExtractCommand("reset", text))
     {
