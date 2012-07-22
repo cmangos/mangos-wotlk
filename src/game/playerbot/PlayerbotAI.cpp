@@ -453,14 +453,8 @@ void PlayerbotAI::AutoUpgradeEquipment() // test for autoequip
     std::ostringstream out;
     std::ostringstream msg;
 
-    // What does this mean? Constants, please!
-    if (AutoEquipPlug != 1)
-    {
-        if (AutoEquipPlug == 2)
-            AutoEquipPlug = 0;
-        else
-            return;
-    }
+    if (!m_AutoEquipToggle)
+        return;
 
     // Find equippable items in main backpack one at a time
     for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
@@ -7994,8 +7988,6 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (ExtractCommand("resumeorders", input)) // restore previous combat orders if any
         CombatOrderRestore();
 
-    else if (ExtractCommand("autoequip", input, true)) // switches autoequip on or off if on already
-        _HandleCommandAutoEquip(input, fromPlayer);
     // find project: 20:50 02/12/10 rev.4 item in world and wait until ordered to follow
     else if (ExtractCommand("find", input, true)) // true -> "find" OR "f"
         _HandleCommandFind(input, fromPlayer);
@@ -9058,39 +9050,6 @@ void PlayerbotAI::_HandleCommandUse(std::string &text, Player &fromPlayer)
     }
     return;
 }
-void PlayerbotAI::_HandleCommandAutoEquip(std::string &text, Player &fromPlayer)
-{
-    std::ostringstream msg;
-    if (ExtractCommand("now", text)) // run autoequip cycle right now
-    {
-        msg << "Running Auto Equip cycle One time. My current setting is" << (AutoEquipPlug ? "ON" : "OFF");
-        SendWhisper(msg.str(),fromPlayer);
-        if (AutoEquipPlug == 0)
-            AutoEquipPlug = 2;
-        AutoUpgradeEquipment();
-        return;
-    }
-    else if (ExtractCommand("on", text)) // true -> "autoequip on"
-    {
-        AutoEquipPlug = 1;
-        msg << "AutoEquip is now ON";
-        SendWhisper(msg.str(),fromPlayer);
-        return;
-    }
-    else if (ExtractCommand("off", text)) // true -> "autoequip off"
-    {
-        AutoEquipPlug = 0;
-        msg << "AutoEquip is now OFF";
-        SendWhisper(msg.str(),fromPlayer);
-        return;
-    }
-    if (AutoEquipPlug != 1)
-        AutoEquipPlug = 1;
-    else
-        AutoEquipPlug = 0;
-    msg << "AutoEquip is now " << (AutoEquipPlug ? "ON" : "OFF");
-    SendWhisper(msg.str(),fromPlayer);
-}
 
 void PlayerbotAI::_HandleCommandEquip(std::string &text, Player& fromPlayer)
 {
@@ -9100,21 +9059,23 @@ void PlayerbotAI::_HandleCommandEquip(std::string &text, Player& fromPlayer)
         // run autoequip cycle once - right now - turning off after
         if (ExtractCommand("once", text))
         {
-            msg << "Running Auto Equip cycle now" << (AutoEquipPlug ? ", then switching it off." : ".");
+            msg << "Running Auto Equip cycle now" << (m_AutoEquipToggle ? ", then switching it off." : ".");
             SendWhisper(msg.str(), fromPlayer);
+            m_AutoEquipToggle = true;
             AutoUpgradeEquipment();
+            m_AutoEquipToggle = false;
             return;
         }
 
         if (ExtractCommand("on", text))
-            AutoEquipPlug = AUTOEQUIP_ON;
+            m_AutoEquipToggle = true;
         else if (ExtractCommand("off", text))
-            AutoEquipPlug = AUTOEQUIP_OFF;
+            m_AutoEquipToggle = false;
 
         // subcommand not found, assume toggle
-        AutoEquipPlug = AutoEquipPlug ? AUTOEQUIP_OFF : AUTOEQUIP_ON;
+        m_AutoEquipToggle = !m_AutoEquipToggle;
 
-        msg << "AutoEquip is " << (AutoEquipPlug ? "ON" : "OFF");
+        msg << "AutoEquip is " << (m_AutoEquipToggle ? "ON" : "OFF");
         SendWhisper(msg.str(),fromPlayer);
         return;
     }

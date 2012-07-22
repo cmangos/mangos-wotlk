@@ -1812,7 +1812,7 @@ public:
     uint8 gPrimOrder;
     uint8 gSecOrder;
 
-    uint32 AutoEquipPlug;               //switch for autoequip
+    uint32 m_AutoEquipToggle;           //switch for autoequip
     uint32 SellWhite;					//switch for white item auto sell
     uint8 DistOverRide;
     float gDist[2]; //gDist, gTemp vars are used for variable follow distance
@@ -1822,7 +1822,6 @@ public:
     uint8 IsUpOrDown; //tracks variable follow distance
     void CombatDelayRestore();
     void CombatOrderRestore();
-    void _HandleCommandAutoEquip(std::string &text, Player &fromPlayer);
     void AutoUpgradeEquipment();
     void FollowAutoReset(Player& player);
     void AutoEquipComparison(Item *pItem, Item *pItem2);
