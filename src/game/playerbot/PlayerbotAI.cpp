@@ -106,60 +106,7 @@ m_taxiMaster(ObjectGuid())
     m_DelayAttackInit = CurrentTime();
 
     // get class specific ai
-    switch (m_bot->getClass())
-    {
-    case CLASS_PRIEST:
-        m_combatStyle = COMBAT_RANGED;
-        m_classAI = (PlayerbotClassAI *) new PlayerbotPriestAI(GetMaster(), m_bot, this);
-        break;
-    case CLASS_MAGE:
-        m_combatStyle = COMBAT_RANGED;
-        m_classAI = (PlayerbotClassAI *) new PlayerbotMageAI(GetMaster(), m_bot, this);
-        break;
-    case CLASS_WARLOCK:
-        m_combatStyle = COMBAT_RANGED;
-        m_classAI = (PlayerbotClassAI *) new PlayerbotWarlockAI(GetMaster(), m_bot, this);
-        break;
-    case CLASS_WARRIOR:
-        m_combatStyle = COMBAT_MELEE;
-        m_classAI = (PlayerbotClassAI *) new PlayerbotWarriorAI(GetMaster(), m_bot, this);
-        break;
-    case CLASS_SHAMAN:
-        if (m_bot->GetSpec() == SHAMAN_SPEC_ENHANCEMENT)
-            m_combatStyle = COMBAT_MELEE;
-        else
-            m_combatStyle = COMBAT_RANGED;
-        m_classAI = (PlayerbotClassAI *) new PlayerbotShamanAI(GetMaster(), m_bot, this);
-        break;
-    case CLASS_PALADIN:
-        m_combatStyle = COMBAT_MELEE;
-        m_classAI = (PlayerbotClassAI *) new PlayerbotPaladinAI(GetMaster(), m_bot, this);
-        break;
-    case CLASS_ROGUE:
-        m_combatStyle = COMBAT_MELEE;
-        m_classAI = (PlayerbotClassAI *) new PlayerbotRogueAI(GetMaster(), m_bot, this);
-        break;
-    case CLASS_DRUID:
-        if (m_bot->GetSpec() == DRUID_SPEC_FERAL)
-            m_combatStyle = COMBAT_MELEE;
-        else
-            m_combatStyle = COMBAT_RANGED;
-        m_classAI = (PlayerbotClassAI *) new PlayerbotDruidAI(GetMaster(), m_bot, this);
-        break;
-    case CLASS_HUNTER:
-        m_combatStyle = COMBAT_RANGED;
-        m_classAI = (PlayerbotClassAI *) new PlayerbotHunterAI(GetMaster(), m_bot, this);
-        ASPECT_OF_THE_MONKEY = initSpell(ASPECT_OF_THE_MONKEY_1);
-        break;
-    case CLASS_DEATH_KNIGHT:
-        m_combatStyle = COMBAT_MELEE;
-        m_classAI = (PlayerbotClassAI *) new PlayerbotDeathKnightAI(GetMaster(), m_bot, this);
-        break;
-    }
-
-    HERB_GATHERING      = initSpell(HERB_GATHERING_1);
-    MINING              = initSpell(MINING_1);
-    SKINNING            = initSpell(SKINNING_1);
+    ReloadAI();
 
     ClearActiveTalentSpec();
 }
