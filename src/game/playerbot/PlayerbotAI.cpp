@@ -449,12 +449,12 @@ void PlayerbotAI::FollowAutoReset(Player& /*player*/)
 
 void PlayerbotAI::AutoUpgradeEquipment() // test for autoequip
 {
+    if (!m_AutoEquipToggle)
+        return;
+
     ChatHandler ch(GetMaster());
     std::ostringstream out;
     std::ostringstream msg;
-
-    if (!m_AutoEquipToggle)
-        return;
 
     // Find equippable items in main backpack one at a time
     for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
@@ -9055,12 +9055,14 @@ void PlayerbotAI::_HandleCommandEquip(std::string &text, Player& fromPlayer)
 {
     if (ExtractCommand("auto", text))
     {
-        std::ostringstream msg;
         // run autoequip cycle once - right now - turning off after
         if (ExtractCommand("once", text))
         {
-            msg << "Running Auto Equip cycle now" << (m_AutoEquipToggle ? ", then switching it off." : ".");
-            SendWhisper(msg.str(), fromPlayer);
+            if (m_AutoEquipToggle)
+                SendWhisper("Running Auto Equip cycle now, then switching it off.", fromPlayer);
+            else
+                SendWhisper("Running Auto Equip cycle now.", fromPlayer);
+
             m_AutoEquipToggle = true;
             AutoUpgradeEquipment();
             m_AutoEquipToggle = false;
@@ -9071,18 +9073,20 @@ void PlayerbotAI::_HandleCommandEquip(std::string &text, Player& fromPlayer)
             m_AutoEquipToggle = true;
         else if (ExtractCommand("off", text))
             m_AutoEquipToggle = false;
-
-        // subcommand not found, assume toggle
-        m_AutoEquipToggle = !m_AutoEquipToggle;
+        else // subcommand not found, assume toggle
+            m_AutoEquipToggle = !m_AutoEquipToggle;
 
         if (m_AutoEquipToggle)
             AutoUpgradeEquipment();
 
-        msg << "Auto Equip " << (m_AutoEquipToggle ? "has run and is on." : "is off.");
-        SendWhisper(msg.str(),fromPlayer);
+        if (m_AutoEquipToggle)
+            SendWhisper("Auto Equip has run and is on.", fromPlayer);
+        else
+            SendWhisper("Auto Equip is off.", fromPlayer);
         return;
     }
 
+    // handle 'equip' command, expected in the form of 'equip [ITEM(s)]'
     std::list<uint32> itemIds;
     std::list<Item*> itemList;
     extractItemIds(text, itemIds);
@@ -10602,24 +10606,23 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     }
     if (bMainHelp || ExtractCommand("equip", text))
     {
-        ch.SendSysMessage(_HandleCommandHelpHelper("equip auto", "I will automatically equip items I acquire.", HL_ITEM, true).c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("equip auto", "I will automatically equip items I acquire if they are better than what I'm wearing. Acts as toggle (ON/OFF) if used without subcommand. Fashion sense not included.", HL_ITEM, true).c_str());
         ch.SendSysMessage(_HandleCommandHelpHelper("equip [ITEM]", "I will equip the linked item(s).", HL_ITEM, true).c_str());
 
         if (!bMainHelp || ExtractCommand("auto", text))
         {
-            ch.SendSysMessage(_HandleCommandHelpHelper("equip auto", "Automatically equips gear that is better than what's being worn. Acts as toggle (ON/OFF) if used without subcommand").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("equip auto on", "Turns auto equip ON, also does an immediate check (like once).").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("equip auto off", "Turns auto equip OFF.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("equip auto once", "Runs auto equip once, then turns it off.").c_str());
 
-            if (!bMainHelp)
-            {
-                ch.SendSysMessage(_HandleCommandHelpHelper("equip auto on", "Turns auto equip ON, also does an immediate check (like once).").c_str());
-                ch.SendSysMessage(_HandleCommandHelpHelper("equip auto off", "Turns auto equip OFF.").c_str());
-                ch.SendSysMessage(_HandleCommandHelpHelper("equip auto once", "Runs auto equip once, then turns it off.").c_str());
-                if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
-                return;
-            }
+            // Catches all valid subcommands, also placeholders for potential future sub-subcommands
+            if (ExtractCommand("on", text, true)) {}
+            else if (ExtractCommand("off", text, true)) {}
+            else if (ExtractCommand("once", text, true)) {}
+
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+            return;
         }
-        if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
-        return;
     }
     if (bMainHelp || ExtractCommand("reset", text))
     {
