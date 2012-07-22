@@ -254,38 +254,23 @@ void PlayerbotPaladinAI::CheckSeals()
     switch (spec)
     {
         case PALADIN_SPEC_HOLY:
-
             //I'm not even sure if holy uses seals?
             if (SEAL_OF_WISDOM > 0 && !m_bot->HasAura(SEAL_OF_WISDOM, EFFECT_INDEX_0))
                 m_ai->CastSpell(SEAL_OF_WISDOM, *m_bot);
             break;
 
         case PALADIN_SPEC_PROTECTION:
-
             if (RACIAL > 0 && !m_bot->HasAura(RACIAL, EFFECT_INDEX_0))
-            {
                 m_ai->CastSpell(RACIAL, *m_bot);
-                break;
-            }
-            //If bot doesn't have corruption/vengeance, use righteousness
             else if (SEAL_OF_RIGHTEOUSNESS > 0 && !m_bot->HasAura(SEAL_OF_RIGHTEOUSNESS, EFFECT_INDEX_0) && !m_bot->HasAura(RACIAL, EFFECT_INDEX_0))
                 m_ai->CastSpell(SEAL_OF_RIGHTEOUSNESS, *m_bot);
             break;
 
         case PALADIN_SPEC_RETRIBUTION:
-
             if (RACIAL > 0 && !m_bot->HasAura(RACIAL, EFFECT_INDEX_0))
-            {
                 m_ai->CastSpell(RACIAL, *m_bot);
-                break;
-            }
-            //If bot doesn't have corruption/vengeance, use command
             else if (SEAL_OF_COMMAND > 0 && !m_bot->HasAura(SEAL_OF_COMMAND, EFFECT_INDEX_0) && !m_bot->HasAura(RACIAL, EFFECT_INDEX_0))
-            {
                 m_ai->CastSpell(SEAL_OF_COMMAND, *m_bot);
-                break;
-            }
-            //If bot doesn't have command either, use righteousness
             else if (SEAL_OF_RIGHTEOUSNESS > 0 && !m_bot->HasAura(SEAL_OF_RIGHTEOUSNESS, EFFECT_INDEX_0) && !m_bot->HasAura(SEAL_OF_COMMAND, EFFECT_INDEX_0) && !m_bot->HasAura(RACIAL, EFFECT_INDEX_0))
                 m_ai->CastSpell(SEAL_OF_RIGHTEOUSNESS, *m_bot);
             break;
@@ -296,8 +281,8 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
+    if (!pTarget) return RETURN_NO_ACTION_INVALIDTARGET;
 
-    // TODO: Assumes valid pTarget
     Unit* pVictim = pTarget->getVictim();
 
     switch (m_ai->GetScenarioType())
@@ -314,11 +299,15 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     }
 
     // damage spells
-    Player *m_bot = GetPlayerBot();
-    Group *m_group = m_bot->GetGroup();
     uint32 spec = m_bot->GetSpec();
-    //float dist = m_bot->GetCombatDistance(pTarget);
+    float dist = m_bot->GetCombatDistance(pTarget);
     std::ostringstream out;
+
+    // Make sure healer stays put, don't even melee (aggro) if in range.
+    if (m_ai->IsHealer() && m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED)
+        m_ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
+    else if (!m_ai->IsHealer() && m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_MELEE)
+        m_ai->SetCombatStyle(PlayerbotAI::COMBAT_MELEE);
 
     // Heal
     if (m_ai->IsHealer())

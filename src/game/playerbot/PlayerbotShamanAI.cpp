@@ -341,9 +341,14 @@ CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
 
     // ------- Non Duel combat ----------
 
-    Player *m_bot = GetPlayerBot();
-    Group *m_group = m_bot->GetGroup();
     uint32 spec = m_bot->GetSpec();
+    float dist = m_bot->GetCombatDistance(pTarget);
+
+    // Make sure healer stays put, don't even melee (aggro) if in range.
+    if (m_ai->IsHealer() && m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED)
+        m_ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
+    else if (!m_ai->IsHealer() && m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_MELEE)
+        m_ai->SetCombatStyle(PlayerbotAI::COMBAT_MELEE);
 
     // Heal
     if (m_ai->IsHealer())

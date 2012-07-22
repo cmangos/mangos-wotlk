@@ -203,6 +203,13 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
     uint32 spec = m_bot->GetSpec();
     if (spec == 0) // default to spellcasting or healing for healer
         spec = (PlayerbotAI::ORDERS_HEAL == m_ai->GetCombatOrder() ? DRUID_SPEC_RESTORATION : DRUID_SPEC_BALANCE);
+    float dist = m_bot->GetCombatDistance(pTarget);
+
+    // Make sure healer stays put, don't even melee (aggro) if in range.
+    if (m_ai->IsHealer() && m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED)
+        m_ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
+    else if (!m_ai->IsHealer() && m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_MELEE)
+        m_ai->SetCombatStyle(PlayerbotAI::COMBAT_MELEE);
 
     //Unit* pVictim = pTarget->getVictim();
     uint32 BEAR = (DIRE_BEAR_FORM > 0 ? DIRE_BEAR_FORM : BEAR_FORM);
@@ -221,6 +228,8 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 
         //case RETURN_OK_NOCHANGE: // great!
         //case RETURN_FAIL_WAITINGONSELFBUFF: // This is war dammit! No time for silly buffs during combat...
+        default:
+            break;
     }
 
     //switch (m_ai->GetScenarioType())
