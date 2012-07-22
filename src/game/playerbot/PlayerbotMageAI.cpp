@@ -259,39 +259,11 @@ void PlayerbotMageAI::DoNonCombatActions()
         if (m_ai->SelfBuff(FROST_ARMOR))
             return;
 
-    // buff master's group
-    if (master->GetGroup())
-    {
-        // Buff master with group buff...
-        if (!master->IsInDuel())
-            if (ARCANE_BRILLIANCE && m_ai->HasSpellReagents(ARCANE_BRILLIANCE))
-                if (m_ai->Buff(ARCANE_BRILLIANCE, master))
-                    return;
-
-        // ...and check group for new members joined or resurrected, or just buff everyone if no group buff available
-        Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
-        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
-        {
-            Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
-            if (!tPlayer || !tPlayer->isAlive() || tPlayer == m_bot)
-                continue;
-
-            if (tPlayer->IsInDuelWith(master))
-                continue;
-
-            // buff
-            if (BuffPlayer(tPlayer))
-                return;
-        }
-
-    }
-    // There is no group, buff master
-    else if (master->isAlive() && !master->IsInDuel())
-        if (BuffPlayer(master))
-            return;
-
-    // Buff self finally
-    if (BuffPlayer(m_bot))
+    // buff group
+    if (m_bot->GetGroup() && ARCANE_BRILLIANCE && m_ai->HasSpellReagents(ARCANE_BRILLIANCE) && m_ai->Buff(ARCANE_BRILLIANCE, m_bot))
+        return;
+    // TODO: Mana peoples only plsxkthxbai
+    if (Buff(&PlayerbotMageAI::BuffHelper, ARCANE_INTELLECT))
         return;
 
     // conjure food & water
@@ -351,15 +323,19 @@ void PlayerbotMageAI::DoNonCombatActions()
     }
 } // end DoNonCombatActions
 
-bool PlayerbotMageAI::BuffPlayer(Player* target)
+// TODO: this and priest's BuffHelper are identical and thus could probably go in PlayerbotClassAI.cpp somewhere
+bool PlayerbotMageAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target)
 {
-    Pet * pet = target->GetPet();
+    if (!ai)          return false;
+    if (spellId == 0) return false;
+    if (!target)      return false;
 
-    if ((pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE)) && pet->getPowerType() == POWER_MANA && m_ai->Buff(ARCANE_INTELLECT, pet))
+    Pet * pet = target->GetPet();
+    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(spellId, pet))
         return true;
 
-    if (ARCANE_INTELLECT)
-        return m_ai->Buff(ARCANE_INTELLECT, target);
-    else
-        return false;
+    if (ai->Buff(spellId, target))
+        return true;
+
+    return false;
 }

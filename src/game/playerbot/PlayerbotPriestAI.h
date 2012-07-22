@@ -86,15 +86,14 @@ public:
     // all non combat actions go here, ex buffs, heals, rezzes
     void DoNonCombatActions();
 
-    // buff a specific player, usually a real PC who is not in group
-    bool BuffPlayer(Player *target);
-
 private:
     CombatManeuverReturns CastSpell(uint32 nextAction, Unit *pTarget = NULL) { return CastSpellWand(nextAction, pTarget, SHOOT); }
 
     // Heals the target based off its hps
     CombatManeuverReturns HealPlayer(Player* target);
     Player* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
+
+    static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target);
 
     // holy
     uint32 BINDING_HEAL,

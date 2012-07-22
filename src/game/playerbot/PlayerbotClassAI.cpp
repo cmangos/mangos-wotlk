@@ -29,7 +29,7 @@ CombatManeuverReturns PlayerbotClassAI::HealPlayer(Player* target) {
     return RETURN_NO_ACTION_OK;
 }
 
-CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, uint32, Unit*), uint32 spellId, JOB_TYPE type, bool bMustBeOOC)
+CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, uint32, Unit*), uint32 spellId, uint32 type, bool bMustBeOOC)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;

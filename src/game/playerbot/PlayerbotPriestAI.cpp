@@ -394,10 +394,9 @@ void PlayerbotPriestAI::DoNonCombatActions()
             return;// RETURN_CONTINUE;
     }
 
-    // buff group or master+self
+    // Buff
     if (m_bot->GetGroup())
     {
-        // Group buffs if available
         if (PRAYER_OF_FORTITUDE && m_ai->HasSpellReagents(PRAYER_OF_FORTITUDE) && m_ai->Buff(PRAYER_OF_FORTITUDE, m_bot))
             return;
 
@@ -406,26 +405,15 @@ void PlayerbotPriestAI::DoNonCombatActions()
 
         if (PRAYER_OF_SHADOW_PROTECTION && m_ai->HasSpellReagents(PRAYER_OF_SHADOW_PROTECTION) && m_ai->Buff(PRAYER_OF_SHADOW_PROTECTION, m_bot))
             return;
-
-        Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
-        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
-        {
-            Player *tPlayer = sObjectMgr.GetPlayer(itr->guid);
-            if (!tPlayer || tPlayer == m_bot)
-                continue;
-
-            if (tPlayer->IsInDuel())
-                continue;
-
-            if (tPlayer->isAlive() && BuffPlayer(tPlayer))
-                return;
-        }
     }
-    // No group
-    else if (!GetMaster()->IsInDuel() && GetMaster()->isAlive() && BuffPlayer(GetMaster()))
+    if (Buff(&PlayerbotPriestAI::BuffHelper, POWER_WORD_FORTITUDE))
         return;
-
-    BuffPlayer(m_bot);
+    // TODO: Can't be done properly with new Buff spell... yet:
+    // if ((target->getClass() == CLASS_DRUID || target->getPowerType() == POWER_MANA) && m_ai->Buff(DIVINE_SPIRIT, target))
+    if (Buff(&PlayerbotPriestAI::BuffHelper, DIVINE_SPIRIT, JOB_HEAL))
+        return;
+    if (Buff(&PlayerbotPriestAI::BuffHelper, SHADOW_PROTECTION, (JOB_TANK | JOB_HEAL) ))
+        return;
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
@@ -461,20 +449,18 @@ void PlayerbotPriestAI::DoNonCombatActions()
     }
 } // end DoNonCombatActions
 
-bool PlayerbotPriestAI::BuffPlayer(Player* target)
+// TODO: this and mage's BuffHelper are identical and thus could probably go in PlayerbotClassAI.cpp somewhere
+bool PlayerbotPriestAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target)
 {
-    if (!m_ai)  return false;
-    if (!m_bot) return false;
+    if (!ai)          return false;
+    if (spellId == 0) return false;
+    if (!target)      return false;
 
     Pet * pet = target->GetPet();
-
-    if ((pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE)) && m_ai->Buff(POWER_WORD_FORTITUDE, pet))
+    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(spellId, pet))
         return true;
 
-    if (m_ai->Buff(POWER_WORD_FORTITUDE, target))
-        return true;
-
-    if ((target->getClass() == CLASS_DRUID || target->getPowerType() == POWER_MANA) && m_ai->Buff(DIVINE_SPIRIT, target))
+    if (ai->Buff(spellId, target))
         return true;
 
     return false;
