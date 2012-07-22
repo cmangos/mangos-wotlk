@@ -624,10 +624,13 @@ void PlayerbotDruidAI::DoNonCombatActions()
 
     // Buff
     if (m_bot->GetGroup() && GIFT_OF_THE_WILD && m_ai->HasSpellReagents(GIFT_OF_THE_WILD) && m_ai->Buff(GIFT_OF_THE_WILD, m_bot))
-            return;
-    Buff(&PlayerbotDruidAI::BuffHelper, MARK_OF_THE_WILD);
-    Buff(&PlayerbotDruidAI::BuffHelper, THORNS, (m_bot->GetGroup() ? JOB_TANK : JOB_ALL));
+        return;
+    if (Buff(&PlayerbotDruidAI::BuffHelper, MARK_OF_THE_WILD))
+        return;
+    if (Buff(&PlayerbotDruidAI::BuffHelper, THORNS, (m_bot->GetGroup() ? JOB_TANK : JOB_ALL)))
+        return;
 
+    // Return to fighting form AFTER reviving, healing, buffing
     CheckForms();
 
     // mana check

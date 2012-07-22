@@ -499,7 +499,8 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     }
 
     // buff group
-    Buff(&PlayerbotPaladinAI::BuffHelper, 1); // Paladin's BuffHelper takes care of choosing the specific Blessing so just pass along a non-zero value
+    if (Buff(&PlayerbotPaladinAI::BuffHelper, 1)) // Paladin's BuffHelper takes care of choosing the specific Blessing so just pass along a non-zero value
+        return;
 
     // mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
