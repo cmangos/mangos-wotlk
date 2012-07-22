@@ -29,6 +29,7 @@ CombatManeuverReturns PlayerbotClassAI::HealPlayer(Player* target) {
     return RETURN_NO_ACTION_OK;
 }
 
+// Please note that job_type JOB_MANAONLY is a cumulative restriction. JOB_TANK | JOB_HEAL means both; JOB_TANK | JOB_MANAONLY means tanks with powertype MANA (paladins, druids)
 CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, uint32, Unit*), uint32 spellId, uint32 type, bool bMustBeOOC)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
@@ -48,7 +49,7 @@ CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, ui
             if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel())
                 continue;
             JOB_TYPE job = GetTargetJob(groupMember);
-            if (job & type)
+            if (job & type && (!(job & JOB_MANAONLY) || groupMember->getClass() == CLASS_DRUID || groupMember->getPowerType() == POWER_MANA))
             {
                 if (BuffHelper(m_ai, spellId, groupMember))
                     return RETURN_CONTINUE;
@@ -57,9 +58,11 @@ CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, ui
     }
     else
     {
-        if (m_master && !m_master->IsInDuel())
+        if (m_master && !m_master->IsInDuel()
+            && (!(GetTargetJob(m_master) & JOB_MANAONLY) || m_master->getClass() == CLASS_DRUID || m_master->getPowerType() == POWER_MANA))
             if (BuffHelper(m_ai, spellId, m_master))
                 return RETURN_CONTINUE;
+        // Do not check job or power type - any buff you have is always useful to self
         if (BuffHelper(m_ai, spellId, m_bot))
             return RETURN_CONTINUE;
     }

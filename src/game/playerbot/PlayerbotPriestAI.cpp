@@ -408,9 +408,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
     }
     if (Buff(&PlayerbotPriestAI::BuffHelper, POWER_WORD_FORTITUDE))
         return;
-    // TODO: Can't be done properly with new Buff spell... yet:
-    // if ((target->getClass() == CLASS_DRUID || target->getPowerType() == POWER_MANA) && m_ai->Buff(DIVINE_SPIRIT, target))
-    if (Buff(&PlayerbotPriestAI::BuffHelper, DIVINE_SPIRIT, JOB_HEAL))
+    if (Buff(&PlayerbotPriestAI::BuffHelper, DIVINE_SPIRIT, (JOB_ALL | JOB_MANAONLY)))
         return;
     if (Buff(&PlayerbotPriestAI::BuffHelper, SHADOW_PROTECTION, (JOB_TANK | JOB_HEAL) ))
         return;

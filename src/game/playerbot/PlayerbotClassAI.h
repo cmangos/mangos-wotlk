@@ -16,11 +16,12 @@ class PlayerbotAI;
 
 enum JOB_TYPE
 {
-    JOB_HEAL   = 0x01,
-    JOB_TANK   = 0x02,
-    JOB_MASTER = 0x04, // Not a fan of this distinction but user (or rather, admin) choice
-    JOB_DPS    = 0x08,
-    JOB_ALL    = 0x0F  // all of the above
+    JOB_HEAL     = 0x01,
+    JOB_TANK     = 0x02,
+    JOB_MASTER   = 0x04, // Not a fan of this distinction but user (or rather, admin) choice
+    JOB_DPS      = 0x08,
+    JOB_ALL      = 0x0F, // all of the above
+    JOB_MANAONLY = 0x10  // for buff checking (NOTE: this means any with powertype mana AND druids (who may be shifted but still have mana)
 };
 
 struct heal_priority
