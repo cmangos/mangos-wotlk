@@ -152,7 +152,7 @@ class Roll : public LootValidatorRef
         ~Roll() { }
         void setLoot(Loot* pLoot) { link(pLoot, this); }
         Loot* getLoot() { return getTarget(); }
-        void targetObjectBuildLink();
+        void targetObjectBuildLink() override;
 
         void CalculateCommonVoteMask(uint32 max_enchanting_skill);
         RollVoteMask GetVoteMaskFor(Player* player) const;
@@ -163,7 +163,7 @@ class Roll : public LootValidatorRef
         uint32 itemRandomSuffix;
         uint8 itemCount;
         typedef UNORDERED_MAP<ObjectGuid, RollVote> PlayerVote;
-        PlayerVote playerVote;                              //vote position correspond with player position (in group)
+        PlayerVote playerVote;                              // vote position correspond with player position (in group)
         uint8 totalPlayersRolling;
         uint8 totalNeed;
         uint8 totalGreed;

@@ -717,7 +717,7 @@ void MapPersistentStateManager::_DelHelper(DatabaseType& db, const char* fields,
         {
             Field* fields = result->Fetch();
             std::ostringstream ss;
-            for (size_t i = 0; i < fieldTokens.size(); i++)
+            for (size_t i = 0; i < fieldTokens.size(); ++i)
             {
                 std::string fieldValue = fields[i].GetCppString();
                 db.escape_string(fieldValue);
@@ -753,7 +753,7 @@ void MapPersistentStateManager::CleanupInstances()
     // clean unused respawn data
     CharacterDatabase.Execute("DELETE FROM creature_respawn WHERE instance <> 0 AND instance NOT IN (SELECT id FROM instance)");
     CharacterDatabase.Execute("DELETE FROM gameobject_respawn WHERE instance <> 0 AND instance NOT IN (SELECT id FROM instance)");
-    //execute transaction directly
+    // execute transaction directly
     CharacterDatabase.CommitTransaction();
 
     bar.step();
@@ -801,7 +801,7 @@ void MapPersistentStateManager::PackInstances()
             CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
             CharacterDatabase.PExecute("UPDATE instance SET id = '%u' WHERE id = '%u'", InstanceNumber, *i);
             CharacterDatabase.PExecute("UPDATE group_instance SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
-            //execute transaction synchronously
+            // execute transaction synchronously
             CharacterDatabase.CommitTransaction();
         }
 

@@ -425,7 +425,7 @@ class Spell
 
         void HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOTarget, SpellEffectIndex i, float DamageMultiplier = 1.0);
         void HandleThreatSpells();
-        //void HandleAddAura(Unit* Target);
+        // void HandleAddAura(Unit* Target);
 
         SpellEntry const* m_spellInfo;
         SpellEntry const* m_triggeredBySpellInfo;
@@ -498,7 +498,7 @@ class Spell
         void CancelGlobalCooldown();
 
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
-        bool IgnoreItemRequirements() const;                        // some item use spells have unexpected reagent data
+        bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data
         void UpdateOriginalCasterPointer();
 
         Unit* m_caster;
@@ -509,7 +509,7 @@ class Spell
 
         Spell** m_selfContainer;                            // pointer to our spell container (if applicable)
 
-        //Spell data
+        // Spell data
         SpellSchoolMask m_spellSchoolMask;                  // Spell school (can be overwrite for some spells (wand shoot for example)
         WeaponAttackType m_attackType;                      // For weapon based attack
         uint32 m_powerCost;                                 // Calculated spell cost     initialized only in Spell::prepare
@@ -526,7 +526,7 @@ class Spell
             if (m_delayAtDamageCount >= 2)
                 return true;
 
-            m_delayAtDamageCount++;
+            ++m_delayAtDamageCount;
             return false;
         }
 
@@ -625,7 +625,7 @@ class Spell
         SpellCastResult CanOpenLock(SpellEffectIndex effIndex, uint32 lockid, SkillType& skillid, int32& reqSkillValue, int32& skillValue);
         // -------------------------------------------
 
-        //List For Triggered Spells
+        // List For Triggered Spells
         typedef std::list<SpellEntry const*> SpellInfoList;
         SpellInfoList m_TriggerSpells;                      // casted by caster to same targets settings in m_targets at success finish of current spell
         SpellInfoList m_preCastSpells;                      // casted by caster to each target at spell hit before spell effects apply
@@ -897,9 +897,9 @@ class SpellEvent : public BasicEvent
         SpellEvent(Spell* spell);
         virtual ~SpellEvent();
 
-        virtual bool Execute(uint64 e_time, uint32 p_time);
-        virtual void Abort(uint64 e_time);
-        virtual bool IsDeletable() const;
+        virtual bool Execute(uint64 e_time, uint32 p_time) override;
+        virtual void Abort(uint64 e_time) override;
+        virtual bool IsDeletable() const override;
     protected:
         Spell* m_Spell;
 };

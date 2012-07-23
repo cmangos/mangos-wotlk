@@ -588,7 +588,7 @@ int kb_hit_return()
 void CliRunnable::run()
 {
     ///- Init new SQL thread for the world database (one connection call enough)
-    WorldDatabase.ThreadStart();                                // let thread do safe mySQL requests
+    WorldDatabase.ThreadStart();                            // let thread do safe mySQL requests
 
     char commandbuf[256];
 
@@ -616,7 +616,7 @@ void CliRunnable::run()
         char* command_str = fgets(commandbuf, sizeof(commandbuf), stdin);
         if (command_str != NULL)
         {
-            for (int x = 0; command_str[x]; x++)
+            for (int x = 0; command_str[x]; ++x)
                 if (command_str[x] == '\r' || command_str[x] == '\n')
                 {
                     command_str[x] = 0;
@@ -646,5 +646,5 @@ void CliRunnable::run()
     }
 
     ///- End the database thread
-    WorldDatabase.ThreadEnd();                                  // free mySQL thread resources
+    WorldDatabase.ThreadEnd();                              // free mySQL thread resources
 }

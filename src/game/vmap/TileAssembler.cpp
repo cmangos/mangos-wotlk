@@ -60,13 +60,13 @@ namespace VMAP
         iFilterMethod = NULL;
         iSrcDir = pSrcDirName;
         iDestDir = pDestDirName;
-        //mkdir(iDestDir);
-        //init();
+        // mkdir(iDestDir);
+        // init();
     }
 
     TileAssembler::~TileAssembler()
     {
-        //delete iCoordModelMapping;
+        // delete iCoordModelMapping;
     }
 
     bool TileAssembler::convertWorld2()
@@ -94,7 +94,7 @@ namespace VMAP
                 else if (entry->second.flags & MOD_WORLDSPAWN) // WMO maps and terrain maps use different origin, so we need to adapt :/
                 {
                     // TODO: remove extractor hack and uncomment below line:
-                    //entry->second.iPos += Vector3(533.33333f*32, 533.33333f*32, 0.f);
+                    // entry->second.iPos += Vector3(533.33333f*32, 533.33333f*32, 0.f);
                     entry->second.iBound = entry->second.iBound + Vector3(533.33333f * 32, 533.33333f * 32, 0.f);
                 }
                 mapSpawns.push_back(&(entry->second));
@@ -121,7 +121,7 @@ namespace VMAP
                 break;
             }
 
-            //general info
+            // general info
             if (success && fwrite(VMAP_MAGIC, 1, 8, mapfile) != 8) success = false;
             uint32 globalTileID = StaticMapTree::packTileID(65, 65);
             pair<TileMap::iterator, TileMap::iterator> globalRange = map_iter->second->TileEntries.equal_range(globalTileID);
@@ -148,7 +148,7 @@ namespace VMAP
             for (tile = tileEntries.begin(); tile != tileEntries.end(); ++tile)
             {
                 const ModelSpawn& spawn = map_iter->second->UniqueEntries[tile->second];
-                if (spawn.flags & MOD_WORLDSPAWN) // WDT spawn, saved as tile 65/65 currently...
+                if (spawn.flags & MOD_WORLDSPAWN)           // WDT spawn, saved as tile 65/65 currently...
                     continue;
                 uint32 nSpawns = tileEntries.count(tile->first);
                 std::stringstream tilefilename;
@@ -175,7 +175,7 @@ namespace VMAP
                 }
                 fclose(tilefile);
             }
-            // break; //test, extract only first map; TODO: remvoe this line
+            // break; // test, extract only first map; TODO: remvoe this line
         }
 
         // export objects
@@ -191,7 +191,7 @@ namespace VMAP
             }
         }
 
-        //cleanup:
+        // cleanup:
         for (MapData::iterator map_iter = mapData.begin(); map_iter != mapData.end(); ++map_iter)
         {
             delete map_iter->second;
@@ -263,7 +263,7 @@ namespace VMAP
 
         // temporary use defines to simplify read/check code (close file and return at fail)
 #define READ_OR_RETURN(V,S) if(fread((V), (S), 1, rf) != 1) { \
-                                        fclose(rf); printf("readfail, op = %i\n", readOperation); return(false); }readOperation++;
+                                        fclose(rf); printf("readfail, op = %i\n", readOperation); return(false); } ++readOperation;
 #define CMP_OR_RETURN(V,S)  if(strcmp((V),(S)) != 0)        { \
                                         fclose(rf); printf("cmpfail, %s!=%s\n", V, S);return(false); }
 
@@ -317,7 +317,7 @@ namespace VMAP
                 return false;
             }
 
-            for (uint32 i = 0, indexNo = 0; indexNo < nvectors; indexNo++, i += 3)
+            for (uint32 i = 0, indexNo = 0; indexNo < nvectors; ++indexNo, i += 3)
             {
                 Vector3 v = Vector3(vectorarray[i + 0], vectorarray[i + 1], vectorarray[i + 2]);
                 v = modelPosition.transform(v);
@@ -369,7 +369,7 @@ namespace VMAP
 
         // temporary use defines to simplify read/check code (close file and return at fail)
 #define READ_OR_RETURN(V,S) if(fread((V), (S), 1, rf) != 1) { \
-                                        fclose(rf); printf("readfail, op = %i\n", readOperation); return(false); }readOperation++;
+                                        fclose(rf); printf("readfail, op = %i\n", readOperation); return(false); } ++readOperation;
 #define CMP_OR_RETURN(V,S)  if(strcmp((V),(S)) != 0)        { \
                                         fclose(rf); printf("cmpfail, %s!=%s\n", V, S);return(false); }
 
@@ -490,7 +490,7 @@ namespace VMAP
             success = model.writeFile(iDestDir + "/" + pModelFilename + ".vmo");
         }
 
-        //std::cout << "readRawFile2: '" << pModelFilename << "' tris: " << nElements << " nodes: " << nNodes << std::endl;
+        // std::cout << "readRawFile2: '" << pModelFilename << "' tris: " << nElements << " nodes: " << nNodes << std::endl;
         return success;
     }
 }

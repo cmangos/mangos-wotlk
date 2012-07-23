@@ -44,7 +44,7 @@ enum SpellInterruptFlags
     SPELL_INTERRUPT_FLAG_INTERRUPT    = 0x04,
     SPELL_INTERRUPT_FLAG_AUTOATTACK   = 0x08,
     SPELL_INTERRUPT_FLAG_ABORT_ON_DMG = 0x10,               // _complete_ interrupt on direct damage
-    //SPELL_INTERRUPT_UNK             = 0x20                // unk, 564 of 727 spells having this spell start with "Glyph"
+    // SPELL_INTERRUPT_UNK             = 0x20               // unk, 564 of 727 spells having this spell start with "Glyph"
 };
 
 enum SpellChannelInterruptFlags
@@ -253,7 +253,7 @@ enum HitInfo
     HITINFO_UNK22               = 0x00800000
 };
 
-//i would like to remove this: (it is defined in item.h
+// i would like to remove this: (it is defined in item.h
 enum InventorySlot
 {
     NULL_BAG                   = 0,
@@ -387,32 +387,32 @@ enum DeathState
 enum UnitState
 {
     // persistent state (applied by aura/etc until expire)
-    UNIT_STAT_MELEE_ATTACKING = 0x00000001,                     // unit is melee attacking someone Unit::Attack
-    UNIT_STAT_ATTACK_PLAYER   = 0x00000002,                     // unit attack player or player's controlled unit and have contested pvpv timer setup, until timer expire, combat end and etc
-    UNIT_STAT_DIED            = 0x00000004,                     // Unit::SetFeignDeath
-    UNIT_STAT_STUNNED         = 0x00000008,                     // Aura::HandleAuraModStun
-    UNIT_STAT_ROOT            = 0x00000010,                     // Aura::HandleAuraModRoot
-    UNIT_STAT_ISOLATED        = 0x00000020,                     // area auras do not affect other players, Aura::HandleAuraModSchoolImmunity
-    UNIT_STAT_CONTROLLED      = 0x00000040,                     // Aura::HandleAuraModPossess
+    UNIT_STAT_MELEE_ATTACKING = 0x00000001,                 // unit is melee attacking someone Unit::Attack
+    UNIT_STAT_ATTACK_PLAYER   = 0x00000002,                 // unit attack player or player's controlled unit and have contested pvpv timer setup, until timer expire, combat end and etc
+    UNIT_STAT_DIED            = 0x00000004,                 // Unit::SetFeignDeath
+    UNIT_STAT_STUNNED         = 0x00000008,                 // Aura::HandleAuraModStun
+    UNIT_STAT_ROOT            = 0x00000010,                 // Aura::HandleAuraModRoot
+    UNIT_STAT_ISOLATED        = 0x00000020,                 // area auras do not affect other players, Aura::HandleAuraModSchoolImmunity
+    UNIT_STAT_CONTROLLED      = 0x00000040,                 // Aura::HandleAuraModPossess
 
     // persistent movement generator state (all time while movement generator applied to unit (independent from top state of movegen)
-    UNIT_STAT_TAXI_FLIGHT     = 0x00000080,                     // player is in flight mode (in fact interrupted at far teleport until next map telport landing)
-    UNIT_STAT_DISTRACTED      = 0x00000100,                     // DistractedMovementGenerator active
+    UNIT_STAT_TAXI_FLIGHT     = 0x00000080,                 // player is in flight mode (in fact interrupted at far teleport until next map telport landing)
+    UNIT_STAT_DISTRACTED      = 0x00000100,                 // DistractedMovementGenerator active
 
     // persistent movement generator state with non-persistent mirror states for stop support
     // (can be removed temporary by stop command or another movement generator apply)
     // not use _MOVE versions for generic movegen state, it can be removed temporary for unit stop and etc
-    UNIT_STAT_CONFUSED        = 0x00000200,                     // ConfusedMovementGenerator active/onstack
+    UNIT_STAT_CONFUSED        = 0x00000200,                 // ConfusedMovementGenerator active/onstack
     UNIT_STAT_CONFUSED_MOVE   = 0x00000400,
-    UNIT_STAT_ROAMING         = 0x00000800,                     // RandomMovementGenerator/PointMovementGenerator/WaypointMovementGenerator active (now always set)
+    UNIT_STAT_ROAMING         = 0x00000800,                 // RandomMovementGenerator/PointMovementGenerator/WaypointMovementGenerator active (now always set)
     UNIT_STAT_ROAMING_MOVE    = 0x00001000,
-    UNIT_STAT_CHASE           = 0x00002000,                     // ChaseMovementGenerator active
+    UNIT_STAT_CHASE           = 0x00002000,                 // ChaseMovementGenerator active
     UNIT_STAT_CHASE_MOVE      = 0x00004000,
-    UNIT_STAT_FOLLOW          = 0x00008000,                     // FollowMovementGenerator active
+    UNIT_STAT_FOLLOW          = 0x00008000,                 // FollowMovementGenerator active
     UNIT_STAT_FOLLOW_MOVE     = 0x00010000,
-    UNIT_STAT_FLEEING         = 0x00020000,                     // FleeMovementGenerator/TimedFleeingMovementGenerator active/onstack
+    UNIT_STAT_FLEEING         = 0x00020000,                 // FleeMovementGenerator/TimedFleeingMovementGenerator active/onstack
     UNIT_STAT_FLEEING_MOVE    = 0x00040000,
-    UNIT_STAT_IGNORE_PATHFINDING    = 0x00080000,               // do not use pathfinding in any MovementGenerator
+    UNIT_STAT_IGNORE_PATHFINDING    = 0x00080000,           // do not use pathfinding in any MovementGenerator
 
     // masks (only for check)
 
@@ -1008,7 +1008,7 @@ struct CharmInfo
         void InitPetActionBar();
         void InitEmptyActionBar();
 
-        //return true if successful
+        // return true if successful
         bool AddSpellToActionBar(uint32 spellid, ActiveStates newstate = ACT_DECIDE);
         bool RemoveSpellFromActionBar(uint32 spell_id);
         void LoadPetActionBar(const std::string& data);
@@ -1093,12 +1093,12 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         virtual ~Unit();
 
-        void AddToWorld();
-        void RemoveFromWorld();
+        void AddToWorld() override;
+        void RemoveFromWorld() override;
 
-        void CleanupsBeforeDelete();                        // used in ~Creature/~Player (or before mass creature delete to remove cross-references to already deleted units)
+        void CleanupsBeforeDelete() override;               // used in ~Creature/~Player (or before mass creature delete to remove cross-references to already deleted units)
 
-        float GetObjectBoundingRadius() const               // overwrite WorldObject version
+        float GetObjectBoundingRadius() const override      // overwrite WorldObject version
         {
             return m_floatValues[UNIT_FIELD_BOUNDINGRADIUS];
         }
@@ -1228,9 +1228,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
         void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction); }
         FactionTemplateEntry const* getFactionTemplateEntry() const;
-        bool IsHostileTo(Unit const* unit) const;
+        bool IsHostileTo(Unit const* unit) const override;
         bool IsHostileToPlayers() const;
-        bool IsFriendlyTo(Unit const* unit) const;
+        bool IsFriendlyTo(Unit const* unit) const override;
         bool IsNeutralToAll() const;
         bool IsContestedGuard() const
         {
@@ -1377,7 +1377,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         }
         bool HasAuraOfDifficulty(uint32 spellId) const;
 
-        bool virtual HasSpell(uint32 /*spellID*/) const { return false; }
+        virtual bool HasSpell(uint32 /*spellID*/) const { return false; }
 
         bool HasStealthAura()      const { return HasAuraType(SPELL_AURA_MOD_STEALTH); }
         bool HasInvisibilityAura() const { return HasAuraType(SPELL_AURA_MOD_INVISIBILITY); }
@@ -1653,15 +1653,15 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // Visibility system
         UnitVisibility GetVisibility() const { return m_Visibility; }
         void SetVisibility(UnitVisibility x);
-        void UpdateVisibilityAndView();                     // overwrite WorldObject::UpdateVisibilityAndView()
+        void UpdateVisibilityAndView() override;            // overwrite WorldObject::UpdateVisibilityAndView()
 
         // common function for visibility checks for player/creatures with detection code
         bool isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true) const;
         bool canDetectInvisibilityOf(Unit const* u) const;
-        void SetPhaseMask(uint32 newPhaseMask, bool update);// overwrite WorldObject::SetPhaseMask
+        void SetPhaseMask(uint32 newPhaseMask, bool update) override;// overwrite WorldObject::SetPhaseMask
 
         // virtual functions for all world objects types
-        bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const;
+        bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
         // function for low level grid visibility checks in player/creature cases
         virtual bool IsVisibleInGridForPlayer(Player* pl) const = 0;
         bool isInvisibleForAlive() const;
@@ -1927,7 +1927,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         SpellAuraHolderMap m_spellAuraHolders;
         SpellAuraHolderMap::iterator m_spellAuraHoldersUpdateIterator; // != end() in Unit::m_spellAuraHolders update and point to next element
-        AuraList m_deletedAuras;                                       // auras removed while in ApplyModifier and waiting deleted
+        AuraList m_deletedAuras;                            // auras removed while in ApplyModifier and waiting deleted
         SpellAuraHolderList m_deletedHolders;
 
         SingleCastSpellTargetMap m_singleCastSpellTargets;  // casted by unit single per-caster auras
@@ -1945,7 +1945,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float m_auraModifiersGroup[UNIT_MOD_END][MODIFIER_TYPE_END];
         float m_weaponDamage[MAX_ATTACK][2];
         bool m_canModifyStats;
-        //std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem
+        // std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem
         VisibleAuraMap m_visibleAuras;
 
         float m_speed_rate[MAX_MOVE_TYPE];

@@ -102,12 +102,12 @@ class BattleGroundWS : public BattleGround
         /* Construction */
         BattleGroundWS();
         ~BattleGroundWS();
-        void Update(uint32 diff);
+        void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr);
-        virtual void StartingEventCloseDoors();
-        virtual void StartingEventOpenDoors();
+        virtual void AddPlayer(Player* plr) override;
+        virtual void StartingEventCloseDoors() override;
+        virtual void StartingEventOpenDoors() override;
 
         /* BG Flags */
         ObjectGuid GetAllianceFlagPickerGuid() const { return m_FlagKeepers[BG_TEAM_ALLIANCE]; }
@@ -123,32 +123,32 @@ class BattleGroundWS : public BattleGround
         uint8 GetFlagState(Team team)             { return m_FlagState[GetTeamIndexByTeamId(team)]; }
 
         /* Battleground Events */
-        virtual void EventPlayerDroppedFlag(Player* Source);
-        virtual void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj);
-        virtual void EventPlayerCapturedFlag(Player* Source);
+        virtual void EventPlayerDroppedFlag(Player* source) override;
+        virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        virtual void EventPlayerCapturedFlag(Player* source) override;
 
-        void RemovePlayer(Player* plr, ObjectGuid guid);
-        void HandleAreaTrigger(Player* Source, uint32 Trigger);
-        void HandleKillPlayer(Player* player, Player* killer);
-        bool SetupBattleGround();
-        virtual void Reset();
-        void EndBattleGround(Team winner);
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
+        void RemovePlayer(Player* plr, ObjectGuid guid) override;
+        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        void HandleKillPlayer(Player* player, Player* killer) override;
+        bool SetupBattleGround() override;
+        virtual void Reset() override;
+        void EndBattleGround(Team winner) override;
+        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
         uint32 GetRemainingTimeInMinutes() { return m_EndTimer ? (m_EndTimer - 1) / (MINUTE * IN_MILLISECONDS) + 1 : 0; }
 
         void UpdateFlagState(Team team, uint32 value);
         void UpdateTeamScore(Team team);
-        void UpdatePlayerScore(Player* Source, uint32 type, uint32 value);
+        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
         void SetDroppedFlagGuid(ObjectGuid guid, Team team)  { m_DroppedFlagGuid[GetTeamIndexByTeamId(team)] = guid;}
         void ClearDroppedFlagGuid(Team team)  { m_DroppedFlagGuid[GetTeamIndexByTeamId(team)].Clear();}
         ObjectGuid const& GetDroppedFlagGuid(Team team) const { return m_DroppedFlagGuid[GetTeamIndexByTeamId(team)];}
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count);
+        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
         /* Scorekeeping */
         uint32 GetTeamScore(Team team) const            { return m_TeamScores[GetTeamIndexByTeamId(team)]; }
-        void AddPoint(Team team, uint32 Points = 1)     { m_TeamScores[GetTeamIndexByTeamId(team)] += Points; }
-        void SetTeamPoint(Team team, uint32 Points = 0) { m_TeamScores[GetTeamIndexByTeamId(team)] = Points; }
-        void RemovePoint(Team team, uint32 Points = 1)  { m_TeamScores[GetTeamIndexByTeamId(team)] -= Points; }
+        void AddPoint(Team team, uint32 points = 1)     { m_TeamScores[GetTeamIndexByTeamId(team)] += points; }
+        void SetTeamPoint(Team team, uint32 points = 0) { m_TeamScores[GetTeamIndexByTeamId(team)] = points; }
+        void RemovePoint(Team team, uint32 points = 1)  { m_TeamScores[GetTeamIndexByTeamId(team)] -= points; }
     private:
         ObjectGuid m_FlagKeepers[BG_TEAMS_COUNT];
 
