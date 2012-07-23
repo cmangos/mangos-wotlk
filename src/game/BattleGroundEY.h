@@ -23,8 +23,8 @@
 
 class BattleGround;
 
-#define BG_EY_FLAG_RESPAWN_TIME         (10*IN_MILLISECONDS) //10 seconds
-#define BG_EY_FPOINTS_TICK_TIME         (2*IN_MILLISECONDS)  //2 seconds
+#define BG_EY_FLAG_RESPAWN_TIME         (10*IN_MILLISECONDS)//10 seconds
+#define BG_EY_FPOINTS_TICK_TIME         (2*IN_MILLISECONDS) //2 seconds
 
 enum BG_EY_WorldStates
 {
@@ -48,7 +48,7 @@ enum BG_EY_WorldStates
     PROGRESS_BAR_STATUS             = 2719,                 //50 init!, 48 ... hordak bere .. 33 .. 0 = full 100% hordacky , 100 = full alliance
     PROGRESS_BAR_SHOW               = 2718,                 //1 init, 0 druhy send - bez messagu, 1 = controlled alliance
     NETHERSTORM_FLAG                = 2757,
-    //set to 2 when flag is picked up, and to 1 if it is dropped
+    // set to 2 when flag is picked up, and to 1 if it is dropped
     NETHERSTORM_FLAG_STATE_ALLIANCE = 2769,
     NETHERSTORM_FLAG_STATE_HORDE    = 2770
 };
@@ -69,7 +69,7 @@ enum BG_EY_ProgressBarConsts
 
 enum BG_EY_Sounds
 {
-    //strange ids, but sure about them
+    // strange ids, but sure about them
     BG_EY_SOUND_FLAG_PICKED_UP_ALLIANCE = 8212,
     BG_EY_SOUND_FLAG_CAPTURED_HORDE     = 8213,
     BG_EY_SOUND_FLAG_PICKED_UP_HORDE    = 8174,
@@ -116,8 +116,8 @@ enum BG_EY_Nodes
     BG_EY_PLAYERS_OUT_OF_POINTS   = 4,                      // used for store out of node players data
 };
 
-#define BG_EY_NODES_MAX             4
-#define BG_EY_NODES_MAX_WITH_SPEIAL 5
+#define BG_EY_NODES_MAX                 4
+#define BG_EY_NODES_MAX_WITH_SPECIAL    5
 
 // node-events work like this: event1:nodeid, event2:state (0alliance,1horde,2neutral)
 #define BG_EYE_NEUTRAL_TEAM 2
@@ -137,7 +137,7 @@ const float BG_EY_NodePositions[BG_EY_NODES_MAX][3] =
 
 enum EYBattleGroundObjectTypes
 {
-    //buffs
+    // buffs
     BG_EY_OBJECT_SPEEDBUFF_FEL_REAVER           = 1,
     BG_EY_OBJECT_REGENBUFF_FEL_REAVER           = 2,
     BG_EY_OBJECT_BERSERKBUFF_FEL_REAVER         = 3,
@@ -210,7 +210,7 @@ struct BattleGroundEYCapturingPointStruct
 const uint8  BG_EY_TickPoints[BG_EY_NODES_MAX] = {1, 2, 5, 10};
 const uint32 BG_EY_FlagPoints[BG_EY_NODES_MAX] = {75, 85, 100, 500};
 
-//constant arrays:
+// constant arrays:
 const BattleGroundEYPointIconsStruct PointsIconStruct[BG_EY_NODES_MAX] =
 {
     BattleGroundEYPointIconsStruct(FEL_REAVER_UNCONTROL, FEL_REAVER_ALLIANCE_CONTROL, FEL_REAVER_HORDE_CONTROL),
@@ -248,12 +248,12 @@ class BattleGroundEY : public BattleGround
     public:
         BattleGroundEY();
         ~BattleGroundEY();
-        void Update(uint32 diff);
+        void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr);
-        virtual void StartingEventCloseDoors();
-        virtual void StartingEventOpenDoors();
+        virtual void AddPlayer(Player* plr) override;
+        virtual void StartingEventCloseDoors() override;
+        virtual void StartingEventOpenDoors() override;
 
         /* BG Flags */
         ObjectGuid const& GetFlagPickerGuid() const { return m_FlagKeeper; }
@@ -264,33 +264,33 @@ class BattleGroundEY : public BattleGround
         void RespawnFlag(bool send_message);
         void RespawnFlagAfterDrop();
 
-        void RemovePlayer(Player* plr, ObjectGuid guid);
-        void HandleAreaTrigger(Player* Source, uint32 Trigger);
-        void HandleKillPlayer(Player* player, Player* killer);
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
-        virtual bool SetupBattleGround();
-        virtual void Reset();
+        void RemovePlayer(Player* plr, ObjectGuid guid) override;
+        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        void HandleKillPlayer(Player* player, Player* killer) override;
+        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
+        virtual bool SetupBattleGround() override;
+        virtual void Reset() override;
         void UpdateTeamScore(Team team);
-        void EndBattleGround(Team winner);
-        void UpdatePlayerScore(Player* Source, uint32 type, uint32 value);
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count);
+        void EndBattleGround(Team winner) override;
+        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
+        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         void SetDroppedFlagGuid(ObjectGuid guid)     { m_DroppedFlagGuid = guid;}
         void ClearDroppedFlagGuid()                  { m_DroppedFlagGuid.Clear();}
         ObjectGuid const& GetDroppedFlagGuid() const { return m_DroppedFlagGuid;}
 
         /* Battleground Events */
-        virtual void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj);
-        virtual void EventPlayerDroppedFlag(Player* Source);
+        virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        virtual void EventPlayerDroppedFlag(Player* source) override;
 
         /* achievement req. */
-        bool IsAllNodesConrolledByTeam(Team team) const;
+        bool IsAllNodesControlledByTeam(Team team) const;
 
     private:
-        void EventPlayerCapturedFlag(Player* Source, BG_EY_Nodes node);
-        void EventTeamCapturedPoint(Player* Source, uint32 Point);
-        void EventTeamLostPoint(Player* Source, uint32 Point);
+        void EventPlayerCapturedFlag(Player* source, BG_EY_Nodes node);     // NOTE: virtual BattleGround::EventPlayerCapturedFlag has different parameters list
+        void EventTeamCapturedPoint(Player* source, uint32 point);
+        void EventTeamLostPoint(Player* source, uint32 point);
         void UpdatePointsCount(Team team);
-        void UpdatePointsIcons(Team team, uint32 Point);
+        void UpdatePointsIcons(Team team, uint32 point);
 
         /* Point status updating procedures */
         void CheckSomeoneLeftPoint();
@@ -299,10 +299,10 @@ class BattleGroundEY : public BattleGround
 
         /* Scorekeeping */
         uint32 GetTeamScore(Team team) const { return m_TeamScores[GetTeamIndexByTeamId(team)]; }
-        void AddPoints(Team team, uint32 Points);
+        void AddPoints(Team team, uint32 points);
 
-        void RemovePoint(Team team, uint32 Points = 1) { m_TeamScores[GetTeamIndexByTeamId(team)] -= Points; }
-        void SetTeamPoint(Team team, uint32 Points = 0) { m_TeamScores[GetTeamIndexByTeamId(team)] = Points; }
+        void RemovePoint(Team team, uint32 points = 1) { m_TeamScores[GetTeamIndexByTeamId(team)] -= points; }
+        void SetTeamPoint(Team team, uint32 points = 0) { m_TeamScores[GetTeamIndexByTeamId(team)] = points; }
 
         uint32 m_HonorScoreTics[2];
         uint32 m_TeamPointsCount[BG_TEAMS_COUNT];
@@ -318,7 +318,7 @@ class BattleGroundEY : public BattleGround
         Team m_PointOwnedByTeam[BG_EY_NODES_MAX];
         uint8 m_PointState[BG_EY_NODES_MAX];
         int32 m_PointBarStatus[BG_EY_NODES_MAX];
-        GuidVector m_PlayersNearPoint[BG_EY_NODES_MAX_WITH_SPEIAL];
+        GuidVector m_PlayersNearPoint[BG_EY_NODES_MAX_WITH_SPECIAL];
         uint8 m_CurrentPointPlayersCount[2 * BG_EY_NODES_MAX];
 
         int32 m_PointAddingTimer;

@@ -481,7 +481,7 @@ void AchievementMgr::SaveToDB()
 
     if (!m_completedAchievements.empty())
     {
-        //delete existing achievements in the loop
+        // delete existing achievements in the loop
         for (CompletedAchievementMap::iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
         {
             if (!iter->second.changed)
@@ -500,7 +500,7 @@ void AchievementMgr::SaveToDB()
 
     if (!m_criteriaProgress.empty())
     {
-        //insert achievements
+        // insert achievements
         for (CriteriaProgressMap::iterator iter = m_criteriaProgress.begin(); iter != m_criteriaProgress.end(); ++iter)
         {
             if (!iter->second.changed)
@@ -1019,7 +1019,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 uint32 counter = 0;
                 for (QuestStatusMap::const_iterator itr = GetPlayer()->getQuestStatusMap().begin(); itr != GetPlayer()->getQuestStatusMap().end(); ++itr)
                     if (itr->second.m_rewarded)
-                        counter++;
+                        ++counter;
                 change = counter;
                 progressType = PROGRESS_HIGHEST;
                 break;
@@ -1035,7 +1035,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 {
                     Quest const* quest = sObjectMgr.GetQuestTemplate(itr->first);
                     if (itr->second.m_rewarded && quest->GetZoneOrSort() >= 0 && uint32(quest->GetZoneOrSort()) == achievementCriteria->complete_quests_in_zone.zoneID)
-                        counter++;
+                        ++counter;
                 }
                 change = counter;
                 progressType = PROGRESS_HIGHEST;
@@ -1126,7 +1126,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (!found)
                     continue;
 
-                //FIXME: work only for instances where max==min for players
+                // FIXME: work only for instances where max==min for players
                 if (map->GetMaxPlayers() != achievementCriteria->death_in_dungeon.manLimit)
                     continue;
 
@@ -1200,9 +1200,9 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 switch (achievement->ID)
                 {
                     case 31:
-                        //case 1275: // these timed achievements have to be "started" on Quest Accept
-                        //case 1276:
-                        //case 1277:
+                        // case 1275: // these timed achievements have to be "started" on Quest Accept
+                        // case 1276:
+                        // case 1277:
                     case 1282:
                     case 1789:
                     {
@@ -1548,7 +1548,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     for (SkillLineAbilityMap::const_iterator skillIter = bounds.first; skillIter != bounds.second; ++skillIter)
                     {
                         if (skillIter->second->skillId == achievementCriteria->learn_skillline_spell.skillLine)
-                            spellCount++;
+                            ++spellCount;
                     }
                 }
                 change = spellCount;
@@ -1612,7 +1612,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellIter->first);
                     for (SkillLineAbilityMap::const_iterator skillIter = bounds.first; skillIter != bounds.second; ++skillIter)
                         if (skillIter->second->skillId == achievementCriteria->learn_skill_line.skillLine)
-                            spellCount++;
+                            ++spellCount;
                 }
                 change = spellCount;
                 progressType = PROGRESS_HIGHEST;
@@ -2472,9 +2472,9 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
                 switch (achievement->ID)
                 {
                     case 31:
-                        //case 1275: // these timed achievements are "started" on Quest Accept, and simple ended on quest-complete
-                        //case 1276:
-                        //case 1277:
+                        // case 1275: // these timed achievements are "started" on Quest Accept, and simple ended on quest-complete
+                        // case 1276:
+                        // case 1277:
                     case 1282:
                     case 1789:
                         break;
@@ -2650,7 +2650,7 @@ void AchievementGlobalMgr::LoadRewards()
             }
         }
 
-        //check mail data before item for report including wrong item case
+        // check mail data before item for report including wrong item case
         if (reward.sender)
         {
             if (!ObjectMgr::GetCreatureTemplate(reward.sender))
@@ -2694,7 +2694,7 @@ void AchievementGlobalMgr::LoadRewards()
 
 void AchievementGlobalMgr::LoadRewardLocales()
 {
-    m_achievementRewardLocales.clear();                       // need for reload case
+    m_achievementRewardLocales.clear();                     // need for reload case
 
     QueryResult* result = WorldDatabase.Query("SELECT entry,gender,subject_loc1,text_loc1,subject_loc2,text_loc2,subject_loc3,text_loc3,subject_loc4,text_loc4,subject_loc5,text_loc5,subject_loc6,text_loc6,subject_loc7,text_loc7,subject_loc8,text_loc8 FROM locales_achievement_reward");
 

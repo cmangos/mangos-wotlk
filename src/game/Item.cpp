@@ -58,7 +58,7 @@ void AddItemsSetItem(Player* player, Item* item)
         eff->setid = setid;
 
         size_t x = 0;
-        for (; x < player->ItemSetEff.size(); x++)
+        for (; x < player->ItemSetEff.size(); ++x)
             if (!player->ItemSetEff[x])
                 break;
 
@@ -70,7 +70,7 @@ void AddItemsSetItem(Player* player, Item* item)
 
     ++eff->item_count;
 
-    for (uint32 x = 0; x < 8; x++)
+    for (uint32 x = 0; x < 8; ++x)
     {
         if (!set->spells[x])
             continue;
@@ -79,7 +79,7 @@ void AddItemsSetItem(Player* player, Item* item)
             continue;
 
         uint32 z = 0;
-        for (; z < 8; z++)
+        for (; z < 8; ++z)
             if (eff->spells[z] && eff->spells[z]->Id == set->spells[x])
                 break;
 
@@ -87,9 +87,9 @@ void AddItemsSetItem(Player* player, Item* item)
             continue;
 
         // new spell
-        for (uint32 y = 0; y < 8; y++)
+        for (uint32 y = 0; y < 8; ++y)
         {
-            if (!eff->spells[y])                             // free slot
+            if (!eff->spells[y])                            // free slot
             {
                 SpellEntry const* spellInfo = sSpellStore.LookupEntry(set->spells[x]);
                 if (!spellInfo)
@@ -121,7 +121,7 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
 
     ItemSetEffect* eff = NULL;
     size_t setindex = 0;
-    for (; setindex < player->ItemSetEff.size(); setindex++)
+    for (; setindex < player->ItemSetEff.size(); ++setindex)
     {
         if (player->ItemSetEff[setindex] && player->ItemSetEff[setindex]->setid == setid)
         {
@@ -136,7 +136,7 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
 
     --eff->item_count;
 
-    for (uint32 x = 0; x < 8; x++)
+    for (uint32 x = 0; x < 8; ++x)
     {
         if (!set->spells[x])
             continue;
@@ -145,7 +145,7 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
         if (set->items_to_triggerspell[x] <= eff->item_count)
             continue;
 
-        for (uint32 z = 0; z < 8; z++)
+        for (uint32 z = 0; z < 8; ++z)
         {
             if (eff->spells[z] && eff->spells[z]->Id == set->spells[x])
             {
@@ -157,7 +157,7 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
         }
     }
 
-    if (!eff->item_count)                                    // all items of a set were removed
+    if (!eff->item_count)                                   // all items of a set were removed
     {
         MANGOS_ASSERT(eff == player->ItemSetEff[setindex]);
         delete eff;
@@ -277,7 +277,7 @@ void Item::UpdateDuration(Player* owner, uint32 diff)
     if (!GetUInt32Value(ITEM_FIELD_DURATION))
         return;
 
-    //DEBUG_LOG("Item::UpdateDuration Item (Entry: %u Duration %u Diff %u)", GetEntry(), GetUInt32Value(ITEM_FIELD_DURATION), diff);
+    // DEBUG_LOG("Item::UpdateDuration Item (Entry: %u Duration %u Diff %u)", GetEntry(), GetUInt32Value(ITEM_FIELD_DURATION), diff);
 
     if (GetUInt32Value(ITEM_FIELD_DURATION) <= diff)
     {
@@ -899,7 +899,7 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
         if (spellInfo->EquippedItemClass != int32(proto->Class))
             return false;                                   //  wrong item class
 
-        if (spellInfo->EquippedItemSubClassMask != 0)        // 0 == any subclass
+        if (spellInfo->EquippedItemSubClassMask != 0)       // 0 == any subclass
         {
             if ((spellInfo->EquippedItemSubClassMask & (1 << proto->SubClass)) == 0)
                 return false;                               // subclass not present in mask
@@ -1081,7 +1081,7 @@ void Item::SendTimeUpdate(Player* owner)
 Item* Item::CreateItem(uint32 item, uint32 count, Player const* player, uint32 randomPropertyId)
 {
     if (count < 1)
-        return NULL;                                        //don't create item at zero count
+        return NULL;                                        // don't create item at zero count
 
     if (ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(item))
     {

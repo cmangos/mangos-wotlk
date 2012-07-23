@@ -51,12 +51,12 @@ enum CanCastResult
 
 enum CastFlags
 {
-    CAST_INTERRUPT_PREVIOUS     = 0x01,                     //Interrupt any spell casting
-    CAST_TRIGGERED              = 0x02,                     //Triggered (this makes spell cost zero mana and have no cast time)
-    CAST_FORCE_CAST             = 0x04,                     //Forces cast even if creature is out of mana or out of range
-    CAST_NO_MELEE_IF_OOM        = 0x08,                     //Prevents creature from entering melee if out of mana or out of range
-    CAST_FORCE_TARGET_SELF      = 0x10,                     //Forces the target to cast this spell on itself
-    CAST_AURA_NOT_PRESENT       = 0x20,                     //Only casts the spell if the target does not have an aura from the spell
+    CAST_INTERRUPT_PREVIOUS     = 0x01,                     // Interrupt any spell casting
+    CAST_TRIGGERED              = 0x02,                     // Triggered (this makes spell cost zero mana and have no cast time)
+    CAST_FORCE_CAST             = 0x04,                     // Forces cast even if creature is out of mana or out of range
+    CAST_NO_MELEE_IF_OOM        = 0x08,                     // Prevents creature from entering melee if out of mana or out of range
+    CAST_FORCE_TARGET_SELF      = 0x10,                     // Forces the target to cast this spell on itself
+    CAST_AURA_NOT_PRESENT       = 0x20,                     // Only casts the spell if the target does not have an aura from the spell
 };
 
 class MANGOS_DLL_SPEC CreatureAI
@@ -78,7 +78,7 @@ class MANGOS_DLL_SPEC CreatureAI
         ///== Reactions At =================================
 
         /**
-         * Called if IsVisible(Unit* pWho) is true at each (relative) pWho move, reaction at visibility zone enter
+         * Called if IsVisible(Unit* pWho) is true at each (relative) override pWho move, reaction at visibility zone enter
          * Note: The Unit* pWho can be out of Line of Sight, usually this is only visibiliy (by state) and range dependendend
          * Note: This function is not called for creatures who are in evade mode
          * @param pWho Unit* who moved in the visibility range and is visisble
@@ -280,7 +280,7 @@ struct CreatureAIFactory : public SelectableAI
 {
     CreatureAIFactory(const char* name) : SelectableAI(name) {}
 
-    CreatureAI* Create(void*) const;
+    CreatureAI* Create(void*) const override;
 
     int Permit(const Creature* c) const { return REAL_AI::Permissible(c); }
 };

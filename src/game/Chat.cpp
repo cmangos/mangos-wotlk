@@ -1330,7 +1330,7 @@ bool ChatHandler::ParseCommands(const char* text)
     MANGOS_ASSERT(text);
     MANGOS_ASSERT(*text);
 
-    //if(m_session->GetSecurity() == SEC_PLAYER)
+    // if(m_session->GetSecurity() == SEC_PLAYER)
     //    return false;
 
     /// chat case (.command or !command format)
@@ -1576,7 +1576,7 @@ bool ChatHandler::isValidChatMessage(const char* message)
             case 'c':
                 color = 0;
                 // validate color, expect 8 hex chars
-                for (int i = 0; i < 8; i++)
+                for (int i = 0; i < 8; ++i)
                 {
                     char c;
                     reader >> c;
@@ -2044,7 +2044,7 @@ bool ChatHandler::isValidChatMessage(const char* message)
     return validSequence == validSequenceIterator;
 }
 
-//Note: target_guid used only in CHAT_MSG_WHISPER_INFORM mode (in this case channelName ignored)
+// Note: target_guid used only in CHAT_MSG_WHISPER_INFORM mode (in this case channelName ignored)
 void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint8 type, uint32 language, const char* channelName, ObjectGuid targetGuid, const char* message, Unit* speaker)
 {
     uint32 messageLength = (message ? strlen(message) : 0) + 1;
