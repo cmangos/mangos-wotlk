@@ -1,4 +1,4 @@
-ALTER TABLE db_version CHANGE COLUMN required_1_playerbotai_talentspecs required_2_playerbotai_saved_data bit;
+ALTER TABLE playerbotai_db_version CHANGE COLUMN required_1_playerbotai_talentspecs required_2_playerbotai_saved_data bit;
 
 /*
 Navicat MySQL Data Transfer
