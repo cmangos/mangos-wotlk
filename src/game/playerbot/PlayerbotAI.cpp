@@ -9056,18 +9056,15 @@ void PlayerbotAI::_HandleCommandEquip(std::string &text, Player& fromPlayer)
 {
     if (ExtractCommand("auto", text))
     {
+        bool bOnce = false;
+        bool bWasToggleOn = m_AutoEquipToggle;
+
         // run autoequip cycle once - right now - turning off after
         if (ExtractCommand("once", text))
         {
-            if (m_AutoEquipToggle)
-                SendWhisper("Running Auto Equip cycle now, then switching it off.", fromPlayer);
-            else
-                SendWhisper("Running Auto Equip cycle now.", fromPlayer);
-
+            bWasToggleOn = m_AutoEquipToggle;
             m_AutoEquipToggle = true;
-            AutoUpgradeEquipment();
-            m_AutoEquipToggle = false;
-            return;
+            bOnce = true;
         }
         else if (ExtractCommand("on", text))
             m_AutoEquipToggle = true;
@@ -9079,12 +9076,24 @@ void PlayerbotAI::_HandleCommandEquip(std::string &text, Player& fromPlayer)
         CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET autoequip = '%u' WHERE guid = '%u'", m_AutoEquipToggle, m_bot->GetGUIDLow());
 
         if (m_AutoEquipToggle)
-        {
             AutoUpgradeEquipment();
-            SendWhisper("Auto Equip has run and is |h|cff1eff00ON|h|r", fromPlayer);
+
+        // feedback
+        if (bOnce)
+        {
+            if (bWasToggleOn)
+                SendWhisper("Equip Auto has run once, switching it off.", fromPlayer);
+            else
+                SendWhisper("Running Equip Auto once.", fromPlayer);
+
+            m_AutoEquipToggle = false;
+        }
+        else if (m_AutoEquipToggle)
+        {
+            SendWhisper("Equip Auto has run and is |h|cff1eff00ON|h|r", fromPlayer);
         }
         else
-            SendWhisper("Auto Equip is |h|cffff0000OFF|h|r", fromPlayer);
+            SendWhisper("Equip Auto is |h|cffff0000OFF|h|r", fromPlayer);
         return;
     }
     else if (ExtractCommand("info", text))
