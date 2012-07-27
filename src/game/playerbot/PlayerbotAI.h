@@ -1778,7 +1778,7 @@ public:
     Item* FindBandage() const;
     Item* FindPoison() const;
     Item* FindMount(uint32 matchingRidingSkill) const;
-    Item* FindItem(uint32 ItemId);
+    Item* FindItem(uint32 ItemId, bool Equipped_too = false);
     Item* FindItemInBank(uint32 ItemId);
     Item* FindKeyForLockValue(uint32 reqSkillValue);
     Item* FindBombForLockValue(uint32 reqSkillValue);

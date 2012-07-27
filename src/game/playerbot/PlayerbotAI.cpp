@@ -4992,13 +4992,17 @@ uint8 PlayerbotAI::_findItemSlot(Item* target)
     return 0;
 }
 
-Item* PlayerbotAI::FindItem(uint32 ItemId)
+Item* PlayerbotAI::FindItem(uint32 ItemId, bool Equipped_too /* default = false */)
 {
-    // list out items equipped & in main backpack
+    uint8 first_slot;
+    Equipped_too ? first_slot = EQUIPMENT_SLOT_START : first_slot = INVENTORY_SLOT_ITEM_START;
+
+    // list out items equipped &/OR in main backpack
+    //EQUIPMENT_SLOT_START = 0
     //INVENTORY_SLOT_ITEM_START = 23
     //INVENTORY_SLOT_ITEM_END = 39
 
-    for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
+    for (uint8 slot = first_slot; slot < INVENTORY_SLOT_ITEM_END; slot++)
     {
         // DEBUG_LOG ("[PlayerbotAI]: FindItem - [%s's]backpack slot = %u",m_bot->GetName(),slot); // 23 to 38 = 16
         Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);  // 255, 23 to 38
@@ -7107,6 +7111,7 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
 
     uint8 autosell = 0;
 
+    SellWhite ? TellMaster("Sell White") : TellMaster("Keep White");
     std::ostringstream mout;
     if (item->CanBeTraded() && item->GetProto()->Quality == ITEM_QUALITY_POOR) // trash sells automatically.
         autosell = 1;
@@ -7144,9 +7149,7 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
 
         report << "Sold ";
         MakeItemLink(item, report, true);
-        report << " for ";
-
-        report << Cash(cost);
+        report << " for " << Cash(cost);
     }
     else if (item->GetProto()->SellPrice > 0)
         MakeItemLink(item, canSell, true);
@@ -7272,7 +7275,7 @@ void PlayerbotAI::Repair(const uint32 itemid, Creature* rCreature)
 {
     uint32 cost = 0;
     uint8 UseGuild = (m_bot->GetGuildId() != 0) ? uint8(1) : uint8(0);
-    Item* rItem = FindItem(itemid); // if item equipped or in bags
+    Item* rItem = FindItem(itemid, true); // if item equipped or in bags
     if (rItem)
         cost = EstRepair(rItem->GetPos());
     else
@@ -7720,9 +7723,7 @@ void PlayerbotAI::Sell(const uint32 itemid)
 
         report << "Sold ";
         MakeItemLink(pItem, report, true);
-        report << " for ";
-
-        report << Cash(cost);
+        report << " for " << Cash(cost);
 
         TellMaster(report.str());
     }
