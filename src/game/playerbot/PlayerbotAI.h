@@ -1486,6 +1486,15 @@ enum AutoEquipEnum
     AUTOEQUIP_ONCE = 2
 };
 
+enum m_FollowAutoGo
+{
+    FOLLOWAUTOGO_OFF        = 0,
+    FOLLOWAUTOGO_INIT       = 1,
+    FOLLOWAUTOGO_SET        = 2,
+    FOLLOWAUTOGO_RESET      = 3,
+    FOLLOWAUTOGO_RUN        = 4
+};
+
 class MANGOS_DLL_SPEC PlayerbotAI
 {
 public:
@@ -1813,12 +1822,12 @@ public:
     uint8 gSecOrder;
 
     bool m_AutoEquipToggle;             //switch for autoequip
-    uint32 SellWhite;					//switch for white item auto sell
+    uint32 SellWhite;                   //switch for white item auto sell
     uint8 DistOverRide;
     float gDist[2]; //gDist, gTemp vars are used for variable follow distance
     float gTempDist;
     float gTempDist2;
-    uint8 FollowAutoGo;
+    uint8 m_FollowAutoGo;
     uint8 IsUpOrDown; //tracks variable follow distance
     void BotDataRestore();
     void CombatOrderRestore();

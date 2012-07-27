@@ -98,7 +98,7 @@ m_bDebugCommandChat(false)
     SetQuestNeedCreatures();
 
     // start following master (will also teleport bot to master)
-    FollowAutoGo = 5; //turn on bot auto follow distance can be turned off by player
+    m_FollowAutoGo = FOLLOWAUTOGO_RUN; //turn on bot auto follow distance can be turned off by player
     DistOverRide = 0; //set initial adjustable follow settings
     IsUpOrDown = 0;
     gTempDist = 0.5f;
@@ -434,9 +434,9 @@ void PlayerbotAI::SendNotEquipList(Player& /*player*/)
 
 void PlayerbotAI::FollowAutoReset(Player& /*player*/)
 {
-    if (FollowAutoGo != 0)
+    if (m_FollowAutoGo != FOLLOWAUTOGO_OFF)
     {
-        FollowAutoGo = 3;
+        m_FollowAutoGo = FOLLOWAUTOGO_RESET;
         SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
         WorldObject* distTarget = m_followTarget;
         for (uint8 i = 0; i < 1; ++i)
@@ -713,7 +713,6 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                         if (itemmod2 > 0)
                             newitemscore = (newitemscore + 1);
                     }
-
                     break;
                 }
             case 2:
@@ -794,7 +793,7 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
             itemmod == ITEM_MOD_HIT_TAKEN_RATING || itemmod == ITEM_MOD_CRIT_TAKEN_RATING || itemmod == ITEM_MOD_ATTACK_POWER ||
             itemmod == ITEM_MOD_BLOCK_VALUE || itemmod2 == ITEM_MOD_HEALTH || itemmod2 == ITEM_MOD_AGILITY || itemmod2 == ITEM_MOD_STRENGTH ||
             itemmod2 == ITEM_MOD_DEFENSE_SKILL_RATING || itemmod2 == ITEM_MOD_DODGE_RATING || itemmod2 == ITEM_MOD_PARRY_RATING ||
-            itemmod2 == ITEM_MOD_BLOCK_RATING ||	itemmod2 == ITEM_MOD_HIT_MELEE_RATING || itemmod2 == ITEM_MOD_CRIT_MELEE_RATING ||
+            itemmod2 == ITEM_MOD_BLOCK_RATING || itemmod2 == ITEM_MOD_HIT_MELEE_RATING || itemmod2 == ITEM_MOD_CRIT_MELEE_RATING ||
             itemmod2 == ITEM_MOD_HIT_TAKEN_MELEE_RATING || itemmod2 == ITEM_MOD_HIT_TAKEN_RANGED_RATING ||itemmod2 == ITEM_MOD_HIT_TAKEN_SPELL_RATING ||
             itemmod2 == ITEM_MOD_CRIT_TAKEN_MELEE_RATING || itemmod2 == ITEM_MOD_CRIT_TAKEN_RANGED_RATING ||
             itemmod2 == ITEM_MOD_CRIT_TAKEN_SPELL_RATING || itemmod2 == ITEM_MOD_HASTE_MELEE_RATING ||
@@ -883,7 +882,6 @@ bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemProt
                         if (itemmod2 > 0)
                             newitemscore = (newitemscore + 1);
                     }
-
                     break;
                 }
             default:
@@ -3858,7 +3856,7 @@ void PlayerbotAI::BotDataRestore()
 */
 void PlayerbotAI::CombatOrderRestore()
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT bot_primary_order,bot_secondary_order,primary_target,secondary_target,pname,sname,combat_delay FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT bot_primary_order,bot_secondary_order,primary_target,secondary_target,pname,sname,combat_delay,auto_follow FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
 
     if (!result)
     {
@@ -3877,6 +3875,7 @@ void PlayerbotAI::CombatOrderRestore()
         std::string pname = fields[4].GetString();
         std::string sname = fields[5].GetString();
         m_DelayAttack = fields[6].GetUInt8();
+        m_FollowAutoGo = fields[7].GetUInt8();
         //if (gPrimtarget > 0)
             gPrimtarget = ObjectAccessor::GetUnit(*m_bot->GetMap()->GetWorldObject(PrimtargetGUID), PrimtargetGUID);
         //if (gSectarget > 0)
@@ -3922,8 +3921,6 @@ void PlayerbotAI::CombatOrderRestore()
     }
     if (gPrimOrder == 0 && gSecOrder == 0)
         SetCombatOrder(co, gtarget);
-    if (FollowAutoGo != 0)
-        FollowAutoGo = 1;
 }
 
 void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit *target)
@@ -3964,8 +3961,8 @@ void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit *target)
     else
         co = ORDERS_RESET;
     SetCombatOrder(co, target);
-    if (FollowAutoGo != 0)
-        FollowAutoGo = 1;
+    if (m_FollowAutoGo != FOLLOWAUTOGO_OFF)
+        m_FollowAutoGo = FOLLOWAUTOGO_INIT;
 }
 
 void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
@@ -3999,7 +3996,7 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
         gSecOrder = 0;
         m_DelayAttackInit = CurrentTime();
         m_DelayAttack = 0;
-        CharacterDatabase.PExecute("DELETE FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
+        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET bot_primary_order = 0, bot_secondary_order = 0, primary_target = 0, secondary_target = 0, pname = '',sname = '', combat_delay = 0 WHERE guid = '%u'",m_bot->GetGUIDLow());
         return;
     }
     if (co == ORDERS_PASSIVE)
@@ -4091,7 +4088,7 @@ void PlayerbotAI::MovementReset()
         {
             if (DistOverRide != 0)
             {
-                if (FollowAutoGo == 0)
+                if (m_FollowAutoGo == FOLLOWAUTOGO_OFF)
                 {
                     if (IsUpOrDown < DistOverRide)
                     {
@@ -4134,7 +4131,7 @@ void PlayerbotAI::MovementReset()
                         IsUpOrDown = DistOverRide;
                     }
                 }
-                if (FollowAutoGo != 3)
+                if (m_FollowAutoGo != FOLLOWAUTOGO_RESET)
                 {
                     gDist[0] = gTempDist;
                     gDist[1] = gTempDist2;
@@ -4144,7 +4141,7 @@ void PlayerbotAI::MovementReset()
                     gDist[0] = 0.5f;
                     gDist[1] = 1.0f;
                     SetIgnoreUpdateTime(3);
-                    FollowAutoGo = 1;
+                    m_FollowAutoGo = FOLLOWAUTOGO_INIT;
                 }
             }
             float dist = rand_float(m_mgr->m_confFollowDistance[0], m_mgr->m_confFollowDistance[1]);
@@ -4164,8 +4161,8 @@ void PlayerbotAI::MovementReset()
             }
             else
                 m_bot->GetMotionMaster()->MoveFollow(m_followTarget, dist, angle);
-            if (FollowAutoGo == 5)
-                FollowAutoGo = 1;
+            if (m_FollowAutoGo == FOLLOWAUTOGO_RUN)
+                m_FollowAutoGo = FOLLOWAUTOGO_INIT;
         }
     }
 }
@@ -4314,8 +4311,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
     // default updates occur every two seconds
     SetIgnoreUpdateTime(2);
 
-    // TODO: use enums rather than meaningless numbers
-    if (FollowAutoGo == 1)
+    if (m_FollowAutoGo == FOLLOWAUTOGO_INIT)
     {
         if (m_combatOrder & ORDERS_TANK)
             DistOverRide = 1;
@@ -4323,7 +4319,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             DistOverRide = 3;
         else
             DistOverRide = 4;
-        FollowAutoGo = 2;
+        m_FollowAutoGo = FOLLOWAUTOGO_SET;
         SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
     }
 
@@ -8204,23 +8200,21 @@ void PlayerbotAI::_HandleCommandFollow(std::string &text, Player &fromPlayer)
         gTempDist = 1;
         gTempDist2 = 2;
 
-        if (FollowAutoGo != 2)
+        if (m_FollowAutoGo != FOLLOWAUTOGO_SET)
         {
-            FollowAutoGo = 1;
-            msg << "Automatic Follow Distance is now ON";
+            m_FollowAutoGo = FOLLOWAUTOGO_INIT;
+            msg << "Automatic Follow Distance is now |h|cff1eff00ON|h|r";
             SendWhisper(msg.str(),fromPlayer);
-            return;
         }
         else
         {
-            FollowAutoGo = 0;
-            msg << "Automatic Follow Distance is now OFF";
+            m_FollowAutoGo = FOLLOWAUTOGO_OFF;
+            msg << "Automatic Follow Distance is now |h|cffff0000OFF|h|r";
             SendWhisper(msg.str(),fromPlayer);
         }
-        SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
-        return;
+        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET auto_follow = '%u' WHERE guid = '%u'", m_FollowAutoGo, m_bot->GetGUIDLow());
     }
-    if (ExtractCommand("reset", text)) // switch to reset follow distance
+    else if (ExtractCommand("reset", text)) // switch to reset follow distance
     {
         if (text != "")
         {
@@ -8234,10 +8228,8 @@ void PlayerbotAI::_HandleCommandFollow(std::string &text, Player &fromPlayer)
         gTempDist2 = 2;
         msg << "Bit crowded isn't it?";
         SendWhisper(msg.str(),fromPlayer);
-        SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
-        return;
     }
-    if (ExtractCommand("far", text)) // switch to increment follow distance
+    else if (ExtractCommand("far", text)) // switch to increment follow distance
     {
         if (text != "")
         {
@@ -8248,10 +8240,8 @@ void PlayerbotAI::_HandleCommandFollow(std::string &text, Player &fromPlayer)
         std::ostringstream msg;
         msg << "Increasing My follow distance";
         SendWhisper(msg.str(),fromPlayer);
-        SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
-        return;
     }
-    if (ExtractCommand("near", text)) // switch to increment follow distance
+    else if (ExtractCommand("near", text)) // switch to increment follow distance
     {
         if (text != "")
         {
@@ -8273,10 +8263,13 @@ void PlayerbotAI::_HandleCommandFollow(std::string &text, Player &fromPlayer)
         if (DistOverRide != 0)
             msg << "Decreasing My follow distance";
         SendWhisper(msg.str(),fromPlayer);
-        SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
+    }
+    else if (ExtractCommand("info", text))
+    {
+        m_FollowAutoGo ?  SendWhisper("Automatic Follow Distance is |h|cff1eff00ON|h|r", fromPlayer) : SendWhisper("Automatic Follow Distance is |h|cffff0000OFF|h|r", fromPlayer);
         return;
     }
-    if (text != "")
+    else if (text != "")
     {
         SendWhisper("see help for details on using follow.", fromPlayer);
         return;
@@ -10462,9 +10455,12 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     if (bMainHelp || ExtractCommand("follow", text))
     {
         ch.SendSysMessage(_HandleCommandHelpHelper("follow", "I will follow you - this also revives me if dead and teleports me if I'm far away.").c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("follow auto", "Toggles Automatic Follow Distance (ON/OFF).").c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("follow info", "I will show my Automatic Follow Distance, toggle status (ON/OFF).").c_str());
         ch.SendSysMessage(_HandleCommandHelpHelper("follow far", "I will follow at a father distance away from you.").c_str());
         ch.SendSysMessage(_HandleCommandHelpHelper("follow near", "I will follow at a closer distance to you.").c_str());
         ch.SendSysMessage(_HandleCommandHelpHelper("follow reset", "I will reset my follow distance to its original state.").c_str());
+
         if (!bMainHelp)
         {
             if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());

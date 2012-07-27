@@ -29,6 +29,7 @@ Note that these commands work both in whisper and in party chat (assuming the bo
 /t BOTNAME follow near (decreases the bots follow distance from the player)
 /t BOTNAME follow reset (resets the bots follow distance to the config default setting. this commmand will be phased out)
 /t BOTNAME follow auto (turns off auto variable follow distance which is ON by default)
+/t BOTNAME follow info (Shows Automatic Follow Distance, toggle status ON or OFF)
 /t BOTNAME combat delay <0-10> (sets the amount of time the bot will wait before engaging your target in combat)
 /t BOTNAME stay
 /t BOTNAME assist (you'll need to be attacking something and the bot only does melee atm)
@@ -58,7 +59,7 @@ Note that these commands work both in whisper and in party chat (assuming the bo
 /t BOTNAME use [ITEM LINK][GAMEOBJECT LINK] (use item on gameobject)
 /t BOTNAME equip [ITEM LINK]
 /t BOTNAME equip auto (*toggle* auto equip acquired items based on usefulness)
-/t BOTMAME equip info (Show auto equip toggle status On or OFF)
+/t BOTNAME equip info (Show auto equip toggle status ON or OFF)
 /t BOTNAME equip auto <on | off | once> (explicitly turn auto equip ON or OFF, or run autoequip once after which it will turn off)
 /t BOTNAME reset (will reset states, orders and loot list)
 /t BOTNAME stats (bot shows available money, free inventory space and estimated item repair costs)
@@ -276,7 +277,7 @@ When updating the sql file(s), keep in mind the following locations:
 * sql/playerbotai
 Place your SQL files here.
 * src/shared/revision_sql.h
-#define REVISION_DB_PLAYERBOTAI "required_4_playerbotai_autoequip"
+#define REVISION_DB_PLAYERBOTAI "required_5_playerbotai_auto_follow"
 NOTE: This string should be an exact copy of your SQL file's second field name in the `playerbotai_db_version` table.
 
 History:
