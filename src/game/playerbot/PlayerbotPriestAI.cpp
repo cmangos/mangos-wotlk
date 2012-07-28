@@ -75,12 +75,12 @@ CombatManeuverReturns PlayerbotPriestAI::DoFirstCombatManeuver(Unit* /*pTarget*/
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    // This is cast on a target, which activates (and switches to another target within the group) upon receiving+healing damage
-    // Mana efficient even at one use
     if (m_ai->IsHealer())
     {
-        // TODO: This must be done with toggles: TANK only, FullHealth allowed
-        Unit* healTarget = GetHealTarget();
+        // TODO: This must be done with toggles: FullHealth allowed
+        Unit* healTarget = GetHealTarget(JOB_TANK);
+        // This is cast on a target, which activates (and switches to another target within the group) upon receiving+healing damage
+        // Mana efficient even at one use
         if (healTarget && PRAYER_OF_MENDING > 0 && !healTarget->HasAura(PRAYER_OF_MENDING, EFFECT_INDEX_0) && CastSpell(PRAYER_OF_MENDING, healTarget) & RETURN_CONTINUE)
             return RETURN_FINISHED_FIRST_MOVES;
     }
@@ -185,7 +185,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             if (MIND_BLAST) // TODO: Check for cooldown
                 return CastSpell(MIND_BLAST);
 
-            if (m_ai->GetHealthPercent() < 20 && GREATER_HEAL) // really? Will you EVER get GREATER_HEAL off before they get your last 20%?
+            if (m_ai->GetHealthPercent() < 50 && GREATER_HEAL)
                 return CastSpell(GREATER_HEAL);
 
             if (SMITE)
@@ -202,7 +202,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
         m_ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
     // if in melee range OR can't shoot OR have no ranged (wand) equipped
     else if(m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_MELEE 
-            && (/*dist <= ATTACK_DISTANCE || */SHOOT == 0 || !m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
+            && (SHOOT == 0 || !m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
             && !m_ai->IsHealer())
         m_ai->SetCombatStyle(PlayerbotAI::COMBAT_MELEE);
 
@@ -220,15 +220,15 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
         // TODO: move to HealTarget code
         // TODO: you forgot to check for the 'temporarily immune to PW:S because you only just got it cast on you' effect
         //       - which is different effect from the actual shield.
-        if (m_ai->GetHealthPercent() < 25 && POWER_WORD_SHIELD > 0 && !m_bot->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0))
+        if (m_ai->GetHealthPercent() < 25 && POWER_WORD_SHIELD > 0 && !m_bot->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0) && CastSpell(POWER_WORD_SHIELD))
         {
             m_ai->TellMaster("I'm casting PW:S on myself.");
-            return CastSpell(POWER_WORD_SHIELD);
+            return RETURN_CONTINUE;
         }
-        if (m_ai->GetHealthPercent() < 35 && DESPERATE_PRAYER > 0)
+        if (m_ai->GetHealthPercent() < 35 && DESPERATE_PRAYER > 0 && CastSpell(DESPERATE_PRAYER, m_bot))
         {
             m_ai->TellMaster("I'm casting desperate prayer.");
-            return CastSpell(DESPERATE_PRAYER, m_bot);
+            return RETURN_CONTINUE;
         }
 
         // Already healed self or tank. If healer, do nothing else to anger mob.
@@ -277,88 +277,65 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     switch (spec)
     {
         case PRIEST_SPEC_HOLY:
-            if (HOLY_FIRE > 0 && !pTarget->HasAura(HOLY_FIRE, EFFECT_INDEX_0) && m_ai->GetManaPercent() >= 13)
-                return CastSpell(HOLY_FIRE, pTarget);
-            if (SMITE > 0 && m_ai->GetManaPercent() >= 17)
-                return CastSpell(SMITE, pTarget);
-            //if (HOLY_NOVA > 0 && LastSpellHoly < 3 && dist <= ATTACK_DISTANCE && m_ai->GetManaPercent() >= 22)
-            //{
-            //    //m_ai->TellMaster("I'm casting holy nova.");
-            //    m_ai->CastSpell(HOLY_NOVA);
-            //    LastSpellHoly = LastSpellHoly + 1;
-            //}
+            if (HOLY_FIRE > 0 && !pTarget->HasAura(HOLY_FIRE, EFFECT_INDEX_0) && CastSpell(HOLY_FIRE, pTarget))
+                return RETURN_CONTINUE;
+            if (SMITE > 0 && CastSpell(SMITE, pTarget))
+                return RETURN_CONTINUE;
+            //if (HOLY_NOVA > 0 && dist <= ATTACK_DISTANCE && m_ai->CastSpell(HOLY_NOVA))
+            //    return RETURN_CONTINUE;
             break;
 
         case PRIEST_SPEC_SHADOW:
-            if (DEVOURING_PLAGUE > 0 && !pTarget->HasAura(DEVOURING_PLAGUE, EFFECT_INDEX_0) && m_ai->GetManaPercent() >= 28)
-                return CastSpell(DEVOURING_PLAGUE, pTarget);
-            if (VAMPIRIC_TOUCH > 0 && !pTarget->HasAura(VAMPIRIC_TOUCH, EFFECT_INDEX_0) && m_ai->GetManaPercent() >= 18)
-                return CastSpell(VAMPIRIC_TOUCH, pTarget);
-            if (SHADOW_WORD_PAIN > 0 && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && m_ai->GetManaPercent() >= 25)
-                return CastSpell(SHADOW_WORD_PAIN, pTarget);
-            if (MIND_BLAST > 0 && (!m_bot->HasSpellCooldown(MIND_BLAST)) && m_ai->GetManaPercent() >= 19)
-                return CastSpell(MIND_BLAST, pTarget);
-            if (MIND_FLAY > 0 && m_ai->GetManaPercent() >= 10)
+            if (DEVOURING_PLAGUE > 0 && !pTarget->HasAura(DEVOURING_PLAGUE, EFFECT_INDEX_0) && CastSpell(DEVOURING_PLAGUE, pTarget))
+                return RETURN_CONTINUE;
+            if (VAMPIRIC_TOUCH > 0 && !pTarget->HasAura(VAMPIRIC_TOUCH, EFFECT_INDEX_0) && CastSpell(VAMPIRIC_TOUCH, pTarget))
+                return RETURN_CONTINUE;
+            if (SHADOW_WORD_PAIN > 0 && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && CastSpell(SHADOW_WORD_PAIN, pTarget))
+                return RETURN_CONTINUE;
+            if (MIND_BLAST > 0 && (!m_bot->HasSpellCooldown(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
+                return RETURN_CONTINUE;
+            if (MIND_FLAY > 0 && CastSpell(MIND_FLAY, pTarget))
             {
-                if (CastSpell(MIND_FLAY, pTarget))
-                {
-                    m_ai->SetIgnoreUpdateTime(3);
-                    return RETURN_CONTINUE;
-                }
+                m_ai->SetIgnoreUpdateTime(3);
+                return RETURN_CONTINUE;
             }
-            if (SHADOWFIEND > 0) // TODO: && mana && isn't active
-                return CastSpell(SHADOWFIEND);
-            /*else if (MIND_SEAR > 0 && m_ai->GetAttackerCount() >= 3 && m_ai->GetManaPercent() >= 28)
+            if (SHADOWFIEND > 0 && !m_bot->GetPet() && CastSpell(SHADOWFIEND))
+                return RETURN_CONTINUE;
+            /*if (MIND_SEAR > 0 && m_ai->GetAttackerCount() >= 3 && CastSpell(MIND_SEAR, pTarget))
             {
-                CastSpell(MIND_SEAR, pTarget);
                 m_ai->SetIgnoreUpdateTime(5);
-                return;
+                return RETURN_CONTINUE;
             }*/
-            if (SHADOWFORM == 0 && MIND_FLAY == 0 && SMITE > 0 && m_ai->GetManaPercent() >= 17) // low levels
-                return CastSpell(SMITE, pTarget);
+            if (SHADOWFORM == 0 && MIND_FLAY == 0 && SMITE > 0 && CastSpell(SMITE, pTarget)) // low levels
+                return RETURN_CONTINUE;
             break;
 
         case PRIEST_SPEC_DISCIPLINE:
-            if (POWER_INFUSION > 0 && m_ai->GetManaPercent() >= 16)
-                return CastSpell(POWER_INFUSION, GetMaster()); // TODO: just master?
-            //if (MASS_DISPEL > 0 && m_ai->GetManaPercent() >= 33)
-            //{
-            //    //m_ai->TellMaster("I'm casting mass dispel");
-            //    return CastSpell(MASS_DISPEL);
-            //}
-            if (INNER_FOCUS > 0 && !m_bot->HasAura(INNER_FOCUS, EFFECT_INDEX_0))
-                return CastSpell(INNER_FOCUS, m_bot);
-            if (PENANCE > 0 && m_ai->GetManaPercent() >= 16)
-                return CastSpell(PENANCE);
-            if (SMITE > 0 && m_ai->GetManaPercent() >= 17)
-                return CastSpell(SMITE, pTarget);
+            if (POWER_INFUSION > 0 && CastSpell(POWER_INFUSION, GetMaster())) // TODO: just master?
+                return RETURN_CONTINUE;
+            if (INNER_FOCUS > 0 && !m_bot->HasAura(INNER_FOCUS, EFFECT_INDEX_0) && CastSpell(INNER_FOCUS, m_bot))
+                return RETURN_CONTINUE;
+            if (PENANCE > 0 && CastSpell(PENANCE))
+                return RETURN_CONTINUE;
+            if (SMITE > 0 && CastSpell(SMITE, pTarget))
+                return RETURN_CONTINUE;
             break;
     }
 
     // No spec due to low level OR no spell found yet
-    if (MIND_BLAST > 0 && (!m_bot->HasSpellCooldown(MIND_BLAST)) && m_ai->GetManaPercent() >= 19)
-        return CastSpell(MIND_BLAST, pTarget);
-    if (SHADOW_WORD_PAIN > 0 && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && m_ai->GetManaPercent() >= 25)
-        return CastSpell(SHADOW_WORD_PAIN, pTarget);
-    if (MIND_FLAY > 0 && m_ai->GetManaPercent() >= 10)
+    if (MIND_BLAST > 0 && (!m_bot->HasSpellCooldown(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
+        return RETURN_CONTINUE;
+    if (SHADOW_WORD_PAIN > 0 && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && CastSpell(SHADOW_WORD_PAIN, pTarget))
+        return RETURN_CONTINUE;
+    if (MIND_FLAY > 0 && CastSpell(MIND_FLAY, pTarget))
     {
-        if (CastSpell(MIND_FLAY, pTarget))
-        {
-            m_ai->SetIgnoreUpdateTime(3);
-            return RETURN_CONTINUE;
-        }
+        m_ai->SetIgnoreUpdateTime(3);
+        return RETURN_CONTINUE;
     }
-    if (SHADOWFORM == 0 && SMITE > 0 && m_ai->GetManaPercent() >= 17)
-        return CastSpell(SMITE, pTarget);
+    if (SHADOWFORM == 0 && SMITE > 0 && CastSpell(SMITE, pTarget))
+        return RETURN_CONTINUE;
 
-    // definitely not out of mana yet
-    if (m_ai->GetManaPercent() >= 20)
-    {
-        m_ai->TellMaster("Couldn't find an appropriate spell.");
-        return RETURN_NO_ACTION_UNKNOWN;
-    }
-
-    return RETURN_NO_ACTION_UNKNOWN;
+    return RETURN_NO_ACTION_OK;
 } // end DoNextCombatManeuver
 
 void PlayerbotPriestAI::DoNonCombatActions()
@@ -373,14 +350,16 @@ void PlayerbotPriestAI::DoNonCombatActions()
     // selfbuff goes first
     if (m_ai->SelfBuff(INNER_FIRE))
         return;
-    if (spec == PRIEST_SPEC_SHADOW && SHADOWFORM > 0)
-        m_ai->SelfBuff(SHADOWFORM);
-    if (VAMPIRIC_EMBRACE > 0)
-        m_ai->SelfBuff(VAMPIRIC_EMBRACE);
 
     // Revive
     if (HealPlayer(GetResurrectionTarget()) & RETURN_CONTINUE)
         return;
+
+    // After revive
+    if (spec == PRIEST_SPEC_SHADOW && SHADOWFORM > 0)
+        m_ai->SelfBuff(SHADOWFORM);
+    if (VAMPIRIC_EMBRACE > 0)
+        m_ai->SelfBuff(VAMPIRIC_EMBRACE);
 
     // Heal
     if (m_ai->IsHealer())

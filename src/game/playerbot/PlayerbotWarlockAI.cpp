@@ -158,49 +158,52 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     switch (spec)
     {
         case WARLOCK_SPEC_AFFLICTION:
-            if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
-                return CastSpell(CURSE_OF_AGONY, pTarget);
-            if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
-                return CastSpell(CORRUPTION, pTarget);
-            if (FIRE && !pTarget->HasAura(FIRE))
-                return CastSpell(FIRE, pTarget);
-            if (HAUNT && !m_bot->HasSpellCooldown(HAUNT))
-                return CastSpell(HAUNT, pTarget);
-            if (SHADOW_BOLT)
-                return CastSpell(SHADOW_BOLT, pTarget);
-            break;
+            if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
+                return RETURN_CONTINUE;
+            if (CORRUPTION && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+                return RETURN_CONTINUE;
+            if (FIRE && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
+                return RETURN_CONTINUE;
+            if (HAUNT && !m_bot->HasSpellCooldown(HAUNT) && CastSpell(HAUNT, pTarget))
+                return RETURN_CONTINUE;
+            if (SHADOW_BOLT && CastSpell(SHADOW_BOLT, pTarget))
+                return RETURN_CONTINUE;
+
+            return RETURN_NO_ACTION_OK;
 
         case WARLOCK_SPEC_DEMONOLOGY:
-            if (pet && DEMONIC_EMPOWERMENT && !m_bot->HasSpellCooldown(DEMONIC_EMPOWERMENT))
-                return CastSpell(DEMONIC_EMPOWERMENT);
-            if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
-                return CastSpell(CURSE_OF_AGONY, pTarget);
-            if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
-                return CastSpell(CORRUPTION, pTarget);
-            if (FIRE && !pTarget->HasAura(FIRE))
-                return CastSpell(FIRE, pTarget);
-            if (INCINERATE && pTarget->HasAura(FIRE))
-                return CastSpell(INCINERATE, pTarget);
-            if (SHADOW_BOLT)
-                return CastSpell(SHADOW_BOLT, pTarget);
-            break;
+            if (pet && DEMONIC_EMPOWERMENT && !m_bot->HasSpellCooldown(DEMONIC_EMPOWERMENT) && CastSpell(DEMONIC_EMPOWERMENT))
+                return RETURN_CONTINUE;
+            if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
+                return RETURN_CONTINUE;
+            if (CORRUPTION && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+                return RETURN_CONTINUE;
+            if (FIRE && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
+                return RETURN_CONTINUE;
+            if (INCINERATE && pTarget->HasAura(FIRE) && CastSpell(INCINERATE, pTarget))
+                return RETURN_CONTINUE;
+            if (SHADOW_BOLT && CastSpell(SHADOW_BOLT, pTarget))
+                return RETURN_CONTINUE;
+
+            return RETURN_NO_ACTION_OK;
 
         case WARLOCK_SPEC_DESTRUCTION:
-            if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY))
-                return CastSpell(CURSE_OF_AGONY, pTarget);
-            if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
-                return CastSpell(CORRUPTION, pTarget);
-            if (FIRE && !pTarget->HasAura(FIRE))
-                return CastSpell(FIRE, pTarget);
-            if (CONFLAGRATE && pTarget->HasAura(FIRE) && !m_bot->HasSpellCooldown(CONFLAGRATE))
-                return CastSpell(CONFLAGRATE, pTarget);
-            if (CHAOS_BOLT && !m_bot->HasSpellCooldown(CHAOS_BOLT))
-                return CastSpell(CHAOS_BOLT, pTarget);
-            if (INCINERATE && pTarget->HasAura(FIRE))
-                return CastSpell(INCINERATE, pTarget);
-            if (SHADOW_BOLT)
-                return CastSpell(SHADOW_BOLT, pTarget);
-            break;
+            if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
+                return RETURN_CONTINUE;
+            if (CORRUPTION && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+                return RETURN_CONTINUE;
+            if (FIRE && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
+                return RETURN_CONTINUE;
+            if (CONFLAGRATE && pTarget->HasAura(FIRE) && !m_bot->HasSpellCooldown(CONFLAGRATE) && CastSpell(CONFLAGRATE, pTarget))
+                return RETURN_CONTINUE;
+            if (CHAOS_BOLT && !m_bot->HasSpellCooldown(CHAOS_BOLT) && CastSpell(CHAOS_BOLT, pTarget))
+                return RETURN_CONTINUE;
+            if (INCINERATE && pTarget->HasAura(FIRE) && CastSpell(INCINERATE, pTarget))
+                return RETURN_CONTINUE;
+            if (SHADOW_BOLT && CastSpell(SHADOW_BOLT, pTarget))
+                return RETURN_CONTINUE;
+
+            return RETURN_NO_ACTION_OK;
 
             //if (LIFE_TAP && LastSpellAffliction < 1 && m_ai->GetManaPercent() <= 50 && m_ai->GetHealthPercent() > 50)
             //    m_ai->CastSpell(LIFE_TAP, *m_bot);
@@ -266,21 +269,14 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     }
 
     // No spec due to low level OR no spell found yet
-    if (CORRUPTION && !pTarget->HasAura(CORRUPTION))
-        return CastSpell(CORRUPTION, pTarget);
-    if (FIRE && !pTarget->HasAura(FIRE))
-        return CastSpell(FIRE, pTarget);
+    if (CORRUPTION && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+        return RETURN_CONTINUE;
+    if (FIRE && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
+        return RETURN_CONTINUE;
     if (SHADOW_BOLT)
         return CastSpell(SHADOW_BOLT, pTarget);
 
-    // definitely not out of mana - TODO: someone removed all mana checks from the spells - shadowbolt uses less than 20% right?
-    if (m_ai->GetManaPercent() > 20)
-    {
-        m_ai->TellMaster("Couldn't find an appropriate spell.");
-        return RETURN_NO_ACTION_UNKNOWN;
-    }
-
-    return RETURN_NO_ACTION_UNKNOWN;
+    return RETURN_NO_ACTION_OK;
 } // end DoNextCombatManeuver
 
 void PlayerbotWarlockAI::CheckDemon()

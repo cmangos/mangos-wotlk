@@ -278,26 +278,23 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 
             return _DoNextPVECombatManeuverSpellDPS(pTarget);
 
-        /*if (BASH > 0 && !pTarget->HasAura(BASH, EFFECT_INDEX_0) && DruidSpellCombat < 5 && m_ai->GetRageAmount() >= 10)
-            CastSpell(BASH, pTarget);
-        if (CHALLENGING_ROAR > 0 && pVictim != m_bot && DruidSpellCombat < 6 && !pTarget->HasAura(CHALLENGING_ROAR, EFFECT_INDEX_0) && !pTarget->HasAura(GROWL, EFFECT_INDEX_0) && m_ai->GetRageAmount() >= 15)
-            CastSpell(CHALLENGING_ROAR, pTarget);
-        if (ROOTS > 0 && DruidSpellCombat < 3 && !pTarget->HasAura(ROOTS, EFFECT_INDEX_0) && m_ai->GetManaPercent() >= 8)
-            CastSpell(ROOTS, pTarget);
-
-        if (HURRICANE > 0 && m_ai->GetAttackerCount() >= 5 && DruidSpellCombat < 4 && m_ai->GetManaPercent() >= 91)
+        /*if (BASH > 0 && !pTarget->HasAura(BASH, EFFECT_INDEX_0) && DruidSpellCombat < 5 && CastSpell(BASH, pTarget))
+            return RETURN_CONTINUE;
+        if (CHALLENGING_ROAR > 0 && pVictim != m_bot && !pTarget->HasAura(CHALLENGING_ROAR, EFFECT_INDEX_0) && !pTarget->HasAura(GROWL, EFFECT_INDEX_0) && CastSpell(CHALLENGING_ROAR, pTarget))
+            return RETURN_CONTINUE;
+        if (ROOTS > 0 && !pTarget->HasAura(ROOTS, EFFECT_INDEX_0) && CastSpell(ROOTS, pTarget))
+            return RETURN_CONTINUE;
+        if (HURRICANE > 0 && m_ai->GetAttackerCount() >= 5 && CastSpell(HURRICANE, pTarget))
         {
-            CastSpell(HURRICANE, pTarget);
             m_ai->SetIgnoreUpdateTime(10);
+            return RETURN_CONTINUE;
         }
-        if (STARFALL > 0 && !m_bot->HasAura(STARFALL, EFFECT_INDEX_0) && m_ai->GetAttackerCount() >= 3 && DruidSpellCombat < 9 && m_ai->GetManaPercent() >= 39)
-            CastSpell(STARFALL, pTarget);
-
-        if (BARKSKIN > 0 && pVictim == m_bot && m_ai->GetHealthPercent() < 75 && DruidSpellCombat < 10 && !m_bot->HasAura(BARKSKIN, EFFECT_INDEX_0))
-            CastSpell(BARKSKIN, m_bot);
-
-        if (INNERVATE > 0 && m_ai->GetManaPercent() < 50 && DruidSpellCombat < 11 && !m_bot->HasAura(INNERVATE, EFFECT_INDEX_0))
-            CastSpell(INNERVATE, m_bot);
+        if (STARFALL > 0 && !m_bot->HasAura(STARFALL, EFFECT_INDEX_0) && m_ai->GetAttackerCount() >= 3 && CastSpell(STARFALL, pTarget))
+            return RETURN_CONTINUE;
+        if (BARKSKIN > 0 && pVictim == m_bot && m_ai->GetHealthPercent() < 75 && !m_bot->HasAura(BARKSKIN, EFFECT_INDEX_0) && CastSpell(BARKSKIN, m_bot))
+            return RETURN_CONTINUE;
+        if (INNERVATE > 0 && !m_bot->HasAura(INNERVATE, EFFECT_INDEX_0) && CastSpell(INNERVATE, m_bot))
+            return RETURN_CONTINUE;
         */
     }
 
@@ -312,7 +309,7 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarg
     if (!m_bot->HasAura( (DIRE_BEAR_FORM > 0 ? DIRE_BEAR_FORM : BEAR_FORM) )) return RETURN_NO_ACTION_UNKNOWN;
 
     // Used to determine if this bot is highest on threat
-    Unit *newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
+    Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
     Unit* pVictim = pTarget->getVictim();
 
     // Face enemy, make sure you're attacking
@@ -331,30 +328,23 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarg
         if (CastSpell(FAERIE_FIRE_FERAL, pTarget))
             return RETURN_CONTINUE;
 
-    // TODO: If 2 or more targets, swipe
-    //if (SWIPE > 0 && TARGETCOUNT > 1)
-    //    if (m_ai->GetRageAmount() < 20 || CastSpell(SWIPE, pTarget))
-    //        return true;
+    if (SWIPE > 0 && m_ai->GetAttackerCount() >= 2 && CastSpell(SWIPE, pTarget))
+        return RETURN_CONTINUE;
 
-    if (ENRAGE > 0 && !m_bot->HasSpellCooldown(ENRAGE))
-        if (CastSpell(ENRAGE, m_bot))
-            return RETURN_CONTINUE;
+    if (ENRAGE > 0 && !m_bot->HasSpellCooldown(ENRAGE) && CastSpell(ENRAGE, m_bot))
+        return RETURN_CONTINUE;
 
-    if (DEMORALIZING_ROAR > 0 && !pTarget->HasAura(DEMORALIZING_ROAR, EFFECT_INDEX_0))
-        if (m_ai->GetRageAmount() < 10 || CastSpell(DEMORALIZING_ROAR, pTarget))
-            return RETURN_CONTINUE;
+    if (DEMORALIZING_ROAR > 0 && !pTarget->HasAura(DEMORALIZING_ROAR, EFFECT_INDEX_0) && CastSpell(DEMORALIZING_ROAR, pTarget))
+        return RETURN_CONTINUE;
 
-    if (MANGLE_BEAR > 0 && !pTarget->HasAura(MANGLE_BEAR))
-        if (m_ai->GetRageAmount() < 15 || CastSpell(MANGLE_BEAR, pTarget))
-            return RETURN_CONTINUE;
+    if (MANGLE_BEAR > 0 && !pTarget->HasAura(MANGLE_BEAR) && CastSpell(MANGLE_BEAR, pTarget))
+        return RETURN_CONTINUE;
 
-    if (LACERATE > 0 && !pTarget->HasAura(LACERATE, EFFECT_INDEX_0))
-        if (m_ai->GetRageAmount() < 15 || CastSpell(LACERATE, pTarget))
-            return RETURN_CONTINUE;
+    if (LACERATE > 0 && !pTarget->HasAura(LACERATE, EFFECT_INDEX_0) && CastSpell(LACERATE, pTarget))
+        return RETURN_CONTINUE;
 
-    if (MAUL > 0)
-        if (m_ai->GetRageAmount() < 10 || CastSpell(MAUL, pTarget))
-            return RETURN_CONTINUE;
+    if (MAUL > 0 && CastSpell(MAUL, pTarget))
+        return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;
 }
@@ -381,43 +371,43 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverCat(Unit* pTarge
     // Attempt to do a finishing move
     if (m_bot->GetComboPoints() >= 5)
     {
-        // TODO: double-check - checking whether bot itself has SAVAGE_ROAR aura, but cast it on pTarget?
+        // 25 Energy
         if (SAVAGE_ROAR > 0 && !m_bot->HasAura(SAVAGE_ROAR))
-            if (m_ai->GetEnergyAmount() < 25 || CastSpell(SAVAGE_ROAR, pTarget))
+        {
+            if (CastSpell(SAVAGE_ROAR, pTarget))
                 return RETURN_CONTINUE;
-
-        if (RIP > 0 && !pTarget->HasAura(RIP, EFFECT_INDEX_0))
-            if (m_ai->GetEnergyAmount() < 30 || CastSpell(RIP, pTarget))
+        }
+        // 30 Energy
+        else if (RIP > 0 && !pTarget->HasAura(RIP, EFFECT_INDEX_0))
+        {
+            if (CastSpell(RIP, pTarget))
                 return RETURN_CONTINUE;
-
-        if (FEROCIOUS_BITE > 0)
-            if (m_ai->GetEnergyAmount() < 35 || CastSpell(FEROCIOUS_BITE, pTarget))
+        }
+        // 35 Energy
+        else if (FEROCIOUS_BITE > 0)
+        {
+            if (CastSpell(FEROCIOUS_BITE, pTarget))
                 return RETURN_CONTINUE;
+        }
     } // End 5 ComboPoints
 
-    if (newTarget && COWER > 0 && !m_bot->HasSpellCooldown(COWER))
-        if (m_ai->GetEnergyAmount() < 20 || CastSpell(COWER, pTarget))
-            return RETURN_CONTINUE;
+    if (newTarget && COWER > 0 && !m_bot->HasSpellCooldown(COWER) && CastSpell(COWER, pTarget))
+        return RETURN_CONTINUE;
 
-    if (FAERIE_FIRE_FERAL > 0 && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0))
-        if (CastSpell(FAERIE_FIRE_FERAL, pTarget))
-            return RETURN_CONTINUE;
+    if (FAERIE_FIRE_FERAL > 0 && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0) && CastSpell(FAERIE_FIRE_FERAL, pTarget))
+        return RETURN_CONTINUE;
 
-    if (TIGERS_FURY > 0 && !m_bot->HasSpellCooldown(TIGERS_FURY))
-        if (CastSpell(TIGERS_FURY))
-            return RETURN_CONTINUE;
+    if (TIGERS_FURY > 0 && !m_bot->HasSpellCooldown(TIGERS_FURY) && CastSpell(TIGERS_FURY))
+        return RETURN_CONTINUE;
 
-    if (MANGLE_CAT > 0 && !pTarget->HasAura(MANGLE_CAT))
-        if (m_ai->GetEnergyAmount() < 40 || CastSpell(MANGLE_CAT))
-            return RETURN_CONTINUE;
+    if (MANGLE_CAT > 0 && !pTarget->HasAura(MANGLE_CAT) && CastSpell(MANGLE_CAT))
+        return RETURN_CONTINUE;
 
-    if (RAKE > 0 && !pTarget->HasAura(RAKE))
-        if (m_ai->GetEnergyAmount() < 40 || CastSpell(RAKE, pTarget))
-            return RETURN_CONTINUE;
+    if (RAKE > 0 && !pTarget->HasAura(RAKE) && CastSpell(RAKE, pTarget))
+        return RETURN_CONTINUE;
 
-    if (CLAW > 0)
-        if (m_ai->GetEnergyAmount() < 45 || CastSpell(CLAW, pTarget))
-            return RETURN_CONTINUE;
+    if (CLAW > 0 && CastSpell(CLAW, pTarget))
+        return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;
 }
@@ -429,44 +419,37 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverSpellDPS(Unit* p
 
     uint32 NATURE = (STARFIRE > 0 ? STARFIRE : WRATH);
 
-    if (FAERIE_FIRE > 0 && !pTarget->HasAura(FAERIE_FIRE, EFFECT_INDEX_0))
-        if (m_ai->GetManaPercent() < 8 || CastSpell(FAERIE_FIRE, pTarget))
-            return RETURN_CONTINUE;
+    if (FAERIE_FIRE > 0 && !pTarget->HasAura(FAERIE_FIRE, EFFECT_INDEX_0) && CastSpell(FAERIE_FIRE, pTarget))
+        return RETURN_CONTINUE;
 
-    if (MOONFIRE > 0 && !pTarget->HasAura(MOONFIRE, EFFECT_INDEX_0))
-        if (m_ai->GetManaPercent() < 24 || CastSpell(MOONFIRE, pTarget))
-            return RETURN_CONTINUE;
+    if (MOONFIRE > 0 && !pTarget->HasAura(MOONFIRE, EFFECT_INDEX_0) && CastSpell(MOONFIRE, pTarget))
+        return RETURN_CONTINUE;
 
-    if (INSECT_SWARM > 0 && !pTarget->HasAura(INSECT_SWARM, EFFECT_INDEX_0))
-        if (m_ai->GetManaPercent() < 9 || CastSpell(INSECT_SWARM, pTarget))
-            return RETURN_CONTINUE;
+    if (INSECT_SWARM > 0 && !pTarget->HasAura(INSECT_SWARM, EFFECT_INDEX_0) && CastSpell(INSECT_SWARM, pTarget))
+        return RETURN_CONTINUE;
 
     // TODO: Doesn't work, I can't seem to nail the aura/effect index that would make this work properly
-    if (ECLIPSE_SOLAR > 0 && WRATH > 0 && m_bot->HasAura(ECLIPSE_SOLAR))
-        if (m_ai->GetManaPercent() < 13 || CastSpell(WRATH, pTarget))
-            return RETURN_CONTINUE;
+    if (ECLIPSE_SOLAR > 0 && WRATH > 0 && m_bot->HasAura(ECLIPSE_SOLAR) && CastSpell(WRATH, pTarget))
+        return RETURN_CONTINUE;
 
     // TODO: Doesn't work, I can't seem to nail the aura/effect index that would make this work properly
-    if (ECLIPSE_LUNAR > 0 && STARFIRE > 0 && m_bot->HasAura(ECLIPSE_LUNAR))
-        if (m_ai->GetManaPercent() < 18 || CastSpell(STARFIRE, pTarget))
-            return RETURN_CONTINUE;
+    if (ECLIPSE_LUNAR > 0 && STARFIRE > 0 && m_bot->HasAura(ECLIPSE_LUNAR) && CastSpell(STARFIRE, pTarget))
+        return RETURN_CONTINUE;
 
-    if (FORCE_OF_NATURE > 0)
-        if (m_ai->GetManaPercent() < 12 || CastSpell(FORCE_OF_NATURE))
-            return RETURN_CONTINUE;
+    if (FORCE_OF_NATURE > 0 && CastSpell(FORCE_OF_NATURE))
+        return RETURN_CONTINUE;
 
-    if (NATURE > 0)
-        if (m_ai->GetManaPercent() < 18 || CastSpell(NATURE, pTarget))
-            return RETURN_CONTINUE;
-
-    Unit* pVictim = pTarget->getVictim();
+    if (NATURE > 0 && CastSpell(NATURE, pTarget))
+        return RETURN_CONTINUE;
 
     // Face enemy, make sure you're attacking
     if (!m_bot->HasInArc(M_PI_F, pTarget))
     {
         m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
-        if (pVictim)
-            pVictim->Attack(pTarget, true);
+        if (m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_MELEE)
+            m_bot->Attack(pTarget, true);
+        else
+            m_bot->AttackStop();
     }
 
     return RETURN_NO_ACTION_UNKNOWN;

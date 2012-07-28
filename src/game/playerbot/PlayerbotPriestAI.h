@@ -91,7 +91,6 @@ private:
 
     // Heals the target based off its hps
     CombatManeuverReturns HealPlayer(Player* target);
-    Player* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
 
     static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target);
 
