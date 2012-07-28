@@ -3886,6 +3886,14 @@ void PlayerbotAI::CombatOrderRestore()
     ObjectGuid NotargetGUID = m_bot->GetObjectGuid();
     gtarget = ObjectAccessor::GetUnit(*m_bot, NotargetGUID);
     CombatOrderType co;
+    if (m_FollowAutoGo == FOLLOWAUTOGO_OFF)
+    {
+        DistOverRide = 0; //set initial adjustable follow settings
+        IsUpOrDown = 0;
+        gTempDist = 0.5f;
+        gTempDist2 = 1.0f;
+        SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
+    }
     if (gPrimOrder > 0)
     {
         if (gPrimOrder == 1) co = ORDERS_TANK;
@@ -8268,7 +8276,21 @@ void PlayerbotAI::_HandleCommandFollow(std::string &text, Player &fromPlayer)
     }
     else if (ExtractCommand("info", text))
     {
-        m_FollowAutoGo ?  SendWhisper("Automatic Follow Distance is |h|cff1eff00ON|h|r", fromPlayer) : SendWhisper("Automatic Follow Distance is |h|cffff0000OFF|h|r", fromPlayer);
+        std::ostringstream msg;
+
+        msg << "Automatic Follow Distance is ";
+
+        switch(DistOverRide)
+        {
+            case 0: msg << "|h|cffff0000" << m_bot->GetDistance(GetMaster()) << "|h|r";break; //red
+            case 1: msg << "|h|cffff8000" << m_bot->GetDistance(GetMaster()) << "|h|r";break; //yellow
+            case 2: msg << "|h|cffe6cc80" << m_bot->GetDistance(GetMaster()) << "|h|r";break; //orange
+            case 3: msg << "|h|cff1eff00" << m_bot->GetDistance(GetMaster()) << "|h|r";break; //green
+            case 4:
+            default: msg << "|h|cff0070dd" << m_bot->GetDistance(GetMaster()) << "|h|r";break; //blue
+        }
+
+        m_FollowAutoGo ?  SendWhisper(msg.str(), fromPlayer) : SendWhisper("Automatic Follow Distance is |h|cffff0000OFF|h|r", fromPlayer);
         return;
     }
     else if (text != "")
