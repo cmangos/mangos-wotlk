@@ -7111,7 +7111,6 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
 
     uint8 autosell = 0;
 
-    SellWhite ? TellMaster("Sell White") : TellMaster("Keep White");
     std::ostringstream mout;
     if (item->CanBeTraded() && item->GetProto()->Quality == ITEM_QUALITY_POOR) // trash sells automatically.
         autosell = 1;
@@ -7797,6 +7796,8 @@ void PlayerbotAI::SellGarbage(Player& /*player*/, bool /*bListNonTrash*/, bool b
 
     if (!bDetailTrashSold) // no trash got sold
         report.str(""); // clear ostringstream
+
+    report << "Auto sell is set " << (SellWhite ? "|h|cff1eff00TO|h|r" : "to |h|cffff0000NOT|h|r") << " sell white items. ";
 
     if (SoldCost > 0)
     {
