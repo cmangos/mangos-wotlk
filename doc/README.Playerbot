@@ -280,6 +280,62 @@ Place your SQL files here.
 #define REVISION_DB_PLAYERBOTAI "required_5_playerbotai_auto_follow"
 NOTE: This string should be an exact copy of your SQL file's second field name in the `playerbotai_db_version` table.
 
+BotGuy NPC Menu System
+======================
+
+The new revised'botguy' utilizes NPCs already distributed throughout the world, to allow players to summon and dismiss
+bots at will, from their own account.
+
+This is a revised (more stable) version that utilizes the new 'GOSSIP MENU SYSTEM' to modify the menus of existing 
+NPCs(e.g Trainers etc) to include the bot Recruit/Dismiss menu.(No GameMaster account necessary).
+
+Install (Server administrators only)
+=======
+Please apply 'mangos_botguy.sql' (in sql/playerbotai) once to the world database to update the 'gossip_menu_option' table.
+
+                                    ---------------------------------------------------------
+
+ToDo
+====
+
+[DONE] ///---Quest---///
+[DONE] Bot can accept quest.
+[DONE] Bot can join quest.
+
+[DONE] ///---Loot---///
+[DONE] Bot can loot.
+[DONE] Bot can loot --- maybe only needed q item.
+
+//---Instance teleport Problems---///
+[DONE] Needs some fix.
+
+///---Combat and Movement Orders---///
+[DONE] Movement orders (stay, follow)
+[DONE] Combat orders (protect, assist)
+Combat order TANK
+Combat order HEAL
+
+///---Temporary item enchantments---///
+[DONE] Rogue	: Poison
+Warrior	: Sharpening Stone, Rune of Warding, Rune of Shielding.
+
+//---After fear bot's lose target---///
+Needs some fix.
+
+///---Move behind target---///
+[DONE] Rogue	: some abilitys require Rogue to be stealthed and behind target.
+
+///---Implement locale independet way of getting spellIDs---///
+[DONE] Hardcode lowest rank spellID, use function to get highest rank
+
+///---Maintenance on portal repository--- 21/07/2012
+[DONE] git fsck --full
+//cd .git/objects/pack
+[DONE] git gc --aggressive
+[DONE] git verify-pack -v *.idx
+object pack files (*.idx) verified, no errors
+///---Maintenance on portal repository--- 21/07/2012
+
 History:
 ========
 This project was ported from a Trinity mod.
