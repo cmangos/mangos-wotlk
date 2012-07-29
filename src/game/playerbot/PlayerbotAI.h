@@ -1832,7 +1832,7 @@ public:
     void BotDataRestore();
     void CombatOrderRestore();
     void AutoUpgradeEquipment();
-    void FollowAutoReset(Player& player);
+    void FollowAutoReset();
     void AutoEquipComparison(Item *pItem, Item *pItem2);
     bool ItemStatComparison(const ItemPrototype *pProto, const ItemPrototype *pProto2);
     void Feast();
