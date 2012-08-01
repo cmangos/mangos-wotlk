@@ -207,27 +207,37 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
         m_ai->SetCombatStyle(PlayerbotAI::COMBAT_MELEE);
 
     //Used to determine if this bot is highest on threat
-    Unit *newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
+    Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
     if (newTarget) // TODO: && party has a tank
     {
         if (newTarget && FADE > 0 && !m_bot->HasAura(FADE, EFFECT_INDEX_0))
         {
-            m_ai->TellMaster("I'm casting fade.");
-            return CastSpell(FADE, m_bot);
+            if (CastSpell(FADE, m_bot))
+            {
+                //m_ai->TellMaster("I'm casting fade.");
+                return RETURN_CONTINUE;
+            }
+            else
+                m_ai->TellMaster("I have AGGRO.");
         }
 
         // Heal myself
         // TODO: move to HealTarget code
         // TODO: you forgot to check for the 'temporarily immune to PW:S because you only just got it cast on you' effect
         //       - which is different effect from the actual shield.
-        if (m_ai->GetHealthPercent() < 25 && POWER_WORD_SHIELD > 0 && !m_bot->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0) && CastSpell(POWER_WORD_SHIELD))
+        if (m_ai->GetHealthPercent() < 25 && POWER_WORD_SHIELD > 0 && !m_bot->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0))
         {
-            m_ai->TellMaster("I'm casting PW:S on myself.");
-            return RETURN_CONTINUE;
+            if (CastSpell(POWER_WORD_SHIELD) & RETURN_CONTINUE)
+            {
+                //m_ai->TellMaster("I'm casting PW:S on myself.");
+                return RETURN_CONTINUE;
+            }
+            else if (m_ai->IsHealer()) // Even if any other RETURN_ANY_OK - aside from RETURN_CONTINUE
+                m_ai->TellMaster("Your healer's about TO DIE. HELP ME.");
         }
-        if (m_ai->GetHealthPercent() < 35 && DESPERATE_PRAYER > 0 && CastSpell(DESPERATE_PRAYER, m_bot))
+        if (m_ai->GetHealthPercent() < 35 && DESPERATE_PRAYER > 0 && CastSpell(DESPERATE_PRAYER, m_bot) & RETURN_CONTINUE)
         {
-            m_ai->TellMaster("I'm casting desperate prayer.");
+            //m_ai->TellMaster("I'm casting desperate prayer.");
             return RETURN_CONTINUE;
         }
 
@@ -267,6 +277,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     // Do damage tweaking for healers here
     if (m_ai->IsHealer())
     {
+        // TODO: elite exception
         //if (Any target is an Elite)
         //    return;
 
