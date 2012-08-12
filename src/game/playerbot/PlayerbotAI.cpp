@@ -7885,13 +7885,13 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     }
 
     // ignore any messages from Addons
-    if (text.empty() ||
-        text.find("X-Perl") != std::wstring::npos ||
-        text.find("HealBot") != std::wstring::npos ||
-        text.find("HealComm") != std::wstring::npos ||      // "HealComm	99990094"
+    if (text.empty()                                   ||
+        text.find("X-Perl")      != std::wstring::npos ||
+        text.find("HealBot")     != std::wstring::npos ||
+        text.find("HealComm")    != std::wstring::npos ||   // "HealComm	99990094"
         text.find("LOOT_OPENED") != std::wstring::npos ||
-        text.find("CTRA") != std::wstring::npos ||
-        text.find("GathX") == 0) // Gatherer
+        text.find("CTRA")        != std::wstring::npos ||
+        text.find("GathX")       == 0)                      // Gatherer
         return;
 
     // if message is not from a player in the masters account auto reply and ignore
@@ -7970,8 +7970,6 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
     else if (ExtractCommand("sell", input))
         _HandleCommandSell(input, fromPlayer);
-    else if (ExtractCommand("combat", input))
-        _HandleCommandCombat(input, fromPlayer);
 
     else if (ExtractCommand("buy", input))
         _HandleCommandBuy(input, fromPlayer);
@@ -8166,6 +8164,13 @@ void PlayerbotAI::_HandleCommandReset(std::string &text, Player &fromPlayer)
 
 void PlayerbotAI::_HandleCommandCombat(std::string &text, Player &fromPlayer)
 {
+    return;
+}
+
+void PlayerbotAI::_HandleCommandOrders(std::string &text, Player &fromPlayer)
+{
+    if (text == "")
+
     if (ExtractCommand("delay", text))
     {
         uint32 gdelay;
@@ -8181,17 +8186,12 @@ void PlayerbotAI::_HandleCommandCombat(std::string &text, Player &fromPlayer)
             TellMaster("Invalid delay. choose a number between 0 and 10");
         return;
     }
-    SendWhisper("Valid sub commands for 'combat' are 'delay <0-10>'", fromPlayer);
-    return;
-}
-
-void PlayerbotAI::_HandleCommandOrders(std::string &text, Player &fromPlayer)
-{
-    if (text != "")
+    else if (text != "")
     {
-        SendWhisper("orders cannot have a subcommand.", fromPlayer);
+        SendWhisper("See help for details on using 'orders'.", fromPlayer);
         return;
     }
+
     SendOrders(*GetMaster());
 }
 
