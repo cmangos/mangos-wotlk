@@ -57,11 +57,31 @@ PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, Play
 
 PlayerbotRogueAI::~PlayerbotRogueAI() {}
 
-CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuver(Unit* pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
+    switch (m_ai->GetScenarioType())
+    {
+        case PlayerbotAI::SCENARIO_PVP_DUEL:
+        case PlayerbotAI::SCENARIO_PVP_BG:
+        case PlayerbotAI::SCENARIO_PVP_ARENA:
+        case PlayerbotAI::SCENARIO_PVP_OPENWORLD:
+            return DoFirstCombatManeuverPVP(pTarget);
+        case PlayerbotAI::SCENARIO_PVE:
+        case PlayerbotAI::SCENARIO_PVE_ELITE:
+        case PlayerbotAI::SCENARIO_PVE_RAID:
+        default:
+            return DoFirstCombatManeuverPVE(pTarget);
+            break;
+    }
+
+    return RETURN_NO_ACTION_ERROR;
+}
+
+CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuverPVE(Unit *pTarget)
+{
     if (STEALTH > 0 && !m_bot->HasAura(STEALTH, EFFECT_INDEX_0) && m_ai->CastSpell(STEALTH, *m_bot))
     {
         m_bot->addUnitState(UNIT_STAT_CHASE); // ensure that the bot does not use MoveChase(), as this doesn't seem to work with STEALTH
@@ -77,27 +97,49 @@ CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuver(Unit *pTarget)
     return RETURN_NO_ACTION_OK;
 }
 
+// TODO: blatant copy of PVE for now, please PVP-port it
+CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuverPVP(Unit *pTarget)
+{
+    if (STEALTH > 0 && !m_bot->HasAura(STEALTH, EFFECT_INDEX_0) && m_ai->CastSpell(STEALTH, *m_bot))
+    {
+        m_bot->addUnitState(UNIT_STAT_CHASE); // ensure that the bot does not use MoveChase(), as this doesn't seem to work with STEALTH
+        return RETURN_FINISHED_FIRST_MOVES; // DoNextCombatManeuver handles active stealth
+    }
+    else if (m_bot->HasAura(STEALTH, EFFECT_INDEX_0))
+    {
+        m_bot->GetMotionMaster()->MoveFollow(pTarget, 4.5f, m_bot->GetOrientation()); // TODO: this isn't the place for movement code, is it?
+        return RETURN_FINISHED_FIRST_MOVES; // DoNextCombatManeuver handles active stealth
+    }
+
+    // Not in stealth, can't cast stealth; Off to DoNextCombatManeuver
+    return RETURN_NO_ACTION_OK;
+}
+
+CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit *pTarget)
+{
+    switch (m_ai->GetScenarioType())
+    {
+        case PlayerbotAI::SCENARIO_PVP_DUEL:
+        case PlayerbotAI::SCENARIO_PVP_BG:
+        case PlayerbotAI::SCENARIO_PVP_ARENA:
+        case PlayerbotAI::SCENARIO_PVP_OPENWORLD:
+            return DoNextCombatManeuverPVP(pTarget);
+        case PlayerbotAI::SCENARIO_PVE:
+        case PlayerbotAI::SCENARIO_PVE_ELITE:
+        case PlayerbotAI::SCENARIO_PVE_RAID:
+        default:
+            return DoNextCombatManeuverPVE(pTarget);
+            break;
+    }
+
+    return RETURN_NO_ACTION_ERROR;
+}
+
 CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
 {
     if (!pTarget) return RETURN_NO_ACTION_ERROR;
     if (!m_ai)    return RETURN_NO_ACTION_ERROR;
     if (!m_bot)   return RETURN_NO_ACTION_ERROR;
-
-    switch (m_ai->GetScenarioType())
-    {
-        case PlayerbotAI::SCENARIO_PVP_DUEL:
-        {
-            if (SINISTER_STRIKE > 0)
-            {
-                m_ai->CastSpell(SINISTER_STRIKE);
-                return RETURN_CONTINUE;
-            }
-
-            return RETURN_NO_ACTION_UNKNOWN;
-        }
-        default:
-            break;
-    }
 
     Unit* pVictim = pTarget->getVictim();
     float fTargetDist = m_bot->GetCombatDistance(pTarget);
@@ -282,9 +324,15 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     }
 
     return RETURN_NO_ACTION_OK;
-}
+} // end DoNextCombatManeuver
 
-// end DoNextCombatManeuver
+CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVP(Unit* pTarget)
+{
+    //if (m_ai->CastSpell(SINISTER_STRIKE))
+    //    return RETURN_CONTINUE;
+
+    return DoNextCombatManeuverPVE(pTarget); // TODO: bad idea perhaps, but better than the alternative
+}
 
 void PlayerbotRogueAI::DoNonCombatActions()
 {

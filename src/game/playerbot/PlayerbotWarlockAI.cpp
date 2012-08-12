@@ -79,12 +79,57 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
 
 PlayerbotWarlockAI::~PlayerbotWarlockAI() {}
 
-CombatManeuverReturns PlayerbotWarlockAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
+CombatManeuverReturns PlayerbotWarlockAI::DoFirstCombatManeuver(Unit* pTarget)
+{
+    switch (m_ai->GetScenarioType())
+    {
+        case PlayerbotAI::SCENARIO_PVP_DUEL:
+        case PlayerbotAI::SCENARIO_PVP_BG:
+        case PlayerbotAI::SCENARIO_PVP_ARENA:
+        case PlayerbotAI::SCENARIO_PVP_OPENWORLD:
+            return DoFirstCombatManeuverPVP(pTarget);
+        case PlayerbotAI::SCENARIO_PVE:
+        case PlayerbotAI::SCENARIO_PVE_ELITE:
+        case PlayerbotAI::SCENARIO_PVE_RAID:
+        default:
+            return DoFirstCombatManeuverPVE(pTarget);
+            break;
+    }
+
+    return RETURN_NO_ACTION_ERROR;
+}
+
+CombatManeuverReturns PlayerbotWarlockAI::DoFirstCombatManeuverPVE(Unit* /*pTarget*/)
+{
+    return RETURN_NO_ACTION_OK;
+}
+
+CombatManeuverReturns PlayerbotWarlockAI::DoFirstCombatManeuverPVP(Unit* /*pTarget*/)
 {
     return RETURN_NO_ACTION_OK;
 }
 
 CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
+{
+    switch (m_ai->GetScenarioType())
+    {
+        case PlayerbotAI::SCENARIO_PVP_DUEL:
+        case PlayerbotAI::SCENARIO_PVP_BG:
+        case PlayerbotAI::SCENARIO_PVP_ARENA:
+        case PlayerbotAI::SCENARIO_PVP_OPENWORLD:
+            return DoNextCombatManeuverPVP(pTarget);
+        case PlayerbotAI::SCENARIO_PVE:
+        case PlayerbotAI::SCENARIO_PVE_ELITE:
+        case PlayerbotAI::SCENARIO_PVE_RAID:
+        default:
+            return DoNextCombatManeuverPVE(pTarget);
+            break;
+    }
+
+    return RETURN_NO_ACTION_ERROR;
+}
+
+CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit *pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -95,17 +140,6 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
     uint32 spec = m_bot->GetSpec();
     uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
 
-    //switch (m_ai->GetScenarioType())
-    //{
-    //    case PlayerbotAI::SCENARIO_DUEL:
-    //        if (SHADOW_BOLT > 0)
-    //            m_ai->CastSpell(SHADOW_BOLT);
-    //        return;
-    //    default:
-    //        break;
-    //}
-
-    // ------- Non Duel combat ----------
     //If we have UA it will replace immolate in our rotation
     uint32 FIRE = (UNSTABLE_AFFLICTION > 0 ? UNSTABLE_AFFLICTION : IMMOLATE);
 
@@ -153,7 +187,6 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
         }
     }
 
-    // TODO: Mana checks (on BASE mana percent, please! - that means before stat bonuses AKA what spells require)
     // Damage Spells
     switch (spec)
     {
@@ -207,65 +240,48 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 
             //if (LIFE_TAP && LastSpellAffliction < 1 && m_ai->GetManaPercent() <= 50 && m_ai->GetHealthPercent() > 50)
             //    m_ai->CastSpell(LIFE_TAP, *m_bot);
-            //    SpellSequence = SPELL_DESTRUCTION;
             //else if (DRAIN_SOUL && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.40 && !pTarget->HasAura(DRAIN_SOUL) && LastSpellAffliction < 3)
             //    m_ai->CastSpell(DRAIN_SOUL, *pTarget);
             //    //m_ai->SetIgnoreUpdateTime(15);
-            //    SpellSequence = SPELL_DESTRUCTION;
             //else if (DRAIN_LIFE && LastSpellAffliction < 4 && !pTarget->HasAura(DRAIN_SOUL) && !pTarget->HasAura(SEED_OF_CORRUPTION) && !pTarget->HasAura(DRAIN_LIFE) && !pTarget->HasAura(DRAIN_MANA) && m_ai->GetHealthPercent() <= 70)
             //    m_ai->CastSpell(DRAIN_LIFE, *pTarget);
             //    //m_ai->SetIgnoreUpdateTime(5);
-            //    SpellSequence = SPELL_DESTRUCTION;
             //else if (SEED_OF_CORRUPTION && !pTarget->HasAura(SEED_OF_CORRUPTION) && LastSpellAffliction < 7)
             //    m_ai->CastSpell(SEED_OF_CORRUPTION, *pTarget);
-            //    SpellSequence = SPELL_DESTRUCTION;
             //else if (HOWL_OF_TERROR && !pTarget->HasAura(HOWL_OF_TERROR) && m_ai->GetAttackerCount() > 3 && LastSpellAffliction < 8)
             //    m_ai->CastSpell(HOWL_OF_TERROR, *pTarget);
             //    m_ai->TellMaster("casting howl of terror!");
-            //    SpellSequence = SPELL_DESTRUCTION;
             //else if (FEAR && !pTarget->HasAura(FEAR) && pVictim == m_bot && m_ai->GetAttackerCount() >= 2 && LastSpellAffliction < 9)
             //    m_ai->CastSpell(FEAR, *pTarget);
             //    //m_ai->TellMaster("casting fear!");
             //    //m_ai->SetIgnoreUpdateTime(1.5);
-            //    SpellSequence = SPELL_DESTRUCTION;
             //else if ((pet) && (DARK_PACT > 0 && m_ai->GetManaPercent() <= 50 && LastSpellAffliction < 10 && pet->GetPower(POWER_MANA) > 0))
             //    m_ai->CastSpell(DARK_PACT, *m_bot);
-            //    SpellSequence = SPELL_DESTRUCTION;
             //if (SHADOWFURY && LastSpellDestruction < 1 && !pTarget->HasAura(SHADOWFURY))
             //    m_ai->CastSpell(SHADOWFURY, *pTarget);
-            //    SpellSequence = SPELL_CURSES;
             //else if (RAIN_OF_FIRE && LastSpellDestruction < 3 && m_ai->GetAttackerCount() >= 3)
             //    m_ai->CastSpell(RAIN_OF_FIRE, *pTarget);
             //    //m_ai->TellMaster("casting rain of fire!");
             //    //m_ai->SetIgnoreUpdateTime(8);
-            //    SpellSequence = SPELL_CURSES;
             //else if (SHADOWFLAME && !pTarget->HasAura(SHADOWFLAME) && LastSpellDestruction < 4)
             //    m_ai->CastSpell(SHADOWFLAME, *pTarget);
-            //    SpellSequence = SPELL_CURSES;
             //else if (SEARING_PAIN && LastSpellDestruction < 8)
             //    m_ai->CastSpell(SEARING_PAIN, *pTarget);
-            //    SpellSequence = SPELL_CURSES;
             //else if (SOUL_FIRE && LastSpellDestruction < 9)
             //    m_ai->CastSpell(SOUL_FIRE, *pTarget);
             //    //m_ai->SetIgnoreUpdateTime(6);
-            //    SpellSequence = SPELL_CURSES;
             //else if (SHADOWBURN && LastSpellDestruction < 11 && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.20 && !pTarget->HasAura(SHADOWBURN))
             //    m_ai->CastSpell(SHADOWBURN, *pTarget);
-            //    SpellSequence = SPELL_CURSES;
             //else if (HELLFIRE && LastSpellDestruction < 12 && !m_bot->HasAura(HELLFIRE) && m_ai->GetAttackerCount() >= 5 && m_ai->GetHealthPercent() >= 50)
             //    m_ai->CastSpell(HELLFIRE);
             //    m_ai->TellMaster("casting hellfire!");
             //    //m_ai->SetIgnoreUpdateTime(15);
-            //    SpellSequence = SPELL_CURSES;
             //else if (CURSE_OF_THE_ELEMENTS && !pTarget->HasAura(CURSE_OF_THE_ELEMENTS) && !pTarget->HasAura(SHADOWFLAME) && !pTarget->HasAura(CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_WEAKNESS) && LastSpellCurse < 2)
             //    m_ai->CastSpell(CURSE_OF_THE_ELEMENTS, *pTarget);
-            //    SpellSequence = SPELL_AFFLICTION;
             //else if (CURSE_OF_WEAKNESS && !pTarget->HasAura(CURSE_OF_WEAKNESS) && !pTarget->HasAura(SHADOWFLAME) && !pTarget->HasAura(CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_THE_ELEMENTS) && LastSpellCurse < 3)
             //    m_ai->CastSpell(CURSE_OF_WEAKNESS, *pTarget);
-            //    SpellSequence = SPELL_AFFLICTION;
             //else if (CURSE_OF_TONGUES && !pTarget->HasAura(CURSE_OF_TONGUES) && !pTarget->HasAura(SHADOWFLAME) && !pTarget->HasAura(CURSE_OF_WEAKNESS) && !pTarget->HasAura(CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_THE_ELEMENTS) && LastSpellCurse < 4)
             //    m_ai->CastSpell(CURSE_OF_TONGUES, *pTarget);
-            //    SpellSequence = SPELL_AFFLICTION;
     }
 
     // No spec due to low level OR no spell found yet
@@ -278,6 +294,16 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget)
 
     return RETURN_NO_ACTION_OK;
 } // end DoNextCombatManeuver
+
+CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVP(Unit* pTarget)
+{
+    if (m_ai->CastSpell(FEAR, *pTarget))
+        return RETURN_CONTINUE;
+    if (m_ai->CastSpell(SHADOW_BOLT))
+        return RETURN_CONTINUE;
+
+    return DoNextCombatManeuverPVE(pTarget); // TODO: bad idea perhaps, but better than the alternative
+}
 
 void PlayerbotWarlockAI::CheckDemon()
 {

@@ -83,7 +83,27 @@ PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, 
 }
 PlayerbotWarriorAI::~PlayerbotWarriorAI() {}
 
-CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuver(Unit* pTarget)
+{
+    switch (m_ai->GetScenarioType())
+    {
+        case PlayerbotAI::SCENARIO_PVP_DUEL:
+        case PlayerbotAI::SCENARIO_PVP_BG:
+        case PlayerbotAI::SCENARIO_PVP_ARENA:
+        case PlayerbotAI::SCENARIO_PVP_OPENWORLD:
+            return DoFirstCombatManeuverPVP(pTarget);
+        case PlayerbotAI::SCENARIO_PVE:
+        case PlayerbotAI::SCENARIO_PVE_ELITE:
+        case PlayerbotAI::SCENARIO_PVE_RAID:
+        default:
+            return DoFirstCombatManeuverPVE(pTarget);
+            break;
+    }
+
+    return RETURN_NO_ACTION_ERROR;
+}
+
+CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVE(Unit *pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -144,45 +164,93 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuver(Unit *pTarget)
     return RETURN_NO_ACTION_OK;
 }
 
-//Buff and rebuff shouts
-void PlayerbotWarriorAI::CheckShouts()
-{
-    if (!m_ai)  return;
-    if (!m_bot) return;
-
-    if (m_bot->GetSpec() == WARRIOR_SPEC_PROTECTION && COMMANDING_SHOUT > 0)
-    {
-        if (!m_bot->HasAura(COMMANDING_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(COMMANDING_SHOUT))
-            return;
-    }
-    else // Not prot, or prot but no Commanding Shout yet
-    {
-        if (!m_bot->HasAura(BATTLE_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(BATTLE_SHOUT))
-            return;
-    }
-}
-
-CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
+// TODO: blatant copy of PVE for now, please PVP-port it
+CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVP(Unit *pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    //switch (m_ai->GetScenarioType())
-    //{
-    //    case PlayerbotAI::SCENARIO_DUEL:
-    //        if (HEROIC_STRIKE > 0)
-    //            if (m_ai->CastSpell(HEROIC_STRIKE, *pTarget))
-    //                return RETURN_CONTINUE;
-    //
-    //        return RETURN_NO_ACTION_ERROR;
-    //    default:
-    //        break;
-    //}
-    // ------- Non Duel combat ----------
+    PlayerbotAI::CombatOrderType co = m_ai->GetCombatOrder();
+    float fTargetDist = m_bot->GetCombatDistance(pTarget);
 
-    // Damage Attacks
+    if (DEFENSIVE_STANCE && (co & PlayerbotAI::ORDERS_TANK))
+    {
+        if (!m_bot->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DEFENSIVE_STANCE))
+            return RETURN_CONTINUE;
+        else if (TAUNT > 0 && m_bot->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(TAUNT, *pTarget))
+            return RETURN_FINISHED_FIRST_MOVES;
+    }
 
-    Player *m_bot = GetPlayerBot();
+    if (BERSERKER_STANCE)
+    {
+        if (!m_bot->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(BERSERKER_STANCE))
+            return RETURN_CONTINUE;
+        if (BLOODRAGE > 0 && m_bot->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0) && m_ai->GetRageAmount() <= 10)
+            return m_ai->CastSpell(BLOODRAGE) ? RETURN_FINISHED_FIRST_MOVES : RETURN_NO_ACTION_ERROR;
+        if (INTERCEPT > 0 && m_bot->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0))
+        {
+            if (fTargetDist < 8.0f)
+                return RETURN_NO_ACTION_OK;
+            else if (fTargetDist > 25.0f)
+                return RETURN_CONTINUE; // wait to come into range
+            else if (INTERCEPT > 0 && m_ai->CastSpell(INTERCEPT, *pTarget))
+            {
+                float x, y, z;
+                pTarget->GetContactPoint(m_bot, x, y, z, 3.666666f);
+                m_bot->Relocate(x, y, z);
+                return RETURN_FINISHED_FIRST_MOVES;
+            }
+        }
+    }
+
+    if (BATTLE_STANCE)
+    {
+        if (!m_bot->HasAura(BATTLE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(BATTLE_STANCE))
+            return RETURN_CONTINUE;
+        if (CHARGE > 0 && m_bot->HasAura(BATTLE_STANCE, EFFECT_INDEX_0))
+        {
+            if (fTargetDist < 8.0f)
+                return RETURN_NO_ACTION_OK;
+            if (fTargetDist > 25.0f)
+                return RETURN_CONTINUE; // wait to come into range
+            else if (CHARGE > 0 && m_ai->CastSpell(CHARGE, *pTarget))
+            {
+                float x, y, z;
+                pTarget->GetContactPoint(m_bot, x, y, z, 3.666666f);
+                m_bot->Relocate(x, y, z);
+                return RETURN_FINISHED_FIRST_MOVES;
+            }
+        }
+    }
+
+    return RETURN_NO_ACTION_OK;
+}
+
+CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
+{
+    switch (m_ai->GetScenarioType())
+    {
+        case PlayerbotAI::SCENARIO_PVP_DUEL:
+        case PlayerbotAI::SCENARIO_PVP_BG:
+        case PlayerbotAI::SCENARIO_PVP_ARENA:
+        case PlayerbotAI::SCENARIO_PVP_OPENWORLD:
+            return DoNextCombatManeuverPVP(pTarget);
+        case PlayerbotAI::SCENARIO_PVE:
+        case PlayerbotAI::SCENARIO_PVE_ELITE:
+        case PlayerbotAI::SCENARIO_PVE_RAID:
+        default:
+            return DoNextCombatManeuverPVE(pTarget);
+            break;
+    }
+
+    return RETURN_NO_ACTION_ERROR;
+}
+
+CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit *pTarget)
+{
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
+
     //Unit* pVictim = pTarget->getVictim();
     //float fTargetDist = m_bot->GetCombatDistance(pTarget);
     //PlayerbotAI::CombatOrderType co = m_ai->GetCombatOrder();
@@ -192,7 +260,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
     //uint32 SUNDER = (DEVASTATE > 0 ? DEVASTATE : SUNDER_ARMOR);
 
     //Used to determine if this bot is highest on threat
-    Unit *newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
+    Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
 
     // do shouts, berserker rage, etc...
     if (BERSERKER_RAGE > 0 && !m_bot->HasAura(BERSERKER_RAGE, EFFECT_INDEX_0))
@@ -201,6 +269,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
         m_ai->CastSpell(BLOODRAGE);
 
     CheckShouts();
+
     switch (spec)
     {
         case WARRIOR_SPEC_ARMS:
@@ -327,6 +396,32 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
     }
 
     return RETURN_NO_ACTION_OK;
+}
+
+CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVP(Unit* pTarget)
+{
+    if (m_ai->CastSpell(HEROIC_STRIKE))
+        return RETURN_CONTINUE;
+
+    return DoNextCombatManeuverPVE(pTarget); // TODO: bad idea perhaps, but better than the alternative
+}
+
+//Buff and rebuff shouts
+void PlayerbotWarriorAI::CheckShouts()
+{
+    if (!m_ai)  return;
+    if (!m_bot) return;
+
+    if (m_bot->GetSpec() == WARRIOR_SPEC_PROTECTION && COMMANDING_SHOUT > 0)
+    {
+        if (!m_bot->HasAura(COMMANDING_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(COMMANDING_SHOUT))
+            return;
+    }
+    else // Not prot, or prot but no Commanding Shout yet
+    {
+        if (!m_bot->HasAura(BATTLE_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(BATTLE_SHOUT))
+            return;
+    }
 }
 
 void PlayerbotWarriorAI::DoNonCombatActions()

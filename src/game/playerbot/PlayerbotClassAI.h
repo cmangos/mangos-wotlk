@@ -53,6 +53,11 @@ public:
     PlayerbotAI* GetAI() { return m_ai; };
 
 protected:
+    virtual CombatManeuverReturns DoFirstCombatManeuverPVE(Unit*);
+    virtual CombatManeuverReturns DoNextCombatManeuverPVE(Unit*);
+    virtual CombatManeuverReturns DoFirstCombatManeuverPVP(Unit*);
+    virtual CombatManeuverReturns DoNextCombatManeuverPVP(Unit*);
+
     CombatManeuverReturns CastSpellNoRanged(uint32 nextAction, Unit *pTarget);
     CombatManeuverReturns CastSpellWand(uint32 nextAction, Unit *pTarget, uint32 SHOOT);
     virtual CombatManeuverReturns HealPlayer(Player* target);

@@ -82,118 +82,57 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
 
 PlayerbotDruidAI::~PlayerbotDruidAI() {}
 
-CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuver(Unit* /*pTarget*/)
+CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuver(Unit* pTarget)
+{
+    switch (m_ai->GetScenarioType())
+    {
+        case PlayerbotAI::SCENARIO_PVP_DUEL:
+        case PlayerbotAI::SCENARIO_PVP_BG:
+        case PlayerbotAI::SCENARIO_PVP_ARENA:
+        case PlayerbotAI::SCENARIO_PVP_OPENWORLD:
+            return DoFirstCombatManeuverPVP(pTarget);
+        case PlayerbotAI::SCENARIO_PVE:
+        case PlayerbotAI::SCENARIO_PVE_ELITE:
+        case PlayerbotAI::SCENARIO_PVE_RAID:
+        default:
+            return DoFirstCombatManeuverPVE(pTarget);
+            break;
+    }
+
+    return RETURN_NO_ACTION_ERROR;
+}
+
+CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuverPVE(Unit* /*pTarget*/)
 {
     return RETURN_NO_ACTION_OK;
 }
 
-CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
+CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuverPVP(Unit* /*pTarget*/)
 {
-    CombatManeuverReturns r = PlayerbotClassAI::HealPlayer(target);
-    if (r != RETURN_NO_ACTION_OK)
-        return r;
-
-    if (!target->isAlive())
-    {
-        if (m_bot->isInCombat())
-        {
-            // TODO: Add check for cooldown
-            if (REBIRTH && m_ai->CastSpell(REBIRTH, *target))
-            {
-                std::string msg = "Resurrecting ";
-                msg += target->GetName();
-                m_bot->Say(msg, LANG_UNIVERSAL);
-                return RETURN_CONTINUE;
-            }
-        }
-        else
-        {
-            if (REVIVE && m_ai->CastSpell(REVIVE, *target))
-            {
-                std::string msg = "Resurrecting ";
-                msg += target->GetName();
-                m_bot->Say(msg, LANG_UNIVERSAL);
-                return RETURN_CONTINUE;
-            }
-        }
-        return RETURN_NO_ACTION_ERROR; // not error per se - possibly just OOM
-    }
-
-    //If spell exists and orders say we should be dispelling
-    if ((REMOVE_CURSE > 0 || ABOLISH_POISON > 0) && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
-    {
-        //This does something important(lol)
-        uint32 dispelMask  = GetDispellMask(DISPEL_CURSE);
-        uint32 dispelMask2  = GetDispellMask(DISPEL_POISON);
-        //Get a list of all the targets auras(spells affecting target)
-        Unit::SpellAuraHolderMap const& auras = target->GetSpellAuraHolderMap();
-        //Iterate through the auras
-        for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); itr++)
-        {
-            SpellAuraHolder *holder = itr->second;
-            //I dont know what this does but it doesn't work without it
-            if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
-            {
-                //If the spell is dispellable and we can dispel it, do so
-                if ((holder->GetSpellProto()->Dispel == DISPEL_CURSE) & (REMOVE_CURSE > 0))
-                {
-                    if (CastSpell(REMOVE_CURSE, target))
-                        return RETURN_CONTINUE;
-                    return RETURN_NO_ACTION_ERROR;
-                }
-            }
-            else if ((1 << holder->GetSpellProto()->Dispel) & dispelMask2)
-            {
-                if ((holder->GetSpellProto()->Dispel == DISPEL_POISON) & (ABOLISH_POISON > 0))
-                {
-                    if (CastSpell(ABOLISH_POISON, target))
-                        return RETURN_CONTINUE;
-                    return RETURN_NO_ACTION_ERROR;
-                }
-            }
-        }
-    }
-
-    uint8 hp = target->GetHealthPercent();
-
-    // Everyone is healthy enough, return OK. MUST correlate to highest value below (should be last HP check)
-    if (hp >= 90)
-        return RETURN_NO_ACTION_OK;
-
-    // Reset form if needed
-    if (!m_bot->HasAura(TREE_OF_LIFE) || TREE_OF_LIFE == 0)
-        GoBuffForm(GetPlayerBot());
-
-    // Start heals. Do lowest HP checks at the top
-    if (hp < 30)
-    {
-        // TODO: Use in conjunction with Nature's Swiftness
-        if (HEALING_TOUCH > 0 && (NOURISH == 0 /*|| CastSpell(NATURES_SWIFTNESS)*/ ) && CastSpell(HEALING_TOUCH, target))
-            return RETURN_CONTINUE;
-
-        if (NOURISH > 0 && CastSpell(NOURISH, target))
-            return RETURN_CONTINUE;
-    }
-
-    if (hp < 45 && WILD_GROWTH > 0 && !target->HasAura(WILD_GROWTH) && CastSpell(WILD_GROWTH, target))
-        return RETURN_CONTINUE;
-
-    if (hp < 50 && SWIFTMEND > 0 && (target->HasAura(REJUVENATION) || target->HasAura(REGROWTH)) && CastSpell(SWIFTMEND, target))
-        return RETURN_CONTINUE;
-
-    if (hp < 60 && REGROWTH > 0 && !target->HasAura(REGROWTH) && CastSpell(REGROWTH, target))
-        return RETURN_CONTINUE;
-
-    if (hp < 65 && LIFEBLOOM > 0 && !target->HasAura(LIFEBLOOM) && CastSpell(LIFEBLOOM, target))
-        return RETURN_CONTINUE;
-
-    if (hp < 90 && REJUVENATION > 0 && !target->HasAura(REJUVENATION) && CastSpell(REJUVENATION, target))
-        return RETURN_CONTINUE;
-
-    return RETURN_NO_ACTION_UNKNOWN;
-} // end HealTarget
+    return RETURN_NO_ACTION_OK;
+}
 
 CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
+{
+    switch (m_ai->GetScenarioType())
+    {
+        case PlayerbotAI::SCENARIO_PVP_DUEL:
+        case PlayerbotAI::SCENARIO_PVP_BG:
+        case PlayerbotAI::SCENARIO_PVP_ARENA:
+        case PlayerbotAI::SCENARIO_PVP_OPENWORLD:
+            return DoNextCombatManeuverPVP(pTarget);
+        case PlayerbotAI::SCENARIO_PVE:
+        case PlayerbotAI::SCENARIO_PVE_ELITE:
+        case PlayerbotAI::SCENARIO_PVE_RAID:
+        default:
+            return DoNextCombatManeuverPVE(pTarget);
+            break;
+    }
+
+    return RETURN_NO_ACTION_ERROR;
+}
+
+CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuverPVE(Unit *pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -231,16 +170,6 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
         default:
             break;
     }
-
-    //switch (m_ai->GetScenarioType())
-    //{
-    //    case PlayerbotAI::SCENARIO_DUEL:
-    //        if (CastSpell(MOONFIRE))
-    //            return RETURN_CONTINUE;
-    //        return RETURN_NO_ACTION_ERROR;
-    //    default:
-    //        break; 
-    //}
 
     //Used to determine if this bot is highest on threat
     Unit *newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
@@ -300,6 +229,14 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
 
     return RETURN_NO_ACTION_UNKNOWN;
 } // end DoNextCombatManeuver
+
+CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuverPVP(Unit* pTarget)
+{
+    if (m_ai->CastSpell(MOONFIRE))
+        return RETURN_CONTINUE;
+
+    return DoNextCombatManeuverPVE(pTarget); // TODO: bad idea perhaps, but better than the alternative
+}
 
 CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarget)
 {
@@ -496,6 +433,112 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverHeal()
 
     return RETURN_NO_ACTION_UNKNOWN;
 }
+
+CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
+{
+    CombatManeuverReturns r = PlayerbotClassAI::HealPlayer(target);
+    if (r != RETURN_NO_ACTION_OK)
+        return r;
+
+    if (!target->isAlive())
+    {
+        if (m_bot->isInCombat())
+        {
+            // TODO: Add check for cooldown
+            if (REBIRTH && m_ai->CastSpell(REBIRTH, *target))
+            {
+                std::string msg = "Resurrecting ";
+                msg += target->GetName();
+                m_bot->Say(msg, LANG_UNIVERSAL);
+                return RETURN_CONTINUE;
+            }
+        }
+        else
+        {
+            if (REVIVE && m_ai->CastSpell(REVIVE, *target))
+            {
+                std::string msg = "Resurrecting ";
+                msg += target->GetName();
+                m_bot->Say(msg, LANG_UNIVERSAL);
+                return RETURN_CONTINUE;
+            }
+        }
+        return RETURN_NO_ACTION_ERROR; // not error per se - possibly just OOM
+    }
+
+    //If spell exists and orders say we should be dispelling
+    if ((REMOVE_CURSE > 0 || ABOLISH_POISON > 0) && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
+    {
+        //This does something important(lol)
+        uint32 dispelMask  = GetDispellMask(DISPEL_CURSE);
+        uint32 dispelMask2  = GetDispellMask(DISPEL_POISON);
+        //Get a list of all the targets auras(spells affecting target)
+        Unit::SpellAuraHolderMap const& auras = target->GetSpellAuraHolderMap();
+        //Iterate through the auras
+        for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); itr++)
+        {
+            SpellAuraHolder *holder = itr->second;
+            //I dont know what this does but it doesn't work without it
+            if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
+            {
+                //If the spell is dispellable and we can dispel it, do so
+                if ((holder->GetSpellProto()->Dispel == DISPEL_CURSE) & (REMOVE_CURSE > 0))
+                {
+                    if (CastSpell(REMOVE_CURSE, target))
+                        return RETURN_CONTINUE;
+                    return RETURN_NO_ACTION_ERROR;
+                }
+            }
+            else if ((1 << holder->GetSpellProto()->Dispel) & dispelMask2)
+            {
+                if ((holder->GetSpellProto()->Dispel == DISPEL_POISON) & (ABOLISH_POISON > 0))
+                {
+                    if (CastSpell(ABOLISH_POISON, target))
+                        return RETURN_CONTINUE;
+                    return RETURN_NO_ACTION_ERROR;
+                }
+            }
+        }
+    }
+
+    uint8 hp = target->GetHealthPercent();
+
+    // Everyone is healthy enough, return OK. MUST correlate to highest value below (should be last HP check)
+    if (hp >= 90)
+        return RETURN_NO_ACTION_OK;
+
+    // Reset form if needed
+    if (!m_bot->HasAura(TREE_OF_LIFE) || TREE_OF_LIFE == 0)
+        GoBuffForm(GetPlayerBot());
+
+    // Start heals. Do lowest HP checks at the top
+    if (hp < 30)
+    {
+        // TODO: Use in conjunction with Nature's Swiftness
+        if (HEALING_TOUCH > 0 && (NOURISH == 0 /*|| CastSpell(NATURES_SWIFTNESS)*/ ) && CastSpell(HEALING_TOUCH, target))
+            return RETURN_CONTINUE;
+
+        if (NOURISH > 0 && CastSpell(NOURISH, target))
+            return RETURN_CONTINUE;
+    }
+
+    if (hp < 45 && WILD_GROWTH > 0 && !target->HasAura(WILD_GROWTH) && CastSpell(WILD_GROWTH, target))
+        return RETURN_CONTINUE;
+
+    if (hp < 50 && SWIFTMEND > 0 && (target->HasAura(REJUVENATION) || target->HasAura(REGROWTH)) && CastSpell(SWIFTMEND, target))
+        return RETURN_CONTINUE;
+
+    if (hp < 60 && REGROWTH > 0 && !target->HasAura(REGROWTH) && CastSpell(REGROWTH, target))
+        return RETURN_CONTINUE;
+
+    if (hp < 65 && LIFEBLOOM > 0 && !target->HasAura(LIFEBLOOM) && CastSpell(LIFEBLOOM, target))
+        return RETURN_CONTINUE;
+
+    if (hp < 90 && REJUVENATION > 0 && !target->HasAura(REJUVENATION) && CastSpell(REJUVENATION, target))
+        return RETURN_CONTINUE;
+
+    return RETURN_NO_ACTION_UNKNOWN;
+} // end HealTarget
 
 /**
 * CheckForms()
