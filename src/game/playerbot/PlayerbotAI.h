@@ -1519,18 +1519,18 @@ public:
     // the master will auto set the target of the bot
     enum CombatOrderType
     {
-        ORDERS_NONE                 = 0x00,             // no special orders given
-        ORDERS_TANK                 = 0x01,             // bind attackers by gaining threat
-        ORDERS_ASSIST               = 0x02,             // assist someone (dps type)
-        ORDERS_HEAL                 = 0x04,             // concentrate on healing (no attacks, only self defense)
-        ORDERS_NODISPEL             = 0x08,             // Dont dispel anything
-        ORDERS_PROTECT              = 0x10,             // combinable state: check if protectee is attacked
-        ORDERS_PASSIVE              = 0x20,             // bots do nothing
-        ORDERS_RESIST               = 0x40,             // resist a magic school(see below for types)
-        ORDERS_PULL                 = 0x80,             // Command to pull was given (expect bots to turn this off themselves)
-        ORDERS_PRIMARY              = 0x0F,
-        ORDERS_SECONDARY            = 0xF0,
-        ORDERS_RESET                = 0xFF
+        ORDERS_NONE                 = 0x0000,           // no special orders given
+        ORDERS_TANK                 = 0x0001,           // bind attackers by gaining threat
+        ORDERS_ASSIST               = 0x0002,           // assist someone (dps type)
+        ORDERS_HEAL                 = 0x0004,           // concentrate on healing (no attacks, only self defense)
+        ORDERS_NODISPEL             = 0x0008,           // Dont dispel anything
+        ORDERS_PROTECT              = 0x0010,           // combinable state: check if protectee is attacked
+        ORDERS_PASSIVE              = 0x0020,           // bots do nothing
+        ORDERS_RESIST               = 0x0040,           // resist a magic school(see below for types)
+        ORDERS_PULL                 = 0x0080,           // Command to pull was given (expect bots to turn this off themselves)
+        ORDERS_PRIMARY              = 0x0007,
+        ORDERS_SECONDARY            = 0x00F8,
+        ORDERS_RESET                = 0xFFFF
     };
 
     enum ResistType
