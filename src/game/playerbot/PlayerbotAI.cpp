@@ -8175,11 +8175,50 @@ void PlayerbotAI::_HandleCommandOrders(std::string &text, Player &fromPlayer)
             return;
         }
         else
-            TellMaster("Invalid delay. choose a number between 0 and 10");
+            SendWhisper("Invalid delay. choose a number between 0 and 10", fromPlayer);
         return;
     }
     else if (ExtractCommand("resume", text))
         CombatOrderRestore();
+    else if (ExtractCommand("combat", text, true))
+    {
+        Unit *target = NULL;
+        if (text == "")
+        {
+            SendWhisper("|cffff0000Syntax error:|cffffffff orders combat <botName> <reset | tank | assist | heal | protect> [targetPlayer]", fromPlayer);
+            return;
+        }
+
+        if (ExtractCommand("protect", text) || ExtractCommand("assist", text))
+        {
+            ObjectGuid targetGUID = fromPlayer.GetSelectionGuid();
+            if (text == "" && !targetGUID)
+            {
+                SendWhisper("|cffff0000Combat orders protect and assist expect a target either by selection or by giving target player in command string!", fromPlayer);
+                return;
+            }
+
+            if (text != "")
+            {
+                ObjectGuid targ_guid = sObjectMgr.GetPlayerGuidByName(text.c_str());
+                targetGUID.Set(targ_guid.GetRawValue());
+            }
+            target = ObjectAccessor::GetUnit(fromPlayer, targetGUID);
+            if (!target)
+            {
+                SendWhisper("|cffff0000Invalid target for combat order protect or assist!", fromPlayer);
+                return;
+            }
+        }
+
+        QueryResult *resultlvl = CharacterDatabase.PQuery("SELECT guid FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetObjectGuid().GetCounter());
+        if (!resultlvl)
+            CharacterDatabase.DirectPExecute("INSERT INTO playerbot_saved_data (guid,bot_primary_order,bot_secondary_order,primary_target,secondary_target,pname,sname,combat_delay,auto_follow,autoequip) VALUES ('%u',0,0,0,0,'','',0,1,false)", m_bot->GetObjectGuid().GetCounter());
+        else
+            delete resultlvl;
+
+        SetCombatOrderByStr(text, target);
+    }
     else if (text != "")
     {
         SendWhisper("See help for details on using 'orders'.", fromPlayer);
@@ -10685,14 +10724,31 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 
         if (!bMainHelp)
         {
+            ch.SendSysMessage(_HandleCommandHelpHelper("orders combat <tank | heal | assist | protect | reset> [targetPlayer]", "Sets general orders I should follow. Assist and Protect require a target.").c_str());
             ch.SendSysMessage(_HandleCommandHelpHelper("orders delay <0-10>", "Activates a delay before I start fighting.").c_str());
             ch.SendSysMessage(_HandleCommandHelpHelper("orders resume", "Resume combat orders to what they were before logout.").c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
-            if (ExtractCommand("delay", text, true)) {}
+            if (ExtractCommand("combat", text, true))
+            {
+                ch.SendSysMessage(_HandleCommandHelpHelper("orders combat tank", "Order me to tank. Best used on paladins, warriors, druids or death knights.").c_str());
+                ch.SendSysMessage(_HandleCommandHelpHelper("orders combat heal", "Order me to heal. Best used on shamans, priests, druids or paladins.").c_str());
+                ch.SendSysMessage(_HandleCommandHelpHelper("orders combat assist", "Assist the linked target focusing our killing power.").c_str());
+                ch.SendSysMessage(_HandleCommandHelpHelper("orders combat protect", "Protect the listed target, attempting to keep aggro away from the target.").c_str());
+                ch.SendSysMessage(_HandleCommandHelpHelper("orders combat reset", "Resets my combat orders as though you'd never given me any at all.").c_str());
+
+                if (ExtractCommand("tank", text, true)) {}
+                else if (ExtractCommand("heal", text, true)) {}
+                else if (ExtractCommand("assist", text, true)) {}
+                else if (ExtractCommand("protect", text, true)) {}
+                else if (ExtractCommand("reset", text, true)) {}
+
+                else if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+            }
+            else if (ExtractCommand("delay", text, true)) {}
             else if (ExtractCommand("resume", text, true)) {}
 
-            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+            else if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }

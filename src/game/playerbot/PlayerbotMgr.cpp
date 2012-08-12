@@ -1278,55 +1278,6 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
             mgr->LogoutPlayerBot(guid);
             PSendSysMessage("Bot removed successfully.");
         }
-        else if (cmdStr == "co" || cmdStr == "combatorder")
-        {
-            Unit *target = NULL;
-            char *orderChar = strtok(NULL, " ");
-            if (!orderChar)
-            {
-                PSendSysMessage("|cffff0000Syntax error:|cffffffff .bot co <botName> <order=reset|tank|assist|heal|protect> [targetPlayer]");
-                SetSentErrorMessage(true);
-                return false;
-            }
-            std::string orderStr = orderChar;
-            if (orderStr == "protect" || orderStr == "assist")
-            {
-                char *targetChar = strtok(NULL, " ");
-                ObjectGuid targetGUID = m_session->GetPlayer()->GetSelectionGuid();
-                if (!targetChar && !targetGUID)
-                {
-                    PSendSysMessage("|cffff0000Combat orders protect and assist expect a target either by selection or by giving target player in command string!");
-                    SetSentErrorMessage(true);
-                    return false;
-                }
-                if (targetChar)
-                {
-                    std::string targetStr = targetChar;
-                    ObjectGuid targ_guid = sObjectMgr.GetPlayerGuidByName(targetStr.c_str());
 
-                    targetGUID.Set(targ_guid.GetRawValue());
-                }
-                target = ObjectAccessor::GetUnit(*m_session->GetPlayer(), targetGUID);
-                if (!target)
-                {
-                    PSendSysMessage("|cffff0000Invalid target for combat order protect or assist!");
-                    SetSentErrorMessage(true);
-                    return false;
-                }
-            }
-            if (mgr->GetPlayerBot(guid) == NULL)
-            {
-                PSendSysMessage("|cffff0000Bot can not receive combat order because bot does not exist in world.");
-                SetSentErrorMessage(true);
-                return false;
-            }
-            QueryResult *resultlvl = CharacterDatabase.PQuery("SELECT guid FROM playerbot_saved_data WHERE guid = '%u'", guid.GetCounter());
-            if (!resultlvl)
-                CharacterDatabase.DirectPExecute("INSERT INTO playerbot_saved_data (guid,bot_primary_order,bot_secondary_order,primary_target,secondary_target,pname,sname,combat_delay,auto_follow,autoequip) VALUES ('%u',0,0,0,0,'','',0,1,false)", guid.GetCounter());
-            else
-                delete resultlvl;
-
-            mgr->GetPlayerBot(guid)->GetPlayerbotAI()->SetCombatOrderByStr(orderStr, target);
-        }
         return true;
 }
