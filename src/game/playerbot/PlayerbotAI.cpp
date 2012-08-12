@@ -7964,6 +7964,8 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         _HandleCommandStay(input, fromPlayer);
     else if (ExtractCommand("attack", input))
         _HandleCommandAttack(input, fromPlayer);
+    else if (ExtractCommand("pull", input))
+        _HandleCommandPull(input, fromPlayer);
 
     else if (ExtractCommand("cast", input, true)) // true -> "cast" OR "c"
         _HandleCommandCast(input, fromPlayer);
@@ -8350,6 +8352,35 @@ void PlayerbotAI::_HandleCommandAttack(std::string &text, Player &fromPlayer)
     if (text != "")
     {
         SendWhisper("attack cannot have a subcommand.", fromPlayer);
+        return;
+    }
+    ObjectGuid attackOnGuid = fromPlayer.GetSelectionGuid();
+    if (attackOnGuid)
+    {
+        if (Unit * thingToAttack = ObjectAccessor::GetUnit(*m_bot, attackOnGuid))
+        {
+            if (!m_bot->IsFriendlyTo(thingToAttack) && !m_bot->IsWithinLOSInMap(thingToAttack))
+            {
+                DoTeleport(*m_followTarget);
+                if (m_bot->IsWithinLOSInMap(thingToAttack))
+                    GetCombatTarget(thingToAttack);
+            }
+            else if (!m_bot->IsFriendlyTo(thingToAttack) && m_bot->IsWithinLOSInMap(thingToAttack))
+                GetCombatTarget(thingToAttack);
+        }
+    }
+    else
+    {
+        SendWhisper("No target is selected.", fromPlayer);
+        m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+    }
+}
+
+void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
+{
+    if (text != "")
+    {
+        SendWhisper("pull cannot have a subcommand.", fromPlayer);
         return;
     }
     ObjectGuid attackOnGuid = fromPlayer.GetSelectionGuid();
@@ -10498,11 +10529,21 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     bool bMainHelp = (text == "") ? true : false;
     const std::string sInvalidSubcommand = "That's not a valid subcommand.";
     std::string msg = "";
-    // All of these must containt the 'bMainHelp' clause -> help lists all major commands
+    // All of these must contain the 'bMainHelp' clause -> help lists all major commands
     // Further indented 'ExtractCommand("subcommand")' conditionals make sure these aren't printed for basic "help"
     if (bMainHelp || ExtractCommand("attack", text))
     {
         ch.SendSysMessage(_HandleCommandHelpHelper("attack", "Attack the selected target. Which would, of course, require a valid target.", HL_TARGET).c_str());
+
+        if (!bMainHelp)
+        {
+            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+            return;
+        }
+    }
+    if (bMainHelp || ExtractCommand("pull", text))
+    {
+        ch.SendSysMessage(_HandleCommandHelpHelper("pull", "Pull the target in a coordinated party/raid manner.", HL_TARGET).c_str());
 
         if (!bMainHelp)
         {
