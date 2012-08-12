@@ -80,7 +80,7 @@ CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget
 
     switch (m_ai->GetScenarioType())
     {
-        case PlayerbotAI::SCENARIO_DUEL:
+        case PlayerbotAI::SCENARIO_PVP_DUEL:
             m_ai->CastSpell(PLAGUE_STRIKE);
             return RETURN_CONTINUE;
         default:

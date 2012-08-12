@@ -1500,11 +1500,13 @@ class MANGOS_DLL_SPEC PlayerbotAI
 public:
     enum ScenarioType
     {
-        SCENARIO_PVEEASY,
-        SCENARIO_PVEHARD,
-        SCENARIO_DUEL,
-        SCENARIO_PVPEASY,
-        SCENARIO_PVPHARD
+        SCENARIO_PVE,
+        SCENARIO_PVE_ELITE, // group (5 members max) when an elite is near - most likely instance (can happen in open world)
+        SCENARIO_PVE_RAID,
+        SCENARIO_PVP_DUEL,
+        SCENARIO_PVP_BG,    // You'll probably want to expand this to suit goal? (capture the flag, assault, domination, ...)
+        SCENARIO_PVP_ARENA,
+        SCENARIO_PVP_OPENWORLD
     };
 
     enum CombatStyle
@@ -1525,6 +1527,7 @@ public:
         ORDERS_PROTECT              = 0x10,             // combinable state: check if protectee is attacked
         ORDERS_PASSIVE              = 0x20,             // bots do nothing
         ORDERS_RESIST               = 0x40,             // resist a magic school(see below for types)
+        ORDERS_PULL                 = 0x80,             // Command to pull was given (expect bots to turn this off themselves)
         ORDERS_PRIMARY              = 0x0F,
         ORDERS_SECONDARY            = 0xF0,
         ORDERS_RESET                = 0xFF

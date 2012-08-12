@@ -167,7 +167,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
 
     switch (m_ai->GetScenarioType())
     {
-        case PlayerbotAI::SCENARIO_DUEL:
+        case PlayerbotAI::SCENARIO_PVP_DUEL:
             // TODO: Mana checks
             // TODO: spec tweaking
             if (m_ai->HasAura(SCREAM, *pTarget) && m_ai->GetHealthPercent() < 60 && HEAL)

@@ -305,7 +305,7 @@ CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget)
 
     switch (m_ai->GetScenarioType())
     {
-        case PlayerbotAI::SCENARIO_DUEL:
+        case PlayerbotAI::SCENARIO_PVP_DUEL:
             m_ai->CastSpell(LIGHTNING_BOLT);
             return RETURN_CONTINUE;
         default:
