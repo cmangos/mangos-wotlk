@@ -1842,15 +1842,15 @@ public:
     void InterruptCurrentCastingSpell();
     void GetCombatTarget(Unit* forcedTarged = 0);
     void GetDuelTarget(Unit* forcedTarget);
-    Unit *GetCurrentTarget() { return m_targetCombat; };
+    Unit* GetCurrentTarget() { return m_targetCombat; };
     void DoNextCombatManeuver();
     void DoCombatMovement();
     void SetIgnoreUpdateTime(uint8 t = 0) { m_ignoreAIUpdatesUntilTime = time(NULL) + t; };
     time_t CurrentTime() { return time(NULL); };
 
-    Player *GetPlayerBot() const { return m_bot; }
-    Player *GetPlayer() const { return m_bot; }
-    Player *GetMaster() const;
+    Player* GetPlayerBot() const { return m_bot; }
+    Player* GetPlayer() const { return m_bot; }
+    Player* GetMaster() const;
 
     BotState GetState() { return m_botState; };
     void SetState(BotState state);
@@ -1882,11 +1882,14 @@ public:
     bool AddQuest(const uint32 entry, WorldObject* questgiver);
 
     bool IsInCombat();
+    bool IsGroupInCombat();
+    Player* GetGroupTank(); // TODO: didn't want to pollute non-playerbot code but this should really go in group.cpp
     void UpdateAttackerInfo();
     Unit* FindAttacker(ATTACKERINFOTYPE ait = AIT_NONE, Unit *victim = 0);
     uint32 GetAttackerCount() { return m_attackerInfo.size(); };
     void SetCombatOrderByStr(std::string str, Unit *target = 0);
     void SetCombatOrder(CombatOrderType co, Unit *target = 0);
+    void ClearCombatOrder(CombatOrderType co);
     CombatOrderType GetCombatOrder() { return this->m_combatOrder; }
     bool IsTank() { return (m_combatOrder & ORDERS_TANK) ? true : false; }
     bool IsHealer() { return (m_combatOrder & ORDERS_HEAL) ? true : false; }

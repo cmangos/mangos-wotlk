@@ -2934,6 +2934,7 @@ void PlayerbotAI::DoNextCombatManeuver()
         m_targetChanged = false;
         m_targetType = TARGET_NORMAL;
         SetQuestNeedCreatures();
+        ClearCombatOrder(ORDERS_PULL);
         return;
     }
 
@@ -2994,6 +2995,52 @@ void PlayerbotAI::DoCombatMovement()
             MovementClear();
     }
 }
+
+/*
+ * IsGroupInCombat()
+ *
+ * return true if any member of the group is in combat or (error handling only) occupied in some way
+ */
+bool PlayerbotAI::IsGroupInCombat()
+{
+    if (!m_bot) return false;
+    if (!m_bot->isAlive() || m_bot->IsInDuel()) return true; // Let's just say you're otherwise occupied
+    if (m_bot->isInCombat()) return true;
+
+    if (m_bot->GetGroup())
+    {
+        Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel() || groupMember->isInCombat()) // all occupied in some way
+                return true;
+        }
+    }
+
+    return false;
+}
+
+Player* PlayerbotAI::GetGroupTank()
+{
+    if (!m_bot) return NULL;
+
+    if (m_bot->GetGroup())
+    {
+        Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (!groupMember || !groupMember->GetPlayerbotAI())
+                return NULL;
+            if (groupMember->GetPlayerbotAI()->IsTank())
+                return groupMember;
+        }
+    }
+
+    return NULL;
+}
+
 
 void PlayerbotAI::SetQuestNeedCreatures()
 {
@@ -3933,14 +3980,13 @@ void PlayerbotAI::CombatOrderRestore()
 
 void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit *target)
 {
-    // uint32 gTempTarget = target->GetGUIDLow();
-    // std::string gname = target->GetName();
     CombatOrderType co;
-    if (str == "tank") co = ORDERS_TANK;
-    else if (str == "assist") co = ORDERS_ASSIST;
-    else if (str == "heal") co = ORDERS_HEAL;
-    else if (str == "protect") co = ORDERS_PROTECT;
-    else if (str == "passive") co = ORDERS_PASSIVE;
+    if (str == "tank")          co = ORDERS_TANK;
+    else if (str == "assist")   co = ORDERS_ASSIST;
+    else if (str == "heal")     co = ORDERS_HEAL;
+    else if (str == "protect")  co = ORDERS_PROTECT;
+    else if (str == "passive")  co = ORDERS_PASSIVE;
+    else if (str == "pull")     co = ORDERS_PULL;
     else if (str == "nodispel") co = ORDERS_NODISPEL;
     else if (str == "resistfrost") {
         co = ORDERS_RESIST;
@@ -3990,10 +4036,27 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
         m_targetProtect = 0;
     }
 
-    if ((co == ORDERS_ASSIST || co == ORDERS_PROTECT) && !target) {
-        TellMaster("Erf, you forget to target assist/protect characters!");
-        return;
+    if ((co == ORDERS_ASSIST || co == ORDERS_PROTECT || co == ORDERS_PULL) && !target) {
+        switch (co)
+        {
+        case ORDERS_ASSIST:
+            TellMaster("The assist command requires a target.");
+            return;
+
+        case ORDERS_PROTECT:
+            TellMaster("The protect command requires a target.");
+            return;
+
+        case ORDERS_PULL:
+            TellMaster("The pull command requires a target.");
+            return;
+
+        default:
+            TellMaster("This command requires a target.");
+            return;
+        }
     }
+
     if (co == ORDERS_RESET) {
         m_combatOrder = ORDERS_NONE;
         m_targetAssist = 0;
@@ -4007,45 +4070,61 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
         CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET bot_primary_order = 0, bot_secondary_order = 0, primary_target = 0, secondary_target = 0, pname = '',sname = '', combat_delay = 0 WHERE guid = '%u'",m_bot->GetGUIDLow());
         return;
     }
+
     if (co == ORDERS_PASSIVE)
     {
         m_combatOrder = ORDERS_PASSIVE;
         SendOrders(*GetMaster());
         return;
     }
-    if (co == ORDERS_TANK)
-    {
-        gPrimOrder = 1;
-        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET bot_primary_order = '%u' WHERE guid = '%u'", gPrimOrder, m_bot->GetGUIDLow());
-    }
-    else if (co == ORDERS_HEAL)
-    {
-        gPrimOrder = 3;
-        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET bot_primary_order = '%u' WHERE guid = '%u'", gPrimOrder, m_bot->GetGUIDLow());
-    }
-    else if (co == ORDERS_NODISPEL)
-    {
-        gSecOrder = 2;
-        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET bot_secondary_order = '%u' WHERE guid = '%u'", gSecOrder, m_bot->GetGUIDLow());
-    }
-    if (co == ORDERS_PROTECT)
-    {
-        gSecOrder = 1;
-        m_targetProtect = target;
-        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET bot_secondary_order = '%u', secondary_target = '%u', sname = '%s' WHERE guid = '%u'", gSecOrder, gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
-    }
-    else if (co == ORDERS_ASSIST)
-    {
-        gPrimOrder = 2;
-        m_targetAssist = target;
-        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET bot_primary_order = '%u', primary_target = '%u', pname = '%s' WHERE guid = '%u'", gPrimOrder, gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
-    }
-    if ((co & ORDERS_PRIMARY))
-        m_combatOrder = (CombatOrderType) (((uint32) m_combatOrder & (uint32) ORDERS_SECONDARY) | (uint32) co);
-    else
-        m_combatOrder = (CombatOrderType) (((uint32) m_combatOrder & (uint32) ORDERS_PRIMARY) | (uint32) co);
-    SendOrders(*GetMaster());
 
+    // Do your magic
+    if ((co & ORDERS_PRIMARY))
+    {
+        m_combatOrder = (CombatOrderType) (((uint32) m_combatOrder & (uint32) ORDERS_SECONDARY) | (uint32) co);
+        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET bot_primary_order = '%u', primary_target = '%u', pname = '%s' WHERE guid = '%u'", (gPrimOrder & (uint8)ORDERS_PRIMARY), gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
+        if (co == ORDERS_ASSIST)
+            m_targetAssist = target;
+    }
+    else
+    {
+        m_combatOrder = (CombatOrderType) ((uint32) m_combatOrder | (uint32) co);
+        if (co != ORDERS_PULL)
+            CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET bot_secondary_order = '%u', secondary_target = '%u', sname = '%s' WHERE guid = '%u'", (gSecOrder & (uint8)ORDERS_SECONDARY), gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
+        if (co == ORDERS_PROTECT)
+            m_targetProtect = target;
+    }
+
+    SendOrders(*GetMaster());
+}
+
+void PlayerbotAI::ClearCombatOrder(CombatOrderType co)
+{
+     m_combatOrder = (CombatOrderType) ((uint32) m_combatOrder | (uint32) !co);
+
+     switch (co)
+     {
+     case ORDERS_NONE:
+     case ORDERS_TANK:
+     case ORDERS_ASSIST:
+     case ORDERS_HEAL:
+     case ORDERS_PASSIVE:
+     case ORDERS_PRIMARY:
+     case ORDERS_RESET:
+     case ORDERS_SECONDARY:
+         SetCombatOrder(ORDERS_RESET);
+         return;
+
+     case ORDERS_NODISPEL:
+     case ORDERS_PROTECT:
+     case ORDERS_RESIST:
+         ;
+         return;
+
+     case ORDERS_PULL:
+     default:
+         return;
+     }
 }
 
 void PlayerbotAI::SetMovementOrder(MovementOrderType mo, Unit *followTarget)
@@ -8383,6 +8462,35 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
         SendWhisper("pull cannot have a subcommand.", fromPlayer);
         return;
     }
+
+    if (fromPlayer.GetGroup() != m_bot->GetGroup())
+    {
+        SendWhisper("I can't pull - we're not in the same group.", fromPlayer);
+        return;
+    }
+
+    if (IsGroupInCombat()) // TODO: add raid support
+    {
+        SendWhisper("Unable to pull - the group is already in combat", fromPlayer);
+        return;
+    }
+
+    // This does not allow for the eventuality that a player is the tank, but assuming the player being a tank
+    // knows how to pull (which is not our job anyway) there is little lost here
+    if (!GetGroupTank()) // TODO: can't this work with: m_bot->GetGroup()->GetMainTankGUID() (which, by-the-by, is raid-proof)
+    {
+        SendWhisper("This group has no playerbot tank to perform the pull. Either give someone the combat order 'tank' or pull yourself.", fromPlayer);
+        return;
+    }
+
+    //(3) if tank does not have the proper pulling method (shoot + gun/bow, spell, ...) -> report failure
+    //(4) else
+    //(4a) if tank, wait a second (if healer class with HoT is present), pull (based on class), deactivate any attack (such as 'shoot (bow/gun)' for warriors), wait until in melee range, attack
+    //(4b) if dps, wait (see (4+5) in first post)
+    //(4c) if healer, do a HoT on the tank if class has a HoT. else do healing checks
+    //(5) when target is in melee range of tank, wait 2 seconds (healers continue to do heal checks), then return to normal functioning
+
+    /*
     ObjectGuid attackOnGuid = fromPlayer.GetSelectionGuid();
     if (attackOnGuid)
     {
@@ -8403,6 +8511,7 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
         SendWhisper("No target is selected.", fromPlayer);
         m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
     }
+    */
 }
 
 void PlayerbotAI::_HandleCommandCast(std::string &text, Player &fromPlayer)
