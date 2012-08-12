@@ -8178,7 +8178,7 @@ void PlayerbotAI::_HandleCommandOrders(std::string &text, Player &fromPlayer)
             TellMaster("Invalid delay. choose a number between 0 and 10");
         return;
     }
-    else if (ExtractCommand("resumeorders", text))
+    else if (ExtractCommand("resume", text))
         CombatOrderRestore();
     else if (text != "")
     {
