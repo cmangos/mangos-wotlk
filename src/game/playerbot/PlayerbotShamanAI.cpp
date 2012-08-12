@@ -196,73 +196,49 @@ void PlayerbotShamanAI::DropTotems()
     Totem* water = m_bot->GetTotem(TOTEM_SLOT_WATER);
     Totem* air = m_bot->GetTotem(TOTEM_SLOT_AIR);
 
-    switch (spec)
+    // Earth Totems
+    if ((earth == NULL) || (m_bot->GetDistance(earth) > 30))
     {
-        case SHAMAN_SPEC_ENHANCEMENT:
-            // Earth Totems
-            if (STRENGTH_OF_EARTH_TOTEM > 0 && ((earth == NULL) || (m_bot->GetDistance(earth) > 30)) && m_ai->CastSpell(STRENGTH_OF_EARTH_TOTEM))
-                ;
-            // Fire Totems
-            if (m_ai->GetResistType() == PlayerbotAI::SCHOOL_FROST && FROST_RESISTANCE_TOTEM > 0 && ((fire == NULL) || (m_bot->GetDistance(fire) > 30)) && m_ai->CastSpell(FROST_RESISTANCE_TOTEM))
-                ;
-            else if (FLAMETONGUE_TOTEM > 0 && ((fire == NULL) || (m_bot->GetDistance(fire) > 30)) && m_ai->CastSpell(FLAMETONGUE_TOTEM))
-                ;
-            // Air totems
-            if (m_ai->GetResistType() == PlayerbotAI::SCHOOL_NATURE && NATURE_RESISTANCE_TOTEM > 0 && ((air == NULL) || (m_bot->GetDistance(air) > 30)) && m_ai->CastSpell(NATURE_RESISTANCE_TOTEM))
-                ;
-            else if (WIND_FURY_TOTEM > 0 && ((air == NULL) || (m_bot->GetDistance(air) > 30)) /*&& !m_bot->HasAura(IMPROVED_ICY_TALONS)*/ && m_ai->CastSpell(WIND_FURY_TOTEM))
-                ;
-            // Water Totems
-            if (m_ai->GetResistType() == PlayerbotAI::SCHOOL_FIRE && FIRE_RESISTANCE_TOTEM > 0 && ((water == NULL) || (m_bot->GetDistance(water) > 30)) && m_ai->CastSpell(FIRE_RESISTANCE_TOTEM))
-                ;
-            else if (MANA_SPRING_TOTEM > 0 && ((water == NULL) || (m_bot->GetDistance(water) > 30)) && m_ai->CastSpell(MANA_SPRING_TOTEM))
-                ;
-            break;
+        if (STRENGTH_OF_EARTH_TOTEM > 0 && m_ai->CastSpell(STRENGTH_OF_EARTH_TOTEM))
+            ;
+    }
 
-        case SHAMAN_SPEC_RESTORATION:
-            // Earth Totems
-            if (STRENGTH_OF_EARTH_TOTEM > 0 && ((earth == NULL) || (m_bot->GetDistance(earth) > 30)) && m_ai->CastSpell(STRENGTH_OF_EARTH_TOTEM))
-                ;
-            // Fire Totems
-            if (m_ai->GetResistType() == PlayerbotAI::SCHOOL_FROST && FROST_RESISTANCE_TOTEM > 0 && ((fire == NULL) || (m_bot->GetDistance(fire) > 30)) && m_ai->CastSpell(FROST_RESISTANCE_TOTEM))
-                ;
-            else if (FLAMETONGUE_TOTEM > 0 && ((fire == NULL) || (m_bot->GetDistance(fire) > 30)) && m_ai->CastSpell(FLAMETONGUE_TOTEM))
-                ;
-            // Air totems
-            if (m_ai->GetResistType() == PlayerbotAI::SCHOOL_NATURE && NATURE_RESISTANCE_TOTEM > 0 && ((air == NULL) || (m_bot->GetDistance(air) > 30)) && m_ai->CastSpell(NATURE_RESISTANCE_TOTEM))
-                ;
-            else if (WRATH_OF_AIR_TOTEM > 0 && ((air == NULL) || (m_bot->GetDistance(air) > 30)) && m_ai->CastSpell(WRATH_OF_AIR_TOTEM))
-                ;
-            // Water Totems
-            if (m_ai->GetResistType() == PlayerbotAI::SCHOOL_FIRE && FIRE_RESISTANCE_TOTEM > 0 && ((water == NULL) || (m_bot->GetDistance(water) > 30)) && m_ai->CastSpell(FIRE_RESISTANCE_TOTEM))
-                ;
-            else if (MANA_SPRING_TOTEM > 0 && ((water == NULL) || (m_bot->GetDistance(water) > 30)) && m_ai->CastSpell(MANA_SPRING_TOTEM))
-                ;
-            break;
+    // Fire Totems
+    if ((fire == NULL) || (m_bot->GetDistance(fire) > 30))
+    {
+        if (m_ai->GetResistType() == PlayerbotAI::SCHOOL_FROST && FROST_RESISTANCE_TOTEM > 0 && m_ai->CastSpell(FROST_RESISTANCE_TOTEM))
+            ;
+        else if (spec == SHAMAN_SPEC_ELEMENTAL && TOTEM_OF_WRATH > 0 && m_ai->CastSpell(TOTEM_OF_WRATH))
+            ;
+        // If the spec didn't take totem of wrath, use flametongue
+        else if ((spec != SHAMAN_SPEC_ELEMENTAL || TOTEM_OF_WRATH == 0) && FLAMETONGUE_TOTEM > 0 && m_ai->CastSpell(FLAMETONGUE_TOTEM))
+            ;
+    }
 
-        case SHAMAN_SPEC_ELEMENTAL:
-            // Earth Totems
-            if (STRENGTH_OF_EARTH_TOTEM > 0 && ((earth == NULL) || (m_bot->GetDistance(earth) > 30)) && m_ai->CastSpell(STRENGTH_OF_EARTH_TOTEM))
-                ;
-            // Fire Totems
-            if (m_ai->GetResistType() == PlayerbotAI::SCHOOL_FROST && FROST_RESISTANCE_TOTEM > 0 && ((fire == NULL) || (m_bot->GetDistance(fire) > 30)) && m_ai->CastSpell(FROST_RESISTANCE_TOTEM))
-                ;
-            else if (TOTEM_OF_WRATH > 0 && ((fire == NULL) || (m_bot->GetDistance(fire) > 30)) && m_ai->CastSpell(TOTEM_OF_WRATH))
-                ;
-            // If the spec didn't take totem of wrath, use flametongue
-            else if (TOTEM_OF_WRATH == 0 && ((fire == NULL) || (m_bot->GetDistance(fire) > 30)) && m_ai->CastSpell(FLAMETONGUE_TOTEM))
-                ;
-            // Air totems
-            if (m_ai->GetResistType() == PlayerbotAI::SCHOOL_NATURE && NATURE_RESISTANCE_TOTEM > 0 && ((air == NULL) || (m_bot->GetDistance(air) > 30)) && m_ai->CastSpell(NATURE_RESISTANCE_TOTEM))
-                ;
-            else if (WRATH_OF_AIR_TOTEM > 0 && ((air == NULL) || (m_bot->GetDistance(air) > 30)) && m_ai->CastSpell(WRATH_OF_AIR_TOTEM))
-                ;
-            // Water Totems
-            if (m_ai->GetResistType() == PlayerbotAI::SCHOOL_FIRE && FIRE_RESISTANCE_TOTEM > 0 && ((water == NULL) || (m_bot->GetDistance(water) > 30)) && m_ai->CastSpell(FIRE_RESISTANCE_TOTEM))
-                ;
-            else if (MANA_SPRING_TOTEM > 0 && ((water == NULL) || (m_bot->GetDistance(water) > 30)) && m_ai->CastSpell(MANA_SPRING_TOTEM))
-                ;
-            break;
+    // Air totems
+    if ((air == NULL) || (m_bot->GetDistance(air) > 30))
+    {
+        if (m_ai->GetResistType() == PlayerbotAI::SCHOOL_NATURE && NATURE_RESISTANCE_TOTEM > 0 && m_ai->CastSpell(NATURE_RESISTANCE_TOTEM))
+            ;
+        else if (spec == SHAMAN_SPEC_ENHANCEMENT)
+        {
+            if (WIND_FURY_TOTEM > 0 /*&& !m_bot->HasAura(IMPROVED_ICY_TALONS)*/ && m_ai->CastSpell(WIND_FURY_TOTEM))
+            ;
+        }
+        else
+        {
+            if (WRATH_OF_AIR_TOTEM > 0 && m_ai->CastSpell(WRATH_OF_AIR_TOTEM))
+            ;
+        }
+    }
+
+    // Water Totems
+    if ((water == NULL) || (m_bot->GetDistance(water) > 30))
+    {
+        if (m_ai->GetResistType() == PlayerbotAI::SCHOOL_FIRE && FIRE_RESISTANCE_TOTEM > 0 && m_ai->CastSpell(FIRE_RESISTANCE_TOTEM))
+            ;
+        else if (MANA_SPRING_TOTEM > 0 && m_ai->CastSpell(MANA_SPRING_TOTEM))
+            ;
     }
 }
 
