@@ -1263,7 +1263,7 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
                 return false;
             }
             CharacterDatabase.DirectPExecute("UPDATE characters SET online = 1 WHERE guid = '%u'", guid.GetCounter());
-            mgr->AddPlayerBot(guid);
+            mgr->LoginPlayerBot(guid);
             PSendSysMessage("Bot added successfully.");
         }
         else if (cmdStr == "remove" || cmdStr == "logout")
