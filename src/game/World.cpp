@@ -50,6 +50,7 @@
 #include "CreatureAIRegistry.h"
 #include "Policies/SingletonImp.h"
 #include "BattleGroundMgr.h"
+#include "OutdoorPvP/OutdoorPvP.h"
 #include "TemporarySummon.h"
 #include "VMapFactory.h"
 #include "MoveMap.h"
@@ -750,6 +751,13 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_ARENA_SEASON_PREVIOUS_ID,                  "Arena.ArenaSeasonPrevious.ID", 0);
     setConfigMin(CONFIG_INT32_ARENA_STARTRATING,                       "Arena.StartRating", -1, -1);
     setConfigMin(CONFIG_INT32_ARENA_STARTPERSONALRATING,               "Arena.StartPersonalRating", -1, -1);
+    setConfig(CONFIG_BOOL_OUTDOORPVP_SI_ENABLED,                       "OutdoorPvp.SIEnabled", true);
+    setConfig(CONFIG_BOOL_OUTDOORPVP_EP_ENABLED,                       "OutdoorPvp.EPEnabled", true);
+    setConfig(CONFIG_BOOL_OUTDOORPVP_HP_ENABLED,                       "OutdoorPvp.HPEnabled", true);
+    setConfig(CONFIG_BOOL_OUTDOORPVP_ZM_ENABLED,                       "OutdoorPvp.ZMEnabled", true);
+    setConfig(CONFIG_BOOL_OUTDOORPVP_TF_ENABLED,                       "OutdoorPvp.TFEnabled", true);
+    setConfig(CONFIG_BOOL_OUTDOORPVP_NA_ENABLED,                       "OutdoorPvp.NAEnabled", true);
+    setConfig(CONFIG_BOOL_OUTDOORPVP_GH_ENABLED,                       "OutdoorPvp.GHEnabled", true);
 
     setConfig(CONFIG_BOOL_OFFHAND_CHECK_AT_TALENTS_RESET, "OffhandCheckAtTalentsReset", false);
 
@@ -1370,6 +1378,10 @@ void World::SetInitialWorldSettings()
     sBattleGroundMgr.CreateInitialBattleGrounds();
     sBattleGroundMgr.InitAutomaticArenaPointDistribution();
 
+    ///- Initialize Outdoor PvP
+    sLog.outString("Starting Outdoor PvP System");
+    sOutdoorPvPMgr.InitOutdoorPvP();
+
     // Not sure if this can be moved up in the sequence (with static data loading) as it uses MapManager
     sLog.outString("Loading Transports...");
     sMapMgr.LoadTransports();
@@ -1540,6 +1552,7 @@ void World::Update(uint32 diff)
     ///- Update objects (maps, transport, creatures,...)
     sMapMgr.Update(diff);
     sBattleGroundMgr.Update(diff);
+    sOutdoorPvPMgr.Update(diff);
 
     ///- Delete all characters which have been deleted X days before
     if (m_timers[WUPDATE_DELETECHARS].Passed())
@@ -1580,23 +1593,6 @@ void World::Update(uint32 diff)
 
     // cleanup unused GridMap objects as well as VMaps
     sTerrainMgr.Update(diff);
-}
-
-/// Send a packet to all players (except self if mentioned)
-void World::SendGlobalMessage(WorldPacket* packet, WorldSession* self /*= NULL*/, Team team /*= TEAM_NONE*/)
-{
-    SessionMap::const_iterator itr;
-    for (itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-    {
-        if (itr->second &&
-                itr->second->GetPlayer() &&
-                itr->second->GetPlayer()->IsInWorld() &&
-                itr->second != self &&
-                (team == TEAM_NONE || itr->second->GetPlayer()->GetTeam() == team))
-        {
-            itr->second->SendPacket(packet);
-        }
-    }
 }
 
 namespace MaNGOS
@@ -1656,7 +1652,7 @@ namespace MaNGOS
     };
 }                                                           // namespace MaNGOS
 
-/// Send a System Message to all players (except self if mentioned)
+/// Sends a system message to all players
 void World::SendWorldText(int32 string_id, ...)
 {
     va_list ap;
@@ -1675,48 +1671,72 @@ void World::SendWorldText(int32 string_id, ...)
     va_end(ap);
 }
 
-/// DEPRICATED, only for debug purpose. Send a System Message to all players (except self if mentioned)
-void World::SendGlobalText(const char* text, WorldSession* self)
+/// Sends a packet to all players with optional team and instance restrictions
+void World::SendGlobalMessage(WorldPacket* packet)
 {
-    WorldPacket data;
-
-    // need copy to prevent corruption by strtok call in LineFromMessage original string
-    char* buf = mangos_strdup(text);
-    char* pos = buf;
-
-    while (char* line = ChatHandler::LineFromMessage(pos))
-    {
-        ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, line);
-        SendGlobalMessage(&data, self);
-    }
-
-    delete[] buf;
-}
-
-/// Send a packet to all players (or players selected team) in the zone (except self if mentioned)
-void World::SendZoneMessage(uint32 zone, WorldPacket* packet, WorldSession* self /*= NULL*/, Team team /*= TEAM_NONE*/)
-{
-    SessionMap::const_iterator itr;
-    for (itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
         if (itr->second &&
                 itr->second->GetPlayer() &&
-                itr->second->GetPlayer()->IsInWorld() &&
-                itr->second->GetPlayer()->GetZoneId() == zone &&
-                itr->second != self &&
-                (team == TEAM_NONE || itr->second->GetPlayer()->GetTeam() == team))
+                itr->second->GetPlayer()->IsInWorld())
         {
             itr->second->SendPacket(packet);
         }
     }
 }
 
-/// Send a System Message to all players in the zone (except self if mentioned)
-void World::SendZoneText(uint32 zone, const char* text, WorldSession* self /*= NULL*/, Team team /*= TEAM_NONE*/)
+/// Sends a server message to the specified or all players
+void World::SendServerMessage(ServerMessageType type, const char* text /*=""*/, Player* player /*= NULL*/)
 {
-    WorldPacket data;
-    ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, text);
-    SendZoneMessage(zone, &data, self, team);
+    WorldPacket data(SMSG_SERVER_MESSAGE, 50);              // guess size
+    data << uint32(type);
+    data << text;
+
+    if (player)
+        player->GetSession()->SendPacket(&data);
+    else
+        SendGlobalMessage(&data);
+}
+
+/// Sends a zone under attack message to all players not in an instance
+void World::SendZoneUnderAttackMessage(uint32 zoneId, Team team)
+{
+    WorldPacket data(SMSG_ZONE_UNDER_ATTACK, 4);
+    data << uint32(zoneId);
+
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    {
+        if (itr->second &&
+                itr->second->GetPlayer() &&
+                itr->second->GetPlayer()->IsInWorld() &&
+                itr->second->GetPlayer()->GetTeam() == team &&
+                !itr->second->GetPlayer()->GetMap()->Instanceable())
+        {
+            itr->second->SendPacket(&data);
+        }
+    }
+}
+
+/// Sends a world defense message to all players not in an instance
+void World::SendDefenseMessage(uint32 zoneId, int32 textId)
+{
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    {
+        if (itr->second &&
+                itr->second->GetPlayer() &&
+                itr->second->GetPlayer()->IsInWorld() &&
+                !itr->second->GetPlayer()->GetMap()->Instanceable())
+        {
+            char const* message = itr->second->GetMangosString(textId);
+            uint32 messageLength = strlen(message) + 1;
+
+            WorldPacket data(SMSG_DEFENSE_MESSAGE, 4 + 4 + messageLength);
+            data << uint32(zoneId);
+            data << uint32(messageLength);
+            data << message;
+            itr->second->SendPacket(&data);
+        }
+    }
 }
 
 /// Kick (and save) all players
@@ -1880,7 +1900,7 @@ void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode)
 }
 
 /// Display a shutdown message to the user(s)
-void World::ShutdownMsg(bool show, Player* player)
+void World::ShutdownMsg(bool show /*= false*/, Player* player /*= NULL*/)
 {
     // not show messages for idle shutdown mode
     if (m_ShutdownMask & SHUTDOWN_MASK_IDLE)
@@ -1918,19 +1938,6 @@ void World::ShutdownCancel()
     SendServerMessage(msgid);
 
     DEBUG_LOG("Server %s cancelled.", (m_ShutdownMask & SHUTDOWN_MASK_RESTART ? "restart" : "shutdown"));
-}
-
-/// Send a server message to the user(s)
-void World::SendServerMessage(ServerMessageType type, const char* text /*=""*/, Player* player /*= NULL*/)
-{
-    WorldPacket data(SMSG_SERVER_MESSAGE, 50);              // guess size
-    data << uint32(type);
-    data << text;
-
-    if (player)
-        player->GetSession()->SendPacket(&data);
-    else
-        SendGlobalMessage(&data);
 }
 
 void World::UpdateSessions(uint32 diff)
@@ -2041,7 +2048,7 @@ void World::InitWeeklyQuestResetTime()
     m_NextWeeklyQuestReset = m_NextWeeklyQuestReset < curTime ? nextWeekResetTime - WEEK : nextWeekResetTime;
 
     if (!result)
-        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextWeeklyQuestResetTime) VALUES ('"UI64FMTD"')", uint64(m_NextWeeklyQuestReset));
+        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextWeeklyQuestResetTime) VALUES ('" UI64FMTD "')", uint64(m_NextWeeklyQuestReset));
     else
         delete result;
 }
@@ -2072,7 +2079,7 @@ void World::InitDailyQuestResetTime()
     m_NextDailyQuestReset = m_NextDailyQuestReset < curTime ? nextDayResetTime - DAY : nextDayResetTime;
 
     if (!result)
-        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextDailyQuestResetTime) VALUES ('"UI64FMTD"')", uint64(m_NextDailyQuestReset));
+        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextDailyQuestResetTime) VALUES ('" UI64FMTD "')", uint64(m_NextDailyQuestReset));
     else
         delete result;
 }
@@ -2120,7 +2127,7 @@ void World::SetMonthlyQuestResetTime(bool initialize)
     m_NextMonthlyQuestReset = (initialize && m_NextMonthlyQuestReset < nextMonthResetTime) ? m_NextMonthlyQuestReset : nextMonthResetTime;
 
     // Row must exist for this to work. Currently row is added by InitDailyQuestResetTime(), called before this function
-    CharacterDatabase.PExecute("UPDATE saved_variables SET NextMonthlyQuestResetTime = '"UI64FMTD"'", uint64(m_NextMonthlyQuestReset));
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextMonthlyQuestResetTime = '" UI64FMTD "'", uint64(m_NextMonthlyQuestReset));
 }
 
 void World::ResetDailyQuests()
@@ -2132,7 +2139,7 @@ void World::ResetDailyQuests()
             itr->second->GetPlayer()->ResetDailyQuestStatus();
 
     m_NextDailyQuestReset = time_t(m_NextDailyQuestReset + DAY);
-    CharacterDatabase.PExecute("UPDATE saved_variables SET NextDailyQuestResetTime = '"UI64FMTD"'", uint64(m_NextDailyQuestReset));
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextDailyQuestResetTime = '" UI64FMTD "'", uint64(m_NextDailyQuestReset));
 }
 
 void World::ResetWeeklyQuests()
@@ -2144,7 +2151,7 @@ void World::ResetWeeklyQuests()
             itr->second->GetPlayer()->ResetWeeklyQuestStatus();
 
     m_NextWeeklyQuestReset = time_t(m_NextWeeklyQuestReset + WEEK);
-    CharacterDatabase.PExecute("UPDATE saved_variables SET NextWeeklyQuestResetTime = '"UI64FMTD"'", uint64(m_NextWeeklyQuestReset));
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextWeeklyQuestResetTime = '" UI64FMTD "'", uint64(m_NextWeeklyQuestReset));
 }
 
 void World::ResetMonthlyQuests()
