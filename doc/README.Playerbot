@@ -273,10 +273,23 @@ define PLAYERBOT_CONF_VERSION    YYYYMMDDVV
 ConfVersion=YYYYMMDDVV
 * Of course don't forget to update your server's playerbot.conf.
 
-When updating the sql file(s), keep in mind the following locations:
-* sql/playerbotai
-Place your SQL files here.
-* src/shared/revision_sql.h
+When updating the sql file(s), keep in mind the following:
+
+=== File Name Description in [sql/playerbotai] folder ===
+
+    FULL_playerbotai_characters_r2_update
+    |    |           |          |  |
+    |    |           |          |  Only if the sql updates a previous sql
+    |    |           |          |
+    |    |           |          Playerbot revision related to sql 
+    |    |           |
+    |    |           |Name of affected DB (default recommended name)
+    |    |
+    |    Playerbot sql file..drrr!
+    |
+    For clean install, just apply this sql
+
+* src/game/playerbot/revision_sql.h
 #define REVISION_DB_PLAYERBOTAI "required_5_playerbotai_auto_follow"
 NOTE: This string should be an exact copy of your SQL file's second field name in the `playerbotai_db_version` table.
 
