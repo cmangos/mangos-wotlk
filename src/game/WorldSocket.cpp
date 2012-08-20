@@ -117,8 +117,7 @@ WorldSocket::WorldSocket(void) :
 
 WorldSocket::~WorldSocket(void)
 {
-    if (m_RecvWPct)
-        delete m_RecvWPct;
+    delete m_RecvWPct;
 
     if (m_OutBuffer)
         m_OutBuffer->release();
@@ -691,7 +690,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
 
                 return HandleAuthSession(*new_pct);
             case CMSG_KEEP_ALIVE:
-                DEBUG_LOG("CMSG_KEEP_ALIVE ,size: "SIZEFMTD" ", new_pct->size());
+                DEBUG_LOG("CMSG_KEEP_ALIVE ,size: " SIZEFMTD " ", new_pct->size());
 
                 return 0;
             default:
