@@ -499,3 +499,11 @@ void PlayerbotDeathKnightAI::DoNonCombatActions()
         return;
     }
 } // end DoNonCombatActions
+
+bool PlayerbotDeathKnightAI::CanPull()
+{
+    if (DEATH_GRIP && !m_bot->HasSpellCooldown(DEATH_GRIP))
+        return true;
+
+    return false;
+}

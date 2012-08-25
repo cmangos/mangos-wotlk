@@ -621,3 +621,13 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *targe
     else
         return ( (petSpellId && ai->Buff(petSpellId, target)) || ai->Buff(spellId, target) );
 }
+
+bool PlayerbotPaladinAI::CanPull()
+{
+    if (HAND_OF_RECKONING && !m_bot->HasSpellCooldown(HAND_OF_RECKONING))
+        return true;
+    if (EXORCISM && !m_bot->HasSpellCooldown(EXORCISM))
+        return true;
+
+    return false;
+}

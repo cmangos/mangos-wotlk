@@ -469,3 +469,11 @@ void PlayerbotWarriorAI::DoNonCombatActions()
         return;
     }
 } // end DoNonCombatActions
+
+bool PlayerbotWarriorAI::CanPull()
+{
+    if (m_bot->GetUInt32Value(PLAYER_AMMO_ID)) // Having ammo equipped means a weapon is equipped as well. Probably. [TODO: does this work with throwing knives? Can a playerbot 'cheat' ammo into the slot without a proper weapon?]
+        return true;
+
+    return false;
+}

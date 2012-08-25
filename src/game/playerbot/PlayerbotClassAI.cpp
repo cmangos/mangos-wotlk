@@ -24,6 +24,8 @@ CombatManeuverReturns PlayerbotClassAI::DoNextCombatManeuverPVP(Unit *) { return
 
 void PlayerbotClassAI::DoNonCombatActions() {}
 
+bool PlayerbotClassAI::CanPull() { return false; }
+
 CombatManeuverReturns PlayerbotClassAI::HealPlayer(Player* target) {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;

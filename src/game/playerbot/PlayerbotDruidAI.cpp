@@ -735,3 +735,11 @@ void PlayerbotDruidAI::GoBuffForm(Player *self)
     if (self->HasAura(TRAVEL_FORM_1))
         self->RemoveAurasDueToSpell(TRAVEL_FORM_1);
 }
+
+bool PlayerbotDruidAI::CanPull()
+{
+    if (FAERIE_FIRE_FERAL)
+        return true;
+
+    return false;
+}

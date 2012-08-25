@@ -8433,34 +8433,33 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
         return;
     }
 
-    //(3) if tank does not have the proper pulling method (shoot + gun/bow, spell, ...) -> report failure
-    //if (NO_PULLING_METHOD_FOUND_FOR_THIS_TANK)
-    //{
-    //    string sError = "I cannot pull, I do not have the proper ";
-    //    switch (m_bot->getClass())
-    //    {
-    //        case CLASS_PALADIN:
-    //        case CLASS_DEATH_KNIGHT:
-    //        case CLASS_DRUID:
-    //            sError += "spell.";
-    //            break;
+    // if tank does not have the proper pulling method (shoot + gun/bow, spell, ...) -> report failure
+    if (GetClassAI() && GetClassAI()->CanPull())
+    {
+        std::string sError = "I cannot pull, I do not have the proper ";
+        switch (m_bot->getClass())
+        {
+            case CLASS_PALADIN:
+            case CLASS_DEATH_KNIGHT:
+            case CLASS_DRUID:
+                sError += "spell, or it's not ready yet.";
+                break;
 
-    //        case CLASS_WARRIOR:
-    //            sError += "weapon.";
-    //            break;
+            case CLASS_WARRIOR:
+                sError += "weapon.";
+                break;
 
-    //        default:
-    //            sError += "class.";
-    //    }
-    //    SendWhisper(sError, fromPlayer);
-    //    return;
-    //}
+            default:
+                sError += "class.";
+        }
+        SendWhisper(sError, fromPlayer);
+        return;
+    }
 
-    //(4) else
     //(4a) if tank, wait a second (if healer class with HoT is present), pull (based on class), deactivate any attack (such as 'shoot (bow/gun)' for warriors), wait until in melee range, attack
     //(4b) if dps, wait (see (4+5) in first post)
     //(4c) if healer, do a HoT on the tank if class has a HoT. else do healing checks
-    //(5) when target is in melee range of tank, wait 2 seconds (healers continue to do heal checks), then return to normal functioning
+    //(5) when target is in melee range of tank, wait 2 seconds (healers continue to do group heal checks, all do self-heal checks), then return to normal functioning
 
     /*
     ObjectGuid attackOnGuid = fromPlayer.GetSelectionGuid();
