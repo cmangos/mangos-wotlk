@@ -8434,6 +8434,28 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
     }
 
     //(3) if tank does not have the proper pulling method (shoot + gun/bow, spell, ...) -> report failure
+    //if (NO_PULLING_METHOD_FOUND_FOR_THIS_TANK)
+    //{
+    //    string sError = "I cannot pull, I do not have the proper ";
+    //    switch (m_bot->getClass())
+    //    {
+    //        case CLASS_PALADIN:
+    //        case CLASS_DEATH_KNIGHT:
+    //        case CLASS_DRUID:
+    //            sError += "spell.";
+    //            break;
+
+    //        case CLASS_WARRIOR:
+    //            sError += "weapon.";
+    //            break;
+
+    //        default:
+    //            sError += "class.";
+    //    }
+    //    SendWhisper(sError, fromPlayer);
+    //    return;
+    //}
+
     //(4) else
     //(4a) if tank, wait a second (if healer class with HoT is present), pull (based on class), deactivate any attack (such as 'shoot (bow/gun)' for warriors), wait until in melee range, attack
     //(4b) if dps, wait (see (4+5) in first post)
