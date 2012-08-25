@@ -738,7 +738,7 @@ void PlayerbotDruidAI::GoBuffForm(Player *self)
 
 bool PlayerbotDruidAI::CanPull()
 {
-    if (FAERIE_FIRE_FERAL)
+    if (BEAR_FORM && FAERIE_FIRE_FERAL)
         return true;
 
     return false;
