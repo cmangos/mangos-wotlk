@@ -290,7 +290,7 @@ When updating the sql file(s), keep in mind the following:
     For clean install, just apply this sql
 
 * src/game/playerbot/revision_sql.h
-#define REVISION_DB_PLAYERBOTAI "required_5_playerbotai_auto_follow"
+#define REVISION_DB_PLAYERBOTAI "required_6_playerbotai_combatorders"
 NOTE: This string should be an exact copy of your SQL file's second field name in the `playerbotai_db_version` table.
 
 BotGuy NPC Menu System

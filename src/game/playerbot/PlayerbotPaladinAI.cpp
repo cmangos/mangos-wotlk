@@ -343,57 +343,47 @@ void PlayerbotPaladinAI::CheckAuras()
     if (!m_bot) return;
 
     uint32 spec = m_bot->GetSpec();
-    PlayerbotAI::ResistType ResistType = m_ai->GetResistType();
-    //Bool to determine whether or not we have resist orders
-    bool resist = false;
 
-    //If we have resist orders, adjust accordingly
-    switch (ResistType)
+    // If we have resist orders, adjust accordingly
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FROST)
     {
-        case PlayerbotAI::SCHOOL_FROST:
-            resist = true;
-            //Check if it is already up
-            if (m_bot->HasAura(FROST_RESISTANCE_AURA))
-                //If up, we don't need to check anything else
-                break;
-            //If not up, put it up
-            else if (FROST_RESISTANCE_AURA > 0 && !m_bot->HasAura(FROST_RESISTANCE_AURA))
-            {
-                m_ai->CastSpell(FROST_RESISTANCE_AURA);
-                //Aura is up, don't check anything else
-                break;
-            }
-
-        case PlayerbotAI::SCHOOL_FIRE:
-            resist = true;
-            if (m_bot->HasAura(FIRE_RESISTANCE_AURA))
-                break;
-            else if (FIRE_RESISTANCE_AURA > 0 && !m_bot->HasAura(FIRE_RESISTANCE_AURA))
-            {
-                m_ai->CastSpell(FIRE_RESISTANCE_AURA);
-                break;
-            }
-
-        case PlayerbotAI::SCHOOL_SHADOW:
-            resist = true;
-            //Shadow protection check is broken, they stack!
-            if (m_bot->HasAura(SHADOW_RESISTANCE_AURA) /*|| m_bot->HasAura(PRAYER_OF_SHADOW_PROTECTION)*/)
-                break;
-            else if (SHADOW_RESISTANCE_AURA > 0 && !m_bot->HasAura(SHADOW_RESISTANCE_AURA) /*&& !m_bot->HasAura(PRAYER_OF_SHADOW_PROTECTION)*/)
-            {
-                m_ai->CastSpell(SHADOW_RESISTANCE_AURA);
-                break;
-            }
-        default:
-            break;
+        if (!m_bot->HasAura(FROST_RESISTANCE_AURA) && FROST_RESISTANCE_AURA > 0 && !m_bot->HasAura(FROST_RESISTANCE_AURA))
+            m_ai->CastSpell(FROST_RESISTANCE_AURA);
+        return;
     }
-    //If we have no resist orders, adjust aura based on spec
-    if (!resist && spec == PALADIN_SPEC_HOLY && CONCENTRATION_AURA > 0 && !m_bot->HasAura(CONCENTRATION_AURA))
-        m_ai->CastSpell(CONCENTRATION_AURA);
-    else if (!resist && spec == PALADIN_SPEC_PROTECTION && DEVOTION_AURA > 0 && !m_bot->HasAura(DEVOTION_AURA))
-        m_ai->CastSpell(DEVOTION_AURA);
-    else if (!resist && spec == PALADIN_SPEC_RETRIBUTION && RETRIBUTION_AURA > 0 && !m_bot->HasAura(RETRIBUTION_AURA))
-        m_ai->CastSpell(RETRIBUTION_AURA);
+    else if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FIRE)
+    {
+        if (!m_bot->HasAura(FIRE_RESISTANCE_AURA) && FIRE_RESISTANCE_AURA > 0 && !m_bot->HasAura(FIRE_RESISTANCE_AURA))
+            m_ai->CastSpell(FIRE_RESISTANCE_AURA);
+        return;
+    }
+    else if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_SHADOW)
+    {
+        // Shadow protection check is broken, they stack!
+        if (!m_bot->HasAura(SHADOW_RESISTANCE_AURA) && SHADOW_RESISTANCE_AURA > 0 && !m_bot->HasAura(SHADOW_RESISTANCE_AURA)) // /*&& !m_bot->HasAura(PRAYER_OF_SHADOW_PROTECTION)*/ /*&& !m_bot->HasAura(PRAYER_OF_SHADOW_PROTECTION)*/
+            m_ai->CastSpell(SHADOW_RESISTANCE_AURA);
+        return;
+    }
+
+    // If we have no resist orders, adjust aura based on spec
+    if (spec == PALADIN_SPEC_HOLY)
+    {
+        if (CONCENTRATION_AURA > 0 && !m_bot->HasAura(CONCENTRATION_AURA))
+            m_ai->CastSpell(CONCENTRATION_AURA);
+        return;
+    }
+    else if (spec == PALADIN_SPEC_PROTECTION)
+    {
+        if (DEVOTION_AURA > 0 && !m_bot->HasAura(DEVOTION_AURA))
+            m_ai->CastSpell(DEVOTION_AURA);
+        return;
+    }
+    else if (spec == PALADIN_SPEC_RETRIBUTION)
+    {
+        if (RETRIBUTION_AURA > 0 && !m_bot->HasAura(RETRIBUTION_AURA))
+            m_ai->CastSpell(RETRIBUTION_AURA);
+        return;
+    }
 
 }
 

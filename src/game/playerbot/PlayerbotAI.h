@@ -1526,20 +1526,17 @@ public:
         ORDERS_NODISPEL             = 0x0008,           // Dont dispel anything
         ORDERS_PROTECT              = 0x0010,           // combinable state: check if protectee is attacked
         ORDERS_PASSIVE              = 0x0020,           // bots do nothing
-        ORDERS_RESIST               = 0x0040,           // resist a magic school(see below for types)
-        ORDERS_PULL                 = 0x0080,           // Command to pull was given (expect bots to turn this off themselves)
-        ORDERS_PRIMARY              = 0x0007,
-        ORDERS_SECONDARY            = 0x00F8,
-        ORDERS_RESET                = 0xFFFF
-    };
+        ORDERS_PULL                 = 0x0040,           // Command to pull was given (expect bots to turn this off themselves)
+        ORDERS_RESIST_FIRE          = 0x0100,           // resist fire
+        ORDERS_RESIST_NATURE        = 0x0200,           // resist nature
+        ORDERS_RESIST_FROST         = 0x0400,           // resist frost
+        ORDERS_RESIST_SHADOW        = 0x0800,           // resist shadow
 
-    enum ResistType
-    {
-        SCHOOL_NONE     = 0,
-        SCHOOL_FIRE     = 1,
-        SCHOOL_NATURE   = 2,
-        SCHOOL_FROST    = 3,
-        SCHOOL_SHADOW   = 4
+        // Cumulative orders
+        ORDERS_PRIMARY              = 0x0007,
+        ORDERS_SECONDARY            = 0x0F78,
+        ORDERS_RESIST               = 0x0F00,
+        ORDERS_RESET                = 0xFFFF
     };
 
     enum CombatTargetType
@@ -1821,8 +1818,6 @@ public:
     Unit *gPrimtarget;
     Unit *gSectarget;
     uint32 gQuestFetch;
-    uint8 gPrimOrder;
-    uint8 gSecOrder;
 
     bool m_AutoEquipToggle;             //switch for autoequip
     uint32 SellWhite;                   //switch for white item auto sell
@@ -1893,7 +1888,6 @@ public:
     CombatOrderType GetCombatOrder() { return this->m_combatOrder; }
     bool IsTank() { return (m_combatOrder & ORDERS_TANK) ? true : false; }
     bool IsHealer() { return (m_combatOrder & ORDERS_HEAL) ? true : false; }
-    ResistType GetResistType() { return this->m_resistType; }
     void SetMovementOrder(MovementOrderType mo, Unit *followTarget = 0);
     MovementOrderType GetMovementOrder() { return this->m_movementOrder; }
     void MovementReset();
@@ -1995,7 +1989,6 @@ private:
 
     CombatStyle m_combatStyle;
     CombatOrderType m_combatOrder;
-    ResistType m_resistType;
     MovementOrderType m_movementOrder;
 
     TalentSpec m_activeTalentSpec;
