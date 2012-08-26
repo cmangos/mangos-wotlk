@@ -8244,7 +8244,7 @@ void PlayerbotAI::_HandleCommandOrders(std::string &text, Player &fromPlayer)
 
         QueryResult *resultlvl = CharacterDatabase.PQuery("SELECT guid FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetObjectGuid().GetCounter());
         if (!resultlvl)
-            CharacterDatabase.DirectPExecute("INSERT INTO playerbot_saved_data (guid,bot_primary_order,bot_secondary_order,primary_target,secondary_target,pname,sname,combat_delay,auto_follow,autoequip) VALUES ('%u',0,0,0,0,'','',0,1,false)", m_bot->GetObjectGuid().GetCounter());
+            CharacterDatabase.DirectPExecute("INSERT INTO playerbot_saved_data (guid,combat_order,primary_target,secondary_target,pname,sname,combat_delay,auto_follow,autoequip) VALUES ('%u',0,0,0,'','',0,1,false)", m_bot->GetObjectGuid().GetCounter());
         else
             delete resultlvl;
 
