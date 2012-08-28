@@ -7913,6 +7913,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                             unitTarget->CastSpell(unitTarget, 59815, true);
                             break;
                         }
+                        case POWER_FOCUS:
+                        case POWER_HAPPINESS:
+                        case POWER_RUNE:
+                        case POWER_HEALTH:
+                            break;
                     }
                     return;
                 }
