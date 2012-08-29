@@ -98,7 +98,7 @@ m_bDebugCommandChat(false)
     SetQuestNeedCreatures();
 
     // start following master (will also teleport bot to master)
-    m_FollowAutoGo = FOLLOWAUTOGO_RUN; //turn on bot auto follow distance can be turned off by player
+    m_FollowAutoGo = FOLLOWAUTOGO_OFF; //turn on bot auto follow distance can be turned off by player
     DistOverRide = 0; //set initial adjustable follow settings
     IsUpOrDown = 0;
     gTempDist = 0.5f;
@@ -3883,12 +3883,11 @@ Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
 /**
 * BotDataRestore()
 * Restores autoequip - the toggle status for the 'equip auto' command.
-* Restores gDelayAttack - the other attributes need a valid target. This function is to be called when the targets
 * may or may not be online (such as upon login). See CombatOrderRestore() for full orders restore.
 */
 void PlayerbotAI::BotDataRestore()
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT combat_delay,autoequip FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT autoequip FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
 
     if (!result)
     {
@@ -3900,8 +3899,7 @@ void PlayerbotAI::BotDataRestore()
     else
     {
         Field* fields = result->Fetch();
-        m_DelayAttack = fields[0].GetUInt8();
-        m_AutoEquipToggle = fields[1].GetBool();
+        m_AutoEquipToggle = fields[0].GetBool();
         delete result;
     }
 }
@@ -3909,6 +3907,7 @@ void PlayerbotAI::BotDataRestore()
 /**
 * CombatOrderRestore()
 * Restores all saved attributes. This function is to be called when the targets are assumed to be online.
+* Restores m_DelayAttack - the other attributes need a valid target. This function is to be called when the targets
 */
 void PlayerbotAI::CombatOrderRestore()
 {
@@ -3930,10 +3929,8 @@ void PlayerbotAI::CombatOrderRestore()
     std::string sname = fields[4].GetString();
     m_DelayAttack = fields[5].GetUInt8();
     m_FollowAutoGo = fields[6].GetUInt8();
-    //if (gPrimtarget > 0)
-        gPrimtarget = ObjectAccessor::GetUnit(*m_bot->GetMap()->GetWorldObject(PrimtargetGUID), PrimtargetGUID);
-    //if (gSectarget > 0)
-        gSectarget = ObjectAccessor::GetUnit(*m_bot->GetMap()->GetWorldObject(SectargetGUID), SectargetGUID);
+    gPrimtarget = ObjectAccessor::GetUnit(*m_bot->GetMap()->GetWorldObject(PrimtargetGUID), PrimtargetGUID);
+    gSectarget = ObjectAccessor::GetUnit(*m_bot->GetMap()->GetWorldObject(SectargetGUID), SectargetGUID);
     delete result;
 
     //Unit* target = NULL;
@@ -3948,8 +3945,8 @@ void PlayerbotAI::CombatOrderRestore()
         SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
     }
 
-    SetCombatOrder((CombatOrderType)(combatOrders & ORDERS_PRIMARY), gPrimtarget);
-    SetCombatOrder((CombatOrderType)(combatOrders & ORDERS_SECONDARY), gSectarget);
+    if (combatOrders & ORDERS_PRIMARY) SetCombatOrder(combatOrders, gPrimtarget);
+    if (combatOrders & ORDERS_SECONDARY) SetCombatOrder(combatOrders, gSectarget);
 }
 
 void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit *target)
@@ -3982,6 +3979,7 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
         gTempTarget = target->GetGUIDLow();
         gname = target->GetName();
     }
+
     // reset m_combatOrder after ORDERS_PASSIVE
     if (m_combatOrder == ORDERS_PASSIVE)
     {
@@ -3990,69 +3988,72 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
         m_targetProtect = 0;
     }
 
-    if ((co == ORDERS_ASSIST || co == ORDERS_PROTECT || co == ORDERS_PULL) && !target) {
-        switch (co)
-        {
-        case ORDERS_ASSIST:
-            TellMaster("The assist command requires a target.");
-            return;
-
-        case ORDERS_PROTECT:
-            TellMaster("The protect command requires a target.");
-            return;
-
-        case ORDERS_PULL:
-            TellMaster("The pull command requires a target.");
-            return;
-
-        default:
-            TellMaster("This command requires a target.");
-            return;
-        }
-    }
-
-    if (co == ORDERS_RESET) {
-        m_combatOrder = ORDERS_NONE;
-        m_targetAssist = 0;
-        m_targetProtect = 0;
-        m_combatOrder = ORDERS_NONE;
-        m_DelayAttackInit = CurrentTime();
-        m_DelayAttack = 0;
-        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = 0, primary_target = 0, secondary_target = 0, pname = '',sname = '', combat_delay = 0 WHERE guid = '%u'", m_bot->GetGUIDLow());
-        TellMaster("Orders are cleaned!");
-        return;
-    }
-
-    if (co == ORDERS_PASSIVE)
+    switch(co)
     {
-        m_combatOrder = ORDERS_PASSIVE;
-        SendOrders(*GetMaster());
-        return;
+        case ORDERS_ASSIST: // 2(10)
+            {
+                if (!target)
+                {
+                    TellMaster("The assist command requires a target.");
+                    return;
+                }
+                else m_targetAssist = target;
+                break;
+            }
+        case ORDERS_PROTECT: // 10(10000)
+            {
+                if (!target)
+                {
+                    TellMaster("The protect command requires a target.");
+                    return;
+                }
+                else m_targetProtect = target;
+                break;
+            }
+        case ORDERS_PASSIVE: // 20(100000)
+            {
+                m_combatOrder = ORDERS_PASSIVE;
+                m_targetAssist = 0;
+                m_targetProtect = 0;
+                return;
+            }
+        case ORDERS_PULL: // 80(10000000)
+            {
+                if (!target)
+                {
+                    TellMaster("The pull command requires a target.");
+                    return;
+                }
+                else m_targetProtect = target;
+                break;
+            }
+        case ORDERS_RESET: // FFFF(11111111)
+            {
+                m_combatOrder = ORDERS_NONE;
+                m_targetAssist = 0;
+                m_targetProtect = 0;
+                m_DelayAttackInit = CurrentTime();
+                m_DelayAttack = 0;
+                CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = 0, primary_target = 0, secondary_target = 0, pname = '',sname = '', combat_delay = 0 WHERE guid = '%u'", m_bot->GetGUIDLow());
+                TellMaster("Orders are cleaned!");
+                return;
+            }
+        default:
+            break;
     }
 
     // Do your magic
     if ((co & ORDERS_PRIMARY))
     {
-        // Primary orders are mutually exclusive - you can only have one at a time
-        if (co & ORDERS_TANK   && (co & ORDERS_PRIMARY) & !ORDERS_TANK   != ORDERS_NONE) return;
-        if (co & ORDERS_ASSIST && (co & ORDERS_PRIMARY) & !ORDERS_ASSIST != ORDERS_NONE) return;
-        if (co & ORDERS_HEAL   && (co & ORDERS_PRIMARY) & !ORDERS_HEAL   != ORDERS_NONE) return;
-
         m_combatOrder = (CombatOrderType) (((uint32) m_combatOrder & (uint32) ORDERS_SECONDARY) | (uint32) co);
         CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u', primary_target = '%u', pname = '%s' WHERE guid = '%u'", m_combatOrder, gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
-        if (co == ORDERS_ASSIST)
-            m_targetAssist = target;
     }
     else
     {
         m_combatOrder = (CombatOrderType) ((uint32) m_combatOrder | (uint32) co);
         if (co != ORDERS_PULL)
             CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u', secondary_target = '%u', sname = '%s' WHERE guid = '%u'", m_combatOrder, gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
-        if (co == ORDERS_PROTECT)
-            m_targetProtect = target;
     }
-
-    SendOrders(*GetMaster());
 }
 
 void PlayerbotAI::ClearCombatOrder(CombatOrderType co)
@@ -8192,8 +8193,6 @@ void PlayerbotAI::_HandleCommandReset(std::string &text, Player &fromPlayer)
 
 void PlayerbotAI::_HandleCommandOrders(std::string &text, Player &fromPlayer)
 {
-    if (text == "")
-
     if (ExtractCommand("delay", text))
     {
         uint32 gdelay;
@@ -8214,11 +8213,21 @@ void PlayerbotAI::_HandleCommandOrders(std::string &text, Player &fromPlayer)
     else if (ExtractCommand("combat", text, true))
     {
         Unit *target = NULL;
+
         if (text == "")
         {
             SendWhisper("|cffff0000Syntax error:|cffffffff orders combat <botName> <reset | tank | assist | heal | protect> [targetPlayer]", fromPlayer);
             return;
         }
+
+        QueryResult *resultlvl = CharacterDatabase.PQuery("SELECT guid FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetObjectGuid().GetCounter());
+        if (!resultlvl)
+            CharacterDatabase.DirectPExecute("INSERT INTO playerbot_saved_data (guid,combat_order,primary_target,secondary_target,pname,sname,combat_delay,auto_follow,autoequip) VALUES ('%u',0,0,0,'','',0,0,false)", m_bot->GetObjectGuid().GetCounter());
+        else
+            delete resultlvl;
+
+        size_t protect = text.find("protect");
+        size_t assist = text.find("assist");
 
         if (ExtractCommand("protect", text) || ExtractCommand("assist", text))
         {
@@ -8240,22 +8249,20 @@ void PlayerbotAI::_HandleCommandOrders(std::string &text, Player &fromPlayer)
                 SendWhisper("|cffff0000Invalid target for combat order protect or assist!", fromPlayer);
                 return;
             }
+
+            if (protect != std::string::npos)
+                SetCombatOrderByStr("protect", target);
+            else if (assist != std::string::npos)
+                SetCombatOrderByStr("assist", target);
         }
-
-        QueryResult *resultlvl = CharacterDatabase.PQuery("SELECT guid FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetObjectGuid().GetCounter());
-        if (!resultlvl)
-            CharacterDatabase.DirectPExecute("INSERT INTO playerbot_saved_data (guid,combat_order,primary_target,secondary_target,pname,sname,combat_delay,auto_follow,autoequip) VALUES ('%u',0,0,0,'','',0,1,false)", m_bot->GetObjectGuid().GetCounter());
         else
-            delete resultlvl;
-
-        SetCombatOrderByStr(text, target);
+            SetCombatOrderByStr(text, target);
     }
     else if (text != "")
     {
         SendWhisper("See help for details on using 'orders'.", fromPlayer);
         return;
     }
-
     SendOrders(*GetMaster());
 }
 
@@ -8363,7 +8370,6 @@ void PlayerbotAI::_HandleCommandFollow(std::string &text, Player &fromPlayer)
         return;
     }
     SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
-
 }
 
 void PlayerbotAI::_HandleCommandStay(std::string &text, Player &fromPlayer)
