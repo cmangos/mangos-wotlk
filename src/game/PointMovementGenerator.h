@@ -35,7 +35,7 @@ class MANGOS_DLL_SPEC PointMovementGenerator
         void Finalize(T&);
         void Interrupt(T&);
         void Reset(T& unit);
-        bool Update(T&, const uint32& diff);
+        bool Update(T&, const uint32& /*diff*/);
 
         void MovementInform(T&);
 

@@ -675,7 +675,7 @@ SOAP_FMAC5 void SOAP_FMAC6 soap_delete_SOAP_ENV__Fault(struct soap* soap, struct
     soap_delete(soap, p);
 }
 
-SOAP_FMAC3 struct SOAP_ENV__Fault* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Fault(struct soap* soap, int n, const char* type, const char* arrayType, size_t* size)
+SOAP_FMAC3 struct SOAP_ENV__Fault* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Fault(struct soap* soap, int n, const char* /*type*/, const char* /*arrayType*/, size_t* size)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Fault(%d, %s, %s)\n", n, type ? type : "", arrayType ? arrayType : ""));
     struct soap_clist* cp = soap_link(soap, NULL, SOAP_TYPE_SOAP_ENV__Fault, n, soap_fdelete);
@@ -701,7 +701,7 @@ SOAP_FMAC3 struct SOAP_ENV__Fault* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Fault(s
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
     return (struct SOAP_ENV__Fault*)cp->ptr;
 }
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Fault(struct soap* soap, int st, int tt, void* p, size_t len, const void* q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Fault(struct soap* /*soap*/, int /*st*/, int /*tt*/, void* p, size_t /*len*/, const void* q, size_t /*n*/)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct SOAP_ENV__Fault %p -> %p\n", q, p));
     *(struct SOAP_ENV__Fault*)p = *(struct SOAP_ENV__Fault*)q;
@@ -797,7 +797,7 @@ SOAP_FMAC5 void SOAP_FMAC6 soap_delete_SOAP_ENV__Reason(struct soap* soap, struc
     soap_delete(soap, p);
 }
 
-SOAP_FMAC3 struct SOAP_ENV__Reason* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Reason(struct soap* soap, int n, const char* type, const char* arrayType, size_t* size)
+SOAP_FMAC3 struct SOAP_ENV__Reason* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Reason(struct soap* soap, int n, const char* /*type*/, const char* /*arrayType*/, size_t* size)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Reason(%d, %s, %s)\n", n, type ? type : "", arrayType ? arrayType : ""));
     struct soap_clist* cp = soap_link(soap, NULL, SOAP_TYPE_SOAP_ENV__Reason, n, soap_fdelete);
@@ -823,7 +823,7 @@ SOAP_FMAC3 struct SOAP_ENV__Reason* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Reason
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
     return (struct SOAP_ENV__Reason*)cp->ptr;
 }
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Reason(struct soap* soap, int st, int tt, void* p, size_t len, const void* q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Reason(struct soap* /*soap*/, int /*st*/, int /*tt*/, void* p, size_t /*len*/, const void* q, size_t /*n*/)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct SOAP_ENV__Reason %p -> %p\n", q, p));
     *(struct SOAP_ENV__Reason*)p = *(struct SOAP_ENV__Reason*)q;
@@ -928,7 +928,7 @@ SOAP_FMAC5 void SOAP_FMAC6 soap_delete_SOAP_ENV__Detail(struct soap* soap, struc
     soap_delete(soap, p);
 }
 
-SOAP_FMAC3 struct SOAP_ENV__Detail* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Detail(struct soap* soap, int n, const char* type, const char* arrayType, size_t* size)
+SOAP_FMAC3 struct SOAP_ENV__Detail* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Detail(struct soap* soap, int n, const char* /*type*/, const char* /*arrayType*/, size_t* size)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Detail(%d, %s, %s)\n", n, type ? type : "", arrayType ? arrayType : ""));
     struct soap_clist* cp = soap_link(soap, NULL, SOAP_TYPE_SOAP_ENV__Detail, n, soap_fdelete);
@@ -954,7 +954,7 @@ SOAP_FMAC3 struct SOAP_ENV__Detail* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Detail
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
     return (struct SOAP_ENV__Detail*)cp->ptr;
 }
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Detail(struct soap* soap, int st, int tt, void* p, size_t len, const void* q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Detail(struct soap* /*soap*/, int /*st*/, int /*tt*/, void* p, size_t /*len*/, const void* q, size_t /*n*/)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct SOAP_ENV__Detail %p -> %p\n", q, p));
     *(struct SOAP_ENV__Detail*)p = *(struct SOAP_ENV__Detail*)q;
@@ -1061,7 +1061,7 @@ SOAP_FMAC5 void SOAP_FMAC6 soap_delete_SOAP_ENV__Code(struct soap* soap, struct 
     soap_delete(soap, p);
 }
 
-SOAP_FMAC3 struct SOAP_ENV__Code* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Code(struct soap* soap, int n, const char* type, const char* arrayType, size_t* size)
+SOAP_FMAC3 struct SOAP_ENV__Code* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Code(struct soap* soap, int n, const char* /*type*/, const char* /*arrayType*/, size_t* size)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Code(%d, %s, %s)\n", n, type ? type : "", arrayType ? arrayType : ""));
     struct soap_clist* cp = soap_link(soap, NULL, SOAP_TYPE_SOAP_ENV__Code, n, soap_fdelete);
@@ -1087,7 +1087,7 @@ SOAP_FMAC3 struct SOAP_ENV__Code* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Code(str
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
     return (struct SOAP_ENV__Code*)cp->ptr;
 }
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Code(struct soap* soap, int st, int tt, void* p, size_t len, const void* q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Code(struct soap* /*soap*/, int /*st*/, int /*tt*/, void* p, size_t /*len*/, const void* q, size_t /*n*/)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct SOAP_ENV__Code %p -> %p\n", q, p));
     *(struct SOAP_ENV__Code*)p = *(struct SOAP_ENV__Code*)q;
@@ -1172,7 +1172,7 @@ SOAP_FMAC5 void SOAP_FMAC6 soap_delete_SOAP_ENV__Header(struct soap* soap, struc
     soap_delete(soap, p);
 }
 
-SOAP_FMAC3 struct SOAP_ENV__Header* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Header(struct soap* soap, int n, const char* type, const char* arrayType, size_t* size)
+SOAP_FMAC3 struct SOAP_ENV__Header* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Header(struct soap* soap, int n, const char* /*type*/, const char* /*arrayType*/, size_t* size)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Header(%d, %s, %s)\n", n, type ? type : "", arrayType ? arrayType : ""));
     struct soap_clist* cp = soap_link(soap, NULL, SOAP_TYPE_SOAP_ENV__Header, n, soap_fdelete);
@@ -1198,7 +1198,7 @@ SOAP_FMAC3 struct SOAP_ENV__Header* SOAP_FMAC4 soap_instantiate_SOAP_ENV__Header
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
     return (struct SOAP_ENV__Header*)cp->ptr;
 }
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Header(struct soap* soap, int st, int tt, void* p, size_t len, const void* q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Header(struct soap* /*soap*/, int /*st*/, int /*tt*/, void* p, size_t /*len*/, const void* q, size_t /*n*/)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct SOAP_ENV__Header %p -> %p\n", q, p));
     *(struct SOAP_ENV__Header*)p = *(struct SOAP_ENV__Header*)q;
@@ -1292,7 +1292,7 @@ SOAP_FMAC5 void SOAP_FMAC6 soap_delete_ns1__executeCommand(struct soap* soap, st
     soap_delete(soap, p);
 }
 
-SOAP_FMAC3 struct ns1__executeCommand* SOAP_FMAC4 soap_instantiate_ns1__executeCommand(struct soap* soap, int n, const char* type, const char* arrayType, size_t* size)
+SOAP_FMAC3 struct ns1__executeCommand* SOAP_FMAC4 soap_instantiate_ns1__executeCommand(struct soap* soap, int n, const char* /*type*/, const char* /*arrayType*/, size_t* size)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__executeCommand(%d, %s, %s)\n", n, type ? type : "", arrayType ? arrayType : ""));
     struct soap_clist* cp = soap_link(soap, NULL, SOAP_TYPE_ns1__executeCommand, n, soap_fdelete);
@@ -1318,7 +1318,7 @@ SOAP_FMAC3 struct ns1__executeCommand* SOAP_FMAC4 soap_instantiate_ns1__executeC
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
     return (struct ns1__executeCommand*)cp->ptr;
 }
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__executeCommand(struct soap* soap, int st, int tt, void* p, size_t len, const void* q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__executeCommand(struct soap* /*soap*/, int /*st*/, int /*tt*/, void* p, size_t /*len*/, const void* q, size_t /*n*/)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct ns1__executeCommand %p -> %p\n", q, p));
     *(struct ns1__executeCommand*)p = *(struct ns1__executeCommand*)q;
@@ -1410,7 +1410,7 @@ SOAP_FMAC5 void SOAP_FMAC6 soap_delete_ns1__executeCommandResponse(struct soap* 
     soap_delete(soap, p);
 }
 
-SOAP_FMAC3 struct ns1__executeCommandResponse* SOAP_FMAC4 soap_instantiate_ns1__executeCommandResponse(struct soap* soap, int n, const char* type, const char* arrayType, size_t* size)
+SOAP_FMAC3 struct ns1__executeCommandResponse* SOAP_FMAC4 soap_instantiate_ns1__executeCommandResponse(struct soap* soap, int n, const char* /*type*/, const char* /*arrayType*/, size_t* size)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__executeCommandResponse(%d, %s, %s)\n", n, type ? type : "", arrayType ? arrayType : ""));
     struct soap_clist* cp = soap_link(soap, NULL, SOAP_TYPE_ns1__executeCommandResponse, n, soap_fdelete);
@@ -1436,7 +1436,7 @@ SOAP_FMAC3 struct ns1__executeCommandResponse* SOAP_FMAC4 soap_instantiate_ns1__
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
     return (struct ns1__executeCommandResponse*)cp->ptr;
 }
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__executeCommandResponse(struct soap* soap, int st, int tt, void* p, size_t len, const void* q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__executeCommandResponse(struct soap* /*soap*/, int /*st*/, int /*tt*/, void* p, size_t /*len*/, const void* q, size_t /*n*/)
 {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct ns1__executeCommandResponse %p -> %p\n", q, p));
     *(struct ns1__executeCommandResponse*)p = *(struct ns1__executeCommandResponse*)q;
