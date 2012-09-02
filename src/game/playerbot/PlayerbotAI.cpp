@@ -3129,6 +3129,53 @@ bool PlayerbotAI::GroupHoTOnTank()
     return bReturn;
 }
 
+bool PlayerbotAI::CanPull(Player &fromPlayer)
+{
+    if (!m_bot) return false;
+
+    if (!m_bot->GetGroup() || fromPlayer.GetGroup() != m_bot->GetGroup())
+    {
+        SendWhisper("I can't pull - we're not in the same group.", fromPlayer);
+        return false;
+    }
+
+    if (IsGroupInCombat()) // TODO: add raid support
+    {
+        SendWhisper("Unable to pull - the group is already in combat", fromPlayer);
+        return false;
+    }
+
+    if (GetClassAI() && GetClassAI()->CanPull())
+    {
+        std::string sError = "I cannot pull, I do not have the proper ";
+        switch (m_bot->getClass())
+        {
+            case CLASS_PALADIN:
+            case CLASS_DEATH_KNIGHT:
+            case CLASS_DRUID:
+                sError += "spell, or it's not ready yet.";
+                break;
+
+            case CLASS_WARRIOR:
+                sError += "weapon.";
+                break;
+
+            default:
+                sError += "class.";
+        }
+        SendWhisper(sError, fromPlayer);
+        return false;
+    }
+
+    if (GetCombatOrder() & ORDERS_TANK == 0)
+    {
+        SendWhisper("I cannot pull as I do not have combat orders to tank.", fromPlayer);
+        return false;
+    }
+
+    return true;
+}
+
 void PlayerbotAI::SetQuestNeedCreatures()
 {
     // reset values first
@@ -8491,25 +8538,28 @@ void PlayerbotAI::_HandleCommandAttack(std::string &text, Player &fromPlayer)
 
 void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
 {
-    if (text != "")
+    bool bReadyCheck = false;
+
+    if (ExtractCommand("test", text)) // switch to automatic follow distance
     {
-        SendWhisper("pull cannot have a subcommand.", fromPlayer);
+        CanPull(fromPlayer);
+        return;
+    }
+    if (ExtractCommand("ready", text)) // switch to automatic follow distance
+    {
+        bReadyCheck = true;
+    }
+    else if (text != "")
+    {
+        SendWhisper("See 'help pull' for details on using the pull command.", fromPlayer);
         return;
     }
 
-    if (!m_bot->GetGroup() || fromPlayer.GetGroup() != m_bot->GetGroup())
-    {
-        SendWhisper("I can't pull - we're not in the same group.", fromPlayer);
+    if (!CanPull(fromPlayer))
         return;
-    }
-
-    if (IsGroupInCombat()) // TODO: add raid support
-    {
-        SendWhisper("Unable to pull - the group is already in combat", fromPlayer);
-        return;
-    }
 
     // Check for valid target
+    m_bot->SetSelectionGuid(fromPlayer.GetSelectionGuid());
     ObjectGuid attackOnGuid = m_bot->GetSelectionGuid();
     if (!attackOnGuid)
     {
@@ -8537,34 +8587,9 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
     }
     GetCombatTarget(thingToAttack);
 
-    // This does not allow for the eventuality that a player is the tank, but assuming the player being a tank
-    // knows how to pull (which is not our job anyway) there is little lost here
-    if (!GetGroupTank()) // TODO: can't this work with: m_bot->GetGroup()->GetMainTankGUID() (which, by-the-by, is raid-proof)
+    if (bReadyCheck)
     {
-        SendWhisper("This group has no playerbot tank to perform the pull. Either give someone the combat order 'tank' or pull yourself.", fromPlayer);
-        return;
-    }
-
-    // if tank does not have the proper pulling method (shoot + gun/bow, spell, ...) -> report failure
-    if (GetClassAI() && GetClassAI()->CanPull())
-    {
-        std::string sError = "I cannot pull, I do not have the proper ";
-        switch (m_bot->getClass())
-        {
-            case CLASS_PALADIN:
-            case CLASS_DEATH_KNIGHT:
-            case CLASS_DRUID:
-                sError += "spell, or it's not ready yet.";
-                break;
-
-            case CLASS_WARRIOR:
-                sError += "weapon.";
-                break;
-
-            default:
-                sError += "class.";
-        }
-        SendWhisper(sError, fromPlayer);
+        SendWhisper("All checks have been passed and I am ready to pull! ... Are you sure you wouldn't like a smaller target?", fromPlayer);
         return;
     }
 
@@ -8584,8 +8609,8 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
     SetIgnoreUpdateTime(0);
 
     //(4a) if tank, pull (based on class), deactivate any attack (such as 'shoot (bow/gun)' for warriors), wait until in melee range, attack
-    //(4b) if dps, wait (see (4+5) in first post)
-    //(4c) if healer, do a HoT on the tank if class has a HoT. else do healing checks
+    //(4b) if dps, wait until the target is in melee range of the tank +2seconds or until tank no longer holds aggro
+    //(4c) if healer, do healing checks
     //(5) when target is in melee range of tank, wait 2 seconds (healers continue to do group heal checks, all do self-heal checks), then return to normal functioning
 }
 
@@ -10731,6 +10756,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
 
         if (!bMainHelp)
         {
+            ch.SendSysMessage(_HandleCommandHelpHelper("pull test", "I'll tell you if I could pull at all. Can be used anywhere.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("pull ready", "I'll tell you if I'm ready to pull *right now*. To be used on location with valid target.").c_str());
             if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }

@@ -1883,6 +1883,7 @@ public:
     void SetGroupCombatOrder(CombatOrderType co);
     void SetGroupIgnoreUpdateTime(uint8 t);
     bool GroupHoTOnTank();
+    bool CanPull(Player &fromPlayer);
     void UpdateAttackerInfo();
     Unit* FindAttacker(ATTACKERINFOTYPE ait = AIT_NONE, Unit *victim = 0);
     uint32 GetAttackerCount() { return m_attackerInfo.size(); };
