@@ -108,10 +108,9 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVE(Unit *pTarget
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    PlayerbotAI::CombatOrderType co = m_ai->GetCombatOrder();
     float fTargetDist = m_bot->GetCombatDistance(pTarget);
 
-    if (DEFENSIVE_STANCE && (co & PlayerbotAI::ORDERS_TANK))
+    if (DEFENSIVE_STANCE && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK))
     {
         if (!m_bot->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DEFENSIVE_STANCE))
             return RETURN_CONTINUE;
@@ -170,10 +169,9 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVP(Unit *pTarget
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    PlayerbotAI::CombatOrderType co = m_ai->GetCombatOrder();
     float fTargetDist = m_bot->GetCombatDistance(pTarget);
 
-    if (DEFENSIVE_STANCE && (co & PlayerbotAI::ORDERS_TANK))
+    if (DEFENSIVE_STANCE && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK))
     {
         if (!m_bot->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DEFENSIVE_STANCE))
             return RETURN_CONTINUE;
@@ -253,7 +251,6 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit *pTarget)
 
     //Unit* pVictim = pTarget->getVictim();
     //float fTargetDist = m_bot->GetCombatDistance(pTarget);
-    //PlayerbotAI::CombatOrderType co = m_ai->GetCombatOrder();
     uint32 spec = m_bot->GetSpec();
 
     //If we have devastate it will replace SA in our rotation
@@ -309,7 +306,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit *pTarget)
                 return RETURN_CONTINUE;
 
         case WARRIOR_SPEC_PROTECTION:
-            if (m_ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK && !newTarget && TAUNT > 0 && !m_bot->HasSpellCooldown(TAUNT) && m_ai->CastSpell(TAUNT, *pTarget))
+            if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK && !newTarget && TAUNT > 0 && !m_bot->HasSpellCooldown(TAUNT) && m_ai->CastSpell(TAUNT, *pTarget))
                 return RETURN_CONTINUE;
             // No way to tell if revenge is active (yet)
             /*if (REVENGE > 0 && m_ai->CastSpell(REVENGE, *pTarget))

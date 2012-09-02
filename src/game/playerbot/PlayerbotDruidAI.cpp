@@ -141,7 +141,7 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuverPVE(Unit *pTarget)
 
     uint32 spec = m_bot->GetSpec();
     if (spec == 0) // default to spellcasting or healing for healer
-        spec = (PlayerbotAI::ORDERS_HEAL == m_ai->GetCombatOrder() ? DRUID_SPEC_RESTORATION : DRUID_SPEC_BALANCE);
+        spec = (PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder() ? DRUID_SPEC_RESTORATION : DRUID_SPEC_BALANCE);
     float dist = m_bot->GetCombatDistance(pTarget);
 
     // Make sure healer stays put, don't even melee (aggro) if in range.
@@ -257,7 +257,7 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarg
             pVictim->Attack(pTarget, true);
     }
 
-    if (PlayerbotAI::ORDERS_TANK == m_ai->GetCombatOrder() && !newTarget && GROWL > 0 && !m_bot->HasSpellCooldown(GROWL))
+    if (PlayerbotAI::ORDERS_TANK & m_ai->GetCombatOrder() && !newTarget && GROWL > 0 && !m_bot->HasSpellCooldown(GROWL))
         if (CastSpell(GROWL, pTarget))
             return RETURN_CONTINUE;
 
@@ -570,7 +570,7 @@ uint8 PlayerbotDruidAI::CheckForms()
     if (spec == DRUID_SPEC_FERAL)
     {
         // Use Bear form only if we are told we're a tank and have thorns up
-        if (m_ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK)
+        if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK)
         {
             if (m_bot->HasAura(BEAR))
                 return RETURN_OK_NOCHANGE;
@@ -747,6 +747,8 @@ bool PlayerbotDruidAI::CanPull()
 bool PlayerbotDruidAI::CastHoTOnTank()
 {
     if (!m_ai) return false;
+
+    if ((PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder()) == 0) return false;
 
     // Druid HoTs: Rejuvenation, Regrowth, Tranquility (channeled, AoE), Lifebloom, and Wild Growth
     if (REJUVENATION)

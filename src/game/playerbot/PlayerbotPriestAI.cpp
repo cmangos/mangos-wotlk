@@ -507,6 +507,8 @@ bool PlayerbotPriestAI::CastHoTOnTank()
 {
     if (!m_ai) return false;
 
+    if ((PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder()) == 0) return false;
+
     // Priest HoTs: Renew, Penance (with talents, channeled)
     if (RENEW)
         return (RETURN_CONTINUE & CastSpell(RENEW, m_ai->GetGroupTank()));

@@ -352,7 +352,7 @@ void PlayerbotShamanAI::DropTotems()
     // Air totems
     if ((air == NULL) || (m_bot->GetDistance(air) > 30))
     {
-        if (m_ai->GetCombatOrder() == PlayerbotAI::ORDERS_RESIST_NATURE && NATURE_RESISTANCE_TOTEM > 0 && m_ai->CastSpell(NATURE_RESISTANCE_TOTEM))
+        if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_NATURE && NATURE_RESISTANCE_TOTEM > 0 && m_ai->CastSpell(NATURE_RESISTANCE_TOTEM))
             ;
         else if (spec == SHAMAN_SPEC_ENHANCEMENT)
         {
@@ -369,7 +369,7 @@ void PlayerbotShamanAI::DropTotems()
     // Water Totems
     if ((water == NULL) || (m_bot->GetDistance(water) > 30))
     {
-        if (m_ai->GetCombatOrder() == PlayerbotAI::ORDERS_RESIST_FIRE && FIRE_RESISTANCE_TOTEM > 0 && m_ai->CastSpell(FIRE_RESISTANCE_TOTEM))
+        if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FIRE && FIRE_RESISTANCE_TOTEM > 0 && m_ai->CastSpell(FIRE_RESISTANCE_TOTEM))
             ;
         else if (MANA_SPRING_TOTEM > 0 && m_ai->CastSpell(MANA_SPRING_TOTEM))
             ;
@@ -550,6 +550,10 @@ void PlayerbotShamanAI::DoNonCombatActions()
 
 bool PlayerbotShamanAI::CastHoTOnTank()
 {
+    if (!m_ai) return false;
+
+    if ((PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder()) == 0) return false;
+
     // Shaman: Healing Stream Totem, Earthliving Weapon, and Riptide (with talents)
     // None of these are cast before Pulling
 

@@ -8478,7 +8478,7 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
         return;
     }
 
-    if (fromPlayer.GetGroup() != m_bot->GetGroup())
+    if (!m_bot->GetGroup() || fromPlayer.GetGroup() != m_bot->GetGroup())
     {
         SendWhisper("I can't pull - we're not in the same group.", fromPlayer);
         return;
@@ -8489,6 +8489,34 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
         SendWhisper("Unable to pull - the group is already in combat", fromPlayer);
         return;
     }
+
+    // Check for valid target
+    ObjectGuid attackOnGuid = m_bot->GetSelectionGuid();
+    if (!attackOnGuid)
+    {
+        SendWhisper("No target is selected.", fromPlayer);
+        return;
+    }
+
+    Unit* thingToAttack = ObjectAccessor::GetUnit(*m_bot, attackOnGuid);
+    if (!thingToAttack)
+    {
+        SendWhisper("No target is selected.", fromPlayer);
+        return;
+    }
+
+    if (m_bot->IsFriendlyTo(thingToAttack))
+    {
+        SendWhisper("Where I come from we don't attack our friends.", fromPlayer);
+        return;
+    }
+    // TODO: Okay, this one should actually be fixable. InMap should return, but LOS (Line of Sight) should result in moving, well, into LoS.
+    if (!m_bot->IsWithinLOSInMap(thingToAttack))
+    {
+        SendWhisper("I can't see that target! <DevNote: If the tank is near the target, remember that Line of Sight rules apply and *you* need to compensate for them - for now>", fromPlayer);
+        return;
+    }
+    GetCombatTarget(thingToAttack);
 
     // This does not allow for the eventuality that a player is the tank, but assuming the player being a tank
     // knows how to pull (which is not our job anyway) there is little lost here
@@ -8524,35 +8552,22 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
     // Sets Combat Orders to PULL
     SetGroupCombatOrder(ORDERS_PULL);
 
+    // All healers which have it available will cast any applicable HoT (Heal over Time) spell on the tank
     GroupHoTOnTank();
 
-    //(4a) if tank, wait a second (if healer class with HoT is present), pull (based on class), deactivate any attack (such as 'shoot (bow/gun)' for warriors), wait until in melee range, attack
+    /* Technically the tank should wait a bit if/until the HoT has been applied
+       but the above function immediately casts it rather than wait for an UpdateAI tick
+       */
+    /* So have the group wait for the tank to take action (and aggro) - this way it will be easy to see if tank has aggro or not without having to
+       worry about tank not being the first to have UpdateAI() called
+       */
+    SetGroupIgnoreUpdateTime(2);
+    SetIgnoreUpdateTime(0);
+
+    //(4a) if tank, pull (based on class), deactivate any attack (such as 'shoot (bow/gun)' for warriors), wait until in melee range, attack
     //(4b) if dps, wait (see (4+5) in first post)
     //(4c) if healer, do a HoT on the tank if class has a HoT. else do healing checks
     //(5) when target is in melee range of tank, wait 2 seconds (healers continue to do group heal checks, all do self-heal checks), then return to normal functioning
-
-    /*
-    ObjectGuid attackOnGuid = fromPlayer.GetSelectionGuid();
-    if (attackOnGuid)
-    {
-        if (Unit * thingToAttack = ObjectAccessor::GetUnit(*m_bot, attackOnGuid))
-        {
-            if (!m_bot->IsFriendlyTo(thingToAttack) && !m_bot->IsWithinLOSInMap(thingToAttack))
-            {
-                DoTeleport(*m_followTarget);
-                if (m_bot->IsWithinLOSInMap(thingToAttack))
-                    GetCombatTarget(thingToAttack);
-            }
-            else if (!m_bot->IsFriendlyTo(thingToAttack) && m_bot->IsWithinLOSInMap(thingToAttack))
-                GetCombatTarget(thingToAttack);
-        }
-    }
-    else
-    {
-        SendWhisper("No target is selected.", fromPlayer);
-        m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
-    }
-    */
 }
 
 void PlayerbotAI::_HandleCommandCast(std::string &text, Player &fromPlayer)

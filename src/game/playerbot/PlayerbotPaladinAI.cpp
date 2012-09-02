@@ -216,7 +216,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit *pTarget)
 
         case PALADIN_SPEC_PROTECTION:
             //Taunt if orders specify
-            if (m_ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK && !newTarget && HAND_OF_RECKONING > 0 && !m_bot->HasSpellCooldown(HAND_OF_RECKONING) && m_ai->CastSpell(HAND_OF_RECKONING, *pTarget))
+            if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK && !newTarget && HAND_OF_RECKONING > 0 && !m_bot->HasSpellCooldown(HAND_OF_RECKONING) && m_ai->CastSpell(HAND_OF_RECKONING, *pTarget))
                 return RETURN_CONTINUE;
             if (CONSECRATION > 0 && !m_bot->HasSpellCooldown(CONSECRATION) && m_ai->CastSpell(CONSECRATION, *pTarget))
                 return RETURN_CONTINUE;
@@ -432,7 +432,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     CheckSeals();
 
     //Put up RF if tank
-    if (m_ai->GetCombatOrder() == PlayerbotAI::ORDERS_TANK)
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK)
         m_ai->SelfBuff(RIGHTEOUS_FURY);
     //Disable RF if not tank
     else if (m_bot->HasAura(RIGHTEOUS_FURY))
@@ -634,6 +634,10 @@ bool PlayerbotPaladinAI::CanPull()
 
 bool PlayerbotPaladinAI::CastHoTOnTank()
 {
+    if (!m_ai) return false;
+
+    if ((PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder()) == 0) return false;
+
     // Paladin: Sheath of Light (with talents), Flash of Light (with Infusion of Light talent and only on a target with the Sacred Shield buff),
     //          Holy Shock (with Tier 8 set bonus)
     // None of these are HoTs to cast before pulling (I think)

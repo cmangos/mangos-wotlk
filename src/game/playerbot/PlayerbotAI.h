@@ -1476,6 +1476,7 @@ enum CombatManeuverReturns
     RETURN_CONTINUE                     = 0x20, // Continue first moves; normal return value for next-combat-maneuver
     RETURN_NO_ACTION_INSUFFICIENT_POWER = 0x40, // No action taken due to insufficient power (rage, focus, mana, runes)
     RETURN_ANY_OK                       = 0x31, // All the OK values bitwise OR'ed
+    RETURN_ANY_ACTION                   = 0x30, // All returns that result in action (which should also be 'OK')
     RETURN_ANY_ERROR                    = 0x4C  // All the ERROR values bitwise OR'ed
 };
 
@@ -1880,6 +1881,7 @@ public:
     bool IsGroupInCombat();
     Player* GetGroupTank(); // TODO: didn't want to pollute non-playerbot code but this should really go in group.cpp
     void SetGroupCombatOrder(CombatOrderType co);
+    void SetGroupIgnoreUpdateTime(uint8 t);
     bool GroupHoTOnTank();
     void UpdateAttackerInfo();
     Unit* FindAttacker(ATTACKERINFOTYPE ait = AIT_NONE, Unit *victim = 0);
