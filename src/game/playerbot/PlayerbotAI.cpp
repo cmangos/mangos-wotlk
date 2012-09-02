@@ -3167,7 +3167,7 @@ bool PlayerbotAI::CanPull(Player &fromPlayer)
         return false;
     }
 
-    if (GetCombatOrder() & ORDERS_TANK == 0)
+    if ((GetCombatOrder() & ORDERS_TANK) == 0)
     {
         SendWhisper("I cannot pull as I do not have combat orders to tank.", fromPlayer);
         return false;
@@ -10881,22 +10881,29 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     }
     if (bMainHelp || ExtractCommand("equip", text))
     {
-        ch.SendSysMessage(_HandleCommandHelpHelper("equip auto", "I will automatically equip items I acquire if they are better than what I'm wearing. Acts as toggle (ON/OFF) if used without subcommand. Fashion sense not included.", HL_ITEM, true).c_str());
-        ch.SendSysMessage(_HandleCommandHelpHelper("equip info", "I will tell you my equip auto toggle status (ON/OFF).").c_str());
         ch.SendSysMessage(_HandleCommandHelpHelper("equip", "I will equip the linked item(s).", HL_ITEM, true).c_str());
 
-        if (!bMainHelp || ExtractCommand("auto", text))
+        if (!bMainHelp)
         {
-            ch.SendSysMessage(_HandleCommandHelpHelper("equip auto on", "Turns auto equip ON, also does an immediate check (like once).").c_str());
-            ch.SendSysMessage(_HandleCommandHelpHelper("equip auto off", "Turns auto equip OFF.").c_str());
-            ch.SendSysMessage(_HandleCommandHelpHelper("equip auto once", "Runs auto equip once, then turns it off.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("equip auto <on | off | once>", "I will automatically equip items I acquire if they are better than what I'm wearing. Acts as toggle (ON/OFF) if used without subcommand. Fashion sense not included.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("equip info", "I will tell you my equip auto toggle status (ON/OFF).").c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
-            if (ExtractCommand("on", text, true)) {}
-            else if (ExtractCommand("off", text, true)) {}
-            else if (ExtractCommand("once", text, true)) {}
+            if (ExtractCommand("auto", text, true))
+            {
+                ch.SendSysMessage(_HandleCommandHelpHelper("equip auto on", "Turns auto equip ON, also does an immediate check (like once).").c_str());
+                ch.SendSysMessage(_HandleCommandHelpHelper("equip auto off", "Turns auto equip OFF.").c_str());
+                ch.SendSysMessage(_HandleCommandHelpHelper("equip auto once", "Runs auto equip once, then turns it off.").c_str());
 
-            if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+                if (ExtractCommand("on", text, true)) {}
+                else if (ExtractCommand("off", text, true)) {}
+                else if (ExtractCommand("once", text, true)) {}
+
+                else if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
+            }
+            else if (ExtractCommand("info", text, true)) {}
+
+            else if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
         }
     }
