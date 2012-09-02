@@ -3069,6 +3069,25 @@ void PlayerbotAI::SetGroupCombatOrder(CombatOrderType co)
     }
 }
 
+void PlayerbotAI::SetGroupIgnoreUpdateTime(uint8 t)
+{
+    if (!m_bot) return;
+
+    if (m_bot->GetGroup())
+    {
+        Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (!groupMember || !groupMember->GetPlayerbotAI())
+                continue;
+            groupMember->GetPlayerbotAI()->SetIgnoreUpdateTime(t);
+        }
+    }
+    else
+        SetIgnoreUpdateTime(t);
+}
+
 bool PlayerbotAI::GroupHoTOnTank()
 {
     if (!m_bot) return false;
