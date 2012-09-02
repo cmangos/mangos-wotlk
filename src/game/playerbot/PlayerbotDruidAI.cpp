@@ -743,3 +743,14 @@ bool PlayerbotDruidAI::CanPull()
 
     return false;
 }
+
+bool PlayerbotDruidAI::CastHoTOnTank()
+{
+    if (!m_ai) return false;
+
+    // Druid HoTs: Rejuvenation, Regrowth, Tranquility (channeled, AoE), Lifebloom, and Wild Growth
+    if (REJUVENATION)
+        return (RETURN_CONTINUE & CastSpell(REJUVENATION, m_ai->GetGroupTank()));
+
+    return false;
+}

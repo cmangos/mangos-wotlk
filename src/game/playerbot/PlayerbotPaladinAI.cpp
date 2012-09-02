@@ -631,3 +631,12 @@ bool PlayerbotPaladinAI::CanPull()
 
     return false;
 }
+
+bool PlayerbotPaladinAI::CastHoTOnTank()
+{
+    // Paladin: Sheath of Light (with talents), Flash of Light (with Infusion of Light talent and only on a target with the Sacred Shield buff),
+    //          Holy Shock (with Tier 8 set bonus)
+    // None of these are HoTs to cast before pulling (I think)
+
+    return false;
+}

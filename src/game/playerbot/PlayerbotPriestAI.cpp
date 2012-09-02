@@ -502,3 +502,14 @@ bool PlayerbotPriestAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target
 
     return false;
 }
+
+bool PlayerbotPriestAI::CastHoTOnTank()
+{
+    if (!m_ai) return false;
+
+    // Priest HoTs: Renew, Penance (with talents, channeled)
+    if (RENEW)
+        return (RETURN_CONTINUE & CastSpell(RENEW, m_ai->GetGroupTank()));
+
+    return false;
+}

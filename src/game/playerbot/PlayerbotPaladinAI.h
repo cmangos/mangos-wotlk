@@ -95,6 +95,7 @@ public:
 
     // Utility Functions
     bool CanPull();
+    bool CastHoTOnTank();
 
 private:
     CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);

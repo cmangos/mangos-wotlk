@@ -86,6 +86,9 @@ public:
     // all non combat actions go here, ex buffs, heals, rezzes
     void DoNonCombatActions();
 
+    // Utility Functions
+    bool CastHoTOnTank();
+
 private:
     CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
     CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
