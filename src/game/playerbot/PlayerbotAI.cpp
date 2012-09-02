@@ -3145,7 +3145,7 @@ bool PlayerbotAI::CanPull(Player &fromPlayer)
         return false;
     }
 
-    if (GetClassAI() && GetClassAI()->CanPull())
+    if (GetClassAI() && !GetClassAI()->CanPull())
     {
         std::string sError = "I cannot pull, I do not have the proper ";
         switch (m_bot->getClass())
@@ -8544,7 +8544,8 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
 
     if (ExtractCommand("test", text)) // switch to automatic follow distance
     {
-        CanPull(fromPlayer);
+        if (CanPull(fromPlayer))
+            SendWhisper("Looks like I could pull just fine.", fromPlayer);
         return;
     }
     if (ExtractCommand("ready", text)) // switch to automatic follow distance
