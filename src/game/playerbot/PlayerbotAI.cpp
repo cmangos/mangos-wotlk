@@ -4008,11 +4008,12 @@ Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
 /**
 * BotDataRestore()
 * Restores autoequip - the toggle status for the 'equip auto' command.
+* Restores gDelayAttack - the other attributes need a valid target. This function is to be called when the targets
 * may or may not be online (such as upon login). See CombatOrderRestore() for full orders restore.
 */
 void PlayerbotAI::BotDataRestore()
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT autoequip FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT combat_delay,autoequip FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
 
     if (!result)
     {
@@ -4024,7 +4025,8 @@ void PlayerbotAI::BotDataRestore()
     else
     {
         Field* fields = result->Fetch();
-        m_AutoEquipToggle = fields[0].GetBool();
+        m_DelayAttack = fields[0].GetUInt8();
+        m_AutoEquipToggle = fields[1].GetBool();
         delete result;
     }
 }
