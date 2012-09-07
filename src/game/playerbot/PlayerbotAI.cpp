@@ -8542,6 +8542,8 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
 {
     bool bReadyCheck = false;
 
+    if (!m_bot) return;
+
     if (ExtractCommand("test", text)) // switch to automatic follow distance
     {
         if (CanPull(fromPlayer))
@@ -8558,6 +8560,7 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
         return;
     }
 
+    // This function also takes care of error reporting
     if (!CanPull(fromPlayer))
         return;
 
@@ -8596,22 +8599,34 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
         return;
     }
 
-    // Sets Combat Orders to PULL
-    SetGroupCombatOrder(ORDERS_PULL);
-
     // All healers which have it available will cast any applicable HoT (Heal over Time) spell on the tank
     GroupHoTOnTank();
 
     /* Technically the tank should wait a bit if/until the HoT has been applied
        but the above function immediately casts it rather than wait for an UpdateAI tick
+
+       There is no need to take into account that GroupHoTOnTank() may fail due to global cooldown. Either you're prepared for a difficult
+       pull in which case it won't fail due to global cooldown, or you're chaining easy pulls in which case you don't care.
        */
     /* So have the group wait for the tank to take action (and aggro) - this way it will be easy to see if tank has aggro or not without having to
        worry about tank not being the first to have UpdateAI() called
        */
-    SetGroupIgnoreUpdateTime(2);
-    SetIgnoreUpdateTime(0);
 
-    //(4a) if tank, pull (based on class), deactivate any attack (such as 'shoot (bow/gun)' for warriors), wait until in melee range, attack
+    // Need to have a group and a tank, both checked in "CanPull()" call above
+    //if (!(GetGroupTank()->GetPlayerbotAI()->GetClassAI()->Pull()))
+    // I've been told to pull and a check was done above whether I'm actually a tank, so *I* will try to pull:
+    if (!(GetClassAI()->Pull()))
+    {
+        SendWhisper("I did my best but I can't actually pull. How odd.", fromPlayer);
+        return;
+    }
+
+    // Sets Combat Orders to PULL
+    SetGroupCombatOrder(ORDERS_PULL);
+
+    SetGroupIgnoreUpdateTime(2);
+
+    //(4a) if tank, deactivate any attack (such as 'shoot (bow/gun)' for warriors), wait until in melee range, attack
     //(4b) if dps, wait until the target is in melee range of the tank +2seconds or until tank no longer holds aggro
     //(4c) if healer, do healing checks
     //(5) when target is in melee range of tank, wait 2 seconds (healers continue to do group heal checks, all do self-heal checks), then return to normal functioning
