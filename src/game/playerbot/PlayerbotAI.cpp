@@ -3132,6 +3132,7 @@ bool PlayerbotAI::GroupHoTOnTank()
 bool PlayerbotAI::CanPull(Player &fromPlayer)
 {
     if (!m_bot) return false;
+    if (!GetClassAI()) return false;
 
     if (!m_bot->GetGroup() || fromPlayer.GetGroup() != m_bot->GetGroup())
     {
@@ -3145,32 +3146,49 @@ bool PlayerbotAI::CanPull(Player &fromPlayer)
         return false;
     }
 
-    if (GetClassAI() && !GetClassAI()->CanPull())
-    {
-        std::string sError = "I cannot pull, I do not have the proper ";
-        switch (m_bot->getClass())
-        {
-            case CLASS_PALADIN:
-            case CLASS_DEATH_KNIGHT:
-            case CLASS_DRUID:
-                sError += "spell, or it's not ready yet.";
-                break;
-
-            case CLASS_WARRIOR:
-                sError += "weapon.";
-                break;
-
-            default:
-                sError += "class.";
-        }
-        SendWhisper(sError, fromPlayer);
-        return false;
-    }
-
     if ((GetCombatOrder() & ORDERS_TANK) == 0)
     {
         SendWhisper("I cannot pull as I do not have combat orders to tank.", fromPlayer);
         return false;
+    }
+
+    switch (m_bot->getClass())
+    {
+        case CLASS_PALADIN:
+            if ( ((PlayerbotPaladinAI*)GetClassAI())->CanPull() == false)
+            {
+                SendWhisper("I cannot pull, I do not have the proper spell or it's not ready yet.", fromPlayer);
+                return false;
+            }
+            break;
+
+        case CLASS_DEATH_KNIGHT:
+            if ( ((PlayerbotDeathKnightAI*)GetClassAI())->CanPull() == false)
+            {
+                SendWhisper("I cannot pull, I do not have the proper spell or it's not ready yet.", fromPlayer);
+                return false;
+            }
+            break;
+
+        case CLASS_DRUID:
+            if ( ((PlayerbotDruidAI*)GetClassAI())->CanPull() == false)
+            {
+                SendWhisper("I cannot pull, I do not have the proper spell or it's not ready yet.", fromPlayer);
+                return false;
+            }
+            break;
+
+        case CLASS_WARRIOR:
+            if ( ((PlayerbotWarriorAI*)GetClassAI())->CanPull() == false)
+            {
+                SendWhisper("I cannot pull, I do not have the proper weapon and/or ammo.", fromPlayer);
+                return false;
+            }
+            break;
+
+        default:
+            SendWhisper("I cannot pull, I am not a tanking class.", fromPlayer);
+            return false;
     }
 
     return true;

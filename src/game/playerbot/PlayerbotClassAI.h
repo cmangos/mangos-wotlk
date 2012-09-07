@@ -43,7 +43,7 @@ public:
     // all combat actions go here
     virtual CombatManeuverReturns DoFirstCombatManeuver(Unit*);
     virtual CombatManeuverReturns DoNextCombatManeuver(Unit*);
-    bool Pull() { return false; }
+    bool Pull() { DEBUG_LOG("[PlayerbotAI]: Warning: Using PlayerbotClassAI::Pull() rather than class specific function"); return false; }
 
     // all non combat actions go here, ex buffs, heals, rezzes
     virtual void DoNonCombatActions();

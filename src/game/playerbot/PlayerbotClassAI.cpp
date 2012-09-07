@@ -22,11 +22,22 @@ CombatManeuverReturns PlayerbotClassAI::DoNextCombatManeuverPVE(Unit *) { return
 CombatManeuverReturns PlayerbotClassAI::DoFirstCombatManeuverPVP(Unit *) { return RETURN_NO_ACTION_OK; }
 CombatManeuverReturns PlayerbotClassAI::DoNextCombatManeuverPVP(Unit *) { return RETURN_NO_ACTION_OK; }
 
-void PlayerbotClassAI::DoNonCombatActions() {}
+void PlayerbotClassAI::DoNonCombatActions()
+{
+    DEBUG_LOG("[PlayerbotAI]: Warning: Using PlayerbotClassAI::DoNonCombatActions() rather than class specific function");
+}
 
-bool PlayerbotClassAI::CanPull() { return false; }
+bool PlayerbotClassAI::CanPull()
+{
+    DEBUG_LOG("[PlayerbotAI]: Warning: Using PlayerbotClassAI::CanPull() rather than class specific function");
+    return false;
+}
 
-bool PlayerbotClassAI::CastHoTOnTank() { return false; }
+bool PlayerbotClassAI::CastHoTOnTank()
+{
+    DEBUG_LOG("[PlayerbotAI]: Warning: Using PlayerbotClassAI::CastHoTOnTank() rather than class specific function");
+    return false;
+}
 
 CombatManeuverReturns PlayerbotClassAI::HealPlayer(Player* target) {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
