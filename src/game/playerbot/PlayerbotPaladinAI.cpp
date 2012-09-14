@@ -93,6 +93,48 @@ PlayerbotPaladinAI::~PlayerbotPaladinAI() {}
 
 CombatManeuverReturns PlayerbotPaladinAI::DoFirstCombatManeuver(Unit* pTarget)
 {
+    // There are NPCs in BGs and Open World PvP, so don't filter this on PvP scenarios (of course if PvP targets anyone but tank, all bets are off anyway)
+    // Wait until the tank says so, until any non-tank gains aggro or X seconds - whichever is shortest
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO)
+    {
+        if (m_WaitUntil > m_ai->CurrentTime() && m_ai->GroupTankHoldsAggro())
+        {
+            if (PlayerbotAI::ORDERS_TANK & m_ai->GetCombatOrder())
+            {
+                if (m_bot->GetCombatDistance(pTarget) <= ATTACK_DISTANCE)
+                {
+                    // Set everyone's UpdateAI() waiting to 2 seconds
+                    m_ai->SetGroupIgnoreUpdateTime(2);
+                    // Clear their TEMP_WAIT_TANKAGGRO flag
+                    m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO);
+
+                    // While everyone else is waiting 2 second, we need to build up aggro, so don't return
+                }
+                else
+                {
+                    // TODO: add check if target is ranged
+                    return RETURN_NO_ACTION_OK; // wait for target to get nearer
+                }
+            }
+            else if (PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder())
+               return HealPlayer(GetHealTarget());
+            else
+                return RETURN_NO_ACTION_OK; // wait it out
+        }
+        else
+        {
+            m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO);
+        }
+    }
+
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_OOC)
+    {
+        if (m_WaitUntil > m_ai->CurrentTime() && !m_ai->IsGroupInCombat())
+            return RETURN_NO_ACTION_OK; // wait it out
+        else
+            m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_OOC);
+    }
+
     switch (m_ai->GetScenarioType())
     {
         case PlayerbotAI::SCENARIO_PVP_DUEL:
@@ -622,11 +664,23 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *targe
         return ( (petSpellId && ai->Buff(petSpellId, target)) || ai->Buff(spellId, target) );
 }
 
+// Match up with "Pull()" below
 bool PlayerbotPaladinAI::CanPull()
 {
     if (HAND_OF_RECKONING && !m_bot->HasSpellCooldown(HAND_OF_RECKONING))
         return true;
     if (EXORCISM && !m_bot->HasSpellCooldown(EXORCISM))
+        return true;
+
+    return false;
+}
+
+// Match up with "CanPull()" above
+bool PlayerbotPaladinAI::Pull()
+{
+    if (HAND_OF_RECKONING && m_ai->CastSpell(HAND_OF_RECKONING))
+        return true;
+    if (EXORCISM && m_ai->CastSpell(EXORCISM))
         return true;
 
     return false;

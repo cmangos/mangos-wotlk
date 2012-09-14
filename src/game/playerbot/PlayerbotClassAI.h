@@ -54,6 +54,10 @@ public:
     PlayerbotAI* GetAI() { return m_ai; }
     bool CanPull();
     bool CastHoTOnTank();
+    time_t GetWaitUntil() { return m_WaitUntil; }
+    void SetWait(uint8 t) { m_WaitUntil = m_ai->CurrentTime() + t; }
+    void ClearWait() { m_WaitUntil = 0; }
+    //void SetWaitUntil(time_t t) { m_WaitUntil = t; }
 
 protected:
     virtual CombatManeuverReturns DoFirstCombatManeuverPVE(Unit*);
@@ -74,6 +78,8 @@ protected:
     uint8 m_MinHealthPercentHealer;
     uint8 m_MinHealthPercentDPS;
     uint8 m_MinHealthPercentMaster;
+
+    time_t m_WaitUntil;
 
     Player* m_master;
     Player* m_bot;

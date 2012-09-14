@@ -11,6 +11,8 @@ PlayerbotClassAI::PlayerbotClassAI(Player* const master, Player* const bot, Play
     m_MinHealthPercentHealer = 60;
     m_MinHealthPercentDPS    = 30;
     m_MinHealthPercentMaster = m_MinHealthPercentDPS;
+
+    ClearWait();
 }
 PlayerbotClassAI::~PlayerbotClassAI() {}
 

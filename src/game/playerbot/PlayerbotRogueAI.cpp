@@ -59,6 +59,28 @@ PlayerbotRogueAI::~PlayerbotRogueAI() {}
 
 CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuver(Unit* pTarget)
 {
+    // There are NPCs in BGs and Open World PvP, so don't filter this on PvP scenarios (of course if PvP targets anyone but tank, all bets are off anyway)
+    // Wait until the tank says so, until any non-tank gains aggro or X seconds - whichever is shortest
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO)
+    {
+        if (m_WaitUntil > m_ai->CurrentTime() && m_ai->GroupTankHoldsAggro())
+        {
+            return RETURN_NO_ACTION_OK; // wait it out
+        }
+        else
+        {
+            m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO);
+        }
+    }
+
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_OOC)
+    {
+        if (m_WaitUntil > m_ai->CurrentTime() && !m_ai->IsGroupInCombat())
+            return RETURN_NO_ACTION_OK; // wait it out
+        else
+            m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_OOC);
+    }
+
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 

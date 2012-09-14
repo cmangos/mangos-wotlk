@@ -84,6 +84,48 @@ PlayerbotDruidAI::~PlayerbotDruidAI() {}
 
 CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuver(Unit* pTarget)
 {
+    // There are NPCs in BGs and Open World PvP, so don't filter this on PvP scenarios (of course if PvP targets anyone but tank, all bets are off anyway)
+    // Wait until the tank says so, until any non-tank gains aggro or X seconds - whichever is shortest
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO)
+    {
+        if (m_WaitUntil > m_ai->CurrentTime() && m_ai->GroupTankHoldsAggro())
+        {
+            if (PlayerbotAI::ORDERS_TANK & m_ai->GetCombatOrder())
+            {
+                if (m_bot->GetCombatDistance(pTarget) <= ATTACK_DISTANCE)
+                {
+                    // Set everyone's UpdateAI() waiting to 2 seconds
+                    m_ai->SetGroupIgnoreUpdateTime(2);
+                    // Clear their TEMP_WAIT_TANKAGGRO flag
+                    m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO);
+
+                    // While everyone else is waiting 2 second, we need to build up aggro, so don't return
+                }
+                else
+                {
+                    // TODO: add check if target is ranged
+                    return RETURN_NO_ACTION_OK; // wait for target to get nearer
+                }
+            }
+            else if (PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder())
+               return _DoNextPVECombatManeuverHeal();
+            else
+                return RETURN_NO_ACTION_OK; // wait it out
+        }
+        else
+        {
+            m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO);
+        }
+    }
+
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_OOC)
+    {
+        if (m_WaitUntil > m_ai->CurrentTime() && !m_ai->IsGroupInCombat())
+            return RETURN_NO_ACTION_OK; // wait it out
+        else
+            m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_OOC);
+    }
+
     switch (m_ai->GetScenarioType())
     {
         case PlayerbotAI::SCENARIO_PVP_DUEL:
@@ -91,12 +133,12 @@ CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuver(Unit* pTarget)
         case PlayerbotAI::SCENARIO_PVP_ARENA:
         case PlayerbotAI::SCENARIO_PVP_OPENWORLD:
             return DoFirstCombatManeuverPVP(pTarget);
+
         case PlayerbotAI::SCENARIO_PVE:
         case PlayerbotAI::SCENARIO_PVE_ELITE:
         case PlayerbotAI::SCENARIO_PVE_RAID:
         default:
             return DoFirstCombatManeuverPVE(pTarget);
-            break;
     }
 
     return RETURN_NO_ACTION_ERROR;
@@ -112,7 +154,7 @@ CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuverPVP(Unit* /*pTarget
     return RETURN_NO_ACTION_OK;
 }
 
-CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit* pTarget)
 {
     switch (m_ai->GetScenarioType())
     {
@@ -121,18 +163,18 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuver(Unit *pTarget)
         case PlayerbotAI::SCENARIO_PVP_ARENA:
         case PlayerbotAI::SCENARIO_PVP_OPENWORLD:
             return DoNextCombatManeuverPVP(pTarget);
+
         case PlayerbotAI::SCENARIO_PVE:
         case PlayerbotAI::SCENARIO_PVE_ELITE:
         case PlayerbotAI::SCENARIO_PVE_RAID:
         default:
             return DoNextCombatManeuverPVE(pTarget);
-            break;
     }
 
     return RETURN_NO_ACTION_ERROR;
 }
 
-CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuverPVE(Unit *pTarget)
+CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuverPVE(Unit* pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -704,7 +746,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
     }
 } // end DoNonCombatActions
 
-bool PlayerbotDruidAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target)
+bool PlayerbotDruidAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target)
 {
     if (!ai)          return false;
     if (spellId == 0) return false;
@@ -720,7 +762,7 @@ bool PlayerbotDruidAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target)
     return false;
 }
 
-void PlayerbotDruidAI::GoBuffForm(Player *self)
+void PlayerbotDruidAI::GoBuffForm(Player* self)
 {
     // RANK_1 spell ids used because this is a static method which does not have access to instance.
     // There is only one rank for these spells anyway.
@@ -736,9 +778,19 @@ void PlayerbotDruidAI::GoBuffForm(Player *self)
         self->RemoveAurasDueToSpell(TRAVEL_FORM_1);
 }
 
+// Match up with "Pull()" below
 bool PlayerbotDruidAI::CanPull()
 {
     if (BEAR_FORM && FAERIE_FIRE_FERAL)
+        return true;
+
+    return false;
+}
+
+// Match up with "CanPull()" above
+bool PlayerbotDruidAI::Pull()
+{
+    if (BEAR_FORM && (CastSpell(FAERIE_FIRE_FERAL) & RETURN_CONTINUE))
         return true;
 
     return false;

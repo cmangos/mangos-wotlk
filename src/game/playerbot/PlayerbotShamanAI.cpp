@@ -105,6 +105,31 @@ PlayerbotShamanAI::~PlayerbotShamanAI() {}
 
 CombatManeuverReturns PlayerbotShamanAI::DoFirstCombatManeuver(Unit* pTarget)
 {
+    // There are NPCs in BGs and Open World PvP, so don't filter this on PvP scenarios (of course if PvP targets anyone but tank, all bets are off anyway)
+    // Wait until the tank says so, until any non-tank gains aggro or X seconds - whichever is shortest
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO)
+    {
+        if (m_WaitUntil > m_ai->CurrentTime() && m_ai->GroupTankHoldsAggro())
+        {
+            if (PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder())
+               return HealPlayer(GetHealTarget());
+            else
+                return RETURN_NO_ACTION_OK; // wait it out
+        }
+        else
+        {
+            m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO);
+        }
+    }
+
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_OOC)
+    {
+        if (m_WaitUntil > m_ai->CurrentTime() && !m_ai->IsGroupInCombat())
+            return RETURN_NO_ACTION_OK; // wait it out
+        else
+            m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_OOC);
+    }
+
     switch (m_ai->GetScenarioType())
     {
         case PlayerbotAI::SCENARIO_PVP_DUEL:
@@ -177,7 +202,7 @@ CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuverPVE(Unit *pTarget)
     {
         // Is this desirable? Debatable.
         // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
-        if (HealPlayer(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        if (HealPlayer(m_bot) & RETURN_CONTINUE)
             return RETURN_CONTINUE;
     }
 

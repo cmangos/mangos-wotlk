@@ -2928,7 +2928,7 @@ void PlayerbotAI::DoNextCombatManeuver()
 
     // check for new targets
     if (m_ScenarioType == SCENARIO_PVP_DUEL)
-        GetDuelTarget(GetMaster());
+        GetDuelTarget(GetMaster()); // TODO: Wow... wait... what? So not right.
     else
         GetCombatTarget();
 
@@ -2943,7 +2943,7 @@ void PlayerbotAI::DoNextCombatManeuver()
         m_targetChanged = false;
         m_targetType = TARGET_NORMAL;
         SetQuestNeedCreatures();
-        ClearCombatOrder(ORDERS_PULL);
+        ClearCombatOrder(ORDERS_TEMP);
         return;
     }
 
@@ -2953,8 +2953,6 @@ void PlayerbotAI::DoNextCombatManeuver()
         switch (GetClassAI()->DoFirstCombatManeuver(m_targetCombat))
         {
             case RETURN_CONTINUE: // true needed for rogue stealth attack
-                // TODO: is there EVER a second 'first combat maneuver' that affects bot/target movement? If no, uncomment below
-                m_targetChanged = true;
                 break;
 
             case RETURN_NO_ACTION_ERROR:
@@ -2991,10 +2989,17 @@ void PlayerbotAI::DoCombatMovement()
 
     float targetDist = m_bot->GetCombatDistance(m_targetCombat);
 
-    if (m_combatStyle == COMBAT_MELEE && !m_bot->hasUnitState(UNIT_STAT_CHASE) && ((m_movementOrder == MOVEMENT_STAY && targetDist <= ATTACK_DISTANCE) || (m_movementOrder != MOVEMENT_STAY)))
+    if (m_combatStyle == COMBAT_MELEE
+        && !m_bot->hasUnitState(UNIT_STAT_CHASE)
+        && (targetDist <= ATTACK_DISTANCE || m_movementOrder != MOVEMENT_STAY)
+        && GetClassAI()->GetWaitUntil() == 0 ) // Not waiting
+    {
         // melee combat - chase target if in range or if we are not forced to stay
         m_bot->GetMotionMaster()->MoveChase(m_targetCombat);
-    else if (m_combatStyle == COMBAT_RANGED && m_movementOrder != MOVEMENT_STAY)
+    }
+    else if (m_combatStyle == COMBAT_RANGED
+             && m_movementOrder != MOVEMENT_STAY
+             && GetClassAI()->GetWaitUntil() == 0 ) // Not waiting
     {
         // ranged combat - just move within spell range
         // TODO: just follow in spell range! how to determine bots spell range?
@@ -3054,8 +3059,6 @@ void PlayerbotAI::SetGroupCombatOrder(CombatOrderType co)
 {
     if (!m_bot) return;
 
-    SetCombatOrder(co);
-
     if (m_bot->GetGroup())
     {
         Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
@@ -3067,6 +3070,27 @@ void PlayerbotAI::SetGroupCombatOrder(CombatOrderType co)
             groupMember->GetPlayerbotAI()->SetCombatOrder(co);
         }
     }
+    else
+        SetCombatOrder(co);
+}
+
+void PlayerbotAI::ClearGroupCombatOrder(CombatOrderType co)
+{
+    if (!m_bot) return;
+
+    if (m_bot->GetGroup())
+    {
+        Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (!groupMember || !groupMember->GetPlayerbotAI())
+                continue;
+            groupMember->GetPlayerbotAI()->ClearCombatOrder(co);
+        }
+    }
+    else
+        ClearCombatOrder(co);
 }
 
 void PlayerbotAI::SetGroupIgnoreUpdateTime(uint8 t)
@@ -3190,6 +3214,56 @@ bool PlayerbotAI::CanPull(Player &fromPlayer)
             SendWhisper("I cannot pull, I am not a tanking class.", fromPlayer);
             return false;
     }
+
+    return true;
+}
+
+// This function assumes a "CanPull()" call was preceded (not doing so will result in odd behavior)
+bool PlayerbotAI::CastPull()
+{
+    if (!m_bot) return false;
+    if (!GetClassAI()) return false;
+
+    if ((GetCombatOrder() & ORDERS_TANK) == 0) return false;
+
+    switch (m_bot->getClass())
+    {
+        case CLASS_PALADIN:
+            return ((PlayerbotPaladinAI*)GetClassAI())->Pull();
+
+        case CLASS_DEATH_KNIGHT:
+            return ((PlayerbotDeathKnightAI*)GetClassAI())->Pull();
+
+        case CLASS_DRUID:
+            return ((PlayerbotDruidAI*)GetClassAI())->Pull();
+
+        case CLASS_WARRIOR:
+            return ((PlayerbotWarriorAI*)GetClassAI())->Pull();
+
+        default:
+            return false;
+    }
+
+    return false;
+}
+
+bool PlayerbotAI::GroupTankHoldsAggro()
+{
+    if (!m_bot) return false;
+
+    // update attacker info now
+    UpdateAttackerInfo();
+
+    if (m_bot->GetGroup())
+    {
+        Unit* newTarget = FindAttacker((ATTACKERINFOTYPE) (AIT_VICTIMNOTSELF), GetGroupTank());
+        if (newTarget)
+        {
+            return false;
+        }
+    }
+    else
+        return false; // no group -> no group tank to hold aggro
 
     return true;
 }
@@ -3977,7 +4051,7 @@ uint32 PlayerbotAI::EstRepair(uint16 pos)
     return TotalCost;
 }
 
-Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
+Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit* victim)
 {
     // list empty? why are we here?
     if (m_attackerInfo.empty())
@@ -4004,7 +4078,7 @@ Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
         if (!(ait & (AIT_LOWESTTHREAT | AIT_HIGHESTTHREAT)))
         {
             a = itr->second.attacker;
-            itr = m_attackerInfo.end();
+            itr = m_attackerInfo.end(); // == break;
         }
         else
         {
@@ -4102,7 +4176,7 @@ void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit *target)
     else if (str == "heal")         co = ORDERS_HEAL;
     else if (str == "protect")      co = ORDERS_PROTECT;
     else if (str == "passive")      co = ORDERS_PASSIVE;
-    else if (str == "pull")         co = ORDERS_PULL;
+    else if (str == "pull")         co = ORDERS_TEMP_WAIT_TANKAGGRO;
     else if (str == "nodispel")     co = ORDERS_NODISPEL;
     else if (str == "resistfrost")  co = ORDERS_RESIST_FROST;
     else if (str == "resistnature") co = ORDERS_RESIST_NATURE;
@@ -4162,16 +4236,6 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
                 m_targetProtect = 0;
                 return;
             }
-        case ORDERS_PULL: // 80(10000000)
-            {
-                if (!target)
-                {
-                    TellMaster("The pull command requires a target.");
-                    return;
-                }
-                else m_targetProtect = target;
-                break;
-            }
         case ORDERS_RESET: // FFFF(11111111)
             {
                 m_combatOrder = ORDERS_NONE;
@@ -4191,13 +4255,12 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit *target)
     if ((co & ORDERS_PRIMARY))
     {
         m_combatOrder = (CombatOrderType) (((uint32) m_combatOrder & (uint32) ORDERS_SECONDARY) | (uint32) co);
-        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u', primary_target = '%u', pname = '%s' WHERE guid = '%u'", m_combatOrder, gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
+        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u', primary_target = '%u', pname = '%s' WHERE guid = '%u'", (m_combatOrder & !ORDERS_TEMP), gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
     }
     else
     {
         m_combatOrder = (CombatOrderType) ((uint32) m_combatOrder | (uint32) co);
-        if (co != ORDERS_PULL)
-            CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u', secondary_target = '%u', sname = '%s' WHERE guid = '%u'", m_combatOrder, gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
+        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u', secondary_target = '%u', sname = '%s' WHERE guid = '%u'", (m_combatOrder & !ORDERS_TEMP), gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
     }
 }
 
@@ -4645,7 +4708,6 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             CastSpell(m_spellIdCommand, *pTarget);
         m_spellIdCommand = 0;
         m_targetGuidCommand = ObjectGuid();
-
         return;
     }
 
@@ -4653,7 +4715,6 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
     {
         SetState(BOTSTATE_NORMAL);
         InspectUpdate();
-
         return;
     }
 
@@ -4687,7 +4748,6 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
     {
         WorldPacket emptyPacket;
         m_bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
-
         return;
     }
 
@@ -4734,7 +4794,6 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
         DoFlight();
         SetState(BOTSTATE_NORMAL);
         SetIgnoreUpdateTime(0);
-
         return;
     }
 
@@ -4755,7 +4814,6 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             if (!m_lootTargets.empty())
                 SetState(BOTSTATE_LOOTING);
         }
-
         return;
     }
 }
@@ -8633,16 +8691,29 @@ void PlayerbotAI::_HandleCommandPull(std::string &text, Player &fromPlayer)
     // Need to have a group and a tank, both checked in "CanPull()" call above
     //if (!(GetGroupTank()->GetPlayerbotAI()->GetClassAI()->Pull()))
     // I've been told to pull and a check was done above whether I'm actually a tank, so *I* will try to pull:
-    if (!(GetClassAI()->Pull()))
+    if (!CastPull())
     {
         SendWhisper("I did my best but I can't actually pull. How odd.", fromPlayer);
         return;
     }
 
     // Sets Combat Orders to PULL
-    SetGroupCombatOrder(ORDERS_PULL);
+    SetGroupCombatOrder(ORDERS_TEMP_WAIT_TANKAGGRO);
 
     SetGroupIgnoreUpdateTime(2);
+
+    // Set all group members (save this tank) to wait 10 seconds. They will wait until the tank says so, until any non-tank gains aggro or 10 seconds - whichever is shortest
+    if (m_bot->GetGroup()) // one last sanity check, should be unnecessary
+    {
+        Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (!groupMember || !groupMember->GetPlayerbotAI() || groupMember == m_bot)
+                continue;
+            groupMember->GetPlayerbotAI()->GetClassAI()->SetWait(10);
+        }
+    }
 
     //(4a) if tank, deactivate any attack (such as 'shoot (bow/gun)' for warriors), wait until in melee range, attack
     //(4b) if dps, wait until the target is in melee range of the tank +2seconds or until tank no longer holds aggro

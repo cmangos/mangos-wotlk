@@ -1520,23 +1520,25 @@ public:
     // the master will auto set the target of the bot
     enum CombatOrderType
     {
-        ORDERS_NONE                 = 0x0000,           // no special orders given
-        ORDERS_TANK                 = 0x0001,           // bind attackers by gaining threat
-        ORDERS_ASSIST               = 0x0002,           // assist someone (dps type)
-        ORDERS_HEAL                 = 0x0004,           // concentrate on healing (no attacks, only self defense)
-        ORDERS_NODISPEL             = 0x0008,           // Dont dispel anything
-        ORDERS_PROTECT              = 0x0010,           // combinable state: check if protectee is attacked
-        ORDERS_PASSIVE              = 0x0020,           // bots do nothing
-        ORDERS_PULL                 = 0x0040,           // Command to pull was given (expect bots to turn this off themselves)
-        ORDERS_RESIST_FIRE          = 0x0100,           // resist fire
-        ORDERS_RESIST_NATURE        = 0x0200,           // resist nature
-        ORDERS_RESIST_FROST         = 0x0400,           // resist frost
-        ORDERS_RESIST_SHADOW        = 0x0800,           // resist shadow
+        ORDERS_NONE                 = 0x0000,   // no special orders given
+        ORDERS_TANK                 = 0x0001,   // bind attackers by gaining threat
+        ORDERS_ASSIST               = 0x0002,   // assist someone (dps type)
+        ORDERS_HEAL                 = 0x0004,   // concentrate on healing (no attacks, only self defense)
+        ORDERS_NODISPEL             = 0x0008,   // Dont dispel anything
+        ORDERS_PROTECT              = 0x0010,   // combinable state: check if protectee is attacked
+        ORDERS_PASSIVE              = 0x0020,   // bots do nothing
+        ORDERS_TEMP_WAIT_TANKAGGRO  = 0x0040,   // Wait on tank to build aggro - expect healing to continue, disable setting when tank loses focus
+        ORDERS_TEMP_WAIT_OOC        = 0x0080,   // Wait but only while OOC - wait only - combat will resume healing, dps, tanking, ...
+        ORDERS_RESIST_FIRE          = 0x0100,   // resist fire
+        ORDERS_RESIST_NATURE        = 0x0200,   // resist nature
+        ORDERS_RESIST_FROST         = 0x0400,   // resist frost
+        ORDERS_RESIST_SHADOW        = 0x0800,   // resist shadow
 
         // Cumulative orders
         ORDERS_PRIMARY              = 0x0007,
         ORDERS_SECONDARY            = 0x0F78,
         ORDERS_RESIST               = 0x0F00,
+        ORDERS_TEMP                 = 0x00C0,   // All orders NOT to be saved, turned off by bots (or logoff, reset, ...)
         ORDERS_RESET                = 0xFFFF
     };
 
@@ -1617,7 +1619,7 @@ public:
         AIT_LOWESTTHREAT            = 0x01,
         AIT_HIGHESTTHREAT           = 0x02,
         AIT_VICTIMSELF              = 0x04,
-        AIT_VICTIMNOTSELF           = 0x08      // !!! must use victim param in FindAttackers
+        AIT_VICTIMNOTSELF           = 0x08      // could/should use victim param in FindAttackers
     };
     struct AttackerInfo
     {
@@ -1881,9 +1883,12 @@ public:
     bool IsGroupInCombat();
     Player* GetGroupTank(); // TODO: didn't want to pollute non-playerbot code but this should really go in group.cpp
     void SetGroupCombatOrder(CombatOrderType co);
+    void ClearGroupCombatOrder(CombatOrderType co);
     void SetGroupIgnoreUpdateTime(uint8 t);
     bool GroupHoTOnTank();
     bool CanPull(Player &fromPlayer);
+    bool CastPull();
+    bool GroupTankHoldsAggro();
     void UpdateAttackerInfo();
     Unit* FindAttacker(ATTACKERINFOTYPE ait = AIT_NONE, Unit *victim = 0);
     uint32 GetAttackerCount() { return m_attackerInfo.size(); };
@@ -2041,9 +2046,9 @@ private:
     bool m_targetChanged;
     CombatTargetType m_targetType;
 
-    Unit *m_targetCombat;       // current combat target
-    Unit *m_targetAssist;       // get new target by checking attacker list of assisted player
-    Unit *m_targetProtect;      // check
+    Unit* m_targetCombat;       // current combat target
+    Unit* m_targetAssist;       // get new target by checking attacker list of assisted player
+    Unit* m_targetProtect;      // check
 
     Unit *m_followTarget;       // whom to follow in non combat situation?
 

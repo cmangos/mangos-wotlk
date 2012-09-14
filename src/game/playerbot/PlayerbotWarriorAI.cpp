@@ -85,6 +85,46 @@ PlayerbotWarriorAI::~PlayerbotWarriorAI() {}
 
 CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuver(Unit* pTarget)
 {
+    // There are NPCs in BGs and Open World PvP, so don't filter this on PvP scenarios (of course if PvP targets anyone but tank, all bets are off anyway)
+    // Wait until the tank says so, until any non-tank gains aggro or X seconds - whichever is shortest
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO)
+    {
+        if (m_WaitUntil > m_ai->CurrentTime() && m_ai->GroupTankHoldsAggro())
+        {
+            if (PlayerbotAI::ORDERS_TANK & m_ai->GetCombatOrder())
+            {
+                if (m_bot->GetCombatDistance(pTarget) <= ATTACK_DISTANCE)
+                {
+                    // Set everyone's UpdateAI() waiting to 2 seconds
+                    m_ai->SetGroupIgnoreUpdateTime(2);
+                    // Clear their TEMP_WAIT_TANKAGGRO flag
+                    m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO);
+
+                    // While everyone else is waiting 2 second, we need to build up aggro, so don't return
+                }
+                else
+                {
+                    // TODO: add check if target is ranged
+                    return RETURN_NO_ACTION_OK; // wait for target to get nearer
+                }
+            }
+            else
+                return RETURN_NO_ACTION_OK; // wait it out
+        }
+        else
+        {
+            m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO);
+        }
+    }
+
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_OOC)
+    {
+        if (m_WaitUntil > m_ai->CurrentTime() && !m_ai->IsGroupInCombat())
+            return RETURN_NO_ACTION_OK; // wait it out
+        else
+            m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_OOC);
+    }
+
     switch (m_ai->GetScenarioType())
     {
         case PlayerbotAI::SCENARIO_PVP_DUEL:
@@ -103,7 +143,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuver(Unit* pTarget)
     return RETURN_NO_ACTION_ERROR;
 }
 
-CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVE(Unit *pTarget)
+CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVE(Unit* pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -467,10 +507,34 @@ void PlayerbotWarriorAI::DoNonCombatActions()
     }
 } // end DoNonCombatActions
 
+// Match up with "Pull()" below
 bool PlayerbotWarriorAI::CanPull()
 {
     if (m_bot->GetUInt32Value(PLAYER_AMMO_ID)) // Having ammo equipped means a weapon is equipped as well. Probably. [TODO: does this work with throwing knives? Can a playerbot 'cheat' ammo into the slot without a proper weapon?]
         return true;
+
+    return false;
+}
+
+// Match up with "CanPull()" above
+bool PlayerbotWarriorAI::Pull()
+{
+    if (m_bot->GetCombatDistance(m_ai->GetCurrentTarget()) > ATTACK_DISTANCE)
+    {
+        if (m_bot->Attack(m_ai->GetCurrentTarget(), false))
+        {
+            m_bot->AttackStop();
+            return true;
+        }
+    }
+    else // target is in melee range
+    {
+        if (m_bot->Attack(m_ai->GetCurrentTarget(), true))
+        {
+            m_bot->AttackStop();
+            return true;
+        }
+    }
 
     return false;
 }
