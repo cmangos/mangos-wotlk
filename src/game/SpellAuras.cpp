@@ -8703,7 +8703,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
     m_applyTime      = time(NULL);
     m_isPassive      = IsPassiveSpell(spellproto);
     m_isDeathPersist = IsDeathPersistentSpell(spellproto);
-    m_isSingleTarget = IsSingleTargetSpell(spellproto);
+    m_trackedAuraType= IsSingleTargetSpell(spellproto) ? TRACK_AURA_TYPE_SINGLE_TARGET : IsSpellHaveAura(spellproto, SPELL_AURA_CONTROL_VEHICLE) ? TRACK_AURA_TYPE_CONTROL_VEHICLE : TRACK_AURA_TYPE_NOT_TRACKED;
     m_procCharges    = spellproto->procCharges;
 
     m_isRemovedOnShapeLost = (GetCasterGuid() == m_target->GetObjectGuid() &&
@@ -10044,13 +10044,38 @@ bool SpellAuraHolder::IsEmptyHolder() const
     return true;
 }
 
-void SpellAuraHolder::UnregisterSingleCastHolder()
+void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
 {
-    if (IsSingleTarget())
+    TrackedAuraType trackedType = GetTrackedAuraType();
+    if (!trackedType)
+        return;
+
+    if (trackedType == TRACK_AURA_TYPE_SINGLE_TARGET)
     {
         if (Unit* caster = GetCaster())
-            caster->GetSingleCastSpellTargets().erase(GetSpellProto());
-
-        m_isSingleTarget = false;
+            caster->GetTrackedAuraTargets(trackedType).erase(GetSpellProto());
     }
+    else if (trackedType == TRACK_AURA_TYPE_CONTROL_VEHICLE)
+    {
+        Unit* caster = GetCaster();
+        if (caster && IsSpellHaveAura(GetSpellProto(), SPELL_AURA_CONTROL_VEHICLE, GetAuraFlags()))
+        {
+            caster->GetTrackedAuraTargets(trackedType).erase(GetSpellProto());
+            caster->RemoveAurasDueToSpell(GetSpellProto()->Id);
+        }
+        else if (caster)
+        {
+            Unit::TrackedAuraTargetMap scTarget = caster->GetTrackedAuraTargets(trackedType);
+            Unit::TrackedAuraTargetMap::iterator find = scTarget.find(GetSpellProto());
+            if (find != scTarget.end())
+            {
+                ObjectGuid vehicleGuid = find->second;
+                scTarget.erase(find);
+                if (Unit* vehicle = caster->GetMap()->GetUnit(vehicleGuid))
+                    vehicle->RemoveAurasDueToSpell(GetSpellProto()->Id, NULL, AURA_REMOVE_BY_DEFAULT);
+            }
+        }
+    }
+
+    m_trackedAuraType = TRACK_AURA_TYPE_NOT_TRACKED;
 }
