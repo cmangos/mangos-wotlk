@@ -98,6 +98,8 @@ CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuver(Unit* pTarget)
                     m_ai->SetGroupIgnoreUpdateTime(2);
                     // Clear their TEMP_WAIT_TANKAGGRO flag
                     m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO);
+                    // Start attacking, force target on current target
+                    m_ai->Attack(m_ai->GetCurrentTarget());
 
                     // While everyone else is waiting 2 second, we need to build up aggro, so don't return
                 }

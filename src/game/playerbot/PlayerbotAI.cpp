@@ -2812,7 +2812,7 @@ void PlayerbotAI::Feast()
 
 // intelligently sets a reasonable combat order for this bot
 // based on its class / level / etc
-void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
+void PlayerbotAI::Attack(Unit* forcedTarget)
 {
     // set combat state, and clear looting, etc...
     if (m_botState != BOTSTATE_COMBAT)
@@ -2825,11 +2825,23 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
         m_DelayAttackInit = CurrentTime(); // Combat started, new start time to check CombatDelay for.
     }
 
+    GetCombatTarget(forcedTarget);
+
+    m_bot->Attack(m_targetCombat, true);
+
+    // add thingToAttack to loot list
+    m_lootTargets.push_back(m_targetCombat->GetObjectGuid());
+}
+
+// intelligently sets a reasonable combat order for this bot
+// based on its class / level / etc
+void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
+{
     // update attacker info now
     UpdateAttackerInfo();
 
     // check for attackers on protected unit, and make it a forcedTarget if any
-    if (!forcedTarget && (m_combatOrder & ORDERS_PROTECT) && m_targetProtect != 0)
+    if (!forcedTarget && (m_combatOrder & ORDERS_PROTECT) && m_targetProtect)
     {
         Unit* newTarget = FindAttacker((ATTACKERINFOTYPE) (AIT_VICTIMNOTSELF | AIT_HIGHESTTHREAT), m_targetProtect);
         if (newTarget && newTarget != m_targetCombat)
@@ -2851,6 +2863,10 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
     if (m_targetCombat && !forcedTarget)
         return;
 
+    // forced to change target to current target == null operation
+    if (forcedTarget && forcedTarget == m_targetCombat)
+        return;
+
     // are we forced on a target?
     if (forcedTarget)
     {
@@ -2858,7 +2874,7 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
         m_targetChanged = true;
     }
     // do we have to assist someone?
-    if (!m_targetCombat && (m_combatOrder & ORDERS_ASSIST) && m_targetAssist != 0)
+    if (!m_targetCombat && (m_combatOrder & ORDERS_ASSIST) && m_targetAssist)
     {
         m_targetCombat = FindAttacker((ATTACKERINFOTYPE) (AIT_VICTIMNOTSELF | AIT_LOWESTTHREAT), m_targetAssist);
         if (m_mgr->m_confDebugWhisper && m_targetCombat)
@@ -2895,13 +2911,6 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
 
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
-
-    m_bot->Attack(m_targetCombat, true);
-
-    // add thingToAttack to loot list
-    m_lootTargets.push_back(m_targetCombat->GetObjectGuid());
-
-    return;
 }
 
 void PlayerbotAI::GetDuelTarget(Unit* forcedTarget)
@@ -2930,7 +2939,7 @@ void PlayerbotAI::DoNextCombatManeuver()
     if (m_ScenarioType == SCENARIO_PVP_DUEL)
         GetDuelTarget(GetMaster()); // TODO: Wow... wait... what? So not right.
     else
-        GetCombatTarget();
+        Attack();
 
     // clear orders if current target for attacks doesn't make sense anymore
     if (!m_targetCombat || m_targetCombat->isDead() || !m_targetCombat->IsInWorld() || !m_bot->IsHostileTo(m_targetCombat) || !m_bot->IsInMap(m_targetCombat))
@@ -8589,16 +8598,15 @@ void PlayerbotAI::_HandleCommandAttack(std::string &text, Player &fromPlayer)
     ObjectGuid attackOnGuid = fromPlayer.GetSelectionGuid();
     if (attackOnGuid)
     {
-        if (Unit * thingToAttack = ObjectAccessor::GetUnit(*m_bot, attackOnGuid))
+        if (Unit* thingToAttack = ObjectAccessor::GetUnit(*m_bot, attackOnGuid))
         {
-            if (!m_bot->IsFriendlyTo(thingToAttack) && !m_bot->IsWithinLOSInMap(thingToAttack))
+            if (!m_bot->IsFriendlyTo(thingToAttack))
             {
-                DoTeleport(*m_followTarget);
+                if (!m_bot->IsWithinLOSInMap(thingToAttack))
+                    DoTeleport(*m_followTarget);
                 if (m_bot->IsWithinLOSInMap(thingToAttack))
-                    GetCombatTarget(thingToAttack);
+                    Attack(thingToAttack);
             }
-            else if (!m_bot->IsFriendlyTo(thingToAttack) && m_bot->IsWithinLOSInMap(thingToAttack))
-                GetCombatTarget(thingToAttack);
         }
     }
     else

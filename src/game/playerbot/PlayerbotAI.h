@@ -1838,7 +1838,8 @@ public:
     bool ItemStatComparison(const ItemPrototype *pProto, const ItemPrototype *pProto2);
     void Feast();
     void InterruptCurrentCastingSpell();
-    void GetCombatTarget(Unit* forcedTarged = 0);
+    void Attack(Unit* forcedTarget = NULL);
+    void GetCombatTarget(Unit* forcedTarget = 0);
     void GetDuelTarget(Unit* forcedTarget);
     Unit* GetCurrentTarget() { return m_targetCombat; };
     void DoNextCombatManeuver();
