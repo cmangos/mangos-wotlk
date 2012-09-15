@@ -1393,20 +1393,22 @@ void PlayerbotAI::SendOrders(Player& /*player*/)
         out << "I HEAL and won't DISPEL";
     else if (m_combatOrder & ORDERS_PASSIVE)
         out << "I'M PASSIVE";
-    if ((m_combatOrder & ORDERS_PRIMARY) && (m_combatOrder & ORDERS_SECONDARY))
-        out << " and ";
-    if (m_combatOrder & ORDERS_PROTECT)
-        out << "I PROTECT " << (m_targetProtect ? m_targetProtect->GetName() : "unknown");
-    if (m_combatOrder & ORDERS_RESIST)
+    if ((m_combatOrder & ORDERS_PRIMARY) && (m_combatOrder & (ORDERS_PROTECT | ORDERS_RESIST)))
     {
-        if (m_combatOrder & ORDERS_RESIST_FIRE)
-            out << "I RESIST FIRE";
-        if (m_combatOrder & ORDERS_RESIST_NATURE)
-            out << "I RESIST NATURE";
-        if (m_combatOrder & ORDERS_RESIST_FROST)
-            out << "I RESIST FROST";
-        if (m_combatOrder & ORDERS_RESIST_SHADOW)
-            out << "I RESIST SHADOW";
+        out << " and ";
+        if (m_combatOrder & ORDERS_PROTECT)
+            out << "I PROTECT " << (m_targetProtect ? m_targetProtect->GetName() : "unknown");
+        if (m_combatOrder & ORDERS_RESIST)
+        {
+            if (m_combatOrder & ORDERS_RESIST_FIRE)
+                out << "I RESIST FIRE";
+            if (m_combatOrder & ORDERS_RESIST_NATURE)
+                out << "I RESIST NATURE";
+            if (m_combatOrder & ORDERS_RESIST_FROST)
+                out << "I RESIST FROST";
+            if (m_combatOrder & ORDERS_RESIST_SHADOW)
+                out << "I RESIST SHADOW";
+        }
     }
     out << ".";
 
@@ -1440,7 +1442,8 @@ void PlayerbotAI::SendOrders(Player& /*player*/)
     }
 
     TellMaster(out.str().c_str());
-    TellMaster("My combat delay is '%u'", m_DelayAttack);
+    if (m_DelayAttack)
+        TellMaster("My combat delay is '%u'", m_DelayAttack);
 }
 
 // handle outgoing packets the server would send to the client
