@@ -521,6 +521,9 @@ bool PlayerbotWarriorAI::CanPull()
 // Match up with "CanPull()" above
 bool PlayerbotWarriorAI::Pull()
 {
+    if (!m_bot) return false;
+    if (!m_ai)  return false;
+
     if (m_bot->GetCombatDistance(m_ai->GetCurrentTarget()) > ATTACK_DISTANCE)
     {
         if (m_bot->Attack(m_ai->GetCurrentTarget(), false))
@@ -531,11 +534,8 @@ bool PlayerbotWarriorAI::Pull()
     }
     else // target is in melee range
     {
-        if (m_bot->Attack(m_ai->GetCurrentTarget(), true))
-        {
-            m_bot->AttackStop();
-            return true;
-        }
+        m_ai->Attack(m_ai->GetCurrentTarget());
+        return true;
     }
 
     return false;
