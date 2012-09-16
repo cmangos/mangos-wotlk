@@ -504,38 +504,12 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     if (Buff(&PlayerbotPaladinAI::BuffHelper, 1)) // Paladin's BuffHelper takes care of choosing the specific Blessing so just pass along a non-zero value
         return;
 
-    // mana check
+    // hp/mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    Item* pItem = m_ai->FindDrink();
-    Item* fItem = m_ai->FindBandage();
-
-    if (pItem != NULL && m_ai->GetManaPercent() < 40)
-    {
-        m_ai->TellMaster("I could use a drink.");
-        m_ai->UseItem(pItem);
+    if (EatDrinkBandage())
         return;
-    }
-
-    // hp check original
-    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
-        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
-
-    pItem = m_ai->FindFood();
-
-    if (pItem != NULL && m_ai->GetHealthPercent() < 40)
-    {
-        m_ai->TellMaster("I could use some food.");
-        m_ai->UseItem(pItem);
-        return;
-    }
-    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 70)
-    {
-        m_ai->TellMaster("I could use first aid.");
-        m_ai->UseItem(fItem);
-        return;
-    }
 }
 
 /**

@@ -65,7 +65,7 @@ enum PriestSpells
     SHADOW_WORD_PAIN_1              = 589,
     SHADOWFIEND_1                   = 34433,
     SHADOWFORM_1                    = 15473,
-    SHOOT_1                                          = 5019,
+    SHOOT_1                         = 5019,
     SILENCE_1                       = 15487,
     SMITE_1                         = 585,
     VAMPIRIC_EMBRACE_1              = 15286,
@@ -150,9 +150,6 @@ private:
            DIVINE_SPIRIT,
            PRAYER_OF_SPIRIT,
            INNER_FOCUS;
-
-    // first aid
-    uint32 RECENTLY_BANDAGED;
 
     // racial
     uint32 ARCANE_TORRENT,

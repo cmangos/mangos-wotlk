@@ -303,39 +303,14 @@ void PlayerbotHunterAI::DoNonCombatActions()
     if (ASPECT_OF_THE_HAWK > 0 && !m_bot->HasAura(ASPECT_OF_THE_HAWK, EFFECT_INDEX_0))
         m_ai->CastSpell(ASPECT_OF_THE_HAWK, *m_bot);
 
-    // mana check
+    // hp/mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    Item* pItem = m_ai->FindDrink();
-    Item* fItem = m_ai->FindBandage();
-
-    if (pItem != NULL && m_ai->GetManaPercent() < 30)
-    {
-        m_ai->TellMaster("I could use a drink.");
-        m_ai->UseItem(pItem);
+    if (EatDrinkBandage())
         return;
-    }
 
-    // hp check
-    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
-        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
-
-    pItem = m_ai->FindFood();
-
-    if (pItem != NULL && m_ai->GetHealthPercent() < 30)
-    {
-        m_ai->TellMaster("I could use some food.");
-        m_ai->UseItem(pItem);
-        return;
-    }
-    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 70)
-    {
-        m_ai->TellMaster("I could use first aid.");
-        m_ai->UseItem(fItem);
-        return;
-    }
-    else if (pItem == NULL && fItem == NULL && m_bot->getRace() == RACE_DRAENEI && !m_bot->HasAura(GIFT_OF_THE_NAARU, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 70)
+    if (m_bot->getRace() == RACE_DRAENEI && !m_bot->HasAura(GIFT_OF_THE_NAARU, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 70)
     {
         m_ai->TellMaster("I'm casting gift of the naaru.");
         m_ai->CastSpell(GIFT_OF_THE_NAARU, *m_bot);

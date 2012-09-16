@@ -477,38 +477,12 @@ void PlayerbotPriestAI::DoNonCombatActions()
     if (Buff(&PlayerbotPriestAI::BuffHelper, SHADOW_PROTECTION, (JOB_TANK | JOB_HEAL) ))
         return;
 
-    // mana check
+    // hp/mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    Item* pItem = m_ai->FindDrink();
-
-    if (pItem != NULL && m_ai->GetManaPercent() < 30)
-    {
-        m_ai->TellMaster("I could use a drink.");
-        m_ai->UseItem(pItem);
+    if (EatDrinkBandage())
         return;
-    }
-
-    // hp check
-    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
-        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
-
-    pItem = m_ai->FindFood();
-    Item* fItem = m_ai->FindBandage();
-
-    if (pItem != NULL && m_ai->GetHealthPercent() < 30)
-    {
-        m_ai->TellMaster("I could use some food.");
-        m_ai->UseItem(pItem);
-        return;
-    }
-    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 70)
-    {
-        m_ai->TellMaster("I could use first aid.");
-        m_ai->UseItem(fItem);
-        return;
-    }
 } // end DoNonCombatActions
 
 // TODO: this and mage's BuffHelper are identical and thus could probably go in PlayerbotClassAI.cpp somewhere

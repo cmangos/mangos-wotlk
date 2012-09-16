@@ -29,6 +29,46 @@ void PlayerbotClassAI::DoNonCombatActions()
     DEBUG_LOG("[PlayerbotAI]: Warning: Using PlayerbotClassAI::DoNonCombatActions() rather than class specific function");
 }
 
+bool PlayerbotClassAI::EatDrinkBandage(bool bMana, unsigned char foodPercent, unsigned char drinkPercent, unsigned char bandagePercent)
+{
+    Item* drinkItem = NULL;
+    Item* foodItem = NULL;
+    if (bMana && m_ai->GetManaPercent() < 25)
+        drinkItem = m_ai->FindDrink();
+    if (m_ai->GetHealthPercent() < 30)
+        foodItem = m_ai->FindFood();
+    if (drinkItem || foodItem)
+    {
+        if (drinkItem)
+        {
+            m_ai->TellMaster("I could use a drink.");
+            m_ai->UseItem(drinkItem);
+        }
+        if (foodItem)
+        {
+            m_ai->TellMaster("I could use some food.");
+            m_ai->UseItem(foodItem);
+        }
+        // and now wait until drinks are finished and/or combat begins
+        m_ai->SetCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_OOC);
+        SetWait(25); // seconds
+        return true;
+    }
+
+    if (m_ai->GetHealthPercent() < 70 && !m_bot->HasAura(RECENTLY_BANDAGED))
+    {
+        Item* bandageItem = m_ai->FindBandage();
+        if (bandageItem)
+        {
+            m_ai->TellMaster("I could use first aid.");
+            m_ai->UseItem(bandageItem);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool PlayerbotClassAI::CanPull()
 {
     DEBUG_LOG("[PlayerbotAI]: Warning: Using PlayerbotClassAI::CanPull() rather than class specific function");

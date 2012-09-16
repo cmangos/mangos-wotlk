@@ -517,7 +517,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    // mana check
+    // hp/mana check
     if (pet && DARK_PACT && pet->GetPower(POWER_MANA) > 0 && m_ai->GetManaPercent() <= 50)
         if (m_ai->CastSpell(DARK_PACT, *m_bot))
             return;
@@ -526,39 +526,8 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         if (m_ai->CastSpell(LIFE_TAP, *m_bot))
             return;
 
-    if (m_ai->GetManaPercent() < 25)
-    {
-        Item* pItem = m_ai->FindDrink();
-        if (pItem)
-        {
-            m_ai->TellMaster("I could use a drink.");
-            m_ai->UseItem(pItem);
-            return;
-        }
-    }
-
-    // hp check
-    if (m_ai->GetHealthPercent() < 30)
-    {
-        Item* pItem = m_ai->FindFood();
-        if (pItem)
-        {
-            m_ai->TellMaster("I could use some food.");
-            m_ai->UseItem(pItem);
-            return;
-        }
-    }
-
-    if (m_ai->GetHealthPercent() < 50 && !m_bot->HasAura(RECENTLY_BANDAGED))
-    {
-        Item* fItem = m_ai->FindBandage();
-        if (fItem)
-        {
-            m_ai->TellMaster("I could use first aid.");
-            m_ai->UseItem(fItem);
-            return;
-        }
-    }
+    if (EatDrinkBandage(true, 50))
+        return;
 
     //Heal Voidwalker
     if (pet && pet->GetEntry() == DEMON_VOIDWALKER && CONSUME_SHADOWS && pet->GetHealthPercent() < 75 && !pet->HasAura(CONSUME_SHADOWS))

@@ -47,6 +47,7 @@ public:
 
     // all non combat actions go here, ex buffs, heals, rezzes
     virtual void DoNonCombatActions();
+    bool EatDrinkBandage(bool bMana = true, unsigned char foodPercent = 70, unsigned char drinkPercent = 30, unsigned char bandagePercent = 70);
 
     // Utilities
     Player* GetMaster() { return m_master; }
@@ -84,6 +85,9 @@ protected:
     Player* m_master;
     Player* m_bot;
     PlayerbotAI* m_ai;
+
+    // first aid
+    uint32 RECENTLY_BANDAGED;
 };
 
 #endif

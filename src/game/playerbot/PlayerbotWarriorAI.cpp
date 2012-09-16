@@ -488,22 +488,10 @@ void PlayerbotWarriorAI::DoNonCombatActions()
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    Item* pItem = m_ai->FindFood();
-    Item* fItem = m_ai->FindBandage();
+    if (EatDrinkBandage(false))
+        return;
 
-    if (pItem != NULL && m_ai->GetHealthPercent() < 30)
-    {
-        m_ai->TellMaster("I could use some food.");
-        m_ai->UseItem(pItem);
-        return;
-    }
-    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 70)
-    {
-        m_ai->TellMaster("I could use first aid.");
-        m_ai->UseItem(fItem);
-        return;
-    }
-    else if (pItem == NULL && fItem == NULL && m_bot->getRace() == RACE_DRAENEI && !m_bot->HasAura(GIFT_OF_THE_NAARU, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 70)
+    if (m_bot->getRace() == RACE_DRAENEI && !m_bot->HasAura(GIFT_OF_THE_NAARU, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 70)
     {
         m_ai->TellMaster("I'm casting gift of the naaru.");
         m_ai->CastSpell(GIFT_OF_THE_NAARU, *m_bot);
@@ -535,7 +523,10 @@ bool PlayerbotWarriorAI::Pull()
         //}
         // activate auto shot: Reworked to account for AUTO_SHOT being a triggered spell
         if (AUTO_SHOT && m_ai->GetCurrentSpellId() != AUTO_SHOT)
+        {
             m_bot->CastSpell(m_ai->GetCurrentTarget(), AUTO_SHOT, true);
+            return true;
+        }
     }
     else // target is in melee range
     {

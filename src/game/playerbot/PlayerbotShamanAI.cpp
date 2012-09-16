@@ -504,7 +504,7 @@ void PlayerbotShamanAI::DoNonCombatActions()
             (!m_bot->HasAura(FROSTBRAND_WEAPON, EFFECT_INDEX_0) && !m_bot->HasAura(EARTHLIVING_WEAPON, EFFECT_INDEX_0) && !m_bot->HasAura(WINDFURY_WEAPON, EFFECT_INDEX_0) && !m_bot->HasAura(FLAMETONGUE_WEAPON, EFFECT_INDEX_0) && !m_bot->HasAura(ROCKBITER_WEAPON, EFFECT_INDEX_0) && m_ai->CastSpell(FROSTBRAND_WEAPON,*m_bot) );
  */
     // Mainhand
-    Item * weapon;
+    Item* weapon;
     weapon = m_bot->GetItemByPos(EQUIPMENT_SLOT_MAINHAND);
     if (weapon && (weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0) && spec == SHAMAN_SPEC_RESTORATION)
         m_ai->CastSpell(EARTHLIVING_WEAPON, *m_bot);
@@ -536,41 +536,12 @@ void PlayerbotShamanAI::DoNonCombatActions()
             return;// RETURN_CONTINUE;
     }
 
-    // mana check
+    // hp/mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    Item* pItem = m_ai->FindDrink();
-    Item* fItem = m_ai->FindBandage();
-
-    if (pItem != NULL && m_ai->GetManaPercent() < 30)
-    {
-        // TODO: ignore non-combat actions for up to 30 seconds
-        m_ai->TellMaster("I could use a drink.");
-        m_ai->UseItem(pItem);
+    if (EatDrinkBandage())
         return;
-    }
-
-    // hp check
-    if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
-        m_bot->SetStandState(UNIT_STAND_STATE_STAND);
-
-    pItem = m_ai->FindFood();
-
-    if (pItem != NULL && m_ai->GetHealthPercent() < 30)
-    {
-        // TODO: ignore non-combat actions for up to 30 seconds
-        m_ai->TellMaster("I could use some food.");
-        m_ai->UseItem(pItem);
-        return;
-    }
-    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 70)
-    {
-        // TODO: Ignore non-combat actions for... 10 seconds, was it?
-        m_ai->TellMaster("I could use first aid.");
-        m_ai->UseItem(fItem);
-        return;
-    }
 } // end DoNonCombatActions
 
 bool PlayerbotShamanAI::CastHoTOnTank()

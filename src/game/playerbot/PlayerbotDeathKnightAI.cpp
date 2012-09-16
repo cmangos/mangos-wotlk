@@ -525,21 +525,8 @@ void PlayerbotDeathKnightAI::DoNonCombatActions()
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    Item* pItem = m_ai->FindFood();
-    Item* fItem = m_ai->FindBandage();
-
-    if (pItem != NULL && m_ai->GetHealthPercent() < 30)
-    {
-        m_ai->TellMaster("I could use some food.");
-        m_ai->UseItem(pItem);
+    if (EatDrinkBandage(false))
         return;
-    }
-    else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 70)
-    {
-        m_ai->TellMaster("I could use first aid.");
-        m_ai->UseItem(fItem);
-        return;
-    }
 } // end DoNonCombatActions
 
 // Match up with "Pull()" below

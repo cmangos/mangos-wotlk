@@ -2955,7 +2955,14 @@ void PlayerbotAI::DoNextCombatManeuver()
         m_targetChanged = false;
         m_targetType = TARGET_NORMAL;
         SetQuestNeedCreatures();
-        ClearCombatOrder(ORDERS_TEMP);
+        if (GetCombatOrder() & ORDERS_TEMP)
+        {
+            if (GetCombatOrder() & ORDERS_TEMP_WAIT_TANKAGGRO)
+                TellMaster("I was still waiting for the tank to gain aggro, but that doesn't make sense anymore...");
+            if (GetCombatOrder() & ORDERS_TEMP_WAIT_OOC)
+                TellMaster("I was still waiting OOC but that was way off...");
+            ClearCombatOrder(ORDERS_TEMP);
+        }
         return;
     }
 
@@ -4787,6 +4794,14 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
     // bot was in combat recently - loot now
     if (m_botState == BOTSTATE_COMBAT)
     {
+        if (GetCombatOrder() & ORDERS_TEMP)
+        {
+            if (GetCombatOrder() & ORDERS_TEMP_WAIT_TANKAGGRO)
+                TellMaster("I was still waiting for the tank to gain aggro, but that doesn't make sense anymore...");
+            if (GetCombatOrder() & ORDERS_TEMP_WAIT_OOC)
+                TellMaster("I was still waiting OOC but I just got out of combat...");
+            ClearCombatOrder(ORDERS_TEMP);
+        }
         SetState(BOTSTATE_LOOTING);
         m_attackerInfo.clear();
         if (HasCollectFlag(COLLECT_FLAG_COMBAT))
