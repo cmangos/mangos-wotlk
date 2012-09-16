@@ -33,9 +33,9 @@ bool PlayerbotClassAI::EatDrinkBandage(bool bMana, unsigned char foodPercent, un
 {
     Item* drinkItem = NULL;
     Item* foodItem = NULL;
-    if (bMana && m_ai->GetManaPercent() < 25)
+    if (bMana && m_ai->GetManaPercent() < drinkPercent)
         drinkItem = m_ai->FindDrink();
-    if (m_ai->GetHealthPercent() < 30)
+    if (m_ai->GetHealthPercent() < foodPercent)
         foodItem = m_ai->FindFood();
     if (drinkItem || foodItem)
     {
@@ -55,7 +55,7 @@ bool PlayerbotClassAI::EatDrinkBandage(bool bMana, unsigned char foodPercent, un
         return true;
     }
 
-    if (m_ai->GetHealthPercent() < 70 && !m_bot->HasAura(RECENTLY_BANDAGED))
+    if (m_ai->GetHealthPercent() < bandagePercent && !m_bot->HasAura(RECENTLY_BANDAGED))
     {
         Item* bandageItem = m_ai->FindBandage();
         if (bandageItem)

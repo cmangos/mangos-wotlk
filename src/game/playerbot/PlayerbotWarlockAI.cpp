@@ -526,7 +526,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         if (m_ai->CastSpell(LIFE_TAP, *m_bot))
             return;
 
-    if (EatDrinkBandage(true, 50))
+    if (EatDrinkBandage())
         return;
 
     //Heal Voidwalker
