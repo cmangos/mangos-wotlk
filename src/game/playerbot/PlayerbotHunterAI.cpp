@@ -75,7 +75,6 @@ PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, Pl
     BERSERKING                    = m_ai->initSpell(BERSERKING_ALL); // troll
 
     m_petSummonFailed = false;
-    m_rangedCombat = true;
 }
 
 PlayerbotHunterAI::~PlayerbotHunterAI() {}
@@ -179,28 +178,34 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
 
     // check if ranged combat is possible
     float dist = m_bot->GetCombatDistance(pTarget);
-    if ((dist <= ATTACK_DISTANCE || !m_bot->GetUInt32Value(PLAYER_AMMO_ID)) && m_rangedCombat)
+    if ((dist <= ATTACK_DISTANCE || !m_bot->GetUInt32Value(PLAYER_AMMO_ID)) && m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED)
     {
         // switch to melee combat (target in melee range, out of ammo)
-        m_rangedCombat = false;
+        m_ai->SetCombatStyle(PlayerbotAI::COMBAT_MELEE);
         if (!m_bot->GetUInt32Value(PLAYER_AMMO_ID))
             m_ai->TellMaster("Out of ammo!");
     }
-    else if (dist > ATTACK_DISTANCE && !m_rangedCombat)
-        m_rangedCombat = true;
+    else if (dist > ATTACK_DISTANCE && m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_MELEE)
+        m_ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
 
     // Set appropriate aspect
-    if (m_rangedCombat && ASPECT_OF_THE_HAWK > 0 && !m_bot->HasAura(ASPECT_OF_THE_HAWK, EFFECT_INDEX_0))
-        m_ai->CastSpell(ASPECT_OF_THE_HAWK, *m_bot);
-    else if (!m_rangedCombat && ASPECT_OF_THE_MONKEY > 0 && !m_bot->HasAura(ASPECT_OF_THE_MONKEY, EFFECT_INDEX_0))
-        m_ai->CastSpell(ASPECT_OF_THE_MONKEY, *m_bot);
+    if (m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED)
+    {
+        if (ASPECT_OF_THE_HAWK && !m_bot->HasAura(ASPECT_OF_THE_HAWK, EFFECT_INDEX_0))
+            m_ai->CastSpell(ASPECT_OF_THE_HAWK, *m_bot);
+    }
+    else
+    {
+        if (ASPECT_OF_THE_MONKEY && !m_bot->HasAura(ASPECT_OF_THE_MONKEY, EFFECT_INDEX_0))
+            m_ai->CastSpell(ASPECT_OF_THE_MONKEY, *m_bot);
+    }
 
     // activate auto shot: Reworked to account for AUTO_SHOT being a triggered spell
-    if (AUTO_SHOT > 0 && m_rangedCombat && m_ai->GetCurrentSpellId() != AUTO_SHOT)
+    if (AUTO_SHOT > 0 && m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && m_ai->GetCurrentSpellId() != AUTO_SHOT)
         m_bot->CastSpell(pTarget, AUTO_SHOT, true);
 
     // damage spells
-    if (m_rangedCombat)
+    if (m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED)
     {
         if (HUNTERS_MARK > 0 && !pTarget->HasAura(HUNTERS_MARK, EFFECT_INDEX_0) && m_ai->CastSpell(HUNTERS_MARK, *pTarget))
             return RETURN_CONTINUE;
@@ -289,10 +294,6 @@ void PlayerbotHunterAI::DoNonCombatActions()
 {
     if (!m_ai)  return;
     if (!m_bot) return;
-
-    // reset ranged combat state
-    if (!m_rangedCombat)
-        m_rangedCombat = true;
 
     // buff group
     if (TRUESHOT_AURA > 0 && !m_bot->HasAura(TRUESHOT_AURA, EFFECT_INDEX_0))

@@ -10,6 +10,8 @@
 class PlayerbotAI;
 PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
 {
+    AUTO_SHOT               = m_ai->initSpell(AUTO_SHOT_2); // GENERAL
+
     BATTLE_STANCE           = m_ai->initSpell(BATTLE_STANCE_1); //ARMS
     CHARGE                  = m_ai->initSpell(CHARGE_1); //ARMS
     OVERPOWER               = m_ai->initSpell(OVERPOWER_1); // ARMS
@@ -526,11 +528,14 @@ bool PlayerbotWarriorAI::Pull()
 
     if (m_bot->GetCombatDistance(m_ai->GetCurrentTarget()) > ATTACK_DISTANCE)
     {
-        if (m_bot->Attack(m_ai->GetCurrentTarget(), false))
-        {
-            m_bot->AttackStop();
-            return true;
-        }
+        //if (m_bot->Attack(m_ai->GetCurrentTarget(), false))
+        //{
+        //    m_bot->AttackStop();
+        //    return true;
+        //}
+        // activate auto shot: Reworked to account for AUTO_SHOT being a triggered spell
+        if (AUTO_SHOT && m_ai->GetCurrentSpellId() != AUTO_SHOT)
+            m_bot->CastSpell(m_ai->GetCurrentTarget(), AUTO_SHOT, true);
     }
     else // target is in melee range
     {
