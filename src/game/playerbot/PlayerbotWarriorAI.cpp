@@ -502,8 +502,18 @@ void PlayerbotWarriorAI::DoNonCombatActions()
 // Match up with "Pull()" below
 bool PlayerbotWarriorAI::CanPull()
 {
+    if (!m_bot) return false;
+    if (!m_ai) return false;
+
     if (m_bot->GetUInt32Value(PLAYER_AMMO_ID)) // Having ammo equipped means a weapon is equipped as well. Probably. [TODO: does this work with throwing knives? Can a playerbot 'cheat' ammo into the slot without a proper weapon?]
+    {
+        if (m_bot->GetCombatDistance(m_ai->GetCurrentTarget()) > m_ai->IsInRange(m_ai->GetCurrentTarget(), AUTO_SHOT))
+        {
+            m_ai->TellMaster("I'm out of range.");
+            return false;
+        }
         return true;
+    }
 
     return false;
 }
@@ -516,11 +526,12 @@ bool PlayerbotWarriorAI::Pull()
 
     if (m_bot->GetCombatDistance(m_ai->GetCurrentTarget()) > ATTACK_DISTANCE)
     {
-        //if (m_bot->Attack(m_ai->GetCurrentTarget(), false))
-        //{
-        //    m_bot->AttackStop();
-        //    return true;
-        //}
+        if (m_bot->GetCombatDistance(m_ai->GetCurrentTarget()) > m_ai->IsInRange(m_ai->GetCurrentTarget(), AUTO_SHOT))
+        {
+            m_ai->TellMaster("I'm out of range.");
+            return false;
+        }
+
         // activate auto shot: Reworked to account for AUTO_SHOT being a triggered spell
         if (AUTO_SHOT && m_ai->GetCurrentSpellId() != AUTO_SHOT)
         {
