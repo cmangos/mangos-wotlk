@@ -741,7 +741,7 @@ enum SpellEffects
     SPELL_EFFECT_141                       = 141,
     SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE  = 142,
     SPELL_EFFECT_APPLY_AREA_AURA_OWNER     = 143,
-    SPELL_EFFECT_144                       = 144,
+    SPELL_EFFECT_KNOCKBACK_FROM_POSITION   = 144,
     SPELL_EFFECT_145                       = 145,
     SPELL_EFFECT_ACTIVATE_RUNE             = 146,
     SPELL_EFFECT_QUEST_FAIL                = 147,
@@ -1214,11 +1214,13 @@ enum Targets
     TARGET_SELF                        = 1,
     TARGET_RANDOM_ENEMY_CHAIN_IN_AREA  = 2,                 // only one spell has that, but regardless, it's a target type after all
     TARGET_RANDOM_FRIEND_CHAIN_IN_AREA = 3,
+    TARGET_4                           = 4,                 // some plague spells that are infectious - maybe targets not-infected friends inrange
     TARGET_PET                         = 5,
     TARGET_CHAIN_DAMAGE                = 6,
     TARGET_AREAEFFECT_INSTANT          = 7,                 // targets around provided destination point
     TARGET_AREAEFFECT_CUSTOM           = 8,
     TARGET_INNKEEPER_COORDINATES       = 9,                 // uses in teleport to innkeeper spells
+    TARGET_11                          = 11,                // used by spell 4 'Word of Recall Other'
     TARGET_ALL_ENEMY_IN_AREA           = 15,
     TARGET_ALL_ENEMY_IN_AREA_INSTANT   = 16,
     TARGET_TABLE_X_Y_Z_COORDINATES     = 17,                // uses in teleport spells and some other
@@ -1232,6 +1234,7 @@ enum Targets
     TARGET_GAMEOBJECT_ITEM             = 26,
     TARGET_MASTER                      = 27,
     TARGET_ALL_ENEMY_IN_AREA_CHANNELED = 28,
+    TARGET_29                          = 29,
     TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER = 30,           // select friendly for caster object faction (in different original caster faction) in TargetB used only with TARGET_ALL_AROUND_CASTER and in self casting range in TargetA
     TARGET_ALL_FRIENDLY_UNITS_IN_AREA  = 31,
     TARGET_MINION                      = 32,
@@ -1259,6 +1262,8 @@ enum Targets
     TARGET_LARGE_FRONTAL_CONE          = 54,
     TARGET_ALL_RAID_AROUND_CASTER      = 56,
     TARGET_SINGLE_FRIEND_2             = 57,
+    TARGET_58                          = 58,
+    TARGET_59                          = 59,
     TARGET_NARROW_FRONTAL_CONE         = 60,
     TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,
     TARGET_DUELVSPLAYER_COORDINATES    = 63,
@@ -1266,8 +1271,13 @@ enum Targets
     TARGET_BEHIND_VICTIM               = 65,                // used in teleport behind spells, caster/target dependent from spell effect
     TARGET_RIGHT_FROM_VICTIM           = 66,
     TARGET_LEFT_FROM_VICTIM            = 67,
+    TARGET_68                          = 68,
+    TARGET_69                          = 69,
+    TARGET_70                          = 70,
     TARGET_RANDOM_NEARBY_LOC           = 72,                // used in teleport onto nearby locations
     TARGET_RANDOM_CIRCUMFERENCE_POINT  = 73,
+    TARGET_74                          = 74,
+    TARGET_75                          = 75,
     TARGET_DYNAMIC_OBJECT_COORDINATES  = 76,
     TARGET_SINGLE_ENEMY                = 77,
     TARGET_POINT_AT_NORTH              = 78,                // 78-85 possible _COORDINATES at radius with pi/4 step around target in unknown order, N?
@@ -1280,10 +1290,20 @@ enum Targets
     TARGET_POINT_AT_SW                 = 85,                // from spell desc: "(SW)"
     TARGET_RANDOM_NEARBY_DEST          = 86,                // "Test Nearby Dest Random" - random around selected destination
     TARGET_SELF2                       = 87,
+    TARGET_88                          = 88,                // Smoke Flare(s) and Hurricane
     TARGET_DIRECTLY_FORWARD            = 89,
     TARGET_NONCOMBAT_PET               = 90,
     TARGET_91                          = 91,
+    TARGET_92                          = 92,
+    TARGET_94                          = 94,
+    TARGET_95                          = 95,
+    TARGET_96                          = 96,
+    TARGET_97                          = 97,
     TARGET_IN_FRONT_OF_CASTER_30       = 104,
+    TARGET_105                         = 105,               // 1 spell
+    TARGET_106                         = 106,
+    TARGET_108                         = 108,               // possible TARGET_WMO(GO?)_IN_FRONT_OF_CASTER(_30 ?)
+    TARGET_110                         = 110,
 };
 
 enum SpellMissInfo
@@ -2964,6 +2984,31 @@ enum ActivateTaxiReply
     ERR_TAXINOTSTANDING             = 12
 };
 
+enum AreaLockStatus
+{
+    AREA_LOCKSTATUS_OK                          = 0,
+    AREA_LOCKSTATUS_UNKNOWN_ERROR               = 1,
+    AREA_LOCKSTATUS_INSUFFICIENT_EXPANSION      = 2,
+    AREA_LOCKSTATUS_TOO_LOW_LEVEL               = 3,
+    AREA_LOCKSTATUS_TOO_HIGH_LEVEL              = 4,
+    AREA_LOCKSTATUS_RAID_LOCKED                 = 5,
+    AREA_LOCKSTATUS_QUEST_NOT_COMPLETED         = 6,
+    AREA_LOCKSTATUS_MISSING_ITEM                = 7,
+    AREA_LOCKSTATUS_MISSING_DIFFICULTY          = 8,
+    AREA_LOCKSTATUS_ZONE_IN_COMBAT              = 9,
+    AREA_LOCKSTATUS_INSTANCE_IS_FULL            = 10,
+    AREA_LOCKSTATUS_NOT_ALLOWED                 = 11,
+    AREA_LOCKSTATUS_HAS_BIND                    = 12,
+};
+
+enum TrackedAuraType
+{
+    TRACK_AURA_TYPE_NOT_TRACKED                 = 0,        // relation - caster : target is n:m (usual case)
+    TRACK_AURA_TYPE_SINGLE_TARGET               = 1,        // relation - caster : target is 1:1. Might get stolen
+    TRACK_AURA_TYPE_CONTROL_VEHICLE             = 2,        // relation - caster : target is N:1.
+    MAX_TRACKED_AURA_TYPES
+};
+
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
 // will only support WoW, WoW:TBC and WoW:WotLK 3.3.5a client build 12340...
@@ -2976,5 +3021,15 @@ enum ActivateTaxiReply
 // because if client receive unsupported expansion level it think
 // that it not have expansion installed and reject
 #define MAX_EXPANSION 2
+
+// Maxlevel for expansion
+enum MaxLevel
+{
+    MAX_LEVEL_CLASSIC                   = 60,
+    MAX_LEVEL_TBC                       = 70,
+    MAX_LEVEL_WOTLK                     = 80,
+};
+
+static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLASSIC, MAX_LEVEL_TBC, MAX_LEVEL_WOTLK };
 
 #endif

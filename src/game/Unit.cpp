@@ -40,7 +40,7 @@
 #include "Util.h"
 #include "Totem.h"
 #include "Vehicle.h"
-#include "BattleGround.h"
+#include "BattleGround/BattleGround.h"
 #include "InstanceData.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "MapPersistentStateMgr.h"
@@ -184,10 +184,12 @@ void GlobalCooldownMgr::CancelGlobalCooldown(SpellEntry const* spellInfo)
 // Methods of class Unit
 
 Unit::Unit() :
-    i_motionMaster(this), m_ThreatManager(this), m_HostileRefManager(this),
+    movespline(new Movement::MoveSpline()),
     m_charmInfo(NULL),
+    i_motionMaster(this),
     m_vehicleInfo(NULL),
-    movespline(new Movement::MoveSpline())
+    m_ThreatManager(this),
+    m_HostileRefManager(this)
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -350,6 +352,10 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
         setAttackTimer(OFF_ATTACK, (update_diff >= base_att ? 0 : base_att - update_diff));
     }
 
+    // Update passenger positions if we are the first vehicle
+    if (IsVehicle() && !IsBoarded())
+        m_vehicleInfo->Update(update_diff);
+
     // update abilities available only for fraction of time
     UpdateReactives(update_diff);
 
@@ -495,6 +501,20 @@ void Unit::RemoveSpellsCausingAura(AuraType auraType, SpellAuraHolder* except)
 
         RemoveAurasDueToSpell((*iter)->GetId(), except);
         iter = m_modAuras[auraType].begin();
+    }
+}
+
+void Unit::RemoveSpellsCausingAura(AuraType auraType, ObjectGuid casterGuid)
+{
+    for (AuraList::const_iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
+    {
+        if ((*iter)->GetCasterGuid() == casterGuid)
+        {
+            RemoveAuraHolderFromStack((*iter)->GetId(), 1, casterGuid);
+            iter = m_modAuras[auraType].begin();
+        }
+        else
+            ++iter;
     }
 }
 
@@ -818,26 +838,29 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             he->DuelComplete(DUEL_INTERUPTED);
         }
 
-        // handle player kill in outdoor pvp
-        if (player_tap && pVictim->GetTypeId() == TYPEID_PLAYER && pVictim != this)
+        // handle player/npc kill in battleground or outdoor pvp script
+        if (player_tap)
         {
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player_tap->GetCachedZoneId()))
-                outdoorPvP->HandlePlayerKill(player_tap, pVictim);
-        }
-
-        // battleground things (do this at the end, so the death state flag will be properly set to handle in the bg->handlekill)
-        if (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->InBattleGround())
-        {
-            Player* killed = ((Player*)pVictim);
-            if (BattleGround* bg = killed->GetBattleGround())
-                if (player_tap)
-                    bg->HandleKillPlayer(killed, player_tap);
-        }
-        else if (pVictim->GetTypeId() == TYPEID_UNIT)
-        {
-            if (player_tap)
+            if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            {
+                Player* killed = (Player*)pVictim;
+                if (killed->InBattleGround())
+                {
+                    if (BattleGround* bg = killed->GetBattleGround())
+                        bg->HandleKillPlayer(killed, player_tap);
+                }
+                else if (pVictim != this)
+                {
+                    // selfkills are not handled in outdoor pvp scripts
+                    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player_tap->GetCachedZoneId()))
+                        outdoorPvP->HandlePlayerKill(player_tap, killed);
+                }
+            }
+            else if (pVictim->GetTypeId() == TYPEID_UNIT)
+            {
                 if (BattleGround* bg = player_tap->GetBattleGround())
                     bg->HandleKillUnit((Creature*)pVictim, player_tap);
+            }
         }
     }
     else                                                    // if (health <= damage)
@@ -3470,7 +3493,7 @@ uint32 Unit::GetWeaponSkillValue(WeaponAttackType attType, Unit const* target) c
             return GetMaxSkillValueForLevel();              // always maximized SKILL_FERAL_COMBAT in fact
 
         // weapon skill or (unarmed for base attack)
-        uint32  skill = item ? item->GetSkill() : SKILL_UNARMED;
+        uint32 skill = item ? item->GetSkill() : uint32(SKILL_UNARMED);
 
         // in PvP use full skill instead current skill value
         value = (target && target->GetTypeId() == TYPEID_PLAYER)
@@ -4085,6 +4108,8 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                     case SPELL_AURA_PERIODIC_MANA_LEECH:
                     case SPELL_AURA_OBS_MOD_MANA:
                     case SPELL_AURA_POWER_BURN_MANA:
+                    case SPELL_AURA_CONTROL_VEHICLE:
+                    case SPELL_AURA_284: // SPELL_AURA_LINKED_AURA, unknown how it is handled, but let it stack like vehicle control aura
                         break;
                     case SPELL_AURA_PERIODIC_ENERGIZE:      // all or self or clear non-stackable
                     default:                                // not allow
@@ -4110,26 +4135,67 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
         }
     }
 
-    // update single target auras list (before aura add to aura list, to prevent unexpected remove recently added aura)
-    if (holder->IsSingleTarget())
+    // update tracked aura targets list (before aura add to aura list, to prevent unexpected remove recently added aura)
+    if (TrackedAuraType trackedType = holder->GetTrackedAuraType())
     {
         if (Unit* caster = holder->GetCaster())             // caster not in world
         {
-            SingleCastSpellTargetMap& scTargets = caster->GetSingleCastSpellTargets();
-            for (SingleCastSpellTargetMap::iterator itr = scTargets.begin(); itr != scTargets.end();)
+            // Only compare TrackedAuras of same tracking type
+            TrackedAuraTargetMap& scTargets = caster->GetTrackedAuraTargets(trackedType);
+            for (TrackedAuraTargetMap::iterator itr = scTargets.begin(); itr != scTargets.end();)
             {
                 SpellEntry const* itr_spellEntry = itr->first;
-                ObjectGuid itr_targetGuid = itr->second;
+                ObjectGuid itr_targetGuid = itr->second;    // Target on whom the tracked aura is
 
-                if (itr_targetGuid != GetObjectGuid() &&
-                        IsSingleTargetSpells(itr_spellEntry, aurSpellInfo))
+                if (itr_targetGuid == GetObjectGuid())      // Note: I don't understand this check (based on old aura concepts, kept when adding holders)
                 {
-                    scTargets.erase(itr);                   // remove for caster in any case
+                    ++itr;
+                    continue;
+                }
 
-                    // remove from target if target found
-                    if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
-                        itr_target->RemoveAurasDueToSpell(itr_spellEntry->Id);
+                bool removed = false;
+                switch (trackedType)
+                {
+                    case TRACK_AURA_TYPE_SINGLE_TARGET:
+                        if (IsSingleTargetSpells(itr_spellEntry, aurSpellInfo))
+                        {
+                            removed = true;
+                            // remove from target if target found
+                            if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
+                                itr_target->RemoveAurasDueToSpell(itr_spellEntry->Id); // TODO AURA_REMOVE_BY_TRACKING (might require additional work elsewhere)
+                            else                            // Normally the tracking will be removed by the AuraRemoval
+                                scTargets.erase(itr);
+                        }
+                        break;
+                    case TRACK_AURA_TYPE_CONTROL_VEHICLE:
+                    {
+                        // find minimal effect-index that applies an aura
+                        uint8 i = EFFECT_INDEX_0;
+                        for (; i < MAX_EFFECT_INDEX; ++i)
+                            if (IsAuraApplyEffect(aurSpellInfo, SpellEffectIndex(i)))
+                                break;
 
+                        // Remove auras when first holder is applied
+                        if ((1 << i) & holder->GetAuraFlags())
+                        {
+                            removed = true;                 // each caster can only control one vehicle
+
+                            // remove from target if target found
+                            if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
+                                itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, caster->GetObjectGuid(), AURA_REMOVE_BY_TRACKING);
+                            else                            // Normally the tracking will be removed by the AuraRemoval
+                                scTargets.erase(itr);
+                        }
+                        break;
+                    }
+                    case TRACK_AURA_TYPE_NOT_TRACKED:       // These two can never happen
+                    case MAX_TRACKED_AURA_TYPES:
+                        MANGOS_ASSERT(false);
+                        break;
+                }
+
+                if (removed)
+                {
                     itr = scTargets.begin();                // list can be chnaged at remove aura
                     continue;
                 }
@@ -4137,8 +4203,16 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 ++itr;
             }
 
-            // register spell holder single target
-            scTargets[aurSpellInfo] = GetObjectGuid();
+            switch (trackedType)
+            {
+                case TRACK_AURA_TYPE_CONTROL_VEHICLE:       // Only track the controlled vehicle, no secondary effects
+                    if (!IsSpellHaveAura(aurSpellInfo, SPELL_AURA_CONTROL_VEHICLE, holder->GetAuraFlags()))
+                        break;
+                    // no break here, track other controlled
+                case TRACK_AURA_TYPE_SINGLE_TARGET:         // Register spell holder single target
+                    scTargets[aurSpellInfo] = GetObjectGuid();
+                    break;
+            }
         }
     }
 
@@ -4150,7 +4224,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
         if (Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
             AddAuraToModList(aur);
 
-    holder->ApplyAuraModifiers(true, true);
+    holder->ApplyAuraModifiers(true, true);                 // This is the place where auras are actually applied onto the target
     DEBUG_LOG("Holder of spell %u now is in use", holder->GetId());
 
     // if aura deleted before boosts apply ignore
@@ -4372,7 +4446,7 @@ void Unit::RemoveAura(uint32 spellId, SpellEffectIndex effindex, Aura* except)
             ++iter;
     }
 }
-void Unit::RemoveAurasByCasterSpell(uint32 spellId, ObjectGuid casterGuid)
+void Unit::RemoveAurasByCasterSpell(uint32 spellId, ObjectGuid casterGuid, AuraRemoveMode mode /*=AURA_REMOVE_BY_DEFAULT*/)
 {
     SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellId);
     for (SpellAuraHolderMap::iterator iter = spair.first; iter != spair.second;)
@@ -4537,7 +4611,7 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, ObjectGuid casterGuid, U
         RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_DISPEL);
 
     // strange but intended behaviour: Stolen single target auras won't be treated as single targeted
-    new_holder->SetIsSingleTarget(false);
+    new_holder->SetTrackedAuraType(TRACK_AURA_TYPE_NOT_TRACKED);
 
     stealer->AddSpellAuraHolder(new_holder);
 }
@@ -4654,12 +4728,19 @@ void Unit::RemoveAurasWithAttribute(uint32 flags)
     }
 }
 
-void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
+void Unit::RemoveNotOwnTrackedTargetAuras(uint32 newPhase)
 {
-    // single target auras from other casters
+    // tracked aura targets from other casters are removed if the phase does no more fit
     for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
     {
-        if (iter->second->GetCasterGuid() != GetObjectGuid() && iter->second->IsSingleTarget())
+        TrackedAuraType trackedType = iter->second->GetTrackedAuraType();
+        if (!trackedType)
+        {
+            ++iter;
+            continue;
+        }
+
+        if (trackedType == TRACK_AURA_TYPE_CONTROL_VEHICLE || iter->second->GetCasterGuid() != GetObjectGuid())
         {
             if (!newPhase)
             {
@@ -4682,46 +4763,48 @@ void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
         ++iter;
     }
 
-    // single target auras at other targets
-    SingleCastSpellTargetMap& scTargets = GetSingleCastSpellTargets();
-    for (SingleCastSpellTargetMap::iterator itr = scTargets.begin(); itr != scTargets.end();)
+    // tracked aura targets at other targets
+    for (uint8 type = TRACK_AURA_TYPE_SINGLE_TARGET; type < MAX_TRACKED_AURA_TYPES; ++type)
     {
-        SpellEntry const* itr_spellEntry = itr->first;
-        ObjectGuid itr_targetGuid = itr->second;
-
-        if (itr_targetGuid != GetObjectGuid())
+        TrackedAuraTargetMap& scTargets = GetTrackedAuraTargets(TrackedAuraType(type));
+        for (TrackedAuraTargetMap::iterator itr = scTargets.begin(); itr != scTargets.end();)
         {
-            if (!newPhase)
-            {
-                scTargets.erase(itr);                       // remove for caster in any case
+            SpellEntry const* itr_spellEntry = itr->first;
+            ObjectGuid itr_targetGuid = itr->second;
 
-                // remove from target if target found
-                if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
-                    itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, GetObjectGuid());
-
-                itr = scTargets.begin();                    // list can be changed at remove aura
-                continue;
-            }
-            else
+            if (itr_targetGuid != GetObjectGuid())
             {
-                Unit* itr_target = GetMap()->GetUnit(itr_targetGuid);
-                if (!itr_target || !itr_target->InSamePhase(newPhase))
+                if (!newPhase)
                 {
-                    scTargets.erase(itr);                   // remove for caster in any case
+                    scTargets.erase(itr);                       // remove for caster in any case
 
                     // remove from target if target found
-                    if (itr_target)
+                    if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
                         itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, GetObjectGuid());
 
-                    itr = scTargets.begin();                // list can be changed at remove aura
+                    itr = scTargets.begin();                    // list can be changed at remove aura
                     continue;
                 }
+                else
+                {
+                    Unit* itr_target = GetMap()->GetUnit(itr_targetGuid);
+                    if (!itr_target || !itr_target->InSamePhase(newPhase))
+                    {
+                        scTargets.erase(itr);                   // remove for caster in any case
+
+                        // remove from target if target found
+                        if (itr_target)
+                            itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, GetObjectGuid());
+
+                        itr = scTargets.begin();                // list can be changed at remove aura
+                        continue;
+                    }
+                }
             }
+
+            ++itr;
         }
-
-        ++itr;
     }
-
 }
 
 void Unit::RemoveSpellAuraHolder(SpellAuraHolder* holder, AuraRemoveMode mode)
@@ -4748,7 +4831,7 @@ void Unit::RemoveSpellAuraHolder(SpellAuraHolder* holder, AuraRemoveMode mode)
     }
 
     holder->SetRemoveMode(mode);
-    holder->UnregisterSingleCastHolder();
+    holder->UnregisterAndCleanupTrackedAuras();
 
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
@@ -5413,8 +5496,12 @@ FactionTemplateEntry const* Unit::getFactionTemplateEntry() const
 
         if (GetObjectGuid() != guid)
         {
-            sLog.outError("%s have invalid faction (faction template id) #%u", GetGuidStr().c_str(), getFaction());
             guid = GetObjectGuid();
+
+            if (guid.GetHigh() == HIGHGUID_PET)
+                sLog.outError("%s (base creature entry %u) have invalid faction template id %u, owner %s", GetGuidStr().c_str(), GetEntry(), getFaction(), ((Pet*)this)->GetOwnerGuid().GetString().c_str());
+            else
+                sLog.outError("%s have invalid faction template id %u", GetGuidStr().c_str(), getFaction());
         }
     }
     return entry;
@@ -7353,7 +7440,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
     bool isWeaponDamageBasedSpell = !(spellProto && (damagetype == DOT || IsSpellHaveEffect(spellProto, SPELL_EFFECT_SCHOOL_DAMAGE)));
     Item*  pWeapon          = GetTypeId() == TYPEID_PLAYER ? ((Player*)this)->GetWeaponForAttack(attType, true, false) : NULL;
     uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
-    uint32 schoolMask       = spellProto ? spellProto->SchoolMask : GetMeleeDamageSchoolMask();
+    uint32 schoolMask       = spellProto ? spellProto->SchoolMask : uint32(GetMeleeDamageSchoolMask());
 
     // FLAT damage bonus auras
     // =======================
@@ -7606,7 +7693,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackTy
 
     // differentiate for weapon damage based spells
     bool isWeaponDamageBasedSpell = !(spellProto && (damagetype == DOT || IsSpellHaveEffect(spellProto, SPELL_EFFECT_SCHOOL_DAMAGE)));
-    uint32 schoolMask       = spellProto ? spellProto->SchoolMask : GetMeleeDamageSchoolMask();
+    uint32 schoolMask       = spellProto ? spellProto->SchoolMask : uint32(GetMeleeDamageSchoolMask());
     uint32 mechanicMask     = spellProto ? GetAllSpellMechanicMask(spellProto) : 0;
 
     // Shred also have bonus as MECHANIC_BLEED damages
@@ -9490,7 +9577,7 @@ void Unit::RemoveFromWorld()
     if (IsInWorld())
     {
         Uncharm();
-        RemoveNotOwnSingleTargetAuras();
+        RemoveNotOwnTrackedTargetAuras();
         RemoveGuardians();
         RemoveMiniPet();
         UnsummonAllTotems();
@@ -9552,7 +9639,6 @@ void CharmInfo::InitPetActionBar()
 
 void CharmInfo::InitEmptyActionBar()
 {
-    SetActionBar(ACTION_BAR_INDEX_START, COMMAND_ATTACK, ACT_COMMAND);
     for (uint32 x = ACTION_BAR_INDEX_START + 1; x < ACTION_BAR_INDEX_END; ++x)
         SetActionBar(x, 0, ACT_PASSIVE);
 }
@@ -9563,6 +9649,8 @@ void CharmInfo::InitPossessCreateSpells()
 
     if (m_unit->GetTypeId() == TYPEID_PLAYER)               // possessed players don't have spells, keep the action bar empty
         return;
+
+    SetActionBar(ACTION_BAR_INDEX_START, COMMAND_ATTACK, ACT_COMMAND);
 
     for (uint32 x = 0; x < CREATURE_MAX_SPELLS; ++x)
     {
@@ -10581,7 +10669,7 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
 
     if (IsInWorld())
     {
-        RemoveNotOwnSingleTargetAuras(newPhaseMask);        // we can lost access to caster or target
+        RemoveNotOwnTrackedTargetAuras(newPhaseMask);       // we can lost access to caster or target
 
         // all controlled except not owned charmed units
         CallForAllControlledUnits(SetPhaseMaskHelper(newPhaseMask), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_MINIPET | CONTROLLED_TOTEMS);
@@ -10661,22 +10749,19 @@ void Unit::SetFFAPvP(bool state)
 void Unit::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpeed)
 {
     float angle = this == target ? GetOrientation() + M_PI_F : target->GetAngle(this);
-    float vsin = sin(angle);
-    float vcos = cos(angle);
+    KnockBackWithAngle(angle, horizontalSpeed, verticalSpeed);
+}
 
+void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float verticalSpeed)
+{
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        WorldPacket data(SMSG_MOVE_KNOCK_BACK, 9 + 4 + 4 + 4 + 4 + 4);
-        data << GetPackGUID();
-        data << uint32(0);                                  // Sequence
-        data << float(vcos);                                // x direction
-        data << float(vsin);                                // y direction
-        data << float(horizontalSpeed);                     // Horizontal speed
-        data << float(-verticalSpeed);                      // Z Movement speed (vertical)
-        ((Player*)this)->GetSession()->SendPacket(&data);
+        ((Player*)this)->GetSession()->SendKnockBack(angle, horizontalSpeed, verticalSpeed);
     }
     else
     {
+        float vsin = sin(angle);
+        float vcos = cos(angle);
         float moveTimeHalf = verticalSpeed / Movement::gravity;
         float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -verticalSpeed);
 
@@ -10967,7 +11052,7 @@ void Unit::SetVehicleId(uint32 entry)
         VehicleEntry const* ventry = sVehicleStore.LookupEntry(entry);
         MANGOS_ASSERT(ventry != NULL);
 
-        m_vehicleInfo = new VehicleInfo(ventry);
+        m_vehicleInfo = new VehicleInfo(this, ventry);
         m_updateFlag |= UPDATEFLAG_VEHICLE;
     }
     else
@@ -11007,7 +11092,9 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
         m_movesplineTimer.Reset(POSITION_UPDATE_DELAY);
         Movement::Location loc = movespline->ComputePosition();
 
-        if (GetTypeId() == TYPEID_PLAYER)
+        if (IsBoarded())
+            GetTransportInfo()->SetLocalPosition(loc.x, loc.y, loc.z, loc.orientation);
+        else if (GetTypeId() == TYPEID_PLAYER)
             ((Player*)this)->SetPosition(loc.x, loc.y, loc.z, loc.orientation);
         else
             GetMap()->CreatureRelocation((Creature*)this, loc.x, loc.y, loc.z, loc.orientation);

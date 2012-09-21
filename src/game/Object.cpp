@@ -42,6 +42,7 @@
 #include "ObjectPosSelector.h"
 #include "TemporarySummon.h"
 #include "movement/packet_builder.h"
+#include "CreatureLinkingMgr.h"
 
 Object::Object()
 {
@@ -250,10 +251,11 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     {
         Unit* unit = ((Unit*)this);
 
+        // ToDo: Remove this hack
         if (GetTypeId() == TYPEID_PLAYER)
         {
             Player* player = ((Player*)unit);
-            if (player->GetTransport())
+            if (player->GetTransport() || player->IsBoarded())
                 player->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
             else
                 player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
@@ -395,7 +397,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     // 0x80
     if (updateFlags & UPDATEFLAG_VEHICLE)
     {
-        *data << uint32(((Unit*)this)->GetVehicleInfo()->GetEntry()->m_ID); // vehicle id
+        *data << uint32(((Unit*)this)->GetVehicleInfo()->GetVehicleEntry()->m_ID); // vehicle id
         *data << float(((WorldObject*)this)->GetOrientation());
     }
 
@@ -931,8 +933,10 @@ void Object::MarkForClientUpdate()
     }
 }
 
-WorldObject::WorldObject()
-    : m_isActiveObject(false), m_currMap(NULL), m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL)
+WorldObject::WorldObject() :
+    m_transportInfo(NULL), m_currMap(NULL),
+    m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL),
+    m_isActiveObject(false)
 {
 }
 
@@ -1578,10 +1582,14 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     // Active state set before added to map
     pCreature->SetActiveObjectState(asActiveObject);
 
-    pCreature->Summon(spwtype, despwtime);
+    pCreature->Summon(spwtype, despwtime);                  // Also initializes the AI and MMGen
 
     if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
         ((Creature*)this)->AI()->JustSummoned(pCreature);
+
+    // Creature Linking, Initial load is handled like respawn
+    if (pCreature->IsLinkingEventTrigger())
+        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, pCreature);
 
     // return the creature therewith the summoner has access to it
     return pCreature;

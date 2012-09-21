@@ -52,8 +52,8 @@ namespace Movement
                 Enter_Cycle  = 0x00100000,           // Everytimes appears with cyclic flag in monster move packet, erases first spline vertex after first cycle done
                 Animation    = 0x00200000,           // Plays animation after some time passed
                 Frozen       = 0x00400000,           // Will never arrive
-                Unknown5     = 0x00800000,
-                Unknown6     = 0x01000000,
+                BoardVehicle = 0x00800000,
+                ExitVehicle  = 0x01000000,
                 Unknown7     = 0x02000000,
                 Unknown8     = 0x04000000,
                 OrientationInversed = 0x08000000,
@@ -71,7 +71,7 @@ namespace Movement
                 // CatmullRom interpolation mode used
                 Mask_CatmullRom = Flying | Catmullrom,
                 // Unused, not suported flags
-                Mask_Unused = No_Spline | Enter_Cycle | Frozen | Unknown5 | Unknown6 | Unknown7 | Unknown8 | Unknown10 | Unknown11 | Unknown12 | Unknown13,
+                Mask_Unused = No_Spline | Enter_Cycle | Frozen | Unknown7 | Unknown8 | Unknown10 | Unknown11 | Unknown12 | Unknown13,
             };
 
             inline uint32& raw() { return (uint32&) * this;}
@@ -107,6 +107,8 @@ namespace Movement
             void EnableFacingPoint()         { raw() = (raw() & ~Mask_Final_Facing)                         | Final_Point;}
             void EnableFacingAngle()         { raw() = (raw() & ~Mask_Final_Facing)                         | Final_Angle;}
             void EnableFacingTarget()        { raw() = (raw() & ~Mask_Final_Facing)                         | Final_Target;}
+            void EnableBoardVehicle()        { raw() = (raw() & ~(Catmullrom | ExitVehicle))                | BoardVehicle; }
+            void EnableExitVehicle()         { raw() = (raw() & ~BoardVehicle)                              | ExitVehicle; }
 
             uint8 animId       : 8;
             bool done          : 1;
@@ -124,8 +126,8 @@ namespace Movement
             bool enter_cycle   : 1;
             bool animation     : 1;
             bool frozen        : 1;
-            bool unknown5      : 1;
-            bool unknown6      : 1;
+            bool boardVehicle  : 1;
+            bool exitVehicle   : 1;
             bool unknown7      : 1;
             bool unknown8      : 1;
             bool orientationInversed : 1;

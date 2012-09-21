@@ -17,12 +17,12 @@
  */
 
 #include "OutdoorPvP.h"
-#include "../Language.h"
-#include "../World.h"
-#include "../ObjectMgr.h"
-#include "../Object.h"
-#include "../GameObject.h"
-#include "../Player.h"
+#include "Language.h"
+#include "World.h"
+#include "ObjectMgr.h"
+#include "Object.h"
+#include "GameObject.h"
+#include "Player.h"
 
 /**
    Function that adds a player to the players of the affected outdoor pvp zones
@@ -61,7 +61,7 @@ void OutdoorPvP::HandlePlayerLeaveZone(Player* player, bool isMainZone)
  */
 void OutdoorPvP::SendUpdateWorldState(uint32 field, uint32 value)
 {
-    for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
+    for (GuidZoneMap::const_iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
     {
         // only send world state update to main zone
         if (!itr->second)
@@ -72,13 +72,27 @@ void OutdoorPvP::SendUpdateWorldState(uint32 field, uint32 value)
     }
 }
 
+void OutdoorPvP::HandleGameObjectCreate(GameObject* go)
+{
+    // set initial data and activate capture points
+    if (go->GetGOInfo()->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
+        go->SetCapturePointSlider(sOutdoorPvPMgr.GetCapturePointSliderValue(go->GetEntry(), CAPTURE_SLIDER_MIDDLE));
+}
+
+void OutdoorPvP::HandleGameObjectRemove(GameObject* go)
+{
+    // save capture point slider value (negative value if locked)
+    if (go->GetGOInfo()->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
+        sOutdoorPvPMgr.SetCapturePointSlider(go->GetEntry(), go->getLootState() == GO_ACTIVATED ? go->GetCapturePointSlider() : -go->GetCapturePointSlider());
+}
+
 /**
    Function that handles player kills in the main outdoor pvp zones
 
    @param   player who killed another player
    @param   victim who was killed
  */
-void OutdoorPvP::HandlePlayerKill(Player* killer, Unit* victim)
+void OutdoorPvP::HandlePlayerKill(Player* killer, Player* victim)
 {
     if (Group* group = killer->GetGroup())
     {
@@ -95,22 +109,22 @@ void OutdoorPvP::HandlePlayerKill(Player* killer, Unit* victim)
 
             // creature kills must be notified, even if not inside objective / not outdoor pvp active
             // player kills only count if active and inside objective
-            if (groupMember->CanUseOutdoorCapturePoint())
-                HandlePlayerKillInsideArea(groupMember, victim);
+            if (groupMember->CanUseCapturePoint())
+                HandlePlayerKillInsideArea(groupMember);
         }
     }
     else
     {
         // creature kills must be notified, even if not inside objective / not outdoor pvp active
-        if (killer && killer->CanUseOutdoorCapturePoint())
-            HandlePlayerKillInsideArea(killer, victim);
+        if (killer && killer->CanUseCapturePoint())
+            HandlePlayerKillInsideArea(killer);
     }
 }
 
 // apply a team buff for the main and affected zones
 void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/)
 {
-    for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
+    for (GuidZoneMap::const_iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
     {
         Player* player = sObjectMgr.GetPlayer(itr->first);
         if (player && player->GetTeam() == team)

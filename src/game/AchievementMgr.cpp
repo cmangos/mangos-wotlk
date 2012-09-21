@@ -36,8 +36,8 @@
 #include "CellImpl.h"
 #include "Language.h"
 #include "MapManager.h"
-#include "BattleGround.h"
-#include "BattleGroundAB.h"
+#include "BattleGround/BattleGround.h"
+#include "BattleGround/BattleGroundAB.h"
 #include "Map.h"
 #include "InstanceData.h"
 #include "DBCStructure.h"
@@ -922,7 +922,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         case 156:                           // AB, win while controlling all 5 flags (all nodes)
                         case 784:                           // EY, win while holding 4 bases (all nodes)
                         {
-                            if (!bg->IsAllNodesConrolledByTeam(GetPlayer()->GetTeam()))
+                            if (!bg->IsAllNodesControlledByTeam(GetPlayer()->GetTeam()))
                                 continue;
                             break;
                         }
@@ -2556,7 +2556,7 @@ void AchievementGlobalMgr::LoadCompletedAchievements()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu realm completed achievements.", (unsigned long)m_allCompletedAchievements.size());
+    sLog.outString(">> Loaded " SIZEFMTD " realm completed achievements.", m_allCompletedAchievements.size());
 }
 
 void AchievementGlobalMgr::LoadRewards()
@@ -2783,5 +2783,5 @@ void AchievementGlobalMgr::LoadRewardLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu achievement reward locale strings", (unsigned long)m_achievementRewardLocales.size());
+    sLog.outString(">> Loaded " SIZEFMTD " achievement reward locale strings", m_achievementRewardLocales.size());
 }

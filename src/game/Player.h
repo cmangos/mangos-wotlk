@@ -35,7 +35,7 @@
 #include "Util.h"                                           // for Tokens typedef
 #include "AchievementMgr.h"
 #include "ReputationMgr.h"
-#include "BattleGround.h"
+#include "BattleGround/BattleGround.h"
 #include "SharedDefines.h"
 
 #include<string>
@@ -57,6 +57,8 @@ class Item;
 // Playerbot mod
 #include "playerbot/PlayerbotMgr.h"
 #include "playerbot/PlayerbotAI.h"
+
+struct AreaTrigger;
 
 typedef std::deque<Mail*> PlayerMails;
 
@@ -386,14 +388,6 @@ enum RaidGroupError
     ERR_RAID_GROUP_ONLY                 = 2,
     ERR_RAID_GROUP_FULL                 = 3,
     ERR_RAID_GROUP_REQUIREMENTS_UNMATCH = 4
-};
-
-enum PlayerMovementType
-{
-    MOVE_ROOT       = 1,
-    MOVE_UNROOT     = 2,
-    MOVE_WATER_WALK = 3,
-    MOVE_LAND_WALK  = 4
 };
 
 enum DrunkenState
@@ -1025,7 +1019,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddToWorld() override;
         void RemoveFromWorld() override;
 
-        bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
+        bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0, AreaTrigger const* at = NULL);
 
         bool TeleportTo(WorldLocation const& loc, uint32 options = 0)
         {
@@ -1057,7 +1051,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
-        void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
         void SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time);
 
         Creature* GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask);
@@ -1892,7 +1885,8 @@ class MANGOS_DLL_SPEC Player : public Unit
             StopMirrorTimer(FIRE_TIMER);
         }
 
-        void SetMovement(PlayerMovementType pType);
+        void SetRoot(bool enable) override;
+        void SetWaterWalk(bool enable) override;
 
         void JoinedChannel(Channel* c);
         void LeftChannel(Channel* c);
@@ -2144,14 +2138,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const;
         bool CanUseBattleGroundObject();
         bool isTotalImmune();
+
+        // returns true if the player is in active state for capture point capturing
         bool CanUseCapturePoint();
-
-        /*********************************************************/
-        /***                OUTDOOR PVP SYSTEM                 ***/
-        /*********************************************************/
-
-        // returns true if the player is in active state for outdoor pvp objective capturing
-        bool CanUseOutdoorCapturePoint();
 
         /*********************************************************/
         /***                    REST SYSTEM                    ***/
@@ -2290,6 +2279,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendSavedInstances();
         static void ConvertInstancesToGroup(Player* player, Group* group = NULL, ObjectGuid player_guid = ObjectGuid());
         DungeonPersistentState* GetBoundInstanceSaveForSelfOrGroup(uint32 mapid);
+
+        AreaLockStatus GetAreaTriggerLockStatus(AreaTrigger const* at, Difficulty difficulty, uint32& miscRequirement);
+        void SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockStatus lockStatus, uint32 miscRequirement = 0);
 
         /*********************************************************/
         /***                   GROUP SYSTEM                    ***/

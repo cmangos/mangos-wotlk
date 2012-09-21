@@ -18,12 +18,12 @@
 
 #include "OutdoorPvPEP.h"
 #include "WorldPacket.h"
-#include "../World.h"
-#include "../ObjectMgr.h"
-#include "../Object.h"
-#include "../Creature.h"
-#include "../GameObject.h"
-#include "../Player.h"
+#include "World.h"
+#include "ObjectMgr.h"
+#include "Object.h"
+#include "Creature.h"
+#include "GameObject.h"
+#include "Player.h"
 
 OutdoorPvPEP::OutdoorPvPEP() : OutdoorPvP(),
     m_towersAlliance(0),
@@ -109,6 +109,8 @@ void OutdoorPvPEP::HandleCreatureCreate(Creature* creature)
 
 void OutdoorPvPEP::HandleGameObjectCreate(GameObject* go)
 {
+    OutdoorPvP::HandleGameObjectCreate(go);
+
     switch (go->GetEntry())
     {
         case GO_TOWER_BANNER_NORTHPASS:

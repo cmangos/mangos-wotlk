@@ -18,11 +18,11 @@
 
 #include "OutdoorPvPHP.h"
 #include "WorldPacket.h"
-#include "../World.h"
-#include "../Object.h"
-#include "../Creature.h"
-#include "../GameObject.h"
-#include "../Player.h"
+#include "World.h"
+#include "Object.h"
+#include "Creature.h"
+#include "GameObject.h"
+#include "Player.h"
 
 OutdoorPvPHP::OutdoorPvPHP() : OutdoorPvP(),
     m_towersAlliance(0),
@@ -80,6 +80,8 @@ void OutdoorPvPHP::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 
 void OutdoorPvPHP::HandleGameObjectCreate(GameObject* go)
 {
+    OutdoorPvP::HandleGameObjectCreate(go);
+
     switch (go->GetEntry())
     {
         case GO_TOWER_BANNER_OVERLOOK:
@@ -142,7 +144,7 @@ void OutdoorPvPHP::HandleObjectiveComplete(uint32 eventId, std::list<Player*> pl
 }
 
 // Cast player spell on opponent kill
-void OutdoorPvPHP::HandlePlayerKillInsideArea(Player* player, Unit* /*victim*/)
+void OutdoorPvPHP::HandlePlayerKillInsideArea(Player* player)
 {
     for (uint8 i = 0; i < MAX_HP_TOWERS; ++i)
     {
