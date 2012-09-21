@@ -41,9 +41,10 @@
 #include "SharedDefines.h"
 #include "LootMgr.h"
 #include "VMapFactory.h"
-#include "BattleGround.h"
+#include "BattleGround/BattleGround.h"
 #include "Util.h"
 #include "Chat.h"
+#include "Vehicle.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
@@ -1079,7 +1080,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
         {
-            caster->ProcDamageAndSpell(unitTarget, real_caster ? procAttacker : PROC_FLAG_NONE, procVictim, procEx, addhealth, m_attackType, m_spellInfo);
+            caster->ProcDamageAndSpell(unitTarget, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, addhealth, m_attackType, m_spellInfo);
         }
 
         int32 gain = caster->DealHeal(unitTarget, addhealth, m_spellInfo, crit, absorb);
@@ -1114,7 +1115,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
-            caster->ProcDamageAndSpell(unitTarget, real_caster ? procAttacker : PROC_FLAG_NONE, procVictim, procEx, damageInfo.damage, m_attackType, m_spellInfo);
+            caster->ProcDamageAndSpell(unitTarget, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, damageInfo.damage, m_attackType, m_spellInfo);
 
         // trigger weapon enchants for weapon based spells; exclude spells that stop attack, because may break CC
         if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON &&
@@ -1158,7 +1159,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         procEx = createProcExtendMask(&damageInfo, missInfo);
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
-            caster->ProcDamageAndSpell(unit, real_caster ? procAttacker : PROC_FLAG_NONE, procVictim, procEx, 0, m_attackType, m_spellInfo);
+            caster->ProcDamageAndSpell(unit, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo);
     }
 
     // Call scripted function for AI if this spell is casted upon a creature
@@ -1594,6 +1595,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 804:                                   // Explode Bug
                 case 23138:                                 // Gate of Shazzrah
                 case 28560:                                 // Summon Blizzard
+                case 30769:                                 // Pick Red Riding Hood
+                case 30835:                                 // Infernal Relay
                 case 31347:                                 // Doom TODO: exclude top threat target from target selection
                 case 33711:                                 // Murmur's Touch
                 case 38794:                                 // Murmur's Touch (h)
@@ -1604,6 +1607,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 50988:                                 // Glare of the Tribunal (Halls of Stone)
                 case 51146:                                 // Searching Gaze (Halls Of Stone)
                 case 52438:                                 // Summon Skittering Swarmer (Azjol Nerub,  Krik'thir the Gatewatcher)
+                case 53457:                                 // Impale (Azjol Nerub,  Anub'arak)
                 case 54148:                                 // Ritual of the Sword (Utgarde Pinnacle, Svala)
                 case 55479:                                 // Forced Obedience (Naxxramas, Razovius)
                 case 56140:                                 // Summon Power Spark (Eye of Eternity, Malygos)
@@ -1669,6 +1673,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     break;
                 case 28796:                                 // Poison Bolt Volley
                 case 29213:                                 // Curse of the Plaguebringer
+                case 30004:                                 // Flame Wreath
                 case 31298:                                 // Sleep
                 case 39992:                                 // Needle Spine Targeting (BT, Warlord Najentus)
                 case 51904:                                 // Limiting the count of Summoned Ghouls
@@ -1828,7 +1833,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             m_caster->GetClosePoint(dest_x, dest_y, dest_z, 0.0f, radius, angle);
             m_targets.setDestination(dest_x, dest_y, dest_z);
 
-            targetUnitMap.push_back(m_caster);
+            // This targetMode is often used as 'last' implicitTarget for positive spells, that just require coordinates
+            // and no unitTarget (e.g. summon effects). As MaNGOS always needs a unitTarget we add just the caster here.
+            if (IsPositiveSpell(m_spellInfo))
+                targetUnitMap.push_back(m_caster);
             break;
         }
         case TARGET_91:
@@ -2209,20 +2217,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             if (targetMode == TARGET_AREAEFFECT_GO_AROUND_SOURCE)
             {
                 if (m_targets.m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
-                {
-                    x = m_targets.m_srcX;
-                    y = m_targets.m_srcY;
-                    z = m_targets.m_srcZ;
-                }
+                    m_targets.getSource(x, y, z);
                 else
                     m_caster->GetPosition(x, y, z);
             }
             else
-            {
-                x = m_targets.m_destX;
-                y = m_targets.m_destY;
-                z = m_targets.m_destZ;
-            }
+                m_targets.getDestination(x, y, z);
 
             // It may be possible to fill targets for some spell effects
             // automatically (SPELL_EFFECT_WMO_REPAIR(88) for example) but
@@ -2468,8 +2468,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             break;
         case TARGET_DUELVSPLAYER:
         {
-            Unit* target = m_targets.getUnitTarget();
-            if (target)
+            if (Unit* target = m_targets.getUnitTarget())
             {
                 if (m_caster->IsFriendlyTo(target))
                 {
@@ -2477,10 +2476,13 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
                 else
                 {
-                    if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(m_targets.getUnitTarget(), this, effIndex))
+                    if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(target, this, effIndex))
                     {
-                        m_targets.setUnitTarget(pUnitTarget);
-                        m_spellFlags |= SPELL_FLAG_REDIRECTED;
+                        if (target != pUnitTarget)
+                        {
+                            m_targets.setUnitTarget(pUnitTarget);
+                            m_spellFlags |= SPELL_FLAG_REDIRECTED;
+                        }
                         targetUnitMap.push_back(pUnitTarget);
                     }
                 }
@@ -4482,17 +4484,6 @@ void Spell::SendResurrectRequest(Player* target)
     target->GetSession()->SendPacket(&data);
 }
 
-void Spell::SendPlaySpellVisual(uint32 SpellID)
-{
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 8 + 4);
-    data << m_caster->GetObjectGuid();
-    data << uint32(SpellID);                                // spell visual id?
-    ((Player*)m_caster)->GetSession()->SendPacket(&data);
-}
-
 void Spell::TakeCastItem()
 {
     if (!m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -4789,7 +4780,7 @@ void Spell::HandleThreatSpells()
         }
     }
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u added an additional %f threat for %s %u target(s)", m_spellInfo->Id, threat, positive ? "assisting" : "harming", uint32(m_UniqueTargetInfo.size()));
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u added an additional %f threat for %s " SIZEFMTD " target(s)", m_spellInfo->Id, threat, positive ? "assisting" : "harming", m_UniqueTargetInfo.size());
 }
 
 void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOTarget, SpellEffectIndex i, float DamageMultiplier)
@@ -5962,6 +5953,46 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 break;
             }
+            case SPELL_AURA_CONTROL_VEHICLE:
+            {
+                if (m_caster->HasAuraType(SPELL_AURA_MOUNTED))
+                    return SPELL_FAILED_NOT_MOUNTED;
+
+                Unit* pTarget = m_targets.getUnitTarget();
+
+                if (!pTarget->IsVehicle())
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                // It is possible to change between vehicles that are boarded on each other
+                if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
+                {
+                    bool boardedOnEachOther = false;
+                    WorldObject* lastTransport = pTarget;
+                    // Check if trying to board a vehicle that is boarded on current transport
+                    while (!boardedOnEachOther && lastTransport->IsBoarded() && lastTransport->GetTransportInfo()->IsOnVehicle())
+                    {
+                        if (lastTransport->GetTransportInfo()->GetTransportGuid() == m_caster->GetTransportInfo()->GetTransportGuid())
+                            boardedOnEachOther = true;
+                        else
+                            lastTransport = lastTransport->GetTransportInfo()->GetTransport();
+                    }
+                    // Check if trying to board a vehicle that has the current transport on board
+                    lastTransport = m_caster;
+                    while (!boardedOnEachOther && lastTransport->IsBoarded() && lastTransport->GetTransportInfo()->IsOnVehicle())
+                    {
+                        if (lastTransport->GetTransportInfo()->GetTransportGuid() == pTarget->GetTransportInfo()->GetTransportGuid())
+                            boardedOnEachOther = true;
+                        else
+                            lastTransport = lastTransport->GetTransportInfo()->GetTransport();
+                    }
+
+                    if (!boardedOnEachOther)
+                        return SPELL_FAILED_NOT_ON_TRANSPORT;
+                }
+
+                if (!pTarget->GetVehicleInfo()->CanBoard(m_caster))
+                    return SPELL_FAILED_BAD_TARGETS;
+            }
             case SPELL_AURA_MIRROR_IMAGE:
             {
                 Unit* pTarget = m_targets.getUnitTarget();
@@ -7056,8 +7087,8 @@ bool Spell::CheckTargetCreatureType(Unit* target) const
         spellCreatureTargetMask = 0x7FF;
     }
 
-    // Dismiss Pet and Taming Lesson skipped
-    if (m_spellInfo->Id == 2641 || m_spellInfo->Id == 23356)
+    // Dismiss Pet and Taming Lesson and Control Roskipped
+    if (m_spellInfo->Id == 2641 || m_spellInfo->Id == 23356 || m_spellInfo->Id == 30009)
         spellCreatureTargetMask =  0;
 
     if (spellCreatureTargetMask)

@@ -18,12 +18,12 @@
 
 #include "OutdoorPvPZM.h"
 #include "WorldPacket.h"
-#include "../World.h"
-#include "../ObjectMgr.h"
-#include "../Object.h"
-#include "../Creature.h"
-#include "../GameObject.h"
-#include "../Player.h"
+#include "World.h"
+#include "ObjectMgr.h"
+#include "Object.h"
+#include "Creature.h"
+#include "GameObject.h"
+#include "Player.h"
 
 OutdoorPvPZM::OutdoorPvPZM() : OutdoorPvP(),
     m_graveyardOwner(TEAM_NONE),
@@ -117,6 +117,8 @@ void OutdoorPvPZM::HandleCreatureCreate(Creature* creature)
 
 void OutdoorPvPZM::HandleGameObjectCreate(GameObject* go)
 {
+    OutdoorPvP::HandleGameObjectCreate(go);
+
     switch (go->GetEntry())
     {
         case GO_ZANGA_BANNER_EAST:
@@ -138,7 +140,7 @@ void OutdoorPvPZM::HandleGameObjectCreate(GameObject* go)
 }
 
 // Cast player spell on opponent kill
-void OutdoorPvPZM::HandlePlayerKillInsideArea(Player* player, Unit* /*victim*/)
+void OutdoorPvPZM::HandlePlayerKillInsideArea(Player* player)
 {
     for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
     {

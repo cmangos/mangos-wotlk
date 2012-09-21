@@ -20,8 +20,8 @@
 #define OUTDOOR_PVP_H
 
 #include "Common.h"
-#include "../ObjectGuid.h"
-#include "../SharedDefines.h"
+#include "ObjectGuid.h"
+#include "SharedDefines.h"
 #include "OutdoorPvPMgr.h"
 
 class WorldPacket;
@@ -53,7 +53,7 @@ class OutdoorPvP
 
     public:
         OutdoorPvP() {}
-        ~OutdoorPvP() {}
+        virtual ~OutdoorPvP() {}
 
         // called when the zone is initialized
         virtual void FillInitialWorldStates(WorldPacket& /*data*/, uint32& /*count*/) {}
@@ -64,9 +64,12 @@ class OutdoorPvP
         // handle capture objective complete
         virtual void HandleObjectiveComplete(uint32 /*eventId*/, std::list<Player*> /*players*/, Team /*team*/) {}
 
-        // Called when a creature or gameobject is created
+        // Called when a creature is created
         virtual void HandleCreatureCreate(Creature* /*creature*/) {}
-        virtual void HandleGameObjectCreate(GameObject* /*go*/) {}
+
+        // Called when a gameobject is created or removed
+        virtual void HandleGameObjectCreate(GameObject* /*go*/);
+        virtual void HandleGameObjectRemove(GameObject* /*go*/);
 
         // Called on creature death
         virtual void HandleCreatureDeath(Creature* /*creature*/) {}
@@ -83,8 +86,8 @@ class OutdoorPvP
         // update - called by the OutdoorPvPMgr
         virtual void Update(uint32 /*diff*/) {}
 
-        // handle npc/player kill
-        void HandlePlayerKill(Player* killer, Unit* victim);
+        // Handle player kill
+        void HandlePlayerKill(Player* killer, Player* victim);
 
     protected:
 
@@ -96,7 +99,7 @@ class OutdoorPvP
         virtual void SendRemoveWorldStates(Player* /*player*/) {}
 
         // handle npc/player kill
-        virtual void HandlePlayerKillInsideArea(Player* /*killer*/, Unit* /*victim*/) {}
+        virtual void HandlePlayerKillInsideArea(Player* /*killer*/) {}
 
         // send world state update to all players present
         void SendUpdateWorldState(uint32 field, uint32 value);

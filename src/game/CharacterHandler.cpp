@@ -250,6 +250,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
             {
                 case ALLIANCE: disabled = mask & (1 << 0); break;
                 case HORDE:    disabled = mask & (1 << 1); break;
+                default: break;
             }
 
             if (disabled)
@@ -795,7 +796,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
             pCurrChar->CastSpell(pCurrChar, 20584, true);   // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
         pCurrChar->CastSpell(pCurrChar, 8326, true);        // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
 
-        pCurrChar->SetMovement(MOVE_WATER_WALK);
+        pCurrChar->SetWaterWalk(true);
     }
 
     pCurrChar->ContinueTaxiFlight();

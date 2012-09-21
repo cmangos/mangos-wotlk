@@ -83,12 +83,22 @@ struct AreaTrigger
     uint32 heroicKey2;
     uint32 requiredQuest;
     uint32 requiredQuestHeroic;
-    std::string requiredFailedText;
     uint32 target_mapId;
     float  target_X;
     float  target_Y;
     float  target_Z;
     float  target_Orientation;
+
+    // Operators
+    bool IsMinimal() const { return requiredLevel == 0 && requiredItem == 0 && requiredItem2 == 0 && heroicKey == 0 &&
+                                    heroicKey2 == 0 && requiredQuest == 0 && requiredQuestHeroic == 0; }
+
+    bool IsLessOrEqualThan(AreaTrigger const* l) const      // Expected to have same map
+    {
+        MANGOS_ASSERT(target_mapId == l->target_mapId);
+        return requiredLevel <= l->requiredLevel && requiredItem <= l->requiredItem && requiredItem2 <= l->requiredItem2
+                && heroicKey <= l->heroicKey&& heroicKey2 <= l->heroicKey2 && requiredQuest <= l->requiredQuest && requiredQuestHeroic <= l->requiredQuestHeroic;
+    }
 };
 
 typedef std::map < uint32/*player guid*/, uint32/*instance*/ > CellCorpseSet;
@@ -378,6 +388,7 @@ enum ConditionType
     // True if player has skill skill_id and skill less than (and not equal) skill_value (for skill_value > 1)
     // If skill_value == 1, then true if player has not skill skill_id
     CONDITION_REPUTATION_RANK_MAX   = 30,                   // faction_id   max_rank
+    CONDITION_COMPLETED_ENCOUNTER   = 31,                   // encounter_id encounter_id2       encounter_id[2] = DungeonEncounter(dbc).id (if value2 provided it will return value1 OR value2)
 };
 
 class PlayerCondition

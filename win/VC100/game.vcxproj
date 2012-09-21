@@ -136,7 +136,7 @@
     <ClCompile>
       <AdditionalOptions>/Zm300 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;MANGOS_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -173,7 +173,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;MANGOS_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -207,7 +207,7 @@
     <ClCompile>
       <AdditionalOptions>/Zm300 %(AdditionalOptions)</AdditionalOptions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -244,7 +244,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj /Zm300 %(AdditionalOptions)</AdditionalOptions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -277,7 +277,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;MANGOS_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -313,7 +313,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;MANGOS_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -352,22 +352,22 @@
     <ClCompile Include="..\..\src\game\AuctionHouseHandler.cpp" />
     <ClCompile Include="..\..\src\game\AuctionHouseMgr.cpp" />
     <ClCompile Include="..\..\src\game\Bag.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGround.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundAA.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundAB.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundRB.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundAV.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundBE.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundDS.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundEY.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundHandler.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundIC.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundMgr.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundNA.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundRL.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundRV.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundSA.cpp" />
-    <ClCompile Include="..\..\src\game\BattleGroundWS.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGround.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundAA.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundAB.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundRB.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundAV.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundBE.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundDS.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundEY.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundHandler.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundIC.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundMgr.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundNA.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundRL.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundRV.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundSA.cpp" />
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundWS.cpp" />
     <ClCompile Include="..\..\src\game\Calendar.cpp" />
     <ClCompile Include="..\..\src\game\CalendarHandler.cpp" />
     <ClCompile Include="..\..\src\game\Camera.cpp" />
@@ -494,6 +494,7 @@
     <ClCompile Include="..\..\src\game\Spell.cpp" />
     <ClCompile Include="..\..\src\game\SpellAuras.cpp" />
     <ClCompile Include="..\..\src\game\SQLStorages.cpp" />
+    <ClCompile Include="..\..\src\game\TransportSystem.cpp" />
     <ClCompile Include="..\..\src\game\UnitAuraProcHandler.cpp" />
     <ClCompile Include="..\..\src\game\SpellEffects.cpp" />
     <ClCompile Include="..\..\src\game\SpellHandler.cpp" />
@@ -510,6 +511,7 @@
     <ClCompile Include="..\..\src\game\Unit.cpp" />
     <ClCompile Include="..\..\src\game\UpdateData.cpp" />
     <ClCompile Include="..\..\src\game\Vehicle.cpp" />
+    <ClCompile Include="..\..\src\game\VehicleHandler.cpp" />
     <ClCompile Include="..\..\src\game\VoiceChatHandler.cpp" />
     <ClCompile Include="..\..\src\game\WaypointManager.cpp" />
     <ClCompile Include="..\..\src\game\WaypointMovementGenerator.cpp" />
@@ -543,21 +545,21 @@
     <ClInclude Include="..\..\src\game\AuctionHouseBot\AuctionHouseBot.h" />
     <ClInclude Include="..\..\src\game\AuctionHouseMgr.h" />
     <ClInclude Include="..\..\src\game\Bag.h" />
-    <ClInclude Include="..\..\src\game\BattleGround.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundAA.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundAB.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundRB.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundAV.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundBE.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundDS.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundEY.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundIC.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundMgr.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundNA.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundRL.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundRV.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundSA.h" />
-    <ClInclude Include="..\..\src\game\BattleGroundWS.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGround.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAA.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAB.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundRB.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAV.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundBE.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundDS.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundEY.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundIC.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundMgr.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundNA.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundRL.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundRV.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundSA.h" />
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundWS.h" />
     <ClInclude Include="..\..\src\game\Calendar.h" />
     <ClInclude Include="..\..\src\game\Camera.h" />
     <ClInclude Include="..\..\src\game\Cell.h" />
@@ -679,6 +681,7 @@
     <ClInclude Include="..\..\src\game\Totem.h" />
     <ClInclude Include="..\..\src\game\TotemAI.h" />
     <ClInclude Include="..\..\src\game\Transports.h" />
+    <ClInclude Include="..\..\src\game\TransportSystem.h" />
     <ClInclude Include="..\..\src\game\Unit.h" />
     <ClInclude Include="..\..\src\game\UnitEvents.h" />
     <ClInclude Include="..\..\src\game\UpdateData.h" />

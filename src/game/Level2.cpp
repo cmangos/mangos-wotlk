@@ -4998,9 +4998,9 @@ bool ChatHandler::HandleWaterwalkCommand(char* args)
         return false;
 
     if (value)
-        player->SetMovement(MOVE_WATER_WALK);               // ON
+        player->SetWaterWalk(true);                         // ON
     else
-        player->SetMovement(MOVE_LAND_WALK);                // OFF
+        player->SetWaterWalk(false);                        // OFF
 
     PSendSysMessage(LANG_YOU_SET_WATERWALK, args, GetNameLink(player).c_str());
     if (needReportToTarget(player))
@@ -5343,7 +5343,7 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
     PointsArray pointPath = path.getPath();
     PSendSysMessage("%s's path to %s:", target->GetName(), player->GetName());
     PSendSysMessage("Building %s", useStraightPath ? "StraightPath" : "SmoothPath");
-    PSendSysMessage("length %i type %u", pointPath.size(), path.getPathType());
+    PSendSysMessage("length " SIZEFMTD " type %u", pointPath.size(), path.getPathType());
 
     Vector3 start = path.getStartPosition();
     Vector3 end = path.getEndPosition();

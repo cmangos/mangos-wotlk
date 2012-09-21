@@ -27,7 +27,7 @@
 #include "SpellAuras.h"
 #include "MapManager.h"
 #include "Transports.h"
-#include "BattleGround.h"
+#include "BattleGround/BattleGround.h"
 #include "WaypointMovementGenerator.h"
 #include "MapPersistentStateMgr.h"
 #include "ObjectMgr.h"
@@ -172,7 +172,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     if (mInstance)
     {
         Difficulty diff = GetPlayer()->GetDifficulty(mEntry->IsRaid());
-        if (MapDifficulty const* mapDiff = GetMapDifficultyData(mEntry->MapID, diff))
+        if (MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mEntry->MapID, diff))
         {
             if (mapDiff->resetTime)
             {
@@ -404,24 +404,6 @@ void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket& recv_data)
     _player->m_movementInfo = mi;
 }
 
-void WorldSession::HandleDismissControlledVehicle(WorldPacket& recv_data)
-{
-    DEBUG_LOG("WORLD: Recvd CMSG_DISMISS_CONTROLLED_VEHICLE");
-    recv_data.hexlike();
-
-    ObjectGuid guid;
-    MovementInfo mi;
-
-    recv_data >> guid.ReadAsPacked();
-    recv_data >> mi;
-
-    ObjectGuid vehicleGUID = _player->GetCharmGuid();
-    if (!vehicleGUID)                                       // something wrong here...
-        return;
-
-    _player->m_movementInfo = mi;
-}
-
 void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvdata*/)
 {
     // DEBUG_LOG("WORLD: Recvd CMSG_MOUNTSPECIAL_ANIM");
@@ -466,6 +448,21 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
     data << movementInfo.GetJumpInfo().xyspeed;
     data << movementInfo.GetJumpInfo().velocity;
     mover->SendMessageToSetExcept(&data, _player);
+}
+
+void WorldSession::SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed)
+{
+    float vsin = sin(angle);
+    float vcos = cos(angle);
+
+    WorldPacket data(SMSG_MOVE_KNOCK_BACK, 9 + 4 + 4 + 4 + 4 + 4);
+    data << GetPlayer()->GetPackGUID();
+    data << uint32(0);                                  // Sequence
+    data << float(vcos);                                // x direction
+    data << float(vsin);                                // y direction
+    data << float(horizontalSpeed);                     // Horizontal speed
+    data << float(-verticalSpeed);                      // Z Movement speed (vertical)
+    SendPacket(&data);
 }
 
 void WorldSession::HandleMoveHoverAck(WorldPacket& recv_data)
@@ -575,8 +572,7 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
 
         if (movementInfo.GetPos()->z < -500.0f)
         {
-            if (plMover->InBattleGround()
-                    && plMover->GetBattleGround()
+            if (plMover->GetBattleGround()
                     && plMover->GetBattleGround()->HandlePlayerUnderMap(_player))
             {
                 // do nothing, the handle already did if returned true

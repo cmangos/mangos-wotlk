@@ -27,7 +27,7 @@
 #include "Util.h"
 #include "WorldPacket.h"
 #include "MapManager.h"
-#include "DBCStores.h"                                      // TODO REMOVE this when graveyard handling for pvp is updated
+#include "DBCStores.h"                                   // TODO REMOVE this when graveyard handling for pvp is updated
 
 BattleGroundAB::BattleGroundAB()
 {
@@ -113,17 +113,17 @@ void BattleGroundAB::Update(uint32 diff)
             {
                 m_lastTick[team] -= BG_AB_TickIntervals[points];
                 m_TeamScores[team] += BG_AB_TickPoints[points];
-                m_HonorScoreTics[team] += BG_AB_TickPoints[points];
+                m_honorScoreTicks[team] += BG_AB_TickPoints[points];
                 m_ReputationScoreTics[team] += BG_AB_TickPoints[points];
                 if (m_ReputationScoreTics[team] >= m_ReputationTics)
                 {
                     (team == BG_TEAM_ALLIANCE) ? RewardReputationToTeam(509, 10, ALLIANCE) : RewardReputationToTeam(510, 10, HORDE);
                     m_ReputationScoreTics[team] -= m_ReputationTics;
                 }
-                if (m_HonorScoreTics[team] >= m_HonorTics)
+                if (m_honorScoreTicks[team] >= m_honorTicks)
                 {
                     RewardHonorToTeam(GetBonusHonorFromKill(1), (team == BG_TEAM_ALLIANCE) ? ALLIANCE : HORDE);
-                    m_HonorScoreTics[team] -= m_HonorTics;
+                    m_honorScoreTicks[team] -= m_honorTicks;
                 }
                 if (!m_IsInformedNearVictory && m_TeamScores[team] > BG_AB_WARNING_NEAR_VICTORY_SCORE)
                 {
@@ -177,7 +177,7 @@ void BattleGroundAB::StartingEventOpenDoors()
     OpenDoorEvent(BG_EVENT_DOOR);
 
     // Players that join battleground after start are not eligible to get achievement.
-    StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, BG_AB_EVENT_START_BATTLE);
+    StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, AB_EVENT_START_BATTLE);
 }
 
 void BattleGroundAB::AddPlayer(Player* plr)
@@ -463,17 +463,17 @@ void BattleGroundAB::Reset()
 
     for (uint8 i = 0; i < BG_TEAMS_COUNT; ++i)
     {
-        m_TeamScores[i]          = 0;
-        m_lastTick[i]            = 0;
-        m_HonorScoreTics[i]      = 0;
+        m_TeamScores[i] = 0;
+        m_lastTick[i] = 0;
+        m_honorScoreTicks[i] = 0;
         m_ReputationScoreTics[i] = 0;
         m_TeamScores500Disadvantage[i] = false;
     }
 
-    m_IsInformedNearVictory                 = false;
+    m_IsInformedNearVictory = false;
     bool isBGWeekend = BattleGroundMgr::IsBGWeekend(GetTypeID());
-    m_HonorTics = (isBGWeekend) ? BG_AB_ABBGWeekendHonorTicks : BG_AB_NotABBGWeekendHonorTicks;
-    m_ReputationTics = (isBGWeekend) ? BG_AB_ABBGWeekendReputationTicks : BG_AB_NotABBGWeekendReputationTicks;
+    m_honorTicks = isBGWeekend ? AB_WEEKEND_HONOR_INTERVAL : AB_NORMAL_HONOR_INTERVAL;
+    m_ReputationTics = isBGWeekend ? AB_WEEKEND_REPUTATION_INTERVAL : AB_NORMAL_REPUTATION_INTERVAL;
 
     for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
     {
@@ -563,11 +563,10 @@ void BattleGroundAB::UpdatePlayerScore(Player* source, uint32 type, uint32 value
 
 bool BattleGroundAB::IsAllNodesControlledByTeam(Team team) const
 {
-    uint8 count = 0;
     for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
-        if ((team == ALLIANCE && m_Nodes[i] == BG_AB_NODE_STATUS_ALLY_OCCUPIED) ||
-                (team == HORDE    && m_Nodes[i] == BG_AB_NODE_STATUS_HORDE_OCCUPIED))
-            ++count;
+        if ((team == ALLIANCE && m_Nodes[i] != BG_AB_NODE_STATUS_ALLY_OCCUPIED) ||
+                (team == HORDE && m_Nodes[i] != BG_AB_NODE_STATUS_HORDE_OCCUPIED))
+            return false;
 
-    return count == BG_AB_NODES_MAX;
+    return true;
 }

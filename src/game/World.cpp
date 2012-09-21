@@ -49,7 +49,7 @@
 #include "ScriptMgr.h"
 #include "CreatureAIRegistry.h"
 #include "Policies/SingletonImp.h"
-#include "BattleGroundMgr.h"
+#include "BattleGround/BattleGroundMgr.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "TemporarySummon.h"
 #include "VMapFactory.h"
@@ -139,6 +139,14 @@ World::~World()
     MMAP::MMapFactory::clear();
 
     // TODO free addSessQueue
+}
+
+/// Cleanups before world stop
+void World::CleanupsBeforeStop()
+{
+    KickAll();                                       // save and kick all players
+    UpdateSessions(1);                               // real players unload required UpdateSessions call
+    sBattleGroundMgr.DeleteAllBattleGrounds();       // unload battleground templates before different singletons destroyed
 }
 
 /// Find a player in a specified zone
@@ -949,7 +957,7 @@ void World::SetInitialWorldSettings()
     // No SQL injection as values are treated as integers
 
     // not send custom type REALM_FFA_PVP to realm list
-    uint32 server_type = IsFFAPvPRealm() ? REALM_TYPE_PVP : getConfig(CONFIG_UINT32_GAME_TYPE);
+    uint32 server_type = IsFFAPvPRealm() ? uint32(REALM_TYPE_PVP) : getConfig(CONFIG_UINT32_GAME_TYPE);
     uint32 realm_zone = getConfig(CONFIG_UINT32_REALM_ZONE);
     LoginDatabase.PExecute("UPDATE realmlist SET icon = %u, timezone = %u WHERE id = '%u'", server_type, realm_zone, realmID);
 

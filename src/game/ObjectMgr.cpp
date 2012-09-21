@@ -139,15 +139,14 @@ template uint32 IdGenerator<uint32>::Generate();
 template uint64 IdGenerator<uint64>::Generate();
 
 ObjectMgr::ObjectMgr() :
-    m_FirstTemporaryCreatureGuid(1),
-    m_FirstTemporaryGameObjectGuid(1),
-
     m_ArenaTeamIds("Arena team ids"),
     m_AuctionIds("Auction ids"),
     m_EquipmentSetIds("Equipment set ids"),
     m_GuildIds("Guild ids"),
     m_MailIds("Mail ids"),
-    m_PetNumbers("Pet numbers")
+    m_PetNumbers("Pet numbers"),
+    m_FirstTemporaryCreatureGuid(1),
+    m_FirstTemporaryGameObjectGuid(1)
 {
     // Only zero condition left, others will be added while loading DB tables
     mConditions.resize(1);
@@ -289,7 +288,7 @@ void ObjectMgr::LoadCreatureLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu creature locale strings", (unsigned long)mCreatureLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " creature locale strings", mCreatureLocaleMap.size());
 }
 
 void ObjectMgr::LoadGossipMenuItemsLocales()
@@ -380,7 +379,7 @@ void ObjectMgr::LoadGossipMenuItemsLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu gossip_menu_option locale strings", (unsigned long)mGossipMenuItemsLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " gossip_menu_option locale strings", mGossipMenuItemsLocaleMap.size());
 }
 
 void ObjectMgr::LoadPointOfInterestLocales()
@@ -1345,7 +1344,7 @@ void ObjectMgr::LoadCreatures()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu creatures", (unsigned long)mCreatureDataMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " creatures", mCreatureDataMap.size());
 }
 
 void ObjectMgr::AddCreatureToGrid(uint32 guid, CreatureData const* data)
@@ -1540,7 +1539,7 @@ void ObjectMgr::LoadGameObjects()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu gameobjects", (unsigned long)mGameObjectDataMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " gameobjects", mGameObjectDataMap.size());
 }
 
 void ObjectMgr::LoadGameObjectAddon()
@@ -1767,7 +1766,7 @@ void ObjectMgr::LoadItemLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu Item locale strings", (unsigned long)mItemLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " Item locale strings", mItemLocaleMap.size());
 }
 
 struct SQLItemLoader : public SQLStorageLoaderBase<SQLItemLoader>
@@ -4311,7 +4310,7 @@ void ObjectMgr::LoadQuests()
     }
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu quests definitions", (unsigned long)mQuestTemplates.size());
+    sLog.outString(">> Loaded " SIZEFMTD " quests definitions", mQuestTemplates.size());
 }
 
 void ObjectMgr::LoadQuestLocales()
@@ -4466,7 +4465,7 @@ void ObjectMgr::LoadQuestLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu Quest locale strings", (unsigned long)mQuestLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " Quest locale strings", mQuestLocaleMap.size());
 }
 
 void ObjectMgr::LoadPageTexts()
@@ -4569,7 +4568,7 @@ void ObjectMgr::LoadPageTextLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu PageText locale strings", (unsigned long)mPageTextLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " PageText locale strings", mPageTextLocaleMap.size());
 }
 
 void ObjectMgr::LoadInstanceEncounters()
@@ -4643,7 +4642,7 @@ void ObjectMgr::LoadInstanceEncounters()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu Instance Encounters", (unsigned long)m_DungeonEncounters.size());
+    sLog.outString(">> Loaded " SIZEFMTD " Instance Encounters", m_DungeonEncounters.size());
 }
 
 struct SQLInstanceLoader : public SQLStorageLoaderBase<SQLInstanceLoader>
@@ -4688,7 +4687,7 @@ void ObjectMgr::LoadInstanceTemplate()
             if (!parentEntry)
             {
                 sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: bad parent map id %u for instance template %d template!",
-                                parentEntry->MapID, temp->map);
+                                temp->parent, temp->map);
                 const_cast<InstanceTemplate*>(temp)->parent = 0;
                 continue;
             }
@@ -4916,7 +4915,7 @@ void ObjectMgr::LoadGossipTextLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu NpcText locale strings", (unsigned long)mNpcTextLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " NpcText locale strings", mNpcTextLocaleMap.size());
 }
 
 // not very fast function but it is called only once a day, or on starting-up
@@ -5481,8 +5480,8 @@ void ObjectMgr::LoadAreaTriggerTeleports()
 
     uint32 count = 0;
 
-    //                                                0   1               2              3               4           5            6                    7                           8                     9           10                 11                 12                 13
-    QueryResult* result = WorldDatabase.Query("SELECT id, required_level, required_item, required_item2, heroic_key, heroic_key2, required_quest_done, required_quest_done_heroic, required_failed_text, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM areatrigger_teleport");
+    //                                                0   1               2              3               4           5            6                    7                           8           9                  10                 11                 12
+    QueryResult* result = WorldDatabase.Query("SELECT id, required_level, required_item, required_item2, heroic_key, heroic_key2, required_quest_done, required_quest_done_heroic, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM areatrigger_teleport");
     if (!result)
     {
 
@@ -5516,12 +5515,11 @@ void ObjectMgr::LoadAreaTriggerTeleports()
         at.heroicKey2           = fields[5].GetUInt32();
         at.requiredQuest        = fields[6].GetUInt32();
         at.requiredQuestHeroic  = fields[7].GetUInt32();
-        at.requiredFailedText   = fields[8].GetCppString();
-        at.target_mapId         = fields[9].GetUInt32();
-        at.target_X             = fields[10].GetFloat();
-        at.target_Y             = fields[11].GetFloat();
-        at.target_Z             = fields[12].GetFloat();
-        at.target_Orientation   = fields[13].GetFloat();
+        at.target_mapId         = fields[8].GetUInt32();
+        at.target_X             = fields[9].GetFloat();
+        at.target_Y             = fields[10].GetFloat();
+        at.target_Z             = fields[11].GetFloat();
+        at.target_Orientation   = fields[12].GetFloat();
 
         AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
         if (!atEntry)
@@ -5623,16 +5621,39 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 map_id) const
     if (!mapEntry || mapEntry->ghost_entrance_map < 0)
         return NULL;
 
+    // Try to find one that teleports to the map we want to enter
+    std::list<AreaTrigger const*> ghostTrigger;
+    AreaTrigger const* compareTrigger = NULL;
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
     {
         if (itr->second.target_mapId == uint32(mapEntry->ghost_entrance_map))
         {
-            AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(itr->first);
-            if (atEntry && atEntry->mapid == map_id)
-                return &itr->second;
+            ghostTrigger.push_back(&itr->second);
+            // First run, only consider AreaTrigger that teleport in the proper map
+            if ((!compareTrigger || itr->second.IsLessOrEqualThan(compareTrigger)) && sAreaTriggerStore.LookupEntry(itr->first)->mapid == map_id)
+            {
+                if (itr->second.IsMinimal())
+                    return &itr->second;
+
+                compareTrigger = &itr->second;
+            }
         }
     }
-    return NULL;
+    if (compareTrigger)
+        return compareTrigger;
+
+    // Second attempt: take one fitting
+    for (std::list<AreaTrigger const*>::const_iterator itr = ghostTrigger.begin(); itr != ghostTrigger.end(); ++itr)
+    {
+        if (!compareTrigger || (*itr)->IsLessOrEqualThan(compareTrigger))
+        {
+            if ((*itr)->IsMinimal())
+                return *itr;
+
+            compareTrigger = *itr;
+        }
+    }
+    return compareTrigger;
 }
 
 /**
@@ -5640,16 +5661,32 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 map_id) const
  */
 AreaTrigger const* ObjectMgr::GetMapEntranceTrigger(uint32 Map) const
 {
+    AreaTrigger const* compareTrigger = NULL;
+    MapEntry const* mEntry = sMapStore.LookupEntry(Map);
+
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
     {
         if (itr->second.target_mapId == Map)
         {
-            AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(itr->first);
-            if (atEntry)
-                return &itr->second;
+            if (mEntry->Instanceable())
+            {
+                // Remark that IsLessOrEqualThan is no total order, and a->IsLeQ(b) != !b->IsLeQ(a)
+                if (!compareTrigger || compareTrigger->IsLessOrEqualThan(&itr->second))
+                    compareTrigger = &itr->second;
+            }
+            else
+            {
+                if (!compareTrigger || itr->second.IsLessOrEqualThan(compareTrigger))
+                {
+                    if (itr->second.IsMinimal())
+                        return &itr->second;
+
+                    compareTrigger = &itr->second;
+                }
+            }
         }
     }
-    return NULL;
+    return compareTrigger;
 }
 
 void ObjectMgr::PackGroupIds()
@@ -5887,7 +5924,7 @@ void ObjectMgr::LoadGameObjectLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu gameobject locale strings", (unsigned long)mGameObjectLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " gameobject locale strings", mGameObjectLocaleMap.size());
 }
 
 struct SQLGameObjectLoader : public SQLStorageLoaderBase<SQLGameObjectLoader>
@@ -7821,6 +7858,31 @@ bool PlayerCondition::Meets(Player const* player) const
             FactionEntry const* faction = sFactionStore.LookupEntry(m_value1);
             return faction && player->GetReputationMgr().GetRank(faction) <= ReputationRank(m_value2);
         }
+        case CONDITION_COMPLETED_ENCOUNTER:
+        {
+            if (!player->GetMap()->IsDungeon())
+            {
+                sLog.outErrorDb("CONDITION_COMPLETED_ENCOUNTER (entry %u) is used outside of a dungeon (on Map %u) by %s", m_entry, player->GetMapId(), player->GetGuidStr().c_str());
+                return false;
+            }
+
+            uint32 completedEncounterMask = ((DungeonMap*)player->GetMap())->GetPersistanceState()->GetCompletedEncountersMask();
+            DungeonEncounterEntry const* dbcEntry1 = sDungeonEncounterStore.LookupEntry(m_value1);
+            DungeonEncounterEntry const* dbcEntry2 = sDungeonEncounterStore.LookupEntry(m_value2);
+            // Check that on proper map
+            if (dbcEntry1->mapId != player->GetMapId())
+            {
+                sLog.outErrorDb("CONDITION_COMPLETED_ENCOUNTER (entry %u, DungeonEncounterEntry %u) is used on wrong map (used on Map %u) by %s", m_entry, m_value1, player->GetMapId(), player->GetGuidStr().c_str());
+                return false;
+            }
+            // Select matching difficulties
+            if (player->GetDifficulty(player->GetMap()->IsRaid()) != Difficulty(dbcEntry1->Difficulty))
+                dbcEntry1 = NULL;
+            if (dbcEntry2 && player->GetDifficulty(player->GetMap()->IsRaid()) != Difficulty(dbcEntry2->Difficulty))
+                dbcEntry2 = NULL;
+
+            return completedEncounterMask & ((dbcEntry1 ? 1 << dbcEntry1->encounterIndex : 0) | (dbcEntry2 ? 1 << dbcEntry2->encounterIndex : 0));
+        }
         default:
             return false;
     }
@@ -8128,7 +8190,7 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
 
             if (bounds.first == bounds.second)
             {
-                sLog.outErrorDb("Learnable ability conditon (entry %u, type %u) has spell id %u defined, but this spell is not listed in SkillLineAbility and can not be used, skipping.", entry, condition, value1);
+                sLog.outErrorDb("Learnable ability condition (entry %u, type %u) has spell id %u defined, but this spell is not listed in SkillLineAbility and can not be used, skipping.", entry, condition, value1);
                 return false;
             }
 
@@ -8137,11 +8199,32 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
                 ItemPrototype const* proto = ObjectMgr::GetItemPrototype(value2);
                 if (!proto)
                 {
-                    sLog.outErrorDb("Learnable ability conditon (entry %u, type %u) has item entry %u defined but item does not exist, skipping.", entry, condition, value2);
+                    sLog.outErrorDb("Learnable ability condition (entry %u, type %u) has item entry %u defined but item does not exist, skipping.", entry, condition, value2);
                     return false;
                 }
             }
 
+            break;
+        }
+        case CONDITION_COMPLETED_ENCOUNTER:
+        {
+            DungeonEncounterEntry const* dbcEntry1 = sDungeonEncounterStore.LookupEntry(value1);
+            DungeonEncounterEntry const* dbcEntry2 = sDungeonEncounterStore.LookupEntry(value2);
+            if (!dbcEntry1)
+            {
+                sLog.outErrorDb("Completed Encounter condition (entry %u, type %u) has an unknown DungeonEncounter entry %u defined (in value1), skipping.", entry, condition, value1);
+                return false;
+            }
+            if (value2 && !dbcEntry2)
+            {
+                sLog.outErrorDb("Completed Encounter condition (entry %u, type %u) has an unknown DungeonEncounter entry %u defined (in value2), skipping.", entry, condition, value2);
+                return false;
+            }
+            if (dbcEntry2 && dbcEntry1->mapId != dbcEntry2->mapId)
+            {
+                sLog.outErrorDb("Completed Encounter condition (entry %u, type %u) has different mapIds for both encounters, skipping.", entry, condition);
+                return false;
+            }
             break;
         }
         case CONDITION_NONE:

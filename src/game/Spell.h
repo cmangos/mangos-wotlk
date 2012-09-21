@@ -142,24 +142,29 @@ class SpellCastTargets
             return *this;
         }
 
+        void setUnitTarget(Unit* target);
         ObjectGuid getUnitTargetGuid() const { return m_unitTargetGUID; }
         Unit* getUnitTarget() const { return m_unitTarget; }
-        void setUnitTarget(Unit* target);
+
         void setDestination(float x, float y, float z);
         void setSource(float x, float y, float z);
+        void getDestination(float& x, float& y, float& z) const { x = m_destX; y = m_destY; z = m_destZ; }
+        void getSource(float& x, float& y, float& z) const { x = m_srcX; y = m_srcY, z = m_srcZ; }
 
+        void setGOTarget(GameObject* target);
         ObjectGuid getGOTargetGuid() const { return m_GOTargetGUID; }
         GameObject* getGOTarget() const { return m_GOTarget; }
-        void setGOTarget(GameObject* target);
 
-        ObjectGuid getCorpseTargetGuid() const { return m_CorpseTargetGUID; }
         void setCorpseTarget(Corpse* corpse);
+        ObjectGuid getCorpseTargetGuid() const { return m_CorpseTargetGUID; }
 
+        void setItemTarget(Item* item);
         ObjectGuid getItemTargetGuid() const { return m_itemTargetGUID; }
         Item* getItemTarget() const { return m_itemTarget; }
         uint32 getItemTargetEntry() const { return m_itemTargetEntry; }
-        void setItemTarget(Item* item);
+
         void setTradeItemTarget(Player* caster);
+
         void updateTradeSlotItem()
         {
             if (m_itemTarget && (m_targetMask & TARGET_FLAG_TRADE_ITEM))
@@ -178,6 +183,7 @@ class SpellCastTargets
         std::string m_strTarget;
 
         uint32 m_targetMask;
+
     private:
         // objects (can be used at spell creating and after Update at casting
         Unit* m_unitTarget;
@@ -352,6 +358,7 @@ class Spell
         void EffectSpecCount(SpellEffectIndex eff_idx);
         void EffectActivateSpec(SpellEffectIndex eff_idx);
         void EffectCancelAura(SpellEffectIndex eff_idx);
+        void EffectKnockBackFromPosition(SpellEffectIndex eff_idx);
 
         Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
         ~Spell();
@@ -421,7 +428,6 @@ class Spell
         void SendChannelUpdate(uint32 time);
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target);
-        void SendPlaySpellVisual(uint32 SpellID);
 
         void HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOTarget, SpellEffectIndex i, float DamageMultiplier = 1.0);
         void HandleThreatSpells();
@@ -754,17 +760,9 @@ namespace MaNGOS
                     break;
                 case PUSH_DEST_CENTER:
                     if (i_spell.m_targets.m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
-                    {
-                        i_centerX = i_spell.m_targets.m_srcX;
-                        i_centerY = i_spell.m_targets.m_srcY;
-                        i_centerZ = i_spell.m_targets.m_srcZ;
-                    }
+                        i_spell.m_targets.getSource(i_centerX, i_centerY, i_centerZ);
                     else
-                    {
-                        i_centerX = i_spell.m_targets.m_destX;
-                        i_centerY = i_spell.m_targets.m_destY;
-                        i_centerZ = i_spell.m_targets.m_destZ;
-                    }
+                        i_spell.m_targets.getDestination(i_centerX, i_centerY, i_centerZ);
                     break;
                 case PUSH_TARGET_CENTER:
                     if (Unit* target = i_spell.m_targets.getUnitTarget())
