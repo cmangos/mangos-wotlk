@@ -4275,18 +4275,18 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit* target)
     if ((co & ORDERS_PRIMARY))
     {
         m_combatOrder = (CombatOrderType) (((uint32) m_combatOrder & (uint32) ORDERS_SECONDARY) | (uint32) co);
-        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u', primary_target = '%u', pname = '%s' WHERE guid = '%u'", (m_combatOrder & !ORDERS_TEMP), gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
+        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u', primary_target = '%u', pname = '%s' WHERE guid = '%u'", (m_combatOrder & ~ORDERS_TEMP), gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
     }
     else
     {
         m_combatOrder = (CombatOrderType) ((uint32) m_combatOrder | (uint32) co);
-        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u', secondary_target = '%u', sname = '%s' WHERE guid = '%u'", (m_combatOrder & !ORDERS_TEMP), gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
+        CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u', secondary_target = '%u', sname = '%s' WHERE guid = '%u'", (m_combatOrder & ~ORDERS_TEMP), gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
     }
 }
 
 void PlayerbotAI::ClearCombatOrder(CombatOrderType co)
 {
-     m_combatOrder = (CombatOrderType) ((uint32) m_combatOrder | (uint32) !co);
+     m_combatOrder = (CombatOrderType) ((uint32) m_combatOrder & (uint32) ~co);
 
      switch (co)
      {
