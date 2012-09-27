@@ -271,7 +271,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             for(GroupReference* itr = group->GetFirstMember(); itr != NULL; itr=itr->next())
             {
                 Player* player = itr->getSource();
-                if (player && (msg.find("help",0) != -1))
+                if (player && ((msg.find("help",0) != std::string::npos)
+                            || (msg.find("gm",0) != std::string::npos)
+                            || (msg.find("complete",0) != std::string::npos)))
                 {
                     player->GetPlayerbotAI()->HandleCommand(msg, *GetPlayer());
                     GetPlayer()->m_speakTime = 0;

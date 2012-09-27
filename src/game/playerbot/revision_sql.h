@@ -1,1 +1,1 @@
-#define REVISION_DB_PLAYERBOTAI "required_6_playerbotai_combatorders"
+#define REVISION_DB_PLAYERBOTAI "required_7_playerbotai_quest_autocomplete"

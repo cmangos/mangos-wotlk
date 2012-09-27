@@ -1879,6 +1879,7 @@ public:
     void TurnInQuests(WorldObject *questgiver);
     void ListQuests(WorldObject* questgiver);
     bool AddQuest(const uint32 entry, WorldObject* questgiver);
+    void MakeQuestLink(Quest const* quest, std::ostringstream &out);
 
     bool IsInCombat();
     bool IsGroupInCombat();

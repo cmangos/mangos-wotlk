@@ -12,7 +12,7 @@
 DROP TABLE IF EXISTS `playerbotai_db_version`;
 CREATE TABLE `playerbotai_db_version` (
   `version` varchar(120) default NULL,
-  `required_6_playerbotai_combatorders` bit(1) default NULL
+  `required_7_playerbotai_quest_autocomplete` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -206,3 +206,12 @@ CREATE TABLE `playerbot_saved_data` (
   `autoequip` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Persistent Playerbot settings per alt';
+
+-- ----------------------------
+-- Table structure for `playerbot_quest_data`
+-- ----------------------------
+DROP TABLE IF EXISTS `playerbot_quest_data`;
+CREATE TABLE `playerbot_quest_data` (
+  `autocomplete` mediumint(8) unsigned NOT NULL,
+  PRIMARY KEY (`autocomplete`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

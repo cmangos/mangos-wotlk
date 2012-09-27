@@ -64,7 +64,6 @@ m_TimeDoneEating(0), m_TimeDoneDrinking(0),
 m_CurrentlyCastingSpellId(0), m_spellIdCommand(0),
 m_targetGuidCommand(ObjectGuid()),
 m_taxiMaster(ObjectGuid()),
-m_AutoEquipToggle(false),
 m_bDebugCommandChat(false)
 {
     // set bot state
@@ -98,6 +97,7 @@ m_bDebugCommandChat(false)
     SetQuestNeedCreatures();
 
     // start following master (will also teleport bot to master)
+    m_AutoEquipToggle = false;
     m_FollowAutoGo = FOLLOWAUTOGO_OFF; //turn on bot auto follow distance can be turned off by player
     DistOverRide = 0; //set initial adjustable follow settings
     IsUpOrDown = 0;
@@ -415,14 +415,8 @@ void PlayerbotAI::SendNotEquipList(Player& /*player*/)
         std::ostringstream out;
         out << descr[equipSlot] << ": ";
         for (std::list<Item*>::iterator it = itemListForEqSlot->begin(); it != itemListForEqSlot->end(); ++it)
-        {
             if ((*it))
                 MakeItemLink((*it), out, true);
-            //const ItemPrototype* const pItemProto = (*it)->GetProto();
-            //std::string itemName = pItemProto->Name1;
-            //ItemLocalization(itemName, pItemProto->ItemId);
-            //out << " |cffffffff|Hitem:" << pItemProto->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
-        }
         ch.SendSysMessage(out.str().c_str());
 
         delete itemListForEqSlot; // delete list of Item*
@@ -2066,11 +2060,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 {
                     const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
                     if (pBag)
-                        // Very cool, but unnecessary
-                        //const ItemPrototype* const pBagProto = pBag->GetProto();
-                        //std::string bagName = pBagProto->Name1;
-                        //ItemLocalization(bagName, pBagProto->ItemId);
-
                         for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
                         {
                             const Item* const pItem = m_bot->GetItemByPos(bag, slot);
@@ -3824,8 +3813,6 @@ void PlayerbotAI::TurnInQuests(WorldObject *questgiver)
             Quest const* pQuest = sObjectMgr.GetQuestTemplate(questID);
 
             std::ostringstream out;
-            std::string questTitle  = pQuest->GetTitle();
-            QuestLocalization(questTitle, questID);
 
             QuestStatus status = m_bot->GetQuestStatus(questID);
 
@@ -3841,62 +3828,52 @@ void PlayerbotAI::TurnInQuests(WorldObject *questgiver)
                         if (m_bot->CanRewardQuest(pQuest, false))
                         {
                             m_bot->RewardQuest(pQuest, 0, questgiver, false);
-                            out << "Quest complete: |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
+                            out << "Quest complete: ";
                         }
                         else
-                            out << "|cffff0000Unable to turn quest in:|r |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
+                            out << "|cffff0000Unable to turn quest in:|r ";
+                        MakeQuestLink(pQuest,out);
                     }
-
                     // auto reward quest if one item as reward
                     else if (pQuest->GetRewChoiceItemsCount() == 1)
                     {
                         int rewardIdx = 0;
                         ItemPrototype const *pRewardItem = sObjectMgr.GetItemPrototype(pQuest->RewChoiceItemId[rewardIdx]);
-                        std::string itemName = pRewardItem->Name1;
-                        ItemLocalization(itemName, pRewardItem->ItemId);
                         if (m_bot->CanRewardQuest(pQuest, rewardIdx, false))
                         {
                             m_bot->RewardQuest(pQuest, rewardIdx, questgiver, true);
-
-                            std::string itemName = pRewardItem->Name1;
-                            ItemLocalization(itemName, pRewardItem->ItemId);
-
-                            out << "Quest complete: "
-                                << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel()
-                                << "|h[" << questTitle << "]|h|r reward: |cffffffff|Hitem:"
-                                << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
+                            out << "Quest complete: ";
+                            MakeQuestLink(pQuest,out);
                         }
                         else
-                            out << "|cffff0000Unable to turn quest in:|r "
-                            << "|cff808080|Hquest:" << questID << ':'
-                            << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r"
-                            << " reward: |cffffffff|Hitem:"
-                            << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
+                            out << "|cffff0000Unable to turn quest in:|r ";
+                            MakeQuestLink(pQuest,out);
+                        out << " reward: ";
+                        MakeItemLink(pRewardItem, out);
                     }
-
                     // else multiple rewards - let master pick
                     else
                     {
-                        out << "What reward should I take for |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel()
-                            << "|h[" << questTitle << "]|h|r? ";
+                        out << "What reward should I take for ";
+                        MakeQuestLink(pQuest,out);
                         for (uint8 i = 0; i < pQuest->GetRewChoiceItemsCount(); ++i)
                         {
                             ItemPrototype const * const pRewardItem = sObjectMgr.GetItemPrototype(pQuest->RewChoiceItemId[i]);
-                            std::string itemName = pRewardItem->Name1;
-                            ItemLocalization(itemName, pRewardItem->ItemId);
-                            out << "|cffffffff|Hitem:" << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
+                            MakeItemLink(pRewardItem, out);
                         }
                     }
                 }
             }
-
             else if (status == QUEST_STATUS_INCOMPLETE)
-                out << "|cffff0000Quest incomplete:|r "
-                << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
-
+            {
+                out << "|cffff0000Quest incomplete:|r ";
+                MakeQuestLink(pQuest,out);
+            }
             else if (status == QUEST_STATUS_AVAILABLE)
-                out << "|cff00ff00Quest available:|r "
-                << " |cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
+            {
+                out << "|cff00ff00Quest available:|r ";
+                MakeQuestLink(pQuest,out);
+            }
 
             if (!out.str().empty())
                 TellMaster(out.str());
@@ -6343,6 +6320,14 @@ void PlayerbotAI::extractQuestIds(const std::string& text, std::list<uint32>& qu
     }
 }
 
+// Build an hlink for Quests in Yellow
+void PlayerbotAI::MakeQuestLink(Quest const* quest, std::ostringstream &out)
+{
+    std::string questTitle = quest->GetTitle();
+    QuestLocalization(questTitle, quest->GetQuestId());
+    out << "|cFFEFFD00|Hquest:" << quest->GetQuestId() << ':' << quest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
+}
+
 // Build an hlink for Weapon skills in Aqua
 void PlayerbotAI::MakeWeaponSkillLink(const SpellEntry *sInfo, std::ostringstream &out, uint32 skillid)
 {
@@ -7754,14 +7739,11 @@ void PlayerbotAI::ListQuests(WorldObject * questgiver)
         uint32 questID = qItem.m_qId;
         Quest const* pQuest = sObjectMgr.GetQuestTemplate(questID);
 
-        std::string questTitle  = pQuest->GetTitle();
-        QuestLocalization(questTitle, questID);
-
         if (m_bot->SatisfyQuestStatus(pQuest, false))
         {
             if (gQuestFetch != 1)
             {
-                out << "|cff808080|Hquest:" << questID << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
+                MakeQuestLink(pQuest,out);
             }
             else
             {
@@ -7807,10 +7789,8 @@ bool PlayerbotAI::AddQuest(const uint32 entry, WorldObject * questgiver)
     {
         m_bot->AddQuest(qInfo, questgiver);
 
-        std::string questTitle  = qInfo->GetTitle();
-        QuestLocalization(questTitle, entry);
-
-        out << "|cffffff00Quest taken " << "|cff808080|Hquest:" << entry << ':' << qInfo->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
+        out << "|cffffff00Quest taken ";
+        MakeQuestLink(qInfo,out);
 
         if (m_bot->CanCompleteQuest(entry))
             m_bot->CompleteQuest(entry);
@@ -8142,11 +8122,11 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     m_tasks.unique();
     m_findNPC.unique();
 
-    if (m_bDebugCommandChat)
-    {
+//    if (m_bDebugCommandChat)
+//    {
         DEBUG_LOG("chat(%s)",text.c_str());
-        TellMaster(text);
-    }
+//        TellMaster(text);
+//    }
 
     // ignore any messages from Addons
     if (text.empty()                                   ||
@@ -8340,13 +8320,11 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                         {
                             m_bot->RewardQuest(pQuest, rewardIdx, pNpc, false);
 
-                            std::string questTitle  = pQuest->GetTitle();
-                            m_bot->GetPlayerbotAI()->QuestLocalization(questTitle, questID);
                             std::string itemName = pRewardItem->Name1;
                             m_bot->GetPlayerbotAI()->ItemLocalization(itemName, pRewardItem->ItemId);
 
                             std::ostringstream out;
-                            out << "|cffffffff|Hitem:" << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r rewarded";
+                            MakeItemLink(pRewardItem, out);
                             SendWhisper(out.str(), fromPlayer);
                             wasRewarded = true;
                         }
@@ -10050,6 +10028,112 @@ void PlayerbotAI::_HandleCommandQuest(std::string &text, Player &fromPlayer)
         m_tasks.push_back(std::pair<enum TaskFlags, uint32>(END_QUEST, 0));
         m_findNPC.push_back(UNIT_NPC_FLAG_QUESTGIVER);
     }
+    else if (ExtractCommand("complete", text))
+    {
+        ChatHandler ch(&fromPlayer);
+
+        std::list<uint32> questIds;
+        extractQuestIds(text, questIds);
+
+        for (std::list<uint32>::iterator it = questIds.begin(); it != questIds.end(); it++)
+        {
+            uint32 entry = *it;
+
+            Quest const* pQuest = sObjectMgr.GetQuestTemplate(entry);
+            if (!pQuest)
+                continue;
+
+            // Compare quest entry from [Quest Link] with quest ids listed DB table
+            // if found the quest is autocompleted
+            QueryResult *result = CharacterDatabase.PQuery("SELECT * FROM playerbot_quest_data WHERE autocomplete='%u'",entry);
+            if (!result)
+            {
+                MakeQuestLink(pQuest, msg);
+                msg << " can't be autocompleted\n";
+                continue;
+            }
+            else
+            {
+                Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
+                for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+                {
+                    Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
+
+                    // If bot doesn't have the quest
+                    if (groupMember->GetQuestStatus(entry) == QUEST_STATUS_NONE)
+                    {
+                        msg << "|cFFD569CE[|r" << groupMember->GetName() << "|cFFD569CE]|r doesn't have that quest\n";
+                        continue;
+                    }
+
+                    // Add quest items for quests that require items
+                    for(uint8 x = 0; x < QUEST_ITEM_OBJECTIVES_COUNT; ++x)
+                    {
+                        uint32 id = pQuest->ReqItemId[x];
+                        uint32 count = pQuest->ReqItemCount[x];
+                        if (!id || !count)
+                            continue;
+
+                        uint32 curItemCount = groupMember->GetItemCount(id,true);
+
+                        ItemPosCountVec dest;
+                        uint8 res = groupMember->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, id, count - curItemCount );
+                        if (res == EQUIP_ERR_OK)
+                        {
+                            Item* item = groupMember->StoreNewItem( dest, id, true);
+                            groupMember->SendNewItem(item,count-curItemCount, true, false);
+                        }
+                    }
+
+                    // All creature/GO slain/casted (not required, but otherwise it will display "Creature slain 0/10")
+                    for(uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+                    {
+                        int32 creature = pQuest->ReqCreatureOrGOId[i];
+                        uint32 creaturecount = pQuest->ReqCreatureOrGOCount[i];
+
+                        if (uint32 spell_id = pQuest->ReqSpell[i])
+                        {
+                            for(uint16 z = 0; z < creaturecount; ++z)
+                                groupMember->CastedCreatureOrGO(creature, ObjectGuid(), spell_id);
+                        }
+                        else if (creature > 0)
+                        {
+                            if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature))
+                                for(uint16 z = 0; z < creaturecount; ++z)
+                                    groupMember->KilledMonster(cInfo, ObjectGuid());
+                        }
+                        else if (creature < 0)
+                        {
+                            for(uint16 z = 0; z < creaturecount; ++z)
+                                groupMember->CastedCreatureOrGO(-creature, ObjectGuid(), 0);
+                        }
+                    }
+
+                    // If the quest requires reputation to complete
+                    if(uint32 repFaction = pQuest->GetRepObjectiveFaction())
+                    {
+                        uint32 repValue = pQuest->GetRepObjectiveValue();
+                        uint32 curRep = groupMember->GetReputationMgr().GetReputation(repFaction);
+                        if (curRep < repValue)
+                            if (FactionEntry const *factionEntry = sFactionStore.LookupEntry(repFaction))
+                                groupMember->GetReputationMgr().SetReputation(factionEntry,repValue);
+                    }
+
+                    // If the quest requires money
+                    int32 ReqOrRewMoney = pQuest->GetRewOrReqMoney();
+                    if (ReqOrRewMoney < 0)
+                        groupMember->ModifyMoney(-ReqOrRewMoney);
+
+                    groupMember->CompleteQuest(entry);
+                    msg << "|cFFD569CE[|r" << groupMember->GetName() << "|cFFD569CE]|r completed quest ";
+                    MakeQuestLink(pQuest, msg);
+                    msg << "\n";
+                }
+                delete result;
+            }
+        }
+        ch.SendSysMessage(msg.str().c_str());
+    }
     else
     {
         bool hasIncompleteQuests = false;
@@ -10064,21 +10148,22 @@ void PlayerbotAI::_HandleCommandQuest(std::string &text, Player &fromPlayer)
             {
                 Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
 
-                std::string questTitle  = pQuest->GetTitle();
-                m_bot->GetPlayerbotAI()->QuestLocalization(questTitle, questId);
-
                 if (m_bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE)
                 {
                     hasCompleteQuests = true;
-                    comout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
+                    MakeQuestLink(pQuest, comout);
                 }
                 else
                 {
                     Item* qitem = FindItem(pQuest->GetSrcItemId());
                     if (qitem)
-                        incomout << " use " << "|cffffffff|Hitem:" << qitem->GetProto()->ItemId << ":0:0:0:0:0:0:0" << "|h[" << qitem->GetProto()->Name1 << "]|h|r" << " on ";
+                    {
+                        incomout << " use ";
+                        MakeItemLink(qitem->GetProto(), incomout);
+                        incomout << " on ";
+                    }
                     hasIncompleteQuests = true;
-                    incomout << " |cFFFFFF00|Hquest:" << questId << ':' << pQuest->GetQuestLevel() << "|h[" <<  questTitle << "]|h|r";
+                    MakeQuestLink(pQuest, incomout);
                 }
             }
         }
@@ -10806,6 +10891,85 @@ void PlayerbotAI::_HandleCommandGM(std::string &text, Player &fromPlayer)
         SendWhisper("gm must have a subcommand.", fromPlayer);
         return;
     }
+    else if (ExtractCommand("quest", text))
+    {
+        std::ostringstream out;
+        ChatHandler ch(&fromPlayer);
+
+        size_t add = text.find("add");
+        size_t del = text.find("del");
+
+/*        if ((add != std::string::npos) && (add != std::string::npos))
+        {
+            SendWhisper("can't add & delete at the same time", fromPlayer);
+            return;
+        }
+*/
+        std::list<uint32> questIds;
+        extractQuestIds(text, questIds);
+
+        for (std::list<uint32>::iterator it = questIds.begin(); it != questIds.end(); it++)
+        {
+
+            uint32 entry = *it;
+
+            Quest const* pQuest = sObjectMgr.GetQuestTemplate(entry);
+
+            if(!pQuest)
+            {
+                out << "quest [" << entry << "] not found\n";
+                continue;
+            }
+
+            //check whether entry is already in database
+            QueryResult* result = CharacterDatabase.PQuery("SELECT * FROM playerbot_quest_data WHERE autocomplete='%u'",entry );
+
+            if (add != std::string::npos)
+            {
+                if(!result)
+                {
+                    // add new entry
+                    out << "adding quest ";
+                    MakeQuestLink(pQuest, out);
+                    out << " to table\n";
+                    CharacterDatabase.DirectPExecute("INSERT INTO playerbot_quest_data (autocomplete) VALUES('%u')",entry);
+                }
+                else
+                {
+                    // entry found in table
+                    MakeQuestLink(pQuest, out);
+                    out << " already in table\n";
+                    delete result;
+                    continue;
+                }
+            }
+            else if (del != std::string::npos)
+            {
+                if(result)
+                {
+                    // delete entry
+                    out << "deleting ";
+                    MakeQuestLink(pQuest, out);
+                    out << " from table\n";
+                    CharacterDatabase.DirectPExecute("DELETE FROM playerbot_quest_data WHERE autocomplete='%u'",entry);
+                    delete result;
+                }
+                else
+                {
+                    // entry not found in table
+                    MakeQuestLink(pQuest, out);
+                    out << " not in table\n";
+                    continue;
+                }
+            }
+            else
+            {
+                out << "'gm quest' does not have that subcommand.";
+                break;
+            }
+        }
+        ch.SendSysMessage(out.str().c_str());
+    }
     else if (ExtractCommand("check", text))
     {
         if (ExtractCommand("talent", text))
@@ -11101,6 +11265,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             ch.SendSysMessage(_HandleCommandHelpHelper("quest end", "Turns in my completed quests.").c_str());
             ch.SendSysMessage(_HandleCommandHelpHelper("quest list", "Lists the quests offered to me by this target.").c_str());
             ch.SendSysMessage(_HandleCommandHelpHelper("quest report", "This will give you a full report of all the items, creatures or gameobjects I still need to finish my quests.", HL_QUEST).c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("quest complete", "Autocompletes quests, available in database", HL_QUEST, true).c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("add", text, true)) {}
@@ -11108,6 +11273,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             else if (ExtractCommand("end", text, true)) {}
             else if (ExtractCommand("list", text, true)) {}
             else if (ExtractCommand("report", text, true)) {}
+            else if (ExtractCommand("complete", text, true)) {}
 
             if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
@@ -11333,6 +11499,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             ch.SendSysMessage(_HandleCommandHelpHelper("gm check", "Lists the things you can run a check on.").c_str());
             ch.SendSysMessage(_HandleCommandHelpHelper("gm target", "Lists target items that can be monitored.").c_str());
             ch.SendSysMessage(_HandleCommandHelpHelper("gm chat", "Outputs all commands the bot receives - including those it feels it can't obey.").c_str());
+            ch.SendSysMessage(_HandleCommandHelpHelper("gm quest", "Lists options to add/remove quests from database.").c_str());
 
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("check", text))
@@ -11352,12 +11519,17 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
                 if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
                 return;
             }
-            if (ExtractCommand("target", text))
+            else if (ExtractCommand("target", text))
             {
                 ch.SendSysMessage(_HandleCommandHelpHelper("gm target combat", "Lists current attacking targets.").c_str());
                 ch.SendSysMessage(_HandleCommandHelpHelper("gm target loot", "Lists current lootable targets.").c_str());
             }
-            if (ExtractCommand("chat", text)) {}
+            else if (ExtractCommand("quest", text))
+            {
+                ch.SendSysMessage(_HandleCommandHelpHelper("gm quest add", "Add quests to database", HL_QUEST, true).c_str());
+                ch.SendSysMessage(_HandleCommandHelpHelper("gm quest del", "Remove quests from database.", HL_QUEST, true).c_str());
+            }
+            else if (ExtractCommand("chat", text)) {}
 
             if (text != "") ch.SendSysMessage(sInvalidSubcommand.c_str());
             return;
