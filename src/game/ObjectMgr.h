@@ -704,6 +704,7 @@ class ObjectMgr
 
         void LoadNPCSpellClickSpells();
         void LoadSpellTemplate();
+        void LoadCreatureTemplateSpells();
 
         void LoadWeatherZoneChances();
         void LoadGameTele();
