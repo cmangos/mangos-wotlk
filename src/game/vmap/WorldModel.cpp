@@ -348,7 +348,7 @@ namespace VMAP
     {
         GModelRayCallback(const std::vector<MeshTriangle>& tris, const std::vector<Vector3>& vert):
             vertices(vert.begin()), triangles(tris.begin()), hit(false) {}
-        bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool pStopAtFirstHit)
+        bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool /*pStopAtFirstHit*/)
         {
             bool result = IntersectTriangle(triangles[entry], vertices, ray, distance);
             if (result)  hit = true;
@@ -361,7 +361,7 @@ namespace VMAP
 
     bool GroupModel::IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit) const
     {
-        if (!triangles.size())
+        if (triangles.empty())
             return false;
         GModelRayCallback callback(triangles, vertices);
         meshTree.intersectRay(ray, callback, distance, stopAtFirstHit);
@@ -370,7 +370,7 @@ namespace VMAP
 
     bool GroupModel::IsInsideObject(const Vector3& pos, const Vector3& down, float& z_dist) const
     {
-        if (!triangles.size() || !iBound.contains(pos))
+        if (triangles.empty() || !iBound.contains(pos))
             return false;
         GModelRayCallback callback(triangles, vertices);
         Vector3 rPos = pos - 0.1f * down;
@@ -470,7 +470,7 @@ namespace VMAP
 
     bool WorldModel::IntersectPoint(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, AreaInfo& info) const
     {
-        if (!groupModels.size())
+        if (groupModels.empty())
             return false;
         WModelAreaCallback callback(groupModels, down);
         groupTree.intersectPoint(p, callback);
@@ -488,7 +488,7 @@ namespace VMAP
 
     bool WorldModel::GetLocationInfo(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, LocationInfo& info) const
     {
-        if (!groupModels.size())
+        if (groupModels.empty())
             return false;
         WModelAreaCallback callback(groupModels, down);
         groupTree.intersectPoint(p, callback);
@@ -541,7 +541,8 @@ namespace VMAP
             return false;
 
         bool result = true;
-        uint32 chunkSize, count;
+        uint32 chunkSize = 0;
+        uint32 count = 0;
         char chunk[8];                          // Ignore the added magic header
         if (!readChunk(rf, chunk, VMAP_MAGIC, 8)) result = false;
 
