@@ -7111,6 +7111,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     break;
                 }
+                case 30541:                                 // Blaze
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 30542, true);
+                    break;
+                }
                 case 30769:                                 // Pick Red Riding Hood
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
