@@ -21,7 +21,7 @@
 
 const char Achievementfmt[] = "niixssssssssssssssssxxxxxxxxxxxxxxxxxxiixixxxxxxxxxxxxxxxxxxii";
 const char AchievementCriteriafmt[] = "niiiiiiiissssssssssssssssxixiii";
-const char AreaTableEntryfmt[] = "iiinixxxxxissssssssssssssssxixxxxxxx";
+const char AreaTableEntryfmt[] = "iiinixxxxxissssssssssssssssxiiiiixxx";
 const char AreaGroupEntryfmt[] = "niiiiiii";
 const char AreaTriggerEntryfmt[] = "niffffffff";
 const char AuctionHouseEntryfmt[] = "niiixxxxxxxxxxxxxxxxx";
@@ -74,6 +74,7 @@ const char ItemLimitCategoryEntryfmt[] = "nxxxxxxxxxxxxxxxxxii";
 const char ItemRandomPropertiesfmt[] = "nxiiiiissssssssssssssssx";
 const char ItemRandomSuffixfmt[] = "nssssssssssssssssxxiiiiiiiiii";
 const char ItemSetEntryfmt[] = "dssssssssssssssssxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
+const char LiquidTypefmt[] = "nxxixixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char LockEntryfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiixxxxxxxx";
 const char MailTemplateEntryfmt[] = "nxxxxxxxxxxxxxxxxxssssssssssssssssx";
 const char MapEntryfmt[] = "nxixxssssssssssssssssxixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxixiffxixx";
