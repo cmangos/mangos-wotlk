@@ -153,7 +153,9 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             ObjectGuid guid;
             uint32 node_count;
             uint8 delay = 9;
-            p >> guid >> node_count;
+            p >> guid;
+            p.read_skip<uint32>();
+            p >> node_count;
 
             std::vector<uint32> nodes;
             for (uint32 i = 0; i < node_count; ++i)

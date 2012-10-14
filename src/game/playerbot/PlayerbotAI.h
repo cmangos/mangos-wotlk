@@ -1556,9 +1556,8 @@ public:
         BOTSTATE_DEADRELEASED,      // we released as ghost and wait to revive
         BOTSTATE_LOOTING,           // looting mode, used just after combat
         BOTSTATE_FLYING,            // bot is flying
-        BOTSTATE_ENCHANT,           // bot is enchanting
-        BOTSTATE_CRAFT,             // bot is crafting
-        BOTSTATE_TAME               // bot hunter taming
+        BOTSTATE_TAME,              // bot hunter taming
+        BOTSTATE_DELAYED            // bot delay action
     };
 
     enum CollectionFlags
@@ -1583,15 +1582,16 @@ public:
     {
         NONE                        = 0x00,  // do nothing
         SELL_ITEMS                  = 0x01,  // sell items
-        REPAIR_ITEMS                = 0x02,  // repair items
-        ADD_AUCTION                 = 0x03,  // add auction
-        REMOVE_AUCTION              = 0x04,  // remove auction
-        RESET_TALENTS               = 0x05,  // reset all talents
-        BANK_WITHDRAW               = 0x06,  // withdraw item from bank
-        BANK_DEPOSIT                = 0x07,  // deposit item in bank
-        LIST_QUEST                  = 0x08,  // list quests
-        END_QUEST                   = 0x09,  // turn in quests
-        TAKE_QUEST                  = 0x0A   // take quest
+        BUY_ITEMS                   = 0x02,  // buy items
+        REPAIR_ITEMS                = 0x03,  // repair items
+        ADD_AUCTION                 = 0x04,  // add auction
+        REMOVE_AUCTION              = 0x05,  // remove auction
+        RESET_TALENTS               = 0x06,  // reset all talents
+        BANK_WITHDRAW               = 0x07,  // withdraw item from bank
+        BANK_DEPOSIT                = 0x08,  // deposit item in bank
+        LIST_QUEST                  = 0x09,  // list quests
+        END_QUEST                   = 0x0A,  // turn in quests
+        TAKE_QUEST                  = 0x0B   // take quest
     };
 
     enum AnnounceFlags
@@ -1900,6 +1900,8 @@ public:
     CombatOrderType GetCombatOrder() { return this->m_combatOrder; }
     bool IsTank() { return (m_combatOrder & ORDERS_TANK) ? true : false; }
     bool IsHealer() { return (m_combatOrder & ORDERS_HEAL) ? true : false; }
+    bool IsDPS() { return (m_combatOrder & ORDERS_ASSIST) ? true : false; }
+    bool Impulse() { srand ( time(NULL) ); return(((rand() % 100) > 50) ? true : false); }
     void SetMovementOrder(MovementOrderType mo, Unit *followTarget = 0);
     MovementOrderType GetMovementOrder() { return this->m_movementOrder; }
     void MovementReset();
@@ -1916,7 +1918,7 @@ public:
     uint32 GetFreeBagSpace() const;
     void SellGarbage(Player& player, bool listNonTrash = true, bool bDetailTrashSold = false, bool verbose = true);
     void Sell(const uint32 itemid);
-    void Buy(ObjectGuid vendorguid, const uint32 itemid);
+    void Buy(Creature* vendor, const uint32 itemid);
     std::string DropItem(const uint32 itemid);
     void AddAuction(const uint32 itemid, Creature* aCreature);
     void ListAuctions();
@@ -2033,6 +2035,7 @@ private:
     time_t m_TimeDoneEating;
     time_t m_TimeDoneDrinking;
     uint32 m_CurrentlyCastingSpellId;
+    uint32 m_CraftSpellId;
     //bool m_IsFollowingMaster;
 
     // if master commands bot to do something, store here until updateAI
