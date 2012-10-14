@@ -1726,6 +1726,8 @@ public:
     void findNearbyGO();
     // finds nearby creatures, whose UNIT_NPC_FLAGS match the flags specified in item list m_itemIds
     void findNearbyCreature();
+    // finds nearby corpse that is lootable
+    void findNearbyCorpse();
 
     void GiveLevel(uint32 level);
 

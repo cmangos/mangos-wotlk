@@ -3491,6 +3491,13 @@ void PlayerbotAI::DoLoot()
 
     WorldObject *wo = m_bot->GetMap()->GetWorldObject(m_lootCurrent);
 
+    // clear invalid object or object that is too far from master
+    if (!wo || GetMaster()->GetDistance(wo) > float(m_mgr->m_confCollectDistanceMax))
+    {
+        m_lootCurrent = ObjectGuid();
+        return;
+    }
+
     Creature *c = m_bot->GetMap()->GetCreature(m_lootCurrent);
     GameObject *go = m_bot->GetMap()->GetGameObject(m_lootCurrent);
 
@@ -4862,6 +4869,15 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
     if (GetClassAI() && !m_bot->IsMounted())
     {
         GetClassAI()->DoNonCombatActions();
+
+        // have we been told to collect loot after combat
+        if (HasCollectFlag(COLLECT_FLAG_LOOT))
+        {
+            findNearbyCorpse();
+            // start looting if have targets
+            if (!m_lootTargets.empty())
+                SetState(BOTSTATE_LOOTING);
+        }
 
         // have we been told to collect GOs
         if (HasCollectFlag(COLLECT_FLAG_NEAROBJECT))
@@ -6840,6 +6856,42 @@ void PlayerbotAI::findNearbyGO()
             // DEBUG_LOG("ground_z (%f) > INVALID_HEIGHT (%f)",ground_z,INVALID_HEIGHT);
             if ((ground_z > INVALID_HEIGHT) && go->isSpawned())
                 m_lootTargets.push_back(go->GetObjectGuid());
+        }
+    }
+}
+
+void PlayerbotAI::findNearbyCorpse()
+{
+    std::list<Unit*> corpseList;
+    float radius = float(m_mgr->m_confCollectDistance);
+
+    MaNGOS::AnyDeadUnitCheck corpse_check(m_bot);
+    MaNGOS::UnitListSearcher<MaNGOS::AnyDeadUnitCheck> reaper(corpseList, corpse_check);
+    Cell::VisitAllObjects(m_bot, reaper, radius);
+
+    //if (!corpseList.empty())
+    //    TellMaster("Found %i Corpse(s)", corpseList.size());
+
+    for (std::list<Unit*>::const_iterator i = corpseList.begin(); i != corpseList.end(); ++i)
+    {
+        Creature* corpse = (Creature*)*i;
+        if (!corpse)
+            continue;
+
+        if (corpse->IsCorpse() && corpse->IsDespawned())
+            continue;
+
+        // DEBUG_LOG("Creature (%s) Guid (%s)",corpse->GetCreatureInfo()->Name, corpse->GetObjectGuid().GetString().c_str());
+
+        uint32 skillId = 0;
+        if (corpse->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
+            skillId = corpse->GetCreatureInfo()->GetRequiredLootSkill();
+
+        if (corpse->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE) ||
+            (corpse->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE) && m_bot->HasSkill(skillId)))
+        {
+            m_lootTargets.push_back(corpse->GetObjectGuid());
+            m_lootTargets.unique();
         }
     }
 }
