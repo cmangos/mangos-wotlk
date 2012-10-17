@@ -2340,6 +2340,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsPet() && ((Pet*)target)->getPetType() == MINI_PET)
                     targetUnitMap.push_back(target);
             break;
+        case TARGET_CONTROLLED_VEHICLE:
+            if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
+                targetUnitMap.push_back((Unit*)m_caster->GetTransportInfo()->GetTransport());
+            break;
         case TARGET_CASTER_COORDINATES:
         {
             // Check original caster is GO - set its coordinates as src cast
@@ -6125,7 +6129,8 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
 
         Unit* _target = m_targets.getUnitTarget();
 
-        if (_target)                                        // for target dead/target not valid
+        // for target dead/target not valid
+        if (_target && m_targets.m_targetMask & TARGET_FLAG_UNIT)
         {
             if (!_target->isTargetableForAttack())
                 return SPELL_FAILED_BAD_TARGETS;            // guessed error
