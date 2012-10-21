@@ -292,7 +292,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recv_data*/)
                     mapid = corpseMapEntry->ghost_entrance_map;
                     x = corpseMapEntry->ghost_entrance_x;
                     y = corpseMapEntry->ghost_entrance_y;
-                    z = entranceMap->GetHeight(x, y, MAX_HEIGHT);
+                    z = entranceMap->GetHeightStatic(x, y, MAX_HEIGHT);
                 }
             }
         }
