@@ -614,6 +614,7 @@ enum CapturePointSlider
 };
 
 class Unit;
+class GameObjectModel;
 struct GameObjectDisplayInfoEntry;
 
 // 5 sec for bobber catch
@@ -702,20 +703,21 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         GameobjectTypes GetGoType() const { return GameobjectTypes(GetByteValue(GAMEOBJECT_BYTES_1, 1)); }
         void SetGoType(GameobjectTypes type) { SetByteValue(GAMEOBJECT_BYTES_1, 1, type); }
         GOState GetGoState() const { return GOState(GetByteValue(GAMEOBJECT_BYTES_1, 0)); }
-        void SetGoState(GOState state) { SetByteValue(GAMEOBJECT_BYTES_1, 0, state); }
+        void SetGoState(GOState state);
         uint8 GetGoArtKit() const { return GetByteValue(GAMEOBJECT_BYTES_1, 2); }
         void SetGoArtKit(uint8 artkit) { SetByteValue(GAMEOBJECT_BYTES_1, 2, artkit); }
         uint8 GetGoAnimProgress() const { return GetByteValue(GAMEOBJECT_BYTES_1, 3); }
         void SetGoAnimProgress(uint8 animprogress) { SetByteValue(GAMEOBJECT_BYTES_1, 3, animprogress); }
         uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_DISPLAYID); }
         void SetDisplayId(uint32 modelId);
+        void SetPhaseMask(uint32 newPhaseMask, bool update);
 
         float GetObjectBoundingRadius() const override;     // overwrite WorldObject version
 
         void Use(Unit* user);
 
         LootState getLootState() const { return m_lootState; }
-        void SetLootState(LootState s) { m_lootState = s; }
+        void SetLootState(LootState s);
 
         void AddToSkillupList(Player* player);
         bool IsInSkillupList(Player* player) const;
@@ -774,6 +776,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         GridReference<GameObject>& GetGridRef() { return m_gridRef; }
 
+        GameObjectModel* m_model;
+
     protected:
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
@@ -810,7 +814,10 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);
         void TickCapturePoint();
+        void UpdateModel();                                 // updates model in case displayId were changed
+        void UpdateCollisionState() const;                  // updates state in Map's dynamic collision tree
 
         GridReference<GameObject> m_gridRef;
 };
+
 #endif
