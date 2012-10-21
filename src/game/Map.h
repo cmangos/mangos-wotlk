@@ -37,6 +37,7 @@
 #include "Utilities/TypeList.h"
 #include "ScriptMgr.h"
 #include "CreatureLinkingMgr.h"
+#include "vmap/DynamicTree.h"
 
 #include <bitset>
 #include <list>
@@ -265,6 +266,11 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         bool IsInLineOfSight(float srcX, float srcY, float srcZ, float destX, float destY, float destZ);
         bool GetObjectHitPos(float srcX, float srcY, float srcZ, float destX, float destY, float destZ, float& resX, float& resY, float& resZ, float pModifyDist);
 
+        // Object Model insertion/remove/test for dynamic vmaps use
+        void InsertGameObjectModel(const GameObjectModel& mdl);
+        void RemoveGameObjectModel(const GameObjectModel& mdl);
+        bool ContainsGameObjectModel(const GameObjectModel& mdl) const;
+
         // Get Holder for Creature Linking
         CreatureLinkingHolder* GetCreatureLinkingHolder() { return &m_creatureLinkingHolder; }
 
@@ -358,6 +364,9 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
 
         // Holder for information about linked mobs
         CreatureLinkingHolder m_creatureLinkingHolder;
+
+        // Dynamic Map tree object
+        DynamicMapTree m_dyn_tree;
 };
 
 class MANGOS_DLL_SPEC WorldMap : public Map
