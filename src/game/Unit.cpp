@@ -10791,8 +10791,8 @@ void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float vertical
         GetPosition(ox, oy, oz);
         float fx = ox + dis * vcos;
         float fy = oy + dis * vsin;
-        float fz = oz;
-        GetMap()->GetObjectHitPos(ox, oy, oz + 0.5f, fx, fy, oz + 0.5f, fx, fy, fz, -0.5f);
+        float fz = oz + 0.5f;
+        GetMap()->GetHitPosition(ox, oy, oz + 0.5f, fx, fy, fz, GetPhaseMask(), -0.5f);
         UpdateAllowedPositionZ(fx, fy, fz);
         GetMotionMaster()->MoveJump(fx, fy, fz, horizontalSpeed, max_height);
     }
