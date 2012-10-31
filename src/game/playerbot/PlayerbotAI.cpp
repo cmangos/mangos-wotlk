@@ -2407,7 +2407,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         out << "|cff009900" << "I received: |r";
                     MakeItemLink(pProto, out);
                     TellMaster(out.str().c_str());
-                    SetState(BOTSTATE_DELAYED);
                 }
             }
 
@@ -4814,7 +4813,6 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
         {
             SetState(BOTSTATE_NORMAL);
             SetIgnoreUpdateTime(0);
-            AutoUpgradeEquipment();
             m_CraftSpellId = 0;
         }
         else
@@ -9973,7 +9971,6 @@ void PlayerbotAI::_HandleCommandEnchant(std::string &text, Player &fromPlayer)
             targets.setItemTarget(iTarget);
             Spell *spell = new Spell(m_bot, spellInfo, false);
             spell->prepare(&targets);
-            SetState(BOTSTATE_DELAYED);
             SetIgnoreUpdateTime(1);
         }
         return;
@@ -11639,6 +11636,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
     if (bMainHelp || ExtractCommand("drop", text))
     {
         ch.SendSysMessage(_HandleCommandHelpHelper("drop", "Drops the linked item(s). Permanently.", HL_ITEM, true).c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("drop all", "When my inventory becomes full, I'll drop all my low level items.").c_str());
+        ch.SendSysMessage(_HandleCommandHelpHelper("drop all", "Toggles,|cff1eff00ON|r |cff9d9d9d[grey]|r & useless |cffffffff[white]|r items,|cffff0000OFF|r only |cff9d9d9d[grey]|r items.").c_str());
 
         if (!bMainHelp)
         {
