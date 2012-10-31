@@ -75,24 +75,8 @@ bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest
 
     updateFilter();
 
-    // check if destination moved - if not we can optimize something here
-    // we are following old, precalculated path?
-    float dist = m_sourceUnit->GetObjectBoundingRadius();
-    if (inRange(oldDest, dest, dist, dist) && m_pathPoints.size() > 2)
-    {
-        // our target is not moving - we just coming closer
-        // we are moving on precalculated path - enjoy the ride
-        DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::calculate:: precalculated path\n");
-
-        m_pathPoints.erase(m_pathPoints.begin());
-        return false;
-    }
-    else
-    {
-        // target moved, so we need to update the poly path
-        BuildPolyPath(start, dest);
-        return true;
-    }
+    BuildPolyPath(start, dest);
+    return true;
 }
 
 dtPolyRef PathFinder::getPathPolyByPosition(const dtPolyRef* polyPath, uint32 polyPathSize, const float* point, float* distance) const
@@ -180,8 +164,19 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: (startPoly == 0 || endPoly == 0)\n");
         BuildShortcut();
-        m_type = (m_sourceUnit->GetTypeId() == TYPEID_UNIT && ((Creature*)m_sourceUnit)->CanFly())
-                 ? PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH) : PATHFIND_NOPATH;
+
+        if (m_sourceUnit->GetTypeId() == TYPEID_UNIT)
+        {
+            // Check for swimming or flying shortcut
+            if ((startPoly == INVALID_POLYREF && m_sourceUnit->GetTerrain()->IsUnderWater(startPos.x, startPos.y, startPos.z)) ||
+                    (endPoly == INVALID_POLYREF && m_sourceUnit->GetTerrain()->IsUnderWater(endPos.x, endPos.y, endPos.z)))
+                m_type = ((Creature*)m_sourceUnit)->CanSwim() ? PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH) : PATHFIND_NOPATH;
+            else
+                m_type = ((Creature*)m_sourceUnit)->CanFly() ? PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH) : PATHFIND_NOPATH;
+        }
+        else
+            m_type = PATHFIND_NOPATH;
+
         return;
     }
 
