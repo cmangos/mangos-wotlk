@@ -654,6 +654,8 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 else
                     choice = 0;  // Pass
 
+                bot->GetPlayerbotAI()->BeingRolledOn(Guid);
+
                 group->CountRollVote(bot, Guid, itemSlot, RollVote(choice));
 
                 switch (choice)

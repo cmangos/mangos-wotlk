@@ -1866,6 +1866,7 @@ public:
     void DoLoot();
     void DoFlight();
     void GetTaxi(ObjectGuid guid, BotTaxiNode& nodes);
+    void BeingRolledOn(ObjectGuid target) { m_being_rolled_on.push_back(target); };
 
     bool HasCollectFlag(uint8 flag) { return m_collectionFlags & flag; }
     void SetCollectFlag(uint8 flag)
@@ -1918,6 +1919,7 @@ public:
     void GameObjectLocalization(std::string& gameobjectName, const uint32 entry) const;
 
     uint32 GetFreeBagSpace() const;
+    bool DropGarbage(bool bVerbose);
     void SellGarbage(Player& player, bool listNonTrash = true, bool bDetailTrashSold = false, bool verbose = true);
     void Sell(const uint32 itemid);
     void Buy(Creature* vendor, const uint32 itemid);
@@ -2026,13 +2028,15 @@ private:
     ObjectGuid m_lootCurrent;           // current remains of interest
     ObjectGuid m_lootPrev;              // previous loot
     BotEntryList m_collectObjects;      // object entries searched for in findNearbyGO
-    BotTaxiNode m_taxiNodes;            // flight node chain;
+    BotTaxiNode m_taxiNodes;            // flight node chain
     BotEntryList m_noToolList;          // list of required tools
+    BotObjectList m_being_rolled_on;    // list of targets currently involved in item rolls
 
     uint8 m_collectionFlags;            // what the bot should look for to loot
     uint32 m_collectDist;               // distance to collect objects
     bool m_inventory_full;
     uint32 m_itemTarget;
+    bool m_dropWhite;
 
     time_t m_TimeDoneEating;
     time_t m_TimeDoneDrinking;

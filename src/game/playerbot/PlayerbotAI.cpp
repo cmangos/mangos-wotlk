@@ -103,6 +103,7 @@ m_bDebugCommandChat(false)
     SetQuestNeedCreatures();
 
     // start following master (will also teleport bot to master)
+    m_dropWhite = false;
     m_AutoEquipToggle = false;
     m_FollowAutoGo = FOLLOWAUTOGO_OFF; //turn on bot auto follow distance can be turned off by player
     DistOverRide = 0; //set initial adjustable follow settings
@@ -1647,8 +1648,11 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 switch (err)
                 {
                 case EQUIP_ERR_CANT_CARRY_MORE_OF_THIS:
+                {
                     TellMaster("I can't carry anymore of those.");
+                    m_lootCurrent = ObjectGuid();
                     return;
+                }
                 case EQUIP_ERR_MISSING_REAGENT:
                     TellMaster("I'm missing some reagents for that.");
                     return;
@@ -1660,9 +1664,14 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     return;
                 case EQUIP_ERR_INVENTORY_FULL:
                     {
+                        if (DropGarbage(false))
+                            return;
+
                         if (m_lootCurrent.IsGameObject())
                             if (GameObject* go = m_bot->GetMap()->GetGameObject(m_lootCurrent))
                                 m_collectObjects.remove(go->GetEntry());
+
+                        m_lootCurrent = ObjectGuid();
 
                         if (m_inventory_full)
                             return;
@@ -2313,19 +2322,32 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
     case SMSG_LOOT_ROLL_WON:
         {
             WorldPacket p(packet);   // (8+4+4+4+4+8+1+1)
-            ObjectGuid guid;
+            ObjectGuid p_guid, co_guid;
             uint32 itemid;
 
-            p.read_skip<ObjectGuid>(); // creature guid what we're looting
+            p >> co_guid;            // creature or gameobject guid what we're looting
             p.read_skip<uint32>();   // item slot in loot
             p >> itemid;             // the itemEntryId for the item that shall be rolled fo
             p.read_skip<uint32>();   // randomSuffix
             p.read_skip<uint32>();   // Item random property
-            p >> guid;               // guid of the player who won
+            p >> p_guid;             // guid of the player who won
             p.read_skip<uint8>();    // rollnumber related to SMSG_LOOT_ROLL
             p.read_skip<uint8>();    // Rolltype related to SMSG_LOOT_ROLL
 
-            if (m_bot->GetObjectGuid() != guid)
+            // Clean up: remove target guid from (ignore list)
+            for (std::list<ObjectGuid>::iterator itr = m_being_rolled_on.begin(); itr != m_being_rolled_on.end();)
+                if (co_guid == *itr)
+                {
+                    // DEBUG_LOG("Rolled item won, removing (%s)",co_guid.GetString().c_str());
+                    itr = m_being_rolled_on.erase(itr);
+                }
+                else
+                    ++itr;
+
+            // allow creature corpses to be skinned after roll
+            m_bot->SendLootRelease(co_guid);
+
+            if (m_bot->GetObjectGuid() != p_guid)
                 return;
 
             SetState(BOTSTATE_DELAYED);
@@ -2870,9 +2892,6 @@ void PlayerbotAI::Attack(Unit* forcedTarget)
         return;
 
     m_bot->Attack(m_targetCombat, true);
-
-    // add thingToAttack to loot list
-    m_lootTargets.push_back(m_targetCombat->GetObjectGuid());
 }
 
 // intelligently sets a reasonable combat order for this bot
@@ -3527,6 +3546,15 @@ void PlayerbotAI::DoLoot()
             return;
         }
     }
+
+    // if target contains item being rolled on, do not loot again.
+    for (std::list<ObjectGuid>::iterator itr = m_being_rolled_on.begin(); itr != m_being_rolled_on.end();++itr)
+        if (m_lootCurrent == *itr)
+        {
+            // DEBUG_LOG("An item is currently being rolled on, ignoring (%s)!",m_lootCurrent.GetString().c_str());
+            m_lootCurrent = ObjectGuid();
+            return;
+        }
 
     if (m_bot->GetDistance(wo) > CONTACT_DISTANCE + wo->GetObjectBoundingRadius())
     {
@@ -4975,6 +5003,7 @@ bool PlayerbotAI::CheckBotCast(const SpellEntry *sInfo )
         {
             case SPELL_CAST_OK:
                 return true;
+            case SPELL_FAILED_NOT_READY:
             case SPELL_FAILED_ALREADY_OPEN:
             case SPELL_FAILED_TRY_AGAIN:
                 return true;
@@ -6878,10 +6907,14 @@ void PlayerbotAI::findNearbyCorpse()
         if (!corpse)
             continue;
 
-        if (corpse->IsCorpse() && corpse->IsDespawned())
+        if (!corpse->IsCorpse() || corpse->IsDespawned() || m_bot->IsFriendlyTo(corpse))
             continue;
 
-        // DEBUG_LOG("Creature (%s) Guid (%s)",corpse->GetCreatureInfo()->Name, corpse->GetObjectGuid().GetString().c_str());
+        Loot &loot = corpse->loot;
+
+        if (loot.GetMaxSlotInLootFor(m_bot) > 0 || !loot.isLooted())
+            if ((loot.GetMaxSlotInLootFor(m_bot) - loot.items.size()) == 0)
+                continue;
 
         uint32 skillId = 0;
         if (corpse->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
@@ -7381,6 +7414,12 @@ bool PlayerbotAI::TradeCopper(uint32 copper)
 
 bool PlayerbotAI::DoTeleport(WorldObject& /*obj*/)
 {
+    if (m_targetCombat)
+    {
+        m_attackerInfo.clear();
+        m_targetCombat = 0;
+    }
+
     SetIgnoreUpdateTime(6);
     PlayerbotChatHandler ch(GetMaster());
     if (!ch.teleport(*m_bot))
@@ -8180,6 +8219,96 @@ void PlayerbotAI::SellGarbage(Player& /*player*/, bool /*bListNonTrash*/, bool b
     }
 }
 
+// no time to sell junk, then just drop it...
+bool PlayerbotAI::DropGarbage(bool bVerbose)
+{
+    std::ostringstream report;
+    bool autodrop = false, junk = false;
+
+    if (bVerbose)
+        report << "Dropping ";
+
+    // list out items in main backpack
+    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
+    {
+        autodrop = false;
+        Item* const item = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if (item)
+        {
+            ItemPrototype const *pProto = item->GetProto();
+            if (item->CanBeTraded() && item->GetProto()->Quality == ITEM_QUALITY_POOR) // trash sells automatically.
+            {
+                junk = true;
+                report << DropItem(pProto->ItemId);
+            }
+            if (m_dropWhite && item->GetProto()->SellPrice > 0 && (item->GetProto()->Quality == ITEM_QUALITY_NORMAL || item->GetProto()->Quality == ITEM_QUALITY_UNCOMMON) && item->GetProto()->SubClass != ITEM_SUBCLASS_QUEST)
+            {
+                if (pProto->RequiredLevel < (m_bot->getLevel() - m_mgr->gConfigSellLevelDiff) && pProto->SubClass != ITEM_SUBCLASS_WEAPON_MISC && pProto->FoodType == 0)
+                {
+                    if (pProto->Class == ITEM_CLASS_WEAPON)
+                        autodrop = true;
+                    if (pProto->Class == ITEM_CLASS_ARMOR)
+                        autodrop = true;
+                }
+                if (pProto->SubClass == ITEM_SUBCLASS_FOOD && (pProto->RequiredLevel < (m_bot->getLevel() - m_mgr->gConfigSellLevelDiff)))
+                {
+                    autodrop = true;
+                }
+                if (autodrop)
+                {
+                    junk = true;
+                    report << DropItem(pProto->ItemId);
+                }
+            }
+        }
+    }
+
+    // and each of our other packs
+    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag) // check for extra bags
+    {
+        const Bag* const pBag = static_cast<Bag *>(m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag));
+        if (pBag)
+        {
+            for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
+            {
+                autodrop = false;
+                Item* const item = m_bot->GetItemByPos(bag, slot);
+                if (item)
+                {
+                    ItemPrototype const *pProto = item->GetProto();
+                    if (item->CanBeTraded() && item->GetProto()->Quality == ITEM_QUALITY_POOR) // trash sells automatically.
+                    {
+                        junk = true;
+                        report << DropItem(pProto->ItemId);
+                    }
+                    if (m_dropWhite && item->GetProto()->SellPrice > 0 && (item->GetProto()->Quality == ITEM_QUALITY_NORMAL || item->GetProto()->Quality == ITEM_QUALITY_UNCOMMON) && item->GetProto()->SubClass != ITEM_SUBCLASS_QUEST)
+                    {
+                        if (pProto->RequiredLevel < (m_bot->getLevel() - m_mgr->gConfigSellLevelDiff) && pProto->SubClass != ITEM_SUBCLASS_WEAPON_MISC && pProto->FoodType == 0)
+                        {
+                            if (pProto->Class == ITEM_CLASS_WEAPON)
+                                autodrop = true;
+                            if (pProto->Class == ITEM_CLASS_ARMOR)
+                                autodrop = true;
+                        }
+                        if (pProto->SubClass == ITEM_SUBCLASS_FOOD && (pProto->RequiredLevel < (m_bot->getLevel() - m_mgr->gConfigSellLevelDiff)))
+                        {
+                            autodrop = true;
+                        }
+                        if (autodrop)
+                        {
+                            junk = true;
+                            report << DropItem(pProto->ItemId);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (bVerbose)
+        TellMaster(report.str());
+    return junk;
+}
+
 std::string PlayerbotAI::DropItem(const uint32 itemid)
 {
     Item* pItem = FindItem(itemid);
@@ -8929,6 +9058,19 @@ void PlayerbotAI::_HandleCommandBuy(std::string &text, Player &fromPlayer)
 // drop [Item Link][Item Link] .. -- Drops item(s) from bot's inventory
 void PlayerbotAI::_HandleCommandDrop(std::string &text, Player &fromPlayer)
 {
+    if (ExtractCommand("all", text)) // switch to auto drop low level white items
+    {
+        std::ostringstream msg;
+        if (text != "")
+        {
+            SendWhisper("Invalid subcommand for 'drop all'", fromPlayer);
+            return;
+        }
+        m_dropWhite = !m_dropWhite;
+        msg << "I will " << (m_dropWhite ? "" : "no longer ") << "drop my low level normal items.";
+        SendWhisper(msg.str(),fromPlayer);
+        return;
+    }
     if (text == "")
     {
         SendWhisper("drop must be used with one or more item links (shift + click the item).", fromPlayer);
