@@ -3245,6 +3245,8 @@ void SpellMgr::LoadSpellScriptTarget()
                     spellProto->EffectImplicitTargetB[i] == TARGET_AREAEFFECT_INSTANT ||
                     spellProto->EffectImplicitTargetA[i] == TARGET_AREAEFFECT_CUSTOM ||
                     spellProto->EffectImplicitTargetB[i] == TARGET_AREAEFFECT_CUSTOM ||
+                    spellProto->EffectImplicitTargetA[i] == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
+                    spellProto->EffectImplicitTargetB[i] == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
                     spellProto->EffectImplicitTargetA[i] == TARGET_AREAEFFECT_GO_AROUND_DEST ||
                     spellProto->EffectImplicitTargetB[i] == TARGET_AREAEFFECT_GO_AROUND_DEST)
             {
@@ -3511,14 +3513,14 @@ bool SpellMgr::LoadPetDefaultSpells_helper(CreatureInfo const* cInfo, PetDefault
 
 void SpellMgr::LoadPetDefaultSpells()
 {
-    MANGOS_ASSERT(MAX_CREATURE_SPELL_DATA_SLOT == CREATURE_MAX_SPELLS);
+    MANGOS_ASSERT(MAX_CREATURE_SPELL_DATA_SLOT <= CREATURE_MAX_SPELLS);
 
     mPetDefaultSpellsMap.clear();
 
     uint32 countCreature = 0;
     uint32 countData = 0;
 
-    for (uint32 i = 0; i < sCreatureStorage.MaxEntry; ++i)
+    for (uint32 i = 0; i < sCreatureStorage.GetMaxEntry(); ++i)
     {
         CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i);
         if (!cInfo)
@@ -3570,8 +3572,9 @@ void SpellMgr::LoadPetDefaultSpells()
                     continue;
 
                 PetDefaultSpellsEntry petDefSpells;
-                for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
-                    petDefSpells.spellid[j] = cInfo->spells[j];
+                if (CreatureTemplateSpells const* templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(cInfo->Entry))
+                    for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
+                        petDefSpells.spellid[j] = templateSpells->spells[j];
 
                 if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
                 {

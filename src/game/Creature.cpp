@@ -23,6 +23,7 @@
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ObjectGuid.h"
+#include "SQLStorages.h"
 #include "SpellMgr.h"
 #include "QuestDef.h"
 #include "GossipDef.h"
@@ -178,7 +179,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
 
-    SetWalk(true);
+    SetWalk(true, true);
 }
 
 Creature::~Creature()
@@ -327,7 +328,7 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
     UpdateSpeed(MOVE_WALK, false);
     UpdateSpeed(MOVE_RUN,  false);
 
-    SetLevitate(CanFly());
+    SetLevitate(cinfo->InhabitType & INHABIT_AIR);
 
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
@@ -392,10 +393,15 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
             SetPvP(false);
     }
 
-    for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
-        m_spells[i] = GetCreatureInfo()->spells[i];
+    // Try difficulty dependend version before falling back to base entry
+    CreatureTemplateSpells const* templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(GetCreatureInfo()->Entry);
+    if (!templateSpells)
+        templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(GetEntry());
+    if (templateSpells)
+        for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
+            m_spells[i] = templateSpells->spells[i];
 
-    SetVehicleId(GetCreatureInfo()->vehicleId);
+    SetVehicleId(GetCreatureInfo()->vehicleId, 0);
 
     // if eventData set then event active and need apply spell_start
     if (eventData)
@@ -943,31 +949,27 @@ void Creature::PrepareBodyLootState()
 {
     loot.clear();
 
-    // only dead
-    if (!isAlive())
+    // if have normal loot then prepare it access
+    if (!lootForBody)
     {
-        // if have normal loot then prepare it access
-        if (!lootForBody)
+        // have normal loot
+        if (GetCreatureInfo()->maxgold > 0 || GetCreatureInfo()->lootid ||
+                // ... or can have skinning after
+                (GetCreatureInfo()->SkinLootId && sWorld.getConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW)))
         {
-            // have normal loot
-            if (GetCreatureInfo()->maxgold > 0 || GetCreatureInfo()->lootid ||
-                    // ... or can have skinning after
-                    (GetCreatureInfo()->SkinLootId && sWorld.getConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW)))
-            {
-                SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-                return;
-            }
-        }
-
-        lootForBody = true;                                 // pass this loot mode
-
-        // if not have normal loot allow skinning if need
-        if (!lootForSkin && GetCreatureInfo()->SkinLootId)
-        {
-            RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+            SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             return;
         }
+    }
+
+    lootForBody = true;                                     // pass this loot mode
+
+    // if not have normal loot allow skinning if need
+    if (!lootForSkin && GetCreatureInfo()->SkinLootId)
+    {
+        RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+        return;
     }
 
     RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
@@ -1529,7 +1531,7 @@ void Creature::SetDeathState(DeathState s)
 
         SetHealth(GetMaxHealth());
         SetLootRecipient(NULL);
-        SetWalk(true);
+        SetWalk(true, true);
 
         if (GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_RESPAWN)
             ClearTemporaryFaction();
@@ -1589,20 +1591,20 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn)
     SetHealth(0);                                           // just for nice GM-mode view
 }
 
-bool Creature::IsImmuneToSpell(SpellEntry const* spellInfo)
+bool Creature::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf)
 {
     if (!spellInfo)
         return false;
 
-    if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
+    if (!castOnSelf && GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
         return true;
 
-    return Unit::IsImmuneToSpell(spellInfo);
+    return Unit::IsImmuneToSpell(spellInfo, castOnSelf);
 }
 
-bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const
+bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
 {
-    if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->EffectMechanic[index] - 1)))
+    if (!castOnSelf && GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->EffectMechanic[index] - 1)))
         return true;
 
     // Taunt immunity special flag check
@@ -1619,7 +1621,7 @@ bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectInd
             return true;
     }
 
-    return Unit::IsImmuneToSpellEffect(spellInfo, index);
+    return Unit::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
 }
 
 SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
@@ -2523,12 +2525,25 @@ bool Creature::HasStaticDBSpawnData() const
     return sObjectMgr.GetCreatureData(GetGUIDLow()) != NULL;
 }
 
-void Creature::SetWalk(bool enable)
+void Creature::SetWalk(bool enable, bool asDefault)
 {
+    if (asDefault)
+    {
+        if (enable)
+            clearUnitState(UNIT_STAT_RUNNING);
+        else
+            addUnitState(UNIT_STAT_RUNNING);
+    }
+
+    // Nothing changed?
+    if (enable == m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE))
+        return;
+
     if (enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_WALK_MODE);
     else
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_WALK_MODE);
+
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_WALK_MODE : SMSG_SPLINE_MOVE_SET_RUN_MODE, 9);
     data << GetPackGUID();
     SendMessageToSet(&data, true);

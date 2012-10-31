@@ -364,7 +364,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                         info->type == GAMEOBJECT_TYPE_BUTTON      ||
                         info->type == GAMEOBJECT_TYPE_TRAP)
                 {
-                    sLog.outErrorDb("Table `%s` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u", tablename, info->id, tmp.id);
+                    sLog.outErrorDb("Table `%s` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u", tablename, info->type, tmp.id);
                     continue;
                 }
                 break;
@@ -723,7 +723,7 @@ void ScriptMgr::LoadEventScripts()
     std::set<uint32> evt_scripts;
 
     // Load all possible script entries from gameobjects
-    for (uint32 i = 1; i < sGOStorage.MaxEntry; ++i)
+    for (uint32 i = 1; i < sGOStorage.GetMaxEntry(); ++i)
     {
         if (GameObjectInfo const* goInfo = sGOStorage.LookupEntry<GameObjectInfo>(i))
         {
@@ -1009,21 +1009,29 @@ Player* ScriptAction::GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldO
 /// Handle one Script Step
 void ScriptAction::HandleScriptStep()
 {
-    Object* source = NULL;
-    Object* target = NULL;
-    if (!GetScriptCommandObject(m_sourceGuid, true, source))
-        return;
-    if (!GetScriptCommandObject(m_targetGuid, false, target))
-        return;
+    WorldObject* pSource;
+    WorldObject* pTarget;
+    Object* pSourceOrItem;                                  // Stores a provided pSource (if exists as WorldObject) or source-item
 
-    // Give some debug log output for easier use
-    DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, command %u for source %s (%sin world), target %s (%sin world)", m_table, m_script->id, m_script->command, m_sourceGuid.GetString().c_str(), source ? "" : "not ", m_targetGuid.GetString().c_str(), target ? "" : "not ");
+    {                                                       // Add scope for source & target variables so that they are not used below
+        Object* source = NULL;
+        Object* target = NULL;
+        if (!GetScriptCommandObject(m_sourceGuid, true, source))
+            return;
+        if (!GetScriptCommandObject(m_targetGuid, false, target))
+            return;
 
-    // Get expected source and target (if defined with buddy)
-    WorldObject* pSource = source && source->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)source : NULL;
-    WorldObject* pTarget = target && target->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)target : NULL;
-    if (!GetScriptProcessTargets(pSource, pTarget, pSource, pTarget))
-        return;
+        // Give some debug log output for easier use
+        DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, command %u for source %s (%sin world), target %s (%sin world)", m_table, m_script->id, m_script->command, m_sourceGuid.GetString().c_str(), source ? "" : "not ", m_targetGuid.GetString().c_str(), target ? "" : "not ");
+
+        // Get expected source and target (if defined with buddy)
+        pSource = source && source->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)source : NULL;
+        pTarget = target && target->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)target : NULL;
+        if (!GetScriptProcessTargets(pSource, pTarget, pSource, pTarget))
+            return;
+
+        pSourceOrItem = pSource ? pSource : (source && source->isType(TYPEMASK_ITEM) ? source : NULL);
+    }
 
     switch (m_script->command)
     {
@@ -1099,20 +1107,18 @@ void ScriptAction::HandleScriptStep()
             break;
         }
         case SCRIPT_COMMAND_FIELD_SET:                      // 2
-            // TODO
-            if (!source)
+            if (!pSourceOrItem)
             {
                 sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u call for NULL object.", m_table, m_script->id, m_script->command);
                 break;
             }
-
-            if (m_script->setField.fieldId <= OBJECT_FIELD_ENTRY || m_script->setField.fieldId >= source->GetValuesCount())
+            if (m_script->setField.fieldId <= OBJECT_FIELD_ENTRY || m_script->setField.fieldId >= pSourceOrItem->GetValuesCount())
             {
-                sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u call for wrong field %u (max count: %u) in object (TypeId: %u).", m_table, m_script->id, m_script->command, m_script->setField.fieldId, source->GetValuesCount(), source->GetTypeId());
+                sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u call for wrong field %u (max count: %u) in %s.",
+                              m_table, m_script->id, m_script->command, m_script->setField.fieldId, pSourceOrItem->GetValuesCount(), pSourceOrItem->GetGuidStr().c_str());
                 break;
             }
-
-            source->SetUInt32Value(m_script->setField.fieldId, m_script->setField.fieldValue);
+            pSourceOrItem->SetUInt32Value(m_script->setField.fieldId, m_script->setField.fieldValue);
             break;
         case SCRIPT_COMMAND_MOVE_TO:                        // 3
         {
@@ -1146,36 +1152,32 @@ void ScriptAction::HandleScriptStep()
             break;
         }
         case SCRIPT_COMMAND_FLAG_SET:                       // 4
-            // TODO
-            if (!source)
+            if (!pSourceOrItem)
             {
                 sLog.outError("SCRIPT_COMMAND_FLAG_SET (script id %u) call for NULL object.", m_script->id);
                 break;
             }
-            if (m_script->setFlag.fieldId <= OBJECT_FIELD_ENTRY || m_script->setFlag.fieldId >= source->GetValuesCount())
+            if (m_script->setFlag.fieldId <= OBJECT_FIELD_ENTRY || m_script->setFlag.fieldId >= pSourceOrItem->GetValuesCount())
             {
-                sLog.outError("SCRIPT_COMMAND_FLAG_SET (script id %u) call for wrong field %u (max count: %u) in object (TypeId: %u).",
-                              m_script->id, m_script->setFlag.fieldId, source->GetValuesCount(), source->GetTypeId());
+                sLog.outError("SCRIPT_COMMAND_FLAG_SET (script id %u) call for wrong field %u (max count: %u) in %s.",
+                              m_script->id, m_script->setFlag.fieldId, pSourceOrItem->GetValuesCount(), pSourceOrItem->GetGuidStr().c_str());
                 break;
             }
-
-            source->SetFlag(m_script->setFlag.fieldId, m_script->setFlag.fieldValue);
+            pSourceOrItem->SetFlag(m_script->setFlag.fieldId, m_script->setFlag.fieldValue);
             break;
         case SCRIPT_COMMAND_FLAG_REMOVE:                    // 5
-            // TODO
-            if (!source)
+            if (!pSourceOrItem)
             {
                 sLog.outError("SCRIPT_COMMAND_FLAG_REMOVE (script id %u) call for NULL object.", m_script->id);
                 break;
             }
-            if (m_script->removeFlag.fieldId <= OBJECT_FIELD_ENTRY || m_script->removeFlag.fieldId >= source->GetValuesCount())
+            if (m_script->removeFlag.fieldId <= OBJECT_FIELD_ENTRY || m_script->removeFlag.fieldId >= pSourceOrItem->GetValuesCount())
             {
-                sLog.outError("SCRIPT_COMMAND_FLAG_REMOVE (script id %u) call for wrong field %u (max count: %u) in object (TypeId: %u).",
-                              m_script->id, m_script->removeFlag.fieldId, source->GetValuesCount(), source->GetTypeId());
+                sLog.outError("SCRIPT_COMMAND_FLAG_REMOVE (script id %u) call for wrong field %u (max count: %u) in %s.",
+                              m_script->id, m_script->removeFlag.fieldId, pSourceOrItem->GetValuesCount(), pSourceOrItem->GetGuidStr().c_str());
                 break;
             }
-
-            source->RemoveFlag(m_script->removeFlag.fieldId, m_script->removeFlag.fieldValue);
+            pSourceOrItem->RemoveFlag(m_script->removeFlag.fieldId, m_script->removeFlag.fieldValue);
             break;
         case SCRIPT_COMMAND_TELEPORT_TO:                    // 6
         {
@@ -1362,7 +1364,7 @@ void ScriptAction::HandleScriptStep()
             pDoor->UseDoorOrButton(time_to_reset);
 
             if (pTarget && pTarget->isType(TYPEMASK_GAMEOBJECT) && ((GameObject*)pTarget)->GetGoType() == GAMEOBJECT_TYPE_BUTTON)
-                ((GameObject*)target)->UseDoorOrButton(time_to_reset);
+                ((GameObject*)pTarget)->UseDoorOrButton(time_to_reset);
 
             break;
         }
@@ -1396,7 +1398,7 @@ void ScriptAction::HandleScriptStep()
 
             break;
         }
-        case SCRIPT_COMMAND_PLAY_SOUND:                     // 16 // TODO
+        case SCRIPT_COMMAND_PLAY_SOUND:                     // 16
         {
             if (!pSource)
             {
@@ -1405,30 +1407,19 @@ void ScriptAction::HandleScriptStep()
             }
 
             // bitmask: 0/1=anyone/target, 0/2=with distance dependent
-            Player* pTarget = NULL;
-
+            Player* pSoundTarget = NULL;
             if (m_script->playSound.flags & 1)
             {
-                if (!target)
-                {
-                    sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u in targeted mode call for NULL target.", m_table, m_script->id, m_script->command);
+                pSoundTarget = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
+                if (!pSoundTarget)
                     break;
-                }
-
-                if (target->GetTypeId() != TYPEID_PLAYER)
-                {
-                    sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u in targeted mode call for non-player (TypeId: %u), skipping.", m_table, m_script->id, m_script->command, target->GetTypeId());
-                    break;
-                }
-
-                pTarget = (Player*)target;
             }
 
             // bitmask: 0/1=anyone/target, 0/2=with distance dependent
             if (m_script->playSound.flags & 2)
-                pSource->PlayDistanceSound(m_script->playSound.soundId, pTarget);
+                pSource->PlayDistanceSound(m_script->playSound.soundId, pSoundTarget);
             else
-                pSource->PlayDirectSound(m_script->playSound.soundId, pTarget);
+                pSource->PlayDirectSound(m_script->playSound.soundId, pSoundTarget);
 
             break;
         }
@@ -1563,7 +1554,7 @@ void ScriptAction::HandleScriptStep()
             if (LogIfNotCreature(pSource))
                 break;
 
-            ((Creature*)pSource)->SetWalk(!m_script->run.run);
+            ((Creature*)pSource)->SetWalk(!m_script->run.run, true);
 
             break;
         }
@@ -1575,7 +1566,7 @@ void ScriptAction::HandleScriptStep()
                 break;
 
             Creature* pAttacker = static_cast<Creature*>(pSource);
-            Unit* unitTarget = static_cast<Unit*>(target);
+            Unit* unitTarget = static_cast<Unit*>(pTarget);
 
             if (pAttacker->IsFriendlyTo(unitTarget))
             {
@@ -1733,7 +1724,7 @@ void ScriptMgr::LoadEventIdScripts()
     std::set<uint32> evt_scripts;
 
     // Load all possible event entries from gameobjects
-    for (uint32 i = 1; i < sGOStorage.MaxEntry; ++i)
+    for (uint32 i = 1; i < sGOStorage.GetMaxEntry(); ++i)
     {
         if (GameObjectInfo const* goInfo = sGOStorage.LookupEntry<GameObjectInfo>(i))
         {

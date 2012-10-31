@@ -131,3 +131,43 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket)
     else
         srcVehicle->GetVehicleInfo()->SwitchSeat(_player, seat);
 }
+
+void WorldSession::HandleRideVehicleInteract(WorldPacket& recvPacket)
+{
+    DEBUG_LOG("WORLD: Received CMSG_RIDE_VEHICLE_INTERACT");
+    recvPacket.hexlike();
+
+    ObjectGuid playerGuid;
+    recvPacket >> playerGuid;
+
+    Player* vehicle = _player->GetMap()->GetPlayer(playerGuid);
+
+    if (!vehicle || !vehicle->IsVehicle())
+        return;
+
+    // Only allowed if in same raid
+    if (!vehicle->IsInSameRaidWith(_player))
+        return;
+
+    _player->CastSpell(vehicle, SPELL_RIDE_VEHICLE_HARDCODED, true);
+}
+
+void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)
+{
+    DEBUG_LOG("WORLD: Received CMSG_CONTROLLER_EJECT_PASSENGER");
+    recvPacket.hexlike();
+
+    ObjectGuid passengerGuid;
+    recvPacket >> passengerGuid;
+
+    Unit* passenger = _player->GetMap()->GetUnit(passengerGuid);
+
+    if (!passenger || !passenger->IsBoarded())
+        return;
+
+    // _player must be transporting passenger
+    if (!_player->IsVehicle() || !_player->GetVehicleInfo()->HasOnBoard(passenger))
+        return;
+
+    _player->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, passengerGuid);
+}

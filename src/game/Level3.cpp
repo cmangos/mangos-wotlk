@@ -2678,7 +2678,7 @@ bool ChatHandler::HandleAddItemSetCommand(char* args)
     DETAIL_LOG(GetMangosString(LANG_ADDITEMSET), itemsetId);
 
     bool found = false;
-    for (uint32 id = 0; id < sItemStorage.MaxEntry; ++id)
+    for (uint32 id = 0; id < sItemStorage.GetMaxEntry(); ++id)
     {
         ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype>(id);
         if (!pProto)
@@ -3127,7 +3127,7 @@ bool ChatHandler::HandleLookupItemCommand(char* args)
     uint32 counter = 0;
 
     // Search in `item_template`
-    for (uint32 id = 0; id < sItemStorage.MaxEntry; ++id)
+    for (uint32 id = 0; id < sItemStorage.GetMaxEntry(); ++id)
     {
         ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype >(id);
         if (!pProto)
@@ -3485,7 +3485,7 @@ bool ChatHandler::HandleLookupCreatureCommand(char* args)
 
     uint32 counter = 0;
 
-    for (uint32 id = 0; id < sCreatureStorage.MaxEntry; ++id)
+    for (uint32 id = 0; id < sCreatureStorage.GetMaxEntry(); ++id)
     {
         CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo> (id);
         if (!cInfo)
@@ -3532,7 +3532,7 @@ bool ChatHandler::HandleLookupObjectCommand(char* args)
 
     uint32 counter = 0;
 
-    for (uint32 id = 0; id < sGOStorage.MaxEntry; ++id)
+    for (uint32 id = 0; id < sGOStorage.GetMaxEntry(); ++id)
     {
         GameObjectInfo const* gInfo = sGOStorage.LookupEntry<GameObjectInfo>(id);
         if (!gInfo)
@@ -4719,7 +4719,7 @@ bool ChatHandler::HandleChangeWeatherCommand(char* args)
     if (!ExtractUInt32(&args, type))
         return false;
 
-    //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
+    // 0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
     if (type > 3)
         return false;
 
@@ -4727,7 +4727,7 @@ bool ChatHandler::HandleChangeWeatherCommand(char* args)
     if (!ExtractFloat(&args, grade))
         return false;
 
-    //0 to 1, sending -1 is instand good weather
+    // 0 to 1, sending -1 is instand good weather
     if (grade < 0.0f || grade > 1.0f)
         return false;
 
@@ -5304,7 +5304,7 @@ bool ChatHandler::HandleQuestAddCommand(char* args)
     }
 
     // check item starting quest (it can work incorrectly if added without item in inventory)
-    for (uint32 id = 0; id < sItemStorage.MaxEntry; ++id)
+    for (uint32 id = 0; id < sItemStorage.GetMaxEntry(); ++id)
     {
         ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype>(id);
         if (!pProto)

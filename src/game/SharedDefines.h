@@ -1107,7 +1107,7 @@ enum Mechanics
     MECHANIC_FEAR             = 5,
     MECHANIC_GRIP             = 6,
     MECHANIC_ROOT             = 7,
-    MECHANIC_PACIFY           = 8,                          //0 spells use this mechanic
+    MECHANIC_PACIFY           = 8,                          // No spells use this mechanic
     MECHANIC_SILENCE          = 9,
     MECHANIC_SLEEP            = 10,
     MECHANIC_SNARE            = 11,
@@ -1295,10 +1295,16 @@ enum Targets
     TARGET_NONCOMBAT_PET               = 90,
     TARGET_91                          = 91,
     TARGET_92                          = 92,
-    TARGET_94                          = 94,
+    TARGET_CONTROLLED_VEHICLE          = 94,
     TARGET_95                          = 95,
-    TARGET_96                          = 96,
-    TARGET_97                          = 97,
+    TARGET_VEHICLE_PASSENGER_0         = 96,
+    TARGET_VEHICLE_PASSENGER_1         = 97,
+    TARGET_VEHICLE_PASSENGER_2         = 98,
+    TARGET_VEHICLE_PASSENGER_3         = 99,
+    TARGET_VEHICLE_PASSENGER_4         = 100,
+    TARGET_VEHICLE_PASSENGER_5         = 101,
+    TARGET_VEHICLE_PASSENGER_6         = 102,
+    TARGET_VEHICLE_PASSENGER_7         = 103,
     TARGET_IN_FRONT_OF_CASTER_30       = 104,
     TARGET_105                         = 105,               // 1 spell
     TARGET_106                         = 106,
@@ -3031,5 +3037,8 @@ enum MaxLevel
 };
 
 static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLASSIC, MAX_LEVEL_TBC, MAX_LEVEL_WOTLK };
+
+// This spell is used for general boarding serverside
+#define SPELL_RIDE_VEHICLE_HARDCODED    46598
 
 #endif

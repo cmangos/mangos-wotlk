@@ -349,7 +349,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleAuraAddMechanicAbilities,                  //293 SPELL_AURA_ADD_MECHANIC_ABILITIES  replaces target's action bars with a predefined spellset
     &Aura::HandleAuraStopNaturalManaRegen,                  //294 SPELL_AURA_STOP_NATURAL_MANA_REGEN implemented in Player:Regenerate
     &Aura::HandleUnused,                                    //295 unused (3.2.2a)
-    &Aura::HandleNULL,                                      //296 2 spells
+    &Aura::HandleAuraSetVehicleId,                          //296 6 spells
     &Aura::HandleNULL,                                      //297 1 spell (counter spell school?)
     &Aura::HandleUnused,                                    //298 unused (3.2.2a)
     &Aura::HandleUnused,                                    //299 unused (3.2.2a)
@@ -1254,11 +1254,11 @@ void Aura::TriggerSpell()
                         float newAngle = target->GetOrientation();
 
                         if (auraId == 26009)
-                            newAngle += M_PI_F/40;
+                            newAngle += M_PI_F / 40;
                         else
-                            newAngle -= M_PI_F/40;
+                            newAngle -= M_PI_F / 40;
 
-                        MapManager::NormalizeOrientation(newAngle);
+                        newAngle = MapManager::NormalizeOrientation(newAngle);
 
                         target->SetFacingTo(newAngle);
 
@@ -1506,10 +1506,23 @@ void Aura::TriggerSpell()
 //                    case 37125: break;
 //                    // Arcane Flurry
 //                    case 37268: break;
-//                    // Spout
-//                    case 37429: break;
-//                    // Spout
-//                    case 37430: break;
+                    case 37429:                             // Spout (left)
+                    case 37430:                             // Spout (right)
+                    {
+                        float newAngle = target->GetOrientation();
+
+                        if (auraId == 37429)
+                            newAngle += 2 * M_PI_F / 100;
+                        else
+                            newAngle -= 2 * M_PI_F / 100;
+
+                        newAngle = MapManager::NormalizeOrientation(newAngle);
+
+                        target->SetFacingTo(newAngle);
+
+                        target->CastSpell(target, 37433, true);
+                        return;
+                    }
 //                    // Karazhan - Chess NPC AI, Snapshot timer
 //                    case 37440: break;
 //                    // Karazhan - Chess NPC AI, action timer
@@ -3233,10 +3246,27 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
             display_id = minfo->modelid;
 
         target->Mount(display_id, GetId());
+
+        if (ci->vehicleId)
+        {
+            target->SetVehicleId(ci->vehicleId, ci->Entry);
+
+            if (target->GetTypeId() == TYPEID_PLAYER)
+                target->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
+        }
     }
     else
     {
         target->Unmount(true);
+
+        CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
+        if (ci && target->IsVehicle() && ci->vehicleId == target->GetVehicleInfo()->GetVehicleEntry()->m_ID)
+        {
+            if (target->GetTypeId() == TYPEID_PLAYER)
+                target->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
+
+            target->SetVehicleId(0, 0);
+        }
     }
 }
 
@@ -3246,14 +3276,7 @@ void Aura::HandleAuraWaterWalk(bool apply, bool Real)
     if (!Real)
         return;
 
-    WorldPacket data;
-    if (apply)
-        data.Initialize(SMSG_MOVE_WATER_WALK, 8 + 4);
-    else
-        data.Initialize(SMSG_MOVE_LAND_WALK, 8 + 4);
-    data << GetTarget()->GetPackGUID();
-    data << uint32(0);
-    GetTarget()->SendMessageToSet(&data, true);
+    GetTarget()->SetWaterWalk(apply);
 }
 
 void Aura::HandleAuraFeatherFall(bool apply, bool Real)
@@ -4420,10 +4443,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             target->SetStandState(UNIT_STAND_STATE_STAND);// in 1.5 client
         }
 
-        WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);
-        data << target->GetPackGUID();
-        data << uint32(0);
-        target->SendMessageToSet(&data, true);
+        target->SetRoot(true);
 
         // Summon the Naj'entus Spine GameObject on target if spell is Impaling Spine
         if (GetId() == 39837)
@@ -4478,10 +4498,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             if (target->getVictim() && target->isAlive())
                 target->SetTargetGuid(target->getVictim()->GetObjectGuid());
 
-            WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 8 + 4);
-            data << target->GetPackGUID();
-            data << uint32(0);
-            target->SendMessageToSet(&data, true);
+            target->SetRoot(false);
         }
 
         // Wyvern Sting
@@ -4709,10 +4726,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
 
         if (target->GetTypeId() == TYPEID_PLAYER)
         {
-            WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
-            data << target->GetPackGUID();
-            data << (uint32)2;
-            target->SendMessageToSet(&data, true);
+            target->SetRoot(true);
 
             // Clear unit movement flags
             ((Player*)target)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
@@ -4757,12 +4771,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
                 target->SetTargetGuid(target->getVictim()->GetObjectGuid());
 
             if (target->GetTypeId() == TYPEID_PLAYER)
-            {
-                WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 10);
-                data << target->GetPackGUID();
-                data << (uint32)2;
-                target->SendMessageToSet(&data, true);
-            }
+                target->SetRoot(false);
         }
     }
 }
@@ -5535,11 +5544,11 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 {
                     if (caster->GetTypeId() != TYPEID_PLAYER)
                         break;
-                    //1 point : ${($m1+$b1*1+0.015*$AP)*4} damage over 8 secs
-                    //2 points: ${($m1+$b1*2+0.024*$AP)*5} damage over 10 secs
-                    //3 points: ${($m1+$b1*3+0.03*$AP)*6} damage over 12 secs
-                    //4 points: ${($m1+$b1*4+0.03428571*$AP)*7} damage over 14 secs
-                    //5 points: ${($m1+$b1*5+0.0375*$AP)*8} damage over 16 secs
+                    // 1 point : ${($m1+$b1*1+0.015*$AP)*4} damage over 8 secs
+                    // 2 points: ${($m1+$b1*2+0.024*$AP)*5} damage over 10 secs
+                    // 3 points: ${($m1+$b1*3+0.03*$AP)*6} damage over 12 secs
+                    // 4 points: ${($m1+$b1*4+0.03428571*$AP)*7} damage over 14 secs
+                    // 5 points: ${($m1+$b1*5+0.0375*$AP)*8} damage over 16 secs
                     float AP_per_combo[6] = {0.0f, 0.015f, 0.024f, 0.03f, 0.03428571f, 0.0375f};
                     uint8 cp = ((Player*)caster)->GetComboPoints();
                     if (cp > 5) cp = 5;
@@ -7874,7 +7883,7 @@ void Aura::PeriodicDummyTick()
                     uint32 rand = urand(0, 99);
                     for (uint32 i = 1; i <= 6; ++i)
                     {
-                        if (rand < i * (i+1) /2 * 5)
+                        if (rand < i * (i + 1) / 2 * 5)
                         {
                             target->CastSpell(target, spell->Id + i, true);
                             break;
@@ -8105,7 +8114,7 @@ void Aura::PeriodicDummyTick()
                     else
                         newAngle -= 0.09f;
 
-                    MapManager::NormalizeOrientation(newAngle);
+                    newAngle = MapManager::NormalizeOrientation(newAngle);
 
                     target->SetFacingTo(newAngle);
 
@@ -8418,7 +8427,7 @@ void Aura::HandleAuraControlVehicle(bool apply, bool Real)
 
     if (apply)
     {
-        target->GetVehicleInfo()->Board(caster, GetSpellProto()->CalculateSimpleValue(m_effIndex) - 1);
+        target->GetVehicleInfo()->Board(caster, GetBasePoints() - 1);
     }
     else
         target->GetVehicleInfo()->UnBoard(caster, m_removeMode == AURA_REMOVE_BY_TRACKING);
@@ -8651,6 +8660,14 @@ void Aura::HandleAuraStopNaturalManaRegen(bool apply, bool Real)
         return;
 
     GetTarget()->ApplyModFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER, !apply && !GetTarget()->IsUnderLastManaUseEffect());
+}
+
+void Aura::HandleAuraSetVehicleId(bool apply, bool Real)
+{
+    if (!Real)
+        return;
+
+    GetTarget()->SetVehicleId(apply ? GetMiscValue() : 0, 0);
 }
 
 bool Aura::IsLastAuraOnHolder()
