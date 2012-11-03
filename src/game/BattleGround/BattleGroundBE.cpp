@@ -119,10 +119,10 @@ void BattleGroundBE::HandleAreaTrigger(Player* source, uint32 trigger)
     switch (trigger)
     {
         case 4538:                                          // buff trigger?
-            // buff_guid = m_BgObjects[BG_BE_OBJECT_BUFF_1];
+            // buff_guid = -nonexistingStorage-[BG_BE_OBJECT_BUFF_1];
             break;
         case 4539:                                          // buff trigger?
-            // buff_guid = m_BgObjects[BG_BE_OBJECT_BUFF_2];
+            // buff_guid = -nonexistingStorage-[BG_BE_OBJECT_BUFF_2];
             break;
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", trigger);

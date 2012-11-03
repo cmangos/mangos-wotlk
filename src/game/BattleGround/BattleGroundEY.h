@@ -281,7 +281,6 @@ class BattleGroundEY : public BattleGround
         void HandleKillPlayer(Player* player, Player* killer) override;
 
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
-        virtual bool SetupBattleGround() override;
         virtual void Reset() override;
         void UpdateTeamScore(Team team);
         void EndBattleGround(Team winner) override;
