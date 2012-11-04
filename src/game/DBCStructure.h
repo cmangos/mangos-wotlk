@@ -798,6 +798,29 @@ struct CurrencyTypesEntry
     uint32    BitIndex;                                     // 3        m_bitIndex bit index in PLAYER_FIELD_KNOWN_CURRENCIES (1 << (index-1))
 };
 
+struct DestructibleModelDataEntry
+{
+    uint32 m_ID;                                            // 0        m_ID
+    // uint32 unk1;                                         // 1
+    // uint32 unk2;                                         // 2
+    uint32 damagedDisplayId;                                // 3
+    // uint32 unk4;                                         // 4
+    // uint32 unk5;                                         // 5
+    // uint32 unk6;                                         // 6
+    uint32 destroyedDisplayId;                              // 7
+    // uint32 unk8;                                         // 8
+    // uint32 unk9;                                         // 9
+    // uint32 unk10;                                        // 10
+    uint32 rebuildingDisplayId;                             // 11       // Maybe rebuildingDisplayIdWhileDestroyed
+    // uint32 unk12;                                        // 12
+    // uint32 unk13;                                        // 13
+    // uint32 unk14;                                        // 14
+    // uint32 unk15;                                        // 15
+    // uint32 unk16;                                        // 16
+    // uint32 unk17;                                        // 17
+    // uint32 unk18;                                        // 18
+};
+
 struct DungeonEncounterEntry
 {
     uint32 Id;                                              // 0        m_ID
