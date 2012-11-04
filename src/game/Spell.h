@@ -351,6 +351,9 @@ class Spell
         void EffectQuestOffer(SpellEffectIndex eff_idx);
         void EffectActivateRune(SpellEffectIndex eff_idx);
         void EffectTeachTaxiNode(SpellEffectIndex eff_idx);
+        void EffectWMODamage(SpellEffectIndex eff_idx);
+        void EffectWMORepair(SpellEffectIndex eff_idx);
+        void EffectWMOChange(SpellEffectIndex eff_idx);
         void EffectTitanGrip(SpellEffectIndex eff_idx);
         void EffectEnchantItemPrismatic(SpellEffectIndex eff_idx);
         void EffectPlaySound(SpellEffectIndex eff_idx);

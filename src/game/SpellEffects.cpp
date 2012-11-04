@@ -147,9 +147,9 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectStuck,                                    // 84 SPELL_EFFECT_STUCK
     &Spell::EffectSummonPlayer,                             // 85 SPELL_EFFECT_SUMMON_PLAYER
     &Spell::EffectActivateObject,                           // 86 SPELL_EFFECT_ACTIVATE_OBJECT
-    &Spell::EffectNULL,                                     // 87 SPELL_EFFECT_WMO_DAMAGE (57 spells in 3.3.2)
-    &Spell::EffectNULL,                                     // 88 SPELL_EFFECT_WMO_REPAIR (2 spells in 3.3.2)
-    &Spell::EffectNULL,                                     // 89 SPELL_EFFECT_WMO_CHANGE (7 spells in 3.3.2)
+    &Spell::EffectWMODamage,                                // 87 SPELL_EFFECT_WMO_DAMAGE (57 spells in 3.3.2)
+    &Spell::EffectWMORepair,                                // 88 SPELL_EFFECT_WMO_REPAIR (2 spells in 3.3.2)
+    &Spell::EffectWMOChange,                                // 89 SPELL_EFFECT_WMO_CHANGE (7 spells in 3.3.2)
     &Spell::EffectKillCreditPersonal,                       // 90 SPELL_EFFECT_KILL_CREDIT_PERSONAL     Kill credit but only for single person
     &Spell::EffectUnused,                                   // 91 SPELL_EFFECT_THREAT_ALL               one spell: zzOLDBrainwash
     &Spell::EffectEnchantHeldItem,                          // 92 SPELL_EFFECT_ENCHANT_HELD_ITEM
@@ -9794,6 +9794,81 @@ void Spell::EffectStealBeneficialBuff(SpellEffectIndex eff_idx)
             }
             m_caster->SendMessageToSet(&data, true);
         }
+    }
+}
+
+void Spell::EffectWMODamage(SpellEffectIndex effIdx)
+{
+    DEBUG_LOG("Effect: WMODamage");
+
+    if (!gameObjTarget || gameObjTarget->GetGoType() != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+    {
+        sLog.outError("Spell::EffectWMODamage called without valid targets. Spell Id %u", m_spellInfo->Id);
+        return;
+    }
+
+    if (!gameObjTarget->GetHealth())
+        return;
+
+    Unit* caster = GetAffectiveCaster();
+    if (!caster)
+        return;
+
+    DEBUG_LOG("Spell::EffectWMODamage, spell Id %u, go entry %u, damage %u", m_spellInfo->Id, gameObjTarget->GetEntry(), uint32(damage));
+    gameObjTarget->DealGameObjectDamage(uint32(damage), m_spellInfo->Id, caster);
+}
+
+void Spell::EffectWMORepair(SpellEffectIndex effIdx)
+{
+    DEBUG_LOG("Effect: WMORepair");
+
+    if (!gameObjTarget || gameObjTarget->GetGoType() != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+    {
+        sLog.outError("Spell::EffectWMORepair called without valid targets. Spell Id %u", m_spellInfo->Id);
+        return;
+    }
+
+    Unit* caster = GetAffectiveCaster();
+    if (!caster)
+        return;
+
+    DEBUG_LOG("Spell::EffectWMORepair, spell Id %u, go entry %u", m_spellInfo->Id, gameObjTarget->GetEntry());
+    gameObjTarget->RebuildGameObject(m_spellInfo->Id, caster);
+}
+
+void Spell::EffectWMOChange(SpellEffectIndex effIdx)
+{
+    DEBUG_LOG("Effect: WMOChange");
+
+    if (!gameObjTarget || gameObjTarget->GetGoType() != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+    {
+        sLog.outError("Spell::EffectWMOChange called without valid targets. Spell Id %u", m_spellInfo->Id);
+        return;
+    }
+
+    DEBUG_LOG("Spell::EffectWMOChange, spell Id %u, object %u, misc-value %u", m_spellInfo->Id,gameObjTarget->GetEntry(), m_spellInfo->EffectMiscValue[effIdx]);
+
+    Unit* caster = GetAffectiveCaster();
+    if (!caster)
+        return;
+
+    switch (m_spellInfo->EffectMiscValue[effIdx])
+    {
+        case 0:                                             // Set to full health
+            gameObjTarget->ForceGameObjectHealth(gameObjTarget->GetMaxHealth(), caster);
+            break;
+        case 1:                                             // Set to damaged
+            gameObjTarget->ForceGameObjectHealth(gameObjTarget->GetGOInfo()->destructibleBuilding.damagedNumHits, caster);
+            break;
+        case 2:                                             // Set to destroyed
+            gameObjTarget->ForceGameObjectHealth(-int32(gameObjTarget->GetHealth()), caster);
+            break;
+        case 3:                                             // Set to rebuilding
+            gameObjTarget->ForceGameObjectHealth(0, caster);
+            break;
+        default:
+            sLog.outError("Spell::EffectWMOChange, spell Id %u with undefined change value %u", m_spellInfo->Id,m_spellInfo->EffectMiscValue[effIdx]);
+            break;
     }
 }
 
