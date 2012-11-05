@@ -6879,7 +6879,7 @@ void PlayerbotAI::findNearbyGO()
 
             TerrainInfo const *map = go->GetTerrain();
 
-            float ground_z = map->GetHeight(go->GetPositionX(), go->GetPositionY(), go->GetPositionZ());
+            float ground_z = map->GetHeightStatic(go->GetPositionX(), go->GetPositionY(), go->GetPositionZ());
             // DEBUG_LOG("ground_z (%f) > INVALID_HEIGHT (%f)",ground_z,INVALID_HEIGHT);
             if ((ground_z > INVALID_HEIGHT) && go->isSpawned())
                 m_lootTargets.push_back(go->GetObjectGuid());
