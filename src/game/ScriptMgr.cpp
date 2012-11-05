@@ -721,55 +721,7 @@ void ScriptMgr::LoadEventScripts()
     LoadScripts(sEventScripts, "event_scripts");
 
     std::set<uint32> eventIds;                              // Store possible event ids
-    // Load all possible script entries from gameobjects
-    for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
-    {
-        if (uint32 eventId = itr->GetEventScriptId())
-            eventIds.insert(eventId);
-
-        if (itr->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
-        {
-            eventIds.insert(itr->capturePoint.neutralEventID1);
-            eventIds.insert(itr->capturePoint.neutralEventID2);
-            eventIds.insert(itr->capturePoint.contestedEventID1);
-            eventIds.insert(itr->capturePoint.contestedEventID2);
-            eventIds.insert(itr->capturePoint.progressEventID1);
-            eventIds.insert(itr->capturePoint.progressEventID2);
-            eventIds.insert(itr->capturePoint.winEventID1);
-            eventIds.insert(itr->capturePoint.winEventID2);
-        }
-    }
-
-    // Load all possible script entries from spells
-    for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
-    {
-        SpellEntry const* spell = sSpellStore.LookupEntry(i);
-        if (spell)
-        {
-            for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
-            {
-                if (spell->Effect[j] == SPELL_EFFECT_SEND_EVENT)
-                {
-                    if (spell->EffectMiscValue[j])
-                        eventIds.insert(spell->EffectMiscValue[j]);
-                }
-            }
-        }
-    }
-
-    for (size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
-    {
-        for (size_t node_idx = 0; node_idx < sTaxiPathNodesByPath[path_idx].size(); ++node_idx)
-        {
-            TaxiPathNodeEntry const& node = sTaxiPathNodesByPath[path_idx][node_idx];
-
-            if (node.arrivalEventID)
-                eventIds.insert(node.arrivalEventID);
-
-            if (node.departureEventID)
-                eventIds.insert(node.departureEventID);
-        }
-    }
+    CollectPossibleEventIds(eventIds);
 
     // Then check if all scripts are in above list of possible script entries
     for (ScriptMapMap::const_iterator itr = sEventScripts.second.begin(); itr != sEventScripts.second.end(); ++itr)
@@ -1716,58 +1668,8 @@ void ScriptMgr::LoadEventIdScripts()
 
     BarGoLink bar(result->GetRowCount());
 
-    // TODO: remove duplicate code below, same way to collect event id's used in LoadEventScripts()
     std::set<uint32> eventIds;                              // Store possible event ids
-    // Load all possible script entries from gameobjects
-    for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
-    {
-        if (uint32 eventId = itr->GetEventScriptId())
-            eventIds.insert(eventId);
-
-        if (itr->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
-        {
-            eventIds.insert(itr->capturePoint.neutralEventID1);
-            eventIds.insert(itr->capturePoint.neutralEventID2);
-            eventIds.insert(itr->capturePoint.contestedEventID1);
-            eventIds.insert(itr->capturePoint.contestedEventID2);
-            eventIds.insert(itr->capturePoint.progressEventID1);
-            eventIds.insert(itr->capturePoint.progressEventID2);
-            eventIds.insert(itr->capturePoint.winEventID1);
-            eventIds.insert(itr->capturePoint.winEventID2);
-        }
-    }
-
-    // Load all possible script entries from spells
-    for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
-    {
-        SpellEntry const* spell = sSpellStore.LookupEntry(i);
-        if (spell)
-        {
-            for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
-            {
-                if (spell->Effect[j] == SPELL_EFFECT_SEND_EVENT)
-                {
-                    if (spell->EffectMiscValue[j])
-                        eventIds.insert(spell->EffectMiscValue[j]);
-                }
-            }
-        }
-    }
-
-    // Load all possible event entries from taxi path nodes
-    for (size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
-    {
-        for (size_t node_idx = 0; node_idx < sTaxiPathNodesByPath[path_idx].size(); ++node_idx)
-        {
-            TaxiPathNodeEntry const& node = sTaxiPathNodesByPath[path_idx][node_idx];
-
-            if (node.arrivalEventID)
-                eventIds.insert(node.arrivalEventID);
-
-            if (node.departureEventID)
-                eventIds.insert(node.departureEventID);
-        }
-    }
+    CollectPossibleEventIds(eventIds);
 
     do
     {
@@ -2111,6 +2013,70 @@ void ScriptMgr::UnloadScriptLibrary()
     m_pOnEffectDummyGO          = NULL;
     m_pOnEffectDummyItem        = NULL;
     m_pOnAuraDummy              = NULL;
+}
+
+void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
+{
+    // Load all possible script entries from gameobjects
+    for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
+    {
+        switch (itr->type)
+        {
+            case GAMEOBJECT_TYPE_GOOBER:
+                eventIds.insert(itr->goober.eventId);
+                break;
+            case GAMEOBJECT_TYPE_CHEST:
+                eventIds.insert(itr->chest.eventId);
+                break;
+            case GAMEOBJECT_TYPE_CAMERA:
+                eventIds.insert(itr->camera.eventID);
+                break;
+            case GAMEOBJECT_TYPE_CAPTURE_POINT:
+                eventIds.insert(itr->capturePoint.neutralEventID1);
+                eventIds.insert(itr->capturePoint.neutralEventID2);
+                eventIds.insert(itr->capturePoint.contestedEventID1);
+                eventIds.insert(itr->capturePoint.contestedEventID2);
+                eventIds.insert(itr->capturePoint.progressEventID1);
+                eventIds.insert(itr->capturePoint.progressEventID2);
+                eventIds.insert(itr->capturePoint.winEventID1);
+                eventIds.insert(itr->capturePoint.winEventID2);
+                break;
+            default:
+                break;
+        }
+    }
+
+    // Load all possible script entries from spells
+    for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
+    {
+        SpellEntry const* spell = sSpellStore.LookupEntry(i);
+        if (spell)
+        {
+            for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+            {
+                if (spell->Effect[j] == SPELL_EFFECT_SEND_EVENT)
+                {
+                    if (spell->EffectMiscValue[j])
+                        eventIds.insert(spell->EffectMiscValue[j]);
+                }
+            }
+        }
+    }
+
+    // Load all possible event entries from taxi path nodes
+    for (size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
+    {
+        for (size_t node_idx = 0; node_idx < sTaxiPathNodesByPath[path_idx].size(); ++node_idx)
+        {
+            TaxiPathNodeEntry const& node = sTaxiPathNodesByPath[path_idx][node_idx];
+
+            if (node.arrivalEventID)
+                eventIds.insert(node.arrivalEventID);
+
+            if (node.departureEventID)
+                eventIds.insert(node.departureEventID);
+        }
+    }
 }
 
 uint32 GetAreaTriggerScriptId(uint32 triggerId)
