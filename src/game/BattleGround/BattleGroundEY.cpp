@@ -30,9 +30,6 @@
 
 BattleGroundEY::BattleGroundEY()
 {
-    m_BuffChange = true;
-    m_BgObjects.resize(EY_OBJECT_MAX);
-
     m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
     m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_EY_START_ONE_MINUTE;
     m_StartMessageIds[BG_STARTING_EVENT_THIRD] = LANG_BG_EY_START_HALF_MINUTE;
@@ -83,13 +80,6 @@ void BattleGroundEY::StartingEventOpenDoors()
 {
     // eye-doors are despawned, not opened
     SpawnEvent(BG_EVENT_DOOR, 0, false);
-
-    for (uint8 i = 0; i < EY_NODES_MAX; ++i)
-    {
-        // randomly spawn buff
-        uint8 buff = urand(0, 2);
-        SpawnBGObject(m_BgObjects[EY_OBJECT_SPEEDBUFF_FEL_REAVER_RUINS + buff + i * 3], RESPAWN_IMMEDIATELY);
-    }
 
     // Players that join battleground after start are not eligible to get achievement.
     StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, EY_EVENT_START_BATTLE);
@@ -315,26 +305,6 @@ void BattleGroundEY::HandleAreaTrigger(Player* source, uint32 trigger)
                 EventPlayerCapturedFlag(source, NODE_DRAENEI_RUINS);
             break;
     }
-}
-
-bool BattleGroundEY::SetupBattleGround()
-{
-    // buffs
-    for (uint8 i = 0; i < EY_NODES_MAX; ++i)
-    {
-        AreaTriggerEntry const* at = sAreaTriggerStore.LookupEntry(eyTriggers[i]);
-        if (!at)
-        {
-            sLog.outError("BattleGroundEY: Unknown trigger: %u", eyTriggers[i]);
-            continue;
-        }
-        if (!AddObject(EY_OBJECT_SPEEDBUFF_FEL_REAVER_RUINS + i * 3, Buff_Entries[0], at->x, at->y, at->z, 0.907571f, 0, 0, 0.438371f, 0.898794f, RESPAWN_ONE_DAY)
-                || !AddObject(EY_OBJECT_SPEEDBUFF_FEL_REAVER_RUINS + i * 3 + 1, Buff_Entries[1], at->x, at->y, at->z, 0.907571f, 0, 0, 0.438371f, 0.898794f, RESPAWN_ONE_DAY)
-                || !AddObject(EY_OBJECT_SPEEDBUFF_FEL_REAVER_RUINS + i * 3 + 2, Buff_Entries[2], at->x, at->y, at->z, 0.907571f, 0, 0, 0.438371f, 0.898794f, RESPAWN_ONE_DAY))
-            sLog.outError("BattleGroundEY: Cannot spawn buff");
-    }
-
-    return true;
 }
 
 void BattleGroundEY::Reset()

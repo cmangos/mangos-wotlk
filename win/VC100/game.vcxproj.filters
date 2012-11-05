@@ -502,6 +502,12 @@
     <ClCompile Include="..\..\src\game\vmap\BIH.cpp">
       <Filter>vmaps</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\vmap\DynamicTree.cpp">
+      <Filter>vmaps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\vmap\GameObjectModel.cpp">
+      <Filter>vmaps</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\vmap\MapTree.cpp">
       <Filter>vmaps</Filter>
     </ClCompile>
@@ -1015,6 +1021,15 @@
     <ClInclude Include="..\..\src\game\vmap\BIH.h">
       <Filter>vmaps</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\game\vmap\BIHWrap.h">
+      <Filter>vmaps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\vmap\DynamicTree.h">
+      <Filter>vmaps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\vmap\GameObjectModel.h">
+      <Filter>vmaps</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\game\vmap\IVMapManager.h">
       <Filter>vmaps</Filter>
     </ClInclude>
@@ -1022,6 +1037,9 @@
       <Filter>vmaps</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\vmap\ModelInstance.h">
+      <Filter>vmaps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\vmap\RegularGrid.h">
       <Filter>vmaps</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\vmap\TileAssembler.h">

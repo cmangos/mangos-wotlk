@@ -1390,6 +1390,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     ((Creature*)unitTarget)->ForcedDespawn(10000);
                     return;
                 }
+                case 39635:                                 // Throw Glaive (first)
+                case 39849:                                 // Throw Glaive (second)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 41466, true, NULL, NULL, m_caster->GetObjectGuid());
+                    return;
+                }
                 case 40802:                                 // Mingo's Fortune Generator (Mingo's Fortune Giblets)
                 {
                     // selecting one from Bloodstained Fortune item
@@ -1421,6 +1430,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
 
                     DoCreateItem(eff_idx, newitemid);
+                    return;
+                }
+                case 40834:                                 // Agonizing Flames
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 40932, true);
                     return;
                 }
                 case 40962:                                 // Blade's Edge Terrace Demon Boss Summon Branch
@@ -4890,13 +4907,13 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION || radius > 1.0f)
         {
             m_caster->GetRandomPoint(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, radius, itr->x, itr->y, itr->z);
-            if (m_caster->GetMap()->GetObjectHitPos(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, itr->x, itr->y, itr->z, itr->x, itr->y, itr->z, 0.5f))
+            if (m_caster->GetMap()->GetHitPosition(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, itr->x, itr->y, itr->z, m_caster->GetPhaseMask(), -0.5f))
                 m_caster->UpdateAllowedPositionZ(itr->x, itr->y, itr->z);
         }
         else                                                // Get a point near the caster
         {
             m_caster->GetClosePoint(itr->x, itr->y, itr->z, 0.0f, radius, frand(0.0f, 2 * M_PI_F));
-            if (m_caster->GetMap()->GetObjectHitPos(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, itr->x, itr->y, itr->z, itr->x, itr->y, itr->z, 0.5f))
+            if (m_caster->GetMap()->GetHitPosition(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, itr->x, itr->y, itr->z, m_caster->GetPhaseMask(), -0.5f))
                 m_caster->UpdateAllowedPositionZ(itr->x, itr->y, itr->z);
         }
     }
@@ -9159,7 +9176,7 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
         float ox, oy, oz;
         unitTarget->GetPosition(ox, oy, oz);
 
-        if (unitTarget->GetMap()->GetObjectHitPos(ox, oy, oz + 0.5f, fx, fy, oz + 0.5f, fx, fy, fz, -0.5f))
+        if (unitTarget->GetMap()->GetHitPosition(ox, oy, oz + 0.5f, fx, fy, fz, unitTarget->GetPhaseMask(), -0.5f))
             unitTarget->UpdateAllowedPositionZ(fx, fy, fz);
 
         unitTarget->NearTeleportTo(fx, fy, fz, unitTarget->GetOrientation(), unitTarget == m_caster);

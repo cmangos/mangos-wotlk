@@ -39,12 +39,14 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "Util.h"
 #include "ScriptMgr.h"
+#include "vmap/GameObjectModel.h"
 #include "SQLStorages.h"
 #include <G3D/Quat.h>
 
 GameObject::GameObject() : WorldObject(),
     m_goInfo(NULL),
-    m_displayInfo(NULL)
+    m_displayInfo(NULL),
+    m_model(NULL)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -70,6 +72,7 @@ GameObject::GameObject() : WorldObject(),
 
 GameObject::~GameObject()
 {
+    delete m_model;
 }
 
 void GameObject::AddToWorld()
@@ -78,7 +81,13 @@ void GameObject::AddToWorld()
     if (!IsInWorld())
         GetMap()->GetObjectsStore().insert<GameObject>(GetObjectGuid(), (GameObject*)this);
 
+    if (m_model)
+        GetMap()->InsertGameObjectModel(*m_model);
+
     Object::AddToWorld();
+
+    // After Object::AddToWorld so that for initial state the GO is added to the world (and hence handled correctly)
+    UpdateCollisionState();
 }
 
 void GameObject::RemoveFromWorld()
@@ -101,6 +110,9 @@ void GameObject::RemoveFromWorld()
                               GetGuidStr().c_str(), m_spellId, GetGOInfo()->GetLinkedGameObjectEntry(), owner_guid.GetString().c_str());
             }
         }
+
+        if (m_model && GetMap()->ContainsGameObjectModel(*m_model))
+            GetMap()->RemoveGameObjectModel(*m_model);
 
         GetMap()->GetObjectsStore().erase<GameObject>(GetObjectGuid(), (GameObject*)NULL);
     }
@@ -936,6 +948,23 @@ GameObject* GameObject::LookupFishingHoleAround(float range)
     Cell::VisitGridObjects(this, checker, range);
 
     return ok;
+}
+
+bool GameObject::IsCollisionEnabled() const
+{
+    if (!isSpawned())
+        return false;
+
+    // TODO: Possible that this function must consider multiple checks
+    switch (GetGoType())
+    {
+        case GAMEOBJECT_TYPE_DOOR:
+        case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
+            return GetGoState() != GO_STATE_ACTIVE && GetGoState() != GO_STATE_ACTIVE_ALTERNATIVE;
+
+        default:
+            return true;
+    }
 }
 
 void GameObject::ResetDoorOrButton()
@@ -1784,10 +1813,48 @@ bool GameObject::IsFriendlyTo(Unit const* unit) const
     return tester_faction->IsFriendlyTo(*target_faction);
 }
 
+void GameObject::SetLootState(LootState state)
+{
+    m_lootState = state;
+    UpdateCollisionState();
+}
+
+void GameObject::SetGoState(GOState state)
+{
+    SetByteValue(GAMEOBJECT_BYTES_1, 0, state);
+    UpdateCollisionState();
+}
+
 void GameObject::SetDisplayId(uint32 modelId)
 {
     SetUInt32Value(GAMEOBJECT_DISPLAYID, modelId);
     m_displayInfo = sGameObjectDisplayInfoStore.LookupEntry(modelId);
+    UpdateModel();
+}
+
+void GameObject::SetPhaseMask(uint32 newPhaseMask, bool update)
+{
+    WorldObject::SetPhaseMask(newPhaseMask, update);
+    UpdateCollisionState();
+}
+
+void GameObject::UpdateCollisionState() const
+{
+    if (!m_model || !IsInWorld())
+        return;
+
+    m_model->enable(IsCollisionEnabled() ? GetPhaseMask() : 0);
+}
+
+void GameObject::UpdateModel()
+{
+    if (m_model && IsInWorld() && GetMap()->ContainsGameObjectModel(*m_model))
+        GetMap()->RemoveGameObjectModel(*m_model);
+    delete m_model;
+
+    m_model = GameObjectModel::construct(this);
+    if (m_model)
+        GetMap()->InsertGameObjectModel(*m_model);
 }
 
 void GameObject::StartGroupLoot(Group* group, uint32 timer)
@@ -1873,10 +1940,16 @@ void GameObject::SetLootRecipient(Unit* pUnit)
 float GameObject::GetObjectBoundingRadius() const
 {
     // FIXME:
-    // 1. This is clearly hack way because GameObjectDisplayInfoEntry have 6 floats related to GO sizes, but better that use DEFAULT_WORLD_OBJECT_SIZE
+    // 1. This is clearly hack way because we usually need this to check range, but a box just is no ball
     // 2. In some cases this must be only interactive size, not GO size, current way can affect creature target point auto-selection in strange ways for big underground/virtual GOs
     if (m_displayInfo)
-        return fabs(m_displayInfo->unknown12) * GetObjectScale();
+    {
+        float dx = m_displayInfo->geoBoxMaxX - m_displayInfo->geoBoxMinX;
+        float dy = m_displayInfo->geoBoxMaxY - m_displayInfo->geoBoxMinY;
+        float dz = m_displayInfo->geoBoxMaxZ - m_displayInfo->geoBoxMinZ;
+
+        return (std::abs(dx) + std::abs(dy) + std::abs(dz)) / 2;
+    }
 
     return DEFAULT_WORLD_OBJECT_SIZE;
 }

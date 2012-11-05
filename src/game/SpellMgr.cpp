@@ -682,6 +682,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             {
                 case 28441:                                 // AB Effect 000
                     return false;
+                case 18153:                                 // Kodo Kombobulator
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
                 case 62105:                                 // To'kini's Blowgun
