@@ -1944,7 +1944,7 @@ float GameObject::GetObjectBoundingRadius() const
         float dy = m_displayInfo->geoBoxMaxY - m_displayInfo->geoBoxMinY;
         float dz = m_displayInfo->geoBoxMaxZ - m_displayInfo->geoBoxMinZ;
 
-        return (std::abs(dx) + std::abs(dy) + std::abs(dz)) / 2;
+        return (std::abs(dx) + std::abs(dy) + std::abs(dz)) / 2 * GetObjectScale();
     }
 
     return DEFAULT_WORLD_OBJECT_SIZE;
@@ -2271,6 +2271,9 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s start rebuild by %s", GetGuidStr().c_str(), caster->GetGuidStr().c_str());
 
         m_useTimes = GetMaxHealth();
+        // Start Event if exist
+        if (caster && m_goInfo->destructibleBuilding.rebuildingEvent)
+            StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.rebuildingEvent, this, caster->GetCharmerOrOwnerOrSelf(), true, caster->GetCharmerOrOwnerOrSelf());
     }
     else                                                    // Set to value
         m_useTimes = uint32(diff);
@@ -2285,6 +2288,10 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
 
         RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_9 | GO_FLAG_UNK_10 | GO_FLAG_UNK_11);
         newDisplayId = m_goInfo->displayId;
+
+        // Start Event if exist
+        if (caster && m_goInfo->destructibleBuilding.intactEvent)
+            StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.intactEvent, this, caster->GetCharmerOrOwnerOrSelf(), true, caster->GetCharmerOrOwnerOrSelf());
     }
     else if (m_useTimes == 0)                               // Destroyed
     {
@@ -2308,6 +2315,10 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
                 else
                     newDisplayId = m_goInfo->destructibleBuilding.damagedDisplayId;
             }
+
+            // Start Event if exist
+            if (caster && m_goInfo->destructibleBuilding.destroyedEvent)
+                StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.destroyedEvent, this, caster->GetCharmerOrOwnerOrSelf(), true, caster->GetCharmerOrOwnerOrSelf());
         }
     }
     else if (m_useTimes <= m_goInfo->destructibleBuilding.damagedNumHits) // Damaged
@@ -2323,6 +2334,10 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
                 newDisplayId = destructibleInfo->damagedDisplayId;
             else
                 newDisplayId = m_goInfo->destructibleBuilding.damagedDisplayId;
+
+            // Start Event if exist
+            if (caster && m_goInfo->destructibleBuilding.damagedEvent)
+                StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.damagedEvent, this, caster->GetCharmerOrOwnerOrSelf(), true, caster->GetCharmerOrOwnerOrSelf());
         }
     }
 

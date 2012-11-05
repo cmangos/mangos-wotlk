@@ -2043,6 +2043,12 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
                 eventIds.insert(itr->capturePoint.winEventID1);
                 eventIds.insert(itr->capturePoint.winEventID2);
                 break;
+            case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
+                eventIds.insert(itr->destructibleBuilding.damagedEvent);
+                eventIds.insert(itr->destructibleBuilding.destroyedEvent);
+                eventIds.insert(itr->destructibleBuilding.intactEvent);
+                eventIds.insert(itr->destructibleBuilding.rebuildingEvent);
+                break;
             default:
                 break;
         }
