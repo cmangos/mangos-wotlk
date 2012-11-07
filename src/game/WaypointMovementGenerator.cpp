@@ -352,9 +352,7 @@ void FlightPathMovementGenerator::DoEventIfAny(Player& player, TaxiPathNodeEntry
     if (uint32 eventid = departure ? node.departureEventID : node.arrivalEventID)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Taxi %s event %u of node %u of path %u for player %s", departure ? "departure" : "arrival", eventid, node.index, node.path, player.GetName());
-
-        if (!sScriptMgr.OnProcessEvent(eventid, &player, &player, departure))
-            player.GetMap()->ScriptsStart(sEventScripts, eventid, &player, &player);
+        StartEvents_Event(player.GetMap(), eventid, &player, &player, departure);
     }
 }
 
