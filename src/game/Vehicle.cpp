@@ -133,6 +133,7 @@ void VehicleInfo::Initialize()
     {
         if (Creature* summoned = m_owner->SummonCreature(itr->passengerEntry, m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ(), m_owner->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
         {
+            DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), itr->seatId);
             m_accessoryGuids.insert(summoned->GetObjectGuid());
             int32 basepoint0 = itr->seatId + 1;
             summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, NULL, NULL, true);
@@ -151,7 +152,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 {
     MANGOS_ASSERT(passenger);
 
-    DEBUG_LOG("VehicleInfo::Board: Try to board passenger %s to seat %u", passenger->GetGuidStr().c_str(), seat);
+    DEBUG_LOG("VehicleInfo(of %s)::Board: Try to board passenger %s to seat %u", m_owner->GetGuidStr().c_str(), passenger->GetGuidStr().c_str(), seat);
 
     // This check is also called in Spell::CheckCast()
     if (!CanBoard(passenger))

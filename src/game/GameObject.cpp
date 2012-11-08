@@ -2255,7 +2255,7 @@ void GameObject::RebuildGameObject(uint32 spell, Unit* caster)
 void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
 {
     MANGOS_ASSERT(GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING);
-    MANGOS_ASSERT(caster || diff > 0);
+    MANGOS_ASSERT(caster || diff >= 0);
 
     if (diff < 0)                                           // Taken damage
     {
@@ -2278,7 +2278,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
     else                                                    // Set to value
         m_useTimes = uint32(diff);
 
-    uint32 newDisplayId = -1;                               // Set to invalid -1 to track if we switched to a change state
+    uint32 newDisplayId = 0xFFFFFFFF;                       // Set to invalid -1 to track if we switched to a change state
     DestructibleModelDataEntry const* destructibleInfo = sDestructibleModelDataStore.LookupEntry(m_goInfo->destructibleBuilding.destructibleData);
 
     // Get Current State - Note about order: Important for GetMaxHealth() == 0
@@ -2342,7 +2342,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
     }
 
     // Set display Id
-    if (newDisplayId != -1 && newDisplayId != GetDisplayId() && newDisplayId)
+    if (newDisplayId != 0xFFFFFFFF && newDisplayId != GetDisplayId() && newDisplayId)
         SetDisplayId(newDisplayId);
 
     // Set health
