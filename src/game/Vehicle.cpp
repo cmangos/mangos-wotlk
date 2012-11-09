@@ -131,7 +131,7 @@ void VehicleInfo::Initialize()
     SQLMultiStorage::SQLMSIteratorBounds<VehicleAccessory> bounds = sVehicleAccessoryStorage.getBounds<VehicleAccessory>(m_overwriteNpcEntry);
     for (SQLMultiStorage::SQLMultiSIterator<VehicleAccessory> itr = bounds.first; itr != bounds.second; ++itr)
     {
-        if (Creature* summoned = m_owner->SummonCreature(itr->passengerEntry, m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ(), m_owner->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
+        if (Creature* summoned = m_owner->SummonCreature(itr->passengerEntry, m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ(), 2 * m_owner->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
         {
             DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), itr->seatId);
             m_accessoryGuids.insert(summoned->GetObjectGuid());
@@ -315,8 +315,9 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         // Despawn if passenger was accessory
         if (passenger->GetTypeId() == TYPEID_UNIT && m_accessoryGuids.find(passenger->GetObjectGuid()) != m_accessoryGuids.end())
         {
+            Creature* cPassenger = static_cast<Creature*>(passenger);
             // TODO Same TODO as in VehicleInfo::RemoveAccessoriesFromMap
-            ((Creature*)passenger)->ForcedDespawn(5000);
+            cPassenger->ForcedDespawn(5000);
             m_accessoryGuids.erase(passenger->GetObjectGuid());
         }
     }
@@ -523,6 +524,11 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             passenger->SetCharm(pVehicle);
             pVehicle->SetCharmerGuid(passenger->GetObjectGuid());
         }
+
+        // Not entirely sure how this must be handled in relation to CONTROL
+        // But in any way this at least would require some changes in the movement system most likely
+        passenger->GetMotionMaster()->Clear(false, true);
+        passenger->GetMotionMaster()->MoveIdle();
     }
 }
 
@@ -560,6 +566,8 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             passenger->SetCharm(NULL);
             pVehicle->SetCharmerGuid(ObjectGuid());
         }
+        // Reinitialize movement
+        passenger->GetMotionMaster()->Initialize();
     }
 }
 
