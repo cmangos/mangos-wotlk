@@ -1,0 +1,3 @@
+ALTER TABLE db_version CHANGE COLUMN required_12269_06_mangos_item_loot_template required_12269_07_mangos_disenchant_loot_template bit;
+
+ALTER TABLE disenchant_loot_template DROP COLUMN lootcondition, DROP COLUMN condition_value1, DROP COLUMN condition_value2;
