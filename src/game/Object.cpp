@@ -1325,7 +1325,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z) const
         }
         case TYPEID_PLAYER:
         {
-            // for server controlled moves playr work same as creature (but it can always swim)
+            // for server controlled moves player work same as creature (but it can always swim)
             if (!((Player const*)this)->CanFly())
             {
                 float ground_z = z;
