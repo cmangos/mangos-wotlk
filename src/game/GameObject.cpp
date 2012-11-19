@@ -2266,7 +2266,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
         else
             m_useTimes = 0;
     }
-    else if (diff == 0)                                     // Rebuild - TODO: Rebuilding over time with special display-id?
+    else if (diff == 0 && GetMaxHealth())                   // Rebuild - TODO: Rebuilding over time with special display-id?
     {
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s start rebuild by %s", GetGuidStr().c_str(), caster->GetGuidStr().c_str());
 
