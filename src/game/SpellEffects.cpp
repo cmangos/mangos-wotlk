@@ -7930,11 +7930,9 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (m_caster->GetTypeId() != TYPEID_PLAYER || !unitTarget)
                         return;
 
-                    uint32 summonedGhouls = 0;
                     // Each ghoul casts 52500 onto player, so use number of auras as check
-                    Unit::SpellAuraHolderConstBounds bonds = m_caster->GetSpellAuraHolderBounds(52500);
-                    for (Unit::SpellAuraHolderMap::const_iterator iter = bonds.first; iter != bonds.second; ++iter)
-                        ++summonedGhouls;
+                    Unit::SpellAuraHolderConstBounds bounds = m_caster->GetSpellAuraHolderBounds(52500);
+                    uint32 summonedGhouls = std::distance(bounds.first, bounds.second);
 
                     m_caster->CastSpell(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), urand(0, 2) || summonedGhouls >= 5 ? 52505 : 52490, true);
                     return;
