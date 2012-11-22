@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_12269_14_mangos_gossip_menu_option` bit(1) default NULL
+  `required_12278_01_mangos_creature_template` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -1288,10 +1288,6 @@ CREATE TABLE `creature_template` (
   `resistance4` smallint(5) NOT NULL default '0',
   `resistance5` smallint(5) NOT NULL default '0',
   `resistance6` smallint(5) NOT NULL default '0',
-  `spell1` mediumint(8) unsigned NOT NULL default '0',
-  `spell2` mediumint(8) unsigned NOT NULL default '0',
-  `spell3` mediumint(8) unsigned NOT NULL default '0',
-  `spell4` mediumint(8) unsigned NOT NULL default '0',
   `PetSpellDataId` mediumint(8) unsigned NOT NULL default '0',
   `mingold` mediumint(8) unsigned NOT NULL default '0',
   `maxgold` mediumint(8) unsigned NOT NULL default '0',
@@ -1326,7 +1322,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,0,0,0,0,0,10045,0,0,0,'Waypoint(Only GM can see it)','Visual',NULL,0,1,1,64,64,0,0,5,35,35,0,0.91,1.14286,1,0,2,3,0,10,1,2000,2200,8,4096,0,0,0,0,0,0,1,2,100,8,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,7,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,130,'');
+(1,0,0,0,0,0,10045,0,0,0,'Waypoint(Only GM can see it)','Visual',NULL,0,1,1,64,64,0,0,5,35,35,0,0.91,1.14286,1,0,2,3,0,10,1,2000,2200,8,4096,0,0,0,0,0,0,1,2,100,8,5242886,0,0,0,0,0,0,0,0,0,0,0,0,'',0,7,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,130,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
