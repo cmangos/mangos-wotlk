@@ -2612,6 +2612,23 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                     return;
                 }
+                case 63820:                                 // Summon Scrap Bot Trigger (Ulduar - Mimiron) for Scrap Bots
+                case 64425:                                 // Summon Scrap Bot Trigger (Ulduar - Mimiron) for Assault Bots
+                case 64620:                                 // Summon Fire Bot Trigger  (Ulduar - Mimiron) for Fire Bots
+                {
+                    if (!unitTarget)
+                        return;
+
+                    uint32 triggerSpell = 0;
+                    switch (m_spellInfo->Id)
+                    {
+                        case 63820: triggerSpell = 64398; break;
+                        case 64425: triggerSpell = 64426; break;
+                        case 64620: triggerSpell = 64621; break;
+                    }
+                    unitTarget->CastSpell(unitTarget, triggerSpell, false);
+                    return;
+                }
                 case 64385:                                 // Spinning (from Unusual Compass)
                 {
                     m_caster->SetFacingTo(frand(0, M_PI_F * 2));

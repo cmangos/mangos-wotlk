@@ -1640,9 +1640,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 63024:                                 // Gravity Bomb (Ulduar, XT-002)
                 case 63387:                                 // Rapid Burst
                 case 63795:                                 // Psychosis (Ulduar, Yogg-Saron)
+                case 63820:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Scrap Bots, hits npc 33856
                 case 64218:                                 // Overcharge (VoA, Emalon)
                 case 64234:                                 // Gravity Bomb (h) (Ulduar, XT-002)
+                case 64425:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Assault Bots, hits npc 33856
                 case 64531:                                 // Rapid Burst (h)
+                case 64620:                                 // Summon Fire Bot Trigger (Ulduar, Mimiron) hits npc 33856
                 case 65121:                                 // Searing Light (h) (Ulduar, XT-002)
                 case 65301:                                 // Psychosis (Ulduar, Yogg-Saron)
                 case 65872:                                 // Pursuing Spikes (ToCrusader, Anub'arak)
