@@ -256,7 +256,11 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 if (pet->HasAuraType(SPELL_AURA_MOD_POSSESS))
                     Spell::SendCastResult(GetPlayer(), spellInfo, 0, result);
                 else
-                    pet->SendPetCastFail(spellid, result);
+                {
+                    Unit* owner = pet->GetCharmerOrOwner();
+                    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                        Spell::SendCastResult((Player*)owner, spellInfo, 0, result, true);
+                }
 
                 if (!((Creature*)pet)->HasSpellCooldown(spellid))
                     GetPlayer()->SendClearCooldown(spellid, pet);
@@ -692,7 +696,10 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     }
     else
     {
-        pet->SendPetCastFail(spellid, result);
+        Unit* owner = pet->GetCharmerOrOwner();
+        if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+            Spell::SendCastResult((Player*)owner, spellInfo, 0, result, true);
+
         if (!pet->HasSpellCooldown(spellid))
             GetPlayer()->SendClearCooldown(spellid, pet);
 

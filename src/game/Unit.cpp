@@ -10095,33 +10095,6 @@ Player* Unit::GetSpellModOwner() const
 }
 
 ///----------Pet responses methods-----------------
-void Unit::SendPetCastFail(uint32 spellid, SpellCastResult msg)
-{
-    if (msg == SPELL_CAST_OK)
-        return;
-
-    Unit* owner = GetCharmerOrOwner();
-    if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    WorldPacket data(SMSG_PET_CAST_FAILED, 1 + 4 + 1);
-    data << uint8(0);                                       // cast count?
-    data << uint32(spellid);
-    data << uint8(msg);
-
-    // More cases exist, see Spell::SendCastResult (can possibly be unified)
-    switch (msg)
-    {
-        case SPELL_FAILED_NOT_READY:
-            data << uint32(0);                              // unknown
-            break;
-        default:
-            break;
-    }
-
-    ((Player*)owner)->GetSession()->SendPacket(&data);
-}
-
 void Unit::SendPetActionFeedback(uint8 msg)
 {
     Unit* owner = GetOwner();
