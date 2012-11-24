@@ -174,12 +174,16 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     SetGoArtKit(0);                                         // unknown what this is
     SetGoAnimProgress(animprogress);
 
-    // Initialize Traps and Fishingnode delayed in ::Update
-    if (GetGoType() == GAMEOBJECT_TYPE_TRAP || GAMEOBJECT_TYPE_TRAP == GAMEOBJECT_TYPE_FISHINGNODE)
-        m_lootState = GO_NOT_READY;
-
-    if (goinfo->type == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
-        ForceGameObjectHealth(GetMaxHealth(), NULL);
+    switch (GetGoType())
+    {
+        case GAMEOBJECT_TYPE_TRAP:
+        case GAMEOBJECT_TYPE_FISHINGNODE:
+            m_lootState = GO_NOT_READY;                     // Initialize Traps and Fishingnode delayed in ::Update
+            break;
+        case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
+            ForceGameObjectHealth(GetMaxHealth(), NULL);
+            break;
+    }
 
     // Notify the battleground or outdoor pvp script
     if (map->IsBattleGroundOrArena())
