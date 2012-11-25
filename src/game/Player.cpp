@@ -6318,8 +6318,16 @@ void Player::RewardReputation(Unit* pVictim, float rate)
     uint32 repFaction2 = Rep->repfaction2;
 
     // Championning tabard reputation system
+    // Get Map to check if the tabard is active
+    Map* rewardMap = NULL;
+    if (isAlive())
+        rewardMap = GetMap();
+    else if (Corpse* corpse = GetCorpse())
+        rewardMap = corpse->GetMap();
+    MANGOS_ASSERT(rewardMap);
+
     // Aura 57818 is a hidden aura common to tabards allowing championning.
-    if (GetMap()->IsNonRaidDungeon() && HasAura(57818))
+    if (rewardMap->IsNonRaidDungeon() && HasAura(57818))
     {
         MapEntry const* storedMap = sMapStore.LookupEntry(GetMapId());
         InstanceTemplate const* instance = ObjectMgr::GetInstanceTemplate(GetMapId());
