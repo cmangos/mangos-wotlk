@@ -2258,23 +2258,17 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         }
         case TARGET_AREAEFFECT_GO_AROUND_SOURCE:
         case TARGET_AREAEFFECT_GO_AROUND_DEST:
+        case TARGET_GO_IN_FRONT_OF_CASTER_90:
         {
             float x, y, z;
-            if (targetMode == TARGET_AREAEFFECT_GO_AROUND_SOURCE)
-            {
-                if (m_targets.m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
-                    m_targets.getSource(x, y, z);
-                else
-                    m_caster->GetPosition(x, y, z);
-            }
-            else
+
+            if (targetMode == TARGET_AREAEFFECT_GO_AROUND_SOURCE && (m_targets.m_targetMask & TARGET_FLAG_SOURCE_LOCATION))
+                m_targets.getSource(x, y, z);
+            else if (targetMode == TARGET_AREAEFFECT_GO_AROUND_DEST)
                 m_targets.getDestination(x, y, z);
+            else                                            // can also happen for GO_AROUND_SOURCE without SOURCE_LOCATION
+                m_caster->GetPosition(x, y, z);
 
-            // It may be possible to fill targets for some spell effects
-            // automatically (SPELL_EFFECT_WMO_REPAIR(88) for example) but
-            // for some/most spells we clearly need/want to limit with spell_target_script
-
-            // Some spells untested, for affected GO type 33. May need further adjustments for spells related.
             bool fixedTargetExist = false;
             SpellScriptTargetBounds bounds = sSpellMgr.GetSpellScriptTargetBounds(m_spellInfo->Id);
             for (SpellScriptTarget::const_iterator i_spellST = bounds.first; i_spellST != bounds.second; ++i_spellST)
@@ -2285,7 +2279,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     // search all GO's with entry, within range of m_destN
                     MaNGOS::GameObjectEntryInPosRangeCheck go_check(*m_caster, i_spellST->second.targetEntry, x, y, z, radius);
                     MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectEntryInPosRangeCheck> checker(tempTargetGOList, go_check);
-                    Cell::VisitGridObjects(m_caster, checker, radius);
+                    Cell::VisitGridObjects(m_caster, checker, radius + GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex)));
                 }
             }
 
@@ -2300,6 +2294,24 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
             }
 
+            // Filter some targets for special target-type
+            for (std::list<GameObject*>::iterator itr = tempTargetGOList.begin(); itr != tempTargetGOList.end();)
+            {
+                switch (targetMode)
+                {
+                    case TARGET_GO_IN_FRONT_OF_CASTER_90:
+                        if (!m_caster->HasInArc(M_PI_F / 2, *itr))
+                        {
+                            tempTargetGOList.erase(itr++);
+                            continue;
+                        }
+                        // no break here
+                    case TARGET_AREAEFFECT_GO_AROUND_SOURCE:
+                    case TARGET_AREAEFFECT_GO_AROUND_DEST:
+                    default:
+                        ++itr;
+                }
+            }
             break;
         }
         case TARGET_ALL_ENEMY_IN_AREA_INSTANT:

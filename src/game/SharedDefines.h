@@ -1308,7 +1308,7 @@ enum Targets
     TARGET_IN_FRONT_OF_CASTER_30       = 104,
     TARGET_105                         = 105,               // 1 spell
     TARGET_106                         = 106,
-    TARGET_108                         = 108,               // possible TARGET_WMO(GO?)_IN_FRONT_OF_CASTER(_30 ?)
+    TARGET_GO_IN_FRONT_OF_CASTER_90    = 108,               // possible TARGET_WMO(GO?)_IN_FRONT_OF_CASTER(_30 ?) TODO: Verify the angle!
     TARGET_110                         = 110,
 };
 
