@@ -1168,6 +1168,15 @@ void Unit::CastSpell(Unit* Victim, SpellEntry const* spellInfo, bool triggered, 
 
         triggeredBy = triggeredByAura->GetSpellProto();
     }
+    else
+    {
+        triggeredByAura = GetTriggeredByClientAura(spellInfo->Id);
+        if (triggeredByAura)
+        {
+            triggered = true;
+            triggeredBy = triggeredByAura->GetSpellProto();
+        }
+    }
 
     Spell* spell = new Spell(this, spellInfo, triggered, originalCaster, triggeredBy);
 
@@ -5041,6 +5050,25 @@ Aura* Unit::GetAura(AuraType type, SpellFamily family, uint64 familyFlag, uint32
         if ((*i)->GetSpellProto()->IsFitToFamily(family, familyFlag, familyFlag2) &&
                 (!casterGuid || (*i)->GetCasterGuid() == casterGuid))
             return *i;
+
+    return NULL;
+}
+
+Aura* Unit::GetTriggeredByClientAura(uint32 spellId) const
+{
+    MANGOS_ASSERT(spellId);
+
+    AuraList const& auras = GetAurasByType(SPELL_AURA_PERIODIC_TRIGGER_BY_CLIENT);
+    for (AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+    {
+        SpellAuraHolder const* holder = (*itr)->GetHolder();
+        if (!holder || holder->IsDeleted())
+            continue;
+
+        // NOTE for further development: If there are more spells of this aura type, it might be required to check that this is the effect that applies SPELL_AURA_PERIODIC_TRIGGER_BY_CLIENT
+        if (holder->GetCasterGuid() == GetObjectGuid() && holder->GetSpellProto()->EffectTriggerSpell[(*itr)->GetEffIndex()] == spellId)
+            return *itr;
+    }
 
     return NULL;
 }

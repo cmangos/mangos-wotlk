@@ -83,7 +83,7 @@ enum AuraType
     SPELL_AURA_TRACK_RESOURCES = 45,
     SPELL_AURA_46 = 46,                                     // Ignore all Gear test spells
     SPELL_AURA_MOD_PARRY_PERCENT = 47,
-    SPELL_AURA_48 = 48,                                     // One periodic spell
+    SPELL_AURA_PERIODIC_TRIGGER_BY_CLIENT = 48,             // Client periodic trigger spell by self (3 spells in 3.3.5a)
     SPELL_AURA_MOD_DODGE_PERCENT = 49,
     SPELL_AURA_MOD_CRITICAL_HEALING_AMOUNT = 50,
     SPELL_AURA_MOD_BLOCK_PERCENT = 51,

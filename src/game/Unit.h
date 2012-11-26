@@ -1720,6 +1720,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         Aura* GetAura(uint32 spellId, SpellEffectIndex effindex);
         Aura* GetAura(AuraType type, SpellFamily family, uint64 familyFlag, uint32 familyFlag2 = 0, ObjectGuid casterGuid = ObjectGuid());
+        Aura* GetTriggeredByClientAura(uint32 spellId) const;
         SpellAuraHolder* GetSpellAuraHolder(uint32 spellid) const;
         SpellAuraHolder* GetSpellAuraHolder(uint32 spellid, ObjectGuid casterGUID) const;
 
