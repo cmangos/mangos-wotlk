@@ -1645,7 +1645,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 64234:                                 // Gravity Bomb (h) (Ulduar, XT-002)
                 case 64425:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Assault Bots, hits npc 33856
                 case 64531:                                 // Rapid Burst (h)
-                case 64620:                                 // Summon Fire Bot Trigger (Ulduar, Mimiron) hits npc 33856
                 case 65121:                                 // Searing Light (h) (Ulduar, XT-002)
                 case 65301:                                 // Psychosis (Ulduar, Yogg-Saron)
                 case 65872:                                 // Pursuing Spikes (ToCrusader, Anub'arak)
@@ -1706,6 +1705,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 60936:                                 // Surge of Power (h) (Malygos)
                 case 61693:                                 // Arcane Storm (Malygos)
                 case 64598:                                 // Cosmic Smash (h) (Ulduar, Algalon)
+                case 64620:                                 // Summon Fire Bot Trigger (Ulduar, Mimiron) hits npc 33856
                 case 70814:                                 // Bone Slice (ICC, Lord Marrowgar, heroic)
                 case 72095:                                 // Frozen Orb (h) (Vault of Archavon, Toravon)
                     unMaxTargets = 3;
