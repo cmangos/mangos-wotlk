@@ -1634,6 +1634,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 59870:                                 // Glare of the Tribunal (h) (Halls of Stone)
                 case 62016:                                 // Charge Orb (Ulduar, Thorim)
                 case 62042:                                 // Stormhammer (Ulduar, Thorim)
+                case 62166:                                 // Stone Grip (Ulduar, Kologarn)
                 case 62301:                                 // Cosmic Smash (Ulduar, Algalon)
                 case 62488:                                 // Activate Construct (Ulduar, Ignis)
                 case 63018:                                 // Searing Light (Ulduar, XT-002)
@@ -1700,10 +1701,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 39992:                                 // Needle Spine Targeting (BT, Warlord Najentus)
                 case 41303:                                 // Soul Drain (BT, Reliquary of Souls)
                 case 41376:                                 // Spite (BT, Reliquary of Souls)
-                case 51904:                                 // Limiting the count of Summoned Ghouls
-                case 54522:
+                case 51904:                                 // Summon Ghouls On Scarlet Crusade
+                case 54522:                                 // Summon Ghouls On Scarlet Crusade
                 case 60936:                                 // Surge of Power (h) (Malygos)
                 case 61693:                                 // Arcane Storm (Malygos)
+                case 63981:                                 // StoneGrip (h) (Ulduar, Kologarn)
                 case 64598:                                 // Cosmic Smash (h) (Ulduar, Algalon)
                 case 64620:                                 // Summon Fire Bot Trigger (Ulduar, Mimiron) hits npc 33856
                 case 70814:                                 // Bone Slice (ICC, Lord Marrowgar, heroic)
@@ -1731,6 +1733,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     break;
                 case 61694:                                 // Arcane Storm (h) (Malygos)
                     unMaxTargets = 7;
+                    break;
+                case 38054:                                 // Random Rocket Missile
+                    unMaxTargets = 8;
                     break;
                 case 54098:                                 // Poison Bolt Volley (h) (Naxx, Faerlina)
                 case 54835:                                 // Curse of the Plaguebringer (h) (Naxx, Noth the Plaguebringer)
@@ -2118,29 +2123,34 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_ALL_ENEMY_IN_AREA:
             FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
 
-            if (m_spellInfo->Id == 42005)                   // Bloodboil (spell hits only the 5 furthest away targets)
-            {
-                if (targetUnitMap.size() > unMaxTargets)
-                {
-                    targetUnitMap.sort(TargetDistanceOrderFarAway(m_caster));
-                    targetUnitMap.resize(unMaxTargets);
-                }
-            }
-            else
+            switch (m_spellInfo->Id)
             {
                 // Do not target current victim
-                switch (m_spellInfo->Id)
+                case 30843:                                 // Enfeeble
+                case 31347:                                 // Doom
+                case 37676:                                 // Insidious Whisper
+                case 38028:                                 // Watery Grave
+                case 40618:                                 // Insignificance
+                case 41376:                                 // Spite
+                case 62166:                                 // Stone Grip
+                case 63981:                                 // Stone Grip (h)
                 {
-                    case 30843:                             // Enfeeble
-                    case 31347:                             // Doom
-                    case 37676:                             // Insidious Whisper
-                    case 38028:                             // Watery Grave
-                    case 40618:                             // Insignificance
-                    case 41376:                             // Spite
-                        if (Unit* pVictim = m_caster->getVictim())
-                            targetUnitMap.remove(pVictim);
-                        break;
+                    if (Unit* pVictim = m_caster->getVictim())
+                        targetUnitMap.remove(pVictim);
+                    break;
                 }
+                // Other special cases
+                case 42005:                                 // Bloodboil (spell hits only the 5 furthest away targets)
+                {
+                    if (targetUnitMap.size() > unMaxTargets)
+                    {
+                        targetUnitMap.sort(TargetDistanceOrderFarAway(m_caster));
+                        targetUnitMap.resize(unMaxTargets);
+                    }
+                    break;
+                }
+                default:
+                    break;
             }
             break;
         case TARGET_AREAEFFECT_INSTANT:
