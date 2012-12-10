@@ -245,6 +245,12 @@ bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, 
     return true;
 }
 
+void WaypointMovementGenerator<Creature>::AddToWaypointPauseTime(int32 waitTimeDiff)
+{
+    if (Stopped())
+        i_nextMoveTime.Reset(i_nextMoveTime.GetExpiry() + waitTimeDiff);
+}
+
 //----------------------------------------------------//
 uint32 FlightPathMovementGenerator::GetPathAtMapEnd() const
 {
