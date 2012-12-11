@@ -27,6 +27,8 @@
 #include "MotionMaster.h"
 
 class Unit;
+class Creature;
+class Player;
 
 class MANGOS_DLL_SPEC MovementGenerator
 {
