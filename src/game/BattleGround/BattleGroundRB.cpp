@@ -32,7 +32,6 @@ BattleGroundRB::BattleGroundRB()
 
 BattleGroundRB::~BattleGroundRB()
 {
-
 }
 
 void BattleGroundRB::Update(uint32 diff)
@@ -59,7 +58,6 @@ void BattleGroundRB::AddPlayer(Player* plr)
 
 void BattleGroundRB::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
 {
-
 }
 
 void BattleGroundRB::HandleAreaTrigger(Player* /*source*/, uint32 /*trigger*/)

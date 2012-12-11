@@ -2066,7 +2066,6 @@ void Unit::CallForAllControlledUnits(Func const& func, uint32 controlledMask)
             func(charm);
 }
 
-
 template<typename Func>
 bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) const
 {
@@ -2086,7 +2085,6 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
             if (Pet const* guardian = _GetPet(*(itr++)))
                 if (func(guardian))
                     return true;
-
     }
 
     if (controlledMask & CONTROLLED_TOTEMS)

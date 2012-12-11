@@ -33,7 +33,6 @@ namespace VMAP
     class WorldModel;
 }
 
-
 class GameObjectModel
 {
         uint32 phasemask;

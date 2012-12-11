@@ -123,7 +123,6 @@ class AuctionBotConfig
         bool getConfigBuyerEnabled(AuctionHouseType houseType) const;
         uint32 getConfigItemQualityAmount(AuctionQuality quality) const;
 
-
         uint32      GetItemPerCycleBoost() const { return m_ItemsPerCycleBoost; }
         uint32      GetItemPerCycleNormal() const { return m_ItemsPerCycleNormal; }
         bool        Reload();

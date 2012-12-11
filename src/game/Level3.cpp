@@ -1235,7 +1235,6 @@ bool ChatHandler::HandleAccountSetPasswordCommand(char* args)
     return false;
 }
 
-
 void ChatHandler::ShowAchievementCriteriaListHelper(AchievementCriteriaEntry const* criEntry, AchievementEntry const* achEntry, LocaleConstant loc, Player* target /*= NULL*/)
 {
     std::ostringstream ss;
@@ -3084,7 +3083,6 @@ bool ChatHandler::HandleListCreatureCommand(char* args)
     return true;
 }
 
-
 void ChatHandler::ShowItemListHelper(uint32 itemId, int loc_idx, Player* target /*=NULL*/)
 {
     ItemPrototype const* itemProto = sItemStorage.LookupEntry<ItemPrototype >(itemId);
@@ -3393,7 +3391,6 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
         SendSysMessage(LANG_COMMAND_NOSPELLFOUND);
     return true;
 }
-
 
 void ChatHandler::ShowQuestListHelper(uint32 questId, int32 loc_idx, Player* target /*= NULL*/)
 {
@@ -4674,7 +4671,6 @@ bool ChatHandler::HandleAuctionItemCommand(char* args)
         MANGOS_ASSERT(newItem);
 
         auctionHouse->AddAuction(auctionHouseEntry, newItem, etime, price, buyout);
-
     }
     while (item_count);
 
@@ -6660,7 +6656,6 @@ bool ChatHandler::ShowPlayerListHelper(QueryResult* result, uint32* limit, bool 
                 PSendSysMessage(LANG_CHARACTERS_LIST_LINE_CONSOLE, guid, name.c_str(), race_name, class_name, level);
             else
                 PSendSysMessage(LANG_CHARACTERS_LIST_LINE_CHAT, guid, name.c_str(), name.c_str(), race_name, class_name, level);
-
         }
         while (result->NextRow());
 
@@ -6672,7 +6667,6 @@ bool ChatHandler::ShowPlayerListHelper(QueryResult* result, uint32* limit, bool 
 
     return true;
 }
-
 
 /// Output list of character for account
 bool ChatHandler::HandleAccountCharactersCommand(char* args)
@@ -6761,8 +6755,6 @@ bool ChatHandler::HandleSendMassMailCommand(char* args)
     PSendSysMessage(LANG_MAIL_SENT, name);
     return true;
 }
-
-
 
 bool ChatHandler::HandleSendItemsHelper(MailDraft& draft, char* args)
 {
@@ -6880,7 +6872,6 @@ bool ChatHandler::HandleSendMassItemsCommand(char* args)
 
     // need dynamic object because it trasfered to mass mailer
     MailDraft* draft = new MailDraft;
-
 
     // fill mail
     if (!HandleSendItemsHelper(*draft, args))

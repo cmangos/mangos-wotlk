@@ -1421,7 +1421,6 @@ bool Creature::HasInvolvedQuest(uint32 quest_id) const
     return false;
 }
 
-
 struct CreatureRespawnDeleteWorker
 {
     explicit CreatureRespawnDeleteWorker(uint32 guid) : i_guid(guid) {}

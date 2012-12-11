@@ -95,7 +95,6 @@ struct WorldLocation
         : mapid(loc.mapid), coord_x(loc.coord_x), coord_y(loc.coord_y), coord_z(loc.coord_z), orientation(loc.orientation) {}
 };
 
-
 // use this class to measure time between world update ticks
 // essential for units updating their spells after cells become active
 class WorldUpdateCounter

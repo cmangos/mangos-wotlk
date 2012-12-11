@@ -36,7 +36,6 @@
 #define PATH_MAX 260
 #endif
 
-
 #define LIBMPQ_MAJOR_VERSION        0       /* Major version number... maybe sometimes we reach version 1 :) */
 #define LIBMPQ_MINOR_VERSION        3       /* Minor version number - increased only for small changes */
 #define LIBMPQ_PATCH_VERSION        0       /* Patchlevel - changed on bugfixes etc... */
@@ -124,7 +123,6 @@ typedef struct
     unsigned int    blocktablesize; /* Number of entries in the block table */
 } mpq_header;
 //} __attribute__ ((packed)) mpq_header;
-
 
 /* Hash entry. All files in the archive are searched by their hashes. */
 typedef struct

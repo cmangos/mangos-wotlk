@@ -25,7 +25,6 @@
 
 HostileRefManager::HostileRefManager(Unit* pOwner) : iOwner(pOwner), m_redirectionMod(0.0f)
 {
-
 }
 
 HostileRefManager::~HostileRefManager()
@@ -168,6 +167,5 @@ Unit* HostileRefManager::GetThreatRedirectionTarget() const
 {
     return m_redirectionTargetGuid ? iOwner->GetMap()->GetUnit(m_redirectionTargetGuid) : NULL;
 }
-
 
 //=================================================

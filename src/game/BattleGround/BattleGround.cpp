@@ -128,7 +128,6 @@ namespace MaNGOS
             va_list* i_args;
     };
 
-
     class BattleGround2ChatBuilder
     {
         public:
@@ -374,7 +373,6 @@ void BattleGround::Update(uint32 diff)
             }
             m_PrematureCountDownTimer = newtime;
         }
-
     }
     else if (m_PrematureCountDown)
         m_PrematureCountDown = false;

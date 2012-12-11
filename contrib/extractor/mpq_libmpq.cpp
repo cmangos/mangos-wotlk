@@ -93,7 +93,6 @@ MPQFile::MPQFile(const char* filename):
         //libmpq_file_getdata
         libmpq_file_getdata(&mpq_a, hash, fileno, (unsigned char*)buffer);
         return;
-
     }
     eof = true;
     buffer = 0;

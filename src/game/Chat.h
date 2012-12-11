@@ -738,7 +738,4 @@ class CliHandler : public ChatHandler
         Print* m_print;
 };
 
-
-
-
 #endif

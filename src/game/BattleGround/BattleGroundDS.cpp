@@ -37,7 +37,6 @@ BattleGroundDS::BattleGroundDS()
 
 BattleGroundDS::~BattleGroundDS()
 {
-
 }
 
 void BattleGroundDS::Update(uint32 diff)

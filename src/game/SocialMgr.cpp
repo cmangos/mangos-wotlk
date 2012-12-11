@@ -171,12 +171,10 @@ bool PlayerSocial::HasIgnore(ObjectGuid ignore_guid)
 
 SocialMgr::SocialMgr()
 {
-
 }
 
 SocialMgr::~SocialMgr()
 {
-
 }
 
 void SocialMgr::GetFriendInfo(Player* player, uint32 friend_lowguid, FriendInfo& friendInfo)

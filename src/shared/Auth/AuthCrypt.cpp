@@ -28,7 +28,6 @@ AuthCrypt::AuthCrypt() : _clientDecrypt(SHA_DIGEST_LENGTH), _serverEncrypt(SHA_D
 
 AuthCrypt::~AuthCrypt()
 {
-
 }
 
 void AuthCrypt::Init(BigNumber* K)

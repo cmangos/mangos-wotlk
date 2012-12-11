@@ -2054,7 +2054,6 @@ void BattleGroundMgr::LoadBattleMastersEntry()
         }
 
         mBattleMastersMap[entry] = BattleGroundTypeId(bgTypeId);
-
     }
     while (result->NextRow());
 
@@ -2201,7 +2200,6 @@ void BattleGroundMgr::LoadBattleEventIndexes()
             m_CreatureBattleEventIndexMap[dbTableGuidLow] = events;
 
         ++count;
-
     }
     while (result->NextRow());
 

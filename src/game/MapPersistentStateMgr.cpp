@@ -633,7 +633,6 @@ MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const
     else
         state = new WorldPersistentState(mapEntry->MapID);
 
-
     if (instanceId)
         m_instanceSaveByInstanceId[instanceId] = state;
     else
@@ -842,7 +841,6 @@ void MapPersistentStateManager::_ResetInstance(uint32 mapid, uint32 instanceId)
         _ResetSave(m_instanceSaveByInstanceId, itr);
     }
 
-
     DeleteInstanceFromDB(instanceId);                       // even if state not loaded
 }
 
@@ -926,7 +924,6 @@ void MapPersistentStateManager::_CleanupExpiredInstancesAtTime(time_t t)
     _DelHelper(CharacterDatabase, "id, map, instance.difficulty", "instance", "LEFT JOIN instance_reset ON mapid = map AND instance.difficulty =  instance_reset.difficulty WHERE (instance.resettime < '" UI64FMTD "' AND instance.resettime > '0') OR (NOT instance_reset.resettime IS NULL AND instance_reset.resettime < '" UI64FMTD "')", (uint64)t, (uint64)t);
 }
 
-
 void MapPersistentStateManager::InitWorldMaps()
 {
     MapPersistentState* state = NULL;                       // need any from created for shared pool state
@@ -995,7 +992,6 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
         state->SetCreatureRespawnTime(loguid, time_t(respawn_time));
 
         ++count;
-
     }
     while (result->NextRow());
 
@@ -1062,7 +1058,6 @@ void MapPersistentStateManager::LoadGameobjectRespawnTimes()
         state->SetGORespawnTime(loguid, time_t(respawn_time));
 
         ++count;
-
     }
     while (result->NextRow());
 
