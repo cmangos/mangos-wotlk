@@ -75,7 +75,7 @@ void WorldSession::HandleBankerActivateOpcode(WorldPacket& recv_data)
 {
     ObjectGuid guid;
 
-    DEBUG_LOG("WORLD: Received CMSG_BANKER_ACTIVATE");
+    DEBUG_LOG("WORLD: Received opcode CMSG_BANKER_ACTIVATE");
 
     recv_data >> guid;
 
@@ -239,7 +239,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
     uint32 spellId = 0;
 
     recv_data >> guid >> spellId;
-    DEBUG_LOG("WORLD: Received CMSG_TRAINER_BUY_SPELL Trainer: %s, learn spell id is: %u", guid.GetString().c_str(), spellId);
+    DEBUG_LOG("WORLD: Received opcode CMSG_TRAINER_BUY_SPELL Trainer: %s, learn spell id is: %u", guid.GetString().c_str(), spellId);
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TRAINER);
     if (!unit)
@@ -312,7 +312,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleGossipHelloOpcode(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received CMSG_GOSSIP_HELLO");
+    DEBUG_LOG("WORLD: Received opcode CMSG_GOSSIP_HELLO");
 
     ObjectGuid guid;
     recv_data >> guid;
