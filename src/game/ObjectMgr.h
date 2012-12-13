@@ -389,6 +389,16 @@ enum ConditionType
     // If skill_value == 1, then true if player has not skill skill_id
     CONDITION_REPUTATION_RANK_MAX   = 30,                   // faction_id   max_rank
     CONDITION_COMPLETED_ENCOUNTER   = 31,                   // encounter_id encounter_id2       encounter_id[2] = DungeonEncounter(dbc).id (if value2 provided it will return value1 OR value2)
+    CONDITION_SOURCE_AURA           = 32,                   // spell_id     effindex (returns true if the source of the condition check has aura of spell_id, effIndex)
+};
+
+enum ConditionSource                                        // From where was the condition called?
+{
+    CONDITION_FROM_LOOT             = 0,                    // Used to check a *_loot_template entry
+    CONDITION_FROM_REFERING_LOOT    = 1,                    // Used to check a entry refering to a reference_loot_template entry
+    CONDITION_FROM_GOSSIP_MENU      = 2,                    // Used to check a gossip menu menu-text
+    CONDITION_FROM_GOSSIP_OPTION    = 3,                    // Used to check a gossip menu option-item
+    CONDITION_FROM_EVENTAI          = 4,                    // Used to check EventAI Event "On Receive Emote"
 };
 
 class PlayerCondition
@@ -404,9 +414,13 @@ class PlayerCondition
         bool IsValid() const { return IsValid(m_entry, m_condition, m_value1, m_value2); }
         static bool IsValid(uint16 entry, ConditionType condition, uint32 value1, uint32 value2);
 
-        bool Meets(Player const* pPlayer) const;            // Checks if the player meets the condition
+        static bool CanBeUsedWithoutPlayer(uint16 entry);
+
+        // Checks if the player meets the condition
+        bool Meets(Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
 
     private:
+        bool CheckParamRequirements(Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
         uint16 m_entry;                                     // entry of the condition
         ConditionType m_condition;                          // additional condition type
         uint32 m_value1;                                    // data for the condition - see ConditionType definition
@@ -940,7 +954,7 @@ class ObjectMgr
         LocaleConstant GetLocaleForIndex(int i);
 
         // Check if a player meets condition conditionId
-        bool IsPlayerMeetToCondition(Player const* pPlayer, uint16 conditionId) const;
+        bool IsPlayerMeetToCondition(uint16 conditionId, Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
 
         GameTele const* GetGameTele(uint32 id) const
         {

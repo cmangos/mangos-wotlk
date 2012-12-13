@@ -7596,13 +7596,10 @@ void ObjectMgr::LoadFishingBaseSkillLevel()
 }
 
 // Check if a player meets condition conditionId
-bool ObjectMgr::IsPlayerMeetToCondition(Player const* pPlayer, uint16 conditionId) const
+bool ObjectMgr::IsPlayerMeetToCondition(uint16 conditionId, Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const
 {
-    if (!pPlayer)
-        return false;                                       // player not present, return false
-
     if (const PlayerCondition* condition = sConditionStorage.LookupEntry<PlayerCondition>(conditionId))
-        return condition->Meets(pPlayer);
+        return condition->Meets(pPlayer, map, source, conditionSourceType);
 
     return false;
 }
@@ -7621,23 +7618,35 @@ bool ObjectMgr::CheckDeclinedNames(std::wstring mainpart, DeclinedName const& na
     return true;
 }
 
-// Checks if player meets the condition
-bool PlayerCondition::Meets(Player const* player) const
+char const* conditionSourceToStr[] =
 {
-    if (!player)
-        return false;                                       // player not present, return false
+    "loot system",
+    "referencing loot",
+    "gossip menu",
+    "gossip menu option",
+    "event AI"
+};
+
+// Checks if player meets the condition
+bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const
+{
+    DEBUG_LOG("Condition-System: Check condition %u, type %i - called from %s with params plr: %s, map %i, src %s",
+                                    m_entry, m_condition, conditionSourceToStr[conditionSourceType], player ? player->GetGuidStr().c_str() : "<NULL>", map ? map->GetId() : -1, source ? source->GetGuidStr().c_str() : "<NULL>");
+
+    if (!CheckParamRequirements(player, map, source, conditionSourceType))
+        return false;
 
     switch (m_condition)
     {
         case CONDITION_NOT:
             // Checked on load
-            return !sConditionStorage.LookupEntry<PlayerCondition>(m_value1)->Meets(player);
+            return !sConditionStorage.LookupEntry<PlayerCondition>(m_value1)->Meets(player, map, source, conditionSourceType);
         case CONDITION_OR:
             // Checked on load
-            return sConditionStorage.LookupEntry<PlayerCondition>(m_value1)->Meets(player) || sConditionStorage.LookupEntry<PlayerCondition>(m_value2)->Meets(player);
+            return sConditionStorage.LookupEntry<PlayerCondition>(m_value1)->Meets(player, map, source, conditionSourceType) || sConditionStorage.LookupEntry<PlayerCondition>(m_value2)->Meets(player, map, source, conditionSourceType);
         case CONDITION_AND:
             // Checked on load
-            return sConditionStorage.LookupEntry<PlayerCondition>(m_value1)->Meets(player) && sConditionStorage.LookupEntry<PlayerCondition>(m_value2)->Meets(player);
+            return sConditionStorage.LookupEntry<PlayerCondition>(m_value1)->Meets(player, map, source, conditionSourceType) && sConditionStorage.LookupEntry<PlayerCondition>(m_value2)->Meets(player, map, source, conditionSourceType);
         case CONDITION_NONE:
             return true;                                    // empty condition, always met
         case CONDITION_AURA:
@@ -7649,7 +7658,8 @@ bool PlayerCondition::Meets(Player const* player) const
         case CONDITION_AREAID:
         {
             uint32 zone, area;
-            player->GetZoneAndAreaId(zone, area);
+            WorldObject const* searcher = source ? source : player;
+            searcher->GetZoneAndAreaId(zone, area);
             return (zone == m_value1 || area == m_value1) == (m_value2 == 0);
         }
         case CONDITION_REPUTATION_RANK_MIN:
@@ -7664,9 +7674,7 @@ bool PlayerCondition::Meets(Player const* player) const
         case CONDITION_QUESTREWARDED:
             return player->GetQuestRewardStatus(m_value1);
         case CONDITION_QUESTTAKEN:
-        {
             return player->IsCurrentQuest(m_value1, m_value2);
-        }
         case CONDITION_AD_COMMISSION_AURA:
         {
             Unit::SpellAuraHolderMap const& auras = player->GetSpellAuraHolderMap();
@@ -7681,7 +7689,8 @@ bool PlayerCondition::Meets(Player const* player) const
             return sGameEventMgr.IsActiveEvent(m_value1);
         case CONDITION_AREA_FLAG:
         {
-            if (AreaTableEntry const* pAreaEntry = GetAreaEntryByAreaID(player->GetAreaId()))
+            WorldObject const* searcher = source ? source : player;
+            if (AreaTableEntry const* pAreaEntry = GetAreaEntryByAreaID(searcher->GetAreaId()))
             {
                 if ((!m_value1 || (pAreaEntry->flags & m_value1)) && (!m_value2 || !(pAreaEntry->flags & m_value2)))
                     return true;
@@ -7724,10 +7733,7 @@ bool PlayerCondition::Meets(Player const* player) const
         }
         case CONDITION_QUESTAVAILABLE:
         {
-            if (Quest const* quest = sObjectMgr.GetQuestTemplate(m_value1))
-                return player->CanTakeQuest(quest, false);
-            else
-                return false;
+            return player->CanTakeQuest(sObjectMgr.GetQuestTemplate(m_value1), false);
         }
         case CONDITION_ACHIEVEMENT:
         {
@@ -7817,10 +7823,12 @@ bool PlayerCondition::Meets(Player const* player) const
             return false;
         }
         case CONDITION_SKILL_BELOW:
+        {
             if (m_value2 == 1)
                 return !player->HasSkill(m_value1);
             else
                 return player->HasSkill(m_value1) && player->GetBaseSkillValue(m_value1) < m_value2;
+        }
         case CONDITION_REPUTATION_RANK_MAX:
         {
             FactionEntry const* faction = sFactionStore.LookupEntry(m_value1);
@@ -7828,25 +7836,27 @@ bool PlayerCondition::Meets(Player const* player) const
         }
         case CONDITION_COMPLETED_ENCOUNTER:
         {
-            if (!player->GetMap()->IsDungeon())
+            if (!map)
+                map = player ? player->GetMap() : source->GetMap();
+            if (!map->IsDungeon())
             {
                 sLog.outErrorDb("CONDITION_COMPLETED_ENCOUNTER (entry %u) is used outside of a dungeon (on Map %u) by %s", m_entry, player->GetMapId(), player->GetGuidStr().c_str());
                 return false;
             }
 
-            uint32 completedEncounterMask = ((DungeonMap*)player->GetMap())->GetPersistanceState()->GetCompletedEncountersMask();
+            uint32 completedEncounterMask = ((DungeonMap*)map)->GetPersistanceState()->GetCompletedEncountersMask();
             DungeonEncounterEntry const* dbcEntry1 = sDungeonEncounterStore.LookupEntry(m_value1);
             DungeonEncounterEntry const* dbcEntry2 = sDungeonEncounterStore.LookupEntry(m_value2);
             // Check that on proper map
-            if (dbcEntry1->mapId != player->GetMapId())
+            if (dbcEntry1->mapId != map->GetId())
             {
                 sLog.outErrorDb("CONDITION_COMPLETED_ENCOUNTER (entry %u, DungeonEncounterEntry %u) is used on wrong map (used on Map %u) by %s", m_entry, m_value1, player->GetMapId(), player->GetGuidStr().c_str());
                 return false;
             }
             // Select matching difficulties
-            if (player->GetDifficulty(player->GetMap()->IsRaid()) != Difficulty(dbcEntry1->Difficulty))
+            if (map->GetDifficulty() != Difficulty(dbcEntry1->Difficulty))
                 dbcEntry1 = NULL;
-            if (dbcEntry2 && player->GetDifficulty(player->GetMap()->IsRaid()) != Difficulty(dbcEntry2->Difficulty))
+            if (dbcEntry2 && map->GetDifficulty() != Difficulty(dbcEntry2->Difficulty))
                 dbcEntry2 = NULL;
 
             return completedEncounterMask & ((dbcEntry1 ? 1 << dbcEntry1->encounterIndex : 0) | (dbcEntry2 ? 1 << dbcEntry2->encounterIndex : 0));
@@ -7854,6 +7864,59 @@ bool PlayerCondition::Meets(Player const* player) const
         default:
             return false;
     }
+}
+
+// Which params must be provided to a Condition
+bool PlayerCondition::CheckParamRequirements(Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const
+{
+    switch (m_condition)
+    {
+        case CONDITION_NOT:
+        case CONDITION_AND:
+        case CONDITION_OR:
+        case CONDITION_NONE:
+        case CONDITION_ACTIVE_GAME_EVENT:
+        case CONDITION_ACHIEVEMENT_REALM:
+        case CONDITION_NOT_ACTIVE_GAME_EVENT:
+        case CONDITION_ACTIVE_HOLIDAY:
+        case CONDITION_NOT_ACTIVE_HOLIDAY:
+            break;
+        case CONDITION_AREAID:
+        case CONDITION_AREA_FLAG:
+            if (!pPlayer && !source)
+            {
+                sLog.outErrorDb("CONDITION %u type %u used with bad parameters, called from %s, used with plr: %s, map %i, src %s",
+                                    m_entry, m_condition, conditionSourceToStr[conditionSourceType], pPlayer ? pPlayer->GetGuidStr().c_str() : "NULL", map ? map->GetId() : -1, source ? source->GetGuidStr().c_str() : "NULL");
+                return false;
+            }
+            break;
+        case CONDITION_INSTANCE_SCRIPT:
+        case CONDITION_COMPLETED_ENCOUNTER:
+            if (!pPlayer && !source && !map)
+            {
+                sLog.outErrorDb("CONDITION %u type %u used with bad parameters, called from %s, used with plr: %s, map %i, src %s",
+                                    m_entry, m_condition, conditionSourceToStr[conditionSourceType], pPlayer ? pPlayer->GetGuidStr().c_str() : "NULL", map ? map->GetId() : -1, source ? source->GetGuidStr().c_str() : "NULL");
+                return false;
+            }
+            break;
+        case CONDITION_SOURCE_AURA:
+            if (!source)
+            {
+                sLog.outErrorDb("CONDITION %u type %u used with bad parameters, called from %s, used with plr: %s, map %i, src %s",
+                                    m_entry, m_condition, conditionSourceToStr[conditionSourceType], pPlayer ? pPlayer->GetGuidStr().c_str() : "NULL", map ? map->GetId() : -1, source ? source->GetGuidStr().c_str() : "NULL");
+                return false;
+            }
+            break;
+        default:
+            if (!pPlayer)
+            {
+                sLog.outErrorDb("CONDITION %u type %u used with bad parameters, called from %s, used with plr: %s, map %i, src %s",
+                                    m_entry, m_condition, conditionSourceToStr[conditionSourceType], pPlayer ? pPlayer->GetGuidStr().c_str() : "NULL", map ? map->GetId() : -1, source ? source->GetGuidStr().c_str() : "NULL");
+                return false;
+            }
+            break;
+    }
+    return true;
 }
 
 // Verification of condition values validity
@@ -8202,6 +8265,37 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
             return false;
     }
     return true;
+}
+
+// Check if a condition can be used without providing a player param
+bool PlayerCondition::CanBeUsedWithoutPlayer(uint16 entry)
+{
+    PlayerCondition const* condition = sConditionStorage.LookupEntry<PlayerCondition>(entry);
+    if (!condition)
+        return false;
+
+    switch (condition->m_condition)
+    {
+        case CONDITION_NOT:
+            return CanBeUsedWithoutPlayer(condition->m_value1);
+        case CONDITION_AND:
+        case CONDITION_OR:
+            return CanBeUsedWithoutPlayer(condition->m_value1) && CanBeUsedWithoutPlayer(condition->m_value2);
+        case CONDITION_NONE:
+        case CONDITION_ACTIVE_GAME_EVENT:
+        case CONDITION_ACHIEVEMENT_REALM:
+        case CONDITION_NOT_ACTIVE_GAME_EVENT:
+        case CONDITION_ACTIVE_HOLIDAY:
+        case CONDITION_NOT_ACTIVE_HOLIDAY:
+        case CONDITION_AREAID:
+        case CONDITION_AREA_FLAG:
+        case CONDITION_INSTANCE_SCRIPT:
+        case CONDITION_COMPLETED_ENCOUNTER:
+        case CONDITION_SOURCE_AURA:
+            return true;
+        default:
+            return false;
+    }
 }
 
 SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial)

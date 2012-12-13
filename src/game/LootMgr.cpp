@@ -364,7 +364,7 @@ LootItem::LootItem(uint32 itemid_, uint32 count_, uint32 randomSuffix_, int32 ra
 bool LootItem::AllowedForPlayer(Player const* player) const
 {
     // DB conditions check
-    if (conditionId && !sObjectMgr.IsPlayerMeetToCondition(player, conditionId))
+    if (conditionId && !sObjectMgr.IsPlayerMeetToCondition(conditionId, player, NULL, NULL, CONDITION_FROM_LOOT))
         return false;
 
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemid);
