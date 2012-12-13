@@ -7724,11 +7724,11 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         }
         case CONDITION_INSTANCE_SCRIPT:
         {
-            // have meaning only for specific map instance script so ignore other maps
-            if (player->GetMapId() != m_value1)
-                return false;
-            if (InstanceData* data = player->GetInstanceData())
-                return data->CheckConditionCriteriaMeet(player, m_value1, m_value2);
+            if (!map)
+                map = player ? player->GetMap() : source->GetMap();
+
+            if (InstanceData* data = map->GetInstanceData())
+                return data->CheckConditionCriteriaMeet(player, m_value1, source, conditionSourceType);
             return false;
         }
         case CONDITION_QUESTAVAILABLE:
@@ -8178,16 +8178,7 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
             break;
         }
         case CONDITION_INSTANCE_SCRIPT:
-        {
-            MapEntry const* mapEntry = sMapStore.LookupEntry(value1);
-            if (!mapEntry || !mapEntry->IsDungeon())
-            {
-                sLog.outErrorDb("Instance script condition (entry %u, type %u) has nonexistent map id %u as first arg, skipped", entry, condition, value1);
-                return false;
-            }
-
             break;
-        }
         case CONDITION_ACHIEVEMENT:
         case CONDITION_ACHIEVEMENT_REALM:
         {
