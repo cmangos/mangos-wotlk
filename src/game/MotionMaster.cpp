@@ -17,8 +17,6 @@
  */
 
 #include "MotionMaster.h"
-#include "CreatureAISelector.h"
-#include "Creature.h"
 #include "ConfusedMovementGenerator.h"
 #include "FleeingMovementGenerator.h"
 #include "HomeMovementGenerator.h"
@@ -29,7 +27,11 @@
 #include "RandomMovementGenerator.h"
 #include "movement/MoveSpline.h"
 #include "movement/MoveSplineInit.h"
+#include "Map.h"
+#include "CreatureAISelector.h"
+#include "Creature.h"
 #include "CreatureLinkingMgr.h"
+#include "Pet.h"
 #include "DBCStores.h"
 
 #include <cassert>

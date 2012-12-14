@@ -27,6 +27,7 @@
 
 #include "MovementGenerator.h"
 #include "WaypointManager.h"
+#include "DBCStructure.h"
 
 #include <vector>
 #include <set>
