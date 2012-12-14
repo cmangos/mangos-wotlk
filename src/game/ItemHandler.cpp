@@ -784,6 +784,9 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
 
                     if ((pProto->AllowableRace & _player->getRaceMask()) == 0)
                         continue;
+
+                    if (crItem->conditionId && !sObjectMgr.IsPlayerMeetToCondition(crItem->conditionId, _player, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
+                        continue;
                 }
 
                 // possible item coverting for BoA case
