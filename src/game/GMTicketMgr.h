@@ -143,7 +143,6 @@ class GMTicketMgr
             return *itr;
         }
 
-
         void Delete(ObjectGuid guid)
         {
             GMTicketMap::iterator itr = m_GMTicketMap.find(guid);

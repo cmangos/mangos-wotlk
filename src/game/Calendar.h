@@ -21,6 +21,6 @@
 
 class Calendar
 {
-
 };
+
 #endif

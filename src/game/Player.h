@@ -54,6 +54,8 @@ class DungeonPersistentState;
 class Spell;
 class Item;
 
+struct AreaTrigger;
+
 typedef std::deque<Mail*> PlayerMails;
 
 #define PLAYER_MAX_SKILLS           127
@@ -63,20 +65,20 @@ typedef std::deque<Mail*> PlayerMails;
 // Note: SPELLMOD_* values is aura types in fact
 enum SpellModType
 {
-    SPELLMOD_FLAT         = 107,                            // SPELL_AURA_ADD_FLAT_MODIFIER
-    SPELLMOD_PCT          = 108                             // SPELL_AURA_ADD_PCT_MODIFIER
+    SPELLMOD_FLAT               = 107,                      // SPELL_AURA_ADD_FLAT_MODIFIER
+    SPELLMOD_PCT                = 108                       // SPELL_AURA_ADD_PCT_MODIFIER
 };
 
 // 2^n internal values, they are never sent to the client
 enum PlayerUnderwaterState
 {
-    UNDERWATER_NONE                     = 0x00,
-    UNDERWATER_INWATER                  = 0x01,             // terrain type is water and player is afflicted by it
-    UNDERWATER_INLAVA                   = 0x02,             // terrain type is lava and player is afflicted by it
-    UNDERWATER_INSLIME                  = 0x04,             // terrain type is lava and player is afflicted by it
-    UNDERWATER_INDARKWATER              = 0x08,             // terrain type is dark water and player is afflicted by it
+    UNDERWATER_NONE             = 0x00,
+    UNDERWATER_INWATER          = 0x01,                     // terrain type is water and player is afflicted by it
+    UNDERWATER_INLAVA           = 0x02,                     // terrain type is lava and player is afflicted by it
+    UNDERWATER_INSLIME          = 0x04,                     // terrain type is lava and player is afflicted by it
+    UNDERWATER_INDARKWATER      = 0x08,                     // terrain type is dark water and player is afflicted by it
 
-    UNDERWATER_EXIST_TIMERS             = 0x10
+    UNDERWATER_EXIST_TIMERS     = 0x10
 };
 
 enum BuyBankSlotResult
@@ -89,10 +91,10 @@ enum BuyBankSlotResult
 
 enum PlayerSpellState
 {
-    PLAYERSPELL_UNCHANGED = 0,
-    PLAYERSPELL_CHANGED   = 1,
-    PLAYERSPELL_NEW       = 2,
-    PLAYERSPELL_REMOVED   = 3
+    PLAYERSPELL_UNCHANGED       = 0,
+    PLAYERSPELL_CHANGED         = 1,
+    PLAYERSPELL_NEW             = 2,
+    PLAYERSPELL_REMOVED         = 3
 };
 
 struct PlayerSpell
@@ -123,28 +125,28 @@ typedef std::map<uint32, SpellCooldown> SpellCooldowns;
 
 enum TrainerSpellState
 {
-    TRAINER_SPELL_GREEN = 0,
-    TRAINER_SPELL_RED   = 1,
-    TRAINER_SPELL_GRAY  = 2,
+    TRAINER_SPELL_GREEN         = 0,
+    TRAINER_SPELL_RED           = 1,
+    TRAINER_SPELL_GRAY          = 2,
     TRAINER_SPELL_GREEN_DISABLED = 10                       // custom value, not send to client: formally green but learn not allowed
 };
 
 enum ActionButtonUpdateState
 {
-    ACTIONBUTTON_UNCHANGED = 0,
-    ACTIONBUTTON_CHANGED   = 1,
-    ACTIONBUTTON_NEW       = 2,
-    ACTIONBUTTON_DELETED   = 3
+    ACTIONBUTTON_UNCHANGED      = 0,
+    ACTIONBUTTON_CHANGED        = 1,
+    ACTIONBUTTON_NEW            = 2,
+    ACTIONBUTTON_DELETED        = 3
 };
 
 enum ActionButtonType
 {
-    ACTION_BUTTON_SPELL     = 0x00,
-    ACTION_BUTTON_C         = 0x01,                         // click?
-    ACTION_BUTTON_EQSET     = 0x20,
-    ACTION_BUTTON_MACRO     = 0x40,
-    ACTION_BUTTON_CMACRO    = ACTION_BUTTON_C | ACTION_BUTTON_MACRO,
-    ACTION_BUTTON_ITEM      = 0x80
+    ACTION_BUTTON_SPELL         = 0x00,
+    ACTION_BUTTON_C             = 0x01,                     // click?
+    ACTION_BUTTON_EQSET         = 0x20,
+    ACTION_BUTTON_MACRO         = 0x40,
+    ACTION_BUTTON_CMACRO        = ACTION_BUTTON_C | ACTION_BUTTON_MACRO,
+    ACTION_BUTTON_ITEM          = 0x80
 };
 
 #define ACTION_BUTTON_ACTION(X) (uint32(X) & 0x00FFFFFF)
@@ -179,16 +181,16 @@ enum ActionButtonIndex
     ACTION_BUTTON_SHAMAN_TOTEMS_BAR = 132,
 };
 
-#define  MAX_ACTION_BUTTONS 144                             // checked in 3.2.0
+#define  MAX_ACTION_BUTTONS     144                         // checked in 3.2.0
 
 typedef std::map<uint8, ActionButton> ActionButtonList;
 
 enum GlyphUpdateState
 {
-    GLYPH_UNCHANGED = 0,
-    GLYPH_CHANGED   = 1,
-    GLYPH_NEW       = 2,
-    GLYPH_DELETED   = 3
+    GLYPH_UNCHANGED             = 0,
+    GLYPH_CHANGED               = 1,
+    GLYPH_NEW                   = 2,
+    GLYPH_DELETED               = 3
 };
 
 struct Glyph
@@ -321,16 +323,16 @@ struct Areas
     float y2;
 };
 
-#define MAX_RUNES       6
-#define RUNE_COOLDOWN   (2*5*IN_MILLISECONDS)               // msec
+#define MAX_RUNES               6
+#define RUNE_COOLDOWN           (2*5*IN_MILLISECONDS)       // msec
 
 enum RuneType
 {
-    RUNE_BLOOD      = 0,
-    RUNE_UNHOLY     = 1,
-    RUNE_FROST      = 2,
-    RUNE_DEATH      = 3,
-    NUM_RUNE_TYPES  = 4
+    RUNE_BLOOD                  = 0,
+    RUNE_UNHOLY                 = 1,
+    RUNE_FROST                  = 2,
+    RUNE_DEATH                  = 3,
+    NUM_RUNE_TYPES              = 4
 };
 
 struct RuneInfo
@@ -369,10 +371,10 @@ typedef std::list<Item*> ItemDurationList;
 
 enum LfgRoles
 {
-    LEADER  = 0x01,
-    TANK    = 0x02,
-    HEALER  = 0x04,
-    DAMAGE  = 0x08
+    LEADER                      = 0x01,
+    TANK                        = 0x02,
+    HEALER                      = 0x04,
+    DAMAGE                      = 0x08
 };
 
 enum RaidGroupError
@@ -386,13 +388,13 @@ enum RaidGroupError
 
 enum DrunkenState
 {
-    DRUNKEN_SOBER   = 0,
-    DRUNKEN_TIPSY   = 1,
-    DRUNKEN_DRUNK   = 2,
-    DRUNKEN_SMASHED = 3
+    DRUNKEN_SOBER               = 0,
+    DRUNKEN_TIPSY               = 1,
+    DRUNKEN_DRUNK               = 2,
+    DRUNKEN_SMASHED             = 3
 };
 
-#define MAX_DRUNKEN   4
+#define MAX_DRUNKEN             4
 
 enum PlayerFlags
 {
@@ -470,8 +472,8 @@ enum PlayerFlags
 #define PLAYER_TITLE_HAND_OF_ADAL          UI64LIT(0x0000008000000000) // 39
 #define PLAYER_TITLE_VENGEFUL_GLADIATOR    UI64LIT(0x0000010000000000) // 40
 
-#define KNOWN_TITLES_SIZE   3
-#define MAX_TITLE_INDEX     (KNOWN_TITLES_SIZE*64)          // 3 uint64 fields
+#define KNOWN_TITLES_SIZE       3
+#define MAX_TITLE_INDEX         (KNOWN_TITLES_SIZE*64)      // 3 uint64 fields
 
 // used in (PLAYER_FIELD_BYTES, 0) byte values
 enum PlayerFieldByteFlags
@@ -495,11 +497,11 @@ enum PlayerFieldByte2Flags
 
 enum MirrorTimerType
 {
-    FATIGUE_TIMER      = 0,
-    BREATH_TIMER       = 1,
-    FIRE_TIMER         = 2
+    FATIGUE_TIMER               = 0,
+    BREATH_TIMER                = 1,
+    FIRE_TIMER                  = 2
 };
-#define MAX_TIMERS      3
+#define MAX_TIMERS              3
 #define DISABLED_MIRROR_TIMER   -1
 
 // 2^n values
@@ -522,40 +524,40 @@ enum PlayerExtraFlags
 // 2^n values
 enum AtLoginFlags
 {
-    AT_LOGIN_NONE              = 0x00,
-    AT_LOGIN_RENAME            = 0x01,
-    AT_LOGIN_RESET_SPELLS      = 0x02,
-    AT_LOGIN_RESET_TALENTS     = 0x04,
-    AT_LOGIN_CUSTOMIZE         = 0x08,
-    AT_LOGIN_RESET_PET_TALENTS = 0x10,
-    AT_LOGIN_FIRST             = 0x20,
+    AT_LOGIN_NONE               = 0x00,
+    AT_LOGIN_RENAME             = 0x01,
+    AT_LOGIN_RESET_SPELLS       = 0x02,
+    AT_LOGIN_RESET_TALENTS      = 0x04,
+    AT_LOGIN_CUSTOMIZE          = 0x08,
+    AT_LOGIN_RESET_PET_TALENTS  = 0x10,
+    AT_LOGIN_FIRST              = 0x20,
 };
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;
 
 enum QuestSlotOffsets
 {
-    QUEST_ID_OFFSET         = 0,
-    QUEST_STATE_OFFSET      = 1,
-    QUEST_COUNTS_OFFSET     = 2,                            // 2 and 3
-    QUEST_TIME_OFFSET       = 4
+    QUEST_ID_OFFSET             = 0,
+    QUEST_STATE_OFFSET          = 1,
+    QUEST_COUNTS_OFFSET         = 2,                        // 2 and 3
+    QUEST_TIME_OFFSET           = 4
 };
 
 #define MAX_QUEST_OFFSET 5
 
 enum QuestSlotStateMask
 {
-    QUEST_STATE_NONE     = 0x0000,
-    QUEST_STATE_COMPLETE = 0x0001,
-    QUEST_STATE_FAIL     = 0x0002
+    QUEST_STATE_NONE            = 0x0000,
+    QUEST_STATE_COMPLETE        = 0x0001,
+    QUEST_STATE_FAIL            = 0x0002
 };
 
 enum SkillUpdateState
 {
-    SKILL_UNCHANGED     = 0,
-    SKILL_CHANGED       = 1,
-    SKILL_NEW           = 2,
-    SKILL_DELETED       = 3
+    SKILL_UNCHANGED             = 0,
+    SKILL_CHANGED               = 1,
+    SKILL_NEW                   = 2,
+    SKILL_DELETED               = 3
 };
 
 struct SkillStatusData
@@ -650,10 +652,10 @@ enum CurrencyTokenSlots                                     // 32 slots
 
 enum EquipmentSetUpdateState
 {
-    EQUIPMENT_SET_UNCHANGED = 0,
-    EQUIPMENT_SET_CHANGED   = 1,
-    EQUIPMENT_SET_NEW       = 2,
-    EQUIPMENT_SET_DELETED   = 3
+    EQUIPMENT_SET_UNCHANGED     = 0,
+    EQUIPMENT_SET_CHANGED       = 1,
+    EQUIPMENT_SET_NEW           = 2,
+    EQUIPMENT_SET_DELETED       = 3
 };
 
 struct EquipmentSet
@@ -736,16 +738,16 @@ enum ArenaTeamInfoType
 
 enum RestType
 {
-    REST_TYPE_NO        = 0,
-    REST_TYPE_IN_TAVERN = 1,
-    REST_TYPE_IN_CITY   = 2
+    REST_TYPE_NO                = 0,
+    REST_TYPE_IN_TAVERN         = 1,
+    REST_TYPE_IN_CITY           = 2
 };
 
 enum DuelCompleteType
 {
-    DUEL_INTERUPTED = 0,
-    DUEL_WON        = 1,
-    DUEL_FLED       = 2
+    DUEL_INTERRUPTED            = 0,
+    DUEL_WON                    = 1,
+    DUEL_FLED                   = 2
 };
 
 enum TeleportToOptions
@@ -760,32 +762,32 @@ enum TeleportToOptions
 /// Type of environmental damages
 enum EnviromentalDamage
 {
-    DAMAGE_EXHAUSTED = 0,
-    DAMAGE_DROWNING  = 1,
-    DAMAGE_FALL      = 2,
-    DAMAGE_LAVA      = 3,
-    DAMAGE_SLIME     = 4,
-    DAMAGE_FIRE      = 5,
-    DAMAGE_FALL_TO_VOID = 6                                 // custom case for fall without durability loss
+    DAMAGE_EXHAUSTED            = 0,
+    DAMAGE_DROWNING             = 1,
+    DAMAGE_FALL                 = 2,
+    DAMAGE_LAVA                 = 3,
+    DAMAGE_SLIME                = 4,
+    DAMAGE_FIRE                 = 5,
+    DAMAGE_FALL_TO_VOID         = 6                         // custom case for fall without durability loss
 };
 
 enum PlayerChatTag
 {
-    CHAT_TAG_NONE       = 0x00,
-    CHAT_TAG_AFK        = 0x01,
-    CHAT_TAG_DND        = 0x02,
-    CHAT_TAG_GM         = 0x04,
-    CHAT_TAG_COM        = 0x08,                             // Commentator
-    CHAT_TAG_DEV        = 0x10,                             // Developer
+    CHAT_TAG_NONE               = 0x00,
+    CHAT_TAG_AFK                = 0x01,
+    CHAT_TAG_DND                = 0x02,
+    CHAT_TAG_GM                 = 0x04,
+    CHAT_TAG_COM                = 0x08,                     // Commentator
+    CHAT_TAG_DEV                = 0x10,                     // Developer
 };
 
 enum PlayedTimeIndex
 {
-    PLAYED_TIME_TOTAL = 0,
-    PLAYED_TIME_LEVEL = 1
+    PLAYED_TIME_TOTAL           = 0,
+    PLAYED_TIME_LEVEL           = 1
 };
 
-#define MAX_PLAYED_TIME_INDEX 2
+#define MAX_PLAYED_TIME_INDEX   2
 
 // used at player loading query list preparing, and later result selection
 enum PlayerLoginQueryIndex
@@ -841,8 +843,8 @@ enum ReputationSource
 };
 
 // Player summoning auto-decline time (in secs)
-#define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
-#define MAX_MONEY_AMOUNT                       (0x7FFFFFFF-1)
+#define MAX_PLAYER_SUMMON_DELAY (2*MINUTE)
+#define MAX_MONEY_AMOUNT        (0x7FFFFFFF-1)
 
 struct InstancePlayerBind
 {
@@ -856,9 +858,9 @@ struct InstancePlayerBind
 
 enum PlayerRestState
 {
-    REST_STATE_RESTED       = 0x01,
-    REST_STATE_NORMAL       = 0x02,
-    REST_STATE_RAF_LINKED   = 0x04                          // Exact use unknown
+    REST_STATE_RESTED           = 0x01,
+    REST_STATE_NORMAL           = 0x02,
+    REST_STATE_RAF_LINKED       = 0x04                      // Exact use unknown
 };
 
 class MANGOS_DLL_SPEC PlayerTaxi
@@ -929,7 +931,6 @@ struct BGData
     time_t             bgAfkReportedTimer;
 
     Team bgTeam;                                            ///< What side the player will be added to, saved
-
 
     uint32 mountSpell;                                      ///< Mount used before join to bg, saved
     uint32 taxiPath[2];                                     ///< Current taxi active path start/end nodes, saved
@@ -1013,7 +1014,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddToWorld() override;
         void RemoveFromWorld() override;
 
-        bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
+        bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0, AreaTrigger const* at = NULL);
 
         bool TeleportTo(WorldLocation const& loc, uint32 options = 0)
         {
@@ -1045,7 +1046,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
-        void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
         void SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time);
 
         Creature* GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask);
@@ -1093,7 +1093,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             else if (state > 0)
                 m_ExtraFlags |= PLAYER_EXTRA_AUCTION_NEUTRAL;
         }
-
 
         void GiveXP(uint32 xp, Unit* victim);
         void GiveLevel(uint32 level);
@@ -1180,7 +1179,6 @@ class MANGOS_DLL_SPEC Player : public Unit
                 return EQUIP_ERR_ITEM_NOT_FOUND;
             uint32 count = pItem->GetCount();
             return _CanStoreItem(bag, slot, dest, pItem->GetEntry(), count, pItem, swap, NULL);
-
         }
         InventoryResult CanStoreItems(Item** pItem, int count) const;
         InventoryResult CanEquipNewItem(uint8 slot, uint16& dest, uint32 item, bool swap) const;
@@ -1203,7 +1201,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool StoreNewItemInBestSlots(uint32 item_id, uint32 item_count);
         Item* StoreNewItemInInventorySlot(uint32 itemEntry, uint32 amount);
 
-        void AutoStoreLoot(uint32 loot_id, LootStore const& store, bool broadcast = false, uint8 bag = NULL_BAG, uint8 slot = NULL_SLOT);
+        void AutoStoreLoot(WorldObject const* lootTarget, uint32 loot_id, LootStore const& store, bool broadcast = false, uint8 bag = NULL_BAG, uint8 slot = NULL_SLOT);
         void AutoStoreLoot(Loot& loot, bool broadcast = false, uint8 bag = NULL_BAG, uint8 slot = NULL_SLOT);
 
         Item* ConvertItem(Item* item, uint32 newItemId);
@@ -1558,7 +1556,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         TrainerSpellState GetTrainerSpellState(TrainerSpell const* trainer_spell, uint32 reqLevel) const;
         bool IsSpellFitByClassAndRace(uint32 spell_id, uint32* pReqlevel = NULL) const;
         bool IsNeedCastPassiveLikeSpellAtLearn(SpellEntry const* spellInfo) const;
-        bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const override;
+        bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const override;
 
         void SendProficiency(ItemClass itemClass, uint32 itemSubclassMask);
         void SendInitialSpells();
@@ -2263,6 +2261,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         static void ConvertInstancesToGroup(Player* player, Group* group = NULL, ObjectGuid player_guid = ObjectGuid());
         DungeonPersistentState* GetBoundInstanceSaveForSelfOrGroup(uint32 mapid);
 
+        AreaLockStatus GetAreaTriggerLockStatus(AreaTrigger const* at, Difficulty difficulty, uint32& miscRequirement);
+        void SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockStatus lockStatus, uint32 miscRequirement = 0);
+
         /*********************************************************/
         /***                   GROUP SYSTEM                    ***/
         /*********************************************************/
@@ -2314,7 +2315,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         AchievementMgr& GetAchievementMgr() { return m_achievementMgr; }
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0, Unit* unit = NULL, uint32 time = 0);
         void StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId, time_t startTime = 0);
-
 
         bool HasTitle(uint32 bitIndex) const;
         bool HasTitle(CharTitlesEntry const* title) const { return HasTitle(title->bit_index); }
@@ -2605,6 +2605,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_lastFallTime;
         float  m_lastFallZ;
+
+        LiquidTypeEntry const* m_lastLiquid;
 
         int32 m_MirrorTimer[MAX_TIMERS];
         uint8 m_MirrorTimerFlags;

@@ -353,33 +353,33 @@ struct GameObjectInfo
             uint32 chairheight;                             //0
             uint32 heightOffset;                            //1
         } barberChair;
-        //33 GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING
+        //33 GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING          // Much guesswork
         struct
         {
             uint32 intactNumHits;                           //0
             uint32 creditProxyCreature;                     //1
             uint32 empty1;                                  //2
             uint32 intactEvent;                             //3
-            uint32 empty2;                                  //4
+            uint32 damagedDisplayId;                        //4
             uint32 damagedNumHits;                          //5
-            uint32 empty3;                                  //6
-            uint32 empty4;                                  //7
-            uint32 empty5;                                  //8
+            uint32 unk1;                                    //6
+            uint32 unk2;                                    //7
+            uint32 unk3;                                    //8
             uint32 damagedEvent;                            //9
-            uint32 empty6;                                  //10
-            uint32 empty7;                                  //11
-            uint32 empty8;                                  //12
-            uint32 empty9;                                  //13
+            uint32 destroyedDisplayId;                      //10
+            uint32 unk4;                                    //11
+            uint32 unk5;                                    //12
+            uint32 unk6;                                    //13
             uint32 destroyedEvent;                          //14
             uint32 empty10;                                 //15
-            uint32 debuildingTimeSecs;                      //16
+            uint32 debuildingTimeSecs;                      //16 // unk, only few with value 300)
             uint32 empty11;                                 //17
-            uint32 destructibleData;                        //18
-            uint32 rebuildingEvent;                         //19
-            uint32 empty12;                                 //20
+            uint32 destructibleData;                        //18 m_ID of DestructibleModelData.DBC
+            uint32 empty12;                                 //19
+            uint32 unk7;                                    //20
             uint32 empty13;                                 //21
-            uint32 damageEvent;                             //22
-            uint32 empty14;                                 //23
+            uint32 rebuildingEvent;                         //22
+            uint32 unk8;                                    //23
         } destructibleBuilding;
         //34 GAMEOBJECT_TYPE_GUILDBANK - empty
         //35 GAMEOBJECT_TYPE_TRAPDOOR
@@ -513,17 +513,6 @@ struct GameObjectInfo
             default: return 0;
         }
     }
-
-    uint32 GetEventScriptId() const
-    {
-        switch (type)
-        {
-            case GAMEOBJECT_TYPE_GOOBER:        return goober.eventId;
-            case GAMEOBJECT_TYPE_CHEST:         return chest.eventId;
-            case GAMEOBJECT_TYPE_CAMERA:        return camera.eventID;
-            default: return 0;
-        }
-    }
 };
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
@@ -610,13 +599,11 @@ enum CapturePointSlider
 {
     CAPTURE_SLIDER_ALLIANCE         = 100,                  // full alliance
     CAPTURE_SLIDER_HORDE            = 0,                    // full horde
-    CAPTURE_SLIDER_NEUTRAL          = 50,                   // middle
-
-    CAPTURE_SLIDER_ALLIANCE_LOCKED  = -1,                   // used to store additional information
-    CAPTURE_SLIDER_HORDE_LOCKED     = -2
+    CAPTURE_SLIDER_MIDDLE           = 50                    // middle
 };
 
 class Unit;
+class GameObjectModel;
 struct GameObjectDisplayInfoEntry;
 
 // 5 sec for bobber catch
@@ -705,20 +692,21 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         GameobjectTypes GetGoType() const { return GameobjectTypes(GetByteValue(GAMEOBJECT_BYTES_1, 1)); }
         void SetGoType(GameobjectTypes type) { SetByteValue(GAMEOBJECT_BYTES_1, 1, type); }
         GOState GetGoState() const { return GOState(GetByteValue(GAMEOBJECT_BYTES_1, 0)); }
-        void SetGoState(GOState state) { SetByteValue(GAMEOBJECT_BYTES_1, 0, state); }
+        void SetGoState(GOState state);
         uint8 GetGoArtKit() const { return GetByteValue(GAMEOBJECT_BYTES_1, 2); }
         void SetGoArtKit(uint8 artkit) { SetByteValue(GAMEOBJECT_BYTES_1, 2, artkit); }
         uint8 GetGoAnimProgress() const { return GetByteValue(GAMEOBJECT_BYTES_1, 3); }
         void SetGoAnimProgress(uint8 animprogress) { SetByteValue(GAMEOBJECT_BYTES_1, 3, animprogress); }
         uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_DISPLAYID); }
         void SetDisplayId(uint32 modelId);
+        void SetPhaseMask(uint32 newPhaseMask, bool update);
 
         float GetObjectBoundingRadius() const override;     // overwrite WorldObject version
 
         void Use(Unit* user);
 
         LootState getLootState() const { return m_lootState; }
-        void SetLootState(LootState s) { m_lootState = s; }
+        void SetLootState(LootState s);
 
         void AddToSkillupList(Player* player);
         bool IsInSkillupList(Player* player) const;
@@ -741,7 +729,6 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         // Loot System
         Loot loot;
-        void getFishLoot(Loot* loot, Player* loot_owner);
         void StartGroupLoot(Group* group, uint32 timer) override;
 
         ObjectGuid GetLootRecipientGuid() const { return m_lootRecipientGuid; }
@@ -766,13 +753,25 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void SummonLinkedTrapIfAny();
         void TriggerLinkedGameObject(Unit* target);
 
+        // Destructible GO handling
+        void DealGameObjectDamage(uint32 damage, uint32 spell, Unit* caster);
+        void RebuildGameObject(uint32 spell, Unit* caster);
+        void ForceGameObjectHealth(int32 diff, Unit* caster);
+        uint32 GetHealth() const { return m_useTimes; }
+        uint32 GetMaxHealth() const { return m_goInfo->destructibleBuilding.intactNumHits + m_goInfo->destructibleBuilding.damagedNumHits; }
+
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
+
+        bool IsCollisionEnabled() const;                    // Check if a go should collide. Like if a door is closed
 
         GameObject* LookupFishingHoleAround(float range);
 
-        void SetCapturePointSlider(int8 value);
+        void SetCapturePointSlider(float value);
+        float GetCapturePointSlider() const { return m_captureSlider; }
 
         GridReference<GameObject>& GetGridRef() { return m_gridRef; }
+
+        GameObjectModel* m_model;
 
     protected:
         uint32      m_spellId;
@@ -784,12 +783,12 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         // For traps/goober this: spell casting cooldown, for doors/buttons: reset time.
 
         uint32      m_captureTimer;                         // (msecs) timer used for capture points
-        float       m_captureSlider;
+        float       m_captureSlider;                        // capture point slider value in range of [0..100]
         CapturePointState m_captureState;
 
         GuidSet m_SkillupSet;                               // players that already have skill-up at GO use
 
-        uint32 m_useTimes;                                  // amount uses/charges triggered
+        uint32 m_useTimes;                                  // amount uses/charges triggered - also used for health for DESTRUCTIBLE_BUILDING
 
         // collected only for GAMEOBJECT_TYPE_SUMMONING_RITUAL
         ObjectGuid m_firstUser;                             // first GO user, in most used cases owner, but in some cases no, for example non-summoned multi-use GAMEOBJECT_TYPE_SUMMONING_RITUAL
@@ -810,7 +809,10 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);
         void TickCapturePoint();
+        void UpdateModel();                                 // updates model in case displayId were changed
+        void UpdateCollisionState() const;                  // updates state in Map's dynamic collision tree
 
         GridReference<GameObject> m_gridRef;
 };
+
 #endif

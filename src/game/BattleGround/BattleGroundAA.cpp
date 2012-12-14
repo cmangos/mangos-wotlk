@@ -37,7 +37,6 @@ BattleGroundAA::BattleGroundAA()
 
 BattleGroundAA::~BattleGroundAA()
 {
-
 }
 
 void BattleGroundAA::Update(uint32 diff)

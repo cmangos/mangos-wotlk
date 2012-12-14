@@ -28,6 +28,9 @@
 #include "Cell.h"
 #include "CellImpl.h"
 #include "SQLStorages.h"
+#include "BattleGround/BattleGround.h"
+#include "OutdoorPvP/OutdoorPvP.h"
+#include "WaypointMovementGenerator.h"
 
 #include "revision_nr.h"
 
@@ -364,7 +367,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                         info->type == GAMEOBJECT_TYPE_BUTTON      ||
                         info->type == GAMEOBJECT_TYPE_TRAP)
                 {
-                    sLog.outErrorDb("Table `%s` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u", tablename, info->id, tmp.id);
+                    sLog.outErrorDb("Table `%s` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u", tablename, info->type, tmp.id);
                     continue;
                 }
                 break;
@@ -614,6 +617,17 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_TERMINATE_SCRIPT:           // 31
+            {
+                if (tmp.terminateScript.npcEntry && !ObjectMgr::GetCreatureTemplate(tmp.terminateScript.npcEntry))
+                {
+                    sLog.outErrorDb("Table `%s` has datalong = %u in SCRIPT_COMMAND_TERMINATE_SCRIPT for script id %u, but this npc entry does not exist.", tablename, tmp.sendTaxiPath.taxiPathId, tmp.id);
+                    continue;
+                }
+                break;
+            }
+            case SCRIPT_COMMAND_PAUSE_WAYPOINTS:            // 32
+                break;
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -640,55 +654,55 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
 
 void ScriptMgr::LoadGameObjectScripts()
 {
-    LoadScripts(sGameObjectScripts, "gameobject_scripts");
+    LoadScripts(sGameObjectScripts, "dbscripts_on_go_use");
 
     // check ids
     for (ScriptMapMap::const_iterator itr = sGameObjectScripts.second.begin(); itr != sGameObjectScripts.second.end(); ++itr)
     {
         if (!sObjectMgr.GetGOData(itr->first))
-            sLog.outErrorDb("Table `gameobject_scripts` has not existing gameobject (GUID: %u) as script id", itr->first);
+            sLog.outErrorDb("Table `dbscripts_on_go_use` has not existing gameobject (GUID: %u) as script id", itr->first);
     }
 }
 
 void ScriptMgr::LoadGameObjectTemplateScripts()
 {
-    LoadScripts(sGameObjectTemplateScripts, "gameobject_template_scripts");
+    LoadScripts(sGameObjectTemplateScripts, "dbscripts_on_go_template_use");
 
     // check ids
     for (ScriptMapMap::const_iterator itr = sGameObjectTemplateScripts.second.begin(); itr != sGameObjectTemplateScripts.second.end(); ++itr)
     {
         if (!sObjectMgr.GetGameObjectInfo(itr->first))
-            sLog.outErrorDb("Table `gameobject_template_scripts` has not existing gameobject (Entry: %u) as script id", itr->first);
+            sLog.outErrorDb("Table `dbscripts_on_go_template_use` has not existing gameobject (Entry: %u) as script id", itr->first);
     }
 }
 
 void ScriptMgr::LoadQuestEndScripts()
 {
-    LoadScripts(sQuestEndScripts, "quest_end_scripts");
+    LoadScripts(sQuestEndScripts, "dbscripts_on_quest_end");
 
     // check ids
     for (ScriptMapMap::const_iterator itr = sQuestEndScripts.second.begin(); itr != sQuestEndScripts.second.end(); ++itr)
     {
         if (!sObjectMgr.GetQuestTemplate(itr->first))
-            sLog.outErrorDb("Table `quest_end_scripts` has not existing quest (Id: %u) as script id", itr->first);
+            sLog.outErrorDb("Table `dbscripts_on_quest_end` has not existing quest (Id: %u) as script id", itr->first);
     }
 }
 
 void ScriptMgr::LoadQuestStartScripts()
 {
-    LoadScripts(sQuestStartScripts, "quest_start_scripts");
+    LoadScripts(sQuestStartScripts, "dbscripts_on_quest_start");
 
     // check ids
     for (ScriptMapMap::const_iterator itr = sQuestStartScripts.second.begin(); itr != sQuestStartScripts.second.end(); ++itr)
     {
         if (!sObjectMgr.GetQuestTemplate(itr->first))
-            sLog.outErrorDb("Table `quest_start_scripts` has not existing quest (Id: %u) as script id", itr->first);
+            sLog.outErrorDb("Table `dbscripts_on_quest_start` has not existing quest (Id: %u) as script id", itr->first);
     }
 }
 
 void ScriptMgr::LoadSpellScripts()
 {
-    LoadScripts(sSpellScripts, "spell_scripts");
+    LoadScripts(sSpellScripts, "dbscripts_on_spell");
 
     // check ids
     for (ScriptMapMap::const_iterator itr = sSpellScripts.second.begin(); itr != sSpellScripts.second.end(); ++itr)
@@ -696,7 +710,7 @@ void ScriptMgr::LoadSpellScripts()
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
         if (!spellInfo)
         {
-            sLog.outErrorDb("Table `spell_scripts` has not existing spell (Id: %u) as script id", itr->first);
+            sLog.outErrorDb("Table `dbscripts_on_spell` has not existing spell (Id: %u) as script id", itr->first);
             continue;
         }
 
@@ -712,89 +726,37 @@ void ScriptMgr::LoadSpellScripts()
         }
 
         if (!found)
-            sLog.outErrorDb("Table `spell_scripts` has unsupported spell (Id: %u)", itr->first);
+            sLog.outErrorDb("Table `dbscripts_on_spell` has unsupported spell (Id: %u)", itr->first);
     }
 }
 
 void ScriptMgr::LoadEventScripts()
 {
-    LoadScripts(sEventScripts, "event_scripts");
+    LoadScripts(sEventScripts, "dbscripts_on_event");
 
-    std::set<uint32> evt_scripts;
-
-    // Load all possible script entries from gameobjects
-    for (uint32 i = 1; i < sGOStorage.MaxEntry; ++i)
-    {
-        if (GameObjectInfo const* goInfo = sGOStorage.LookupEntry<GameObjectInfo>(i))
-        {
-            if (uint32 eventId = goInfo->GetEventScriptId())
-                evt_scripts.insert(eventId);
-
-            if (goInfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
-            {
-                evt_scripts.insert(goInfo->capturePoint.neutralEventID1);
-                evt_scripts.insert(goInfo->capturePoint.neutralEventID2);
-                evt_scripts.insert(goInfo->capturePoint.contestedEventID1);
-                evt_scripts.insert(goInfo->capturePoint.contestedEventID2);
-                evt_scripts.insert(goInfo->capturePoint.progressEventID1);
-                evt_scripts.insert(goInfo->capturePoint.progressEventID2);
-                evt_scripts.insert(goInfo->capturePoint.winEventID1);
-                evt_scripts.insert(goInfo->capturePoint.winEventID2);
-            }
-        }
-    }
-
-    // Load all possible script entries from spells
-    for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
-    {
-        SpellEntry const* spell = sSpellStore.LookupEntry(i);
-        if (spell)
-        {
-            for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
-            {
-                if (spell->Effect[j] == SPELL_EFFECT_SEND_EVENT)
-                {
-                    if (spell->EffectMiscValue[j])
-                        evt_scripts.insert(spell->EffectMiscValue[j]);
-                }
-            }
-        }
-    }
-
-    for (size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
-    {
-        for (size_t node_idx = 0; node_idx < sTaxiPathNodesByPath[path_idx].size(); ++node_idx)
-        {
-            TaxiPathNodeEntry const& node = sTaxiPathNodesByPath[path_idx][node_idx];
-
-            if (node.arrivalEventID)
-                evt_scripts.insert(node.arrivalEventID);
-
-            if (node.departureEventID)
-                evt_scripts.insert(node.departureEventID);
-        }
-    }
+    std::set<uint32> eventIds;                              // Store possible event ids
+    CollectPossibleEventIds(eventIds);
 
     // Then check if all scripts are in above list of possible script entries
     for (ScriptMapMap::const_iterator itr = sEventScripts.second.begin(); itr != sEventScripts.second.end(); ++itr)
     {
-        std::set<uint32>::const_iterator itr2 = evt_scripts.find(itr->first);
-        if (itr2 == evt_scripts.end())
-            sLog.outErrorDb("Table `event_scripts` has script (Id: %u) not referring to any gameobject_template type 10 data2 field, type 3 data6 field, type 13 data 2 field, type 29 or any spell effect %u or path taxi node data",
+        std::set<uint32>::const_iterator itr2 = eventIds.find(itr->first);
+        if (itr2 == eventIds.end())
+            sLog.outErrorDb("Table `dbscripts_on_event` has script (Id: %u) not referring to any fitting gameobject_template or any spell effect %u or path taxi node data",
                             itr->first, SPELL_EFFECT_SEND_EVENT);
     }
 }
 
 void ScriptMgr::LoadGossipScripts()
 {
-    LoadScripts(sGossipScripts, "gossip_scripts");
+    LoadScripts(sGossipScripts, "dbscripts_on_gossip");
 
     // checks are done in LoadGossipMenuItems and LoadGossipMenu
 }
 
 void ScriptMgr::LoadCreatureMovementScripts()
 {
-    LoadScripts(sCreatureMovementScripts, "creature_movement_scripts");
+    LoadScripts(sCreatureMovementScripts, "dbscripts_on_creature_movement");
 
     // checks are done in WaypointManager::Load
 }
@@ -1007,23 +969,32 @@ Player* ScriptAction::GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldO
 }
 
 /// Handle one Script Step
-void ScriptAction::HandleScriptStep()
+// Return true if and only if further parts of this script shall be skipped
+bool ScriptAction::HandleScriptStep()
 {
-    Object* source = NULL;
-    Object* target = NULL;
-    if (!GetScriptCommandObject(m_sourceGuid, true, source))
-        return;
-    if (!GetScriptCommandObject(m_targetGuid, false, target))
-        return;
+    WorldObject* pSource;
+    WorldObject* pTarget;
+    Object* pSourceOrItem;                                  // Stores a provided pSource (if exists as WorldObject) or source-item
 
-    // Give some debug log output for easier use
-    DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, command %u for source %s (%sin world), target %s (%sin world)", m_table, m_script->id, m_script->command, m_sourceGuid.GetString().c_str(), source ? "" : "not ", m_targetGuid.GetString().c_str(), target ? "" : "not ");
+    {                                                       // Add scope for source & target variables so that they are not used below
+        Object* source = NULL;
+        Object* target = NULL;
+        if (!GetScriptCommandObject(m_sourceGuid, true, source))
+            return false;
+        if (!GetScriptCommandObject(m_targetGuid, false, target))
+            return false;
 
-    // Get expected source and target (if defined with buddy)
-    WorldObject* pSource = source && source->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)source : NULL;
-    WorldObject* pTarget = target && target->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)target : NULL;
-    if (!GetScriptProcessTargets(pSource, pTarget, pSource, pTarget))
-        return;
+        // Give some debug log output for easier use
+        DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, command %u for source %s (%sin world), target %s (%sin world)", m_table, m_script->id, m_script->command, m_sourceGuid.GetString().c_str(), source ? "" : "not ", m_targetGuid.GetString().c_str(), target ? "" : "not ");
+
+        // Get expected source and target (if defined with buddy)
+        pSource = source && source->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)source : NULL;
+        pTarget = target && target->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)target : NULL;
+        if (!GetScriptProcessTargets(pSource, pTarget, pSource, pTarget))
+            return false;
+
+        pSourceOrItem = pSource ? pSource : (source && source->isType(TYPEMASK_ITEM) ? source : NULL);
+    }
 
     switch (m_script->command)
     {
@@ -1099,20 +1070,18 @@ void ScriptAction::HandleScriptStep()
             break;
         }
         case SCRIPT_COMMAND_FIELD_SET:                      // 2
-            // TODO
-            if (!source)
+            if (!pSourceOrItem)
             {
                 sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u call for NULL object.", m_table, m_script->id, m_script->command);
                 break;
             }
-
-            if (m_script->setField.fieldId <= OBJECT_FIELD_ENTRY || m_script->setField.fieldId >= source->GetValuesCount())
+            if (m_script->setField.fieldId <= OBJECT_FIELD_ENTRY || m_script->setField.fieldId >= pSourceOrItem->GetValuesCount())
             {
-                sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u call for wrong field %u (max count: %u) in object (TypeId: %u).", m_table, m_script->id, m_script->command, m_script->setField.fieldId, source->GetValuesCount(), source->GetTypeId());
+                sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u call for wrong field %u (max count: %u) in %s.",
+                              m_table, m_script->id, m_script->command, m_script->setField.fieldId, pSourceOrItem->GetValuesCount(), pSourceOrItem->GetGuidStr().c_str());
                 break;
             }
-
-            source->SetUInt32Value(m_script->setField.fieldId, m_script->setField.fieldValue);
+            pSourceOrItem->SetUInt32Value(m_script->setField.fieldId, m_script->setField.fieldValue);
             break;
         case SCRIPT_COMMAND_MOVE_TO:                        // 3
         {
@@ -1146,36 +1115,32 @@ void ScriptAction::HandleScriptStep()
             break;
         }
         case SCRIPT_COMMAND_FLAG_SET:                       // 4
-            // TODO
-            if (!source)
+            if (!pSourceOrItem)
             {
                 sLog.outError("SCRIPT_COMMAND_FLAG_SET (script id %u) call for NULL object.", m_script->id);
                 break;
             }
-            if (m_script->setFlag.fieldId <= OBJECT_FIELD_ENTRY || m_script->setFlag.fieldId >= source->GetValuesCount())
+            if (m_script->setFlag.fieldId <= OBJECT_FIELD_ENTRY || m_script->setFlag.fieldId >= pSourceOrItem->GetValuesCount())
             {
-                sLog.outError("SCRIPT_COMMAND_FLAG_SET (script id %u) call for wrong field %u (max count: %u) in object (TypeId: %u).",
-                              m_script->id, m_script->setFlag.fieldId, source->GetValuesCount(), source->GetTypeId());
+                sLog.outError("SCRIPT_COMMAND_FLAG_SET (script id %u) call for wrong field %u (max count: %u) in %s.",
+                              m_script->id, m_script->setFlag.fieldId, pSourceOrItem->GetValuesCount(), pSourceOrItem->GetGuidStr().c_str());
                 break;
             }
-
-            source->SetFlag(m_script->setFlag.fieldId, m_script->setFlag.fieldValue);
+            pSourceOrItem->SetFlag(m_script->setFlag.fieldId, m_script->setFlag.fieldValue);
             break;
         case SCRIPT_COMMAND_FLAG_REMOVE:                    // 5
-            // TODO
-            if (!source)
+            if (!pSourceOrItem)
             {
                 sLog.outError("SCRIPT_COMMAND_FLAG_REMOVE (script id %u) call for NULL object.", m_script->id);
                 break;
             }
-            if (m_script->removeFlag.fieldId <= OBJECT_FIELD_ENTRY || m_script->removeFlag.fieldId >= source->GetValuesCount())
+            if (m_script->removeFlag.fieldId <= OBJECT_FIELD_ENTRY || m_script->removeFlag.fieldId >= pSourceOrItem->GetValuesCount())
             {
-                sLog.outError("SCRIPT_COMMAND_FLAG_REMOVE (script id %u) call for wrong field %u (max count: %u) in object (TypeId: %u).",
-                              m_script->id, m_script->removeFlag.fieldId, source->GetValuesCount(), source->GetTypeId());
+                sLog.outError("SCRIPT_COMMAND_FLAG_REMOVE (script id %u) call for wrong field %u (max count: %u) in %s.",
+                              m_script->id, m_script->removeFlag.fieldId, pSourceOrItem->GetValuesCount(), pSourceOrItem->GetGuidStr().c_str());
                 break;
             }
-
-            source->RemoveFlag(m_script->removeFlag.fieldId, m_script->removeFlag.fieldValue);
+            pSourceOrItem->RemoveFlag(m_script->removeFlag.fieldId, m_script->removeFlag.fieldValue);
             break;
         case SCRIPT_COMMAND_TELEPORT_TO:                    // 6
         {
@@ -1362,7 +1327,7 @@ void ScriptAction::HandleScriptStep()
             pDoor->UseDoorOrButton(time_to_reset);
 
             if (pTarget && pTarget->isType(TYPEMASK_GAMEOBJECT) && ((GameObject*)pTarget)->GetGoType() == GAMEOBJECT_TYPE_BUTTON)
-                ((GameObject*)target)->UseDoorOrButton(time_to_reset);
+                ((GameObject*)pTarget)->UseDoorOrButton(time_to_reset);
 
             break;
         }
@@ -1396,7 +1361,7 @@ void ScriptAction::HandleScriptStep()
 
             break;
         }
-        case SCRIPT_COMMAND_PLAY_SOUND:                     // 16 // TODO
+        case SCRIPT_COMMAND_PLAY_SOUND:                     // 16
         {
             if (!pSource)
             {
@@ -1405,30 +1370,19 @@ void ScriptAction::HandleScriptStep()
             }
 
             // bitmask: 0/1=anyone/target, 0/2=with distance dependent
-            Player* pTarget = NULL;
-
+            Player* pSoundTarget = NULL;
             if (m_script->playSound.flags & 1)
             {
-                if (!target)
-                {
-                    sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u in targeted mode call for NULL target.", m_table, m_script->id, m_script->command);
+                pSoundTarget = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
+                if (!pSoundTarget)
                     break;
-                }
-
-                if (target->GetTypeId() != TYPEID_PLAYER)
-                {
-                    sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u in targeted mode call for non-player (TypeId: %u), skipping.", m_table, m_script->id, m_script->command, target->GetTypeId());
-                    break;
-                }
-
-                pTarget = (Player*)target;
             }
 
             // bitmask: 0/1=anyone/target, 0/2=with distance dependent
             if (m_script->playSound.flags & 2)
-                pSource->PlayDistanceSound(m_script->playSound.soundId, pTarget);
+                pSource->PlayDistanceSound(m_script->playSound.soundId, pSoundTarget);
             else
-                pSource->PlayDirectSound(m_script->playSound.soundId, pTarget);
+                pSource->PlayDirectSound(m_script->playSound.soundId, pSoundTarget);
 
             break;
         }
@@ -1563,7 +1517,7 @@ void ScriptAction::HandleScriptStep()
             if (LogIfNotCreature(pSource))
                 break;
 
-            ((Creature*)pSource)->SetWalk(!m_script->run.run);
+            ((Creature*)pSource)->SetWalk(!m_script->run.run, true);
 
             break;
         }
@@ -1575,7 +1529,7 @@ void ScriptAction::HandleScriptStep()
                 break;
 
             Creature* pAttacker = static_cast<Creature*>(pSource);
-            Unit* unitTarget = static_cast<Unit*>(target);
+            Unit* unitTarget = static_cast<Unit*>(pTarget);
 
             if (pAttacker->IsFriendlyTo(unitTarget))
             {
@@ -1655,10 +1609,64 @@ void ScriptAction::HandleScriptStep()
             pPlayer->ActivateTaxiPathTo(m_script->sendTaxiPath.taxiPathId);
             break;
         }
+        case SCRIPT_COMMAND_TERMINATE_SCRIPT:               // 31
+        {
+            bool result = false;
+            if (m_script->terminateScript.npcEntry)
+            {
+                WorldObject* pSearcher = pSource ? pSource : pTarget;
+                if (pSearcher->GetTypeId() == TYPEID_PLAYER && pTarget && pTarget->GetTypeId() != TYPEID_PLAYER)
+                    pSearcher = pTarget;
+
+                Creature* pCreatureBuddy = NULL;
+                MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->terminateScript.npcEntry, true, false, m_script->terminateScript.searchDist);
+                MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
+                Cell::VisitGridObjects(pSearcher, searcher, m_script->terminateScript.searchDist);
+
+                if (!(m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) && !pCreatureBuddy)
+                {
+                    DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched npc %u was not found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
+                    result = true;
+                }
+                else if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && pCreatureBuddy)
+                {
+                    DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched npc %u was found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
+                    result = true;
+                }
+            }
+            else
+                result = true;
+
+            if (result)                                    // Terminate further steps of this script
+            {
+                 if (m_script->textId[0] && !LogIfNotCreature(pSource))
+                 {
+                     Creature* cSource = static_cast<Creature*>(pSource);
+                     if (cSource->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                         (static_cast<WaypointMovementGenerator<Creature>* >(cSource->GetMotionMaster()->top()))->AddToWaypointPauseTime(m_script->textId[0]);
+                 }
+
+                return true;
+            }
+
+            break;
+        }
+        case SCRIPT_COMMAND_PAUSE_WAYPOINTS:                // 32
+        {
+            if (LogIfNotCreature(pSource))
+                return false;
+            if (m_script->pauseWaypoint.doPause)
+                ((Creature*)pSource)->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+            else
+                ((Creature*)pSource)->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+            break;
+        }
         default:
             sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u unknown command used.", m_table, m_script->id, m_script->command);
             break;
     }
+
+    return false;
 }
 
 // /////////////////////////////////////////////////////////
@@ -1729,62 +1737,8 @@ void ScriptMgr::LoadEventIdScripts()
 
     BarGoLink bar(result->GetRowCount());
 
-    // TODO: remove duplicate code below, same way to collect event id's used in LoadEventScripts()
-    std::set<uint32> evt_scripts;
-
-    // Load all possible event entries from gameobjects
-    for (uint32 i = 1; i < sGOStorage.MaxEntry; ++i)
-    {
-        if (GameObjectInfo const* goInfo = sGOStorage.LookupEntry<GameObjectInfo>(i))
-        {
-            if (uint32 eventId = goInfo->GetEventScriptId())
-                evt_scripts.insert(eventId);
-
-            if (goInfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
-            {
-                evt_scripts.insert(goInfo->capturePoint.neutralEventID1);
-                evt_scripts.insert(goInfo->capturePoint.neutralEventID2);
-                evt_scripts.insert(goInfo->capturePoint.contestedEventID1);
-                evt_scripts.insert(goInfo->capturePoint.contestedEventID2);
-                evt_scripts.insert(goInfo->capturePoint.progressEventID1);
-                evt_scripts.insert(goInfo->capturePoint.progressEventID2);
-                evt_scripts.insert(goInfo->capturePoint.winEventID1);
-                evt_scripts.insert(goInfo->capturePoint.winEventID2);
-            }
-        }
-    }
-
-    // Load all possible event entries from spells
-    for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
-    {
-        SpellEntry const* spell = sSpellStore.LookupEntry(i);
-        if (spell)
-        {
-            for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
-            {
-                if (spell->Effect[j] == SPELL_EFFECT_SEND_EVENT)
-                {
-                    if (spell->EffectMiscValue[j])
-                        evt_scripts.insert(spell->EffectMiscValue[j]);
-                }
-            }
-        }
-    }
-
-    // Load all possible event entries from taxi path nodes
-    for (size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
-    {
-        for (size_t node_idx = 0; node_idx < sTaxiPathNodesByPath[path_idx].size(); ++node_idx)
-        {
-            TaxiPathNodeEntry const& node = sTaxiPathNodesByPath[path_idx][node_idx];
-
-            if (node.arrivalEventID)
-                evt_scripts.insert(node.arrivalEventID);
-
-            if (node.departureEventID)
-                evt_scripts.insert(node.departureEventID);
-        }
-    }
+    std::set<uint32> eventIds;                              // Store possible event ids
+    CollectPossibleEventIds(eventIds);
 
     do
     {
@@ -1796,8 +1750,8 @@ void ScriptMgr::LoadEventIdScripts()
         uint32 eventId          = fields[0].GetUInt32();
         const char* scriptName  = fields[1].GetString();
 
-        std::set<uint32>::const_iterator itr = evt_scripts.find(eventId);
-        if (itr == evt_scripts.end())
+        std::set<uint32>::const_iterator itr = eventIds.find(eventId);
+        if (itr == eventIds.end())
             sLog.outErrorDb("Table `scripted_event_id` has id %u not referring to any gameobject_template type 10 data2 field, type 3 data6 field, type 13 data 2 field, type 29 or any spell effect %u or path taxi node data",
                             eventId, SPELL_EFFECT_SEND_EVENT);
 
@@ -2130,6 +2084,121 @@ void ScriptMgr::UnloadScriptLibrary()
     m_pOnAuraDummy              = NULL;
 }
 
+void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
+{
+    // Load all possible script entries from gameobjects
+    for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
+    {
+        switch (itr->type)
+        {
+            case GAMEOBJECT_TYPE_GOOBER:
+                eventIds.insert(itr->goober.eventId);
+                break;
+            case GAMEOBJECT_TYPE_CHEST:
+                eventIds.insert(itr->chest.eventId);
+                break;
+            case GAMEOBJECT_TYPE_CAMERA:
+                eventIds.insert(itr->camera.eventID);
+                break;
+            case GAMEOBJECT_TYPE_CAPTURE_POINT:
+                eventIds.insert(itr->capturePoint.neutralEventID1);
+                eventIds.insert(itr->capturePoint.neutralEventID2);
+                eventIds.insert(itr->capturePoint.contestedEventID1);
+                eventIds.insert(itr->capturePoint.contestedEventID2);
+                eventIds.insert(itr->capturePoint.progressEventID1);
+                eventIds.insert(itr->capturePoint.progressEventID2);
+                eventIds.insert(itr->capturePoint.winEventID1);
+                eventIds.insert(itr->capturePoint.winEventID2);
+                break;
+            case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
+                eventIds.insert(itr->destructibleBuilding.damagedEvent);
+                eventIds.insert(itr->destructibleBuilding.destroyedEvent);
+                eventIds.insert(itr->destructibleBuilding.intactEvent);
+                eventIds.insert(itr->destructibleBuilding.rebuildingEvent);
+                break;
+            default:
+                break;
+        }
+    }
+
+    // Load all possible script entries from spells
+    for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
+    {
+        SpellEntry const* spell = sSpellStore.LookupEntry(i);
+        if (spell)
+        {
+            for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+            {
+                if (spell->Effect[j] == SPELL_EFFECT_SEND_EVENT)
+                {
+                    if (spell->EffectMiscValue[j])
+                        eventIds.insert(spell->EffectMiscValue[j]);
+                }
+            }
+        }
+    }
+
+    // Load all possible event entries from taxi path nodes
+    for (size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
+    {
+        for (size_t node_idx = 0; node_idx < sTaxiPathNodesByPath[path_idx].size(); ++node_idx)
+        {
+            TaxiPathNodeEntry const& node = sTaxiPathNodesByPath[path_idx][node_idx];
+
+            if (node.arrivalEventID)
+                eventIds.insert(node.arrivalEventID);
+
+            if (node.departureEventID)
+                eventIds.insert(node.departureEventID);
+        }
+    }
+}
+
+// Starters for events
+bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart/*=true*/, Unit* forwardToPvp/*=NULL*/)
+{
+    MANGOS_ASSERT(source);
+
+    // Handle SD2 script
+    if (sScriptMgr.OnProcessEvent(id, source, target, isStart))
+        return true;
+
+    // Handle PvP Calls
+    if (forwardToPvp && source->GetTypeId() == TYPEID_GAMEOBJECT)
+    {
+        BattleGround* bg = NULL;
+        OutdoorPvP* opvp = NULL;
+        if (forwardToPvp->GetTypeId() == TYPEID_PLAYER)
+        {
+            bg = ((Player*)forwardToPvp)->GetBattleGround();
+            if (!bg)
+                opvp = sOutdoorPvPMgr.GetScript(((Player*)forwardToPvp)->GetCachedZoneId());
+        }
+        else
+        {
+            if (map->IsBattleGroundOrArena())
+                bg = ((BattleGroundMap*)map)->GetBG();
+            else                                            // Use the go, because GOs don't move
+                opvp = sOutdoorPvPMgr.GetScript(((GameObject*)source)->GetZoneId());
+        }
+
+        if (bg && bg->HandleEvent(id, static_cast<GameObject*>(source)))
+            return true;
+
+        if (opvp && opvp->HandleEvent(id, static_cast<GameObject*>(source)))
+            return true;
+    }
+
+    Map::ScriptExecutionParam execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET;
+    if (source->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT))
+        execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE;
+    else if (target && target->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT))
+        execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET;
+
+    return map->ScriptsStart(sEventScripts, id, source, target, execParam);
+}
+
+// Wrappers
 uint32 GetAreaTriggerScriptId(uint32 triggerId)
 {
     return sScriptMgr.GetAreaTriggerScriptId(triggerId);

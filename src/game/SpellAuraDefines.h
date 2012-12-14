@@ -55,7 +55,7 @@ enum AuraType
     SPELL_AURA_MOD_STEALTH_DETECT = 17,
     SPELL_AURA_MOD_INVISIBILITY = 18,
     SPELL_AURA_MOD_INVISIBILITY_DETECTION = 19,
-    SPELL_AURA_OBS_MOD_HEALTH = 20,                         //20,21 unofficial
+    SPELL_AURA_OBS_MOD_HEALTH = 20,                         // 20,21 unofficial
     SPELL_AURA_OBS_MOD_MANA = 21,
     SPELL_AURA_MOD_RESISTANCE = 22,
     SPELL_AURA_PERIODIC_TRIGGER_SPELL = 23,
@@ -83,7 +83,7 @@ enum AuraType
     SPELL_AURA_TRACK_RESOURCES = 45,
     SPELL_AURA_46 = 46,                                     // Ignore all Gear test spells
     SPELL_AURA_MOD_PARRY_PERCENT = 47,
-    SPELL_AURA_48 = 48,                                     // One periodic spell
+    SPELL_AURA_PERIODIC_TRIGGER_BY_CLIENT = 48,             // Client periodic trigger spell by self (3 spells in 3.3.5a)
     SPELL_AURA_MOD_DODGE_PERCENT = 49,
     SPELL_AURA_MOD_CRITICAL_HEALING_AMOUNT = 50,
     SPELL_AURA_MOD_BLOCK_PERCENT = 51,
@@ -331,7 +331,7 @@ enum AuraType
     SPELL_AURA_ADD_MECHANIC_ABILITIES = 293,
     SPELL_AURA_STOP_NATURAL_MANA_REGEN = 294,
     SPELL_AURA_295 = 295,
-    SPELL_AURA_296 = 296,
+    SPELL_AURA_SET_VEHICLE_ID = 296,
     SPELL_AURA_297 = 297,
     SPELL_AURA_298 = 298,
     SPELL_AURA_299 = 299,

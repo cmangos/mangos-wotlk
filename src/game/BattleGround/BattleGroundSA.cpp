@@ -32,7 +32,6 @@ BattleGroundSA::BattleGroundSA()
 
 BattleGroundSA::~BattleGroundSA()
 {
-
 }
 
 void BattleGroundSA::Update(uint32 diff)
@@ -59,7 +58,6 @@ void BattleGroundSA::AddPlayer(Player* plr)
 
 void BattleGroundSA::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
 {
-
 }
 
 void BattleGroundSA::HandleAreaTrigger(Player* /*source*/, uint32 /*trigger*/)

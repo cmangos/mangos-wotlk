@@ -181,7 +181,7 @@ void Totem::SetTypeBySummonSpell(SpellEntry const* spellProto)
         m_type = TOTEM_STATUE;                              // Jewelery statue
 }
 
-bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const
+bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
 {
     switch (spellInfo->Effect[index])
     {
@@ -211,5 +211,5 @@ bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex 
             return true;
     }
 
-    return Creature::IsImmuneToSpellEffect(spellInfo, index);
+    return Creature::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
 }

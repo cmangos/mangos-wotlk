@@ -809,7 +809,8 @@ enum MangosStrings
     LANG_GUILD_INITIATE                 = 815,
     LANG_FAIL_ENTER_SPECTRAL_REALM      = 816,
     LANG_NO_FLY_ZONE                    = 817,
-    // Room for in-game strings           818-999 not used
+    LANG_TELEREQ_QUEST_BLACK_MORASS     = 818,
+    // Room for in-game strings           819-999 not used
 
     // Level 4 (CLI only commands)
     LANG_COMMAND_EXIT                   = 1000,
@@ -939,7 +940,9 @@ enum MangosStrings
     LANG_AHBOT_ITEMS_RATIO              = 1191,
     LANG_MOVEGENS_EFFECT                = 1192,
     LANG_GEARSCORE                      = 1193,
-    // Room for more level 3              1194-1199 not used
+    LANG_COMMAND_GO_STATUS              = 1194,
+    LANG_COMMAND_GO_STATUS_DOOR         = 1195,
+    // Room for more level 3              1196-1199 not used
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
@@ -965,7 +968,8 @@ enum MangosStrings
     LANG_NPC_EVENTAI_PHASE              = 1506,
     LANG_NPC_EVENTAI_MOVE               = 1507,
     LANG_NPC_EVENTAI_COMBAT             = 1508,
-    // Room for more Level 2              1509-1599 not used
+    LANG_POOL_ENTRY_LOWER_MAX_POOL      = 1509,
+    // Room for more Level 2              1510-1599 not used
 
     // Outdoor PvP
     LANG_OPVP_EP_CAPTURE_NPT_H          = 1600,

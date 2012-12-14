@@ -79,7 +79,6 @@ enum RollVoteMask
     ROLL_VOTE_MASK_ALL        = 0x0F,
 };
 
-
 enum GroupMemberFlags
 {
     MEMBER_STATUS_OFFLINE   = 0x0000,

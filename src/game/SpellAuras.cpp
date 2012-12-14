@@ -101,7 +101,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleAuraTrackResources,                        // 45 SPELL_AURA_TRACK_RESOURCES
     &Aura::HandleUnused,                                    // 46 SPELL_AURA_46 (used in test spells 54054 and 54058, and spell 48050) (3.0.8a-3.2.2a)
     &Aura::HandleAuraModParryPercent,                       // 47 SPELL_AURA_MOD_PARRY_PERCENT
-    &Aura::HandleNULL,                                      // 48 SPELL_AURA_48 spell Napalm (area damage spell with additional delayed damage effect)
+    &Aura::HandleNoImmediateEffect,                         // 48 SPELL_AURA_PERIODIC_TRIGGER_BY_CLIENT (Client periodic trigger spell by self (3 spells in 3.3.5a)). Implemented in pet/player cast chains.
     &Aura::HandleAuraModDodgePercent,                       // 49 SPELL_AURA_MOD_DODGE_PERCENT
     &Aura::HandleNoImmediateEffect,                         // 50 SPELL_AURA_MOD_CRITICAL_HEALING_AMOUNT implemented in Unit::SpellCriticalHealingBonus
     &Aura::HandleAuraModBlockPercent,                       // 51 SPELL_AURA_MOD_BLOCK_PERCENT
@@ -349,7 +349,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleAuraAddMechanicAbilities,                  //293 SPELL_AURA_ADD_MECHANIC_ABILITIES  replaces target's action bars with a predefined spellset
     &Aura::HandleAuraStopNaturalManaRegen,                  //294 SPELL_AURA_STOP_NATURAL_MANA_REGEN implemented in Player:Regenerate
     &Aura::HandleUnused,                                    //295 unused (3.2.2a)
-    &Aura::HandleNULL,                                      //296 2 spells
+    &Aura::HandleAuraSetVehicleId,                          //296 6 spells
     &Aura::HandleNULL,                                      //297 1 spell (counter spell school?)
     &Aura::HandleUnused,                                    //298 unused (3.2.2a)
     &Aura::HandleUnused,                                    //299 unused (3.2.2a)
@@ -714,6 +714,10 @@ void AreaAura::Update(uint32 diff)
                 }
 
                 if (!apply)
+                    continue;
+
+                // Skip some targets (TODO: Might require better checks, also unclear how the actual caster must/can be handled)
+                if (GetSpellProto()->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && (*tIter)->GetTypeId() != TYPEID_PLAYER)
                     continue;
 
                 if (SpellEntry const* actualSpellInfo = sSpellMgr.SelectAuraRankForLevel(GetSpellProto(), (*tIter)->getLevel()))
@@ -1254,11 +1258,11 @@ void Aura::TriggerSpell()
                         float newAngle = target->GetOrientation();
 
                         if (auraId == 26009)
-                            newAngle += M_PI_F/40;
+                            newAngle += M_PI_F / 40;
                         else
-                            newAngle -= M_PI_F/40;
+                            newAngle -= M_PI_F / 40;
 
-                        MapManager::NormalizeOrientation(newAngle);
+                        newAngle = MapManager::NormalizeOrientation(newAngle);
 
                         target->SetFacingTo(newAngle);
 
@@ -1386,7 +1390,7 @@ void Aura::TriggerSpell()
                             if (!creature->GetCreatureInfo()->SkinLootId)
                                 return;
 
-                            player->AutoStoreLoot(creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning, true);
+                            player->AutoStoreLoot(creature, creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning, true);
 
                             creature->ForcedDespawn();
                         }
@@ -1506,10 +1510,23 @@ void Aura::TriggerSpell()
 //                    case 37125: break;
 //                    // Arcane Flurry
 //                    case 37268: break;
-//                    // Spout
-//                    case 37429: break;
-//                    // Spout
-//                    case 37430: break;
+                    case 37429:                             // Spout (left)
+                    case 37430:                             // Spout (right)
+                    {
+                        float newAngle = target->GetOrientation();
+
+                        if (auraId == 37429)
+                            newAngle += 2 * M_PI_F / 100;
+                        else
+                            newAngle -= 2 * M_PI_F / 100;
+
+                        newAngle = MapManager::NormalizeOrientation(newAngle);
+
+                        target->SetFacingTo(newAngle);
+
+                        target->CastSpell(target, 37433, true);
+                        return;
+                    }
 //                    // Karazhan - Chess NPC AI, Snapshot timer
 //                    case 37440: break;
 //                    // Karazhan - Chess NPC AI, action timer
@@ -1584,10 +1601,23 @@ void Aura::TriggerSpell()
 //                    case 40113: break;
 //                    // Spirit Lance
 //                    case 40157: break;
-//                    // Demon Transform 2
-//                    case 40398: break;
-//                    // Demon Transform 1
-//                    case 40511: break;
+                    case 40398:                             // Demon Transform 2
+                        switch (GetAuraTicks())
+                        {
+                            case 1:
+                                if (target->HasAura(40506))
+                                    target->RemoveAurasDueToSpell(40506);
+                                else
+                                    trigger_spell_id = 40506;
+                                break;
+                            case 2:
+                                trigger_spell_id = 40510;
+                                break;
+                        }
+                        break;
+                    case 40511:                             // Demon Transform 1
+                        trigger_spell_id = 40398;
+                        break;
 //                    // Ancient Flames
 //                    case 40657: break;
 //                    // Ethereal Ring Cannon: Cannon Aura
@@ -2747,6 +2777,20 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                 return;
             }
+            case 64398:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Scrap Bots
+            case 64426:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Assault Bots
+            case 64621:                                     // Summon Fire Bot (Ulduar, Mimiron)
+            {
+                uint32 triggerSpell = 0;
+                switch (GetId())
+                {
+                    case 64398: triggerSpell = 63819; break;
+                    case 64426: triggerSpell = 64427; break;
+                    case 64621: triggerSpell = 64622; break;
+                }
+                target->CastSpell(target, triggerSpell, false);
+                return;
+            }
             case 68839:                                     // Corrupt Soul
             {
                 // Knockdown Stun
@@ -3233,10 +3277,27 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
             display_id = minfo->modelid;
 
         target->Mount(display_id, GetId());
+
+        if (ci->vehicleId)
+        {
+            target->SetVehicleId(ci->vehicleId, ci->Entry);
+
+            if (target->GetTypeId() == TYPEID_PLAYER)
+                target->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
+        }
     }
     else
     {
         target->Unmount(true);
+
+        CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
+        if (ci && target->IsVehicle() && ci->vehicleId == target->GetVehicleInfo()->GetVehicleEntry()->m_ID)
+        {
+            if (target->GetTypeId() == TYPEID_PLAYER)
+                target->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
+
+            target->SetVehicleId(0, 0);
+        }
     }
 }
 
@@ -3246,14 +3307,7 @@ void Aura::HandleAuraWaterWalk(bool apply, bool Real)
     if (!Real)
         return;
 
-    WorldPacket data;
-    if (apply)
-        data.Initialize(SMSG_MOVE_WATER_WALK, 8 + 4);
-    else
-        data.Initialize(SMSG_MOVE_LAND_WALK, 8 + 4);
-    data << GetTarget()->GetPackGUID();
-    data << uint32(0);
-    GetTarget()->SendMessageToSet(&data, true);
+    GetTarget()->SetWaterWalk(apply);
 }
 
 void Aura::HandleAuraFeatherFall(bool apply, bool Real)
@@ -4070,7 +4124,6 @@ void Aura::HandleModPossess(bool apply, bool Real)
         {
             ((Player*)target)->SetClientControl(target, 0);
         }
-
     }
     else
     {
@@ -4420,10 +4473,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             target->SetStandState(UNIT_STAND_STATE_STAND);// in 1.5 client
         }
 
-        WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);
-        data << target->GetPackGUID();
-        data << uint32(0);
-        target->SendMessageToSet(&data, true);
+        target->SetRoot(true);
 
         // Summon the Naj'entus Spine GameObject on target if spell is Impaling Spine
         if (GetId() == 39837)
@@ -4478,10 +4528,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             if (target->getVictim() && target->isAlive())
                 target->SetTargetGuid(target->getVictim()->GetObjectGuid());
 
-            WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 8 + 4);
-            data << target->GetPackGUID();
-            data << uint32(0);
-            target->SendMessageToSet(&data, true);
+            target->SetRoot(false);
         }
 
         // Wyvern Sting
@@ -4709,10 +4756,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
 
         if (target->GetTypeId() == TYPEID_PLAYER)
         {
-            WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
-            data << target->GetPackGUID();
-            data << (uint32)2;
-            target->SendMessageToSet(&data, true);
+            target->SetRoot(true);
 
             // Clear unit movement flags
             ((Player*)target)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
@@ -4757,12 +4801,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
                 target->SetTargetGuid(target->getVictim()->GetObjectGuid());
 
             if (target->GetTypeId() == TYPEID_PLAYER)
-            {
-                WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 10);
-                data << target->GetPackGUID();
-                data << (uint32)2;
-                target->SendMessageToSet(&data, true);
-            }
+                target->SetRoot(false);
         }
     }
 }
@@ -5301,7 +5340,6 @@ void Aura::HandlePeriodicEnergize(bool apply, bool Real)
                 if (Unit* caster = GetCaster())
                     m_modifier.m_amount = int32(caster->GetCreateMana() * GetBasePoints() / (200 * GetAuraMaxTicks()));
                 break;
-
             }
             case 29166:                                     // Innervate (value% of casters base mana)
             {
@@ -5535,11 +5573,11 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 {
                     if (caster->GetTypeId() != TYPEID_PLAYER)
                         break;
-                    //1 point : ${($m1+$b1*1+0.015*$AP)*4} damage over 8 secs
-                    //2 points: ${($m1+$b1*2+0.024*$AP)*5} damage over 10 secs
-                    //3 points: ${($m1+$b1*3+0.03*$AP)*6} damage over 12 secs
-                    //4 points: ${($m1+$b1*4+0.03428571*$AP)*7} damage over 14 secs
-                    //5 points: ${($m1+$b1*5+0.0375*$AP)*8} damage over 16 secs
+                    // 1 point : ${($m1+$b1*1+0.015*$AP)*4} damage over 8 secs
+                    // 2 points: ${($m1+$b1*2+0.024*$AP)*5} damage over 10 secs
+                    // 3 points: ${($m1+$b1*3+0.03*$AP)*6} damage over 12 secs
+                    // 4 points: ${($m1+$b1*4+0.03428571*$AP)*7} damage over 14 secs
+                    // 5 points: ${($m1+$b1*5+0.0375*$AP)*8} damage over 16 secs
                     float AP_per_combo[6] = {0.0f, 0.015f, 0.024f, 0.03f, 0.03428571f, 0.0375f};
                     uint8 cp = ((Player*)caster)->GetComboPoints();
                     if (cp > 5) cp = 5;
@@ -6672,7 +6710,6 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                     ++itr;
             }
 
-
             // Master Shapeshifter
             if (MasterShaperSpellId)
             {
@@ -7264,7 +7301,7 @@ void Aura::PeriodicTick()
             if (pCaster->GetTypeId() == TYPEID_PLAYER)
                 pdamage -= target->GetSpellDamageReduction(pdamage);
 
-            target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
+            target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED));
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s attacked %s for %u dmg inflicted by %u abs is %u",
                               GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId(), absorb);
@@ -7356,7 +7393,7 @@ void Aura::PeriodicTick()
             if (GetCasterGuid().IsPlayer())
                 pdamage -= target->GetSpellDamageReduction(pdamage);
 
-            target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
+            target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !spellProto->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED));
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s health leech of %s for %u dmg inflicted by %u abs is %u",
                               GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId(), absorb);
@@ -7868,8 +7905,20 @@ void Aura::PeriodicDummyTick()
 //              case 42596: break;
 //              // Headless Horseman Climax, Head: Periodic
 //              case 42603: break;
-//              // Fire Bomb
-//              case 42621: break;
+                case 42621:                                 // Fire Bomb
+                {
+                    // Cast the summon spells (42622 to 42627) with increasing chance
+                    uint32 rand = urand(0, 99);
+                    for (uint32 i = 1; i <= 6; ++i)
+                    {
+                        if (rand < i * (i + 1) / 2 * 5)
+                        {
+                            target->CastSpell(target, spell->Id + i, true);
+                            break;
+                        }
+                    }
+                    break;
+                }
 //              // Headless Horseman - Conflagrate, Periodic Aura
 //              case 42637: break;
 //              // Headless Horseman - Create Pumpkin Treats Aura
@@ -8093,7 +8142,7 @@ void Aura::PeriodicDummyTick()
                     else
                         newAngle -= 0.09f;
 
-                    MapManager::NormalizeOrientation(newAngle);
+                    newAngle = MapManager::NormalizeOrientation(newAngle);
 
                     target->SetFacingTo(newAngle);
 
@@ -8400,29 +8449,16 @@ void Aura::HandleAuraControlVehicle(bool apply, bool Real)
     if (!target->IsVehicle())
         return;
 
-    // TODO: Check for free seat
-
     Unit* caster = GetCaster();
     if (!caster)
         return;
 
     if (apply)
     {
-        if (caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)caster)->RemovePet(PET_SAVE_AS_CURRENT);
-
-        // caster->EnterVehicle(target);
+        target->GetVehicleInfo()->Board(caster, GetBasePoints() - 1);
     }
     else
-    {
-        // some SPELL_AURA_CONTROL_VEHICLE auras have a dummy effect on the player - remove them
-        caster->RemoveAurasDueToSpell(GetId());
-
-        // caster->ExitVehicle();
-
-        if (caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)caster)->ResummonPetTemporaryUnSummonedIfAny();
-    }
+        target->GetVehicleInfo()->UnBoard(caster, m_removeMode == AURA_REMOVE_BY_TRACKING);
 }
 
 void Aura::HandleAuraAddMechanicAbilities(bool apply, bool Real)
@@ -8654,6 +8690,14 @@ void Aura::HandleAuraStopNaturalManaRegen(bool apply, bool Real)
     GetTarget()->ApplyModFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER, !apply && !GetTarget()->IsUnderLastManaUseEffect());
 }
 
+void Aura::HandleAuraSetVehicleId(bool apply, bool Real)
+{
+    if (!Real)
+        return;
+
+    GetTarget()->SetVehicleId(apply ? GetMiscValue() : 0, 0);
+}
+
 bool Aura::IsLastAuraOnHolder()
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -8691,7 +8735,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
     m_applyTime      = time(NULL);
     m_isPassive      = IsPassiveSpell(spellproto);
     m_isDeathPersist = IsDeathPersistentSpell(spellproto);
-    m_isSingleTarget = IsSingleTargetSpell(spellproto);
+    m_trackedAuraType= IsSingleTargetSpell(spellproto) ? TRACK_AURA_TYPE_SINGLE_TARGET : IsSpellHaveAura(spellproto, SPELL_AURA_CONTROL_VEHICLE) ? TRACK_AURA_TYPE_CONTROL_VEHICLE : TRACK_AURA_TYPE_NOT_TRACKED;
     m_procCharges    = spellproto->procCharges;
 
     m_isRemovedOnShapeLost = (GetCasterGuid() == m_target->GetObjectGuid() &&
@@ -10032,13 +10076,38 @@ bool SpellAuraHolder::IsEmptyHolder() const
     return true;
 }
 
-void SpellAuraHolder::UnregisterSingleCastHolder()
+void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
 {
-    if (IsSingleTarget())
+    TrackedAuraType trackedType = GetTrackedAuraType();
+    if (!trackedType)
+        return;
+
+    if (trackedType == TRACK_AURA_TYPE_SINGLE_TARGET)
     {
         if (Unit* caster = GetCaster())
-            caster->GetSingleCastSpellTargets().erase(GetSpellProto());
-
-        m_isSingleTarget = false;
+            caster->GetTrackedAuraTargets(trackedType).erase(GetSpellProto());
     }
+    else if (trackedType == TRACK_AURA_TYPE_CONTROL_VEHICLE)
+    {
+        Unit* caster = GetCaster();
+        if (caster && IsSpellHaveAura(GetSpellProto(), SPELL_AURA_CONTROL_VEHICLE, GetAuraFlags()))
+        {
+            caster->GetTrackedAuraTargets(trackedType).erase(GetSpellProto());
+            caster->RemoveAurasDueToSpell(GetSpellProto()->Id);
+        }
+        else if (caster)
+        {
+            Unit::TrackedAuraTargetMap scTarget = caster->GetTrackedAuraTargets(trackedType);
+            Unit::TrackedAuraTargetMap::iterator find = scTarget.find(GetSpellProto());
+            if (find != scTarget.end())
+            {
+                ObjectGuid vehicleGuid = find->second;
+                scTarget.erase(find);
+                if (Unit* vehicle = caster->GetMap()->GetUnit(vehicleGuid))
+                    vehicle->RemoveAurasDueToSpell(GetSpellProto()->Id, NULL, AURA_REMOVE_BY_DEFAULT);
+            }
+        }
+    }
+
+    m_trackedAuraType = TRACK_AURA_TYPE_NOT_TRACKED;
 }

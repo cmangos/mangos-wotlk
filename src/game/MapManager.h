@@ -139,13 +139,11 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         typedef std::map<uint32, TransportSet> TransportMap;
         TransportMap m_TransportsByMap;
 
-        bool CanPlayerEnter(uint32 mapid, Player* player);
         void InitializeVisibilityDistanceInfo();
 
         /* statistics */
         uint32 GetNumInstances();
         uint32 GetNumPlayersInInstances();
-
 
         // get list of all maps
         const MapMapType& Maps() const { return i_maps; }

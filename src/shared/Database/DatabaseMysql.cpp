@@ -313,7 +313,6 @@ SqlPreparedStatement* MySQLConnection::CreateStatement(const std::string& fmt)
     return new MySqlPreparedStatement(fmt, *this, mMysql);
 }
 
-
 //////////////////////////////////////////////////////////////////////////
 MySqlPreparedStatement::MySqlPreparedStatement(const std::string& fmt, SqlConnection& conn, MYSQL* mysql) : SqlPreparedStatement(fmt, conn),
     m_pMySQLConn(mysql), m_stmt(NULL), m_pInputArgs(NULL), m_pResult(NULL), m_pResultMetadata(NULL)

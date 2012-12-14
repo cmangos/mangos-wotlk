@@ -272,7 +272,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNK0                         = 0x00000001,// 0
     SPELL_ATTR_EX_DRAIN_ALL_POWER              = 0x00000002,// 1 use all power (Only paladin Lay of Hands and Bunyanize)
     SPELL_ATTR_EX_CHANNELED_1                  = 0x00000004,// 2 channeled 1
-    SPELL_ATTR_EX_UNK3                         = 0x00000008,// 3
+    SPELL_ATTR_EX_CANT_REFLECTED               = 0x00000008,// 3 used for detect can or not spell reflected
     SPELL_ATTR_EX_UNK4                         = 0x00000010,// 4
     SPELL_ATTR_EX_NOT_BREAK_STEALTH            = 0x00000020,// 5 Not break stealth
     SPELL_ATTR_EX_CHANNELED_2                  = 0x00000040,// 6 channeled 2
@@ -307,7 +307,7 @@ enum SpellAttributesEx2
 {
     SPELL_ATTR_EX2_UNK0                        = 0x00000001,// 0
     SPELL_ATTR_EX2_UNK1                        = 0x00000002,// 1
-    SPELL_ATTR_EX2_CANT_REFLECTED              = 0x00000004,// 2 ? used for detect can or not spell reflected // do not need LOS (e.g. 18220 since 3.3.3)
+    SPELL_ATTR_EX2_IGNORE_LOS                  = 0x00000004,// 2 do not need LOS (e.g. 18220 since 3.3.3) // changed meaning from ? used for detect can or not spell reflected
     SPELL_ATTR_EX2_UNK3                        = 0x00000008,// 3 auto targeting? (e.g. fishing skill enhancement items since 3.3.3)
     SPELL_ATTR_EX2_UNK4                        = 0x00000010,// 4
     SPELL_ATTR_EX2_AUTOREPEAT_FLAG             = 0x00000020,// 5
@@ -349,7 +349,7 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_UNK5                        = 0x00000020,// 5
     SPELL_ATTR_EX3_UNK6                        = 0x00000040,// 6
     SPELL_ATTR_EX3_UNK7                        = 0x00000080,// 7 create a separate (de)buff stack for each caster
-    SPELL_ATTR_EX3_UNK8                        = 0x00000100,// 8
+    SPELL_ATTR_EX3_TARGET_ONLY_PLAYER          = 0x00000100,// 8 Can target only player
     SPELL_ATTR_EX3_UNK9                        = 0x00000200,// 9
     SPELL_ATTR_EX3_MAIN_HAND                   = 0x00000400,// 10 Main hand weapon required
     SPELL_ATTR_EX3_BATTLEGROUND                = 0x00000800,// 11 Can casted only on battleground
@@ -1107,7 +1107,7 @@ enum Mechanics
     MECHANIC_FEAR             = 5,
     MECHANIC_GRIP             = 6,
     MECHANIC_ROOT             = 7,
-    MECHANIC_PACIFY           = 8,                          //0 spells use this mechanic
+    MECHANIC_PACIFY           = 8,                          // No spells use this mechanic
     MECHANIC_SILENCE          = 9,
     MECHANIC_SLEEP            = 10,
     MECHANIC_SNARE            = 11,
@@ -1295,14 +1295,20 @@ enum Targets
     TARGET_NONCOMBAT_PET               = 90,
     TARGET_91                          = 91,
     TARGET_92                          = 92,
-    TARGET_94                          = 94,
+    TARGET_CONTROLLED_VEHICLE          = 94,
     TARGET_95                          = 95,
-    TARGET_96                          = 96,
-    TARGET_97                          = 97,
+    TARGET_VEHICLE_PASSENGER_0         = 96,
+    TARGET_VEHICLE_PASSENGER_1         = 97,
+    TARGET_VEHICLE_PASSENGER_2         = 98,
+    TARGET_VEHICLE_PASSENGER_3         = 99,
+    TARGET_VEHICLE_PASSENGER_4         = 100,
+    TARGET_VEHICLE_PASSENGER_5         = 101,
+    TARGET_VEHICLE_PASSENGER_6         = 102,
+    TARGET_VEHICLE_PASSENGER_7         = 103,
     TARGET_IN_FRONT_OF_CASTER_30       = 104,
     TARGET_105                         = 105,               // 1 spell
     TARGET_106                         = 106,
-    TARGET_108                         = 108,               // possible TARGET_WMO(GO?)_IN_FRONT_OF_CASTER(_30 ?)
+    TARGET_GO_IN_FRONT_OF_CASTER_90    = 108,               // possible TARGET_WMO(GO?)_IN_FRONT_OF_CASTER(_30 ?) TODO: Verify the angle!
     TARGET_110                         = 110,
 };
 
@@ -1417,9 +1423,9 @@ enum GameObjectFlags
     GO_FLAG_NODESPAWN       = 0x00000020,                   // never despawn, typically for doors, they just change state
     GO_FLAG_TRIGGERED       = 0x00000040,                   // typically, summoned objects. Triggered by spell or other events
     GO_FLAG_UNK_8           = 0x00000080,
-    GO_FLAG_UNK_9           = 0x00000100,                   //? Seen on type 33, possible meaning "destruct in progress"
-    GO_FLAG_UNK_10          = 0x00000200,                   //? Seen on type 33
-    GO_FLAG_UNK_11          = 0x00000400                    //? Seen on type 33, possibly meaning "destructed"
+    GO_FLAG_UNK_9           = 0x00000100,                   //? Seen on type 33, meaning unknown
+    GO_FLAG_UNK_10          = 0x00000200,                   //? Seen on type 33, likely damaged
+    GO_FLAG_UNK_11          = 0x00000400                    //? Seen on type 33, likely destroyed
 };
 
 enum GameObjectDynamicLowFlags
@@ -2984,6 +2990,31 @@ enum ActivateTaxiReply
     ERR_TAXINOTSTANDING             = 12
 };
 
+enum AreaLockStatus
+{
+    AREA_LOCKSTATUS_OK                          = 0,
+    AREA_LOCKSTATUS_UNKNOWN_ERROR               = 1,
+    AREA_LOCKSTATUS_INSUFFICIENT_EXPANSION      = 2,
+    AREA_LOCKSTATUS_TOO_LOW_LEVEL               = 3,
+    AREA_LOCKSTATUS_TOO_HIGH_LEVEL              = 4,
+    AREA_LOCKSTATUS_RAID_LOCKED                 = 5,
+    AREA_LOCKSTATUS_QUEST_NOT_COMPLETED         = 6,
+    AREA_LOCKSTATUS_MISSING_ITEM                = 7,
+    AREA_LOCKSTATUS_MISSING_DIFFICULTY          = 8,
+    AREA_LOCKSTATUS_ZONE_IN_COMBAT              = 9,
+    AREA_LOCKSTATUS_INSTANCE_IS_FULL            = 10,
+    AREA_LOCKSTATUS_NOT_ALLOWED                 = 11,
+    AREA_LOCKSTATUS_HAS_BIND                    = 12,
+};
+
+enum TrackedAuraType
+{
+    TRACK_AURA_TYPE_NOT_TRACKED                 = 0,        // relation - caster : target is n:m (usual case)
+    TRACK_AURA_TYPE_SINGLE_TARGET               = 1,        // relation - caster : target is 1:1. Might get stolen
+    TRACK_AURA_TYPE_CONTROL_VEHICLE             = 2,        // relation - caster : target is N:1.
+    MAX_TRACKED_AURA_TYPES
+};
+
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
 // will only support WoW, WoW:TBC and WoW:WotLK 3.3.5a client build 12340...
@@ -2996,5 +3027,18 @@ enum ActivateTaxiReply
 // because if client receive unsupported expansion level it think
 // that it not have expansion installed and reject
 #define MAX_EXPANSION 2
+
+// Maxlevel for expansion
+enum MaxLevel
+{
+    MAX_LEVEL_CLASSIC                   = 60,
+    MAX_LEVEL_TBC                       = 70,
+    MAX_LEVEL_WOTLK                     = 80,
+};
+
+static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLASSIC, MAX_LEVEL_TBC, MAX_LEVEL_WOTLK };
+
+// This spell is used for general boarding serverside
+#define SPELL_RIDE_VEHICLE_HARDCODED    46598
 
 #endif

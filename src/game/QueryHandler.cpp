@@ -179,8 +179,8 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         for (int i = 0; i < MAX_CREATURE_MODEL; ++i)
             data << uint32(ci->ModelId[i]);
 
-        data << float(ci->unk16);                           // health modifier
-        data << float(ci->unk17);                           // power modifier
+        data << float(ci->healthModifier);                  // health modifier
+        data << float(ci->powerModifier);                   // power modifier
         data << uint8(ci->RacialLeader);
         for (uint32 i = 0; i < 6; ++i)
             data << uint32(ci->questItems[i]);              // itemId[6], quest drop
@@ -260,7 +260,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recv_data*/)
 {
-    DETAIL_LOG("WORLD: Received MSG_CORPSE_QUERY");
+    DETAIL_LOG("WORLD: Received opcode MSG_CORPSE_QUERY");
 
     Corpse* corpse = GetPlayer()->GetCorpse();
 
@@ -292,7 +292,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recv_data*/)
                     mapid = corpseMapEntry->ghost_entrance_map;
                     x = corpseMapEntry->ghost_entrance_x;
                     y = corpseMapEntry->ghost_entrance_y;
-                    z = entranceMap->GetHeight(x, y, MAX_HEIGHT);
+                    z = entranceMap->GetHeightStatic(x, y, MAX_HEIGHT);
                 }
             }
         }
@@ -386,7 +386,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recv_data)
 {
-    DETAIL_LOG("WORLD: Received CMSG_PAGE_TEXT_QUERY");
+    DETAIL_LOG("WORLD: Received opcode CMSG_PAGE_TEXT_QUERY");
     recv_data.hexlike();
 
     uint32 pageID;

@@ -33,7 +33,6 @@
 // cause this buff apears 90sec after start in every bg i implement it here
 #define ARENA_BUFF_EVENT 253
 
-
 class Creature;
 class GameObject;
 class Group;
@@ -503,12 +502,8 @@ class BattleGround
 
         void HandleTriggerBuff(ObjectGuid go_guid);
 
-        // TODO drop m_BGObjects
-        GuidVector m_BgObjects;
         void SpawnBGObject(ObjectGuid guid, uint32 respawntime);
-        bool AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime = 0);
         void SpawnBGCreature(ObjectGuid guid, uint32 respawntime);
-        bool DelObject(uint32 type);
 
         void DoorOpen(ObjectGuid guid);
         void DoorClose(ObjectGuid guid);
@@ -538,7 +533,6 @@ class BattleGround
         // creatures will get added wrong
         // door-events are automaticly added - but _ALL_ other must be in this vector
         std::map<uint8, uint8> m_ActiveEvents;
-
 
     protected:
         // this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends BattleGround

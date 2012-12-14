@@ -391,7 +391,6 @@ struct AchievementCriteriaEntry
             uint32  goldInCopper;                           // 4
         } quest_reward_money;
 
-
         // ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY             = 67
         struct
         {
@@ -525,7 +524,7 @@ struct AreaTableEntry
     char*   area_name[16];                                  // 11-26    m_AreaName_lang
     // 27 string flags
     uint32  team;                                           // 28       m_factionGroupMask
-    // 29-32    m_liquidTypeID[4]
+    uint32  LiquidTypeOverride[4];                          // 29-32    m_liquidTypeID[4]
     // 33       m_minElevation
     // 34       m_ambient_multiplier
     // 35       m_lightid
@@ -798,6 +797,29 @@ struct CurrencyTypesEntry
     uint32    BitIndex;                                     // 3        m_bitIndex bit index in PLAYER_FIELD_KNOWN_CURRENCIES (1 << (index-1))
 };
 
+struct DestructibleModelDataEntry
+{
+    uint32 m_ID;                                            // 0        m_ID
+    // uint32 unk1;                                         // 1
+    // uint32 unk2;                                         // 2
+    uint32 damagedDisplayId;                                // 3
+    // uint32 unk4;                                         // 4
+    // uint32 unk5;                                         // 5
+    // uint32 unk6;                                         // 6
+    uint32 destroyedDisplayId;                              // 7
+    // uint32 unk8;                                         // 8
+    // uint32 unk9;                                         // 9
+    // uint32 unk10;                                        // 10
+    uint32 rebuildingDisplayId;                             // 11       // Maybe rebuildingDisplayIdWhileDestroyed
+    // uint32 unk12;                                        // 12
+    // uint32 unk13;                                        // 13
+    // uint32 unk14;                                        // 14
+    // uint32 unk15;                                        // 15
+    // uint32 unk16;                                        // 16
+    // uint32 unk17;                                        // 17
+    // uint32 unk18;                                        // 18
+};
+
 struct DungeonEncounterEntry
 {
     uint32 Id;                                              // 0        m_ID
@@ -926,16 +948,16 @@ struct FactionTemplateEntry
 
 struct GameObjectDisplayInfoEntry
 {
-    uint32      Displayid;                                  // 0        m_ID
-    // char* filename;                                      // 1        m_modelName
-    // 2-11     m_Sound
-    float  unknown12;                                       // 12       m_geoBoxMinX (use first value as interact dist, mostly in hacks way)
-    // 13       m_geoBoxMinY
-    // 14       m_geoBoxMinZ
-    // 15       m_geoBoxMaxX
-    // 16       m_geoBoxMaxY
-    // 17       m_geoBoxMaxZ
-    // 18       m_objectEffectPackageID
+    uint32 Displayid;                                       // 0 m_ID
+    char* filename;                                         // 1 m_modelName
+    // uint32 unknown2[10];                                 // 2-11 m_Sound
+    float geoBoxMinX;                                       // 12 m_geoBoxMinX (use first value as interact dist, mostly in hacks way)
+    float geoBoxMinY;                                       // 13 m_geoBoxMinY
+    float geoBoxMinZ;                                       // 14 m_geoBoxMinZ
+    float geoBoxMaxX;                                       // 15 m_geoBoxMaxX
+    float geoBoxMaxY;                                       // 16 m_geoBoxMaxY
+    float geoBoxMaxZ;                                       // 17 m_geoBoxMaxZ
+    // uint32 unknown18; // 18 m_objectEffectPackageID
 };
 
 struct GemPropertiesEntry
@@ -1201,6 +1223,29 @@ struct ItemSetEntry
     m_target_level_min
     m_target_level_max
 };*/
+
+struct LiquidTypeEntry
+{
+    uint32 Id;                                              // 0
+    //char* Name;                                           // 1
+    //uint32 Flags;                                         // 2 Water: 1|2|4|8, Magma: 8|16|32|64, Slime: 2|64|256, WMO Ocean: 1|2|4|8|512
+    uint32 Type;                                            // 3 0: Water, 1: Ocean, 2: Magma, 3: Slime
+    //uint32 SoundId;                                       // 4 Reference to SoundEntries.dbc
+    uint32 SpellId;                                         // 5 Reference to Spell.dbc
+    //float MaxDarkenDepth;                                 // 6 Only oceans got values here!
+    //float FogDarkenIntensity;                             // 7 Only oceans got values here!
+    //float AmbDarkenIntensity;                             // 8 Only oceans got values here!
+    //float DirDarkenIntensity;                             // 9 Only oceans got values here!
+    //uint32 LightID;                                       // 10 Only Slime (6) and Magma (7)
+    //float ParticleScale;                                  // 11 0: Slime, 1: Water/Ocean, 4: Magma
+    //uint32 ParticleMovement;                              // 12
+    //uint32 ParticleTexSlots;                              // 13
+    //uint32 LiquidMaterialID;                              // 14
+    //char* Texture[6];                                     // 15-20
+    //uint32 Color[2];                                      // 21-22
+    //float Unk1[18];                                       // 23-40 Most likely these are attributes for the shaders. Water: (23, TextureTilesPerBlock),(24, Rotation) Magma: (23, AnimationX),(24, AnimationY)
+    //uint32 Unk2[4];                                       // 41-44
+};
 
 #define MAX_LOCK_CASE 8
 
@@ -2105,15 +2150,6 @@ typedef std::set<uint32> PetFamilySpellsSet;
 typedef std::map<uint32, PetFamilySpellsSet > PetFamilySpellsStore;
 
 // Structures not used for casting to loaded DBC data and not required then packing
-struct MapDifficulty
-{
-    MapDifficulty() : resetTime(0), maxPlayers(0) {}
-    MapDifficulty(uint32 _resetTime, uint32 _maxPlayers) : resetTime(_resetTime), maxPlayers(_maxPlayers) {}
-
-    uint32 resetTime;                                       // in secs, 0 if no fixed reset time
-    uint32 maxPlayers;                                      // some heroic dungeons have 0 when expect same value as in normal dificulty case
-};
-
 struct TalentSpellPos
 {
     TalentSpellPos() : talent_id(0), rank(0) {}

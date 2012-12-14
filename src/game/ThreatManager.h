@@ -136,7 +136,6 @@ class ThreatManager;
 
 typedef std::list<HostileReference*> ThreatList;
 
-
 class MANGOS_DLL_SPEC ThreatContainer
 {
     private:

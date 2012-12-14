@@ -33,7 +33,7 @@ inline void* dtCustomAlloc(int size, dtAllocHint /*hint*/)
 
 inline void dtCustomFree(void* ptr)
 {
-    delete[] (unsigned char*)ptr;
+    delete[](unsigned char*)ptr;
 }
 
 //  move map related classes
@@ -61,7 +61,6 @@ namespace MMAP
         NavMeshQuerySet navMeshQueries;     // instanceId to query
         MMapTileSet mmapLoadedTiles;        // maps [map grid coords] to [dtTile]
     };
-
 
     typedef UNORDERED_MAP<uint32, MMapData*> MMapDataSet;
 

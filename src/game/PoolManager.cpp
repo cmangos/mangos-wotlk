@@ -192,7 +192,6 @@ void PoolGroup<T>::SetExcludeObject(uint32 guid, bool state)
     }
 }
 
-
 template <class T>
 PoolObject* PoolGroup<T>::RollOne(SpawnedPoolData& spawns, uint32 triggerFrom)
 {
@@ -506,7 +505,6 @@ void PoolGroup<Pool>::ReSpawn1Object(MapPersistentState& /*mapState*/, PoolObjec
 {
 }
 
-
 ////////////////////////////////////////////////////////////
 // Methods of class PoolManager
 
@@ -605,7 +603,6 @@ void PoolManager::LoadFromDB()
         pPoolTemplate.MaxLimit    = fields[1].GetUInt32();
         pPoolTemplate.description = fields[2].GetCppString();
         pPoolTemplate.AutoSpawn = true;          // will update and later data loading
-
     }
     while (result->NextRow());
 
@@ -675,7 +672,6 @@ void PoolManager::LoadFromDB()
             cregroup.AddEntry(plObject, pPoolTemplate->MaxLimit);
             SearchPair p(guid, pool_id);
             mCreatureSearchMap.insert(p);
-
         }
         while (result->NextRow());
         sLog.outString();
@@ -748,7 +744,6 @@ void PoolManager::LoadFromDB()
             cregroup.AddEntry(plObject, pPoolTemplate->MaxLimit);
             SearchPair p(guid, pool_id);
             mCreatureSearchMap.insert(p);
-
         }
         while (result->NextRow());
         sLog.outString();
@@ -795,7 +790,8 @@ void PoolManager::LoadFromDB()
             GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(data->id);
             if (goinfo->type != GAMEOBJECT_TYPE_CHEST &&
                     goinfo->type != GAMEOBJECT_TYPE_GOOBER &&
-                    goinfo->type != GAMEOBJECT_TYPE_FISHINGHOLE)
+                    goinfo->type != GAMEOBJECT_TYPE_FISHINGHOLE &&
+                    goinfo->type != GAMEOBJECT_TYPE_TRAP)
             {
                 sLog.outErrorDb("`pool_gameobject` has a not lootable gameobject spawn (GUID: %u, type: %u) defined for pool id (%u), skipped.", guid, goinfo->type, pool_id);
                 continue;
@@ -824,7 +820,6 @@ void PoolManager::LoadFromDB()
             gogroup.AddEntry(plObject, pPoolTemplate->MaxLimit);
             SearchPair p(guid, pool_id);
             mGameobjectSearchMap.insert(p);
-
         }
         while (result->NextRow());
         sLog.outString();
@@ -868,7 +863,8 @@ void PoolManager::LoadFromDB()
             GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(data->id);
             if (goinfo->type != GAMEOBJECT_TYPE_CHEST &&
                     goinfo->type != GAMEOBJECT_TYPE_GOOBER &&
-                    goinfo->type != GAMEOBJECT_TYPE_FISHINGHOLE)
+                    goinfo->type != GAMEOBJECT_TYPE_FISHINGHOLE &&
+                    goinfo->type != GAMEOBJECT_TYPE_TRAP)
             {
                 sLog.outErrorDb("`pool_gameobject_template` has a not lootable gameobject spawn (GUID: %u Entry %u Type: %u) defined for pool id (%u), skipped.", guid, entry_id, goinfo->type, pool_id);
                 continue;
@@ -907,7 +903,6 @@ void PoolManager::LoadFromDB()
             gogroup.AddEntry(plObject, pPoolTemplate->MaxLimit);
             SearchPair p(guid, pool_id);
             mGameobjectSearchMap.insert(p);
-
         }
         while (result->NextRow());
         sLog.outString();
@@ -977,7 +972,6 @@ void PoolManager::LoadFromDB()
 
             // update top independent pool flag
             mPoolTemplate[child_pool_id].AutoSpawn = false;
-
         }
         while (result->NextRow());
 

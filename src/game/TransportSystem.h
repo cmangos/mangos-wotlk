@@ -53,7 +53,7 @@ class TransportBase
 {
     public:
         explicit TransportBase(WorldObject* owner);
-        ~TransportBase();
+        virtual ~TransportBase();
 
         void Update(uint32 diff);
         void UpdateGlobalPositions();
@@ -67,7 +67,14 @@ class TransportBase
 
         void CalculateGlobalPositionOf(float lx, float ly, float lz, float lo, float& gx, float& gy, float& gz, float& go) const;
 
+        // Helper function to check if a unit is boarded onto this transporter (or a transporter boarded onto this)*
+        bool HasOnBoard(WorldObject const* passenger) const;
+
     protected:
+        // Helper functions to add/ remove a passenger from the list
+        void BoardPassenger(WorldObject* passenger, float lx, float ly, float lz, float lo, uint8 seat);
+        void UnBoardPassenger(WorldObject* passenger);
+
         WorldObject* m_owner;                               ///< The transporting unit
         PassengerMap m_passengers;                          ///< List of passengers and their transport-information
 
@@ -88,7 +95,9 @@ class TransportInfo
     public:
         explicit TransportInfo(WorldObject* owner, TransportBase* transport, float lx, float ly, float lz, float lo, uint8 seat);
 
+        // Set local positions
         void SetLocalPosition(float lx, float ly, float lz, float lo);
+        void SetTransportSeat(uint8 seat) { m_seat = seat; }
 
         // Accessors
         WorldObject* GetTransport() const { return m_transport->GetOwner(); }
@@ -96,6 +105,9 @@ class TransportInfo
 
         // Required for chain-updating (passenger on transporter on transporter)
         bool IsOnVehicle() const { return m_transport->GetOwner()->GetTypeId() == TYPEID_PLAYER || m_transport->GetOwner()->GetTypeId() == TYPEID_UNIT; }
+
+        // Helper function if a passenger is already boarded somewhere onto the boarded transports
+        bool HasOnBoard(WorldObject const* passenger) const { return m_transport->HasOnBoard(passenger); }
 
         // Get local position and seat
         uint8 GetTransportSeat() const { return m_seat; }

@@ -61,8 +61,8 @@ bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredT
 bool Zone2MapCoordinates(float& x, float& y, uint32 zone);
 bool Map2ZoneCoordinates(float& x, float& y, uint32 zone);
 
-typedef std::map < uint32/*pair32(map,diff)*/, MapDifficulty > MapDifficultyMap;
-MapDifficulty const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty);
+typedef std::map<uint32/*pair32(map,diff)*/, MapDifficultyEntry const*> MapDifficultyMap;
+MapDifficultyEntry const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty);
 
 // natural order for difficulties up-down iteration
 // difficulties for dungeons/battleground ordered in normal way
@@ -116,6 +116,7 @@ extern DBCStorage <CreatureFamilyEntry>          sCreatureFamilyStore;
 extern DBCStorage <CreatureSpellDataEntry>       sCreatureSpellDataStore;
 extern DBCStorage <CreatureTypeEntry>            sCreatureTypeStore;
 extern DBCStorage <CurrencyTypesEntry>           sCurrencyTypesStore;
+extern DBCStorage <DestructibleModelDataEntry>   sDestructibleModelDataStore;
 extern DBCStorage <DungeonEncounterEntry>        sDungeonEncounterStore;
 extern DBCStorage <DurabilityCostsEntry>         sDurabilityCostsStore;
 extern DBCStorage <DurabilityQualityEntry>       sDurabilityQualityStore;
@@ -149,6 +150,7 @@ extern DBCStorage <ItemLimitCategoryEntry>       sItemLimitCategoryStore;
 extern DBCStorage <ItemRandomPropertiesEntry>    sItemRandomPropertiesStore;
 extern DBCStorage <ItemRandomSuffixEntry>        sItemRandomSuffixStore;
 extern DBCStorage <ItemSetEntry>                 sItemSetStore;
+extern DBCStorage <LiquidTypeEntry>              sLiquidTypeStore;
 extern DBCStorage <LockEntry>                    sLockStore;
 extern DBCStorage <MailTemplateEntry>            sMailTemplateStore;
 extern DBCStorage <MapEntry>                     sMapStore;

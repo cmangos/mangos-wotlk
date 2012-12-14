@@ -99,13 +99,11 @@ bool Config::GetBoolDefault(const char* name, bool def)
         return false;
 }
 
-
 int32 Config::GetIntDefault(const char* name, int32 def)
 {
     ACE_TString val;
     return GetValueHelper(mConf, name, val) ? atoi(val.c_str()) : def;
 }
-
 
 float Config::GetFloatDefault(const char* name, float def)
 {

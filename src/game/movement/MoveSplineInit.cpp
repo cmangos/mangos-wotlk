@@ -64,7 +64,7 @@ namespace Movement
 
         // there is a big chane that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
-        if (!move_spline.Finalized())
+        if (!move_spline.Finalized() && !transportInfo)
             real_position = move_spline.ComputePosition();
 
         if (args.path.empty())
@@ -88,7 +88,7 @@ namespace Movement
         if (args.velocity == 0.f)
             args.velocity = unit.GetSpeed(SelectSpeedType(moveFlags));
 
-        if (!args.Validate())
+        if (!args.Validate(&unit))
             return 0;
 
         unit.m_movementInfo.SetMovementFlags((MovementFlags)moveFlags);

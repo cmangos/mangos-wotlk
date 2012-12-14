@@ -167,7 +167,6 @@ void GameEventMgr::LoadFromDB()
             }
 
             pGameEvent.description  = fields[6].GetCppString();
-
         }
         while (result->NextRow());
         delete result;
@@ -253,7 +252,6 @@ void GameEventMgr::LoadFromDB()
 
             GuidList& crelist = mGameEventCreatureGuids[internal_event_id];
             crelist.push_back(guid);
-
         }
         while (result->NextRow());
         delete result;
@@ -332,7 +330,6 @@ void GameEventMgr::LoadFromDB()
 
             GuidList& golist = mGameEventGameobjectGuids[internal_event_id];
             golist.push_back(guid);
-
         }
         while (result->NextRow());
         delete result;
@@ -427,7 +424,6 @@ void GameEventMgr::LoadFromDB()
 
             equiplist.push_back(GameEventCreatureDataPair(guid, newData));
             mGameEventCreatureDataPerGuid.insert(GameEventCreatureDataPerGuidMap::value_type(guid, event_id));
-
         }
         while (result->NextRow());
         delete result;
@@ -488,7 +484,6 @@ void GameEventMgr::LoadFromDB()
 
             QuestList& questlist = mGameEventQuests[event_id];
             questlist.push_back(quest);
-
         }
         while (result->NextRow());
         delete result;
@@ -569,7 +564,6 @@ void GameEventMgr::LoadFromDB()
 
             MailList& maillist = mGameEventMails[internal_event_id];
             maillist.push_back(mail);
-
         }
         while (result->NextRow());
         delete result;

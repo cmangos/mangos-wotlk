@@ -23,7 +23,6 @@
 #include "LockedQueue.h"
 #include "Threading.h"
 
-
 class Database;
 class SqlOperation;
 class SqlConnection;

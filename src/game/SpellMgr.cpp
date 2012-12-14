@@ -682,6 +682,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             {
                 case 28441:                                 // AB Effect 000
                     return false;
+                case 18153:                                 // Kodo Kombobulator
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
                 case 62105:                                 // To'kini's Blowgun
@@ -697,6 +698,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
         case SPELL_EFFECT_HEAL_PCT:
         case SPELL_EFFECT_ENERGIZE_PCT:
         case SPELL_EFFECT_QUEST_COMPLETE:
+        case SPELL_EFFECT_KILL_CREDIT_PERSONAL:
+        case SPELL_EFFECT_KILL_CREDIT_GROUP:
             return true;
 
             // non-positive aura use
@@ -1101,7 +1104,6 @@ void SpellMgr::LoadSpellTargetPositions()
 
         mSpellTargetPositions[Spell_ID] = st;
         ++count;
-
     }
     while (result->NextRow());
 
@@ -1337,7 +1339,6 @@ void SpellMgr::LoadSpellProcEvents()
         spe.cooldown        = fields[16].GetUInt32();
 
         rankHelper.RecordRank(spe, entry);
-
     }
     while (result->NextRow());
 
@@ -1614,7 +1615,6 @@ void SpellMgr::LoadSpellBonuses()
         doForHighRanks(entry, worker);
 
         ++count;
-
     }
     while (result->NextRow());
 
@@ -1821,7 +1821,6 @@ void SpellMgr::LoadSpellThreats()
         ste.ap_bonus = fields[3].GetFloat();
 
         rankHelper.RecordRank(ste, entry);
-
     }
     while (result->NextRow());
 
@@ -2536,7 +2535,6 @@ uint32 SpellMgr::GetProfessionSpellMinLevel(uint32 spellId)
     }
 }
 
-
 bool SpellMgr::IsPrimaryProfessionFirstRankSpell(uint32 spellId) const
 {
     return IsPrimaryProfessionSpell(spellId) && GetSpellRank(spellId) == 1;
@@ -2926,7 +2924,6 @@ void SpellMgr::LoadSpellChains()
                     continue;
                 }*/
             }
-
         }
 
         // removed ranks often still listed as forward in skill abilities but not listed as spell in it
@@ -3244,6 +3241,8 @@ void SpellMgr::LoadSpellScriptTarget()
                     spellProto->EffectImplicitTargetB[i] == TARGET_AREAEFFECT_INSTANT ||
                     spellProto->EffectImplicitTargetA[i] == TARGET_AREAEFFECT_CUSTOM ||
                     spellProto->EffectImplicitTargetB[i] == TARGET_AREAEFFECT_CUSTOM ||
+                    spellProto->EffectImplicitTargetA[i] == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
+                    spellProto->EffectImplicitTargetB[i] == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
                     spellProto->EffectImplicitTargetA[i] == TARGET_AREAEFFECT_GO_AROUND_DEST ||
                     spellProto->EffectImplicitTargetB[i] == TARGET_AREAEFFECT_GO_AROUND_DEST)
             {
@@ -3510,14 +3509,14 @@ bool SpellMgr::LoadPetDefaultSpells_helper(CreatureInfo const* cInfo, PetDefault
 
 void SpellMgr::LoadPetDefaultSpells()
 {
-    MANGOS_ASSERT(MAX_CREATURE_SPELL_DATA_SLOT == CREATURE_MAX_SPELLS);
+    MANGOS_ASSERT(MAX_CREATURE_SPELL_DATA_SLOT <= CREATURE_MAX_SPELLS);
 
     mPetDefaultSpellsMap.clear();
 
     uint32 countCreature = 0;
     uint32 countData = 0;
 
-    for (uint32 i = 0; i < sCreatureStorage.MaxEntry; ++i)
+    for (uint32 i = 0; i < sCreatureStorage.GetMaxEntry(); ++i)
     {
         CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i);
         if (!cInfo)
@@ -3569,8 +3568,9 @@ void SpellMgr::LoadPetDefaultSpells()
                     continue;
 
                 PetDefaultSpellsEntry petDefSpells;
-                for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
-                    petDefSpells.spellid[j] = cInfo->spells[j];
+                if (CreatureTemplateSpells const* templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(cInfo->Entry))
+                    for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
+                        petDefSpells.spellid[j] = templateSpells->spells[j];
 
                 if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
                 {
@@ -3620,7 +3620,6 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
                         }
                         return false;
                     }
-
                 }
                 // also possible IsLootCraftingSpell case but fake item must exist anyway
                 else if (!ObjectMgr::GetItemPrototype(spellInfo->EffectItemType[i]))
@@ -3756,7 +3755,6 @@ void SpellMgr::LoadSpellAreas()
                 sLog.outErrorDb("Spell %u listed in `spell_area` already listed with similar requirements.", spell);
                 continue;
             }
-
         }
 
         if (spellArea.areaId && !GetAreaEntryByAreaID(spellArea.areaId))
@@ -4200,7 +4198,6 @@ void SpellMgr::CheckUsedSpells(char const* table)
                                       spell, name.c_str(), familyMaskA, familyMaskB, code.c_str());
                         continue;
                     }
-
                 }
                 else
                 {
@@ -4209,7 +4206,6 @@ void SpellMgr::CheckUsedSpells(char const* table)
                         sLog.outError("Spell %u '%s' not fit to (" I64FMT "," I32FMT ") but used in %s.", spell, name.c_str(), familyMaskA, familyMaskB, code.c_str());
                         continue;
                     }
-
                 }
             }
 
@@ -4244,7 +4240,6 @@ void SpellMgr::CheckUsedSpells(char const* table)
                     sLog.outError("Spell %u '%s' aura%d <> %u but used in %s.", spell, name.c_str(), effectIdx + 1, auraType, code.c_str());
                     continue;
                 }
-
             }
             else
             {
@@ -4330,7 +4325,6 @@ void SpellMgr::CheckUsedSpells(char const* table)
                 continue;
             }
         }
-
     }
     while (result->NextRow());
 

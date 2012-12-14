@@ -24,7 +24,7 @@
  * This file contains the code needed for MaNGOS to provide abstract support for transported entities
  * Currently implemented
  * - Calculating between local and global coords
- *
+ * - Abstract storage of passengers (added by BoardPassenger, UnboardPassenger)
  */
 
 #include "TransportSystem.h"
@@ -103,9 +103,9 @@ void TransportBase::UpdateGlobalPositionOf(WorldObject* passenger, float lx, flo
         else
             m_owner->GetMap()->CreatureRelocation((Creature*)passenger, gx, gy, gz, go);
 
-        //// If passenger is vehicle
-        //if (((Unit*)passenger)->IsVehicle())
-        //    ((Unit*)passenger)->GetVehicleInfo()->UpdateGlobalPositions();
+        // If passenger is vehicle
+        if (((Unit*)passenger)->IsVehicle())
+            ((Unit*)passenger)->GetVehicleInfo()->UpdateGlobalPositions();
     }
     // ToDo: Add gameobject relocation
     // ToDo: Add passenger relocation for MO transports
@@ -134,6 +134,53 @@ void TransportBase::CalculateGlobalPositionOf(float lx, float ly, float lz, floa
 
     gz = lz + m_owner->GetPositionZ();
     go = MapManager::NormalizeOrientation(lo + m_owner->GetOrientation());
+}
+
+//  Helper function to check if a unit is boarded onto this transporter (or a transporter boarded onto this) recursively
+bool TransportBase::HasOnBoard(WorldObject const* passenger) const
+{
+    MANGOS_ASSERT(passenger);
+
+    // For efficiency we go down from the (possible) passenger until we reached our owner, or until we reached no passenger
+    // Note, this will not catch, if self and passenger are boarded onto the same transporter (as it should not)
+    while (passenger->IsBoarded())
+    {
+        // pasenger is boarded onto this
+        if (passenger->GetTransportInfo()->GetTransport() == m_owner)
+            return true;
+        else
+            passenger = passenger->GetTransportInfo()->GetTransport();
+    }
+
+    return false;
+}
+
+void TransportBase::BoardPassenger(WorldObject* passenger, float lx, float ly, float lz, float lo, uint8 seat)
+{
+    TransportInfo* transportInfo = new TransportInfo(passenger, this, lx, ly, lz, lo, seat);
+
+    // Insert our new passenger
+    m_passengers.insert(PassengerMap::value_type(passenger, transportInfo));
+
+    // The passenger needs fast access to transportInfo
+    passenger->SetTransportInfo(transportInfo);
+}
+
+void TransportBase::UnBoardPassenger(WorldObject* passenger)
+{
+    PassengerMap::iterator itr = m_passengers.find(passenger);
+
+    if (itr == m_passengers.end())
+        return;
+
+    // Set passengers transportInfo to NULL
+    passenger->SetTransportInfo(NULL);
+
+    // Delete transportInfo
+    delete itr->second;
+
+    // Unboard finally
+    m_passengers.erase(itr);
 }
 
 /* **************************************** TransportInfo ****************************************/

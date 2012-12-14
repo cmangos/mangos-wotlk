@@ -435,6 +435,8 @@ bool Map::loaded(const GridPair& p) const
 
 void Map::Update(const uint32& t_diff)
 {
+    m_dyn_tree.update(t_diff);
+
     /// update worldsessions for existing players
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
     {
@@ -824,21 +826,21 @@ void Map::UnloadAll(bool pForce)
     }
 }
 
-MapDifficulty const* Map::GetMapDifficulty() const
+MapDifficultyEntry const* Map::GetMapDifficulty() const
 {
     return GetMapDifficultyData(GetId(), GetDifficulty());
 }
 
 uint32 Map::GetMaxPlayers() const
 {
-    if (MapDifficulty const* mapDiff = GetMapDifficulty())
+    if (MapDifficultyEntry const* mapDiff = GetMapDifficulty())
     {
         if (mapDiff->maxPlayers || IsRegularDifficulty())   // Normal case (expect that regular difficulty always have correct maxplayers)
             return mapDiff->maxPlayers;
         else                                                // DBC have 0 maxplayers for heroic instances with expansion < 2
         {
             // The heroic entry exists, so we don't have to check anything, simply return normal max players
-            MapDifficulty const* normalDiff = GetMapDifficultyData(i_id, REGULAR_DIFFICULTY);
+            MapDifficultyEntry const* normalDiff = GetMapDifficultyData(i_id, REGULAR_DIFFICULTY);
             return normalDiff ? normalDiff->maxPlayers : 0;
         }
     }
@@ -1245,37 +1247,6 @@ void DungeonMap::InitVisibilityDistance()
 }
 
 /*
-    Do map specific checks to see if the player can enter
-*/
-bool DungeonMap::CanEnter(Player* player)
-{
-    if (player->GetMapRef().getTarget() == this)
-    {
-        sLog.outError("DungeonMap::CanEnter - player %s(%u) already in map %d,%d,%d!", player->GetName(), player->GetGUIDLow(), GetId(), GetInstanceId(), GetSpawnMode());
-        MANGOS_ASSERT(false);
-        return false;
-    }
-
-    // cannot enter if the instance is full (player cap), GMs don't count
-    uint32 maxPlayers = GetMaxPlayers();
-    if (!player->isGameMaster() && GetPlayersCountExceptGMs() >= maxPlayers)
-    {
-        DETAIL_LOG("MAP: Instance '%u' of map '%s' cannot have more than '%u' players. Player '%s' rejected", GetInstanceId(), GetMapName(), maxPlayers, player->GetName());
-        player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
-        return false;
-    }
-
-    // cannot enter while an encounter in the instance is in progress
-    if (!player->isGameMaster() && GetInstanceData() && GetInstanceData()->IsEncounterInProgress() && player->GetMapId() != GetId())
-    {
-        player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
-        return false;
-    }
-
-    return Map::CanEnter(player);
-}
-
-/*
     Do map specific checks and add the player to the map if successful.
 */
 bool DungeonMap::Add(Player* player)
@@ -1514,7 +1485,6 @@ DungeonPersistentState* DungeonMap::GetPersistanceState() const
     return (DungeonPersistentState*)Map::GetPersistentState();
 }
 
-
 /* ******* Battleground Instance Maps ******* */
 
 BattleGroundMap::BattleGroundMap(uint32 id, time_t expiry, uint32 InstanceId, uint8 spawnMode)
@@ -1540,7 +1510,6 @@ BattleGroundPersistentState* BattleGroundMap::GetPersistanceState() const
     return (BattleGroundPersistentState*)Map::GetPersistentState();
 }
 
-
 void BattleGroundMap::InitVisibilityDistance()
 {
     // init visibility distance for BG/Arenas
@@ -1549,19 +1518,14 @@ void BattleGroundMap::InitVisibilityDistance()
 
 bool BattleGroundMap::CanEnter(Player* player)
 {
-    if (player->GetMapRef().getTarget() == this)
-    {
-        sLog.outError("BGMap::CanEnter - player %u already in map!", player->GetGUIDLow());
-        MANGOS_ASSERT(false);
+    if (!Map::CanEnter(player))
         return false;
-    }
 
     if (player->GetBattleGroundId() != GetInstanceId())
         return false;
 
     // player number limit is checked in bgmgr, no need to do it here
-
-    return Map::CanEnter(player);
+    return true;
 }
 
 bool BattleGroundMap::Add(Player* player)
@@ -1603,9 +1567,23 @@ void BattleGroundMap::UnloadAll(bool pForce)
     Map::UnloadAll(pForce);
 }
 
-/// Put scripts in the execution queue
-bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target)
+bool Map::CanEnter(Player* player)
 {
+    if (player->GetMapRef().getTarget() == this)
+    {
+        sLog.outError("Map::CanEnter -%s already in map!", player->GetGuidStr().c_str());
+        MANGOS_ASSERT(false);
+        return false;
+    }
+
+    return true;
+}
+
+/// Put scripts in the execution queue
+bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams /*=SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET*/)
+{
+    MANGOS_ASSERT(source);
+
     ///- Find the script map
     ScriptMapMap::const_iterator s = scripts.second.find(id);
     if (s == scripts.second.end())
@@ -1615,6 +1593,20 @@ bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* sourc
     ObjectGuid sourceGuid = source->GetObjectGuid();
     ObjectGuid targetGuid = target ? target->GetObjectGuid() : ObjectGuid();
     ObjectGuid ownerGuid  = source->isType(TYPEMASK_ITEM) ? ((Item*)source)->GetOwnerGuid() : ObjectGuid();
+
+    if (execParams)                                         // Check if the execution should be uniquely
+    {
+        for (ScriptScheduleMap::const_iterator searchItr = m_scriptSchedule.begin(); searchItr != m_scriptSchedule.end(); ++searchItr)
+        {
+            if (searchItr->second.IsSameScript(scripts.first, id,
+                    execParams & SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE ? sourceGuid : ObjectGuid(),
+                    execParams & SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET ? targetGuid : ObjectGuid(), ownerGuid))
+            {
+                DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u. Skip script as script already started for source %s, target %s - ScriptsStartParams %u", scripts.first, id, sourceGuid.GetString().c_str(), targetGuid.GetString().c_str(), execParams);
+                return true;
+            }
+        }
+    }
 
     ///- Schedule script execution for all scripts in the script map
     ScriptMap const* s2 = &(s->second);
@@ -1657,12 +1649,33 @@ void Map::ScriptsProcess()
     // ok as multimap is a *sorted* associative container
     while (!m_scriptSchedule.empty() && (iter->first <= sWorld.GetGameTime()))
     {
-        iter->second.HandleScriptStep();
+        if (iter->second.HandleScriptStep())
+        {
+            // Terminate following script steps of this script
+            const char* tableName = iter->second.GetTableName();
+            uint32 id = iter->second.GetId();
+            ObjectGuid sourceGuid = iter->second.GetSourceGuid();
+            ObjectGuid targetGuid = iter->second.GetTargetGuid();
+            ObjectGuid ownerGuid = iter->second.GetOwnerGuid();
 
-        m_scriptSchedule.erase(iter);
+            for (ScriptScheduleMap::iterator rmItr = m_scriptSchedule.begin(); rmItr != m_scriptSchedule.end();)
+            {
+                if (rmItr->second.IsSameScript(tableName, id, sourceGuid, targetGuid, ownerGuid))
+                {
+                    m_scriptSchedule.erase(rmItr++);
+                    sScriptMgr.DecreaseScheduledScriptCount();
+                }
+                else
+                    ++rmItr;
+            }
+        }
+        else
+        {
+            m_scriptSchedule.erase(iter);
+
+            sScriptMgr.DecreaseScheduledScriptCount();
+        }
         iter = m_scriptSchedule.begin();
-
-        sScriptMgr.DecreaseScheduledScriptCount();
     }
 }
 
@@ -1867,7 +1880,6 @@ class StaticMonsterChatBuilder
         Unit* i_target;
 };
 
-
 /**
  * Function simulates yell of creature
  *
@@ -1895,7 +1907,6 @@ void Map::MonsterYellToMap(ObjectGuid guid, int32 textId, uint32 language, Unit*
         return;
     }
 }
-
 
 /**
  * Function simulates yell of creature
@@ -1937,18 +1948,60 @@ void Map::PlayDirectSoundToMap(uint32 soundId, uint32 zoneId /*=0*/)
 /**
  * Function to check if a point is in line of sight from an other point
  */
-bool Map::IsInLineOfSight(float srcX, float srcY, float srcZ, float destX, float destY, float destZ)
+bool Map::IsInLineOfSight(float srcX, float srcY, float srcZ, float destX, float destY, float destZ, uint32 phasemask) const
 {
-    VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
-    return vMapManager->isInLineOfSight(GetId(), srcX, srcY, srcZ, destX, destY, destZ);
+    return VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(GetId(), srcX, srcY, srcZ, destX, destY, destZ)
+           && m_dyn_tree.isInLineOfSight(srcX, srcY, srcZ, destX, destY, destZ, phasemask);
 }
 
 /**
- * get the hit position and return true if we hit something
+ * get the hit position and return true if we hit something (in this case the dest position will hold the hit-position)
  * otherwise the result pos will be the dest pos
  */
-bool Map::GetObjectHitPos(float srcX, float srcY, float srcZ, float destX, float destY, float destZ, float& resX, float& resY, float& resZ, float pModifyDist)
+bool Map::GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, uint32 phasemask, float modifyDist) const
 {
-    VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
-    return vMapManager->getObjectHitPos(GetId(), srcX, srcY, srcZ, destX, destY, destZ, resX, resY, resZ, pModifyDist);
+    // at first check all static objects
+    float tempX, tempY, tempZ = 0.0f;
+    bool result0 = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetId(), srcX, srcY, srcZ, destX, destY, destZ, tempX, tempY, tempZ, modifyDist);
+    if (result0)
+    {
+        DEBUG_LOG("Map::GetHitPosition vmaps corrects gained with static objects! new dest coords are X:%f Y:%f Z:%f", destX, destY, destZ);
+        destX = tempX;
+        destY = tempY;
+        destZ = tempZ;
+    }
+    // at second all dynamic objects, if static check has an hit, then we can calculate only to this closer point
+    bool result1 = m_dyn_tree.getObjectHitPos(phasemask, srcX, srcY, srcZ, destX, destY, destZ, tempX, tempY, tempZ, modifyDist);
+    if (result1)
+    {
+        DEBUG_LOG("Map::GetHitPosition vmaps corrects gained with dynamic objects! new dest coords are X:%f Y:%f Z:%f", destX, destY, destZ);
+        destX = tempX;
+        destY = tempY;
+        destZ = tempZ;
+    }
+    return result0 || result1;
+}
+
+float Map::GetHeight(uint32 phasemask, float x, float y, float z) const
+{
+    float staticHeight = m_TerrainData->GetHeightStatic(x, y, z);
+
+    // Get Dynamic Height around static Height (if valid)
+    float dynSearchHeight = 2.0f + (z < staticHeight ? staticHeight : z);
+    return std::max<float>(staticHeight, m_dyn_tree.getHeight(x, y, dynSearchHeight, dynSearchHeight - staticHeight, phasemask));
+}
+
+void Map::InsertGameObjectModel(const GameObjectModel& mdl)
+{
+    m_dyn_tree.insert(mdl);
+}
+
+void Map::RemoveGameObjectModel(const GameObjectModel& mdl)
+{
+    m_dyn_tree.remove(mdl);
+}
+
+bool Map::ContainsGameObjectModel(const GameObjectModel& mdl) const
+{
+    return m_dyn_tree.contains(mdl);
 }

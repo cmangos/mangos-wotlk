@@ -95,7 +95,6 @@ struct WorldLocation
         : mapid(loc.mapid), coord_x(loc.coord_x), coord_y(loc.coord_y), coord_z(loc.coord_z), orientation(loc.orientation) {}
 };
 
-
 // use this class to measure time between world update ticks
 // essential for units updating their spells after cells become active
 class WorldUpdateCounter
@@ -354,8 +353,6 @@ class MANGOS_DLL_SPEC Object
         bool LoadValues(const char* data);
 
         uint16 GetValuesCount() const { return m_valuesCount; }
-
-        void InitValues() { _InitValues(); }
 
         virtual bool HasQuest(uint32 /* quest_id */) const { return false; }
         virtual bool HasInvolvedQuest(uint32 /* quest_id */) const { return false; }

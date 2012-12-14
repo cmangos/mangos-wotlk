@@ -110,9 +110,9 @@ namespace VMAP
         iFlags = new uint8[width * height];
     }
 
-    WmoLiquid::WmoLiquid(const WmoLiquid& other): iHeight(0), iFlags(0)
+    WmoLiquid::WmoLiquid(const WmoLiquid& other): iHeight(NULL), iFlags(NULL)
     {
-        *this = other; // use assignment operator...
+        *this = other;                                      // use assignment operator defined below
     }
 
     WmoLiquid::~WmoLiquid()
@@ -125,26 +125,29 @@ namespace VMAP
     {
         if (this == &other)
             return *this;
+
         iTilesX = other.iTilesX;
         iTilesY = other.iTilesY;
         iCorner = other.iCorner;
         iType = other.iType;
-        delete iHeight;
-        delete iFlags;
+        delete[] iHeight;
+        delete[] iFlags;
+
         if (other.iHeight)
         {
             iHeight = new float[(iTilesX + 1) * (iTilesY + 1)];
-            memcpy(iHeight, other.iHeight, (iTilesX + 1) * (iTilesY + 1)*sizeof(float));
+            memcpy(iHeight, other.iHeight, (iTilesX + 1) * (iTilesY + 1) * sizeof(float));
         }
         else
-            iHeight = 0;
+            iHeight = NULL;
         if (other.iFlags)
         {
             iFlags = new uint8[iTilesX * iTilesY];
-            memcpy(iFlags, other.iFlags, iTilesX * iTilesY);
+            memcpy(iFlags, other.iFlags, iTilesX * iTilesY * sizeof(uint8));
         }
         else
-            iFlags = 0;
+            iFlags = NULL;
+
         return *this;
     }
 
@@ -281,7 +284,8 @@ namespace VMAP
         chunkSize = sizeof(uint32) + sizeof(MeshTriangle) * count;
         if (result && fwrite(&chunkSize, sizeof(uint32), 1, wf) != 1) result = false;
         if (result && fwrite(&count, sizeof(uint32), 1, wf) != 1) result = false;
-        if (result && fwrite(&triangles[0], sizeof(MeshTriangle), count, wf) != count) result = false;
+        if (count)
+            if (result && fwrite(&triangles[0], sizeof(MeshTriangle), count, wf) != count) result = false;
 
         // write mesh BIH
         if (result && fwrite("MBIH", 1, 4, wf) != 4) result = false;
@@ -289,15 +293,10 @@ namespace VMAP
 
         // write liquid data
         if (result && fwrite("LIQU", 1, 4, wf) != 4) result = false;
-        if (!iLiquid)
-        {
-            chunkSize = 0;
-            if (result && fwrite(&chunkSize, sizeof(uint32), 1, wf) != 1) result = false;
-            return result;
-        }
-        chunkSize = iLiquid->GetFileSize();
+        chunkSize = iLiquid ? iLiquid->GetFileSize() : 0;
         if (result && fwrite(&chunkSize, sizeof(uint32), 1, wf) != 1) result = false;
-        if (result) result = iLiquid->writeToFile(wf);
+        if (chunkSize)
+            if (result) result = iLiquid->writeToFile(wf);
 
         return result;
     }
@@ -329,14 +328,17 @@ namespace VMAP
         if (result && !readChunk(rf, chunk, "TRIM", 4)) result = false;
         if (result && fread(&chunkSize, sizeof(uint32), 1, rf) != 1) result = false;
         if (result && fread(&count, sizeof(uint32), 1, rf) != 1) result = false;
-        if (result) triangles.resize(count);
-        if (result && fread(&triangles[0], sizeof(MeshTriangle), count, rf) != count) result = false;
+        if (count)
+        {
+            if (result) triangles.resize(count);
+            if (result && fread(&triangles[0], sizeof(MeshTriangle), count, rf) != count) result = false;
+        }
 
         // read mesh BIH
         if (result && !readChunk(rf, chunk, "MBIH", 4)) result = false;
         if (result) result = meshTree.readFromFile(rf);
 
-        // write liquid data
+        // read liquid data
         if (result && !readChunk(rf, chunk, "LIQU", 4)) result = false;
         if (result && fread(&chunkSize, sizeof(uint32), 1, rf) != 1) result = false;
         if (result && chunkSize > 0)
@@ -361,7 +363,7 @@ namespace VMAP
 
     bool GroupModel::IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit) const
     {
-        if (!triangles.size())
+        if (triangles.empty())
             return false;
         GModelRayCallback callback(triangles, vertices);
         meshTree.intersectRay(ray, callback, distance, stopAtFirstHit);
@@ -370,7 +372,7 @@ namespace VMAP
 
     bool GroupModel::IsInsideObject(const Vector3& pos, const Vector3& down, float& z_dist) const
     {
-        if (!triangles.size() || !iBound.contains(pos))
+        if (triangles.empty() || !iBound.contains(pos))
             return false;
         GModelRayCallback callback(triangles, vertices);
         Vector3 rPos = pos - 0.1f * down;
@@ -391,9 +393,8 @@ namespace VMAP
 
     uint32 GroupModel::GetLiquidType() const
     {
-        // convert to type mask, matching MAP_LIQUID_TYPE_* defines in Map.h
         if (iLiquid)
-            return (1 << iLiquid->GetType());
+            return iLiquid->GetType();
         return 0;
     }
 
@@ -470,7 +471,7 @@ namespace VMAP
 
     bool WorldModel::IntersectPoint(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, AreaInfo& info) const
     {
-        if (!groupModels.size())
+        if (groupModels.empty())
             return false;
         WModelAreaCallback callback(groupModels, down);
         groupTree.intersectPoint(p, callback);
@@ -488,7 +489,7 @@ namespace VMAP
 
     bool WorldModel::GetLocationInfo(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, LocationInfo& info) const
     {
-        if (!groupModels.size())
+        if (groupModels.empty())
             return false;
         WModelAreaCallback callback(groupModels, down);
         groupTree.intersectPoint(p, callback);
@@ -541,7 +542,8 @@ namespace VMAP
             return false;
 
         bool result = true;
-        uint32 chunkSize, count;
+        uint32 chunkSize = 0;
+        uint32 count = 0;
         char chunk[8];                          // Ignore the added magic header
         if (!readChunk(rf, chunk, VMAP_MAGIC, 8)) result = false;
 

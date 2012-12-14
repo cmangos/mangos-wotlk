@@ -69,6 +69,8 @@
 
 INSTANTIATE_SINGLETON_1(World);
 
+extern void LoadGameObjectModelList();
+
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
 volatile uint32 World::m_worldLoopCounter = 0;
@@ -1008,6 +1010,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Game Object Templates...");     // must be after LoadPageTexts
     sObjectMgr.LoadGameobjectInfo();
 
+    sLog.outString("Loading GameObject models...");
+    LoadGameObjectModelList();
+
     sLog.outString("Loading Spell Chain Data...");
     sSpellMgr.LoadSpellChains();
 
@@ -1056,11 +1061,17 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature templates...");
     sObjectMgr.LoadCreatureTemplates();
 
+    sLog.outString("Loading Creature template spells...");
+    sObjectMgr.LoadCreatureTemplateSpells();
+
     sLog.outString("Loading Creature Model for race...");   // must be after creature templates
     sObjectMgr.LoadCreatureModelRace();
 
     sLog.outString("Loading SpellsScriptTarget...");
     sSpellMgr.LoadSpellScriptTarget();                      // must be after LoadCreatureTemplates and LoadGameobjectInfo
+
+    sLog.outString("Loading Vehicle Accessory...");         // must be after creature templates
+    sObjectMgr.LoadVehicleAccessory();
 
     sLog.outString("Loading ItemRequiredTarget...");
     sObjectMgr.LoadItemRequiredTarget();
@@ -1314,10 +1325,10 @@ void World::SetInitialWorldSettings()
     sScriptMgr.LoadDbScriptStrings();
 
     sLog.outString("Loading CreatureEventAI Texts...");
-    sEventAIMgr.LoadCreatureEventAI_Texts(false);       // false, will checked in LoadCreatureEventAI_Scripts
+    sEventAIMgr.LoadCreatureEventAI_Texts(false);           // false, will checked in LoadCreatureEventAI_Scripts
 
     sLog.outString("Loading CreatureEventAI Summons...");
-    sEventAIMgr.LoadCreatureEventAI_Summons(false);     // false, will checked in LoadCreatureEventAI_Scripts
+    sEventAIMgr.LoadCreatureEventAI_Summons(false);         // false, will checked in LoadCreatureEventAI_Scripts
 
     sLog.outString("Loading CreatureEventAI Scripts...");
     sEventAIMgr.LoadCreatureEventAI_Scripts();
@@ -1369,7 +1380,7 @@ void World::SetInitialWorldSettings()
     // mailtimer is increased when updating auctions
     // one second is 1000 -(tested on win system)
     mail_timer = uint32((((localtime(&m_gameTime)->tm_hour + 20) % 24) * HOUR * IN_MILLISECONDS) / m_timers[WUPDATE_AUCTIONS].GetInterval());
-    //1440
+    // 1440
     mail_timer_expires = uint32((DAY * IN_MILLISECONDS) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
     DEBUG_LOG("Mail timer set to: %u, mail return is called every %u minutes", mail_timer, mail_timer_expires);
 

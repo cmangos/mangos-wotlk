@@ -42,6 +42,7 @@
 #include "ObjectPosSelector.h"
 #include "TemporarySummon.h"
 #include "movement/packet_builder.h"
+#include "CreatureLinkingMgr.h"
 
 Object::Object()
 {
@@ -250,10 +251,11 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     {
         Unit* unit = ((Unit*)this);
 
+        // ToDo: Remove this hack
         if (GetTypeId() == TYPEID_PLAYER)
         {
             Player* player = ((Player*)unit);
-            if (player->GetTransport())
+            if (player->GetTransport() || player->IsBoarded())
                 player->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
             else
                 player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
@@ -395,7 +397,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     // 0x80
     if (updateFlags & UPDATEFLAG_VEHICLE)
     {
-        *data << uint32(((Unit*)this)->GetVehicleInfo()->GetEntry()->m_ID); // vehicle id
+        *data << uint32(((Unit*)this)->GetVehicleInfo()->GetVehicleEntry()->m_ID); // vehicle id
         *data << float(((WorldObject*)this)->GetOrientation());
     }
 
@@ -886,7 +888,6 @@ bool Object::PrintEntryError(char const* descr) const
     return false;
 }
 
-
 void Object::BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_players)
 {
     UpdateDataMapType::iterator iter = update_players.find(pl);
@@ -1098,7 +1099,7 @@ bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
 {
     float x, y, z;
     GetPosition(x, y, z);
-    return GetMap()->IsInLineOfSight(x, y, z + 2.0f, ox, oy, oz + 2.0f);
+    return GetMap()->IsInLineOfSight(x, y, z + 2.0f, ox, oy, oz + 2.0f, GetPhaseMask());
 }
 
 bool WorldObject::GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D /* = true */) const
@@ -1285,7 +1286,7 @@ void WorldObject::GetRandomPoint(float x, float y, float z, float distance, floa
 
 void WorldObject::UpdateGroundPositionZ(float x, float y, float& z) const
 {
-    float new_z = GetTerrain()->GetHeight(x, y, z, true);
+    float new_z = GetMap()->GetHeight(GetPhaseMask(), x, y, z);
     if (new_z > INVALID_HEIGHT)
         z = new_z + 0.05f;                                  // just to be sure that we are not a few pixel under the surface
 }
@@ -1304,7 +1305,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z) const
                 float ground_z = z;
                 float max_z = canSwim
                               ? GetTerrain()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK))
-                              : ((ground_z = GetTerrain()->GetHeight(x, y, z, true)));
+                              : ((ground_z = GetMap()->GetHeight(GetPhaseMask(), x, y, z)));
                 if (max_z > INVALID_HEIGHT)
                 {
                     if (z > max_z)
@@ -1315,7 +1316,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z) const
             }
             else
             {
-                float ground_z = GetTerrain()->GetHeight(x, y, z, true);
+                float ground_z = GetMap()->GetHeight(GetPhaseMask(), x, y, z);
                 if (z < ground_z)
                     z = ground_z;
             }
@@ -1323,7 +1324,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z) const
         }
         case TYPEID_PLAYER:
         {
-            // for server controlled moves playr work same as creature (but it can always swim)
+            // for server controlled moves player work same as creature (but it can always swim)
             if (!((Player const*)this)->CanFly())
             {
                 float ground_z = z;
@@ -1338,7 +1339,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z) const
             }
             else
             {
-                float ground_z = GetTerrain()->GetHeight(x, y, z, true);
+                float ground_z = GetMap()->GetHeight(GetPhaseMask(), x, y, z);
                 if (z < ground_z)
                     z = ground_z;
             }
@@ -1346,7 +1347,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z) const
         }
         default:
         {
-            float ground_z = GetTerrain()->GetHeight(x, y, z, true);
+            float ground_z = GetMap()->GetHeight(GetPhaseMask(), x, y, z);
             if (ground_z > INVALID_HEIGHT)
                 z = ground_z;
             break;
@@ -1580,10 +1581,14 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     // Active state set before added to map
     pCreature->SetActiveObjectState(asActiveObject);
 
-    pCreature->Summon(spwtype, despwtime);
+    pCreature->Summon(spwtype, despwtime);                  // Also initializes the AI and MMGen
 
     if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
         ((Creature*)this)->AI()->JustSummoned(pCreature);
+
+    // Creature Linking, Initial load is handled like respawn
+    if (pCreature->IsLinkingEventTrigger())
+        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, pCreature);
 
     // return the creature therewith the summoner has access to it
     return pCreature;
