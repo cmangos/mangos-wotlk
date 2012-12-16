@@ -787,6 +787,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
             {
                 at = corpseAt;
                 targetMapEntry = sMapStore.LookupEntry(at->target_mapId);
+                if (!targetMapEntry)
+                    return;
             }
         }
 
