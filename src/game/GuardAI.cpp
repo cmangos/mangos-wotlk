@@ -133,7 +133,7 @@ void GuardAI::AttackStart(Unit* u)
         m_creature->SetInCombatWith(u);
         u->SetInCombatWith(m_creature);
 
-        m_creature->GetMotionMaster()->MoveChase(u);
+        HandleMovementOnAttackStart(u);
     }
 }
 
