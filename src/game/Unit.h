@@ -1993,8 +1993,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Unit* _GetTotem(TotemSlot slot) const;              // for templated function without include need
         Pet* _GetPet(ObjectGuid guid) const;                // for templated function without include need
 
-        // Wrapper called by DealDamage when a creature is killed
-        void JustKilledCreature(Creature* victim, Player* responsiblePlayer);
+        void JustKilledCreature(Creature* victim);          // Wrapper called by DealDamage when a creature is killed
 
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
