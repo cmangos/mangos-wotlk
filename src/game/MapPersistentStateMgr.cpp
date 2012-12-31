@@ -343,6 +343,7 @@ void DungeonResetScheduler::LoadResetTimes()
 {
     time_t now = time(NULL);
     time_t today = (now / DAY) * DAY;
+    time_t nextWeek = today + (7 * DAY);
 
     // NOTE: Use DirectPExecute for tables that will be queried later
 
@@ -469,7 +470,7 @@ void DungeonResetScheduler::LoadResetTimes()
             CharacterDatabase.DirectPExecute("INSERT INTO instance_reset VALUES ('%u','%u','" UI64FMTD "')", mapid, difficulty, (uint64)t);
         }
 
-        if (t < now)
+        if (t < now || t > nextWeek)
         {
             // assume that expired instances have already been cleaned
             // calculate the next reset time
