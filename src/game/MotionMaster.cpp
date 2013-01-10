@@ -17,8 +17,6 @@
  */
 
 #include "MotionMaster.h"
-#include "CreatureAISelector.h"
-#include "Creature.h"
 #include "ConfusedMovementGenerator.h"
 #include "FleeingMovementGenerator.h"
 #include "HomeMovementGenerator.h"
@@ -29,7 +27,11 @@
 #include "RandomMovementGenerator.h"
 #include "movement/MoveSpline.h"
 #include "movement/MoveSplineInit.h"
+#include "Map.h"
+#include "CreatureAISelector.h"
+#include "Creature.h"
 #include "CreatureLinkingMgr.h"
+#include "Pet.h"
 #include "DBCStores.h"
 
 #include <cassert>
@@ -451,6 +453,16 @@ void MotionMaster::propagateSpeedChange()
     {
         (*it)->unitSpeedChanged();
     }
+}
+
+uint32 MotionMaster::getLastReachedWaypoint() const
+{
+    for (Impl::container_type::const_reverse_iterator rItr = Impl::c.rbegin(); rItr != Impl::c.rend(); ++rItr)
+    {
+        if ((*rItr)->GetMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+            return (static_cast<WaypointMovementGenerator<Creature>*>(*rItr))->getLastReachedWaypoint();
+    }
+    return 0;
 }
 
 MovementGeneratorType MotionMaster::GetCurrentMovementGeneratorType() const

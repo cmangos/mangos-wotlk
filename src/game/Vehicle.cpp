@@ -31,15 +31,16 @@
  * - Internal helper to control the available seats of a vehicle
  */
 
+#include "Vehicle.h"
 #include "Common.h"
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
 #include "Log.h"
 #include "Unit.h"
 #include "Creature.h"
+#include "CreatureAI.h"
 #include "ObjectMgr.h"
 #include "SQLStorages.h"
-#include "Vehicle.h"
 #include "Util.h"
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
@@ -525,6 +526,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             pVehicle->SetCharmerGuid(passenger->GetObjectGuid());
         }
 
+        ((Creature*)passenger)->AI()->SetCombatMovement(false);
         // Not entirely sure how this must be handled in relation to CONTROL
         // But in any way this at least would require some changes in the movement system most likely
         passenger->GetMotionMaster()->Clear(false, true);
@@ -567,7 +569,9 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             pVehicle->SetCharmerGuid(ObjectGuid());
         }
         // Reinitialize movement
-        passenger->GetMotionMaster()->Initialize();
+        ((Creature*)passenger)->AI()->SetCombatMovement(true, true);
+        if (!passenger->getVictim())
+            passenger->GetMotionMaster()->Initialize();
     }
 }
 

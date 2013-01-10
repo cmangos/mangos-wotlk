@@ -592,12 +592,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 
         ((Creature*)pVictim)->SetLootRecipient(this);
 
-        pVictim->m_deathState = DEAD;                       // so that isAlive, isDead return expected results in the called hooks of JustKilledCreature
-                                                            // must be used only shortly before SetDeathState(JUST_DIED) and only for Creatures or Pets
-
-        JustKilledCreature((Creature*)pVictim);
-
-        pVictim->SetDeathState(JUST_DIED);
+        JustKilledCreature((Creature*)pVictim, NULL);
         pVictim->SetHealth(0);
 
         return damage;
@@ -857,18 +852,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             }
         }
         else                                                // Killed creature
-        {
-            pVictim->m_deathState = DEAD;                   // so that isAlive, isDead return expected results in the called hooks of JustKilledCreature
-                                                            // must be used only shortly before SetDeathState(JUST_DIED) and only for Creatures or Pets
-            JustKilledCreature((Creature*)pVictim);
-
-            DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "SET JUST_DIED");
-            pVictim->SetDeathState(JUST_DIED);              // if !spiritOfRedemtionTalentReady always true for unit
-
-            if (player_tap)                                 // killedby Player
-                if (BattleGround* bg = player_tap->GetBattleGround())
-                    bg->HandleKillUnit((Creature*)pVictim, player_tap);
-        }
+            JustKilledCreature((Creature*)pVictim, player_tap);
     }
     else                                                    // if (health <= damage)
     {
@@ -1030,16 +1014,10 @@ struct PetOwnerKilledUnitHelper
     Unit* m_victim;
 };
 
-void Unit::JustKilledCreature(Creature* victim)
+void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
 {
-    if (!victim->IsPet())                                   // Prepare loot if can
-    {
-        victim->DeleteThreatList();
-        // only lootable if it has loot or can drop gold
-        victim->PrepareBodyLootState();
-        // may have no loot, so update death timer if allowed
-        victim->AllLootRemovedFromCorpse();
-    }
+    victim->m_deathState = DEAD;                            // so that isAlive, isDead return expected results in the called hooks of JustKilledCreature
+                                                            // must be used only shortly before SetDeathState(JUST_DIED) and only for Creatures or Pets
 
     // some critters required for quests (need normal entry instead possible heroic in any cases)
     if (victim->GetCreatureType() == CREATURE_TYPE_CRITTER && GetTypeId() == TYPEID_PLAYER)
@@ -1086,8 +1064,11 @@ void Unit::JustKilledCreature(Creature* victim)
     if (InstanceData* mapInstance = victim->GetInstanceData())
         mapInstance->OnCreatureDeath(victim);
 
+    if (responsiblePlayer)                                  // killedby Player, inform BG
+        if (BattleGround* bg = responsiblePlayer->GetBattleGround())
+            bg->HandleKillUnit(victim, responsiblePlayer);
     // Notify the outdoor pvp script
-    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
+    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(responsiblePlayer ? responsiblePlayer->GetCachedZoneId() : GetZoneId()))
         outdoorPvP->HandleCreatureDeath(victim);
 
     if (victim->IsLinkingEventTrigger())
@@ -1121,6 +1102,22 @@ void Unit::JustKilledCreature(Creature* victim)
             ((DungeonMap*)m)->GetPersistanceState()->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, victim->GetEntry());
         }
     }
+
+    bool isPet = victim->IsPet();
+
+    /* ********************************* Set Death finally ************************************* */
+    DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "SET JUST_DIED");
+    victim->SetDeathState(JUST_DIED);                       // if !spiritOfRedemtionTalentReady always true for unit
+
+    if (isPet)
+        return;                                             // Pets might have been unsummoned at this place, do not handle them further!
+
+    /* ******************************** Prepare loot if can ************************************ */
+    victim->DeleteThreatList();
+    // only lootable if it has loot or can drop gold
+    victim->PrepareBodyLootState();
+    // may have no loot, so update death timer if allowed, must be after SetDeathState(JUST_DIED)
+    victim->AllLootRemovedFromCorpse();
 }
 
 void Unit::PetOwnerKilledUnit(Unit* pVictim)
@@ -2674,15 +2671,14 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
     int32 victimDefenseSkill = pVictim->GetDefenseSkillValue(this);
 
     // bonus from skills is 0.04%
-    int32    skillBonus  = 4 * (attackerWeaponSkill - victimMaxSkillValueForLevel);
-    int32    sum = 0, tmp = 0;
-    int32    roll = urand(0, 10000);
+    int32 skillBonus  = 4 * (attackerWeaponSkill - victimMaxSkillValueForLevel);
+    int32 sum = 0;
+    int32 roll = urand(0, 10000);
+    int32 tmp = miss_chance;
 
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: skill bonus of %d for attacker", skillBonus);
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: rolled %d, miss %d, dodge %d, parry %d, block %d, crit %d",
                      roll, miss_chance, dodge_chance, parry_chance, block_chance, crit_chance);
-
-    tmp = miss_chance;
 
     if (tmp > 0 && roll < (sum += tmp))
     {
@@ -4975,6 +4971,23 @@ void Unit::RemoveAllAurasOnDeath()
         if (!iter->second->IsPassive() && !iter->second->IsDeathPersistent())
         {
             RemoveSpellAuraHolder(iter->second, AURA_REMOVE_BY_DEATH);
+            iter = m_spellAuraHolders.begin();
+        }
+        else
+            ++iter;
+    }
+}
+
+void Unit::RemoveAllAurasOnEvade()
+{
+    // used when evading to remove all auras except some special auras
+    // Vehicle control auras should not be removed on evade - neither should linked auras
+    for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
+    {
+        SpellEntry const* proto = iter->second->GetSpellProto();
+        if (!IsSpellHaveAura(proto, SPELL_AURA_CONTROL_VEHICLE))
+        {
+            RemoveSpellAuraHolder(iter->second, AURA_REMOVE_BY_DEFAULT);
             iter = m_spellAuraHolders.begin();
         }
         else

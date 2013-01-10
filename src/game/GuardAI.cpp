@@ -93,7 +93,7 @@ void GuardAI::EnterEvadeMode()
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim out run him [guid=%u]", m_creature->GetGUIDLow());
     }
 
-    m_creature->RemoveAllAuras();
+    m_creature->RemoveAllAurasOnEvade();
     m_creature->DeleteThreatList();
     i_victimGuid.Clear();
     m_creature->CombatStop(true);
@@ -133,7 +133,7 @@ void GuardAI::AttackStart(Unit* u)
         m_creature->SetInCombatWith(u);
         u->SetInCombatWith(m_creature);
 
-        m_creature->GetMotionMaster()->MoveChase(u);
+        HandleMovementOnAttackStart(u);
     }
 }
 
