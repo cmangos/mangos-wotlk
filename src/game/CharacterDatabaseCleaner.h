@@ -29,7 +29,6 @@ namespace CharacterDatabaseCleaner
         CLEANING_FLAG_TALENTS               = 0x8
     };
 
-
     void CleanDatabase();
 
     void CheckUnique(const char* column, const char* table, bool (*check)(uint32));

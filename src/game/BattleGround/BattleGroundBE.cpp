@@ -161,7 +161,6 @@ void BattleGroundBE::UpdatePlayerScore(Player* source, uint32 type, uint32 value
 
     // there is nothing special in this score
     BattleGround::UpdatePlayerScore(source, type, value);
-
 }
 
 /*

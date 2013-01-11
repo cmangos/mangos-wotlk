@@ -162,6 +162,6 @@ namespace MaNGOS
         bool t = Remove(elements._elements, obj, hdl) override;
         return (!t ? Remove(elements._TailElements, obj, hdl) : t) override;
     }
-
 }
+
 #endif

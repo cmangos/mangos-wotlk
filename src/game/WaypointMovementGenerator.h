@@ -27,8 +27,7 @@
 
 #include "MovementGenerator.h"
 #include "WaypointManager.h"
-
-#include "Player.h"
+#include "DBCStructure.h"
 
 #include <vector>
 #include <set>
@@ -83,26 +82,19 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
 
         bool GetResetPosition(Creature&, float& x, float& y, float& z);
 
+        void AddToWaypointPauseTime(int32 waitTimeDiff);
+
+        uint32 getLastReachedWaypoint() const { return m_isArrivalDone ? i_currentNode + 1 : i_currentNode; }
+
     private:
-
         void Stop(int32 time) { i_nextMoveTime.Reset(time); }
-
-        bool Stopped() { return !i_nextMoveTime.Passed(); }
-
-        bool CanMove(int32 diff)
-        {
-            i_nextMoveTime.Update(diff);
-            return i_nextMoveTime.Passed();
-        }
+        bool Stopped(Creature& u);
+        bool CanMove(int32 diff, Creature& u);
 
         void OnArrived(Creature&);
         void StartMove(Creature&);
 
-        void StartMoveNow(Creature& creature)
-        {
-            i_nextMoveTime.Reset(0);
-            StartMove(creature);
-        }
+        void StartMoveNow(Creature& creature);
 
         ShortTimeTracker i_nextMoveTime;
         bool m_isArrivalDone;

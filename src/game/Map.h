@@ -218,7 +218,14 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         PlayerList const& GetPlayers() const { return m_mapRefManager; }
 
         // per-map script storage
-        bool ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target);
+        enum ScriptExecutionParam
+        {
+            SCRIPT_EXEC_PARAM_NONE                    = 0x00,   // Start regardless if already started
+            SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE        = 0x01,   // Start Script only if not yet started (uniqueness identified by id and source)
+            SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET        = 0x02,   // Start Script only if not yet started (uniqueness identified by id and target)
+            SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET = 0x03,   // Start Script only if not yet started (uniqueness identified by id, source and target)
+        };
+        bool ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams = SCRIPT_EXEC_PARAM_NONE);
         void ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* source, Object* target);
 
         // must called with AddToWorld
@@ -256,7 +263,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         const TerrainInfo* GetTerrain() const { return m_TerrainData; }
 
         void CreateInstanceData(bool load);
-        InstanceData* GetInstanceData() { return i_data; }
+        InstanceData* GetInstanceData() const { return i_data; }
         uint32 GetScriptId() const { return i_script_id; }
 
         void MonsterYellToMap(ObjectGuid guid, int32 textId, uint32 language, Unit* target);
@@ -264,7 +271,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void PlayDirectSoundToMap(uint32 soundId, uint32 zoneId = 0);
 
         // Dynamic VMaps
-        float GetHeight(uint32 phasemask, float x, float y, float z, bool pCheckVMap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
+        float GetHeight(uint32 phasemask, float x, float y, float z) const;
         bool IsInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
         bool GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, uint32 phasemask, float modifyDist) const;
 

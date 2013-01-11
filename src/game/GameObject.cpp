@@ -46,6 +46,7 @@
 GameObject::GameObject() : WorldObject(),
     m_goInfo(NULL),
     m_displayInfo(NULL),
+    loot(this),
     m_model(NULL)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
@@ -56,7 +57,7 @@ GameObject::GameObject() : WorldObject(),
     m_valuesCount = GAMEOBJECT_END;
     m_respawnTime = 0;
     m_respawnDelayTime = 25;
-    m_lootState = GO_NOT_READY;
+    m_lootState = GO_READY;
     m_spawnedByDefault = true;
     m_useTimes = 0;
     m_spellId = 0;
@@ -174,6 +175,17 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     SetGoArtKit(0);                                         // unknown what this is
     SetGoAnimProgress(animprogress);
 
+    switch (GetGoType())
+    {
+        case GAMEOBJECT_TYPE_TRAP:
+        case GAMEOBJECT_TYPE_FISHINGNODE:
+            m_lootState = GO_NOT_READY;                     // Initialize Traps and Fishingnode delayed in ::Update
+            break;
+        case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
+            ForceGameObjectHealth(GetMaxHealth(), NULL);
+            break;
+    }
+
     // Notify the battleground or outdoor pvp script
     if (map->IsBattleGroundOrArena())
         ((BattleGroundMap*)map)->GetBG()->HandleGameObjectCreate(this);
@@ -203,16 +215,16 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
         {
             switch (GetGoType())
             {
-                case GAMEOBJECT_TYPE_TRAP:
+                case GAMEOBJECT_TYPE_TRAP:                  // Initialized delayed to be able to use GetOwner()
                 {
                     // Arming Time for GAMEOBJECT_TYPE_TRAP (6)
                     Unit* owner = GetOwner();
-                    if (owner && ((Player*)owner)->isInCombat())
+                    if (owner && owner->isInCombat())
                         m_cooldownTime = time(NULL) + GetGOInfo()->trap.startDelay;
                     m_lootState = GO_READY;
                     break;
                 }
-                case GAMEOBJECT_TYPE_FISHINGNODE:
+                case GAMEOBJECT_TYPE_FISHINGNODE:           // Keep not ready for some delay
                 {
                     // fishing code (bobber ready)
                     if (time(NULL) > m_respawnTime - FISHING_BOBBER_READY_TIME)
@@ -231,13 +243,10 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 
                         m_lootState = GO_READY;             // can be successfully open with some chance
                     }
-                    return;
-                }
-                default:
-                    m_lootState = GO_READY;                 // for other GO is same switched without delay to GO_READY
                     break;
+                }
             }
-            // NO BREAK for switch (m_lootState)
+            break;
         }
         case GO_READY:
         {
@@ -317,31 +326,16 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                         }
                     }
 
-                    // Note: this hack with search required until GO casting not implemented
-                    // search unfriendly creature
-                    if (owner && goInfo->trap.charges > 0)  // hunter trap
-                    {
-                        MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, owner, radius);
-                        MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
-                        Cell::VisitGridObjects(this, checker, radius);
-                        if (!ok)
-                            Cell::VisitWorldObjects(this, checker, radius);
-                    }
-                    else                                    // environmental trap
-                    {
-                        // environmental damage spells already have around enemies targeting but this not help in case nonexistent GO casting support
-
-                        // affect only players
-                        Player* p_ok = NULL;
-                        MaNGOS::AnyPlayerInObjectRangeCheck p_check(this, radius);
-                        MaNGOS::PlayerSearcher<MaNGOS::AnyPlayerInObjectRangeCheck>  checker(p_ok, p_check);
-                        Cell::VisitWorldObjects(this, checker, radius);
-                        ok = p_ok;
-                    }
+                    // Should trap trigger?
+                    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, radius);
+                    MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
+                    Cell::VisitAllObjects(this, checker, radius);
 
                     if (ok)
                     {
                         Unit* caster =  owner ? owner : ok;
+
+                        // Code below should be refactored into GO::Use, but not clear how to handle caster/victim for non AoE spells
 
                         caster->CastSpell(ok, goInfo->trap.spellId, true, NULL, NULL, GetObjectGuid());
                         // use template cooldown if provided
@@ -518,7 +512,6 @@ void GameObject::AddUniqueUse(Player* player)
         m_firstUser = player->GetObjectGuid();
 
     m_UniqueUsers.insert(player->GetObjectGuid());
-
 }
 
 void GameObject::Delete()
@@ -532,19 +525,6 @@ void GameObject::Delete()
         sPoolMgr.UpdatePool<GameObject>(*GetMap()->GetPersistentState(), poolid, GetGUIDLow());
     else
         AddObjectToRemoveList();
-}
-
-void GameObject::getFishLoot(Loot* fishloot, Player* loot_owner)
-{
-    fishloot->clear();
-
-    uint32 zone, subzone;
-    GetZoneAndAreaId(zone, subzone);
-
-    // if subzone loot exist use it
-    if (!fishloot->FillLoot(subzone, LootTemplates_Fishing, loot_owner, true, (subzone != zone)) && subzone != zone)
-        // else use zone loot (if zone diff. from subzone, must exist in like case)
-        fishloot->FillLoot(zone, LootTemplates_Fishing, loot_owner, true);
 }
 
 void GameObject::SaveToDB()
@@ -683,7 +663,6 @@ struct GameObjectRespawnDeleteWorker
 
     uint32 i_guid;
 };
-
 
 void GameObject::DeleteFromDB()
 {
@@ -1077,10 +1056,8 @@ void GameObject::Use(Unit* user)
             // TODO: possible must be moved to loot release (in different from linked triggering)
             if (GetGOInfo()->chest.eventId)
             {
-                DEBUG_LOG("Chest ScriptStart id %u for GO %u", GetGOInfo()->chest.eventId, GetGUIDLow());
-
-                if (!sScriptMgr.OnProcessEvent(GetGOInfo()->chest.eventId, user, this, true))
-                    GetMap()->ScriptsStart(sEventScripts, GetGOInfo()->chest.eventId, user, this);
+                DEBUG_LOG("Chest ScriptStart id %u for %s (opened by %s)", GetGOInfo()->chest.eventId, GetGuidStr().c_str(), user->GetGuidStr().c_str());
+                StartEvents_Event(GetMap(), GetGOInfo()->chest.eventId, user, this);
             }
 
             return;
@@ -1229,10 +1206,8 @@ void GameObject::Use(Unit* user)
 
                 if (info->goober.eventId)
                 {
-                    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Goober ScriptStart id %u for GO entry %u (GUID %u).", info->goober.eventId, GetEntry(), GetGUIDLow());
-
-                    if (!sScriptMgr.OnProcessEvent(info->goober.eventId, player, this, true))
-                        GetMap()->ScriptsStart(sEventScripts, info->goober.eventId, player, this);
+                    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Goober ScriptStart id %u for %s (Used by %s).", info->goober.eventId, GetGuidStr().c_str(), player->GetGuidStr().c_str());
+                    StartEvents_Event(GetMap(), info->goober.eventId, player, this);
                 }
 
                 // possible quest objective for active quests
@@ -1279,10 +1254,7 @@ void GameObject::Use(Unit* user)
                 player->SendCinematicStart(info->camera.cinematicId);
 
             if (info->camera.eventID)
-            {
-                if (!sScriptMgr.OnProcessEvent(info->camera.eventID, player, this, true))
-                    GetMap()->ScriptsStart(sEventScripts, info->camera.eventID, player, this);
-            }
+                StartEvents_Event(GetMap(), info->camera.eventID, player, this);
 
             return;
         }
@@ -1740,9 +1712,9 @@ bool GameObject::IsHostileTo(Unit const* unit) const
     if (Unit const* targetOwner = unit->GetCharmerOrOwner())
         return IsHostileTo(targetOwner);
 
-    // for not set faction case (wild object) use hostile case
+    // for not set faction case: be hostile towards player, not hostile towards not-players
     if (!GetGOInfo()->faction)
-        return true;
+        return unit->IsControlledByPlayer();
 
     // faction base cases
     FactionTemplateEntry const* tester_faction = sFactionTemplateStore.LookupEntry(GetGOInfo()->faction);
@@ -1948,7 +1920,7 @@ float GameObject::GetObjectBoundingRadius() const
         float dy = m_displayInfo->geoBoxMaxY - m_displayInfo->geoBoxMinY;
         float dz = m_displayInfo->geoBoxMaxZ - m_displayInfo->geoBoxMinZ;
 
-        return (std::abs(dx) + std::abs(dy) + std::abs(dz)) / 2;
+        return (std::abs(dx) + std::abs(dy) + std::abs(dz)) / 2 * GetObjectScale();
     }
 
     return DEFAULT_WORLD_OBJECT_SIZE;
@@ -2223,23 +2195,132 @@ void GameObject::TickCapturePoint()
     }
 
     if (eventId)
-    {
-        // Notify the battleground or outdoor pvp script
-        if (BattleGround* bg = (*capturingPlayers.begin())->GetBattleGround())
-        {
-            // Allow only certain events to be handled by other script engines
-            if (bg->HandleEvent(eventId, this))
-                return;
-        }
-        else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript((*capturingPlayers.begin())->GetCachedZoneId()))
-        {
-            // Allow only certain events to be handled by other script engines
-            if (outdoorPvP->HandleEvent(eventId, this))
-                return;
-        }
+        StartEvents_Event(GetMap(), eventId, this, this, true, *capturingPlayers.begin());
+}
 
-        // Send script event to SD2 and database as well - this can be used for summoning creatures, casting specific spells or spawning GOs
-        if (!sScriptMgr.OnProcessEvent(eventId, this, this, true))
-            GetMap()->ScriptsStart(sEventScripts, eventId, this, this);
+// ////////////////////////////////////////////////////////////////////////////////////////////////
+//                              Destructible GO handling
+// ////////////////////////////////////////////////////////////////////////////////////////////////
+void GameObject::DealGameObjectDamage(uint32 damage, uint32 spell, Unit* caster)
+{
+    MANGOS_ASSERT(GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING);
+    MANGOS_ASSERT(spell && sSpellStore.LookupEntry(spell) && caster);
+
+    if (!damage)
+        return;
+
+    ForceGameObjectHealth(-int32(damage), caster);
+
+    WorldPacket data(SMSG_DESTRUCTIBLE_BUILDING_DAMAGE, 9+9+9+4+4);
+    data << GetPackGUID();
+    data << caster->GetPackGUID();
+    data << caster->GetCharmerOrOwnerOrSelf()->GetPackGUID();
+    data << uint32(damage);
+    data << uint32(spell);
+    SendMessageToSet(&data, false);
+}
+
+void GameObject::RebuildGameObject(uint32 spell, Unit* caster)
+{
+    MANGOS_ASSERT(GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING);
+    MANGOS_ASSERT(caster);
+
+    ForceGameObjectHealth(0, caster);
+}
+
+void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
+{
+    MANGOS_ASSERT(GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING);
+    MANGOS_ASSERT(caster || diff >= 0);
+
+    if (diff < 0)                                           // Taken damage
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s taken damage %u dealt by %s", GetGuidStr().c_str(), uint32(-diff), caster->GetGuidStr().c_str());
+
+        if (m_useTimes > uint32(-diff))
+            m_useTimes += diff;
+        else
+            m_useTimes = 0;
     }
+    else if (diff == 0 && GetMaxHealth())                   // Rebuild - TODO: Rebuilding over time with special display-id?
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s start rebuild by %s", GetGuidStr().c_str(), caster->GetGuidStr().c_str());
+
+        m_useTimes = GetMaxHealth();
+        // Start Event if exist
+        if (caster && m_goInfo->destructibleBuilding.rebuildingEvent)
+            StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.rebuildingEvent, this, caster->GetCharmerOrOwnerOrSelf(), true, caster->GetCharmerOrOwnerOrSelf());
+    }
+    else                                                    // Set to value
+        m_useTimes = uint32(diff);
+
+    uint32 newDisplayId = 0xFFFFFFFF;                       // Set to invalid -1 to track if we switched to a change state
+    DestructibleModelDataEntry const* destructibleInfo = sDestructibleModelDataStore.LookupEntry(m_goInfo->destructibleBuilding.destructibleData);
+
+    // Get Current State - Note about order: Important for GetMaxHealth() == 0
+    if (m_useTimes == GetMaxHealth())                       // Full Health
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s set to full health %u", GetGuidStr().c_str(), m_useTimes);
+
+        RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_9 | GO_FLAG_UNK_10 | GO_FLAG_UNK_11);
+        newDisplayId = m_goInfo->displayId;
+
+        // Start Event if exist
+        if (caster && m_goInfo->destructibleBuilding.intactEvent)
+            StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.intactEvent, this, caster->GetCharmerOrOwnerOrSelf(), true, caster->GetCharmerOrOwnerOrSelf());
+    }
+    else if (m_useTimes == 0)                               // Destroyed
+    {
+        if (!HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_11))     // Was not destroyed before
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s got destroyed", GetGuidStr().c_str());
+
+            RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_9 | GO_FLAG_UNK_10);
+            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_11);
+
+            // Get destroyed DisplayId
+            if ((!m_goInfo->destructibleBuilding.destroyedDisplayId || m_goInfo->destructibleBuilding.destroyedDisplayId == 1) && destructibleInfo)
+                newDisplayId = destructibleInfo->destroyedDisplayId;
+            else
+                newDisplayId = m_goInfo->destructibleBuilding.destroyedDisplayId;
+
+            if (!newDisplayId)                              // No proper destroyed display ID exists, fetch damaged
+            {
+                if ((!m_goInfo->destructibleBuilding.damagedDisplayId || m_goInfo->destructibleBuilding.damagedDisplayId == 1) && destructibleInfo)
+                    newDisplayId = destructibleInfo->damagedDisplayId;
+                else
+                    newDisplayId = m_goInfo->destructibleBuilding.damagedDisplayId;
+            }
+
+            // Start Event if exist
+            if (caster && m_goInfo->destructibleBuilding.destroyedEvent)
+                StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.destroyedEvent, this, caster->GetCharmerOrOwnerOrSelf(), true, caster->GetCharmerOrOwnerOrSelf());
+        }
+    }
+    else if (m_useTimes <= m_goInfo->destructibleBuilding.damagedNumHits) // Damaged
+    {
+        if (!HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_10))     // Was not damaged before
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s got damaged (health now %u)", GetGuidStr().c_str(), m_useTimes);
+
+            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_10);
+
+            // Get damaged DisplayId
+            if ((!m_goInfo->destructibleBuilding.damagedDisplayId || m_goInfo->destructibleBuilding.damagedDisplayId == 1) && destructibleInfo)
+                newDisplayId = destructibleInfo->damagedDisplayId;
+            else
+                newDisplayId = m_goInfo->destructibleBuilding.damagedDisplayId;
+
+            // Start Event if exist
+            if (caster && m_goInfo->destructibleBuilding.damagedEvent)
+                StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.damagedEvent, this, caster->GetCharmerOrOwnerOrSelf(), true, caster->GetCharmerOrOwnerOrSelf());
+        }
+    }
+
+    // Set display Id
+    if (newDisplayId != 0xFFFFFFFF && newDisplayId != GetDisplayId() && newDisplayId)
+        SetDisplayId(newDisplayId);
+
+    // Set health
+    SetGoAnimProgress(GetMaxHealth() ? m_useTimes * 255 / GetMaxHealth() : 255);
 }

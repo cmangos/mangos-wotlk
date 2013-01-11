@@ -240,7 +240,6 @@ class ByteBuffer
             return *this;
         }
 
-
         uint8 operator[](size_t pos) const
         {
             return read<uint8>(pos);

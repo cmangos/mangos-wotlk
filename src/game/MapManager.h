@@ -145,7 +145,6 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         uint32 GetNumInstances();
         uint32 GetNumPlayersInInstances();
 
-
         // get list of all maps
         const MapMapType& Maps() const { return i_maps; }
 

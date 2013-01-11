@@ -1,19 +1,54 @@
-MaNGOS 0.17   (??? ??? 2010)
+MaNGOS 0.18   (?? ??? 20??)
+
+ MaNGOS 0.18 - adds further improvements to the
+ server core as well as to the majority of game classes and the game content
+ database.
+
+==== Game Features ====
+==== Server Features ====
+==== Statistics ====
+* Fixed Bugs: ??? tickets and many bugs reported at forum resolved
+* Total number of changes: ??? revisions (??? commits)
+
+
+MaNGOS 0.17   (17 November 2012)
 
  MaNGOS 0.17 - adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.
 
- ==== Game Features ====
+==== Game Features ====
+* Add Auction House Bot
+* Add Creature linking
+* Add Pathfinding
+* Add Outdoor PvP for zones Eastern Plaguelands, Silithus, Hellfire Peninsula, Terorkkar Forest, Zangarmarsh, Halaa and Venture Bay
+* Add support for Gameobject group loot
+* Add support for Vehicles
+* Improve liquid handling
+* Add support for dynamic collision
 
- ==== Server Features ====
+==== Server Features ====
+* Add Prepared SQL-Statements
+* Add a bunch of new commands for DB scripts and rewrite the engine
+* Map system re-engineered. Instance maps are updated normally like non instance maps, memory usage reduced
+* Optimize server performance by reducing frequency of visibility update calls
+* Multiple MySQL connections to database.
+* New system for parallelizing client packet processing
+* Move vmaps to vmap version 3.0 and then to 4.0
+* Add PersistantState system
+* Implement proper work pool/gameevent spawns in Map instances
+* Implement server side spells
+* Implement a new conditions system that is more flexible
+* Improve overall spell targeting and implement many spells
+* Generic code style fixes
 
- * Improved: Updated MySQL client libs to 5.1.49.
- * Improved: Updated ACE framework to 5.8.3.
+* Updated MySQL client libs to 5.1.49.
+* Updated ACE framework to 5.8.3.
+* Updated G3DLite library to 8.0.1
 
- ==== Statistics ====
- * Fixed Bugs: ??? tickets and many bugs reported at forum resolved
- * Total number of changes: ??? revisions (??? commits)
+==== Statistics ====
+* Total number of changes: 2132 revisions (2273 commits)
+* Lots of bugs from forum and issues from github fixed
 
 
 MaNGOS 0.16   (2 July 2010)

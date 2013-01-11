@@ -260,7 +260,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recv_data*/)
 {
-    DETAIL_LOG("WORLD: Received MSG_CORPSE_QUERY");
+    DETAIL_LOG("WORLD: Received opcode MSG_CORPSE_QUERY");
 
     Corpse* corpse = GetPlayer()->GetCorpse();
 
@@ -386,7 +386,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recv_data)
 {
-    DETAIL_LOG("WORLD: Received CMSG_PAGE_TEXT_QUERY");
+    DETAIL_LOG("WORLD: Received opcode CMSG_PAGE_TEXT_QUERY");
     recv_data.hexlike();
 
     uint32 pageID;

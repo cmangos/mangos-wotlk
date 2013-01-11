@@ -8,14 +8,14 @@ Copyright (C) 2010-2012 MaNGOS <http://getmangos.com/>
 ## id
 -- --------------------------
 
-creature_movement_scripts       DB project self defined id
-event_scripts                   Event id. Several sources: spell effect 61, taxi/transport nodes, gameobject_template data
-gameobject_scripts              Gameobject guid
-gameobject_template_scripts     Gameobject entry
-gossip_scripts                  DB project self defined id
-quest_end_scripts               DB project self defined id (generally quest entry)
-quest_start_scripts             DB project self defined id (generally quest entry)
-spell_scripts                   Spell id
+dbscripts_on_creature_movement      DB project self defined id
+dbscripts_on_event                  Event id. Several sources: spell effect 61, taxi/transport nodes, gameobject_template data
+dbscripts_on_go_use                 Gameobject guid
+dbscripts_on_go_template_use        Gameobject entry
+dbscripts_on_gossip                 DB project self defined id
+dbscripts_on_quest_end              DB project self defined id (generally quest entry)
+dbscripts_on_quest_start            DB project self defined id (generally quest entry)
+dbscripts_on_spell                  Spell id
 
 -- --------------------------
 ## delay
@@ -66,7 +66,8 @@ Detailed meaning described below!
 -- --------------------------
 
 4 multipurpose fields, store raw data as signed values
-Note: currently used only for text ids
+Note: currently used only for text ids SCRIPT_COMMAND_TALK (0),
+      and in relation with SCRIPT_COMMAND_TERMINATE_SCRIPT (31)
 
 -- --------------------------
 ## x y z o
@@ -78,10 +79,10 @@ Map coordinates for commands that need it.
 ## origin of script and source/target in scripts
 -- --------------------------
 
-creature_movement_scripts
+dbscripts_on_creature_movement
                             `creature_movement` `creature_movement_template`
                                 Source: creature. Target: creature
-event_scripts
+dbscripts_on_event
                             Flight path
                                 Source: player. Target: player
                             Transport path
@@ -90,21 +91,21 @@ event_scripts
                                 Source: User (player/creature). Target: GO
                             Spell (effect 61)
                                 Source: caster. Target: Target
-gameobject_scripts
-gameobject_template_scripts
+dbscripts_on_go_use
+dbscripts_on_go_template_use
                             Gameobject use
                                 Source: user: Target: GO
-gossip_scripts
-                            `gossip_menu_option`
+dbscripts_on_gossip
+                            `gossip_menu_option`, `gossip_menu`
                                 Source: creature. Target: player (in case of NPC-Gossip)
                                 Source: player. Target: GO (in case of GO-Gossip)
-quest_end_scripts
+dbscripts_on_quest_end
                             `quest_template`
                                 Source: quest taker (creature/GO). Target: player
-quest_start_scripts
+dbscripts_on_quest_start
                             `quest_template`
                                 Source: quest giver (creature/GO). Target: player
-spell_scripts
+dbscripts_on_spell
                             Spell (effect 77 - SCRIPT_EFFECT)
                             Spell (effect  3 - DUMMY)
                             Spell (effect 64 - TRIGGER_SPELL, with non-existing triggered spell)
@@ -233,6 +234,10 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                                     TEMPFACTION_RESTORE_RESPAWN         = 0x01,  // Default faction will be restored at respawn
                                                     TEMPFACTION_RESTORE_COMBAT_STOP     = 0x02,  // ... at CombatStop() (happens at creature death, at evade or custom scripte among others)
                                                     TEMPFACTION_RESTORE_REACH_HOME      = 0x04,  // ... at reaching home in home movement (evade), if not already done at CombatStop()
+                                                    // The next three allow to remove unit_flags combined with a faction change (also these flags will be reapplied when the faction is changed back)
+                                                    TEMPFACTION_TOGGLE_NON_ATTACKABLE   = 0x08,  // Remove UNIT_FLAG_NON_ATTACKABLE(0x02) when faction is changed (reapply when temp-faction is removed)
+                                                    TEMPFACTION_TOGGLE_OOC_NOT_ATTACK   = 0x10,  // Remove UNIT_FLAG_OOC_NOT_ATTACKABLE(0x100) when faction is changed (reapply when temp-faction is removed)
+                                                    TEMPFACTION_TOGGLE_PASSIVE          = 0x20,  // Remove UNIT_FLAG_PASSIVE(0x200)
 
 23 SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL   resultingSource = Creature
                                             * datalong=creature entry/modelid (depend on data_flags) OR 0 to demorph
@@ -259,3 +264,10 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * datalong2= 0x00=toggle, 0x01=add, 0x02=remove
 30 SCRIPT_COMMAND_SEND_TAXI_PATH            resultingTarget or Source must be Player
                                             * datalong = taxi path id
+31 SCRIPT_COMMAND_TERMINATE_SCRIPT          * datalong = search for npc entry if provided
+                                            * datalong2= search distance
+                                            * !(data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL): if npc not alive found, terminate script
+                                                data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL:  if npc alive found, terminate script
+                                            * dataint  = change of waittime (MILLIESECONDS) of a current waypoint movement type (negative values will decrease time)
+32 SCRIPT_COMMAND_PAUSE_WAYPOINTS           resultingSource must be Creature
+                                            * datalong: 0/1 unpause/pause waypoint movement

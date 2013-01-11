@@ -272,7 +272,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNK0                         = 0x00000001,// 0
     SPELL_ATTR_EX_DRAIN_ALL_POWER              = 0x00000002,// 1 use all power (Only paladin Lay of Hands and Bunyanize)
     SPELL_ATTR_EX_CHANNELED_1                  = 0x00000004,// 2 channeled 1
-    SPELL_ATTR_EX_UNK3                         = 0x00000008,// 3
+    SPELL_ATTR_EX_CANT_REFLECTED               = 0x00000008,// 3 used for detect can or not spell reflected
     SPELL_ATTR_EX_UNK4                         = 0x00000010,// 4
     SPELL_ATTR_EX_NOT_BREAK_STEALTH            = 0x00000020,// 5 Not break stealth
     SPELL_ATTR_EX_CHANNELED_2                  = 0x00000040,// 6 channeled 2
@@ -307,7 +307,7 @@ enum SpellAttributesEx2
 {
     SPELL_ATTR_EX2_UNK0                        = 0x00000001,// 0
     SPELL_ATTR_EX2_UNK1                        = 0x00000002,// 1
-    SPELL_ATTR_EX2_CANT_REFLECTED              = 0x00000004,// 2 ? used for detect can or not spell reflected // do not need LOS (e.g. 18220 since 3.3.3)
+    SPELL_ATTR_EX2_IGNORE_LOS                  = 0x00000004,// 2 do not need LOS (e.g. 18220 since 3.3.3) // changed meaning from ? used for detect can or not spell reflected
     SPELL_ATTR_EX2_UNK3                        = 0x00000008,// 3 auto targeting? (e.g. fishing skill enhancement items since 3.3.3)
     SPELL_ATTR_EX2_UNK4                        = 0x00000010,// 4
     SPELL_ATTR_EX2_AUTOREPEAT_FLAG             = 0x00000020,// 5
@@ -349,7 +349,7 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_UNK5                        = 0x00000020,// 5
     SPELL_ATTR_EX3_UNK6                        = 0x00000040,// 6
     SPELL_ATTR_EX3_UNK7                        = 0x00000080,// 7 create a separate (de)buff stack for each caster
-    SPELL_ATTR_EX3_UNK8                        = 0x00000100,// 8
+    SPELL_ATTR_EX3_TARGET_ONLY_PLAYER          = 0x00000100,// 8 Can target only player
     SPELL_ATTR_EX3_UNK9                        = 0x00000200,// 9
     SPELL_ATTR_EX3_MAIN_HAND                   = 0x00000400,// 10 Main hand weapon required
     SPELL_ATTR_EX3_BATTLEGROUND                = 0x00000800,// 11 Can casted only on battleground
@@ -1308,7 +1308,7 @@ enum Targets
     TARGET_IN_FRONT_OF_CASTER_30       = 104,
     TARGET_105                         = 105,               // 1 spell
     TARGET_106                         = 106,
-    TARGET_108                         = 108,               // possible TARGET_WMO(GO?)_IN_FRONT_OF_CASTER(_30 ?)
+    TARGET_GO_IN_FRONT_OF_CASTER_90    = 108,               // possible TARGET_WMO(GO?)_IN_FRONT_OF_CASTER(_30 ?) TODO: Verify the angle!
     TARGET_110                         = 110,
 };
 
@@ -1423,9 +1423,9 @@ enum GameObjectFlags
     GO_FLAG_NODESPAWN       = 0x00000020,                   // never despawn, typically for doors, they just change state
     GO_FLAG_TRIGGERED       = 0x00000040,                   // typically, summoned objects. Triggered by spell or other events
     GO_FLAG_UNK_8           = 0x00000080,
-    GO_FLAG_UNK_9           = 0x00000100,                   //? Seen on type 33, possible meaning "destruct in progress"
-    GO_FLAG_UNK_10          = 0x00000200,                   //? Seen on type 33
-    GO_FLAG_UNK_11          = 0x00000400                    //? Seen on type 33, possibly meaning "destructed"
+    GO_FLAG_UNK_9           = 0x00000100,                   //? Seen on type 33, meaning unknown
+    GO_FLAG_UNK_10          = 0x00000200,                   //? Seen on type 33, likely damaged
+    GO_FLAG_UNK_11          = 0x00000400                    //? Seen on type 33, likely destroyed
 };
 
 enum GameObjectDynamicLowFlags

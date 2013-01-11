@@ -41,6 +41,7 @@ const char CreatureFamilyfmt[] = "nfifiiiiixssssssssssssssssxx";
 const char CreatureSpellDatafmt[] = "niiiixxxx";
 const char CreatureTypefmt[] = "nxxxxxxxxxxxxxxxxxx";
 const char CurrencyTypesfmt[] = "xnxi";
+const char DestructibleModelDataFmt[] = "nxxixxxixxxixxxxxxx";
 const char DungeonEncounterfmt[] = "niiiissssssssssssssssxx";
 const char DurabilityCostsfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiiiiiii";
 const char DurabilityQualityfmt[] = "nf";

@@ -28,7 +28,7 @@
 
 void WorldSession::HandleDismissControlledVehicle(WorldPacket& recvPacket)
 {
-    DEBUG_LOG("WORLD: Received CMSG_DISMISS_CONTROLLED_VEHICLE");
+    DEBUG_LOG("WORLD: Received opcode CMSG_DISMISS_CONTROLLED_VEHICLE");
     recvPacket.hexlike();
 
     ObjectGuid vehicleGuid;
@@ -53,7 +53,7 @@ void WorldSession::HandleDismissControlledVehicle(WorldPacket& recvPacket)
 
 void WorldSession::HandleRequestVehicleExit(WorldPacket& recvPacket)
 {
-    DEBUG_LOG("WORLD: Received CMSG_REQUEST_VEHICLE_EXIT");
+    DEBUG_LOG("WORLD: Received opcode CMSG_REQUEST_VEHICLE_EXIT");
     recvPacket.hexlike();
 
     TransportInfo* transportInfo = _player->GetTransportInfo();
@@ -65,7 +65,7 @@ void WorldSession::HandleRequestVehicleExit(WorldPacket& recvPacket)
 
 void WorldSession::HandleRequestVehicleSwitchSeat(WorldPacket& recvPacket)
 {
-    DEBUG_LOG("WORLD: Received CMSG_REQUEST_VEHICLE_SWITCH_SEAT");
+    DEBUG_LOG("WORLD: Received opcode CMSG_REQUEST_VEHICLE_SWITCH_SEAT");
     recvPacket.hexlike();
 
     ObjectGuid vehicleGuid;
@@ -89,7 +89,7 @@ void WorldSession::HandleRequestVehicleSwitchSeat(WorldPacket& recvPacket)
 
 void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket)
 {
-    DEBUG_LOG("WORLD: Received CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE");
+    DEBUG_LOG("WORLD: Received opcode CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE");
     recvPacket.hexlike();
 
     ObjectGuid srcVehicleGuid;
@@ -134,7 +134,7 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket)
 
 void WorldSession::HandleRideVehicleInteract(WorldPacket& recvPacket)
 {
-    DEBUG_LOG("WORLD: Received CMSG_RIDE_VEHICLE_INTERACT");
+    DEBUG_LOG("WORLD: Received opcode CMSG_RIDE_VEHICLE_INTERACT");
     recvPacket.hexlike();
 
     ObjectGuid playerGuid;
@@ -154,7 +154,7 @@ void WorldSession::HandleRideVehicleInteract(WorldPacket& recvPacket)
 
 void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)
 {
-    DEBUG_LOG("WORLD: Received CMSG_CONTROLLER_EJECT_PASSENGER");
+    DEBUG_LOG("WORLD: Received opcode CMSG_CONTROLLER_EJECT_PASSENGER");
     recvPacket.hexlike();
 
     ObjectGuid passengerGuid;

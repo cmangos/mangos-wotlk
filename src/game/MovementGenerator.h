@@ -25,8 +25,11 @@
 #include "Dynamic/ObjectRegistry.h"
 #include "Dynamic/FactoryHolder.h"
 #include "MotionMaster.h"
+#include "Timer.h"
 
 class Unit;
+class Creature;
+class Player;
 
 class MANGOS_DLL_SPEC MovementGenerator
 {

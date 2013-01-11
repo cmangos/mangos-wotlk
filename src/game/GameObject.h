@@ -353,33 +353,33 @@ struct GameObjectInfo
             uint32 chairheight;                             //0
             uint32 heightOffset;                            //1
         } barberChair;
-        //33 GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING
+        //33 GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING          // Much guesswork
         struct
         {
             uint32 intactNumHits;                           //0
             uint32 creditProxyCreature;                     //1
             uint32 empty1;                                  //2
             uint32 intactEvent;                             //3
-            uint32 empty2;                                  //4
+            uint32 damagedDisplayId;                        //4
             uint32 damagedNumHits;                          //5
-            uint32 empty3;                                  //6
-            uint32 empty4;                                  //7
-            uint32 empty5;                                  //8
+            uint32 unk1;                                    //6
+            uint32 unk2;                                    //7
+            uint32 unk3;                                    //8
             uint32 damagedEvent;                            //9
-            uint32 empty6;                                  //10
-            uint32 empty7;                                  //11
-            uint32 empty8;                                  //12
-            uint32 empty9;                                  //13
+            uint32 destroyedDisplayId;                      //10
+            uint32 unk4;                                    //11
+            uint32 unk5;                                    //12
+            uint32 unk6;                                    //13
             uint32 destroyedEvent;                          //14
             uint32 empty10;                                 //15
-            uint32 debuildingTimeSecs;                      //16
+            uint32 debuildingTimeSecs;                      //16 // unk, only few with value 300)
             uint32 empty11;                                 //17
-            uint32 destructibleData;                        //18
-            uint32 rebuildingEvent;                         //19
-            uint32 empty12;                                 //20
+            uint32 destructibleData;                        //18 m_ID of DestructibleModelData.DBC
+            uint32 empty12;                                 //19
+            uint32 unk7;                                    //20
             uint32 empty13;                                 //21
-            uint32 damageEvent;                             //22
-            uint32 empty14;                                 //23
+            uint32 rebuildingEvent;                         //22
+            uint32 unk8;                                    //23
         } destructibleBuilding;
         //34 GAMEOBJECT_TYPE_GUILDBANK - empty
         //35 GAMEOBJECT_TYPE_TRAPDOOR
@@ -729,7 +729,6 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         // Loot System
         Loot loot;
-        void getFishLoot(Loot* loot, Player* loot_owner);
         void StartGroupLoot(Group* group, uint32 timer) override;
 
         ObjectGuid GetLootRecipientGuid() const { return m_lootRecipientGuid; }
@@ -753,6 +752,13 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         void SummonLinkedTrapIfAny();
         void TriggerLinkedGameObject(Unit* target);
+
+        // Destructible GO handling
+        void DealGameObjectDamage(uint32 damage, uint32 spell, Unit* caster);
+        void RebuildGameObject(uint32 spell, Unit* caster);
+        void ForceGameObjectHealth(int32 diff, Unit* caster);
+        uint32 GetHealth() const { return m_useTimes; }
+        uint32 GetMaxHealth() const { return m_goInfo->destructibleBuilding.intactNumHits + m_goInfo->destructibleBuilding.damagedNumHits; }
 
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
 
@@ -782,7 +788,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         GuidSet m_SkillupSet;                               // players that already have skill-up at GO use
 
-        uint32 m_useTimes;                                  // amount uses/charges triggered
+        uint32 m_useTimes;                                  // amount uses/charges triggered - also used for health for DESTRUCTIBLE_BUILDING
 
         // collected only for GAMEOBJECT_TYPE_SUMMONING_RITUAL
         ObjectGuid m_firstUser;                             // first GO user, in most used cases owner, but in some cases no, for example non-summoned multi-use GAMEOBJECT_TYPE_SUMMONING_RITUAL

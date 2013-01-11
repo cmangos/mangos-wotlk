@@ -7,8 +7,8 @@ DBCFile::DBCFile(const std::string& filename):
     filename(filename),
     data(0)
 {
-
 }
+
 bool DBCFile::open()
 {
     MPQFile f(filename.c_str());

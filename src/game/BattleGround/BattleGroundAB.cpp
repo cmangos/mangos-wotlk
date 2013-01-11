@@ -175,7 +175,6 @@ void BattleGroundAB::AddPlayer(Player* plr)
 
 void BattleGroundAB::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
 {
-
 }
 
 void BattleGroundAB::HandleAreaTrigger(Player* source, uint32 trigger)
@@ -454,7 +453,6 @@ void BattleGroundAB::Reset()
         // all nodes owned by neutral team at beginning
         m_ActiveEvents[i] = BG_AB_NODE_TYPE_NEUTRAL;
     }
-
 }
 
 void BattleGroundAB::EndBattleGround(Team winner)

@@ -113,6 +113,6 @@ namespace VMAP
             std::string getDirEntryNameFromModName(unsigned int pMapId, const std::string& pModPosName);
             unsigned int getUniqueNameId(const std::string pName);
     };
-
 }                                                           // VMAP
+
 #endif                                                      /*_TILEASSEMBLER_H_*/

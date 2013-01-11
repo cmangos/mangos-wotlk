@@ -604,7 +604,6 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
                         continue;
 
                     worker(*cr_data);
-
                 }
                 while (result->NextRow());
 
@@ -753,7 +752,6 @@ bool ChatHandler::HandleGoObjectCommand(char* args)
                         continue;
 
                     worker(*go_data);
-
                 }
                 while (result->NextRow());
 
@@ -1461,8 +1459,7 @@ bool ChatHandler::HandleModifyRepCommand(char* args)
     if (!*args)
         return false;
 
-    Player* target = NULL;
-    target = getSelectedPlayer();
+    Player* target = getSelectedPlayer();
 
     if (!target)
     {
@@ -2446,7 +2443,6 @@ bool ChatHandler::HandleDeMorphCommand(char* /*args*/)
     Unit* target = getSelectedUnit();
     if (!target)
         target = m_session->GetPlayer();
-
 
     // check online security
     else if (target->GetTypeId() == TYPEID_PLAYER && HasLowerSecurity((Player*)target))
@@ -3576,7 +3572,6 @@ bool ChatHandler::HandleWpShowCommand(char* args)
             PSendSysMessage(LANG_WAYPOINT_INFO_SPELL, spell);
             for (int i = 0;  i < MAX_WAYPOINT_TEXT; ++i)
                 PSendSysMessage(LANG_WAYPOINT_INFO_TEXT, i + 1, textid[i], (textid[i] ? GetMangosString(textid[i]) : ""));
-
         }
         while (result->NextRow());
         // Cleanup memory
@@ -3617,7 +3612,6 @@ bool ChatHandler::HandleWpShowCommand(char* args)
                     pCreature->DeleteFromDB();
                     pCreature->AddObjectToRemoveList();
                 }
-
             }
             while (result2->NextRow());
             delete result2;
@@ -3909,7 +3903,6 @@ bool ChatHandler::HandleWpExportCommand(char* args)
         outfile << ", ";
         outfile << fields[14].GetUInt32();                  // textid5
         outfile << ");\n ";
-
     }
     while (result->NextRow());
     delete result;
@@ -4551,7 +4544,6 @@ bool ChatHandler::ShowAccountListHelper(QueryResult* result, uint32* limit, bool
         else
             PSendSysMessage(LANG_ACCOUNT_LIST_LINE_CONSOLE,
                             account, fields[1].GetString(), char_name, fields[2].GetString(), fields[3].GetUInt32(), fields[4].GetUInt32());
-
     }
     while (result->NextRow());
 
@@ -4789,6 +4781,12 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
     uint32 pool_id;
     if (!ExtractUint32KeyFromLink(&args, "Hpool", pool_id))
         return false;
+
+    if (pool_id > sPoolMgr.GetMaxPoolId())
+    {
+        PSendSysMessage(LANG_POOL_ENTRY_LOWER_MAX_POOL, pool_id, sPoolMgr.GetMaxPoolId());
+        return true;
+    }
 
     Player* player = m_session ? m_session->GetPlayer() : NULL;
 

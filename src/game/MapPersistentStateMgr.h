@@ -401,7 +401,6 @@ inline void MapPersistentStateManager::DoForAllStatesWithMapId(uint32 mapId, Do&
             else
                 ++itr;
         }
-
     }
     else
     {

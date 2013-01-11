@@ -34,6 +34,7 @@ alter table creature_movement add `wpguid` int(11) default '0';
 
 #include "WaypointMovementGenerator.h"
 #include "ObjectMgr.h"
+#include "Player.h"
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "WaypointManager.h"
@@ -75,14 +76,18 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature)
             return;
         }
     }
-
-    StartMoveNow(creature);
 }
 
 void WaypointMovementGenerator<Creature>::Initialize(Creature& creature)
 {
+    creature.addUnitState(UNIT_STAT_ROAMING);
     LoadPath(creature);
-    creature.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+
+    if (!creature.isAlive() || creature.hasUnitState(UNIT_STAT_NOT_MOVE))
+        return;
+
+    creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
+    StartMoveNow(creature);
 }
 
 void WaypointMovementGenerator<Creature>::Finalize(Creature& creature)
@@ -157,12 +162,19 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
     Stop(i_path->at(i_currentNode).delay);
 }
 
+void WaypointMovementGenerator<Creature>::StartMoveNow(Creature& creature)
+{
+    i_nextMoveTime.Reset(0);
+    creature.clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+    StartMove(creature);
+}
+
 void WaypointMovementGenerator<Creature>::StartMove(Creature& creature)
 {
     if (!i_path || i_path->empty())
         return;
 
-    if (Stopped())
+    if (Stopped(creature))
         return;
 
     if (WaypointBehavior* behavior = i_path->at(i_currentNode).behavior)
@@ -206,9 +218,9 @@ bool WaypointMovementGenerator<Creature>::Update(Creature& creature, const uint3
         return true;
     }
 
-    if (Stopped())
+    if (Stopped(creature))
     {
-        if (CanMove(diff))
+        if (CanMove(diff, creature))
             StartMove(creature);
     }
     else
@@ -239,6 +251,30 @@ bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, 
     const WaypointNode& node = i_path->at(i_currentNode);
     x = node.x; y = node.y; z = node.z;
     return true;
+}
+
+bool WaypointMovementGenerator<Creature>::Stopped(Creature& u)
+{
+    return !i_nextMoveTime.Passed() || u.hasUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+}
+
+bool WaypointMovementGenerator<Creature>::CanMove(int32 diff, Creature& u)
+{
+    i_nextMoveTime.Update(diff);
+    if (i_nextMoveTime.Passed() && u.hasUnitState(UNIT_STAT_WAYPOINT_PAUSED))
+        i_nextMoveTime.Reset(1);
+
+    return i_nextMoveTime.Passed() && !u.hasUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+}
+
+void WaypointMovementGenerator<Creature>::AddToWaypointPauseTime(int32 waitTimeDiff)
+{
+    if (!i_nextMoveTime.Passed())
+    {
+        // Prevent <= 0, the code in Update requires to catch the change from moving to not moving
+        int32 newWaitTime = i_nextMoveTime.GetExpiry() + waitTimeDiff;
+        i_nextMoveTime.Reset(newWaitTime > 0 ? newWaitTime : 1);
+    }
 }
 
 //----------------------------------------------------//
@@ -352,9 +388,7 @@ void FlightPathMovementGenerator::DoEventIfAny(Player& player, TaxiPathNodeEntry
     if (uint32 eventid = departure ? node.departureEventID : node.arrivalEventID)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Taxi %s event %u of node %u of path %u for player %s", departure ? "departure" : "arrival", eventid, node.index, node.path, player.GetName());
-
-        if (!sScriptMgr.OnProcessEvent(eventid, &player, &player, departure))
-            player.GetMap()->ScriptsStart(sEventScripts, eventid, &player, &player);
+        StartEvents_Event(player.GetMap(), eventid, &player, &player, departure);
     }
 }
 

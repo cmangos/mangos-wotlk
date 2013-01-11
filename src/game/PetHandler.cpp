@@ -27,6 +27,7 @@
 #include "CreatureAI.h"
 #include "Util.h"
 #include "Pet.h"
+#include "SpellAuras.h"
 
 void WorldSession::HandlePetAction(WorldPacket& recv_data)
 {
@@ -256,7 +257,11 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 if (pet->HasAuraType(SPELL_AURA_MOD_POSSESS))
                     Spell::SendCastResult(GetPlayer(), spellInfo, 0, result);
                 else
-                    pet->SendPetCastFail(spellid, result);
+                {
+                    Unit* owner = pet->GetCharmerOrOwner();
+                    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                        Spell::SendCastResult((Player*)owner, spellInfo, 0, result, true);
+                }
 
                 if (!((Creature*)pet)->HasSpellCooldown(spellid))
                     GetPlayer()->SendClearCooldown(spellid, pet);
@@ -273,7 +278,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
 void WorldSession::HandlePetStopAttack(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received CMSG_PET_STOP_ATTACK");
+    DEBUG_LOG("WORLD: Received opcode CMSG_PET_STOP_ATTACK");
 
     ObjectGuid petGuid;
     recv_data >> petGuid;
@@ -659,9 +664,10 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     if (pet->GetCharmInfo() && pet->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
         return;
 
+    Aura* triggeredByAura = pet->GetTriggeredByClientAura(spellid);
 
     // do not cast not learned spells
-    if (!pet->HasSpell(spellid) || IsPassiveSpell(spellInfo))
+    if ((!triggeredByAura && !pet->HasSpell(spellid)) || IsPassiveSpell(spellInfo))
         return;
 
     SpellCastTargets targets;
@@ -670,11 +676,11 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 
     pet->clearUnitState(UNIT_STAT_MOVING);
 
-    Spell* spell = new Spell(pet, spellInfo, false);
+    Spell* spell = new Spell(pet, spellInfo, triggeredByAura ? true : false, pet->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : NULL);
     spell->m_cast_count = cast_count;                       // probably pending spell cast
     spell->m_targets = targets;
 
-    SpellCastResult result = spell->CheckPetCast(NULL);
+    SpellCastResult result = triggeredByAura ? SPELL_CAST_OK : spell->CheckPetCast(NULL);
     if (result == SPELL_CAST_OK)
     {
         pet->AddCreatureSpellCooldown(spellid);
@@ -688,12 +694,15 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
                 pet->SendPetAIReaction();
         }
 
-        spell->prepare(&(spell->m_targets));
+        spell->prepare(&(spell->m_targets), triggeredByAura);
     }
     else
     {
-        pet->SendPetCastFail(spellid, result);
-        if (!pet->HasSpellCooldown(spellid))
+        Unit* owner = pet->GetCharmerOrOwner();
+        if (owner && owner->GetTypeId() == TYPEID_PLAYER && !triggeredByAura)
+            Spell::SendCastResult((Player*)owner, spellInfo, 0, result, true);
+
+        if (!pet->HasSpellCooldown(spellid) && !triggeredByAura)
             GetPlayer()->SendClearCooldown(spellid, pet);
 
         spell->finish(false);

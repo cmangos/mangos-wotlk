@@ -32,7 +32,6 @@ BattleGroundIC::BattleGroundIC()
 
 BattleGroundIC::~BattleGroundIC()
 {
-
 }
 
 void BattleGroundIC::Update(uint32 diff)
@@ -59,7 +58,6 @@ void BattleGroundIC::AddPlayer(Player* plr)
 
 void BattleGroundIC::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
 {
-
 }
 
 void BattleGroundIC::HandleAreaTrigger(Player* /*source*/, uint32 /*trigger*/)

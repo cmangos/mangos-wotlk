@@ -301,6 +301,9 @@ inline bool IsSpellWithCasterSourceTargetsOnly(SpellEntry const* spellInfo)
 {
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
+        if (!spellInfo->Effect[i])                          // Skip junk in DBC
+            continue;
+
         uint32 targetA = spellInfo->EffectImplicitTargetA[i];
         if (targetA && !IsCasterSourceTarget(targetA))
             return false;
@@ -434,6 +437,34 @@ inline bool HasAuraWithTriggerEffect(SpellEntry const* spellInfo)
     return false;
 }
 
+inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
+{
+    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (!spellInfo->Effect[i])
+            return true;
+
+        switch (spellInfo->EffectImplicitTargetA[i])
+        {
+            case TARGET_SELF:
+            case TARGET_SELF2:
+                break;
+            default:
+                return false;
+        }
+        switch (spellInfo->EffectImplicitTargetB[i])
+        {
+            case TARGET_SELF:
+            case TARGET_SELF2:
+            case TARGET_NONE:
+                break;
+            default:
+                return false;
+        }
+    }
+    return true;
+}
+
 inline bool IsDispelSpell(SpellEntry const* spellInfo)
 {
     return IsSpellHaveEffect(spellInfo, SPELL_EFFECT_DISPEL);
@@ -469,7 +500,6 @@ inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftFo
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
     return (spellInfo->Stances & (1 << (form - 1)) && !spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT));
 }
-
 
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)
 {
@@ -702,9 +732,10 @@ typedef UNORDERED_MAP<uint32, SpellTargetPosition> SpellTargetPositionMap;
 class PetAura
 {
     public:
-        PetAura()
+        PetAura() :
+            removeOnChangePet(false),
+            damage(0)
         {
-            auras.clear();
         }
 
         PetAura(uint32 petEntry, uint32 aura, bool _removeOnChangePet, int _damage) :
@@ -775,7 +806,6 @@ typedef std::pair<SpellAreaForQuestMap::const_iterator, SpellAreaForQuestMap::co
 typedef std::pair<SpellAreaForAuraMap::const_iterator, SpellAreaForAuraMap::const_iterator>  SpellAreaForAuraMapBounds;
 typedef std::pair<SpellAreaForAreaMap::const_iterator, SpellAreaForAreaMap::const_iterator>  SpellAreaForAreaMapBounds;
 
-
 // Spell rank chain  (accessed using SpellMgr functions)
 struct SpellChainNode
 {
@@ -825,7 +855,6 @@ struct PetDefaultSpellsEntry
 
 // < 0 for petspelldata id, > 0 for creature_id
 typedef std::map<int32, PetDefaultSpellsEntry> PetDefaultSpellsMap;
-
 
 bool IsPrimaryProfessionSkill(uint32 skill);
 
@@ -1053,7 +1082,6 @@ class SpellMgr
         uint32 GetProfessionSpellMinLevel(uint32 spellId);
 
         bool IsSkillBonusSpell(uint32 spellId) const;
-
 
         // Spell script targets
         SpellScriptTargetBounds GetSpellScriptTargetBounds(uint32 spell_id) const

@@ -698,6 +698,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
         case SPELL_EFFECT_HEAL_PCT:
         case SPELL_EFFECT_ENERGIZE_PCT:
         case SPELL_EFFECT_QUEST_COMPLETE:
+        case SPELL_EFFECT_KILL_CREDIT_PERSONAL:
+        case SPELL_EFFECT_KILL_CREDIT_GROUP:
             return true;
 
             // non-positive aura use
@@ -1102,7 +1104,6 @@ void SpellMgr::LoadSpellTargetPositions()
 
         mSpellTargetPositions[Spell_ID] = st;
         ++count;
-
     }
     while (result->NextRow());
 
@@ -1338,7 +1339,6 @@ void SpellMgr::LoadSpellProcEvents()
         spe.cooldown        = fields[16].GetUInt32();
 
         rankHelper.RecordRank(spe, entry);
-
     }
     while (result->NextRow());
 
@@ -1615,7 +1615,6 @@ void SpellMgr::LoadSpellBonuses()
         doForHighRanks(entry, worker);
 
         ++count;
-
     }
     while (result->NextRow());
 
@@ -1822,7 +1821,6 @@ void SpellMgr::LoadSpellThreats()
         ste.ap_bonus = fields[3].GetFloat();
 
         rankHelper.RecordRank(ste, entry);
-
     }
     while (result->NextRow());
 
@@ -2537,7 +2535,6 @@ uint32 SpellMgr::GetProfessionSpellMinLevel(uint32 spellId)
     }
 }
 
-
 bool SpellMgr::IsPrimaryProfessionFirstRankSpell(uint32 spellId) const
 {
     return IsPrimaryProfessionSpell(spellId) && GetSpellRank(spellId) == 1;
@@ -2928,7 +2925,6 @@ void SpellMgr::LoadSpellChains()
                     continue;
                 }*/
             }
-
         }
 
         // removed ranks often still listed as forward in skill abilities but not listed as spell in it
@@ -3625,7 +3621,6 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
                         }
                         return false;
                     }
-
                 }
                 // also possible IsLootCraftingSpell case but fake item must exist anyway
                 else if (!ObjectMgr::GetItemPrototype(spellInfo->EffectItemType[i]))
@@ -3761,7 +3756,6 @@ void SpellMgr::LoadSpellAreas()
                 sLog.outErrorDb("Spell %u listed in `spell_area` already listed with similar requirements.", spell);
                 continue;
             }
-
         }
 
         if (spellArea.areaId && !GetAreaEntryByAreaID(spellArea.areaId))
@@ -4205,7 +4199,6 @@ void SpellMgr::CheckUsedSpells(char const* table)
                                       spell, name.c_str(), familyMaskA, familyMaskB, code.c_str());
                         continue;
                     }
-
                 }
                 else
                 {
@@ -4214,7 +4207,6 @@ void SpellMgr::CheckUsedSpells(char const* table)
                         sLog.outError("Spell %u '%s' not fit to (" I64FMT "," I32FMT ") but used in %s.", spell, name.c_str(), familyMaskA, familyMaskB, code.c_str());
                         continue;
                     }
-
                 }
             }
 
@@ -4249,7 +4241,6 @@ void SpellMgr::CheckUsedSpells(char const* table)
                     sLog.outError("Spell %u '%s' aura%d <> %u but used in %s.", spell, name.c_str(), effectIdx + 1, auraType, code.c_str());
                     continue;
                 }
-
             }
             else
             {
@@ -4335,7 +4326,6 @@ void SpellMgr::CheckUsedSpells(char const* table)
                 continue;
             }
         }
-
     }
     while (result->NextRow());
 

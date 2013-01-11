@@ -106,7 +106,7 @@ void AggressorAI::EnterEvadeMode()
 
     if (!m_creature->isCharmed())
     {
-        m_creature->RemoveAllAuras();
+        m_creature->RemoveAllAurasOnEvade();
 
         // Remove ChaseMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
         if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
@@ -152,6 +152,6 @@ AggressorAI::AttackStart(Unit* u)
         m_creature->SetInCombatWith(u);
         u->SetInCombatWith(m_creature);
 
-        m_creature->GetMotionMaster()->MoveChase(u);
+        HandleMovementOnAttackStart(u);
     }
 }
