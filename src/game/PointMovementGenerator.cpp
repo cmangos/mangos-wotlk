@@ -29,6 +29,9 @@
 template<class T>
 void PointMovementGenerator<T>::Initialize(T& unit)
 {
+    if (unit.hasUnitState(UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_NOT_MOVE))
+        return;
+
     if (!unit.IsStopped())
         unit.StopMoving();
 
@@ -74,7 +77,9 @@ bool PointMovementGenerator<T>::Update(T& unit, const uint32& diff)
         return true;
     }
 
-    unit.addUnitState(UNIT_STAT_ROAMING_MOVE);
+    if (!unit.hasUnitState(UNIT_STAT_ROAMING_MOVE) && unit.movespline->Finalized())
+        Initialize(unit);
+
     return !unit.movespline->Finalized();
 }
 
