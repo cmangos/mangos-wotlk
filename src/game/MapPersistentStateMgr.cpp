@@ -975,14 +975,11 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
         if (!data)
             continue;
 
-        if (mapId != data->mapid)
+        MapEntry const* mapEntry = sMapStore.LookupEntry(data->mapid);
+        if (!mapEntry || (instanceId && (mapId != data->mapid || mapEntry->Instanceable())))
             continue;
 
-        MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
-        if (!mapEntry || (mapEntry->Instanceable() != (instanceId != 0)))
-            continue;
-
-        if (difficulty >= (!mapEntry->Instanceable() ? REGULAR_DIFFICULTY : (mapEntry->IsRaid() ? MAX_RAID_DIFFICULTY : MAX_DUNGEON_DIFFICULTY)))
+        if (difficulty >= (!mapEntry->Instanceable() ? REGULAR_DIFFICULTY + 1 : (mapEntry->IsRaid() ? MAX_RAID_DIFFICULTY : MAX_DUNGEON_DIFFICULTY)))
             continue;
 
         MapPersistentState* state = AddPersistentState(mapEntry, instanceId, Difficulty(difficulty), resetTime, mapEntry->IsDungeon(), true, true, completedEncounters);
@@ -1041,14 +1038,11 @@ void MapPersistentStateManager::LoadGameobjectRespawnTimes()
         if (!data)
             continue;
 
-        if (mapId != data->mapid)
+        MapEntry const* mapEntry = sMapStore.LookupEntry(data->mapid);
+        if (!mapEntry || (instanceId && (mapId != data->mapid || mapEntry->Instanceable())))
             continue;
 
-        MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
-        if (!mapEntry || (mapEntry->Instanceable() != (instanceId != 0)))
-            continue;
-
-        if (difficulty >= (!mapEntry->Instanceable() ? REGULAR_DIFFICULTY : (mapEntry->IsRaid() ? MAX_RAID_DIFFICULTY : MAX_DUNGEON_DIFFICULTY)))
+        if (difficulty >= (!mapEntry->Instanceable() ? REGULAR_DIFFICULTY + 1 : (mapEntry->IsRaid() ? MAX_RAID_DIFFICULTY : MAX_DUNGEON_DIFFICULTY)))
             continue;
 
         MapPersistentState* state = AddPersistentState(mapEntry, instanceId, Difficulty(difficulty), resetTime, mapEntry->IsDungeon(), true, true, completedEncounters);
