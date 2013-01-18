@@ -5116,7 +5116,18 @@ SpellCastResult Spell::CheckCast(bool strict)
 
             // Not allow casting on flying player
             if (target->IsTaxiFlying())
-                return SPELL_FAILED_BAD_TARGETS;
+            {
+                switch (m_spellInfo->Id)
+                {
+                    // Except some spells from Taxi Flying cast
+                    case 36573:                             // Vision Guide
+                    case 42316:                             // Alcaz Survey Credit
+                    case 42385:                             // Alcaz Survey Aura
+                        break;
+                    default:
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+            }
 
             if (!m_IsTriggeredSpell && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
                 return SPELL_FAILED_LINE_OF_SIGHT;
