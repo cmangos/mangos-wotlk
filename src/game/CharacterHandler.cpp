@@ -39,6 +39,7 @@
 #include "ArenaTeam.h"
 #include "Language.h"
 #include "SpellMgr.h"
+#include "Calendar.h"
 
 // config option SkipCinematics supported values
 enum CinematicsSkipMode
@@ -538,6 +539,8 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
         std::string dump = PlayerDumpWriter().GetDump(lowguid);
         sLog.outCharDump(dump.c_str(), GetAccountId(), lowguid, name.c_str());
     }
+
+    sCalendarMgr.RemovePlayerCalendar(guid);
 
     Player::DeleteFromDB(guid, GetAccountId());
 

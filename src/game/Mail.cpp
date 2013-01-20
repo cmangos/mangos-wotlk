@@ -32,6 +32,7 @@
 #include "Item.h"
 #include "Player.h"
 #include "World.h"
+#include "Calendar.h"
 
 /**
  * Creates a new MailSender object.
@@ -49,11 +50,6 @@ MailSender::MailSender(Object* sender, MailStationery stationery) : m_stationery
             break;
         case TYPEID_GAMEOBJECT:
             m_messageType = MAIL_GAMEOBJECT;
-            m_senderId = sender->GetEntry();
-            break;
-        case TYPEID_ITEM:
-        case TYPEID_CONTAINER:
-            m_messageType = MAIL_ITEM;
             m_senderId = sender->GetEntry();
             break;
         case TYPEID_PLAYER:
@@ -74,6 +70,18 @@ MailSender::MailSender(Object* sender, MailStationery stationery) : m_stationery
  */
 MailSender::MailSender(AuctionEntry* sender)
     : m_messageType(MAIL_AUCTION), m_senderId(sender->GetHouseId()), m_stationery(MAIL_STATIONERY_AUCTION)
+{
+}
+
+/**
+ * Creates a new MailSender object from an event.
+ *
+ * @param sender the calendar event from which this mail is generated.
+ *
+ * Note : Actualy it seem no info from event is required. We need more research to correctly initialise m_senderId
+ */
+MailSender::MailSender(CalendarEvent const* sender)
+    : m_messageType(MAIL_CALENDAR), m_senderId(0), m_stationery(MAIL_STATIONERY_DEFAULT)
 {
 }
 

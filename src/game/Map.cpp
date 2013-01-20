@@ -37,6 +37,7 @@
 #include "VMapFactory.h"
 #include "MoveMap.h"
 #include "BattleGround/BattleGroundMgr.h"
+#include "Calendar.h"
 
 Map::~Map()
 {
@@ -1333,6 +1334,7 @@ bool DungeonMap::Add(Player* player)
                     data << uint32(0);
                     player->GetSession()->SendPacket(&data);
                     player->BindToInstance(GetPersistanceState(), true);
+                    sCalendarMgr.SendCalendarRaidLockoutAdd(player, GetPersistanceState());
                 }
             }
         }
@@ -1439,6 +1441,7 @@ void DungeonMap::PermBindAllPlayers(Player* player)
             WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
             data << uint32(0);
             plr->GetSession()->SendPacket(&data);
+            sCalendarMgr.SendCalendarRaidLockoutAdd(plr, GetPersistanceState());
         }
 
         // if the leader is not in the instance the group will not get a perm bind

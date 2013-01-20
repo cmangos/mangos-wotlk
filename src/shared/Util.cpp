@@ -245,6 +245,21 @@ std::string TimeToTimestampStr(time_t t)
     return std::string(buf);
 }
 
+time_t timeBitFieldsToSecs( uint32 packedDate )
+{
+    tm lt;
+    memset(&lt, 0, sizeof(lt));
+
+    lt.tm_min = packedDate & 0x3F;
+    lt.tm_hour = (packedDate >> 6) & 0x1F;
+    lt.tm_wday = (packedDate >> 11) & 7;
+    lt.tm_mday = ((packedDate >> 14) & 0x3F) + 1;
+    lt.tm_mon = (packedDate >> 20) & 0xF;
+    lt.tm_year = ((packedDate >> 24) & 0x1F) + 100;
+
+    return time_t(mktime(&lt));
+}
+
 /// Check if the string is a valid ip address representation
 bool IsIPAddress(char const* ipaddress)
 {

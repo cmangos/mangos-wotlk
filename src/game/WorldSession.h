@@ -847,6 +847,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleCalendarGetCalendar(WorldPacket& recv_data);
         void HandleCalendarGetEvent(WorldPacket& recv_data);
         void HandleCalendarGuildFilter(WorldPacket& recv_data);
+        void HandleCalendarEventSignup(WorldPacket& recvData);
         void HandleCalendarArenaTeam(WorldPacket& recv_data);
         void HandleCalendarAddEvent(WorldPacket& recv_data);
         void HandleCalendarUpdateEvent(WorldPacket& recv_data);

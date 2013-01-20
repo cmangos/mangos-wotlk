@@ -42,6 +42,7 @@ struct AuctionEntry;
 class Item;
 class Object;
 class Player;
+class CalendarEvent;
 
 #define MAIL_BODY_ITEM_TEMPLATE 8383                        ///< - plain letter, A Dusty Unsent Letter: 889
 /// The maximal amount of items a mail can contain.
@@ -56,7 +57,7 @@ enum MailMessageType
     MAIL_AUCTION        = 2,
     MAIL_CREATURE       = 3,                                /// client send CMSG_CREATURE_QUERY on this mailmessagetype
     MAIL_GAMEOBJECT     = 4,                                /// client send CMSG_GAMEOBJECT_QUERY on this mailmessagetype
-    MAIL_ITEM           = 5,                                /// client send CMSG_ITEM_QUERY on this mailmessagetype
+    MAIL_CALENDAR       = 5,
 };
 /**
  * A Mask representing the status of the mail.
@@ -130,6 +131,7 @@ class MailSender
         }
         MailSender(Object* sender, MailStationery stationery = MAIL_STATIONERY_DEFAULT);
         MailSender(AuctionEntry* sender);
+        MailSender(CalendarEvent const* event);
     public:                                                 // Accessors
         /// The Messagetype of this MailSender.
         MailMessageType GetMailMessageType() const { return m_messageType; }

@@ -779,3 +779,23 @@ bool ArenaTeam::IsFighting() const
     }
     return false;
 }
+
+// add new arena event to all already connected team members
+void ArenaTeam::MassInviteToEvent(WorldSession* session)
+{
+    WorldPacket data(SMSG_CALENDAR_ARENA_TEAM);
+
+    data << uint32(m_members.size());
+
+    for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    {
+        uint32 level = Player::GetLevelFromDB(itr->guid);
+
+        if (itr->guid != session->GetPlayer()->GetObjectGuid())
+        {
+            data << itr->guid.WriteAsPacked();
+            data << uint8(level);
+        }
+    }
+    session->SendPacket(&data);
+}

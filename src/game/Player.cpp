@@ -65,6 +65,7 @@
 #include "DBCStores.h"
 #include "SQLStorages.h"
 #include "Vehicle.h"
+#include "Calendar.h"
 
 #include <cmath>
 
@@ -17131,6 +17132,9 @@ void Player::UnbindInstance(BoundInstancesMap::iterator& itr, Difficulty difficu
         if (!unload)
             CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%u' AND instance = '%u'",
                                        GetGUIDLow(), itr->second.state->GetInstanceId());
+
+        sCalendarMgr.SendCalendarRaidLockoutRemove(this, itr->second.state);
+
         itr->second.state->RemovePlayer(this);              // state can become invalid
         m_boundInstances[difficulty].erase(itr++);
     }

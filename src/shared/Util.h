@@ -35,6 +35,7 @@ void stripLineInvisibleChars(std::string& src);
 std::string secsToTimeString(time_t timeInSecs, bool shortText = false, bool hoursOnly = false);
 uint32 TimeStringToSecs(const std::string& timestring);
 std::string TimeToTimestampStr(time_t t);
+time_t timeBitFieldsToSecs(uint32 packedDate);
 
 inline uint32 secsToTimeBitFields(time_t secs)
 {
