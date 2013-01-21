@@ -24,6 +24,7 @@
 #include "Opcodes.h"
 #include "MapPersistentStateMgr.h"
 #include "Calendar.h"
+#include "ObjectMgr.h"
 #include "SocialMgr.h"
 #include "World.h"
 #include "Guild.h"
