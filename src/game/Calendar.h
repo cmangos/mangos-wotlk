@@ -129,6 +129,9 @@ enum CalendarError
 class CalendarEvent;
 class CalendarInvite;
 class CalendarMgr;
+class Player;
+class DungeonPersistentState;
+class WorldPacket;
 
 typedef std::map<uint64, CalendarInvite*> CalendarInviteMap;
 typedef std::list<CalendarInvite*> CalendarInvitesList;
