@@ -197,7 +197,7 @@ void WorldSession::HandleCalendarGetEvent(WorldPacket& recv_data)
 
 void WorldSession::HandleCalendarGuildFilter(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received opcode CMSG_CALENDAR_GUILD_FILTER [%s]", _player->GetObjectGuid().GetString().c_str());
+    DEBUG_LOG("WORLD: Received opcode CMSG_CALENDAR_GUILD_FILTER [%s]", _player->GetGuidStr().c_str());
 
     uint32 minLevel;
     uint32 maxLevel;
@@ -241,7 +241,7 @@ void WorldSession::HandleCalendarEventSignup(WorldPacket& recv_data)
 
 void WorldSession::HandleCalendarArenaTeam(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received opcode CMSG_CALENDAR_ARENA_TEAM [%s]", _player->GetObjectGuid().GetString().c_str());
+    DEBUG_LOG("WORLD: Received opcode CMSG_CALENDAR_ARENA_TEAM [%s]", _player->GetGuidStr().c_str());
     uint32 areanTeamId;
     recv_data >> areanTeamId;
 
@@ -376,7 +376,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
 
 void WorldSession::HandleCalendarRemoveEvent(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received opcode CMSG_CALENDAR_REMOVE_EVENT [%s]", _player->GetObjectGuid().GetString().c_str());
+    DEBUG_LOG("WORLD: Received opcode CMSG_CALENDAR_REMOVE_EVENT [%s]", _player->GetGuidStr().c_str());
 
     uint64 eventId;
     uint64 inviteId;
