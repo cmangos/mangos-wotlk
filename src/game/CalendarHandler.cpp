@@ -367,7 +367,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
         CharacterDatabase.PExecute("UPDATE calendar_events SET "
                                    "type=%hu, flags=%u, dungeonId=%d, eventTime=%u, title=%s, description=%s "
                                    "WHERE eventid=" UI64FMTD,
-                                   type, flags, dungeonId, event->EventTime, title, description, eventId);
+                                   type, flags, dungeonId, event->EventTime, title.c_str(), description.c_str(), eventId);
     }
     else
         sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_EVENT_INVALID);
@@ -375,18 +375,17 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
 
 void WorldSession::HandleCalendarRemoveEvent(WorldPacket& recv_data)
 {
-    ObjectGuid guid = _player->GetObjectGuid();
-    DEBUG_LOG("WORLD: Received opcode CMSG_CALENDAR_REMOVE_EVENT [%s]", guid.GetString().c_str());
+    DEBUG_LOG("WORLD: Received opcode CMSG_CALENDAR_REMOVE_EVENT [%s]", _player->GetObjectGuid().GetString().c_str());
 
     uint64 eventId;
-    ObjectGuid creatorGuid;
+    uint64 inviteId;
     uint32 Flags;
 
     recv_data >> eventId;
-    recv_data >> creatorGuid.ReadAsPacked();
+    recv_data >> inviteId;
     recv_data >> Flags;
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "creatorGuid [%s]", creatorGuid.GetString().c_str());
-    sCalendarMgr.RemoveEvent(eventId, guid);
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Remove event (eventId=" UI64FMTD ", remover inviteId =" UI64FMTD ")", eventId, inviteId);
+    sCalendarMgr.RemoveEvent(eventId, _player);
 }
 
 void WorldSession::HandleCalendarCopyEvent(WorldPacket& recv_data)
@@ -459,7 +458,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
         return;
     }
 
-    if (QueryResult* result = CharacterDatabase.PQuery("SELECT flags FROM character_social WHERE guid = %s AND friend = %s", inviteeGuid.GetString().c_str(), playerGuid.GetString().c_str()))
+    if (QueryResult* result = CharacterDatabase.PQuery("SELECT flags FROM character_social WHERE guid = %s AND friend = %s", inviteeGuid.GetCounter(), playerGuid.GetCounter()))
     {
         Field* fields = result->Fetch();
         if (fields[0].GetUInt8() & SOCIAL_FLAG_IGNORED)

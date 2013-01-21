@@ -145,7 +145,7 @@ class CalendarEvent
             Description(description) { }
 
         CalendarEvent() : EventId(0), CreatorGuid(uint64(0)), GuildId(0), Type(CALENDAR_TYPE_OTHER), DungeonId(-1), EventTime(0),
-            Flags(0), UnknownTime(0), Title(""), Description("") { }
+            Flags(0), UnknownTime(0), Title(), Description() { }
 
         ~CalendarEvent();
 
@@ -227,7 +227,7 @@ class CalendarMgr
 
         CalendarInvite* AddInvite(CalendarEvent* event, ObjectGuid const& senderGuid, ObjectGuid const& inviteeGuid, CalendarInviteStatus status, CalendarModerationRank rank, std::string text, time_t statusTime);
 
-        void RemoveEvent(uint64 eventId, ObjectGuid const& removerGuid);
+        void RemoveEvent(uint64 eventId, Player* remover);
         bool RemoveInvite(uint64 eventId, uint64 inviteId, ObjectGuid const& removerGuid);
         void RemovePlayerCalendar(ObjectGuid const& playerGuid);
         void RemoveGuildCalendar(ObjectGuid const& playerGuid, uint32 GuildId);

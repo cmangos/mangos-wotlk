@@ -287,22 +287,24 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CalendarMgr::AddEvent> ID("UI64FMTD"), '%s', Desc > '%s', type=%u, repeat=%u, maxInvites=%u, dungeonId=%d, flags=%u",
                      nId, title.c_str(), description.c_str(), type, repeatable, maxInvites, dungeonId, flags);
 
-    m_EventStore[nId].EventId = nId;
-    m_EventStore[nId].CreatorGuid = guid;
-    m_EventStore[nId].Title = title;
-    m_EventStore[nId].Description = description;
-    m_EventStore[nId].Type = (CalendarEventType) type;
-    m_EventStore[nId].Repeatable = (CalendarRepeatType) repeatable;
-    m_EventStore[nId].DungeonId = dungeonId;
-    m_EventStore[nId].EventTime = eventTime;
-    m_EventStore[nId].Flags = flags;
-    m_EventStore[nId].GuildId = guildId;
+    CalendarEvent& newEvent = m_EventStore[nId];
+
+    newEvent.EventId = nId;
+    newEvent.CreatorGuid = guid;
+    newEvent.Title = title;
+    newEvent.Description = description;
+    newEvent.Type = (CalendarEventType) type;
+    newEvent.Repeatable = (CalendarRepeatType) repeatable;
+    newEvent.DungeonId = dungeonId;
+    newEvent.EventTime = eventTime;
+    newEvent.Flags = flags;
+    newEvent.GuildId = guildId;
 
     CharacterDatabase.escape_string(title);
     CharacterDatabase.escape_string(description);
-    CharacterDatabase.PExecute("INSERT INTO calendar_events VALUES ("UI64FMTD", %s, %u, %u, %u, %d, %u, '%s', '%s')",
+    CharacterDatabase.PExecute("INSERT INTO calendar_events VALUES ("UI64FMTD", %u, %u, %u, %u, %d, %u, '%s', '%s')",
                                nId,
-                               guid.GetString().c_str(),
+                               guid.GetCounter(),
                                guildId,
                                type,
                                flags,
@@ -310,14 +312,13 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
                                uint32(eventTime),
                                title.c_str(),
                                description.c_str());
-    return &m_EventStore[nId];
+    return &newEvent;
 }
 
 // remove event by its id
 // some check done before so it may fail and raison is sent to client
-void CalendarMgr::RemoveEvent(uint64 eventId, ObjectGuid const& removerGuid)
+void CalendarMgr::RemoveEvent(uint64 eventId, Player* remover)
 {
-    Player* remover = sObjectMgr.GetPlayer(removerGuid);
     CalendarEventStore::iterator citr = m_EventStore.find(eventId);
     if (citr == m_EventStore.end())
     {
@@ -325,7 +326,7 @@ void CalendarMgr::RemoveEvent(uint64 eventId, ObjectGuid const& removerGuid)
         return;
     }
 
-    if (removerGuid != citr->second.CreatorGuid)
+    if (remover->GetObjectGuid() != citr->second.CreatorGuid)
     {
         // only creator can remove his event
         SendCalendarCommandResult(remover, CALENDAR_ERROR_PERMISSIONS);
@@ -337,7 +338,7 @@ void CalendarMgr::RemoveEvent(uint64 eventId, ObjectGuid const& removerGuid)
     CharacterDatabase.PExecute("DELETE FROM calendar_events WHERE eventId=" UI64FMTD, eventId);
 
     // explicitly remove all invite and send mail to all invitee
-    citr->second.RemoveAllInvite(removerGuid);
+    citr->second.RemoveAllInvite(remover->GetObjectGuid());
     m_EventStore.erase(citr);
 }
 
@@ -395,11 +396,11 @@ CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& s
         return NULL;
     }
 
-    CharacterDatabase.PExecute("INSERT INTO calendar_invites VALUES ("UI64FMTD", "UI64FMTD", %s, %s, %u, %u, %u)",
+    CharacterDatabase.PExecute("INSERT INTO calendar_invites VALUES ("UI64FMTD", "UI64FMTD", %u, %u, %u, %u, %u)",
                                invite->InviteId,
                                event->EventId,
-                               inviteeGuid.GetString().c_str(),
-                               senderGuid.GetString().c_str(),
+                               inviteeGuid.GetCounter(),
+                               senderGuid.GetCounter(),
                                uint32(status),
                                uint32(statusTime),
                                uint32(rank));
@@ -574,17 +575,20 @@ void CalendarMgr::LoadCalendarsFromDB()
         do
         {
             Field* field = eventsQuery->Fetch();
+            
+            uint64 eventId         = field[0].GetUInt64();
 
-            uint64 eventId                      = field[0].GetUInt64();
-            m_EventStore[eventId].EventId       = eventId;
-            m_EventStore[eventId].CreatorGuid   = ObjectGuid(HIGHGUID_PLAYER, field[1].GetUInt32());
-            m_EventStore[eventId].GuildId       = field[2].GetUInt32();
-            m_EventStore[eventId].Type          = CalendarEventType(field[3].GetUInt8());
-            m_EventStore[eventId].Flags         = field[4].GetUInt32();
-            m_EventStore[eventId].DungeonId     = field[5].GetInt32();
-            m_EventStore[eventId].EventTime     = time_t(field[6].GetUInt32());
-            m_EventStore[eventId].Title         = field[7].GetString();
-            m_EventStore[eventId].Description   = field[8].GetString();
+            CalendarEvent& newEvent = m_EventStore[eventId];
+
+            newEvent.EventId       = eventId;
+            newEvent.CreatorGuid   = ObjectGuid(HIGHGUID_PLAYER, field[1].GetUInt32());
+            newEvent.GuildId       = field[2].GetUInt32();
+            newEvent.Type          = CalendarEventType(field[3].GetUInt8());
+            newEvent.Flags         = field[4].GetUInt32();
+            newEvent.DungeonId     = field[5].GetInt32();
+            newEvent.EventTime     = time_t(field[6].GetUInt32());
+            newEvent.Title         = field[7].GetCppString();
+            newEvent.Description   = field[8].GetCppString();
 
             m_MaxEventId = std::max(eventId, m_MaxEventId);
         }
