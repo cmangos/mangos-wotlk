@@ -545,7 +545,10 @@ void CalendarMgr::RemoveGuildCalendar(ObjectGuid const& playerGuid, uint32 Guild
 
         // event not owned by playerGuid but an guild invite can still be found
         if (event->GuildId != GuildId || !(event->IsGuildEvent() || event->IsGuildAnnouncement()))
+        {
+            ++itr;
             continue;
+        }
 
         event->RemoveInviteByGuid(playerGuid);
         ++itr;

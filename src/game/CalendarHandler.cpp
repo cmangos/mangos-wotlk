@@ -422,6 +422,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
     ObjectGuid inviteeGuid;
     uint32 inviteeTeam = 0;
     uint32 inviteeGuildId = 0;
+    bool isIgnored = false;
 
     recv_data >> eventId >> inviteId >> name >> isPreInvite >> isGuildEvent;
 
@@ -431,6 +432,8 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
         inviteeGuid = player->GetObjectGuid();
         inviteeTeam = player->GetTeam();
         inviteeGuildId = player->GetGuildId();
+        if (player->GetSocial()->HasIgnore(playerGuid))
+            isIgnored = true;
     }
     else
     {
@@ -444,6 +447,15 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
             inviteeTeam = Player::TeamForRace(fields[1].GetUInt8());
             inviteeGuildId = Player::GetGuildIdFromDB(inviteeGuid);
             delete result;
+
+            result = CharacterDatabase.PQuery("SELECT flags FROM character_social WHERE guid = %u AND friend = %u", inviteeGuid.GetCounter(), playerGuid.GetCounter());
+            if (result)
+            {
+                Field* fields = result->Fetch();
+                if (fields[0].GetUInt8() & SOCIAL_FLAG_IGNORED)
+                    isIgnored = true;
+                delete result;
+            }
         }
     }
 
@@ -453,20 +465,16 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
         return;
     }
 
+    if (isIgnored)
+    {
+        sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_IGNORING_YOU_S, name.c_str());
+        return;
+    }
+
     if (_player->GetTeam() != inviteeTeam && !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CALENDAR))
     {
         sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_NOT_ALLIED);
         return;
-    }
-
-    if (QueryResult* result = CharacterDatabase.PQuery("SELECT flags FROM character_social WHERE guid = %u AND friend = %u", inviteeGuid.GetCounter(), playerGuid.GetCounter()))
-    {
-        Field* fields = result->Fetch();
-        if (fields[0].GetUInt8() & SOCIAL_FLAG_IGNORED)
-        {
-            sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_IGNORING_YOU_S, name.c_str());
-            return;
-        }
     }
 
     if (!isPreInvite)
