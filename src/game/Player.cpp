@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * This file is part of the Continued-MaNGOS Project
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,6 +65,7 @@
 #include "DBCStores.h"
 #include "SQLStorages.h"
 #include "Vehicle.h"
+#include "Calendar.h"
 
 // Playerbot mod:
 #include "playerbot/PlayerbotAI.h"
@@ -17237,6 +17238,9 @@ void Player::UnbindInstance(BoundInstancesMap::iterator& itr, Difficulty difficu
         if (!unload)
             CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%u' AND instance = '%u'",
                                        GetGUIDLow(), itr->second.state->GetInstanceId());
+
+        sCalendarMgr.SendCalendarRaidLockoutRemove(this, itr->second.state);
+
         itr->second.state->RemovePlayer(this);              // state can become invalid
         m_boundInstances[difficulty].erase(itr++);
     }

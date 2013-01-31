@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * This file is part of the Continued-MaNGOS Project
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1070,6 +1070,9 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
     // Notify the outdoor pvp script
     if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(responsiblePlayer ? responsiblePlayer->GetCachedZoneId() : GetZoneId()))
         outdoorPvP->HandleCreatureDeath(victim);
+
+    // Start creature death script
+    GetMap()->ScriptsStart(sCreatureDeathScripts, victim->GetEntry(), victim, responsiblePlayer ? responsiblePlayer : this);
 
     if (victim->IsLinkingEventTrigger())
         victim->GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_DIE, victim);
@@ -8780,6 +8783,8 @@ void Unit::TauntFadeOut(Unit* taunter)
 
     if (m_ThreatManager.isThreatListEmpty())
     {
+        m_fixateTargetGuid.Clear();
+
         if (((Creature*)this)->AI())
             ((Creature*)this)->AI()->EnterEvadeMode();
 
@@ -8802,6 +8807,19 @@ void Unit::TauntFadeOut(Unit* taunter)
         if (((Creature*)this)->AI())
             ((Creature*)this)->AI()->AttackStart(target);
     }
+}
+
+//======================================================================
+/// if pVictim is given, the npc will fixate onto pVictim, if NULL it will remove current fixation
+void Unit::FixateTarget(Unit* pVictim)
+{
+    if (!pVictim)                                           // Remove Fixation
+        m_fixateTargetGuid.Clear();
+    else if (pVictim->isTargetableForAttack())              // Apply Fixation
+        m_fixateTargetGuid = pVictim->GetObjectGuid();
+
+    // Start attacking the fixated target or the next proper one
+    SelectHostileTarget();
 }
 
 //======================================================================
@@ -8836,10 +8854,22 @@ bool Unit::SelectHostileTarget()
     Unit* target = NULL;
     Unit* oldTarget = getVictim();
 
-    // First checking if we have some taunt on us
-    const AuraList& tauntAuras = GetAurasByType(SPELL_AURA_MOD_TAUNT);
-    if (!tauntAuras.empty())
+    // first check if we should fixate a target
+    if (m_fixateTargetGuid)
     {
+        if (oldTarget && oldTarget->GetObjectGuid() == m_fixateTargetGuid)
+            target = oldTarget;
+        else
+        {
+            Unit* pFixateTarget = GetMap()->GetUnit(m_fixateTargetGuid);
+            if (pFixateTarget && pFixateTarget->isAlive() && !IsSecondChoiceTarget(pFixateTarget, true))
+                target = pFixateTarget;
+        }
+    }
+    // then checking if we have some taunt on us
+    if (!target)
+    {
+        const AuraList& tauntAuras = GetAurasByType(SPELL_AURA_MOD_TAUNT);
         Unit* caster;
 
         // Find first available taunter target
@@ -8856,7 +8886,7 @@ bool Unit::SelectHostileTarget()
         }
     }
 
-    // No taunt aura or taunt aura caster is dead, standard target selection
+    // No valid fixate target, taunt aura or taunt aura caster is dead, standard target selection
     if (!target && !m_ThreatManager.isThreatListEmpty())
         target = m_ThreatManager.getHostileTarget();
 
@@ -8915,6 +8945,7 @@ bool Unit::SelectHostileTarget()
     }
 
     // enter in evade mode in other case
+    m_fixateTargetGuid.Clear();
     ((Creature*)this)->AI()->EnterEvadeMode();
 
     if (InstanceData* mapInstance = GetInstanceData())

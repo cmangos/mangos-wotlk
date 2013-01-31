@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * This file is part of the Continued-MaNGOS Project
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "Util.h"
 #include "Language.h"
 #include "World.h"
+#include "Calendar.h"
 
 //// MemberSlot ////////////////////////////////////////////
 void MemberSlot::SetMemberStats(Player* player)
@@ -612,6 +613,39 @@ void Guild::BroadcastPacketToRank(WorldPacket* packet, uint32 rankId)
                 player->GetSession()->SendPacket(packet);
         }
     }
+}
+
+// add new event to all already connected guild memebers
+void Guild::MassInviteToEvent(WorldSession* session, uint32 minLevel, uint32 maxLevel, uint32 minRank)
+{
+    uint32 count = 0;
+
+    WorldPacket data(SMSG_CALENDAR_FILTER_GUILD);
+    data << uint32(count); // count placeholder
+
+    for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
+    {
+        // not sure if needed, maybe client checks it as well
+        if (count >= CALENDAR_MAX_INVITES)
+        {
+            sCalendarMgr.SendCalendarCommandResult(session->GetPlayer(), CALENDAR_ERROR_INVITES_EXCEEDED);
+            return;
+        }
+
+        MemberSlot const* member = &itr->second;
+        uint32 level = Player::GetLevelFromDB(member->guid);
+
+        if (member->guid != session->GetPlayer()->GetObjectGuid() && level >= minLevel && level <= maxLevel && member->RankId <= minRank)
+        {
+            data << member->guid.WriteAsPacked();
+            data << uint8(level);
+            ++count;
+        }
+    }
+
+    data.put<uint32>(0, count);
+
+    session->SendPacket(&data);
 }
 
 void Guild::CreateRank(std::string name_, uint32 rights)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * This file is part of the Continued-MaNGOS Project
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -383,7 +383,7 @@ class MANGOS_DLL_SPEC Object
             float*  m_floatValues;
         };
 
-        uint32* m_uint32Values_mirror;
+        std::vector<bool> m_changedValues;
 
         uint16 m_valuesCount;
 

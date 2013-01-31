@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * This file is part of the Continued-MaNGOS Project
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -653,8 +653,8 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
             case MAIL_AUCTION:
                 data << uint32((*itr)->sender);             // creature/gameobject entry, auction id
                 break;
-            case MAIL_ITEM:                                 // item entry (?) sender = "Unknown", NYI
-                data << uint32(0);                          // item entry
+            case MAIL_CALENDAR:
+                data << uint32(0);                          // unknown
                 break;
         }
 

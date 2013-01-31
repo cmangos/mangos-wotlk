@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * This file is part of the Continued-MaNGOS Project
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@
 #include "ArenaTeam.h"
 #include "Language.h"
 #include "SpellMgr.h"
+#include "Calendar.h"
 
 // Playerbot mod:
 #include "playerbot/PlayerbotMgr.h"
@@ -566,6 +567,8 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
         std::string dump = PlayerDumpWriter().GetDump(lowguid);
         sLog.outCharDump(dump.c_str(), GetAccountId(), lowguid, name.c_str());
     }
+
+    sCalendarMgr.RemovePlayerCalendar(guid);
 
     Player::DeleteFromDB(guid, GetAccountId());
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * This file is part of the Continued-MaNGOS Project
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,12 +41,16 @@ namespace VMAP
 #define MANGOS_ASSERT(x) assert(x)
 #define DEBUG_LOG(...) 0
 #define DETAIL_LOG(...) 0
+#define LOG_FILTER_MAP_LOADING true
+#define DEBUG_FILTER_LOG(F,...) do{ if (F) DEBUG_LOG(__VA_ARGS__); } while(0)
 #define ERROR_LOG(...) do{ printf("ERROR:"); printf(__VA_ARGS__); printf("\n"); } while(0)
 #else
 #include <assert.h>
 #define MANGOS_ASSERT(x) assert(x)
 #define DEBUG_LOG(...) do{ printf(__VA_ARGS__); printf("\n"); } while(0)
 #define DETAIL_LOG(...) do{ printf(__VA_ARGS__); printf("\n"); } while(0)
+#define LOG_FILTER_MAP_LOADING true
+#define DEBUG_FILTER_LOG(F,...) do{ if (F) DEBUG_LOG(__VA_ARGS__); } while(0)
 #define ERROR_LOG(...) do{ printf("ERROR:"); printf(__VA_ARGS__); printf("\n"); } while(0)
 #endif
 

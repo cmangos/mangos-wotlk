@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * This file is part of the Continued-MaNGOS Project
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -430,6 +430,7 @@ extern ScriptMapMapName sGameObjectScripts;
 extern ScriptMapMapName sGameObjectTemplateScripts;
 extern ScriptMapMapName sEventScripts;
 extern ScriptMapMapName sGossipScripts;
+extern ScriptMapMapName sCreatureDeathScripts;
 extern ScriptMapMapName sCreatureMovementScripts;
 
 enum ScriptLoadResult
@@ -453,6 +454,7 @@ class ScriptMgr
         void LoadEventScripts();
         void LoadSpellScripts();
         void LoadGossipScripts();
+        void LoadCreatureDeathScripts();
         void LoadCreatureMovementScripts();
 
         void LoadDbScriptStrings();
