@@ -9212,7 +9212,7 @@ void PlayerbotAI::_HandleCommandMail(std::string &text, Player &fromPlayer)
                     msg << AuctionResult((*itr)->subject, (*itr)->body) << "\n";
                     break;
                 }
-            case MAIL_ITEM:
+            case MAIL_CALENDAR:
                 msg << "|cffccffccMAIL_ITEM\n"; // green
                 break;
             }
