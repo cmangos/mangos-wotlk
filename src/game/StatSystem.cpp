@@ -161,7 +161,7 @@ void Player::UpdateResistances(uint32 school)
 
 void Player::UpdateArmor()
 {
-    float value = 0.0f;
+    float value;
     UnitMods unitMod = UNIT_MOD_ARMOR;
 
     value  = GetModifierValue(unitMod, BASE_VALUE);         // base armor (from items)

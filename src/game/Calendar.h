@@ -148,7 +148,7 @@ class CalendarEvent
             Description(description) { }
 
         CalendarEvent() : EventId(0), CreatorGuid(uint64(0)), GuildId(0), Type(CALENDAR_TYPE_OTHER), DungeonId(-1), EventTime(0),
-            Flags(0), UnknownTime(0), Title(), Description() { }
+            Flags(0), UnknownTime(0) { }
 
         ~CalendarEvent();
 
