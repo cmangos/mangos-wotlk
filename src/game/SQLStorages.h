@@ -39,5 +39,6 @@ extern SQLHashStorage sGameObjectDataAddonStorage;
 extern SQLHashStorage sCreatureTemplateSpellsStorage;
 
 extern SQLMultiStorage sVehicleAccessoryStorage;
+extern SQLMultiStorage sSpellScriptTargetStorage;
 
 #endif
