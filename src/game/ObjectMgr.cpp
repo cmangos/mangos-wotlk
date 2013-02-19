@@ -7636,7 +7636,8 @@ char const* conditionSourceToStr[] =
     "referencing loot",
     "gossip menu",
     "gossip menu option",
-    "event AI"
+    "event AI",
+    "hardcoded"
 };
 
 // Checks if player meets the condition
