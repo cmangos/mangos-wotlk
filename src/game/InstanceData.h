@@ -41,6 +41,10 @@ enum InstanceConditionIDs                                   // Suggested values 
     // to check for which team the instance is doing scripts
     INSTANCE_CONDITION_ID_TEAM_HORDE        = 67,
     INSTANCE_CONDITION_ID_TEAM_ALLIANCE     = 469,
+
+    // to check water event in SSC
+    INSTANCE_CONDITION_ID_LURKER            = 21217,
+    INSTANCE_CONDITION_ID_SCALDING_WATER    = 37284,
 };
 
 class MANGOS_DLL_SPEC InstanceData

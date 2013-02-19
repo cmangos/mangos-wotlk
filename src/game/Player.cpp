@@ -414,6 +414,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
     m_zoneUpdateId = 0;
     m_zoneUpdateTimer = 0;
+    m_liquidUpdateTimer = 0;
 
     m_areaUpdateId = 0;
 
@@ -1270,6 +1271,14 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             m_regenTimer = 0;
         else
             m_regenTimer -= update_diff;
+    }
+
+    if (m_liquidUpdateTimer)
+    {
+        if (update_diff >= m_liquidUpdateTimer)
+            m_liquidUpdateTimer = 0;
+        else
+            m_liquidUpdateTimer -= update_diff;
     }
 
     if (m_weaponChangeTimer > 0)
@@ -21517,13 +21526,19 @@ void Player::SetOriginalGroup(Group* group, int8 subgroup)
 
 void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
 {
+    // Update only on interval
+    if (m_liquidUpdateTimer)
+        return;
+    else
+        m_liquidUpdateTimer = 100;
+
     GridMapLiquidData liquid_status;
     GridMapLiquidStatus res = m->GetTerrain()->getLiquidStatus(x, y, z, MAP_ALL_LIQUIDS, &liquid_status);
     if (!res)
     {
         m_MirrorTimerFlags &= ~(UNDERWATER_INWATER | UNDERWATER_INLAVA | UNDERWATER_INSLIME | UNDERWATER_INDARKWATER);
         if (m_lastLiquid && m_lastLiquid->SpellId)
-            RemoveAurasDueToSpell(m_lastLiquid->SpellId);
+            RemoveAurasDueToSpell(m_lastLiquid->SpellId == 37025 ? 37284 : m_lastLiquid->SpellId);
         m_lastLiquid = NULL;
         return;
     }
@@ -21536,20 +21551,44 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
 
         if (liquid && liquid->SpellId)
         {
+            // Exception for SSC water
+            uint32 liquidSpellId = liquid->SpellId == 37025 ? 37284 : liquid->SpellId;
+
             if (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER))
             {
-                if (!HasAura(liquid->SpellId))
-                    CastSpell(this, liquid->SpellId, true);
+                if (!HasAura(liquidSpellId))
+                {
+                    // Handle exception for SSC water
+                    if (liquid->SpellId == 37025)
+                    {
+                        if (InstanceData* pInst = GetInstanceData())
+                        {
+                            if (pInst->CheckConditionCriteriaMeet(this, INSTANCE_CONDITION_ID_LURKER, NULL, CONDITION_FROM_HARDCODED))
+                            {
+                                if (pInst->CheckConditionCriteriaMeet(this, INSTANCE_CONDITION_ID_SCALDING_WATER, NULL, CONDITION_FROM_HARDCODED))
+                                    CastSpell(this, liquidSpellId, true);
+                                else
+                                {
+                                    SummonCreature(21508, 0, 0, 0, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 2000);
+                                    // Special update timer for the SSC water
+                                    m_liquidUpdateTimer = 2000;
+                                }
+                            }
+                        }
+                    }
+                    else
+                        CastSpell(this, liquidSpellId, true);
+                }
             }
             else
-                RemoveAurasDueToSpell(liquid->SpellId);
+                RemoveAurasDueToSpell(liquidSpellId);
         }
 
         m_lastLiquid = liquid;
     }
     else if (m_lastLiquid && m_lastLiquid->SpellId)
     {
-        RemoveAurasDueToSpell(m_lastLiquid->SpellId);
+        RemoveAurasDueToSpell(m_lastLiquid->SpellId == 37025 ? 37284 : m_lastLiquid->SpellId);
         m_lastLiquid = NULL;
     }
 
