@@ -414,7 +414,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
     m_zoneUpdateId = 0;
     m_zoneUpdateTimer = 0;
-    m_liquidUpdateTimer = 0;
+    m_positionStatusUpdateTimer = 0;
 
     m_areaUpdateId = 0;
 
@@ -1273,12 +1273,12 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             m_regenTimer -= update_diff;
     }
 
-    if (m_liquidUpdateTimer)
+    if (m_positionStatusUpdateTimer)
     {
-        if (update_diff >= m_liquidUpdateTimer)
-            m_liquidUpdateTimer = 0;
+        if (update_diff >= m_positionStatusUpdateTimer)
+            m_positionStatusUpdateTimer = 0;
         else
-            m_liquidUpdateTimer -= update_diff;
+            m_positionStatusUpdateTimer -= update_diff;
     }
 
     if (m_weaponChangeTimer > 0)
@@ -6050,9 +6050,14 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
             GetSession()->SendCancelTrade();   // will close both side trade windows
     }
 
+    if (m_positionStatusUpdateTimer)                        // Update position's state only on interval
+        return true;
+    m_positionStatusUpdateTimer = 100;
+
     // code block for underwater state update
     UpdateUnderwaterState(m, x, y, z);
 
+    // code block for outdoor state and area-explore check
     CheckAreaExploreAndOutdoor();
 
     return true;
@@ -21532,12 +21537,6 @@ void Player::SetOriginalGroup(Group* group, int8 subgroup)
 
 void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
 {
-    // Update only on interval
-    if (m_liquidUpdateTimer)
-        return;
-    else
-        m_liquidUpdateTimer = 100;
-
     GridMapLiquidData liquid_status;
     GridMapLiquidStatus res = m->GetTerrain()->getLiquidStatus(x, y, z, MAP_ALL_LIQUIDS, &liquid_status);
     if (!res)
@@ -21577,7 +21576,7 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
                                 {
                                     SummonCreature(21508, 0, 0, 0, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 2000);
                                     // Special update timer for the SSC water
-                                    m_liquidUpdateTimer = 2000;
+                                    m_positionStatusUpdateTimer = 2000;
                                 }
                             }
                         }
