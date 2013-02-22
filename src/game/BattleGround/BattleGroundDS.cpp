@@ -35,23 +35,6 @@ BattleGroundDS::BattleGroundDS()
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
 }
 
-BattleGroundDS::~BattleGroundDS()
-{
-}
-
-void BattleGroundDS::Update(uint32 diff)
-{
-    BattleGround::Update(diff);
-}
-
-void BattleGroundDS::StartingEventCloseDoors()
-{
-}
-
-void BattleGroundDS::StartingEventOpenDoors()
-{
-}
-
 void BattleGroundDS::AddPlayer(Player* plr)
 {
     BattleGround::AddPlayer(plr);
@@ -59,22 +42,4 @@ void BattleGroundDS::AddPlayer(Player* plr)
     BattleGroundDSScore* sc = new BattleGroundDSScore;
 
     m_PlayerScores[plr->GetObjectGuid()] = sc;
-}
-
-void BattleGroundDS::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
-{
-}
-
-void BattleGroundDS::HandleKillPlayer(Player* player, Player* killer)
-{
-    BattleGround::HandleKillPlayer(player, killer);
-}
-
-void BattleGroundDS::HandleAreaTrigger(Player* /*source*/, uint32 /*trigger*/)
-{
-}
-
-bool BattleGroundDS::SetupBattleGround()
-{
-    return true;
 }
