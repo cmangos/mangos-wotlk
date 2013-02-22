@@ -30,23 +30,6 @@ BattleGroundIC::BattleGroundIC()
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_WS_HAS_BEGUN;
 }
 
-BattleGroundIC::~BattleGroundIC()
-{
-}
-
-void BattleGroundIC::Update(uint32 diff)
-{
-    BattleGround::Update(diff);
-}
-
-void BattleGroundIC::StartingEventCloseDoors()
-{
-}
-
-void BattleGroundIC::StartingEventOpenDoors()
-{
-}
-
 void BattleGroundIC::AddPlayer(Player* plr)
 {
     BattleGround::AddPlayer(plr);
@@ -54,17 +37,6 @@ void BattleGroundIC::AddPlayer(Player* plr)
     BattleGroundICScore* sc = new BattleGroundICScore;
 
     m_PlayerScores[plr->GetObjectGuid()] = sc;
-}
-
-void BattleGroundIC::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
-{
-}
-
-void BattleGroundIC::HandleAreaTrigger(Player* /*source*/, uint32 /*trigger*/)
-{
-    // this is wrong way to implement these things. On official it done by gameobject spell cast.
-    if (GetStatus() != STATUS_IN_PROGRESS)
-        return;
 }
 
 void BattleGroundIC::UpdatePlayerScore(Player* source, uint32 type, uint32 value)

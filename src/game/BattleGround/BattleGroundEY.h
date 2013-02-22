@@ -162,24 +162,6 @@ enum EYNodes
 #define EY_EVENT2_FLAG_CENTER 4 // maximum node is 3 so 4 for center is ok
 // all other event2 are just nodeids, i won't define something here
 
-enum EYBuffs
-{
-    // buffs
-    EY_OBJECT_SPEEDBUFF_FEL_REAVER_RUINS    = 1,
-    EY_OBJECT_REGENBUFF_FEL_REAVER_RUINS    = 2,
-    EY_OBJECT_BERSERKBUFF_FEL_REAVER_RUINS  = 3,
-    EY_OBJECT_SPEEDBUFF_BLOOD_ELF_TOWER     = 4,
-    EY_OBJECT_REGENBUFF_BLOOD_ELF_TOWER     = 5,
-    EY_OBJECT_BERSERKBUFF_BLOOD_ELF_TOWER   = 6,
-    EY_OBJECT_SPEEDBUFF_DRAENEI_RUINS       = 7,
-    EY_OBJECT_REGENBUFF_DRAENEI_RUINS       = 8,
-    EY_OBJECT_BERSERKBUFF_DRAENEI_RUINS     = 9,
-    EY_OBJECT_SPEEDBUFF_MAGE_TOWER          = 10,
-    EY_OBJECT_REGENBUFF_MAGE_TOWER          = 11,
-    EY_OBJECT_BERSERKBUFF_MAGE_TOWER        = 12,
-    EY_OBJECT_MAX                           = 13
-};
-
 #define EY_NORMAL_HONOR_INTERVAL        260
 #define EY_WEEKEND_HONOR_INTERVAL       160
 #define EY_EVENT_START_BATTLE           13180
@@ -257,12 +239,10 @@ class BattleGroundEY : public BattleGround
 
     public:
         BattleGroundEY();
-        ~BattleGroundEY();
         void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player* plr) override;
-        virtual void StartingEventCloseDoors() override;
         virtual void StartingEventOpenDoors() override;
 
         /* BG Flags */

@@ -34,17 +34,8 @@ class BattleGroundDS : public BattleGround
 
     public:
         BattleGroundDS();
-        ~BattleGroundDS();
-        void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player* plr) override;
-        virtual void StartingEventCloseDoors() override;
-        virtual void StartingEventOpenDoors() override;
-
-        void RemovePlayer(Player* plr, ObjectGuid guid) override;
-        void HandleAreaTrigger(Player* source, uint32 trigger) override;
-        bool SetupBattleGround() override;
-        void HandleKillPlayer(Player* player, Player* killer) override;
 };
 #endif
