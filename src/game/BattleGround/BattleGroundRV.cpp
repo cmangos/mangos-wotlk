@@ -35,24 +35,6 @@ BattleGroundRV::BattleGroundRV()
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
 }
 
-BattleGroundRV::~BattleGroundRV()
-{
-
-}
-
-void BattleGroundRV::Update(uint32 diff)
-{
-    BattleGround::Update(diff);
-}
-
-void BattleGroundRV::StartingEventCloseDoors()
-{
-}
-
-void BattleGroundRV::StartingEventOpenDoors()
-{
-}
-
 void BattleGroundRV::AddPlayer(Player* plr)
 {
     BattleGround::AddPlayer(plr);
@@ -60,22 +42,4 @@ void BattleGroundRV::AddPlayer(Player* plr)
     BattleGroundRVScore* sc = new BattleGroundRVScore;
 
     m_PlayerScores[plr->GetObjectGuid()] = sc;
-}
-
-void BattleGroundRV::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
-{
-}
-
-void BattleGroundRV::HandleKillPlayer(Player* player, Player* killer)
-{
-    BattleGround::HandleKillPlayer(player, killer);
-}
-
-void BattleGroundRV::HandleAreaTrigger(Player* /*source*/, uint32 /*trigger*/)
-{
-}
-
-bool BattleGroundRV::SetupBattleGround()
-{
-    return true;
 }

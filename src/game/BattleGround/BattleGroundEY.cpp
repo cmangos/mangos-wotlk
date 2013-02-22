@@ -36,10 +36,6 @@ BattleGroundEY::BattleGroundEY()
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_EY_HAS_BEGUN;
 }
 
-BattleGroundEY::~BattleGroundEY()
-{
-}
-
 void BattleGroundEY::Update(uint32 diff)
 {
     BattleGround::Update(diff);
@@ -70,10 +66,6 @@ void BattleGroundEY::Update(uint32 diff)
         else
             m_flagRespawnTimer -= diff;
     }
-}
-
-void BattleGroundEY::StartingEventCloseDoors()
-{
 }
 
 void BattleGroundEY::StartingEventOpenDoors()

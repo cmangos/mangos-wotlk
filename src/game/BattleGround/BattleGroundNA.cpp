@@ -37,23 +37,6 @@ BattleGroundNA::BattleGroundNA()
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
 }
 
-BattleGroundNA::~BattleGroundNA()
-{
-}
-
-void BattleGroundNA::Update(uint32 diff)
-{
-    BattleGround::Update(diff);
-
-    /*if (GetStatus() == STATUS_IN_PROGRESS)
-    {
-        // update something
-    }*/
-}
-
-void BattleGroundNA::StartingEventCloseDoors()
-{
-}
 
 void BattleGroundNA::StartingEventOpenDoors()
 {
@@ -135,17 +118,6 @@ void BattleGroundNA::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, 0xa0f, GetAlivePlayersCountByTeam(ALLIANCE));
     FillInitialWorldState(data, count, 0xa10, GetAlivePlayersCountByTeam(HORDE));
     FillInitialWorldState(data, count, 0xa11, 1);
-}
-
-void BattleGroundNA::Reset()
-{
-    // call parent's class reset
-    BattleGround::Reset();
-}
-
-bool BattleGroundNA::SetupBattleGround()
-{
-    return true;
 }
 
 /*
