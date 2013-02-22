@@ -2761,6 +2761,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, m_caster->CanReachWithMeleeAttack(unitTarget) ? 71623 : 72264, true);
                     return;
                 }
+                case 74452:                                 // Conflagration
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 74453, true);
+                    return;
+                }
             }
             break;
         }
@@ -8382,6 +8390,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     for (uint32 triggeredSpell = m_spellInfo->CalculateSimpleValue(eff_idx); triggeredSpell < m_spellInfo->Id; ++triggeredSpell)
                         unitTarget->CastSpell(unitTarget, triggeredSpell, true);
 
+                    return;
+                }
+                case 74455:                                 // Conflagration
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
             }

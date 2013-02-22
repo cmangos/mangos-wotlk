@@ -1762,6 +1762,24 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 63482:                                 // Lightning Whirl (h) (Ulduar, Stormcaller Brundir)
                     unMaxTargets = urand(3, 6);
                     break;
+                case 74452:                                 // Conflagration (Saviana, Ruby Sanctum)
+                {
+                    if (m_caster)
+                    {
+                        switch (m_caster->GetMap()->GetDifficulty())
+                        {
+                            case RAID_DIFFICULTY_10MAN_NORMAL:
+                            case RAID_DIFFICULTY_10MAN_HEROIC:
+                                unMaxTargets = 3;
+                                break;
+                            case RAID_DIFFICULTY_25MAN_NORMAL:
+                            case RAID_DIFFICULTY_25MAN_HEROIC:
+                                unMaxTargets = 6;
+                                break;
+                        }
+                    }
+                    break;
+                }
                 default:
                     break;
             }
