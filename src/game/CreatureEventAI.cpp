@@ -61,6 +61,13 @@ void CreatureEventAI::GetAIInformation(ChatHandler& reader)
     reader.PSendSysMessage(LANG_NPC_EVENTAI_COMBAT, reader.GetOnOffStr(m_MeleeEnabled));
 }
 
+// For Non Dungeon map only allow non-difficulty flags or EFLAG_DIFFICULTY_0 mode
+inline bool IsEventFlagsFitForNormalMap(uint8 eFlags)
+{
+    return !(eFlags & (EFLAG_DIFFICULTY_0 | EFLAG_DIFFICULTY_1 | EFLAG_DIFFICULTY_2 | EFLAG_DIFFICULTY_3)) ||
+                (eFlags & EFLAG_DIFFICULTY_0);
+}
+
 CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c)
 {
     // Need make copy for filter unneeded steps and safe in case table reload
@@ -68,21 +75,21 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c)
     if (creatureEventsItr != sEventAIMgr.GetCreatureEventAIMap().end())
     {
         uint32 events_count = 0;
-        for (CreatureEventAI_Event_Vec::const_iterator i = (*creatureEventsItr).second.begin(); i != (*creatureEventsItr).second.end(); ++i)
+        for (CreatureEventAI_Event_Vec::const_iterator i = creatureEventsItr->second.begin(); i != creatureEventsItr->second.end(); ++i)
         {
             // Debug check
 #ifndef MANGOS_DEBUG
-            if ((*i).event_flags & EFLAG_DEBUG_ONLY)
+            if (i->event_flags & EFLAG_DEBUG_ONLY)
                 continue;
 #endif
             if (m_creature->GetMap()->IsDungeon())
             {
-                if ((1 << (m_creature->GetMap()->GetSpawnMode() + 1)) & (*i).event_flags)
+                if ((1 << (m_creature->GetMap()->GetSpawnMode() + 1)) & i->event_flags)
                 {
                     ++events_count;
                 }
             }
-            else
+            else if (IsEventFlagsFitForNormalMap(i->event_flags))
                 ++events_count;
         }
         // EventMap had events but they were not added because they must be for instance
@@ -91,23 +98,23 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c)
         else
         {
             m_CreatureEventAIList.reserve(events_count);
-            for (CreatureEventAI_Event_Vec::const_iterator i = (*creatureEventsItr).second.begin(); i != (*creatureEventsItr).second.end(); ++i)
+            for (CreatureEventAI_Event_Vec::const_iterator i = creatureEventsItr->second.begin(); i != creatureEventsItr->second.end(); ++i)
             {
 
                 // Debug check
 #ifndef MANGOS_DEBUG
-                if ((*i).event_flags & EFLAG_DEBUG_ONLY)
+                if (i->event_flags & EFLAG_DEBUG_ONLY)
                     continue;
 #endif
                 if (m_creature->GetMap()->IsDungeon())
                 {
-                    if ((1 << (m_creature->GetMap()->GetSpawnMode() + 1)) & (*i).event_flags)
+                    if ((1 << (m_creature->GetMap()->GetSpawnMode() + 1)) & i->event_flags)
                     {
                         // event flagged for instance mode
                         m_CreatureEventAIList.push_back(CreatureEventAIHolder(*i));
                     }
                 }
-                else
+                else if (IsEventFlagsFitForNormalMap(i->event_flags))
                     m_CreatureEventAIList.push_back(CreatureEventAIHolder(*i));
             }
         }
