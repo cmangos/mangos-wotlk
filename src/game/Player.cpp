@@ -425,6 +425,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
     m_zoneUpdateId = 0;
     m_zoneUpdateTimer = 0;
+    m_positionStatusUpdateTimer = 0;
 
     m_areaUpdateId = 0;
 
@@ -1291,6 +1292,14 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             m_regenTimer = 0;
         else
             m_regenTimer -= update_diff;
+    }
+
+    if (m_positionStatusUpdateTimer)
+    {
+        if (update_diff >= m_positionStatusUpdateTimer)
+            m_positionStatusUpdateTimer = 0;
+        else
+            m_positionStatusUpdateTimer -= update_diff;
     }
 
     if (m_weaponChangeTimer > 0)
@@ -6076,9 +6085,14 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
             GetSession()->SendCancelTrade();   // will close both side trade windows
     }
 
+    if (m_positionStatusUpdateTimer)                        // Update position's state only on interval
+        return true;
+    m_positionStatusUpdateTimer = 100;
+
     // code block for underwater state update
     UpdateUnderwaterState(m, x, y, z);
 
+    // code block for outdoor state and area-explore check
     CheckAreaExploreAndOutdoor();
 
     return true;
@@ -6162,6 +6176,17 @@ void Player::CheckAreaExploreAndOutdoor()
                 // Player left inn (REST_TYPE_IN_CITY overrides REST_TYPE_IN_TAVERN, so just clear rest)
                 SetRestType(REST_TYPE_NO);
             }
+        }
+        // Check if we need to reaply outdoor only passive spells
+        const PlayerSpellMap& sp_list = GetSpellMap();
+        for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+        {
+            if (itr->second.state == PLAYERSPELL_REMOVED)
+                continue;
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
+            if (!spellInfo || !IsNeedCastSpellAtOutdoor(spellInfo) || HasAura(itr->first))
+                continue;
+            CastSpell(this, itr->first, true, NULL);
         }
     }
     else if (sWorld.getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK) && !isGameMaster())
@@ -6361,7 +6386,7 @@ void Player::RewardReputation(Unit* pVictim, float rate)
             // The required MinLevel for the tabard to work is related to the item level of the tabard
             if ((instance->levelMin + 1 >= pProto->ItemLevel || !GetMap()->IsRegularDifficulty())
                     // For ItemLevel == 75 (or 85) need to check expansion
-                    && (pProto->ItemLevel == 75 && storedMap->Expansion() == 2))
+                    && (pProto->ItemLevel == 75 && storedMap->Expansion() == EXPANSION_WOTLK))
             {
                 if (uint32 tabardFactionID = pItem->GetProto()->RequiredReputationFaction)
                 {
@@ -19576,6 +19601,12 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         }
     }
 
+    if (crItem->conditionId && !isGameMaster() && !sObjectMgr.IsPlayerMeetToCondition(crItem->conditionId, this, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
+    {
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
+        return false;
+    }
+
     uint32 price = (crItem->ExtendedCost == 0 || pProto->Flags2 & ITEM_FLAG2_EXT_COST_REQUIRES_GOLD) ? pProto->BuyPrice * count : 0;
 
     // reputation discount
@@ -21629,7 +21660,7 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     {
         m_MirrorTimerFlags &= ~(UNDERWATER_INWATER | UNDERWATER_INLAVA | UNDERWATER_INSLIME | UNDERWATER_INDARKWATER);
         if (m_lastLiquid && m_lastLiquid->SpellId)
-            RemoveAurasDueToSpell(m_lastLiquid->SpellId);
+            RemoveAurasDueToSpell(m_lastLiquid->SpellId == 37025 ? 37284 : m_lastLiquid->SpellId);
         m_lastLiquid = NULL;
         return;
     }
@@ -21642,20 +21673,44 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
 
         if (liquid && liquid->SpellId)
         {
+            // Exception for SSC water
+            uint32 liquidSpellId = liquid->SpellId == 37025 ? 37284 : liquid->SpellId;
+
             if (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER))
             {
-                if (!HasAura(liquid->SpellId))
-                    CastSpell(this, liquid->SpellId, true);
+                if (!HasAura(liquidSpellId))
+                {
+                    // Handle exception for SSC water
+                    if (liquid->SpellId == 37025)
+                    {
+                        if (InstanceData* pInst = GetInstanceData())
+                        {
+                            if (pInst->CheckConditionCriteriaMeet(this, INSTANCE_CONDITION_ID_LURKER, NULL, CONDITION_FROM_HARDCODED))
+                            {
+                                if (pInst->CheckConditionCriteriaMeet(this, INSTANCE_CONDITION_ID_SCALDING_WATER, NULL, CONDITION_FROM_HARDCODED))
+                                    CastSpell(this, liquidSpellId, true);
+                                else
+                                {
+                                    SummonCreature(21508, 0, 0, 0, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 2000);
+                                    // Special update timer for the SSC water
+                                    m_positionStatusUpdateTimer = 2000;
+                                }
+                            }
+                        }
+                    }
+                    else
+                        CastSpell(this, liquidSpellId, true);
+                }
             }
             else
-                RemoveAurasDueToSpell(liquid->SpellId);
+                RemoveAurasDueToSpell(liquidSpellId);
         }
 
         m_lastLiquid = liquid;
     }
     else if (m_lastLiquid && m_lastLiquid->SpellId)
     {
-        RemoveAurasDueToSpell(m_lastLiquid->SpellId);
+        RemoveAurasDueToSpell(m_lastLiquid->SpellId == 37025 ? 37284 : m_lastLiquid->SpellId);
         m_lastLiquid = NULL;
     }
 

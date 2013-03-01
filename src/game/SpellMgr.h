@@ -500,6 +500,11 @@ inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftFo
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
     return (spellInfo->Stances & (1 << (form - 1)) && !spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT));
 }
+ 
+inline bool IsNeedCastSpellAtOutdoor(SpellEntry const* spellInfo)
+{
+    return (spellInfo->HasAttribute(SPELL_ATTR_OUTDOORS_ONLY) && spellInfo->HasAttribute(SPELL_ATTR_PASSIVE));
+}
 
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)
 {
@@ -706,15 +711,16 @@ enum SpellTargetType
 
 #define MAX_SPELL_TARGET_TYPE 3
 
+// pre-defined targeting for spells
 struct SpellTargetEntry
 {
-    SpellTargetEntry(SpellTargetType type_, uint32 targetEntry_) : type(type_), targetEntry(targetEntry_) {}
-    SpellTargetType type;
+    uint32 spellId;
+    uint32 type;
     uint32 targetEntry;
-};
+    uint32 inverseEffectMask;
 
-typedef std::multimap<uint32, SpellTargetEntry> SpellScriptTarget;
-typedef std::pair<SpellScriptTarget::const_iterator, SpellScriptTarget::const_iterator> SpellScriptTargetBounds;
+    bool CanNotHitWithSpellEffect(SpellEffectIndex effect) const { return inverseEffectMask & (1 << effect); }
+};
 
 // coordinates for spells (accessed using SpellMgr functions)
 struct SpellTargetPosition
@@ -1083,12 +1089,6 @@ class SpellMgr
 
         bool IsSkillBonusSpell(uint32 spellId) const;
 
-        // Spell script targets
-        SpellScriptTargetBounds GetSpellScriptTargetBounds(uint32 spell_id) const
-        {
-            return mSpellScriptTarget.equal_range(spell_id);
-        }
-
         // Spell correctness for client using
         static bool IsSpellValid(SpellEntry const* spellInfo, Player* pl = NULL, bool msg = true);
 
@@ -1186,7 +1186,6 @@ class SpellMgr
     private:
         bool LoadPetDefaultSpells_helper(CreatureInfo const* cInfo, PetDefaultSpellsEntry& petDefSpells);
 
-        SpellScriptTarget  mSpellScriptTarget;
         SpellChainMap      mSpellChains;
         SpellChainMapNext  mSpellChainsNext;
         SpellLearnSkillMap mSpellLearnSkills;

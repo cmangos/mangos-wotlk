@@ -34,10 +34,6 @@ BattleGroundAV::BattleGroundAV()
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_AV_HAS_BEGUN;
 }
 
-BattleGroundAV::~BattleGroundAV()
-{
-}
-
 void BattleGroundAV::HandleKillPlayer(Player* player, Player* killer)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
@@ -273,11 +269,6 @@ void BattleGroundAV::Update(uint32 diff)
     }
 }
 
-void BattleGroundAV::StartingEventCloseDoors()
-{
-    DEBUG_LOG("BattleGroundAV: entering state STATUS_WAIT_JOIN ...");
-}
-
 void BattleGroundAV::StartingEventOpenDoors()
 {
     UpdateWorldState(BG_AV_SHOW_H_SCORE, WORLD_STATE_ADD);
@@ -352,10 +343,6 @@ void BattleGroundAV::EndBattleGround(Team winner)
         RewardHonorToTeam(m_HonorMapComplete, HORDE);
     }
     BattleGround::EndBattleGround(winner);
-}
-
-void BattleGroundAV::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
-{
 }
 
 void BattleGroundAV::HandleAreaTrigger(Player* source, uint32 trigger)
