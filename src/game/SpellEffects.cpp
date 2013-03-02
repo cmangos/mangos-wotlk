@@ -7854,6 +7854,28 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     ((Player*)caster)->RemoveSpellCategoryCooldown(82, true);
                     return;
                 }
+                case 50742:                                 // Ooze Combine
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 50747, true);
+                    ((Creature*)m_caster)->ForcedDespawn();
+                    return;
+                }
+                case 50810:                                 // Shatter
+                case 61546:                                 // Shatter (h)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (!unitTarget->HasAura(50812))
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(50812);
+                    unitTarget->CastSpell(unitTarget, m_spellInfo->Id == 50810 ? 50811 : 61547 , true, NULL, NULL, m_caster->GetObjectGuid());
+                    return;
+                }
                 case 50894:                                 // Zul'Drak Rat
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
