@@ -16,13 +16,17 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-file(GLOB gsoap_SRCS *.cpp)
+set(LIBRARY_NAME gsoap)
+
+set(LIBRARY_SRCS
+    stdsoap2.cpp
+   )
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/dep/include/gsoap
 )
 
-add_library(gsoap STATIC
-  ${gsoap_SRCS}
+add_library(${LIBRARY_NAME} STATIC
+  ${LIBRARY_SRCS}
 )
