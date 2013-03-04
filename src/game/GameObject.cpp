@@ -2211,7 +2211,7 @@ void GameObject::DealGameObjectDamage(uint32 damage, uint32 spell, Unit* caster)
 
     ForceGameObjectHealth(-int32(damage), caster);
 
-    WorldPacket data(SMSG_DESTRUCTIBLE_BUILDING_DAMAGE, 9+9+9+4+4);
+    WorldPacket data(SMSG_DESTRUCTIBLE_BUILDING_DAMAGE, 9 + 9 + 9 + 4 + 4);
     data << GetPackGUID();
     data << caster->GetPackGUID();
     data << caster->GetCharmerOrOwnerOrSelf()->GetPackGUID();

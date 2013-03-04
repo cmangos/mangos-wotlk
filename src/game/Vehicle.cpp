@@ -332,7 +332,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         // TODO: Guesswork, but seems to be fairly near correct
         // Only if the passenger was on control seat? Also depending on some flags
         if ((seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL) &&
-            !(m_vehicleEntry->m_flags & (VEHICLE_FLAG_UNK4 | VEHICLE_FLAG_UNK20)))
+                !(m_vehicleEntry->m_flags & (VEHICLE_FLAG_UNK4 | VEHICLE_FLAG_UNK20)))
         {
             if (((Creature*)m_owner)->IsTemporarySummon())
                 ((Creature*)m_owner)->ForcedDespawn(1000);

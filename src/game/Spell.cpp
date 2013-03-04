@@ -1613,7 +1613,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // and no unitTarget (e.g. summon effects). As MaNGOS always needs a unitTarget we add just the caster here.
             // Logic: This is first target, and no second target => use m_caster -- This is second target: use m_caster if the spell is positive or a summon spell
             if ((m_spellInfo->EffectImplicitTargetA[effIndex] == targetMode && m_spellInfo->EffectImplicitTargetB[effIndex] == TARGET_NONE) ||
-                (m_spellInfo->EffectImplicitTargetB[effIndex] == targetMode && (IsPositiveSpell(m_spellInfo) || m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SUMMON)))
+                    (m_spellInfo->EffectImplicitTargetB[effIndex] == targetMode && (IsPositiveSpell(m_spellInfo) || m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SUMMON)))
                 targetUnitMap.push_back(m_caster);
             break;
         }
@@ -1637,7 +1637,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // and no unitTarget (e.g. summon effects). As MaNGOS always needs a unitTarget we add just the caster here.
             // Logic: This is first target, and no second target => use m_caster -- This is second target: use m_caster if the spell is positive or a summon spell
             if ((m_spellInfo->EffectImplicitTargetA[effIndex] == targetMode && m_spellInfo->EffectImplicitTargetB[effIndex] == TARGET_NONE) ||
-                (m_spellInfo->EffectImplicitTargetB[effIndex] == targetMode && (IsPositiveSpell(m_spellInfo) || m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SUMMON)))
+                    (m_spellInfo->EffectImplicitTargetB[effIndex] == targetMode && (IsPositiveSpell(m_spellInfo) || m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SUMMON)))
                 targetUnitMap.push_back(m_caster);
 
             break;
@@ -7753,14 +7753,14 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                     {
                         switch (m_caster->GetMap()->GetDifficulty())
                         {
-                        case RAID_DIFFICULTY_10MAN_NORMAL:
-                        case RAID_DIFFICULTY_10MAN_HEROIC:
-                            unMaxTargets = 2;
-                            break;
-                        case RAID_DIFFICULTY_25MAN_NORMAL:
-                        case RAID_DIFFICULTY_25MAN_HEROIC:
-                            unMaxTargets = 5;
-                            break;
+                            case RAID_DIFFICULTY_10MAN_NORMAL:
+                            case RAID_DIFFICULTY_10MAN_HEROIC:
+                                unMaxTargets = 2;
+                                break;
+                            case RAID_DIFFICULTY_25MAN_NORMAL:
+                            case RAID_DIFFICULTY_25MAN_HEROIC:
+                                unMaxTargets = 5;
+                                break;
                         }
                     }
                     break;
@@ -7803,9 +7803,9 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 // overwrite EffectChainTarget for non single target spell
                 if (Spell* currSpell = m_caster->GetCurrentSpell(CURRENT_GENERIC_SPELL))
                     if (currSpell->m_spellInfo->MaxAffectedTargets > 0 ||
-                        currSpell->m_spellInfo->EffectChainTarget[EFFECT_INDEX_0] > 0 ||
-                        currSpell->m_spellInfo->EffectChainTarget[EFFECT_INDEX_1] > 0 ||
-                        currSpell->m_spellInfo->EffectChainTarget[EFFECT_INDEX_2] > 0)
+                            currSpell->m_spellInfo->EffectChainTarget[EFFECT_INDEX_0] > 0 ||
+                            currSpell->m_spellInfo->EffectChainTarget[EFFECT_INDEX_1] > 0 ||
+                            currSpell->m_spellInfo->EffectChainTarget[EFFECT_INDEX_2] > 0)
                         EffectChainTarget = 0;              // no chain targets
             }
             break;
@@ -7821,19 +7821,19 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
             switch (m_spellInfo->Id)
             {
                 case 24811:                                 // Draw Spirit (Lethon)
-                    {
-                        if (effIndex == EFFECT_INDEX_0)         // Copy range from EFF_1 to 0
-                            radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_1]));
-                        break;
-                    }
+                {
+                    if (effIndex == EFFECT_INDEX_0)         // Copy range from EFF_1 to 0
+                        radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_1]));
+                    break;
+                }
                 case 28241:                                 // Poison (Naxxramas, Grobbulus Cloud)
                 case 54363:                                 // Poison (Naxxramas, Grobbulus Cloud) (H)
-                    {
-                        uint32 auraId = (m_spellInfo->Id == 28241 ? 28158 : 54362);
-                        if (SpellAuraHolder* auraHolder = m_caster->GetSpellAuraHolder(auraId))
-                            radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
-                        break;
-                    }
+                {
+                    uint32 auraId = (m_spellInfo->Id == 28241 ? 28158 : 54362);
+                    if (SpellAuraHolder* auraHolder = m_caster->GetSpellAuraHolder(auraId))
+                        radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
+                    break;
+                }
                 case 66881:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale)
                 case 67638:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale) (Mode 1)
                 case 67639:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale) (Mode 2)
@@ -7857,8 +7857,8 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                     break;
                 default:
                     break;
-                }
-                break;
+            }
+            break;
         }
         default:
             break;

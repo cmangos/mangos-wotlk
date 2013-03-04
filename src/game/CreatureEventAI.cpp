@@ -65,7 +65,7 @@ void CreatureEventAI::GetAIInformation(ChatHandler& reader)
 inline bool IsEventFlagsFitForNormalMap(uint8 eFlags)
 {
     return !(eFlags & (EFLAG_DIFFICULTY_0 | EFLAG_DIFFICULTY_1 | EFLAG_DIFFICULTY_2 | EFLAG_DIFFICULTY_3)) ||
-                (eFlags & EFLAG_DIFFICULTY_0);
+           (eFlags & EFLAG_DIFFICULTY_0);
 }
 
 CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c)

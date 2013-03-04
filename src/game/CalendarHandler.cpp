@@ -86,8 +86,8 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
                          uint32(event->Flags), event->DungeonId, event->CreatorGuid.GetString().c_str());
     }
 
-    data << uint32(currTime);                      // server time
-    data << secsToTimeBitFields(currTime);                      // zone time ??
+    data << uint32(currTime);                               // server time
+    data << secsToTimeBitFields(currTime);                  // zone time ??
 
     ByteBuffer dataBuffer;
     uint32 boundCounter = 0;
@@ -111,7 +111,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
     data << uint32(boundCounter);
     data.append(dataBuffer);
 
-    data << uint32(1135753200);                                 // Constant date, unk (28.12.2005 07:00)
+    data << uint32(1135753200);                             // Constant date, unk (28.12.2005 07:00)
 
     // Reuse variables
     boundCounter = 0;
@@ -628,7 +628,7 @@ void WorldSession::HandleCalendarEventStatus(WorldPacket& recv_data)
                 }
             }
             invite->Status = (CalendarInviteStatus)status;
-            invite->LastUpdateTime = time(NULL);                                        // not sure if we should set response time when moderator changes invite status
+            invite->LastUpdateTime = time(NULL);            // not sure if we should set response time when moderator changes invite status
 
             CharacterDatabase.PExecute("UPDATE calendar_invites SET status=%u, lastUpdateTime=%u WHERE inviteId=" UI64FMTD, status, uint32(invite->LastUpdateTime), invite->InviteId);
             sCalendarMgr.SendCalendarEventStatus(invite);
@@ -760,7 +760,7 @@ void CalendarMgr::SendCalendarEventInviteAlert(CalendarInvite const* invite)
     //data.hexlike();
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SendCalendarInviteAlert> senderGuid[%s], inviteeGuid[%s], EventId["UI64FMTD"], Status[%u], InviteId["UI64FMTD"]",
-        invite->SenderGuid.GetString().c_str(), invite->InviteeGuid.GetString().c_str(), event->EventId, uint32(invite->Status), invite->InviteId);
+                     invite->SenderGuid.GetString().c_str(), invite->InviteeGuid.GetString().c_str(), event->EventId, uint32(invite->Status), invite->InviteId);
 
     if (event->IsGuildEvent() || event->IsGuildAnnouncement())
     {
@@ -800,7 +800,7 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const* invite)
     data << uint8(invite->SenderGuid != invite->InviteeGuid); // false only if the invite is sign-up (invitee create himself his invite)
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SendCalendarInvit> %s senderGuid[%s], inviteeGuid[%s], EventId["UI64FMTD"], Status[%u], InviteId["UI64FMTD"]",
-        preInvite ? "is PreInvite," : "", invite->SenderGuid.GetString().c_str(), invite->InviteeGuid.GetString().c_str(), eventId, uint32(invite->Status), invite->InviteId);
+                     preInvite ? "is PreInvite," : "", invite->SenderGuid.GetString().c_str(), invite->InviteeGuid.GetString().c_str(), eventId, uint32(invite->Status), invite->InviteId);
 
     //data.hexlike();
     if (preInvite)
@@ -823,14 +823,14 @@ void CalendarMgr::SendCalendarCommandResult(Player* player, CalendarError err, c
     data << uint8(0);
     switch (err)
     {
-    case CALENDAR_ERROR_OTHER_INVITES_EXCEEDED_S:
-    case CALENDAR_ERROR_ALREADY_INVITED_TO_EVENT_S:
-    case CALENDAR_ERROR_IGNORING_YOU_S:
-        data << param;
-        break;
-    default:
-        data << uint8(0);
-        break;
+        case CALENDAR_ERROR_OTHER_INVITES_EXCEEDED_S:
+        case CALENDAR_ERROR_ALREADY_INVITED_TO_EVENT_S:
+        case CALENDAR_ERROR_IGNORING_YOU_S:
+            data << param;
+            break;
+        default:
+            data << uint8(0);
+            break;
     }
 
     data << uint32(err);
@@ -856,7 +856,7 @@ void CalendarMgr::SendCalendarEvent(Player* player, CalendarEvent const* event, 
 
     std::string timeStr = TimeToTimestampStr(event->EventTime);
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SendCalendarEvent> sendType[%u], CreatorGuid[%s], EventId["UI64FMTD"], Type[%u], Flags[%u], Title[%s]",
-        sendType, event->CreatorGuid.GetString().c_str(), event->EventId, uint32(event->Type), event->Flags, event->Title.c_str());
+                     sendType, event->CreatorGuid.GetString().c_str(), event->EventId, uint32(event->Type), event->Flags, event->Title.c_str());
 
     WorldPacket data(SMSG_CALENDAR_SEND_EVENT);
     data << uint8(sendType);
@@ -894,8 +894,8 @@ void CalendarMgr::SendCalendarEvent(Player* player, CalendarEvent const* event, 
         data << invite->Text;
 
         DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Invite> InviteId["UI64FMTD"], InviteLvl[%u], Status[%u], Rank[%u],  GuildEvent[%s], Text[%s]",
-            invite->InviteId, uint32(inviteeLevel), uint32(invite->Status), uint32(invite->Rank),
-            (event->IsGuildEvent() && event->GuildId == inviteeGuildId) ? "true" : "false", invite->Text.c_str());
+                         invite->InviteId, uint32(inviteeLevel), uint32(invite->Status), uint32(invite->Rank),
+                         (event->IsGuildEvent() && event->GuildId == inviteeGuildId) ? "true" : "false", invite->Text.c_str());
     }
     //data.hexlike();
     player->SendDirectMessage(&data);
@@ -952,7 +952,7 @@ void CalendarMgr::SendCalendarClearPendingAction(Player* player)
 {
     if (player)
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SMSG_CALENDAR_CLEAR_PENDING_ACTION TO [%s]",player->GetObjectGuid().GetString().c_str());
+        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SMSG_CALENDAR_CLEAR_PENDING_ACTION TO [%s]", player->GetObjectGuid().GetString().c_str());
         WorldPacket data(SMSG_CALENDAR_CLEAR_PENDING_ACTION, 0);
         player->SendDirectMessage(&data);
     }
@@ -975,7 +975,7 @@ void CalendarMgr::SendCalendarEventUpdateAlert(CalendarEvent const* event, time_
 {
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SMSG_CALENDAR_EVENT_UPDATED_ALERT");
     WorldPacket data(SMSG_CALENDAR_EVENT_UPDATED_ALERT, 1 + 8 + 4 + 4 + 4 + 1 + 4 +
-        event->Title.size() + event->Description.size() + 1 + 4 + 4);
+                     event->Title.size() + event->Description.size() + 1 + 4 + 4);
     data << uint8(1);       // show pending alert?
     data << uint64(event->EventId);
     data << secsToTimeBitFields(oldEventTime);

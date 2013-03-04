@@ -644,7 +644,7 @@ void LoadDBCStores(const std::string& dataPath)
 
             // Hack DK node at Ebon Hold (unclear if bad dbc data or we need to revisit our checks in ObjectMgr::GetNearestTaxiNode )
             if (i == 315)
-               (const_cast<TaxiNodesEntry*>(node))->MountCreatureID[1] = node->MountCreatureID[0];
+                (const_cast<TaxiNodesEntry*>(node))->MountCreatureID[1] = node->MountCreatureID[0];
         }
     }
 

@@ -245,7 +245,7 @@ std::string TimeToTimestampStr(time_t t)
     return std::string(buf);
 }
 
-time_t timeBitFieldsToSecs( uint32 packedDate )
+time_t timeBitFieldsToSecs(uint32 packedDate)
 {
     tm lt;
     memset(&lt, 0, sizeof(lt));

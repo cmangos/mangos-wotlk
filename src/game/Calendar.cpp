@@ -580,7 +580,7 @@ void CalendarMgr::LoadCalendarsFromDB()
         do
         {
             Field* field = eventsQuery->Fetch();
-            
+
             uint64 eventId         = field[0].GetUInt64();
 
             CalendarEvent& newEvent = m_EventStore[eventId];
