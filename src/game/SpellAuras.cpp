@@ -3031,7 +3031,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     if (apply)
                         target->m_AuraFlags |= UNIT_AURAFLAG_ALIVE_INVISIBLE;
                     else
-                        target->m_AuraFlags |= ~UNIT_AURAFLAG_ALIVE_INVISIBLE;
+                        target->m_AuraFlags &= ~UNIT_AURAFLAG_ALIVE_INVISIBLE;
                     return;
             }
             break;
