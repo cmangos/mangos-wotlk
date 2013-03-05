@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_12363_02_mangos_npc_vendor_template` bit(1) default NULL
+  `required_12401_01_mangos_spell_template` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -17824,6 +17824,9 @@ INSERT INTO `spell_template` VALUES
 (35904, 0x00000000, 101,  21,  28,  44,   8,   0, 20405,  64,    0,     'Summon Nether Charge right of the caster'),
 (35905, 0x00000000, 101,  21,  28,  43,   8,   0, 20405,  64,    0,     'Summon Nether Charge left of the caster'),
 (35906, 0x00000000, 101,  21,  28,  41,   8,   0, 20405,  64,    0,     'Summon Nether Charge front of the caster'),
+(37264, 0x00000000, 101,  21,  28,  18,   7,   0, 21729, 64,     0,     'Power Converters: Summon Electromental (from cata)'),
+(37278, 0x00000000, 101,  21,  28,  18,   1,   0, 21737, 64,     0,     'Power Converters: Summon Mini-Electromental (from cata)'),
+(37365, 0x00000000, 101,  21,  28,  18,   1,   0, 21757, 64,     0,     'Power Converters: Summon Big Flavor Electromental (from cata)'),
 (44920, 0x00000000, 101,  21,   6,   1,   0,  56, 24941,  0,     0,     'Model - Shattered Sun Marksman - BE Male Tier 4'),
 (44924, 0x00000000, 101,  21,   6,   1,   0,  56, 24945,  0,     0,     'Model - Shattered Sun Marksman - BE Female Tier 4'),
 (44928, 0x00000000, 101,  21,   6,   1,   0,  56, 24949,  0,     0,     'Model - Shattered Sun Marksman - Draenei Male Tier 4'),
