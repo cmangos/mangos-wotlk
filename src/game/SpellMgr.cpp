@@ -1990,6 +1990,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                             (spellInfo_2->Id == 50758 && spellInfo_1->Id == 50756))
                         return false;
 
+                    // Arcane Beam Periodic and Arcane Beam Visual
+                    if ((spellInfo_1->Id == 51019 && spellInfo_2->Id == 51024) ||
+                            (spellInfo_2->Id == 51019 && spellInfo_1->Id == 51024))
+                        return false;
+
                     break;
                 }
                 case SPELLFAMILY_MAGE:
