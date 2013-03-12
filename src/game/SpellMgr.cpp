@@ -2000,6 +2000,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                             (spellInfo_2->Id == 50442 && spellInfo_1->Id == 47941))
                         return false;
 
+                    // Impale aura and Submerge
+                    if ((spellInfo_1->Id == 53456 && spellInfo_2->Id == 53421) ||
+                            (spellInfo_2->Id == 53456 && spellInfo_1->Id == 53421))
+                        return false;
+
                     break;
                 }
                 case SPELLFAMILY_MAGE:
