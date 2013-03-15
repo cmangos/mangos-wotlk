@@ -299,6 +299,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
     SendPacket(&data);
 
     // learn explicitly or cast explicitly
+    // TODO - Are these spells really cast correctly this way?
     if (trainer_spell->IsCastable())
         _player->CastSpell(_player, trainer_spell->spell, true);
     else
