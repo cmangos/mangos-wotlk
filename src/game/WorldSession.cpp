@@ -39,6 +39,8 @@
 #include "Auth/AuthCrypt.h"
 #include "Auth/HMACSHA1.h"
 #include "zlib/zlib.h"
+#include "Warden/WardenWin.h"
+#include "Warden/WardenMac.h"
 
 // select opcodes appropriate for processing in Map::Update context for current session state
 static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& opHandle)
@@ -84,7 +86,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     m_muteTime(mute_time), _player(NULL), m_Socket(sock), _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
-    m_latency(0), m_tutorialState(TUTORIALDATA_UNCHANGED)
+    m_latency(0), m_tutorialState(TUTORIALDATA_UNCHANGED), m_Warden(NULL)
 {
     if (sock)
     {
@@ -107,6 +109,9 @@ WorldSession::~WorldSession()
         m_Socket->RemoveReference();
         m_Socket = NULL;
     }
+
+    if (m_Warden)
+        delete m_Warden;
 
     ///- empty incoming packet queue
     WorldPacket* packet = NULL;
@@ -297,6 +302,9 @@ bool WorldSession::Update(PacketFilter& updater)
 
         delete packet;
     }
+
+    if (m_Socket && !m_Socket->IsClosed() && m_Warden && GetPlayer())
+        m_Warden->Update();
 
     ///- Cleanup socket pointer if need
     if (m_Socket && m_Socket->IsClosed())
@@ -981,6 +989,19 @@ void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* pac
 
     if (packet->rpos() < packet->wpos() && sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG))
         LogUnprocessedTail(packet);
+}
+
+void WorldSession::InitWarden(BigNumber *K, std::string os)
+{
+    if (!sWorld.getConfig(CONFIG_BOOL_ANTICHEAT_WARDEN))
+        return;
+
+    if (os == "niW")                                        // Windows
+        m_Warden = (WardenBase*)new WardenWin();
+    else                                                    // MacOS
+        m_Warden = (WardenBase*)new WardenMac();
+
+    m_Warden->Init(this, K);
 }
 
 void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit)

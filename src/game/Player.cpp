@@ -563,6 +563,8 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_lastFallTime = 0;
     m_lastFallZ = 0;
 
+	m_anticheat = new AntiCheat(this);
+
     m_cachedGS = 0;
 }
 
@@ -604,6 +606,7 @@ Player::~Player()
 
     delete m_declinedname;
     delete m_runes;
+    delete m_anticheat;
 }
 
 void Player::CleanupsBeforeDelete()

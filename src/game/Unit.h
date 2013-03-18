@@ -678,6 +678,8 @@ enum MovementFlags2
 
 class MovementInfo
 {
+	friend class AntiCheat;
+
     public:
         MovementInfo() : moveFlags(MOVEFLAG_NONE), moveFlags2(MOVEFLAG2_NONE), time(0),
             t_time(0), t_seat(-1), t_time2(0), s_pitch(0.0f), fallTime(0), u_unk1(0.0f) {}
@@ -1531,6 +1533,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         bool AddSpellAuraHolder(SpellAuraHolder* holder);
         void AddAuraToModList(Aura* aura);
+		//void AddAura(uint32 spellID, uint32 duration = 60000); // TODO Доделать!
 
         // removing specific aura stack
         void RemoveAura(Aura* aura, AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);

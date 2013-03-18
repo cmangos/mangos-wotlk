@@ -28,6 +28,7 @@
 #include "ObjectGuid.h"
 #include "AuctionHouseMgr.h"
 #include "Item.h"
+#include "Warden/WardenBase.h"
 
 struct ItemPrototype;
 struct AuctionEntry;
@@ -264,6 +265,8 @@ class MANGOS_DLL_SPEC WorldSession
         std::string const& GetRemoteAddress() { return m_Address; }
         void SetPlayer(Player* plr);
         uint8 Expansion() const { return m_expansion; }
+
+		void InitWarden(BigNumber *K, std::string os);
 
         /// Session in auth.queue currently
         void SetInQueue(bool state) { m_inQueue = state; }
@@ -910,6 +913,9 @@ class MANGOS_DLL_SPEC WorldSession
         TutorialDataState m_tutorialState;
         AddonsList m_addonsList;
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
+
+        // Warden
+        WardenBase *m_Warden;
 };
 #endif
 /// @}

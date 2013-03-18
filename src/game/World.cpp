@@ -533,6 +533,13 @@ void World::LoadConfigSettings(bool reload)
     setConfigPos(CONFIG_FLOAT_CREATURE_FAMILY_FLEE_ASSISTANCE_RADIUS, "CreatureFamilyFleeAssistanceRadius", 30.0f);
 
     ///- Read other configuration items from the config file
+
+    // Anticheat
+    setConfig(CONFIG_BOOL_ANTICHEAT_ENABLE,              "Anticheat.Enable", false);
+    setConfig(CONFIG_UINT32_ANTICHEAT_ACTION_DELAY,   "Anticheat.DelayAfterAction",30);
+    setConfig(CONFIG_UINT32_ANTICHEAT_GMLEVEL,        "Anticheat.GmLevel",0);
+    setConfig(CONFIG_BOOL_ANTICHEAT_WARDEN,              "Anticheat.Warden", false);
+
     setConfigMinMax(CONFIG_UINT32_COMPRESSION, "Compression", 1, 1, 9);
     setConfig(CONFIG_BOOL_ADDON_CHANNEL, "AddonChannel", true);
     setConfig(CONFIG_BOOL_CLEAN_CHARACTER_DB, "CleanCharacterDB", true);
@@ -1311,6 +1318,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading GM tickets...");
     sTicketMgr.LoadGMTickets();
 
+    sLog.outString( "Loading AntiCheat config..." );
+    sObjectMgr.LoadAntiCheatConfig();
+
     ///- Handle outdated emails (delete/return)
     sLog.outString("Returning old mails...");
     sObjectMgr.ReturnOrDeleteOldMails(false);
@@ -1826,11 +1836,17 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_
         Field* fieldsAccount = resultAccounts->Fetch();
         uint32 account = fieldsAccount->GetUInt32();
 
-        if (mode != BAN_IP)
-        {
-            // No SQL injection as strings are escaped
-            LoginDatabase.PExecute("INSERT INTO account_banned VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, '%s', '%s', '1')",
-                                   account, duration_secs, safe_author.c_str(), reason.c_str());
+		switch (mode)
+		{
+			case BAN_CHARACTER:
+				LoginDatabase.PExecute("UPDATE account SET locked = 1 WHERE id = %u",
+					account);
+			break;
+			case BAN_IP:
+				// No SQL injection as strings are escaped
+				LoginDatabase.PExecute("INSERT INTO account_banned VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, '%s', '%s', '1')",
+					account, duration_secs, safe_author.c_str(), reason.c_str());
+			break;
         }
 
         if (WorldSession* sess = FindSession(account))

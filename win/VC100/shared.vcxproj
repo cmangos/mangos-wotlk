@@ -460,6 +460,7 @@
     <ClInclude Include="..\..\src\shared\Auth\md5.h" />
     <ClInclude Include="..\..\src\shared\Auth\SARC4.h" />
     <ClInclude Include="..\..\src\shared\Auth\Sha1.h" />
+    <ClInclude Include="..\..\src\shared\Auth\WardenKeyGeneration.h" />
     <ClInclude Include="..\..\src\shared\ByteBuffer.h" />
     <ClInclude Include="..\..\src\shared\Database\SqlPreparedStatement.h" />
     <ClInclude Include="..\..\src\shared\WorldPacket.h" />

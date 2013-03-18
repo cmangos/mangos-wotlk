@@ -661,6 +661,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
     {
         Player* killer = ((Player*)this);
 
+        /* process anticheat check */
+        killer->GetAntiCheat()->DoAntiCheatCheck(CHECK_DAMAGE, 0, 0, damage);
+
         // in bg, count dmg if victim is also a player
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
         {
@@ -4256,6 +4259,36 @@ void Unit::AddAuraToModList(Aura* aura)
     if (aura->GetModifier()->m_auraname < TOTAL_AURAS)
         m_modAuras[aura->GetModifier()->m_auraname].push_back(aura);
 }
+
+/* b -->
+void Unit::AddAura(uint32 spellID, uint32 duration)
+{
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry( spellID );
+
+    if (spellInfo)
+    {
+        if (IsSpellAppliesAura(spellInfo, (1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)) || IsSpellHaveEffect(spellInfo, SPELL_EFFECT_PERSISTENT_AREA_AURA))
+        {
+            SpellAuraHolderPtr holder = CreateSpellAuraHolder(spellInfo, this, this);
+
+            for(uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            {
+                if (spellInfo->Effect[i] >= TOTAL_SPELL_EFFECTS)
+                    continue;
+                if ( IsAreaAuraEffect(spellInfo->Effect[i])           ||
+                    spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA  ||
+                    spellInfo->Effect[i] == SPELL_EFFECT_PERSISTENT_AREA_AURA )
+                {
+                    holder->CreateAura(spellInfo, SpellEffectIndex(i), NULL, holder, this, NULL, NULL); //Aura *aura =
+                    holder->SetAuraDuration(duration);
+                    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Manually adding aura of spell %u, index %u, duration %u ms", spellID, i, duration);
+                }
+            }
+            AddSpellAuraHolder(holder);
+        }
+    }
+}
+ b <-- */
 
 void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
 {
@@ -10822,6 +10855,8 @@ void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float vertical
 {
     if (GetTypeId() == TYPEID_PLAYER)
     {
+		//SetFallInformation(0, GetPositionZ()); TODO Проверить!!!
+		((Player*)this)->GetAntiCheat()->SetImmune(uint32((3 * verticalSpeed / Movement::gravity) * 1000));
         ((Player*)this)->GetSession()->SendKnockBack(angle, horizontalSpeed, verticalSpeed);
     }
     else
