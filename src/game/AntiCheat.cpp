@@ -259,75 +259,48 @@ void AntiCheat::DoAntiCheatAction(AntiCheatCheck checkType, std::string reason)
         for (int i=0; i < ANTICHEAT_ACTIONS; ++i )
         {
             AntiCheatAction actionID = AntiCheatAction(config->actionType[i]);
-
-
             switch(actionID)
             {
-                case    ANTICHEAT_ACTION_KICK:
-                        GetPlayer()->GetSession()->KickPlayer();
+                case ANTICHEAT_ACTION_KICK:
+					GetPlayer()->GetSession()->KickPlayer();
                 break;
-
-                case    ANTICHEAT_ACTION_BAN:
-                    sWorld.BanAccount(BAN_CHARACTER, name.c_str(), config->actionParam[i], reason, "AntiCheat");
+                case ANTICHEAT_ACTION_BAN:
+					sWorld.BanAccount(BAN_CHARACTER, name.c_str(), config->actionParam[i], reason, "AntiCheat");
                 break;
-
-                case    ANTICHEAT_ACTION_SHEEP:
-                    {
+                case ANTICHEAT_ACTION_SHEEP:
+					{
                         uint32 sheepAura = 28272;
                         switch (urand(0,6))
                         {
-                            case 0:
-                                sheepAura = 118;
-                            break;
-                            case 1:
-                                sheepAura = 28271;
-                            break;
-                            case 2:
-                                sheepAura = 28272;
-                            break;
-                            case 3:
-                                sheepAura = 61025;
-                            break;
-                            case 4:
-                                sheepAura = 61721;
-                            break;
-                            case 5:
-                                sheepAura = 71319;
-                            break;
-                            default:
-                            break;
+                            case 0:	sheepAura = 118;	break;
+                            case 1:	sheepAura = 28271;	break;
+                            case 2:	sheepAura = 28272;	break;
+                            case 3:	sheepAura = 61025;	break;
+                            case 4:	sheepAura = 61721;	break;
+                            case 5:	sheepAura = 71319;	break;
                         }
-                        //GetPlayer()->_AddAura(sheepAura,config->actionParam[i]); // TODO Доработать!
-
-                        if (checkType == CHECK_MOVEMENT_FLY ||
-                            GetPlayer()->HasAuraType(SPELL_AURA_FLY))
-                            {
-                                GetPlayer()->CastSpell(GetPlayer(), 55001, true);
-                            }
+                        GetPlayer()->AddAura(sheepAura, config->actionParam[i] * 1000);
+						if ( checkType == CHECK_MOVEMENT_FLY || GetPlayer()->HasAuraType(SPELL_AURA_FLY) )
+							GetPlayer()->CastSpell(GetPlayer(), 55001, true);
                     }
                 break;
-
-                case    ANTICHEAT_ACTION_STUN:
-                        //GetPlayer()->_AddAura(13005,config->actionParam[i]); // TODO Доработать!
+                case ANTICHEAT_ACTION_STUN:
+					GetPlayer()->AddAura(13005, config->actionParam[i] * 1000);
+                break;
+                case ANTICHEAT_ACTION_SICKNESS:
+					GetPlayer()->AddAura(15007, config->actionParam[i] * 1000);
+                break;
+                case ANTICHEAT_ACTION_ANNOUNCE_GM:
+					//sWorld.SendWorldTextWithSecurity(AccountTypes(config->actionParam[i]), config->messageNum, namechat.c_str(), config->description.c_str()); // TODO Доработать!
+                break;
+                case ANTICHEAT_ACTION_ANNOUNCE_ALL:
+					sWorld.SendWorldText(config->messageNum, name.c_str(), config->description.c_str());
                 break;
 
-                case    ANTICHEAT_ACTION_SICKNESS:
-                        //GetPlayer()->_AddAura(15007,config->actionParam[i]); // TODO Доработать!
-                break;
-
-                case    ANTICHEAT_ACTION_ANNOUNCE_GM:
-                        //sWorld.SendWorldTextWithSecurity(AccountTypes(config->actionParam[i]), config->messageNum, namechat.c_str(), config->description.c_str()); // TODO Доработать!
-                break;
-
-                case    ANTICHEAT_ACTION_ANNOUNCE_ALL:
-                        sWorld.SendWorldText(config->messageNum, name.c_str(), config->description.c_str());
-                break;
-
-                case    ANTICHEAT_ACTION_LOG:
-                case    ANTICHEAT_ACTION_NULL:
+                case ANTICHEAT_ACTION_LOG:
+                case ANTICHEAT_ACTION_NULL:
                 default:
                 break;
-
             }
         }
     }
@@ -341,7 +314,6 @@ void AntiCheat::DoAntiCheatAction(AntiCheatCheck checkType, std::string reason)
         }
 
         const char* playerName = GetPlayer()->GetName();
-
         if ( !playerName )
         {
            sLog.outError("AntiCheat action log: Player with no name?");

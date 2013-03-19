@@ -4260,7 +4260,6 @@ void Unit::AddAuraToModList(Aura* aura)
         m_modAuras[aura->GetModifier()->m_auraname].push_back(aura);
 }
 
-/* b -->
 void Unit::AddAura(uint32 spellID, uint32 duration)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry( spellID );
@@ -4269,8 +4268,7 @@ void Unit::AddAura(uint32 spellID, uint32 duration)
     {
         if (IsSpellAppliesAura(spellInfo, (1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)) || IsSpellHaveEffect(spellInfo, SPELL_EFFECT_PERSISTENT_AREA_AURA))
         {
-            SpellAuraHolderPtr holder = CreateSpellAuraHolder(spellInfo, this, this);
-
+			SpellAuraHolder* holder = CreateSpellAuraHolder(spellInfo, this, this);
             for(uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
                 if (spellInfo->Effect[i] >= TOTAL_SPELL_EFFECTS)
@@ -4279,8 +4277,9 @@ void Unit::AddAura(uint32 spellID, uint32 duration)
                     spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA  ||
                     spellInfo->Effect[i] == SPELL_EFFECT_PERSISTENT_AREA_AURA )
                 {
-                    holder->CreateAura(spellInfo, SpellEffectIndex(i), NULL, holder, this, NULL, NULL); //Aura *aura =
-                    holder->SetAuraDuration(duration);
+                    Aura* aura = CreateAura(spellInfo, SpellEffectIndex(i), NULL, holder, this);
+					holder->SetAuraDuration(duration);
+					holder->AddAura(aura, SpellEffectIndex(i));
                     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Manually adding aura of spell %u, index %u, duration %u ms", spellID, i, duration);
                 }
             }
@@ -4288,7 +4287,6 @@ void Unit::AddAura(uint32 spellID, uint32 duration)
         }
     }
 }
- b <-- */
 
 void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
 {
