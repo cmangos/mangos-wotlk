@@ -1,4 +1,4 @@
-ALTER TABLE db_version CHANGE COLUMN required_12401_01_mangos_spell_template required_xxxxx_01_mangos_anticheat bit;
+ALTER TABLE db_version CHANGE COLUMN required_12401_01_mangos_spell_template required_12416_01_mangos_anticheat bit;
 
 -- Anticheat
 DELETE FROM `mangos_string` WHERE `entry`='11000';

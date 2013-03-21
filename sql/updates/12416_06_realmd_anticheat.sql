@@ -1,4 +1,4 @@
-ALTER TABLE realmd_db_version CHANGE COLUMN required_8728_01_realmd_account required_xxxxx_06_realmd_anticheat bit;
+ALTER TABLE realmd_db_version CHANGE COLUMN required_10008_01_realmd_realmd_db_version required_12416_06_realmd_anticheat bit;
 
 -- realmd table update for warden
 ALTER TABLE `account`
