@@ -22,8 +22,8 @@
 #include "Player.h"
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
-#include "warden/WardenWin.h"
-#include "warden/WardenMac.h"
+#include "Warden/WardenWin.h"
+#include "Warden/WardenMac.h"
 #include "World.h"
 
 #define ANTICHEAT_DEFAULT_DELTA 2000

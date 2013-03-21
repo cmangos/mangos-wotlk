@@ -19,24 +19,14 @@
 set(LIBRARY_NAME game)
 
 set(LIBRARY_SRCS
-	AntiCheat.cpp
-	AntiCheat.h
-	Warden/WardenBase.cpp
-	Warden/WardenBase.h
-	Warden/WardenDataStorage.cpp
-	Warden/WardenDataStorage.h
-	Warden/WardenMac.cpp
-	Warden/WardenMac.h
-	Warden/WardenModuleMac.h
-	Warden/WardenModuleWin.h
-	Warden/WardenWin.cpp
-	Warden/WardenWin.h
     AccountMgr.cpp
     AccountMgr.h
     AchievementMgr.cpp
     AchievementMgr.h
     AggressorAI.cpp
     AggressorAI.h
+    AntiCheat.cpp
+    AntiCheat.h
     ArenaTeam.cpp
     ArenaTeam.h
     ArenaTeamHandler.cpp
@@ -319,6 +309,16 @@ set(LIBRARY_SRCS
     Vehicle.h
     VehicleHandler.cpp
     VoiceChatHandler.cpp
+    Warden/WardenBase.cpp
+    Warden/WardenBase.h
+    Warden/WardenDataStorage.cpp
+    Warden/WardenDataStorage.h
+    Warden/WardenMac.cpp
+    Warden/WardenMac.h
+    Warden/WardenModuleMac.h
+    Warden/WardenModuleWin.h
+    Warden/WardenWin.cpp
+    Warden/WardenWin.h
     WaypointManager.cpp
     WaypointManager.h
     WaypointMovementGenerator.cpp
@@ -371,7 +371,8 @@ set(LIBRARY_SRCS
     vmap/VMapManager2.h
     vmap/VMapTools.h
     vmap/WorldModel.cpp
-    vmap/WorldModel.h   )
+    vmap/WorldModel.h
+)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
