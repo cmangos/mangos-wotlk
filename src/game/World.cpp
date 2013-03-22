@@ -1836,17 +1836,11 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_
         Field* fieldsAccount = resultAccounts->Fetch();
         uint32 account = fieldsAccount->GetUInt32();
 
-		switch (mode)
-		{
-			case BAN_CHARACTER:
-				LoginDatabase.PExecute("UPDATE account SET locked = 1 WHERE id = %u",
-					account);
-			break;
-			case BAN_IP:
-				// No SQL injection as strings are escaped
-				LoginDatabase.PExecute("INSERT INTO account_banned VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, '%s', '%s', '1')",
-					account, duration_secs, safe_author.c_str(), reason.c_str());
-			break;
+        if (mode != BAN_IP)
+        {
+            // No SQL injection as strings are escaped
+            LoginDatabase.PExecute("INSERT INTO account_banned VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, '%s', '%s', '1')",
+                                   account, duration_secs, safe_author.c_str(), reason.c_str());
         }
 
         if (WorldSession* sess = FindSession(account))
