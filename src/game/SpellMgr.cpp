@@ -2005,6 +2005,21 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                             (spellInfo_2->Id == 53456 && spellInfo_1->Id == 53421))
                         return false;
 
+                    // Summon Anub'ar Champion Periodic and Summon Anub'ar Necromancer Periodic
+                    if ((spellInfo_1->Id == 53035 && spellInfo_2->Id == 53036) ||
+                            (spellInfo_2->Id == 53035 && spellInfo_1->Id == 53036))
+                        return false;
+
+                    // Summon Anub'ar Necromancer Periodic and Summon Anub'ar Crypt Fiend Periodic
+                    if ((spellInfo_1->Id == 53036 && spellInfo_2->Id == 53037) ||
+                            (spellInfo_2->Id == 53036 && spellInfo_1->Id == 53037))
+                        return false;
+
+                    // Summon Anub'ar Crypt Fiend Periodic and Summon Anub'ar Champion Periodic
+                    if ((spellInfo_1->Id == 53037 && spellInfo_2->Id == 53035) ||
+                            (spellInfo_2->Id == 53037 && spellInfo_1->Id == 53035))
+                        return false;
+
                     break;
                 }
                 case SPELLFAMILY_MAGE:
