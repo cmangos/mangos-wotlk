@@ -885,6 +885,21 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     }
                     break;
                 }
+                case SPELL_AURA_PHASE:
+                {
+                    switch (spellproto->Id)
+                    {
+                        case 57508:                         // Insanity (16)
+                        case 57509:                         // Insanity (32)
+                        case 57510:                         // Insanity (64)
+                        case 57511:                         // Insanity (128)
+                        case 57512:                         // Insanity (256)
+                            return false;
+                        default:
+                            break;
+                    }
+                    break;
+                }
                 default:
                     break;
             }
