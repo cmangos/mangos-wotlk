@@ -2036,6 +2036,7 @@ void Aura::TriggerSpell()
                 return;
             }
             case 44883:                                     // Encapsulate
+            case 56505:                                     // Surge of Power
             {
                 // Self cast spell, hence overwrite caster (only channeled spell where the triggered spell deals dmg to SELF)
                 triggerCaster = triggerTarget;
