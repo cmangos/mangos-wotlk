@@ -635,6 +635,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             }
             case SCRIPT_COMMAND_PAUSE_WAYPOINTS:            // 32
                 break;
+            case SCRIPT_COMMAND_XP_USER:                    // 33
+                break;
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -1680,6 +1682,18 @@ bool ScriptAction::HandleScriptStep()
                 ((Creature*)pSource)->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
             else
                 ((Creature*)pSource)->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+            break;
+        }
+        case SCRIPT_COMMAND_XP_USER:                        // 33
+        {
+            Player* pPlayer = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
+            if (!pPlayer)
+                break;
+
+            if (m_script->xpDisabled.flags)
+                pPlayer->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
+            else
+                pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
             break;
         }
         default:
