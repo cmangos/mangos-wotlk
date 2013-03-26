@@ -77,6 +77,7 @@ ScriptMgr::ScriptMgr() :
     m_pOnEffectDummyCreature(NULL),
     m_pOnEffectDummyGO(NULL),
     m_pOnEffectDummyItem(NULL),
+    m_pOnEffectScriptEffectCreature(NULL),
     m_pOnAuraDummy(NULL)
 {
 }
@@ -633,6 +634,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 break;
             }
             case SCRIPT_COMMAND_PAUSE_WAYPOINTS:            // 32
+                break;
+            case SCRIPT_COMMAND_XP_USER:                    // 33
                 break;
             default:
             {
@@ -1681,6 +1684,18 @@ bool ScriptAction::HandleScriptStep()
                 ((Creature*)pSource)->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
             break;
         }
+        case SCRIPT_COMMAND_XP_USER:                        // 33
+        {
+            Player* pPlayer = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
+            if (!pPlayer)
+                break;
+
+            if (m_script->xpDisabled.flags)
+                pPlayer->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
+            else
+                pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
+            break;
+        }
         default:
             sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u unknown command used.", m_table, m_script->id, m_script->command);
             break;
@@ -2053,6 +2068,7 @@ ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
     GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyCreature,      "EffectDummyCreature");
     GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyGO,            "EffectDummyGameObject");
     GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyItem,          "EffectDummyItem");
+    GET_SCRIPT_HOOK_PTR(m_pOnEffectScriptEffectCreature, "EffectScriptEffectCreature");
     GET_SCRIPT_HOOK_PTR(m_pOnAuraDummy,                "AuraDummy");
 
 #   undef GET_SCRIPT_HOOK_PTR
@@ -2106,6 +2122,7 @@ void ScriptMgr::UnloadScriptLibrary()
     m_pOnEffectDummyCreature    = NULL;
     m_pOnEffectDummyGO          = NULL;
     m_pOnEffectDummyItem        = NULL;
+    m_pOnEffectScriptEffectCreature = NULL;
     m_pOnAuraDummy              = NULL;
 }
 

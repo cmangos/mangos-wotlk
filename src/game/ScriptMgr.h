@@ -98,6 +98,8 @@ enum ScriptCommand                                          // resSource, resTar
                                                             // dataint=diff to change a waittime of current Waypoint Movement
     SCRIPT_COMMAND_PAUSE_WAYPOINTS          = 32,           // resSource = Creature
                                                             // datalong = 0: unpause waypoint 1: pause waypoint
+    SCRIPT_COMMAND_XP_USER                  = 33,           // source or target with Player, datalong = bool (0=off, 1=on)
+
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
@@ -312,6 +314,12 @@ struct ScriptInfo
             uint32 doPause;                                 // datalong
             uint32 empty;
         } pauseWaypoint;
+
+        struct                                              // SCRIPT_COMMAND_XP_USER (33)
+        {
+            uint32 flags;                                   // datalong
+            uint32 empty;                                   // datalong2
+        } xpDisabled;
 
         struct
         {

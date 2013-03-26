@@ -885,6 +885,21 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     }
                     break;
                 }
+                case SPELL_AURA_PHASE:
+                {
+                    switch (spellproto->Id)
+                    {
+                        case 57508:                         // Insanity (16)
+                        case 57509:                         // Insanity (32)
+                        case 57510:                         // Insanity (64)
+                        case 57511:                         // Insanity (128)
+                        case 57512:                         // Insanity (256)
+                            return false;
+                        default:
+                            break;
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -2003,6 +2018,21 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Impale aura and Submerge
                     if ((spellInfo_1->Id == 53456 && spellInfo_2->Id == 53421) ||
                             (spellInfo_2->Id == 53456 && spellInfo_1->Id == 53421))
+                        return false;
+
+                    // Summon Anub'ar Champion Periodic and Summon Anub'ar Necromancer Periodic
+                    if ((spellInfo_1->Id == 53035 && spellInfo_2->Id == 53036) ||
+                            (spellInfo_2->Id == 53035 && spellInfo_1->Id == 53036))
+                        return false;
+
+                    // Summon Anub'ar Necromancer Periodic and Summon Anub'ar Crypt Fiend Periodic
+                    if ((spellInfo_1->Id == 53036 && spellInfo_2->Id == 53037) ||
+                            (spellInfo_2->Id == 53036 && spellInfo_1->Id == 53037))
+                        return false;
+
+                    // Summon Anub'ar Crypt Fiend Periodic and Summon Anub'ar Champion Periodic
+                    if ((spellInfo_1->Id == 53037 && spellInfo_2->Id == 53035) ||
+                            (spellInfo_2->Id == 53037 && spellInfo_1->Id == 53035))
                         return false;
 
                     break;

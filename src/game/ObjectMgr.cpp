@@ -7997,6 +7997,17 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             }
             return false;
         }
+        case CONDITION_XP_USER:
+        {
+            switch (m_value1)
+            {
+                case 0: return player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
+                case 1: return !player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
+            }
+            return false;
+        }
+        case CONDITION_GENDER:
+            return player->getGender() == m_value1;
         default:
             return false;
     }
@@ -8392,6 +8403,28 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
             if (value2 > 2)
             {
                 sLog.outErrorDb("Last Waypoint condition (entry %u, type %u) has an invalid value in value2. (Has %u, supported 0, 1, or 2), skipping.", entry, condition, value2);
+                return false;
+            }
+            break;
+        }
+        case CONDITION_XP_USER:
+        {
+            if (value1 > 1)
+            {
+                sLog.outErrorDb("XP user condition (entry %u, type %u) has invalid argument %u (must be 0..1), skipped", entry, condition, value1);
+                return false;
+            }
+
+            if (value2)
+                sLog.outErrorDb("XP user condition (entry %u, type %u) has useless data in value2 (%u)!", entry, condition, value2);
+
+            break;
+        }
+        case CONDITION_GENDER:
+        {
+            if (value1 >= MAX_GENDER)
+            {
+                sLog.outErrorDb("Gender condition (entry %u, type %u) has an invalid value in value1. (Has %u, must be smaller than %u), skipping.", entry, condition, value1, MAX_GENDER);
                 return false;
             }
             break;
