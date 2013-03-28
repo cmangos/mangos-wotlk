@@ -1,5 +1,5 @@
 #
-# This file is part of the Continued-MaNGOS Project
+# This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,64 +16,71 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+cmake_minimum_required(VERSION 2.8)
+
 project(MaNGOS)
 set(MANGOS_VERSION 0.17)
-
-# CMake policies
-cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH}
   ${CMAKE_SOURCE_DIR}/cmake
 )
 
+# define all options here
+option(DEBUG                "Debug mode"                            OFF)
+option(TBB_USE_EXTERNAL     "Use external TBB"                      OFF)
+option(USE_STD_MALLOC       "Use standard malloc instead of TBB"    OFF)
+option(ACE_USE_EXTERNAL     "Use external ACE"                      OFF)
+if(PCHSupport_FOUND AND WIN32) # TODO: why only enable it on windows by default?
+  option(PCH                "Use precompiled headers"               ON)
+else()
+  option(PCH                "Use precompiled headers"               OFF)
+endif()
+# TODO: options that should be checked/created:
+#option(CLI                  "With CLI"                              ON)
+#option(RA                   "With Remote Access"                    OFF)
+#option(SQL                  "Copy SQL files"                        OFF)
+#option(TOOLS                "Build tools"                           OFF)
+
+# Output description of this script
+message("")
+message(
+  "This script builds the MaNGOS server.
+  Options that can be used in order to configure the process:
+    CMAKE_INSTALL_PREFIX    Path where the server should be installed to
+    PCH                     Use precompiled headers
+    DEBUG                   Debug mode
+    TBB_USE_EXTERNAL        Use external TBB
+    USE_STD_MALLOC          Use standard malloc instead of TBB
+    ACE_USE_EXTERNAL        Use external ACE
+  To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
+  Also, you can specify the generator with -G. see 'cmake --help' for more details
+  For example: cmake .. -DDEBUG=1 -DCMAKE_INSTALL_PREFIX=/opt/mangos"
+)
+message("")
+
 # Force out-of-source build
-string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" BUILDING_IN_SOURCE)
-if(BUILDING_IN_SOURCE)
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
   message(FATAL_ERROR
-    "This project requires an out of source build. Remove the file 'CMakeCache.txt' found in this directory before continuing, create a separate build directory and run 'cmake <srcs> [options]' from there."
+    "This project requires an out of source build. Remove the file 'CMakeCache.txt' found in this directory before continuing, create a separate build directory and run 'cmake [options] <srcs>' from there."
   )
 endif()
 
+# TODO: allow other compilers under windows in the future
 if(WIN32 AND NOT MSVC)
   message(FATAL_ERROR
     "Under Windows other compiler than Microsoft Visual Studio are not supported."
   )
 endif()
 
+# TODO: remove this in the future! it has only been added to make the switch easier for end users
+if(PREFIX)
+  message(FATAL_ERROR "The parameter PREFIX has been removed. Please re-run CMake and use CMAKE_INSTALL_PREFIX instead to define your installation location!")
+endif()
+
+# TODO: use MSVC_CXX_ARCHITECTURE_ID instead to identify platform on windows (not required on other systems)
+# find platform: required to build 3rd party libraries w/o CMake files
 find_package(Platform REQUIRED)
-find_package(Git)
-
-# VS100 uses MSBuild.exe instead of devenv.com, so force it to use devenv.com
-if(WIN32 AND MSVC_VERSION MATCHES 1600)
-  find_package(VisualStudio2010)
-endif()
-
-# if(NOT PLATFORM MATCHES X86 AND NOT PLATFORM MATCHES X64)
-#   message(FATAL_ERROR
-#     "An unknown Architecture was selected. Only the values X86 and X64 for PLATFORM are supported."
-#   )
-# endif()
-
-# Output description of this script
-message(
-  "\nThis script builds the MaNGOS server.
-  Options that can be used in order to configure the process:
-    PREFIX: Path where the server should be installed to
-    PCH: Use precompiled headers
-    DEBUG: Debug mode
-  To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
-  For example: cmake .. -DDEBUG=1 -DPREFIX=/opt/mangos\n"
-) # TODO: PLATFORM: Sets the architecture for compile (X86,X64)
-
-# Override configuration-types - we don't use anything else than debug and release
-if(CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_CONFIGURATION_TYPES Release Debug)
-  set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
-    "Reset the configurations to what we need"
-    FORCE)
-endif()
-
 # Find out what system we use to include the needed libs
 if(WIN32)
   if(PLATFORM MATCHES X86) # 32-bit
@@ -83,55 +90,24 @@ if(WIN32)
   endif()
 endif()
 
-# if(WIN32)
-#   if(PLATFORM MATCHES X86)
-#     set(ARCH_FLAGS "/MACHINE:X86")
-#   else()
-#     set(ARCH_FLAGS "/MACHINE:X64")
-#   endif()
-# elseif(UNIX)
-#   if(PLATFORM MATCHES X86)
-#     set(ARCH_FLAGS "-m32")
-#   else()
-#     set(ARCH_FLAGS "-m64")
-#   endif()
-# endif()
+# find Git: used to get the revision number
+find_package(Git)
 
-option(DEBUG "Debug mode" 0)
-# option(CLI "With CLI" 1) # Not used by MaNGOS so far
-# option(RA "With Remote Access" 0) # TODO: support remote access
-option(TBB_USE_EXTERNAL "Use external TBB" 0)
-option(USE_STD_MALLOC "Use standard malloc instead of TBB" 0)
-option(ACE_USE_EXTERNAL "Use external ACE" 0)
-
+# check if the platform supports precomiled headers
 find_package(PCHSupport)
 
-# Add options for compile of mangos
-if(PCHSupport_FOUND)
-  if(WIN32)
-    option(PCH "Use precompiled headers" 1)
-  else()
-    option(PCH "Use precompiled headers" 0)
-  endif()
+# TODO: remove this (refactor ACE & TBB CMake code)
+# VS100 uses MSBuild.exe instead of devenv.com, so force it to use devenv.com
+if(WIN32 AND MSVC_VERSION MATCHES 1600)
+  find_package(VisualStudio2010)
 endif()
 
-# FIXME: options that should be checked
-# option(SQL "Copy SQL files" 0)
-# option(TOOLS "Build tools" 0)
-
-# Set up the install-prefix
-if(CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
-  get_filename_component(PREFIX_ABSOLUTE "../mangos-server" ABSOLUTE)
-  set(CMAKE_INSTALL_PREFIX ${PREFIX_ABSOLUTE} CACHE PATH "Install path prefix." FORCE)
-endif()
-if(PREFIX)
-  if(!WIN32)
-    string(REGEX REPLACE "^~" "$ENV{HOME}" PREFIX ${PREFIX})
-  endif()
-  get_filename_component(PREFIX_ABSOLUTE ${PREFIX} ABSOLUTE)
-  set(CMAKE_INSTALL_PREFIX ${PREFIX_ABSOLUTE} CACHE PATH "Install path prefix." FORCE)
-else()
-  set(PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH "Install path prefix.")
+# Override configuration-types - we don't use anything else than debug and release
+if(CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_CONFIGURATION_TYPES Release Debug)
+  set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
+    "Reset the configurations to what we need"
+    FORCE)
 endif()
 
 set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
@@ -189,7 +165,7 @@ if(NOT USE_STD_MALLOC)
   endif()
 endif()
 
-# Win32 delifered packages
+# Win32 delivered packages
 if(WIN32)
   set(MYSQL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/include/mysql)
   set(MYSQL_LIBRARY ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libmySQL.lib)
@@ -226,6 +202,7 @@ if(GIT_EXECUTABLE)
     OUTPUT_VARIABLE GIT_REVISION
     RESULT_VARIABLE GIT_RESULT
     ERROR_QUIET
+    OUTPUT_STRIP_TRAILING_WHITESPACE
   )
   if(GIT_RESULT)
     set(GIT_REVISION "Git repository not found")
@@ -234,45 +211,42 @@ else()
   set(GIT_REVISION "Git not found")
 endif()
 
-message("")
-message("MaNGOS-Core revision  : ${GIT_REVISION}")
-message("Install server to     : ${CMAKE_INSTALL_PREFIX}")
-message("")
+message(STATUS "MaNGOS-Core revision  : ${GIT_REVISION}")
+message(STATUS "Install server to     : ${CMAKE_INSTALL_PREFIX}")
 
 # if(CLI)
-#   message("Build with CLI        : Yes (default)")
+#   message(STATUS "Build with CLI        : Yes (default)")
 #   add_definitions(-DENABLE_CLI)
 # else()
-#   message("Build with CLI        : No")
+#   message(STATUS "Build with CLI        : No")
 # endif()
 
 # if(RA)
-#   message("* Build with RA         : Yes")
+#   message(STATUS "* Build with RA         : Yes")
 #   add_definitions(-DENABLE_RA)
 # else(RA)
-#   message("* Build with RA         : No  (default)")
+#   message(STATUS "* Build with RA         : No  (default)")
 # endif(RA)
 
 if(PCH AND NOT PCHSupport_FOUND)
   set(PCH 0 CACHE BOOL
     "Use precompiled headers"
     FORCE)
-  message(
-    "No PCH for your system possible but PCH was set to 1. Resetting it."
+  message(WARNING "No PCH for your system possible but PCH was set to 1. Resetting it."
   )
 endif()
 if(PCH)
-  message("Use PCH               : Yes")
+  message(STATUS "Use PCH               : Yes")
 else()
-  message("Use PCH               : No")
+  message(STATUS "Use PCH               : No")
 endif()
 
 if(DEBUG)
-  message("Build in debug-mode   : Yes")
+  message(STATUS "Build in debug-mode   : Yes")
   set(CMAKE_BUILD_TYPE Debug)
 else()
   set(CMAKE_BUILD_TYPE Release)
-  message("Build in debug-mode   : No  (default)")
+  message(STATUS "Build in debug-mode   : No  (default)")
 endif()
 # Handle debugmode compiles (this will require further work for proper WIN32-setups)
 if(UNIX)
@@ -297,18 +271,16 @@ elseif(WIN32)
 endif()
 
 # if(SQL)
-#   message("Install SQL-files     : Yes")
+#   message(STATUS "Install SQL-files     : Yes")
 # else()
-#   message("Install SQL-files     : No  (default)")
+#   message(STATUS "Install SQL-files     : No  (default)")
 # endif()
 
 # if(TOOLS)
-#   message("Build map/vmap tools  : Yes")
+#   message(STATUS "Build map/vmap tools  : Yes")
 # else()
-#   message("Build map/vmap tools  : No  (default)")
+#   message(STATUS "Build map/vmap tools  : No  (default)")
 # endif()
-
-message("")
 
 # Some small tweaks for Visual Studio 7 and above.
 if(MSVC)
@@ -331,22 +303,6 @@ set(GENREV_SRC
 add_executable(genrev
   ${GENREV_SRC}
 )
-
-# if(WIN32)
-#   set_target_properties(genrev PROPERTIES
-#     COMPILE_FLAGS "/MACHINE:X86"
-#   )
-# elseif(UNIX)
-#   set_target_properties(genrev PROPERTIES
-#     COMPILE_FLAGS "-m32"
-#     LINK_FLAGS "-m32"
-#   )
-# endif()
-# if(XCODE)
-#   set_target_properties(genrev PROPERTIES
-#     XCODE_ATTRIBUTE_ARCHS "i386"
-#   )
-# endif()
 
 get_target_property(GENERATE_EXE genrev LOCATION)
 add_custom_target("revision.h" ALL
@@ -387,9 +343,6 @@ if(WIN32)
   endif()
 endif()
 
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARCH_FLAGS}")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH_FLAGS}")
-# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ARCH_FLAGS}")
 if(XCODE)
   if(PLATFORM MATCHES X86)
     set(CMAKE_OSX_ARCHITECTURES i386)

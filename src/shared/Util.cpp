@@ -1,5 +1,5 @@
 /*
- * This file is part of the Continued-MaNGOS Project
+ * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -245,7 +245,7 @@ std::string TimeToTimestampStr(time_t t)
     return std::string(buf);
 }
 
-time_t timeBitFieldsToSecs( uint32 packedDate )
+time_t timeBitFieldsToSecs(uint32 packedDate)
 {
     tm lt;
     memset(&lt, 0, sizeof(lt));

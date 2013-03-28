@@ -1,5 +1,5 @@
 /*
- * This file is part of the Continued-MaNGOS Project
+ * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_CAST_SPELL               = 15,           // resSource = Unit, cast spell at resTarget = Unit
                                                             // datalong=spellid
                                                             // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = cast triggered
-    SCRIPT_COMMAND_PLAY_SOUND               = 16,           // resSource = WorldObject, target=any/player, datalong (sound_id), datalong2 (bitmask: 0/1=anyone/target, 0/2=with distance dependent, so 1|2 = 3 is target with distance dependent)
+    SCRIPT_COMMAND_PLAY_SOUND               = 16,           // resSource = WorldObject, target=any/player, datalong (sound_id), datalong2 (bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide; so 1|2 = 3 is target with distance dependent)
     SCRIPT_COMMAND_CREATE_ITEM              = 17,           // source or target must be player, datalong = item entry, datalong2 = amount
     SCRIPT_COMMAND_DESPAWN_SELF             = 18,           // resSource = Creature, datalong = despawn delay
     SCRIPT_COMMAND_PLAY_MOVIE               = 19,           // target can only be a player, datalog = movie id
@@ -98,6 +98,8 @@ enum ScriptCommand                                          // resSource, resTar
                                                             // dataint=diff to change a waittime of current Waypoint Movement
     SCRIPT_COMMAND_PAUSE_WAYPOINTS          = 32,           // resSource = Creature
                                                             // datalong = 0: unpause waypoint 1: pause waypoint
+    SCRIPT_COMMAND_XP_USER                  = 33,           // source or target with Player, datalong = bool (0=off, 1=on)
+
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
@@ -313,6 +315,12 @@ struct ScriptInfo
             uint32 empty;
         } pauseWaypoint;
 
+        struct                                              // SCRIPT_COMMAND_XP_USER (33)
+        {
+            uint32 flags;                                   // datalong
+            uint32 empty;                                   // datalong2
+        } xpDisabled;
+
         struct
         {
             uint32 data[2];
@@ -397,9 +405,9 @@ class ScriptAction
         bool IsSameScript(const char* table, uint32 id, ObjectGuid sourceGuid, ObjectGuid targetGuid, ObjectGuid ownerGuid) const
         {
             return table == m_table && id == GetId() &&
-                (sourceGuid == m_sourceGuid || !sourceGuid) &&
-                (targetGuid == m_targetGuid || !targetGuid) &&
-                (ownerGuid == m_ownerGuid || !ownerGuid);
+                   (sourceGuid == m_sourceGuid || !sourceGuid) &&
+                   (targetGuid == m_targetGuid || !targetGuid) &&
+                   (ownerGuid == m_ownerGuid || !ownerGuid);
         }
 
     private:
@@ -502,6 +510,7 @@ class ScriptMgr
         bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget);
         bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, GameObject* pTarget);
         bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Item* pTarget);
+        bool OnEffectScriptEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget);
         bool OnAuraDummy(Aura const* pAura, bool apply);
 
     private:
@@ -555,6 +564,7 @@ class ScriptMgr
         bool (MANGOS_IMPORT* m_pOnEffectDummyCreature)(Unit*, uint32, SpellEffectIndex, Creature*);
         bool (MANGOS_IMPORT* m_pOnEffectDummyGO)(Unit*, uint32, SpellEffectIndex, GameObject*);
         bool (MANGOS_IMPORT* m_pOnEffectDummyItem)(Unit*, uint32, SpellEffectIndex, Item*);
+        bool (MANGOS_IMPORT* m_pOnEffectScriptEffectCreature)(Unit*, uint32, SpellEffectIndex, Creature*);
         bool (MANGOS_IMPORT* m_pOnAuraDummy)(Aura const*, bool);
 };
 

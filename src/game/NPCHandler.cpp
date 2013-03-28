@@ -1,5 +1,5 @@
 /*
- * This file is part of the Continued-MaNGOS Project
+ * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -299,6 +299,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
     SendPacket(&data);
 
     // learn explicitly or cast explicitly
+    // TODO - Are these spells really cast correctly this way?
     if (trainer_spell->IsCastable())
         _player->CastSpell(_player, trainer_spell->spell, true);
     else
