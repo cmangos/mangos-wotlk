@@ -7650,8 +7650,9 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 67296:                                 // Touch of Light (Mode 1)
                 case 67297:                                 // Touch of Light (Mode 2)
                 case 67298:                                 // Touch of Light (Mode 3)
-                case 68950:                                 // Fear (FoS)
                 case 68912:                                 // Wailing Souls (FoS)
+                case 68950:                                 // Fear (FoS)
+                case 68987:                                 // Pursuit (PoS)
                 case 69048:                                 // Mirrored Soul (FoS)
                 case 69057:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar) 10 man
                 case 72088:

@@ -1740,6 +1740,20 @@ void Aura::TriggerSpell()
 //                    case 65422: break;
 //                    // Rolling Throw
 //                    case 67546: break;
+                    case 69012:                             // Explosive Barrage
+                    {
+                        // Summon an Exploding Orb for each player in combat with the caster
+                        ThreatList const& threatList = target->getThreatManager().getThreatList();
+                        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+                        {
+                            if (Unit* expectedTarget = target->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                            {
+                                if (expectedTarget->GetTypeId() == TYPEID_PLAYER)
+                                    target->CastSpell(expectedTarget, 69015, true);
+                            }
+                        }
+                        return;
+                    }
 //                    // Gunship Cannon Fire
 //                    case 70017: break;
 //                    // Ice Tomb
@@ -3027,6 +3041,19 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->PlayDirectSound(14972, (Player*)target);
                     }
                     return;
+                case 68987:                                 // Pursuit
+                {
+                    Unit* caster = GetCaster();
+                    if (!caster || target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (apply)
+                        caster->FixateTarget(target);
+                    else if (target->GetObjectGuid() == caster->GetFixateTargetGuid())
+                        caster->FixateTarget(NULL);
+
+                    return;
+                }
                 case 27978:
                 case 40131:
                     if (apply)
