@@ -66,12 +66,13 @@ struct SpellClickInfo
     uint32 questEnd;                                        // quest end (quest don't must be rewarded for spell apply)
     bool   questStartCanActive;                             // if true then quest start can be active (not only rewarded)
     uint8 castFlags;
+    uint16 conditionId;                                     // intends to replace questStart, questEnd, questStartCanActive
 
     // helpers
-    bool IsFitToRequirements(Player const* player) const;
+    bool IsFitToRequirements(Player const* player, Creature const* clickedCreature) const;
 };
 
-typedef std::multimap<uint32, SpellClickInfo> SpellClickInfoMap;
+typedef std::multimap<uint32 /*npcEntry*/, SpellClickInfo> SpellClickInfoMap;
 typedef std::pair<SpellClickInfoMap::const_iterator, SpellClickInfoMap::const_iterator> SpellClickInfoMapBounds;
 
 struct AreaTrigger
@@ -406,6 +407,7 @@ enum ConditionSource                                        // From where was th
     CONDITION_FROM_HARDCODED        = 5,                    // Used to check a hardcoded event - not actually a condition
     CONDITION_FROM_VENDOR           = 6,                    // Used to check a condition from a vendor
     CONDITION_FROM_SPELL_AREA       = 7,                    // Used to check a condition from spell_area table
+    CONDITION_FROM_SPELLCLICK       = 8,                    // Used to check a condition from npc_spellclick_spells table
 };
 
 class PlayerCondition
