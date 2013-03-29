@@ -3698,9 +3698,6 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
 void SpellMgr::LoadSpellAreas()
 {
     mSpellAreaMap.clear();                                  // need for reload case
-    mSpellAreaForQuestMap.clear();
-    mSpellAreaForActiveQuestMap.clear();
-    mSpellAreaForQuestEndMap.clear();
     mSpellAreaForAuraMap.clear();
 
     uint32 count = 0;
@@ -3892,19 +3889,6 @@ void SpellMgr::LoadSpellAreas()
         // for search by current zone/subzone at zone/subzone change
         if (spellArea.areaId)
             mSpellAreaForAreaMap.insert(SpellAreaForAreaMap::value_type(spellArea.areaId, sa));
-
-        // for search at quest start/reward
-        if (spellArea.questStart)
-        {
-            if (spellArea.questStartCanActive)
-                mSpellAreaForActiveQuestMap.insert(SpellAreaForQuestMap::value_type(spellArea.questStart, sa));
-            else
-                mSpellAreaForQuestMap.insert(SpellAreaForQuestMap::value_type(spellArea.questStart, sa));
-        }
-
-        // for search at quest start/reward
-        if (spellArea.questEnd)
-            mSpellAreaForQuestEndMap.insert(SpellAreaForQuestMap::value_type(spellArea.questEnd, sa));
 
         // for search at aura apply
         if (spellArea.auraSpell)
@@ -4618,6 +4602,19 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
     }
 
     return true;
+}
+
+void SpellArea::ApplyOrRemoveSpellIfCan(Player* player, uint32 newZone, uint32 newArea, bool onlyApply) const
+{
+    MANGOS_ASSERT(player);
+
+    if (IsFitToRequirements(player, newZone, newArea))
+    {
+        if (autocast && !player->HasAura(spellId))
+            player->CastSpell(player, spellId, true);
+    }
+    else if (!onlyApply && player->HasAura(spellId))
+        player->RemoveAurasDueToSpell(spellId);
 }
 
 SpellEntry const* GetSpellEntryByDifficulty(uint32 id, Difficulty difficulty, bool isRaid)
