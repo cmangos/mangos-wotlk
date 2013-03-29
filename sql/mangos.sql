@@ -14513,6 +14513,7 @@ CREATE TABLE `spell_area` (
   `quest_start`        mediumint(8) unsigned NOT NULL default '0',
   `quest_start_active` tinyint(1) unsigned NOT NULL default '0',
   `quest_end`          mediumint(8) unsigned NOT NULL default '0',
+  `condition_id`       mediumint(8) unsigned NOT NULL default '0',
   `aura_spell`         mediumint(8) NOT NULL default '0',
   `racemask`           mediumint(8) unsigned NOT NULL default '0',
   `gender`             tinyint(1) unsigned NOT NULL default '2',
