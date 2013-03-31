@@ -99,7 +99,8 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_PAUSE_WAYPOINTS          = 32,           // resSource = Creature
                                                             // datalong = 0: unpause waypoint 1: pause waypoint
     SCRIPT_COMMAND_XP_USER                  = 33,           // source or target with Player, datalong = bool (0=off, 1=on)
-
+    SCRIPT_COMMAND_TERMINATE_COND           = 34,           // datalong = condition_id, datalong2 = if != 0 then quest_id of quest that will be failed for player's group if the script is terminated
+                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL terminate when condition is false ELSE terminate when condition is true
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
@@ -321,6 +322,12 @@ struct ScriptInfo
             uint32 empty;                                   // datalong2
         } xpDisabled;
 
+        struct                                              // SCRIPT_COMMAND_TERMINATE_COND (34)
+        {
+            uint32 conditionId;                             // datalong
+            uint32 failQuest;                               // datalong2
+        } terminateCond;
+
         struct
         {
             uint32 data[2];
@@ -380,6 +387,7 @@ struct ScriptInfo
             case SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL:
             case SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL:
             case SCRIPT_COMMAND_TERMINATE_SCRIPT:
+            case SCRIPT_COMMAND_TERMINATE_COND:
                 return true;
             default:
                 return false;

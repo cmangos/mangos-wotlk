@@ -7640,7 +7640,8 @@ char const* conditionSourceToStr[] =
     "hardcoded",
     "vendor's item check",
     "spell_area check",
-    "npc_spellclick_spells check"
+    "npc_spellclick_spells check",
+    "DBScript engine"
 };
 
 // Checks if player meets the condition
