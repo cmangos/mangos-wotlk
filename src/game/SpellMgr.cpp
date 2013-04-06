@@ -682,6 +682,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             {
                 case 28441:                                 // AB Effect 000
                     return false;
+                case 10258:                                 // Awaken Vault Warder
                 case 18153:                                 // Kodo Kombobulator
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
@@ -2033,6 +2034,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Summon Anub'ar Crypt Fiend Periodic and Summon Anub'ar Champion Periodic
                     if ((spellInfo_1->Id == 53037 && spellInfo_2->Id == 53035) ||
                             (spellInfo_2->Id == 53037 && spellInfo_1->Id == 53035))
+                        return false;
+
+                    // Possess visual and Possess
+                    if ((spellInfo_1->Id == 23014 && spellInfo_2->Id == 19832) ||
+                            (spellInfo_2->Id == 23014 && spellInfo_1->Id == 19832))
                         return false;
 
                     break;
