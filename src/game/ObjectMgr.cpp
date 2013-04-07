@@ -105,8 +105,11 @@ LanguageDesc const* GetLanguageDescByID(uint32 lang)
     return NULL;
 }
 
-bool SpellClickInfo::IsFitToRequirements(Player const* player) const
+bool SpellClickInfo::IsFitToRequirements(Player const* player, Creature const* clickedCreature) const
 {
+    if (conditionId)
+        return sObjectMgr.IsPlayerMeetToCondition(conditionId, player, player->GetMap(), clickedCreature, CONDITION_FROM_SPELLCLICK);
+
     if (questStart)
     {
         // not in expected required quest state
@@ -6778,8 +6781,8 @@ void ObjectMgr::LoadNPCSpellClickSpells()
     uint32 count = 0;
 
     mSpellClickInfoMap.clear();
-    //                                                0          1         2            3                   4          5
-    QueryResult* result = WorldDatabase.Query("SELECT npc_entry, spell_id, quest_start, quest_start_active, quest_end, cast_flags FROM npc_spellclick_spells");
+    //                                                0          1         2            3                   4          5           6
+    QueryResult* result = WorldDatabase.Query("SELECT npc_entry, spell_id, quest_start, quest_start_active, quest_end, cast_flags, condition_id FROM npc_spellclick_spells");
 
     if (!result)
     {
@@ -6799,7 +6802,15 @@ void ObjectMgr::LoadNPCSpellClickSpells()
         Field* fields = result->Fetch();
         bar.step();
 
-        uint32 npc_entry = fields[0].GetUInt32();
+        SpellClickInfo info;
+        uint32 npc_entry         = fields[0].GetUInt32();
+        info.spellId             = fields[1].GetUInt32();
+        info.questStart          = fields[2].GetUInt32();
+        info.questStartCanActive = fields[3].GetBool();
+        info.questEnd            = fields[4].GetUInt32();
+        info.castFlags           = fields[5].GetUInt8();
+        info.conditionId         = fields[6].GetUInt16();
+
         CreatureInfo const* cInfo = GetCreatureTemplate(npc_entry);
         if (!cInfo)
         {
@@ -6807,46 +6818,35 @@ void ObjectMgr::LoadNPCSpellClickSpells()
             continue;
         }
 
-        uint32 spellid = fields[1].GetUInt32();
-        SpellEntry const* spellinfo = sSpellStore.LookupEntry(spellid);
+        SpellEntry const* spellinfo = sSpellStore.LookupEntry(info.spellId);
         if (!spellinfo)
         {
-            sLog.outErrorDb("Table npc_spellclick_spells references unknown spellid %u. Skipping entry.", spellid);
+            sLog.outErrorDb("Table npc_spellclick_spells references unknown spellid %u. Skipping entry.", info.spellId);
             continue;
         }
 
-        uint32 quest_start = fields[2].GetUInt32();
-
-        // quest might be 0 to enable spellclick independent of any quest
-        if (quest_start)
+        if (info.conditionId && !sConditionStorage.LookupEntry<PlayerCondition const*>(info.conditionId))
         {
-            if (mQuestTemplates.find(quest_start) == mQuestTemplates.end())
+            sLog.outErrorDb("Table npc_spellclick_spells references unknown condition %u. Skipping entry.", info.conditionId);
+            continue;
+        }
+        else if (!info.conditionId)                         // TODO Drop block after finished converting
+        {
+            // quest might be 0 to enable spellclick independent of any quest
+            if (info.questStart && mQuestTemplates.find(info.questStart) == mQuestTemplates.end())
             {
-                sLog.outErrorDb("Table npc_spellclick_spells references unknown start quest %u. Skipping entry.", quest_start);
+                sLog.outErrorDb("Table npc_spellclick_spells references unknown start quest %u. Skipping entry.", info.questStart);
+                continue;
+            }
+
+            // quest might be 0 to enable spellclick active infinity after start quest
+            if (info.questEnd && mQuestTemplates.find(info.questEnd) == mQuestTemplates.end())
+            {
+                sLog.outErrorDb("Table npc_spellclick_spells references unknown end quest %u. Skipping entry.", info.questEnd);
                 continue;
             }
         }
 
-        bool quest_start_active = fields[3].GetBool();
-
-        uint32 quest_end = fields[4].GetUInt32();
-        // quest might be 0 to enable spellclick active infinity after start quest
-        if (quest_end)
-        {
-            if (mQuestTemplates.find(quest_end) == mQuestTemplates.end())
-            {
-                sLog.outErrorDb("Table npc_spellclick_spells references unknown end quest %u. Skipping entry.", quest_end);
-                continue;
-            }
-        }
-
-        uint8 castFlags = fields[5].GetUInt8();
-        SpellClickInfo info;
-        info.spellId = spellid;
-        info.questStart = quest_start;
-        info.questStartCanActive = quest_start_active;
-        info.questEnd = quest_end;
-        info.castFlags = castFlags;
         mSpellClickInfoMap.insert(SpellClickInfoMap::value_type(npc_entry, info));
 
         // mark creature template as spell clickable
@@ -7638,7 +7638,9 @@ char const* conditionSourceToStr[] =
     "gossip menu option",
     "event AI",
     "hardcoded",
-    "vendor's item check"
+    "vendor's item check",
+    "spell_area check",
+    "npc_spellclick_spells check"
 };
 
 // Checks if player meets the condition

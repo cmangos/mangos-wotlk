@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_12434_01_mangos_spell_template` bit(1) default NULL
+  `required_12441_01_mangos_npc_spellclick_spells` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -4040,7 +4040,8 @@ CREATE TABLE `npc_spellclick_spells` (
     `quest_start`        mediumint(8) unsigned NOT NULL COMMENT 'reference to quest_template',
     `quest_start_active` tinyint(1) unsigned NOT NULL default '0',
     `quest_end`          mediumint(8) unsigned NOT NULL default '0',
-    `cast_flags`  tinyint unsigned NOT NULL COMMENT 'first bit defines caster: 1=player, 0=creature; second bit defines target, same mapping as caster bit'
+    `cast_flags`         tinyint unsigned NOT NULL COMMENT 'first bit defines caster: 1=player, 0=creature; second bit defines target, same mapping as caster bit',
+    `condition_id`       mediumint(8) unsigned NOT NULL default '0'
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
 
 --
@@ -14513,6 +14514,7 @@ CREATE TABLE `spell_area` (
   `quest_start`        mediumint(8) unsigned NOT NULL default '0',
   `quest_start_active` tinyint(1) unsigned NOT NULL default '0',
   `quest_end`          mediumint(8) unsigned NOT NULL default '0',
+  `condition_id`       mediumint(8) unsigned NOT NULL default '0',
   `aura_spell`         mediumint(8) NOT NULL default '0',
   `racemask`           mediumint(8) unsigned NOT NULL default '0',
   `gender`             tinyint(1) unsigned NOT NULL default '2',
