@@ -1476,6 +1476,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 40932, true);
                     return;
                 }
+                case 40869:                                 // Fatal Attraction
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 41001, true);
+                    return;
+                }
                 case 40962:                                 // Blade's Edge Terrace Demon Boss Summon Branch
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -1490,6 +1498,16 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         case 4: spell_id = 40961; break;    // Blade's Edge Terrace Demon Boss Summon 4
                     }
                     unitTarget->CastSpell(unitTarget, spell_id, true);
+                    return;
+                }
+                case 41333:                                 // Empyreal Equivalency
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // Equilize the health of all targets based on the corresponding health percent
+                    float health_diff = (float)unitTarget->GetMaxHealth() / (float)m_caster->GetMaxHealth();
+                    unitTarget->SetHealth(m_caster->GetHealth() * health_diff);
                     return;
                 }
                 case 42287:                                 // Salvage Wreckage
