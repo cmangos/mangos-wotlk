@@ -282,3 +282,7 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 
 33 SCRIPT_COMMAND_XP_USER                   source or target with Player
                                             * datalong=bool 0=off, 1=on
+
+34 SCRIPT_COMMAND_TERMINATE_COND            * datalong = condition_id, datalong2 = fail-quest (if provided this quest will be failed for a player)
+                                            * !(data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL): terminate when condition is true
+                                                data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL:  terminate when condition is false
