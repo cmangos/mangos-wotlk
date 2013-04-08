@@ -1598,6 +1598,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     switch (targetMode)
     {
         case TARGET_RANDOM_NEARBY_LOC:
+            // special case for Fatal Attraction (BT, Mother Shahraz)
+            if (m_spellInfo->Id == 40869)
+                radius = 30.0f;
+
             // Get a random point in circle. Use sqrt(rand) to correct distribution when converting polar to Cartesian coordinates.
             radius *= sqrtf(rand_norm_f());
             // no 'break' expected since we use code in case TARGET_RANDOM_CIRCUMFERENCE_POINT!!!
@@ -7692,6 +7696,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 30004:                                 // Flame Wreath (Karazhan, Shade of Aran)
                 case 31298:                                 // Sleep (Hyjal Summit, Anetheron)
                 case 39992:                                 // Needle Spine Targeting (BT, Warlord Najentus)
+                case 40869:                                 // Fatal Attraction (BT, Mother Shahraz)
                 case 41303:                                 // Soul Drain (BT, Reliquary of Souls)
                 case 41376:                                 // Spite (BT, Reliquary of Souls)
                 case 51904:                                 // Summon Ghouls On Scarlet Crusade

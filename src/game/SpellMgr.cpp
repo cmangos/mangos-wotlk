@@ -2041,6 +2041,16 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                             (spellInfo_2->Id == 23014 && spellInfo_1->Id == 19832))
                         return false;
 
+                    // Shade Soul Channel and Akama Soul Channel
+                    if ((spellInfo_1->Id == 40401 && spellInfo_2->Id == 40447) ||
+                            (spellInfo_2->Id == 40401 && spellInfo_1->Id == 40447))
+                        return false;
+
+                    // Eye Blast visual and Eye Blast
+                    if ((spellInfo_1->Id == 39908 && spellInfo_2->Id == 40017) ||
+                            (spellInfo_2->Id == 39908 && spellInfo_1->Id == 40017))
+                        return false;
+
                     break;
                 }
                 case SPELLFAMILY_MAGE:
