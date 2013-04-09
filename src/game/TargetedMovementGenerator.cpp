@@ -44,12 +44,11 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
     if (updateDestination || !i_path)
     {
         // prevent redundant micro-movement for pets, other followers.
-        if (i_offset > 0 && i_target->IsWithinDistInMap(&owner, 2 * i_offset))
+        owner.GetPosition(x, y, z);
+        if (!RequiresNewPosition(owner, x, y, z))
         {
             if (!owner.movespline->Finalized())
                 return;
-
-            owner.GetPosition(x, y, z);
         }
         else
         {
@@ -132,25 +131,8 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     if (i_recheckDistance.Passed())
     {
         i_recheckDistance.Reset(this->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE ? 50 : 100);
-
-        // More distance let have better performance, less distance let have more sensitive reaction at target move.
-        float allowed_dist;
-        // Give some space in case of big follow-distance
-        if (this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)
-            allowed_dist = 0.8f * i_target->GetCombatReach(&owner) - i_target->GetObjectBoundingRadius();
-        else
-        {
-            allowed_dist = sWorld.getConfig(CONFIG_FLOAT_RATE_TARGET_POS_RECALCULATION_RANGE) - i_target->GetObjectBoundingRadius();
-            allowed_dist += 0.3f * (owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius());
-            if (i_offset > 5.0f)
-                allowed_dist += 0.1f * i_offset;
-        }
         G3D::Vector3 dest = owner.movespline->FinalDestination();
-
-        if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly())
-            targetMoved = !i_target->IsWithinDist3d(dest.x, dest.y, dest.z, allowed_dist);
-        else
-            targetMoved = !i_target->IsWithinDist2d(dest.x, dest.y, allowed_dist);
+        targetMoved = RequiresNewPosition(owner, dest.x, dest.y, dest.z);
     }
 
     if (m_speedChanged || targetMoved)
@@ -174,6 +156,28 @@ template<class T, typename D>
 bool TargetedMovementGeneratorMedium<T, D>::IsReachable() const
 {
     return (i_path) ? (i_path->getPathType() & PATHFIND_NORMAL) : true;
+}
+
+template<class T, typename D>
+bool TargetedMovementGeneratorMedium<T, D>::RequiresNewPosition(T& owner, float x, float y, float z) const
+{
+    // More distance let have better performance, less distance let have more sensitive reaction at target move.
+    float allowed_dist;
+    // Give some space in case of big follow-distance
+    if (this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)
+        allowed_dist = 0.8f * i_target->GetCombatReach(&owner) - i_target->GetObjectBoundingRadius();
+    else
+    {
+        allowed_dist = sWorld.getConfig(CONFIG_FLOAT_RATE_TARGET_POS_RECALCULATION_RANGE) - i_target->GetObjectBoundingRadius();
+        allowed_dist += 0.3f * (owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius());
+        if (i_offset > 5.0f)
+            allowed_dist += 0.1f * i_offset;
+    }
+
+    if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly())
+        return !i_target->IsWithinDist3d(x, y, z, allowed_dist);
+    else
+        return !i_target->IsWithinDist2d(x, y, allowed_dist);
 }
 
 
