@@ -53,12 +53,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
         else
         {
             // to at i_offset distance from target and i_angle from target facing
-            if (this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)
-            {
-                i_target->GetNearPoint(&owner, x, y, z, owner.GetObjectBoundingRadius(), i_offset, i_target->GetOrientation() + i_angle);
-            }
-            else
-                i_target->GetClosePoint(x, y, z, owner.GetObjectBoundingRadius(), i_offset, i_angle, &owner);
+            i_target->GetNearPoint(&owner, x, y, z, owner.GetObjectBoundingRadius(), this->GetDynamicTargetDistance(owner, false), i_target->GetOrientation() + i_angle);
         }
     }
     else
@@ -162,24 +157,11 @@ template<class T, typename D>
 bool TargetedMovementGeneratorMedium<T, D>::RequiresNewPosition(T& owner, float x, float y, float z) const
 {
     // More distance let have better performance, less distance let have more sensitive reaction at target move.
-    float allowed_dist;
-    // Give some space in case of big follow-distance
-    if (this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)
-        allowed_dist = 0.9f * i_target->GetCombatReach(&owner) - i_target->GetObjectBoundingRadius();
-    else
-    {
-        allowed_dist = sWorld.getConfig(CONFIG_FLOAT_RATE_TARGET_POS_RECALCULATION_RANGE) - i_target->GetObjectBoundingRadius();
-        allowed_dist += 0.3f * (owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius());
-        if (i_offset > 5.0f)
-            allowed_dist += 0.1f * i_offset;
-    }
-
     if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly())
-        return !i_target->IsWithinDist3d(x, y, z, allowed_dist);
+        return !i_target->IsWithinDist3d(x, y, z, this->GetDynamicTargetDistance(owner, true));
     else
-        return !i_target->IsWithinDist2d(x, y, allowed_dist);
+        return !i_target->IsWithinDist2d(x, y, this->GetDynamicTargetDistance(owner, true));
 }
-
 
 //-----------------------------------------------//
 template<class T>
@@ -231,6 +213,15 @@ template<class T>
 void ChaseMovementGenerator<T>::Reset(T& owner)
 {
     Initialize(owner);
+}
+
+template<class T>
+float ChaseMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRangeCheck) const
+{
+    if (!forRangeCheck)
+        return i_offset + 0.55f * i_target->GetCombatReach(&owner);
+
+    return 0.9f * i_target->GetCombatReach(&owner) - i_target->GetObjectBoundingRadius();
 }
 
 //-----------------------------------------------//
@@ -303,6 +294,20 @@ template<class T>
 void FollowMovementGenerator<T>::Reset(T& owner)
 {
     Initialize(owner);
+}
+
+template<class T>
+float FollowMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRangeCheck) const
+{
+    if (!forRangeCheck)
+        return i_offset + owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius();
+
+    float allowed_dist = sWorld.getConfig(CONFIG_FLOAT_RATE_TARGET_POS_RECALCULATION_RANGE) - i_target->GetObjectBoundingRadius();
+    allowed_dist += 0.3f * (owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius());
+    if (i_offset > 5.0f)
+        allowed_dist += 0.1f * i_offset;
+
+    return allowed_dist;
 }
 
 //-----------------------------------------------//
