@@ -2049,6 +2049,12 @@ void Aura::TriggerSpell()
                     caster->CastSpell(triggerTarget, trigger_spell_id, true, NULL, this);
                 return;
             }
+            case 43149:                                     // Claw Rage
+            {
+                // Need to provide explicit target for trigger spell target combination
+                target->CastSpell(target->getVictim(), trigger_spell_id, true, NULL, this);
+                return;
+            }
             case 44883:                                     // Encapsulate
             case 56505:                                     // Surge of Power
             {
@@ -3015,6 +3021,20 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->CastSpell(target, 42517, true);
                     return;
                 }
+                case 42583:                                 // Claw Rage
+                case 68987:                                 // Pursuit
+                {
+                    Unit* caster = GetCaster();
+                    if (!caster || target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (apply)
+                        caster->FixateTarget(target);
+                    else if (target->GetObjectGuid() == caster->GetFixateTargetGuid())
+                        caster->FixateTarget(NULL);
+
+                    return;
+                }
                 case 43874:                                 // Scourge Mur'gul Camp: Force Shield Arcane Purple x3
                     target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE, apply);
                     if (apply)
@@ -3049,19 +3069,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->PlayDirectSound(14972, (Player*)target);
                     }
                     return;
-                case 68987:                                 // Pursuit
-                {
-                    Unit* caster = GetCaster();
-                    if (!caster || target->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    if (apply)
-                        caster->FixateTarget(target);
-                    else if (target->GetObjectGuid() == caster->GetFixateTargetGuid())
-                        caster->FixateTarget(NULL);
-
-                    return;
-                }
                 case 27978:
                 case 40131:
                     if (apply)
