@@ -2051,6 +2051,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                             (spellInfo_2->Id == 39908 && spellInfo_1->Id == 40017))
                         return false;
 
+                    // Encapsulate and Encapsulate (channeled)
+                    if ((spellInfo_1->Id == 45665 && spellInfo_2->Id == 45661) ||
+                            (spellInfo_2->Id == 45665 && spellInfo_1->Id == 45661))
+                        return false;
+
                     break;
                 }
                 case SPELLFAMILY_MAGE:
