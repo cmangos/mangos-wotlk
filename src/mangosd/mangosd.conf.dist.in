@@ -592,7 +592,7 @@ LogColors = ""
 #        Max amount triggered spell casts in chain by one caster, prevent stack overflow crash
 #        Too Low value will make some correct triggered casts fail
 #                 0 (no limit)
-#        Default: 10
+#        Default: 20
 #
 #   BirthdayTime
 #        Set to birthday (date in unix time), By default 28th August 2005, when MaNGOS got it’s name
@@ -809,7 +809,7 @@ AllFlightPaths = 0
 AlwaysMaxSkillForLevel = 0
 ActivateWeather = 1
 CastUnstuck = 1
-MaxSpellCastsInChain = 10
+MaxSpellCastsInChain = 20
 BirthdayTime = 1125180000
 RabbitDay = 0
 Instance.IgnoreLevel = 0
