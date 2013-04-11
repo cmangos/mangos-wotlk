@@ -1676,7 +1676,7 @@ SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
         float range = GetSpellMaxRange(srange);
         float minrange = GetSpellMinRange(srange);
 
-        float dist = GetCombatDistance(pVictim);
+        float dist = GetCombatDistance(pVictim, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
 
         // if(!isInFront( pVictim, range ) && spellInfo->AttributesEx )
         //    continue;
@@ -1725,7 +1725,7 @@ SpellEntry const* Creature::ReachWithSpellCure(Unit* pVictim)
         float range = GetSpellMaxRange(srange);
         float minrange = GetSpellMinRange(srange);
 
-        float dist = GetCombatDistance(pVictim);
+        float dist = GetCombatDistance(pVictim, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
 
         // if(!isInFront( pVictim, range ) && spellInfo->AttributesEx )
         //    continue;
@@ -2079,7 +2079,7 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
         SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(pSpellInfo->rangeIndex);
         float max_range = GetSpellMaxRange(srange);
         float min_range = GetSpellMinRange(srange);
-        float dist = GetCombatDistance(pTarget);
+        float dist = GetCombatDistance(pTarget, false);
 
         return dist < max_range && dist >= min_range;
     }
