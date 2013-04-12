@@ -1649,7 +1649,9 @@ namespace MaNGOS
                 float dist2d = sqrt((dx * dx) + (dy * dy));
 
                 // It is ok for the objects to require a bit more space
-                float delta = 1.4f * u->GetObjectBoundingRadius();
+                float delta = 1.5 * u->GetObjectBoundingRadius();
+                if (i_selector.m_searchPosFor && i_selector.m_searchPosFor != u)
+                    delta += i_selector.m_searchPosFor->GetObjectBoundingRadius();
 
                 // u is too near/far away from i_object. Do not consider it to occupy space
                 if (dist2d < i_selector.m_searcherDist - delta ||

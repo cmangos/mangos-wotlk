@@ -219,9 +219,9 @@ template<class T>
 float ChaseMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRangeCheck) const
 {
     if (!forRangeCheck)
-        return i_offset + 0.55f * i_target->GetCombatReach(&owner);
+        return i_offset + 0.4f * i_target->GetCombatReach(&owner);
 
-    return 0.9f * i_target->GetCombatReach(&owner) - i_target->GetObjectBoundingRadius();
+    return 0.7f * i_target->GetCombatReach(&owner) - i_target->GetObjectBoundingRadius();
 }
 
 //-----------------------------------------------//
