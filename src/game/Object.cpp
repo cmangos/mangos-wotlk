@@ -1648,7 +1648,8 @@ namespace MaNGOS
                 float dy = i_object.GetPositionY() - y;
                 float dist2d = sqrt((dx * dx) + (dy * dy));
 
-                float delta = u->GetObjectBoundingRadius();
+                // It is ok for the objects to require a bit more space
+                float delta = 1.4f * u->GetObjectBoundingRadius();
 
                 // u is too near/far away from i_object. Do not consider it to occupy space
                 if (dist2d < i_selector.m_searcherDist - delta ||
