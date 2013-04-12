@@ -139,13 +139,13 @@ bool ObjectPosSelector::NextAngle(float& angle)
         // ++ direction less updated
         if (m_stepAngle[USED_POS_PLUS] < M_PI_F && m_stepAngle[USED_POS_PLUS] <= m_stepAngle[USED_POS_MINUS])
         {
-            if (NextSideAngle(USED_POS_PLUS, angle))
+            if (NextSideAngle(USED_POS_PLUS, angle) && FindAlreadyOccupiedAngle(USED_POS_MINUS, angle, std::min(M_PI_F, angle + 2 * m_searchedForReqHAngle)))
                 return true;
         }
         // -- direction less updated
         else if (m_stepAngle[USED_POS_MINUS] < M_PI_F)
         {
-            if (NextSideAngle(USED_POS_MINUS, angle))
+            if (NextSideAngle(USED_POS_MINUS, angle) && FindAlreadyOccupiedAngle(USED_POS_PLUS, angle, std::min(M_PI_F, -angle + 2 * m_searchedForReqHAngle)))
                 return true;
         }
         // both sides finishes
@@ -197,6 +197,37 @@ bool ObjectPosSelector::NextSideAngle(UsedAreaSide side, float& angle)
     ++m_nextUsedAreaItr[side];
 
     return false;
+}
+
+/**
+ * Find angle in some limited range if the position is already occupied by self
+ *
+ * @param side     On which side to search
+ * @param angle    Return at success found angle
+ * @param maxSearchAngle  How far to search at most
+ *
+ * @return always true
+ */
+
+bool ObjectPosSelector::FindAlreadyOccupiedAngle(UsedAreaSide side, float& angle, float maxSearchAngle)
+{
+    if (!m_searchPosFor)                                    // Only search for an already self-occupied angle if we have a "self"
+        return true;
+
+    m_stepAngle[side] += m_searchedForReqHAngle;            // Next possible place
+
+    while (m_nextUsedAreaItr[side] != m_UsedAreaLists[side].end() && m_stepAngle[side] < maxSearchAngle)
+    {
+        if (m_nextUsedAreaItr[side]->second.occupyingObj == m_searchPosFor)
+        {
+            angle = SignOf(side) * std::min(m_nextUsedAreaItr[side]->first, m_stepAngle[side]);
+            return true;
+        }
+
+        m_stepAngle[side] = m_nextUsedAreaItr[side]->first + m_nextUsedAreaItr[side]->second.angleOffset + m_searchedForReqHAngle;
+        ++m_nextUsedAreaItr[side];
+    }
+    return true;
 }
 
 /**

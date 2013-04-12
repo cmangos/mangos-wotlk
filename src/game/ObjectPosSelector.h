@@ -63,6 +63,7 @@ struct ObjectPosSelector
     bool CheckAngle(UsedArea const& usedArea, UsedAreaSide side, float angle) const;
     void InitializeAngle(UsedAreaSide side);
     bool NextSideAngle(UsedAreaSide side, float& angle);
+    bool FindAlreadyOccupiedAngle(UsedAreaSide side, float& angle, float maxSearchAngle);
 
     float m_centerX;
     float m_centerY;
