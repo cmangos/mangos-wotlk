@@ -53,9 +53,10 @@ To be able to accomplish these goals, we support and promote:
   * [CMaNGOS Forum](http://cmangos.net/)
   * CMaNGOS IRC channel: #cmangos on irc.rizon.net
   * [GitHub repositories](https://github.com/cmangos/)
-  * [Issue tracker](https://github.com/cmangos/mangos-wotlk/issues)
+  * [Issue tracker](https://github.com/cmangos/issues/issues)
+  * [Pull Requests](https://github.com/cmangos/mangos-wotlk/pulls)
   * [Current build status on Travis CI](https://travis-ci.org/cmangos/mangos-wotlk/)
-  * [Wiki](https://github.com/cmangos/mangos-wotlk/wiki) with additional information on installation
+  * [Wiki](https://github.com/cmangos/issues/wiki) with additional information on installation
   * Documentation can be found in the doc/ subdirectory and on the github wiki
 
 ## License

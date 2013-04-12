@@ -56,7 +56,7 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
         if (pTarget != m_creature)
         {
             // pTarget is out of range of this spell (also done by Spell::CheckCast())
-            float fDistance = m_creature->GetCombatDistance(pTarget);
+            float fDistance = m_creature->GetCombatDistance(pTarget, pSpell->rangeIndex == SPELL_RANGE_IDX_COMBAT);
 
             if (fDistance > (m_creature->IsHostileTo(pTarget) ? pSpellRange->maxRange : pSpellRange->maxRangeFriendly))
                 return CAST_FAIL_TOO_FAR;
@@ -145,7 +145,8 @@ void CreatureAI::HandleMovementOnAttackStart(Unit* victim)
 {
     if (m_isCombatMovement)
         m_creature->GetMotionMaster()->MoveChase(victim, m_attackDistance, m_attackAngle);
-    else
+    // TODO - adapt this to only stop OOC-MMGens when MotionMaster rewrite is finished
+    else if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE || m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
     {
         m_creature->GetMotionMaster()->MoveIdle();
         m_creature->StopMoving();

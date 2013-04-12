@@ -682,6 +682,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             {
                 case 28441:                                 // AB Effect 000
                     return false;
+                case 10258:                                 // Awaken Vault Warder
                 case 18153:                                 // Kodo Kombobulator
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
@@ -837,6 +838,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     switch (spellproto->Id)
                     {
                         case 802:                           // Mutate Bug, wrongly negative by target modes
+                        case 38449:                         // Blessing of the Tides
                             return true;
                         case 36900:                         // Soul Split: Evil!
                         case 36901:                         // Soul Split: Good
@@ -873,6 +875,17 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                             break;
                     }
                 }   break;
+                case SPELL_AURA_MOD_MELEE_HASTE:
+                {
+                    switch (spellproto->Id)
+                    {
+                        case 38449:                         // Blessing of the Tides
+                            return true;
+                        default:
+                            break;
+                    }
+                    break;
+                }
                 case SPELL_AURA_FORCE_REACTION:
                 {
                     switch (spellproto->Id)
@@ -2033,6 +2046,26 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Summon Anub'ar Crypt Fiend Periodic and Summon Anub'ar Champion Periodic
                     if ((spellInfo_1->Id == 53037 && spellInfo_2->Id == 53035) ||
                             (spellInfo_2->Id == 53037 && spellInfo_1->Id == 53035))
+                        return false;
+
+                    // Possess visual and Possess
+                    if ((spellInfo_1->Id == 23014 && spellInfo_2->Id == 19832) ||
+                            (spellInfo_2->Id == 23014 && spellInfo_1->Id == 19832))
+                        return false;
+
+                    // Shade Soul Channel and Akama Soul Channel
+                    if ((spellInfo_1->Id == 40401 && spellInfo_2->Id == 40447) ||
+                            (spellInfo_2->Id == 40401 && spellInfo_1->Id == 40447))
+                        return false;
+
+                    // Eye Blast visual and Eye Blast
+                    if ((spellInfo_1->Id == 39908 && spellInfo_2->Id == 40017) ||
+                            (spellInfo_2->Id == 39908 && spellInfo_1->Id == 40017))
+                        return false;
+
+                    // Encapsulate and Encapsulate (channeled)
+                    if ((spellInfo_1->Id == 45665 && spellInfo_2->Id == 45661) ||
+                            (spellInfo_2->Id == 45665 && spellInfo_1->Id == 45661))
                         return false;
 
                     break;
@@ -3699,15 +3732,12 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
 void SpellMgr::LoadSpellAreas()
 {
     mSpellAreaMap.clear();                                  // need for reload case
-    mSpellAreaForQuestMap.clear();
-    mSpellAreaForActiveQuestMap.clear();
-    mSpellAreaForQuestEndMap.clear();
     mSpellAreaForAuraMap.clear();
 
     uint32 count = 0;
 
-    //                                                0      1     2            3                   4          5           6         7       8
-    QueryResult* result = WorldDatabase.Query("SELECT spell, area, quest_start, quest_start_active, quest_end, aura_spell, racemask, gender, autocast FROM spell_area");
+    //                                                0      1     2            3                   4          5             6           7         8       9
+    QueryResult* result = WorldDatabase.Query("SELECT spell, area, quest_start, quest_start_active, quest_end, condition_id, aura_spell, racemask, gender, autocast FROM spell_area");
 
     if (!result)
     {
@@ -3735,10 +3765,11 @@ void SpellMgr::LoadSpellAreas()
         spellArea.questStart          = fields[2].GetUInt32();
         spellArea.questStartCanActive = fields[3].GetBool();
         spellArea.questEnd            = fields[4].GetUInt32();
-        spellArea.auraSpell           = fields[5].GetInt32();
-        spellArea.raceMask            = fields[6].GetUInt32();
-        spellArea.gender              = Gender(fields[7].GetUInt8());
-        spellArea.autocast            = fields[8].GetBool();
+        spellArea.conditionId         = fields[5].GetUInt16();
+        spellArea.auraSpell           = fields[6].GetInt32();
+        spellArea.raceMask            = fields[7].GetUInt32();
+        spellArea.gender              = Gender(fields[8].GetUInt8());
+        spellArea.autocast            = fields[9].GetBool();
 
         if (!sSpellStore.LookupEntry(spell))
         {
@@ -3782,6 +3813,13 @@ void SpellMgr::LoadSpellAreas()
             continue;
         }
 
+        if (spellArea.conditionId && !sConditionStorage.LookupEntry<PlayerCondition>(spellArea.conditionId))
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_area` have wrong conditionId (%u) requirement", spell, spellArea.conditionId);
+            continue;
+        }
+        else if (!spellArea.conditionId)
+    {
         if (spellArea.questStart && !sObjectMgr.GetQuestTemplate(spellArea.questStart))
         {
             sLog.outErrorDb("Spell %u listed in `spell_area` have wrong start quest (%u) requirement", spell, spellArea.questStart);
@@ -3802,6 +3840,19 @@ void SpellMgr::LoadSpellAreas()
                 continue;
             }
         }
+
+        if (spellArea.raceMask && (spellArea.raceMask & RACEMASK_ALL_PLAYABLE) == 0)
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_area` have wrong race mask (%u) requirement", spell, spellArea.raceMask);
+            continue;
+        }
+
+        if (spellArea.gender != GENDER_NONE && spellArea.gender != GENDER_FEMALE && spellArea.gender != GENDER_MALE)
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_area` have wrong gender (%u) requirement", spell, spellArea.gender);
+            continue;
+        }
+   }
 
         if (spellArea.auraSpell)
         {
@@ -3867,36 +3918,11 @@ void SpellMgr::LoadSpellAreas()
             }
         }
 
-        if (spellArea.raceMask && (spellArea.raceMask & RACEMASK_ALL_PLAYABLE) == 0)
-        {
-            sLog.outErrorDb("Spell %u listed in `spell_area` have wrong race mask (%u) requirement", spell, spellArea.raceMask);
-            continue;
-        }
-
-        if (spellArea.gender != GENDER_NONE && spellArea.gender != GENDER_FEMALE && spellArea.gender != GENDER_MALE)
-        {
-            sLog.outErrorDb("Spell %u listed in `spell_area` have wrong gender (%u) requirement", spell, spellArea.gender);
-            continue;
-        }
-
         SpellArea const* sa = &mSpellAreaMap.insert(SpellAreaMap::value_type(spell, spellArea))->second;
 
         // for search by current zone/subzone at zone/subzone change
         if (spellArea.areaId)
             mSpellAreaForAreaMap.insert(SpellAreaForAreaMap::value_type(spellArea.areaId, sa));
-
-        // for search at quest start/reward
-        if (spellArea.questStart)
-        {
-            if (spellArea.questStartCanActive)
-                mSpellAreaForActiveQuestMap.insert(SpellAreaForQuestMap::value_type(spellArea.questStart, sa));
-            else
-                mSpellAreaForQuestMap.insert(SpellAreaForQuestMap::value_type(spellArea.questStart, sa));
-        }
-
-        // for search at quest start/reward
-        if (spellArea.questEnd)
-            mSpellAreaForQuestEndMap.insert(SpellAreaForQuestMap::value_type(spellArea.questEnd, sa));
 
         // for search at aura apply
         if (spellArea.auraSpell)
@@ -4553,6 +4579,13 @@ DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
 
 bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32 newArea) const
 {
+    if (conditionId)
+    {
+        if (!player || !sObjectMgr.IsPlayerMeetToCondition(conditionId, player, player->GetMap(), NULL, CONDITION_FROM_SPELL_AREA))
+            return false;
+    }
+    else                                                    // This block will be removed
+ {
     if (gender != GENDER_NONE)
     {
         // not in expected gender
@@ -4564,13 +4597,6 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
     {
         // not in expected race
         if (!player || !(raceMask & player->getRaceMask()))
-            return false;
-    }
-
-    if (areaId)
-    {
-        // not in expected zone
-        if (newZone != areaId && newArea != areaId)
             return false;
     }
 
@@ -4587,6 +4613,14 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
         if (!player || player->GetQuestRewardStatus(questEnd))
             return false;
     }
+ }
+
+    if (areaId)
+    {
+        // not in expected zone
+        if (newZone != areaId && newArea != areaId)
+            return false;
+    }
 
     if (auraSpell)
     {
@@ -4595,13 +4629,26 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
             return false;
         if (auraSpell > 0)
             // have expected aura
-            return player->HasAura(auraSpell, EFFECT_INDEX_0);
+            return player->HasAura(auraSpell);
         else
             // not have expected aura
-            return !player->HasAura(-auraSpell, EFFECT_INDEX_0);
+            return !player->HasAura(-auraSpell);
     }
 
     return true;
+}
+
+void SpellArea::ApplyOrRemoveSpellIfCan(Player* player, uint32 newZone, uint32 newArea, bool onlyApply) const
+{
+    MANGOS_ASSERT(player);
+
+    if (IsFitToRequirements(player, newZone, newArea))
+    {
+        if (autocast && !player->HasAura(spellId))
+            player->CastSpell(player, spellId, true);
+    }
+    else if (!onlyApply && player->HasAura(spellId))
+        player->RemoveAurasDueToSpell(spellId);
 }
 
 SpellEntry const* GetSpellEntryByDifficulty(uint32 id, Difficulty difficulty, bool isRaid)

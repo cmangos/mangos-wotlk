@@ -1598,6 +1598,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     switch (targetMode)
     {
         case TARGET_RANDOM_NEARBY_LOC:
+            // special case for Fatal Attraction (BT, Mother Shahraz)
+            if (m_spellInfo->Id == 40869)
+                radius = 30.0f;
+
             // Get a random point in circle. Use sqrt(rand) to correct distribution when converting polar to Cartesian coordinates.
             radius *= sqrtf(rand_norm_f());
             // no 'break' expected since we use code in case TARGET_RANDOM_CIRCUMFERENCE_POINT!!!
@@ -6260,7 +6264,7 @@ SpellCastResult Spell::CheckRange(bool strict)
     if (target && target != m_caster)
     {
         // distance from target in checks
-        float dist = m_caster->GetCombatDistance(target);
+        float dist = m_caster->GetCombatDistance(target, m_spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
 
         if (dist > max_range)
             return SPELL_FAILED_OUT_OF_RANGE;
@@ -7604,6 +7608,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 40834:                                 // Agonizing Flames (BT, Illidan Stormrage)
                 case 41537:                                 // Summon Enslaved Soul (BT, Reliquary of Souls)
                 case 44869:                                 // Spectral Blast (SWP, Kalecgos)
+                case 45785:                                 // Sinister Reflection Clone (SWP, Kil'jaeden)
                 case 45892:                                 // Sinister Reflection (SWP, Kil'jaeden)
                 case 45976:                                 // Open Portal (SWP, M'uru)
                 case 47669:                                 // Awaken Subboss (Utgarde Pinnacle)
@@ -7650,8 +7655,9 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 67296:                                 // Touch of Light (Mode 1)
                 case 67297:                                 // Touch of Light (Mode 2)
                 case 67298:                                 // Touch of Light (Mode 3)
-                case 68950:                                 // Fear (FoS)
                 case 68912:                                 // Wailing Souls (FoS)
+                case 68950:                                 // Fear (FoS)
+                case 68987:                                 // Pursuit (PoS)
                 case 69048:                                 // Mirrored Soul (FoS)
                 case 69057:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar) 10 man
                 case 72088:
@@ -7673,6 +7679,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 73023:                                 // Mutated Infection (Mode 3)
                     unMaxTargets = 1;
                     break;
+                case 10258:                                 // Awaken Vault Warder (Uldaman)
                 case 28542:                                 // Life Drain (Naxx, Sapphiron)
                 case 66013:                                 // Penetrating Cold (10 man) (ToCrusader, Anub'arak)
                 case 67755:                                 // Nerubian Burrower (Mode 1) (ToCrusader, Anub'arak)
@@ -7690,6 +7697,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 30004:                                 // Flame Wreath (Karazhan, Shade of Aran)
                 case 31298:                                 // Sleep (Hyjal Summit, Anetheron)
                 case 39992:                                 // Needle Spine Targeting (BT, Warlord Najentus)
+                case 40869:                                 // Fatal Attraction (BT, Mother Shahraz)
                 case 41303:                                 // Soul Drain (BT, Reliquary of Souls)
                 case 41376:                                 // Spite (BT, Reliquary of Souls)
                 case 51904:                                 // Summon Ghouls On Scarlet Crusade

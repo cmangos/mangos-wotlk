@@ -1740,6 +1740,20 @@ void Aura::TriggerSpell()
 //                    case 65422: break;
 //                    // Rolling Throw
 //                    case 67546: break;
+                    case 69012:                             // Explosive Barrage
+                    {
+                        // Summon an Exploding Orb for each player in combat with the caster
+                        ThreatList const& threatList = target->getThreatManager().getThreatList();
+                        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+                        {
+                            if (Unit* expectedTarget = target->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                            {
+                                if (expectedTarget->GetTypeId() == TYPEID_PLAYER)
+                                    target->CastSpell(expectedTarget, 69015, true);
+                            }
+                        }
+                        return;
+                    }
 //                    // Gunship Cannon Fire
 //                    case 70017: break;
 //                    // Ice Tomb
@@ -2035,6 +2049,12 @@ void Aura::TriggerSpell()
                     caster->CastSpell(triggerTarget, trigger_spell_id, true, NULL, this);
                 return;
             }
+            case 43149:                                     // Claw Rage
+            {
+                // Need to provide explicit target for trigger spell target combination
+                target->CastSpell(target->getVictim(), trigger_spell_id, true, NULL, this);
+                return;
+            }
             case 44883:                                     // Encapsulate
             case 56505:                                     // Surge of Power
             {
@@ -2280,6 +2300,14 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             // TODO - this is confusing, it seems the boss should channel this aura, and start casting the next spell
                             caster->CastSpell(caster, 68899, false);
                         }
+                        return;
+                    case 70623:                             // Jaina's Call
+                        if (target->GetTypeId() == TYPEID_PLAYER)
+                            target->CastSpell(target, 70525, true, NULL, this);
+                        return;
+                    case 70638:                             // Call of Sylvanas
+                        if (target->GetTypeId() == TYPEID_PLAYER)
+                            target->CastSpell(target, 70639, true, NULL, this);
                         return;
                     case 71342:                             // Big Love Rocket
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 71344, 71345, 71346, 71347, 0);
@@ -2993,6 +3021,20 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->CastSpell(target, 42517, true);
                     return;
                 }
+                case 42583:                                 // Claw Rage
+                case 68987:                                 // Pursuit
+                {
+                    Unit* caster = GetCaster();
+                    if (!caster || target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (apply)
+                        caster->FixateTarget(target);
+                    else if (target->GetObjectGuid() == caster->GetFixateTargetGuid())
+                        caster->FixateTarget(NULL);
+
+                    return;
+                }
                 case 43874:                                 // Scourge Mur'gul Camp: Force Shield Arcane Purple x3
                     target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE, apply);
                     if (apply)
@@ -3244,7 +3286,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         return;
     }
 
-    if (GetEffIndex() == EFFECT_INDEX_0 && target->GetTypeId() == TYPEID_PLAYER)
+    if (target->GetTypeId() == TYPEID_PLAYER)
     {
         SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAuraMapBounds(GetId());
         if (saBounds.first != saBounds.second)
@@ -3253,17 +3295,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             target->GetZoneAndAreaId(zone, area);
 
             for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-            {
-                // some auras remove at aura remove
-                if (!itr->second->IsFitToRequirements((Player*)target, zone, area))
-                    target->RemoveAurasDueToSpell(itr->second->spellId);
-                // some auras applied at aura apply
-                else if (itr->second->autocast)
-                {
-                    if (!target->HasAura(itr->second->spellId, EFFECT_INDEX_0))
-                        target->CastSpell(target, itr->second->spellId, true);
-                }
-            }
+                itr->second->ApplyOrRemoveSpellIfCan((Player*)target, zone, area, false);
         }
     }
 
@@ -4486,9 +4518,8 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         {
             ((Player*)target)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
             target->SetStandState(UNIT_STAND_STATE_STAND);// in 1.5 client
+            target->SetRoot(true);
         }
-
-        target->SetRoot(true);
 
         // Summon the Naj'entus Spine GameObject on target if spell is Impaling Spine
         if (GetId() == 39837)
@@ -8641,7 +8672,7 @@ void Aura::HandlePhase(bool apply, bool Real)
 
     target->SetPhaseMask(apply ? GetMiscValue() : uint32(PHASEMASK_NORMAL), true);
     // no-phase is also phase state so same code for apply and remove
-    if (GetEffIndex() == EFFECT_INDEX_0 && target->GetTypeId() == TYPEID_PLAYER)
+    if (target->GetTypeId() == TYPEID_PLAYER)
     {
         SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAuraMapBounds(GetId());
         if (saBounds.first != saBounds.second)
@@ -8650,17 +8681,7 @@ void Aura::HandlePhase(bool apply, bool Real)
             target->GetZoneAndAreaId(zone, area);
 
             for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-            {
-                // some auras remove at aura remove
-                if (!itr->second->IsFitToRequirements((Player*)target, zone, area))
-                    target->RemoveAurasDueToSpell(itr->second->spellId);
-                // some auras applied at aura apply
-                else if (itr->second->autocast)
-                {
-                    if (!target->HasAura(itr->second->spellId, EFFECT_INDEX_0))
-                        target->CastSpell(target, itr->second->spellId, true);
-                }
-            }
+                itr->second->ApplyOrRemoveSpellIfCan((Player*)target, zone, area, false);
         }
     }
 }

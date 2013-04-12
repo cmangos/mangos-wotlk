@@ -592,11 +592,16 @@ LogColors = ""
 #        Max amount triggered spell casts in chain by one caster, prevent stack overflow crash
 #        Too Low value will make some correct triggered casts fail
 #                 0 (no limit)
-#        Default: 10
+#        Default: 20
 #
 #   BirthdayTime
 #        Set to birthday (date in unix time), By default 28th August 2005, when MaNGOS got it’s name
 #        Default: 1125180000
+#
+#   RabbitDay
+#        Set to Rabbit Day (date in unix time), only the day and month are considered, the year is not important
+#        Default: 0 (off)
+#        Suggested: 954547200 (April 1st, 2000)
 #
 #    Instance.IgnoreLevel
 #        Ignore level requirement to enter instance
@@ -804,8 +809,9 @@ AllFlightPaths = 0
 AlwaysMaxSkillForLevel = 0
 ActivateWeather = 1
 CastUnstuck = 1
-MaxSpellCastsInChain = 10
+MaxSpellCastsInChain = 20
 BirthdayTime = 1125180000
+RabbitDay = 0
 Instance.IgnoreLevel = 0
 Instance.IgnoreRaid = 0
 Instance.ResetTimeHour = 4
