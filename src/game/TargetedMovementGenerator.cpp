@@ -165,7 +165,7 @@ bool TargetedMovementGeneratorMedium<T, D>::RequiresNewPosition(T& owner, float 
     float allowed_dist;
     // Give some space in case of big follow-distance
     if (this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)
-        allowed_dist = 0.8f * i_target->GetCombatReach(&owner) - i_target->GetObjectBoundingRadius();
+        allowed_dist = 0.9f * i_target->GetCombatReach(&owner) - i_target->GetObjectBoundingRadius();
     else
     {
         allowed_dist = sWorld.getConfig(CONFIG_FLOAT_RATE_TARGET_POS_RECALCULATION_RANGE) - i_target->GetObjectBoundingRadius();
