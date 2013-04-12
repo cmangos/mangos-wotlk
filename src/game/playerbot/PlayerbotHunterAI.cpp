@@ -177,7 +177,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
         m_ai->CastSpell(BERSERKING, *m_bot);
 
     // check if ranged combat is possible
-    float dist = m_bot->GetCombatDistance(pTarget);
+    float dist = m_bot->GetCombatDistance(pTarget, true);
     if ((dist <= ATTACK_DISTANCE || !m_bot->GetUInt32Value(PLAYER_AMMO_ID)) && m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED)
     {
         // switch to melee combat (target in melee range, out of ammo)

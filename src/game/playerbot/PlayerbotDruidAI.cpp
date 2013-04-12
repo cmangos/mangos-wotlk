@@ -92,7 +92,7 @@ CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuver(Unit* pTarget)
         {
             if (PlayerbotAI::ORDERS_TANK & m_ai->GetCombatOrder())
             {
-                if (m_bot->GetCombatDistance(pTarget) <= ATTACK_DISTANCE)
+                if (m_bot->GetCombatDistance(pTarget, true) <= ATTACK_DISTANCE)
                 {
                     // Set everyone's UpdateAI() waiting to 2 seconds
                     m_ai->SetGroupIgnoreUpdateTime(2);
@@ -186,7 +186,7 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuverPVE(Unit* pTarget)
     uint32 spec = m_bot->GetSpec();
     if (spec == 0) // default to spellcasting or healing for healer
         spec = (PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder() ? DRUID_SPEC_RESTORATION : DRUID_SPEC_BALANCE);
-    float dist = m_bot->GetCombatDistance(pTarget);
+    float dist = m_bot->GetCombatDistance(pTarget, true);
 
     // Make sure healer stays put, don't even melee (aggro) if in range.
     if (m_ai->IsHealer() && m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED)

@@ -157,7 +157,7 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit *pTarget)
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     //Unit* pVictim = pTarget->getVictim();
-    float dist = m_bot->GetCombatDistance(pTarget);
+    float dist = m_bot->GetCombatDistance(pTarget, true);
     Pet *pet = m_bot->GetPet();
     uint32 spec = m_bot->GetSpec();
     uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);

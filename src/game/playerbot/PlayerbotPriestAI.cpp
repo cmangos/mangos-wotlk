@@ -163,7 +163,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit *pTarget)
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     Unit* pVictim = pTarget->getVictim();
-    float dist = m_bot->GetCombatDistance(pTarget);
+    float dist = m_bot->GetCombatDistance(pTarget, true);
     uint32 spec = m_bot->GetSpec();
 
     Group *m_group = m_bot->GetGroup();
@@ -334,7 +334,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVP(Unit* pTarget)
             if (m_ai->GetHealthPercent() < 80 && RENEW && CastSpell(RENEW) & RETURN_ANY_OK) // TODO: Check whether you have renew active on you
                 return RETURN_CONTINUE;
 
-            if (m_bot->GetCombatDistance(pTarget) <= 5 && SCREAM && CastSpell(SCREAM) & RETURN_ANY_OK) // TODO: Check for cooldown
+            if (m_bot->GetCombatDistance(pTarget, true) <= 5 && SCREAM && CastSpell(SCREAM) & RETURN_ANY_OK) // TODO: Check for cooldown
                 return RETURN_CONTINUE;
 
             if (MIND_BLAST && CastSpell(MIND_BLAST) & RETURN_ANY_OK) // TODO: Check for cooldown

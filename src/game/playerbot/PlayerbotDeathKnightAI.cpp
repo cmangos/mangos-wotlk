@@ -78,7 +78,7 @@ CombatManeuverReturns PlayerbotDeathKnightAI::DoFirstCombatManeuver(Unit* pTarge
         {
             if (PlayerbotAI::ORDERS_TANK & m_ai->GetCombatOrder())
             {
-                if (m_bot->GetCombatDistance(pTarget) <= ATTACK_DISTANCE)
+                if (m_bot->GetCombatDistance(pTarget, true) <= ATTACK_DISTANCE)
                 {
                     // Set everyone's UpdateAI() waiting to 2 seconds
                     m_ai->SetGroupIgnoreUpdateTime(2);
@@ -170,7 +170,7 @@ CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuverPVE(Unit *pTar
     // damage spells
     Unit* pVictim = pTarget->getVictim();
     Pet *pet = m_bot->GetPet();
-    float dist = m_bot->GetCombatDistance(pTarget);
+    float dist = m_bot->GetCombatDistance(pTarget, true);
     std::ostringstream out;
 
     switch (SpellSequence)

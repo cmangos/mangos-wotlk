@@ -3063,7 +3063,7 @@ void PlayerbotAI::DoCombatMovement()
 {
     if (!m_targetCombat) return;
 
-    float targetDist = m_bot->GetCombatDistance(m_targetCombat);
+    float targetDist = m_bot->GetCombatDistance(m_targetCombat, true);
 
     if (m_combatStyle == COMBAT_MELEE
         && !m_bot->hasUnitState(UNIT_STAT_CHASE)

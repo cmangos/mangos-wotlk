@@ -164,7 +164,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     if (!m_bot)   return RETURN_NO_ACTION_ERROR;
 
     Unit* pVictim = pTarget->getVictim();
-    float fTargetDist = m_bot->GetCombatDistance(pTarget);
+    float fTargetDist = m_bot->GetCombatDistance(pTarget, true);
 
     // TODO: make this work better...
     /*if (pVictim)
