@@ -29,6 +29,34 @@
 #include <set>
 #include <string>
 
+// ////////////////////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//      Testing defines for Chase-movement:
+// These factors depend on combat-reach distance
+#define CHASE_DEFAULT_RANGE_FACTOR                        0.5f
+#define CHASE_RECHASE_RANGE_FACTOR                        0.75f
+
+//      Testing defines for Follow-movement:
+// This factor defines how much of the bounding-radius (as measurement of size) will be used for recalculating a new following position
+// The smaller, the more micromovement, the bigger, possibly no proper movement updates
+#define FOLLOW_RECALCULATE_FACTOR                         0.3f
+// This flat value defines when the distance of a follower will have impact onto following-position updates
+#define FOLLOW_DIST_GAP_FOR_DIST_FACTOR                   5.0f
+// This factor how much of the follow-distance will be used as sloppyness value (if the above distance is exceeded)
+#define FOLLOW_DIST_RECALCULATE_FACTOR                    0.1f
+
+//      Testing defines for ObjectPos selector
+// The bigger these values, the more space npcs require around their target
+#define OCCUPY_POS_ANGLE_ATAN_FACTOR                      2.0f
+// how much space should be left before a mob that already uses a space
+#define OCCUPY_POS_BEFORE_FACTOR                          1.5f
+//                               behind
+#define OCCUPY_POS_BEHIND_FACTOR                          1.5f
+//
+// ////////////////////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////////////////////////
+
 #define CONTACT_DISTANCE            0.5f
 #define INTERACTION_DISTANCE        5.0f
 #define ATTACK_DISTANCE             5.0f

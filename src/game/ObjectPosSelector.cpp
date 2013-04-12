@@ -30,7 +30,7 @@ ObjectPosSelector::ObjectPosSelector(float x, float y, float dist, float searche
     if (m_searcherDist == 0.0f)
         m_searcherDist = DEFAULT_WORLD_OBJECT_SIZE;
 
-    m_searchedForReqHAngle = atan(2 * searchedForSize / m_searcherDist);
+    m_searchedForReqHAngle = atan(OCCUPY_POS_ANGLE_ATAN_FACTOR * searchedForSize / m_searcherDist);
 
     // Really init in InitilizeAngle
     m_nextUsedAreaItr[USED_POS_PLUS]  = m_UsedAreaLists[USED_POS_PLUS].begin();
@@ -58,7 +58,7 @@ void ObjectPosSelector::AddUsedArea(WorldObject const* obj, float angle, float d
         return;
 
     // (half) angle that obj occupies
-    float sr_angle = atan(2 * obj->GetObjectBoundingRadius() / dist);
+    float sr_angle = atan(OCCUPY_POS_ANGLE_ATAN_FACTOR * obj->GetObjectBoundingRadius() / dist);
 
     if (angle >= 0)
         m_UsedAreaLists[USED_POS_PLUS].insert(UsedArea(angle, OccupiedArea(sr_angle, obj)));
