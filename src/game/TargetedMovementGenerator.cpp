@@ -44,17 +44,12 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
     if (updateDestination || !i_path)
     {
         // prevent redundant micro-movement for pets, other followers.
-        if (i_offset && i_target->IsWithinDistInMap(&owner, 2 * i_offset))
+        if (i_offset > 0 && i_target->IsWithinDistInMap(&owner, 2 * i_offset))
         {
             if (!owner.movespline->Finalized())
                 return;
 
             owner.GetPosition(x, y, z);
-        }
-        else if (!i_offset)
-        {
-            // to nearest contact position
-            i_target->GetContactPoint(&owner, x, y, z);
         }
         else
         {
@@ -136,10 +131,20 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     i_recheckDistance.Update(time_diff);
     if (i_recheckDistance.Passed())
     {
-        i_recheckDistance.Reset(100);
+        i_recheckDistance.Reset(this->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE ? 50 : 100);
 
         // More distance let have better performance, less distance let have more sensitive reaction at target move.
-        float allowed_dist = owner.GetObjectBoundingRadius() + sWorld.getConfig(CONFIG_FLOAT_RATE_TARGET_POS_RECALCULATION_RANGE);
+        float allowed_dist;
+        // Give some space in case of big follow-distance
+        if (this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)
+            allowed_dist = 0.8f * i_target->GetCombatReach(&owner) - i_target->GetObjectBoundingRadius();
+        else
+        {
+            allowed_dist = sWorld.getConfig(CONFIG_FLOAT_RATE_TARGET_POS_RECALCULATION_RANGE) - i_target->GetObjectBoundingRadius();
+            allowed_dist += 0.3f * (owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius());
+            if (i_offset > 5.0f)
+                allowed_dist += 0.1f * i_offset;
+        }
         G3D::Vector3 dest = owner.movespline->FinalDestination();
 
         if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly())
