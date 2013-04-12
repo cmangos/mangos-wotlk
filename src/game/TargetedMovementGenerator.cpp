@@ -50,6 +50,10 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
             if (!owner.movespline->Finalized())
                 return;
         }
+        else if (this->GetMovementGeneratorType() == CHASE_MOTION_TYPE && i_angle == 0.0f)
+        {
+            i_target->GetNearPoint(&owner, x, y, z, owner.GetObjectBoundingRadius(), this->GetDynamicTargetDistance(owner, false), i_target->GetAngle(&owner));
+        }
         else
         {
             // to at i_offset distance from target and i_angle from target facing
