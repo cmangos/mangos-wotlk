@@ -1648,7 +1648,7 @@ namespace MaNGOS
                 float dy = i_object.GetPositionY() - y;
                 float dist2d = sqrt((dx * dx) + (dy * dy));
 
-                float delta = i_selector.m_searcherSize + u->GetObjectBoundingRadius();
+                float delta = i_selector.m_searcherSize + 2 * u->GetObjectBoundingRadius();
 
                 // u is too nearest/far away to i_object
                 if (dist2d < i_selector.m_searcherDist - delta ||
@@ -1663,7 +1663,7 @@ namespace MaNGOS
                 else if (angle < -M_PI_F)
                     angle += 2.0f * M_PI_F;
 
-                i_selector.AddUsedArea(u->GetObjectBoundingRadius(), angle, dist2d);
+                i_selector.AddUsedArea(u, angle, dist2d);
             }
         private:
             WorldObject const& i_object;
@@ -1707,14 +1707,14 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     const float dist = distance2d + searcher_bounding_radius + GetObjectBoundingRadius();
 
     // prepare selector for work
-    ObjectPosSelector selector(GetPositionX(), GetPositionY(), dist, searcher_bounding_radius);
+    ObjectPosSelector selector(GetPositionX(), GetPositionY(), dist, searcher_bounding_radius, searcher);
 
     // adding used positions around object
     {
         MaNGOS::NearUsedPosDo u_do(*this, searcher, absAngle, selector);
         MaNGOS::WorldObjectWorker<MaNGOS::NearUsedPosDo> worker(this, u_do);
 
-        Cell::VisitAllObjects(this, worker, distance2d + searcher_bounding_radius);
+        Cell::VisitAllObjects(this, worker, dist);
     }
 
     // maybe can just place in primary position
