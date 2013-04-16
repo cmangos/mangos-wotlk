@@ -223,9 +223,9 @@ template<class T>
 float ChaseMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRangeCheck) const
 {
     if (!forRangeCheck)
-        return i_offset + CHASE_DEFAULT_RANGE_FACTOR * i_target->GetCombatReach(&owner);
+        return this->i_offset + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombatReach(&owner);
 
-    return CHASE_RECHASE_RANGE_FACTOR * i_target->GetCombatReach(&owner) - i_target->GetObjectBoundingRadius();
+    return CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombatReach(&owner) - this->i_target->GetObjectBoundingRadius();
 }
 
 //-----------------------------------------------//
@@ -304,12 +304,12 @@ template<class T>
 float FollowMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRangeCheck) const
 {
     if (!forRangeCheck)
-        return i_offset + owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius();
+        return this->i_offset + owner.GetObjectBoundingRadius() + this->i_target->GetObjectBoundingRadius();
 
-    float allowed_dist = sWorld.getConfig(CONFIG_FLOAT_RATE_TARGET_POS_RECALCULATION_RANGE) - i_target->GetObjectBoundingRadius();
-    allowed_dist += FOLLOW_RECALCULATE_FACTOR * (owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius());
-    if (i_offset > FOLLOW_DIST_GAP_FOR_DIST_FACTOR)
-        allowed_dist += FOLLOW_DIST_RECALCULATE_FACTOR * i_offset;
+    float allowed_dist = sWorld.getConfig(CONFIG_FLOAT_RATE_TARGET_POS_RECALCULATION_RANGE) - this->i_target->GetObjectBoundingRadius();
+    allowed_dist += FOLLOW_RECALCULATE_FACTOR * (owner.GetObjectBoundingRadius() + this->i_target->GetObjectBoundingRadius());
+    if (this->i_offset > FOLLOW_DIST_GAP_FOR_DIST_FACTOR)
+        allowed_dist += FOLLOW_DIST_RECALCULATE_FACTOR * this->i_offset;
 
     return allowed_dist;
 }
