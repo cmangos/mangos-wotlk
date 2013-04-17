@@ -340,6 +340,8 @@ template void ChaseMovementGenerator<Player>::Interrupt(Player&);
 template void ChaseMovementGenerator<Creature>::Interrupt(Creature&);
 template void ChaseMovementGenerator<Player>::Reset(Player&);
 template void ChaseMovementGenerator<Creature>::Reset(Creature&);
+template float ChaseMovementGenerator<Creature>::GetDynamicTargetDistance(Creature&, bool) const;
+template float ChaseMovementGenerator<Player>::GetDynamicTargetDistance(Player&, bool) const;
 
 template void FollowMovementGenerator<Player>::_clearUnitStateMove(Player& u);
 template void FollowMovementGenerator<Creature>::_addUnitStateMove(Creature& u);
@@ -349,3 +351,5 @@ template void FollowMovementGenerator<Player>::Interrupt(Player&);
 template void FollowMovementGenerator<Creature>::Interrupt(Creature&);
 template void FollowMovementGenerator<Player>::Reset(Player&);
 template void FollowMovementGenerator<Creature>::Reset(Creature&);
+template float FollowMovementGenerator<Creature>::GetDynamicTargetDistance(Creature&, bool) const;
+template float FollowMovementGenerator<Player>::GetDynamicTargetDistance(Player&, bool) const;
