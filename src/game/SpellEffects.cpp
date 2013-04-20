@@ -3954,6 +3954,32 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target
     if (!unitTarget || unitTarget->IsTaxiFlying())
         return;
 
+        switch (m_spellInfo->Id)
+        {
+            case 48129:                                 // Scroll of Recall
+            case 60320:                                 // Scroll of Recall II
+            case 60321:                                 // Scroll of Recall III
+            {
+                uint32 failAtLevel = 0;
+                switch (m_spellInfo->Id)
+                {
+                    case 48129: failAtLevel = 40; break;
+                    case 60320: failAtLevel = 70; break;
+                    case 60321: failAtLevel = 80; break;
+                }
+
+                if (unitTarget->getLevel() > failAtLevel && unitTarget->GetTypeId() == TYPEID_PLAYER)
+                {
+                    unitTarget->CastSpell(unitTarget, 60444, true);
+                    // TODO: Unclear use of probably related spell 60322
+                    uint32 spellId = (((Player*)unitTarget)->GetTeam() == ALLIANCE ? 60323 : 60328) + urand(0, 7);
+                    unitTarget->CastSpell(unitTarget, spellId, true);
+                    return;
+                }
+                break;
+            }
+        }
+
     // Target dependend on TargetB, if there is none provided, decide dependend on A
     uint32 targetType = m_spellInfo->EffectImplicitTargetB[eff_idx];
     if (!targetType)
