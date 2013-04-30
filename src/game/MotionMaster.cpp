@@ -56,6 +56,8 @@ void MotionMaster::Initialize()
         MovementGenerator* movement = FactorySelector::selectMovementGenerator((Creature*)m_owner);
         push(movement == NULL ? &si_idleMovement : movement);
         top()->Initialize(*m_owner);
+        if (top()->GetMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+            ((WaypointMovementGenerator<Creature>*)top())->InitializeWaypointPath(*((Creature*)(m_owner)), 0);
     }
     else
         push(&si_idleMovement);
@@ -371,7 +373,7 @@ void MotionMaster::MoveFleeing(Unit* enemy, uint32 time)
     }
 }
 
-void MotionMaster::MoveWaypoint()
+void MotionMaster::MoveWaypoint(int32 id /*=0*/)
 {
     if (m_owner->GetTypeId() == TYPEID_UNIT)
     {
@@ -384,7 +386,9 @@ void MotionMaster::MoveWaypoint()
         Creature* creature = (Creature*)m_owner;
 
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature %s (Entry %u) start MoveWaypoint()", m_owner->GetGuidStr().c_str(), m_owner->GetEntry());
-        Mutate(new WaypointMovementGenerator<Creature>(*creature));
+        WaypointMovementGenerator<Creature>* newWPMMgen = new WaypointMovementGenerator<Creature>(*creature);
+        Mutate(newWPMMgen);
+        newWPMMgen->InitializeWaypointPath(*creature, id);
     }
     else
     {

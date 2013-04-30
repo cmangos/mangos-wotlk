@@ -64,9 +64,9 @@ class WaypointManager
         void Load();
         void Unload();
 
-        WaypointPath* GetPath(uint32 id)
+        WaypointPath* GetPath(uint32 guid)
         {
-            WaypointPathMap::iterator itr = m_pathMap.find(id);
+            WaypointPathMap::iterator itr = m_pathMap.find(guid);
             return itr != m_pathMap.end() ? &itr->second : NULL;
         }
 
@@ -74,6 +74,28 @@ class WaypointManager
         {
             WaypointPathMap::iterator itr = m_pathTemplateMap.find(entry);
             return itr != m_pathTemplateMap.end() ? &itr->second : NULL;
+        }
+
+        WaypointPath* GetPathById(uint32 npcEntry, int32 id)
+        {
+            WaypointPathMap::iterator itr = m_keyPathMap.find(createWPKey(npcEntry, id));
+            return itr != m_keyPathMap.end() ? &itr->second : NULL;
+        }
+
+        void AddPath(uint32 npcEntry, int32 id, WaypointPath const* path)
+        {
+            WaypointPath& _path = m_keyPathMap[createWPKey(npcEntry, id)];
+            _clearPath(_path);
+            _path = *path;
+            //for (WaypointPath::const_iterator itr = path->begin(); itr != path->end(); ++itr)
+            //    _path.insert(*itr);
+        }
+
+        void DeletePath(uint32 npcEntry, int32 id)
+        {
+            WaypointPathMap::iterator itr = m_keyPathMap.find(createWPKey(npcEntry, id));
+            if (itr != m_keyPathMap.end())
+                _clearPath(itr->second);
         }
 
         void AddLastNode(uint32 id, float x, float y, float z, float o, uint32 delay, uint32 wpGuid);
@@ -89,9 +111,15 @@ class WaypointManager
         void _addNode(uint32 id, uint32 point, float x, float y, float z, float o, uint32 delay, uint32 wpGuid);
         void _clearPath(WaypointPath& path);
 
-        typedef UNORDERED_MAP<uint32 /*guidOrEntry*/, WaypointPath> WaypointPathMap;
+        int32 createWPKey(uint32 npcEntry, int32 id) const
+        {
+            return id > 0 ? npcEntry * 0xFF + id : npcEntry * -0xFF - id;
+        }
+
+        typedef UNORDERED_MAP<int32 /*guidOrEntryOrKey*/, WaypointPath> WaypointPathMap;
         WaypointPathMap m_pathMap;
         WaypointPathMap m_pathTemplateMap;
+        WaypointPathMap m_keyPathMap;
 };
 
 #define sWaypointMgr MaNGOS::Singleton<WaypointManager>::Instance()
