@@ -63,6 +63,7 @@ enum EventAI_Type
     EVENT_T_MISSING_AURA            = 27,                   // Param1 = SpellID, Param2 = Number of time stacked expected, Param3/4 Repeat Min/Max
     EVENT_T_TARGET_MISSING_AURA     = 28,                   // Param1 = SpellID, Param2 = Number of time stacked expected, Param3/4 Repeat Min/Max
     EVENT_T_TIMER_GENERIC           = 29,                   // InitialMin, InitialMax, RepeatMin, RepeatMax
+    EVENT_T_RECEIVE_AI_EVENT        = 30,                   // AIEventType, Sender-Entry, unsused, unused
 
     EVENT_T_END,
 };
@@ -114,6 +115,8 @@ enum EventAI_ActionType
     ACTION_T_SET_INVINCIBILITY_HP_LEVEL = 42,               // MinHpValue, format(0-flat,1-percent from max health)
     ACTION_T_MOUNT_TO_ENTRY_OR_MODEL    = 43,               // Creature_template entry(param1) OR ModelId (param2) (or 0 for both to unmount)
     ACTION_T_CHANCED_TEXT               = 44,               // Chance to display the text, TextId1, optionally TextId2. If more than just -TextId1 is defined, randomize. Negative values.
+    ACTION_T_THROW_AI_EVENT             = 45,               // EventType, Radius, unused_yet
+
     ACTION_T_END,
 };
 
@@ -385,13 +388,19 @@ struct CreatureEventAI_Action
             uint32 creatureId;                              // set one from fields (or 0 for both to dismount)
             uint32 modelId;
         } mount;
-
         // ACTION_T_CHANCED_TEXT                            = 44
         struct
         {
             uint32 chance;
             int32 TextId[2];
         } chanced_text;
+        // ACTION_T_THROW_AI_EVENT                          = 45
+        struct
+        {
+            uint32 eventType;
+            uint32 radius;
+            uint32 unused;
+        } throwEvent;
         // RAW
         struct
         {
@@ -504,8 +513,8 @@ struct CreatureEventAI_Event
             uint32 repeatMax;
         } friendly_buff;
         // EVENT_T_SUMMONED_UNIT                            = 17
-        // EVENT_T_SUMMONED_JUST_DIED                        = 25
-        // EVENT_T_SUMMONED_JUST_DESPAWN                     = 26
+        // EVENT_T_SUMMONED_JUST_DIED                       = 25
+        // EVENT_T_SUMMONED_JUST_DESPAWN                    = 26
         struct
         {
             uint32 creatureId;
@@ -537,6 +546,14 @@ struct CreatureEventAI_Event
             uint32 repeatMin;
             uint32 repeatMax;
         } buffed;
+        // EVENT_T_RECEIVE_AI_EVENT                         = 30
+        struct
+        {
+            uint32 eventType;                               // See CreatureAI.h enum AIEventType - Receive only events of this type
+            uint32 senderEntry;                             // Optional npc from only whom this event can be received
+            uint32 unused1;
+            uint32 unused2;
+        } receiveAIEvent;
         // RAW
         struct
         {
@@ -607,6 +624,7 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         void ReceiveEmote(Player* pPlayer, uint32 text_emote) override;
         void SummonedCreatureJustDied(Creature* unit) override;
         void SummonedCreatureDespawn(Creature* unit) override;
+        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker) override;
 
         static int Permissible(const Creature*);
 
