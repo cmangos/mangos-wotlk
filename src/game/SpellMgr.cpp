@@ -103,7 +103,7 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
     if (spell)
     {
         // some triggered spells have data only usable for client
-        if (spell->IsTriggeredSpellWithRedundentData())
+        if (spell->IsTriggeredSpellWithRedundentCastTime())
             return 0;
 
         // spell targeted to non-trading trade slot item instant at trade success apply
@@ -838,6 +838,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     switch (spellproto->Id)
                     {
                         case 802:                           // Mutate Bug, wrongly negative by target modes
+                        case 38449:                         // Blessing of the Tides
                             return true;
                         case 36900:                         // Soul Split: Evil!
                         case 36901:                         // Soul Split: Good
@@ -874,6 +875,17 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                             break;
                     }
                 }   break;
+                case SPELL_AURA_MOD_MELEE_HASTE:
+                {
+                    switch (spellproto->Id)
+                    {
+                        case 38449:                         // Blessing of the Tides
+                            return true;
+                        default:
+                            break;
+                    }
+                    break;
+                }
                 case SPELL_AURA_FORCE_REACTION:
                 {
                     switch (spellproto->Id)
@@ -2054,6 +2066,16 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Encapsulate and Encapsulate (channeled)
                     if ((spellInfo_1->Id == 45665 && spellInfo_2->Id == 45661) ||
                             (spellInfo_2->Id == 45665 && spellInfo_1->Id == 45661))
+                        return false;
+
+                    // Flame Tsunami Visual and Flame Tsunami Damage Aura
+                    if ((spellInfo_1->Id == 57494 && spellInfo_2->Id == 57492) ||
+                            (spellInfo_2->Id == 57494 && spellInfo_1->Id == 57492))
+                        return false;
+
+                    // Cyclone Aura 2 and Cyclone Aura
+                    if ((spellInfo_1->Id == 57598 && spellInfo_2->Id == 57560) ||
+                            (spellInfo_2->Id == 57598 && spellInfo_1->Id == 57560))
                         return false;
 
                     break;

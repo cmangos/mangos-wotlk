@@ -8796,7 +8796,8 @@ void Unit::TauntApply(Unit* taunter)
     // Only attack taunter if this is a valid target
     if (!hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED) && !IsSecondChoiceTarget(taunter, true))
     {
-        SetInFront(taunter);
+        if (GetTargetGuid() || !target)
+            SetInFront(taunter);
 
         if (((Creature*)this)->AI())
             ((Creature*)this)->AI()->AttackStart(taunter);
@@ -8843,7 +8844,8 @@ void Unit::TauntFadeOut(Unit* taunter)
 
     if (target && target != taunter)
     {
-        SetInFront(target);
+        if (GetTargetGuid())
+            SetInFront(target);
 
         if (((Creature*)this)->AI())
             ((Creature*)this)->AI()->AttackStart(target);
@@ -10246,9 +10248,12 @@ void Unit::SendPetAIReaction()
 
 ///----------End of Pet responses methods----------
 
-void Unit::StopMoving()
+void Unit::StopMoving(bool forceSendStop /*=false*/)
 {
     clearUnitState(UNIT_STAT_MOVING);
+
+    if (IsStopped() && !forceSendStop)
+        return;
 
     // not need send any packets if not in world
     if (!IsInWorld())
@@ -10257,6 +10262,21 @@ void Unit::StopMoving()
     Movement::MoveSplineInit init(*this);
     init.SetFacing(GetOrientation());
     init.Launch();
+}
+
+void Unit::InterruptMoving(bool forceSendStop /*=false*/)
+{
+    bool isMoving = false;
+
+    if (!movespline->Finalized())
+    {
+        Movement::Location loc = movespline->ComputePosition();
+        movespline->_Interrupt();
+        Relocate(loc.x, loc.y, loc.z, loc.orientation);
+        isMoving = true;
+    }
+
+    StopMoving(forceSendStop || isMoving);
 }
 
 void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 time)

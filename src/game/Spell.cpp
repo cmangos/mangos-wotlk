@@ -7121,11 +7121,9 @@ bool Spell::IsNeedSendToClient() const
            m_spellInfo->speed > 0.0f || (!m_triggeredByAuraSpell && !m_IsTriggeredSpell);
 }
 
-bool Spell::IsTriggeredSpellWithRedundentData() const
+bool Spell::IsTriggeredSpellWithRedundentCastTime() const
 {
-    return m_triggeredByAuraSpell || m_triggeredBySpellInfo ||
-           // possible not need after above check?
-           m_IsTriggeredSpell && (m_spellInfo->manaCost || m_spellInfo->ManaCostPercentage);
+    return m_IsTriggeredSpell && (m_spellInfo->manaCost || m_spellInfo->ManaCostPercentage);
 }
 
 bool Spell::HaveTargetsForEffect(SpellEffectIndex effect) const
@@ -7627,6 +7625,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 54148:                                 // Ritual of the Sword (Utgarde Pinnacle, Svala)
                 case 55479:                                 // Forced Obedience (Naxxramas, Razovius)
                 case 56140:                                 // Summon Power Spark (Eye of Eternity, Malygos)
+                case 57578:                                 // Lava Strike (Obsidian Sanctum, Sartharion)
                 case 59870:                                 // Glare of the Tribunal (h) (Halls of Stone)
                 case 62016:                                 // Charge Orb (Ulduar, Thorim)
                 case 62042:                                 // Stormhammer (Ulduar, Thorim)
