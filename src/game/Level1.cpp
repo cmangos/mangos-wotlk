@@ -2245,15 +2245,15 @@ bool ChatHandler::HandleGoGridCommand(char* args)
 
 bool ChatHandler::HandleModifyDrunkCommand(char* args)
 {
-    if (!*args)    return false;
+    if (!*args)
+        return false;
 
-    uint32 drunklevel = (uint32)atoi(args);
-    if (drunklevel > 100)
-        drunklevel = 100;
+    uint8 drunkValue = (uint8)atoi(args);
+    if (drunkValue > 100)
+        drunkValue = 100;
 
-    uint16 drunkMod = drunklevel * 0xFFFF / 100;
-
-    m_session->GetPlayer()->SetDrunkValue(drunkMod);
+    if (Player* target = getSelectedPlayer())
+        target->SetDrunkValue(drunkValue);
 
     return true;
 }

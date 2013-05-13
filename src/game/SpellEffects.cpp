@@ -9315,13 +9315,17 @@ void Spell::EffectInebriate(SpellEffectIndex /*eff_idx*/)
         return;
 
     Player* player = (Player*)unitTarget;
-    uint16 currentDrunk = player->GetDrunkValue();
-    uint16 drunkMod = damage * 256;
-    if (currentDrunk + drunkMod > 0xFFFF)
-        currentDrunk = 0xFFFF;
-    else
-        currentDrunk += drunkMod;
-    player->SetDrunkValue(currentDrunk, m_CastItem ? m_CastItem->GetEntry() : 0);
+
+    uint8 drunkValue = player->GetDrunkValue() + (uint8)damage;
+    if (drunkValue > 100)
+    {
+        drunkValue = 100;
+
+        if (roll_chance_i(25))
+            player->CastSpell(player, 67468, false);    // Drunken Vomit
+    }
+
+    player->SetDrunkValue(drunkValue, m_CastItem ? m_CastItem->GetEntry() : 0);
 }
 
 void Spell::EffectFeedPet(SpellEffectIndex eff_idx)
