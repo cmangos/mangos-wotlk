@@ -490,7 +490,7 @@ int main(int argc, char** argv)
     for (size_t i = 0; i < archiveNames.size(); ++i)
     {
         MPQArchive* archive = new MPQArchive(archiveNames[i].c_str());
-        if (!gOpenArchives.size() || gOpenArchives.front() != archive)
+        if (!gOpenArchives.size() || gOpenArchives.back() != archive)
             delete archive;
     }
 
