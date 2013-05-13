@@ -8652,9 +8652,9 @@ void Unit::SetDeathState(DeathState s)
         RemoveMiniPet();
         UnsummonAllTotems();
 
+        StopMoving();
         i_motionMaster.Clear(false, true);
         i_motionMaster.MoveIdle();
-        StopMoving();
 
         // Unsummon vehicle accessories
         if (IsVehicle())
