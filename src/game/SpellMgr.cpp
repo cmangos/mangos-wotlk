@@ -1109,17 +1109,6 @@ void SpellMgr::LoadSpellTargetPositions()
         {
             if (spellInfo->EffectImplicitTargetA[i] == TARGET_TABLE_X_Y_Z_COORDINATES || spellInfo->EffectImplicitTargetB[i] == TARGET_TABLE_X_Y_Z_COORDINATES)
             {
-                // additional requirements
-                if (spellInfo->Effect[i] == SPELL_EFFECT_BIND && spellInfo->EffectMiscValue[i])
-                {
-                    uint32 zone_id = sTerrainMgr.GetAreaId(st.target_mapId, st.target_X, st.target_Y, st.target_Z);
-                    if (int32(zone_id) != spellInfo->EffectMiscValue[i])
-                    {
-                        sLog.outErrorDb("Spell (Id: %u) listed in `spell_target_position` expected point to zone %u bit point to zone %u.", Spell_ID, spellInfo->EffectMiscValue[i], zone_id);
-                        break;
-                    }
-                }
-
                 found = true;
                 break;
             }
