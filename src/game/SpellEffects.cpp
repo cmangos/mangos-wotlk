@@ -1927,6 +1927,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 46372:                                 // Ice Spear Target Picker
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 46359, true);
+                    return;
+                }
                 case 46485:                                 // Greatmother's Soulcatcher
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
@@ -7729,6 +7737,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     unitTarget->CastSpell(unitTarget, spellId, true);
                     break;
+                }
+                case 46430:                                 // Synch Health
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->SetHealth(m_caster->GetHealth());
+                    return;
                 }
                 case 46642:                                 // 5,000 Gold
                 {

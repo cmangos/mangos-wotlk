@@ -8039,8 +8039,9 @@ void Aura::PeriodicDummyTick()
 //              case 46205: break;
 //              // Find Opening Beam End
 //              case 46333: break;
-//              // Ice Spear Control Aura
-//              case 46371: break;
+                case 46371:                                 // Ice Spear Control Aura
+                    target->CastSpell(target, 46372, true, NULL, this);
+                    return;
 //              // Hailstone Chill
 //              case 46458: break;
 //              // Hailstone Chill, Internal
