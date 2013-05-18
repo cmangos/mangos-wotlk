@@ -2228,7 +2228,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         switch (GetId())
                         {
                             case 38224: spellId = (gender == GENDER_MALE ? 38225 : 38227); break;
-                            case 37096: spellId = (gender == GENDER_MALE ? 37092 : 37094); break;
+                            case 37096: spellId = (gender == GENDER_MALE ? 37093 : 37095); break;
                             case 46354: spellId = (gender == GENDER_MALE ? 46355 : 46356); break;
                             default: return;
                         }
