@@ -4718,7 +4718,6 @@ void Aura::HandleInvisibility(bool apply, bool Real)
         {
             // apply glow vision
             target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
-
         }
 
         // apply only if not in GM invisibility and not stealth
@@ -8552,7 +8551,6 @@ void Aura::HandleAuraAddMechanicAbilities(bool apply, bool Real)
 
     if (apply)
     {
-
         // spell give the player a new castbar with some spells.. this is a clientside process..
         // serverside just needs to register the new spells so that player isn't kicked as cheater
         for (int i = 0; i < MAX_OVERRIDE_SPELLS; ++i)

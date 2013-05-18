@@ -156,7 +156,6 @@ void CreatureEventAIMgr::CheckUnusedAITexts()
 // -------------------
 void CreatureEventAIMgr::LoadCreatureEventAI_Summons(bool check_entry_use)
 {
-
     // Drop Existing EventSummon Map
     m_CreatureEventAI_Summon_Map.clear();
 

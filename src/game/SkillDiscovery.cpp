@@ -48,7 +48,6 @@ static SkillDiscoveryMap SkillDiscoveryStore;
 
 void LoadSkillDiscoveryTable()
 {
-
     SkillDiscoveryStore.clear();                            // need for reload
 
     uint32 count = 0;
