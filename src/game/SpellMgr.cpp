@@ -103,7 +103,7 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
     if (spell)
     {
         // some triggered spells have data only usable for client
-        if (spell->IsTriggeredSpellWithRedundentData())
+        if (spell->IsTriggeredSpellWithRedundentCastTime())
             return 0;
 
         // spell targeted to non-trading trade slot item instant at trade success apply
@@ -1109,17 +1109,6 @@ void SpellMgr::LoadSpellTargetPositions()
         {
             if (spellInfo->EffectImplicitTargetA[i] == TARGET_TABLE_X_Y_Z_COORDINATES || spellInfo->EffectImplicitTargetB[i] == TARGET_TABLE_X_Y_Z_COORDINATES)
             {
-                // additional requirements
-                if (spellInfo->Effect[i] == SPELL_EFFECT_BIND && spellInfo->EffectMiscValue[i])
-                {
-                    uint32 zone_id = sTerrainMgr.GetAreaId(st.target_mapId, st.target_X, st.target_Y, st.target_Z);
-                    if (int32(zone_id) != spellInfo->EffectMiscValue[i])
-                    {
-                        sLog.outErrorDb("Spell (Id: %u) listed in `spell_target_position` expected point to zone %u bit point to zone %u.", Spell_ID, spellInfo->EffectMiscValue[i], zone_id);
-                        break;
-                    }
-                }
-
                 found = true;
                 break;
             }
@@ -1397,7 +1386,6 @@ void SpellMgr::LoadSpellProcItemEnchant()
     QueryResult* result = WorldDatabase.Query("SELECT entry, ppmRate FROM spell_proc_item_enchant");
     if (!result)
     {
-
         BarGoLink bar(1);
 
         bar.step();
@@ -1722,7 +1710,6 @@ void SpellMgr::LoadSpellElixirs()
     QueryResult* result = WorldDatabase.Query("SELECT entry, mask FROM spell_elixir");
     if (!result)
     {
-
         BarGoLink bar(1);
 
         bar.step();
@@ -2066,6 +2053,16 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Encapsulate and Encapsulate (channeled)
                     if ((spellInfo_1->Id == 45665 && spellInfo_2->Id == 45661) ||
                             (spellInfo_2->Id == 45665 && spellInfo_1->Id == 45661))
+                        return false;
+
+                    // Flame Tsunami Visual and Flame Tsunami Damage Aura
+                    if ((spellInfo_1->Id == 57494 && spellInfo_2->Id == 57492) ||
+                            (spellInfo_2->Id == 57494 && spellInfo_1->Id == 57492))
+                        return false;
+
+                    // Cyclone Aura 2 and Cyclone Aura
+                    if ((spellInfo_1->Id == 57598 && spellInfo_2->Id == 57560) ||
+                            (spellInfo_2->Id == 57598 && spellInfo_1->Id == 57560))
                         return false;
 
                     break;
@@ -3398,7 +3395,6 @@ void SpellMgr::LoadSpellPetAuras()
     QueryResult* result = WorldDatabase.Query("SELECT spell, effectId, pet, aura FROM spell_pet_auras");
     if (!result)
     {
-
         BarGoLink bar(1);
 
         bar.step();

@@ -20,6 +20,9 @@
 #include "Creature.h"
 #include "DBCStores.h"
 #include "Spell.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 
 CreatureAI::~CreatureAI()
 {
@@ -151,4 +154,82 @@ void CreatureAI::HandleMovementOnAttackStart(Unit* victim)
         m_creature->GetMotionMaster()->MoveIdle();
         m_creature->StopMoving();
     }
+}
+
+// ////////////////////////////////////////////////////////////////////////////////////////////////
+//                                      Event system
+// ////////////////////////////////////////////////////////////////////////////////////////////////
+
+class AiDelayEventAround : public BasicEvent
+{
+    public:
+        AiDelayEventAround(AIEventType eventType, ObjectGuid invokerGuid, Creature& owner, std::list<Creature*> const& receivers, uint32 miscValue) :
+            BasicEvent(),
+            m_eventType(eventType),
+            m_invokerGuid(invokerGuid),
+            m_owner(owner),
+            m_miscValue(miscValue)
+        {
+            // Pushing guids because in delay can happen some creature gets despawned => invalid pointer
+            m_receiverGuids.reserve(receivers.size());
+            for (std::list<Creature*>::const_iterator itr = receivers.begin(); itr != receivers.end(); ++itr)
+                m_receiverGuids.push_back((*itr)->GetObjectGuid());
+        }
+
+        bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) override
+        {
+            Unit* pInvoker = m_owner.GetMap()->GetUnit(m_invokerGuid);
+
+            for (GuidVector::const_reverse_iterator itr = m_receiverGuids.rbegin(); itr != m_receiverGuids.rend(); ++itr)
+            {
+                if (Creature* pReceiver = m_owner.GetMap()->GetAnyTypeCreature(*itr))
+                {
+                    pReceiver->AI()->ReceiveAIEvent(m_eventType, &m_owner, pInvoker, m_miscValue);
+                    // Special case for type 0 (call-assistance)
+                    if (m_eventType == AI_EVENT_CALL_ASSISTANCE && pInvoker && pReceiver->CanAssistTo(&m_owner, pInvoker))
+                    {
+                        pReceiver->SetNoCallAssistance(true);
+                        pReceiver->AI()->AttackStart(pInvoker);
+                    }
+                }
+            }
+            m_receiverGuids.clear();
+
+            return true;
+        }
+
+    private:
+        AiDelayEventAround();
+
+        ObjectGuid m_invokerGuid;
+        GuidVector m_receiverGuids;
+        Creature&  m_owner;
+
+        AIEventType m_eventType;
+        uint32 m_miscValue;
+};
+
+void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue /*=0*/) const
+{
+    if (fRadius > 0)
+    {
+        std::list<Creature*> receiverList;
+
+        // Use this check here to collect only assitable creatures in case of CALL_ASSISTANCE, else be less strict
+        MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_creature, eventType == AI_EVENT_CALL_ASSISTANCE ? pInvoker : NULL, fRadius);
+        MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(receiverList, u_check);
+        Cell::VisitGridObjects(m_creature, searcher, fRadius);
+
+        if (!receiverList.empty())
+        {
+            AiDelayEventAround* e = new AiDelayEventAround(eventType, pInvoker ? pInvoker->GetObjectGuid() : ObjectGuid(), *m_creature, receiverList, miscValue);
+            m_creature->m_Events.AddEvent(e, m_creature->m_Events.CalculateTime(uiDelay));
+        }
+    }
+}
+
+void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue /*=0*/) const
+{
+    MANGOS_ASSERT(pReceiver);
+    pReceiver->AI()->ReceiveAIEvent(eventType, m_creature, pInvoker, miscValue);
 }

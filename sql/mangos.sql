@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_12441_01_mangos_npc_spellclick_spells` bit(1) default NULL
+  `required_12465_01_mangos_spell_template` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -17841,6 +17841,7 @@ INSERT INTO `spell_template` VALUES
 (45162, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 101,  21,   6,   1,    0,   0,  56, 25123,   0,    0,     'Model - Shattered Sun Warrior - BE Male Tier 4'),
 (45166, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 101,  21,   6,   1,    0,   0,  56, 25127,   0,    0,     'Model - Shattered Sun Warrior - Draenei Female Tier 4'),
 (45170, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 101,  21,   6,   1,    0,   0,  56, 25131,   0,    0,     'Model - Shattered Sun Warrior - Draenei Male Tier 4'),
+(50574, 0x00000100, 0x00000000, 0x00000000, 0x00000000, 101,   0,  90,  25,    0,  11,   0, 28042,   0,    0,     'Captain Brandon Kill Credit'),
 (58630, 0x00800180, 0x00000000, 0x00000005, 0x00000000, 101,  37,   6,  22,    7,  28,   4, 0,       0,    0,     'Achievement check - Mal\'Ganis'),
 (59046, 0x00800180, 0x00000000, 0x00000005, 0x00000000, 101,  37,   6,  22,    7,  28,   4, 0,       0,    0,     'Achievement check - Tribunal of Ages'),
 (59450, 0x00800180, 0x00000000, 0x00000005, 0x00000000, 101,  37,   6,  22,    7,  28,   4, 0,       0,    0,     'Achievement check - The Four Horsemen'),

@@ -112,7 +112,10 @@ enum ScriptInfoDataFlags
     SCRIPT_FLAG_REVERSE_DIRECTION           = 0x02,         // t* -> s* (* result after previous flag is evaluated)
     SCRIPT_FLAG_SOURCE_TARGETS_SELF         = 0x04,         // s* -> s* (* result after previous flag is evaluated)
     SCRIPT_FLAG_COMMAND_ADDITIONAL          = 0x08,         // command dependend
+    SCRIPT_FLAG_BUDDY_BY_GUID               = 0x10,         // take the buddy by guid
+    SCRIPT_FLAG_BUDDY_IS_PET                = 0x20,         // buddy is a pet
 };
+#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_IS_PET - 1)
 
 struct ScriptInfo
 {
@@ -335,8 +338,8 @@ struct ScriptInfo
     };
 
     // Buddy system (entry can be npc or go entry, depending on command)
-    uint32 buddyEntry;                                      // datalong3 -> buddy_entry
-    uint32 searchRadius;                                    // datalong4 -> search_radius
+    uint32 buddyEntry;                                      // buddy_entry
+    uint32 searchRadiusOrGuid;                              // search_radius (can also be guid in case of SCRIPT_FLAG_BUDDY_BY_GUID)
     uint8 data_flags;                                       // data_flags
 
     int32 textId[MAX_TEXT_ID];                              // dataint to dataint4

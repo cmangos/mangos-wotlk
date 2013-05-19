@@ -2556,7 +2556,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 // TODO - maybe use an (internal) value for the map for neat far teleport handling
 
                 // far-teleport spells are handled in SpellEffect, elsewise report an error about an unexpected map (spells are always locally)
-                if (st->target_mapId != m_caster->GetMapId() && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_TELEPORT_UNITS)
+                if (st->target_mapId != m_caster->GetMapId() && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_TELEPORT_UNITS && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_BIND)
                     sLog.outError("SPELL: wrong map (%u instead %u) target coordinates for spell ID %u", st->target_mapId, m_caster->GetMapId(), m_spellInfo->Id);
             }
             else
@@ -2655,7 +2655,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_POINT_AT_SE:
         case TARGET_POINT_AT_SW:
         {
-
             if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
             {
                 Unit* currentTarget = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster;
@@ -3340,7 +3339,6 @@ void Spell::cast(bool skipCheck)
     float speed = m_spellInfo->speed == 0.0f && m_triggeredBySpellInfo ? m_triggeredBySpellInfo->speed : m_spellInfo->speed;
     if (speed > 0.0f)
     {
-
         // Remove used for cast item if need (it can be already NULL after TakeReagents call
         // in case delayed spell remove item at cast delay start
         TakeCastItem();
@@ -5105,7 +5103,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                     m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT_COORDINATES ||
                     m_spellInfo->EffectImplicitTargetA[j] == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT)
             {
-
                 SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(m_spellInfo->Id);
 
                 if (bounds.first == bounds.second)
@@ -5649,7 +5646,6 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 if (m_caster->GetPetGuid())                 // let warlock do a replacement summon
                 {
-
                     Pet* pet = ((Player*)m_caster)->GetPet();
 
                     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_WARLOCK)
@@ -7117,11 +7113,9 @@ bool Spell::IsNeedSendToClient() const
            m_spellInfo->speed > 0.0f || (!m_triggeredByAuraSpell && !m_IsTriggeredSpell);
 }
 
-bool Spell::IsTriggeredSpellWithRedundentData() const
+bool Spell::IsTriggeredSpellWithRedundentCastTime() const
 {
-    return m_triggeredByAuraSpell || m_triggeredBySpellInfo ||
-           // possible not need after above check?
-           m_IsTriggeredSpell && (m_spellInfo->manaCost || m_spellInfo->ManaCostPercentage);
+    return m_IsTriggeredSpell && (m_spellInfo->manaCost || m_spellInfo->ManaCostPercentage);
 }
 
 bool Spell::HaveTargetsForEffect(SpellEffectIndex effect) const
@@ -7611,6 +7605,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 45785:                                 // Sinister Reflection Clone (SWP, Kil'jaeden)
                 case 45892:                                 // Sinister Reflection (SWP, Kil'jaeden)
                 case 45976:                                 // Open Portal (SWP, M'uru)
+                case 46372:                                 // Ice Spear Target Picker (Slave Pens, Ahune)
                 case 47669:                                 // Awaken Subboss (Utgarde Pinnacle)
                 case 48278:                                 // Paralyze (Utgarde Pinnacle)
                 case 50742:                                 // Ooze Combine (Halls of Stone)
@@ -7623,6 +7618,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 54148:                                 // Ritual of the Sword (Utgarde Pinnacle, Svala)
                 case 55479:                                 // Forced Obedience (Naxxramas, Razovius)
                 case 56140:                                 // Summon Power Spark (Eye of Eternity, Malygos)
+                case 57578:                                 // Lava Strike (Obsidian Sanctum, Sartharion)
                 case 59870:                                 // Glare of the Tribunal (h) (Halls of Stone)
                 case 62016:                                 // Charge Orb (Ulduar, Thorim)
                 case 62042:                                 // Stormhammer (Ulduar, Thorim)
@@ -7675,6 +7671,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 71837:                                 // Vampiric Bite
                 case 71861:                                 // Swarming Shadows
                 case 72091:                                 // Frozen Orb (Vault of Archavon, Toravon)
+                case 72254:                                 // Mark of Fallen Champion (target selection) (ICC, Deathbringer Saurfang)
                 case 73022:                                 // Mutated Infection (Mode 2)
                 case 73023:                                 // Mutated Infection (Mode 3)
                     unMaxTargets = 1;

@@ -1927,6 +1927,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 46372:                                 // Ice Spear Target Picker
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 46359, true);
+                    return;
+                }
                 case 46485:                                 // Greatmother's Soulcatcher
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
@@ -2613,6 +2621,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     unitTarget->CastSpell(unitTarget, 56431, true, NULL, NULL, m_caster->GetObjectGuid());
                     unitTarget->CastSpell(unitTarget, 56432, true, NULL, NULL, m_caster->GetObjectGuid());
+                    return;
+                }
+                case 57578:                                 // Lava Strike
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
                 case 57908:                                 // Stain Cloth
@@ -3946,6 +3962,32 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target
     if (!unitTarget || unitTarget->IsTaxiFlying())
         return;
 
+        switch (m_spellInfo->Id)
+        {
+            case 48129:                                 // Scroll of Recall
+            case 60320:                                 // Scroll of Recall II
+            case 60321:                                 // Scroll of Recall III
+            {
+                uint32 failAtLevel = 0;
+                switch (m_spellInfo->Id)
+                {
+                    case 48129: failAtLevel = 40; break;
+                    case 60320: failAtLevel = 70; break;
+                    case 60321: failAtLevel = 80; break;
+                }
+
+                if (unitTarget->getLevel() > failAtLevel && unitTarget->GetTypeId() == TYPEID_PLAYER)
+                {
+                    unitTarget->CastSpell(unitTarget, 60444, true);
+                    // TODO: Unclear use of probably related spell 60322
+                    uint32 spellId = (((Player*)unitTarget)->GetTeam() == ALLIANCE ? 60323 : 60328) + urand(0, 7);
+                    unitTarget->CastSpell(unitTarget, spellId, true);
+                    return;
+                }
+                break;
+            }
+        }
+
     // Target dependend on TargetB, if there is none provided, decide dependend on A
     uint32 targetType = m_spellInfo->EffectImplicitTargetB[eff_idx];
     if (!targetType)
@@ -4954,6 +4996,18 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         return;
     }
 
+    // Get casting object
+    WorldObject* realCaster = GetCastingObject();
+    if (!realCaster)
+    {
+        sLog.outError("EffectSummonType: No Casting Object found for spell %u, (caster = %s)", m_spellInfo->Id, m_caster->GetGuidStr().c_str());
+        return;
+    }
+
+    Unit* responsibleCaster = m_originalCaster;
+    if (realCaster->GetTypeId() == TYPEID_GAMEOBJECT)
+        responsibleCaster = ((GameObject*)realCaster)->GetOwner();
+
     // Expected Amount: TODO - there are quite some exceptions (like totems, engineering dragonlings..)
     uint32 amount = damage > 0 ? damage : 1;
 
@@ -4962,7 +5016,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         amount = 1;
 
     // Expected Level                                       (Totem, Pet and Critter may not use this)
-    uint32 level = m_caster->getLevel();
+    uint32 level = responsibleCaster ? responsibleCaster->getLevel() : m_caster->getLevel();
     // level of creature summoned using engineering item based at engineering skill level
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_CastItem)
     {
@@ -4983,7 +5037,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         m_targets.getDestination(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z);
     else
     {
-        m_caster->GetPosition(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z);
+        realCaster->GetPosition(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z);
 
         // TODO - Is this really an error?
         sLog.outDebug("Spell Effect EFFECT_SUMMON (%u) - summon without destination (spell id %u, effIndex %u)", m_spellInfo->Effect[eff_idx], m_spellInfo->Id, eff_idx);
@@ -4996,15 +5050,15 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     {
         if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION || radius > 1.0f)
         {
-            m_caster->GetRandomPoint(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, radius, itr->x, itr->y, itr->z);
-            if (m_caster->GetMap()->GetHitPosition(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, itr->x, itr->y, itr->z, m_caster->GetPhaseMask(), -0.5f))
-                m_caster->UpdateAllowedPositionZ(itr->x, itr->y, itr->z);
+            realCaster->GetRandomPoint(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, radius, itr->x, itr->y, itr->z);
+            if (realCaster->GetMap()->GetHitPosition(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, itr->x, itr->y, itr->z, m_caster->GetPhaseMask(), -0.5f))
+                realCaster->UpdateAllowedPositionZ(itr->x, itr->y, itr->z);
         }
         else                                                // Get a point near the caster
         {
-            m_caster->GetClosePoint(itr->x, itr->y, itr->z, 0.0f, radius, frand(0.0f, 2 * M_PI_F));
-            if (m_caster->GetMap()->GetHitPosition(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, itr->x, itr->y, itr->z, m_caster->GetPhaseMask(), -0.5f))
-                m_caster->UpdateAllowedPositionZ(itr->x, itr->y, itr->z);
+            realCaster->GetClosePoint(itr->x, itr->y, itr->z, 0.0f, radius, frand(0.0f, 2 * M_PI_F));
+            if (realCaster->GetMap()->GetHitPosition(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, itr->x, itr->y, itr->z, m_caster->GetPhaseMask(), -0.5f))
+                realCaster->UpdateAllowedPositionZ(itr->x, itr->y, itr->z);
         }
     }
 
@@ -5130,6 +5184,9 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
 
         if (summon_prop->FactionId)
             itr->creature->setFaction(summon_prop->FactionId);
+        // Else set faction to summoner's faction for pet-like summoned
+        else if ((summon_prop->Flags & SUMMON_PROP_FLAG_INHERIT_FACTION) || !itr->creature->IsTemporarySummon())
+            itr->creature->setFaction(responsibleCaster ? responsibleCaster->getFaction() : m_caster->getFaction());
 
         if (!itr->creature->IsTemporarySummon())
         {
@@ -7681,6 +7738,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, spellId, true);
                     break;
                 }
+                case 46430:                                 // Synch Health
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->SetHealth(m_caster->GetHealth());
+                    return;
+                }
                 case 46642:                                 // 5,000 Gold
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -9155,7 +9220,7 @@ static ScriptInfo generateActivateCommand()
     si.command = SCRIPT_COMMAND_ACTIVATE_OBJECT;
     si.id = 0;
     si.buddyEntry = 0;
-    si.searchRadius = 0;
+    si.searchRadiusOrGuid = 0;
     si.data_flags = 0x00;
     return si;
 }
@@ -9266,13 +9331,17 @@ void Spell::EffectInebriate(SpellEffectIndex /*eff_idx*/)
         return;
 
     Player* player = (Player*)unitTarget;
-    uint16 currentDrunk = player->GetDrunkValue();
-    uint16 drunkMod = damage * 256;
-    if (currentDrunk + drunkMod > 0xFFFF)
-        currentDrunk = 0xFFFF;
-    else
-        currentDrunk += drunkMod;
-    player->SetDrunkValue(currentDrunk, m_CastItem ? m_CastItem->GetEntry() : 0);
+
+    uint8 drunkValue = player->GetDrunkValue() + (uint8)damage;
+    if (drunkValue > 100)
+    {
+        drunkValue = 100;
+
+        if (roll_chance_i(25))
+            player->CastSpell(player, 67468, false);    // Drunken Vomit
+    }
+
+    player->SetDrunkValue(drunkValue, m_CastItem ? m_CastItem->GetEntry() : 0);
 }
 
 void Spell::EffectFeedPet(SpellEffectIndex eff_idx)
@@ -10274,7 +10343,7 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
 
     Player* player = (Player*)unitTarget;
 
-    uint32 area_id;
+    uint32 area_id = m_spellInfo->EffectMiscValue[eff_idx];
     WorldLocation loc;
     if (m_spellInfo->EffectImplicitTargetA[eff_idx] == TARGET_TABLE_X_Y_Z_COORDINATES ||
             m_spellInfo->EffectImplicitTargetB[eff_idx] == TARGET_TABLE_X_Y_Z_COORDINATES)
@@ -10291,12 +10360,14 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
         loc.coord_y     = st->target_Y;
         loc.coord_z     = st->target_Z;
         loc.orientation = st->target_Orientation;
-        area_id = sTerrainMgr.GetAreaId(loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
+        if (!area_id)
+            area_id = sTerrainMgr.GetAreaId(loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
     }
     else
     {
         player->GetPosition(loc);
-        area_id = player->GetAreaId();
+        if (!area_id)
+            area_id = player->GetAreaId();
     }
 
     player->SetHomebindToLocation(loc, area_id);
@@ -10310,15 +10381,11 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
     data << uint32(area_id);
     player->SendDirectMessage(&data);
 
-    DEBUG_LOG("New Home Position X is %f", loc.coord_x);
-    DEBUG_LOG("New Home Position Y is %f", loc.coord_y);
-    DEBUG_LOG("New Home Position Z is %f", loc.coord_z);
-    DEBUG_LOG("New Home MapId is %u", loc.mapid);
-    DEBUG_LOG("New Home AreaId is %u", area_id);
+    DEBUG_LOG("New Home Position for %s: XYZ: %f %f %f on Map %u", player->GetGuidStr().c_str(), loc.coord_x, loc.coord_y, loc.coord_z, loc.mapid);
 
     // zone update
     data.Initialize(SMSG_PLAYERBOUND, 8 + 4);
-    data << player->GetObjectGuid();
+    data << m_caster->GetObjectGuid();
     data << uint32(area_id);
     player->SendDirectMessage(&data);
 }

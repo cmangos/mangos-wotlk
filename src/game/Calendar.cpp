@@ -656,7 +656,6 @@ void CalendarMgr::LoadCalendarsFromDB()
                 event->AddInvite(invite);
                 ++totalInvites;
                 m_MaxInviteId = std::max(inviteId, m_MaxInviteId);
-
             }
             while (invitesQuery->NextRow());
             sLog.outString();

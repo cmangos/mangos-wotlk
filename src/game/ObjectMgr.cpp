@@ -1553,6 +1553,10 @@ void ObjectMgr::LoadGameObjects()
         if (gameEvent == 0 && GuidPoolId == 0 && EntryPoolId == 0) // if not this is to be managed by GameEvent System or Pool system
             AddGameobjectToGrid(guid, &data);
 
+        //uint32 zoneId, areaId;
+        //sTerrainMgr.LoadTerrain(data.mapid)->GetZoneAndAreaId(zoneId, areaId, data.posX, data.posY, data.posZ);
+        //sLog.outErrorDb("UPDATE gameobject SET zone_id=%u, area_id=%u WHERE guid=%u;", zoneId, areaId, guid);
+
         ++count;
     }
     while (result->NextRow());
@@ -3433,7 +3437,6 @@ void ObjectMgr::LoadArenaTeams()
 
     if (!result)
     {
-
         BarGoLink bar(1);
 
         bar.step();
@@ -3453,7 +3456,6 @@ void ObjectMgr::LoadArenaTeams()
 
     do
     {
-
         bar.step();
         ++count;
 
@@ -4317,15 +4319,13 @@ void ObjectMgr::LoadQuests()
             if (!quest)
                 continue;
 
-            if (!quest->HasSpecialFlag(QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT))
+            // Exclude false positive of quest 10162
+            if (!quest->HasSpecialFlag(QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT) && spellInfo->Id != 33824 && quest_id != 10162)
             {
                 sLog.outErrorDb("Spell (id: %u) have SPELL_EFFECT_QUEST_COMPLETE for quest %u , but quest does not have SpecialFlags QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT (2) set. Quest SpecialFlags should be corrected to enable this objective.", spellInfo->Id, quest_id);
 
-                // The below forced alteration has been disabled because of spell 33824 / quest 10162.
-                // A startup error will still occur with proper data in quest_template, but it will be possible to sucessfully complete the quest with the expected data.
-
                 // this will prevent quest completing without objective
-                // const_cast<Quest*>(quest)->SetSpecialFlag(QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT);
+                const_cast<Quest*>(quest)->SetSpecialFlag(QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT);
             }
         }
     }
@@ -5500,7 +5500,6 @@ void ObjectMgr::LoadAreaTriggerTeleports()
     QueryResult* result = WorldDatabase.Query("SELECT id, required_level, required_item, required_item2, heroic_key, heroic_key2, required_quest_done, required_quest_done_heroic, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM areatrigger_teleport");
     if (!result)
     {
-
         BarGoLink bar(1);
 
         bar.step();
@@ -8945,7 +8944,6 @@ void ObjectMgr::LoadVendorTemplates()
 
 void ObjectMgr::LoadNpcGossips()
 {
-
     m_mCacheNpcTextIdMap.clear();
 
     QueryResult* result = WorldDatabase.Query("SELECT npc_guid, textid FROM npc_gossip");
@@ -9093,7 +9091,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
                               "SELECT menu_id, id, option_icon, option_text, option_id, npc_option_npcflag, "
                               "action_menu_id, action_poi_id, action_script_id, box_coded, box_money, box_text, "
                               "condition_id "
-                              "FROM gossip_menu_option");
+                              "FROM gossip_menu_option ORDER BY menu_id, id");
 
     if (!result)
     {

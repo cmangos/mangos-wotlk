@@ -398,7 +398,7 @@ enum SummonPropFlags
     SUMMON_PROP_FLAG_UNK7               = 0x0040,           // 12 spells in 3.0.3, no idea
     SUMMON_PROP_FLAG_UNK8               = 0x0080,           // 4 spells in 3.0.3, no idea
     SUMMON_PROP_FLAG_UNK9               = 0x0100,           // 51 spells in 3.0.3, no idea, many quest related
-    SUMMON_PROP_FLAG_UNK10              = 0x0200,           // 51 spells in 3.0.3, something defensive
+    SUMMON_PROP_FLAG_INHERIT_FACTION    = 0x0200,           // 51 spells in 3.0.3, something defensive (Faction inheriting is much guesswork)
     SUMMON_PROP_FLAG_UNK11              = 0x0400,           // 3 spells, requires something near?
     SUMMON_PROP_FLAG_UNK12              = 0x0800,           // 30 spells in 3.0.3, no idea
     SUMMON_PROP_FLAG_UNK13              = 0x1000,           // 8 spells in 3.0.3, siege vehicle
