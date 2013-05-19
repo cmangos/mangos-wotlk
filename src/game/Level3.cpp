@@ -850,7 +850,6 @@ bool ChatHandler::HandleReloadBattleEventCommand(char* /*args*/)
 
 bool ChatHandler::HandleReloadEventAITextsCommand(char* /*args*/)
 {
-
     sLog.outString("Re-Loading Texts from `creature_ai_texts`...");
     sEventAIMgr.LoadCreatureEventAI_Texts(true);
     SendGlobalSysMessage("DB table `creature_ai_texts` reloaded.");

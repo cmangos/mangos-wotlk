@@ -637,7 +637,6 @@ WheatyExceptionReport::EnumerateSymbolsCallback(
     ULONG         SymbolSize,
     PVOID         UserContext)
 {
-
     char szBuffer[2048];
 
     __try

@@ -30,7 +30,6 @@ This is the minimum interface to the VMapMamager.
 
 namespace VMAP
 {
-
     enum VMAPLoadResult
     {
         VMAP_LOAD_RESULT_ERROR,

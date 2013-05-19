@@ -51,6 +51,10 @@
 
 #define NULL_AURA_SLOT 0xFF
 
+/**
+ * An array with all the different handlers for taking care of
+ * the various aura types that are defined in AuraType.
+ */
 pAuraHandler AuraHandler[TOTAL_AURAS] =
 {
     &Aura::HandleNULL,                                      //  0 SPELL_AURA_NONE
@@ -2224,7 +2228,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         switch (GetId())
                         {
                             case 38224: spellId = (gender == GENDER_MALE ? 38225 : 38227); break;
-                            case 37096: spellId = (gender == GENDER_MALE ? 37092 : 37094); break;
+                            case 37096: spellId = (gender == GENDER_MALE ? 37093 : 37095); break;
                             case 46354: spellId = (gender == GENDER_MALE ? 46355 : 46356); break;
                             default: return;
                         }
@@ -4714,7 +4718,6 @@ void Aura::HandleInvisibility(bool apply, bool Real)
         {
             // apply glow vision
             target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
-
         }
 
         // apply only if not in GM invisibility and not stealth
@@ -8548,7 +8551,6 @@ void Aura::HandleAuraAddMechanicAbilities(bool apply, bool Real)
 
     if (apply)
     {
-
         // spell give the player a new castbar with some spells.. this is a clientside process..
         // serverside just needs to register the new spells so that player isn't kicked as cheater
         for (int i = 0; i < MAX_OVERRIDE_SPELLS; ++i)
