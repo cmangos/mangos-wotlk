@@ -3358,6 +3358,29 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 trigger_spell_id = 54843;
                 target = pVictim;
             }
+            // Item - Coliseum 25 Normal and Heroic Caster Trinket
+            else if (auraSpellInfo->Id == 67712 || auraSpellInfo->Id == 67758)
+            {
+                if (!pVictim || !pVictim->isAlive())
+                    return SPELL_AURA_PROC_FAILED;
+
+                uint32 castSpell = auraSpellInfo->Id == 67758 ? 67759 : 67713;
+
+                // stacking
+                CastSpell(this, castSpell, true, NULL, triggeredByAura);
+
+                // counting
+                Aura* dummy = GetDummyAura(castSpell);
+
+                // release at 3 aura in stack (count contained in basepoint of trigger aura)
+                if (!dummy || dummy->GetStackAmount() < uint32(triggerAmount))
+                    return SPELL_AURA_PROC_FAILED;
+
+                RemoveAurasDueToSpell(castSpell);
+                trigger_spell_id = castSpell + 1;
+                target = pVictim;
+                break;
+            }
             break;
         }
         case SPELLFAMILY_SHAMAN:
