@@ -7419,7 +7419,29 @@ void ObjectMgr::LoadGameObjectForQuests()
     sLog.outString(">> Loaded %u GameObjects for quests", count);
 }
 
-bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min_value, int32 max_value)
+inline void _DoStringError(int32 entry, char const* text, ...) ATTR_PRINTF(3, 4)
+{
+    MANGOS_ASSERT(text);
+
+    char buf[256];
+    va_list ap;
+    va_start(ap, text);
+    vsnprintf(buf, 256, text, ap);
+    va_end(ap);
+
+    DEBUG_LOG("%s", buf);
+
+    if (entry < MAX_CREATURE_AI_TEXT_STRING_ID)                 // script library error
+        sLog.outErrorScriptLib("%s", entry, buf);
+    else if (entry <= MIN_CREATURE_AI_TEXT_STRING_ID)           // eventAI error
+        sLog.outErrorEventAI("%s", entry, buf);
+    else if (entry < MIN_DB_SCRIPT_STRING_ID)                   // mangos string error
+        sLog.outError("%s");
+    else // if (entry > MIN_DB_SCRIPT_STRING_ID)                // DB script error
+        sLog.outErrorDb("DB-SCRIPTS: %s", entry, buf);
+}
+
+bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min_value, int32 max_value, bool extra_content)
 {
     int32 start_value = min_value;
     int32 end_value   = max_value;
@@ -7455,7 +7477,16 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
             ++itr;
     }
 
-    QueryResult* result = db.PQuery("SELECT entry,content_default,content_loc1,content_loc2,content_loc3,content_loc4,content_loc5,content_loc6,content_loc7,content_loc8 FROM %s", table);
+    QueryResult* result = NULL;
+
+    if (extra_content)
+    {
+        result = db.PQuery("SELECT entry,content_default,content_loc1,content_loc2,content_loc3,content_loc4,content_loc5,content_loc6,content_loc7,content_loc8,sound,type,language,emote FROM %s", table);
+
+        sLog.outString("Loading EventAI Texts additional data...");
+    }
+    else
+        result = db.PQuery("SELECT entry,content_default,content_loc1,content_loc2,content_loc3,content_loc4,content_loc5,content_loc6,content_loc7,content_loc8 FROM %s", table);
 
     if (!result)
     {
@@ -7501,6 +7532,21 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
             continue;
         }
 
+        // ToDo: fix this!
+        // range negative
+            //if (i > MIN_CREATURE_AI_TEXT_STRING_ID || i <= MAX_CREATURE_AI_TEXT_STRING_ID)
+            //{
+            //    sLog.outErrorEventAI("CreatureEventAI:  Entry %i in table `creature_ai_texts` is not in valid range(%d-%d)", i, MIN_CREATURE_AI_TEXT_STRING_ID, MAX_CREATURE_AI_TEXT_STRING_ID);
+            //    continue;
+            //}
+
+            //// range negative (don't must be happen, loaded from same table)
+            //if (!sObjectMgr.GetMangosStringLocale(i))
+            //{
+            //    sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` not found", i);
+            //    continue;
+            //}
+
         data.Content.resize(1);
         ++count;
 
@@ -7521,6 +7567,33 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
 
                     data.Content[idx + 1] = str;
                 }
+            }
+        }
+
+        // Load additional string content if necessary
+        if (extra_content)
+        {
+            data.SoundId     = fields[10].GetUInt32();
+            data.Type        = fields[11].GetUInt32();
+            data.Language    = fields[12].GetUInt32();
+            data.Emote       = fields[13].GetUInt32();
+
+            if (data.SoundId)
+            {
+                if (!GetSoundEntriesStore()->LookupEntry(data.SoundId))
+                    sLog.outErrorDb("Entry %i in table `%s` has soundId %u but sound does not exist.", entry, table, data.SoundId);
+            }
+
+            if (!GetLanguageDescByID(data.Language))
+                sLog.outErrorDb("Entry %i in table `%s` using Language %u but Language does not exist.", entry, table, data.Language);
+
+            if (data.Type > CHAT_TYPE_ZONE_YELL)
+                sLog.outErrorDb("Entry %i in table `%s` has Type %u but this Chat Type does not exist.", entry, table, data.Type);
+
+            if (data.Emote)
+            {
+                if (!sEmotesStore.LookupEntry(data.Emote))
+                    sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` has Emote %u but emote does not exist.", entry, data.Emote);
             }
         }
     }
@@ -9521,7 +9594,7 @@ void ObjectMgr::GetNpcTextLocaleStrings0(uint32 entry, int32 loc_idx, std::strin
 }
 
 // Functions for scripting access
-bool LoadMangosStrings(DatabaseType& db, char const* table, int32 start_value, int32 end_value)
+bool LoadMangosStrings(DatabaseType& db, char const* table, int32 start_value, int32 end_value, bool extra_content)
 {
     // MAX_DB_SCRIPT_STRING_ID is max allowed negative value for scripts (scrpts can use only more deep negative values
     // start/end reversed for negative values
@@ -9531,7 +9604,7 @@ bool LoadMangosStrings(DatabaseType& db, char const* table, int32 start_value, i
         return false;
     }
 
-    return sObjectMgr.LoadMangosStrings(db, table, start_value, end_value);
+    return sObjectMgr.LoadMangosStrings(db, table, start_value, end_value, extra_content);
 }
 
 void ObjectMgr::LoadCreatureTemplateSpells()
@@ -9667,4 +9740,66 @@ GameObjectDataPair const* FindGOData::GetResult() const
         return i_spawnedData;
 
     return i_anyData;
+}
+
+bool DoDisplayText(WorldObject const* source, int32 entry, Unit const* target /*=NULL*/)
+{
+    MangosStringLocale const* data = sObjectMgr.GetMangosStringLocale(entry);
+
+    if (!data)
+    {
+        _DoStringError(entry, "DoScriptText with source entry %u (TypeId=%u, guid=%u) could not find text entry %i.", source->GetEntry(), source->GetTypeId(), source->GetGUIDLow());
+        return false;
+    }
+
+    if (data->SoundId)
+    {
+        if (GetSoundEntriesStore()->LookupEntry(data->SoundId))
+            source->PlayDirectSound(data->SoundId);
+        else
+            _DoStringError(entry, "DoDisplayText entry %i tried to process invalid sound id %u.", data->SoundId);
+    }
+
+    if (data->Emote)
+    {
+        if (source->GetTypeId() == TYPEID_UNIT || source->GetTypeId() == TYPEID_PLAYER)
+        {
+            ((Unit*)source)->HandleEmote(data->Emote);
+        }
+        else
+            _DoStringError(entry, "DoDisplayText entry %i tried to process emote for invalid TypeId (%u)", source->GetTypeId());
+    }
+
+    switch (data->Type)
+    {
+        case CHAT_TYPE_SAY:
+            source->MonsterSay(entry, data->Language, target);
+            break;
+        case CHAT_TYPE_YELL:
+            source->MonsterYell(entry, data->Language, target);
+            break;
+        case CHAT_TYPE_TEXT_EMOTE:
+            source->MonsterTextEmote(entry, target);
+            break;
+        case CHAT_TYPE_BOSS_EMOTE:
+            source->MonsterTextEmote(entry, target, true);
+            break;
+        case CHAT_TYPE_WHISPER:
+        {
+            if (target && target->GetTypeId() == TYPEID_PLAYER)
+                source->MonsterWhisper(entry, target);
+            else
+                _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).");
+        } break;
+        case CHAT_TYPE_BOSS_WHISPER:
+        {
+            if (target && target->GetTypeId() == TYPEID_PLAYER)
+                source->MonsterWhisper(entry, target, true);
+            else
+                _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).");
+        } break;
+        case CHAT_TYPE_ZONE_YELL:
+            this->MonsterYellToZone(entry, data->Language, target);
+            break;
+    }
 }
