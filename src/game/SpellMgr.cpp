@@ -2070,6 +2070,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                             (spellInfo_2->SpellIconID == 2302 && spellInfo_2->SpellVisual[0] == 0))
                         return false;
 
+                    // Felblaze Visual and Fog of Corruption
+                    if ((spellInfo_1->Id == 45068 && spellInfo_2->Id == 45582) ||
+                            (spellInfo_2->Id == 45068 && spellInfo_1->Id == 45582))
+                        return false;
+
                     break;
                 }
                 case SPELLFAMILY_MAGE:
