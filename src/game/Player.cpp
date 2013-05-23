@@ -4858,6 +4858,7 @@ void Player::RepopAtGraveyard()
             data << ClosestGrave->z;
             GetSession()->SendPacket(&data);
         }
+        UpdateVisibilityAndView();
     }
 }
 

@@ -3752,8 +3752,7 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
     // special cases
     switch (triggered_spell_id)
     {
-            // Vanish (not exist)
-        case 18461:
+        case 18461:                                         // Vanish (not exist)
         {
             unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
             unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
@@ -3771,26 +3770,18 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
             m_caster->CastSpell(unitTarget, spellId, true);
             return;
         }
-        // just skip
-        case 23770:                                         // Sayge's Dark Fortune of *
-            // not exist, common cooldown can be implemented in scripts if need.
-            return;
-            // Brittle Armor - (need add max stack of 24575 Brittle Armor)
-        case 29284:
+        case 29284:                                         // Brittle Armor - (need add max stack of 24575 Brittle Armor)
             m_caster->CastSpell(unitTarget, 24575, true, m_CastItem, NULL, m_originalCasterGUID);
             return;
-            // Mercurial Shield - (need add max stack of 26464 Mercurial Shield)
-        case 29286:
+        case 29286:                                         // Mercurial Shield - (need add max stack of 26464 Mercurial Shield)
             m_caster->CastSpell(unitTarget, 26464, true, m_CastItem, NULL, m_originalCasterGUID);
             return;
-            // Righteous Defense
-        case 31980:
+        case 31980:                                         // Righteous Defense
         {
             m_caster->CastSpell(unitTarget, 31790, true, m_CastItem, NULL, m_originalCasterGUID);
             return;
         }
-        // Cloak of Shadows
-        case 35729:
+        case 35729:                                         // Cloak of Shadows
         {
             Unit::SpellAuraHolderMap& Auras = unitTarget->GetSpellAuraHolderMap();
             for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
@@ -3807,15 +3798,13 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
             }
             return;
         }
-        // Priest Shadowfiend (34433) need apply mana gain trigger aura on pet
-        case 41967:
+        case 41967:                                         // Priest Shadowfiend (34433) need apply mana gain trigger aura on pet
         {
             if (Unit* pet = unitTarget->GetPet())
                 pet->CastSpell(pet, 28305, true);
             return;
         }
-        // Empower Rune Weapon
-        case 53258:
+        case 53258:                                         // Empower Rune Weapon
         {
             // remove cooldown of frost/death, undead/blood activated in main spell
             if (unitTarget->GetTypeId() == TYPEID_PLAYER)
@@ -6740,32 +6729,6 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
             ((Player*)m_caster)->AddComboPoints(unitTarget, 1);
     }
 
-    // take ammo
-    if (m_attackType == RANGED_ATTACK && m_caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        Item* pItem = ((Player*)m_caster)->GetWeaponForAttack(RANGED_ATTACK, true, false);
-
-        // wands don't have ammo
-        if (!pItem || pItem->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_WAND)
-            return;
-
-        if (pItem->GetProto()->InventoryType == INVTYPE_THROWN)
-        {
-            if (pItem->GetMaxStackCount() == 1)
-            {
-                // decrease durability for non-stackable throw weapon
-                ((Player*)m_caster)->DurabilityPointLossForEquipSlot(EQUIPMENT_SLOT_RANGED);
-            }
-            else
-            {
-                // decrease items amount for stackable throw weapon
-                uint32 count = 1;
-                ((Player*)m_caster)->DestroyItemCount(pItem, count, true);
-            }
-        }
-        else if (uint32 ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID))
-            ((Player*)m_caster)->DestroyItemCount(ammo, 1, true);
-    }
 }
 
 void Spell::EffectThreat(SpellEffectIndex /*eff_idx*/)
