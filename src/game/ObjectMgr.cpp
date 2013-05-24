@@ -7532,21 +7532,6 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
             continue;
         }
 
-        // ToDo: fix this!
-        // range negative
-            //if (i > MIN_CREATURE_AI_TEXT_STRING_ID || i <= MAX_CREATURE_AI_TEXT_STRING_ID)
-            //{
-            //    sLog.outErrorEventAI("CreatureEventAI:  Entry %i in table `creature_ai_texts` is not in valid range(%d-%d)", i, MIN_CREATURE_AI_TEXT_STRING_ID, MAX_CREATURE_AI_TEXT_STRING_ID);
-            //    continue;
-            //}
-
-            //// range negative (don't must be happen, loaded from same table)
-            //if (!sObjectMgr.GetMangosStringLocale(i))
-            //{
-            //    sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` not found", i);
-            //    continue;
-            //}
-
         data.Content.resize(1);
         ++count;
 
@@ -7581,19 +7566,19 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
             if (data.SoundId)
             {
                 if (!GetSoundEntriesStore()->LookupEntry(data.SoundId))
-                    sLog.outErrorDb("Entry %i in table `%s` has soundId %u but sound does not exist.", entry, table, data.SoundId);
+                    _DoStringError(entry, "Entry %i in table `%s` has soundId %u but sound does not exist.", table, data.SoundId);
             }
 
             if (!GetLanguageDescByID(data.Language))
-                sLog.outErrorDb("Entry %i in table `%s` using Language %u but Language does not exist.", entry, table, data.Language);
+                _DoStringError(entry, "Entry %i in table `%s` using Language %u but Language does not exist.", table, data.Language);
 
             if (data.Type > CHAT_TYPE_ZONE_YELL)
-                sLog.outErrorDb("Entry %i in table `%s` has Type %u but this Chat Type does not exist.", entry, table, data.Type);
+                _DoStringError(entry, "Entry %i in table `%s` has Type %u but this Chat Type does not exist.", table, data.Type);
 
             if (data.Emote)
             {
                 if (!sEmotesStore.LookupEntry(data.Emote))
-                    sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` has Emote %u but emote does not exist.", entry, data.Emote);
+                    _DoStringError(entry, "Entry %i in table `%s` has Emote %u but emote does not exist.", table, data.Emote);
             }
         }
     }
@@ -9799,7 +9784,9 @@ bool DoDisplayText(WorldObject const* source, int32 entry, Unit const* target /*
                 _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).");
         } break;
         case CHAT_TYPE_ZONE_YELL:
-            this->MonsterYellToZone(entry, data->Language, target);
+            source->MonsterYellToZone(entry, data->Language, target);
             break;
     }
+
+    return true;
 }
