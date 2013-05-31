@@ -2075,6 +2075,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                             (spellInfo_2->Id == 45068 && spellInfo_1->Id == 45582))
                         return false;
 
+                    // Simon Game START timer, (DND) and Simon Game Pre-game timer
+                    if ((spellInfo_1->Id == 39993 && spellInfo_2->Id == 40041) ||
+                            (spellInfo_2->Id == 39993 && spellInfo_1->Id == 40041))
+                        return false;
+
                     break;
                 }
                 case SPELLFAMILY_MAGE:
