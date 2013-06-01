@@ -128,7 +128,13 @@ static_assert(MAX_DB_SCRIPT_STRING_ID < ACE_INT32_MAX, "Must scope with int32 ra
 
 struct MangosStringLocale
 {
+    MangosStringLocale() : SoundId(0), Type(0), Language(0), Emote(0) { }
+
     std::vector<std::string> Content;                       // 0 -> default, i -> i-1 locale index
+    uint32 SoundId;
+    uint8  Type;
+    uint32 Language;
+    uint32 Emote;
 };
 
 typedef UNORDERED_MAP<uint32, CreatureData> CreatureDataMap;
@@ -681,8 +687,8 @@ class ObjectMgr
         void LoadCreatureQuestRelations();
         void LoadCreatureInvolvedRelations();
 
-        bool LoadMangosStrings(DatabaseType& db, char const* table, int32 min_value, int32 max_value);
-        bool LoadMangosStrings() { return LoadMangosStrings(WorldDatabase, "mangos_string", MIN_MANGOS_STRING_ID, MAX_MANGOS_STRING_ID); }
+        bool LoadMangosStrings(DatabaseType& db, char const* table, int32 min_value, int32 max_value, bool extra_content);
+        bool LoadMangosStrings() { return LoadMangosStrings(WorldDatabase, "mangos_string", MIN_MANGOS_STRING_ID, MAX_MANGOS_STRING_ID, false); }
         void LoadCreatureLocales();
         void LoadCreatureTemplates();
         void LoadCreatures();
@@ -929,6 +935,13 @@ class ObjectMgr
             MangosStringLocaleMap::const_iterator itr = mMangosStringLocaleMap.find(entry);
             if (itr == mMangosStringLocaleMap.end()) return NULL;
             return &itr->second;
+        }
+        uint32 GetLoadedStringsCount(int32 minEntry) const
+        {
+            std::map<int32, uint32>::const_iterator itr = m_loadedStringCount.find(minEntry);
+            if (itr != m_loadedStringCount.end())
+                return itr->second;
+            return 0;
         }
 
         const char* GetMangosString(int32 entry, int locale_idx) const;
@@ -1226,6 +1239,7 @@ class ObjectMgr
         NpcTextLocaleMap mNpcTextLocaleMap;
         PageTextLocaleMap mPageTextLocaleMap;
         MangosStringLocaleMap mMangosStringLocaleMap;
+        std::map<int32 /*minEntryOfBracket*/, uint32 /*count*/> m_loadedStringCount;
         GossipMenuItemsLocaleMap mGossipMenuItemsLocaleMap;
         PointOfInterestLocaleMap mPointOfInterestLocaleMap;
         DungeonEncounterMap m_DungeonEncounters;
@@ -1241,9 +1255,13 @@ class ObjectMgr
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()
 
+/// generic text function
+MANGOS_DLL_SPEC bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target = NULL);
+
 // scripting access functions
-MANGOS_DLL_SPEC bool LoadMangosStrings(DatabaseType& db, char const* table, int32 start_value = MAX_CREATURE_AI_TEXT_STRING_ID, int32 end_value = std::numeric_limits<int32>::min());
+MANGOS_DLL_SPEC bool LoadMangosStrings(DatabaseType& db, char const* table, int32 start_value = MAX_CREATURE_AI_TEXT_STRING_ID, int32 end_value = std::numeric_limits<int32>::min(), bool extra_content = false);
 MANGOS_DLL_SPEC CreatureInfo const* GetCreatureTemplateStore(uint32 entry);
 MANGOS_DLL_SPEC Quest const* GetQuestTemplateStore(uint32 entry);
+MANGOS_DLL_SPEC MangosStringLocale const* GetMangosStringData(int32 entry);
 
 #endif

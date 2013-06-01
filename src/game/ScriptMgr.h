@@ -125,12 +125,7 @@ struct ScriptInfo
 
     union
     {
-        struct                                              // SCRIPT_COMMAND_TALK (0)
-        {
-            uint32 chatType;                                // datalong
-            uint32 language;                                // datalong2
-        } talk;
-
+        // SCRIPT_COMMAND_TALK (0)
         struct                                              // SCRIPT_COMMAND_EMOTE (1)
         {
             uint32 emoteId;                                 // datalong
