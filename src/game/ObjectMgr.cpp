@@ -9735,7 +9735,18 @@ bool DoDisplayText(WorldObject const* source, int32 entry, Unit const* target /*
     }
 
     if (data->SoundId)
-        source->PlayDirectSound(data->SoundId);
+    {
+        if (data->Type == CHAT_TYPE_ZONE_YELL)
+            source->GetMap()->PlayDirectSoundToMap(data->SoundId, source->GetZoneId());
+        else if (data->Type == CHAT_TYPE_WHISPER || data->Type == CHAT_TYPE_BOSS_WHISPER)
+        {
+            // An error will be displayed for the text
+            if (target && target->GetTypeId() == TYPEID_PLAYER)
+                source->PlayDirectSound(data->SoundId, (Player*)target);
+        }
+        else
+            source->PlayDirectSound(data->SoundId);
+    }
 
     if (data->Emote)
     {
@@ -9790,73 +9801,6 @@ bool DoDisplayText(WorldObject const* source, int32 entry, Unit const* target /*
             source->MonsterYellToZone(entry, data->Language, target);
             break;
     }
-
-
-    /* Reference SD2 code - fix accordingly!
-        if (pData->uiSoundId)
-    {
-        if (GetSoundEntriesStore()->LookupEntry(pData->uiSoundId))
-        {
-            if (pData->uiType == CHAT_TYPE_ZONE_YELL)
-                pSource->GetMap()->PlayDirectSoundToMap(pData->uiSoundId, pSource->GetZoneId());
-            else if (pData->uiType == CHAT_TYPE_WHISPER || pData->uiType == CHAT_TYPE_BOSS_WHISPER)
-            {
-                // An error will be displayed for the text
-                if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER)
-                    pSource->PlayDirectSound(pData->uiSoundId, (Player*)pTarget);
-            }
-            else
-                pSource->PlayDirectSound(pData->uiSoundId);
-        }
-        else
-            script_error_log("DoScriptText entry %i tried to process invalid sound id %u.", iTextEntry, pData->uiSoundId);
-    }
-
-    if (pData->uiEmote)
-    {
-        if (pSource->GetTypeId() == TYPEID_UNIT || pSource->GetTypeId() == TYPEID_PLAYER)
-            ((Unit*)pSource)->HandleEmote(pData->uiEmote);
-        else
-            script_error_log("DoScriptText entry %i tried to process emote for invalid TypeId (%u).", iTextEntry, pSource->GetTypeId());
-    }
-
-    switch (pData->uiType)
-    {
-        case CHAT_TYPE_SAY:
-            pSource->MonsterSay(iTextEntry, pData->uiLanguage, pTarget);
-            break;
-        case CHAT_TYPE_YELL:
-            pSource->MonsterYell(iTextEntry, pData->uiLanguage, pTarget);
-            break;
-        case CHAT_TYPE_TEXT_EMOTE:
-            pSource->MonsterTextEmote(iTextEntry, pTarget);
-            break;
-        case CHAT_TYPE_BOSS_EMOTE:
-            pSource->MonsterTextEmote(iTextEntry, pTarget, true);
-            break;
-        case CHAT_TYPE_WHISPER:
-        {
-            if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER)
-                pSource->MonsterWhisper(iTextEntry, pTarget);
-            else
-                script_error_log("DoScriptText entry %i cannot whisper without target unit (TYPEID_PLAYER).", iTextEntry);
-
-            break;
-        }
-        case CHAT_TYPE_BOSS_WHISPER:
-        {
-            if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER)
-                pSource->MonsterWhisper(iTextEntry, pTarget, true);
-            else
-                script_error_log("DoScriptText entry %i cannot whisper without target unit (TYPEID_PLAYER).", iTextEntry);
-
-            break;
-        }
-        case CHAT_TYPE_ZONE_YELL:
-            pSource->MonsterYellToZone(iTextEntry, pData->uiLanguage, pTarget);
-            break;
-    }
-    */
 
     return true;
 }
