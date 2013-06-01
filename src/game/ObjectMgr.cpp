@@ -9619,6 +9619,11 @@ Quest const* GetQuestTemplateStore(uint32 entry)
     return sObjectMgr.GetQuestTemplate(entry);
 }
 
+MangosStringLocale const* GetMangosStringData(int32 entry)
+{
+    return sObjectMgr.GetMangosStringLocale(entry);
+}
+
 bool FindCreatureData::operator()(CreatureDataPair const& dataPair)
 {
     // skip wrong entry ids
