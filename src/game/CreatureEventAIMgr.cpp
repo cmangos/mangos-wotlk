@@ -480,7 +480,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                                     sLog.outErrorEventAI("Event %u Action %u param%d references out-of-range entry (%i) in texts table.", i, j + 1, k + 1, action.text.TextId[k]);
                                     action.text.TextId[k] = 0;
                                 }
-                                else if (sObjectMgr.GetMangosStringLocale(action.text.TextId[k]))
+                                else if (!sObjectMgr.GetMangosStringLocale(action.text.TextId[k]))
                                 {
                                     sLog.outErrorEventAI("Event %u Action %u param%d references non-existing entry (%i) in texts table.", i, j + 1, k + 1, action.text.TextId[k]);
                                     action.text.TextId[k] = 0;
