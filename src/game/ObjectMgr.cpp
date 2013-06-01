@@ -9756,7 +9756,7 @@ bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=NULL*
         }
         else
         {
-            _DoStringError(entry, "DoDisplayText entry %i tried to process emote for invalid source %s", source->GetGuidStr().c_str());
+            _DoStringError(entry, "DoDisplayText entry %i tried to process emote for invalid source %s", entry, source->GetGuidStr().c_str());
             return false;
         }
     }
