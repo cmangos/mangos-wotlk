@@ -9724,7 +9724,7 @@ GameObjectDataPair const* FindGOData::GetResult() const
     return i_anyData;
 }
 
-bool DoDisplayText(WorldObject const* source, int32 entry, Unit const* target /*=NULL*/)
+bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=NULL*/)
 {
     MangosStringLocale const* data = sObjectMgr.GetMangosStringLocale(entry);
 
@@ -9742,7 +9742,7 @@ bool DoDisplayText(WorldObject const* source, int32 entry, Unit const* target /*
         {
             // An error will be displayed for the text
             if (target && target->GetTypeId() == TYPEID_PLAYER)
-                source->PlayDirectSound(data->SoundId, (Player*)target);
+                source->PlayDirectSound(data->SoundId, (Player const*)target);
         }
         else
             source->PlayDirectSound(data->SoundId);

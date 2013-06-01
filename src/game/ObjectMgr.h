@@ -1248,7 +1248,7 @@ class ObjectMgr
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()
 
 /// generic text function
-MANGOS_DLL_SPEC bool DoDisplayText(WorldObject const* source, int32 entry, Unit const* target = NULL);
+MANGOS_DLL_SPEC bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target = NULL);
 
 // scripting access functions
 MANGOS_DLL_SPEC bool LoadMangosStrings(DatabaseType& db, char const* table, int32 start_value = MAX_CREATURE_AI_TEXT_STRING_ID, int32 end_value = std::numeric_limits<int32>::min(), bool extra_content = false);
