@@ -1117,7 +1117,8 @@ bool ScriptAction::HandleScriptStep()
                 textId = m_script->textId[urand(0, i - 1)];
             }
 
-            DoDisplayText(pSource, textId, unitTarget);
+            if (!DoDisplayText(pSource, textId, unitTarget))
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, could not display text %i properly", m_table, m_script->id, textId);
             break;
         }
         case SCRIPT_COMMAND_EMOTE:                          // 1
