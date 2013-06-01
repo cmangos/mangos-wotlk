@@ -7419,7 +7419,7 @@ void ObjectMgr::LoadGameObjectForQuests()
     sLog.outString(">> Loaded %u GameObjects for quests", count);
 }
 
-inline void _DoStringError(int32 entry, char const* text, ...) ATTR_PRINTF(3, 4)
+inline void _DoStringError(int32 entry, char const* text, ...)
 {
     MANGOS_ASSERT(text);
 
