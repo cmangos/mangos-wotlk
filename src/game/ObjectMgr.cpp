@@ -7588,7 +7588,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
     if (min_value == MIN_MANGOS_STRING_ID)
         sLog.outString(">> Loaded %u MaNGOS strings from table %s", count, table);
     else
-        sLog.outString(">> Loaded %u string templates from %s", count, table);
+        sLog.outString(">> Loaded %u %s templates from %s", count, extra_content ? "text" : "string", table);
 
     return true;
 }
