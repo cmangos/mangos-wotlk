@@ -484,27 +484,27 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             if (!action.text.TextId[0])
                 return;
 
-            int32 temp = 0;
+            int32 textId = 0;
 
             if (action.type == ACTION_T_TEXT)
             {
                 if (action.text.TextId[1] && action.text.TextId[2])
-                    temp = action.text.TextId[urand(0, 2)];
+                    textId = action.text.TextId[urand(0, 2)];
                 else if (action.text.TextId[1] && urand(0, 1))
-                    temp = action.text.TextId[1];
+                    textId = action.text.TextId[1];
                 else
-                    temp = action.text.TextId[0];
+                    textId = action.text.TextId[0];
             }
             // ACTION_T_CHANCED_TEXT, chance hits
             else if (urand(0, 99) < action.chanced_text.chance)
             {
                 if (action.chanced_text.TextId[0] && action.chanced_text.TextId[1])
-                    temp = action.chanced_text.TextId[urand(0, 1)];
+                    textId = action.chanced_text.TextId[urand(0, 1)];
                 else
-                    temp = action.chanced_text.TextId[0];
+                    textId = action.chanced_text.TextId[0];
             }
 
-            if (temp)
+            if (textId)
             {
                 Unit* target = NULL;
 
@@ -526,7 +526,8 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                                 target = owner;
                 }
 
-                DoScriptText(temp, m_creature, target);
+                if (!DoDisplayText(m_creature, textId, target))
+                    sLog.outErrorEventAI("Error attempting to display text %i, used by script %u", textId, EventId);
             }
             break;
         }
@@ -1400,23 +1401,6 @@ void CreatureEventAI::DoFindFriendlyMissingBuff(std::list<Creature*>& _list, flo
 
 //*********************************
 //*** Functions used globally ***
-
-void CreatureEventAI::DoScriptText(int32 textEntry, WorldObject* pSource, Unit* target)
-{
-    if (!pSource)
-    {
-        sLog.outErrorEventAI("DoScriptText entry %i, invalid Source pointer.", textEntry);
-        return;
-    }
-
-    if (textEntry >= 0)
-    {
-        sLog.outErrorEventAI("DoScriptText with source entry %u (TypeId=%u, guid=%u) attempts to process text entry %i, but text entry must be negative.", pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), textEntry);
-        return;
-    }
-
-    DoScriptText(textEntry, pSource, target);
-}
 
 void CreatureEventAI::ReceiveEmote(Player* pPlayer, uint32 text_emote)
 {

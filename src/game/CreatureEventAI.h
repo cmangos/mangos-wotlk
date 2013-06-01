@@ -637,8 +637,6 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         /// If the bool& param is true, an error should be reported
         inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker, Creature* pAIEventSender, bool& isError, uint32 forSpellId = 0, uint32 selectFlags = 0);
 
-        void DoScriptText(int32 textEntry, WorldObject* pSource, Unit* target);
-
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event);
 
         Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff);
