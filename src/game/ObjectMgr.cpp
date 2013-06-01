@@ -7555,22 +7555,28 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
             data.Language    = fields[12].GetUInt32();
             data.Emote       = fields[13].GetUInt32();
 
-            if (data.SoundId)
+            if (data.SoundId && !sSoundEntriesStore.LookupEntry(data.SoundId))
             {
-                if (!GetSoundEntriesStore()->LookupEntry(data.SoundId))
-                    _DoStringError(entry, "Entry %i in table `%s` has soundId %u but sound does not exist.", entry, table, data.SoundId);
+                _DoStringError(entry, "Entry %i in table `%s` has soundId %u but sound does not exist.", entry, table, data.SoundId);
+                data.SoundId = 0;
             }
 
             if (!GetLanguageDescByID(data.Language))
+            {
                 _DoStringError(entry, "Entry %i in table `%s` using Language %u but Language does not exist.", entry, table, data.Language);
+                data.Language = LANG_UNIVERSAL;
+            }
 
             if (data.Type > CHAT_TYPE_ZONE_YELL)
-                _DoStringError(entry, "Entry %i in table `%s` has Type %u but this Chat Type does not exist.", entry, table, data.Type);
-
-            if (data.Emote)
             {
-                if (!sEmotesStore.LookupEntry(data.Emote))
-                    _DoStringError(entry, "Entry %i in table `%s` has Emote %u but emote does not exist.", entry, table, data.Emote);
+                _DoStringError(entry, "Entry %i in table `%s` has Type %u but this Chat Type does not exist.", entry, table, data.Type);
+                data.Type = CHAT_TYPE_SAY;
+            }
+
+            if (data.Emote && !sEmotesStore.LookupEntry(data.Emote))
+            {
+                _DoStringError(entry, "Entry %i in table `%s` has Emote %u but emote does not exist.", entry, table, data.Emote);
+                data.Emote = EMOTE_ONESHOT_NONE;
             }
         }
     }
@@ -9719,17 +9725,12 @@ bool DoDisplayText(WorldObject const* source, int32 entry, Unit const* target /*
 
     if (!data)
     {
-        _DoStringError(entry, "DoScriptText with source entry %u (TypeId=%u, guid=%u) could not find text entry %i.", source->GetEntry(), source->GetTypeId(), source->GetGUIDLow());
+        _DoStringError(entry, "DoScriptText with source %s could not find text entry %i.", source->GetGuidStr().c_str(), entry);
         return false;
     }
 
     if (data->SoundId)
-    {
-        if (GetSoundEntriesStore()->LookupEntry(data->SoundId))
-            source->PlayDirectSound(data->SoundId);
-        else
-            _DoStringError(entry, "DoDisplayText entry %i tried to process invalid sound id %u.", data->SoundId);
-    }
+        source->PlayDirectSound(data->SoundId);
 
     if (data->Emote)
     {
@@ -9738,7 +9739,10 @@ bool DoDisplayText(WorldObject const* source, int32 entry, Unit const* target /*
             ((Unit*)source)->HandleEmote(data->Emote);
         }
         else
-            _DoStringError(entry, "DoDisplayText entry %i tried to process emote for invalid TypeId (%u)", source->GetTypeId());
+        {
+            _DoStringError(entry, "DoDisplayText entry %i tried to process emote for invalid source %s", source->GetGuidStr().c_str());
+            return false;
+        }
     }
 
     switch (data->Type)
@@ -9760,15 +9764,23 @@ bool DoDisplayText(WorldObject const* source, int32 entry, Unit const* target /*
             if (target && target->GetTypeId() == TYPEID_PLAYER)
                 source->MonsterWhisper(entry, target);
             else
+            {
                 _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).");
-        } break;
+                return false;
+            }
+            break;
+        }
         case CHAT_TYPE_BOSS_WHISPER:
         {
             if (target && target->GetTypeId() == TYPEID_PLAYER)
                 source->MonsterWhisper(entry, target, true);
             else
+            {
                 _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).");
-        } break;
+                return false;
+            }
+            break;
+        }
         case CHAT_TYPE_ZONE_YELL:
             source->MonsterYellToZone(entry, data->Language, target);
             break;
