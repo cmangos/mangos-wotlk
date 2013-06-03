@@ -56,10 +56,10 @@ namespace MaNGOS
 
     struct MANGOS_DLL_DECL MessageDeliverer
     {
-        Player& i_player;
+        Player const& i_player;
         WorldPacket* i_message;
         bool i_toSelf;
-        MessageDeliverer(Player& pl, WorldPacket* msg, bool to_self) : i_player(pl), i_message(msg), i_toSelf(to_self) {}
+        MessageDeliverer(Player const& pl, WorldPacket* msg, bool to_self) : i_player(pl), i_message(msg), i_toSelf(to_self) {}
         void Visit(CameraMapType& m);
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
@@ -81,7 +81,7 @@ namespace MaNGOS
     {
         uint32 i_phaseMask;
         WorldPacket* i_message;
-        explicit ObjectMessageDeliverer(WorldObject& obj, WorldPacket* msg)
+        explicit ObjectMessageDeliverer(WorldObject const& obj, WorldPacket* msg)
             : i_phaseMask(obj.GetPhaseMask()), i_message(msg) {}
         void Visit(CameraMapType& m);
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
@@ -89,13 +89,13 @@ namespace MaNGOS
 
     struct MANGOS_DLL_DECL MessageDistDeliverer
     {
-        Player& i_player;
+        Player const& i_player;
         WorldPacket* i_message;
         bool i_toSelf;
         bool i_ownTeamOnly;
         float i_dist;
 
-        MessageDistDeliverer(Player& pl, WorldPacket* msg, float dist, bool to_self, bool ownTeamOnly)
+        MessageDistDeliverer(Player const& pl, WorldPacket* msg, float dist, bool to_self, bool ownTeamOnly)
             : i_player(pl), i_message(msg), i_toSelf(to_self), i_ownTeamOnly(ownTeamOnly), i_dist(dist) {}
         void Visit(CameraMapType& m);
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
@@ -103,10 +103,10 @@ namespace MaNGOS
 
     struct MANGOS_DLL_DECL ObjectMessageDistDeliverer
     {
-        WorldObject& i_object;
+        WorldObject const& i_object;
         WorldPacket* i_message;
         float i_dist;
-        ObjectMessageDistDeliverer(WorldObject& obj, WorldPacket* msg, float dist) : i_object(obj), i_message(msg), i_dist(dist) {}
+        ObjectMessageDistDeliverer(WorldObject const& obj, WorldPacket* msg, float dist) : i_object(obj), i_message(msg), i_dist(dist) {}
         void Visit(CameraMapType& m);
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
