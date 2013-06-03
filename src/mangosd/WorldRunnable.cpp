@@ -66,7 +66,7 @@ void WorldRunnable::run()
         if (diff <= WORLD_SLEEP_CONST + prevSleepTime)
         {
             prevSleepTime = WORLD_SLEEP_CONST + prevSleepTime - diff;
-            ACE_Based::Thread::Sleep(prevSleepTime);
+            MaNGOS::Thread::Sleep(prevSleepTime);
         }
         else
             prevSleepTime = 0;
