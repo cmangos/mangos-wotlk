@@ -7435,7 +7435,7 @@ inline void _DoStringError(int32 entry, char const* text, ...)
     else if (entry <= MIN_CREATURE_AI_TEXT_STRING_ID)       // eventAI error
         sLog.outErrorEventAI("%s", buf);
     else if (entry < MIN_DB_SCRIPT_STRING_ID)               // mangos string error
-        sLog.outError("%s");
+        sLog.outError("%s", buf);
     else // if (entry > MIN_DB_SCRIPT_STRING_ID)            // DB script text error
         sLog.outErrorDb("DB-SCRIPTS: %s", buf);
 }
@@ -9784,7 +9784,7 @@ bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=NULL*
                 source->MonsterWhisper(entry, target);
             else
             {
-                _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).");
+                _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).", entry);
                 return false;
             }
             break;
@@ -9795,7 +9795,7 @@ bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=NULL*
                 source->MonsterWhisper(entry, target, true);
             else
             {
-                _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).");
+                _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).", entry);
                 return false;
             }
             break;
