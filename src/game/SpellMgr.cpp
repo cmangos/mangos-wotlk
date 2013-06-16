@@ -2065,6 +2065,21 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                             (spellInfo_2->Id == 57598 && spellInfo_1->Id == 57560))
                         return false;
 
+                    // Shard of Flame and Mote of Flame
+                    if ((spellInfo_1->SpellIconID == 2302 && spellInfo_1->SpellVisual[0] == 0) ||
+                            (spellInfo_2->SpellIconID == 2302 && spellInfo_2->SpellVisual[0] == 0))
+                        return false;
+
+                    // Felblaze Visual and Fog of Corruption
+                    if ((spellInfo_1->Id == 45068 && spellInfo_2->Id == 45582) ||
+                            (spellInfo_2->Id == 45068 && spellInfo_1->Id == 45582))
+                        return false;
+
+                    // Simon Game START timer, (DND) and Simon Game Pre-game timer
+                    if ((spellInfo_1->Id == 39993 && spellInfo_2->Id == 40041) ||
+                            (spellInfo_2->Id == 39993 && spellInfo_1->Id == 40041))
+                        return false;
+
                     break;
                 }
                 case SPELLFAMILY_MAGE:
