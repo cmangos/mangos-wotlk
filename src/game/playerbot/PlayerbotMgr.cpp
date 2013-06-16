@@ -813,19 +813,18 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
         case CMSG_GAMEOBJECT_QUERY:
         case MSG_MOVE_JUMP:
         case MSG_MOVE_FALL_LAND:
-        return;
+        return;*/
 
-        default:
+    default:
         {
-        const char* oc = LookupOpcodeName(packet.GetOpcode());
-        // ChatHandler ch(m_master);
-        // ch.SendSysMessage(oc);
+            /*const char* oc = LookupOpcodeName(packet.GetOpcode());
+            // ChatHandler ch(m_master);
+            // ch.SendSysMessage(oc);
 
-        std::ostringstream out;
-        out << "masterin: " << oc;
-        sLog.outError(out.str().c_str());
+            std::ostringstream out;
+            out << "masterin: " << oc;
+            sLog.outError(out.str().c_str()); */
         }
-        */
     }
 }
 

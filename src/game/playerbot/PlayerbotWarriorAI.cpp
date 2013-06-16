@@ -527,7 +527,7 @@ bool PlayerbotWarriorAI::Pull()
 
     if (m_bot->GetCombatDistance(m_ai->GetCurrentTarget(), true) > ATTACK_DISTANCE)
     {
-        if (!m_ai->IsInRange(m_ai->GetCurrentTarget(), AUTO_SHOT))
+        if (!m_ai->In_Range(m_ai->GetCurrentTarget(), AUTO_SHOT))
         {
             m_ai->TellMaster("I'm out of range.");
             return false;

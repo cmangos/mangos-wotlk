@@ -157,7 +157,7 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit *pTarget)
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     //Unit* pVictim = pTarget->getVictim();
-    float dist = m_bot->GetCombatDistance(pTarget, true);
+    bool meleeReach = m_bot->CanReachWithMeleeAttack(pTarget);
     Pet *pet = m_bot->GetPet();
     uint32 spec = m_bot->GetSpec();
     uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
@@ -181,10 +181,10 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit *pTarget)
     if (m_ai->GetHealthPercent() < 20 && pet && pet->GetEntry() == DEMON_VOIDWALKER && SACRIFICE && !m_bot->HasAura(SACRIFICE))
         m_ai->CastPetSpell(SACRIFICE);
 
-    if (m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED && dist > ATTACK_DISTANCE)
+    if (m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED && !meleeReach)
         m_ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
     // if in melee range OR can't shoot OR have no ranged (wand) equipped
-    else if(m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_MELEE && (dist <= ATTACK_DISTANCE || SHOOT == 0 || !m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true)))
+    else if(m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_MELEE && (meleeReach || SHOOT == 0 || !m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true)))
         m_ai->SetCombatStyle(PlayerbotAI::COMBAT_MELEE);
 
     //Used to determine if this bot is highest on threat
@@ -213,15 +213,15 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit *pTarget)
     switch (spec)
     {
         case WARLOCK_SPEC_AFFLICTION:
-            if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
+            if (CURSE_OF_AGONY && m_ai->In_Reach(pTarget,CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
                 return RETURN_CONTINUE;
-            if (CORRUPTION && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+            if (CORRUPTION && m_ai->In_Reach(pTarget,CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
                 return RETURN_CONTINUE;
-            if (FIRE && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
+            if (FIRE && m_ai->In_Reach(pTarget,FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
                 return RETURN_CONTINUE;
-            if (HAUNT && !m_bot->HasSpellCooldown(HAUNT) && CastSpell(HAUNT, pTarget))
+            if (HAUNT && m_ai->In_Reach(pTarget,HAUNT) && !m_bot->HasSpellCooldown(HAUNT) && CastSpell(HAUNT, pTarget))
                 return RETURN_CONTINUE;
-            if (SHADOW_BOLT && CastSpell(SHADOW_BOLT, pTarget))
+            if (SHADOW_BOLT && m_ai->In_Reach(pTarget,SHADOW_BOLT) && CastSpell(SHADOW_BOLT, pTarget))
                 return RETURN_CONTINUE;
 
             return RETURN_NO_ACTION_OK;
@@ -229,33 +229,33 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit *pTarget)
         case WARLOCK_SPEC_DEMONOLOGY:
             if (pet && DEMONIC_EMPOWERMENT && !m_bot->HasSpellCooldown(DEMONIC_EMPOWERMENT) && CastSpell(DEMONIC_EMPOWERMENT))
                 return RETURN_CONTINUE;
-            if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
+            if (CURSE_OF_AGONY && m_ai->In_Reach(pTarget,CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
                 return RETURN_CONTINUE;
-            if (CORRUPTION && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+            if (CORRUPTION && m_ai->In_Reach(pTarget,CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
                 return RETURN_CONTINUE;
-            if (FIRE && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
+            if (FIRE && m_ai->In_Reach(pTarget,FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
                 return RETURN_CONTINUE;
-            if (INCINERATE && pTarget->HasAura(FIRE) && CastSpell(INCINERATE, pTarget))
+            if (INCINERATE && m_ai->In_Reach(pTarget,INCINERATE) && pTarget->HasAura(FIRE) && CastSpell(INCINERATE, pTarget))
                 return RETURN_CONTINUE;
-            if (SHADOW_BOLT && CastSpell(SHADOW_BOLT, pTarget))
+            if (SHADOW_BOLT && m_ai->In_Reach(pTarget,SHADOW_BOLT) && CastSpell(SHADOW_BOLT, pTarget))
                 return RETURN_CONTINUE;
 
             return RETURN_NO_ACTION_OK;
 
         case WARLOCK_SPEC_DESTRUCTION:
-            if (CURSE_OF_AGONY && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
+            if (CURSE_OF_AGONY && m_ai->In_Reach(pTarget,CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
                 return RETURN_CONTINUE;
-            if (CORRUPTION && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+            if (CORRUPTION && m_ai->In_Reach(pTarget,CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
                 return RETURN_CONTINUE;
-            if (FIRE && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
+            if (FIRE && m_ai->In_Reach(pTarget,FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
                 return RETURN_CONTINUE;
-            if (CONFLAGRATE && pTarget->HasAura(FIRE) && !m_bot->HasSpellCooldown(CONFLAGRATE) && CastSpell(CONFLAGRATE, pTarget))
+            if (CONFLAGRATE && m_ai->In_Reach(pTarget,CONFLAGRATE) && pTarget->HasAura(FIRE) && !m_bot->HasSpellCooldown(CONFLAGRATE) && CastSpell(CONFLAGRATE, pTarget))
                 return RETURN_CONTINUE;
-            if (CHAOS_BOLT && !m_bot->HasSpellCooldown(CHAOS_BOLT) && CastSpell(CHAOS_BOLT, pTarget))
+            if (CHAOS_BOLT && m_ai->In_Reach(pTarget,CHAOS_BOLT) && !m_bot->HasSpellCooldown(CHAOS_BOLT) && CastSpell(CHAOS_BOLT, pTarget))
                 return RETURN_CONTINUE;
-            if (INCINERATE && pTarget->HasAura(FIRE) && CastSpell(INCINERATE, pTarget))
+            if (INCINERATE && m_ai->In_Reach(pTarget,INCINERATE) && pTarget->HasAura(FIRE) && CastSpell(INCINERATE, pTarget))
                 return RETURN_CONTINUE;
-            if (SHADOW_BOLT && CastSpell(SHADOW_BOLT, pTarget))
+            if (SHADOW_BOLT && m_ai->In_Reach(pTarget,SHADOW_BOLT) && CastSpell(SHADOW_BOLT, pTarget))
                 return RETURN_CONTINUE;
 
             return RETURN_NO_ACTION_OK;
@@ -307,11 +307,11 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit *pTarget)
     }
 
     // No spec due to low level OR no spell found yet
-    if (CORRUPTION && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+    if (CORRUPTION && m_ai->In_Reach(pTarget,CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
         return RETURN_CONTINUE;
-    if (FIRE && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
+    if (FIRE && m_ai->In_Reach(pTarget,FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
         return RETURN_CONTINUE;
-    if (SHADOW_BOLT)
+    if (SHADOW_BOLT && m_ai->In_Reach(pTarget,SHADOW_BOLT))
         return CastSpell(SHADOW_BOLT, pTarget);
 
     return RETURN_NO_ACTION_OK;
@@ -319,9 +319,9 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit *pTarget)
 
 CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVP(Unit* pTarget)
 {
-    if (m_ai->CastSpell(FEAR, *pTarget))
+    if (FEAR && m_ai->In_Reach(pTarget,FEAR) && m_ai->CastSpell(FEAR, *pTarget))
         return RETURN_CONTINUE;
-    if (m_ai->CastSpell(SHADOW_BOLT))
+    if (SHADOW_BOLT && m_ai->In_Reach(pTarget,SHADOW_BOLT) && m_ai->CastSpell(SHADOW_BOLT))
         return RETURN_CONTINUE;
 
     return DoNextCombatManeuverPVE(pTarget); // TODO: bad idea perhaps, but better than the alternative

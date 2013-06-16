@@ -1788,6 +1788,7 @@ public:
     Item* FindKeyForLockValue(uint32 reqSkillValue);
     Item* FindBombForLockValue(uint32 reqSkillValue);
     Item* FindConsumable(uint32 displayId) const;
+    bool  FindAmmo() const;
     uint8 _findItemSlot(Item* target);
     bool CanStore();
 
@@ -1803,7 +1804,9 @@ public:
     bool CastPetSpell(uint32 spellId, Unit* target = NULL);
     bool Buff(uint32 spellId, Unit * target, void (*beforeCast)(Player *) = NULL);
     bool SelfBuff(uint32 spellId);
-    bool IsInRange(Unit* Target, uint32 spellId);
+    bool In_Range(Unit* Target, uint32 spellId);
+    bool In_Reach(Unit* Target, uint32 spellId);
+    bool CanReachWithSpellAttack(Unit* target);
 
     void UseItem(Item *item, uint32 targetFlag, ObjectGuid targetGUID);
     void UseItem(Item *item, uint8 targetInventorySlot);

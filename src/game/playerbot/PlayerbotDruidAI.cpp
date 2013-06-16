@@ -84,6 +84,7 @@ PlayerbotDruidAI::~PlayerbotDruidAI() {}
 
 CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuver(Unit* pTarget)
 {
+    bool meleeReach = m_bot->CanReachWithMeleeAttack(pTarget);
     // There are NPCs in BGs and Open World PvP, so don't filter this on PvP scenarios (of course if PvP targets anyone but tank, all bets are off anyway)
     // Wait until the tank says so, until any non-tank gains aggro or X seconds - whichever is shortest
     if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO)
@@ -92,7 +93,7 @@ CombatManeuverReturns PlayerbotDruidAI::DoFirstCombatManeuver(Unit* pTarget)
         {
             if (PlayerbotAI::ORDERS_TANK & m_ai->GetCombatOrder())
             {
-                if (m_bot->GetCombatDistance(pTarget, true) <= ATTACK_DISTANCE)
+                if (meleeReach)
                 {
                     // Set everyone's UpdateAI() waiting to 2 seconds
                     m_ai->SetGroupIgnoreUpdateTime(2);
@@ -186,7 +187,6 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuverPVE(Unit* pTarget)
     uint32 spec = m_bot->GetSpec();
     if (spec == 0) // default to spellcasting or healing for healer
         spec = (PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder() ? DRUID_SPEC_RESTORATION : DRUID_SPEC_BALANCE);
-    float dist = m_bot->GetCombatDistance(pTarget, true);
 
     // Make sure healer stays put, don't even melee (aggro) if in range.
     if (m_ai->IsHealer() && m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED)
@@ -257,16 +257,16 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuverPVE(Unit* pTarget)
             return RETURN_CONTINUE;
         if (ROOTS > 0 && !pTarget->HasAura(ROOTS, EFFECT_INDEX_0) && CastSpell(ROOTS, pTarget))
             return RETURN_CONTINUE;
-        if (HURRICANE > 0 && m_ai->GetAttackerCount() >= 5 && CastSpell(HURRICANE, pTarget))
+        if (HURRICANE > 0 && ai->In_Reach(target,HURRICANE) && m_ai->GetAttackerCount() >= 5 && CastSpell(HURRICANE, pTarget))
         {
             m_ai->SetIgnoreUpdateTime(10);
             return RETURN_CONTINUE;
         }
-        if (STARFALL > 0 && !m_bot->HasAura(STARFALL, EFFECT_INDEX_0) && m_ai->GetAttackerCount() >= 3 && CastSpell(STARFALL, pTarget))
+        if (STARFALL > 0 && ai->In_Reach(target,STARFALL) && !m_bot->HasAura(STARFALL, EFFECT_INDEX_0) && m_ai->GetAttackerCount() >= 3 && CastSpell(STARFALL, pTarget))
             return RETURN_CONTINUE;
         if (BARKSKIN > 0 && pVictim == m_bot && m_ai->GetHealthPercent() < 75 && !m_bot->HasAura(BARKSKIN, EFFECT_INDEX_0) && CastSpell(BARKSKIN, m_bot))
             return RETURN_CONTINUE;
-        if (INNERVATE > 0 && !m_bot->HasAura(INNERVATE, EFFECT_INDEX_0) && CastSpell(INNERVATE, m_bot))
+        if (INNERVATE > 0 && ai->In_Reach(m_bot,INNERVATE) && !m_bot->HasAura(INNERVATE, EFFECT_INDEX_0) && CastSpell(INNERVATE, m_bot))
             return RETURN_CONTINUE;
         */
     }
@@ -305,11 +305,11 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarg
         if (CastSpell(GROWL, pTarget))
             return RETURN_CONTINUE;
 
-    if (FAERIE_FIRE_FERAL > 0 && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0))
+    if (FAERIE_FIRE_FERAL > 0 && m_ai->In_Reach(pTarget,FAERIE_FIRE_FERAL) && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0))
         if (CastSpell(FAERIE_FIRE_FERAL, pTarget))
             return RETURN_CONTINUE;
 
-    if (SWIPE > 0 && m_ai->GetAttackerCount() >= 2 && CastSpell(SWIPE, pTarget))
+    if (SWIPE > 0 && m_ai->In_Reach(pTarget,SWIPE) && m_ai->GetAttackerCount() >= 2 && CastSpell(SWIPE, pTarget))
         return RETURN_CONTINUE;
 
     if (ENRAGE > 0 && !m_bot->HasSpellCooldown(ENRAGE) && CastSpell(ENRAGE, m_bot))
@@ -375,7 +375,7 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverCat(Unit* pTarge
     if (newTarget && COWER > 0 && !m_bot->HasSpellCooldown(COWER) && CastSpell(COWER, pTarget))
         return RETURN_CONTINUE;
 
-    if (FAERIE_FIRE_FERAL > 0 && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0) && CastSpell(FAERIE_FIRE_FERAL, pTarget))
+    if (FAERIE_FIRE_FERAL > 0 && m_ai->In_Reach(pTarget,FAERIE_FIRE_FERAL) && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0) && CastSpell(FAERIE_FIRE_FERAL, pTarget))
         return RETURN_CONTINUE;
 
     if (TIGERS_FURY > 0 && !m_bot->HasSpellCooldown(TIGERS_FURY) && CastSpell(TIGERS_FURY))
@@ -400,24 +400,24 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverSpellDPS(Unit* p
 
     uint32 NATURE = (STARFIRE > 0 ? STARFIRE : WRATH);
 
-    if (FAERIE_FIRE > 0 && !pTarget->HasAura(FAERIE_FIRE, EFFECT_INDEX_0) && CastSpell(FAERIE_FIRE, pTarget))
+    if (FAERIE_FIRE > 0 && m_ai->In_Reach(pTarget,FAERIE_FIRE) && !pTarget->HasAura(FAERIE_FIRE, EFFECT_INDEX_0) && CastSpell(FAERIE_FIRE, pTarget))
         return RETURN_CONTINUE;
 
-    if (MOONFIRE > 0 && !pTarget->HasAura(MOONFIRE, EFFECT_INDEX_0) && CastSpell(MOONFIRE, pTarget))
+    if (MOONFIRE > 0 && m_ai->In_Reach(pTarget,MOONFIRE) && !pTarget->HasAura(MOONFIRE, EFFECT_INDEX_0) && CastSpell(MOONFIRE, pTarget))
         return RETURN_CONTINUE;
 
-    if (INSECT_SWARM > 0 && !pTarget->HasAura(INSECT_SWARM, EFFECT_INDEX_0) && CastSpell(INSECT_SWARM, pTarget))
-        return RETURN_CONTINUE;
-
-    // TODO: Doesn't work, I can't seem to nail the aura/effect index that would make this work properly
-    if (ECLIPSE_SOLAR > 0 && WRATH > 0 && m_bot->HasAura(ECLIPSE_SOLAR) && CastSpell(WRATH, pTarget))
+    if (INSECT_SWARM > 0 && m_ai->In_Reach(pTarget,INSECT_SWARM) && !pTarget->HasAura(INSECT_SWARM, EFFECT_INDEX_0) && CastSpell(INSECT_SWARM, pTarget))
         return RETURN_CONTINUE;
 
     // TODO: Doesn't work, I can't seem to nail the aura/effect index that would make this work properly
-    if (ECLIPSE_LUNAR > 0 && STARFIRE > 0 && m_bot->HasAura(ECLIPSE_LUNAR) && CastSpell(STARFIRE, pTarget))
+    if (ECLIPSE_SOLAR > 0 && WRATH > 0 && m_ai->In_Reach(pTarget,WRATH) && m_bot->HasAura(ECLIPSE_SOLAR) && CastSpell(WRATH, pTarget))
         return RETURN_CONTINUE;
 
-    if (FORCE_OF_NATURE > 0 && CastSpell(FORCE_OF_NATURE))
+    // TODO: Doesn't work, I can't seem to nail the aura/effect index that would make this work properly
+    if (ECLIPSE_LUNAR > 0 && m_ai->In_Reach(pTarget,STARFIRE) && STARFIRE > 0 && m_bot->HasAura(ECLIPSE_LUNAR) && CastSpell(STARFIRE, pTarget))
+        return RETURN_CONTINUE;
+
+    if (FORCE_OF_NATURE > 0 && m_ai->In_Reach(pTarget,FORCE_OF_NATURE) && CastSpell(FORCE_OF_NATURE))
         return RETURN_CONTINUE;
 
     if (NATURE > 0 && CastSpell(NATURE, pTarget))
@@ -489,7 +489,7 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
         if (m_bot->isInCombat())
         {
             // TODO: Add check for cooldown
-            if (REBIRTH && m_ai->CastSpell(REBIRTH, *target))
+            if (REBIRTH && m_ai->In_Reach(target,REBIRTH) && m_ai->CastSpell(REBIRTH, *target))
             {
                 std::string msg = "Resurrecting ";
                 msg += target->GetName();
@@ -499,7 +499,7 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
         }
         else
         {
-            if (REVIVE && m_ai->CastSpell(REVIVE, *target))
+            if (REVIVE && m_ai->In_Reach(target,REVIVE) && m_ai->CastSpell(REVIVE, *target))
             {
                 std::string msg = "Resurrecting ";
                 msg += target->GetName();
@@ -559,26 +559,26 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
     if (hp < 30)
     {
         // TODO: Use in conjunction with Nature's Swiftness
-        if (HEALING_TOUCH > 0 && (NOURISH == 0 /*|| CastSpell(NATURES_SWIFTNESS)*/ ) && CastSpell(HEALING_TOUCH, target))
+        if (HEALING_TOUCH > 0 && m_ai->In_Reach(target,HEALING_TOUCH) && (NOURISH == 0 /*|| CastSpell(NATURES_SWIFTNESS)*/ ) && CastSpell(HEALING_TOUCH, target))
             return RETURN_CONTINUE;
 
-        if (NOURISH > 0 && CastSpell(NOURISH, target))
+        if (NOURISH > 0 && m_ai->In_Reach(target,NOURISH) && CastSpell(NOURISH, target))
             return RETURN_CONTINUE;
     }
 
-    if (hp < 45 && WILD_GROWTH > 0 && !target->HasAura(WILD_GROWTH) && CastSpell(WILD_GROWTH, target))
+    if (hp < 45 && WILD_GROWTH > 0 && m_ai->In_Reach(target,WILD_GROWTH) && !target->HasAura(WILD_GROWTH) && CastSpell(WILD_GROWTH, target))
         return RETURN_CONTINUE;
 
-    if (hp < 50 && SWIFTMEND > 0 && (target->HasAura(REJUVENATION) || target->HasAura(REGROWTH)) && CastSpell(SWIFTMEND, target))
+    if (hp < 50 && SWIFTMEND > 0 && m_ai->In_Reach(target,SWIFTMEND) && (target->HasAura(REJUVENATION) || target->HasAura(REGROWTH)) && CastSpell(SWIFTMEND, target))
         return RETURN_CONTINUE;
 
-    if (hp < 60 && REGROWTH > 0 && !target->HasAura(REGROWTH) && CastSpell(REGROWTH, target))
+    if (hp < 60 && REGROWTH > 0 && m_ai->In_Reach(target,REGROWTH) && !target->HasAura(REGROWTH) && CastSpell(REGROWTH, target))
         return RETURN_CONTINUE;
 
-    if (hp < 65 && LIFEBLOOM > 0 && !target->HasAura(LIFEBLOOM) && CastSpell(LIFEBLOOM, target))
+    if (hp < 65 && LIFEBLOOM > 0 && m_ai->In_Reach(target,LIFEBLOOM) && !target->HasAura(LIFEBLOOM) && CastSpell(LIFEBLOOM, target))
         return RETURN_CONTINUE;
 
-    if (hp < 90 && REJUVENATION > 0 && !target->HasAura(REJUVENATION) && CastSpell(REJUVENATION, target))
+    if (hp < 90 && REJUVENATION > 0 && m_ai->In_Reach(target,REJUVENATION) && !target->HasAura(REJUVENATION) && CastSpell(REJUVENATION, target))
         return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;
@@ -719,7 +719,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
     if (EatDrinkBandage())
         return;
 
-    if (INNERVATE && !m_bot->HasAura(INNERVATE) && m_ai->GetManaPercent() <= 20 && CastSpell(INNERVATE, m_bot))
+    if (INNERVATE && m_ai->In_Reach(m_bot,INNERVATE) && !m_bot->HasAura(INNERVATE) && m_ai->GetManaPercent() <= 20 && CastSpell(INNERVATE, m_bot))
         return;
 } // end DoNonCombatActions
 

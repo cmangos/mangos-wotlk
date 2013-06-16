@@ -184,7 +184,6 @@ CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuverPVE(Unit *pTarget)
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     uint32 spec = m_bot->GetSpec();
-    float dist = m_bot->GetCombatDistance(pTarget, true);
 
     // Make sure healer stays put, don't even melee (aggro) if in range.
     if (m_ai->IsHealer() && m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED)
@@ -359,35 +358,35 @@ void PlayerbotShamanAI::DropTotems()
     if ((earth == NULL) || (m_bot->GetDistance(earth) > 30))
     {
         if (STRENGTH_OF_EARTH_TOTEM > 0 && m_ai->CastSpell(STRENGTH_OF_EARTH_TOTEM))
-            ;
+            return;
     }
 
     // Fire Totems
     if ((fire == NULL) || (m_bot->GetDistance(fire) > 30))
     {
         if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FROST && FROST_RESISTANCE_TOTEM > 0 && m_ai->CastSpell(FROST_RESISTANCE_TOTEM))
-            ;
+            return;
         else if (spec == SHAMAN_SPEC_ELEMENTAL && TOTEM_OF_WRATH > 0 && m_ai->CastSpell(TOTEM_OF_WRATH))
-            ;
+            return;
         // If the spec didn't take totem of wrath, use flametongue
         else if ((spec != SHAMAN_SPEC_ELEMENTAL || TOTEM_OF_WRATH == 0) && FLAMETONGUE_TOTEM > 0 && m_ai->CastSpell(FLAMETONGUE_TOTEM))
-            ;
+            return;
     }
 
     // Air totems
     if ((air == NULL) || (m_bot->GetDistance(air) > 30))
     {
         if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_NATURE && NATURE_RESISTANCE_TOTEM > 0 && m_ai->CastSpell(NATURE_RESISTANCE_TOTEM))
-            ;
+            return;
         else if (spec == SHAMAN_SPEC_ENHANCEMENT)
         {
             if (WIND_FURY_TOTEM > 0 /*&& !m_bot->HasAura(IMPROVED_ICY_TALONS)*/ && m_ai->CastSpell(WIND_FURY_TOTEM))
-            ;
+            return;
         }
         else
         {
             if (WRATH_OF_AIR_TOTEM > 0 && m_ai->CastSpell(WRATH_OF_AIR_TOTEM))
-            ;
+            return;
         }
     }
 
@@ -395,9 +394,9 @@ void PlayerbotShamanAI::DropTotems()
     if ((water == NULL) || (m_bot->GetDistance(water) > 30))
     {
         if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FIRE && FIRE_RESISTANCE_TOTEM > 0 && m_ai->CastSpell(FIRE_RESISTANCE_TOTEM))
-            ;
+            return;
         else if (MANA_SPRING_TOTEM > 0 && m_ai->CastSpell(MANA_SPRING_TOTEM))
-            ;
+            return;
     }
 
     /*if (EARTH_ELEMENTAL_TOTEM > 0 && m_ai->CastSpell(EARTH_ELEMENTAL_TOTEM))
@@ -447,9 +446,9 @@ void PlayerbotShamanAI::UseCooldowns()
     uint32 spec = m_bot->GetSpec();
 
     if (BLOODLUST > 0 && (!GetMaster()->HasAura(BLOODLUST, EFFECT_INDEX_0)) && m_ai->CastSpell(BLOODLUST))
-        ;
+        return;
     else if (HEROISM > 0 && (!GetMaster()->HasAura(HEROISM, EFFECT_INDEX_0)) && m_ai->CastSpell(HEROISM))
-        ;
+        return;
 
     switch (spec)
     {

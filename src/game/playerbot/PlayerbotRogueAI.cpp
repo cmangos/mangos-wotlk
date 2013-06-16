@@ -164,7 +164,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     if (!m_bot)   return RETURN_NO_ACTION_ERROR;
 
     Unit* pVictim = pTarget->getVictim();
-    float fTargetDist = m_bot->GetCombatDistance(pTarget, true);
+    bool meleeReach = m_bot->CanReachWithMeleeAttack(pTarget);
 
     // TODO: make this work better...
     /*if (pVictim)
@@ -208,7 +208,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
         SpellSequence = RogueCombat;
 
     // we fight in melee, target is not in range, skip the next part!
-    if (fTargetDist > ATTACK_DISTANCE)
+    if (!meleeReach)
         return RETURN_CONTINUE;
 
     std::ostringstream out;
@@ -330,13 +330,13 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
                 return RETURN_CONTINUE;
             if (m_bot->getRace() == RACE_BLOODELF && !pTarget->HasAura(ARCANE_TORRENT, EFFECT_INDEX_0) && m_ai->CastSpell(ARCANE_TORRENT, *pTarget))
                 return RETURN_CONTINUE;
-            if ((m_bot->getRace() == RACE_HUMAN && (m_bot->hasUnitState(UNIT_STAT_STUNNED)) || m_bot->HasAuraType(SPELL_AURA_MOD_FEAR) || m_bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) || (m_bot->HasAuraType(SPELL_AURA_MOD_CHARM)) && m_ai->CastSpell(EVERY_MAN_FOR_HIMSELF, *m_bot)))
+            if (m_bot->getRace() == RACE_HUMAN && (m_bot->hasUnitState(UNIT_STAT_STUNNED) || m_bot->HasAuraType(SPELL_AURA_MOD_FEAR) || m_bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) || m_bot->HasAuraType(SPELL_AURA_MOD_CHARM)) && m_ai->CastSpell(EVERY_MAN_FOR_HIMSELF, *m_bot))
                 return RETURN_CONTINUE;
-            if ((m_bot->getRace() == RACE_UNDEAD && (m_bot->HasAuraType(SPELL_AURA_MOD_FEAR)) || (m_bot->HasAuraType(SPELL_AURA_MOD_CHARM)) && m_ai->CastSpell(WILL_OF_THE_FORSAKEN, *m_bot)))
+            if (m_bot->getRace() == RACE_UNDEAD && (m_bot->HasAuraType(SPELL_AURA_MOD_FEAR) || m_bot->HasAuraType(SPELL_AURA_MOD_CHARM)) && m_ai->CastSpell(WILL_OF_THE_FORSAKEN, *m_bot))
                 return RETURN_CONTINUE;
             if (m_bot->getRace() == RACE_DWARF && m_bot->HasAuraState(AURA_STATE_DEADLY_POISON) && m_ai->CastSpell(STONEFORM, *m_bot))
                 return RETURN_CONTINUE;
-            if ((m_bot->getRace() == RACE_GNOME && (m_bot->hasUnitState(UNIT_STAT_STUNNED)) || (m_bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED)) && m_ai->CastSpell(ESCAPE_ARTIST, *m_bot)))
+            if (m_bot->getRace() == RACE_GNOME && (m_bot->hasUnitState(UNIT_STAT_STUNNED) || m_bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED)) && m_ai->CastSpell(ESCAPE_ARTIST, *m_bot))
                 return RETURN_CONTINUE;
             else if (m_bot->getRace() == RACE_ORC && !m_bot->HasAura(BLOOD_FURY, EFFECT_INDEX_0) && m_ai->CastSpell(BLOOD_FURY, *m_bot))
                 return RETURN_CONTINUE;

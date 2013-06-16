@@ -101,7 +101,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoFirstCombatManeuver(Unit* pTarget)
         {
             if (PlayerbotAI::ORDERS_TANK & m_ai->GetCombatOrder())
             {
-                if (m_bot->GetCombatDistance(pTarget, true) <= ATTACK_DISTANCE)
+                if (m_bot->CanReachWithMeleeAttack(pTarget))
                 {
                     // Set everyone's UpdateAI() waiting to 2 seconds
                     m_ai->SetGroupIgnoreUpdateTime(2);
@@ -191,11 +191,8 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit *pTarget)
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
     if (!pTarget) return RETURN_NO_ACTION_INVALIDTARGET;
 
-    Unit* pVictim = pTarget->getVictim();
-
     // damage spells
     uint32 spec = m_bot->GetSpec();
-    float dist = m_bot->GetCombatDistance(pTarget, true);
     std::ostringstream out;
 
     // Make sure healer stays put, don't even melee (aggro) if in range.
@@ -234,7 +231,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit *pTarget)
                 return RETURN_CONTINUE;
             if (CRUSADER_STRIKE > 0 && !m_bot->HasSpellCooldown(CRUSADER_STRIKE) && m_ai->CastSpell (CRUSADER_STRIKE, *pTarget))
                 return RETURN_CONTINUE;
-            if (DIVINE_STORM > 0 && /*m_ai->GetAttackerCount() >= 3 && dist <= ATTACK_DISTANCE*/ !m_bot->HasSpellCooldown(DIVINE_STORM) && m_ai->CastSpell (DIVINE_STORM, *pTarget))
+            if (DIVINE_STORM > 0 && /*m_ai->GetAttackerCount() >= 3 && meleeReach*/ !m_bot->HasSpellCooldown(DIVINE_STORM) && m_ai->CastSpell (DIVINE_STORM, *pTarget))
                 return RETURN_CONTINUE;
             if (JUDGEMENT_OF_LIGHT > 0 && m_ai->CastSpell (JUDGEMENT_OF_LIGHT, *pTarget))
                 return RETURN_CONTINUE;
@@ -244,7 +241,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit *pTarget)
                 return RETURN_CONTINUE;*/
             /*if (SACRED_SHIELD > 0 && pVictim == m_bot && m_ai->GetHealthPercent() < 70 && !m_bot->HasAura(SACRED_SHIELD, EFFECT_INDEX_0) && m_ai->CastSpell (SACRED_SHIELD, *m_bot))
                 return RETURN_CONTINUE;*/
-            /*if (HOLY_WRATH > 0 && m_ai->GetAttackerCount() >= 3 && dist <= ATTACK_DISTANCE && m_ai->CastSpell (HOLY_WRATH, *pTarget))
+            /*if (HOLY_WRATH > 0 && m_ai->GetAttackerCount() >= 3 && meleeReach && m_ai->CastSpell (HOLY_WRATH, *pTarget))
                 return RETURN_CONTINUE;*/
             /*if (HAND_OF_SACRIFICE > 0 && pVictim == GetMaster() && !GetMaster()->HasAura(HAND_OF_SACRIFICE, EFFECT_INDEX_0) && m_ai->CastSpell (HAND_OF_SACRIFICE, *GetMaster()))
                 return RETURN_CONTINUE;*/

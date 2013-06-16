@@ -75,12 +75,23 @@ PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, Pl
     BERSERKING                    = m_ai->initSpell(BERSERKING_ALL); // troll
 
     m_petSummonFailed = false;
+    m_rangedCombat = true;
 }
 
 PlayerbotHunterAI::~PlayerbotHunterAI() {}
 
 CombatManeuverReturns PlayerbotHunterAI::DoFirstCombatManeuver(Unit* pTarget)
 {
+    Player *m_bot = GetPlayerBot();
+    m_has_ammo = m_bot->HasItemCount( m_bot->GetUInt32Value(PLAYER_AMMO_ID), 1 );
+    //DEBUG_LOG("current ammo (%u)",m_bot->GetUInt32Value(PLAYER_AMMO_ID));
+    m_bot->setAttackTimer(RANGED_ATTACK,0);
+    if (!m_has_ammo)
+    {
+       m_ai->FindAmmo();
+       //DEBUG_LOG("new ammo (%u)",m_bot->GetUInt32Value(PLAYER_AMMO_ID));
+       m_has_ammo = m_bot->HasItemCount( m_bot->GetUInt32Value(PLAYER_AMMO_ID), 1 );
+    }
     // There are NPCs in BGs and Open World PvP, so don't filter this on PvP scenarios (of course if PvP targets anyone but tank, all bets are off anyway)
     // Wait until the tank says so, until any non-tank gains aggro or X seconds - whichever is shortest
     if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_TANKAGGRO)
@@ -177,80 +188,95 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
         m_ai->CastSpell(BERSERKING, *m_bot);
 
     // check if ranged combat is possible
-    float dist = m_bot->GetCombatDistance(pTarget, true);
-    if ((dist <= ATTACK_DISTANCE || !m_bot->GetUInt32Value(PLAYER_AMMO_ID)) && m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED)
+    bool meleeReach = m_bot->CanReachWithMeleeAttack(pTarget);
+
+    if (meleeReach || !m_has_ammo)
     {
         // switch to melee combat (target in melee range, out of ammo)
+        m_rangedCombat = false;
         m_ai->SetCombatStyle(PlayerbotAI::COMBAT_MELEE);
         if (!m_bot->GetUInt32Value(PLAYER_AMMO_ID))
             m_ai->TellMaster("Out of ammo!");
+
+        // become monkey (increases dodge chance)...
+        if (ASPECT_OF_THE_MONKEY > 0 && !m_bot->HasAura(ASPECT_OF_THE_MONKEY, EFFECT_INDEX_0))
+            m_ai->CastSpell(ASPECT_OF_THE_MONKEY, *m_bot);
+
     }
-    else if (dist > ATTACK_DISTANCE && m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_MELEE)
+    else if (!meleeReach)
+    {
+        // switch to ranged combat
+        m_rangedCombat = true;
         m_ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
 
-    // Set appropriate aspect
-    if (m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED)
-    {
-        if (ASPECT_OF_THE_HAWK && !m_bot->HasAura(ASPECT_OF_THE_HAWK, EFFECT_INDEX_0))
+        // increase ranged attack power...
+        if (ASPECT_OF_THE_HAWK > 0 && !m_bot->HasAura(ASPECT_OF_THE_HAWK, EFFECT_INDEX_0))
             m_ai->CastSpell(ASPECT_OF_THE_HAWK, *m_bot);
-    }
-    else
-    {
-        if (ASPECT_OF_THE_MONKEY && !m_bot->HasAura(ASPECT_OF_THE_MONKEY, EFFECT_INDEX_0))
-            m_ai->CastSpell(ASPECT_OF_THE_MONKEY, *m_bot);
-    }
 
-    // activate auto shot: Reworked to account for AUTO_SHOT being a triggered spell
-    if (AUTO_SHOT > 0 && m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && m_ai->GetCurrentSpellId() != AUTO_SHOT)
-        m_bot->CastSpell(pTarget, AUTO_SHOT, true);
+        // m_ai->TellMaster("target dist %f",m_bot->GetCombatDistance(pTarget,true));
+        if (AUTO_SHOT > 0)
+        {
+            if (m_bot->isAttackReady(RANGED_ATTACK))
+                m_bot->CastSpell(pTarget, AUTO_SHOT, true);
+
+            m_bot->setAttackTimer(RANGED_ATTACK,500);
+
+            const SpellEntry* spellInfo = sSpellStore.LookupEntry(AUTO_SHOT);
+            if (!spellInfo)
+                return RETURN_CONTINUE;
+
+            if (m_ai->CheckBotCast(spellInfo) != SPELL_CAST_OK)
+                m_bot->InterruptNonMeleeSpells(true, AUTO_SHOT);
+        }
+    }
 
     // damage spells
     if (m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED)
     {
-        if (HUNTERS_MARK > 0 && !pTarget->HasAura(HUNTERS_MARK, EFFECT_INDEX_0) && m_ai->CastSpell(HUNTERS_MARK, *pTarget))
+        if (HUNTERS_MARK > 0 && m_ai->In_Reach(pTarget,HUNTERS_MARK) && !pTarget->HasAura(HUNTERS_MARK, EFFECT_INDEX_0) && m_ai->CastSpell(HUNTERS_MARK, *pTarget))
             return RETURN_CONTINUE;
-        else if (RAPID_FIRE > 0 && !m_bot->HasAura(RAPID_FIRE, EFFECT_INDEX_0) && m_ai->CastSpell(RAPID_FIRE, *m_bot))
+        else if (RAPID_FIRE > 0 && m_ai->In_Reach(pTarget,RAPID_FIRE) && !m_bot->HasAura(RAPID_FIRE, EFFECT_INDEX_0) && m_ai->CastSpell(RAPID_FIRE, *m_bot))
             return RETURN_CONTINUE;
-        else if (MULTI_SHOT > 0 && m_ai->GetAttackerCount() >= 3 && m_ai->CastSpell(MULTI_SHOT, *pTarget))
+        else if (MULTI_SHOT > 0 && m_ai->In_Reach(pTarget,MULTI_SHOT) && m_ai->GetAttackerCount() >= 3 && m_ai->CastSpell(MULTI_SHOT, *pTarget))
             return RETURN_CONTINUE;
-        else if (ARCANE_SHOT > 0 && m_ai->CastSpell(ARCANE_SHOT, *pTarget))
+        else if (ARCANE_SHOT > 0 && m_ai->In_Reach(pTarget,ARCANE_SHOT) && m_ai->CastSpell(ARCANE_SHOT, *pTarget))
             return RETURN_CONTINUE;
-        else if (CONCUSSIVE_SHOT > 0 && !pTarget->HasAura(CONCUSSIVE_SHOT, EFFECT_INDEX_0) && m_ai->CastSpell(CONCUSSIVE_SHOT, *pTarget))
+        else if (CONCUSSIVE_SHOT > 0 && m_ai->In_Reach(pTarget,CONCUSSIVE_SHOT) && !pTarget->HasAura(CONCUSSIVE_SHOT, EFFECT_INDEX_0) && m_ai->CastSpell(CONCUSSIVE_SHOT, *pTarget))
             return RETURN_CONTINUE;
-        else if (EXPLOSIVE_SHOT > 0 && !pTarget->HasAura(EXPLOSIVE_SHOT, EFFECT_INDEX_0) && m_ai->CastSpell(EXPLOSIVE_SHOT, *pTarget))
+        else if (EXPLOSIVE_SHOT > 0 && m_ai->In_Reach(pTarget,EXPLOSIVE_SHOT) && !pTarget->HasAura(EXPLOSIVE_SHOT, EFFECT_INDEX_0) && m_ai->CastSpell(EXPLOSIVE_SHOT, *pTarget))
             return RETURN_CONTINUE;
-        else if (VIPER_STING > 0 && pTarget->GetPower(POWER_MANA) > 0 && m_ai->GetManaPercent() < 70 && !pTarget->HasAura(VIPER_STING, EFFECT_INDEX_0) && m_ai->CastSpell(VIPER_STING, *pTarget))
+        else if (VIPER_STING > 0 && m_ai->In_Reach(pTarget,VIPER_STING) && pTarget->GetPower(POWER_MANA) > 0 && m_ai->GetManaPercent() < 70 && !pTarget->HasAura(VIPER_STING, EFFECT_INDEX_0) && m_ai->CastSpell(VIPER_STING, *pTarget))
             return RETURN_CONTINUE;
-        else if (SERPENT_STING > 0 && !pTarget->HasAura(SERPENT_STING, EFFECT_INDEX_0) && !pTarget->HasAura(SCORPID_STING, EFFECT_INDEX_0) &&  !pTarget->HasAura(VIPER_STING, EFFECT_INDEX_0) && m_ai->CastSpell(SERPENT_STING, *pTarget))
+        else if (SERPENT_STING > 0 && m_ai->In_Reach(pTarget,SERPENT_STING) && !pTarget->HasAura(SERPENT_STING, EFFECT_INDEX_0) && !pTarget->HasAura(SCORPID_STING, EFFECT_INDEX_0) &&  !pTarget->HasAura(VIPER_STING, EFFECT_INDEX_0) && m_ai->CastSpell(SERPENT_STING, *pTarget))
             return RETURN_CONTINUE;
-        else if (SCORPID_STING > 0 && !pTarget->HasAura(WYVERN_STING, EFFECT_INDEX_0) && !pTarget->HasAura(SCORPID_STING, EFFECT_INDEX_0) && !pTarget->HasAura(SERPENT_STING, EFFECT_INDEX_0) && !pTarget->HasAura(VIPER_STING, EFFECT_INDEX_0) && m_ai->CastSpell(SCORPID_STING, *pTarget))
+        else if (SCORPID_STING > 0 && m_ai->In_Reach(pTarget,SCORPID_STING) && !pTarget->HasAura(WYVERN_STING, EFFECT_INDEX_0) && !pTarget->HasAura(SCORPID_STING, EFFECT_INDEX_0) && !pTarget->HasAura(SERPENT_STING, EFFECT_INDEX_0) && !pTarget->HasAura(VIPER_STING, EFFECT_INDEX_0) && m_ai->CastSpell(SCORPID_STING, *pTarget))
             return RETURN_CONTINUE;
-        else if (CHIMERA_SHOT > 0 && m_ai->CastSpell(CHIMERA_SHOT, *pTarget))
+        else if (CHIMERA_SHOT > 0 && m_ai->In_Reach(pTarget,CHIMERA_SHOT) && m_ai->CastSpell(CHIMERA_SHOT, *pTarget))
             return RETURN_CONTINUE;
-        else if (VOLLEY > 0 && m_ai->GetAttackerCount() >= 3 && m_ai->CastSpell(VOLLEY, *pTarget))
+        else if (VOLLEY > 0 && m_ai->In_Reach(pTarget,VOLLEY) && m_ai->GetAttackerCount() >= 3 && m_ai->CastSpell(VOLLEY, *pTarget))
             return RETURN_CONTINUE;
-        else if (BLACK_ARROW > 0 && !pTarget->HasAura(BLACK_ARROW, EFFECT_INDEX_0) && m_ai->CastSpell(BLACK_ARROW, *pTarget))
+        else if (BLACK_ARROW > 0 && m_ai->In_Reach(pTarget,BLACK_ARROW) && !pTarget->HasAura(BLACK_ARROW, EFFECT_INDEX_0) && m_ai->CastSpell(BLACK_ARROW, *pTarget))
             return RETURN_CONTINUE;
-        else if (AIMED_SHOT > 0 && m_ai->CastSpell(AIMED_SHOT, *pTarget))
+        else if (AIMED_SHOT > 0 && m_ai->In_Reach(pTarget,AIMED_SHOT) && m_ai->CastSpell(AIMED_SHOT, *pTarget))
             return RETURN_CONTINUE;
-        else if (STEADY_SHOT > 0 && m_ai->CastSpell(STEADY_SHOT, *pTarget))
+        else if (STEADY_SHOT > 0 && m_ai->In_Reach(pTarget,STEADY_SHOT) && m_ai->CastSpell(STEADY_SHOT, *pTarget))
             return RETURN_CONTINUE;
-        else if (KILL_SHOT > 0 && pTarget->GetHealthPercent() < 20 && m_ai->CastSpell(KILL_SHOT, *pTarget))
+        else if (KILL_SHOT > 0 && m_ai->In_Reach(pTarget,KILL_SHOT) && pTarget->GetHealthPercent() < 20 && m_ai->CastSpell(KILL_SHOT, *pTarget))
             return RETURN_CONTINUE;
         else
             return RETURN_NO_ACTION_OK;
     }
     else
     {
-        if (RAPTOR_STRIKE > 0 && m_ai->CastSpell(RAPTOR_STRIKE, *pTarget))
+        if (RAPTOR_STRIKE > 0 && m_ai->In_Reach(pTarget,RAPTOR_STRIKE) && m_ai->CastSpell(RAPTOR_STRIKE, *pTarget))
             return RETURN_CONTINUE;
         else if (EXPLOSIVE_TRAP > 0 && !pTarget->HasAura(EXPLOSIVE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(ARCANE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(IMMOLATION_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(FROST_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(BEAR_TRAP, EFFECT_INDEX_0) && m_ai->CastSpell(EXPLOSIVE_TRAP, *pTarget))
             return RETURN_CONTINUE;
-        else if (WING_CLIP > 0 && !pTarget->HasAura(WING_CLIP, EFFECT_INDEX_0) && m_ai->CastSpell(WING_CLIP, *pTarget))
+        else if (WING_CLIP > 0 && m_ai->In_Reach(pTarget,WING_CLIP) && !pTarget->HasAura(WING_CLIP, EFFECT_INDEX_0) && m_ai->CastSpell(WING_CLIP, *pTarget))
             return RETURN_CONTINUE;
         else if (IMMOLATION_TRAP > 0 && !pTarget->HasAura(IMMOLATION_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(ARCANE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(EXPLOSIVE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(FROST_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(BEAR_TRAP, EFFECT_INDEX_0) && m_ai->CastSpell(IMMOLATION_TRAP, *pTarget))
             return RETURN_CONTINUE;
-        else if (MONGOOSE_BITE > 0 && m_ai->CastSpell(MONGOOSE_BITE, *pTarget))
+        else if (MONGOOSE_BITE > 0 && m_ai->Impulse() && m_ai->CastSpell(MONGOOSE_BITE, *pTarget))
             return RETURN_CONTINUE;
         else if (FROST_TRAP > 0 && !pTarget->HasAura(FROST_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(ARCANE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(IMMOLATION_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(EXPLOSIVE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(BEAR_TRAP, EFFECT_INDEX_0) && m_ai->CastSpell(FROST_TRAP, *pTarget))
             return RETURN_CONTINUE;
@@ -268,7 +294,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
             return RETURN_CONTINUE;
         else if (m_bot->getRace() == RACE_DRAENEI && m_ai->GetHealthPercent() < 25 && !m_bot->HasAura(GIFT_OF_THE_NAARU, EFFECT_INDEX_0) && m_ai->CastSpell(GIFT_OF_THE_NAARU, *m_bot))
             return RETURN_CONTINUE;
-        else if (pet && pet->isAlive() && MISDIRECTION > 0 && pVictim == m_bot && !m_bot->HasAura(MISDIRECTION, EFFECT_INDEX_0) && m_ai->CastSpell(MISDIRECTION, *pet))
+        else if (pet && pet->isAlive() && MISDIRECTION > 0 && m_ai->In_Reach(pet,MISDIRECTION) && pVictim == m_bot && !m_bot->HasAura(MISDIRECTION, EFFECT_INDEX_0) && m_ai->CastSpell(MISDIRECTION, *pet))
             return RETURN_CONTINUE;
         /*else if(FREEZING_TRAP > 0 && !pTarget->HasAura(FREEZING_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(ARCANE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(EXPLOSIVE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(BEAR_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(IMMOLATION_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(FROST_TRAP, EFFECT_INDEX_0) && m_ai->CastSpell(FREEZING_TRAP,*pTarget) )
             out << " > Freezing Trap"; // this can trap your bots too
@@ -276,7 +302,6 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
             out << " > Bear Trap"; // this was just too annoying :)
            else if(DISENGAGE > 0 && pVictim && m_ai->CastSpell(DISENGAGE,*pTarget) )
             out << " > Disengage!"; // attempt to return to ranged combat*/
-        else RETURN_NO_ACTION_OK;
     }
 
     return RETURN_NO_ACTION_OK;
@@ -294,6 +319,12 @@ void PlayerbotHunterAI::DoNonCombatActions()
 {
     if (!m_ai)  return;
     if (!m_bot) return;
+
+    if (!m_rangedCombat || m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_MELEE)
+    {
+        m_rangedCombat = true;
+        m_ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
+    }
 
     // buff group
     if (TRUESHOT_AURA > 0 && !m_bot->HasAura(TRUESHOT_AURA, EFFECT_INDEX_0))

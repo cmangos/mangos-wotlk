@@ -176,9 +176,9 @@ Player* PlayerbotClassAI::GetHealTarget(JOB_TYPE type)
     // Sorts according to type: Healers first, tanks next, then master followed by DPS, thanks to the order of the TYPE enum
     std::sort(targets.begin(), targets.end());
 
-    uint8 uCount = 0;
+    uint8 uCount = 0,i = 0;
     // x is used as 'target found' variable; i is used as the targets iterator throughout all 4 types.
-    int16 x = -1, i = 0;
+    int16 x = -1;
 
     // Try to find a healer in need of healing (if multiple, the lowest health one)
     while (true)
@@ -306,7 +306,7 @@ JOB_TYPE PlayerbotClassAI::GetTargetJob(Player* target)
     }
 
     // figure out what to do with human players - i.e. figure out if they're tank, DPS or healer
-    uint8 uSpec = target->GetSpec();
+    uint32 uSpec = target->GetSpec();
     switch (target->getClass())
     {
         case CLASS_PALADIN:
