@@ -1890,6 +1890,7 @@ public:
     bool IsInCombat();
     bool IsGroupInCombat();
     Player* GetGroupTank(); // TODO: didn't want to pollute non-playerbot code but this should really go in group.cpp
+    Player* GetGroupHealer(); // TODO: didn't want to pollute non-playerbot code but this should really go in group.cpp
     void SetGroupCombatOrder(CombatOrderType co);
     void ClearGroupCombatOrder(CombatOrderType co);
     void SetGroupIgnoreUpdateTime(uint8 t);

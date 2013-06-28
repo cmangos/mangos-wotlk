@@ -3226,6 +3226,26 @@ Player* PlayerbotAI::GetGroupTank()
     return NULL;
 }
 
+Player* PlayerbotAI::GetGroupHealer()
+{
+    if (!m_bot) return NULL;
+
+    if (m_bot->GetGroup())
+    {
+        Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (!groupMember || !groupMember->GetPlayerbotAI())
+                continue;
+            if (groupMember->GetPlayerbotAI()->IsHealer())
+                return groupMember;
+        }
+    }
+
+    return NULL;
+}
+
 void PlayerbotAI::SetGroupCombatOrder(CombatOrderType co)
 {
     if (!m_bot) return;

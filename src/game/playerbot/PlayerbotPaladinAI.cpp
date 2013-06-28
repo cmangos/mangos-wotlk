@@ -207,11 +207,19 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit *pTarget)
         if (HealPlayer(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return RETURN_CONTINUE;
     }
+    else if (m_ai->GetGroupHealer() && m_ai->GetGroupHealer()->isAlive())
+    {
+        // Desirable? Debatable. We should have faith in the healer. On the other hand this low HP could be considered a crisis,
+        // and DPS is not crucial so probably a good thing (which is why I put it in)
+        // Of course, keep in mind we're not healing specced so it's unlikely to do much later on...
+        if (!m_ai->IsTank() && m_ai->GetHealthPercent() < 35 && HealPlayer(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+            return RETURN_CONTINUE;
+    }
     else
     {
         // Is this desirable? Debatable.
         // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
-        if (HealPlayer(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        if (m_ai->GetHealthPercent() < 50 && HealPlayer(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return RETURN_CONTINUE;
     }
 
