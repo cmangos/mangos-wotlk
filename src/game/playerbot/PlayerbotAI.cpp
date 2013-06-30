@@ -538,6 +538,7 @@ void PlayerbotAI::AutoUpgradeEquipment() // test for autoequip
 
         if (pItem->GetProto()->Flags & ITEM_FLAG_LOOTABLE && spellId == 0)
         {
+            // TODO: std::string oops = "Opening " + [ITEM] + " to see what's inside.";
             std::string oops = "Oh... Look! Theres something inside!!!";
             m_bot->Say(oops, LANG_UNIVERSAL);
             UseItem(pItem);
@@ -546,16 +547,22 @@ void PlayerbotAI::AutoUpgradeEquipment() // test for autoequip
 
         if (uint32 questid = pItem->GetProto()->StartQuest)
         {
-            Quest const* qInfo = sObjectMgr.GetQuestTemplate(questid);
-            if (m_bot->GetQuestStatus(questid) == QUEST_STATUS_COMPLETE)
+            // TODO: if quest failed, auto-drop and auto-pickup
+            //if (m_bot->GetQuestStatus(questid) == QUEST_STATUS_FAILED)
+            if (m_bot->GetQuestStatus(questid) == QUEST_STATUS_COMPLETE
+                || m_bot->GetQuestStatus(questid) == QUEST_STATUS_UNAVAILABLE)
                 continue;
-            else if (!m_bot->CanTakeQuest(qInfo, false))
+            else
             {
-                std::string oops = "Great, more junk... Can I get rid of this please?";
-                m_bot->Say(oops, LANG_UNIVERSAL);
-                continue;
+                Quest const* qInfo = sObjectMgr.GetQuestTemplate(questid);
+                if (!m_bot->CanTakeQuest(qInfo, false))
+                {
+                    // TODO: make clear which item should be thrown away
+                    std::string oops = "Great, more junk... Can I get rid of this please?";
+                    m_bot->Say(oops, LANG_UNIVERSAL);
+                    continue;
+                }
             }
-
             UseItem(pItem);
         }
 
