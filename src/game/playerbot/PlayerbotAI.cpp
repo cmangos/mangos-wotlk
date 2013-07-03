@@ -5356,21 +5356,18 @@ bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player *
 
     // Check if spell will boost one of already existent auras
     bool willBenefitFromSpell = false;
-    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX && !willBenefitFromSpell; ++i)
     {
         if (spellProto->EffectApplyAuraName[i] == SPELL_AURA_NONE)
             break;
 
-        bool sameOrBetterAuraFound = false;
         int32 bonus = m_bot->CalculateSpellDamage(target, spellProto, SpellEffectIndex(i));
         Unit::AuraList const& auras = target->GetAurasByType(AuraType(spellProto->EffectApplyAuraName[i]));
-        for (Unit::AuraList::const_iterator it = auras.begin(); it != auras.end(); ++it)
+        for (Unit::AuraList::const_iterator it = auras.begin(); it != auras.end() && !willBenefitFromSpell; ++it)
+        {
             if ((*it)->GetModifier()->m_miscvalue == spellProto->EffectMiscValue[i] && (*it)->GetModifier()->m_amount >= bonus)
-            {
-                sameOrBetterAuraFound = true;
-                break;
-            }
-            willBenefitFromSpell = willBenefitFromSpell || !sameOrBetterAuraFound;
+                willBenefitFromSpell = true;
+        }
     }
 
     if (!willBenefitFromSpell)
