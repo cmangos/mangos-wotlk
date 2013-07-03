@@ -39,6 +39,10 @@ bool PlayerbotClassAI::EatDrinkBandage(bool bMana, unsigned char foodPercent, un
         foodItem = m_ai->FindFood();
     if (drinkItem || foodItem)
     {
+        // have it wait until drinks are finished and/or combat begins
+        m_ai->SetCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_OOC);
+        SetWait(25); // seconds
+
         if (drinkItem)
         {
             m_ai->TellMaster("I could use a drink.");
@@ -49,9 +53,6 @@ bool PlayerbotClassAI::EatDrinkBandage(bool bMana, unsigned char foodPercent, un
             m_ai->TellMaster("I could use some food.");
             m_ai->UseItem(foodItem);
         }
-        // and now wait until drinks are finished and/or combat begins
-        m_ai->SetCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_OOC);
-        SetWait(25); // seconds
         return true;
     }
 
