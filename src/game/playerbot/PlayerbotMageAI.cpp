@@ -312,7 +312,7 @@ void PlayerbotMageAI::DoNonCombatActions()
     // buff group
     if (m_bot->GetGroup() && ARCANE_BRILLIANCE && m_ai->In_Reach(m_bot,ARCANE_BRILLIANCE) && m_ai->HasSpellReagents(ARCANE_BRILLIANCE) && m_ai->Buff(ARCANE_BRILLIANCE, m_bot))
         return;
-    if (Buff(&PlayerbotMageAI::BuffHelper, ARCANE_INTELLECT, (JOB_ALL | JOB_MANAONLY)))
+    if (Buff(&PlayerbotMageAI::BuffHelper, ARCANE_INTELLECT, (JOB_ALL | JOB_MANAONLY)) & RETURN_CONTINUE)
         return;
 
     // conjure food & water + hp/mana check

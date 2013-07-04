@@ -467,11 +467,11 @@ void PlayerbotPriestAI::DoNonCombatActions()
         if (PRAYER_OF_SHADOW_PROTECTION && m_ai->In_Reach(m_bot,PRAYER_OF_SHADOW_PROTECTION) && m_ai->HasSpellReagents(PRAYER_OF_SHADOW_PROTECTION) && m_ai->Buff(PRAYER_OF_SHADOW_PROTECTION, m_bot))
             return;
     }
-    if (Buff(&PlayerbotPriestAI::BuffHelper, POWER_WORD_FORTITUDE))
+    if (Buff(&PlayerbotPriestAI::BuffHelper, POWER_WORD_FORTITUDE) & RETURN_CONTINUE)
         return;
-    if (Buff(&PlayerbotPriestAI::BuffHelper, DIVINE_SPIRIT, (JOB_ALL | JOB_MANAONLY)))
+    if (Buff(&PlayerbotPriestAI::BuffHelper, DIVINE_SPIRIT, (JOB_ALL | JOB_MANAONLY)) & RETURN_CONTINUE)
         return;
-    if (Buff(&PlayerbotPriestAI::BuffHelper, SHADOW_PROTECTION, (JOB_TANK | JOB_HEAL) ))
+    if (Buff(&PlayerbotPriestAI::BuffHelper, SHADOW_PROTECTION, (JOB_TANK | JOB_HEAL)) & RETURN_CONTINUE)
         return;
 
     // hp/mana check

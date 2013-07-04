@@ -704,9 +704,9 @@ void PlayerbotDruidAI::DoNonCombatActions()
     // Buff
     if (m_bot->GetGroup() && GIFT_OF_THE_WILD && m_ai->HasSpellReagents(GIFT_OF_THE_WILD) && m_ai->Buff(GIFT_OF_THE_WILD, m_bot))
         return;
-    if (Buff(&PlayerbotDruidAI::BuffHelper, MARK_OF_THE_WILD))
+    if (Buff(&PlayerbotDruidAI::BuffHelper, MARK_OF_THE_WILD) & RETURN_CONTINUE)
         return;
-    if (Buff(&PlayerbotDruidAI::BuffHelper, THORNS, (m_bot->GetGroup() ? JOB_TANK : JOB_ALL)))
+    if (Buff(&PlayerbotDruidAI::BuffHelper, THORNS, (m_bot->GetGroup() ? JOB_TANK : JOB_ALL)) & RETURN_CONTINUE)
         return;
 
     // Return to fighting form AFTER reviving, healing, buffing

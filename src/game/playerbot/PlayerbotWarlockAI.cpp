@@ -483,6 +483,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
             Player* master = GetMaster();
             if (!master->HasAura(soulStoneSpell) && !m_bot->HasSpellCooldown(soulStoneSpell))
             {
+                // TODO: first choice: healer. Second choice: anyone else with revive spell. Third choice: self or master.
                 m_ai->UseItem(soulStone, master);
                 return;
             }
@@ -518,11 +519,11 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
 
     // hp/mana check
-    if (pet && DARK_PACT && pet->GetPower(POWER_MANA) > 0 && m_ai->GetManaPercent() <= 50)
+    if (pet && DARK_PACT && (pet->GetPower(POWER_MANA) / pet->GetMaxPower()) > 40 && m_ai->GetManaPercent() <= 50)
         if (m_ai->CastSpell(DARK_PACT, *m_bot))
             return;
 
-    if (LIFE_TAP && m_ai->GetManaPercent() <= 50 && m_ai->GetHealthPercent() > 50)
+    if (LIFE_TAP && m_ai->GetManaPercent() <= 60 && m_ai->GetHealthPercent() > 60)
         if (m_ai->CastSpell(LIFE_TAP, *m_bot))
             return;
 
