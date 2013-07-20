@@ -313,7 +313,10 @@ void PlayerbotMageAI::DoNonCombatActions()
     if (m_bot->GetGroup() && ARCANE_BRILLIANCE && m_ai->In_Reach(m_bot,ARCANE_BRILLIANCE) && m_ai->HasSpellReagents(ARCANE_BRILLIANCE) && m_ai->Buff(ARCANE_BRILLIANCE, m_bot))
         return;
     if (Buff(&PlayerbotMageAI::BuffHelper, ARCANE_INTELLECT, (JOB_ALL | JOB_MANAONLY)) & RETURN_CONTINUE)
+    {
+        //DEBUG_LOG("Buffed, exiting");
         return;
+    }//DEBUG_LOG("Didn't buff. Woot!");
 
     // conjure food & water + hp/mana check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
@@ -341,16 +344,18 @@ void PlayerbotMageAI::DoNonCombatActions()
 // TODO: this and priest's BuffHelper are identical and thus could probably go in PlayerbotClassAI.cpp somewhere
 bool PlayerbotMageAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target)
 {
+    //DEBUG_LOG("..Mage_BuffHelper to the rescue!");
     if (!ai)          return false;
     if (spellId == 0) return false;
     if (!target)      return false;
-
-    Pet* pet = target->GetPet();
-    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(spellId, pet))
-        return true;
+    //DEBUG_LOG("..Sanity checks passed");
 
     if (ai->Buff(spellId, target))
+    {
+        //DEBUG_LOG("..Buffed");
         return true;
+    }
 
+    //DEBUG_LOG("..Not buffing anyone!");
     return false;
 }

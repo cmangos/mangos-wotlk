@@ -5338,6 +5338,7 @@ bool PlayerbotAI::CastPetSpell(uint32 spellId, Unit* target)
 // Perform sanity checks and cast spell
 bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player *))
 {
+    //DEBUG_LOG("...Buff");
     if (spellId == 0)
         return false;
 
@@ -5354,29 +5355,48 @@ bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player *
     if (!spellProto)
         return false;
 
+    //DEBUG_LOG("...Sanity checks passed for %s", target->GetName());
     // Check if spell will boost one of already existent auras
     bool willBenefitFromSpell = false;
+    bool hasComparableAura = false;
+    //DEBUG_LOG("...willBenefit: %d (start)", willBenefitFromSpell);
     for (uint8 i = 0; i < MAX_EFFECT_INDEX && !willBenefitFromSpell; ++i)
     {
         if (spellProto->EffectApplyAuraName[i] == SPELL_AURA_NONE)
+        {
+            //DEBUG_LOG("...Effect%d NONE", i);
             break;
+        }
+        //DEBUG_LOG("...Effect%d exists", i);
 
         int32 bonus = m_bot->CalculateSpellDamage(target, spellProto, SpellEffectIndex(i));
         Unit::AuraList const& auras = target->GetAurasByType(AuraType(spellProto->EffectApplyAuraName[i]));
         for (Unit::AuraList::const_iterator it = auras.begin(); it != auras.end() && !willBenefitFromSpell; ++it)
         {
-            if ((*it)->GetModifier()->m_miscvalue == spellProto->EffectMiscValue[i] && (*it)->GetModifier()->m_amount >= bonus)
-                willBenefitFromSpell = true;
+            //DEBUG_LOG("...m_amount (%d) vs bonus (%d)", (*it)->GetModifier()->m_amount, bonus);
+            if ((*it)->GetModifier()->m_miscvalue == spellProto->EffectMiscValue[i])
+            {
+                hasComparableAura = true;
+                //DEBUG_LOG("...hasComparableAura");
+                if ((*it)->GetModifier()->m_amount < bonus)
+                {
+                    //DEBUG_LOG("...Will benefit!");
+                    willBenefitFromSpell = true;
+                }
+            }
+            //DEBUG_LOG("...willBenefit: %d", willBenefitFromSpell);
         }
     }
+    //DEBUG_LOG("...willBenefit: %d (end)", willBenefitFromSpell);
 
-    if (!willBenefitFromSpell)
+    if (hasComparableAura && !willBenefitFromSpell)
         return false;
 
     // Druids may need to shapeshift before casting
     if (beforeCast)
         (*beforeCast)(m_bot);
 
+    //DEBUG_LOG("...Casting spell");
     return CastSpell(spellProto->Id, *target);
 }
 

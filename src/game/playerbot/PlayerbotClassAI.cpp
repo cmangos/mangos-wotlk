@@ -95,41 +95,69 @@ CombatManeuverReturns PlayerbotClassAI::HealPlayer(Player* target) {
 // Please note that job_type JOB_MANAONLY is a cumulative restriction. JOB_TANK | JOB_HEAL means both; JOB_TANK | JOB_MANAONLY means tanks with powertype MANA (paladins, druids)
 CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, uint32, Unit*), uint32 spellId, uint32 type, bool bMustBeOOC)
 {
+    //DEBUG_LOG(".Buff");
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
     if (!m_bot->isAlive() || m_bot->IsInDuel()) return RETURN_NO_ACTION_ERROR;
     if (bMustBeOOC && m_bot->isInCombat()) return RETURN_NO_ACTION_ERROR;
 
     if (spellId == 0) return RETURN_NO_ACTION_OK;
+    //DEBUG_LOG(".Still here");
 
-    // First, fill the list of targets
     if (m_bot->GetGroup())
     {
+        //DEBUG_LOG(".So this group walks into a bar...");
         Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
+            //DEBUG_LOG(".Group_Member");
             Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
             if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel())
                 continue;
-            JOB_TYPE job = GetTargetJob(groupMember);
-            if (job & type && (!(job & JOB_MANAONLY) || groupMember->getClass() == CLASS_DRUID || groupMember->getPowerType() == POWER_MANA))
+
+            Pet* pet = groupMember->GetPet();
+            // If pet is available and (any buff OR mana buff and pet is mana)
+            if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE)
+                && ( !(type & JOB_MANAONLY) || pet->getPowerType() == POWER_MANA ))
             {
-                if (BuffHelper(m_ai, spellId, groupMember))
+                //DEBUG_LOG(".Group_Member's pet: %s's %s", groupMember->GetName(), pet->GetName());
+                if(BuffHelper(m_ai, spellId, pet))
+                {
+                    //DEBUG_LOG(".Buffing pet, RETURN");
                     return RETURN_CONTINUE;
+                }
             }
+            //DEBUG_LOG(".Group_Member: %s", groupMember->GetName());
+            JOB_TYPE job = GetTargetJob(groupMember);
+            if (job & type && (!(type & JOB_MANAONLY) || groupMember->getClass() == CLASS_DRUID || groupMember->getPowerType() == POWER_MANA))
+            {
+                //DEBUG_LOG(".Correct job");
+                if (BuffHelper(m_ai, spellId, groupMember))
+                {
+                    //DEBUG_LOG(".Buffing, RETURN");
+                    return RETURN_CONTINUE;
+                }
+            }
+            //DEBUG_LOG(".no buff, checking next group member");
         }
+        //DEBUG_LOG(".nobody in the group to buff");
     }
     else
     {
+        //DEBUG_LOG(".No group");
         if (m_master && !m_master->IsInDuel()
             && (!(GetTargetJob(m_master) & JOB_MANAONLY) || m_master->getClass() == CLASS_DRUID || m_master->getPowerType() == POWER_MANA))
             if (BuffHelper(m_ai, spellId, m_master))
                 return RETURN_CONTINUE;
         // Do not check job or power type - any buff you have is always useful to self
         if (BuffHelper(m_ai, spellId, m_bot))
+        {
+            //DEBUG_LOG(".Buffed");
             return RETURN_CONTINUE;
+        }
     }
 
+    //DEBUG_LOG(".No buff");
     return RETURN_NO_ACTION_OK;
 }
 

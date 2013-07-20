@@ -485,17 +485,19 @@ void PlayerbotPriestAI::DoNonCombatActions()
 // TODO: this and mage's BuffHelper are identical and thus could probably go in PlayerbotClassAI.cpp somewhere
 bool PlayerbotPriestAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target)
 {
+    //DEBUG_LOG("..Priest_BuffHelper to the rescue!");
     if (!ai)          return false;
     if (spellId == 0) return false;
     if (!target)      return false;
-
-    Pet * pet = target->GetPet();
-    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(spellId, pet))
-        return true;
+    //DEBUG_LOG("..Sanity checks passed");
 
     if (ai->Buff(spellId, target))
+    {
+        //DEBUG_LOG("..Buffed");
         return true;
+    }
 
+    //DEBUG_LOG("..Not buffing anyone!");
     return false;
 }
 

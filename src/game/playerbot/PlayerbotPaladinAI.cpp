@@ -536,8 +536,8 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *targe
     PlayerbotPaladinAI* c = (PlayerbotPaladinAI*) ai->GetClassAI();
     uint32 bigSpellId = 0;
 
-    Pet* pet = target->GetPet();
-    uint32 petSpellId = 0, petBigSpellId = 0;
+    //Pet* pet = target->GetPet();
+    //uint32 petSpellId = 0, petBigSpellId = 0;
 
     if (ai->CanReceiveSpecificSpell(SPELL_BLESSING, target))
         return false;
@@ -567,16 +567,6 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *targe
             break;
         case CLASS_DEATH_KNIGHT:
         case CLASS_HUNTER:
-            if (pet && ai->CanReceiveSpecificSpell(SPELL_BLESSING, pet) && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
-            {
-                petSpellId = c->BLESSING_OF_MIGHT;
-                if (!petSpellId)
-                {
-                    petSpellId = c->BLESSING_OF_KINGS;
-                    if (!petSpellId)
-                        petSpellId = c->BLESSING_OF_SANCTUARY;
-                }
-            }
         case CLASS_ROGUE:
         case CLASS_WARRIOR:
             spellId = c->BLESSING_OF_MIGHT;
@@ -592,20 +582,6 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *targe
             }
             break;
         case CLASS_WARLOCK:
-            if (pet && ai->CanReceiveSpecificSpell(SPELL_BLESSING, pet) && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
-            {
-                if (pet->getPowerType() == POWER_MANA)
-                    petSpellId = c->BLESSING_OF_WISDOM;
-                else
-                    petSpellId = c->BLESSING_OF_MIGHT;
-
-                if (!petSpellId)
-                {
-                    petSpellId = c->BLESSING_OF_KINGS;
-                    if (!petSpellId)
-                        petSpellId = c->BLESSING_OF_SANCTUARY;
-                }
-            }
         case CLASS_PRIEST:
         case CLASS_MAGE:
             spellId = c->BLESSING_OF_WISDOM;
@@ -620,16 +596,43 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *targe
                 }
             }
             break;
+        default:
+            // PET
+            /** Hunter pet
+            if (pet && ai->CanReceiveSpecificSpell(SPELL_BLESSING, pet) && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
+            {
+                petSpellId = c->BLESSING_OF_MIGHT;
+                if (!petSpellId)
+                {
+                    petSpellId = c->BLESSING_OF_KINGS;
+                    if (!petSpellId)
+                        petSpellId = c->BLESSING_OF_SANCTUARY;
+                }
+            }*/
+            if (/*pet && ai->CanReceiveSpecificSpell(SPELL_BLESSING, pet) && */!target->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
+            {
+                if (target->getPowerType() == POWER_MANA)
+                    spellId = c->BLESSING_OF_WISDOM;
+                else
+                    spellId = c->BLESSING_OF_MIGHT;
+
+                if (!spellId)
+                {
+                    spellId = c->BLESSING_OF_KINGS;
+                    if (!spellId)
+                        spellId = c->BLESSING_OF_SANCTUARY;
+                }
+            }
     }
 
-    if (petSpellId == c->BLESSING_OF_MIGHT)
+    /*if (petSpellId == c->BLESSING_OF_MIGHT)
         petBigSpellId = c->GREATER_BLESSING_OF_MIGHT;
     else if (petSpellId == c->BLESSING_OF_WISDOM)
         petBigSpellId = c->GREATER_BLESSING_OF_WISDOM;
     else if (petSpellId == c->BLESSING_OF_KINGS)
         petBigSpellId = c->GREATER_BLESSING_OF_KINGS;
     else if (petSpellId == c->BLESSING_OF_SANCTUARY)
-        petBigSpellId = c->GREATER_BLESSING_OF_SANCTUARY;
+        petBigSpellId = c->GREATER_BLESSING_OF_SANCTUARY;*/
 
     if (spellId == c->BLESSING_OF_MIGHT)
         bigSpellId = c->GREATER_BLESSING_OF_MIGHT;
@@ -640,10 +643,10 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *targe
     else if (spellId == c->BLESSING_OF_SANCTUARY)
         bigSpellId = c->GREATER_BLESSING_OF_SANCTUARY;
 
-    if (bigSpellId && ai->HasSpellReagents(bigSpellId) && ((petSpellId && ai->Buff(petBigSpellId, pet)) || ai->Buff(bigSpellId, target)))
+    if (bigSpellId && ai->HasSpellReagents(bigSpellId) && (/*(petSpellId && ai->Buff(petBigSpellId, pet)) || */ai->Buff(bigSpellId, target)))
         return true;
     else
-        return ( (petSpellId && ai->Buff(petSpellId, target)) || ai->Buff(spellId, target) );
+        return ( /*(petSpellId && ai->Buff(petSpellId, target)) || */ai->Buff(spellId, target) );
 }
 
 // Match up with "Pull()" below
