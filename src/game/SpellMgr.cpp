@@ -684,6 +684,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     return false;
                 case 10258:                                 // Awaken Vault Warder
                 case 18153:                                 // Kodo Kombobulator
+                case 32312:                                 // Move 1
+                case 37388:                                 // Move 2
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
                 case 62105:                                 // To'kini's Blowgun
@@ -2080,6 +2082,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                             (spellInfo_2->Id == 39993 && spellInfo_1->Id == 40041))
                         return false;
 
+                    // Karazhan - Chess: Is Square OCCUPIED aura Karazhan - Chess: Create Move Marker
+                    if ((spellInfo_1->Id == 39400 && spellInfo_2->Id == 32261) ||
+                            (spellInfo_2->Id == 39400 && spellInfo_1->Id == 32261))
+                        return false;
                     break;
                 }
                 case SPELLFAMILY_MAGE:

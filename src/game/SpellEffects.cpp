@@ -1340,6 +1340,16 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, unitTarget->GetMap()->IsRegularDifficulty() ? 32302 : 38382, true);
                     return;
                 }
+                case 32312:                                 // Move 1 (Chess event AI short distance move)
+                case 37388:                                 // Move 2 (Chess event AI long distance move)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    // cast generic move spell
+                    m_caster->CastSpell(unitTarget, 30012, true);
+                    return;
+                }
                 case 33060:                                 // Make a Wish
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -3016,6 +3026,35 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 23881:
                 {
                     m_caster->CastCustomSpell(unitTarget, 23885, &damage, NULL, NULL, true, NULL);
+                    return;
+                }
+                case 30012:                                 // Move
+                {
+                    if (!unitTarget || unitTarget->HasAura(39400))
+                        return;
+
+                    unitTarget->CastSpell(m_caster, 30253, true);
+                }
+                case 30284:                                 // Change Facing
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, 30270, true);
+                    return;
+                }
+                case 37144:                                 // Move (Chess event player knight move)
+                case 37146:                                 // Move (Chess event player pawn move)
+                case 37148:                                 // Move (Chess event player queen move)
+                case 37151:                                 // Move (Chess event player rook move)
+                case 37152:                                 // Move (Chess event player bishop move)
+                case 37153:                                 // Move (Chess event player king move)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    // cast generic move spell
+                    m_caster->CastSpell(unitTarget, 30012, true);
                     return;
                 }
             }
@@ -7293,6 +7332,25 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAurasAtMechanicImmunity(IMMUNE_TO_ROOT_AND_SNARE_MASK, 30918, true);
                     break;
                 }
+                case 37142:                                 // Karazhan - Chess NPC Action: Melee Attack: Conjured Water Elemental
+                case 37143:                                 // Karazhan - Chess NPC Action: Melee Attack: Charger
+                case 37147:                                 // Karazhan - Chess NPC Action: Melee Attack: Human Cleric
+                case 37149:                                 // Karazhan - Chess NPC Action: Melee Attack: Human Conjurer
+                case 37150:                                 // Karazhan - Chess NPC Action: Melee Attack: King Llane
+                case 37220:                                 // Karazhan - Chess NPC Action: Melee Attack: Summoned Daemon
+                case 32227:                                 // Karazhan - Chess NPC Action: Melee Attack: Footman
+                case 32228:                                 // Karazhan - Chess NPC Action: Melee Attack: Grunt
+                case 37337:                                 // Karazhan - Chess NPC Action: Melee Attack: Orc Necrolyte
+                case 37339:                                 // Karazhan - Chess NPC Action: Melee Attack: Orc Wolf
+                case 37345:                                 // Karazhan - Chess NPC Action: Melee Attack: Orc Warlock
+                case 37348:                                 // Karazhan - Chess NPC Action: Melee Attack: Warchief Blackhand
+                {
+                        if (!unitTarget)
+                            return;
+
+                        m_caster->CastSpell(unitTarget, 32247, true);
+                        return;
+                }
                 case 32301:                                 // Ping Shirrak
                 {
                     if (!unitTarget)
@@ -7331,12 +7389,46 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, urand(0, 1) ? 37429 : 37430, true);
                     return;
                 }
+                case 37775:                                 // Karazhan - Chess NPC Action - Poison Cloud
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 37469, true);
+                    return;
+                }
+                case 37824:                                 // Karazhan - Chess NPC Action - Shadow Mend
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 37456, true);
+                    return;
+                }
                 case 38358:                                 // Tidal Surge
                 {
                     if (!unitTarget)
                         return;
 
                     unitTarget->CastSpell(unitTarget, 38353, true, NULL, NULL, m_caster->GetObjectGuid());
+                    return;
+                }
+                case 39338:                                 // Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Horde
+                case 39342:                                 // Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Alliance
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 39339, true);
+                    return;
+                }
+                case 39341:                                 // Karazhan - Chess, Medivh CHEAT: Fury of Medivh, Target Horde
+                case 39344:                                 // Karazhan - Chess, Medivh CHEAT: Fury of Medivh, Target Alliance
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
                 case 41055:                                 // Copy Weapon
@@ -7544,6 +7636,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     unitTarget->CastSpell(unitTarget, 45236, true, NULL, NULL, m_caster->GetObjectGuid());
+                    return;
+                }
+                case 45260:                                 // Karazhan - Chess - Force Player to Kill Bunny
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 45259, true);
                     return;
                 }
                 case 45668:                                 // Ultra-Advanced Proto-Typical Shortening Blaster

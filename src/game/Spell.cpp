@@ -7641,8 +7641,12 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 30769:                                 // Pick Red Riding Hood (Karazhan, Big Bad Wolf)
                 case 30835:                                 // Infernal Relay (Karazhan, Prince Malchezaar)
                 case 31347:                                 // Doom (Hyjal Summit, Azgalor)
+                case 32312:                                 // Move 1 (Karazhan, Chess Event)
                 case 33711:                                 // Murmur's Touch (Shadow Labyrinth, Murmur)
+                case 37388:                                 // Move 2 (Karazhan, Chess Event)
                 case 38794:                                 // Murmur's Touch (h) (Shadow Labyrinth, Murmur)
+                case 39338:                                 // Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Horde
+                case 39342:                                 // Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Alliance
                 case 40834:                                 // Agonizing Flames (BT, Illidan Stormrage)
                 case 41537:                                 // Summon Enslaved Soul (BT, Reliquary of Souls)
                 case 44869:                                 // Spectral Blast (SWP, Kalecgos)
@@ -7738,6 +7742,8 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 29213:                                 // Curse of the Plaguebringer (Naxx, Noth the Plaguebringer)
                 case 30004:                                 // Flame Wreath (Karazhan, Shade of Aran)
                 case 31298:                                 // Sleep (Hyjal Summit, Anetheron)
+                case 39341:                                 // Karazhan - Chess, Medivh CHEAT: Fury of Medivh, Target Horde
+                case 39344:                                 // Karazhan - Chess, Medivh CHEAT: Fury of Medivh, Target Alliance
                 case 39992:                                 // Needle Spine Targeting (BT, Warlord Najentus)
                 case 40869:                                 // Fatal Attraction (BT, Mother Shahraz)
                 case 41303:                                 // Soul Drain (BT, Reliquary of Souls)
