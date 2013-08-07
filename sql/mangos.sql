@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_12522_01_mangos_db_script_string` bit(1) default NULL
+  `required_12534_01_mangos_playercreateinfo_spell` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -13311,7 +13311,8 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (10,2,27762,'Libram'),
 (10,2,28730,'Arcane Torrent'),
 (10,2,28877,'Arcane Affinity'),
-(10,2,68398, 'Opening'),
+(10,2,61437,'Opening'),
+(10,2,68398,'Opening'),
 (10,3,75,'Auto Shot'),
 (10,3,81,'Dodge'),
 (10,3,197,'Two-Handed Axes'),
@@ -13350,6 +13351,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (10,3,28730,'Arcane Torrent'),
 (10,3,28877,'Arcane Affinity'),
 (10,3,34082,'Advantaged State (DND)'),
+(10,3,61437,'Opening'),
 (10,3,68398,'Opening'),
 (10,4,81,'Dodge'),
 (10,4,203,'Unarmed'),
@@ -13389,6 +13391,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (10,4,22810,'Opening - No Text'),
 (10,4,25046,'Arcane Torrent'),
 (10,4,28877,'Arcane Affinity'),
+(10,4,61437,'Opening'),
 (10,4,68398,'Opening'),
 (10,5,81,'Dodge'),
 (10,5,198,'One-Handed Maces'),
@@ -13425,7 +13428,8 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (10,5,22810,'Opening - No Text'),
 (10,5,28730,'Arcane Torrent'),
 (10,5,28877,'Arcane Affinity'),
-(10,5,68398, 'Opening'),
+(10,5,61437,'Opening'),
+(10,5,68398,'Opening'),
 (10,6,81,'Dodge'),
 (10,6,196,'One-Handed Axes'),
 (10,6,197,'Two-Handed Axes'),
@@ -13527,6 +13531,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (10,8,22810,'Opening - No Text'),
 (10,8,28730,'Arcane Torrent'),
 (10,8,28877,'Arcane Affinity'),
+(10,8,61437,'Opening'),
 (10,8,68398,'Opening'),
 (10,9,81,'Dodge'),
 (10,9,203,'Unarmed'),
@@ -13565,6 +13570,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (10,9,28730,'Arcane Torrent'),
 (10,9,28877,'Arcane Affinity'),
 (10,9,58284,'Chaos Bolt Passive'),
+(10,9,61437,'Opening'),
 (10,9,68398,'Opening'),
 (10,9,75445,'Demonic Immolate'),
 (11,1,78,'Heroic Strike'),
