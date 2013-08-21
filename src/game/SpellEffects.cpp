@@ -9352,9 +9352,105 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
         case 15:                    // GO destroy
             gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
             break;
-        case 16:                    // GO lock - found mostly in Wind Stones and Simon Game spells
-            gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+        case 16:                    // GO custom use - found mostly in Wind Stones spells, Simon Game spells and other GO target summoning spells
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 24734:         // Summon Templar Random
+                case 24744:         // Summon Templar (fire)
+                case 24756:         // Summon Templar (air)
+                case 24758:         // Summon Templar (earth)
+                case 24760:         // Summon Templar (water)
+                case 24763:         // Summon Duke Random
+                case 24765:         // Summon Duke (fire)
+                case 24768:         // Summon Duke (air)
+                case 24770:         // Summon Duke (earth)
+                case 24772:         // Summon Duke (water)
+                case 24784:         // Summon Royal Random
+                case 24786:         // Summon Royal (fire)
+                case 24788:         // Summon Royal (air)
+                case 24789:         // Summon Royal (earth)
+                case 24790:         // Summon Royal (water)
+                {
+                    uint32 npcEntry = 0;
+                    uint32 templars[] = {15209, 15211, 15212, 15307};
+                    uint32 dukes[] = {15206, 15207, 15208, 15220};
+                    uint32 royals[] = {15203, 15204, 15205, 15305};
+
+                    switch (m_spellInfo->Id)
+                    {
+                        case 24734: npcEntry = templars[urand(0, 3)]; break;
+                        case 24763: npcEntry = dukes[urand(0, 3)];    break;
+                        case 24784: npcEntry = royals[urand(0, 3)];   break;
+                        case 24744: npcEntry = 15209;                 break;
+                        case 24756: npcEntry = 15212;                 break;
+                        case 24758: npcEntry = 15307;                 break;
+                        case 24760: npcEntry = 15211;                 break;
+                        case 24765: npcEntry = 15206;                 break;
+                        case 24768: npcEntry = 15220;                 break;
+                        case 24770: npcEntry = 15208;                 break;
+                        case 24772: npcEntry = 15207;                 break;
+                        case 24786: npcEntry = 15203;                 break;
+                        case 24788: npcEntry = 15204;                 break;
+                        case 24789: npcEntry = 15205;                 break;
+                        case 24790: npcEntry = 15305;                 break;
+                    }
+
+                    gameObjTarget->SummonCreature(npcEntry, gameObjTarget->GetPositionX(), gameObjTarget->GetPositionY(), gameObjTarget->GetPositionZ(), gameObjTarget->GetAngle(m_caster), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
+                    gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
+                    break;
+                }
+                case 40176:         // Simon Game pre-game Begin, blue
+                case 40177:         // Simon Game pre-game Begin, green
+                case 40178:         // Simon Game pre-game Begin, red
+                case 40179:         // Simon Game pre-game Begin, yellow
+                case 40283:         // Simon Game END, blue
+                case 40284:         // Simon Game END, green
+                case 40285:         // Simon Game END, red
+                case 40286:         // Simon Game END, yellow
+                case 40494:         // Simon Game, switched ON
+                case 40495:         // Simon Game, switched OFF
+                case 40512:         // Simon Game, switch...disable Off switch
+                    gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                    break;
+                case 40632:         // Summon Gezzarak the Huntress
+                case 40640:         // Summon Karrog
+                case 40642:         // Summon Darkscreecher Akkarai
+                case 40644:         // Summon Vakkiz the Windrager
+                case 41004:         // Summon Terokk
+                    gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
+                    break;
+                case 46085:         // Place Fake Fur
+                {
+                    float x, y, z;
+                    gameObjTarget->GetClosePoint(x, y, z, gameObjTarget->GetObjectBoundingRadius(), 2 * INTERACTION_DISTANCE, frand(0, M_PI_F * 2));
+
+                    // Note: event script is implemented in script library
+                    gameObjTarget->SummonCreature(25835, x, y, z, gameObjTarget->GetOrientation(), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 15000);
+                    gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+                    break;
+                }
+                case 46592:         // Summon Ahune Lieutenant
+                {
+                    uint32 npcEntry = 0;
+
+                    switch (gameObjTarget->GetEntry())
+                    {
+                        case 188049: npcEntry = 26116; break;       // Frostwave Lieutenant (Ashenvale)
+                        case 188137: npcEntry = 26178; break;       // Hailstone Lieutenant (Desolace)
+                        case 188138: npcEntry = 26204; break;       // Chillwind Lieutenant (Stranglethorn)
+                        case 188148: npcEntry = 26214; break;       // Frigid Lieutenant (Searing Gorge)
+                        case 188149: npcEntry = 26215; break;       // Glacial Lieutenant (Silithus)
+                        case 188150: npcEntry = 26216; break;       // Glacial Templar (Hellfire Peninsula)
+                    }
+
+                    gameObjTarget->SummonCreature(npcEntry, gameObjTarget->GetPositionX(), gameObjTarget->GetPositionY(), gameObjTarget->GetPositionZ(), gameObjTarget->GetAngle(m_caster), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
+                    gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
+                    break;
+                }
+            }
             break;
+        }
         case 17:                    // GO unlock - found mostly in Simon Game spells
             gameObjTarget->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             break;
