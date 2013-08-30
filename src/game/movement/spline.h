@@ -24,7 +24,6 @@
 
 namespace Movement
 {
-
     class SplineBase
     {
         public:

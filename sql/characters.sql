@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_12339_02_characters_calendar_invites` bit(1) default NULL
+  `required_12487_01_characters_characters` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
@@ -276,7 +276,7 @@ CREATE TABLE `characters` (
   `chosenTitle` int(10) UNSIGNED NOT NULL default '0',
   `knownCurrencies` bigint(20) UNSIGNED NOT NULL default '0',
   `watchedFaction` int(10) UNSIGNED NOT NULL default '0',
-  `drunk` smallint(5) UNSIGNED NOT NULL default '0',
+  `drunk` tinyint(3) UNSIGNED NOT NULL default '0',
   `health` int(10) UNSIGNED NOT NULL default '0',
   `power1` int(10) UNSIGNED NOT NULL default '0',
   `power2` int(10) UNSIGNED NOT NULL default '0',

@@ -34,93 +34,24 @@ INSTANTIATE_SINGLETON_1(CreatureEventAIMgr);
 // -------------------
 void CreatureEventAIMgr::LoadCreatureEventAI_Texts(bool check_entry_use)
 {
-    // Drop Existing Text Map, only done once and we are ready to add data from multiple sources.
-    m_CreatureEventAI_TextMap.clear();
-
     // Load EventAI Text
-    sObjectMgr.LoadMangosStrings(WorldDatabase, "creature_ai_texts", MIN_CREATURE_AI_TEXT_STRING_ID, MAX_CREATURE_AI_TEXT_STRING_ID);
+    sObjectMgr.LoadMangosStrings(WorldDatabase, "creature_ai_texts", MIN_CREATURE_AI_TEXT_STRING_ID, MAX_CREATURE_AI_TEXT_STRING_ID, true);
 
-    // Gather Additional data from EventAI Texts
-    QueryResult* result = WorldDatabase.Query("SELECT entry, sound, type, language, emote FROM creature_ai_texts");
-
-    sLog.outString("Loading EventAI Texts additional data...");
-    if (result)
-    {
-        BarGoLink bar(result->GetRowCount());
-        uint32 count = 0;
-
-        do
-        {
-            bar.step();
-            Field* fields = result->Fetch();
-            StringTextData temp;
-
-            int32 i             = fields[0].GetInt32();
-            temp.SoundId        = fields[1].GetInt32();
-            temp.Type           = fields[2].GetInt32();
-            temp.Language       = fields[3].GetInt32();
-            temp.Emote          = fields[4].GetInt32();
-
-            // range negative
-            if (i > MIN_CREATURE_AI_TEXT_STRING_ID || i <= MAX_CREATURE_AI_TEXT_STRING_ID)
-            {
-                sLog.outErrorEventAI("CreatureEventAI:  Entry %i in table `creature_ai_texts` is not in valid range(%d-%d)", i, MIN_CREATURE_AI_TEXT_STRING_ID, MAX_CREATURE_AI_TEXT_STRING_ID);
-                continue;
-            }
-
-            // range negative (don't must be happen, loaded from same table)
-            if (!sObjectMgr.GetMangosStringLocale(i))
-            {
-                sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` not found", i);
-                continue;
-            }
-
-            if (temp.SoundId)
-            {
-                if (!sSoundEntriesStore.LookupEntry(temp.SoundId))
-                    sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` has Sound %u but sound does not exist.", i, temp.SoundId);
-            }
-
-            if (!GetLanguageDescByID(temp.Language))
-                sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` using Language %u but Language does not exist.", i, temp.Language);
-
-            if (temp.Type > CHAT_TYPE_ZONE_YELL)
-                sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` has Type %u but this Chat Type does not exist.", i, temp.Type);
-
-            if (temp.Emote)
-            {
-                if (!sEmotesStore.LookupEntry(temp.Emote))
-                    sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` has Emote %u but emote does not exist.", i, temp.Emote);
-            }
-
-            m_CreatureEventAI_TextMap[i] = temp;
-            ++count;
-        }
-        while (result->NextRow());
-
-        delete result;
-
-        if (check_entry_use)
-            CheckUnusedAITexts();
-
-        sLog.outString();
-        sLog.outString(">> Loaded %u additional CreatureEventAI Texts data.", count);
-    }
-    else
-    {
-        BarGoLink bar(1);
-        bar.step();
-        sLog.outString();
-        sLog.outString(">> Loaded 0 additional CreatureEventAI Texts data. DB table `creature_ai_texts` is empty.");
-    }
+    if (check_entry_use)
+        CheckUnusedAITexts();
 }
 
 void CreatureEventAIMgr::CheckUnusedAITexts()
 {
+    if (m_usedTextsAmount == sObjectMgr.GetLoadedStringsCount(MIN_CREATURE_AI_TEXT_STRING_ID))
+        return;
+
+    sLog.outString("Checking EventAI for unused texts, this might take a while");
+
     std::set<int32> idx_set;
-    // check not used strings this is negative range
-    for (CreatureEventAI_TextMap::const_iterator itr = m_CreatureEventAI_TextMap.begin(); itr != m_CreatureEventAI_TextMap.end(); ++itr)
-        idx_set.insert(itr->first);
+    for (int32 i = MAX_CREATURE_AI_TEXT_STRING_ID + 1; i <= MIN_CREATURE_AI_TEXT_STRING_ID; ++i)
+        if (sObjectMgr.GetMangosStringLocale(i))
+            idx_set.insert(i);
 
     for (CreatureEventAI_Event_Map::const_iterator itr = m_CreatureEventAI_Event_Map.begin(); itr != m_CreatureEventAI_Event_Map.end(); ++itr)
     {
@@ -156,7 +87,6 @@ void CreatureEventAIMgr::CheckUnusedAITexts()
 // -------------------
 void CreatureEventAIMgr::LoadCreatureEventAI_Summons(bool check_entry_use)
 {
-
     // Drop Existing EventSummon Map
     m_CreatureEventAI_Summon_Map.clear();
 
@@ -249,6 +179,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
 {
     // Drop Existing EventAI List
     m_CreatureEventAI_Event_Map.clear();
+    std::set<int32> usedTextIds;
 
     // Gather event data
     QueryResult* result = WorldDatabase.Query("SELECT id, creature_id, event_type, event_inverse_phase_mask, event_chance, event_flags, "
@@ -493,13 +424,13 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     // Sender-Creature does not exist in database
                     if (temp.receiveAIEvent.senderEntry && !sCreatureStorage.LookupEntry<CreatureInfo>(temp.receiveAIEvent.senderEntry))
                     {
-                        sLog.outErrorDb("CreatureEventAI:  Event %u has nonexisting creature (%u) defined for event RECEIVE_AI_EVENT, skipping.", i, temp.receiveAIEvent.senderEntry);
+                        sLog.outErrorEventAI("Event %u has nonexisting creature (%u) defined for event RECEIVE_AI_EVENT, skipping.", i, temp.receiveAIEvent.senderEntry);
                         continue;
                     }
                     // Event-Type is not defined
                     if (temp.receiveAIEvent.eventType >= MAXIMAL_AI_EVENT_EVENTAI)
                     {
-                        sLog.outErrorDb("CreatureEventAI:  Event %u has unfitting event-type (%u) defined for event RECEIVE_AI_EVENT (must be less than %u), skipping.", i, temp.receiveAIEvent.eventType, MAXIMAL_AI_EVENT_EVENTAI);
+                        sLog.outErrorEventAI("Event %u has unfitting event-type (%u) defined for event RECEIVE_AI_EVENT (must be less than %u), skipping.", i, temp.receiveAIEvent.eventType, MAXIMAL_AI_EVENT_EVENTAI);
                         continue;
                     }
                     break;
@@ -557,11 +488,13 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                                     sLog.outErrorEventAI("Event %u Action %u param%d references out-of-range entry (%i) in texts table.", i, j + 1, k + 1, action.text.TextId[k]);
                                     action.text.TextId[k] = 0;
                                 }
-                                else if (m_CreatureEventAI_TextMap.find(action.text.TextId[k]) == m_CreatureEventAI_TextMap.end())
+                                else if (!sObjectMgr.GetMangosStringLocale(action.text.TextId[k]))
                                 {
                                     sLog.outErrorEventAI("Event %u Action %u param%d references non-existing entry (%i) in texts table.", i, j + 1, k + 1, action.text.TextId[k]);
                                     action.text.TextId[k] = 0;
                                 }
+                                else
+                                    usedTextIds.insert(action.text.TextId[k]);
                             }
                         }
                         break;
@@ -852,18 +785,25 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_THROW_AI_EVENT:
                         if (action.throwEvent.eventType >= MAXIMAL_AI_EVENT_EVENTAI)
                         {
-                            sLog.outErrorDb("CreatureEventAI:  Event %u Action %u uses invalid event type %u (must be less than %u), skipping", i, j + 1, action.throwEvent.eventType, MAXIMAL_AI_EVENT_EVENTAI);
+                            sLog.outErrorEventAI("Event %u Action %u uses invalid event type %u (must be less than %u), skipping", i, j + 1, action.throwEvent.eventType, MAXIMAL_AI_EVENT_EVENTAI);
                             continue;
                         }
                         if (action.throwEvent.radius > SIZE_OF_GRIDS)
-                            sLog.outErrorDb("CreatureEventAI:  Event %u Action %u uses unexpectedly huge radius %u (expected to be less than %f)", i, j + 1, action.throwEvent.radius, SIZE_OF_GRIDS);
+                            sLog.outErrorEventAI("Event %u Action %u uses unexpectedly huge radius %u (expected to be less than %f)", i, j + 1, action.throwEvent.radius, SIZE_OF_GRIDS);
 
                         if (action.throwEvent.radius == 0)
                         {
-                            sLog.outErrorDb("CreatureEventAI:  Event %u Action %u uses unexpected radius 0 (set to %f of CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS)", i, j + 1, sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));
+                            sLog.outErrorEventAI("Event %u Action %u uses unexpected radius 0 (set to %f of CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS)", i, j + 1, sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));
                             action.throwEvent.radius = uint32(sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));
                         }
 
+                        break;
+                    case ACTION_T_SET_THROW_MASK:
+                        if (action.setThrowMask.eventTypeMask & ~((1 << MAXIMAL_AI_EVENT_EVENTAI) - 1))
+                        {
+                            sLog.outErrorEventAI("Event %u Action %u uses invalid AIEvent-typemask %u (must be smaller than %u)", i, j + 1, action.setThrowMask.eventTypeMask, MAXIMAL_AI_EVENT_EVENTAI << 1);
+                            continue;
+                        }
                         break;
 
                     default:
@@ -879,6 +819,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
         while (result->NextRow());
 
         delete result;
+        m_usedTextsAmount = usedTextIds.size();
 
         // post check
         for (uint32 i = 1; i < sCreatureStorage.GetMaxEntry(); ++i)

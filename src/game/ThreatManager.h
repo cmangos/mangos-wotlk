@@ -34,7 +34,7 @@ class Creature;
 class ThreatManager;
 struct SpellEntry;
 
-#define THREAT_UPDATE_INTERVAL 1 * IN_MILLISECONDS    // Server should send threat update to client periodically each second
+#define THREAT_UPDATE_INTERVAL (1 * IN_MILLISECONDS)        // Server should send threat update to client periodically each second
 
 //==============================================================
 // Class to calculate the real threat based
@@ -163,7 +163,7 @@ class MANGOS_DLL_SPEC ThreatContainer
 
         bool isDirty() const { return iDirty; }
 
-        bool empty() const { return(iThreatList.empty()); }
+        bool empty() const { return iThreatList.empty(); }
 
         HostileReference* getMostHated() { return iThreatList.empty() ? NULL : iThreatList.front(); }
 
