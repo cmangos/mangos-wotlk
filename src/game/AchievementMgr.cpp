@@ -67,6 +67,7 @@ namespace MaNGOS
                 data << uint8(0);
                 data << uint32(i_achievementId);
             }
+            void AfterCached(WorldPacket*& aData) {}
 
         private:
             Player const& i_player;

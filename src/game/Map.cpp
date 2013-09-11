@@ -1872,6 +1872,7 @@ class StaticMonsterChatBuilder
 
             WorldObject::BuildMonsterChat(&data, i_senderGuid, i_msgtype, text, i_language, nameForLocale, i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
         }
+        void AfterCached(WorldPacket*& aData) {}
 
     private:
         ObjectGuid i_senderGuid;
