@@ -2275,8 +2275,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 0, 0, 54726, 54727, 0);
                         return;
                     case 58600:                             // Restricted Flight Area
-                        target->MonsterWhisper(LANG_NO_FLY_ZONE, target, true);
+                    {
+                        if (!target || target->GetTypeId() != TYPEID_PLAYER)
+                            return;
+                        const char* text = sObjectMgr.GetMangosString(LANG_NO_FLY_ZONE, ((Player*)target)->GetSession()->GetSessionDbLocaleIndex());
+                        target->MonsterWhisper(text, target, true);
                         return;
+                    }
                     case 61187:                             // Twilight Shift (single target)
                     case 61190:                             // Twilight Shift (many targets)
                         target->RemoveAurasDueToSpell(57620);
