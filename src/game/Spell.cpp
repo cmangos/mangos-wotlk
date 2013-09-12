@@ -7036,13 +7036,13 @@ bool Spell::CheckTargetCreatureType(Unit* target) const
 CurrentSpellTypes Spell::GetCurrentContainer()
 {
     if (IsNextMeleeSwingSpell())
-        return(CURRENT_MELEE_SPELL);
+        return (CURRENT_MELEE_SPELL);
     else if (IsAutoRepeat())
-        return(CURRENT_AUTOREPEAT_SPELL);
+        return (CURRENT_AUTOREPEAT_SPELL);
     else if (IsChanneledSpell(m_spellInfo))
-        return(CURRENT_CHANNELED_SPELL);
+        return (CURRENT_CHANNELED_SPELL);
     else
-        return(CURRENT_GENERIC_SPELL);
+        return (CURRENT_GENERIC_SPELL);
 }
 
 bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
@@ -7641,8 +7641,12 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 30769:                                 // Pick Red Riding Hood (Karazhan, Big Bad Wolf)
                 case 30835:                                 // Infernal Relay (Karazhan, Prince Malchezaar)
                 case 31347:                                 // Doom (Hyjal Summit, Azgalor)
+                case 32312:                                 // Move 1 (Karazhan, Chess Event)
                 case 33711:                                 // Murmur's Touch (Shadow Labyrinth, Murmur)
+                case 37388:                                 // Move 2 (Karazhan, Chess Event)
                 case 38794:                                 // Murmur's Touch (h) (Shadow Labyrinth, Murmur)
+                case 39338:                                 // Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Horde
+                case 39342:                                 // Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Alliance
                 case 40834:                                 // Agonizing Flames (BT, Illidan Stormrage)
                 case 41537:                                 // Summon Enslaved Soul (BT, Reliquary of Souls)
                 case 44869:                                 // Spectral Blast (SWP, Kalecgos)
@@ -7738,6 +7742,8 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 29213:                                 // Curse of the Plaguebringer (Naxx, Noth the Plaguebringer)
                 case 30004:                                 // Flame Wreath (Karazhan, Shade of Aran)
                 case 31298:                                 // Sleep (Hyjal Summit, Anetheron)
+                case 39341:                                 // Karazhan - Chess, Medivh CHEAT: Fury of Medivh, Target Horde
+                case 39344:                                 // Karazhan - Chess, Medivh CHEAT: Fury of Medivh, Target Alliance
                 case 39992:                                 // Needle Spine Targeting (BT, Warlord Najentus)
                 case 40869:                                 // Fatal Attraction (BT, Mother Shahraz)
                 case 41303:                                 // Soul Drain (BT, Reliquary of Souls)
@@ -7759,6 +7765,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                     break;
                 case 37676:                                 // Insidious Whisper (SSC, Leotheras the Blind)
                 case 38028:                                 // Watery Grave (SSC, Morogrim Tidewalker)
+                case 46650:                                 // Open Brutallus Back Door (SWP, Felmyst)
                 case 67757:                                 // Nerubian Burrower (Mode 3) (ToCrusader, Anub'arak)
                 case 71221:                                 // Gas spore (Mode 1) (ICC, Festergut)
                     unMaxTargets = 4;

@@ -13694,7 +13694,7 @@ uint32 Player::GetDefaultGossipMenuForSource(WorldObject* pSource)
     if (pSource->GetTypeId() == TYPEID_UNIT)
         return ((Creature*)pSource)->GetCreatureInfo()->GossipMenuId;
     else if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
-        return((GameObject*)pSource)->GetGOInfo()->GetGossipMenuId();
+        return ((GameObject*)pSource)->GetGOInfo()->GetGossipMenuId();
 
     return 0;
 }
@@ -13896,6 +13896,11 @@ Quest const* Player::GetNextQuest(ObjectGuid guid, Quest const* pQuest)
     return NULL;
 }
 
+/**
+ * Check if a player could see a start quest
+ * Basic Quest-taking requirements: Class, Race, Skill, Quest-Line, ...
+ * Check if the quest-level is not too high (related config value CONFIG_INT32_QUEST_HIGH_LEVEL_HIDE_DIFF)
+ */
 bool Player::CanSeeStartQuest(Quest const* pQuest) const
 {
     if (SatisfyQuestClass(pQuest, false) && SatisfyQuestRace(pQuest, false) && SatisfyQuestSkill(pQuest, false) &&
@@ -13905,7 +13910,10 @@ bool Player::CanSeeStartQuest(Quest const* pQuest) const
             SatisfyQuestMonth(pQuest, false) &&
             pQuest->IsActive())
     {
-        return int32(getLevel()) + sWorld.getConfig(CONFIG_INT32_QUEST_HIGH_LEVEL_HIDE_DIFF) >= int32(pQuest->GetMinLevel());
+        int32 highLevelDiff = sWorld.getConfig(CONFIG_INT32_QUEST_HIGH_LEVEL_HIDE_DIFF);
+        if (highLevelDiff < 0)
+            return true;
+        return getLevel() + uint32(highLevelDiff) >= pQuest->GetMinLevel();
     }
 
     return false;

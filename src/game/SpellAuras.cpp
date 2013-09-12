@@ -2277,6 +2277,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 58600:                             // Restricted Flight Area
                         target->MonsterWhisper(LANG_NO_FLY_ZONE, target, true);
                         return;
+                    case 61187:                             // Twilight Shift (single target)
+                    case 61190:                             // Twilight Shift (many targets)
+                        target->RemoveAurasDueToSpell(57620);
+                        target->CastSpell(target, 61885, true, NULL, this);
+                        return;
                     case 62061:                             // Festive Holiday Mount
                         if (target->HasAuraType(SPELL_AURA_MOUNTED))
                             // Reindeer Transformation
@@ -2725,6 +2730,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             {
                 // casted only at creatures at spawn
                 target->CastSpell(target, 47287, true, NULL, this);
+                return;
+            }
+            case 46637:                                     // Break Ice
+            {
+                target->CastSpell(target, 46638, true);
                 return;
             }
             case 48385:                                     // Create Spirit Fount Beam
@@ -7909,6 +7919,19 @@ void Aura::PeriodicDummyTick()
                     return;
 //              // Panda
 //              case 19230: break;
+                case 30019:                                 // Control Piece
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    Unit* chessPiece = target->GetCharm();
+                    if (!chessPiece)
+                    {
+                        target->CastSpell(target, 30529, true);
+                        target->RemoveAurasDueToSpell(30019);
+                    }
+                    return;
+                }
 //              // Gossip NPC Periodic - Talk
 //              case 33208: break;
 //              // Gossip NPC Periodic - Despawn
@@ -8165,6 +8188,15 @@ void Aura::PeriodicDummyTick()
                     target->CastSpell(target, 62591, true);
                     target->CastSpell(target, 62592, true);
                     target->CastSpell(target, 62593, true);
+                    return;
+                }
+                case 62717:                                 // Slag Pot
+                {
+                    target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 65722 : 65723, true, NULL, this);
+
+                    // cast Slag Imbued if the target survives up to the last tick
+                    if (GetAuraTicks() == 10)
+                        target->CastSpell(target, 63536, true, NULL, this);
                     return;
                 }
                 case 64217:                                 // Overcharged
