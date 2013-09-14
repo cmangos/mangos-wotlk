@@ -8616,14 +8616,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAuraHolderFromStack(64473);
                     return;
                 }
-                case 64503:                                 // Water
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() == TYPEID_PLAYER || !unitTarget->HasAura(62373))
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 62381, true);
-                    return;
-                }
                 case 66477:                                 // Bountiful Feast
                 {
                     if (!unitTarget)
