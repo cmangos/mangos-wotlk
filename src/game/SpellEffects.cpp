@@ -2687,6 +2687,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                     return;
                 }
+                case 62907:                                 // Freya's Ward
+                {
+                    if (!unitTarget)
+                        return;
+
+                    for (uint8 i = 0; i < 5; ++i)
+                        m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
                 case 63820:                                 // Summon Scrap Bot Trigger (Ulduar - Mimiron) for Scrap Bots
                 case 64425:                                 // Summon Scrap Bot Trigger (Ulduar - Mimiron) for Assault Bots
                 case 64620:                                 // Summon Fire Bot Trigger  (Ulduar - Mimiron) for Fire Bots
