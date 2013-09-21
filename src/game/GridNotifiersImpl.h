@@ -573,6 +573,7 @@ void MaNGOS::LocalizedPacketDo<Builder>::operator()(Player* p)
         data = new WorldPacket(SMSG_MESSAGECHAT, 200);
 
         i_builder(*data, loc_idx);
+        i_builder.AfterCached(i_aData);
 
         i_data_cache[cache_idx] = data;
     }
@@ -580,6 +581,8 @@ void MaNGOS::LocalizedPacketDo<Builder>::operator()(Player* p)
         data = i_data_cache[cache_idx];
 
     p->SendDirectMessage(data);
+    if (i_aData)
+        p->SendDirectMessage(i_aData);
 }
 
 template<class Builder>

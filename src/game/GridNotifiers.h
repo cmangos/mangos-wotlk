@@ -1233,18 +1233,21 @@ namespace MaNGOS
     class LocalizedPacketDo
     {
         public:
-            explicit LocalizedPacketDo(Builder& builder) : i_builder(builder) {}
+            explicit LocalizedPacketDo(Builder& builder) : i_builder(builder), i_aData(NULL) {}
 
             ~LocalizedPacketDo()
             {
                 for (size_t i = 0; i < i_data_cache.size(); ++i)
                     delete i_data_cache[i];
+                if (i_aData)
+                    delete i_aData;
             }
             void operator()(Player* p);
 
         private:
             Builder& i_builder;
             std::vector<WorldPacket*> i_data_cache;         // 0 = default, i => i-1 locale index
+            WorldPacket* i_aData;
     };
 
     // Prepare using Builder localized packets with caching and send to player

@@ -61,6 +61,7 @@ namespace MaNGOS
                 else
                     do_helper(data, text);
             }
+            void AfterCached(WorldPacket*& aData) {}
         private:
             void do_helper(WorldPacket& data, char const* text)
             {
@@ -106,6 +107,7 @@ namespace MaNGOS
                 else
                     do_helper(data, text);
             }
+            void AfterCached(WorldPacket*& aData) {}
         private:
             void do_helper(WorldPacket& data, char const* text)
             {
@@ -153,6 +155,7 @@ namespace MaNGOS
                 data << str;
                 data << uint8(i_source ? i_source->GetChatTag() : uint8(CHAT_TAG_NONE));
             }
+            void AfterCached(WorldPacket*& aData) {}
         private:
 
             ChatMsg i_msgtype;
@@ -187,6 +190,7 @@ namespace MaNGOS
                 data << str;
                 data << uint8(0);                           // ChatTag - for bgs allways 0?
             }
+            void AfterCached(WorldPacket*& aData) {}
         private:
 
             uint32 i_language;

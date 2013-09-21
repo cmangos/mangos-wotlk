@@ -1413,6 +1413,14 @@ namespace MaNGOS
 
                 WorldObject::BuildMonsterChat(&data, i_object.GetObjectGuid(), i_msgtype, text, i_language, i_object.GetNameForLocaleIdx(loc_idx), i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
             }
+            void AfterCached(WorldPacket*& aData)
+            {
+                if (!aData && i_textData->SoundId)
+                {
+                    aData = new WorldPacket(SMSG_PLAY_SOUND, 4);
+                    *aData << uint32(i_textData->SoundId);
+                }
+            }
 
         private:
             WorldObject const& i_object;

@@ -539,6 +539,7 @@ namespace MaNGOS
                 else
                     data << uint8(0x00);
             }
+            void AfterCached(WorldPacket*& aData) {}
 
         private:
             Player const& i_player;
