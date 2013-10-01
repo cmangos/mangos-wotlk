@@ -29,34 +29,6 @@
 #include <set>
 #include <string>
 
-// ////////////////////////////////////////////////////////////////////////////////////////////////
-// ////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//      Testing defines for Chase-movement:
-// These factors depend on combat-reach distance
-#define CHASE_DEFAULT_RANGE_FACTOR                        0.5f
-#define CHASE_RECHASE_RANGE_FACTOR                        0.75f
-
-//      Testing defines for Follow-movement:
-// This factor defines how much of the bounding-radius (as measurement of size) will be used for recalculating a new following position
-// The smaller, the more micromovement, the bigger, possibly no proper movement updates
-#define FOLLOW_RECALCULATE_FACTOR                         0.3f
-// This flat value defines when the distance of a follower will have impact onto following-position updates
-#define FOLLOW_DIST_GAP_FOR_DIST_FACTOR                   5.0f
-// This factor how much of the follow-distance will be used as sloppyness value (if the above distance is exceeded)
-#define FOLLOW_DIST_RECALCULATE_FACTOR                    0.1f
-
-//      Testing defines for ObjectPos selector
-// The bigger these values, the more space npcs require around their target
-#define OCCUPY_POS_ANGLE_ATAN_FACTOR                      2.0f
-// how much space should be left before a mob that already uses a space
-#define OCCUPY_POS_BEFORE_FACTOR                          1.5f
-//                               behind
-#define OCCUPY_POS_BEHIND_FACTOR                          1.5f
-//
-// ////////////////////////////////////////////////////////////////////////////////////////////////
-// ////////////////////////////////////////////////////////////////////////////////////////////////
-
 #define CONTACT_DISTANCE            0.5f
 #define INTERACTION_DISTANCE        5.0f
 #define ATTACK_DISTANCE             5.0f
@@ -491,12 +463,12 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void GetClosePoint(float& x, float& y, float& z, float bounding_radius, float distance2d = 0, float angle = 0, const WorldObject* obj = NULL) const
         {
             // angle calculated from current orientation
-            GetNearPoint(obj, x, y, z, bounding_radius, distance2d + GetObjectBoundingRadius() + bounding_radius, GetOrientation() + angle);
+            GetNearPoint(obj, x, y, z, bounding_radius, distance2d, GetOrientation() + angle);
         }
         void GetContactPoint(const WorldObject* obj, float& x, float& y, float& z, float distance2d = CONTACT_DISTANCE) const
         {
             // angle to face `obj` to `this` using distance includes size of `obj`
-            GetNearPoint(obj, x, y, z, obj->GetObjectBoundingRadius(), distance2d + GetObjectBoundingRadius() + obj->GetObjectBoundingRadius(), GetAngle(obj));
+            GetNearPoint(obj, x, y, z, obj->GetObjectBoundingRadius(), distance2d, GetAngle(obj));
         }
 
         virtual float GetObjectBoundingRadius() const { return DEFAULT_WORLD_OBJECT_SIZE; }

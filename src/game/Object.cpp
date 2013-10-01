@@ -1673,14 +1673,11 @@ namespace MaNGOS
                 float dy = i_object.GetPositionY() - y;
                 float dist2d = sqrt((dx * dx) + (dy * dy));
 
-                // It is ok for the objects to require a bit more space
-                float delta = u->GetObjectBoundingRadius();
-                if (i_selector.m_searchPosFor && i_selector.m_searchPosFor != u)
-                    delta += i_selector.m_searchPosFor->GetObjectBoundingRadius();
+                float delta = i_selector.m_searcherSize + u->GetObjectBoundingRadius();
 
-                // u is too near/far away from i_object. Do not consider it to occupy space
-                if (dist2d < i_selector.m_searcherDist - OCCUPY_POS_BEFORE_FACTOR * delta ||
-                        dist2d > i_selector.m_searcherDist + OCCUPY_POS_BEHIND_FACTOR * delta)
+                // u is too nearest/far away to i_object
+                if (dist2d < i_selector.m_searcherDist - delta ||
+                        dist2d >= i_selector.m_searcherDist + delta)
                     return;
 
                 float angle = i_object.GetAngle(u) - i_absAngle;
@@ -1691,7 +1688,7 @@ namespace MaNGOS
                 else if (angle < -M_PI_F)
                     angle += 2.0f * M_PI_F;
 
-                i_selector.AddUsedArea(u, angle, dist2d);
+                i_selector.AddUsedArea(u->GetObjectBoundingRadius(), angle, dist2d);
             }
         private:
             WorldObject const& i_object;
@@ -1705,8 +1702,8 @@ namespace MaNGOS
 
 void WorldObject::GetNearPoint2D(float& x, float& y, float distance2d, float absAngle) const
 {
-    x = GetPositionX() + distance2d * cos(absAngle);
-    y = GetPositionY() + distance2d * sin(absAngle);
+    x = GetPositionX() + (GetObjectBoundingRadius() + distance2d) * cos(absAngle);
+    y = GetPositionY() + (GetObjectBoundingRadius() + distance2d) * sin(absAngle);
 
     MaNGOS::NormalizeMapCoord(x);
     MaNGOS::NormalizeMapCoord(y);
@@ -1714,7 +1711,7 @@ void WorldObject::GetNearPoint2D(float& x, float& y, float distance2d, float abs
 
 void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, float& z, float searcher_bounding_radius, float distance2d, float absAngle) const
 {
-    GetNearPoint2D(x, y, distance2d, absAngle);
+    GetNearPoint2D(x, y, distance2d + searcher_bounding_radius, absAngle);
     const float init_z = z = GetPositionZ();
 
     // if detection disabled, return first point
@@ -1735,14 +1732,14 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     const float dist = distance2d + searcher_bounding_radius + GetObjectBoundingRadius();
 
     // prepare selector for work
-    ObjectPosSelector selector(GetPositionX(), GetPositionY(), distance2d, searcher_bounding_radius, searcher);
+    ObjectPosSelector selector(GetPositionX(), GetPositionY(), dist, searcher_bounding_radius);
 
     // adding used positions around object
     {
         MaNGOS::NearUsedPosDo u_do(*this, searcher, absAngle, selector);
         MaNGOS::WorldObjectWorker<MaNGOS::NearUsedPosDo> worker(this, u_do);
 
-        Cell::VisitAllObjects(this, worker, dist);
+        Cell::VisitAllObjects(this, worker, distance2d + searcher_bounding_radius);
     }
 
     // maybe can just place in primary position
@@ -1767,7 +1764,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     // select in positions after current nodes (selection one by one)
     while (selector.NextAngle(angle))                       // angle for free pos
     {
-        GetNearPoint2D(x, y, distance2d, absAngle + angle);
+        GetNearPoint2D(x, y, distance2d + searcher_bounding_radius, absAngle + angle);
         z = GetPositionZ();
 
         if (searcher)
@@ -1799,7 +1796,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     // select in positions after current nodes (selection one by one)
     while (selector.NextUsedAngle(angle))                   // angle for used pos but maybe without LOS problem
     {
-        GetNearPoint2D(x, y, distance2d, absAngle + angle);
+        GetNearPoint2D(x, y, distance2d + searcher_bounding_radius, absAngle + angle);
         z = GetPositionZ();
 
         if (searcher)

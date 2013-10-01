@@ -7212,7 +7212,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     float angle = unitTarget->GetOrientation();
                     for (uint8 i = 0; i < 4; ++i)
                     {
-                        unitTarget->GetNearPoint(unitTarget, x, y, z, unitTarget->GetObjectBoundingRadius(), INTERACTION_DISTANCE, angle + i * M_PI_F / 2);
+                        unitTarget->GetNearPoint(unitTarget, x, y, z, unitTarget->GetObjectBoundingRadius(), 5.0f, angle + i * M_PI_F / 2);
                         unitTarget->SummonCreature(16119, x, y, z, angle, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 10 * MINUTE * IN_MILLISECONDS);
                     }
                     return;
@@ -7386,7 +7386,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     float x, y, z;
                     for (uint8 i = 0; i < 4; ++i)
                     {
-                        m_caster->GetNearPoint(m_caster, x, y, z, 0, INTERACTION_DISTANCE, M_PI_F * .5f * i + M_PI_F * .25f);
+                        m_caster->GetNearPoint(m_caster, x, y, z, 0, 5.0f, M_PI_F * .5f * i + M_PI_F * .25f);
                         m_caster->SummonCreature(21002, x, y, z, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                     }
                     return;
@@ -10193,7 +10193,7 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
             // calculate angle variation for roughly equal dimensions of target area
             float max_angle = (max_dis - min_dis) / (max_dis + m_caster->GetObjectBoundingRadius());
             float angle_offset = max_angle * (rand_norm_f() - 0.5f);
-            m_caster->GetNearPoint2D(fx, fy, dis + m_caster->GetObjectBoundingRadius(), m_caster->GetOrientation() + angle_offset);
+            m_caster->GetNearPoint2D(fx, fy, dis, m_caster->GetOrientation() + angle_offset);
 
             GridMapLiquidData liqData;
             if (!m_caster->GetTerrain()->IsInWater(fx, fy, m_caster->GetPositionZ() + 1.f, &liqData))

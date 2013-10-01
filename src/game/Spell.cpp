@@ -2639,7 +2639,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
 
                 float x, y;
-                m_caster->GetNearPoint2D(x, y, radius + m_caster->GetObjectBoundingRadius(), angle);
+                m_caster->GetNearPoint2D(x, y, radius, angle);
                 m_targets.setDestination(x, y, m_caster->GetPositionZ());
             }
 
@@ -2673,7 +2673,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
 
                 float x, y;
-                currentTarget->GetNearPoint2D(x, y, radius + currentTarget->GetObjectBoundingRadius(), angle);
+                currentTarget->GetNearPoint2D(x, y, radius, angle);
                 m_targets.setDestination(x, y, currentTarget->GetPositionZ());
             }
             break;
