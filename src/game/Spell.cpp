@@ -45,6 +45,7 @@
 #include "Util.h"
 #include "Chat.h"
 #include "Vehicle.h"
+#include "TemporarySummon.h"
 #include "SQLStorages.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
@@ -2158,6 +2159,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             if (Unit* target = m_targets.getUnitTarget())
                 if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsPet() && ((Pet*)target)->getPetType() == MINI_PET)
                     targetUnitMap.push_back(target);
+            break;
+        case TARGET_SUMMONER:
+            if (((Creature*)m_caster)->IsTemporarySummon())
+                targetUnitMap.push_back(((TemporarySummon*)(Creature*)m_caster)->GetSummoner());
+            else
+                sLog.outError("SPELL: Spell ID %u with target ID %u was used by non temporary summon creature %s.", m_spellInfo->Id, targetMode, m_caster->GetGuidStr().c_str());
             break;
         case TARGET_CONTROLLED_VEHICLE:
             if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
