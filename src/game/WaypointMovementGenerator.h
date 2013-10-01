@@ -33,7 +33,7 @@
 #include <set>
 
 #define FLIGHT_TRAVEL_UPDATE  100
-#define STOP_TIME_FOR_PLAYER  3 * MINUTE * IN_MILLISECONDS  // 3 Minutes
+#define STOP_TIME_FOR_PLAYER  (3 * MINUTE * IN_MILLISECONDS)// 3 Minutes
 
 template<class T, class P>
 class MANGOS_DLL_SPEC PathMovementBase
@@ -65,7 +65,7 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
   public PathMovementBase<Creature, WaypointPath const*>
 {
     public:
-        WaypointMovementGenerator(Creature&) : i_nextMoveTime(0), m_isArrivalDone(false) {}
+        WaypointMovementGenerator(Creature&) : i_nextMoveTime(0), m_isArrivalDone(false), m_lastReachedWaypoint(0) {}
         ~WaypointMovementGenerator() { i_path = NULL; }
         void Initialize(Creature& u);
         void Interrupt(Creature&);
@@ -80,11 +80,11 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
         // now path movement implmementation
         void LoadPath(Creature& c);
 
-        bool GetResetPosition(Creature&, float& x, float& y, float& z);
+        bool GetResetPosition(Creature&, float& x, float& y, float& z) const;
 
         void AddToWaypointPauseTime(int32 waitTimeDiff);
 
-        uint32 getLastReachedWaypoint() const { return m_isArrivalDone ? i_currentNode + 1 : i_currentNode; }
+        uint32 getLastReachedWaypoint() const { return m_lastReachedWaypoint; }
 
     private:
         void Stop(int32 time) { i_nextMoveTime.Reset(time); }
@@ -98,6 +98,7 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
 
         ShortTimeTracker i_nextMoveTime;
         bool m_isArrivalDone;
+        uint32 m_lastReachedWaypoint;
 };
 
 /** FlightPathMovementGenerator generates movement of the player for the paths
@@ -126,7 +127,7 @@ class MANGOS_DLL_SPEC FlightPathMovementGenerator
         void SetCurrentNodeAfterTeleport();
         void SkipCurrentNode() { ++i_currentNode; }
         void DoEventIfAny(Player& player, TaxiPathNodeEntry const& node, bool departure);
-        bool GetResetPosition(Player&, float& x, float& y, float& z);
+        bool GetResetPosition(Player&, float& x, float& y, float& z) const;
 };
 
 #endif

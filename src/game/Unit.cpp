@@ -5003,11 +5003,11 @@ void Unit::RemoveAllAurasOnDeath()
 void Unit::RemoveAllAurasOnEvade()
 {
     // used when evading to remove all auras except some special auras
-    // Vehicle control auras should not be removed on evade - neither should linked auras
+    // Vehicle control auras / Fly should not be removed on evade - neither should linked auras
     for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
     {
         SpellEntry const* proto = iter->second->GetSpellProto();
-        if (!IsSpellHaveAura(proto, SPELL_AURA_CONTROL_VEHICLE))
+        if (!IsSpellHaveAura(proto, SPELL_AURA_CONTROL_VEHICLE) && !IsSpellHaveAura(proto, SPELL_AURA_FLY))
         {
             RemoveSpellAuraHolder(iter->second, AURA_REMOVE_BY_DEFAULT);
             iter = m_spellAuraHolders.begin();
@@ -6457,6 +6457,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
             return owner->SpellDamageBonusDone(pVictim, spellProto, pdamage, damagetype);
     }
 
+    uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
     float DoneTotalMod = 1.0f;
     int32 DoneTotal = 0;
 
@@ -6477,24 +6478,20 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
         }
     }
 
-    uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
     // Add flat bonus from spell damage versus
     DoneTotal += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS, creatureTypeMask);
-    AuraList const& mDamageDoneVersus = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS);
-    for (AuraList::const_iterator i = mDamageDoneVersus.begin(); i != mDamageDoneVersus.end(); ++i)
-        if (creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
-            DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
 
-    AuraList const& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
-    for (AuraList::const_iterator i = mDamageDoneCreature.begin(); i != mDamageDoneCreature.end(); ++i)
-    {
-        if (creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
-            DoneTotalMod += ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
-    }
+    // Add pct bonus from spell damage versus
+    DoneTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS, creatureTypeMask);
+
+    // Add flat bonus from spell damage creature
+    DoneTotal += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE, creatureTypeMask);
 
     // done scripted mod (take it from owner)
     Unit* owner = GetOwner();
-    if (!owner) owner = this;
+    if (!owner)
+        owner = this;
+
     AuraList const& mOverrideClassScript = owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
     for (AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
     {
@@ -8103,7 +8100,7 @@ int32 Unit::ModifyHealth(int32 dVal)
         SetHealth(val);
         gain = val - curHealth;
     }
-    else if (curHealth != maxHealth)
+    else
     {
         SetHealth(maxHealth);
         gain = maxHealth - curHealth;
@@ -8135,7 +8132,7 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
         SetPower(power, val);
         gain = val - curPower;
     }
-    else if (curPower != maxPower)
+    else
     {
         SetPower(power, maxPower);
         gain = maxPower - curPower;
@@ -8352,7 +8349,6 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 
 void Unit::UpdateVisibilityAndView()
 {
-
     static const AuraType auratypes[] = {SPELL_AURA_BIND_SIGHT, SPELL_AURA_FAR_SIGHT, SPELL_AURA_NONE};
     for (AuraType const* type = &auratypes[0]; *type != SPELL_AURA_NONE; ++type)
     {
@@ -8652,9 +8648,9 @@ void Unit::SetDeathState(DeathState s)
         RemoveMiniPet();
         UnsummonAllTotems();
 
+        StopMoving();
         i_motionMaster.Clear(false, true);
         i_motionMaster.MoveIdle();
-        StopMoving();
 
         // Unsummon vehicle accessories
         if (IsVehicle())
@@ -8765,7 +8761,8 @@ void Unit::TauntApply(Unit* taunter)
     // Only attack taunter if this is a valid target
     if (!hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED) && !IsSecondChoiceTarget(taunter, true))
     {
-        SetInFront(taunter);
+        if (GetTargetGuid() || !target)
+            SetInFront(taunter);
 
         if (((Creature*)this)->AI())
             ((Creature*)this)->AI()->AttackStart(taunter);
@@ -8812,7 +8809,8 @@ void Unit::TauntFadeOut(Unit* taunter)
 
     if (target && target != taunter)
     {
-        SetInFront(target);
+        if (GetTargetGuid())
+            SetInFront(target);
 
         if (((Creature*)this)->AI())
             ((Creature*)this)->AI()->AttackStart(target);
@@ -8927,8 +8925,8 @@ bool Unit::SelectHostileTarget()
                     // next iteration we will select next possible target
                     m_HostileRefManager.deleteReference(target);
                     m_ThreatManager.modifyThreatPercent(target, -101);
-
-                    _removeAttacker(target);
+                    // remove target from current attacker, do not exit combat settings
+                    AttackStop(true);
                 }
 
                 return false;
@@ -10215,8 +10213,11 @@ void Unit::SendPetAIReaction()
 
 ///----------End of Pet responses methods----------
 
-void Unit::StopMoving()
+void Unit::StopMoving(bool forceSendStop /*=false*/)
 {
+    if (IsStopped() && !forceSendStop)
+        return;
+
     clearUnitState(UNIT_STAT_MOVING);
 
     // not need send any packets if not in world
@@ -10226,6 +10227,21 @@ void Unit::StopMoving()
     Movement::MoveSplineInit init(*this);
     init.SetFacing(GetOrientation());
     init.Launch();
+}
+
+void Unit::InterruptMoving(bool forceSendStop /*=false*/)
+{
+    bool isMoving = false;
+
+    if (!movespline->Finalized())
+    {
+        Movement::Location loc = movespline->ComputePosition();
+        movespline->_Interrupt();
+        Relocate(loc.x, loc.y, loc.z, loc.orientation);
+        isMoving = true;
+    }
+
+    StopMoving(forceSendStop || isMoving);
 }
 
 void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 time)

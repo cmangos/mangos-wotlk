@@ -30,7 +30,6 @@ This is the minimum interface to the VMapMamager.
 
 namespace VMAP
 {
-
     enum VMAPLoadResult
     {
         VMAP_LOAD_RESULT_ERROR,
@@ -83,9 +82,9 @@ namespace VMAP
             */
             void setEnableHeightCalc(bool pVal) { iEnableHeightCalc = pVal; }
 
-            bool isLineOfSightCalcEnabled() const { return(iEnableLineOfSightCalc); }
-            bool isHeightCalcEnabled() const { return(iEnableHeightCalc); }
-            bool isMapLoadingEnabled() const { return(iEnableLineOfSightCalc || iEnableHeightCalc); }
+            bool isLineOfSightCalcEnabled() const { return iEnableLineOfSightCalc; }
+            bool isHeightCalcEnabled() const { return iEnableHeightCalc; }
+            bool isMapLoadingEnabled() const { return iEnableLineOfSightCalc || iEnableHeightCalc; }
 
             virtual std::string getDirFileName(unsigned int pMapId, int x, int y) const = 0;
             /**

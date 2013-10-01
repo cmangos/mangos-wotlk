@@ -499,8 +499,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool IsGuard() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_GUARD; }
 
         bool CanWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
-        bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
-        bool CanFly()  const { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_UNK_2); }
+        virtual bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
+        bool CanFly()  const { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_UNK_2) || HasAuraType(SPELL_AURA_FLY); }
 
         bool IsTrainerOf(Player* player, bool msg) const;
         bool CanInteractWithBattleMaster(Player* player, bool msg) const;
@@ -696,6 +696,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void GetCombatStartPosition(float& x, float& y, float& z) { x = m_combatStartX; y = m_combatStartY; z = m_combatStartZ; }
 
         void SetRespawnCoord(CreatureCreatePos const& pos) { m_respawnPos = pos.m_pos; }
+        void SetRespawnCoord(float x, float y, float z, float ori) { m_respawnPos.x = x; m_respawnPos.y = y; m_respawnPos.z = z; m_respawnPos.o = ori; }
         void GetRespawnCoord(float& x, float& y, float& z, float* ori = NULL, float* dist = NULL) const;
         void ResetRespawnCoord();
 
@@ -765,20 +766,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
     private:
         GridReference<Creature> m_gridRef;
         CreatureInfo const* m_creatureInfo;                 // in difficulty mode > 0 can different from ObjMgr::GetCreatureTemplate(GetEntry())
-};
-
-class AssistDelayEvent : public BasicEvent
-{
-    public:
-        AssistDelayEvent(ObjectGuid victim, Unit& owner, std::list<Creature*> const& assistants);
-
-        bool Execute(uint64 e_time, uint32 p_time) override;
-    private:
-        AssistDelayEvent();
-
-        ObjectGuid m_victimGuid;
-        GuidVector m_assistantGuids;
-        Unit&      m_owner;
 };
 
 class ForcedDespawnDelayEvent : public BasicEvent

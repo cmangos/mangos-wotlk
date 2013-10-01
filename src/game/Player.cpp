@@ -471,7 +471,6 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
     m_isInWater = false;
     m_drunkTimer = 0;
-    m_drunk = 0;
     m_restTime = 0;
     m_deathTimer = 0;
     m_deathExpireTime = 0;
@@ -684,7 +683,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     SetByteValue(PLAYER_BYTES_2, 0, facialHair);
     SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_NORMAL);
 
-    SetUInt16Value(PLAYER_BYTES_3, 0, gender);              // only GENDER_MALE/GENDER_FEMALE (1 bit) allowed, drunk state = 0
+    SetByteValue(PLAYER_BYTES_3, 0, gender);
     SetByteValue(PLAYER_BYTES_3, 3, 0);                     // BattlefieldArenaFaction (0 or 1)
 
     SetUInt32Value(PLAYER_GUILDID, 0);
@@ -1124,34 +1123,43 @@ void Player::HandleDrowning(uint32 time_diff)
     m_MirrorTimerFlagsLast = m_MirrorTimerFlags;
 }
 
-/// The player sobers by 256 every 10 seconds
+/// The player sobers by 1% every 9 seconds
 void Player::HandleSobering()
 {
     m_drunkTimer = 0;
 
-    uint32 drunk = (m_drunk <= 256) ? 0 : (m_drunk - 256);
-    SetDrunkValue(drunk);
+    uint8 currentDrunkValue = GetDrunkValue();
+    if (currentDrunkValue)
+    {
+        --currentDrunkValue;
+        SetDrunkValue(currentDrunkValue);
+    }
 }
 
-DrunkenState Player::GetDrunkenstateByValue(uint16 value)
+DrunkenState Player::GetDrunkenstateByValue(uint8 value)
 {
-    if (value >= 23000)
+    if (value >= 90)
         return DRUNKEN_SMASHED;
-    if (value >= 12800)
+    if (value >= 50)
         return DRUNKEN_DRUNK;
-    if (value & 0xFFFE)
+    if (value)
         return DRUNKEN_TIPSY;
     return DRUNKEN_SOBER;
 }
 
-void Player::SetDrunkValue(uint16 newDrunkenValue, uint32 itemId)
+void Player::SetDrunkValue(uint8 newDrunkValue, uint32 itemId /*= 0*/)
 {
-    uint32 oldDrunkenState = Player::GetDrunkenstateByValue(m_drunk);
+    if (newDrunkValue > 100)
+        newDrunkValue = 100;
 
-    m_drunk = newDrunkenValue;
-    SetUInt16Value(PLAYER_BYTES_3, 0, uint16(getGender()) | (m_drunk & 0xFFFE));
+    if (newDrunkValue < GetDrunkValue())
+        m_drunkTimer = 0;   // reset sobering timer
 
-    uint32 newDrunkenState = Player::GetDrunkenstateByValue(m_drunk);
+    uint32 oldDrunkenState = Player::GetDrunkenstateByValue(GetDrunkValue());
+
+    SetByteValue(PLAYER_BYTES_3, 1, newDrunkValue);
+
+    uint32 newDrunkenState = Player::GetDrunkenstateByValue(newDrunkValue);
 
     // special drunk invisibility detection
     if (newDrunkenState >= DRUNKEN_DRUNK)
@@ -1369,11 +1377,11 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         m_Last_tick = now;
     }
 
-    if (m_drunk)
+    if (GetDrunkValue())
     {
         m_drunkTimer += update_diff;
 
-        if (m_drunkTimer > 10 * IN_MILLISECONDS)
+        if (m_drunkTimer > 9 * IN_MILLISECONDS)
             HandleSobering();
     }
 
@@ -4840,6 +4848,7 @@ void Player::RepopAtGraveyard()
     // and don't show spirit healer location
     if (ClosestGrave)
     {
+        bool updateVisibility = IsInWorld() && GetMapId() == ClosestGrave->map_id;
         TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, GetOrientation());
         if (isDead())                                       // not send if alive, because it used in TeleportTo()
         {
@@ -4850,6 +4859,8 @@ void Player::RepopAtGraveyard()
             data << ClosestGrave->z;
             GetSession()->SendPacket(&data);
         }
+        if (updateVisibility && IsInWorld())
+            UpdateVisibilityAndView();
     }
 }
 
@@ -6075,7 +6086,7 @@ void Player::SaveRecallPosition()
     m_recallO = GetOrientation();
 }
 
-void Player::SendMessageToSet(WorldPacket* data, bool self)
+void Player::SendMessageToSet(WorldPacket* data, bool self) const
 {
     if (IsInWorld())
         GetMap()->MessageBroadcast(this, data, false);
@@ -6086,7 +6097,7 @@ void Player::SendMessageToSet(WorldPacket* data, bool self)
         GetSession()->SendPacket(data);
 }
 
-void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self)
+void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self) const
 {
     if (IsInWorld())
         GetMap()->MessageDistBroadcast(this, data, dist, false);
@@ -6095,7 +6106,7 @@ void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self)
         GetSession()->SendPacket(data);
 }
 
-void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self, bool own_team_only)
+void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self, bool own_team_only) const
 {
     if (IsInWorld())
         GetMap()->MessageDistBroadcast(this, data, dist, false, own_team_only);
@@ -6104,7 +6115,7 @@ void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self, b
         GetSession()->SendPacket(data);
 }
 
-void Player::SendDirectMessage(WorldPacket* data)
+void Player::SendDirectMessage(WorldPacket* data) const
 {
     GetSession()->SendPacket(data);
 }
@@ -13577,7 +13588,7 @@ uint32 Player::GetDefaultGossipMenuForSource(WorldObject* pSource)
     if (pSource->GetTypeId() == TYPEID_UNIT)
         return ((Creature*)pSource)->GetCreatureInfo()->GossipMenuId;
     else if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
-        return((GameObject*)pSource)->GetGOInfo()->GetGossipMenuId();
+        return ((GameObject*)pSource)->GetGOInfo()->GetGossipMenuId();
 
     return 0;
 }
@@ -13779,6 +13790,11 @@ Quest const* Player::GetNextQuest(ObjectGuid guid, Quest const* pQuest)
     return NULL;
 }
 
+/**
+ * Check if a player could see a start quest
+ * Basic Quest-taking requirements: Class, Race, Skill, Quest-Line, ...
+ * Check if the quest-level is not too high (related config value CONFIG_INT32_QUEST_HIGH_LEVEL_HIDE_DIFF)
+ */
 bool Player::CanSeeStartQuest(Quest const* pQuest) const
 {
     if (SatisfyQuestClass(pQuest, false) && SatisfyQuestRace(pQuest, false) && SatisfyQuestSkill(pQuest, false) &&
@@ -13788,7 +13804,10 @@ bool Player::CanSeeStartQuest(Quest const* pQuest) const
             SatisfyQuestMonth(pQuest, false) &&
             pQuest->IsActive())
     {
-        return int32(getLevel()) + sWorld.getConfig(CONFIG_INT32_QUEST_HIGH_LEVEL_HIDE_DIFF) >= int32(pQuest->GetMinLevel());
+        int32 highLevelDiff = sWorld.getConfig(CONFIG_INT32_QUEST_HIGH_LEVEL_HIDE_DIFF);
+        if (highLevelDiff < 0)
+            return true;
+        return getLevel() + uint32(highLevelDiff) >= pQuest->GetMinLevel();
     }
 
     return false;
@@ -15649,7 +15668,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     SetByteValue(UNIT_FIELD_BYTES_0, 0, fields[3].GetUInt8()); // race
     SetByteValue(UNIT_FIELD_BYTES_0, 1, fields[4].GetUInt8()); // class
 
-    uint8 gender = fields[5].GetUInt8() & 0x01;             // allowed only 1 bit values male/female cases (for fit drunk gender part)
+    uint8 gender = fields[5].GetUInt8() & 0x01;
     SetByteValue(UNIT_FIELD_BYTES_0, 2, gender);            // gender
 
     SetUInt32Value(UNIT_FIELD_LEVEL, fields[6].GetUInt8());
@@ -15674,9 +15693,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     SetUInt32Value(PLAYER_BYTES, fields[9].GetUInt32());
     SetUInt32Value(PLAYER_BYTES_2, fields[10].GetUInt32());
 
-    m_drunk = fields[49].GetUInt16();
-
-    SetUInt16Value(PLAYER_BYTES_3, 0, (m_drunk & 0xFFFE) | gender);
+    SetByteValue(PLAYER_BYTES_3, 0, gender);
+    SetByteValue(PLAYER_BYTES_3, 1, fields[49].GetUInt8());
 
     SetUInt32Value(PLAYER_FLAGS, fields[11].GetUInt32());
     SetInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, fields[48].GetInt32());
@@ -15916,13 +15934,11 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     // set value, including drunk invisibility detection
     // calculate sobering. after 15 minutes logged out, the player will be sober again
-    float soberFactor;
-    if (time_diff > 15 * MINUTE)
-        soberFactor = 0;
-    else
-        soberFactor = 1 - time_diff / (15.0f * MINUTE);
-    uint16 newDrunkenValue = uint16(soberFactor * m_drunk);
-    SetDrunkValue(newDrunkenValue);
+    uint8 newDrunkValue = 0;
+    if (time_diff < uint32(GetDrunkValue()) * 9)
+        newDrunkValue = GetDrunkValue() - time_diff / 9;
+
+    SetDrunkValue(newDrunkValue);
 
     m_cinematic = fields[18].GetUInt32();
     m_Played_time[PLAYED_TIME_TOTAL] = fields[19].GetUInt32();
@@ -17554,7 +17570,7 @@ void Player::SaveToDB()
     // FIXME: at this moment send to DB as unsigned, including unit32(-1)
     uberInsert.addUInt32(GetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX));
 
-    uberInsert.addUInt16(uint16(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE));
+    uberInsert.addUInt8(GetDrunkValue());
 
     uberInsert.addUInt32(GetHealth());
 
