@@ -8183,6 +8183,12 @@ void Aura::PeriodicDummyTick()
                         case 2: target->CastSpell(target, 55739, true); break;
                     }
                     return;
+                case 61968:                                 // Flash Freeze
+                {
+                    if (GetAuraTicks() == 1 && !target->HasAura(62464))
+                        target->CastSpell(target, 61970, true, NULL, this);
+                    return;
+                }
                 case 62018:                                 // Collapse
                 {
                     // lose 1% of health every second
@@ -8192,6 +8198,22 @@ void Aura::PeriodicDummyTick()
                 case 62019:                                 // Rune of Summoning
                 {
                     target->CastSpell(target, 62020, true, NULL, this);
+                    return;
+                }
+                case 62038:                                 // Biting Cold
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER || target->HasAura(62821))
+                        return;
+
+                    if (((Player*)target)->isMoving())
+                        target->RemoveAuraHolderFromStack(62039);
+                    else
+                        target->CastSpell(target, 62039, true, NULL, this);
+                    return;
+                }
+                case 62039:                                 // Biting Cold
+                {
+                    target->CastSpell(target, 62188, true);
                     return;
                 }
                 case 62566:                                 // Healthy Spore Summon Periodic
@@ -8246,6 +8268,11 @@ void Aura::PeriodicDummyTick()
                             }
                         }
                     }
+                    return;
+                }
+                case 65272:                                 // Shatter Chest
+                {
+                    target->CastSpell(target, 62501, true, NULL, this);
                     return;
                 }
                 case 66118:                                 // Leeching Swarm
