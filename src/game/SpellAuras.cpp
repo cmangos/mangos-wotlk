@@ -8202,12 +8202,14 @@ void Aura::PeriodicDummyTick()
                 }
                 case 62038:                                 // Biting Cold
                 {
-                    if (target->GetTypeId() != TYPEID_PLAYER || target->HasAura(62821))
+                    if (target->GetTypeId() != TYPEID_PLAYER)
                         return;
 
+                    // if player is moving remove one aura stack
                     if (((Player*)target)->isMoving())
                         target->RemoveAuraHolderFromStack(62039);
-                    else
+                    // otherwise add one aura stack each 3 seconds
+                    else if (GetAuraTicks() % 3 && !target->HasAura(62821))
                         target->CastSpell(target, 62039, true, NULL, this);
                     return;
                 }
