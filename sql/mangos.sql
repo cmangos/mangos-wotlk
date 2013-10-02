@@ -11223,8 +11223,7 @@ CREATE TABLE `playercreateinfo_action` (
   `button` smallint(5) unsigned NOT NULL DEFAULT '0',
   `action` int(11) unsigned NOT NULL DEFAULT '0',
   `type` smallint(5) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`race`,`class`,`button`),
-  KEY `playercreateinfo_race_class_index` (`race`,`class`)
+  PRIMARY KEY (`race`,`class`,`button`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
