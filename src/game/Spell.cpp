@@ -2162,11 +2162,19 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     targetUnitMap.push_back(target);
             break;
         case TARGET_SUMMONER:
-            if (((Creature*)m_caster)->IsTemporarySummon())
-                targetUnitMap.push_back(((TemporarySummon*)(Creature*)m_caster)->GetSummoner());
+        {
+            WorldObject* caster = GetAffectiveCasterObject();
+            if (!caster)
+                return;
+
+            if (caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->IsTemporarySummon())
+                targetUnitMap.push_back(((TemporarySummon*)(Creature*)caster)->GetSummoner());
+            else if (caster->GetTypeId() == TYPEID_GAMEOBJECT && !((GameObject*)caster)->HasStaticDBSpawnData())
+                targetUnitMap.push_back(((GameObject*)caster)->GetOwner());
             else
-                sLog.outError("SPELL: Spell ID %u with target ID %u was used by non temporary summon creature %s.", m_spellInfo->Id, targetMode, m_caster->GetGuidStr().c_str());
+                sLog.outError("SPELL: Spell ID %u with target ID %u was used by non temporary summon object %s.", m_spellInfo->Id, targetMode, caster->GetGuidStr().c_str());
             break;
+        }
         case TARGET_CONTROLLED_VEHICLE:
             if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
                 targetUnitMap.push_back((Unit*)m_caster->GetTransportInfo()->GetTransport());
