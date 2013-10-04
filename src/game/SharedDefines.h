@@ -1305,7 +1305,7 @@ enum Targets
     TARGET_DIRECTLY_FORWARD            = 89,
     TARGET_NONCOMBAT_PET               = 90,
     TARGET_91                          = 91,
-    TARGET_92                          = 92,
+    TARGET_SUMMONER                    = 92,
     TARGET_CONTROLLED_VEHICLE          = 94,
     TARGET_95                          = 95,
     TARGET_VEHICLE_PASSENGER_0         = 96,

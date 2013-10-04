@@ -1,0 +1,3 @@
+ALTER TABLE db_version CHANGE COLUMN required_12540_01_mangos_command required_12562_01_mangos_playercreateinfo_action bit;
+
+ALTER TABLE playercreateinfo_action DROP INDEX playercreateinfo_race_class_index;

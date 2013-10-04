@@ -699,6 +699,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             switch (spellproto->Id)
             {
                 case 46650:                                 // Open Brutallus Back Door
+                case 62488:                                 // Activate Construct
+                case 64503:                                 // Water
                     return true;
                 default:
                     break;
@@ -744,6 +746,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                         case 27202:
                         case 27203:
                         case 47669:
+                        case 64996:                         // Reorigination
                             return true;
                         default:
                             break;
@@ -2095,6 +2098,21 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Karazhan - Chess: Is Square OCCUPIED aura Karazhan - Chess: Create Move Marker
                     if ((spellInfo_1->Id == 39400 && spellInfo_2->Id == 32261) ||
                             (spellInfo_2->Id == 39400 && spellInfo_1->Id == 32261))
+                        return false;
+
+                    // Black Hole (damage) and Black Hole (phase)
+                    if ((spellInfo_1->Id == 62169 && spellInfo_2->Id == 62168) ||
+                            (spellInfo_2->Id == 62169 && spellInfo_1->Id == 62168))
+                        return false;
+
+                    // Black Hole (damage) and Worm Hole (phase)
+                    if ((spellInfo_1->Id == 62169 && spellInfo_2->Id == 65250) ||
+                            (spellInfo_2->Id == 62169 && spellInfo_1->Id == 65250))
+                        return false;
+
+                    // Black Hole (damage) and Phase Punch (phase)
+                    if ((spellInfo_1->Id == 62169 && spellInfo_2->Id == 64417) ||
+                            (spellInfo_2->Id == 62169 && spellInfo_1->Id == 64417))
                         return false;
                     break;
                 }
