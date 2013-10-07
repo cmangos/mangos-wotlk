@@ -73,7 +73,7 @@ class MANGOS_DLL_SPEC TargetedMovementGeneratorMedium
 template<class T>
 class MANGOS_DLL_SPEC ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >
 {
-    template<class T, typename D> friend class TargetedMovementGeneratorMedium;
+    template<class UType, typename D> friend class TargetedMovementGeneratorMedium;
 
     public:
         ChaseMovementGenerator(Unit& target, float offset, float angle)
@@ -100,7 +100,7 @@ class MANGOS_DLL_SPEC ChaseMovementGenerator : public TargetedMovementGeneratorM
 template<class T>
 class MANGOS_DLL_SPEC FollowMovementGenerator : public TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >
 {
-    template<class T, typename D> friend class TargetedMovementGeneratorMedium;
+    template<class UType, typename D> friend class TargetedMovementGeneratorMedium;
 
     public:
         FollowMovementGenerator(Unit& target)
