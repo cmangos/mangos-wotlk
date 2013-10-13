@@ -7691,6 +7691,8 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 62301:                                 // Cosmic Smash (Ulduar, Algalon)
                 case 62374:                                 // Pursued (Ulduar, Flame Leviathan)
                 case 62488:                                 // Activate Construct (Ulduar, Ignis)
+                case 62577:                                 // Blizzard (Ulduar, Thorim)
+                case 62603:                                 // Blizzard (h) (Ulduar, Thorim)
                 case 62797:                                 // Storm Cloud (Ulduar, Hodir)
                 case 63018:                                 // Searing Light (Ulduar, XT-002)
                 case 63024:                                 // Gravity Bomb (Ulduar, XT-002)
