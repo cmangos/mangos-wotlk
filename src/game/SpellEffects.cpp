@@ -8587,6 +8587,28 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, 64909, true);
                     return;
                 }
+                case 62282:                                 // Iron Roots
+                case 62440:                                 // Strengthened Iron Roots
+                case 63598:                                 // Iron Roots (h)
+                case 63601:                                 // Strengthened Iron Roots (h)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || !((Creature*)unitTarget)->IsTemporarySummon())
+                        return;
+
+                    uint32 ownerAura = 0;
+
+                    switch (m_spellInfo->Id)
+                    {
+                        case 62282: ownerAura = 62283; break;
+                        case 62440: ownerAura = 62438; break;
+                        case 63598: ownerAura = 62930; break;
+                        case 63601: ownerAura = 62861; break;
+                    };
+
+                    if (Unit* summoner = unitTarget->GetMap()->GetUnit(((TemporarySummon*)unitTarget)->GetSummonerGuid()))
+                        summoner->RemoveAurasDueToSpell(ownerAura);
+                    return;
+                }
                 case 62381:                                 // Chill
                 {
                     if (!unitTarget)
