@@ -2114,6 +2114,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     if ((spellInfo_1->Id == 62169 && spellInfo_2->Id == 64417) ||
                             (spellInfo_2->Id == 62169 && spellInfo_1->Id == 64417))
                         return false;
+
+                    // Auto Grow and Healthy Spore Visual
+                    if ((spellInfo_1->Id == 62559 && spellInfo_2->Id == 62538) ||
+                            (spellInfo_2->Id == 62559 && spellInfo_1->Id == 62538))
+                        return false;
                     break;
                 }
                 case SPELLFAMILY_MAGE:

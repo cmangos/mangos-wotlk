@@ -2696,6 +2696,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 62279, true);
                     return;
                 }
+                case 62652:                                 // Tidal Wave
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_caster->GetMap()->IsRegularDifficulty() ? 62653 : 62935, true);
+                    return;
+                }
                 case 62797:                                 // Storm Cloud
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -8585,6 +8593,31 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     unitTarget->CastSpell(unitTarget, 62470, true);
                     unitTarget->CastSpell(m_caster, 64909, true);
+                    return;
+                }
+                case 62217:                                 // Unstable Energy
+                case 62922:                                 // Unstable Energy (h)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    return;
+                }
+                case 62262:                                 // Brightleaf Flux
+                {
+                    if (!unitTarget)
+                        return;
+
+                    if (unitTarget->HasAura(62239))
+                        unitTarget->RemoveAurasDueToSpell(62239);
+                    else
+                    {
+                        uint32 stackAmount = urand(1, GetSpellStore()->LookupEntry(62239)->StackAmount);
+
+                        for (uint8 i = 0; i < stackAmount; ++i)
+                            unitTarget->CastSpell(unitTarget, 62239, true);
+                    }
                     return;
                 }
                 case 62282:                                 // Iron Roots
