@@ -684,9 +684,23 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     return false;
                 case 10258:                                 // Awaken Vault Warder
                 case 18153:                                 // Kodo Kombobulator
+                case 32312:                                 // Move 1
+                case 37388:                                 // Move 2
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
                 case 62105:                                 // To'kini's Blowgun
+                    return true;
+                default:
+                    break;
+            }
+            break;
+        case SPELL_EFFECT_SCRIPT_EFFECT:
+            // some explicitly required script effect sets
+            switch (spellproto->Id)
+            {
+                case 46650:                                 // Open Brutallus Back Door
+                case 62488:                                 // Activate Construct
+                case 64503:                                 // Water
                     return true;
                 default:
                     break;
@@ -732,6 +746,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                         case 27202:
                         case 27203:
                         case 47669:
+                        case 64996:                         // Reorigination
                             return true;
                         default:
                             break;
@@ -2080,6 +2095,30 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                             (spellInfo_2->Id == 39993 && spellInfo_1->Id == 40041))
                         return false;
 
+                    // Karazhan - Chess: Is Square OCCUPIED aura Karazhan - Chess: Create Move Marker
+                    if ((spellInfo_1->Id == 39400 && spellInfo_2->Id == 32261) ||
+                            (spellInfo_2->Id == 39400 && spellInfo_1->Id == 32261))
+                        return false;
+
+                    // Black Hole (damage) and Black Hole (phase)
+                    if ((spellInfo_1->Id == 62169 && spellInfo_2->Id == 62168) ||
+                            (spellInfo_2->Id == 62169 && spellInfo_1->Id == 62168))
+                        return false;
+
+                    // Black Hole (damage) and Worm Hole (phase)
+                    if ((spellInfo_1->Id == 62169 && spellInfo_2->Id == 65250) ||
+                            (spellInfo_2->Id == 62169 && spellInfo_1->Id == 65250))
+                        return false;
+
+                    // Black Hole (damage) and Phase Punch (phase)
+                    if ((spellInfo_1->Id == 62169 && spellInfo_2->Id == 64417) ||
+                            (spellInfo_2->Id == 62169 && spellInfo_1->Id == 64417))
+                        return false;
+
+                    // Auto Grow and Healthy Spore Visual
+                    if ((spellInfo_1->Id == 62559 && spellInfo_2->Id == 62538) ||
+                            (spellInfo_2->Id == 62559 && spellInfo_1->Id == 62538))
+                        return false;
                     break;
                 }
                 case SPELLFAMILY_MAGE:

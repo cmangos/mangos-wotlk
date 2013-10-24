@@ -1407,6 +1407,7 @@ void LoadLootTemplates_Reference()
     LootTemplates_Prospecting.CheckLootRefs(&ids_set);
     LootTemplates_Mail.CheckLootRefs(&ids_set);
     LootTemplates_Reference.CheckLootRefs(&ids_set);
+    LootTemplates_Spell.CheckLootRefs(&ids_set);
 
     // output error for any still listed ids (not referenced from any loot table)
     LootTemplates_Reference.ReportUnusedIds(ids_set);
