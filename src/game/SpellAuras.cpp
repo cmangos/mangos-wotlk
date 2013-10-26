@@ -2857,20 +2857,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
                 return;
             }
-            case 64398:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Scrap Bots
-            case 64426:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Assault Bots
-            case 64621:                                     // Summon Fire Bot (Ulduar, Mimiron)
-            {
-                uint32 triggerSpell = 0;
-                switch (GetId())
-                {
-                    case 64398: triggerSpell = 63819; break;
-                    case 64426: triggerSpell = 64427; break;
-                    case 64621: triggerSpell = 64622; break;
-                }
-                target->CastSpell(target, triggerSpell, false);
-                return;
-            }
             case 68839:                                     // Corrupt Soul
             {
                 // Knockdown Stun
@@ -8247,6 +8233,14 @@ void Aura::PeriodicDummyTick()
                     // cast Slag Imbued if the target survives up to the last tick
                     if (GetAuraTicks() == 10)
                         target->CastSpell(target, 63536, true, NULL, this);
+                    return;
+                }
+                case 63382:                                 // Rapid Burst
+                {
+                    if (GetAuraTicks() % 2)
+                        target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 64019 : 64532, true);
+                    else
+                        target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 63387 : 64531, true);
                     return;
                 }
                 case 64217:                                 // Overcharged

@@ -2736,26 +2736,17 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                 }
-                case 63820:                                 // Summon Scrap Bot Trigger (Ulduar - Mimiron) for Scrap Bots
-                case 64425:                                 // Summon Scrap Bot Trigger (Ulduar - Mimiron) for Assault Bots
-                case 64620:                                 // Summon Fire Bot Trigger  (Ulduar - Mimiron) for Fire Bots
+                case 64385:                                 // Spinning (from Unusual Compass)
+                {
+                    m_caster->SetFacingTo(frand(0, M_PI_F * 2));
+                    return;
+                }
+                case 64402:                                 // Rocket Strike
                 {
                     if (!unitTarget)
                         return;
 
-                    uint32 triggerSpell = 0;
-                    switch (m_spellInfo->Id)
-                    {
-                        case 63820: triggerSpell = 64398; break;
-                        case 64425: triggerSpell = 64426; break;
-                        case 64620: triggerSpell = 64621; break;
-                    }
-                    unitTarget->CastSpell(unitTarget, triggerSpell, false);
-                    return;
-                }
-                case 64385:                                 // Spinning (from Unusual Compass)
-                {
-                    m_caster->SetFacingTo(frand(0, M_PI_F * 2));
+                    unitTarget->CastSpell(unitTarget, 63681, true);
                     return;
                 }
                 case 64489:                                 // Feral Rush
@@ -2795,6 +2786,17 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
 
                     m_caster->CastSpell(m_caster, spell_id, true);
+                    return;
+                }
+                case 65346:                                 // Proximity Mine
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(m_caster, m_caster->GetMap()->IsRegularDifficulty() ? 66351 : 63009, true);
+                    m_caster->RemoveAurasDueToSpell(65345);
+                    m_caster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    ((Creature*)m_caster)->ForcedDespawn(2000);
                     return;
                 }
                 case 66390:                                 // Read Last Rites
@@ -8701,6 +8703,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 62708, true);
                     return;
                 }
+                case 63027:                                 // Proximity Mines
+                {
+                    if (!unitTarget)
+                        return;
+
+                    for (uint8 i = 0; i < 15; ++i)
+                        unitTarget->CastSpell(unitTarget, 65347, true);
+                    return;
+                }
                 case 63633:                                 // Summon Rubble
                 {
                     if (!unitTarget)
@@ -8708,6 +8719,22 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     for (uint8 i = 0; i < 5; ++i)
                         unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
+                case 63667:                                 // Napalm Shell
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_caster->GetMap()->IsRegularDifficulty() ? 63666 : 65026, true);
+                    return;
+                }
+                case 63681:                                 // Rocket Strike
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 63036, true);
                     return;
                 }
                 case 64456:                                 // Feral Essence Application Removal
@@ -8740,6 +8767,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         target->CastSpell(target, 64778, true);
                         target->ForcedDespawn(10000);
                     }
+                    return;
+                }
+                case 64841:                                 // Rapid Burst
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, 63382, false);
                     return;
                 }
                 case 66477:                                 // Bountiful Feast
