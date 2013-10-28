@@ -7696,7 +7696,6 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 62797:                                 // Storm Cloud (Ulduar, Hodir)
                 case 63018:                                 // Searing Light (Ulduar, XT-002)
                 case 63024:                                 // Gravity Bomb (Ulduar, XT-002)
-                case 63387:                                 // Rapid Burst
                 case 63545:                                 // Icicle (Ulduar, Hodir)
                 case 63795:                                 // Psychosis (Ulduar, Yogg-Saron)
                 case 63820:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Scrap Bots, hits npc 33856
@@ -7704,8 +7703,8 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 64234:                                 // Gravity Bomb (h) (Ulduar, XT-002)
                 case 64402:                                 // Rocket Strike (Ulduar, Mimiron)
                 case 64425:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Assault Bots, hits npc 33856
-                case 64531:                                 // Rapid Burst (h)
                 case 64543:                                 // Melt Ice (Ulduar, Hodir)
+                case 64623:                                 // Frost Bomb (Ulduar, Mimiron)
                 case 65121:                                 // Searing Light (h) (Ulduar, XT-002)
                 case 65301:                                 // Psychosis (Ulduar, Yogg-Saron)
                 case 65872:                                 // Pursuing Spikes (ToCrusader, Anub'arak)
