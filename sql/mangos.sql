@@ -1,4 +1,4 @@
--- MySQL dump 10.11
+﻿-- MySQL dump 10.11
 --
 -- Host: localhost    Database: mangos
 -- ------------------------------------------------------
@@ -3984,8 +3984,7 @@ INSERT INTO `mangos_string` VALUES
 (1633,'|cffffff00The Alliance has taken control of Halaa!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1634,'|cffffff00Halaa is defenseless!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1635,'|cffffff00The Horde has collected 200 silithyst!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(1636,'|cffffff00The Alliance has collected 200 silithyst!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(11000,'|cffff0000[Anticheat]: Cheater detected. Nickname: %s. Cheat type: %s.|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'|cffff0000[Античит]: Читер обнаружен. Имя: %s. Тип чита: %s.|r');
+(1636,'|cffffff00The Alliance has collected 200 silithyst!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
 /*!40000 ALTER TABLE `mangos_string` ENABLE KEYS */;
 UNLOCK TABLES;

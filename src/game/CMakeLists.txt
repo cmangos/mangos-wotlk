@@ -25,8 +25,6 @@ set(LIBRARY_SRCS
     AchievementMgr.h
     AggressorAI.cpp
     AggressorAI.h
-    AntiCheat.cpp
-    AntiCheat.h
     ArenaTeam.cpp
     ArenaTeam.h
     ArenaTeamHandler.cpp
@@ -107,26 +105,27 @@ set(LIBRARY_SRCS
     CreatureLinkingMgr.cpp
     CreatureLinkingMgr.h
     DBCEnums.h
+    DBCfmt.h
     DBCStores.cpp
     DBCStores.h
     DBCStructure.h
-    DBCfmt.h
+    debugcmds.cpp
     DuelHandler.cpp
     DynamicObject.cpp
     DynamicObject.h
     FleeingMovementGenerator.cpp
     FleeingMovementGenerator.h
-    FollowerRefManager.h
     FollowerReference.cpp
     FollowerReference.h
+    FollowerRefManager.h
     Formulas.h
-    GMTicketHandler.cpp
-    GMTicketMgr.cpp
-    GMTicketMgr.h
     GameEventMgr.cpp
     GameEventMgr.h
     GameObject.cpp
     GameObject.h
+    GMTicketHandler.cpp
+    GMTicketMgr.cpp
+    GMTicketMgr.h
     GossipDef.cpp
     GossipDef.h
     GridDefines.h
@@ -140,9 +139,9 @@ set(LIBRARY_SRCS
     Group.cpp
     Group.h
     GroupHandler.cpp
-    GroupRefManager.h
     GroupReference.cpp
     GroupReference.h
+    GroupRefManager.h
     GuardAI.cpp
     GuardAI.h
     Guild.cpp
@@ -164,12 +163,12 @@ set(LIBRARY_SRCS
     ItemEnchantmentMgr.h
     ItemHandler.cpp
     ItemPrototype.h
-    LFGHandler.cpp
     Language.h
     Level0.cpp
     Level1.cpp
     Level2.cpp
     Level3.cpp
+    LFGHandler.cpp
     LootHandler.cpp
     LootMgr.cpp
     LootMgr.h
@@ -182,8 +181,8 @@ set(LIBRARY_SRCS
     MapManager.h
     MapPersistentStateMgr.cpp
     MapPersistentStateMgr.h
-    MapRefManager.h
     MapReference.h
+    MapRefManager.h
     MassMailMgr.cpp
     MassMailMgr.h
     MiscHandler.cpp
@@ -192,6 +191,19 @@ set(LIBRARY_SRCS
     MoveMap.cpp
     MoveMap.h
     MoveMapSharedDefines.h
+    movement/MoveSpline.cpp
+    movement/MoveSpline.h
+    movement/MoveSplineFlag.h
+    movement/MoveSplineInit.cpp
+    movement/MoveSplineInit.h
+    movement/MoveSplineInitArgs.h
+    movement/packet_builder.cpp
+    movement/packet_builder.h
+    movement/spline.cpp
+    movement/spline.h
+    movement/spline.impl.h
+    movement/typedefs.h
+    movement/util.cpp
     MovementGenerator.cpp
     MovementGenerator.h
     MovementGeneratorImpl.h
@@ -235,6 +247,8 @@ set(LIBRARY_SRCS
     Path.h
     PathFinder.cpp
     PathFinder.h
+    pchdef.cpp
+    pchdef.h
     Pet.cpp
     Pet.h
     PetAI.cpp
@@ -259,8 +273,6 @@ set(LIBRARY_SRCS
     ReactorAI.h
     ReputationMgr.cpp
     ReputationMgr.h
-    SQLStorages.cpp
-    SQLStorages.h
     ScriptMgr.cpp
     ScriptMgr.h
     SharedDefines.h
@@ -280,6 +292,8 @@ set(LIBRARY_SRCS
     SpellHandler.cpp
     SpellMgr.cpp
     SpellMgr.h
+    SQLStorages.cpp
+    SQLStorages.h
     StatSystem.cpp
     TargetedMovementGenerator.cpp
     TargetedMovementGenerator.h
@@ -293,10 +307,10 @@ set(LIBRARY_SRCS
     TotemAI.cpp
     TotemAI.h
     TradeHandler.cpp
-    TransportSystem.cpp
-    TransportSystem.h
     Transports.cpp
     Transports.h
+    TransportSystem.cpp
+    TransportSystem.h
     Unit.cpp
     Unit.h
     UnitAuraProcHandler.cpp
@@ -308,47 +322,6 @@ set(LIBRARY_SRCS
     Vehicle.cpp
     Vehicle.h
     VehicleHandler.cpp
-    VoiceChatHandler.cpp
-    Warden/WardenBase.cpp
-    Warden/WardenBase.h
-    Warden/WardenDataStorage.cpp
-    Warden/WardenDataStorage.h
-    Warden/WardenMac.cpp
-    Warden/WardenMac.h
-    Warden/WardenModuleMac.h
-    Warden/WardenModuleWin.h
-    Warden/WardenWin.cpp
-    Warden/WardenWin.h
-    WaypointManager.cpp
-    WaypointManager.h
-    WaypointMovementGenerator.cpp
-    WaypointMovementGenerator.h
-    Weather.cpp
-    Weather.h
-    World.cpp
-    World.h
-    WorldSession.cpp
-    WorldSession.h
-    WorldSocket.cpp
-    WorldSocket.h
-    WorldSocketMgr.cpp
-    WorldSocketMgr.h
-    debugcmds.cpp
-    movement/MoveSpline.cpp
-    movement/MoveSpline.h
-    movement/MoveSplineFlag.h
-    movement/MoveSplineInit.cpp
-    movement/MoveSplineInit.h
-    movement/MoveSplineInitArgs.h
-    movement/packet_builder.cpp
-    movement/packet_builder.h
-    movement/spline.cpp
-    movement/spline.h
-    movement/spline.impl.h
-    movement/typedefs.h
-    movement/util.cpp
-    pchdef.cpp
-    pchdef.h
     vmap/BIH.cpp
     vmap/BIH.h
     vmap/BIHWrap.h
@@ -372,7 +345,22 @@ set(LIBRARY_SRCS
     vmap/VMapTools.h
     vmap/WorldModel.cpp
     vmap/WorldModel.h
-)
+    VoiceChatHandler.cpp
+    WaypointManager.cpp
+    WaypointManager.h
+    WaypointMovementGenerator.cpp
+    WaypointMovementGenerator.h
+    Weather.cpp
+    Weather.h
+    World.cpp
+    World.h
+    WorldSession.cpp
+    WorldSession.h
+    WorldSocket.cpp
+    WorldSocket.h
+    WorldSocketMgr.cpp
+    WorldSocketMgr.h
+   )
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
