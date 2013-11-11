@@ -45,6 +45,7 @@
 #include "Util.h"
 #include "Chat.h"
 #include "Vehicle.h"
+#include "TemporarySummon.h"
 #include "SQLStorages.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
@@ -1666,8 +1667,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
             float x, y;
             float z = m_caster->GetPositionZ();
-            // Ignore the BOUNDING_RADIUS for spells with radius (add a small value to prevent < 0 rounding errors)
-            m_caster->GetNearPoint2D(x, y, radius > 0.001f ? radius - m_caster->GetObjectBoundingRadius() + 0.01f : 2.0f, angle);
+            // Do not search for a free spot. TODO: Should there be searched for a free spot. There was once a discussion that in case this space was impossible (LOS) m_caster's position should be used.
+            // TODO Bring this back to memory and search for it!
+            m_caster->GetNearPoint2D(x, y, radius, angle);
             m_caster->UpdateAllowedPositionZ(x, y, z);
             m_targets.setDestination(x, y, z);
 
@@ -2163,6 +2165,20 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsPet() && ((Pet*)target)->getPetType() == MINI_PET)
                     targetUnitMap.push_back(target);
             break;
+        case TARGET_SUMMONER:
+        {
+            WorldObject* caster = GetAffectiveCasterObject();
+            if (!caster)
+                return;
+
+            if (caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->IsTemporarySummon())
+                targetUnitMap.push_back(((TemporarySummon*)(Creature*)caster)->GetSummoner());
+            else if (caster->GetTypeId() == TYPEID_GAMEOBJECT && !((GameObject*)caster)->HasStaticDBSpawnData())
+                targetUnitMap.push_back(((GameObject*)caster)->GetOwner());
+            else
+                sLog.outError("SPELL: Spell ID %u with target ID %u was used by non temporary summon object %s.", m_spellInfo->Id, targetMode, caster->GetGuidStr().c_str());
+            break;
+        }
         case TARGET_CONTROLLED_VEHICLE:
             if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
                 targetUnitMap.push_back((Unit*)m_caster->GetTransportInfo()->GetTransport());
@@ -2643,7 +2659,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
 
                 float x, y;
-                m_caster->GetNearPoint2D(x, y, radius, angle);
+                m_caster->GetNearPoint2D(x, y, radius + m_caster->GetObjectBoundingRadius(), angle);
                 m_targets.setDestination(x, y, m_caster->GetPositionZ());
             }
 
@@ -2677,7 +2693,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
 
                 float x, y;
-                currentTarget->GetNearPoint2D(x, y, radius, angle);
+                currentTarget->GetNearPoint2D(x, y, radius + currentTarget->GetObjectBoundingRadius(), angle);
                 m_targets.setDestination(x, y, currentTarget->GetPositionZ());
             }
             break;
@@ -7677,16 +7693,22 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 62042:                                 // Stormhammer (Ulduar, Thorim)
                 case 62166:                                 // Stone Grip (Ulduar, Kologarn)
                 case 62301:                                 // Cosmic Smash (Ulduar, Algalon)
+                case 62374:                                 // Pursued (Ulduar, Flame Leviathan)
                 case 62488:                                 // Activate Construct (Ulduar, Ignis)
+                case 62577:                                 // Blizzard (Ulduar, Thorim)
+                case 62603:                                 // Blizzard (h) (Ulduar, Thorim)
+                case 62797:                                 // Storm Cloud (Ulduar, Hodir)
                 case 63018:                                 // Searing Light (Ulduar, XT-002)
                 case 63024:                                 // Gravity Bomb (Ulduar, XT-002)
-                case 63387:                                 // Rapid Burst
+                case 63545:                                 // Icicle (Ulduar, Hodir)
                 case 63795:                                 // Psychosis (Ulduar, Yogg-Saron)
                 case 63820:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Scrap Bots, hits npc 33856
                 case 64218:                                 // Overcharge (VoA, Emalon)
                 case 64234:                                 // Gravity Bomb (h) (Ulduar, XT-002)
+                case 64402:                                 // Rocket Strike (Ulduar, Mimiron)
                 case 64425:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Assault Bots, hits npc 33856
-                case 64531:                                 // Rapid Burst (h)
+                case 64543:                                 // Melt Ice (Ulduar, Hodir)
+                case 64623:                                 // Frost Bomb (Ulduar, Mimiron)
                 case 65121:                                 // Searing Light (h) (Ulduar, XT-002)
                 case 65301:                                 // Psychosis (Ulduar, Yogg-Saron)
                 case 65872:                                 // Pursuing Spikes (ToCrusader, Anub'arak)
@@ -7731,6 +7753,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                     break;
                 case 10258:                                 // Awaken Vault Warder (Uldaman)
                 case 28542:                                 // Life Drain (Naxx, Sapphiron)
+                case 62476:                                 // Icicle (Ulduar, Hodir)
                 case 66013:                                 // Penetrating Cold (10 man) (ToCrusader, Anub'arak)
                 case 67755:                                 // Nerubian Burrower (Mode 1) (ToCrusader, Anub'arak)
                 case 67756:                                 // Nerubian Burrower (Mode 2) (ToCrusader, Anub'arak)
@@ -7756,6 +7779,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 54522:                                 // Summon Ghouls On Scarlet Crusade
                 case 60936:                                 // Surge of Power (h) (Malygos)
                 case 61693:                                 // Arcane Storm (Malygos)
+                case 62477:                                 // Icicle (h) (Ulduar, Hodir)
                 case 63981:                                 // StoneGrip (h) (Ulduar, Kologarn)
                 case 64598:                                 // Cosmic Smash (h) (Ulduar, Algalon)
                 case 64620:                                 // Summon Fire Bot Trigger (Ulduar, Mimiron) hits npc 33856
