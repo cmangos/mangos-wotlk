@@ -688,6 +688,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case 37388:                                 // Move 2
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
+                case 56099:                                 // Throw Ice
                 case 62105:                                 // To'kini's Blowgun
                 case 64402:                                 // Rocket Strike
                     return true;
