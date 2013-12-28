@@ -62,6 +62,17 @@ enum ChatCommandSearchResult
     CHAT_COMMAND_UNKNOWN_SUBCOMMAND,                        // command found but some level subcommand not find in subcommand list
 };
 
+enum PlayerChatTag
+{
+    CHAT_TAG_NONE               = 0x00,
+    CHAT_TAG_AFK                = 0x01,
+    CHAT_TAG_DND                = 0x02,
+    CHAT_TAG_GM                 = 0x04,
+    CHAT_TAG_COM                = 0x08,                     // Commentator
+    CHAT_TAG_DEV                = 0x10,                     // Developer
+};
+typedef uint32 ChatTagFlags;
+
 class MANGOS_DLL_SPEC ChatHandler
 {
     public:
