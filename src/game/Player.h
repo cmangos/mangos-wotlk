@@ -780,6 +780,7 @@ enum PlayerChatTag
     CHAT_TAG_COM                = 0x08,                     // Commentator
     CHAT_TAG_DEV                = 0x10,                     // Developer
 };
+typedef uint32 ChatTagFlags;
 
 enum PlayedTimeIndex
 {
@@ -1055,7 +1056,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ToggleDND();
         bool isAFK() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK); }
         bool isDND() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND); }
-        uint8 GetChatTag() const;
+        ChatTagFlags GetChatTag() const;
         std::string autoReplyMsg;
 
         uint32 GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 newfacialhair, uint32 newskintone);
@@ -1129,7 +1130,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void Yell(const std::string& text, const uint32 language);
         void TextEmote(const std::string& text);
         void Whisper(const std::string& text, const uint32 language, ObjectGuid receiver);
-        void BuildPlayerChat(WorldPacket* data, uint8 msgtype, const std::string& text, uint32 language) const;
 
         /*********************************************************/
         /***                    STORAGE SYSTEM                 ***/
