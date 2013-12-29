@@ -972,7 +972,7 @@ void ChatHandler::SendSysMessage(const char* str)
 
     while (char* line = LineFromMessage(pos))
     {
-        ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, line, LANG_UNIVERSAL, m_session->GetPlayer()->GetObjectGuid());
+        ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, line, LANG_UNIVERSAL, CHAT_TAG_NONE, m_session->GetPlayer()->GetObjectGuid());
         m_session->SendPacket(&data);
     }
 
@@ -990,7 +990,7 @@ void ChatHandler::SendGlobalSysMessage(const char* str)
 
     while (char* line = LineFromMessage(pos))
     {
-        ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, line, LANG_UNIVERSAL, m_session->GetPlayer()->GetObjectGuid());
+        ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, line, LANG_UNIVERSAL, CHAT_TAG_NONE, m_session->GetPlayer()->GetObjectGuid());
         sWorld.SendGlobalMessage(&data);
     }
 
@@ -3508,19 +3508,19 @@ void ChatHandler::LogCommand(char const* fullcmd)
     }
 }
 
-// Build message chat packet generic way
-void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const* message, Language language /*= LANG_UNIVERSAL*/,
+void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const* message, Language language /*= LANG_UNIVERSAL*/, ChatTagFlags chatTag /*= CHAT_TAG_NONE*/,
                                   ObjectGuid const& senderGuid /*= ObjectGuid()*/, char const* senderName /*= NULL*/,
                                   ObjectGuid const& targetGuid /*= ObjectGuid()*/, char const* targetName /*= NULL*/,
-                                  char const* channelName /*= NULL*/, uint32 achievementId /*= 0*/, bool GM /*= false*/, ChatTagFlags tag /*= CHAT_TAG_NONE*/)
+                                  char const* channelName /*= NULL*/, uint32 achievementId /*= 0*/)
 {
-    data.Initialize(GM ? SMSG_GM_MESSAGECHAT : SMSG_MESSAGECHAT);
+    bool isGM = chatTag & CHAT_TAG_GM;
     bool isAchievement = false;
 
+    data.Initialize(isGM ? SMSG_GM_MESSAGECHAT : SMSG_MESSAGECHAT);
     data << uint8(msgtype);
     data << uint32(language);
     data << ObjectGuid(senderGuid);
-    data << uint32(0);                                          // 2.1.0
+    data << uint32(0);                                              // 2.1.0
 
     switch (msgtype)
     {
@@ -3560,7 +3560,7 @@ void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const
             isAchievement = true;
             break;
         default:
-            if (GM)
+            if (isGM)
             {
                 MANGOS_ASSERT(senderName);
                 data << uint32(strlen(senderName) + 1);
@@ -3578,11 +3578,7 @@ void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const
     MANGOS_ASSERT(message);
     data << uint32(strlen(message) + 1);
     data << message;
-
-    if (GM)
-        tag = CHAT_TAG_GM; //overwrite tag in gm mode case (probably not needed)
-
-    data << uint8(tag);                                         // ChatTag
+    data << uint8(chatTag);
 
     if (isAchievement)
         data << uint32(achievementId);
