@@ -1297,13 +1297,13 @@ CREATE TABLE `creature_template` (
   `Name` char(100) NOT NULL DEFAULT '0',
   `SubName` char(100) DEFAULT NULL,
   `IconName` char(100) DEFAULT NULL,
+  `DifficultyEntry1` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `DifficultyEntry2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `DifficultyEntry3` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `ModelId1` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `ModelId2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `ModelId3` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `ModelId4` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `DifficultyEntry1` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `DifficultyEntry2` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `DifficultyEntry3` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `FactionAlliance` smallint(5) unsigned NOT NULL DEFAULT '0',
   `FactionHorde` smallint(5) unsigned NOT NULL DEFAULT '0',
   `Scale` float NOT NULL DEFAULT '1',
@@ -1333,8 +1333,6 @@ CREATE TABLE `creature_template` (
   `MaxMana` int(10) unsigned NOT NULL DEFAULT '0',
   `MinMeleeDmg` float NOT NULL DEFAULT '0',
   `MaxMeleeDmg` float NOT NULL DEFAULT '0',
-  `MinOffhandDmg` float NOT NULL DEFAULT '0',
-  `MaxOffhandDmg` float NOT NULL DEFAULT '0',
   `MinRangedDmg` float NOT NULL DEFAULT '0',
   `MaxRangedDmg` float NOT NULL DEFAULT '0',
   `MeleeAttackPower` int(10) unsigned NOT NULL DEFAULT '0',
@@ -1387,7 +1385,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,0,0,0,0,0,10045,0,0,0,'Waypoint(Only GM can see it)','Visual',NULL,0,1,1,64,64,0,0,5,35,35,0,0.91,1.14286,1,0,2,3,0,10,1,2000,2200,8,4096,0,0,0,0,0,0,1,2,100,8,5242886,0,0,0,0,0,0,0,0,0,0,0,0,'',0,7,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,130,'');
+(1,'Waypoint(Only GM can see it)','Visual',NULL,0,0,0,10045,0,0,0,35,35,1,0,8,7,1,0,0,4096,0,130,5242886,0.91,1.14286,8,0,0,1,1,1,1,1,64,64,0,0,2,3,1,2,10,100,2000,2200,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 

@@ -73,8 +73,8 @@ struct CreatureInfo
     char*   Name;
     char*   SubName;
     char*   IconName;
-    uint32  ModelId[MAX_CREATURE_MODEL];
     uint32  DifficultyEntry[MAX_DIFFICULTY - 1];
+    uint32  ModelId[MAX_CREATURE_MODEL];
     uint32  faction_A;
     uint32  faction_H;
     float   scale;
@@ -104,8 +104,6 @@ struct CreatureInfo
     uint32  maxmana;
     float   mindmg;
     float   maxdmg;
-    float   min_offhand_dmg;
-    float   max_offhand_dmg;
     float   minrangedmg;
     float   maxrangedmg;
     uint32  attackpower;
