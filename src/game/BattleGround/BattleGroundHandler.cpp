@@ -672,6 +672,8 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
         return;
     }
 
+    bg->SetRated(isRated); // Fix arena queue button
+
     BattleGroundTypeId bgTypeId = bg->GetTypeID();
     BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bgTypeId, arenatype);
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), _player->getLevel());
