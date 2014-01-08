@@ -756,6 +756,9 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
             if (isRated)
                 DEBUG_LOG("Battleground: arena team id %u, leader %s queued with rating %u for type %u", _player->GetArenaTeamId(arenaslot), _player->GetName(), arenaRating, arenatype);
 
+            // set arena rated type to show correct minimap arena icon
+            bg->SetRated(isRated);
+
             GroupQueueInfo* ginfo = bgQueue.AddGroup(_player, grp, bgTypeId, bracketEntry, arenatype, isRated, false, arenaRating, ateamId);
             avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry->GetBracketId());
         }
