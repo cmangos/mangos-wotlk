@@ -291,7 +291,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             // END Playerbot mod
 
             WorldPacket data;
-            ChatHandler::FillMessageData(&data, this, type, lang, msg.c_str());
+            ChatHandler::BuildChatPacket(data, ChatMsg(type), msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
             group->BroadcastPacket(&data, false, group->GetMemberGroup(GetPlayer()->GetObjectGuid()));
 
             break;
@@ -369,7 +369,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             }
 
             WorldPacket data;
-            ChatHandler::FillMessageData(&data, this, CHAT_MSG_RAID, lang, msg.c_str());
+            ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID, msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
             group->BroadcastPacket(&data, false);
         } break;
         case CHAT_MSG_RAID_LEADER:
@@ -399,7 +399,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             }
 
             WorldPacket data;
-            ChatHandler::FillMessageData(&data, this, CHAT_MSG_RAID_LEADER, lang, msg.c_str());
+            ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_LEADER, msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
             group->BroadcastPacket(&data, false);
         } break;
 
@@ -421,7 +421,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
 
             WorldPacket data;
             // in battleground, raid warning is sent only to players in battleground - code is ok
-            ChatHandler::FillMessageData(&data, this, CHAT_MSG_RAID_WARNING, lang, msg.c_str());
+            ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_WARNING, msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
             group->BroadcastPacket(&data, false);
         } break;
 
@@ -442,7 +442,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 return;
 
             WorldPacket data;
-            ChatHandler::FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND, lang, msg.c_str());
+            ChatHandler::BuildChatPacket(data, CHAT_MSG_BATTLEGROUND, msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
             group->BroadcastPacket(&data, false);
         } break;
 
@@ -463,7 +463,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 return;
 
             WorldPacket data;
-            ChatHandler::FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND_LEADER, lang, msg.c_str());
+            ChatHandler::BuildChatPacket(data, CHAT_MSG_BATTLEGROUND_LEADER, msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
             group->BroadcastPacket(&data, false);
         } break;
 
@@ -481,7 +481,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
 
             if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
                 if (Channel* chn = cMgr->GetChannel(channel, _player))
-                    chn->Say(_player->GetObjectGuid(), msg.c_str(), lang);
+                    chn->Say(_player, msg.c_str(), lang);
         } break;
 
         case CHAT_MSG_AFK:
@@ -653,7 +653,7 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data)
         return;
 
     WorldPacket data;
-    ChatHandler::FillMessageData(&data, this, CHAT_MSG_IGNORED, LANG_UNIVERSAL, NULL, GetPlayer()->GetObjectGuid(), GetPlayer()->GetName(), NULL);
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_IGNORED, _player->GetName(), LANG_UNIVERSAL, CHAT_TAG_NONE, _player->GetObjectGuid());
     player->GetSession()->SendPacket(&data);
 }
 

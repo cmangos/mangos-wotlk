@@ -1729,8 +1729,9 @@ void Aura::TriggerSpell()
 //                    // Shield Level 3
 //                    case 63132: break;
 //                    // Food
-//                    case 64345: break;
-//                    // Remove Player from Phase
+                    case 64345:                             // Remove Player from Phase
+                        target->RemoveSpellsCausingAura(SPELL_AURA_PHASE);
+                        return;
 //                    case 64445: break;
 //                    // Food
 //                    case 65418: break;
@@ -2275,8 +2276,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 0, 0, 54726, 54727, 0);
                         return;
                     case 58600:                             // Restricted Flight Area
-                        target->MonsterWhisper(LANG_NO_FLY_ZONE, target, true);
+                    {
+                        if (!target || target->GetTypeId() != TYPEID_PLAYER)
+                            return;
+                        const char* text = sObjectMgr.GetMangosString(LANG_NO_FLY_ZONE, ((Player*)target)->GetSession()->GetSessionDbLocaleIndex());
+                        target->MonsterWhisper(text, target, true);
                         return;
+                    }
                     case 61187:                             // Twilight Shift (single target)
                     case 61190:                             // Twilight Shift (many targets)
                         target->RemoveAurasDueToSpell(57620);
@@ -2837,18 +2843,18 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                 return;
             }
-            case 64398:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Scrap Bots
-            case 64426:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Assault Bots
-            case 64621:                                     // Summon Fire Bot (Ulduar, Mimiron)
+            case 62483:                                     // Stonebark's Essence Channel
+            case 62484:                                     // Ironbranch's Essence Channel
+            case 62485:                                     // Brightleaf's Essence Channel
+            case 65587:                                     // Brightleaf's Essence Channel (h)
+            case 65588:                                     // Ironbranch's Essence Channel (h)
+            case 65589:                                     // Stonebark's Essence Channel (h)
             {
-                uint32 triggerSpell = 0;
-                switch (GetId())
+                if (Unit* caster = GetCaster())
                 {
-                    case 64398: triggerSpell = 63819; break;
-                    case 64426: triggerSpell = 64427; break;
-                    case 64621: triggerSpell = 64622; break;
+                    if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+                        caster->CastSpell(caster, 62467, true);
                 }
-                target->CastSpell(target, triggerSpell, false);
                 return;
             }
             case 68839:                                     // Corrupt Soul
@@ -8177,9 +8183,39 @@ void Aura::PeriodicDummyTick()
                         case 2: target->CastSpell(target, 55739, true); break;
                     }
                     return;
+                case 61968:                                 // Flash Freeze
+                {
+                    if (GetAuraTicks() == 1 && !target->HasAura(62464))
+                        target->CastSpell(target, 61970, true, NULL, this);
+                    return;
+                }
+                case 62018:                                 // Collapse
+                {
+                    // lose 1% of health every second
+                    target->DealDamage(target, target->GetMaxHealth() * .01, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                    return;
+                }
                 case 62019:                                 // Rune of Summoning
                 {
                     target->CastSpell(target, 62020, true, NULL, this);
+                    return;
+                }
+                case 62038:                                 // Biting Cold
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // if player is moving remove one aura stack
+                    if (((Player*)target)->isMoving())
+                        target->RemoveAuraHolderFromStack(62039);
+                    // otherwise add one aura stack each 3 seconds
+                    else if (GetAuraTicks() % 3 && !target->HasAura(62821))
+                        target->CastSpell(target, 62039, true, NULL, this);
+                    return;
+                }
+                case 62039:                                 // Biting Cold
+                {
+                    target->CastSpell(target, 62188, true);
                     return;
                 }
                 case 62566:                                 // Healthy Spore Summon Periodic
@@ -8199,6 +8235,14 @@ void Aura::PeriodicDummyTick()
                         target->CastSpell(target, 63536, true, NULL, this);
                     return;
                 }
+                case 63382:                                 // Rapid Burst
+                {
+                    if (GetAuraTicks() % 2)
+                        target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 64019 : 64532, true);
+                    else
+                        target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 63387 : 64531, true);
+                    return;
+                }
                 case 64217:                                 // Overcharged
                 {
                     if (GetHolder()->GetStackAmount() >= 10)
@@ -8206,6 +8250,39 @@ void Aura::PeriodicDummyTick()
                         target->CastSpell(target, 64219, true);
                         target->DealDamage(target, target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     }
+                    return;
+                }
+                case 64412:                                 // Phase Punch
+                {
+                    if (SpellAuraHolder* phaseAura = target->GetSpellAuraHolder(64412))
+                    {
+                        uint32 uiAuraId = 0;
+                        switch (phaseAura->GetStackAmount())
+                        {
+                            case 1: uiAuraId = 64435; break;
+                            case 2: uiAuraId = 64434; break;
+                            case 3: uiAuraId = 64428; break;
+                            case 4: uiAuraId = 64421; break;
+                            case 5: uiAuraId = 64417; break;
+                        }
+
+                        if (uiAuraId && !target->HasAura(uiAuraId))
+                        {
+                            target->CastSpell(target, uiAuraId, true, NULL, this);
+
+                            // remove original aura if phased
+                            if (uiAuraId == 64417)
+                            {
+                                target->RemoveAurasDueToSpell(64412);
+                                target->CastSpell(target, 62169, true, NULL, this);
+                            }
+                        }
+                    }
+                    return;
+                }
+                case 65272:                                 // Shatter Chest
+                {
+                    target->CastSpell(target, 62501, true, NULL, this);
                     return;
                 }
                 case 66118:                                 // Leeching Swarm

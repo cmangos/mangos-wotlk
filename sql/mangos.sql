@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_12540_01_mangos_command` bit(1) DEFAULT NULL
+  `required_12562_01_mangos_playercreateinfo_action` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -11223,8 +11223,7 @@ CREATE TABLE `playercreateinfo_action` (
   `button` smallint(5) unsigned NOT NULL DEFAULT '0',
   `action` int(11) unsigned NOT NULL DEFAULT '0',
   `type` smallint(5) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`race`,`class`,`button`),
-  KEY `playercreateinfo_race_class_index` (`race`,`class`)
+  PRIMARY KEY (`race`,`class`,`button`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
