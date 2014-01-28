@@ -10046,11 +10046,8 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
         // check if that aura is triggered by proc event (then it will be managed by proc handler)
         if (!IsTriggeredAtSpellProcEvent(pTarget, itr->second, procSpell, procFlag, procExtra, attType, isVictim, spellProcEvent))
         {
-            const SpellEntry* se = itr->second->GetSpellProto();
-            if (!se)
-                continue;
-
             // spell seem not managed by proc system, although some case need to be handled
+            const SpellEntry* se = itr->second->GetSpellProto();
 
             // check if the aura is interruptible by damage (not remove self added aura)
             if (procSpell && procSpell->Id != se->Id && se->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE)
