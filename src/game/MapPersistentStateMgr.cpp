@@ -598,7 +598,10 @@ void DungeonResetScheduler::ResetAllRaid()
 
         // we only reset raid dungeon
         if (event.type == RESET_EVENT_NORMAL_DUNGEON)
+        {
+            rTQ.insert(std::pair<time_t, DungeonResetEvent>(itr->first, event));
             continue;
+        }
         event.type = RESET_EVENT_FORCED_INFORM_1;
         time_t next_reset = now + timeleft;
         SetResetTimeFor(event.mapid, event.difficulty, next_reset);
