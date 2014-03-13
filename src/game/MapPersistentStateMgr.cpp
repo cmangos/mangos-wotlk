@@ -38,7 +38,9 @@
 
 INSTANTIATE_SINGLETON_1(MapPersistentStateManager);
 
-static uint32 resetEventTypeDelay[MAX_RESET_EVENT_TYPE] = { 0, 3600, 900, 300, 60, 60, 30, 10, 5 };
+static uint32 resetEventTypeDelay[MAX_RESET_EVENT_TYPE] = { 0,                      // not used
+                                                            3600, 900, 300, 60,     // (seconds) normal and official timer delay to inform player about instance reset
+                                                            60, 30, 10, 5 };        // (seconds) fast reset by gm command inform timer
 
 //== MapPersistentState functions ==========================
 MapPersistentState::MapPersistentState(uint16 MapId, uint32 InstanceId, Difficulty difficulty)
@@ -906,7 +908,7 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
 {
     // global reset for all instances of the given map
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
-    if (!mapEntry->Instanceable() || !mapEntry->IsDungeon())
+    if (!mapEntry->IsRaid() && (mapEntry->map_type == MAP_INSTANCE && difficulty == DUNGEON_DIFFICULTY_NORMAL))
         return;
 
     time_t now = time(NULL);
