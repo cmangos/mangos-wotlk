@@ -75,7 +75,7 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
 
         void MovementInform(Creature&);
 
-        MovementGeneratorType GetMovementGeneratorType() const { return WAYPOINT_MOTION_TYPE; }
+        static MovementGeneratorType GetMovementGeneratorTypeStatic() { return WAYPOINT_MOTION_TYPE; }
 
         // now path movement implmementation
         void LoadPath(Creature& c);
@@ -119,7 +119,7 @@ class MANGOS_DLL_SPEC FlightPathMovementGenerator
         void Interrupt(Player&);
         void Reset(Player&);
         bool Update(Player&, const uint32&);
-        MovementGeneratorType GetMovementGeneratorType() const override { return FLIGHT_MOTION_TYPE; }
+        static MovementGeneratorType GetMovementGeneratorTypeStatic() { return FLIGHT_MOTION_TYPE; }
 
         TaxiPathNodeList const& GetPath() { return *i_path; }
         uint32 GetPathAtMapEnd() const;

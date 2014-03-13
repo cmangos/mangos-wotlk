@@ -60,7 +60,6 @@ class MANGOS_DLL_SPEC TargetedMovementGeneratorMedium
     protected:
         void _setTargetLocation(T&, bool updateDestination);
         bool RequiresNewPosition(T& owner, float x, float y, float z) const;
-        virtual float GetDynamicTargetDistance(T& owner, bool forRangeCheck) const { return i_offset; }
 
         ShortTimeTracker i_recheckDistance;
         float i_offset;
@@ -74,12 +73,14 @@ class MANGOS_DLL_SPEC TargetedMovementGeneratorMedium
 template<class T>
 class MANGOS_DLL_SPEC ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >
 {
+    template<class UType, typename D> friend class TargetedMovementGeneratorMedium;
+
     public:
         ChaseMovementGenerator(Unit& target, float offset, float angle)
             : TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >(target, offset, angle) {}
         ~ChaseMovementGenerator() {}
 
-        MovementGeneratorType GetMovementGeneratorType() const override { return CHASE_MOTION_TYPE; }
+        static MovementGeneratorType GetMovementGeneratorTypeStatic() { return CHASE_MOTION_TYPE; }
 
         void Initialize(T&);
         void Finalize(T&);
@@ -93,12 +94,14 @@ class MANGOS_DLL_SPEC ChaseMovementGenerator : public TargetedMovementGeneratorM
         void _reachTarget(T&);
 
     protected:
-        float GetDynamicTargetDistance(T& owner, bool forRangeCheck) const override;
+        static float GetDynamicTargetDistance(T& owner, Unit const* target, float offset, bool forRangeCheck);
 };
 
 template<class T>
 class MANGOS_DLL_SPEC FollowMovementGenerator : public TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >
 {
+    template<class UType, typename D> friend class TargetedMovementGeneratorMedium;
+
     public:
         FollowMovementGenerator(Unit& target)
             : TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >(target) {}
@@ -106,7 +109,7 @@ class MANGOS_DLL_SPEC FollowMovementGenerator : public TargetedMovementGenerator
             : TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >(target, offset, angle) {}
         ~FollowMovementGenerator() {}
 
-        MovementGeneratorType GetMovementGeneratorType() const override { return FOLLOW_MOTION_TYPE; }
+        static MovementGeneratorType GetMovementGeneratorTypeStatic() { return FOLLOW_MOTION_TYPE; }
 
         void Initialize(T&);
         void Finalize(T&);
@@ -123,7 +126,7 @@ class MANGOS_DLL_SPEC FollowMovementGenerator : public TargetedMovementGenerator
         void _updateSpeed(T& u);
 
     protected:
-        float GetDynamicTargetDistance(T& owner, bool forRangeCheck) const override;
+        static float GetDynamicTargetDistance(T& owner, Unit const* target, float offset, bool forRangeCheck);
 };
 
 #endif

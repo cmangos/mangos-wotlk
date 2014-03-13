@@ -97,6 +97,11 @@ class MANGOS_DLL_SPEC MovementGeneratorMedium : public MovementGenerator
             // u->AssertIsType<T>();
             return (static_cast<D const*>(this))->GetResetPosition(*((T*)&u), x, y, z);
         }
+        MovementGeneratorType GetMovementGeneratorType() const override
+        {
+            return D::GetMovementGeneratorTypeStatic();
+        }
+
     public:
         // Will not link if not overridden in the generators
         void Initialize(T& u);

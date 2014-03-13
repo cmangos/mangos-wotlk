@@ -40,9 +40,9 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Weather.h"
-#include "PointMovementGenerator.h"
+#include "PointMovementGenerator.h"                         // Related HandleComeToMeCommand (unsure if include really required..)
 #include "PathFinder.h"
-#include "TargetedMovementGenerator.h"
+#include "TargetedMovementGenerator.h"                      // Required for HandleMovegensCommand
 #include "SkillDiscovery.h"
 #include "SkillExtraItems.h"
 #include "SystemConfig.h"
