@@ -686,6 +686,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case 18153:                                 // Kodo Kombobulator
                 case 32312:                                 // Move 1
                 case 37388:                                 // Move 2
+                case 45863:                                 // Cosmetic - Incinerate to Random Target
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
                 case 56099:                                 // Throw Ice

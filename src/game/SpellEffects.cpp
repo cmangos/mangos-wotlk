@@ -7541,6 +7541,23 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, triggeredSpell[urand(0, 3)], true);
                     return;
                 }
+                case 44323:                                 // Hawk Hunting
+                case 44407:                                 // Hawk Hunting
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    // check target entry specific to each spell
+                    if (m_spellInfo->Id == 44323 && unitTarget->GetEntry() != 24746)
+                        return;
+                    if (m_spellInfo->Id == 44407 && unitTarget->GetEntry() != 24747)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    // despawn delay depends on the distance between caster and target
+                    ((Creature*)unitTarget)->ForcedDespawn(100 * unitTarget->GetDistance2d(m_caster));
+                    return;
+                }
                 case 44364:                                 // Rock Falcon Primer
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
