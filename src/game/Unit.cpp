@@ -10052,8 +10052,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
             // check if the aura is interruptible by damage
             if (se->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE)
             {
-                itr->second->GetAuraByEffectIndex(EFFECT_INDEX_0)->GetModifier()->m_auraname;
-                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: Added Spell %u to 'remove aura due to spell' list! Raison Damage received.", se->Id);
+                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: Added Spell %u to 'remove aura due to spell' list! Reason: Damage received.", se->Id);
                 removedSpells.push_back(se->Id);
             }
             continue;
