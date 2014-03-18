@@ -686,8 +686,10 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case 18153:                                 // Kodo Kombobulator
                 case 32312:                                 // Move 1
                 case 37388:                                 // Move 2
+                case 45863:                                 // Cosmetic - Incinerate to Random Target
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
+                case 56099:                                 // Throw Ice
                 case 62105:                                 // To'kini's Blowgun
                 case 64402:                                 // Rocket Strike
                     return true;
@@ -3396,7 +3398,7 @@ void SpellMgr::LoadSpellScriptTarget()
                 }
                 if (const CreatureInfo* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(itr->targetEntry))
                 {
-                    if (itr->spellId == 30427 && !cInfo->SkinLootId)
+                    if (itr->spellId == 30427 && !cInfo->SkinningLootId)
                     {
                         sLog.outErrorDb("Table `spell_script_target` has creature %u as a target of spellid 30427, but this creature has no skinlootid. Gas extraction will not work!", cInfo->Entry);
                         sSpellScriptTargetStorage.EraseEntry(itr->spellId);
@@ -3577,7 +3579,7 @@ bool SpellMgr::LoadPetDefaultSpells_helper(CreatureInfo const* cInfo, PetDefault
         return false;
 
     // remove duplicates with levelupSpells if any
-    if (PetLevelupSpellSet const* levelupSpells = cInfo->family ? GetPetLevelupSpellList(cInfo->family) : NULL)
+    if (PetLevelupSpellSet const* levelupSpells = cInfo->Family ? GetPetLevelupSpellList(cInfo->Family) : NULL)
     {
         for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
         {

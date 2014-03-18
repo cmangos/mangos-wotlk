@@ -1148,6 +1148,14 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     basepoints[0] = damage * 15 / 100;
                     break;
                 }
+                // Fingers of Frost
+                case 74396:
+                {
+                    // Remove only single aura from stack and remove holder if its last stack
+                    RemoveAuraHolderFromStack(74396);
+                    return SPELL_AURA_PROC_OK;
+                    break;
+                }
             }
             break;
         }
@@ -3025,6 +3033,12 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 // spell applied only to permanent immunes to stun targets (bosses)
                 if (pVictim->GetTypeId() != TYPEID_UNIT ||
                         (((Creature*)pVictim)->GetCreatureInfo()->MechanicImmuneMask & (1 << (MECHANIC_STUN - 1))) == 0)
+                    return SPELL_AURA_PROC_FAILED;
+            }
+            else if (auraSpellInfo->SpellIconID == 2947)     // Fingers of Frost
+            {
+                // proc chance for spells in basepoints
+                if (!roll_chance_i(triggerAmount))
                     return SPELL_AURA_PROC_FAILED;
             }
             break;
