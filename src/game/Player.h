@@ -37,6 +37,7 @@
 #include "ReputationMgr.h"
 #include "BattleGround/BattleGround.h"
 #include "SharedDefines.h"
+
 #include "AntiCheat.h"
 
 #include<string>
