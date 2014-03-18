@@ -64,7 +64,7 @@ void PointMovementGenerator<T>::Reset(T& unit)
 }
 
 template<class T>
-bool PointMovementGenerator<T>::Update(T& unit, const uint32& diff)
+bool PointMovementGenerator<T>::Update(T& unit, const uint32& /*diff*/)
 {
     if (!&unit)
         return false;
@@ -110,7 +110,7 @@ template void PointMovementGenerator<Player>::Interrupt(Player&);
 template void PointMovementGenerator<Creature>::Interrupt(Creature&);
 template void PointMovementGenerator<Player>::Reset(Player&);
 template void PointMovementGenerator<Creature>::Reset(Creature&);
-template bool PointMovementGenerator<Player>::Update(Player&, const uint32& diff);
+template bool PointMovementGenerator<Player>::Update(Player&, const uint32& /*diff*/);
 template bool PointMovementGenerator<Creature>::Update(Creature&, const uint32& diff);
 
 void AssistanceMovementGenerator::Finalize(Unit& unit)

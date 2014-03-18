@@ -288,7 +288,7 @@ void RASocket::zprint(void* callbackArg, const char* szText)
     ((RASocket*)callbackArg)->sendf(szText);
 }
 
-void RASocket::commandFinished(void* callbackArg, bool success)
+void RASocket::commandFinished(void* callbackArg, bool /*success*/)
 {
     RASocket* raSocket = (RASocket*)callbackArg;
     raSocket->sendf("mangos>");
