@@ -832,8 +832,20 @@ void WorldSession::BuildListAuctionItems(std::vector<AuctionEntry*> const& aucti
             if (levelmin != 0x00 && (proto->RequiredLevel < levelmin || (levelmax != 0x00 && proto->RequiredLevel > levelmax)))
                 continue;
 
-            if (usable != 0x00 && _player->CanUseItem(item) != EQUIP_ERR_OK)
-                continue;
+            if (usable != 0x00)
+            {
+                if (_player->CanUseItem(item) != EQUIP_ERR_OK)
+                    continue;
+
+                if (proto->Class == ITEM_CLASS_RECIPE)
+                {
+                    if (SpellEntry const* spell = sSpellStore.LookupEntry(proto->Spells[0].SpellId))
+                    {
+                        if (_player->HasSpell(spell->EffectTriggerSpell[EFFECT_INDEX_0]))
+                            continue;
+                    }
+                }
+            }
 
             std::string name = proto->Name1;
             sObjectMgr.GetItemLocaleStrings(proto->ItemId, loc_idx, &name);
