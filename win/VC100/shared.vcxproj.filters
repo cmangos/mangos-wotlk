@@ -179,6 +179,9 @@
     <ClInclude Include="..\..\src\shared\Database\SqlPreparedStatement.h">
       <Filter>Database</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\shared\Auth\WardenKeyGeneration.h">
+      <Filter>Auth</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\shared\revision.h" />

@@ -240,6 +240,7 @@ bool ChatHandler::HandleReloadAllCommand(char* /*args*/)
     HandleReloadAllGossipsCommand((char*)"");
     HandleReloadAllLocalesCommand((char*)"");
 
+	HandleReloadAntiCheatCommand((char*)"");
     HandleReloadMailLevelRewardCommand((char*)"");
     HandleReloadCommandCommand((char*)"");
     HandleReloadReservedNameCommand((char*)"");
@@ -398,6 +399,14 @@ bool ChatHandler::HandleReloadAchievementRewardCommand(char* /*args*/)
     sLog.outString("Re-Loading Achievement Reward Data...");
     sAchievementMgr.LoadRewards();
     SendGlobalSysMessage("DB table `achievement_reward` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadAntiCheatCommand(char* /*arg*/)
+{
+    sLog.outString( "Re-Loading anticheat config table...");
+    sObjectMgr.LoadAntiCheatConfig();
+    SendGlobalSysMessage("Anticheat config reloaded.");
     return true;
 }
 
