@@ -2340,7 +2340,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             {
                 Creature *c = m_bot->GetMap()->GetCreature(m_lootCurrent);
 
-                if (c && c->GetCreatureInfo()->SkinLootId && !c->lootForSkin)
+                if (c && c->GetCreatureInfo()->SkinningLootId && !c->lootForSkin)
                 {
                     uint32 reqSkill = c->GetCreatureInfo()->GetRequiredLootSkill();
                     // check if it is a leather skin and if it is to be collected (could be ore or herb)
@@ -4884,7 +4884,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             return;
 
         if (m_bot->GetPetGuid() || spell->CheckCast(true) != SPELL_CAST_OK || !pTarget ||
-            pTarget->isDead() || !m_bot->IsInMap(pTarget) || !(((Creature *) pTarget)->GetCreatureInfo()->type_flags & CREATURE_TYPEFLAGS_TAMEABLE))
+            pTarget->isDead() || !m_bot->IsInMap(pTarget) || !(((Creature *) pTarget)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_TAMEABLE))
         {
             MovementReset();
             m_bot->SetSelectionGuid(ObjectGuid());
