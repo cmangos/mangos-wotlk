@@ -1123,6 +1123,14 @@ bool ChatHandler::HandleReloadMailLevelRewardCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadCreaturesStatsCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading stats data...");
+    sObjectMgr.LoadCreatureClassLvlStats();
+    SendGlobalSysMessage("DB table `creature_template_classlevelstats` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleLoadScriptsCommand(char* args)
 {
     if (!*args)

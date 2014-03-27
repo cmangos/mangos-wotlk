@@ -693,6 +693,7 @@ class ObjectMgr
         void LoadCreatureTemplates();
         void LoadCreatures();
         void LoadCreatureAddons();
+        void LoadCreatureClassLvlStats();
         void LoadCreatureModelInfo();
         void LoadCreatureModelRace();
         void LoadEquipmentTemplates();
@@ -1113,6 +1114,19 @@ class ObjectMgr
         QuestRelationsMap& GetCreatureQuestRelationsMap() { return m_CreatureQuestRelations; }
 
         uint32 GetModelForRace(uint32 sourceModelId, uint32 racemask);
+        /**
+        * \brief: Data returned is used to compute health, mana, armor, damage of creatures. May be NULL.
+        * \param uint32 level               creature level
+        * \param uint32 unitClass           creature class, related to CLASSMASK_ALL_CREATURES
+        * \param uint32 expansion           creature expansion (we could have creature exp = 0 for wotlk as well as exp = 1 or exp = 2)
+        * \return: CreatureClassLvlStats const* or NULL
+        *
+        * Description: GetCreatureClassLvlStats give fast access to creature stats data.
+        * FullName: ObjectMgr::GetCreatureClassLvlStats
+        * Access: public
+        * Qualifier: const
+        **/
+        CreatureClassLvlStats const* GetCreatureClassLvlStats(uint32 level, uint32 unitClass, int32 expansion) const;
     protected:
 
         // first free id for selected id type
@@ -1228,6 +1242,9 @@ class ObjectMgr
         typedef std::map<uint32, std::vector<std::string> > HalfNameMap;
         HalfNameMap PetHalfName0;
         HalfNameMap PetHalfName1;
+
+        // Array to store creature stats, Max creature level + 1 (for data alignement with in game level)
+        CreatureClassLvlStats m_creatureClassLvlStats[DEFAULT_MAX_CREATURE_LEVEL + 1][MAX_CREATURE_CLASS][MAX_EXPANSION + 1];
 
         MapObjectGuids mMapObjectGuids;
         CreatureDataMap mCreatureDataMap;
