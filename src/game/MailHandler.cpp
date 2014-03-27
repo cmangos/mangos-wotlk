@@ -69,7 +69,7 @@ bool WorldSession::CheckMailBox(ObjectGuid guid)
             return false;
         }
 
-        if (!(creature->GetCreatureInfo()->type_flags & CREATURE_TYPEFLAGS_SQUIRE))
+        if (!(creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_SQUIRE))
         {
             DEBUG_LOG("%s not have access to mailbox.", creature->GetGuidStr().c_str());
             return false;

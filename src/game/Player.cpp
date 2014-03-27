@@ -1579,7 +1579,7 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
             {
                 petDisplayId = fields[17].GetUInt32();
                 petLevel     = fields[18].GetUInt32();
-                petFamily    = cInfo->family;
+                petFamily    = cInfo->Family;
             }
         }
 
@@ -8318,7 +8318,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                     creature->lootForPickPocketed = true;
                     loot->clear();
 
-                    if (uint32 lootid = creature->GetCreatureInfo()->pickpocketLootId)
+                    if (uint32 lootid = creature->GetCreatureInfo()->PickpocketLootId)
                         loot->FillLoot(lootid, LootTemplates_Pickpocketing, this, false);
 
                     // Generate extra money for pick pocket loot
@@ -8349,10 +8349,10 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                     creature->lootForBody = true;
                     loot->clear();
 
-                    if (uint32 lootid = creature->GetCreatureInfo()->lootid)
+                    if (uint32 lootid = creature->GetCreatureInfo()->LootId)
                         loot->FillLoot(lootid, LootTemplates_Creature, recipient, false);
 
-                    loot->generateMoneyLoot(creature->GetCreatureInfo()->mingold, creature->GetCreatureInfo()->maxgold);
+                    loot->generateMoneyLoot(creature->GetCreatureInfo()->MinLootGold, creature->GetCreatureInfo()->MaxLootGold);
 
                     if (Group* group = creature->GetGroupLootRecipient())
                     {
@@ -8383,7 +8383,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                     {
                         creature->lootForSkin = true;
                         loot->clear();
-                        loot->FillLoot(creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning, this, false);
+                        loot->FillLoot(creature->GetCreatureInfo()->SkinningLootId, LootTemplates_Skinning, this, false);
 
                         // let reopen skinning loot if will closed.
                         if (!loot->empty())
@@ -8478,302 +8478,6 @@ void Player::SendUpdateWorldState(uint32 Field, uint32 Value)
     GetSession()->SendPacket(&data);
 }
 
-static WorldStatePair AV_world_states[] =
-{
-    { 0x7ae, 0x1 },                                         // 1966  7 snowfall n
-    { 0x532, 0x1 },                                         // 1330  8 frostwolfhut hc
-    { 0x531, 0x0 },                                         // 1329  9 frostwolfhut ac
-    { 0x52e, 0x0 },                                         // 1326 10 stormpike firstaid a_a
-    { 0x571, 0x0 },                                         // 1393 11 east frostwolf tower horde assaulted -unused
-    { 0x570, 0x0 },                                         // 1392 12 west frostwolf tower horde assaulted - unused
-    { 0x567, 0x1 },                                         // 1383 13 frostwolfe c
-    { 0x566, 0x1 },                                         // 1382 14 frostwolfw c
-    { 0x550, 0x1 },                                         // 1360 15 irondeep (N) ally
-    { 0x544, 0x0 },                                         // 1348 16 ice grave a_a
-    { 0x536, 0x0 },                                         // 1334 17 stormpike grave h_c
-    { 0x535, 0x1 },                                         // 1333 18 stormpike grave a_c
-    { 0x518, 0x0 },                                         // 1304 19 stoneheart grave a_a
-    { 0x517, 0x0 },                                         // 1303 20 stoneheart grave h_a
-    { 0x574, 0x0 },                                         // 1396 21 unk
-    { 0x573, 0x0 },                                         // 1395 22 iceblood tower horde assaulted -unused
-    { 0x572, 0x0 },                                         // 1394 23 towerpoint horde assaulted - unused
-    { 0x56f, 0x0 },                                         // 1391 24 unk
-    { 0x56e, 0x0 },                                         // 1390 25 iceblood a
-    { 0x56d, 0x0 },                                         // 1389 26 towerp a
-    { 0x56c, 0x0 },                                         // 1388 27 frostwolfe a
-    { 0x56b, 0x0 },                                         // 1387 28 froswolfw a
-    { 0x56a, 0x1 },                                         // 1386 29 unk
-    { 0x569, 0x1 },                                         // 1385 30 iceblood c
-    { 0x568, 0x1 },                                         // 1384 31 towerp c
-    { 0x565, 0x0 },                                         // 1381 32 stoneh tower a
-    { 0x564, 0x0 },                                         // 1380 33 icewing tower a
-    { 0x563, 0x0 },                                         // 1379 34 dunn a
-    { 0x562, 0x0 },                                         // 1378 35 duns a
-    { 0x561, 0x0 },                                         // 1377 36 stoneheart bunker alliance assaulted - unused
-    { 0x560, 0x0 },                                         // 1376 37 icewing bunker alliance assaulted - unused
-    { 0x55f, 0x0 },                                         // 1375 38 dunbaldar south alliance assaulted - unused
-    { 0x55e, 0x0 },                                         // 1374 39 dunbaldar north alliance assaulted - unused
-    { 0x55d, 0x0 },                                         // 1373 40 stone tower d
-    { 0x3c6, 0x0 },                                         //  966 41 unk
-    { 0x3c4, 0x0 },                                         //  964 42 unk
-    { 0x3c2, 0x0 },                                         //  962 43 unk
-    { 0x516, 0x1 },                                         // 1302 44 stoneheart grave a_c
-    { 0x515, 0x0 },                                         // 1301 45 stonheart grave h_c
-    { 0x3b6, 0x0 },                                         //  950 46 unk
-    { 0x55c, 0x0 },                                         // 1372 47 icewing tower d
-    { 0x55b, 0x0 },                                         // 1371 48 dunn d
-    { 0x55a, 0x0 },                                         // 1370 49 duns d
-    { 0x559, 0x0 },                                         // 1369 50 unk
-    { 0x558, 0x0 },                                         // 1368 51 iceblood d
-    { 0x557, 0x0 },                                         // 1367 52 towerp d
-    { 0x556, 0x0 },                                         // 1366 53 frostwolfe d
-    { 0x555, 0x0 },                                         // 1365 54 frostwolfw d
-    { 0x554, 0x1 },                                         // 1364 55 stoneh tower c
-    { 0x553, 0x1 },                                         // 1363 56 icewing tower c
-    { 0x552, 0x1 },                                         // 1362 57 dunn c
-    { 0x551, 0x1 },                                         // 1361 58 duns c
-    { 0x54f, 0x0 },                                         // 1359 59 irondeep (N) horde
-    { 0x54e, 0x0 },                                         // 1358 60 irondeep (N) ally
-    { 0x54d, 0x1 },                                         // 1357 61 mine (S) neutral
-    { 0x54c, 0x0 },                                         // 1356 62 mine (S) horde
-    { 0x54b, 0x0 },                                         // 1355 63 mine (S) ally
-    { 0x545, 0x0 },                                         // 1349 64 iceblood h_a
-    { 0x543, 0x1 },                                         // 1347 65 iceblod h_c
-    { 0x542, 0x0 },                                         // 1346 66 iceblood a_c
-    { 0x540, 0x0 },                                         // 1344 67 snowfall h_a
-    { 0x53f, 0x0 },                                         // 1343 68 snowfall a_a
-    { 0x53e, 0x0 },                                         // 1342 69 snowfall h_c
-    { 0x53d, 0x0 },                                         // 1341 70 snowfall a_c
-    { 0x53c, 0x0 },                                         // 1340 71 frostwolf g h_a
-    { 0x53b, 0x0 },                                         // 1339 72 frostwolf g a_a
-    { 0x53a, 0x1 },                                         // 1338 73 frostwolf g h_c
-    { 0x539, 0x0 },                                         // l33t 74 frostwolf g a_c
-    { 0x538, 0x0 },                                         // 1336 75 stormpike grave h_a
-    { 0x537, 0x0 },                                         // 1335 76 stormpike grave a_a
-    { 0x534, 0x0 },                                         // 1332 77 frostwolf hut h_a
-    { 0x533, 0x0 },                                         // 1331 78 frostwolf hut a_a
-    { 0x530, 0x0 },                                         // 1328 79 stormpike first aid h_a
-    { 0x52f, 0x0 },                                         // 1327 80 stormpike first aid h_c
-    { 0x52d, 0x1 },                                         // 1325 81 stormpike first aid a_c
-    { 0x0,   0x0 }
-};
-
-static WorldStatePair WS_world_states[] =
-{
-    { 0x62d, 0x0 },                                         // 1581  7 alliance flag captures
-    { 0x62e, 0x0 },                                         // 1582  8 horde flag captures
-    { 0x609, 0x0 },                                         // 1545  9 unk, set to 1 on alliance flag pickup...
-    { 0x60a, 0x0 },                                         // 1546 10 unk, set to 1 on horde flag pickup, after drop it's -1
-    { 0x60b, 0x2 },                                         // 1547 11 unk
-    { 0x641, 0x3 },                                         // 1601 12 unk (max flag captures?)
-    { 0x922, 0x1 },                                         // 2338 13 horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
-    { 0x923, 0x1 },                                         // 2339 14 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
-    { 0x1097, 0x1 },                                        // 4247 15 show time limit?
-    { 0x1098, 0x19 },                                       // 4248 16 time remaining in minutes
-    { 0x0,   0x0 }
-};
-
-static WorldStatePair AB_world_states[] =
-{
-    { 0x6e7, 0x0 },                                         // 1767  7 stables alliance
-    { 0x6e8, 0x0 },                                         // 1768  8 stables horde
-    { 0x6e9, 0x0 },                                         // 1769  9 unk, ST?
-    { 0x6ea, 0x0 },                                         // 1770 10 stables (show/hide)
-    { 0x6ec, 0x0 },                                         // 1772 11 farm (0 - horde controlled, 1 - alliance controlled)
-    { 0x6ed, 0x0 },                                         // 1773 12 farm (show/hide)
-    { 0x6ee, 0x0 },                                         // 1774 13 farm color
-    { 0x6ef, 0x0 },                                         // 1775 14 gold mine color, may be FM?
-    { 0x6f0, 0x0 },                                         // 1776 15 alliance resources
-    { 0x6f1, 0x0 },                                         // 1777 16 horde resources
-    { 0x6f2, 0x0 },                                         // 1778 17 horde bases
-    { 0x6f3, 0x0 },                                         // 1779 18 alliance bases
-    { 0x6f4, 0x7d0 },                                       // 1780 19 max resources (2000)
-    { 0x6f6, 0x0 },                                         // 1782 20 blacksmith color
-    { 0x6f7, 0x0 },                                         // 1783 21 blacksmith (show/hide)
-    { 0x6f8, 0x0 },                                         // 1784 22 unk, bs?
-    { 0x6f9, 0x0 },                                         // 1785 23 unk, bs?
-    { 0x6fb, 0x0 },                                         // 1787 24 gold mine (0 - horde contr, 1 - alliance contr)
-    { 0x6fc, 0x0 },                                         // 1788 25 gold mine (0 - conflict, 1 - horde)
-    { 0x6fd, 0x0 },                                         // 1789 26 gold mine (1 - show/0 - hide)
-    { 0x6fe, 0x0 },                                         // 1790 27 gold mine color
-    { 0x700, 0x0 },                                         // 1792 28 gold mine color, wtf?, may be LM?
-    { 0x701, 0x0 },                                         // 1793 29 lumber mill color (0 - conflict, 1 - horde contr)
-    { 0x702, 0x0 },                                         // 1794 30 lumber mill (show/hide)
-    { 0x703, 0x0 },                                         // 1795 31 lumber mill color color
-    { 0x732, 0x1 },                                         // 1842 32 stables (1 - uncontrolled)
-    { 0x733, 0x1 },                                         // 1843 33 gold mine (1 - uncontrolled)
-    { 0x734, 0x1 },                                         // 1844 34 lumber mill (1 - uncontrolled)
-    { 0x735, 0x1 },                                         // 1845 35 farm (1 - uncontrolled)
-    { 0x736, 0x1 },                                         // 1846 36 blacksmith (1 - uncontrolled)
-    { 0x745, 0x2 },                                         // 1861 37 unk
-    { 0x7a3, 0x708 },                                       // 1955 38 warning limit (1800)
-    { 0x0,   0x0 }
-};
-
-static WorldStatePair EY_world_states[] =
-{
-    { 2753, 0 },                                            // WORLD_STATE_EY_TOWER_COUNT_HORDE
-    { 2752, 0 },                                            // WORLD_STATE_EY_TOWER_COUNT_ALLIANCE
-    { 2733, WORLD_STATE_REMOVE },                           // WORLD_STATE_EY_DRAENEI_RUINS_HORDE
-    { 2732, WORLD_STATE_REMOVE },                           // WORLD_STATE_EY_DRAENEI_RUINS_ALLIANCE
-    { 2731, WORLD_STATE_REMOVE },                           // WORLD_STATE_EY_DRAENEI_RUINS_NEUTRAL
-    { 2730, WORLD_STATE_REMOVE },                           // WORLD_STATE_EY_MAGE_TOWER_ALLIANCE
-    { 2729, WORLD_STATE_REMOVE },                           // WORLD_STATE_EY_MAGE_TOWER_HORDE
-    { 2728, WORLD_STATE_REMOVE },                           // WORLD_STATE_EY_MAGE_TOWER_NEUTRAL
-    { 2727, WORLD_STATE_REMOVE },                           // WORLD_STATE_EY_FEL_REAVER_HORDE
-    { 2726, WORLD_STATE_REMOVE },                           // WORLD_STATE_EY_FEL_REAVER_ALLIANCE
-    { 2725, WORLD_STATE_REMOVE },                           // WORLD_STATE_EY_FEL_REAVER_NEUTRAL
-    { 2724, WORLD_STATE_REMOVE },                           // WORLD_STATE_EY_BLOOD_ELF_HORDE
-    { 2723, WORLD_STATE_REMOVE },                           // WORLD_STATE_EY_BLOOD_ELF_ALLIANCE
-    { 2722, WORLD_STATE_REMOVE },                           // WORLD_STATE_EY_BLOOD_ELF_NEUTRAL
-    { 2757, WORLD_STATE_REMOVE },                           // WORLD_STATE_EY_NETHERSTORM_FLAG_READY
-    { 2770, 1 },                                            // WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_HORDE
-    { 2769, 1 },                                            // WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_ALLIANCE
-    { 2750, 0 },                                            // WORLD_STATE_EY_RESOURCES_HORDE
-    { 2749, 0 },                                            // WORLD_STATE_EY_RESOURCES_ALLIANCE
-    { 2565, 0x8e },                                         // global unk -- TODO: move to global world state
-    { 3085, 0x17b }                                         // global unk -- TODO: move to global world state
-};
-
-static WorldStatePair SI_world_states[] =                   // Silithus
-{
-    { 2313, 0 },                                            // WORLD_STATE_SI_GATHERED_A
-    { 2314, 0 },                                            // WORLD_STATE_SI_GATHERED_H
-    { 2317, 0 }                                             // WORLD_STATE_SI_SILITHYST_MAX
-};
-
-static WorldStatePair EP_world_states[] =                   // Eastern Plaguelands
-{
-    { 2327, 0 },                                            // WORLD_STATE_EP_TOWER_COUNT_ALLIANCE
-    { 2328, 0 },                                            // WORLD_STATE_EP_TOWER_COUNT_HORDE
-    { 2355, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_NEUTRAL
-    { 2374, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_CONTEST_ALLIANCE
-    { 2375, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_CONTEST_HORDE
-    { 2376, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_PROGRESS_ALLIANCE
-    { 2377, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_PROGRESS_HORDE
-    { 2378, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_ALLIANCE
-    { 2379, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_HORDE
-    { 2354, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_ALLIANCE
-    { 2356, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_HORDE
-    { 2357, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_PROGRESS_ALLIANCE
-    { 2358, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_PROGRESS_HORDE
-    { 2359, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_CONTEST_ALLIANCE
-    { 2360, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_CONTEST_HORDE
-    { 2361, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_NEUTRAL
-    { 2352, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_NEUTRAL
-    { 2362, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_CONTEST_ALLIANCE
-    { 2363, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_CONTEST_HORDE
-    { 2364, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_PROGRESS_ALLIANCE
-    { 2365, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_PROGRESS_HORDE
-    { 2372, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_ALLIANCE
-    { 2373, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_HORDE
-    { 2353, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_NEUTRAL
-    { 2366, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_CONTEST_ALLIANCE
-    { 2367, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_CONTEST_HORDE - not in dbc! sent for consistency's sake, and to match field count
-    { 2368, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_PROGRESS_ALLIANCE
-    { 2369, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_PROGRESS_HORDE
-    { 2370, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_ALLIANCE
-    { 2371, WORLD_STATE_REMOVE }                            // WORLD_STATE_EP_PLAGUEWOOD_HORDE
-};
-
-static WorldStatePair HP_world_states[] =                   // Hellfire Peninsula
-{
-    { 2490, WORLD_STATE_REMOVE },                           // WORLD_STATE_HP_TOWER_DISPLAY_A
-    { 2489, WORLD_STATE_REMOVE },                           // WORLD_STATE_HP_TOWER_DISPLAY_H
-    { 2485, WORLD_STATE_REMOVE },                           // WORLD_STATE_HP_BROKEN_HILL_NEUTRAL
-    { 2484, WORLD_STATE_REMOVE },                           // WORLD_STATE_HP_BROKEN_HILL_HORDE
-    { 2483, WORLD_STATE_REMOVE },                           // WORLD_STATE_HP_BROKEN_HILL_ALLIANCE
-    { 2482, WORLD_STATE_REMOVE },                           // WORLD_STATE_HP_OVERLOOK_NEUTRAL
-    { 2481, WORLD_STATE_REMOVE },                           // WORLD_STATE_HP_OVERLOOK_HORDE
-    { 2480, WORLD_STATE_REMOVE },                           // WORLD_STATE_HP_OVERLOOK_ALLIANCE
-    { 2478, 0 },                                            // WORLD_STATE_HP_TOWER_COUNT_HORDE
-    { 2476, 0 },                                            // WORLD_STATE_HP_TOWER_COUNT_ALLIANCE
-    { 2472, WORLD_STATE_REMOVE },                           // WORLD_STATE_HP_STADIUM_NEUTRAL
-    { 2471, WORLD_STATE_REMOVE },                           // WORLD_STATE_HP_STADIUM_ALLIANCE
-    { 2470, WORLD_STATE_REMOVE }                            // WORLD_STATE_HP_STADIUM_HORDE
-};
-
-static WorldStatePair TF_world_states[] =                   // Terokkar Forest
-{
-    { 2622, 0 },                                            // WORLD_STATE_TF_TOWER_COUNT_H
-    { 2621, 0 },                                            // WORLD_STATE_TF_TOWER_COUNT_A
-    { 2620, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_TOWERS_CONTROLLED
-    { 2695, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_SOUTH_EAST_TOWER_HORDE
-    { 2694, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_SOUTH_EAST_TOWER_ALLIANCE
-    { 2693, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_SOUTH_TOWER_NEUTRAL
-    { 2692, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_SOUTH_TOWER_HORDE
-    { 2691, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_SOUTH_TOWER_ALLIANCE
-    { 2690, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_EAST_TOWER_NEUTRAL
-    { 2689, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_EAST_TOWER_HORDE
-    { 2688, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_EAST_TOWER_ALLIANCE
-    { 2686, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_NORTH_TOWER_NEUTRAL
-    { 2685, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_NORTH_TOWER_HORDE
-    { 2684, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_NORTH_TOWER_ALLIANCE
-    { 2683, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_WEST_TOWER_ALLIANCE
-    { 2682, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_WEST_TOWER_HORDE
-    { 2681, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_WEST_TOWER_NEUTRAL
-    { 2512, 0 },                                            // WORLD_STATE_TF_TIME_MIN_FIRST_DIGIT
-    { 2510, 0 },                                            // WORLD_STATE_TF_TIME_MIN_SECOND_DIGIT
-    { 2509, 0 },                                            // WORLD_STATE_TF_TIME_HOURS
-    { 2508, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_LOCKED_NEUTRAL
-    { 2696, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_SOUTH_EAST_TOWER_NEUTRAL
-    { 2768, WORLD_STATE_REMOVE },                           // WORLD_STATE_TF_LOCKED_HORDE
-    { 2767, WORLD_STATE_REMOVE }                            // WORLD_STATE_TF_LOCKED_ALLIANCE
-};
-
-static WorldStatePair ZM_world_states[] =                   // Zangarmarsh
-{
-    { 2653, 0x1 },                                          // WORLD_STATE_ZM_UNK
-    { 2652, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_BEACON_EAST_NEUTRAL
-    { 2651, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_BEACON_EAST_HORDE
-    { 2650, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_BEACON_EAST_ALLIANCE
-    { 2649, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_GRAVEYARD_HORDE
-    { 2648, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_GRAVEYARD_ALLIANCE
-    { 2647, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_GRAVEYARD_NEUTRAL
-    { 2646, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_BEACON_WEST_NEUTRAL
-    { 2645, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_BEACON_WEST_HORDE
-    { 2644, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_BEACON_WEST_ALLIANCE
-    { 2560, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_BEACON_EAST_UI_NEUTRAL
-    { 2559, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_BEACON_EAST_UI_HORDE
-    { 2558, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_BEACON_EAST_UI_ALLIANCE
-    { 2557, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_BEACON_WEST_UI_NEUTRAL
-    { 2556, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_BEACON_WEST_UI_HORDE
-    { 2555, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_BEACON_WEST_UI_ALLIANCE
-    { 2658, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_FLAG_READY_HORDE
-    { 2657, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_FLAG_NOT_READY_HORDE
-    { 2656, WORLD_STATE_REMOVE },                           // WORLD_STATE_ZM_FLAG_NOT_READY_ALLIANCE
-    { 2655, WORLD_STATE_REMOVE }                            // WORLD_STATE_ZM_FLAG_READY_ALLIANCE
-};
-
-static WorldStatePair NA_world_states[] =
-{
-    { 2503, 0 },                                            // WORLD_STATE_NA_GUARDS_HORDE
-    { 2502, 0 },                                            // WORLD_STATE_NA_GUARDS_ALLIANCE
-    { 2493, 0 },                                            // WORLD_STATE_NA_GUARDS_MAX
-    { 2491, 0 },                                            // WORLD_STATE_NA_GUARDS_LEFT
-    { 2762, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_NORTH_NEUTRAL_H
-    { 2662, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_NORTH_NEUTRAL_A
-    { 2663, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_NORTH_H
-    { 2664, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_NORTH_A
-    { 2760, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_SOUTH_NEUTRAL_H
-    { 2670, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_SOUTH_NEUTRAL_A
-    { 2668, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_SOUTH_H
-    { 2669, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_SOUTH_A
-    { 2761, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_WEST_NEUTRAL_H
-    { 2667, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_WEST_NEUTRAL_A
-    { 2665, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_WEST_H
-    { 2666, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_WEST_A
-    { 2763, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_EAST_NEUTRAL_H
-    { 2659, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_EAST_NEUTRAL_A
-    { 2660, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_EAST_H
-    { 2661, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_WYVERN_EAST_A
-    { 2671, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_HALAA_NEUTRAL
-    { 2676, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_HALAA_NEUTRAL_A
-    { 2677, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_HALAA_NEUTRAL_H
-    { 2672, WORLD_STATE_REMOVE },                           // WORLD_STATE_NA_HALAA_HORDE
-    { 2673, WORLD_STATE_REMOVE }                            // WORLD_STATE_NA_HALAA_ALLIANCE
-};
-
 void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
 {
     // data depends on zoneid/mapid...
@@ -8791,136 +8495,53 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
     size_t count_pos = data.wpos();
     data << uint16(0);                                      // count of uint64 blocks, placeholder
 
-    // common fields
-    FillInitialWorldState(data, count, 0x8d8, 0x0);         // 2264 1
-    FillInitialWorldState(data, count, 0x8d7, 0x0);         // 2263 2
-    FillInitialWorldState(data, count, 0x8d6, 0x0);         // 2262 3
-    FillInitialWorldState(data, count, 0x8d5, 0x0);         // 2261 4
-    FillInitialWorldState(data, count, 0x8d4, 0x0);         // 2260 5
-    FillInitialWorldState(data, count, 0x8d3, 0x0);         // 2259 6
-    // 3191 7 Current arena season
+    // Current arena season
     FillInitialWorldState(data, count, 0xC77, sWorld.getConfig(CONFIG_UINT32_ARENA_SEASON_ID));
-    // 3901 8 Previous arena season
+    // Previous arena season
     FillInitialWorldState(data, count, 0xF3D, sWorld.getConfig(CONFIG_UINT32_ARENA_SEASON_PREVIOUS_ID));
-    FillInitialWorldState(data, count, 0xED9, 1);           // 3801 9  0 - Battle for Wintergrasp in progress, 1 - otherwise
-    // 4354 10 Time when next Battle for Wintergrasp starts
+    // 0 - Battle for Wintergrasp in progress, 1 - otherwise
+    FillInitialWorldState(data, count, 0xED9, 1);
+    // Time when next Battle for Wintergrasp starts
     FillInitialWorldState(data, count, 0x1102, uint32(time(NULL) + 9000));
-
-    if (mapid == 530)                                       // Outland
-    {
-        FillInitialWorldState(data, count, 0x9bf, 0x0);     // 2495
-        FillInitialWorldState(data, count, 0x9bd, 0xF);     // 2493
-        FillInitialWorldState(data, count, 0x9bb, 0xF);     // 2491
-    }
 
     switch (zoneid)
     {
-        case 1:                                             // Dun Morogh
-        case 11:                                            // Wetlands
-        case 12:                                            // Elwynn Forest
-        case 38:                                            // Loch Modan
-        case 40:                                            // Westfall
-        case 51:                                            // Searing Gorge
-        case 1519:                                          // Stormwind City
-        case 1537:                                          // Ironforge
-        case 2257:                                          // Deeprun Tram
-        case 3703:                                          // Shattrath City
-            break;
         case 139:                                           // Eastern Plaguelands
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
-                outdoorPvP->FillInitialWorldStates(data, count);
-            else
-                FillInitialWorldState(data, count, EP_world_states);
-            break;
         case 1377:                                          // Silithus
+        case 3483:                                          // Hellfire Peninsula
+        case 3518:                                          // Nagrand
+        case 3519:                                          // Terokkar Forest
+        case 3521:                                          // Zangarmarsh
             if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
                 outdoorPvP->FillInitialWorldStates(data, count);
-            else
-                FillInitialWorldState(data, count, SI_world_states);
             break;
         case 2597:                                          // AV
             if (bg && bg->GetTypeID() == BATTLEGROUND_AV)
                 bg->FillInitialWorldStates(data, count);
-            else
-                FillInitialWorldState(data, count, AV_world_states);
             break;
         case 3277:                                          // WS
             if (bg && bg->GetTypeID() == BATTLEGROUND_WS)
                 bg->FillInitialWorldStates(data, count);
-            else
-                FillInitialWorldState(data, count, WS_world_states);
             break;
         case 3358:                                          // AB
             if (bg && bg->GetTypeID() == BATTLEGROUND_AB)
                 bg->FillInitialWorldStates(data, count);
-            else
-                FillInitialWorldState(data, count, AB_world_states);
             break;
         case 3820:                                          // EY
             if (bg && bg->GetTypeID() == BATTLEGROUND_EY)
                 bg->FillInitialWorldStates(data, count);
-            else
-                FillInitialWorldState(data, count, EY_world_states);
-            break;
-        case 3483:                                          // Hellfire Peninsula
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
-                outdoorPvP->FillInitialWorldStates(data, count);
-            else
-                FillInitialWorldState(data, count, HP_world_states);
-            break;
-        case 3518:                                          // Nagrand
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
-                outdoorPvP->FillInitialWorldStates(data, count);
-            else
-                FillInitialWorldState(data, count, NA_world_states);
-            break;
-        case 3519:                                          // Terokkar Forest
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
-                outdoorPvP->FillInitialWorldStates(data, count);
-            else
-                FillInitialWorldState(data, count, TF_world_states);
-            break;
-        case 3521:                                          // Zangarmarsh
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
-                outdoorPvP->FillInitialWorldStates(data, count);
-            else
-                FillInitialWorldState(data, count, ZM_world_states);
             break;
         case 3698:                                          // Nagrand Arena
             if (bg && bg->GetTypeID() == BATTLEGROUND_NA)
                 bg->FillInitialWorldStates(data, count);
-            else
-            {
-                FillInitialWorldState(data, count, 0xa0f, 0x0); // 2575 7
-                FillInitialWorldState(data, count, 0xa10, 0x0); // 2576 8
-                FillInitialWorldState(data, count, 0xa11, 0x0); // 2577 9 show
-            }
             break;
         case 3702:                                          // Blade's Edge Arena
             if (bg && bg->GetTypeID() == BATTLEGROUND_BE)
                 bg->FillInitialWorldStates(data, count);
-            else
-            {
-                FillInitialWorldState(data, count, 0x9f0, 0x0); // 2544 7 gold
-                FillInitialWorldState(data, count, 0x9f1, 0x0); // 2545 8 green
-                FillInitialWorldState(data, count, 0x9f3, 0x0); // 2547 9 show
-            }
             break;
         case 3968:                                          // Ruins of Lordaeron
             if (bg && bg->GetTypeID() == BATTLEGROUND_RL)
                 bg->FillInitialWorldStates(data, count);
-            else
-            {
-                FillInitialWorldState(data, count, 0xbb8, 0x0); // 3000 7 gold
-                FillInitialWorldState(data, count, 0xbb9, 0x0); // 3001 8 green
-                FillInitialWorldState(data, count, 0xbba, 0x0); // 3002 9 show
-            }
-            break;
-        default:
-            FillInitialWorldState(data, count, 0x914, 0x0); // 2324 7
-            FillInitialWorldState(data, count, 0x913, 0x0); // 2323 8
-            FillInitialWorldState(data, count, 0x912, 0x0); // 2322 9
-            FillInitialWorldState(data, count, 0x915, 0x0); // 2325 10
             break;
     }
 
@@ -13296,7 +12917,7 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                         hasMenuItem = false;
                     break;
                 case GOSSIP_OPTION_UNLEARNPETSKILLS:
-                    if (pCreature->GetCreatureInfo()->trainer_type != TRAINER_TYPE_PETS || pCreature->GetCreatureInfo()->trainer_class != CLASS_HUNTER)
+                    if (pCreature->GetCreatureInfo()->TrainerType != TRAINER_TYPE_PETS || pCreature->GetCreatureInfo()->TrainerClass != CLASS_HUNTER)
                         hasMenuItem = false;
                     else if (Pet* pet = GetPet())
                     {
@@ -18735,7 +18356,7 @@ void Player::PetSpellInitialize()
 
     WorldPacket data(SMSG_PET_SPELLS, 8 + 2 + 4 + 4 + 4 * MAX_UNIT_ACTION_BAR_INDEX + 1 + 1);
     data << pet->GetObjectGuid();
-    data << uint16(pet->GetCreatureInfo()->family);         // creature family (required for pet talents)
+    data << uint16(pet->GetCreatureInfo()->Family);         // creature family (required for pet talents)
     data << uint32(0);
     data << uint8(charmInfo->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0);
 
@@ -18852,7 +18473,7 @@ void Player::CharmSpellInitialize()
     {
         CreatureInfo const* cinfo = ((Creature*)charm)->GetCreatureInfo();
 
-        if (cinfo && cinfo->type == CREATURE_TYPE_DEMON && getClass() == CLASS_WARLOCK)
+        if (cinfo && cinfo->CreatureType == CREATURE_TYPE_DEMON && getClass() == CLASS_WARLOCK)
         {
             for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
             {
@@ -21304,7 +20925,7 @@ bool Player::isHonorOrXPTarget(Unit* pVictim) const
     {
         if (((Creature*)pVictim)->IsTotem() ||
                 ((Creature*)pVictim)->IsPet() ||
-                ((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL)
+                ((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL)
             return false;
     }
     return true;
@@ -22534,7 +22155,7 @@ void Player::LearnPetTalent(ObjectGuid petGuid, uint32 talentId, uint32 talentRa
     if (!ci)
         return;
 
-    CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->family);
+    CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->Family);
 
     if (!pet_family)
         return;
@@ -22766,7 +22387,7 @@ void Player::BuildPetTalentsInfoData(WorldPacket* data)
     if (!ci)
         return;
 
-    CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->family);
+    CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->Family);
     if (!pet_family || pet_family->petTalentType < 0)
         return;
 
