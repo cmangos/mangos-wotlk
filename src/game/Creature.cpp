@@ -1135,7 +1135,7 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
 
 void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float percentMana)
 {
-    uint32 rank = IsPet() ? 0 : cinfo->Rank;
+    uint32 rank = IsPet() ? 0 : cinfo->Rank;    // TODO :: IsPet probably not needed here
 
     // level
     uint32 minlevel = std::min(cinfo->MaxLevel, cinfo->MinLevel);
@@ -1143,14 +1143,35 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
     uint32 level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
     SetLevel(level);
 
-    float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel)) / (maxlevel - minlevel);
+    uint32 health = 0;
+    uint32 mana = 0;
 
-    // health
-    float healthmod = _GetHealthMod(rank);
+    CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass, cinfo->Expansion);
+    if (!cCLS)
+    {
+        // using old way to compute stats
+        float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel)) / (maxlevel - minlevel);
 
-    uint32 minhealth = std::min(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
-    uint32 maxhealth = std::max(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
-    uint32 health = uint32(healthmod * (minhealth + uint32(rellevel * (maxhealth - minhealth))));
+        // health
+        float healthmod = _GetHealthMod(rank);
+        uint32 minhealth = std::min(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
+        uint32 maxhealth = std::max(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
+        health = uint32(healthmod * (minhealth + uint32(rellevel * (maxhealth - minhealth))));
+
+        // mana
+        uint32 minmana = std::min(cinfo->MaxLevelMana, cinfo->MinLevelMana);
+        uint32 maxmana = std::max(cinfo->MaxLevelMana, cinfo->MinLevelMana);
+        mana = minmana + uint32(rellevel * (maxmana - minmana));
+    }
+    else
+    {
+        // using new way to compute stats
+        // health
+        health = cCLS->BaseHealth * cinfo->HealthMultiplier;
+
+        // mana
+        mana = cCLS->BaseMana * cinfo->ManaMultiplier;
+    }
 
     SetCreateHealth(health);
     SetMaxHealth(health);
@@ -1159,11 +1180,6 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
         SetHealth(health);
     else
         SetHealthPercent(percentHealth);
-
-    // mana
-    uint32 minmana = std::min(cinfo->MaxLevelMana, cinfo->MinLevelMana);
-    uint32 maxmana = std::max(cinfo->MaxLevelMana, cinfo->MinLevelMana);
-    uint32 mana = minmana + uint32(rellevel * (maxmana - minmana));
 
     SetCreateMana(mana);
     SetMaxPower(POWER_MANA, mana);                          // MAX Mana
