@@ -1138,18 +1138,31 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
     uint32 rank = IsPet() ? 0 : cinfo->Rank;    // TODO :: IsPet probably not needed here
 
     // level
-    uint32 minlevel = std::min(cinfo->MaxLevel, cinfo->MinLevel);
-    uint32 maxlevel = std::max(cinfo->MaxLevel, cinfo->MinLevel);
+    uint32 const minlevel = cinfo->MinLevel;
+    uint32 const maxlevel = cinfo->MaxLevel;
     uint32 level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
     SetLevel(level);
 
-    uint32 health = 0;
-    uint32 mana = 0;
+    //////////////////////////////////////////////////////////////////////////
+    // Calculate level dependend stats
+    //////////////////////////////////////////////////////////////////////////
 
-    CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass, cinfo->Expansion);
-    if (!cCLS)
+    uint32 health;
+    uint32 mana;
+
+    if (CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass, cinfo->Expansion))
     {
-        // using old way to compute stats
+        // Use Creature Stats to calculate stat values
+
+        // health
+        health = cCLS->BaseHealth * cinfo->HealthMultiplier;
+
+        // mana
+        mana = cCLS->BaseMana * cinfo->ManaMultiplier;
+    }
+    else
+    {
+        // Use old style to calculate stat values
         float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel)) / (maxlevel - minlevel);
 
         // health
@@ -1163,15 +1176,10 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
         uint32 maxmana = std::max(cinfo->MaxLevelMana, cinfo->MinLevelMana);
         mana = minmana + uint32(rellevel * (maxmana - minmana));
     }
-    else
-    {
-        // using new way to compute stats
-        // health
-        health = cCLS->BaseHealth * cinfo->HealthMultiplier;
 
-        // mana
-        mana = cCLS->BaseMana * cinfo->ManaMultiplier;
-    }
+    //////////////////////////////////////////////////////////////////////////
+    // Set values
+    //////////////////////////////////////////////////////////////////////////
 
     SetCreateHealth(health);
     SetMaxHealth(health);
