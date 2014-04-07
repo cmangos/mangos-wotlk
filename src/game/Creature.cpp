@@ -1166,16 +1166,19 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
         float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel)) / (maxlevel - minlevel);
 
         // health
-        float healthmod = _GetHealthMod(rank);
         uint32 minhealth = std::min(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
         uint32 maxhealth = std::max(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
-        health = uint32(healthmod * (minhealth + uint32(rellevel * (maxhealth - minhealth))));
+        health = uint32(minhealth + uint32(rellevel * (maxhealth - minhealth)));
 
         // mana
         uint32 minmana = std::min(cinfo->MaxLevelMana, cinfo->MinLevelMana);
         uint32 maxmana = std::max(cinfo->MaxLevelMana, cinfo->MinLevelMana);
         mana = minmana + uint32(rellevel * (maxmana - minmana));
     }
+
+    health *= _GetHealthMod(rank); // Apply custom config settting
+    if (health < 1)
+        health = 1;
 
     //////////////////////////////////////////////////////////////////////////
     // Set values
