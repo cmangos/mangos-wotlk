@@ -1133,7 +1133,7 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     WorldDatabase.CommitTransaction();
 }
 
-void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float percentMana)
+void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float /*percentMana*/)
 {
     uint32 rank = IsPet() ? 0 : cinfo->Rank;    // TODO :: IsPet probably not needed here
 

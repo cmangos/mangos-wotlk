@@ -80,7 +80,7 @@ MailSender::MailSender(AuctionEntry* sender)
  *
  * Note : Actualy it seem no info from event is required. We need more research to correctly initialise m_senderId
  */
-MailSender::MailSender(CalendarEvent const* sender)
+MailSender::MailSender(CalendarEvent const* /*sender*/)
     : m_messageType(MAIL_CALENDAR), m_senderId(0), m_stationery(MAIL_STATIONERY_DEFAULT)
 {
 }
