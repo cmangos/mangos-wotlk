@@ -651,7 +651,7 @@ void ObjectMgr::LoadCreatureTemplates()
             const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
         }
 
-        if (!cInfo->Expansion < 0)
+        if (cInfo->Expansion >= 0)
         {
              for (uint32 level = cInfo->MinLevel; level <= cInfo->MaxLevel; ++level)
              {
@@ -971,7 +971,7 @@ CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, u
 
     CreatureClassLvlStats const* cCLS = &m_creatureClassLvlStats[level][classToIndex[unitClass]][expansion];
 
-    if (cCLS->BaseHealth != 0 && cCLS->BaseDamage != 0.0f)
+    if (cCLS->BaseHealth != 0 && cCLS->BaseDamage > 0.1f)
         return cCLS;
 
     return NULL;
