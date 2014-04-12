@@ -191,7 +191,7 @@ class CalendarInvite
 {
     public:
 
-        CalendarInvite() : m_calendarEvent(NULL), InviteId(0), LastUpdateTime(time(NULL)), Status(CALENDAR_STATUS_INVITED), Rank(CALENDAR_RANK_PLAYER) {}
+        CalendarInvite() : InviteId(0), LastUpdateTime(time(NULL)), Status(CALENDAR_STATUS_INVITED), Rank(CALENDAR_RANK_PLAYER), m_calendarEvent(NULL) {}
 
         CalendarInvite(CalendarEvent* event, uint64 inviteId, ObjectGuid senderGuid, ObjectGuid inviteeGuid, time_t statusTime,
                        CalendarInviteStatus status, CalendarModerationRank rank, std::string text);
