@@ -989,6 +989,8 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(QueryResult* result, uin
     data << guid;
     data << newname;
     session->SendPacket(&data);
+
+    sWorld.InvalidatePlayerDataToAllClient(guid);
 }
 
 void WorldSession::HandleSetPlayerDeclinedNamesOpcode(WorldPacket& recv_data)
@@ -1244,6 +1246,8 @@ void WorldSession::HandleCharCustomizeOpcode(WorldPacket& recv_data)
     data << uint8(hairColor);
     data << uint8(facialHair);
     SendPacket(&data);
+
+    sWorld.InvalidatePlayerDataToAllClient(guid);
 }
 
 void WorldSession::HandleEquipmentSetSaveOpcode(WorldPacket& recv_data)
