@@ -141,19 +141,24 @@ void VehicleInfo::Initialize()
         }
     }
 
-    // Initialize movement limitations
-    uint32 vehicleFlags = GetVehicleEntry()->m_flags;
+    // Vehicles should always be Unit
+    if (m_owner->GetTypeId() == TYPEID_UNIT)
+    {
+        // Initialize movement limitations
+        uint32 vehicleFlags = GetVehicleEntry()->m_flags;
+        Unit* pVehicle = (Unit*)m_owner;
 
-    if (vehicleFlags & VEHICLE_FLAG_NO_STRAFE)
-        ((Unit*)m_owner)->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_STRAFE);
-    if (vehicleFlags & VEHICLE_FLAG_NO_JUMPING)
-        ((Unit*)m_owner)->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_JUMPING);
-    if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDTURNING)
-        ((Unit*)m_owner)->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDTURNING);
-    if (vehicleFlags & VEHICLE_FLAG_ALLOW_PITCHING)
-        ((Unit*)m_owner)->m_movementInfo.AddMovementFlags2(MOVEFLAG2_ALLOW_PITCHING);
-    if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDPITCHING)
-        ((Unit*)m_owner)->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDPITCHING);
+        if (vehicleFlags & VEHICLE_FLAG_NO_STRAFE)
+            pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_STRAFE);
+        if (vehicleFlags & VEHICLE_FLAG_NO_JUMPING)
+            pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_JUMPING);
+        if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDTURNING)
+            pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDTURNING);
+        if (vehicleFlags & VEHICLE_FLAG_ALLOW_PITCHING)
+            pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_ALLOW_PITCHING);
+        if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDPITCHING)
+            pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDPITCHING);
+    }
 
     m_isInitialized = true;
 }
@@ -523,6 +528,9 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
                     ((Creature*)pVehicle)->SetWalk(true, true);
                 }
             }
+
+            // Reinitialize AI after player control is set
+            ((Creature*)pVehicle)->AIM_Initialize();
         }
 
         if (seatFlags & (SEAT_FLAG_USABLE | SEAT_FLAG_CAN_CAST))
@@ -574,6 +582,9 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
 
             // must be called after movement control unapplying
             pPlayer->GetCamera().ResetView();
+
+            // Reinitialize AI after player control is removed
+            ((Creature*)pVehicle)->AIM_Initialize();
         }
 
         if (seatFlags & (SEAT_FLAG_USABLE | SEAT_FLAG_CAN_CAST))
