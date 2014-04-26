@@ -141,24 +141,20 @@ void VehicleInfo::Initialize()
         }
     }
 
-    // Vehicles should always be Unit
-    if (m_owner->GetTypeId() == TYPEID_UNIT)
-    {
-        // Initialize movement limitations
-        uint32 vehicleFlags = GetVehicleEntry()->m_flags;
-        Unit* pVehicle = (Unit*)m_owner;
+    // Initialize movement limitations
+    uint32 vehicleFlags = GetVehicleEntry()->m_flags;
+    Unit* pVehicle = (Unit*)m_owner;
 
-        if (vehicleFlags & VEHICLE_FLAG_NO_STRAFE)
-            pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_STRAFE);
-        if (vehicleFlags & VEHICLE_FLAG_NO_JUMPING)
-            pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_JUMPING);
-        if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDTURNING)
-            pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDTURNING);
-        if (vehicleFlags & VEHICLE_FLAG_ALLOW_PITCHING)
-            pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_ALLOW_PITCHING);
-        if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDPITCHING)
-            pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDPITCHING);
-    }
+    if (vehicleFlags & VEHICLE_FLAG_NO_STRAFE)
+        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_STRAFE);
+    if (vehicleFlags & VEHICLE_FLAG_NO_JUMPING)
+        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_JUMPING);
+    if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDTURNING)
+        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDTURNING);
+    if (vehicleFlags & VEHICLE_FLAG_ALLOW_PITCHING)
+        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_ALLOW_PITCHING);
+    if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDPITCHING)
+        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDPITCHING);
 
     m_isInitialized = true;
 }
