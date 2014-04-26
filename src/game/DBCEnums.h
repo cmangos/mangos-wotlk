@@ -534,4 +534,16 @@ enum VehicleSeatFlags
     SEAT_FLAG_UNK26                 = 0x80000000,           // "AllowsInteraction"
 };
 
+enum VehicleSeatFlagsB
+{
+    SEAT_FLAG_B_USABLE_FORCED       = 0x00000002,
+    SEAT_FLAG_B_TARGETS_IN_RAIDUI   = 0x00000008,           // Lua_UnitTargetsVehicleInRaidUI
+    SEAT_FLAG_B_EJECTABLE           = 0x00000020,           // Ejectable
+    SEAT_FLAG_B_USABLE_FORCED_2     = 0x00000040,
+    SEAT_FLAG_B_USABLE_FORCED_3     = 0x00000100,
+    SEAT_FLAG_B_USABLE_FORCED_4     = 0x02000000,
+    SEAT_FLAG_B_CAN_SWITCH          = 0x04000000,
+    SEAT_FLAG_B_PLAYERFRAME_UI      = 0x80000000            // Lua_UnitHasVehiclePlayerFrameUI
+};
+
 #endif
