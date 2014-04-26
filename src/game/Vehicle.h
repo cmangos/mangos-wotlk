@@ -91,7 +91,7 @@ class VehicleInfo : public TransportBase
         uint8 GetEmptySeatsMask() const { return ~GetTakenSeatsMask(); }
         uint8 GetEmptySeats() const { return m_vehicleSeats.size() - m_passengers.size(); }
 
-        bool IsUsableSeatForPlayer(uint32 seatFlags) const;
+        bool IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) const;
         bool IsUsableSeatForCreature(uint32 /*seatFlags*/) const { return true; } // special flag?, !IsUsableSeatForPlayer(seatFlags)?
 
         // Apply/ Remove Controlling of the vehicle

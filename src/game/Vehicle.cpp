@@ -109,7 +109,7 @@ VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 o
                 if (IsUsableSeatForCreature(seatEntry->m_flags))
                     m_creatureSeats |= 1 << i;
 
-                if (IsUsableSeatForPlayer(seatEntry->m_flags))
+                if (IsUsableSeatForPlayer(seatEntry->m_flags, seatEntry->m_flagsB))
                     m_playerSeats |= 1 << i;
             }
         }
@@ -489,9 +489,13 @@ uint8 VehicleInfo::GetTakenSeatsMask() const
     return takenSeatsMask;
 }
 
-bool VehicleInfo:: IsUsableSeatForPlayer(uint32 seatFlags) const
+bool VehicleInfo::IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) const
 {
-    return seatFlags & SEAT_FLAG_USABLE;
+    return seatFlags & SEAT_FLAG_CAN_EXIT ||
+           seatFlags & SEAT_FLAG_UNCONTROLLED ||
+           seatFlagsB &
+               (SEAT_FLAG_B_USABLE_FORCED   | SEAT_FLAG_B_USABLE_FORCED_2 |
+                SEAT_FLAG_B_USABLE_FORCED_3 | SEAT_FLAG_B_USABLE_FORCED_4);
 }
 
 /// Add control and such modifiers to a passenger if required
