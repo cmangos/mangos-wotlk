@@ -173,6 +173,13 @@ namespace Movement
         vertical_acceleration = 0.f;
         effect_start_time = 0;
 
+        // detect Stop command
+        if (splineflags.done)
+        {
+            spline.clear();
+            return;
+        }
+
         init_spline(args);
 
         // init parabolic / animation
