@@ -1344,6 +1344,16 @@ struct OverrideSpellDataEntry
     // uint32      unk2;                                    // 11       m_flags
 };
 
+struct PowerDisplayEntry
+{
+    uint32      id;                                         // 0        m_ID
+    uint32      power;                                      // 1        m_power
+    // uint32   unk1                                        // 2
+    // float    unk2                                        // 3
+    // float    unk3                                        // 4
+    // float    unk4                                        // 5
+};
+
 struct PvPDifficultyEntry
 {
     // uint32      id;                                      // 0        m_ID
@@ -2007,7 +2017,7 @@ struct VehicleEntry
     uint32  m_uiLocomotionType;                             // 34
     float   m_msslTrgtImpactTexRadius;                      // 35
     uint32  m_uiSeatIndicatorType;                          // 36       m_vehicleUIIndicatorID
-    // 37       m_powerDisplayID
+    uint32  m_powerDisplayID;                               // 37
     // 38 new in 3.1
     // 39 new in 3.1
 };
