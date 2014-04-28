@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_12615_01_mangos_creature_template_classlevelstats` bit(1) DEFAULT NULL
+  `required_12654_01_mangos_creature_template_power` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -1312,7 +1312,7 @@ CREATE TABLE `creature_template` (
   `Family` tinyint(4) NOT NULL DEFAULT '0',
   `CreatureType` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `InhabitType` tinyint(3) unsigned NOT NULL DEFAULT '3',
-  `RegenerateHealth` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `RegenerateStats` tinyint(3) unsigned NOT NULL DEFAULT '3',
   `RacialLeader` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `NpcFlags` int(10) unsigned NOT NULL DEFAULT '0',
   `UnitFlags` int(10) unsigned NOT NULL DEFAULT '0',
@@ -1325,7 +1325,7 @@ CREATE TABLE `creature_template` (
   `Rank` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `Expansion` tinyint(3) NOT NULL DEFAULT '-1',
   `HealthMultiplier` float NOT NULL DEFAULT '1',
-  `ManaMultiplier` float NOT NULL DEFAULT '1',
+  `PowerMultiplier` float NOT NULL DEFAULT '1',
   `DamageMultiplier` float NOT NULL DEFAULT '1',
   `DamageVariance` float NOT NULL DEFAULT '1',
   `ArmorMultiplier` float NOT NULL DEFAULT '1',
