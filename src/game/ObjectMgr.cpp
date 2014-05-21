@@ -46,6 +46,7 @@
 #include "Mail.h"
 #include "InstanceData.h"
 #include "GridNotifiers.h"
+#include "CellImpl.h"
 
 #include <limits>
 
