@@ -1647,10 +1647,23 @@ void Aura::TriggerSpell()
 //                    case 41629: break;
 //                    // Alert Drums
 //                    case 42177: break;
-//                    // Spout
-//                    case 42581: break;
-//                    // Spout
-//                    case 42582: break;
+                    case 42581:                             // Spout (left)
+                    case 42582:                             // Spout (right)
+                    {
+                        float newAngle = target->GetOrientation();
+
+                        if (auraId == 42581)
+                            newAngle += 2 * M_PI_F / 100;
+                        else
+                            newAngle -= 2 * M_PI_F / 100;
+
+                        newAngle = MapManager::NormalizeOrientation(newAngle);
+
+                        target->SetFacingTo(newAngle);
+
+                        target->CastSpell(target, auraSpellInfo->CalculateSimpleValue(m_effIndex), true);
+                        return;
+                    }
 //                    // Return to the Spirit Realm
 //                    case 44035: break;
 //                    // Curse of Boundless Agony

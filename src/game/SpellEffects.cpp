@@ -7524,6 +7524,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 41131, true);
                     break;
                 }
+                case 42578:                                 // Cannon Blast
+                {
+                    if (!unitTarget)
+                        return;
+
+                    int32 basePoints = m_spellInfo->CalculateSimpleValue(eff_idx);
+                    unitTarget->CastCustomSpell(unitTarget, 42576, &basePoints, NULL, NULL, true);
+                    return;
+                }
                 case 43365:                                 // The Cleansing: Shrine Cast
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
