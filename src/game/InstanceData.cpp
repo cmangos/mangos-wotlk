@@ -20,6 +20,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Map.h"
 #include "Log.h"
+#include "WorldPacket.h"
 
 void InstanceData::SaveToDB() const
 {
