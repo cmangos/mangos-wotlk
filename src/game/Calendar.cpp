@@ -174,7 +174,14 @@ void CalendarEvent::RemoveAllInvite(ObjectGuid const& removerGuid)
 //////////////////////////////////////////////////////////////////////////
 
 CalendarInvite::CalendarInvite(CalendarEvent* event, uint64 inviteId, ObjectGuid senderGuid, ObjectGuid inviteeGuid, time_t statusTime, CalendarInviteStatus status, CalendarModerationRank rank, std::string text) :
-    m_calendarEvent(event), InviteId(inviteId), SenderGuid(senderGuid), InviteeGuid(inviteeGuid), LastUpdateTime(statusTime), Status(status), Rank(rank), Text(text)
+    InviteId(inviteId),
+    InviteeGuid(inviteeGuid),
+    SenderGuid(senderGuid),
+    LastUpdateTime(statusTime),
+    Status(status),
+    Rank(rank),
+    Text(text),
+    m_calendarEvent(event)
 {
     // only for pre invite case
     if (!event)
@@ -240,7 +247,7 @@ void CalendarMgr::GetPlayerInvitesList(ObjectGuid const& guid, CalendarInvitesLi
 // some check done before so it may fail and raison is sent to client
 // return value is the CalendarEvent pointer on success
 CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, std::string description, uint32 type, uint32 repeatable,
-                                     uint32 maxInvites, int32 dungeonId, time_t eventTime, time_t unkTime, uint32 flags)
+                                     uint32 maxInvites, int32 dungeonId, time_t eventTime, time_t /*unkTime*/, uint32 flags)
 {
     Player* player = sObjectMgr.GetPlayer(guid);
     if (!player)

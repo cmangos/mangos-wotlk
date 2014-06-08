@@ -45,6 +45,9 @@
 #include "GossipDef.h"
 #include "Mail.h"
 #include "InstanceData.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 
 #include <limits>
 
@@ -626,11 +629,43 @@ void ObjectMgr::LoadCreatureTemplates()
             const_cast<CreatureInfo*>(cInfo)->MaxLevel = cInfo->MinLevel;
         }
 
+        if (cInfo->MinLevel > DEFAULT_MAX_CREATURE_LEVEL)
+        {
+            sLog.outErrorDb("Creature (Entry: %u) `MinLevel` exceeds maximum allowed value of '%u'", cInfo->Entry, uint32(DEFAULT_MAX_CREATURE_LEVEL));
+            const_cast<CreatureInfo*>(cInfo)->MinLevel = uint32(DEFAULT_MAX_CREATURE_LEVEL);
+        }
+
+        if (cInfo->MaxLevel > DEFAULT_MAX_CREATURE_LEVEL)
+        {
+            sLog.outErrorDb("Creature (Entry: %u) `MaxLevel` exceeds maximum allowed value of '%u'", cInfo->Entry, uint32(DEFAULT_MAX_CREATURE_LEVEL));
+            const_cast<CreatureInfo*>(cInfo)->MaxLevel = uint32(DEFAULT_MAX_CREATURE_LEVEL);
+        }
+
+        if (cInfo->Expansion > MAX_EXPANSION)
+        {
+            sLog.outErrorDb("Creature (Entry: %u) `Expansion(%u)` is not correct", cInfo->Entry, uint32(MAX_EXPANSION));
+            const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
+        }
+
         // use below code for 0-checks for unit_class
-        if (!cInfo->UnitClass)
-            ERROR_DB_STRICT_LOG("Creature (Entry: %u) not has proper `UnitClass(%u)` for creature_template", cInfo->Entry, cInfo->UnitClass);
-        else if (((1 << (cInfo->UnitClass - 1)) & CLASSMASK_ALL_CREATURES) == 0)
-            sLog.outErrorDb("Creature (Entry: %u) has invalid `UnitClass(%u)` for creature_template", cInfo->Entry, cInfo->UnitClass);
+        if (!cInfo->UnitClass || (((1 << (cInfo->UnitClass - 1)) & CLASSMASK_ALL_CREATURES) == 0))
+        {
+            sLog.outErrorDb("Creature (Entry: %u) does not have proper `UnitClass(%u)` in creature_template", cInfo->Entry, cInfo->UnitClass);
+            const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
+        }
+
+        if (cInfo->Expansion >= 0)
+        {
+             for (uint32 level = cInfo->MinLevel; level <= cInfo->MaxLevel; ++level)
+             {
+                 if (!GetCreatureClassLvlStats(level, cInfo->UnitClass, cInfo->Expansion))
+                 {
+                     sLog.outErrorDb("Creature (Entry: %u), level(%u) has no data in `creature_template_classlevelstats`", cInfo->Entry, level);
+                     const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
+                     break;
+                 }
+             }
+        }
 
         if (cInfo->DamageSchool >= MAX_SPELL_SCHOOL)
         {
@@ -850,6 +885,99 @@ void ObjectMgr::LoadCreatureAddons()
         if (CreatureDataAddon const* addon = sCreatureDataAddonStorage.LookupEntry<CreatureDataAddon>(i))
             if (mCreatureDataMap.find(addon->guidOrEntry) == mCreatureDataMap.end())
                 sLog.outErrorDb("Creature (GUID: %u) does not exist but has a record in `creature_addon`", addon->guidOrEntry);
+}
+
+void ObjectMgr::LoadCreatureClassLvlStats()
+{
+    // initialize data array
+    memset(&m_creatureClassLvlStats, 0, sizeof(m_creatureClassLvlStats));
+
+    std::string queryStr = "SELECT Class, Level, BaseMana, BaseMeleeAttackPower, BaseRangedAttackPower, BaseArmor";
+
+    std::string expData = "";
+    for (int i = 0; i <= MAX_EXPANSION; ++i)
+    {
+        std::ostringstream str;
+        str << ", BaseHealthExp" << i << ", BaseDamageExp" << i;
+        expData += str.str();
+    }
+
+    queryStr += expData + " FROM creature_template_classlevelstats ORDER BY Class, Level";
+
+    QueryResult* result = WorldDatabase.Query(queryStr.c_str());
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outErrorDb("DB table `creature_template_classlevelstats` is empty.");
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+    uint32 storedRow = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        bar.step();
+
+        uint32 creatureClass               = fields[0].GetUInt32();
+        uint32 creatureLevel               = fields[1].GetUInt32();
+
+        if (creatureLevel == 0 || creatureLevel > DEFAULT_MAX_CREATURE_LEVEL)
+        {
+            sLog.outErrorDb("Found stats for creature level [%u], incorrect level for this core. Skip!", creatureLevel);
+            continue;
+        }
+
+        if (((1 << (creatureClass - 1)) & CLASSMASK_ALL_CREATURES) == 0)
+        {
+            sLog.outErrorDb("Found stats for creature class [%u], incorrect class for this core. Skip!", creatureClass);
+            continue;
+        }
+
+        uint32  baseMana                   = fields[2].GetUInt32();
+        float   baseMeleeAttackPower       = fields[3].GetFloat();
+        float   baseRangedAttackPower      = fields[4].GetFloat();
+        uint32  baseArmor                  = fields[5].GetUInt32();
+
+        for (int i = 0; i <= MAX_EXPANSION; ++i)
+        {
+            CreatureClassLvlStats &cCLS = m_creatureClassLvlStats[creatureLevel][classToIndex[creatureClass]][i];
+
+            cCLS.BaseMana                   = baseMana;
+            cCLS.BaseMeleeAttackPower       = baseMeleeAttackPower;
+            cCLS.BaseRangedAttackPower      = baseRangedAttackPower;
+            cCLS.BaseArmor                  = baseArmor;
+
+            cCLS.BaseHealth = fields[6 + (i * 2)].GetUInt32();
+            cCLS.BaseDamage = fields[7 + (i * 2)].GetFloat();
+        }
+        ++storedRow;
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString(">> Found %u creature stats definitions.", storedRow);
+}
+
+CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, uint32 unitClass, int32 expansion) const
+{
+    if (expansion < 0)
+        return NULL;
+
+    CreatureClassLvlStats const* cCLS = &m_creatureClassLvlStats[level][classToIndex[unitClass]][expansion];
+
+    if (cCLS->BaseHealth != 0 && cCLS->BaseDamage > 0.1f)
+        return cCLS;
+
+    return NULL;
 }
 
 void ObjectMgr::LoadEquipmentTemplates()
@@ -1303,9 +1431,9 @@ void ObjectMgr::LoadCreatures()
             }
         }
 
-        if (cInfo->RegenerateHealth && data.curhealth < cInfo->MinLevelHealth)
+        if (cInfo->RegenerateStats & REGEN_FLAG_HEALTH && data.curhealth < cInfo->MinLevelHealth)
         {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenHealth`=1 and low current health (%u), `creature_template`.`minhealth`=%u.", guid, data.id, data.curhealth, cInfo->MinLevelHealth);
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenerateStats` & REGEN_FLAG_HEALTH and low current health (%u), `creature_template`.`minhealth`=%u.", guid, data.id, data.curhealth, cInfo->MinLevelHealth);
             data.curhealth = cInfo->MinLevelHealth;
         }
 
@@ -7997,6 +8125,16 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
                 case 3:                                     // Creature source is dead
                     return !source || source->GetTypeId() != TYPEID_UNIT || !((Unit*)source)->isAlive();
             }
+        case CONDITION_CREATURE_IN_RANGE:
+        {
+            Creature* creature = NULL;
+
+            MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck creature_check(*player, m_value1, true, false, m_value2, true);
+            MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(creature, creature_check);
+            Cell::VisitGridObjects(player, searcher, m_value2);
+
+            return creature;
+        }
         default:
             return false;
     }
@@ -8451,6 +8589,19 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
                 return false;
             }
             break;
+        }
+        case CONDITION_CREATURE_IN_RANGE:
+        {
+            if (!sCreatureStorage.LookupEntry<CreatureInfo> (value1))
+            {
+                sLog.outErrorDb("Creature in range condition (entry %u, type %u) has an invalid value in value1. (Creature %u does not exist in the database), skipping.", entry, condition, value1);
+                return false;
+            }
+            if (value2 <= 0)
+            {
+                sLog.outErrorDb("Creature in range condition (entry %u, type %u) has an invalid value in value2. (Range %u must be greater than 0), skipping.", entry, condition, value2);
+                return false;
+            }
         }
         case CONDITION_NONE:
             break;

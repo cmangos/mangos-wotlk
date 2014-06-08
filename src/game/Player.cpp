@@ -756,13 +756,13 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     UpdateMaxHealth();                                      // Update max Health (for add bonus from stamina)
     SetHealth(GetMaxHealth());
 
-    if (getPowerType() == POWER_MANA)
+    if (GetPowerType() == POWER_MANA)
     {
         UpdateMaxPower(POWER_MANA);                         // Update max Mana (for add bonus from intellect)
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     }
 
-    if (getPowerType() != POWER_MANA)                       // hide additional mana bar if we have no mana
+    if (GetPowerType() != POWER_MANA)                       // hide additional mana bar if we have no mana
     {
         SetPower(POWER_MANA, 0);
         SetMaxPower(POWER_MANA, 0);
@@ -971,7 +971,11 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
     data << uint32(resist);
     SendMessageToSet(&data, true);
 
-    uint32 final_damage = DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+    DamageEffectType damageType = SELF_DAMAGE;
+    if (type == DAMAGE_FALL && getClass() == CLASS_ROGUE)
+        damageType = SELF_DAMAGE_ROGUE_FALL;
+
+    uint32 final_damage = DealDamage(this, damage, NULL, damageType, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 
     if (!isAlive())
     {
@@ -8107,7 +8111,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
 
             // not check distance for GO in case owned GO (fishing bobber case, for example)
             // And permit out of range GO with no owner in case fishing hole
-            if (!go || (loot_type != LOOT_FISHINGHOLE && (loot_type != LOOT_FISHING && loot_type != LOOT_FISHING_FAIL || go->GetOwnerGuid() != GetObjectGuid()) && !go->IsWithinDistInMap(this, INTERACTION_DISTANCE)))
+            if (!go || (loot_type != LOOT_FISHINGHOLE && ((loot_type != LOOT_FISHING && loot_type != LOOT_FISHING_FAIL) || go->GetOwnerGuid() != GetObjectGuid()) && !go->IsWithinDistInMap(this, INTERACTION_DISTANCE)))
             {
                 SendLootRelease(guid);
                 return;
@@ -16971,7 +16975,7 @@ DungeonPersistentState* Player::GetBoundInstanceSaveForSelfOrGroup(uint32 mapid)
         InstanceGroupBind* groupBind = NULL;
         // use the player's difficulty setting (it may not be the same as the group's)
         if (Group* group = GetGroup())
-            if (groupBind = group->GetBoundInstance(mapid, this))
+            if ((groupBind = group->GetBoundInstance(mapid, this)))
                 state = groupBind->state;
     }
 
@@ -19034,22 +19038,22 @@ void Player::InitDataForForm(bool reapplyMods)
     {
         case FORM_CAT:
         {
-            if (getPowerType() != POWER_ENERGY)
-                setPowerType(POWER_ENERGY);
+            if (GetPowerType() != POWER_ENERGY)
+                SetPowerType(POWER_ENERGY);
             break;
         }
         case FORM_BEAR:
         case FORM_DIREBEAR:
         {
-            if (getPowerType() != POWER_RAGE)
-                setPowerType(POWER_RAGE);
+            if (GetPowerType() != POWER_RAGE)
+                SetPowerType(POWER_RAGE);
             break;
         }
         default:                                            // 0, for example
         {
             ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(getClass());
-            if (cEntry && cEntry->powerType < MAX_POWERS && uint32(getPowerType()) != cEntry->powerType)
-                setPowerType(Powers(cEntry->powerType));
+            if (cEntry && cEntry->powerType < MAX_POWERS && uint32(GetPowerType()) != cEntry->powerType)
+                SetPowerType(Powers(cEntry->powerType));
             break;
         }
     }
@@ -22798,11 +22802,11 @@ void Player::ActivateSpec(uint8 specNum)
 
     SendInitialActionButtons();
 
-    Powers pw = getPowerType();
-    if (pw != POWER_MANA)
+    Powers powerType = GetPowerType();
+    if (powerType != POWER_MANA)
         SetPower(POWER_MANA, 0);
 
-    SetPower(pw, 0);
+    SetPower(powerType, 0);
 }
 
 void Player::UpdateSpecCount(uint8 count)

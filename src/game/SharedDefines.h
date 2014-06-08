@@ -101,6 +101,11 @@ enum Classes
     (1<<(CLASS_DEATH_KNIGHT-1)) )
 
 #define CLASSMASK_ALL_CREATURES ((1<<(CLASS_WARRIOR-1)) | (1<<(CLASS_PALADIN-1)) | (1<<(CLASS_ROGUE-1)) | (1<<(CLASS_MAGE-1)) )
+#define MAX_CREATURE_CLASS 4
+
+// array index could be used to store class data only Warrior, Paladin, Rogue and Mage are indexed for creature
+//                                                  W  P     R           M
+static const uint8 classToIndex[MAX_CLASSES] = { 0, 0, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0 };
 
 #define CLASSMASK_WAND_USERS ((1<<(CLASS_PRIEST-1))|(1<<(CLASS_MAGE-1))|(1<<(CLASS_WARLOCK-1)))
 
@@ -143,13 +148,13 @@ enum Stats
 
 enum Powers
 {
-    POWER_MANA                          = 0,
-    POWER_RAGE                          = 1,
-    POWER_FOCUS                         = 2,
-    POWER_ENERGY                        = 3,
-    POWER_HAPPINESS                     = 4,
-    POWER_RUNE                          = 5,
-    POWER_RUNIC_POWER                   = 6,
+    POWER_MANA                          = 0,            // UNIT_FIELD_POWER1
+    POWER_RAGE                          = 1,            // UNIT_FIELD_POWER2
+    POWER_FOCUS                         = 2,            // UNIT_FIELD_POWER3
+    POWER_ENERGY                        = 3,            // UNIT_FIELD_POWER4
+    POWER_HAPPINESS                     = 4,            // UNIT_FIELD_POWER5
+    POWER_RUNE                          = 5,            // UNIT_FIELD_POWER6
+    POWER_RUNIC_POWER                   = 6,            // UNIT_FIELD_POWER7
     POWER_HEALTH                        = 0xFFFFFFFE    // (-2 as signed value)
 };
 
@@ -1379,7 +1384,8 @@ enum DamageEffectType
     DOT                     = 2,
     HEAL                    = 3,
     NODAMAGE                = 4,                            //< used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
-    SELF_DAMAGE             = 5
+    SELF_DAMAGE_ROGUE_FALL  = 5,                            //< used to avoid rogue loosing stealth on falling damage
+    SELF_DAMAGE             = 6
 };
 
 enum GameobjectTypes
@@ -3055,6 +3061,9 @@ enum MaxLevel
 };
 
 static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLASSIC, MAX_LEVEL_TBC, MAX_LEVEL_WOTLK };
+
+// Max creature level (included some bosses and elite)
+#define DEFAULT_MAX_CREATURE_LEVEL 85
 
 // This spell is used for general boarding serverside
 #define SPELL_RIDE_VEHICLE_HARDCODED    46598

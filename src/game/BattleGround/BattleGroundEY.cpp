@@ -214,7 +214,7 @@ bool BattleGroundEY::HandleEvent(uint32 eventId, GameObject* go)
     return false;
 }
 
-void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState, uint32 message)
+void BattleGroundEY::ProcessCaptureEvent(GameObject* /*go*/, uint32 towerId, Team team, uint32 newWorldState, uint32 message)
 {
     if (team == ALLIANCE)
     {

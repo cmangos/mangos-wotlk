@@ -203,12 +203,12 @@ class AiDelayEventAround : public BasicEvent
     private:
         AiDelayEventAround();
 
-        ObjectGuid m_invokerGuid;
-        GuidVector m_receiverGuids;
-        Creature&  m_owner;
-
         AIEventType m_eventType;
+        ObjectGuid m_invokerGuid;
+        Creature&  m_owner;
         uint32 m_miscValue;
+
+        GuidVector m_receiverGuids;
 };
 
 void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue /*=0*/) const
@@ -217,10 +217,20 @@ void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32
     {
         std::list<Creature*> receiverList;
 
-        // Use this check here to collect only assitable creatures in case of CALL_ASSISTANCE, else be less strict
-        MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_creature, eventType == AI_EVENT_CALL_ASSISTANCE ? pInvoker : NULL, fRadius);
-        MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(receiverList, u_check);
-        Cell::VisitGridObjects(m_creature, searcher, fRadius);
+        // Allow sending custom AI events to all units in range
+        if (eventType == AI_EVENT_CUSTOM_EVENTAI_A || eventType == AI_EVENT_CUSTOM_EVENTAI_B)
+        {
+            MaNGOS::AnyUnitInObjectRangeCheck u_check(m_creature, fRadius);
+            MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(receiverList, u_check);
+            Cell::VisitGridObjects(m_creature, searcher, fRadius);
+        }
+        else
+        {
+            // Use this check here to collect only assitable creatures in case of CALL_ASSISTANCE, else be less strict
+            MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_creature, eventType == AI_EVENT_CALL_ASSISTANCE ? pInvoker : NULL, fRadius);
+            MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(receiverList, u_check);
+            Cell::VisitGridObjects(m_creature, searcher, fRadius);
+        }
 
         if (!receiverList.empty())
         {

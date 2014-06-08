@@ -138,11 +138,10 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     lootForPickPocketed(false), lootForBody(false), lootForSkin(false),
     m_groupLootTimer(0), m_groupLootId(0),
     m_lootMoney(0), m_lootGroupRecipientId(0),
-    m_corpseDecayTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(5.0f), m_aggroDelay(0),
+    m_corpseDecayTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_aggroDelay(0), m_respawnradius(5.0f),
     m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
     m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false),
-    m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
-    m_temporaryFactionFlags(TEMPFACTION_NONE),
+    m_AI_locked(false), m_isDeadByDefault(false), m_temporaryFactionFlags(TEMPFACTION_NONE),
     m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_originalEntry(0),
     m_creatureInfo(NULL)
 {
@@ -294,6 +293,24 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
 
     SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
 
+    // set PowerType based on unit class
+    switch (cinfo->UnitClass)
+    {
+        case CLASS_WARRIOR:
+            SetPowerType(POWER_RAGE);
+            break;
+        case CLASS_PALADIN:
+        case CLASS_MAGE:
+            SetPowerType(POWER_MANA);
+            break;
+        case CLASS_ROGUE:
+            SetPowerType(POWER_ENERGY);
+            break;
+        default:
+            sLog.outErrorDb("Creature (Entry: %u) has unhandled unit class. Power type will not be set!", Entry);
+            break;
+    }
+
     // Load creature equipment
     if (eventData && eventData->equipment_id)
     {
@@ -332,8 +349,6 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
 {
     if (!InitEntry(Entry, data, eventData))
         return false;
-
-    m_regenHealth = GetCreatureInfo()->RegenerateHealth;
 
     // creatures always have melee weapon ready if any
     SetSheath(SHEATH_STATE_MELEE);
@@ -623,36 +638,65 @@ void Creature::RegenerateAll(uint32 update_diff)
     if (!isInCombat() || IsPolymorphed())
         RegenerateHealth();
 
-    RegenerateMana();
+    RegeneratePower();
 
     m_regenTimer = REGEN_TIME_FULL;
 }
 
-void Creature::RegenerateMana()
+void Creature::RegeneratePower()
 {
-    uint32 curValue = GetPower(POWER_MANA);
-    uint32 maxValue = GetMaxPower(POWER_MANA);
+    if (!IsRegeneratingPower())
+        return;
+
+    Powers powerType = GetPowerType();
+    uint32 curValue = GetPower(powerType);
+    uint32 maxValue = GetMaxPower(powerType);
 
     if (curValue >= maxValue)
         return;
 
-    uint32 addvalue = 0;
+    float addValue = 0.0f;
 
-    // Combat and any controlled creature
-    if (isInCombat() || GetCharmerOrOwnerGuid())
+    switch (powerType)
     {
-        if (!IsUnderLastManaUseEffect())
-        {
-            float ManaIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_MANA);
-            float Spirit = GetStat(STAT_SPIRIT);
+        case POWER_MANA:
+            // Combat and any controlled creature
+            if (isInCombat() || GetCharmerOrOwnerGuid())
+            {
+                if (!IsUnderLastManaUseEffect())
+                {
+                    float ManaIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_MANA);
+                    float Spirit = GetStat(STAT_SPIRIT);
 
-            addvalue = uint32((Spirit / 5.0f + 17.0f) * ManaIncreaseRate);
-        }
+                    addValue = (Spirit / 5.0f + 17.0f) * ManaIncreaseRate;
+                }
+            }
+            else
+                addValue = maxValue / 3;
+            break;
+        case POWER_ENERGY:
+            // ToDo: for vehicle this is different - NEEDS TO BE FIXED!
+            addValue = 20 * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_ENERGY);
+            break;
+        case POWER_FOCUS:
+            addValue = 24 * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_FOCUS);
+            break;
+        default:
+            return;
     }
-    else
-        addvalue = maxValue / 3;
 
-    ModifyPower(POWER_MANA, addvalue);
+    // Apply modifiers (if any)
+    AuraList const& ModPowerRegenAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
+    for(AuraList::const_iterator i = ModPowerRegenAuras.begin(); i != ModPowerRegenAuras.end(); ++i)
+        if ((*i)->GetModifier()->m_miscvalue == int32(powerType))
+            addValue += (*i)->GetModifier()->m_amount;
+
+    AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+    for(AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
+        if ((*i)->GetModifier()->m_miscvalue == int32(powerType))
+            addValue *= ((*i)->GetModifier()->m_amount + 100) / 100.0f;
+
+    ModifyPower(powerType, int32(addValue));
 }
 
 void Creature::RegenerateHealth()
@@ -705,7 +749,10 @@ void Creature::DoFleeToGetAssistance()
         if (!pCreature)
             SetFeared(true, getVictim()->GetObjectGuid(), 0 , sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
         else
+        {
+            SetTargetGuid(ObjectGuid());        // creature flee loose its target
             GetMotionMaster()->MoveSeekAssistance(pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ());
+        }
     }
 }
 
@@ -1130,25 +1177,58 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     WorldDatabase.CommitTransaction();
 }
 
-void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float percentMana)
+void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float /*percentMana*/)
 {
-    uint32 rank = IsPet() ? 0 : cinfo->Rank;
+    uint32 rank = IsPet() ? 0 : cinfo->Rank;    // TODO :: IsPet probably not needed here
 
     // level
-    uint32 minlevel = std::min(cinfo->MaxLevel, cinfo->MinLevel);
-    uint32 maxlevel = std::max(cinfo->MaxLevel, cinfo->MinLevel);
+    uint32 const minlevel = cinfo->MinLevel;
+    uint32 const maxlevel = cinfo->MaxLevel;
     uint32 level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
     SetLevel(level);
 
-    float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel)) / (maxlevel - minlevel);
+    //////////////////////////////////////////////////////////////////////////
+    // Calculate level dependend stats
+    //////////////////////////////////////////////////////////////////////////
+
+    uint32 health;
+    uint32 mana;
+
+    if (CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass, cinfo->Expansion))
+    {
+        // Use Creature Stats to calculate stat values
+
+        // health
+        health = cCLS->BaseHealth * cinfo->HealthMultiplier;
+
+        // mana
+        mana = cCLS->BaseMana * cinfo->PowerMultiplier;
+    }
+    else
+    {
+        // Use old style to calculate stat values
+        float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel)) / (maxlevel - minlevel);
+
+        // health
+        uint32 minhealth = std::min(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
+        uint32 maxhealth = std::max(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
+        health = uint32(minhealth + uint32(rellevel * (maxhealth - minhealth)));
+
+        // mana
+        uint32 minmana = std::min(cinfo->MaxLevelMana, cinfo->MinLevelMana);
+        uint32 maxmana = std::max(cinfo->MaxLevelMana, cinfo->MinLevelMana);
+        mana = minmana + uint32(rellevel * (maxmana - minmana));
+    }
+
+    health *= _GetHealthMod(rank); // Apply custom config settting
+    if (health < 1)
+        health = 1;
+
+    //////////////////////////////////////////////////////////////////////////
+    // Set values
+    //////////////////////////////////////////////////////////////////////////
 
     // health
-    float healthmod = _GetHealthMod(rank);
-
-    uint32 minhealth = std::min(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
-    uint32 maxhealth = std::max(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
-    uint32 health = uint32(healthmod * (minhealth + uint32(rellevel * (maxhealth - minhealth))));
-
     SetCreateHealth(health);
     SetMaxHealth(health);
 
@@ -1157,19 +1237,38 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
     else
         SetHealthPercent(percentHealth);
 
-    // mana
-    uint32 minmana = std::min(cinfo->MaxLevelMana, cinfo->MinLevelMana);
-    uint32 maxmana = std::max(cinfo->MaxLevelMana, cinfo->MinLevelMana);
-    uint32 mana = minmana + uint32(rellevel * (maxmana - minmana));
-
-    SetCreateMana(mana);
-    SetMaxPower(POWER_MANA, mana);                          // MAX Mana
-    SetPower(POWER_MANA, mana);
-
-    // TODO: set UNIT_FIELD_POWER*, for some creature class case (energy, etc)
-
     SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
-    SetModifierValue(UNIT_MOD_MANA, BASE_VALUE, float(mana));
+
+    // all power types
+    for (int i = POWER_MANA; i <= POWER_RUNIC_POWER; ++i)
+    {
+        uint32 maxValue;
+
+        switch (i)
+        {
+            case POWER_MANA:        maxValue = mana; break;
+            case POWER_RAGE:        maxValue = 0; break;
+            case POWER_FOCUS:       maxValue = POWER_FOCUS_DEFAULT; break;
+            case POWER_ENERGY:      maxValue = POWER_ENERGY_DEFAULT * cinfo->PowerMultiplier; break;
+            case POWER_HAPPINESS:   maxValue = POWER_HAPPINESS_DEFAULT; break;
+            case POWER_RUNE:        maxValue = 0; break;
+            case POWER_RUNIC_POWER: maxValue = 0; break;
+        }
+
+        uint32 value = maxValue;
+
+        // For non regenerating powers set 0
+        if ((i == POWER_ENERGY || i == POWER_MANA) && !IsRegeneratingPower())
+            value = 0;
+
+        // Mana requires an extra field to be set
+        if (i == POWER_MANA)
+            SetCreateMana(value);
+
+        SetMaxPower(Powers(i), maxValue);
+        SetPower(Powers(i), value);
+        SetModifierValue(UnitMods(UNIT_MOD_POWER_START + i), BASE_VALUE, float(value));
+    }
 
     // damage
     float damagemod = _GetDamageMod(rank);
@@ -1224,7 +1323,7 @@ float Creature::_GetDamageMod(int32 Rank)
     }
 }
 
-float Creature::GetSpellDamageMod(int32 Rank)
+float Creature::_GetSpellDamageMod(int32 Rank)
 {
     switch (Rank)                                           // define rates for each elite rank
     {
@@ -2016,13 +2115,13 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
     if (selectFlags & SELECT_FLAG_PLAYER && pTarget->GetTypeId() != TYPEID_PLAYER)
         return false;
 
-    if (selectFlags & SELECT_FLAG_POWER_MANA && pTarget->getPowerType() != POWER_MANA)
+    if (selectFlags & SELECT_FLAG_POWER_MANA && pTarget->GetPowerType() != POWER_MANA)
         return false;
-    else if (selectFlags & SELECT_FLAG_POWER_RAGE && pTarget->getPowerType() != POWER_RAGE)
+    else if (selectFlags & SELECT_FLAG_POWER_RAGE && pTarget->GetPowerType() != POWER_RAGE)
         return false;
-    else if (selectFlags & SELECT_FLAG_POWER_ENERGY && pTarget->getPowerType() != POWER_ENERGY)
+    else if (selectFlags & SELECT_FLAG_POWER_ENERGY && pTarget->GetPowerType() != POWER_ENERGY)
         return false;
-    else if (selectFlags & SELECT_FLAG_POWER_RUNIC && pTarget->getPowerType() != POWER_RUNIC_POWER)
+    else if (selectFlags & SELECT_FLAG_POWER_RUNIC && pTarget->GetPowerType() != POWER_RUNIC_POWER)
         return false;
 
     if (selectFlags & SELECT_FLAG_IN_MELEE_RANGE && !CanReachWithMeleeAttack(pTarget))

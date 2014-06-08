@@ -68,6 +68,7 @@ class VehicleInfo : public TransportBase
         ~VehicleInfo();
 
         VehicleEntry const* GetVehicleEntry() const { return m_vehicleEntry; }
+        VehicleSeatEntry const* GetSeatEntry(uint8 seat) const;
 
         void Board(Unit* passenger, uint8 seat);            // Board a passenger to a vehicle
         void SwitchSeat(Unit* passenger, uint8 seat);       // Used to switch seats of a passenger
@@ -83,7 +84,6 @@ class VehicleInfo : public TransportBase
         void CalculateBoardingPositionOf(float gx, float gy, float gz, float go, float& lx, float& ly, float& lz, float& lo) const;
 
         // Seat information
-        VehicleSeatEntry const* GetSeatEntry(uint8 seat) const;
         bool GetUsableSeatFor(Unit* passenger, uint8& seat) const;
         bool IsSeatAvailableFor(Unit* passenger, uint8 seat) const;
 
@@ -91,8 +91,8 @@ class VehicleInfo : public TransportBase
         uint8 GetEmptySeatsMask() const { return ~GetTakenSeatsMask(); }
         uint8 GetEmptySeats() const { return m_vehicleSeats.size() - m_passengers.size(); }
 
-        bool IsUsableSeatForPlayer(uint32 seatFlags) const;
-        bool IsUsableSeatForCreature(uint32 seatFlags) const { return true; } // special flag?, !IsUsableSeatForPlayer(seatFlags)?
+        bool IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) const;
+        bool IsUsableSeatForCreature(uint32 /*seatFlags*/) const { return true; } // special flag?, !IsUsableSeatForPlayer(seatFlags)?
 
         // Apply/ Remove Controlling of the vehicle
         void ApplySeatMods(Unit* passenger, uint32 seatFlags);
