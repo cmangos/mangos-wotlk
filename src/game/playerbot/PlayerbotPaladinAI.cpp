@@ -611,7 +611,7 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *targe
             }*/
             if (/*pet && ai->CanReceiveSpecificSpell(SPELL_BLESSING, pet) && */!target->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
             {
-                if (target->getPowerType() == POWER_MANA)
+                if (target->GetPowerType() == POWER_MANA)
                     spellId = c->BLESSING_OF_WISDOM;
                 else
                     spellId = c->BLESSING_OF_MIGHT;

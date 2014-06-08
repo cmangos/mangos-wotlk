@@ -2922,7 +2922,7 @@ void PlayerbotAI::InterruptCurrentCastingSpell()
 void PlayerbotAI::Feast()
 {
     // stand up if we are done feasting
-    if (!(m_bot->GetHealth() < m_bot->GetMaxHealth() || (m_bot->getPowerType() == POWER_MANA && m_bot->GetPower(POWER_MANA) < m_bot->GetMaxPower(POWER_MANA))))
+    if (!(m_bot->GetHealth() < m_bot->GetMaxHealth() || (m_bot->GetPowerType() == POWER_MANA && m_bot->GetPower(POWER_MANA) < m_bot->GetMaxPower(POWER_MANA))))
     {
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
         return;
@@ -2932,7 +2932,7 @@ void PlayerbotAI::Feast()
     SetIgnoreUpdateTime(3);
 
     // should we drink another
-    if (m_bot->getPowerType() == POWER_MANA && CurrentTime() > m_TimeDoneDrinking
+    if (m_bot->GetPowerType() == POWER_MANA && CurrentTime() > m_TimeDoneDrinking
         && ((static_cast<float> (m_bot->GetPower(POWER_MANA)) / m_bot->GetMaxPower(POWER_MANA)) < 0.8))
     {
         Item* pItem = FindDrink();
