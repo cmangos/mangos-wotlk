@@ -118,7 +118,7 @@ CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, ui
             Pet* pet = groupMember->GetPet();
             // If pet is available and (any buff OR mana buff and pet is mana)
             if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE)
-                && ( !(type & JOB_MANAONLY) || pet->getPowerType() == POWER_MANA ))
+                && ( !(type & JOB_MANAONLY) || pet->GetPowerType() == POWER_MANA ))
             {
                 //DEBUG_LOG(".Group_Member's pet: %s's %s", groupMember->GetName(), pet->GetName());
                 if(BuffHelper(m_ai, spellId, pet))
@@ -129,7 +129,7 @@ CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, ui
             }
             //DEBUG_LOG(".Group_Member: %s", groupMember->GetName());
             JOB_TYPE job = GetTargetJob(groupMember);
-            if (job & type && (!(type & JOB_MANAONLY) || groupMember->getClass() == CLASS_DRUID || groupMember->getPowerType() == POWER_MANA))
+            if (job & type && (!(type & JOB_MANAONLY) || groupMember->getClass() == CLASS_DRUID || groupMember->GetPowerType() == POWER_MANA))
             {
                 //DEBUG_LOG(".Correct job");
                 if (BuffHelper(m_ai, spellId, groupMember))
@@ -146,7 +146,7 @@ CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, ui
     {
         //DEBUG_LOG(".No group");
         if (m_master && !m_master->IsInDuel()
-            && (!(GetTargetJob(m_master) & JOB_MANAONLY) || m_master->getClass() == CLASS_DRUID || m_master->getPowerType() == POWER_MANA))
+            && (!(GetTargetJob(m_master) & JOB_MANAONLY) || m_master->getClass() == CLASS_DRUID || m_master->GetPowerType() == POWER_MANA))
             if (BuffHelper(m_ai, spellId, m_master))
                 return RETURN_CONTINUE;
         // Do not check job or power type - any buff you have is always useful to self
