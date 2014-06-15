@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_12654_01_mangos_creature_template_power` bit(1) DEFAULT NULL
+  `required_12670_01_mangos_spell_template` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -18432,6 +18432,7 @@ LOCK TABLES `spell_template` WRITE;
 INSERT INTO `spell_template` VALUES
 -- id   attr        attr_ex     attr_ex2    attr_ex3    proc_flags chnce dur  ef0 tarA0 tarB0 rad  aur  misc    miscB, trigger
 (21387, 0x00000140, 0x10000000, 0x00000000, 0x00000000, 0x00000028,  15,  21,   6,   1,    0,   0,  42, 0,       0,    21388, 'Melt-Weapon trigger aura related used by Ragnaros'),
+(21883, 0x00000180, 0x10000000, 0x00000000, 0x00000000, 0x00000000, 101, 225,  76,  22,    0,   0,   0, 178904,  0,    0,     'Summon Healed Celebrian Vine'),
 (23363, 0x00000100, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 101,  21,  76,  18,    0,   0,   0, 179804,  0,    0,     'Summon Drakonid Corpse Trigger'),
 (23770, 0x24800100, 0x10000088, 0x00000001, 0x00100000, 0x00000000, 101, 367,   6, 25,     0,   0,   4, 0,       0,    0,     'Sayge''s timer - Darkmoon Faire'),
 (25192, 0x00000100, 0x00000000, 0x00000004, 0x00000000, 0x00000000, 101,  21,  76,  18,    0,   0,   0, 180619,  0,    0,     'Summon Ossirian Crystal'),
