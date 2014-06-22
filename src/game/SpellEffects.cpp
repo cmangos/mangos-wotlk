@@ -7524,6 +7524,17 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 41131, true);
                     break;
                 }
+                case 42281:                                 // Sprouting
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(42280);
+                    unitTarget->RemoveAurasDueToSpell(42294);
+                    unitTarget->CastSpell(unitTarget, 42285, true);
+                    unitTarget->CastSpell(unitTarget, 42291, true);
+                    return;
+                }
                 case 42578:                                 // Cannon Blast
                 {
                     if (!unitTarget)
