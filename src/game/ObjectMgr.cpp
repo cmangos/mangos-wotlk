@@ -6946,11 +6946,15 @@ void ObjectMgr::LoadNPCSpellClickSpells()
             continue;
         }
 
-        SpellEntry const* spellinfo = sSpellStore.LookupEntry(info.spellId);
-        if (!spellinfo)
+        // spell can be 0 for special or custom cases
+        if (info.spellId)
         {
-            sLog.outErrorDb("Table npc_spellclick_spells references unknown spellid %u. Skipping entry.", info.spellId);
-            continue;
+            SpellEntry const* spellinfo = sSpellStore.LookupEntry(info.spellId);
+            if (!spellinfo)
+            {
+                sLog.outErrorDb("Table npc_spellclick_spells references unknown spellid %u. Skipping entry.", info.spellId);
+                continue;
+            }
         }
 
         if (info.conditionId && !sConditionStorage.LookupEntry<PlayerCondition const*>(info.conditionId))
