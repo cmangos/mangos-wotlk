@@ -127,7 +127,7 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
         return false;
 
     uint32 opcode = 0;
-    if (!stream >> opcode)
+    if (!(stream >> opcode))
     {
         stream.close();
         return false;
