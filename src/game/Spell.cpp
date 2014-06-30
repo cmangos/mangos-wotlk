@@ -7700,9 +7700,13 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 62577:                                 // Blizzard (Ulduar, Thorim)
                 case 62603:                                 // Blizzard (h) (Ulduar, Thorim)
                 case 62797:                                 // Storm Cloud (Ulduar, Hodir)
+                case 62978:                                 // Summon Guardian (Ulduar, Yogg Saron)
                 case 63018:                                 // Searing Light (Ulduar, XT-002)
                 case 63024:                                 // Gravity Bomb (Ulduar, XT-002)
                 case 63545:                                 // Icicle (Ulduar, Hodir)
+                case 63744:                                 // Sara's Anger (Ulduar, Yogg-Saron)
+                case 63745:                                 // Sara's Blessing (Ulduar, Yogg-Saron)
+                case 63747:                                 // Sara's Fervor (Ulduar, Yogg-Saron)
                 case 63795:                                 // Psychosis (Ulduar, Yogg-Saron)
                 case 63820:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Scrap Bots, hits npc 33856
                 case 64218:                                 // Overcharge (VoA, Emalon)

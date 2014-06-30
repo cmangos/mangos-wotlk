@@ -2122,6 +2122,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     if ((spellInfo_1->Id == 62559 && spellInfo_2->Id == 62538) ||
                             (spellInfo_2->Id == 62559 && spellInfo_1->Id == 62538))
                         return false;
+
+                    // Phase 2 Transform and Shadowy Barrier
+                    if ((spellInfo_1->Id == 65157 && spellInfo_2->Id == 64775) ||
+                            (spellInfo_2->Id == 65157 && spellInfo_1->Id == 64775))
+                        return false;
                     break;
                 }
                 case SPELLFAMILY_MAGE:
