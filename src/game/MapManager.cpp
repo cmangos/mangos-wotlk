@@ -102,6 +102,8 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
         MANGOS_ASSERT(obj && obj->GetTypeId() == TYPEID_PLAYER);
         // create DungeonMap object
         m = CreateInstance(id, (Player*)obj);
+        // Load active objects for this map
+        sObjectMgr.LoadActiveEntities(m);
     }
     else
     {

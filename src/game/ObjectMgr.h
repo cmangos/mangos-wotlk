@@ -137,7 +137,7 @@ struct MangosStringLocale
     uint32 Emote;
 };
 
-typedef UNORDERED_MAP<uint32, CreatureData> CreatureDataMap;
+typedef UNORDERED_MAP<uint32 /*guid*/, CreatureData> CreatureDataMap;
 typedef CreatureDataMap::value_type CreatureDataPair;
 
 class FindCreatureData
@@ -756,6 +756,9 @@ class ObjectMgr
         void LoadVendors() { LoadVendors("npc_vendor", false); }
         void LoadTrainerTemplates();
         void LoadTrainers() { LoadTrainers("npc_trainer", false); }
+
+        /// @param _map Map* of the map for which to load active entities. If NULL active entities on continents are loaded
+        void LoadActiveEntities(Map* _map);
 
         void LoadVehicleAccessory();
 
