@@ -1455,6 +1455,9 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    // depend on next event
     sLog.outString();
 
+    sLog.outString("Loading grids for active creatures or transports...");
+    sObjectMgr.LoadActiveEntities(NULL);
+
     // Delete all characters which have been deleted X days before
     Player::DeleteOldCharacters();
 

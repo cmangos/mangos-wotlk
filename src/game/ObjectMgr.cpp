@@ -9076,6 +9076,57 @@ void ObjectMgr::LoadVendorTemplates()
         sLog.outErrorDb("Table `npc_vendor_template` has vendor template %u not used by any vendors ", *vItr);
 }
 
+/* This function is supposed to take care of three things:
+ *  1) Load Transports on Map or on Continents
+ *  2) Load Active Npcs on Map or Continents
+ *  3) Load Everything dependend on CONFIG_BOOL_GRID_FORCE_LOAD_ALL_CREATUERS
+ *
+ *  This function is currently WIP, hence many things are only existing as draft.
+ */
+void ObjectMgr::LoadActiveEntities(Map* _map)
+{
+    // Check - if _map is provided, it is expected that this is no continent
+    if (_map && _map->IsContinent())
+        return;
+
+    // Collect Maps that should be processed
+    std::vector<Map*> processMaps;
+    if (_map)
+        processMaps.push_back(_map);
+    else                                                    // Continent case
+    {
+        uint32 continents[] = {0, 1, 530, 571};
+        for (int i = 0; i < countof(continents); ++i)
+        {
+            _map = sMapMgr.FindMap(continents[i]);
+            if (!_map)
+                _map = sMapMgr.CreateMap(continents[i], NULL);
+            if (_map)
+                processMaps.push_back(_map);
+            else
+                sLog.outError("ObjectMgr::LoadActiveEntities - Unable to create Map %u", continents[i]);
+        }
+    }
+
+    // Load active objects for this map
+    for (uint32 i = 0; i < processMaps.size(); ++i)
+    {
+        Map* m = processMaps[i];
+
+        if (sWorld.getConfig(CONFIG_BOOL_GRID_FORCE_LOAD_ALL_CREATURES))
+        {
+            for (CreatureDataMap::const_iterator itr = mCreatureDataMap.begin(); itr != mCreatureDataMap.end(); ++itr)
+            {
+                if (itr->second.mapid == m->GetId())
+                    m->ForceLoadGrid(itr->second.posX, itr->second.posY);
+            }
+        }
+        //else                                                // Normal case - Load all npcs that are active
+
+        // Load Transports on Map m
+    }
+}
+
 void ObjectMgr::LoadNpcGossips()
 {
     m_mCacheNpcTextIdMap.clear();

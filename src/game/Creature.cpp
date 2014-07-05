@@ -174,6 +174,10 @@ void Creature::AddToWorld()
         GetMap()->GetObjectsStore().insert<Creature>(GetObjectGuid(), (Creature*)this);
 
     Unit::AddToWorld();
+
+    // Make active if required
+    if (sWorld.getConfig(CONFIG_BOOL_GRID_FORCE_LOAD_ALL_CREATURES) /*|| FlagsExtra & ACTIVE*/)
+        SetActiveObjectState(true);
 }
 
 void Creature::RemoveFromWorld()
