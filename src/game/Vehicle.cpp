@@ -506,6 +506,9 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 {
     Unit* pVehicle = (Unit*)m_owner;                        // Vehicles are alawys Unit
 
+    if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
+        passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
         Player* pPlayer = (Player*)passenger;
@@ -556,9 +559,6 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             pVehicle->SetCharmerGuid(passenger->GetObjectGuid());
         }
 
-        if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
-            passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
         ((Creature*)passenger)->AI()->SetCombatMovement(false);
         // Not entirely sure how this must be handled in relation to CONTROL
         // But in any way this at least would require some changes in the movement system most likely
@@ -571,6 +571,9 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
 {
     Unit* pVehicle = (Unit*)m_owner;
+
+    if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
+        passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
@@ -604,9 +607,6 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             passenger->SetCharm(NULL);
             pVehicle->SetCharmerGuid(ObjectGuid());
         }
-
-        if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
-            passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
         // Reinitialize movement
         ((Creature*)passenger)->AI()->SetCombatMovement(true, true);
