@@ -1471,7 +1471,12 @@ void ObjectMgr::LoadCreatures()
         }
 
         if (gameEvent == 0 && GuidPoolId == 0 && EntryPoolId == 0) // if not this is to be managed by GameEvent System or Pool system
+        {
             AddCreatureToGrid(guid, &data);
+
+            if (cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_ACTIVE)
+                m_activeCreatures.insert(ActiveCreatureGuidsOnMap::value_type(data.mapid, guid));
+        }
 
         ++count;
     }
@@ -9081,7 +9086,7 @@ void ObjectMgr::LoadVendorTemplates()
  *  2) Load Active Npcs on Map or Continents
  *  3) Load Everything dependend on CONFIG_BOOL_GRID_FORCE_LOAD_ALL_CREATUERS
  *
- *  This function is currently WIP, hence many things are only existing as draft.
+ *  This function is currently WIP, hence parts exist only as draft.
  */
 void ObjectMgr::LoadActiveEntities(Map* _map)
 {
@@ -9114,7 +9119,15 @@ void ObjectMgr::LoadActiveEntities(Map* _map)
                 _map->ForceLoadGrid(itr->second.posX, itr->second.posY);
         }
     }
-    //else                                                // Normal case - Load all npcs that are active
+    else                                                    // Normal case - Load all npcs that are active
+    {
+        std::pair<ActiveCreatureGuidsOnMap::const_iterator, ActiveCreatureGuidsOnMap::const_iterator> bounds = m_activeCreatures.equal_range(_map->GetId());
+        for (ActiveCreatureGuidsOnMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+        {
+            CreatureData const& data = mCreatureDataMap[itr->second];
+            _map->ForceLoadGrid(data.posX, data.posY);
+        }
+    }
 
     // Load Transports on Map _map
 }
