@@ -542,9 +542,6 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
                     ((Creature*)pVehicle)->SetWalk(true, true);
                 }
             }
-
-            // Reinitialize AI after player control is set
-            ((Creature*)pVehicle)->AIM_Initialize();
         }
 
         if (seatFlags & SEAT_FLAG_CAN_CAST)
@@ -600,9 +597,6 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
 
             // must be called after movement control unapplying
             pPlayer->GetCamera().ResetView();
-
-            // Reinitialize AI after player control is removed
-            ((Creature*)pVehicle)->AIM_Initialize();
         }
 
         if (seatFlags & SEAT_FLAG_CAN_CAST)
