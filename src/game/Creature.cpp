@@ -1940,6 +1940,9 @@ bool Creature::CanInitiateAttack()
     if (m_aggroDelay != 0)
         return false;
 
+    if (!CanAttackByItself())
+        return false;
+
     return true;
 }
 

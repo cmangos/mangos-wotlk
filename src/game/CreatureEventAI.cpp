@@ -1167,7 +1167,7 @@ void CreatureEventAI::EnterCombat(Unit* enemy)
 
 void CreatureEventAI::AttackStart(Unit* who)
 {
-    if (!who)
+    if (!who || !m_creature->CanAttackByItself())
         return;
 
     if (m_creature->Attack(who, m_MeleeEnabled))

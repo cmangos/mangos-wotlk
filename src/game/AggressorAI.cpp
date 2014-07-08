@@ -141,7 +141,7 @@ AggressorAI::IsVisible(Unit* pl) const
 void
 AggressorAI::AttackStart(Unit* u)
 {
-    if (!u)
+    if (!u || !m_creature->CanAttackByItself())
         return;
 
     if (m_creature->Attack(u, true))

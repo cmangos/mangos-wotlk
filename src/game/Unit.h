@@ -1346,6 +1346,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         AttackerSet const& getAttackers() const { return m_attackers; }
 
         bool isAttackingPlayer() const;                     //< Returns if this unit is attacking a player (or this unit's minions/pets are attacking a player)
+        bool CanAttackByItself() const;                     //< Used to check if a vehicle is allowed attack other units by itself
 
         Unit* getVictim() const { return m_attacking; }     //< Returns the victim that this unit is currently attacking
         void CombatStop(bool includingCast = false);        //< Stop this unit from combat, if includingCast==true, also interrupt casting
