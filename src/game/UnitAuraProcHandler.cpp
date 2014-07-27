@@ -2944,6 +2944,11 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 // case 59288: break;                       // Infra-Green Shield
                 // case 59532: break;                       // Abandon Passengers on Poly
                 // case 59735: break:                       // Woe Strike
+                case 64148:                                 // Diminsh Power
+                {
+                    trigger_spell_id = 64145;
+                    break;
+                }
                 case 64415:                                 // // Val'anyr Hammer of Ancient Kings - Equip Effect
                 {
                     // for DOT procs

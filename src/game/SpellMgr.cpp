@@ -2127,6 +2127,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     if ((spellInfo_1->Id == 65157 && spellInfo_2->Id == 64775) ||
                             (spellInfo_2->Id == 65157 && spellInfo_1->Id == 64775))
                         return false;
+
+                    // Empowered (dummy) and Empowered
+                    if ((spellInfo_1->Id == 64161 && spellInfo_2->Id == 65294) ||
+                            (spellInfo_2->Id == 64161 && spellInfo_1->Id == 65294))
+                        return false;
                     break;
                 }
                 case SPELLFAMILY_MAGE:

@@ -2321,6 +2321,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             ((Player*)target)->removeSpell(63680);
                         return;
+                    case 64132:                             // Constrictor Tentacle
+                        if (target->GetTypeId() == TYPEID_PLAYER)
+                            target->CastSpell(target, 64133, true, NULL, this);
+                        return;
                     case 68912:                             // Wailing Souls
                         if (Unit* caster = GetCaster())
                         {
@@ -8946,6 +8950,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
         case 58914:                                         // Kill Command (pet part)
         case 62519:                                         // Attuned to Nature
         case 64455:                                         // Feral Essence
+        case 65294:                                         // Empowered
         case 71564:                                         // Deadly Precision
         case 74396:                                         // Fingers of Frost
             m_stackAmount = m_spellProto->StackAmount;
