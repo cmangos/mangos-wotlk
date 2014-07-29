@@ -2804,6 +2804,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 64540, true);
                     return;
                 }
+                case 64555:                                 // Insane Periodic
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(63050) || unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 64464, true);
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
                 case 64673:                                 // Feral Rush (h)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -8802,6 +8811,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         unitTarget->CastSpell(unitTarget, 65347, true);
                     return;
                 }
+                case 63122:                                 // Clear Insane
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    return;
+                }
                 case 63633:                                 // Summon Rubble
                 {
                     if (!unitTarget)
@@ -8827,6 +8844,33 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 63036, true);
                     return;
                 }
+                case 63795:                                 // Psychosis
+                case 65301:                                 // Psychosis (h)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
+                        return;
+
+                    unitTarget->RemoveAuraHolderFromStack(63050, 12);
+                    return;
+                }
+                case 63803:                                 // Brain Link
+                case 64164:                                 // Lunatic Gaze (Yogg)
+                case 64168:                                 // Lunatic Gaze (Skull)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint8 removedAmount = 0;
+                    switch (m_spellInfo->Id)
+                    {
+                        case 63803: removedAmount = 2; break;
+                        case 64164: removedAmount = 4; break;
+                        case 64168: removedAmount = 2; break;
+                    }
+
+                    unitTarget->RemoveAuraHolderFromStack(63050, removedAmount);
+                    return;
+                }
                 case 63993:                                 // Cancel Illusion Room Aura
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -8834,6 +8878,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     unitTarget->CastSpell(unitTarget, 63992, true);
                     unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    return;
+                }
+                case 64059:                                 // Induce Madness
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || !unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(63050);
                     return;
                 }
                 case 64069:                                 // Match Health (Rank 1)

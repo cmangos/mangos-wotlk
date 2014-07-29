@@ -691,6 +691,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case 54530:                                 // Opening
                 case 56099:                                 // Throw Ice
                 case 62105:                                 // To'kini's Blowgun
+                case 63745:                                 // Sara's Blessing
+                case 63747:                                 // Sara's Fervor
                 case 64402:                                 // Rocket Strike
                     return true;
                 default:
