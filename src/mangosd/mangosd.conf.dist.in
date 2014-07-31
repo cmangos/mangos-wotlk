@@ -1007,6 +1007,10 @@ TalentsInspecting = 1
 #        in game from other side
 #        Default: 100
 #
+#    UseNewStats
+#        Default: 0 (Disabled)
+#                 1 (Enabled)
+#
 ###################################################################################################################
 
 ThreatRadius = 100
@@ -1044,7 +1048,7 @@ ListenRange.TextEmote = 40
 ListenRange.Yell = 300
 GuidReserveSize.Creature = 100
 GuidReserveSize.GameObject = 100
-
+UseNewStats = 0
 
 ###################################################################################################################
 # CHAT SETTINGS
