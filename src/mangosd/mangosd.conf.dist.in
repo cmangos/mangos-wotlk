@@ -759,8 +759,8 @@ LogColors = ""
 #
 #    ShowProgressBars
 #        Control show progress bars for load steps at server startup
-#        Default: 1 (true)
-#                 0 (false)
+#        Default: 0 (true)
+#                 1 (false)
 #
 #    WaitAtStartupError
 #        After startup error report wait <Enter> or some time before continue (and possible close console window)
@@ -850,9 +850,9 @@ PetUnsummonAtMount = 1
 ClientCacheVersion = 0
 Event.Announce = 0
 BeepAtStart = 1
-ShowProgressBars = 1
+ShowProgressBars = 0
 WaitAtStartupError = 0
-Motd = "Welcome to the Massive Network Game Object Server."
+Motd = "Welcome to the Continued Massive Network Game Object Server."
 Raid.MinLevel = 10
 PlayerCommands = 1
 
