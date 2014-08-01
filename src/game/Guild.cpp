@@ -2227,10 +2227,9 @@ void Guild::MoveFromBankToChar(Player* pl, uint8 BankTab, uint8 BankTabSlot, uin
             {
                 pl->MoveItemFromInventory(PlayerBag, PlayerSlot, true);
                 pItemChar->DeleteFromInventoryDB();
+                StoreItem(BankTab, gDest, pItemChar);
             }
 
-            if (pItemChar)
-                StoreItem(BankTab, gDest, pItemChar);
             pl->MoveItemToInventory(iDest, pItemBank, true);
             pl->SaveInventoryAndGoldToDB();
 
