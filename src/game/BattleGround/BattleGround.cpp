@@ -961,6 +961,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
             plr->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
 
         plr->RemoveAurasDueToSpell(isArena() ? SPELL_ARENA_DAMPENING : SPELL_BATTLEGROUND_DAMPENING);
+        plr->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
         if (!plr->isAlive())                                // resurrect on exit
         {
