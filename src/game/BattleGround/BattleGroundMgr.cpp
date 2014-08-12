@@ -1645,14 +1645,17 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         uint32 MaxPlayersPerTeam = fields[2].GetUInt32();
 
         // check values from DB
-        if (MaxPlayersPerTeam == 0 || MinPlayersPerTeam == 0)
+        if (MaxPlayersPerTeam == 0)
         {
-            sLog.outErrorDb("Table `battleground_template` for id %u have wrong min/max players per team settings. BG not created.", bgTypeID);
+            sLog.outErrorDb("Table `battleground_template` for id %u doesn't allow any player per team settings. BG not created.", bgTypeID);
             continue;
         }
 
         if (MinPlayersPerTeam > MaxPlayersPerTeam)
+        {
             MinPlayersPerTeam = MaxPlayersPerTeam;
+            sLog.outErrorDb("Table `battleground_template` for id %u has min players > max players per team settings. Min players will use same value as max players.", bgTypeID);
+        }
 
         float AStartLoc[4];
         float HStartLoc[4];
