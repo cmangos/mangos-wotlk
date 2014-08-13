@@ -578,8 +578,8 @@ void CalendarMgr::LoadCalendarsFromDB()
     {
         BarGoLink bar(1);
         bar.step();
-        sLog.outString();
         sLog.outString(">> calendar_events table is empty!");
+        sLog.outString();
     }
     else
     {
@@ -607,8 +607,8 @@ void CalendarMgr::LoadCalendarsFromDB()
         }
         while (eventsQuery->NextRow());
 
-        sLog.outString();
         sLog.outString(">> Loaded %u events!", uint32(eventsQuery->GetRowCount()));
+        sLog.outString();
         delete eventsQuery;
     }
 
@@ -619,7 +619,6 @@ void CalendarMgr::LoadCalendarsFromDB()
     {
         BarGoLink bar(1);
         bar.step();
-        sLog.outString();
 
         if (m_MaxEventId)                                   // An Event was loaded before
         {
@@ -631,6 +630,7 @@ void CalendarMgr::LoadCalendarsFromDB()
         }
         else
             sLog.outString(">> calendar_invite table is empty!");
+        sLog.outString();
     }
     else
     {
@@ -667,7 +667,7 @@ void CalendarMgr::LoadCalendarsFromDB()
                 m_MaxInviteId = std::max(inviteId, m_MaxInviteId);
             }
             while (invitesQuery->NextRow());
-            sLog.outString();
+
             sLog.outString(">> Loaded "UI64FMTD" invites! %s", totalInvites, (deletedInvites != 0) ? "(deleted some invites without corresponding event!)" : "");
         }
         else

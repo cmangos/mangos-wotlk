@@ -134,8 +134,6 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
     if (IsScriptScheduled())                                // function don't must be called in time scripts use.
         return;
 
-    sLog.outString("%s :", tablename);
-
     scripts.first = tablename;
     scripts.second.clear();                                 // need for reload support
 
@@ -148,9 +146,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
     {
         BarGoLink bar(1);
         bar.step();
-
+        sLog.outString(">> Loaded %u script definitions from table %s", count, tablename);
         sLog.outString();
-        sLog.outString(">> Loaded %u script definitions", count);
         return;
     }
 
@@ -708,8 +705,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
 
     delete result;
 
+    sLog.outString(">> Loaded %u script definitions from table %s", count, tablename);
     sLog.outString();
-    sLog.outString(">> Loaded %u script definitions", count);
 }
 
 void ScriptMgr::LoadGameObjectScripts()
@@ -1839,9 +1836,8 @@ void ScriptMgr::LoadAreaTriggerScripts()
     {
         BarGoLink bar(1);
         bar.step();
-
-        sLog.outString();
         sLog.outString(">> Loaded %u scripted areatrigger", count);
+        sLog.outString();
         return;
     }
 
@@ -1869,8 +1865,9 @@ void ScriptMgr::LoadAreaTriggerScripts()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u areatrigger scripts", count);
+    sLog.outString();
+
 }
 
 void ScriptMgr::LoadEventIdScripts()
@@ -1884,9 +1881,8 @@ void ScriptMgr::LoadEventIdScripts()
     {
         BarGoLink bar(1);
         bar.step();
-
-        sLog.outString();
         sLog.outString(">> Loaded %u scripted event id", count);
+        sLog.outString();
         return;
     }
 
@@ -1916,8 +1912,8 @@ void ScriptMgr::LoadEventIdScripts()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u scripted event id", count);
+    sLog.outString();
 }
 
 void ScriptMgr::LoadScriptNames()
@@ -1942,8 +1938,8 @@ void ScriptMgr::LoadScriptNames()
     {
         BarGoLink bar(1);
         bar.step();
-        sLog.outString();
         sLog.outErrorDb(">> Loaded empty set of Script Names!");
+        sLog.outString();
         return;
     }
 
@@ -1960,8 +1956,9 @@ void ScriptMgr::LoadScriptNames()
     delete result;
 
     std::sort(m_scriptNames.begin(), m_scriptNames.end());
-    sLog.outString();
+
     sLog.outString(">> Loaded %d Script Names", count);
+    sLog.outString();
 }
 
 uint32 ScriptMgr::GetScriptId(const char* name) const

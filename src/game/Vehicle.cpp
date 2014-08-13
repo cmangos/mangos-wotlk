@@ -51,9 +51,6 @@ void ObjectMgr::LoadVehicleAccessory()
 {
     sVehicleAccessoryStorage.Load();
 
-    sLog.outString(">> Loaded %u vehicle accessories", sVehicleAccessoryStorage.GetRecordCount());
-    sLog.outString();
-
     // Check content
     for (SQLMultiStorage::SQLSIterator<VehicleAccessory> itr = sVehicleAccessoryStorage.getDataBegin<VehicleAccessory>(); itr < sVehicleAccessoryStorage.getDataEnd<VehicleAccessory>(); ++itr)
     {
@@ -76,6 +73,9 @@ void ObjectMgr::LoadVehicleAccessory()
             continue;
         }
     }
+
+    sLog.outString(">> Loaded %u vehicle accessories", sVehicleAccessoryStorage.GetRecordCount());
+    sLog.outString();
 }
 
 /**
@@ -497,8 +497,8 @@ bool VehicleInfo::IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) con
     return seatFlags & SEAT_FLAG_CAN_EXIT ||
            seatFlags & SEAT_FLAG_UNCONTROLLED ||
            seatFlagsB &
-               (SEAT_FLAG_B_USABLE_FORCED   | SEAT_FLAG_B_USABLE_FORCED_2 |
-                SEAT_FLAG_B_USABLE_FORCED_3 | SEAT_FLAG_B_USABLE_FORCED_4);
+           (SEAT_FLAG_B_USABLE_FORCED   | SEAT_FLAG_B_USABLE_FORCED_2 |
+            SEAT_FLAG_B_USABLE_FORCED_3 | SEAT_FLAG_B_USABLE_FORCED_4);
 }
 
 /// Add control and such modifiers to a passenger if required

@@ -793,8 +793,9 @@ void MapPersistentStateManager::CleanupInstances()
     CharacterDatabase.CommitTransaction();
 
     bar.step();
-    sLog.outString();
+
     sLog.outString(">> Instances cleaned up");
+    sLog.outString();
 }
 
 void MapPersistentStateManager::PackInstances()
@@ -883,7 +884,7 @@ void MapPersistentStateManager::_ResetInstance(uint32 mapid, uint32 instanceId)
 
 struct MapPersistantStateResetWorker
 {
-    MapPersistantStateResetWorker(){};
+    MapPersistantStateResetWorker() {};
     void operator()(Map* map)
     {
         ((DungeonMap*)map)->TeleportAllPlayersTo(TELEPORT_LOCATION_HOMEBIND);
@@ -926,7 +927,7 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
         for (PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end(); ++itr)
             if (itr->second->GetMapId() == mapid && itr->second->GetDifficulty() == difficulty)
                 ((DungeonPersistentState*)(itr->second))->UnbindThisState();
-        
+
         // reset maps, teleport player automaticaly to their homebinds and unload maps
         MapPersistantStateResetWorker worker;
         sMapMgr.DoForAllMapsWithMapId(mapid, worker);
@@ -947,7 +948,7 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
 
     // note: this isn't fast but it's meant to be executed very rarely
     MapPersistantStateWarnWorker worker(timeLeft);
-    sMapMgr.DoForAllMapsWithMapId(mapid, worker); 
+    sMapMgr.DoForAllMapsWithMapId(mapid, worker);
 }
 
 void MapPersistentStateManager::GetStatistics(uint32& numStates, uint32& numBoundPlayers, uint32& numBoundGroups)
@@ -997,11 +998,9 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outString(">> Loaded 0 creature respawn time.");
+        sLog.outString();
         return;
     }
 
@@ -1071,11 +1070,9 @@ void MapPersistentStateManager::LoadGameobjectRespawnTimes()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outString(">> Loaded 0 gameobject respawn time.");
+        sLog.outString();
         return;
     }
 
