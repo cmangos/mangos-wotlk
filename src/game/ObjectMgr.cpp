@@ -635,25 +635,23 @@ void ObjectMgr::LoadCreatureTemplates()
             const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
         }
 
-        if (cInfo->Expansion >= 0 && sWorld.getConfig(CONFIG_BOOL_USE_NEW_STATS))
+        if (!cInfo->UnitClass || (((1 << (cInfo->UnitClass - 1)) & CLASSMASK_ALL_CREATURES) == 0))
         {
-            // use below code for 0-checks for unit_class
-            if (!cInfo->UnitClass || (((1 << (cInfo->UnitClass - 1)) & CLASSMASK_ALL_CREATURES) == 0))
+            ERROR_DB_STRICT_LOG("Creature (Entry: %u) does not have proper `UnitClass` (%u) in creature_template", cInfo->Entry, cInfo->UnitClass);
+            // Mark NPC as having improper data by his expansion
+            const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
+        }
+
+        if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK) && cInfo->Expansion >= 0)  // TODO - Remove the DB_STRICTED_CHECK after a while
+        {
+            // check if ClassLevel data are available for all possible level of that creature
+            for (uint32 level = cInfo->MinLevel; level <= cInfo->MaxLevel; ++level)
             {
-                sLog.outErrorDb("Creature (Entry: %u) does not have proper `UnitClass(%u)` in creature_template", cInfo->Entry, cInfo->UnitClass);
-                const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
-            }
-            else
-            {
-                // check if data are available for all possible level of that creature
-                for (uint32 level = cInfo->MinLevel; level <= cInfo->MaxLevel; ++level)
+                if (!GetCreatureClassLvlStats(level, cInfo->UnitClass, cInfo->Expansion))
                 {
-                    if (!GetCreatureClassLvlStats(level, cInfo->UnitClass, cInfo->Expansion))
-                    {
-                        sLog.outErrorDb("Creature (Entry: %u), level(%u) has no data in `creature_template_classlevelstats`", cInfo->Entry, level);
-                        const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
-                        break;
-                    }
+                    sLog.outErrorDb("Creature (Entry: %u), level(%u) has no data in `creature_template_classlevelstats`", cInfo->Entry, level);
+                    // Deactivate using ClassLevelStats for this NPC
+                    const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
                 }
             }
         }
@@ -884,13 +882,6 @@ void ObjectMgr::LoadCreatureClassLvlStats()
 {
     // initialize data array
     memset(&m_creatureClassLvlStats, 0, sizeof(m_creatureClassLvlStats));
-
-    if (!sWorld.getConfig(CONFIG_BOOL_USE_NEW_STATS))
-    {
-        sLog.outString("New Stat system is currently disabled!");
-        sLog.outString();
-        return;
-    }
 
     std::string queryStr = "SELECT Class, Level, BaseMana, BaseMeleeAttackPower, BaseRangedAttackPower, BaseArmor";
 

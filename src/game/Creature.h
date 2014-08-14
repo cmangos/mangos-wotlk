@@ -95,7 +95,7 @@ struct CreatureInfo
     float   SpeedRun;
     uint32  UnitClass;                                      // enum Classes. Note only 4 classes are known for creatures.
     uint32  Rank;
-    int32   Expansion;                                      // creature expansion, important for stats
+    int32   Expansion;                                      // creature expansion, important for stats, CAN BE -1 as marker for some invalid cases.
     float   HealthMultiplier;
     float   PowerMultiplier;
     float   DamageMultiplier;
