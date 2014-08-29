@@ -42,7 +42,7 @@ ConfVersion=2013012201
 #	CharacterDatabaseConnections
 #		 Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
 #		 Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
-#		 So formula to find out how many connections will be established: X = ¹_connections + 1
+#		 So formula to find out how many connections will be established: X = ï¿½_connections + 1
 #		 Default: 1 connection for SELECT statements
 #
 #    MaxPingTime
@@ -595,7 +595,7 @@ LogColors = ""
 #        Default: 20
 #
 #   BirthdayTime
-#        Set to birthday (date in unix time), By default 28th August 2005, when MaNGOS got it’s name
+#        Set to birthday (date in unix time), By default 28th August 2005, when MaNGOS got itï¿½s name
 #        Default: 1125180000
 #
 #   RabbitDay
@@ -1478,6 +1478,10 @@ Death.Ghost.RunSpeed.Battleground = 1.0
 #        Enable queue announcer posting to chat at BG start
 #        Default: 0 (disable)
 #                 1 (enable)
+#    Battleground.StoreStatistics.Enable
+#        Store Battleground scores in the database.
+#        Default: 0 - (Disabled)
+#                 1 - (Enabled)
 #
 #    Battleground.InvitationType
 #        Set Battleground invitation type
@@ -1499,6 +1503,7 @@ Death.Ghost.RunSpeed.Battleground = 1.0
 Battleground.CastDeserter = 1
 Battleground.QueueAnnouncer.Join = 0
 Battleground.QueueAnnouncer.Start = 0
+Battleground.StoreStatistics.Enable = 0
 Battleground.InvitationType = 0
 BattleGround.PrematureFinishTimer = 300000
 BattleGround.PremadeGroupWaitForMatch = 1800000
