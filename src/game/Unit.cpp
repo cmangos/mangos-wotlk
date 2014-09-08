@@ -5530,9 +5530,12 @@ void Unit::SetPowerType(Powers new_powertype)
                 break;
         }
 
-        // set power
-        SetMaxPower(new_powertype, maxValue);
-        SetPower(new_powertype, curValue);
+        // set power (except for mana)
+        if (new_powertype != POWER_MANA)
+        {
+            SetMaxPower(new_powertype, maxValue);
+            SetPower(new_powertype, curValue);
+        }
 
         // send power type update to client
         WorldPacket data(SMSG_POWER_UPDATE);
