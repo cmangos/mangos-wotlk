@@ -10863,6 +10863,24 @@ void Unit::SetFFAPvP(bool state)
     CallForAllControlledUnits(SetFFAPvPHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
+void Unit::RestoreOriginalFaction()
+{
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->setFactionForRace(getRace());
+    else
+    {
+        Creature* creature = (Creature*)this;
+
+        if (creature->IsPet() || creature->IsTotem())
+        {
+            if (Unit* owner = GetOwner())
+                setFaction(owner->getFaction());
+        }
+        else
+            setFaction(creature->GetCreatureInfo()->FactionAlliance);
+    }
+}
+
 void Unit::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpeed)
 {
     float angle = this == target ? GetOrientation() + M_PI_F : target->GetAngle(this);

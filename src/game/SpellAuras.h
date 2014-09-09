@@ -410,6 +410,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraSetVehicleId(bool apply, bool Real);
         void HandleMirrorName(bool apply, bool Real);
         void HandlePreventResurrection(bool apply, bool Real);
+        void HandleFactionOverride(bool apply, bool Real);
 
         virtual ~Aura();
 
