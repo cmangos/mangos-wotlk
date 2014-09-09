@@ -1171,7 +1171,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     // Remove only single aura from stack and remove holder if its last stack
                     RemoveAuraHolderFromStack(74396);
                     return SPELL_AURA_PROC_OK;
-                    break;
                 }
             }
             break;
