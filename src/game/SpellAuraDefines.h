@@ -418,7 +418,7 @@ enum AuraType
     SPELL_AURA_276 = 276,                                   // Only "Test Mod Damage % Mechanic" spell, possible mod damage done
     SPELL_AURA_MOD_MAX_AFFECTED_TARGETS = 277,
     SPELL_AURA_MOD_DISARM_RANGED = 278,
-    SPELL_AURA_279 = 279,
+    SPELL_AURA_MIRROR_NAME = 279,
     SPELL_AURA_MOD_TARGET_ARMOR_PCT = 280,
     SPELL_AURA_MOD_HONOR_GAIN = 281,
     SPELL_AURA_MOD_BASE_HEALTH_PCT = 282,
