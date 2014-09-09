@@ -5751,6 +5751,21 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 break;
             }
+            case SPELL_EFFECT_RESURRECT:
+            case SPELL_EFFECT_RESURRECT_NEW:
+            {
+                if (m_targets.getUnitTarget()->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+                    return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
+
+                break;
+            }
+            case SPELL_EFFECT_SELF_RESURRECT:
+            {
+                if (m_caster->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+                    return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
+
+                break;
+            }
             case SPELL_EFFECT_LEAP:
             case SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER:
             {
@@ -7948,6 +7963,8 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 73143:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 25N)
                 case 73144:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 10H)
                 case 73145:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 25H)
+                case 72350:                                 // Fury of Frostmourne
+                case 72351:                                 // Fury of Frostmourne
                     radius = DEFAULT_VISIBILITY_INSTANCE;
                     break;
                 default:
