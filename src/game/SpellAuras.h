@@ -411,6 +411,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleMirrorName(bool apply, bool Real);
         void HandlePreventResurrection(bool apply, bool Real);
         void HandleFactionOverride(bool apply, bool Real);
+        void HandleTriggerLinkedAura(bool apply, bool Real);
 
         virtual ~Aura();
 
