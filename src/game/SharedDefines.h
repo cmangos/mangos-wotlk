@@ -758,7 +758,7 @@ enum SpellEffects
     SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE  = 142,
     SPELL_EFFECT_APPLY_AREA_AURA_OWNER     = 143,
     SPELL_EFFECT_KNOCKBACK_FROM_POSITION   = 144,
-    SPELL_EFFECT_145                       = 145,
+    SPELL_EFFECT_GRAVITY_PULL              = 145,
     SPELL_EFFECT_ACTIVATE_RUNE             = 146,
     SPELL_EFFECT_QUEST_FAIL                = 147,
     SPELL_EFFECT_148                       = 148,
