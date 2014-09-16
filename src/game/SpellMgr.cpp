@@ -703,6 +703,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             // some explicitly required script effect sets
             switch (spellproto->Id)
             {
+                case 42436:                                 // Drink!
                 case 46650:                                 // Open Brutallus Back Door
                 case 62488:                                 // Activate Construct
                 case 64503:                                 // Water
