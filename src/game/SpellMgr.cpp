@@ -2132,6 +2132,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     if ((spellInfo_1->Id == 64161 && spellInfo_2->Id == 65294) ||
                             (spellInfo_2->Id == 64161 && spellInfo_1->Id == 65294))
                         return false;
+
+                    // Spectral Realm (reaction) and Spectral Realm (invisibility)
+                    if ((spellInfo_1->Id == 44852 && spellInfo_2->Id == 46021) ||
+                            (spellInfo_2->Id == 44852 && spellInfo_1->Id == 46021))
+                        return false;
                     break;
                 }
                 case SPELLFAMILY_MAGE:

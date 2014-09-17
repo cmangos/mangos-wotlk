@@ -2265,6 +2265,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                         return;
                     }
+                    case 46637:                             // Break Ice
+                        target->CastSpell(target, 46638, true, NULL, this);
+                        return;
                     case 46699:                             // Requires No Ammo
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             // not use ammo and not allow use
@@ -2761,7 +2764,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             case 46637:                                     // Break Ice
             {
-                target->CastSpell(target, 46638, true);
+                target->CastSpell(target, 47030, true, NULL, this);
                 return;
             }
             case 48385:                                     // Create Spirit Fount Beam
