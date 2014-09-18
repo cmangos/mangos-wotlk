@@ -1029,7 +1029,7 @@ class SpellMgr
             return 0;
         }
 
-        uint8 IsHighRankOfSpell(uint32 spell1, uint32 spell2) const
+        bool IsHighRankOfSpell(uint32 spell1, uint32 spell2) const
         {
             SpellChainMap::const_iterator itr = mSpellChains.find(spell1);
 

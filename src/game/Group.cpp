@@ -479,7 +479,7 @@ void Group::Disband(bool hideDestroy)
     }
 
     m_leaderGuid.Clear();
-    m_leaderName = "";
+    m_leaderName.clear();
 }
 
 /*********************************************************/

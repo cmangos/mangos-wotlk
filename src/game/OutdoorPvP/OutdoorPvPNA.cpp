@@ -534,7 +534,8 @@ void OutdoorPvPNA::RespawnSoldier()
         if (Player* player = sObjectMgr.GetPlayer(itr->first))
         {
             // summon a soldier replacement in the order they were set in the deque. delete the element after summon
-            player->SummonCreature(m_zoneOwner == ALLIANCE ? NPC_ALLIANCE_HANAANI_GUARD : NPC_HORDE_HALAANI_GUARD, m_deadSoldiers.front().x, m_deadSoldiers.front().y, m_deadSoldiers.front().z, m_deadSoldiers.front().o, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            HalaaSoldiersSpawns location = m_deadSoldiers.front();
+            player->SummonCreature(m_zoneOwner == ALLIANCE ? NPC_ALLIANCE_HANAANI_GUARD : NPC_HORDE_HALAANI_GUARD, location.x, location.y, location.z, location.o, TEMPSUMMON_DEAD_DESPAWN, 0, true);
             m_deadSoldiers.pop();
             break;
         }

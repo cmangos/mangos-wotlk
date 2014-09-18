@@ -93,7 +93,7 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32
     uint32 lowguid      = fields[0].GetUInt32();
     std::string name = fields[1].GetCppString();
     uint8 pRace = 0, pGender = 0, pClass = 0;
-    if (name == "")
+    if (name.empty())
         name         = session->GetMangosString(LANG_NON_EXIST_CHARACTER);
     else
     {
@@ -112,7 +112,7 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32
     data << uint8(pClass);                                  // class
 
     // if the first declined name field (5) is empty, the rest must be too
-    if (sWorld.getConfig(CONFIG_BOOL_DECLINED_NAMES_USED) && fields[5].GetCppString() != "")
+    if (sWorld.getConfig(CONFIG_BOOL_DECLINED_NAMES_USED) && !fields[5].GetCppString().empty())
     {
         data << uint8(1);                                   // is declined
         for (int i = 5; i < MAX_DECLINED_NAME_CASES + 5; ++i)
