@@ -2277,6 +2277,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->CastSpell(target, 47189, true, NULL, this);
                         // allow script to process further (text)
                         break;
+                    case 47563:                             // Freezing Cloud
+                        target->CastSpell(target, 47574, true, NULL, this);
+                        return;
+                    case 47593:                             // Freezing Cloud
+                        target->CastSpell(target, 47594, true, NULL, this);
+                        return;
                     case 48025:                             // Headless Horseman's Mount
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 51621, 48024, 51617, 48023, 0);
                         return;
