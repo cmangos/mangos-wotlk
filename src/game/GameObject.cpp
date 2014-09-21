@@ -121,7 +121,7 @@ void GameObject::RemoveFromWorld()
     Object::RemoveFromWorld();
 }
 
-bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, QuaternionData rotation, uint8 animprogress, GOState go_state)
+bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, const QuaternionData &rotation, uint8 animprogress, GOState go_state)
 {
     MANGOS_ASSERT(map);
     Relocate(x, y, z, ang);
@@ -1687,7 +1687,7 @@ void GameObject::SetWorldRotation(float qx, float qy, float qz, float qw)
     m_worldRotation.w = rotation.w;
 }
 
-void GameObject::SetTransportPathRotation(QuaternionData rotation)
+void GameObject::SetTransportPathRotation(const QuaternionData &rotation)
 {
     SetFloatValue(GAMEOBJECT_PARENTROTATION + 0, rotation.x);
     SetFloatValue(GAMEOBJECT_PARENTROTATION + 1, rotation.y);

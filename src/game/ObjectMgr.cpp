@@ -7270,7 +7270,7 @@ static LanguageType GetRealmLanguageType(bool create)
     }
 }
 
-bool isValidString(std::wstring wstr, uint32 strictMask, bool numericOrSpace, bool create = false)
+bool isValidString(const std::wstring &wstr, uint32 strictMask, bool numericOrSpace, bool create = false)
 {
     if (strictMask == 0)                                    // any language, ignore realm
     {
@@ -7725,7 +7725,7 @@ bool ObjectMgr::IsPlayerMeetToCondition(uint16 conditionId, Player const* pPlaye
     return false;
 }
 
-bool ObjectMgr::CheckDeclinedNames(std::wstring mainpart, DeclinedName const& names)
+bool ObjectMgr::CheckDeclinedNames(const std::wstring &mainpart, DeclinedName const& names)
 {
     for (int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
     {

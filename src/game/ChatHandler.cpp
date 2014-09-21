@@ -623,14 +623,14 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data)
     player->GetSession()->SendPacket(&data);
 }
 
-void WorldSession::SendPlayerNotFoundNotice(std::string name)
+void WorldSession::SendPlayerNotFoundNotice(const std::string &name)
 {
     WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, name.size() + 1);
     data << name;
     SendPacket(&data);
 }
 
-void WorldSession::SendPlayerAmbiguousNotice(std::string name)
+void WorldSession::SendPlayerAmbiguousNotice(const std::string &name)
 {
     WorldPacket data(SMSG_CHAT_PLAYER_AMBIGUOUS, name.size() + 1);
     data << name;

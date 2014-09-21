@@ -225,7 +225,7 @@ class MailDraft
     public:                                                 // modifiers
 
         // this two modifiers expected to be applied in normal case to blank draft and exclusively, it will work and with mixed cases but this will be not normal way use.
-        MailDraft& SetSubjectAndBody(std::string subject, std::string body) { m_subject = subject; m_body = body; return *this; }
+        MailDraft& SetSubjectAndBody(const std::string &subject, const std::string &body) { m_subject = subject; m_body = body; return *this; }
         MailDraft& SetMailTemplate(uint16 mailTemplateId, bool need_items = true) { m_mailTemplateId = mailTemplateId, m_mailTemplateItemsNeed = need_items; return *this; }
 
         MailDraft& AddItem(Item* item);

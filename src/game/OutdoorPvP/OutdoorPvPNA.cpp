@@ -82,11 +82,11 @@ void OutdoorPvPNA::HandlePlayerLeaveZone(Player* player, bool isMainZone)
     OutdoorPvP::HandlePlayerLeaveZone(player, isMainZone);
 }
 
-void OutdoorPvPNA::HandleObjectiveComplete(uint32 eventId, std::list<Player*> players, Team team)
+void OutdoorPvPNA::HandleObjectiveComplete(uint32 eventId, const std::list<Player*> &players, Team team)
 {
     if (eventId == EVENT_HALAA_BANNER_WIN_ALLIANCE || eventId == EVENT_HALAA_BANNER_WIN_HORDE)
     {
-        for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
+        for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
         {
             if ((*itr) && (*itr)->GetTeam() == team)
                 (*itr)->KilledMonsterCredit(NPC_HALAA_COMBATANT);
@@ -534,7 +534,7 @@ void OutdoorPvPNA::RespawnSoldier()
         if (Player* player = sObjectMgr.GetPlayer(itr->first))
         {
             // summon a soldier replacement in the order they were set in the deque. delete the element after summon
-            HalaaSoldiersSpawns location = m_deadSoldiers.front();
+            const HalaaSoldiersSpawns &location = m_deadSoldiers.front();
             player->SummonCreature(m_zoneOwner == ALLIANCE ? NPC_ALLIANCE_HANAANI_GUARD : NPC_HORDE_HALAANI_GUARD, location.x, location.y, location.z, location.o, TEMPSUMMON_DEAD_DESPAWN, 0, true);
             m_deadSoldiers.pop();
             break;

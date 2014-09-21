@@ -354,7 +354,7 @@ void CalendarMgr::RemoveEvent(uint64 eventId, Player* remover)
 // Add invit to an event and inform client
 // some check done before so it may fail and raison is sent to client
 // return value is the CalendarInvite pointer on success
-CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& senderGuid, ObjectGuid const& inviteeGuid, CalendarInviteStatus status, CalendarModerationRank rank, std::string text, time_t statusTime)
+CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& senderGuid, ObjectGuid const& inviteeGuid, CalendarInviteStatus status, CalendarModerationRank rank, const std::string &text, time_t statusTime)
 {
     Player* sender = sObjectMgr.GetPlayer(senderGuid);
     if (!event || !sender)
