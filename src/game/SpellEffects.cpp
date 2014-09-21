@@ -996,6 +996,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, spell_list[urand(0, 5)], true);
                     return;
                 }
+                case 19395:                                 // Gordunni Trap
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, urand(0, 1) ? 19394 : 11756, true);
+                    return;
+                }
                 case 19411:                                 // Lava Bomb
                 case 20474:                                 // Lava Bomb
                 {

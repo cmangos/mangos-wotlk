@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_12670_01_mangos_spell_template` bit(1) DEFAULT NULL
+  `required_12748_01_mangos_spell_template` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -18431,6 +18431,8 @@ LOCK TABLES `spell_template` WRITE;
 /*!40000 ALTER TABLE `spell_template` DISABLE KEYS */;
 INSERT INTO `spell_template` VALUES
 -- id   attr        attr_ex     attr_ex2    attr_ex3    proc_flags chnce dur  ef0 tarA0 tarB0 rad  aur  misc    miscB, trigger
+(11756, 0x00000180, 0x10000000, 0x00000000, 0x00000000, 0x00000000, 101,   4,  76,  47,    0,  15,   0, 144064,  0,    0,     'Summon Gordunni chest (COBALT)'),
+(19394, 0x00000180, 0x10000000, 0x00000000, 0x00000000, 0x00000000, 101,   4,  76,  47,    0,  15,   0, 177681,  0,    0,     'Summon Gordunni chest (JUNK)'),
 (21387, 0x00000140, 0x10000000, 0x00000000, 0x00000000, 0x00000028,  15,  21,   6,   1,    0,   0,  42, 0,       0,    21388, 'Melt-Weapon trigger aura related used by Ragnaros'),
 (21883, 0x00000180, 0x10000000, 0x00000000, 0x00000000, 0x00000000, 101, 225,  76,  22,    0,   0,   0, 178904,  0,    0,     'Summon Healed Celebrian Vine'),
 (23363, 0x00000100, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 101,  21,  76,  18,    0,   0,   0, 179804,  0,    0,     'Summon Drakonid Corpse Trigger'),
