@@ -1306,13 +1306,15 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
 
     for (BattleGround::BattleGroundScoreMap::const_iterator itr = bg->GetPlayerScoresBegin(); itr != bg->GetPlayerScoresEnd(); ++itr)
     {
+        const BattleGroundScore* score = itr->second;
+
         *data << ObjectGuid(itr->first);
-        *data << (int32)itr->second->KillingBlows;
+        *data << (int32)score->KillingBlows;
         if (type == 0)
         {
-            *data << (int32)itr->second->HonorableKills;
-            *data << (int32)itr->second->Deaths;
-            *data << (int32)(itr->second->BonusHonor);
+            *data << (int32)score->HonorableKills;
+            *data << (int32)score->Deaths;
+            *data << (int32)(score->BonusHonor);
         }
         else
         {
@@ -1326,31 +1328,31 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
             else
                 *data << uint8(0);
         }
-        *data << (int32)itr->second->DamageDone;            // damage done
-        *data << (int32)itr->second->HealingDone;           // healing done
+        *data << (int32)score->DamageDone;            // damage done
+        *data << (int32)score->HealingDone;           // healing done
         switch (bg->GetTypeID())                            // battleground specific things
         {
             case BATTLEGROUND_AV:
                 *data << (uint32)0x00000005;                // count of next fields
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsAssaulted;  // GraveyardsAssaulted
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsDefended;   // GraveyardsDefended
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersAssaulted;      // TowersAssaulted
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersDefended;       // TowersDefended
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->SecondaryObjectives;  // SecondaryObjectives - free some of the Lieutnants
+                *data << (uint32)((BattleGroundAVScore*)score)->GraveyardsAssaulted;  // GraveyardsAssaulted
+                *data << (uint32)((BattleGroundAVScore*)score)->GraveyardsDefended;   // GraveyardsDefended
+                *data << (uint32)((BattleGroundAVScore*)score)->TowersAssaulted;      // TowersAssaulted
+                *data << (uint32)((BattleGroundAVScore*)score)->TowersDefended;       // TowersDefended
+                *data << (uint32)((BattleGroundAVScore*)score)->SecondaryObjectives;  // SecondaryObjectives - free some of the Lieutnants
                 break;
             case BATTLEGROUND_WS:
                 *data << (uint32)0x00000002;                // count of next fields
-                *data << (uint32)((BattleGroundWGScore*)itr->second)->FlagCaptures;         // flag captures
-                *data << (uint32)((BattleGroundWGScore*)itr->second)->FlagReturns;          // flag returns
+                *data << (uint32)((BattleGroundWGScore*)score)->FlagCaptures;         // flag captures
+                *data << (uint32)((BattleGroundWGScore*)score)->FlagReturns;          // flag returns
                 break;
             case BATTLEGROUND_AB:
                 *data << (uint32)0x00000002;                // count of next fields
-                *data << (uint32)((BattleGroundABScore*)itr->second)->BasesAssaulted;       // bases asssulted
-                *data << (uint32)((BattleGroundABScore*)itr->second)->BasesDefended;        // bases defended
+                *data << (uint32)((BattleGroundABScore*)score)->BasesAssaulted;       // bases asssulted
+                *data << (uint32)((BattleGroundABScore*)score)->BasesDefended;        // bases defended
                 break;
             case BATTLEGROUND_EY:
                 *data << (uint32)0x00000001;                // count of next fields
-                *data << (uint32)((BattleGroundEYScore*)itr->second)->FlagCaptures;         // flag captures
+                *data << (uint32)((BattleGroundEYScore*)score)->FlagCaptures;         // flag captures
                 break;
             case BATTLEGROUND_NA:
             case BATTLEGROUND_BE:

@@ -136,13 +136,14 @@ void ReputationMgr::SendState(FactionState const* faction, bool anyRankIncreased
 
     for (FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
-        if (itr->second.needSend)
+        FactionState &subFaction = itr->second;
+        if (subFaction.needSend)
         {
-            itr->second.needSend = false;
-            if (itr->second.ReputationListID != faction->ReputationListID)
+            subFaction.needSend = false;
+            if (subFaction.ReputationListID != faction->ReputationListID)
             {
-                data << uint32(itr->second.ReputationListID);
-                data << uint32(itr->second.Standing);
+                data << uint32(subFaction.ReputationListID);
+                data << uint32(subFaction.Standing);
 
                 ++count;
             }
@@ -311,36 +312,39 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
     FactionStateList::iterator itr = m_factions.find(factionEntry->reputationListID);
     if (itr != m_factions.end())
     {
+        FactionState &faction = itr->second;
         int32 BaseRep = GetBaseReputation(factionEntry);
 
         if (incremental)
-            standing += itr->second.Standing + BaseRep;
+            standing += faction.Standing + BaseRep;
 
         if (standing > Reputation_Cap)
             standing = Reputation_Cap;
         else if (standing < Reputation_Bottom)
             standing = Reputation_Bottom;
 
-        ReputationRank old_rank = ReputationToRank(itr->second.Standing + BaseRep);
+        ReputationRank old_rank = ReputationToRank(faction.Standing + BaseRep);
         ReputationRank new_rank = ReputationToRank(standing);
 
-        itr->second.Standing = standing - BaseRep;
-        itr->second.needSend = true;
-        itr->second.needSave = true;
+        faction.Standing = standing - BaseRep;
+        faction.needSend = true;
+        faction.needSave = true;
 
-        SetVisible(&itr->second);
+        SetVisible(&faction);
 
         if (new_rank <= REP_HOSTILE)
-            SetAtWar(&itr->second, true);
+            SetAtWar(&faction, true);
 
         UpdateRankCounters(old_rank, new_rank);
 
         m_player->ReputationChanged(factionEntry);
-        m_player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KNOWN_FACTIONS,         factionEntry->ID);
-        m_player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_REPUTATION,        factionEntry->ID);
-        m_player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_EXALTED_REPUTATION, factionEntry->ID);
-        m_player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_REVERED_REPUTATION, factionEntry->ID);
-        m_player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_HONORED_REPUTATION, factionEntry->ID);
+
+        AchievementMgr &achievementManager = m_player->GetAchievementMgr();
+        achievementManager.UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KNOWN_FACTIONS,         factionEntry->ID);
+        achievementManager.UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_REPUTATION,        factionEntry->ID);
+        achievementManager.UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_EXALTED_REPUTATION, factionEntry->ID);
+        achievementManager.UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_REVERED_REPUTATION, factionEntry->ID);
+        achievementManager.UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_HONORED_REPUTATION, factionEntry->ID);
 
         if (new_rank > old_rank)
             return true;
@@ -526,11 +530,12 @@ void ReputationMgr::SaveToDB()
 
     for (FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
-        if (itr->second.needSave)
+        FactionState &faction = itr->second;
+        if (faction.needSave)
         {
-            stmtDel.PExecute(m_player->GetGUIDLow(), itr->second.ID);
-            stmtIns.PExecute(m_player->GetGUIDLow(), itr->second.ID, itr->second.Standing, itr->second.Flags);
-            itr->second.needSave = false;
+            stmtDel.PExecute(m_player->GetGUIDLow(), faction.ID);
+            stmtIns.PExecute(m_player->GetGUIDLow(), faction.ID, faction.Standing, faction.Flags);
+            faction.needSave = false;
         }
     }
 }

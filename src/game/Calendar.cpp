@@ -491,18 +491,19 @@ void CalendarMgr::CopyEvent(uint64 eventId, time_t newTime, ObjectGuid const& gu
 
         while (ci_itr != cInvMap->end())
         {
-            if (ci_itr->second->InviteeGuid == guid)
+            const CalendarInvite* invite = ci_itr->second;
+            if (invite->InviteeGuid == guid)
             {
-                AddInvite(newEvent, guid, ci_itr->second->InviteeGuid,  CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(NULL));
+                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(NULL));
             }
             else
             {
                 CalendarModerationRank rank = CALENDAR_RANK_PLAYER;
                 // copy moderator rank
-                if (ci_itr->second->Rank == CALENDAR_RANK_MODERATOR)
+                if (invite->Rank == CALENDAR_RANK_MODERATOR)
                     rank = CALENDAR_RANK_MODERATOR;
 
-                AddInvite(newEvent, guid, ci_itr->second->InviteeGuid,  CALENDAR_STATUS_INVITED, rank, "", time(NULL));
+                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_INVITED, rank, "", time(NULL));
             }
             ++ci_itr;
         }
