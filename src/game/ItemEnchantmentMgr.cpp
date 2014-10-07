@@ -73,14 +73,12 @@ void LoadRandomEnchantmentsTable()
 
         delete result;
 
-        sLog.outString();
         sLog.outString(">> Loaded %u Item Enchantment definitions", count);
     }
     else
-    {
-        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
-    }
+
+    sLog.outString();
 }
 
 uint32 GetItemEnchantMod(uint32 entry)
@@ -98,7 +96,8 @@ uint32 GetItemEnchantMod(uint32 entry)
     double dRoll = rand_chance();
     float fCount = 0;
 
-    for (EnchStoreList::const_iterator ench_iter = tab->second.begin(); ench_iter != tab->second.end(); ++ench_iter)
+    const EnchStoreList &enchantList = tab->second;
+    for (EnchStoreList::const_iterator ench_iter = enchantList.begin(); ench_iter != enchantList.end(); ++ench_iter)
     {
         fCount += ench_iter->chance;
 
@@ -109,7 +108,7 @@ uint32 GetItemEnchantMod(uint32 entry)
     dRoll = (irand(0, (int)floor(fCount * 100) + 1)) / 100;
     fCount = 0;
 
-    for (EnchStoreList::const_iterator ench_iter = tab->second.begin(); ench_iter != tab->second.end(); ++ench_iter)
+    for (EnchStoreList::const_iterator ench_iter = enchantList.begin(); ench_iter != enchantList.end(); ++ench_iter)
     {
         fCount += ench_iter->chance;
 

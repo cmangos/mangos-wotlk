@@ -103,7 +103,7 @@ class MANGOS_DLL_SPEC ChatHandler
         *
         * Method:    BuildChatPacket build message chat packet generic way
         * FullName:  ChatHandler::BuildChatPacket
-        * Access:    public static 
+        * Access:    public static
         * Returns:   void
         *
         * \param WorldPacket& data             : Provided packet will be filled with requested info
@@ -525,6 +525,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleServerLogLevelCommand(char* args);
         bool HandleServerMotdCommand(char* args);
         bool HandleServerPLimitCommand(char* args);
+        bool HandleServerResetAllRaidCommand(char* args);
         bool HandleServerRestartCommand(char* args);
         bool HandleServerSetMotdCommand(char* args);
         bool HandleServerShutDownCommand(char* args);

@@ -128,15 +128,15 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Summons(bool check_entry_use)
         if (check_entry_use)
             CheckUnusedAISummons();
 
-        sLog.outString();
         sLog.outString(">> Loaded %u CreatureEventAI summon definitions", Count);
+        sLog.outString();
     }
     else
     {
         BarGoLink bar(1);
         bar.step();
-        sLog.outString();
         sLog.outString(">> Loaded 0 CreatureEventAI Summon definitions. DB table `creature_ai_summons` is empty.");
+        sLog.outString();
     }
 }
 
@@ -873,6 +873,13 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             continue;
                         }
                         break;
+                    case ACTION_T_CHANGE_MOVEMENT:
+                        if (action.changeMovement.movementType >= MAX_DB_MOTION_TYPE)
+                        {
+                            sLog.outErrorEventAI("Event %u Action %u uses invalid movement type %u (must be smaller than %u)", i, j + 1, action.changeMovement.movementType, MAX_DB_MOTION_TYPE);
+                            continue;
+                        }
+                        break;
 
                     default:
                         sLog.outErrorEventAI("Event %u Action %u have currently not checked at load action type (%u). Need check code update?", i, j + 1, temp.action[j].type);
@@ -906,14 +913,14 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
         CheckUnusedAITexts();
         CheckUnusedAISummons();
 
-        sLog.outString();
         sLog.outString(">> Loaded %u CreatureEventAI scripts", Count);
+        sLog.outString();
     }
     else
     {
         BarGoLink bar(1);
         bar.step();
-        sLog.outString();
         sLog.outString(">> Loaded 0 CreatureEventAI scripts. DB table `creature_ai_scripts` is empty.");
+        sLog.outString();
     }
 }

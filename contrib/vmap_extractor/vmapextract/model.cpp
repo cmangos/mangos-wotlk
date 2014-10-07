@@ -102,6 +102,15 @@ bool Model::ConvertToVMAPModel(const char* outfilename)
     fwrite(&nIndexes, sizeof(uint32), 1, output);
     if (nIndexes > 0)
     {
+        for (uint32 i = 0; i < nIndexes; ++i)
+        {
+            if ((i % 3) - 1 == 0)
+            {
+                uint16 tmp = indices[i];
+                indices[i] = indices[i+1];
+                indices[i+1] = tmp;
+            }
+        }
         fwrite(indices, sizeof(unsigned short), nIndexes, output);
     }
     fwrite("VERT", 4, 1, output);
@@ -112,7 +121,9 @@ bool Model::ConvertToVMAPModel(const char* outfilename)
     {
         for (uint32 vpos = 0; vpos < nVertices; ++vpos)
         {
-            std::swap(vertices[vpos].y, vertices[vpos].z);
+            float tmp = vertices[vpos].y;
+            vertices[vpos].y = -vertices[vpos].z;
+            vertices[vpos].z = tmp;
         }
         fwrite(vertices, sizeof(float) * 3, nVertices, output);
     }
@@ -141,7 +152,11 @@ ModelInstance::ModelInstance(MPQFile& f, const char* ModelInstName, uint32 mapID
     pos = fixCoords(Vec3D(ff[0], ff[1], ff[2]));
     f.read(ff, 12);
     rot = Vec3D(ff[0], ff[1], ff[2]);
-    f.read(&scale, 4);
+
+    uint16 fFlags;      // dummy var
+    f.read(&scale, 2);
+    f.read(&fFlags, 2); // unknown but flag 1 is used for biodome in Outland, currently this value is not used
+
     // scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
     sc = scale / 1024.0f;
 
@@ -180,20 +195,4 @@ ModelInstance::ModelInstance(MPQFile& f, const char* ModelInstName, uint32 mapID
     uint32 nlen = strlen(ModelInstName);
     fwrite(&nlen, sizeof(uint32), 1, pDirfile);
     fwrite(ModelInstName, sizeof(char), nlen, pDirfile);
-
-    /* int realx1 = (int) ((float) pos.x / 533.333333f);
-    int realy1 = (int) ((float) pos.z / 533.333333f);
-    int realx2 = (int) ((float) pos.x / 533.333333f);
-    int realy2 = (int) ((float) pos.z / 533.333333f);
-
-    fprintf(pDirfile,"%s/%s %f,%f,%f_%f,%f,%f %f %d %d %d,%d %d\n",
-        MapName,
-        ModelInstName,
-        (float) pos.x, (float) pos.y, (float) pos.z,
-        (float) rot.x, (float) rot.y, (float) rot.z,
-        sc,
-        nVertices,
-        realx1, realy1,
-        realx2, realy2
-        ); */
 }

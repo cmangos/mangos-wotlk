@@ -1306,13 +1306,15 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
 
     for (BattleGround::BattleGroundScoreMap::const_iterator itr = bg->GetPlayerScoresBegin(); itr != bg->GetPlayerScoresEnd(); ++itr)
     {
+        const BattleGroundScore* score = itr->second;
+
         *data << ObjectGuid(itr->first);
-        *data << (int32)itr->second->KillingBlows;
+        *data << (int32)score->KillingBlows;
         if (type == 0)
         {
-            *data << (int32)itr->second->HonorableKills;
-            *data << (int32)itr->second->Deaths;
-            *data << (int32)(itr->second->BonusHonor);
+            *data << (int32)score->HonorableKills;
+            *data << (int32)score->Deaths;
+            *data << (int32)(score->BonusHonor);
         }
         else
         {
@@ -1326,31 +1328,31 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
             else
                 *data << uint8(0);
         }
-        *data << (int32)itr->second->DamageDone;            // damage done
-        *data << (int32)itr->second->HealingDone;           // healing done
+        *data << (int32)score->DamageDone;            // damage done
+        *data << (int32)score->HealingDone;           // healing done
         switch (bg->GetTypeID())                            // battleground specific things
         {
             case BATTLEGROUND_AV:
                 *data << (uint32)0x00000005;                // count of next fields
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsAssaulted;  // GraveyardsAssaulted
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsDefended;   // GraveyardsDefended
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersAssaulted;      // TowersAssaulted
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersDefended;       // TowersDefended
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->SecondaryObjectives;  // SecondaryObjectives - free some of the Lieutnants
+                *data << (uint32)((BattleGroundAVScore*)score)->GraveyardsAssaulted;  // GraveyardsAssaulted
+                *data << (uint32)((BattleGroundAVScore*)score)->GraveyardsDefended;   // GraveyardsDefended
+                *data << (uint32)((BattleGroundAVScore*)score)->TowersAssaulted;      // TowersAssaulted
+                *data << (uint32)((BattleGroundAVScore*)score)->TowersDefended;       // TowersDefended
+                *data << (uint32)((BattleGroundAVScore*)score)->SecondaryObjectives;  // SecondaryObjectives - free some of the Lieutnants
                 break;
             case BATTLEGROUND_WS:
                 *data << (uint32)0x00000002;                // count of next fields
-                *data << (uint32)((BattleGroundWGScore*)itr->second)->FlagCaptures;         // flag captures
-                *data << (uint32)((BattleGroundWGScore*)itr->second)->FlagReturns;          // flag returns
+                *data << (uint32)((BattleGroundWGScore*)score)->FlagCaptures;         // flag captures
+                *data << (uint32)((BattleGroundWGScore*)score)->FlagReturns;          // flag returns
                 break;
             case BATTLEGROUND_AB:
                 *data << (uint32)0x00000002;                // count of next fields
-                *data << (uint32)((BattleGroundABScore*)itr->second)->BasesAssaulted;       // bases asssulted
-                *data << (uint32)((BattleGroundABScore*)itr->second)->BasesDefended;        // bases defended
+                *data << (uint32)((BattleGroundABScore*)score)->BasesAssaulted;       // bases asssulted
+                *data << (uint32)((BattleGroundABScore*)score)->BasesDefended;        // bases defended
                 break;
             case BATTLEGROUND_EY:
                 *data << (uint32)0x00000001;                // count of next fields
-                *data << (uint32)((BattleGroundEYScore*)itr->second)->FlagCaptures;         // flag captures
+                *data << (uint32)((BattleGroundEYScore*)score)->FlagCaptures;         // flag captures
                 break;
             case BATTLEGROUND_NA:
             case BATTLEGROUND_BE:
@@ -1613,11 +1615,9 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 battlegrounds. DB table `battleground_template` is empty.");
+        sLog.outString();
         return;
     }
 
@@ -1645,14 +1645,17 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         uint32 MaxPlayersPerTeam = fields[2].GetUInt32();
 
         // check values from DB
-        if (MaxPlayersPerTeam == 0 || MinPlayersPerTeam == 0)
+        if (MaxPlayersPerTeam == 0)
         {
-            sLog.outErrorDb("Table `battleground_template` for id %u have wrong min/max players per team settings. BG not created.", bgTypeID);
+            sLog.outErrorDb("Table `battleground_template` for id %u doesn't allow any player per team settings. BG not created.", bgTypeID);
             continue;
         }
 
         if (MinPlayersPerTeam > MaxPlayersPerTeam)
+        {
             MinPlayersPerTeam = MaxPlayersPerTeam;
+            sLog.outErrorDb("Table `battleground_template` for id %u has min players > max players per team settings. Min players will use same value as max players.", bgTypeID);
+        }
 
         float AStartLoc[4];
         float HStartLoc[4];
@@ -1713,8 +1716,8 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u battlegrounds", count);
+    sLog.outString();
 }
 
 void BattleGroundMgr::InitAutomaticArenaPointDistribution()
@@ -2028,9 +2031,8 @@ void BattleGroundMgr::LoadBattleMastersEntry()
     {
         BarGoLink bar(1);
         bar.step();
-
-        sLog.outString();
         sLog.outString(">> Loaded 0 battlemaster entries - table is empty!");
+        sLog.outString();
         return;
     }
 
@@ -2057,8 +2059,8 @@ void BattleGroundMgr::LoadBattleMastersEntry()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u battlemaster entries", count);
+    sLog.outString();
 }
 
 HolidayIds BattleGroundMgr::BGTypeToWeekendHolidayId(BattleGroundTypeId bgTypeId)
@@ -2140,9 +2142,8 @@ void BattleGroundMgr::LoadBattleEventIndexes()
     {
         BarGoLink bar(1);
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 battleground eventindexes.");
+        sLog.outString();
         return;
     }
 
@@ -2201,7 +2202,7 @@ void BattleGroundMgr::LoadBattleEventIndexes()
     }
     while (result->NextRow());
 
-    sLog.outString();
     sLog.outString(">> Loaded %u battleground eventindexes", count);
+    sLog.outString();
     delete result;
 }

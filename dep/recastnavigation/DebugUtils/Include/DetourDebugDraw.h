@@ -21,11 +21,13 @@
 
 #include "DetourNavMesh.h"
 #include "DetourNavMeshQuery.h"
+#include "DetourTileCacheBuilder.h"
 
 enum DrawNavMeshFlags
 {
 	DU_DRAWNAVMESH_OFFMESHCONS = 0x01,
 	DU_DRAWNAVMESH_CLOSEDLIST = 0x02,
+	DU_DRAWNAVMESH_COLOR_TILES = 0x04,
 };
 
 void duDebugDrawNavMesh(struct duDebugDraw* dd, const dtNavMesh& mesh, unsigned char flags);
@@ -33,6 +35,14 @@ void duDebugDrawNavMeshWithClosedList(struct duDebugDraw* dd, const dtNavMesh& m
 void duDebugDrawNavMeshNodes(struct duDebugDraw* dd, const dtNavMeshQuery& query);
 void duDebugDrawNavMeshBVTree(struct duDebugDraw* dd, const dtNavMesh& mesh);
 void duDebugDrawNavMeshPortals(struct duDebugDraw* dd, const dtNavMesh& mesh);
+void duDebugDrawNavMeshPolysWithFlags(struct duDebugDraw* dd, const dtNavMesh& mesh, const unsigned short polyFlags, const unsigned int col);
 void duDebugDrawNavMeshPoly(struct duDebugDraw* dd, const dtNavMesh& mesh, dtPolyRef ref, const unsigned int col);
+
+void duDebugDrawTileCacheLayerAreas(struct duDebugDraw* dd, const dtTileCacheLayer& layer, const float cs, const float ch);
+void duDebugDrawTileCacheLayerRegions(struct duDebugDraw* dd, const dtTileCacheLayer& layer, const float cs, const float ch);
+void duDebugDrawTileCacheContours(duDebugDraw* dd, const struct dtTileCacheContourSet& lcset,
+								  const float* orig, const float cs, const float ch);
+void duDebugDrawTileCachePolyMesh(duDebugDraw* dd, const struct dtTileCachePolyMesh& lmesh,
+								  const float* orig, const float cs, const float ch);
 
 #endif // DETOURDEBUGDRAW_H

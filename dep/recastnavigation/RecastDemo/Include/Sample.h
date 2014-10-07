@@ -19,26 +19,27 @@
 #ifndef RECASTSAMPLE_H
 #define RECASTSAMPLE_H
 
-#include <string.h>
-
 #include "Recast.h"
 #include "SampleInterfaces.h"
 
 
-// Tool types.
+/// Tool types.
 enum SampleToolType
 {
 	TOOL_NONE = 0,
 	TOOL_TILE_EDIT,
 	TOOL_TILE_HIGHLIGHT,
+	TOOL_TEMP_OBSTACLE,
 	TOOL_NAVMESH_TESTER,
+	TOOL_NAVMESH_PRUNE,
 	TOOL_OFFMESH_CONNECTION,
 	TOOL_CONVEX_VOLUME,
 	TOOL_CROWD,
+	MAX_TOOLS
 };
 
-// These are just sample areas to use consistent values across the samples.
-// The use should specify these base on his needs.
+/// These are just sample areas to use consistent values across the samples.
+/// The use should specify these base on his needs.
 enum SamplePolyAreas
 {
 	SAMPLE_POLYAREA_GROUND,
@@ -50,11 +51,19 @@ enum SamplePolyAreas
 };
 enum SamplePolyFlags
 {
-	SAMPLE_POLYFLAGS_WALK = 0x01,		// Ability to walk (ground, grass, road)
-	SAMPLE_POLYFLAGS_SWIM = 0x02,		// Ability to swim (water).
-	SAMPLE_POLYFLAGS_DOOR = 0x04,		// Ability to move through doors.
-	SAMPLE_POLYFLAGS_JUMP = 0x08,		// Ability to jump.
-	SAMPLE_POLYFLAGS_ALL = 0xffff		// All abilities.
+	SAMPLE_POLYFLAGS_WALK		= 0x01,		// Ability to walk (ground, grass, road)
+	SAMPLE_POLYFLAGS_SWIM		= 0x02,		// Ability to swim (water).
+	SAMPLE_POLYFLAGS_DOOR		= 0x04,		// Ability to move through doors.
+	SAMPLE_POLYFLAGS_JUMP		= 0x08,		// Ability to jump.
+	SAMPLE_POLYFLAGS_DISABLED	= 0x10,		// Disabled polygon
+	SAMPLE_POLYFLAGS_ALL		= 0xffff	// All abilities.
+};
+
+enum SamplePartitionType
+{
+	SAMPLE_PARTITION_WATERSHED,
+	SAMPLE_PARTITION_MONOTONE,
+	SAMPLE_PARTITION_LAYERS,
 };
 
 struct SampleTool
@@ -72,6 +81,14 @@ struct SampleTool
 	virtual void handleUpdate(const float dt) = 0;
 };
 
+struct SampleToolState {
+	virtual ~SampleToolState() {}
+	virtual void init(class Sample* sample) = 0;
+	virtual void reset() = 0;
+	virtual void handleRender() = 0;
+	virtual void handleRenderOverlay(double* proj, double* model, int* view) = 0;
+	virtual void handleUpdate(const float dt) = 0;
+};
 
 class Sample
 {
@@ -79,6 +96,8 @@ protected:
 	class InputGeom* m_geom;
 	class dtNavMesh* m_navMesh;
 	class dtNavMeshQuery* m_navQuery;
+	class dtCrowd* m_crowd;
+
 	unsigned char m_navMeshDrawFlags;
 
 	float m_cellSize;
@@ -94,12 +113,12 @@ protected:
 	float m_vertsPerPoly;
 	float m_detailSampleDist;
 	float m_detailSampleMaxError;
+	int m_partitionType;
 	
 	SampleTool* m_tool;
+	SampleToolState* m_toolStates[MAX_TOOLS];
 	
 	BuildContext* m_ctx;
-    
-    char m_meshName[128];
 	
 public:
 	Sample();
@@ -108,6 +127,8 @@ public:
 	void setContext(BuildContext* ctx) { m_ctx = ctx; }
 	
 	void setTool(SampleTool* tool);
+	SampleToolState* getToolState(int type) { return m_toolStates[type]; }
+	void setToolState(int type, SampleToolState* s) { m_toolStates[type] = s; }
 	
 	virtual void handleSettings();
 	virtual void handleTools();
@@ -124,6 +145,7 @@ public:
 	virtual class InputGeom* getInputGeom() { return m_geom; }
 	virtual class dtNavMesh* getNavMesh() { return m_navMesh; }
 	virtual class dtNavMeshQuery* getNavMeshQuery() { return m_navQuery; }
+	virtual class dtCrowd* getCrowd() { return m_crowd; }
 	virtual float getAgentRadius() { return m_agentRadius; }
 	virtual float getAgentHeight() { return m_agentHeight; }
 	virtual float getAgentClimb() { return m_agentMaxClimb; }
@@ -133,11 +155,14 @@ public:
 	inline unsigned char getNavMeshDrawFlags() const { return m_navMeshDrawFlags; }
 	inline void setNavMeshDrawFlags(unsigned char flags) { m_navMeshDrawFlags = flags; }
 
+	void updateToolStates(const float dt);
+	void initToolStates(Sample* sample);
+	void resetToolStates();
+	void renderToolStates();
+	void renderOverlayToolStates(double* proj, double* model, int* view);
+
 	void resetCommonSettings();
 	void handleCommonSettings();
-    
-    inline void setMeshName(char* meshName) { memcpy(m_meshName, meshName, 128*sizeof(char)); }
-    inline char* getMeshName() { return m_meshName; }
 };
 
 

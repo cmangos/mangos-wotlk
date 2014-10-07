@@ -67,11 +67,11 @@ void CreatureEventAI::GetAIInformation(ChatHandler& reader)
     for (CreatureEventAIList::const_iterator itr = m_CreatureEventAIList.begin(); itr != m_CreatureEventAIList.end(); ++itr)
     {
         if (itr->Event.action[2].type != ACTION_T_NONE)
-            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) actions[type(param1)]: %2u(%5u)  --  %2u(%u)  --  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time/1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1, itr->Event.action[1].type, itr->Event.action[1].raw.param1, itr->Event.action[2].type, itr->Event.action[2].raw.param1);
+            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) actions[type(param1)]: %2u(%5u)  --  %2u(%u)  --  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time / 1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1, itr->Event.action[1].type, itr->Event.action[1].raw.param1, itr->Event.action[2].type, itr->Event.action[2].raw.param1);
         else if (itr->Event.action[1].type != ACTION_T_NONE)
-            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) actions[type(param1)]: %2u(%5u)  --  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time/1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1, itr->Event.action[1].type, itr->Event.action[1].raw.param1);
+            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) actions[type(param1)]: %2u(%5u)  --  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time / 1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1, itr->Event.action[1].type, itr->Event.action[1].raw.param1);
         else
-            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) action[type(param1)]:  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time/1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1);
+            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) action[type(param1)]:  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time / 1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1);
     }
 }
 
@@ -94,7 +94,9 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
     if (creatureEventsItr != sEventAIMgr.GetCreatureEventAIMap().end())
     {
         uint32 events_count = 0;
-        for (CreatureEventAI_Event_Vec::const_iterator i = creatureEventsItr->second.begin(); i != creatureEventsItr->second.end(); ++i)
+
+        const CreatureEventAI_Event_Vec &creatureEvent = creatureEventsItr->second;
+        for (CreatureEventAI_Event_Vec::const_iterator i = creatureEvent.begin(); i != creatureEvent.end(); ++i)
         {
             // Debug check
 #ifndef MANGOS_DEBUG
@@ -117,7 +119,7 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
         else
         {
             m_CreatureEventAIList.reserve(events_count);
-            for (CreatureEventAI_Event_Vec::const_iterator i = creatureEventsItr->second.begin(); i != creatureEventsItr->second.end(); ++i)
+            for (CreatureEventAI_Event_Vec::const_iterator i = creatureEvent.begin(); i != creatureEvent.end(); ++i)
             {
                 // Debug check
 #ifndef MANGOS_DEBUG
@@ -965,6 +967,22 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_creature->SetStandState(action.setStandState.standState);
             break;
         }
+        case ACTION_T_CHANGE_MOVEMENT:
+        {
+            switch (action.changeMovement.movementType)
+            {
+                case IDLE_MOTION_TYPE:
+                    m_creature->GetMotionMaster()->MoveIdle();
+                    break;
+                case RANDOM_MOTION_TYPE:
+                    m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), float(action.changeMovement.wanderDistance));
+                    break;
+                case WAYPOINT_MOTION_TYPE:
+                    m_creature->GetMotionMaster()->MoveWaypoint();
+                    break;
+            }
+            break;
+        }
     }
 }
 
@@ -1151,7 +1169,7 @@ void CreatureEventAI::EnterCombat(Unit* enemy)
 
 void CreatureEventAI::AttackStart(Unit* who)
 {
-    if (!who)
+    if (!who || !m_creature->CanAttackByItself())
         return;
 
     if (m_creature->Attack(who, m_MeleeEnabled))

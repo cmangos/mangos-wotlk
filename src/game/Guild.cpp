@@ -80,8 +80,9 @@ void MemberSlot::ChangeRank(uint32 newRank)
 Guild::Guild()
 {
     m_Id = 0;
-    m_Name = "";
-    GINFO = MOTD = "";
+    m_Name.clear();
+    GINFO.clear();
+    MOTD.clear();
     m_EmblemStyle = 0;
     m_EmblemColor = 0;
     m_BorderStyle = 0;
@@ -115,7 +116,7 @@ bool Guild::Create(Player* leader, std::string gname)
 
     m_LeaderGuid = leader->GetObjectGuid();
     m_Name = gname;
-    GINFO = "";
+    GINFO.clear();
     MOTD = "No message set.";
     m_GuildBankMoney = 0;
     m_Id = sObjectMgr.GenerateGuildId();
@@ -311,8 +312,11 @@ bool Guild::CheckGuildStructure()
 
     // Allow only 1 guildmaster, set other to officer
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
-        if (itr->second.RankId == GR_GUILDMASTER && m_LeaderGuid != itr->second.guid)
-            itr->second.ChangeRank(GR_OFFICER);
+    {
+        MemberSlot &member = itr->second;
+        if (member.RankId == GR_GUILDMASTER && m_LeaderGuid != member.guid)
+            member.ChangeRank(GR_OFFICER);
+    }
 
     return true;
 }
@@ -560,35 +564,43 @@ bool Guild::DelMember(ObjectGuid guid, bool isDisbanding)
 
 void Guild::BroadcastToGuild(WorldSession* session, const std::string& msg, uint32 language)
 {
-    if (session && session->GetPlayer() && HasRankRight(session->GetPlayer()->GetRank(), GR_RIGHT_GCHATSPEAK))
+    if (!session)
+        return;
+
+    Player* player = session->GetPlayer();
+    if (!player || !HasRankRight(player->GetRank(), GR_RIGHT_GCHATSPEAK))
+        return;
+
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_GUILD, msg.c_str(), Language(language), player->GetChatTag(), player->GetObjectGuid(), player->GetName());
+
+    for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        WorldPacket data;
-        ChatHandler::BuildChatPacket(data, CHAT_MSG_GUILD, msg.c_str(), Language(language), session->GetPlayer()->GetChatTag(), session->GetPlayer()->GetObjectGuid(), session->GetPlayer()->GetName());
+        Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
 
-        for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
-        {
-            Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
-
-            if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_GCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetObjectGuid()))
-                pl->GetSession()->SendPacket(&data);
-        }
+        if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_GCHATLISTEN) && !pl->GetSocial()->HasIgnore(player->GetObjectGuid()))
+            pl->GetSession()->SendPacket(&data);
     }
 }
 
 void Guild::BroadcastToOfficers(WorldSession* session, const std::string& msg, uint32 language)
 {
-    if (session && session->GetPlayer() && HasRankRight(session->GetPlayer()->GetRank(), GR_RIGHT_OFFCHATSPEAK))
+    if (!session)
+        return;
+
+    Player* player = session->GetPlayer();
+    if (!player || !HasRankRight(player->GetRank(), GR_RIGHT_OFFCHATSPEAK))
+        return;
+
+    for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
-        {
-            WorldPacket data;
-            ChatHandler::BuildChatPacket(data, CHAT_MSG_OFFICER, msg.c_str(), Language(language), session->GetPlayer()->GetChatTag(), session->GetPlayer()->GetObjectGuid(), session->GetPlayer()->GetName());
+        WorldPacket data;
+        ChatHandler::BuildChatPacket(data, CHAT_MSG_OFFICER, msg.c_str(), Language(language), player->GetChatTag(), player->GetObjectGuid(), player->GetName());
 
-            Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+        Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
 
-            if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_OFFCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetObjectGuid()))
-                pl->GetSession()->SendPacket(&data);
-        }
+        if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_OFFCHATLISTEN) && !pl->GetSocial()->HasIgnore(player->GetObjectGuid()))
+            pl->GetSession()->SendPacket(&data);
     }
 }
 
@@ -632,12 +644,12 @@ void Guild::MassInviteToEvent(WorldSession* session, uint32 minLevel, uint32 max
             return;
         }
 
-        MemberSlot const* member = &itr->second;
-        uint32 level = Player::GetLevelFromDB(member->guid);
+        MemberSlot const& member = itr->second;
+        uint32 level = Player::GetLevelFromDB(member.guid);
 
-        if (member->guid != session->GetPlayer()->GetObjectGuid() && level >= minLevel && level <= maxLevel && member->RankId <= minRank)
+        if (member.guid != session->GetPlayer()->GetObjectGuid() && level >= minLevel && level <= maxLevel && member.RankId <= minRank)
         {
-            data << member->guid.WriteAsPacked();
+            data << member.guid.WriteAsPacked();
             data << uint8(level);
             ++count;
         }
@@ -1320,21 +1332,22 @@ uint32 Guild::GetMemberSlotWithdrawRem(uint32 LowGuid, uint8 TabId)
     if (itr == members.end())
         return 0;
 
-    if (itr->second.RankId == GR_GUILDMASTER)
+    MemberSlot &member = itr->second;
+    if (member.RankId == GR_GUILDMASTER)
         return WITHDRAW_SLOT_UNLIMITED;
 
-    if ((GetBankRights(itr->second.RankId, TabId) & GUILD_BANK_RIGHT_VIEW_TAB) != GUILD_BANK_RIGHT_VIEW_TAB)
+    if ((GetBankRights(member.RankId, TabId) & GUILD_BANK_RIGHT_VIEW_TAB) != GUILD_BANK_RIGHT_VIEW_TAB)
         return 0;
 
     uint32 curTime = uint32(time(NULL) / MINUTE);
-    if (curTime - itr->second.BankResetTimeTab[TabId] >= 24 * HOUR / MINUTE)
+    if (curTime - member.BankResetTimeTab[TabId] >= 24 * HOUR / MINUTE)
     {
-        itr->second.BankResetTimeTab[TabId] = curTime;
-        itr->second.BankRemSlotsTab[TabId] = GetBankSlotPerDay(itr->second.RankId, TabId);
+        member.BankResetTimeTab[TabId] = curTime;
+        member.BankRemSlotsTab[TabId] = GetBankSlotPerDay(member.RankId, TabId);
         CharacterDatabase.PExecute("UPDATE guild_member SET BankResetTimeTab%u='%u', BankRemSlotsTab%u='%u' WHERE guildid='%u' AND guid='%u'",
-                                   uint32(TabId), itr->second.BankResetTimeTab[TabId], uint32(TabId), itr->second.BankRemSlotsTab[TabId], m_Id, LowGuid);
+                                   uint32(TabId), member.BankResetTimeTab[TabId], uint32(TabId), member.BankRemSlotsTab[TabId], m_Id, LowGuid);
     }
-    return itr->second.BankRemSlotsTab[TabId];
+    return member.BankRemSlotsTab[TabId];
 }
 
 uint32 Guild::GetMemberMoneyWithdrawRem(uint32 LowGuid)
@@ -1343,19 +1356,20 @@ uint32 Guild::GetMemberMoneyWithdrawRem(uint32 LowGuid)
     if (itr == members.end())
         return 0;
 
-    if (itr->second.RankId == GR_GUILDMASTER)
+    MemberSlot &member = itr->second;
+    if (member.RankId == GR_GUILDMASTER)
         return WITHDRAW_MONEY_UNLIMITED;
 
     uint32 curTime = uint32(time(NULL) / MINUTE);           // minutes
     // 24 hours
-    if (curTime > itr->second.BankResetTimeMoney + 24 * HOUR / MINUTE)
+    if (curTime > member.BankResetTimeMoney + 24 * HOUR / MINUTE)
     {
-        itr->second.BankResetTimeMoney = curTime;
-        itr->second.BankRemMoney = GetBankMoneyPerDay(itr->second.RankId);
+        member.BankResetTimeMoney = curTime;
+        member.BankRemMoney = GetBankMoneyPerDay(member.RankId);
         CharacterDatabase.PExecute("UPDATE guild_member SET BankResetTimeMoney='%u', BankRemMoney='%u' WHERE guildid='%u' AND guid='%u'",
-                                   itr->second.BankResetTimeMoney, itr->second.BankRemMoney, m_Id, LowGuid);
+                                   member.BankResetTimeMoney, member.BankRemMoney, m_Id, LowGuid);
     }
-    return itr->second.BankRemMoney;
+    return member.BankRemMoney;
 }
 
 void Guild::SetBankMoneyPerDay(uint32 rankId, uint32 money)
@@ -1369,8 +1383,11 @@ void Guild::SetBankMoneyPerDay(uint32 rankId, uint32 money)
     m_Ranks[rankId].BankMoneyPerDay = money;
 
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
-        if (itr->second.RankId == rankId)
-            itr->second.BankResetTimeMoney = 0;
+    {
+        MemberSlot &member = itr->second;
+        if (member.RankId == rankId)
+            member.BankResetTimeMoney = 0;
+    }
 
     CharacterDatabase.PExecute("UPDATE guild_rank SET BankMoneyPerDay='%u' WHERE rid='%u' AND guildid='%u'", money, rankId, m_Id);
     CharacterDatabase.PExecute("UPDATE guild_member SET BankResetTimeMoney='0' WHERE guildid='%u' AND rank='%u'", m_Id, rankId);
@@ -1397,9 +1414,12 @@ void Guild::SetBankRightsAndSlots(uint32 rankId, uint8 TabId, uint32 right, uint
     if (db)
     {
         for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
-            if (itr->second.RankId == rankId)
+        {
+            MemberSlot &member = itr->second;
+            if (member.RankId == rankId)
                 for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
-                    itr->second.BankResetTimeTab[i] = 0;
+                    member.BankResetTimeTab[i] = 0;
+        }
 
         CharacterDatabase.PExecute("DELETE FROM guild_bank_right WHERE guildid='%u' AND TabId='%u' AND rid='%u'", m_Id, uint32(TabId), rankId);
         CharacterDatabase.PExecute("INSERT INTO guild_bank_right (guildid,TabId,rid,gbright,SlotPerDay) VALUES "
@@ -2227,10 +2247,9 @@ void Guild::MoveFromBankToChar(Player* pl, uint8 BankTab, uint8 BankTabSlot, uin
             {
                 pl->MoveItemFromInventory(PlayerBag, PlayerSlot, true);
                 pItemChar->DeleteFromInventoryDB();
+                StoreItem(BankTab, gDest, pItemChar);
             }
 
-            if (pItemChar)
-                StoreItem(BankTab, gDest, pItemChar);
             pl->MoveItemToInventory(iDest, pItemBank, true);
             pl->SaveInventoryAndGoldToDB();
 

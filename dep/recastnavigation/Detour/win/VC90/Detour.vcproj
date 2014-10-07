@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
@@ -44,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include"
-				PreprocessorDefinitions="WIN32;DEBUG;"
+				PreprocessorDefinitions="WIN32;DEBUG;DT_POLYREF64;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -107,7 +106,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="..\..\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;"
+				PreprocessorDefinitions="WIN32;NDEBUG;DT_POLYREF64;"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
@@ -168,7 +167,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include"
-				PreprocessorDefinitions="WIN32;DEBUG;"
+				PreprocessorDefinitions="WIN32;DEBUG;DT_POLYREF64;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -232,7 +231,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="..\..\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;"
+				PreprocessorDefinitions="WIN32;NDEBUG;DT_POLYREF64;"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
@@ -286,6 +285,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Include\DetourMath.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Include\DetourNavMesh.h"
 				>
 			</File>
@@ -299,6 +302,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Include\DetourNode.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Include\DetourStatus.h"
 				>
 			</File>
 		</Filter>

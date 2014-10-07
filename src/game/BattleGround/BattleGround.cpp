@@ -123,7 +123,7 @@ namespace MaNGOS
                 {
                     guid = i_source->GetObjectGuid();
                     pName = i_source->GetName();
-                } 
+                }
                 ChatHandler::BuildChatPacket(data, i_msgtype, str, LANG_UNIVERSAL, CHAT_TAG_NONE, ObjectGuid(), NULL, guid, pName);
             }
         private:
@@ -961,6 +961,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
             plr->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
 
         plr->RemoveAurasDueToSpell(isArena() ? SPELL_ARENA_DAMPENING : SPELL_BATTLEGROUND_DAMPENING);
+        plr->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
         if (!plr->isAlive())                                // resurrect on exit
         {
@@ -1267,11 +1268,12 @@ void BattleGround::RemoveFromBGFreeSlotQueue()
 {
     // set to be able to re-add if needed
     m_InBGFreeSlotQueue = false;
-    for (BGFreeSlotQueueType::iterator itr = sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].begin(); itr != sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].end(); ++itr)
+    BGFreeSlotQueueType& bgFreeSlot = sBattleGroundMgr.BGFreeSlotQueue[m_TypeID];
+    for (BGFreeSlotQueueType::iterator itr = bgFreeSlot.begin(); itr != bgFreeSlot.end(); ++itr)
     {
         if ((*itr)->GetInstanceID() == GetInstanceID())
         {
-            sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].erase(itr);
+            bgFreeSlot.erase(itr);
             return;
         }
     }

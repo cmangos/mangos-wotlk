@@ -754,11 +754,11 @@ enum SpellEffects
     SPELL_EFFECT_LEAP_BACK                 = 138,
     SPELL_EFFECT_CLEAR_QUEST               = 139,
     SPELL_EFFECT_FORCE_CAST                = 140,
-    SPELL_EFFECT_141                       = 141,
+    SPELL_EFFECT_FORCE_CAST_WITH_VALUE     = 141,
     SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE  = 142,
     SPELL_EFFECT_APPLY_AREA_AURA_OWNER     = 143,
     SPELL_EFFECT_KNOCKBACK_FROM_POSITION   = 144,
-    SPELL_EFFECT_145                       = 145,
+    SPELL_EFFECT_GRAVITY_PULL              = 145,
     SPELL_EFFECT_ACTIVATE_RUNE             = 146,
     SPELL_EFFECT_QUEST_FAIL                = 147,
     SPELL_EFFECT_148                       = 148,
@@ -1230,7 +1230,7 @@ enum Targets
     TARGET_SELF                        = 1,
     TARGET_RANDOM_ENEMY_CHAIN_IN_AREA  = 2,                 // only one spell has that, but regardless, it's a target type after all
     TARGET_RANDOM_FRIEND_CHAIN_IN_AREA = 3,
-    TARGET_4                           = 4,                 // some plague spells that are infectious - maybe targets not-infected friends inrange
+    TARGET_RANDOM_UNIT_CHAIN_IN_AREA   = 4,                 // some plague spells that are infectious - maybe targets not-infected friends inrange
     TARGET_PET                         = 5,
     TARGET_CHAIN_DAMAGE                = 6,
     TARGET_AREAEFFECT_INSTANT          = 7,                 // targets around provided destination point
@@ -1279,7 +1279,7 @@ enum Targets
     TARGET_ALL_RAID_AROUND_CASTER      = 56,
     TARGET_SINGLE_FRIEND_2             = 57,
     TARGET_58                          = 58,
-    TARGET_59                          = 59,
+    TARGET_FRIENDLY_FRONTAL_CONE       = 59,
     TARGET_NARROW_FRONTAL_CONE         = 60,
     TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,
     TARGET_DUELVSPLAYER_COORDINATES    = 63,
@@ -1325,7 +1325,7 @@ enum Targets
     TARGET_105                         = 105,               // 1 spell
     TARGET_106                         = 106,
     TARGET_GO_IN_FRONT_OF_CASTER_90    = 108,               // possible TARGET_WMO(GO?)_IN_FRONT_OF_CASTER(_30 ?) TODO: Verify the angle!
-    TARGET_110                         = 110,
+    TARGET_NARROW_FRONTAL_CONE_2       = 110,
 };
 
 enum SpellMissInfo
@@ -3067,5 +3067,11 @@ static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLAS
 
 // This spell is used for general boarding serverside
 #define SPELL_RIDE_VEHICLE_HARDCODED    46598
+
+enum TeleportLocation
+{
+    TELEPORT_LOCATION_HOMEBIND          = 0,
+    TELEPORT_LOCATION_BG_ENTRY_POINT    = 1,
+};
 
 #endif

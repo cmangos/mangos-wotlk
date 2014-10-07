@@ -118,7 +118,7 @@ SpellCastTargets::SpellCastTargets()
     m_itemTargetEntry  = 0;
 
     m_srcX = m_srcY = m_srcZ = m_destX = m_destY = m_destZ = 0.0f;
-    m_strTarget = "";
+    m_strTarget.clear();
     m_targetMask = 0;
 }
 
@@ -1678,77 +1678,38 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             targetUnitMap.push_back(m_caster);
             break;
         case TARGET_RANDOM_ENEMY_CHAIN_IN_AREA:
-        {
-            m_targets.m_targetMask = 0;
-            unMaxTargets = EffectChainTarget;
-            float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
-
-            UnitList tempTargetUnitMap;
-
-            {
-                MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(m_caster, max_range);
-                MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
-                Cell::VisitAllObjects(m_caster, searcher, max_range);
-            }
-
-            if (tempTargetUnitMap.empty())
-                break;
-
-            tempTargetUnitMap.sort(TargetDistanceOrderNear(m_caster));
-
-            // Now to get us a random target that's in the initial range of the spell
-            uint32 t = 0;
-            UnitList::iterator itr = tempTargetUnitMap.begin();
-            while (itr != tempTargetUnitMap.end() && (*itr)->IsWithinDist(m_caster, radius))
-                ++t, ++itr;
-
-            if (!t)
-                break;
-
-            itr = tempTargetUnitMap.begin();
-            std::advance(itr, rand() % t);
-            Unit* pUnitTarget = *itr;
-            targetUnitMap.push_back(pUnitTarget);
-
-            tempTargetUnitMap.erase(itr);
-
-            tempTargetUnitMap.sort(TargetDistanceOrderNear(pUnitTarget));
-
-            t = unMaxTargets - 1;
-            Unit* prev = pUnitTarget;
-            UnitList::iterator next = tempTargetUnitMap.begin();
-
-            while (t && next != tempTargetUnitMap.end())
-            {
-                if (!prev->IsWithinDist(*next, CHAIN_SPELL_JUMP_RADIUS))
-                    break;
-
-                if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !prev->IsWithinLOSInMap(*next))
-                {
-                    ++next;
-                    continue;
-                }
-
-                prev = *next;
-                targetUnitMap.push_back(prev);
-                tempTargetUnitMap.erase(next);
-                tempTargetUnitMap.sort(TargetDistanceOrderNear(prev));
-                next = tempTargetUnitMap.begin();
-
-                --t;
-            }
-            break;
-        }
         case TARGET_RANDOM_FRIEND_CHAIN_IN_AREA:
+        case TARGET_RANDOM_UNIT_CHAIN_IN_AREA:
         {
             m_targets.m_targetMask = 0;
             unMaxTargets = EffectChainTarget;
             float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
+
             UnitList tempTargetUnitMap;
+
+            switch (targetMode)
             {
-                MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, max_range);
-                MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
-                Cell::VisitAllObjects(m_caster, searcher, max_range);
+                case TARGET_RANDOM_ENEMY_CHAIN_IN_AREA:
+                {
+                    MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(m_caster, max_range);
+                    MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
+                    Cell::VisitAllObjects(m_caster, searcher, max_range);
+                    break;
+                }
+                case TARGET_RANDOM_FRIEND_CHAIN_IN_AREA:
+                {
+                    MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, max_range);
+                    MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
+                    Cell::VisitAllObjects(m_caster, searcher, max_range);
+                    break;
+                }
+                case TARGET_RANDOM_UNIT_CHAIN_IN_AREA:
+                {
+                    MaNGOS::AnyUnitInObjectRangeCheck u_check(m_caster, max_range);
+                    MaNGOS::UnitListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
+                    Cell::VisitAllObjects(m_caster, searcher, max_range);
+                    break;
+                }
             }
 
             if (tempTargetUnitMap.empty())
@@ -2335,9 +2296,57 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_LARGE_FRONTAL_CONE:
             FillAreaTargets(targetUnitMap, radius, PUSH_IN_FRONT_90, SPELL_TARGETS_AOE_DAMAGE);
             break;
-        case TARGET_NARROW_FRONTAL_CONE:
-            FillAreaTargets(targetUnitMap, radius, PUSH_IN_FRONT_15, SPELL_TARGETS_AOE_DAMAGE);
+        case TARGET_FRIENDLY_FRONTAL_CONE:
+            FillAreaTargets(targetUnitMap, radius, PUSH_IN_FRONT_30, SPELL_TARGETS_FRIENDLY);
             break;
+        case TARGET_NARROW_FRONTAL_CONE:
+        case TARGET_NARROW_FRONTAL_CONE_2:
+        {
+            SpellTargets targetB = SPELL_TARGETS_AOE_DAMAGE;
+
+            if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SCRIPT_EFFECT)
+                targetB = SPELL_TARGETS_ALL;
+
+            UnitList tempTargetUnitMap;
+            SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(m_spellInfo->Id);
+
+            // fill real target list if no spell script target defined
+            FillAreaTargets(bounds.first != bounds.second ? tempTargetUnitMap : targetUnitMap,
+                            radius, PUSH_IN_FRONT_15, bounds.first != bounds.second ? SPELL_TARGETS_ALL : targetB);
+
+            if (!tempTargetUnitMap.empty())
+            {
+                for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
+                {
+                    if ((*iter)->GetTypeId() != TYPEID_UNIT)
+                        continue;
+
+                    for (SQLMultiStorage::SQLMultiSIterator<SpellTargetEntry> i_spellST = bounds.first; i_spellST != bounds.second; ++i_spellST)
+                    {
+                        if (i_spellST->CanNotHitWithSpellEffect(effIndex))
+                            continue;
+
+                        // only creature entries supported for this target type
+                        if (i_spellST->type == SPELL_TARGET_TYPE_GAMEOBJECT)
+                            continue;
+
+                        if ((*iter)->GetEntry() == i_spellST->targetEntry)
+                        {
+                            if (i_spellST->type == SPELL_TARGET_TYPE_DEAD && ((Creature*)(*iter))->IsCorpse())
+                            {
+                                targetUnitMap.push_back((*iter));
+                            }
+                            else if (i_spellST->type == SPELL_TARGET_TYPE_CREATURE && (*iter)->isAlive())
+                            {
+                                targetUnitMap.push_back((*iter));
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            break;
+        }
         case TARGET_IN_FRONT_OF_CASTER_30:
             FillAreaTargets(targetUnitMap, radius, PUSH_IN_FRONT_30, SPELL_TARGETS_AOE_DAMAGE);
             break;
@@ -5751,6 +5760,21 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 break;
             }
+            case SPELL_EFFECT_RESURRECT:
+            case SPELL_EFFECT_RESURRECT_NEW:
+            {
+                if (m_targets.getUnitTarget()->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+                    return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
+
+                break;
+            }
+            case SPELL_EFFECT_SELF_RESURRECT:
+            {
+                if (m_caster->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+                    return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
+
+                break;
+            }
             case SPELL_EFFECT_LEAP:
             case SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER:
             {
@@ -6300,9 +6324,11 @@ SpellCastResult Spell::CheckRange(bool strict)
                     return SPELL_CAST_OK;
 
                 float range_mod = strict ? 0.0f : 5.0f;
-                float base = ATTACK_DISTANCE;
                 if (Player* modOwner = m_caster->GetSpellModOwner())
+                {
+                    float base = ATTACK_DISTANCE;
                     range_mod += modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, base, this);
+                }
 
                 // with additional 5 dist for non stricted case (some melee spells have delay in apply
                 return m_caster->CanReachWithMeleeAttack(target, range_mod) ? SPELL_CAST_OK : SPELL_FAILED_OUT_OF_RANGE;
@@ -7089,16 +7115,22 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
         if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
             return false;
 
-        // unselectable targets skipped in all cases except TARGET_SCRIPT targeting
+        // unselectable targets skipped in all cases except TARGET_SCRIPT targeting or vehicle passengers
         // in case TARGET_SCRIPT target selected by server always and can't be cheated
         if ((!m_IsTriggeredSpell || target != m_targets.getUnitTarget()) &&
                 target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) &&
+                (!target->GetTransportInfo() || (target->GetTransportInfo() &&
+                !((Unit*)target->GetTransportInfo()->GetTransport())->IsVehicle())) &&
                 m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT &&
                 m_spellInfo->EffectImplicitTargetB[eff] != TARGET_SCRIPT &&
                 m_spellInfo->EffectImplicitTargetA[eff] != TARGET_AREAEFFECT_INSTANT &&
                 m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_INSTANT &&
                 m_spellInfo->EffectImplicitTargetA[eff] != TARGET_AREAEFFECT_CUSTOM &&
-                m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_CUSTOM)
+                m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_CUSTOM &&
+                m_spellInfo->EffectImplicitTargetA[eff] != TARGET_NARROW_FRONTAL_CONE &&
+                m_spellInfo->EffectImplicitTargetB[eff] != TARGET_NARROW_FRONTAL_CONE &&
+                m_spellInfo->EffectImplicitTargetA[eff] != TARGET_NARROW_FRONTAL_CONE_2 &&
+                m_spellInfo->EffectImplicitTargetB[eff] != TARGET_NARROW_FRONTAL_CONE_2)
             return false;
     }
 
@@ -7700,15 +7732,21 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 62577:                                 // Blizzard (Ulduar, Thorim)
                 case 62603:                                 // Blizzard (h) (Ulduar, Thorim)
                 case 62797:                                 // Storm Cloud (Ulduar, Hodir)
+                case 62978:                                 // Summon Guardian (Ulduar, Yogg Saron)
                 case 63018:                                 // Searing Light (Ulduar, XT-002)
                 case 63024:                                 // Gravity Bomb (Ulduar, XT-002)
                 case 63545:                                 // Icicle (Ulduar, Hodir)
+                case 63744:                                 // Sara's Anger (Ulduar, Yogg-Saron)
+                case 63745:                                 // Sara's Blessing (Ulduar, Yogg-Saron)
+                case 63747:                                 // Sara's Fervor (Ulduar, Yogg-Saron)
                 case 63795:                                 // Psychosis (Ulduar, Yogg-Saron)
                 case 63820:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Scrap Bots, hits npc 33856
+                case 63830:                                 // Malady of the Mind (Ulduar, Yogg-Saron)
                 case 64218:                                 // Overcharge (VoA, Emalon)
                 case 64234:                                 // Gravity Bomb (h) (Ulduar, XT-002)
                 case 64402:                                 // Rocket Strike (Ulduar, Mimiron)
                 case 64425:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Assault Bots, hits npc 33856
+                case 64465:                                 // Shadow Beacon (Ulduar, Yogg-Saron)
                 case 64543:                                 // Melt Ice (Ulduar, Hodir)
                 case 64623:                                 // Frost Bomb (Ulduar, Mimiron)
                 case 65121:                                 // Searing Light (h) (Ulduar, XT-002)
@@ -7756,6 +7794,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 10258:                                 // Awaken Vault Warder (Uldaman)
                 case 28542:                                 // Life Drain (Naxx, Sapphiron)
                 case 62476:                                 // Icicle (Ulduar, Hodir)
+                case 63802:                                 // Brain Link (Ulduar, Yogg-Saron)
                 case 66013:                                 // Penetrating Cold (10 man) (ToCrusader, Anub'arak)
                 case 67755:                                 // Nerubian Burrower (Mode 1) (ToCrusader, Anub'arak)
                 case 67756:                                 // Nerubian Burrower (Mode 2) (ToCrusader, Anub'arak)
@@ -7941,6 +7980,8 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 73143:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 25N)
                 case 73144:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 10H)
                 case 73145:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 25H)
+                case 72350:                                 // Fury of Frostmourne
+                case 72351:                                 // Fury of Frostmourne
                     radius = DEFAULT_VISIBILITY_INSTANCE;
                     break;
                 default:

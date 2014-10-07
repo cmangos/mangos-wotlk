@@ -585,9 +585,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-        if (pVictim != this)
-            RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
-
         if (pVictim->GetTypeId() == TYPEID_PLAYER && !pVictim->IsStandState() && !pVictim->hasUnitState(UNIT_STAT_STUNNED))
             pVictim->SetStandState(UNIT_STAND_STATE_STAND);
     }
@@ -4121,7 +4118,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                     case SPELL_AURA_OBS_MOD_MANA:
                     case SPELL_AURA_POWER_BURN_MANA:
                     case SPELL_AURA_CONTROL_VEHICLE:
-                    case SPELL_AURA_284: // SPELL_AURA_LINKED_AURA, unknown how it is handled, but let it stack like vehicle control aura
+                    case SPELL_AURA_TRIGGER_LINKED_AURA:
                     case SPELL_AURA_PERIODIC_DUMMY:
                         break;
                     case SPELL_AURA_PERIODIC_ENERGIZE:      // all or self or clear non-stackable
@@ -4142,7 +4139,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
     if (!IsPassiveSpell(aurSpellInfo) || !IsPassiveSpellStackableWithRanks(aurSpellInfo))
     {
         // Hack exceptions for Vehicle/Linked auras
-        if (!IsSpellHaveAura(aurSpellInfo, SPELL_AURA_CONTROL_VEHICLE) && !IsSpellHaveAura(aurSpellInfo, SPELL_AURA_284) &&
+        if (!IsSpellHaveAura(aurSpellInfo, SPELL_AURA_CONTROL_VEHICLE) && !IsSpellHaveAura(aurSpellInfo, SPELL_AURA_TRIGGER_LINKED_AURA) &&
                 !RemoveNoStackAurasDueToAuraHolder(holder))
         {
             delete holder;
@@ -5530,9 +5527,12 @@ void Unit::SetPowerType(Powers new_powertype)
                 break;
         }
 
-        // set power
-        SetMaxPower(new_powertype, maxValue);
-        SetPower(new_powertype, curValue);
+        // set power (except for mana)
+        if (new_powertype != POWER_MANA)
+        {
+            SetMaxPower(new_powertype, maxValue);
+            SetPower(new_powertype, curValue);
+        }
 
         // send power type update to client
         WorldPacket data(SMSG_POWER_UPDATE);
@@ -5986,6 +5986,27 @@ bool Unit::isAttackingPlayer() const
         return true;
 
     return CheckAllControlledUnits(IsAttackingPlayerHelper(), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+}
+
+/// Returns true if a vehicle can attack other units by itself (without any controller)
+bool Unit::CanAttackByItself() const
+{
+    if (!IsVehicle())
+        return true;
+
+    for (uint8 i = 0; i < MAX_VEHICLE_SEAT; ++i)
+    {
+        if (uint32 seatId = m_vehicleInfo->GetVehicleEntry()->m_seatID[i])
+        {
+            if (VehicleSeatEntry const* seatEntry = sVehicleSeatStore.LookupEntry(seatId))
+            {
+                if (seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL)
+                    return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 void Unit::RemoveAllAttackers()
@@ -8640,6 +8661,10 @@ void Unit::SetDeathState(DeathState s)
         if (IsVehicle())
             m_vehicleInfo->RemoveAccessoriesFromMap();
 
+        // Unboard from transport
+        if (GetTransportInfo() && ((Unit*)GetTransportInfo()->GetTransport())->IsVehicle())
+            ((Unit*)GetTransportInfo()->GetTransport())->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, GetObjectGuid());
+
         ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
         ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
         // remove aurastates allowing special moves
@@ -9773,7 +9798,6 @@ void CharmInfo::InitCharmCreateSpells()
             bool onlyselfcast = true;
             SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
 
-            if (!spellInfo) onlyselfcast = false;
             for (uint32 i = 0; i < 3 && onlyselfcast; ++i)  // nonexistent spell will not make any problems as onlyselfcast would be false -> break right away
             {
                 if (spellInfo->EffectImplicitTargetA[i] != TARGET_SELF && spellInfo->EffectImplicitTargetA[i] != 0)
@@ -10114,13 +10138,13 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                 SpellAuraProcResult procResult = (*this.*AuraProcHandler[triggeredByHolder->GetSpellProto()->EffectApplyAuraName[i]])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
                 switch (procResult)
                 {
-                case SPELL_AURA_PROC_CANT_TRIGGER:
-                    continue;
-                case SPELL_AURA_PROC_FAILED:
-                    procSuccess = false;
-                    break;
-                case SPELL_AURA_PROC_OK:
-                    break;
+                    case SPELL_AURA_PROC_CANT_TRIGGER:
+                        continue;
+                    case SPELL_AURA_PROC_FAILED:
+                        procSuccess = false;
+                        break;
+                    case SPELL_AURA_PROC_OK:
+                        break;
                 }
 
                 anyAuraProc = true;
@@ -10833,6 +10857,24 @@ void Unit::SetFFAPvP(bool state)
         RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
 
     CallForAllControlledUnits(SetFFAPvPHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+}
+
+void Unit::RestoreOriginalFaction()
+{
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->setFactionForRace(getRace());
+    else
+    {
+        Creature* creature = (Creature*)this;
+
+        if (creature->IsPet() || creature->IsTotem())
+        {
+            if (Unit* owner = GetOwner())
+                setFaction(owner->getFaction());
+        }
+        else
+            setFaction(creature->GetCreatureInfo()->FactionAlliance);
+    }
 }
 
 void Unit::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpeed)

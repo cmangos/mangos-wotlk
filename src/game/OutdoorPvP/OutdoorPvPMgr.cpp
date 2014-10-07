@@ -64,8 +64,8 @@ void OutdoorPvPMgr::InitOutdoorPvP()
     LOAD_OPVP_ZONE(NA);
     LOAD_OPVP_ZONE(GH);
 
-    sLog.outString();
     sLog.outString(">> Loaded %u Outdoor PvP zones", counter);
+    sLog.outString();
 }
 
 OutdoorPvP* OutdoorPvPMgr::GetScript(uint32 zoneId)

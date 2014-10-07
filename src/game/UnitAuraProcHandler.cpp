@@ -50,7 +50,7 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS] =
     &Unit::HandleNULLProc,                                  // 15 SPELL_AURA_DAMAGE_SHIELD
     &Unit::HandleNULLProc,                                  // 16 SPELL_AURA_MOD_STEALTH
     &Unit::HandleNULLProc,                                  // 17 SPELL_AURA_MOD_STEALTH_DETECT
-    &Unit::HandleNULLProc,                                  // 18 SPELL_AURA_MOD_INVISIBILITY
+    &Unit::HandleInvisibilityAuraProc,                      // 18 SPELL_AURA_MOD_INVISIBILITY
     &Unit::HandleNULLProc,                                  // 19 SPELL_AURA_MOD_INVISIBILITY_DETECTION
     &Unit::HandleNULLProc,                                  // 20 SPELL_AURA_OBS_MOD_HEALTH
     &Unit::HandleNULLProc,                                  // 21 SPELL_AURA_OBS_MOD_MANA
@@ -955,6 +955,23 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     if (triggeredByAura->GetStackAmount() > 1 && !triggeredByAura->GetHolder()->ModStackAmount(-1))
                         return SPELL_AURA_PROC_CANT_TRIGGER;
                 }
+                // Grim Reprisal
+                case 63305:
+                {
+                    // also update caster entry if required
+                    if (Unit* caster = triggeredByAura->GetCaster())
+                    {
+                        if (caster->GetEntry() != 33943 && caster->GetTypeId() == TYPEID_UNIT)
+                        {
+                            ((Creature*)caster)->UpdateEntry(33943);
+                            caster->CastSpell(caster, 64017, true);
+                        }
+                    }
+
+                    triggered_spell_id = 64039;
+                    basepoints[EFFECT_INDEX_0] = damage;
+                    break;
+                }
                 // Glyph of Life Tap
                 case 63320:
                     triggered_spell_id = 63321;
@@ -1154,7 +1171,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     // Remove only single aura from stack and remove holder if its last stack
                     RemoveAuraHolderFromStack(74396);
                     return SPELL_AURA_PROC_OK;
-                    break;
                 }
             }
             break;
@@ -2944,6 +2960,12 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 // case 59288: break;                       // Infra-Green Shield
                 // case 59532: break;                       // Abandon Passengers on Poly
                 // case 59735: break:                       // Woe Strike
+                case 64148:                                 // Diminsh Power
+                {
+                    if (Unit* caster = triggeredByAura->GetCaster())
+                        caster->InterruptNonMeleeSpells(false);
+                    return SPELL_AURA_PROC_OK;
+                }
                 case 64415:                                 // // Val'anyr Hammer of Ancient Kings - Equip Effect
                 {
                     // for DOT procs
@@ -4141,4 +4163,13 @@ SpellAuraProcResult Unit::HandleRemoveByDamageChanceProc(Unit* /*pVictim*/, uint
     }
 
     return SPELL_AURA_PROC_FAILED;
+}
+
+SpellAuraProcResult Unit::HandleInvisibilityAuraProc(Unit* pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const *procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown)
+{
+    if (triggeredByAura->GetSpellProto()->HasAttribute(SPELL_ATTR_PASSIVE) || triggeredByAura->GetSpellProto()->HasAttribute(SPELL_ATTR_EX_NEGATIVE))
+        return SPELL_AURA_PROC_FAILED;
+
+    RemoveAurasDueToSpell(triggeredByAura->GetId());
+    return SPELL_AURA_PROC_OK;
 }

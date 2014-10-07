@@ -30,7 +30,6 @@ protected:
 	bool m_keepInterResults;
 	bool m_buildAll;
 	float m_totalBuildTimeMs;
-	bool m_drawPortals;
 
 	unsigned char* m_triareas;
 	rcHeightfield* m_solid;
@@ -59,10 +58,10 @@ protected:
 		DRAWMODE_BOTH_CONTOURS,
 		DRAWMODE_CONTOURS,
 		DRAWMODE_POLYMESH,
-		DRAWMODE_POLYMESH_DETAIL,
+		DRAWMODE_POLYMESH_DETAIL,		
 		MAX_DRAWMODE
 	};
-	
+		
 	DrawMode m_drawMode;
 	
 	int m_maxTiles;

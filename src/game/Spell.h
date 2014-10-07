@@ -362,6 +362,7 @@ class Spell
         void EffectActivateSpec(SpellEffectIndex eff_idx);
         void EffectCancelAura(SpellEffectIndex eff_idx);
         void EffectKnockBackFromPosition(SpellEffectIndex eff_idx);
+        void EffectGravityPull(SpellEffectIndex eff_idx);
 
         Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
         ~Spell();

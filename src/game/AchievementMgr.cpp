@@ -59,7 +59,7 @@ namespace MaNGOS
                 char const* text = sObjectMgr.GetMangosString(i_textId, loc_idx);
 
                 ChatHandler::BuildChatPacket(data, i_msgtype, text, LANG_UNIVERSAL, i_player.GetChatTag(),  i_player.GetObjectGuid(), NULL, i_player.GetObjectGuid(), NULL, NULL,
-                    i_achievementId);
+                                             i_achievementId);
             }
 
         private:

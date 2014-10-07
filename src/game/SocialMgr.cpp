@@ -132,19 +132,20 @@ void PlayerSocial::SendSocialList()
 
     for (PlayerSocialMap::iterator itr = m_playerSocialMap.begin(); itr != m_playerSocialMap.end(); ++itr)
     {
-        sSocialMgr.GetFriendInfo(plr, itr->first, itr->second);
+        FriendInfo &friendInfo = itr->second;
+        sSocialMgr.GetFriendInfo(plr, itr->first, friendInfo);
 
         data << ObjectGuid(HIGHGUID_PLAYER, itr->first);    // player guid
-        data << uint32(itr->second.Flags);                  // player flag (0x1-friend?, 0x2-ignored?, 0x4-muted?)
-        data << itr->second.Note;                           // string note
-        if (itr->second.Flags & SOCIAL_FLAG_FRIEND)         // if IsFriend()
+        data << uint32(friendInfo.Flags);                  // player flag (0x1-friend?, 0x2-ignored?, 0x4-muted?)
+        data << friendInfo.Note;                           // string note
+        if (friendInfo.Flags & SOCIAL_FLAG_FRIEND)         // if IsFriend()
         {
-            data << uint8(itr->second.Status);              // online/offline/etc?
-            if (itr->second.Status)                         // if online
+            data << uint8(friendInfo.Status);              // online/offline/etc?
+            if (friendInfo.Status)                         // if online
             {
-                data << uint32(itr->second.Area);           // player area
-                data << uint32(itr->second.Level);          // player level
-                data << uint32(itr->second.Class);          // player class
+                data << uint32(friendInfo.Area);           // player area
+                data << uint32(friendInfo.Level);          // player level
+                data << uint32(friendInfo.Class);          // player class
             }
         }
     }

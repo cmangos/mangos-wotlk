@@ -100,6 +100,9 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_XP_USER                  = 33,           // source or target with Player, datalong = bool (0=off, 1=on)
     SCRIPT_COMMAND_TERMINATE_COND           = 34,           // datalong = condition_id, datalong2 = if != 0 then quest_id of quest that will be failed for player's group if the script is terminated
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL terminate when condition is false ELSE terminate when condition is true
+    SCRIPT_COMMAND_SEND_AI_EVENT_AROUND     = 35,           // resSource = Creature, resTarget = Unit
+                                                            // datalong = AIEventType
+                                                            // datalong2 = radius
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
@@ -323,6 +326,12 @@ struct ScriptInfo
             uint32 failQuest;                               // datalong2
         } terminateCond;
 
+        struct                                              // SCRIPT_COMMAND_SEND_AI_EVENT_AROUND (35)
+        {
+            uint32 eventType;                               // datalong
+            uint32 radius;                                  // datalong2
+        } sendAIEvent;
+
         struct
         {
             uint32 data[2];
@@ -509,6 +518,7 @@ class ScriptMgr
         bool OnGameObjectUse(Player* pPlayer, GameObject* pGameObject);
         bool OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets);
         bool OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry);
+        bool OnNpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 spellId);
         bool OnProcessEvent(uint32 eventId, Object* pSource, Object* pTarget, bool isStart);
         bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid);
         bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, GameObject* pTarget, ObjectGuid originalCasterGuid);
@@ -563,6 +573,7 @@ class ScriptMgr
         bool (MANGOS_IMPORT* m_pOnGOUse)(Player*, GameObject*);
         bool (MANGOS_IMPORT* m_pOnItemUse)(Player*, Item*, SpellCastTargets const&);
         bool (MANGOS_IMPORT* m_pOnAreaTrigger)(Player*, AreaTriggerEntry const*);
+        bool (MANGOS_IMPORT* m_pOnNpcSpellClick)(Player*, Creature*, uint32);
         bool (MANGOS_IMPORT* m_pOnProcessEvent)(uint32, Object*, Object*, bool);
         bool (MANGOS_IMPORT* m_pOnEffectDummyCreature)(Unit*, uint32, SpellEffectIndex, Creature*, ObjectGuid);
         bool (MANGOS_IMPORT* m_pOnEffectDummyGO)(Unit*, uint32, SpellEffectIndex, GameObject*, ObjectGuid);

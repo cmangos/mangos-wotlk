@@ -226,7 +226,7 @@ void WorldSession::SendLfgJoinResult(LfgJoinResult result)
     {
         uint8 count1 = 0;
         data << uint8(count1);                              // players count?
-        for (uint32 i = 0; i < count1; ++i)
+        /*for (uint32 i = 0; i < count1; ++i)
         {
             data << uint64(0);                              // player guid?
             uint32 count2 = 0;
@@ -235,7 +235,7 @@ void WorldSession::SendLfgJoinResult(LfgJoinResult result)
                 data << uint32(0);                          // dungeon id/type
                 data << uint32(0);                          // lock status?
             }
-        }
+        }*/
     }
 
     SendPacket(&data);

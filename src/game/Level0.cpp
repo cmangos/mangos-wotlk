@@ -123,23 +123,25 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
 
 bool ChatHandler::HandleDismountCommand(char* /*args*/)
 {
+    Player* player = m_session->GetPlayer();
+
     // If player is not mounted, so go out :)
-    if (!m_session->GetPlayer()->IsMounted())
+    if (!player->IsMounted())
     {
         SendSysMessage(LANG_CHAR_NON_MOUNTED);
         SetSentErrorMessage(true);
         return false;
     }
 
-    if (m_session->GetPlayer()->IsTaxiFlying())
+    if (player->IsTaxiFlying())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         SetSentErrorMessage(true);
         return false;
     }
 
-    m_session->GetPlayer()->Unmount();
-    m_session->GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+    player->Unmount();
+    player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     return true;
 }
 
@@ -172,10 +174,11 @@ bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
         HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
         for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
         {
-            AccountTypes itr_sec = itr->second->GetSession()->GetSecurity();
-            if ((itr->second->isGameMaster() || (itr_sec > SEC_PLAYER && itr_sec <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
-                    (!m_session || itr->second->IsVisibleGloballyFor(m_session->GetPlayer())))
-                names.push_back(std::make_pair<std::string, bool>(GetNameLink(itr->second), itr->second->isAcceptWhispers()));
+            Player* player = itr->second;
+            AccountTypes security = player->GetSession()->GetSecurity();
+            if ((player->isGameMaster() || (security > SEC_PLAYER && security <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
+                (!m_session || player->IsVisibleGloballyFor(m_session->GetPlayer())))
+                names.push_back(std::make_pair<std::string, bool>(GetNameLink(player), player->isAcceptWhispers()));
         }
     }
 

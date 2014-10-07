@@ -130,7 +130,7 @@ bool InputGeom::loadMesh(rcContext* ctx, const char* filepath)
 	m_offMeshConCount = 0;
 	m_volumeCount = 0;
 	
-	m_mesh = new myMeshLoaderObj;
+	m_mesh = new rcMeshLoaderObj;
 	if (!m_mesh)
 	{
 		ctx->log(RC_LOG_ERROR, "loadMesh: Out of memory 'm_mesh'.");
@@ -174,8 +174,12 @@ bool InputGeom::load(rcContext* ctx, const char* filePath)
 		fclose(fp);
 		return false;
 	}
-	fread(buf, bufSize, 1, fp);
+	size_t readLen = fread(buf, bufSize, 1, fp);
 	fclose(fp);
+	if (readLen != 1)
+	{
+		return false;
+	}
 	
 	m_offMeshConCount = 0;
 	m_volumeCount = 0;
@@ -272,8 +276,8 @@ bool InputGeom::save(const char* filepath)
 	{
 		ConvexVolume* vol = &m_volumes[i];
 		fprintf(fp, "v %d %d %f %f\n", vol->nverts, vol->area, vol->hmin, vol->hmax);
-		for (int i = 0; i < vol->nverts; ++i)
-			fprintf(fp, "%f %f %f\n", vol->verts[i*3+0], vol->verts[i*3+1], vol->verts[i*3+2]);
+		for (int j = 0; j < vol->nverts; ++j)
+			fprintf(fp, "%f %f %f\n", vol->verts[j*3+0], vol->verts[j*3+1], vol->verts[j*3+2]);
 	}
 	
 	fclose(fp);

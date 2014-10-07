@@ -283,6 +283,9 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         // Get Holder for Creature Linking
         CreatureLinkingHolder* GetCreatureLinkingHolder() { return &m_creatureLinkingHolder; }
 
+        // Teleport all players in that map to choosed location
+        void TeleportAllPlayersTo(TeleportLocation loc);
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 
@@ -293,7 +296,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void SendInitTransports(Player* player);
         void SendRemoveTransports(Player* player);
 
-        bool CreatureCellRelocation(Creature* creature, Cell new_cell);
+        bool CreatureCellRelocation(Creature* creature, const Cell &new_cell);
 
         bool loaded(const GridPair&) const;
         void EnsureGridCreated(const GridPair&);

@@ -26,6 +26,7 @@
 #include "DetourDebugDraw.h"
 #include "DetourNavMesh.h"
 #include "DetourNavMeshQuery.h"
+#include "DetourCrowd.h"
 #include "imgui.h"
 #include "SDL.h"
 #include "SDL_opengl.h"
@@ -38,19 +39,27 @@ Sample::Sample() :
 	m_geom(0),
 	m_navMesh(0),
 	m_navQuery(0),
+	m_crowd(0),
 	m_navMeshDrawFlags(DU_DRAWNAVMESH_OFFMESHCONS|DU_DRAWNAVMESH_CLOSEDLIST),
 	m_tool(0),
 	m_ctx(0)
 {
 	resetCommonSettings();
 	m_navQuery = dtAllocNavMeshQuery();
+	m_crowd = dtAllocCrowd();
+
+	for (int i = 0; i < MAX_TOOLS; i++)
+		m_toolStates[i] = 0;
 }
 
 Sample::~Sample()
 {
 	dtFreeNavMeshQuery(m_navQuery);
 	dtFreeNavMesh(m_navMesh);
+	dtFreeCrowd(m_crowd);
 	delete m_tool;
+	for (int i = 0; i < MAX_TOOLS; i++)
+		delete m_toolStates[i];
 }
 
 void Sample::setTool(SampleTool* tool)
@@ -82,7 +91,7 @@ void Sample::handleRender()
 		
 	// Draw mesh
 	duDebugDrawTriMesh(&dd, m_geom->getMesh()->getVerts(), m_geom->getMesh()->getVertCount(),
-					   m_geom->getMesh()->getTris(), m_geom->getMesh()->getNormals(), m_geom->getMesh()->getTriCount(), 0);
+					   m_geom->getMesh()->getTris(), m_geom->getMesh()->getNormals(), m_geom->getMesh()->getTriCount(), 0, 1.0f);
 	// Draw bounds
 	const float* bmin = m_geom->getMeshBoundsMin();
 	const float* bmax = m_geom->getMeshBoundsMax();
@@ -125,6 +134,7 @@ void Sample::resetCommonSettings()
 	m_vertsPerPoly = 6.0f;
 	m_detailSampleDist = 6.0f;
 	m_detailSampleMaxError = 1.0f;
+	m_partitionType = SAMPLE_PARTITION_WATERSHED;
 }
 
 void Sample::handleCommonSettings()
@@ -155,16 +165,25 @@ void Sample::handleCommonSettings()
 	imguiLabel("Region");
 	imguiSlider("Min Region Size", &m_regionMinSize, 0.0f, 150.0f, 1.0f);
 	imguiSlider("Merged Region Size", &m_regionMergeSize, 0.0f, 150.0f, 1.0f);
+
+	imguiSeparator();
+	imguiLabel("Partitioning");
+	if (imguiCheck("Watershed", m_partitionType == SAMPLE_PARTITION_WATERSHED))
+		m_partitionType = SAMPLE_PARTITION_WATERSHED;
+	if (imguiCheck("Monotone", m_partitionType == SAMPLE_PARTITION_MONOTONE))
+		m_partitionType = SAMPLE_PARTITION_MONOTONE;
+	if (imguiCheck("Layers", m_partitionType == SAMPLE_PARTITION_LAYERS))
+		m_partitionType = SAMPLE_PARTITION_LAYERS;
 	
 	imguiSeparator();
 	imguiLabel("Polygonization");
 	imguiSlider("Max Edge Length", &m_edgeMaxLen, 0.0f, 50.0f, 1.0f);
-	imguiSlider("Max Edge Error", &m_edgeMaxError, 0.1f, 4.0f, 0.1f);
+	imguiSlider("Max Edge Error", &m_edgeMaxError, 0.1f, 3.0f, 0.1f);
 	imguiSlider("Verts Per Poly", &m_vertsPerPoly, 3.0f, 12.0f, 1.0f);		
 
 	imguiSeparator();
 	imguiLabel("Detail Mesh");
-	imguiSlider("Sample Distance", &m_detailSampleDist, 0.0f, 32.0f, 1.0f);
+	imguiSlider("Sample Distance", &m_detailSampleDist, 0.0f, 16.0f, 1.0f);
 	imguiSlider("Max Sample Error", &m_detailSampleMaxError, 0.0f, 16.0f, 1.0f);
 	
 	imguiSeparator();
@@ -197,5 +216,52 @@ void Sample::handleUpdate(const float dt)
 {
 	if (m_tool)
 		m_tool->handleUpdate(dt);
+	updateToolStates(dt);
+}
+
+
+void Sample::updateToolStates(const float dt)
+{
+	for (int i = 0; i < MAX_TOOLS; i++)
+	{
+		if (m_toolStates[i])
+			m_toolStates[i]->handleUpdate(dt);
+	}
+}
+
+void Sample::initToolStates(Sample* sample)
+{
+	for (int i = 0; i < MAX_TOOLS; i++)
+	{
+		if (m_toolStates[i])
+			m_toolStates[i]->init(sample);
+	}
+}
+
+void Sample::resetToolStates()
+{
+	for (int i = 0; i < MAX_TOOLS; i++)
+	{
+		if (m_toolStates[i])
+			m_toolStates[i]->reset();
+	}
+}
+
+void Sample::renderToolStates()
+{
+	for (int i = 0; i < MAX_TOOLS; i++)
+	{
+		if (m_toolStates[i])
+			m_toolStates[i]->handleRender();
+	}
+}
+
+void Sample::renderOverlayToolStates(double* proj, double* model, int* view)
+{
+	for (int i = 0; i < MAX_TOOLS; i++)
+	{
+		if (m_toolStates[i])
+			m_toolStates[i]->handleRenderOverlay(proj, model, view);
+	}
 }
 

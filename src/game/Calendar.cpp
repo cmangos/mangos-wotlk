@@ -354,7 +354,7 @@ void CalendarMgr::RemoveEvent(uint64 eventId, Player* remover)
 // Add invit to an event and inform client
 // some check done before so it may fail and raison is sent to client
 // return value is the CalendarInvite pointer on success
-CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& senderGuid, ObjectGuid const& inviteeGuid, CalendarInviteStatus status, CalendarModerationRank rank, std::string text, time_t statusTime)
+CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& senderGuid, ObjectGuid const& inviteeGuid, CalendarInviteStatus status, CalendarModerationRank rank, const std::string &text, time_t statusTime)
 {
     Player* sender = sObjectMgr.GetPlayer(senderGuid);
     if (!event || !sender)
@@ -491,18 +491,19 @@ void CalendarMgr::CopyEvent(uint64 eventId, time_t newTime, ObjectGuid const& gu
 
         while (ci_itr != cInvMap->end())
         {
-            if (ci_itr->second->InviteeGuid == guid)
+            const CalendarInvite* invite = ci_itr->second;
+            if (invite->InviteeGuid == guid)
             {
-                AddInvite(newEvent, guid, ci_itr->second->InviteeGuid,  CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(NULL));
+                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(NULL));
             }
             else
             {
                 CalendarModerationRank rank = CALENDAR_RANK_PLAYER;
                 // copy moderator rank
-                if (ci_itr->second->Rank == CALENDAR_RANK_MODERATOR)
+                if (invite->Rank == CALENDAR_RANK_MODERATOR)
                     rank = CALENDAR_RANK_MODERATOR;
 
-                AddInvite(newEvent, guid, ci_itr->second->InviteeGuid,  CALENDAR_STATUS_INVITED, rank, "", time(NULL));
+                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_INVITED, rank, "", time(NULL));
             }
             ++ci_itr;
         }
@@ -578,8 +579,8 @@ void CalendarMgr::LoadCalendarsFromDB()
     {
         BarGoLink bar(1);
         bar.step();
-        sLog.outString();
         sLog.outString(">> calendar_events table is empty!");
+        sLog.outString();
     }
     else
     {
@@ -607,8 +608,8 @@ void CalendarMgr::LoadCalendarsFromDB()
         }
         while (eventsQuery->NextRow());
 
-        sLog.outString();
         sLog.outString(">> Loaded %u events!", uint32(eventsQuery->GetRowCount()));
+        sLog.outString();
         delete eventsQuery;
     }
 
@@ -619,7 +620,6 @@ void CalendarMgr::LoadCalendarsFromDB()
     {
         BarGoLink bar(1);
         bar.step();
-        sLog.outString();
 
         if (m_MaxEventId)                                   // An Event was loaded before
         {
@@ -631,6 +631,7 @@ void CalendarMgr::LoadCalendarsFromDB()
         }
         else
             sLog.outString(">> calendar_invite table is empty!");
+        sLog.outString();
     }
     else
     {
@@ -667,7 +668,7 @@ void CalendarMgr::LoadCalendarsFromDB()
                 m_MaxInviteId = std::max(inviteId, m_MaxInviteId);
             }
             while (invitesQuery->NextRow());
-            sLog.outString();
+
             sLog.outString(">> Loaded "UI64FMTD" invites! %s", totalInvites, (deletedInvites != 0) ? "(deleted some invites without corresponding event!)" : "");
         }
         else

@@ -438,7 +438,7 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
 
     // normalize the name if specified and check if it exists
     if (!normalizePlayerName(name))
-        name = "";
+        name.clear();
 
     if (ObjectMgr::CheckPlayerName(name, true) == CHAR_NAME_SUCCESS)
     {
@@ -446,12 +446,12 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
         result = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", name.c_str());
         if (result)
         {
-            name = "";                                      // use the one from the dump
+            name.clear();                                   // use the one from the dump
             delete result;
         }
     }
     else
-        name = "";
+        name.clear();
 
     // name encoded or empty
 
@@ -552,7 +552,7 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
                 if (!changenth(line, 2, chraccount))        // characters.account update
                     ROLLBACK(DUMP_FILE_BROKEN);
 
-                if (name == "")
+                if (name.empty())
                 {
                     // check if the original name already exists
                     name = getnth(line, 3);                 // characters.name

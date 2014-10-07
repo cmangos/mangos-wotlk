@@ -1008,7 +1008,7 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(QueryResult* result, uin
     WorldSession* session = sWorld.FindSession(accountId);
     if (!session)
     {
-        if (result) delete result;
+        delete result;
         return;
     }
 

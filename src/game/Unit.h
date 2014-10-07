@@ -1346,6 +1346,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         AttackerSet const& getAttackers() const { return m_attackers; }
 
         bool isAttackingPlayer() const;                     //< Returns if this unit is attacking a player (or this unit's minions/pets are attacking a player)
+        bool CanAttackByItself() const;                     //< Used to check if a vehicle is allowed attack other units by itself
 
         Unit* getVictim() const { return m_attacking; }     //< Returns the victim that this unit is currently attacking
         void CombatStop(bool includingCast = false);        //< Stop this unit from combat, if includingCast==true, also interrupt casting
@@ -1412,6 +1413,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
         void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction); }
         FactionTemplateEntry const* getFactionTemplateEntry() const;
+        void RestoreOriginalFaction();
         bool IsHostileTo(Unit const* unit) const override;
         bool IsHostileToPlayers() const;
         bool IsFriendlyTo(Unit const* unit) const override;
@@ -1997,6 +1999,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         SpellAuraProcResult HandleManaShieldAuraProc(Unit* pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
         SpellAuraProcResult HandleModResistanceAuraProc(Unit* pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
         SpellAuraProcResult HandleRemoveByDamageChanceProc(Unit* pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
+        SpellAuraProcResult HandleInvisibilityAuraProc(Unit* pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
         SpellAuraProcResult HandleNULLProc(Unit* /*pVictim*/, uint32 /*damage*/, Aura* /*triggeredByAura*/, SpellEntry const* /*procSpell*/, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
         {
             // no proc handler for this aura type

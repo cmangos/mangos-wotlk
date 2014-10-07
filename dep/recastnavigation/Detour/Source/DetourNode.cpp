@@ -22,16 +22,30 @@
 #include "DetourCommon.h"
 #include <string.h>
 
+#ifdef DT_POLYREF64
+// From Thomas Wang, https://gist.github.com/badboy/6267743
 inline unsigned int dtHashRef(dtPolyRef a)
 {
-    a = (~a) + (a << 18);
-    a = a ^ (a >> 31);
-    a = a * 21;
-    a = a ^ (a >> 11);
-    a = a + (a << 6);
-    a = a ^ (a >> 22);
-    return (unsigned int)a;
+	a = (~a) + (a << 18); // a = (a << 18) - a - 1;
+	a = a ^ (a >> 31);
+	a = a * 21; // a = (a + (a << 2)) + (a << 4);
+	a = a ^ (a >> 11);
+	a = a + (a << 6);
+	a = a ^ (a >> 22);
+	return (unsigned int)a;
 }
+#else
+inline unsigned int dtHashRef(dtPolyRef a)
+{
+	a += ~(a<<15);
+	a ^=  (a>>10);
+	a +=  (a<<3);
+	a ^=  (a>>6);
+	a += ~(a<<11);
+	a ^=  (a>>16);
+	return (unsigned int)a;
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////
 dtNodePool::dtNodePool(int maxNodes, int hashSize) :
@@ -46,15 +60,15 @@ dtNodePool::dtNodePool(int maxNodes, int hashSize) :
 	dtAssert(m_maxNodes > 0);
 
 	m_nodes = (dtNode*)dtAlloc(sizeof(dtNode)*m_maxNodes, DT_ALLOC_PERM);
-	m_next = (unsigned short*)dtAlloc(sizeof(unsigned short)*m_maxNodes, DT_ALLOC_PERM);
-	m_first = (unsigned short*)dtAlloc(sizeof(unsigned short)*hashSize, DT_ALLOC_PERM);
+	m_next = (dtNodeIndex*)dtAlloc(sizeof(dtNodeIndex)*m_maxNodes, DT_ALLOC_PERM);
+	m_first = (dtNodeIndex*)dtAlloc(sizeof(dtNodeIndex)*hashSize, DT_ALLOC_PERM);
 
 	dtAssert(m_nodes);
 	dtAssert(m_next);
 	dtAssert(m_first);
 
-	memset(m_first, 0xff, sizeof(unsigned short)*m_hashSize);
-	memset(m_next, 0xff, sizeof(unsigned short)*m_maxNodes);
+	memset(m_first, 0xff, sizeof(dtNodeIndex)*m_hashSize);
+	memset(m_next, 0xff, sizeof(dtNodeIndex)*m_maxNodes);
 }
 
 dtNodePool::~dtNodePool()
@@ -66,31 +80,50 @@ dtNodePool::~dtNodePool()
 
 void dtNodePool::clear()
 {
-	memset(m_first, 0xff, sizeof(unsigned short)*m_hashSize);
+	memset(m_first, 0xff, sizeof(dtNodeIndex)*m_hashSize);
 	m_nodeCount = 0;
 }
 
-dtNode* dtNodePool::findNode(dtPolyRef id)
+unsigned int dtNodePool::findNodes(dtPolyRef id, dtNode** nodes, const int maxNodes)
 {
+	int n = 0;
 	unsigned int bucket = dtHashRef(id) & (m_hashSize-1);
-	unsigned short i = m_first[bucket];
+	dtNodeIndex i = m_first[bucket];
 	while (i != DT_NULL_IDX)
 	{
 		if (m_nodes[i].id == id)
+		{
+			if (n >= maxNodes)
+				return n;
+			nodes[n++] = &m_nodes[i];
+		}
+		i = m_next[i];
+	}
+
+	return n;
+}
+
+dtNode* dtNodePool::findNode(dtPolyRef id, unsigned char state)
+{
+	unsigned int bucket = dtHashRef(id) & (m_hashSize-1);
+	dtNodeIndex i = m_first[bucket];
+	while (i != DT_NULL_IDX)
+	{
+		if (m_nodes[i].id == id && m_nodes[i].state == state)
 			return &m_nodes[i];
 		i = m_next[i];
 	}
 	return 0;
 }
 
-dtNode* dtNodePool::getNode(dtPolyRef id)
+dtNode* dtNodePool::getNode(dtPolyRef id, unsigned char state)
 {
 	unsigned int bucket = dtHashRef(id) & (m_hashSize-1);
-	unsigned short i = m_first[bucket];
+	dtNodeIndex i = m_first[bucket];
 	dtNode* node = 0;
 	while (i != DT_NULL_IDX)
 	{
-		if (m_nodes[i].id == id)
+		if (m_nodes[i].id == id && m_nodes[i].state == state)
 			return &m_nodes[i];
 		i = m_next[i];
 	}
@@ -98,7 +131,7 @@ dtNode* dtNodePool::getNode(dtPolyRef id)
 	if (m_nodeCount >= m_maxNodes)
 		return 0;
 	
-	i = (unsigned short)m_nodeCount;
+	i = (dtNodeIndex)m_nodeCount;
 	m_nodeCount++;
 	
 	// Init node
@@ -107,6 +140,7 @@ dtNode* dtNodePool::getNode(dtPolyRef id)
 	node->cost = 0;
 	node->total = 0;
 	node->id = id;
+	node->state = state;
 	node->flags = 0;
 	
 	m_next[i] = m_first[bucket];

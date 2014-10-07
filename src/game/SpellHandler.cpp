@@ -590,6 +590,9 @@ void WorldSession::HandleSelfResOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: CMSG_SELF_RES");                  // empty opcode
 
+    if (_player->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+        return;
+
     if (_player->GetUInt32Value(PLAYER_SELF_RES_SPELL))
     {
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL));
@@ -605,7 +608,8 @@ void WorldSession::HandleSpellClick(WorldPacket& recv_data)
     ObjectGuid guid;
     recv_data >> guid;
 
-    if (_player->isInCombat())                              // client prevent click and set different icon at combat state
+    // client prevent click and set different icon at combat state; however combat state is allowed for dungeons
+    if (_player->isInCombat() && !_player->GetMap()->IsDungeon())
         return;
 
     Creature* unit = _player->GetMap()->GetAnyTypeCreature(guid);
@@ -617,10 +621,16 @@ void WorldSession::HandleSpellClick(WorldPacket& recv_data)
     {
         if (itr->second.IsFitToRequirements(_player, unit))
         {
+            if (sScriptMgr.OnNpcSpellClick(_player, unit, itr->second.spellId))
+                return;
+
             Unit* caster = (itr->second.castFlags & 0x1) ? (Unit*)_player : (Unit*)unit;
             Unit* target = (itr->second.castFlags & 0x2) ? (Unit*)_player : (Unit*)unit;
 
-            caster->CastSpell(target, itr->second.spellId, true);
+            if (itr->second.spellId)
+                caster->CastSpell(target, itr->second.spellId, true);
+            else
+                sLog.outError("WorldSession::HandleSpellClick: npc_spell_click with entry %u has 0 in spell_id. Not handled custom case?", unit->GetEntry());
         }
     }
 }

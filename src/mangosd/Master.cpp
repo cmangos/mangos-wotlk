@@ -519,6 +519,8 @@ bool Master::_StartDB()
         return false;
     }
 
+    sLog.outString();
+
     ///- Get the realm Id from the configuration file
     realmID = sConfig.GetIntDefault("RealmID", 0);
     if (!realmID)
@@ -533,6 +535,7 @@ bool Master::_StartDB()
     }
 
     sLog.outString("Realm running as realm ID %d", realmID);
+    sLog.outString();
 
     ///- Clean the database before starting
     clearOnlineAccounts();
@@ -541,6 +544,7 @@ bool Master::_StartDB()
 
     sLog.outString("Using World DB: %s", sWorld.GetDBVersion());
     sLog.outString("Using creature EventAI: %s", sWorld.GetCreatureEventAIVersion());
+    sLog.outString();
     return true;
 }
 

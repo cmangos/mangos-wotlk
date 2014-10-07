@@ -28,6 +28,8 @@
 #include "Group.h"
 #include "SocialMgr.h"
 #include "Util.h"
+#include "Vehicle.h"
+#include "TransportSystem.h"
 
 /* differeces from off:
     -you can uninvite yourself - is is useful
@@ -819,6 +821,14 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         else
             *data << uint64(0);
     }
+
+    if (mask & GROUP_UPDATE_FLAG_VEHICLE_SEAT)
+    {
+        if (player->GetTransportInfo())
+            *data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->m_seatID[player->GetTransportInfo()->GetTransportSeat()]);
+        else
+            *data << uint32(0);
+    }
 }
 
 /*this procedure handles clients CMSG_REQUEST_PARTY_MEMBER_STATS request*/
@@ -932,6 +942,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         data << uint8(0);                                   // GROUP_UPDATE_FLAG_PET_NAME
         data << uint64(0);                                  // GROUP_UPDATE_FLAG_PET_AURAS
     }
+
+    if (player->GetTransportInfo())                         // GROUP_UPDATE_FLAG_VEHICLE_SEAT
+        data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->m_seatID[player->GetTransportInfo()->GetTransportSeat()]);
 
     SendPacket(&data);
 }

@@ -677,11 +677,12 @@ ChatCommand* ChatHandler::getCommandTable()
         { "corpses",        SEC_GAMEMASTER,     true,  &ChatHandler::HandleServerCorpsesCommand,       "", NULL },
         { "exit",           SEC_CONSOLE,        true,  &ChatHandler::HandleServerExitCommand,          "", NULL },
         { "idlerestart",    SEC_ADMINISTRATOR,  true,  NULL,                                           "", serverIdleRestartCommandTable },
-        { "idleshutdown",   SEC_ADMINISTRATOR,  true,  NULL,                                           "", serverShutdownCommandTable },
+        { "idleshutdown",   SEC_ADMINISTRATOR,  true,  NULL,                                           "", serverIdleShutdownCommandTable },
         { "info",           SEC_PLAYER,         true,  &ChatHandler::HandleServerInfoCommand,          "", NULL },
         { "log",            SEC_CONSOLE,        true,  NULL,                                           "", serverLogCommandTable },
         { "motd",           SEC_PLAYER,         true,  &ChatHandler::HandleServerMotdCommand,          "", NULL },
         { "plimit",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerPLimitCommand,        "", NULL },
+        { "resetallraid",   SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerResetAllRaidCommand,  "", NULL },
         { "restart",        SEC_ADMINISTRATOR,  true,  NULL,                                           "", serverRestartCommandTable },
         { "shutdown",       SEC_ADMINISTRATOR,  true,  NULL,                                           "", serverShutdownCommandTable },
         { "set",            SEC_ADMINISTRATOR,  true,  NULL,                                           "", serverSetCommandTable },
@@ -2524,9 +2525,7 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
     if (*tail == ':' && somethingPair)                      // optional data extraction
     {
         // :something...|h[name]|h|r
-
-        if (*tail == ':')
-            ++tail;
+        ++tail;
 
         // something|h[name]|h|r or something:something2...|h[name]|h|r
 

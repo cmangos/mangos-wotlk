@@ -19,28 +19,17 @@
 #ifndef RECASTSAMPLEDEBUG_H
 #define RECASTSAMPLEDEBUG_H
 
-#include "Sample_SoloMeshTiled.h"
+#include "Sample.h"
 #include "DetourNavMesh.h"
 #include "Recast.h"
 
-// Sample used for random debugging.
-class Sample_Debug : public Sample_SoloMeshTiled
+/// Sample used for random debugging.
+class Sample_Debug : public Sample
 {
 protected:
-    int m_hfCount;
-    rcHeightfield* m_hf;
-
-    int m_chfCount;
 	rcCompactHeightfield* m_chf;
 	rcContourSet* m_cset;
-	
-    int m_csetCount;
-
-    int m_pmeshCount;
-    rcPolyMesh* m_pmeshes;
-
-    int m_dmeshCount;
-    rcPolyMeshDetail* m_dmeshes;
+	rcPolyMesh* m_pmesh;
 
 	float m_ext[3];
 	float m_center[3];
@@ -48,21 +37,19 @@ protected:
 	dtPolyRef m_ref;
 	
 public:
-    virtual void cleanup();
 	Sample_Debug();
 	virtual ~Sample_Debug();
 	
 	virtual void handleSettings();
 	virtual void handleTools();
 	virtual void handleDebugMode();
-	virtual void handleClick(const float* p, bool shift);
+	virtual void handleClick(const float* s, const float* p, bool shift);
 	virtual void handleToggle();
 	virtual void handleRender();
 	virtual void handleRenderOverlay(double* proj, double* model, int* view);
 	virtual void handleMeshChanged(class InputGeom* geom);
 	virtual bool handleBuild();
-    virtual void setHighlightedTile(const float* pos);
-    
+
 	virtual const float* getBoundsMin();
 	virtual const float* getBoundsMax();
 };

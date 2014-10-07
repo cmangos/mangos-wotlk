@@ -135,7 +135,7 @@ bool duDumpPolyMeshDetailToObj(rcPolyMeshDetail& dmesh, duFileIO* io)
 }
 
 static const int CSET_MAGIC = ('c' << 24) | ('s' << 16) | ('e' << 8) | 't';
-static const int CSET_VERSION = 1;
+static const int CSET_VERSION = 2;
 
 bool duDumpContourSet(struct rcContourSet& cset, duFileIO* io)
 {
@@ -160,6 +160,10 @@ bool duDumpContourSet(struct rcContourSet& cset, duFileIO* io)
 	
 	io->write(&cset.cs, sizeof(cset.cs));
 	io->write(&cset.ch, sizeof(cset.ch));
+
+	io->write(&cset.width, sizeof(cset.width));
+	io->write(&cset.height, sizeof(cset.height));
+	io->write(&cset.borderSize, sizeof(cset.borderSize));
 
 	for (int i = 0; i < cset.nconts; ++i)
 	{
@@ -221,6 +225,10 @@ bool duReadContourSet(struct rcContourSet& cset, duFileIO* io)
 	io->read(&cset.cs, sizeof(cset.cs));
 	io->read(&cset.ch, sizeof(cset.ch));
 	
+	io->read(&cset.width, sizeof(cset.width));
+	io->read(&cset.height, sizeof(cset.height));
+	io->read(&cset.borderSize, sizeof(cset.borderSize));
+	
 	for (int i = 0; i < cset.nconts; ++i)
 	{
 		rcContour& cont = cset.conts[i];
@@ -251,7 +259,7 @@ bool duReadContourSet(struct rcContourSet& cset, duFileIO* io)
 	
 
 static const int CHF_MAGIC = ('r' << 24) | ('c' << 16) | ('h' << 8) | 'f';
-static const int CHF_VERSION = 2;
+static const int CHF_VERSION = 3;
 
 bool duDumpCompactHeightfield(struct rcCompactHeightfield& chf, duFileIO* io)
 {
@@ -275,6 +283,7 @@ bool duDumpCompactHeightfield(struct rcCompactHeightfield& chf, duFileIO* io)
 
 	io->write(&chf.walkableHeight, sizeof(chf.walkableHeight));
 	io->write(&chf.walkableClimb, sizeof(chf.walkableClimb));
+	io->write(&chf.borderSize, sizeof(chf.borderSize));
 
 	io->write(&chf.maxDistance, sizeof(chf.maxDistance));
 	io->write(&chf.maxRegions, sizeof(chf.maxRegions));
@@ -341,7 +350,8 @@ bool duReadCompactHeightfield(struct rcCompactHeightfield& chf, duFileIO* io)
 	
 	io->read(&chf.walkableHeight, sizeof(chf.walkableHeight));
 	io->read(&chf.walkableClimb, sizeof(chf.walkableClimb));
-	
+	io->write(&chf.borderSize, sizeof(chf.borderSize));
+
 	io->read(&chf.maxDistance, sizeof(chf.maxDistance));
 	io->read(&chf.maxRegions, sizeof(chf.maxRegions));
 	
@@ -419,7 +429,8 @@ void duLogBuildTimes(rcContext& ctx, const int totalTimeUsec)
 	logLine(ctx, RC_TIMER_MEDIAN_AREA,				"- Median Area", pc);
 	logLine(ctx, RC_TIMER_MARK_BOX_AREA,				"- Mark Box Area", pc);
 	logLine(ctx, RC_TIMER_MARK_CONVEXPOLY_AREA,		"- Mark Convex Area", pc);
-	logLine(ctx, RC_TIMER_BUILD_DISTANCEFIELD,		"- Build Disntace Field", pc);
+	logLine(ctx, RC_TIMER_MARK_CYLINDER_AREA,		"- Mark Cylinder Area", pc);
+	logLine(ctx, RC_TIMER_BUILD_DISTANCEFIELD,		"- Build Distance Field", pc);
 	logLine(ctx, RC_TIMER_BUILD_DISTANCEFIELD_DIST,	"    - Distance", pc);
 	logLine(ctx, RC_TIMER_BUILD_DISTANCEFIELD_BLUR,	"    - Blur", pc);
 	logLine(ctx, RC_TIMER_BUILD_REGIONS,				"- Build Regions", pc);
@@ -427,6 +438,7 @@ void duLogBuildTimes(rcContext& ctx, const int totalTimeUsec)
 	logLine(ctx, RC_TIMER_BUILD_REGIONS_EXPAND,		"      - Expand", pc);
 	logLine(ctx, RC_TIMER_BUILD_REGIONS_FLOOD,		"      - Find Basins", pc);
 	logLine(ctx, RC_TIMER_BUILD_REGIONS_FILTER,		"    - Filter", pc);
+	logLine(ctx, RC_TIMER_BUILD_LAYERS,				"- Build Layers", pc);
 	logLine(ctx, RC_TIMER_BUILD_CONTOURS,			"- Build Contours", pc);
 	logLine(ctx, RC_TIMER_BUILD_CONTOURS_TRACE,		"    - Trace", pc);
 	logLine(ctx, RC_TIMER_BUILD_CONTOURS_SIMPLIFY,	"    - Simplify", pc);
