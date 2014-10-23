@@ -323,6 +323,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         {
             Player* pPlayer = (Player*)passenger;
             pPlayer->ResummonPetTemporaryUnSummonedIfAny();
+            pPlayer->SetFallInformation(0, pPlayer->GetPositionZ());
 
             // SMSG_PET_DISMISS_SOUND (?)
         }
