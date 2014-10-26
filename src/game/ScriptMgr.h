@@ -387,6 +387,7 @@ struct ScriptInfo
             case SCRIPT_COMMAND_MOVE_TO:
             case SCRIPT_COMMAND_TEMP_SUMMON_CREATURE:
             case SCRIPT_COMMAND_CAST_SPELL:
+            case SCRIPT_COMMAND_PLAY_SOUND:
             case SCRIPT_COMMAND_MOVEMENT:
             case SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL:
             case SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL:
