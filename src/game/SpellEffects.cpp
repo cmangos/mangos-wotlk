@@ -3929,8 +3929,8 @@ void Spell::EffectForceCast(SpellEffectIndex eff_idx)
             m_caster->RemoveAurasDueToSpell(basePoints);
     }
 
-    // spell effect 141 has BasePoints greater than 1
-    if (eff_idx == SPELL_EFFECT_FORCE_CAST_WITH_VALUE)
+    // spell effect 141 needs to be cast as custom with basePoints
+    if (m_spellInfo->Effect[eff_idx] == SPELL_EFFECT_FORCE_CAST_WITH_VALUE)
         unitTarget->CastCustomSpell(unitTarget, spellInfo, &basePoints, &basePoints, &basePoints, true, NULL , NULL, m_originalCasterGUID, m_spellInfo);
     else
         unitTarget->CastSpell(unitTarget, spellInfo, true, NULL, NULL, m_originalCasterGUID, m_spellInfo);
