@@ -79,7 +79,7 @@ void BattleGroundEY::StartingEventOpenDoors()
 
 void BattleGroundEY::AddPoints(Team team, uint32 points)
 {
-    BattleGroundTeamIndex team_index = GetTeamIndexByTeamId(team);
+    PvpTeamIndex team_index = GetTeamIndexByTeamId(team);
     m_TeamScores[team_index] += points;
     m_honorScoreTicks[team_index] += points;
     if (m_honorScoreTicks[team_index] >= m_honorTicks)
@@ -225,7 +225,7 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* /*go*/, uint32 towerId, Tea
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_ALLIANCE);
 
         // spawn gameobjects
-        SpawnEvent(towerId, BG_TEAM_ALLIANCE, true);
+        SpawnEvent(towerId, TEAM_INDEX_ALLIANCE, true);
     }
     else if (team == HORDE)
     {
@@ -236,7 +236,7 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* /*go*/, uint32 towerId, Tea
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_HORDE);
 
         // spawn gameobjects
-        SpawnEvent(towerId, BG_TEAM_HORDE, true);
+        SpawnEvent(towerId, TEAM_INDEX_HORDE, true);
     }
     else
     {
@@ -304,15 +304,15 @@ void BattleGroundEY::Reset()
     // call parent's class reset
     BattleGround::Reset();
 
-    m_TeamScores[BG_TEAM_ALLIANCE] = 0;
-    m_TeamScores[BG_TEAM_HORDE] = 0;
+    m_TeamScores[TEAM_INDEX_ALLIANCE] = 0;
+    m_TeamScores[TEAM_INDEX_HORDE] = 0;
 
     m_towersAlliance = 0;
     m_towersHorde = 0;
 
     m_honorTicks = BattleGroundMgr::IsBGWeekend(GetTypeID()) ? EY_WEEKEND_HONOR_INTERVAL : EY_NORMAL_HONOR_INTERVAL;
-    m_honorScoreTicks[BG_TEAM_ALLIANCE] = 0;
-    m_honorScoreTicks[BG_TEAM_HORDE] = 0;
+    m_honorScoreTicks[TEAM_INDEX_ALLIANCE] = 0;
+    m_honorScoreTicks[TEAM_INDEX_HORDE] = 0;
 
     m_flagState = EY_FLAG_STATE_ON_BASE;
     m_flagCarrier.Clear();
@@ -506,8 +506,8 @@ void BattleGroundEY::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, WORLD_STATE_EY_TOWER_COUNT_ALLIANCE, m_towersAlliance);
     FillInitialWorldState(data, count, WORLD_STATE_EY_TOWER_COUNT_HORDE, m_towersHorde);
 
-    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_ALLIANCE, m_TeamScores[BG_TEAM_ALLIANCE]);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_HORDE, m_TeamScores[BG_TEAM_HORDE]);
+    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_ALLIANCE, m_TeamScores[TEAM_INDEX_ALLIANCE]);
+    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_HORDE, m_TeamScores[TEAM_INDEX_HORDE]);
 
     // tower world states
     FillInitialWorldState(data, count, WORLD_STATE_EY_BLOOD_ELF_TOWER_ALLIANCE, m_towerOwner[NODE_BLOOD_ELF_TOWER] == ALLIANCE);
