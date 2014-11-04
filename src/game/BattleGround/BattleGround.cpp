@@ -629,7 +629,7 @@ void BattleGround::EndBattleGround(Team winner)
     WorldPacket data;
     int32 winmsg_id = 0;
 
-    uint32 winner_team = 0;
+    uint32 winner_team = BG_TEAM_NEUTRAL;
     uint64 battleground_id = 1;
 
     if (winner == ALLIANCE)

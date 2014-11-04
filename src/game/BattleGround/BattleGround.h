@@ -202,8 +202,9 @@ enum BattleGroundType
 
 enum BattleGroundTeamIndex
 {
-    BG_TEAM_ALLIANCE        = 0,
-    BG_TEAM_HORDE           = 1
+    BG_TEAM_HORDE       = 0, // Battleground: Horde
+    BG_TEAM_ALLIANCE    = 1, // Battleground: Alliance
+    BG_TEAM_NEUTRAL     = 2  // Battleground: Neutral
 };
 
 #define BG_TEAMS_COUNT  2
