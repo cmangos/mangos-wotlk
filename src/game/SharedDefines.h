@@ -613,8 +613,8 @@ enum Team
 
 enum PvpTeamIndex
 {
-    TEAM_INDEX_ALLIANCE = 0,
-    TEAM_INDEX_HORDE    = 1,
+    TEAM_INDEX_HORDE    = 0,
+    TEAM_INDEX_ALLIANCE = 1,
     TEAM_INDEX_NEUTRAL  = 2,
 };
 
