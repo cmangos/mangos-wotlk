@@ -664,6 +664,7 @@ void BattleGround::EndBattleGround(Team winner)
         {
             Field* fields = result->Fetch();
             battleground_id = fields[0].GetUInt64() + 1;
+            delete result;
         }
 
         stmt.PExecute(battleground_id, winner_team, battleground_bracket, battleground_type);
