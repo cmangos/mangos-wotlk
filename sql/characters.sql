@@ -1744,7 +1744,7 @@ CREATE TABLE `pvpstats_battlegrounds` (
 -- Dumping data for table `pvpstats_battlegrounds`
 --
 
-LOCK TABLES `petition_sign` WRITE;
+LOCK TABLES `pvpstats_battlegrounds` WRITE;
 /*!40000 ALTER TABLE `pvpstats_battlegrounds` DISABLE KEYS */;
 /*!40000 ALTER TABLE `pvpstats_battlegrounds` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1768,7 +1768,7 @@ CREATE TABLE `pvpstats_players` (
   `attr_3` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
   `attr_4` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
   `attr_5` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
-  PRIMARY KEY (`battleground_id`, `playerguid`)
+  PRIMARY KEY (`battleground_id`, `player_guid`)
 ) ENGINE=InnoDB;
 
 --

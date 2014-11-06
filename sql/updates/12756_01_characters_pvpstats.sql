@@ -25,5 +25,5 @@ CREATE TABLE `pvpstats_players` (
   `attr_3` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
   `attr_4` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
   `attr_5` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
-  PRIMARY KEY (`battleground_id`, `playerguid`)
+  PRIMARY KEY (`battleground_id`, `player_guid`)
 ) ENGINE=InnoDB;
