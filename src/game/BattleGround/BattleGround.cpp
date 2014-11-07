@@ -637,12 +637,18 @@ void BattleGround::EndBattleGround(Team winner)
         winmsg_id = isBattleGround() ? LANG_BG_A_WINS : LANG_ARENA_GOLD_WINS;
         winner_team = TEAM_INDEX_ALLIANCE;
 
+        // winner team variable has reversed index for the bg score storage
+        winner_team = std::abs(int(winner_team - 1));
+
         PlaySoundToAll(SOUND_ALLIANCE_WINS);                // alliance wins sound
     }
     else if (winner == HORDE)
     {
         winmsg_id = isBattleGround() ? LANG_BG_H_WINS : LANG_ARENA_GREEN_WINS;
         winner_team = TEAM_INDEX_HORDE;
+
+        // winner team variable has reversed index for the bg score storage
+        winner_team = std::abs(int(winner_team - 1));
 
         PlaySoundToAll(SOUND_HORDE_WINS);                   // horde wins sound
     }
@@ -657,9 +663,6 @@ void BattleGround::EndBattleGround(Team winner)
 
         uint8 battleground_bracket = GetMinLevel() / 10;
         uint8 battleground_type = (uint8)GetTypeID();
-
-        // winner team variable has reversed index for the bg score storage
-        winner_team = std::abs(int(winner_team - 1));
 
         // query next id
         result = CharacterDatabase.Query("SELECT MAX(id) FROM pvpstats_battlegrounds");
