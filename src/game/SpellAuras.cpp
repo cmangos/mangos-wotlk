@@ -802,7 +802,7 @@ void AreaAura::Update(uint32 diff)
                     target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(), GetCasterGuid());
             }
         }
-        else if (m_areaAuraType == AREA_AURA_RAID)          // TODO: fix me!
+        else if (m_areaAuraType == AREA_AURA_RAID)          // Check if on same raid group
         {
             // not check group if target == owner or target == pet
             if (caster->GetCharmerOrOwnerGuid() != target->GetObjectGuid() && caster->GetObjectGuid() != target->GetCharmerOrOwnerGuid())
@@ -813,7 +813,7 @@ void AreaAura::Update(uint32 diff)
                 if (pGroup)
                 {
                     Player* checkTarget = target->GetCharmerOrOwnerPlayerOrPlayerItself();
-                    if (!checkTarget)
+                    if (!checkTarget || !checkTarget->GetGroup() || checkTarget->GetGroup()->GetId() != pGroup->GetId())
                         target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(), GetCasterGuid());
                 }
                 else
