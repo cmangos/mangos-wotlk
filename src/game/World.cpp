@@ -1457,6 +1457,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading grids for active creatures or transports...");
     sObjectMgr.LoadActiveEntities(NULL);
+    sLog.outString();
 
     // Delete all characters which have been deleted X days before
     Player::DeleteOldCharacters();

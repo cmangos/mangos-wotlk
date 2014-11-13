@@ -9085,15 +9085,8 @@ void ObjectMgr::LoadVendorTemplates()
  */
 void ObjectMgr::LoadActiveEntities(Map* _map)
 {
-    // Check - if _map is provided, it is expected that this is no continent
-    if (_map && _map->IsContinent())
-        return;
-
-    // Collect Maps that should be processed
-    std::vector<Map*> processMaps;
-    if (_map)
-        processMaps.push_back(_map);
-    else                                                    // Continent case
+    // Special case on startup - load continents
+    if (!_map)
     {
         uint32 continents[] = {0, 1, 530, 571};
         for (int i = 0; i < countof(continents); ++i)
@@ -9101,30 +9094,29 @@ void ObjectMgr::LoadActiveEntities(Map* _map)
             _map = sMapMgr.FindMap(continents[i]);
             if (!_map)
                 _map = sMapMgr.CreateMap(continents[i], NULL);
+
             if (_map)
-                processMaps.push_back(_map);
+                LoadActiveEntities(_map);
             else
                 sLog.outError("ObjectMgr::LoadActiveEntities - Unable to create Map %u", continents[i]);
         }
+
+        return;
     }
 
-    // Load active objects for this map
-    for (uint32 i = 0; i < processMaps.size(); ++i)
+    // Load active objects for _map
+    std::set<uint32> const* mapList = sWorld.getConfigForceLoadMapIds();
+    if (mapList && mapList->find(_map->GetId()) != mapList->end())
     {
-        Map* m = processMaps[i];
-
-        if (sWorld.getConfig(CONFIG_BOOL_GRID_FORCE_LOAD_ALL_CREATURES))
+        for (CreatureDataMap::const_iterator itr = mCreatureDataMap.begin(); itr != mCreatureDataMap.end(); ++itr)
         {
-            for (CreatureDataMap::const_iterator itr = mCreatureDataMap.begin(); itr != mCreatureDataMap.end(); ++itr)
-            {
-                if (itr->second.mapid == m->GetId())
-                    m->ForceLoadGrid(itr->second.posX, itr->second.posY);
-            }
+            if (itr->second.mapid == _map->GetId())
+                _map->ForceLoadGrid(itr->second.posX, itr->second.posY);
         }
-        //else                                                // Normal case - Load all npcs that are active
-
-        // Load Transports on Map m
     }
+    //else                                                // Normal case - Load all npcs that are active
+
+    // Load Transports on Map _map
 }
 
 void ObjectMgr::LoadNpcGossips()

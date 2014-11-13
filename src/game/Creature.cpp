@@ -176,7 +176,8 @@ void Creature::AddToWorld()
     Unit::AddToWorld();
 
     // Make active if required
-    if (sWorld.getConfig(CONFIG_BOOL_GRID_FORCE_LOAD_ALL_CREATURES) /*|| FlagsExtra & ACTIVE*/)
+    std::set<uint32> const* mapList = sWorld.getConfigForceLoadMapIds();
+    if ((mapList && mapList->find(GetMapId()) != mapList->end()) /*|| FlagsExtra & ACTIVE*/)
         SetActiveObjectState(true);
 }
 
