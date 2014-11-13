@@ -551,7 +551,7 @@ void World::LoadConfigSettings(bool reload)
         unsigned int id;
         VMAP::VMapFactory::chompAndTrim(forceLoadGridOnMaps);
         while (VMAP::VMapFactory::getNextId(forceLoadGridOnMaps, pos, id))
-            m_configForceLoadMapIds->push_back(id);
+            m_configForceLoadMapIds->insert(id);
     }
 
     setConfig(CONFIG_UINT32_INTERVAL_SAVE, "PlayerSave.Interval", 15 * MINUTE * IN_MILLISECONDS);
