@@ -9084,7 +9084,7 @@ void ObjectMgr::LoadVendorTemplates()
 /* This function is supposed to take care of three things:
  *  1) Load Transports on Map or on Continents
  *  2) Load Active Npcs on Map or Continents
- *  3) Load Everything dependend on CONFIG_BOOL_GRID_FORCE_LOAD_ALL_CREATUERS
+ *  3) Load Everything dependend on config setting LoadAllGridsOnMaps
  *
  *  This function is currently WIP, hence parts exist only as draft.
  */
