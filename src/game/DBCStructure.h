@@ -1312,7 +1312,7 @@ struct MapEntry
 
     bool IsContinent() const
     {
-        return MapID == 0 || MapID == 1 || MapID == 530 || MapID == 571;
+        return MAP_IS_CONTINENT(MapID);
     }
 };
 
