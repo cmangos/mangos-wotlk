@@ -246,6 +246,7 @@ bool CreatureLinkingMgr::IsLinkingEntryValid(uint32 slaveEntry, CreatureLinkingI
             if (result->GetRowCount() > 1)
             {
                 sLog.outErrorDb("`creature_linking_template` has FLAG_FOLLOW, but non unique master, (entry: %u, map: %u, master: %u)", slaveEntry, pTmp->mapId, pTmp->masterId);
+                delete result;
                 return false;
             }
             Field* fields = result->Fetch();
