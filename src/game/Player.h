@@ -1429,6 +1429,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddTimedQuest(uint32 quest_id) { m_timedquests.insert(quest_id); }
         void RemoveTimedQuest(uint32 quest_id) { m_timedquests.erase(quest_id); }
 
+        //! Return collision height sent to client
+		float GetCollisionHeight(bool mounted) const;
+
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
