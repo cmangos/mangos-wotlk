@@ -55,6 +55,7 @@ Object::Object()
 
     m_inWorld           = false;
     m_objectUpdated     = false;
+    loot              = NULL;
 }
 
 Object::~Object()
@@ -73,6 +74,8 @@ Object::~Object()
     }
 
     delete[] m_uint32Values;
+
+    delete loot;
 }
 
 void Object::_InitValues()
@@ -526,14 +529,15 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 // Hide lootable animation for unallowed players
                 else if (index == UNIT_DYNAMIC_FLAGS)
                 {
+                    Creature* creature = (Creature*)this;
                     uint32 dynflagsValue = m_uint32Values[index];
 
                     // Checking SPELL_AURA_EMPATHY and caster
-                    if (dynflagsValue & UNIT_DYNFLAG_SPECIALINFO && ((Unit*)this)->isAlive())
+                    if (dynflagsValue & UNIT_DYNFLAG_SPECIALINFO && creature->isAlive())
                     {
                         bool bIsEmpathy = false;
                         bool bIsCaster = false;
-                        Unit::AuraList const& mAuraEmpathy = ((Unit*)this)->GetAurasByType(SPELL_AURA_EMPATHY);
+                        Unit::AuraList const& mAuraEmpathy = creature->GetAurasByType(SPELL_AURA_EMPATHY);
                         for (Unit::AuraList::const_iterator itr = mAuraEmpathy.begin(); !bIsCaster && itr != mAuraEmpathy.end(); ++itr)
                         {
                             bIsEmpathy = true;              // Empathy by aura set
@@ -545,15 +549,24 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     }
 
                     // Checking lootable
-                    if (dynflagsValue & UNIT_DYNFLAG_LOOTABLE && GetTypeId() == TYPEID_UNIT)
+                    if (creature->loot && creature->loot->CanLoot(target->GetObjectGuid()))
                     {
-                        if (!target->isAllowedToLoot((Creature*)this))
-                            dynflagsValue &= ~(UNIT_DYNFLAG_LOOTABLE | UNIT_DYNFLAG_TAPPED_BY_PLAYER);
+                        dynflagsValue = (dynflagsValue | (UNIT_DYNFLAG_LOOTABLE | UNIT_DYNFLAG_TAPPED | UNIT_DYNFLAG_TAPPED_BY_PLAYER));
+                        //sLog.outString(">> %s is lootable for %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
+                    }
+                    else
+                    {
+                        dynflagsValue = (dynflagsValue & ~(UNIT_DYNFLAG_LOOTABLE));
+                        //sLog.outString(">> %s is not lootable for %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
+                        if (creature->IsTappedBy(target))
+                        {
+                            dynflagsValue = (dynflagsValue | UNIT_DYNFLAG_TAPPED_BY_PLAYER);
+                            //sLog.outString(">> %s is tapped by %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
+                        }
                         else
                         {
-                            // flag only for original loot recipent
-                            if (target->GetObjectGuid() != ((Creature*)this)->GetLootRecipientGuid())
-                                dynflagsValue &= ~(UNIT_DYNFLAG_TAPPED | UNIT_DYNFLAG_TAPPED_BY_PLAYER);
+                            dynflagsValue = (dynflagsValue & ~(UNIT_DYNFLAG_TAPPED_BY_PLAYER));
+                            //sLog.outString(">> %s is not tapped by %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
                         }
                     }
 
@@ -956,6 +969,16 @@ void Object::MarkForClientUpdate()
             AddToClientUpdateList();
             m_objectUpdated = true;
         }
+    }
+}
+
+void Object::ForceValuesUpdateAtIndex(uint32 index)
+{
+    m_changedValues[index] = true;
+    if (m_inWorld && !m_objectUpdated)
+    {
+        AddToClientUpdateList();
+        m_objectUpdated = true;
     }
 }
 

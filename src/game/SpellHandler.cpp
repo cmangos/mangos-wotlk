@@ -269,7 +269,13 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         stmt.PExecute(pItem->GetGUIDLow());
     }
     else
-        pUser->SendLoot(pItem->GetObjectGuid(), LOOT_CORPSE);
+    {
+        Loot*& loot = pItem->loot;
+        if (!loot)
+            loot = new Loot(pUser, pItem);
+
+        loot->ShowContentTo(pUser);
+    }
 }
 
 void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)

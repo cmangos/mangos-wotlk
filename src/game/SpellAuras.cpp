@@ -4075,8 +4075,10 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
         if (spellInfo->EffectItemType[m_effIndex] == 6265)
         {
             // Only from non-grey units
-            if (!((Player*)caster)->isHonorOrXPTarget(victim) ||
-                    (victim->GetTypeId() == TYPEID_UNIT && !((Player*)caster)->isAllowedToLoot((Creature*)victim)))
+            if (!((Player*)caster)->isHonorOrXPTarget(victim))
+                return;
+            // Only if the creature is tapped by the player or his group
+            if (victim->GetTypeId() == TYPEID_UNIT && !((Creature*)victim)->IsTappedBy((Player*)caster))
                 return;
         }
 
@@ -7414,9 +7416,9 @@ void Aura::PeriodicTick()
             if (pCaster->GetTypeId() == TYPEID_PLAYER && spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && spellProto->SpellFamilyFlags & UI64LIT(0x0000000000004000))
             {
                 // Only from non-grey units
-                if (roll_chance_i(10) &&                    // 1-2 from drain with final and without glyph, 0-1 from damage
-                        ((Player*)pCaster)->isHonorOrXPTarget(target) &&
-                        (target->GetTypeId() != TYPEID_UNIT || ((Player*)pCaster)->isAllowedToLoot((Creature*)target)))
+                if (roll_chance_i(10) &&                                                                        // 1-2 from drain with final and without glyph, 0-1 from damage
+                   ((Player*)pCaster)->isHonorOrXPTarget(target) &&                                             // Gain XP or Honor requirement
+                   (target->GetTypeId() == TYPEID_UNIT && !((Creature*)target)->IsTappedBy((Player*)pCaster)))  // Tapped by player requirement
                 {
                     pCaster->CastSpell(pCaster, 43836, true, nullptr, this);
                 }
