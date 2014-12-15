@@ -3084,4 +3084,43 @@ enum TeleportLocation
     TELEPORT_LOCATION_BG_ENTRY_POINT    = 1,
 };
 
+// For Loot system
+enum CreatureLootStatus
+{
+    CREATURE_LOOT_STATUS_NONE = 0,
+    CREATURE_LOOT_STATUS_PICKPOCKETED = 1,
+    CREATURE_LOOT_STATUS_LOOTED = 2,
+    CREATURE_LOOT_STATUS_SKINNED = 3
+};
+
+enum LootMethod
+{
+    FREE_FOR_ALL = 0,
+    ROUND_ROBIN = 1,
+    MASTER_LOOT = 2,
+    GROUP_LOOT = 3,
+    NEED_BEFORE_GREED = 4,
+
+    NOT_GROUP_TYPE_LOOT = 5                                 // internal use only
+};
+
+enum LootType
+{
+    LOOT_NONE = 0,                                          // for internal use only
+    LOOT_CORPSE = 1,
+    LOOT_PICKPOCKETING = 2,
+    LOOT_FISHING = 3,
+    LOOT_DISENCHANTING = 4,
+    // ignored always by client
+    LOOT_SKINNING = 6,
+    LOOT_PROSPECTING = 7,
+    LOOT_MILLING = 8,
+
+    LOOT_FISHINGHOLE = 20,                                  // unsupported by client, sending LOOT_FISHING instead
+    LOOT_FISHING_FAIL = 21,                                 // unsupported by client, sending LOOT_FISHING instead
+    LOOT_INSIGNIA = 22,                                     // unsupported by client, sending LOOT_CORPSE instead
+    LOOT_MAIL = 23,                                         // unsupported by client, not send at all (only used to generate loot)
+    LOOT_SPELL = 24,                                        // unsupported by client, not send at all (only used to generate loot)
+};
+
 #endif

@@ -33,6 +33,7 @@
 #include "Player.h"
 #include "World.h"
 #include "Calendar.h"
+#include "LootMgr.h"
 
 /**
  * Creates a new MailSender object.
@@ -125,10 +126,8 @@ bool MailDraft::prepareItems(Player* receiver)
 
     m_mailTemplateItemsNeed = false;
 
-    Loot mailLoot;
-
-    // can be empty
-    mailLoot.FillLoot(m_mailTemplateId, LootTemplates_Mail, receiver, true, true);
+    // mailLoot can be empty
+    Loot mailLoot(receiver, m_mailTemplateId, LOOT_MAIL);
 
     uint32 max_slot = mailLoot.GetMaxSlotInLootFor(receiver);
     for (uint32 i = 0; m_items.size() < MAX_MAIL_ITEMS && i < max_slot; ++i)
@@ -355,10 +354,8 @@ void Mail::prepareTemplateItems(Player* receiver)
 
     has_items = true;
 
-    Loot mailLoot;
-
-    // can be empty
-    mailLoot.FillLoot(mailTemplateId, LootTemplates_Mail, receiver, true, true);
+    // mailLoot can be empty
+    Loot mailLoot(receiver, mailTemplateId, LOOT_MAIL);
 
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("UPDATE mail SET has_items = 1 WHERE id = %u", messageID);

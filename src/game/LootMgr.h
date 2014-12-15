@@ -57,23 +57,6 @@ enum PermissionTypes
     NONE_PERMISSION   = 4
 };
 
-enum LootType
-{
-    LOOT_NONE                   = 0,                        // for internal use only
-    LOOT_CORPSE                 = 1,
-    LOOT_PICKPOCKETING          = 2,
-    LOOT_FISHING                = 3,
-    LOOT_DISENCHANTING          = 4,
-    // ignored always by client
-    LOOT_SKINNING               = 6,
-    LOOT_PROSPECTING            = 7,
-    LOOT_MILLING                = 8,
-
-    LOOT_FISHINGHOLE            = 20,                       // unsupported by client, sending LOOT_FISHING instead
-    LOOT_FISHING_FAIL           = 21,                       // unsupported by client, sending LOOT_FISHING instead
-    LOOT_INSIGNIA               = 22                        // unsupported by client, sending LOOT_CORPSE instead
-};
-
 enum LootSlotType
 {
     LOOT_SLOT_NORMAL  = 0,                                  // can be looted
@@ -82,17 +65,6 @@ enum LootSlotType
     LOOT_SLOT_REQS    = 3,                                  // can't be looted (error message about missing reqs)
     LOOT_SLOT_OWNER   = 4,                                  // ignore binding confirmation and etc, for single player looting
     MAX_LOOT_SLOT_TYPE                                      // custom, use for mark skipped from show items
-};
-
-enum LootMethod
-{
-    FREE_FOR_ALL = 0,
-    ROUND_ROBIN = 1,
-    MASTER_LOOT = 2,
-    GROUP_LOOT = 3,
-    NEED_BEFORE_GREED = 4,
-
-    NOT_GROUP_TYPE_LOOT = 5                                   // internal use only
 };
 
 enum RollVote
@@ -114,14 +86,6 @@ enum RollVoteMask
     ROLL_VOTE_MASK_DISENCHANT = 0x08,
 
     ROLL_VOTE_MASK_ALL = 0x0F,
-};
-
-enum CreatureLootStatus
-{
-    CREATURE_LOOT_STATUS_NONE           = 0,
-    CREATURE_LOOT_STATUS_PICKPOCKETED   = 1,
-    CREATURE_LOOT_STATUS_LOOTED         = 2,
-    CREATURE_LOOT_STATUS_SKINNED        = 3
 };
 
 struct PlayerRollVote
@@ -343,16 +307,11 @@ public:
     bool             haveItemOverThreshold;         // if at least one item in the loot is over threshold
     bool             isChecked;                     // true if at least one player received the loot content
 
-    Loot() : gold(0), unlootedCount(0), lootType(LOOT_NONE), m_lootTarget(NULL),
-        lootMethod(NOT_GROUP_TYPE_LOOT), maxEnchantSkill(0), isReleased(false), threshold(ITEM_QUALITY_UNCOMMON),
-        haveItemOverThreshold(false), isChecked(false)
-    {
-    }
-
     Loot(Player* player, Creature* creature, LootType type);
     Loot(Player* player, GameObject* gameObject, LootType type);
     Loot(Player* player, Corpse* corpse, LootType type);
     Loot(Player* player, Item* item, LootType type);
+    Loot(Player* player, uint32 id, LootType type);
     Loot(Unit* unit, Item* item);
 
     ~Loot() { clear(); }
@@ -432,6 +391,7 @@ public:
     bool AutoStore(Player* player, bool broadcast = false, uint32 bag = NULL_BAG, uint32 slot = NULL_SLOT);
 
 private:
+    Loot(){}
     void SetGroupLootRight(Player* player);
     void FillNotNormalLootFor(Player* player);
     QuestItemList* FillFFALoot(Player* player);

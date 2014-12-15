@@ -44,6 +44,7 @@
 #include "movement/packet_builder.h"
 #include "CreatureLinkingMgr.h"
 #include "Chat.h"
+#include "LootMgr.h"
 
 Object::Object()
 {

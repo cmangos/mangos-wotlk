@@ -971,8 +971,9 @@ bool Creature::CanTrainAndResetTalentsOf(Player* pPlayer) const
 
 void Creature::PrepareBodyLootState()
 {
-    if (loot)
-        delete loot;
+    // loot may already exist (pickpocket case)
+    delete loot;
+    loot = NULL;
 
     Player* killer = GetLootRecipient();
 
@@ -2750,7 +2751,7 @@ void Creature::SetLootStatus(CreatureLootStatus status)
 }
 
 // simple tap system return true if player or his group tapped the creature
-bool Creature::IsTappedBy(Player* plr)
+bool Creature::IsTappedBy(Player* plr) const
 {
     // never tapped by any (mob solo kill)
     if (!HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))

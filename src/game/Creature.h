@@ -24,7 +24,6 @@
 #include "UpdateMask.h"
 #include "ItemPrototype.h"
 #include "SharedDefines.h"
-#include "LootMgr.h"
 #include "DBCEnums.h"
 #include "Database/DatabaseEnv.h"
 #include "Cell.h"
@@ -639,9 +638,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         static void DeleteFromDB(uint32 lowguid, CreatureData const* data);
 
         void PrepareBodyLootState();
-        CreatureLootStatus GetLootStatus() { return m_lootStatus; }
+        CreatureLootStatus GetLootStatus() const { return m_lootStatus; }
         void SetLootStatus(CreatureLootStatus status);
-        bool IsTappedBy(Player* plr);
+        bool IsTappedBy(Player* plr) const;
         ObjectGuid GetLootRecipientGuid() const { return m_lootRecipientGuid; }
         uint32 GetLootGroupRecipientId() const { return m_lootGroupRecipientId; }
         Player* GetLootRecipient() const;                   // use group cases as prefered

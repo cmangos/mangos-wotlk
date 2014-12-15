@@ -23,6 +23,7 @@
 #include "Database/DatabaseEnv.h"
 #include "ItemEnchantmentMgr.h"
 #include "SQLStorages.h"
+#include "LootMgr.h"
 
 void AddItemsSetItem(Player* player, Item* item)
 {

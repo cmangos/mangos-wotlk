@@ -28,6 +28,7 @@
 #include "ScriptMgr.h"
 #include "Totem.h"
 #include "SpellAuras.h"
+#include "LootMgr.h"
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {

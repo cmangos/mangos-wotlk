@@ -31,7 +31,6 @@
 #include "MapManager.h"
 #include "MapPersistentStateMgr.h"
 #include "Util.h"
-#include "LootMgr.h"
 
 //===================================================
 //============== Group ==============================

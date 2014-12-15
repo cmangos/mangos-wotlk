@@ -1819,6 +1819,25 @@ Loot::Loot(Unit* unit, Item* item) :
     m_guidTarget = item->GetObjectGuid();
 }
 
+Loot::Loot(Player* player, uint32 id, LootType type) :
+    lootType(type), lootMethod(NOT_GROUP_TYPE_LOOT), threshold(ITEM_QUALITY_UNCOMMON),
+    gold(0), unlootedCount(0), maxEnchantSkill(0), isReleased(false), haveItemOverThreshold(false),
+    isChecked(false), m_lootTarget(NULL)
+{
+    switch (type)
+    {
+        case LOOT_MAIL:
+            FillLoot(id, LootTemplates_Mail, player, true, true);
+            break;
+        case LOOT_SKINNING:
+            FillLoot(id, LootTemplates_Skinning, player, true, true);
+            break;
+        default:
+            sLog.outError("Loot::Loot> invalid loot type passed to loot constructor.");
+            break;
+    }
+}
+
 void Loot::SendAllowedLooter()
 {
     if (lootMethod == FREE_FOR_ALL || lootMethod == NOT_GROUP_TYPE_LOOT)

@@ -66,6 +66,7 @@
 #include "SQLStorages.h"
 #include "Vehicle.h"
 #include "Calendar.h"
+#include "LootMgr.h"
 
 #include <cmath>
 
@@ -21259,38 +21260,6 @@ bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
             return false;
 
     return true;
-}
-
-void Player::AutoStoreLoot(WorldObject const* lootTarget, uint32 loot_id, LootStore const& store, bool broadcast, uint8 bag, uint8 slot)
-{
-    //Loot loot(lootTarget);
-    //loot.FillLoot(loot_id, store, this, true);
-
-    //AutoStoreLoot(loot, broadcast, bag, slot);
-}
-
-void Player::AutoStoreLoot(Loot& loot, bool broadcast, uint8 bag, uint8 slot)
-{
-    uint32 max_slot = loot.GetMaxSlotInLootFor(this);
-    for (uint32 i = 0; i < max_slot; ++i)
-    {
-        LootItem* lootItem = loot.LootItemInSlot(i, this);
-
-        ItemPosCountVec dest;
-        InventoryResult msg = CanStoreNewItem(bag, slot, dest, lootItem->itemid, lootItem->count);
-        if (msg != EQUIP_ERR_OK && slot != NULL_SLOT)
-            msg = CanStoreNewItem(bag, NULL_SLOT, dest, lootItem->itemid, lootItem->count);
-        if (msg != EQUIP_ERR_OK && bag != NULL_BAG)
-            msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, lootItem->itemid, lootItem->count);
-        if (msg != EQUIP_ERR_OK)
-        {
-            SendEquipError(msg, nullptr, nullptr, lootItem->itemid);
-            continue;
-        }
-
-        Item* pItem = StoreNewItem(dest, lootItem->itemid, true, lootItem->randomPropertyId);
-        SendNewItem(pItem, lootItem->count, false, false, broadcast);
-    }
 }
 
 Item* Player::ConvertItem(Item* item, uint32 newItemId)

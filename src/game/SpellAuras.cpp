@@ -48,6 +48,7 @@
 #include "CellImpl.h"
 #include "Language.h"
 #include "MapManager.h"
+#include "LootMgr.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -1407,7 +1408,8 @@ void Aura::TriggerSpell()
                             if (!creature->GetCreatureInfo()->SkinningLootId)
                                 return;
 
-                            player->AutoStoreLoot(creature, creature->GetCreatureInfo()->SkinningLootId, LootTemplates_Skinning, true);
+                            Loot loot(player, creature->GetCreatureInfo()->SkinningLootId, LOOT_SKINNING);
+                            loot.AutoStore(player);
 
                             creature->ForcedDespawn();
                         }

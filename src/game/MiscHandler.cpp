@@ -31,7 +31,6 @@
 #include "Auth/BigNumber.h"
 #include "Auth/Sha1.h"
 #include "UpdateData.h"
-#include "LootMgr.h"
 #include "Chat.h"
 #include "ScriptMgr.h"
 #include <zlib/zlib.h>

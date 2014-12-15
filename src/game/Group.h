@@ -24,7 +24,6 @@
 #include "GroupReference.h"
 #include "GroupRefManager.h"
 #include "BattleGround/BattleGround.h"
-#include "LootMgr.h"
 #include "DBCEnums.h"
 #include "SharedDefines.h"
 

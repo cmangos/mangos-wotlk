@@ -22,7 +22,6 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "Object.h"
-#include "LootMgr.h"
 #include "Database/DatabaseEnv.h"
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
