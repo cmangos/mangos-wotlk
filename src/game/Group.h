@@ -151,10 +151,6 @@ class MANGOS_DLL_SPEC Group
         bool   AddMember(ObjectGuid guid, const char* name);
         uint32 RemoveMember(ObjectGuid guid, uint8 method); // method: 0=just remove, 1=kick
         void   ChangeLeader(ObjectGuid guid);
-        void   SetLootMethod(LootMethod method) { m_lootMethod = method; }
-        void   SetLooterGuid(ObjectGuid guid) { m_masterLooterGuid = guid; }
-        void   UpdateLooterGuid(WorldObject* pSource, bool ifneed = false);
-        void   SetLootThreshold(ItemQualities threshold) { m_lootThreshold = threshold; }
         void   Disband(bool hideDestroy = false);
 
         // properties accessories
@@ -271,6 +267,9 @@ class MANGOS_DLL_SPEC Group
 
         // Loot
         void UpdateCurrentLooterGuid(WorldObject* pSource);
+        void SetLootMethod(LootMethod method) { m_lootMethod = method; }
+        void SetLooterGuid(ObjectGuid guid) { m_masterLooterGuid = guid; }
+        void SetLootThreshold(ItemQualities threshold) { m_lootThreshold = threshold; }
         LootMethod        GetLootMethod() const { return m_lootMethod; }
         ItemQualities     GetLootThreshold() const { return m_lootThreshold; }
         ObjectGuid const& GetMasterLooterGuid() const { return m_masterLooterGuid; }

@@ -39,6 +39,7 @@
 #include "Auth/AuthCrypt.h"
 #include "Auth/HMACSHA1.h"
 #include "zlib/zlib.h"
+#include "LootMgr.h"
 
 // select opcodes appropriate for processing in Map::Update context for current session state
 static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& opHandle)
@@ -335,8 +336,8 @@ void WorldSession::LogoutPlayer(bool Save)
     {
         sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName() , _player->GetGUIDLow());
 
-        if (ObjectGuid lootGuid = GetPlayer()->GetLootGuid())
-            DoLootRelease(lootGuid);
+        if (Loot* loot = sLootMgr.GetLoot(_player))
+            loot->Release(_player);
 
         ///- If the player just died before logging out, make him appear as a ghost
         // FIXME: logout must be delayed in case lost connection with client in time of combat

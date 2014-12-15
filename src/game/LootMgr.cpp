@@ -1326,11 +1326,11 @@ void Loot::Release(Player* player)
                     Creature* creature = (Creature*)m_lootTarget;
                     if (IsLootedFor(player->GetObjectGuid()))
                     {
-                        // for example skinning after normal loot
-                        //pCreature->PrepareBodyLootState(pCreature);
-                        //creature->AllLootRemovedFromCorpse();
                         creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-                        SendReleaseForAll();
+
+                        if (IsLootedForAll())
+                            SendReleaseForAll();
+
                         CreatureInfo const* creatureInfo = creature->GetCreatureInfo();
                         creature->SetLootStatus(CREATURE_LOOT_STATUS_LOOTED);
                         if (creatureInfo->SkinningLootId)

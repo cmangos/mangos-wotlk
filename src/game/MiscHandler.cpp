@@ -270,9 +270,6 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_LOGOUT_REQUEST, security %u", GetSecurity());
 
-    if (ObjectGuid lootGuid = GetPlayer()->GetLootGuid())
-        DoLootRelease(lootGuid);
-
     // Can not logout if...
     if (GetPlayer()->isInCombat() ||                        //...is in combat
             //...is jumping ...is falling

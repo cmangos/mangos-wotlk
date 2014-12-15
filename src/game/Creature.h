@@ -648,7 +648,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool HasLootRecipient() const { return m_lootGroupRecipientId || m_lootRecipientGuid; }
         bool IsGroupLootRecipient() const { return m_lootGroupRecipientId; }
         void SetLootRecipient(Unit* unit);
-        void AllLootRemovedFromCorpse();
         Player* GetOriginalLootRecipient() const;           // ignore group changes/etc, not for looting
 
         SpellEntry const* ReachWithSpellAttack(Unit* pVictim);
