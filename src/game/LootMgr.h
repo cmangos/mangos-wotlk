@@ -22,6 +22,7 @@
 #include "ItemEnchantmentMgr.h"
 #include "ByteBuffer.h"
 #include "ObjectGuid.h"
+#include "SharedDefines.h"
 
 #include "Utilities/LinkedReference/RefManager.h"
 
@@ -36,8 +37,8 @@ class Group;
 class LootStore;
 class WorldObject;
 class LootTemplate;
-struct LootView;
 class Loot;
+struct LootView;
 struct LootItem;
 struct ItemPrototype;
 
@@ -135,7 +136,7 @@ class GroupLootRoll
 public:
     typedef UNORDERED_MAP<ObjectGuid, PlayerRollVote> RollVoteMap;
 
-    GroupLootRoll() : m_isStarted(false), m_lootItem(NULL), m_loot(NULL), m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_itemProto(NULL) {}
+    GroupLootRoll() : m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_isStarted(false), m_lootItem(NULL), m_loot(NULL), m_itemProto(NULL) {}
     ~GroupLootRoll();
 
     void Start(Loot& loot, uint32 itemSlot);
@@ -342,15 +343,6 @@ public:
     bool             haveItemOverThreshold;         // if at least one item in the loot is over threshold
     bool             isChecked;                     // true if at least one player received the loot content
 
-    Loot(Unit* unit, Item* item) : gold(0), unlootedCount(0), lootType(LOOT_SKINNING), m_lootTarget(NULL),
-        lootMethod(NOT_GROUP_TYPE_LOOT), maxEnchantSkill(0), isReleased(false), threshold(ITEM_QUALITY_UNCOMMON),
-        haveItemOverThreshold(false), isChecked(false)
-    {
-        ownerSet.insert(unit->GetObjectGuid());
-        m_itemTarget = item;
-        m_guidTarget = item->GetObjectGuid();
-    }
-
     Loot() : gold(0), unlootedCount(0), lootType(LOOT_NONE), m_lootTarget(NULL),
         lootMethod(NOT_GROUP_TYPE_LOOT), maxEnchantSkill(0), isReleased(false), threshold(ITEM_QUALITY_UNCOMMON),
         haveItemOverThreshold(false), isChecked(false)
@@ -361,6 +353,7 @@ public:
     Loot(Player* player, GameObject* gameObject, LootType type);
     Loot(Player* player, Corpse* corpse, LootType type);
     Loot(Player* player, Item* item, LootType type);
+    Loot(Unit* unit, Item* item);
 
     ~Loot() { clear(); }
 

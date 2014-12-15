@@ -26,7 +26,7 @@
 #include "SpellMgr.h"
 #include "DBCStores.h"
 #include "SQLStorages.h"
-#include "BattleGround\BattleGroundAV.h"
+#include "BattleGround/BattleGroundAV.h"
 
 INSTANTIATE_SINGLETON_1(LootMgr);
 
@@ -707,6 +707,9 @@ bool GroupLootRoll::AllPlayerVoted(RollVoteMap::const_iterator& winnerItr)
                     if (winnerItr == m_rollVoteMap.end() || itr->second.number > winnerItr->second.number)
                         winnerItr = itr;
                 }
+                break;
+            // Explicitly passing excludes a player from winning loot, so no action required.
+            case ROLL_PASS:
                 break;
             case ROLL_NOT_EMITED_YET:
                 ++notVoted;
@@ -1518,9 +1521,10 @@ void Loot::SetGroupLootRight(Player* player)
 }
 
 
-Loot::Loot(Player* player, Creature* creature, LootType type) : gold(0), unlootedCount(0), lootType(type), m_lootTarget(NULL),
-lootMethod(NOT_GROUP_TYPE_LOOT), maxEnchantSkill(0), isReleased(false), threshold(ITEM_QUALITY_UNCOMMON),
-haveItemOverThreshold(false), isChecked(false)
+Loot::Loot(Player* player, Creature* creature, LootType type) :
+    lootType(LOOT_NONE), lootMethod(NOT_GROUP_TYPE_LOOT), threshold(ITEM_QUALITY_UNCOMMON),
+    gold(0), unlootedCount(0), maxEnchantSkill(0), isReleased(false), haveItemOverThreshold(false),
+    isChecked(false), m_lootTarget(NULL)
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1611,9 +1615,10 @@ haveItemOverThreshold(false), isChecked(false)
     return;
 }
 
-Loot::Loot(Player* player, GameObject* gameObject, LootType type) : gold(0), unlootedCount(0), lootType(type), m_lootTarget(NULL),
-lootMethod(NOT_GROUP_TYPE_LOOT), maxEnchantSkill(0), isReleased(false), threshold(ITEM_QUALITY_UNCOMMON),
-haveItemOverThreshold(false), isChecked(false)
+Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
+    lootType(LOOT_NONE), lootMethod(NOT_GROUP_TYPE_LOOT), threshold(ITEM_QUALITY_UNCOMMON),
+    gold(0), unlootedCount(0), maxEnchantSkill(0), isReleased(false), haveItemOverThreshold(false),
+    isChecked(false), m_lootTarget(NULL)
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1712,9 +1717,10 @@ haveItemOverThreshold(false), isChecked(false)
     return;
 }
 
-Loot::Loot(Player* player, Corpse* corpse, LootType type) : gold(0), unlootedCount(0), lootType(type), m_lootTarget(NULL),
-lootMethod(NOT_GROUP_TYPE_LOOT), maxEnchantSkill(0), isReleased(false), threshold(ITEM_QUALITY_UNCOMMON),
-haveItemOverThreshold(false), isChecked(false)
+Loot::Loot(Player* player, Corpse* corpse, LootType type) :
+    lootType(LOOT_NONE), lootMethod(NOT_GROUP_TYPE_LOOT), threshold(ITEM_QUALITY_UNCOMMON),
+    gold(0), unlootedCount(0), maxEnchantSkill(0), isReleased(false), haveItemOverThreshold(false),
+    isChecked(false), m_lootTarget(NULL)
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1755,9 +1761,10 @@ haveItemOverThreshold(false), isChecked(false)
     return;
 }
 
-Loot::Loot(Player* player, Item* item, LootType type) : gold(0), unlootedCount(0), lootType(type), m_lootTarget(NULL),
-lootMethod(NOT_GROUP_TYPE_LOOT), maxEnchantSkill(0), isReleased(false), threshold(ITEM_QUALITY_UNCOMMON),
-haveItemOverThreshold(false), isChecked(false)
+Loot::Loot(Player* player, Item* item, LootType type) :
+    lootType(LOOT_NONE), lootMethod(NOT_GROUP_TYPE_LOOT), threshold(ITEM_QUALITY_UNCOMMON),
+    gold(0), unlootedCount(0), maxEnchantSkill(0), isReleased(false), haveItemOverThreshold(false),
+    isChecked(false), m_lootTarget(NULL)
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1801,6 +1808,15 @@ haveItemOverThreshold(false), isChecked(false)
     ownerSet.insert(player->GetObjectGuid());
     lootMethod = NOT_GROUP_TYPE_LOOT;
     return;
+}
+
+Loot::Loot(Unit* unit, Item* item) :
+    lootType(LOOT_NONE), lootMethod(NOT_GROUP_TYPE_LOOT), threshold(ITEM_QUALITY_UNCOMMON),
+    gold(0), unlootedCount(0), maxEnchantSkill(0), isReleased(false), haveItemOverThreshold(false),
+    isChecked(false), m_lootTarget(NULL), m_itemTarget(item)
+{
+    ownerSet.insert(unit->GetObjectGuid());
+    m_guidTarget = item->GetObjectGuid();
 }
 
 void Loot::SendAllowedLooter()
