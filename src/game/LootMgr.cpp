@@ -1865,39 +1865,43 @@ InventoryResult Loot::SendItem(ObjectGuid const& targetGuid, uint32 itemSlot)
 
 InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
 {
-    LootItem& lootItem = items[itemSlot];
+    QuestItem* qitem = NULL;
+    QuestItem* ffaitem = NULL;
+    QuestItem* conditem = NULL;
+    LootItem* lootItem = LootItemInSlot(itemSlot, target, &qitem, &ffaitem, &conditem);
+    if (!lootItem)
+        return EQUIP_ERR_ITEM_NOT_FOUND;
+
     bool playerGotItem = false;
     InventoryResult msg;
     if (target && target->GetSession())
     {
         ItemPosCountVec dest;
-        msg = target->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, lootItem.itemid, lootItem.count);
+        msg = target->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, lootItem->itemid, lootItem->count);
         if (msg == EQUIP_ERR_OK)
         {
-            Item* newItem = target->StoreNewItem(dest, lootItem.itemid, true, lootItem.randomPropertyId);
-            target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, lootItem.itemid, lootItem.count);
-            target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, lootType, lootItem.count);
-            target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, lootItem.itemid, lootItem.count);
+            Item* newItem = target->StoreNewItem(dest, lootItem->itemid, true, lootItem->randomPropertyId);
+            target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, lootItem->itemid, lootItem->count);
+            target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, lootType, lootItem->count);
+            target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, lootItem->itemid, lootItem->count);
 
-            //lootItem.is_looted = true;
-            //--unlootedCount;
-            if (!lootItem.freeforall)
+            if (!lootItem->freeforall)
             {
-                lootItem.is_looted = true;
+                lootItem->is_looted = true;
                 --unlootedCount;
                 NotifyItemRemoved(itemSlot);
             }
-            target->SendNewItem(newItem, uint32(lootItem.count), false, false, true);
+            target->SendNewItem(newItem, uint32(lootItem->count), false, false, true);
             playerGotItem = true;
         }
         else
-            target->SendEquipError(msg, NULL, NULL, lootItem.itemid);
+            target->SendEquipError(msg, NULL, NULL, lootItem->itemid);
     }
 
     if (!playerGotItem)
     {
         // an error occurred player didn't received his loot
-        lootItem.is_blocked = false;                                // make the item available (was blocked since roll started)
+        lootItem->is_blocked = false;                               // make the item available (was blocked since roll started)
         currentLooterGuid = target->GetObjectGuid();                // change looter guid to let only him right to loot
         isReleased = false;                                         // be sure the loot was not already released by another player
         SendAllowedLooter();                                        // update the looter right for client
