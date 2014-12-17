@@ -23382,7 +23382,7 @@ float Player::GetCollisionHeight(bool mounted) const
 {
     if (mounted)
     {
-		// mounted case
+        // mounted case
         CreatureDisplayInfoEntry const* mountDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID));
         if (!mountDisplayInfo)
             return GetCollisionHeight(false);
@@ -23392,18 +23392,18 @@ float Player::GetCollisionHeight(bool mounted) const
             return GetCollisionHeight(false);
 
         CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
-		if(!displayInfo)
-		{
-			sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
-			return 0;
-		}
+        if(!displayInfo)
+        {
+            sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
+            return 0;
+        }
         CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
-		if(!modelData)
-		{
-			sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
-			return 0;
-		}
-			
+        if(!modelData)
+        {
+            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
+            return 0;
+        }
+
         float scaleMod = GetObjectScale(); // 99% sure about this
 
         return scaleMod * mountModelData->MountHeight + modelData->CollisionHeight * 0.5f;
@@ -23412,17 +23412,17 @@ float Player::GetCollisionHeight(bool mounted) const
     {
         // use native model collision height in dismounted case
         CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
-		if(!displayInfo)
-		{
-			sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
-			return 0;
-		}
+        if(!displayInfo)
+        {
+            sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
+            return 0;
+        }
         CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
-		if(!modelData)
-		{
-			sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
-			return 0;
-		}
+        if(!modelData)
+        {
+            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
+            return 0;
+        }
 
         return modelData->CollisionHeight;
     }

@@ -733,24 +733,24 @@ struct CreatureDisplayInfoEntry
 
 struct CreatureModelDataEntry
 {
-    uint32	Id;
-    uint32	Flags;
-    //char* ModelPath[16]
-    //uint32 Unk1;
-    float	Scale;                                             // Used in calculation of unit collision data
-    //int32 Unk2
-    //int32 Unk3
-    //uint32 Unk4
-    //uint32 Unk5
-    //float Unk6
-    //uint32 Unk7
-    //float Unk8
-    //uint32 Unk9
-    //uint32 Unk10
-    //float CollisionWidth;
-    float	CollisionHeight;
-    float	MountHeight;                                       // Used in calculation of unit collision data when mounted
-    //float Unks[11]
+    uint32      Id;
+    uint32      Flags;
+    // char*    ModelPath[16]
+    // uint32   Unk1;
+    float       Scale;                                      // Used in calculation of unit collision data
+    // int32    Unk2
+    // int32    Unk3
+    // uint32   Unk4
+    // uint32   Unk5
+    // float    Unk6
+    // uint32   Unk7
+    // float    Unk8
+    // uint32   Unk9
+    // uint32   Unk10
+    // float    CollisionWidth;
+    float       CollisionHeight;
+    float       MountHeight;                                // Used in calculation of unit collision data when mounted
+    // float Unks[11]
 };
 
 struct CreatureDisplayInfoExtraEntry
