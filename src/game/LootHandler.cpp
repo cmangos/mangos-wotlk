@@ -440,12 +440,11 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 
     InventoryResult msg = pLoot->SendItem(target_playerguid, slotid);
 
+    // Don't have to use LootItemInSlot because i doubt quest item may be distributable by the master of the loot
     LootItem& item = pLoot->items[slotid];
 
     if (msg != EQUIP_ERR_OK)
     {
-        target->SendEquipError(msg, nullptr, nullptr, item.itemid);
-
         // send duplicate of error massage to master looter
         _player->SendEquipError(msg, nullptr, nullptr, item.itemid);
         return;
