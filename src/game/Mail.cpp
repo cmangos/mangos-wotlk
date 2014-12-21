@@ -128,15 +128,15 @@ bool MailDraft::prepareItems(Player* receiver)
 
     // mailLoot can be empty
     Loot mailLoot(receiver, m_mailTemplateId, LOOT_MAIL);
-    LootItemPtrList lootList;
+    LootItemList lootList;
 
     mailLoot.GetLootItemsListFor(receiver, lootList);
-    for (LootItemPtrList::const_iterator lootItr = lootList.begin(); lootItr != lootList.end(); ++lootItr)
+    for (LootItemList::const_iterator lootItr = lootList.begin(); lootItr != lootList.end(); ++lootItr)
     {
         if (m_items.size() < MAX_MAIL_ITEMS)
         {
             LootItem* lootitem = *lootItr;
-            if (Item* item = Item::CreateItem(lootitem->itemid, lootitem->count, receiver))
+            if (Item* item = Item::CreateItem(lootitem->itemId, lootitem->count, receiver))
             {
                 item->SaveToDB();                           // save for prevent lost at next mail load, if send fail then item will deleted
                 AddItem(item);
@@ -361,15 +361,15 @@ void Mail::prepareTemplateItems(Player* receiver)
 
     // mailLoot can be empty
     Loot mailLoot(receiver, mailTemplateId, LOOT_MAIL);
-    LootItemPtrList lootList;
+    LootItemList lootList;
 
     mailLoot.GetLootItemsListFor(receiver, lootList);
-    for (LootItemPtrList::const_iterator lootItr = lootList.begin(); lootItr != lootList.end(); ++lootItr)
+    for (LootItemList::const_iterator lootItr = lootList.begin(); lootItr != lootList.end(); ++lootItr)
     {
         if (items.size() < MAX_MAIL_ITEMS)
         {
             LootItem* lootitem = *lootItr;
-            if (Item* item = Item::CreateItem(lootitem->itemid, lootitem->count, receiver))
+            if (Item* item = Item::CreateItem(lootitem->itemId, lootitem->count, receiver))
             {
                 item->SaveToDB();
                 AddItem(item->GetGUIDLow(), item->GetEntry());

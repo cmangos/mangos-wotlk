@@ -24,8 +24,6 @@
 #include "ObjectGuid.h"
 #include "SharedDefines.h"
 
-#include "Utilities/LinkedReference/RefManager.h"
-
 #include <map>
 #include <vector>
 #include "Bag.h"
@@ -157,18 +155,18 @@ struct LootStoreItem
 
 struct LootItem
 {
-    uint32  itemid;
-    uint32  randomSuffix;
-    int32   randomPropertyId;
+    uint32       itemId;
+    uint32       randomSuffix;
+    int32        randomPropertyId;
     LootItemType lootItemType;
-    GuidSet lootedBy;                                       // player's guid who looted this item
-    uint32  lootSlot;                                       // the slot number will be send to client
-    uint16  conditionId       : 16;                         // allow compiler pack structure
-    uint8   count             : 8;
-    bool    is_blocked        : 1;
-    bool    freeforall        : 1;                          // free for all
-    bool    is_underthreshold : 1;
-    bool    currentLooterPass : 1;
+    GuidSet      lootedBy;                                          // player's guid who looted this item
+    uint32       lootSlot;                                          // the slot number will be send to client
+    uint16       conditionId       : 16;                            // allow compiler pack structure
+    uint8        count             : 8;
+    bool         isBlocked         : 1;
+    bool         freeForAll        : 1;                             // free for all
+    bool         isUnderThreshold  : 1;
+    bool         currentLooterPass : 1;
 
     // Constructor, copies most fields from LootStoreItem, generates random count and random suffixes/properties
     // Should be called for non-reference LootStoreItem entries only (mincountOrRef > 0)
@@ -182,31 +180,12 @@ struct LootItem
     bool IsLootedFor(ObjectGuid const& playerGuid) const { return lootedBy.find(playerGuid) != lootedBy.end(); }
 };
 
-typedef std::vector<LootItem> LootItemList;
-typedef std::vector<LootItem*> LootItemPtrList;
+typedef std::vector<LootItem*> LootItemList;
 
-struct QuestItem
-{
-    uint8   index;                                          // position in quest_items;
-    bool    is_looted;
-
-    QuestItem()
-        : index(0), is_looted(false) {}
-
-    QuestItem(uint8 _index, bool _islooted = false)
-        : index(_index), is_looted(_islooted) {}
-};
-
-
-typedef std::vector<QuestItem> QuestItemList;
-typedef std::map<uint32, QuestItemList*> QuestItemMap;
 typedef std::vector<LootStoreItem> LootStoreItemList;
 typedef UNORDERED_MAP<uint32, LootTemplate*> LootTemplateMap;
 
 typedef std::set<uint32> LootIdSet;
-typedef std::set<uint32> LootSlotSet;
-typedef std::map<ObjectGuid, LootItemPtrList> LootItemMap;
-
 
 class LootStore
 {
@@ -218,7 +197,7 @@ class LootStore
         void Verify() const;
 
         void LoadAndCollectLootIds(LootIdSet& ids_set);
-        void CheckLootRefs(LootIdSet* ref_set = nullptr) const;// check existence reference and remove it from ref_set
+        void CheckLootRefs(LootIdSet* ref_set = NULL) const; // check existence reference and remove it from ref_set
         void ReportUnusedIds(LootIdSet const& ids_set) const;
         void ReportNotExistedId(uint32 id) const;
 
@@ -267,32 +246,6 @@ class LootTemplate
 
 //=====================================================
 
-class LootValidatorRef :  public Reference<Loot, LootValidatorRef>
-{
-    public:
-        LootValidatorRef() {}
-        void targetObjectDestroyLink() override {}
-        void sourceObjectDestroyLink() override {}
-};
-
-//=====================================================
-
-class LootValidatorRefManager : public RefManager<Loot, LootValidatorRef>
-{
-    public:
-        typedef LinkedListHead::Iterator< LootValidatorRef > iterator;
-
-        LootValidatorRef* getFirst() { return (LootValidatorRef*)RefManager<Loot, LootValidatorRef>::getFirst(); }
-        LootValidatorRef* getLast() { return (LootValidatorRef*)RefManager<Loot, LootValidatorRef>::getLast(); }
-
-        iterator begin() { return iterator(getFirst()); }
-        iterator end() { return iterator(nullptr); }
-        iterator rbegin() { return iterator(getLast()); }
-        iterator rend() { return iterator(nullptr); }
-};
-
-//=====================================================
-
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
 ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
 
@@ -301,7 +254,7 @@ class Loot
 public:
     friend ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
 
-    LootItemPtrList  items;
+    LootItemList     lootItems;
     uint32           gold;
     uint32           maxSlot;
     LootType         lootType;                      // required for achievement system
@@ -325,33 +278,7 @@ public:
 
     ~Loot() { clear(); }
 
-    // if loot becomes invalid this reference is used to inform the listener
-    void addLootValidatorRef(LootValidatorRef* pLootValidatorRef)
-    {
-        m_LootValidatorRefManager.insertFirst(pLootValidatorRef);
-    }
-
-    // void clear();
-    void clear()
-    {
-        for (LootItemPtrList::iterator itr = items.begin(); itr != items.end(); ++itr)
-            delete *itr;
-        items.clear();
-        m_playersLooting.clear();
-        gold = 0;
-        m_LootValidatorRefManager.clearReferences();
-        ownerSet.clear();
-        masterOwnerGuid.Clear();
-        currentLooterGuid.Clear();
-        lootType = LOOT_NONE;
-        lootMethod = NOT_GROUP_TYPE_LOOT;
-        roll.clear();
-        maxEnchantSkill = 0;
-        isReleased = false;
-        haveItemOverThreshold = false;
-        isChecked = false;
-        maxSlot = 0;
-    }
+    void clear();
 
     bool CanLoot(Player const* player, bool onlyRightCheck = false);
     bool IsLootedFor(Player const* player) const;
@@ -386,7 +313,7 @@ public:
     void ForceLootAnimationCLientUpdate();
     bool AutoStore(Player* player, bool broadcast = false, uint32 bag = NULL_BAG, uint32 slot = NULL_SLOT);
     LootItem* GetLootItemInSlot(uint32 itemSlot);
-    void GetLootItemsListFor(Player* player, LootItemPtrList& lootList);
+    void GetLootItemsListFor(Player* player, LootItemList& lootList);
 
 private:
     Loot(){}
@@ -398,9 +325,6 @@ private:
     void AddItemOld(LootStoreItem const& item);
 
     GuidSet m_playersLooting;
-
-    // All rolls are registered here. They need to know, when the loot is not valid anymore
-    LootValidatorRefManager m_LootValidatorRefManager;
 
     // What is looted
     WorldObject* m_lootTarget;
@@ -467,9 +391,6 @@ public:
     bool IsAllowedToLoot(Player* player, Creature* creature);
 
     void update(uint32 diff);
-
-private:
-    void StartRoll(Loot& loot, uint32 itemSlot);
 };
 
 #define sLootMgr MaNGOS::Singleton<LootMgr>::Instance()

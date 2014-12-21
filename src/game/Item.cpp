@@ -385,14 +385,14 @@ void Item::SaveToDB()
             SqlStatement stmt = CharacterDatabase.CreateStatement(saveLoot, "INSERT INTO item_loot (guid,owner_guid,itemid,amount,suffix,property) VALUES (?, ?, ?, ?, ?, ?)");
 
             // save items and quest items (at load its all will added as normal, but this not important for item loot case)
-            LootItemPtrList lootList;
+            LootItemList lootList;
             loot->GetLootItemsListFor(owner, lootList);
-            for (LootItemPtrList::const_iterator lootItr = lootList.begin(); lootItr != lootList.end(); ++lootItr)
+            for (LootItemList::const_iterator lootItr = lootList.begin(); lootItr != lootList.end(); ++lootItr)
             {
                 LootItem* lootItem = *lootItr;
                 stmt.addUInt32(GetGUIDLow());
                 stmt.addUInt32(owner->GetGUIDLow());
-                stmt.addUInt32(lootItem->itemid);
+                stmt.addUInt32(lootItem->itemId);
                 stmt.addUInt8(lootItem->count);
                 stmt.addUInt32(lootItem->randomSuffix);
                 stmt.addInt32(lootItem->randomPropertyId);
