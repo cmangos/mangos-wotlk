@@ -385,24 +385,17 @@ void Item::SaveToDB()
             SqlStatement stmt = CharacterDatabase.CreateStatement(saveLoot, "INSERT INTO item_loot (guid,owner_guid,itemid,amount,suffix,property) VALUES (?, ?, ?, ?, ?, ?)");
 
             // save items and quest items (at load its all will added as normal, but this not important for item loot case)
-            for (size_t i = 0; i < loot->GetMaxSlotInLootFor(owner); ++i)
+            LootItemPtrList lootList;
+            loot->GetLootItemsListFor(owner, lootList);
+            for (LootItemPtrList::const_iterator lootItr = lootList.begin(); lootItr != lootList.end(); ++lootItr)
             {
-                QuestItem* qitem = nullptr;
-
-                LootItem* item = loot->LootItemInSlot(i, owner, &qitem);
-                if (!item)
-                    continue;
-
-                // questitems use the blocked field for other purposes
-                if (!qitem && item->is_blocked)
-                    continue;
-
+                LootItem* lootItem = *lootItr;
                 stmt.addUInt32(GetGUIDLow());
                 stmt.addUInt32(owner->GetGUIDLow());
-                stmt.addUInt32(item->itemid);
-                stmt.addUInt8(item->count);
-                stmt.addUInt32(item->randomSuffix);
-                stmt.addInt32(item->randomPropertyId);
+                stmt.addUInt32(lootItem->itemid);
+                stmt.addUInt8(lootItem->count);
+                stmt.addUInt32(lootItem->randomSuffix);
+                stmt.addInt32(lootItem->randomPropertyId);
 
                 stmt.Execute();
             }
@@ -542,8 +535,7 @@ void Item::LoadLootFromDB(Field* fields)
         return;
     }
 
-    loot->items.push_back(LootItem(item_id, item_amount, item_suffix, item_propid));
-    ++loot->unlootedCount;
+    loot->AddItem(item_id, item_amount, item_suffix, item_propid);
 
     SetLootState(ITEM_LOOT_UNCHANGED);
 }

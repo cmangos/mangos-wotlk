@@ -35,12 +35,10 @@
 
 void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_AUTOSTORE_LOOT_ITEM");
-
     uint8 lootSlot;
-    Item* pItem = NULL;
-
     recv_data >> lootSlot;
+
+    DEBUG_LOG("WORLD: CMSG_AUTOSTORE_LOOT_ITEM > requesting loot in slot %u", uint32(lootSlot));
 
     Loot* loot = sLootMgr.GetLoot(_player);
 
@@ -52,11 +50,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 
     ObjectGuid const& lguid = loot->GetLootGuid();
 
-    QuestItem* qitem = NULL;
-    QuestItem* ffaitem = NULL;
-    QuestItem* conditem = NULL;
-
-    LootItem* item = loot->LootItemInSlot(lootSlot, _player, &qitem, &ffaitem, &conditem);
+    LootItem* item = loot->GetLootItemInSlot(lootSlot);
 
     if (!item)
     {
@@ -64,57 +58,16 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
         return;
     }
 
-    // questitems use the blocked field for other purposes
-    if (!qitem && item->is_blocked)
+    // item may not be already looted or blocked by roll system
+    if (item->is_blocked || item->lootedBy.find(_player->GetObjectGuid()) != item->lootedBy.end())
     {
+        sLog.outError("HandleAutostoreLootItemOpcode> %s already looted itemId(%u)", _player->GetObjectGuid().GetString().c_str(), item->itemid);
         loot->SendReleaseFor(_player);
         return;
     }
 
-    ItemPosCountVec dest;
-    InventoryResult msg = _player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item->itemid, item->count);
-    if (msg == EQUIP_ERR_OK)
-    {
-        loot->SendItem(_player, lootSlot);
-        //Item* newitem = _player->StoreNewItem(dest, item->itemid, true, item->randomPropertyId);
-
-        if (qitem)
-        {
-            qitem->is_looted = true;
-            // freeforall is 1 if everyone's supposed to get the quest item.
-            if (item->freeforall || loot->GetPlayerQuestItems().size() == 1)
-                loot->NotifyItemRemoved(lootSlot);
-            else
-                loot->NotifyQuestItemRemoved(qitem->index);
-        }
-        else
-        {
-            if (ffaitem)
-            {
-                // freeforall case, notify only one player of the removal
-                ffaitem->is_looted = true;
-                loot->NotifyItemRemoved(lootSlot);
-            }
-            else
-            {
-                // not freeforall, notify everyone
-                if (conditem)
-                    conditem->is_looted = true;
-                loot->NotifyItemRemoved(lootSlot);
-            }
-        }
-
-/*
-        // if only one person is supposed to loot the item, then set it to looted
-        if (!item->freeforall)
-        {
-            item->is_looted = true;
-        }
-*/
-
-    }
-    else
-        _player->SendEquipError(msg, NULL, NULL, item->itemid);
+    // TODO maybe add another loot is allowed for check to be sure no possible cheat
+    loot->SendItem(_player, lootSlot);
 
     if (lguid.IsItem())
     {
@@ -179,9 +132,9 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
         }
         pLoot->gold = 0;
 
-        if (pLoot->IsLootedFor(_player->GetObjectGuid()))
+        if (pLoot->IsLootedFor(_player))
         {
-            pLoot->SendReleaseFor(_player->GetObjectGuid());
+            pLoot->SendReleaseFor(_player);
         }
         else
         {
@@ -441,21 +394,19 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
     InventoryResult msg = pLoot->SendItem(target_playerguid, slotid);
 
     // Don't have to use LootItemInSlot because i doubt quest item may be distributable by the master of the loot
-    LootItem& item = pLoot->items[slotid];
+    LootItem* item = pLoot->GetLootItemInSlot(slotid);
 
     if (msg != EQUIP_ERR_OK)
     {
         // send duplicate of error massage to master looter
-        _player->SendEquipError(msg, nullptr, nullptr, item.itemid);
+        _player->SendEquipError(msg, NULL, NULL, item->itemid);
         return;
     }
 
     // mark as looted
-    item.count = 0;
-    item.is_looted = true;
+    item->lootedBy.insert(target_playerguid);
 
     pLoot->NotifyItemRemoved(slotid);
-    --pLoot->unlootedCount;
 }
 
 void WorldSession::HandleLootMethodOpcode(WorldPacket& recv_data)

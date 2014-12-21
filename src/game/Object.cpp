@@ -550,7 +550,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     }
 
                     // Checking lootable
-                    if (creature->loot && creature->loot->CanLoot(target->GetObjectGuid()))
+                    if (creature->loot && creature->loot->CanLoot(target))
                     {
                         dynflagsValue = (dynflagsValue | (UNIT_DYNFLAG_LOOTABLE | UNIT_DYNFLAG_TAPPED | UNIT_DYNFLAG_TAPPED_BY_PLAYER));
                         //sLog.outString(">> %s is lootable for %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());

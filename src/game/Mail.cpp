@@ -128,12 +128,14 @@ bool MailDraft::prepareItems(Player* receiver)
 
     // mailLoot can be empty
     Loot mailLoot(receiver, m_mailTemplateId, LOOT_MAIL);
+    LootItemPtrList lootList;
 
-    uint32 max_slot = mailLoot.GetMaxSlotInLootFor(receiver);
-    for (uint32 i = 0; m_items.size() < MAX_MAIL_ITEMS && i < max_slot; ++i)
+    mailLoot.GetLootItemsListFor(receiver, lootList);
+    for (LootItemPtrList::const_iterator lootItr = lootList.begin(); lootItr != lootList.end(); ++lootItr)
     {
-        if (LootItem* lootitem = mailLoot.LootItemInSlot(i, receiver))
+        if (m_items.size() < MAX_MAIL_ITEMS)
         {
+            LootItem* lootitem = *lootItr;
             if (Item* item = Item::CreateItem(lootitem->itemid, lootitem->count, receiver))
             {
                 item->SaveToDB();                           // save for prevent lost at next mail load, if send fail then item will deleted
@@ -354,25 +356,24 @@ void Mail::prepareTemplateItems(Player* receiver)
 
     has_items = true;
 
-    // mailLoot can be empty
-    Loot mailLoot(receiver, mailTemplateId, LOOT_MAIL);
-
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("UPDATE mail SET has_items = 1 WHERE id = %u", messageID);
 
-    uint32 max_slot = mailLoot.GetMaxSlotInLootFor(receiver);
-    for (uint32 i = 0; items.size() < MAX_MAIL_ITEMS && i < max_slot; ++i)
+    // mailLoot can be empty
+    Loot mailLoot(receiver, mailTemplateId, LOOT_MAIL);
+    LootItemPtrList lootList;
+
+    mailLoot.GetLootItemsListFor(receiver, lootList);
+    for (LootItemPtrList::const_iterator lootItr = lootList.begin(); lootItr != lootList.end(); ++lootItr)
     {
-        if (LootItem* lootitem = mailLoot.LootItemInSlot(i, receiver))
+        if (items.size() < MAX_MAIL_ITEMS)
         {
+            LootItem* lootitem = *lootItr;
             if (Item* item = Item::CreateItem(lootitem->itemid, lootitem->count, receiver))
             {
                 item->SaveToDB();
-
                 AddItem(item->GetGUIDLow(), item->GetEntry());
-
                 receiver->AddMItem(item);
-
                 CharacterDatabase.PExecute("INSERT INTO mail_items (mail_id,item_guid,item_template,receiver) VALUES ('%u', '%u', '%u','%u')",
                                            messageID, item->GetGUIDLow(), item->GetEntry(), receiver->GetGUIDLow());
             }

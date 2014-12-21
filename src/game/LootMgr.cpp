@@ -327,51 +327,50 @@ bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
 //
 
 // Constructor, copies most fields from LootStoreItem and generates random count
-LootItem::LootItem(LootStoreItem const& li)
+LootItem::LootItem(LootStoreItem const& li, uint32 _lootSlot, uint32 threshold)
 {
-    itemid      = li.itemid;
-    conditionId = li.conditionId;
-
     ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemid);
     freeforall  = proto && (proto->Flags & ITEM_FLAG_PARTY_LOOT);
 
-    needs_quest = li.needs_quest;
+    if (li.needs_quest)
+        lootItemType = LOOTITEM_TYPE_QUEST;
+    else if (li.conditionId)
+        lootItemType = LOOTITEM_TYPE_CONDITIONNAL;
+    else
+        lootItemType = LOOTITEM_TYPE_NORMAL;
 
-    count       = urand(li.mincountOrRef, li.maxcount);     // constructor called for mincountOrRef > 0 only
-    randomSuffix = GenerateEnchSuffixFactor(itemid);
-    randomPropertyId = Item::GenerateItemRandomPropertyId(itemid);
-    is_looted = 0;
-    is_blocked = 0;
-    is_underthreshold = 0;
-    is_counted = 0;
+    itemid            = li.itemid;
+    conditionId       = li.conditionId;
+    lootSlot          = _lootSlot;
+    count             = urand(li.mincountOrRef, li.maxcount);     // constructor called for mincountOrRef > 0 only
+    randomSuffix      = GenerateEnchSuffixFactor(itemid);
+    randomPropertyId  = Item::GenerateItemRandomPropertyId(itemid);
+    is_blocked        = false;
+    is_underthreshold = proto && proto->Quality < threshold;
+    currentLooterPass = false;
 }
 
-LootItem::LootItem(uint32 itemid_, uint32 count_, uint32 randomSuffix_, int32 randomPropertyId_)
+LootItem::LootItem(uint32 _itemid, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId, uint32 _lootSlot)
 {
-    itemid      = itemid_;
-    conditionId = 0;
-
     ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemid);
     freeforall  = proto && (proto->Flags & ITEM_FLAG_PARTY_LOOT);
 
-    needs_quest = false;
-
-    count       = count_;
-    randomSuffix = randomSuffix_;
-    randomPropertyId = randomPropertyId_;
-    is_looted = 0;
-    is_blocked = 0;
-    is_underthreshold = 0;
-    is_counted = 0;
+    itemid            = _itemid;
+    lootSlot          = _lootSlot;
+    conditionId       = 0;
+    lootItemType      = LOOTITEM_TYPE_NORMAL;
+    count             = _count;
+    randomSuffix      = _randomSuffix;
+    randomPropertyId  = _randomPropertyId;
+    is_blocked        = false;
+    is_underthreshold = false;
+    currentLooterPass = false;
 }
+
 
 // Basic checks for player/item compatibility - if false no chance to see the item in the loot
 bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTarget) const
 {
-    // DB conditions check
-    if (conditionId && !sObjectMgr.IsPlayerMeetToCondition(conditionId, player, player->GetMap(), lootTarget, CONDITION_FROM_LOOT))
-        return false;
-
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemid);
     if (!pProto)
         return false;
@@ -383,28 +382,54 @@ bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTar
     if ((pProto->Flags2 & ITEM_FLAG2_ALLIANCE_ONLY) && player->GetTeam() != ALLIANCE)
         return false;
 
-    if (needs_quest)
+    switch (lootItemType)
     {
-        // Checking quests for quest-only drop (check only quests requirements in this case)
-        if (!player->HasQuestForItem(itemid))
-            return false;
+        case LOOTITEM_TYPE_NORMAL:
+            break;
+
+        case LOOTITEM_TYPE_CONDITIONNAL:
+            // DB conditions check
+            if (!sObjectMgr.IsPlayerMeetToCondition(conditionId, player, player->GetMap(), lootTarget, CONDITION_FROM_LOOT))
+                return false;
+            break;
+
+        case LOOTITEM_TYPE_QUEST:
+            // Checking quests for quest-only drop (check only quests requirements in this case)
+            if (!player->HasQuestForItem(itemid))
+                return false;
+            break;
+
+        default:
+            break;
     }
-    else
-    {
-        // Not quest only drop (check quest starting items for already accepted non-repeatable quests)
-        if (pProto->StartQuest && player->GetQuestStatus(pProto->StartQuest) != QUEST_STATUS_NONE && !player->HasQuestForItem(itemid))
-            return false;
-    }
+
+    // Not quest only drop (check quest starting items for already accepted non-repeatable quests)
+    if (pProto->StartQuest && player->GetQuestStatus(pProto->StartQuest) != QUEST_STATUS_NONE && !player->HasQuestForItem(itemid))
+        return false;
 
     return true;
 }
 
-LootSlotType LootItem::GetSlotTypeForSharedLoot(LootView const& lv, bool condition_ok /*= false*/) const
+LootSlotType LootItem::GetSlotTypeForSharedLoot(LootView const& lv) const
 {
     // ignore looted, FFA (each player get own copy) and not allowed items
-    if (is_looted || freeforall || (conditionId && !condition_ok) || !AllowedForPlayer(lv.viewer, lv.loot.GetLootTarget()))
+    if (IsLootedFor(lv.viewer->GetObjectGuid()) || !AllowedForPlayer(lv.viewer, lv.loot.GetLootTarget()))
         return MAX_LOOT_SLOT_TYPE;
 
+    if (freeforall)
+        return NOT_GROUP_TYPE_LOOT ? LOOT_SLOT_OWNER : LOOT_SLOT_NORMAL; // player have not yet looted a free for all item
+
+    if (!lootedBy.empty())
+        return MAX_LOOT_SLOT_TYPE;                                       // a not free for all item should not be looted more than once
+    
+    if (lootItemType != LOOTITEM_TYPE_NORMAL)
+    {
+        // Check if its turn of that player to loot a not party loot. The loot may be released or the item may be passed by currentLooter
+        if (lv.loot.isReleased || currentLooterPass || lv.loot.currentLooterGuid == lv.viewer->GetObjectGuid())
+            return lv.loot.lootMethod == NOT_GROUP_TYPE_LOOT ? LOOT_SLOT_OWNER : LOOT_SLOT_NORMAL; // TODO maybe always owner
+        return MAX_LOOT_SLOT_TYPE;
+    }
+    
     switch (lv.loot.lootMethod)
     {
         case FREE_FOR_ALL:
@@ -591,7 +616,7 @@ void GroupLootRoll::Start(Loot& loot, uint32 itemSlot)
             return;
 
         // initialize the data needed for the roll
-        m_lootItem = &loot.items[itemSlot];
+        m_lootItem = loot.GetLootItemInSlot(itemSlot);
         m_loot = &loot;
         m_itemSlot = itemSlot;
         m_lootItem->is_blocked = true;                      // block the item while rolling
@@ -726,7 +751,7 @@ void GroupLootRoll::Finish(RollVoteMap::const_iterator& winnerItr)
     if (winnerItr == m_rollVoteMap.end())
     {
         SendAllPassed();
-        m_loot->items[m_itemSlot].is_blocked = false;
+        m_lootItem->is_blocked = false;
         m_loot->isReleased = true;
     }
     else
@@ -754,28 +779,25 @@ void GroupLootRoll::Finish(RollVoteMap::const_iterator& winnerItr)
 // Inserts the item into the loot (called by LootTemplate processors)
 void Loot::AddItem(LootStoreItem const& item)
 {
-    if (item.needs_quest)                                   // Quest drop
+    if (items.size() < MAX_NR_LOOT_ITEMS)                              // Normal drop
     {
-        if (m_questItems.size() < MAX_NR_QUEST_ITEMS)
-            m_questItems.push_back(LootItem(item));
-    }
-    else if (items.size() < MAX_NR_LOOT_ITEMS)              // Non-quest drop
-    {
-        items.push_back(LootItem(item));
+        LootItem* lootItem = new LootItem(item, maxSlot++, uint32(threshold));
 
-        // non-conditional one-player only items are counted here,
-        // free for all items are counted in FillFFALoot(),
-        // non-ffa conditionals are counted in FillNonQuestNonFFAConditionalLoot()
-        if (!item.conditionId)
-        {
-            ItemPrototype const* proto = ObjectMgr::GetItemPrototype(item.itemid);
-            if (!proto || !(proto->Flags & ITEM_FLAG_PARTY_LOOT))
-            {
-                if (proto->Quality >= uint32(threshold))    // set flag for later to know that we have an over threshold item
-                    haveItemOverThreshold = true;
-                ++unlootedCount;
-            }
-        }
+        if (!lootItem->is_underthreshold)                                    // set flag for later to know that we have an over threshold item
+            haveItemOverThreshold = true;
+
+        items.push_back(lootItem);
+    }
+}
+
+// Insert item into the loot explicit way. (used for container item and Item::LoadFromDB)
+void Loot::AddItem(uint32 itemid, uint32 count, uint32 randomSuffix, int32 randomPropertyId)
+{
+    if (items.size() < MAX_NR_LOOT_ITEMS)                              // Normal drop
+    {
+        LootItem* lootItem = new LootItem(itemid, count, randomSuffix, randomPropertyId, maxSlot++);
+
+        items.push_back(lootItem);
     }
 }
 
@@ -796,117 +818,78 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, 
     }
 
     items.reserve(MAX_NR_LOOT_ITEMS);
-    m_questItems.reserve(MAX_NR_QUEST_ITEMS);
 
     tab->Process(*this, store, store.IsRatesAllowed());     // Processing is done there, callback via Loot::AddItem()
 
-    // Setting access rights for group loot case
-    Group* pGroup = loot_owner->GetGroup();
-    if (!personal && pGroup)
+    // Must now check if current looter have right to loot all item or he will lockout that item until he look and release the loot
+    if (!currentLooterGuid.IsEmpty()) // currentLooterGuid is set only for some loot group method
     {
-        for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
-            if (Player* pl = itr->getSource())
-                FillNotNormalLootFor(pl);
+        Player* currentLooter = ObjectAccessor::FindPlayer(currentLooterGuid);
+        for (LootItemPtrList::const_iterator lootItemItr = items.begin(); lootItemItr != items.end(); ++lootItemItr)
+        {
+            LootItem* lootItem = *lootItemItr;
+
+            // Normal loot have no condition to check
+            if (lootItem->lootItemType == LOOTITEM_TYPE_NORMAL)
+                continue;
+
+            if (!currentLooter || !lootItem->AllowedForPlayer(currentLooter, m_lootTarget))
+                lootItem->currentLooterPass = true;         // Some item may not be allowed for current looter, must set this flag to avoid item not distributed to other player
+        }
     }
-    // ... for personal loot
-    else
-        FillNotNormalLootFor(loot_owner);
 
     return true;
 }
 
-void Loot::FillNotNormalLootFor(Player* pl)
+// Is there is any loot available for provided player
+bool Loot::IsLootedFor(Player const* player) const
 {
-    uint32 plguid = pl->GetGUIDLow();
+    if (gold != 0)
+        return false;
 
-    QuestItemMap::const_iterator qmapitr = m_playerQuestItems.find(plguid);
-    if (qmapitr == m_playerQuestItems.end())
-        FillQuestLoot(pl);
-
-    qmapitr = m_playerFFAItems.find(plguid);
-    if (qmapitr == m_playerFFAItems.end())
-        FillFFALoot(pl);
-
-    qmapitr = m_playerNonQuestNonFFAConditionalItems.find(plguid);
-    if (qmapitr == m_playerNonQuestNonFFAConditionalItems.end())
-        FillNonQuestNonFFAConditionalLoot(pl);
-}
-
-QuestItemList* Loot::FillFFALoot(Player* player)
-{
-    QuestItemList* ql = new QuestItemList();
-
-    for (uint8 i = 0; i < items.size(); ++i)
+    ObjectGuid const& playerGuid = player->GetObjectGuid();
+    for (LootItemPtrList::const_iterator lootItemItr = items.begin(); lootItemItr != items.end(); ++lootItemItr)
     {
-        LootItem& item = items[i];
-        if (!item.is_looted && item.freeforall && item.AllowedForPlayer(player, m_lootTarget))
+        LootItem* lootItem = *lootItemItr;
+        if (!lootItem->AllowedForPlayer(player, m_lootTarget))
+            continue; // player have no right to see/loot this item
+
+        if (lootMethod == NOT_GROUP_TYPE_LOOT)
         {
-            ql->push_back(QuestItem(i));
-            ++unlootedCount;
+            if (lootItem->lootedBy.empty())
+                return false;
+        }
+        else if (lootMethod == FREE_FOR_ALL || lootItem->freeforall || playerGuid == currentLooterGuid || isReleased || lootItem->currentLooterPass)
+        {
+            if (lootItem->lootedBy.empty())
+                return false;
+
+            if (lootItem->freeforall && !lootItem->IsLootedFor(playerGuid))
+                return false;
         }
     }
-    if (ql->empty())
-    {
-        delete ql;
-        return NULL;
-    }
 
-    m_playerFFAItems[player->GetGUIDLow()] = ql;
-    return ql;
-}
-
-QuestItemList* Loot::FillQuestLoot(Player* player)
-{
-    if (items.size() == MAX_NR_LOOT_ITEMS) return NULL;
-    QuestItemList* ql = new QuestItemList();
-
-    for (uint8 i = 0; i < m_questItems.size(); ++i)
-    {
-        LootItem& item = m_questItems[i];
-        if (!item.is_looted && item.AllowedForPlayer(player, m_lootTarget))
-        {
-            ql->push_back(QuestItem(i));
-
-            // questitems get blocked when they first apper in a
-            // player's quest vector
-            //
-            // increase once if one looter only, looter-times if free for all
-            if (item.freeforall || !item.is_blocked)
-                ++unlootedCount;
-
-            item.is_blocked = true;
-
-            if (items.size() + ql->size() == MAX_NR_LOOT_ITEMS)
-                break;
-        }
-    }
-    if (ql->empty())
-    {
-        delete ql;
-        return NULL;
-    }
-
-    m_playerQuestItems[player->GetGUIDLow()] = ql;
-    return ql;
-}
-
-bool Loot::IsLootedFor(ObjectGuid const& playerGuid) const
-{
-    QuestItemMap::const_iterator itr = m_playerQuestItems.find(playerGuid.GetCounter());
-    if (itr == m_playerQuestItems.end() && unlootedCount == 0 && gold == 0)
-        return true;
-    return false;
+    return true;
 }
 
 bool Loot::IsLootedForAll() const
 {
-    if (m_playerQuestItems.empty() && unlootedCount == 0 && gold == 0)
-        return true;
-    return false;
+    for (GuidSet::const_iterator itr = ownerSet.begin(); itr != ownerSet.end(); ++itr)
+    {
+        Player* player = ObjectAccessor::FindPlayer(*itr);
+        if (!player)
+            continue;
+
+        if (!IsLootedFor(player))
+            return false;
+    }
+    return true;
 }
 
-bool Loot::CanLoot(ObjectGuid const& playerGuid, bool onlyRightCheck /*= false*/)
+bool Loot::CanLoot(Player const* player, bool onlyRightCheck /*= false*/)
 {
+    ObjectGuid const& playerGuid = player->GetObjectGuid();
+
     // not in Guid list of possible owner mean cheat or big problem
     GuidSet::const_iterator itr = ownerSet.find(playerGuid);
     if (itr == ownerSet.end())
@@ -917,24 +900,16 @@ bool Loot::CanLoot(ObjectGuid const& playerGuid, bool onlyRightCheck /*= false*/
         return true;
 
     // is already looted?
-    if (IsLootedFor(playerGuid))
+    if (IsLootedFor(player))
         return false;
 
     if (lootMethod == NOT_GROUP_TYPE_LOOT || lootMethod == FREE_FOR_ALL)
         return true;
 
-    // now check group right if any
-    if (!m_playerFFAItems.empty())
-        return true;
-
-    // if it contain quest item then it will be lootable for that player
-    if (m_playerQuestItems.find(playerGuid) != m_playerQuestItems.end())
-        return true;
-
     if (haveItemOverThreshold)
     {
         // master loot have always loot right when the loot contain over threshold item
-        if (lootMethod == MASTER_LOOT && playerGuid == masterOwnerGuid)
+        if (lootMethod == MASTER_LOOT && player->GetObjectGuid() == masterOwnerGuid)
             return true;
 
         // player can all loot on 'group loot' or 'need before greed' loot type
@@ -943,37 +918,10 @@ bool Loot::CanLoot(ObjectGuid const& playerGuid, bool onlyRightCheck /*= false*/
     }
 
     // if the player is the current looter (his turn to loot under threshold item) or the current looter released the loot then the player can loot
-    if (isReleased || playerGuid == currentLooterGuid)
+    if (isReleased || player->GetObjectGuid() == currentLooterGuid)
         return true;
 
     return false;
-}
-
-QuestItemList* Loot::FillNonQuestNonFFAConditionalLoot(Player* player)
-{
-    QuestItemList* ql = new QuestItemList();
-
-    for (uint8 i = 0; i < items.size(); ++i)
-    {
-        LootItem& item = items[i];
-        if (!item.is_looted && !item.freeforall && item.conditionId && item.AllowedForPlayer(player, m_lootTarget))
-        {
-            ql->push_back(QuestItem(i));
-            if (!item.is_counted)
-            {
-                ++unlootedCount;
-                item.is_counted = true;
-            }
-        }
-    }
-    if (ql->empty())
-    {
-        delete ql;
-        return NULL;
-    }
-
-    m_playerNonQuestNonFFAConditionalItems[player->GetGUIDLow()] = ql;
-    return ql;
 }
 
 //===================================================
@@ -1018,40 +966,6 @@ void Loot::NotifyMoneyRemoved()
     }
 }
 
-void Loot::NotifyQuestItemRemoved(uint8 questIndex)
-{
-    // when a free for all questitem is looted
-    // all players will get notified of it being removed
-    // (other questitems can be looted by each group member)
-    // bit inefficient but isnt called often
-
-    GuidSet::iterator i_next;
-    for (GuidSet::iterator i = m_playersLooting.begin(); i != m_playersLooting.end(); i = i_next)
-    {
-        i_next = i;
-        ++i_next;
-        if (Player* pl = ObjectAccessor::FindPlayer(*i))
-        {
-            QuestItemMap::const_iterator pq = m_playerQuestItems.find(pl->GetGUIDLow());
-            if (pq != m_playerQuestItems.end() && pq->second)
-            {
-                // find where/if the player has the given item in it's vector
-                QuestItemList& pql = *pq->second;
-
-                uint8 j;
-                for (j = 0; j < pql.size(); ++j)
-                    if (pql[j].index == questIndex)
-                        break;
-
-                if (j < pql.size())
-                    NotifyItemRemoved(items.size() + j);
-            }
-        }
-        else
-            m_playersLooting.erase(i);
-    }
-}
-
 void Loot::generateMoneyLoot(uint32 minAmount, uint32 maxAmount)
 {
     if (maxAmount > 0)
@@ -1063,69 +977,6 @@ void Loot::generateMoneyLoot(uint32 minAmount, uint32 maxAmount)
         else
             gold = uint32(urand(minAmount >> 8, maxAmount >> 8) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY)) << 8;
     }
-}
-
-LootItem* Loot::LootItemInSlot(uint32 lootSlot, Player* player, QuestItem** qitem, QuestItem** ffaitem, QuestItem** conditem)
-{
-    LootItem* item = NULL;
-    bool is_looted = true;
-    if (lootSlot >= items.size())
-    {
-        uint32 questSlot = lootSlot - items.size();
-        QuestItemMap::const_iterator itr = m_playerQuestItems.find(player->GetGUIDLow());
-        if (itr != m_playerQuestItems.end() && questSlot < itr->second->size())
-        {
-            QuestItem* qitem2 = &itr->second->at(questSlot);
-            if (qitem)
-                *qitem = qitem2;
-            item = &m_questItems[qitem2->index];
-            is_looted = qitem2->is_looted;
-        }
-    }
-    else
-    {
-        item = &items[lootSlot];
-        is_looted = item->is_looted;
-        if (item->freeforall)
-        {
-            QuestItemMap::const_iterator itr = m_playerFFAItems.find(player->GetGUIDLow());
-            if (itr != m_playerFFAItems.end())
-            {
-                for (QuestItemList::const_iterator iter = itr->second->begin(); iter != itr->second->end(); ++iter)
-                    if (iter->index == lootSlot)
-                    {
-                        QuestItem* ffaitem2 = (QuestItem*) & (*iter);
-                        if (ffaitem)
-                            *ffaitem = ffaitem2;
-                        is_looted = ffaitem2->is_looted;
-                        break;
-                    }
-            }
-        }
-        else if (item->conditionId)
-        {
-            QuestItemMap::const_iterator itr = m_playerNonQuestNonFFAConditionalItems.find(player->GetGUIDLow());
-            if (itr != m_playerNonQuestNonFFAConditionalItems.end())
-            {
-                for (QuestItemList::const_iterator iter = itr->second->begin(); iter != itr->second->end(); ++iter)
-                {
-                    if (iter->index == lootSlot)
-                    {
-                        QuestItem* conditem2 = (QuestItem*) & (*iter);
-                        if (conditem)
-                            *conditem = conditem2;
-                        is_looted = conditem2->is_looted;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    if (is_looted)
-        return NULL;
-
-    return item;
 }
 
 void Loot::SendReleaseFor(ObjectGuid const& guid)
@@ -1157,6 +1008,10 @@ void Loot::SendReleaseForAll()
 
 void Loot::Release(Player* player)
 {
+    // the owner of the loot released it
+    if (player->GetObjectGuid() == currentLooterGuid)
+        isReleased = true;
+
     switch (m_guidTarget.GetHigh())
     {
         case HIGHGUID_GAMEOBJECT:
@@ -1168,7 +1023,7 @@ void Loot::Release(Player* player)
                 // locked doors are opened with spelleffect openlock, prevent remove its as looted
                 go->UseDoorOrButton();
             }
-            else if (IsLootedFor(player->GetObjectGuid()) || go->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE)
+            else if (IsLootedFor(player) || go->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE)
             {
                 // GO is mineral vein? so it is not removed after its looted
                 if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
@@ -1241,7 +1096,7 @@ void Loot::Release(Player* player)
             if (!corpse || !corpse->IsWithinDistInMap(player, INTERACTION_DISTANCE))
                 return;
 
-            if (IsLootedFor(player->GetObjectGuid()))
+            if (IsLootedFor(player))
             {
                 clear();
                 corpse->RemoveFlag(CORPSE_FIELD_DYNAMIC_FLAGS, CORPSE_DYNFLAG_LOOTABLE);
@@ -1272,7 +1127,7 @@ void Loot::Release(Player* player)
                     // temporary loot, auto loot move
                 case LOOT_DISENCHANTING:
                 {
-                    if (!IsLootedFor(player->GetObjectGuid()))
+                    if (!IsLootedFor(player))
                         AutoStore(player); // can be lost if no space
                     clear();
                     m_itemTarget->SetLootState(ITEM_LOOT_REMOVED);
@@ -1283,7 +1138,7 @@ void Loot::Release(Player* player)
                 default:
                 {
                     // must be destroyed only if no loot
-                    if (IsLootedFor(player->GetObjectGuid()))
+                    if (IsLootedFor(player))
                     {
                         m_itemTarget->SetLootState(ITEM_LOOT_REMOVED);
                         player->DestroyItem(m_itemTarget->GetBagSlot(), m_itemTarget->GetSlot(), true);
@@ -1301,7 +1156,7 @@ void Loot::Release(Player* player)
                 case LOOT_PICKPOCKETING:
                 {
                     //creature->AllLootRemovedFromCorpse();
-                    if (IsLootedFor(player->GetObjectGuid()))
+                    if (IsLootedFor(player))
                     {
                         Creature* creature = (Creature*)m_lootTarget;
                         creature->SetLootStatus(CREATURE_LOOT_STATUS_PICKPOCKETED);
@@ -1310,7 +1165,7 @@ void Loot::Release(Player* player)
                 }
                 case LOOT_SKINNING:
                     //creature->AllLootRemovedFromCorpse();
-                    if (IsLootedFor(player->GetObjectGuid()))
+                    if (IsLootedFor(player))
                     {
                         Creature* creature = (Creature*)m_lootTarget;
                         creature->SetLootStatus(CREATURE_LOOT_STATUS_SKINNED);
@@ -1318,13 +1173,9 @@ void Loot::Release(Player* player)
                     break;
                 case LOOT_CORPSE:
                 {
-                    // the owner of the loot released it
-                    if (player->GetObjectGuid() == currentLooterGuid)
-                        isReleased = true;
-
                     player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
                     Creature* creature = (Creature*)m_lootTarget;
-                    if (IsLootedFor(player->GetObjectGuid()))
+                    if (IsLootedFor(player))
                     {
                         creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
 
@@ -1338,9 +1189,9 @@ void Loot::Release(Player* player)
                     }
                     else
                     {
-                        ForceLootAnimationCLientUpdate(); // set the loot available for other player
                         SendReleaseFor(player->GetObjectGuid());
                     }
+                    ForceLootAnimationCLientUpdate(); // set the loot available for other player
                     break;
                 }
             }
@@ -1406,17 +1257,17 @@ void Loot::GroupCheck()
 
             for (uint8 itemSlot = 0; itemSlot < items.size(); ++itemSlot)
             {
-                LootItem& lootItem = items[itemSlot];
-                ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(lootItem.itemid);
+                LootItem* lootItem = GetLootItemInSlot(itemSlot);
+                ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(lootItem->itemid);
                 if (!itemProto)
                 {
-                    DEBUG_LOG("Loot::GroupCheck> missing item prototype for item with id: %d", lootItem.itemid);
+                    DEBUG_LOG("Loot::GroupCheck> missing item prototype for item with id: %d", lootItem->itemid);
                     continue;
                 }
 
                 // roll for over-threshold item if it's one-player loot
-                if (lootItem.freeforall || itemProto->Quality < uint32(threshold))
-                    lootItem.is_underthreshold = 1;
+                if (!lootItem->freeforall && itemProto->Quality < uint32(threshold))
+                    lootItem->is_underthreshold = 1;
             }
             break;
         }
@@ -1425,25 +1276,26 @@ void Loot::GroupCheck()
         {
             for (uint8 itemSlot = 0; itemSlot < items.size(); ++itemSlot)
             {
-                LootItem& lootItem = items[itemSlot];
-                ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(lootItem.itemid);
+                LootItem* lootItem = GetLootItemInSlot(itemSlot);
+                ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(lootItem->itemid);
                 if (!itemProto)
                 {
-                    DEBUG_LOG("Loot::GroupCheck> missing item prototype for item with id: %d", lootItem.itemid);
+                    DEBUG_LOG("Loot::GroupCheck> missing item prototype for item with id: %d", lootItem->itemid);
                     continue;
                 }
 
                 // roll for over-threshold item if it's one-player loot
-                if (itemProto->Quality >= uint32(threshold) && !lootItem.freeforall)
+                if (itemProto->Quality >= uint32(threshold) && !lootItem->freeforall)
                     roll[itemSlot].Start(*this, itemSlot);
                 else
-                    lootItem.is_underthreshold = 1;
+                    lootItem->is_underthreshold = 1;
             }
             break;
         }
     }
 }
 
+// Set the player who have right for this loot
 void Loot::SetGroupLootRight(Player* player)
 {
     Group* grp = player->GetGroup();
@@ -1474,57 +1326,32 @@ void Loot::SetGroupLootRight(Player* player)
         {
             lootMethod = grp->GetLootMethod();
             threshold = grp->GetLootThreshold();
-            switch (lootMethod)
+            if (lootMethod == MASTER_LOOT)
             {
-                case MASTER_LOOT:
-                    masterOwnerGuid = grp->GetMasterLooterGuid();
-                    // check if master is in looter list
-                    if (ownerSet.find(masterOwnerGuid) == ownerSet.end())
-                        ownerSet.insert(masterOwnerGuid);
-
-                    currentLooterGuid = grp->GetCurrentLooterGuid();
-                    grp->UpdateCurrentLooterGuid(m_lootTarget);
-                    SendAllowedLooter();
-                    break;
-                case NEED_BEFORE_GREED:
-                    currentLooterGuid = grp->GetCurrentLooterGuid();
-                    grp->UpdateCurrentLooterGuid(m_lootTarget);
-                    SendAllowedLooter();
-                    break;
-                case GROUP_LOOT:
-                    currentLooterGuid = grp->GetCurrentLooterGuid();
-                    grp->UpdateCurrentLooterGuid(m_lootTarget);
-                    SendAllowedLooter();
-                    break;
-                case ROUND_ROBIN:
-                    currentLooterGuid = grp->GetCurrentLooterGuid();
-                    grp->UpdateCurrentLooterGuid(m_lootTarget);
-                    SendAllowedLooter();
-                    break;
-                case FREE_FOR_ALL:
-                    break;
-                default:
-                    break;
+                masterOwnerGuid = grp->GetMasterLooterGuid();
+                // check if master is in looter list
+                if (ownerSet.find(masterOwnerGuid) == ownerSet.end())
+                    ownerSet.insert(masterOwnerGuid);
             }
-        }
-        else
-        {
-            ownerSet.insert(player->GetObjectGuid());
-            lootMethod = NOT_GROUP_TYPE_LOOT;
+
+            currentLooterGuid = grp->GetCurrentLooterGuid(); // TODO:: this may be improved, current looter may not be in ownerSet!
+            grp->UpdateCurrentLooterGuid(m_lootTarget);
+
+            if (lootMethod != FREE_FOR_ALL)
+                SendAllowedLooter();
+            return;
         }
     }
-    else
-    {
-        ownerSet.insert(player->GetObjectGuid());
-        lootMethod = NOT_GROUP_TYPE_LOOT;
-    }
+
+    ownerSet.insert(player->GetObjectGuid());
+    lootMethod = NOT_GROUP_TYPE_LOOT;
 }
 
 
 Loot::Loot(Player* player, Creature* creature, LootType type) :
     lootType(LOOT_NONE), lootMethod(NOT_GROUP_TYPE_LOOT), threshold(ITEM_QUALITY_UNCOMMON),
-    gold(0), unlootedCount(0), maxEnchantSkill(0), isReleased(false), haveItemOverThreshold(false),
-    isChecked(false), m_lootTarget(NULL)
+    gold(0), maxEnchantSkill(0), maxSlot(0), isReleased(false),
+    haveItemOverThreshold(false), isChecked(false), m_lootTarget(NULL)
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1617,8 +1444,8 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
 
 Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
     lootType(LOOT_NONE), lootMethod(NOT_GROUP_TYPE_LOOT), threshold(ITEM_QUALITY_UNCOMMON),
-    gold(0), unlootedCount(0), maxEnchantSkill(0), isReleased(false), haveItemOverThreshold(false),
-    isChecked(false), m_lootTarget(NULL)
+    gold(0), maxEnchantSkill(0), maxSlot(0), isReleased(false),
+    haveItemOverThreshold(false), isChecked(false), m_lootTarget(NULL)
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1719,8 +1546,8 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
 
 Loot::Loot(Player* player, Corpse* corpse, LootType type) :
     lootType(LOOT_NONE), lootMethod(NOT_GROUP_TYPE_LOOT), threshold(ITEM_QUALITY_UNCOMMON),
-    gold(0), unlootedCount(0), maxEnchantSkill(0), isReleased(false), haveItemOverThreshold(false),
-    isChecked(false), m_lootTarget(NULL)
+    gold(0), maxEnchantSkill(0), maxSlot(0), isReleased(false),
+    haveItemOverThreshold(false), isChecked(false), m_lootTarget(NULL)
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1737,6 +1564,7 @@ Loot::Loot(Player* player, Corpse* corpse, LootType type) :
 
     m_lootTarget = corpse;
     m_guidTarget = corpse->GetObjectGuid();
+    lootType     = type;
 
     if (type != LOOT_INSIGNIA || corpse->GetType() == CORPSE_BONES)
         return;
@@ -1763,8 +1591,8 @@ Loot::Loot(Player* player, Corpse* corpse, LootType type) :
 
 Loot::Loot(Player* player, Item* item, LootType type) :
     lootType(LOOT_NONE), lootMethod(NOT_GROUP_TYPE_LOOT), threshold(ITEM_QUALITY_UNCOMMON),
-    gold(0), unlootedCount(0), maxEnchantSkill(0), isReleased(false), haveItemOverThreshold(false),
-    isChecked(false), m_lootTarget(NULL)
+    gold(0), maxEnchantSkill(0), maxSlot(0), isReleased(false),
+    haveItemOverThreshold(false), isChecked(false), m_lootTarget(NULL)
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1811,9 +1639,9 @@ Loot::Loot(Player* player, Item* item, LootType type) :
 }
 
 Loot::Loot(Unit* unit, Item* item) :
-    lootType(LOOT_NONE), lootMethod(NOT_GROUP_TYPE_LOOT), threshold(ITEM_QUALITY_UNCOMMON),
-    gold(0), unlootedCount(0), maxEnchantSkill(0), isReleased(false), haveItemOverThreshold(false),
-    isChecked(false), m_lootTarget(NULL), m_itemTarget(item)
+    lootType(LOOT_SKINNING), lootMethod(NOT_GROUP_TYPE_LOOT), threshold(ITEM_QUALITY_UNCOMMON),
+    gold(0), maxEnchantSkill(0), maxSlot(0), isReleased(false),
+    haveItemOverThreshold(false), isChecked(false), m_lootTarget(NULL), m_itemTarget(item)
 {
     ownerSet.insert(unit->GetObjectGuid());
     m_guidTarget = item->GetObjectGuid();
@@ -1821,8 +1649,8 @@ Loot::Loot(Unit* unit, Item* item) :
 
 Loot::Loot(Player* player, uint32 id, LootType type) :
     lootType(type), lootMethod(NOT_GROUP_TYPE_LOOT), threshold(ITEM_QUALITY_UNCOMMON),
-    gold(0), unlootedCount(0), maxEnchantSkill(0), isReleased(false), haveItemOverThreshold(false),
-    isChecked(false), m_lootTarget(NULL)
+    gold(0), maxEnchantSkill(0), maxSlot(0), isReleased(false),
+    haveItemOverThreshold(false), isChecked(false), m_lootTarget(NULL)
 {
     switch (type)
     {
@@ -1865,10 +1693,7 @@ InventoryResult Loot::SendItem(ObjectGuid const& targetGuid, uint32 itemSlot)
 
 InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
 {
-    QuestItem* qitem = NULL;
-    QuestItem* ffaitem = NULL;
-    QuestItem* conditem = NULL;
-    LootItem* lootItem = LootItemInSlot(itemSlot, target, &qitem, &ffaitem, &conditem);
+    LootItem* lootItem = GetLootItemInSlot(itemSlot);
     if (!lootItem)
         return EQUIP_ERR_ITEM_NOT_FOUND;
 
@@ -1886,12 +1711,12 @@ InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
             target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, lootItem->itemid, lootItem->count);
 
             if (!lootItem->freeforall)
-            {
-                lootItem->is_looted = true;
-                --unlootedCount;
                 NotifyItemRemoved(itemSlot);
-            }
+
             target->SendNewItem(newItem, uint32(lootItem->count), false, false, true);
+
+            lootItem->lootedBy.insert(target->GetObjectGuid());     // mark looted by this target
+
             playerGotItem = true;
         }
         else
@@ -1918,10 +1743,14 @@ InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
 bool Loot::AutoStore(Player* player, bool broadcast /*= false*/, uint32 bag /*= NULL_BAG*/, uint32 slot /*= NULL_SLOT*/)
 {
     bool result = true;
-    uint32 max_slot = GetMaxSlotInLootFor(player);
-    for (uint32 i = 0; i < max_slot; ++i)
+    for (LootItemPtrList::const_iterator lootItemItr = items.begin(); lootItemItr != items.end(); ++lootItemItr)
     {
-        LootItem* lootItem = LootItemInSlot(i, player);
+        LootItem* lootItem = *lootItemItr;
+        if (!lootItem->AllowedForPlayer(player, m_lootTarget))
+            continue; // player have no right to see/loot this item
+
+        if (!lootItem->lootedBy.empty())
+            continue; // already looted
 
         ItemPosCountVec dest;
         InventoryResult msg = player->CanStoreNewItem(bag, slot, dest, lootItem->itemid, lootItem->count);
@@ -1936,9 +1765,11 @@ bool Loot::AutoStore(Player* player, bool broadcast /*= false*/, uint32 bag /*= 
             continue;
         }
 
+        lootItem->lootedBy.insert(player->GetObjectGuid());
         Item* pItem = player->StoreNewItem(dest, lootItem->itemid, true, lootItem->randomPropertyId);
         player->SendNewItem(pItem, lootItem->count, false, false, broadcast);
     }
+
     return result;
 }
 
@@ -1954,16 +1785,38 @@ void Loot::Update()
     }
 }
 
-uint32 Loot::GetMaxSlotInLootFor(Player* player) const
-{
-    QuestItemMap::const_iterator itr = m_playerQuestItems.find(player->GetGUIDLow());
-    return items.size() + (itr != m_playerQuestItems.end() ?  itr->second->size() : 0);
-}
-
 void Loot::ForceLootAnimationCLientUpdate()
 {
     if (m_lootTarget)
         m_lootTarget->ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);
+}
+
+LootItem* Loot::GetLootItemInSlot(uint32 itemSlot)
+{
+    for (LootItemPtrList::iterator lootItemItr = items.begin(); lootItemItr != items.end(); ++lootItemItr)
+    {
+        LootItem* lootItem = *lootItemItr;
+        if (lootItem->lootSlot == itemSlot)
+            return lootItem;
+    }
+    return NULL;
+}
+
+// Will return available loot item for specific player. Use only for own loot like loot in item and mail
+void Loot::GetLootItemsListFor(Player* player, LootItemPtrList& lootList)
+{
+    ObjectGuid const& playerGuid = player->GetObjectGuid();
+    for (LootItemPtrList::const_iterator lootItemItr = items.begin(); lootItemItr != items.end(); ++lootItemItr)
+    {
+        LootItem* lootItem = *lootItemItr;
+        if (!lootItem->AllowedForPlayer(player, m_lootTarget))
+            continue; // player have no right to see/loot this item
+
+        if (!lootItem->lootedBy.empty())
+            continue; // already looted
+
+        lootList.push_back(lootItem);
+    }
 }
 
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li)
@@ -1977,90 +1830,37 @@ ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li)
     return b;
 }
 
-ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
+ByteBuffer& operator<<(ByteBuffer& buffer, LootView const& lootView)
 {
-    Loot const& l = lv.loot;
+    Loot const& loot = lootView.loot;
 
     uint8 itemsShown = 0;
 
     // gold
-    b << uint32(l.gold);
+    buffer << uint32(loot.gold);
 
-    size_t count_pos = b.wpos();                            // pos of item count byte
-    b << uint8(0);                                          // item count placeholder
+    size_t count_pos = buffer.wpos();                            // pos of item count byte
+    buffer << uint8(0);                                          // item count placeholder
 
-    for (uint8 i = 0; i < l.items.size(); ++i)
+    for (LootItemPtrList::const_iterator lootItemItr = loot.items.begin(); lootItemItr != loot.items.end(); ++lootItemItr)
     {
-        LootSlotType slot_type = l.items[i].GetSlotTypeForSharedLoot(lv);
+        LootItem* lootItem = *lootItemItr;
+        LootSlotType slot_type = lootItem->GetSlotTypeForSharedLoot(lootView);
         if (slot_type >= MAX_LOOT_SLOT_TYPE)
             continue;
 
-        b << uint8(i) << l.items[i];
-        b << uint8(slot_type);                              // 0 - get 1 - look only 2 - master selection
+        buffer << uint8(lootItem->lootSlot);
+        buffer << *lootItem;
+        buffer << uint8(slot_type);                              // 0 - get 1 - look only 2 - master selection
         ++itemsShown;
-    }
 
-    QuestItemMap const& lootPlayerNonQuestNonFFAConditionalItems = l.GetPlayerNonQuestNonFFAConditionalItems();
-    QuestItemMap::const_iterator nn_itr = lootPlayerNonQuestNonFFAConditionalItems.find(lv.viewer->GetGUIDLow());
-    if (nn_itr != lootPlayerNonQuestNonFFAConditionalItems.end())
-    {
-        QuestItemList* conditional_list =  nn_itr->second;
-        for (QuestItemList::const_iterator ci = conditional_list->begin() ; ci != conditional_list->end(); ++ci)
-        {
-            LootItem const& item = l.items[ci->index];
-
-            LootSlotType slot_type = item.GetSlotTypeForSharedLoot(lv, !ci->is_looted);
-            if (slot_type >= MAX_LOOT_SLOT_TYPE)
-                continue;
-
-            b << uint8(ci->index) << item;
-            b << uint8(slot_type);                          // allow loot
-            ++itemsShown;
-        }
-    }
-
-    // in next cases used same slot type for all items
-    LootSlotType slot_type = lv.loot.lootMethod == NOT_GROUP_TYPE_LOOT ? LOOT_SLOT_OWNER : LOOT_SLOT_NORMAL;
-
-    QuestItemMap const& lootPlayerQuestItems = l.GetPlayerQuestItems();
-    QuestItemMap::const_iterator q_itr = lootPlayerQuestItems.find(lv.viewer->GetGUIDLow());
-    if (q_itr != lootPlayerQuestItems.end())
-    {
-        QuestItemList* q_list = q_itr->second;
-        for (QuestItemList::const_iterator qi = q_list->begin() ; qi != q_list->end(); ++qi)
-        {
-            LootItem const& item = l.m_questItems[qi->index];
-            if (!qi->is_looted && !item.is_looted)
-            {
-                b << uint8(l.items.size() + (qi - q_list->begin()));
-                b << item;
-                b << uint8(slot_type);                      // allow loot
-                ++itemsShown;
-            }
-        }
-    }
-
-    QuestItemMap const& lootPlayerFFAItems = l.GetPlayerFFAItems();
-    QuestItemMap::const_iterator ffa_itr = lootPlayerFFAItems.find(lv.viewer->GetGUIDLow());
-    if (ffa_itr != lootPlayerFFAItems.end())
-    {
-        QuestItemList* ffa_list = ffa_itr->second;
-        for (QuestItemList::const_iterator fi = ffa_list->begin() ; fi != ffa_list->end(); ++fi)
-        {
-            LootItem const& item = l.items[fi->index];
-            if (!fi->is_looted && !item.is_looted)
-            {
-                b << uint8(fi->index) << item;
-                b << uint8(slot_type);                      // allow loot
-                ++itemsShown;
-            }
-        }
+        sLog.outString("Sending loot> itemid(%u) in slot (%u)!", lootItem->itemid, uint32(lootItem->lootSlot));
     }
 
     // update number of items shown
-    b.put<uint8>(count_pos, itemsShown);
+    buffer.put<uint8>(count_pos, itemsShown);
 
-    return b;
+    return buffer;
 }
 
 //
@@ -2744,7 +2544,7 @@ bool LootMgr::IsAllowedToLoot(Player* player, Creature* creature)
 
     bool canLoot = false;
     if (Loot* loot = creature->loot)
-        canLoot = loot->CanLoot(player->GetObjectGuid());
+        canLoot = loot->CanLoot(player);
 
     return canLoot;
 }
