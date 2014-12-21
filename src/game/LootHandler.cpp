@@ -35,10 +35,10 @@
 
 void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 {
-    uint8 lootSlot;
-    recv_data >> lootSlot;
+    uint8 itemSlot;
+    recv_data >> itemSlot;
 
-    DEBUG_LOG("WORLD: CMSG_AUTOSTORE_LOOT_ITEM > requesting loot in slot %u", uint32(lootSlot));
+    DEBUG_LOG("WORLD: CMSG_AUTOSTORE_LOOT_ITEM > requesting item in slot %u", uint32(itemSlot));
 
     Loot* loot = sLootMgr.GetLoot(_player);
 
@@ -50,11 +50,11 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 
     ObjectGuid const& lguid = loot->GetLootGuid();
 
-    LootItem* item = loot->GetLootItemInSlot(lootSlot);
+    LootItem* item = loot->GetLootItemInSlot(itemSlot);
 
     if (!item)
     {
-        _player->SendEquipError(EQUIP_ERR_ALREADY_LOOTED, NULL, NULL);
+        _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
         return;
     }
 
@@ -67,7 +67,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
     }
 
     // TODO maybe add another loot is allowed for check to be sure no possible cheat
-    loot->SendItem(_player, lootSlot);
+    loot->SendItem(_player, itemSlot);
 
     if (lguid.IsItem())
     {
@@ -368,45 +368,34 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
 
 void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 {
-    uint8 slotid;
-    ObjectGuid lootguid;
-    ObjectGuid target_playerguid;
+    uint8      itemSlot;        // slot sent in LOOT_RESPONSE
+    ObjectGuid lootguid;        // the guid of the loot object owner
+    ObjectGuid targetGuid;      // the item receiver guid
 
-    recv_data >> lootguid >> slotid >> target_playerguid;
+    recv_data >> lootguid >> itemSlot >> targetGuid;
 
-    Player* target = ObjectAccessor::FindPlayer(target_playerguid);
+    Player* target = ObjectAccessor::FindPlayer(targetGuid);
     if (!target)
         return;
 
-    DEBUG_LOG("WorldSession::HandleLootMasterGiveOpcode> Giver = %s, Target = %s.", _player->GetObjectGuid().GetString().c_str(), target_playerguid.GetString().c_str());
+    DEBUG_LOG("WorldSession::HandleLootMasterGiveOpcode> Giver = %s, Target = %s.", _player->GetObjectGuid().GetString().c_str(), targetGuid.GetString().c_str());
 
     Loot* pLoot = sLootMgr.GetLoot(_player, lootguid);
 
     if (!pLoot || _player->GetObjectGuid() != pLoot->masterOwnerGuid)
         return;
 
-    if (slotid > pLoot->lootItems.size())
-    {
-        DEBUG_LOG("WorldSession::HandleLootMasterGiveOpcode> Player %s might be using a hack! (slot %d, size " SIZEFMTD ")", _player->GetName(), slotid, pLoot->lootItems.size());
-        return;
-    }
-
-    InventoryResult msg = pLoot->SendItem(target_playerguid, slotid);
-
-    // Don't have to use LootItemInSlot because i doubt quest item may be distributable by the master of the loot
-    LootItem* item = pLoot->GetLootItemInSlot(slotid);
+    InventoryResult msg = pLoot->SendItem(target, itemSlot);
 
     if (msg != EQUIP_ERR_OK)
     {
         // send duplicate of error massage to master looter
-        _player->SendEquipError(msg, NULL, NULL, item->itemId);
+        if (LootItem* lootItem = pLoot->GetLootItemInSlot(itemSlot))
+            _player->SendEquipError(msg, NULL, NULL, lootItem->itemId);
+        else
+            _player->SendEquipError(msg, NULL, NULL);
         return;
     }
-
-    // mark as looted
-    item->lootedBy.insert(target_playerguid);
-
-    pLoot->NotifyItemRemoved(slotid);
 }
 
 void WorldSession::HandleLootMethodOpcode(WorldPacket& recv_data)
