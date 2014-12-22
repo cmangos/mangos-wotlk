@@ -329,9 +329,6 @@ bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
 // Constructor, copies most fields from LootStoreItem and generates random count
 LootItem::LootItem(LootStoreItem const& li, uint32 _lootSlot, uint32 threshold)
 {
-    ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemId);
-    freeForAll  = proto && (proto->Flags & ITEM_FLAG_PARTY_LOOT);
-
     if (li.needs_quest)
         lootItemType = LOOTITEM_TYPE_QUEST;
     else if (li.conditionId)
@@ -339,31 +336,56 @@ LootItem::LootItem(LootStoreItem const& li, uint32 _lootSlot, uint32 threshold)
     else
         lootItemType = LOOTITEM_TYPE_NORMAL;
 
+    itemProto         = ObjectMgr::GetItemPrototype(li.itemid);
+    if (itemProto)
+    {
+        freeForAll       = (itemProto->Flags & ITEM_FLAG_PARTY_LOOT);
+        displayID        = itemProto->DisplayInfoID;
+        isUnderThreshold = itemProto->Quality < threshold;
+    }
+    else
+    {
+        sLog.outError("LootItem::LootItem()> item ID(%u) have no prototype!", li.itemid); // maybe i must make an assert here
+        freeForAll = false;
+        displayID = 0;
+        isUnderThreshold = false;
+    }
+
+
     itemId            = li.itemid;
     conditionId       = li.conditionId;
     lootSlot          = _lootSlot;
     count             = urand(li.mincountOrRef, li.maxcount);     // constructor called for mincountOrRef > 0 only
     randomSuffix      = GenerateEnchSuffixFactor(itemId);
     randomPropertyId  = Item::GenerateItemRandomPropertyId(itemId);
-    isBlocked        = false;
-    isUnderThreshold = proto && proto->Quality < threshold;
+    isBlocked         = false;
     currentLooterPass = false;
 }
 
-LootItem::LootItem(uint32 _itemid, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId, uint32 _lootSlot)
+LootItem::LootItem(uint32 _itemId, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId, uint32 _lootSlot)
 {
-    ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemId);
-    freeForAll  = proto && (proto->Flags & ITEM_FLAG_PARTY_LOOT);
+    itemProto = ObjectMgr::GetItemPrototype(_itemId);
+    if (itemProto)
+    {
+        freeForAll = (itemProto->Flags & ITEM_FLAG_PARTY_LOOT);
+        displayID = itemProto->DisplayInfoID;
+    }
+    else
+    {
+        sLog.outError("LootItem::LootItem()> item ID(%u) have no prototype!", _itemId); // maybe i must make an assert here
+        freeForAll = false;
+        displayID = 0;
+    }
 
-    itemId            = _itemid;
+    itemId            = _itemId;
     lootSlot          = _lootSlot;
     conditionId       = 0;
     lootItemType      = LOOTITEM_TYPE_NORMAL;
     count             = _count;
     randomSuffix      = _randomSuffix;
     randomPropertyId  = _randomPropertyId;
-    isBlocked        = false;
-    isUnderThreshold = false;
+    isBlocked         = false;
+    isUnderThreshold  = false;
     currentLooterPass = false;
 }
 
@@ -371,15 +393,14 @@ LootItem::LootItem(uint32 _itemid, uint32 _count, uint32 _randomSuffix, int32 _r
 // Basic checks for player/item compatibility - if false no chance to see the item in the loot
 bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTarget) const
 {
-    ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemId);
-    if (!pProto)
+    if (!itemProto)
         return false;
 
     // not show loot for not own team
-    if ((pProto->Flags2 & ITEM_FLAG2_HORDE_ONLY) && player->GetTeam() != HORDE)
+    if ((itemProto->Flags2 & ITEM_FLAG2_HORDE_ONLY) && player->GetTeam() != HORDE)
         return false;
 
-    if ((pProto->Flags2 & ITEM_FLAG2_ALLIANCE_ONLY) && player->GetTeam() != ALLIANCE)
+    if ((itemProto->Flags2 & ITEM_FLAG2_ALLIANCE_ONLY) && player->GetTeam() != ALLIANCE)
         return false;
 
     switch (lootItemType)
@@ -404,7 +425,7 @@ bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTar
     }
 
     // Not quest only drop (check quest starting items for already accepted non-repeatable quests)
-    if (pProto->StartQuest && player->GetQuestStatus(pProto->StartQuest) != QUEST_STATUS_NONE && !player->HasQuestForItem(itemId))
+    if (itemProto->StartQuest && player->GetQuestStatus(itemProto->StartQuest) != QUEST_STATUS_NONE && !player->HasQuestForItem(itemId))
         return false;
 
     return true;
@@ -503,7 +524,7 @@ void GroupLootRoll::SendStartRoll()
         // dependent from player
         RollVoteMask mask = m_voteMask;
         // In NEED_BEFORE_GREED need disabled for non-usable item for player
-        if (m_loot->lootMethod == NEED_BEFORE_GREED && plr->CanUseItem(m_itemProto) != EQUIP_ERR_OK)
+        if (m_loot->lootMethod == NEED_BEFORE_GREED && plr->CanUseItem(m_lootItem->itemProto) != EQUIP_ERR_OK)
             mask = RollVoteMask(mask & ~ROLL_VOTE_MASK_NEED);
         data.put<uint8>(voteMaskPos, uint8(mask));
 
@@ -632,10 +653,9 @@ void GroupLootRoll::Start(Loot& loot, uint32 itemSlot)
 
         // initialize item prototype and check enchant possibilities for this group
         m_voteMask = ROLL_VOTE_MASK_ALL;
-        m_itemProto = ObjectMgr::GetItemPrototype(m_lootItem->itemId);
-        if (m_itemProto->Flags2 & ITEM_FLAG2_NEED_ROLL_DISABLED)
+        if (m_lootItem->itemProto->Flags2 & ITEM_FLAG2_NEED_ROLL_DISABLED)
             m_voteMask = RollVoteMask(m_voteMask & ~ROLL_VOTE_MASK_NEED);
-        if (!m_itemProto->DisenchantID || uint32(m_itemProto->RequiredDisenchantSkill) > m_loot->maxEnchantSkill)
+        if (!m_lootItem->itemProto->DisenchantID || uint32(m_lootItem->itemProto->RequiredDisenchantSkill) > m_loot->maxEnchantSkill)
             m_voteMask = RollVoteMask(m_voteMask & ~ROLL_VOTE_MASK_DISENCHANT);
 
         SendStartRoll();
@@ -966,7 +986,7 @@ void Loot::NotifyMoneyRemoved()
     }
 }
 
-void Loot::generateMoneyLoot(uint32 minAmount, uint32 maxAmount)
+void Loot::GenerateMoneyLoot(uint32 minAmount, uint32 maxAmount)
 {
     if (maxAmount > 0)
     {
@@ -1083,7 +1103,7 @@ void Loot::Release(Player* player)
                 else // not chest (or vein/herb/etc)
                     go->SetLootState(GO_JUST_DEACTIVATED);
 
-                clear();
+                Clear();
             }
             else
                 // not fully looted object
@@ -1098,7 +1118,7 @@ void Loot::Release(Player* player)
 
             if (IsLootedFor(player))
             {
-                clear();
+                Clear();
                 corpse->RemoveFlag(CORPSE_FIELD_DYNAMIC_FLAGS, CORPSE_DYNFLAG_LOOTABLE);
             }
             break;
@@ -1118,7 +1138,7 @@ void Loot::Release(Player* player)
                         count = 5;
 
                     // reset loot for allow repeat looting if stack > 5
-                    clear();
+                    Clear();
                     m_itemTarget->SetLootState(ITEM_LOOT_REMOVED);
 
                     player->DestroyItemCount(m_itemTarget, count, true);
@@ -1129,7 +1149,7 @@ void Loot::Release(Player* player)
                 {
                     if (!IsLootedFor(player))
                         AutoStore(player); // can be lost if no space
-                    clear();
+                    Clear();
                     m_itemTarget->SetLootState(ITEM_LOOT_REMOVED);
                     player->DestroyItem(m_itemTarget->GetBagSlot(), m_itemTarget->GetSlot(), true);
                     break;
@@ -1370,7 +1390,6 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
     m_guidTarget = creature->GetObjectGuid();
     CreatureInfo const* creatureInfo = creature->GetCreatureInfo();
 
-    clear();
     lootType = type;
 
     switch (type)
@@ -1382,7 +1401,7 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
 
             if ((creatureInfo->LootId && FillLoot(creatureInfo->LootId, LootTemplates_Creature, player, false)) || creatureInfo->MaxLootGold > 0)
             {
-                generateMoneyLoot(creatureInfo->MinLootGold, creatureInfo->MaxLootGold);
+                GenerateMoneyLoot(creatureInfo->MinLootGold, creatureInfo->MaxLootGold);
                 creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                 break;
             }
@@ -1473,7 +1492,6 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
         return;
     }
 
-    clear();
     lootType = type;
 
     // generate loot only if ready for open and spawned in world
@@ -1530,7 +1548,7 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
                     }
 
                     FillLoot(lootid, LootTemplates_Gameobject, player, false);
-                    generateMoneyLoot(gameObject->GetGOInfo()->MinMoneyLoot, gameObject->GetGOInfo()->MaxMoneyLoot);
+                    GenerateMoneyLoot(gameObject->GetGOInfo()->MinMoneyLoot, gameObject->GetGOInfo()->MaxMoneyLoot);
 
                     if (lootType == LOOT_FISHINGHOLE)
                         lootType = LOOT_FISHING;
@@ -1577,7 +1595,7 @@ Loot::Loot(Player* player, Corpse* corpse, LootType type) :
             pLevel = plr->getLevel();
         else
             pLevel = player->getLevel(); // TODO:: not correct, need to save real player level in the corpse data in case of logout
-        clear();
+
         if (player->GetBattleGround()->GetTypeID() == BATTLEGROUND_AV)
             FillLoot(0, LootTemplates_Creature, player, false);
         // It may need a better formula
@@ -1610,7 +1628,6 @@ Loot::Loot(Player* player, Item* item, LootType type) :
     m_itemTarget = item;
     m_guidTarget = item->GetObjectGuid();
 
-    clear();
     lootType = type;
 
     switch (type)
@@ -1629,7 +1646,7 @@ Loot::Loot(Player* player, Item* item, LootType type) :
             break;
         default:
             FillLoot(item->GetEntry(), LootTemplates_Item, player, true, item->GetProto()->MaxMoneyLoot == 0);
-            generateMoneyLoot(item->GetProto()->MinMoneyLoot, item->GetProto()->MaxMoneyLoot);
+            GenerateMoneyLoot(item->GetProto()->MinMoneyLoot, item->GetProto()->MaxMoneyLoot);
             item->SetLootState(ITEM_LOOT_CHANGED);
             break;
     }
@@ -1819,7 +1836,13 @@ void Loot::GetLootItemsListFor(Player* player, LootItemList& lootList)
     }
 }
 
-void Loot::clear()
+Loot::~Loot()
+{
+    for (LootItemList::iterator itr = lootItems.begin(); itr != lootItems.end(); ++itr)
+        delete *itr;
+}
+
+void Loot::Clear()
 {
     for (LootItemList::iterator itr = lootItems.begin(); itr != lootItems.end(); ++itr)
         delete *itr;
@@ -1846,7 +1869,6 @@ ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li)
     b << uint32(ObjectMgr::GetItemPrototype(li.itemId)->DisplayInfoID);
     b << uint32(li.randomSuffix);
     b << uint32(li.randomPropertyId);
-    // b << uint8(0);                                       // slot type - will send after this function call
     return b;
 }
 

@@ -105,7 +105,7 @@ class GroupLootRoll
 public:
     typedef UNORDERED_MAP<ObjectGuid, PlayerRollVote> RollVoteMap;
 
-    GroupLootRoll() : m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_isStarted(false), m_lootItem(NULL), m_loot(NULL), m_itemProto(NULL) {}
+    GroupLootRoll() : m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_isStarted(false), m_lootItem(NULL), m_loot(NULL) {}
     ~GroupLootRoll();
 
     void Start(Loot& loot, uint32 itemSlot);
@@ -125,7 +125,6 @@ private:
     Loot*                 m_loot;
     uint32                m_itemSlot;
     RollVoteMask          m_voteMask;
-    ItemPrototype const*  m_itemProto;
     uint32                m_voteCount;
     time_t                m_endTime;
 };
@@ -158,6 +157,7 @@ struct LootItem
     uint32       itemId;
     uint32       randomSuffix;
     int32        randomPropertyId;
+    uint32       displayID;
     LootItemType lootItemType;
     GuidSet      lootedBy;                                          // player's guid who looted this item
     uint32       lootSlot;                                          // the slot number will be send to client
@@ -167,6 +167,9 @@ struct LootItem
     bool         freeForAll        : 1;                             // free for all
     bool         isUnderThreshold  : 1;
     bool         currentLooterPass : 1;
+
+    // storing item prototype for fast access
+    ItemPrototype const* itemProto;
 
     // Constructor, copies most fields from LootStoreItem, generates random count and random suffixes/properties
     // Should be called for non-reference LootStoreItem entries only (mincountOrRef > 0)
@@ -241,7 +244,7 @@ class LootTemplate
         void CheckLootRefs(LootIdSet* ref_set) const;
     private:
         LootStoreItemList Entries;                          // not grouped only
-        LootGroups        Groups;                           // groups have own (optimised) processing, grouped entries go there
+        LootGroups        Groups;                           // groups have own (optimized) processing, grouped entries go there
 };
 
 //=====================================================
@@ -254,9 +257,38 @@ class Loot
 public:
     friend ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
 
-    LootItemList     lootItems;
-    uint32           gold;
-    uint32           maxSlot;
+    Loot(Player* player, Creature* creature, LootType type);
+    Loot(Player* player, GameObject* gameObject, LootType type);
+    Loot(Player* player, Corpse* corpse, LootType type);
+    Loot(Player* player, Item* item, LootType type);
+    Loot(Player* player, uint32 id, LootType type);
+    Loot(Unit* unit, Item* item);
+
+    ~Loot();
+
+    // Inserts the item into the loot (called by LootTemplate processors)
+    void AddItem(LootStoreItem const& item);
+    void AddItem(uint32 _itemid, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId);             // used in item.cpp to explicitly load a saved item
+    bool AutoStore(Player* player, bool broadcast = false, uint32 bag = NULL_BAG, uint32 slot = NULL_SLOT);
+    bool CanLoot(Player const* player, bool onlyRightCheck = false);
+    bool IsLootedFor(Player const* player) const;
+    bool IsLootedForAll() const;
+    void ShowContentTo(Player* plr);
+    void Update();
+    void Release(Player* player);
+    void NotifyItemRemoved(uint8 lootIndex);
+    void NotifyMoneyRemoved();
+    void ForceLootAnimationCLientUpdate();
+    void GetLootItemsListFor(Player* player, LootItemList& lootList);
+    LootItem* GetLootItemInSlot(uint32 itemSlot);
+    InventoryResult SendItem(ObjectGuid const& targetGuid, uint32 itemSlot);
+    InventoryResult SendItem(Player* target, uint32 itemSlot);
+    WorldObject const* GetLootTarget() const { return m_lootTarget; }
+    ObjectGuid const& GetLootGuid() const { return m_guidTarget; }
+
+    LootItemList     lootItems;                     // store of the items contained in loot
+    uint32           gold;                          // amount of money contained in loot
+    uint32           maxSlot;                       // used to increment slot index and get total items count
     LootType         lootType;                      // required for achievement system
     LootMethod       lootMethod;                    // used to know what kind of check must be done at loot time
     ItemQualities    threshold;                     // group threshold for items
@@ -269,56 +301,19 @@ public:
     bool             haveItemOverThreshold;         // if at least one item in the loot is over threshold
     bool             isChecked;                     // true if at least one player received the loot content
 
-    Loot(Player* player, Creature* creature, LootType type);
-    Loot(Player* player, GameObject* gameObject, LootType type);
-    Loot(Player* player, Corpse* corpse, LootType type);
-    Loot(Player* player, Item* item, LootType type);
-    Loot(Player* player, uint32 id, LootType type);
-    Loot(Unit* unit, Item* item);
-
-    ~Loot() { clear(); }
-
-    void clear();
-
-    bool CanLoot(Player const* player, bool onlyRightCheck = false);
-    bool IsLootedFor(Player const* player) const;
-    bool IsLootedForAll() const;
-
-    void NotifyItemRemoved(uint8 lootIndex);
-    void NotifyMoneyRemoved();
+private:
+    Loot(){}
     void AddLooter(ObjectGuid guid) { m_playersLooting.insert(guid); }
+    void Clear();
     void RemoveLooter(ObjectGuid guid) { m_playersLooting.erase(guid); }
     void SendReleaseFor(ObjectGuid const& guid);
     void SendReleaseFor(Player* plr);
     void SendReleaseForAll();
-
-    void generateMoneyLoot(uint32 minAmount, uint32 maxAmount);
-    bool FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, bool personal, bool noEmptyError = false);
-
-    // Inserts the item into the loot (called by LootTemplate processors)
-    void AddItem(LootStoreItem const& item);
-    void AddItem(uint32 _itemid, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId);
-
-    WorldObject const* GetLootTarget() const { return m_lootTarget; }
-    ObjectGuid const& GetLootGuid() const { return m_guidTarget; }
-    //WorldObject* GetLootTarget() { return m_lootTarget; };
-
-    void ShowContentTo(Player* plr);
-    InventoryResult SendItem(ObjectGuid const& targetGuid, uint32 itemSlot);
-    InventoryResult SendItem(Player* target, uint32 itemSlot);
-    void Update();
     void SendAllowedLooter();
     void GroupCheck();
-    void Release(Player* player);
-    void ForceLootAnimationCLientUpdate();
-    bool AutoStore(Player* player, bool broadcast = false, uint32 bag = NULL_BAG, uint32 slot = NULL_SLOT);
-    LootItem* GetLootItemInSlot(uint32 itemSlot);
-    void GetLootItemsListFor(Player* player, LootItemList& lootList);
-
-private:
-    Loot(){}
     void SetGroupLootRight(Player* player);
-    void FillNotNormalLootFor(Player* player);
+    void GenerateMoneyLoot(uint32 minAmount, uint32 maxAmount);
+    bool FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, bool personal, bool noEmptyError = false);
     void AddConditionnalItem(ObjectGuid playerGuid, uint32 itemSlot);
     void RemoveConditionnalItem(ObjectGuid playerGuid, uint32 itemSlot);
 
@@ -386,9 +381,9 @@ inline void LoadLootTables()
 class LootMgr
 {
 public:
+    bool IsAllowedToLoot(Player* player, Creature* creature);
     void PlayerVote(Player* player, ObjectGuid const& lootTargetGuid, uint32 itemSlot, RollVote vote);
     Loot* GetLoot(Player* player, ObjectGuid const& targetGuid = ObjectGuid());
-    bool IsAllowedToLoot(Player* player, Creature* creature);
 
     void update(uint32 diff);
 };

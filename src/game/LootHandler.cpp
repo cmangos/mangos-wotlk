@@ -62,7 +62,6 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
     if (item->isBlocked || item->lootedBy.find(_player->GetObjectGuid()) != item->lootedBy.end())
     {
         sLog.outError("HandleAutostoreLootItemOpcode> %s already looted itemId(%u)", _player->GetObjectGuid().GetString().c_str(), item->itemId);
-        loot->SendReleaseFor(_player);
         return;
     }
 
@@ -133,13 +132,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
         pLoot->gold = 0;
 
         if (pLoot->IsLootedFor(_player))
-        {
-            pLoot->SendReleaseFor(_player);
-        }
-        else
-        {
-            pLoot->ForceLootAnimationCLientUpdate();
-        }
+            pLoot->Release(_player);
     }
 }
 
