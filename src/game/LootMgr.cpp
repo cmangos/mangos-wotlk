@@ -1017,8 +1017,7 @@ void Loot::SendReleaseFor(Player* plr)
     data << m_guidTarget;
     data << uint8(1);
     plr->GetSession()->SendPacket(&data);
-    m_playersLooting.erase(plr->GetObjectGuid());
-    plr->SetLootGuid(ObjectGuid());
+    SetPlayerIsNotLooting(plr);
 }
 
 void Loot::SendReleaseForAll()
@@ -1028,6 +1027,22 @@ void Loot::SendReleaseForAll()
     {
         SendReleaseFor(*itr++);
     }
+}
+
+void Loot::SetPlayerIsLooting(Player* player)
+{
+    m_playersLooting.insert(player->GetObjectGuid());      // add 'this' player as one of the players that are looting 'loot'
+    player->SetLootGuid(m_guidTarget);                     // used to keep track of what loot is opened for that player
+    if (m_lootType == LOOT_CORPSE)
+        player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
+}
+
+void Loot::SetPlayerIsNotLooting(Player* player)
+{
+    m_playersLooting.erase(player->GetObjectGuid());
+    player->SetLootGuid(ObjectGuid());
+    if (m_lootType == LOOT_CORPSE)
+        player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
 }
 
 void Loot::Release(Player* player)
@@ -1197,23 +1212,16 @@ void Loot::Release(Player* player)
                     break;
                 case LOOT_CORPSE:
                 {
-                    player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
                     Creature* creature = (Creature*)m_lootTarget;
+                    SetPlayerIsNotLooting(player);
                     if (IsLootedFor(player))
                     {
-                        creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-
                         if (IsLootedForAll())
                             SendReleaseForAll();
-
                         CreatureInfo const* creatureInfo = creature->GetCreatureInfo();
                         creature->SetLootStatus(CREATURE_LOOT_STATUS_LOOTED);
                         if (creatureInfo->SkinningLootId)
                             creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-                    }
-                    else
-                    {
-                        SendReleaseFor(player->GetObjectGuid());
                     }
                     ForceLootAnimationCLientUpdate(); // set the loot available for other player
                     break;
@@ -1237,10 +1245,7 @@ void Loot::ShowContentTo(Player* plr)
     {
         // player have some right to see the loot
         data << LootView(*this, plr);
-        m_playersLooting.insert(plr->GetObjectGuid());      // add 'this' player as one of the players that are looting 'loot'
-        plr->SetLootGuid(m_guidTarget);                     // used to keep track of what loot is opened for that player
-        if (m_guidTarget.IsCreatureOrVehicle())
-            plr->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
+        SetPlayerIsLooting(plr);
     }
     else
     {
@@ -1742,11 +1747,10 @@ InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
     if (!playerGotItem)
     {
         // an error occurred player didn't received his loot
-        lootItem->isBlocked = false;                                // make the item available (was blocked since roll started)
+        lootItem->isBlocked = false;                                  // make the item available (was blocked since roll started)
         m_currentLooterGuid = target->GetObjectGuid();                // change looter guid to let only him right to loot
         m_isReleased = false;                                         // be sure the loot was not already released by another player
-        SendAllowedLooter();                                        // update the looter right for client
-        ForceLootAnimationCLientUpdate();
+        SendAllowedLooter();                                          // update the looter right for client
     }
     else
     {
