@@ -305,7 +305,6 @@ private:
     void RemoveConditionnalItem(ObjectGuid playerGuid, uint32 itemSlot);
     void ForceLootAnimationCLientUpdate();
 
-
     // What is looted
     WorldObject*     m_lootTarget;
     Item*            m_itemTarget;

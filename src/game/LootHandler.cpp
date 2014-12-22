@@ -44,7 +44,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 
     if (!loot)
     {
-        sLog.outError("HandleAutostoreLootItemOpcode> Cannot retrieve loot for player %s", _player->GetObjectGuid().GetString().c_str());
+        sLog.outError("HandleAutostoreLootItemOpcode> Cannot retrieve loot for player %s", _player->GetGuidStr().c_str());
         return;
     }
 
@@ -61,7 +61,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
     // item may not be already looted or blocked by roll system
     if (item->isBlocked || item->lootedBy.find(_player->GetObjectGuid()) != item->lootedBy.end())
     {
-        sLog.outError("HandleAutostoreLootItemOpcode> %s already looted itemId(%u)", _player->GetObjectGuid().GetString().c_str(), item->itemId);
+        sLog.outError("HandleAutostoreLootItemOpcode> %s already looted itemId(%u)", _player->GetGuidStr().c_str(), item->itemId);
         return;
     }
 
@@ -83,7 +83,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
 
     if (!pLoot)
     {
-        sLog.outError("HandleLootMoneyOpcode> Cannot retrieve loot for player %s", _player->GetObjectGuid().GetString().c_str());
+        sLog.outError("HandleLootMoneyOpcode> Cannot retrieve loot for player %s", _player->GetGuidStr().c_str());
         return;
     }
 
@@ -328,19 +328,19 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
         return;
     }
 
-    DEBUG_LOG("WorldSession::HandleLootMasterGiveOpcode> Giver = %s, Target = %s.", _player->GetObjectGuid().GetString().c_str(), targetGuid.GetString().c_str());
+    DEBUG_LOG("WorldSession::HandleLootMasterGiveOpcode> Giver = %s, Target = %s.", _player->GetGuidStr().c_str(), targetGuid.GetString().c_str());
 
     Loot* pLoot = sLootMgr.GetLoot(_player, lootguid);
 
     if (!pLoot)
     {
-        sLog.outError("WorldSession::HandleLootMasterGiveOpcode> Cannot retrieve loot for player %s", _player->GetObjectGuid().GetString().c_str());
+        sLog.outError("WorldSession::HandleLootMasterGiveOpcode> Cannot retrieve loot for player %s", _player->GetGuidStr().c_str());
         return;
     }
     
     if (_player->GetObjectGuid() != pLoot->GetMasterLootGuid())
     {
-        sLog.outError("WorldSession::HandleLootMasterGiveOpcode> player %s is not the loot master!", _player->GetObjectGuid().GetString().c_str());
+        sLog.outError("WorldSession::HandleLootMasterGiveOpcode> player %s is not the loot master!", _player->GetGuidStr().c_str());
         return;
     }
 
