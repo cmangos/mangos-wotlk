@@ -271,42 +271,39 @@ public:
     void AddItem(uint32 _itemid, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId);             // used in item.cpp to explicitly load a saved item
     bool AutoStore(Player* player, bool broadcast = false, uint32 bag = NULL_BAG, uint32 slot = NULL_SLOT);
     bool CanLoot(Player const* player, bool onlyRightCheck = false);
-    bool IsLootedFor(Player const* player) const;
-    bool IsLootedForAll() const;
     void ShowContentTo(Player* plr);
     void Update();
     void Release(Player* player);
-    void NotifyItemRemoved(uint8 lootIndex);
-    void NotifyMoneyRemoved();
-    void ForceLootAnimationCLientUpdate();
     void GetLootItemsListFor(Player* player, LootItemList& lootList);
     void SetGoldAmount(uint32 _gold);
     void SendGold(Player* player);
-    uint32 GetGoldAmount() const { return gold; }
-    LootType GetLootType() const { return lootType; }
+    uint32 GetGoldAmount() const { return m_gold; }
+    LootType GetLootType() const { return m_lootType; }
     LootItem* GetLootItemInSlot(uint32 itemSlot);
     GroupLootRoll* GetRollForSlot(uint32 itemSlot);
-    InventoryResult SendItem(ObjectGuid const& targetGuid, uint32 itemSlot);
     InventoryResult SendItem(Player* target, uint32 itemSlot);
     WorldObject const* GetLootTarget() const { return m_lootTarget; }
     ObjectGuid const& GetLootGuid() const { return m_guidTarget; }
-    ObjectGuid const& GetMasterLootGuid() const { return masterOwnerGuid; }
+    ObjectGuid const& GetMasterLootGuid() const { return m_masterOwnerGuid; }
 
 private:
     Loot(){}
-    void AddLooter(ObjectGuid guid) { m_playersLooting.insert(guid); }
     void Clear();
-    void RemoveLooter(ObjectGuid guid) { m_playersLooting.erase(guid); }
+    bool IsLootedFor(Player const* player) const;
+    bool IsLootedForAll() const;
     void SendReleaseFor(ObjectGuid const& guid);
     void SendReleaseFor(Player* plr);
     void SendReleaseForAll();
     void SendAllowedLooter();
+    void NotifyMoneyRemoved();
+    void NotifyItemRemoved(uint32 lootIndex);
     void GroupCheck();
     void SetGroupLootRight(Player* player);
     void GenerateMoneyLoot(uint32 minAmount, uint32 maxAmount);
     bool FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, bool personal, bool noEmptyError = false);
     void AddConditionnalItem(ObjectGuid playerGuid, uint32 itemSlot);
     void RemoveConditionnalItem(ObjectGuid playerGuid, uint32 itemSlot);
+    void ForceLootAnimationCLientUpdate();
 
 
     // What is looted
@@ -314,20 +311,20 @@ private:
     Item*            m_itemTarget;
     ObjectGuid       m_guidTarget;
 
-    LootItemList     lootItems;                     // store of the items contained in loot
-    uint32           gold;                          // amount of money contained in loot
-    uint32           maxSlot;                       // used to increment slot index and get total items count
-    LootType         lootType;                      // required for achievement system
-    LootMethod       lootMethod;                    // used to know what kind of check must be done at loot time
-    ItemQualities    threshold;                     // group threshold for items
-    ObjectGuid       masterOwnerGuid;               // master loot player or round robin owner
-    ObjectGuid       currentLooterGuid;             // current player for under threshold items (Round Robin)
-    GuidSet          ownerSet;                      // set of all player who have right to the loot
-    uint32           maxEnchantSkill;               // used to know group right to use disenchant option
-    bool             isReleased;                    // used to release loot for round robin item
-    bool             haveItemOverThreshold;         // if at least one item in the loot is over threshold
-    bool             isChecked;                     // true if at least one player received the loot content
-    GroupLootRollMap roll;                          // used if an item is under rolling
+    LootItemList     m_lootItems;                     // store of the items contained in loot
+    uint32           m_gold;                          // amount of money contained in loot
+    uint32           m_maxSlot;                       // used to increment slot index and get total items count
+    LootType         m_lootType;                      // required for achievement system
+    LootMethod       m_lootMethod;                    // used to know what kind of check must be done at loot time
+    ItemQualities    m_threshold;                     // group threshold for items
+    ObjectGuid       m_masterOwnerGuid;               // master loot player or round robin owner
+    ObjectGuid       m_currentLooterGuid;             // current player for under threshold items (Round Robin)
+    GuidSet          m_ownerSet;                      // set of all player who have right to the loot
+    uint32           m_maxEnchantSkill;               // used to know group right to use disenchant option
+    bool             m_isReleased;                    // used to release loot for round robin item
+    bool             m_haveItemOverThreshold;         // if at least one item in the loot is over threshold
+    bool             m_isChecked;                     // true if at least one player received the loot content
+    GroupLootRollMap m_roll;                          // used if an item is under rolling
     GuidSet          m_playersLooting;              // player who opened loot windows
 };
 
