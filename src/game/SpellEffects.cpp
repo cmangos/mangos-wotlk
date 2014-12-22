@@ -6212,7 +6212,7 @@ void Spell::EffectPickPocket(SpellEffectIndex /*eff_idx*/)
                 loot = new Loot((Player*)m_caster, (Creature*)unitTarget, LOOT_PICKPOCKETING);
             else
             {
-                if (loot->lootType != LOOT_PICKPOCKETING)
+                if (loot->GetLootType() != LOOT_PICKPOCKETING)
                 {
                     delete loot;
                     loot = new Loot((Player*)m_caster, (Creature*)unitTarget, LOOT_PICKPOCKETING);
@@ -10417,7 +10417,7 @@ void Spell::EffectDisEnchant(SpellEffectIndex /*eff_idx*/)
         loot = new Loot(p_caster, itemTarget, LOOT_DISENCHANTING);
     else
     {
-        if (loot->lootType != LOOT_DISENCHANTING)
+        if (loot->GetLootType() != LOOT_DISENCHANTING)
         {
             delete loot;
             loot = new Loot(p_caster, itemTarget, LOOT_DISENCHANTING);
@@ -10885,7 +10885,7 @@ void Spell::EffectSkinning(SpellEffectIndex /*eff_idx*/)
         loot = new Loot((Player*)m_caster, creature, LOOT_SKINNING);
     else
     {
-        if (loot->lootType != LOOT_SKINNING)
+        if (loot->GetLootType() != LOOT_SKINNING)
         {
             delete loot;
             loot = new Loot((Player*)m_caster, creature, LOOT_SKINNING);
@@ -11290,7 +11290,7 @@ void Spell::EffectProspecting(SpellEffectIndex /*eff_idx*/)
         loot = new Loot(p_caster, itemTarget, LOOT_PROSPECTING);
     else
     {
-        if (loot->lootType != LOOT_PROSPECTING)
+        if (loot->GetLootType() != LOOT_PROSPECTING)
         {
             delete loot;
             loot = new Loot(p_caster, itemTarget, LOOT_PROSPECTING);
@@ -11319,7 +11319,7 @@ void Spell::EffectMilling(SpellEffectIndex /*eff_idx*/)
         loot = new Loot(p_caster, itemTarget, LOOT_MILLING);
     else
     {
-        if (loot->lootType != LOOT_MILLING)
+        if (loot->GetLootType() != LOOT_MILLING)
         {
             delete loot;
             loot = new Loot(p_caster, itemTarget, LOOT_MILLING);

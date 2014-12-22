@@ -87,53 +87,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
         return;
     }
 
-    ObjectGuid const& lguid = pLoot->GetLootGuid();
-
-    if (pLoot)
-    {
-        pLoot->NotifyMoneyRemoved();
-
-        if (!lguid.IsItem() && pLoot->lootMethod != NOT_GROUP_TYPE_LOOT)           // item can be looted only single player
-        {
-            uint32 money_per_player = uint32((pLoot->gold) / (pLoot->ownerSet.size()));
-
-            for (GuidSet::const_iterator itr = pLoot->ownerSet.begin(); itr != pLoot->ownerSet.end(); ++itr)
-            {
-                Player* plr = sObjectMgr.GetPlayer(*itr);
-                if (!plr || !plr->GetSession())
-                    continue;
-
-                plr->ModifyMoney(money_per_player);
-                plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, money_per_player);
-
-                WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
-                data << uint32(money_per_player);
-                data << uint8(0);// 0 is "you share of loot..."
-
-                plr->GetSession()->SendPacket(&data);
-            }
-        }
-        else
-        {
-            _player->ModifyMoney(pLoot->gold);
-            _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, pLoot->gold);
-
-            WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
-            data << uint32(pLoot->gold);
-            data << uint8(1);                               // 1 is "you loot..."
-            _player->GetSession()->SendPacket(&data);
-
-            if (lguid.IsItem())
-            {
-                if (Item* item = _player->GetItemByGuid(lguid))
-                    item->SetLootState(ITEM_LOOT_CHANGED);
-            }
-        }
-        pLoot->gold = 0;
-
-        if (pLoot->IsLootedFor(_player))
-            pLoot->Release(_player);
-    }
+    pLoot->SendGold(_player);
 }
 
 void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
@@ -369,14 +323,26 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 
     Player* target = ObjectAccessor::FindPlayer(targetGuid);
     if (!target)
+    {
+        sLog.outError("WorldSession::HandleLootMasterGiveOpcode> Cannot retrieve target %s", targetGuid.GetString().c_str());
         return;
+    }
 
     DEBUG_LOG("WorldSession::HandleLootMasterGiveOpcode> Giver = %s, Target = %s.", _player->GetObjectGuid().GetString().c_str(), targetGuid.GetString().c_str());
 
     Loot* pLoot = sLootMgr.GetLoot(_player, lootguid);
 
-    if (!pLoot || _player->GetObjectGuid() != pLoot->masterOwnerGuid)
+    if (!pLoot)
+    {
+        sLog.outError("WorldSession::HandleLootMasterGiveOpcode> Cannot retrieve loot for player %s", _player->GetObjectGuid().GetString().c_str());
         return;
+    }
+    
+    if (_player->GetObjectGuid() != pLoot->GetMasterLootGuid())
+    {
+        sLog.outError("WorldSession::HandleLootMasterGiveOpcode> player %s is not the loot master!", _player->GetObjectGuid().GetString().c_str());
+        return;
+    }
 
     InventoryResult msg = pLoot->SendItem(target, itemSlot);
 

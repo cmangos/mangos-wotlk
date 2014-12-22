@@ -8170,7 +8170,7 @@ void Player::RemovedInsignia(Player* looterPlr)
         loot = new Loot(looterPlr, bones, LOOT_INSIGNIA);
     else
     {
-        if (loot->lootType != LOOT_INSIGNIA)
+        if (loot->GetLootType() != LOOT_INSIGNIA)
         {
             delete loot;
             loot = new Loot(looterPlr, bones, LOOT_INSIGNIA);

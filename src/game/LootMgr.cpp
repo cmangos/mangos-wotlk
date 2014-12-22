@@ -1862,6 +1862,65 @@ void Loot::Clear()
     maxSlot = 0;
 }
 
+// only used from explicitly loaded loot
+void Loot::SetGoldAmount(uint32 _gold)
+{
+    if (lootType == LOOT_SKINNING)
+        gold = _gold;
+}
+
+void Loot::SendGold(Player* player)
+{
+    NotifyMoneyRemoved();
+
+    if (lootMethod != NOT_GROUP_TYPE_LOOT)           // item can be looted only single player
+    {
+        uint32 money_per_player = uint32(gold / (ownerSet.size()));
+
+        for (GuidSet::const_iterator itr = ownerSet.begin(); itr != ownerSet.end(); ++itr)
+        {
+            Player* plr = sObjectMgr.GetPlayer(*itr);
+            if (!plr || !plr->GetSession())
+                continue;
+
+            plr->ModifyMoney(money_per_player);
+            plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, money_per_player);
+
+            WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
+            data << uint32(money_per_player);
+            data << uint8(0);// 0 is "you share of loot..."
+
+            plr->GetSession()->SendPacket(&data);
+        }
+    }
+    else
+    {
+        player->ModifyMoney(gold);
+        player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, gold);
+
+        WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
+        data << uint32(gold);
+        data << uint8(1);                               // 1 is "you loot..."
+        player->GetSession()->SendPacket(&data);
+
+        if (m_guidTarget.IsItem())
+        {
+            if (Item* item = player->GetItemByGuid(m_guidTarget))
+                item->SetLootState(ITEM_LOOT_CHANGED);
+        }
+    }
+    gold = 0;
+    Release(player);
+}
+
+GroupLootRoll* Loot::GetRollForSlot(uint32 itemSlot)
+{
+    GroupLootRollMap::iterator rollItr = roll.find(itemSlot);
+    if (rollItr == roll.end())
+        return NULL;
+    return &rollItr->second;
+}
+
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li)
 {
     b << uint32(li.itemId);
@@ -2492,13 +2551,14 @@ void LootMgr::PlayerVote(Player* player, ObjectGuid const& lootTargetGuid, uint3
         return;
     }
 
-    if (loot->roll.find(itemSlot) == loot->roll.end())
+    GroupLootRoll* roll = loot->GetRollForSlot(itemSlot);
+    if (!roll)
     {
         sLog.outError("LootMgr::PlayerVote> Invalid itemSlot!");
         return;
     }
 
-    if (loot->roll[itemSlot].PlayerVote(player, vote))
+    if (roll->PlayerVote(player, vote))
     {
         switch (vote)
         {
