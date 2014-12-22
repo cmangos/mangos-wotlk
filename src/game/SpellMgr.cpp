@@ -1323,7 +1323,7 @@ struct DoSpellProcEvent
             ++count;
     }
 
-    bool HasEntry(uint32 spellId) { return spe_map.count(spellId) > 0; }
+    bool HasEntry(uint32 spellId) { return spe_map.find(spellId) != spe_map.end(); }
     bool SetStateToEntry(uint32 spellId) { return (state = spe_map.find(spellId)) != spe_map.end(); }
     SpellProcEventMap& spe_map;
     SpellProcEventMap::const_iterator state;
@@ -2741,7 +2741,6 @@ SpellEntry const* SpellMgr::SelectAuraRankForLevel(SpellEntry const* spellInfo, 
             break;
 
         // if found appropriate level
-        // partial Playerbot mod: fix for core bug (commit 073cdd0e...)
         if (level + 10 >= nextSpellInfo->spellLevel)
             return nextSpellInfo;
 
@@ -3420,7 +3419,7 @@ void SpellMgr::LoadSpellScriptTarget()
                 {
                     if (itr->spellId == 30427 && !cInfo->SkinningLootId)
                     {
-                        sLog.outErrorDb("Table `spell_script_target` has creature %u as a target of spellid 30427, but this creature has no skinlootid. Gas extraction will not work!", cInfo->Entry);
+                        sLog.outErrorDb("Table `spell_script_target` has creature %u as a target of spellid 30427, but this creature has no SkinningLootId. Gas extraction will not work!", cInfo->Entry);
                         sSpellScriptTargetStorage.EraseEntry(itr->spellId);
                         continue;
                     }

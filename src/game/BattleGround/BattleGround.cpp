@@ -196,32 +196,32 @@ BattleGround::BattleGround()
     m_MapId             = 0;
     m_Map               = NULL;
 
-    m_TeamStartLocX[BG_TEAM_ALLIANCE]   = 0;
-    m_TeamStartLocX[BG_TEAM_HORDE]      = 0;
+    m_TeamStartLocX[TEAM_INDEX_ALLIANCE]   = 0;
+    m_TeamStartLocX[TEAM_INDEX_HORDE]      = 0;
 
-    m_TeamStartLocY[BG_TEAM_ALLIANCE]   = 0;
-    m_TeamStartLocY[BG_TEAM_HORDE]      = 0;
+    m_TeamStartLocY[TEAM_INDEX_ALLIANCE]   = 0;
+    m_TeamStartLocY[TEAM_INDEX_HORDE]      = 0;
 
-    m_TeamStartLocZ[BG_TEAM_ALLIANCE]   = 0;
-    m_TeamStartLocZ[BG_TEAM_HORDE]      = 0;
+    m_TeamStartLocZ[TEAM_INDEX_ALLIANCE]   = 0;
+    m_TeamStartLocZ[TEAM_INDEX_HORDE]      = 0;
 
-    m_TeamStartLocO[BG_TEAM_ALLIANCE]   = 0;
-    m_TeamStartLocO[BG_TEAM_HORDE]      = 0;
+    m_TeamStartLocO[TEAM_INDEX_ALLIANCE]   = 0;
+    m_TeamStartLocO[TEAM_INDEX_HORDE]      = 0;
 
-    m_ArenaTeamIds[BG_TEAM_ALLIANCE]   = 0;
-    m_ArenaTeamIds[BG_TEAM_HORDE]      = 0;
+    m_ArenaTeamIds[TEAM_INDEX_ALLIANCE]   = 0;
+    m_ArenaTeamIds[TEAM_INDEX_HORDE]      = 0;
 
-    m_ArenaTeamRatingChanges[BG_TEAM_ALLIANCE]   = 0;
-    m_ArenaTeamRatingChanges[BG_TEAM_HORDE]      = 0;
+    m_ArenaTeamRatingChanges[TEAM_INDEX_ALLIANCE]   = 0;
+    m_ArenaTeamRatingChanges[TEAM_INDEX_HORDE]      = 0;
 
-    m_BgRaids[BG_TEAM_ALLIANCE]         = NULL;
-    m_BgRaids[BG_TEAM_HORDE]            = NULL;
+    m_BgRaids[TEAM_INDEX_ALLIANCE]         = NULL;
+    m_BgRaids[TEAM_INDEX_HORDE]            = NULL;
 
-    m_PlayersCount[BG_TEAM_ALLIANCE]    = 0;
-    m_PlayersCount[BG_TEAM_HORDE]       = 0;
+    m_PlayersCount[TEAM_INDEX_ALLIANCE]    = 0;
+    m_PlayersCount[TEAM_INDEX_HORDE]       = 0;
 
-    m_TeamScores[BG_TEAM_ALLIANCE]      = 0;
-    m_TeamScores[BG_TEAM_HORDE]         = 0;
+    m_TeamScores[TEAM_INDEX_ALLIANCE]      = 0;
+    m_TeamScores[TEAM_INDEX_HORDE]         = 0;
 
     m_PrematureCountDown = false;
     m_PrematureCountDownTimer = 0;
@@ -450,7 +450,7 @@ void BattleGround::Update(uint32 diff)
 
 void BattleGround::SetTeamStartLoc(Team team, float X, float Y, float Z, float O)
 {
-    BattleGroundTeamIndex teamIdx = GetTeamIndexByTeamId(team);
+    PvpTeamIndex teamIdx = GetTeamIndexByTeamId(team);
     m_TeamStartLocX[teamIdx] = X;
     m_TeamStartLocY[teamIdx] = Y;
     m_TeamStartLocZ[teamIdx] = Z;
@@ -629,17 +629,47 @@ void BattleGround::EndBattleGround(Team winner)
     WorldPacket data;
     int32 winmsg_id = 0;
 
+    uint32 bgScoresWinner = TEAM_INDEX_NEUTRAL;
+    uint64 battleground_id = 1;
+
     if (winner == ALLIANCE)
     {
         winmsg_id = isBattleGround() ? LANG_BG_A_WINS : LANG_ARENA_GOLD_WINS;
+        PlaySoundToAll(SOUND_ALLIANCE_WINS);
 
-        PlaySoundToAll(SOUND_ALLIANCE_WINS);                // alliance wins sound
+        // reversed index for the bg score storage system
+        bgScoresWinner = TEAM_INDEX_HORDE;
     }
     else if (winner == HORDE)
     {
         winmsg_id = isBattleGround() ? LANG_BG_H_WINS : LANG_ARENA_GREEN_WINS;
+        PlaySoundToAll(SOUND_HORDE_WINS);
 
-        PlaySoundToAll(SOUND_HORDE_WINS);                   // horde wins sound
+        // reversed index for the bg score storage system
+        bgScoresWinner = TEAM_INDEX_ALLIANCE;
+    }
+
+    // store battleground scores
+    if (isBattleGround() && sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_SCORE_STATISTICS))
+    {
+        static SqlStatementID insPvPstatsBattleground;
+        QueryResult* result;
+
+        SqlStatement stmt = CharacterDatabase.CreateStatement(insPvPstatsBattleground, "INSERT INTO pvpstats_battlegrounds (id, winner_team, bracket_id, type, date) VALUES (?, ?, ?, ?, NOW())");
+
+        uint8 battleground_bracket = GetMinLevel() / 10;
+        uint8 battleground_type = (uint8)GetTypeID();
+
+        // query next id
+        result = CharacterDatabase.Query("SELECT MAX(id) FROM pvpstats_battlegrounds");
+        if (result)
+        {
+            Field* fields = result->Fetch();
+            battleground_id = fields[0].GetUInt64() + 1;
+            delete result;
+        }
+
+        stmt.PExecute(battleground_id, bgScoresWinner, battleground_bracket, battleground_type);
     }
 
     SetWinner(winner);
@@ -738,6 +768,30 @@ void BattleGround::EndBattleGround(Team winner)
                 // Arena lost => reset the win_rated_arena having the "no_loose" condition
                 plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, ACHIEVEMENT_CRITERIA_CONDITION_NO_LOOSE);
             }
+        }
+
+        // store battleground score statistics for each player
+        if (isBattleGround() && sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_SCORE_STATISTICS))
+        {
+            static SqlStatementID insPvPstatsPlayer;
+            BattleGroundScoreMap::iterator score = m_PlayerScores.find(itr->first);
+            SqlStatement stmt = CharacterDatabase.CreateStatement(insPvPstatsPlayer, "INSERT INTO pvpstats_players (battleground_id, player_guid, score_killing_blows, score_deaths, score_honorable_kills, score_bonus_honor, score_damage_done, score_healing_done, attr_1, attr_2, attr_3, attr_4, attr_5) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+            stmt.addUInt32(battleground_id);
+            stmt.addUInt32(plr->GetGUIDLow());
+            stmt.addUInt32(score->second->GetKillingBlows());
+            stmt.addUInt32(score->second->GetDeaths());
+            stmt.addUInt32(score->second->GetHonorableKills());
+            stmt.addUInt32(score->second->GetBonusHonor());
+            stmt.addUInt32(score->second->GetDamageDone());
+            stmt.addUInt32(score->second->GetHealingDone());
+            stmt.addUInt32(score->second->GetAttr1());
+            stmt.addUInt32(score->second->GetAttr2());
+            stmt.addUInt32(score->second->GetAttr3());
+            stmt.addUInt32(score->second->GetAttr4());
+            stmt.addUInt32(score->second->GetAttr5());
+
+            stmt.Execute();
         }
 
         if (team == winner)
@@ -1678,7 +1732,7 @@ WorldSafeLocsEntry const* BattleGround::GetClosestGraveYard(Player* player)
 
 bool BattleGround::IsTeamScoreInRange(Team team, uint32 minScore, uint32 maxScore) const
 {
-    BattleGroundTeamIndex team_idx = GetTeamIndexByTeamId(team);
+    PvpTeamIndex team_idx = GetTeamIndexByTeamId(team);
     uint32 score = (m_TeamScores[team_idx] < 0) ? 0 : uint32(m_TeamScores[team_idx]);
     return score >= minScore && score <= maxScore;
 }

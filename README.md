@@ -1,4 +1,4 @@
-# C(ontinued)-MaNGOS -- README
+# C(ontinued)-MaNGOS -- README [![Build Status](https://travis-ci.org/cmangos/mangos-wotlk.svg?branch=master)](https://travis-ci.org/cmangos/mangos-wotlk)
 
 This file is part of the CMaNGOS Project. See [AUTHORS](AUTHORS.md) file for Copyright information
 

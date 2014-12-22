@@ -57,6 +57,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "Vehicle.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
 {
@@ -3920,8 +3921,16 @@ void Spell::EffectForceCast(SpellEffectIndex eff_idx)
 
     int32 basePoints = damage;
 
-    // spell effect 141 has BasePoints greater than 1
-    if (basePoints > 1)
+    // forced cast spells by vehicle on master always unboard the master
+    if (m_caster->IsVehicle() && m_caster->GetVehicleInfo()->HasOnBoard(unitTarget) &&
+        m_spellInfo->EffectImplicitTargetA[eff_idx] == TARGET_MASTER)
+    {
+        if (sSpellStore.LookupEntry(basePoints))
+            m_caster->RemoveAurasDueToSpell(basePoints);
+    }
+
+    // spell effect 141 needs to be cast as custom with basePoints
+    if (m_spellInfo->Effect[eff_idx] == SPELL_EFFECT_FORCE_CAST_WITH_VALUE)
         unitTarget->CastCustomSpell(unitTarget, spellInfo, &basePoints, &basePoints, &basePoints, true, NULL , NULL, m_originalCasterGUID, m_spellInfo);
     else
         unitTarget->CastSpell(unitTarget, spellInfo, true, NULL, NULL, m_originalCasterGUID, m_spellInfo);
@@ -11015,9 +11024,7 @@ void Spell::EffectPlayMusic(SpellEffectIndex eff_idx)
         return;
     }
 
-    WorldPacket data(SMSG_PLAY_MUSIC, 4);
-    data << uint32(soundId);
-    ((Player*)unitTarget)->GetSession()->SendPacket(&data);
+    m_caster->PlayMusic(soundId, (Player*)unitTarget);
 }
 
 void Spell::EffectSpecCount(SpellEffectIndex /*eff_idx*/)

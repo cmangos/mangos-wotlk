@@ -299,7 +299,7 @@ class BattleGroundEY : public BattleGround
         ObjectGuid m_towers[EY_NODES_MAX];
 
         uint32 m_honorTicks;
-        uint32 m_honorScoreTicks[BG_TEAMS_COUNT];
+        uint32 m_honorScoreTicks[PVP_TEAM_COUNT];
 
         uint32 m_flagRespawnTimer;
         uint32 m_resourceUpdateTimer;

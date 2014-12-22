@@ -147,6 +147,10 @@ class BattleGroundABScore : public BattleGroundScore
     public:
         BattleGroundABScore(): BasesAssaulted(0), BasesDefended(0) {};
         virtual ~BattleGroundABScore() {};
+
+        uint32 GetAttr1() const { return BasesAssaulted; }
+        uint32 GetAttr2() const { return BasesDefended; }
+
         uint32 BasesAssaulted;
         uint32 BasesDefended;
 };
@@ -201,13 +205,13 @@ class BattleGroundAB : public BattleGround
         uint8               m_prevNodes[BG_AB_NODES_MAX];   // used for performant wordlstate-updating
         BG_AB_BannerTimer   m_BannerTimers[BG_AB_NODES_MAX];
         uint32              m_NodeTimers[BG_AB_NODES_MAX];
-        uint32              m_lastTick[BG_TEAMS_COUNT];
-        uint32              m_honorScoreTicks[BG_TEAMS_COUNT];
-        uint32              m_ReputationScoreTics[BG_TEAMS_COUNT];
+        uint32              m_lastTick[PVP_TEAM_COUNT];
+        uint32              m_honorScoreTicks[PVP_TEAM_COUNT];
+        uint32              m_ReputationScoreTics[PVP_TEAM_COUNT];
         bool                m_IsInformedNearVictory;
         uint32              m_honorTicks;
         uint32              m_ReputationTics;
         // need for achievements
-        bool                m_TeamScores500Disadvantage[BG_TEAMS_COUNT];
+        bool                m_TeamScores500Disadvantage[PVP_TEAM_COUNT];
 };
 #endif

@@ -329,6 +329,7 @@ enum eConfigBoolValues
     CONFIG_BOOL_SKILL_FAIL_POSSIBLE_FISHINGPOOL,
     CONFIG_BOOL_BATTLEGROUND_CAST_DESERTER,
     CONFIG_BOOL_BATTLEGROUND_QUEUE_ANNOUNCER_START,
+    CONFIG_BOOL_BATTLEGROUND_SCORE_STATISTICS,
     CONFIG_BOOL_ARENA_AUTO_DISTRIBUTE_POINTS,
     CONFIG_BOOL_ARENA_QUEUE_ANNOUNCER_JOIN,
     CONFIG_BOOL_ARENA_QUEUE_ANNOUNCER_EXIT,
@@ -559,6 +560,9 @@ class World
         /// Get a server configuration element (see #eConfigBoolValues)
         bool getConfig(eConfigBoolValues index) const { return m_configBoolValues[index]; }
 
+        /// Get configuration about force-loaded maps
+        std::set<uint32>* getConfigForceLoadMapIds() const { return m_configForceLoadMapIds; }
+
         /// Are we on a "Player versus Player" server?
         bool IsPvPRealm() { return (getConfig(CONFIG_UINT32_GAME_TYPE) == REALM_TYPE_PVP || getConfig(CONFIG_UINT32_GAME_TYPE) == REALM_TYPE_RPPVP || getConfig(CONFIG_UINT32_GAME_TYPE) == REALM_TYPE_FFA_PVP); }
         bool IsFFAPvPRealm() { return getConfig(CONFIG_UINT32_GAME_TYPE) == REALM_TYPE_FFA_PVP; }
@@ -697,6 +701,9 @@ class World
         // used versions
         std::string m_DBVersion;
         std::string m_CreatureEventAIVersion;
+
+        // List of Maps that should be force-loaded on startup
+        std::set<uint32>* m_configForceLoadMapIds;
 };
 
 extern uint32 realmID;

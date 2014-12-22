@@ -174,7 +174,7 @@ void CreatureEventAIMgr::CheckUnusedAISummons()
         sLog.outErrorEventAI("Entry %i in table `creature_ai_summons` but not used in EventAI scripts.", *itr);
 }
 
-/// Helper function to check if a target-suite is suitable for the event-type
+/// Helper function to check if a target-type is suitable for the event-type
 bool IsValidTargetType(EventAI_Type eventType, EventAI_ActionType actionType, uint32 targetType, uint32 eventId, uint8 action)
 {
     switch (targetType)
@@ -321,6 +321,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                 case EVENT_T_MANA:
                 case EVENT_T_TARGET_HP:
                 case EVENT_T_TARGET_MANA:
+                case EVENT_T_ENERGY:
                     if (temp.percent_range.percentMax > 100)
                         sLog.outErrorEventAI("Creature %u are using percentage event(%u) with param2 (MinPercent) > 100. Event will never trigger! ", temp.creature_id, i);
 

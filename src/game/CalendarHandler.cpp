@@ -854,7 +854,6 @@ void CalendarMgr::SendCalendarEvent(Player* player, CalendarEvent const* event, 
     if (!player || !event)
         return;
 
-    std::string timeStr = TimeToTimestampStr(event->EventTime);
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SendCalendarEvent> sendType[%u], CreatorGuid[%s], EventId["UI64FMTD"], Type[%u], Flags[%u], Title[%s]",
                      sendType, event->CreatorGuid.GetString().c_str(), event->EventId, uint32(event->Type), event->Flags, event->Title.c_str());
 

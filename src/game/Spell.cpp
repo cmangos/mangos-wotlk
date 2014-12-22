@@ -5763,7 +5763,28 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_EFFECT_RESURRECT:
             case SPELL_EFFECT_RESURRECT_NEW:
             {
-                if (m_targets.getUnitTarget()->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+                if (m_targets.m_targetMask & (TARGET_FLAG_CORPSE | TARGET_FLAG_PVP_CORPSE))
+                {
+                    if (Corpse* corpse = m_caster->GetMap()->GetCorpse(m_targets.getCorpseTargetGuid()))
+                    {
+                        if (Player* owner = ObjectAccessor::FindPlayer(corpse->GetOwnerGuid()))
+                        {
+                            if (owner->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+                                return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
+                        }
+                        else
+                            return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
+                    }
+                    else
+                        return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
+                }
+                else if (m_targets.m_targetMask & TARGET_FLAG_UNIT)
+                {
+                    Unit* target = m_targets.getUnitTarget();
+                    if (!target || target->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+                        return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
+                }
+                else
                     return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
 
                 break;
