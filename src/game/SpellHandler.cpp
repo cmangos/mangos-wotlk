@@ -273,7 +273,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
     {
         Loot*& loot = pItem->loot;
         if (!loot)
-            loot = new Loot(pUser, pItem);
+            loot = new Loot(pUser, pItem, LOOT_PICKPOCKETING);
 
         loot->ShowContentTo(pUser);
     }
