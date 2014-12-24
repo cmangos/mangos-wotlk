@@ -445,10 +445,15 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(LootView const& lv) const
 
     if (lootItemType != LOOTITEM_TYPE_NORMAL)
     {
-        // Check if its turn of that player to loot a not party loot. The loot may be released or the item may be passed by currentLooter
-        if (lv.loot.m_isReleased || currentLooterPass || lv.loot.m_currentLooterGuid == lv.viewer->GetObjectGuid())
-            return lv.loot.m_lootMethod == NOT_GROUP_TYPE_LOOT ? LOOT_SLOT_OWNER : LOOT_SLOT_NORMAL; // TODO maybe always owner
-        return MAX_LOOT_SLOT_TYPE;
+        if (lv.loot.m_lootMethod == NOT_GROUP_TYPE_LOOT || FREE_FOR_ALL)
+            return LOOT_SLOT_OWNER;
+        else
+        {
+            // Check if its turn of that player to loot a not party loot. The loot may be released or the item may be passed by currentLooter
+            if (lv.loot.m_isReleased || currentLooterPass || lv.loot.m_currentLooterGuid == lv.viewer->GetObjectGuid())
+                return LOOT_SLOT_OWNER;
+            return MAX_LOOT_SLOT_TYPE;
+        }
     }
 
     switch (lv.loot.m_lootMethod)
