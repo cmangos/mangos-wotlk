@@ -5667,6 +5667,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                     lockId = go->GetGOInfo()->GetLockId();
                     if (!lockId)
                         return SPELL_FAILED_ALREADY_OPEN;
+
+                    // check if its in use only when cast is finished (called from spell::cast() with strict = false)
+                    if (!strict && go->IsInUse())
+                        return SPELL_FAILED_CHEST_IN_USE;
                 }
                 else if (Item* item = m_targets.getItemTarget())
                 {

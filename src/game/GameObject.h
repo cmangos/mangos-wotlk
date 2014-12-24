@@ -720,6 +720,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         void AddUniqueUse(Player* player);
         void AddUse() { ++m_useTimes; }
+        bool IsInUse() { return m_isInUse; }
+        void SetInUse(bool use) { m_isInUse = use; }
 
         uint32 GetUseCount() const { return m_useTimes; }
         uint32 GetUniqueUseCount() const { return m_UniqueUsers.size(); }
@@ -800,6 +802,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         // Loot System
         ObjectGuid m_lootRecipientGuid;                     // player who will have rights for looting if m_lootGroupRecipient==0 or group disbanded
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
+
+        bool m_isInUse;
 
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);

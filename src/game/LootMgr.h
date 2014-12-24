@@ -325,8 +325,9 @@ private:
     bool             m_isReleased;                    // used to release loot for round robin item
     bool             m_haveItemOverThreshold;         // if at least one item in the loot is over threshold
     bool             m_isChecked;                     // true if at least one player received the loot content
+    bool             m_isChest;                       // chest type object have special loot right
     GroupLootRollMap m_roll;                          // used if an item is under rolling
-    GuidSet          m_playersLooting;              // player who opened loot windows
+    GuidSet          m_playersLooting;                // player who opened loot windows
 };
 
 struct LootView

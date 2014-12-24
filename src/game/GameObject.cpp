@@ -66,6 +66,8 @@ GameObject::GameObject() : WorldObject(),
 
     m_packedRotation = 0;
     m_lootGroupRecipientId = 0;
+
+    m_isInUse = false;
 }
 
 GameObject::~GameObject()
