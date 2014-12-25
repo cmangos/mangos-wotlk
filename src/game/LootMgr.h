@@ -273,6 +273,7 @@ public:
     bool CanLoot(Player const* player, bool onlyRightCheck = false);
     void ShowContentTo(Player* plr);
     void Update();
+    bool IsChanged() { return m_isChanged; }
     void Release(Player* player);
     void GetLootItemsListFor(Player* player, LootItemList& lootList);
     void SetGoldAmount(uint32 _gold);
@@ -326,6 +327,7 @@ private:
     bool             m_haveItemOverThreshold;         // if at least one item in the loot is over threshold
     bool             m_isChecked;                     // true if at least one player received the loot content
     bool             m_isChest;                       // chest type object have special loot right
+    bool             m_isChanged;                     // true if at least one item is looted
     GroupLootRollMap m_roll;                          // used if an item is under rolling
     GuidSet          m_playersLooting;                // player who opened loot windows
 };

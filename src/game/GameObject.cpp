@@ -68,6 +68,8 @@ GameObject::GameObject() : WorldObject(),
     m_lootGroupRecipientId = 0;
 
     m_isInUse = false;
+    m_reStockTimer = 0;
+    m_despawnTimer = 0;
 }
 
 GameObject::~GameObject()
@@ -246,6 +248,29 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     }
                     break;
                 }
+                case GAMEOBJECT_TYPE_CHEST:
+                {
+                    if (m_goInfo->chest.chestRestockTime)
+                    {
+                        if (m_reStockTimer != 0)
+                        {
+                            if (m_reStockTimer <= time(NULL))
+                            {
+                                m_reStockTimer = 0;
+                                m_lootState = GO_READY;
+                                delete loot;
+                                loot = NULL;
+                                ForceValuesUpdateAtIndex(GAMEOBJECT_DYNAMIC);
+                            }
+                        }
+                        else
+                            m_lootState = GO_READY;
+
+                        return;
+                    }
+                    else
+                        m_lootState = GO_READY;
+                }
                 default:
                     break;
             }
@@ -361,7 +386,14 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     break;
                 case GAMEOBJECT_TYPE_CHEST:
                     if (loot)
+                    {
+                        if (loot->IsChanged())
+                            m_despawnTimer = time(NULL) + 5 * MINUTE; // TODO:: need to add a define?
+                        else if (m_despawnTimer != 0 && m_despawnTimer <= time(NULL))
+                            m_lootState = GO_JUST_DEACTIVATED;
+
                         loot->Update();
+                    }
                     break;
                 case GAMEOBJECT_TYPE_GOOBER:
                     if (m_cooldownTime < time(nullptr))
@@ -417,6 +449,16 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     m_UniqueUsers.clear();
                     SetLootState(GO_READY);
                     return; // SetLootState and return because go is treated as "burning flag" due to GetGoAnimProgress() being 100 and would be removed on the client
+                case GAMEOBJECT_TYPE_CHEST:
+                    m_despawnTimer = 0;
+                    if (m_goInfo->chest.chestRestockTime)
+                    {
+                        m_reStockTimer = time(NULL) + m_goInfo->chest.chestRestockTime * MINUTE;
+                        m_lootState = GO_NOT_READY;
+                        ForceValuesUpdateAtIndex(GAMEOBJECT_DYNAMIC);
+                        return;
+                    }
+                    break;
                 default:
                     break;
             }

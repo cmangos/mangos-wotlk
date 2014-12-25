@@ -1274,7 +1274,7 @@ void Loot::ShowContentTo(Player* plr)
     WorldPacket data(SMSG_LOOT_RESPONSE);
     data << m_guidTarget;
     data << uint8(m_lootType);
-    if (m_ownerSet.find(plr->GetObjectGuid()) != m_ownerSet.end())
+    if (!IsLootedFor(plr))
     {
         // player have some right to see the loot
         data << LootView(*this, plr);
@@ -1415,7 +1415,7 @@ void Loot::SetGroupLootRight(Player* player)
 
 Loot::Loot(Player* player, Creature* creature, LootType type) :
     m_lootType(LOOT_NONE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON),
-    m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false),
+    m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false), m_isChanged(false),
     m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(NULL)
 {
     // the player whose group may loot the corpse
@@ -1508,7 +1508,7 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
 
 Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
     m_lootType(LOOT_NONE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON),
-    m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false),
+    m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false), m_isChanged(false),
     m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(NULL)
 {
     // the player whose group may loot the corpse
@@ -1606,7 +1606,7 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
 
 Loot::Loot(Player* player, Corpse* corpse, LootType type) :
     m_lootType(LOOT_NONE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON),
-    m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false),
+    m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false), m_isChanged(false),
     m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(NULL)
 {
     // the player whose group may loot the corpse
@@ -1651,7 +1651,7 @@ Loot::Loot(Player* player, Corpse* corpse, LootType type) :
 
 Loot::Loot(Player* player, Item* item, LootType type) :
     m_lootType(LOOT_NONE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON),
-    m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false),
+    m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false), m_isChanged(false),
     m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(NULL)
 {
     // the player whose group may loot the corpse
@@ -1699,7 +1699,7 @@ Loot::Loot(Player* player, Item* item, LootType type) :
 
 Loot::Loot(Unit* unit, Item* item) :
     m_lootType(LOOT_SKINNING), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON),
-    m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false),
+    m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false), m_isChanged(false),
     m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(NULL), m_itemTarget(item)
 {
     m_ownerSet.insert(unit->GetObjectGuid());
@@ -1708,7 +1708,7 @@ Loot::Loot(Unit* unit, Item* item) :
 
 Loot::Loot(Player* player, uint32 id, LootType type) :
     m_lootType(type), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON),
-    m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false),
+    m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false), m_isChanged(false),
     m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(NULL)
 {
     switch (type)
@@ -1772,6 +1772,7 @@ InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
             lootItem->lootedBy.insert(target->GetObjectGuid());     // mark looted by this target
 
             playerGotItem = true;
+            m_isChanged = true;
         }
         else
             target->SendEquipError(msg, NULL, NULL, lootItem->itemId);
@@ -1821,6 +1822,7 @@ bool Loot::AutoStore(Player* player, bool broadcast /*= false*/, uint32 bag /*= 
         lootItem->lootedBy.insert(player->GetObjectGuid());
         Item* pItem = player->StoreNewItem(dest, lootItem->itemId, true, lootItem->randomPropertyId);
         player->SendNewItem(pItem, lootItem->count, false, false, broadcast);
+        m_isChanged = true;
     }
 
     return result;
@@ -1828,6 +1830,7 @@ bool Loot::AutoStore(Player* player, bool broadcast /*= false*/, uint32 bag /*= 
 
 void Loot::Update()
 {
+    m_isChanged = false;
     GroupLootRollMap::iterator itr = m_roll.begin();
     while (itr != m_roll.end())
     {
