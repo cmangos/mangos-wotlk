@@ -716,7 +716,7 @@ struct CinematicSequencesEntry
 struct CreatureDisplayInfoEntry
 {
     uint32      Displayid;                                  // 0        m_ID
-    // 1        m_modelID
+    uint32      ModelId;
     // 2        m_soundID
     uint32      ExtendedDisplayInfoID;                      // 3        m_extendedDisplayInfoID -> CreatureDisplayInfoExtraEntry::DisplayExtraId
     float       scale;                                      // 4        m_creatureModelScale
@@ -729,6 +729,28 @@ struct CreatureDisplayInfoEntry
     // 13       m_particleColorID
     // 14       m_creatureGeosetData
     // 15       m_objectEffectPackageID
+};
+
+struct CreatureModelDataEntry
+{
+    uint32      Id;
+    uint32      Flags;
+    // char*    ModelPath[16]
+    // uint32   Unk1;
+    float       Scale;                                      // Used in calculation of unit collision data
+    // int32    Unk2
+    // int32    Unk3
+    // uint32   Unk4
+    // uint32   Unk5
+    // float    Unk6
+    // uint32   Unk7
+    // float    Unk8
+    // uint32   Unk9
+    // uint32   Unk10
+    // float    CollisionWidth;
+    float       CollisionHeight;
+    float       MountHeight;                                // Used in calculation of unit collision data when mounted
+    // float Unks[11]
 };
 
 struct CreatureDisplayInfoExtraEntry

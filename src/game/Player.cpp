@@ -4401,6 +4401,72 @@ void Player::SetWaterWalk(bool enable)
     GetSession()->SendPacket(&data);
 }
 
+void Player::SetLevitate(bool enable)
+{
+    WorldPacket data;
+    if (enable)
+        data.Initialize(SMSG_MOVE_GRAVITY_DISABLE, 12);
+    else
+        data.Initialize(SMSG_MOVE_GRAVITY_ENABLE, 12);
+
+    data << GetPackGUID();
+    data << uint32(0);                                      // unk
+    SendMessageToSet(&data, true);
+
+    data.Initialize(MSG_MOVE_GRAVITY_CHNG, 64);
+    data << GetPackGUID();
+    m_movementInfo.Write(data);
+    SendMessageToSet(&data, false);
+}
+
+void Player::SetCanFly(bool enable)
+{
+    WorldPacket data;
+    if (enable)
+        data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+    else
+        data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
+
+    data << GetPackGUID();
+    data << uint32(0);                                      // unk
+    SendMessageToSet(&data, true);
+
+    data.Initialize(MSG_MOVE_UPDATE_CAN_FLY, 64);
+    data << GetPackGUID();
+    m_movementInfo.Write(data);
+    SendMessageToSet(&data, false);
+}
+
+void Player::SetFeatherFall(bool enable)
+{
+    WorldPacket data;
+    if (enable)
+        data.Initialize(SMSG_MOVE_FEATHER_FALL, 8 + 4);
+    else
+        data.Initialize(SMSG_MOVE_NORMAL_FALL, 8 + 4);
+
+    data << GetPackGUID();
+    data << uint32(0);
+    SendMessageToSet(&data, true);
+
+    // start fall from current height
+    if (!enable)
+        SetFallInformation(0, GetPositionZ());
+}
+
+void Player::SetHover(bool enable)
+{
+    WorldPacket data;
+    if (enable)
+        data.Initialize(SMSG_MOVE_SET_HOVER, 8 + 4);
+    else
+        data.Initialize(SMSG_MOVE_UNSET_HOVER, 8 + 4);
+
+    data << GetPackGUID();
+    data << uint32(0);
+    SendMessageToSet(&data, true);
+}
+
 /* Preconditions:
   - a resurrectable corpse must not be loaded for the player (only bones)
   - the player must be in world
@@ -23310,4 +23376,54 @@ float Player::ComputeRest(time_t timePassed, bool offline /*= false*/, bool inRe
             bonus *= sWorld.getConfig(CONFIG_FLOAT_RATE_REST_OFFLINE_IN_WILDERNESS) / 4.0f; // bonus is reduced by 4 when not in rest place
     }
     return bonus;
+}
+
+float Player::GetCollisionHeight(bool mounted) const
+{
+    if (mounted)
+    {
+        // mounted case
+        CreatureDisplayInfoEntry const* mountDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID));
+        if (!mountDisplayInfo)
+            return GetCollisionHeight(false);
+
+        CreatureModelDataEntry const* mountModelData = sCreatureModelDataStore.LookupEntry(mountDisplayInfo->ModelId);
+        if (!mountModelData)
+            return GetCollisionHeight(false);
+
+        CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
+        if(!displayInfo)
+        {
+            sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
+            return 0;
+        }
+        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+        if(!modelData)
+        {
+            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
+            return 0;
+        }
+
+        float scaleMod = GetObjectScale(); // 99% sure about this
+
+        return scaleMod * mountModelData->MountHeight + modelData->CollisionHeight * 0.5f;
+    }
+    else
+    {
+        // use native model collision height in dismounted case
+        CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
+        if(!displayInfo)
+        {
+            sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
+            return 0;
+        }
+        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+        if(!modelData)
+        {
+            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
+            return 0;
+        }
+
+        return modelData->CollisionHeight;
+    }
 }

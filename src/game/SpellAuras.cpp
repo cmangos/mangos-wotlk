@@ -3424,19 +3424,8 @@ void Aura::HandleAuraFeatherFall(bool apply, bool Real)
     // only at real add/remove aura
     if (!Real)
         return;
-    Unit* target = GetTarget();
-    WorldPacket data;
-    if (apply)
-        data.Initialize(SMSG_MOVE_FEATHER_FALL, 8 + 4);
-    else
-        data.Initialize(SMSG_MOVE_NORMAL_FALL, 8 + 4);
-    data << target->GetPackGUID();
-    data << uint32(0);
-    target->SendMessageToSet(&data, true);
 
-    // start fall from current height
-    if (!apply && target->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)target)->SetFallInformation(0, target->GetPositionZ());
+    GetTarget()->SetFeatherFall(apply);
 }
 
 void Aura::HandleAuraHover(bool apply, bool Real)
@@ -3445,14 +3434,7 @@ void Aura::HandleAuraHover(bool apply, bool Real)
     if (!Real)
         return;
 
-    WorldPacket data;
-    if (apply)
-        data.Initialize(SMSG_MOVE_SET_HOVER, 8 + 4);
-    else
-        data.Initialize(SMSG_MOVE_UNSET_HOVER, 8 + 4);
-    data << GetTarget()->GetPackGUID();
-    data << uint32(0);
-    GetTarget()->SendMessageToSet(&data, true);
+    GetTarget()->SetHover(apply);
 }
 
 void Aura::HandleWaterBreathing(bool /*apply*/, bool /*Real*/)
@@ -3478,6 +3460,9 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
     uint32 modelid = 0;
     Unit* target = GetTarget();
+
+    // remove SPELL_AURA_EMPATHY
+    target->RemoveSpellsCausingAura(SPELL_AURA_EMPATHY);
 
     if (ssEntry->modelID_A)
     {
@@ -5068,14 +5053,7 @@ void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
     // Enable Fly mode for flying mounts
     if (m_modifier.m_auraname == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)
     {
-        WorldPacket data;
-        if (apply)
-            data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
-        else
-            data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
-        data << target->GetPackGUID();
-        data << uint32(0);                                  // unknown
-        target->SendMessageToSet(&data, true);
+        target->SetCanFly(apply);
 
         // Players on flying mounts must be immune to polymorph
         if (target->GetTypeId() == TYPEID_PLAYER)
@@ -6938,12 +6916,12 @@ void Aura::HandleShapeshiftBoosts(bool apply)
 
 void Aura::HandleAuraEmpathy(bool apply, bool /*Real*/)
 {
-    if (GetTarget()->GetTypeId() != TYPEID_UNIT)
-        return;
+    Unit* target = GetTarget();
 
-    CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(GetTarget()->GetEntry());
-    if (ci && ci->CreatureType == CREATURE_TYPE_BEAST)
-        GetTarget()->ApplyModUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO, apply);
+    // This aura is expected to only work with CREATURE_TYPE_BEAST or players
+    CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(target->GetEntry());
+    if (target->GetTypeId() == TYPEID_PLAYER || (target->GetTypeId() == TYPEID_UNIT && ci && ci->CreatureType == CREATURE_TYPE_BEAST))
+        target->ApplyModUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO, apply);
 }
 
 void Aura::HandleAuraUntrackable(bool apply, bool /*Real*/)
@@ -6989,15 +6967,7 @@ void Aura::HandleAuraAllowFlight(bool apply, bool Real)
     if (!Real)
         return;
 
-    // allow fly
-    WorldPacket data;
-    if (apply)
-        data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
-    else
-        data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
-    data << GetTarget()->GetPackGUID();
-    data << uint32(0);                                      // unk
-    GetTarget()->SendMessageToSet(&data, true);
+    GetTarget()->SetCanFly(apply);
 }
 
 void Aura::HandleModRating(bool apply, bool Real)

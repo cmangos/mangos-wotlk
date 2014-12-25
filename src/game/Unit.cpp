@@ -6402,6 +6402,17 @@ void Unit::EnergizeBySpell(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers 
     pVictim->ModifyPower(powertype, Damage);
 }
 
+/** Calculate spell coefficents and level penalties for spell/melee damage or heal
+ *
+ * this is the caster of the spell/ melee attacker
+ * @param spellProto SpellEntry of the used spell
+ * @param total current value onto which the Bonus and level penalty will be calculated
+ * @param benefit additional benefit from ie spellpower-auras
+ * @param ap_benefit additional melee attackpower benefit from auras
+ * @param damagetype what kind of damage
+ * @param donePart calculate for done or taken
+ * @param defCoeffMod default coefficient for additional scaling (i.e. normal player healing 1.88)
+ */
 int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int32 benefit, int32 ap_benefit,  DamageEffectType damagetype, bool donePart, float defCoeffMod)
 {
     // Distribute Damage over multiple effects, reduce by AoE
@@ -6845,7 +6856,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* pCaster, SpellEntry const* spellProto, 
     int32 TakenAdvertisedBenefit = SpellBaseDamageBonusTaken(GetSpellSchoolMask(spellProto));
 
     // apply benefit affected by spell power implicit coeffs and spell level penalties
-    TakenTotal = SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
+    TakenTotal = pCaster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
 
     float tmpDamage = (int32(pdamage) + TakenTotal * int32(stack)) * TakenTotalMod;
 
@@ -7300,7 +7311,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
  * Calculates target part of healing spell bonuses,
  * will be called on each tick for periodic damage over time auras
  */
-uint32 Unit::SpellHealingBonusTaken(Unit* /*pCaster*/, SpellEntry const* spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack)
+uint32 Unit::SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack)
 {
     float  TakenTotalMod = 1.0f;
 
@@ -7335,7 +7346,7 @@ uint32 Unit::SpellHealingBonusTaken(Unit* /*pCaster*/, SpellEntry const* spellPr
     int32 TakenAdvertisedBenefit = SpellBaseHealingBonusTaken(GetSpellSchoolMask(spellProto));
 
     // apply benefit affected by spell power implicit coeffs and spell level penalties
-    TakenTotal = SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false, 1.88f);
+    TakenTotal = pCaster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false, 1.88f);
 
     AuraList const& mHealingGet = GetAurasByType(SPELL_AURA_MOD_HEALING_RECEIVED);
     for (AuraList::const_iterator i = mHealingGet.begin(); i != mHealingGet.end(); ++i)
@@ -7840,7 +7851,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackTy
     if (!isWeaponDamageBasedSpell)
     {
         // apply benefit affected by spell power implicit coeffs and spell level penalties
-        TakenFlat = SpellBonusWithCoeffs(spellProto, 0, TakenFlat, 0, damagetype, false);
+        TakenFlat = pCaster->SpellBonusWithCoeffs(spellProto, 0, TakenFlat, 0, damagetype, false);
     }
 
     float tmpDamage = float(int32(pdamage) + TakenFlat * int32(stack)) * TakenPercent;
@@ -7942,6 +7953,10 @@ void Unit::Mount(uint32 mount, uint32 spellId)
                     pet->ApplyModeFlags(PET_MODE_DISABLE_ACTIONS, true);
             }
         }
+
+        float height = ((Player*)this)->GetCollisionHeight(true);
+        if (height)
+            SendCollisionHeightUpdate(height);
     }
 }
 
@@ -7972,6 +7987,10 @@ void Unit::Unmount(bool from_aura)
             pet->ApplyModeFlags(PET_MODE_DISABLE_ACTIONS, false);
         else
             ((Player*)this)->ResummonPetTemporaryUnSummonedIfAny();
+
+        float height = ((Player*)this)->GetCollisionHeight(false);
+        if (height)
+            SendCollisionHeightUpdate(height);
     }
 }
 
@@ -11240,4 +11259,16 @@ void Unit::DisableSpline()
 {
     m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD));
     movespline->_Interrupt();
+}
+
+void Unit::SendCollisionHeightUpdate(float height)
+{
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        WorldPacket data(SMSG_MOVE_SET_COLLISION_HGT, GetPackGUID().size() + 4 + 4);
+        data << GetPackGUID();
+        data << uint32(sWorld.GetGameTime());
+        data << height;
+        ((Player*)this)->GetSession()->SendPacket(&data);
+    }
 }
