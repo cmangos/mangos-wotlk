@@ -431,10 +431,10 @@ bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTar
     return true;
 }
 
-LootSlotType LootItem::GetSlotTypeForSharedLoot(LootView const& lv) const
+LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const* loot) const
 {
     // ignore looted, FFA (each player get own copy) and not allowed items
-    if (IsLootedFor(lv.viewer->GetObjectGuid()) || !AllowedForPlayer(lv.viewer, lv.loot.GetLootTarget()))
+    if (IsLootedFor(player->GetObjectGuid()) || !AllowedForPlayer(player, loot->GetLootTarget()))
         return MAX_LOOT_SLOT_TYPE;
 
     if (freeForAll)
@@ -445,18 +445,18 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(LootView const& lv) const
 
     if (lootItemType != LOOTITEM_TYPE_NORMAL)
     {
-        if (lv.loot.m_lootMethod == NOT_GROUP_TYPE_LOOT || FREE_FOR_ALL)
+        if (loot->m_lootMethod == NOT_GROUP_TYPE_LOOT || FREE_FOR_ALL)
             return LOOT_SLOT_OWNER;
         else
         {
             // Check if its turn of that player to loot a not party loot. The loot may be released or the item may be passed by currentLooter
-            if (lv.loot.m_isReleased || currentLooterPass || lv.loot.m_currentLooterGuid == lv.viewer->GetObjectGuid())
+            if (loot->m_isReleased || currentLooterPass || loot->m_currentLooterGuid == player->GetObjectGuid())
                 return LOOT_SLOT_OWNER;
             return MAX_LOOT_SLOT_TYPE;
         }
     }
 
-    switch (lv.loot.m_lootMethod)
+    switch (loot->m_lootMethod)
     {
         case FREE_FOR_ALL:
             return LOOT_SLOT_NORMAL;
@@ -465,7 +465,7 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(LootView const& lv) const
         {
             if (!isBlocked)
             {
-                if (lv.loot.m_isReleased || lv.viewer->GetObjectGuid() == lv.loot.m_currentLooterGuid)
+                if (loot->m_isReleased || player->GetObjectGuid() == loot->m_currentLooterGuid)
                     return LOOT_SLOT_NORMAL;
                 else
                     return MAX_LOOT_SLOT_TYPE;
@@ -476,20 +476,20 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(LootView const& lv) const
         {
             if (isUnderThreshold)
             {
-                if (lv.loot.m_isReleased || lv.viewer->GetObjectGuid() == lv.loot.m_currentLooterGuid)
+                if (loot->m_isReleased || player->GetObjectGuid() == loot->m_currentLooterGuid)
                     return LOOT_SLOT_NORMAL;
                 return MAX_LOOT_SLOT_TYPE;
             }
             else
             {
-                if (lv.viewer->GetObjectGuid() == lv.loot.m_masterOwnerGuid)
+                if (player->GetObjectGuid() == loot->m_masterOwnerGuid)
                     return LOOT_SLOT_MASTER;
                 return LOOT_SLOT_VIEW;
             }
         }
         case ROUND_ROBIN:
         {
-            if (lv.loot.m_isReleased || lv.viewer->GetObjectGuid() == lv.loot.m_currentLooterGuid)
+            if (loot->m_isReleased || player->GetObjectGuid() == loot->m_currentLooterGuid)
                 return LOOT_SLOT_OWNER;
             return MAX_LOOT_SLOT_TYPE;
         }
@@ -803,6 +803,14 @@ void GroupLootRoll::Finish(RollVoteMap::const_iterator& winnerItr)
     m_isStarted = false;
 }
 
+GroupLootRoll* Loot::GetRollForSlot(uint32 itemSlot)
+{
+    GroupLootRollMap::iterator rollItr = m_roll.find(itemSlot);
+    if (rollItr == m_roll.end())
+        return NULL;
+    return &rollItr->second;
+}
+
 //
 // --------- Loot ---------
 //
@@ -882,22 +890,8 @@ bool Loot::IsLootedFor(Player const* player) const
     for (LootItemList::const_iterator lootItemItr = m_lootItems.begin(); lootItemItr != m_lootItems.end(); ++lootItemItr)
     {
         LootItem* lootItem = *lootItemItr;
-        if (!lootItem->AllowedForPlayer(player, m_lootTarget))
-            continue; // player have no right to see/loot this item
-
-        if (m_lootMethod == NOT_GROUP_TYPE_LOOT)
-        {
-            if (lootItem->lootedBy.empty())
-                return false;
-        }
-        else if (m_lootMethod == FREE_FOR_ALL || lootItem->freeForAll || playerGuid == m_currentLooterGuid || m_isReleased || lootItem->currentLooterPass)
-        {
-            if (lootItem->lootedBy.empty())
-                return false;
-
-            if (lootItem->freeForAll && !lootItem->IsLootedFor(playerGuid))
-                return false;
-        }
+        if (lootItem->GetSlotTypeForSharedLoot(player, this) != MAX_LOOT_SLOT_TYPE)
+            return false;
     }
 
     return true;
@@ -960,22 +954,26 @@ bool Loot::CanLoot(Player const* player, bool onlyRightCheck /*= false*/)
 void Loot::NotifyItemRemoved(uint32 lootIndex)
 {
     // notify all players that are looting this that the item was removed
-    // convert the index to the slot the player sees
     GuidSet::iterator i_next;
     for (GuidSet::iterator i = m_playersLooting.begin(); i != m_playersLooting.end(); i = i_next)
     {
         i_next = i;
         ++i_next;
         Player* plr = ObjectAccessor::FindPlayer(*i);
+
         if (plr && plr->GetSession())
-        {
-            WorldPacket data(SMSG_LOOT_REMOVED, 1);
-            data << uint8(lootIndex);
-            plr->GetSession()->SendPacket(&data);
-        }
+            NotifyItemRemoved(plr, lootIndex);
         else
             m_playersLooting.erase(i);
     }
+}
+
+void Loot::NotifyItemRemoved(Player* player, uint32 lootIndex)
+{
+    // notify a player that are looting this that the item was removed
+    WorldPacket data(SMSG_LOOT_REMOVED, 1);
+    data << uint8(lootIndex);
+    player->GetSession()->SendPacket(&data);
 }
 
 void Loot::NotifyMoneyRemoved()
@@ -1073,18 +1071,21 @@ void Loot::Release(Player* player)
             GameObject* go = (GameObject*) m_lootTarget;
             SetPlayerIsNotLooting(player);
 
-            if (go->GetGoType() == GAMEOBJECT_TYPE_DOOR)
+            // GO is mineral vein? so it is not removed after its looted
+            switch (go->GetGoType())
             {
-                // locked doors are opened with spelleffect openlock, prevent remove its as looted
-                go->UseDoorOrButton();
-            }
-            else if (IsLootedFor(player) || go->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE)
-            {
-                // GO is mineral vein? so it is not removed after its looted
-                if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
+                case GAMEOBJECT_TYPE_DOOR:
+                    // locked doors are opened with spelleffect openlock, prevent remove its as looted
+                    go->UseDoorOrButton();
+                    break;
+                case GAMEOBJECT_TYPE_CHEST:
                 {
+                    if (!IsLootedFor(player))
+                        break;
+
                     uint32 go_min = go->GetGOInfo()->chest.minSuccessOpens;
                     uint32 go_max = go->GetGOInfo()->chest.maxSuccessOpens;
+                    bool refill = false;
 
                     // only vein pass this check
                     if (go_min != 0 && go_max > go_min)
@@ -1095,7 +1096,6 @@ void Loot::Release(Player* player)
 
                         go->AddUse();
                         float uses = float(go->GetUseCount());
-
                         if (uses < max_amount)
                         {
                             if (uses >= min_amount)
@@ -1109,23 +1109,26 @@ void Loot::Release(Player* player)
                                 float skill = float(player->GetSkillValue(SKILL_MINING)) / (ReqValue + 25);
                                 double chance = pow(0.8 * chance_rate, 4 * (1 / double(max_amount)) * double(uses));
                                 if (roll_chance_f(float(100.0f * chance + skill)))
-                                {
-                                    go->SetLootState(GO_READY);
-                                }
-                                else                        // not have more uses
-                                    go->SetLootState(GO_JUST_DEACTIVATED);
+                                    refill = true;
                             }
-                            else                            // 100% chance until min uses
-                                go->SetLootState(GO_READY);
+                            else
+                                refill = true;  // 100% chance untill min uses
                         }
-                        else                                // max uses already
-                            go->SetLootState(GO_JUST_DEACTIVATED);
                     }
-                    else                                    // not vein
+
+                    if (refill)
+                    {
+                        // this vein have can be now refilled, as this is a vein no other player are looting it so no need to send them release
+                        Clear();                // clear the content and reset some values
+                        FillLoot(go->GetGOInfo()->GetLootId(), LootTemplates_Gameobject, player, false); // refill the loot with new items
+                        go->SetLootState(GO_READY);
+                    }
+                    else
                         go->SetLootState(GO_JUST_DEACTIVATED);
+
+                    break;
                 }
-                else if (go->GetGoType() == GAMEOBJECT_TYPE_FISHINGHOLE)
-                {
+                case GAMEOBJECT_TYPE_FISHINGHOLE:
                     // The fishing hole used once more
                     go->AddUse();                           // if the max usage is reached, will be despawned at next tick
                     if (go->GetUseCount() >= urand(go->GetGOInfo()->fishinghole.minSuccessOpens, go->GetGOInfo()->fishinghole.maxSuccessOpens))
@@ -1134,15 +1137,11 @@ void Loot::Release(Player* player)
                     }
                     else
                         go->SetLootState(GO_READY);
-                }
-                else // not chest (or vein/herb/etc)
+                    break;
+                default:
                     go->SetLootState(GO_JUST_DEACTIVATED);
-
-                Clear();
+                    break;
             }
-            else
-                // not fully looted object
-                go->SetLootState(GO_ACTIVATED);
             break;
         }
         case HIGHGUID_CORPSE:                               // ONLY remove insignia at BG
@@ -1239,7 +1238,6 @@ void Loot::Release(Player* player)
                         if (creatureInfo->SkinningLootId)
                             creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
                     }
-                    ForceLootAnimationCLientUpdate(); // set the loot available for other player
                     break;
                 }
             }
@@ -1274,18 +1272,10 @@ void Loot::ShowContentTo(Player* plr)
     WorldPacket data(SMSG_LOOT_RESPONSE);
     data << m_guidTarget;
     data << uint8(m_lootType);
-    if (!IsLootedFor(plr))
-    {
-        // player have some right to see the loot
-        data << LootView(*this, plr);
+
+    if (GetLootContentFor(plr, data))
         SetPlayerIsLooting(plr);
-    }
-    else
-    {
-        // player cannot see the loot
-        data << uint32(0);                                  // gold
-        data << uint8(0);                                   // item count
-    }
+
     plr->SendDirectMessage(&data);
 }
 
@@ -1764,7 +1754,12 @@ InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
             target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, m_lootType, lootItem->count);
             target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, lootItem->itemId, lootItem->count);
 
-            if (!lootItem->freeForAll)
+            if (lootItem->freeForAll)
+            {
+                NotifyItemRemoved(target, itemSlot);
+                sLog.outString("This item is free for all!!");
+            }
+            else
                 NotifyItemRemoved(itemSlot);
 
             target->SendNewItem(newItem, uint32(lootItem->count), false, false, true);
@@ -1790,6 +1785,10 @@ InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
     {
         if (IsLootedForAll())
             SendReleaseForAll();
+        else
+            if (IsLootedFor(target))
+                SendReleaseFor(target);
+        ForceLootAnimationCLientUpdate();
     }
     return msg;
 }
@@ -1891,8 +1890,6 @@ void Loot::Clear()
     m_ownerSet.clear();
     m_masterOwnerGuid.Clear();
     m_currentLooterGuid.Clear();
-    m_lootType = LOOT_NONE;
-    m_lootMethod = NOT_GROUP_TYPE_LOOT;
     m_roll.clear();
     m_maxEnchantSkill = 0;
     m_isReleased = false;
@@ -1949,43 +1946,26 @@ void Loot::SendGold(Player* player)
         }
     }
     m_gold = 0;
-    Release(player);
+
+    if (IsLootedFor(player))
+        Release(player);
 }
 
-GroupLootRoll* Loot::GetRollForSlot(uint32 itemSlot)
+// fill in the bytebuffer with loot content for specified player (return false if no items/gold filled)
+bool Loot::GetLootContentFor(Player* player, ByteBuffer& buffer)
 {
-    GroupLootRollMap::iterator rollItr = m_roll.find(itemSlot);
-    if (rollItr == m_roll.end())
-        return NULL;
-    return &rollItr->second;
-}
-
-ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li)
-{
-    b << uint32(li.itemId);
-    b << uint32(li.count);                                  // nr of items of this type
-    b << uint32(ObjectMgr::GetItemPrototype(li.itemId)->DisplayInfoID);
-    b << uint32(li.randomSuffix);
-    b << uint32(li.randomPropertyId);
-    return b;
-}
-
-ByteBuffer& operator<<(ByteBuffer& buffer, LootView const& lootView)
-{
-    Loot const& loot = lootView.loot;
-
     uint8 itemsShown = 0;
 
     // gold
-    buffer << uint32(loot.m_gold);
+    buffer << uint32(m_gold);
 
     size_t count_pos = buffer.wpos();                            // pos of item count byte
     buffer << uint8(0);                                          // item count placeholder
 
-    for (LootItemList::const_iterator lootItemItr = loot.m_lootItems.begin(); lootItemItr != loot.m_lootItems.end(); ++lootItemItr)
+    for (LootItemList::const_iterator lootItemItr = m_lootItems.begin(); lootItemItr != m_lootItems.end(); ++lootItemItr)
     {
         LootItem* lootItem = *lootItemItr;
-        LootSlotType slot_type = lootItem->GetSlotTypeForSharedLoot(lootView);
+        LootSlotType slot_type = lootItem->GetSlotTypeForSharedLoot(player, this);
         if (slot_type >= MAX_LOOT_SLOT_TYPE)
             continue;
 
@@ -1999,8 +1979,17 @@ ByteBuffer& operator<<(ByteBuffer& buffer, LootView const& lootView)
 
     // update number of items shown
     buffer.put<uint8>(count_pos, itemsShown);
+    return m_gold != 0 || itemsShown != 0;
+}
 
-    return buffer;
+ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li)
+{
+    b << uint32(li.itemId);
+    b << uint32(li.count);                                  // nr of items of this type
+    b << uint32(ObjectMgr::GetItemPrototype(li.itemId)->DisplayInfoID);
+    b << uint32(li.randomSuffix);
+    b << uint32(li.randomPropertyId);
+    return b;
 }
 
 //
