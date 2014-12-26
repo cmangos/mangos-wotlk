@@ -453,7 +453,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     m_despawnTimer = 0;
                     if (m_goInfo->chest.chestRestockTime)
                     {
-                        m_reStockTimer = time(NULL) + m_goInfo->chest.chestRestockTime * MINUTE;
+                        m_reStockTimer = time(NULL) + m_goInfo->chest.chestRestockTime;
                         m_lootState = GO_NOT_READY;
                         ForceValuesUpdateAtIndex(GAMEOBJECT_DYNAMIC);
                         return;
