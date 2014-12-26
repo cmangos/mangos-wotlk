@@ -1029,9 +1029,9 @@ void Loot::SendReleaseForAll()
 {
     GuidSet::iterator itr = m_playersLooting.begin();
     while (itr != m_playersLooting.end())
-    {
         SendReleaseFor(*itr++);
-    }
+    if (m_guidTarget.IsCreatureOrVehicle())
+        static_cast<Creature*>(m_lootTarget)->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
 }
 
 void Loot::SetPlayerIsLooting(Player* player)
@@ -1437,14 +1437,19 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
             if ((creatureInfo->LootId && FillLoot(creatureInfo->LootId, LootTemplates_Creature, player, false)) || creatureInfo->MaxLootGold > 0)
             {
                 GenerateMoneyLoot(creatureInfo->MinLootGold, creatureInfo->MaxLootGold);
-                creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-                break;
+                // loot may be anyway empty
+                if (!IsLootedForAll())      // TODO:: implement empty windows? sWorld.getConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW))
+                {
+                    creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                    break;
+                }
             }
 
             sLog.outDebug("Loot::CreateLoot> cannot create corpse loot, FillLoot failed with loot id(%u)!", creatureInfo->LootId);
+            creature->SetLootStatus(CREATURE_LOOT_STATUS_LOOTED);
 
             // loot is empty, can we show empty loot?
-            if (!creatureInfo->SkinningLootId || sWorld.getConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW))
+            if (!creatureInfo->SkinningLootId )
                 return;
 
             // loot is empty so we can set the corpse as skinnable
@@ -1876,6 +1881,7 @@ void Loot::GetLootItemsListFor(Player* player, LootItemList& lootList)
 
 Loot::~Loot()
 {
+    SendReleaseForAll();
     for (LootItemList::iterator itr = m_lootItems.begin(); itr != m_lootItems.end(); ++itr)
         delete *itr;
 }

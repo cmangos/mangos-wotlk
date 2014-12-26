@@ -528,47 +528,65 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 }
                 // Hide special-info for non empathy-casters,
                 // Hide lootable animation for unallowed players
+                // Handle tapped flag
                 else if (index == UNIT_DYNAMIC_FLAGS)
                 {
                     Creature* creature = (Creature*)this;
                     uint32 dynflagsValue = m_uint32Values[index];
 
-                    // Checking SPELL_AURA_EMPATHY and caster
-                    if (dynflagsValue & UNIT_DYNFLAG_SPECIALINFO && creature->isAlive())
+                    if (creature->isAlive())
                     {
-                        bool bIsEmpathy = false;
-                        bool bIsCaster = false;
-                        Unit::AuraList const& mAuraEmpathy = creature->GetAurasByType(SPELL_AURA_EMPATHY);
-                        for (Unit::AuraList::const_iterator itr = mAuraEmpathy.begin(); !bIsCaster && itr != mAuraEmpathy.end(); ++itr)
+                        // Checking SPELL_AURA_EMPATHY and caster
+                        if (dynflagsValue & UNIT_DYNFLAG_SPECIALINFO)
                         {
-                            bIsEmpathy = true;              // Empathy by aura set
-                            if ((*itr)->GetCasterGuid() == target->GetObjectGuid())
-                                bIsCaster = true;           // target is the caster of an empathy aura
+                            bool bIsEmpathy = false;
+                            bool bIsCaster = false;
+                            Unit::AuraList const& mAuraEmpathy = creature->GetAurasByType(SPELL_AURA_EMPATHY);
+                            for (Unit::AuraList::const_iterator itr = mAuraEmpathy.begin(); !bIsCaster && itr != mAuraEmpathy.end(); ++itr)
+                            {
+                                bIsEmpathy = true;              // Empathy by aura set
+                                if ((*itr)->GetCasterGuid() == target->GetObjectGuid())
+                                    bIsCaster = true;           // target is the caster of an empathy aura
+                            }
+                            if (bIsEmpathy && !bIsCaster)       // Empathy by aura, but target is not the caster
+                                dynflagsValue &= ~UNIT_DYNFLAG_SPECIALINFO;
                         }
-                        if (bIsEmpathy && !bIsCaster)       // Empathy by aura, but target is not the caster
-                            dynflagsValue &= ~UNIT_DYNFLAG_SPECIALINFO;
-                    }
 
-                    // Checking lootable
-                    if (creature->loot && creature->loot->CanLoot(target))
+                        // creature is alive so, not lootable
+                        dynflagsValue = (dynflagsValue & ~(UNIT_DYNFLAG_LOOTABLE));
+                        if (creature->isInCombat())
+                        {
+                            if (creature->IsTappedBy(target))
+                            {
+                                // creature is in combat and tapped by this player
+                                dynflagsValue = (dynflagsValue & ~(UNIT_DYNFLAG_TAPPED) | UNIT_DYNFLAG_TAPPED_BY_PLAYER);
+                                //sLog.outString(">> %s is tapped by %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
+                            }
+                            else
+                            {
+                                // creature is in combat but not tapped by this player
+                                dynflagsValue = (dynflagsValue & ~(UNIT_DYNFLAG_TAPPED_BY_PLAYER) | UNIT_DYNFLAG_TAPPED);
+                                //sLog.outString(">> %s is not tapped by %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
+                            }
+                        }
+                        else
+                        {
+                            // creature is not in combat so its not tapped
+                            dynflagsValue = (dynflagsValue & ~(UNIT_DYNFLAG_TAPPED) | UNIT_DYNFLAG_TAPPED_BY_PLAYER);
+                            //sLog.outString(">> %s is not in combat so not tapped by %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
+                        }
+                    }
+                    else if (creature->loot && creature->loot->CanLoot(target))
                     {
+                        // creature is dead and this player can loot it
                         dynflagsValue = (dynflagsValue | (UNIT_DYNFLAG_LOOTABLE | UNIT_DYNFLAG_TAPPED | UNIT_DYNFLAG_TAPPED_BY_PLAYER));
                         //sLog.outString(">> %s is lootable for %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
                     }
                     else
                     {
-                        dynflagsValue = (dynflagsValue & ~(UNIT_DYNFLAG_LOOTABLE));
+                        // creature is dead but this player cannot loot it
+                        dynflagsValue = (dynflagsValue & ~(UNIT_DYNFLAG_TAPPED_BY_PLAYER | UNIT_DYNFLAG_LOOTABLE) | UNIT_DYNFLAG_TAPPED);
                         //sLog.outString(">> %s is not lootable for %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
-                        if (creature->IsTappedBy(target))
-                        {
-                            dynflagsValue = (dynflagsValue | UNIT_DYNFLAG_TAPPED_BY_PLAYER);
-                            //sLog.outString(">> %s is tapped by %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
-                        }
-                        else
-                        {
-                            dynflagsValue = (dynflagsValue & ~(UNIT_DYNFLAG_TAPPED_BY_PLAYER));
-                            //sLog.outString(">> %s is not tapped by %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
-                        }
                     }
 
                     *data << dynflagsValue;
