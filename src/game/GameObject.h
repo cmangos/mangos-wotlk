@@ -721,7 +721,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void AddUniqueUse(Player* player);
         void AddUse() { ++m_useTimes; }
         bool IsInUse() const { return m_isInUse; }
-        void SetInUse(bool use) { m_isInUse = use; }
+        void SetInUse(bool use);
 
         uint32 GetUseCount() const { return m_useTimes; }
         uint32 GetUniqueUseCount() const { return m_UniqueUsers.size(); }

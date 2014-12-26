@@ -729,7 +729,6 @@ bool GroupLootRoll::UpdateRoll()
     return false;
 }
 
-
 /**
 * \brief: Check if all player have voted and return true in that case. Also return current winner.
 * \param: RollVoteMap::const_iterator& winnerItr > will be different than m_rollCoteMap.end() if winner exist. (Someone voted greed or need)
@@ -948,8 +947,6 @@ bool Loot::CanLoot(Player const* player, bool onlyRightCheck /*= false*/)
 
     return false;
 }
-
-//===================================================
 
 void Loot::NotifyItemRemoved(uint32 lootIndex)
 {
@@ -1402,7 +1399,6 @@ void Loot::SetGroupLootRight(Player* player)
     m_lootMethod = NOT_GROUP_TYPE_LOOT;
 }
 
-
 Loot::Loot(Player* player, Creature* creature, LootType type) :
     m_lootType(LOOT_NONE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON),
     m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false), m_isChanged(false),
@@ -1495,8 +1491,6 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
             m_lootType = LOOT_NONE;
             break;
     }
-
-    sLog.outString("CreateLoot: %s", m_haveItemOverThreshold ? "have over threshold item" : "have not over threshold item");
 
     return;
 }
