@@ -2696,9 +2696,19 @@ void Creature::SetLootStatus(CreatureLootStatus status)
         return;
 
     m_lootStatus = status;
-
-    if (status == CREATURE_LOOT_STATUS_SKINNED)
-        m_corpseDecayTimer = 0; // remove corpse at next update
+    switch (status)
+    {
+        case CREATURE_LOOT_STATUS_LOOTED:
+            RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
+            if (m_creatureInfo->SkinningLootId)
+                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+            break;
+        case CREATURE_LOOT_STATUS_SKINNED:
+            m_corpseDecayTimer = 0; // remove corpse at next update
+            break;
+        default:
+            break;
+    }
 }
 
 // simple tap system return true if player or his group tapped the creature
