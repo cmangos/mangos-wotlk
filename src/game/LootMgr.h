@@ -249,8 +249,8 @@ ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
 class Loot
 {
 public:
-    friend LootItem;
-    friend GroupLootRoll;
+    friend struct LootItem;
+    friend class GroupLootRoll;
 
     Loot(Player* player, Creature* creature, LootType type);
     Loot(Player* player, GameObject* gameObject, LootType type);
