@@ -50,25 +50,24 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 
     ObjectGuid const& lguid = loot->GetLootGuid();
 
-    LootItem* item = loot->GetLootItemInSlot(itemSlot);
+    LootItem* lootItem = loot->GetLootItemInSlot(itemSlot);
 
-    if (!item)
+    if (!lootItem)
     {
         _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
         return;
     }
 
-    // item may not be already looted or blocked by roll system
-    if (item->isBlocked || item->lootedBy.find(_player->GetObjectGuid()) != item->lootedBy.end())
+    // item may be blocked by roll system or already looted or another cheating possibility
+    if (lootItem->isBlocked || lootItem->GetSlotTypeForSharedLoot(_player, loot) == MAX_LOOT_SLOT_TYPE)
     {
-        sLog.outError("HandleAutostoreLootItemOpcode> %s already looted itemId(%u)", _player->GetGuidStr().c_str(), item->itemId);
+        sLog.outError("HandleAutostoreLootItemOpcode> %s have no right to loot itemId(%u)", _player->GetGuidStr().c_str(), lootItem->itemId);
         return;
     }
 
-    // TODO maybe add another loot is allowed for check to be sure no possible cheat
-    loot->SendItem(_player, itemSlot);
+    InventoryResult result = loot->SendItem(_player, lootItem);
 
-    if (lguid.IsItem())
+    if (result == EQUIP_ERR_OK && lguid.IsItem())
     {
         if (Item* item = _player->GetItemByGuid(lguid))
             item->SetLootState(ITEM_LOOT_CHANGED);

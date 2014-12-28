@@ -278,6 +278,7 @@ public:
     LootItem* GetLootItemInSlot(uint32 itemSlot);
     GroupLootRoll* GetRollForSlot(uint32 itemSlot);
     InventoryResult SendItem(Player* target, uint32 itemSlot);
+    InventoryResult SendItem(Player* target, LootItem* lootItem);
     WorldObject const* GetLootTarget() const { return m_lootTarget; }
     ObjectGuid const& GetLootGuid() const { return m_guidTarget; }
     ObjectGuid const& GetMasterLootGuid() const { return m_masterOwnerGuid; }

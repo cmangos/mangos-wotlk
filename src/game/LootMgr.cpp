@@ -774,10 +774,10 @@ bool GroupLootRoll::AllPlayerVoted(RollVoteMap::const_iterator& winnerItr)
 // terminate the roll
 void GroupLootRoll::Finish(RollVoteMap::const_iterator& winnerItr)
 {
+    m_lootItem->isBlocked = false;
     if (winnerItr == m_rollVoteMap.end())
     {
         SendAllPassed();
-        m_lootItem->isBlocked = false;
         m_loot->m_isReleased = true;
     }
     else
@@ -796,7 +796,7 @@ void GroupLootRoll::Finish(RollVoteMap::const_iterator& winnerItr)
         else
         {
             // hum the winner is not available
-            m_lootItem->isBlocked = false;
+            m_loot->m_isReleased = true;
         }
     }
     m_isStarted = false;
@@ -1724,6 +1724,11 @@ void Loot::SendAllowedLooter()
 InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
 {
     LootItem* lootItem = GetLootItemInSlot(itemSlot);
+    return SendItem(target, lootItem);
+}
+
+InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
+{
     if (!lootItem)
         return EQUIP_ERR_ITEM_NOT_FOUND;
 
@@ -1742,11 +1747,11 @@ InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
 
             if (lootItem->freeForAll)
             {
-                NotifyItemRemoved(target, itemSlot);
+                NotifyItemRemoved(target, lootItem->lootSlot);
                 sLog.outString("This item is free for all!!");
             }
             else
-                NotifyItemRemoved(itemSlot);
+                NotifyItemRemoved(lootItem->lootSlot);
 
             target->SendNewItem(newItem, uint32(lootItem->count), false, false, true);
 
@@ -1832,6 +1837,7 @@ void Loot::ForceLootAnimationCLientUpdate()
         m_lootTarget->ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);
 }
 
+// will return the pointer of item in loot slot provided without any right check
 LootItem* Loot::GetLootItemInSlot(uint32 itemSlot)
 {
     for (LootItemList::iterator lootItemItr = m_lootItems.begin(); lootItemItr != m_lootItems.end(); ++lootItemItr)
@@ -2632,7 +2638,7 @@ Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid)
         case HIGHGUID_ITEM:
         {
             Item* item = player->GetItemByGuid(lguid);
-            if (item || item->HasGeneratedLoot())
+            if (item && item->HasGeneratedLoot())
                 loot = item->loot;
             break;
         }
