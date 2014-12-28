@@ -343,15 +343,30 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
         return;
     }
 
-    InventoryResult msg = pLoot->SendItem(target, itemSlot);
+    LootItem* lootItem = pLoot->GetLootItemInSlot(itemSlot);
 
-    if (msg != EQUIP_ERR_OK)
+    if (!lootItem)
+    {
+        _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
+        return;
+    }
+
+    // item may be already looted or another cheating possibility
+    if (lootItem->GetSlotTypeForSharedLoot(_player, pLoot) == MAX_LOOT_SLOT_TYPE)
+    {
+        sLog.outError("HandleAutostoreLootItemOpcode> %s have no right to loot itemId(%u)", _player->GetGuidStr().c_str(), lootItem->itemId);
+        return;
+    }
+
+    InventoryResult result = pLoot->SendItem(_player, lootItem);
+
+    if (result != EQUIP_ERR_OK)
     {
         // send duplicate of error massage to master looter
         if (LootItem* lootItem = pLoot->GetLootItemInSlot(itemSlot))
-            _player->SendEquipError(msg, NULL, NULL, lootItem->itemId);
+            _player->SendEquipError(result, NULL, NULL, lootItem->itemId);
         else
-            _player->SendEquipError(msg, NULL, NULL);
+            _player->SendEquipError(result, NULL, NULL);
         return;
     }
 }
