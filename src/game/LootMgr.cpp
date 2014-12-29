@@ -860,7 +860,7 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, 
     tab->Process(*this, store, store.IsRatesAllowed());     // Processing is done there, callback via Loot::AddItem()
 
     // Must now check if current looter have right to loot all item or he will lockout that item until he look and release the loot
-    if (!m_currentLooterGuid.IsEmpty()) // currentLooterGuid is set only for some loot group method
+    if (!m_currentLooterGuid.IsEmpty() && m_ownerSet.size() > 1 && m_lootMethod != FREE_FOR_ALL) // only for group that are not free for all
     {
         Player* currentLooter = ObjectAccessor::FindPlayer(m_currentLooterGuid);
         for (LootItemList::const_iterator lootItemItr = m_lootItems.begin(); lootItemItr != m_lootItems.end(); ++lootItemItr)
@@ -1345,10 +1345,35 @@ void Loot::SetGroupLootRight(Player* player)
     Group* grp = player->GetGroup();
     if (grp && (!m_isChest || m_isChest && static_cast<GameObject*>(m_lootTarget)->GetGOInfo()->chest.groupLootRules))
     {
-        // filling the player who have access to the loot
+        m_lootMethod = grp->GetLootMethod();
+        m_threshold = grp->GetLootThreshold();
+
+        // we need to fill m_ownerSet with player who have access to the loot
         Group::MemberSlotList const& memberList = grp->GetMemberSlots();
-        for (Group::MemberSlotList::const_iterator itr = memberList.begin(); itr != memberList.end(); ++itr)
+        ObjectGuid const& currentLooterGuid = grp->GetCurrentLooterGuid();
+        GuidList ownerList;                 // used to keep order of the player (important to get correctly next looter)
+
+        // current looter must be in the group
+        Group::MemberSlotList::const_iterator currentLooterItr;
+        for (currentLooterItr = memberList.begin(); currentLooterItr != memberList.end(); ++currentLooterItr)
+            if (currentLooterItr->guid == currentLooterGuid)
+                break;
+
+        // if not then assign first player in group
+        if (currentLooterItr == memberList.end())
         {
+            currentLooterItr = memberList.begin();
+            currentLooterGuid == currentLooterItr->guid;
+        }
+
+        // now that we get a valid current looter iterator we can start to check the loot owner
+        Group::MemberSlotList::const_iterator itr = currentLooterItr;
+        do
+        {
+            ++itr;                              // we start by next current looter position in list that way we have directly next looter in result ownerSet (if any exist)
+            if (itr == memberList.end())
+                itr = memberList.begin();       // reached the end of the list is possible so simply restart from the first element in it
+
             Player* looter = ObjectAccessor::FindPlayer(itr->guid);
 
             if (!looter)
@@ -1356,37 +1381,51 @@ void Loot::SetGroupLootRight(Player* player)
 
             if (looter->IsWithinDist(m_lootTarget, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
             {
-                m_ownerSet.insert(itr->guid);
+                m_ownerSet.insert(itr->guid);   // save this guid to main owner set
+                ownerList.push_back(itr->guid); // save this guid to local ordered GuidList (we need to keep it ordered only here)
 
                 // get enchant skill of authorized looter
                 uint32 enchantSkill = looter->GetSkillValue(SKILL_ENCHANTING);
                 if (m_maxEnchantSkill < enchantSkill)
                     m_maxEnchantSkill = enchantSkill;
             }
+
+        } while (itr != currentLooterItr);
+
+        if (m_lootMethod == MASTER_LOOT)
+        {
+            m_masterOwnerGuid = grp->GetMasterLooterGuid();
+            // check if master is in looter list
+            if (m_ownerSet.find(m_masterOwnerGuid) == m_ownerSet.end())
+            {
+                m_ownerSet.insert(m_masterOwnerGuid);
+                ownerList.push_back(m_masterOwnerGuid);
+            }
         }
 
         // if more than one player have right to loot than we have to handle group method, round robin, roll, etc..
-        if (m_ownerSet.size() > 1)
+        if (m_ownerSet.size() > 1 && m_lootMethod != FREE_FOR_ALL)
         {
-            m_lootMethod = grp->GetLootMethod();
-            m_threshold = grp->GetLootThreshold();
-            if (m_lootMethod == MASTER_LOOT)
+            // is current looter have right for this loot?
+            if (m_ownerSet.find(currentLooterGuid) == m_ownerSet.end())
             {
-                m_masterOwnerGuid = grp->GetMasterLooterGuid();
-                // check if master is in looter list
-                if (m_ownerSet.find(m_masterOwnerGuid) == m_ownerSet.end())
-                    m_ownerSet.insert(m_masterOwnerGuid);
+                // as owner list is filled from NEXT current looter position we can assign first element in list as looter and next element in list as next looter
+                m_currentLooterGuid = ownerList.front();                        // set first player who have right to loot as current looter
+                grp->SetNextLooterGuid(*(++ownerList.begin()));                 // set second player who have right as next looter
+            }
+            else
+            {
+                // as owner set is filled from NEXT current looter position we can assign first element in list as next looter
+                m_currentLooterGuid = currentLooterGuid;
+                grp->SetNextLooterGuid(ownerList.front());                      // set first player who have right as next looter
             }
 
-            m_currentLooterGuid = grp->GetCurrentLooterGuid(); // TODO:: this may be improved, current looter may not be in ownerSet!
-            grp->UpdateCurrentLooterGuid(m_lootTarget);
-
-            if (m_lootMethod != FREE_FOR_ALL)
-                SendAllowedLooter();
-
+            SendAllowedLooter();
             m_isChecked = false;
             return;
         }
+        m_currentLooterGuid = player->GetObjectGuid();
+        SendAllowedLooter();
     }
 
     m_ownerSet.insert(player->GetObjectGuid());

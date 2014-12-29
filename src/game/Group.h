@@ -266,10 +266,10 @@ class MANGOS_DLL_SPEC Group
         bool SetPlayerMap(ObjectGuid guid, uint32 mapid);
 
         // Loot
-        void UpdateCurrentLooterGuid(WorldObject* pSource);
         void SetLootMethod(LootMethod method) { m_lootMethod = method; }
         void SetLooterGuid(ObjectGuid guid) { m_masterLooterGuid = guid; }
         void SetLootThreshold(ItemQualities threshold) { m_lootThreshold = threshold; }
+        void SetNextLooterGuid(ObjectGuid const& guid) { m_currentLooterGuid = guid; }
         LootMethod        GetLootMethod() const { return m_lootMethod; }
         ItemQualities     GetLootThreshold() const { return m_lootThreshold; }
         ObjectGuid const& GetMasterLooterGuid() const { return m_masterLooterGuid; }
