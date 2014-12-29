@@ -267,7 +267,7 @@ class MANGOS_DLL_SPEC Group
 
         // Loot
         void SetLootMethod(LootMethod method) { m_lootMethod = method; }
-        void SetLooterGuid(ObjectGuid guid) { m_masterLooterGuid = guid; }
+        void SetMasterLooterGuid(ObjectGuid guid) { m_masterLooterGuid = guid; }
         void SetLootThreshold(ItemQualities threshold) { m_lootThreshold = threshold; }
         void SetNextLooterGuid(ObjectGuid const& guid) { m_currentLooterGuid = guid; }
         LootMethod        GetLootMethod() const { return m_lootMethod; }
