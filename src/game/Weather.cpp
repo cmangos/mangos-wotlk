@@ -27,6 +27,7 @@
 #include "WorldPacket.h"
 #include "Log.h"
 #include "Util.h"
+#include "ProgressBar.h"
 
 /// Create the Weather object
 Weather::Weather(uint32 zone, WeatherZoneChances const* weatherChances) :
