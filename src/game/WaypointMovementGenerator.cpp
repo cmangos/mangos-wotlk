@@ -284,7 +284,7 @@ bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, 
             prevWP = &(lastPoint->second);
         }
         else                                                // Take the last waypoint (crbegin()) as previous
-            prevWP = &(i_path->crbegin()->second);
+            prevWP = &(i_path->rbegin()->second);
 
         float dx = x - prevWP->x;
         float dy = y - prevWP->y;
