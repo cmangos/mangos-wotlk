@@ -389,7 +389,6 @@ LootItem::LootItem(uint32 _itemId, uint32 _count, uint32 _randomSuffix, int32 _r
     currentLooterPass = false;
 }
 
-
 // Basic checks for player/item compatibility - if false no chance to see the item in the loot
 bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTarget) const
 {
@@ -438,14 +437,14 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
         return MAX_LOOT_SLOT_TYPE;
 
     if (freeForAll)
-        return NOT_GROUP_TYPE_LOOT ? LOOT_SLOT_OWNER : LOOT_SLOT_NORMAL; // player have not yet looted a free for all item
+        return loot->m_lootMethod == NOT_GROUP_TYPE_LOOT ? LOOT_SLOT_OWNER : LOOT_SLOT_NORMAL; // player have not yet looted a free for all item
 
     if (!lootedBy.empty())
         return MAX_LOOT_SLOT_TYPE;                                       // a not free for all item should not be looted more than once
 
     if (lootItemType != LOOTITEM_TYPE_NORMAL)
     {
-        if (loot->m_lootMethod == NOT_GROUP_TYPE_LOOT || FREE_FOR_ALL)
+        if (loot->m_lootMethod == NOT_GROUP_TYPE_LOOT || loot->m_lootMethod == FREE_FOR_ALL)
             return LOOT_SLOT_OWNER;
         else
         {
