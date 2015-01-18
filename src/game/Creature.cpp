@@ -1062,8 +1062,7 @@ void Creature::SetLootRecipient(Unit* unit)
     {
         m_lootRecipientGuid.Clear();
         m_lootGroupRecipientId = 0;
-        RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
-        RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED_BY_PLAYER);
+        ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);       // needed to be sure tapping status is updated
         return;
     }
 
@@ -1078,8 +1077,7 @@ void Creature::SetLootRecipient(Unit* unit)
     if (Group* group = player->GetGroup())
         m_lootGroupRecipientId = group->GetId();
 
-    SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
-    SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED_BY_PLAYER);
+    ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);           // needed to be sure tapping status is updated
 }
 
 void Creature::SaveToDB()
@@ -2699,7 +2697,6 @@ void Creature::SetLootStatus(CreatureLootStatus status)
     switch (status)
     {
         case CREATURE_LOOT_STATUS_LOOTED:
-            RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
             if (m_creatureInfo->SkinningLootId)
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
             break;
@@ -2712,12 +2709,9 @@ void Creature::SetLootStatus(CreatureLootStatus status)
 }
 
 // simple tap system return true if player or his group tapped the creature
+// TODO:: this is semi correct. For group situation need more work but its not a big issue
 bool Creature::IsTappedBy(Player* plr) const
 {
-    // never tapped by any (mob solo kill)
-    if (!HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))
-        return false;
-
     if (Player* recipient = GetLootRecipient())
     {
         if (recipient == plr)

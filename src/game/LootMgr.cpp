@@ -1026,8 +1026,6 @@ void Loot::SendReleaseForAll()
     GuidSet::iterator itr = m_playersLooting.begin();
     while (itr != m_playersLooting.end())
         SendReleaseFor(*itr++);
-    if (m_guidTarget.IsCreatureOrVehicle())
-        static_cast<Creature*>(m_lootTarget)->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
 }
 
 void Loot::SetPlayerIsLooting(Player* player)
