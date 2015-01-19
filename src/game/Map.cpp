@@ -2050,8 +2050,8 @@ bool Map::GetHeightInRange(uint32 phasemask, float x, float y, float &z, float m
     {
         if (diffMaps < maxSearchDist)
         {
-            // here we often have to take vmap value but sometime we have to take map value.
-            if (vmapHeight > mapHeight || diffMaps > diffVmaps)
+            // well we simply have to take the highest as normally there we cannot be on top of cavern is maxSearchDist is not too big
+            if (vmapHeight > mapHeight)
                 height = vmapHeight;
             else
                 height = mapHeight;
