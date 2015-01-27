@@ -8849,6 +8849,25 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAuraHolderFromStack(spellId, numStacks);
                     return;
                 }
+                case 62552:                                 // Defend
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 63119, true);
+                    return;
+                }
+                case 62575:                                 // Shield-Breaker (player)
+                case 68282:                                 // Charge (player)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAuraHolderFromStack(62719);
+                    unitTarget->RemoveAuraHolderFromStack(64100);
+                    unitTarget->RemoveAuraHolderFromStack(64192);
+                    return;
+                }
                 case 62688:                                 // Summon Wave - 10 Mob
                 {
                     uint32 spellId = m_spellInfo->CalculateSimpleValue(eff_idx);
@@ -8866,6 +8885,35 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 62708, true);
                     return;
                 }
+                case 63010:                                 // Charge
+                case 68307:                                 // Charge
+                case 68504:                                 // Shield-Breaker
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    Unit* owner = unitTarget->GetCharmerOrOwnerPlayerOrPlayerItself();
+                    if (!owner)
+                        return;
+
+                    owner->RemoveAuraHolderFromStack(62552);
+                    owner->RemoveAuraHolderFromStack(63119);
+
+                    if (owner->HasAura(63132))
+                    {
+                        owner->RemoveAurasDueToSpell(63132);
+                        owner->CastSpell(unitTarget, 63131, true);
+                    }
+                    else if (owner->HasAura(63131))
+                    {
+                        owner->RemoveAurasDueToSpell(63131);
+                        owner->CastSpell(unitTarget, 63130, true);
+                    }
+                    else if (owner->HasAura(63130))
+                        owner->RemoveAurasDueToSpell(63130);
+
+                    return;
+                }
                 case 63027:                                 // Proximity Mines
                 {
                     if (!unitTarget)
@@ -8873,6 +8921,28 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     for (uint8 i = 0; i < 15; ++i)
                         unitTarget->CastSpell(unitTarget, 65347, true);
+                    return;
+                }
+                case 63119:                                 // Block!
+                case 64192:                                 // Block!
+                {
+                    if (!unitTarget)
+                        return;
+
+                    if (unitTarget->HasAura(63132))
+                        return;
+                    else if (unitTarget->HasAura(63131))
+                    {
+                        unitTarget->RemoveAurasDueToSpell(63131);
+                        unitTarget->CastSpell(unitTarget, 63132, true);         // Shield Level 3
+                    }
+                    else if (unitTarget->HasAura(63130))
+                    {
+                        unitTarget->RemoveAurasDueToSpell(63130);
+                        unitTarget->CastSpell(unitTarget, 63131, true);         // Shield Level 2
+                    }
+                    else
+                        unitTarget->CastSpell(unitTarget, 63130, true);         // Shield Level 1
                     return;
                 }
                 case 63122:                                 // Clear Insane
