@@ -10013,7 +10013,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                 if (pTarget->GetTypeId() != TYPEID_PLAYER && pTarget->GetCreatureType() != CREATURE_TYPE_CRITTER)
                     ((Player*)this)->UpdateCombatSkills(pTarget, attType, isVictim);
             }
-            // Update defence if player is victim and parry/dodge/block
+            // Update defense if player is victim and parry/dodge/block
             if (isVictim && procExtra & (PROC_EX_DODGE | PROC_EX_PARRY | PROC_EX_BLOCK))
                 ((Player*)this)->UpdateDefense();
         }
@@ -10088,8 +10088,8 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
 
             const SpellEntry* se = itr->second->GetSpellProto();
 
-            // check if the aura is interruptible by damage
-            if (se->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE)
+            // check if the aura is interruptible by damage and if its not just added by this spell (spell who is responsible for this damage is procSpell)
+            if (se->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE && (!procSpell || procSpell->Id != se->Id))
             {
                 DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: Added Spell %u to 'remove aura due to spell' list! Reason: Damage received.", se->Id);
                 removedSpells.push_back(se->Id);
