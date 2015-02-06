@@ -319,3 +319,10 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * datalong = mailTemplateId
                                             * datalong2: AlternativeSenderEntry. Use as sender-Entry of the sent mail
                                             * dataint1: Delay (>= 0) in Seconds
+
+39 SCRIPT_COMMAND_CORPSE_DELAY              resultingSource = Creature
+                                            * datalong = corpse delay
+                                            
+40 SCRIPT_COMMAND_RESPAWN_DELAY              resultingSource = Creature
+                                            * datalong = respawn delay
+                                            
