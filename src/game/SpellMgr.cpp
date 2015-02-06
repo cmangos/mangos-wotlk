@@ -704,6 +704,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             switch (spellproto->Id)
             {
                 case 42436:                                 // Drink!
+                case 45666:                                 // Arcane Bolt
                 case 46650:                                 // Open Brutallus Back Door
                 case 62488:                                 // Activate Construct
                 case 64503:                                 // Water
@@ -752,6 +753,15 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                         case 27202:
                         case 27203:
                         case 47669:
+                        case 58630:
+                        case 59046:
+                        case 59450:
+                        case 64899:
+                        case 64985:
+                        case 65074:
+                        case 65195:
+                        case 68184:
+                        case 72845:
                         case 64996:                         // Reorigination
                             return true;
                         default:
