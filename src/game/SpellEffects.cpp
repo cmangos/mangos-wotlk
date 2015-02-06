@@ -9127,6 +9127,17 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 66622, true);
                     break;
                 }
+                case 66545:                                 // Summon Memory
+                {
+                    if (!unitTarget)
+                        return;
+
+                    uint32 memorySpells[25] = {66543, 66691, 66692, 66694, 66695, 66696, 66697, 66698, 66699, 66700, 66701,
+                        66702, 66703, 66704, 66705, 66706, 66707, 66708, 66709, 66710, 66711, 66712, 66713, 66714, 66715};
+
+                    m_caster->CastSpell(unitTarget, memorySpells[urand(0, 24)], true);
+                    return;
+                }
                 case 66741:                                 // Chum the Water
                 {
                     // maybe this check should be done sooner?
