@@ -724,6 +724,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             case SCRIPT_COMMAND_CORPSE_DELAY:              // 39
                 break;
             case SCRIPT_COMMAND_RESPAWN_DELAY              // 40
+                break;
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
