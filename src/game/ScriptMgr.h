@@ -118,7 +118,7 @@ enum ScriptCommand                                          // resSource, resTar
                                                             // datalong2: AlternativeSenderEntry. Use as sender-Entry
                                                             // dataint1: Delay (>= 0) in Seconds
     SCRIPT_COMMAND_CORPSE_DELAY             = 39,           // resSource Creature, datalong - corpse delay.
-    SCRIPT_COMMAND_SET_RESPAWN_TIME         = 40,           // resSource Creature, datalong - respawn delay.
+    SCRIPT_COMMAND_RESPAWN_DELAY            = 40,           // resSource Creature, datalong - respawn delay.
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
