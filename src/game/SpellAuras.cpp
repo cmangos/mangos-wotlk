@@ -8324,6 +8324,16 @@ void Aura::PeriodicDummyTick()
 
                     return;
                 }
+                case 66798:                                 // Death's Respite
+                {
+                    Unit* caster = GetCaster();
+                    if (!caster)
+                        return;
+
+                    caster->CastSpell(target, 66797, true, NULL, this);
+                    target->RemoveAurasDueToSpell(GetId());
+                    return;
+                }
                 case 68875:                                 // Wailing Souls
                 case 68876:                                 // Wailing Souls
                 {
