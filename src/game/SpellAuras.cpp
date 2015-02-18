@@ -3135,6 +3135,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     else
                         target->m_AuraFlags &= ~UNIT_AURAFLAG_ALIVE_INVISIBLE;
                     return;
+                case 66936:                                     // Submerge
+                case 66948:                                     // Submerge
+                    if (apply)
+                        target->CastSpell(target, 66969, true);
+                    else
+                        target->RemoveAurasDueToSpell(66969);
+                    return;
             }
             break;
         }
