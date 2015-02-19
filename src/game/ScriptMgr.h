@@ -375,13 +375,13 @@ struct ScriptInfo
         {
             uint32 corpseDelay;                             // datalong
             uint32 empty;                                   // datalong2
-        } despawn;
+        } corpse;
         
         struct                                              // SCRIPT_COMMAND_RESPAWN_DELAY (40)
         {
             uint32 respawnDelay;                            // datalong
             uint32 empty;                                   // datalong2
-        } despawn;
+        } respawn;
     };
 
     // Buddy system (entry can be npc or go entry, depending on command)
