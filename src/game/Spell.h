@@ -434,6 +434,8 @@ class Spell
         SpellEntry const* m_spellInfo;
         SpellEntry const* m_triggeredBySpellInfo;
         int32 m_currentBasePoints[MAX_EFFECT_INDEX];        // cache SpellEntry::CalculateSimpleValue and use for set custom base points
+
+        ObjectGuid m_CastItemGuid;
         Item* m_CastItem;
         uint8 m_cast_count;
         uint32 m_glyphIndex;
