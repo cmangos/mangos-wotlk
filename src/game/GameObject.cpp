@@ -2219,7 +2219,7 @@ void GameObject::DealGameObjectDamage(uint32 damage, uint32 spell, Unit* caster)
     SendMessageToSet(&data, false);
 }
 
-void GameObject::RebuildGameObject(uint32 /*spell*/, Unit* caster)
+void GameObject::RebuildGameObject(Unit* caster)
 {
     MANGOS_ASSERT(GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING);
     MANGOS_ASSERT(caster);

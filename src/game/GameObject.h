@@ -755,7 +755,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         // Destructible GO handling
         void DealGameObjectDamage(uint32 damage, uint32 spell, Unit* caster);
-        void RebuildGameObject(uint32 spell, Unit* caster);
+        void RebuildGameObject(Unit* caster);
         void ForceGameObjectHealth(int32 diff, Unit* caster);
         uint32 GetHealth() const { return m_useTimes; }
         uint32 GetMaxHealth() const { return m_goInfo->destructibleBuilding.intactNumHits + m_goInfo->destructibleBuilding.damagedNumHits; }

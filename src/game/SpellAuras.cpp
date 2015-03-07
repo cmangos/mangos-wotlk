@@ -4484,7 +4484,7 @@ void Aura::HandleFeignDeath(bool apply, bool Real)
     if (!Real)
         return;
 
-    GetTarget()->SetFeignDeath(apply, GetCasterGuid(), GetId());
+    GetTarget()->SetFeignDeath(apply, GetCasterGuid());
 }
 
 void Aura::HandleAuraModDisarm(bool apply, bool Real)
@@ -10280,7 +10280,7 @@ void SpellAuraHolder::Update(uint32 diff)
             float max_range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellProto->rangeIndex));
 
             if (Player* modOwner = caster->GetSpellModOwner())
-                modOwner->ApplySpellMod(GetId(), SPELLMOD_RANGE, max_range, NULL);
+                modOwner->ApplySpellMod(GetId(), SPELLMOD_RANGE, max_range);
 
             if (!caster->IsWithinDistInMap(m_target, max_range))
             {
