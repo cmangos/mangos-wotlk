@@ -5432,7 +5432,7 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
         return false;
 
     SkillStatusData &skillStatus = itr->second;
-    if (itr == mSkillStatus.end() || skillStatus.uState == SKILL_DELETED)
+    if (skillStatus.uState == SKILL_DELETED)
         return false;
 
     uint32 valueIndex = PLAYER_SKILL_VALUE_INDEX(skillStatus.pos);
