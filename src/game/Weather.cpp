@@ -195,8 +195,10 @@ void Weather::SendWeatherUpdateToPlayer(Player* player)
 {
     NormalizeGrade();
 
-    WorldPacket data(SMSG_WEATHER, (4 + 4 + 1));
-    data << uint32(GetWeatherState()) << (float)m_grade << uint8(0);
+    WorldPacket data(SMSG_WEATHER, 4 + 4 + 1);
+    data << uint32(GetWeatherState());
+    data << float(m_grade);
+    data << uint8(0);       // 1 = instant change, 0 = smooth change
 
     player->GetSession()->SendPacket(&data);
 }
@@ -208,9 +210,10 @@ bool Weather::SendWeatherForPlayersInZone(Map const* _map)
 
     WeatherState state = GetWeatherState();
 
-    // To be sent packet
-    WorldPacket data(SMSG_WEATHER, (4 + 4 + 1));
-    data << uint32(state) << (float)m_grade << uint8(0);
+    WorldPacket data(SMSG_WEATHER, 4 + 4 + 1);
+    data << uint32(state);
+    data << float(m_grade);
+    data << uint8(0);       // 1 = instant change, 0 = smooth change
 
     ///- Send the weather packet to all players in this zone
     if (!_map->SendToPlayersInZone(&data, m_zone))
