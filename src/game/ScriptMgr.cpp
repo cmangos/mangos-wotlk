@@ -725,6 +725,10 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_CORPSE_DELAY:              // 39
+                break;
+            case SCRIPT_COMMAND_RESPAWN_DELAY              // 40
+                break;
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -1949,6 +1953,38 @@ bool ScriptAction::HandleScriptStep()
             uint32 deliverDelay = m_script->textId[0] > 0 ? (uint32)m_script->textId[0] : 0;
 
             MailDraft(m_script->sendMail.mailTemplateId).SendMailTo(static_cast<Player*>(pTarget), sender, MAIL_CHECK_MASK_HAS_BODY, deliverDelay);
+            break;
+        }
+        case SCRIPT_COMMAND_CORPSE_DELAY:                   // 39
+        {
+            // TODO - Remove this check after a while
+            if (pTarget && pTarget->GetTypeId() != TYPEID_UNIT && pSource && pSource->GetTypeId() == TYPEID_UNIT)
+            {
+                sLog.outErrorDb("DB-SCRIPTS: Process table `%s` id %u, command %u target must be creature, but (only) source is, use data_flags to fix", m_table, m_script->id, m_script->command);
+                pTarget = pSource;
+            }
+
+            if (LogIfNotCreature(pTarget))
+                break;
+
+            ((Creature*)pTarget)->SetCorpseDelay(m_script->corpse.corpseDelay);
+
+            break;
+        }
+        case SCRIPT_COMMAND_RESPAWN_DELAY:                   // 40
+        {
+            // TODO - Remove this check after a while
+            if (pTarget && pTarget->GetTypeId() != TYPEID_UNIT && pSource && pSource->GetTypeId() == TYPEID_UNIT)
+            {
+                sLog.outErrorDb("DB-SCRIPTS: Process table `%s` id %u, command %u target must be creature, but (only) source is, use data_flags to fix", m_table, m_script->id, m_script->command);
+                pTarget = pSource;
+            }
+
+            if (LogIfNotCreature(pTarget))
+                break;
+
+            ((Creature*)pTarget)->SetRespawnDelay(m_script->respawn.respawnDelay);
+            
             break;
         }
         default:

@@ -117,6 +117,8 @@ enum ScriptCommand                                          // resSource, resTar
                                                             // datalong: Send mailTemplateId from resSource (if provided) to player resTarget
                                                             // datalong2: AlternativeSenderEntry. Use as sender-Entry
                                                             // dataint1: Delay (>= 0) in Seconds
+    SCRIPT_COMMAND_CORPSE_DELAY             = 39,           // resSource Creature, datalong - corpse delay.
+    SCRIPT_COMMAND_RESPAWN_DELAY            = 40,           // resSource Creature, datalong - respawn delay.
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -368,6 +370,18 @@ struct ScriptInfo
         {
             uint32 data[2];
         } raw;
+        
+        struct                                              // SCRIPT_COMMAND_CORPSE_DELAY (39)
+        {
+            uint32 corpseDelay;                             // datalong
+            uint32 empty;                                   // datalong2
+        } corpse;
+        
+        struct                                              // SCRIPT_COMMAND_RESPAWN_DELAY (40)
+        {
+            uint32 respawnDelay;                            // datalong
+            uint32 empty;                                   // datalong2
+        } respawn;
     };
 
     // Buddy system (entry can be npc or go entry, depending on command)
