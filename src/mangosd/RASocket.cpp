@@ -179,7 +179,7 @@ int RASocket::handle_input(ACE_HANDLE)
         inputBufferLen = 0;
         switch (stage)
         {
-                /// <ul> <li> If the input is '<username>'
+            /// <ul> <li> If the input is '<username>'
             case NONE:
             {
                 std::string szLogin = inputBuffer;

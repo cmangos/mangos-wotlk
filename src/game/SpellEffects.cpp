@@ -312,7 +312,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
             {
                 switch (m_spellInfo->Id)                    // better way to check unknown
                 {
-                        // Meteor like spells (divided damage to targets)
+                    // Meteor like spells (divided damage to targets)
                     case 24340: case 26558: case 28884:     // Meteor
                     case 36837: case 38903: case 41276:     // Meteor
                     case 57467:                             // Meteor
@@ -382,7 +382,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                     case 67485:
                         damage += uint32(0.5f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
                         break;
-                        // Magic Bane normal (Forge of Souls - Bronjahm)
+                    // Magic Bane normal (Forge of Souls - Bronjahm)
                     case 68793:
                     {
                         damage += uint32(unitTarget->GetMaxPower(POWER_MANA) / 2);
@@ -810,9 +810,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     uint32 spell_id = 0;
                     switch (urand(1, 2))
                     {
-                            // Flip Out - ninja
+                        // Flip Out - ninja
                         case 1: spell_id = (m_caster->getGender() == GENDER_MALE ? 8219 : 8220); break;
-                            // Yaaarrrr - pirate
+                        // Yaaarrrr - pirate
                         case 2: spell_id = (m_caster->getGender() == GENDER_MALE ? 8221 : 8222); break;
                     }
 
@@ -3163,7 +3163,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
             switch (m_spellInfo->Id)
             {
-                    // Warrior's Wrath
+                // Warrior's Wrath
                 case 21977:
                 {
                     if (!unitTarget)
@@ -3933,7 +3933,7 @@ void Spell::EffectForceCast(SpellEffectIndex eff_idx)
 
     // forced cast spells by vehicle on master always unboard the master
     if (m_caster->IsVehicle() && m_caster->GetVehicleInfo()->HasOnBoard(unitTarget) &&
-        m_spellInfo->EffectImplicitTargetA[eff_idx] == TARGET_MASTER)
+            m_spellInfo->EffectImplicitTargetA[eff_idx] == TARGET_MASTER)
     {
         if (sSpellStore.LookupEntry(basePoints))
             m_caster->RemoveAurasDueToSpell(basePoints);
@@ -4029,7 +4029,7 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
         {
             // Glyph of Mirror Image
             if (m_caster->HasAura(63093))
-               m_caster->CastSpell(m_caster, 65047, true, m_CastItem, NULL, m_originalCasterGUID);
+                m_caster->CastSpell(m_caster, 65047, true, m_CastItem, NULL, m_originalCasterGUID);
             break;
         }
     }
@@ -4111,7 +4111,7 @@ void Spell::EffectTriggerMissileSpell(SpellEffectIndex effect_idx)
         }
         else
             sLog.outError("EffectTriggerMissileSpell of spell %u (eff: %u): triggering unknown spell id %u",
-                      m_spellInfo->Id, effect_idx, triggered_spell_id);
+                          m_spellInfo->Id, effect_idx, triggered_spell_id);
         return;
     }
 
@@ -4286,7 +4286,7 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target
     // post effects for TARGET_TABLE_X_Y_Z_COORDINATES
     switch (m_spellInfo->Id)
     {
-            // Dimensional Ripper - Everlook
+        // Dimensional Ripper - Everlook
         case 23442:
         {
             int32 r = irand(0, 119);
@@ -5276,7 +5276,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     bool summonResult = false;
     switch (summon_prop->Group)
     {
-            // faction handled later on, or loaded from template
+        // faction handled later on, or loaded from template
         case SUMMON_PROP_GROUP_WILD:
         case SUMMON_PROP_GROUP_FRIENDLY:
         {
@@ -5892,7 +5892,7 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
         return;
 
     // Fill possible dispel list
-    std::list <std::pair<SpellAuraHolder* , uint32> > dispel_list;
+    std::list <std::pair<SpellAuraHolder*, uint32> > dispel_list;
 
     // Create dispel mask by dispel type
     uint32 dispel_type = m_spellInfo->EffectMiscValue[eff_idx];
@@ -5921,13 +5921,13 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
                 if (unitTarget->HasAura(50536))
                     continue;
 
-            dispel_list.push_back(std::pair<SpellAuraHolder* , uint32>(holder, holder->GetStackAmount()));
+            dispel_list.push_back(std::pair<SpellAuraHolder*, uint32>(holder, holder->GetStackAmount()));
         }
     }
     // Ok if exist some buffs for dispel try dispel it
     if (!dispel_list.empty())
     {
-        std::list<std::pair<SpellAuraHolder* , uint32> > success_list; // (spell_id,casterGuid)
+        std::list<std::pair<SpellAuraHolder*, uint32> > success_list;  // (spell_id,casterGuid)
         std::list < uint32 > fail_list;                     // spell_id
 
         // some spells have effect value = 0 and all from its by meaning expect 1
@@ -5938,7 +5938,7 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
         for (int32 count = 0; count < damage && !dispel_list.empty(); ++count)
         {
             // Random select buff for dispel
-            std::list<std::pair<SpellAuraHolder* , uint32> >::iterator dispel_itr = dispel_list.begin();
+            std::list<std::pair<SpellAuraHolder*, uint32> >::iterator dispel_itr = dispel_list.begin();
             std::advance(dispel_itr, urand(0, dispel_list.size() - 1));
 
             SpellAuraHolder* holder = dispel_itr->first;
@@ -5965,7 +5965,7 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
             else
             {
                 bool foundDispelled = false;
-                for (std::list<std::pair<SpellAuraHolder* , uint32> >::iterator success_iter = success_list.begin(); success_iter != success_list.end(); ++success_iter)
+                for (std::list<std::pair<SpellAuraHolder*, uint32> >::iterator success_iter = success_list.begin(); success_iter != success_list.end(); ++success_iter)
                 {
                     if (success_iter->first->GetId() == holder->GetId() && success_iter->first->GetCasterGuid() == holder->GetCasterGuid())
                     {
@@ -5975,7 +5975,7 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
                     }
                 }
                 if (!foundDispelled)
-                    success_list.push_back(std::pair<SpellAuraHolder* , uint32>(holder, 1));
+                    success_list.push_back(std::pair<SpellAuraHolder*, uint32>(holder, 1));
             }
         }
         // Send success log and really remove auras
@@ -5988,7 +5988,7 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
             data << uint32(m_spellInfo->Id);                // Dispel spell id
             data << uint8(0);                               // not used
             data << uint32(count);                          // count
-            for (std::list<std::pair<SpellAuraHolder* , uint32> >::iterator j = success_list.begin(); j != success_list.end(); ++j)
+            for (std::list<std::pair<SpellAuraHolder*, uint32> >::iterator j = success_list.begin(); j != success_list.end(); ++j)
             {
                 SpellAuraHolder* dispelledHolder = j->first;
                 data << uint32(dispelledHolder->GetId());   // Spell Id
@@ -6303,15 +6303,15 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
         // RW enchantments applied damage int32(float(v)+0.5), this create  0..1 difference sometime
         switch (damage)
         {
-                // Rank 1
+            // Rank 1
             case  2: spell_id = 36744; break;               //  0% [ 7% ==  2, 14% == 2, 20% == 2]
-                // Rank 2
+            // Rank 2
             case  4: spell_id = 36753; break;               //  0% [ 7% ==  4, 14% == 4]
             case  5: spell_id = 36751; break;               // 20%
-                // Rank 3
+            // Rank 3
             case  6: spell_id = 36754; break;               //  0% [ 7% ==  6, 14% == 6]
             case  7: spell_id = 36755; break;               // 20%
-                // Rank 4
+            // Rank 4
             case  9: spell_id = 36761; break;               //  0% [ 7% ==  6]
             case 10: spell_id = 36758; break;               // 14%
             case 11: spell_id = 36760; break;               // 20%
@@ -6692,7 +6692,7 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
         {
             switch (m_spellInfo->Id)
             {
-                    // for spells with divided damage to targets
+                // for spells with divided damage to targets
                 case 66765: case 66809: case 67331:         // Meteor Fists
                 case 67333:                                 // Meteor Fists
                 case 69055:                                 // Bone Slice
@@ -9156,7 +9156,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     uint32 memorySpells[25] = {66543, 66691, 66692, 66694, 66695, 66696, 66697, 66698, 66699, 66700, 66701,
-                        66702, 66703, 66704, 66705, 66706, 66707, 66708, 66709, 66710, 66711, 66712, 66713, 66714, 66715};
+                                               66702, 66703, 66704, 66705, 66706, 66707, 66708, 66709, 66710, 66711, 66712, 66713, 66714, 66715
+                                              };
 
                     m_caster->CastSpell(unitTarget, memorySpells[urand(0, 24)], true);
                     return;

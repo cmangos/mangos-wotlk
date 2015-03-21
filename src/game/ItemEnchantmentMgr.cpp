@@ -96,7 +96,7 @@ uint32 GetItemEnchantMod(uint32 entry)
     double dRoll = rand_chance();
     float fCount = 0;
 
-    const EnchStoreList &enchantList = tab->second;
+    const EnchStoreList& enchantList = tab->second;
     for (EnchStoreList::const_iterator ench_iter = enchantList.begin(); ench_iter != enchantList.end(); ++ench_iter)
     {
         fCount += ench_iter->chance;
@@ -134,7 +134,7 @@ uint32 GenerateEnchSuffixFactor(uint32 item_id)
     uint32 suffixFactor;
     switch (itemProto->InventoryType)
     {
-            // Items of that type don`t have points
+        // Items of that type don`t have points
         case INVTYPE_NON_EQUIP:
         case INVTYPE_BAG:
         case INVTYPE_TABARD:
@@ -142,7 +142,7 @@ uint32 GenerateEnchSuffixFactor(uint32 item_id)
         case INVTYPE_QUIVER:
         case INVTYPE_RELIC:
             return 0;
-            // Select point coefficient
+        // Select point coefficient
         case INVTYPE_HEAD:
         case INVTYPE_BODY:
         case INVTYPE_CHEST:

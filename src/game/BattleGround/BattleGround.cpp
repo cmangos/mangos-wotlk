@@ -1377,7 +1377,7 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
                     itr->second->BonusHonor += value;
             }
             break;
-            // used only in EY, but in MSG_PVP_LOG_DATA opcode
+        // used only in EY, but in MSG_PVP_LOG_DATA opcode
         case SCORE_DAMAGE_DONE:                             // Damage Done
             itr->second->DamageDone += value;
             break;

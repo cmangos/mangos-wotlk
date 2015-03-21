@@ -2238,8 +2238,8 @@ GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameo
             float maxdist;
             switch (go->GetGoType())
             {
-                    // TODO: find out how the client calculates the maximal usage distance to spellless working
-                    // gameobjects like guildbanks and mailboxes - 10.0 is a just an abitrary choosen number
+                // TODO: find out how the client calculates the maximal usage distance to spellless working
+                // gameobjects like guildbanks and mailboxes - 10.0 is a just an abitrary choosen number
                 case GAMEOBJECT_TYPE_GUILD_BANK:
                 case GAMEOBJECT_TYPE_MAILBOX:
                     maxdist = 10.0f;
@@ -3105,7 +3105,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         {
             for (PlayerSpellMap::iterator itr2 = m_spells.begin(); itr2 != m_spells.end(); ++itr2)
             {
-                PlayerSpell &playerSpell2 = itr2->second;
+                PlayerSpell& playerSpell2 = itr2->second;
 
                 if (playerSpell2.state == PLAYERSPELL_REMOVED) continue;
                 SpellEntry const* i_spellInfo = sSpellStore.LookupEntry(itr2->first);
@@ -4170,7 +4170,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
 
     switch (charDelete_method)
     {
-            // completely remove from the database
+        // completely remove from the database
         case 0:
         {
             // return back all mails with COD and Item                 0  1           2              3      4       5    6     7
@@ -5431,7 +5431,7 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
     if (itr == mSkillStatus.end())
         return false;
 
-    SkillStatusData &skillStatus = itr->second;
+    SkillStatusData& skillStatus = itr->second;
     if (skillStatus.uState == SKILL_DELETED)
         return false;
 
@@ -5565,7 +5565,7 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
     if (itr == mSkillStatus.end())
         return false;
 
-    SkillStatusData &skillStatus = itr->second;
+    SkillStatusData& skillStatus = itr->second;
     if (skillStatus.uState == SKILL_DELETED)
         return false;
 
@@ -5696,7 +5696,7 @@ void Player::UpdateSkillsForLevel()
 
     for (SkillStatusMap::iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
     {
-        SkillStatusData &skillStatus = itr->second;
+        SkillStatusData& skillStatus = itr->second;
         if (skillStatus.uState == SKILL_DELETED)
             continue;
 
@@ -5739,7 +5739,7 @@ void Player::UpdateSkillsToMaxSkillsForLevel()
 {
     for (SkillStatusMap::iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
     {
-        SkillStatusData &skillStatus = itr->second;
+        SkillStatusData& skillStatus = itr->second;
         if (skillStatus.uState == SKILL_DELETED)
             continue;
 
@@ -5776,7 +5776,7 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
     // has skill
     if (itr != mSkillStatus.end() && itr->second.uState != SKILL_DELETED)
     {
-        SkillStatusData &skillStatus = itr->second;
+        SkillStatusData& skillStatus = itr->second;
         if (currVal)
         {
             if (step)                                      // need update step
@@ -7348,7 +7348,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool appl
             case ITEM_MOD_BLOCK_VALUE:
                 HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(val), apply);
                 break;
-                // deprecated item mods
+            // deprecated item mods
             case ITEM_MOD_FERAL_ATTACK_POWER:
             case ITEM_MOD_SPELL_HEALING_DONE:
             case ITEM_MOD_SPELL_DAMAGE_DONE:
@@ -11129,8 +11129,8 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
     {
         ItemPrototype const* itemProto = pItem2->GetProto();
         if (itemProto->Bonding == BIND_WHEN_PICKED_UP ||
-            itemProto->Bonding == BIND_QUEST_ITEM ||
-            (itemProto->Bonding == BIND_WHEN_EQUIPPED && IsBagPos(pos)))
+                itemProto->Bonding == BIND_QUEST_ITEM ||
+                (itemProto->Bonding == BIND_WHEN_EQUIPPED && IsBagPos(pos)))
         {
             pItem2->SetBinding(true);
         }
@@ -13335,7 +13335,7 @@ uint32 Player::GetGossipTextId(uint32 menuId, WorldObject* pSource)
         // Take the text that has the highest conditionId of all fitting
         // No condition and no text with condition found OR higher and fitting condition found
         if ((!gossipMenu.conditionId && !lastConditionId) ||
-            (gossipMenu.conditionId > lastConditionId && sObjectMgr.IsPlayerMeetToCondition(gossipMenu.conditionId, this, GetMap(), pSource, CONDITION_FROM_GOSSIP_MENU)))
+                (gossipMenu.conditionId > lastConditionId && sObjectMgr.IsPlayerMeetToCondition(gossipMenu.conditionId, this, GetMap(), pSource, CONDITION_FROM_GOSSIP_MENU)))
         {
             lastConditionId = gossipMenu.conditionId;
             textId = gossipMenu.text_id;
@@ -17767,7 +17767,7 @@ void Player::_SaveQuestStatus()
     // we don't need transactions here.
     for (QuestStatusMap::iterator i = mQuestStatus.begin(); i != mQuestStatus.end(); ++i)
     {
-        QuestStatusData &questStatus = i->second;
+        QuestStatusData& questStatus = i->second;
         switch (questStatus.uState)
         {
             case QUEST_NEW :
@@ -17977,7 +17977,7 @@ void Player::_SaveTalents()
     {
         for (PlayerTalentMap::iterator itr = m_talents[i].begin(); itr != m_talents[i].end();)
         {
-            PlayerTalent &playerTalent = itr->second;
+            PlayerTalent& playerTalent = itr->second;
             if (playerTalent.state == PLAYERSPELL_REMOVED || playerTalent.state == PLAYERSPELL_CHANGED)
                 stmtDel.PExecute(GetGUIDLow(), itr->first, i);
 
@@ -20239,7 +20239,7 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
                 DEBUG_LOG("SendTransferAbortedByLockStatus: LockAreaStatus %u, do not teleport, no message sent (mapId %u)", lockStatus, mapEntry->MapID);
                 break;
             }
-            // No break here!
+        // No break here!
         case AREA_LOCKSTATUS_MISSING_ITEM:
             GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_DIFFICULTY, GetDifficulty(mapEntry->IsRaid()));
             break;
@@ -23205,8 +23205,8 @@ void Player::_fillGearScoreData(Item* item, GearScoreVec* gearScore, uint32& two
         case INVTYPE_HANDS:
             (*gearScore)[EQUIPMENT_SLOT_HEAD] = std::max((*gearScore)[EQUIPMENT_SLOT_HEAD], level);
             break;
-            // equipped gear score check uses both rings and trinkets for calculation, assume that for bags/banks it is the same
-            // with keeping second highest score at second slot
+        // equipped gear score check uses both rings and trinkets for calculation, assume that for bags/banks it is the same
+        // with keeping second highest score at second slot
         case INVTYPE_FINGER:
         {
             if ((*gearScore)[EQUIPMENT_SLOT_FINGER1] < level)
@@ -23387,13 +23387,13 @@ float Player::GetCollisionHeight(bool mounted) const
             return GetCollisionHeight(false);
 
         CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
-        if(!displayInfo)
+        if (!displayInfo)
         {
             sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
             return 0;
         }
         CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
-        if(!modelData)
+        if (!modelData)
         {
             sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
             return 0;
@@ -23407,13 +23407,13 @@ float Player::GetCollisionHeight(bool mounted) const
     {
         // use native model collision height in dismounted case
         CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
-        if(!displayInfo)
+        if (!displayInfo)
         {
             sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
             return 0;
         }
         CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
-        if(!modelData)
+        if (!modelData)
         {
             sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
             return 0;

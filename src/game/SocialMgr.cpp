@@ -132,7 +132,7 @@ void PlayerSocial::SendSocialList()
 
     for (PlayerSocialMap::iterator itr = m_playerSocialMap.begin(); itr != m_playerSocialMap.end(); ++itr)
     {
-        FriendInfo &friendInfo = itr->second;
+        FriendInfo& friendInfo = itr->second;
         sSocialMgr.GetFriendInfo(plr, itr->first, friendInfo);
 
         data << ObjectGuid(HIGHGUID_PLAYER, itr->first);    // player guid

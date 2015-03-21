@@ -735,7 +735,7 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
     MANGOS_ASSERT(CheckGridIntegrity(creature, true));
 }
 
-bool Map::CreatureCellRelocation(Creature* c, const Cell &new_cell)
+bool Map::CreatureCellRelocation(Creature* c, const Cell& new_cell)
 {
     Cell const& old_cell = c->GetCurrentCell();
     if (old_cell.DiffGrid(new_cell))
@@ -1896,30 +1896,30 @@ uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
 class StaticMonsterChatBuilder
 {
     public:
-        StaticMonsterChatBuilder(CreatureInfo const* cInfo, ChatMsg msgtype, int32 textId, Language language, Unit const* target, uint32 senderLowGuid = 0)
-            : i_cInfo(cInfo), i_msgtype(msgtype), i_textId(textId), i_language(language), i_target(target)
-        {
-            // 0 lowguid not used in core, but accepted fine in this case by client
-            i_senderGuid = i_cInfo->GetObjectGuid(senderLowGuid);
-        }
-        void operator()(WorldPacket& data, int32 loc_idx)
-        {
-            char const* text = sObjectMgr.GetMangosString(i_textId, loc_idx);
+    StaticMonsterChatBuilder(CreatureInfo const* cInfo, ChatMsg msgtype, int32 textId, Language language, Unit const* target, uint32 senderLowGuid = 0)
+    : i_cInfo(cInfo), i_msgtype(msgtype), i_textId(textId), i_language(language), i_target(target)
+{
+    // 0 lowguid not used in core, but accepted fine in this case by client
+    i_senderGuid = i_cInfo->GetObjectGuid(senderLowGuid);
+}
+void operator()(WorldPacket& data, int32 loc_idx)
+{
+    char const* text = sObjectMgr.GetMangosString(i_textId, loc_idx);
 
-            char const* nameForLocale = i_cInfo->Name;
-            sObjectMgr.GetCreatureLocaleStrings(i_cInfo->Entry, loc_idx, &nameForLocale);
+    char const* nameForLocale = i_cInfo->Name;
+    sObjectMgr.GetCreatureLocaleStrings(i_cInfo->Entry, loc_idx, &nameForLocale);
 
-            ChatHandler::BuildChatPacket(data, i_msgtype, text, i_language, CHAT_TAG_NONE, i_senderGuid, nameForLocale, i_target ? i_target->GetObjectGuid() : ObjectGuid(),
-                i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
-        }
+    ChatHandler::BuildChatPacket(data, i_msgtype, text, i_language, CHAT_TAG_NONE, i_senderGuid, nameForLocale, i_target ? i_target->GetObjectGuid() : ObjectGuid(),
+                                 i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
+}
 
-    private:
-        ObjectGuid i_senderGuid;
-        CreatureInfo const* i_cInfo;
-        ChatMsg i_msgtype;
-        int32 i_textId;
-        Language i_language;
-        Unit const* i_target;
+private:
+ObjectGuid i_senderGuid;
+CreatureInfo const* i_cInfo;
+ChatMsg i_msgtype;
+int32 i_textId;
+Language i_language;
+Unit const* i_target;
 };
 
 /**
@@ -1993,7 +1993,7 @@ void Map::PlayDirectSoundToMap(uint32 soundId, uint32 zoneId /*=0*/) const
 bool Map::IsInLineOfSight(float srcX, float srcY, float srcZ, float destX, float destY, float destZ, uint32 phasemask) const
 {
     return VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(GetId(), srcX, srcY, srcZ, destX, destY, destZ)
-           && m_dyn_tree.isInLineOfSight(srcX, srcY, srcZ, destX, destY, destZ, phasemask);
+    && m_dyn_tree.isInLineOfSight(srcX, srcY, srcZ, destX, destY, destZ, phasemask);
 }
 
 /**
@@ -2025,7 +2025,7 @@ bool Map::GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float
 }
 
 // Find an height within a reasonable range of provided Z. This method may fail so we have to handle that case.
-bool Map::GetHeightInRange(uint32 phasemask, float x, float y, float &z, float maxSearchDist /*= 4.0f*/) const
+bool Map::GetHeightInRange(uint32 phasemask, float x, float y, float& z, float maxSearchDist /*= 4.0f*/) const
 {
     float height, vmapHeight, mapHeight;
     vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
@@ -2119,8 +2119,8 @@ bool Map::GetRandomPointUnderWater(uint32 phaseMask, float& x, float& y, float& 
     {
         float min_z = z - 0.7f * radius; // 0.7 to have a bit a "flat" cylinder, TODO which value looks nicest
         if (min_z < ground)
-            min_z = ground + 0.5f; // Get some space to prevent under map
-        
+                    min_z = ground + 0.5f; // Get some space to prevent under map
+
         float liquidLevel = liquid_status.level - 2.0f; // just to make the generated point is in water and not on surface or a bit above
 
         // if not enough space to fit the creature better is to return from here
@@ -2153,7 +2153,7 @@ bool Map::GetRandomPointInTheAir(uint32 phaseMask, float& x, float& y, float& z,
     {
         float min_z = z - 0.7f * radius; // 0.7 to have a bit a "flat" cylinder, TODO which value looks nicest
         if (min_z < ground)
-            min_z = ground + 2.5f; // Get some space to prevent landing
+                    min_z = ground + 2.5f; // Get some space to prevent landing
         float max_z = std::max(z + 0.7f * radius, min_z);
         x = i_x;
         y = i_y;

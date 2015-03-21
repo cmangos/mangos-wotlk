@@ -7191,9 +7191,9 @@ bool ChatHandler::HandleMmapTestHeight(char* args)
     ExtractFloat(&args, radius);
     if (radius > 40.0f)
         radius = 40.0f;
-    
+
     Unit* unit = getSelectedUnit();
-    
+
     Player* player = m_session->GetPlayer();
     if (!unit)
         unit = player;
@@ -7225,7 +7225,7 @@ bool ChatHandler::HandleMmapTestHeight(char* args)
     unit->GetPosition(gx, gy, gz);
 
     Creature* summoned = unit->SummonCreature(VISUAL_WAYPOINT, gx, gy, gz + 0.5f, 0, TEMPSUMMON_TIMED_DESPAWN, 20000);
-    summoned->CastSpell(summoned, 8599, false); 
+    summoned->CastSpell(summoned, 8599, false);
     uint32 tryed = 1;
     uint32 succeed = 0;
     uint32 startTime = WorldTimer::getMSTime();

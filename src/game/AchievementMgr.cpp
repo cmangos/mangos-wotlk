@@ -829,7 +829,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
 
         switch (type)
         {
-                // std. case: increment at 1
+            // std. case: increment at 1
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST:
             case ACHIEVEMENT_CRITERIA_TYPE_NUMBER_OF_TALENT_RESETS:
             case ACHIEVEMENT_CRITERIA_TYPE_LOSE_DUEL:
@@ -846,7 +846,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 change = 1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
-                // std case: increment at miscvalue1
+            // std case: increment at miscvalue1
             case ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_VENDORS:
             case ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_TALENTS:
             case ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_QUEST_REWARD:
@@ -863,7 +863,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 change = miscvalue1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
-                // std case: high value at miscvalue1
+            // std case: high value at miscvalue1
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_BID:
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_SOLD: /* FIXME: for online player only currently */
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HIT_DEALT:
@@ -877,7 +877,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 progressType = PROGRESS_HIGHEST;
                 break;
 
-                // specialized cases
+            // specialized cases
 
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_BG:
             {
@@ -1191,9 +1191,9 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 switch (achievement->ID)
                 {
                     case 31:
-                        // case 1275: // these timed achievements have to be "started" on Quest Accept
-                        // case 1276:
-                        // case 1277:
+                    // case 1275: // these timed achievements have to be "started" on Quest Accept
+                    // case 1276:
+                    // case 1277:
                     case 1282:
                     case 1789:
                     {
@@ -1675,7 +1675,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_STAT:
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_RATING:
                 break;
-                // FIXME: not triggered in code as result, need to implement
+            // FIXME: not triggered in code as result, need to implement
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY:
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_RAID:
             case ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE:
@@ -1837,7 +1837,7 @@ uint32 AchievementMgr::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry co
             resultValue = achievementCriteria->highest_personal_rating.teamrating;
             break;
 
-            // handle all statistic-only criteria here
+        // handle all statistic-only criteria here
         case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_BATTLEGROUND:
         case ACHIEVEMENT_CRITERIA_TYPE_DEATH_AT_MAP:
         case ACHIEVEMENT_CRITERIA_TYPE_DEATH:
@@ -2463,9 +2463,9 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
                 switch (achievement->ID)
                 {
                     case 31:
-                        // case 1275: // these timed achievements are "started" on Quest Accept, and simple ended on quest-complete
-                        // case 1276:
-                        // case 1277:
+                    // case 1275: // these timed achievements are "started" on Quest Accept, and simple ended on quest-complete
+                    // case 1276:
+                    // case 1277:
                     case 1282:
                     case 1789:
                         break;

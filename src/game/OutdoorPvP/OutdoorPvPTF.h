@@ -155,7 +155,7 @@ static const uint32 terokkarTowers[MAX_TF_TOWERS] = {GO_TOWER_BANNER_WEST, GO_TO
 
 class OutdoorPvPTF : public OutdoorPvP
 {
-    friend class OutdoorPvPMgr;
+        friend class OutdoorPvPMgr;
 
     public:
         OutdoorPvPTF();
@@ -166,7 +166,7 @@ class OutdoorPvPTF : public OutdoorPvP
         void SendRemoveWorldStates(Player* player) override;
 
         bool HandleEvent(uint32 eventId, GameObject* go) override;
-        void HandleObjectiveComplete(uint32 eventId, const std::list<Player*> &players, Team team) override;
+        void HandleObjectiveComplete(uint32 eventId, const std::list<Player*>& players, Team team) override;
 
         void HandleGameObjectCreate(GameObject* go) override;
         void Update(uint32 diff) override;
