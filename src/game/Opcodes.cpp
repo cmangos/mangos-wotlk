@@ -106,7 +106,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x04D*/ { "SMSG_LOGOUT_COMPLETE",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x04E*/ { "CMSG_LOGOUT_CANCEL",                           STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLogoutCancelOpcode        },
     /*0x04F*/ { "SMSG_LOGOUT_CANCEL_ACK",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x050*/ { "CMSG_NAME_QUERY",                              STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleNameQueryOpcode           },
+    /*0x050*/ { "CMSG_NAME_QUERY",                              STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleNameQueryOpcode           },
     /*0x051*/ { "SMSG_NAME_QUERY_RESPONSE",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x052*/ { "CMSG_PET_NAME_QUERY",                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandlePetNameQueryOpcode        },
     /*0x053*/ { "SMSG_PET_NAME_QUERY_RESPONSE",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
