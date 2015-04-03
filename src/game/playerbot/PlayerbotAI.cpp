@@ -349,7 +349,7 @@ uint32 PlayerbotAI::initSpell(uint32 spellId)
         SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(pSpellInfo->rangeIndex);
         float range = GetSpellMaxRange(srange, IsPositiveSpell(spellId));
         if (Player* modOwner = m_bot->GetSpellModOwner())
-            modOwner->ApplySpellMod(pSpellInfo->Id, SPELLMOD_RANGE, range, spell);
+            modOwner->ApplySpellMod(pSpellInfo->Id, SPELLMOD_RANGE, range);
         m_spellRangeMap.insert(std::pair<uint32, float>(spellId, range));
         delete spell;
     }
