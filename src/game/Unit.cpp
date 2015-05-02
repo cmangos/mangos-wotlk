@@ -654,6 +654,27 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         return damage;
     }
 
+    // share damage by auras
+    AuraList const& vShareDamageAuras = pVictim->GetAurasByType(SPELL_AURA_SHARE_DAMAGE_PCT);
+    for (AuraList::const_iterator itr = vShareDamageAuras.begin(); itr != vShareDamageAuras.end(); ++itr)
+    {
+        // if damage is done by another shared aura, then skip to avoid circular reference (aura 300 is only applied on effect_idx_0
+        if (spellProto && spellProto->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_APPLY_AURA &&
+            spellProto->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_SHARE_DAMAGE_PCT)
+            break;
+
+        if (Unit* shareTarget = (*itr)->GetCaster())
+        {
+            if (shareTarget != pVictim && ((*itr)->GetMiscValue() & damageSchoolMask))
+            {
+                SpellEntry const* shareSpell = (*itr)->GetSpellProto();
+                uint32 shareDamage = uint32(damage*(*itr)->GetModifier()->m_amount / 100.0f);
+                DealDamageMods(shareTarget, shareDamage, NULL);
+                DealDamage(shareTarget, shareDamage, 0, damagetype, GetSpellSchoolMask(shareSpell), shareSpell, false);
+            }
+        }
+    }
+
     // duel ends when player has 1 or less hp
     bool duel_hasEnded = false;
     if (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->duel && damage >= (health - 1))
