@@ -2927,6 +2927,38 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 65870, true);
                     return;
                 }
+                case 66312:                                 // Light Ball Passive
+                {
+                    if (!unitTarget || m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (unitTarget->HasAuraOfDifficulty(65686))
+                            unitTarget->CastSpell(unitTarget, 67590, true);
+                        else
+                            m_caster->CastSpell(m_caster, 65795, true);
+
+                        ((Creature*)m_caster)->ForcedDespawn();
+                    }
+                    return;
+                }
+                case 66314:                                 // Dark Ball Passive
+                {
+                    if (!unitTarget || m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (unitTarget->HasAuraOfDifficulty(65684))
+                            unitTarget->CastSpell(unitTarget, 67590, true);
+                        else
+                            m_caster->CastSpell(m_caster, 65808, true);
+
+                        ((Creature*)m_caster)->ForcedDespawn();
+                    }
+                    return;
+                }
                 case 66390:                                 // Read Last Rites
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -9253,6 +9285,35 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 67547:                                 // Clear Val'kyr Essence
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(67590);
+                    unitTarget->RemoveAurasDueToSpell(65684);
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    return;
+                }
+                case 67590:                                 // Powering Up
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (SpellAuraHolder* playerAura = unitTarget->GetSpellAuraHolder(m_spellInfo->Id))
+                    {
+                        if (playerAura && playerAura->GetStackAmount() == 100)
+                        {
+                            if (unitTarget->HasAuraOfDifficulty(65684))
+                                unitTarget->CastSpell(unitTarget, 65724, true);
+                            else if (unitTarget->HasAuraOfDifficulty(65686))
+                                unitTarget->CastSpell(unitTarget, 65748, true);
+
+                            unitTarget->RemoveAurasDueToSpell(m_spellInfo->Id);
+                        }
+                    }
+                    return;
+                }
                 case 67751:                                 // Ghoul Explode
                 {
                     if (!unitTarget)
@@ -9260,6 +9321,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     unitTarget->InterruptNonMeleeSpells(false);
                     unitTarget->CastSpell(unitTarget, 67729, false);
+                    return;
+                }
+                case 68084:                                 // Clear Val'kyr Touch of Light/Dark
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(66001);
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     return;
                 }
                 case 68861:                                 // Consume Soul (ICC FoS: Bronjahm)

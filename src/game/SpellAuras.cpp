@@ -2346,6 +2346,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             target->CastSpell(target, 64133, true, NULL, this);
                         return;
+                    case 65684:                             // Dark Essence
+                        target->RemoveAurasDueToSpell(65686);
+                        return;
+                    case 65686:                             // Light Essence
+                        target->RemoveAurasDueToSpell(65684);
+                        return;
                     case 68912:                             // Wailing Souls
                         if (Unit* caster = GetCaster())
                         {
