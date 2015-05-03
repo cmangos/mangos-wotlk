@@ -7616,6 +7616,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 33684, true);
                     return;
                 }
+                case 34653:                                 // Fireball
+                case 36920:                                 // Fireball (h)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, unitTarget->GetMap()->IsRegularDifficulty() ? 23971 : 30928, true, NULL, NULL, m_caster->GetObjectGuid());
+                    return;
+                }
                 case 35865:                                 // Summon Nether Vapor
                 {
                     if (!unitTarget)
