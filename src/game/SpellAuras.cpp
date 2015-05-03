@@ -7951,6 +7951,7 @@ void Aura::PeriodicDummyTick()
                     {
                         target->CastSpell(target, 30529, true);
                         target->RemoveAurasDueToSpell(30019);
+                        target->RemoveAurasDueToSpell(30532);
                     }
                     return;
                 }
