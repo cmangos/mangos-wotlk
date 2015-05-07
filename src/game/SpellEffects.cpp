@@ -3057,6 +3057,22 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 71264, true);
                     return;
                 }
+                case 72202:                                 // Blood Link
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 72195, true);
+                    return;
+                }
+                case 72254:                                 // Mark of the Fallen Champion
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
                 case 72261:                                 // Delirious Slash
                 {
                     if (!unitTarget)
@@ -9424,6 +9440,38 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     // cast Whiteout visual
                     m_caster->CastSpell(unitTarget, 72036, true);
+                    return;
+                }
+                case 72195:                                 // Blood Link
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    uint32 auraStacks = 0;
+                    if (SpellAuraHolder* playerAura = unitTarget->GetSpellAuraHolder(72371))
+                        auraStacks = playerAura->GetStackAmount();
+
+                    int32 missingStacks = unitTarget->GetPower(unitTarget->GetPowerType()) - auraStacks;
+                    if (missingStacks <= 0)
+                        return;
+
+                    unitTarget->CastCustomSpell(unitTarget, 72371, &missingStacks, &missingStacks, NULL, true);
+                    return;
+                }
+                case 72257:                                 // Remove Marks of the Fallen Champion
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    return;
+                }
+                case 72409:                                 // Rune of Blood
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
                 case 72705:                                 // Coldflame (summon around the caster)

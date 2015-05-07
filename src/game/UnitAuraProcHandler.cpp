@@ -1029,6 +1029,10 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     }
                     break;
                 }
+                // Blood Link
+                case 72178:
+                    triggered_spell_id = 72195;
+                    break;
             }
             break;
         }
