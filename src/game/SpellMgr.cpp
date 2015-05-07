@@ -2139,6 +2139,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     if ((spellInfo_1->Id == 44852 && spellInfo_2->Id == 46021) ||
                             (spellInfo_2->Id == 44852 && spellInfo_1->Id == 46021))
                         return false;
+                        
+                    // Sanity Well (dummy) and Sanity Well (blessing), also (in Cataclysm Spirit Link Totem and Name: Blessing of the Grove)
+                    if (spellInfo_1->SpellIconID == 3062 && spellInfo_2->SpellIconID == 3062)
+                        return false;
                     break;
                 }
                 case SPELLFAMILY_MAGE:
