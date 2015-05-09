@@ -5304,7 +5304,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     uint32 amount = damage > 0 ? damage : 1;
 
     // basepoints of SUMMON_PROP_GROUP_VEHICLE is often a spellId, set amount to 1
-    if (summon_prop->Group == SUMMON_PROP_GROUP_VEHICLE)
+    if (summon_prop->Group == SUMMON_PROP_GROUP_VEHICLE || summon_prop->Group == SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE)
         amount = 1;
 
     // Expected Level                                       (Totem, Pet and Critter may not use this)
@@ -5453,6 +5453,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
             break;
         }
         case SUMMON_PROP_GROUP_VEHICLE:
+        case SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE:
         {
             summonResult = DoSummonVehicle(summonPositions, summon_prop, eff_idx, level);
             break;
@@ -9387,6 +9388,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, 69023, true);
                     return;
                 }
+                case 69057:                                 // Bone Spike Graveyard
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1)))
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 69062, true);
+                    return;
+                }
                 case 69140:                                 // Coldflame (random target selection)
                 {
                     if (!unitTarget)
@@ -9483,6 +9492,22 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     for (uint32 triggeredSpell = m_spellInfo->CalculateSimpleValue(eff_idx); triggeredSpell < m_spellInfo->Id; ++triggeredSpell)
                         unitTarget->CastSpell(unitTarget, triggeredSpell, true);
 
+                    return;
+                }
+                case 73142:                                 // Bone Spike Graveyard (during storm)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(69065))
+                        return;
+
+                    uint32 spellId = 0;
+                    switch (urand(0, 2))
+                    {
+                        case 0: spellId = 69062; break;
+                        case 1: spellId = 72669; break;
+                        case 2: spellId = 72670; break;
+                    }
+
+                    unitTarget->CastSpell(unitTarget, spellId, true);
                     return;
                 }
                 case 74455:                                 // Conflagration
