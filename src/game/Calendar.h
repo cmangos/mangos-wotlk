@@ -125,7 +125,6 @@ enum CalendarError
 #define CALENDAR_MAX_GUILD_EVENTS   100
 #define CALENDAR_MAX_INVITES        100
 
-// forward declaration
 class CalendarEvent;
 class CalendarInvite;
 class CalendarMgr;
