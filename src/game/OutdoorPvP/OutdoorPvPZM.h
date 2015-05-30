@@ -98,7 +98,7 @@ enum
     WORLD_STATE_ZM_FLAG_READY_ALLIANCE      = 2655,
     WORLD_STATE_ZM_FLAG_NOT_READY_ALLIANCE  = 2656
 
-    //WORLD_STATE_ZM_UNK                    = 2653
+            //WORLD_STATE_ZM_UNK                    = 2653
 };
 
 struct ZangarmarshTowerEvent

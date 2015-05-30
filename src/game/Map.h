@@ -56,6 +56,7 @@ struct ScriptInfo;
 class BattleGround;
 class GridMap;
 class GameObjectModel;
+class WeatherSystem;
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
@@ -212,7 +213,10 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         uint32 GetPlayersCountExceptGMs() const;
         bool ActiveObjectsNearGrid(uint32 x, uint32 y) const;
 
+        /// Send a Packet to all players on a map
         void SendToPlayers(WorldPacket const* data) const;
+        /// Send a Packet to all players in a zone. Return false if no player found
+        bool SendToPlayersInZone(WorldPacket const* data, uint32 zoneId) const;
 
         typedef MapRefManager PlayerList;
         PlayerList const& GetPlayers() const { return m_mapRefManager; }
@@ -272,6 +276,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
 
         // Dynamic VMaps
         float GetHeight(uint32 phasemask, float x, float y, float z) const;
+        bool GetHeightInRange(uint32 phasemask, float x, float y, float& z, float maxSearchDist = 4.0f) const;
         bool IsInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
         bool GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, uint32 phasemask, float modifyDist) const;
 
@@ -286,6 +291,22 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         // Teleport all players in that map to choosed location
         void TeleportAllPlayersTo(TeleportLocation loc);
 
+        // WeatherSystem
+        WeatherSystem* GetWeatherSystem() const { return m_weatherSystem; }
+        /** Set the weather in a zone on this map
+         * @param zoneId set the weather for which zone
+         * @param type What weather to set
+         * @param grade how strong the weather should be
+         * @param permanently set the weather permanently?
+         */
+        void SetWeather(uint32 zoneId, WeatherType type, float grade, bool permanently);
+
+        // Random on map generation
+        bool GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius);
+        bool GetReachableRandomPointOnGround(uint32 phaseMask, float& x, float& y, float& z, float radius);
+        bool GetRandomPointInTheAir(uint32 phaseMask, float& x, float& y, float& z, float radius);
+        bool GetRandomPointUnderWater(uint32 phaseMask, float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status);
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 
@@ -296,7 +317,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void SendInitTransports(Player* player);
         void SendRemoveTransports(Player* player);
 
-        bool CreatureCellRelocation(Creature* creature, const Cell &new_cell);
+        bool CreatureCellRelocation(Creature* creature, const Cell& new_cell);
 
         bool loaded(const GridPair&) const;
         void EnsureGridCreated(const GridPair&);
@@ -373,12 +394,14 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
 
         template<class T>
         void RemoveFromGrid(T*, NGridType*, Cell const&);
-
         // Holder for information about linked mobs
         CreatureLinkingHolder m_creatureLinkingHolder;
 
         // Dynamic Map tree object
         DynamicMapTree m_dyn_tree;
+
+        // WeatherSystem
+        WeatherSystem* m_weatherSystem;
 };
 
 class MANGOS_DLL_SPEC WorldMap : public Map

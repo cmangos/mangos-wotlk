@@ -621,7 +621,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void RemoveFromWorld() override;
 
         bool Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang,
-                    const QuaternionData &rotation = QuaternionData(), uint8 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY);
+                    const QuaternionData& rotation = QuaternionData(), uint8 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY);
         void Update(uint32 update_diff, uint32 p_time) override;
         GameObjectInfo const* GetGOInfo() const;
 
@@ -632,7 +632,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         // z_rot, y_rot, x_rot - rotation angles around z, y and x axes
         void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot);
         void SetWorldRotation(float qx, float qy, float qz, float qw);
-        void SetTransportPathRotation(const QuaternionData &rotation);      // transforms(rotates) transport's path
+        void SetTransportPathRotation(const QuaternionData& rotation);      // transforms(rotates) transport's path
         int64 GetPackedWorldRotation() const { return m_packedRotation; }
 
         // overwrite WorldObject function for proper name localization
@@ -755,7 +755,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         // Destructible GO handling
         void DealGameObjectDamage(uint32 damage, uint32 spell, Unit* caster);
-        void RebuildGameObject(uint32 spell, Unit* caster);
+        void RebuildGameObject(Unit* caster);
         void ForceGameObjectHealth(int32 diff, Unit* caster);
         uint32 GetHealth() const { return m_useTimes; }
         uint32 GetMaxHealth() const { return m_goInfo->destructibleBuilding.intactNumHits + m_goInfo->destructibleBuilding.damagedNumHits; }

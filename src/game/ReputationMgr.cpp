@@ -136,7 +136,7 @@ void ReputationMgr::SendState(FactionState const* faction, bool anyRankIncreased
 
     for (FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
-        FactionState &subFaction = itr->second;
+        FactionState& subFaction = itr->second;
         if (subFaction.needSend)
         {
             subFaction.needSend = false;
@@ -312,7 +312,7 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
     FactionStateList::iterator itr = m_factions.find(factionEntry->reputationListID);
     if (itr != m_factions.end())
     {
-        FactionState &faction = itr->second;
+        FactionState& faction = itr->second;
         int32 BaseRep = GetBaseReputation(factionEntry);
 
         if (incremental)
@@ -339,7 +339,7 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
 
         m_player->ReputationChanged(factionEntry);
 
-        AchievementMgr &achievementManager = m_player->GetAchievementMgr();
+        AchievementMgr& achievementManager = m_player->GetAchievementMgr();
         achievementManager.UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KNOWN_FACTIONS,         factionEntry->ID);
         achievementManager.UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_REPUTATION,        factionEntry->ID);
         achievementManager.UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_EXALTED_REPUTATION, factionEntry->ID);
@@ -530,7 +530,7 @@ void ReputationMgr::SaveToDB()
 
     for (FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
-        FactionState &faction = itr->second;
+        FactionState& faction = itr->second;
         if (faction.needSave)
         {
             stmtDel.PExecute(m_player->GetGUIDLow(), faction.ID);

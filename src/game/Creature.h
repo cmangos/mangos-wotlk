@@ -43,19 +43,21 @@ struct GameEventCreatureData;
 
 enum CreatureFlagsExtra
 {
-    CREATURE_FLAG_EXTRA_INSTANCE_BIND   = 0x00000001,       // creature kill bind instance with killer and killer's group
-    CREATURE_FLAG_EXTRA_CIVILIAN        = 0x00000002,       // not aggro (ignore faction/reputation hostility)
-    CREATURE_FLAG_EXTRA_NO_PARRY        = 0x00000004,       // creature can't parry
-    CREATURE_FLAG_EXTRA_NO_PARRY_HASTEN = 0x00000008,       // creature can't counter-attack at parry
-    CREATURE_FLAG_EXTRA_NO_BLOCK        = 0x00000010,       // creature can't block
-    CREATURE_FLAG_EXTRA_NO_CRUSH        = 0x00000020,       // creature can't do crush attacks
-    CREATURE_FLAG_EXTRA_NO_XP_AT_KILL   = 0x00000040,       // creature kill not provide XP
-    CREATURE_FLAG_EXTRA_INVISIBLE       = 0x00000080,       // creature is always invisible for player (mostly trigger creatures)
-    CREATURE_FLAG_EXTRA_NOT_TAUNTABLE   = 0x00000100,       // creature is immune to taunt auras and effect attack me
-    CREATURE_FLAG_EXTRA_AGGRO_ZONE      = 0x00000200,       // creature sets itself in combat with zone on aggro
-    CREATURE_FLAG_EXTRA_GUARD           = 0x00000400,       // creature is a guard
-    CREATURE_FLAG_EXTRA_NO_CALL_ASSIST  = 0x00000800,       // creature shouldn't call for assistance on aggro
-    CREATURE_FLAG_EXTRA_ACTIVE          = 0x00001000,       // creature is active object. Grid of this creature will be loaded and creature set as active
+    CREATURE_FLAG_EXTRA_INSTANCE_BIND       = 0x00000001,       // creature kill bind instance with killer and killer's group
+    CREATURE_FLAG_EXTRA_CIVILIAN            = 0x00000002,       // not aggro (ignore faction/reputation hostility)
+    CREATURE_FLAG_EXTRA_NO_PARRY            = 0x00000004,       // creature can't parry
+    CREATURE_FLAG_EXTRA_NO_PARRY_HASTEN     = 0x00000008,       // creature can't counter-attack at parry
+    CREATURE_FLAG_EXTRA_NO_BLOCK            = 0x00000010,       // creature can't block
+    CREATURE_FLAG_EXTRA_NO_CRUSH            = 0x00000020,       // creature can't do crush attacks
+    CREATURE_FLAG_EXTRA_NO_XP_AT_KILL       = 0x00000040,       // creature kill not provide XP
+    CREATURE_FLAG_EXTRA_INVISIBLE           = 0x00000080,       // creature is always invisible for player (mostly trigger creatures)
+    CREATURE_FLAG_EXTRA_NOT_TAUNTABLE       = 0x00000100,       // creature is immune to taunt auras and effect attack me
+    CREATURE_FLAG_EXTRA_AGGRO_ZONE          = 0x00000200,       // creature sets itself in combat with zone on aggro
+    CREATURE_FLAG_EXTRA_GUARD               = 0x00000400,       // creature is a guard
+    CREATURE_FLAG_EXTRA_NO_CALL_ASSIST      = 0x00000800,       // creature shouldn't call for assistance on aggro
+    CREATURE_FLAG_EXTRA_ACTIVE              = 0x00001000,       // creature is active object. Grid of this creature will be loaded and creature set as active
+    CREATURE_FLAG_EXTRA_MMAP_FORCE_ENABLE   = 0x00002000,       // creature is force to use MMaps
+    CREATURE_FLAG_EXTRA_MMAP_FORCE_DISABLE  = 0x00004000,       // creature is forced to NOT use MMaps
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
@@ -499,7 +501,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, Team team = TEAM_NONE, const CreatureData* data = NULL, GameEventCreatureData const* eventData = NULL);
         bool LoadCreatureAddon(bool reload);
-        void SelectLevel(const CreatureInfo* cinfo, float percentHealth = 100.0f, float percentMana = 100.0f);
+        void SelectLevel(const CreatureInfo* cinfo, float percentHealth = 100.0f);
         void LoadEquipment(uint32 equip_entry, bool force = false);
 
         bool HasStaticDBSpawnData() const;                  // listed in `creature` table and have fixed in DB guid
@@ -527,9 +529,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool IsGuard() const { return GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_GUARD; }
 
         bool CanWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
-        virtual bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
-        bool CanFly()  const { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_FLY_ANIM) || m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_LEVITATING | MOVEFLAG_CAN_FLY)); }
-
+        bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
+        bool IsSwimming() const { return (m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_SWIMMING))); }
+        bool CanFly() const { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_FLY_ANIM) || m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_LEVITATING | MOVEFLAG_CAN_FLY)); }
+        bool IsFlying() const { return (m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_FLYING | MOVEFLAG_LEVITATING))); }
         bool IsTrainerOf(Player* player, bool msg) const;
         bool CanInteractWithBattleMaster(Player* player, bool msg) const;
         bool CanTrainAndResetTalentsOf(Player* pPlayer) const;

@@ -717,7 +717,7 @@ void WorldSession::LoadAccountData(QueryResult* result, uint32 mask)
     delete result;
 }
 
-void WorldSession::SetAccountData(AccountDataType type, time_t time_, const std::string &data)
+void WorldSession::SetAccountData(AccountDataType type, time_t time_, const std::string& data)
 {
     if ((1 << type) & GLOBAL_CACHE_MASK)
     {

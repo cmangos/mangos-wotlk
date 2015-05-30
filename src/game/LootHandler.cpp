@@ -429,7 +429,7 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
 
             switch (pItem->loot.loot_type)
             {
-                    // temporary loot in stacking items, clear loot state, no auto loot move
+                // temporary loot in stacking items, clear loot state, no auto loot move
                 case LOOT_MILLING:
                 case LOOT_PROSPECTING:
                 {

@@ -104,6 +104,19 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_SEND_AI_EVENT_AROUND     = 35,           // resSource = Creature, resTarget = Unit
                                                             // datalong = AIEventType
                                                             // datalong2 = radius
+    SCRIPT_COMMAND_SET_FACING               = 36,           // resSource = Creature, resTarget WorldObject. Turn resSource towards Taget
+                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL also set TargetGuid of resSource to resTarget. In this case resTarget MUST be Creature/ Player
+                                                            // datalong != 0 Reset TargetGuid, Reset orientation
+    SCRIPT_COMMAND_MOVE_DYNAMIC             = 37,           // resSource = Creature, resTarget Worldobject.
+                                                            // datalong = 0: Move resSource towards resTarget
+                                                            // datalong != 0: Move resSource to a random point between datalong2..datalong around resTarget.
+                                                            //      orientation != 0: Obtain a random point around resTarget in direction of orientation
+                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL Obtain a random point around resTarget in direction of resTarget->GetOrientation + orientation
+                                                            // for resTarget == resSource and orientation == 0 this will mean resSource moving forward
+    SCRIPT_COMMAND_SEND_MAIL                = 38,           // resSource WorldObject, can be NULL, resTarget Player
+                                                            // datalong: Send mailTemplateId from resSource (if provided) to player resTarget
+                                                            // datalong2: AlternativeSenderEntry. Use as sender-Entry
+                                                            // dataint1: Delay (>= 0) in Seconds
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -333,6 +346,24 @@ struct ScriptInfo
             uint32 radius;                                  // datalong2
         } sendAIEvent;
 
+        struct                                              // SCRIPT_COMMAND_SET_FACING (36)
+        {
+            uint32 resetFacing;                             // datalong
+            uint32 empty;                                   // datalong2
+        } setFacing;
+
+        struct                                              // SCRIPT_COMMAND_MOVE_DYNAMIC (37)
+        {
+            uint32 maxDist;                                 // datalong
+            uint32 minDist;                                 // datalong2
+        } moveDynamic;
+
+        struct                                              // SCRIPT_COMMAND_SEND_MAIL (38)
+        {
+            uint32 mailTemplateId;                          // datalong
+            uint32 altSender;                               // datalong2;
+        } sendMail;
+
         struct
         {
             uint32 data[2];
@@ -394,6 +425,8 @@ struct ScriptInfo
             case SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL:
             case SCRIPT_COMMAND_TERMINATE_SCRIPT:
             case SCRIPT_COMMAND_TERMINATE_COND:
+            case SCRIPT_COMMAND_SET_FACING:
+            case SCRIPT_COMMAND_MOVE_DYNAMIC:
                 return true;
             default:
                 return false;
@@ -438,6 +471,7 @@ class ScriptAction
         bool LogIfNotCreature(WorldObject* pWorldObject);
         bool LogIfNotUnit(WorldObject* pWorldObject);
         bool LogIfNotGameObject(WorldObject* pWorldObject);
+        bool LogIfNotPlayer(WorldObject* pWorldObject);
         Player* GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldObject* pTarget);
 };
 
@@ -594,5 +628,7 @@ MANGOS_DLL_SPEC uint32 GetEventIdScriptId(uint32 eventId);
 MANGOS_DLL_SPEC uint32 GetScriptId(const char* name);
 MANGOS_DLL_SPEC char const* GetScriptName(uint32 id);
 MANGOS_DLL_SPEC uint32 GetScriptIdsCount();
+MANGOS_DLL_SPEC void SetExternalWaypointTable(char const* tableName);
+MANGOS_DLL_SPEC bool AddWaypointFromExternal(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
 
 #endif

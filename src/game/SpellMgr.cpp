@@ -125,7 +125,7 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
     if (spell)
     {
         if (Player* modOwner = spell->GetCaster()->GetSpellModOwner())
-            modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CASTING_TIME, castTime, spell);
+            modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CASTING_TIME, castTime);
 
         if (!spellInfo->HasAttribute(SPELL_ATTR_UNK4) && !spellInfo->HasAttribute(SPELL_ATTR_TRADESPELL))
             castTime = int32(castTime * spell->GetCaster()->GetFloatValue(UNIT_MOD_CAST_SPEED));
@@ -182,7 +182,7 @@ uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType d
                         if (GetSpellDuration(spellProto))
                             overTime = GetSpellDuration(spellProto);
                         break;
-                        // Penalty for additional effects
+                    // Penalty for additional effects
                     case SPELL_AURA_DUMMY:
                         ++effects;
                         break;
@@ -403,12 +403,12 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
                 {
                     switch (spellInfo->EffectApplyAuraName[i])
                     {
-                            // Food
+                        // Food
                         case SPELL_AURA_MOD_REGEN:
                         case SPELL_AURA_OBS_MOD_HEALTH:
                             food = true;
                             break;
-                            // Drink
+                        // Drink
                         case SPELL_AURA_MOD_POWER_REGEN:
                         case SPELL_AURA_OBS_MOD_MANA:
                             drink = true;
@@ -619,7 +619,7 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB)
 {
     switch (targetA)
     {
-            // non-positive targets
+        // non-positive targets
         case TARGET_CHAIN_DAMAGE:
         case TARGET_ALL_ENEMY_IN_AREA:
         case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
@@ -629,7 +629,7 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB)
         case TARGET_SINGLE_ENEMY:
         case TARGET_IN_FRONT_OF_CASTER_30:
             return false;
-            // positive or dependent
+        // positive or dependent
         case TARGET_CASTER_COORDINATES:
             return (targetB == TARGET_ALL_PARTY || targetB == TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER);
         default:
@@ -704,6 +704,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             switch (spellproto->Id)
             {
                 case 42436:                                 // Drink!
+                case 42492:                                 // Cast Energized
                 case 46650:                                 // Open Brutallus Back Door
                 case 62488:                                 // Activate Construct
                 case 64503:                                 // Water
@@ -712,7 +713,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     break;
             }
             break;
-            // always positive effects (check before target checks that provided non-positive result in some case for positive effects)
+        // always positive effects (check before target checks that provided non-positive result in some case for positive effects)
         case SPELL_EFFECT_HEAL:
         case SPELL_EFFECT_LEARN_SPELL:
         case SPELL_EFFECT_SKILL_STEP:
@@ -723,7 +724,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
         case SPELL_EFFECT_KILL_CREDIT_GROUP:
             return true;
 
-            // non-positive aura use
+        // non-positive aura use
         case SPELL_EFFECT_APPLY_AURA:
         case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
         {
@@ -744,7 +745,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                         case 44689:                         // Relay Race Accept Hidden Debuff - DND
                         case 58600:                         // Restricted Flight Area
                             return false;
-                            // some spells have unclear target modes for selection, so just make effect positive
+                        // some spells have unclear target modes for selection, so just make effect positive
                         case 27184:
                         case 27190:
                         case 27191:
@@ -769,6 +770,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                         return false;
                     break;
                 case SPELL_AURA_MOD_DAMAGE_TAKEN:           // dependent from bas point sign (positive -> negative)
+                case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
                     if (spellproto->CalculateSimpleValue(effIndex) < 0)
                         return true;
                     // let check by target modes (for Amplify Magic cases/etc)
@@ -1596,7 +1598,7 @@ void SpellMgr::LoadSpellBonuses()
                     break;
                 }
             }
-            direct_calc = CalculateDefaultCoefficient(spell, SPELL_DIRECT_DAMAGE) * (isHeal ? 1.88f : 1.0f);
+            direct_calc = CalculateDefaultCoefficient(spell, SPELL_DIRECT_DAMAGE) * (isHeal ? SCALE_SPELLPOWER_HEALING : 1.0f);
             direct_diff = std::abs(sbe.direct_damage - direct_calc);
         }
 
@@ -1615,7 +1617,7 @@ void SpellMgr::LoadSpellBonuses()
                     break;
                 }
             }
-            dot_calc = CalculateDefaultCoefficient(spell, DOT) * (isHeal ? 1.88f : 1.0f);
+            dot_calc = CalculateDefaultCoefficient(spell, DOT) * (isHeal ? SCALE_SPELLPOWER_HEALING : 1.0f);
             dot_diff = std::abs(sbe.dot_damage - dot_calc);
         }
 
@@ -3726,7 +3728,7 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
             case SPELL_EFFECT_NONE:
                 continue;
 
-                // craft spell for crafting nonexistent item (break client recipes list show)
+            // craft spell for crafting nonexistent item (break client recipes list show)
             case SPELL_EFFECT_CREATE_ITEM:
             case SPELL_EFFECT_CREATE_ITEM_2:
             {
@@ -3889,40 +3891,40 @@ void SpellMgr::LoadSpellAreas()
             continue;
         }
         else if (!spellArea.conditionId)
-    {
-        if (spellArea.questStart && !sObjectMgr.GetQuestTemplate(spellArea.questStart))
         {
-            sLog.outErrorDb("Spell %u listed in `spell_area` have wrong start quest (%u) requirement", spell, spellArea.questStart);
-            continue;
-        }
-
-        if (spellArea.questEnd)
-        {
-            if (!sObjectMgr.GetQuestTemplate(spellArea.questEnd))
+            if (spellArea.questStart && !sObjectMgr.GetQuestTemplate(spellArea.questStart))
             {
-                sLog.outErrorDb("Spell %u listed in `spell_area` have wrong end quest (%u) requirement", spell, spellArea.questEnd);
+                sLog.outErrorDb("Spell %u listed in `spell_area` have wrong start quest (%u) requirement", spell, spellArea.questStart);
                 continue;
             }
 
-            if (spellArea.questEnd == spellArea.questStart && !spellArea.questStartCanActive)
+            if (spellArea.questEnd)
             {
-                sLog.outErrorDb("Spell %u listed in `spell_area` have quest (%u) requirement for start and end in same time", spell, spellArea.questEnd);
+                if (!sObjectMgr.GetQuestTemplate(spellArea.questEnd))
+                {
+                    sLog.outErrorDb("Spell %u listed in `spell_area` have wrong end quest (%u) requirement", spell, spellArea.questEnd);
+                    continue;
+                }
+
+                if (spellArea.questEnd == spellArea.questStart && !spellArea.questStartCanActive)
+                {
+                    sLog.outErrorDb("Spell %u listed in `spell_area` have quest (%u) requirement for start and end in same time", spell, spellArea.questEnd);
+                    continue;
+                }
+            }
+
+            if (spellArea.raceMask && (spellArea.raceMask & RACEMASK_ALL_PLAYABLE) == 0)
+            {
+                sLog.outErrorDb("Spell %u listed in `spell_area` have wrong race mask (%u) requirement", spell, spellArea.raceMask);
+                continue;
+            }
+
+            if (spellArea.gender != GENDER_NONE && spellArea.gender != GENDER_FEMALE && spellArea.gender != GENDER_MALE)
+            {
+                sLog.outErrorDb("Spell %u listed in `spell_area` have wrong gender (%u) requirement", spell, spellArea.gender);
                 continue;
             }
         }
-
-        if (spellArea.raceMask && (spellArea.raceMask & RACEMASK_ALL_PLAYABLE) == 0)
-        {
-            sLog.outErrorDb("Spell %u listed in `spell_area` have wrong race mask (%u) requirement", spell, spellArea.raceMask);
-            continue;
-        }
-
-        if (spellArea.gender != GENDER_NONE && spellArea.gender != GENDER_FEMALE && spellArea.gender != GENDER_MALE)
-        {
-            sLog.outErrorDb("Spell %u listed in `spell_area` have wrong gender (%u) requirement", spell, spellArea.gender);
-            continue;
-        }
-   }
 
         if (spellArea.auraSpell)
         {
@@ -4077,7 +4079,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spell
 
     switch (spellInfo->Id)
     {
-            // a trinket in alterac valley allows to teleport to the boss
+        // a trinket in alterac valley allows to teleport to the boss
         case 22564:                                         // recall
         case 22563:                                         // recall
         {
@@ -4655,35 +4657,35 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
             return false;
     }
     else                                                    // This block will be removed
- {
-    if (gender != GENDER_NONE)
     {
-        // not in expected gender
-        if (!player || gender != player->getGender())
-            return false;
-    }
+        if (gender != GENDER_NONE)
+        {
+            // not in expected gender
+            if (!player || gender != player->getGender())
+                return false;
+        }
 
-    if (raceMask)
-    {
-        // not in expected race
-        if (!player || !(raceMask & player->getRaceMask()))
-            return false;
-    }
+        if (raceMask)
+        {
+            // not in expected race
+            if (!player || !(raceMask & player->getRaceMask()))
+                return false;
+        }
 
-    if (questStart)
-    {
-        // not in expected required quest state
-        if (!player || (!questStartCanActive || !player->IsActiveQuest(questStart)) && !player->GetQuestRewardStatus(questStart))
-            return false;
-    }
+        if (questStart)
+        {
+            // not in expected required quest state
+            if (!player || (!questStartCanActive || !player->IsActiveQuest(questStart)) && !player->GetQuestRewardStatus(questStart))
+                return false;
+        }
 
-    if (questEnd)
-    {
-        // not in expected forbidden quest state
-        if (!player || player->GetQuestRewardStatus(questEnd))
-            return false;
+        if (questEnd)
+        {
+            // not in expected forbidden quest state
+            if (!player || player->GetQuestRewardStatus(questEnd))
+                return false;
+        }
     }
- }
 
     if (areaId)
     {

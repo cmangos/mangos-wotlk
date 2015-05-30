@@ -1891,7 +1891,7 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
         return;
 
     PetSpellMap::iterator itr = m_spells.find(spellid);
-    PetSpell &petSpell = itr->second;
+    PetSpell& petSpell = itr->second;
 
     uint32 i;
 
@@ -1938,8 +1938,8 @@ bool Pet::IsPermanentPetFor(Player* owner)
         case SUMMON_PET:
             switch (owner->getClass())
             {
-                    // oddly enough, Mage's Water Elemental is still treated as temporary pet with Glyph of Eternal Water
-                    // i.e. does not unsummon at mounting, gets dismissed at teleport etc.
+                // oddly enough, Mage's Water Elemental is still treated as temporary pet with Glyph of Eternal Water
+                // i.e. does not unsummon at mounting, gets dismissed at teleport etc.
                 case CLASS_WARLOCK:
                     return GetCreatureInfo()->CreatureType == CREATURE_TYPE_DEMON;
                 case CLASS_DEATH_KNIGHT:
@@ -2027,18 +2027,15 @@ void Pet::CastOwnerTalentAuras()
     if (!GetOwner() || GetOwner()->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    Player* pOwner = static_cast<Player *>(GetOwner());
+    Player* pOwner = static_cast<Player*>(GetOwner());
 
     // Handle Ferocious Inspiration Talent
     if (pOwner && pOwner->getClass() == CLASS_HUNTER)
     {
         // clear any existing Ferocious Inspiration auras
-        if (HasAura(75593))
-            RemoveAurasDueToSpell(75593);
-        if (HasAura(75446))
-            RemoveAurasDueToSpell(75446);
-        if (HasAura(75447))
-            RemoveAurasDueToSpell(75447);
+        RemoveAurasDueToSpell(75593);
+        RemoveAurasDueToSpell(75446);
+        RemoveAurasDueToSpell(75447);
 
         if (isAlive())
         {
@@ -2101,11 +2098,11 @@ void Pet::SynchronizeLevelWithOwner()
 
     switch (getPetType())
     {
-            // always same level
+        // always same level
         case SUMMON_PET:
             GivePetLevel(owner->getLevel());
             break;
-            // can't be greater owner level
+        // can't be greater owner level
         case HUNTER_PET:
             if (getLevel() > owner->getLevel())
                 GivePetLevel(owner->getLevel());

@@ -313,7 +313,7 @@ bool Guild::CheckGuildStructure()
     // Allow only 1 guildmaster, set other to officer
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        MemberSlot &member = itr->second;
+        MemberSlot& member = itr->second;
         if (member.RankId == GR_GUILDMASTER && m_LeaderGuid != member.guid)
             member.ChangeRank(GR_OFFICER);
     }
@@ -1332,7 +1332,7 @@ uint32 Guild::GetMemberSlotWithdrawRem(uint32 LowGuid, uint8 TabId)
     if (itr == members.end())
         return 0;
 
-    MemberSlot &member = itr->second;
+    MemberSlot& member = itr->second;
     if (member.RankId == GR_GUILDMASTER)
         return WITHDRAW_SLOT_UNLIMITED;
 
@@ -1356,7 +1356,7 @@ uint32 Guild::GetMemberMoneyWithdrawRem(uint32 LowGuid)
     if (itr == members.end())
         return 0;
 
-    MemberSlot &member = itr->second;
+    MemberSlot& member = itr->second;
     if (member.RankId == GR_GUILDMASTER)
         return WITHDRAW_MONEY_UNLIMITED;
 
@@ -1384,7 +1384,7 @@ void Guild::SetBankMoneyPerDay(uint32 rankId, uint32 money)
 
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        MemberSlot &member = itr->second;
+        MemberSlot& member = itr->second;
         if (member.RankId == rankId)
             member.BankResetTimeMoney = 0;
     }
@@ -1415,7 +1415,7 @@ void Guild::SetBankRightsAndSlots(uint32 rankId, uint8 TabId, uint32 right, uint
     {
         for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
         {
-            MemberSlot &member = itr->second;
+            MemberSlot& member = itr->second;
             if (member.RankId == rankId)
                 for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
                     member.BankResetTimeTab[i] = 0;

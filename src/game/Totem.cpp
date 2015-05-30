@@ -192,7 +192,7 @@ bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex 
     switch (spellInfo->Effect[index])
     {
         case SPELL_EFFECT_ATTACK_ME:
-            // immune to any type of regeneration effects hp/mana etc.
+        // immune to any type of regeneration effects hp/mana etc.
         case SPELL_EFFECT_HEAL:
         case SPELL_EFFECT_HEAL_MAX_HEALTH:
         case SPELL_EFFECT_HEAL_MECHANICAL:

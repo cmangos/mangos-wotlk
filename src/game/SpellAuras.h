@@ -67,7 +67,6 @@ class Unit;
 struct SpellEntry;
 struct ProcTriggerSpell;
 
-// forward decl
 class Aura;
 
 // internal helper

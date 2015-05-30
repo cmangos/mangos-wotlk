@@ -96,7 +96,7 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
     {
         uint32 events_count = 0;
 
-        const CreatureEventAI_Event_Vec &creatureEvent = creatureEventsItr->second;
+        const CreatureEventAI_Event_Vec& creatureEvent = creatureEventsItr->second;
         for (CreatureEventAI_Event_Vec::const_iterator i = creatureEvent.begin(); i != creatureEvent.end(); ++i)
         {
             // Debug check
@@ -169,6 +169,7 @@ inline bool IsTimerBasedEvent(EventAI_Type type)
         case EVENT_T_TARGET_HP:
         case EVENT_T_TARGET_CASTING:
         case EVENT_T_FRIENDLY_HP:
+        case EVENT_T_FRIENDLY_IS_CC:
         case EVENT_T_AURA:
         case EVENT_T_TARGET_AURA:
         case EVENT_T_MISSING_AURA:
@@ -339,6 +340,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
             // We don't really care about the whole list, just return first available
             pActionInvoker = *(pList.begin());
 
+            LOG_PROCESS_EVENT;
             // Repeat Timers
             pHolder.UpdateRepeatTimer(m_creature, event.friendly_is_cc.repeatMin, event.friendly_is_cc.repeatMax);
             break;
@@ -1052,18 +1054,18 @@ void CreatureEventAI::Reset()
         CreatureEventAI_Event const& event = i->Event;
         switch (event.event_type)
         {
-                // Reset all out of combat timers
+            // Reset all out of combat timers
             case EVENT_T_TIMER_OOC:
             {
                 if (i->UpdateRepeatTimer(m_creature, event.timer.initialMin, event.timer.initialMax))
                     i->Enabled = true;
                 break;
             }
-            // default:
-            // TODO: enable below code line / verify this is correct to enable events previously disabled (ex. aggro yell), instead of enable this in void Aggro()
-            //i->Enabled = true;
-            //i->Time = 0;
-            // break;
+                // default:
+                // TODO: enable below code line / verify this is correct to enable events previously disabled (ex. aggro yell), instead of enable this in void Aggro()
+                //i->Enabled = true;
+                //i->Time = 0;
+                // break;
         }
     }
 }
@@ -1186,12 +1188,12 @@ void CreatureEventAI::EnterCombat(Unit* enemy)
                 i->Enabled = true;
                 ProcessEvent(*i, enemy);
                 break;
-                // Reset all in combat timers
+            // Reset all in combat timers
             case EVENT_T_TIMER_IN_COMBAT:
                 if (i->UpdateRepeatTimer(m_creature, event.timer.initialMin, event.timer.initialMax))
                     i->Enabled = true;
                 break;
-                // All normal events need to be re-enabled and their time set to 0
+            // All normal events need to be re-enabled and their time set to 0
             default:
                 i->Enabled = true;
                 i->Time = 0;
@@ -1235,7 +1237,7 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
 
                 // if friendly event && who is not hostile OR hostile event && who is hostile
                 if ((itr->Event.ooc_los.noHostile && !m_creature->IsHostileTo(who)) ||
-                    ((!itr->Event.ooc_los.noHostile) && m_creature->IsHostileTo(who)))
+                        ((!itr->Event.ooc_los.noHostile) && m_creature->IsHostileTo(who)))
                 {
                     // if range is ok and we are actually in LOS
                     if (m_creature->IsWithinDistInMap(who, fMaxAllowedRange) && m_creature->IsWithinLOSInMap(who))
@@ -1457,7 +1459,7 @@ void CreatureEventAI::ReceiveEmote(Player* pPlayer, uint32 text_emote)
         if (itr->Event.event_type == EVENT_T_RECEIVE_EMOTE)
         {
             if (itr->Event.receive_emote.emoteId != text_emote)
-                return;
+                continue;
 
             PlayerCondition pcon(0, itr->Event.receive_emote.condition, itr->Event.receive_emote.conditionValue1, itr->Event.receive_emote.conditionValue2);
             if (pcon.Meets(pPlayer, m_creature->GetMap(), m_creature, CONDITION_FROM_EVENTAI))

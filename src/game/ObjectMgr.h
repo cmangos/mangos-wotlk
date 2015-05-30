@@ -320,19 +320,6 @@ struct QuestPOI
 typedef std::vector<QuestPOI> QuestPOIVector;
 typedef UNORDERED_MAP<uint32, QuestPOIVector> QuestPOIMap;
 
-#define WEATHER_SEASONS 4
-struct WeatherSeasonChances
-{
-    uint32 rainChance;
-    uint32 snowChance;
-    uint32 stormChance;
-};
-
-struct WeatherZoneChances
-{
-    WeatherSeasonChances data[WEATHER_SEASONS];
-};
-
 struct DungeonEncounter
 {
     DungeonEncounter(DungeonEncounterEntry const* _dbcEntry, EncounterCreditType _creditType, uint32 _creditEntry, uint32 _lastEncounterDungeon)
@@ -524,7 +511,6 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, PointOfInterest> PointOfInterestMap;
 
-        typedef UNORDERED_MAP<uint32, WeatherZoneChances> WeatherZoneMap;
 
         void LoadGameobjectInfo();
         void AddGameobjectInfo(GameObjectInfo* goinfo);
@@ -745,7 +731,6 @@ class ObjectMgr
         void LoadSpellTemplate();
         void LoadCreatureTemplateSpells();
 
-        void LoadWeatherZoneChances();
         void LoadGameTele();
 
         void LoadNpcGossips();
@@ -810,15 +795,6 @@ class ObjectMgr
                     return &*set_itr;
 
             return NULL;
-        }
-
-        WeatherZoneChances const* GetWeatherChances(uint32 zone_id) const
-        {
-            WeatherZoneMap::const_iterator itr = mWeatherZoneMap.find(zone_id);
-            if (itr != mWeatherZoneMap.end())
-                return &itr->second;
-            else
-                return NULL;
         }
 
         CreatureDataPair const* GetCreatureDataPair(uint32 guid) const
@@ -978,7 +954,7 @@ class ObjectMgr
         static PetNameInvalidReason CheckPetName(const std::string& name);
         static bool IsValidCharterName(const std::string& name);
 
-        static bool CheckDeclinedNames(const std::wstring &mainpart, DeclinedName const& names);
+        static bool CheckDeclinedNames(const std::wstring& mainpart, DeclinedName const& names);
 
         int GetIndexForLocale(LocaleConstant loc);
         LocaleConstant GetLocaleForIndex(int i);
@@ -1184,8 +1160,6 @@ class ObjectMgr
         PointOfInterestMap  mPointsOfInterest;
 
         QuestPOIMap         mQuestPOIMap;
-
-        WeatherZoneMap      mWeatherZoneMap;
 
         // character reserved names
         typedef std::set<std::wstring> ReservedNamesMap;

@@ -149,7 +149,7 @@ class MANGOS_DLL_SPEC ObjectGuid
             switch (high)
             {
                 case HIGHGUID_ITEM:         return TYPEID_ITEM;
-                    // case HIGHGUID_CONTAINER:    return TYPEID_CONTAINER; HIGHGUID_CONTAINER==HIGHGUID_ITEM currently
+                // case HIGHGUID_CONTAINER:    return TYPEID_CONTAINER; HIGHGUID_CONTAINER==HIGHGUID_ITEM currently
                 case HIGHGUID_UNIT:         return TYPEID_UNIT;
                 case HIGHGUID_PET:          return TYPEID_UNIT;
                 case HIGHGUID_PLAYER:       return TYPEID_PLAYER;
@@ -158,7 +158,7 @@ class MANGOS_DLL_SPEC ObjectGuid
                 case HIGHGUID_CORPSE:       return TYPEID_CORPSE;
                 case HIGHGUID_MO_TRANSPORT: return TYPEID_GAMEOBJECT;
                 case HIGHGUID_VEHICLE:      return TYPEID_UNIT;
-                    // unknown
+                // unknown
                 case HIGHGUID_INSTANCE:
                 case HIGHGUID_GROUP:
                 default:                    return TYPEID_OBJECT;
