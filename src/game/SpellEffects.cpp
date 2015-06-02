@@ -3878,6 +3878,27 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, true);
                 return;
             }
+            // Death Grip
+            else if (m_spellInfo->Id == 49576)
+            {
+                if (!unitTarget)
+                    return;
+
+                m_caster->CastSpell(unitTarget, 49560, true);
+                return;
+            }
+            // Death Grip
+            else if (m_spellInfo->Id == 49560)
+            {
+                if (!unitTarget || unitTarget == m_caster)
+                    return;
+
+                uint32 spellId = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
+                float dest_x, dest_y;
+                m_caster->GetNearPoint2D(dest_x, dest_y, m_caster->GetObjectBoundingRadius() + unitTarget->GetObjectBoundingRadius(), m_caster->GetOrientation());
+                unitTarget->CastSpell(dest_x, dest_y, m_caster->GetPositionZ() + 0.5f, spellId, true, NULL, NULL, m_caster->GetObjectGuid(), m_spellInfo);
+                return;
+            }
             // Obliterate
             else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0002000000000000))
             {
@@ -4246,7 +4267,11 @@ void Spell::EffectJump(SpellEffectIndex eff_idx)
         return;
     }
 
-    m_caster->NearTeleportTo(x, y, z, o, true);             // TODO Implement this as jump movement?
+    // Try to normalize Z coord because GetContactPoint do nothing with Z axis
+    m_caster->UpdateAllowedPositionZ(x, y, z);
+
+    float speed = m_spellInfo->speed ? m_spellInfo->speed : 27.0f;
+    m_caster->GetMotionMaster()->MoveJump(x, y, z, speed, 2.5f);
 }
 
 void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target settings for this effect!
@@ -10866,11 +10891,18 @@ void Spell::EffectPlayerPull(SpellEffectIndex eff_idx)
     if (!unitTarget)
         return;
 
-    float dist = unitTarget->GetDistance2d(m_caster);
-    if (damage && dist > damage)
-        dist = float(damage);
+    float x, y, z;
+    m_caster->GetPosition(x, y, z);
 
-    unitTarget->KnockBackFrom(m_caster, -dist, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10);
+    // move back a bit
+    x = x - (0.6 * cos(m_caster->GetOrientation() + M_PI_F));
+    y = y - (0.6 * sin(m_caster->GetOrientation() + M_PI_F));
+
+    // Try to normalize Z coord because GetContactPoint do nothing with Z axis
+    unitTarget->UpdateAllowedPositionZ(x, y, z);
+
+    float speed = m_spellInfo->speed ? m_spellInfo->speed : 27.0f;
+    unitTarget->GetMotionMaster()->MoveJump(x, y, z, speed, 2.5f);
 }
 
 void Spell::EffectDispelMechanic(SpellEffectIndex eff_idx)
