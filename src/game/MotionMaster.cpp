@@ -529,6 +529,16 @@ void MotionMaster::MoveJump(float x, float y, float z, float horizontalSpeed, fl
     Mutate(new EffectMovementGenerator(id));
 }
 
+void MotionMaster::MoveDestination(float x, float y, float z, float o, float horizontalSpeed, float max_height, Unit* target)
+{
+    Movement::MoveSplineInit init(*m_owner);
+    init.MoveTo(x, y, z);
+    init.SetParabolic(max_height, 0);
+    init.SetVelocity(horizontalSpeed);
+    target ? init.SetFacing(target) : init.SetFacing(o);
+    init.Launch();
+}
+
 void MotionMaster::MoveFall()
 {
     // use larger distance for vmap height search than in most other cases
