@@ -378,7 +378,7 @@ void MotionMaster::MoveWaypoint(int32 id /*=0*/, uint32 source /*=0==PATH_NO_PAT
     {
         if (GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
         {
-            sLog.outError("Creature %s (Entry %u) attempt to MoveWaypoint() but creature is already using waypoint", m_owner->GetGuidStr().c_str(), m_owner->GetEntry());
+            sLog.outError("%s attempt to MoveWaypoint() but is already using waypoint", m_owner->GetGuidStr().c_str());
             return;
         }
 
@@ -527,6 +527,16 @@ void MotionMaster::MoveJump(float x, float y, float z, float horizontalSpeed, fl
     init.SetVelocity(horizontalSpeed);
     init.Launch();
     Mutate(new EffectMovementGenerator(id));
+}
+
+void MotionMaster::MoveDestination(float x, float y, float z, float o, float horizontalSpeed, float max_height, Unit* target)
+{
+    Movement::MoveSplineInit init(*m_owner);
+    init.MoveTo(x, y, z);
+    init.SetParabolic(max_height, 0);
+    init.SetVelocity(horizontalSpeed);
+    target ? init.SetFacing(target) : init.SetFacing(o);
+    init.Launch();
 }
 
 void MotionMaster::MoveFall()

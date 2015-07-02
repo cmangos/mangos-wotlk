@@ -65,7 +65,7 @@ bool WorldSession::CheckMailBox(ObjectGuid guid)
         Creature* creature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
         if (!creature)
         {
-            DEBUG_LOG("Creature %s not found or %s can't interact with him.", guid.GetString().c_str(), GetPlayer()->GetGuidStr().c_str());
+            DEBUG_LOG("%s not found or %s can't interact with him.", guid.GetString().c_str(), GetPlayer()->GetGuidStr().c_str());
             return false;
         }
 
