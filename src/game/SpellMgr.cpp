@@ -738,6 +738,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                         case 13139:                         // net-o-matic special effect
                         case 23445:                         // evil twin
                         case 35679:                         // Protectorate Demolitionist
+                        case 37695:                         // Stanky
                         case 38637:                         // Nether Exhaustion (red)
                         case 38638:                         // Nether Exhaustion (green)
                         case 38639:                         // Nether Exhaustion (blue)
