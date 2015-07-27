@@ -3169,6 +3169,9 @@ void Spell::cast(bool skipCheck)
             // Chaos Bane strength buff
             else if (m_spellInfo->Id == 71904)
                 AddTriggeredSpell(73422);
+            // Weak Alcohol
+            else if (m_spellInfo->SpellIconID == 1306 && m_spellInfo->SpellVisual[0] == 11359)
+                AddTriggeredSpell(51655);                   // BOTM - Create Empty Brew Bottle
             break;
         }
         case SPELLFAMILY_MAGE:
