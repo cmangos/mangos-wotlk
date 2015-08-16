@@ -690,6 +690,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
                 case 56099:                                 // Throw Ice
+                case 58533:                                 // Return to Stormwind
+                case 58552:                                 // Return to Orgrimmar
                 case 62105:                                 // To'kini's Blowgun
                 case 63745:                                 // Sara's Blessing
                 case 63747:                                 // Sara's Fervor
