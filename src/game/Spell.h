@@ -363,6 +363,7 @@ class Spell
         void EffectCancelAura(SpellEffectIndex eff_idx);
         void EffectKnockBackFromPosition(SpellEffectIndex eff_idx);
         void EffectGravityPull(SpellEffectIndex eff_idx);
+        void EffectCreateTamedPet(SpellEffectIndex eff_ifx);
 
         Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
         ~Spell();

@@ -215,7 +215,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectQuestOffer,                               //150 SPELL_EFFECT_QUEST_OFFER
     &Spell::EffectTriggerRitualOfSummoning,                 //151 SPELL_EFFECT_TRIGGER_SPELL_2
     &Spell::EffectNULL,                                     //152 SPELL_EFFECT_152                      summon Refer-a-Friend
-    &Spell::EffectNULL,                                     //153 SPELL_EFFECT_CREATE_PET               misc value is creature entry
+    &Spell::EffectCreateTamedPet,                           //153 SPELL_EFFECT_CREATE_PET               misc value is creature entry
     &Spell::EffectTeachTaxiNode,                            //154 SPELL_EFFECT_TEACH_TAXI_NODE          single spell: Teach River's Heart Taxi Path
     &Spell::EffectTitanGrip,                                //155 SPELL_EFFECT_TITAN_GRIP Allows you to equip two-handed axes, maces and swords in one hand, but you attack $49152s1% slower than normal.
     &Spell::EffectEnchantItemPrismatic,                     //156 SPELL_EFFECT_ENCHANT_ITEM_PRISMATIC
@@ -11710,4 +11710,72 @@ void Spell::EffectGravityPull(SpellEffectIndex eff_idx)
     float height = float(unitTarget->GetDistance(x, y, z) * 0.2f);
 
     unitTarget->GetMotionMaster()->MoveJump(x, y, z, speed, height);
+}
+
+void Spell::EffectCreateTamedPet(SpellEffectIndex eff_idx)
+{
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->getClass() != CLASS_HUNTER)
+        return;
+
+    uint32 creatureEntry = m_spellInfo->EffectMiscValue[eff_idx];
+
+    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creatureEntry);
+    if (creatureEntry && !cInfo)
+    {
+        sLog.outErrorDb("EffectCreateTamedPet: Creature entry %u not found for spell %u.", creatureEntry, m_spellInfo->Id);
+        return;
+    }
+
+    Pet* newTamedPet = new Pet;
+    CreatureCreatePos pos(unitTarget, unitTarget->GetOrientation());
+
+    Map* map = unitTarget->GetMap();
+    uint32 petNumber = sObjectMgr.GeneratePetNumber();
+    if (!newTamedPet->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, petNumber))
+    {
+        delete newTamedPet;
+        return;
+    }
+
+    newTamedPet->SetRespawnCoord(pos);
+    newTamedPet->setPetType(HUNTER_PET);
+
+    newTamedPet->SetOwnerGuid(unitTarget->GetObjectGuid());
+    newTamedPet->SetCreatorGuid(unitTarget->GetObjectGuid());
+    newTamedPet->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+    newTamedPet->setFaction(unitTarget->getFaction());
+    newTamedPet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL)));
+    newTamedPet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
+    newTamedPet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
+    newTamedPet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+
+    newTamedPet->GetCharmInfo()->SetPetNumber(petNumber, true);
+
+    if (unitTarget->IsPvP())
+        newTamedPet->SetPvP(true);
+
+    if (unitTarget->IsFFAPvP())
+        newTamedPet->SetFFAPvP(true);
+
+    newTamedPet->InitStatsForLevel(unitTarget->getLevel(), unitTarget);
+    newTamedPet->InitPetCreateSpells();
+    newTamedPet->InitLevelupSpellsForLevel();
+    newTamedPet->InitTalentForLevel();
+
+    newTamedPet->RemoveByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED);
+    newTamedPet->SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_ABANDONED);
+
+    newTamedPet->AIM_Initialize();
+    newTamedPet->SetHealth(newTamedPet->GetMaxHealth());
+    newTamedPet->SetPower(POWER_MANA, newTamedPet->GetMaxPower(POWER_MANA));
+
+    float x, y, z;
+    unitTarget->GetClosePoint(x, y, z, newTamedPet->GetObjectBoundingRadius());
+    newTamedPet->Relocate(x, y, z, unitTarget->GetOrientation());
+
+    map->Add((Creature*)newTamedPet);
+    m_caster->SetPet(newTamedPet);
+
+    newTamedPet->SavePetToDB(PET_SAVE_AS_CURRENT);
+    ((Player*)unitTarget)->PetSpellInitialize();
 }
