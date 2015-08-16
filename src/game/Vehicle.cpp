@@ -542,6 +542,9 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
                 {
                     ((Creature*)pVehicle)->SetWalk(true, true);
                 }
+
+                // set vehicle faction as per the controller faction
+                ((Creature*)pVehicle)->SetFactionTemporary(pPlayer->getFaction(), TEMPFACTION_NONE);
             }
         }
 
@@ -598,6 +601,10 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
 
             // must be called after movement control unapplying
             pPlayer->GetCamera().ResetView();
+
+            // reset vehicle faction
+            if (pVehicle->GetTypeId() == TYPEID_UNIT)
+                ((Creature*)pVehicle)->ClearTemporaryFaction();
         }
 
         if (seatFlags & SEAT_FLAG_CAN_CAST)
