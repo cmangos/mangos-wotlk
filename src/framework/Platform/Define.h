@@ -19,36 +19,71 @@
 #ifndef MANGOS_DEFINE_H
 #define MANGOS_DEFINE_H
 
+#include <cstdint>
+
 #include <sys/types.h>
 
-#include <ace/Basic_Types.h>
-#include <ace/Default_Constants.h>
-#include <ace/OS_NS_dlfcn.h>
-#include <ace/ACE_export.h>
-
 #include "Platform/CompilerDefs.h"
+
+#if PLATFORM == PLATFORM_WINDOWS
+#  define WIN32_LEAN_AND_MEAN
+#  include <Windows.h>
+#  if !defined (_WIN32_WINNT)
+#    define _WIN32_WINNT 0x0501
+#  endif
+#endif
+
+#include <boost/cstdint.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/detail/endian.hpp>
 
 #define MANGOS_LITTLEENDIAN 0
 #define MANGOS_BIGENDIAN    1
 
 #if !defined(MANGOS_ENDIAN)
-#  if defined (ACE_BIG_ENDIAN)
+#  if defined (BOOST_BIG_ENDIAN)
 #    define MANGOS_ENDIAN MANGOS_BIGENDIAN
-#  else // ACE_BYTE_ORDER != ACE_BIG_ENDIAN
+#  elif defined (BOOST_LITTLE_ENDIAN)
 #    define MANGOS_ENDIAN MANGOS_LITTLEENDIAN
-#  endif // ACE_BYTE_ORDER
+#  else
+#    error "Unsuported endianess"
+#  endif
 #endif // MANGOS_ENDIAN
 
-typedef ACE_SHLIB_HANDLE MANGOS_LIBRARY_HANDLE;
-
 #define MANGOS_SCRIPT_NAME "mangosscript"
-#define MANGOS_SCRIPT_SUFFIX ACE_DLL_SUFFIX
-#define MANGOS_SCRIPT_PREFIX ACE_DLL_PREFIX
-#define MANGOS_LOAD_LIBRARY(libname)    ACE_OS::dlopen(libname)
-#define MANGOS_CLOSE_LIBRARY(hlib)      ACE_OS::dlclose(hlib)
-#define MANGOS_GET_PROC_ADDR(hlib,name) ACE_OS::dlsym(hlib,name)
+#if PLATFORM == PLATFORM_WINDOWS
+   typedef HMODULE MANGOS_LIBRARY_HANDLE;
+#  define MANGOS_LOAD_LIBRARY(libname)     LoadLibraryA(libname)
+#  define MANGOS_CLOSE_LIBRARY(hlib)       FreeLibrary(hlib)
+#  define MANGOS_GET_PROC_ADDR(hlib, name) GetProcAddress(hlib, name)
+#  define MANGOS_SCRIPT_SUFFIX ".dll"
+#  define MANGOS_SCRIPT_PREFIX ""
+#  pragma comment(lib, "kernel32.lib")
+#else
+#  include <dlfcn.h>
+   typedef void* MANGOS_LIBRARY_HANDLE;
+#  define MANGOS_LOAD_LIBRARY(libname)     dlopen(libname, RTLD_LAZY)
+#  define MANGOS_CLOSE_LIBRARY(hlib)       dlclose(hlib)
+#  define MANGOS_GET_PROC_ADDR(hlib, name) dlsym(hlib, name)
+#  define MANGOS_SCRIPT_PREFIX "lib"
+#  if PLATFORM == PLATFORM_APPLE
+#    define MANGOS_SCRIPT_SUFFIX ".dylib"
+#  else
+#    define MANGOS_SCRIPT_SUFFIX ".so"
+#  endif // if platform apple
+#endif // if platform windows
 
-#define MANGOS_PATH_MAX PATH_MAX                            // ace/os_include/os_limits.h -> ace/Basic_Types.h
+// part of old ace lib.
+#if !defined (PATH_MAX)
+#  if defined (_MAX_PATH)
+#    define PATH_MAX _MAX_PATH
+#  elif defined (MAX_PATH)
+#    define PATH_MAX MAX_PATH
+#  else /* !_MAX_PATH */
+#    define PATH_MAX 1024
+#  endif /* _MAX_PATH */
+#endif /* !PATH_MAX */
+#define MANGOS_PATH_MAX PATH_MAX
 
 #if PLATFORM == PLATFORM_WINDOWS
 #  define MANGOS_EXPORT __declspec(dllexport)
@@ -91,33 +126,28 @@ typedef ACE_SHLIB_HANDLE MANGOS_LIBRARY_HANDLE;
 #  define ATTR_PRINTF(F,V)
 #endif // COMPILER == COMPILER_GNU
 
-typedef ACE_INT64 int64;
-typedef ACE_INT32 int32;
-typedef ACE_INT16 int16;
-typedef ACE_INT8 int8;
-typedef ACE_UINT64 uint64;
-typedef ACE_UINT32 uint32;
-typedef ACE_UINT16 uint16;
-typedef ACE_UINT8 uint8;
+typedef std::int64_t int64;
+typedef std::int32_t int32;
+typedef std::int16_t int16;
+typedef std::int8_t int8;
+typedef std::uint64_t uint64;
+typedef std::uint32_t uint32;
+typedef std::uint16_t uint16;
+typedef std::uint8_t uint8;
 
 #if COMPILER != COMPILER_MICROSOFT
 typedef uint16      WORD;
 typedef uint32      DWORD;
 #endif // COMPILER
 
-#define CONCAT(x, y) CONCAT1(x, y)
-#define CONCAT1(x, y) x##y
-#define STATIC_ASSERT_WORKAROUND(expr, msg) typedef char CONCAT(static_assert_failed_at_line_, __LINE__) [(expr) ? 1 : -1]
-
 #if COMPILER == COMPILER_GNU
 #  if !defined(__GXX_EXPERIMENTAL_CXX0X__) || (__GNUC__ < 4) || (__GNUC__ == 4) && (__GNUC_MINOR__ < 7)
 #    define override
-#    define static_assert(a, b) STATIC_ASSERT_WORKAROUND(a, b)
 #  endif
-#elif COMPILER == COMPILER_MICROSOFT
-#  if _MSC_VER < 1600
-#    define static_assert(a, b) STATIC_ASSERT_WORKAROUND(a, b)
-#  endif
+#endif
+
+#ifdef BOOST_NO_CXX11_STATIC_ASSERT
+#  define static_assert(a, b) BOOST_STATIC_ASSERT_MSG((a), b)
 #endif
 
 typedef uint64 OBJECT_HANDLE;

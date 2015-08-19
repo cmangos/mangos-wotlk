@@ -16,68 +16,37 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/** \addtogroup u2w User to World Communication
- *  @{
- *  \file WorldSocketMgr.h
- *  \author Derex <derex101@gmail.com>
- */
+#ifndef WORLD_SOCKET_MGR_H
+#define WORLD_SOCKET_MGR_H
 
-#ifndef __WORLDSOCKETMGR_H
-#define __WORLDSOCKETMGR_H
-
-#include <ace/Basic_Types.h>
-#include <ace/Singleton.h>
-#include <ace/Thread_Mutex.h>
-
+#include <mutex>
 #include <string>
+#include <cstdint>
 
-class WorldSocket;
-class ReactorRunnable;
-class ACE_Event_Handler;
+#include "Policies/Singleton.h"
+#include "Network/NetworkManager.h"
 
 /// Manages all sockets connected to peers and network threads
-class WorldSocketMgr
+class WorldSocketMgr : public NetworkManager, public MaNGOS::Singleton<WorldSocketMgr, MaNGOS::ClassLevelLockable<WorldSocketMgr, std::recursive_mutex>>
 {
-    public:
-        friend class WorldSocket;
-        friend class ACE_Singleton<WorldSocketMgr, ACE_Thread_Mutex>;
+public:
+    friend class WorldSocket;
+    friend class MaNGOS::OperatorNew<WorldSocketMgr>;
 
-        /// Start network, listen at address:port .
-        int StartNetwork(ACE_UINT16 port, std::string& address);
+    virtual bool StartNetwork(std::uint16_t port, std::string address) override;
 
-        /// Stops all network threads, It will wait for all running threads .
-        void StopNetwork();
+private:
+    WorldSocketMgr();
+    virtual ~WorldSocketMgr();
 
-        /// Wait untill all network threads have "joined" .
-        void Wait();
+    virtual bool OnSocketOpen(const SocketPtr& socket) override;
+    virtual SocketPtr CreateSocket(NetworkThread& owner) override;
 
-        std::string& GetBindAddress() { return m_addr; }
-        ACE_UINT16 GetBindPort() { return m_port; }
-
-        /// Make this class singleton .
-        static WorldSocketMgr* Instance();
-
-    private:
-        int OnSocketOpen(WorldSocket* sock);
-        int StartReactiveIO(ACE_UINT16 port, const char* address);
-
-        WorldSocketMgr();
-        virtual ~WorldSocketMgr();
-
-        ReactorRunnable* m_NetThreads;
-        size_t m_NetThreadsCount;
-
-        int m_SockOutKBuff;
-        int m_SockOutUBuff;
-        bool m_UseNoDelay;
-
-        std::string m_addr;
-        ACE_UINT16 m_port;
-
-        ACE_Event_Handler* m_Acceptor;
+    int     m_SockOutKBuff;
+    int     m_SockOutUBuff;
+    bool    m_UseNoDelay;
 };
 
 #define sWorldSocketMgr WorldSocketMgr::Instance()
 
-#endif
-/// @}
+#endif // WORLD_SOCKET_MGR_H

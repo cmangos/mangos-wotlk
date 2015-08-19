@@ -22,8 +22,6 @@
 #include "Common.h"
 #include "Platform/Define.h"
 #include "Policies/ThreadingModel.h"
-#include "ace/RW_Thread_Mutex.h"
-#include "ace/Thread_Mutex.h"
 
 #include "DBCStructure.h"
 #include "GridDefines.h"
@@ -198,7 +196,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         bool IsBattleGroundOrArena() const { return i_mapEntry && i_mapEntry->IsBattleGroundOrArena(); }
         bool IsContinent() const { return i_mapEntry && i_mapEntry->IsContinent(); }
 
-        // can't be NULL for loaded map
+        // can't be nullptr for loaded map
         MapPersistentState* GetPersistentState() const { return m_persistentState; }
 
         void AddObjectToRemoveList(WorldObject* obj);
@@ -322,7 +320,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         bool loaded(const GridPair&) const;
         void EnsureGridCreated(const GridPair&);
         bool EnsureGridLoaded(Cell const&);
-        void EnsureGridLoadedAtEnter(Cell const&, Player* player = NULL);
+        void EnsureGridLoadedAtEnter(Cell const&, Player* player = nullptr);
 
         void buildNGridLinkage(NGridType* pNGridType) { pNGridType->link(this); }
 
@@ -412,7 +410,7 @@ class MANGOS_DLL_SPEC WorldMap : public Map
         WorldMap(uint32 id, time_t expiry) : Map(id, expiry, 0, REGULAR_DIFFICULTY) {}
         ~WorldMap() {}
 
-        // can't be NULL for loaded map
+        // can't be nullptr for loaded map
         WorldPersistentState* GetPersistanceState() const;
 };
 
@@ -432,7 +430,7 @@ class MANGOS_DLL_SPEC DungeonMap : public Map
         void SendResetWarnings(uint32 timeLeft) const;
         void SetResetSchedule(bool on);
 
-        // can't be NULL for loaded map
+        // can't be nullptr for loaded map
         DungeonPersistentState* GetPersistanceState() const;
 
         virtual void InitVisibilityDistance() override;
@@ -460,7 +458,7 @@ class MANGOS_DLL_SPEC BattleGroundMap : public Map
         BattleGround* GetBG() { return m_bg; }
         void SetBG(BattleGround* bg) { m_bg = bg; }
 
-        // can't be NULL for loaded map
+        // can't be nullptr for loaded map
         BattleGroundPersistentState* GetPersistanceState() const;
 
     private:

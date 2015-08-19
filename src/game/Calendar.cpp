@@ -47,7 +47,7 @@ CalendarInvite* CalendarEvent::GetInviteById(uint64 inviteId)
     CalendarInviteMap::iterator itr = m_Invitee.find(inviteId);
     if (itr != m_Invitee.end())
         return itr->second;
-    return NULL;
+    return nullptr;
 }
 
 CalendarInvite* CalendarEvent::GetInviteByGuid(ObjectGuid const& guid)
@@ -60,7 +60,7 @@ CalendarInvite* CalendarEvent::GetInviteByGuid(ObjectGuid const& guid)
         ++inviteItr;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // remove invite by its iterator
@@ -111,7 +111,7 @@ bool CalendarEvent::RemoveInviteById(uint64 inviteId, Player* remover)
     {
         // check if remover is an invitee
         CalendarInvite* removerInvite = GetInviteByGuid(remover->GetObjectGuid());
-        if (removerInvite == NULL)
+        if (removerInvite == nullptr)
         {
             // remover is not invitee cheat???
             sCalendarMgr.SendCalendarCommandResult(remover, CALENDAR_ERROR_NOT_INVITED);
@@ -155,7 +155,7 @@ void CalendarEvent::RemoveAllInvite(ObjectGuid const& removerGuid)
 
     // build mail body
     std::ostringstream body;
-    body << secsToTimeBitFields(time(NULL));
+    body << secsToTimeBitFields(time(nullptr));
 
     // creating mail draft
     MailDraft draft(title.str(), body.str());
@@ -251,18 +251,18 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
 {
     Player* player = sObjectMgr.GetPlayer(guid);
     if (!player)
-        return NULL;
+        return nullptr;
 
     if (title.empty())
     {
         SendCalendarCommandResult(player, CALENDAR_ERROR_NEEDS_TITLE);
-        return NULL;
+        return nullptr;
     }
 
-    if (eventTime < time(NULL))
+    if (eventTime < time(nullptr))
     {
         SendCalendarCommandResult(player, CALENDAR_ERROR_INVALID_DATE);
-        return NULL;
+        return nullptr;
     }
 
     uint32 guildId = 0;
@@ -273,13 +273,13 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
         if (!guildId)
         {
             SendCalendarCommandResult(player, CALENDAR_ERROR_GUILD_PLAYER_NOT_IN_GUILD);
-            return NULL;
+            return nullptr;
         }
 
         if (!CanAddGuildEvent(guildId))
         {
             SendCalendarCommandResult(player, CALENDAR_ERROR_GUILD_EVENTS_EXCEEDED);
-            return NULL;
+            return nullptr;
         }
     }
     else
@@ -287,13 +287,13 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
         if (!CanAddEvent(guid))
         {
             SendCalendarCommandResult(player, CALENDAR_ERROR_EVENTS_EXCEEDED);
-            return NULL;
+            return nullptr;
         }
     }
 
     uint64 nId = GetNewEventId();
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CalendarMgr::AddEvent> ID("UI64FMTD"), '%s', Desc > '%s', type=%u, repeat=%u, maxInvites=%u, dungeonId=%d, flags=%u",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CalendarMgr::AddEvent> ID(" UI64FMTD "), '%s', Desc > '%s', type=%u, repeat=%u, maxInvites=%u, dungeonId=%d, flags=%u",
                      nId, title.c_str(), description.c_str(), type, repeatable, maxInvites, dungeonId, flags);
 
     CalendarEvent& newEvent = m_EventStore[nId];
@@ -311,7 +311,7 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
 
     CharacterDatabase.escape_string(title);
     CharacterDatabase.escape_string(description);
-    CharacterDatabase.PExecute("INSERT INTO calendar_events VALUES ("UI64FMTD", %u, %u, %u, %u, %d, %u, '%s', '%s')",
+    CharacterDatabase.PExecute("INSERT INTO calendar_events VALUES (" UI64FMTD ", %u, %u, %u, %u, %d, %u, '%s', '%s')",
                                nId,
                                guid.GetCounter(),
                                guildId,
@@ -358,7 +358,7 @@ CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& s
 {
     Player* sender = sObjectMgr.GetPlayer(senderGuid);
     if (!event || !sender)
-        return NULL;
+        return nullptr;
 
     std::string name;
     sObjectMgr.GetPlayerNameByGUID(inviteeGuid, name);
@@ -367,7 +367,7 @@ CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& s
     if (event->GetInviteByGuid(inviteeGuid))
     {
         SendCalendarCommandResult(sender, CALENDAR_ERROR_ALREADY_INVITED_TO_EVENT_S, name.c_str());
-        return NULL;
+        return nullptr;
     }
 
     // check if player can still have new invite (except for event creator)
@@ -376,7 +376,7 @@ CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& s
         if (!CanAddInviteTo(inviteeGuid))
         {
             SendCalendarCommandResult(sender, CALENDAR_ERROR_OTHER_INVITES_EXCEEDED_S, name.c_str());
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -392,20 +392,20 @@ CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& s
     {
         // no need to realy add invite for announcements
         delete invite;
-        return NULL;
+        return nullptr;
     }
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Add Invite> eventId["UI64FMTD"], senderGuid[%s], inviteGuid[%s], Status[%u], rank[%u], text[%s], time[%u]",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Add Invite> eventId[" UI64FMTD "], senderGuid[%s], inviteGuid[%s], Status[%u], rank[%u], text[%s], time[%u]",
                      event->EventId, senderGuid.GetString().c_str(), inviteeGuid.GetString().c_str(), uint32(status), uint32(rank), text.c_str(), uint32(statusTime));
 
     if (!event->AddInvite(invite))
     {
         sLog.outError("CalendarEvent::AddInvite > Fail adding invite!");
         delete invite;
-        return NULL;
+        return nullptr;
     }
 
-    CharacterDatabase.PExecute("INSERT INTO calendar_invites VALUES ("UI64FMTD", "UI64FMTD", %u, %u, %u, %u, %u)",
+    CharacterDatabase.PExecute("INSERT INTO calendar_invites VALUES (" UI64FMTD ", " UI64FMTD ", %u, %u, %u, %u, %u)",
                                invite->InviteId,
                                event->EventId,
                                inviteeGuid.GetCounter(),
@@ -442,7 +442,7 @@ uint32 CalendarMgr::GetPlayerNumPending(ObjectGuid const& guid)
     GetPlayerInvitesList(guid, inviteList);
 
     uint32 pendingNum = 0;
-    time_t currTime = time(NULL);
+    time_t currTime = time(nullptr);
     for (CalendarInvitesList::const_iterator itr = inviteList.begin(); itr != inviteList.end(); ++itr)
     {
         if (CalendarEvent const* event = (*itr)->GetCalendarEvent())
@@ -482,7 +482,7 @@ void CalendarMgr::CopyEvent(uint64 eventId, time_t newTime, ObjectGuid const& gu
         return;
 
     if (newEvent->IsGuildAnnouncement())
-        AddInvite(newEvent, guid, guid,  CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(NULL));
+        AddInvite(newEvent, guid, guid,  CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(nullptr));
     else
     {
         // copy all invitees, set new owner as the one who make the copy, set invitees status to invited
@@ -494,7 +494,7 @@ void CalendarMgr::CopyEvent(uint64 eventId, time_t newTime, ObjectGuid const& gu
             const CalendarInvite* invite = ci_itr->second;
             if (invite->InviteeGuid == guid)
             {
-                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(NULL));
+                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(nullptr));
             }
             else
             {
@@ -503,7 +503,7 @@ void CalendarMgr::CopyEvent(uint64 eventId, time_t newTime, ObjectGuid const& gu
                 if (invite->Rank == CALENDAR_RANK_MODERATOR)
                     rank = CALENDAR_RANK_MODERATOR;
 
-                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_INVITED, rank, "", time(NULL));
+                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_INVITED, rank, "", time(nullptr));
             }
             ++ci_itr;
         }
@@ -669,7 +669,7 @@ void CalendarMgr::LoadCalendarsFromDB()
             }
             while (invitesQuery->NextRow());
 
-            sLog.outString(">> Loaded "UI64FMTD" invites! %s", totalInvites, (deletedInvites != 0) ? "(deleted some invites without corresponding event!)" : "");
+            sLog.outString(">> Loaded " UI64FMTD " invites! %s", totalInvites, (deletedInvites != 0) ? "(deleted some invites without corresponding event!)" : "");
         }
         else
         {

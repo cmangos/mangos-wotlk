@@ -44,7 +44,7 @@ class GameObjectModel
         float iScale;
         VMAP::WorldModel* iModel;
 
-        GameObjectModel() : phasemask(0), iModel(NULL) {}
+        GameObjectModel() : phasemask(0), iModel(nullptr) {}
         bool initialize(const GameObject* const pGo, const GameObjectDisplayInfoEntry* info);
 
     public:

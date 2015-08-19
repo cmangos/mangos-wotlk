@@ -32,7 +32,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/shared
   ${CMAKE_SOURCE_DIR}/src/framework
   ${CMAKE_BINARY_DIR}
-  ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
 )
 
@@ -41,13 +40,9 @@ add_library(${LIBRARY_NAME} SHARED
 )
 
 add_dependencies(${LIBRARY_NAME} revision.h)
-if(NOT ACE_USE_EXTERNAL)
-  add_dependencies(${LIBRARY_NAME} ACE_Project)
-endif()
 
 target_link_libraries(${LIBRARY_NAME}
   ${ZLIB_LIBRARIES}
-  ${ACE_LIBRARIES}
 )
 
 if(WIN32)

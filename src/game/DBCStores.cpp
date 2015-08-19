@@ -230,7 +230,7 @@ static bool ReadDBCBuildFileText(const std::string& dbc_path, char const* locale
         return false;
 }
 
-static uint32 ReadDBCBuild(const std::string& dbc_path, LocaleNameStr const* localeNameStr = NULL)
+static uint32 ReadDBCBuild(const std::string& dbc_path, LocaleNameStr const* localeNameStr = nullptr)
 {
     std::string text;
 
@@ -708,25 +708,25 @@ SimpleFactionsList const* GetFactionTeamList(uint32 faction)
 {
     FactionTeamMap::const_iterator itr = sFactionTeamMap.find(faction);
     if (itr == sFactionTeamMap.end())
-        return NULL;
+        return nullptr;
     return &itr->second;
 }
 
 char const* GetPetName(uint32 petfamily, uint32 dbclang)
 {
     if (!petfamily)
-        return NULL;
+        return nullptr;
     CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(petfamily);
     if (!pet_family)
-        return NULL;
-    return pet_family->Name[dbclang] ? pet_family->Name[dbclang] : NULL;
+        return nullptr;
+    return pet_family->Name[dbclang] ? pet_family->Name[dbclang] : nullptr;
 }
 
 TalentSpellPos const* GetTalentSpellPos(uint32 spellId)
 {
     TalentSpellPosMap::const_iterator itr = sTalentSpellPosMap.find(spellId);
     if (itr == sTalentSpellPosMap.end())
-        return NULL;
+        return nullptr;
 
     return &itr->second;
 }
@@ -757,7 +757,7 @@ WMOAreaTableEntry const* GetWMOAreaTableEntryByTripple(int32 rootid, int32 adtid
 {
     WMOAreaInfoByTripple::iterator i = sWMOAreaInfoByTripple.find(WMOAreaTableTripple(rootid, adtid, groupid));
     if (i == sWMOAreaInfoByTripple.end())
-        return NULL;
+        return nullptr;
     return i->second;
 }
 
@@ -765,7 +765,7 @@ AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)
 {
     int32 areaflag = GetAreaFlagByAreaID(area_id);
     if (areaflag < 0)
-        return NULL;
+        return nullptr;
 
     return sAreaStore.LookupEntry(areaflag);
 }
@@ -778,7 +778,7 @@ AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_
     if (MapEntry const* mapEntry = sMapStore.LookupEntry(map_id))
         return GetAreaEntryByAreaID(mapEntry->linked_zone);
 
-    return NULL;
+    return nullptr;
 }
 
 uint32 GetAreaFlagByMapId(uint32 mapid)
@@ -828,7 +828,7 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
         if (ch && ch->ChannelID == channel_id)
             return ch;
     }
-    return NULL;
+    return nullptr;
 }
 
 bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId)
@@ -884,12 +884,12 @@ bool Map2ZoneCoordinates(float& x, float& y, uint32 zone)
 MapDifficultyEntry const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty)
 {
     MapDifficultyMap::const_iterator itr = sMapDifficultyMap.find(MAKE_PAIR32(mapId, difficulty));
-    return itr != sMapDifficultyMap.end() ? itr->second : NULL;
+    return itr != sMapDifficultyMap.end() ? itr->second : nullptr;
 }
 
 PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 level)
 {
-    PvPDifficultyEntry const* maxEntry = NULL;              // used for level > max listed level case
+    PvPDifficultyEntry const* maxEntry = nullptr;              // used for level > max listed level case
     for (uint32 i = 0; i < sPvPDifficultyStore.GetNumRows(); ++i)
     {
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
@@ -918,7 +918,7 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattleGroundB
             if (entry->mapId == mapid && entry->GetBracketId() == id)
                 return entry;
 
-    return NULL;
+    return nullptr;
 }
 
 uint32 const* GetTalentTabPages(uint32 cls)

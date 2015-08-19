@@ -23,7 +23,9 @@
 #include <Policies/Singleton.h>
 #include "Platform/Define.h"
 
-class ACE_Configuration_Heap;
+#include "Utilities/UnorderedMapSet.h"
+
+#include <boost/program_options.hpp>
 
 class MANGOS_DLL_SPEC Config
 {
@@ -32,20 +34,24 @@ class MANGOS_DLL_SPEC Config
         Config();
         ~Config();
 
-        bool SetSource(const char* file);
+        bool SetSource(std::string const& filename, std::string const& sectionname);
         bool Reload();
 
-        std::string GetStringDefault(const char* name, const char* def);
-        bool GetBoolDefault(const char* name, const bool def = false);
-        int32 GetIntDefault(const char* name, const int32 def);
-        float GetFloatDefault(const char* name, const float def);
+        std::string GetStringDefault(const char* name, const char* def) const;
+        bool GetBoolDefault(const char* name, bool def = false) const;
+        int32 GetIntDefault(const char* name, int32 def = 0) const;
+        float GetFloatDefault(const char* name, float def = 0.0f) const;
 
-        std::string GetFilename() const { return mFilename; }
+        std::string GetFilename() const { return m_Filename; }
 
     private:
 
-        std::string mFilename;
-        ACE_Configuration_Heap* mConf;
+        std::string const* GetValue(const char* name) const;
+
+        std::string m_Filename;
+        std::string m_SectionName;
+        typedef UNORDERED_MAP<std::string, std::string> Values;
+        Values m_values;
 };
 
 #define sConfig MaNGOS::Singleton<Config>::Instance()

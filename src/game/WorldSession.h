@@ -23,6 +23,8 @@
 #ifndef __WORLDSESSION_H
 #define __WORLDSESSION_H
 
+#include <mutex>
+
 #include "Common.h"
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
@@ -229,7 +231,7 @@ class MANGOS_DLL_SPEC WorldSession
         friend class CharacterHandler;
 
     public:
-        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale);
+        WorldSession(uint32 id, const std::shared_ptr<WorldSocket>& sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale);
         ~WorldSession();
 
         bool PlayerLoading() const { return m_playerLoading; }
@@ -308,7 +310,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendTabardVendorActivate(ObjectGuid guid);
         void SendSpiritResurrect();
         void SendBindPoint(Creature* npc);
-        void SendGMTicketGetTicket(uint32 status, GMTicket* ticket = NULL);
+        void SendGMTicketGetTicket(uint32 status, GMTicket* ticket = nullptr);
         void SendGMResponse(GMTicket* ticket);
 
         void SendAttackStop(Unit const* enemy);
@@ -407,7 +409,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendItemPageInfo(ItemPrototype* itemProto);
 
         // opcodes handlers
-        void Handle_NULL(WorldPacket& recvPacket);          // not used
+        void Handle_nullptr(WorldPacket& recvPacket);          // not used
         void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
         void Handle_ServerSide(WorldPacket& recvPacket);    // sever side only, can't be accepted from client
         void Handle_Deprecated(WorldPacket& recvPacket);    // never used anymore by client
@@ -889,7 +891,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
         Player* _player;
-        WorldSocket* m_Socket;
+        std::shared_ptr<WorldSocket> m_Socket;
         std::string m_Address;
 
         AccountTypes _security;
@@ -910,7 +912,7 @@ class MANGOS_DLL_SPEC WorldSession
         uint32 m_Tutorials[8];
         TutorialDataState m_tutorialState;
         AddonsList m_addonsList;
-        ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
+        MaNGOS::LockedQueue<WorldPacket*, std::mutex> _recvQueue;
 };
 #endif
 /// @}

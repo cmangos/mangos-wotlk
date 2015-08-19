@@ -105,6 +105,15 @@ set(LIBRARY_SRCS
     SystemConfig.h
     Threading.cpp
     Threading.h
+    Network/NetworkBuffer.cpp
+    Network/NetworkBuffer.h
+    Network/NetworkThread.cpp
+    Network/NetworkThread.h
+    Network/NetworkManager.cpp
+    Network/NetworkManager.h
+    Network/ProtocolDefinitions.h
+    Network/Socket.cpp
+    Network/Socket.h
 )
 
 
@@ -160,7 +169,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/dep/include
   ${CMAKE_SOURCE_DIR}/src/framework
   ${CMAKE_BINARY_DIR}
-  ${ACE_INCLUDE_DIR}
 )
 
 if(POSTGRESQL)
@@ -180,6 +188,3 @@ if(POSTGRESQL)
 endif()
 
 add_dependencies(${LIBRARY_NAME} revision.h)
-if(NOT ACE_USE_EXTERNAL)
-  add_dependencies(${LIBRARY_NAME} ACE_Project)
-endif()

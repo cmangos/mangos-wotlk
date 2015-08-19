@@ -55,7 +55,10 @@
 #endif
 
 #if COMPILER == COMPILER_MICROSOFT
-#  pragma warning( disable : 4267 )                         // conversion from 'size_t' to 'int', possible loss of data
+#  pragma warning( disable : 4996 )                         // 'function': was declared deprecated
+#  pragma warning( disable : 4267 )                         // 'argument' : conversion from 'type1' to 'type2', possible loss of data
 #  pragma warning( disable : 4786 )                         // identifier was truncated to '255' characters in the debug information
+#  pragma warning( disable : 4251 )                         // needs to have dll-interface to be used by clients of class
+#  pragma warning( disable : 4800 )                         // forcing value to bool 'true' or 'false'
 #endif
 #endif

@@ -23,13 +23,10 @@ set(EXECUTABLE_SRCS
     CliRunnable.h
     MaNGOSsoap.cpp
     MaNGOSsoap.h
-    Main.cpp
     Master.cpp
-    Master.h
-    RASocket.cpp
-    RASocket.h
-    WorldRunnable.cpp
-    WorldRunnable.h
+    FreezeDetector.h
+    RemoteAdministration.cpp
+    RemoteAdministration.h
     soapC.cpp
     soapH.h
     soapServer.cpp
@@ -48,7 +45,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/game
   ${CMAKE_BINARY_DIR}
   ${CMAKE_BINARY_DIR}/src/shared
-  ${ACE_INCLUDE_DIR}
   ${OPENSSL_INCLUDE_DIR}
 )
 
@@ -63,10 +59,6 @@ add_executable(${EXECUTABLE_NAME}
 )
 
 add_dependencies(${EXECUTABLE_NAME} revision.h)
-if(NOT ACE_USE_EXTERNAL)
-  add_dependencies(${EXECUTABLE_NAME} ACE_Project)
-# add_dependencies(${EXECUTABLE_NAME} ace)
-endif()
 
 target_link_libraries(${EXECUTABLE_NAME}
   game
@@ -74,7 +66,7 @@ target_link_libraries(${EXECUTABLE_NAME}
   framework
   g3dlite
   gsoap
-  ${ACE_LIBRARIES}
+  ${Boost_LIBRARIES}
 )
 
 if(WIN32)

@@ -96,7 +96,7 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
-    <Import Project="$(LocalAppData)\Microsoft\VisualStudio\10.0\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(LocalAppData)\Microsoft\VisualStudio\10.0\Microsoft.Cpp.$(Platform).user.props')" />
+    <Import Project="$(LocalAppData)\Microsoft\MSBuild\v4.0\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(LocalAppData)\Microsoft\MSBuild\v4.0\Microsoft.Cpp.$(Platform).user.props')" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -453,10 +453,15 @@
     <ClCompile Include="..\..\src\shared\Database\SqlPreparedStatement.cpp" />
     <ClCompile Include="..\..\src\shared\Database\SQLStorage.cpp" />
     <ClCompile Include="..\..\src\shared\Log.cpp" />
+    <ClCompile Include="..\..\src\shared\Network\NetworkBuffer.cpp" />
+    <ClCompile Include="..\..\src\shared\Network\NetworkManager.cpp" />
+    <ClCompile Include="..\..\src\shared\Network\NetworkThread.cpp" />
+    <ClCompile Include="..\..\src\shared\Network\Socket.cpp" />
     <ClCompile Include="..\..\src\shared\ProgressBar.cpp" />
     <ClCompile Include="..\..\src\shared\ServiceWin32.cpp" />
     <ClCompile Include="..\..\src\shared\Threading.cpp" />
     <ClCompile Include="..\..\src\shared\Util.cpp" />
+    <ClCompile Include="..\..\src\shared\WheatyExceptionReport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\dep\include\mersennetwister\MersenneTwister.h" />
@@ -468,6 +473,12 @@
     <ClInclude Include="..\..\src\shared\Auth\Sha1.h" />
     <ClInclude Include="..\..\src\shared\ByteBuffer.h" />
     <ClInclude Include="..\..\src\shared\Database\SqlPreparedStatement.h" />
+    <ClInclude Include="..\..\src\shared\Network\NetworkBuffer.h" />
+    <ClInclude Include="..\..\src\shared\Network\NetworkManager.h" />
+    <ClInclude Include="..\..\src\shared\Network\NetworkThread.h" />
+    <ClInclude Include="..\..\src\shared\Network\ProtocolDefinitions.h" />
+    <ClInclude Include="..\..\src\shared\Network\Socket.h" />
+    <ClInclude Include="..\..\src\shared\WheatyExceptionReport.h" />
     <ClInclude Include="..\..\src\shared\WorldPacket.h" />
     <ClInclude Include="..\..\src\shared\Common.h" />
     <ClInclude Include="..\..\src\shared\Config\Config.h" />
@@ -496,9 +507,6 @@
     <ClInclude Include="..\..\src\shared\Util.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="ACE_vc11.vcxproj">
-      <Project>{bd537c9a-feca-1bad-6757-8a6348ea12c8}</Project>
-    </ProjectReference>
     <ProjectReference Include="framework.vcxproj">
       <Project>{bf6f5d0e-33a5-4e23-9e7d-dd481b7b5b9e}</Project>
     </ProjectReference>

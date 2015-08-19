@@ -5,7 +5,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pchdef.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles>pchdef.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <AdditionalOptions>/Zm300 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zm512 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
 </Project>

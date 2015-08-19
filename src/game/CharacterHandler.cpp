@@ -554,7 +554,7 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
     ObjectGuid playerGuid;
     recv_data >> playerGuid;
 
-    if (PlayerLoading() || GetPlayer() != NULL)
+    if (PlayerLoading() || GetPlayer() != nullptr)
     {
         sLog.outError("Player tryes to login again, AccountId = %d", GetAccountId());
         return;
@@ -949,7 +949,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recv_data)
     // and that there is no character with the desired new name
     CharacterDatabase.AsyncPQuery(&WorldSession::HandleChangePlayerNameOpcodeCallBack,
                                   GetAccountId(), newname,
-                                  "SELECT guid, name FROM characters WHERE guid = %u AND account = %u AND (at_login & %u) = %u AND NOT EXISTS (SELECT NULL FROM characters WHERE name = '%s')",
+                                  "SELECT guid, name FROM characters WHERE guid = %u AND account = %u AND (at_login & %u) = %u AND NOT EXISTS (SELECT nullptr FROM characters WHERE name = '%s')",
                                   guid.GetCounter(), GetAccountId(), AT_LOGIN_RENAME, AT_LOGIN_RENAME, escaped_newname.c_str()
                                  );
 }
@@ -1343,14 +1343,14 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket& recv_data)
                 continue;
 
             ItemPosCountVec sDest;
-            InventoryResult msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, sDest, uItem, false);
+            InventoryResult msg = _player->CanStoreItem(nullptr_BAG, nullptr_SLOT, sDest, uItem, false);
             if (msg == EQUIP_ERR_OK)
             {
                 _player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
                 _player->StoreItem(sDest, uItem, true);
             }
             else
-                _player->SendEquipError(msg, uItem, NULL);
+                _player->SendEquipError(msg, uItem, nullptr);
 
             continue;
         }

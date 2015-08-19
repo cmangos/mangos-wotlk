@@ -31,6 +31,16 @@ compiler:
   - gcc
   - clang
 
+before_install:
+  - echo "yes" | sudo add-apt-repository ppa:kalakris/cmake
+  - echo "yes" | sudo add-apt-repository ppa:boost-latest/ppa
+  - echo "yes" | sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+  - sudo apt-get -qq update
+  - sudo apt-get -qq install build-essential libtool gcc-4.8 g++-4.8 make cmake
+  - export CXX="g++-4.8"
+  - export CC="gcc-4.8"
+  - sudo apt-get install libboost1.55-dev libboost-thread1.55-dev libboost-system1.55-dev libboost-program-options1.55-dev libboost-filesystem1.55-dev
+
 script:
   - test -d _build || mkdir _build
   - test -d _install || mkdir _install
@@ -38,10 +48,3 @@ script:
   - cmake -DCMAKE_INSTALL_PREFIX=../_install ..
   - make -j4
 
-# if this configuration file is not in one of the offical CMaNGOS repositories at http://github.com/cmangos/, PLEASE remove the notifications or point them to another IRC channel!
-notifications:
-  irc:
-    channels:
-      - "irc.rizon.net#cmangos"
-    on_success: never
-    on_failure: always

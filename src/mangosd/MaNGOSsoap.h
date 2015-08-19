@@ -16,100 +16,61 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _MANGOSSOAP_H
-#define _MANGOSSOAP_H
+#ifndef MANGOSSOAP_H
+#define MANGOSSOAP_H
 
-#include "Common.h"
-#include "World.h"
+#include <mutex>
+#include <condition_variable>
 #include "AccountMgr.h"
+#include "Common.h"
 #include "Log.h"
-
 #include "soapH.h"
 #include "soapStub.h"
+#include "World.h"
 
-#include <ace/Semaphore.h>
-#include <ace/Task.h>
-
-class MaNGOSsoapRunnable: public ACE_Based::Runnable
+class SoapMgr
 {
-    public:
-        MaNGOSsoapRunnable() { }
-        void run() override;
-        void setListenArguments(std::string host, uint16 port)
-        {
-            m_host = host;
-            m_port = port;
-        }
-    private:
-        std::string m_host;
-        uint16 m_port;
-};
+public:
+    SoapMgr() : m_running(false) { }
 
-class SOAPWorkingThread : public ACE_Task<ACE_MT_SYNCH>
-{
-    public:
-        SOAPWorkingThread()
-        { }
+    void StartNetwork(std::string host, uint16 port);
+    void StopNetwork();
 
-        virtual int svc(void) override
-        {
-            while (1)
-            {
-                ACE_Message_Block* mb = 0;
-                if (this->getq(mb) == -1)
-                {
-                    ACE_DEBUG((LM_INFO,
-                               ACE_TEXT("(%t) Shutting down\n")));
-                    break;
-                }
+private:
+    void NetworkThread();
 
-                // Process the message.
-                process_message(mb);
-            }
-
-            return 0;
-        }
-    private:
-        void process_message(ACE_Message_Block* mb);
+    std::string                      m_host;
+    uint16                           m_port;
+    bool                             m_running;
+    std::shared_ptr<std::thread> m_networkThread;
 };
 
 class SOAPCommand
 {
-    public:
-        SOAPCommand():
-            pendingCommands(0, USYNC_THREAD, "pendingCommands")
-        {
-        }
-
-        ~SOAPCommand()
-        {
-        }
-
-        void appendToPrintBuffer(const char* msg)
-        {
-            m_printBuffer += msg;
-        }
-
-        ACE_Semaphore pendingCommands;
-
-        void setCommandSuccess(bool val)
-        {
-            m_success = val;
-        }
-        bool hasCommandSucceeded()
-        {
-            return m_success;
-        }
-
-        static void print(void* callbackArg, const char* msg)
-        {
-            ((SOAPCommand*)callbackArg)->appendToPrintBuffer(msg);
-        }
-
-        static void commandFinished(void* callbackArg, bool success);
-
-        bool m_success;
-        std::string m_printBuffer;
+public:
+    SOAPCommand() : finished(false), m_success(false) {}
+    std::mutex localMutex;
+    std::condition_variable conditionVariable;
+    void appendToPrintBuffer(const char* msg)
+    {
+        m_printBuffer += msg;
+    }
+    void setCommandSuccess(bool val)
+    {
+        m_success = val;
+    }
+    bool hasCommandSucceeded()
+    {
+        return m_success;
+    }
+    static void print(void* callbackArg, const char* msg)
+    {
+        ((SOAPCommand*)callbackArg)->appendToPrintBuffer(msg);
+    }
+    static void commandFinished(void* callbackArg, bool success);
+    bool m_success;
+    bool finished;
+    std::string m_printBuffer;
 };
 
-#endif
+#endif // MANGOSSOAP_H

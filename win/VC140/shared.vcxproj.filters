@@ -19,6 +19,9 @@
     <Filter Include="Auth">
       <UniqueIdentifier>{e35fd108-bd39-46ae-83f9-09cf1ebf4ea8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{6e024db2-928e-4705-8276-208ec98ececa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\shared\Database\Database.cpp">
@@ -84,6 +87,19 @@
     <ClCompile Include="..\..\src\shared\Database\SqlPreparedStatement.cpp">
       <Filter>Database</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\shared\Network\NetworkBuffer.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\shared\Network\Socket.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\shared\Network\NetworkManager.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\shared\Network\NetworkThread.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\shared\WheatyExceptionReport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\shared\Database\Database.h">
@@ -179,6 +195,22 @@
     <ClInclude Include="..\..\src\shared\Database\SqlPreparedStatement.h">
       <Filter>Database</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\shared\Network\NetworkBuffer.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shared\Network\Socket.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shared\Network\NetworkManager.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shared\Network\NetworkThread.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shared\Network\ProtocolDefinitions.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shared\WheatyExceptionReport.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\shared\revision.h" />

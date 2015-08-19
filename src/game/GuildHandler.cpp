@@ -70,7 +70,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_INVITE");
 
     std::string Invitedname, plname;
-    Player* player = NULL;
+    Player* player = nullptr;
 
     recvPacket >> Invitedname;
 
@@ -983,8 +983,8 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recv_data)
     uint8 BankToBank;
 
     uint8 BankTab, BankTabSlot, AutoStore;
-    uint8 PlayerSlot = NULL_SLOT;
-    uint8 PlayerBag = NULL_BAG;
+    uint8 PlayerSlot = nullptr_SLOT;
+    uint8 PlayerBag = nullptr_BAG;
     uint8 BankTabDst, BankTabSlotDst, unk2;
     uint8 ToChar = 1;
     uint32 ItemEntry, unk1;
@@ -1068,9 +1068,9 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recv_data)
     // Player <-> Bank
 
     // allow work with inventory only
-    if (!Player::IsInventoryPos(PlayerBag, PlayerSlot) && !(PlayerBag == NULL_BAG && PlayerSlot == NULL_SLOT))
+    if (!Player::IsInventoryPos(PlayerBag, PlayerSlot) && !(PlayerBag == nullptr_BAG && PlayerSlot == nullptr_SLOT))
     {
-        _player->SendEquipError(EQUIP_ERR_NONE, NULL, NULL);
+        _player->SendEquipError(EQUIP_ERR_NONE, nullptr, nullptr);
         return;
     }
 
