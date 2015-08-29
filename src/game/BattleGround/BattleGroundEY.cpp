@@ -66,6 +66,28 @@ void BattleGroundEY::Update(uint32 diff)
         else
             m_flagRespawnTimer -= diff;
     }
+
+    // workaround for Fel Reaver Ruins flag capture needed on 3.3.5 only
+    // the original areatrigger (4514) is covered by a bigger one (4515) and is not triggered on client side
+    if (IsFlagPickedUp())
+    {
+        if (m_felReaverFlagTimer < diff)
+        {
+            Player* flagCarrier = sObjectMgr.GetPlayer(GetFlagCarrierGuid());
+            if (flagCarrier)
+            {
+                if (m_towerOwner[NODE_FEL_REAVER_RUINS] == flagCarrier->GetTeam())
+                {
+                    // coords and range taken from DBC of areatrigger (4514)
+                    if (flagCarrier->GetDistance(2044.0f, 1729.729f, 1190.03f) <= 3.0f)
+                        EventPlayerCapturedFlag(flagCarrier, NODE_FEL_REAVER_RUINS);
+                }
+            }
+            m_felReaverFlagTimer = EY_FEL_REAVER_FLAG_UPDATE_TIME;
+        }
+        else
+            m_felReaverFlagTimer -= diff;
+    }
 }
 
 void BattleGroundEY::StartingEventOpenDoors()
@@ -320,6 +342,7 @@ void BattleGroundEY::Reset()
 
     m_flagRespawnTimer = 0;
     m_resourceUpdateTimer = 0;
+    m_felReaverFlagTimer = 0;
 
     m_towerWorldState[NODE_BLOOD_ELF_TOWER] = WORLD_STATE_EY_BLOOD_ELF_TOWER_NEUTRAL;
     m_towerWorldState[NODE_FEL_REAVER_RUINS] = WORLD_STATE_EY_FEL_REAVER_RUINS_NEUTRAL;
