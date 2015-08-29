@@ -23,8 +23,9 @@
 
 class BattleGround;
 
-#define EY_FLAG_RESPAWN_TIME            (10 * IN_MILLISECONDS) //10 seconds
-#define EY_RESOURCES_UPDATE_TIME        (2 * IN_MILLISECONDS) //2 seconds
+#define EY_FLAG_RESPAWN_TIME            (10 * IN_MILLISECONDS) // 10 seconds
+#define EY_RESOURCES_UPDATE_TIME        (2 * IN_MILLISECONDS) // 2 seconds
+#define EY_FEL_REAVER_FLAG_UPDATE_TIME  (1 * IN_MILLISECONDS) // 1 seconds
 
 enum EYWorldStates
 {
@@ -303,5 +304,6 @@ class BattleGroundEY : public BattleGround
 
         uint32 m_flagRespawnTimer;
         uint32 m_resourceUpdateTimer;
+        uint32 m_felReaverFlagTimer;
 };
 #endif
