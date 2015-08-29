@@ -159,7 +159,7 @@ class ArenaTeam
                 if (itr->guid == guid)
                     return &(*itr);
 
-            return NULL;
+            return nullptr;
         }
 
         ArenaTeamMember* GetMember(const std::string& name)
@@ -168,7 +168,7 @@ class ArenaTeam
                 if (itr->name == name)
                     return &(*itr);
 
-            return NULL;
+            return nullptr;
         }
 
         bool IsFighting() const;
@@ -181,8 +181,8 @@ class ArenaTeam
 
         void BroadcastPacket(WorldPacket* packet);
 
-        void BroadcastEvent(ArenaTeamEvents event, ObjectGuid guid, char const* str1 = NULL, char const* str2 = NULL, char const* str3 = NULL);
-        void BroadcastEvent(ArenaTeamEvents event, char const* str1 = NULL, char const* str2 = NULL, char const* str3 = NULL)
+        void BroadcastEvent(ArenaTeamEvents event, ObjectGuid guid, char const* str1 = nullptr, char const* str2 = nullptr, char const* str3 = nullptr);
+        void BroadcastEvent(ArenaTeamEvents event, char const* str1 = nullptr, char const* str2 = nullptr, char const* str3 = nullptr)
         {
             BroadcastEvent(event, ObjectGuid(), str1, str2, str3);
         }

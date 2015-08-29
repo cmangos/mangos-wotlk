@@ -16,21 +16,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/// \addtogroup mangosd
-/// @{
-/// \file
-
-#ifndef __CLIRUNNABLE_H
-#define __CLIRUNNABLE_H
+#ifndef CLIRUNNABLE_H
+#define CLIRUNNABLE_H
 
 #include "Common.h"
 #include "Threading.h"
 
-/// Command Line Interface handling thread
-class CliRunnable : public ACE_Based::Runnable
+/// Thread for handling the command line interface
+class CliRunnable : public MaNGOS::Runnable
 {
-    public:
-        void run() override;
+public:
+    void run() override;
 };
-#endif
-/// @}
+
+#endif // CLIRUNNABLE_H

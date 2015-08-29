@@ -16,68 +16,76 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/// \addtogroup realmd
-/// @{
-/// \file
+#ifndef AUTH_SOCKET_H
+#define AUTH_SOCKET_H
 
-#ifndef _AUTHSOCKET_H
-#define _AUTHSOCKET_H
-
+#include <string>
+#include <boost/filesystem/fstream.hpp>
 #include "Common.h"
 #include "Auth/BigNumber.h"
 #include "Auth/Sha1.h"
 #include "ByteBuffer.h"
+#include "Network/Socket.h"
 
-#include "BufferedSocket.h"
+class NetworkManager;
+class NetworkThread;
 
-/// Handle login commands
-class AuthSocket: public BufferedSocket
+/// Handles authentication service packets
+class AuthSocket: public Socket
 {
-    public:
-        const static int s_BYTE_SIZE = 32;
+public:
+    const static int s_BYTE_SIZE = 32;
 
-        AuthSocket();
-        ~AuthSocket();
+    AuthSocket(NetworkManager& manager, NetworkThread& owner);
+    ~AuthSocket();
 
-        void OnAccept() override;
-        void OnRead() override;
-        void SendProof(Sha1Hash sha);
-        void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
+protected:
+    virtual bool Open() override;
+    virtual bool ProcessIncomingData() override;
 
-        bool _HandleLogonChallenge();
-        bool _HandleLogonProof();
-        bool _HandleReconnectChallenge();
-        bool _HandleReconnectProof();
-        bool _HandleRealmList();
-        // data transfer handle for patch
+private:
+    bool SendPacket(const char* buf, size_t len);
+    size_t ReceivedDataLength(void) const;
+    bool Read(char* buf, size_t len);
+    void ReadSkip(size_t len);
 
-        bool _HandleXferResume();
-        bool _HandleXferCancel();
-        bool _HandleXferAccept();
+    // Login process handlers
+    bool HandleLogonChallenge();
+    bool HandleLogonProof();
+    bool HandleReconnectChallenge();
+    bool HandleReconnectProof();
+    bool HandleRealmList();
+    void SendProof(Sha1Hash sha);
+    void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
 
-        void _SetVSFields(const std::string& rI);
+    // Patch transfer handlers
+    void InitPatch();
+    bool HandleXferAccept();
+    bool HandleXferCancel();
+    bool HandleXferResume();
 
-    private:
+    // Make the SRP6 calculation based on the hash in the database
+    void SetVSFields(const std::string& rI);
 
-        BigNumber N, s, g, v;
-        BigNumber b, B;
-        BigNumber K;
-        BigNumber _reconnectProof;
+    // SRP6
+    BigNumber N, s, g, v;
+    BigNumber b, B;
+    BigNumber K;
+    BigNumber reconnect_proof_;
 
-        bool _authed;
+    bool authed_;
 
-        std::string _login;
-        std::string _safelogin;
+    std::string login_;
+    std::string safe_login_;
 
-        // Since GetLocaleByName() is _NOT_ bijective, we have to store the locale as a string. Otherwise we can't differ
-        // between enUS and enGB, which is important for the patch system
-        std::string _localizationName;
-        uint16 _build;
-        AccountTypes _accountSecurityLevel;
+    uint16 build_;
+    AccountTypes account_security_level_;
 
-        ACE_HANDLE patch_;
+    // Since GetLocaleByName() is _NOT_ bijective, we have to store the locale as a string. Otherwise we can't differ
+    // between enUS and enGB, which is important for the patch system
+    std::string localization_name_;
 
-        void InitPatch();
+    boost::filesystem::fstream patch_;
 };
-#endif
-/// @}
+
+#endif // AUTH_SOCKET_H

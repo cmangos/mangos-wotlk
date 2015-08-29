@@ -16,40 +16,35 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOSSERVER_WORLDPACKET_H
-#define MANGOSSERVER_WORLDPACKET_H
+#ifndef WORLD_PACKET_H
+#define WORLD_PACKET_H
 
 #include "Common.h"
 #include "ByteBuffer.h"
 #include "Opcodes.h"
 
-// Note: m_opcode and size stored in platfom dependent format
-// ignore endianess until send, and converted at receive
+// Note: opcode_ and size stored in platfom dependent format
+// Ignore endianess until send, and converted at receive
 class WorldPacket : public ByteBuffer
 {
-    public:
-        // just container for later use
-        WorldPacket()                                       : ByteBuffer(0), m_opcode(MSG_NULL_ACTION)
-        {
-        }
-        explicit WorldPacket(Opcodes opcode, size_t res = 200) : ByteBuffer(res), m_opcode(opcode) { }
-        // copy constructor
-        WorldPacket(const WorldPacket& packet)              : ByteBuffer(packet), m_opcode(packet.m_opcode)
-        {
-        }
+public:
+    WorldPacket() : ByteBuffer(0), opcode_(MSG_nullptr_ACTION) { }
+    explicit WorldPacket(Opcodes opcode, size_t res = 200) : ByteBuffer(res), opcode_(opcode) { }
+    WorldPacket(const WorldPacket& packet) : ByteBuffer(packet), opcode_(packet.opcode_) { }
 
-        void Initialize(Opcodes opcode, size_t newres = 200)
-        {
-            clear();
-            _storage.reserve(newres);
-            m_opcode = opcode;
-        }
+    void Initialize(Opcodes opcode, size_t newres = 200)
+    {
+        clear();
+        _storage.reserve(newres);
+        opcode_ = opcode;
+    }
 
-        Opcodes GetOpcode() const { return m_opcode; }
-        void SetOpcode(Opcodes opcode) { m_opcode = opcode; }
-        inline const char* GetOpcodeName() const { return LookupOpcodeName(m_opcode); }
+    Opcodes GetOpcode() const { return opcode_; }
+    void SetOpcode(Opcodes opcode) { opcode_ = opcode; }
+    inline const char* GetOpcodeName() const { return LookupOpcodeName(opcode_); }
 
-    protected:
-        Opcodes m_opcode;
+protected:
+    Opcodes opcode_;
 };
-#endif
+
+#endif // WORLD_PACKET_H

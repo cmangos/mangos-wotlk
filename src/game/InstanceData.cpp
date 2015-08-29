@@ -40,7 +40,7 @@ void InstanceData::SaveToDB() const
         CharacterDatabase.PExecute("UPDATE world SET data = '%s' WHERE map = '%u'", data.c_str(), instance->GetId());
 }
 
-bool InstanceData::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/ /*= NULL*/, uint32 /*miscvalue1*/ /*= 0*/) const
+bool InstanceData::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/ /*= nullptr*/, uint32 /*miscvalue1*/ /*= 0*/) const
 {
     sLog.outError("Achievement system call InstanceData::CheckAchievementCriteriaMeet but instance script for map %u not have implementation for achievement criteria %u",
                   instance->GetId(), criteria_id);
@@ -54,7 +54,7 @@ bool InstanceData::CheckConditionCriteriaMeet(Player const* /*source*/, uint32 i
     return false;
 }
 
-void InstanceData::SendEncounterFrame(uint32 type, ObjectGuid sourceGuid /*= NULL*/, uint8 param1 /*= 0*/, uint8 param2 /*= 0*/)
+void InstanceData::SendEncounterFrame(uint32 type, ObjectGuid sourceGuid /*= nullptr*/, uint8 param1 /*= 0*/, uint8 param2 /*= 0*/)
 {
     // size of this packet is at most 15 (usually less)
     WorldPacket data(SMSG_INSTANCE_ENCOUNTER, 15);

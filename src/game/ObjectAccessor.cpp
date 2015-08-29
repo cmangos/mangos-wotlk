@@ -16,6 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <mutex>
+#include <cmath>
+
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Policies/Singleton.h"
@@ -31,11 +34,9 @@
 #include "ObjectGuid.h"
 #include "World.h"
 
-#include <cmath>
-
-#define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, ACE_Thread_Mutex>
+#define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, std::mutex>
 INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
-INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ACE_Thread_Mutex);
+INSTANTIATE_CLASS_MUTEX(ObjectAccessor, std::mutex);
 
 ObjectAccessor::ObjectAccessor() {}
 ObjectAccessor::~ObjectAccessor()
@@ -51,13 +52,13 @@ Unit*
 ObjectAccessor::GetUnit(WorldObject const& u, ObjectGuid guid)
 {
     if (!guid)
-        return NULL;
+        return nullptr;
 
     if (guid.IsPlayer())
         return FindPlayer(guid);
 
     if (!u.IsInWorld())
-        return NULL;
+        return nullptr;
 
     return u.GetMap()->GetAnyTypeCreature(guid);
 }
@@ -66,9 +67,9 @@ Corpse* ObjectAccessor::GetCorpseInMap(ObjectGuid guid, uint32 mapid)
 {
     Corpse* ret = HashMapHolder<Corpse>::Find(guid);
     if (!ret)
-        return NULL;
+        return nullptr;
     if (ret->GetMapId() != mapid)
-        return NULL;
+        return nullptr;
 
     return ret;
 }
@@ -76,30 +77,30 @@ Corpse* ObjectAccessor::GetCorpseInMap(ObjectGuid guid, uint32 mapid)
 Player* ObjectAccessor::FindPlayer(ObjectGuid guid, bool inWorld /*= true*/)
 {
     if (!guid)
-        return NULL;
+        return nullptr;
 
     Player* plr = HashMapHolder<Player>::Find(guid);
     if (!plr || (!plr->IsInWorld() && inWorld))
-        return NULL;
+        return nullptr;
 
     return plr;
 }
 
 Player* ObjectAccessor::FindPlayerByName(const char* name)
 {
-    HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
+    HashMapHolder<Player>::GuardType g(HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
     for (HashMapHolder<Player>::MapType::iterator iter = m.begin(); iter != m.end(); ++iter)
         if (iter->second->IsInWorld() && (::strcmp(name, iter->second->GetName()) == 0))
             return iter->second;
 
-    return NULL;
+    return nullptr;
 }
 
 void
 ObjectAccessor::SaveAllPlayers()
 {
-    HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
+    HashMapHolder<Player>::GuardType g(HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
     for (HashMapHolder<Player>::MapType::iterator itr = m.begin(); itr != m.end(); ++itr)
         itr->second->SaveToDB();
@@ -122,7 +123,7 @@ ObjectAccessor::GetCorpseForPlayerGUID(ObjectGuid guid)
 
     Player2CorpsesMapType::iterator iter = i_player2corpse.find(guid);
     if (iter == i_player2corpse.end())
-        return NULL;
+        return nullptr;
 
     MANGOS_ASSERT(iter->second->GetType() != CORPSE_BONES);
 
@@ -196,7 +197,7 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
         // in fact this function is called from several places
         // even when player doesn't have a corpse, not an error
         // sLog.outError("Try remove corpse that not in map for GUID %ul", player_guid);
-        return NULL;
+        return nullptr;
     }
 
     DEBUG_LOG("Deleting Corpse and spawning bones.");
@@ -213,7 +214,7 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
     // remove corpse from DB
     corpse->DeleteFromDB();
 
-    Corpse* bones = NULL;
+    Corpse* bones = nullptr;
     // create the bones only if the map and the grid is loaded at the corpse's location
     // ignore bones creating option in case insignia
     if (map && (insignia ||
@@ -255,7 +256,7 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
 
 void ObjectAccessor::RemoveOldCorpses()
 {
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     Player2CorpsesMapType::iterator next;
     for (Player2CorpsesMapType::iterator itr = i_player2corpse.begin(); itr != i_player2corpse.end(); itr = next)
     {
@@ -272,7 +273,7 @@ void ObjectAccessor::RemoveOldCorpses()
 /// Define the static member of HashMapHolder
 
 template <class T> typename HashMapHolder<T>::MapType HashMapHolder<T>::m_objectMap;
-template <class T> ACE_RW_Thread_Mutex HashMapHolder<T>::i_lock;
+template <class T> typename HashMapHolder<T>::LockType HashMapHolder<T>::i_lock;
 
 /// Global definitions for the hashmap storage
 

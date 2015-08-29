@@ -31,6 +31,8 @@
 #include "revision_nr.h"
 #include "Util.h"
 
+#include "boost/version.hpp"
+
 bool ChatHandler::HandleHelpCommand(char* args)
 {
     if (!*args)
@@ -113,6 +115,7 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
     else
         SendSysMessage(LANG_USING_SCRIPT_LIB_NONE);
 
+    PSendSysMessage("Using BOOST: %i.%i.%i", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
     PSendSysMessage(LANG_USING_WORLD_DB, sWorld.GetDBVersion());
     PSendSysMessage(LANG_USING_EVENT_AI, sWorld.GetCreatureEventAIVersion());
     PSendSysMessage(LANG_CONNECTED_USERS, activeClientsNum, maxActiveClientsNum, queuedClientsNum, maxQueuedClientsNum);
@@ -170,7 +173,7 @@ bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
     std::list< std::pair<std::string, bool> > names;
 
     {
-        HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
+        HashMapHolder<Player>::GuardType g(HashMapHolder<Player>::GetLock());
         HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
         for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
         {

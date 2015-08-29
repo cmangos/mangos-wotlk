@@ -19,11 +19,13 @@
 #ifndef MANGOS_OBJECTACCESSOR_H
 #define MANGOS_OBJECTACCESSOR_H
 
+#include <mutex>
+#include <set>
+#include <list>
+
 #include "Common.h"
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
-#include <ace/Thread_Mutex.h>
-#include <ace/RW_Thread_Mutex.h>
 #include "Utilities/UnorderedMapSet.h"
 #include "Policies/ThreadingModel.h"
 
@@ -33,9 +35,6 @@
 #include "Object.h"
 #include "Player.h"
 #include "Corpse.h"
-
-#include <set>
-#include <list>
 
 class Unit;
 class WorldObject;
@@ -47,27 +46,26 @@ class HashMapHolder
     public:
 
         typedef UNORDERED_MAP<ObjectGuid, T*>   MapType;
-        typedef ACE_RW_Thread_Mutex LockType;
-        typedef ACE_Read_Guard<LockType> ReadGuard;
-        typedef ACE_Write_Guard<LockType> WriteGuard;
+        typedef std::mutex LockType;
+		typedef std::lock_guard<LockType> GuardType;
 
         static void Insert(T* o)
         {
-            WriteGuard guard(i_lock);
+			GuardType guard(i_lock);
             m_objectMap[o->GetObjectGuid()] = o;
         }
 
         static void Remove(T* o)
         {
-            WriteGuard guard(i_lock);
+			GuardType guard(i_lock);
             m_objectMap.erase(o->GetObjectGuid());
         }
 
         static T* Find(ObjectGuid guid)
         {
-            ReadGuard guard(i_lock);
+			GuardType guard(i_lock);
             typename MapType::iterator itr = m_objectMap.find(guid);
-            return (itr != m_objectMap.end()) ? itr->second : NULL;
+            return (itr != m_objectMap.end()) ? itr->second : nullptr;
         }
 
         static MapType& GetContainer() { return m_objectMap; }
@@ -83,7 +81,7 @@ class HashMapHolder
         static MapType  m_objectMap;
 };
 
-class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLevelLockable<ObjectAccessor, ACE_Thread_Mutex> >
+class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLevelLockable<ObjectAccessor, std::mutex> >
 {
         friend class MaNGOS::OperatorNew<ObjectAccessor>;
 
@@ -130,7 +128,7 @@ class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLev
 
         Player2CorpsesMapType   i_player2corpse;
 
-        typedef ACE_Thread_Mutex LockType;
+        typedef std::mutex LockType;
         typedef MaNGOS::GeneralLock<LockType > Guard;
 
         LockType i_playerGuard;

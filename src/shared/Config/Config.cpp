@@ -17,96 +17,125 @@
  */
 
 #include "Config.h"
-#include "ace/Configuration_Import_Export.h"
 
 #include "Policies/Singleton.h"
 
+#include <fstream>
+
+#include <boost/lexical_cast.hpp>
+
 INSTANTIATE_SINGLETON_1(Config);
 
-static bool GetValueHelper(ACE_Configuration_Heap* mConf, const char* name, ACE_TString& result)
-{
-    if (!mConf)
-        return false;
-
-    ACE_TString section_name;
-    ACE_Configuration_Section_Key section_key;
-    ACE_Configuration_Section_Key root_key = mConf->root_section();
-
-    int i = 0;
-    while (mConf->enumerate_sections(root_key, i, section_name) == 0)
-    {
-        mConf->open_section(root_key, section_name.c_str(), 0, section_key);
-        if (mConf->get_string_value(section_key, name, result) == 0)
-            return true;
-        ++i;
-    }
-
-    return false;
-}
-
 Config::Config()
-    : mConf(NULL)
 {
 }
 
 Config::~Config()
 {
-    delete mConf;
 }
 
-bool Config::SetSource(const char* file)
+bool Config::SetSource(std::string const& filename, std::string const& sectionname)
 {
-    mFilename = file;
+    m_Filename = filename;
+    m_SectionName = sectionname;
 
     return Reload();
 }
 
 bool Config::Reload()
 {
-    delete mConf;
-    mConf = new ACE_Configuration_Heap;
+    std::ifstream file;
+    file.open(m_Filename.c_str());
+    if (!file.is_open())
+        return false;
 
-    if (mConf->open() == 0)
-    {
-        ACE_Ini_ImpExp config_importer(*mConf);
-        if (config_importer.import_config(mFilename.c_str()) == 0)
-            return true;
-    }
+        // clear all old values
+        m_values.clear();
 
-    delete mConf;
-    mConf = NULL;
-    return false;
+        // we accept any options but check later used cases, so use empty
+        boost::program_options::options_description description;
+
+        boost::program_options::basic_parsed_options<char> options =
+            boost::program_options::parse_config_file(file, description, true);
+
+        // store all given options
+        for (size_t i = 0; i < options.options.size(); ++i)
+        {
+            std::string option_name = options.options[i].string_key;
+
+            // Skip positional options without name
+            if (option_name.empty())
+             continue;
+
+            std::string original_token = options.options[i].original_tokens.size() ?
+                options.options[i].original_tokens[1] : "";
+
+            // remove ""
+            // VC90 std::string missing front/back access functions
+            if (original_token.size() > 1 && original_token[0] == '"' && original_token[original_token.size() - 1] == '"')
+             original_token = original_token.substr(1, original_token.size() - 2);
+
+            m_values[option_name] = original_token;
+        }
+
+    return true;
 }
 
-std::string Config::GetStringDefault(const char* name, const char* def)
+std::string const* Config::GetValue(const char* name) const
 {
-    ACE_TString val;
-    return GetValueHelper(mConf, name, val) ? val.c_str() : def;
+    std::string key = m_SectionName + "." + name;
+    Values::const_iterator itr = m_values.find(key);
+    return itr != m_values.end() ? &itr->second : nullptr;
 }
 
-bool Config::GetBoolDefault(const char* name, bool def)
+std::string Config::GetStringDefault(const char* name, const char* def) const
 {
-    ACE_TString val;
-    if (!GetValueHelper(mConf, name, val))
+    std::string const* val_ptr = GetValue(name);
+    if (!val_ptr)
         return def;
 
-    const char* str = val.c_str();
-    if (strcmp(str, "true") == 0 || strcmp(str, "TRUE") == 0 ||
-            strcmp(str, "yes") == 0 || strcmp(str, "YES") == 0 ||
-            strcmp(str, "1") == 0)
-        return true;
-    else
-        return false;
+    return *val_ptr;
 }
 
-int32 Config::GetIntDefault(const char* name, int32 def)
+bool Config::GetBoolDefault(const char* name, bool def) const
 {
-    ACE_TString val;
-    return GetValueHelper(mConf, name, val) ? atoi(val.c_str()) : def;
+    std::string const* val_ptr = GetValue(name);
+    if (!val_ptr)
+        return def;
+
+    std::string str = *val_ptr;
+    return str == "true" || str == "TRUE" || str == "yes" || str == "YES" || str == "1";
 }
 
-float Config::GetFloatDefault(const char* name, float def)
+int32 Config::GetIntDefault(const char* name, int32 def) const
 {
-    ACE_TString val;
-    return GetValueHelper(mConf, name, val) ? (float)atof(val.c_str()) : def;
+    std::string const* val_ptr = GetValue(name);
+    if (!val_ptr)
+        return def;
+
+    try
+    {
+        return boost::lexical_cast<int32>(*val_ptr);
+    }
+    catch (...)
+    {
+        return def;
+    }
+
+}
+
+float Config::GetFloatDefault(const char* name, float def) const
+{
+    std::string const* val_ptr = GetValue(name);
+    if (!val_ptr)
+        return def;
+
+    try
+    {
+        return boost::lexical_cast<float>(*val_ptr);
+    }
+    catch (...)
+    {
+        return def;
+    }
 }

@@ -21,6 +21,7 @@
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+#include <sys/stat.h>
 
 pid_t parent_pid = 0, sid = 0;
 

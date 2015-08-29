@@ -16,6 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <mutex>
+
 #include "MapManager.h"
 #include "MapPersistentStateMgr.h"
 #include "Policies/Singleton.h"
@@ -28,9 +30,9 @@
 #include "Corpse.h"
 #include "ObjectMgr.h"
 
-#define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, ACE_Recursive_Thread_Mutex>
+#define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, std::recursive_mutex>
 INSTANTIATE_SINGLETON_2(MapManager, CLASS_LOCK);
-INSTANTIATE_CLASS_MUTEX(MapManager, ACE_Recursive_Thread_Mutex);
+INSTANTIATE_CLASS_MUTEX(MapManager, std::recursive_mutex);
 
 MapManager::MapManager()
     : i_gridCleanUpDelay(sWorld.getConfig(CONFIG_UINT32_INTERVAL_GRIDCLEAN))
@@ -91,11 +93,11 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
 {
     Guard _guard(*this);
 
-    Map* m = NULL;
+    Map* m = nullptr;
 
     const MapEntry* entry = sMapStore.LookupEntry(id);
     if (!entry)
-        return NULL;
+        return nullptr;
 
     if (entry->Instanceable())
     {
@@ -109,7 +111,7 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
     {
         // create regular non-instanceable map
         m = FindMap(id);
-        if (m == NULL)
+        if (m == nullptr)
         {
             m = new WorldMap(id, i_gridCleanUpDelay);
             // add map into container
@@ -137,13 +139,13 @@ Map* MapManager::FindMap(uint32 mapid, uint32 instanceId) const
 
     MapMapType::const_iterator iter = i_maps.find(MapID(mapid, instanceId));
     if (iter == i_maps.end())
-        return NULL;
+        return nullptr;
 
     // this is a small workaround for transports
     if (instanceId == 0 && iter->second->Instanceable())
     {
         assert(false);
-        return NULL;
+        return nullptr;
     }
 
     return iter->second;
@@ -267,8 +269,8 @@ uint32 MapManager::GetNumPlayersInInstances()
 ///// in case of battlegrounds it will only return an existing map, those maps are created by bg-system
 Map* MapManager::CreateInstance(uint32 id, Player* player)
 {
-    Map* map = NULL;
-    Map* pNewMap = NULL;
+    Map* map = nullptr;
+    Map* pNewMap = nullptr;
     uint32 NewInstanceId = 0;                               // instanceId of the resulting map
     const MapEntry* entry = sMapStore.LookupEntry(id);
 
@@ -332,7 +334,7 @@ DungeonMap* MapManager::CreateDungeonMap(uint32 id, uint32 InstanceId, Difficult
     DungeonMap* map = new DungeonMap(id, i_gridCleanUpDelay, InstanceId, difficulty);
 
     // Dungeons can have saved instance data
-    bool load_data = save != NULL;
+    bool load_data = save != nullptr;
     map->CreateInstanceData(load_data);
 
     return map;

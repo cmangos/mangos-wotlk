@@ -16,77 +16,80 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/** \file
-  \ingroup realmd
-  */
+#ifndef PATCH_HANDLER_H
+#define PATCH_HANDLER_H
 
-#ifndef _PATCHHANDLER_H_
-#define _PATCHHANDLER_H_
-
-#include <ace/Basic_Types.h>
-#include <ace/Synch_Traits.h>
-#include <ace/Svc_Handler.h>
-#include <ace/SOCK_Stream.h>
-#include <ace/Message_Block.h>
-#include <ace/Auto_Ptr.h>
 #include <map>
-
+#include <memory>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/path.hpp>
 #include <openssl/bn.h>
 #include <openssl/md5.h>
+#include "Network/NetworkBuffer.h"
+#include "Network/ProtocolDefinitions.h"
+#include "Policies/Singleton.h"
 
-/**
- * @brief Caches MD5 hash of client patches present on the server
- */
+/// Caches MD5 hash of client patches present on the server
 class PatchCache
 {
-    public:
-        ~PatchCache();
-        PatchCache();
+public:
+    PatchCache();
+    ~PatchCache();
 
-        static PatchCache* instance();
+    struct PATCH_INFO
+    {
+        uint8 md5[MD5_DIGEST_LENGTH];
+    };
 
-        struct PATCH_INFO
-        {
-            ACE_UINT8 md5[MD5_DIGEST_LENGTH];
-        };
+    typedef std::map<std::string, PATCH_INFO*> Patches;
 
-        typedef std::map<std::string, PATCH_INFO*> Patches;
+    Patches::const_iterator begin() const
+    {
+        return patches_.begin();
+    }
 
-        Patches::const_iterator begin() const
-        {
-            return patches_.begin();
-        }
+    Patches::const_iterator end() const
+    {
+        return patches_.end();
+    }
 
-        Patches::const_iterator end() const
-        {
-            return patches_.end();
-        }
+    void LoadPatchMD5(const boost::filesystem::path& p);
+    bool GetHash(const char* pat, uint8 mymd5[MD5_DIGEST_LENGTH]);
 
-        void LoadPatchMD5(const char*);
-        bool GetHash(const char* pat, ACE_UINT8 mymd5[MD5_DIGEST_LENGTH]);
+private:
+    void LoadPatchesInfo();
 
-    private:
-        void LoadPatchesInfo();
-        Patches patches_;
+    Patches patches_;
 };
 
-class PatchHandler: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
+#define sPatchCache MaNGOS::Singleton<PatchCache>::Instance()
+
+class PatchHandler : public std::enable_shared_from_this<PatchHandler>
 {
-    protected:
-        typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> Base;
+public:
+    PatchHandler(protocol::Socket& socket, boost::filesystem::fstream& fs_patch);
+    virtual ~PatchHandler();
 
-    public:
-        PatchHandler(ACE_HANDLE socket, ACE_HANDLE patch);
-        virtual ~PatchHandler();
+    bool Open();
 
-        int open(void* = 0) override;
+protected:
+    void TransmitFile();
+    void StartAsyncWrite();
 
-    protected:
-        virtual int svc(void) override;
+    void OnWriteComplete(const boost::system::error_code& error, size_t bytes_transferred);
+    void OnTimeout(const boost::system::error_code& error);
 
-    private:
-        ACE_HANDLE patch_fd_;
+private:
+    size_t offset() const;
+
+    protocol::Socket& socket_;
+    boost::asio::deadline_timer timer_;
+
+    boost::filesystem::fstream& fs_patch_;
+
+    NetworkBuffer send_buffer_;
 };
 
-#endif /* _BK_PATCHHANDLER_H__ */
+typedef std::shared_ptr<PatchHandler> PatchHandlerPtr;
 
+#endif // PATCH_HANDLER_H

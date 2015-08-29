@@ -77,7 +77,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId);
 
 // Different spell properties
 inline float GetSpellRadius(SpellRadiusEntry const* radius) { return (radius ? radius->Radius : 0); }
-uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell = NULL);
+uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell = nullptr);
 uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType damagetype);
 float CalculateDefaultCoefficient(SpellEntry const* spellProto, DamageEffectType const damagetype);
 inline float GetSpellMinRange(SpellRangeEntry const* range, bool friendly = false)
@@ -95,7 +95,7 @@ inline float GetSpellMaxRange(SpellRangeEntry const* range, bool friendly = fals
 inline uint32 GetSpellRecoveryTime(SpellEntry const* spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
 int32 GetSpellDuration(SpellEntry const* spellInfo);
 int32 GetSpellMaxDuration(SpellEntry const* spellInfo);
-int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster = NULL);
+int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster = nullptr);
 uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo);
 uint16 GetSpellAuraMaxTicks(uint32 spellId);
 WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo);
@@ -925,7 +925,7 @@ class SpellMgr
             if (itr != mSpellThreatMap.end())
                 return &itr->second;
 
-            return NULL;
+            return nullptr;
         }
 
         float GetSpellThreatMultiplier(SpellEntry const* spellInfo) const
@@ -945,7 +945,7 @@ class SpellMgr
             SpellProcEventMap::const_iterator itr = mSpellProcEventMap.find(spellId);
             if (itr != mSpellProcEventMap.end())
                 return &itr->second;
-            return NULL;
+            return nullptr;
         }
 
         // Spell procs from item enchants
@@ -968,7 +968,7 @@ class SpellMgr
             if (itr != mSpellBonusMap.end())
                 return &itr->second;
 
-            return NULL;
+            return nullptr;
         }
 
         // Spell target coordinates
@@ -977,7 +977,7 @@ class SpellMgr
             SpellTargetPositionMap::const_iterator itr = mSpellTargetPositions.find(spell_id);
             if (itr != mSpellTargetPositions.end())
                 return &itr->second;
-            return NULL;
+            return nullptr;
         }
 
         // Spell ranks chains
@@ -985,7 +985,7 @@ class SpellMgr
         {
             SpellChainMap::const_iterator itr = mSpellChains.find(spell_id);
             if (itr == mSpellChains.end())
-                return NULL;
+                return nullptr;
 
             return &itr->second;
         }
@@ -1064,7 +1064,7 @@ class SpellMgr
             if (itr != mSpellLearnSkills.end())
                 return &itr->second;
             else
-                return NULL;
+                return nullptr;
         }
 
         bool IsSpellLearnSpell(uint32 spell_id) const
@@ -1095,7 +1095,7 @@ class SpellMgr
         bool IsSkillBonusSpell(uint32 spellId) const;
 
         // Spell correctness for client using
-        static bool IsSpellValid(SpellEntry const* spellInfo, Player* pl = NULL, bool msg = true);
+        static bool IsSpellValid(SpellEntry const* spellInfo, Player* pl = nullptr, bool msg = true);
 
         SkillLineAbilityMapBounds GetSkillLineAbilityMapBounds(uint32 spell_id) const
         {
@@ -1113,7 +1113,7 @@ class SpellMgr
             if (itr != mSpellPetAuraMap.end())
                 return &itr->second;
             else
-                return NULL;
+                return nullptr;
         }
 
         PetLevelupSpellSet const* GetPetLevelupSpellList(uint32 petFamily) const
@@ -1122,7 +1122,7 @@ class SpellMgr
             if (itr != mPetLevelupSpellMap.end())
                 return &itr->second;
             else
-                return NULL;
+                return nullptr;
         }
 
         // < 0 for petspelldata id, > 0 for creature_id
@@ -1131,10 +1131,10 @@ class SpellMgr
             PetDefaultSpellsMap::const_iterator itr = mPetDefaultSpellsMap.find(id);
             if (itr != mPetDefaultSpellsMap.end())
                 return &itr->second;
-            return NULL;
+            return nullptr;
         }
 
-        SpellCastResult GetSpellAllowedInLocationError(SpellEntry const* spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player = NULL);
+        SpellCastResult GetSpellAllowedInLocationError(SpellEntry const* spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player = nullptr);
 
         SpellAreaMapBounds GetSpellAreaMapBounds(uint32 spell_id) const
         {

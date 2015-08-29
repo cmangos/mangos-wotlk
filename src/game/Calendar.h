@@ -190,7 +190,7 @@ class CalendarInvite
 {
     public:
 
-        CalendarInvite() : InviteId(0), LastUpdateTime(time(NULL)), Status(CALENDAR_STATUS_INVITED), Rank(CALENDAR_RANK_PLAYER), m_calendarEvent(NULL) {}
+        CalendarInvite() : InviteId(0), LastUpdateTime(time(nullptr)), Status(CALENDAR_STATUS_INVITED), Rank(CALENDAR_RANK_PLAYER), m_calendarEvent(nullptr) {}
 
         CalendarInvite(CalendarEvent* event, uint64 inviteId, ObjectGuid senderGuid, ObjectGuid inviteeGuid, time_t statusTime,
                        CalendarInviteStatus status, CalendarModerationRank rank, std::string text);
@@ -240,7 +240,7 @@ class CalendarMgr
         CalendarEvent* GetEventById(uint64 eventId)
         {
             CalendarEventStore::iterator itr = m_EventStore.find(eventId);
-            return (itr != m_EventStore.end()) ? &itr->second : NULL;
+            return (itr != m_EventStore.end()) ? &itr->second : nullptr;
         }
 
         // sql related
@@ -249,7 +249,7 @@ class CalendarMgr
         // send data to client function
         void SendCalendarEventInvite(CalendarInvite const* invite);
         void SendCalendarEventInviteAlert(CalendarInvite const* invite);
-        void SendCalendarCommandResult(Player* player, CalendarError err, char const* param = NULL);
+        void SendCalendarCommandResult(Player* player, CalendarError err, char const* param = nullptr);
         void SendCalendarEventRemovedAlert(CalendarEvent const* event);
         void SendCalendarEvent(Player* player, CalendarEvent const* event, uint32 sendType);
         void SendCalendarEventInviteRemoveAlert(Player* player, CalendarEvent const* event, CalendarInviteStatus status);

@@ -87,7 +87,7 @@ OutdoorPvP* OutdoorPvPMgr::GetScript(uint32 zoneId)
         case ZONE_ID_GRIZZLY_HILLS:
             return m_scripts[OPVP_ID_GH];
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -119,7 +119,7 @@ OutdoorPvP* OutdoorPvPMgr::GetScriptOfAffectedZone(uint32 zoneId)
         case ZONE_ID_MANA_TOMBS:
             return m_scripts[OPVP_ID_TF];
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
