@@ -293,7 +293,7 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
 
     uint64 nId = GetNewEventId();
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CalendarMgr::AddEvent> ID("UI64FMTD"), '%s', Desc > '%s', type=%u, repeat=%u, maxInvites=%u, dungeonId=%d, flags=%u",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CalendarMgr::AddEvent> ID(" UI64FMTD "), '%s', Desc > '%s', type=%u, repeat=%u, maxInvites=%u, dungeonId=%d, flags=%u",
                      nId, title.c_str(), description.c_str(), type, repeatable, maxInvites, dungeonId, flags);
 
     CalendarEvent& newEvent = m_EventStore[nId];
@@ -311,7 +311,7 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
 
     CharacterDatabase.escape_string(title);
     CharacterDatabase.escape_string(description);
-    CharacterDatabase.PExecute("INSERT INTO calendar_events VALUES ("UI64FMTD", %u, %u, %u, %u, %d, %u, '%s', '%s')",
+    CharacterDatabase.PExecute("INSERT INTO calendar_events VALUES (" UI64FMTD ", %u, %u, %u, %u, %d, %u, '%s', '%s')",
                                nId,
                                guid.GetCounter(),
                                guildId,
@@ -395,7 +395,7 @@ CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& s
         return NULL;
     }
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Add Invite> eventId["UI64FMTD"], senderGuid[%s], inviteGuid[%s], Status[%u], rank[%u], text[%s], time[%u]",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Add Invite> eventId[" UI64FMTD "], senderGuid[%s], inviteGuid[%s], Status[%u], rank[%u], text[%s], time[%u]",
                      event->EventId, senderGuid.GetString().c_str(), inviteeGuid.GetString().c_str(), uint32(status), uint32(rank), text.c_str(), uint32(statusTime));
 
     if (!event->AddInvite(invite))
@@ -405,7 +405,7 @@ CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& s
         return NULL;
     }
 
-    CharacterDatabase.PExecute("INSERT INTO calendar_invites VALUES ("UI64FMTD", "UI64FMTD", %u, %u, %u, %u, %u)",
+    CharacterDatabase.PExecute("INSERT INTO calendar_invites VALUES (" UI64FMTD ", " UI64FMTD ", %u, %u, %u, %u, %u)",
                                invite->InviteId,
                                event->EventId,
                                inviteeGuid.GetCounter(),
@@ -669,7 +669,7 @@ void CalendarMgr::LoadCalendarsFromDB()
             }
             while (invitesQuery->NextRow());
 
-            sLog.outString(">> Loaded "UI64FMTD" invites! %s", totalInvites, (deletedInvites != 0) ? "(deleted some invites without corresponding event!)" : "");
+            sLog.outString(">> Loaded " UI64FMTD " invites! %s", totalInvites, (deletedInvites != 0) ? "(deleted some invites without corresponding event!)" : "");
         }
         else
         {

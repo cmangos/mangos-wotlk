@@ -58,7 +58,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
 
         data << uint8(event->IsGuildEvent());
         data << event->CreatorGuid.WriteAsPacked();
-        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "invite> EventId["UI64FMTD"], InviteId["UI64FMTD"], status[%u], rank[%u]",
+        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "invite> EventId[" UI64FMTD "], InviteId[" UI64FMTD "], status[%u], rank[%u]",
                          event->EventId, (*itr)->InviteId, uint32((*itr)->Status), uint32((*itr)->Rank));
     }
 
@@ -81,7 +81,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
         data << event->CreatorGuid.WriteAsPacked();
 
         std::string timeStr = TimeToTimestampStr(event->EventTime);
-        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Events> EventId["UI64FMTD"], Title[%s], Time[%s], Type[%u],  Flag[%u], DungeonId[%d], CreatorGuid[%s]",
+        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Events> EventId[" UI64FMTD "], Title[%s], Time[%s], Type[%u],  Flag[%u], DungeonId[%d], CreatorGuid[%s]",
                          event->EventId, event->Title.c_str(), timeStr.c_str(), uint32(event->Type),
                          uint32(event->Flags), event->DungeonId, event->CreatorGuid.GetString().c_str());
     }
@@ -221,7 +221,7 @@ void WorldSession::HandleCalendarEventSignup(WorldPacket& recv_data)
 
     recv_data >> eventId;
     recv_data >> tentative; // uint8 == bool size in all compilator???
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId ["UI64FMTD"] Tentative %u", eventId, uint32(tentative));
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "] Tentative %u", eventId, uint32(tentative));
 
     if (CalendarEvent* event = sCalendarMgr.GetEventById(eventId))
     {
@@ -327,7 +327,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
     recv_data >> UnknownPackedTime;
     recv_data >> flags;
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId ["UI64FMTD"], InviteId ["UI64FMTD"] Title %s, Description %s, type %u "
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "], InviteId [" UI64FMTD "] Title %s, Description %s, type %u "
                      "Repeatable %u, MaxInvites %u, Dungeon ID %d, Flags %u", eventId, inviteId, title.c_str(),
                      description.c_str(), uint32(type), uint32(repetitionType), maxInvites, dungeonId, flags);
 
@@ -400,7 +400,7 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recv_data)
 
     recv_data >> eventId >> inviteId;
     recv_data >> packedTime;
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId ["UI64FMTD"] inviteId ["UI64FMTD"]",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "] inviteId [" UI64FMTD "]",
                      eventId, inviteId);
 
     sCalendarMgr.CopyEvent(eventId, timeBitFieldsToSecs(packedTime), guid);
@@ -524,7 +524,7 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recv_data)
     uint32 status;
 
     recv_data >> eventId >> inviteId >> status;
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId ["UI64FMTD "], InviteId [" UI64FMTD "], status %u",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "], InviteId [" UI64FMTD "], status %u",
                      eventId, inviteId, status);
 
     if (CalendarEvent* event = sCalendarMgr.GetEventById(eventId))
@@ -557,7 +557,7 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recv_data)
             invite->Status = CalendarInviteStatus(status);
             invite->LastUpdateTime = time(NULL);
 
-            CharacterDatabase.PExecute("UPDATE calendar_invites SET status=%u, lastUpdateTime=%u WHERE inviteId = "UI64FMTD, status, uint32(invite->LastUpdateTime), invite->InviteId);
+            CharacterDatabase.PExecute("UPDATE calendar_invites SET status=%u, lastUpdateTime=%u WHERE inviteId = " UI64FMTD, status, uint32(invite->LastUpdateTime), invite->InviteId);
             sCalendarMgr.SendCalendarEventStatus(invite);
             sCalendarMgr.SendCalendarClearPendingAction(_player);
         }
@@ -581,7 +581,7 @@ void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket& recv_data)
     recv_data >> invitee.ReadAsPacked();
     recv_data >> inviteId >> ownerInviteId >> eventId;
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId ["UI64FMTD"], ownerInviteId ["UI64FMTD"], Invitee ([%s] id: ["UI64FMTD"])",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "], ownerInviteId [" UI64FMTD "], Invitee ([%s] id: [" UI64FMTD "])",
                      eventId, ownerInviteId, invitee.GetString().c_str(), inviteId);
 
     if (CalendarEvent* event = sCalendarMgr.GetEventById(eventId))
@@ -604,7 +604,7 @@ void WorldSession::HandleCalendarEventStatus(WorldPacket& recv_data)
 
     recv_data >> invitee.ReadAsPacked();
     recv_data >> eventId >> inviteId >> ownerInviteId >> status;
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId ["UI64FMTD"] ownerInviteId ["UI64FMTD"], Invitee ([%s] id: ["UI64FMTD"], status %u",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "] ownerInviteId [" UI64FMTD "], Invitee ([%s] id: [" UI64FMTD "], status %u",
                      eventId, ownerInviteId, invitee.GetString().c_str(), inviteId, status);
 
     if (CalendarEvent* event = sCalendarMgr.GetEventById(eventId))
@@ -654,7 +654,7 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recv_data)
 
     recv_data >> invitee.ReadAsPacked();
     recv_data >> eventId >>  inviteId >> ownerInviteId >> rank;
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId ["UI64FMTD"] ownerInviteId ["UI64FMTD"], Invitee ([%s] id: ["UI64FMTD"], rank %u",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "] ownerInviteId [" UI64FMTD "], Invitee ([%s] id: [" UI64FMTD "], rank %u",
                      eventId, ownerInviteId, invitee.GetString().c_str(), inviteId, rank);
 
     if (CalendarEvent* event = sCalendarMgr.GetEventById(eventId))
@@ -706,7 +706,7 @@ void WorldSession::HandleCalendarComplain(WorldPacket& recv_data)
 
     recv_data >> badGuyGuid;
     recv_data >> eventId >>  inviteId;
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId ["UI64FMTD"], BadGuyGuid ([%s] inviteId: ["UI64FMTD"])",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "], BadGuyGuid ([%s] inviteId: [" UI64FMTD "])",
                      eventId, badGuyGuid.GetString().c_str(), inviteId);
 
     // Remove the invite
@@ -759,7 +759,7 @@ void CalendarMgr::SendCalendarEventInviteAlert(CalendarInvite const* invite)
     data << invite->SenderGuid.WriteAsPacked();
     //data.hexlike();
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SendCalendarInviteAlert> senderGuid[%s], inviteeGuid[%s], EventId["UI64FMTD"], Status[%u], InviteId["UI64FMTD"]",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SendCalendarInviteAlert> senderGuid[%s], inviteeGuid[%s], EventId[" UI64FMTD "], Status[%u], InviteId[" UI64FMTD "]",
                      invite->SenderGuid.GetString().c_str(), invite->InviteeGuid.GetString().c_str(), event->EventId, uint32(invite->Status), invite->InviteId);
 
     if (event->IsGuildEvent() || event->IsGuildAnnouncement())
@@ -799,7 +799,7 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const* invite)
         data << secsToTimeBitFields(statusTime);
     data << uint8(invite->SenderGuid != invite->InviteeGuid); // false only if the invite is sign-up (invitee create himself his invite)
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SendCalendarInvit> %s senderGuid[%s], inviteeGuid[%s], EventId["UI64FMTD"], Status[%u], InviteId["UI64FMTD"]",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SendCalendarInvit> %s senderGuid[%s], inviteeGuid[%s], EventId[" UI64FMTD "], Status[%u], InviteId[" UI64FMTD "]",
                      preInvite ? "is PreInvite," : "", invite->SenderGuid.GetString().c_str(), invite->InviteeGuid.GetString().c_str(), eventId, uint32(invite->Status), invite->InviteId);
 
     //data.hexlike();
@@ -854,7 +854,7 @@ void CalendarMgr::SendCalendarEvent(Player* player, CalendarEvent const* event, 
     if (!player || !event)
         return;
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SendCalendarEvent> sendType[%u], CreatorGuid[%s], EventId["UI64FMTD"], Type[%u], Flags[%u], Title[%s]",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SendCalendarEvent> sendType[%u], CreatorGuid[%s], EventId[" UI64FMTD "], Type[%u], Flags[%u], Title[%s]",
                      sendType, event->CreatorGuid.GetString().c_str(), event->EventId, uint32(event->Type), event->Flags, event->Title.c_str());
 
     WorldPacket data(SMSG_CALENDAR_SEND_EVENT);
@@ -892,7 +892,7 @@ void CalendarMgr::SendCalendarEvent(Player* player, CalendarEvent const* event, 
         data << secsToTimeBitFields(invite->LastUpdateTime);
         data << invite->Text;
 
-        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Invite> InviteId["UI64FMTD"], InviteLvl[%u], Status[%u], Rank[%u],  GuildEvent[%s], Text[%s]",
+        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Invite> InviteId[" UI64FMTD "], InviteLvl[%u], Status[%u], Rank[%u],  GuildEvent[%s], Text[%s]",
                          invite->InviteId, uint32(inviteeLevel), uint32(invite->Status), uint32(invite->Rank),
                          (event->IsGuildEvent() && event->GuildId == inviteeGuildId) ? "true" : "false", invite->Text.c_str());
     }

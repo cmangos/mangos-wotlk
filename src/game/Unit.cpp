@@ -8632,7 +8632,8 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
         m_speed_rate[mtype] = rate;
         propagateSpeedChange();
 
-        const uint16 SetSpeed2Opc_table[MAX_MOVE_TYPE][2] =
+        typedef const uint16 SpeedOpcodePair[2];
+        SpeedOpcodePair SetSpeed2Opc_table[MAX_MOVE_TYPE] =
         {
             {SMSG_FORCE_WALK_SPEED_CHANGE,        SMSG_SPLINE_SET_WALK_SPEED},
             {SMSG_FORCE_RUN_SPEED_CHANGE,         SMSG_SPLINE_SET_RUN_SPEED},
@@ -8645,13 +8646,15 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
             {SMSG_FORCE_PITCH_RATE_CHANGE,        SMSG_SPLINE_SET_PITCH_RATE},
         };
 
+        const SpeedOpcodePair& speedOpcodes = SetSpeed2Opc_table[mtype];
+        
         if (forced && GetTypeId() == TYPEID_PLAYER)
         {
             // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
             // and do it only for real sent packets and use run for run/mounted as client expected
             ++((Player*)this)->m_forced_speed_changes[mtype];
 
-            WorldPacket data(Opcodes(SetSpeed2Opc_table[mtype][0]), 18);
+            WorldPacket data(Opcodes(speedOpcodes[0]), 18);
             data << GetPackGUID();
             data << (uint32)0;                              // moveEvent, NUM_PMOVE_EVTS = 0x39
             if (mtype == MOVE_RUN)
@@ -8659,7 +8662,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
             data << float(GetSpeed(mtype));
             ((Player*)this)->GetSession()->SendPacket(&data);
         }
-        WorldPacket data(Opcodes(SetSpeed2Opc_table[mtype][1]), 12);
+        WorldPacket data(Opcodes(speedOpcodes[1]), 12);
         data << GetPackGUID();
         data << float(GetSpeed(mtype));
         SendMessageToSet(&data, false);
