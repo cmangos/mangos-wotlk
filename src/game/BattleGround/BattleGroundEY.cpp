@@ -395,18 +395,6 @@ void BattleGroundEY::HandleKillPlayer(Player* player, Player* killer)
 
 void BattleGroundEY::EventPlayerDroppedFlag(Player* source)
 {
-    if (GetStatus() != STATUS_IN_PROGRESS)
-    {
-        // if not running, do not cast things at the dropper player, neither send unnecessary messages
-        // just take off the aura
-        if (IsFlagPickedUp() && GetFlagCarrierGuid() == source->GetObjectGuid())
-        {
-            ClearFlagCarrier();
-            source->RemoveAurasDueToSpell(EY_NETHERSTORM_FLAG_SPELL);
-        }
-        return;
-    }
-
     if (!IsFlagPickedUp())
         return;
 
@@ -415,6 +403,13 @@ void BattleGroundEY::EventPlayerDroppedFlag(Player* source)
 
     ClearFlagCarrier();
     source->RemoveAurasDueToSpell(EY_NETHERSTORM_FLAG_SPELL);
+
+    if (GetStatus() != STATUS_IN_PROGRESS)
+    {
+        // do not cast auras or send messages after match has ended
+        return;
+    }
+
     m_flagState = EY_FLAG_STATE_ON_GROUND;
     m_flagRespawnTimer = EY_FLAG_RESPAWN_TIME;
     source->CastSpell(source, SPELL_RECENTLY_DROPPED_FLAG, true);

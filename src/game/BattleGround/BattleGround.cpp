@@ -1459,13 +1459,15 @@ void BattleGround::DoorOpen(ObjectGuid guid)
 
 Team BattleGround::GetPrematureWinner()
 {
-    Team winner = TEAM_NONE;
-    if (GetPlayersCountByTeam(ALLIANCE) >= GetMinPlayersPerTeam())
-        winner = ALLIANCE;
-    else if (GetPlayersCountByTeam(HORDE) >= GetMinPlayersPerTeam())
-        winner = HORDE;
+    uint32 hordePlayers = GetPlayersCountByTeam(HORDE);
+    uint32 alliancePlayers = GetPlayersCountByTeam(ALLIANCE);
 
-    return winner;
+    if (hordePlayers > alliancePlayers)
+        return HORDE;
+    if (alliancePlayers > hordePlayers)
+        return ALLIANCE;
+
+    return TEAM_NONE;
 }
 
 void BattleGround::OnObjectDBLoad(Creature* creature)
