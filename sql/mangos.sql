@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_12864_01_mangos_spell_template` bit(1) DEFAULT NULL
+  `required_12916_01_mangos_battleground_template` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -385,6 +385,7 @@ CREATE TABLE `battleground_template` (
   `AllianceStartO` float NOT NULL,
   `HordeStartLoc` mediumint(8) unsigned NOT NULL,
   `HordeStartO` float NOT NULL,
+  `StartMaxDist` float NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -395,19 +396,19 @@ CREATE TABLE `battleground_template` (
 LOCK TABLES `battleground_template` WRITE;
 /*!40000 ALTER TABLE `battleground_template` DISABLE KEYS */;
 INSERT INTO `battleground_template` VALUES
-(1,40,40,611,2.72532,610,2.27452),
-(2,10,10,769,3.14159,770,3.14159),
-(3,15,15,890,3.40156,889,0.263892),
-(4,5,5,929,0,936,3.14159),
-(5,5,5,939,0,940,3.14159),
-(6,5,5,0,0,0,0),
-(7,15,15,1103,3.40156,1104,0.263892),
-(8,5,5,1258,0,1259,3.14159),
-(9,15,15,1367,0,1368,0),
-(10,5,5,1362,0,1363,0),
-(11,5,5,1364,0,1365,0),
-(30,40,40,1485,0,1486,0),
-(32,5,40,0,0,0,0);
+(1,40,40,611,2.72532,610,2.27452,100),
+(2,10,10,769,3.14159,770,3.14159,75),
+(3,15,15,890,3.40156,889,0.263892,75),
+(4,5,5,929,0,936,3.14159,0),
+(5,5,5,939,0,940,3.14159,0),
+(6,5,5,0,0,0,0,0),
+(7,15,15,1103,3.40156,1104,0.263892,75),
+(8,5,5,1258,0,1259,3.14159,0),
+(9,15,15,1367,0,1368,0,0),
+(10,5,5,1362,0,1363,0,0),
+(11,5,5,1364,0,1365,0,0),
+(30,40,40,1485,0,1486,0,200),
+(32,5,40,0,0,0,0,0);
 /*!40000 ALTER TABLE `battleground_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
