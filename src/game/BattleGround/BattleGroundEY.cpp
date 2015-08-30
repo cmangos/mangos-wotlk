@@ -79,7 +79,7 @@ void BattleGroundEY::Update(uint32 diff)
                 if (m_towerOwner[NODE_FEL_REAVER_RUINS] == flagCarrier->GetTeam())
                 {
                     // coords and range taken from DBC of areatrigger (4514)
-                    if (flagCarrier->GetDistance(2044.0f, 1729.729f, 1190.03f) <= 3.0f)
+                    if (flagCarrier->IsWithinDist3d(2044.0f, 1729.729f, 1190.03f, 3.0f))
                         EventPlayerCapturedFlag(flagCarrier, NODE_FEL_REAVER_RUINS);
                 }
             }
