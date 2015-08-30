@@ -39,7 +39,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
     ObjectGuid lguid = player->GetLootGuid();
     Loot*    loot;
     uint8    lootSlot;
-    Item* pItem = NULL;
+    Item* pItem = nullptr;
 
     recv_data >> lootSlot;
 
@@ -106,15 +106,15 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
         }
     }
 
-    QuestItem* qitem = NULL;
-    QuestItem* ffaitem = NULL;
-    QuestItem* conditem = NULL;
+    QuestItem* qitem = nullptr;
+    QuestItem* ffaitem = nullptr;
+    QuestItem* conditem = nullptr;
 
     LootItem* item = loot->LootItemInSlot(lootSlot, player, &qitem, &ffaitem, &conditem);
 
     if (!item)
     {
-        player->SendEquipError(EQUIP_ERR_ALREADY_LOOTED, NULL, NULL);
+        player->SendEquipError(EQUIP_ERR_ALREADY_LOOTED, nullptr, nullptr);
         return;
     }
 
@@ -172,7 +172,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item->itemid, item->count);
     }
     else
-        player->SendEquipError(msg, NULL, NULL, item->itemid);
+        player->SendEquipError(msg, nullptr, nullptr, item->itemid);
 }
 
 void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
@@ -184,8 +184,8 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
     if (!guid)
         return;
 
-    Loot* pLoot = NULL;
-    Item* pItem = NULL;
+    Loot* pLoot = nullptr;
+    Item* pItem = nullptr;
 
     switch (guid.GetHigh())
     {
@@ -242,7 +242,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
             Group* group = player->GetGroup();
 
             std::vector<Player*> playersNear;
-            for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+            for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
             {
                 Player* playerGroup = itr->getSource();
                 if (!playerGroup)
@@ -528,7 +528,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
     if (_player->GetLootGuid() != lootguid)
         return;
 
-    Loot* pLoot = NULL;
+    Loot* pLoot = nullptr;
 
     if (lootguid.IsCreatureOrVehicle())
     {
@@ -561,10 +561,10 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
     InventoryResult msg = target->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item.itemid, item.count);
     if (msg != EQUIP_ERR_OK)
     {
-        target->SendEquipError(msg, NULL, NULL, item.itemid);
+        target->SendEquipError(msg, nullptr, nullptr, item.itemid);
 
         // send duplicate of error massage to master looter
-        _player->SendEquipError(msg, NULL, NULL, item.itemid);
+        _player->SendEquipError(msg, nullptr, nullptr, item.itemid);
         return;
     }
 

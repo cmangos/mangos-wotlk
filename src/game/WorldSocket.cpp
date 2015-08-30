@@ -147,7 +147,7 @@ void WorldSocket::CloseSocket(void)
     {
         ACE_GUARD(LockType, Guard, m_SessionLock);
 
-        m_Session = NULL;
+        m_Session = nullptr;
     }
 }
 

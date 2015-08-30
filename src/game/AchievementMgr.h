@@ -267,7 +267,7 @@ class AchievementMgr
         void ResetAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0);
         void StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId, time_t startTime = 0);
         void DoFailedTimedAchievementCriterias();
-        void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0, Unit* unit = NULL, uint32 time = 0);
+        void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0, Unit* unit = nullptr, uint32 time = 0);
         void CheckAllAchievementCriteria();
         void SendAllAchievementData();
         void SendRespondInspectAchievements(Player* player);
@@ -277,10 +277,10 @@ class AchievementMgr
         CompletedAchievementData const* GetCompleteData(uint32 achievement_id) const
         {
             CompletedAchievementMap::const_iterator itr = m_completedAchievements.find(achievement_id);
-            return itr != m_completedAchievements.end() ? &itr->second : NULL;
+            return itr != m_completedAchievements.end() ? &itr->second : nullptr;
         }
 
-        bool HasAchievement(uint32 achievement_id) const { return GetCompleteData(achievement_id) != NULL; }
+        bool HasAchievement(uint32 achievement_id) const { return GetCompleteData(achievement_id) != nullptr; }
         CompletedAchievementMap const& GetCompletedAchievements() const { return m_completedAchievements; }
         bool IsCompletedCriteria(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement) const;
 

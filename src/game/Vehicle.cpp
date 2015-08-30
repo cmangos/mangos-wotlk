@@ -137,7 +137,7 @@ void VehicleInfo::Initialize()
             DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), itr->seatId);
             m_accessoryGuids.insert(summoned->GetObjectGuid());
             int32 basepoint0 = itr->seatId + 1;
-            summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, NULL, NULL, true);
+            summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, true);
         }
     }
 
@@ -408,7 +408,7 @@ Unit* VehicleInfo::GetPassenger(uint8 seat) const
         if (itr->second->GetTransportSeat() == seat)
             return (Unit*)itr->first;
 
-    return NULL;
+    return nullptr;
 }
 
 // Helper function to undo the turning of the vehicle to calculate a relative position of the passenger when boarding
@@ -443,7 +443,7 @@ void VehicleInfo::RemoveAccessoriesFromMap()
 VehicleSeatEntry const* VehicleInfo::GetSeatEntry(uint8 seat) const
 {
     VehicleSeatMap::const_iterator itr = m_vehicleSeats.find(seat);
-    return itr != m_vehicleSeats.end() ? itr->second : NULL;
+    return itr != m_vehicleSeats.end() ? itr->second : nullptr;
 }
 
 /**
@@ -590,11 +590,11 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
 
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
-            pPlayer->SetCharm(NULL);
+            pPlayer->SetCharm(nullptr);
             pVehicle->SetCharmerGuid(ObjectGuid());
 
             pPlayer->SetClientControl(pVehicle, 0);
-            pPlayer->SetMover(NULL);
+            pPlayer->SetMover(nullptr);
 
             pVehicle->clearUnitState(UNIT_STAT_CONTROLLED);
             pVehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
@@ -614,7 +614,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
     {
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
-            passenger->SetCharm(NULL);
+            passenger->SetCharm(nullptr);
             pVehicle->SetCharmerGuid(ObjectGuid());
         }
 
