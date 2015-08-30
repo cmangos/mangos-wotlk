@@ -646,3 +646,17 @@ void BattleGroundWS::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, BG_WS_TIME_ENABLED, WORLD_STATE_ADD);
     FillInitialWorldState(data, count, BG_WS_TIME_REMAINING, GetRemainingTimeInMinutes());
 }
+
+Team BattleGroundWS::GetPrematureWinner()
+{
+    int32 hordeScore = m_TeamScores[TEAM_INDEX_HORDE];
+    int32 allianceScore = m_TeamScores[TEAM_INDEX_ALLIANCE];
+
+    if (hordeScore > allianceScore)
+        return HORDE;
+    if (allianceScore > hordeScore)
+        return ALLIANCE;
+
+    // If the values are equal, fall back to number of players on each team
+    return BattleGround::GetPrematureWinner();
+}

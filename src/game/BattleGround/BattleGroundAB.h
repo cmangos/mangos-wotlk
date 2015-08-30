@@ -183,6 +183,9 @@ class BattleGroundAB : public BattleGround
         /* achievement req. */
         bool IsAllNodesControlledByTeam(Team team) const override;
         bool IsTeamScores500Disadvantage(Team team) const { return m_TeamScores500Disadvantage[GetTeamIndexByTeamId(team)]; }
+
+        virtual Team GetPrematureWinner() override;
+
     private:
         /* Gameobject spawning/despawning */
         void _CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool delay);

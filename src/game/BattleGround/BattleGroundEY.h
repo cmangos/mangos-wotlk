@@ -278,6 +278,8 @@ class BattleGroundEY : public BattleGround
         /* achievement req. */
         bool IsAllNodesControlledByTeam(Team team) const override;
 
+        virtual Team GetPrematureWinner() override;
+
     private:
         // process capture events
         void ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState, uint32 message);
