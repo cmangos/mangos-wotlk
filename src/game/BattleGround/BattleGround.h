@@ -32,6 +32,7 @@
 // only arena event
 // cause this buff apears 90sec after start in every bg i implement it here
 #define ARENA_BUFF_EVENT 253
+#define ARENA_TIMELIMIT_POINTS_LOSS -16
 
 class Creature;
 class GameObject;
@@ -112,6 +113,7 @@ enum BattleGroundTimeIntervals
     RESPAWN_IMMEDIATELY             = 0,                    // secs
     BUFF_RESPAWN_TIME               = 180,                  // secs
     ARENA_SPAWN_BUFF_OBJECTS        = 90000,                // ms - 90sec after start
+    ARENA_FORCED_DRAW               = 2700000,              // ms - 45min after start
 };
 
 enum BattleGroundStartTimeIntervals
