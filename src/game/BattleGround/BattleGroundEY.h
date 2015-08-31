@@ -258,7 +258,7 @@ class BattleGroundEY : public BattleGround
         void RemovePlayer(Player* plr, ObjectGuid guid) override;
         bool HandleEvent(uint32 eventId, GameObject* go) override;
         void HandleGameObjectCreate(GameObject* go) override;
-        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         void HandleKillPlayer(Player* player, Player* killer) override;
 
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
