@@ -1089,6 +1089,9 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     if (!plr)                                               // wrong player
         return;
 
+    if (!_player->IsWithinDistInMap(plr, INSPECT_DISTANCE, false))
+        return;
+
     WorldPacket data(SMSG_INSPECT_RESULTS, 50);
     data << plr->GetPackGUID();
 
@@ -1118,6 +1121,9 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
         sLog.outError("InspectHonorStats: WTF, player not found...");
         return;
     }
+
+    if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+        return;
 
     WorldPacket data(MSG_INSPECT_HONOR_STATS, 8 + 1 + 4 * 4);
     data << player->GetObjectGuid();
@@ -1517,8 +1523,14 @@ void WorldSession::HandleQueryInspectAchievementsOpcode(WorldPacket& recv_data)
 
     recv_data >> guid.ReadAsPacked();
 
-    if (Player* player = sObjectMgr.GetPlayer(guid))
-        player->GetAchievementMgr().SendRespondInspectAchievements(_player);
+    Player* player = sObjectMgr.GetPlayer(guid);
+    if (!player)
+        return;
+
+    if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+        return;
+
+    player->GetAchievementMgr().SendRespondInspectAchievements(_player);
 }
 
 void WorldSession::HandleUITimeRequestOpcode(WorldPacket& /*recv_data*/)

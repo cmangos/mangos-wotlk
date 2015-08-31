@@ -34,15 +34,19 @@ void WorldSession::HandleInspectArenaTeamsOpcode(WorldPacket& recv_data)
     recv_data >> guid;
     DEBUG_LOG("Inspect Arena stats %s", guid.GetString().c_str());
 
-    if (Player* plr = sObjectMgr.GetPlayer(guid))
+    Player* player = sObjectMgr.GetPlayer(guid);
+    if (!player)
+        return;
+
+    if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+        return;
+
+    for (uint8 i = 0; i < MAX_ARENA_SLOT; ++i)
     {
-        for (uint8 i = 0; i < MAX_ARENA_SLOT; ++i)
+        if (uint32 a_id = player->GetArenaTeamId(i))
         {
-            if (uint32 a_id = plr->GetArenaTeamId(i))
-            {
-                if (ArenaTeam* at = sObjectMgr.GetArenaTeamById(a_id))
-                    at->InspectStats(this, plr->GetObjectGuid());
-            }
+            if (ArenaTeam* arenaTeam = sObjectMgr.GetArenaTeamById(a_id))
+                arenaTeam->InspectStats(this, player->GetObjectGuid());
         }
     }
 }
