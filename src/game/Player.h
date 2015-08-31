@@ -934,6 +934,19 @@ struct BGData
     bool HasTaxiPath() const { return taxiPath[0] && taxiPath[1]; }
 };
 
+struct TradeStatusInfo
+{
+    TradeStatusInfo() : Status(TRADE_STATUS_BUSY), TraderGuid(), Result(EQUIP_ERR_OK),
+        IsTargetResult(false), ItemLimitCategoryId(0), Slot(0) { }
+
+    TradeStatus Status;
+    ObjectGuid TraderGuid;
+    InventoryResult Result;
+    bool IsTargetResult;
+    uint32 ItemLimitCategoryId;
+    uint8 Slot;
+};
+
 class TradeData
 {
     public:                                                 // constructors
