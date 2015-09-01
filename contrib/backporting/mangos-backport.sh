@@ -31,11 +31,12 @@ BATCH_PROCESS=0
 VERBOSE=0
 
 ## user-tunable
-AUTORESOLVE="src/shared/revision_nr.h"
+AUTORESOLVE_FILES[0]="src/shared/revision_sql.h"
 GIT_AMEND_OPTS="-s"
 GIT_RECOVER="git reset --hard HEAD^"
 CONFLICT_RETVAL=2    # for batch usage
-GIT_PATH="./"
+PARENT_REPOSITORY="cmangos/mangos-"
+DEFAULT_REPOSITORY_CLIENT="wotlk"
 
 
 ### print error to stderr
@@ -45,7 +46,7 @@ function print_error {
 
 ### prints help
 function print_help {
-	echo -e "Usage: ${0##*/} [-vb] <revspec>" \
+	echo -e "Usage: ${0##*/} [OPTIONS] <hash> [<repository clientversion>]" \
 		"\nBackports a specified commit to current branch." \
 		"\n\n  -b       Batch processing (no interaction)." \
 		"\n           (runs amend without calling \$EDITOR)" \
@@ -157,6 +158,12 @@ done;
 shift $(( $OPTIND - 1 ))
 ORIG_REF=${1}
 
+if [[ -z ${2} ]]; then
+  PARENT_REPOSITORY=${PARENT_REPOSITORY}${DEFAULT_REPOSITORY_CLIENT}
+else
+  PARENT_REPOSITORY=${PARENT_REPOSITORY}${2}
+fi
+
 # check for needed arguments
 if [[ -z ${ORIG_REF} ]]; then
 	print_help
@@ -202,16 +209,13 @@ COMMIT_HASH=$(git show -s --pretty=format:'%h' ${ORIG_REF})
 # subject (with removed revision number)
 COMMIT_SUBJECT=$(git show -s --pretty=format:'%s' ${ORIG_REF} | sed -r 's/\[[a-z]?[0-9]*\] //')
 [[ $? != 0 ]] && exit 1
-COMMIT_REVISION=$(git show -s --pretty=format:'%s' ${ORIG_REF} | sed -nr 's/^\[([a-z]?[0-9]*).*/\1/p')
-[[ $? != 0 ]] && exit 1
-if [ "$COMMIT_REVISION" != "" ]; then COMMIT_REVISION="[$COMMIT_REVISION] - "; fi
 
 # body
 COMMIT_BODY=$(git show -s --pretty=format:'%b' ${ORIG_REF})
 [[ $? != 0 ]] && exit 1
 
 # whole message (yea, it could be done without echo)
-COMMIT_MESSAGE=$(echo -e "${COMMIT_SUBJECT}\n\n${COMMIT_BODY}\n\n(based on commit $COMMIT_REVISION${COMMIT_HASH})")
+COMMIT_MESSAGE=$(echo -e "${COMMIT_SUBJECT}\n\n${COMMIT_BODY}\n\n(based on ${PARENT_REPOSITORY}@${COMMIT_HASH})")
 [[ $? != 0 ]] && exit 1
 
 ## new empty commit ready, so create it
@@ -280,15 +284,12 @@ if [[ -z $unmerged_files ]]; then
 	git_recover
 fi
 
-# if $AUTORESOLVE isn't there (but other conflicts are), simply exit
+for AUTORESOLVE in "${AUTORESOLVE_FILES[@]}"
+do
+
+# if $AUTORESOLVE isn't there (but other conflicts are)
 if [[ -z $(echo "${unmerged_files}" | grep ${AUTORESOLVE}) ]]; then
-	print_error "${pick_out}"
-	echo "----------"
-	verbose_print "${AUTORESOLVE} not found as unmerged."
-	echo "Please run git commit ${GIT_AMEND_OPTS} --amend" \
-	     "after resolving all conflicts."
-	echo "To recover from the resolution, use ${GIT_RECOVER}."
-	exit ${CONFLICT_RETVAL}
+	continue
 fi
 
 # do the resolution - use old version of the file
@@ -300,7 +301,6 @@ if [[ -f ${AUTORESOLVE} ]]; then
 	[[ $? != 0 ]] && git_recover
 	git add ${AUTORESOLVE}
 	[[ $? != 0 ]] && git_recover
-#	echo "Resolution of ${AUTORESOLVE} finished successfuly."
 else
 	print_error "${pick_out}"
 	print_error "----------"
@@ -308,7 +308,9 @@ else
 	git_recover
 fi
 
-# if $AUTORESOLVE was the only conflict, amend the commit
+done
+
+# if $AUTORESOLVE_FILES were the only conflicts, amend the commit
 if [[ $(echo "${unmerged_files}" | wc -l) == 1 ]]; then
 	verbose_print "----------"
 	if [[ ${NO_AUTOCOMMIT} > 0 ]]; then
