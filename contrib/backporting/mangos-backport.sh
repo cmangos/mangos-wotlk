@@ -1,23 +1,4 @@
 #!/bin/bash
-#
-# mangos-backport - a bash helper for backporting in git for MaNGOS project
-#  Copyright (C) 2009  freghar <compmancz@gmail.com>
-#
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-#  02110-1301, USA
-#
 
 # The script works pretty simple - each time an empty commit is made,
 # copying author and message from the original one.
@@ -34,6 +15,7 @@ AUTORESOLVE_FILES_REMOVE[1]=1
 GIT_AMEND_OPTS="-s"
 GIT_RECOVER="git reset --hard HEAD^"
 CONFLICT_RETVAL=2    # for batch usage
+AUTOCOMMIT=1
 PARENT_REPOSITORY="cmangos/mangos-"
 DEFAULT_REPOSITORY_CLIENT="wotlk"
 
@@ -102,7 +84,7 @@ function git_autoamend {
 while getopts "n" OPTION; do
   case $OPTION in
     n)
-      NO_AUTOCOMMIT=1
+      AUTOCOMMIT=0
       ;;
     \?)
       print_help
@@ -174,7 +156,7 @@ COMMIT_MESSAGE=$(echo -e "${COMMIT_SUBJECT}\n\n${COMMIT_BODY}\n\n(based on ${PAR
 [[ $? != 0 ]] && exit 1
 
 ## new empty commit ready, so create it
-git commit --author="${COMMIT_AUTHOR}" -m "${COMMIT_MESSAGE}"
+git commit --author="${COMMIT_AUTHOR}" -m "${COMMIT_MESSAGE}" --allow-empty
 [[ $? != 0 ]] && exit 1
 
 
@@ -207,7 +189,7 @@ fi
 
 # simply amend if the pick was successful
 if [[ $pick_retval == 0 && -z $unmerged_files ]]; then
-  if [[ ${NO_AUTOCOMMIT} == 0 ]]; then
+  if [[ ${AUTOCOMMIT} > 0 ]]; then
     git_autoamend
   fi
   exit 0
@@ -225,30 +207,30 @@ fi
 for ((i=0; i<${#AUTORESOLVE_FILES[@]}; i++));
 do
 
-AUTORESOLVE=${AUTORESOLVE_FILES[$i]}
+  AUTORESOLVE=${AUTORESOLVE_FILES[$i]}
 
-# if $AUTORESOLVE isn't there (but other conflicts are)
-if [[ -z $(echo "${unmerged_files}" | grep ${AUTORESOLVE}) ]]; then
-  continue
-fi
-
-# do the resolution - use old version of the file
-if [[ -f ${AUTORESOLVE} ]]; then
-  if [[ ${AUTORESOLVE_FILES_REMOVE[$i]} > 0 ]]; then
-    [[ $? != 0 ]] && git_recover
-    git rm -q ${AUTORESOLVE}
-  else
-    git show :2:${AUTORESOLVE} > ${AUTORESOLVE}
-    [[ $? != 0 ]] && git_recover
-    git add ${AUTORESOLVE}
+  # if $AUTORESOLVE isn't there (but other conflicts are)
+  if [[ -z $(echo "${unmerged_files}" | grep ${AUTORESOLVE}) ]]; then
+    continue
   fi
-  [[ $? != 0 ]] && git_recover
-else
-  print_error "${pick_out}"
-  print_error "----------"
-  print_error "error: ${AUTORESOLVE} not found, cannot resolve"
-  git_recover
-fi
+
+  # do the resolution - use old version of the file
+  if [[ -f ${AUTORESOLVE} ]]; then
+    if [[ ${AUTORESOLVE_FILES_REMOVE[$i]} > 0 ]]; then
+      [[ $? != 0 ]] && git_recover
+      git rm -q ${AUTORESOLVE}
+    else
+      git show :2:${AUTORESOLVE} > ${AUTORESOLVE}
+      [[ $? != 0 ]] && git_recover
+      git add ${AUTORESOLVE}
+    fi
+    [[ $? != 0 ]] && git_recover
+  else
+    print_error "${pick_out}"
+    print_error "----------"
+    print_error "error: ${AUTORESOLVE} not found, cannot resolve"
+    git_recover
+  fi
 
 done
 
@@ -261,7 +243,7 @@ fi
 
 # if $AUTORESOLVE_FILES were the only conflicts, amend the commit
 if [[ -z ${unmerged_files} ]]; then
-  if [[ ${NO_AUTOCOMMIT} == 0 ]]; then
+  if [[ ${AUTOCOMMIT} > 0 ]]; then
     git_autoamend
   fi
   exit 0
