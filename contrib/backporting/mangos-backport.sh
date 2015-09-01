@@ -26,12 +26,11 @@
 
 ### general definitions
 
-## internals
-BATCH_PROCESS=0
-VERBOSE=0
-
 ## user-tunable
 AUTORESOLVE_FILES[0]="src/shared/revision_sql.h"
+AUTORESOLVE_FILES[1]="src/shared/revision_nr.h"
+AUTORESOLVE_FILES_REMOVE[0]=0
+AUTORESOLVE_FILES_REMOVE[1]=1
 GIT_AMEND_OPTS="-s"
 GIT_RECOVER="git reset --hard HEAD^"
 CONFLICT_RETVAL=2    # for batch usage
@@ -48,34 +47,9 @@ function print_error {
 function print_help {
 	echo -e "Usage: ${0##*/} [OPTIONS] <hash> [<repository clientversion>]" \
 		"\nBackports a specified commit to current branch." \
-		"\n\n  -b       Batch processing (no interaction)." \
-		"\n           (runs amend without calling \$EDITOR)" \
-		"\n  -v       Be verbose." \
-		"\n  -n       Never automatically commit." \
+		"\n\n  -n       Never automatically commit." \
 		"\n"
 }
-
-### verbose print
-function verbose_print {
-	[[ ${VERBOSE} > 0 ]] && echo "${@}"
-}
-
-### runs a command and handles it's output verbosity
-#function verbose_run {
-#	if [[ ${VERBOSE} > 0 ]]; then
-#		"${@}"
-#		return $?
-#	else
-#		"${@}" 1 > /dev/null
-#		return $?
-#	fi
-#}
-
-### catches output of a command and returns it's retval
-#function catch_out {
-#		pick_out=$(${@} 2>&1)
-#		return $?
-#}
 
 ### recover from an error, deleting empty commit
 function git_recover {
@@ -114,21 +88,8 @@ function git_autoamend {
 		git_recover
 	fi
 
-	verbose_print "----------"
-	if [[ ${BATCH_PROCESS} > 0 ]]; then
-		if [[ ${VERBOSE} > 0 ]]; then
-			git commit ${GIT_AMEND_OPTS} --amend -C HEAD
-			git_retval=$?
-		else
-			git commit ${GIT_AMEND_OPTS} --amend -C HEAD 1> /dev/null
-			git_retval=$?
-			[[ $git_retval == 0 ]] && echo \
-						"Commit ${COMMIT_HASH} picked."
-		fi
-	else
-		git commit ${GIT_AMEND_OPTS} --amend -c HEAD
-		git_retval=$?
-	fi
+	git commit ${GIT_AMEND_OPTS} --amend -C HEAD
+	git_retval=$?
 	[[ $git_retval != 0 ]] && git_recover
 }
 
@@ -138,14 +99,8 @@ function git_autoamend {
 ## arguments
 
 # arg parsing
-while getopts "vbn" OPTION; do
+while getopts "n" OPTION; do
 	case $OPTION in
-		v)
-			VERBOSE=1
-			;;
-		b)
-			BATCH_PROCESS=1
-			;;
 		n)
 			NO_AUTOCOMMIT=1
 			;;
@@ -219,17 +174,8 @@ COMMIT_MESSAGE=$(echo -e "${COMMIT_SUBJECT}\n\n${COMMIT_BODY}\n\n(based on ${PAR
 [[ $? != 0 ]] && exit 1
 
 ## new empty commit ready, so create it
-verbose_print "Creating new empty commit on current HEAD (${CURRENT_HEAD}}."
-verbose_print "----------"
-if [[ ${VERBOSE} > 0 ]]; then
-	git commit --author="${COMMIT_AUTHOR}" -m "${COMMIT_MESSAGE}" \
-		--allow-empty
-	[[ $? != 0 ]] && exit 1
-else
-	git commit --author="${COMMIT_AUTHOR}" -m "${COMMIT_MESSAGE}" \
-		--allow-empty 1> /dev/null
-	[[ $? != 0 ]] && exit 1
-fi
+git commit --author="${COMMIT_AUTHOR}" -m "${COMMIT_MESSAGE}"
+[[ $? != 0 ]] && exit 1
 
 
 ## first, try cherry-picking the commit and catch conflicts.
@@ -261,15 +207,7 @@ fi
 
 # simply amend if the pick was successful
 if [[ $pick_retval == 0 && -z $unmerged_files ]]; then
-	verbose_print "${pick_out}"
-	verbose_print "----------"
-	if [[ ${NO_AUTOCOMMIT} > 0 ]]; then
-		verbose_print "No conflicts to resolve, nothing to do."
-		verbose_print "Please run git commit ${GIT_AMEND_OPTS} --amend" \
-			      "after making all necessary changes."
-		verbose_print "Use ${GIT_RECOVER} to recover."
-	else
-		verbose_print "No conflicts to resolve, running amend."
+	if [[ ${NO_AUTOCOMMIT} == 0 ]]; then
 		git_autoamend
 	fi
 	exit 0
@@ -284,8 +222,10 @@ if [[ -z $unmerged_files ]]; then
 	git_recover
 fi
 
-for AUTORESOLVE in "${AUTORESOLVE_FILES[@]}"
+for ((i=0; i<${#AUTORESOLVE_FILES[@]}; i++));
 do
+
+AUTORESOLVE=${AUTORESOLVE_FILES[$i]}
 
 # if $AUTORESOLVE isn't there (but other conflicts are)
 if [[ -z $(echo "${unmerged_files}" | grep ${AUTORESOLVE}) ]]; then
@@ -294,12 +234,14 @@ fi
 
 # do the resolution - use old version of the file
 if [[ -f ${AUTORESOLVE} ]]; then
-	verbose_print "${pick_out}"
-	verbose_print "----------"
-	verbose_print "Auto-resolving ${AUTORESOLVE} using old version."
-	git show :2:${AUTORESOLVE} > ${AUTORESOLVE}
-	[[ $? != 0 ]] && git_recover
-	git add ${AUTORESOLVE}
+	if [[ ${AUTORESOLVE_FILES_REMOVE[$i]} > 0 ]]; then
+		[[ $? != 0 ]] && git_recover
+		git rm -q ${AUTORESOLVE}
+	else
+		git show :2:${AUTORESOLVE} > ${AUTORESOLVE}
+		[[ $? != 0 ]] && git_recover
+		git add ${AUTORESOLVE}
+	fi
 	[[ $? != 0 ]] && git_recover
 else
 	print_error "${pick_out}"
@@ -310,16 +252,16 @@ fi
 
 done
 
+unmerged_files=$(git diff-files --diff-filter=U | sed 's/^[^\t]*\t//')
+git_retval=$?
+if [[ $git_retval != 0 ]]; then
+	print_error "${pick_out}"
+	git_recover
+fi
+
 # if $AUTORESOLVE_FILES were the only conflicts, amend the commit
-if [[ $(echo "${unmerged_files}" | wc -l) == 1 ]]; then
-	verbose_print "----------"
-	if [[ ${NO_AUTOCOMMIT} > 0 ]]; then
-		verbose_print "All done, autocommit disabled, nothing to do."
-		verbose_print "Please run git commit ${GIT_AMEND_OPTS} --amend" \
-			      "after making all necessary changes."
-		verbose_print "Use ${GIT_RECOVER} to recover."
-	else
-		verbose_print "All done, running git commit ${GIT_AMEND_OPTS} --amend ..."
+if [[ -z ${unmerged_files} ]]; then
+	if [[ ${NO_AUTOCOMMIT} == 0 ]]; then
 		git_autoamend
 	fi
 	exit 0
