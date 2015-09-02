@@ -16,8 +16,6 @@ GIT_AMEND_OPTS="-s"
 GIT_RECOVER="git reset --hard HEAD^"
 CONFLICT_RETVAL=2    # for batch usage
 AUTOCOMMIT=1
-PARENT_REPOSITORY="cmangos/mangos-"
-DEFAULT_REPOSITORY_CLIENT="wotlk"
 
 
 ### print error to stderr
@@ -27,7 +25,7 @@ function print_error {
 
 ### prints help
 function print_help {
-  echo -e "Usage: ${0##*/} [OPTIONS] <hash> [<repository clientversion>]" \
+  echo -e "Usage: ${0##*/} [OPTIONS] <hash>" \
     "\nBackports a specified commit to current branch." \
     "\n\n  -n       Never automatically commit." \
     "\n"
@@ -95,12 +93,6 @@ done;
 shift $(( $OPTIND - 1 ))
 ORIG_REF=${1}
 
-if [[ -z ${2} ]]; then
-  PARENT_REPOSITORY=${PARENT_REPOSITORY}${DEFAULT_REPOSITORY_CLIENT}
-else
-  PARENT_REPOSITORY=${PARENT_REPOSITORY}${2}
-fi
-
 # check for needed arguments
 if [[ -z ${ORIG_REF} ]]; then
   print_help
@@ -130,6 +122,14 @@ if [[ ! -z $(git diff-index HEAD) ]]; then
 fi
 
 ## original commit infos
+
+# branch
+PARENT_REPOSITORY=$(git branch -r --contains $ORIG_REF | sed 's% *\(.*\)/.*%\1%')
+[[ $? != 0 ]] && exit 1
+
+# remote
+PARENT_REPOSITORY=$(git ls-remote --get-url $PARENT_REPOSITORY | sed 's%.*github.com.\(.*\)\.git%\1%')
+[[ $? != 0 ]] && exit 1
 
 # current HEAD commit hash
 CURRENT_HEAD=$(git show -s --pretty=format:'%h' HEAD)
