@@ -288,7 +288,7 @@ class MANGOS_DLL_SPEC Database
 
         SqlResultQueue*     m_pResultQueue;                 ///< Transaction queues from diff. threads
         SqlDelayThread*     m_threadBody;                   ///< Pointer to delay sql executer (owned by m_delayThread)
-        ACE_Based::Thread* m_delayThread;                   ///< Pointer to executer thread
+        MaNGOS::Thread* m_delayThread;                   ///< Pointer to executer thread
 
         bool m_bAllowAsyncTransactions;                     ///< flag which specifies if async transactions are enabled
 
