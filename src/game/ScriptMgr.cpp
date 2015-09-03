@@ -2338,6 +2338,11 @@ ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
             return SCRIPT_LOAD_ERR_WRONG_API;   \
         }
 
+    // let check used mangosd revision for build library (unsafe use with different revision because changes in inline functions, define and etc)
+    //char const* (MANGOS_IMPORT * pGetMangosRevStr)();
+
+    //GET_SCRIPT_HOOK_PTR(pGetMangosRevStr,              "GetMangosRevStr");
+
     GET_SCRIPT_HOOK_PTR(m_pOnInitScriptLibrary,        "InitScriptLibrary");
     GET_SCRIPT_HOOK_PTR(m_pOnFreeScriptLibrary,        "FreeScriptLibrary");
 

@@ -27,6 +27,7 @@ The third party libraries have their own way of addressing authorship, and the a
 a third party library reflects who did the importing instead of who wrote the code within the commit.
 
 The Authors of third party libraries are not explicitly mentioned, and usually are possible to obtain from the files belonging to the third party libraries.
+The Authors of ScriptDev2 are merged on 04 sept 2015.
 
 ## Authors List:
 
@@ -36,21 +37,25 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 
 * 123qwe
 * a1ien
+* Abim
 * AbsoluteZero
 * aerione_alt
 * akreao
 * Alex
 * Alex Bolotsin
 * AlexDereka (a.k.a. alex_dereka)
+* Alexluana
 * Alez
 * alien
 * Amaru
 * Ambal
 * Ambient
 * Ambient5
+* Amki
 * anakin
 * Andeeria
 * andre
+* antifreak
 * Antimozg
 * antiroot
 * Antonio593
@@ -63,14 +68,16 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * ascent
 * Astellar
 * Astoria
+* astriconX
 * Athor
 * awpolt
 * Az@zel
 * Azelen
+* Azuritus
 * b482518
 * Backbone
 * Balrok
-* bastili
+* bastii (a.K.a. bastili)
 * begemot
 * benemorius
 * Blackhawk
@@ -84,6 +91,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * BombermaG
 * BonDit
 * boxa
+* BroodWyrm
 * Brueggus
 * BThallid
 * bubbles
@@ -102,23 +110,29 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Ceris
 * Charlie2025
 * CHEG
+* Cher0 (a.k.a. Chero)
 * ChipLeo
 * Christyan
 * CipherCOM
+* ckegg
 * click
 * cmaranec
 * codels
 * Corfen
 * crackm
+* creakie
+* Cupcake
 * cyberbrest2
 * Cyberium
 * cyrex
+* DaC
 * danielich
 * Danstahr
 * dardennf
 * Dark
 * darkEvil
 * Darkknight900
+* darkman1983
 * Darkruler
 * Darkrulerz
 * darkstalker
@@ -137,12 +151,16 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Derex (a.k.a. mr_derex)
 * Diablox
 * Dietrich
+* DiffuSer
 * DiSlord (a.k.a. dislord_rus)
 * domingo
 * DonTomika
 * dpedroia15
 * Dragonfly
+* drz2002
 * duckman
+* dufernst
+* Dunemaster
 * Dyddye
 * dynosys
 * dythzer
@@ -157,6 +175,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * EnderGT
 * Energy
 * erickeir
+* etznab
 * evil-at-wow
 * evilstar
 * fallenangelX
@@ -172,8 +191,12 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Fog
 * Foks
 * foohey
+* foot
 * Forusim
 * foxbox
+* fr1ge
+* fra298
+* FragFrog
 * Frankir
 * frcoun
 * Fred
@@ -185,28 +208,34 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * GalaxyMan
 * gc
 * Gendalph
+* Goaul
 * goldberg002
 * Gommes
 * gonnabustya
 * Gorlum13
 * Gotisch
 * Grandres
+* greenseed
 * GriffonHeart
 * Grinder
 * Grz3s
 * GS
+* Gurg
 * Hantet
 * hectolight
 * herrtrigger
 * HipToday
 * Hiram
 * horogandris
+* hoshie
 * Hundekuchen
 * hunuza
+* Huricane
 * if85myh
 * ilija
 * imbecile
 * Infinity
+* Insanity Peppers
 * invalid-email-address
 * invliD
 * Iriskin
@@ -215,17 +244,17 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Itch
 * j4r0d
 * Janu
-* jethro84530
 * Jethrogibbs
 * Jolan
 * jorooo
+* jotapdiez
 * jsee
+* Junta
 * kaelima
 * Kaios
 * kamikazetg
 * KAPATEJIb (a.k.a. insider42, Insider)
 * kbz
-* kb_z
 * kid10 (a.k.a. kid 10)
 * killdozer
 * KillerFrca
@@ -234,7 +263,9 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Klark20
 * klightspeed
 * kolomati
+* kolomati2
 * komdori
+* krofna
 * ksergik
 * Kubius@getmangos.com
 * kyle1
@@ -265,7 +296,9 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Maxxie
 * MaxXx2021
 * McBen
+* MeanMachine
 * Megamage
+* Meldanor
 * MeRclLy
 * michalpolko
 * Midna
@@ -275,6 +308,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * mns
 * Mordred
 * Morphau
+* Morpho
 * mosst
 * Most_Mangos
 * MrLama
@@ -294,12 +328,14 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Nick Templeton
 * Nighoo (a.k.a. DaC, Daggy)
 * Nihilus
+* nitka
 * NoFantasy
 * NoReturn
 * nos4r2zod
 * nostre
 * Ntsc
 * nugu100
+* NuRRi
 * oceanor
 * Odyssey
 * Olynn
@@ -309,10 +345,13 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Pablo
 * pabzea
 * palf4711
+* Panic
 * partizanes
 * pasdVn
 * Pat S
 * Patman128 (a.k.a. Patman64)
+* paytheo
+* Peppers
 * phan
 * plaes
 * popovk
@@ -333,6 +372,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Ramses_II
 * rastikzzz
 * raven_coda
+* raynar
 * reagent
 * Reamer (a.k.a. breakwater)
 * rechapa79
@@ -344,14 +384,17 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Revils
 * Rhyll
 * rilex
+* rise2
 * Rockette
 * rowman
 * rozr
 * rsa (a.k.a. C:/Program Files (x86)/git/dev/rsa)
 * Saeba
+* Saeldur
 * Salja
 * sani
 * Sarjuuk
+* Sattelit
 * Schmoozerd
 * seirge
 * Seizerkiller (a.k.a. Seize, Seizer)
@@ -376,22 +419,21 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * siuolly
 * sixsixnine
 * Skirnir
-* SkirnirMaNGOS
 * SKW
 * Snow
 * Sorken
 * Sorya
 * Splash
 * Splinter (a.k.a. Splinet)
-* Spp
 * Spp_
+* SRobot
 * starik222
-* stfx
-* stfxpi
+* stfx (a.k.a. stfxpi)
 * Stillhard
 * supervendy
 * Syn
 * Tanatos
+* tarwyn
 * Tassadar (a.k.a. Tasssadar, Tassader, Tassader2)
 * tehmarto
 * Tequila
@@ -410,12 +452,15 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Trazom
 * Triply
 * Trogvar
+* truera3or
 * Turk3y
+* Turok
 * Ungaminga
 * Unid
 * unik
 * uniqueone (a.k.a. unique)
 * unknown
+* UnknowN-TerroR
 * unloading
 * Valroft
 * Velorien
@@ -431,6 +476,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * wilibald09
 * win
 * Win32
+* Wizz
 * Wojta
 * Woweur
 * Wowka321
@@ -442,13 +488,13 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * XEQT
 * Xfurry
 * xILOSWag
+* XTZGZoReX
 * yad02
 * yavi
 * Yehonal
 * YuruY
 * Zakamurite
-* zerg
-* Zerg2000
+* zerg (a.k.a. Zerg2000)
 * zergtmn
 * zhanhang03
 * zhenya
@@ -458,3 +504,4 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * zuudu
 * [D4RK]Doom-Lord
 * `win
+

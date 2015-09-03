@@ -26,7 +26,7 @@ if(WIN32)
   )
 endif()
 
-add_subdirectory(bindings)
+add_subdirectory(scriptdev2)
 add_subdirectory(framework)
 add_subdirectory(shared)
 add_subdirectory(realmd)
