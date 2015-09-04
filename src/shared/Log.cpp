@@ -27,6 +27,7 @@
 #include <stdarg.h>
 #include <fstream>
 #include <iostream>
+#include <mutex>
 
 #include "ace/OS_NS_unistd.h"
 
@@ -875,7 +876,7 @@ void Log::outWorldPacketDump(ACE_HANDLE socket, uint32 opcode, char const* opcod
     if (!worldLogfile)
         return;
 
-    ACE_GUARD(ACE_Thread_Mutex, GuardObj, m_worldLogMtx);
+    std::lock_guard<std::mutex> guard(m_worldLogMtx);
 
     outTimestamp(worldLogfile);
 

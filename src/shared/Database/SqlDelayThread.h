@@ -19,7 +19,6 @@
 #ifndef __SQLDELAYTHREAD_H
 #define __SQLDELAYTHREAD_H
 
-#include "ace/Thread_Mutex.h"
 #include "LockedQueue.h"
 #include "Threading.h"
 
@@ -29,7 +28,7 @@ class SqlConnection;
 
 class SqlDelayThread : public MaNGOS::Runnable
 {
-        typedef ACE_Based::LockedQueue<SqlOperation*, ACE_Thread_Mutex> SqlQueue;
+        typedef ACE_Based::LockedQueue<SqlOperation*> SqlQueue;
 
     private:
         SqlQueue m_sqlQueue;                                ///< Queue of SQL statements
