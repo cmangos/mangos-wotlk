@@ -44,9 +44,9 @@
 
 struct Chunk
 {
-    ACE_UINT8 cmd;
-    ACE_UINT16 data_size;
-    ACE_UINT8 data[4096]; // 4096 - page size on most arch
+    uint8 cmd;
+    uint16 data_size;
+    uint8 data[4096]; // 4096 - page size on most arch
 };
 
 #if defined( __GNUC__ )
@@ -113,7 +113,7 @@ int PatchHandler::svc(void)
 
     while ((r = ACE_OS::read(patch_fd_, data.data, sizeof(data.data))) > 0)
     {
-        data.data_size = (ACE_UINT16)r;
+        data.data_size = (uint16)r;
 
         if (peer().send((const char*)&data,
                         ((size_t) r) + sizeof(data) - sizeof(data.data),
@@ -164,7 +164,7 @@ void PatchCache::LoadPatchMD5(const char* szFileName)
 
     const size_t check_chunk_size = 4 * 1024;
 
-    ACE_UINT8 buf[check_chunk_size];
+    uint8 buf[check_chunk_size];
 
     while (!feof(pPatch))
     {
@@ -176,10 +176,10 @@ void PatchCache::LoadPatchMD5(const char* szFileName)
 
     // Store the result in the internal patch hash map
     patches_[path] = new PATCH_INFO;
-    MD5_Final((ACE_UINT8*) & patches_[path]->md5, &ctx);
+    MD5_Final((uint8*) & patches_[path]->md5, &ctx);
 }
 
-bool PatchCache::GetHash(const char* pat, ACE_UINT8 mymd5[MD5_DIGEST_LENGTH])
+bool PatchCache::GetHash(const char* pat, uint8 mymd5[MD5_DIGEST_LENGTH])
 {
     for (Patches::iterator i = patches_.begin(); i != patches_.end(); ++i)
         if (!stricmp(pat, i->first.c_str()))

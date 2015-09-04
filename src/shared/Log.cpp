@@ -870,7 +870,7 @@ void Log::outErrorScriptLib(const char* err, ...)
     fflush(stderr);
 }
 
-void Log::outWorldPacketDump(uint32 socket, uint32 opcode, char const* opcodeName, ByteBuffer const* packet, bool incoming)
+void Log::outWorldPacketDump(ACE_HANDLE socket, uint32 opcode, char const* opcodeName, ByteBuffer const* packet, bool incoming)
 {
     if (!worldLogfile)
         return;
@@ -881,7 +881,12 @@ void Log::outWorldPacketDump(uint32 socket, uint32 opcode, char const* opcodeNam
 
     fprintf(worldLogfile, "\n%s:\nSOCKET: %u\nLENGTH: " SIZEFMTD "\nOPCODE: %s (0x%.4X)\nDATA:\n",
             incoming ? "CLIENT" : "SERVER",
-            socket, packet->size(), opcodeName, opcode);
+#ifdef WIN32
+            PtrToUlong(socket),
+#else
+            uint32(socket),
+#endif
+            packet->size(), opcodeName, opcode);
 
     size_t p = 0;
     while (p < packet->size())
