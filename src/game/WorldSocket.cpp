@@ -25,9 +25,9 @@
 #include <ace/os_include/sys/os_socket.h>
 #include <ace/OS_NS_string.h>
 #include <ace/Reactor.h>
-#include <ace/Auto_Ptr.h>
 
 #include <mutex>
+#include <memory>
 
 #include "WorldSocket.h"
 #include "Common.h"
@@ -668,7 +668,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     MANGOS_ASSERT(new_pct);
 
     // manage memory ;)
-    ACE_Auto_Ptr<WorldPacket> aptr(new_pct);
+    std::unique_ptr<WorldPacket> aptr(new_pct);
 
     const uint16 opcode = new_pct->GetOpcode();
 
