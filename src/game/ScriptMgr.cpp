@@ -2338,10 +2338,12 @@ ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
             return SCRIPT_LOAD_ERR_WRONG_API;   \
         }
 
+    /* Check disabled due to no cmangos no longer use revision number
+    TODO::May require a new way to check if we can use that dll.
     // let check used mangosd revision for build library (unsafe use with different revision because changes in inline functions, define and etc)
-    //char const* (MANGOS_IMPORT * pGetMangosRevStr)();
+    char const* (MANGOS_IMPORT * pGetMangosRevStr)();
 
-    //GET_SCRIPT_HOOK_PTR(pGetMangosRevStr,              "GetMangosRevStr");
+    GET_SCRIPT_HOOK_PTR(pGetMangosRevStr,              "GetMangosRevStr");*/
 
     GET_SCRIPT_HOOK_PTR(m_pOnInitScriptLibrary,        "InitScriptLibrary");
     GET_SCRIPT_HOOK_PTR(m_pOnFreeScriptLibrary,        "FreeScriptLibrary");
