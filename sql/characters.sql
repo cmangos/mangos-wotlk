@@ -1756,7 +1756,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `pvpstats_players`;
 CREATE TABLE `pvpstats_players` (
   `battleground_id` BIGINT UNSIGNED NOT NULL,
-  `player_guid` INT UNSIGNED NOT NULL,
+  `character_guid` INT UNSIGNED NOT NULL,
   `score_killing_blows` MEDIUMINT UNSIGNED NOT NULL,
   `score_deaths` MEDIUMINT UNSIGNED NOT NULL,
   `score_honorable_kills` MEDIUMINT UNSIGNED NOT NULL,
@@ -1768,7 +1768,7 @@ CREATE TABLE `pvpstats_players` (
   `attr_3` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
   `attr_4` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
   `attr_5` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
-  PRIMARY KEY (`battleground_id`, `player_guid`)
+  PRIMARY KEY (`battleground_id`, `character_guid`)
 ) ENGINE=InnoDB;
 
 --
