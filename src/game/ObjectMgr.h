@@ -39,7 +39,7 @@
 
 #include <string>
 #include <map>
-#include <limits>
+#include <cstdint>
 
 class Group;
 class ArenaTeam;
@@ -124,7 +124,7 @@ typedef UNORDERED_MAP < uint32/*(mapid,spawnMode) pair*/, CellObjectGuidsMap > M
 #define MAX_CREATURE_AI_TEXT_STRING_ID (-1000000)
 // Anything below MAX_CREATURE_AI_TEXT_STRING_ID is handled by the external script lib
 
-static_assert(MAX_DB_SCRIPT_STRING_ID < ACE_INT32_MAX, "Must scope with int32 range");
+static_assert(MAX_DB_SCRIPT_STRING_ID < INT32_MAX, "Must scope with int32 range");
 
 struct MangosStringLocale
 {

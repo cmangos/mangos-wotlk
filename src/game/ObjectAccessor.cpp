@@ -32,10 +32,11 @@
 #include "World.h"
 
 #include <cmath>
+#include <mutex>
 
-#define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, ACE_Thread_Mutex>
+#define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, std::mutex>
 INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
-INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ACE_Thread_Mutex);
+INSTANTIATE_CLASS_MUTEX(ObjectAccessor, std::mutex);
 
 ObjectAccessor::ObjectAccessor() {}
 ObjectAccessor::~ObjectAccessor()

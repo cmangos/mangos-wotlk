@@ -172,7 +172,7 @@ void Database::InitDelayThread()
 
     // New delay thread for delay execute
     m_threadBody = CreateDelayThread();              // will deleted at m_delayThread delete
-    m_delayThread = new ACE_Based::Thread(m_threadBody);
+    m_delayThread = new MaNGOS::Thread(m_threadBody);
 }
 
 void Database::HaltDelayThread()
@@ -561,7 +561,7 @@ bool Database::ExecuteStmt(const SqlStatementID& id, SqlStmtParameters* params)
 bool Database::DirectExecuteStmt(const SqlStatementID& id, SqlStmtParameters* params)
 {
     MANGOS_ASSERT(params);
-    std::auto_ptr<SqlStmtParameters> p(params);
+    std::unique_ptr<SqlStmtParameters> p(params);
     // execute statement
     SqlConnection::Lock _guard(getAsyncConnection());
     return _guard->ExecuteStmt(id.ID(), *params);
