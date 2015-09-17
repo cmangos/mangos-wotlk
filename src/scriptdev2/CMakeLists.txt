@@ -44,6 +44,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/game
   ${CMAKE_SOURCE_DIR}/dep/include
   ${CMAKE_BINARY_DIR}
+  ${CMAKE_BINARY_DIR}/src/shared
   ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
 )
@@ -66,7 +67,8 @@ if(WIN32)
   )
 endif()
 
-add_dependencies(mangosscript revision.h)
+add_dependencies(mangosscript mangosd)
+
 if(NOT ACE_USE_EXTERNAL)
   add_dependencies(mangosscript ACE_Project)
 # add_dependencies(mangosscript ace)
