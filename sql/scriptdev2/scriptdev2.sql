@@ -119,7 +119,6 @@ UPDATE creature_template SET ScriptName='boss_lethon' WHERE entry=14888;
 UPDATE creature_template SET ScriptName='npc_spirit_shade' WHERE entry=15261;
 
 /* GO */
-UPDATE gameobject_template SET ScriptName='go_barov_journal' WHERE entry=180794;
 UPDATE gameobject_template SET ScriptName='go_ethereum_prison' WHERE entry BETWEEN 184418 AND 184431;
 UPDATE gameobject_template SET ScriptName='go_ethereum_stasis' WHERE entry BETWEEN 185465 AND 185467;
 UPDATE gameobject_template SET ScriptName='go_ethereum_stasis' WHERE entry=184595;
