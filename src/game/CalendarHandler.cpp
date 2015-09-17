@@ -44,7 +44,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
     sCalendarMgr.GetPlayerInvitesList(guid, invites);
 
     data << uint32(invites.size());
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > %u invites", invites.size());
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > %u invites", uint32(invites.size()));
 
     for (CalendarInvitesList::const_iterator itr = invites.begin(); itr != invites.end(); ++itr)
     {
@@ -66,7 +66,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
     sCalendarMgr.GetPlayerEventsList(guid, events);
 
     data << uint32(events.size());
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > %u events", events.size());
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > %u events", uint32(events.size()));
 
     for (CalendarEventsList::const_iterator itr = events.begin(); itr != events.end(); ++itr)
     {
@@ -368,7 +368,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
         CharacterDatabase.PExecute("UPDATE calendar_events SET "
                                    "type=%hu, flags=%u, dungeonId=%d, eventTime=%u, title='%s', description='%s'"
                                    "WHERE eventid=" UI64FMTD,
-                                   type, flags, dungeonId, event->EventTime, title.c_str(), description.c_str(), eventId);
+                                   type, flags, dungeonId, uint32(event->EventTime), title.c_str(), description.c_str(), eventId);
     }
     else
         sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_EVENT_INVALID);
@@ -510,7 +510,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
         invite.LastUpdateTime = time(NULL);
 
         sCalendarMgr.SendCalendarEventInvite(&invite);
-        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "PREINVITE> sender[%s], Invitee[%u]", playerGuid.GetString().c_str(), inviteeGuid.GetString().c_str());
+        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "PREINVITE> sender[%s], Invitee[%s]", playerGuid.GetString().c_str(), inviteeGuid.GetString().c_str());
     }
 }
 
