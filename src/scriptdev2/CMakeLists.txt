@@ -141,5 +141,3 @@ install(TARGETS mangosscript
   LIBRARY DESTINATION ${LIBS_DIR}
   RUNTIME DESTINATION ${LIBS_DIR}
 )
-
-install(FILES scriptdev2.conf.dist.in DESTINATION ${CONF_DIR} RENAME scriptdev2.conf.dist)
