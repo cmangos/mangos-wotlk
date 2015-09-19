@@ -390,6 +390,7 @@ extern void AddSC_boss_exarch_maladaar();                   // auchindoun, auche
 extern void AddSC_boss_shirrak();
 extern void AddSC_boss_nexusprince_shaffar();               // auchindoun, mana_tombs
 extern void AddSC_boss_pandemonius();
+extern void AddSC_mana_tombs();
 extern void AddSC_boss_anzu();                              // auchindoun, sethekk_halls
 extern void AddSC_boss_darkweaver_syth();
 extern void AddSC_boss_talon_king_ikiss();
@@ -856,6 +857,7 @@ void AddScripts()
     AddSC_boss_shirrak();
     AddSC_boss_nexusprince_shaffar();                       // auchindoun, mana_tombs
     AddSC_boss_pandemonius();
+    AddSC_mana_tombs();
     AddSC_boss_anzu();                                      // auchindoun, sethekk_halls
     AddSC_boss_darkweaver_syth();
     AddSC_boss_talon_king_ikiss();

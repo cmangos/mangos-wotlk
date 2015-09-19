@@ -1404,6 +1404,9 @@
     <ClCompile Include="..\..\src\scriptdev2\scripts\outland\auchindoun\mana_tombs\boss_pandemonius.cpp">
       <Filter>scripts\outland\auchindoun\mana_tombs</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\outland\auchindoun\mana_tombs\mana_tombs.cpp">
+      <Filter>scripts\outland\auchindoun\mana_tombs</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\scriptdev2\scripts\outland\auchindoun\sethekk_halls\boss_anzu.cpp">
       <Filter>scripts\outland\auchindoun\sethekk_halls</Filter>
     </ClCompile>

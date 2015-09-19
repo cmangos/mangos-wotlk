@@ -589,6 +589,7 @@
     <ClCompile Include="..\..\src\scriptdev2\scripts\outland\auchindoun\auchenai_crypts\boss_shirrak.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\outland\auchindoun\mana_tombs\boss_nexusprince_shaffar.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\outland\auchindoun\mana_tombs\boss_pandemonius.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\outland\auchindoun\mana_tombs\mana_tombs.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\outland\auchindoun\sethekk_halls\boss_anzu.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\outland\auchindoun\sethekk_halls\boss_darkweaver_syth.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\outland\auchindoun\sethekk_halls\boss_talon_king_ikiss.cpp" />
