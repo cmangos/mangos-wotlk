@@ -97,7 +97,6 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
         DialogueHelper(aIntroDialogue)
     {
         StartNextDialogueText(SPELL_ETHEREAL_TELEPORT);
-        SetCombatMovement(false);
         Reset();
     }
 
