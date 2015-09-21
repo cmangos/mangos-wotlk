@@ -225,6 +225,7 @@ UPDATE creature_template SET ScriptName='npc_feero_ironhand' WHERE entry=4484;
 /* MANA TOMBS */
 UPDATE creature_template SET ScriptName='boss_pandemonius' WHERE entry=18341;
 UPDATE creature_template SET ScriptName='boss_nexusprince_shaffar' WHERE entry=18344;
+UPDATE creature_template SET ScriptName='npc_shaheen' WHERE entry=19671;
 
 /* AUCHENAI CRYPTS */
 UPDATE creature_template SET ScriptName='boss_exarch_maladaar' WHERE entry=18373;
@@ -2403,7 +2404,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000757,'Ancient ones guide my hand... Wake from your slumber! WAKE AND SEAL THIS CURSED PLACE!',0,0,0,0, 'SAY_FANDRAL_SEAL_6'),
 (-1000758,'%s falls to one knee - exhausted.',0,2,0,0,'EMOTE_FANDRAL_EXHAUSTED'),
 (-1000759,'It... It is over, Lord Staghelm. We are victorious. Albeit the cost for this victory was great.',0,0,0,1,'SAY_ANACHRONOS_EPILOGUE_1'),
-(-1000760,'There is but one duty that remains…',0,0,0,1,'SAY_ANACHRONOS_EPILOGUE_2'),
+(-1000760,'There is but one duty that remains...',0,0,0,1,'SAY_ANACHRONOS_EPILOGUE_2'),
 (-1000761,'Before I leave this place, I make one final offering for you, Lord Staghelm. Should a time arise in which you must gain entry to this accursed fortress, use the scepter of the shifting sands on the sacred gong. The magic holding the barrier together will dissipate an the horrors of the Ahn\'Qiraj will be unleashed upon the world once more.',0,0,0,1,'SAY_ANACHRONOS_EPILOGUE_3'),
 (-1000762,'%s hands the Scepter of the Shifting Sands to $N.',0,2,0,0,'EMOTE_ANACHRONOS_SCEPTER'),
 (-1000763,'After the savagery that my people have witnessed and felt, you expect me to accept another burden, dragon? Surely you are mad.',0,0,0,1,'SAY_FANDRAL_EPILOGUE_4'),
@@ -2413,7 +2414,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000767,'My son\'s soul will find no comfort in this hollow victory, dragon! I will have him back. Though it takes a millenia. I WILL have my son back!',0,0,0,1,'SAY_FANDRAL_EPILOGUE_7'),
 (-1000768,'%s shakes his head in disappointment.',0,2,0,25,'EMOTE_ANACHRONOS_DISPPOINTED'),
 (-1000769,'%s kneels down to pickup the fragments of the shattered scepter.',0,2,0,0,'EMOTE_ANACHRONOS_PICKUP'),
-(-1000770,'And now you know all that there is to know, mortal…',0,0,0,0,'SAY_ANACHRONOS_EPILOGUE_8'),
+(-1000770,'And now you know all that there is to know, mortal...',0,0,0,0,'SAY_ANACHRONOS_EPILOGUE_8'),
 
 (-1000771,'Let\'s go $N!',0,0,0,0,'Feero Ironhand SAY_QUEST_START'),
 (-1000772,'It looks like we\'re in trouble. Look lively, here they come!',0,0,0,0,'Feero Ironhand SAY_FIRST_AMBUSH_START'),
@@ -4346,7 +4347,29 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1557011,'Yes! I am... empowered!',10564,1,0,0,'pandemonius SAY_KILL_1'),
 (-1557012,'More... I must have more!',10565,1,0,0,'pandemonius SAY_KILL_2'),
 (-1557013,'To the void... once... more..',10566,1,0,0,'pandemonius SAY_DEATH'),
-(-1557014,'%s shifts into the void...',0,3,0,0,'pandemonius EMOTE_DARK_SHELL');
+(-1557014,'%s shifts into the void...',0,3,0,0,'pandemonius EMOTE_DARK_SHELL'),
+
+(-1557015,'This should\'t take very long. Just watch my back as I empty these nether collectors.',0,0,0,0,'sha\'heen SAY_ESCORT_START'),
+(-1557016,'Fantastic! let\'s move on, shall we?',0,0,0,0,'sha\'heen SAY_START'),
+(-1557017,'Looking at these energy levels, Shaffar was set to make a killing!',0,0,0,28,'sha\'heen SAY_FIRST_STOP'),
+(-1557018,'That should do it...',0,0,0,0,'sha\'heen SAY_FIRST_STOP_COMPLETE'),
+(-1557019,'Hmm, now where is the next collector?',0,0,0,0,'sha\'heen SAY_COLLECTOR_SEARCH'),
+(-1557020,'Ah, there it is. Follow me, fleshling.',0,0,0,0,'sha\'heen SAY_COLLECTOR_FOUND'),
+(-1557021,'There can\'t be too many more of these collectors. Just keep me safe as I do my job.',0,0,0,28,'sha\'heen SAY_SECOND_STOP'),
+(-1557022,'What do we have here? I thought you said the area was secure? This is now the third attack? If we make it out of here, I will definitely be deducting this from your reward. Now don\'t just stand here, destroy them so I can get to that collector.',0,0,0,0,'sha\'heen SAY_THIRD_STOP'),
+(-1557023,'We\'re close to the exit. I\'ll let you rest for about thirty seconds, but then we\'re out of here.',0,0,0,0,'sha\'heen SAY_REST'),
+(-1557024,'Are you ready to go?',0,0,0,0,'sha\'heen SAY_READY_GO'),
+(-1557025,'Ok break time is OVER. Let\'s go!',0,0,0,0,'sha\'heen SAY_BREAK_OVER'),
+(-1557026,'Shadow Lord Xiraxis yells: Bravo! Bravo! Good show... I couldn\'t convince you to work for me, could I? No, I suppose the needless slaughter of my employees might negatively impact your employment application.',0,1,0,0,'xiraxis SAY_SPAWN'),
+(-1557027,'Your plan was a good one, Sha\'heen, and you would have gotten away with it if not for one thing...',0,0,0,1,'xiraxis SAY_FINAL_STOP_1'),
+(-1557028,'Oh really? And what might that be?',0,0,0,1,'sha\'heen SAY_FINAL_STOP_2'),
+(-1557029,'Never underestimate the other ethereal\'s greed!',0,0,0,0,'xiraxis SAY_FINAL_STOP_3'),
+(-1557030,'He was right, you know. I\'ll have to take that tag-line for my own... It\'s not like he\'ll have a use for it anymore!',0,0,0,1,'sha\'heen SAY_XIRAXIS_DEAD'),
+(-1557031,'Thanks and good luck!',0,0,0,1,'sha\'heen SAY_COMPLETE'),
+(-1557032,'%s checks to make sure his body is intact.',0,2,0,0,'sha\'heen EMOTE_TELEPORT'),
+(-1557033,'You made it! Well done, $r. Now if you\'ll excuse me, I have to get the rest of our crew inside.',0,0,0,1,'sha\'heen SAY_SPAWN'),
+(-1557034,'%s expertly manipulates the control panel.',0,2,0,28,'sha\'heen EMOTE_PANEL'),
+(-1557035,'Let\'s not waste any time! Take anything that isn\'t nailed down to the floor and teleport directly to Stormspire! Chop chop!',0,0,0,1,'sha\'heen SAY_ESCORT_READY');
 
 -- -1 558 000 AUCHENAI CRYPTS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -10381,5 +10404,53 @@ INSERT INTO script_waypoint VALUES
 (26499, 77, 2300.743, 1487.231, 128.362, 0, ''),
 (26499, 78, 2308.582, 1460.863, 127.839, 0, ''),
 (26499, 79, 2326.608, 1420.555, 127.780, 0, '');
+
+DELETE FROM script_waypoint WHERE entry=19671;
+INSERT INTO script_waypoint VALUES
+(19671, 0, -362.876, -71.333, -0.960, 5000, 'SAY_ESCORT_START'),
+(19671, 1, -372.647, -88.728, -0.958, 0, ''),
+(19671, 2, -373.163, -114.959, -0.958, 0, ''),
+(19671, 3, -373.137, -138.439, -0.958, 0, ''),
+(19671, 4, -373.687, -152.964, -0.958, 0, ''),
+(19671, 5, -379.091, -158.089, -0.958, 0, ''),
+(19671, 6, -381.149, -164.796, -0.958, 0, ''),
+(19671, 7, -375.292, -164.111, 0.715, 0, 'SAY_FIRST_STOP - escort paused'),
+(19671, 8, -375.292, -164.111, 0.715, 1000, 'SAY_FIRST_STOP_COMPLETE'),
+(19671, 9, -381.149, -164.796, -0.958, 0, ''),
+(19671, 10, -374.292, -193.614, -0.967, 0, ''),
+(19671, 11, -370.799, -217.796, -0.959, 0, ''),
+(19671, 12, -344.132, -222.647, -0.959, 0, ''),
+(19671, 13, -310.880, -219.357, -0.945, 9000, 'SAY_COLLECTOR_SEARCH'),
+(19671, 14, -299.879, -201.809, -1.181, 0, ''),
+(19671, 15, -285.874, -187.791, -0.694, 0, ''),
+(19671, 16, -271.884, -164.856, -1.912, 0, ''),
+(19671, 17, -260.729, -159.094, -1.190, 0, 'SAY_SECOND_STOP - escort paused'),
+(19671, 18, -244.372, -163.136, -0.924, 0, ''),
+(19671, 19, -236.428, -185.952, -0.953, 0, ''),
+(19671, 20, -210.659, -206.710, 0.906, 0, ''),
+(19671, 21, -193.375, -219.378, -0.518, 0, ''),
+(19671, 22, -171.121, -223.043, -0.955, 0, ''),
+(19671, 23, -148.658, -221.031, -0.770, 0, ''),
+(19671, 24, -128.150, -215.657, -0.187, 0, ''),
+(19671, 25, -93.429, -219.264, -1.320, 0, ''),
+(19671, 26, -72.886, -222.278, -0.184, 0, 'SAY_THIRD_STOP - escort paused'),
+(19671, 27, -42.343, -224.004, -0.268, 0, ''),
+(19671, 28, -15.603, -223.780, 0.793, 0, ''),
+(19671, 29, -12.975, -223.157, 1.811, 42000, 'SAY_REST'),
+(19671, 30, -12.975, -223.157, 1.811, 5000, 'SAY_BREAK_OVER'),
+(19671, 31, -14.898, -222.906, 0.786, 0, ''),
+(19671, 32, -44.684, -221.592, -0.146, 0, ''),
+(19671, 33, -59.746, -211.847, 0.216, 0, ''),
+(19671, 34, -63.100, -195.288, -0.615, 0, ''),
+(19671, 35, -63.218, -191.959, -1.725, 0, ''),
+(19671, 36, -67.063, -160.281, -0.955, 0, ''),
+(19671, 37, -67.888, -128.704, -1.226, 0, ''),
+(19671, 38, -68.226, -107.766, -0.289, 0, ''),
+(19671, 39, -68.251, -105.624, -1.631, 0, ''),
+(19671, 40, -66.342, -88.147, -1.167, 0, 'SAY_XIRAXIS_SPAWN - escort paused'),
+(19671, 41, -67.831, -78.571, -2.114, 0, ''),
+(19671, 42, -67.692, -76.665, -0.941, 0, ''),
+(19671, 43, -67.624, -56.025, -0.844, 0, 'quest complete'),
+(19671, 44, -64.493, -15.776, -0.943, 0, '');
 
 -- EOF
