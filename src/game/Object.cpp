@@ -56,7 +56,7 @@ Object::Object()
 
     m_inWorld           = false;
     m_objectUpdated     = false;
-    loot              = NULL;
+    loot              = nullptr;
 }
 
 Object::~Object()

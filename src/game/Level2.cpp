@@ -1224,7 +1224,7 @@ bool ChatHandler::HandleGameObjectRespawnCommand(char* args)
     if (!lowguid)
         return false;
 
-    GameObject* obj = NULL;
+    GameObject* obj = nullptr;
 
     // by DB guid
     if (GameObjectData const* go_data = sObjectMgr.GetGOData(lowguid))

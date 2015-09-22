@@ -44,9 +44,9 @@
 #include <G3D/Quat.h>
 
 GameObject::GameObject() : WorldObject(),
-    m_model(NULL),
-    m_goInfo(NULL),
-    m_displayInfo(NULL)
+    m_model(nullptr),
+    m_goInfo(nullptr),
+    m_displayInfo(nullptr)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -254,12 +254,12 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     {
                         if (m_reStockTimer != 0)
                         {
-                            if (m_reStockTimer <= time(NULL))
+                            if (m_reStockTimer <= time(nullptr))
                             {
                                 m_reStockTimer = 0;
                                 m_lootState = GO_READY;
                                 delete loot;
-                                loot = NULL;
+                                loot = nullptr;
                                 ForceValuesUpdateAtIndex(GAMEOBJECT_DYNAMIC);
                             }
                         }
@@ -388,8 +388,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     if (loot)
                     {
                         if (loot->IsChanged())
-                            m_despawnTimer = time(NULL) + 5 * MINUTE; // TODO:: need to add a define?
-                        else if (m_despawnTimer != 0 && m_despawnTimer <= time(NULL))
+                            m_despawnTimer = time(nullptr) + 5 * MINUTE; // TODO:: need to add a define?
+                        else if (m_despawnTimer != 0 && m_despawnTimer <= time(nullptr))
                             m_lootState = GO_JUST_DEACTIVATED;
 
                         loot->Update();
@@ -453,7 +453,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     m_despawnTimer = 0;
                     if (m_goInfo->chest.chestRestockTime)
                     {
-                        m_reStockTimer = time(NULL) + m_goInfo->chest.chestRestockTime;
+                        m_reStockTimer = time(nullptr) + m_goInfo->chest.chestRestockTime;
                         m_lootState = GO_NOT_READY;
                         ForceValuesUpdateAtIndex(GAMEOBJECT_DYNAMIC);
                         return;
@@ -488,8 +488,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
             }
 
             delete loot;
-            loot = NULL;
-            SetLootRecipient(NULL);
+            loot = nullptr;
+            SetLootRecipient(nullptr);
             SetLootState(GO_READY);
 
             if (!m_respawnDelayTime)

@@ -28,7 +28,7 @@
 #include "ObjectMgr.h"
 
 Corpse::Corpse(CorpseType type) : WorldObject(),
-    lootRecipient(NULL),
+    lootRecipient(nullptr),
     lootForBody(false)
 {
     m_objectType |= TYPEMASK_CORPSE;

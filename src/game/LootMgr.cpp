@@ -665,7 +665,7 @@ void GroupLootRoll::Start(Loot& loot, uint32 itemSlot)
             m_voteMask = RollVoteMask(m_voteMask & ~ROLL_VOTE_MASK_DISENCHANT);
 
         SendStartRoll();
-        m_endTime = time(NULL) + (LOOT_ROLL_TIMEOUT / 1000);
+        m_endTime = time(nullptr) + (LOOT_ROLL_TIMEOUT / 1000);
         m_isStarted = true;
     }
 }
@@ -720,7 +720,7 @@ bool GroupLootRoll::UpdateRoll()
 {
     RollVoteMap::const_iterator winnerItr = m_rollVoteMap.end();
 
-    if (AllPlayerVoted(winnerItr) || m_endTime <= time(NULL))
+    if (AllPlayerVoted(winnerItr) || m_endTime <= time(nullptr))
     {
         Finish(winnerItr);
         return true;
@@ -805,7 +805,7 @@ GroupLootRoll* Loot::GetRollForSlot(uint32 itemSlot)
 {
     GroupLootRollMap::iterator rollItr = m_roll.find(itemSlot);
     if (rollItr == m_roll.end())
-        return NULL;
+        return nullptr;
     return &rollItr->second;
 }
 
@@ -1442,7 +1442,7 @@ void Loot::SetGroupLootRight(Player* player)
 Loot::Loot(Player* player, Creature* creature, LootType type) :
     m_lootType(type), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_clientLootType(CLIENT_LOOT_CORPSE),
     m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false), m_isChanged(false),
-    m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(NULL)
+    m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(nullptr)
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1532,7 +1532,7 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
 Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
     m_lootType(type), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_clientLootType(CLIENT_LOOT_CORPSE),
     m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false), m_isChanged(false),
-    m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(NULL)
+    m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(nullptr)
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1631,7 +1631,7 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
 Loot::Loot(Player* player, Corpse* corpse, LootType type) :
     m_lootType(type), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_clientLootType(CLIENT_LOOT_CORPSE),
     m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false), m_isChanged(false),
-    m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(NULL)
+    m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(nullptr)
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1676,7 +1676,7 @@ Loot::Loot(Player* player, Corpse* corpse, LootType type) :
 Loot::Loot(Player* player, Item* item, LootType type) :
     m_lootType(type), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_clientLootType(CLIENT_LOOT_CORPSE),
     m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false), m_isChanged(false),
-    m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(NULL)
+    m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(nullptr)
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1723,7 +1723,7 @@ Loot::Loot(Player* player, Item* item, LootType type) :
 Loot::Loot(Unit* unit, Item* item) :
     m_lootType(LOOT_SKINNING), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_clientLootType(CLIENT_LOOT_PICKPOCKETING),
     m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false), m_isChanged(false),
-    m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(NULL), m_itemTarget(item)
+    m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(nullptr), m_itemTarget(item)
 {
     m_ownerSet.insert(unit->GetObjectGuid());
     m_guidTarget = item->GetObjectGuid();
@@ -1732,7 +1732,7 @@ Loot::Loot(Unit* unit, Item* item) :
 Loot::Loot(Player* player, uint32 id, LootType type) :
     m_lootType(type), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_clientLootType(CLIENT_LOOT_CORPSE),
     m_gold(0), m_maxEnchantSkill(0), m_maxSlot(0), m_isReleased(false), m_isChest(false), m_isChanged(false),
-    m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(NULL)
+    m_haveItemOverThreshold(false), m_isChecked(false), m_lootTarget(nullptr)
 {
     switch (type)
     {
@@ -1810,7 +1810,7 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
             m_isChanged = true;
         }
         else
-            target->SendEquipError(msg, NULL, NULL, lootItem->itemId);
+            target->SendEquipError(msg, nullptr, nullptr, lootItem->itemId);
     }
 
     if (!playerGotItem)
@@ -1853,7 +1853,7 @@ bool Loot::AutoStore(Player* player, bool broadcast /*= false*/, uint32 bag /*= 
             msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, lootItem->itemId, lootItem->count);
         if (msg != EQUIP_ERR_OK)
         {
-            player->SendEquipError(msg, NULL, NULL, lootItem->itemId);
+            player->SendEquipError(msg, nullptr, nullptr, lootItem->itemId);
             result = false;
             continue;
         }
@@ -1895,7 +1895,7 @@ LootItem* Loot::GetLootItemInSlot(uint32 itemSlot)
         if (lootItem->lootSlot == itemSlot)
             return lootItem;
     }
-    return NULL;
+    return nullptr;
 }
 
 // Will return available loot item for specific player. Use only for own loot like loot in item and mail
@@ -2648,7 +2648,7 @@ void LootMgr::PlayerVote(Player* player, ObjectGuid const& lootTargetGuid, uint3
 // If target guid is not provided, try to find it by recipient or current player target
 Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid)
 {
-    Loot* loot = NULL;
+    Loot* loot = nullptr;
     ObjectGuid lguid;
     if (targetGuid.IsEmpty())
     {
@@ -2658,7 +2658,7 @@ Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid)
         {
             lguid = player->GetTargetGuid();
             if (lguid.IsEmpty())
-                return NULL;
+                return nullptr;
         }
     }
     else
@@ -2703,7 +2703,7 @@ Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid)
             break;
         }
         default:
-            return NULL;                                         // unlootable type
+            return nullptr;                                         // unlootable type
     }
 
     return loot;

@@ -133,7 +133,7 @@ bool CreatureCreatePos::Relocate(Creature* cr) const
 }
 
 Creature::Creature(CreatureSubtype subtype) : Unit(),
-    i_AI(NULL),
+    i_AI(nullptr),
     m_lootMoney(0), m_lootGroupRecipientId(0),
     m_lootStatus(CREATURE_LOOT_STATUS_NONE),
     m_corpseDecayTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_aggroDelay(0), m_respawnradius(5.0f),
@@ -207,7 +207,7 @@ void Creature::RemoveCorpse()
     UpdateObjectVisibility();
 
     delete loot;
-    loot = NULL;
+    loot = nullptr;
     m_lootStatus = CREATURE_LOOT_STATUS_NONE;
     uint32 respawnDelay = 0;
 
@@ -508,7 +508,7 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                 m_respawnTime = 0;
                 m_aggroDelay = sWorld.getConfig(CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY);
                 delete loot;
-                loot = NULL;
+                loot = nullptr;
 
                 // Clear possible auras having IsDeathPersistent() attribute
                 RemoveAllAuras();
@@ -973,7 +973,7 @@ void Creature::PrepareBodyLootState()
 {
     // loot may already exist (pickpocket case)
     delete loot;
-    loot = NULL;
+    loot = nullptr;
 
     Player* killer = GetLootRecipient();
 
