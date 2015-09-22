@@ -324,13 +324,13 @@ void PlayerbotMageAI::DoNonCombatActions()
 
     // TODO: The beauty of a mage is not only its ability to supply itself with water, but to share its water
     // So, conjure at *least* 1.25 stacks, ready to trade a stack and still have some left for self
-    if (m_ai->FindDrink() == NULL && CONJURE_WATER && m_ai->CastSpell(CONJURE_WATER, *m_bot))
+    if (m_ai->FindDrink() == nullptr && CONJURE_WATER && m_ai->CastSpell(CONJURE_WATER, *m_bot))
     {
         m_ai->TellMaster("I'm conjuring some water.");
         m_ai->SetIgnoreUpdateTime(3);
         return;
     }
-    if (m_ai->FindFood() == NULL && CONJURE_FOOD && m_ai->CastSpell(CONJURE_FOOD, *m_bot))
+    if (m_ai->FindFood() == nullptr && CONJURE_FOOD && m_ai->CastSpell(CONJURE_FOOD, *m_bot))
     {
         m_ai->TellMaster("I'm conjuring some food.");
         m_ai->SetIgnoreUpdateTime(3);

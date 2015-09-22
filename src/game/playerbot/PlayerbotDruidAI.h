@@ -112,7 +112,7 @@ private:
     CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
     CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
 
-    CombatManeuverReturns CastSpell(uint32 nextAction, Unit *pTarget = NULL) { return CastSpellNoRanged(nextAction, pTarget); }
+    CombatManeuverReturns CastSpell(uint32 nextAction, Unit *pTarget = nullptr) { return CastSpellNoRanged(nextAction, pTarget); }
 
     // Combat Maneuver helper functions
     CombatManeuverReturns _DoNextPVECombatManeuverBear(Unit* pTarget);

@@ -355,14 +355,14 @@ void PlayerbotShamanAI::DropTotems()
     Totem* air = m_bot->GetTotem(TOTEM_SLOT_AIR);
 
     // Earth Totems
-    if ((earth == NULL) || (m_bot->GetDistance(earth) > 30))
+    if ((earth == nullptr) || (m_bot->GetDistance(earth) > 30))
     {
         if (STRENGTH_OF_EARTH_TOTEM > 0 && m_ai->CastSpell(STRENGTH_OF_EARTH_TOTEM))
             return;
     }
 
     // Fire Totems
-    if ((fire == NULL) || (m_bot->GetDistance(fire) > 30))
+    if ((fire == nullptr) || (m_bot->GetDistance(fire) > 30))
     {
         if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FROST && FROST_RESISTANCE_TOTEM > 0 && m_ai->CastSpell(FROST_RESISTANCE_TOTEM))
             return;
@@ -374,7 +374,7 @@ void PlayerbotShamanAI::DropTotems()
     }
 
     // Air totems
-    if ((air == NULL) || (m_bot->GetDistance(air) > 30))
+    if ((air == nullptr) || (m_bot->GetDistance(air) > 30))
     {
         if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_NATURE && NATURE_RESISTANCE_TOTEM > 0 && m_ai->CastSpell(NATURE_RESISTANCE_TOTEM))
             return;
@@ -391,7 +391,7 @@ void PlayerbotShamanAI::DropTotems()
     }
 
     // Water Totems
-    if ((water == NULL) || (m_bot->GetDistance(water) > 30))
+    if ((water == nullptr) || (m_bot->GetDistance(water) > 30))
     {
         if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FIRE && FIRE_RESISTANCE_TOTEM > 0 && m_ai->CastSpell(FIRE_RESISTANCE_TOTEM))
             return;

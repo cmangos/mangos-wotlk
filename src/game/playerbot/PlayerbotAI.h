@@ -1801,8 +1801,8 @@ public:
     bool CastSpell(uint32 spellId);
     bool CastSpell(uint32 spellId, Unit& target);
     bool CheckBotCast(const SpellEntry *sInfo );
-    bool CastPetSpell(uint32 spellId, Unit* target = NULL);
-    bool Buff(uint32 spellId, Unit * target, void (*beforeCast)(Player *) = NULL);
+    bool CastPetSpell(uint32 spellId, Unit* target = nullptr);
+    bool Buff(uint32 spellId, Unit * target, void (*beforeCast)(Player *) = nullptr);
     bool SelfBuff(uint32 spellId);
     bool In_Range(Unit* Target, uint32 spellId);
     bool In_Reach(Unit* Target, uint32 spellId);
@@ -1843,14 +1843,14 @@ public:
     bool ItemStatComparison(const ItemPrototype *pProto, const ItemPrototype *pProto2);
     void Feast();
     void InterruptCurrentCastingSpell();
-    void Attack(Unit* forcedTarget = NULL);
+    void Attack(Unit* forcedTarget = nullptr);
     void GetCombatTarget(Unit* forcedTarget = 0);
     void GetDuelTarget(Unit* forcedTarget);
     Unit* GetCurrentTarget() { return m_targetCombat; };
     void DoNextCombatManeuver();
     void DoCombatMovement();
-    void SetIgnoreUpdateTime(uint8 t = 0) { m_ignoreAIUpdatesUntilTime = time(NULL) + t; };
-    time_t CurrentTime() { return time(NULL); };
+    void SetIgnoreUpdateTime(uint8 t = 0) { m_ignoreAIUpdatesUntilTime = time(nullptr) + t; };
+    time_t CurrentTime() { return time(nullptr); };
 
     Player* GetPlayerBot() const { return m_bot; }
     Player* GetPlayer() const { return m_bot; }
@@ -1908,7 +1908,7 @@ public:
     bool IsTank() { return (m_combatOrder & ORDERS_TANK) ? true : false; }
     bool IsHealer() { return (m_combatOrder & ORDERS_HEAL) ? true : false; }
     bool IsDPS() { return (m_combatOrder & ORDERS_ASSIST) ? true : false; }
-    bool Impulse() { srand ( time(NULL) ); return(((rand() % 100) > 50) ? true : false); }
+    bool Impulse() { srand ( time(nullptr) ); return(((rand() % 100) > 50) ? true : false); }
     void SetMovementOrder(MovementOrderType mo, Unit *followTarget = 0);
     MovementOrderType GetMovementOrder() { return this->m_movementOrder; }
     void MovementReset();

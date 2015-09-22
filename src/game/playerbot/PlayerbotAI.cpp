@@ -399,7 +399,7 @@ void PlayerbotAI::SendNotEquipList(Player& /*player*/)
     // is assigned to. (The first is EQUIPMENT_SLOT_HEAD=0, and last is EQUIPMENT_SLOT_TABARD=18)
     std::list<Item*>* equip[19];
     for (uint8 i = 0; i < 19; ++i)
-        equip[i] = NULL;
+        equip[i] = nullptr;
 
     // list out items in main backpack
     for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
@@ -420,7 +420,7 @@ void PlayerbotAI::SendNotEquipList(Player& /*player*/)
             continue;
 
         // create a list if one doesn't already exist
-        if (equip[equipSlot] == NULL)
+        if (equip[equipSlot] == nullptr)
             equip[equipSlot] = new std::list<Item*>;
 
         std::list<Item*>* itemListForEqSlot = equip[equipSlot];
@@ -448,7 +448,7 @@ void PlayerbotAI::SendNotEquipList(Player& /*player*/)
                     continue;
 
                 // create a list if one doesn't already exist
-                if (equip[equipSlot] == NULL)
+                if (equip[equipSlot] == nullptr)
                     equip[equipSlot] = new std::list<Item*>;
 
                 std::list<Item*>* itemListForEqSlot = equip[equipSlot];
@@ -467,7 +467,7 @@ void PlayerbotAI::SendNotEquipList(Player& /*player*/)
     // now send client all items that can be equipped by slot
     for (uint8 equipSlot = 0; equipSlot < 19; ++equipSlot)
     {
-        if (equip[equipSlot] == NULL)
+        if (equip[equipSlot] == nullptr)
             continue;
 
         if (!bAnyEquippable)
@@ -2082,7 +2082,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         // also sends list of tradable items bot can trade if bot is allowed to obey commands from
     case SMSG_TRADE_STATUS:
         {
-            if (m_bot->GetTrader() == NULL)
+            if (m_bot->GetTrader() == nullptr)
                 break;
 
             WorldPacket p(packet);
@@ -2605,7 +2605,7 @@ Item* PlayerbotAI::FindMount(uint32 matchingRidingSkill) const
 {
     // list out items in main backpack
 
-    Item* partialMatch = NULL;
+    Item* partialMatch = nullptr;
 
     for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
     {
@@ -2696,7 +2696,7 @@ Item* PlayerbotAI::FindFood() const
                 }
             }
     }
-    return NULL;
+    return nullptr;
 }
 
 Item* PlayerbotAI::FindDrink() const
@@ -2747,7 +2747,7 @@ Item* PlayerbotAI::FindDrink() const
                 }
             }
     }
-    return NULL;
+    return nullptr;
 }
 
 Item* PlayerbotAI::FindBandage() const
@@ -2787,7 +2787,7 @@ Item* PlayerbotAI::FindBandage() const
                 }
             }
     }
-    return NULL;
+    return nullptr;
 }
 //Find Poison ...Natsukawa
 Item* PlayerbotAI::FindPoison() const
@@ -2827,7 +2827,7 @@ Item* PlayerbotAI::FindPoison() const
                 }
             }
     }
-    return NULL;
+    return nullptr;
 }
 
 Item* PlayerbotAI::FindConsumable(uint32 displayId) const
@@ -2867,7 +2867,7 @@ Item* PlayerbotAI::FindConsumable(uint32 displayId) const
                 }
             }
     }
-    return NULL;
+    return nullptr;
 }
 
 bool PlayerbotAI::FindAmmo() const
@@ -2936,7 +2936,7 @@ void PlayerbotAI::Feast()
         && ((static_cast<float> (m_bot->GetPower(POWER_MANA)) / m_bot->GetMaxPower(POWER_MANA)) < 0.8))
     {
         Item* pItem = FindDrink();
-        if (pItem != NULL)
+        if (pItem != nullptr)
         {
             TellMaster("drinking %s now...",pItem->GetProto()->Name1);
             UseItem(pItem);
@@ -2950,7 +2950,7 @@ void PlayerbotAI::Feast()
     if (CurrentTime() > m_TimeDoneEating && ((static_cast<float> (m_bot->GetHealth()) / m_bot->GetMaxHealth()) < 0.8))
     {
         Item* pItem = FindFood();
-        if (pItem != NULL)
+        if (pItem != nullptr)
         {
             TellMaster("eating %s now...",pItem->GetProto()->Name1);
             UseItem(pItem);
@@ -3215,7 +3215,7 @@ bool PlayerbotAI::IsGroupInCombat()
 
 Player* PlayerbotAI::GetGroupTank()
 {
-    if (!m_bot) return NULL;
+    if (!m_bot) return nullptr;
 
     if (m_bot->GetGroup())
     {
@@ -3230,12 +3230,12 @@ Player* PlayerbotAI::GetGroupTank()
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 Player* PlayerbotAI::GetGroupHealer()
 {
-    if (!m_bot) return NULL;
+    if (!m_bot) return nullptr;
 
     if (m_bot->GetGroup())
     {
@@ -3250,7 +3250,7 @@ Player* PlayerbotAI::GetGroupHealer()
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void PlayerbotAI::SetGroupCombatOrder(CombatOrderType co)
@@ -4354,7 +4354,7 @@ void PlayerbotAI::CombatOrderRestore()
     gSectarget = ObjectAccessor::GetUnit(*m_bot->GetMap()->GetWorldObject(SectargetGUID), SectargetGUID);
     delete result;
 
-    //Unit* target = NULL;
+    //Unit* target = nullptr;
     //ObjectGuid NoTargetGUID = m_bot->GetObjectGuid();
     //target = ObjectAccessor::GetUnit(*m_bot, NoTargetGUID);
     if (m_FollowAutoGo == FOLLOWAUTOGO_OFF)
@@ -5043,7 +5043,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
 Spell* PlayerbotAI::GetCurrentSpell() const
 {
     if (m_CurrentlyCastingSpellId == 0)
-        return NULL;
+        return nullptr;
 
     Spell* const pSpell = m_bot->FindCurrentSpellBySpellId(m_CurrentlyCastingSpellId);
     return pSpell;
@@ -5519,7 +5519,7 @@ Item* PlayerbotAI::FindItem(uint32 ItemId, bool Equipped_too /* default = false 
                 }
             }
     }
-    return NULL;
+    return nullptr;
 }
 
 Item* PlayerbotAI::FindItemInBank(uint32 ItemId)
@@ -5561,7 +5561,7 @@ Item* PlayerbotAI::FindItemInBank(uint32 ItemId)
                 }
             }
     }
-    return NULL;
+    return nullptr;
 }
 
 Item* PlayerbotAI::FindKeyForLockValue(uint32 reqSkillValue)
@@ -5579,7 +5579,7 @@ Item* PlayerbotAI::FindKeyForLockValue(uint32 reqSkillValue)
     if (reqSkillValue <= 400 && m_bot->HasItemCount(COBALT_SKELETON_KEY, 1))
         return m_bot->GetItemByEntry(COBALT_SKELETON_KEY);
 
-    return NULL;
+    return nullptr;
 }
 
 Item* PlayerbotAI::FindBombForLockValue(uint32 reqSkillValue)
@@ -5593,7 +5593,7 @@ Item* PlayerbotAI::FindBombForLockValue(uint32 reqSkillValue)
     if (reqSkillValue <= 350 && m_bot->HasItemCount(ELEMENTAL_SEAFORIUM_CHARGE, 1))
         return m_bot->GetItemByEntry(ELEMENTAL_SEAFORIUM_CHARGE);
 
-    return NULL;
+    return nullptr;
 }
 
 bool PlayerbotAI::HasTool(uint32 TC)
@@ -7436,7 +7436,7 @@ void PlayerbotAI::EquipItem(Item* src_Item)
     InventoryResult msg = m_bot->CanEquipItem(NULL_SLOT, dest, src_Item, !src_Item->IsBag());
     if (msg != EQUIP_ERR_OK)
     {
-        m_bot->SendEquipError(msg, src_Item, NULL);
+        m_bot->SendEquipError(msg, src_Item, nullptr);
         return;
     }
 
@@ -7459,7 +7459,7 @@ void PlayerbotAI::EquipItem(Item* src_Item)
         msg = m_bot->CanUnequipItem(dest, false);
         if (msg != EQUIP_ERR_OK)
         {
-            m_bot->SendEquipError(msg, dest_Item, NULL);
+            m_bot->SendEquipError(msg, dest_Item, nullptr);
             return;
         }
 
@@ -7514,12 +7514,12 @@ bool PlayerbotAI::TradeItem(const Item& item, int8 slot)
     int8 tradeSlot = -1;
 
     TradeData* pTrade = m_bot->GetTradeData();
-    if ((slot >= 0 && slot < TRADE_SLOT_COUNT) && pTrade->GetItem(TradeSlots(slot)) == NULL)
+    if ((slot >= 0 && slot < TRADE_SLOT_COUNT) && pTrade->GetItem(TradeSlots(slot)) == nullptr)
         tradeSlot = slot;
     else
         for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT && tradeSlot == -1; i++)
         {
-            if (pTrade->GetItem(TradeSlots(i)) == NULL)
+            if (pTrade->GetItem(TradeSlots(i)) == nullptr)
             {
                 tradeSlot = i;
                 // reserve trade slot to allow multiple items to be traded
@@ -7707,7 +7707,7 @@ bool PlayerbotAI::Withdraw(const uint32 itemid)
         InventoryResult msg = m_bot->CanStoreItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
         if (msg != EQUIP_ERR_OK)
         {
-            m_bot->SendEquipError(msg, pItem, NULL);
+            m_bot->SendEquipError(msg, pItem, nullptr);
             return false;
         }
 
@@ -7733,7 +7733,7 @@ bool PlayerbotAI::Deposit(const uint32 itemid)
         InventoryResult msg = m_bot->CanBankItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
         if (msg != EQUIP_ERR_OK)
         {
-            m_bot->SendEquipError(msg, pItem, NULL);
+            m_bot->SendEquipError(msg, pItem, nullptr);
             return false;
         }
 
@@ -7880,7 +7880,7 @@ bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
         auction->bid = fields[7].GetUInt32();
         auction->startbid = fields[8].GetUInt32();
         auction->deposit = fields[9].GetUInt32();
-        auction->auctionHouseEntry = NULL;                  // init later
+        auction->auctionHouseEntry = nullptr;                  // init later
 
         // check if sold item exists for guid
         // and item_template in fact (GetAItem will fail if problematic in result check in AuctionHouseMgr::LoadAuctionItems)
@@ -8799,7 +8799,7 @@ void PlayerbotAI::_HandleCommandOrders(std::string &text, Player &fromPlayer)
         CombatOrderRestore();
     else if (ExtractCommand("combat", text, true))
     {
-        Unit *target = NULL;
+        Unit *target = nullptr;
 
         if (text == "")
         {
@@ -9673,7 +9673,7 @@ void PlayerbotAI::_HandleCommandTalent(std::string &text, Player &fromPlayer)
         }
         else
         {
-            uint32 chosenSpec = strtoul(text.c_str(), NULL, 0); // non-int returns 0; too big returns UINT MAX (or somesuch)
+            uint32 chosenSpec = strtoul(text.c_str(), nullptr, 0); // non-int returns 0; too big returns UINT MAX (or somesuch)
 
             // Warning: also catches non-int sub2command's - e.g. 'talent spec foobar'
             if (0 == chosenSpec)
@@ -11018,7 +11018,7 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                         break;
 
                     // Try find spell in npc_trainer
-                    TrainerSpell const* trainer_spell = cSpells ? cSpells->Find(spellId) : NULL;
+                    TrainerSpell const* trainer_spell = cSpells ? cSpells->Find(spellId) : nullptr;
 
                     // Not found, try find in npc_trainer_template
                     if (!trainer_spell && tSpells)

@@ -268,7 +268,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 return;
 
             // Playerbot mod: broadcast message to bot members
-            for(GroupReference* itr = group->GetFirstMember(); itr != NULL; itr=itr->next())
+            for(GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr=itr->next())
             {
                 Player* player = itr->getSource();
                 if (player && player->GetPlayerbotAI() && ((msg.find("help",0) != std::string::npos)

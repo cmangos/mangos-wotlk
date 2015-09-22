@@ -160,7 +160,7 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit *pTarget)
     bool meleeReach = m_bot->CanReachWithMeleeAttack(pTarget);
     Pet *pet = m_bot->GetPet();
     uint32 spec = m_bot->GetSpec();
-    uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
+    uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, nullptr);
 
     //If we have UA it will replace immolate in our rotation
     uint32 FIRE = (UNSTABLE_AFFLICTION > 0 ? UNSTABLE_AFFLICTION : IMMOLATE);
@@ -330,7 +330,7 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVP(Unit* pTarget)
 void PlayerbotWarlockAI::CheckDemon()
 {
     uint32 spec = m_bot->GetSpec();
-    uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
+    uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, nullptr);
     Pet *pet = m_bot->GetPet();
 
     //Assign demon of choice
@@ -440,7 +440,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
     }
 
     // Destroy extra soul shards
-    uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, NULL);
+    uint8 shardCount = m_bot->GetItemCount(SOUL_SHARD, false, nullptr);
     uint8 freeSpace = m_ai->GetFreeBagSpace();
     if (shardCount > MAX_SHARD_COUNT || (freeSpace == 0 && shardCount > 1))
         m_bot->DestroyItemCount(SOUL_SHARD, shardCount > MAX_SHARD_COUNT ? shardCount - MAX_SHARD_COUNT : 1, true, false);
