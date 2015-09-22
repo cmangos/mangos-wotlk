@@ -153,7 +153,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
         bool CreateBaseAtCreature(Creature* creature);
         bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false);
         void SavePetToDB(PetSaveMode mode);
-        void Unsummon(PetSaveMode mode, Unit* owner = NULL);
+        void Unsummon(PetSaveMode mode, Unit* owner = nullptr);
         static void DeleteFromDB(uint32 guidlow, bool separate_transaction = true);
 
         void SetDeathState(DeathState s) override;          // overwrite virtual Creature::SetDeathState and Unit::SetDeathState
@@ -185,7 +185,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint32 level);
         void SynchronizeLevelWithOwner();
-        bool InitStatsForLevel(uint32 level, Unit* owner = NULL);
+        bool InitStatsForLevel(uint32 level, Unit* owner = nullptr);
         bool HaveInDiet(ItemPrototype const* item) const;
         uint32 GetCurrentFoodBenefitLevel(uint32 itemlevel);
         void SetDuration(int32 dur) { m_duration = dur; }
@@ -236,7 +236,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
         void InitPetCreateSpells();
 
         bool resetTalents(bool no_cost = false);
-        static void resetTalentsForAllPetsOf(Player* owner, Pet* online_pet = NULL);
+        static void resetTalentsForAllPetsOf(Player* owner, Pet* online_pet = nullptr);
         uint32 resetTalentsCost() const;
         void InitTalentForLevel();
 

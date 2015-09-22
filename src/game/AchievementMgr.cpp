@@ -58,7 +58,7 @@ namespace MaNGOS
             {
                 char const* text = sObjectMgr.GetMangosString(i_textId, loc_idx);
 
-                ChatHandler::BuildChatPacket(data, i_msgtype, text, LANG_UNIVERSAL, i_player.GetChatTag(),  i_player.GetObjectGuid(), NULL, i_player.GetObjectGuid(), NULL, NULL,
+                ChatHandler::BuildChatPacket(data, i_msgtype, text, LANG_UNIVERSAL, i_player.GetChatTag(),  i_player.GetObjectGuid(), nullptr, i_player.GetObjectGuid(), nullptr, nullptr,
                                              i_achievementId);
             }
 
@@ -584,7 +584,7 @@ void AchievementMgr::LoadFromDB(QueryResult* achievementResult, QueryResult* cri
                     time_t failTime = time_t(progress.date + criteria->timeLimit);
                     m_criteriaFailTimes[criteria->ID] = failTime;
                     // A failed Achievement - will be removed by DoFailedTimedAchievementCriterias on next tick for player
-                    if (failTime <= time(NULL))
+                    if (failTime <= time(nullptr))
                         progress.timedCriteriaFailed = true;
                 }
             }
@@ -641,7 +641,7 @@ void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement)
     WorldPacket data(SMSG_ACHIEVEMENT_EARNED, 8 + 4 + 8);
     data << GetPlayer()->GetPackGUID();
     data << uint32(achievement->ID);
-    data << uint32(secsToTimeBitFields(time(NULL)));
+    data << uint32(secsToTimeBitFields(time(nullptr)));
     data << uint32(0);
     GetPlayer()->SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY), true);
 }
@@ -651,7 +651,7 @@ void AchievementMgr::SendCriteriaUpdate(uint32 id, CriteriaProgress const* progr
     WorldPacket data(SMSG_CRITERIA_UPDATE, 8 + 4 + 8);
     data << uint32(id);
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     // the counter is packed like a packed Guid
     data.appendPackGUID(progress->counter);
 
@@ -728,10 +728,10 @@ void AchievementMgr::StartTimedAchievementCriteria(AchievementCriteriaTypes type
             continue;
 
         // do not start already failed timers
-        if (startTime && time_t(startTime + achievementCriteria->timeLimit) < time(NULL))
+        if (startTime && time_t(startTime + achievementCriteria->timeLimit) < time(nullptr))
             continue;
 
-        CriteriaProgress* progress = NULL;
+        CriteriaProgress* progress = nullptr;
 
         CriteriaProgressMap::iterator iter = m_criteriaProgress.find(achievementCriteria->ID);
         if (iter == m_criteriaProgress.end())
@@ -743,7 +743,7 @@ void AchievementMgr::StartTimedAchievementCriteria(AchievementCriteriaTypes type
         progress->counter = 0;
 
         // Start with given startTime or now
-        progress->date = startTime ? startTime : time(NULL);
+        progress->date = startTime ? startTime : time(nullptr);
         progress->timedCriteriaFailed = false;
 
         // Add to timer map
@@ -761,7 +761,7 @@ void AchievementMgr::DoFailedTimedAchievementCriterias()
     if (m_criteriaFailTimes.empty())
         return;
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     for (AchievementCriteriaFailTimeMap::iterator iter = m_criteriaFailTimes.begin(); iter != m_criteriaFailTimes.end();)
     {
         if (iter->second > now)
@@ -1660,7 +1660,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
 
                 // They have no proper requirements in dbc
                 AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
-                if (!data || !data->Meets(GetPlayer(), NULL))
+                if (!data || !data->Meets(GetPlayer(), nullptr))
                     continue;
 
                 change = 1;
@@ -1991,7 +1991,7 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
     if (changeValue > max_value)
         changeValue = max_value;
 
-    CriteriaProgress* progress = NULL;
+    CriteriaProgress* progress = nullptr;
     uint32 old_value = 0;
     uint32 newValue = 0;
 
@@ -2008,7 +2008,7 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
 
         progress = &m_criteriaProgress[criteria->ID];
 
-        progress->date = time(NULL);
+        progress->date = time(nullptr);
         progress->timedCriteriaFailed = false;
 
         // timed criterias are added to fail-timer map, and send the starting with counter=0
@@ -2104,7 +2104,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
 
     SendAchievementEarned(achievement);
     CompletedAchievementData& ca =  m_completedAchievements[achievement->ID];
-    ca.date = time(NULL);
+    ca.date = time(nullptr);
     ca.changed = true;
 
     // don't insert for ACHIEVEMENT_FLAG_REALM_FIRST_KILL since otherwise only the first group member would reach that achievement
@@ -2131,7 +2131,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
     // mail
     if (reward->sender)
     {
-        Item* item = reward->itemId ? Item::CreateItem(reward->itemId, 1, GetPlayer()) : NULL;
+        Item* item = reward->itemId ? Item::CreateItem(reward->itemId, 1, GetPlayer()) : nullptr;
 
         int loc_idx = GetPlayer()->GetSession()->GetSessionDbLocaleIndex();
 
@@ -2230,7 +2230,7 @@ void AchievementMgr::BuildAllDataPacket(WorldPacket* data)
     }
     *data << int32(-1);
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter != m_criteriaProgress.end(); ++iter)
     {
         *data << uint32(iter->first);
@@ -2254,13 +2254,13 @@ AchievementCriteriaEntryList const& AchievementGlobalMgr::GetAchievementCriteria
 AchievementCriteriaEntryList const* AchievementGlobalMgr::GetAchievementCriteriaByAchievement(uint32 id)
 {
     AchievementCriteriaListByAchievement::const_iterator itr = m_AchievementCriteriaListByAchievement.find(id);
-    return itr != m_AchievementCriteriaListByAchievement.end() ? &itr->second : NULL;
+    return itr != m_AchievementCriteriaListByAchievement.end() ? &itr->second : nullptr;
 }
 
 AchievementEntryList const* AchievementGlobalMgr::GetAchievementByReferencedId(uint32 id) const
 {
     AchievementListByReferencedId::const_iterator itr = m_AchievementListByReferencedId.find(id);
-    return itr != m_AchievementListByReferencedId.end() ? &itr->second : NULL;
+    return itr != m_AchievementListByReferencedId.end() ? &itr->second : nullptr;
 }
 
 AchievementReward const* AchievementGlobalMgr::GetAchievementReward(AchievementEntry const* achievement, uint8 gender) const
@@ -2270,7 +2270,7 @@ AchievementReward const* AchievementGlobalMgr::GetAchievementReward(AchievementE
         if (iter->second.gender == GENDER_NONE || uint8(iter->second.gender) == gender)
             return &iter->second;
 
-    return NULL;
+    return nullptr;
 }
 
 AchievementRewardLocale const* AchievementGlobalMgr::GetAchievementRewardLocale(AchievementEntry const* achievement, uint8 gender) const
@@ -2280,13 +2280,13 @@ AchievementRewardLocale const* AchievementGlobalMgr::GetAchievementRewardLocale(
         if (iter->second.gender == GENDER_NONE || uint8(iter->second.gender) == gender)
             return &iter->second;
 
-    return NULL;
+    return nullptr;
 }
 
 AchievementCriteriaRequirementSet const* AchievementGlobalMgr::GetCriteriaRequirementSet(AchievementCriteriaEntry const* achievementCriteria)
 {
     AchievementCriteriaRequirementMap::const_iterator iter = m_criteriaRequirementMap.find(achievementCriteria->ID);
-    return iter != m_criteriaRequirementMap.end() ? &iter->second : NULL;
+    return iter != m_criteriaRequirementMap.end() ? &iter->second : nullptr;
 }
 
 bool AchievementGlobalMgr::IsRealmCompleted(AchievementEntry const* achievement) const

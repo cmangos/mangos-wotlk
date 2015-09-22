@@ -1,0 +1,17 @@
+= ScriptDev2 TODO Points =
+
+== Cataclysm content ==
+* Start implementing 4.x scripts for dungeons and quests
+
+== WotLK content ==
+* Finish script for Trial of the Crusader, Icecrown Citadel, Eye of Eternity and Ruby Sanctum
+* Implement dungeon scripts for Halls of Reflection and Trial of the Champion
+* Implement various missing quest scripts
+
+== TBC content ==
+* Various quests which still require script (examples: 5821, 5943, 10985)
+* Hyjal Summit - Optimize game event.
+* Black Temple - Teron Gorefiend script improvement (requires core proper mind control support)
+
+== Classic content ==
+* Various quests which still require script (examples: 5721)

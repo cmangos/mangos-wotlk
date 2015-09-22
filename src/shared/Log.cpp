@@ -67,8 +67,8 @@ enum LogType
 const int LogType_count = int(LogError) + 1;
 
 Log::Log() :
-    raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL),
-    dberLogfile(NULL), eventAiErLogfile(NULL), scriptErrLogFile(NULL), worldLogfile(NULL), m_colored(false), m_includeTime(false), m_gmlog_per_account(false), m_scriptLibName(NULL)
+    raLogfile(nullptr), logfile(nullptr), gmLogfile(nullptr), charLogfile(nullptr),
+    dberLogfile(nullptr), eventAiErLogfile(nullptr), scriptErrLogFile(nullptr), worldLogfile(nullptr), m_colored(false), m_includeTime(false), m_gmlog_per_account(false), m_scriptLibName(nullptr)
 {
     Initialize();
 }
@@ -263,9 +263,9 @@ void Log::Initialize()
     }
 
     charLogfile = openLogFile("CharLogFile", "CharLogTimestamp", "a");
-    dberLogfile = openLogFile("DBErrorLogFile", NULL, "a");
-    eventAiErLogfile = openLogFile("EventAIErrorLogFile", NULL, "a");
-    raLogfile = openLogFile("RaLogFile", NULL, "a");
+    dberLogfile = openLogFile("DBErrorLogFile", nullptr, "a");
+    eventAiErLogfile = openLogFile("EventAIErrorLogFile", nullptr, "a");
+    raLogfile = openLogFile("RaLogFile", nullptr, "a");
     worldLogfile = openLogFile("WorldLogFile", "WorldLogTimestamp", "a");
 
     // Main log file settings
@@ -288,7 +288,7 @@ FILE* Log::openLogFile(char const* configFileName, char const* configTimeStampFl
 {
     std::string logfn = sConfig.GetStringDefault(configFileName, "");
     if (logfn.empty())
-        return NULL;
+        return nullptr;
 
     if (configTimeStampFlag && sConfig.GetBoolDefault(configTimeStampFlag, false))
     {
@@ -305,7 +305,7 @@ FILE* Log::openLogFile(char const* configFileName, char const* configTimeStampFl
 FILE* Log::openGmlogPerAccount(uint32 account)
 {
     if (m_gmlog_filename_format.empty())
-        return NULL;
+        return nullptr;
 
     char namebuf[MANGOS_PATH_MAX];
     snprintf(namebuf, MANGOS_PATH_MAX, m_gmlog_filename_format.c_str(), account);
@@ -314,7 +314,7 @@ FILE* Log::openGmlogPerAccount(uint32 account)
 
 void Log::outTimestamp(FILE* file)
 {
-    time_t t = time(NULL);
+    time_t t = time(nullptr);
     tm* aTm = localtime(&t);
     //       YYYY   year
     //       MM     month (2 digits 01-12)
@@ -327,7 +327,7 @@ void Log::outTimestamp(FILE* file)
 
 void Log::outTime()
 {
-    time_t t = time(NULL);
+    time_t t = time(nullptr);
     tm* aTm = localtime(&t);
     //       YYYY   year
     //       MM     month (2 digits 01-12)
@@ -340,7 +340,7 @@ void Log::outTime()
 
 std::string Log::GetTimestampStr()
 {
-    time_t t = time(NULL);
+    time_t t = time(nullptr);
     tm* aTm = localtime(&t);
     //       YYYY   year
     //       MM     month (2 digits 01-12)
@@ -956,7 +956,7 @@ void Log::setScriptLibraryErrorFile(char const* fname, char const* libName)
 
     if (!fname)
     {
-        scriptErrLogFile = NULL;
+        scriptErrLogFile = nullptr;
         return;
     }
 

@@ -275,7 +275,7 @@ bool IsIPAddress(char const* ipaddress)
 uint32 CreatePIDFile(const std::string& filename)
 {
     FILE* pid_file = fopen(filename.c_str(), "w");
-    if (pid_file == NULL)
+    if (pid_file == nullptr)
         return 0;
 
 #ifdef WIN32
@@ -440,12 +440,12 @@ std::wstring GetMainPartOfName(std::wstring wname, uint32 declension)
 
     static wchar_t const* const dropEnds[6][8] =
     {
-        { &a_End[1],  &o_End[1],    &ya_End[1],   &ie_End[1],  &soft_End[1], &j_End[1],    NULL,       NULL },
-        { &a_End[1],  &ya_End[1],   &yeru_End[1], &i_End[1],   NULL,         NULL,         NULL,       NULL },
-        { &ie_End[1], &u_End[1],    &yu_End[1],   &i_End[1],   NULL,         NULL,         NULL,       NULL },
-        { &u_End[1],  &yu_End[1],   &o_End[1],    &ie_End[1],  &soft_End[1], &ya_End[1],   &a_End[1],  NULL },
-        { &oj_End[1], &io_j_End[1], &ie_j_End[1], &o_m_End[1], &io_m_End[1], &ie_m_End[1], &yu_End[1], NULL },
-        { &ie_End[1], &i_End[1],    NULL,         NULL,        NULL,         NULL,         NULL,       NULL }
+        { &a_End[1],  &o_End[1],    &ya_End[1],   &ie_End[1],  &soft_End[1], &j_End[1],    nullptr,       nullptr },
+        { &a_End[1],  &ya_End[1],   &yeru_End[1], &i_End[1],   nullptr,         nullptr,         nullptr,       nullptr },
+        { &ie_End[1], &u_End[1],    &yu_End[1],   &i_End[1],   nullptr,         nullptr,         nullptr,       nullptr },
+        { &u_End[1],  &yu_End[1],   &o_End[1],    &ie_End[1],  &soft_End[1], &ya_End[1],   &a_End[1],  nullptr },
+        { &oj_End[1], &io_j_End[1], &ie_j_End[1], &o_m_End[1], &io_m_End[1], &ie_m_End[1], &yu_End[1], nullptr },
+        { &ie_End[1], &i_End[1],    nullptr,         nullptr,        nullptr,         nullptr,         nullptr,       nullptr }
     };
 
     for (wchar_t const * const* itr = &dropEnds[declension][0]; *itr; ++itr)

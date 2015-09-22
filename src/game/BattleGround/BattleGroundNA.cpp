@@ -91,41 +91,9 @@ bool BattleGroundNA::HandlePlayerUnderMap(Player* player)
     return true;
 }
 
-void BattleGroundNA::HandleAreaTrigger(Player* source, uint32 trigger)
-{
-    if (GetStatus() != STATUS_IN_PROGRESS)
-        return;
-
-    // uint32 spellId = 0;
-    // uint64 buff_guid = 0;
-    switch (trigger)
-    {
-        case 4536:                                          // buff trigger?
-        case 4537:                                          // buff trigger?
-            break;
-        default:
-            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", trigger);
-            source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", trigger);
-            break;
-    }
-
-    // if (buff_guid)
-    //    HandleTriggerBuff(buff_guid, source);
-}
-
 void BattleGroundNA::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
     FillInitialWorldState(data, count, 0xa0f, GetAlivePlayersCountByTeam(ALLIANCE));
     FillInitialWorldState(data, count, 0xa10, GetAlivePlayersCountByTeam(HORDE));
     FillInitialWorldState(data, count, 0xa11, 1);
 }
-
-/*
-20:12:14 id:036668 [S2C] SMSG_INIT_WORLD_STATES (706 = 0x02C2) len: 86
-0000: 2f 02 00 00 72 0e 00 00 00 00 00 00 09 00 11 0a  |  /...r...........
-0010: 00 00 01 00 00 00 0f 0a 00 00 00 00 00 00 10 0a  |  ................
-0020: 00 00 00 00 00 00 d4 08 00 00 00 00 00 00 d8 08  |  ................
-0030: 00 00 00 00 00 00 d7 08 00 00 00 00 00 00 d6 08  |  ................
-0040: 00 00 00 00 00 00 d5 08 00 00 00 00 00 00 d3 08  |  ................
-0050: 00 00 00 00 00 00                                |  ......
-*/

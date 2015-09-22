@@ -310,7 +310,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
     data << uint32(0);
     data << uint8(0);
     SendPacket(&data);
-    LogoutRequest(time(NULL));
+    LogoutRequest(time(nullptr));
 }
 
 void WorldSession::HandlePlayerLogoutOpcode(WorldPacket& /*recv_data*/)
@@ -367,7 +367,7 @@ void WorldSession::HandleTogglePvP(WorldPacket& recv_data)
     else
     {
         if (!GetPlayer()->pvpInfo.inHostileArea && GetPlayer()->IsPvP())
-            GetPlayer()->pvpInfo.endTimer = time(NULL);     // start toggle-off
+            GetPlayer()->pvpInfo.endTimer = time(nullptr);     // start toggle-off
     }
 }
 
@@ -652,7 +652,7 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recv_data)
         return;
 
     // prevent resurrect before 30-sec delay after body release not finished
-    if (corpse->GetGhostTime() + GetPlayer()->GetCorpseReclaimDelay(corpse->GetType() == CORPSE_RESURRECTABLE_PVP) > time(NULL))
+    if (corpse->GetGhostTime() + GetPlayer()->GetCorpseReclaimDelay(corpse->GetType() == CORPSE_RESURRECTABLE_PVP) > time(nullptr))
         return;
 
     if (!corpse->IsWithinDistInMap(GetPlayer(), CORPSE_RECLAIM_RADIUS, true))
@@ -747,8 +747,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
 
     if (BattleGround* bg = player->GetBattleGround())
     {
-        bg->HandleAreaTrigger(player, Trigger_ID);
-        return;
+        if (bg->HandleAreaTrigger(player, Trigger_ID))
+            return;
     }
     else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
     {
@@ -756,7 +756,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
             return;
     }
 
-    // NULL if all values default (non teleport trigger)
+    // nullptr if all values default (non teleport trigger)
     AreaTrigger const* at = sObjectMgr.GetAreaTrigger(Trigger_ID);
     if (!at)
         return;
@@ -1089,6 +1089,12 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     if (!plr)                                               // wrong player
         return;
 
+    if (!_player->IsWithinDistInMap(plr, INSPECT_DISTANCE, false))
+        return;
+
+    if (_player->IsHostileTo(plr))
+        return;
+
     WorldPacket data(SMSG_INSPECT_RESULTS, 50);
     data << plr->GetPackGUID();
 
@@ -1118,6 +1124,12 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
         sLog.outError("InspectHonorStats: WTF, player not found...");
         return;
     }
+
+    if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+        return;
+
+    if (_player->IsHostileTo(player))
+        return;
 
     WorldPacket data(MSG_INSPECT_HONOR_STATS, 8 + 1 + 4 * 4);
     data << player->GetObjectGuid();
@@ -1517,8 +1529,17 @@ void WorldSession::HandleQueryInspectAchievementsOpcode(WorldPacket& recv_data)
 
     recv_data >> guid.ReadAsPacked();
 
-    if (Player* player = sObjectMgr.GetPlayer(guid))
-        player->GetAchievementMgr().SendRespondInspectAchievements(_player);
+    Player* player = sObjectMgr.GetPlayer(guid);
+    if (!player)
+        return;
+
+    if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+        return;
+
+    if (_player->IsHostileTo(player))
+        return;
+
+    player->GetAchievementMgr().SendRespondInspectAchievements(_player);
 }
 
 void WorldSession::HandleUITimeRequestOpcode(WorldPacket& /*recv_data*/)
@@ -1527,7 +1548,7 @@ void WorldSession::HandleUITimeRequestOpcode(WorldPacket& /*recv_data*/)
     DEBUG_LOG("WORLD: Received opcode SMSG_UI_TIME");
 
     WorldPacket data(SMSG_UI_TIME, 4);
-    data << uint32(time(NULL));
+    data << uint32(time(nullptr));
     SendPacket(&data);
 }
 

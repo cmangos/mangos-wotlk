@@ -167,7 +167,7 @@ class BattleGroundAB : public BattleGround
         void AddPlayer(Player* plr) override;
         virtual void StartingEventOpenDoors() override;
         void RemovePlayer(Player* plr, ObjectGuid guid) override;
-        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         virtual void Reset() override;
         void EndBattleGround(Team winner) override;
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
@@ -183,6 +183,9 @@ class BattleGroundAB : public BattleGround
         /* achievement req. */
         bool IsAllNodesControlledByTeam(Team team) const override;
         bool IsTeamScores500Disadvantage(Team team) const { return m_TeamScores500Disadvantage[GetTeamIndexByTeamId(team)]; }
+
+        virtual Team GetPrematureWinner() override;
+
     private:
         /* Gameobject spawning/despawning */
         void _CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool delay);
