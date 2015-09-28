@@ -30,7 +30,7 @@
 #include <ace/Semaphore.h>
 #include <ace/Task.h>
 
-class MaNGOSsoapRunnable: public ACE_Based::Runnable
+class MaNGOSsoapRunnable: public MaNGOS::Runnable
 {
     public:
         MaNGOSsoapRunnable() { }

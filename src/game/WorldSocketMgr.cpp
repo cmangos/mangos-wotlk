@@ -29,20 +29,21 @@
 #include <ace/Reactor_Impl.h>
 #include <ace/TP_Reactor.h>
 #include <ace/Dev_Poll_Reactor.h>
-#include <ace/Guard_T.h>
-#include <ace/Atomic_Op.h>
 #include <ace/os_include/arpa/os_inet.h>
 #include <ace/os_include/netinet/os_tcp.h>
 #include <ace/os_include/sys/os_types.h>
 #include <ace/os_include/sys/os_socket.h>
 
+#include <atomic>
 #include <set>
+#include <mutex>
 
 #include "Log.h"
 #include "Common.h"
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldSocket.h"
+#include "Policies/Lock.h"
 
 /**
 * This is a helper class to WorldSocketMgr ,that manages
@@ -101,12 +102,12 @@ class ReactorRunnable : protected ACE_Task_Base
 
         long Connections()
         {
-            return static_cast<long>(m_Connections.value());
+            return m_Connections;
         }
 
         int AddSocket(WorldSocket* sock)
         {
-            ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, m_NewSockets_Lock, -1);
+            GUARD_RETURN(m_NewSockets_Lock, -1);
 
             ++m_Connections;
             sock->AddReference();
@@ -124,7 +125,7 @@ class ReactorRunnable : protected ACE_Task_Base
     protected:
         void AddNewSockets()
         {
-            ACE_GUARD(ACE_Thread_Mutex, Guard, m_NewSockets_Lock);
+            std::lock_guard<std::mutex> guard(m_NewSockets_Lock);
 
             if (m_NewSockets.empty())
                 return;
@@ -190,18 +191,19 @@ class ReactorRunnable : protected ACE_Task_Base
         }
 
     private:
-        typedef ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> AtomicInt;
         typedef std::set<WorldSocket*> SocketSet;
 
         ACE_Reactor* m_Reactor;
-        AtomicInt m_Connections;
+        std::atomic_int m_Connections;
         int m_ThreadId;
 
         SocketSet m_Sockets;
 
         SocketSet m_NewSockets;
-        ACE_Thread_Mutex m_NewSockets_Lock;
+        std::mutex m_NewSockets_Lock;
 };
+
+INSTANTIATE_SINGLETON_1(WorldSocketMgr);
 
 WorldSocketMgr::WorldSocketMgr():
     m_NetThreads(0),
@@ -219,7 +221,7 @@ WorldSocketMgr::~WorldSocketMgr()
     delete m_Acceptor;
 }
 
-int WorldSocketMgr::StartReactiveIO(ACE_UINT16 port, const char* address)
+int WorldSocketMgr::StartReactiveIO(uint16 port, const char* address)
 {
     m_UseNoDelay = sConfig.GetBoolDefault("Network.TcpNodelay", true);
 
@@ -265,7 +267,7 @@ int WorldSocketMgr::StartReactiveIO(ACE_UINT16 port, const char* address)
     return 0;
 }
 
-int WorldSocketMgr::StartNetwork(ACE_UINT16 port, std::string& address)
+int WorldSocketMgr::StartNetwork(uint16 port, std::string& address)
 {
     m_addr = address;
     m_port = port;
@@ -345,7 +347,3 @@ int WorldSocketMgr::OnSocketOpen(WorldSocket* sock)
     return m_NetThreads[min].AddSocket(sock);
 }
 
-WorldSocketMgr* WorldSocketMgr::Instance()
-{
-    return ACE_Singleton<WorldSocketMgr, ACE_Thread_Mutex>::instance();
-}
