@@ -57,8 +57,8 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_ACTIVE                 = 0x00001000,       // creature is active object. Grid of this creature will be loaded and creature set as active
     CREATURE_FLAG_EXTRA_MMAP_FORCE_ENABLE      = 0x00002000,       // creature is forced to use MMaps
     CREATURE_FLAG_EXTRA_MMAP_FORCE_DISABLE     = 0x00004000,       // creature is forced to NOT use MMaps
-    CREATURE_EXTRA_FLAG_WALK_IN_WATER          = 0x00008000,       // creature is forced to walk in water even it can swim
-    CREATURE_EXTRA_FLAG_HAVE_NO_SWIM_ANIMATION = 0x00010000,       // we have to not set "swim" animation or creature will have "no animation"
+    CREATURE_FLAG_EXTRA_WALK_IN_WATER          = 0x00008000,       // creature is forced to walk in water even it can swim
+    CREATURE_FLAG_EXTRA_HAVE_NO_SWIM_ANIMATION = 0x00010000,       // we have to not set "swim" animation or creature will have "no animation"
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
