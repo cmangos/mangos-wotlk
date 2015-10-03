@@ -21973,6 +21973,15 @@ void Player::UnsummonPetTemporaryIfAny()
     pet->Unsummon(PET_SAVE_AS_CURRENT, this);
 }
 
+void Player::UnsummonPetIfAny()
+{
+    Pet* pet = GetPet();
+    if (!pet)
+        return;
+ 
+    pet->Unsummon(PET_SAVE_NOT_IN_SLOT, this);
+}
+
 void Player::ResummonPetTemporaryUnSummonedIfAny()
 {
     if (!m_temporaryUnsummonedPetNumber)
