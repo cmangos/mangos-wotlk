@@ -28,7 +28,6 @@
 #include "ObjectMgr.h"
 
 Corpse::Corpse(CorpseType type) : WorldObject(),
-    loot(this),
     lootRecipient(nullptr),
     lootForBody(false)
 {

@@ -21,7 +21,6 @@
 
 #include "Common.h"
 #include "Object.h"
-#include "LootMgr.h"
 #include "ItemPrototype.h"
 
 struct SpellEntry;
@@ -354,11 +353,9 @@ class MANGOS_DLL_SPEC Item : public Object
         bool HasMaxCharges() const;
         void RestoreCharges();
 
-        Loot loot;
-
         void SetLootState(ItemLootUpdateState state);
-        bool HasGeneratedLoot() const { return m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_REMOVED; }
-        bool HasTemporaryLoot() const { return m_lootState == ITEM_LOOT_TEMPORARY; }
+        bool HasGeneratedLoot() const { return loot && m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_REMOVED; }
+        bool HasTemporaryLoot() const { return loot && m_lootState == ITEM_LOOT_TEMPORARY; }
 
         bool HasSavedLoot() const { return m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_NEW && m_lootState != ITEM_LOOT_TEMPORARY; }
 

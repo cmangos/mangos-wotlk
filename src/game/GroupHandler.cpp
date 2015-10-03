@@ -379,63 +379,6 @@ void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
     GetPlayer()->RemoveFromGroup();
 }
 
-void WorldSession::HandleLootMethodOpcode(WorldPacket& recv_data)
-{
-    uint32 lootMethod;
-    ObjectGuid lootMaster;
-    uint32 lootThreshold;
-    recv_data >> lootMethod >> lootMaster >> lootThreshold;
-
-    Group* group = GetPlayer()->GetGroup();
-    if (!group)
-        return;
-
-    /** error handling **/
-    if (!group->IsLeader(GetPlayer()->GetObjectGuid()))
-        return;
-    /********************/
-
-    // everything is fine, do it
-    group->SetLootMethod((LootMethod)lootMethod);
-    group->SetLooterGuid(lootMaster);
-    group->SetLootThreshold((ItemQualities)lootThreshold);
-    group->SendUpdate();
-}
-
-void WorldSession::HandleLootRoll(WorldPacket& recv_data)
-{
-    ObjectGuid lootedTarget;
-    uint32 itemSlot;
-    uint8  rollType;
-    recv_data >> lootedTarget;                              // guid of the item rolled
-    recv_data >> itemSlot;
-    recv_data >> rollType;
-
-    // DEBUG_LOG("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, rollType:%u", (uint32)Guid, NumberOfPlayers, rollType);
-
-    Group* group = GetPlayer()->GetGroup();
-    if (!group)
-        return;
-
-    if (rollType >= MAX_ROLL_FROM_CLIENT)
-        return;
-
-    // everything is fine, do it, if false then some cheating problem found
-    if (!group->CountRollVote(GetPlayer(), lootedTarget, itemSlot, RollVote(rollType)))
-        return;
-
-    switch (rollType)
-    {
-        case ROLL_NEED:
-            GetPlayer()->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_NEED, 1);
-            break;
-        case ROLL_GREED:
-        case ROLL_DISENCHANT:
-            GetPlayer()->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_GREED, 1);
-            break;
-    }
-}
-
 void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
 {
     float x, y;

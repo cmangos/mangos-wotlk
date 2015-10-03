@@ -23,6 +23,7 @@
 #include "Database/DatabaseEnv.h"
 #include "ItemEnchantmentMgr.h"
 #include "SQLStorages.h"
+#include "LootMgr.h"
 
 void AddItemsSetItem(Player* player, Item* item)
 {
@@ -230,8 +231,7 @@ bool ItemCanGoIntoBag(ItemPrototype const* pProto, ItemPrototype const* pBagProt
     return false;
 }
 
-Item::Item() :
-    loot(nullptr)
+Item::Item()
 {
     m_objectType |= TYPEMASK_ITEM;
     m_objectTypeId = TYPEID_ITEM;
@@ -368,7 +368,7 @@ void Item::SaveToDB()
         stmt.PExecute(GetGUIDLow());
     }
 
-    if (m_lootState == ITEM_LOOT_NEW || m_lootState == ITEM_LOOT_CHANGED)
+    if (loot && (m_lootState == ITEM_LOOT_NEW || m_lootState == ITEM_LOOT_CHANGED))
     {
         if (Player* owner = GetOwner())
         {
@@ -376,33 +376,26 @@ void Item::SaveToDB()
             static SqlStatementID saveLoot ;
 
             // save money as 0 itemid data
-            if (loot.gold)
+            if (loot->GetGoldAmount())
             {
                 SqlStatement stmt = CharacterDatabase.CreateStatement(saveGold, "INSERT INTO item_loot (guid,owner_guid,itemid,amount,suffix,property) VALUES (?, ?, 0, ?, 0, 0)");
-                stmt.PExecute(GetGUIDLow(), owner->GetGUIDLow(), loot.gold);
+                stmt.PExecute(GetGUIDLow(), owner->GetGUIDLow(), loot->GetGoldAmount());
             }
 
             SqlStatement stmt = CharacterDatabase.CreateStatement(saveLoot, "INSERT INTO item_loot (guid,owner_guid,itemid,amount,suffix,property) VALUES (?, ?, ?, ?, ?, ?)");
 
             // save items and quest items (at load its all will added as normal, but this not important for item loot case)
-            for (size_t i = 0; i < loot.GetMaxSlotInLootFor(owner); ++i)
+            LootItemList lootList;
+            loot->GetLootItemsListFor(owner, lootList);
+            for (LootItemList::const_iterator lootItr = lootList.begin(); lootItr != lootList.end(); ++lootItr)
             {
-                QuestItem* qitem = nullptr;
-
-                LootItem* item = loot.LootItemInSlot(i, owner, &qitem);
-                if (!item)
-                    continue;
-
-                // questitems use the blocked field for other purposes
-                if (!qitem && item->is_blocked)
-                    continue;
-
+                LootItem* lootItem = *lootItr;
                 stmt.addUInt32(GetGUIDLow());
                 stmt.addUInt32(owner->GetGUIDLow());
-                stmt.addUInt32(item->itemid);
-                stmt.addUInt8(item->count);
-                stmt.addUInt32(item->randomSuffix);
-                stmt.addInt32(item->randomPropertyId);
+                stmt.addUInt32(lootItem->itemId);
+                stmt.addUInt8(lootItem->count);
+                stmt.addUInt32(lootItem->randomSuffix);
+                stmt.addInt32(lootItem->randomPropertyId);
 
                 stmt.Execute();
             }
@@ -527,7 +520,7 @@ void Item::LoadLootFromDB(Field* fields)
     // money value special case
     if (item_id == 0)
     {
-        loot.gold = item_amount;
+        loot->SetGoldAmount(item_amount);
         SetLootState(ITEM_LOOT_UNCHANGED);
         return;
     }
@@ -542,8 +535,7 @@ void Item::LoadLootFromDB(Field* fields)
         return;
     }
 
-    loot.items.push_back(LootItem(item_id, item_amount, item_suffix, item_propid));
-    ++loot.unlootedCount;
+    loot->AddItem(item_id, item_amount, item_suffix, item_propid);
 
     SetLootState(ITEM_LOOT_UNCHANGED);
 }
