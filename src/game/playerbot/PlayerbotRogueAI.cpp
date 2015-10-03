@@ -215,8 +215,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
     switch (SpellSequence)
     {
         case RogueStealth:
-            if (PICK_POCKET > 0 && (pTarget->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) != 0 &&
-                !((Creature *) pTarget)->lootForPickPocketed && m_ai->CastSpell(PICK_POCKET, *pTarget))
+            if (PICK_POCKET > 0 && (pTarget->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) != 0 && m_ai->PickPocket(pTarget))
                 return RETURN_CONTINUE;
             if (PREMEDITATION > 0 && m_ai->CastSpell(PREMEDITATION, *pTarget))
                 return RETURN_CONTINUE;

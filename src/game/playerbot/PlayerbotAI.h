@@ -1761,6 +1761,7 @@ public:
     bool CanReceiveSpecificSpell(uint8 spec, Unit* target) const;
 
     bool HasTool(uint32 TC);
+    bool PickPocket(Unit* pTarget);
     bool HasSpellReagents(uint32 spellId);
     void ItemCountInInv(uint32 itemid, uint32 &count);
     uint32 GetSpellCharges(uint32 spellId);

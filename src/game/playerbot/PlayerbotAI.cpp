@@ -35,6 +35,7 @@
 #include "../Guild.h"
 #include "../GuildMgr.h"
 #include "../Language.h"
+#include "../LootMgr.h"
 #include <iomanip>
 #include <iostream>
 
@@ -2340,7 +2341,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             {
                 Creature *c = m_bot->GetMap()->GetCreature(m_lootCurrent);
 
-                if (c && c->GetCreatureInfo()->SkinningLootId && !c->lootForSkin)
+                if (c && c->GetCreatureInfo()->SkinningLootId && !c->GetLootStatus() != CREATURE_LOOT_STATUS_LOOTED)
                 {
                     uint32 reqSkill = c->GetCreatureInfo()->GetRequiredLootSkill();
                     // check if it is a leather skin and if it is to be collected (could be ore or herb)
@@ -2394,6 +2395,11 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             p.read_skip<uint8>();    // rollnumber related to SMSG_LOOT_ROLL
             p.read_skip<uint8>();    // Rolltype related to SMSG_LOOT_ROLL
 
+			Loot* loot = sLootMgr.GetLoot(m_bot, co_guid);
+			
+			if (!loot)
+				return;
+			
             // Clean up: remove target guid from (ignore list)
             for (std::list<ObjectGuid>::iterator itr = m_being_rolled_on.begin(); itr != m_being_rolled_on.end();)
                 if (co_guid == *itr)
@@ -2405,7 +2411,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     ++itr;
 
             // allow creature corpses to be skinned after roll
-            m_bot->SendLootRelease(co_guid);
+            loot->Release(m_bot);
 
             if (m_bot->GetObjectGuid() != p_guid)
                 return;
@@ -3694,7 +3700,7 @@ void PlayerbotAI::DoLoot()
 
         if (c)  // creature
         {
-            if (c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE))
+            if (c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE) && !c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
             {
                 // loot the creature
                 WorldPacket* const packet = new WorldPacket(CMSG_LOOT, 8);
@@ -5725,6 +5731,64 @@ bool PlayerbotAI::HasTool(uint32 TC)
     return false;
 }
 
+bool PlayerbotAI::PickPocket(Unit* pTarget)
+{
+    if(!pTarget)
+        return false;
+
+    ObjectGuid markGuid = pTarget->GetObjectGuid();
+    Creature *c = m_bot->GetMap()->GetCreature(markGuid);
+    if(c)
+    {
+        Loot*& loot = c->loot;
+        if (!loot)
+            loot = new Loot(m_bot, c, LOOT_PICKPOCKETING);
+        else
+        {
+            if (loot->GetLootType() != LOOT_PICKPOCKETING)
+            {
+                delete loot;
+                loot = new Loot(m_bot, c, LOOT_PICKPOCKETING);
+            }
+        }
+
+        if (loot->GetGoldAmount())
+        {
+            m_bot->ModifyMoney(loot->GetGoldAmount());
+
+            if (m_mgr->m_confDebugWhisper)
+            {
+                std::ostringstream out;
+
+                // calculate how much money bot loots
+                uint32 copper = loot->GetGoldAmount();
+                uint32 gold = uint32(copper / 10000);
+                copper -= (gold * 10000);
+                uint32 silver = uint32(copper / 100);
+                copper -= (silver * 100);
+
+                out << "|r|cff009900" << m_bot->GetName() << " loots: " << "|h|cffffffff[|r|cff00ff00" << gold
+                    << "|r|cfffffc00g|r|cff00ff00" << silver
+                    << "|r|cffcdcdcds|r|cff00ff00" << copper
+                    << "|r|cff993300c"
+                    << "|h|cffffffff]";
+
+                TellMaster(out.str().c_str());
+            }
+
+            // send the money to the bot and remove it from the creature
+            loot->SendGold(m_bot);
+        }
+
+        if (!loot->AutoStore(m_bot, false, NULL_BAG, NULL_SLOT))
+            sLog.outDebug("PLAYERBOT Debug: Failed to get loot from pickpocketed NPC");
+
+        // release the loot whatever happened
+        loot->Release(m_bot);
+    }
+    return false; // ensures that the rogue only pick pockets target once
+}
+
 bool PlayerbotAI::HasSpellReagents(uint32 spellId)
 {
     const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
@@ -7047,10 +7111,11 @@ void PlayerbotAI::findNearbyCorpse()
         if (!corpse->IsCorpse() || corpse->IsDespawned() || m_bot->IsFriendlyTo(corpse))
             continue;
 
-        Loot &loot = corpse->loot;
+        Loot* loot = sLootMgr.GetLoot(m_bot, corpse->GetObjectGuid());
+        LootItemList lootList;
+		loot->GetLootItemsListFor(m_bot, lootList);
 
-        if (loot.GetMaxSlotInLootFor(m_bot) > 0 || !loot.isLooted())
-            if ((loot.GetMaxSlotInLootFor(m_bot) - loot.items.size()) == 0)
+        if (lootList.size() > 0 || loot->CanLoot(m_bot))
                 continue;
 
         uint32 skillId = 0;
