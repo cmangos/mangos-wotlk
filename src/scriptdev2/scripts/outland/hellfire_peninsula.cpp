@@ -151,8 +151,11 @@ struct npc_ancestral_wolfAI : public npc_escortAI
 
     void Reset() override
     {
-        m_creature->CastSpell(m_creature, SPELL_ANCESTRAL_WOLF_BUFF, true);
+        DoCastSpellIfCan(m_creature, SPELL_ANCESTRAL_WOLF_BUFF);
     }
+
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
     void WaypointReached(uint32 uiPointId) override
     {
