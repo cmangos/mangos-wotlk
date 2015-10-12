@@ -6624,7 +6624,8 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3000111,'I am ready, Anchorite. Let us begin the exorcism.','anchorite barada GOSSIP_ITEM_EXORCISM'),
 (-3000112,'I\'m ready - let\'s get out of here.','injured goblin miner GOSSIP_ITEM_ESCORT_READY'),
 (-3000113,'Go on, you\'re free. Get out of here!','saronite mine slave GOSSIP_ITEM_SLAVE_FREE'),
-(-3000114,'I\'m ready to start the distillation, uh, Tipsy.','tipsy mcmanus GOSSIP_ITEM_START_DISTILLATION');
+(-3000114,'I\'m ready to start the distillation, uh, Tipsy.','tipsy mcmanus GOSSIP_ITEM_START_DISTILLATION'),
+(-3000115,'Turn the key to start the machine.','threshwackonator  GOSSIP_ITEM_TURN_KEY');
 
 -- -3 033 000 SHADOWFANG KEEP
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
