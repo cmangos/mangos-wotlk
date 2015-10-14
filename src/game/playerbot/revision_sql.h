@@ -1,0 +1,1 @@
+#define REVISION_DB_PLAYERBOTAI "required_7_playerbotai_quest_autocomplete"
