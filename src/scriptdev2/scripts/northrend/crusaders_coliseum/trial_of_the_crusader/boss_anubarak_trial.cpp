@@ -450,6 +450,8 @@ struct npc_anubarak_trial_spikeAI : public ScriptedAI
             case PHASE_IMPALE_FAST:
                 m_creature->RemoveAurasDueToSpell(SPELL_PURSUING_SPIKES_SPEED3);
                 break;
+            default:
+                break;
         }
 
         // Set Spike fail animation and despawn
@@ -501,6 +503,8 @@ struct npc_anubarak_trial_spikeAI : public ScriptedAI
                             m_Phase = PHASE_IMPALE_FAST;
                             m_PhaseSwitchTimer = 0;
                         }
+                        break;
+                    default:
                         break;
                 }
             }

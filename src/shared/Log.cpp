@@ -879,9 +879,9 @@ void Log::outWorldPacketDump(uint32 socket, uint32 opcode, char const* opcodeNam
 
     outTimestamp(worldLogfile);
 
-    fprintf(worldLogfile, "\n%s:\nSOCKET: %u\nLENGTH: " SIZEFMTD "\nOPCODE: %s (0x%.4X)\nDATA:\n",
+    fprintf(worldLogfile, "\n%s:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
             incoming ? "CLIENT" : "SERVER",
-            socket, packet->size(), opcodeName, opcode);
+            socket, static_cast<uint32>(packet->size()), opcodeName, opcode);
 
     size_t p = 0;
     while (p < packet->size())

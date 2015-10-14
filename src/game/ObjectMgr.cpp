@@ -3715,8 +3715,9 @@ void ObjectMgr::LoadGroups()
 
             uint32 leaderGuidLow = fields[0].GetUInt32();
             uint32 mapId = fields[1].GetUInt32();
-            Difficulty diff = (Difficulty)fields[4].GetUInt8();
+            uint8 tempDiff = fields[4].GetUInt8();
             uint32 groupId = fields[7].GetUInt32();
+            Difficulty diff = REGULAR_DIFFICULTY;
 
             if (!group || group->GetId() != groupId)
             {
@@ -3736,11 +3737,10 @@ void ObjectMgr::LoadGroups()
                 continue;
             }
 
-            if (diff >= (mapEntry->IsRaid() ? MAX_RAID_DIFFICULTY : MAX_DUNGEON_DIFFICULTY))
-            {
-                sLog.outErrorDb("Wrong dungeon difficulty use in group_instance table: %d", diff + 1);
-                diff = REGULAR_DIFFICULTY;                  // default for both difficaly types
-            }
+            if (tempDiff >= (mapEntry->IsRaid() ? MAX_RAID_DIFFICULTY : MAX_DUNGEON_DIFFICULTY))
+                sLog.outErrorDb("Wrong dungeon difficulty use in group_instance table: %u", uint32(tempDiff));
+            else
+                diff = Difficulty(tempDiff);
 
             DungeonPersistentState* state = (DungeonPersistentState*)sMapPersistentStateMgr.AddPersistentState(mapEntry, fields[2].GetUInt32(), Difficulty(diff), (time_t)fields[5].GetUInt64(), (fields[6].GetUInt32() == 0), true, true, fields[8].GetUInt32());
             group->BindToInstance(state, fields[3].GetBool(), true);
@@ -4586,7 +4586,7 @@ void ObjectMgr::LoadQuestLocales()
 
     delete result;
 
-    sLog.outString(">> Loaded " SIZEFMTD " Quest locale strings", mQuestLocaleMap.size());
+    sLog.outString(">> Loaded %u Quest locale strings", (uint32)mQuestLocaleMap.size());
     sLog.outString();
 }
 
