@@ -113,8 +113,8 @@ struct PlayerTalent
     PlayerSpellState state;
 };
 
-typedef UNORDERED_MAP<uint32, PlayerSpell> PlayerSpellMap;
-typedef UNORDERED_MAP<uint32, PlayerTalent> PlayerTalentMap;
+typedef std::unordered_map<uint32, PlayerSpell> PlayerSpellMap;
+typedef std::unordered_map<uint32, PlayerTalent> PlayerTalentMap;
 
 struct SpellCooldown
 {
@@ -570,7 +570,7 @@ struct SkillStatusData
     SkillUpdateState uState;
 };
 
-typedef UNORDERED_MAP<uint32, SkillStatusData> SkillStatusMap;
+typedef std::unordered_map<uint32, SkillStatusData> SkillStatusMap;
 
 enum PlayerSlots
 {
@@ -1535,7 +1535,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 unReadMails;
         time_t m_nextMailDelivereTime;
 
-        typedef UNORDERED_MAP<uint32, Item*> ItemMap;
+        typedef std::unordered_map<uint32, Item*> ItemMap;
 
         ItemMap mMitems;                                    // template defined in objectmgr.cpp
 
@@ -2255,7 +2255,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                 INSTANCE SYSTEM                   ***/
         /*********************************************************/
 
-        typedef UNORDERED_MAP < uint32 /*mapId*/, InstancePlayerBind > BoundInstancesMap;
+        typedef std::unordered_map < uint32 /*mapId*/, InstancePlayerBind > BoundInstancesMap;
 
         void UpdateHomebindTime(uint32 time);
 
