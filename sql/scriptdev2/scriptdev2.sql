@@ -337,6 +337,8 @@ UPDATE gameobject_template SET ScriptName='go_fathom_stone' WHERE entry=177964;
 /* BLACKROCK DEPTHS */
 DELETE FROM scripted_areatrigger WHERE entry=1526;
 INSERT INTO scripted_areatrigger VALUES (1526,'at_ring_of_law');
+DELETE FROM scripted_areatrigger WHERE entry=1786;
+INSERT INTO scripted_areatrigger VALUES (1786,'at_shadowforge_bridge');
 UPDATE instance_template SET ScriptName='instance_blackrock_depths' WHERE map =230;
 UPDATE creature_template SET ScriptName='boss_emperor_dagran_thaurissan' WHERE entry=9019;
 UPDATE creature_template SET ScriptName='boss_moira_bronzebeard' WHERE entry=8929;
@@ -348,12 +350,19 @@ UPDATE creature_template SET ScriptName='boss_coren_direbrew' WHERE entry=23872;
 UPDATE creature_template SET ScriptName='npc_grimstone' WHERE entry=10096;
 UPDATE creature_template SET ScriptName='npc_theldren_trigger' WHERE entry=16079;
 UPDATE creature_template SET ScriptName='npc_kharan_mighthammer' WHERE entry=9021;
+UPDATE creature_template SET ScriptName='npc_phalanx' WHERE entry=9502;
+UPDATE creature_template SET ScriptName='npc_mistress_nagmara' WHERE entry=9500;
 UPDATE creature_template SET ScriptName='npc_rocknot' WHERE entry=9503;
 UPDATE creature_template SET ScriptName='npc_marshal_windsor' WHERE entry=9023;
 UPDATE creature_template SET ScriptName='npc_dughal_stormwing' WHERE entry=9022;
 UPDATE creature_template SET ScriptName='npc_tobias_seecher' WHERE entry=9679;
+UPDATE creature_template SET ScriptName='npc_hurley_blackbreath' WHERE entry=9537;
+UPDATE creature_template SET ScriptName='boss_plugger_spazzring' WHERE entry=9499;
+UPDATE creature_template SET ScriptName='npc_ironhand_guardian' WHERE entry=8982;
 UPDATE gameobject_template SET ScriptName='go_shadowforge_brazier' WHERE entry IN (174744, 174745);
 UPDATE gameobject_template SET ScriptName='go_relic_coffer_door' WHERE entry IN (174554, 174555, 174556, 174557, 174558, 174559, 174560, 174561, 174562, 174563, 174564, 174566);
+UPDATE gameobject_template SET ScriptName='go_bar_beer_keg' WHERE entry=164911;
+UPDATE gameobject_template SET ScriptName='go_bar_ale_mug' WHERE entry IN (165738,165739);
 
 /* BLACKROCK SPIRE */
 UPDATE instance_template SET ScriptName='instance_blackrock_spire' WHERE map=229;
@@ -3130,7 +3139,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 -- -1 230 000 BLACKROCK DEPTHS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
-(-1230000,'Ah, hits the spot!',0,0,0,0,'rocknot SAY_GOT_BEER'),
+(-1230000,'Ah, hits the spot!',0,0,0,5,'rocknot SAY_GOT_BEER'),
 (-1230001,'Come to aid the Throne!',0,1,0,0,'dagran SAY_AGGRO'),
 (-1230002,'Hail to the king, baby!',0,1,0,0,'dagran SAY_SLAY'),
 (-1230003,'You have challenged the Seven, and now you will die!',0,0,0,0,'doomrel SAY_DOOMREL_START_EVENT'),
@@ -3169,7 +3178,42 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1230034,'You\'ll pay for this insult, $c!',0,0,0,15,'coren direbrew SAY_AGGRO'),
 
-(-1230035,'%s cries out an alarm!',0,2,0,0,'general_angerforge EMOTE_ALARM');
+(-1230035,'%s cries out an alarm!',0,2,0,0,'general_angerforge EMOTE_ALARM'),
+
+(-1230036,'I want more ale! Give me more ale!',0,0,0,0,'rocknot SAY_MORE_BEER'),
+(-1230037,'You\'ll pay for that!',0,0,0,0,'Grim Patron SAY_PISSED_PATRON_1'),
+(-1230038,'No!',0,0,0,0,'Grim Patron SAY_PISSED_PATRON_2'),
+(-1230039,'Oh! Now I\'m pissed!',0,0,0,0,'Grim Patron SAY_PISSED_PATRON_3'),
+(-1230040,'Violence! Property damage! None shall pass!!',0,1,0,0,'Phalanx YELL_PHALANX_AGGRO'),
+(-1230041,'Get away from those kegs!',0,1,0,0,'Hurley Blackbreath YELL_HURLEY_SPAWN'),
+(-1230042,'You\'ll pay for that!',0,0,0,0,'Hurley Blackbreath SAY_HURLEY_AGGRO'),
+(-1230043,'You can\'t hide from us. Prepare to burn!',0,1,0,0,'anvilrage guardsman SAY_GUARD_AGGRO'),
+(-1230044,'That one\'s empty!!',0,0,0,60,'rocknot SAY_BARREL_1'),
+(-1230045,'Ah, empty again!',0,0,0,35,'rocknot SAY_BARREL_2'),
+(-1230046,'ALE!',0,0,0,60,'rocknot SAY_BARREL_3'),
+(-1230047,'I\m out of here!',0,0,0,0,'rocknot SAY_ROCKNOT_DESPAWN'),
+(-1230048,'HALT! There were...reports...of a...disturbance.',0,1,0,0,'Fireguard Destroyer YELL_PATROL_1'),
+(-1230049,'We...are...investigating.',0,1,0,0,'Fireguard Destroyer YELL_PATROL_2'),
+(-1230050,'Try the boar! It\'s my new recipe!',0,0,0,0,'Plugger Spazzring SAY_OOC_1'),
+(-1230051,'Enjoy! You won\'t find better ale anywhere!',0,0,0,0,'Plugger Spazzring SAY_OOC_2'),
+(-1230052,'Drink up! There\'s more where that came from!',0,0,0,0,'Plugger Spazzring SAY_OOC_3'),
+(-1230053,'Have you tried the Dark Iron Ale? It\'s the best!',0,0,0,0,'Plugger Spazzring SAY_OOC_4'),
+(-1230054,'What are you doing over there?',0,1,0,0,'Plugger Spazzring YELL_STOLEN_1'),
+(-1230055,'Hey! Get away from that!',0,1,0,0,'Plugger Spazzring YELL_STOLEN_2'),
+(-1230056,'No stealing the goods!',0,1,0,0,'Plugger Spazzring YELL_STOLEN_3'),
+(-1230057,'That\'s it! You\'re going down!',0,1,0,0,'Plugger Spazzring YELL_AGRRO_1'),
+(-1230058,'That\'s it! No more beer until this mess is sorted out!',0,1,0,0,'Plugger Spazzring YELL_AGRRO_2'),
+(-1230059,'Hey, my pockets were picked!',0,1,0,0,'Plugger Spazzring YELL_PICKPOCKETED'),
+(-1230060,'Ha! You can\'t even begin to imagine the futility of your efforts.',0,1,0,0,'Emperor Thaurissan YELL_SENATOR_1'),
+(-1230061,'Is that the best you can do? Do you really expect that you could defeat someone as awe inspiring as me?',0,1,0,0,'Emperor Thaurissan YELL_SENATOR_2'),
+(-1230062,'They were just getting in the way anyways.',0,1,0,0,'Emperor Thaurissan YELL_SENATOR_3'),
+(-1230063,'Your efforts are utterly pointless, fools! You will never be able to defeat me!',0,1,0,0,'Emperor Thaurissan YELL_SENATOR_4'),
+(-1230064,'I will crush you into little tiny pieces!',0,1,0,0,'Emperor Thaurissan YELL_AGGRO_2'),
+(-1230065,'Prepare to meet your doom at the hands of Ragnaros\' most powerful servant!',0,1,0,0,'Emperor Thaurissan YELL_AGGRO_3'),
+(-1230066,'Hey, Rocknot!',0,0,0,0,'Nagmara SAY_NAGMARA_1'),
+(-1230067,'Let\'s go, honey.',0,0,0,0,'Nagmara SAY_NAGMARA_2'),
+(-1230068,'%s kisses her lover.',0,2,0,0,'Nagmara TEXTEMOTE_NAGMARA'),
+(-1230069,'%s kisses Mistress Nagmara',0,2,0,17,'Rocknot TEXTEMOTE_ROCKNOT');
 
 -- -1 249 000 ONYXIA'S LAIR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -6643,7 +6687,8 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3230000,'You\'re free, Dughal! Get out of here!','dughal GOSSIP_ITEM_DUGHAL'),
 (-3230001,'Get out of here, Tobias, you\'re free!','tobias GOSSIP_ITEM_TOBIAS'),
-(-3230002,'Your bondage is at an end, Doom\'rel. I challenge you!','doomrel GOSSIP_ITEM_CHALLENGE');
+(-3230002,'Your bondage is at an end, Doom\'rel. I challenge you!','doomrel GOSSIP_ITEM_CHALLENGE'),
+(-3230003,'Why don\'t you and Rocknot go find somewhere private...','nagmara GOSSIP_ITEM_NAGMARA');
 
 -- -3 409 000 MOLTEN CORE
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
@@ -7383,16 +7428,56 @@ INSERT INTO script_waypoint VALUES
 (7807, 36, -4405.25, 2231.77, 5.94, 0, ''),
 (7807, 37, -4377.61, 2265.45, 06.71, 15000, 'complete quest SAY_END');
 
+DELETE FROM script_waypoint WHERE entry=9502;
+INSERT INTO script_waypoint VALUES
+(9502, 0,847.848, -230.067, -43.614, 0, ''),
+(9502, 1,868.122, -223.884, -43.695, 0, 'YELL_PHALANX_AGGRO');
+
 DELETE FROM script_waypoint WHERE entry=9503;
 INSERT INTO script_waypoint VALUES
-(9503, 0, 883.294861, -188.926300, -43.703655, 0,''),
-(9503, 1, 872.763550, -185.605621, -43.703655, 5000,'b1'),
-(9503, 2, 867.923401, -188.006393, -43.703655, 5000,'b2'),
-(9503, 3, 863.295898, -190.795212, -43.703655, 5000,'b3'),
-(9503, 4, 856.139587, -194.652756, -43.703655, 5000,'b4'),
-(9503, 5, 851.878906, -196.928131, -43.703655, 15000,'b5'),
-(9503, 6, 877.035217, -187.048080, -43.703655, 0,''),
-(9503, 7, 891.198000, -197.924000, -43.620400, 0,'home');
+(9503, 0, 885.1852, -194.0071, -43.45835, 0,''),
+(9503, 1, 885.1852, -194.0071, -43.45835, 0,''),
+(9503, 2, 872.763550, -185.605621, -43.703655, 5000,'b1'),
+(9503, 3, 867.923401, -188.006393, -43.703655, 5000,'b2'),
+(9503, 4, 863.295898, -190.795212, -43.703655, 5000,'b3'),
+(9503, 5, 856.139587, -194.652756, -43.703655, 5000,'b4'),
+(9503, 6, 851.878906, -196.928131, -43.703655, 15000,'b5'),
+(9503, 7, 877.035217, -187.048080, -43.703655, 0,''),
+(9503, 8, 891.198000, -197.924000, -43.620400, 0,'home'),
+(9503, 9, 876.9352, -189.0071, -43.45835, 0,'Nagmara escort'),
+(9503, 10, 885.1852, -194.0071, -43.45835, 0,''),
+(9503, 11, 869.1238, -202.8515, -43.70884, 0,''),
+(9503, 12, 869.4652, -202.8777, -43.45879, 0,''),
+(9503, 13, 864.2437, -210.8257, -43.45896, 0,''),
+(9503, 14, 866.8236, -220.959, -43.44718, 0,''),
+(9503, 15, 867.0736, -221.959, -43.44718, 0,''),
+(9503, 16, 870.4187, -225.6747, -43.55664, 0,'open door'),
+(9503, 17, 872.1687, -227.4247, -43.55664, 0,''),
+(9503, 18, 872.9187, -228.1747, -43.55664, 0,''),
+(9503, 19, 875.9187, -230.9247, -43.55664, 0,''),
+(9503, 20, 876.9187, -230.1747, -43.55664, 0,''),
+(9503, 21, 877.9187, -229.4247, -43.55664, 0,''),
+(9503, 22, 882.3948, -225.949, -46.74049, 0,''),
+(9503, 23, 885.8948, -223.699, -49.24049, 0,''),
+(9503, 24, 887.6448, -222.449, -49.24049, 0,''),
+(9503, 25, 885.937, -223.3513, -49.29544, 0,''),
+(9503, 26, 887.437, -222.3513, -49.29544, 0,''),
+(9503, 27, 888.937, -221.6013, -49.54544, 0,''),
+(9503, 28, 887.687, -220.1013, -49.54544, 0,''),
+(9503, 29, 886.687, -218.8513, -49.54544, 0,''),
+(9503, 30, 887.5667, -220.0395, -49.70586, 0,''),
+(9503, 31, 886.5667, -218.7895, -49.70586, 0,''),
+(9503, 32, 886.0667, -218.2895, -49.70586, 0,''),
+(9503, 33, 880.8252, -221.3895, -49.95622, 0,'stop');
+
+DELETE FROM script_waypoint WHERE entry=9537;
+INSERT INTO script_waypoint VALUES
+(9537, 0, 854.9774, -150.3077, -49.671, 0, ''),
+(9537, 1, 855.8161, -149.763, -49.671, 0, 'YELL_HURLEY_SPAWN'),
+(9537, 2, 882.6298, -148.1658, -49.75969, 0, ''),
+(9537, 3, 883.9604, -148.0866, -49.76004, 0, ''),
+(9537, 4, 896.846, -147.319, -49.75753, 0, ''),
+(9537, 5, 896.846, -147.319, -49.75753, 0, '');
 
 DELETE FROM script_waypoint WHERE entry=9623;
 INSERT INTO script_waypoint VALUES
