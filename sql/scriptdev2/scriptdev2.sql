@@ -281,7 +281,6 @@ UPDATE creature_template SET ScriptName='npc_loramus_thalipedes' WHERE entry=778
 
 /* AZUREMYST ISLE */
 UPDATE creature_template SET ScriptName='npc_draenei_survivor' WHERE entry=16483;
-UPDATE creature_template SET ScriptName='npc_engineer_spark_overgrind' WHERE entry=17243;
 UPDATE creature_template SET ScriptName='npc_injured_draenei' WHERE entry=16971;
 UPDATE creature_template SET ScriptName='npc_magwin' WHERE entry=17312;
 
@@ -1743,9 +1742,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000182,'Ughhh... I hurt. Can you help me?',0,0,7,0,'draenei_survivor SAY_HELP3'),
 (-1000183,'I don\'t know if I can make it, please help me...',0,0,7,0,'draenei_survivor SAY_HELP4'),
 
-(-1000184,'Yes Master, all goes along as planned.',0,0,7,0,'engineer_spark SAY_TEXT'),
-(-1000185,'%s puts the shell to his ear.',0,2,7,0,'engineer_spark EMOTE_SHELL'),
-(-1000186,'Now I cut you!',0,1,7,0,'engineer_spark SAY_ATTACK'),
+-- REUSE -1000184 to -1000186
 
 (-1000187,'Thank you, dear $C, you just saved my life.',0,0,0,0,'npc_redemption_target SAY_HEAL'),
 
