@@ -7111,13 +7111,6 @@ void PlayerbotAI::findNearbyCorpse()
         if (!corpse->IsCorpse() || corpse->IsDespawned() || m_bot->IsFriendlyTo(corpse))
             continue;
 
-        Loot* loot = sLootMgr.GetLoot(m_bot, corpse->GetObjectGuid());
-        LootItemList lootList;
-		loot->GetLootItemsListFor(m_bot, lootList);
-
-        if (lootList.size() > 0 || loot->CanLoot(m_bot))
-                continue;
-
         uint32 skillId = 0;
         if (corpse->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
             skillId = corpse->GetCreatureInfo()->GetRequiredLootSkill();
