@@ -30,6 +30,7 @@ enum
     EMOTE_BOSS_GENERIC_ENRAGED      = -1000006,
     EMOTE_DECIMATE                  = -1533152,
 
+    SPELL_DOUBLE_ATTACK             = 19818,
     SPELL_MORTALWOUND               = 54378,                // old vanilla spell was 25646,
     SPELL_DECIMATE                  = 28374,
     SPELL_DECIMATE_H                = 54426,
@@ -60,6 +61,8 @@ struct boss_gluthAI : public ScriptedAI
         m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
+
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     instance_naxxramas* m_pInstance;
@@ -112,6 +115,8 @@ struct boss_gluthAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_GLUTH, FAIL);
+
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void JustSummoned(Creature* pSummoned) override
