@@ -2894,20 +2894,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                 return;
             }
-            case 62483:                                     // Stonebark's Essence Channel
-            case 62484:                                     // Ironbranch's Essence Channel
-            case 62485:                                     // Brightleaf's Essence Channel
-            case 65587:                                     // Brightleaf's Essence Channel (h)
-            case 65588:                                     // Ironbranch's Essence Channel (h)
-            case 65589:                                     // Stonebark's Essence Channel (h)
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
-                        caster->CastSpell(caster, 62467, true);
-                }
-                return;
-            }
             case 68839:                                     // Corrupt Soul
             {
                 // Knockdown Stun
