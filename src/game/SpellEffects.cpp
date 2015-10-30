@@ -7648,6 +7648,60 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 30542, true);
                     break;
                 }
+                case 30469:                                 // Nether Beam
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // The player and boss spells are different
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        switch (m_caster->GetEntry())
+                        {
+                            case 17367:
+                                if (unitTarget->HasAura(38638))
+                                    return;
+
+                                m_caster->CastSpell(unitTarget, 30401, true);
+                                m_caster->CastSpell(unitTarget, 30422, true);
+                                break;
+                            case 17368:
+                                if (unitTarget->HasAura(38639))
+                                    return;
+
+                                m_caster->CastSpell(unitTarget, 30402, true);
+                                m_caster->CastSpell(unitTarget, 30423, true);
+                                break;
+                            case 17369:
+                                if (unitTarget->HasAura(38637))
+                                    return;
+
+                                m_caster->CastSpell(unitTarget, 30400, true);
+                                m_caster->CastSpell(unitTarget, 30421, true);
+                                break;
+                        }
+                    }
+                    // target boss
+                    else if (unitTarget->GetEntry() == 15689)
+                    {
+                        switch (m_caster->GetEntry())
+                        {
+                            case 17367:
+                                m_caster->CastSpell(unitTarget, 30464, true);
+                                m_caster->CastSpell(unitTarget, 30467, true);
+                                break;
+                            case 17368:
+                                m_caster->CastSpell(unitTarget, 30463, true);
+                                m_caster->CastSpell(unitTarget, 30468, true);
+                                break;
+                            case 17369:
+                                m_caster->CastSpell(unitTarget, 30465, true);
+                                m_caster->CastSpell(unitTarget, 30466, true);
+                                break;
+                        }
+                    }
+                    return;
+                }
                 case 30769:                                 // Pick Red Riding Hood
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
