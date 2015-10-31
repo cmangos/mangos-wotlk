@@ -96,6 +96,7 @@ extern void AddSC_instance_scarlet_monastery();
 extern void AddSC_boss_darkmaster_gandling();               // scholomance
 extern void AddSC_boss_jandicebarov();
 extern void AddSC_instance_scholomance();
+extern void AddSC_scholomance();
 extern void AddSC_boss_hummel();                            // shadowfang_keep
 extern void AddSC_shadowfang_keep();
 extern void AddSC_instance_shadowfang_keep();
@@ -563,6 +564,7 @@ void AddScripts()
     AddSC_boss_darkmaster_gandling();                       // scholomance
     AddSC_boss_jandicebarov();
     AddSC_instance_scholomance();
+    AddSC_scholomance();
     AddSC_boss_hummel();                                    // shadowfang_keep
     AddSC_shadowfang_keep();
     AddSC_instance_shadowfang_keep();
