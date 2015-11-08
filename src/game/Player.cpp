@@ -5103,6 +5103,8 @@ void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, floa
             val = (100.0f + amount) / 100.0f;
             m_auraBaseMod[modGroup][modType] *= apply ? val : (1.0f / val);
             break;
+        default:
+            break;
     }
 
     if (!CanModifyStats())

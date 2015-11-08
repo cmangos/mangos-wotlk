@@ -16,6 +16,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+# disable warnings for dependencies
+add_compile_options(-w)
+
 if(NOT (TBB_USE_EXTERNAL OR USE_STD_MALLOC))
   add_subdirectory(tbb)
 endif()

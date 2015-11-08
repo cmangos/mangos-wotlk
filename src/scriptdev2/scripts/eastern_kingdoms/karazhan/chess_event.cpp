@@ -860,7 +860,7 @@ bool GossipHello_npc_warchief_blackhand(Player* pPlayer, Creature* pCreature)
 
     if (instance_karazhan* pInstance = (instance_karazhan*)pCreature->GetInstanceData())
     {
-        if (pInstance->GetData(TYPE_CHESS) != DONE && pPlayer->GetTeam() == HORDE || pInstance->IsFriendlyGameReady())
+        if (pInstance->GetData(TYPE_CHESS) != DONE && (pPlayer->GetTeam() == HORDE || pInstance->IsFriendlyGameReady()))
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_WARCHIEF_BLACKHAND, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
     }
 

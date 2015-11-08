@@ -366,9 +366,9 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
         CharacterDatabase.escape_string(title);
         CharacterDatabase.escape_string(description);
         CharacterDatabase.PExecute("UPDATE calendar_events SET "
-                                   "type=%hu, flags=%u, dungeonId=%d, eventTime=%u, title='%s', description='%s'"
+                                   "type=%u, flags=%u, dungeonId=%d, eventTime=%u, title='%s', description='%s'"
                                    "WHERE eventid=" UI64FMTD,
-                                   type, flags, dungeonId, uint32(event->EventTime), title.c_str(), description.c_str(), eventId);
+                                   uint32(type), flags, dungeonId, uint32(event->EventTime), title.c_str(), description.c_str(), eventId);
     }
     else
         sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_EVENT_INVALID);

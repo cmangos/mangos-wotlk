@@ -1939,6 +1939,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                             return SPELL_AURA_PROC_FAILED;
                     }
                     break;
+                default:
+                    break;
                 }
                 // Holy Power (Redemption Armor set)
                 case 28789:

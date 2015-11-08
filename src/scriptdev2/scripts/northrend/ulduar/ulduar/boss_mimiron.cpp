@@ -587,6 +587,8 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                 if (!m_uiWakeUpTimer)
                     m_uiWakeUpTimer = 10000;
                 break;
+            default:
+                break;
         }
     }
 
