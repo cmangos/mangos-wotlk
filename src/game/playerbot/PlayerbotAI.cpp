@@ -661,46 +661,42 @@ bool PlayerbotAI::EquipPrototypeComparison(const ItemPrototype *pProtoItem, cons
 
         switch (pProtoItem->Class)
         {
-        case ITEM_CLASS_WEAPON:
-        {
-            // DEBUG_LOG("Current Item DPS (%f) Equippable Item DPS (%f)",pProto->getDPS(),pProto2->getDPS());
-            // m_bot->GetSkillValue(pProto->RequiredSkill) < m_bot->GetSkillValue(pProto2->RequiredSkill)
-            if (pProtoItem->getDPS() < pProtoItem2->getDPS())   // if new item has a better DPS
-            {
-                bRetVal = true;
-            }
-        }
-        break;
-        case ITEM_CLASS_ARMOR:
-        {
-            // Can we use the item, and is it the best class of armor we can use?
-            if (m_bot->HasSkill(item_armor_skills[pProtoItem2->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProtoItem2->SubClass + 1]))
-            {
-                // We only want item that are of the same level or better.  There will be an exception (perhaps)
-                // for armor sets, but that will be a later addition to the logic.
-                if (pProtoItem->ItemLevel <= pProtoItem2->ItemLevel)
+            case ITEM_CLASS_WEAPON:
+                // DEBUG_LOG("Current Item DPS (%f) Equippable Item DPS (%f)",pProto->getDPS(),pProto2->getDPS());
+                // m_bot->GetSkillValue(pProto->RequiredSkill) < m_bot->GetSkillValue(pProto2->RequiredSkill)
+                if (pProtoItem->getDPS() < pProtoItem2->getDPS())   // if new item has a better DPS
                 {
-                    // We only want items of equal or greater quality (Green, Blue, Purple ...)
-                    if (pProtoItem->Quality <= pProtoItem2->Quality)
+                    bRetVal = true;
+                }
+                break;
+            case ITEM_CLASS_ARMOR:
+                // Can we use the item, and is it the best class of armor we can use?
+                if (m_bot->HasSkill(item_armor_skills[pProtoItem2->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProtoItem2->SubClass + 1]))
+                {
+                    // We only want item that are of the same level or better.  There will be an exception (perhaps)
+                    // for armor sets, but that will be a later addition to the logic.
+                    if (pProtoItem->ItemLevel <= pProtoItem2->ItemLevel)
                     {
-                        // If the AC is equal or greater than the prior
-                        if (pProtoItem->Armor <= pProtoItem2->Armor)
+                        // We only want items of equal or greater quality (Green, Blue, Purple ...)
+                        if (pProtoItem->Quality <= pProtoItem2->Quality)
                         {
-                            // If the new stats are greater than old.  This really needs to be changed to return not a bool
-                            // but some percentage/value that can be used to match against the difference in armor.  Only
-                            // then can a reasonable determination be made.
-                            if (ItemStatComparison(pProtoItem, pProtoItem2))
+                            // If the AC is equal or greater than the prior
+                            if (pProtoItem->Armor <= pProtoItem2->Armor)
                             {
-                                bRetVal = true;
+                                // If the new stats are greater than old.  This really needs to be changed to return not a bool
+                                // but some percentage/value that can be used to match against the difference in armor.  Only
+                                // then can a reasonable determination be made.
+                                if (ItemStatComparison(pProtoItem, pProtoItem2))
+                                {
+                                    bRetVal = true;
+                                }
                             }
                         }
                     }
                 }
-            }
-        }
-        break;
-        default:
-            break;
+                break;
+            default:
+                break;
         }
     }
 
