@@ -8590,7 +8590,7 @@ bool Player::ViableEquipSlots(ItemPrototype const* proto, uint8 *viable_slots) c
                 viable_slots[0] = EQUIPMENT_SLOT_RANGED;
                 break;
             case INVTYPE_BAG:
-                //DEBUG_LOG("**** [Player::ViableEquipSlots] proto->InventoryType == INVTYPE_RANGEDRIGHT ****");
+                //DEBUG_LOG("**** [Player::ViableEquipSlots] proto->InventoryType == INVTYPE_BAG ****");
                 viable_slots[0] = INVENTORY_SLOT_BAG_START + 0;
                 viable_slots[1] = INVENTORY_SLOT_BAG_START + 1;
                 viable_slots[2] = INVENTORY_SLOT_BAG_START + 2;
