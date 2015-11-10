@@ -8573,13 +8573,15 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     }
 
     // ignore any messages from Addons
-    if (text.empty()                                   ||
-        text.find("X-Perl")      != std::wstring::npos ||
-        text.find("HealBot")     != std::wstring::npos ||
-        text.find("HealComm")    != std::wstring::npos ||   // "HealComm	99990094"
-        text.find("LOOT_OPENED") != std::wstring::npos ||
-        text.find("CTRA")        != std::wstring::npos ||
-        text.find("GathX")       == 0)                      // Gatherer
+    if (text.empty() ||
+        text.find("X-Perl") != std::wstring::npos       ||
+        text.find("HealBot") != std::wstring::npos      ||
+        text.find("hbComms") != std::wstring::npos      ||
+        text.find("HealComm") != std::wstring::npos     ||   // "HealComm	99990094"
+        text.find("LOOT_OPENED") != std::wstring::npos  ||
+        text.find("CTRA") != std::wstring::npos         ||
+        text.find("Crb") != std::wstring::npos          ||   // Carbonite
+        text.find("GathX") == 0)                            // Gatherer
         return;
 
     // if message is not from a player in the masters account auto reply and ignore
@@ -8778,7 +8780,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         else
         {
             // TODO: make this only in response to direct whispers (chatting in party chat can in fact be between humans)
-            std::string msg = "What? For a list of commands, ask for 'help'.";
+            std::string msg = "What is [";
+            msg += text.c_str();
+            msg += "]? For a list of commands, ask for 'help'.";
             SendWhisper(msg, fromPlayer);
             m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
         }
