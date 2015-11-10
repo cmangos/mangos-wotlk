@@ -5364,18 +5364,17 @@ bool PlayerbotAI::CastPetSpell(uint32 spellId, Unit* target)
 // Perform sanity checks and cast spell
 bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void(*beforeCast)(Player *))
 {
-    int32	bonus = 0;
-    uint8	i;
-    bool	hasEqualOrGreaterAuraEffect[MAX_EFFECT_INDEX];
-    bool	needsBuff = false;
+    int32			bonus;
+    uint8			i;
+    bool			hasEqualOrGreaterAuraEffect[MAX_EFFECT_INDEX];
+    bool			isThorns;
 
     //DEBUG_LOG("**** PlayerbotAI::Buff ****");
-    if (spellId == 0) return false;
 
+    if (spellId == 0) return false;
     //DEBUG_LOG("[PlayerbotAI::Buff] spellId = %u", spellId);
 
     if (!target) return false;
-    
     //DEBUG_LOG("[PlayerbotAI::Buff] target = %s", target->GetName());
 
     SpellEntry const * spellProto = sSpellStore.LookupEntry(spellId);
@@ -5386,6 +5385,9 @@ bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void(*beforeCast)(Player *)
     spellProto = sSpellMgr.SelectAuraRankForLevel(spellProto, target->getLevel());
     if (!spellProto) return false;
     //DEBUG_LOG("[PlayerbotAI::Buff] sSpellMgr.SelectAuraRankForLevel(spellProto, target->getLevel()) .... Success!");
+
+    isThorns = (strncmp(spellProto->SpellName[0], "Thorns", 5) == 0);
+    //DEBUG_LOG("[PlayerbotAI::Buff] isThorns = %s", (isThorns ? "True" : "False"));
 
     //DEBUG_LOG("[PlayerbotAI::Buff] BEGIN Aura Check Loop!");
 
@@ -5421,7 +5423,21 @@ bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void(*beforeCast)(Player *)
                 //DEBUG_LOG("[PlayerbotAI::Buff] ---> INNER LOOP  m_amount (%d) vs bonus (%d)", (*it)->GetModifier()->m_amount, bonus);
                 if ((*it)->GetModifier()->m_amount >= bonus)
                 {
-                    //DEBUG_LOG("[PlayerbotAI::Buff] ---> INNER LOOP: Found equal or better!");
+                    //DEBUG_LOG("[PlayerbotAI::Buff] ---> INNER LOOP: Found equal or better - Checking Exceptions!");
+
+                    // We now have to check for exceptions to this rule - meaning those that can stack anyways.
+                    if (isThorns)
+                    {
+                        //DEBUG_LOG("[PlayerbotAI::Buff] ---> INNER LOOP: Checking 'Thorns' Exceptions.");
+                        if (strncmp((*it)->GetSpellProto()->SpellName[0], "Retribution Aura", 16) == 0)
+                        {
+                            //DEBUG_LOG("[PlayerbotAI::Buff] ---> INNER LOOP: 'Thorns' Exception found - Retribution Aura!");
+                            continue;
+                        }
+                        //DEBUG_LOG("[PlayerbotAI::Buff] ---> INNER LOOP: No 'Thorns' exceptions found.");
+                    }
+
+                    //DEBUG_LOG("[PlayerbotAI::Buff] ---> INNER LOOP: No exceptions found - setting hasEqualOrGreaterAuraEffect[i] = true.");
                     hasEqualOrGreaterAuraEffect[i] = true;
                 }
             }
@@ -5438,13 +5454,14 @@ bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void(*beforeCast)(Player *)
         //DEBUG_LOG("[PlayerbotAI::Buff] hasEqualOrGreaterAura[%u] = %u", hasEqualOrGreaterAuraEffect[i], i);
         if (!hasEqualOrGreaterAuraEffect[i])
         {
-            //DEBUG_LOG("[PlayerbotAI::Buff] Determined to need buff.");
+            //DEBUG_LOG("[PlayerbotAI::Buff] Determined target requires buff.");
 
             // Druids may need to shapeshift before casting
             if (beforeCast)
             {
-                //DEBUG_LOG("[PlayerbotAI::Buff] Shape Shifing.");
+                //DEBUG_LOG("[PlayerbotAI::Buff] beforeCast function about to be executed.");
                 (*beforeCast)(m_bot);
+                //DEBUG_LOG("[PlayerbotAI::Buff] beforeCast function executed.");
             }
 
             //DEBUG_LOG("[PlayerbotAI::Buff] Casting Spell.");
@@ -5456,6 +5473,7 @@ bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void(*beforeCast)(Player *)
     //DEBUG_LOG("[PlayerbotAI::Buff] Target does not require buff.");
     return false;
 }
+
 
 // Can be used for personal buffs like Mage Armor and Inner Fire
 bool PlayerbotAI::SelfBuff(uint32 spellId)
