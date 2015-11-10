@@ -1841,6 +1841,7 @@ public:
     void AutoUpgradeEquipment();
     void FollowAutoReset();
     void AutoEquipComparison(Item *pItem, Item *pItem2);
+    bool EquipPrototypeComparison(const ItemPrototype *pProtoItem, const ItemPrototype *pProtoItem2);
     bool ItemStatComparison(const ItemPrototype *pProto, const ItemPrototype *pProto2);
     void Feast();
     void InterruptCurrentCastingSpell();

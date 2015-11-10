@@ -630,68 +630,79 @@ void PlayerbotAI::AutoUpgradeEquipment() // test for autoequip
 
 void PlayerbotAI::AutoEquipComparison(Item *pItem, Item *pItem2)
 {
+    ItemPrototype const *pProto = pItem2->GetProto(); // equipped item if any
+    ItemPrototype const *pProto2 = pItem->GetProto(); // new item to compare
+
+    if (EquipPrototypeComparison(pProto, pProto2))
+    {
+        EquipItem(pItem);
+        InspectUpdate();
+    }
+
+}
+
+
+bool PlayerbotAI::EquipPrototypeComparison(const ItemPrototype *pProtoItem, const ItemPrototype *pProtoItem2)
+{
     const static uint32 item_armor_skills[MAX_ITEM_SUBCLASS_ARMOR] =
     {
         0, SKILL_CLOTH, SKILL_LEATHER, SKILL_MAIL, SKILL_PLATE_MAIL, 0, SKILL_SHIELD, 0, 0, 0, 0
     };
-    ItemPrototype const *pProto = pItem2->GetProto(); // equipped item if any
-    ItemPrototype const *pProto2 = pItem->GetProto(); // new item to compare
-    // DEBUG_LOG("Item Class (%s)",(pProto->Class == ITEM_CLASS_WEAPON ? "Weapon" : "Not Weapon"));
-    switch (pProto->Class)
+
+    bool bRetVal = false;
+
+    // If it is the same item in the slot, then it is not 'better'
+    if (pProtoItem->ItemId != pProtoItem2->ItemId)
     {
-    case ITEM_CLASS_WEAPON:
+
+        // DEBUG_LOG("Item Class (%s)",(pProto->Class == ITEM_CLASS_WEAPON ? "Weapon" : "Not Weapon"));
+
+        switch (pProtoItem->Class)
+        {
+        case ITEM_CLASS_WEAPON:
         {
             // DEBUG_LOG("Current Item DPS (%f) Equippable Item DPS (%f)",pProto->getDPS(),pProto2->getDPS());
             // m_bot->GetSkillValue(pProto->RequiredSkill) < m_bot->GetSkillValue(pProto2->RequiredSkill)
-            if (pProto->getDPS() < pProto2->getDPS())   // if new item has a better DPS
+            if (pProtoItem->getDPS() < pProtoItem2->getDPS())   // if new item has a better DPS
             {
-                EquipItem(pItem);
-                pProto = pProto2; // ensure that the item with the highest DPS is equipped
+                bRetVal = true;
             }
+        }
+        break;
+        case ITEM_CLASS_ARMOR:
+        {
+            // Can we use the item, and is it the best class of armor we can use?
+            if (m_bot->HasSkill(item_armor_skills[pProtoItem2->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProtoItem2->SubClass + 1]))
+            {
+                // We only want item that are of the same level or better.  There will be an exception (perhaps)
+                // for armor sets, but that will be a later addition to the logic.
+                if (pProtoItem->ItemLevel <= pProtoItem2->ItemLevel)
+                {
+                    // We only want items of equal or greater quality (Green, Blue, Purple ...)
+                    if (pProtoItem->Quality <= pProtoItem2->Quality)
+                    {
+                        // If the AC is equal or greater than the prior
+                        if (pProtoItem->Armor <= pProtoItem2->Armor)
+                        {
+                            // If the new stats are greater than old.  This really needs to be changed to return not a bool
+                            // but some percentage/value that can be used to match against the difference in armor.  Only
+                            // then can a reasonable determination be made.
+                            if (ItemStatComparison(pProtoItem, pProtoItem2))
+                            {
+                                bRetVal = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        break;
+        default:
             break;
         }
-    case ITEM_CLASS_ARMOR:
-        {
-            // now in case they are same itemlevel, but one is better than the other..
-            if (pProto->ItemLevel == pProto2->ItemLevel && pProto->Quality < pProto2->Quality && pProto->Armor <= pProto2->Armor &&
-                m_bot->HasSkill(item_armor_skills[pProto2->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProto2->SubClass + 1])) // itemlevel + armour + armour class
-            {
-                // First check to see if this item has stats, and if the bot REALLY wants to lose its old item
-                if (pProto2->StatsCount > 0)
-                {
-                    if (!ItemStatComparison(pProto, pProto2))
-                        return; // stats on equipped item are better, OR stats are not useful for this bots class/style
-                }
-                EquipItem(pItem);
-                break;
-            }
-            if (pProto->ItemLevel <= pProto2->ItemLevel && pProto->Quality < pProto2->Quality && pProto->Armor > pProto2->Armor &&
-                m_bot->HasSkill(item_armor_skills[pProto2->SubClass]) && !m_bot->HasSkill(item_armor_skills[pProto2->SubClass + 1])) // itemlevel + armour + armour class
-            {
-                // First check to see if this item has stats, and if the bot REALLY wants to lose its old item
-                if (pProto2->StatsCount > 0)
-                {
-                    if (!ItemStatComparison(pProto, pProto2))
-                        return; // stats on equipped item are better, OR stats are not useful for this bots class/style
-                }
-                EquipItem(pItem);
-                break;
-            }
-            if (pProto->ItemLevel <= pProto2->ItemLevel && pProto->Armor <= pProto2->Armor && m_bot->HasSkill(item_armor_skills[pProto2->SubClass]) &&
-                !m_bot->HasSkill(item_armor_skills[pProto2->SubClass + 1])) // itemlevel + armour + armour class
-            {
-                // First check to see if this item has stats, and if the bot REALLY wants to lose its old item
-                if (pProto2->StatsCount > 0)
-                {
-                    if (!ItemStatComparison(pProto, pProto2))
-                        return; // stats on equipped item are better, OR stats are not useful for this bots class/style
-                }
-                EquipItem(pItem);
-                break;
-            }
-        }
     }
-    InspectUpdate();
+
+    return bRetVal;
 }
 
 bool PlayerbotAI::ItemStatComparison(const ItemPrototype *pProto, const ItemPrototype *pProto2)
