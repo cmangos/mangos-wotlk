@@ -34,6 +34,7 @@ include_directories(SYSTEM
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/vmap
+  ${CMAKE_CURRENT_SOURCE_DIR}/playerbot
   ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
   ${CMAKE_CURRENT_SOURCE_DIR}/BattleGround
   ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
@@ -41,6 +42,36 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/framework
   ${CMAKE_BINARY_DIR}
   ${CMAKE_BINARY_DIR}/src/shared
+)
+
+set(SRC_GRP_PLAYERBOT
+    playerbot/config.h
+    playerbot/PlayerbotAI.cpp
+    playerbot/PlayerbotAI.h
+    playerbot/PlayerbotClassAI.cpp
+    playerbot/PlayerbotClassAI.h
+    playerbot/PlayerbotDeathKnightAI.cpp
+    playerbot/PlayerbotDeathKnightAI.h
+    playerbot/PlayerbotDruidAI.cpp
+    playerbot/PlayerbotDruidAI.h
+    playerbot/PlayerbotHunterAI.cpp
+    playerbot/PlayerbotHunterAI.h
+    playerbot/PlayerbotMageAI.cpp
+    playerbot/PlayerbotMageAI.h
+    playerbot/PlayerbotMgr.cpp
+    playerbot/PlayerbotMgr.h
+    playerbot/PlayerbotPaladinAI.cpp
+    playerbot/PlayerbotPaladinAI.h
+    playerbot/PlayerbotPriestAI.cpp
+    playerbot/PlayerbotPriestAI.h
+    playerbot/PlayerbotRogueAI.cpp
+    playerbot/PlayerbotRogueAI.h
+    playerbot/PlayerbotShamanAI.cpp
+    playerbot/PlayerbotShamanAI.h
+    playerbot/PlayerbotWarlockAI.cpp
+    playerbot/PlayerbotWarlockAI.h
+    playerbot/PlayerbotWarriorAI.cpp
+    playerbot/PlayerbotWarriorAI.h
 )
 
 set(SRC_GRP_AHBOT
@@ -419,6 +450,7 @@ set(SRC_GRP_WORLD_HANDLERS
 )
 
 set(LIBRARY_SRCS
+    ${SRC_GRP_PLAYERBOT}
     ${SRC_GRP_AHBOT}
     ${SRC_GRP_BATTLEGROUND}
     ${SRC_GRP_CHAT_COMMANDS}
@@ -433,6 +465,11 @@ set(LIBRARY_SRCS
     ${SRC_GRP_WORLD_HANDLERS}
     pchdef.cpp
     pchdef.h
+)
+
+source_group("Playerbot"
+  FILES
+    ${SRC_GRP_PLAYERBOT}
 )
 
 source_group("AhBot"
@@ -536,3 +573,5 @@ if(PCH)
     endif()
   endif()
 endif()
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/playerbot.conf.dist.in DESTINATION ${CONF_DIR} RENAME playerbot.conf.dist)

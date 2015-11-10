@@ -40,6 +40,7 @@
 #include "RASocket.h"
 #include "Util.h"
 #include "revision_sql.h"
+#include "playerbot/revision_sql.h"
 #include "MaNGOSsoap.h"
 #include "MassMailMgr.h"
 #include "DBCStores.h"
@@ -469,6 +470,14 @@ bool Master::_StartDB()
     }
 
     if (!CharacterDatabase.CheckRequiredField("character_db_version", REVISION_DB_CHARACTERS))
+    {
+        ///- Wait for already started DB delay threads to end
+        WorldDatabase.HaltDelayThread();
+        CharacterDatabase.HaltDelayThread();
+        return false;
+    }
+
+    if(!CharacterDatabase.CheckRequiredField("playerbotai_db_version",REVISION_DB_PLAYERBOTAI))
     {
         ///- Wait for already started DB delay threads to end
         WorldDatabase.HaltDelayThread();
