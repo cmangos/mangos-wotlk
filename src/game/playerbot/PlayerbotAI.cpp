@@ -5362,68 +5362,99 @@ bool PlayerbotAI::CastPetSpell(uint32 spellId, Unit* target)
 }
 
 // Perform sanity checks and cast spell
-bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player *))
+bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void(*beforeCast)(Player *))
 {
-    //DEBUG_LOG("...Buff");
-    if (spellId == 0)
-        return false;
+    int32	bonus = 0;
+    uint8	i;
+    bool	hasEqualOrGreaterAuraEffect[MAX_EFFECT_INDEX];
+    bool	needsBuff = false;
+
+    //DEBUG_LOG("**** PlayerbotAI::Buff ****");
+    if (spellId == 0) return false;
+
+    //DEBUG_LOG("[PlayerbotAI::Buff] spellId = %u", spellId);
+
+    if (!target) return false;
+    
+    //DEBUG_LOG("[PlayerbotAI::Buff] target = %s", target->GetName());
 
     SpellEntry const * spellProto = sSpellStore.LookupEntry(spellId);
-
-    if (!spellProto)
-        return false;
-
-    if (!target)
-        return false;
+    if (!spellProto) return false;
+    //DEBUG_LOG("[PlayerbotAI::Buff] sSpellStore.LookupEntry(spellId) .... Success!");
 
     // Select appropriate spell rank for target's level
     spellProto = sSpellMgr.SelectAuraRankForLevel(spellProto, target->getLevel());
-    if (!spellProto)
-        return false;
+    if (!spellProto) return false;
+    //DEBUG_LOG("[PlayerbotAI::Buff] sSpellMgr.SelectAuraRankForLevel(spellProto, target->getLevel()) .... Success!");
 
-    //DEBUG_LOG("...Sanity checks passed for %s", target->GetName());
-    // Check if spell will boost one of already existent auras
-    bool willBenefitFromSpell = false;
-    bool hasComparableAura = false;
-    //DEBUG_LOG("...willBenefit: %d (start)", willBenefitFromSpell);
-    for (uint8 i = 0; i < MAX_EFFECT_INDEX && !willBenefitFromSpell; ++i)
+    //DEBUG_LOG("[PlayerbotAI::Buff] BEGIN Aura Check Loop!");
+
+    // Loop through effects
+    for (i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
+        //DEBUG_LOG("[PlayerbotAI::Buff] OUTER LOOP: Effect Index = %u", i);
+
+        //DEBUG_LOG("[PlayerbotAI::Buff] OUTER LOOP: Initialize hasEqualOrGreaterAuraEffect[%u] to false", i);
+        hasEqualOrGreaterAuraEffect[i] = false;
+
         if (spellProto->EffectApplyAuraName[i] == SPELL_AURA_NONE)
         {
-            //DEBUG_LOG("...Effect%d NONE", i);
+            //DEBUG_LOG("[PlayerbotAI::Buff] OUTER LOOP: spellProto->EffectApplyAuraName[%u] == SPELL_AURA_NONE  -  Exiting Loop", i);
             break;
         }
-        //DEBUG_LOG("...Effect%d exists", i);
 
-        int32 bonus = m_bot->CalculateSpellDamage(target, spellProto, SpellEffectIndex(i));
+        //DEBUG_LOG("[PlayerbotAI::Buff] OUTER LOOP: Effect Index %u = %u", i, spellProto->EffectApplyAuraName[i]);
+
+        bonus = m_bot->CalculateSpellDamage(target, spellProto, SpellEffectIndex(i));
+        //DEBUG_LOG("[PlayerbotAI::Buff] OUTER LOOP: Aura Effect Bonus = %d", bonus);
+
         Unit::AuraList const& auras = target->GetAurasByType(AuraType(spellProto->EffectApplyAuraName[i]));
-        for (Unit::AuraList::const_iterator it = auras.begin(); it != auras.end() && !willBenefitFromSpell; ++it)
+
+        // Itterate through the targets existing aura's
+        for (Unit::AuraList::const_iterator it = auras.begin(); it != auras.end() && !hasEqualOrGreaterAuraEffect[i]; ++it)
         {
-            //DEBUG_LOG("...m_amount (%d) vs bonus (%d)", (*it)->GetModifier()->m_amount, bonus);
+            //DEBUG_LOG("[PlayerbotAI::Buff] ---> INNER LOOP: AuraList Index = %d", it);
+
+            //DEBUG_LOG("[PlayerbotAI::Buff] ---> INNER LOOP: (*it)->GetModifier()->m_miscvalue (%d) vs spellProto->EffectMiscValue[%d] (%d)",(*it)->GetModifier()->m_miscvalue,i,spellProto->EffectMiscValue[i]);
             if ((*it)->GetModifier()->m_miscvalue == spellProto->EffectMiscValue[i])
             {
-                hasComparableAura = true;
-                //DEBUG_LOG("...hasComparableAura");
-                if ((*it)->GetModifier()->m_amount < bonus)
+                //DEBUG_LOG("[PlayerbotAI::Buff] ---> INNER LOOP  m_amount (%d) vs bonus (%d)", (*it)->GetModifier()->m_amount, bonus);
+                if ((*it)->GetModifier()->m_amount >= bonus)
                 {
-                    //DEBUG_LOG("...Will benefit!");
-                    willBenefitFromSpell = true;
+                    //DEBUG_LOG("[PlayerbotAI::Buff] ---> INNER LOOP: Found equal or better!");
+                    hasEqualOrGreaterAuraEffect[i] = true;
                 }
             }
-            //DEBUG_LOG("...willBenefit: %d", willBenefitFromSpell);
         }
+        //DEBUG_LOG("[PlayerbotAI::Buff] ---> INNER LOOP: Exit loop.");
     }
-    //DEBUG_LOG("...willBenefit: %d (end)", willBenefitFromSpell);
 
-    if (hasComparableAura && !willBenefitFromSpell)
-        return false;
+    //DEBUG_LOG("[PlayerbotAI::Buff] OUTER LOOP: Exit loop.");
 
-    // Druids may need to shapeshift before casting
-    if (beforeCast)
-        (*beforeCast)(m_bot);
+    do
+    {
+        i--;
 
-    //DEBUG_LOG("...Casting spell");
-    return CastSpell(spellProto->Id, *target);
+        //DEBUG_LOG("[PlayerbotAI::Buff] hasEqualOrGreaterAura[%u] = %u", hasEqualOrGreaterAuraEffect[i], i);
+        if (!hasEqualOrGreaterAuraEffect[i])
+        {
+            //DEBUG_LOG("[PlayerbotAI::Buff] Determined to need buff.");
+
+            // Druids may need to shapeshift before casting
+            if (beforeCast)
+            {
+                //DEBUG_LOG("[PlayerbotAI::Buff] Shape Shifing.");
+                (*beforeCast)(m_bot);
+            }
+
+            //DEBUG_LOG("[PlayerbotAI::Buff] Casting Spell.");
+            return CastSpell(spellProto->Id, *target);
+        }
+
+    } while (i > 0);
+
+    //DEBUG_LOG("[PlayerbotAI::Buff] Target does not require buff.");
+    return false;
 }
 
 // Can be used for personal buffs like Mage Armor and Inner Fire
