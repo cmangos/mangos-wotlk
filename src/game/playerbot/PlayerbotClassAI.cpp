@@ -127,20 +127,20 @@ CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, ui
                     return RETURN_CONTINUE;
                 }
             }
-            //DEBUG_LOG(".Group_Member: %s", groupMember->GetName());
+            // DEBUG_LOG("[PlayerbotClassAI::Buff] Group_Member: %s", groupMember->GetName());
             JOB_TYPE job = GetTargetJob(groupMember);
             if (job & type && (!(type & JOB_MANAONLY) || groupMember->getClass() == CLASS_DRUID || groupMember->GetPowerType() == POWER_MANA))
             {
-                //DEBUG_LOG(".Correct job");
+                // DEBUG_LOG("[PlayerbotClassAI::Buff] Correct job");
                 if (BuffHelper(m_ai, spellId, groupMember))
                 {
-                    //DEBUG_LOG(".Buffing, RETURN");
+                    // DEBUG_LOG("[PlayerbotClassAI::Buff] BuffHelper Done - RETURN_CONTINUE");
                     return RETURN_CONTINUE;
                 }
             }
-            //DEBUG_LOG(".no buff, checking next group member");
+            // DEBUG_LOG("[PlayerbotClassAI::Buff] No buff, checking next group member");
         }
-        //DEBUG_LOG(".nobody in the group to buff");
+        // DEBUG_LOG("[PlayerbotClassAI::Buff] nobody in the group to buff");
     }
     else
     {
