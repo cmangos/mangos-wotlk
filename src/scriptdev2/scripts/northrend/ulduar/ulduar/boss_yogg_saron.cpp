@@ -812,6 +812,8 @@ struct npc_voice_yogg_saronAI : public Scripted_NoMovementAI
             case AI_EVENT_START_EVENT_B:
                 m_uiPhase = PHASE_OLD_GOD;
                 break;
+            default:
+                break;
         }
     }
 

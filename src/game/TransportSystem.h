@@ -41,7 +41,7 @@
 
 class TransportInfo;
 
-typedef UNORDERED_MAP < WorldObject* /*passenger*/, TransportInfo* /*passengerInfo*/ > PassengerMap;
+typedef std::unordered_map<WorldObject* /*passenger*/, TransportInfo* /*passengerInfo*/> PassengerMap;
 
 /**
  * A class to provide basic support for each transporter. This includes

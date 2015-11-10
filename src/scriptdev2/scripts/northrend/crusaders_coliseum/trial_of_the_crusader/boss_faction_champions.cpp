@@ -596,6 +596,8 @@ struct boss_crusader_druid_restoAI : public trial_crusader_commonAI
             case AI_EVENT_LOST_SOME_HEALTH:
                 uiIndex = urand(0, 1) ? 3 : 4;
                 break;
+            default:
+                break;
         }
 
         if (uiIndex > MAX_DRUID_RESTO_SPELLS - 1)
@@ -660,6 +662,8 @@ struct boss_crusader_paladin_holyAI : public trial_crusader_commonAI
                 break;
             case AI_EVENT_GOT_CCED:
                 uiSpellEntry = SPELL_CLEANSE;
+                break;
+            default:
                 break;
         }
 
@@ -736,6 +740,8 @@ struct boss_crusader_priest_discAI : public trial_crusader_commonAI
             case AI_EVENT_GOT_CCED:
                 uiSpellEntry = SPELL_DISPEL_MAGIC;
                 break;
+            default:
+                break;
         }
 
         if (!uiSpellEntry)
@@ -811,6 +817,8 @@ struct boss_crusader_shaman_restoAI : public trial_crusader_commonAI
             case AI_EVENT_GOT_CCED:
                 uiSpellEntry = SPELL_CLEANSE_SPIRIT;
                 break;
+            default:
+                break;
         }
 
         if (!uiSpellEntry)
@@ -881,6 +889,8 @@ struct boss_crusader_druid_balanceAI : public trial_crusader_commonAI
             case AI_EVENT_CRITICAL_HEALTH:
                 uiIndex = urand(0, 1) ? 7 : 8;
                 break;
+            default:
+                break;
         }
 
         if (uiIndex > MAX_DRUID_BALANCE_SPELLS - 1)
@@ -944,6 +954,8 @@ struct boss_crusader_hunterAI : public trial_crusader_commonAI
                         case 2: uiIndex = 7; break;
                     }
                     break;
+                default:
+                    break;
             }
 
             if (uiIndex > MAX_HUNTER_SPELLS - 1)
@@ -1001,6 +1013,8 @@ struct boss_crusader_mageAI : public trial_crusader_commonAI
                 break;
             case AI_EVENT_GOT_CCED:
                 uiIndex = 1;
+                break;
+            default:
                 break;
         }
 
@@ -1060,6 +1074,8 @@ struct boss_crusader_priest_shadowAI : public trial_crusader_commonAI
                 break;
             case AI_EVENT_GOT_CCED:
                 uiSpellEntry = SPELL_DISPEL;
+                break;
+            default:
                 break;
         }
 
@@ -1131,6 +1147,8 @@ struct boss_crusader_warlockAI : public trial_crusader_commonAI
                 case AI_EVENT_CRITICAL_HEALTH:
                     uiIndex = 8;
                     break;
+                default:
+                    break;
             }
 
             if (uiIndex > MAX_WARLOCK_SPELLS - 1)
@@ -1187,6 +1205,9 @@ struct boss_crusader_death_knightAI : public trial_crusader_commonAI
             case AI_EVENT_CRITICAL_HEALTH:
                 uiIndex = urand(0, 1) ? 5 : 6;
                 break;
+
+            default:
+                break;
         }
 
         if (uiIndex > MAX_DEATH_KNIGHT_SPELLS - 1)
@@ -1236,6 +1257,8 @@ struct boss_crusader_warriorAI : public trial_crusader_commonAI
             case AI_EVENT_CRITICAL_HEALTH:
             case AI_EVENT_LOST_HEALTH:
                 uiIndex = 8;
+                break;
+            default:
                 break;
         }
 
@@ -1287,6 +1310,8 @@ struct boss_crusader_paladin_retriAI : public trial_crusader_commonAI
                 case AI_EVENT_CRITICAL_HEALTH:
                 case AI_EVENT_LOST_HEALTH:
                     uiIndex = urand(0, 1) ? 3 : 5;
+                    break;
+                default:
                     break;
             }
 
@@ -1363,6 +1388,8 @@ struct boss_crusader_rogueAI : public trial_crusader_commonAI
             case AI_EVENT_CRITICAL_HEALTH:
             case AI_EVENT_LOST_HEALTH:
                 uiIndex = 7;
+                break;
+            default:
                 break;
         }
 
