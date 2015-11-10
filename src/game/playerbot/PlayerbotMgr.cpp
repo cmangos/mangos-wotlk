@@ -612,7 +612,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
-                uint32 choice = 0;
+                uint32 choice = 2;
 
                 Player* const bot = it->second;
                 if (!bot)
@@ -642,12 +642,41 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
                 if (bot->GetPlayerbotAI()->CanStore())
                 {
-                    if (bot->CanUseItem(pProto) == EQUIP_ERR_OK && bot->GetPlayerbotAI()->IsItemUseful(lootItem->itemId))
-                        choice = 1;		// Need
-                    else if (bot->HasSkill(SKILL_ENCHANTING))
-                        choice = 3;		// Disenchant
+                    uint8 slots[4];
+
+                    if (bot->ViableEquipSlots(pProto, &slots[0]))
+                    {
+                        int iSlot = 0;
+
+                        // First we check what we are currently wearing
+                        while (slots[iSlot] != NULL_SLOT && iSlot < 4)
+                        {
+                            Item* const pItem2 = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slots[iSlot]);
+
+                            // Make sure there is something slotted
+                            if (pItem2)
+                            {
+                                if (bot->GetPlayerbotAI()->EquipPrototypeComparison(pItem2->GetProto(), pProto))
+                                {
+                                    choice = 1;
+                                    break;
+                                }
+                            }
+                            iSlot++;
+                        }
+
+                        // TODO: Need to add logic for those cases where secondary equipment is
+                        // used.  For instance - 2H is used by Tank, but sword and board are in
+                        // inventory for specific encounters.  Upgrading thsoe should be taken
+                        // into consideration.  Also, more specific logic for 'sets'.
+                    }
                     else
-                        choice = 2;		// Greed
+                    {
+                        if (bot->HasSkill(SKILL_ENCHANTING))
+                        {
+                            choice = 3;		// Disenchant
+                        }
+                    }
                 }
                 else
                     choice = 0;			// Pass
