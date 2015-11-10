@@ -123,11 +123,13 @@ m_bDebugCommandChat(false)
 
 PlayerbotAI::~PlayerbotAI()
 {
+    //DEBUG_LOG("**** [PlayerbotAI::~PlayerbotAI] ****");
     if (m_classAI) delete m_classAI;
 }
 
 Player* PlayerbotAI::GetMaster() const
 {
+    //DEBUG_LOG("**** [PlayerbotAI::GetMaster] ****");
     return m_mgr->GetMaster();
 }
 
@@ -1525,6 +1527,7 @@ void PlayerbotAI::SendOrders(Player& /*player*/)
 // handle outgoing packets the server would send to the client
 void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 {
+    //DEBUG_LOG("**** [PlayerbotAI::HandleBotOutgoingPacket] ****");
     switch (packet.GetOpcode())
     {
     case SMSG_DUEL_WINNER:
@@ -2990,6 +2993,8 @@ void PlayerbotAI::Feast()
 // based on its class / level / etc
 void PlayerbotAI::Attack(Unit* forcedTarget)
 {
+    // DEBUG_LOG("**** [PlayerbotAI::Attack] ****")
+
     // set combat state, and clear looting, etc...
     if (m_botState != BOTSTATE_COMBAT)
     {
@@ -3013,6 +3018,8 @@ void PlayerbotAI::Attack(Unit* forcedTarget)
 // based on its class / level / etc
 void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
 {
+    // DEBUG_LOG("**** [PlayerbotAI::GetCombatTarget] ****")
+
     // update attacker info now
     UpdateAttackerInfo();
 
@@ -3628,6 +3635,8 @@ void PlayerbotAI::DoFlight()
 
 void PlayerbotAI::DoLoot()
 {
+    // DEBUG_LOG("**** PlayerbotAI::DoLoot ****");
+
     // clear BOTSTATE_LOOTING if no more loot targets
     if (m_lootCurrent.IsEmpty() && m_lootTargets.empty())
     {
@@ -7049,6 +7058,8 @@ void PlayerbotAI::findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<
 
 void PlayerbotAI::findNearbyGO()
 {
+    // DEBUG_LOG("**** [PlayerbotAI::findNearbyGO] ****");
+
     if (m_collectObjects.empty())
         return;
 
@@ -7103,6 +7114,8 @@ void PlayerbotAI::findNearbyGO()
 
 void PlayerbotAI::findNearbyCorpse()
 {
+    // DEBUG_LOG("**** [PlayerbotAI::findNearbyCorpse] ****");
+
     std::list<Unit*> corpseList;
     float radius = float(m_mgr->m_confCollectDistance);
 
@@ -8561,6 +8574,8 @@ void PlayerbotAI::GetTaxi(ObjectGuid guid, BotTaxiNode& nodes)
 // handle commands sent through chat channels
 void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 {
+    // DEBUG_LOG("**** [PlayerbotAI::HandleCommand] ****");
+
     // prevent bot task spam
     m_inventory_full = false;
     m_tasks.unique();
