@@ -1888,7 +1888,7 @@ void World::ShutdownMsg(bool show /*= false*/, Player* player /*= nullptr*/)
 /// Cancel a planned server shutdown
 void World::ShutdownCancel()
 {
-    // nothing cancel or too later
+    // nothing to cancel or too late
     if (!m_ShutdownTimer || m_stopEvent)
         return;
 

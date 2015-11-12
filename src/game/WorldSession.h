@@ -28,6 +28,10 @@
 #include "ObjectGuid.h"
 #include "AuctionHouseMgr.h"
 #include "Item.h"
+#include "WorldSocket.h"
+
+#include <queue>
+#include <mutex>
 
 struct ItemPrototype;
 struct AuctionEntry;
@@ -42,7 +46,6 @@ class Object;
 class Player;
 class Unit;
 class WorldPacket;
-class WorldSocket;
 class QueryResult;
 class LoginQueryHolder;
 class CharacterHandler;
@@ -262,7 +265,7 @@ class MANGOS_DLL_SPEC WorldSession
         Player* GetPlayer() const { return _player; }
         char const* GetPlayerName() const;
         void SetSecurity(AccountTypes security) { _security = security; }
-        std::string const& GetRemoteAddress() { return m_Address; }
+        const std::string &GetRemoteAddress() const { return m_Socket->GetRemoteAddress(); }
         void SetPlayer(Player* plr);
         uint8 Expansion() const { return m_expansion; }
 
@@ -887,9 +890,8 @@ class MANGOS_DLL_SPEC WorldSession
         void LogUnprocessedTail(WorldPacket* packet);
 
         uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
-        Player* _player;
-        WorldSocket* m_Socket;
-        std::string m_Address;
+        Player * _player;
+        WorldSocket * const m_Socket;
 
         AccountTypes _security;
         uint32 _accountId;
@@ -909,7 +911,9 @@ class MANGOS_DLL_SPEC WorldSession
         uint32 m_Tutorials[8];
         TutorialDataState m_tutorialState;
         AddonsList m_addonsList;
-        ACE_Based::LockedQueue<WorldPacket*> _recvQueue;
+
+        std::mutex m_packetQueueLock;
+        std::queue<WorldPacket *> m_packetQueue;
 };
 #endif
 /// @}
