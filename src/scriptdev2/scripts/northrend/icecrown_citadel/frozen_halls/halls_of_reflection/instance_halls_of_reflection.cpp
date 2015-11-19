@@ -16,13 +16,18 @@
 
 /* ScriptData
 SDName: instance_halls_of_reflection
-SD%Complete: 10
+SD%Complete: 20
 SDComment: Basic support
 SDCategory: Halls of Reflection
 EndScriptData */
 
 #include "precompiled.h"
 #include "halls_of_reflection.h"
+
+enum
+{
+    SPELL_SPIRIT_ACTIVATE_VISUAL            = 72130,            // cast when activate spirit
+};
 
 instance_halls_of_reflection::instance_halls_of_reflection(Map* pMap) : ScriptedInstance(pMap),
     m_uiTeam(TEAM_NONE)
@@ -41,13 +46,19 @@ void instance_halls_of_reflection::OnPlayerEnter(Player* pPlayer)
     {
         m_uiTeam = pPlayer->GetTeam();
 
-        // Spawn intro npcs
+        // Spawn intro npcs and make the start the movement
         for (uint8 i = 0; i < countof(aEventBeginLocations); ++i)
         {
-            pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocations[i].uiEntryHorde : aEventBeginLocations[i].uiEntryAlliance,
-                aEventBeginLocations[i].fX, aEventBeginLocations[i].fY, aEventBeginLocations[i].fZ, aEventBeginLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+            if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocations[i].uiEntryHorde : aEventBeginLocations[i].uiEntryAlliance,
+                aEventBeginLocations[i].fX, aEventBeginLocations[i].fY, aEventBeginLocations[i].fZ, aEventBeginLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true))
+            {
+                pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                pCreature->GetMotionMaster()->MoveWaypoint();
+            }
         }
     }
+
+    // ToDo: spawn Uther for Quel'delar quest
 }
 
 void instance_halls_of_reflection::OnCreatureCreate(Creature* pCreature)
@@ -58,10 +69,21 @@ void instance_halls_of_reflection::OnCreatureCreate(Creature* pCreature)
         case NPC_JAINA_PART2:
         case NPC_SYLVANAS_PART1:
         case NPC_SYLVANAS_PART2:
-        case NPC_FALRIC:
-        case NPC_MARWYN:
         case NPC_LICH_KING:
             break;
+        case NPC_FALRIC:
+            // // ToDo: start event after Falric is spawned
+            break;
+        case NPC_MARWYN:
+            // // ToDo: start event after Marwyn is spawned
+            break;
+        case NPC_PHANTOM_MAGE:
+        case NPC_SPECTRAL_FOOTMAN:
+        case NPC_GHOSTLY_PRIEST:
+        case NPC_TORTURED_RIFLEMAN:
+        case NPC_SHADOWY_MERCENARY:
+            // ToDo: store the trash mobs for event use
+            return;
         default:
             return;
     }
@@ -98,6 +120,9 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
 {
     switch (uiType)
     {
+        case TYPE_FROSTMOURNE_INTRO:
+            m_auiEncounter[uiType] = uiData;
+            break;
         case TYPE_FALRIC:
             m_auiEncounter[uiType] = uiData;
             break;
@@ -119,12 +144,12 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
             return;
     }
 
-    if (uiData == DONE)
+    if (uiData == DONE || uiData == FAIL)
     {
         OUT_SAVE_INST_DATA;
 
         std::ostringstream saveStream;
-        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2];
+        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " " << m_auiEncounter[3];
 
         m_strInstData = saveStream.str();
 
@@ -144,7 +169,7 @@ void instance_halls_of_reflection::Load(const char* chrIn)
     OUT_LOAD_INST_DATA(chrIn);
 
     std::istringstream loadStream(chrIn);
-    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2];
+    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2]  >> m_auiEncounter[3];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
@@ -161,6 +186,56 @@ uint32 instance_halls_of_reflection::GetData(uint32 uiType) const
         return m_auiEncounter[uiType];
 
     return 0;
+}
+
+void instance_halls_of_reflection::OnCreatureDeath(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_FALRIC: SetData(TYPE_FALRIC, DONE); break;
+        case NPC_MARWYN: SetData(TYPE_MARWYN, DONE); break;
+        case NPC_PHANTOM_MAGE:
+        case NPC_SPECTRAL_FOOTMAN:
+        case NPC_GHOSTLY_PRIEST:
+        case NPC_TORTURED_RIFLEMAN:
+        case NPC_SHADOWY_MERCENARY:
+            // ToDo:
+            break;
+    }
+}
+void instance_halls_of_reflection::OnCreatureEvade(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_FALRIC: SetData(TYPE_FALRIC, FAIL); break;
+        case NPC_MARWYN: SetData(TYPE_MARWYN, FAIL); break;
+        case NPC_PHANTOM_MAGE:
+        case NPC_SPECTRAL_FOOTMAN:
+        case NPC_GHOSTLY_PRIEST:
+        case NPC_TORTURED_RIFLEMAN:
+        case NPC_SHADOWY_MERCENARY:
+            // ToDo:
+            break;
+    }
+}
+
+void instance_halls_of_reflection::OnCreatureDespawn(Creature* pCreature)
+{
+    if (pCreature->GetEntry() == NPC_LICH_KING_INTRO)
+        SetData(TYPE_FROSTMOURNE_INTRO, DONE);
+}
+
+void instance_halls_of_reflection::OnCreatureEnterCombat(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_FALRIC: SetData(TYPE_FALRIC, IN_PROGRESS); break;
+        case NPC_MARWYN: SetData(TYPE_MARWYN, IN_PROGRESS); break;
+    }
+}
+
+void instance_halls_of_reflection::Update(uint32 uiDiff)
+{
 }
 
 InstanceData* GetInstanceData_instance_halls_of_reflection(Map* pMap)

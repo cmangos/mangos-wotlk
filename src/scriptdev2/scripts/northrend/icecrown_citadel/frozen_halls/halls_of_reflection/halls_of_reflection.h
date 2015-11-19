@@ -7,11 +7,12 @@
 
 enum
 {
-    MAX_ENCOUNTER                   = 3,
+    MAX_ENCOUNTER                   = 4,
 
-    TYPE_FALRIC                     = 0,
-    TYPE_MARWYN                     = 1,
-    TYPE_LICH_KING                  = 2,
+    TYPE_FROSTMOURNE_INTRO          = 0,
+    TYPE_FALRIC                     = 1,
+    TYPE_MARWYN                     = 2,
+    TYPE_LICH_KING                  = 3,
 
     NPC_FALRIC                      = 38112,
     NPC_MARWYN                      = 38113,
@@ -98,6 +99,11 @@ class instance_halls_of_reflection : public ScriptedInstance
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
 
+        void OnCreatureDeath(Creature* pCreature) override;
+        void OnCreatureEvade(Creature* pCreature) override;
+        void OnCreatureDespawn(Creature* pCreature) override;
+        void OnCreatureEnterCombat(Creature* pCreature) override;
+
         void OnPlayerEnter(Player* pPlayer) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
@@ -107,6 +113,8 @@ class instance_halls_of_reflection : public ScriptedInstance
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
+
+        void Update(uint32 uiDiff);
 
     protected:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
