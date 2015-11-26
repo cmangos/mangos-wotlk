@@ -30,7 +30,10 @@ enum
 };
 
 instance_halls_of_reflection::instance_halls_of_reflection(Map* pMap) : ScriptedInstance(pMap),
-    m_uiTeam(TEAM_NONE)
+    m_uiTeam(TEAM_NONE),
+    m_uiEventTimer(0),
+    m_uiActivateTimer(0),
+    m_uiEventStage(0)
 {
     Initialize();
 }
@@ -45,6 +48,9 @@ void instance_halls_of_reflection::OnPlayerEnter(Player* pPlayer)
     if (!m_uiTeam)                                          // very first player to enter
     {
         m_uiTeam = pPlayer->GetTeam();
+
+        if (GetData(TYPE_FROSTMOURNE_INTRO) == DONE)
+            return;
 
         // Spawn intro npcs and make the start the movement
         for (uint8 i = 0; i < countof(aEventBeginLocations); ++i)
@@ -72,17 +78,21 @@ void instance_halls_of_reflection::OnCreatureCreate(Creature* pCreature)
         case NPC_LICH_KING:
             break;
         case NPC_FALRIC:
-            // // ToDo: start event after Falric is spawned
+            // Start event after intro
+            if (m_auiEncounter[TYPE_FALRIC] != DONE)
+                SetData(TYPE_FALRIC, SPECIAL);
             break;
         case NPC_MARWYN:
-            // // ToDo: start event after Marwyn is spawned
+            // Start event after event wipe, but Falric is done
+            if (m_auiEncounter[TYPE_MARWYN] != DONE && m_auiEncounter[TYPE_FALRIC] == DONE)
+                SetData(TYPE_MARWYN, SPECIAL);
             break;
         case NPC_PHANTOM_MAGE:
         case NPC_SPECTRAL_FOOTMAN:
         case NPC_GHOSTLY_PRIEST:
         case NPC_TORTURED_RIFLEMAN:
         case NPC_SHADOWY_MERCENARY:
-            // ToDo: store the trash mobs for event use
+            m_lRisenSpiritsGuids.push_back(pCreature->GetObjectGuid());
             return;
         default:
             return;
@@ -99,6 +109,10 @@ void instance_halls_of_reflection::OnObjectCreate(GameObject* pGo)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_FROSTMOURNE:
+            // Note: Frostmourne shouldn't be loaded if the intro is done
+            if (m_auiEncounter[TYPE_FROSTMOURNE_INTRO] == DONE)
+                pGo->Delete();
+            break;
         case GO_FROSTMOURNE_ALTAR:
         case GO_ICECROWN_DOOR_ENTRANCE:
         case GO_ICECROWN_DOOR_LK_ENTRANCE:
@@ -124,11 +138,35 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_FALRIC:
+            if (uiData == DONE)
+                m_uiEventTimer = 60000;
+            else if (uiData == FAIL)
+                DoCleanupFrostmourneEvent();
+            else if (uiData == SPECIAL)
+            {
+                DoUseDoorOrButton(GO_ICECROWN_DOOR_ENTRANCE);
+
+                m_uiEventTimer = 40000;
+                m_uiEventStage = 0;
+            }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_MARWYN:
             if (uiData == DONE)
+            {
                 DoUseDoorOrButton(GO_IMPENETRABLE_DOOR);
+                DoUseDoorOrButton(GO_ICECROWN_DOOR_ENTRANCE);
+                DoUpdateWorldState(WORLD_STATE_SPIRIT_WAVES, 0);
+            }
+            else if (uiData == FAIL)
+                DoCleanupFrostmourneEvent();
+            else if (uiData == SPECIAL)
+            {
+                DoUseDoorOrButton(GO_ICECROWN_DOOR_ENTRANCE);
+
+                m_uiEventTimer = 60000;
+                m_uiEventStage = 5;
+            }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_LICH_KING:
@@ -194,12 +232,15 @@ void instance_halls_of_reflection::OnCreatureDeath(Creature* pCreature)
     {
         case NPC_FALRIC: SetData(TYPE_FALRIC, DONE); break;
         case NPC_MARWYN: SetData(TYPE_MARWYN, DONE); break;
+
         case NPC_PHANTOM_MAGE:
         case NPC_SPECTRAL_FOOTMAN:
         case NPC_GHOSTLY_PRIEST:
         case NPC_TORTURED_RIFLEMAN:
         case NPC_SHADOWY_MERCENARY:
-            // ToDo:
+            m_lActiveSpiritsGuids.remove(pCreature->GetObjectGuid());
+            if (m_lActiveSpiritsGuids.empty())
+                m_uiEventTimer = 1000;
             break;
     }
 }
@@ -209,12 +250,18 @@ void instance_halls_of_reflection::OnCreatureEvade(Creature* pCreature)
     {
         case NPC_FALRIC: SetData(TYPE_FALRIC, FAIL); break;
         case NPC_MARWYN: SetData(TYPE_MARWYN, FAIL); break;
+
         case NPC_PHANTOM_MAGE:
+            if (pCreature->HasAuraType(SPELL_AURA_MOD_INVISIBILITY))
+                break;
         case NPC_SPECTRAL_FOOTMAN:
         case NPC_GHOSTLY_PRIEST:
         case NPC_TORTURED_RIFLEMAN:
         case NPC_SHADOWY_MERCENARY:
-            // ToDo:
+            if (m_uiEventStage <= 5)
+                SetData(TYPE_FALRIC, FAIL);
+            else
+                SetData(TYPE_MARWYN, FAIL);
             break;
     }
 }
@@ -234,8 +281,157 @@ void instance_halls_of_reflection::OnCreatureEnterCombat(Creature* pCreature)
     }
 }
 
+// Function to send the next spirit wave
+void instance_halls_of_reflection::DoSendNextSpiritWave()
+{
+    uint8 m_uiMaxMobs = 0;
+    DoUpdateWorldState(WORLD_STATE_SPIRIT_WAVES_COUNT, m_uiEventStage);
+
+    switch (m_uiEventStage)
+    {
+        case 1:
+        case 6:
+            // First wave in the series
+            m_uiMaxMobs = 3;
+            DoUpdateWorldState(WORLD_STATE_SPIRIT_WAVES, 1);
+            break;
+        case 2:
+        case 7:
+            // Second wave in the series
+            m_uiMaxMobs = 4;
+            break;
+        case 5:
+            // Falric (wave 5)
+            if (Creature* pFalric = GetSingleCreatureFromStorage(NPC_FALRIC))
+            {
+                pFalric->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                if (Player* pPlayer = GetPlayerInMap(true, false))
+                    pFalric->AI()->AttackStart(pPlayer);
+
+                m_uiEventTimer = 0;
+            }
+            return;
+        case 10:
+            // Marwyn (wave 10)
+            if (Creature* pMarwyn = GetSingleCreatureFromStorage(NPC_MARWYN))
+            {
+                pMarwyn->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                if (Player* pPlayer = GetPlayerInMap(true, false))
+                    pMarwyn->AI()->AttackStart(pPlayer);
+
+                m_uiEventTimer = 0;
+            }
+            return;
+        default:
+            // Third and fourth wave of the series
+            m_uiMaxMobs = 5;
+            break;
+    }
+
+    // Activate random spirits
+    for (uint8 i = 0; i < m_uiMaxMobs; ++i)
+    {
+        if (m_lRisenSpiritsGuids.empty())
+            return;
+
+        GuidList::iterator iter = m_lRisenSpiritsGuids.begin();
+        advance(iter, urand(0, m_lRisenSpiritsGuids.size() - 1));
+
+        if (Creature* pCreature = instance->GetCreature(*iter))
+        {
+            if (!pCreature->isAlive())
+            {
+                script_error_log("instance_halls_of_reflection: Error: couldn't find alive creature %u", pCreature->GetEntry());
+                return;
+            }
+
+            pCreature->CastSpell(pCreature, SPELL_SPIRIT_ACTIVATE_VISUAL, false);
+            pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+            m_lActiveSpiritsGuids.push_back(*iter);
+            m_lRisenSpiritsGuids.remove(*iter);
+        }
+        else
+            script_error_log("instance_halls_of_reflection: Error: couldn't find creature %u", pCreature->GetEntry());
+    }
+
+    m_uiActivateTimer = 3000;
+}
+
+// Function to cleanup the first two encounters events
+void instance_halls_of_reflection::DoCleanupFrostmourneEvent()
+{
+    // Cleanup boses
+    if (GetData(TYPE_FALRIC) != DONE)
+    {
+        if (Creature* pFalric = GetSingleCreatureFromStorage(NPC_FALRIC))
+            pFalric->ForcedDespawn();
+    }
+    if (Creature* pMarwyn = GetSingleCreatureFromStorage(NPC_MARWYN))
+        pMarwyn->ForcedDespawn();
+
+    // Cleanup trash
+    for (GuidList::const_iterator itr = m_lRisenSpiritsGuids.begin(); itr != m_lRisenSpiritsGuids.end(); ++itr)
+    {
+        if (Creature* pCreature = instance->GetCreature(*itr))
+            pCreature->ForcedDespawn();
+    }
+    for (GuidList::const_iterator itr = m_lActiveSpiritsGuids.begin(); itr != m_lActiveSpiritsGuids.end(); ++itr)
+    {
+        if (Creature* pCreature = instance->GetCreature(*itr))
+            pCreature->ForcedDespawn();
+    }
+
+    // Remove world state and open door
+    DoUpdateWorldState(WORLD_STATE_SPIRIT_WAVES, 0);
+    DoUseDoorOrButton(GO_ICECROWN_DOOR_ENTRANCE);
+
+    m_lRisenSpiritsGuids.clear();
+    m_lActiveSpiritsGuids.clear();
+
+    m_uiEventTimer = 0;
+}
+
 void instance_halls_of_reflection::Update(uint32 uiDiff)
 {
+    // Main spirits event timer
+    if (m_uiEventTimer)
+    {
+        if (m_uiEventTimer <= uiDiff)
+        {
+            ++m_uiEventStage;
+            m_uiEventTimer = 60000;
+            DoSendNextSpiritWave();
+        }
+        else
+            m_uiEventTimer -= uiDiff;
+    }
+
+    // Activate spirits after a few seconds only
+    if (m_uiActivateTimer)
+    {
+        if (m_uiActivateTimer <= uiDiff)
+        {
+            Player* pPlayer = GetPlayerInMap(true, false);
+            if (!pPlayer)
+            {
+                script_error_log("instance_halls_of_reflection: Error: couldn't find any player alive in instance");
+                return;
+            }
+
+            for (GuidList::const_iterator itr = m_lActiveSpiritsGuids.begin(); itr != m_lActiveSpiritsGuids.end(); ++itr)
+            {
+                if (Creature* pCreature = instance->GetCreature(*itr))
+                {
+                    pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    pCreature->AI()->AttackStart(pPlayer);
+                }
+            }
+            m_uiActivateTimer = 0;
+        }
+        else
+            m_uiActivateTimer -= uiDiff;
+    }
 }
 
 InstanceData* GetInstanceData_instance_halls_of_reflection(Map* pMap)

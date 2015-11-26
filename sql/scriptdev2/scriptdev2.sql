@@ -803,6 +803,7 @@ UPDATE instance_template SET ScriptName='instance_forge_of_souls' WHERE map=632;
 /* HALLS OF REFLECTION */
 UPDATE instance_template SET ScriptName='instance_halls_of_reflection' WHERE map=668;
 UPDATE creature_template SET ScriptName='npc_spell_aura_dummy_frostmourne_equip' WHERE entry=37226;
+UPDATE creature_template SET ScriptName='npc_phantom_mage' WHERE entry=38172;
 DELETE FROM scripted_areatrigger WHERE entry IN (5697);
 INSERT INTO scripted_areatrigger VALUES
 (5697,'at_frostmourne_chamber');
@@ -6562,6 +6563,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1658069,'Brave champions, we owe you our lives, our freedom... Though it be a tiny gesture in the face of this enormous debt, I pledge that from this day forth, all will know of your deeds, and the blazing path of light you cut through the shadow of this dark citadel.',17151,1,0,0,'ironskull SAY_IRONSKULL_OUTRO_1');
 
 -- -1 668 000 ICC: HALLS OF REFLECTION
+INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1668000,'The master surveyed his kingdom and found it... Lacking. His judgement was swift and without mercy: DEATH TO ALL!',16738,1,0,0,'marwyn SAY_GAUNTLET');
 
 -- -1 724 000 RUBY SANCTUM
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

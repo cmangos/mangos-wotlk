@@ -117,10 +117,19 @@ class instance_halls_of_reflection : public ScriptedInstance
         void Update(uint32 uiDiff);
 
     protected:
+        void DoCleanupFrostmourneEvent();
+        void DoSendNextSpiritWave();
+
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
         uint32 m_uiTeam;                                    // Team of first entered player, used to set if Jaina or Silvana to spawn
+        uint32 m_uiEventTimer;
+        uint32 m_uiActivateTimer;
+        uint8 m_uiEventStage;
+
+        GuidList m_lRisenSpiritsGuids;
+        GuidList m_lActiveSpiritsGuids;
 };
 
 #endif
