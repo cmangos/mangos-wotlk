@@ -25,10 +25,13 @@ EndScriptData */
 at_frostmourne_chamber
 spell_aura_dummy_frostmourne_equip
 npc_phantom_mage
+at_frostworn_general
+spell_summon_reflections
 EndContentData */
 
 #include "precompiled.h"
 #include "halls_of_reflection.h"
+#include "TemporarySummon.h"
 
 /*######
 ## at_frostmourne_chamber
@@ -54,7 +57,7 @@ bool AreaTrigger_at_frostmourne_chamber(Player* pPlayer, AreaTriggerEntry const*
             return false;
 
         // reset event only after fail and if intro is complete or Maryn isn't complete
-        if (pInstance->GetData(TYPE_FROSTMOURNE_INTRO) != DONE || pInstance->GetData(TYPE_MARWYN) == DONE)
+        if (pInstance->GetData(TYPE_FROSTMOURNE_INTRO) != DONE || pInstance->GetData(TYPE_MARWYN) == DONE || pInstance->GetData(TYPE_QUEL_DELAR) == IN_PROGRESS)
             return false;
 
         // reset on Falric fail
@@ -224,6 +227,129 @@ CreatureAI* GetAI_npc_phantom_mage(Creature* pCreature)
     return new npc_phantom_mageAI(pCreature);
 }
 
+/*######
+## at_frostworn_general
+######*/
+
+enum
+{
+    SPELL_FROZEN_POSITION                   = 69609,                    // in c_t_a
+    SPELL_HALLS_OF_REFLECTION_CLONE_NAME    = 69837,
+    SPELL_HALLS_OF_REFLECTION_CLONE         = 69828,
+    SPELL_HALLS_OF_REFLECTION_GHOST         = 69861,
+};
+
+bool AreaTrigger_at_frostworn_general(Player* pPlayer, AreaTriggerEntry const* pAt)
+{
+    if (pAt->id == AREATRIGGER_FROSTWORN_GENERAL)
+    {
+        if (pPlayer->isGameMaster() || !pPlayer->isAlive())
+            return false;
+
+        instance_halls_of_reflection* pInstance = (instance_halls_of_reflection*)pPlayer->GetInstanceData();
+        if (!pInstance)
+            return false;
+
+        if (pInstance->GetData(TYPE_MARWYN) != DONE || pInstance->GetData(TYPE_FROSTWORN_GENERAL) == IN_PROGRESS || pInstance->GetData(TYPE_FROSTWORN_GENERAL) == DONE)
+            return false;
+
+        // Get the dongeon traps list to get summon location
+        GuidList lDugeonTrapsGuids;
+        pInstance->GetDungeonTrapsGUIDList(lDugeonTrapsGuids);
+
+        if (lDugeonTrapsGuids.empty())
+        {
+            script_error_log("instance_halls_of_reflection: Error: couldn't find any dungeon trap stalker.");
+            return true;
+        }
+
+        // summon a reflection for each player in the list
+        Map::PlayerList const& allPlayers = pInstance->instance->GetPlayers();
+        if (allPlayers.isEmpty())
+            return false;
+
+        for (Map::PlayerList::const_iterator itr = allPlayers.begin(); itr != allPlayers.end(); ++itr)
+        {
+            Player* pPlayerTarget = itr->getSource();
+            if (!pPlayerTarget)
+                continue;
+
+            // Spawn a reflection using the player as summoner and the dungeon trap for location
+            GuidList::iterator iter = lDugeonTrapsGuids.begin();
+            advance(iter, urand(0, lDugeonTrapsGuids.size() - 1));
+
+            Creature* pSpawnCreature = pPlayerTarget->GetMap()->GetCreature(*iter);
+            if (!pSpawnCreature)
+                return false;
+
+            // spawn a spiritual reflection
+            // ToDo: research what is the difference between the two entries
+            if (Creature* pReflection = pPlayerTarget->SummonCreature(urand(0, 1) ? NPC_SPIRITUAL_REFLECTION_1 : NPC_SPIRITUAL_REFLECTION_2, pSpawnCreature->GetPositionX(), pSpawnCreature->GetPositionY(), pSpawnCreature->GetPositionZ(), pSpawnCreature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
+            {
+                pPlayerTarget->CastSpell(pReflection, SPELL_HALLS_OF_REFLECTION_CLONE_NAME, true);
+                pPlayerTarget->CastSpell(pReflection, SPELL_HALLS_OF_REFLECTION_CLONE, true);
+                pReflection->CastSpell(pReflection, SPELL_HALLS_OF_REFLECTION_GHOST, true);
+            }
+
+            lDugeonTrapsGuids.remove(*iter);
+        }
+
+        pInstance->SetData(TYPE_FROSTWORN_GENERAL, IN_PROGRESS);
+    }
+
+    return false;
+}
+
+/*######
+## spell_summon_reflections
+######*/
+
+enum
+{
+    SPELL_SUMMON_REFLECTIONS    = 69223,
+    SPELL_JUMPT_TO_TARGET       = 69886,
+};
+
+bool EffectDummyCreature_spell_summon_reflections(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+{
+    if (uiSpellId == SPELL_SUMMON_REFLECTIONS && uiEffIndex == EFFECT_INDEX_0)
+    {
+        instance_halls_of_reflection* pInstance = (instance_halls_of_reflection*)pCreatureTarget->GetInstanceData();
+        if (!pInstance)
+            return true;
+
+        GuidList lReflectionsGuids;
+        pInstance->GetReflectionsGUIDList(lReflectionsGuids);
+
+        if (lReflectionsGuids.empty())
+        {
+            script_error_log("instance_halls_of_reflection: Error: couldn't find any spiritual reflection.");
+            return true;
+        }
+
+        // Set all reflections to attack owner
+        for (GuidList::const_iterator itr = lReflectionsGuids.begin(); itr != lReflectionsGuids.end(); ++itr)
+        {
+            if (Creature* pCreature = pCreatureTarget->GetMap()->GetCreature(*itr))
+            {
+                if (pCreature->IsTemporarySummon())
+                {
+                    TemporarySummon* pTemporary = (TemporarySummon*)pCreature;
+
+                    if (Player* pSummoner = pCreature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                    {
+                        pCreature->AI()->AttackStart(pSummoner);
+                        pCreature->RemoveAurasDueToSpell(SPELL_FROZEN_POSITION);
+                        pCreature->CastSpell(pSummoner, SPELL_JUMPT_TO_TARGET, true);
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+};
+
 void AddSC_halls_of_reflection()
 {
     Script* pNewScript;
@@ -241,5 +367,15 @@ void AddSC_halls_of_reflection()
     pNewScript = new Script;
     pNewScript->Name = "npc_phantom_mage";
     pNewScript->GetAI = &GetAI_npc_phantom_mage;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_frostworn_general";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_frostworn_general;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_spell_summon_reflections";
+    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_summon_reflections;
     pNewScript->RegisterSelf();
 }

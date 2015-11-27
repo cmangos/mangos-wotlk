@@ -804,9 +804,11 @@ UPDATE instance_template SET ScriptName='instance_forge_of_souls' WHERE map=632;
 UPDATE instance_template SET ScriptName='instance_halls_of_reflection' WHERE map=668;
 UPDATE creature_template SET ScriptName='npc_spell_aura_dummy_frostmourne_equip' WHERE entry=37226;
 UPDATE creature_template SET ScriptName='npc_phantom_mage' WHERE entry=38172;
-DELETE FROM scripted_areatrigger WHERE entry IN (5697);
+UPDATE creature_template SET ScriptName='npc_spell_summon_reflections' WHERE entry=36723;
+DELETE FROM scripted_areatrigger WHERE entry IN (5697,5740);
 INSERT INTO scripted_areatrigger VALUES
-(5697,'at_frostmourne_chamber');
+(5697,'at_frostmourne_chamber'),
+(5740,'at_frostworn_general');
 
 /* PIT OF SARON */
 UPDATE instance_template SET ScriptName='instance_pit_of_saron' WHERE map=658;

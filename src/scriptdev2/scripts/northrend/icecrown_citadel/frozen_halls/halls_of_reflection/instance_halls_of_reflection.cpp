@@ -26,7 +26,12 @@ EndScriptData */
 
 enum
 {
+    SPELL_START_HALLS_REFLECTION            = 72900,            // triggers 71351 for alliance or 71542 for horde
+    SPELL_QUELDELAR_COMPULSION              = 70013,
     SPELL_SPIRIT_ACTIVATE_VISUAL            = 72130,            // cast when activate spirit
+
+    QUEST_ID_HALLS_REFLECTION_ALLY          = 24480,            // Quel'delar alliance quest
+    QUEST_ID_HALLS_REFLECTION_HORDE         = 24561,            // Quel'delar horde quest
 };
 
 instance_halls_of_reflection::instance_halls_of_reflection(Map* pMap) : ScriptedInstance(pMap),
@@ -45,26 +50,64 @@ void instance_halls_of_reflection::Initialize()
 
 void instance_halls_of_reflection::OnPlayerEnter(Player* pPlayer)
 {
+    // send quest start
+    if (Creature* pCreature = GetSingleCreatureFromStorage(NPC_FROSTMOURNE_ALTAR_BUNNY))
+    {
+        if (GetData(TYPE_FROSTMOURNE_INTRO) != DONE)
+            pCreature->CastSpell(pCreature, SPELL_START_HALLS_REFLECTION, true);
+    }
+
     if (!m_uiTeam)                                          // very first player to enter
     {
         m_uiTeam = pPlayer->GetTeam();
 
-        if (GetData(TYPE_FROSTMOURNE_INTRO) == DONE)
-            return;
-
-        // Spawn intro npcs and make the start the movement
-        for (uint8 i = 0; i < countof(aEventBeginLocations); ++i)
+        // intro event
+        if (GetData(TYPE_FROSTMOURNE_INTRO) != DONE)
         {
-            if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocations[i].uiEntryHorde : aEventBeginLocations[i].uiEntryAlliance,
-                aEventBeginLocations[i].fX, aEventBeginLocations[i].fY, aEventBeginLocations[i].fZ, aEventBeginLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true))
+            // Spawn intro npcs and make the start the movement
+            for (uint8 i = 0; i < countof(aEventBeginLocations); ++i)
             {
-                pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
-                pCreature->GetMotionMaster()->MoveWaypoint();
+                if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocations[i].uiEntryHorde : aEventBeginLocations[i].uiEntryAlliance,
+                    aEventBeginLocations[i].fX, aEventBeginLocations[i].fY, aEventBeginLocations[i].fZ, aEventBeginLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true))
+                {
+                    pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                    pCreature->GetMotionMaster()->MoveWaypoint();
+                }
+            }
+        }
+        // last encounter
+        else if (GetData(TYPE_FROSTWORN_GENERAL) == DONE && !GetSingleCreatureFromStorage(NPC_LICH_KING, true))
+        {
+            // Spawn npc for the last encounter
+            for (uint8 i = 0; i < countof(aEventKingLocations); ++i)
+            {
+                pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventKingLocations[i].uiEntryHorde : aEventKingLocations[i].uiEntryAlliance,
+                    aEventKingLocations[i].fX, aEventKingLocations[i].fY, aEventKingLocations[i].fZ, aEventKingLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            }
+        }
+        // mini boss
+        else if (GetData(TYPE_MARWYN) == DONE && !GetSingleCreatureFromStorage(NPC_FROSTSWORN_GENERAL, true))
+            pPlayer->SummonCreature(NPC_FROSTSWORN_GENERAL, afGeneralSpawnLoc[0], afGeneralSpawnLoc[1], afGeneralSpawnLoc[2], afGeneralSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+    }
+
+    // Quel'delar
+    if (!GetSingleCreatureFromStorage(NPC_UTHER, true) && pPlayer->HasAura(SPELL_QUELDELAR_COMPULSION))
+    {
+        if (pPlayer->GetQuestStatus(m_uiTeam == HORDE ? QUEST_ID_HALLS_REFLECTION_HORDE : QUEST_ID_HALLS_REFLECTION_ALLY) == QUEST_STATUS_INCOMPLETE)
+        {
+            // Don't start Quel'delar event if intro already started
+            Creature* pTemp = GetSingleCreatureFromStorage(m_uiTeam == HORDE ? NPC_SYLVANAS_PART1 : NPC_SYLVANAS_PART2, true);
+            if ((pTemp && pTemp->GetMotionMaster()->getLastReachedWaypoint() <= 2) || !pTemp)
+            {
+                // ToDo: implement the visuals for event
+                // requires more research regarind the spells used
+                //pPlayer->SummonCreature(NPC_UTHER, 5301.767f, 1990.667f, 707.695f, 3.909f, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+
+                // Set data to avoid starting the instance intro
+                //SetData(TYPE_QUEL_DELAR, IN_PROGRESS);
             }
         }
     }
-
-    // ToDo: spawn Uther for Quel'delar quest
 }
 
 void instance_halls_of_reflection::OnCreatureCreate(Creature* pCreature)
@@ -76,6 +119,8 @@ void instance_halls_of_reflection::OnCreatureCreate(Creature* pCreature)
         case NPC_SYLVANAS_PART1:
         case NPC_SYLVANAS_PART2:
         case NPC_LICH_KING:
+        case NPC_FROSTMOURNE_ALTAR_BUNNY:
+        case NPC_FROSTSWORN_GENERAL:
             break;
         case NPC_FALRIC:
             // Start event after intro
@@ -93,6 +138,13 @@ void instance_halls_of_reflection::OnCreatureCreate(Creature* pCreature)
         case NPC_TORTURED_RIFLEMAN:
         case NPC_SHADOWY_MERCENARY:
             m_lRisenSpiritsGuids.push_back(pCreature->GetObjectGuid());
+            return;
+        case NPC_DUNGEON_TRAP_STALKER:
+            m_lDungeonTrapsGuids.push_back(pCreature->GetObjectGuid());
+            return;
+        case NPC_SPIRITUAL_REFLECTION_1:
+        case NPC_SPIRITUAL_REFLECTION_2:
+            m_lSpiritReflectionsGuids.push_back(pCreature->GetObjectGuid());
             return;
         default:
             return;
@@ -157,6 +209,10 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
                 DoUseDoorOrButton(GO_IMPENETRABLE_DOOR);
                 DoUseDoorOrButton(GO_ICECROWN_DOOR_ENTRANCE);
                 DoUpdateWorldState(WORLD_STATE_SPIRIT_WAVES, 0);
+
+                // spawn next mini boss
+                if (Player* pPlayer = GetPlayerInMap())
+                    pPlayer->SummonCreature(NPC_FROSTSWORN_GENERAL, afGeneralSpawnLoc[0], afGeneralSpawnLoc[1], afGeneralSpawnLoc[2], afGeneralSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
             }
             else if (uiData == FAIL)
                 DoCleanupFrostmourneEvent();
@@ -178,6 +234,25 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
             }
             m_auiEncounter[uiType] = uiData;
             break;
+        case TYPE_FROSTWORN_GENERAL:
+            if (uiData == DONE)
+            {
+                // spawn creatures for last encounter
+                if (Player* pPlayer = GetPlayerInMap())
+                {
+                    // Spawn npc for the last encounter
+                    for (uint8 i = 0; i < countof(aEventKingLocations); ++i)
+                    {
+                        pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventKingLocations[i].uiEntryHorde : aEventKingLocations[i].uiEntryAlliance,
+                            aEventKingLocations[i].fX, aEventKingLocations[i].fY, aEventKingLocations[i].fZ, aEventKingLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+                    }
+                }
+            }
+            m_auiEncounter[uiType] = uiData;
+            break;
+        case TYPE_QUEL_DELAR:
+            m_auiEncounter[uiType] = uiData;
+            break;
         default:
             return;
     }
@@ -187,7 +262,8 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
         OUT_SAVE_INST_DATA;
 
         std::ostringstream saveStream;
-        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " " << m_auiEncounter[3];
+        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
+                   << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5];
 
         m_strInstData = saveStream.str();
 
@@ -207,7 +283,8 @@ void instance_halls_of_reflection::Load(const char* chrIn)
     OUT_LOAD_INST_DATA(chrIn);
 
     std::istringstream loadStream(chrIn);
-    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2]  >> m_auiEncounter[3];
+    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >>
+               m_auiEncounter[3] >> m_auiEncounter[4] >> m_auiEncounter[5];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
@@ -232,6 +309,8 @@ void instance_halls_of_reflection::OnCreatureDeath(Creature* pCreature)
     {
         case NPC_FALRIC: SetData(TYPE_FALRIC, DONE); break;
         case NPC_MARWYN: SetData(TYPE_MARWYN, DONE); break;
+        case NPC_QUEL_DELAR: SetData(TYPE_QUEL_DELAR, DONE); break;
+        case NPC_FROSTSWORN_GENERAL: SetData(TYPE_FROSTWORN_GENERAL, DONE); break;
 
         case NPC_PHANTOM_MAGE:
         case NPC_SPECTRAL_FOOTMAN:
@@ -250,6 +329,7 @@ void instance_halls_of_reflection::OnCreatureEvade(Creature* pCreature)
     {
         case NPC_FALRIC: SetData(TYPE_FALRIC, FAIL); break;
         case NPC_MARWYN: SetData(TYPE_MARWYN, FAIL); break;
+        case NPC_FROSTSWORN_GENERAL: SetData(TYPE_FROSTWORN_GENERAL, FAIL); break;
 
         case NPC_PHANTOM_MAGE:
             if (pCreature->HasAuraType(SPELL_AURA_MOD_INVISIBILITY))

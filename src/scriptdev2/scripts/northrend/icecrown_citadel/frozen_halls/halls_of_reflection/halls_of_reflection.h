@@ -7,17 +7,18 @@
 
 enum
 {
-    MAX_ENCOUNTER                   = 4,
+    MAX_ENCOUNTER                   = 6,
 
     TYPE_FROSTMOURNE_INTRO          = 0,
     TYPE_FALRIC                     = 1,
     TYPE_MARWYN                     = 2,
     TYPE_LICH_KING                  = 3,
+    TYPE_FROSTWORN_GENERAL          = 4,
+    TYPE_QUEL_DELAR                 = 5,
 
     NPC_FALRIC                      = 38112,
     NPC_MARWYN                      = 38113,
     NPC_LICH_KING                   = 36954,
-    NPC_FROSTSWORN_GENERAL          = 36723,                    // miniboss between Marwyn and Lich King
 
     NPC_JAINA_PART1                 = 37221,
     NPC_JAINA_PART2                 = 36955,
@@ -31,8 +32,15 @@ enum
     // intro related npcs
     NPC_UTHER                       = 37225,
     NPC_LICH_KING_INTRO             = 37226,
-    NPC_FROSTMOURNE_ALTER_BUNNY     = 37704,                    // dummy trigger for Quel'Delar
+    NPC_FROSTMOURNE_ALTAR_BUNNY     = 37704,                    // dummy trigger for Quel'Delar
     NPC_QUEL_DELAR                  = 37158,
+    NPC_DUNGEON_TAP_CONTROLLER      = 37071,                    // casts 69843 on all players to maintain dungeon control
+
+    // Frostworn general related
+    NPC_DUNGEON_TRAP_STALKER        = 36736,
+    NPC_FROSTSWORN_GENERAL          = 36723,                    // miniboss between Marwyn and Lich King
+    NPC_SPIRITUAL_REFLECTION_1      = 37068,
+    NPC_SPIRITUAL_REFLECTION_2      = 37107,
 
     // spirit event creatures
     NPC_PHANTOM_MAGE                = 38172,
@@ -72,6 +80,7 @@ enum
 
     // area triggers
     AREATRIGGER_FROSTMOURNE_ALTAR   = 5697,
+    AREATRIGGER_FROSTWORN_GENERAL   = 5740,
     AREATRIGGER_LICH_KING_ROOM      = 5605,
 };
 
@@ -79,7 +88,6 @@ struct EventNpcLocations
 {
     uint32 uiEntryHorde, uiEntryAlliance;
     float fX, fY, fZ, fO;
-    float fMoveX, fMoveY, fMoveZ;
 };
 
 const EventNpcLocations aEventBeginLocations[2] =
@@ -87,6 +95,14 @@ const EventNpcLocations aEventBeginLocations[2] =
     {NPC_SYLVANAS_PART1, NPC_JAINA_PART1,   5236.659f, 1929.894f, 707.7781f, 0.87f},
     {NPC_LORALEN,        NPC_KORELN,        5232.680f, 1931.460f, 707.7781f, 0.83f},
 };
+
+const EventNpcLocations aEventKingLocations[2] =
+{
+    {NPC_SYLVANAS_PART2, NPC_JAINA_PART2,   5549.290f, 2257.353f, 733.0943f, 0.89f},
+    {NPC_LICH_KING,      NPC_LICH_KING,     5552.930f, 2261.475f, 733.0110f, 3.89f},
+};
+
+static const float afGeneralSpawnLoc[4] = { 5415.538f, 2117.842f, 707.778f, 3.944f };
 
 class instance_halls_of_reflection : public ScriptedInstance
 {
@@ -114,6 +130,9 @@ class instance_halls_of_reflection : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
+        void GetDungeonTrapsGUIDList(GuidList& lList) { lList = m_lDungeonTrapsGuids; }
+        void GetReflectionsGUIDList(GuidList& lList) { lList = m_lSpiritReflectionsGuids; }
+
         void Update(uint32 uiDiff);
 
     protected:
@@ -130,6 +149,8 @@ class instance_halls_of_reflection : public ScriptedInstance
 
         GuidList m_lRisenSpiritsGuids;
         GuidList m_lActiveSpiritsGuids;
+        GuidList m_lDungeonTrapsGuids;
+        GuidList m_lSpiritReflectionsGuids;
 };
 
 #endif
