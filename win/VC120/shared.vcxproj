@@ -423,6 +423,9 @@
     <ClCompile Include="..\..\src\shared\Database\SqlPreparedStatement.cpp" />
     <ClCompile Include="..\..\src\shared\Database\SQLStorage.cpp" />
     <ClCompile Include="..\..\src\shared\Log.cpp" />
+    <ClCompile Include="..\..\src\shared\Network\NetworkThread.cpp" />
+    <ClCompile Include="..\..\src\shared\Network\PacketBuffer.cpp" />
+    <ClCompile Include="..\..\src\shared\Network\Socket.cpp" />
     <ClCompile Include="..\..\src\shared\ProgressBar.cpp" />
     <ClCompile Include="..\..\src\shared\ServiceWin32.cpp" />
     <ClCompile Include="..\..\src\shared\Threading.cpp" />
@@ -438,6 +441,10 @@
     <ClInclude Include="..\..\src\shared\Auth\Sha1.h" />
     <ClInclude Include="..\..\src\shared\ByteBuffer.h" />
     <ClInclude Include="..\..\src\shared\Database\SqlPreparedStatement.h" />
+    <ClInclude Include="..\..\src\shared\Network\Listener.hpp" />
+    <ClInclude Include="..\..\src\shared\Network\NetworkThread.hpp" />
+    <ClInclude Include="..\..\src\shared\Network\PacketBuffer.hpp" />
+    <ClInclude Include="..\..\src\shared\Network\Socket.hpp" />
     <ClInclude Include="..\..\src\shared\WorldPacket.h" />
     <ClInclude Include="..\..\src\shared\Common.h" />
     <ClInclude Include="..\..\src\shared\Config\Config.h" />

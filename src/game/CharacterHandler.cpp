@@ -478,7 +478,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     data << (uint8)CHAR_CREATE_SUCCESS;
     SendPacket(&data);
 
-    std::string IP_str = GetRemoteAddress();
+    const std::string &IP_str = GetRemoteAddress();
     BASIC_LOG("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
     sLog.outChar("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
 
@@ -530,7 +530,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
     if (accountId != GetAccountId())
         return;
 
-    std::string IP_str = GetRemoteAddress();
+    const std::string &IP_str = GetRemoteAddress();
     BASIC_LOG("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), lowguid);
     sLog.outChar("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), lowguid);
 
@@ -817,9 +817,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
             pCurrChar->CastSpell(pCurrChar, invisibleAuraInfo, true);
     }
 
-    std::string IP_str = GetRemoteAddress();
-    sLog.outChar("Account: %d (IP: %s) Login Character:[%s] (guid: %u)",
-                 GetAccountId(), IP_str.c_str(), pCurrChar->GetName(), pCurrChar->GetGUIDLow());
+    sLog.outChar("Account: %d (IP: %s) Login Character:[%s] (guid: %u)", 
+                 GetAccountId(), GetRemoteAddress().c_str(), pCurrChar->GetName(), pCurrChar->GetGUIDLow());
 
     if (!pCurrChar->IsStandState() && !pCurrChar->hasUnitState(UNIT_STAT_STUNNED))
         pCurrChar->SetStandState(UNIT_STAND_STATE_STAND);
@@ -1232,8 +1231,7 @@ void WorldSession::HandleCharCustomizeOpcode(WorldPacket& recv_data)
     CharacterDatabase.PExecute("UPDATE characters set name = '%s', at_login = at_login & ~ %u WHERE guid ='%u'", newname.c_str(), uint32(AT_LOGIN_CUSTOMIZE), guid.GetCounter());
     CharacterDatabase.PExecute("DELETE FROM character_declinedname WHERE guid ='%u'", guid.GetCounter());
 
-    std::string IP_str = GetRemoteAddress();
-    sLog.outChar("Account: %d (IP: %s), Character %s customized to: %s", GetAccountId(), IP_str.c_str(), guid.GetString().c_str(), newname.c_str());
+    sLog.outChar("Account: %d (IP: %s), Character %s customized to: %s", GetAccountId(), GetRemoteAddress().c_str(), guid.GetString().c_str(), newname.c_str());
 
     WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1 + 8 + (newname.size() + 1) + 6);
     data << uint8(RESPONSE_SUCCESS);

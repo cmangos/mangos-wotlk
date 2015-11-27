@@ -505,7 +505,6 @@
     <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPZM.cpp" />
     <ClCompile Include="..\..\src\game\WorldSession.cpp" />
     <ClCompile Include="..\..\src\game\WorldSocket.cpp" />
-    <ClCompile Include="..\..\src\game\WorldSocketMgr.cpp" />
     <ClCompile Include="..\..\src\game\vmap\BIH.cpp" />
     <ClCompile Include="..\..\src\game\vmap\DynamicTree.cpp" />
     <ClCompile Include="..\..\src\game\vmap\GameObjectModel.cpp" />
@@ -669,7 +668,6 @@
     <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPZM.h" />
     <ClInclude Include="..\..\src\game\WorldSession.h" />
     <ClInclude Include="..\..\src\game\WorldSocket.h" />
-    <ClInclude Include="..\..\src\game\WorldSocketMgr.h" />
     <ClInclude Include="..\..\src\game\vmap\BIH.h" />
     <ClInclude Include="..\..\src\game\vmap\BIHWrap.h" />
     <ClInclude Include="..\..\src\game\vmap\DynamicTree.h" />
