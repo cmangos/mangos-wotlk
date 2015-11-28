@@ -891,7 +891,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
         Player * _player;
-        WorldSocket * const m_Socket;
+        WorldSocket * const m_Socket;                       // socket pointer is owned by the network thread which created it
 
         AccountTypes _security;
         uint32 _accountId;

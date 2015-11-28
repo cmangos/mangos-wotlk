@@ -31,7 +31,7 @@ using namespace MaNGOS;
 
 Socket::Socket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler)
     : m_socket(service), m_address("0.0.0.0"), m_outBufferFlushTimer(service),
-      m_closeHandler(closeHandler), m_writeState(WriteState::Idle) {}
+      m_closeHandler(closeHandler), m_writeState(WriteState::Idle), m_readState(ReadState::Idle) {}
 
 bool Socket::Open()
 {
@@ -68,8 +68,12 @@ void Socket::Close()
 void Socket::StartAsyncRead()
 {
     if (IsClosed())
+    {
+        m_readState = ReadState::Idle;
         return;
+    }
 
+    m_readState = ReadState::Reading;
     m_socket.async_read_some(boost::asio::buffer(&m_inBuffer->m_buffer[m_inBuffer->m_writePosition], m_inBuffer->m_buffer.size() - m_inBuffer->m_writePosition),
                              [this](const boost::system::error_code &error, size_t length) { this->OnRead(error, length); });
 }
@@ -79,6 +83,12 @@ void Socket::OnRead(const boost::system::error_code &error, size_t length)
     if (error)
     {
         OnError(error);
+        return;
+    }
+
+    if (IsClosed())
+    {
+        m_readState = ReadState::Idle;
         return;
     }
 
@@ -187,6 +197,13 @@ void Socket::StartWriteFlushTimer()
     if (m_writeState == WriteState::Buffering)
         return;
 
+    // if the socket is closed, silently fail
+    if (IsClosed())
+    {
+        m_writeState = WriteState::Idle;
+        return;
+    }
+
     m_writeState = WriteState::Buffering;
 
     m_outBufferFlushTimer.expires_from_now(boost::posix_time::milliseconds(BufferTimeout));
@@ -195,6 +212,13 @@ void Socket::StartWriteFlushTimer()
 
 void Socket::FlushOut()
 {
+    // if the socket is closed, silently fail
+    if (IsClosed())
+    {
+        m_writeState = WriteState::Idle;
+        return;
+    }
+
     std::lock_guard<std::mutex> guard(m_mutex);
 
     assert(m_writeState == WriteState::Buffering);
@@ -226,6 +250,12 @@ void Socket::OnWriteComplete(const boost::system::error_code &error, size_t leng
     if (error)
     {
         OnError(error);
+        return;
+    }
+
+    if (IsClosed())
+    {
+        m_writeState = WriteState::Idle;
         return;
     }
 

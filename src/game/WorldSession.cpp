@@ -102,8 +102,6 @@ WorldSession::~WorldSession()
     if (!m_Socket->IsClosed())
         m_Socket->Close();
 
-    std::lock_guard<std::mutex> guard(m_packetQueueLock);
-
     ///- empty incoming packet queue
     while (!m_packetQueue.empty())
     {

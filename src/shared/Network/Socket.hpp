@@ -37,14 +37,21 @@ namespace MaNGOS
             // ingame but increase bandwidth efficiency by reducing tcp overhead.
             const int BufferTimeout = 50;
 
-            enum WriteState
+            enum class WriteState
             {
                 Idle,       // no write operation is currently underway
                 Buffering,  // a write operation has been performed, and we are currently awaiting others before sending
                 Sending,    // a send operation is underway
             };
 
+            enum class ReadState
+            {
+                Idle,
+                Reading
+            };
+
             WriteState m_writeState;
+            ReadState m_readState;
 
             boost::asio::ip::tcp::socket m_socket;
 
@@ -79,11 +86,13 @@ namespace MaNGOS
 
         public:
             Socket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler);
+            ~Socket() { assert(m_writeState == WriteState::Idle && m_readState == ReadState::Idle); }
 
             virtual bool Open();
             void Close();
 
             bool IsClosed() const { return !m_socket.is_open(); }
+            bool Deletable() const { return IsClosed() && m_writeState == WriteState::Idle && m_readState == ReadState::Idle; }
 
             bool Read(char *buffer, int length);
             void ReadSkip(int length) { m_inBuffer->Read(nullptr, length); }
