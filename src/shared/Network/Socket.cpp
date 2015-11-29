@@ -58,7 +58,8 @@ void Socket::Close()
 {
     assert(!IsClosed());
 
-    m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+    boost::system::error_code ec;
+    m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
     m_socket.close();
 
     if (m_closeHandler)
