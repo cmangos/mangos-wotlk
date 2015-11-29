@@ -146,8 +146,6 @@ bool WorldSocket::ProcessIncomingData()
         m_useExistingHeader = false;
         header = m_existingHeader;
 
-        sLog.outError("WorldSocket::ProcessIncomingData: using existing header with opcode %u and size %u", header.cmd, header.size);
-
         ReadSkip(sizeof(ClientPktHeader));
     }
     else
