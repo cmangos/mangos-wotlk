@@ -36,7 +36,7 @@ namespace MaNGOS
     class NetworkThread
     {
         private:
-            const static int WorkDelay = 500;
+            const int WorkDelay = 500;
 
             boost::asio::io_service m_service;
 
