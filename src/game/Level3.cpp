@@ -4877,34 +4877,6 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
             }
         }
     }
-    for (int i = 0; i < TOTAL_AURAS; ++i)
-    {
-        Unit::AuraList const& uAuraList = unit->GetAurasByType(AuraType(i));
-        if (uAuraList.empty()) continue;
-        PSendSysMessage(LANG_COMMAND_TARGET_LISTAURATYPE, uAuraList.size(), i);
-        for (Unit::AuraList::const_iterator itr = uAuraList.begin(); itr != uAuraList.end(); ++itr)
-        {
-            bool talent = GetTalentSpellCost((*itr)->GetId()) > 0;
-
-            char const* name = (*itr)->GetSpellProto()->SpellName[GetSessionDbcLocale()];
-
-            if (m_session)
-            {
-                std::ostringstream ss_name;
-                ss_name << "|cffffffff|Hspell:" << (*itr)->GetId() << "|h[" << name << "]|h|r";
-
-                PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(),
-                                ss_name.str().c_str(), ((*itr)->GetHolder()->IsPassive() ? passiveStr : ""), (talent ? talentStr : ""),
-                                (*itr)->GetCasterGuid().GetString().c_str());
-            }
-            else
-            {
-                PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(),
-                                name, ((*itr)->GetHolder()->IsPassive() ? passiveStr : ""), (talent ? talentStr : ""),
-                                (*itr)->GetCasterGuid().GetString().c_str());
-            }
-        }
-    }
     return true;
 }
 
