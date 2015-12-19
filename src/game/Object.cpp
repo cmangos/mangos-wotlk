@@ -143,40 +143,28 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     if (target == this)                                     // building packet for yourself
         updateFlags |= UPDATEFLAG_SELF;
 
-    if (updateFlags & UPDATEFLAG_HAS_POSITION)
+    if (m_itsNewObject)
     {
-        // UPDATETYPE_CREATE_OBJECT2 dynamic objects, corpses...
-        if (isType(TYPEMASK_DYNAMICOBJECT) || isType(TYPEMASK_CORPSE) || isType(TYPEMASK_PLAYER))
-            updatetype = UPDATETYPE_CREATE_OBJECT2;
-
-        // UPDATETYPE_CREATE_OBJECT2 for pets...
-        if (target->GetPetGuid() == GetObjectGuid())
-            updatetype = UPDATETYPE_CREATE_OBJECT2;
-
-        // UPDATETYPE_CREATE_OBJECT2 for some gameobject types...
-        if (isType(TYPEMASK_GAMEOBJECT))
+        switch (GetObjectGuid().GetHigh())
         {
-            switch (((GameObject*)this)->GetGoType())
-            {
-                case GAMEOBJECT_TYPE_TRAP:
-                case GAMEOBJECT_TYPE_DUEL_ARBITER:
-                case GAMEOBJECT_TYPE_FLAGSTAND:
-                case GAMEOBJECT_TYPE_FLAGDROP:
-                    updatetype = UPDATETYPE_CREATE_OBJECT2;
-                    break;
-                case GAMEOBJECT_TYPE_TRANSPORT:
-                    updateFlags |= UPDATEFLAG_TRANSPORT;
-                    break;
-                default:
-                    break;
-            }
-        }
+            case HighGuid::HIGHGUID_DYNAMICOBJECT:
+            case HighGuid::HIGHGUID_CORPSE:
+            case HighGuid::HIGHGUID_PLAYER:
+            case HighGuid::HIGHGUID_UNIT:
+            case HighGuid::HIGHGUID_VEHICLE:
+            case HighGuid::HIGHGUID_GAMEOBJECT:
+                updatetype = UPDATETYPE_CREATE_OBJECT2;
+                break;
 
-        if (isType(TYPEMASK_UNIT))
-        {
-            if (((Unit*)this)->getVictim())
-                updateFlags |= UPDATEFLAG_HAS_ATTACKING_TARGET;
+            default:
+                break;
         }
+    }
+
+    if (isType(TYPEMASK_UNIT))
+    {
+        if (((Unit*)this)->getVictim())
+            updateFlags |= UPDATEFLAG_HAS_ATTACKING_TARGET;
     }
 
     // DEBUG_LOG("BuildCreateUpdate: update-type: %u, object-type: %u got updateFlags: %X", updatetype, m_objectTypeId, updateFlags);
