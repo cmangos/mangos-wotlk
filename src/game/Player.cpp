@@ -4381,7 +4381,7 @@ void Player::DeleteOldCharacters(uint32 keepDays)
 void Player::SetRoot(bool enable)
 {
     WorldPacket data(enable ? SMSG_FORCE_MOVE_ROOT : SMSG_FORCE_MOVE_UNROOT, GetPackGUID().size() + 4);
-    data << GetPackGUID();
+    data << GetMover()->GetPackGUID();
     data << uint32(0);
     SendMessageToSet(&data, true);
 }
@@ -4389,7 +4389,7 @@ void Player::SetRoot(bool enable)
 void Player::SetWaterWalk(bool enable)
 {
     WorldPacket data(enable ? SMSG_MOVE_WATER_WALK : SMSG_MOVE_LAND_WALK, GetPackGUID().size() + 4);
-    data << GetPackGUID();
+    data << GetMover()->GetPackGUID();
     data << uint32(0);
     GetSession()->SendPacket(&data);
 }
@@ -4402,12 +4402,12 @@ void Player::SetLevitate(bool enable)
     else
         data.Initialize(SMSG_MOVE_GRAVITY_ENABLE, 12);
 
-    data << GetPackGUID();
+    data << GetMover()->GetPackGUID();
     data << uint32(0);                                      // unk
     SendMessageToSet(&data, true);
 
     data.Initialize(MSG_MOVE_GRAVITY_CHNG, 64);
-    data << GetPackGUID();
+    data << GetMover()->GetPackGUID();
     m_movementInfo.Write(data);
     SendMessageToSet(&data, false);
 }
@@ -4420,12 +4420,12 @@ void Player::SetCanFly(bool enable)
     else
         data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
 
-    data << GetPackGUID();
+    data << GetMover()->GetPackGUID();
     data << uint32(0);                                      // unk
     SendMessageToSet(&data, true);
 
     data.Initialize(MSG_MOVE_UPDATE_CAN_FLY, 64);
-    data << GetPackGUID();
+    data << GetMover()->GetPackGUID();
     m_movementInfo.Write(data);
     SendMessageToSet(&data, false);
 }
@@ -4438,7 +4438,7 @@ void Player::SetFeatherFall(bool enable)
     else
         data.Initialize(SMSG_MOVE_NORMAL_FALL, 8 + 4);
 
-    data << GetPackGUID();
+    data << GetMover()->GetPackGUID();
     data << uint32(0);
     SendMessageToSet(&data, true);
 
@@ -4455,7 +4455,7 @@ void Player::SetHover(bool enable)
     else
         data.Initialize(SMSG_MOVE_UNSET_HOVER, 8 + 4);
 
-    data << GetPackGUID();
+    data << GetMover()->GetPackGUID();
     data << uint32(0);
     SendMessageToSet(&data, true);
 }

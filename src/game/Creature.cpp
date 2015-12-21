@@ -2626,6 +2626,15 @@ void Creature::SetWalk(bool enable, bool asDefault)
 
 void Creature::SetLevitate(bool enable)
 {
+    if (Unit* unit = GetCharmer())
+    {
+        if (unit->GetTypeId() == TYPEID_PLAYER)
+        {
+            static_cast<Player*>(unit)->SetLevitate(enable);
+            return;
+        }
+    }
+
     if (enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_LEVITATING);
     else
@@ -2638,6 +2647,15 @@ void Creature::SetLevitate(bool enable)
 
 void Creature::SetSwim(bool enable)
 {
+    if (Unit* unit = GetCharmer())
+    {
+        if (unit->GetTypeId() == TYPEID_PLAYER)
+        {
+            static_cast<Player*>(unit)->SetSwim(enable);
+            return;
+        }
+    }
+
     if (enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);
     else
@@ -2650,6 +2668,15 @@ void Creature::SetSwim(bool enable)
 
 void Creature::SetCanFly(bool enable)
 {
+    if (Unit* unit = GetCharmer())
+    {
+        if (unit->GetTypeId() == TYPEID_PLAYER)
+        {
+            static_cast<Player*>(unit)->SetCanFly(enable);
+            return;
+        }
+    }
+
     if (enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_CAN_FLY);
     else
@@ -2662,6 +2689,15 @@ void Creature::SetCanFly(bool enable)
 
 void Creature::SetFeatherFall(bool enable)
 {
+    if (Unit* unit = GetCharmer())
+    {
+        if (unit->GetTypeId() == TYPEID_PLAYER)
+        {
+            static_cast<Player*>(unit)->SetFeatherFall(enable);
+            return;
+        }
+    }
+
     if (enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_SAFE_FALL);
     else
@@ -2674,6 +2710,15 @@ void Creature::SetFeatherFall(bool enable)
 
 void Creature::SetHover(bool enable)
 {
+    if (Unit* unit = GetCharmer())
+    {
+        if (unit->GetTypeId() == TYPEID_PLAYER)
+        {
+            static_cast<Player*>(unit)->SetHover(enable);
+            return;
+        }
+    }
+
     if (enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_HOVER);
     else
@@ -2686,6 +2731,15 @@ void Creature::SetHover(bool enable)
 
 void Creature::SetRoot(bool enable)
 {
+    if (Unit* unit = GetCharmer())
+    {
+        if (unit->GetTypeId() == TYPEID_PLAYER)
+        {
+            static_cast<Player*>(unit)->SetRoot(enable);
+            return;
+        }
+    }
+
     if (enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
     else
@@ -2698,6 +2752,15 @@ void Creature::SetRoot(bool enable)
 
 void Creature::SetWaterWalk(bool enable)
 {
+    if (Unit* unit = GetCharmer())
+    {
+        if (unit->GetTypeId() == TYPEID_PLAYER)
+        {
+            static_cast<Player*>(unit)->SetWaterWalk(enable);
+            return;
+        }
+    }
+
     if (enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_WATERWALKING);
     else
