@@ -183,7 +183,7 @@ bool WorldSocket::ProcessIncomingData()
         m_existingHeader = header;
 
         // we move the read pointer backward because it will be skipped again later.  this is a slight kludge, but to solve
-        // it more elegantly would require introducing content awareness into the socket library, which we want to avoid
+        // it more elegantly would require introducing protocol awareness into the socket library, which we want to avoid
         ReadSkip(-static_cast<int>(sizeof(ClientPktHeader)));
 
         errno = EBADMSG;
@@ -235,7 +235,16 @@ bool WorldSocket::ProcessIncomingData()
                     return false;
                 }
 
-                m_session->QueuePacket(pct);
+                // if the player has logged out, don't bother queueing the packet.  instead, destroy the session >=]
+                if (m_session->PlayerLogout())
+                {
+                    delete m_session;
+                    delete pct;
+                    m_session = nullptr;
+                }
+                else
+                    m_session->QueuePacket(pct);
+
                 return true;
             }
         }

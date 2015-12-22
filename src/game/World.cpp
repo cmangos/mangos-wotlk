@@ -1918,11 +1918,11 @@ void World::UpdateSessions(uint32 /*diff*/)
         WorldSession* pSession = itr->second;
         WorldSessionFilter updater(pSession);
 
+        // the session itself is owned by the socket which created it.  that is where the destruction of the session will happen.
         if (!pSession->Update(updater))
         {
             RemoveQueuedSession(pSession);
             m_sessions.erase(itr);
-            delete pSession;
         }
     }
 }
