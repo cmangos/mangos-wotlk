@@ -1923,6 +1923,7 @@ void World::UpdateSessions(uint32 /*diff*/)
         {
             RemoveQueuedSession(pSession);
             m_sessions.erase(itr);
+            pSession->Finalize();
         }
     }
 }

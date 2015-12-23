@@ -92,7 +92,7 @@ namespace MaNGOS
             void Close();
 
             bool IsClosed() const { return !m_socket.is_open(); }
-            bool Deletable() const { return IsClosed() && m_writeState == WriteState::Idle && m_readState == ReadState::Idle; }
+            virtual bool Deletable() const { return IsClosed() && m_writeState == WriteState::Idle && m_readState == ReadState::Idle; }
 
             bool Read(char *buffer, int length);
             void ReadSkip(int length) { m_inBuffer->Read(nullptr, length); }

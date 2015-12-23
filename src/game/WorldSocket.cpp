@@ -84,14 +84,13 @@ struct ServerPktHeader
 #endif
 
 WorldSocket::WorldSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler)
-    : Socket(service, closeHandler), m_lastPingTime(std::chrono::system_clock::time_point::min()),
+    : Socket(service, closeHandler), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_sessionFinalized(false),
       m_overSpeedPings(0), m_session(nullptr), m_seed(static_cast<uint32>(rand32())), m_useExistingHeader(false)
 {}
 
 WorldSocket::~WorldSocket()
 {
-    if (!IsClosed())
-        Close();
+    delete m_session;
 }
 
 void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
@@ -235,15 +234,7 @@ bool WorldSocket::ProcessIncomingData()
                     return false;
                 }
 
-                // if the player has logged out, don't bother queueing the packet.  instead, destroy the session >=]
-                if (m_session->PlayerLogout())
-                {
-                    delete m_session;
-                    delete pct;
-                    m_session = nullptr;
-                }
-                else
-                    m_session->QueuePacket(pct);
+                m_session->QueuePacket(pct);
 
                 return true;
             }

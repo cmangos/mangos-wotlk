@@ -32,6 +32,7 @@
 
 #include <chrono>
 #include <functional>
+#include <memory>
 
 #include <boost/asio.hpp>
 
@@ -107,7 +108,8 @@ class WorldSocket : public MaNGOS::Socket
         AuthCrypt m_crypt;
 
         /// Session to which received packets are routed
-        WorldSession* m_session;
+        WorldSession *m_session;
+        bool m_sessionFinalized;
 
         const uint32 m_seed;
 
@@ -130,7 +132,10 @@ class WorldSocket : public MaNGOS::Socket
         // send a packet \o/
         void SendPacket(const WorldPacket& pct, bool immediate = false);
 
+        void FinalizeSession() { m_sessionFinalized = true; }
+
         virtual bool Open() override;
+        virtual bool Deletable() const override { return m_sessionFinalized && Socket::Deletable(); }
 
         /// Return the session key
         BigNumber &GetSessionKey() { return m_s; }

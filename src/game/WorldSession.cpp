@@ -98,10 +98,6 @@ WorldSession::~WorldSession()
     if (_player)
         LogoutPlayer(true);
 
-    /// - If have unclosed socket, close it
-    if (!m_Socket->IsClosed())
-        m_Socket->Close();
-
     ///- empty incoming packet queue
     while (!m_packetQueue.empty())
     {
