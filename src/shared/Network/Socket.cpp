@@ -266,8 +266,6 @@ void Socket::OnWriteComplete(const boost::system::error_code &error, size_t leng
 
         assert(m_writeState == WriteState::Sending);
 
-        assert(length <= m_outBuffer->m_writePosition);
-
         // if we have data left to write, do so immediately, including any data from the secondary buffer as well
         if (length < m_outBuffer->m_writePosition)
         {
