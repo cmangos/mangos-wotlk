@@ -1018,22 +1018,31 @@ enum
     EMOTE_DESTIANTION       = -1609089,
     EMOTE_CONTROL           = -1609090,
 
-    POINT_EYE_DESTINATION   = 0
+    POINT_EYE_START_POS     = 0,
+    POINT_EYE_DESTINATION   = 1,
+
+    START_POINT_PAUSE_TIME  = 5000
 };
 
 // movement destination coords
-static const float aEyeDestination[3] = {1750.8276f, -5873.788f, 147.2266f};
+static const float aEyeDestination[3] = { 1758.007f, -5876.785f, 166.8667f };
+static const float aEyeStartPos[3] = { 2361.21f, -5660.45f, 503.8283f };
 
 struct npc_eye_of_acherusAI : public ScriptedAI
 {
     npc_eye_of_acherusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_bIsInitialized = false;
-        m_creature->SetPhaseMask(3, true);                  // HACK as mangos cannot handle auras proberly, also HACK below
+        m_isFinished = false;
+        m_reachPoint = false;
+        m_timer = START_POINT_PAUSE_TIME;
+        m_phase = 0;
         Reset();
     }
 
-    bool m_bIsInitialized;
+    bool m_isFinished;
+    bool m_reachPoint;
+    uint32 m_timer;
+    uint32 m_phase;
 
     void Reset() override {}
 
@@ -1044,41 +1053,105 @@ struct npc_eye_of_acherusAI : public ScriptedAI
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
     {
-        if (uiType != POINT_MOTION_TYPE || uiPointId != POINT_EYE_DESTINATION)
+        if (m_isFinished || m_reachPoint || uiType != POINT_MOTION_TYPE)
             return;
 
-        if (Player* pPlayer = m_creature->GetCharmerOrOwnerPlayerOrPlayerItself())
-            DoScriptText(EMOTE_CONTROL, m_creature, pPlayer);
+        switch (uiPointId)
+        {
+            case POINT_EYE_START_POS:
+            case POINT_EYE_DESTINATION:
+                m_reachPoint = true;
+                break;
 
-        DoCastSpellIfCan(m_creature, SPELL_EYE_FLIGHT, CAST_TRIGGERED);
+            default:
+                return;
+        }
+    }
+
+    void SummonedCreatureDespawn(Creature* pCreature) override
+    {
+        if (Unit* unit = pCreature->GetCharmer())
+        {
+            // this aura is applied to the master instead to the creature
+            unit->RemoveAurasDueToSpell(SPELL_EYE_FLIGHT_BOOST);
+        }
     }
 
     void AttackStart(Unit* /*pWho*/) override {}
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
+    void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_bIsInitialized)
+        if (m_isFinished)
             return;
 
-        if (Player* pPlayer = m_creature->GetCharmerOrOwnerPlayerOrPlayerItself())
+        switch (m_phase)
         {
-            m_creature->SetDisplayId(26320);                // HACK remove when correct modelid will be taken by core
-            m_creature->SetPhaseMask(2, true);              // HACK remove when summon spells and auras are implemented properly in mangos
+            case 0: // initialization > move to start position
+                if (Player* player = m_creature->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
+                    m_creature->SetPhaseMask(2, true);              // HACK remove when summon spells and auras are implemented properly in mangos
 
-            DoScriptText(EMOTE_DESTIANTION, m_creature, pPlayer);
+                    DoCastSpellIfCan(m_creature, SPELL_EYE_VISUAL, CAST_TRIGGERED);
+                    m_creature->SetRoot(true);
+                    m_creature->GetMotionMaster()->MovePoint(POINT_EYE_DESTINATION, aEyeStartPos[0], aEyeStartPos[1], aEyeStartPos[2]);
+                }
+                else
+                {
+                    m_creature->ForcedDespawn();
+                    m_isFinished = true;
+                }
+                ++m_phase;
+                break;
 
-            DoCastSpellIfCan(m_creature, SPELL_EYE_VISUAL, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_EYE_FLIGHT_BOOST, CAST_TRIGGERED);
-            // Update Speed for Eye
-            m_creature->UpdateSpeed(MOVE_FLIGHT, true, pPlayer->GetSpeed(MOVE_FLIGHT));
+            case 1: // wait start position reached then wait 5 sec before the journey to the end point
+                if (!m_reachPoint)
+                    return;
 
-            //m_creature->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
-            m_creature->GetMotionMaster()->MovePoint(POINT_EYE_DESTINATION, aEyeDestination[0], aEyeDestination[1], aEyeDestination[2]);
+                if (m_timer < uiDiff)
+                {
+                    Player* player = m_creature->GetCharmerOrOwnerPlayerOrPlayerItself();
+                    if (!player)
+                        return;
 
-            m_bIsInitialized = true;
+                    // Update Speed for Eye
+                    DoScriptText(EMOTE_DESTIANTION, m_creature, player);
+                    DoCastSpellIfCan(m_creature, SPELL_EYE_FLIGHT_BOOST, CAST_FORCE_TARGET_SELF);
+                    m_creature->SetRoot(false);
+                    ++m_phase;
+                }
+                else
+                    m_timer -= uiDiff;
+                break;
+
+            case 2: // go to the end point
+                m_creature->GetMotionMaster()->MovePoint(POINT_EYE_DESTINATION, aEyeDestination[0], aEyeDestination[1], aEyeDestination[2]);
+                m_reachPoint = false;
+                ++m_phase;
+                break;
+
+            case 3: // wait to reach end point then set fly mode by applying SPELL_EYE_FLIGHT
+                if (!m_reachPoint)
+                    return;
+
+                if (Player* pPlayer = m_creature->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    DoScriptText(EMOTE_CONTROL, m_creature, pPlayer);
+
+                if (m_creature->m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING))
+                    m_creature->SetLevitate(false);             // HACK to remove levitating flag and thus permit fly.
+
+                if (Unit* unit = m_creature->GetCharmer())
+                {
+                    // this aura is applied to the master instead to the creature
+                    unit->RemoveAurasDueToSpell(SPELL_EYE_FLIGHT_BOOST);
+                }
+                DoCastSpellIfCan(m_creature, SPELL_EYE_FLIGHT, CAST_TRIGGERED);
+                ++m_phase;
+                break;
+
+            default:
+                m_isFinished = true;
+                break;
         }
-        else
-            m_creature->ForcedDespawn();
     }
 };
 
