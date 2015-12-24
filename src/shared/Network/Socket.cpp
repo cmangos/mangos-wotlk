@@ -272,19 +272,23 @@ void Socket::OnWriteComplete(const boost::system::error_code &error, size_t leng
                 m_outBuffer->m_buffer.resize((m_outBuffer->m_writePosition - length) + m_secondaryOutBuffer->m_writePosition);
 
             std::copy(&m_secondaryOutBuffer->m_buffer[0], &m_secondaryOutBuffer->m_buffer[m_secondaryOutBuffer->m_writePosition], ins);
+
+            m_outBuffer->m_writePosition = (m_outBuffer->m_writePosition - length) + m_secondaryOutBuffer->m_writePosition;
         }
         // otherwise, swap the buffers
         else
         {
             std::swap(m_secondaryOutBuffer->m_buffer, m_outBuffer->m_buffer);
             m_outBuffer->m_writePosition = m_secondaryOutBuffer->m_writePosition;
-            m_secondaryOutBuffer->m_writePosition = 0;
         }
 
         // in either of the above cases, once we reach here, the primary buffer is ready to be written.  do so immediately.
+        // also, the secondary buffer is ready to be cleared.
 
         m_socket.async_write_some(boost::asio::buffer(m_outBuffer->m_buffer, m_outBuffer->m_writePosition),
             [this](const boost::system::error_code &error, size_t length) { this->OnWriteComplete(error, length); });
+
+        m_secondaryOutBuffer->m_writePosition = 0;
     }
     // otherwise, reset the primary buffer and reset to idle write state
     else
