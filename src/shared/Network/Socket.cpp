@@ -258,42 +258,35 @@ void Socket::OnWriteComplete(const boost::system::error_code &error, size_t leng
     std::lock_guard<std::mutex> guard(m_mutex);
 
     assert(m_writeState == WriteState::Sending);
+    assert(length <= m_outBuffer->m_writePosition);
 
-    // if there is data in the secondary buffer, we must write it immediately.  prepare the buffer.
+    // if there is data left to write, move it to the start of the buffer
+    if (length < m_outBuffer->m_writePosition)
+    {
+        std::copy(&m_outBuffer->m_buffer[length], &m_outBuffer->m_buffer[m_outBuffer->m_writePosition], m_outBuffer->m_buffer.begin());
+        m_outBuffer->m_writePosition -= length;
+    }
+    // if not, reset the write pointer
+    else
+        m_outBuffer->m_writePosition = 0;
+
+    // if there is data in the secondary buffer, append it to the primary buffer
     if (m_secondaryOutBuffer->m_writePosition > 0)
     {
-        // if we also have data leftover from the primary buffer to write, it must be written first.
-        if (length < m_outBuffer->m_writePosition)
-        {
-            auto const ins = std::copy(&m_outBuffer->m_buffer[length], &m_outBuffer->m_buffer[m_outBuffer->m_writePosition], m_outBuffer->m_buffer.begin());
-            
-            // do we have enough space?  if not, resize
-            if (m_outBuffer->m_buffer.size() < ((m_outBuffer->m_writePosition - length) + m_secondaryOutBuffer->m_writePosition))
-                m_outBuffer->m_buffer.resize((m_outBuffer->m_writePosition - length) + m_secondaryOutBuffer->m_writePosition);
+        // do we have enough space? if not, resize
+        if (m_outBuffer->m_buffer.size() < (m_outBuffer->m_writePosition + m_secondaryOutBuffer->m_writePosition))
+            m_outBuffer->m_buffer.resize(m_outBuffer->m_writePosition + m_secondaryOutBuffer->m_writePosition);
 
-            std::copy(&m_secondaryOutBuffer->m_buffer[0], &m_secondaryOutBuffer->m_buffer[m_secondaryOutBuffer->m_writePosition], ins);
+        std::copy(&m_secondaryOutBuffer->m_buffer[0], &m_secondaryOutBuffer->m_buffer[m_secondaryOutBuffer->m_writePosition], &m_outBuffer->m_buffer[m_outBuffer->m_writePosition]);
 
-            m_outBuffer->m_writePosition = (m_outBuffer->m_writePosition - length) + m_secondaryOutBuffer->m_writePosition;
-        }
-        // otherwise, swap the buffers
-        else
-        {
-            std::swap(m_secondaryOutBuffer->m_buffer, m_outBuffer->m_buffer);
-            m_outBuffer->m_writePosition = m_secondaryOutBuffer->m_writePosition;
-        }
-
-        // in either of the above cases, once we reach here, the primary buffer is ready to be written.  do so immediately.
-        // also, the secondary buffer is ready to be cleared.
-
-        m_socket.async_write_some(boost::asio::buffer(m_outBuffer->m_buffer, m_outBuffer->m_writePosition),
-            [this](const boost::system::error_code &error, size_t length) { this->OnWriteComplete(error, length); });
-
+        m_outBuffer->m_writePosition += m_secondaryOutBuffer->m_writePosition;
         m_secondaryOutBuffer->m_writePosition = 0;
     }
-    // otherwise, reset the primary buffer and reset to idle write state
+
+    // if there is any data to write, do so immediately
+    if (m_outBuffer->m_writePosition > 0)
+        m_socket.async_write_some(boost::asio::buffer(m_outBuffer->m_buffer, m_outBuffer->m_writePosition),
+            [this](const boost::system::error_code &error, size_t length) { this->OnWriteComplete(error, length); });
     else
-    {
-        m_outBuffer->m_writePosition = 0;
         m_writeState = WriteState::Idle;
-    }
 }
