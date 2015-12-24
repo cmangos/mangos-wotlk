@@ -86,7 +86,7 @@ namespace MaNGOS
 
         public:
             Socket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler);
-            ~Socket() { assert(m_writeState == WriteState::Idle && m_readState == ReadState::Idle); }
+            ~Socket() { assert(Deletable()); }
 
             virtual bool Open();
             void Close();
