@@ -6208,6 +6208,14 @@ void Unit::Uncharm()
         charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
         charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
         charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS_PET);
+
+        // TODO:: find a way to get rid of this bad hack to remove Raise ally aura
+        if (charm->GetTypeId() == TYPEID_UNIT)
+        {
+            uint32 createdBySpellId = charm->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+            if (static_cast<Creature*>(charm)->IsTemporarySummon() && createdBySpellId)
+                RemoveAurasDueToSpell(createdBySpellId);
+        }
     }
 }
 
