@@ -11314,7 +11314,6 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
     pCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, spellEntry->Id);
     pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
     pCreature->addUnitState(UNIT_STAT_CONTROLLED);
-    pCreature->SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_ABANDONED);
     pCreature->SetUInt32Value(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
 
     pCreature->SelectLevel(getLevel());
