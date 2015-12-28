@@ -435,7 +435,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     // this must help in case next save after mass player load after server startup
     m_nextSave = urand(m_nextSave / 2, m_nextSave * 3 / 2);
 
-    clearResurrectRequestData();
+    ClearResurrectRequestData();
 
     memset(m_items, 0, sizeof(Item*)*PLAYER_SLOTS_COUNT);
 
@@ -1437,7 +1437,7 @@ void Player::SetDeathState(DeathState s)
         // lost combo points at any target (targeted combo points clear in Unit::SetDeathState)
         ClearComboPoints();
 
-        clearResurrectRequestData();
+        ClearResurrectRequestData();
 
         // remove form before other mods to prevent incorrect stats calculation
         RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
@@ -23064,3 +23064,35 @@ float Player::GetCollisionHeight(bool mounted) const
         return modelData->CollisionHeight;
     }
 }
+
+// set data to accept next resurrect response and process it with required data
+void Player::SetResurrectRequestData(Unit* caster, uint32 health, uint32 mana)
+{
+    m_resurrectGuid = caster->GetObjectGuid();
+    m_resurrectMap = caster->GetMapId();
+    caster->GetPosition(m_resurrectX, m_resurrectY, m_resurrectZ);
+    m_resurrectHealth = health;
+    m_resurrectMana = mana;
+    m_resurrectToGhoul = false;
+}
+
+// we can use this to prepare data in case we have to resurrect player in ghoul form
+void Player::SetResurrectRequestDataToGhoul(Unit* caster)
+{
+    SetResurrectRequestData(caster, 0, 0);
+    m_resurrectToGhoul = true;
+}
+
+// clear resurrect data (no resurrect response will be accepted)
+void Player::ClearResurrectRequestData()
+{
+    m_resurrectGuid = ObjectGuid();
+    m_resurrectMap = 0;
+    m_resurrectX = .0f;
+    m_resurrectY = .0f;
+    m_resurrectZ = .0f;
+    m_resurrectHealth = 0;
+    m_resurrectMana = 0;
+    m_resurrectToGhoul = false;
+}
+

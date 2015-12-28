@@ -1653,17 +1653,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetLastPotionId() { return m_lastPotionId; }
         void UpdatePotionCooldown(Spell* spell = nullptr);
 
-        void setResurrectRequestData(ObjectGuid guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana)
-        {
-            m_resurrectGuid = guid;
-            m_resurrectMap = mapId;
-            m_resurrectX = X;
-            m_resurrectY = Y;
-            m_resurrectZ = Z;
-            m_resurrectHealth = health;
-            m_resurrectMana = mana;
-        }
-        void clearResurrectRequestData() { setResurrectRequestData(ObjectGuid(), 0, 0.0f, 0.0f, 0.0f, 0, 0); }
+        void SetResurrectRequestData(Unit* caster, uint32 health, uint32 mana);
+        void SetResurrectRequestDataToGhoul(Unit* caster);
+        void ClearResurrectRequestData();
         bool isRessurectRequestedBy(ObjectGuid guid) const { return m_resurrectGuid == guid; }
         bool isRessurectRequested() const { return !m_resurrectGuid.IsEmpty(); }
         void ResurectUsingRequestData();
@@ -2483,6 +2475,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_resurrectMap;
         float m_resurrectX, m_resurrectY, m_resurrectZ;
         uint32 m_resurrectHealth, m_resurrectMana;
+        bool m_resurrectToGhoul;
 
         WorldSession* m_session;
 
