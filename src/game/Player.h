@@ -2316,6 +2316,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetTitle(CharTitlesEntry const* title, bool lost = false);
 
         bool canSeeSpellClickOn(Creature const* creature) const;
+
+        // function used for raise ally spell
+        bool IsGhouled() const { return m_isGhouled; }
+        void SetGhouled(bool enable) { m_isGhouled = enable; }
     protected:
 
         uint32 m_contestedPvPTimer;
@@ -2633,6 +2637,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_timeSyncServer;
 
         uint32 m_cachedGS;
+
+        bool m_isGhouled;
 };
 
 void AddItemsSetItem(Player* player, Item* item);
