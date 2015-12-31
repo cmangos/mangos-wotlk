@@ -3356,6 +3356,30 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             break;
         }
+        case SPELLFAMILY_DEATHKNIGHT:
+            switch (GetId())
+            {
+                // Raise ally
+                case 46619:
+                {
+                    // at this point the ghoul is already spawned
+                    Unit* caster = GetCaster();
+                    if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    Player* player = static_cast<Player*>(caster);
+
+                    if (apply)
+                    {
+                        player->SetGhouled(true);
+                    }
+                    else
+                    {
+                        player->SetGhouled(false);
+                    }
+                }
+            }
+            break;
     }
 
     // pet auras

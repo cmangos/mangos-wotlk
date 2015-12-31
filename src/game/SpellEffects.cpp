@@ -4034,6 +4034,36 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 // consume diseases
                 unitTarget->RemoveAurasWithDispelType(DISPEL_DISEASE, m_caster->GetObjectGuid());
             }
+            // Raise ally
+            else if (m_spellInfo->Id == 61999)
+            {
+                if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                bool checkSuccess = true;
+                if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->isAlive())
+                {
+                    SendCastResult(SPELL_FAILED_TARGET_NOT_DEAD);
+                    checkSuccess = false;
+                }
+
+                if (!m_caster->IsFriendlyTo(unitTarget))
+                {
+                    SendCastResult(SPELL_FAILED_TARGET_ENEMY);
+                    checkSuccess = false;
+                }
+
+                if (checkSuccess)
+                {
+                    Player* pTarget = static_cast<Player*>(unitTarget);
+                    pTarget->SetResurrectRequestDataToGhoul(m_caster);
+                    SendResurrectRequest(pTarget);
+                }
+                else
+                    finish(true);
+
+                return;
+            }
             break;
         }
     }
@@ -8921,7 +8951,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (!charmer || charmer->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    charmer->RemoveAurasDueToSpell(51923);
                     charmer->RemoveAurasDueToSpell(51852);
                     return;
                 }
