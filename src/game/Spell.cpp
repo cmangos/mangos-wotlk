@@ -6075,9 +6075,14 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
 
     if (m_caster->GetTypeId() == TYPEID_UNIT && (((Creature*)m_caster)->IsPet() || m_caster->isCharmed()))
     {
-        // dead owner (pets still alive when owners ressed?)
-        if (m_caster->GetCharmerOrOwner() && !m_caster->GetCharmerOrOwner()->isAlive())
-            return SPELL_FAILED_CASTER_DEAD;
+        // dead owner (currently only ghouled players can have alive pet casting)
+        Unit* charmer = m_caster->GetCharmerOrOwner();
+        if (charmer)
+        {
+            Player* pCharmer = charmer->GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(charmer) : nullptr;
+            if (!charmer->isAlive() && (!pCharmer || !pCharmer->IsGhouled()))
+                return SPELL_FAILED_CASTER_DEAD;
+        }
 
         if (!target && m_targets.getUnitTarget())
             target = m_targets.getUnitTarget();
