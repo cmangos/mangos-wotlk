@@ -11309,6 +11309,12 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
         return nullptr;
     }
 
+    if (GetCharm())
+    {
+        sLog.outError("Unit::TakePossessOf> There is already a charmed creature for %s its : %s. ", GetGuidStr().c_str(), GetCharm()->GetGuidStr().c_str());
+        return nullptr;
+    }
+
     TemporarySummon* pCreature = new TemporarySummon(GetObjectGuid());
 
     CreatureCreatePos pos(GetMap(), x, y, z, ang, GetPhaseMask());
