@@ -11427,7 +11427,7 @@ bool Unit::TakePossessOf(Unit* possessed)
     return true;
 }
 
-void Unit::ResetControlState()
+void Unit::ResetControlState(bool attackCharmer /*= true*/)
 {
     Player* player = nullptr;
     if (GetTypeId() == TYPEID_PLAYER)
@@ -11501,10 +11501,12 @@ void Unit::ResetControlState()
                 possessedCreature->GetMotionMaster()->MoveFollow(this, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
             }
         }
-
-        CreatureInfo const* cinfo = possessedCreature->GetCreatureInfo();
-        possessedCreature->setFaction(cinfo->FactionAlliance);
-        possessedCreature->AIM_Initialize();
-        possessedCreature->AttackedBy(this);
+        else if (attackCharmer)
+        {
+            CreatureInfo const* cinfo = possessedCreature->GetCreatureInfo();
+            possessedCreature->setFaction(cinfo->FactionAlliance);
+            possessedCreature->AIM_Initialize();
+            possessedCreature->AttackedBy(this);
+        }
     }
 }

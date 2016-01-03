@@ -2116,7 +2116,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Unit* TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry const* summonProp, uint32 effIdx, float x, float y, float z, float ang);
 
         // Reset control to player
-        void ResetControlState();
+        void ResetControlState(bool attackCharmer = true);
 
     protected:
         explicit Unit();

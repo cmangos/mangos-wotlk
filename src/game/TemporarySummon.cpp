@@ -256,7 +256,7 @@ void TemporarySummon::RemoveAuraFromOwner()
         if (Unit* charmer = GetCharmer())
         {
             charmer->RemoveAurasDueToSpell(spellId);
-            charmer->ResetControlState();
+            charmer->ResetControlState(false);
         }
         else if (Unit* owner = GetOwner())
         {
