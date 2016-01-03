@@ -3376,6 +3376,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     else
                     {
                         player->SetGhouled(false);
+
+                        // this will reset death timer in the client
+                        WorldPacket data(SMSG_FORCED_DEATH_UPDATE);
+                        player->GetSession()->SendPacket(&data);
+                        player->ResetDeathTimer();
                     }
                 }
             }
