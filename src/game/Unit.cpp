@@ -11289,6 +11289,7 @@ void Unit::SendCollisionHeightUpdate(float height)
     }
 }
 
+// This will create a new creature and set the current unit as the controller of that new creature
 Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry const* summonProp, uint32 effIdx, float x, float y, float z, float ang)
 {
     int32 const& creatureEntry = spellEntry->EffectMiscValue[effIdx];
@@ -11312,44 +11313,44 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
         return nullptr;
     }
 
-    pCreature->setFaction(getFaction());
+    Player* player = GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this): nullptr;
 
-    pCreature->SetRespawnCoord(pos);
+    pCreature->setFaction(getFaction());                                // set same faction than player
+    pCreature->SetRespawnCoord(pos);                                    // set spawn coord
+    pCreature->SetCharmerGuid(GetObjectGuid());                         // save guid of the charmer
+    pCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, spellEntry->Id);   // set the spell id used to create this (may be used for removing corresponding aura
+    pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);  // set flag for client that mean this unit is controlled by a player
+    pCreature->addUnitState(UNIT_STAT_CONTROLLED);                      // also set internal unit state flag
+    pCreature->SelectLevel(getLevel());                                 // set level to same level than summoner TODO:: not sure its always the case...
+    pCreature->SetWalk(IsWalking(), true);                              // synch the walking state with the summoner
 
-    pCreature->SetCharmerGuid(GetObjectGuid());
-    pCreature->SetCreatorGuid(GetObjectGuid());
-    pCreature->SetOwnerGuid(GetObjectGuid());
-    pCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, spellEntry->Id);
-    pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-    pCreature->addUnitState(UNIT_STAT_CONTROLLED);
-    pCreature->SetUInt32Value(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
+    // important before adding to the map!
+    SetCharmGuid(pCreature->GetObjectGuid());                           // save guid of charmed creature
 
-    pCreature->SelectLevel(getLevel());
+    pCreature->SetSummonProperties(TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000); // set 5s corpse decay
+    GetMap()->Add(static_cast<Creature*>(pCreature));                   // create the creature in the client
 
-    pCreature->SetWalk(IsWalking(), true);
-
-    //TODO:
-    //maybe set speed to player speed
-
-    // important before summon!
-    SetCharm(pCreature);
-
-    pCreature->Summon(TEMPSUMMON_CORPSE_TIMED_DESPAWN, 6000);        // Also initializes the AI and MMGen
-
-    // Changes to owner if player
-    if (GetTypeId() == TYPEID_PLAYER)
+    // Give the control to the player
+    if (player)
     {
-        Player* player = static_cast<Player*>(this);
-        player->GetCamera().SetView(pCreature);
-        player->SetClientControl(pCreature, 1);
-        player->SetMover(pCreature);
+        player->GetCamera().SetView(pCreature);                         // modify camera view to the creature view
+        player->SetClientControl(pCreature, 1);                         // transfer client control to the creature
+        player->SetMover(pCreature);                                    // set mover so now we know that creature is "moved" by this unit
+    }
 
+    // initialize AI
+    pCreature->AIM_Initialize();
+    
+    if (player)
+    {
+        // Initialize pet bar
         if (CharmInfo* charmInfo = pCreature->InitCharmInfo(pCreature))
             charmInfo->InitPossessCreateSpells();
         player->PossessSpellInitialize();
     }
     else
     {
+        // fire just summoned hook
         if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
             ((Creature*)this)->AI()->JustSummoned(pCreature);
     }
