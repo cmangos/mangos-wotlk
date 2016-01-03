@@ -4442,15 +4442,15 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         target->CastStop(target->GetObjectGuid() == GetCasterGuid() ? GetId() : 0);
 
-        // Creature specific
-        if (target->GetTypeId() != TYPEID_PLAYER)
-            target->StopMoving();
-        else
+        Unit* charmer = target->GetCharmer();
+        if (target->GetTypeId() == TYPEID_PLAYER || (charmer && charmer->GetTypeId() == TYPEID_PLAYER))
         {
-            ((Player*)target)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+            target->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
             target->SetStandState(UNIT_STAND_STATE_STAND);// in 1.5 client
             target->SetRoot(true);
         }
+        else
+            target->StopMoving();
 
         // Summon the Naj'entus Spine GameObject on target if spell is Impaling Spine
         if (GetId() == 39837)
