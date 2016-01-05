@@ -1797,6 +1797,10 @@ Loot::Loot(Player* player, uint32 id, LootType type) :
             FillLoot(id, LootTemplates_Skinning, player, true, true);
             m_clientLootType = CLIENT_LOOT_PICKPOCKETING;
             break;
+        case LOOT_SPELL:
+            FillLoot(id, LootTemplates_Spell, player, true, true);
+            m_clientLootType = CLIENT_LOOT_PICKPOCKETING;
+            break;
         default:
             sLog.outError("Loot::Loot> invalid loot type passed to loot constructor.");
             break;
