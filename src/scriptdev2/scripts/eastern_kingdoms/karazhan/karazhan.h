@@ -9,6 +9,8 @@ enum
 {
     MAX_ENCOUNTER                   = 11,
     MAX_OZ_OPERA_MOBS               = 4,
+    MAX_BASEMENT_MINIBOSSES         = 3,
+    MIN_BASEMENT_MOBS               = 45,               // note: some DB provides have more spawns, up to 55. However we need to keep this compatible with all
 
     TYPE_ATTUMEN                    = 0,
     TYPE_MOROES                     = 1,
@@ -22,6 +24,8 @@ enum
     TYPE_MALCHEZZAR                 = 9,
     TYPE_NIGHTBANE                  = 10,
     TYPE_OPERA_PERFORMANCE          = 11,               // no regular encounter - just store one random opera event
+
+    DATA_BASEMENT_EVENT             = 1,                // DO NOT CHANGE! Used by Acid. - used to check the mobs for the the basement event.
 
     NPC_ATTUMEN                     = 15550,
     NPC_MIDNIGHT                    = 16151,
@@ -78,6 +82,20 @@ enum
     NPC_CONJURED_WATER_ELEMENTAL    = 21160,                    // rook
     NPC_KING_LLANE                  = 21684,                    // king
 
+    // Servants' Quarters event
+    NPC_BAT_MINIBOSS                = 16180,                    // Shadikith the Glider
+    NPC_DOG_MINIBOSS                = 16181,                    // Rokad the Ravager
+    NPC_SPIDER_MINIBOSS             = 16179,                    // Hyakiss the Lurker
+
+    NPC_SHADOWBAT                   = 16173,
+    NPC_GREATER_SHADOWBAT           = 16174,
+    NPC_VAMPIRIC_SHADOWBAT          = 16175,
+    NPC_PHASE_HOUND                 = 16178,
+    NPC_DREADBEAST                  = 16177,
+    NPC_SHADOWBEAST                 = 16176,
+    NPC_COLDMIST_STALKER            = 16170,
+    NPC_COLDMIST_WIDOW              = 16171,
+
     GO_STAGE_CURTAIN                = 183932,
     GO_STAGE_DOOR_LEFT              = 184278,
     GO_STAGE_DOOR_RIGHT             = 184279,
@@ -111,6 +129,10 @@ enum
 
     FACTION_ID_CHESS_HORDE          = 1689,
     FACTION_ID_CHESS_ALLIANCE       = 1690,
+
+    EMOTE_BAT_SPAWN                 = -1532133,
+    EMOTE_DOG_SPAWN                 = -1532134,
+    EMOTE_SPIDER_SPAWN              = -1532135,
 };
 
 enum OperaEvents
@@ -132,6 +154,20 @@ static const OperaSpawns aOperaLocOz[MAX_OZ_OPERA_MOBS] =
     {NPC_ROAR,      -10889.53f, -1758.10f, 90.55f, 4.57f},
     {NPC_TINHEAD,   -10883.84f, -1758.85f, 90.55f, 4.53f},
     {NPC_STRAWMAN,  -10902.11f, -1756.45f, 90.55f, 4.66f},
+};
+
+struct BasementSpawns
+{
+    uint32 uiEntry;
+    int32 iEmote;
+    float fX, fY, fZ, fO;
+};
+
+static const BasementSpawns aBasementEnum[MAX_BASEMENT_MINIBOSSES] =
+{
+    {NPC_BAT_MINIBOSS,    EMOTE_BAT_SPAWN,    -10959.11f, -1940.86f, 46.19f, 3.769f},
+    {NPC_DOG_MINIBOSS,    EMOTE_DOG_SPAWN,    -10900.01f, -2085.47f, 49.55f, 1.343f},
+    {NPC_SPIDER_MINIBOSS, EMOTE_SPIDER_SPAWN, -10939.75f, -2041.11f, 49.55f, 1.361f},
 };
 
 static const OperaSpawns aOperaLocWolf = {NPC_GRANDMOTHER, -10892.01f, -1758.01f, 90.55f, 4.73f};
@@ -156,6 +192,8 @@ class instance_karazhan : public ScriptedInstance
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
+
+        void SetData64(uint32 uiType, uint64 uiGuid) override;
 
         void DoPrepareOperaStage(Creature* pOrganizer);
 
@@ -187,6 +225,7 @@ class instance_karazhan : public ScriptedInstance
         uint8 m_uiHordeStalkerCount;
 
         bool m_bFriendlyGame;
+        bool m_bBasementBossReady;
 
         ObjectGuid m_HordeStatusGuid;
         ObjectGuid m_AllianceStatusGuid;
@@ -195,6 +234,7 @@ class instance_karazhan : public ScriptedInstance
         GuidList m_lOperaHayGuidList;
         GuidList m_lNightbaneGroundTriggers;
         GuidList m_lNightbaneAirTriggers;
+        GuidSet m_sBasementMobsSet;
 
         GuidList m_lChessHordeStalkerList;
         GuidList m_lChessAllianceStalkerList;

@@ -46,7 +46,8 @@ instance_karazhan::instance_karazhan(Map* pMap) : ScriptedInstance(pMap),
     m_uiNightbaneResetTimer(0),
     m_uiAllianceStalkerCount(0),
     m_uiHordeStalkerCount(0),
-    m_bFriendlyGame(false)
+    m_bFriendlyGame(false),
+    m_bBasementBossReady(false)
 {
     Initialize();
 }
@@ -345,6 +346,20 @@ uint32 instance_karazhan::GetData(uint32 uiType) const
     return 0;
 }
 
+void instance_karazhan::SetData64(uint32 uiData, uint64 uiGuid)
+{
+    // Note: this is handled in Acid. The purpose is check which npc from the basement set is alive
+    // The function is triggered by eventAI on generic timer
+    if (uiData == DATA_BASEMENT_EVENT)
+    {
+        m_sBasementMobsSet.insert(ObjectGuid(uiGuid));
+
+        // only allow the event to progress when all mobs are spawned
+        if (m_sBasementMobsSet.size() >= MIN_BASEMENT_MOBS)
+            m_bBasementBossReady = true;
+    }
+}
+
 void instance_karazhan::Load(const char* chrIn)
 {
     if (!chrIn)
@@ -386,6 +401,34 @@ void instance_karazhan::OnCreatureDeath(Creature* pCreature)
                 {
                     if (pCreature->getVictim())
                         pCrone->AI()->AttackStart(pCreature->getVictim());
+                }
+            }
+            break;
+        case NPC_SHADOWBAT:
+        case NPC_GREATER_SHADOWBAT:
+        case NPC_VAMPIRIC_SHADOWBAT:
+        case NPC_PHASE_HOUND:
+        case NPC_DREADBEAST:
+        case NPC_SHADOWBEAST:
+        case NPC_COLDMIST_STALKER:
+        case NPC_COLDMIST_WIDOW:
+            // avoid exploiting the event
+            if (!m_bBasementBossReady)
+                break;
+
+            if (m_sBasementMobsSet.find(pCreature->GetObjectGuid()) != m_sBasementMobsSet.end())
+            {
+                m_sBasementMobsSet.erase(pCreature->GetObjectGuid());
+
+                // spawn boss when empty
+                if (m_sBasementMobsSet.empty())
+                {
+                    uint8 uiIndex = urand(0, 2);
+                    m_bBasementBossReady = false;
+
+                    if (Creature* pBoss = pCreature->SummonCreature(aBasementEnum[uiIndex].uiEntry, aBasementEnum[uiIndex].fX, aBasementEnum[uiIndex].fY, aBasementEnum[uiIndex].fZ,
+                            aBasementEnum[uiIndex].fO, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 2 * HOUR * IN_MILLISECONDS, true))
+                        DoScriptText(aBasementEnum[uiIndex].iEmote, pBoss);
                 }
             }
             break;
