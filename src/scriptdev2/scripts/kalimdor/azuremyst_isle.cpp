@@ -213,6 +213,9 @@ enum
     SAY_END1                = -1000114,
     SAY_END2                = -1000115,
     EMOTE_HUG               = -1000116,
+    SAY_DAUGHTER            = -1000184,
+
+    NPC_COWLEN              = 17311,
 
     QUEST_A_CRY_FOR_HELP    = 9528
 };
@@ -221,49 +224,79 @@ struct npc_magwinAI : public npc_escortAI
 {
     npc_magwinAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
-    void WaypointReached(uint32 uiPointId) override
+    void Reset() override
     {
-        Player* pPlayer = GetPlayerForEscort();
-
-        if (!pPlayer)
-            return;
-
-        switch (uiPointId)
-        {
-            case 0:
-                DoScriptText(SAY_START, m_creature, pPlayer);
-                break;
-            case 17:
-                DoScriptText(SAY_PROGRESS, m_creature, pPlayer);
-                break;
-            case 28:
-                DoScriptText(SAY_END1, m_creature, pPlayer);
-                break;
-            case 29:
-                DoScriptText(EMOTE_HUG, m_creature, pPlayer);
-                DoScriptText(SAY_END2, m_creature, pPlayer);
-                pPlayer->GroupEventHappens(QUEST_A_CRY_FOR_HELP, m_creature);
-                break;
-        }
+        if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
     }
 
     void Aggro(Unit* pWho) override
     {
-        DoScriptText(SAY_AGGRO, m_creature, pWho);
+        if (urand(0, 1))
+            DoScriptText(SAY_AGGRO, m_creature);
     }
 
-    void Reset() override { }
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+            case 0:
+                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                DoScriptText(SAY_START, m_creature);
+                break;
+            case 20:
+                DoScriptText(SAY_PROGRESS, m_creature);
+                break;
+            case 33:
+                SetRun();
+                DoScriptText(SAY_END1, m_creature);
+                if (Player* pPlayer = GetPlayerForEscort())
+                    pPlayer->GroupEventHappens(QUEST_A_CRY_FOR_HELP, m_creature);
+                if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_COWLEN, 30.0f))
+                {
+                    pFather->SetStandState(UNIT_STAND_STATE_STAND);
+                    pFather->SetFacingToObject(m_creature);
+                }
+                break;
+            case 34:
+                if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_COWLEN, 30.0f))
+                    DoScriptText(SAY_DAUGHTER, pFather);
+                break;
+            case 35:
+                DoScriptText(EMOTE_HUG, m_creature);
+                break;
+            case 36:
+                if (Player* pPlayer = GetPlayerForEscort())
+                    DoScriptText(SAY_END2, m_creature, pPlayer);
+                break;
+            case 37:
+                if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_COWLEN, 30.0f))
+                {
+                    pFather->SetStandState(UNIT_STAND_STATE_SIT);
+                    pFather->GetMotionMaster()->MoveTargetedHome();
+                }
+                SetEscortPaused(true);
+                m_creature->ForcedDespawn(10000);
+                m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 3.0f);
+                break;
+        }
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            m_creature->SetFactionTemporary(FACTION_ESCORT_A_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
+        }
+    }
 };
 
 bool QuestAccept_npc_magwin(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
     if (pQuest->GetQuestId() == QUEST_A_CRY_FOR_HELP)
-    {
-        pCreature->SetFactionTemporary(FACTION_ESCORT_A_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
 
-        if (npc_magwinAI* pEscortAI = dynamic_cast<npc_magwinAI*>(pCreature->AI()))
-            pEscortAI->Start(false, pPlayer, pQuest);
-    }
     return true;
 }
 
