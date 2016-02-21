@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: instance_halls_of_reflection
-SD%Complete: 20
-SDComment: Basic support
+SD%Complete: 80
+SDComment: Script support for most of the events.
 SDCategory: Halls of Reflection
 EndScriptData */
 
@@ -26,18 +26,38 @@ EndScriptData */
 
 enum
 {
+    // texts
+    SAY_ALLY_INTRO_1                        = -1668001,
+    SAY_ALLY_INTRO_2                        = -1668002,
+    SAY_HORDE_INTRO_1                       = -1668003,
+    SAY_HORDE_INTRO_2                       = -1668004,
+
+    // spells
     SPELL_START_HALLS_REFLECTION            = 72900,            // triggers 71351 for alliance or 71542 for horde
     SPELL_QUELDELAR_COMPULSION              = 70013,
     SPELL_SPIRIT_ACTIVATE_VISUAL            = 72130,            // cast when activate spirit
+
+    SPELL_FINDING_JAINA_CREDIT              = 71538,
+    SPELL_FINDING_SYLVANAS_CREDIT           = 71536,
 
     QUEST_ID_HALLS_REFLECTION_ALLY          = 24480,            // Quel'delar alliance quest
     QUEST_ID_HALLS_REFLECTION_HORDE         = 24561,            // Quel'delar horde quest
 };
 
-instance_halls_of_reflection::instance_halls_of_reflection(Map* pMap) : ScriptedInstance(pMap),
+static const DialogueEntryTwoSide aHoRDialogues[] =
+{
+    {SAY_ALLY_INTRO_1,      NPC_LICH_KING,      SAY_HORDE_INTRO_1,  NPC_LICH_KING,      12000},
+    {NPC_LICH_KING,         0,                  0,                  0,                  5000},
+    {SAY_ALLY_INTRO_2,      NPC_JAINA_PART2,    SAY_HORDE_INTRO_2,  NPC_SYLVANAS_PART2, 0},
+
+    {0, 0, 0},
+};
+
+instance_halls_of_reflection::instance_halls_of_reflection(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aHoRDialogues),
     m_uiTeam(TEAM_NONE),
     m_uiEventTimer(0),
     m_uiActivateTimer(0),
+    m_uiEscapeResetTimer(0),
     m_uiEventStage(0)
 {
     Initialize();
@@ -46,6 +66,7 @@ instance_halls_of_reflection::instance_halls_of_reflection(Map* pMap) : Scripted
 void instance_halls_of_reflection::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+    InitializeDialogueHelper(this);
 }
 
 void instance_halls_of_reflection::OnPlayerEnter(Player* pPlayer)
@@ -60,6 +81,7 @@ void instance_halls_of_reflection::OnPlayerEnter(Player* pPlayer)
     if (!m_uiTeam)                                          // very first player to enter
     {
         m_uiTeam = pPlayer->GetTeam();
+        SetDialogueSide(m_uiTeam == ALLIANCE);
 
         // intro event
         if (GetData(TYPE_FROSTMOURNE_INTRO) != DONE)
@@ -77,14 +99,7 @@ void instance_halls_of_reflection::OnPlayerEnter(Player* pPlayer)
         }
         // last encounter
         else if (GetData(TYPE_FROSTWORN_GENERAL) == DONE && !GetSingleCreatureFromStorage(NPC_LICH_KING, true))
-        {
-            // Spawn npc for the last encounter
-            for (uint8 i = 0; i < countof(aEventKingLocations); ++i)
-            {
-                pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventKingLocations[i].uiEntryHorde : aEventKingLocations[i].uiEntryAlliance,
-                    aEventKingLocations[i].fX, aEventKingLocations[i].fY, aEventKingLocations[i].fZ, aEventKingLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
-            }
-        }
+            DoSetupEscapeEvent(pPlayer);
         // mini boss
         else if (GetData(TYPE_MARWYN) == DONE && !GetSingleCreatureFromStorage(NPC_FROSTSWORN_GENERAL, true))
             pPlayer->SummonCreature(NPC_FROSTSWORN_GENERAL, afGeneralSpawnLoc[0], afGeneralSpawnLoc[1], afGeneralSpawnLoc[2], afGeneralSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
@@ -146,6 +161,11 @@ void instance_halls_of_reflection::OnCreatureCreate(Creature* pCreature)
         case NPC_SPIRITUAL_REFLECTION_2:
             m_lSpiritReflectionsGuids.push_back(pCreature->GetObjectGuid());
             return;
+        case NPC_ICE_WALL_TARGET:
+            // add creatures to the list and mark as active to handle the future event
+            m_lIceWallTargetsGuids.push_back(pCreature->GetObjectGuid());
+            pCreature->SetActiveObjectState(true);
+            return;
         default:
             return;
     }
@@ -170,6 +190,7 @@ void instance_halls_of_reflection::OnObjectCreate(GameObject* pGo)
         case GO_ICECROWN_DOOR_LK_ENTRANCE:
         case GO_ICECROWN_DOOR_LK_EXIT:
         case GO_CAVE_IN:
+        case GO_ICE_WALL:
 
         case GO_CAPTAIN_CHEST_HORDE:
         case GO_CAPTAIN_CHEST_HORDE_H:
@@ -228,9 +249,28 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
         case TYPE_LICH_KING:
             if (uiData == DONE)
             {
+                // ToDo: handle transports
+                // Note: loot needs to be hacked in DB until the ships are implemented
                 uint32 uiChestEntry = m_uiTeam == ALLIANCE ? (instance->IsRegularDifficulty() ? GO_CAPTAIN_CHEST_ALLIANCE : GO_CAPTAIN_CHEST_ALLIANCE_H) :
                         (instance->IsRegularDifficulty() ? GO_CAPTAIN_CHEST_HORDE : GO_CAPTAIN_CHEST_HORDE_H);
+                DoRespawnGameObject(uiChestEntry, 60 * MINUTE);
                 DoToggleGameObjectFlags(uiChestEntry, GO_FLAG_NO_INTERACT, false);
+
+                // remove active object status for ice wall targets
+                for (GuidList::const_iterator itr = m_lIceWallTargetsGuids.begin(); itr != m_lIceWallTargetsGuids.end(); ++itr)
+                {
+                    if (Creature* pCreature = instance->GetCreature(*itr))
+                        pCreature->SetActiveObjectState(false);
+                }
+            }
+            else if (uiData == IN_PROGRESS)
+                StartNextDialogueText(SAY_ALLY_INTRO_1);
+            else if (uiData == FAIL)
+            {
+                m_uiEscapeResetTimer = 10000;
+
+                if (Creature* pCreature = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_JAINA_PART2 : NPC_SYLVANAS_PART2))
+                    pCreature->ForcedDespawn(10000);
             }
             m_auiEncounter[uiType] = uiData;
             break;
@@ -239,14 +279,7 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
             {
                 // spawn creatures for last encounter
                 if (Player* pPlayer = GetPlayerInMap())
-                {
-                    // Spawn npc for the last encounter
-                    for (uint8 i = 0; i < countof(aEventKingLocations); ++i)
-                    {
-                        pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventKingLocations[i].uiEntryHorde : aEventKingLocations[i].uiEntryAlliance,
-                            aEventKingLocations[i].fX, aEventKingLocations[i].fY, aEventKingLocations[i].fZ, aEventKingLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
-                    }
-                }
+                    DoSetupEscapeEvent(pPlayer);
             }
             m_auiEncounter[uiType] = uiData;
             break;
@@ -361,6 +394,28 @@ void instance_halls_of_reflection::OnCreatureEnterCombat(Creature* pCreature)
     }
 }
 
+void instance_halls_of_reflection::JustDidDialogueStep(int32 iEntry)
+{
+    switch (iEntry)
+    {
+        case NPC_LICH_KING:
+            if (Creature* pCreature = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_JAINA_PART2 : NPC_SYLVANAS_PART2))
+            {
+                pCreature->InterruptNonMeleeSpells(false);
+                pCreature->CastSpell(pCreature, m_uiTeam == ALLIANCE ? SPELL_ICE_PRISON : SPELL_DARK_BINDING, false);
+            }
+            break;
+        case SAY_ALLY_INTRO_2:
+            if (Creature* pCreature = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_JAINA_PART2 : NPC_SYLVANAS_PART2))
+            {
+                pCreature->CastSpell(pCreature, m_uiTeam == ALLIANCE ? SPELL_FINDING_JAINA_CREDIT : SPELL_FINDING_SYLVANAS_CREDIT, true);
+                pCreature->SetWalk(false);
+                pCreature->GetMotionMaster()->MoveWaypoint();
+            }
+            break;
+    }
+}
+
 // Function to send the next spirit wave
 void instance_halls_of_reflection::DoSendNextSpiritWave()
 {
@@ -472,8 +527,22 @@ void instance_halls_of_reflection::DoCleanupFrostmourneEvent()
     m_uiEventTimer = 0;
 }
 
+// Function to handle Escape event setup
+void instance_halls_of_reflection::DoSetupEscapeEvent(Player* pPlayer)
+{
+    // Spawn npc for the last encounter
+    for (uint8 i = 0; i < countof(aEventKingLocations); ++i)
+    {
+        if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventKingLocations[i].uiEntryHorde : aEventKingLocations[i].uiEntryAlliance,
+            aEventKingLocations[i].fX, aEventKingLocations[i].fY, aEventKingLocations[i].fZ, aEventKingLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true))
+            pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+    }
+}
+
 void instance_halls_of_reflection::Update(uint32 uiDiff)
 {
+    DialogueUpdate(uiDiff);
+
     // Main spirits event timer
     if (m_uiEventTimer)
     {
@@ -511,6 +580,34 @@ void instance_halls_of_reflection::Update(uint32 uiDiff)
         }
         else
             m_uiActivateTimer -= uiDiff;
+    }
+
+    // Escape event reset
+    if (m_uiEscapeResetTimer)
+    {
+        if (m_uiEscapeResetTimer <= uiDiff)
+        {
+            if (Player* pPlayer = GetPlayerInMap())
+            {
+                DoSetupEscapeEvent(pPlayer);
+
+                // reset walls and respawn wall targets
+                if (GameObject* pWall = GetSingleGameObjectFromStorage(GO_ICE_WALL))
+                    pWall->Use(pPlayer);
+
+                for (GuidList::const_iterator itr = m_lIceWallTargetsGuids.begin(); itr != m_lIceWallTargetsGuids.end(); ++itr)
+                {
+                    if (Creature* pCreature = instance->GetCreature(*itr))
+                    {
+                        if (!pCreature->isAlive())
+                            pCreature->Respawn();
+                    }
+                }
+            }
+            m_uiEscapeResetTimer = 0;
+        }
+        else
+            m_uiEscapeResetTimer -= uiDiff;
     }
 }
 

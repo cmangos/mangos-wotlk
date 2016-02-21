@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: halls_of_reflection.cpp
-SD%Complete: 30
-SDComment: Support for the first encounters only
+SD%Complete: 90
+SDComment: Scripts for the first encounter and the mini-boss.
 SDCategory: Halls of Reflection
 EndScriptData */
 
@@ -338,6 +338,7 @@ bool EffectDummyCreature_spell_summon_reflections(Unit* /*pCaster*/, uint32 uiSp
 
                     if (Player* pSummoner = pCreature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
                     {
+                        pCreature->SetLevitate(false);
                         pCreature->AI()->AttackStart(pSummoner);
                         pCreature->RemoveAurasDueToSpell(SPELL_FROZEN_POSITION);
                         pCreature->CastSpell(pSummoner, SPELL_JUMPT_TO_TARGET, true);

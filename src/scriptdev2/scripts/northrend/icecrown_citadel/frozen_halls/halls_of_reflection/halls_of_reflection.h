@@ -66,13 +66,18 @@ enum
     GO_ICE_WALL                     = 201385,                   // summoned during the Lich King escape
     GO_CAVE_IN                      = 201596,                   // door after the final encounter
     GO_PORTAL_DALARAN               = 202079,
-    GO_THE_SKYBREAKER               = 201598,
-    GO_OGRIMS_HAMMER                = 201581,
+    GO_TRANSPORT_SKYBREAKER         = 201598,                   // transport ships used at the end of the event; requires more research
+    GO_TRANSPORT_OGRIMS_HAMMER      = 201599,
+    GO_GUNSHIP_STAIRS               = 201709,
 
     GO_CAPTAIN_CHEST_HORDE          = 202212,
     GO_CAPTAIN_CHEST_HORDE_H        = 202337,
     GO_CAPTAIN_CHEST_ALLIANCE       = 201710,
     GO_CAPTAIN_CHEST_ALLIANCE_H     = 202336,
+
+    // spells
+    SPELL_ICE_PRISON                = 69708,
+    SPELL_DARK_BINDING              = 70194,
 
     // world states
     WORLD_STATE_SPIRIT_WAVES        = 4884,
@@ -82,6 +87,9 @@ enum
     AREATRIGGER_FROSTMOURNE_ALTAR   = 5697,
     AREATRIGGER_FROSTWORN_GENERAL   = 5740,
     AREATRIGGER_LICH_KING_ROOM      = 5605,
+
+    // achievs
+    ACHIEV_START_NOT_RETREATING_ID  = 22615,                    // Lich King escape timed achievs 4526
 };
 
 struct EventNpcLocations
@@ -98,13 +106,13 @@ const EventNpcLocations aEventBeginLocations[2] =
 
 const EventNpcLocations aEventKingLocations[2] =
 {
-    {NPC_SYLVANAS_PART2, NPC_JAINA_PART2,   5549.290f, 2257.353f, 733.0943f, 0.89f},
     {NPC_LICH_KING,      NPC_LICH_KING,     5552.930f, 2261.475f, 733.0110f, 3.89f},
+    {NPC_SYLVANAS_PART2, NPC_JAINA_PART2,   5549.290f, 2257.353f, 733.0943f, 0.89f},
 };
 
 static const float afGeneralSpawnLoc[4] = { 5415.538f, 2117.842f, 707.778f, 3.944f };
 
-class instance_halls_of_reflection : public ScriptedInstance
+class instance_halls_of_reflection : public ScriptedInstance, private DialogueHelper
 {
     public:
         instance_halls_of_reflection(Map* pMap);
@@ -136,8 +144,10 @@ class instance_halls_of_reflection : public ScriptedInstance
         void Update(uint32 uiDiff);
 
     protected:
+        void JustDidDialogueStep(int32 iEntry) override;
         void DoCleanupFrostmourneEvent();
         void DoSendNextSpiritWave();
+        void DoSetupEscapeEvent(Player* pPlayer);
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
@@ -145,12 +155,14 @@ class instance_halls_of_reflection : public ScriptedInstance
         uint32 m_uiTeam;                                    // Team of first entered player, used to set if Jaina or Silvana to spawn
         uint32 m_uiEventTimer;
         uint32 m_uiActivateTimer;
+        uint32 m_uiEscapeResetTimer;
         uint8 m_uiEventStage;
 
         GuidList m_lRisenSpiritsGuids;
         GuidList m_lActiveSpiritsGuids;
         GuidList m_lDungeonTrapsGuids;
         GuidList m_lSpiritReflectionsGuids;
+        GuidList m_lIceWallTargetsGuids;
 };
 
 #endif
