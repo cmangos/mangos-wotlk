@@ -8030,6 +8030,8 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 73145:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 25H)
                 case 72350:                                 // Fury of Frostmourne
                 case 72351:                                 // Fury of Frostmourne
+                case 72706:                                 // Achievement Check
+                case 72830:                                 // Achievement Check
                     radius = DEFAULT_VISIBILITY_INSTANCE;
                     break;
                 default:
