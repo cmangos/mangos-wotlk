@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: halls_of_reflection.cpp
 SD%Complete: 90
-SDComment: Scripts for the first encounter and the mini-boss.
+SDComment: Scripts for the first encounter and the mini-boss. Quests 24480 and 24561.
 SDCategory: Halls of Reflection
 EndScriptData */
 
@@ -351,6 +351,44 @@ bool EffectDummyCreature_spell_summon_reflections(Unit* /*pCaster*/, uint32 uiSp
     return true;
 };
 
+/*######
+## at_queldelar_start
+######*/
+
+enum
+{
+    SPELL_QUELDELARS_WILL           = 70698,
+};
+
+bool AreaTrigger_at_queldelar_start(Player* pPlayer, AreaTriggerEntry const* pAt)
+{
+    if (pAt->id == AREATRIGGER_QUELDELAR_START)
+    {
+        if (pPlayer->isGameMaster() || !pPlayer->isAlive())
+            return false;
+
+        if (!pPlayer->HasAura(SPELL_QUELDELAR_COMPULSION))
+            return false;
+
+        instance_halls_of_reflection* pInstance = (instance_halls_of_reflection*)pPlayer->GetInstanceData();
+        if (!pInstance)
+            return false;
+
+        if (pInstance->GetData(TYPE_QUEL_DELAR) != SPECIAL)
+            return false;
+
+        // start event
+        if (Creature* pUther = pInstance->GetSingleCreatureFromStorage(NPC_UTHER))
+            pUther->GetMotionMaster()->MoveWaypoint();
+
+        pPlayer->CastSpell(pPlayer, SPELL_QUELDELARS_WILL, true);
+
+        pInstance->SetData(TYPE_QUEL_DELAR, IN_PROGRESS);
+    }
+
+    return true;
+};
+
 void AddSC_halls_of_reflection()
 {
     Script* pNewScript;
@@ -378,5 +416,10 @@ void AddSC_halls_of_reflection()
     pNewScript = new Script;
     pNewScript->Name = "npc_spell_summon_reflections";
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_summon_reflections;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_queldelar_start";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_queldelar_start;
     pNewScript->RegisterSelf();
 }

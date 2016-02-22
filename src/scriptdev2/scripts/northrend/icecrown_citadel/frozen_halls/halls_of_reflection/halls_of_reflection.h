@@ -78,6 +78,7 @@ enum
     // spells
     SPELL_ICE_PRISON                = 69708,
     SPELL_DARK_BINDING              = 70194,
+    SPELL_QUELDELAR_COMPULSION      = 70013,
 
     // world states
     WORLD_STATE_SPIRIT_WAVES        = 4884,
@@ -87,6 +88,7 @@ enum
     AREATRIGGER_FROSTMOURNE_ALTAR   = 5697,
     AREATRIGGER_FROSTWORN_GENERAL   = 5740,
     AREATRIGGER_LICH_KING_ROOM      = 5605,
+    AREATRIGGER_QUELDELAR_START     = 5660,
 
     // achievs
     ACHIEV_START_NOT_RETREATING_ID  = 22615,                    // Lich King escape timed achievs 4526
@@ -111,6 +113,7 @@ const EventNpcLocations aEventKingLocations[2] =
 };
 
 static const float afGeneralSpawnLoc[4] = { 5415.538f, 2117.842f, 707.778f, 3.944f };
+static const float afUtherSpawnLoc[4] = {5301.767f, 1990.667f, 707.695f, 3.909f };
 
 class instance_halls_of_reflection : public ScriptedInstance, private DialogueHelper
 {

@@ -32,9 +32,10 @@ enum
     SAY_HORDE_INTRO_1                       = -1668003,
     SAY_HORDE_INTRO_2                       = -1668004,
 
+    SAY_QUELDELAR_INTRO                     = -1668009,
+
     // spells
     SPELL_START_HALLS_REFLECTION            = 72900,            // triggers 71351 for alliance or 71542 for horde
-    SPELL_QUELDELAR_COMPULSION              = 70013,
     SPELL_SPIRIT_ACTIVATE_VISUAL            = 72130,            // cast when activate spirit
 
     SPELL_FINDING_JAINA_CREDIT              = 71538,
@@ -49,6 +50,10 @@ static const DialogueEntryTwoSide aHoRDialogues[] =
     {SAY_ALLY_INTRO_1,      NPC_LICH_KING,      SAY_HORDE_INTRO_1,  NPC_LICH_KING,      12000},
     {NPC_LICH_KING,         0,                  0,                  0,                  5000},
     {SAY_ALLY_INTRO_2,      NPC_JAINA_PART2,    SAY_HORDE_INTRO_2,  NPC_SYLVANAS_PART2, 0},
+
+    {NPC_FROSTMOURNE_ALTAR_BUNNY, 0,            0,                  0,                  3000},
+    {NPC_UTHER,             0,                  0,                  0,                  1000},
+    {SAY_QUELDELAR_INTRO,   NPC_UTHER,          0,                  0,                  0},
 
     {0, 0, 0},
 };
@@ -114,12 +119,9 @@ void instance_halls_of_reflection::OnPlayerEnter(Player* pPlayer)
             Creature* pTemp = GetSingleCreatureFromStorage(m_uiTeam == HORDE ? NPC_SYLVANAS_PART1 : NPC_SYLVANAS_PART2, true);
             if ((pTemp && pTemp->GetMotionMaster()->getLastReachedWaypoint() <= 2) || !pTemp)
             {
-                // ToDo: implement the visuals for event
-                // requires more research regarind the spells used
-                //pPlayer->SummonCreature(NPC_UTHER, 5301.767f, 1990.667f, 707.695f, 3.909f, TEMPSUMMON_DEAD_DESPAWN, 0, true);
-
                 // Set data to avoid starting the instance intro
-                //SetData(TYPE_QUEL_DELAR, IN_PROGRESS);
+                if (GetData(TYPE_QUEL_DELAR) == NOT_STARTED)
+                    SetData(TYPE_QUEL_DELAR, SPECIAL);
             }
         }
     }
@@ -136,6 +138,7 @@ void instance_halls_of_reflection::OnCreatureCreate(Creature* pCreature)
         case NPC_LICH_KING:
         case NPC_FROSTMOURNE_ALTAR_BUNNY:
         case NPC_FROSTSWORN_GENERAL:
+        case NPC_UTHER:
             break;
         case NPC_FALRIC:
             // Start event after intro
@@ -284,6 +287,8 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_QUEL_DELAR:
+            if (uiData == SPECIAL)
+                StartNextDialogueText(NPC_FROSTMOURNE_ALTAR_BUNNY);
             m_auiEncounter[uiType] = uiData;
             break;
         default:
@@ -412,6 +417,13 @@ void instance_halls_of_reflection::JustDidDialogueStep(int32 iEntry)
                 pCreature->SetWalk(false);
                 pCreature->GetMotionMaster()->MoveWaypoint();
             }
+            break;
+        case NPC_FROSTMOURNE_ALTAR_BUNNY:
+            // ToDo: handle summon visual effect
+            break;
+        case NPC_UTHER:
+            if (Creature* pBunny = GetSingleCreatureFromStorage(NPC_FROSTMOURNE_ALTAR_BUNNY))
+                pBunny->SummonCreature(NPC_UTHER, afUtherSpawnLoc[0], afUtherSpawnLoc[1], afUtherSpawnLoc[2], afUtherSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
             break;
     }
 }

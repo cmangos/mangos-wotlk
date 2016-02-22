@@ -807,11 +807,12 @@ UPDATE creature_template SET ScriptName='npc_phantom_mage' WHERE entry=38172;
 UPDATE creature_template SET ScriptName='npc_spell_summon_reflections' WHERE entry=36723;
 UPDATE creature_template SET ScriptName='boss_lich_king_hor' WHERE entry=36954;
 UPDATE creature_template SET ScriptName='npc_jaina_sylvanas_hor' WHERE entry IN (36955,37554);
-DELETE FROM scripted_areatrigger WHERE entry IN (5697,5740,5605);
+DELETE FROM scripted_areatrigger WHERE entry IN (5697,5740,5605,5660);
 INSERT INTO scripted_areatrigger VALUES
 (5697,'at_frostmourne_chamber'),
 (5740,'at_frostworn_general'),
-(5605,'at_wrath_lich_king');
+(5605,'at_wrath_lich_king'),
+(5660,'at_queldelar_start');
 DELETE FROM scripted_event_id WHERE id=22795;
 INSERT INTO scripted_event_id VALUES
 (22795,'event_spell_summon_ice_wall');
@@ -6588,7 +6589,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1668005,'Death\'s cold embrace awaits.',17221,1,0,0,'Lich King - SAY_FIRST_WALL'),
 (-1668006,'Succumb to the chill of the grave.',17218,1,0,0,'Lich King - SAY_SECOND_WALL'),
 (-1668007,'Another dead end.',17219,1,0,0,'Lich King - SAY_THIRD_WALL'),
-(-1668008,'How long can you fight it?',17220,1,0,0,'Lich King - SAY_LAST_WALL');
+(-1668008,'How long can you fight it?',17220,1,0,0,'Lich King - SAY_LAST_WALL'),
+
+(-1668009,'Halt! Do not carry that blade any further!',16675,1,0,1,'Uther - SAY_INTRO_QUELDELAR');
 
 -- -1 724 000 RUBY SANCTUM
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
