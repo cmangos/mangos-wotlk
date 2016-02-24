@@ -1323,6 +1323,9 @@
     <ClCompile Include="..\..\src\scriptdev2\scripts\northrend\icecrown_citadel\icecrown_citadel\gunship_battle.cpp">
       <Filter>scripts\northrend\icecrown_citadel\icecrown_citadel</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\northrend\icecrown_citadel\icecrown_citadel\icecrown_citadel.cpp">
+      <Filter>scripts\northrend\icecrown_citadel\icecrown_citadel</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\scriptdev2\scripts\northrend\icecrown_citadel\icecrown_citadel\instance_icecrown_citadel.cpp">
       <Filter>scripts\northrend\icecrown_citadel\icecrown_citadel</Filter>
     </ClCompile>

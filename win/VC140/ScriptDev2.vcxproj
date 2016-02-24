@@ -483,6 +483,7 @@
     <ClCompile Include="..\..\src\scriptdev2\scripts\northrend\icecrown_citadel\icecrown_citadel\boss_the_lich_king.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\northrend\icecrown_citadel\icecrown_citadel\boss_valithria_dreamwalker.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\northrend\icecrown_citadel\icecrown_citadel\gunship_battle.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\northrend\icecrown_citadel\icecrown_citadel\icecrown_citadel.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\northrend\icecrown_citadel\icecrown_citadel\instance_icecrown_citadel.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\northrend\naxxramas\boss_anubrekhan.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\northrend\naxxramas\boss_faerlina.cpp" />

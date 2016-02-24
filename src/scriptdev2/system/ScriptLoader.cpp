@@ -295,6 +295,7 @@ extern void AddSC_boss_sindragosa();
 extern void AddSC_boss_the_lich_king();
 extern void AddSC_boss_valithria_dreamwalker();
 extern void AddSC_gunship_battle();
+extern void AddSC_icecrown_citadel();
 extern void AddSC_instance_icecrown_citadel();
 extern void AddSC_boss_anubrekhan();                        // naxxramas
 extern void AddSC_boss_four_horsemen();
@@ -763,6 +764,7 @@ void AddScripts()
     AddSC_boss_the_lich_king();
     AddSC_boss_valithria_dreamwalker();
     AddSC_gunship_battle();
+    AddSC_icecrown_citadel();
     AddSC_instance_icecrown_citadel();
     AddSC_boss_anubrekhan();                                // naxxramas
     AddSC_boss_four_horsemen();
