@@ -3101,6 +3101,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     target->SetFeared(apply, GetCasterGuid(), GetId());
                     return;
                 case 56422:                                 // Nerubian Submerge
+                case 70733:                                 // Stoneform
                     // not known if there are other things todo, only flag are confirmed valid
                     target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE, apply);
                     return;
