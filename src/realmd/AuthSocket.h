@@ -23,24 +23,25 @@
 #ifndef _AUTHSOCKET_H
 #define _AUTHSOCKET_H
 
+#include <functional>
+
+#include <boost/asio.hpp>
+
 #include "Common.h"
 #include "Auth/BigNumber.h"
 #include "Auth/Sha1.h"
 #include "ByteBuffer.h"
 
-#include "BufferedSocket.h"
+#include "Network/Socket.hpp"
 
-/// Handle login commands
-class AuthSocket: public BufferedSocket
+class AuthSocket : public MaNGOS::Socket
 {
     public:
         const static int s_BYTE_SIZE = 32;
 
-        AuthSocket();
+        AuthSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler);
         ~AuthSocket();
 
-        void OnAccept() override;
-        void OnRead() override;
         void SendProof(Sha1Hash sha);
         void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
 
@@ -58,7 +59,6 @@ class AuthSocket: public BufferedSocket
         void _SetVSFields(const std::string& rI);
 
     private:
-
         BigNumber N, s, g, v;
         BigNumber b, B;
         BigNumber K;
@@ -77,7 +77,9 @@ class AuthSocket: public BufferedSocket
 
         ACE_HANDLE patch_;
 
-        void InitPatch();
+        //void InitPatch();
+
+        virtual bool ProcessIncomingData() override;
 };
 #endif
 /// @}

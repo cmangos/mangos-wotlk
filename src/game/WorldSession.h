@@ -28,6 +28,7 @@
 #include "ObjectGuid.h"
 #include "AuctionHouseMgr.h"
 #include "Item.h"
+#include "WorldSocket.h"
 
 #include <deque>
 #include <mutex>
@@ -45,7 +46,6 @@ class Object;
 class Player;
 class Unit;
 class WorldPacket;
-class WorldSocket;
 class QueryResult;
 class LoginQueryHolder;
 class CharacterHandler;
@@ -240,6 +240,10 @@ class MANGOS_DLL_SPEC WorldSession
         bool PlayerLogout() const { return m_playerLogout; }
         bool PlayerLogoutWithSave() const { return m_playerLogout && m_playerSave; }
 
+        // marks this session as finalized in the socket which owns it.  this lets
+        // the socket handling code know that the session can be safely deleted
+        void Finalize() { m_Socket->FinalizeSession(); }
+
         void SizeError(WorldPacket const& packet, uint32 size) const;
 
         void ReadAddonsInfo(WorldPacket& data);
@@ -265,7 +269,7 @@ class MANGOS_DLL_SPEC WorldSession
         Player* GetPlayer() const { return _player; }
         char const* GetPlayerName() const;
         void SetSecurity(AccountTypes security) { _security = security; }
-        std::string const& GetRemoteAddress() { return m_Address; }
+        const std::string &GetRemoteAddress() const { return m_Socket->GetRemoteAddress(); }
         void SetPlayer(Player* plr);
         uint8 Expansion() const { return m_expansion; }
 
@@ -890,9 +894,8 @@ class MANGOS_DLL_SPEC WorldSession
         void LogUnprocessedTail(WorldPacket* packet);
 
         uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
-        Player* _player;
-        WorldSocket* m_Socket;
-        std::string m_Address;
+        Player * _player;
+        WorldSocket * const m_Socket;                       // socket pointer is owned by the network thread which created it
 
         AccountTypes _security;
         uint32 _accountId;

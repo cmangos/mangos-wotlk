@@ -76,6 +76,16 @@ set(SRC_GRP_LOG
     Log.h
 )
 
+set(SRC_GRP_NETWORK
+    Network/NetworkThread.cpp
+    Network/PacketBuffer.cpp
+    Network/Socket.cpp
+    Network/Listener.hpp
+    Network/NetworkThread.hpp
+    Network/PacketBuffer.hpp
+    Network/Socket.hpp
+)
+
 set(SRC_GRP_UTIL
     ByteBuffer.cpp
     ByteBuffer.h
@@ -97,6 +107,7 @@ set(LIBRARY_SRCS
     ${SRC_GRP_DATABASE_DBC}
     ${SRC_GRP_LOG}
     ${SRC_GRP_UTIL}
+    ${SRC_GRP_NETWORK}
     Common.cpp
     Common.h
     LockedQueue.h
