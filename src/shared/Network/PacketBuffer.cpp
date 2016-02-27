@@ -40,7 +40,7 @@ void PacketBuffer::Write(const char *buffer, int length)
 {
     assert(!!buffer && !!length);
 
-    const int newLength = m_writePosition + length;
+    const size_t newLength = m_writePosition + length;
 
     if (m_buffer.size() < newLength)
         m_buffer.resize(newLength);

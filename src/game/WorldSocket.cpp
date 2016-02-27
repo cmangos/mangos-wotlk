@@ -210,7 +210,7 @@ bool WorldSocket::ProcessIncomingData()
         switch (opcode)
         {
             case CMSG_AUTH_SESSION:
-                if (!!m_session)
+                if (m_session)
                 {
                     sLog.outError("WorldSocket::ProcessIncomingData: Player send CMSG_AUTH_SESSION again");
                     return false;
