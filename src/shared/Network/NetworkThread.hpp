@@ -52,7 +52,7 @@ namespace MaNGOS
             std::mutex m_closingSocketLock;
             std::list<std::unique_ptr<SocketType>> m_closingSockets;
 
-            std::atomic_bool m_pendingShutdown;
+            std::atomic<bool> m_pendingShutdown;
 
             void SocketCleanupWork();
 
