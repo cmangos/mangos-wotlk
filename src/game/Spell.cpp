@@ -6117,6 +6117,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
             target = m_targets.getUnitTarget();
 
         bool need = false;
+        bool script = false;
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
             if (m_spellInfo->EffectImplicitTargetA[i] == TARGET_CHAIN_DAMAGE ||
@@ -6131,9 +6132,16 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
                     return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
                 break;
             }
+            else if (m_spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT_COORDINATES)
+            {
+                script = true;
+                continue;
+            }
         }
         if (need)
             m_targets.setUnitTarget(target);
+        else if (script == true)
+            return CheckCast(true);
 
         Unit* _target = m_targets.getUnitTarget();
 
