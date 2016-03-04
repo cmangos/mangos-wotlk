@@ -222,7 +222,7 @@ extern int main(int argc, char** argv)
     sLog.outBasic("Max allowed open files is %d", ACE::max_handles());
 
     /// realmd PID file creation
-    std::string pidfile = sConfig.GetStringDefault("PidFile", "");
+    std::string pidfile = sConfig.GetStringDefault("PidFile");
     if (!pidfile.empty())
     {
         uint32 pid = CreatePIDFile(pidfile);
@@ -375,7 +375,7 @@ void OnSignal(int s)
 /// Initialize connection to the database
 bool StartDB()
 {
-    std::string dbstring = sConfig.GetStringDefault("LoginDatabaseInfo", "");
+    std::string dbstring = sConfig.GetStringDefault("LoginDatabaseInfo");
     if (dbstring.empty())
     {
         sLog.outError("Database not specified");
