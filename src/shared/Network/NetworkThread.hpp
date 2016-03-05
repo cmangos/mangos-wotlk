@@ -46,13 +46,13 @@ namespace MaNGOS
             // note that the work member *must* be declared after the service member for the work constructor to function correctly
             boost::asio::io_service::work m_work;
 
-            std::thread m_serviceThread;
-            std::thread m_socketCleanupThread;
-
             std::mutex m_closingSocketLock;
             std::list<std::unique_ptr<SocketType>> m_closingSockets;
 
             std::atomic<bool> m_pendingShutdown;
+
+            std::thread m_serviceThread;
+            std::thread m_socketCleanupThread;
 
             void SocketCleanupWork();
 
