@@ -40,7 +40,6 @@ class AuthSocket : public MaNGOS::Socket
         const static int s_BYTE_SIZE = 32;
 
         AuthSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler);
-        ~AuthSocket();
 
         void SendProof(Sha1Hash sha);
         void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
@@ -74,8 +73,6 @@ class AuthSocket : public MaNGOS::Socket
         std::string _localizationName;
         uint16 _build;
         AccountTypes _accountSecurityLevel;
-
-        ACE_HANDLE patch_;
 
         //void InitPatch();
 

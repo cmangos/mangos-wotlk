@@ -27,14 +27,9 @@
 #include "RealmList.h"
 #include "AuthSocket.h"
 #include "AuthCodes.h"
-#include "PatchHandler.h"
 
 #include <openssl/md5.h>
 //#include "Util.h" -- for commented utf8ToUpperOnlyLatin
-
-#include <ace/OS_NS_unistd.h>
-#include <ace/OS_NS_fcntl.h>
-#include <ace/OS_NS_sys_stat.h>
 
 extern DatabaseType LoginDatabase;
 
@@ -166,17 +161,10 @@ typedef struct AuthHandler
 
 /// Constructor - set the N and g values for SRP6
 AuthSocket::AuthSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler)
-    : Socket(service, closeHandler), _authed(false), _build(0), _accountSecurityLevel(SEC_PLAYER), patch_(ACE_INVALID_HANDLE)
+    : Socket(service, closeHandler), _authed(false), _build(0), _accountSecurityLevel(SEC_PLAYER)
 {
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
-}
-
-/// Close patch file descriptor before leaving
-AuthSocket::~AuthSocket()
-{
-    if (patch_ != ACE_INVALID_HANDLE)
-        ACE_OS::close(patch_);
 }
 
 /// Read the packet from the client
@@ -523,65 +511,17 @@ bool AuthSocket::_HandleLogonProof()
     if (!Read((char*)&lp, sizeof(sAuthLogonProof_C)))
         return false;
 
-    ///- Check if the client has one of the expected version numbers
-    bool valid_version = FindBuildInfo(_build) != nullptr;
-
     /// <ul><li> If the client has no valid version
-    if (!valid_version)
+    if (!FindBuildInfo(_build))
     {
-        if (this->patch_ != ACE_INVALID_HANDLE)
-            return false;
 
-        ///- Check if we have the apropriate patch on the disk
-        // file looks like: 65535enGB.mpq
-        char tmp[64];
-
-        snprintf(tmp, 24, "./patches/%d%s.mpq", _build, _localizationName.c_str());
-
-        char filename[PATH_MAX];
-        if (ACE_OS::realpath(tmp, filename) != nullptr)
-        {
-            patch_ = ACE_OS::open(filename, GENERIC_READ | FILE_FLAG_SEQUENTIAL_SCAN);
-        }
-
-        if (patch_ == ACE_INVALID_HANDLE)
-        {
-            // no patch found
-            ByteBuffer pkt;
-            pkt << (uint8) CMD_AUTH_LOGON_CHALLENGE;
-            pkt << (uint8) 0x00;
-            pkt << (uint8) WOW_FAIL_VERSION_INVALID;
-            DEBUG_LOG("[AuthChallenge] %u is not a valid client version!", _build);
-            DEBUG_LOG("[AuthChallenge] Patch %s not found", tmp);
-            Write((const char *)pkt.contents(), pkt.size());
-            return true;
-        }
-
-        XFER_INIT xferh;
-
-        ACE_OFF_T file_size = ACE_OS::filesize(this->patch_);
-
-        if (file_size == -1)
-        {
-            Close();
-            return false;
-        }
-
-        if (!sPatchCache.GetHash(tmp, (uint8*)&xferh.md5))
-        {
-            // calculate patch md5, happens if patch was added while realmd was running
-            sPatchCache.LoadPatchMD5(tmp);
-            sPatchCache.GetHash(tmp, (uint8*)&xferh.md5);
-        }
-
-        const uint8 data[2] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_VERSION_UPDATE};
-        Write((const char *)data, sizeof(data));
-
-        memcpy(&xferh, "0\x05Patch", 7);
-        xferh.cmd = CMD_XFER_INITIATE;
-        xferh.file_size = file_size;
-
-        Write((const char*)&xferh, sizeof(xferh));
+        // no patch found
+        ByteBuffer pkt;
+        pkt << (uint8) CMD_AUTH_LOGON_CHALLENGE;
+        pkt << (uint8) 0x00;
+        pkt << (uint8) WOW_FAIL_VERSION_INVALID;
+        DEBUG_LOG("[AuthChallenge] %u is not a valid client version!", _build);
+        Write((const char *)pkt.contents(), pkt.size());
         return true;
     }
     /// </ul>
@@ -1023,32 +963,7 @@ bool AuthSocket::_HandleXferResume()
     if (ReadLengthRemaining() < 9)
         return false;
 
-    ReadSkip(1);
-
-    uint64 start_pos;
-    Read((char*)&start_pos, 8);
-
-    if (patch_ == ACE_INVALID_HANDLE)
-    {
-        Close();
-        return false;
-    }
-
-    ACE_OFF_T file_size = ACE_OS::filesize(patch_);
-
-    if (file_size == -1 || start_pos >= (uint64)file_size)
-    {
-        Close();
-        return false;
-    }
-
-    if (ACE_OS::lseek(patch_, start_pos, SEEK_SET) == -1)
-    {
-        Close();
-        return false;
-    }
-
-    //InitPatch();
+    ReadSkip(9);
 
     return true;
 }
@@ -1071,20 +986,5 @@ bool AuthSocket::_HandleXferAccept()
 
     ReadSkip(1);
 
-    //InitPatch();
-
     return true;
 }
-
-//void AuthSocket::InitPatch()
-//{
-//    PatchHandler* handler = new PatchHandler(ACE_OS::dup(get_handle()), patch_);
-//
-//    patch_ = ACE_INVALID_HANDLE;
-//
-//    if (handler->open() == -1)
-//    {
-//        handler->close();
-//        Close();
-//    }
-//}
