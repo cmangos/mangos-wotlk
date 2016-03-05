@@ -315,6 +315,7 @@ The Authors of ScriptDev2 are merged on 04 sept 2015.
 * multiplexer
 * mumion
 * Naicisum
+* namreeb
 * narma
 * Nay
 * NeatElves
