@@ -47,7 +47,7 @@ namespace MaNGOS
                 int minIndex = 0;
                 size_t minSize = m_workerThreads[minIndex]->Size();
 
-                for (int i = 1; i < m_workerThreads.size(); ++i)
+                for (size_t i = 1; i < m_workerThreads.size(); ++i)
                 {
                     const size_t size = m_workerThreads[i]->Size();
 

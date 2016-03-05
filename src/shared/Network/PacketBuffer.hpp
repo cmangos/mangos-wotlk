@@ -33,8 +33,8 @@ namespace MaNGOS
         friend class Socket;
 
         private:
-            int m_writePosition;
-            int m_readPosition;
+            size_t m_writePosition;
+            size_t m_readPosition;
 
             std::vector<uint8> m_buffer;
 

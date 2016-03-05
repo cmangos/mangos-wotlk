@@ -114,7 +114,7 @@ void Socket::OnRead(const boost::system::error_code &error, size_t length)
             // specified in the header goes past what we've read.  in this case, we will reset the buffer with the remaining data 
             if (errno == EBADMSG)
             {
-                const int bytesRemaining = m_inBuffer->m_writePosition - m_inBuffer->m_readPosition;
+                const size_t bytesRemaining = m_inBuffer->m_writePosition - m_inBuffer->m_readPosition;
 
                 // first, check to see if we can fit the remaining bytes at the absolute start of the existing input buffer.
                 // if we can, it will save us a re-allocation
