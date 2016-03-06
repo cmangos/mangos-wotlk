@@ -71,7 +71,7 @@ bool Config::Reload()
     return true;
 }
 
-const std::string &Config::GetStringDefault(const std::string &name, const std::string &def) const
+const std::string Config::GetStringDefault(const std::string &name, const std::string &def) const
 {
     auto const nameLower = boost::algorithm::to_lower_copy(name);
 
