@@ -34,8 +34,6 @@
 #include <functional>
 #include <memory>
 
-#include <boost/asio.hpp>
-
 class WorldPacket;
 class WorldSession;
 
@@ -116,7 +114,6 @@ class WorldSocket : public MaNGOS::Socket
         BigNumber m_s;
 
         /// process one incoming packet.
-        /// @param new_pct received packet ,note that you need to delete it.
         virtual bool ProcessIncomingData() override;
 
         /// Called by ProcessIncoming() on CMSG_AUTH_SESSION.
