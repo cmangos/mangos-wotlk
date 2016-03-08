@@ -35,6 +35,8 @@ class MANGOS_DLL_SPEC Config
         bool SetSource(const std::string &file);
         bool Reload();
 
+        bool IsSet(const std::string &name) const;
+
         const std::string GetStringDefault(const std::string &name, const std::string &def = "") const;
         bool GetBoolDefault(const std::string &name, bool def) const;
         int32 GetIntDefault(const std::string &name, int32 def) const;
