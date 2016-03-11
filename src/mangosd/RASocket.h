@@ -42,7 +42,7 @@ class RASocket : public MaNGOS::Socket
             Authenticated
         };
 
-        static constexpr int InitialBufferSize = 64;
+        static const int InitialBufferSize = 64;
 
         const bool m_secure;
         bool m_restricted;
