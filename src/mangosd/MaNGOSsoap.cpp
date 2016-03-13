@@ -25,6 +25,7 @@ SOAPThread::SOAPThread(const std::string &host, int port) : m_host(host), m_port
 SOAPThread::~SOAPThread()
 {
     sLog.outError("SOAP shutting down");
+    m_workerThread.join();
 }
 
 void SOAPThread::Work()
