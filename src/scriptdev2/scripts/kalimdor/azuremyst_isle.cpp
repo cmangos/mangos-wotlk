@@ -100,7 +100,7 @@ struct npc_draenei_survivorAI : public ScriptedAI
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
     {
-        if (pSpell->IsFitToFamilyMask(UI64LIT(0x0000000000000000), 0x080000000))
+        if (pSpell->IsFitToFamilyMask(uint64(0x0000000000000000), 0x080000000))
         {
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);

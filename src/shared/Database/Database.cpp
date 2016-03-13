@@ -24,6 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include <cstdarg>
 
 #define MIN_CONNECTION_POOL_SIZE 1
 #define MAX_CONNECTION_POOL_SIZE 16
