@@ -18,16 +18,16 @@
 
 #include "Util.h"
 #include "Timer.h"
-
 #include "utf8cpp/utf8.h"
 #include "mersennetwister/MersenneTwister.h"
-#include <ace/TSS_T.h>
-#include <ace/INET_Addr.h>
+#include "TSS.h"
 
-typedef ACE_TSS<MTRand> MTRandTSS;
-static MTRandTSS mtRand;
+#include <boost/asio.hpp>
 
-static ACE_Time_Value g_SystemTickTime = ACE_OS::gettimeofday();
+#include <chrono>
+#include <cstdarg>
+
+static MaNGOS::thread_local_ptr<MTRand> mtRand;
 
 uint32 WorldTimer::m_iTime = 0;
 uint32 WorldTimer::m_iPrevTime = 0;
@@ -41,7 +41,7 @@ uint32 WorldTimer::tick()
     m_iPrevTime = m_iTime;
 
     // get the new one and don't forget to persist current system time in m_SystemTickTime
-    m_iTime = WorldTimer::getMSTime_internal();
+    m_iTime = WorldTimer::getMSTime();
 
     // return tick diff
     return getMSTimeDiff(m_iPrevTime, m_iTime);
@@ -49,22 +49,8 @@ uint32 WorldTimer::tick()
 
 uint32 WorldTimer::getMSTime()
 {
-    return getMSTime_internal();
-}
-
-uint32 WorldTimer::getMSTime_internal()
-{
-    // get current time
-    const ACE_Time_Value currTime = ACE_OS::gettimeofday();
-    // calculate time diff between two world ticks
-    // special case: curr_time < old_time - we suppose that our time has not ticked at all
-    // this should be constant value otherwise it is possible that our time can start ticking backwards until next world tick!!!
-    ACE_UINT64 diff = 0;
-    (currTime - g_SystemTickTime).msec(diff);
-
-    // lets calculate current world time
-    uint32 iRes = uint32(diff % UI64LIT(0x00000000FFFFFFFF));
-    return iRes;
+    static auto const start_time = std::chrono::system_clock::now();
+    return static_cast<uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start_time).count());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -268,7 +254,9 @@ bool IsIPAddress(char const* ipaddress)
 
     // Let the big boys do it.
     // Drawback: all valid ip address formats are recognized e.g.: 12.23,121234,0xABCD)
-    return ACE_OS::inet_addr(ipaddress) != INADDR_NONE;
+    boost::system::error_code ec;
+    boost::asio::ip::address::from_string(ipaddress, ec);
+    return !!ec;
 }
 
 /// create PID file
@@ -440,12 +428,12 @@ std::wstring GetMainPartOfName(std::wstring wname, uint32 declension)
 
     static wchar_t const* const dropEnds[6][8] =
     {
-        { &a_End[1],  &o_End[1],    &ya_End[1],   &ie_End[1],  &soft_End[1], &j_End[1],    nullptr,       nullptr },
-        { &a_End[1],  &ya_End[1],   &yeru_End[1], &i_End[1],   nullptr,         nullptr,         nullptr,       nullptr },
-        { &ie_End[1], &u_End[1],    &yu_End[1],   &i_End[1],   nullptr,         nullptr,         nullptr,       nullptr },
+        { &a_End[1],  &o_End[1],    &ya_End[1],   &ie_End[1],  &soft_End[1], &j_End[1],    nullptr,    nullptr },
+        { &a_End[1],  &ya_End[1],   &yeru_End[1], &i_End[1],   nullptr,      nullptr,      nullptr,    nullptr },
+        { &ie_End[1], &u_End[1],    &yu_End[1],   &i_End[1],   nullptr,      nullptr,      nullptr,    nullptr },
         { &u_End[1],  &yu_End[1],   &o_End[1],    &ie_End[1],  &soft_End[1], &ya_End[1],   &a_End[1],  nullptr },
         { &oj_End[1], &io_j_End[1], &ie_j_End[1], &o_m_End[1], &io_m_End[1], &ie_m_End[1], &yu_End[1], nullptr },
-        { &ie_End[1], &i_End[1],    nullptr,         nullptr,        nullptr,         nullptr,         nullptr,       nullptr }
+        { &ie_End[1], &i_End[1],    nullptr,      nullptr,     nullptr,      nullptr,      nullptr,    nullptr }
     };
 
     for (wchar_t const * const* itr = &dropEnds[declension][0]; *itr; ++itr)

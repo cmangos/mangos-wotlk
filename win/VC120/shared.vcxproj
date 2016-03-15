@@ -445,6 +445,7 @@
     <ClInclude Include="..\..\src\shared\Network\NetworkThread.hpp" />
     <ClInclude Include="..\..\src\shared\Network\PacketBuffer.hpp" />
     <ClInclude Include="..\..\src\shared\Network\Socket.hpp" />
+    <ClInclude Include="..\..\src\shared\TSS.h" />
     <ClInclude Include="..\..\src\shared\WorldPacket.h" />
     <ClInclude Include="..\..\src\shared\Common.h" />
     <ClInclude Include="..\..\src\shared\Config\Config.h" />
@@ -471,9 +472,6 @@
     <ClInclude Include="..\..\src\shared\Util.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="ACE_vc11.vcxproj">
-      <Project>{bd537c9a-feca-1bad-6757-8a6348ea12c8}</Project>
-    </ProjectReference>
     <ProjectReference Include="framework.vcxproj">
       <Project>{bf6f5d0e-33a5-4e23-9e7d-dd481b7b5b9e}</Project>
     </ProjectReference>

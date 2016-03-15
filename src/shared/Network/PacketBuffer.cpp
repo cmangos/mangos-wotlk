@@ -16,11 +16,12 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <cassert>
-#include <vector>
-
 #include "Platform/Define.h"
 #include "PacketBuffer.hpp"
+
+#include <cassert>
+#include <vector>
+#include <cstring>
 
 using namespace MaNGOS;
 

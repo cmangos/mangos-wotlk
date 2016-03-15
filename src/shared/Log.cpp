@@ -27,8 +27,7 @@
 #include <stdarg.h>
 #include <fstream>
 #include <iostream>
-
-#include "ace/OS_NS_unistd.h"
+#include <thread>
 
 INSTANTIATE_SINGLETON_1(Log);
 
@@ -942,7 +941,7 @@ void Log::WaitBeforeContinueIfNeed()
         for (int i = 0; i < mode; ++i)
         {
             bar.step();
-            ACE_OS::sleep(1);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
 }
