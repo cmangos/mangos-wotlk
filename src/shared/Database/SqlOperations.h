@@ -25,6 +25,7 @@
 #include <queue>
 #include <vector>
 #include <mutex>
+#include <memory>
 
 /// ---- BASE ---
 
