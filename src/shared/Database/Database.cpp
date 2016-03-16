@@ -397,7 +397,7 @@ bool Database::BeginTransaction()
     if (!m_currentTransaction.get())
         m_currentTransaction.reset(new SqlTransaction);
 
-    return m_currentTransaction.get();
+    return !!m_currentTransaction.get();
 }
 
 bool Database::CommitTransaction()

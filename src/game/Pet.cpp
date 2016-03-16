@@ -1068,9 +1068,9 @@ bool Pet::HaveInDiet(ItemPrototype const* item) const
     if (!cFamily)
         return false;
 
-    uint32 diet = cFamily->petFoodMask;
-    uint32 FoodMask = 1 << (item->FoodType - 1);
-    return diet & FoodMask;
+    const uint32 diet = cFamily->petFoodMask;
+    const uint32 FoodMask = 1 << (item->FoodType - 1);
+    return !!(diet & FoodMask);
 }
 
 uint32 Pet::GetCurrentFoodBenefitLevel(uint32 itemlevel)

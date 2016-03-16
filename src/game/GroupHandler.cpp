@@ -923,5 +923,5 @@ void WorldSession::HandleSetAllowLowLevelRaidOpcode(WorldPacket& recv_data)
     uint8 allow;
     recv_data >> allow;
 
-    GetPlayer()->SetAllowLowLevelRaid(allow);
+    GetPlayer()->SetAllowLowLevelRaid(!!allow);
 }

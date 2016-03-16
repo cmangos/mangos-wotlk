@@ -3514,7 +3514,7 @@ void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const
                                   ObjectGuid const& targetGuid /*= ObjectGuid()*/, char const* targetName /*= nullptr*/,
                                   char const* channelName /*= nullptr*/, uint32 achievementId /*= 0*/)
 {
-    bool isGM = chatTag & CHAT_TAG_GM;
+    const bool isGM = !!(chatTag & CHAT_TAG_GM);
     bool isAchievement = false;
 
     data.Initialize(isGM ? SMSG_GM_MESSAGECHAT : SMSG_MESSAGECHAT);

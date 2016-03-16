@@ -1632,7 +1632,7 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotCreature(pSource))
                 break;
 
-            ((Creature*)pSource)->SetActiveObjectState(m_script->activeObject.activate);
+            ((Creature*)pSource)->SetActiveObjectState(!!m_script->activeObject.activate);
             break;
         }
         case SCRIPT_COMMAND_SET_FACTION:                    // 22
@@ -1992,7 +1992,7 @@ bool ScriptAction::HandleScriptStep()
                     pSource->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
             }
 
-            ((Creature*)pSource)->SetLevitate(m_script->fly.fly);
+            ((Creature*)pSource)->SetLevitate(!!m_script->fly.fly);
             break;
         }
         case SCRIPT_COMMAND_DESPAWN_GO:                     // 40

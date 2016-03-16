@@ -152,8 +152,8 @@ class CalendarEvent
         ~CalendarEvent();
 
         // helper to test event flag
-        bool IsGuildEvent() const { return Flags & CALENDAR_FLAG_GUILD_EVENT; }
-        bool IsGuildAnnouncement() const { return Flags & CALENDAR_FLAG_GUILD_ANNOUNCEMENT; }
+        bool IsGuildEvent() const { return !!(Flags & CALENDAR_FLAG_GUILD_EVENT); }
+        bool IsGuildAnnouncement() const { return !!(Flags & CALENDAR_FLAG_GUILD_ANNOUNCEMENT); }
 
         bool AddInvite(CalendarInvite* invite);
 

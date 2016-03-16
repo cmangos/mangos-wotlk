@@ -161,7 +161,7 @@ class MANGOS_DLL_SPEC Object
         void SetObjectScale(float newScale);
 
         uint8 GetTypeId() const { return m_objectTypeId; }
-        bool isType(TypeMask mask) const { return (mask & m_objectType); }
+        bool isType(TypeMask mask) const { return !!(mask & m_objectType); }
 
         virtual void BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const;
         void SendCreateUpdateToPlayer(Player* player);
@@ -512,7 +512,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         virtual void SetPhaseMask(uint32 newPhaseMask, bool update);
         uint32 GetPhaseMask() const { return m_phaseMask; }
         bool InSamePhase(WorldObject const* obj) const { return InSamePhase(obj->GetPhaseMask()); }
-        bool InSamePhase(uint32 phasemask) const { return (GetPhaseMask() & phasemask); }
+        bool InSamePhase(uint32 phasemask) const { return !!(GetPhaseMask() & phasemask); }
 
         uint32 GetZoneId() const;
         uint32 GetAreaId() const;

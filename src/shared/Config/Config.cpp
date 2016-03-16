@@ -109,3 +109,4 @@ float Config::GetFloatDefault(const std::string &name, float def) const
 
     return std::stof(value);
 }
+

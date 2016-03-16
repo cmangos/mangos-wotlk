@@ -673,7 +673,7 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
 
         // Variables used by Events themselves
         typedef std::vector<CreatureEventAIHolder> CreatureEventAIList;
-        CreatureEventAIList m_CreatureEventAIList;          // Holder for events (stores enabled, time, and eventid)
+        CreatureEventAIList m_CreatureEventAIList;  // Holder for events (stores enabled, time, and eventid)
 
         uint8  m_Phase;                                     // Current phase, max 32 phases
         bool   m_MeleeEnabled;                              // If we allow melee auto attack

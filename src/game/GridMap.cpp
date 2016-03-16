@@ -866,27 +866,25 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=tr
 
 inline bool IsOutdoorWMO(uint32 mogpFlags, WMOAreaTableEntry const* wmoEntry, AreaTableEntry const* atEntry)
 {
-    bool outdoor = true;
-
-    if (wmoEntry && atEntry)
-    {
-        if (atEntry->flags & AREA_FLAG_OUTSIDE)
-            return true;
-        if (atEntry->flags & AREA_FLAG_INSIDE)
-            return false;
-    }
-
-    outdoor = mogpFlags & 0x8;
-
     if (wmoEntry)
     {
+        if (atEntry)
+        {
+            if (atEntry->flags & AREA_FLAG_OUTSIDE)
+                return true;
+
+            if (atEntry->flags & AREA_FLAG_INSIDE)
+                return false;
+        }
+
         if (wmoEntry->Flags & 4)
             return true;
 
-        if ((wmoEntry->Flags & 2) != 0)
-            outdoor = false;
+        if (!!(wmoEntry->Flags & 2))
+            return false;
     }
-    return outdoor;
+
+    return !!(mogpFlags & 0x8);
 }
 
 bool TerrainInfo::IsOutdoors(float x, float y, float z) const

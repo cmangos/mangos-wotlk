@@ -689,7 +689,7 @@ class MovementInfo
         // Movement flags manipulations
         void AddMovementFlag(MovementFlags f) { moveFlags |= f; }
         void RemoveMovementFlag(MovementFlags f) { moveFlags &= ~f; }
-        bool HasMovementFlag(MovementFlags f) const { return moveFlags & f; }
+        bool HasMovementFlag(MovementFlags f) const { return !!(moveFlags & f); }
         MovementFlags GetMovementFlags() const { return MovementFlags(moveFlags); }
         void SetMovementFlags(MovementFlags f) { moveFlags = f; }
         MovementFlags2 GetMovementFlags2() const { return MovementFlags2(moveFlags2); }
@@ -1354,7 +1354,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SendMeleeAttackStart(Unit* pVictim);
 
         void addUnitState(uint32 f) { m_state |= f; }
-        bool hasUnitState(uint32 f) const { return (m_state & f); }
+        bool hasUnitState(uint32 f) const { return !!(m_state & f); }
         void clearUnitState(uint32 f) { m_state &= ~f; }
         bool CanFreeMove() const
         {
@@ -2020,7 +2020,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
             m_lastManaUseTimer = 5000;
         }
-        bool IsUnderLastManaUseEffect() const { return m_lastManaUseTimer; }
+        bool IsUnderLastManaUseEffect() const { return !!m_lastManaUseTimer; }
 
         uint32 GetRegenTimer() const { return m_regenTimer; }
 
