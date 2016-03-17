@@ -166,7 +166,6 @@ endif()
 # include external dependencies without warnings
 include_directories(SYSTEM
   ${CMAKE_SOURCE_DIR}/dep/include
-  ${ACE_INCLUDE_DIR}
 )
 
 include_directories(
@@ -192,6 +191,3 @@ if(POSTGRESQL)
 endif()
 
 add_dependencies(${LIBRARY_NAME} revision.h)
-if(NOT ACE_USE_EXTERNAL)
-  add_dependencies(${LIBRARY_NAME} ACE_Project)
-endif()
