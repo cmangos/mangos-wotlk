@@ -1231,7 +1231,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             return StoreItem(dest, pItem, update);
         }
-        Item* BankItem(uint16 pos, Item* pItem, bool update);
         void RemoveItem(uint8 bag, uint8 slot, bool update);// see ApplyItemOnStoreSpell notes
         void MoveItemFromInventory(uint8 bag, uint8 slot, bool update);
         // in trade, auction, guild bank, mail....
@@ -1461,7 +1460,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SaveInventoryAndGoldToDB();                    // fast save function for item/money cheating preventing
         void SaveGoldToDB();
         static void SetUInt32ValueInArray(Tokens& data, uint16 index, uint32 value);
-        static void SetFloatValueInArray(Tokens& data, uint16 index, float value);
         static void Customize(ObjectGuid guid, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair);
         static void SavePositionInDB(ObjectGuid guid, uint32 mapid, float x, float y, float z, float o, uint32 zone);
 
@@ -1477,7 +1475,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendTalentWipeConfirm(ObjectGuid guid);
         void RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker);
         void SendPetSkillWipeConfirm();
-        void CalcRage(uint32 damage, bool attacker);
         void RegenerateAll(uint32 diff = REGEN_TIME_FULL);
         void Regenerate(Powers power, uint32 diff);
         void RegenerateHealth(uint32 diff);
@@ -1764,8 +1761,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 GetBaseDefenseSkillValue() const { return GetBaseSkillValue(SKILL_DEFENSE); }
         uint32 GetBaseWeaponSkillValue(WeaponAttackType attType) const;
-
-        uint32 GetSpellByProto(ItemPrototype* proto);
 
         float GetHealthBonusFromStamina();
         float GetManaBonusFromIntellect();
@@ -2156,7 +2151,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void UpdateSpeakTime();
         bool CanSpeak() const;
-        void ChangeSpeakTime(int utime);
 
         /*********************************************************/
         /***                 VARIOUS SYSTEMS                   ***/
@@ -2384,7 +2378,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadSkills(QueryResult* result);
         void _LoadSpells(QueryResult* result);
         void _LoadTalents(QueryResult* result);
-        void _LoadFriendList(QueryResult* result);
         bool _LoadHomeBind(QueryResult* result);
         void _LoadDeclinedNames(QueryResult* result);
         void _LoadArenaTeamInfo(QueryResult* result);

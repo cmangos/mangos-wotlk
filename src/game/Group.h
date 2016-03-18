@@ -249,7 +249,6 @@ class MANGOS_DLL_SPEC Group
         Difficulty GetRaidDifficulty() const { return m_raidDifficulty; }
         void SetDungeonDifficulty(Difficulty difficulty);
         void SetRaidDifficulty(Difficulty difficulty);
-        uint16 InInstance();
         bool InCombatToInstance(uint32 instanceId);
         void ResetInstances(InstanceResetMethod method, bool isRaid, Player* SendMsgTo);
 

@@ -512,7 +512,6 @@ class ObjectMgr
 
 
         void LoadGameobjectInfo();
-        void AddGameobjectInfo(GameObjectInfo* goinfo);
 
         void PackGroupIds();
         Group* GetGroupById(uint32 id) const;

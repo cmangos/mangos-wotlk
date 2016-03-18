@@ -358,8 +358,6 @@ class MANGOS_DLL_SPEC WorldSession
                     m_tutorialState = TUTORIALDATA_CHANGED;
             }
         }
-        // used with item_page table
-        bool SendItemInfo(uint32 itemid, WorldPacket data);
 
         // auction
         void SendAuctionHello(Unit* unit);
@@ -410,7 +408,6 @@ class MANGOS_DLL_SPEC WorldSession
         // Misc
         void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed);
         void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit);
-        void SendItemPageInfo(ItemPrototype* itemProto);
 
         // opcodes handlers
         void Handle_NULL(WorldPacket& recvPacket);          // not used
@@ -458,8 +455,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleMoveTeleportAckOpcode(WorldPacket& recvPacket);
         void HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data);
 
-        void HandlePingOpcode(WorldPacket& recvPacket);
-        void HandleAuthSessionOpcode(WorldPacket& recvPacket);
         void HandleRepopRequestOpcode(WorldPacket& recvPacket);
         void HandleAutostoreLootItemOpcode(WorldPacket& recvPacket);
         void HandleLootMoneyOpcode(WorldPacket& recvPacket);
@@ -637,7 +632,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleAuctionListOwnerItems(WorldPacket& recv_data);
         void HandleAuctionPlaceBid(WorldPacket& recv_data);
 
-        void AuctionBind(uint32 price, AuctionEntry* auction, Player* pl, Player* auction_owner);
         void HandleAuctionListPendingSales(WorldPacket& recv_data);
 
         void HandleGetMailList(WorldPacket& recv_data);

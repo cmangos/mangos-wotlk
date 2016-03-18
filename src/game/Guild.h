@@ -421,7 +421,6 @@ class Guild
         uint8  GetPurchasedTabs() const { return m_TabListMap.size(); }
         uint32 GetBankRights(uint32 rankId, uint8 TabId) const;
         bool   IsMemberHaveRights(uint32 LowGuid, uint8 TabId, uint32 rights) const;
-        bool   CanMemberViewTab(uint32 LowGuid, uint8 TabId) const;
         // Load
         void   LoadGuildBankFromDB();
         // Money deposit/withdraw
@@ -484,7 +483,6 @@ class Guild
 
     private:
         void UpdateAccountsNumber() { m_accountsNumber = 0;}// mark for lazy calculation at request in GetAccountsNumber
-        void _ChangeRank(ObjectGuid guid, MemberSlot* slot, uint32 newRank);
 
         // used only from high level Swap/Move functions
         Item*  GetItem(uint8 TabId, uint8 SlotId);
