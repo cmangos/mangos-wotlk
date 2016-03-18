@@ -1656,7 +1656,7 @@ void Guild::LogBankEvent(uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uin
 
     // add new event to the end of event list
     uint32 currentTabId = TabId;
-    uint32 currentLogGuid = 0;
+    uint32 currentLogGuid;
     if (NewEvent.isMoneyEvent())
     {
         m_GuildBankEventLogNextGuid_Money = (m_GuildBankEventLogNextGuid_Money + 1) % sWorld.getConfig(CONFIG_UINT32_GUILD_BANK_EVENT_LOG_COUNT);

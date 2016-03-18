@@ -559,7 +559,7 @@ void BattleGroundEY::FillInitialWorldStates(WorldPacket& data, uint32& count)
 
 WorldSafeLocsEntry const* BattleGroundEY::GetClosestGraveYard(Player* player)
 {
-    uint32 g_id = 0;
+    uint32 g_id;
 
     switch (player->GetTeam())
     {

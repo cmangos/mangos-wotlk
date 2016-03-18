@@ -1498,7 +1498,7 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
         }
     }
 
-    BattleGround* bg = nullptr;
+    BattleGround* bg;
     // create a copy of the BG template
     switch (bgTypeId)
     {
@@ -1569,7 +1569,7 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
 uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, bool IsArena, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char const* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO, float StartMaxDist)
 {
     // Create the BG
-    BattleGround* bg = nullptr;
+    BattleGround* bg;
     switch (bgTypeId)
     {
         case BATTLEGROUND_AV: bg = new BattleGroundAV; break;

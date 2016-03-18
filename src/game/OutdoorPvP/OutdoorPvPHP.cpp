@@ -113,8 +113,7 @@ void OutdoorPvPHP::HandleGameObjectCreate(GameObject* go)
 
 void OutdoorPvPHP::HandleObjectiveComplete(uint32 eventId, const std::list<Player*>& players, Team team)
 {
-    uint32 credit = 0;
-
+    uint32 credit;
     switch (eventId)
     {
         case EVENT_OVERLOOK_PROGRESS_ALLIANCE:

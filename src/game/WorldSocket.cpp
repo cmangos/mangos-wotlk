@@ -269,7 +269,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket &recvPacket)
     uint8 digest[20];
     uint32 clientSeed, id, security;
     uint32 ClientBuild;
-    uint8 expansion = 0;
+    uint8 expansion;
     LocaleConstant locale;
     std::string account;
     Sha1Hash sha1;

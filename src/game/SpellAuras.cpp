@@ -2199,8 +2199,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 28834:                             // Mark of Rivendare
                     case 28835:                             // Mark of Zeliek
                     {
-                        int32 damage = 0;
-
+                        int32 damage;
                         switch (GetStackAmount())
                         {
                             case 1:
@@ -4637,8 +4636,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
                 return;
 
-            uint32 spell_id = 0;
-
+            uint32 spell_id;
             switch (GetId())
             {
                 case 19386: spell_id = 24131; break;

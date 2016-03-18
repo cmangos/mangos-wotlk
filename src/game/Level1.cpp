@@ -1252,7 +1252,7 @@ bool ChatHandler::HandleModifyMountCommand(char* args)
     if (!*args)
         return false;
 
-    uint16 mId = 1147;
+    uint16 mId;
     float speed = (float)15;
     uint32 num = atoi(args);
     switch (num)

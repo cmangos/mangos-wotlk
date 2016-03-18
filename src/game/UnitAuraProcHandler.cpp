@@ -392,7 +392,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* pVictim, SpellAuraHolder* holder, S
     {
         if (spellProto->EquippedItemClass == ITEM_CLASS_WEAPON)
         {
-            Item* item = nullptr;
+            Item* item;
             if (attType == BASE_ATTACK)
                 item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
             else if (attType == OFF_ATTACK)
@@ -2528,7 +2528,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                 if (cooldown && GetTypeId() == TYPEID_PLAYER && ((Player*)this)->HasSpellCooldown(dummySpell->Id))
                     return SPELL_AURA_PROC_FAILED;
 
-                uint32 spellId = 0;
+                uint32 spellId;
                 // Every Lightning Bolt and Chain Lightning spell have duplicate vs half damage and zero cost
                 switch (procSpell->Id)
                 {
@@ -2582,7 +2582,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     if ((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN &&
                             ((*itr)->GetSpellProto()->SpellFamilyFlags & uint64(0x0000000000000400)))
                     {
-                        uint32 spell = 0;
+                        uint32 spell;
                         switch ((*itr)->GetId())
                         {
                             case   324: spell = 26364; break;

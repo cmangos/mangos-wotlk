@@ -2191,14 +2191,13 @@ bool Map::GetReachableRandomPointOnGround(uint32 phaseMask, float& x, float& y, 
     float ac = fabs(z - i_z);
 
     // slope represented by c angle (in radian)
-    float slope = 0;
     const float MAX_SLOPE_IN_RADIAN = 50.0f / 180.0f * M_PI_F;  // 50(degree) max seem best value for walkable slope
 
     // check ab vector to avoid divide by 0
     if (ab > 0.0f)
     {
         // compute c angle and convert it from radian to degree
-        slope = atan(ac / ab);
+        float slope = atan(ac / ab);
         if (slope < MAX_SLOPE_IN_RADIAN)
         {
             x = i_x;
