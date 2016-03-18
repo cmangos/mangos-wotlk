@@ -3677,7 +3677,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (!unitTarget)
                         return;
 
-                    uint32 spell_id = 0;
+                    uint32 spell_id;
                     switch (unitTarget->getClass())
                     {
                         case CLASS_DRUID:   spell_id = 37878; break;
