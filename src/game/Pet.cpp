@@ -1701,7 +1701,7 @@ bool Pet::resetTalents(bool no_cost)
 
         if (player->GetMoney() < cost)
         {
-            player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
+            player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, nullptr, 0, 0);
             return false;
         }
     }

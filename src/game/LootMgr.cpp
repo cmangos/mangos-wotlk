@@ -678,7 +678,7 @@ bool GroupLootRoll::TryToStart(Loot& loot, uint32 itemSlot)
         {
             // start the roll
             SendStartRoll();
-            m_endTime = time(NULL) + (LOOT_ROLL_TIMEOUT / 1000);
+            m_endTime = time(nullptr) + (LOOT_ROLL_TIMEOUT / 1000);
             m_isStarted = true;
             return true;
         }

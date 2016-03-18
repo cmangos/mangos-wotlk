@@ -896,7 +896,7 @@ bool TerrainInfo::IsOutdoors(float x, float y, float z) const
     if (!GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))
         return true;
 
-    AreaTableEntry const* atEntry = 0;
+    AreaTableEntry const* atEntry = nullptr;
     WMOAreaTableEntry const* wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId);
     if (wmoEntry)
     {
@@ -931,8 +931,8 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
 {
     uint32 mogpFlags;
     int32 adtId, rootId, groupId;
-    WMOAreaTableEntry const* wmoEntry = 0;
-    AreaTableEntry const* atEntry = 0;
+    WMOAreaTableEntry const* wmoEntry = nullptr;
+    AreaTableEntry const* atEntry = nullptr;
     bool haveAreaInfo = false;
 
     if (GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))

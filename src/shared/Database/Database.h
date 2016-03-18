@@ -196,7 +196,7 @@ class MANGOS_DLL_SPEC Database
         // get prepared statement format string
         std::string GetStmtString(const int stmtId) const;
 
-        operator bool () const { return m_pQueryConnections.size() && m_pAsyncConn != 0; }
+        operator bool () const { return m_pQueryConnections.size() && m_pAsyncConn; }
 
         // escape string generation
         void escape_string(std::string& str);

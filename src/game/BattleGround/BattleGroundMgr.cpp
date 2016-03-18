@@ -1543,7 +1543,7 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
             break;
         default:
             // error, but it is handled few lines above
-            return 0;
+            return nullptr;
     }
 
     // set before Map creating for let use proper difficulty

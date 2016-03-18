@@ -120,7 +120,7 @@ bool Guild::Create(Player* leader, std::string gname)
     MOTD = "No message set.";
     m_GuildBankMoney = 0;
     m_Id = sObjectMgr.GenerateGuildId();
-    m_CreatedDate = time(0);
+    m_CreatedDate = time(nullptr);
 
     DEBUG_LOG("GUILD: creating guild %s to leader: %s", gname.c_str(), m_LeaderGuid.GetString().c_str());
 

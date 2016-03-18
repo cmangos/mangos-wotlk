@@ -8398,7 +8398,7 @@ void Aura::PeriodicDummyTick()
                     if (!target->HasAura(58670))
                     {
                         int32 basepoints = GetBasePoints();
-                        target->CastCustomSpell(target, 58670, &basepoints, 0, 0, true);
+                        target->CastCustomSpell(target, 58670, &basepoints, nullptr, nullptr, true);
                     }
                 }
                 else
@@ -8494,7 +8494,7 @@ void Aura::PeriodicDummyTick()
             // Explosive Shot
             if (spell->SpellFamilyFlags & uint64(0x8000000000000000))
             {
-                target->CastCustomSpell(target, 53352, &m_modifier.m_amount, 0, 0, true, 0, this, GetCasterGuid());
+                target->CastCustomSpell(target, 53352, &m_modifier.m_amount, nullptr, nullptr, true, nullptr, this, GetCasterGuid());
                 return;
             }
             switch (spell->Id)
@@ -9801,7 +9801,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 {
                     Aura* shield = GetAuraByEffectIndex(EFFECT_INDEX_0);
                     int32 heal = (glyph->GetModifier()->m_amount * shield->GetModifier()->m_amount) / 100;
-                    caster->CastCustomSpell(m_target, 56160, &heal, nullptr, nullptr, true, 0, shield);
+                    caster->CastCustomSpell(m_target, 56160, &heal, nullptr, nullptr, true, nullptr, shield);
                 }
                 return;
             }

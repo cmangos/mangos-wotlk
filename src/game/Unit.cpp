@@ -670,7 +670,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
                 SpellEntry const* shareSpell = (*itr)->GetSpellProto();
                 uint32 shareDamage = uint32(damage*(*itr)->GetModifier()->m_amount / 100.0f);
                 DealDamageMods(shareTarget, shareDamage, nullptr);
-                DealDamage(shareTarget, shareDamage, 0, damagetype, GetSpellSchoolMask(shareSpell), shareSpell, false);
+                DealDamage(shareTarget, shareDamage, nullptr, damagetype, GetSpellSchoolMask(shareSpell), shareSpell, false);
             }
         }
     }
@@ -1743,7 +1743,9 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
 
 void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 {
-    if (damageInfo == 0) return;
+    if (!damageInfo)
+        return;
+
     Unit* pVictim = damageInfo->target;
 
     if (!this || !pVictim)
@@ -1868,7 +1870,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
                 data << uint32(i_spellProto->SchoolMask);
                 pVictim->SendMessageToSet(&data, true);
 
-                pVictim->DealDamage(this, damage, 0, SPELL_DIRECT_DAMAGE, GetSpellSchoolMask(i_spellProto), i_spellProto, true);
+                pVictim->DealDamage(this, damage, nullptr, SPELL_DIRECT_DAMAGE, GetSpellSchoolMask(i_spellProto), i_spellProto, true);
 
                 i = vDamageShields.begin();
             }
@@ -2281,7 +2283,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 
                     uint32 ab_damage = absorbed;
                     pCaster->DealDamageMods(caster, ab_damage, nullptr);
-                    pCaster->DealDamage(caster, ab_damage, nullptr, damagetype, schoolMask, 0, false);
+                    pCaster->DealDamage(caster, ab_damage, nullptr, damagetype, schoolMask, nullptr, false);
                     continue;
                 }
                 break;
@@ -6169,7 +6171,7 @@ Pet* Unit::GetPet() const
             return pet;
 
         sLog.outError("Unit::GetPet: %s not exist.", pet_guid.GetString().c_str());
-        const_cast<Unit*>(this)->SetPet(0);
+        const_cast<Unit*>(this)->SetPet(nullptr);
     }
 
     return nullptr;
