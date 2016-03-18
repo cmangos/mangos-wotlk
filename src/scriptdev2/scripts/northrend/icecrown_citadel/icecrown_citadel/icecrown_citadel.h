@@ -81,7 +81,7 @@ enum
     GO_ORANGE_TUBE                  = 201617,
     GO_GREEN_TUBE                   = 201618,
 
-    // GO_BLOODWING_DOOR             = 201920,       // not used
+    GO_BLOODWING_DOOR               = 201920,       // ToDo: implement opening event
     GO_CRIMSON_HALL_DOOR            = 201376,       // Council combat door
     GO_COUNCIL_DOOR_1               = 201377,
     GO_COUNCIL_DOOR_2               = 201378,
@@ -99,7 +99,6 @@ enum
     GO_SINDRAGOSA_SHORTCUT_EXIT     = 201379,
     GO_SINDRAGOSA_ENTRANCE          = 201373,
 
-    GO_FROZENTRONE_TRANSPORTER      = 202223,
     GO_ICESHARD_1                   = 202142,
     GO_ICESHARD_2                   = 202141,
     GO_ICESHARD_3                   = 202143,
@@ -135,10 +134,22 @@ enum
     GO_DREAMWALKER_CACHE_10_H       = 202338,
     GO_DREAMWALKER_CACHE_25_H       = 202340,
 
+    // transporters
+    GO_TRANSPORTER_FROZEN_THRONE    = 202223,       // used only for display
+    GO_TRANSPORTER_UPPER_SPIRE      = 202235,
+    GO_TRANSPORTER_LIGHTS_HAMMER    = 202242,
+    GO_TRANSPORTER_RAMPART_SKULLS   = 202243,
+    GO_TRANSPORTER_DEATHBRINGER     = 202244,
+    GO_TRANSPORTER_ORATORY_DAMNED   = 202245,
+    GO_TRANSPORTER_SINDRAGOSA       = 202246,
+
     // Area triggers
-    AREATRIGGER_MARROWGAR_INTRO     = 5732,
-    AREATRIGGER_DEATHWHISPER_INTRO  = 5709,
-    AREATRIGGER_SINDRAGOSA_PLATFORM = 5604,
+    AT_SINDRAGOSA_PLATFORM          = 5604,
+    AT_LIGHTS_HAMMER_INTRO_1        = 5611,
+    AT_LIGHTS_HAMMER_INTRO_2        = 5612,
+    AT_DEATHWHISPER_INTRO           = 5709,
+    AT_FROZEN_THRONE_TELE           = 5718,
+    AT_MARROWGAR_INTRO              = 5732,
 
     // Achievement criterias
     ACHIEV_CRIT_BONED_10N                  = 12775,     // Lord Marrowgar, achievs 4534, 4610

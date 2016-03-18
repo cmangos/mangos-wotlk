@@ -80,11 +80,6 @@ INSERT INTO scripted_areatrigger VALUES
 (1738,'at_scent_larkorwi'),
 (1739,'at_scent_larkorwi'),
 (1740,'at_scent_larkorwi');
-DELETE FROM scripted_areatrigger WHERE entry IN (5604,5709,5732);
-INSERT INTO scripted_areatrigger VALUES
-(5604,'at_icecrown_citadel'),
-(5709,'at_icecrown_citadel'),
-(5732,'at_icecrown_citadel');
 DELETE FROM scripted_areatrigger WHERE entry in (4288,4485);
 INSERT INTO scripted_areatrigger VALUES
 (4288,'at_dark_portal'),
@@ -788,10 +783,17 @@ UPDATE creature_template SET ScriptName='mob_big_ooze' WHERE entry=36899;
 UPDATE creature_template SET ScriptName='boss_valithria_dreamwalker' WHERE entry=36789;
 UPDATE creature_template SET ScriptName='boss_professor_putricide' WHERE entry=36678;
 UPDATE creature_template SET ScriptName='boss_the_lich_king_icc' WHERE entry=36597;
+UPDATE gameobject_template SET ScriptName='go_icc_teleporter' WHERE entry IN (202235,202242,202243,202244,202245,202246);
 DELETE FROM scripted_event_id WHERE id IN (23426,23438);
 INSERT INTO scripted_event_id VALUES
 (23426,'event_gameobject_citadel_valve'),
 (23438,'event_gameobject_citadel_valve');
+DELETE FROM scripted_areatrigger WHERE entry IN (5604,5709,5718,5732);
+INSERT INTO scripted_areatrigger VALUES
+(5604,'at_icecrown_citadel'),
+(5709,'at_icecrown_citadel'),
+(5718,'at_frozen_throne_tele'),
+(5732,'at_icecrown_citadel');
 
 /* FORGE OF SOULS */
 UPDATE creature_template SET ScriptName='boss_bronjahm' WHERE entry=36497;
@@ -6848,6 +6850,15 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3609000,'I challenge you, death knight!','Death Knight Initiate GOSSIP_ITEM_ACCEPT_DUEL'),
 (-3609001,'I am ready, Highlord. Let the siege of Light\'s Hope begin!','Highlord Darion Mograine GOSSIP_ITEM_READY');
+
+-- -3 631 000 ICECROWN CITADEL
+INSERT INTO gossip_texts (entry,content_default,comment) VALUES
+(-3631000,'Teleport to the Light\'s Hammer.','GOSSIP_ITEM_TELE_LIGHTS_HAMMER'),
+(-3631001,'Teleport to the Oratory of the Damned.','GOSSIP_ITEM_TELE_ORATORY_DAMNED'),
+(-3631002,'Teleport to the Rampart of Skulls.','GOSSIP_ITEM_TELE_RAMPART_OF_SKULLS'),
+(-3631003,'Teleport to the Deathbringer\'s Rise.','GOSSIP_ITEM_TELE_DEATHBRINGERS_RISE'),
+(-3631004,'Teleport to the Upper Spire.','GOSSIP_ITEM_TELE_UPPER_SPIRE'),
+(-3631005,'Teleport to the Sindragosa\'s Lair.','GOSSIP_ITEM_TELE_SINDRAGOSAS_LAIR');
 
 -- -3 649 000 TRIAL OF CRUSADER
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
