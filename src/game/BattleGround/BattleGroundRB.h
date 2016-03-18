@@ -40,7 +40,5 @@ class BattleGroundRB : public BattleGround
 
         /* Scorekeeping */
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
-
-    private:
 };
 #endif

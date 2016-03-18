@@ -7747,7 +7747,6 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
                     break;
                 default:
                     return uint32(player->GetTeam()) == m_value1;
-                    break;
             }
         case CONDITION_SKILL:
             return player->HasSkill(m_value1) && player->GetBaseSkillValue(m_value1) >= m_value2;
