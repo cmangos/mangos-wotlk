@@ -1009,8 +1009,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST_COUNT:
             {
                 uint32 counter = 0;
-                for (QuestStatusMap::const_iterator itr = GetPlayer()->getQuestStatusMap().begin(); itr != GetPlayer()->getQuestStatusMap().end(); ++itr)
-                    if (itr->second.m_rewarded)
+                for (QuestStatusMap::const_iterator questItr = GetPlayer()->getQuestStatusMap().begin(); questItr != GetPlayer()->getQuestStatusMap().end(); ++questItr)
+                    if (questItr->second.m_rewarded)
                         ++counter;
                 change = counter;
                 progressType = PROGRESS_HIGHEST;
@@ -1023,10 +1023,10 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
 
                 uint32 counter = 0;
-                for (QuestStatusMap::const_iterator itr = GetPlayer()->getQuestStatusMap().begin(); itr != GetPlayer()->getQuestStatusMap().end(); ++itr)
+                for (QuestStatusMap::const_iterator questItr = GetPlayer()->getQuestStatusMap().begin(); questItr != GetPlayer()->getQuestStatusMap().end(); ++questItr)
                 {
-                    Quest const* quest = sObjectMgr.GetQuestTemplate(itr->first);
-                    if (itr->second.m_rewarded && quest->GetZoneOrSort() >= 0 && uint32(quest->GetZoneOrSort()) == achievementCriteria->complete_quests_in_zone.zoneID)
+                    Quest const* quest = sObjectMgr.GetQuestTemplate(questItr->first);
+                    if (questItr->second.m_rewarded && quest->GetZoneOrSort() >= 0 && uint32(quest->GetZoneOrSort()) == achievementCriteria->complete_quests_in_zone.zoneID)
                         ++counter;
                 }
                 change = counter;

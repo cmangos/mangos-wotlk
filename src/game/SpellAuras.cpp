@@ -7707,8 +7707,8 @@ void Aura::PeriodicTick()
                         drain_amount = target->GetPower(POWER_MANA) > pdamage ? pdamage : target->GetPower(POWER_MANA);
                         target->ModifyPower(POWER_MANA, -drain_amount);
 
-                        SpellPeriodicAuraLogInfo pInfo(this, drain_amount, 0, 0, 0, 0.0f);
-                        target->SendPeriodicAuraLog(&pInfo);
+                        SpellPeriodicAuraLogInfo info(this, drain_amount, 0, 0, 0, 0.0f);
+                        target->SendPeriodicAuraLog(&info);
                     }
                     // no break here
                 }

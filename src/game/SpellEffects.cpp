@@ -5529,7 +5529,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     if (!summonResult)
         return;                                             // No further handling required
 
-    for (CreatureSummonPositions::iterator itr = summonPositions.begin(); itr != summonPositions.end(); ++itr)
+    for (itr = summonPositions.begin(); itr != summonPositions.end(); ++itr)
     {
         MANGOS_ASSERT(itr->creature || itr != summonPositions.begin());
         if (!itr->creature)

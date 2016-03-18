@@ -3032,10 +3032,10 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 }
                 case 69023:                                 // Mirrored Soul
                 {
-                    int32 basepoints = (int32)(damage * 0.45f);
+                    int32 basepoints2 = (int32)(damage * 0.45f);
                     if (Unit* caster = triggeredByAura->GetCaster())
                         // Actually this spell should be sent with SMSG_SPELL_START
-                        CastCustomSpell(caster, 69034, &basepoints, nullptr, nullptr, true, nullptr, triggeredByAura, GetObjectGuid());
+                        CastCustomSpell(caster, 69034, &basepoints2, nullptr, nullptr, true, nullptr, triggeredByAura, GetObjectGuid());
 
                     return SPELL_AURA_PROC_OK;
                 }
@@ -3135,8 +3135,8 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                     if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (*i)->GetSpellProto()->SpellIconID == 113)
                     {
                         // basepoints of trigger spell stored in dummyeffect of spellProto
-                        int32 basepoints = GetMaxPower(POWER_MANA) * (*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2) / 100;
-                        CastCustomSpell(this, 18371, &basepoints, nullptr, nullptr, true, castItem, triggeredByAura);
+                        int32 basepoints2 = GetMaxPower(POWER_MANA) * (*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2) / 100;
+                        CastCustomSpell(this, 18371, &basepoints2, nullptr, nullptr, true, castItem, triggeredByAura);
                         break;
                     }
                 }
