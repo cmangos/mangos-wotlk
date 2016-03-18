@@ -187,6 +187,7 @@ Unit::Unit() :
     movespline(new Movement::MoveSpline()),
     m_charmInfo(nullptr),
     i_motionMaster(this),
+    m_regenTimer(0),
     m_vehicleInfo(nullptr),
     m_ThreatManager(this),
     m_HostileRefManager(this)

@@ -46,7 +46,7 @@
 #include "Chat.h"
 #include "LootMgr.h"
 
-Object::Object()
+Object::Object(): m_updateFlag(0)
 {
     m_objectTypeId      = TYPEID_OBJECT;
     m_objectType        = TYPEMASK_OBJECT;
