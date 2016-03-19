@@ -30,6 +30,7 @@
 #include "GuildMgr.h"
 #include "ObjectAccessor.h"
 #include "Group.h"
+#include "Database/DatabaseImpl.h"
 #include "PlayerDump.h"
 #include "SocialMgr.h"
 #include "Util.h"

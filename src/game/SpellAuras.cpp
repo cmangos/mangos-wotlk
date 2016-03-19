@@ -43,6 +43,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "Vehicle.h"
+#include "CellImpl.h"
 #include "Language.h"
 #include "MapManager.h"
 #include "LootMgr.h"

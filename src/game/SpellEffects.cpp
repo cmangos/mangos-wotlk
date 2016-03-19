@@ -49,6 +49,8 @@
 #include "SkillDiscovery.h"
 #include "Formulas.h"
 #include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 #include "Vehicle.h"
 #include "G3D/Vector3.h"
 #include "LootMgr.h"
