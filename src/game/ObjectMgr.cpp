@@ -41,6 +41,8 @@
 #include "Mail.h"
 #include "InstanceData.h"
 #include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 
 #include <limits>
 #include "ItemEnchantmentMgr.h"

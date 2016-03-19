@@ -42,6 +42,8 @@
 #include "WaypointManager.h"
 #include "Util.h"
 #include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 #include "WaypointMovementGenerator.h"
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "MoveMap.h"                                        // for mmap manager

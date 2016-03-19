@@ -42,6 +42,7 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "MapPersistentStateMgr.h"
 #include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 #include "MovementGenerator.h"
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
