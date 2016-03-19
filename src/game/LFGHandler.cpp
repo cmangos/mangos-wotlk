@@ -63,10 +63,11 @@ void WorldSession::HandleSearchLfgJoinOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_LFG_SEARCH_JOIN");
 
-    uint32 temp, entry;
-    recv_data >> temp;
+    recv_data >> Unused<uint32>();
+    //uint32 temp, entry;
+    //recv_data >> temp;
 
-    entry = (temp & 0x00FFFFFF);
+    //entry = (temp & 0x00FFFFFF);
     // LfgType type = LfgType((temp >> 24) & 0x000000FF);
 
     // SendLfgSearchResults(type, entry);
