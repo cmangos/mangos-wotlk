@@ -30,9 +30,7 @@
 #include "WorldSession.h"
 #include "Log.h"
 #include "DBCStores.h"
-#include "Policies/Lock.h"
 
-#include <mutex>
 #include <chrono>
 #include <functional>
 

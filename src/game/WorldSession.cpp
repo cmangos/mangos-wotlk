@@ -34,9 +34,7 @@
 #include "GuildMgr.h"
 #include "World.h"
 #include "BattleGround/BattleGroundMgr.h"
-#include "MapManager.h"
 #include "SocialMgr.h"
-#include "Auth/AuthCrypt.h"
 #include "Auth/HMACSHA1.h"
 #include "zlib/zlib.h"
 #include "LootMgr.h"
@@ -45,7 +43,6 @@
 
 #include <mutex>
 #include <deque>
-#include <algorithm>
 
 // select opcodes appropriate for processing in Map::Update context for current session state
 static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& opHandle)

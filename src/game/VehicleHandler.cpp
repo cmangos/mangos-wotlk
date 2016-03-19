@@ -19,7 +19,6 @@
 #include "Common.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Opcodes.h"
 #include "ObjectGuid.h"
 #include "Log.h"
 #include "Player.h"

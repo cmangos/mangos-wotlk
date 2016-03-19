@@ -45,8 +45,6 @@
 
 #include "Policies/Singleton.h"
 
-#include <mutex>
-
 INSTANTIATE_SINGLETON_1(BattleGroundMgr);
 
 /*********************************************************/

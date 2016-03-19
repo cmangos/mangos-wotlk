@@ -27,8 +27,6 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "ArenaTeam.h"
-#include "GossipDef.h"
-#include "SocialMgr.h"
 
 /*enum PetitionType // dbc data
 {

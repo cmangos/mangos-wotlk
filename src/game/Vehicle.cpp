@@ -41,11 +41,8 @@
 #include "CreatureAI.h"
 #include "ObjectMgr.h"
 #include "SQLStorages.h"
-#include "Util.h"
 #include "movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
 #include "MapManager.h"
-#include "TemporarySummon.h"
 
 void ObjectMgr::LoadVehicleAccessory()
 {

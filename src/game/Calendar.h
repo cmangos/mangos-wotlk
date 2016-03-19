@@ -19,10 +19,8 @@
 #ifndef MANGOS_CALENDAR_H
 #define MANGOS_CALENDAR_H
 
-#include "Policies/Singleton.h"
 #include "Common.h"
 #include "ObjectGuid.h"
-#include "SharedDefines.h"
 
 enum CalendarEventType
 {

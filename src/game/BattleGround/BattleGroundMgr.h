@@ -20,7 +20,6 @@
 #define __BATTLEGROUNDMGR_H
 
 #include "Common.h"
-#include "Policies/Singleton.h"
 #include "Utilities/EventProcessor.h"
 #include "SharedDefines.h"
 #include "DBCEnums.h"

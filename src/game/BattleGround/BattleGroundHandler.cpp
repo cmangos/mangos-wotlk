@@ -25,7 +25,6 @@
 #include "ObjectMgr.h"
 #include "WorldSession.h"
 #include "Object.h"
-#include "Chat.h"
 #include "BattleGroundEY.h"
 #include "BattleGroundMgr.h"
 #include "BattleGroundWS.h"

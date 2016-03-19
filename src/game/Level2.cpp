@@ -35,7 +35,6 @@
 #include "Language.h"
 #include "World.h"
 #include "GameEventMgr.h"
-#include "ScriptMgr.h"
 #include "SpellMgr.h"
 #include "MapPersistentStateMgr.h"
 #include "AccountMgr.h"
@@ -43,19 +42,15 @@
 #include "WaypointManager.h"
 #include "Util.h"
 #include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "CellImpl.h"
 #include "WaypointMovementGenerator.h"
-#include <cctype>
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <typeinfo>
-
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "MoveMap.h"                                        // for mmap manager
 #include "PathFinder.h"                                     // for mmap commands
 #include "movement/MoveSplineInit.h"
+
+#include <fstream>
+#include <map>
+#include <typeinfo>
 
 static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
 {

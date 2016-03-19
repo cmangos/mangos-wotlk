@@ -20,7 +20,6 @@
 #include "Player.h"
 #include "BattleGround.h"
 #include "BattleGroundNA.h"
-#include "ObjectMgr.h"
 #include "WorldPacket.h"
 #include "Language.h"
 

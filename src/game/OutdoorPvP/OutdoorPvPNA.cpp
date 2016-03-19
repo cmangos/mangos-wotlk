@@ -24,6 +24,7 @@
 #include "Creature.h"
 #include "GameObject.h"
 #include "Player.h"
+#include "Language.h"
 
 OutdoorPvPNA::OutdoorPvPNA() : OutdoorPvP(),
     m_zoneOwner(TEAM_NONE),

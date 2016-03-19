@@ -19,14 +19,12 @@
 #define __MANGOS_ACHIEVEMENTMGR_H
 
 #include "Common.h"
-#include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
 #include "DBCEnums.h"
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
 
 #include <map>
-#include <string>
 
 struct AchievementEntry;
 struct AchievementCriteriaEntry;

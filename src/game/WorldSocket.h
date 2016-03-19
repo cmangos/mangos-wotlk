@@ -32,7 +32,6 @@
 
 #include <chrono>
 #include <functional>
-#include <memory>
 
 class WorldPacket;
 class WorldSession;

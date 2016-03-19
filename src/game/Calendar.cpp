@@ -17,7 +17,6 @@
  */
 
 #include "Calendar.h"
-#include "Guild.h"
 #include "Mail.h"
 #include "ObjectMgr.h"
 #include "ProgressBar.h"

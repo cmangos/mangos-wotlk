@@ -20,8 +20,7 @@
 #include "Log.h"
 #include "Player.h"
 #include "WorldPacket.h"
-#include "ObjectMgr.h"
-#include "World.h"
+#include "ObjectAccessor.h"
 
 void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
 {

@@ -29,7 +29,6 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "Language.h"
-#include "CellImpl.h"
 #include "MapPersistentStateMgr.h"
 #include "Mail.h"
 #include "Util.h"
