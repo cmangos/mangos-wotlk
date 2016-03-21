@@ -40,6 +40,8 @@
 #include <boost/version.hpp>
 
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 #ifdef WIN32
 #include "ServiceWin32.h"
@@ -256,7 +258,7 @@ int main(int argc, char *argv[])
     LoginDatabase.AllowAsyncTransactions();
 
     // maximum counter for next ping
-    uint32 numLoops = (sConfig.GetIntDefault("MaxPingTime", 30) * (MINUTE * 1000000 / 100000));
+    auto const numLoops = sConfig.GetIntDefault("MaxPingTime", 30) * MINUTE * 10;
     uint32 loopCounter = 0;
 
 #ifndef WIN32
@@ -271,6 +273,7 @@ int main(int argc, char *argv[])
             DETAIL_LOG("Ping MySQL to keep connection alive");
             LoginDatabase.Ping();
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 #ifdef WIN32
         if (m_ServiceStatus == 0) stopEvent = true;
         while (m_ServiceStatus == 2) Sleep(1000);
