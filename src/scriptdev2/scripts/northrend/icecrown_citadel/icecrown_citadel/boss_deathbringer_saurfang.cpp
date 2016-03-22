@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: boss_deathbringer_saurfang
-SD%Complete: 80%
+SD%Complete: 90%
 SDComment: Intro and Outro event NYI.
 SDCategory: Icecrown Citadel
 EndScriptData */
@@ -133,6 +133,7 @@ struct boss_deathbringer_saurfangAI : public ScriptedAI
     uint32 m_uiBloodBeastsTimer;
     uint32 m_uiScentOfBloodTimer;
     uint32 m_uiBerserkTimer;
+    uint8 m_uiAchievSpellCount;
 
     bool m_bIsFrenzied;
     bool m_bIsIntroDone;
@@ -150,6 +151,7 @@ struct boss_deathbringer_saurfangAI : public ScriptedAI
             m_uiBerserkTimer    = 6 * MINUTE * IN_MILLISECONDS;
 
         m_bIsFrenzied           = false;
+        m_uiAchievSpellCount    = 0;
 
         m_creature->SetPower(m_creature->GetPowerType(), 0);
     }
@@ -249,6 +251,15 @@ struct boss_deathbringer_saurfangAI : public ScriptedAI
                 DoScriptText(SAY_FALLENCHAMPION, m_creature);
                 m_creature->RemoveAurasDueToSpell(SPELL_BLOOD_POWER);
                 m_creature->SetPower(m_creature->GetPowerType(), 0);
+
+                // check for achievement fail
+                ++m_uiAchievSpellCount;
+
+                if (m_pInstance)
+                {
+                    if (m_uiAchievSpellCount == (m_pInstance->Is25ManDifficulty() ? 5 : 3))
+                        m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_MADE_A_MESS, false);
+                }
             }
         }
 

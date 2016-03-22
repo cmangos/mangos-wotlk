@@ -71,6 +71,9 @@ void instance_icecrown_citadel::Initialize()
 {
     InitializeDialogueHelper(this);
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
+    for (uint8 i = 0; i < MAX_SPECIAL_ACHIEV_CRITS; ++i)
+        m_abAchievCriteria[i] = false;
 }
 
 bool instance_icecrown_citadel::IsEncounterInProgress() const
@@ -161,6 +164,12 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
             break;
         case NPC_DEATHWHISPER_SPAWN_STALKER:
             m_lDeathwhisperStalkersGuids.push_back(pCreature->GetObjectGuid());
+            return;
+        case NPC_CULT_ADHERENT:
+        case NPC_CULT_FANATIC:
+        case NPC_REANIMATED_FANATIC:
+        case NPC_REANIMATED_ADHERENT:
+            m_lDeathwhisperCultistsGuids.push_back(pCreature->GetObjectGuid());
             return;
     }
 }
@@ -337,6 +346,14 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
                     DoScriptText(SAY_PRECIOUS_DIES, pRotface);
             }
             break;
+        case NPC_CULT_ADHERENT:
+        case NPC_CULT_FANATIC:
+        case NPC_EMPOWERED_ADHERENT:
+        case NPC_DEFORMED_FANATIC:
+        case NPC_REANIMATED_FANATIC:
+        case NPC_REANIMATED_ADHERENT:
+            m_lDeathwhisperCultistsGuids.remove(pCreature->GetObjectGuid());
+            return;
     }
 }
 
@@ -361,6 +378,8 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                 if (GameObject* pTransporter = GetSingleGameObjectFromStorage(GO_TRANSPORTER_LIGHTS_HAMMER))
                     pTransporter->SetGoState(GO_STATE_ACTIVE);
             }
+            else if (uiData == IN_PROGRESS)
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_BONED, true);
             break;
         case TYPE_LADY_DEATHWHISPER:
             m_auiEncounter[uiType] = uiData;
@@ -373,7 +392,29 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                 DoToggleGameObjectFlags(GO_TRANSPORTER_RAMPART_SKULLS, GO_FLAG_NO_INTERACT, false);
                 if (GameObject* pTransporter = GetSingleGameObjectFromStorage(GO_TRANSPORTER_RAMPART_SKULLS))
                     pTransporter->SetGoState(GO_STATE_ACTIVE);
+
+                // Check for achievement
+                if (m_lDeathwhisperCultistsGuids.size() < 5)
+                    break;
+
+                // check if the entries of the remaining cultists is greater than 5
+                std::set<uint32> lCultistsEntries;
+
+                for (GuidList::const_iterator itr = m_lDeathwhisperCultistsGuids.begin(); itr != m_lDeathwhisperCultistsGuids.end(); ++itr)
+                {
+                    if (Creature* pTemp = instance->GetCreature(*itr))
+                        lCultistsEntries.insert(pTemp->GetEntry());
+                }
+
+                // The set automatically excludes duplicates
+                if (lCultistsEntries.size() >= 5)
+                {
+                    if (Creature* pDeathwhisper = GetSingleCreatureFromStorage(NPC_LADY_DEATHWHISPER))
+                        pDeathwhisper->CastSpell(pDeathwhisper, SPELL_FULL_HOUSE_ACHIEV_CHECK, true);
+                }
             }
+            else if (uiData == IN_PROGRESS)
+                m_lDeathwhisperCultistsGuids.clear();
             break;
         case TYPE_GUNSHIP_BATTLE:
             m_auiEncounter[uiType] = uiData;
@@ -402,6 +443,8 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                 DoUseDoorOrButton(GO_CRIMSON_HALL_DOOR);
                 DoUseDoorOrButton(GO_GREEN_DRAGON_ENTRANCE);
             }
+            else if (uiData == IN_PROGRESS)
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_MADE_A_MESS, true);
             break;
         case TYPE_FESTERGUT:
             m_auiEncounter[uiType] = uiData;
@@ -555,9 +598,28 @@ uint32 instance_icecrown_citadel::GetData(uint32 uiType) const
     return 0;
 }
 
-bool instance_icecrown_citadel::CheckAchievementCriteriaMeet(uint32 /*uiCriteriaId*/, Player const* /*pSource*/, Unit const* /*pTarget*/, uint32 /*uiMiscvalue1*/) const
+void instance_icecrown_citadel::SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet)
 {
-    // ToDo:
+    if (uiType < MAX_SPECIAL_ACHIEV_CRITS)
+        m_abAchievCriteria[uiType] = bIsMet;
+}
+
+bool instance_icecrown_citadel::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* /*pSource*/, Unit const* /*pTarget*/, uint32 /*uiMiscvalue1*/) const
+{
+    switch (uiCriteriaId)
+    {
+        case ACHIEV_CRIT_BONED_10N:
+        case ACHIEV_CRIT_BONED_25N:
+        case ACHIEV_CRIT_BONED_10H:
+        case ACHIEV_CRIT_BONED_25H:
+            return m_abAchievCriteria[TYPE_ACHIEV_BONED];
+        case ACHIEV_CRIT_MADE_A_MESS_10N:
+        case ACHIEV_CRIT_MADE_A_MESS_25N:
+        case ACHIEV_CRIT_MADE_A_MESS_10H:
+        case ACHIEV_CRIT_MADE_A_MESS_25H:
+            return m_abAchievCriteria[TYPE_ACHIEV_MADE_A_MESS];
+    }
+
     return false;
 }
 

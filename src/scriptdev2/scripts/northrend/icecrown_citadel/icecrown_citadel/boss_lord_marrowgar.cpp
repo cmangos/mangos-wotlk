@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: boss_lord_marrowgar
-SD%Complete: 90%
-SDComment: Achiev NYI.
+SD%Complete: 100%
+SDComment:
 SDCategory: Icecrown Citadel
 EndScriptData */
 
@@ -308,11 +308,18 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
 {
     npc_bone_spikeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
+        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
         m_bHasImpaled = false;
+        m_bBonedFailed = false;
+        m_uiImpaledTimer = 0;
         Reset();
     }
 
+    instance_icecrown_citadel* m_pInstance;
+
     bool m_bHasImpaled;
+    bool m_bBonedFailed;
+    uint32 m_uiImpaledTimer;
 
     void Reset() override { }
 
@@ -338,7 +345,7 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
         }
     }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
+    void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_bHasImpaled)
         {
@@ -353,6 +360,20 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
 
             m_bHasImpaled = true;
         }
+
+        // achievement check
+        if (m_bBonedFailed)
+            return;
+
+        if (m_uiImpaledTimer > 8000)
+        {
+            m_bBonedFailed = true;
+
+            if (m_pInstance)
+                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_BONED, false);
+        }
+
+        m_uiImpaledTimer += uiDiff;
     }
 };
 

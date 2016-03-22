@@ -23,6 +23,11 @@ EndScriptData */
 
 #include "precompiled.h"
 
+enum
+{
+    SPELL_ACHIEVEMENT_CHECK         = 72959,
+};
+
 void AddSC_gunship_battle()
 {
 }

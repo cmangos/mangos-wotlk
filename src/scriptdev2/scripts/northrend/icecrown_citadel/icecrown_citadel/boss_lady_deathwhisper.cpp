@@ -59,9 +59,7 @@ enum
     // SPELL_SUMMON_ADHERENT     = 70820,            // cast by the stalkers - only server side
     // SPELL_SUMMON_FANATIC      = 70819,            // cast by the stalkers - only server side
 
-    // npcs
-    NPC_CULT_ADHERENT           = 37949,
-    NPC_CULT_FANATIC            = 37890,
+    // phase 2 npcs
     NPC_VENGEFUL_SHADE          = 38222,            // has aura 71494
 };
 

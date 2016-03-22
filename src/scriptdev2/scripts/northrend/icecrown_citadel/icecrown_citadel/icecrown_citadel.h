@@ -60,6 +60,20 @@ enum
     NPC_RIMEFANG                    = 37533,
     NPC_SPINESTALKER                = 37534,
 
+    // Deathwhisper cultists
+    NPC_CULT_FANATIC                = 37890,
+    NPC_CULT_ADHERENT               = 37949,
+    NPC_DEFORMED_FANATIC            = 38135,
+    NPC_EMPOWERED_ADHERENT          = 38136,
+    NPC_REANIMATED_FANATIC          = 38009,
+    NPC_REANIMATED_ADHERENT         = 38010,
+
+    // achievement types
+    MAX_SPECIAL_ACHIEV_CRITS        = 2,
+
+    TYPE_ACHIEV_BONED               = 0,
+    TYPE_ACHIEV_MADE_A_MESS         = 1,
+
     // GameObjects entries
     GO_ICEWALL_1                    = 201911,
     GO_ICEWALL_2                    = 201910,
@@ -151,6 +165,9 @@ enum
     AT_FROZEN_THRONE_TELE           = 5718,
     AT_MARROWGAR_INTRO              = 5732,
 
+    // Spells
+    SPELL_FULL_HOUSE_ACHIEV_CHECK   = 72827,
+
     // Achievement criterias
     ACHIEV_CRIT_BONED_10N                  = 12775,     // Lord Marrowgar, achievs 4534, 4610
     ACHIEV_CRIT_BONED_25N                  = 12962,
@@ -211,6 +228,11 @@ enum
     ACHIEV_CRIT_WAITING_A_LONG_TIME_25N    = 13244,
     ACHIEV_CRIT_WAITING_A_LONG_TIME_10H    = 13247,
     ACHIEV_CRIT_WAITING_A_LONG_TIME_25H    = 13245,
+
+    ACHIEV_CRIT_NECK_DEEP_VILE_10N         = 12823,    // Lich King, achievs 4581, 4622
+    ACHIEV_CRIT_NECK_DEEP_VILE_25N         = 13243,
+    ACHIEV_CRIT_NECK_DEEP_VILE_10H         = 13163,
+    ACHIEV_CRIT_NECK_DEEP_VILE_25H         = 13164,
 };
 
 class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelper
@@ -244,6 +266,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         // Open Putricide door in a few seconds
         void DoPreparePutricideDoor() { m_uiPutricideValveTimer = 15000; }
 
+        void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget = NULL, uint32 uiMiscvalue1 = 0) const override;
 
         void Update(uint32 uiDiff) override;
@@ -251,6 +274,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
     private:
         std::string m_strInstData;
         uint32 m_auiEncounter[MAX_ENCOUNTER];
+        bool m_abAchievCriteria[MAX_SPECIAL_ACHIEV_CRITS];
 
         uint32 m_uiTeam;                                    // Team of first entered player, used on the Gunship event
         uint32 m_uiPutricideValveTimer;
@@ -261,6 +285,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         bool m_bHasSpinestalkerLanded;
 
         GuidList m_lDeathwhisperStalkersGuids;
+        GuidList m_lDeathwhisperCultistsGuids;
 };
 
 #endif
