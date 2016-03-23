@@ -174,6 +174,60 @@ bool AreaTrigger_at_frozen_throne_tele(Player* pPlayer, AreaTriggerEntry const* 
     return false;
 }
 
+enum
+{
+    SPELL_WEB_BEAM              = 69887,
+
+    NPC_NERUBAR_BROODKEEPER     = 36725,
+};
+
+/*#####
+## at_lights_hammer
+#####*/
+
+bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
+{
+    if (pPlayer->isGameMaster() || pPlayer->isDead())
+        return false;
+
+    // search for the first set of Nerubar Broodkeepers and lower them to the ground
+    if (pAt->id == AT_LIGHTS_HAMMER_INTRO_1)
+    {
+        std::list<Creature*> lKeepersInRange;
+        GetCreatureListWithEntryInGrid(lKeepersInRange, pPlayer, NPC_NERUBAR_BROODKEEPER, 150.0f);
+
+        for (std::list<Creature*>::const_iterator itr = lKeepersInRange.begin(); itr != lKeepersInRange.end(); ++itr)
+        {
+            if ((*itr)->GetPositionZ() >= 75.0f && (*itr)->GetPositionZ() < 82.0f)
+            {
+                (*itr)->CastSpell((*itr), SPELL_WEB_BEAM, true);
+                (*itr)->SetWalk(false);
+                (*itr)->GetMotionMaster()->MoveWaypoint();
+                (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+            }
+        }
+    }
+    // search for the second set of Nerubar Broodkeepers and lower them to the ground
+    else if (pAt->id == AT_LIGHTS_HAMMER_INTRO_2)
+    {
+        std::list<Creature*> lKeepersInRange;
+        GetCreatureListWithEntryInGrid(lKeepersInRange, pPlayer, NPC_NERUBAR_BROODKEEPER, 150.0f);
+
+        for (std::list<Creature*>::const_iterator itr = lKeepersInRange.begin(); itr != lKeepersInRange.end(); ++itr)
+        {
+            if ((*itr)->GetPositionZ() >= 85.0f)
+            {
+                (*itr)->CastSpell((*itr), SPELL_WEB_BEAM, true);
+                (*itr)->SetWalk(false);
+                (*itr)->GetMotionMaster()->MoveWaypoint();
+                (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+            }
+        }
+    }
+
+    return false;
+}
+
 void AddSC_icecrown_citadel()
 {
     Script* pNewScript;
@@ -187,5 +241,10 @@ void AddSC_icecrown_citadel()
     pNewScript = new Script;
     pNewScript->Name = "at_frozen_throne_tele";
     pNewScript->pAreaTrigger = &AreaTrigger_at_frozen_throne_tele;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_lights_hammer";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_lights_hammer;
     pNewScript->RegisterSelf();
 }

@@ -788,9 +788,11 @@ DELETE FROM scripted_event_id WHERE id IN (23426,23438);
 INSERT INTO scripted_event_id VALUES
 (23426,'event_gameobject_citadel_valve'),
 (23438,'event_gameobject_citadel_valve');
-DELETE FROM scripted_areatrigger WHERE entry IN (5604,5709,5718,5732);
+DELETE FROM scripted_areatrigger WHERE entry IN (5604,5611,5612,5709,5718,5732);
 INSERT INTO scripted_areatrigger VALUES
 (5604,'at_icecrown_citadel'),
+(5611,'at_lights_hammer'),
+(5612,'at_lights_hammer'),
 (5709,'at_icecrown_citadel'),
 (5718,'at_frozen_throne_tele'),
 (5732,'at_icecrown_citadel');
