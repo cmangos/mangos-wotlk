@@ -171,6 +171,13 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_REANIMATED_ADHERENT:
             m_lDeathwhisperCultistsGuids.push_back(pCreature->GetObjectGuid());
             return;
+        case NPC_DARFALLEN_NOBLE:
+        case NPC_DARKFALLEN_ARCHMAGE:
+        case NPC_DARKFALLEN_BLOOD_KNIGHT:
+        case NPC_DARKFALLEN_ADVISOR:
+            if (pCreature->GetPositionZ() < 352.0f)
+                m_sDarkfallenCreaturesGuids.insert(pCreature->GetObjectGuid());
+            return;
     }
 }
 
@@ -189,9 +196,13 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
             break;
         case GO_SAURFANG_DOOR:
         case GO_SCIENTIST_DOOR:
+            break;
         case GO_CRIMSON_HALL_DOOR:
+            if (m_auiEncounter[TYPE_BLOOD_WING_ENTRANCE] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
         case GO_GREEN_DRAGON_ENTRANCE:
-            if (m_auiEncounter[TYPE_DEATHBRINGER_SAURFANG] == DONE)
+            if (m_auiEncounter[TYPE_FROST_WING_ENTRANCE] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_ORANGE_TUBE:
@@ -324,6 +335,10 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[TYPE_VALITHRIA] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
+        case GO_EMPOWERING_BLOOD_ORB:
+            if (m_auiEncounter[TYPE_BLOOD_WING_ENTRANCE] == DONE)
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            break;
     }
     m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
@@ -353,6 +368,18 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
         case NPC_REANIMATED_FANATIC:
         case NPC_REANIMATED_ADHERENT:
             m_lDeathwhisperCultistsGuids.remove(pCreature->GetObjectGuid());
+            return;
+        case NPC_DARFALLEN_NOBLE:
+        case NPC_DARKFALLEN_ARCHMAGE:
+        case NPC_DARKFALLEN_BLOOD_KNIGHT:
+        case NPC_DARKFALLEN_ADVISOR:
+            if (m_sDarkfallenCreaturesGuids.find(pCreature->GetObjectGuid()) != m_sDarkfallenCreaturesGuids.end())
+            {
+                m_sDarkfallenCreaturesGuids.erase(pCreature->GetObjectGuid());
+
+                if (m_sDarkfallenCreaturesGuids.empty())
+                    SetData(TYPE_BLOOD_WING_ENTRANCE, DONE);
+            }
             return;
     }
 }
@@ -567,6 +594,19 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
         case TYPE_LICH_KING:
             m_auiEncounter[uiType] = uiData;
             break;
+        case TYPE_BLOOD_WING_ENTRANCE:
+            m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE)
+            {
+                DoUseDoorOrButton(GO_CRIMSON_HALL_DOOR);
+                DoToggleGameObjectFlags(GO_EMPOWERING_BLOOD_ORB, GO_FLAG_NO_INTERACT, false);
+            }
+            break;
+        case TYPE_FROST_WING_ENTRANCE:
+            m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE)
+                DoUseDoorOrButton(GO_GREEN_DRAGON_ENTRANCE);
+            break;
         default:
             script_error_log("Instance Icecrown Citadel: ERROR SetData = %u for type %u does not exist/not implemented.", uiType, uiData);
             return;
@@ -581,7 +621,8 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
         saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
                    << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " "
                    << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
-                   << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11];
+                   << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11] << " "
+                   << m_auiEncounter[12] << " " << m_auiEncounter[13];
 
         m_strInstData = saveStream.str();
 
@@ -635,8 +676,9 @@ void instance_icecrown_citadel::Load(const char* strIn)
 
     std::istringstream loadStream(strIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
-               >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7] >> m_auiEncounter[8]
-               >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11];
+               >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
+               >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11]
+               >> m_auiEncounter[12] >> m_auiEncounter[13];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {

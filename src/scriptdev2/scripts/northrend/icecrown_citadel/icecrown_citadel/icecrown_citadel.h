@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER                   = 12,
+    MAX_ENCOUNTER                   = 14,
 
     TYPE_MARROWGAR                  = 0,
     TYPE_LADY_DEATHWHISPER          = 1,
@@ -21,6 +21,8 @@ enum
     TYPE_VALITHRIA                  = 9,
     TYPE_SINDRAGOSA                 = 10,
     TYPE_LICH_KING                  = 11,
+    TYPE_BLOOD_WING_ENTRANCE        = 12,
+    TYPE_FROST_WING_ENTRANCE        = 13,
 
     // NPC entries
     NPC_LORD_MARROWGAR              = 36612,
@@ -68,6 +70,12 @@ enum
     NPC_REANIMATED_FANATIC          = 38009,
     NPC_REANIMATED_ADHERENT         = 38010,
 
+    // Blood wing entrance creatures
+    NPC_DARFALLEN_NOBLE             = 37663,
+    NPC_DARKFALLEN_ARCHMAGE         = 37664,
+    NPC_DARKFALLEN_BLOOD_KNIGHT     = 37595,
+    NPC_DARKFALLEN_ADVISOR          = 37571,
+
     // achievement types
     MAX_SPECIAL_ACHIEV_CRITS        = 2,
 
@@ -95,7 +103,8 @@ enum
     GO_ORANGE_TUBE                  = 201617,
     GO_GREEN_TUBE                   = 201618,
 
-    GO_BLOODWING_DOOR               = 201920,       // ToDo: implement opening event
+    // GO_BLOODWING_DOOR            = 201920,       // Blood wing entrance door - not used
+    GO_EMPOWERING_BLOOD_ORB         = 201741,
     GO_CRIMSON_HALL_DOOR            = 201376,       // Council combat door
     GO_COUNCIL_DOOR_1               = 201377,
     GO_COUNCIL_DOOR_2               = 201378,
@@ -286,6 +295,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
 
         GuidList m_lDeathwhisperStalkersGuids;
         GuidList m_lDeathwhisperCultistsGuids;
+        GuidSet m_sDarkfallenCreaturesGuids;
 };
 
 #endif
