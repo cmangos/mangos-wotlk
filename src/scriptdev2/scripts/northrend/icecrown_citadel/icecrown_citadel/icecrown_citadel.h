@@ -75,6 +75,7 @@ enum
     NPC_DARKFALLEN_ARCHMAGE         = 37664,
     NPC_DARKFALLEN_BLOOD_KNIGHT     = 37595,
     NPC_DARKFALLEN_ADVISOR          = 37571,
+    NPC_EMPOWERING_ORB_STALKER      = 36934,
 
     // achievement types
     MAX_SPECIAL_ACHIEV_CRITS        = 2,
@@ -176,6 +177,7 @@ enum
 
     // Spells
     SPELL_FULL_HOUSE_ACHIEV_CHECK   = 72827,
+    SPELL_SIPHON_ESSENCE            = 70299,
 
     // Achievement criterias
     ACHIEV_CRIT_BONED_10N                  = 12775,     // Lord Marrowgar, achievs 4534, 4610
@@ -256,6 +258,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
 
+        void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
@@ -295,7 +298,9 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
 
         GuidList m_lDeathwhisperStalkersGuids;
         GuidList m_lDeathwhisperCultistsGuids;
-        GuidSet m_sDarkfallenCreaturesGuids;
+        GuidSet m_sDarkfallenCreaturesLowerGuids;
+        GuidSet m_sDarkfallenCreaturesLeftGuids;
+        GuidSet m_sDarkfallenCreaturesRightGuids;
 };
 
 #endif

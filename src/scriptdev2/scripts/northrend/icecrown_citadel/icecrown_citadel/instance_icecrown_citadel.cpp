@@ -176,7 +176,14 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_DARKFALLEN_BLOOD_KNIGHT:
         case NPC_DARKFALLEN_ADVISOR:
             if (pCreature->GetPositionZ() < 352.0f)
-                m_sDarkfallenCreaturesGuids.insert(pCreature->GetObjectGuid());
+                m_sDarkfallenCreaturesLowerGuids.insert(pCreature->GetObjectGuid());
+            else if (pCreature->GetPositionZ() < 400.0f)
+            {
+                if (pCreature->GetPositionY() < 2800.0f)
+                    m_sDarkfallenCreaturesRightGuids.insert(pCreature->GetObjectGuid());
+                else
+                    m_sDarkfallenCreaturesLeftGuids.insert(pCreature->GetObjectGuid());
+            }
             return;
     }
 }
@@ -335,12 +342,21 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[TYPE_VALITHRIA] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
-        case GO_EMPOWERING_BLOOD_ORB:
-            if (m_auiEncounter[TYPE_BLOOD_WING_ENTRANCE] == DONE)
-                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
-            break;
     }
     m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+}
+
+void instance_icecrown_citadel::OnCreatureEnterCombat(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_DARFALLEN_NOBLE:
+        case NPC_DARKFALLEN_ARCHMAGE:
+        case NPC_DARKFALLEN_BLOOD_KNIGHT:
+        case NPC_DARKFALLEN_ADVISOR:
+            // ToDo: cast SPELL_SIPHON_ESSENCE on combat
+            return;
+    }
 }
 
 void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
@@ -373,12 +389,40 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
         case NPC_DARKFALLEN_ARCHMAGE:
         case NPC_DARKFALLEN_BLOOD_KNIGHT:
         case NPC_DARKFALLEN_ADVISOR:
-            if (m_sDarkfallenCreaturesGuids.find(pCreature->GetObjectGuid()) != m_sDarkfallenCreaturesGuids.end())
+            // lower pack
+            if (m_sDarkfallenCreaturesLowerGuids.find(pCreature->GetObjectGuid()) != m_sDarkfallenCreaturesLowerGuids.end())
             {
-                m_sDarkfallenCreaturesGuids.erase(pCreature->GetObjectGuid());
+                m_sDarkfallenCreaturesLowerGuids.erase(pCreature->GetObjectGuid());
 
-                if (m_sDarkfallenCreaturesGuids.empty())
+                if (m_sDarkfallenCreaturesLowerGuids.empty())
+                {
                     SetData(TYPE_BLOOD_WING_ENTRANCE, DONE);
+
+                    if (GameObject* pOrb = GetClosestGameObjectWithEntry(pCreature, GO_EMPOWERING_BLOOD_ORB, 30.0f))
+                        DoToggleGameObjectFlags(pOrb->GetObjectGuid(), GO_FLAG_NO_INTERACT, false);
+                }
+            }
+            // left pack
+            else if (m_sDarkfallenCreaturesLeftGuids.find(pCreature->GetObjectGuid()) != m_sDarkfallenCreaturesLeftGuids.end())
+            {
+                m_sDarkfallenCreaturesLeftGuids.erase(pCreature->GetObjectGuid());
+
+                if (m_sDarkfallenCreaturesLeftGuids.empty())
+                {
+                    if (GameObject* pOrb = GetClosestGameObjectWithEntry(pCreature, GO_EMPOWERING_BLOOD_ORB, 30.0f))
+                        DoToggleGameObjectFlags(pOrb->GetObjectGuid(), GO_FLAG_NO_INTERACT, false);
+                }
+            }
+            // right pack
+            else if (m_sDarkfallenCreaturesRightGuids.find(pCreature->GetObjectGuid()) != m_sDarkfallenCreaturesRightGuids.end())
+            {
+                m_sDarkfallenCreaturesRightGuids.erase(pCreature->GetObjectGuid());
+
+                if (m_sDarkfallenCreaturesRightGuids.empty())
+                {
+                    if (GameObject* pOrb = GetClosestGameObjectWithEntry(pCreature, GO_EMPOWERING_BLOOD_ORB, 30.0f))
+                        DoToggleGameObjectFlags(pOrb->GetObjectGuid(), GO_FLAG_NO_INTERACT, false);
+                }
             }
             return;
     }
@@ -597,10 +641,7 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
         case TYPE_BLOOD_WING_ENTRANCE:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-            {
                 DoUseDoorOrButton(GO_CRIMSON_HALL_DOOR);
-                DoToggleGameObjectFlags(GO_EMPOWERING_BLOOD_ORB, GO_FLAG_NO_INTERACT, false);
-            }
             break;
         case TYPE_FROST_WING_ENTRANCE:
             m_auiEncounter[uiType] = uiData;
