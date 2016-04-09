@@ -782,17 +782,19 @@ UPDATE creature_template SET ScriptName='mob_little_ooze' WHERE entry=36897;
 UPDATE creature_template SET ScriptName='mob_big_ooze' WHERE entry=36899;
 UPDATE creature_template SET ScriptName='boss_valithria_dreamwalker' WHERE entry=36789;
 UPDATE creature_template SET ScriptName='boss_professor_putricide' WHERE entry=36678;
+UPDATE creature_template SET ScriptName='npc_putricides_trap' WHERE entry=38879;
 UPDATE creature_template SET ScriptName='boss_the_lich_king_icc' WHERE entry=36597;
 UPDATE gameobject_template SET ScriptName='go_icc_teleporter' WHERE entry IN (202235,202242,202243,202244,202245,202246);
 DELETE FROM scripted_event_id WHERE id IN (23426,23438);
 INSERT INTO scripted_event_id VALUES
 (23426,'event_gameobject_citadel_valve'),
 (23438,'event_gameobject_citadel_valve');
-DELETE FROM scripted_areatrigger WHERE entry IN (5604,5611,5612,5709,5718,5732);
+DELETE FROM scripted_areatrigger WHERE entry IN (5604,5611,5612,5647,5709,5718,5732);
 INSERT INTO scripted_areatrigger VALUES
 (5604,'at_icecrown_citadel'),
 (5611,'at_lights_hammer'),
 (5612,'at_lights_hammer'),
+(5647,'at_putricides_trap'),
 (5709,'at_icecrown_citadel'),
 (5718,'at_frozen_throne_tele'),
 (5732,'at_icecrown_citadel');

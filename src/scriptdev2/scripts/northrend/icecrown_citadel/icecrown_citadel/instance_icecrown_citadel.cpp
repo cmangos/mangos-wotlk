@@ -160,6 +160,7 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_SPINESTALKER:
         case NPC_VALITHRIA_COMBAT_TRIGGER:
         case NPC_BLOOD_ORB_CONTROL:
+        case NPC_PUTRICIDES_TRAP:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_DEATHWHISPER_SPAWN_STALKER:
@@ -202,7 +203,10 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
             // ToDo: set in motion when TYPE_LADY_DEATHWHISPER == DONE
             break;
         case GO_SAURFANG_DOOR:
+            break;
         case GO_SCIENTIST_DOOR:
+            if (m_auiEncounter[TYPE_PLAGUE_WING_ENTRANCE] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_CRIMSON_HALL_DOOR:
             if (m_auiEncounter[TYPE_BLOOD_WING_ENTRANCE] == DONE)
@@ -508,11 +512,6 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                 DoUseDoorOrButton(GO_SAURFANG_DOOR);
                 DoRespawnGameObject(GO_SAURFANG_CACHE, 60 * MINUTE);
                 DoToggleGameObjectFlags(GO_SAURFANG_CACHE, GO_FLAG_NO_INTERACT, false);
-
-                // Note: these doors may not be correct. In theory the doors should be already opened
-                DoUseDoorOrButton(GO_SCIENTIST_DOOR);
-                DoUseDoorOrButton(GO_CRIMSON_HALL_DOOR);
-                DoUseDoorOrButton(GO_GREEN_DRAGON_ENTRANCE);
             }
             else if (uiData == IN_PROGRESS)
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_MADE_A_MESS, true);
@@ -648,6 +647,26 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_GREEN_DRAGON_ENTRANCE);
             break;
+        case TYPE_PLAGUE_WING_ENTRANCE:
+            m_auiEncounter[uiType] = uiData;
+            // combat door
+            DoUseDoorOrButton(GO_SCIENTIST_DOOR_COLLISION);
+            if (uiData == DONE)
+                DoUseDoorOrButton(GO_SCIENTIST_DOOR);
+            // combat doors with custom anim
+            else if (uiData == IN_PROGRESS)
+            {
+                DoUseDoorOrButton(GO_SCIENTIST_DOOR_GREEN);
+                DoUseDoorOrButton(GO_SCIENTIST_DOOR_ORANGE);
+            }
+            if (uiData == FAIL || uiData == DONE)
+            {
+                if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_SCIENTIST_DOOR_GREEN))
+                    pDoor->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_SCIENTIST_DOOR_ORANGE))
+                    pDoor->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+            }
+            break;
         default:
             script_error_log("Instance Icecrown Citadel: ERROR SetData = %u for type %u does not exist/not implemented.", uiType, uiData);
             return;
@@ -663,7 +682,7 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                    << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " "
                    << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
                    << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11] << " "
-                   << m_auiEncounter[12] << " " << m_auiEncounter[13];
+                   << m_auiEncounter[12] << " " << m_auiEncounter[13] << " " << m_auiEncounter[14];
 
         m_strInstData = saveStream.str();
 
@@ -719,7 +738,7 @@ void instance_icecrown_citadel::Load(const char* strIn)
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11]
-               >> m_auiEncounter[12] >> m_auiEncounter[13];
+               >> m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {

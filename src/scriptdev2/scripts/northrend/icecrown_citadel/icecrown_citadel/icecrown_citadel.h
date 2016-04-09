@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER                   = 14,
+    MAX_ENCOUNTER                   = 15,
 
     TYPE_MARROWGAR                  = 0,
     TYPE_LADY_DEATHWHISPER          = 1,
@@ -23,6 +23,7 @@ enum
     TYPE_LICH_KING                  = 11,
     TYPE_BLOOD_WING_ENTRANCE        = 12,
     TYPE_FROST_WING_ENTRANCE        = 13,
+    TYPE_PLAGUE_WING_ENTRANCE       = 14,
 
     // NPC entries
     NPC_LORD_MARROWGAR              = 36612,
@@ -48,6 +49,7 @@ enum
     NPC_SKYBREAKER_MARINE           = 37830,
     NPC_ALLIANCE_MARINE             = 37830,
     NPC_BLOOD_ORB_CONTROL           = 38008,
+    NPC_PUTRICIDES_TRAP             = 38879,        // Handles trap event before Putricide
     NPC_LANATHEL_INTRO              = 38004,
     NPC_VALITHRIA_QUEST             = 38589,
     NPC_VALITHRIA_COMBAT_TRIGGER    = 38752,
@@ -171,6 +173,7 @@ enum
     AT_SINDRAGOSA_PLATFORM          = 5604,
     AT_LIGHTS_HAMMER_INTRO_1        = 5611,
     AT_LIGHTS_HAMMER_INTRO_2        = 5612,
+    AT_PUTRICIDES_TRAP              = 5647,
     AT_DEATHWHISPER_INTRO           = 5709,
     AT_FROZEN_THRONE_TELE           = 5718,
     AT_MARROWGAR_INTRO              = 5732,
