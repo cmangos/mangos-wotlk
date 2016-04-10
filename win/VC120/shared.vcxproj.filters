@@ -87,9 +87,6 @@
     <ClCompile Include="..\..\src\shared\Database\SqlPreparedStatement.cpp">
       <Filter>Database</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\shared\Network\NetworkThread.cpp">
-      <Filter>Network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\shared\Network\Socket.cpp">
       <Filter>Network</Filter>
     </ClCompile>

@@ -26,16 +26,18 @@
 
 #include <boost/asio.hpp>
 
+#include "Platform/Define.h"
+
 #include "PacketBuffer.hpp"
 
 namespace MaNGOS
 {
-    class Socket
+    class MANGOS_DLL_SPEC Socket
     {
         private:
             // buffer timeout period, in milliseconds.  higher values decrease responsiveness
             // ingame but increase bandwidth efficiency by reducing tcp overhead.
-            const int BufferTimeout = 50;
+            static const int BufferTimeout = 50;
 
             enum class WriteState
             {

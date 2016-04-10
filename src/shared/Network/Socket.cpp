@@ -83,6 +83,7 @@ void Socket::OnRead(const boost::system::error_code &error, size_t length)
 {
     if (error)
     {
+        m_readState = ReadState::Idle;
         OnError(error);
         return;
     }
@@ -152,7 +153,8 @@ void Socket::OnRead(const boost::system::error_code &error, size_t length)
 void Socket::OnError(const boost::system::error_code &error)
 {
     // skip logging this code because it happens whenever anyone disconnects.  reduces spam.
-    if (error != boost::asio::error::eof)
+    if (error != boost::asio::error::eof &&
+        error != boost::asio::error::operation_aborted)
         sLog.outBasic("Socket::OnError.  %s.  Connection closed.", error.message().c_str());
 
     if (!IsClosed())

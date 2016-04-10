@@ -131,7 +131,7 @@ class WorldSocket : public MaNGOS::Socket
         void FinalizeSession() { m_sessionFinalized = true; }
 
         virtual bool Open() override;
-        virtual bool Deletable() const override { return m_sessionFinalized && Socket::Deletable(); }
+        virtual bool Deletable() const override { return (m_sessionFinalized || IsClosed()) && Socket::Deletable(); }
 
         /// Return the session key
         BigNumber &GetSessionKey() { return m_s; }

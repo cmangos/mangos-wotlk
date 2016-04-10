@@ -36,7 +36,7 @@ namespace MaNGOS
     class NetworkThread
     {
         private:
-            const int WorkDelay = 500;
+            static const int WorkDelay = 500;
 
             boost::asio::io_service m_service;
 
@@ -47,6 +47,9 @@ namespace MaNGOS
             boost::asio::io_service::work m_work;
 
             std::mutex m_closingSocketLock;
+            // most people think that you should always use a vector rather than a list, but i believe that this is an exception
+            // because this collection can potentially get rather large and we will frequently be removing elements at an arbitrary
+            // position within it.
             std::list<std::unique_ptr<SocketType>> m_closingSockets;
 
             std::atomic<bool> m_pendingShutdown;
@@ -66,6 +69,16 @@ namespace MaNGOS
 
             ~NetworkThread()
             {
+                // we do not lock the list here because Close() will call RemoveSocket which needs the lock
+                while (!m_sockets.empty())
+                {
+                    // if it is already closed (which can happen with the placeholder socket for a pending accept), just remove it
+                    if (m_sockets.front()->IsClosed())
+                        m_sockets.erase(m_sockets.begin());
+                    else
+                        m_sockets.front()->Close();
+                }
+
                 m_pendingShutdown = true;
                 m_socketCleanupThread.join();
             }
@@ -83,6 +96,7 @@ namespace MaNGOS
                     if (i->get() == socket)
                     {
                         m_closingSockets.push_front(std::move(*i));
+                        m_sockets.erase(i);
                         return;
                     }
             }
@@ -91,14 +105,20 @@ namespace MaNGOS
     template <typename SocketType>
     void NetworkThread<SocketType>::SocketCleanupWork()
     {
-        while (!m_pendingShutdown)
+        while (!m_pendingShutdown || !m_closingSockets.empty())
         {
             {
                 std::lock_guard<std::mutex> guard(m_closingSocketLock);
 
                 for (auto i = m_closingSockets.begin(); i != m_closingSockets.end(); i++)
                     if (i->get()->Deletable())
+                    {
                         i = m_closingSockets.erase(i);
+
+                        // avoid incrementing the end iterator
+                        if (i == m_closingSockets.end())
+                            break;
+                    }
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(WorkDelay));
