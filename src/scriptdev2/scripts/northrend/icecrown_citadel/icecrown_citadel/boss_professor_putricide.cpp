@@ -116,7 +116,9 @@ enum Phase
 
 enum Waypoint
 {
-    POINT_PUTRICIDE_SPAWN = 1
+    POINT_PUTRICIDE_SPAWN = 1,
+    POINT_FESTERGUT_BALCONY = 101,
+    POINT_ROTFACE_BALCONY   = 102,
 };
 
 static const float fPutricidePosition[1][3] =
@@ -153,6 +155,15 @@ struct boss_professor_putricideAI : public ScriptedAI
         m_uiUnstableExperimentTimer = 20000;
         m_uiUnboundPlagueTimer      = 10000;
         m_uiChokingGasBombTimer     = urand(10000, 15000);
+
+        // set or remove not selectable flag depending on Festergut and Rotface
+        if (m_pInstance)
+        {
+            if (m_pInstance->GetData(TYPE_ROTFACE) != DONE || m_pInstance->GetData(TYPE_FESTERGUT) != DONE)
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            else
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -162,6 +173,10 @@ struct boss_professor_putricideAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
+        // no attacking during the Festergut / Rotface encounters
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            return;
+
         if (m_pInstance)
             m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, IN_PROGRESS);
 
@@ -180,6 +195,14 @@ struct boss_professor_putricideAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, FAIL);
+    }
+    void AttackStart(Unit* pWho) override
+    {
+        // no attacking during the Festergut / Rotface encounters
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            return;
+
+        ScriptedAI::AttackStart(pWho);
     }
 
     void MovementInform(uint32 uiMovementType, uint32 uiData) override
@@ -222,10 +245,18 @@ struct boss_professor_putricideAI : public ScriptedAI
                 m_uiPhase = PHASE_TRANSITION_TWO;           // waiting for entering phase 3
             }
         }
+        else if (uiData == POINT_FESTERGUT_BALCONY)
+            m_creature->SetFacingTo(3.316f);
+        else if (uiData == POINT_ROTFACE_BALCONY)
+            m_creature->SetFacingTo(5.822f);
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        // no attacking during the Festergut / Rotface encounters
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            return;
+
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 

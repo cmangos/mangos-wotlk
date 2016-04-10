@@ -161,6 +161,7 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_VALITHRIA_COMBAT_TRIGGER:
         case NPC_BLOOD_ORB_CONTROL:
         case NPC_PUTRICIDES_TRAP:
+        case NPC_GAS_STALKER:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_DEATHWHISPER_SPAWN_STALKER:
@@ -400,7 +401,8 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
 
                 if (m_sDarkfallenCreaturesLowerGuids.empty())
                 {
-                    SetData(TYPE_BLOOD_WING_ENTRANCE, DONE);
+                    if (GetData(TYPE_BLOOD_WING_ENTRANCE) != DONE)
+                        SetData(TYPE_BLOOD_WING_ENTRANCE, DONE);
 
                     if (GameObject* pOrb = GetClosestGameObjectWithEntry(pCreature, GO_EMPOWERING_BLOOD_ORB, 30.0f))
                         DoToggleGameObjectFlags(pOrb->GetObjectGuid(), GO_FLAG_NO_INTERACT, false);

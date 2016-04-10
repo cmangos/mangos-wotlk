@@ -50,6 +50,7 @@ enum
     NPC_ALLIANCE_MARINE             = 37830,
     NPC_BLOOD_ORB_CONTROL           = 38008,
     NPC_PUTRICIDES_TRAP             = 38879,        // Handles trap event before Putricide
+    NPC_GAS_STALKER                 = 36659,        // Handles the gas in Festergut room
     NPC_LANATHEL_INTRO              = 38004,
     NPC_VALITHRIA_QUEST             = 38589,
     NPC_VALITHRIA_COMBAT_TRIGGER    = 38752,
@@ -179,6 +180,7 @@ enum
     AT_MARROWGAR_INTRO              = 5732,
 
     // Spells
+    SPELL_SOUL_FEAST                = 71203,            // kill credit for 38121
     SPELL_FULL_HOUSE_ACHIEV_CHECK   = 72827,
     SPELL_SIPHON_ESSENCE            = 70299,
 

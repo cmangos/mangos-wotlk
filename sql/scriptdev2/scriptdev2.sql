@@ -777,6 +777,8 @@ UPDATE creature_template SET ScriptName='npc_rimefang_icc' WHERE entry=37533;
 UPDATE creature_template SET ScriptName='npc_spinestalker_icc' WHERE entry=37534;
 UPDATE creature_template SET ScriptName='mob_frost_bomb' WHERE entry=37186;
 UPDATE creature_template SET ScriptName='boss_festergut' WHERE entry=36626;
+UPDATE creature_template SET ScriptName='npc_puddle_stalker' WHERE entry=37013;
+UPDATE creature_template SET ScriptName='npc_orange_gas_stalker' WHERE entry=36659;
 UPDATE creature_template SET ScriptName='boss_rotface' WHERE entry=36627;
 UPDATE creature_template SET ScriptName='mob_little_ooze' WHERE entry=36897;
 UPDATE creature_template SET ScriptName='mob_big_ooze' WHERE entry=36899;
@@ -6168,7 +6170,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1631082,'Fun time!',16901,1,0,0,'festergut SAY_AGGRO'),
 (-1631083,'Just an ordinary gas cloud. But watch out, because that\'s no ordinary gas cloud! ',17119,1,0,0,'putricide SAY_BLIGHT'),
 (-1631084,'%s farts.',16911,2,0,0,'festergut SAY_SPORE'), -- TODO Can be wrong
-(-1631085,'Gyah! Uhhh, I not feel so good...',16906,1,0,0,'festergut SAY_PUNGUENT_BLIGHT'),
+(-1631085,'I not feel so good...',16906,1,0,0,'festergut SAY_PUNGUENT_BLIGHT'),
 (-1631086,'%s vomits',0,2,0,0,'festergut SAY_PUNGUENT_BLIGHT_EMOTE'), -- TODO Can be wrong
 (-1631087,'Daddy, I did it',16902,1,0,0,'festergut SAY_SLAY_1'),
 (-1631088,'Dead, dead, dead!',16903,1,0,0,'festergut SAY_SLAY_2'),
@@ -6294,7 +6296,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1631197,'Invocation of Blood jumps to %s!',0,3,0,0,'blood_princes EMOTE_INVOCATION'),
 (-1631198,'%s begins casting Empowered Shock Vortex!',0,3,0,0,'valanar EMOTE_SHOCK_VORTEX'),
-(-1631199,'%s speed toward $N!',0,3,0,0,'taldaram EMOTE_FLAMES');
+(-1631199,'%s speed toward $N!',0,3,0,0,'taldaram EMOTE_FLAMES'),
+
+(-1631200,'Terrible news everyone. Rotface is dead, but great news everyone! He left behind plenty of ooze for me to use! What? I\'m a poet and I didn\'t know it.... Astounding!',17146,1,0,0,'festergut SAY_BLIGHT_2'),
+(-1631201,'%s releases Gas Spores!',0,3,0,0,'festergut EMOTE_SPORES');
 
 -- -1 632 000 ICC: FORGE OF SOULS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

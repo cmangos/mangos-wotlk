@@ -54,6 +54,7 @@ enum
     // Ooze Flood
     SPELL_OOZE_FLOOD_PERIODIC   = 70069, // periodically trigger ooze flood
     SPELL_OOZE_FLOOD_REMOVE     = 70079,
+    SPELL_OOZE_FLOOD_TRIGGER    = 69795,            // cast by Putricide
 
     // Little Ooze
     SPELL_STICKY_OOZE           = 69774,
@@ -69,6 +70,9 @@ enum
     SPELL_BIG_OOZE_BUFF_COMB    = 69611, // periodic check
     SPELL_UNSTABLE_EXPLOSION    = 69839,
 
+    // heroic spells
+    SPELL_VILE_TRIGGER          = 72285,            // triggers 72287 which spawns 38548; Putricide casts 72272 on the spawned npc
+
     MAX_MUTATE_INFACTION_STEPS  = 5,
 };
 
@@ -80,6 +84,8 @@ static const uint32 uiMutatedInfections[MAX_MUTATE_INFACTION_STEPS] =
     SPELL_MUTATED_INFECTION_4,
     SPELL_MUTATED_INFECTION_5
 };
+
+static const float afBalconyLocation[3] = {4390.371f, 3164.5f, 389.389f};
 
 struct boss_rotfaceAI : public ScriptedAI
 {
