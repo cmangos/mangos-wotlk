@@ -420,7 +420,6 @@ enum RealmZone
 };
 
 /// Storage class for commands issued for delayed execution
-// FIXME - once SOAP is ported to C++11/ASIO this structure can be simplified by use of lambdas in handlers
 struct CliCommandHolder
 {
     typedef std::function<void(const char *)> Print;
