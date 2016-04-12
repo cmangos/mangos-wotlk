@@ -36,7 +36,7 @@ namespace MaNGOS
     class NetworkThread
     {
         private:
-            static const int WorkDelay = 500;
+            static const int WorkDelay;
 
             boost::asio::io_service m_service;
 
@@ -101,6 +101,9 @@ namespace MaNGOS
                     }
             }
     };
+
+    template <typename SocketType>
+    const int NetworkThread<SocketType>::WorkDelay = 500;
 
     template <typename SocketType>
     void NetworkThread<SocketType>::SocketCleanupWork()
