@@ -570,6 +570,8 @@ UPDATE gameobject_template SET ScriptName='go_defias_cannon' WHERE entry=16398;
 UPDATE creature_template SET ScriptName='npc_aged_dying_ancient_kodo' WHERE entry IN (4700, 4701, 4702, 11627);
 UPDATE creature_template SET ScriptName='npc_dalinda_malem' WHERE entry=5644;
 UPDATE creature_template SET ScriptName='npc_melizza_brimbuzzle' WHERE entry=12277;
+UPDATE creature_template SET ScriptName='npc_cork_gizelton' WHERE entry=11625;
+UPDATE creature_template SET ScriptName='npc_rigger_gizelton' WHERE entry=11626;
 
 /* DIRE MAUL */
 UPDATE instance_template SET ScriptName='instance_dire_maul' WHERE map=429;
@@ -2914,7 +2916,15 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001187,'Gah! I spent too much time in that weak little shell.',14426,1,0,0,'malganis_icecrown SAY_TRANSFORM'),
 (-1001188,'Kirel narak! I am Mal\'Ganis. I AM ETERNAL!',14427,1,0,0,'malganis_icecrown SAY_20_HP'),
 (-1001189,'ENOUGH! I waste my time here. I must gather my strength on the homeworld.',14428,1,0,0,'malganis_icecrown SAY_DEFEATED'),
-(-1001190,'You\'ll never defeat the Lich King without my forces. I\'ll have my revenge... on him AND you!',14429,1,0,0,'malganis_icecrown SAY_ESCAPE');
+(-1001190,'You\'ll never defeat the Lich King without my forces. I\'ll have my revenge... on him AND you!',14429,1,0,0,'malganis_icecrown SAY_ESCAPE'),
+
+(-1001191,'Hey, you call yourself a body guard? Get to work and protect us...',0,0,0,0,'SAY_CORK_AMBUSH1'),
+(-1001192,'Mister body guard, are you going to earn your money or what?',0,0,0,0,'SAY_CORK_AMBUSH2'),
+(-1001193,'You\'re fired! <Cough...Cork clears throat.> I mean, help!',0,0,0,0,'SAY_CORK_AMBUSH3'),
+(-1001194,'Blast those stupid centaurs! Sigh - well, it seems you kept your bargain. Up the road you shall find Smeed Scrabblescrew, he has your money.',0,0,0,1,'SAY_CORK_END'),
+(-1001195,'Eeck! Demons hungry for the kodos!',0,0,0,0,'SAY_RIGGER_AMBUSH1'),
+(-1001196,'What am I paying you for? The kodos are nearly dead!',0,0,0,0,'SAY_RIGGER_AMBUSH2'),
+(-1001197,'Wow! We did it... not sure why we thought we needed the likes of you. Nevertheless, speak with Smeed Srablescrew; he will give you your earnings!',0,0,0,0,'SAY_RIGGER_END');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
