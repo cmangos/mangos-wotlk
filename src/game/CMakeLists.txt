@@ -23,7 +23,7 @@ add_definitions(-DDT_POLYREF64)
 # include external dependencies libs headers (warnings disabled)
 include_directories(SYSTEM
   ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
-  ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour
+  ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour/Include
   ${CMAKE_SOURCE_DIR}/dep/recastnavigation
   ${CMAKE_SOURCE_DIR}/dep/include
   ${MYSQL_INCLUDE_DIR}
