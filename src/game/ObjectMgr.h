@@ -35,7 +35,7 @@
 #include "ObjectGuid.h"
 
 #include <map>
-#include <limits>
+#include <climits>
 
 class Group;
 class ArenaTeam;
