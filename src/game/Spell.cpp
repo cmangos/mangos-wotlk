@@ -3019,11 +3019,8 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
     }
 
-    // execute triggered without cast time explicitly in call point
-    if (!m_timer)
-        cast(true);
     // add non-triggered (with cast time and without)
-    else if (!m_IsTriggeredSpell)
+    if (!m_IsTriggeredSpell)
     {
         // add to cast type slot
         m_caster->SetCurrentCastedSpell(this);
@@ -3032,8 +3029,14 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
         SendSpellStart();
 
         TriggerGlobalCooldown();
-    }
 
+        // Execute instant spells immediate
+        if (m_timer == 0 && !IsNextMeleeSwingSpell() && !IsAutoRepeat() && !IsChanneledSpell(m_spellInfo))
+            cast();
+    }
+    // execute triggered without cast time explicitly in call point
+    else if (m_timer == 0)
+        cast(true);
     // else triggered with cast time will execute execute at next tick or later
     // without adding to cast type slot
     // will not show cast bar but will show effects at casting time etc
