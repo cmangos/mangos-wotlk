@@ -100,6 +100,8 @@ INSERT INTO scripted_areatrigger VALUES
 (5716, 'at_hot_on_the_trail');
 DELETE FROM scripted_areatrigger WHERE entry=3587;
 INSERT INTO scripted_areatrigger VALUES (3587,'at_ancient_leaf');
+DELETE FROM scripted_areatrigger WHERE entry=4479;
+INSERT INTO scripted_areatrigger VALUES (4479,'at_haramad_teleport');
 
 
 /* BATTLEGROUNDS */

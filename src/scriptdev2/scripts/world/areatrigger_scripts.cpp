@@ -412,6 +412,25 @@ bool AreaTrigger_at_ancient_leaf(Player* pPlayer, AreaTriggerEntry const* pAt)
     return false;
 }
 
+/*######
+## at_haramad_teleport
+######*/
+
+enum
+{
+    QUEST_SPECIAL_DELIVERY_TO_SHATTRATH = 10280
+};
+
+static const WorldLocation haramadTeleportDest(530, -1810.465, 5323.083, -12.428, 2.040);
+
+bool AreaTrigger_at_haramad_teleport(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
+{
+    if (pPlayer->IsCurrentQuest(QUEST_SPECIAL_DELIVERY_TO_SHATTRATH))
+        pPlayer->TeleportTo(haramadTeleportDest);
+
+    return false;
+}
+
 void AddSC_areatrigger_scripts()
 {
     Script* pNewScript;
@@ -479,5 +498,10 @@ void AddSC_areatrigger_scripts()
     pNewScript = new Script;
     pNewScript->Name = "at_ancient_leaf";
     pNewScript->pAreaTrigger = &AreaTrigger_at_ancient_leaf;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_haramad_teleport";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_haramad_teleport;
     pNewScript->RegisterSelf();
 }
