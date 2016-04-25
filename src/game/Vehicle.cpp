@@ -153,6 +153,9 @@ void VehicleInfo::Initialize()
     if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDPITCHING)
         pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDPITCHING);
 
+    if (vehicleFlags & VEHICLE_FLAG_FIXED_POSITION)
+        pVehicle->SetRoot(true);
+
     // Initialize power type based on DBC values (creatures only)
     if (pVehicle->GetTypeId() == TYPEID_UNIT)
     {

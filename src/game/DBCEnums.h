@@ -486,7 +486,7 @@ enum VehicleFlags
     VEHICLE_FLAG_UNK11              = 0x00040000,
     VEHICLE_FLAG_UNK12              = 0x00080000,
     VEHICLE_FLAG_UNK13              = 0x00100000,
-    VEHICLE_FLAG_UNK14              = 0x00200000,
+    VEHICLE_FLAG_FIXED_POSITION     = 0x00200000,           // Used for vehicles that have a fixed position, such as cannons
     VEHICLE_FLAG_DISABLE_SWITCH     = 0x00400000,           // Can't change seats, VEHICLE_ID = 335 chopper
     VEHICLE_FLAG_UNK15              = 0x00800000,
     VEHICLE_FLAG_UNK16              = 0x01000000,
