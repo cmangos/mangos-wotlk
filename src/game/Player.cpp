@@ -20151,10 +20151,6 @@ void Player::SendAurasForTarget(Unit* target)
     data << target->GetPackGUID();
 
     Unit::VisibleAuraMap const& visibleAuras = target->GetVisibleAuras();
-
-    if (visibleAuras.empty())
-        return;
-
     for (Unit::VisibleAuraMap::const_iterator itr = visibleAuras.begin(); itr != visibleAuras.end(); ++itr)
     {
         SpellAuraHolderConstBounds bounds = target->GetSpellAuraHolderBounds(itr->second);
