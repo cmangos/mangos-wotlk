@@ -2160,6 +2160,17 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
         for (std::vector <LootStoreItem const*>::const_iterator itr = lootStoreItemVector.begin(); itr != lootStoreItemVector.end(); ++itr)
         {
             LootStoreItem const* lsi = *itr;
+
+            //check if we already have that item in the loot list
+            if (loot.IsItemAlreadyIn(lsi->itemid))
+            {
+                // the item is already looted, let's give a 50%  chance to pick another one
+                uint32 chance = urand(0,1);
+
+                if (chance)
+                    continue;                               // pass this item
+            }
+
             if (lsi->conditionId && !sObjectMgr.IsPlayerMeetToCondition(lsi->conditionId, lootOwner, lootOwner->GetMap(), loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT))
             {
                 sLog.outDebug("In equal chance -> This item cannot be added! (%u)", lsi->itemid);
