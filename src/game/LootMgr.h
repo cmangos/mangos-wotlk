@@ -315,7 +315,7 @@ private:
     void ForceLootAnimationCLientUpdate();
     void SetPlayerIsLooting(Player* player);
     void SetPlayerIsNotLooting(Player* player);
-    bool GetLootContentFor(Player* player, ByteBuffer& buffer);
+    void GetLootContentFor(Player* player, ByteBuffer& buffer);
     // What is looted
     WorldObject*     m_lootTarget;
     Item*            m_itemTarget;
