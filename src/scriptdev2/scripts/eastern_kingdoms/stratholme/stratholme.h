@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER               = 10,
+    MAX_ENCOUNTER               = 11,
     MAX_SILVERHAND              = 5,
     MAX_ZIGGURATS               = 3,
 
@@ -18,9 +18,10 @@ enum
     TYPE_RAMSTEIN               = 4,
     TYPE_BARON                  = 5,
     TYPE_BARTHILAS_RUN          = 6,
-    TYPE_BLACK_GUARDS           = 7,
-    TYPE_POSTMASTER             = 8,
-    TYPE_TRUE_MASTERS           = 9,
+    TYPE_AURIUS                 = 7,
+    TYPE_BLACK_GUARDS           = 8,
+    TYPE_POSTMASTER             = 9,
+    TYPE_TRUE_MASTERS           = 10,
 
     NPC_TIMMY_THE_CRUEL         = 10808,
     NPC_BARTHILAS               = 10435,
@@ -41,6 +42,7 @@ enum
     NPC_CRIMSON_GALLANT         = 10424,
     NPC_CRIMSON_GUARDSMAN       = 10418,
     NPC_CRIMSON_CONJURER        = 10419,
+    NPC_AURIUS                  = 10917,
     NPC_UNDEAD_POSTMAN          = 11142,
     NPC_GREGOR_THE_JUSTICIAR    = 17910,                    // related to quest "True Masters of the Light"
     NPC_CATHELA_THE_SEEKER      = 17911,
@@ -63,6 +65,7 @@ enum
     GO_YSIDA_CAGE               = 181071,                   // Cage to open after baron event is done
 
     QUEST_DEAD_MAN_PLEA         = 8945,
+    QUEST_MEDALLION_FAITH       = 5122,
     SPELL_BARON_ULTIMATUM       = 27861,                    // Aura for player during the run (visual icon)
     SPELL_BARON_SOUL_DRAIN      = 27640,                    // Used by the Baron to kill Ysida
     SPELL_YSIDA_FREED           = 27773,                    // Argent Dawn extra-reputation reward on successful Baron run
@@ -83,6 +86,9 @@ enum
     SAY_ANNOUNCE_RAMSTEIN       = -1329013,
     SAY_UNDEAD_DEFEAT           = -1329014,
     SAY_EPILOGUE                = -1329015,
+
+    YELL_AURIUS_AGGRO           = -1329021,
+    SAY_AURIUS_DEATH            = -1329022,
 };
 
 struct EventLocation
@@ -151,6 +157,7 @@ class instance_stratholme : public ScriptedInstance
         uint32 m_uiBarthilasRunTimer;
         uint32 m_uiMindlessSummonTimer;
         uint32 m_uiSlaugtherSquareTimer;
+        uint32 m_uiAuriusSummonTimer;
 
         uint32 m_uiYellCounter;
         uint32 m_uiMindlessCount;
