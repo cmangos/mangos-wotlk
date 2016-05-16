@@ -87,10 +87,6 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
-
     uint32 charterid;
     uint32 cost;
     uint32 type;
@@ -912,10 +908,6 @@ void WorldSession::SendPetitionShowList(ObjectGuid guid)
         DEBUG_LOG("WORLD: HandlePetitionShowListOpcode - %s not found or you can't interact with him.", guid.GetString().c_str());
         return;
     }
-
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     uint8 count;
     if (pCreature->isTabardDesigner())

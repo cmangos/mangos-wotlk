@@ -45,10 +45,6 @@ void WorldSession::HandleAuctionHelloOpcode(WorldPacket& recv_data)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
-
     SendAuctionHello(unit);
 }
 
@@ -287,10 +283,6 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
             return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
-
     for (uint32 i = 0; i < itemCount; ++i)
     {
         ObjectGuid itemGuid = guids[i];
@@ -390,10 +382,6 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recv_data)
     // always return pointer
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(auctionHouseEntry);
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
-
     AuctionEntry* auction = auctionHouse->GetAuction(auctionId);
     Player* pl = GetPlayer();
 
@@ -468,10 +456,6 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recv_data)
 
     // always return pointer
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(auctionHouseEntry);
-
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     AuctionEntry* auction = auctionHouse->GetAuction(auctionId);
     Player* pl = GetPlayer();
@@ -548,10 +532,6 @@ void WorldSession::HandleAuctionListBidderItems(WorldPacket& recv_data)
     // always return pointer
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(auctionHouseEntry);
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
-
     WorldPacket data(SMSG_AUCTION_BIDDER_LIST_RESULT, (4 + 4 + 4));
     Player* pl = GetPlayer();
     data << uint32(0);                                      // add 0 as count
@@ -594,10 +574,6 @@ void WorldSession::HandleAuctionListOwnerItems(WorldPacket& recv_data)
 
     // always return pointer
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(auctionHouseEntry);
-
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     WorldPacket data(SMSG_AUCTION_OWNER_LIST_RESULT, (4 + 4 + 4));
     data << uint32(0);                                      // amount place holder
@@ -666,10 +642,6 @@ void WorldSession::HandleAuctionListItems(WorldPacket& recv_data)
 
     AuctionSorter sorter(Sort, GetPlayer());
     std::sort(auctions.begin(), auctions.end(), sorter);
-
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     // DEBUG_LOG("Auctionhouse search %s list from: %u, searchedname: %s, levelmin: %u, levelmax: %u, auctionSlotID: %u, auctionMainCategory: %u, auctionSubCategory: %u, quality: %u, usable: %u",
     //  auctioneerGuid.GetString().c_str(), listfrom, searchedname.c_str(), levelmin, levelmax, auctionSlotID, auctionMainCategory, auctionSubCategory, quality, usable);
