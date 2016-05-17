@@ -1701,7 +1701,7 @@ void GameObject::Use(Unit* user)
     SpellCastTargets targets;
     targets.setUnitTarget(user);
 
-    spell->prepare(&targets);
+    spell->SpellStart(&targets);
 }
 
 // overwrite WorldObject function for proper name localization

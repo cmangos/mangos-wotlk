@@ -6462,7 +6462,7 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
         Spell* spell = new Spell(m_caster, spellInfo, true);
         SpellCastTargets targets;
         targets.setItemTarget(itemTarget);
-        spell->prepare(&targets);
+        spell->SpellStart(&targets);
         return;
     }
 

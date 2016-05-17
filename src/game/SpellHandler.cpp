@@ -429,7 +429,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     Spell* spell = new Spell(mover, spellInfo, triggeredByAura ? true : false, mover->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : nullptr);
     spell->m_cast_count = cast_count;                       // set count of casts
-    spell->prepare(&targets, triggeredByAura);
+    spell->SpellStart(&targets, triggeredByAura);
 }
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
