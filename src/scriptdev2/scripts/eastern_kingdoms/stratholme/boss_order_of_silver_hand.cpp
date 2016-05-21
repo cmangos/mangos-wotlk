@@ -106,7 +106,7 @@ struct boss_silver_hand_bossesAI : public ScriptedAI
                 if (pKiller->GetTypeId() == TYPEID_PLAYER)
                 {
                     if (Creature* pCredit = m_pInstance->GetSingleCreatureFromStorage(NPC_PALADIN_QUEST_CREDIT))
-                        ((Player*)pKiller)->KilledMonsterCredit(NPC_PALADIN_QUEST_CREDIT, pCredit->GetObjectGuid());
+                        ((Player*)pKiller)->RewardPlayerAndGroupAtEvent(pCredit->GetEntry(), pCredit);
                 }
             }
         }
