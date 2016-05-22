@@ -1441,8 +1441,9 @@ void Aura::TriggerSpell()
                         triggerTarget->SummonCreature(17870, 0.0f, 0.0f, 0.0f, triggerTarget->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
                         return;
                     }
-//                    // Bloodmyst Tesla
-//                    case 31611: break;
+                    case 31611:                             // Bloodmyst Tesla
+                        // no custom effect required; return to avoid spamming with errors
+                        return;
                     case 31944:                             // Doomfire
                     {
                         int32 damage = m_modifier.m_amount * ((GetAuraDuration() + m_modifier.periodictime) / GetAuraMaxDuration());

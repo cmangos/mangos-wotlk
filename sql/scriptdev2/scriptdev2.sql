@@ -395,6 +395,7 @@ UPDATE creature_template SET ScriptName='npc_fallen_hero_of_horde' WHERE entry=7
 
 /* BLOODMYST ISLE */
 UPDATE creature_template SET ScriptName='mob_webbed_creature' WHERE entry=17680;
+UPDATE creature_template SET ScriptName='npc_demolitionist_legoso' WHERE entry=17982;
 
 /* BOREAN TUNDRA */
 UPDATE creature_template SET ScriptName='npc_nesingwary_trapper' WHERE entry=25835;
@@ -1772,7 +1773,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1000184,'Daughter!',0,0,7,5,'cowlen SAY_DAUGHTER'),
 
--- REUSE -1000185 to -1000186
+(-1000185,'There\'s no turning back now, $n. Stay close and watch my back.',0,0,0,1,'demolitionist_legoso SAY_ESCORT_START'),
+(-1000186,'There it is! Do you see where the large red crystal is jutting out from the Vector Coil? That\'s where I need to plant the first set of explosives.',0,0,0,25,'demolitionist_legoso SAY_ESCORT_1'),
 
 (-1000187,'Thank you, dear $C, you just saved my life.',0,0,0,0,'npc_redemption_target SAY_HEAL'),
 
@@ -2927,7 +2929,24 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001194,'Blast those stupid centaurs! Sigh - well, it seems you kept your bargain. Up the road you shall find Smeed Scrabblescrew, he has your money.',0,0,0,1,'SAY_CORK_END'),
 (-1001195,'Eeck! Demons hungry for the kodos!',0,0,0,0,'SAY_RIGGER_AMBUSH1'),
 (-1001196,'What am I paying you for? The kodos are nearly dead!',0,0,0,0,'SAY_RIGGER_AMBUSH2'),
-(-1001197,'Wow! We did it... not sure why we thought we needed the likes of you. Nevertheless, speak with Smeed Srablescrew; he will give you your earnings!',0,0,0,0,'SAY_RIGGER_END');
+(-1001197,'Wow! We did it... not sure why we thought we needed the likes of you. Nevertheless, speak with Smeed Srablescrew; he will give you your earnings!',0,0,0,0,'SAY_RIGGER_END'),
+
+(-1001198,'Cover me!',0,0,0,5,'demolitionist_legoso SAY_ESCORT_2'),
+(-1001199,'It won\'t be much longer, $n. Just keep them off me while I work.',0,0,0,133,'demolitionist_legoso SAY_ESCORT_3'),
+(-1001200,'That\'ll do it! Quickly, take cover!',0,0,0,5,'demolitionist_legoso SAY_ESCORT_4'),
+(-1001201,'3...',0,0,0,0,'demolitionist_legoso SAY_ESCORT_COUNT_3'),
+(-1001202,'2...',0,0,0,0,'demolitionist_legoso SAY_ESCORT_COUNT_2'),
+(-1001203,'1...',0,0,0,0,'demolitionist_legoso SAY_ESCORT_COUNT_1'),
+(-1001204,'Don\'t get too excited, hero, that was the easy part. The challenge lies ahead! Let\'s go.',0,0,0,1,'demolitionist_legoso SAY_ESCORT_CONTINUE'),
+(-1001205,'What in the Nether is that?!?!',0,0,0,5,'demolitionist_legoso SAY_ESCORT_5'),
+(-1001206,'Be ready for anything, $n.',0,0,0,1,'demolitionist_legoso SAY_ESCORT_6'),
+(-1001207,'Blessed Light! She\'s siphoning energy right out of the Vector Coil!',0,0,0,34,'demolitionist_legoso SAY_ESCORT_7'),
+(-1001208,'Cover me, we have to do this quickly. Once I blow the support on this side, it will disrupt the energy beams and she\'ll break out! I doubt very much that she\'ll be happy to see us.',0,0,0,1,'demolitionist_legoso SAY_ESCORT_8'),
+(-1001209,'I\'ve almost got it! Just a little more time...',0,0,0,0,'demolitionist_legoso SAY_ESCORT_9'),
+(-1001210,'Take cover and be ready for the fight of your life, $n!',0,0,0,5,'demolitionist_legoso SAY_ESCORT_10'),
+(-1001211,'Holy mother of O\'ros!',0,0,0,5,'demolitionist_legoso SAY_ESCORT_AGGRO'),
+(-1001212,'I... I can\'t believe it\'s over. You did it! You\'ve destroyed the blood elves and their leader!',0,0,0,1,'demolitionist_legoso SAY_ESCORT_COMPLETE_1'),
+(-1001213,'Get back to Blood Watch. I\'ll see you there...',0,0,0,1,'demolitionist_legoso SAY_ESCORT_COMPLETE_2');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -10616,5 +10635,48 @@ INSERT INTO script_waypoint VALUES
 (19671, 42, -67.692, -76.665, -0.941, 0, ''),
 (19671, 43, -67.624, -56.025, -0.844, 0, 'quest complete'),
 (19671, 44, -64.493, -15.776, -0.943, 0, '');
+
+DELETE FROM script_waypoint WHERE entry=17982;
+INSERT INTO script_waypoint VALUES
+(17982, 0, -1778.691, -11063.521, 77.140, 0, ''),
+(17982, 1, -1786.793, -11051.682, 77.624, 0, ''),
+(17982, 2, -1793.498, -11045.093, 76.965, 0, ''),
+(17982, 3, -1793.670, -11038.277, 76.308, 0, ''),
+(17982, 4, -1809.280, -11025.772, 68.239, 0, ''),
+(17982, 5, -1828.214, -11007.534, 67.414, 0, ''),
+(17982, 6, -1848.783, -10995.200, 65.269, 0, ''),
+(17982, 7, -1875.192, -10981.417, 61.316, 0, ''),
+(17982, 8, -1893.577, -10962.064, 61.258, 0, ''),
+(17982, 9, -1912.960, -10935.167, 61.436, 0, ''),
+(17982, 10, -1927.932, -10909.572, 62.588, 0, ''),
+(17982, 11, -1936.610, -10866.243, 66.684, 0, ''),
+(17982, 12, -1939.888, -10854.035, 69.186, 0, ''),
+(17982, 13, -1936.704, -10839.362, 73.829, 0, ''),
+(17982, 14, -1936.740, -10817.189, 81.554, 0, ''),
+(17982, 15, -1942.172, -10803.520, 86.075, 0, ''),
+(17982, 16, -1962.055, -10791.647, 88.658, 0, ''),
+(17982, 17, -1973.293, -10780.165, 88.985, 0, ''),
+(17982, 18, -1976.268, -10763.559, 90.655, 0, ''),
+(17982, 19, -1964.070, -10745.006, 95.730, 0, ''),
+(17982, 20, -1953.445, -10728.167, 104.113, 0, ''),
+(17982, 21, -1950.743, -10710.538, 111.087, 0, ''),
+(17982, 22, -1956.330, -10689.001, 110.965, 5000, 'SAY_ESCORT_LEGOSO_1'),
+(17982, 23, -1955.620, -10658.600, 110.883, 1000, 'escort paused, SAY_ESCORT_LEGOSO_2, SAY_ESCORT_LEGOSO_3'),
+(17982, 24, -1976.113, -10688.756, 112.680, 0, 'SAY_ESCORT_LEGOSO_4'),
+(17982, 25, -1985.777, -10699.355, 115.460, 1000, 'escort paused, SAY_ESCORT_COUNT_3'),
+(17982, 26, -2000.165, -10676.817, 118.616, 0, ''),
+(17982, 27, -2016.455, -10657.827, 125.049, 0, ''),
+(17982, 28, -2033.140, -10641.366, 137.672, 0, ''),
+(17982, 29, -2039.429, -10628.161, 144.266, 0, ''),
+(17982, 30, -2032.072, -10609.500, 148.143, 0, ''),
+(17982, 31, -2017.386, -10608.134, 153.232, 0, ''),
+(17982, 32, -1989.028, -10613.335, 162.852, 0, ''),
+(17982, 33, -1975.880, -10616.800, 163.837, 5000, 'SAY_ESCORT_LEGOSO_5, SAY_ESCORT_LEGOSO_6'),
+(17982, 34, -1957.047, -10596.522, 168.726, 0, ''),
+(17982, 35, -1944.290, -10580.700, 174.467, 13000, 'SAY_ESCORT_LEGOSO_7, SAY_ESCORT_LEGOSO_8'),
+(17982, 36, -1936.099, -10581.618, 176.737, 0, ''),
+(17982, 37, -1915.010, -10581.500, 178.105, 1000, 'escort paused, SAY_ESCORT_LEGOSO_9, SAY_ESCORT_LEGOSO_10'),
+(17982, 38, -1952.080, -10560.300, 177.657, 4000, 'SAY_ESCORT_COUNT_3, SAY_ESCORT_COUNT_2, SAY_ESCORT_COUNT_1'),
+(17982, 39, -1952.080, -10560.300, 177.657, 1000, 'escort paused, SAY_LEGOSO_AGGRO');
 
 -- EOF
