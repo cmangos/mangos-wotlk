@@ -9552,12 +9552,72 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 72588, true);
                     return;
                 }
+                case 69538:                                 // Small Ooze Combine
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    // combine two small oozes, spawn a large ooze and despawn the caster (the target is killed by spell)
+                    m_caster->CastSpell(unitTarget, 69889, true);
+                    m_caster->DealDamage(m_caster, m_caster->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                    return;
+                }
+                case 69553:                                 // Large Ooze Combine
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    // increase the unstable ooze stack on the big ooze and kill the target
+                    unitTarget->CastSpell(m_caster, 69644, true);
+                    unitTarget->DealDamage(unitTarget, unitTarget->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                    return;
+                }
+                case 69610:                                 // Large Ooze Buff Combine
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    // select the target and the caster based on the creature with the highest aura stacks
+                    Unit* resultingTarget = nullptr;
+                    Unit* resultingCaster = nullptr;
+                    uint32 casterAuraStacks = 0;
+                    uint32 targetAuraStacks = 0;
+
+                    if (SpellAuraHolder* oozeHolder = unitTarget->GetSpellAuraHolder(69558))
+                        targetAuraStacks = oozeHolder->GetStackAmount();
+                    if (SpellAuraHolder* oozeHolder = m_caster->GetSpellAuraHolder(69558))
+                        casterAuraStacks = oozeHolder->GetStackAmount();
+
+                    resultingTarget = (casterAuraStacks >= targetAuraStacks) ? m_caster : unitTarget;
+                    resultingCaster = (casterAuraStacks >= targetAuraStacks) ? unitTarget : m_caster;
+
+                    // increase the unstable ooze stack on the big ooze and kill the target
+                    resultingCaster->CastSpell(resultingTarget, 69644, true);
+                    resultingCaster->DealDamage(resultingCaster, resultingCaster->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                    return;
+                }
+                case 69674:                                 // Mutated Infection
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true, NULL, NULL, m_caster->GetObjectGuid());
+                    return;
+                }
                 case 69828:                                 // Halls of Reflection Clone
                 {
                     if (!unitTarget)
                         return;
 
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
+                case 70079:                                 // Ooze Flood Periodic Trigger Cancel
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     return;
                 }
                 case 71806:                                 // Glittering Sparks

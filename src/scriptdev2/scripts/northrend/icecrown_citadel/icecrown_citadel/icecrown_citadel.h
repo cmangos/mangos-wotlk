@@ -81,10 +81,11 @@ enum
     NPC_EMPOWERING_ORB_STALKER      = 36934,
 
     // achievement types
-    MAX_SPECIAL_ACHIEV_CRITS        = 2,
+    MAX_SPECIAL_ACHIEV_CRITS        = 3,
 
     TYPE_ACHIEV_BONED               = 0,
     TYPE_ACHIEV_MADE_A_MESS         = 1,
+    TYPE_ACHIEV_DANCES_OOZES        = 2,
 
     // GameObjects entries
     GO_ICEWALL_1                    = 201911,
@@ -279,6 +280,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         bool Is25ManDifficulty() { return instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
 
         void GetDeathwhisperStalkersList(GuidList& lList) { lList = m_lDeathwhisperStalkersGuids; }
+        void GetRotfaceStalkersList(GuidList& lList) { lList = m_lRotfaceUpperStalkersGuids; }
 
         // Open Putricide door in a few seconds
         void DoPreparePutricideDoor() { m_uiPutricideValveTimer = 15000; }
@@ -303,6 +305,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
 
         GuidList m_lDeathwhisperStalkersGuids;
         GuidList m_lDeathwhisperCultistsGuids;
+        GuidList m_lRotfaceUpperStalkersGuids;
         GuidSet m_sDarkfallenCreaturesLowerGuids;
         GuidSet m_sDarkfallenCreaturesLeftGuids;
         GuidSet m_sDarkfallenCreaturesRightGuids;

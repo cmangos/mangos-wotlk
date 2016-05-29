@@ -36,6 +36,10 @@ enum
     SAY_SLAY_2                  = -1631098,
     SAY_BERSERK                 = -1631099,
     SAY_DEATH                   = -1631100,
+
+    // Rotface encounter yells
+    SAY_SLIME_FLOW_1            = -1631074,
+    SAY_SLIME_FLOW_2            = -1631075,
 };
 
 enum
@@ -100,7 +104,11 @@ enum
     SPELL_GAS_VARIABLE              = 70353,
     SPELL_GAS_VARIABLE_GAS          = 74119,
 
-    SPELL_OOZE_TANK_PROTECTION      = 71770
+    SPELL_OOZE_TANK_PROTECTION      = 71770,
+
+    // spells used for other encounters
+    SPELL_OOZE_FLOOD_TRIGGER        = 69795,                // triggers 69782 on top pipes targets - 37013
+    SPELL_OOZE_FLOOD                = 69782,                // triggers 69783 on the closest lower pipe target - 37013
 };
 
 enum Phase
@@ -520,6 +528,101 @@ CreatureAI* GetAI_boss_professor_putricide(Creature* pCreature)
     return new boss_professor_putricideAI(pCreature);
 }
 
+bool EffectScriptEffectCreature_spell_ooze_trigger(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+{
+    if (uiSpellId == SPELL_OOZE_FLOOD_TRIGGER && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_PROFESSOR_PUTRICIDE)
+    {
+        instance_icecrown_citadel* pInstance = (instance_icecrown_citadel*)pCreatureTarget->GetInstanceData();
+        if (!pInstance)
+            return false;
+
+        // Defind the target as one of the stalkers from the top of the taps
+        GuidList lStalkersGuidList;
+        pInstance->GetRotfaceStalkersList(lStalkersGuidList);
+
+        std::vector<Creature*> vTapStalkers;
+        vTapStalkers.reserve(lStalkersGuidList.size());
+
+        for (GuidList::const_iterator itr = lStalkersGuidList.begin(); itr != lStalkersGuidList.end(); ++itr)
+        {
+            if (Creature* pStalker = pCreatureTarget->GetMap()->GetCreature(*itr))
+                vTapStalkers.push_back(pStalker);
+        }
+
+        if (vTapStalkers.empty())
+        {
+            script_error_log("Instance Icecrown Citadel: ERROR Failed to properly find creature %u for Ooze Flood event.", NPC_PUDDLE_STALKER);
+            return false;
+        }
+
+        // pick random target of the tap stalkers
+        Creature* pTarget = vTapStalkers[urand(0, vTapStalkers.size() - 1)];
+        if (!pTarget)
+            return false;
+
+        // get the nearest twin tap stalker
+        Creature* pNearTarget = NULL;
+        std::list<Creature*> lTargetsInRange;
+        GetCreatureListWithEntryInGrid(lTargetsInRange, pTarget, pTarget->GetEntry(), 30.0f);
+
+        if (lTargetsInRange.empty())
+            return false;
+
+        // find only the nearest tap trigger
+        for (std::list<Creature*>::const_iterator itr = lTargetsInRange.begin(); itr != lTargetsInRange.end(); ++itr)
+        {
+            if ((*itr)->GetPositionZ() > 370.0f)
+                pNearTarget = *itr;
+        }
+
+        if (!pNearTarget)
+            return false;
+
+        // cast the triggered spell on each target
+        pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), true);
+        pCreatureTarget->CastSpell(pNearTarget, GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), true);
+        DoScriptText(urand(0, 1) ? SAY_SLIME_FLOW_1 : SAY_SLIME_FLOW_2, pCreatureTarget);
+
+        return true;
+    }
+
+    return false;
+}
+
+/*######
+## npc_puddle_stalker
+######*/
+
+// TODO Remove this 'script' when combat can be proper prevented from core-side
+struct npc_puddle_stalkerAI : public Scripted_NoMovementAI
+{
+    npc_puddle_stalkerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+    void Reset() override { }
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+    void UpdateAI(const uint32 /*uiDiff*/) override { }
+};
+
+CreatureAI* GetAI_npc_puddle_stalker(Creature* pCreature)
+{
+    return new npc_puddle_stalkerAI(pCreature);
+}
+
+bool EffectScriptEffectCreature_spell_ooze_flood(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+{
+    if (uiSpellId == SPELL_OOZE_FLOOD && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_PUDDLE_STALKER)
+    {
+        // Set target manually to hit exactly the stalker below the tap
+        if (Creature* pStalker = GetClosestCreatureWithEntry(pCreatureTarget, pCreatureTarget->GetEntry(), 20.0f))
+            pCreatureTarget->CastSpell(pStalker, GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), true);
+
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_boss_professor_putricide()
 {
     Script* pNewScript;
@@ -527,5 +630,12 @@ void AddSC_boss_professor_putricide()
     pNewScript = new Script;
     pNewScript->Name = "boss_professor_putricide";
     pNewScript->GetAI = &GetAI_boss_professor_putricide;
+    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_ooze_trigger;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_puddle_stalker";
+    pNewScript->GetAI = GetAI_npc_puddle_stalker;
+    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_ooze_flood;
     pNewScript->RegisterSelf();
 }

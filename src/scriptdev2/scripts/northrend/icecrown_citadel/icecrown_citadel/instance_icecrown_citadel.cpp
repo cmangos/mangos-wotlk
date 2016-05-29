@@ -187,6 +187,11 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
                     m_sDarkfallenCreaturesLeftGuids.insert(pCreature->GetObjectGuid());
             }
             return;
+        case NPC_PUDDLE_STALKER:
+            // select Puddle Stalkers only from Rotface encounter, upper plan
+            if (pCreature->GetPositionX() > 4350.0f && pCreature->GetPositionZ() > 365.0f)
+                m_lRotfaceUpperStalkersGuids.push_back(pCreature->GetObjectGuid());
+            return;
     }
 }
 
@@ -529,6 +534,8 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             DoUseDoorOrButton(GO_GREEN_PLAGUE);
             if (uiData == DONE)
                 DoToggleGameObjectFlags(GO_GREEN_VALVE, GO_FLAG_NO_INTERACT, false);
+            else if (uiData == IN_PROGRESS)
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_DANCES_OOZES, true);
             break;
         case TYPE_PROFESSOR_PUTRICIDE:
             m_auiEncounter[uiType] = uiData;
@@ -721,6 +728,12 @@ bool instance_icecrown_citadel::CheckAchievementCriteriaMeet(uint32 uiCriteriaId
         case ACHIEV_CRIT_MADE_A_MESS_10H:
         case ACHIEV_CRIT_MADE_A_MESS_25H:
             return m_abAchievCriteria[TYPE_ACHIEV_MADE_A_MESS];
+        case ACHIEV_CRIT_DANCES_WITH_OOZES_10N:
+        case ACHIEV_CRIT_DANCES_WITH_OOZES_25N:
+        case ACHIEV_CRIT_DANCES_WITH_OOZES_10H:
+        case ACHIEV_CRIT_DANCES_WITH_OOZES_25H:
+            return m_abAchievCriteria[TYPE_ACHIEV_DANCES_OOZES];
+
     }
 
     return false;

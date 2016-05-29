@@ -74,7 +74,7 @@ enum
     SAY_SLAY_2                  = -1631088,
     SAY_BERSERK                 = -1631089,
     SAY_DEATH                   = -1631090,
-    //SAY_FESTERGUT_DEATH         = -1631091,         // use unk
+    SAY_PUTRICIDE_AGGRO         = -1631080,
     EMOTE_SPORES                = -1631201,
 };
 
@@ -128,6 +128,10 @@ struct boss_festergutAI : public ScriptedAI
             {
                 pPutricide->SetWalk(false);
                 pPutricide->GetMotionMaster()->MovePoint(101, afBalconyLocation[0], afBalconyLocation[1], afBalconyLocation[2]);
+
+                // heroic aggro text
+                if (m_pInstance->IsHeroicDifficulty() && m_pInstance->GetData(TYPE_ROTFACE) == DONE)
+                    DoScriptText(SAY_PUTRICIDE_AGGRO, pPutricide);
             }
         }
     }
@@ -332,26 +336,6 @@ bool EffectScriptEffectCreature_spell_inhale_blight(Unit* pCaster, uint32 uiSpel
 }
 
 /*######
-## npc_puddle_stalker
-######*/
-
-// TODO Remove this 'script' when combat can be proper prevented from core-side
-struct npc_puddle_stalkerAI : public Scripted_NoMovementAI
-{
-    npc_puddle_stalkerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
-
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
-};
-
-CreatureAI* GetAI_npc_puddle_stalker(Creature* pCreature)
-{
-    return new npc_puddle_stalkerAI(pCreature);
-}
-
-/*######
 ## npc_orange_gas_stalker
 ######*/
 
@@ -379,11 +363,6 @@ void AddSC_boss_festergut()
     pNewScript->Name = "boss_festergut";
     pNewScript->GetAI = &GetAI_boss_festergut;
     pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_inhale_blight;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_puddle_stalker";
-    pNewScript->GetAI = GetAI_npc_puddle_stalker;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

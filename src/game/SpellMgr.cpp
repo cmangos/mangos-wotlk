@@ -706,6 +706,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case 46650:                                 // Open Brutallus Back Door
                 case 62488:                                 // Activate Construct
                 case 64503:                                 // Water
+                case 69782:                                 // Ooze Flood
                     return true;
                 default:
                     break;
@@ -2141,6 +2142,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 
                     // Halls of Reflection Clone
                     if (spellInfo_1->SpellIconID == 692 && spellInfo_2->SpellIconID == 692)
+                        return false;
+
+                    // Large Ooze Combine and Large Ooze Buff Combine
+                    if ((spellInfo_1->Id == 69552 && spellInfo_2->Id == 69611) ||
+                            (spellInfo_2->Id == 69552 && spellInfo_1->Id == 69611))
                         return false;
                     break;
                 }

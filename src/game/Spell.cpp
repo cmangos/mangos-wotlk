@@ -1859,6 +1859,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 41376:                                 // Spite
                 case 62166:                                 // Stone Grip
                 case 63981:                                 // Stone Grip (h)
+                case 69674:                                 // Mutated Infection (10n)
+                case 71224:                                 // Mutated Infection (25n)
+                case 73022:                                 // Mutated Infection (10h)
+                case 73023:                                 // Mutated Infection (25h)
                 {
                     if (Unit* pVictim = m_caster->getVictim())
                         targetUnitMap.remove(pVictim);
@@ -7809,6 +7813,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 73144:
                 case 69140:                                 // Coldflame (ICC, Marrowgar)
                 case 69674:                                 // Mutated Infection (ICC, Rotface)
+                case 69782:                                 // Ooze Flood (ICC, Rotface) (note: targets should be 2, but the second is handled in script due to complex logic)
                 case 70450:                                 // Blood Mirror
                 case 70837:                                 // Blood Mirror
                 case 70882:                                 // Slime Spray Summon Trigger (ICC, Rotface)

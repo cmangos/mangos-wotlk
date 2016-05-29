@@ -6336,7 +6336,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1631199,'%s speed toward $N!',0,3,0,0,'taldaram EMOTE_FLAMES'),
 
 (-1631200,'Terrible news everyone. Rotface is dead, but great news everyone! He left behind plenty of ooze for me to use! What? I\'m a poet and I didn\'t know it.... Astounding!',17146,1,0,0,'festergut SAY_BLIGHT_2'),
-(-1631201,'%s releases Gas Spores!',0,3,0,0,'festergut EMOTE_SPORES');
+(-1631201,'%s releases Gas Spores!',0,3,0,0,'festergut EMOTE_SPORES'),
+(-1631202,'%s begins to cast Slime Spray!',0,3,0,0,'rotface EMOTE_SLIME_SPRAY'),
+(-1631203,'%s grows more unstable!',0,2,0,0,'rotface EMOTE_OOZE_GROW_1'),
+(-1631204,'%s is growing volatile!',0,2,0,0,'rotface EMOTE_OOZE_GROW_2'),
+(-1631205,'%s can barely maintain its form!',0,2,0,0,'rotface EMOTE_OOZE_GROW_3');
 
 -- -1 632 000 ICC: FORGE OF SOULS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

@@ -1799,6 +1799,9 @@ void Aura::TriggerSpell()
 //                    case 71110: break;
 //                    // Aura of Darkness
 //                    case 71111: break;
+                    case 71441:                             // Unstable Ooze Explosion Suicide Trigger
+                        target->DealDamage(target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                        return;
 //                    // Ball of Flames Visual
 //                    case 71706: break;
 //                    // Summon Broken Frostmourne
@@ -8249,6 +8252,11 @@ void Aura::PeriodicDummyTick()
 
                     // Should actually be SMSG_SPELL_START, too
                     target->CastSpell(target, 68873, true);
+                    return;
+                }
+                case 70069:                                 // Ooze Flood Periodic Trigger
+                {
+                    target->CastSpell(target, GetSpellProto()->CalculateSimpleValue(m_effIndex), true);
                     return;
                 }
 // Exist more after, need add later
