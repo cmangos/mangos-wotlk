@@ -2154,6 +2154,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
                 targetUnitMap.push_back((Unit*)m_caster->GetTransportInfo()->GetTransport());
             break;
+        case TARGET_VEHICLE_DRIVER:
+            if (m_caster->IsVehicle())
+                if (Unit* vehicleDriver = m_caster->GetCharmer())
+                    targetUnitMap.push_back(vehicleDriver);
+            break;
         case TARGET_VEHICLE_PASSENGER_0:
         case TARGET_VEHICLE_PASSENGER_1:
         case TARGET_VEHICLE_PASSENGER_2:

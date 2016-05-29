@@ -1320,7 +1320,7 @@ enum Targets
     TARGET_91                          = 91,
     TARGET_SUMMONER                    = 92,
     TARGET_CONTROLLED_VEHICLE          = 94,
-    TARGET_95                          = 95,
+    TARGET_VEHICLE_DRIVER              = 95,
     TARGET_VEHICLE_PASSENGER_0         = 96,
     TARGET_VEHICLE_PASSENGER_1         = 97,
     TARGET_VEHICLE_PASSENGER_2         = 98,
