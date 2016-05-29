@@ -167,11 +167,7 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI
             if (m_uiEjectTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EJECT_1) == CAST_OK)
-                {
-                    // Script effect: reduce threat on main target
-                    m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -40);
                     m_uiEjectTimer = 15000;
-                }
             }
             else
                 m_uiEjectTimer -= uiDiff;

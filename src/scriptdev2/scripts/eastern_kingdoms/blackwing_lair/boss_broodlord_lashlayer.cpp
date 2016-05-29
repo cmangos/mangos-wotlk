@@ -112,12 +112,8 @@ struct boss_broodlordAI : public ScriptedAI
 
         if (m_uiKnockAwayTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY);
-            // Drop 50% aggro - TODO should be scriptedEffect?
-            if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
-                m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -50);
-
-            m_uiKnockAwayTimer = urand(15000, 30000);
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+                m_uiKnockAwayTimer = urand(15000, 30000);
         }
         else
             m_uiKnockAwayTimer -= uiDiff;

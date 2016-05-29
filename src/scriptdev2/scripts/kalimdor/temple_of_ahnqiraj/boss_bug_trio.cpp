@@ -176,8 +176,11 @@ struct boss_vemAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_KNOCKBACK) == CAST_OK)
             {
-                if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
-                    m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -80);
+                if (Unit* pTarget = m_creature->getVictim())
+                {
+                    if (m_creature->getThreatManager().getThreat(pTarget))
+                        m_creature->getThreatManager().modifyThreatPercent(pTarget, -80);
+                }
 
                 m_uiKnockBackTimer = urand(15000, 25000);
             }
