@@ -5137,7 +5137,7 @@ bool ChatHandler::HandleResetTalentsCommand(char* args)
         if (!*args && creature && creature->IsPet())
         {
             Unit* owner = creature->GetOwner();
-            if (owner && owner->GetTypeId() == TYPEID_PLAYER && ((Pet*)creature)->IsPermanentPetFor((Player*)owner))
+            if (owner && owner->GetTypeId() == TYPEID_PLAYER && ((Pet*)creature)->isControlled())
             {
                 ((Pet*)creature)->resetTalents(true);
                 ((Player*)owner)->SendTalentsInfoData(true);

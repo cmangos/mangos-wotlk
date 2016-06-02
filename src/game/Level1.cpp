@@ -935,7 +935,7 @@ bool ChatHandler::HandleModifyTalentCommand(char* args)
     else if (((Creature*)target)->IsPet())
     {
         Unit* owner = target->GetOwner();
-        if (owner && owner->GetTypeId() == TYPEID_PLAYER && ((Pet*)target)->IsPermanentPetFor((Player*)owner))
+        if (owner && owner->GetTypeId() == TYPEID_PLAYER && ((Pet*)target)->isControlled())
         {
             // check online security
             if (HasLowerSecurity((Player*)owner))
