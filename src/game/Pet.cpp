@@ -32,7 +32,8 @@ Pet::Pet(PetType type) :
     m_removed(false), m_happinessTimer(7500), m_petType(type), m_duration(0),
     m_bonusdamage(0), m_auraUpdateMask(0), m_loading(false),
     m_declinedname(nullptr), m_petModeFlags(PET_MODE_DEFAULT),
-    m_stayPosSet(false), m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0)
+    m_stayPosSet(false), m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
+    m_opener(0), m_openerMinRange(0), m_openerMaxRange(0)
 {
     m_name = "Pet";
     m_regenTimer = 4000;
@@ -1965,9 +1966,10 @@ void Pet::LearnPetPassives()
 
 void Pet::CastPetAuras(bool current)
 {
-    Unit* owner = GetOwner();
-    if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
+    if (!isControlled())
         return;
+
+    Unit* owner = GetOwner();
 
     for (PetAuraSet::const_iterator itr = owner->m_petAuras.begin(); itr != owner->m_petAuras.end();)
     {

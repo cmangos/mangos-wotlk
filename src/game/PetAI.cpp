@@ -153,11 +153,66 @@ void PetAI::UpdateAI(const uint32 diff)
     else
         m_updateAlliesTimer -= diff;
 
-    if (inCombat && (!m_creature->getVictim() || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
+    if (inCombat && (!victim || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
         _stopAttack();
 
+    if (((Pet*)m_creature)->GetIsRetreating())
+    {
+        if (!owner->_IsWithinDist(m_creature, (PET_FOLLOW_DIST * 2), true))
+        {
+            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
+                m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+
+            return;
+        }
+        else
+           ((Pet*)m_creature)->SetIsRetreating();
+    }
+    else if (((Pet*)m_creature)->GetSpellOpener() != 0) // have opener stored
+    {
+        uint32 minRange = ((Pet*)m_creature)->GetSpellOpenerMinRange();
+
+        if (!(victim = m_creature->getVictim())
+            || (minRange != 0 && m_creature->IsWithinDistInMap(victim, minRange)))
+            ((Pet*)m_creature)->SetSpellOpener();
+        else if (m_creature->IsWithinDistInMap(victim, ((Pet*)m_creature)->GetSpellOpenerMaxRange()) && m_creature->IsWithinLOSInMap(victim))
+        {
+            // stop moving
+            m_creature->clearUnitState(UNIT_STAT_MOVING);
+
+            // auto turn to target
+            m_creature->SetInFront(victim);
+
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                m_creature->SendCreateUpdateToPlayer((Player*)victim);
+
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+                m_creature->SendCreateUpdateToPlayer((Player*)owner);
+
+            uint32 spell_id = ((Pet*)m_creature)->GetSpellOpener();
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
+
+            Spell* spell = new Spell(m_creature, spellInfo, false);
+
+            SpellCastResult result = spell->CheckPetCast(victim);
+
+            if (result == SPELL_CAST_OK)
+            {
+                m_creature->AddCreatureSpellCooldown(spell_id);
+
+                spell->SpellStart(&(spell->m_targets));
+            }
+            else
+                delete spell;
+
+            ((Pet*)m_creature)->SetSpellOpener();
+        }
+
+        else
+            return;
+    }
     // Autocast (casted only in combat or persistent spells in any state)
-    if (!m_creature->IsNonMeleeSpellCasted(false))
+    else if (!m_creature->IsNonMeleeSpellCasted(false))
     {
         typedef std::vector<std::pair<Unit*, Spell*> > TargetSpellList;
         TargetSpellList targetSpellStore;
@@ -360,7 +415,8 @@ void PetAI::UpdateAllies()
 
 void PetAI::AttackedBy(Unit* attacker)
 {
-    // when attacked, fight back in case 1)no victim already AND 2)not set to passive AND 3)not set to stay, unless can it can reach attacker with melee attack anyway
-    if (!m_creature->getVictim() && m_creature->GetCharmInfo() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE))
+    // when attacked, fight back if no victim unless we have a charm state set to passive
+    if (!(m_creature->getVictim() || ((Pet*)m_creature)->GetIsRetreating() == true)
+        && !(m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE)))
         AttackStart(attacker);
 }
