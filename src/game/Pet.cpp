@@ -148,13 +148,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     uint32 pet_number = fields[0].GetUInt32();
 
-    if (current && owner->IsPetNeedBeTemporaryUnsummoned())
-    {
-        owner->SetTemporaryUnsummonedPetNumber(pet_number);
-        delete result;
-        return false;
-    }
-
     Map* map = owner->GetMap();
 
     CreatureCreatePos pos(owner, owner->GetOrientation(), PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
@@ -180,7 +173,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         return true;
     }
 
-    m_charmInfo->SetPetNumber(pet_number, IsPermanentPetFor(owner));
+    m_charmInfo->SetPetNumber(pet_number, isControlled());
 
     SetOwnerGuid(owner->GetObjectGuid());
     SetDisplayId(fields[3].GetUInt32());
@@ -189,20 +182,15 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
     SetName(fields[8].GetString());
 
-    switch (getPetType())
+    if (getPetType() == HUNTER_PET)
     {
-        case SUMMON_PET:
-            petlevel = owner->getLevel();
-            break;
-        case HUNTER_PET:
-            SetByteFlag(UNIT_FIELD_BYTES_2, 2, fields[9].GetBool() ? UNIT_CAN_BE_ABANDONED : UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
-            SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
-            SetPower(POWER_HAPPINESS, fields[12].GetUInt32());
-            SetPowerType(POWER_FOCUS);
-            break;
-        default:
-            sLog.outError("Pet have incorrect type (%u) for pet loading.", getPetType());
+        SetByteFlag(UNIT_FIELD_BYTES_2, 2, fields[9].GetBool() ? UNIT_CAN_BE_ABANDONED : UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
+        SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
+        SetPower(POWER_HAPPINESS, fields[12].GetUInt32());
+        SetPowerType(POWER_FOCUS);
     }
+    else if (getPetType() != SUMMON_PET)
+        sLog.outError("Pet have incorrect type (%u) for pet loading.", getPetType());
 
     if (owner->IsPvP())
         SetPvP(true);
@@ -273,16 +261,11 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     Powers powerType = GetPowerType();
 
-    if (getPetType() == SUMMON_PET && !current)             // all (?) summon pets come with full health when called, but not when they are current
-    {
-        SetHealth(GetMaxHealth());
-        SetPower(powerType, GetMaxPower(powerType));
-    }
-    else
-    {
-        SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
-        SetPower(powerType, savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower);
-    }
+    SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
+    SetPower(powerType, savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower);
+
+    if (getPetType() == HUNTER_PET && savedhealth <= 0)
+        SetDeathState(JUST_DIED);
 
     map->Add((Creature*)this);
     AIM_Initialize();
@@ -419,7 +402,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         savePet.addUInt32(uint32(mode));
         savePet.addString(m_name);
         savePet.addUInt32(uint32(HasByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED) ? 0 : 1));
-        savePet.addUInt32((curhealth < 1 ? 1 : curhealth));
+        savePet.addUInt32(curhealth);
         savePet.addUInt32(curpower);
         savePet.addUInt32(GetPower(POWER_HAPPINESS));
 
