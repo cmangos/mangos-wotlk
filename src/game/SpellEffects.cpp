@@ -11441,16 +11441,11 @@ void Spell::EffectProspecting(SpellEffectIndex /*eff_idx*/)
     }
 
     Loot*& loot = itemTarget->loot;
-    if (!loot)
-        loot = new Loot(p_caster, itemTarget, LOOT_PROSPECTING);
-    else
-    {
-        if (loot->GetLootType() != LOOT_PROSPECTING)
-        {
-            delete loot;
-            loot = new Loot(p_caster, itemTarget, LOOT_PROSPECTING);
-        }
-    }
+
+    if (loot)
+        delete loot;
+
+    loot = new Loot(p_caster, itemTarget, LOOT_PROSPECTING);
 
     loot->ShowContentTo(p_caster);
 }
@@ -11470,16 +11465,10 @@ void Spell::EffectMilling(SpellEffectIndex /*eff_idx*/)
     }
 
     Loot*& loot = itemTarget->loot;
-    if (!loot)
-        loot = new Loot(p_caster, itemTarget, LOOT_MILLING);
-    else
-    {
-        if (loot->GetLootType() != LOOT_MILLING)
-        {
-            delete loot;
-            loot = new Loot(p_caster, itemTarget, LOOT_MILLING);
-        }
-    }
+    if (loot)
+        delete loot;
+
+    loot = new Loot(p_caster, itemTarget, LOOT_MILLING);
 
     loot->ShowContentTo(p_caster);
 }
