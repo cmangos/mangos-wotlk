@@ -1090,6 +1090,7 @@ struct npc_eye_of_acherusAI : public ScriptedAI
                 if (Player* player = m_creature->GetCharmerOrOwnerPlayerOrPlayerItself())
                 {
                     m_creature->SetPhaseMask(2, true);              // HACK remove when summon spells and auras are implemented properly in mangos
+                    m_creature->SetDisplayId(26320);                // HACK remove when correct modelid will be taken by core
 
                     DoCastSpellIfCan(m_creature, SPELL_EYE_VISUAL, CAST_TRIGGERED);
                     m_creature->SetRoot(true);
