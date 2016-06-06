@@ -1213,10 +1213,10 @@ void Loot::Release(Player* player)
                     if (count > 5)
                         count = 5;
 
-                    // reset loot for allow repeat looting if stack > 5
+                    if (!IsLootedFor(player))
+                        AutoStore(player); // can be lost if no space
                     Clear();
                     m_itemTarget->SetLootState(ITEM_LOOT_REMOVED);
-
                     player->DestroyItemCount(m_itemTarget, count, true);
                     break;
                 }
