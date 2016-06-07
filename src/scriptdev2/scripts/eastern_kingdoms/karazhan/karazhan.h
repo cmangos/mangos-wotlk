@@ -36,6 +36,8 @@ enum
     NPC_NIGHTBANE_HELPER            = 17260,
     NPC_NETHERSPITE                 = 15689,
     NPC_ECHO_MEDIVH                 = 16816,
+    NPC_INFERNAL_RELAY              = 17645,                    // helper for the Netherspite infernals for Prince Malchezaar
+    NPC_INFERNAL_TARGET             = 17644,                    // targets for the Netherspite infernals
     NPC_INVISIBLE_STALKER           = 22519,                    // placeholder for dead chess npcs
     NPC_CHESS_STATUS_BAR            = 22520,                    // npc that controlls the transformation of dead pieces
     NPC_CHESS_VICTORY_CONTROLLER    = 22524,
@@ -204,6 +206,9 @@ class instance_karazhan : public ScriptedInstance
 
         void GetNightbaneTriggers(GuidList& lList, bool bGround) { lList = bGround ? m_lNightbaneGroundTriggers : m_lNightbaneAirTriggers; }
 
+        ObjectGuid GetRelayGuid(bool bLower) { return bLower ? m_LowerRelayGuid : m_HigherRelayGuid; }
+        void GetInfernalTargetsList(GuidList& lList) { lList = m_lInfernalTargetsGuidList; }
+
         void Load(const char* chrIn) override;
         const char* Save() const override { return m_strInstData.c_str(); }
 
@@ -230,6 +235,9 @@ class instance_karazhan : public ScriptedInstance
         ObjectGuid m_HordeStatusGuid;
         ObjectGuid m_AllianceStatusGuid;
 
+        ObjectGuid m_LowerRelayGuid;
+        ObjectGuid m_HigherRelayGuid;
+
         GuidList m_lOperaTreeGuidList;
         GuidList m_lOperaHayGuidList;
         GuidList m_lNightbaneGroundTriggers;
@@ -242,6 +250,8 @@ class instance_karazhan : public ScriptedInstance
         GuidList m_lChessPiecesHorde;
         GuidVector m_vHordeStalkers;
         GuidVector m_vAllianceStalkers;
+
+        GuidList m_lInfernalTargetsGuidList;
 };
 
 #endif

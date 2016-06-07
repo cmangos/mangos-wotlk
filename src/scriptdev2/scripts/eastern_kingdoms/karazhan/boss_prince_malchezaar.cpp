@@ -51,7 +51,7 @@ enum
     SPELL_EQUIP_AXES            = 30857,                    // Visual for axe equiping - transition to phase 2
     SPELL_AMPLIFY_DAMAGE        = 39095,                    // Amplifiy during phase 3 3
     // SPELL_CLEAVE              = 30131,                   // spell not confirmed
-    // SPELL_INFERNAL_RELAY      = 30834,                   // purpose unk
+    // SPELL_INFERNAL_RELAY      = 30834,                   // TBC: possible cast from the far Infernal Relay to the close Infernal Relay; currently not used because of map issues
     SPELL_INFERNAL_RELAY_SUMMON = 30835,                    // triggers 30836, which summons an infernal
 
     SPELL_HELLFIRE              = 30859,                    // Infernal damage aura
@@ -67,15 +67,19 @@ enum
     MAX_ENFEEBLE_TARGETS        = 5,
 };
 
+/*######
+## boss_malchezaar
+######*/
+
 struct boss_malchezaarAI : public ScriptedAI
 {
     boss_malchezaarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance  = (instance_karazhan*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_karazhan* m_pInstance;
 
     uint8 m_uiEnfeebleIndex;
     uint32 m_uiEnfeebleTimer;
@@ -191,6 +195,38 @@ struct boss_malchezaarAI : public ScriptedAI
         m_uiEnfeebleIndex = 0;
     }
 
+    // Function that returns a valid relay target
+    Unit* GetInfernalRelayTarget()
+    {
+        if (!m_pInstance)
+            return nullptr;
+
+        // Check if the Infernal targets doesn't already have a Netherspite infernal
+        GuidList lTargetsGuidList;
+        m_pInstance->GetInfernalTargetsList(lTargetsGuidList);
+
+        std::vector<Creature*> vAvailableTargets;
+        vAvailableTargets.reserve(lTargetsGuidList.size());
+
+        for (GuidList::const_iterator itr = lTargetsGuidList.begin(); itr != lTargetsGuidList.end(); ++itr)
+        {
+            if (Creature* pInfernalTarget = m_creature->GetMap()->GetCreature(*itr))
+            {
+                if (!GetClosestCreatureWithEntry(pInfernalTarget, NPC_NETHERSPITE_INFERNAL, 5.0f))
+                    vAvailableTargets.push_back(pInfernalTarget);
+            }
+        }
+
+        if (vAvailableTargets.empty())
+            return nullptr;
+
+        Creature* pTarget = vAvailableTargets[urand(0, vAvailableTargets.size() - 1)];
+        if (pTarget)
+            return pTarget;
+
+        return nullptr;
+    }
+
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -263,10 +299,19 @@ struct boss_malchezaarAI : public ScriptedAI
         // Summon an infernal on timer
         if (m_uiInfernalTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_INFERNAL_RELAY_SUMMON) == CAST_OK)
+            if (m_pInstance)
             {
-                DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
-                m_uiInfernalTimer =  m_uiPhase == 3 ? 17000 : 45000;
+                if (Creature* pRelay = m_creature->GetMap()->GetCreature(m_pInstance->GetRelayGuid(true)))
+                {
+                    if (Unit* pTarget = GetInfernalRelayTarget())
+                    {
+                        pRelay->CastSpell(pTarget, SPELL_INFERNAL_RELAY_SUMMON, true, nullptr, nullptr, m_creature->GetObjectGuid());
+                        DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
+                        m_uiInfernalTimer =  m_uiPhase == 3 ? 17000 : 45000;
+                    }
+                }
+                else
+                    script_error_log("Instance Karazhan: ERROR Failed to properly load Infernal Relays for creature %u.", m_creature->GetEntry());
             }
         }
         else
@@ -331,6 +376,10 @@ CreatureAI* GetAI_boss_malchezaar(Creature* pCreature)
 {
     return new boss_malchezaarAI(pCreature);
 }
+
+/*######
+## npc_infernal_target
+######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
 struct npc_infernal_targetAI : public Scripted_NoMovementAI

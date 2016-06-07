@@ -139,6 +139,16 @@ void instance_karazhan::OnCreatureCreate(Creature* pCreature)
         case NPC_WARCHIEF_BLACKHAND:
             m_lChessPiecesHorde.push_back(pCreature->GetObjectGuid());
             break;
+        case NPC_INFERNAL_RELAY:
+            if (pCreature->GetPositionZ() < 350.0f)
+                m_LowerRelayGuid = pCreature->GetObjectGuid();
+            // Note: upper trigger isn't used because the map is unable to load it at the moment (too far away)
+            //else
+            //    m_HigherRelayGuid = pCreature->GetObjectGuid();
+            break;
+        case NPC_INFERNAL_TARGET:
+            m_lInfernalTargetsGuidList.push_back(pCreature->GetObjectGuid());
+            break;
     }
 }
 
