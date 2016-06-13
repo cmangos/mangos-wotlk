@@ -775,6 +775,9 @@ bool Creature::AIM_Initialize()
     i_motionMaster.Initialize();
     i_AI = FactorySelector::selectAI(this);
     delete oldAI;
+
+    // Handle Spawned Events, also calls Reset()
+    i_AI->JustRespawned();
     return true;
 }
 
