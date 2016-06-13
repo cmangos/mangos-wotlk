@@ -258,6 +258,7 @@ The Authors of ScriptDev2 are merged on 04 sept 2015.
 * kid10 (a.k.a. kid 10)
 * killdozer
 * KillerFrca
+* Killerwife
 * KiriX
 * kizura
 * Klark20
@@ -293,6 +294,7 @@ The Authors of ScriptDev2 are merged on 04 sept 2015.
 * Marik
 * marintrica
 * MaS0n
+* maximus (a.k.a. devmaximus)
 * Maxxie
 * MaxXx2021
 * McBen
@@ -354,6 +356,7 @@ The Authors of ScriptDev2 are merged on 04 sept 2015.
 * paytheo
 * Peppers
 * phan
+* Phatcat (a.k.a. Thunderbear, Entrancler, ulp)
 * plaes
 * popovk
 * porteyoplait
