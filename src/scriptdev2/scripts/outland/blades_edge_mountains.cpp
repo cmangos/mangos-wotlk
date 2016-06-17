@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Blades_Edge_Mountains
 SD%Complete: 90
-SDComment: Quest support: 10503, 10504, 10512, 10545, 10556, 10609, 10674, 10859, 11058, 11080. (npc_daranelle needs bit more work before consider complete)
+SDComment: Quest support: 10503, 10504, 10506, 10512, 10545, 10556, 10609, 10674, 10859, 11058, 11080. (npc_daranelle needs bit more work before consider complete)
 SDCategory: Blade's Edge Mountains
 EndScriptData */
 
@@ -27,6 +27,7 @@ npc_daranelle
 npc_bloodmaul_stout_trigger
 npc_simon_game_bunny
 npc_light_orb_collector
+npc_bloodmaul_dire_wolf
 EndContentData */
 
 #include "precompiled.h"
@@ -889,6 +890,96 @@ CreatureAI* GetAI_npc_light_orb_collector(Creature* pCreature)
     return new npc_light_orb_collectorAI(pCreature);
 }
 
+/*######
+## npc_bloodmaul_dire_wolf
+######*/
+
+enum
+{
+    SPELL_REND                          = 13443,
+    SPELL_RINAS_DIMINUTION_POWDER       = 36310,                // Note: spell also throws event id 13584; requires more research on the purpose of this event
+
+    NPC_DIRE_WOLF_TRIGGER               = 21176,
+    NPC_BLOODMAUL_DIRE_WOLF             = 20058,
+
+    FACTION_FRIENDLY                    = 35,
+};
+
+struct npc_bloodmaul_dire_wolfAI : public ScriptedAI
+{
+    npc_bloodmaul_dire_wolfAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiUnfriendlyTimer;
+    uint32 m_uiRendTimer;
+
+    void Reset() override
+    {
+        m_uiUnfriendlyTimer = 0;
+        m_uiRendTimer       = urand(3000, 6000);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+            m_uiUnfriendlyTimer = 60000;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        // Reset npc on timer
+        if (m_uiUnfriendlyTimer)
+        {
+            if (m_uiUnfriendlyTimer <= uiDiff)
+                EnterEvadeMode();
+            else
+                m_uiUnfriendlyTimer -= uiDiff;
+        }
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiRendTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_REND) == CAST_OK)
+                m_uiRendTimer = urand(8000, 13000);
+        }
+        else
+            m_uiRendTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_bloodmaul_dire_wolf(Creature* pCreature)
+{
+    return new npc_bloodmaul_dire_wolfAI(pCreature);
+}
+
+bool EffectScriptEffectCreature_spell_diminution_powder(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+{
+    if (uiSpellId == SPELL_RINAS_DIMINUTION_POWDER && uiEffIndex == EFFECT_INDEX_1 && pCreatureTarget->GetEntry() == NPC_BLOODMAUL_DIRE_WOLF)
+    {
+        // Check if creature already has aura. ToDo: check for Hibernating creatures
+        if (pCreatureTarget->HasAura(SPELL_RINAS_DIMINUTION_POWDER))
+            return true;
+
+        // give kill credit, change to friendly and inform the creautre about the reset timer
+        ((Player*)pCaster)->KilledMonsterCredit(NPC_DIRE_WOLF_TRIGGER);
+        pCreatureTarget->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_REACH_HOME);
+
+        // Note: we can't remove all auras because it will also remove the current aura; so currently we only remove periodic damage auras
+        // This might be wrong and we might need to change this to something like "RemoveAllAurasExceptId(...)"
+        pCreatureTarget->RemoveSpellsCausingAura(SPELL_AURA_PERIODIC_DAMAGE);
+        pCreatureTarget->DeleteThreatList();
+        pCreatureTarget->CombatStop(true);
+
+        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_blades_edge_mountains()
 {
     Script* pNewScript;
@@ -918,5 +1009,11 @@ void AddSC_blades_edge_mountains()
     pNewScript = new Script;
     pNewScript->Name = "npc_light_orb_collector";
     pNewScript->GetAI = &GetAI_npc_light_orb_collector;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_bloodmaul_dire_wolf";
+    pNewScript->GetAI = &GetAI_npc_bloodmaul_dire_wolf;
+    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_diminution_powder;
     pNewScript->RegisterSelf();
 }
