@@ -409,6 +409,7 @@ UPDATE creature_template SET ScriptName='npc_nexus_drake_hatchling' WHERE entry=
 UPDATE creature_template SET ScriptName='npc_scourged_flamespitter' WHERE entry=25582;
 UPDATE creature_template SET ScriptName='npc_bonker_togglevolt' WHERE entry=25589;
 UPDATE creature_template SET ScriptName='npc_jenny' WHERE entry=25969;
+UPDATE creature_template SET ScriptName='npc_seaforium_depth_charge' WHERE entry=25401;
 
 /* BURNING STEPPES */
 UPDATE creature_template SET ScriptName='npc_ragged_john' WHERE entry=9563;

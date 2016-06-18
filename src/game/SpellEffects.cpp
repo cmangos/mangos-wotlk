@@ -1797,6 +1797,22 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     break;
                 }
+                case 45502:                                 // Seaforium Depth Charge Explosion
+                {
+                    if (!unitTarget || m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    // Note: summoned caster is a scripted totem
+                    if (((Creature*)m_caster)->IsTotem())
+                    {
+                        if (Unit* summonerPlayer = ((Totem*)m_caster)->GetOwner())
+                        {
+                            if (summonerPlayer->GetTypeId() == TYPEID_PLAYER)
+                                ((Player*)summonerPlayer)->KilledMonsterCredit(unitTarget->GetEntry(), unitTarget->GetObjectGuid());
+                        }
+                    }
+                    return;
+                }
                 case 45583:                                 // Throw Gnomish Grenade
                 {
                     if (!unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER)

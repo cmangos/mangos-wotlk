@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Borean_Tundra
 SD%Complete: 100
-SDComment: Quest support: 11570, 11590, 11673, 11728, 11865, 11881, 11889, 11897, 11919, 11940.
+SDComment: Quest support: 11570, 11590, 11608, 11673, 11728, 11865, 11881, 11889, 11897, 11919, 11940.
 SDCategory: Borean Tundra
 EndScriptData */
 
@@ -1151,6 +1151,50 @@ CreatureAI* GetAI_npc_jenny(Creature* pCreature)
     return new npc_jennyAI(pCreature);
 }
 
+/*######
+## npc_seaforium_depth_charge
+######*/
+
+enum
+{
+    SPELL_SEAFORIUM_DEPTH_EXPLOSION         = 45502,
+};
+
+// Note: Creature is summoned as a TotemAI in the core. This script is required in order to tweak the creature's behavior
+struct npc_seaforium_depth_chargeAI : public Scripted_NoMovementAI
+{
+    npc_seaforium_depth_chargeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+    uint32 m_uiExplosionTimer;
+
+    void Reset() override
+    {
+        m_uiExplosionTimer = 10000;
+    }
+
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiExplosionTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_SEAFORIUM_DEPTH_EXPLOSION) == CAST_OK)
+            {
+                m_creature->ForcedDespawn(1000);
+                m_uiExplosionTimer = 10000;
+            }
+        }
+        else
+            m_uiExplosionTimer -= uiDiff;
+    }
+};
+
+CreatureAI* GetAI_npc_seaforium_depth_charge(Creature* pCreature)
+{
+    return new npc_seaforium_depth_chargeAI(pCreature);
+}
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript;
@@ -1210,5 +1254,10 @@ void AddSC_borean_tundra()
     pNewScript = new Script;
     pNewScript->Name = "npc_jenny";
     pNewScript->GetAI = &GetAI_npc_jenny;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_seaforium_depth_charge";
+    pNewScript->GetAI = &GetAI_npc_seaforium_depth_charge;
     pNewScript->RegisterSelf();
 }
