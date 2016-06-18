@@ -354,6 +354,11 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                         damage = damage * unitTarget->GetMaxHealth() / 100;
                         break;
                     }
+                    // Lightning Strike
+                    case 37841:
+                        if (unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->HasAura(37830)) // Repolarized Magneto Sphere
+                            ((Player*)unitTarget)->KilledMonsterCredit(21910);
+                        break;
                     // Cataclysmic Bolt
                     case 38441:
                     {
