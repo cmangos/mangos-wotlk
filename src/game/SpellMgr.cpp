@@ -755,6 +755,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                         case 27203:
                         case 47669:
                         case 64996:                         // Reorigination
+                        case 70346:                         // Slime Puddle
                             return true;
                         default:
                             break;
@@ -2148,6 +2149,16 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Large Ooze Combine and Large Ooze Buff Combine
                     if ((spellInfo_1->Id == 69552 && spellInfo_2->Id == 69611) ||
                             (spellInfo_2->Id == 69552 && spellInfo_1->Id == 69611))
+                        return false;
+
+                    // Slime Puddle and Grow Stacker
+                    if ((spellInfo_1->Id == 70343 && spellInfo_2->Id == 70345) ||
+                            (spellInfo_2->Id == 70343 && spellInfo_1->Id == 70345))
+                        return false;
+
+                    // Choking Gas Bomb Periodic Trigger and Choking Gas Bomb Periodic Explosion Trigger
+                    if ((spellInfo_1->Id == 71259 && spellInfo_2->Id == 71280) ||
+                            (spellInfo_2->Id == 71259 && spellInfo_1->Id == 71280))
                         return false;
                     break;
                 }

@@ -7841,6 +7841,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 69140:                                 // Coldflame (ICC, Marrowgar)
                 case 69674:                                 // Mutated Infection (ICC, Rotface)
                 case 69782:                                 // Ooze Flood (ICC, Rotface) (note: targets should be 2, but the second is handled in script due to complex logic)
+                case 70447:                                 // Volatile Ooze Adhesive (ICC, Putricide 10n)
                 case 70450:                                 // Blood Mirror
                 case 70837:                                 // Blood Mirror
                 case 70882:                                 // Slime Spray Summon Trigger (ICC, Rotface)
@@ -7852,6 +7853,9 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 71861:                                 // Swarming Shadows
                 case 72091:                                 // Frozen Orb (Vault of Archavon, Toravon)
                 case 72254:                                 // Mark of Fallen Champion (target selection) (ICC, Deathbringer Saurfang)
+                case 72836:                                 // Volatile Ooze Adhesive (ICC, Putricide 10h)
+                case 72837:                                 // Volatile Ooze Adhesive (ICC, Putricide 25n)
+                case 72838:                                 // Volatile Ooze Adhesive (ICC, Putricide 25h)
                 case 73022:                                 // Mutated Infection (Mode 2)
                 case 73023:                                 // Mutated Infection (Mode 3)
                     unMaxTargets = 1;
@@ -7869,6 +7873,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 70341:                                 // Slime Puddle (ICC, Putricide)
                 case 71336:                                 // Pact of the Darkfallen
                 case 71390:                                 // Pact of the Darkfallen
+                case 71424:                                 // Slime Puddle Trigger (ICC, Putricide)
                     unMaxTargets = 2;
                     break;
                 case 28796:                                 // Poison Bolt Volley (Naxx, Faerlina)

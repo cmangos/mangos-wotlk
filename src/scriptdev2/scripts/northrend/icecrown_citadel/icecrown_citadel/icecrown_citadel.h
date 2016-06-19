@@ -51,6 +51,7 @@ enum
     NPC_BLOOD_ORB_CONTROL           = 38008,
     NPC_PUTRICIDES_TRAP             = 38879,        // Handles trap event before Putricide
     NPC_GAS_STALKER                 = 36659,        // Handles the gas in Festergut room
+    NPC_MAD_SCIENTIST_STALKER       = 37824,        // Putricide stalkers
     NPC_LANATHEL_INTRO              = 38004,
     NPC_VALITHRIA_QUEST             = 38589,
     NPC_VALITHRIA_COMBAT_TRIGGER    = 38752,
@@ -64,6 +65,8 @@ enum
     NPC_PUDDLE_STALKER              = 37013,        // related to Festergut and Rotface
     NPC_RIMEFANG                    = 37533,
     NPC_SPINESTALKER                = 37534,
+    NPC_OOZE_TENTACLE_STALKER       = 38308,        // accessories to Putricide
+    NPC_SLIMY_TENTACLE_STALKER      = 38309,
 
     // Deathwhisper cultists
     NPC_CULT_FANATIC                = 37890,
@@ -81,11 +84,12 @@ enum
     NPC_EMPOWERING_ORB_STALKER      = 36934,
 
     // achievement types
-    MAX_SPECIAL_ACHIEV_CRITS        = 3,
+    MAX_SPECIAL_ACHIEV_CRITS        = 4,
 
     TYPE_ACHIEV_BONED               = 0,
     TYPE_ACHIEV_MADE_A_MESS         = 1,
     TYPE_ACHIEV_DANCES_OOZES        = 2,
+    TYPE_ACHIEV_NAUSEA              = 3,
 
     // GameObjects entries
     GO_ICEWALL_1                    = 201911,
@@ -107,6 +111,7 @@ enum
     GO_ORANGE_VALVE                 = 201616,       // triggers event 23438
     GO_ORANGE_TUBE                  = 201617,
     GO_GREEN_TUBE                   = 201618,
+    GO_DRINK_ME                     = 201584,       // Putricide table; used to start the encounter
 
     // GO_BLOODWING_DOOR            = 201920,       // Blood wing entrance door - not used
     GO_EMPOWERING_BLOOD_ORB         = 201741,
@@ -281,6 +286,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
 
         void GetDeathwhisperStalkersList(GuidList& lList) { lList = m_lDeathwhisperStalkersGuids; }
         void GetRotfaceStalkersList(GuidList& lList) { lList = m_lRotfaceUpperStalkersGuids; }
+        ObjectGuid GetScientistStalkerGuid(bool bLeft) { return bLeft ? m_leftScientistStalkerGuid : m_rightScientistStalkerGuid; }
 
         // Open Putricide door in a few seconds
         void DoPreparePutricideDoor() { m_uiPutricideValveTimer = 15000; }
@@ -302,6 +308,9 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         bool m_bHasDeathwhisperIntroYelled;
         bool m_bHasRimefangLanded;
         bool m_bHasSpinestalkerLanded;
+
+        ObjectGuid m_leftScientistStalkerGuid;
+        ObjectGuid m_rightScientistStalkerGuid;
 
         GuidList m_lDeathwhisperStalkersGuids;
         GuidList m_lDeathwhisperCultistsGuids;

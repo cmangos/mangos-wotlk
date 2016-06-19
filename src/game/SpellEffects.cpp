@@ -3061,6 +3061,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 71818, true);
                     return;
                 }
+                case 71693:                                 // Cleanse Mutation
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(70405);
+                    return;
+                }
                 case 71718:                                 // Conjure Flame
                 case 72040:                                 // Conjure Empowered Flame
                 {
@@ -3113,6 +3121,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 72285:                                 // Vile Gas Trigger
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
+                case 72295:                                 // Malleable Goo
+                {
+                    if (!unitTarget)
                         return;
 
                     m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
@@ -9670,6 +9686,36 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 70079:                                 // Ooze Flood Periodic Trigger Cancel
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    return;
+                }
+                case 71255:                                 // Choking Gas Bomb
+                {
+                    if (!unitTarget)
+                        return;
+
+                    switch (urand(0, 2))
+                    {
+                        case 0:
+                            unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                            unitTarget->CastSpell(unitTarget, 71275, true);
+                            break;
+                        case 1:
+                            unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                            unitTarget->CastSpell(unitTarget, 71276, true);
+                            break;
+                        case 2:
+                            unitTarget->CastSpell(unitTarget, 71275, true);
+                            unitTarget->CastSpell(unitTarget, 71276, true);
+                            break;
+                    }
+                    return;
+                }
+                case 71620:                                 // Tear Gas Cancel
                 {
                     if (!unitTarget)
                         return;

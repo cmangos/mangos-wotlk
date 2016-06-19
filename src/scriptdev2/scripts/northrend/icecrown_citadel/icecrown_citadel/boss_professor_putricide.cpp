@@ -16,9 +16,8 @@
 
 /* ScriptData
 SDName: boss_professor_putricide
-SD%Complete: 70%
-SDComment: NYI: Abomination and table handling, Malleable Goo,
-           possibly Green Ooze and Orange Gas scripts require handling in sd2, but need further research on their spells
+SD%Complete: 90%
+SDComment: Heroic spells require more research and probably core fix
 SDCategory: Icecrown Citadel
 EndScriptData */
 
@@ -37,78 +36,86 @@ enum
     SAY_BERSERK                 = -1631099,
     SAY_DEATH                   = -1631100,
 
+    EMOTE_EXPERIMENT            = -1631206,
+
     // Rotface encounter yells
     SAY_SLIME_FLOW_1            = -1631074,
     SAY_SLIME_FLOW_2            = -1631075,
-};
 
-enum
-{
+    // Spells
     SPELL_BERSERK                   = 47008,
 
-    // controlled abomination
-    SPELL_MUTATED_TRANSFORMATION    = 70308,
-    SPELL_EAT_OOZE                  = 72527,
-    SPELL_REGURGITATED_OOZE         = 70539,
-    SPELL_MUTATED_SLASH             = 70542,
-    SPELL_MUTATED_AURA              = 70405,
-    SPELL_ABOMINATION_POWER_DRAIN   = 70385, // prevents normal regen of abomination's power
+    // Volatile Ooze and Gaz Cloud summon
+    SPELL_ORANGE_OOZE_SUMMON        = 71415,                // triggers 71414 to summon 37562
+    SPELL_GREEN_OOZE_SUMMON         = 71412,                // triggers 71413 to summon 37697
 
-    SPELL_UNSTABLE_EXPERIMENT       = 70351, // ooze and gas summoning spells in basepoints of effects of this spell suggest that they should be handled in core
+    // Slime puddle summon
+    SPELL_SLIME_PUDDLE_SUMMON       = 70341,                // triggers 70342 to summon 37690
+    SPELL_SLIME_PUDDLE_TRIGGER      = 71424,                // triggers 71425 to summon 38234
 
-    // Volatile Experiment on heroic difficulties
-    SPELL_VOLATILE_EXPERIMENT       = 72840, // single target dummy effect
-    SPELL_VOLATILE_EXPERIMENT_2     = 72841, // single target dummy effect
-    SPELL_VOLATILE_EXPERIMENT_3     = 72842, // radius target dummy effect
-    SPELL_VOLATILE_EXPERIMENT_4     = 72843, // radius target dummy effect
+    SPELL_UNSTABLE_EXPERIMENT       = 70351,                // triggers 71412 or 71415 alternatively
 
-    SPELL_GREEN_OOZE_SUMMON         = 71412,
-    SPELL_ORANGE_OOZE_SUMMON        = 71415,
+    // Phase 2 spells
+    SPELL_CREATE_CONCOCTION         = 71621,                // transform spell
+    SPELL_MALLEABLE_GOO             = 72295,                // triggers 70852 on players
+    SPELL_CHOKING_GAS_BOMB          = 71255,                // triggers 71273
 
-    SPELL_OOZE_ADHESIVE             = 70447,
-    SPELL_OOZE_ERUPTION             = 70492,
-
-    SPELL_GASEOUS_BLOAT             = 70672,
-    SPELL_EXPUNGED_GAS              = 70701,
-    SPELL_GASEOUS_BLOAT_VISUAL      = 70215,
-
-    SPELL_SLIME_PUDDLE              = 70341,
-    SPELL_SLIME_PUDDLE_SUMMON       = 70342,
-    SPELL_SLIME_PUDDLE_AURA         = 70343,
-// SPELL_SLIME_PUDDLE_TRIGGER      = 71424, // trigger summon spell from target?
-// SPELL_SLIME_PUDDLE_SUMMON_TRIG  = 71425,
-    SPELL_GROW_STACKER              = 70345,
-    SPELL_GROW_STACKER_GROW_AURA    = 70347,
-
-    SPELL_MALLEABLE_GOO_MISSILE     = 70852,
-
-    SPELL_CHOKING_GAS_BOMB          = 71255,
-    SPELL_CHOKING_GAS_BOMB_AURA     = 71259,
-    SPELL_CHOKING_GAS_BOMB_EXPL_AUR = 71280,
-    SPELL_CHOKING_GAS_EXPLOSION     = 71279,
-
-    // phase transitions
-    SPELL_TEAR_GAS                  = 71617, // stuns players
-    SPELL_TEAR_GAS_PERIODIC_AURA    = 73170, // stuns summoned creatures?
+    // Tear Gas - phase transitions
+    SPELL_TEAR_GAS                  = 71617,                // initial tear gas spell on transition start
     SPELL_TEAR_GAS_CANCEL           = 71620,
+    SPELL_TEAR_GAS_PERIODIC         = 73170,                // putricide continues to have the periodic aura during transition
+    SPELL_VOLATILE_EXPERIMENT       = 72840,                // heroic transition spell; triggers 71412 and 71415 at once
 
-    SPELL_CREATE_CONCOCTION         = 71621,
-    SPELL_GUZZLE_POTIONS            = 71893,
-
+    // Phase 3 transition and spell
+    SPELL_CLEANSE_MUTATION          = 71693,                // cancel abomination
+    SPELL_GUZZLE_POTIONS            = 71893,                // triggers 71704 and 71621
     SPELL_MUTATED_PLAGUE            = 72451,
 
-    // heroic
+    // heroic spells
     SPELL_UNBOUND_PLAGUE            = 70911,
-    SPELL_OOZE_VARIABLE             = 70352, // aura 303 - dont allow taking damage from attacker with linked aura303?
-    SPELL_OOZE_VARIABLE_OOZE        = 74118, // anyway, implemented as hardcoded in script
-    SPELL_GAS_VARIABLE              = 70353,
+    SPELL_OOZE_VARIABLE             = 70352,                // ToDo: research how this should work
+    SPELL_OOZE_VARIABLE_OOZE        = 74118,
+    SPELL_GAS_VARIABLE              = 70353,                // ToDo: research how this should work
     SPELL_GAS_VARIABLE_GAS          = 74119,
 
-    SPELL_OOZE_TANK_PROTECTION      = 71770,
+    SPELL_OOZE_TANK_PROTECTION      = 71770,                // ToDo: research how this should work
 
     // spells used for other encounters
     SPELL_OOZE_FLOOD_TRIGGER        = 69795,                // triggers 69782 on top pipes targets - 37013
     SPELL_OOZE_FLOOD                = 69782,                // triggers 69783 on the closest lower pipe target - 37013
+
+    // Summoned spells
+    // growing ooze puddle
+    SPELL_SLIME_PUDDLE_DAMAGE       = 70343,
+    SPELL_GROW_STACKER              = 70345,                // triggers 70347
+    //SPELL_GROW_STACKER_GROW_AURA  = 70347,
+    SPELL_EAT_OOZE                  = 70360,
+
+    // choking gas bomb
+    SPELL_CHOKING_GAS_PERIODIC      = 71259,
+    SPELL_CHOKING_GAS_EXPLOSION_PER = 71280,
+
+    // Volatile Ooze
+    SPELL_OOZE_ADHESIVE             = 70447,                // Cast on player and follow the player to errupt
+    SPELL_OOZE_ERUPTION             = 70492,
+
+    // Gas cloud
+    SPELL_GASEOUS_BLOAT             = 70672,                // Chase players and expunge gas
+    SPELL_EXPUNGED_GAS              = 70701,
+    SPELL_GASEOUS_BLOAT_VISUAL      = 70215,
+
+    // Mutated Abomination (scripted in ACID and kept here only for reference)
+    //SPELL_TRANSFORMATION_NAME       = 72402,
+    //SPELL_TRANSFORMATION_WHISPER    = 70438,              // use unk
+    //SPELL_TRANSFORMATION_DAMAGE     = 70405,
+    //SPELL_POWER_DRAIN               = 70385,
+
+    // npcs
+    NPC_GROWING_OOZE_PUDDLE_TRIGGER = 38234,
+    NPC_GROWING_OOZE_PUDDLE         = 37690,
+    NPC_GAS_CLOUD                   = 37562,
+    NPC_VOLATILE_OOZE               = 37697,
+    NPC_CHOKING_GAS_BOMB            = 38159,
 };
 
 enum Phase
@@ -124,15 +131,14 @@ enum Phase
 
 enum Waypoint
 {
-    POINT_PUTRICIDE_SPAWN = 1,
+    POINT_PUTRICIDE_SPAWN   = 1,
     POINT_FESTERGUT_BALCONY = 101,
     POINT_ROTFACE_BALCONY   = 102,
 };
 
-static const float fPutricidePosition[1][3] =
-{
-    {4356.78f, 3263.51f, 389.40f}   // 0 Putricide spawn point
-};
+/*######
+## boss_professor_putricide
+######*/
 
 struct boss_professor_putricideAI : public ScriptedAI
 {
@@ -144,33 +150,37 @@ struct boss_professor_putricideAI : public ScriptedAI
 
     instance_icecrown_citadel* m_pInstance;
 
+    bool m_bIsOrange;
+
     uint32 m_uiPhase;
 
-    uint32 m_uiHealthCheckTimer;
     uint32 m_uiTransitionTimer;
     uint32 m_uiEnrageTimer;
     uint32 m_uiPuddleTimer;
     uint32 m_uiUnstableExperimentTimer;
     uint32 m_uiUnboundPlagueTimer;
     uint32 m_uiChokingGasBombTimer;
+    uint32 m_uiMalleableGooTimer;
 
     void Reset() override
     {
+        m_bIsOrange                 = urand(0, 1) ? true : false;
         m_uiPhase                   = PHASE_ONE;
-        m_uiHealthCheckTimer        = 1000;
         m_uiEnrageTimer             = 10 * MINUTE * IN_MILLISECONDS;
+        m_uiTransitionTimer         = 0;
         m_uiPuddleTimer             = 10000;
-        m_uiUnstableExperimentTimer = 20000;
+        m_uiUnstableExperimentTimer = 30000;
         m_uiUnboundPlagueTimer      = 10000;
-        m_uiChokingGasBombTimer     = urand(10000, 15000);
+        m_uiChokingGasBombTimer     = 35000;
+        m_uiMalleableGooTimer       = 25000;
 
         // set or remove not selectable flag depending on Festergut and Rotface
         if (m_pInstance)
         {
             if (m_pInstance->GetData(TYPE_ROTFACE) != DONE || m_pInstance->GetData(TYPE_FESTERGUT) != DONE)
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
             else
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
         }
     }
 
@@ -202,8 +212,16 @@ struct boss_professor_putricideAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, FAIL);
+
+            if (Creature* pTentacle = m_pInstance->GetSingleCreatureFromStorage(NPC_OOZE_TENTACLE_STALKER))
+                pTentacle->RemoveAllAurasOnEvade();
+            if (Creature* pTentacle = m_pInstance->GetSingleCreatureFromStorage(NPC_SLIMY_TENTACLE_STALKER))
+                pTentacle->RemoveAllAurasOnEvade();
+        }
     }
+
     void AttackStart(Unit* pWho) override
     {
         // no attacking during the Festergut / Rotface encounters
@@ -218,45 +236,79 @@ struct boss_professor_putricideAI : public ScriptedAI
         if (uiMovementType != POINT_MOTION_TYPE)
             return;
 
+        // handle phase transition
         if (uiData == POINT_PUTRICIDE_SPAWN)
         {
-            if (m_uiPhase == PHASE_RUNNING_ONE)
-            {
-                if (m_pInstance && m_pInstance->IsHeroicDifficulty())
-                {
-                    DoScriptText(SAY_PHASE_CHANGE, m_creature);
-                    m_uiTransitionTimer = 30000;
-                }
-                else
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_CREATE_CONCOCTION);
-                    DoScriptText(SAY_TRANSFORM_1, m_creature);
-                    m_uiTransitionTimer = 15000;
-                }
+            if (!m_pInstance)
+                return;
 
-                m_uiPhase = PHASE_TRANSITION_ONE;           // waiting for entering phase 2
-            }
-            else if (m_uiPhase == PHASE_RUNNING_TWO)
-            {
-                if (m_pInstance && m_pInstance->IsHeroicDifficulty())
-                {
-                    DoScriptText(SAY_PHASE_CHANGE, m_creature);
-                    m_uiTransitionTimer = 30000;
-                }
-                else
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_GUZZLE_POTIONS);
-                    DoScriptText(SAY_TRANSFORM_2, m_creature);
-                    m_uiTransitionTimer = 15000;
-                }
+            DoCastSpellIfCan(m_creature, (m_uiPhase == PHASE_RUNNING_ONE ? SPELL_CREATE_CONCOCTION : SPELL_GUZZLE_POTIONS));
 
-                m_uiPhase = PHASE_TRANSITION_TWO;           // waiting for entering phase 3
+            if (m_pInstance->IsHeroicDifficulty())
+            {
+                DoScriptText(SAY_PHASE_CHANGE, m_creature);
+                m_uiTransitionTimer = 30000;
             }
+            else
+                m_uiTransitionTimer = 15000;
+
+            m_uiPhase = (m_uiPhase == PHASE_RUNNING_ONE ? PHASE_TRANSITION_ONE : PHASE_TRANSITION_TWO);           // waiting for entering next phase
         }
         else if (uiData == POINT_FESTERGUT_BALCONY)
             m_creature->SetFacingTo(3.316f);
         else if (uiData == POINT_ROTFACE_BALCONY)
             m_creature->SetFacingTo(5.822f);
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        switch (pSummoned->GetEntry())
+        {
+            case NPC_GROWING_OOZE_PUDDLE_TRIGGER:
+                DoCastSpellIfCan(pSummoned, SPELL_SLIME_PUDDLE_SUMMON, CAST_TRIGGERED);
+                pSummoned->ForcedDespawn(10000);
+                break;
+            case NPC_GROWING_OOZE_PUDDLE:
+                pSummoned->CastSpell(pSummoned, SPELL_GROW_STACKER, true);
+                pSummoned->CastSpell(pSummoned, SPELL_SLIME_PUDDLE_DAMAGE, true);
+                break;
+            case NPC_CHOKING_GAS_BOMB:
+                pSummoned->CastSpell(pSummoned, SPELL_CHOKING_GAS_PERIODIC, true);
+                pSummoned->CastSpell(pSummoned, SPELL_CHOKING_GAS_EXPLOSION_PER, true);
+                pSummoned->ForcedDespawn(15000);
+                break;
+            case NPC_GAS_CLOUD:
+                pSummoned->CastSpell(pSummoned, SPELL_GASEOUS_BLOAT_VISUAL, true);
+                // no break;
+            case NPC_VOLATILE_OOZE:
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    pSummoned->AI()->AttackStart(pTarget);
+                pSummoned->SetInCombatWithZone();
+                break;
+        }
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    {
+        if (!m_pInstance)
+            return;
+
+        // Unstable experiment
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetScientistStalkerGuid(m_bIsOrange)))
+                DoCastSpellIfCan(pStalker, m_bIsOrange ? SPELL_ORANGE_OOZE_SUMMON : SPELL_GREEN_OOZE_SUMMON, CAST_TRIGGERED);
+
+            m_bIsOrange = !m_bIsOrange;
+        }
+        // Volatile Experiment
+        else if (eventType == AI_EVENT_CUSTOM_B)
+        {
+            if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetScientistStalkerGuid(true)))
+                DoCastSpellIfCan(pStalker, SPELL_ORANGE_OOZE_SUMMON, CAST_TRIGGERED);
+            if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetScientistStalkerGuid(false)))
+                DoCastSpellIfCan(pStalker, SPELL_GREEN_OOZE_SUMMON, CAST_TRIGGERED);
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -266,6 +318,9 @@ struct boss_professor_putricideAI : public ScriptedAI
             return;
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (!m_pInstance)
             return;
 
         // Enrage
@@ -285,195 +340,60 @@ struct boss_professor_putricideAI : public ScriptedAI
 
         switch (m_uiPhase)
         {
-            case PHASE_ONE:
-            {
-                // health check
-                if (m_uiHealthCheckTimer <= uiDiff)
-                {
-                    if (m_creature->GetHealthPercent() <= 80.0f)
-                    {
-                        uint32 spellId = (m_pInstance && m_pInstance->IsHeroicDifficulty() ? SPELL_VOLATILE_EXPERIMENT : SPELL_TEAR_GAS);
-
-                        if (DoCastSpellIfCan(m_creature, spellId) == CAST_OK)
-                        {
-                            m_creature->GetMotionMaster()->Clear();
-                            SetCombatMovement(false);
-                            m_creature->GetMotionMaster()->MovePoint(POINT_PUTRICIDE_SPAWN, fPutricidePosition[0][0], fPutricidePosition[0][1], fPutricidePosition[0][2]);
-                            m_uiPhase = PHASE_RUNNING_ONE;
-                            return;
-                        }
-                    }
-                    m_uiHealthCheckTimer = 1000;
-                }
-                else
-                    m_uiHealthCheckTimer -= uiDiff;
-
-                // Unbound Plague
-                if (m_pInstance && m_pInstance->IsHeroicDifficulty())
-                {
-                    if (m_uiUnboundPlagueTimer <= uiDiff)
-                    {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_UNBOUND_PLAGUE, SELECT_FLAG_PLAYER))
-                        {
-                            if (DoCastSpellIfCan(pTarget, SPELL_UNBOUND_PLAGUE) == CAST_OK)
-                                m_uiUnboundPlagueTimer = 70000;
-                        }
-                    }
-                    else
-                        m_uiUnboundPlagueTimer -= uiDiff;
-                }
-
-                // Slime Puddle
-                if (m_uiPuddleTimer <= uiDiff)
-                {
-                    for (int i = 0; i < 2; ++i)
-                    {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SLIME_PUDDLE_SUMMON, SELECT_FLAG_PLAYER))
-                            DoCastSpellIfCan(pTarget, SPELL_SLIME_PUDDLE, CAST_TRIGGERED);
-                    }
-                    m_uiPuddleTimer = 30000;
-                }
-                else
-                    m_uiPuddleTimer -= uiDiff;
-
-                // Unstable Experiment
-                if (m_uiUnstableExperimentTimer <= uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_UNSTABLE_EXPERIMENT) == CAST_OK)
-                        m_uiUnstableExperimentTimer = 30000;
-                }
-                else
-                    m_uiUnstableExperimentTimer -= uiDiff;
-
-                break;
-            }
-            case PHASE_TRANSITION_ONE:
-            {
-                if (m_uiTransitionTimer <= uiDiff)
-                {
-                    m_creature->GetMotionMaster()->Clear();
-                    SetCombatMovement(true);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-                    m_uiPhase = PHASE_TWO;
-
-                    if (m_pInstance && m_pInstance->IsHeroicDifficulty())
-                    {
-                        DoCastSpellIfCan(m_creature, SPELL_CREATE_CONCOCTION);
-                        DoScriptText(SAY_TRANSFORM_1, m_creature);
-                    }
-                    else
-                        DoCastSpellIfCan(m_creature, SPELL_TEAR_GAS_CANCEL, CAST_INTERRUPT_PREVIOUS);
-                }
-                else
-                    m_uiTransitionTimer -= uiDiff;
-
-                return;
-            }
             case PHASE_TWO:
-            {
-                // health check
-                if (m_uiHealthCheckTimer <= uiDiff)
-                {
-                    if (m_creature->GetHealthPercent() <= 35.0f)
-                    {
-                        uint32 spellId = (m_pInstance && m_pInstance->IsHeroicDifficulty() ? SPELL_VOLATILE_EXPERIMENT : SPELL_TEAR_GAS);
-
-                        if (DoCastSpellIfCan(m_creature, spellId) == CAST_OK)
-                        {
-                            m_creature->GetMotionMaster()->Clear();
-                            SetCombatMovement(false);
-                            m_creature->GetMotionMaster()->MovePoint(POINT_PUTRICIDE_SPAWN, fPutricidePosition[0][0], fPutricidePosition[0][1], fPutricidePosition[0][2]);
-                            m_uiPhase = PHASE_RUNNING_TWO;
-
-                            // TODO: remove Mutated Abomination
-
-                            return;
-                        }
-                    }
-                    m_uiHealthCheckTimer = 1000;
-                }
-                else
-                    m_uiHealthCheckTimer -= uiDiff;
-
-                // Unbound Plague
-                if (m_pInstance && m_pInstance->IsHeroicDifficulty())
-                {
-                    if (m_uiUnboundPlagueTimer <= uiDiff)
-                    {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_UNBOUND_PLAGUE, SELECT_FLAG_PLAYER))
-                        {
-                            if (DoCastSpellIfCan(pTarget, SPELL_UNBOUND_PLAGUE) == CAST_OK)
-                                m_uiUnboundPlagueTimer = 70000;
-                        }
-                    }
-                    else
-                        m_uiUnboundPlagueTimer -= uiDiff;
-                }
-
-                // Slime Puddle
-                if (m_uiPuddleTimer <= uiDiff)
-                {
-                    for (int i = 0; i < 2; ++i)
-                    {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SLIME_PUDDLE_SUMMON, SELECT_FLAG_PLAYER))
-                            DoCastSpellIfCan(pTarget, SPELL_SLIME_PUDDLE, CAST_TRIGGERED);
-                    }
-
-                    m_uiPuddleTimer = 30000;
-                }
-                else
-                    m_uiPuddleTimer -= uiDiff;
-
-                // Unstable Experiment
-                if (m_uiUnstableExperimentTimer <= uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_UNSTABLE_EXPERIMENT) == CAST_OK)
-                        m_uiUnstableExperimentTimer = 30000;
-                }
-                else
-                    m_uiUnstableExperimentTimer -= uiDiff;
-
-                // Choking Gas
-                if (m_uiChokingGasBombTimer <= uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_CHOKING_GAS_BOMB) == CAST_OK)
-                        m_uiChokingGasBombTimer = urand(25000, 30000);
-                }
-                else
-                    m_uiChokingGasBombTimer -= uiDiff;
-
-                // TODO: Malleable Goo
-
-                break;
-            }
-            case PHASE_TRANSITION_TWO:
-            {
-                if (m_uiTransitionTimer <= uiDiff)
-                {
-                    m_creature->GetMotionMaster()->Clear();
-                    SetCombatMovement(true);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-                    m_uiPhase = PHASE_THREE;
-
-                    if (m_pInstance && m_pInstance->IsHeroicDifficulty())
-                    {
-                        DoCastSpellIfCan(m_creature, SPELL_GUZZLE_POTIONS);
-                        DoScriptText(SAY_TRANSFORM_2, m_creature);
-                    }
-                    else
-                        DoCastSpellIfCan(m_creature, SPELL_TEAR_GAS_CANCEL, CAST_INTERRUPT_PREVIOUS);
-                }
-                else
-                    m_uiTransitionTimer -= uiDiff;
-
-                return;
-            }
             case PHASE_THREE:
             {
-                // Unbound Plague
-                if (m_pInstance && m_pInstance->IsHeroicDifficulty())
+                // Choking Gas
+                if (m_uiChokingGasBombTimer < uiDiff)
                 {
-                    if (m_uiUnboundPlagueTimer <= uiDiff)
+                    if (DoCastSpellIfCan(m_creature, SPELL_CHOKING_GAS_BOMB) == CAST_OK)
+                        m_uiChokingGasBombTimer = 35000;
+                }
+                else
+                    m_uiChokingGasBombTimer -= uiDiff;
+
+                // Malleable Goo
+                if (m_uiMalleableGooTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_MALLEABLE_GOO) == CAST_OK)
+                        m_uiMalleableGooTimer = 25000;
+                }
+                else
+                    m_uiMalleableGooTimer -= uiDiff;
+
+                if (m_uiPhase == PHASE_THREE)
+                    break;
+                // else no break;
+            }
+            case PHASE_ONE:
+            {
+                if (m_uiTransitionTimer)
+                {
+                    if (m_uiTransitionTimer <= uiDiff)
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_TEAR_GAS_PERIODIC, CAST_TRIGGERED);
+
+                        float fX, fY, fZ;
+                        SetCombatMovement(false);
+
+                        m_creature->GetMotionMaster()->Clear();
+                        m_creature->GetRespawnCoord(fX, fY, fZ);
+                        m_creature->GetMotionMaster()->MovePoint(POINT_PUTRICIDE_SPAWN, fX, fY, fZ);
+
+                        m_uiPhase = (m_uiPhase == PHASE_ONE ? PHASE_RUNNING_ONE : PHASE_RUNNING_TWO);
+                        m_uiTransitionTimer = 0;
+                    }
+                    else
+                        m_uiTransitionTimer -= uiDiff;
+
+                    // Preparing for phase transition
+                    return;
+                }
+
+                // Unbound Plague
+                if (m_pInstance->IsHeroicDifficulty())
+                {
+                    if (m_uiUnboundPlagueTimer < uiDiff)
                     {
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_UNBOUND_PLAGUE, SELECT_FLAG_PLAYER))
                         {
@@ -485,39 +405,73 @@ struct boss_professor_putricideAI : public ScriptedAI
                         m_uiUnboundPlagueTimer -= uiDiff;
                 }
 
-                // Slime Puddle
-                if (m_uiPuddleTimer <= uiDiff)
+                // Unstable Experiment
+                if (m_uiUnstableExperimentTimer < uiDiff)
                 {
-                    for (int i = 0; i < 2; ++i)
+                    if (DoCastSpellIfCan(m_creature, SPELL_UNSTABLE_EXPERIMENT) == CAST_OK)
                     {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SLIME_PUDDLE_SUMMON, SELECT_FLAG_PLAYER))
-                            DoCastSpellIfCan(pTarget, SPELL_SLIME_PUDDLE, CAST_TRIGGERED);
+                        DoScriptText(EMOTE_EXPERIMENT, m_creature);
+                        m_uiUnstableExperimentTimer = 37000;
                     }
-                    m_uiPuddleTimer = 30000;
                 }
                 else
-                    m_uiPuddleTimer -= uiDiff;
+                    m_uiUnstableExperimentTimer -= uiDiff;
 
-                // Choking Gas
-                if (m_uiChokingGasBombTimer <= uiDiff)
+                // health check
+                if (m_creature->GetHealthPercent() <= (m_uiPhase == PHASE_ONE ? 80.0f : 35.0f))
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_CHOKING_GAS_BOMB) == CAST_OK)
-                        m_uiChokingGasBombTimer = urand(25000, 30000);
-                }
-                else
-                    m_uiChokingGasBombTimer -= uiDiff;
+                    uint32 spellId = (m_pInstance->IsHeroicDifficulty() ? SPELL_VOLATILE_EXPERIMENT : SPELL_TEAR_GAS);
 
-                // TODO: Malleable Goo
+                    if (DoCastSpellIfCan(m_creature, spellId, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        m_uiTransitionTimer = 2500;
+                        return;
+                    }
+                }
 
                 break;
             }
+            // Transition phases
+            case PHASE_TRANSITION_ONE:
+            case PHASE_TRANSITION_TWO:
+            {
+                if (m_uiTransitionTimer < uiDiff)
+                {
+                    SetCombatMovement(true);
+                    m_creature->GetMotionMaster()->Clear();
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+
+                    DoScriptText((m_uiPhase == PHASE_TRANSITION_ONE ? SAY_TRANSFORM_1 : SAY_TRANSFORM_2), m_creature);
+
+                    // in heroic it changes form at the end of the transition
+                    if (!m_pInstance->IsHeroicDifficulty())
+                        DoCastSpellIfCan(m_creature, SPELL_TEAR_GAS_CANCEL, CAST_TRIGGERED);
+
+                    m_uiPhase = (m_uiPhase == PHASE_TRANSITION_ONE ? PHASE_TWO : PHASE_THREE);
+                    m_uiTransitionTimer = 0;
+                }
+                else
+                    m_uiTransitionTimer -= uiDiff;
+
+                return;
+            }
+            // Movement transition phases
             case PHASE_RUNNING_ONE:
             case PHASE_RUNNING_TWO:
             {
                 // wait for arriving at the table (during phase transition)
-                break;
+                return;
             }
         }
+
+        // Slime Puddle (all phases, except for transition
+        if (m_uiPuddleTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_SLIME_PUDDLE_TRIGGER) == CAST_OK)
+                m_uiPuddleTimer = 35000;
+        }
+        else
+            m_uiPuddleTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
@@ -528,9 +482,13 @@ CreatureAI* GetAI_boss_professor_putricide(Creature* pCreature)
     return new boss_professor_putricideAI(pCreature);
 }
 
-bool EffectScriptEffectCreature_spell_ooze_trigger(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+bool EffectScriptEffectCreature_npc_putricide(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
-    if (uiSpellId == SPELL_OOZE_FLOOD_TRIGGER && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_PROFESSOR_PUTRICIDE)
+    if (pCreatureTarget->GetEntry() != NPC_PROFESSOR_PUTRICIDE)
+        return false;
+
+    // Ooze flood trigger - used in Rotface encounter
+    if (uiSpellId == SPELL_OOZE_FLOOD_TRIGGER && uiEffIndex == EFFECT_INDEX_0)
     {
         instance_icecrown_citadel* pInstance = (instance_icecrown_citadel*)pCreatureTarget->GetInstanceData();
         if (!pInstance)
@@ -585,8 +543,212 @@ bool EffectScriptEffectCreature_spell_ooze_trigger(Unit* pCaster, uint32 uiSpell
 
         return true;
     }
+    else if (uiSpellId == SPELL_UNSTABLE_EXPERIMENT && uiEffIndex == EFFECT_INDEX_0)
+    {
+        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
+        return true;
+    }
 
     return false;
+}
+
+bool EffectDummyCreature_npc_putricide(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+{
+    if (pCreatureTarget->GetEntry() != NPC_PROFESSOR_PUTRICIDE)
+        return false;
+
+    if (uiSpellId == SPELL_VOLATILE_EXPERIMENT && uiEffIndex == EFFECT_INDEX_0)
+    {
+        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pCaster, pCreatureTarget);
+        return true;
+    }
+
+    return false;
+}
+
+/*######
+## npc_volatile_ooze_icc
+######*/
+
+struct npc_volatile_ooze_iccAI : public ScriptedAI
+{
+    npc_volatile_ooze_iccAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiAdhesiveTimer;
+
+    ObjectGuid m_targetGuid;
+
+    void Reset() override
+    {
+        m_uiAdhesiveTimer = urand(2000, 4000);
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        if (!m_uiAdhesiveTimer && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsWithinDistInMap(m_creature, ATTACK_DISTANCE) && pWho->GetObjectGuid() == m_targetGuid)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_OOZE_ERUPTION) == CAST_OK)
+            {
+                m_uiAdhesiveTimer = urand(3000, 5000);
+                m_targetGuid.Clear();
+            }
+        }
+
+        ScriptedAI::MoveInLineOfSight(pWho);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiAdhesiveTimer)
+        {
+            if (m_uiAdhesiveTimer <= uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_OOZE_ADHESIVE, SELECT_FLAG_PLAYER))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_OOZE_ADHESIVE) == CAST_OK)
+                    {
+                        m_creature->GetMotionMaster()->MoveFollow(pTarget, ATTACK_DISTANCE * 0.5f, m_creature->GetAngle(pTarget));
+                        m_targetGuid = pTarget->GetObjectGuid();
+                        m_uiAdhesiveTimer = 0;
+                    }
+                }
+            }
+            else
+                m_uiAdhesiveTimer -= uiDiff;
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_volatile_ooze_icc(Creature* pCreature)
+{
+    return new npc_volatile_ooze_iccAI(pCreature);
+}
+
+/*######
+## npc_gas_cloud_icc
+######*/
+
+struct npc_gas_cloud_iccAI : public ScriptedAI
+{
+    npc_gas_cloud_iccAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiGasBloatTimer;
+
+    ObjectGuid m_targetGuid;
+
+    void Reset() override
+    {
+        m_uiGasBloatTimer = urand(2000, 4000);
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        if (!m_uiGasBloatTimer && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsWithinDistInMap(m_creature, ATTACK_DISTANCE) && pWho->GetObjectGuid() == m_targetGuid)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_EXPUNGED_GAS) == CAST_OK)
+            {
+                m_uiGasBloatTimer = urand(3000, 5000);
+                m_targetGuid.Clear();
+            }
+        }
+
+        ScriptedAI::MoveInLineOfSight(pWho);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiGasBloatTimer)
+        {
+            if (m_uiGasBloatTimer <= uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_OOZE_ADHESIVE, SELECT_FLAG_PLAYER))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_GASEOUS_BLOAT) == CAST_OK)
+                    {
+                        m_creature->GetMotionMaster()->MoveFollow(pTarget, ATTACK_DISTANCE * 0.5f, m_creature->GetAngle(pTarget));
+                        m_targetGuid = pTarget->GetObjectGuid();
+                        m_uiGasBloatTimer = 0;
+                    }
+                }
+            }
+            else
+                m_uiGasBloatTimer -= uiDiff;
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_gas_cloud_icc(Creature* pCreature)
+{
+    return new npc_gas_cloud_iccAI(pCreature);
+}
+
+/*######
+## npc_growing_ooze_puddle
+######*/
+
+// TODO Remove this 'script' when combat can be proper prevented from core-side
+struct npc_growing_ooze_puddleAI : public Scripted_NoMovementAI
+{
+    npc_growing_ooze_puddleAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+    void Reset() override { }
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+    void UpdateAI(const uint32 /*uiDiff*/) override { }
+};
+
+CreatureAI* GetAI_npc_growing_ooze_puddle(Creature* pCreature)
+{
+    return new npc_growing_ooze_puddleAI(pCreature);
+}
+
+bool EffectScriptEffectCreature_spell_eat_ooze(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+{
+    if (pCreatureTarget->GetEntry() != NPC_GROWING_OOZE_PUDDLE)
+        return false;
+
+    // Ooze flood trigger - used in Rotface encounter
+    if (uiSpellId == SPELL_EAT_OOZE && uiEffIndex == EFFECT_INDEX_0)
+    {
+        instance_icecrown_citadel* pInstance = (instance_icecrown_citadel*)pCreatureTarget->GetInstanceData();
+        if (!pInstance)
+            return false;
+
+        // ToDo: research if the amount of stacks removal is correct
+        pCreatureTarget->RemoveAuraHolderFromStack(GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), 3);
+
+        // despawn if we don't have the grow aura anymore
+        if (!pCreatureTarget->HasAura(GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex)))
+        {
+            pCreatureTarget->RemoveAllAurasOnEvade();
+            pCreatureTarget->ForcedDespawn(5000);
+        }
+
+        pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_NAUSEA, false);
+        return true;
+    }
+
+    return false;
+}
+
+/*######
+## npc_choking_gas_bomb
+######*/
+
+// TODO Remove this 'script' when combat can be proper prevented from core-side
+struct npc_choking_gas_bombAI : public Scripted_NoMovementAI
+{
+    npc_choking_gas_bombAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+    void Reset() override { }
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+    void UpdateAI(const uint32 /*uiDiff*/) override { }
+};
+
+CreatureAI* GetAI_npc_choking_gas_bomb(Creature* pCreature)
+{
+    return new npc_choking_gas_bombAI(pCreature);
 }
 
 /*######
@@ -630,7 +792,29 @@ void AddSC_boss_professor_putricide()
     pNewScript = new Script;
     pNewScript->Name = "boss_professor_putricide";
     pNewScript->GetAI = &GetAI_boss_professor_putricide;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_ooze_trigger;
+    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_putricide;
+    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_npc_putricide;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_volatile_ooze_icc";
+    pNewScript->GetAI = GetAI_npc_volatile_ooze_icc;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_gas_cloud_icc";
+    pNewScript->GetAI = GetAI_npc_gas_cloud_icc;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_growing_ooze_puddle";
+    pNewScript->GetAI = GetAI_npc_growing_ooze_puddle;
+    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_eat_ooze;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_choking_gas_bomb";
+    pNewScript->GetAI = GetAI_npc_choking_gas_bomb;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

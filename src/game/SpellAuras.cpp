@@ -2903,6 +2903,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 target->CastSpell(target, 68846, true, nullptr, this);
                 return;
             }
+            case 70308:                                     // Mutated Transformation
+            {
+                target->CastSpell(target, 70311, true, nullptr, this);
+                return;
+            }
         }
 
         // Living Bomb
@@ -5302,6 +5307,19 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                         pCaster->CastSpell(target, GetSpellProto()->EffectTriggerSpell[GetEffIndex()], true, nullptr, this);
                 }
 
+                return;
+            case 70405:                                     // Mutated Transformation (10n)
+            case 72508:                                     // Mutated Transformation (25n)
+            case 72509:                                     // Mutated Transformation (10h)
+            case 72510:                                     // Mutated Transformation (25h)
+                if (m_removeMode == AURA_REMOVE_BY_DEFAULT)
+                {
+                    if (target->IsVehicle() && target->GetTypeId() == TYPEID_UNIT)
+                    {
+                        target->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+                        ((Creature*)target)->ForcedDespawn();
+                    }
+                }
                 return;
             default:
                 break;
@@ -8994,6 +9012,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
         case 63050:                                         // Sanity
         case 64455:                                         // Feral Essence
         case 65294:                                         // Empowered
+        case 70672:                                         // Gaseous Bloat
         case 71564:                                         // Deadly Precision
         case 74396:                                         // Fingers of Frost
             m_stackAmount = m_spellProto->StackAmount;

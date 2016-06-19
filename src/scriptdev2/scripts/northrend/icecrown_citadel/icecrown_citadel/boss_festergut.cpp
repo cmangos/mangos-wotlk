@@ -57,8 +57,9 @@ enum
     SPELL_GASEOUS_BLIGHT_DUMMY3 = 69154,            // lower level gas visual aura
 
     // heroic spells
-    SPELL_MALLEABLE_GOO_SUMMON  = 72310,            // spawns creature 38556
+    SPELL_MALLEABLE_GOO_SUMMON  = 72299,            // spawns creature 38556
     SPELL_MALLEABLE_GOO         = 72296,
+    //SPELL_MALLEABLE_GOO_VISUAL  = 75845,          // ToDo: research if this is really used
 
     // npcs
     NPC_MALLEABLE_OOZE_STALKER  = 38556,

@@ -793,6 +793,10 @@ UPDATE creature_template SET ScriptName='mob_big_ooze' WHERE entry=36899;
 UPDATE creature_template SET ScriptName='boss_valithria_dreamwalker' WHERE entry=36789;
 UPDATE creature_template SET ScriptName='boss_professor_putricide' WHERE entry=36678;
 UPDATE creature_template SET ScriptName='npc_putricides_trap' WHERE entry=38879;
+UPDATE creature_template SET ScriptName='npc_volatile_ooze_icc' WHERE entry=37697;
+UPDATE creature_template SET ScriptName='npc_gas_cloud_icc' WHERE entry=37562;
+UPDATE creature_template SET ScriptName='npc_growing_ooze_puddle' WHERE entry=37690;
+UPDATE creature_template SET ScriptName='npc_choking_gas_bomb' WHERE entry=38159;
 UPDATE creature_template SET ScriptName='boss_the_lich_king_icc' WHERE entry=36597;
 UPDATE gameobject_template SET ScriptName='go_icc_teleporter' WHERE entry IN (202235,202242,202243,202244,202245,202246);
 DELETE FROM scripted_event_id WHERE id IN (23426,23438);
@@ -6346,7 +6350,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1631202,'%s begins to cast Slime Spray!',0,3,0,0,'rotface EMOTE_SLIME_SPRAY'),
 (-1631203,'%s grows more unstable!',0,2,0,0,'rotface EMOTE_OOZE_GROW_1'),
 (-1631204,'%s is growing volatile!',0,2,0,0,'rotface EMOTE_OOZE_GROW_2'),
-(-1631205,'%s can barely maintain its form!',0,2,0,0,'rotface EMOTE_OOZE_GROW_3');
+(-1631205,'%s can barely maintain its form!',0,2,0,0,'rotface EMOTE_OOZE_GROW_3'),
+(-1631206,'%s begins to cast Unstable Experiment!',0,3,0,0,'putricide EMOTE_EXPERIMENT');
 
 -- -1 632 000 ICC: FORGE OF SOULS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
