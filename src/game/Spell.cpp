@@ -3065,7 +3065,7 @@ SpellCastResult Spell::PreCastCheck(Aura* triggeredByAura /*= nullptr*/)
     return SPELL_CAST_OK;
 }
 
-void Spell::SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura)
+SpellCastResult Spell::SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura)
 {
     m_spellState = SPELL_STATE_STARTING;
     m_targets = *targets;
@@ -3093,10 +3093,12 @@ void Spell::SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura)
     {
         SendCastResult(result);
         finish(false);
-        return;
+        return result;
     }
     else
         Prepare();
+
+    return SPELL_CAST_OK;
 }
 
 void Spell::Prepare()

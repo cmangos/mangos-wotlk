@@ -982,7 +982,8 @@ enum SpellCastResult
     SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED = 186,
     SPELL_FAILED_UNKNOWN = 187,                             // actually doesn't exist in client
 
-    SPELL_CAST_OK = 255                                     // custom value, don't must be send to client
+    SPELL_NOT_FOUND = 254,                                  // custom value, don't must be send to client
+    SPELL_CAST_OK = 255
 };
 
 // Used in addition to SPELL_FAILED_CUSTOM_ERROR
