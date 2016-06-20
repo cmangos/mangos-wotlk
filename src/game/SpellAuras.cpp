@@ -2905,7 +2905,18 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             case 70308:                                     // Mutated Transformation
             {
-                target->CastSpell(target, 70311, true, nullptr, this);
+                if (target->GetMap()->IsDungeon())
+                {
+                    uint32 spellId;
+
+                    Difficulty diff = target->GetMap()->GetDifficulty();
+                    if (diff == RAID_DIFFICULTY_10MAN_NORMAL || diff == RAID_DIFFICULTY_10MAN_HEROIC)
+                        spellId = 70311;
+                    else
+                        spellId = 71503;
+
+                    target->CastSpell(target, spellId, true, NULL, this);
+                }
                 return;
             }
         }
