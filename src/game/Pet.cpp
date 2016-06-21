@@ -899,7 +899,6 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             else
             {
                 sLog.outErrorDb("HUNTER PET levelstats missing in DB! 'Weakifying' pet");
-                return false;
 
                 for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
                     SetCreateStat(Stats(i), 1.0f);
@@ -967,7 +966,6 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             else
             {
                 sLog.outErrorDb("WARLOCK PET levelstats missing in DB! 'Weakifying' pet");
-                return false;
 
                 for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
                     SetCreateStat(Stats(i), 1.0f);
