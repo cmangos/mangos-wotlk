@@ -2629,7 +2629,8 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     }
 
     // attack can be redirected to another target
-    pVictim = SelectMagnetTarget(pVictim);
+    if (Unit* magnetTarget = SelectMagnetTarget(pVictim))
+        pVictim = magnetTarget;
 
     CalcDamageInfo damageInfo;
     CalculateMeleeDamage(pVictim, &damageInfo, attType);
@@ -6438,7 +6439,8 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell, SpellEffectIndex eff)
         }
     }
 
-    return victim;
+    // No magnet Target found
+    return nullptr;
 }
 
 void Unit::SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, uint32 OverHeal, bool critical, uint32 absorb)
