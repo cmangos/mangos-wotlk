@@ -2815,11 +2815,13 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
         return MELEE_HIT_CRIT;
     }
 
+    tmp = (victimDefenseSkill < victimMaxSkillValueForLevel) ? victimDefenseSkill : victimMaxSkillValueForLevel;
+
     // mobs can score crushing blows if they're 4 or more levels above victim
     // having defense above your maximum (from items, talents etc.) has no effect
     // mob's level * 5 - player's current defense skill - add 2% chance per lacking skill point, min. is 20%
     if ((getLevel() - 4) >= pVictim->getLevel() && !IsNonMeleeSpellCasted(false) /* It should have been !spellCasted but wrath doesn't have that? */
-        && roll < (tmp = (((attackerMaxSkillValueForLevel - victimMaxSkillValueForLevel) * 200) - 2000)))
+        && roll < (tmp = (((attackerMaxSkillValueForLevel - tmp) * 200) - 2000)))
     {
         uint32 typeId = GetTypeId();
         /* It should have been !(((Creature*)this)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_CRUSH) but wrath doesn't have that? */
