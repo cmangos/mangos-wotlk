@@ -5778,7 +5778,18 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
         spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
         spawnCreature->InitStatsForLevel(level);
-        spawnCreature->GetCharmInfo()->SetPetNumber(pet_number, false);
+
+        if (CharmInfo* charmInfo = spawnCreature->GetCharmInfo())
+        {
+            charmInfo->SetPetNumber(pet_number, false);
+
+            if (spawnCreature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE))
+                charmInfo->SetReactState(REACT_PASSIVE);
+            else if ((cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE) || petType == PROTECTOR_PET)
+                charmInfo->SetReactState(REACT_DEFENSIVE);
+            else
+                charmInfo->SetReactState(REACT_AGGRESSIVE);
+        }
 
         m_caster->AddGuardian(spawnCreature);
 
@@ -5800,6 +5811,7 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
         }
     }
 
+        
     return true;
 }
 

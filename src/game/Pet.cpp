@@ -43,10 +43,6 @@ Pet::Pet(PetType type) :
 
     if (type == MINI_PET)                                   // always passive
         charmInfo->SetReactState(REACT_PASSIVE);
-    else if (type == PROTECTOR_PET)                         // always defensive
-        charmInfo->SetReactState(REACT_DEFENSIVE);
-    else if (type == GUARDIAN_PET)                          // always aggressive
-        charmInfo->SetReactState(REACT_AGGRESSIVE);
 }
 
 Pet::~Pet()
