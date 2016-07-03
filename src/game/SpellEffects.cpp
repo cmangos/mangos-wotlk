@@ -5503,28 +5503,22 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                     break;
                 case UNITNAME_SUMMON_TITLE_GUARDIAN:
                 {
-                    if (prop_id == 61)                      // mixed guardians, totems, statues
+                    if (prop_id == 61)
                     {
-                        // * Stone Statue, etc  -- fits much better totem AI
-                        if (m_spellInfo->SpellIconID == 2056)
-                            summonResult = DoSummonTotem(eff_idx);
-                        else
+                        // Totem cases
+                        if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(m_spellInfo->EffectMiscValue[eff_idx]))
                         {
-                            // possible sort totems/guardians only by summon creature type
-                            CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(m_spellInfo->EffectMiscValue[eff_idx]);
-
-                            if (!cInfo)
-                                return;
-
-                            // FIXME: not all totems and similar cases seelcted by this check...
                             if (cInfo->CreatureType == CREATURE_TYPE_TOTEM)
+                            {
                                 summonResult = DoSummonTotem(eff_idx);
-                            else
-                                summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, level);
+                                break;
+                            }
                         }
+                        else
+                            return;
                     }
-                    else
-                        summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, level);
+
+                    summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, level);
                     break;
                 }
                 case UNITNAME_SUMMON_TITLE_CONSTRUCT:
