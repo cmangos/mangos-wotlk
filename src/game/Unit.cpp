@@ -2628,6 +2628,8 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
         return;
     }
 
+    RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_UNK12);
+
     // attack can be redirected to another target
     if (Unit* magnetTarget = SelectMagnetTarget(pVictim))
         pVictim = magnetTarget;
