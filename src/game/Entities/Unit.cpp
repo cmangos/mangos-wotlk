@@ -3020,7 +3020,12 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
         }
     }
     // !!!
-    const SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
+    SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
+    // wand case
+    bool wand = spell->Id == 5019;
+    if (wand && !!(getClassMask() & CLASSMASK_WAND_USERS) && GetTypeId() == TYPEID_PLAYER)
+        schoolMask = SpellSchoolMask(GetWeaponDamageSchool(RANGED_ATTACK));
+
     // Reflect (when available)
     if (reflectable)
     {
@@ -3032,7 +3037,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
     {
         // TODO: improve for partial application
         // Check for immune
-        if (pVictim->IsImmuneToSpell(spell, (this == pVictim)))
+        if (!wand && pVictim->IsImmuneToSpell(spell, (this == pVictim)))
             return SPELL_MISS_IMMUNE;
         // Check for immune (use charges)
         if (pVictim->IsImmuneToDamage(schoolMask))

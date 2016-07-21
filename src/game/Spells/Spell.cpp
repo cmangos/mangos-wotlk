@@ -428,15 +428,11 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
 
     m_spellSchoolMask = GetSpellSchoolMask(info);           // Can be override for some spell (wand shoot for example)
 
+    // wand case
     if (m_attackType == RANGED_ATTACK)
-    {
-        // wand case
-        if ((m_caster->getClassMask() & CLASSMASK_WAND_USERS) != 0 && m_caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (Item* pItem = ((Player*)m_caster)->GetWeaponForAttack(RANGED_ATTACK))
-                m_spellSchoolMask = SpellSchoolMask(1 << pItem->GetProto()->Damage[0].DamageType);
-        }
-    }
+        if (!!(m_caster->getClassMask() & CLASSMASK_WAND_USERS) && m_caster->GetTypeId() == TYPEID_PLAYER)
+            m_spellSchoolMask = SpellSchoolMask(m_caster->GetWeaponDamageSchool(RANGED_ATTACK));
+
     // Set health leech amount to zero
     m_healthLeech = 0;
 
