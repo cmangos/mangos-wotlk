@@ -1747,7 +1747,7 @@ class Player : public Unit
         void UpdateRating(CombatRating cr);
         void UpdateAllRatings();
 
-        void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, float& min_damage, float& max_damage);
+        void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, float& min_damage, float& max_damage, uint8 index = 0);
 
         void UpdateDefenseBonusesMod();
         float GetMeleeCritFromAgility() const;

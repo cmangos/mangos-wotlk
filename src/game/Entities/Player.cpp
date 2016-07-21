@@ -7485,77 +7485,92 @@ void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool appl
 
     if (proto->ArcaneRes)
         HandleStatModifier(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(proto->ArcaneRes), apply);
+    
+    if (proto->IsWeapon())
+    {
+        WeaponAttackType attType = BASE_ATTACK;
 
-    WeaponAttackType attType = BASE_ATTACK;
-    float damage = 0.0f;
-
-    if (slot == EQUIPMENT_SLOT_RANGED && (
-                proto->InventoryType == INVTYPE_RANGED || proto->InventoryType == INVTYPE_THROWN ||
-                proto->InventoryType == INVTYPE_RANGEDRIGHT))
-    {
-        attType = RANGED_ATTACK;
-    }
-    else if (slot == EQUIPMENT_SLOT_OFFHAND)
-    {
-        attType = OFF_ATTACK;
-    }
-
-    float minDamage = proto->Damage[0].DamageMin;
-    float maxDamage = proto->Damage[0].DamageMax;
-    int32 extraDPS = 0;
-    // If set dpsMod in ScalingStatValue use it for min (70% from average), max (130% from average) damage
-    if (ssv)
-    {
-        extraDPS = ssv->getDPSMod(proto->ScalingStatValue);
-        if (extraDPS)
-        {
-            float average = extraDPS * proto->Delay / 1000.0f;
-            minDamage = 0.7f * average;
-            maxDamage = 1.3f * average;
-        }
-    }
-    if (minDamage > 0)
-    {
-        damage = apply ? minDamage : BASE_MINDAMAGE;
-        SetBaseWeaponDamage(attType, MINDAMAGE, damage);
-        // sLog.outError("applying mindam: assigning %f to weapon mindamage, now is: %f", damage, GetWeaponDamageRange(attType, MINDAMAGE));
-    }
-
-    if (maxDamage  > 0)
-    {
-        damage = apply ? maxDamage : BASE_MAXDAMAGE;
-        SetBaseWeaponDamage(attType, MAXDAMAGE, damage);
-    }
-
-    // Apply feral bonus from ScalingStatValue if set
-    if (ssv)
-    {
-        if (int32 feral_bonus = ssv->getFeralBonus(proto->ScalingStatValue))
-            ApplyFeralAPBonus(feral_bonus, apply);
-    }
-    // Druids get feral AP bonus from weapon dps (also use DPS from ScalingStatValue)
-    if (getClass() == CLASS_DRUID)
-    {
-        int32 feral_bonus = proto->getFeralBonus(extraDPS);
-        if (feral_bonus > 0)
-            ApplyFeralAPBonus(feral_bonus, apply);
-    }
-
-    if (!CanUseEquippedWeapon(attType))
-        return;
-
-    if (proto->Delay)
-    {
-        if (slot == EQUIPMENT_SLOT_RANGED)
-            SetAttackTime(RANGED_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
-        else if (slot == EQUIPMENT_SLOT_MAINHAND)
-            SetAttackTime(BASE_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
+        if (slot == EQUIPMENT_SLOT_RANGED && proto->IsRangedWeapon())
+            attType = RANGED_ATTACK;
         else if (slot == EQUIPMENT_SLOT_OFFHAND)
-            SetAttackTime(OFF_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
-    }
+            attType = OFF_ATTACK;
 
-    if (CanModifyStats() && (damage || proto->Delay))
-        UpdateDamagePhysical(attType);
+        bool hasDamage = false;
+        m_weaponDamageCount[attType] = 0;
+
+        int32 extraDPS = 0;
+
+        for (int i = 0; i < MAX_ITEM_PROTO_DAMAGES; i++)
+        {
+            if (proto->Damage[i].DamageMax == 0)
+                break;
+
+            hasDamage = true;
+
+            float minDamage = 0.0f;
+            float maxDamage = 0.0f;
+            SpellSchools school = SPELL_SCHOOL_NORMAL;
+
+            if (apply)
+            {
+                minDamage = proto->Damage[i].DamageMin;
+                maxDamage = proto->Damage[i].DamageMax;
+                school = SpellSchools(proto->Damage[i].DamageType);
+
+                m_weaponDamageCount[attType]++;
+
+                // If set dpsMod in ScalingStatValue use it for min (70% from average), max (130% from average) damage
+                if (ssv && school == SPELL_SCHOOL_NORMAL)
+                {
+                    if (uint32 extra = ssv->getDPSMod(proto->ScalingStatValue))
+                    {
+                        extraDPS += extra;
+
+                        float average = extra * proto->Delay / 1000.0f;
+                        minDamage = 0.7f * average;
+                        maxDamage = 1.3f * average;
+                    }
+                }
+            }
+
+            SetBaseWeaponDamage(attType, MINDAMAGE, minDamage, i);
+            SetBaseWeaponDamage(attType, MAXDAMAGE, maxDamage, i);
+            SetWeaponDamageSchool(attType, school, i);
+        }
+
+        if (m_weaponDamageCount[attType] == 0)
+            m_weaponDamageCount[attType] = 1;
+
+        // Apply feral bonus from ScalingStatValue if set
+        if (ssv)
+        {
+            if (int32 feral_bonus = ssv->getFeralBonus(proto->ScalingStatValue))
+                ApplyFeralAPBonus(feral_bonus, apply);
+        }
+        // Druids get feral AP bonus from weapon dps (also use DPS from ScalingStatValue)
+        if (getClass() == CLASS_DRUID)
+        {
+            int32 feral_bonus = proto->getFeralBonus(extraDPS);
+            if (feral_bonus > 0)
+                ApplyFeralAPBonus(feral_bonus, apply);
+        }
+
+        if (!CanUseEquippedWeapon(attType))
+            return;
+
+        if (proto->Delay)
+        {
+            if (slot == EQUIPMENT_SLOT_RANGED)
+                SetAttackTime(RANGED_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
+            else if (slot == EQUIPMENT_SLOT_MAINHAND)
+                SetAttackTime(BASE_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
+            else if (slot == EQUIPMENT_SLOT_OFFHAND)
+                SetAttackTime(OFF_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
+        }
+
+        if (CanModifyStats() && proto->Delay)
+            UpdateDamagePhysical(attType);
+    }
 }
 
 void Player::_ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackType, bool apply)
