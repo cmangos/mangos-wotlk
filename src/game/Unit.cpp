@@ -11521,7 +11521,7 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         if (player)
         {
             player->GetCamera().ResetView();
-            player->SetClientControl(player, 0);
+            player->SetClientControl(player, 1);
             player->SetMover(nullptr);
         }
         return;
