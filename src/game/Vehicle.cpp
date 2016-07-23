@@ -313,6 +313,9 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 
     UnBoardPassenger(passenger);                            // Use TransportBase to remove the passenger from storage list
 
+    // Remove passenger modifications
+    RemoveSeatMods(passenger, seatEntry->m_flags);
+
     if (!changeVehicle)                                     // Send expected unboarding packages
     {
         // Update movementInfo
@@ -346,9 +349,6 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
             m_accessoryGuids.erase(passenger->GetObjectGuid());
         }
     }
-
-    // Remove passenger modifications
-    RemoveSeatMods(passenger, seatEntry->m_flags);
 
     // Some creature vehicles get despawned after passenger unboarding
     if (m_owner->GetTypeId() == TYPEID_UNIT)
