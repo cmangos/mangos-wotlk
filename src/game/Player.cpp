@@ -19056,6 +19056,19 @@ uint32 Player::GetMaxPersonalArenaRatingRequirement(uint32 minarenaslot)
     return max_personal_rating;
 }
 
+uint8 Player::GetHighestPvPRankIndex()
+{
+    uint8 index = 0;
+    for (uint8 rank = 1; rank <= 28; ++rank)
+    {
+        if (HasTitle(rank))
+            // Old rank index starts at 5, values below 5 are discontinued negative ranks
+            index = (rank <= 14) ? (rank + 4) : (rank - 10);
+    }
+
+    return index;
+}
+
 void Player::UpdateHomebindTime(uint32 time)
 {
     // GMs never get homebind timer online
