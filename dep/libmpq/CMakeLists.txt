@@ -8,11 +8,12 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-cmake_minimum_required (VERSION 2.6)
-set(EXECUTABLE_NAME "vmap_extractor")
-project (${EXECUTABLE_NAME})
+cmake_minimum_required (VERSION 2.8)
+project(mpq)
 
-add_executable(${EXECUTABLE_NAME} adtfile.cpp  dbcfile.cpp gameobject_extract.cpp model.cpp  mpq_libmpq.cpp  vmapexport.cpp  wdtfile.cpp  wmo.cpp)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libmpq)
 
-target_link_libraries(${EXECUTABLE_NAME} mpq bz2 z)
-install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)
+file(GLOB mpqfiles libmpq/*.c libmpq/*.h *.h)
+
+add_library(mpq ${mpqfiles})

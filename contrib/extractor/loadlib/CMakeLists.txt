@@ -8,6 +8,9 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# disable warnings for dependencies
+add_compile_options(-w)
+
 add_library (loadlib loadlib.cpp  adt.cpp  wdt.cpp)
 # link loadlib with zlib
 target_link_libraries (loadlib z)

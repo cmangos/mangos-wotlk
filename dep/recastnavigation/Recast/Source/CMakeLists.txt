@@ -16,11 +16,27 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-# disable warnings for dependencies
-add_compile_options(-w)
+add_definitions(-DDT_POLYREF64)
 
-add_subdirectory(recastnavigation)
-add_subdirectory(src)
-if (BUILD_VMAP_EXTRACTOR)
-  add_subdirectory(libmpq)
-endif()
+set(RECAST_SRCS
+    Recast.cpp
+    RecastAlloc.cpp
+    RecastArea.cpp
+    RecastContour.cpp
+    RecastFilter.cpp
+    RecastMesh.cpp
+    RecastMeshDetail.cpp
+    RecastRasterization.cpp
+    RecastRegion.cpp
+)
+
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_SOURCE_DIR}/dep/recastnavigation
+  ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Recast
+  ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Recast/Include
+)
+
+add_library(recast STATIC
+  ${RECAST_SRCS}
+)
