@@ -5801,14 +5801,14 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
             ((Creature*)m_originalCaster)->AI()->JustSummoned(spawnCreature);
 
             if (m_originalCaster->isInCombat() && !(spawnCreature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
-				((Creature*)spawnCreature)->AI()->AttackStart(m_originalCaster->getAttackerForHelper());
+                ((Creature*)spawnCreature)->AI()->AttackStart(m_originalCaster->getAttackerForHelper());
         }
         else if ((m_caster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_caster)->AI())
         {
             ((Creature*)m_caster)->AI()->JustSummoned(spawnCreature);
 
             if (m_caster->isInCombat() && !(spawnCreature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
-				((Creature*)spawnCreature)->AI()->AttackStart(m_caster->getAttackerForHelper());
+                ((Creature*)spawnCreature)->AI()->AttackStart(m_caster->getAttackerForHelper());
         }
     }
 
@@ -6647,90 +6647,87 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     if (plr->IsFFAPvP())
         pet->SetFFAPvP(true);
 
-    // level of hunter pet can't be less owner level at 5 levels
-    uint32 level = creatureTarget->getLevel() + 5 < plr->getLevel() ? (plr->getLevel() - 5) : creatureTarget->getLevel();
-
-	pet->InitStatsForLevel(level);
-
     pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
-    // this enables pet details window (Shift+P)
-    pet->InitPetCreateSpells();
+
+    pet->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
+
+    // level of hunter pet can't be less owner level at 5 levels
+    uint32 cLevel = creatureTarget->getLevel();
+    uint32 plLevel = plr->getLevel();
+    uint32 level = (cLevel + 5) < plLevel ? (plLevel - 5) : cLevel;
+    pet->InitStatsForLevel(level);
     pet->InitLevelupSpellsForLevel();
     pet->InitTalentForLevel();
-    pet->SetHealth(pet->GetMaxHealth());
 
-    // "kill" original creature
+    pet->SetHealthPercent(creatureTarget->GetHealthPercent());
+
+    pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
+
+    // destroy creature object
     creatureTarget->ForcedDespawn();
 
     // prepare visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, level - 1);
 
-    // add to world
+    // add pet object to the world
     pet->GetMap()->Add((Creature*)pet);
     pet->AIM_Initialize();
 
     // visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
 
+    // this enables pet details window (Shift+P)
+    pet->InitPetCreateSpells();
+
     // caster have pet now
     plr->SetPet(pet);
 
-    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
     plr->PetSpellInitialize();
+
+    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
 
 void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 {
     uint32 petentry = m_spellInfo->EffectMiscValue[eff_idx];
 
-    // if pet requested type already exist
-    if (Pet* OldSummon = m_caster->GetPet())
-    {
-        if ((petentry == 0 || OldSummon->GetEntry() == petentry) && OldSummon->getPetType() != SUMMON_PET)
-        {
-            // pet in corpse state can't be summoned
-            if (OldSummon->isDead())
-                return;
-
-            OldSummon->GetMap()->Remove((Creature*)OldSummon, false);
-
-            float px, py, pz;
-            m_caster->GetClosePoint(px, py, pz, OldSummon->GetObjectBoundingRadius());
-
-            OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
-            m_caster->GetMap()->Add((Creature*)OldSummon);
-
-            if (m_caster->GetTypeId() == TYPEID_PLAYER && OldSummon->isControlled())
-            {
-                ((Player*)m_caster)->PetSpellInitialize();
-            }
-            return;
-        }
-
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            OldSummon->Unsummon(OldSummon->getPetType() == HUNTER_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT, m_caster);
-        else
-            return;
-    }
-
-    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(petentry);
-
-    // == 0 in case call current pet, check only real summon case
-    if (petentry && !cInfo)
-    {
-        sLog.outErrorDb("EffectSummonPet: creature entry %u not found for spell %u.", petentry, m_spellInfo->Id);
-        return;
-    }
-
     Pet* NewSummon = new Pet;
 
-    // petentry==0 for hunter "call pet" (current pet summoned if any)
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
-        return;
-
-    // not error in case fail hunter call pet
-    if (!petentry)
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
+        switch(m_caster->getClass())
+        {
+            case CLASS_HUNTER:
+            {
+                // Everything already taken care of, we are only here because we loaded pet from db successfully
+                delete NewSummon;
+                return;
+            }
+            default:
+            {
+                if (Pet* OldSummon = m_caster->GetPet())
+                    OldSummon->Unsummon(PET_SAVE_NOT_IN_SLOT, m_caster);
+
+                // Load pet from db; if any to load
+                if (NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
+                {
+                    NewSummon->SetHealth(NewSummon->GetMaxHealth());
+                    NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
+
+                    NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
+
+                    return;
+                }
+            }
+        }
+    }
+    else
+        NewSummon->setPetType(GUARDIAN_PET);
+
+    CreatureInfo const* cInfo = petentry ? ObjectMgr::GetCreatureTemplate(petentry) : nullptr;
+    if (!cInfo)
+    {
+        sLog.outErrorDb("EffectSummonPet: creature entry %u not found for spell %u.", petentry, m_spellInfo->Id);
         delete NewSummon;
         return;
     }
@@ -6747,71 +6744,20 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     NewSummon->SetRespawnCoord(pos);
 
-    uint32 petlevel = std::max(m_caster->getLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
+    // Level of pet summoned
+    uint32 level = std::max(m_caster->getLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
 
-    uint32 faction = m_caster->getFaction();
-
-    if (m_caster->GetTypeId() == TYPEID_UNIT)
-    {
-        NewSummon->setPetType(GUARDIAN_PET);
-
-        if (((Creature*)m_caster)->IsTotem())
-            NewSummon->GetCharmInfo()->SetReactState(REACT_AGGRESSIVE);
-        else
-            NewSummon->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
-    }
-    else
-        NewSummon->setPetType(SUMMON_PET);
-
+    NewSummon->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
     NewSummon->SetOwnerGuid(m_caster->GetObjectGuid());
     NewSummon->SetCreatorGuid(m_caster->GetObjectGuid());
-    NewSummon->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
-    NewSummon->setFaction(faction);
+    NewSummon->setFaction(m_caster->getFaction());
     NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
-    NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
-    NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
     NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
-    NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
-    // this enables pet details window (Shift+P)
-
-    if (m_caster->IsPvP())
-        NewSummon->SetPvP(true);
-
-    if (m_caster->IsFFAPvP())
-        NewSummon->SetFFAPvP(true);
-
-    NewSummon->InitStatsForLevel(petlevel);
+    NewSummon->InitStatsForLevel(level);
     NewSummon->InitPetCreateSpells();
     NewSummon->InitLevelupSpellsForLevel();
     NewSummon->InitTalentForLevel();
-
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && NewSummon->getPetType() == SUMMON_PET)
-    {
-        NewSummon->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
-
-        // This is done for hunters pets, so now we do it for other controlled pets as well, why not? they're all unknowns anyway.
-		// I very much doubt this flag has anything to do with sanctuaries as this flag is needed to be able to bandage pet in classic and tbc
-        NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY | UNIT_BYTE2_FLAG_UNK4 | UNIT_BYTE2_FLAG_UNK5);
-
-        // this enables popup window (pet dismiss, cancel)
-        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-        NewSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-
-        // generate new name for summon pet
-        std::string new_name = sObjectMgr.GeneratePetName(petentry);
-        if (!new_name.empty())
-            NewSummon->SetName(new_name);
-    }
-
-    if (NewSummon->getPetType() == HUNTER_PET)
-    {
-        NewSummon->RemoveByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED);
-        NewSummon->SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_ABANDONED);
-    }
-
-    NewSummon->SetHealth(NewSummon->GetMaxHealth());
-    NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
 
     map->Add((Creature*)NewSummon);
     NewSummon->AIM_Initialize();
@@ -6821,8 +6767,42 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
+        NewSummon->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+
+        // I very much doubt this flag has anything to do with sanctuaries as this flag is needed to be able to bandage pet after load from db
+        NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY | UNIT_BYTE2_FLAG_UNK4 | UNIT_BYTE2_FLAG_UNK5);
+        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+
+        NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
+
+        // generate new name for summon pet
+        NewSummon->SetName(sObjectMgr.GeneratePetName(petentry));
+
+        if (m_caster->IsPvP())
+            NewSummon->SetPvP(true);
+
+        if (m_caster->IsFFAPvP())
+            NewSummon->SetFFAPvP(true);
+
         NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
         ((Player*)m_caster)->PetSpellInitialize();
+    }
+    else
+    {
+        // Notify Summoner
+        if (m_originalCaster && (m_originalCaster != m_caster)
+            && (m_originalCaster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_originalCaster)->AI())
+        {
+            ((Creature*)m_originalCaster)->AI()->JustSummoned(NewSummon);
+            if (m_originalCaster->isInCombat() && !(NewSummon->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
+                ((Creature*)NewSummon)->AI()->AttackStart(m_originalCaster->getAttackerForHelper());
+        }
+        else if ((m_caster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_caster)->AI())
+        {
+            ((Creature*)m_caster)->AI()->JustSummoned(NewSummon);
+            if (m_caster->isInCombat() && !(NewSummon->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
+                ((Creature*)NewSummon)->AI()->AttackStart(m_caster->getAttackerForHelper());
+        }
     }
 }
 
