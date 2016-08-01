@@ -1783,10 +1783,13 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
             if (Unit* magnetTarget = m_caster->SelectMagnetTarget(pUnitTarget, this, effIndex))
             {
-                m_targets.setUnitTarget(magnetTarget);
-                m_spellFlags |= SPELL_FLAG_REDIRECTED;
-                targetUnitMap.push_back(magnetTarget);
-                break;
+                if (magnetTarget != pUnitTarget)    // magnet target may be same as current target
+                {
+                    m_targets.setUnitTarget(magnetTarget);
+                    m_spellFlags |= SPELL_FLAG_REDIRECTED;
+                    targetUnitMap.push_back(magnetTarget);
+                    break;
+                }
             }
 
             if (EffectChainTarget <= 1)
@@ -2377,14 +2380,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
                 else
                 {
-                    if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(target, this, effIndex))
+                    Unit* magnetTarget = m_caster->SelectMagnetTarget(target, this, effIndex);
+                    if (magnetTarget && (magnetTarget != target))
                     {
-                        if (target != pUnitTarget)
-                        {
-                            m_targets.setUnitTarget(pUnitTarget);
-                            m_spellFlags |= SPELL_FLAG_REDIRECTED;
-                        }
-                        targetUnitMap.push_back(pUnitTarget);
+                        m_targets.setUnitTarget(magnetTarget);
+                        m_spellFlags |= SPELL_FLAG_REDIRECTED;
+                        targetUnitMap.push_back(magnetTarget);
                     }
                     else
                         targetUnitMap.push_back(target);
@@ -2415,11 +2416,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         {
             if (Unit* target = m_targets.getUnitTarget())
             {
-                if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(target, this, effIndex))
+                Unit* magnetTarget = m_caster->SelectMagnetTarget(target, this, effIndex);
+                if (magnetTarget && (magnetTarget != target))
                 {
-                    m_targets.setUnitTarget(pUnitTarget);
+                    m_targets.setUnitTarget(magnetTarget);
                     m_spellFlags |= SPELL_FLAG_REDIRECTED;
-                    targetUnitMap.push_back(pUnitTarget);
+                    targetUnitMap.push_back(magnetTarget);
                 }
                 else
                     targetUnitMap.push_back(target);
