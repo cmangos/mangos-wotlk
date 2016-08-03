@@ -6978,13 +6978,13 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     if (zone->flags & AREA_FLAG_SANCTUARY)                  // in sanctuary
     {
-		SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY);
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY);
         if (sWorld.IsFFAPvPRealm())
             SetFFAPvP(false);
     }
     else
     {
-		RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY);
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY);
     }
 
     if (zone->flags & AREA_FLAG_CAPITAL)                    // in capital city
