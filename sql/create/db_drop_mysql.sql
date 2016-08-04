@@ -12,7 +12,7 @@ REVOKE ALL PRIVILEGES ON `realmd` . * FROM 'mangos'@'localhost';
 
 REVOKE GRANT OPTION ON `realmd` . * FROM 'mangos'@'localhost';
 
-DELETE FROM `mysql` . `user` WHERE CONVERT( USER USING utf8 ) = CONVERT( 'mangos' USING utf8 ) AND CONVERT( HOST USING utf8 ) = CONVERT( 'localhost' USING utf8 ) ;
+DELETE FROM `mysql` . `user` WHERE CONVERT( user USING utf8 ) = CONVERT( 'mangos' USING utf8 ) AND CONVERT( host USING utf8 ) = CONVERT( 'localhost' USING utf8 );
 
 DROP DATABASE IF EXISTS `mangos` ;
 
