@@ -2987,7 +2987,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 SpellCastResult Spell::PreCastCheck(Aura* triggeredByAura /*= nullptr*/)
 {
     // Prevent casting at cast another spell (ServerSide check)
-    if (!m_IsTriggeredSpell && m_caster->IsNonMeleeSpellCasted(false, true, true))
+    if (m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count)
         return SPELL_FAILED_SPELL_IN_PROGRESS;
 
     SpellCastResult result = CheckCast(true);
