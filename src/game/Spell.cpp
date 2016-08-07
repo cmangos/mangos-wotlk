@@ -4167,7 +4167,11 @@ void Spell::WriteSpellGoTargets(WorldPacket* data)
             m_needAliveTargetMask |= ihit->effectMask;
         }
         else
+        {
+            if (IsChanneledSpell(m_spellInfo) && ihit->missCondition == SPELL_MISS_RESIST)
+                m_duration = 0;                             // cancel aura to avoid visual effect continue
             ++miss;
+        }
     }
 
     for (GOTargetList::const_iterator ighit = m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end(); ++ighit)
