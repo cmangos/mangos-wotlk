@@ -7473,7 +7473,6 @@ void Aura::PeriodicTick()
                 return;
 
             bool canApplyHealthPart = true;
-            bool canApplyDamagePart = true;
 
             // don't heal target if max health or if not alive, mostly death persistent effects from items
             if (!target->isAlive() || (target->GetHealth() == target->GetMaxHealth()))
@@ -7556,17 +7555,15 @@ void Aura::PeriodicTick()
                         pCaster->DealDamage(pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
                     }
                     else
-                        canApplyDamagePart = false;
+                    {
+                        // cannot apply damage part so we have to cancel responsible aura
+                        pCaster->RemoveAurasDueToSpell(GetId());
+
+                        // finish current generic/channeling spells, don't affect autorepeat
+                        pCaster->FinishSpell(CURRENT_GENERIC_SPELL);
+                        pCaster->FinishSpell(CURRENT_CHANNELED_SPELL);
+                    }
                 }
-            }
-
-            if (!canApplyHealthPart || !canApplyDamagePart)
-            {
-                pCaster->RemoveAurasDueToSpell(GetId());
-
-                // finish current generic/channeling spells, don't affect autorepeat
-                pCaster->FinishSpell(CURRENT_GENERIC_SPELL);
-                pCaster->FinishSpell(CURRENT_CHANNELED_SPELL);
             }
             break;
         }
