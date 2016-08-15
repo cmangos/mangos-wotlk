@@ -45,7 +45,7 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
 
     if (GetId(username))
     {
-        return AOR_NAME_ALREDY_EXIST;                       // username does already exist
+        return AOR_NAME_ALREADY_EXIST;                       // username does already exist
     }
 
     if (!LoginDatabase.PExecute("INSERT INTO account(username,sha_pass_hash,joindate) VALUES('%s','%s',NOW())", username.c_str(), CalculateShaPassHash(username, password).c_str()))
@@ -65,7 +65,7 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
 
     if (GetId(username))
     {
-        return AOR_NAME_ALREDY_EXIST;                       // username does already exist
+        return AOR_NAME_ALREADY_EXIST;                       // username does already exist
     }
 
     if (!LoginDatabase.PExecute("INSERT INTO account(username,sha_pass_hash,joindate,expansion) VALUES('%s','%s',NOW(),'%u')", username.c_str(), CalculateShaPassHash(username, password).c_str(), expansion))
