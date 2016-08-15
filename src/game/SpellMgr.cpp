@@ -860,6 +860,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     {
                         case 36897:                         // Transporter Malfunction (race mutation to horde)
                         case 36899:                         // Transporter Malfunction (race mutation to alliance)
+                        case 37097:                         // Crate Disguise
                             return false;
                     }
                     break;
@@ -869,6 +870,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     {
                         case 802:                           // Mutate Bug, wrongly negative by target modes
                         case 38449:                         // Blessing of the Tides
+                        case 50312:                         // Unholy Frenzy
                             return true;
                         case 36900:                         // Soul Split: Evil!
                         case 36901:                         // Soul Split: Good
