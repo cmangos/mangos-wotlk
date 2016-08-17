@@ -97,7 +97,7 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
         return;
 
     // Dump outgoing packet.
-    //sLog.outWorldPacketDump(uint32(get_handle()), pct.GetOpcode(), pct.GetOpcodeName(), &pct, false);
+    sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct.GetOpcode(), pct.GetOpcodeName(), &pct, false);
 
     ServerPktHeader header(pct.size() + 2, pct.GetOpcode());
     m_crypt.EncryptSend((uint8*)header.header, header.getHeaderLength());
@@ -192,9 +192,6 @@ bool WorldSocket::ProcessIncomingData()
     if (IsClosed())
         return false;
 
-    // Dump received packet.
-    //sLog.outWorldPacketDump(uint32(get_handle()), new_pct->GetOpcode(), new_pct->GetOpcodeName(), new_pct, true);
-
     WorldPacket *pct = new WorldPacket(opcode, validBytesRemaining);
 
     if (validBytesRemaining)
@@ -202,6 +199,8 @@ bool WorldSocket::ProcessIncomingData()
         pct->append(InPeak(), validBytesRemaining);
         ReadSkip(validBytesRemaining);
     }
+
+    sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct->GetOpcode(), pct->GetOpcodeName(), pct, true);
 
     try
     {
