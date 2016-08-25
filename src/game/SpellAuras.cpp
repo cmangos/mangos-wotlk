@@ -4247,9 +4247,6 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
         {
             //remove any existing charm just in case
             caster->Uncharm();
-
-            //pets should be removed when possesing a target if somehow check was bypassed
-            ((Player*)caster)->UnsummonPetIfAny();
         }
 
         pet->StopMoving();
