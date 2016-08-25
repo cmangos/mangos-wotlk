@@ -1280,15 +1280,19 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
                 if (!unit->IsStandState() && !unit->hasUnitState(UNIT_STAT_STUNNED))
                     unit->SetStandState(UNIT_STAND_STATE_STAND);
 
-                if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
-                    unit->AttackedBy(realCaster);
-
                 unit->AddThreat(realCaster);
-                unit->SetInCombatWith(realCaster);
-                realCaster->SetInCombatWith(unit);
 
-                if (Player* attackedPlayer = unit->GetCharmerOrOwnerPlayerOrPlayerItself())
-                    realCaster->SetContestedPvP(attackedPlayer);
+                if (!m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET))
+                {
+                    if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
+                        unit->AttackedBy(realCaster);
+
+                    unit->SetInCombatWith(realCaster);
+                    realCaster->SetInCombatWith(unit);
+
+                    if (Player* attackedPlayer = unit->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        realCaster->SetContestedPvP(attackedPlayer);
+                }
             }
         }
         else
