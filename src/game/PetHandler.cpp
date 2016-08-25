@@ -124,7 +124,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                             pet->AttackStop();
                             pet->GetMotionMaster()->Clear();
 
-                            if (((Creature*)pet)->AI())
+                            if (((Creature*)pet)->AI() && !pet->hasUnitState(UNIT_STAT_CONTROLLED))
                             {
                                 ((Creature*)pet)->AI()->AttackStart(targetUnit);
                                  // 10% chance to play special warlock pet attack talk, else growl

@@ -130,7 +130,7 @@ bool CreatureCreatePos::Relocate(Creature* cr) const
 }
 
 Creature::Creature(CreatureSubtype subtype) : Unit(),
-    i_AI(nullptr),
+    i_AI(nullptr), m_pausedAI(nullptr),
     m_lootMoney(0), m_lootGroupRecipientId(0),
     m_lootStatus(CREATURE_LOOT_STATUS_NONE),
     m_corpseDecayTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_aggroDelay(0), m_respawnradius(5.0f),
@@ -776,6 +776,30 @@ bool Creature::AIM_Initialize()
     // Handle Spawned Events, also calls Reset()
     i_AI->JustRespawned();
     return true;
+}
+
+void Creature::SetPossessed(bool isPossessed)
+{
+    if (!i_AI)
+        return;
+
+    if (isPossessed)
+    {
+        if (m_pausedAI || !i_AI->IsControllable())
+            return;
+
+        m_pausedAI = i_AI;
+        i_AI = FactorySelector::GetPossessAI(this);
+    }
+    else
+    {
+        if (!m_pausedAI)
+            return;
+
+        delete i_AI;
+        i_AI = m_pausedAI;
+        m_pausedAI = nullptr;
+    }
 }
 
 bool Creature::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, Team team /*= TEAM_NONE*/, const CreatureData* data /*= nullptr*/, GameEventCreatureData const* eventData /*= nullptr*/)

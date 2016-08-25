@@ -11448,8 +11448,8 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
         player->SendForcedObjectUpdate();                               // we have to update client data here to avoid problem with the "release spirit" windows reappear.
     }
 
-    // initialize AI
-    pCreature->AIM_Initialize();
+    // set temp possess ai (creature will not be able to react by itself)
+    pCreature->SetPossessed(true);
     
     if (player)
     {
@@ -11488,7 +11488,10 @@ bool Unit::TakePossessOf(Unit* possessed)
 
     Creature* possessedCreature = nullptr;
     if (possessed->GetTypeId() == TYPEID_UNIT)
+    {
         possessedCreature = static_cast<Creature *>(possessed);
+        possessedCreature->SetPossessed(true);
+    }
 
     if (player)
     {
@@ -11517,14 +11520,9 @@ bool Unit::TakePossessOf(Unit* possessed)
     possessed->DeleteThreatList();
     possessed->getHostileRefManager().deleteReferences();
 
-    if (possessedCreature)
-    {
-        possessedCreature->AIM_Initialize();
-    }
-    else if (possessed->GetTypeId() == TYPEID_PLAYER)
-    {
+    if (possessed->GetTypeId() == TYPEID_PLAYER)
         static_cast<Player*>(possessed)->SetClientControl(possessed, 0);
-    }
+
     return true;
 }
 
@@ -11590,6 +11588,7 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
     }
     else if (possessedCreature)
     {
+        possessedCreature->SetPossessed(false);
         if (possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
         {
             // out of range pet dismissed
@@ -11606,7 +11605,6 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         {
             CreatureInfo const* cinfo = possessedCreature->GetCreatureInfo();
             possessedCreature->setFaction(cinfo->FactionAlliance);
-            possessedCreature->AIM_Initialize();
             possessedCreature->AttackedBy(this);
         }
     }
