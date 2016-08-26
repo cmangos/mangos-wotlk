@@ -645,7 +645,7 @@ enum MovementFlags
 // flags that use in movement check for example at spell casting
 MovementFlags const movementFlagsMask = MovementFlags(
         MOVEFLAG_FORWARD | MOVEFLAG_BACKWARD  | MOVEFLAG_STRAFE_LEFT | MOVEFLAG_STRAFE_RIGHT |
-        MOVEFLAG_PITCH_UP | MOVEFLAG_PITCH_DOWN | MOVEFLAG_ROOT        |
+        MOVEFLAG_PITCH_UP | MOVEFLAG_PITCH_DOWN |
         MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR | MOVEFLAG_ASCENDING   |
         MOVEFLAG_FLYING  | MOVEFLAG_SPLINE_ELEVATION
                                         );
