@@ -9880,7 +9880,7 @@ void CharmInfo::InitVehicleCreateSpells()
         if (IsPassiveSpell(((Creature*)m_unit)->m_spells[x]))
             m_unit->CastSpell(m_unit, ((Creature*)m_unit)->m_spells[x], true);
         else
-            AddSpellToActionBar(((Creature*)m_unit)->m_spells[x], ActiveStates(0x8 + x));
+            AddSpellToActionBar(((Creature*)m_unit)->m_spells[x], ActiveStates(0x8 + x), x);
     }
 }
 
@@ -9898,7 +9898,7 @@ void CharmInfo::InitPossessCreateSpells()
         if (IsPassiveSpell(((Creature*)m_unit)->m_spells[x]))
             m_unit->CastSpell(m_unit, ((Creature*)m_unit)->m_spells[x], true);
         else
-            AddSpellToActionBar(((Creature*)m_unit)->m_spells[x], ACT_PASSIVE);
+            AddSpellToActionBar(((Creature*)m_unit)->m_spells[x], ACT_PASSIVE, x + 1);
     }
 }
 
@@ -9946,14 +9946,14 @@ void CharmInfo::InitCharmCreateSpells()
             else
                 newstate = ACT_PASSIVE;
 
-            AddSpellToActionBar(spellId, newstate);
+            AddSpellToActionBar(spellId, newstate, x + 1);
         }
     }
 }
 
-bool CharmInfo::AddSpellToActionBar(uint32 spell_id, ActiveStates newstate)
+bool CharmInfo::AddSpellToActionBar(uint32 spellId, ActiveStates newstate /*= ACT_DECIDE*/, int32 prefPos /*= -1*/)
 {
-    uint32 first_id = sSpellMgr.GetFirstSpellInChain(spell_id);
+    uint32 first_id = sSpellMgr.GetFirstSpellInChain(spellId);
 
     // new spell rank can be already listed
     for (uint8 i = 0; i < MAX_UNIT_ACTION_BAR_INDEX; ++i)
@@ -9962,9 +9962,19 @@ bool CharmInfo::AddSpellToActionBar(uint32 spell_id, ActiveStates newstate)
         {
             if (PetActionBar[i].IsActionBarForSpell() && sSpellMgr.GetFirstSpellInChain(action) == first_id)
             {
-                PetActionBar[i].SetAction(spell_id);
+                PetActionBar[i].SetAction(spellId);
                 return true;
             }
+        }
+    }
+
+    // if provided a valid preferred position for this spell try to use it
+    if (prefPos >= 0 && prefPos <= MAX_UNIT_ACTION_BAR_INDEX)
+    {
+        if (!PetActionBar[prefPos].GetAction() && PetActionBar[prefPos].IsActionBarForSpell())
+        {
+            SetActionBar(prefPos, spellId, newstate == ACT_DECIDE ? ACT_DISABLED : newstate);
+            return true;
         }
     }
 
@@ -9973,7 +9983,7 @@ bool CharmInfo::AddSpellToActionBar(uint32 spell_id, ActiveStates newstate)
     {
         if (!PetActionBar[i].GetAction() && PetActionBar[i].IsActionBarForSpell())
         {
-            SetActionBar(i, spell_id, newstate == ACT_DECIDE ? ACT_DISABLED : newstate);
+            SetActionBar(i, spellId, newstate == ACT_DECIDE ? ACT_DISABLED : newstate);
             return true;
         }
     }
