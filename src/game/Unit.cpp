@@ -11490,18 +11490,29 @@ bool Unit::TakePossessOf(Unit* possessed)
     if (GetTypeId() == TYPEID_PLAYER)
         player = static_cast<Player *>(this);
 
+    possessed->CombatStop(true);
+    possessed->DeleteThreatList();
+    possessed->getHostileRefManager().deleteReferences();
+
     possessed->addUnitState(UNIT_STAT_CONTROLLED);
     possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
     possessed->SetCharmerGuid(GetObjectGuid());
-    possessed->setFaction(getFaction());
 
     SetCharm(possessed);
 
     Creature* possessedCreature = nullptr;
+    Player* possessedPlayer = nullptr;
     if (possessed->GetTypeId() == TYPEID_UNIT)
     {
         possessedCreature = static_cast<Creature *>(possessed);
         possessedCreature->SetPossessed(true);
+        possessedCreature->GetMotionMaster()->Clear(true, true);
+        possessedCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);
+    }
+    else if (possessed->GetTypeId() == TYPEID_PLAYER)
+    {
+        possessedPlayer = static_cast<Player *>(possessed);
+        possessedPlayer->setFaction(getFaction());
     }
 
     if (player)
@@ -11526,10 +11537,6 @@ bool Unit::TakePossessOf(Unit* possessed)
         }
         player->PossessSpellInitialize();
     }
-
-    possessed->CombatStop(true);
-    possessed->DeleteThreatList();
-    possessed->getHostileRefManager().deleteReferences();
 
     if (possessed->GetTypeId() == TYPEID_PLAYER)
         static_cast<Player*>(possessed)->SetClientControl(possessed, 0);
@@ -11556,12 +11563,21 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         return;
     }
 
-    Creature* possessedCreature = static_cast<Creature *>(possessed);
+    possessed->CombatStop(true);
+    possessed->DeleteThreatList();
+    possessed->getHostileRefManager().deleteReferences();
 
     possessed->clearUnitState(UNIT_STAT_CONTROLLED);
     possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
     possessed->SetCharmerGuid(ObjectGuid());
     SetCharmGuid(ObjectGuid());
+
+    Creature* possessedCreature = nullptr;
+    if (possessed->GetTypeId() == TYPEID_UNIT)
+    {
+        possessedCreature = static_cast<Creature *>(possessed);
+        possessedCreature->SetPossessed(false);
+    }
 
     if (player)
     {
@@ -11587,10 +11603,6 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
             player->RemovePetActionBar();
     }
 
-    possessed->CombatStop(true);
-    possessed->DeleteThreatList();
-    possessed->getHostileRefManager().deleteReferences();
-
     if (possessed->GetTypeId() == TYPEID_PLAYER)
     {
         Player* possessedPlayer = static_cast<Player *>(possessed);
@@ -11599,7 +11611,6 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
     }
     else if (possessedCreature)
     {
-        possessedCreature->SetPossessed(false);
         if (possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
         {
             // out of range pet dismissed
@@ -11612,11 +11623,13 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
                 possessedCreature->GetMotionMaster()->MoveFollow(this, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
             }
         }
-        else if (attackCharmer)
+        else
         {
             CreatureInfo const* cinfo = possessedCreature->GetCreatureInfo();
-            possessedCreature->setFaction(cinfo->FactionAlliance);
-            possessedCreature->AttackedBy(this);
+            possessedCreature->ClearTemporaryFaction();
+            //TODO: find the correct rule to attack back the controller
+            /*if (attackCharmer)
+                possessedCreature->AddThreat(this, possessedCreature->GetHealth());*/
         }
     }
 }
