@@ -11433,7 +11433,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
 
     Player* player = GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this): nullptr;
 
-    pCreature->setFaction(getFaction());                                // set same faction than player
+    pCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);     // set same faction than player
     pCreature->SetRespawnCoord(pos);                                    // set spawn coord
     pCreature->SetCharmerGuid(GetObjectGuid());                         // save guid of the charmer
     pCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, spellEntry->Id);   // set the spell id used to create this (may be used for removing corresponding aura
@@ -11468,12 +11468,6 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
         if (CharmInfo* charmInfo = pCreature->InitCharmInfo(pCreature))
             charmInfo->InitPossessCreateSpells();
         player->PossessSpellInitialize();
-    }
-    else
-    {
-        // fire just summoned hook
-        if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-            ((Creature*)this)->AI()->JustSummoned(pCreature);
     }
 
     // Creature Linking, Initial load is handled like respawn
@@ -11584,23 +11578,6 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         player->SetClientControl(possessed, 0);
         player->SetMover(nullptr);
         player->GetCamera().ResetView();
-
-        if (possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
-        {
-            // out of range pet dismissed
-            if (!possessedCreature->IsWithinDistInMap(this, possessedCreature->GetMap()->GetVisibilityDistance()))
-            {
-                player->RemovePet(PET_SAVE_REAGENTS);
-            }
-            else
-            {
-                possessedCreature->GetMotionMaster()->MoveFollow(this, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-            }
-
-            return;
-        }
-        else
-            player->RemovePetActionBar();
     }
 
     if (possessed->GetTypeId() == TYPEID_PLAYER)
@@ -11608,6 +11585,8 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         Player* possessedPlayer = static_cast<Player *>(possessed);
         possessedPlayer->setFactionForRace(possessedPlayer->getRace());
         possessedPlayer->SetClientControl(possessedPlayer, 1);
+        if (player)
+            player->RemovePetActionBar();
     }
     else if (possessedCreature)
     {
@@ -11634,6 +11613,9 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         }
         else
         {
+            if (player)
+                player->RemovePetActionBar();
+
             CreatureInfo const* cinfo = possessedCreature->GetCreatureInfo();
             possessedCreature->ClearTemporaryFaction();
             //TODO: find the correct rule to attack back the controller
