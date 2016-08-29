@@ -11502,6 +11502,7 @@ bool Unit::TakePossessOf(Unit* possessed)
         possessedCreature->SetPossessed(true);
         possessedCreature->GetMotionMaster()->Clear(true, true);
         possessedCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);
+        possessedCreature->SetWalk(IsWalking(), true);
     }
     else if (possessed->GetTypeId() == TYPEID_PLAYER)
     {
