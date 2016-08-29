@@ -11620,7 +11620,16 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
             }
             else
             {
-                possessedCreature->GetMotionMaster()->MoveFollow(this, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+                // reset pet motion
+                if (possessedCreature->GetCharmInfo() && possessedCreature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
+                {
+                    possessedCreature->GetMotionMaster()->MoveFollow(this, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+                }
+                else
+                {
+                    possessedCreature->GetMotionMaster()->Clear(false);
+                    possessedCreature->GetMotionMaster()->MoveIdle();
+                }
             }
         }
         else
