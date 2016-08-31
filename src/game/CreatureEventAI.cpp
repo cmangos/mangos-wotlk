@@ -150,11 +150,7 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
         sLog.outErrorEventAI("EventMap for Creature %u is empty but creature is using CreatureEventAI.", m_creature->GetEntry());
 }
 
-#define LOG_PROCESS_EVENT                                                                                                       \
-    DEBUG_FILTER_LOG(LOG_FILTER_EVENT_AI_DEV, "CreatureEventAI: Event type %u (script %u) triggered for %s (invoked by %s)",    \
-                     pHolder.Event.event_type, pHolder.Event.event_id, m_creature->GetGuidStr().c_str(), pActionInvoker ? pActionInvoker->GetGuidStr().c_str() : "<no invoker>")
-
-inline bool IsTimerBasedEvent(EventAI_Type type)
+inline bool CreatureEventAI::IsTimerBasedEvent(EventAI_Type type)
 {
     switch (type)
     {

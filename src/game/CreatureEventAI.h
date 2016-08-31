@@ -31,6 +31,10 @@ class WorldObject;
 #define MAX_ACTIONS                     3
 #define MAX_PHASE                       32
 
+#define LOG_PROCESS_EVENT                                                                                                       \
+    DEBUG_FILTER_LOG(LOG_FILTER_EVENT_AI_DEV, "CreatureEventAI: Event type %u (script %u) triggered for %s (invoked by %s)",    \
+                     pHolder.Event.event_type, pHolder.Event.event_id, m_creature->GetGuidStr().c_str(), pActionInvoker ? pActionInvoker->GetGuidStr().c_str() : "<no invoker>")
+
 enum EventAI_Type
 {
     EVENT_T_TIMER_IN_COMBAT         = 0,                    // InitialMin, InitialMax, RepeatMin, RepeatMax
@@ -656,8 +660,8 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
 
         static int Permissible(const Creature*);
 
-        bool ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvoker = nullptr, Creature* pAIEventSender = nullptr);
-        void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker, Creature* pAIEventSender);
+        virtual bool ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvoker = nullptr, Creature* pAIEventSender = nullptr);
+        virtual void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker, Creature* pAIEventSender);
         inline uint32 GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3);
         inline int32 GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3);
         /// If the bool& param is true, an error should be reported
@@ -670,6 +674,8 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         void DoFindFriendlyCC(std::list<Creature*>& _list, float range);
 
     protected:
+        inline bool IsTimerBasedEvent(EventAI_Type type);
+
         uint32 m_EventUpdateTime;                           // Time between event updates
         uint32 m_EventDiff;                                 // Time between the last event call
 
