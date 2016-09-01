@@ -125,6 +125,7 @@ enum EventAI_ActionType
     ACTION_T_SET_STAND_STATE            = 47,               // StandState, unused, unused
     ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance, unused
     ACTION_T_DYNAMIC_MOVEMENT           = 49,               // EnableDynamicMovement (1 = on; 0 = off)
+    ACTION_T_SET_REACT_STATE            = 50,               // React state, unused, unused
 
     ACTION_T_END,
 };
@@ -427,6 +428,13 @@ struct CreatureEventAI_Action
             uint32 unused1;
             uint32 unused2;
         } dynamicMovement;
+        // ACTION_T_SET_REACT_STATE                         = 50
+        struct  
+        {
+            uint32 reactState;
+            uint32 unused1;
+            uint32 unused2;
+        } setReactState;
         // RAW
         struct
         {
@@ -694,6 +702,8 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         // Steps 0..2 correspond to AI_EVENT_LOST_SOME_HEALTH(90%), AI_EVENT_LOST_HEALTH(50%), AI_EVENT_CRITICAL_HEALTH(10%)
         uint32 m_throwAIEventStep;                          // Used for damage taken/ received heal
         float m_LastSpellMaxRange;                          // Maximum spell range that was cast during dynamic movement
+
+        ReactStates m_reactState;                           // Define if creature is passive or aggressive
 };
 
 #endif

@@ -88,7 +88,8 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
     m_InvinceabilityHpLevel(0),
     m_throwAIEventMask(0),
     m_throwAIEventStep(0),
-    m_LastSpellMaxRange(0)
+    m_LastSpellMaxRange(0),
+    m_reactState(REACT_AGGRESSIVE)
 {
     // Need make copy for filter unneeded steps and safe in case table reload
     CreatureEventAI_Event_Map::const_iterator creatureEventsItr = sEventAIMgr.GetCreatureEventAIMap().find(m_creature->GetEntry());
@@ -1052,6 +1053,13 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             SetCombatMovement(!m_DynamicMovement, true);
             break;
         }
+        case ACTION_T_SET_REACT_STATE:
+        {
+            // only set this on spawn event for now (need more implementation to set it in another place)
+            m_reactState = ReactStates(action.setReactState.reactState);
+            sLog.outString("Set AI react state to %u for %s", uint32(m_reactState), m_creature->GetGuidStr().c_str());
+            break;
+        }
         default:
             sLog.outError("CreatureEventAi::ProcessAction(): action(%u) not implemented", static_cast<uint32>(action.type));
             break;
@@ -1242,7 +1250,7 @@ void CreatureEventAI::EnterCombat(Unit* enemy)
 
 void CreatureEventAI::AttackStart(Unit* who)
 {
-    if (!who || !m_creature->CanAttackByItself())
+    if (!who || !m_creature->CanAttackByItself() || m_reactState == REACT_PASSIVE)
         return;
 
     if (m_creature->Attack(who, m_MeleeEnabled))
@@ -1257,7 +1265,7 @@ void CreatureEventAI::AttackStart(Unit* who)
 
 void CreatureEventAI::MoveInLineOfSight(Unit* who)
 {
-    if (!who)
+    if (!who || m_reactState != REACT_AGGRESSIVE)
         return;
 
     // Check for OOC LOS Event
