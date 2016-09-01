@@ -8844,7 +8844,12 @@ bool Unit::CanHaveThreatList(bool ignoreAliveState/*=false*/) const
 
     // pets can not have a threat list, unless they are controlled by a creature
     if (creature->IsPet() && creature->GetOwnerGuid().IsPlayer())
+    {
+        Pet const* pet = static_cast<Pet const*>(creature);
+        if (pet->getPetType() == GUARDIAN_PET || pet->getPetType() == PROTECTOR_PET)
+            return true;
         return false;
+    }
 
     // charmed units can not have a threat list if charmed by player
     if (creature->GetCharmerGuid().IsPlayer())
