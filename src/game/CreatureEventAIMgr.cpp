@@ -909,7 +909,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
         {
             if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
             {
-                bool ainame = strcmp(cInfo->AIName, "EventAI") == 0;
+                bool ainame = strcmp(cInfo->AIName, "EventAI") == 0 || strcmp(cInfo->AIName, "GuardianAI") == 0;
                 bool hasevent = m_CreatureEventAI_Event_Map.find(i) != m_CreatureEventAI_Event_Map.end();
                 if (ainame && !hasevent)
                     sLog.outErrorEventAI("EventAI not has script for creature entry (%u), but AIName = '%s'.", i, cInfo->AIName);

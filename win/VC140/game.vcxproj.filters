@@ -553,6 +553,9 @@
     <ClCompile Include="..\..\src\game\BattleGround\BattleGroundWS.cpp">
       <Filter>BattleGround</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\GuardianAI.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\game\AccountMgr.h">
@@ -1052,6 +1055,9 @@
       <Filter>BattleGround</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\PossessedAI.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\GuardianAI.h">
       <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
