@@ -5679,6 +5679,15 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     if (!summonResult)
         return;                                             // No further handling required
 
+    Creature* caster = nullptr;
+    if (m_originalCaster)
+    {
+        if (m_originalCaster->GetTypeId() == TYPEID_UNIT)
+            caster = static_cast<Creature*>(m_originalCaster);
+    }
+    else if (m_caster && m_caster->GetTypeId() == TYPEID_UNIT)
+        caster = static_cast<Creature*>(m_caster);
+
     for (itr = summonPositions.begin(); itr != summonPositions.end(); ++itr)
     {
         MANGOS_ASSERT(itr->creature || itr != summonPositions.begin());
@@ -5700,21 +5709,14 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
 
             itr->creature->AIM_Initialize();
 
-            // Notify Summoner
-            if (m_originalCaster && (m_originalCaster != m_caster)
-                && (m_originalCaster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_originalCaster)->AI())
+            // Notify original caster if not done already
+            if (caster && caster->AI())
             {
-                ((Creature*)m_originalCaster)->AI()->JustSummoned(itr->creature);
+                caster->AI()->JustSummoned(itr->creature);
 
-                if (m_originalCaster->isInCombat() && !(itr->creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
-                    ((Creature*)itr->creature)->AI()->AttackStart(m_originalCaster->getAttackerForHelper());
-            }
-            else if ((m_caster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_caster)->AI())
-            {
-                ((Creature*)m_caster)->AI()->JustSummoned(itr->creature);
-
-                if (m_caster->isInCombat() && !(itr->creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
-                    ((Creature*)itr->creature)->AI()->AttackStart(m_caster->getAttackerForHelper());
+                // TODO: handling attack start here is not correct we do not check any react state before (REACT_PASSIVE ?)
+                if (caster->isInCombat() && !(itr->creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
+                    itr->creature->AI()->AttackStart(m_caster->getAttackerForHelper());
             }
         }
     }
@@ -5744,12 +5746,6 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
             // UNIT_FIELD_CREATEDBY are not set for these kind of spells.
             // Does exceptions exist? If so, what are they?
             // summon->SetCreatorGuid(m_caster->GetObjectGuid());
-
-            // Notify original caster if not done already
-            if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
-                ((Creature*)m_originalCaster)->AI()->JustSummoned(summon);
-            else if (m_caster && ((Creature*)m_caster)->AI())
-                ((Creature*)m_caster)->AI()->JustSummoned(summon);
         }
         else
             return false;
@@ -6002,11 +5998,6 @@ bool Spell::DoSummonPossessed(CreatureSummonPositions& list, SummonPropertiesEnt
     }
 
     list[0].creature = static_cast<Creature*>(newUnit);
-
-    // Notify Summoner
-    if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
-        ((Creature*)m_originalCaster)->AI()->JustSummoned(list[0].creature);
-
     return true;
 }
 
@@ -6093,24 +6084,6 @@ bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
         spawnCreature->SavePetToDB(PET_SAVE_AS_CURRENT);
         ((Player*)m_caster)->PetSpellInitialize();
     }
-    else
-    {
-        // Notify Summoner
-        if (m_originalCaster && (m_originalCaster != m_caster)
-            && (m_originalCaster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_originalCaster)->AI())
-        {
-            ((Creature*)m_originalCaster)->AI()->JustSummoned(spawnCreature);
-            if (m_originalCaster->isInCombat() && !(spawnCreature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
-                ((Creature*)spawnCreature)->AI()->AttackStart(m_originalCaster->getAttackerForHelper());
-        }
-        else if ((m_caster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_caster)->AI())
-        {
-            ((Creature*)m_caster)->AI()->JustSummoned(spawnCreature);
-            if (m_caster->isInCombat() && !(spawnCreature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
-                ((Creature*)spawnCreature)->AI()->AttackStart(m_caster->getAttackerForHelper());
-        }
-    }
-
     return true;
 }
 
@@ -6155,11 +6128,6 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
         spawnCreature->ForcedDespawn();
         return false;
     }
-
-    // Notify Summoner
-    if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
-        ((Creature*)m_originalCaster)->AI()->JustSummoned(spawnCreature);
-
     return true;
 }
 
