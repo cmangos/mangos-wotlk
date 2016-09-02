@@ -321,10 +321,9 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
 
     if (CanHaveThreatList())
         getThreatManager().UpdateForClient(update_diff);
-
-    // update combat timer only for players and pets
-    if (isInCombat() && GetCharmerOrOwnerPlayerOrPlayerItself())
+    else if (isInCombat())
     {
+        // update combat timer only for players and pets (they have no threat list)
         // Check UNIT_STAT_MELEE_ATTACKING or UNIT_STAT_CHASE (without UNIT_STAT_FOLLOW in this case) so pets can reach far away
         // targets without stopping half way there and running off.
         // These flags are reset after target dies or another command is given.
