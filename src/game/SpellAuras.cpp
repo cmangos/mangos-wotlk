@@ -4806,11 +4806,10 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
             target->ModifyAuraState(AURA_STATE_FROZEN, apply);
 
         target->addUnitState(UNIT_STAT_ROOT);
+        target->SetRoot(true);
 
         if (target->GetTypeId() == TYPEID_PLAYER)
         {
-            target->SetRoot(true);
-
             // Clear unit movement flags
             ((Player*)target)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
         }
@@ -4848,7 +4847,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
 
         target->clearUnitState(UNIT_STAT_ROOT);
 
-        if (!target->hasUnitState(UNIT_STAT_STUNNED) && (target->GetTypeId() == TYPEID_PLAYER))     // prevent allow move if have also stun effect
+        if (!target->hasUnitState(UNIT_STAT_STUNNED))     // prevent allow move if have also stun effect
             target->SetRoot(false);
     }
 }
