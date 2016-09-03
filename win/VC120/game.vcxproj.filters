@@ -324,6 +324,9 @@
     <ClCompile Include="..\..\src\game\GuardAI.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\GuardianAI.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\Guild.cpp">
       <Filter>Object</Filter>
     </ClCompile>
@@ -778,6 +781,9 @@
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\GuardAI.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\GuardianAI.h">
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\Guild.h">
