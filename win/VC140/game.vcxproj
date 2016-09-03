@@ -404,7 +404,7 @@
     <ClCompile Include="..\..\src\game\GridStates.cpp" />
     <ClCompile Include="..\..\src\game\Group.cpp" />
     <ClCompile Include="..\..\src\game\GroupHandler.cpp" />
-    <ClCompile Include="..\..\src\game\GroupReference.cpp" />>
+    <ClCompile Include="..\..\src\game\GroupReference.cpp" />
     <ClCompile Include="..\..\src\game\Guild.cpp" />
     <ClCompile Include="..\..\src\game\GuildHandler.cpp" />
     <ClCompile Include="..\..\src\game\GuildMgr.cpp" />
