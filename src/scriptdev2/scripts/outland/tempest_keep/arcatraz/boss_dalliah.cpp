@@ -168,7 +168,7 @@ struct boss_dalliahAI : public ScriptedAI
         {
             if (m_uiShadowWaveTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_FARTHEST_AWAY, 0, SPELL_SHADOW_WAVE, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_WAVE) == CAST_OK)
                         m_uiShadowWaveTimer = urand(13000, 17000);
