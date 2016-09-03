@@ -51,7 +51,7 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "MapPersistentStateMgr.h"
 #include "InstanceData.h"
-#include "CreatureEventAIMgr.h"
+#include "AI/CreatureEventAIMgr.h"
 #include "DBCEnums.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
 #include "SQLStorages.h"
