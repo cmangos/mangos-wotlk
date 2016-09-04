@@ -403,6 +403,15 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
         case GO_BRAIN_DOOR_ICECROWN:
         case GO_BRAIN_DOOR_STORMWIND:
             break;
+        case GO_TRAM:
+            if (m_auiEncounter[TYPE_KOLOGARN] == DONE)
+            {
+                pGo->SetRespawnTime(30);
+                pGo->Refresh();
+                pGo->SetUInt32Value(GAMEOBJECT_LEVEL, 0);
+                pGo->SetGoState(GO_STATE_READY);
+            }
+            break;
 
             // -----------------    Chests    -----------------
             // Kologarn
@@ -601,6 +610,14 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             {
                 DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_CACHE_OF_LIVING_STONE_10 : GO_CACHE_OF_LIVING_STONE_25, 30 * MINUTE);
                 DoUseDoorOrButton(GO_KOLOGARN_BRIDGE);
+
+                // enable Mimiron tram
+                if (GameObject* pTram = GetSingleGameObjectFromStorage(GO_TRAM))
+                {
+                    DoRespawnGameObject(GO_TRAM, 30);
+                    pTram->SetUInt32Value(GAMEOBJECT_LEVEL, 0);
+                    pTram->SetGoState(GO_STATE_READY);
+                }
             }
             else if (uiData == IN_PROGRESS)
             {

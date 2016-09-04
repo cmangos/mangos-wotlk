@@ -323,6 +323,13 @@ enum
     GO_BRAIN_DOOR_STORMWIND     = 194637,
     GO_FLEE_TO_SURFACE          = 194625,                   // Brain chamber portals
 
+    // Mimiron tram
+    GO_TRAM                     = 194675,                   // Transport GO to Mimiron
+    // GO_CALL_TRAM_1           = 194914,                   // button - central Ulduar
+    // GO_CALL_TRAM_2           = 194912,                   // button - mimiron
+    // GO_TRAM_TURNAROUND_2     = 194915,                   // triggered by event 21393, when tram does 1st stop
+    // GO_TRAM_TURNAROUND_2     = 194913,                   // triggered by event 21394, when tram does 2nd stop
+
     // World state used for algalon timer
     WORLD_STATE_TIMER           = 4132,
     WORLD_STATE_TIMER_COUNT     = 4131,
