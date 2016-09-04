@@ -74,7 +74,7 @@ class BattleGroundDS : public BattleGround
         uint32 m_uiWaterfallSpellTimer;
         uint8 m_uiWaterfallStage;
 
-        GuidList m_gateTriggersGuids;
+        GuidList m_lGateTriggersGuids;
 
         ObjectGuid m_waterfallTriggerGuid;
         ObjectGuid m_waterfallCollisionGuid;

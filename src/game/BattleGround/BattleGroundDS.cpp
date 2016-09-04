@@ -21,6 +21,7 @@
 #include "BattleGround.h"
 #include "BattleGroundDS.h"
 #include "Language.h"
+#include "ObjectMgr.h"
 #include "WorldPacket.h"
 
 BattleGroundDS::BattleGroundDS()
@@ -46,7 +47,7 @@ void BattleGroundDS::Update(uint32 diff)
         if (m_uiFlushTimer <= diff)
         {
             // cast flush spell
-            for (GuidList::const_iterator itr = m_gateTriggersGuids.begin(); itr != m_gateTriggersGuids.end(); ++itr)
+            for (GuidList::const_iterator itr = m_lGateTriggersGuids.begin(); itr != m_lGateTriggersGuids.end(); ++itr)
             {
                 if (Creature* trigger = GetBgMap()->GetCreature(*itr))
                     trigger->CastSpell(trigger, SPELL_FLUSH, true);
@@ -210,7 +211,7 @@ void BattleGroundDS::HandleCreatureCreate(Creature* creature)
         if (creature->GetPositionZ() < 10.0f)
             m_waterfallTriggerGuid = creature->GetObjectGuid();
         else
-            m_gateTriggersGuids.push_back(creature->GetObjectGuid());
+            m_lGateTriggersGuids.push_back(creature->GetObjectGuid());
     }
 }
 
