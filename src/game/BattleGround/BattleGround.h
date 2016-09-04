@@ -469,6 +469,9 @@ class BattleGround
         // Process Capture event
         virtual bool HandleEvent(uint32 /*eventId*/, GameObject* /*go*/) { return false; }
 
+        // Called when a creature is created
+        virtual void HandleCreatureCreate(Creature* /*creature*/) {}
+
         // Called when a gameobject is created
         virtual void HandleGameObjectCreate(GameObject* /*go*/) {}
 
