@@ -8278,6 +8278,10 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             if (bg && bg->GetTypeID() == BATTLEGROUND_RL)
                 bg->FillInitialWorldStates(data, count);
             break;
+        case 4378:                                          // Dalaran Severs
+            if (bg && bg->GetTypeID() == BATTLEGROUND_DS)
+                bg->FillInitialWorldStates(data, count);
+            break;
     }
 
     FillBGWeekendWorldStates(data, count);
