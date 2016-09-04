@@ -4754,18 +4754,12 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flags)
     }
 }
 
-void Unit::RemoveAurasWithAttribute(uint32 flags, uint32 attrIndex)
+template <class T>
+void Unit::RemoveAurasWithAttribute(T flags)
 {
     for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
     {
-        if ((attrIndex == 0 && iter->second->GetSpellProto()->HasAttribute((SpellAttributes)flags))
-                || (attrIndex == 1 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx)flags))
-                || (attrIndex == 2 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx2)flags))
-                || (attrIndex == 3 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx3)flags))
-                || (attrIndex == 4 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx4)flags))
-                || (attrIndex == 5 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx5)flags))
-                || (attrIndex == 6 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx6)flags))
-                || (attrIndex == 7 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx7)flags)))
+        if (iter->second->GetSpellProto()->HasAttribute(T(flags)))
         {
             RemoveSpellAuraHolder(iter->second);
             iter = m_spellAuraHolders.begin();
@@ -4774,6 +4768,15 @@ void Unit::RemoveAurasWithAttribute(uint32 flags, uint32 attrIndex)
             ++iter;
     }
 }
+
+template void Unit::RemoveAurasWithAttribute(SpellAttributes flags);
+template void Unit::RemoveAurasWithAttribute(SpellAttributesEx flags);
+template void Unit::RemoveAurasWithAttribute(SpellAttributesEx2 flags);
+template void Unit::RemoveAurasWithAttribute(SpellAttributesEx3 flags);
+template void Unit::RemoveAurasWithAttribute(SpellAttributesEx4 flags);
+template void Unit::RemoveAurasWithAttribute(SpellAttributesEx5 flags);
+template void Unit::RemoveAurasWithAttribute(SpellAttributesEx6 flags);
+template void Unit::RemoveAurasWithAttribute(SpellAttributesEx7 flags);
 
 void Unit::RemoveAurasOnCast(SpellEntry const* castedSpellEntry)
 {
