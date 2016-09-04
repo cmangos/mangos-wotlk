@@ -4754,11 +4754,18 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flags)
     }
 }
 
-void Unit::RemoveAurasWithAttribute(uint32 flags)
+void Unit::RemoveAurasWithAttribute(uint32 flags, uint32 attrIndex)
 {
     for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
     {
-        if (iter->second->GetSpellProto()->HasAttribute((SpellAttributes)flags))
+        if ((attrIndex == 0 && iter->second->GetSpellProto()->HasAttribute((SpellAttributes)flags))
+                || (attrIndex == 1 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx)flags))
+                || (attrIndex == 2 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx2)flags))
+                || (attrIndex == 3 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx3)flags))
+                || (attrIndex == 4 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx4)flags))
+                || (attrIndex == 5 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx5)flags))
+                || (attrIndex == 6 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx6)flags))
+                || (attrIndex == 7 && iter->second->GetSpellProto()->HasAttribute((SpellAttributesEx7)flags)))
         {
             RemoveSpellAuraHolder(iter->second);
             iter = m_spellAuraHolders.begin();
