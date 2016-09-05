@@ -22,27 +22,37 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 
-GuardianAI::GuardianAI(Creature* c) : CreatureEventAI(c), m_owner(nullptr)
+GuardianAI::GuardianAI(Creature* c) : CreatureEventAI(c)
 {
-    m_owner = c->GetOwner();
-    MANGOS_ASSERT(m_owner);
+    Unit* owner = c->GetOwner();
+    MANGOS_ASSERT(owner);
 }
 
 void GuardianAI::JustRespawned()
 {
+    Unit* owner = m_creature->GetOwner();
+
+    if (!owner)
+        return;
+
     CreatureEventAI::JustRespawned();
 
-    m_creature->GetMotionMaster()->MoveFollow(m_owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+    m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
 }
 
 void GuardianAI::UpdateAI(const uint32 diff)
 {
+    Unit* owner = m_creature->GetOwner();
+
+    if (!owner)
+        return;
+
     switch (m_reactState)
     {
         case REACT_AGGRESSIVE:
         case REACT_DEFENSIVE:
-            if (!m_creature->isInCombat() && m_owner->isInCombat())
-                AttackStart(m_owner->getAttackerForHelper());   // check for getAttackerForHelper() == nullpter in AttackStart()
+            if (!m_creature->isInCombat() && owner->isInCombat())
+                AttackStart(owner->getAttackerForHelper());   // check for getAttackerForHelper() == nullpter in AttackStart()
             break;
         default:
             break;
@@ -167,9 +177,14 @@ void GuardianAI::ProcessAction(CreatureEventAI_Action const& action, uint32 rnd,
 
 void GuardianAI::CombatStop()
 {
+    Unit* owner = m_creature->GetOwner();
+
+    if (!owner)
+        return;
+
     // only alive creatures that are not on transport can return to home position
     if (m_creature->isAlive() && !m_creature->IsBoarded())
-        m_creature->GetMotionMaster()->MoveFollow(m_owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+        m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
 }
 
 void GuardianAI::EnterEvadeMode()
@@ -188,12 +203,17 @@ void GuardianAI::EnterEvadeMode()
 
 Unit* GuardianAI::DoSelectLowestHpFriendly(float range, uint32 MinHPDiff, bool onlyInCombat)
 {
+    Unit* owner = m_creature->GetOwner();
+
+    if (!owner)
+        return nullptr;
+
     Unit* pUnit = nullptr;
 
     MaNGOS::MostHPMissingInRangeCheck u_check(m_creature, range, MinHPDiff, onlyInCombat);
     MaNGOS::UnitLastSearcher<MaNGOS::MostHPMissingInRangeCheck> searcher(pUnit, u_check);
 
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
+    if (owner->GetTypeId() == TYPEID_PLAYER)
         Cell::VisitWorldObjects(m_creature, searcher, range);   // search all friendly unit including players
     else
         Cell::VisitGridObjects(m_creature, searcher, range);    // search only friendly creatures

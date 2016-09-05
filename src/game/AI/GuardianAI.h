@@ -43,7 +43,5 @@ public:
     virtual bool ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvoker = nullptr, Creature* pAIEventSender = nullptr) override;
     virtual void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker, Creature* pAIEventSender) override;
     Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff, bool onlyInCombat);
-private:
-    Unit* m_owner;
 };
 #endif
