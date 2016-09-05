@@ -1340,9 +1340,9 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                 {
                     if (i->Time > m_EventDiff)
                         i->Time -= m_EventDiff;
+                    else
+                        i->Time = 0;
                 }
-                else
-                    i->Time = 0;
             }
 
             // Skip processing of events that have time remaining or are disabled
