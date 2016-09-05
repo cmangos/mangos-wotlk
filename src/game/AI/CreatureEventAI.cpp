@@ -151,7 +151,7 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
         sLog.outErrorEventAI("EventMap for Creature %u is empty but creature is using CreatureEventAI.", m_creature->GetEntry());
 }
 
-inline bool CreatureEventAI::IsTimerBasedEvent(EventAI_Type type)
+bool CreatureEventAI::IsTimerBasedEvent(EventAI_Type type)
 {
     switch (type)
     {
