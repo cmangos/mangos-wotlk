@@ -8786,16 +8786,6 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
 
 void Unit::SetDeathState(DeathState s)
 {
-    if (s != ALIVE && s != JUST_ALIVED)
-    {
-        CombatStop();
-        DeleteThreatList();
-        ClearComboPointHolders();                           // any combo points pointed to unit lost at it death
-
-        if (IsNonMeleeSpellCasted(false))
-            InterruptNonMeleeSpells(false);
-    }
-
     if (s == JUST_DIED)
     {
         RemoveAllAurasOnDeath();
@@ -8828,8 +8818,19 @@ void Unit::SetDeathState(DeathState s)
 
     if (s != ALIVE && s != JUST_ALIVED)
     {
-        //_ApplyAllAuraMods();
+        CombatStop();
+        DeleteThreatList();
+        ClearComboPointHolders();                           // any combo points pointed to unit lost at it death
+
+        if (IsNonMeleeSpellCasted(false))
+            InterruptNonMeleeSpells(false);
     }
+
+    // TODO:: what is/was that?
+    /*if (m_deathState != ALIVE && s == ALIVE)
+    {
+        //_ApplyAllAuraMods();
+    }*/
     m_deathState = s;
 }
 
