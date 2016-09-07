@@ -11478,7 +11478,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
     }
 
     // set temp possess ai (creature will not be able to react by itself)
-    pCreature->SetPossessed(true);
+    pCreature->SetPossessed();
     
     if (player)
     {
@@ -11502,9 +11502,9 @@ bool Unit::TakePossessOf(Unit* possessed)
     if (GetTypeId() == TYPEID_PLAYER)
         player = static_cast<Player *>(this);
 
-    possessed->CombatStop(true);
-    possessed->DeleteThreatList();
-    possessed->getHostileRefManager().deleteReferences();
+    // stop combat but keep threat list
+    possessed->AttackStop(true, true);
+    possessed->ClearInCombat();
 
     possessed->addUnitState(UNIT_STAT_CONTROLLED);
     possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
@@ -11517,8 +11517,9 @@ bool Unit::TakePossessOf(Unit* possessed)
     if (possessed->GetTypeId() == TYPEID_UNIT)
     {
         possessedCreature = static_cast<Creature *>(possessed);
-        possessedCreature->SetPossessed(true);
+        possessedCreature->SetPossessed();
         possessedCreature->GetMotionMaster()->Clear(true, true);
+        possessedCreature->StopMoving(true);
         possessedCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);
         possessedCreature->SetWalk(IsWalking(), true);
     }
@@ -11575,11 +11576,7 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         }
         return;
     }
-
-    possessed->CombatStop(true);
-    possessed->DeleteThreatList();
-    possessed->getHostileRefManager().deleteReferences();
-
+    
     possessed->clearUnitState(UNIT_STAT_CONTROLLED);
     possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
     possessed->SetCharmerGuid(ObjectGuid());
@@ -11589,7 +11586,8 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
     if (possessed->GetTypeId() == TYPEID_UNIT)
     {
         possessedCreature = static_cast<Creature *>(possessed);
-        possessedCreature->SetPossessed(false);
+        possessedCreature->ClearTemporaryFaction();
+        possessedCreature->SetPossessed(false, this);
     }
 
     if (player)
@@ -11634,12 +11632,6 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         {
             if (player)
                 player->RemovePetActionBar();
-
-            CreatureInfo const* cinfo = possessedCreature->GetCreatureInfo();
-            possessedCreature->ClearTemporaryFaction();
-            //TODO: find the correct rule to attack back the controller
-            /*if (attackCharmer)
-                possessedCreature->AddThreat(this, possessedCreature->GetHealth());*/
         }
     }
 }
