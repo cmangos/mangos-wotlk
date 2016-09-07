@@ -792,11 +792,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
                 player_tap->RewardSinglePlayerAtKill(pVictim);
         }
 
-        // stop combat
-        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageAttackStop");
-        pVictim->CombatStop();
-        pVictim->getHostileRefManager().deleteReferences();
-
         /*
          *                      Actions for the killer
          */
@@ -892,6 +887,11 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         }
         else                                                // Killed creature
             JustKilledCreature((Creature*)pVictim, player_tap);
+
+        // stop combat
+        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageAttackStop");
+        pVictim->CombatStop();
+        pVictim->getHostileRefManager().deleteReferences();
     }
     else                                                    // if (health <= damage)
     {
