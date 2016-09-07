@@ -180,17 +180,13 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                             if (!petUnit->hasUnitState(UNIT_STAT_CONTROLLED))
                             {
                                 petUnit->GetMotionMaster()->Clear();
-                                if (pet->AI())
-                                {
-                                    pet->AI()->AttackStart(targetUnit);
-                                    // 10% chance to play special warlock pet attack talk, else growl
-                                    if (pet->getPetType() == SUMMON_PET && roll_chance_i(10))
-                                        pet->SendPetTalk((uint32)PET_TALK_ATTACK);
 
-                                    pet->SendPetAIReaction();
-                                }
-                                else
-                                    pet->Attack(targetUnit, true);
+                                pet->AI()->AttackStart(targetUnit);
+                                // 10% chance to play special warlock pet attack talk, else growl
+                                if (pet->getPetType() == SUMMON_PET && roll_chance_i(10))
+                                    pet->SendPetTalk((uint32)PET_TALK_ATTACK);
+
+                                pet->SendPetAIReaction();
                             }
                             else
                                 pet->Attack(targetUnit, true);
@@ -200,17 +196,11 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 }
                 case COMMAND_ABANDON:                       // abandon (hunter pet) or dismiss (summoned pet)
                 {
-                        if (pet->getPetType() == HUNTER_PET)
-                            pet->Unsummon(PET_SAVE_AS_DELETED, _player);
-                        else
-                            // dismissing a summoned pet is like killing them (this prevents returning a soulshard...)
-                            pet->SetDeathState(CORPSE);
-
-                    /*if (pet->IsTemporarySummon()) // special case when pet was temporary summon through DoSummonPossesed
-                    {
-                        petC->ForcedDespawn();
-                        return;
-                    }*/
+                    if (pet->getPetType() == HUNTER_PET)
+                        pet->Unsummon(PET_SAVE_AS_DELETED, _player);
+                    else
+                        // dismissing a summoned pet is like killing them (this prevents returning a soulshard...)
+                        pet->SetDeathState(CORPSE);
 
                     pet->SetStayPosition();
                     break;
