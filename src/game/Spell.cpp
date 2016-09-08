@@ -1212,7 +1212,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
 void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
 {
-    if (!unit || !effectMask)
+    if (!unit)
         return;
 
     Unit* realCaster = GetAffectiveCaster();
