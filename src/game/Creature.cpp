@@ -804,7 +804,8 @@ void Creature::SetPossessed(bool isPossessed /*= true*/, Unit* owner /*= nullptr
         m_combatData = new CombatData(this);
 
         // stop any generated movement TODO:: this may not be correct! what about possessing a feared creature?
-        GetMotionMaster()->Clear(true, true);
+        GetMotionMaster()->Clear();
+        GetMotionMaster()->MoveIdle();
         StopMoving(true);
     }
     else
