@@ -5994,7 +5994,7 @@ void Unit::AttackedBy(Unit* attacker)
         pet->AttackedBy(attacker);
 }
 
-void Unit::AttackStop(bool targetSwitch /*=false*/, bool includingCast /*=false*/)
+bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= false*/)
 {
     // interrupt cast only id includingCast == true and we have something to interrupt.
     if (includingCast && IsNonMeleeSpellCasted(false))
@@ -6014,7 +6014,9 @@ void Unit::AttackStop(bool targetSwitch /*=false*/, bool includingCast /*=false*
 
         m_attacking->_removeAttacker(this);
         m_attacking = nullptr;
+        return true;
     }
+    return false;
 }
 
 void Unit::CombatStop(bool includingCast)
@@ -6098,11 +6100,10 @@ void Unit::RemoveAllAttackers()
     while (!m_combatData->attackers.empty())
     {
         AttackerSet::iterator iter = m_combatData->attackers.begin();
-        (*iter)->AttackStop();
 
-        if (m_attacking)
+        if (!(*iter)->AttackStop())
         {
-            sLog.outError("WORLD: Unit has an attacker that isn't attacking it!");
+            //sLog.outError("WORLD: Unit has an attacker that isn't attacking it!");
             m_combatData->attackers.erase(iter);
         }
     }
