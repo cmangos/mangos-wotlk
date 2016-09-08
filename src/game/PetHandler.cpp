@@ -102,16 +102,13 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             {
                 Unit* targetUnit = targetGuid ? _player->GetMap()->GetUnit(targetGuid) : nullptr;
 
-                if (targetUnit && targetUnit != petUnit && targetUnit->isTargetableForAttack() && targetUnit->isInAccessablePlaceFor((Creature*)petUnit))
+                if (targetUnit && targetUnit != petUnit && targetUnit->isTargetableForAttack())
                 {
                     _player->SetInCombatState(true, targetUnit);
 
                     // This is true if pet has no target or has target but targets differs.
                     if (petUnit->getVictim() != targetUnit)
-                    {
-                        petUnit->AttackStop();
                         petUnit->Attack(targetUnit, true);
-                    }
                 }
                 break;
             }

@@ -9907,10 +9907,10 @@ void CharmInfo::InitPossessCreateSpells()
 {
     InitEmptyActionBar();                                   // charm action bar
 
+    SetActionBar(ACTION_BAR_INDEX_START, COMMAND_ATTACK, ACT_COMMAND);
+
     if (m_unit->GetTypeId() == TYPEID_PLAYER)               // possessed players don't have spells, keep the action bar empty
         return;
-
-    SetActionBar(ACTION_BAR_INDEX_START, COMMAND_ATTACK, ACT_COMMAND);
 
     for (uint32 x = 0; x < CREATURE_MAX_SPELLS; ++x)
     {
