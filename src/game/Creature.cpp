@@ -794,11 +794,11 @@ void Creature::SetPossessed(bool isPossessed /*= true*/, Unit* owner /*= nullptr
 
     if (isPossessed)
     {
-        if (m_pausedAI || (i_AI && !i_AI->IsControllable()))
-            return;
-
-        m_pausedAI = i_AI;
-        i_AI = FactorySelector::GetPossessAI(this);
+        if (!m_pausedAI && (i_AI && i_AI->IsControllable()))
+        {
+            m_pausedAI = i_AI;
+            i_AI = FactorySelector::GetPossessAI(this);
+        }
 
         m_pausedCombatData = m_combatData;
         m_combatData = new CombatData(this);
@@ -846,7 +846,6 @@ void Creature::SetPossessed(bool isPossessed /*= true*/, Unit* owner /*= nullptr
 
         AttackStop(true, true);
         m_Events.KillAllEvents(true);
-        SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
 
         // now we can remove the whole threat list and restore the one right before the possess
         delete m_combatData;
@@ -856,13 +855,23 @@ void Creature::SetPossessed(bool isPossessed /*= true*/, Unit* owner /*= nullptr
         // we have to restore initial MotionMaster
         GetMotionMaster()->Initialize();
 
-        // check if its own pet
-        if (IsPet() && GetOwner() == owner)
-            return;
+        if (isAlive())
+        {
+            SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
 
-        // TODO:: iam not sure we need that faction check
-        if (factionEntry->IsHostileTo(*owner->getFactionTemplateEntry()))
-            getThreatManager().addThreat(owner, GetMaxHealth()); // generating threat by max life amount best way i found to make it realistic
+            // check if its own pet
+            if (IsPet() && GetOwner() == owner)
+                return;
+
+            // TODO:: iam not sure we need that faction check
+            if (factionEntry->IsHostileTo(*owner->getFactionTemplateEntry()))
+                getThreatManager().addThreat(owner, GetMaxHealth()); // generating threat by max life amount best way i found to make it realistic
+        }
+        else
+        {
+            m_combatData->attackers.clear();
+            m_combatData->threatManager.clearReferences();
+        }
     }
 }
 
