@@ -11479,6 +11479,9 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
 
         // this seem to be needed for controlled creature (else cannot attack neutral creature)
         pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+
+        // player pet is unsumoned while possessing
+        player->UnsummonPetTemporaryIfAny();
     }
 
     // set temp possess ai (creature will not be able to react by itself)
@@ -11542,14 +11545,19 @@ bool Unit::TakePossessOf(Unit* possessed)
         player->SetMover(possessed);
         player->SendForcedObjectUpdate();
 
-        if (possessedCreature && possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
+        if (possessedCreature)
         {
-            possessed->StopMoving();
-            possessed->GetMotionMaster()->Clear(false);
-            possessed->GetMotionMaster()->MoveIdle();
-            return true;
+            if (possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
+            {
+                // possessing own pet, pet bar already initialized
+                return true;
+            }
         }
-        else if (CharmInfo* charmInfo = possessed->InitCharmInfo(possessed))
+        
+        // player pet is unsmumoned while possessing
+        player->UnsummonPetTemporaryIfAny();
+
+        if (CharmInfo* charmInfo = possessed->InitCharmInfo(possessed))
         {
             charmInfo->InitPossessCreateSpells();
             charmInfo->SetReactState(REACT_PASSIVE);
@@ -11558,8 +11566,8 @@ bool Unit::TakePossessOf(Unit* possessed)
         player->PossessSpellInitialize();
     }
 
-    if (possessed->GetTypeId() == TYPEID_PLAYER)
-        static_cast<Player*>(possessed)->SetClientControl(possessed, 0);
+    if (possessedPlayer)
+        possessedPlayer->SetClientControl(possessed, 0);
 
     return true;
 }
@@ -11601,6 +11609,9 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         player->SetClientControl(possessed, 0);
         player->SetMover(nullptr);
         player->GetCamera().ResetView();
+
+        // player pet can be re summoned here
+        player->ResummonPetTemporaryUnSummonedIfAny();
     }
 
     if (possessed->GetTypeId() == TYPEID_PLAYER)
@@ -11608,12 +11619,10 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         Player* possessedPlayer = static_cast<Player *>(possessed);
         possessedPlayer->setFactionForRace(possessedPlayer->getRace());
         possessedPlayer->SetClientControl(possessedPlayer, 1);
-        if (player)
-            player->RemovePetActionBar();
     }
     else if (possessedCreature)
     {
-        if (possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
+        if (player && possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
         {
             // out of range pet dismissed
             if (!possessedCreature->IsWithinDistInMap(this, possessedCreature->GetMap()->GetVisibilityDistance()))
@@ -11636,15 +11645,14 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         }
         else
         {
-            if (player)
-            {
-                player->RemovePetActionBar();
-
-                // we can remove that flag if its set, that is supposed to be only for creature controlled by player
-                // however player's pet should keep it
-                if (!possessedCreature->IsPet() || possessedCreature->GetOwner()->GetTypeId() != TYPEID_PLAYER)
-                    possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-            }
+            // we can remove that flag if its set, that is supposed to be only for creature controlled by player
+            // however player's pet should keep it
+            if (!possessedCreature->IsPet() || possessedCreature->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
         }
     }
+
+    // remove pet bar only if no pet
+    if (player && !player->GetPet())
+        player->RemovePetActionBar();
 }
