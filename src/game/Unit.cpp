@@ -11476,6 +11476,9 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
         player->SetClientControl(pCreature, 1);                         // transfer client control to the creature
         player->SetMover(pCreature);                                    // set mover so now we know that creature is "moved" by this unit
         player->SendForcedObjectUpdate();                               // we have to update client data here to avoid problem with the "release spirit" windows reappear.
+
+        // this seem to be needed for controlled creature (else cannot attack neutral creature)
+        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
     }
 
     // set temp possess ai (creature will not be able to react by itself)
@@ -11519,10 +11522,12 @@ bool Unit::TakePossessOf(Unit* possessed)
     {
         possessedCreature = static_cast<Creature *>(possessed);
         possessedCreature->SetPossessed();
-        possessedCreature->GetMotionMaster()->Clear(true, true);
-        possessedCreature->StopMoving(true);
         possessedCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);
         possessedCreature->SetWalk(IsWalking(), true);
+
+        // this seem to be needed for controlled creature (else cannot attack neutral creature)
+        if (player)
+            possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
     }
     else if (possessed->GetTypeId() == TYPEID_PLAYER)
     {
@@ -11632,7 +11637,14 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         else
         {
             if (player)
+            {
                 player->RemovePetActionBar();
+
+                // we can remove that flag if its set, that is supposed to be only for creature controlled by player
+                // however player's pet should keep it
+                if (!possessedCreature->IsPet() || possessedCreature->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                    possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+            }
         }
     }
 }
