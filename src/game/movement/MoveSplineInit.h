@@ -48,7 +48,7 @@ namespace Movement
             int32 Launch();
 
             /* Stop any creature movement */
-            void Stop();
+            void Stop(bool forceSend = false);
 
             /* Adds movement by parabolic trajectory
              * @param amplitude  - the maximum height of parabola, value could be negative and positive
