@@ -1130,7 +1130,6 @@ enum PowerDefaults
 
 struct SpellProcEventEntry;                                 // used only privately
 
-typedef std::set<Unit*> AttackerSet;
 
 struct CombatData
 {
@@ -1141,13 +1140,12 @@ public:
     ThreatManager threatManager;
     // Manage all Units that are threatened by us
     HostileRefManager hostileRefManager;
-
-    AttackerSet attackers;
 };
 
 class MANGOS_DLL_SPEC Unit : public WorldObject
 {
     public:
+        typedef std::set<Unit*> AttackerSet;
         typedef std::multimap<uint32 /*spellId*/, SpellAuraHolder*> SpellAuraHolderMap;
         typedef std::pair<SpellAuraHolderMap::iterator, SpellAuraHolderMap::iterator> SpellAuraHolderBounds;
         typedef std::pair<SpellAuraHolderMap::const_iterator, SpellAuraHolderMap::const_iterator> SpellAuraHolderConstBounds;
@@ -1297,21 +1295,21 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void _addAttacker(Unit* pAttacker)                  //< (Internal Use) must be called only from Unit::Attack(Unit*)
         {
-            AttackerSet::const_iterator itr = m_combatData->attackers.find(pAttacker);
-            if (itr == m_combatData->attackers.end())
-                m_combatData->attackers.insert(pAttacker);
+            AttackerSet::const_iterator itr = m_attackers.find(pAttacker);
+            if (itr == m_attackers.end())
+                m_attackers.insert(pAttacker);
         }
         void _removeAttacker(Unit* pAttacker)               //< (Internal Use) must be called only from Unit::AttackStop()
         {
-            m_combatData->attackers.erase(pAttacker);
+            m_attackers.erase(pAttacker);
         }
         Unit* getAttackerForHelper()                        //< Return a possible enemy from this unit to help in combat
         {
             if (getVictim() != nullptr)
                 return getVictim();
 
-            if (!m_combatData->attackers.empty())
-                return *(m_combatData->attackers.begin());
+            if (!m_attackers.empty())
+                return *(m_attackers.begin());
 
             return nullptr;
         }
@@ -1352,7 +1350,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveAllAttackers();
 
         /// Returns the Unit::m_attackers, that stores the units that are attacking you
-        AttackerSet const& getAttackers() const { return m_combatData->attackers; }
+        AttackerSet const& getAttackers() const { return m_attackers; }
 
         bool isAttackingPlayer() const;                     //< Returns if this unit is attacking a player (or this unit's minions/pets are attacking a player)
         bool CanAttackByItself() const;                     //< Used to check if a vehicle is allowed attack other units by itself
@@ -2210,6 +2208,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
 
+        AttackerSet m_attackers;                            // Used to help know who is currently attacking this unit
         Spell* m_currentSpells[CURRENT_MAX_SPELL];
         uint32 m_castCounter;                               // count casts chain of triggered spells for prevent infinity cast crashes
 
