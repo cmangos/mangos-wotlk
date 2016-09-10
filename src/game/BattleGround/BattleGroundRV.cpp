@@ -130,22 +130,22 @@ void BattleGroundRV::HandleGameObjectCreate(GameObject* go)
 {
     switch (go->GetEntry())
     {
-        case GO_ORG_ARENA_PILAR_1:
-        case GO_ORG_ARENA_PILAR_2:
-        case GO_ORG_ARENA_PILAR_3:
-        case GO_ORG_ARENA_PILAR_4:
+        case BG_RV_GO_ORG_ARENA_PILAR_1:
+        case BG_RV_GO_ORG_ARENA_PILAR_2:
+        case BG_RV_GO_ORG_ARENA_PILAR_3:
+        case BG_RV_GO_ORG_ARENA_PILAR_4:
             m_lPillarsGuids.push_back(go->GetObjectGuid());
             break;
-        case GO_ORG_ARENA_COLLISION_1:
-        case GO_ORG_ARENA_COLLISION_2:
-        case GO_ORG_ARENA_COLLISION_3:
-        case GO_ORG_ARENA_COLLISION_4:
+        case BG_RV_GO_ORG_ARENA_COLLISION_1:
+        case BG_RV_GO_ORG_ARENA_COLLISION_2:
+        case BG_RV_GO_ORG_ARENA_COLLISION_3:
+        case BG_RV_GO_ORG_ARENA_COLLISION_4:
             m_lCollisionsGuids.push_back(go->GetObjectGuid());
             break;
-        case GO_ORG_ARENA_GEAR_1:
-        case GO_ORG_ARENA_GEAR_2:
-        case GO_ORG_ARENA_PULLEY_1:
-        case GO_ORG_ARENA_PULLEY_2:
+        case BG_RV_GO_ORG_ARENA_GEAR_1:
+        case BG_RV_GO_ORG_ARENA_GEAR_2:
+        case BG_RV_GO_ORG_ARENA_PULLEY_1:
+        case BG_RV_GO_ORG_ARENA_PULLEY_2:
             m_lAnimationsGuids.push_back(go->GetObjectGuid());
             break;
     }

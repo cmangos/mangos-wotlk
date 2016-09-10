@@ -20,19 +20,19 @@
 
 enum
 {
-    CREATURE_WATER_SPOUT        = 28567,
+    BG_DS_CREATURE_WATER_SPOUT        = 28567,
 
-    // GO_DALARA_SEWERS_DOOR_1  = 192642,
-    // GO_DALARA_SEWERS_DOOR_2  = 192643,
-    GO_WATERFALL_COLLISION      = 194395,
-    GO_WATERFALL_ANIM           = 191877,
-    // GO_SHADOW_SIGHT_1        = 184663,
-    // GO_SHADOW_SIGHT_2        = 184664,
+    // BG_DS_GO_DALARA_SEWERS_DOOR_1  = 192642,
+    // BG_DS_GO_DALARA_SEWERS_DOOR_2  = 192643,
+    BG_DS_GO_WATERFALL_COLLISION      = 194395,
+    BG_DS_GO_WATERFALL_ANIM           = 191877,
+    // BG_DS_GO_SHADOW_SIGHT_1        = 184663,
+    // BG_DS_GO_SHADOW_SIGHT_2        = 184664,
 
-    SPELL_FLUSH                 = 57405,    // Triggers 61698; Visual and target selector for the starting knockback from the pipe
-    SPELL_WATER_SPOUT           = 58873,    // Knockback effect of the central waterfall
+    BG_DS_SPELL_FLUSH                 = 57405,    // Triggers 61698; Visual and target selector for the starting knockback from the pipe
+    BG_DS_SPELL_WATER_SPOUT           = 58873,    // Knockback effect of the central waterfall
 
-    SPELL_DEMONIC_CIRCLE        = 48018     // Demonic Circle Summon
+    BG_DS_SPELL_DEMONIC_CIRCLE        = 48018     // Demonic Circle Summon
 };
 
 class BattleGround;

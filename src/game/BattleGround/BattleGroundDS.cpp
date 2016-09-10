@@ -50,7 +50,7 @@ void BattleGroundDS::Update(uint32 diff)
             for (GuidList::const_iterator itr = m_lGateTriggersGuids.begin(); itr != m_lGateTriggersGuids.end(); ++itr)
             {
                 if (Creature* trigger = GetBgMap()->GetCreature(*itr))
-                    trigger->CastSpell(trigger, SPELL_FLUSH, true);
+                    trigger->CastSpell(trigger, BG_DS_SPELL_FLUSH, true);
             }
 
             // knockback players manually due to missing triggered spell 61698
@@ -118,7 +118,7 @@ void BattleGroundDS::Update(uint32 diff)
         if (m_uiWaterfallSpellTimer <= diff)
         {
             if (Creature* trigger = GetBgMap()->GetCreature(m_waterfallTriggerGuid))
-                trigger->CastSpell(trigger, SPELL_WATER_SPOUT, true);
+                trigger->CastSpell(trigger, BG_DS_SPELL_WATER_SPOUT, true);
 
             m_uiWaterfallSpellTimer = 1500;
         }
@@ -196,7 +196,7 @@ bool BattleGroundDS::HandleAreaTrigger(Player* player, uint32 triggerId)
         case 5347:
         case 5348:
             // safety check
-            player->RemoveAurasDueToSpell(SPELL_DEMONIC_CIRCLE);
+            player->RemoveAurasDueToSpell(BG_DS_SPELL_DEMONIC_CIRCLE);
             break;
         default:
             return false;
@@ -206,7 +206,7 @@ bool BattleGroundDS::HandleAreaTrigger(Player* player, uint32 triggerId)
 
 void BattleGroundDS::HandleCreatureCreate(Creature* creature)
 {
-    if (creature->GetEntry() == CREATURE_WATER_SPOUT)
+    if (creature->GetEntry() == BG_DS_CREATURE_WATER_SPOUT)
     {
         if (creature->GetPositionZ() < 10.0f)
             m_waterfallTriggerGuid = creature->GetObjectGuid();
@@ -219,10 +219,10 @@ void BattleGroundDS::HandleGameObjectCreate(GameObject* go)
 {
     switch (go->GetEntry())
     {
-        case GO_WATERFALL_COLLISION:
+        case BG_DS_GO_WATERFALL_COLLISION:
             m_waterfallCollisionGuid = go->GetObjectGuid();
             break;
-        case GO_WATERFALL_ANIM:
+        case BG_DS_GO_WATERFALL_ANIM:
             m_waterfallAnimGuid = go->GetObjectGuid();
             break;
     }
