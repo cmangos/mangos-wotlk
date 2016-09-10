@@ -3768,12 +3768,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         ihit->effectMask &= ~(1 << 1);
 
                     // not empty (checked), copy
-                    AttackerSet attackers = friendTarget->getAttackers();
+                    Unit::AttackerSet attackers = friendTarget->getAttackers();
 
                     // selected from list 3
                     for (uint32 i = 0; i < std::min(size_t(3), attackers.size()); ++i)
                     {
-                        AttackerSet::iterator aItr = attackers.begin();
+                        Unit::AttackerSet::iterator aItr = attackers.begin();
                         std::advance(aItr, rand() % attackers.size());
                         AddUnitTarget((*aItr), EFFECT_INDEX_1);
                         attackers.erase(aItr);
