@@ -53,7 +53,8 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_uiHorsemenAchievTimer(0),
     m_uiHorseMenKilled(0),
     m_dialogueHelper(aNaxxDialogue),
-    m_uiLivingPoisonTimer(5000)
+    m_uiLivingPoisonTimer(5000),
+    m_uiScreamsTimer(2 * MINUTE * IN_MILLISECONDS)
 {
     Initialize();
 }
@@ -606,6 +607,18 @@ void instance_naxxramas::Update(uint32 uiDiff)
         }
         else
             m_uiLivingPoisonTimer -= uiDiff;
+    }
+
+    if (m_uiScreamsTimer && m_auiEncounter[TYPE_THADDIUS] != DONE)
+    {
+        if (m_uiScreamsTimer <= uiDiff)
+        {
+            if (Player* pPlayer = GetPlayerInMap())
+                pPlayer->GetMap()->PlayDirectSoundToMap(SOUND_SCREAM1 + urand(0,3));
+            m_uiScreamsTimer = (2 * MINUTE + urand(0, 30)) * IN_MILLISECONDS;
+        }
+        else
+            m_uiScreamsTimer -= uiDiff;
     }
 
     if (m_uiTauntTimer)
