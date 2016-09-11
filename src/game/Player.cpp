@@ -8282,9 +8282,18 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             if (bg && bg->GetTypeID() == BATTLEGROUND_DS)
                 bg->FillInitialWorldStates(data, count);
             break;
+        case 4384:                                          // Strand of the Ancients
+            if (bg && bg->GetTypeID() == BATTLEGROUND_SA)
+                bg->FillInitialWorldStates(data, count);
+            break;
         case 4406:                                          // Ring of Valor
             if (bg && bg->GetTypeID() == BATTLEGROUND_RV)
                 bg->FillInitialWorldStates(data, count);
+            break;
+        case 4710:                                          // Isle of Conquest
+            if (bg && bg->GetTypeID() == BATTLEGROUND_IC)
+                bg->FillInitialWorldStates(data, count);
+            break;
     }
 
     FillBGWeekendWorldStates(data, count);
