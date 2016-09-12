@@ -438,7 +438,7 @@ enum SpellAttributesEx5
     SPELL_ATTR_EX5_UNK7                        = 0x00000080,// 7
     SPELL_ATTR_EX5_UNK8                        = 0x00000100,// 8
     SPELL_ATTR_EX5_START_PERIODIC_AT_APPLY     = 0x00000200,// 9  begin periodic tick at aura apply
-    SPELL_ATTR_EX5_UNK10                       = 0x00000400,// 10
+    SPELL_ATTR_EX5_HIDE_DURATION               = 0x00000400,// 10
     SPELL_ATTR_EX5_UNK11                       = 0x00000800,// 11
     SPELL_ATTR_EX5_UNK12                       = 0x00001000,// 12
     SPELL_ATTR_EX5_HASTE_AFFECT_DURATION       = 0x00002000,// 13 haste affects duration
