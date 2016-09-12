@@ -189,6 +189,11 @@ inline bool IsSealSpell(SpellEntry const* spellInfo)
            spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0] == TARGET_SELF;
 }
 
+inline bool IsAllowingDeadTarget(SpellEntry const* spellInfo)
+{
+    return spellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD) || spellInfo->Targets & (TARGET_FLAG_PVP_CORPSE | TARGET_FLAG_UNIT_CORPSE | TARGET_FLAG_CORPSE_ALLY);
+}
+
 inline bool IsElementalShield(SpellEntry const* spellInfo)
 {
     // family flags 10 (Lightning), 42 (Earth), 37 (Water), proc shield from T2 8 pieces bonus
