@@ -252,12 +252,12 @@ enum SpellAttributes
     SPELL_ATTR_RANGED                          = 0x00000002,// 1 All ranged abilites have this flag
     SPELL_ATTR_ON_NEXT_SWING_1                 = 0x00000004,// 2 on next swing
     SPELL_ATTR_UNK3                            = 0x00000008,// 3 not set in 3.0.3
-    SPELL_ATTR_UNK4                            = 0x00000010,// 4 isAbility
+    SPELL_ATTR_ABILITY                         = 0x00000010,// 4 Displays ability instead of spell clientside
     SPELL_ATTR_TRADESPELL                      = 0x00000020,// 5 trade spells, will be added by client to a sublist of profession spell
     SPELL_ATTR_PASSIVE                         = 0x00000040,// 6 Passive spell
-    SPELL_ATTR_UNK7                            = 0x00000080,// 7 can't be linked in chat?
-    SPELL_ATTR_UNK8                            = 0x00000100,// 8 hide created item in tooltip (for effect=24)
-    SPELL_ATTR_UNK9                            = 0x00000200,// 9
+    SPELL_ATTR_HIDDEN_CLIENTSIDE               = 0x00000080,// 7 Spells with this attribute are not visible in spellbook or aura bar TODO: check usage
+    SPELL_ATTR_HIDE_IN_COMBAT_LOG              = 0x00000100,// 8 hide created item in tooltip (for effect=24) TODO: implement it
+    SPELL_ATTR_TARGET_MAINHAND_ITEM            = 0x00000200,// 9 Client automatically selects item from mainhand slot as a cast target TODO: Implement
     SPELL_ATTR_ON_NEXT_SWING_2                 = 0x00000400,// 10 on next swing 2
     SPELL_ATTR_UNK11                           = 0x00000800,// 11
     SPELL_ATTR_DAYTIME_ONLY                    = 0x00001000,// 12 only useable at daytime, not set in 2.4.2
@@ -266,12 +266,12 @@ enum SpellAttributes
     SPELL_ATTR_OUTDOORS_ONLY                   = 0x00008000,// 15 Only useable outdoors.
     SPELL_ATTR_NOT_SHAPESHIFT                  = 0x00010000,// 16 Not while shapeshifted
     SPELL_ATTR_ONLY_STEALTHED                  = 0x00020000,// 17 Must be in stealth
-    SPELL_ATTR_UNK18                           = 0x00040000,// 18
+    SPELL_ATTR_DONT_AFFECT_SHEATH_STATE        = 0x00040000,// 18 client won't hide unit weapons in sheath on cast/channel TODO: Implement
     SPELL_ATTR_LEVEL_DAMAGE_CALCULATION        = 0x00080000,// 19 spelldamage depends on caster level
     SPELL_ATTR_STOP_ATTACK_TARGET              = 0x00100000,// 20 Stop attack after use this spell (and not begin attack if use)
     SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK    = 0x00200000,// 21 Cannot be dodged/parried/blocked
     SPELL_ATTR_SET_TRACKING_TARGET             = 0x00400000,// 22 SetTrackingTarget
-    SPELL_ATTR_UNK23                           = 0x00800000,// 23 castable while dead?
+    SPELL_ATTR_CASTABLE_WHILE_DEAD             = 0x00800000,// 23 castable while dead TODO: Implement
     SPELL_ATTR_CASTABLE_WHILE_MOUNTED          = 0x01000000,// 24 castable while mounted
     SPELL_ATTR_DISABLED_WHILE_ACTIVE           = 0x02000000,// 25 Activate and start cooldown after aura fade or remove summoned creature or go
     SPELL_ATTR_NEGATIVE                        = 0x04000000,// 26 Almost all negative spell have it
@@ -287,13 +287,13 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNK0                         = 0x00000001,// 0
     SPELL_ATTR_EX_DRAIN_ALL_POWER              = 0x00000002,// 1 use all power (Only paladin Lay of Hands and Bunyanize)
     SPELL_ATTR_EX_CHANNELED_1                  = 0x00000004,// 2 channeled 1
-    SPELL_ATTR_EX_CANT_REFLECTED               = 0x00000008,// 3 used for detect can or not spell reflected
+    SPELL_ATTR_EX_CANT_BE_REDIRECTED           = 0x00000008,// 3
     SPELL_ATTR_EX_UNK4                         = 0x00000010,// 4
     SPELL_ATTR_EX_NOT_BREAK_STEALTH            = 0x00000020,// 5 Not break stealth
     SPELL_ATTR_EX_CHANNELED_2                  = 0x00000040,// 6 channeled 2
-    SPELL_ATTR_EX_UNK7                         = 0x00000080,// 7
+    SPELL_ATTR_EX_CANT_BE_REFLECTED            = 0x00000080,// 7
     SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET         = 0x00000100,// 8 Spell req target not to be in combat state
-    SPELL_ATTR_EX_UNK9                         = 0x00000200,// 9
+    SPELL_ATTR_EX_FACING_TARGET                = 0x00000200,// 9 TODO: CONFIRM!
     SPELL_ATTR_EX_NO_THREAT                    = 0x00000400,// 10 no generates threat on cast 100%
     SPELL_ATTR_EX_UNK11                        = 0x00000800,// 11
     SPELL_ATTR_EX_UNK12                        = 0x00001000,// 12
