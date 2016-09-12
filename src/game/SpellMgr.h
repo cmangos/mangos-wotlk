@@ -232,6 +232,19 @@ inline bool IsPassiveSpellStackableWithRanks(SpellEntry const* spellProto)
     return !IsSpellHaveEffect(spellProto, SPELL_EFFECT_APPLY_AURA);
 }
 
+inline bool IsAutocastable(SpellEntry const* spellInfo)
+{
+    return !(spellInfo->HasAttribute(SPELL_ATTR_EX4_UNAUTOCASTABLE) || spellInfo->HasAttribute(SPELL_ATTR_PASSIVE));
+}
+
+inline bool IsAutocastable(uint32 spellId)
+{
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+    if (!spellInfo)
+        return false;
+    return IsAutocastable(spellInfo);
+}
+
 inline bool IsSpellRemoveAllMovementAndControlLossEffects(SpellEntry const* spellProto)
 {
     return spellProto->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MECHANIC_IMMUNITY &&

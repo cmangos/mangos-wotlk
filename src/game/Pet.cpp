@@ -1514,10 +1514,10 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
 
     if (active == ACT_DECIDE)                               // active was not used before, so we save it's autocast/passive state here
     {
-        if (IsPassiveSpell(spellInfo))
-            newspell.active = ACT_PASSIVE;
-        else
+        if (IsAutocastable(spellInfo))
             newspell.active = ACT_DISABLED;
+        else
+            newspell.active = ACT_PASSIVE;
     }
     else
         newspell.active = active;
@@ -1959,7 +1959,7 @@ uint8 Pet::GetMaxTalentPointsForLevel(uint32 level)
 
 void Pet::ToggleAutocast(uint32 spellid, bool apply)
 {
-    if (IsPassiveSpell(spellid))
+    if (!IsAutocastable(spellid))
         return;
 
     PetSpellMap::iterator itr = m_spells.find(spellid);
