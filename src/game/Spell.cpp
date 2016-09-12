@@ -6270,6 +6270,9 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
 
 SpellCastResult Spell::CheckCasterAuras() const
 {
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_CASTER_AURAS))
+        return SPELL_CAST_OK;
+
     // Flag drop spells totally immuned to caster auras
     // FIXME: find more nice check for all totally immuned spells
     // HasAttribute(SPELL_ATTR_EX3_UNK28) ?

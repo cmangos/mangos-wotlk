@@ -466,7 +466,7 @@ enum SpellAttributesEx6
 {
     SPELL_ATTR_EX6_UNK0                        = 0x00000001,// 0 Only Move spell have this flag
     SPELL_ATTR_EX6_ONLY_IN_ARENA               = 0x00000002,// 1 only usable in arena, not used in 3.2.0a and early
-    SPELL_ATTR_EX6_UNK2                        = 0x00000004,// 2
+    SPELL_ATTR_EX6_IGNORE_CASTER_AURAS         = 0x00000004,// 2
     SPELL_ATTR_EX6_UNK3                        = 0x00000008,// 3
     SPELL_ATTR_EX6_UNK4                        = 0x00000010,// 4
     SPELL_ATTR_EX6_UNK5                        = 0x00000020,// 5
