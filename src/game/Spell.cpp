@@ -4974,13 +4974,20 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (!m_IsTriggeredSpell && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
                 return SPELL_FAILED_LINE_OF_SIGHT;
 
-            // auto selection spell rank implemented in WorldSession::HandleCastSpellOpcode
-            // this case can be triggered if rank not found (too low-level target for first rank)
-            if (m_caster->GetTypeId() == TYPEID_PLAYER && !m_CastItem && !m_IsTriggeredSpell)
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
-                // spell expected to be auto-downranking in cast handle, so must be same
-                if (m_spellInfo != sSpellMgr.SelectAuraRankForLevel(m_spellInfo, target->getLevel()))
-                    return SPELL_FAILED_LOWLEVEL;
+                // auto selection spell rank implemented in WorldSession::HandleCastSpellOpcode
+                // this case can be triggered if rank not found (too low-level target for first rank)
+                if (!m_CastItem && !m_IsTriggeredSpell)
+                    // spell expected to be auto-downranking in cast handle, so must be same
+                    if (m_spellInfo != sSpellMgr.SelectAuraRankForLevel(m_spellInfo, target->getLevel()))
+                        return SPELL_FAILED_LOWLEVEL;
+
+                // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
+                if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_TARGET_TAPPED))
+                    if (Creature const* targetCreature = dynamic_cast<Creature*>(target))
+                        if ((!targetCreature->GetLootRecipientGuid().IsEmpty()) && !targetCreature->IsTappedBy((Player*)m_caster))
+                            return SPELL_FAILED_CANT_CAST_ON_TAPPED;
             }
 
             if (strict && m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER && !IsAreaOfEffectSpell(m_spellInfo))
@@ -7223,20 +7230,22 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
     if (m_spellInfo->excludeTargetAuraSpell && target->HasAura(m_spellInfo->excludeTargetAuraSpell))
         return false;
 
-    // Check targets for not_selectable unit flag and remove
-    // A player can cast spells on his pet (or other controlled unit) though in any state
-    if (target != m_caster && target->GetCharmerOrOwnerGuid() != m_caster->GetObjectGuid())
+    if (target != m_caster)
     {
-        // any unattackable target skipped
-        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-            return false;
+        // Check targets for not_selectable unit flag and remove
+        // A player can cast spells on his pet (or other controlled unit) though in any state
+        if (target->GetCharmerOrOwnerGuid() != m_caster->GetObjectGuid())
+        {
+            // any unattackable target skipped
+            if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                return false;
 
-        // unselectable targets skipped in all cases except TARGET_SCRIPT targeting or vehicle passengers
-        // in case TARGET_SCRIPT target selected by server always and can't be cheated
-        if ((!m_IsTriggeredSpell || target != m_targets.getUnitTarget()) &&
+            // unselectable targets skipped in all cases except TARGET_SCRIPT targeting
+            // in case TARGET_SCRIPT target selected by server always and can't be cheated
+            if ((!m_IsTriggeredSpell || target != m_targets.getUnitTarget()) &&
                 target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) &&
                 (!target->GetTransportInfo() || (target->GetTransportInfo() &&
-                        !((Unit*)target->GetTransportInfo()->GetTransport())->IsVehicle())) &&
+                    !((Unit*)target->GetTransportInfo()->GetTransport())->IsVehicle())) &&
                 m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT &&
                 m_spellInfo->EffectImplicitTargetB[eff] != TARGET_SCRIPT &&
                 m_spellInfo->EffectImplicitTargetA[eff] != TARGET_AREAEFFECT_INSTANT &&
@@ -7247,17 +7256,27 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
                 m_spellInfo->EffectImplicitTargetB[eff] != TARGET_NARROW_FRONTAL_CONE &&
                 m_spellInfo->EffectImplicitTargetA[eff] != TARGET_NARROW_FRONTAL_CONE_2 &&
                 m_spellInfo->EffectImplicitTargetB[eff] != TARGET_NARROW_FRONTAL_CONE_2)
-            return false;
-    }
+                return false;
+        }
 
-    // Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
-    if (target != m_caster && target->GetTypeId() == TYPEID_PLAYER)
-    {
-        if (((Player*)target)->GetVisibility() == VISIBILITY_OFF)
-            return false;
+        // Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
+        if (target != m_caster && target->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (((Player*)target)->GetVisibility() == VISIBILITY_OFF)
+                return false;
 
-        if (((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
-            return false;
+            if (((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
+                return false;
+        }
+
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_TARGET_TAPPED))
+                if (Creature const* targetCreature = dynamic_cast<Creature*>(target))
+                    if ((!targetCreature->GetLootRecipientGuid().IsEmpty()) && !targetCreature->IsTappedBy((Player*)m_caster))
+                        return false;
+        }
     }
 
     // Check targets for LOS visibility (except spells without range limitations )
