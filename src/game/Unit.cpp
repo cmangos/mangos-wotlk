@@ -10256,7 +10256,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
             // spell seem not managed by proc system, although some case need to be handled
 
             // only process damage case on victim
-            if (!isVictim || !(procFlag & PROC_FLAG_TAKEN_ANY_DAMAGE))
+            if (!isVictim || !(procFlag & PROC_FLAG_TAKEN_ANY_DAMAGE) || (procSpell && procSpell->HasAttribute(SPELL_ATTR_EX4_DAMAGE_DOESNT_BREAK_AURAS)))
                 continue;
 
             const SpellEntry* se = itr->second->GetSpellProto();
