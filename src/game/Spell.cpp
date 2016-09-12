@@ -3192,8 +3192,12 @@ void Spell::cast(bool skipCheck)
         return;
     }
 
-    if (m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
-        m_caster->SetInFront(m_targets.getUnitTarget());
+    if (m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster && !m_spellInfo->HasAttribute(SPELL_ATTR_EX5_DONT_TURN_DURING_CAST))
+    {
+        Unit* charmer = m_caster->GetCharmer();
+        if (charmer && !(charmer->GetTypeId() == TYPEID_PLAYER && ((Player*)charmer)->GetCamera().GetBody() == m_caster)) // need to check if target doesnt have a player controlling it
+            m_caster->SetInFront(m_targets.getUnitTarget());
+    }
 
     SpellCastResult castResult = CheckPower();
     if (castResult != SPELL_CAST_OK)
