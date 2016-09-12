@@ -4977,7 +4977,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         // totem immunity for channeled spells(needs to be before spell cast)
         // spell attribs for player channeled spells
-        if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_UNK14)
+        if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET) // TODO: Investigate this condition
                 && m_spellInfo->HasAttribute(SPELL_ATTR_EX5_HASTE_AFFECT_DURATION)
                 && target->GetTypeId() == TYPEID_UNIT
                 && ((Creature*)target)->IsTotem())

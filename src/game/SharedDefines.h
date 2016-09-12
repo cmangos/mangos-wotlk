@@ -296,9 +296,9 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_FACING_TARGET                = 0x00000200,// 9 TODO: CONFIRM!
     SPELL_ATTR_EX_NO_THREAT                    = 0x00000400,// 10 no generates threat on cast 100%
     SPELL_ATTR_EX_UNK11                        = 0x00000800,// 11
-    SPELL_ATTR_EX_UNK12                        = 0x00001000,// 12
+    SPELL_ATTR_EX_IS_PICKPOCKET                = 0x00001000,// 12
     SPELL_ATTR_EX_FARSIGHT                     = 0x00002000,// 13 related to farsight
-    SPELL_ATTR_EX_UNK14                        = 0x00004000,// 14
+    SPELL_ATTR_EX_CHANNEL_TRACK_TARGET         = 0x00004000,// 14
     SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY     = 0x00008000,// 15 remove auras on immunity
     SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE  = 0x00010000,// 16 unaffected by school immunity
     SPELL_ATTR_EX_UNK17                        = 0x00020000,// 17 for auras SPELL_AURA_TRACK_CREATURES, SPELL_AURA_TRACK_RESOURCES and SPELL_AURA_TRACK_STEALTHED select non-stacking tracking spells
@@ -312,9 +312,9 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNK25                        = 0x02000000,// 25
     SPELL_ATTR_EX_UNK26                        = 0x04000000,// 26
     SPELL_ATTR_EX_UNK27                        = 0x08000000,// 27
-    SPELL_ATTR_EX_UNK28                        = 0x10000000,// 28
-    SPELL_ATTR_EX_UNK29                        = 0x20000000,// 29
-    SPELL_ATTR_EX_UNK30                        = 0x40000000,// 30 overpower
+    SPELL_ATTR_EX_DONT_DISPLAY_IN_AURA_BAR     = 0x10000000,// 28
+    SPELL_ATTR_EX_CHANNEL_DISPLAY_SPELL_NAME   = 0x20000000,// 29
+    SPELL_ATTR_EX_ENABLE_AT_DODGE              = 0x40000000,// 30 overpower
     SPELL_ATTR_EX_UNK31                        = 0x80000000,// 31
 };
 
@@ -324,7 +324,7 @@ enum SpellAttributesEx2
     SPELL_ATTR_EX2_UNK1                        = 0x00000002,// 1
     SPELL_ATTR_EX2_IGNORE_LOS                  = 0x00000004,// 2 do not need LOS (e.g. 18220 since 3.3.3) // changed meaning from ? used for detect can or not spell reflected
     SPELL_ATTR_EX2_UNK3                        = 0x00000008,// 3 auto targeting? (e.g. fishing skill enhancement items since 3.3.3)
-    SPELL_ATTR_EX2_UNK4                        = 0x00000010,// 4
+    SPELL_ATTR_EX2_DISPLAY_IN_STANCE_BAR       = 0x00000010,// 4
     SPELL_ATTR_EX2_AUTOREPEAT_FLAG             = 0x00000020,// 5
     SPELL_ATTR_EX2_CANT_TARGET_TAPPED          = 0x00000040,// 6 only usable on tabbed by yourself
     SPELL_ATTR_EX2_UNK7                        = 0x00000080,// 7
@@ -336,14 +336,14 @@ enum SpellAttributesEx2
     SPELL_ATTR_EX2_UNK13                       = 0x00002000,// 13
     SPELL_ATTR_EX2_UNK14                       = 0x00004000,// 14
     SPELL_ATTR_EX2_UNK15                       = 0x00008000,// 15 not set in 3.0.3
-    SPELL_ATTR_EX2_UNK16                       = 0x00010000,// 16
+    SPELL_ATTR_EX2_TAME_BEAST                  = 0x00010000,// 16
     SPELL_ATTR_EX2_UNK17                       = 0x00020000,// 17 suspend weapon timer instead of resetting it, (?Hunters Shot and Stings only have this flag?)
-    SPELL_ATTR_EX2_UNK18                       = 0x00040000,// 18 Only Revive pet - possible req dead pet
+    SPELL_ATTR_EX2_REQ_DEAD_PET                = 0x00040000,// 18 Only Revive pet - possible req dead pet
     SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT         = 0x00080000,// 19 does not necessarly need shapeshift
     SPELL_ATTR_EX2_UNK20                       = 0x00100000,// 20
     SPELL_ATTR_EX2_DAMAGE_REDUCED_SHIELD       = 0x00200000,// 21 for ice blocks, pala immunity buffs, priest absorb shields, but used also for other spells -> not sure!
     SPELL_ATTR_EX2_UNK22                       = 0x00400000,// 22
-    SPELL_ATTR_EX2_UNK23                       = 0x00800000,// 23 Only mage Arcane Concentration have this flag
+    SPELL_ATTR_EX2_IS_ARCANE_CONCENTRATION     = 0x00800000,// 23 Only mage Arcane Concentration have this flag
     SPELL_ATTR_EX2_UNK24                       = 0x01000000,// 24
     SPELL_ATTR_EX2_UNK25                       = 0x02000000,// 25
     SPELL_ATTR_EX2_UNK26                       = 0x04000000,// 26 unaffected by school immunity
@@ -363,14 +363,14 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_IGNORE_RESURRECTION_TIMER   = 0x00000010,// 4 Druid Rebirth only this spell have this flag
     SPELL_ATTR_EX3_UNK5                        = 0x00000020,// 5
     SPELL_ATTR_EX3_UNK6                        = 0x00000040,// 6
-    SPELL_ATTR_EX3_UNK7                        = 0x00000080,// 7 create a separate (de)buff stack for each caster
+    SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS      = 0x00000080,// 7 create a separate (de)buff stack for each caster
     SPELL_ATTR_EX3_TARGET_ONLY_PLAYER          = 0x00000100,// 8 Can target only player
     SPELL_ATTR_EX3_UNK9                        = 0x00000200,// 9
     SPELL_ATTR_EX3_MAIN_HAND                   = 0x00000400,// 10 Main hand weapon required
     SPELL_ATTR_EX3_BATTLEGROUND                = 0x00000800,// 11 Can casted only on battleground
     SPELL_ATTR_EX3_CAST_ON_DEAD                = 0x00001000,// 12 target is a dead player (not every spell has this flag)
-    SPELL_ATTR_EX3_UNK13                       = 0x00002000,// 13
-    SPELL_ATTR_EX3_UNK14                       = 0x00004000,// 14 "Honorless Target" only this spells have this flag
+    SPELL_ATTR_EX3_DONT_DISPLAY_CHANNEL_BAR    = 0x00002000,// 13
+    SPELL_ATTR_EX3_IS_HONORLESS_TARGET         = 0x00004000,// 14 "Honorless Target" only this spells have this flag
     SPELL_ATTR_EX3_UNK15                       = 0x00008000,// 15 Auto Shoot, Shoot, Throw,  - this is autoshot flag
     SPELL_ATTR_EX3_UNK16                       = 0x00010000,// 16 no triggers effects that trigger on casting a spell??
     SPELL_ATTR_EX3_NO_INITIAL_AGGRO            = 0x00020000,// 17 Causes no aggro if not missed
@@ -383,7 +383,7 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_REQ_OFFHAND                 = 0x01000000,// 24 Req offhand weapon
     SPELL_ATTR_EX3_UNK25                       = 0x02000000,// 25 no cause spell pushback ?
     SPELL_ATTR_EX3_UNK26                       = 0x04000000,// 26
-    SPELL_ATTR_EX3_UNK27                       = 0x08000000,// 27
+    SPELL_ATTR_EX3_DRAIN_SOUL                  = 0x08000000,// 27
     SPELL_ATTR_EX3_UNK28                       = 0x10000000,// 28 always cast ok ? (requires more research)
     SPELL_ATTR_EX3_UNK29                       = 0x20000000,// 29 can only target ground targets (non fly non jump)
     SPELL_ATTR_EX3_DONT_DISPLAY_RANGE          = 0x40000000,// 30
@@ -401,7 +401,7 @@ enum SpellAttributesEx4
     SPELL_ATTR_EX4_NOT_STEALABLE               = 0x00000040,// 6 although such auras might be dispellable, they cannot be stolen
     SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING      = 0x00000080,// 7 In theory, can use this spell while another is channeled/cast/autocast
     SPELL_ATTR_EX4_STACK_DOT_MODIFIER          = 0x00000100,// 8 no effect on non DoTs?
-    SPELL_ATTR_EX4_UNK9                        = 0x00000200,// 9
+    SPELL_ATTR_EX4_TRIGGER_ACTIVATE            = 0x00000200,// 9 initially disabled / trigger activate from event (Execute, Riposte, Deep Freeze end other)
     SPELL_ATTR_EX4_SPELL_VS_EXTEND_COST        = 0x00000400,// 10 Rogue Shiv have this flag
     SPELL_ATTR_EX4_UNK11                       = 0x00000800,// 11
     SPELL_ATTR_EX4_UNK12                       = 0x00001000,// 12
@@ -412,12 +412,12 @@ enum SpellAttributesEx4
     SPELL_ATTR_EX4_USABLE_IN_ARENA             = 0x00020000,// 17 usable in arena
     SPELL_ATTR_EX4_UNK18                       = 0x00040000,// 18
     SPELL_ATTR_EX4_UNK19                       = 0x00080000,// 19
-    SPELL_ATTR_EX4_UNK20                       = 0x00100000,// 20 do not give "more powerful spell" error message
+    SPELL_ATTR_EX4_NOT_CHECK_SELFCAST_POWER    = 0x00100000,// 20 do not give "more powerful spell" error message
     SPELL_ATTR_EX4_UNK21                       = 0x00200000,// 21
     SPELL_ATTR_EX4_UNK22                       = 0x00400000,// 22
     SPELL_ATTR_EX4_UNK23                       = 0x00800000,// 23
     SPELL_ATTR_EX4_UNK24                       = 0x01000000,// 24
-    SPELL_ATTR_EX4_UNK25                       = 0x02000000,// 25 pet scaling auras
+    SPELL_ATTR_EX4_IS_PET_SCALING              = 0x02000000,// 25 pet scaling auras
     SPELL_ATTR_EX4_CAST_ONLY_IN_OUTLAND        = 0x04000000,// 26 Can only be used in Outland.
     SPELL_ATTR_EX4_UNK27                       = 0x08000000,// 27
     SPELL_ATTR_EX4_UNK28                       = 0x10000000,// 28
@@ -455,8 +455,8 @@ enum SpellAttributesEx5
     SPELL_ATTR_EX5_UNK24                       = 0x01000000,// 24
     SPELL_ATTR_EX5_UNK25                       = 0x02000000,// 25
     SPELL_ATTR_EX5_UNK26                       = 0x04000000,// 26
-    SPELL_ATTR_EX5_UNK27                       = 0x08000000,// 27
-    SPELL_ATTR_EX5_UNK28                       = 0x10000000,// 28
+    SPELL_ATTR_EX5_DONT_SHOW_AURA_IF_SELF_CAST = 0x08000000,// 27 Auras with this attribute are not visible on units that are the caster
+    SPELL_ATTR_EX5_DONT_SHOW_AURA_IF_NOT_SELF_CAST = 0x10000000,// 28 Auras with this attribute are not visible on units that are not the caster
     SPELL_ATTR_EX5_UNK29                       = 0x20000000,// 29
     SPELL_ATTR_EX5_UNK30                       = 0x40000000,// 30
     SPELL_ATTR_EX5_UNK31                       = 0x80000000,// 31 Forces all nearby enemies to focus attacks caster
@@ -464,13 +464,13 @@ enum SpellAttributesEx5
 
 enum SpellAttributesEx6
 {
-    SPELL_ATTR_EX6_UNK0                        = 0x00000001,// 0 Only Move spell have this flag
+    SPELL_ATTR_EX6_DONT_DISPLAY_COOLDOWN       = 0x00000001,// 0 Only Move spell have this flag
     SPELL_ATTR_EX6_ONLY_IN_ARENA               = 0x00000002,// 1 only usable in arena, not used in 3.2.0a and early
     SPELL_ATTR_EX6_IGNORE_CASTER_AURAS         = 0x00000004,// 2
     SPELL_ATTR_EX6_UNK3                        = 0x00000008,// 3
     SPELL_ATTR_EX6_UNK4                        = 0x00000010,// 4
     SPELL_ATTR_EX6_UNK5                        = 0x00000020,// 5
-    SPELL_ATTR_EX6_UNK6                        = 0x00000040,// 6
+    SPELL_ATTR_EX6_USE_SPELL_CAST_EVENT        = 0x00000040,// 6 Auras with this attribute trigger SPELL_CAST combat log event instead of SPELL_AURA_START (clientside attribute)
     SPELL_ATTR_EX6_UNK7                        = 0x00000080,// 7
     SPELL_ATTR_EX6_IGNORE_CC_TARGETS           = 0x00000100,// 8 ignores target with cc effects
     SPELL_ATTR_EX6_UNK9                        = 0x00000200,// 9
