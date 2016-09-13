@@ -2001,23 +2001,23 @@ void ObjectMgr::LoadItemPrototypes()
             const_cast<ItemPrototype*>(proto)->Quality = ITEM_QUALITY_NORMAL;
         }
 
-        if (proto->Flags2 & ITEM_FLAG2_HORDE_ONLY)
+        if (proto->Flags2 & ITEM_FLAG2_FACTION_HORDE)
         {
             if (FactionEntry const* faction = sFactionStore.LookupEntry(HORDE))
                 if ((proto->AllowableRace & faction->BaseRepRaceMask[0]) == 0)
                     sLog.outErrorDb("Item (Entry: %u) have in `AllowableRace` races (%u) only not compatible with ITEM_FLAG2_HORDE_ONLY (%u) in Flags field, item any way will can't be equipped or use by this races.",
-                                    i, proto->AllowableRace, ITEM_FLAG2_HORDE_ONLY);
+                                    i, proto->AllowableRace, ITEM_FLAG2_FACTION_HORDE);
 
-            if (proto->Flags2 & ITEM_FLAG2_ALLIANCE_ONLY)
+            if (proto->Flags2 & ITEM_FLAG2_FACTION_ALLIANCE)
                 sLog.outErrorDb("Item (Entry: %u) have in `Flags2` flags ITEM_FLAG2_ALLIANCE_ONLY (%u) and ITEM_FLAG2_HORDE_ONLY (%u) in Flags field, this is wrong combination.",
-                                i, ITEM_FLAG2_ALLIANCE_ONLY, ITEM_FLAG2_HORDE_ONLY);
+                                i, ITEM_FLAG2_FACTION_ALLIANCE, ITEM_FLAG2_FACTION_HORDE);
         }
-        else if (proto->Flags2 & ITEM_FLAG2_ALLIANCE_ONLY)
+        else if (proto->Flags2 & ITEM_FLAG2_FACTION_ALLIANCE)
         {
             if (FactionEntry const* faction = sFactionStore.LookupEntry(ALLIANCE))
                 if ((proto->AllowableRace & faction->BaseRepRaceMask[0]) == 0)
                     sLog.outErrorDb("Item (Entry: %u) have in `AllowableRace` races (%u) only not compatible with ITEM_FLAG2_ALLIANCE_ONLY (%u) in Flags field, item any way will can't be equipped or use by this races.",
-                                    i, proto->AllowableRace, ITEM_FLAG2_ALLIANCE_ONLY);
+                                    i, proto->AllowableRace, ITEM_FLAG2_FACTION_ALLIANCE);
         }
 
         if (proto->BuyCount <= 0)

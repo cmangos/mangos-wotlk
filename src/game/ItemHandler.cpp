@@ -763,10 +763,10 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                         continue;
 
                     // race wrong item skip always
-                    if ((pProto->Flags2 & ITEM_FLAG2_HORDE_ONLY) && _player->GetTeam() != HORDE)
+                    if ((pProto->Flags2 & ITEM_FLAG2_FACTION_HORDE) && _player->GetTeam() != HORDE)
                         continue;
 
-                    if ((pProto->Flags2 & ITEM_FLAG2_ALLIANCE_ONLY) && _player->GetTeam() != ALLIANCE)
+                    if ((pProto->Flags2 & ITEM_FLAG2_FACTION_ALLIANCE) && _player->GetTeam() != ALLIANCE)
                         continue;
 
                     if ((pProto->AllowableRace & _player->getRaceMask()) == 0)
@@ -791,7 +791,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                 ++count;
 
                 // reputation discount
-                uint32 price = (crItem->ExtendedCost == 0 || pProto->Flags2 & ITEM_FLAG2_EXT_COST_REQUIRES_GOLD) ? uint32(floor(pProto->BuyPrice * discountMod)) : 0;
+                uint32 price = (crItem->ExtendedCost == 0 || pProto->Flags2 & ITEM_FLAG2_DONT_IGNORE_BUY_PRICE) ? uint32(floor(pProto->BuyPrice * discountMod)) : 0;
 
                 data << uint32(vendorslot + 1);             // client size expected counting from 1
                 data << uint32(pProto->ItemId);
