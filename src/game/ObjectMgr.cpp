@@ -2034,22 +2034,22 @@ void ObjectMgr::LoadItemPrototypes()
 
         if (proto->InventoryType != INVTYPE_NON_EQUIP)
         {
-            if (proto->Flags & ITEM_FLAG_LOOTABLE)
+            if (proto->Flags & ITEM_FLAG_HAS_LOOT)
             {
-                sLog.outErrorDb("Item container (Entry: %u) has not allowed for containers flag ITEM_FLAG_LOOTABLE (%u), flag removed.", i, ITEM_FLAG_LOOTABLE);
-                const_cast<ItemPrototype*>(proto)->Flags &= ~ITEM_FLAG_LOOTABLE;
+                sLog.outErrorDb("Item container (Entry: %u) has not allowed for containers flag ITEM_FLAG_LOOTABLE (%u), flag removed.", i, ITEM_FLAG_HAS_LOOT);
+                const_cast<ItemPrototype*>(proto)->Flags &= ~ITEM_FLAG_HAS_LOOT;
             }
 
-            if (proto->Flags & ITEM_FLAG_MILLABLE)
+            if (proto->Flags & ITEM_FLAG_IS_MILLABLE)
             {
-                sLog.outErrorDb("Item container (Entry: %u) has not allowed for containers flag ITEM_FLAG_MILLABLE (%u), flag removed.", i, ITEM_FLAG_MILLABLE);
-                const_cast<ItemPrototype*>(proto)->Flags &= ~ITEM_FLAG_MILLABLE;
+                sLog.outErrorDb("Item container (Entry: %u) has not allowed for containers flag ITEM_FLAG_MILLABLE (%u), flag removed.", i, ITEM_FLAG_IS_MILLABLE);
+                const_cast<ItemPrototype*>(proto)->Flags &= ~ITEM_FLAG_IS_MILLABLE;
             }
 
-            if (proto->Flags & ITEM_FLAG_PROSPECTABLE)
+            if (proto->Flags & ITEM_FLAG_IS_PROSPECTABLE)
             {
-                sLog.outErrorDb("Item container (Entry: %u) has not allowed for containers flag ITEM_FLAG_PROSPECTABLE (%u), flag removed.", i, ITEM_FLAG_PROSPECTABLE);
-                const_cast<ItemPrototype*>(proto)->Flags &= ~ITEM_FLAG_PROSPECTABLE;
+                sLog.outErrorDb("Item container (Entry: %u) has not allowed for containers flag ITEM_FLAG_PROSPECTABLE (%u), flag removed.", i, ITEM_FLAG_IS_PROSPECTABLE);
+                const_cast<ItemPrototype*>(proto)->Flags &= ~ITEM_FLAG_IS_PROSPECTABLE;
             }
         }
         else if (proto->InventoryType != INVTYPE_BAG)
@@ -2545,7 +2545,7 @@ void ObjectMgr::LoadItemConverts()
 
         // 2 cases when item convert used
         // Boa item with reputation requirement
-        if ((!(pItemEntryProto->Flags & ITEM_FLAG_BOA) || !pItemEntryProto->RequiredReputationFaction) &&
+        if ((!(pItemEntryProto->Flags & ITEM_FLAG_IS_BOUND_TO_ACCOUNT) || !pItemEntryProto->RequiredReputationFaction) &&
                 // convertion to another team/race
                 (pItemTargetProto->AllowableRace & pItemEntryProto->AllowableRace))
         {

@@ -18974,7 +18974,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
 
         // possible item converted for BoA case
         ItemPrototype const* crProto = ObjectMgr::GetItemPrototype(crItem->item);
-        if (crProto->Flags & ITEM_FLAG_BOA && crProto->RequiredReputationFaction &&
+        if (crProto->Flags & ITEM_FLAG_IS_BOUND_TO_ACCOUNT && crProto->RequiredReputationFaction &&
                 uint32(GetReputationRank(crProto->RequiredReputationFaction)) >= crProto->RequiredReputationRank)
             converted = (sObjectMgr.GetItemConvert(crItem->item, getRaceMask()) != 0);
 
@@ -20093,7 +20093,7 @@ void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint3
 
 void Player::ApplyEquipCooldown(Item* pItem)
 {
-    if (pItem->GetProto()->Flags & ITEM_FLAG_NO_EQUIP_COOLDOWN)
+    if (pItem->GetProto()->Flags & ITEM_FLAG_NO_EQUIPCOOLDOWN)
         return;
 
     for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
@@ -21774,7 +21774,7 @@ InventoryResult Player::CanEquipUniqueItem(Item* pItem, uint8 eslot, uint32 limi
 InventoryResult Player::CanEquipUniqueItem(ItemPrototype const* itemProto, uint8 except_slot, uint32 limit_count) const
 {
     // check unique-equipped on item
-    if (itemProto->Flags & ITEM_FLAG_UNIQUE_EQUIPPED)
+    if (itemProto->Flags & ITEM_FLAG_UNIQUE_EQUIPPABLE)
     {
         // there is an equip limit on this item
         if (HasItemOrGemWithIdEquipped(itemProto->ItemId, 1, except_slot))

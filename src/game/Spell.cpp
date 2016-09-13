@@ -6652,7 +6652,7 @@ SpellCastResult Spell::CheckPower()
 bool Spell::IgnoreItemRequirements() const
 {
     /// Check if it's an enchant scroll. These have no required reagents even though their spell does.
-    if (m_CastItem && (m_CastItem->GetProto()->Flags & ITEM_FLAG_ENCHANT_SCROLL))
+    if (m_CastItem && (m_CastItem->GetProto()->Flags & ITEM_FLAG_NO_REAGENT_COST))
         return true;
 
     if (m_IsTriggeredSpell)
@@ -6696,7 +6696,7 @@ SpellCastResult Spell::CheckItems()
         if (!proto)
             return SPELL_FAILED_ITEM_NOT_FOUND;
 
-        if (proto->Flags & ITEM_FLAG_ENCHANT_SCROLL)
+        if (proto->Flags & ITEM_FLAG_NO_REAGENT_COST)
             isScrollItem = true;
 
         for (int i = 0; i < 5; ++i)
@@ -6988,7 +6988,7 @@ SpellCastResult Spell::CheckItems()
                 if (!m_targets.getItemTarget())
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
                 // ensure item is a prospectable ore
-                if (!(m_targets.getItemTarget()->GetProto()->Flags & ITEM_FLAG_PROSPECTABLE))
+                if (!(m_targets.getItemTarget()->GetProto()->Flags & ITEM_FLAG_IS_PROSPECTABLE))
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
                 // prevent prospecting in trade slot
                 if (m_targets.getItemTarget()->GetOwnerGuid() != m_caster->GetObjectGuid())
@@ -7011,7 +7011,7 @@ SpellCastResult Spell::CheckItems()
                 if (!m_targets.getItemTarget())
                     return SPELL_FAILED_CANT_BE_MILLED;
                 // ensure item is a millable herb
-                if (!(m_targets.getItemTarget()->GetProto()->Flags & ITEM_FLAG_MILLABLE))
+                if (!(m_targets.getItemTarget()->GetProto()->Flags & ITEM_FLAG_IS_MILLABLE))
                     return SPELL_FAILED_CANT_BE_MILLED;
                 // prevent milling in trade slot
                 if (m_targets.getItemTarget()->GetOwnerGuid() != m_caster->GetObjectGuid())

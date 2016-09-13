@@ -6490,7 +6490,7 @@ void Spell::EffectEnchantItemPerm(SpellEffectIndex eff_idx)
     }
 
     // Using enchant stored on scroll does not increase enchanting skill! (Already granted on scroll creation)
-    if (!(m_CastItem && m_CastItem->GetProto()->Flags & ITEM_FLAG_ENCHANT_SCROLL))
+    if (!(m_CastItem && m_CastItem->GetProto()->Flags & ITEM_FLAG_NO_REAGENT_COST))
         p_caster->UpdateCraftSkill(m_spellInfo->Id);
 
     if (item_owner != p_caster && p_caster->GetSession()->GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_BOOL_GM_LOG_TRADE))
