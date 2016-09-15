@@ -7927,6 +7927,9 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
     // use triggered flag only for items with many spell casts and for not first cast
     int count = 0;
 
+    // as we neet to check at each cast if item still exist we'll save its pos here to retrieve it later
+    uint16 itemPos = item->GetPos();
+
     // item spells casted at use
     for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
     {
@@ -7953,8 +7956,18 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
         spell->m_glyphIndex = glyphIndex;                   // glyph index
         spell->SpellStart(&targets);
 
+        // some spell can destroy the item so we have to refresh the pointer here
+        // TODO::Remove this hack when we'll found a better way to handle DestroyItem in spell::TakeReagent() because some spells may not be fully processed due to this
+        item = GetItemByPos(itemPos);
+        if (!item)
+            return;
+
         ++count;
     }
+
+    // if we already used the item spell then nothing to do more (is it exist more than one use for an item?)
+    if (count)
+        return;
 
     // Item enchantments spells casted at use
     for (int e_slot = 0; e_slot < MAX_ENCHANTMENT_SLOT; ++e_slot)
@@ -7981,6 +7994,12 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
             spell->m_cast_count = cast_count;               // set count of casts
             spell->m_glyphIndex = glyphIndex;               // glyph index
             spell->SpellStart(&targets);
+
+            // some spell can destroy the item so we have to refresh the pointer here
+            // TODO::Remove this hack when we'll found a better way to handle DestroyItem in spell::TakeReagent() because some spells may not be fully processed due to this
+            item = GetItemByPos(itemPos);
+            if (!item)
+                return;
 
             ++count;
         }
