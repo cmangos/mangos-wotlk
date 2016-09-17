@@ -26,7 +26,6 @@
 #include "SharedDefines.h"
 #include "SpellAuraDefines.h"
 #include "DBCStructure.h"
-#include "SQLStorages.h"
 
 #include <map>
 
@@ -240,7 +239,7 @@ inline bool IsAutocastable(SpellEntry const* spellInfo)
 
 inline bool IsAutocastable(uint32 spellId)
 {
-    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
         return false;
     return IsAutocastable(spellInfo);
