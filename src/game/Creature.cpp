@@ -608,7 +608,6 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                 if (!IsInEvadeMode() && AI())
                 {
                     // do not allow the AI to be changed during update
-                    uint32 guid = GetObjectGuid().GetCounter();
                     m_AI_locked = true;
                     AI()->UpdateAI(diff);   // AI not react good at real update delays (while freeze in non-active part of map)
                     m_AI_locked = false;
