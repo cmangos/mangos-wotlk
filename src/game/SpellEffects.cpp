@@ -1844,23 +1844,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 45088, true);
                     return;
                 }
-                case 45449:                                // Arcane Prisoner Rescue
-                {
-                    uint32 spellId = 0;
-                    switch (rand() % 2)
-                    {
-                        case 0: spellId = 45446; break;    // Summon Arcane Prisoner - Male
-                        case 1: spellId = 45448; break;    // Summon Arcane Prisoner - Female
-                    }
-                    // Spawn
-                    m_caster->CastSpell(m_caster, spellId, true);
-
-                    if (!unitTarget) return;
-                    // Arcane Prisoner Kill Credit
-                    unitTarget->CastSpell(m_caster, 45456, true);
-
-                    break;
-                }
                 case 45502:                                 // Seaforium Depth Charge Explosion
                 {
                     if (!unitTarget || m_caster->GetTypeId() != TYPEID_UNIT)
