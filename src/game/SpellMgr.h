@@ -26,6 +26,7 @@
 #include "SharedDefines.h"
 #include "SpellAuraDefines.h"
 #include "DBCStructure.h"
+#include "DBCStores.h"
 
 #include <map>
 
