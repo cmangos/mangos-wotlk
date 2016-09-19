@@ -216,6 +216,39 @@ inline bool IsLootCraftingSpell(SpellEntry const* spellInfo)
              (spellInfo->TotemCategory[0] != 0 || spellInfo->EffectItemType[0] == 0 || spellInfo->Id == 62941)));
 }
 
+inline bool IsSpellEffectAbleToCrit(const SpellEntry* entry, SpellEffectIndex index)
+{
+    if (!entry || entry->HasAttribute(SPELL_ATTR_EX2_CANT_CRIT))
+        return false;
+
+    switch (entry->Effect[index])
+    {
+        case SPELL_EFFECT_SCHOOL_DAMAGE:
+        case SPELL_EFFECT_HEAL:
+        case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+        case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+        case SPELL_EFFECT_WEAPON_DAMAGE:
+        case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+            return true;
+        case SPELL_EFFECT_ENERGIZE: // Mana Potion and similar spells, Lay on hands
+            return (entry->SpellFamilyName && entry->DmgClass);
+    }
+    return false;
+}
+
+inline bool IsSpellAbleToCrit(const SpellEntry* entry)
+{
+    if (!entry || entry->HasAttribute(SPELL_ATTR_EX2_CANT_CRIT))
+        return false;
+
+    for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (entry->Effect[i] && IsSpellEffectAbleToCrit(entry, SpellEffectIndex(i)))
+            return true;
+    }
+    return false;
+}
+
 int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2);
 
 // order from less to more strict
