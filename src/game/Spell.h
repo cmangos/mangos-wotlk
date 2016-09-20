@@ -440,6 +440,7 @@ class Spell
         uint8 m_cast_count;
         uint32 m_glyphIndex;
         SpellCastTargets m_targets;
+        bool m_ignoreHitResult;
 
         int32 GetCastTime() const { return m_casttime; }
         uint32 GetCastedTime() { return m_timer; }
