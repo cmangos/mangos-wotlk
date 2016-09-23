@@ -665,6 +665,7 @@ inline bool IsNeutralTarget(uint32 target)
         case TARGET_DYNAMIC_OBJECT_BEHIND:
         case TARGET_DYNAMIC_OBJECT_LEFT_SIDE:
         case TARGET_DYNAMIC_OBJECT_RIGHT_SIDE:
+        case TARGET_DEST_CASTER_FRONT_LEAP:
         case TARGET_58:
         case TARGET_DUELVSPLAYER_COORDINATES:
         case TARGET_INFRONT_OF_VICTIM:
@@ -675,7 +676,7 @@ inline bool IsNeutralTarget(uint32 target)
         case TARGET_RANDOM_NEARBY_LOC:
         case TARGET_RANDOM_CIRCUMFERENCE_POINT:
         case TARGET_74:
-        case TARGET_75:
+        case TARGET_RANDOM_CIRCUMFERENCE_AROUND_TARGET:
         case TARGET_DYNAMIC_OBJECT_COORDINATES:
         case TARGET_POINT_AT_NORTH:
         case TARGET_POINT_AT_SOUTH:
@@ -798,7 +799,7 @@ inline bool IsNeutralEffectTargetPositive(uint32 etarget, const WorldObject* cas
         case TARGET_58:
         case TARGET_70:
         case TARGET_74:
-        case TARGET_75:
+        case TARGET_RANDOM_CIRCUMFERENCE_AROUND_TARGET:
         case TARGET_SUMMONER:
         case TARGET_VEHICLE_DRIVER:
         case TARGET_VEHICLE_PASSENGER_0:
