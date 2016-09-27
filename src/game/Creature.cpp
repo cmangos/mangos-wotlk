@@ -2353,7 +2353,7 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
 
                         if (target == ATTACKING_TARGET_NEAREST_BY)
                         {
-                            if (combatDistance < distance)
+                            if (!suitableTarget || combatDistance < distance)
                             {
                                 distance = combatDistance;
                                 suitableTarget = pTarget;
