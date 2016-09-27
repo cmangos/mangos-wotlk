@@ -2734,142 +2734,133 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
     int32 skillBonus  = 4 * (attackerWeaponSkill - victimMaxSkillValueForLevel);
     int32 sum = 0;
     int32 roll = urand(0, 10000);
-    int32 tmp = miss_chance;
+    int32 tmp;
 
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: skill bonus of %d for attacker", skillBonus);
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: rolled %d, miss %d, dodge %d, parry %d, block %d, crit %d",
                      roll, miss_chance, dodge_chance, parry_chance, block_chance, crit_chance);
-
-    if (tmp > 0 && roll < (sum += tmp))
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: MISS");
-        return MELEE_HIT_MISS;
-    }
-
-    // always crit against a sitting target (except 0 crit chance)
-    if (pVictim->GetTypeId() == TYPEID_PLAYER && crit_chance > 0 && !pVictim->IsStandState())
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: CRIT (sitting victim)");
-        return MELEE_HIT_CRIT;
-    }
 
     bool from_behind = !pVictim->HasInArc(M_PI_F, this);
 
     if (from_behind)
         DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: attack came from behind.");
 
-    // Dodge chance
-
-    // only players can't dodge if attacker is behind
-    if (pVictim->GetTypeId() != TYPEID_PLAYER || !from_behind)
+    if (miss_chance > 0)
     {
+        tmp = miss_chance - skillBonus;
+        if (roll < (sum += tmp))
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: MISS <%d, %d)", sum - tmp, tmp);
+            return MELEE_HIT_MISS;
+        }
+    }
+
+    // always crit against a sitting target (except 0 crit chance)
+    if (!pVictim->IsStandState() && pVictim->GetTypeId() == TYPEID_PLAYER && crit_chance > 0)
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: CRIT (sitting victim)");
+        return MELEE_HIT_CRIT;
+    }
+
+    if (dodge_chance > 0)
+    {
+        tmp = dodge_chance - skillBonus;
+
         // Reduce dodge chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
-            dodge_chance -= int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType) * 100);
+            tmp -= int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType) * 100);
         else
-            dodge_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE) * 25;
+            tmp -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE) * 25;
 
         // Modify dodge chance by attacker SPELL_AURA_MOD_COMBAT_RESULT_CHANCE
-        dodge_chance += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE) * 100;
+        tmp += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE) * 100;
 
-        tmp = dodge_chance;
-        if ((tmp > 0)                                       // check if unit _can_ dodge
-                && ((tmp -= skillBonus) > 0)
-                && roll < (sum += tmp))
+        // only players can't dodge if attacker is behind
+        if (!(from_behind && pVictim->GetTypeId() == TYPEID_PLAYER) && roll < (sum += tmp))
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum - tmp, sum);
+            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum - tmp, tmp);
             return MELEE_HIT_DODGE;
         }
     }
 
-    // parry chances
-    // check if attack comes from behind, nobody can parry or block if attacker is behind if not have
-    if (!from_behind || pVictim->HasAuraType(SPELL_AURA_MOD_PARRY_FROM_BEHIND_PERCENT))
+    // can't parry attacks coming from behind unless they have specific spell aura mod
+    if (parry_chance > 0 && (!from_behind || pVictim->HasAuraType(SPELL_AURA_MOD_PARRY_FROM_BEHIND_PERCENT)))
     {
+        tmp = parry_chance - skillBonus;
+
         // Reduce parry chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
-            parry_chance -= int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType) * 100);
+            tmp -= int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType) * 100);
         else
-            parry_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE) * 25;
+            tmp -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE) * 25;
 
-        if (parry_chance > 0 && (pVictim->GetTypeId() == TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_PARRY)))
+        if (roll < (sum += tmp) && (pVictim->GetTypeId() == TYPEID_PLAYER
+            || !(((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_PARRY)))
         {
-            parry_chance -= skillBonus;
-
             // if (from_behind) -- only 100% currently and not 100% sure way value apply
             //    parry_chance = int32(parry_chance * (pVictim->GetTotalAuraMultiplier(SPELL_AURA_MOD_PARRY_FROM_BEHIND_PERCENT) - 1);
 
-            if (parry_chance > 0 &&                         // check if unit _can_ parry
-                    (roll < (sum += parry_chance)))
-            {
-                DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: PARRY <%d, %d)", sum - parry_chance, sum);
-                return MELEE_HIT_PARRY;
-            }
+            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: PARRY <%d, %d)", sum - tmp, tmp);
+            return MELEE_HIT_PARRY;
         }
     }
 
-    // Max 40% chance to score a glancing blow against mobs that are higher level (can do only players and pets and not with ranged weapon)
-    if (attType != RANGED_ATTACK &&
-            (GetTypeId() == TYPEID_PLAYER || ((Creature*)this)->IsPet()) &&
-            pVictim->GetTypeId() != TYPEID_PLAYER && !((Creature*)pVictim)->IsPet() &&
-            getLevel() < pVictim->GetLevelForTarget(this))
+    // can't block attacks coming from behind
+    if (!from_behind && block_chance > 0)
     {
-        // cap possible value (with bonuses > max skill)
-        int32 skill = attackerWeaponSkill;
-        int32 maxskill = attackerMaxSkillValueForLevel;
-        skill = (skill > maxskill) ? maxskill : skill;
+        tmp = block_chance - skillBonus;
 
-        tmp = (10 + (victimDefenseSkill - skill)) * 100;
-        tmp = tmp > 4000 ? 4000 : tmp;
-        if (roll < (sum += tmp))
+        if (roll < (sum += tmp) && (pVictim->GetTypeId() == TYPEID_PLAYER
+            || !(((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_BLOCK)))
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum - 4000, sum);
+            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: BLOCK <%d, %d)", sum - tmp, tmp);
+            return MELEE_HIT_BLOCK;
+        }
+    }
+
+    // Max 40% chance to score a glancing blow against mobs that are higher level
+    // (can do only players and pets and not with ranged weapon)
+    if ((GetTypeId() == TYPEID_PLAYER || ((Creature*)this)->IsPet())
+        && pVictim->GetTypeId() != TYPEID_PLAYER && !((Creature*)pVictim)->IsPet()
+        && getLevel() < pVictim->getLevel() && attType != RANGED_ATTACK)
+    {
+        tmp = 1000 + ((attackerWeaponSkill < attackerMaxSkillValueForLevel)
+            ? (victimDefenseSkill - attackerWeaponSkill) * 200
+            : (victimDefenseSkill - attackerMaxSkillValueForLevel) * 200);
+
+        if (roll < (tmp = (tmp > 4000) ? 4000 : tmp))
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum - tmp, tmp);
             return MELEE_HIT_GLANCING;
         }
     }
 
-    // block chances
-    // check if attack comes from behind, nobody can parry or block if attacker is behind
-    if (!from_behind)
+    if (crit_chance > 0)
     {
-        if (pVictim->GetTypeId() == TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_BLOCK))
+        tmp = crit_chance + skillBonus;
+        if (roll < (sum += tmp))
         {
-            tmp = block_chance;
-            if ((tmp > 0)                                   // check if unit _can_ block
-                    && ((tmp -= skillBonus) > 0)
-                    && (roll < (sum += tmp)))
-            {
-                DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: BLOCK <%d, %d)", sum - tmp, sum);
-                return MELEE_HIT_BLOCK;
-            }
+            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: CRIT <%d, %d)", sum - tmp, tmp);
+            return MELEE_HIT_CRIT;
         }
     }
 
-    // Critical chance
-    tmp = crit_chance;
-
-    if (tmp > 0 && roll < (sum += tmp))
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: CRIT <%d, %d)", sum - tmp, sum);
-        return MELEE_HIT_CRIT;
-    }
-
-    tmp = (victimDefenseSkill < victimMaxSkillValueForLevel) ? victimDefenseSkill : victimMaxSkillValueForLevel;
-
     // mobs can score crushing blows if they're 4 or more levels above victim
-    // having defense above your maximum (from items, talents etc.) has no effect
-    // mob's level * 5 - player's current defense skill - add 2% chance per lacking skill point, min. is 20%
-    if ((getLevel() - 4) >= pVictim->getLevel() && !IsNonMeleeSpellCasted(false) /* It should have been !spellCasted but wrath doesn't have that? */
-        && roll < (tmp = (((attackerMaxSkillValueForLevel - tmp) * 200) - 2000)))
+    if ((getLevel() - 4) >= pVictim->getLevel()) /* It should have been && !spellCasted but wrath doesn't have that? */
     {
-        uint32 typeId = GetTypeId();
-        /* It should have been !(((Creature*)this)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_CRUSH) but wrath doesn't have that? */
-        if ((typeId == TYPEID_UNIT && !(GetOwnerGuid() && GetOwner()->GetTypeId() == TYPEID_PLAYER)
-            && !(static_cast<Creature const*>(this)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_CRUSH))
-            || (typeId == TYPEID_PLAYER && GetCharmerGuid() && GetCharmer()->GetTypeId() == TYPEID_UNIT))
+        // having defense above your maximum (from items, talents etc.) has no effect
+        // mob's level * 5 - player's current defense skill - add 2% chance per lacking skill point, min. is 20%
+        tmp = (victimDefenseSkill < victimMaxSkillValueForLevel) ? victimDefenseSkill : victimMaxSkillValueForLevel;
+        if (roll < (tmp = (((attackerMaxSkillValueForLevel - tmp) * 200) - 2000)))
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: CRUSHING %d)", tmp);
-            return MELEE_HIT_CRUSHING;
+            uint32 typeId = GetTypeId();
+            if ((typeId == TYPEID_UNIT && !(GetOwnerGuid() && GetOwner()->GetTypeId() == TYPEID_PLAYER)
+                && !(static_cast<Creature const*>(this)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_CRUSH))
+                || (typeId == TYPEID_PLAYER && GetCharmerGuid() && GetCharmer()->GetTypeId() == TYPEID_UNIT))
+            {
+                DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: CRUSHING %d)", tmp);
+                return MELEE_HIT_CRUSHING;
+            }
         }
     }
 
