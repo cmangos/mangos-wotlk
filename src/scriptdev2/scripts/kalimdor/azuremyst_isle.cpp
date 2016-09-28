@@ -23,7 +23,6 @@ EndScriptData */
 
 /* ContentData
 npc_draenei_survivor
-npc_injured_draenei
 npc_magwin
 EndContentData */
 
@@ -173,35 +172,6 @@ CreatureAI* GetAI_npc_draenei_survivor(Creature* pCreature)
 }
 
 /*######
-## npc_injured_draenei
-######*/
-
-struct npc_injured_draeneiAI : public ScriptedAI
-{
-    npc_injured_draeneiAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
-
-    void Reset() override
-    {
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
-        m_creature->SetHealth(int(m_creature->GetMaxHealth()*.15));
-        switch (urand(0, 1))
-        {
-            case 0: m_creature->SetStandState(UNIT_STAND_STATE_SIT); break;
-            case 1: m_creature->SetStandState(UNIT_STAND_STATE_SLEEP); break;
-        }
-    }
-
-    void MoveInLineOfSight(Unit* /*pWho*/) override {}          // ignore everyone around them (won't aggro anything)
-
-    void UpdateAI(const uint32 /*uiDiff*/) override {}
-};
-
-CreatureAI* GetAI_npc_injured_draenei(Creature* pCreature)
-{
-    return new npc_injured_draeneiAI(pCreature);
-}
-
-/*######
 ## npc_magwin
 ######*/
 
@@ -312,11 +282,6 @@ void AddSC_azuremyst_isle()
     pNewScript = new Script;
     pNewScript->Name = "npc_draenei_survivor";
     pNewScript->GetAI = &GetAI_npc_draenei_survivor;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_injured_draenei";
-    pNewScript->GetAI = &GetAI_npc_injured_draenei;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

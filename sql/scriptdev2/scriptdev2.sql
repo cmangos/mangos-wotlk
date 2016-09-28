@@ -279,7 +279,6 @@ UPDATE creature_template SET ScriptName='npc_loramus_thalipedes' WHERE entry=778
 
 /* AZUREMYST ISLE */
 UPDATE creature_template SET ScriptName='npc_draenei_survivor' WHERE entry=16483;
-UPDATE creature_template SET ScriptName='npc_injured_draenei' WHERE entry=16971;
 UPDATE creature_template SET ScriptName='npc_magwin' WHERE entry=17312;
 
 /* BADLANDS */
