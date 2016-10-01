@@ -5434,8 +5434,12 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     if (petInvoker->GetTypeId() != TYPEID_PLAYER)
     {
         // pet players do not need this
-        // TODO :: Totem, Pet and Critter may not use this
-        level += std::max(m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
+        // TODO :: Totem, Pet and Critter may not use this. This is probably wrongly used and need more research.
+        uint32 resultLevel = level + std::max(m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
+
+        // result level should be a possible level for creatures
+        if (resultLevel > 0 && resultLevel < DEFAULT_MAX_CREATURE_LEVEL)
+            level = resultLevel;
     }
     // level of creature summoned using engineering item based at engineering skill level
     else if (m_CastItem)
