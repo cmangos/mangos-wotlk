@@ -173,7 +173,8 @@ struct boss_aranAI : public ScriptedAI
 
     void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType damagetype) override
     {
-        if (!m_bDrinkInturrupted && m_bIsDrinking && uiDamage > 0)
+        // Must only break drinking on direct damage
+        if (!m_bDrinkInturrupted && m_bIsDrinking && uiDamage > 0 && (damagetype == SPELL_DIRECT_DAMAGE || damagetype == DIRECT_DAMAGE))
         {
             if (!m_creature->HasAura(SPELL_DRINK))
                 return;
