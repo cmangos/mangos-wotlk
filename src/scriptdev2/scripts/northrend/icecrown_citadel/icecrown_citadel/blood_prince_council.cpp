@@ -291,7 +291,7 @@ struct npc_kinetic_bombAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_KINETIC_BOMB_VISUAL, CAST_TRIGGERED);
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         // Note: this npc shouldn't take any damage - however this has an issue in the core, because the Unstanble spell doesn't proc on 0 damage
         uiDamage = 0;
@@ -347,7 +347,7 @@ struct npc_dark_nucleusAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* pDealer, uint32& /*uiDamage*/) override
+    void DamageTaken(Unit* pDealer, uint32& /*uiDamage*/, DamageEffectType /*damagetype*/) override
     {
         if (m_creature->getVictim() && pDealer != m_creature->getVictim())
         {
@@ -518,7 +518,7 @@ struct blood_prince_council_baseAI : public ScriptedAI
         ScriptedAI::EnterEvadeMode();
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         // Damage is shared by the Blood Orb Control npc
         if (!m_uiEmpowermentTimer)

@@ -177,7 +177,7 @@ struct boss_black_knightAI : public ScriptedAI
             m_ghoulGuid = pSummoned->GetObjectGuid();
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (m_uiPhase == PHASE_GHOST)
             return;

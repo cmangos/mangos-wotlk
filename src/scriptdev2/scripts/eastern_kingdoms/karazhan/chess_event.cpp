@@ -660,7 +660,7 @@ struct npc_king_llaneAI : public npc_chess_piece_genericAI
 
     bool m_bIsAttacked;
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
+    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (!uiDamage || !m_bIsAttacked || !m_pInstance || pDoneBy->GetTypeId() != TYPEID_UNIT)
             return;
@@ -771,7 +771,7 @@ struct npc_warchief_blackhandAI : public npc_chess_piece_genericAI
 
     bool m_bIsAttacked;
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
+    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (!uiDamage || !m_bIsAttacked || !m_pInstance || pDoneBy->GetTypeId() != TYPEID_UNIT)
             return;

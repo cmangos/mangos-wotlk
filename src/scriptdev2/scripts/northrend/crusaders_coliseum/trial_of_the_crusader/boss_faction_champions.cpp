@@ -360,7 +360,7 @@ struct trial_crusader_commonAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* pDealer, uint32& uiDamage) override
+    void DamageTaken(Unit* pDealer, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         uint32 uiStep = m_uiThrowAIEventStep != 100 ? m_uiThrowAIEventStep : 0;
         if (uiStep < CRUSADER_HEALTH_STEPS)

@@ -106,7 +106,7 @@ struct mob_vrykul_skeletonAI : public ScriptedAI
         m_uiReviveTimer = 0;
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (m_uiReviveTimer)
         {

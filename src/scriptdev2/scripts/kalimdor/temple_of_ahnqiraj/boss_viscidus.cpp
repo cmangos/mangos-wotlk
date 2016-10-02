@@ -201,7 +201,7 @@ struct boss_viscidusAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* pDealer, uint32& uiDamage) override
+    void DamageTaken(Unit* pDealer, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         // apply missing aura: 50% damage reduction;
         uiDamage = uiDamage * 0.5f;

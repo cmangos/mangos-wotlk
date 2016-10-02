@@ -76,7 +76,7 @@ struct mob_lumpAI : public ScriptedAI
         AttackStart(pAttacker);
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (m_creature->GetHealth() < uiDamage || (m_creature->GetHealth() - uiDamage) * 100 / m_creature->GetMaxHealth() < 30)
         {
@@ -445,7 +445,7 @@ struct npc_rethhedronAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         // go to epilog at 10% health
         if (!m_bEventFinished && m_creature->GetHealthPercent() < 10.0f)

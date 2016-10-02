@@ -229,7 +229,7 @@ struct boss_alarAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         // Only init fake in phase one
         if (m_uiPhase != PHASE_ONE)

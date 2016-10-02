@@ -172,7 +172,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (m_fightPhase != PHASE_HEAD_TOSS && uiDamage >= m_creature->GetHealth())
         {
@@ -392,7 +392,7 @@ struct boss_head_of_horsemanAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& /*uiDamage*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& /*uiDamage*/, DamageEffectType /*damagetype*/) override
     {
         // allow him to die the last phase
         if (m_uiHeadPhase >= 3)

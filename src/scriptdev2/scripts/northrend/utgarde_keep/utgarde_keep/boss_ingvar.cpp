@@ -126,7 +126,7 @@ struct boss_ingvarAI : public ScriptedAI
             m_pInstance->SetData(TYPE_INGVAR, IN_PROGRESS);
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (m_bIsResurrected)
             return;

@@ -755,7 +755,7 @@ struct advisor_base_ai : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* /*pDoneby*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDoneby*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         // Allow fake death only in the first phase
         if (!m_bCanFakeDeath)
@@ -1122,7 +1122,7 @@ struct mob_phoenix_tkAI : public ScriptedAI
         ScriptedAI::EnterEvadeMode();
     }
 
-    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (uiDamage < m_creature->GetHealth())
             return;

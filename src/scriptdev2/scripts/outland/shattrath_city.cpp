@@ -185,7 +185,7 @@ struct npc_dirty_larryAI : public ScriptedAI
         AttackStart(pAttacker);
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (uiDamage < m_creature->GetHealth())
             return;
@@ -568,7 +568,7 @@ struct npc_salsalabimAI : public ScriptedAI
         m_uiMagneticPullTimer = 15000;
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
+    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (pDoneBy->GetTypeId() == TYPEID_PLAYER)
         {

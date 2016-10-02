@@ -356,7 +356,7 @@ struct mob_molten_golemAI : public ScriptedAI
         m_creature->UpdateEntry(NPC_BRITTLE_GOLEM);
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         // Transform intro Brittle when damaged to 0 HP
         if (uiDamage >= m_creature->GetHealth())

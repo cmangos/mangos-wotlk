@@ -158,7 +158,7 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
     }
 
     // Boss has an interesting speech before killed, so we need to fake death (without stand state) and allow him to finish his theatre
-    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (uiDamage < m_creature->GetHealth())
             return;
@@ -465,7 +465,7 @@ struct mob_felkael_phoenixAI : public ScriptedAI
         ScriptedAI::EnterEvadeMode();
     }
 
-    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (uiDamage < m_creature->GetHealth())
             return;
