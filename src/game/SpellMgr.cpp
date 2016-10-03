@@ -1330,6 +1330,43 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
     if (EventProcFlag & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_ON_TRAP_ACTIVATION))
         return true;
 
+    if (procFlags & PROC_FLAG_ON_DO_PERIODIC && EventProcFlag & PROC_FLAG_ON_DO_PERIODIC)
+    {
+        if (procExtra & PROC_EX_INTERNAL_HOT)
+        {
+            if (EventProcFlag == PROC_FLAG_ON_DO_PERIODIC)
+            {
+                /// no aura with only PROC_FLAG_DONE_PERIODIC and spellFamilyName == 0 can proc from a HOT.
+                if (!procSpell->SpellFamilyName)
+                    return false;
+            }
+            /// Aura must have positive procflags for a HOT to proc
+            else if (!(EventProcFlag & (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS)))
+                return false;
+        }
+        /// Aura must have negative or neutral(PROC_FLAG_DONE_PERIODIC only) procflags for a DOT to proc
+        else if (EventProcFlag != PROC_FLAG_ON_DO_PERIODIC)
+            if (!(EventProcFlag & (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG)))
+                return false;
+    }
+
+    if (procFlags & PROC_FLAG_ON_TAKE_PERIODIC && EventProcFlag & PROC_FLAG_ON_TAKE_PERIODIC)
+    {
+        if (procExtra & PROC_EX_INTERNAL_HOT)
+        {
+            /// No aura that only has PROC_FLAG_TAKEN_PERIODIC can proc from a HOT.
+            if (EventProcFlag == PROC_FLAG_ON_TAKE_PERIODIC)
+                return false;
+            /// Aura must have positive procflags for a HOT to proc
+            if (!(EventProcFlag & (PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS)))
+                return false;
+        }
+        /// Aura must have negative or neutral(PROC_FLAG_TAKEN_PERIODIC only) procflags for a DOT to proc
+        else if (EventProcFlag != PROC_FLAG_ON_TAKE_PERIODIC)
+            if (!(EventProcFlag & (PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG | PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG)))
+                return false;
+    }
+
     if (spellProcEvent)     // Exist event data
     {
         // Store extra req
