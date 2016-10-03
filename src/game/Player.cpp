@@ -15968,6 +15968,7 @@ void Player::_LoadAuras(QueryResult* result, uint32 timediff)
 
                 holder->SetState(SPELLAURAHOLDER_STATE_DB_LOAD); // Safeguard mechanism against some actions
                 AddSpellAuraHolder(holder);
+                holder->SetState(SPELLAURAHOLDER_STATE_READY);
                 DETAIL_LOG("Added auras from spellid %u", spellproto->Id);
             }
             else
