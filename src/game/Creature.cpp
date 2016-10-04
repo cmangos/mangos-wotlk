@@ -2242,25 +2242,28 @@ void Creature::SetInCombatWithZone()
 
 bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags) const
 {
-    if (selectFlags & SELECT_FLAG_PLAYER && pTarget->GetTypeId() != TYPEID_PLAYER)
-        return false;
+    if (selectFlags)
+    {
+        if (selectFlags & SELECT_FLAG_PLAYER && pTarget->GetTypeId() != TYPEID_PLAYER)
+            return false;
 
-    if (selectFlags & SELECT_FLAG_POWER_MANA && pTarget->GetPowerType() != POWER_MANA)
-        return false;
-    else if (selectFlags & SELECT_FLAG_POWER_RAGE && pTarget->GetPowerType() != POWER_RAGE)
-        return false;
-    else if (selectFlags & SELECT_FLAG_POWER_ENERGY && pTarget->GetPowerType() != POWER_ENERGY)
-        return false;
-    else if (selectFlags & SELECT_FLAG_POWER_RUNIC && pTarget->GetPowerType() != POWER_RUNIC_POWER)
-        return false;
+        if (selectFlags & SELECT_FLAG_POWER_MANA && pTarget->GetPowerType() != POWER_MANA)
+            return false;
+        else if (selectFlags & SELECT_FLAG_POWER_RAGE && pTarget->GetPowerType() != POWER_RAGE)
+            return false;
+        else if (selectFlags & SELECT_FLAG_POWER_ENERGY && pTarget->GetPowerType() != POWER_ENERGY)
+            return false;
+        else if (selectFlags & SELECT_FLAG_POWER_RUNIC && pTarget->GetPowerType() != POWER_RUNIC_POWER)
+            return false;
 
-    if (selectFlags & SELECT_FLAG_IN_MELEE_RANGE && !CanReachWithMeleeAttack(pTarget))
-        return false;
-    if (selectFlags & SELECT_FLAG_NOT_IN_MELEE_RANGE && CanReachWithMeleeAttack(pTarget))
-        return false;
+        if (selectFlags & SELECT_FLAG_IN_MELEE_RANGE && !CanReachWithMeleeAttack(pTarget))
+            return false;
+        else if (selectFlags & SELECT_FLAG_NOT_IN_MELEE_RANGE && CanReachWithMeleeAttack(pTarget))
+            return false;
 
-    if (selectFlags & SELECT_FLAG_IN_LOS && !IsWithinLOSInMap(pTarget))
-        return false;
+        if (selectFlags & SELECT_FLAG_IN_LOS && !IsWithinLOSInMap(pTarget))
+            return false;
+    }
 
     if (pSpellInfo)
     {
@@ -2304,13 +2307,19 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
     {
         case ATTACKING_TARGET_RANDOM:
         {
+            Unit* pTarget = nullptr;
             std::vector<Unit*> suitableUnits;
             suitableUnits.reserve(threatlist.size() - position);
+
             advance(itr, position);
-            for (; itr != threatlist.end(); ++itr)
-                if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
-                    if (!selectFlags || MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
-                        suitableUnits.push_back(pTarget);
+            while (itr != threatlist.end())
+            {
+                pTarget = GetMap()->GetUnit((*itr)->getUnitGuid());
+                if (pTarget && MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
+                    suitableUnits.push_back(pTarget);
+
+                ++itr;
+            }
 
             if (!suitableUnits.empty())
                 return suitableUnits[urand(0, suitableUnits.size() - 1)];
@@ -2319,21 +2328,33 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
         }
         case ATTACKING_TARGET_TOPAGGRO:
         {
+            Unit* pTarget = nullptr;
+
             advance(itr, position);
-            for (; itr != threatlist.end(); ++itr)
-                if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
-                    if (!selectFlags || MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
-                        return pTarget;
+            while (itr != threatlist.end())
+            {
+                pTarget = GetMap()->GetUnit((*itr)->getUnitGuid());
+                if (pTarget && MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
+                    return pTarget;
+
+                ++itr;
+            }
 
             break;
         }
         case ATTACKING_TARGET_BOTTOMAGGRO:
         {
+            Unit* pTarget = nullptr;
+
             advance(ritr, position);
-            for (; ritr != threatlist.rend(); ++ritr)
-                if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
-                    if (!selectFlags || MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
-                        return pTarget;
+            while (ritr != threatlist.rend())
+            {
+                pTarget = GetMap()->GetUnit((*itr)->getUnitGuid());
+                if (pTarget && MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
+                    return pTarget;
+
+                ++ritr;
+            }
 
             break;
         }
@@ -2341,31 +2362,33 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
         case ATTACKING_TARGET_FARTHEST_AWAY:
         {
             float distance = -1;
+            float combatDistance = 0;
+            Unit* pTarget = nullptr;
             Unit* suitableTarget = nullptr;
 
+            advance(itr, position);
             while (itr != threatlist.end())
             {
-                if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
-                {
-                    if (selectFlags && MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
-                    {
-                        float combatDistance = Creature::GetCombatDistance(pTarget, false);
+                pTarget = GetMap()->GetUnit((*itr)->getUnitGuid());
 
-                        if (target == ATTACKING_TARGET_NEAREST_BY)
+                if (pTarget && MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
+                {
+                    combatDistance = Creature::GetCombatDistance(pTarget, false);
+
+                    if (target == ATTACKING_TARGET_NEAREST_BY)
+                    {
+                        if (!suitableTarget || combatDistance < distance)
                         {
-                            if (!suitableTarget || combatDistance < distance)
-                            {
-                                distance = combatDistance;
-                                suitableTarget = pTarget;
-                            }
+                            distance = combatDistance;
+                            suitableTarget = pTarget;
                         }
-                        else // FARTHEST
+                    }
+                    else // FARTHEST
+                    {
+                        if (combatDistance > distance)
                         {
-                            if (combatDistance > distance)
-                            {
-                                distance = combatDistance;
-                                suitableTarget = pTarget;
-                            }
+                            distance = combatDistance;
+                            suitableTarget = pTarget;
                         }
                     }
                 }
