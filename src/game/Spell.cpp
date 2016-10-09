@@ -5009,9 +5009,8 @@ SpellCastResult Spell::CheckCast(bool strict)
         // totem immunity for channeled spells(needs to be before spell cast)
         // spell attribs for player channeled spells
         if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET) // TODO: Investigate this condition
-                && m_spellInfo->HasAttribute(SPELL_ATTR_EX5_HASTE_AFFECT_DURATION)
-                && target->GetTypeId() == TYPEID_UNIT
-                && ((Creature*)target)->IsTotem())
+            && m_spellInfo->HasAttribute(SPELL_ATTR_EX5_HASTE_AFFECT_DURATION)
+            && target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsTotem())
             return SPELL_FAILED_IMMUNE;
 
         bool non_caster_target = target != m_caster && !IsSpellWithCasterSourceTargetsOnly(m_spellInfo);
@@ -5531,9 +5530,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 else if (m_spellInfo->SpellIconID == 156)   // Holy Shock
                 {
+                    Unit* target = m_targets.getUnitTarget();
                     // spell different for friends and enemies
                     // hart version required facing
-                    if (m_targets.getUnitTarget() && !m_caster->IsFriendlyTo(m_targets.getUnitTarget()) && !m_caster->HasInArc(M_PI_F, m_targets.getUnitTarget()))
+                    if (target && !(m_caster->IsFriendlyTo(target) || m_caster->HasInArc(M_PI_F, target)))
                         return SPELL_FAILED_UNIT_NOT_INFRONT;
                 }
                 // Fire Nova
