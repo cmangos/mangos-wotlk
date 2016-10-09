@@ -3767,18 +3767,20 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             // Flametongue Weapon Proc, Ranks
             if (m_spellInfo->SpellFamilyFlags & uint64(0x0000000000200000))
             {
-                if (!m_CastItem)
+                if (m_CastItem)
                 {
-                    sLog.outError("Spell::EffectDummy: spell %i requires cast Item", m_spellInfo->Id);
-                    return;
-                }
-                // found spelldamage coefficients of 0.381% per 0.1 speed and 15.244 per 4.0 speed
-                // but own calculation say 0.385 gives at most one point difference to published values
-                int32 spellDamage = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo));
-                float weaponSpeed = (1.0f / IN_MILLISECONDS) * m_CastItem->GetProto()->Delay;
-                int32 totalDamage = int32((damage + 3.85f * spellDamage) * 0.01 * weaponSpeed);
+                    // found spelldamage coefficients of 0.381% per 0.1 speed and 15.244 per 4.0 speed
+                    // but own calculation say 0.385 gives at most one point difference to published values
+                    // calculation should really be; ((damage + 0.385 * BonusSpellDamage) * 0.1 * weaponSpeed)
+                    // base damage is multiplied by 10 in spell.dbc so we have to multiply the coefficients by 10 and then divide the whole bracket by 10.
+                    float weaponSpeed = (m_CastItem->GetProto()->Delay / IN_MILLISECONDS) * m_CastItem->GetProto()->Delay;
+                    int32 totalDamage = (damage + 3.85f * m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo))) * 0.01 * weaponSpeed;
 
-                m_caster->CastCustomSpell(unitTarget, 10444, &totalDamage, nullptr, nullptr, true, m_CastItem);
+                    m_caster->CastCustomSpell(unitTarget, 10444, &totalDamage, nullptr, nullptr, true, m_CastItem);
+                }
+                else
+                    sLog.outError("Spell::EffectDummy: spell %i requires cast Item", m_spellInfo->Id);
+
                 return;
             }
             if (m_spellInfo->Id == 39610)                   // Mana Tide Totem effect
