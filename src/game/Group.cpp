@@ -549,12 +549,12 @@ void Group::SendUpdate()
             if (citr->guid == citr2->guid)
                 continue;
             Player* member = sObjectMgr.GetPlayer(citr2->guid);
-            uint8 onlineState = (member) ? MEMBER_STATUS_ONLINE : MEMBER_STATUS_OFFLINE;
+            uint8 onlineState = (member && member->GetSession() && !member->GetSession()->PlayerLogout()) ? MEMBER_STATUS_ONLINE : MEMBER_STATUS_OFFLINE;
             onlineState = onlineState | ((isBGGroup()) ? MEMBER_STATUS_PVP : 0);
 
             data << citr2->name;
             data << citr2->guid;
-            data << uint8(onlineState);                     // online-state
+            data << uint8(onlineState);
             data << uint8(citr2->group);                    // groupid
             data << uint8(GetFlags(*citr2));                // group flags
             data << uint8(0);                               // 3.3, role?
