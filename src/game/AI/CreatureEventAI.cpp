@@ -1079,9 +1079,6 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 case 4:
                     m_creature->SetMaxHealth(action.setPower.value);
                     break;
-                case 5:
-                    m_creature->SetHealthPercent((float)action.setPower.percent);
-                    break;
             }
             break;
         }
