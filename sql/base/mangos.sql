@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_12941_01_mangos_event_linkedto` bit(1) DEFAULT NULL
+  `required_12943_01_mangos_flametongue` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -15394,7 +15394,7 @@ INSERT INTO `spell_bonus_data` VALUES
 (8042,  0.3858, 0,       0,     0,     'Shaman - Earth Shock'),
 (8050,  0.2142, 0.1,     0,     0,     'Shaman - Flame Shock'),
 (10444, 0,      0,       0,     0,     'Shaman - Flametongue Attack'),
-(8026,  0.1,    0,       0,     0,     'Shaman - Flametongue Weapon Proc'),
+(8026,  3.85,   0,       0,     0,     'Shaman - Flametongue Weapon Proc'),
 (8056,  0.3858, 0,       0,     0,     'Shaman - Frost Shock'),
 (8034,  0.1,    0,       0,     0,     'Shaman - Frostbrand Attack Rank 1'),
 (5672,  0.08272,0,       0,     0,     'Shaman - Healing Stream Totem Aura'),
