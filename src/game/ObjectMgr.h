@@ -514,6 +514,8 @@ class ObjectMgr
         Group* GetGroupById(uint32 id) const;
         void AddGroup(Group* group);
         void RemoveGroup(Group* group);
+        GroupMap::iterator GetGroupMapBegin() { return mGroupMap.begin(); }
+        GroupMap::iterator GetGroupMapEnd() { return mGroupMap.end(); }
 
         ArenaTeam* GetArenaTeamById(uint32 arenateamid) const;
         ArenaTeam* GetArenaTeamByName(const std::string& arenateamname) const;
