@@ -325,25 +325,27 @@ enum AttackingTarget
 
 enum SelectFlags
 {
-    SELECT_FLAG_IN_LOS                    = 0x00001,                // Default Selection Requirement for Spell-targets
-    SELECT_FLAG_PLAYER                    = 0x00002,
-    SELECT_FLAG_PLAYER_CLASS_WARRIOR      = 0x00004,
-    SELECT_FLAG_PLAYER_CLASS_PALADIN      = 0x00008,
-    SELECT_FLAG_PLAYER_CLASS_HUNTER       = 0x00010,
-    SELECT_FLAG_PLAYER_CLASS_ROGUE        = 0x00020,
-    SELECT_FLAG_PLAYER_CLASS_PRIEST       = 0x00040,
-    SELECT_FLAG_PLAYER_CLASS_DEATH_KNIGHT = 0x00080,
-    SELECT_FLAG_PLAYER_CLASS_SHAMAN       = 0x00100,
-    SELECT_FLAG_PLAYER_CLASS_MAGE         = 0x00200,
-    SELECT_FLAG_PLAYER_CLASS_WARLOCK      = 0x00400,
+    SELECT_FLAG_IN_LOS                    = 0x000001,                // Default Selection Requirement for Spell-targets
+    SELECT_FLAG_PLAYER                    = 0x000002,
+    SELECT_FLAG_PLAYER_CLASS_WARRIOR      = 0x000004,
+    SELECT_FLAG_PLAYER_CLASS_PALADIN      = 0x000008,
+    SELECT_FLAG_PLAYER_CLASS_HUNTER       = 0x000010,
+    SELECT_FLAG_PLAYER_CLASS_ROGUE        = 0x000020,
+    SELECT_FLAG_PLAYER_CLASS_PRIEST       = 0x000040,
+    SELECT_FLAG_PLAYER_CLASS_DEATH_KNIGHT = 0x000080,
+    SELECT_FLAG_PLAYER_CLASS_SHAMAN       = 0x000100,
+    SELECT_FLAG_PLAYER_CLASS_MAGE         = 0x000200,
+    SELECT_FLAG_PLAYER_CLASS_WARLOCK      = 0x000400,
     // SELECT_FLAG_PLAYER_CLASS_UNK2         = 0x00800,                   // not used, probably was reserved for demon hunter (which was planned back in vanilla)
-    SELECT_FLAG_PLAYER_CLASS_DRUID        = 0x01000,
-    SELECT_FLAG_POWER_MANA                = 0x02000,                // For Energy based spells, like manaburn
-    SELECT_FLAG_POWER_RAGE                = 0x04000,
-    SELECT_FLAG_POWER_ENERGY              = 0x08000,
-    SELECT_FLAG_POWER_RUNIC               = 0x10000,
-    SELECT_FLAG_IN_MELEE_RANGE            = 0x20000,
-    SELECT_FLAG_NOT_IN_MELEE_RANGE        = 0x40000,
+    SELECT_FLAG_PLAYER_CLASS_DRUID        = 0x001000,
+    SELECT_FLAG_POWER_MANA                = 0x002000,                // For Energy based spells, like manaburn
+    SELECT_FLAG_POWER_RAGE                = 0x004000,
+    SELECT_FLAG_POWER_ENERGY              = 0x008000,
+    SELECT_FLAG_POWER_RUNIC               = 0x010000,
+    SELECT_FLAG_IN_MELEE_RANGE            = 0x020000,
+    SELECT_FLAG_NOT_IN_MELEE_RANGE        = 0x040000,
+    SELECT_FLAG_MOVING                    = 0x080000,
+    SELECT_FLAG_NOT_MOVING                = 0x100000
 };
 
 enum RegenStatsFlags

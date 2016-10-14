@@ -2286,6 +2286,12 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
         else if (selectFlags & SELECT_FLAG_NOT_IN_MELEE_RANGE && canReach)
             return false;
 
+        bool isMoving = pTarget->hasUnitState(UNIT_STAT_MOVING);
+        if (selectFlags & SELECT_FLAG_NOT_MOVING && isMoving)
+            return false;
+        else if (selectFlags & SELECT_FLAG_MOVING && !isMoving)
+            return false;
+
         if (selectFlags & SELECT_FLAG_IN_LOS && !IsWithinLOSInMap(pTarget))
             return false;
     }
