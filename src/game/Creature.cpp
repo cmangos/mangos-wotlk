@@ -2244,42 +2244,46 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
 {
     if (selectFlags)
     {
-        if (selectFlags & SELECT_FLAG_PLAYER && pTarget->GetTypeId() != TYPEID_PLAYER)
+        bool targetIsPlayer = pTarget->GetTypeId() == TYPEID_PLAYER ? true : false;
+        if (selectFlags & SELECT_FLAG_PLAYER && !targetIsPlayer)
             return false;
 
-        if (selectFlags & SELECT_FLAG_PLAYER_CLASS_WARRIOR && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_WARRIOR))
+        uint32 playerClass = pTarget->getClass();
+        if (selectFlags & SELECT_FLAG_PLAYER_CLASS_WARRIOR && (!targetIsPlayer || playerClass != CLASS_WARRIOR))
             return false;
-        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_PALADIN && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_PALADIN))
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_PALADIN && (!targetIsPlayer || playerClass != CLASS_PALADIN))
             return false;
-        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_HUNTER && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_HUNTER))
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_HUNTER && (!targetIsPlayer || playerClass != CLASS_HUNTER))
             return false;
-        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_ROGUE && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_ROGUE))
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_ROGUE && (!targetIsPlayer || playerClass != CLASS_ROGUE))
             return false;
-        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_PRIEST && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_PRIEST))
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_PRIEST && (!targetIsPlayer || playerClass != CLASS_PRIEST))
             return false;
-        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_DEATH_KNIGHT && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_DEATH_KNIGHT))
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_DEATH_KNIGHT && (!targetIsPlayer || playerClass != CLASS_DEATH_KNIGHT))
             return false;
-        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_SHAMAN && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_SHAMAN))
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_SHAMAN && (!targetIsPlayer || playerClass != CLASS_SHAMAN))
             return false;
-        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_MAGE && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_MAGE))
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_MAGE && (!targetIsPlayer || playerClass != CLASS_MAGE))
             return false;
-        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_WARLOCK && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_WARLOCK))
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_WARLOCK && (!targetIsPlayer || playerClass != CLASS_WARLOCK))
             return false;
-        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_DRUID && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_DRUID))
-            return false;
-
-        if (selectFlags & SELECT_FLAG_POWER_MANA && pTarget->GetPowerType() != POWER_MANA)
-            return false;
-        else if (selectFlags & SELECT_FLAG_POWER_RAGE && pTarget->GetPowerType() != POWER_RAGE)
-            return false;
-        else if (selectFlags & SELECT_FLAG_POWER_ENERGY && pTarget->GetPowerType() != POWER_ENERGY)
-            return false;
-        else if (selectFlags & SELECT_FLAG_POWER_RUNIC && pTarget->GetPowerType() != POWER_RUNIC_POWER)
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_DRUID && (!targetIsPlayer || playerClass != CLASS_DRUID))
             return false;
 
-        if (selectFlags & SELECT_FLAG_IN_MELEE_RANGE && !CanReachWithMeleeAttack(pTarget))
+        uint32 powerType = pTarget->GetPowerType();
+        if (selectFlags & SELECT_FLAG_POWER_MANA && powerType != POWER_MANA)
             return false;
-        else if (selectFlags & SELECT_FLAG_NOT_IN_MELEE_RANGE && CanReachWithMeleeAttack(pTarget))
+        else if (selectFlags & SELECT_FLAG_POWER_RAGE && powerType != POWER_RAGE)
+            return false;
+        else if (selectFlags & SELECT_FLAG_POWER_ENERGY && powerType != POWER_ENERGY)
+            return false;
+        else if (selectFlags & SELECT_FLAG_POWER_RUNIC && powerType != POWER_RUNIC_POWER)
+            return false;
+
+        bool canReach = CanReachWithMeleeAttack(pTarget);
+        if (selectFlags & SELECT_FLAG_IN_MELEE_RANGE && !canReach)
+            return false;
+        else if (selectFlags & SELECT_FLAG_NOT_IN_MELEE_RANGE && canReach)
             return false;
 
         if (selectFlags & SELECT_FLAG_IN_LOS && !IsWithinLOSInMap(pTarget))
