@@ -2247,6 +2247,27 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
         if (selectFlags & SELECT_FLAG_PLAYER && pTarget->GetTypeId() != TYPEID_PLAYER)
             return false;
 
+        if (selectFlags & SELECT_FLAG_PLAYER_CLASS_WARRIOR && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_WARRIOR))
+            return false;
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_PALADIN && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_PALADIN))
+            return false;
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_HUNTER && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_HUNTER))
+            return false;
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_ROGUE && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_ROGUE))
+            return false;
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_PRIEST && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_PRIEST))
+            return false;
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_DEATH_KNIGHT && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_DEATH_KNIGHT))
+            return false;
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_SHAMAN && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_SHAMAN))
+            return false;
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_MAGE && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_MAGE))
+            return false;
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_WARLOCK && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_WARLOCK))
+            return false;
+        else if (selectFlags & SELECT_FLAG_PLAYER_CLASS_DRUID && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->getClass() != CLASS_DRUID))
+            return false;
+
         if (selectFlags & SELECT_FLAG_POWER_MANA && pTarget->GetPowerType() != POWER_MANA)
             return false;
         else if (selectFlags & SELECT_FLAG_POWER_RAGE && pTarget->GetPowerType() != POWER_RAGE)
