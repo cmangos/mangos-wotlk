@@ -427,7 +427,7 @@ struct npc_toogaAI : public FollowerAI
 
         if (!m_creature->getVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE | STATE_FOLLOW_POSTEVENT) && pWho->GetEntry() == NPC_TORTA)
         {
-            if (m_creature->IsWithinDistInMap(pWho, INTERACTION_DISTANCE))
+            if (m_creature->IsWithinDistInMap(pWho, 15.f))
             {
                 if (Player* pPlayer = GetLeaderForFollower())
                 {
