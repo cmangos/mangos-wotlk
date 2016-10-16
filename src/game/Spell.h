@@ -500,6 +500,8 @@ class Spell
         void CleanupTargetList();
         void ClearCastItem();
 
+        void ProcSpellAuraTriggers();
+
         static void SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpell, uint32 spellId75, uint32 spellId150, uint32 spellId225, uint32 spellId300, uint32 spellIdSpecial);
 
         typedef std::list<Unit*> UnitList;
