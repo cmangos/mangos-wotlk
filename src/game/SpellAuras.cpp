@@ -8759,8 +8759,8 @@ void Aura::HandleAuraSafeFall(bool Apply, bool Real)
     // implemented in WorldSession::HandleMovementOpcodes
 
     // only special case
-    if (Apply && Real && GetId() == 32474 && GetTarget()->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)GetTarget())->ActivateTaxiPathTo(506, GetId());
+    if (Apply && Real && GetId() == 32474 && GetTarget()->GetTypeId() == TYPEID_PLAYER && GetHolder()->GetState() != SPELLAURAHOLDER_STATE_DB_LOAD)
+        ((Player*)GetTarget())->ActivateTaxiPathTo(506, GetId()); // on DB load flight path is initiated on its own after its safe to do so
 }
 
 bool Aura::IsCritFromAbilityAura(Unit* caster, uint32& damage) const
