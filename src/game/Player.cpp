@@ -15966,6 +15966,7 @@ void Player::_LoadAuras(QueryResult* result, uint32 timediff)
                 if (caster_guid != GetObjectGuid() && holder->GetTrackedAuraType() == TRACK_AURA_TYPE_SINGLE_TARGET)
                     holder->SetTrackedAuraType(TRACK_AURA_TYPE_NOT_TRACKED);
 
+                holder->SetState(SPELLAURAHOLDER_STATE_DB_LOAD); // Safeguard mechanism against some actions
                 AddSpellAuraHolder(holder);
                 DETAIL_LOG("Added auras from spellid %u", spellproto->Id);
             }

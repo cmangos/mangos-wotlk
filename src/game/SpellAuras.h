@@ -76,7 +76,8 @@ enum SpellAuraHolderState
 {
     SPELLAURAHOLDER_STATE_CREATED       = 0,                // just created, initialization steps
     SPELLAURAHOLDER_STATE_READY         = 1,                // all initialization steps are done
-    SPELLAURAHOLDER_STATE_REMOVING      = 2                 // removing steps
+    SPELLAURAHOLDER_STATE_REMOVING      = 2,                // removing steps
+    SPELLAURAHOLDER_STATE_DB_LOAD       = 3                 // during db load some events must not be executed
 };
 
 class MANGOS_DLL_SPEC SpellAuraHolder
