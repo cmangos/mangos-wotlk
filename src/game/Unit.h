@@ -92,6 +92,23 @@ enum SpellAuraInterruptFlags
     AURA_INTERRUPT_FLAG_DIRECT_DAMAGE               = 0x01000000    // 24   removed by any direct damage
 };
 
+enum SpellPartialResist
+{
+    SPELL_PARTIAL_RESIST_NONE = 0,  // 0%, full hit
+    SPELL_PARTIAL_RESIST_PCT_10,    // 10%
+    SPELL_PARTIAL_RESIST_PCT_20,    // 20%
+    SPELL_PARTIAL_RESIST_PCT_30,    // 30%
+    SPELL_PARTIAL_RESIST_PCT_40,    // 40%
+    SPELL_PARTIAL_RESIST_PCT_50,    // 50%
+    SPELL_PARTIAL_RESIST_PCT_60,    // 60%
+    SPELL_PARTIAL_RESIST_PCT_70,    // 70%
+    SPELL_PARTIAL_RESIST_PCT_80,    // 80%
+    SPELL_PARTIAL_RESIST_PCT_90,    // 90%
+    SPELL_PARTIAL_RESIST_PCT_100,   // 100%, full resist
+};
+
+#define NUM_SPELL_PARTIAL_RESISTS 11
+
 enum SpellModOp
 {
     SPELLMOD_DAMAGE                 = 0,
