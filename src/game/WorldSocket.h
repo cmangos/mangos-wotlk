@@ -106,7 +106,6 @@ class WorldSocket : public MaNGOS::Socket
 
         /// Session to which received packets are routed
         WorldSession *m_session;
-        bool m_sessionFinalized;
 
         const uint32 m_seed;
 
@@ -123,15 +122,14 @@ class WorldSocket : public MaNGOS::Socket
 
     public:
         WorldSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler);
-        virtual ~WorldSocket();
 
         // send a packet \o/
         void SendPacket(const WorldPacket& pct, bool immediate = false);
 
-        void FinalizeSession() { m_sessionFinalized = true; }
+        void ClearSession() { m_session = nullptr; }
 
         virtual bool Open() override;
-        virtual bool Deletable() const override { return (m_sessionFinalized || IsClosed()) && Socket::Deletable(); }
+        virtual bool Deletable() const override { return !m_session && Socket::Deletable(); }
 
         /// Return the session key
         BigNumber &GetSessionKey() { return m_s; }
