@@ -334,7 +334,7 @@ void instance_arcatraz::JustDidDialogueStep(int32 iEntry)
     switch (iEntry)
     {
         case SPELL_TARGET_ALPHA:
-            pMellichar->CastSpell(pMellichar, SPELL_TARGET_ALPHA, false);
+            pMellichar->CastSpell(pMellichar, SPELL_TARGET_ALPHA, TRIGGERED_NONE);
             if (Creature* pTarget = GetSingleCreatureFromStorage(NPC_PRISON_APHPA_POD))
                 pMellichar->SetFacingToObject(pTarget);
             SetData(TYPE_WARDEN_1, IN_PROGRESS);
@@ -347,21 +347,21 @@ void instance_arcatraz::JustDidDialogueStep(int32 iEntry)
                 pMellichar->SetFacingToObject(pTarget);
             break;
         case SPELL_TARGET_BETA:
-            pMellichar->CastSpell(pMellichar, SPELL_TARGET_BETA, false);
+            pMellichar->CastSpell(pMellichar, SPELL_TARGET_BETA, TRIGGERED_NONE);
             SetData(TYPE_WARDEN_2, IN_PROGRESS);
             break;
         case TYPE_WARDEN_2:
             pMellichar->SummonCreature(NPC_MILLHOUSE, aSummonPosition[1].m_fX, aSummonPosition[1].m_fY, aSummonPosition[1].m_fZ, aSummonPosition[1].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
             break;
         case SPELL_TARGET_DELTA:
-            pMellichar->CastSpell(pMellichar, SPELL_TARGET_DELTA, false);
+            pMellichar->CastSpell(pMellichar, SPELL_TARGET_DELTA, TRIGGERED_NONE);
             if (Creature* pTarget = GetSingleCreatureFromStorage(NPC_PRISON_DELTA_POD))
                 pMellichar->SetFacingToObject(pTarget);
             SetData(TYPE_WARDEN_3, IN_PROGRESS);
             break;
         case TYPE_WARDEN_3:
             pMellichar->SummonCreature(urand(0, 1) ? NPC_AKKIRIS : NPC_SULFURON, aSummonPosition[2].m_fX, aSummonPosition[2].m_fY, aSummonPosition[2].m_fZ, aSummonPosition[2].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
-            pMellichar->CastSpell(pMellichar, SPELL_TARGET_OMEGA, false);
+            pMellichar->CastSpell(pMellichar, SPELL_TARGET_OMEGA, TRIGGERED_NONE);
             if (Creature* pTarget = GetSingleCreatureFromStorage(NPC_PRISON_BOSS_POD))
                 pMellichar->SetFacingToObject(pTarget);
             break;
@@ -371,14 +371,14 @@ void instance_arcatraz::JustDidDialogueStep(int32 iEntry)
                 pMellichar->SetFacingToObject(pTarget);
             break;
         case SPELL_TARGET_GAMMA:
-            pMellichar->CastSpell(pMellichar, SPELL_TARGET_GAMMA, false);
+            pMellichar->CastSpell(pMellichar, SPELL_TARGET_GAMMA, TRIGGERED_NONE);
             if (Creature* pTarget = GetSingleCreatureFromStorage(NPC_PRISON_GAMMA_POD))
                 pMellichar->SetFacingToObject(pTarget);
             SetData(TYPE_WARDEN_4, IN_PROGRESS);
             break;
         case TYPE_WARDEN_4:
             pMellichar->SummonCreature(urand(0, 1) ? NPC_TW_DRAKONAAR : NPC_BL_DRAKONAAR, aSummonPosition[3].m_fX, aSummonPosition[3].m_fY, aSummonPosition[3].m_fZ, aSummonPosition[3].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
-            pMellichar->CastSpell(pMellichar, SPELL_TARGET_OMEGA, false);
+            pMellichar->CastSpell(pMellichar, SPELL_TARGET_OMEGA, TRIGGERED_NONE);
             if (Creature* pTarget = GetSingleCreatureFromStorage(NPC_PRISON_BOSS_POD))
                 pMellichar->SetFacingToObject(pTarget);
             break;
@@ -388,11 +388,11 @@ void instance_arcatraz::JustDidDialogueStep(int32 iEntry)
             break;
         case TYPE_WARDEN_5:
             if (Creature* pSkyriss = pMellichar->SummonCreature(NPC_SKYRISS, aSummonPosition[4].m_fX, aSummonPosition[4].m_fY, aSummonPosition[4].m_fZ, aSummonPosition[4].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
-                pSkyriss->CastSpell(pSkyriss, SPELL_SIMPLE_TELEPORT, false);
+                pSkyriss->CastSpell(pSkyriss, SPELL_SIMPLE_TELEPORT, TRIGGERED_NONE);
             break;
         case YELL_MELLICAR_WELCOME:
             if (Creature* pSkyriss = GetSingleCreatureFromStorage(NPC_SKYRISS))
-                pSkyriss->CastSpell(pSkyriss, SPELL_MIND_REND, false);
+                pSkyriss->CastSpell(pSkyriss, SPELL_MIND_REND, TRIGGERED_NONE);
             break;
         case SAY_SKYRISS_AGGRO:
             // Kill Mellichar and start combat

@@ -124,8 +124,8 @@ struct boss_gruulAI : public ScriptedAI
             {
                 switch (urand(0, 1))
                 {
-                    case 0: pTarget->CastSpell(pTarget, SPELL_MAGNETIC_PULL, true, NULL, NULL, m_creature->GetObjectGuid()); break;
-                    case 1: pTarget->CastSpell(pTarget, SPELL_KNOCK_BACK, true, NULL, NULL, m_creature->GetObjectGuid()); break;
+                    case 0: pTarget->CastSpell(pTarget, SPELL_MAGNETIC_PULL, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid()); break;
+                    case 1: pTarget->CastSpell(pTarget, SPELL_KNOCK_BACK, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid()); break;
                 }
             }
         }
@@ -134,7 +134,7 @@ struct boss_gruulAI : public ScriptedAI
         if (pSpell->Id == SPELL_SHATTER)
         {
             // this spell must have custom handling in mangos, dealing damage based on distance
-            pTarget->CastSpell(pTarget, SPELL_SHATTER_EFFECT, true);
+            pTarget->CastSpell(pTarget, SPELL_SHATTER_EFFECT, TRIGGERED_OLD_TRIGGERED);
 
             if (pTarget->HasAura(SPELL_STONED))
                 pTarget->RemoveAurasDueToSpell(SPELL_STONED);

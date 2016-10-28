@@ -202,7 +202,7 @@ struct boss_janalaiAI : public ScriptedAI
                 if (!m_bIsFlameWall)
                     DoCastSpellIfCan(pSummoned, SPELL_FIRE_BOMB_THROW, CAST_TRIGGERED);
                 else
-                    pSummoned->CastSpell(pSummoned, SPELL_FIRE_WALL, true);
+                    pSummoned->CastSpell(pSummoned, SPELL_FIRE_WALL, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_HATCHLING:
                 pSummoned->SetInCombatWithZone();
@@ -450,7 +450,7 @@ struct npc_amanishi_hatcherAI : public ScriptedAI
 
         if (Creature* pJanalai = m_pInstance->GetSingleCreatureFromStorage(NPC_JANALAI))
         {
-            pTarget->CastSpell(pTarget, SPELL_SUMMON_DRAGONHAWK, true, NULL, NULL, pJanalai->GetObjectGuid());
+            pTarget->CastSpell(pTarget, SPELL_SUMMON_DRAGONHAWK, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pJanalai->GetObjectGuid());
             ++m_uiEggsHatched;
         }
     }

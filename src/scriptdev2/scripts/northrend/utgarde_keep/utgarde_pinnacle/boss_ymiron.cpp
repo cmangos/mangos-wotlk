@@ -189,7 +189,7 @@ struct boss_ymironAI : public ScriptedAI
         if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
         {
             pSpirit->InterruptNonMeleeSpells(false);
-            pSpirit->CastSpell(pSpirit, SPELL_SPIRIT_DIES, false);
+            pSpirit->CastSpell(pSpirit, SPELL_SPIRIT_DIES, TRIGGERED_NONE);
         }
 
         if (m_pInstance)
@@ -220,7 +220,7 @@ struct boss_ymironAI : public ScriptedAI
     void DoChannelSpiritYmiron()
     {
         if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
-            pSpirit->CastSpell(m_creature, SPELL_CHANNEL_SPIRIT_YMIRON, false);
+            pSpirit->CastSpell(m_creature, SPELL_CHANNEL_SPIRIT_YMIRON, TRIGGERED_NONE);
 
         // Channeling is finished - resume combat
         if (m_creature->getVictim())
@@ -267,8 +267,8 @@ struct boss_ymironAI : public ScriptedAI
             {
                 if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
                 {
-                    pSpirit->CastSpell(pSpirit, aYmironBoatsSpirits[m_vuiBoatPhases[m_uiBoats]].uiSpiritSpell, true);
-                    pSpirit->CastSpell(pSpirit, SPELL_EMERGE_STATE, true);
+                    pSpirit->CastSpell(pSpirit, aYmironBoatsSpirits[m_vuiBoatPhases[m_uiBoats]].uiSpiritSpell, TRIGGERED_OLD_TRIGGERED);
+                    pSpirit->CastSpell(pSpirit, SPELL_EMERGE_STATE, TRIGGERED_OLD_TRIGGERED);
                 }
                 m_uiSpiritTransformTimer = 0;
             }
@@ -326,7 +326,7 @@ struct boss_ymironAI : public ScriptedAI
             if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
             {
                 pSpirit->InterruptNonMeleeSpells(false);
-                pSpirit->CastSpell(pSpirit, SPELL_SPIRIT_DIES, false);
+                pSpirit->CastSpell(pSpirit, SPELL_SPIRIT_DIES, TRIGGERED_NONE);
             }
 
             // Get a close point to the spirits and move near them

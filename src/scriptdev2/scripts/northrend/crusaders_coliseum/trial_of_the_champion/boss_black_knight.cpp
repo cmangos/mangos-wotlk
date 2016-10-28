@@ -198,7 +198,7 @@ struct boss_black_knightAI : public ScriptedAI
                 if (Creature* pGhoul = m_creature->GetMap()->GetCreature(m_ghoulGuid))
                 {
                     pGhoul->InterruptNonMeleeSpells(true);
-                    pGhoul->CastSpell(pGhoul, SPELL_EXPLODE, false);
+                    pGhoul->CastSpell(pGhoul, SPELL_EXPLODE, TRIGGERED_NONE);
                 }
             }
             else if (m_uiPhase == PHASE_SKELETON)

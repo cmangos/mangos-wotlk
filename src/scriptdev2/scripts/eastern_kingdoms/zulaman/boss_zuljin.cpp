@@ -244,8 +244,8 @@ struct boss_zuljinAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_FEATHER_VORTEX:
-                pSummoned->CastSpell(pSummoned, SPELL_CYCLONE_VISUAL, true);
-                pSummoned->CastSpell(pSummoned, SPELL_CYCLONE_PASSIVE, true);
+                pSummoned->CastSpell(pSummoned, SPELL_CYCLONE_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_CYCLONE_PASSIVE, TRIGGERED_OLD_TRIGGERED);
                 m_lSummonsList.push_back(pSummoned->GetObjectGuid());
 
                 // Attack random target
@@ -253,7 +253,7 @@ struct boss_zuljinAI : public ScriptedAI
                     pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
                 break;
             case NPC_COLUMN_OF_FIRE:
-                pSummoned->CastSpell(pSummoned, SPELL_PILLAR_TRIGGER, true);
+                pSummoned->CastSpell(pSummoned, SPELL_PILLAR_TRIGGER, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -271,7 +271,7 @@ struct boss_zuljinAI : public ScriptedAI
 
         // drain the spirit
         if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aZuljinPhases[m_uiPhase].uiSpiritId))
-            pSpirit->CastSpell(m_creature, SPELL_SPIRIT_DRAIN, false);
+            pSpirit->CastSpell(m_creature, SPELL_SPIRIT_DRAIN, TRIGGERED_NONE);
     }
 
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
@@ -347,7 +347,7 @@ struct boss_zuljinAI : public ScriptedAI
                 if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aZuljinPhases[m_uiPhase].uiSpiritId))
                 {
                     pSpirit->InterruptNonMeleeSpells(false);
-                    pSpirit->CastSpell(m_creature, SPELL_SPIRIT_DRAINED, false);
+                    pSpirit->CastSpell(m_creature, SPELL_SPIRIT_DRAINED, TRIGGERED_NONE);
                     pSpirit->SetStandState(UNIT_STAND_STATE_DEAD);
                 }
             }

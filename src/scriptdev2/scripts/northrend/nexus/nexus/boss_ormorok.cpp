@@ -127,7 +127,7 @@ struct boss_ormorokAI : public ScriptedAI
                     pSummoned->AI()->AttackStart(pTarget);
                 break;
             case NPC_CRYSTAL_SPIKE_TRIGGER:
-                pSummoned->CastSpell(pSummoned, SPELL_CRYSTAL_SPIKE_PRE, true);
+                pSummoned->CastSpell(pSummoned, SPELL_CRYSTAL_SPIKE_PRE, TRIGGERED_OLD_TRIGGERED);
                 ++m_uiSpikeCount;
                 // no break;
             case NPC_CRYSTAL_SPIKE_INITIAL:
@@ -136,7 +136,7 @@ struct boss_ormorokAI : public ScriptedAI
 
                 // allow continuous summoning only until we reach the limit
                 if (m_uiSpikeCount < MAX_ALLOWED_SPIKES)
-                    pSummoned->CastSpell(pSummoned, SPELL_CRYSTAL_SPIKE_AURA, true);
+                    pSummoned->CastSpell(pSummoned, SPELL_CRYSTAL_SPIKE_AURA, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -231,7 +231,7 @@ bool EffectDummyCreature_npc_crystal_spike_trigger(Unit* /*pCaster*/, uint32 uiS
             else
                 uiSpellId = urand(0, 1) ? SPELL_CRYSTAL_SPIKE_LEFT : SPELL_CRYSTAL_SPIKE_RIGHT;
 
-            pCreatureTarget->CastSpell(pCreatureTarget, uiSpellId, true, NULL, NULL, pOrmorok->GetObjectGuid());
+            pCreatureTarget->CastSpell(pCreatureTarget, uiSpellId, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pOrmorok->GetObjectGuid());
             // always return true when we are handling this spell and effect
             return true;
         }

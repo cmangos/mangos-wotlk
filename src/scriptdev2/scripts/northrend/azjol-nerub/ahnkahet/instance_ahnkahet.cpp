@@ -217,7 +217,7 @@ void instance_ahnkahet::OnCreatureDeath(Creature* pCreature)
         case NPC_TWISTED_VISAGE_3:
         case NPC_TWISTED_VISAGE_4:
         case NPC_TWISTED_VISAGE_5:
-            pCreature->CastSpell(pCreature, SPELL_TWISTED_VISAGE_DEATH, true);
+            pCreature->CastSpell(pCreature, SPELL_TWISTED_VISAGE_DEATH, TRIGGERED_OLD_TRIGGERED);
 
             --m_uiTwistedVisageCount;
 
@@ -227,7 +227,7 @@ void instance_ahnkahet::OnCreatureDeath(Creature* pCreature)
                 // Clear Insanity
                 if (Creature* pVolazj = GetSingleCreatureFromStorage(NPC_HERALD_VOLAZJ))
                 {
-                    pVolazj->CastSpell(pVolazj, SPELL_INSANITY_CLEAR, true);
+                    pVolazj->CastSpell(pVolazj, SPELL_INSANITY_CLEAR, TRIGGERED_OLD_TRIGGERED);
                     pVolazj->RemoveAllAuras();
                 }
 
@@ -240,7 +240,7 @@ void instance_ahnkahet::OnCreatureDeath(Creature* pCreature)
             {
                 // Switch Insanity
                 if (Creature* pVolazj = GetSingleCreatureFromStorage(NPC_HERALD_VOLAZJ))
-                    pVolazj->CastSpell(pVolazj, SPELL_INSANITY_SWITCH, true);
+                    pVolazj->CastSpell(pVolazj, SPELL_INSANITY_SWITCH, TRIGGERED_OLD_TRIGGERED);
 
                 // Handle insanity switch manually, because the boss can't hit phased players
                 if (pCreature->IsTemporarySummon())
@@ -273,7 +273,7 @@ void instance_ahnkahet::OnCreatureEvade(Creature* pCreature)
                 // Clear Insanity
                 if (Creature* pVolazj = GetSingleCreatureFromStorage(NPC_HERALD_VOLAZJ))
                 {
-                    pVolazj->CastSpell(pVolazj, SPELL_INSANITY_CLEAR, true);
+                    pVolazj->CastSpell(pVolazj, SPELL_INSANITY_CLEAR, TRIGGERED_OLD_TRIGGERED);
                     pVolazj->RemoveAllAuras();
                 }
 
@@ -370,7 +370,7 @@ void instance_ahnkahet::HandleInsanitySwitch(Player* pPhasedPlayer)
 
     // Move the same phase players to the new phase
     for (std::list<Player*>::const_iterator itr = lSamePhasePlayers.begin(); itr != lSamePhasePlayers.end(); ++itr)
-        (*itr)->CastSpell((*itr), uiNewPhaseAura, true);
+        (*itr)->CastSpell((*itr), uiNewPhaseAura, TRIGGERED_OLD_TRIGGERED);
 }
 
 bool instance_ahnkahet::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* /*pSource*/, Unit const* /*pTarget*/, uint32 /*uiMiscValue1 = 0*/) const

@@ -168,7 +168,7 @@ struct mob_blood_elf_council_voice_triggerAI : public ScriptedAI
                 for (uint8 i = 0; i < 4; ++i)
                 {
                     if (Creature* pMember = m_pInstance->GetSingleCreatureFromStorage(aCouncilMember[i]))
-                        pMember->CastSpell(pMember, SPELL_BERSERK, true);
+                        pMember->CastSpell(pMember, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                 }
                 // Start yells
                 m_councilDialogue.StartNextDialogueText(SAY_GATH_BERSERK);
@@ -337,13 +337,13 @@ struct boss_illidari_councilAI : public ScriptedAI
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
     {
         int32 uiDamageTaken = (int32)uiDamage;
-        m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_DAM, &uiDamageTaken, NULL, NULL, true);
+        m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_DAM, &uiDamageTaken, NULL, NULL, TRIGGERED_OLD_TRIGGERED);
     }
 
     void HealedBy(Unit* pHealer, uint32& uiHealedAmount) override
     {
         int32 uHealTaken = (int32)uiHealedAmount;
-        m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_HEAL, &uHealTaken, NULL, NULL, true);
+        m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_HEAL, &uHealTaken, NULL, NULL, TRIGGERED_OLD_TRIGGERED);
     }
 };
 

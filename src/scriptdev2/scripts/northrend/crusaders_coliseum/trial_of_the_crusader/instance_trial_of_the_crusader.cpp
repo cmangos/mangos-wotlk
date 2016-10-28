@@ -496,11 +496,11 @@ void instance_trial_of_the_crusader::OnCreatureDeath(Creature* pCreature)
                 SetData(TYPE_FACTION_CHAMPIONS, DONE);
 
                 // kill credit
-                pCreature->CastSpell(pCreature, SPELL_ENCOUNTER_KILL_CREDIT, true);
+                pCreature->CastSpell(pCreature, SPELL_ENCOUNTER_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
 
                 // cast the resilience fix credit
                 if (m_uiCrusadersAchievTimer)
-                    pCreature->CastSpell(pCreature, SPELL_RESILIENCE_FIX_CREDIT, true);
+                    pCreature->CastSpell(pCreature, SPELL_RESILIENCE_FIX_CREDIT, TRIGGERED_OLD_TRIGGERED);
             }
             break;
         case NPC_SNOBOLD_VASSAL:
@@ -708,7 +708,7 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
                     for (uint8 i = 0; i < uiMaxSnobolds; ++i)
                     {
                         if (Creature* pSnobold = pGormok->SummonCreature(NPC_SNOBOLD_VASSAL, pGormok->GetPositionX(), pGormok->GetPositionY(), pGormok->GetPositionZ(), 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000))
-                            pSnobold->CastSpell(pGormok, SPELL_RIDE_VEHICLE_HARDCODED, true);
+                            pSnobold->CastSpell(pGormok, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
                     }
                 }
             }
@@ -724,13 +724,13 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
             if (Creature* pFizzlebang = GetSingleCreatureFromStorage(NPC_FIZZLEBANG))
             {
                 pFizzlebang->SummonCreature(NPC_PURPLE_RUNE, aSpawnPositions[11][0], aSpawnPositions[11][1], aSpawnPositions[11][2], aSpawnPositions[11][3], TEMPSUMMON_TIMED_DESPAWN, 15000);
-                pFizzlebang->CastSpell(pFizzlebang, SPELL_OPEN_PORTAL, false);
+                pFizzlebang->CastSpell(pFizzlebang, SPELL_OPEN_PORTAL, TRIGGERED_NONE);
             }
             break;
         case EVENT_OPEN_PORTAL:
             if (Creature* pOpenPortalTarget = GetSingleCreatureFromStorage(NPC_OPEN_PORTAL_TARGET))
             {
-                pOpenPortalTarget->CastSpell(pOpenPortalTarget, SPELL_WILFRED_PORTAL, true);
+                pOpenPortalTarget->CastSpell(pOpenPortalTarget, SPELL_WILFRED_PORTAL, TRIGGERED_OLD_TRIGGERED);
                 pOpenPortalTarget->ForcedDespawn(9000);
             }
             break;
@@ -741,7 +741,7 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
             break;
         case EVENT_KILL_FIZZLEBANG:
             if (Creature* pJaraxxus = GetSingleCreatureFromStorage(NPC_JARAXXUS))
-                pJaraxxus->CastSpell(pJaraxxus, SPELL_FEL_LIGHTNING_KILL, true);
+                pJaraxxus->CastSpell(pJaraxxus, SPELL_FEL_LIGHTNING_KILL, TRIGGERED_OLD_TRIGGERED);
             break;
         case EVENT_JARAXXUS_START_ATTACK:
             if (Creature* pJaraxxus = GetSingleCreatureFromStorage(NPC_JARAXXUS))
@@ -809,7 +809,7 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
             {
                 if (Creature* pCrusader = instance->GetCreature(m_vCrusadersGuidsVector[i]))
                 {
-                    pCrusader->CastSpell(pCrusader, SPELL_ANCHOR_HERE, true);
+                    pCrusader->CastSpell(pCrusader, SPELL_ANCHOR_HERE, TRIGGERED_OLD_TRIGGERED);
                     pCrusader->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
 
                     // some crusaders have to summon their pet
@@ -832,12 +832,12 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
             if (Creature* pTwin = GetSingleCreatureFromStorage(NPC_FJOLA))
             {
                 pTwin->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
-                pTwin->CastSpell(pTwin, SPELL_TWIN_EMPATHY_LIGHT, true);
+                pTwin->CastSpell(pTwin, SPELL_TWIN_EMPATHY_LIGHT, TRIGGERED_OLD_TRIGGERED);
             }
             if (Creature* pTwin = GetSingleCreatureFromStorage(NPC_EYDIS))
             {
                 pTwin->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
-                pTwin->CastSpell(pTwin, SPELL_TWIN_EMPATHY_DARK, true);
+                pTwin->CastSpell(pTwin, SPELL_TWIN_EMPATHY_DARK, TRIGGERED_OLD_TRIGGERED);
             }
             break;
         case SAY_LKING_ANUB_INTRO_1:
@@ -846,7 +846,7 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
             break;
         case EVENT_ARTHAS_PORTAL:
             if (Creature* pWorldTriggerLarge = GetSingleCreatureFromStorage(NPC_WORLD_TRIGGER_LARGE))
-                pWorldTriggerLarge->CastSpell(pWorldTriggerLarge, SPELL_ARTHAS_PORTAL, true);
+                pWorldTriggerLarge->CastSpell(pWorldTriggerLarge, SPELL_ARTHAS_PORTAL, TRIGGERED_OLD_TRIGGERED);
             break;
         case EVENT_SUMMON_THE_LICHKING:
             if (Player* pPlayer = GetPlayerInMap())
@@ -862,13 +862,13 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
 
             if (Creature* pLichKingVisual = GetSingleCreatureFromStorage(NPC_THE_LICHKING_VISUAL))
             {
-                pLichKingVisual->CastSpell(pLichKingVisual, SPELL_FROSTNOVA, true);
-                // pLichKingVisual->CastSpell(pLichKingVisual, SPELL_CORPSE_TELEPORT, true); // NYI
+                pLichKingVisual->CastSpell(pLichKingVisual, SPELL_FROSTNOVA, TRIGGERED_OLD_TRIGGERED);
+                // pLichKingVisual->CastSpell(pLichKingVisual, SPELL_CORPSE_TELEPORT, TRIGGERED_OLD_TRIGGERED); // NYI
                 pLichKingVisual->ForcedDespawn();
             }
 
             if (Creature* pLichKing = GetSingleCreatureFromStorage(NPC_THE_LICHKING))
-                pLichKing->CastSpell(pLichKing, SPELL_DESTROY_FLOOR_KNOCKUP, true);
+                pLichKing->CastSpell(pLichKing, SPELL_DESTROY_FLOOR_KNOCKUP, TRIGGERED_OLD_TRIGGERED);
 
             if (Creature* pWorldTriggerLarge = GetSingleCreatureFromStorage(NPC_WORLD_TRIGGER_LARGE))
                 pWorldTriggerLarge->ForcedDespawn();

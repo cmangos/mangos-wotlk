@@ -284,7 +284,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
     // learn explicitly or cast explicitly
     // TODO - Are these spells really cast correctly this way?
     if (trainer_spell->IsCastable())
-        _player->CastSpell(_player, trainer_spell->spell, true);
+        _player->CastSpell(_player, trainer_spell->spell, TRIGGERED_OLD_TRIGGERED);
     else
         _player->learnSpell(spellId, false);
 
@@ -450,7 +450,7 @@ void WorldSession::SendBindPoint(Creature* npc) const
         return;
 
     // send spell for bind 3286 bind magic
-    npc->CastSpell(_player, 3286, true);                    // Bind
+    npc->CastSpell(_player, 3286, TRIGGERED_OLD_TRIGGERED);                    // Bind
 
     WorldPacket data(SMSG_TRAINER_BUY_SUCCEEDED, (8 + 4));
     data << npc->GetObjectGuid();

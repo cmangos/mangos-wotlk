@@ -95,7 +95,7 @@ bool EffectDummyCreature_npc_restless_frostborn(Unit* pCaster, uint32 uiSpellId,
         }
 
         // spawn the spirit and give the credit; spirit animation is handled by the script above
-        pCaster->CastSpell(pCaster, uiSpawnSpell, true);
+        pCaster->CastSpell(pCaster, uiSpawnSpell, TRIGGERED_OLD_TRIGGERED);
         ((Player*)pCaster)->KilledMonsterCredit(uiCredit);
         return true;
     }

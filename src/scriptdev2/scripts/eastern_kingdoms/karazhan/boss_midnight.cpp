@@ -306,7 +306,7 @@ struct boss_attumenAI : public ScriptedAI
         {
             if (Creature* pMidnight = m_pInstance->GetSingleCreatureFromStorage(NPC_MIDNIGHT))
             {
-                pMidnight->CastSpell(m_creature, SPELL_MOUNT, true);
+                pMidnight->CastSpell(m_creature, SPELL_MOUNT, TRIGGERED_OLD_TRIGGERED);
                 m_bHasSummonRider = true;
             }
         }

@@ -161,7 +161,7 @@ void instance_ruby_sanctum::SetData(uint32 uiType, uint32 uiData)
                 // Start Halion summoning process
                 if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
                 {
-                    pSummoner->CastSpell(pSummoner, SPELL_FIRE_PILLAR, false);
+                    pSummoner->CastSpell(pSummoner, SPELL_FIRE_PILLAR, TRIGGERED_NONE);
                     m_uiHalionSummonTimer = 5000;
                 }
             }
@@ -199,7 +199,7 @@ void instance_ruby_sanctum::SetData(uint32 uiType, uint32 uiData)
                 case DONE:
                     // clear debuffs
                     if (Creature* pController = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
-                        pController->CastSpell(pController, SPELL_CLEAR_DEBUFFS, true);
+                        pController->CastSpell(pController, SPELL_CLEAR_DEBUFFS, TRIGGERED_OLD_TRIGGERED);
 
                     // Despawn the portals
                     if (GameObject* pPortal = GetSingleGameObjectFromStorage(GO_TWILIGHT_PORTAL_ENTER_1))
@@ -256,7 +256,7 @@ void instance_ruby_sanctum::Update(uint32 uiDiff)
                 case 2:
                     // Cast Fiery explosion
                     if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
-                        pSummoner->CastSpell(pSummoner, SPELL_FIERY_EXPLOSION, true);
+                        pSummoner->CastSpell(pSummoner, SPELL_FIERY_EXPLOSION, TRIGGERED_OLD_TRIGGERED);
                     m_uiHalionSummonTimer = 2000;
                 case 3:
                     // Spawn Halion

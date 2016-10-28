@@ -266,15 +266,15 @@ struct npc_demoniac_scryerAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_HELLFIRE_WARDLING)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SUMMONED_DEMON, false);
+            pSummoned->CastSpell(pSummoned, SPELL_SUMMONED_DEMON, TRIGGERED_NONE);
             pSummoned->AI()->AttackStart(m_creature);
         }
         else
         {
             if (pSummoned->GetEntry() == NPC_BUTTRESS)
             {
-                pSummoned->CastSpell(pSummoned, SPELL_BUTTRESS_APPERANCE, false);
-                pSummoned->CastSpell(m_creature, SPELL_SUCKER_CHANNEL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_BUTTRESS_APPERANCE, TRIGGERED_NONE);
+                pSummoned->CastSpell(m_creature, SPELL_SUCKER_CHANNEL, TRIGGERED_OLD_TRIGGERED);
             }
         }
     }
@@ -294,7 +294,7 @@ struct npc_demoniac_scryerAI : public ScriptedAI
         {
             if (m_uiButtressCount >= MAX_BUTTRESS)
             {
-                m_creature->CastSpell(m_creature, SPELL_SUCKER_DESPAWN_MOB, false);
+                m_creature->CastSpell(m_creature, SPELL_SUCKER_DESPAWN_MOB, TRIGGERED_NONE);
 
                 if (m_creature->isInCombat())
                 {
@@ -350,7 +350,7 @@ bool GossipSelect_npc_demoniac_scryer(Player* pPlayer, Creature* pCreature, uint
     if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
     {
         pPlayer->CLOSE_GOSSIP_MENU();
-        pCreature->CastSpell(pPlayer, SPELL_DEMONIAC_VISITATION, false);
+        pCreature->CastSpell(pPlayer, SPELL_DEMONIAC_VISITATION, TRIGGERED_NONE);
     }
 
     return true;
@@ -713,8 +713,8 @@ struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
             case SPELL_JULES_THREATENS:
                 if (Creature* pColonel = m_creature->GetMap()->GetCreature(m_colonelGuid))
                 {
-                    pColonel->CastSpell(pColonel, SPELL_JULES_THREATENS, true);
-                    pColonel->CastSpell(pColonel, SPELL_JULES_RELEASE_DARKNESS, true);
+                    pColonel->CastSpell(pColonel, SPELL_JULES_THREATENS, TRIGGERED_OLD_TRIGGERED);
+                    pColonel->CastSpell(pColonel, SPELL_JULES_RELEASE_DARKNESS, TRIGGERED_OLD_TRIGGERED);
                     pColonel->SetFacingTo(0);
                 }
                 break;
@@ -722,13 +722,13 @@ struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
                 if (Creature* pColonel = m_creature->GetMap()->GetCreature(m_colonelGuid))
                 {
                     pColonel->InterruptNonMeleeSpells(false);
-                    pColonel->CastSpell(pColonel, SPELL_JULES_GOES_UPRIGHT, false);
+                    pColonel->CastSpell(pColonel, SPELL_JULES_GOES_UPRIGHT, TRIGGERED_NONE);
                 }
                 break;
             case SPELL_JULES_VOMITS:
                 if (Creature* pColonel = m_creature->GetMap()->GetCreature(m_colonelGuid))
                 {
-                    pColonel->CastSpell(pColonel, SPELL_JULES_VOMITS, true);
+                    pColonel->CastSpell(pColonel, SPELL_JULES_VOMITS, TRIGGERED_OLD_TRIGGERED);
                     pColonel->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 3.0f, 5.0f);
                 }
                 break;
@@ -1129,7 +1129,7 @@ bool EffectAuraDummy_spell_aura_dummy_living_flare(const Aura* pAura, bool bAppl
     {
         if (Creature* pTarget = (Creature*)pAura->GetTarget())
         {
-            pTarget->CastSpell(pTarget, SPELL_FEL_FLAREUP, true);
+            pTarget->CastSpell(pTarget, SPELL_FEL_FLAREUP, TRIGGERED_OLD_TRIGGERED);
 
             SpellAuraHolder* pHolder = pTarget->GetSpellAuraHolder(SPELL_FEL_FLAREUP);
             if (pHolder)
@@ -1138,7 +1138,7 @@ bool EffectAuraDummy_spell_aura_dummy_living_flare(const Aura* pAura, bool bAppl
                     pTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pTarget, pTarget);
                 // Note: cosmetic aura is removed, so we need to add it back. This needs to be fixed
                 else
-                    pTarget->CastSpell(pTarget, SPELL_LIVING_COSMETIC, true);
+                    pTarget->CastSpell(pTarget, SPELL_LIVING_COSMETIC, TRIGGERED_OLD_TRIGGERED);
             }
         }
     }

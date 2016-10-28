@@ -133,7 +133,7 @@ struct boss_teron_gorefiendAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_SHADOWY_CONSTRUCT)
-            pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_CONSTRUCT, true);
+            pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_CONSTRUCT, TRIGGERED_OLD_TRIGGERED);
 
         pSummoned->SetInCombatWithZone();
     }

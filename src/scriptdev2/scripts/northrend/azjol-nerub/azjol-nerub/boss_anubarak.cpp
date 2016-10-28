@@ -181,7 +181,7 @@ struct boss_anubarakAI : public ScriptedAI
                 }
                 break;
             case NPC_IMPALE_TARGET:
-                pSummoned->CastSpell(pSummoned, SPELL_IMPALE_VISUAL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_IMPALE_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 break;
             default:
                 break;
@@ -267,13 +267,13 @@ struct boss_anubarakAI : public ScriptedAI
                 for (uint8 i = 0; i < 2; ++i)
                 {
                     if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->GetRandomAssassinTrigger()))
-                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_ASSASSIN, true, NULL, NULL, m_creature->GetObjectGuid());
+                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_ASSASSIN, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
                 }
 
                 // on the first wave summon a guardian; on the second wave summon a venonmancer
                 if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->GetGuardianTrigger()))
                 {
-                    pTrigger->CastSpell(pTrigger, m_bIsFirstWave ? SPELL_SUMMON_GUARDIAN : SPELL_SUMMON_VENOMANCER, true, NULL, NULL, m_creature->GetObjectGuid());
+                    pTrigger->CastSpell(pTrigger, m_bIsFirstWave ? SPELL_SUMMON_GUARDIAN : SPELL_SUMMON_VENOMANCER, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
                     m_bIsFirstWave = false;
                 }
 
@@ -292,7 +292,7 @@ struct boss_anubarakAI : public ScriptedAI
 
                     if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->GetDarterTrigger()))
                     {
-                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_DARTER, true, NULL, NULL, m_creature->GetObjectGuid());
+                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_DARTER, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
                         m_uiDarterTimer = urand(10000, 15000);
                     }
                 }
@@ -360,7 +360,7 @@ struct npc_impale_targetAI : public Scripted_NoMovementAI
 
                 // The impale is cast by Anub on the impale target
                 if (Creature* pAnub = m_pInstance->GetSingleCreatureFromStorage(NPC_ANUBARAK))
-                    pAnub->CastSpell(m_creature, m_bIsRegularMode ? SPELL_IMPALE : SPELL_IMPALE_H, true);
+                    pAnub->CastSpell(m_creature, m_bIsRegularMode ? SPELL_IMPALE : SPELL_IMPALE_H, TRIGGERED_OLD_TRIGGERED);
 
                 m_creature->ForcedDespawn(3000);
                 m_uiImpaleTimer = 0;

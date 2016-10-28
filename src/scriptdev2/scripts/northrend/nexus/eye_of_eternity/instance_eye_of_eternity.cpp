@@ -115,11 +115,11 @@ void instance_eye_of_eternity::JustDidDialogueStep(int32 iEntry)
     {
         case SPELL_ALEXSTRASZAS_GIFT_BEAM:
             if (Creature* pAlextrasza = GetSingleCreatureFromStorage(NPC_ALEXSTRASZA))
-                pAlextrasza->CastSpell(pAlextrasza, SPELL_ALEXSTRASZAS_GIFT_BEAM, false);
+                pAlextrasza->CastSpell(pAlextrasza, SPELL_ALEXSTRASZAS_GIFT_BEAM, TRIGGERED_NONE);
             break;
         case NPC_ALEXSTRASZAS_GIFT:
             if (Creature* pGift = GetSingleCreatureFromStorage(NPC_ALEXSTRASZAS_GIFT))
-                pGift->CastSpell(pGift, SPELL_ALEXSTRASZAS_GIFT_VISUAL, false);
+                pGift->CastSpell(pGift, SPELL_ALEXSTRASZAS_GIFT_VISUAL, TRIGGERED_NONE);
             DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_ALEXSTRASZAS_GIFT : GO_ALEXSTRASZAS_GIFT_H, 30 * MINUTE);
             break;
         case GO_PLATFORM:

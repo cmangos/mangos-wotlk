@@ -148,7 +148,7 @@ struct boss_viscidusAI : public ScriptedAI
             m_lGlobesGuidList.push_back(pSummoned->GetObjectGuid());
         }
         else if (pSummoned->GetEntry() == NPC_VISCIDUS_TRIGGER)
-            pSummoned->CastSpell(pSummoned, SPELL_TOXIN, true);
+            pSummoned->CastSpell(pSummoned, SPELL_TOXIN, TRIGGERED_OLD_TRIGGERED);
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
@@ -187,7 +187,7 @@ struct boss_viscidusAI : public ScriptedAI
             return;
 
         m_lGlobesGuidList.remove(pSummoned->GetObjectGuid());
-        pSummoned->CastSpell(m_creature, SPELL_REJOIN_VISCIDUS, true);
+        pSummoned->CastSpell(m_creature, SPELL_REJOIN_VISCIDUS, TRIGGERED_OLD_TRIGGERED);
         pSummoned->ForcedDespawn(1000);
 
         if (m_lGlobesGuidList.empty())

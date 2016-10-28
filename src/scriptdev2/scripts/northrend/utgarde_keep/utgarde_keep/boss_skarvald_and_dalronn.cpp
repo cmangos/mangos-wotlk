@@ -147,7 +147,7 @@ struct boss_s_and_d_dummyAI : public ScriptedAI
                 DoScriptText(m_creature->GetEntry() == NPC_SKARVALD ? m_aYell[1].m_iTextId : m_aYell[2].m_iTextId, m_creature);
                 DoScriptText(m_creature->GetEntry() == NPC_SKARVALD ? m_aYell[1].m_iTextReplyId : m_aYell[2].m_iTextReplyId, pBuddy);
 
-                pBuddy->CastSpell(m_creature, m_creature->GetEntry() == NPC_SKARVALD ? SPELL_SUMMON_SKA_GHOST : SPELL_SUMMON_DAL_GHOST, true);
+                pBuddy->CastSpell(m_creature, m_creature->GetEntry() == NPC_SKARVALD ? SPELL_SUMMON_SKA_GHOST : SPELL_SUMMON_DAL_GHOST, TRIGGERED_OLD_TRIGGERED);
 
                 m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             }

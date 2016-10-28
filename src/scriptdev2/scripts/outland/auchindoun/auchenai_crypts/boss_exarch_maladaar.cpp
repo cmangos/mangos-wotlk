@@ -212,7 +212,7 @@ struct boss_exarch_maladaarAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_STOLEN_SOUL)
         {
             // SPELL_STOLEN_SOUL_VISUAL has shapeshift effect, but not implemented feature in mangos for this spell.
-            pSummoned->CastSpell(pSummoned, SPELL_STOLEN_SOUL_VISUAL, false);
+            pSummoned->CastSpell(pSummoned, SPELL_STOLEN_SOUL_VISUAL, TRIGGERED_NONE);
 
             if (Player* pTarget = m_creature->GetMap()->GetPlayer(m_targetGuid))
             {

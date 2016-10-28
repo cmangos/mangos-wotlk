@@ -160,17 +160,17 @@ struct boss_archimondeAI : public ScriptedAI
             case CLASS_PRIEST:
             case CLASS_PALADIN:
             case CLASS_WARLOCK:
-                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_RED, true);
+                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_RED, TRIGGERED_OLD_TRIGGERED);
                 break;
             case CLASS_MAGE:
             case CLASS_ROGUE:
             case CLASS_WARRIOR:
-                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_YELLOW, true);
+                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_YELLOW, TRIGGERED_OLD_TRIGGERED);
                 break;
             case CLASS_DRUID:
             case CLASS_SHAMAN:
             case CLASS_HUNTER:
-                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_GREEN, true);
+                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_GREEN, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -199,12 +199,12 @@ struct boss_archimondeAI : public ScriptedAI
 
             // When enough wisps have gathered or boss is low hp, then kill him
             if (m_uiWispCount >= 45 || m_creature->GetHealthPercent() <= 1.0f)
-                pSummoned->CastSpell(pSummoned, SPELL_DENOUEMENT_WISP, false);
+                pSummoned->CastSpell(pSummoned, SPELL_DENOUEMENT_WISP, TRIGGERED_NONE);
         }
         else if (pSummoned->GetEntry() == NPC_DOOMFIRE)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_DOOMFIRE_SPAWN, true);
-            pSummoned->CastSpell(pSummoned, SPELL_DOOMFIRE, true, NULL, NULL, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_DOOMFIRE_SPAWN, TRIGGERED_OLD_TRIGGERED);
+            pSummoned->CastSpell(pSummoned, SPELL_DOOMFIRE, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
         }
     }
 

@@ -52,7 +52,7 @@ bool GossipSelect_npc_spirit_of_olum(Player* pPlayer, Creature* /*pCreature*/, u
         pPlayer->CLOSE_GOSSIP_MENU();
 
     pPlayer->InterruptNonMeleeSpells(false);
-    pPlayer->CastSpell(pPlayer, SPELL_TELEPORT, false);
+    pPlayer->CastSpell(pPlayer, SPELL_TELEPORT, TRIGGERED_NONE);
     return true;
 }
 

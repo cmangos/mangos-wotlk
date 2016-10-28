@@ -63,7 +63,7 @@ struct npc_oculus_drakeAI : public ScriptedAI
             // Force player to mount
             if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
             {
-                pSummoner->CastSpell(pSummoner, uiMountSpell, true);
+                pSummoner->CastSpell(pSummoner, uiMountSpell, TRIGGERED_OLD_TRIGGERED);
 
                 // The dragon moves near the player after spawn
                 float fX, fY, fZ;
@@ -94,7 +94,7 @@ struct npc_oculus_drakeAI : public ScriptedAI
             if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
             {
                 pSummoner->RemoveAurasDueToSpell(SPELL_DRAKE_FLAG_VISUAL);
-                pSummoner->CastSpell(pSummoner, SPELL_PARACHUTE, true);
+                pSummoner->CastSpell(pSummoner, SPELL_PARACHUTE, TRIGGERED_OLD_TRIGGERED);
             }
         }
     }
@@ -120,13 +120,13 @@ struct npc_oculus_drakeAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_FLIGHT, CAST_TRIGGERED);
 
         // Set passenger auras
-        pPassenger->CastSpell(pPassenger, SPELL_DRAKE_FLAG_VISUAL, true);
+        pPassenger->CastSpell(pPassenger, SPELL_DRAKE_FLAG_VISUAL, TRIGGERED_OLD_TRIGGERED);
     }
 
     void PassengerUnBoarded(Unit* pPassenger) override
     {
         pPassenger->RemoveAurasDueToSpell(SPELL_DRAKE_FLAG_VISUAL);
-        pPassenger->CastSpell(pPassenger, SPELL_PARACHUTE, true);
+        pPassenger->CastSpell(pPassenger, SPELL_PARACHUTE, TRIGGERED_OLD_TRIGGERED);
 
         DoScriptText(EMOTE_FLY_AWAY, m_creature);
 

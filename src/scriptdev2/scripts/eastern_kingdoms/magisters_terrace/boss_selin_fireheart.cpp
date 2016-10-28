@@ -273,7 +273,7 @@ struct mob_fel_crystalAI : public ScriptedAI
         if (m_sWretchedGuids.find(pWho->GetObjectGuid()) == m_sWretchedGuids.end() && pWho->IsWithinDist(m_creature, 5.0f) && pWho->isAlive() &&
                 (pWho->GetEntry() == NPC_SKULER || pWho->GetEntry() == NPC_BRUISER || pWho->GetEntry() == NPC_HUSK))
         {
-            pWho->CastSpell(m_creature, SPELL_FEL_CRYSTAL_COSMETIC, false);
+            pWho->CastSpell(m_creature, SPELL_FEL_CRYSTAL_COSMETIC, TRIGGERED_NONE);
             m_sWretchedGuids.insert(pWho->GetObjectGuid());
         }
     }

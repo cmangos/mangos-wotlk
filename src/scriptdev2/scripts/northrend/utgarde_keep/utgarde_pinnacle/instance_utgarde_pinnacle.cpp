@@ -102,7 +102,7 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
                 if (Creature* pOrb = instance->GetCreature(m_gortokEventTriggerGuid))
                 {
                     pOrb->SetLevitate(true);
-                    pOrb->CastSpell(pOrb, SPELL_ORB_VISUAL, true);
+                    pOrb->CastSpell(pOrb, SPELL_ORB_VISUAL, TRIGGERED_OLD_TRIGGERED);
                     pOrb->GetMotionMaster()->MovePoint(0, aOrbPositions[0][0], aOrbPositions[0][1], aOrbPositions[0][2]);
 
                     m_uiGortokOrbTimer = 2000;
@@ -315,7 +315,7 @@ void instance_pinnacle::Update(uint32 const uiDiff)
 
                 if (Creature* pOrb = instance->GetCreature(m_gortokEventTriggerGuid))
                 {
-                    pOrb->CastSpell(pOrb, uiSpellId, false);
+                    pOrb->CastSpell(pOrb, uiSpellId, TRIGGERED_NONE);
 
                     if (m_uiGortokOrbPhase == uiMaxOrbPhase)
                         pOrb->ForcedDespawn(10000);

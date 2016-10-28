@@ -301,7 +301,7 @@ struct boss_sindragosaAI : public ScriptedAI
         y = frand(FROST_BOMB_MIN_Y, FROST_BOMB_MAX_Y);
         z = SindragosaPosition[0][2]; // platform height
 
-        m_creature->CastSpell(x, y, z, SPELL_FROST_BOMB, false);
+        m_creature->CastSpell(x, y, z, SPELL_FROST_BOMB, TRIGGERED_NONE);
     }
 
     void UpdateAI(const uint32 uiDiff) override

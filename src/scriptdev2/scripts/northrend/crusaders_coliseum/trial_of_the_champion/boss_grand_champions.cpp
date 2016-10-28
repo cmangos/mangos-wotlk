@@ -411,7 +411,7 @@ struct boss_champion_warriorAI : public trial_companion_commonAI
 
         if (m_uiThrowTimer < uiDiff)
         {
-            m_creature->getVictim()->CastSpell(m_creature->getVictim(), SPELL_ROLLING_THROW, true);
+            m_creature->getVictim()->CastSpell(m_creature->getVictim(), SPELL_ROLLING_THROW, TRIGGERED_OLD_TRIGGERED);
             m_uiThrowTimer = urand(20000, 30000);
         }
         else

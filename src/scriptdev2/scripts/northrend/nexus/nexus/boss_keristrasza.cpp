@@ -97,7 +97,7 @@ struct boss_keristraszaAI : public ScriptedAI
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        m_creature->CastSpell(m_creature, SPELL_INTENSE_COLD, true);
+        m_creature->CastSpell(m_creature, SPELL_INTENSE_COLD, TRIGGERED_OLD_TRIGGERED);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_KERISTRASZA, IN_PROGRESS);
@@ -192,12 +192,12 @@ struct boss_keristraszaAI : public ScriptedAI
                                 if (Player* pMember = pRef->getSource())
                                 {
                                     if (pMember->isAlive() && pMember->IsWithinDistInMap(m_creature, 50.0f))
-                                        m_creature->CastSpell(pMember, SPELL_CRYSTAL_CHAINS, true);
+                                        m_creature->CastSpell(pMember, SPELL_CRYSTAL_CHAINS, TRIGGERED_OLD_TRIGGERED);
                                 }
                             }
                         }
                         else
-                            m_creature->CastSpell(pPlayer, SPELL_CRYSTAL_CHAINS, false);
+                            m_creature->CastSpell(pPlayer, SPELL_CRYSTAL_CHAINS, TRIGGERED_NONE);
                     }
                 }
             }

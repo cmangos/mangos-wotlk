@@ -80,7 +80,7 @@ void instance_halls_of_reflection::OnPlayerEnter(Player* pPlayer)
     if (Creature* pCreature = GetSingleCreatureFromStorage(NPC_FROSTMOURNE_ALTAR_BUNNY))
     {
         if (GetData(TYPE_FROSTMOURNE_INTRO) != DONE)
-            pCreature->CastSpell(pCreature, SPELL_START_HALLS_REFLECTION, true);
+            pCreature->CastSpell(pCreature, SPELL_START_HALLS_REFLECTION, TRIGGERED_OLD_TRIGGERED);
     }
 
     if (!m_uiTeam)                                          // very first player to enter
@@ -407,13 +407,13 @@ void instance_halls_of_reflection::JustDidDialogueStep(int32 iEntry)
             if (Creature* pCreature = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_JAINA_PART2 : NPC_SYLVANAS_PART2))
             {
                 pCreature->InterruptNonMeleeSpells(false);
-                pCreature->CastSpell(pCreature, m_uiTeam == ALLIANCE ? SPELL_ICE_PRISON : SPELL_DARK_BINDING, false);
+                pCreature->CastSpell(pCreature, m_uiTeam == ALLIANCE ? SPELL_ICE_PRISON : SPELL_DARK_BINDING, TRIGGERED_NONE);
             }
             break;
         case SAY_ALLY_INTRO_2:
             if (Creature* pCreature = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_JAINA_PART2 : NPC_SYLVANAS_PART2))
             {
-                pCreature->CastSpell(pCreature, m_uiTeam == ALLIANCE ? SPELL_FINDING_JAINA_CREDIT : SPELL_FINDING_SYLVANAS_CREDIT, true);
+                pCreature->CastSpell(pCreature, m_uiTeam == ALLIANCE ? SPELL_FINDING_JAINA_CREDIT : SPELL_FINDING_SYLVANAS_CREDIT, TRIGGERED_OLD_TRIGGERED);
                 pCreature->SetWalk(false);
                 pCreature->GetMotionMaster()->MoveWaypoint();
             }
@@ -492,7 +492,7 @@ void instance_halls_of_reflection::DoSendNextSpiritWave()
                 return;
             }
 
-            pCreature->CastSpell(pCreature, SPELL_SPIRIT_ACTIVATE_VISUAL, false);
+            pCreature->CastSpell(pCreature, SPELL_SPIRIT_ACTIVATE_VISUAL, TRIGGERED_NONE);
             pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
             m_lActiveSpiritsGuids.push_back(*iter);

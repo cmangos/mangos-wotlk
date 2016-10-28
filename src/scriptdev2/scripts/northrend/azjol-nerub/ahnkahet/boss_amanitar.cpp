@@ -98,20 +98,20 @@ struct boss_amanitarAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_POISONOUS_MUSHROOM)
-            pSummoned->CastSpell(pSummoned, SPELL_POISON_MUSHROOM_VISUAL, true);
+            pSummoned->CastSpell(pSummoned, SPELL_POISON_MUSHROOM_VISUAL, TRIGGERED_OLD_TRIGGERED);
         else if (pSummoned->GetEntry() == NPC_HEALTHY_MUSHROOM)
-            pSummoned->CastSpell(pSummoned, SPELL_POWER_MUSHROOM_VISUAL, true);
+            pSummoned->CastSpell(pSummoned, SPELL_POWER_MUSHROOM_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
         // ToDo: research if the mushrooms should have a grow effect!
-        pSummoned->CastSpell(pSummoned, SPELL_MUSHROOM_FORM, true);
+        pSummoned->CastSpell(pSummoned, SPELL_MUSHROOM_FORM, TRIGGERED_OLD_TRIGGERED);
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_POISONOUS_MUSHROOM)
-            pSummoned->CastSpell(pSummoned, SPELL_POISON_CLOUD, true);
+            pSummoned->CastSpell(pSummoned, SPELL_POISON_CLOUD, TRIGGERED_OLD_TRIGGERED);
         else if (pSummoned->GetEntry() == NPC_HEALTHY_MUSHROOM)
-            pSummoned->CastSpell(pSummoned, SPELL_POTENT_FUNGUS, true);
+            pSummoned->CastSpell(pSummoned, SPELL_POTENT_FUNGUS, TRIGGERED_OLD_TRIGGERED);
     }
 
     void DoSummonMushrooms(bool bIsFirstSummon)

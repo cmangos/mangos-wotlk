@@ -494,7 +494,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             case NPC_IMAGE_OF_ERONZION:
                 if (m_pInstance)
                     DoScriptText(m_pInstance->GetThrallEventCount() < MAX_WIPE_COUNTER ? SAY_ERONZION_RESET_THRALL : SAY_ERONZION_RESET_LAST, pSummoned);
-                pSummoned->CastSpell(pSummoned, SPELL_SPAWN_EROZION_IMAGE, false);
+                pSummoned->CastSpell(pSummoned, SPELL_SPAWN_EROZION_IMAGE, TRIGGERED_NONE);
                 pSummoned->ForcedDespawn(30000);
                 break;
             case NPC_SKARLOC:
@@ -618,21 +618,21 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             case NPC_TARREN_MILL_GUARDSMAN:
                 if (uiPointId)
                 {
-                    pSummoned->CastSpell(pSummoned, SPELL_TRANSFORM, false);
+                    pSummoned->CastSpell(pSummoned, SPELL_TRANSFORM, TRIGGERED_NONE);
                     pSummoned->UpdateEntry(NPC_INFINITE_SLAYER);
                 }
                 break;
             case NPC_TARREN_MILL_PROTECTOR:
                 if (uiPointId)
                 {
-                    pSummoned->CastSpell(pSummoned, SPELL_TRANSFORM, false);
+                    pSummoned->CastSpell(pSummoned, SPELL_TRANSFORM, TRIGGERED_NONE);
                     pSummoned->UpdateEntry(NPC_INFINITE_SABOTEOR);
                 }
                 break;
             case NPC_TARREN_MILL_LOOKOUT:
                 if (uiPointId)
                 {
-                    pSummoned->CastSpell(pSummoned, SPELL_TRANSFORM, false);
+                    pSummoned->CastSpell(pSummoned, SPELL_TRANSFORM, TRIGGERED_NONE);
                     pSummoned->UpdateEntry(NPC_INFINITE_DEFILER);
                 }
                 break;
@@ -673,7 +673,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             case SAY_EPOCH_ENTER2:
                 if (Creature* pTaretha = m_pInstance->GetSingleCreatureFromStorage(NPC_TARETHA))
                 {
-                    pTaretha->CastSpell(pTaretha, SPELL_SHADOW_SPIKE, true);
+                    pTaretha->CastSpell(pTaretha, SPELL_SHADOW_SPIKE, TRIGGERED_OLD_TRIGGERED);
                     pTaretha->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     pTaretha->SetStandState(UNIT_STAND_STATE_DEAD);
                 }
@@ -1181,7 +1181,7 @@ struct npc_tarethaAI : public npc_escortAI, private DialogueHelper
         if (pSummoned->GetEntry() == NPC_EROZION)
         {
             DoScriptText(SAY_PRE_WIPE, pSummoned);
-            pSummoned->CastSpell(pSummoned, SPELL_TELEPORT, false);
+            pSummoned->CastSpell(pSummoned, SPELL_TELEPORT, TRIGGERED_NONE);
             pSummoned->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
         }
     }
@@ -1216,11 +1216,11 @@ struct npc_tarethaAI : public npc_escortAI, private DialogueHelper
                 break;
             case SPELL_MEMORY_WIPE:
                 if (Creature* pErozion = m_pInstance->GetSingleCreatureFromStorage(NPC_EROZION))
-                    pErozion->CastSpell(pErozion, SPELL_MEMORY_WIPE, false);
+                    pErozion->CastSpell(pErozion, SPELL_MEMORY_WIPE, TRIGGERED_NONE);
                 break;
             case SAY_TH_EVENT_COMPLETE:
                 if (Creature* pErozion = m_pInstance->GetSingleCreatureFromStorage(NPC_EROZION))
-                    pErozion->CastSpell(pErozion, SPELL_MEMORY_WP_RESUME, false);
+                    pErozion->CastSpell(pErozion, SPELL_MEMORY_WP_RESUME, TRIGGERED_NONE);
                 if (Creature* pThrall = m_pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
                     pThrall->RemoveAurasDueToSpell(SPELL_MEMORY_WIPE);
                 m_creature->RemoveAurasDueToSpell(SPELL_MEMORY_WIPE);

@@ -484,7 +484,7 @@ struct npc_rethhedronAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_RETHHEDRONS_TARGET)
-            pSummoned->CastSpell(pSummoned, SPELL_ABYSSAL_IMPACT, true);
+            pSummoned->CastSpell(pSummoned, SPELL_ABYSSAL_IMPACT, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override

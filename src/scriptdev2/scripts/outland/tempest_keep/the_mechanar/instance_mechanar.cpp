@@ -207,7 +207,7 @@ void instance_mechanar::DoSpawnBridgeWave()
 
             if (Creature* pTemp = pPlayer->SummonCreature(aBridgeEventLocs[m_uiBridgeEventPhase][i].m_uiSpawnEntry, aBridgeEventLocs[m_uiBridgeEventPhase][i].m_fX, aBridgeEventLocs[m_uiBridgeEventPhase][i].m_fY, aBridgeEventLocs[m_uiBridgeEventPhase][i].m_fZ, aBridgeEventLocs[m_uiBridgeEventPhase][i].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
             {
-                pTemp->CastSpell(pTemp, SPELL_ETHEREAL_TELEPORT, false);
+                pTemp->CastSpell(pTemp, SPELL_ETHEREAL_TELEPORT, TRIGGERED_NONE);
 
                 switch (m_uiBridgeEventPhase)
                 {

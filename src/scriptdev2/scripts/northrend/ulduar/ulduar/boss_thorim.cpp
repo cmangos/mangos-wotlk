@@ -263,7 +263,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
                         StartNextDialogueText(SAY_DEFEATED);
                 }
 
-                m_creature->CastSpell(m_creature, SPELL_THORIM_CREDIT, true);
+                m_creature->CastSpell(m_creature, SPELL_THORIM_CREDIT, TRIGGERED_OLD_TRIGGERED);
                 m_creature->SetFactionTemporary(FACTION_ID_FRIENDLY, TEMPFACTION_NONE);
                 m_bEventFinished = true;
                 EnterEvadeMode();
@@ -359,7 +359,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
         {
                 // the lightning orb should clean out the whole hallway on arena berserk
             case NPC_LIGHTNING_ORB:
-                pSummoned->CastSpell(pSummoned, SPELL_LIGHTNING_DESTRUCTION, true);
+                pSummoned->CastSpell(pSummoned, SPELL_LIGHTNING_DESTRUCTION, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_DARK_RUNE_CHAMPION:
             case NPC_DARK_RUNE_WARBRINGER:
@@ -367,7 +367,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
             case NPC_DARK_RUNE_COMMONER:
             case NPC_DARK_RUNE_ACOLYTE:
                 if (Creature* pTarget = GetClosestLowerBunny(pSummoned))
-                    pSummoned->CastSpell(pTarget, SPELL_LEAP, true);
+                    pSummoned->CastSpell(pTarget, SPELL_LEAP, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->SetInCombatWithZone();
                 break;
         }
@@ -387,7 +387,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
                 break;
             case SPELL_TOUCH_OF_DOMINION:
                 if (Creature* pSif = m_pInstance->GetSingleCreatureFromStorage(NPC_SIF))
-                    pSif->CastSpell(m_creature, SPELL_TOUCH_OF_DOMINION, false);
+                    pSif->CastSpell(m_creature, SPELL_TOUCH_OF_DOMINION, TRIGGERED_NONE);
                 break;
             case PHASE_SOLO:
                 m_creature->GetMotionMaster()->MoveJump(afArenaCenterLoc[0], afArenaCenterLoc[1], afArenaCenterLoc[2], 45.55969f, 5.0f, 1);
@@ -631,11 +631,11 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
                     // this spell requires very specific targets
                     if (Creature* pTarget = m_creature->GetMap()->GetCreature(SelectRandomOrbGuid()))
                     {
-                        pTarget->CastSpell(pTarget, SPELL_LIGHTNING_ORG_CHARGED, true);
+                        pTarget->CastSpell(pTarget, SPELL_LIGHTNING_ORG_CHARGED, TRIGGERED_OLD_TRIGGERED);
 
                         // charge the lower orb as well
                         if (Unit* pOrb = GetClosestCreatureWithEntry(pTarget, NPC_THUNDER_ORB, 25.0f, true, false, true))
-                            pTarget->CastSpell(pOrb, SPELL_LIGHTNING_PILLAR, true);
+                            pTarget->CastSpell(pOrb, SPELL_LIGHTNING_PILLAR, TRIGGERED_OLD_TRIGGERED);
 
                         m_uiChargeOrbTimer = 20000;
                     }
@@ -923,7 +923,7 @@ struct npc_runic_colossusAI : public ScriptedAI
                     // use 12 and 16 as multipliers in order to get the perfect combination
                     if (pBunny->GetPositionY() > m_creature->GetPositionY() + 12 * m_uiSmashIndex &&
                             pBunny->GetPositionY() < m_creature->GetPositionY() + 16 * m_uiSmashIndex)
-                        pBunny->CastSpell(pBunny, SPELL_RUNIC_SMASH, false);
+                        pBunny->CastSpell(pBunny, SPELL_RUNIC_SMASH, TRIGGERED_NONE);
                 }
             }
 
@@ -1025,7 +1025,7 @@ struct npc_thunder_orbAI : public Scripted_NoMovementAI
         if (pSpell->Id == SPELL_CHARGE_ORB)
         {
             if (Creature* pOrb = GetClosestCreatureWithEntry(m_creature, NPC_THUNDER_ORB, 25.0f, true, false, true))
-                pOrb->CastSpell(pOrb, SPELL_LIGHTNING_PILLAR_ORB, false);
+                pOrb->CastSpell(pOrb, SPELL_LIGHTNING_PILLAR_ORB, TRIGGERED_NONE);
         }
         // SPECIAL NOTE: this aura has a duration lower than the trigger period for the next spell; so we need to force this by timer
         else if (pSpell->Id == SPELL_LIGHTNING_ORG_CHARGED)

@@ -235,7 +235,7 @@ struct boss_xt_002AI : public ScriptedAI
                     pHeart->AI()->EnterEvadeMode();
                     m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
                     pHeart->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    pHeart->CastSpell(m_creature, SPELL_HEART_RIDE_VEHICLE, true);
+                    pHeart->CastSpell(m_creature, SPELL_HEART_RIDE_VEHICLE, TRIGGERED_OLD_TRIGGERED);
                 }
 
                 m_uiMountTimer = 0;
@@ -344,7 +344,7 @@ struct boss_xt_002AI : public ScriptedAI
                         {
                             pHeart->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
-                            pHeart->CastSpell(m_creature, SPELL_HEART_RIDE_VEHICLE, true);
+                            pHeart->CastSpell(m_creature, SPELL_HEART_RIDE_VEHICLE, TRIGGERED_OLD_TRIGGERED);
 
                             // no spell found for this
                             pHeart->SetHealth(pHeart->GetMaxHealth());
@@ -439,10 +439,10 @@ struct boss_heart_deconstructorAI : public ScriptedAI
         {
             // spawn a bunch of scrap bots
             for (uint8 i = 0; i < MAX_SCRAPBOTS; ++i)
-                pTarget->CastSpell(pTarget, SPELL_RECHARGE_ROBOT_1, true, NULL, NULL, m_creature->GetObjectGuid());
+                pTarget->CastSpell(pTarget, SPELL_RECHARGE_ROBOT_1, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
 
             // spawn a boombot or pummeller, depending on chance
-            pTarget->CastSpell(pTarget, roll_chance_i(80) ? SPELL_RECHARGE_ROBOT_2 : SPELL_RECHARGE_ROBOT_3, true, NULL, NULL, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, roll_chance_i(80) ? SPELL_RECHARGE_ROBOT_2 : SPELL_RECHARGE_ROBOT_3, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
         }
     }
 
@@ -499,7 +499,7 @@ struct npc_scrapbotAI : public ScriptedAI
         if (!m_bIsHealed && pWho->GetEntry() == NPC_XT002 && pWho->isAlive() && pWho->IsWithinDistInMap(m_creature, 10.0f))
         {
             DoCastSpellIfCan(pWho, SPELL_RIDE_VEHICLE_SCRAPBOT, CAST_TRIGGERED);
-            pWho->CastSpell(m_creature, SPELL_SCRAP_REPAIR, true);
+            pWho->CastSpell(m_creature, SPELL_SCRAP_REPAIR, TRIGGERED_OLD_TRIGGERED);
             DoScriptText(EMOTE_REPAIR, pWho);
             m_creature->ForcedDespawn(4000);
             m_bIsHealed = true;

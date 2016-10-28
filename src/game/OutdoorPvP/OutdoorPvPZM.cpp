@@ -81,7 +81,7 @@ void OutdoorPvPZM::HandlePlayerEnterZone(Player* player, bool isMainZone)
 
     // cast buff the the player which enters the zone
     if (player->GetTeam() == m_graveyardOwner)
-        player->CastSpell(player, SPELL_TWIN_SPIRE_BLESSING, true);
+        player->CastSpell(player, SPELL_TWIN_SPIRE_BLESSING, TRIGGERED_OLD_TRIGGERED);
 }
 
 void OutdoorPvPZM::HandlePlayerLeaveZone(Player* player, bool isMainZone)
@@ -152,7 +152,7 @@ void OutdoorPvPZM::HandlePlayerKillInsideArea(Player* player)
             {
                 // check capture point team
                 if (player->GetTeam() == m_towerOwner[i])
-                    player->CastSpell(player, player->GetTeam() == ALLIANCE ? SPELL_ZANGA_TOWER_TOKEN_ALLIANCE : SPELL_ZANGA_TOWER_TOKEN_HORDE, true);
+                    player->CastSpell(player, player->GetTeam() == ALLIANCE ? SPELL_ZANGA_TOWER_TOKEN_ALLIANCE : SPELL_ZANGA_TOWER_TOKEN_HORDE, TRIGGERED_OLD_TRIGGERED);
 
                 return;
             }
@@ -398,7 +398,7 @@ void OutdoorPvPZM::SetBeaconArtKit(const WorldObject* objRef, ObjectGuid creatur
     if (Creature* beam = objRef->GetMap()->GetCreature(creatureGuid))
     {
         if (auraId)
-            beam->CastSpell(beam, auraId, true);
+            beam->CastSpell(beam, auraId, TRIGGERED_OLD_TRIGGERED);
         else
             beam->RemoveAllAuras();
     }

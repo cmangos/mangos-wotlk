@@ -165,9 +165,9 @@ struct boss_headless_horsemanAI : public ScriptedAI
             m_headGuid = pSummoned->GetObjectGuid();
         else if (pSummoned->GetEntry() == NPC_PULSING_PUMPKIN)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SPROUTING, false);
-            pSummoned->CastSpell(pSummoned, SPELL_PUMPKIN_AURA, true);
-            pSummoned->CastSpell(pSummoned, SPELL_PUMPKIN_LIFE_CYCLE, true);
+            pSummoned->CastSpell(pSummoned, SPELL_SPROUTING, TRIGGERED_NONE);
+            pSummoned->CastSpell(pSummoned, SPELL_PUMPKIN_AURA, TRIGGERED_OLD_TRIGGERED);
+            pSummoned->CastSpell(pSummoned, SPELL_PUMPKIN_LIFE_CYCLE, TRIGGERED_OLD_TRIGGERED);
             pSummoned->AI()->AttackStart(m_creature->getVictim());
         }
     }
@@ -214,7 +214,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_HEAD_OF_HORSEMAN)
         {
             DoRejoinHead();
-            pInvoker->CastSpell(m_creature, SPELL_SEND_HEAD, true);
+            pInvoker->CastSpell(m_creature, SPELL_SEND_HEAD, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -386,8 +386,8 @@ struct boss_head_of_horsemanAI : public ScriptedAI
 
             if (Unit* pHorseman = m_creature->GetMap()->GetUnit(pTemporary->GetSummonerGuid()))
             {
-                pHorseman->CastSpell(pHorseman, SPELL_BODY_LEAVE_COMBAT, true);
-                pHorseman->CastSpell(pHorseman, SPELL_BODY_DEAD, true);
+                pHorseman->CastSpell(pHorseman, SPELL_BODY_LEAVE_COMBAT, TRIGGERED_OLD_TRIGGERED);
+                pHorseman->CastSpell(pHorseman, SPELL_BODY_DEAD, TRIGGERED_OLD_TRIGGERED);
             }
         }
     }

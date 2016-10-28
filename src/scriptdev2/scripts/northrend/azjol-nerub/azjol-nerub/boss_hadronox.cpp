@@ -215,9 +215,9 @@ struct boss_hadronoxAI : public ScriptedAI
                 {
                     if (Creature* pTrigger = m_creature->GetMap()->GetCreature(*itr))
                     {
-                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_CHAMPION, true, NULL, NULL, m_creature->GetObjectGuid());
-                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_NECROMANCER, true, NULL, NULL, m_creature->GetObjectGuid());
-                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_CRYPT_FIEND, true, NULL, NULL, m_creature->GetObjectGuid());
+                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_CHAMPION, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_NECROMANCER, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_CRYPT_FIEND, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
                     }
                 }
 

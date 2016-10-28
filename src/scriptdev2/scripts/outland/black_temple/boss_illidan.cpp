@@ -546,26 +546,26 @@ struct boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
         switch (pSummoned->GetEntry())
         {
             case NPC_FLAME_CRASH:
-                pSummoned->CastSpell(pSummoned, SPELL_FLAME_CRASH_EFFECT, false);
+                pSummoned->CastSpell(pSummoned, SPELL_FLAME_CRASH_EFFECT, TRIGGERED_NONE);
                 break;
             case NPC_BLADE_OF_AZZINOTH:
-                pSummoned->CastSpell(pSummoned, SPELL_RANGE_MARKER, true);
-                pSummoned->CastSpell(pSummoned, SPELL_SUMMON_TEAR_AZZINOTH, true);
+                pSummoned->CastSpell(pSummoned, SPELL_RANGE_MARKER, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_SUMMON_TEAR_AZZINOTH, TRIGGERED_OLD_TRIGGERED);
                 m_lBladesGuidList.push_back(pSummoned->GetObjectGuid());
                 break;
             case NPC_ILLIDAN_TARGET:
                 pSummoned->SetWalk(false);
-                pSummoned->CastSpell(pSummoned, SPELL_EYE_BLAST_TRIGGER, true);
+                pSummoned->CastSpell(pSummoned, SPELL_EYE_BLAST_TRIGGER, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->GetMotionMaster()->MovePoint(0, m_fTargetMoveX, m_fTargetMoveY, m_fTargetMoveZ);
                 DoCastSpellIfCan(pSummoned, SPELL_EYE_BLAST_DUMMY, CAST_TRIGGERED);
                 break;
             case NPC_SHADOW_DEMON:
-                pSummoned->CastSpell(pSummoned, SPELL_SHADOW_DEMON_PASSIVE, true);
+                pSummoned->CastSpell(pSummoned, SPELL_SHADOW_DEMON_PASSIVE, TRIGGERED_OLD_TRIGGERED);
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PARALYZE, SELECT_FLAG_PLAYER))
                 {
                     // Dummy attack function - used only to set the target
                     pSummoned->AI()->AttackStart(pTarget);
-                    pSummoned->CastSpell(pTarget, SPELL_PARALYZE, true);
+                    pSummoned->CastSpell(pTarget, SPELL_PARALYZE, TRIGGERED_OLD_TRIGGERED);
 
                     // Move towards target (which is stunned)
                     float fX, fY, fZ;
@@ -937,7 +937,7 @@ struct boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                                 {
                                     if (Creature* pBlade = m_creature->GetMap()->GetCreature(*itr))
                                     {
-                                        pBlade->CastSpell(m_creature, SPELL_GLAIVE_RETURNS, true);
+                                        pBlade->CastSpell(m_creature, SPELL_GLAIVE_RETURNS, TRIGGERED_OLD_TRIGGERED);
                                         pBlade->ForcedDespawn(500);
                                     }
                                 }
@@ -1166,9 +1166,9 @@ struct npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
                 if (m_pInstance)
                 {
                     if (Creature* pOlum = m_pInstance->GetSingleCreatureFromStorage(NPC_SPIRIT_OF_OLUM))
-                        pOlum->CastSpell(pOlum, SPELL_DEATHSWORN_DOOR_CHANNEL, true);
+                        pOlum->CastSpell(pOlum, SPELL_DEATHSWORN_DOOR_CHANNEL, TRIGGERED_OLD_TRIGGERED);
                     if (Creature* pUdalo = m_pInstance->GetSingleCreatureFromStorage(NPC_SPIRIT_OF_UDALO))
-                        pUdalo->CastSpell(pUdalo, SPELL_DEATHSWORN_DOOR_CHANNEL, true);
+                        pUdalo->CastSpell(pUdalo, SPELL_DEATHSWORN_DOOR_CHANNEL, TRIGGERED_OLD_TRIGGERED);
                 }
                 break;
             case GO_ILLIDAN_GATE:
@@ -1431,7 +1431,7 @@ struct npc_cage_trap_triggerAI : public ScriptedAI
     {
         if (!m_bActive && pWho->GetEntry() == NPC_ILLIDAN_STORMRAGE && m_creature->IsWithinDistInMap(pWho, 3.0f))
         {
-            pWho->CastSpell(pWho, SPELL_CAGED, true);
+            pWho->CastSpell(pWho, SPELL_CAGED, TRIGGERED_OLD_TRIGGERED);
 
             // Cast the visual effects
             for (uint8 i = 0; i < MAX_CAGE_SPELLS; ++i)
@@ -1475,7 +1475,7 @@ struct npc_flame_of_azzinothAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_BLAZE)
-            pSummoned->CastSpell(pSummoned, SPELL_BLAZE_EFFECT, false);
+            pSummoned->CastSpell(pSummoned, SPELL_BLAZE_EFFECT, TRIGGERED_NONE);
     }
 
     void UpdateAI(const uint32 uiDiff) override

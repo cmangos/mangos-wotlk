@@ -174,7 +174,7 @@ struct boss_volazjAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->CastSpell(pSummoned, SPELL_TWISTED_VISAGE_PASSIVE, true);
+        pSummoned->CastSpell(pSummoned, SPELL_TWISTED_VISAGE_PASSIVE, TRIGGERED_OLD_TRIGGERED);
 
         if (pSummoned->IsTemporarySummon())
         {
@@ -182,8 +182,8 @@ struct boss_volazjAI : public ScriptedAI
 
             if (Player* pPlayer = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
             {
-                pPlayer->CastSpell(pSummoned, SPELL_TWISTED_VISAGE_EFFECT, true);
-                pSummoned->CastSpell(pPlayer, m_bIsRegularMode ? SPELL_TWISTED_VISAGE_SPAWN : SPELL_TWISTED_VISAGE_SPAWN_H, true);
+                pPlayer->CastSpell(pSummoned, SPELL_TWISTED_VISAGE_EFFECT, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pPlayer, m_bIsRegularMode ? SPELL_TWISTED_VISAGE_SPAWN : SPELL_TWISTED_VISAGE_SPAWN_H, TRIGGERED_OLD_TRIGGERED);
 
                 pSummoned->AI()->AttackStart(pPlayer);
             }
@@ -216,8 +216,8 @@ struct boss_volazjAI : public ScriptedAI
                 m_pInstance->SetData64(DATA_INSANITY_PLAYER, pTarget->GetObjectGuid());
 
             // Phase and summon a Visage for each player
-            pTarget->CastSpell(pTarget, aInsanityPhaseSpells[m_uiInsanityIndex], true, 0, 0, m_creature->GetObjectGuid());
-            pTarget->CastSpell(pTarget, aSpawnVisageSpells[m_uiInsanityIndex], true, 0, 0, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, aInsanityPhaseSpells[m_uiInsanityIndex], TRIGGERED_OLD_TRIGGERED, 0, 0, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, aSpawnVisageSpells[m_uiInsanityIndex], TRIGGERED_OLD_TRIGGERED, 0, 0, m_creature->GetObjectGuid());
             ++m_uiInsanityIndex;
         }
     }

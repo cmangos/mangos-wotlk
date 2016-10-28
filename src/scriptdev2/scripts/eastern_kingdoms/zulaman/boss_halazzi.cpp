@@ -157,7 +157,7 @@ struct boss_halazziAI : public ScriptedAI
         {
             m_spiritLynxGuid = pSummoned->GetObjectGuid();
             pSummoned->SetInCombatWithZone();
-            pSummoned->CastSpell(m_creature, SPELL_HALAZZI_TRANSFORM_DUMMY, true);
+            pSummoned->CastSpell(m_creature, SPELL_HALAZZI_TRANSFORM_DUMMY, TRIGGERED_OLD_TRIGGERED);
         }
     }
 

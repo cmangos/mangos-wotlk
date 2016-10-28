@@ -413,8 +413,8 @@ void BattleGroundEY::EventPlayerDroppedFlag(Player* source)
 
     m_flagState = EY_FLAG_STATE_ON_GROUND;
     m_flagRespawnTimer = EY_FLAG_RESPAWN_TIME;
-    source->CastSpell(source, SPELL_RECENTLY_DROPPED_FLAG, true);
-    source->CastSpell(source, EY_PLAYER_DROPPED_FLAG_SPELL, true);
+    source->CastSpell(source, SPELL_RECENTLY_DROPPED_FLAG, TRIGGERED_OLD_TRIGGERED);
+    source->CastSpell(source, EY_PLAYER_DROPPED_FLAG_SPELL, TRIGGERED_OLD_TRIGGERED);
 
     if (source->GetTeam() == ALLIANCE)
     {
@@ -456,7 +456,7 @@ void BattleGroundEY::EventPlayerClickedOnFlag(Player* source, GameObject* target
 
     SetFlagCarrier(source->GetObjectGuid());
     // get flag aura on player
-    source->CastSpell(source, EY_NETHERSTORM_FLAG_SPELL, true);
+    source->CastSpell(source, EY_NETHERSTORM_FLAG_SPELL, TRIGGERED_OLD_TRIGGERED);
     source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
 
     if (source->GetTeam() == ALLIANCE)

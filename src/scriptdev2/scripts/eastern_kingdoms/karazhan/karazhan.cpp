@@ -280,7 +280,7 @@ bool GossipHello_npc_berthold(Player* pPlayer, Creature* pCreature)
 bool GossipSelect_npc_berthold(Player* pPlayer, Creature* /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction)
 {
     if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
-        pPlayer->CastSpell(pPlayer, SPELL_TELEPORT, true);
+        pPlayer->CastSpell(pPlayer, SPELL_TELEPORT, TRIGGERED_OLD_TRIGGERED);
 
     pPlayer->CLOSE_GOSSIP_MENU();
     return true;

@@ -284,7 +284,7 @@ void instance_shattered_halls::DoCastGroupDebuff(uint32 uiSpellId)
     {
         Player* pPlayer = itr->getSource();
         if (pPlayer && !pPlayer->HasAura(uiSpellId))
-            pPlayer->CastSpell(pPlayer, uiSpellId, true);
+            pPlayer->CastSpell(pPlayer, uiSpellId, TRIGGERED_OLD_TRIGGERED);
     }
 }
 

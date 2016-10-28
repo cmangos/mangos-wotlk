@@ -105,8 +105,8 @@ struct boss_curatorAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_ASTRAL_FLARE)
         {
             // Flare start with aggro on it's target, should be immune to arcane
-            pSummoned->CastSpell(pSummoned, SPELL_ASTRAL_FLARE_PASSIVE, true);
-            pSummoned->CastSpell(pSummoned, SPELL_ASTRAL_FLARE_VISUAL, true);
+            pSummoned->CastSpell(pSummoned, SPELL_ASTRAL_FLARE_PASSIVE, TRIGGERED_OLD_TRIGGERED);
+            pSummoned->CastSpell(pSummoned, SPELL_ASTRAL_FLARE_VISUAL, TRIGGERED_OLD_TRIGGERED);
             pSummoned->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ARCANE, true);
 
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))

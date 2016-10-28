@@ -149,7 +149,7 @@ struct boss_alarAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_FLAME_PATCH)
-            pSummoned->CastSpell(pSummoned, SPELL_FLAME_PATCH, true);
+            pSummoned->CastSpell(pSummoned, SPELL_FLAME_PATCH, TRIGGERED_OLD_TRIGGERED);
         else
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))

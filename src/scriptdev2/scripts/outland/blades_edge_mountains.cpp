@@ -290,8 +290,8 @@ struct npc_bloodmaul_stout_triggerAI : public ScriptedAI
         {
             // This part it's not 100% accurate - most of it is guesswork
             // Some animations or spells may be missing
-            pWho->CastSpell(pWho, SPELL_INTOXICATION_VISUAL, true);
-            pWho->CastSpell(pWho, SPELL_INTOXICATION, true);
+            pWho->CastSpell(pWho, SPELL_INTOXICATION_VISUAL, TRIGGERED_OLD_TRIGGERED);
+            pWho->CastSpell(pWho, SPELL_INTOXICATION, TRIGGERED_OLD_TRIGGERED);
 
             // Handle evade after some time with EAI
             m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, m_creature, (Creature*)pWho);

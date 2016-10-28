@@ -376,7 +376,7 @@ void instance_gundrak::DoAltarVisualEffect(uint8 uiType)
     uint32 auiFireBeamSpells[3] = {SPELL_BEAM_SNAKE, SPELL_BEAM_ELEMENTAL, SPELL_BEAM_MAMMOTH};
 
     // Cast from Caster to Target
-    pCaster->CastSpell(pTarget, auiFireBeamSpells[uiIndex], false);
+    pCaster->CastSpell(pTarget, auiFireBeamSpells[uiIndex], TRIGGERED_NONE);
 }
 
 void instance_gundrak::Update(uint32 uiDiff)

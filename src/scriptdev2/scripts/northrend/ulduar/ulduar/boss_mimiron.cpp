@@ -362,8 +362,8 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                     // hard mode aura
                     if (m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
                     {
-                        pLeviathan->CastSpell(pLeviathan, SPELL_EMERGENCY_MODE, true);
-                        pLeviathan->CastSpell(pLeviathan, SPELL_EMERGENCY_MODE_LEVIATHAN, true);
+                        pLeviathan->CastSpell(pLeviathan, SPELL_EMERGENCY_MODE, TRIGGERED_OLD_TRIGGERED);
+                        pLeviathan->CastSpell(pLeviathan, SPELL_EMERGENCY_MODE_LEVIATHAN, TRIGGERED_OLD_TRIGGERED);
                     }
 
                     m_uiBerserkTimer = 15 * MINUTE * IN_MILLISECONDS;
@@ -411,7 +411,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
 
                     // hard mode aura
                     if (m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
-                        pVx001->CastSpell(pVx001, SPELL_EMERGENCY_MODE, true);
+                        pVx001->CastSpell(pVx001, SPELL_EMERGENCY_MODE, TRIGGERED_OLD_TRIGGERED);
                 }
                 break;
             case SEAT_ID_TURRET:
@@ -449,7 +449,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
 
                     // hard mode aura
                     if (m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
-                        pAerial->CastSpell(pAerial, SPELL_EMERGENCY_MODE, true);
+                        pAerial->CastSpell(pAerial, SPELL_EMERGENCY_MODE, TRIGGERED_OLD_TRIGGERED);
                 }
                 break;
             case SAY_HEAD_ACTIVE:
@@ -481,7 +481,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                     return;
 
                 pVx001->RemoveAurasDueToSpell(SPELL_TORSO_DISABLED);
-                pVx001->CastSpell(pLeviathan, SPELL_RIDE_VEHICLE_ROBOT_1, true);
+                pVx001->CastSpell(pLeviathan, SPELL_RIDE_VEHICLE_ROBOT_1, TRIGGERED_OLD_TRIGGERED);
                 break;
             }
             case NPC_BOMB_BOT:
@@ -496,7 +496,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                 if (!pAerial || !pVx001)
                     return;
 
-                pAerial->CastSpell(pVx001, SPELL_RIDE_VEHICLE_ROBOT_2, true);
+                pAerial->CastSpell(pVx001, SPELL_RIDE_VEHICLE_ROBOT_2, TRIGGERED_OLD_TRIGGERED);
                 break;
             }
             case NPC_ROCKET_VISUAL:
@@ -635,7 +635,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                 pTarget = m_pInstance->GetPlayerInMap(true, false);
 
             if (pTarget)
-                pTrigger->CastSpell(pTarget, SPELL_SUMMON_FLAMES_INITIAL, true);
+                pTrigger->CastSpell(pTarget, SPELL_SUMMON_FLAMES_INITIAL, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -710,11 +710,11 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
             if (m_uiBerserkTimer <= uiDiff)
             {
                 if (Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
-                    pLeviathan->CastSpell(pLeviathan, SPELL_BERSERK, true);
+                    pLeviathan->CastSpell(pLeviathan, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                 if (Creature* pVx001 = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001, true))
-                    pVx001->CastSpell(pVx001, SPELL_BERSERK, true);
+                    pVx001->CastSpell(pVx001, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                 if (Creature* pAerial = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT, true))
-                    pAerial->CastSpell(pAerial, SPELL_BERSERK, true);
+                    pAerial->CastSpell(pAerial, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
 
                 DoScriptText(SAY_BERSERK, m_creature);
                 m_uiBerserkTimer = 0;
@@ -759,8 +759,8 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                     case 9: DoScriptText(SAY_DESTRUCT_1_MIN, pComputer); break;
                     case 10:
                         DoScriptText(SAY_DESTRUCT_0_MIN, pComputer);
-                        pComputer->CastSpell(pComputer, SPELL_SELF_DESTRUCTION, true);
-                        pComputer->CastSpell(pComputer, SPELL_SELF_DESTRUCTION_DAMAGE, true);
+                        pComputer->CastSpell(pComputer, SPELL_SELF_DESTRUCTION, TRIGGERED_OLD_TRIGGERED);
+                        pComputer->CastSpell(pComputer, SPELL_SELF_DESTRUCTION_DAMAGE, TRIGGERED_OLD_TRIGGERED);
                         m_uiDestructTimer = 0;
                         break;
                 }
@@ -958,7 +958,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_PROXIMITY_MINE)
-            pSummoned->CastSpell(pSummoned, SPELL_PROXIMITY_MINE, true);
+            pSummoned->CastSpell(pSummoned, SPELL_PROXIMITY_MINE, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -979,11 +979,11 @@ struct boss_leviathan_mk2AI : public ScriptedAI
                 if (Creature* pTurret = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK_TURRET))
                 {
                     int32 iSeat = (int32)SEAT_ID_TURRET;
-                    pTurret->CastCustomSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, &iSeat, NULL, NULL, true);
+                    pTurret->CastCustomSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, &iSeat, NULL, NULL, TRIGGERED_OLD_TRIGGERED);
                 }
 
                 if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
-                    pMimiron->CastSpell(m_creature, SPELL_RIDE_VEHICLE_MIMIRON_0, true);
+                    pMimiron->CastSpell(m_creature, SPELL_RIDE_VEHICLE_MIMIRON_0, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiMountTimer = 0;
             }
@@ -1006,7 +1006,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (Creature* pTurret = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK_TURRET))
-                        pTurret->CastSpell(pTarget, m_bIsRegularMode ? SPELL_PLASMA_BLAST : SPELL_PLASMA_BLAST_H, false);
+                        pTurret->CastSpell(pTarget, m_bIsRegularMode ? SPELL_PLASMA_BLAST : SPELL_PLASMA_BLAST_H, TRIGGERED_NONE);
 
                     DoScriptText(EMOTE_PLASMA_BLAST, m_creature);
                     m_uiPlasmaBlastTimer = 30000;
@@ -1212,7 +1212,7 @@ struct boss_vx001AI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_BURST_TARGET:
-                pSummoned->CastSpell(m_creature, SPELL_RAPID_BURST_EFFECT, true);
+                pSummoned->CastSpell(m_creature, SPELL_RAPID_BURST_EFFECT, TRIGGERED_OLD_TRIGGERED);
                 m_uiBurstEndTimer = 3000;
 
                 // Remove the target focus but allow the boss to face the burst target
@@ -1220,7 +1220,7 @@ struct boss_vx001AI : public ScriptedAI
                 m_creature->SetFacingToObject(pSummoned);
                 break;
             case NPC_FROST_BOMB:
-                pSummoned->CastSpell(pSummoned, SPELL_FROST_BOMB_VISUAL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_FROST_BOMB_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -1502,7 +1502,7 @@ struct boss_aerial_unitAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (m_pInstance && m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
-            pSummoned->CastSpell(pSummoned, SPELL_EMERGENCY_MODE, true);
+            pSummoned->CastSpell(pSummoned, SPELL_EMERGENCY_MODE, TRIGGERED_OLD_TRIGGERED);
 
         pSummoned->AI()->AttackStart(m_creature->getVictim());
     }
@@ -1758,7 +1758,7 @@ bool EffectDummyCreature_npc_bot_trigger(Unit* pCaster, uint32 uiSpellId, SpellE
                 break;
         }
 
-        pCreatureTarget->CastSpell(pCreatureTarget, uiVisualSpell, true);
+        pCreatureTarget->CastSpell(pCreatureTarget, uiVisualSpell, TRIGGERED_OLD_TRIGGERED);
         pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget, uiSummonSpell);
 
         // search for a nearby teleporter and enable the visual

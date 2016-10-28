@@ -512,7 +512,7 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                 if (lCultistsEntries.size() >= 5)
                 {
                     if (Creature* pDeathwhisper = GetSingleCreatureFromStorage(NPC_LADY_DEATHWHISPER))
-                        pDeathwhisper->CastSpell(pDeathwhisper, SPELL_FULL_HOUSE_ACHIEV_CHECK, true);
+                        pDeathwhisper->CastSpell(pDeathwhisper, SPELL_FULL_HOUSE_ACHIEV_CHECK, TRIGGERED_OLD_TRIGGERED);
                 }
             }
             else if (uiData == IN_PROGRESS)

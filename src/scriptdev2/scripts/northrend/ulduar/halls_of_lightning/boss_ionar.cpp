@@ -199,7 +199,7 @@ struct boss_ionarAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_SPARK_OF_IONAR)
         {
-            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_SPARK_VISUAL_TRIGGER_N : SPELL_SPARK_VISUAL_TRIGGER_H, true);
+            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_SPARK_VISUAL_TRIGGER_N : SPELL_SPARK_VISUAL_TRIGGER_H, TRIGGERED_OLD_TRIGGERED);
 
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 pSummoned->AI()->AttackStart(pTarget);
@@ -302,7 +302,7 @@ bool EffectDummyCreature_boss_ionar(Unit* /*pCaster*/, uint32 uiSpellId, SpellEf
             return true;
 
         for (uint8 i = 0; i < MAX_SPARKS; ++i)
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_SUMMON_SPARK, true);
+            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_SUMMON_SPARK, TRIGGERED_OLD_TRIGGERED);
 
         pCreatureTarget->AttackStop();
         pCreatureTarget->SetVisibility(VISIBILITY_OFF);

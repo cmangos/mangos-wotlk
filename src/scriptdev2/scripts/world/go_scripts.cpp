@@ -86,7 +86,7 @@ bool GOUse_go_ethereum_prison(Player* pPlayer, GameObject* pGo)
                 }
 
                 if (uiSpell)
-                    pCreature->CastSpell(pPlayer, uiSpell, false);
+                    pCreature->CastSpell(pPlayer, uiSpell, TRIGGERED_NONE);
                 else
                     script_error_log("go_ethereum_prison summoned creature (entry %u) but faction (%u) are not expected by script.", pCreature->GetEntry(), pCreature->getFaction());
             }
@@ -129,7 +129,7 @@ enum
 bool GOUse_go_jump_a_tron(Player* pPlayer, GameObject* pGo)
 {
     if (Creature* pCreature = GetClosestCreatureWithEntry(pGo, NPC_JUMP_A_TRON, INTERACTION_DISTANCE))
-        pCreature->CastSpell(pPlayer, SPELL_JUMP_A_TRON, false);
+        pCreature->CastSpell(pPlayer, SPELL_JUMP_A_TRON, TRIGGERED_NONE);
 
     return false;
 }
@@ -149,15 +149,15 @@ bool GOUse_go_mysterious_snow_mound(Player* pPlayer, GameObject* pGo)
 {
     if (urand(0, 1))
     {
-        pPlayer->CastSpell(pPlayer, SPELL_SUMMON_DEEP_JORMUNGAR, true);
+        pPlayer->CastSpell(pPlayer, SPELL_SUMMON_DEEP_JORMUNGAR, TRIGGERED_OLD_TRIGGERED);
     }
     else
     {
         // This is basically wrong, but added for support.
         // Mole machine would summon, along with unkonwn GO (a GO trap?) and then
         // the npc would summon with base of that location.
-        pPlayer->CastSpell(pPlayer, SPELL_SUMMON_MOLE_MACHINE, true);
-        pPlayer->CastSpell(pPlayer, SPELL_SUMMON_MARAUDER, true);
+        pPlayer->CastSpell(pPlayer, SPELL_SUMMON_MOLE_MACHINE, TRIGGERED_OLD_TRIGGERED);
+        pPlayer->CastSpell(pPlayer, SPELL_SUMMON_MARAUDER, TRIGGERED_OLD_TRIGGERED);
     }
 
     pGo->SetLootState(GO_JUST_DEACTIVATED);
@@ -249,7 +249,7 @@ bool GOUse_go_scourge_enclosure(Player* pPlayer, GameObject* pGo)
     {
         for (std::list<Creature*>::iterator itr = m_lResearchersList.begin(); itr != m_lResearchersList.end(); ++itr)
         {
-            (*itr)->CastSpell((*itr), SPELL_GYMER_LOCK_EXPLOSION, true);
+            (*itr)->CastSpell((*itr), SPELL_GYMER_LOCK_EXPLOSION, TRIGGERED_OLD_TRIGGERED);
         }
     }
     pPlayer->KilledMonsterCredit(NPC_GYMER_LOCK_DUMMY);
@@ -289,7 +289,7 @@ bool GOUse_go_lab_work_reagents(Player* pPlayer, GameObject* pGo)
         }
 
         if (uiCreditSpellId)
-            pPlayer->CastSpell(pPlayer, uiCreditSpellId, true);
+            pPlayer->CastSpell(pPlayer, uiCreditSpellId, TRIGGERED_OLD_TRIGGERED);
     }
 
     return false;

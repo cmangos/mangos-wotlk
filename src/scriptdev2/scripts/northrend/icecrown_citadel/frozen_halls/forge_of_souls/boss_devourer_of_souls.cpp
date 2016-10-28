@@ -169,10 +169,10 @@ struct boss_devourer_of_soulsAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_WELL_OF_SOULS)
         {
             m_lWellGuids.push_back(pSummoned->GetObjectGuid());
-            pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_TRIGGER, true, NULL, NULL, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_TRIGGER, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
             // Commented as of not stacking auras
-            // pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_VISUAL1, true);
-            // pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_VISUAL2, true);
+            // pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_VISUAL1, TRIGGERED_OLD_TRIGGERED);
+            // pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_VISUAL2, TRIGGERED_OLD_TRIGGERED);
         }
         else if (pSummoned->GetEntry() == NPC_UNLEASHED_SOUL)
         {

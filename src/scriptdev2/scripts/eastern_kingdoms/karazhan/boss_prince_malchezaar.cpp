@@ -160,7 +160,7 @@ struct boss_malchezaarAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_NETHERSPITE_INFERNAL)
-            pSummoned->CastSpell(pSummoned, SPELL_HELLFIRE, false);
+            pSummoned->CastSpell(pSummoned, SPELL_HELLFIRE, TRIGGERED_NONE);
         else if (pSummoned->GetEntry() == NPC_MALCHEZARS_AXE)
             pSummoned->SetInCombatWithZone();
     }
@@ -305,7 +305,7 @@ struct boss_malchezaarAI : public ScriptedAI
                 {
                     if (Unit* pTarget = GetInfernalRelayTarget())
                     {
-                        pRelay->CastSpell(pTarget, SPELL_INFERNAL_RELAY_SUMMON, true, nullptr, nullptr, m_creature->GetObjectGuid());
+                        pRelay->CastSpell(pTarget, SPELL_INFERNAL_RELAY_SUMMON, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                         DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
                         m_uiInfernalTimer =  m_uiPhase == 3 ? 17000 : 45000;
                     }

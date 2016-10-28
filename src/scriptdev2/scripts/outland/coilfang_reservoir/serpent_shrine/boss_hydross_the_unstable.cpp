@@ -203,7 +203,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
                 if (bReset)
                     pBeam->InterruptNonMeleeSpells(false);
                 else
-                    pBeam->CastSpell(m_creature, SPELL_BLUE_BEAM, false);
+                    pBeam->CastSpell(m_creature, SPELL_BLUE_BEAM, TRIGGERED_NONE);
             }
         }
     }

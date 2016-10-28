@@ -85,7 +85,7 @@ void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket& recv_data)
     }
 
     _player->SendTalentsInfoData(false);
-    unit->CastSpell(_player, 14867, true);                  // spell: "Untalent Visual Effect"
+    unit->CastSpell(_player, 14867, TRIGGERED_OLD_TRIGGERED);                  // spell: "Untalent Visual Effect"
 
     if (_player->GetPet())
         _player->GetPet()->CastOwnerTalentAuras();

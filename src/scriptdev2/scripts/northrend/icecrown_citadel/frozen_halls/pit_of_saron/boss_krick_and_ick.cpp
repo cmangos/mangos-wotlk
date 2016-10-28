@@ -163,7 +163,7 @@ struct boss_ickAI : public ScriptedAI
             if (m_uiMountTimer <= uiDiff)
             {
                 if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
-                    pKrick->CastSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, true);
+                    pKrick->CastSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiMountTimer = 0;
             }
@@ -236,7 +236,7 @@ struct boss_ickAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
-                    pKrick->CastSpell(pTarget, SPELL_TOXIC_WASTE, true);
+                    pKrick->CastSpell(pTarget, SPELL_TOXIC_WASTE, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiToxicWasteTimer = urand(3000, 5000);
             }
@@ -249,7 +249,7 @@ struct boss_ickAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
-                    pKrick->CastSpell(pTarget, SPELL_SHADOW_BOLT, true);
+                    pKrick->CastSpell(pTarget, SPELL_SHADOW_BOLT, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiShadowboltTimer = urand(4000, 8000);
             }
@@ -263,7 +263,7 @@ struct boss_ickAI : public ScriptedAI
             {
                 if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
                 {
-                    pKrick->CastSpell(pKrick, SPELL_EXPLOSIVE_BARRAGE_KRICK, true);
+                    pKrick->CastSpell(pKrick, SPELL_EXPLOSIVE_BARRAGE_KRICK, TRIGGERED_OLD_TRIGGERED);
 
                     DoScriptText(SAY_ORDER_STOP, pKrick);
                     DoScriptText(EMOTE_KRICK_MINES, pKrick);
@@ -329,8 +329,8 @@ struct boss_krickAI : public ScriptedAI
                 break;
             }
             case NPC_EXPLODING_ORB:
-                pSummoned->CastSpell(pSummoned, SPELL_EXPLODING_ORB_VISUAL, true);
-                pSummoned->CastSpell(pSummoned, SPELL_AUTO_GROW_AND_SPEED_BOOST, true);
+                pSummoned->CastSpell(pSummoned, SPELL_EXPLODING_ORB_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_AUTO_GROW_AND_SPEED_BOOST, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }

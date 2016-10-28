@@ -415,8 +415,8 @@ struct boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
     {
         if (pSummoned->GetEntry() == NPC_YOGGSARON)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_BARRIER_YOGG, true);
-            pSummoned->CastSpell(pSummoned, SPELL_KNOCK_AWAY, true);
+            pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_BARRIER_YOGG, TRIGGERED_OLD_TRIGGERED);
+            pSummoned->CastSpell(pSummoned, SPELL_KNOCK_AWAY, TRIGGERED_OLD_TRIGGERED);
             pSummoned->SetInCombatWithZone();
         }
         else if (pSummoned->GetEntry() == NPC_DEATH_ORB)
@@ -431,10 +431,10 @@ struct boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
                 m_creature->SummonCreature(NPC_DEATH_RAY, fX, fY, fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 20000);
             }
 
-            pSummoned->CastSpell(pSummoned, SPELL_DEATH_RAY_VISUAL_ORIGIN, true);
+            pSummoned->CastSpell(pSummoned, SPELL_DEATH_RAY_VISUAL_ORIGIN, TRIGGERED_OLD_TRIGGERED);
         }
         else if (pSummoned->GetEntry() == NPC_DEATH_RAY)
-            pSummoned->CastSpell(pSummoned, SPELL_DEATH_RAY_VISUAL_WARN, false);
+            pSummoned->CastSpell(pSummoned, SPELL_DEATH_RAY_VISUAL_WARN, TRIGGERED_NONE);
     }
 
     void JustDidDialogueStep(int32 iEntry) override
@@ -478,8 +478,8 @@ struct boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
         {
             if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_FREYA_HELPER))
             {
-                pHelper->CastSpell(pHelper, SPELL_SUMMON_SANITY_WELL, false);
-                pHelper->CastSpell(pHelper, SPELL_RESILIENCE_OF_NATURE, true);
+                pHelper->CastSpell(pHelper, SPELL_SUMMON_SANITY_WELL, TRIGGERED_NONE);
+                pHelper->CastSpell(pHelper, SPELL_RESILIENCE_OF_NATURE, TRIGGERED_OLD_TRIGGERED);
                 ++uiKeeperCount;
             }
         }
@@ -488,8 +488,8 @@ struct boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
         {
             if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_HODIR_HELPER))
             {
-                pHelper->CastSpell(pHelper, SPELL_HODIRS_PROTECTIVE_GAZE, false);
-                pHelper->CastSpell(pHelper, SPELL_FORTITUDE_OF_FROST, true);
+                pHelper->CastSpell(pHelper, SPELL_HODIRS_PROTECTIVE_GAZE, TRIGGERED_NONE);
+                pHelper->CastSpell(pHelper, SPELL_FORTITUDE_OF_FROST, TRIGGERED_OLD_TRIGGERED);
                 ++uiKeeperCount;
             }
         }
@@ -498,7 +498,7 @@ struct boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
         {
             if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON_HELPER))
             {
-                pHelper->CastSpell(pHelper, SPELL_SPEED_OF_INVENTION, true);
+                pHelper->CastSpell(pHelper, SPELL_SPEED_OF_INVENTION, TRIGGERED_OLD_TRIGGERED);
                 SendAIEvent(AI_EVENT_START_EVENT, m_creature, pHelper);
                 ++uiKeeperCount;
             }
@@ -508,8 +508,8 @@ struct boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
         {
             if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_THORIM_HELPER))
             {
-                pHelper->CastSpell(pHelper, SPELL_TITANIC_STORM, false);
-                pHelper->CastSpell(pHelper, SPELL_FURY_OF_THE_STORM, true);
+                pHelper->CastSpell(pHelper, SPELL_TITANIC_STORM, TRIGGERED_NONE);
+                pHelper->CastSpell(pHelper, SPELL_FURY_OF_THE_STORM, TRIGGERED_OLD_TRIGGERED);
                 ++uiKeeperCount;
             }
         }
@@ -586,7 +586,7 @@ struct boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
                     DoScriptText(SAY_SARA_DEATH_RAY, m_creature);
 
                 // spawn death orb at predefined location
-                m_creature->CastSpell(1980.43f, -25.7708f, 351.5418f, SPELL_DEATH_RAY_SUMMON, true);
+                m_creature->CastSpell(1980.43f, -25.7708f, 351.5418f, SPELL_DEATH_RAY_SUMMON, TRIGGERED_OLD_TRIGGERED);
                 m_uiDeathRayTimer = 20000;
             }
             else
@@ -823,32 +823,32 @@ struct npc_voice_yogg_saronAI : public Scripted_NoMovementAI
         {
             case NPC_DESCEND_INTO_MADNESS:
                 SendAIEvent(AI_EVENT_START_EVENT, m_creature, pSummoned, aMadnessTeleportSpells[m_uiPortalsCount]);
-                pSummoned->CastSpell(pSummoned, SPELL_TELEPORT_PORTAL_VISUAL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_TELEPORT_PORTAL_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_CONSTRICTOR_TENTACLE:
-                pSummoned->CastSpell(pSummoned, SPELL_TENTACLE_VOID_ZONE, true);
-                pSummoned->CastSpell(pSummoned, SPELL_ERUPT, true);
-                pSummoned->CastSpell(pSummoned, SPELL_LUNGE, true);
+                pSummoned->CastSpell(pSummoned, SPELL_TENTACLE_VOID_ZONE, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_ERUPT, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_LUNGE, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->SetInCombatWithZone();
                 break;
             case NPC_CRUSHER_TENTACLE:
-                pSummoned->CastSpell(pSummoned, SPELL_TENTACLE_VOID_ZONE_BIG, true);
-                pSummoned->CastSpell(pSummoned, SPELL_CRUSH, true);
-                pSummoned->CastSpell(pSummoned, SPELL_DIMINISH_POWER, true);
-                pSummoned->CastSpell(pSummoned, SPELL_FOCUSED_ANGER, true);
-                pSummoned->CastSpell(pSummoned, SPELL_ERUPT, true);
+                pSummoned->CastSpell(pSummoned, SPELL_TENTACLE_VOID_ZONE_BIG, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_CRUSH, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_DIMINISH_POWER, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_FOCUSED_ANGER, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_ERUPT, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->SetInCombatWithZone();
                 break;
             case NPC_CORRUPTOR_TENTACLE:
-                pSummoned->CastSpell(pSummoned, SPELL_TENTACLE_VOID_ZONE_BIG, true);
-                pSummoned->CastSpell(pSummoned, SPELL_ERUPT, true);
+                pSummoned->CastSpell(pSummoned, SPELL_TENTACLE_VOID_ZONE_BIG, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_ERUPT, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->SetInCombatWithZone();
                 break;
             case NPC_IMMORTAL_GUARDIAN:
-                pSummoned->CastSpell(pSummoned, SPELL_EMPOWERED, true);
-                pSummoned->CastSpell(pSummoned, SPELL_EMPOWERED_MOD, true);
-                pSummoned->CastSpell(pSummoned, SPELL_RECENTLY_SPAWNED, true);
-                pSummoned->CastSpell(pSummoned, SPELL_SIMPLE_TELEPORT, true);
+                pSummoned->CastSpell(pSummoned, SPELL_EMPOWERED, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_EMPOWERED_MOD, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_RECENTLY_SPAWNED, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_SIMPLE_TELEPORT, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->SetInCombatWithZone();
                 break;
         }
@@ -1034,11 +1034,11 @@ struct npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHe
         switch (pSummoned->GetEntry())
         {
             case NPC_LAUGHING_SKULL:
-                pSummoned->CastSpell(pSummoned, SPELL_LUNATIC_GAZE_SKULL, false);
+                pSummoned->CastSpell(pSummoned, SPELL_LUNATIC_GAZE_SKULL, TRIGGERED_NONE);
                 break;
             case NPC_SUIT_OF_ARMOR:
-                pSummoned->CastSpell(pSummoned, SPELL_NONDESCRIPT_ARMOR, true);
-                pSummoned->CastSpell(pSummoned, SPELL_GRIM_REPRISAL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_NONDESCRIPT_ARMOR, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_GRIM_REPRISAL, TRIGGERED_OLD_TRIGGERED);
                 m_lTentaclesGuids.push_back(pSummoned->GetObjectGuid());
                 break;
             case NPC_DEATHSWORM_ZEALOT:
@@ -1046,8 +1046,8 @@ struct npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHe
             case NPC_OBSIDIAN_CONSORT:
             case NPC_AZURE_CONSORT:
             case NPC_EMERALD_CONSORT:
-                pSummoned->CastSpell(pSummoned, SPELL_NONDESCRIPT_CREATURE, true);
-                pSummoned->CastSpell(pSummoned, SPELL_GRIM_REPRISAL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_NONDESCRIPT_CREATURE, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_GRIM_REPRISAL, TRIGGERED_OLD_TRIGGERED);
                 m_lTentaclesGuids.push_back(pSummoned->GetObjectGuid());
                 break;
         }
@@ -1088,11 +1088,11 @@ struct npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHe
         {
             case SPELL_ASSASSINATE:
                 if (Creature* pGarona = m_pInstance->GetSingleCreatureFromStorage(NPC_GARONA))
-                    pGarona->CastSpell(pGarona, SPELL_ASSASSINATE, true);
+                    pGarona->CastSpell(pGarona, SPELL_ASSASSINATE, TRIGGERED_OLD_TRIGGERED);
                 break;
             case SAY_LICH_KING_1:
                 if (Creature* pLichKing = m_pInstance->GetSingleCreatureFromStorage(NPC_LICH_KING))
-                    pLichKing->CastSpell(pLichKing, SPELL_DEATHGRASP, false);
+                    pLichKing->CastSpell(pLichKing, SPELL_DEATHGRASP, TRIGGERED_NONE);
                 break;
         }
     }
@@ -1395,7 +1395,7 @@ bool EffectDummyCreature_npc_immortal_guardian(Unit* /*pCaster*/, uint32 uiSpell
         else
         {
             for (uint8 i = 0; i < uiProjectedStacks - uiCurrentStacks; ++i)
-                pCreatureTarget->CastSpell(pCreatureTarget, SPELL_EMPOWERED_MOD, true);
+                pCreatureTarget->CastSpell(pCreatureTarget, SPELL_EMPOWERED_MOD, TRIGGERED_OLD_TRIGGERED);
         }
 
         if (uiCurrentStacks == 0 && uiCurrentStacks < uiProjectedStacks)
@@ -1576,7 +1576,7 @@ bool NpcSpellClick_npc_descent_madness(Player* pPlayer, Creature* pClickedCreatu
         if (!uiClickSpell)
             return true;
 
-        pPlayer->CastSpell(pPlayer, uiClickSpell, true);
+        pPlayer->CastSpell(pPlayer, uiClickSpell, TRIGGERED_OLD_TRIGGERED);
         pClickedCreature->ForcedDespawn();
         return true;
     }

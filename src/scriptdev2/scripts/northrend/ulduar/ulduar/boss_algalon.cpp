@@ -335,11 +335,11 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
                 break;
             case NPC_ASTEROID_STALKER_1:
                 // visual impact point for Cosmic Smash
-                pSummoned->CastSpell(pSummoned, SPELL_COSMIC_SMASH_STATE, true);
+                pSummoned->CastSpell(pSummoned, SPELL_COSMIC_SMASH_STATE, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_COLLAPSING_STAR:
                 // cast Collapse and move around spawn point
-                pSummoned->CastSpell(pSummoned, SPELL_COLLAPSE, true);
+                pSummoned->CastSpell(pSummoned, SPELL_COLLAPSE, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->GetMotionMaster()->MoveRandomAroundPoint(pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 30.0f);
                 ++m_uiActiveStars;
                 m_lSummonedGuids.push_back(pSummoned->GetObjectGuid());
@@ -350,19 +350,19 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
                 break;
             case NPC_BLACK_HOLE:
                 // cast Black Hole visuals
-                pSummoned->CastSpell(pSummoned, SPELL_BLACK_HOLE_SPAWN_VISUAL, true);
-                pSummoned->CastSpell(pSummoned, SPELL_BLACK_HOLE_STATE, true);
-                pSummoned->CastSpell(pSummoned, SPELL_BLACK_HOLE_TRIGG, true);
-                pSummoned->CastSpell(pSummoned, SPELL_SUMMON_VOID_ZONE_VISUAL, true, NULL, NULL, m_creature->GetObjectGuid());
+                pSummoned->CastSpell(pSummoned, SPELL_BLACK_HOLE_SPAWN_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_BLACK_HOLE_STATE, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_BLACK_HOLE_TRIGG, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_SUMMON_VOID_ZONE_VISUAL, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
                 m_lSummonedGuids.push_back(pSummoned->GetObjectGuid());
                 break;
             case NPC_WORM_HOLE:
-                pSummoned->CastSpell(pSummoned, SPELL_WORM_HOLE_TRIGGER, true);
-                pSummoned->CastSpell(pSummoned, SPELL_SUMMON_VOID_ZONE_VISUAL, true, NULL, NULL, m_creature->GetObjectGuid());
+                pSummoned->CastSpell(pSummoned, SPELL_WORM_HOLE_TRIGGER, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_SUMMON_VOID_ZONE_VISUAL, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
                 m_lSummonedGuids.push_back(pSummoned->GetObjectGuid());
                 break;
             case NPC_VOID_ZONE_VISUAL:
-                pSummoned->CastSpell(pSummoned, SPELL_VOID_ZONE_VISUAL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_VOID_ZONE_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 m_lSummonedGuids.push_back(pSummoned->GetObjectGuid());
                 break;
         }
@@ -372,8 +372,8 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
     {
         if (pSummoned->GetEntry() == NPC_COLLAPSING_STAR)
         {
-            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_BLACK_HOLE_EXPLOSION : SPELL_BLACK_HOLE_EXPLOSION_H, true);
-            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_BLACK_HOLE, true, NULL, NULL, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_BLACK_HOLE_EXPLOSION : SPELL_BLACK_HOLE_EXPLOSION_H, TRIGGERED_OLD_TRIGGERED);
+            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_BLACK_HOLE, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
             --m_uiActiveStars;
             // Note: there should be some emote here informing the players how many Black Holes are spawned
         }
@@ -697,7 +697,7 @@ struct npc_worm_holeAI : public Scripted_NoMovementAI
     void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
     {
         if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpellEntry->Id == SPELL_WORM_HOLE_PHASE)
-            pTarget->CastSpell(pTarget, SPELL_BLACK_HOLE_DMG, true, NULL, NULL, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, SPELL_BLACK_HOLE_DMG, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -738,7 +738,7 @@ struct npc_black_holeAI : public Scripted_NoMovementAI
         if (!m_bIsDespawned && pWho->GetEntry() == NPC_LIVING_CONSTELLATION && pWho->IsWithinDistInMap(m_creature, 6.0f))
         {
             DoCastSpellIfCan(m_creature, SPELL_BLACK_HOLE_CREDIT, CAST_TRIGGERED);
-            pWho->CastSpell(m_creature, SPELL_BLACK_HOLE_DESPAWN, true);
+            pWho->CastSpell(m_creature, SPELL_BLACK_HOLE_DESPAWN, TRIGGERED_OLD_TRIGGERED);
             m_bIsDespawned = true;
 
             // despawn everything
@@ -752,7 +752,7 @@ struct npc_black_holeAI : public Scripted_NoMovementAI
     void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
     {
         if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpellEntry->Id == SPELL_BLACK_HOLE_PHASE)
-            pTarget->CastSpell(pTarget, SPELL_BLACK_HOLE_DMG, true, NULL, NULL, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, SPELL_BLACK_HOLE_DMG, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
     }
 
     void AttackStart(Unit* /*pWho*/) override { }

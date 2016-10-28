@@ -162,17 +162,17 @@ struct boss_svalaAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_ARTHAS_IMAGE)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_ARTHAS_VISUAL, true);
+            pSummoned->CastSpell(pSummoned, SPELL_ARTHAS_VISUAL, TRIGGERED_OLD_TRIGGERED);
             pArthas = pSummoned;
             pSummoned->SetFacingToObject(m_creature);
         }
         else if (pSummoned->GetEntry() == NPC_CHANNELER)
         {
             if (!m_bIsRegularMode)
-                pSummoned->CastSpell(pSummoned, SPELL_SHADOWS_IN_THE_DARK, true);
+                pSummoned->CastSpell(pSummoned, SPELL_SHADOWS_IN_THE_DARK, TRIGGERED_OLD_TRIGGERED);
 
             if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_ritualTargetGuid))
-                pSummoned->CastSpell(pTarget, SPELL_PARALIZE, true);
+                pSummoned->CastSpell(pTarget, SPELL_PARALIZE, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -248,7 +248,7 @@ struct boss_svalaAI : public ScriptedAI
                             break;
                         case 2:
                             DoCastSpellIfCan(m_creature, SPELL_TRANSFORMING_FLOATING);
-                            pArthas->CastSpell(m_creature, SPELL_TRANSFORMING_CHANNEL, false);
+                            pArthas->CastSpell(m_creature, SPELL_TRANSFORMING_CHANNEL, TRIGGERED_NONE);
                             DoMoveToPosition();
                             break;
                         case 3:

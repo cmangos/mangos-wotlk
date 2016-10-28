@@ -225,7 +225,7 @@ struct boss_skadiAI : public ScriptedAI
         // Prepare to periodic summon the mobs
         if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->GetSkadiMobsTrigger()))
         {
-            pTrigger->CastSpell(pTrigger, m_bIsRegularMode ? SPELL_SUMMON_GAUNTLET_MOBS : SPELL_SUMMON_GAUNTLET_MOBS_H, true, NULL, NULL, m_creature->GetObjectGuid());
+            pTrigger->CastSpell(pTrigger, m_bIsRegularMode ? SPELL_SUMMON_GAUNTLET_MOBS : SPELL_SUMMON_GAUNTLET_MOBS_H, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
 
             // Spawn the intro mobs
             m_IntroMobs = true;
@@ -360,7 +360,7 @@ struct npc_graufAI : public ScriptedAI
                     DoScriptText(SAY_DRAKE_DEATH, pSkadi);
                     // Exit vehicle before teleporting
                     m_creature->RemoveAllAuras();
-                    pSkadi->CastSpell(pSkadi, SPELL_SKADI_TELEPORT, true);
+                    pSkadi->CastSpell(pSkadi, SPELL_SKADI_TELEPORT, TRIGGERED_OLD_TRIGGERED);
                 }
             }
             else if (urand(0, 1))
@@ -489,12 +489,12 @@ bool EffectAuraDummy_npc_flame_breath_trigger(const Aura* pAura, bool bApply)
     if (pAura->GetId() == SPELL_CLOUD_AURA_LEFT)
     {
         if (pTarget->GetPositionY() > -511.0f)
-            pTarget->CastSpell(pTarget, SPELL_CLOUD_AURA_DAMAGE, true);
+            pTarget->CastSpell(pTarget, SPELL_CLOUD_AURA_DAMAGE, TRIGGERED_OLD_TRIGGERED);
     }
     else if (pAura->GetId() == SPELL_CLOUD_AURA_RIGHT)
     {
         if (pTarget->GetPositionY() < -511.0f)
-            pTarget->CastSpell(pTarget, SPELL_CLOUD_AURA_DAMAGE, true);
+            pTarget->CastSpell(pTarget, SPELL_CLOUD_AURA_DAMAGE, TRIGGERED_OLD_TRIGGERED);
     }
     return true;
 }

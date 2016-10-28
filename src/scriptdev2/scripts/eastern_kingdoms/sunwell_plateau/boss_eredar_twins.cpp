@@ -183,7 +183,7 @@ struct boss_alythessAI : public ScriptedAI
                     m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                     DoScriptText(SAY_SACROLASH_EMPOWER, pSacrolash);
                     pSacrolash->InterruptNonMeleeSpells(true);
-                    pSacrolash->CastSpell(pSacrolash, SPELL_EMPOWER, false);
+                    pSacrolash->CastSpell(pSacrolash, SPELL_EMPOWER, TRIGGERED_NONE);
                 }
             }
         }
@@ -199,20 +199,20 @@ struct boss_alythessAI : public ScriptedAI
             if (pTarget->HasAura(SPELL_DARK_TOUCHED))
             {
                 pTarget->RemoveAurasDueToSpell(SPELL_DARK_TOUCHED);
-                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
+                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, TRIGGERED_OLD_TRIGGERED);
             }
             else
-                pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true);
+                pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, TRIGGERED_OLD_TRIGGERED);
         }
         else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
         {
             if (pTarget->HasAura(SPELL_FLAME_TOUCHED))
             {
                 pTarget->RemoveAurasDueToSpell(SPELL_FLAME_TOUCHED);
-                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
+                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, TRIGGERED_OLD_TRIGGERED);
             }
             else
-                pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, true);
+                pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -363,7 +363,7 @@ struct boss_sacrolashAI : public ScriptedAI
                     m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                     DoScriptText(SAY_ALYTHESS_EMPOWER, pAlythess);
                     pAlythess->InterruptNonMeleeSpells(true);
-                    pAlythess->CastSpell(pAlythess, SPELL_EMPOWER, false);
+                    pAlythess->CastSpell(pAlythess, SPELL_EMPOWER, TRIGGERED_NONE);
                 }
             }
         }
@@ -379,20 +379,20 @@ struct boss_sacrolashAI : public ScriptedAI
             if (pTarget->HasAura(SPELL_DARK_TOUCHED))
             {
                 pTarget->RemoveAurasDueToSpell(SPELL_DARK_TOUCHED);
-                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
+                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, TRIGGERED_OLD_TRIGGERED);
             }
             else
-                pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true);
+                pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, TRIGGERED_OLD_TRIGGERED);
         }
         else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
         {
             if (pTarget->HasAura(SPELL_FLAME_TOUCHED))
             {
                 pTarget->RemoveAurasDueToSpell(SPELL_FLAME_TOUCHED);
-                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
+                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, TRIGGERED_OLD_TRIGGERED);
             }
             else
-                pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, true);
+                pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -421,7 +421,7 @@ struct boss_sacrolashAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_SHADOW_IMAGE)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_IMAGE_VISUAL, false);
+            pSummoned->CastSpell(pSummoned, SPELL_IMAGE_VISUAL, TRIGGERED_NONE);
             // Attack random range target
             if (Unit* pTarget = GetRandomTargetAtDist(10.0f))
                 pSummoned->AI()->AttackStart(pTarget);

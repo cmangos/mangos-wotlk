@@ -226,7 +226,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_FURY_MEDIVH_VISUAL)
-            pSummoned->CastSpell(pSummoned, SPELL_FURY_OF_MEDIVH_AURA, true);
+            pSummoned->CastSpell(pSummoned, SPELL_FURY_OF_MEDIVH_AURA, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -367,13 +367,13 @@ struct npc_chess_piece_genericAI : public ScriptedAI
 
             // ToDo: enable this when the scope of the spell is clear
             //if (Creature* pStalker = m_pInstance->GetSingleCreatureFromStorage(NPC_WAITING_ROOM_STALKER))
-            //    pStalker->CastSpell(pStalker, SPELL_AI_ACTION_TIMER, true);
+            //    pStalker->CastSpell(pStalker, SPELL_AI_ACTION_TIMER, TRIGGERED_OLD_TRIGGERED);
 
             //DoCastSpellIfCan(m_creature, SPELL_AI_SNAPSHOT_TIMER, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_CHESS_AI_ATTACK_TIMER, CAST_TRIGGERED);
 
-            pInvoker->CastSpell(pInvoker, SPELL_DISABLE_SQUARE, true);
-            pInvoker->CastSpell(pInvoker, SPELL_IS_SQUARE_USED, true);
+            pInvoker->CastSpell(pInvoker, SPELL_DISABLE_SQUARE, TRIGGERED_OLD_TRIGGERED);
+            pInvoker->CastSpell(pInvoker, SPELL_IS_SQUARE_USED, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -579,8 +579,8 @@ bool GossipSelect_npc_chess_generic(Player* pPlayer, Creature* pCreature, uint32
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             // teleport at the entrance and control the chess piece
-            pPlayer->CastSpell(pPlayer, SPELL_IN_GAME, true);
-            pPlayer->CastSpell(pCreature, SPELL_CONTROL_PIECE, true);
+            pPlayer->CastSpell(pPlayer, SPELL_IN_GAME, TRIGGERED_OLD_TRIGGERED);
+            pPlayer->CastSpell(pCreature, SPELL_CONTROL_PIECE, TRIGGERED_OLD_TRIGGERED);
 
             if (pInstance->GetData(TYPE_CHESS) == NOT_STARTED)
                 pInstance->SetData(TYPE_CHESS, IN_PROGRESS);
@@ -601,10 +601,10 @@ bool EffectDummyCreature_npc_chess_generic(Unit* pCaster, uint32 uiSpellId, Spel
     {
         if (pCaster->GetTypeId() == TYPEID_UNIT)
         {
-            pCaster->CastSpell(pCaster, SPELL_DISABLE_SQUARE, true);
-            pCaster->CastSpell(pCaster, SPELL_IS_SQUARE_USED, true);
+            pCaster->CastSpell(pCaster, SPELL_DISABLE_SQUARE, TRIGGERED_OLD_TRIGGERED);
+            pCaster->CastSpell(pCaster, SPELL_IS_SQUARE_USED, TRIGGERED_OLD_TRIGGERED);
 
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_MOVE_COOLDOWN, true);
+            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_MOVE_COOLDOWN, TRIGGERED_OLD_TRIGGERED);
             pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
         }
 
@@ -631,7 +631,7 @@ bool EffectDummyCreature_npc_chess_generic(Unit* pCaster, uint32 uiSpellId, Spel
             case NPC_SUMMONED_DAEMON:       uiMeleeSpell = SPELL_MELEE_DAEMON;              break;
         }
 
-        pCreatureTarget->CastSpell(pCreatureTarget, uiMeleeSpell, true);
+        pCreatureTarget->CastSpell(pCreatureTarget, uiMeleeSpell, TRIGGERED_OLD_TRIGGERED);
         return true;
     }
     // square facing

@@ -185,7 +185,7 @@ struct boss_lady_vashjAI : public ScriptedAI
                 for (GuidList::const_iterator itr = lShieldGeneratorsGuid.begin(); itr != lShieldGeneratorsGuid.end(); ++itr)
                 {
                     if (Creature* pGenerator = m_creature->GetMap()->GetCreature(*itr))
-                        pGenerator->CastSpell(m_creature, SPELL_MAGIC_BARRIER, false);
+                        pGenerator->CastSpell(m_creature, SPELL_MAGIC_BARRIER, TRIGGERED_NONE);
                 }
             }
 

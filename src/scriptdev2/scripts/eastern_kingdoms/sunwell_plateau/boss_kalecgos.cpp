@@ -392,8 +392,8 @@ struct boss_sathrovarrAI : public ScriptedAI
         // !!! Workaround which ejects the players from the spectral realm on death !!!
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
         {
-            pVictim->CastSpell(pVictim, SPELL_TELEPORT_NORMAL_REALM, true);
-            pVictim->CastSpell(pVictim, SPELL_SPECTRAL_EXHAUSTION, true);
+            pVictim->CastSpell(pVictim, SPELL_TELEPORT_NORMAL_REALM, TRIGGERED_OLD_TRIGGERED);
+            pVictim->CastSpell(pVictim, SPELL_SPECTRAL_EXHAUSTION, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -404,8 +404,8 @@ struct boss_sathrovarrAI : public ScriptedAI
         {
             if (!pWho->HasAura(SPELL_SPECTRAL_REALM_AURA))
             {
-                pWho->CastSpell(pWho, SPELL_TELEPORT_NORMAL_REALM, true);
-                pWho->CastSpell(pWho, SPELL_SPECTRAL_EXHAUSTION, true);
+                pWho->CastSpell(pWho, SPELL_TELEPORT_NORMAL_REALM, TRIGGERED_OLD_TRIGGERED);
+                pWho->CastSpell(pWho, SPELL_SPECTRAL_EXHAUSTION, TRIGGERED_OLD_TRIGGERED);
 
                 if (m_pInstance)
                     m_pInstance->RemoveFromSpectralRealm(pWho->GetObjectGuid());

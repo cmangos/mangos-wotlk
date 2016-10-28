@@ -83,7 +83,7 @@ struct mobs_risen_husk_spiritAI : public ScriptedAI
             if (pPlayer->GetQuestStatus(QUEST_WHATS_HAUNTING_WITCH_HILL) == QUEST_STATUS_INCOMPLETE)
             {
                 m_pCreditPlayer = pPlayer;
-                m_creature->CastSpell(pDoneBy, SPELL_SUMMON_RESTLESS_APPARITION, true);
+                m_creature->CastSpell(pDoneBy, SPELL_SUMMON_RESTLESS_APPARITION, TRIGGERED_OLD_TRIGGERED);
             }
         }
     }
@@ -521,7 +521,7 @@ struct npc_ogronAI : public npc_escortAI
                                         DoScriptText(SAY_OGR_HALL_GLAD, pHallan);
 
                                         if (Creature* pReethe = GetCreature(NPC_REETHE))
-                                            pHallan->CastSpell(pReethe, SPELL_FAKE_SHOT, false);
+                                            pHallan->CastSpell(pReethe, SPELL_FAKE_SHOT, TRIGGERED_NONE);
                                     }
                                     break;
                                 case 9:
