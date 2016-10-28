@@ -354,6 +354,7 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
     uint8 m_uiMobCount;
     uint32 m_uiFireballTimer;
     ObjectGuid m_playerGuid;
+    std::vector<ObjectGuid> summons;
 
     void Reset() override
     {
@@ -368,11 +369,24 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
 
         if (pPlayer && pPlayer->GetQuestStatus(QUEST_UNEXPECTED_RESULT) == QUEST_STATUS_INCOMPLETE)
             pPlayer->SendQuestFailed(QUEST_UNEXPECTED_RESULT);
+
+        for (ObjectGuid &guid : summons)
+            if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
+                creature->ForcedDespawn();
+        summons.clear();
+    }
+
+    void JustRespawned() override // moved from JustDied to prevent getting stuck in a crash scenario
+    {
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        m_creature->SetActiveObjectState(false);
+        ScriptedAI::JustRespawned();
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
         pSummoned->AI()->AttackStart(m_creature);
+        summons.push_back(pSummoned->GetObjectGuid());
         ++m_uiMobCount;
     }
 
@@ -390,6 +404,9 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
 
         m_playerGuid.Clear();
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+        m_creature->SetActiveObjectState(false);
+        summons.clear();
     }
 
     void StartEvent(Player* pPlayer)
@@ -400,6 +417,8 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
         m_creature->SummonCreature(NPC_GHARSUL,    8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 4000);
         m_creature->SummonCreature(NPC_ANGERSHADE, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 4000);
         m_creature->SummonCreature(NPC_ANGERSHADE, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 4000);
+
+        m_creature->SetActiveObjectState(true);
     }
 
     void UpdateAI(const uint32 uiDiff) override
