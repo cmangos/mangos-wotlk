@@ -122,8 +122,3 @@ if(PCH)
   cotire(mangosscript)
 endif()
 
-# LIBRARY = dyld / so, RUNTIME = dll
-install(TARGETS mangosscript
-  LIBRARY DESTINATION ${LIBS_DIR}
-  RUNTIME DESTINATION ${LIBS_DIR}
-)
