@@ -54,7 +54,7 @@ if(PCH)
   )
 endif()
 
-add_library(mangosscript SHARED
+add_library(mangosscript STATIC
   ${mangosscript_SRCS}
 )
 
