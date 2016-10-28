@@ -93,7 +93,7 @@ struct npc_rizzle_sprysprocketAI : public npc_escortAI
             if (!HasEscortState(STATE_ESCORT_PAUSED) && m_creature->IsWithinDistInMap(pUnit, INTERACTION_DISTANCE) && m_creature->IsWithinLOSInMap(pUnit))
             {
                 if (((Player*)pUnit)->GetQuestStatus(QUEST_MOONSTONE) == QUEST_STATUS_INCOMPLETE)
-                    m_creature->CastSpell(m_creature, SPELL_SURRENDER, true);
+                    m_creature->CastSpell(m_creature, SPELL_SURRENDER, TRIGGERED_OLD_TRIGGERED);
             }
         }
 
@@ -105,7 +105,7 @@ struct npc_rizzle_sprysprocketAI : public npc_escortAI
         switch (uiPointId)
         {
             case 0:
-                m_creature->CastSpell(m_creature, SPELL_PERIODIC_CHECK, true);
+                m_creature->CastSpell(m_creature, SPELL_PERIODIC_CHECK, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -132,7 +132,7 @@ struct npc_rizzle_sprysprocketAI : public npc_escortAI
     // this may be wrong
     void JustSummoned(Creature* /*pSummoned*/) override
     {
-        // pSummoned->CastSpell(pSummoned,SPELL_PERIODIC_GRENADE,false,NULL,NULL,m_creature->GetObjectGuid());
+        // pSummoned->CastSpell(pSummoned,SPELL_PERIODIC_GRENADE,TRIGGERED_NONE,NULL,NULL,m_creature->GetObjectGuid());
     }
 
     void UpdateEscortAI(const uint32 uiDiff) override
@@ -155,10 +155,10 @@ struct npc_rizzle_sprysprocketAI : public npc_escortAI
                     break;
                 case 1:
                     // teleports to water _before_ we Start()
-                    m_creature->CastSpell(m_creature, SPELL_ESCAPE, false);
+                    m_creature->CastSpell(m_creature, SPELL_ESCAPE, TRIGGERED_NONE);
                     break;
                 case 2:
-                    m_creature->CastSpell(m_creature, SPELL_SWIM_SPEED, false);
+                    m_creature->CastSpell(m_creature, SPELL_SWIM_SPEED, TRIGGERED_NONE);
                     m_bIsIntro = false;
                     Start(true);
                     break;
@@ -171,7 +171,7 @@ struct npc_rizzle_sprysprocketAI : public npc_escortAI
         if (m_uiDepthChargeTimer < uiDiff)
         {
             if (!HasEscortState(STATE_ESCORT_PAUSED))
-                m_creature->CastSpell(m_creature, SPELL_SUMMON_DEPTH_CHARGE, false);
+                m_creature->CastSpell(m_creature, SPELL_SUMMON_DEPTH_CHARGE, TRIGGERED_NONE);
 
             m_uiDepthChargeTimer = urand(10000, 15000);
         }
@@ -199,7 +199,7 @@ bool GossipSelect_npc_rizzle_sprysprocket(Player* pPlayer, Creature* /*pCreature
     if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
     {
         pPlayer->CLOSE_GOSSIP_MENU();
-        pPlayer->CastSpell(pPlayer, SPELL_GIVE_MOONSTONE, false);
+        pPlayer->CastSpell(pPlayer, SPELL_GIVE_MOONSTONE, TRIGGERED_NONE);
     }
 
     return true;
@@ -215,7 +215,7 @@ struct npc_depth_chargeAI : public ScriptedAI
             return;
 
         if (m_creature->IsWithinDistInMap(pUnit, INTERACTION_DISTANCE) && m_creature->IsWithinLOSInMap(pUnit))
-            m_creature->CastSpell(pUnit, SPELL_TRAP, false);
+            m_creature->CastSpell(pUnit, SPELL_TRAP, TRIGGERED_NONE);
     }
 
     void Reset() override { }
@@ -233,10 +233,10 @@ CreatureAI* GetAI_npc_depth_charge(Creature* pCreature)
 bool GOUse_go_southfury_moonstone(Player* pPlayer, GameObject* /*pGo*/)
 {
     // implicitTarget=48 not implemented as of writing this code, and manual summon may be just ok for our purpose
-    // pPlayer->CastSpell(pPlayer,SPELL_SUMMON_RIZZLE,false);
+    // pPlayer->CastSpell(pPlayer,SPELL_SUMMON_RIZZLE,TRIGGERED_NONE);
 
     if (Creature* pCreature = pPlayer->SummonCreature(NPC_RIZZLE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0))
-        pCreature->CastSpell(pPlayer, SPELL_BLACKJACK, false);
+        pCreature->CastSpell(pPlayer, SPELL_BLACKJACK, TRIGGERED_NONE);
 
     return false;
 }

@@ -574,7 +574,7 @@ void BattleGround::CastSpellOnTeam(uint32 SpellID, Team teamId)
         if (!team) team = plr->GetTeam();
 
         if (team == teamId)
-            plr->CastSpell(plr, SpellID, true);
+            plr->CastSpell(plr, SpellID, TRIGGERED_OLD_TRIGGERED);
     }
 }
 
@@ -927,7 +927,7 @@ void BattleGround::RewardSpellCast(Player* plr, uint32 spell_id) const
         return;
     }
 
-    plr->CastSpell(plr, spellInfo, true);
+    plr->CastSpell(plr, spellInfo, TRIGGERED_OLD_TRIGGERED);
 }
 
 void BattleGround::RewardItem(Player* plr, uint32 item_id, uint32 count)
@@ -1238,32 +1238,32 @@ void BattleGround::AddPlayer(Player* plr)
         if (team == ALLIANCE)                               // gold
         {
             if (plr->GetTeam() == HORDE)
-                plr->CastSpell(plr, SPELL_HORDE_GOLD_FLAG, true);
+                plr->CastSpell(plr, SPELL_HORDE_GOLD_FLAG, TRIGGERED_OLD_TRIGGERED);
             else
-                plr->CastSpell(plr, SPELL_ALLIANCE_GOLD_FLAG, true);
+                plr->CastSpell(plr, SPELL_ALLIANCE_GOLD_FLAG, TRIGGERED_OLD_TRIGGERED);
         }
         else                                                // green
         {
             if (plr->GetTeam() == HORDE)
-                plr->CastSpell(plr, SPELL_HORDE_GREEN_FLAG, true);
+                plr->CastSpell(plr, SPELL_HORDE_GREEN_FLAG, TRIGGERED_OLD_TRIGGERED);
             else
-                plr->CastSpell(plr, SPELL_ALLIANCE_GREEN_FLAG, true);
+                plr->CastSpell(plr, SPELL_ALLIANCE_GREEN_FLAG, TRIGGERED_OLD_TRIGGERED);
         }
 
         plr->DestroyConjuredItems(true);
         plr->UnsummonPetTemporaryIfAny();
 
         if (GetStatus() == STATUS_WAIT_JOIN)                // not started yet
-            plr->CastSpell(plr, SPELL_ARENA_PREPARATION, true);
+            plr->CastSpell(plr, SPELL_ARENA_PREPARATION, TRIGGERED_OLD_TRIGGERED);
 
-        plr->CastSpell(plr, SPELL_ARENA_DAMPENING, true);
+        plr->CastSpell(plr, SPELL_ARENA_DAMPENING, TRIGGERED_OLD_TRIGGERED);
     }
     else
     {
         if (GetStatus() == STATUS_WAIT_JOIN)                // not started yet
-            plr->CastSpell(plr, SPELL_PREPARATION, true);   // reduces all mana cost of spells.
+            plr->CastSpell(plr, SPELL_PREPARATION, TRIGGERED_OLD_TRIGGERED);   // reduces all mana cost of spells.
 
-        plr->CastSpell(plr, SPELL_BATTLEGROUND_DAMPENING, true);
+        plr->CastSpell(plr, SPELL_BATTLEGROUND_DAMPENING, TRIGGERED_OLD_TRIGGERED);
     }
 
     plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());

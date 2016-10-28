@@ -571,8 +571,8 @@ struct boss_croneAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->CastSpell(pSummoned, SPELL_CYCLONE, true);
-        pSummoned->CastSpell(pSummoned, SPELL_CYCLONE_VISUAL, true);
+        pSummoned->CastSpell(pSummoned, SPELL_CYCLONE, TRIGGERED_OLD_TRIGGERED);
+        pSummoned->CastSpell(pSummoned, SPELL_CYCLONE_VISUAL, TRIGGERED_OLD_TRIGGERED);
         pSummoned->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f);
     }
 

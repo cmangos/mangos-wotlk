@@ -127,7 +127,7 @@ struct boss_lich_king_horAI : public ScriptedAI
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpellEntry) override
     {
         if (pSpellEntry->Id == SPELL_SOUL_REAPER || pSpellEntry->Id == SPELL_SOUL_REAPER_H)
-            pTarget->CastSpell(m_creature, SPELL_SOUL_REAPER_TRIGGER, true);
+            pTarget->CastSpell(m_creature, SPELL_SOUL_REAPER_TRIGGER, TRIGGERED_OLD_TRIGGERED);
     }
 
     void JustSummoned(GameObject* pGo) override

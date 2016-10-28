@@ -85,7 +85,7 @@ struct boss_eckAI : public ScriptedAI
     void SpellHitTarget(Unit* pUnit, const SpellEntry* pSpellEntry) override
     {
         if (pSpellEntry->Id == SPELL_ECK_SPIT && pUnit->GetTypeId() == TYPEID_PLAYER && !pUnit->HasAura(SPELL_ECK_RESIDUE))
-            pUnit->CastSpell(pUnit, SPELL_ECK_RESIDUE, true);
+            pUnit->CastSpell(pUnit, SPELL_ECK_RESIDUE, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override

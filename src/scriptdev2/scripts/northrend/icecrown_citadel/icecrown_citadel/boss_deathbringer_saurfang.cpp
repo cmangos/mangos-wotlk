@@ -230,8 +230,8 @@ struct boss_deathbringer_saurfangAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->CastSpell(pSummoned, SPELL_RESISTANT_SKIN, true);
-        pSummoned->CastSpell(pSummoned, SPELL_BLOOD_LINK_BEAST, true);
+        pSummoned->CastSpell(pSummoned, SPELL_RESISTANT_SKIN, TRIGGERED_OLD_TRIGGERED);
+        pSummoned->CastSpell(pSummoned, SPELL_BLOOD_LINK_BEAST, TRIGGERED_OLD_TRIGGERED);
 
         // Note: the summoned should be activated only after 2-3 seconds after summon - can be done in eventAI
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))

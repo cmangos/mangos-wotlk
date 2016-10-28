@@ -163,15 +163,15 @@ struct boss_taldaramAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->CastSpell(pSummoned, SPELL_FLAME_SPHERE_SPAWN_EFFECT, true);
-        pSummoned->CastSpell(pSummoned, SPELL_FLAME_SPHERE_VISUAL, true);
+        pSummoned->CastSpell(pSummoned, SPELL_FLAME_SPHERE_SPAWN_EFFECT, TRIGGERED_OLD_TRIGGERED);
+        pSummoned->CastSpell(pSummoned, SPELL_FLAME_SPHERE_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
         m_lFlameOrbsGuidList.push_back(pSummoned->GetObjectGuid());
     }
 
     void SummonedCreatureDespawn(Creature* pSummoned) override
     {
-        pSummoned->CastSpell(pSummoned, SPELL_FLAME_SPHERE_DEATH_EFFECT, true);
+        pSummoned->CastSpell(pSummoned, SPELL_FLAME_SPHERE_DEATH_EFFECT, TRIGGERED_OLD_TRIGGERED);
     }
 
     // Wrapper which sends each sphere in a different direction
@@ -183,7 +183,7 @@ struct boss_taldaramAI : public ScriptedAI
         {
             if (Creature* pOrb = m_creature->GetMap()->GetCreature(*itr))
             {
-                pOrb->CastSpell(pOrb, m_bIsRegularMode ? SPELL_FLAME_SPHERE_PERIODIC : SPELL_FLAME_SPHERE_PERIODIC_H, true);
+                pOrb->CastSpell(pOrb, m_bIsRegularMode ? SPELL_FLAME_SPHERE_PERIODIC : SPELL_FLAME_SPHERE_PERIODIC_H, TRIGGERED_OLD_TRIGGERED);
 
                 pOrb->GetNearPoint2D(fX, fY, 70.0f, (2 * M_PI_F / 3)*uiIndex);
                 pOrb->GetMotionMaster()->MovePoint(0, fX, fY, pOrb->GetPositionZ());
@@ -205,7 +205,7 @@ struct boss_taldaramAI : public ScriptedAI
                 for (GuidList::const_iterator itr = lControllersList.begin(); itr != lControllersList.end(); ++itr)
                 {
                     if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                        pTemp->CastSpell(m_creature, SPELL_BEAM_VISUAL, false);
+                        pTemp->CastSpell(m_creature, SPELL_BEAM_VISUAL, TRIGGERED_NONE);
                 }
                 m_uiVisualTimer = 0;
             }
@@ -267,13 +267,13 @@ struct boss_taldaramAI : public ScriptedAI
                 m_lFlameOrbsGuidList.clear();
 
                 // Flame speres are summoned above the boss
-                m_creature->CastSpell(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 5.0f, SPELL_FLAME_SPHERE_SUMMON_1, true);
+                m_creature->CastSpell(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 5.0f, SPELL_FLAME_SPHERE_SUMMON_1, TRIGGERED_OLD_TRIGGERED);
 
                 // 2 more spheres on heroic
                 if (!m_bIsRegularMode)
                 {
-                    m_creature->CastSpell(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 5.0f, SPELL_FLAME_SPHERE_SUMMON_2, true);
-                    m_creature->CastSpell(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 5.0f, SPELL_FLAME_SPHERE_SUMMON_3, true);
+                    m_creature->CastSpell(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 5.0f, SPELL_FLAME_SPHERE_SUMMON_2, TRIGGERED_OLD_TRIGGERED);
+                    m_creature->CastSpell(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 5.0f, SPELL_FLAME_SPHERE_SUMMON_3, TRIGGERED_OLD_TRIGGERED);
                 }
 
                 m_uiFlameOrbTimer = urand(50000, 60000);

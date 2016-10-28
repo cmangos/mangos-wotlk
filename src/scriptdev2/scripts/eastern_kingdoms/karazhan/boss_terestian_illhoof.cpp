@@ -129,7 +129,7 @@ struct boss_terestianAI : public ScriptedAI
                 pSummoned->SetInCombatWithZone();
                 break;
             case NPC_DEMONCHAINS:
-                pSummoned->CastSpell(pSummoned, SPELL_DEMON_CHAINS, false);
+                pSummoned->CastSpell(pSummoned, SPELL_DEMON_CHAINS, TRIGGERED_NONE);
                 break;
         }
     }
@@ -139,7 +139,7 @@ struct boss_terestianAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_KILREK:
-                pSummoned->CastSpell(m_creature, SPELL_BROKEN_PACT, true);
+                pSummoned->CastSpell(m_creature, SPELL_BROKEN_PACT, TRIGGERED_OLD_TRIGGERED);
                 m_uiSummonKilrekTimer = 30000;
                 break;
             case NPC_DEMONCHAINS:

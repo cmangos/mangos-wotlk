@@ -213,8 +213,8 @@ struct boss_felmystAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_DEMONIC_VAPOR)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_VAPOR_SPAWN_TRIGGER, true);
-            pSummoned->CastSpell(pSummoned, SPELL_DEMONIC_VAPOR_PER, true);
+            pSummoned->CastSpell(pSummoned, SPELL_VAPOR_SPAWN_TRIGGER, TRIGGERED_OLD_TRIGGERED);
+            pSummoned->CastSpell(pSummoned, SPELL_DEMONIC_VAPOR_PER, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -290,7 +290,7 @@ struct boss_felmystAI : public ScriptedAI
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
         if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_ENCAPSULATE_CHANNEL)
-            pTarget->CastSpell(pTarget, SPELL_ENCAPSULATE, true, NULL, NULL, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, SPELL_ENCAPSULATE, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -483,7 +483,7 @@ struct npc_demonic_vaporAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_DEMONIC_VAPOR_TRAIL)
-            pSummoned->CastSpell(pSummoned, SPELL_DEMONIC_VAPOR, true);
+            pSummoned->CastSpell(pSummoned, SPELL_DEMONIC_VAPOR, TRIGGERED_OLD_TRIGGERED);
     }
 
     void AttackStart(Unit* /*pWho*/) override { }

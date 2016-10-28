@@ -149,9 +149,9 @@ struct boss_fjolaAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_CONCENTRATED_LIGHT)
-            pSummoned->CastSpell(pSummoned, SPELL_LIGHT_BALL_PASSIVE, true);
+            pSummoned->CastSpell(pSummoned, SPELL_LIGHT_BALL_PASSIVE, TRIGGERED_OLD_TRIGGERED);
         else if (pSummoned->GetEntry() == NPC_CONCENTRATED_DARKNESS)
-            pSummoned->CastSpell(pSummoned, SPELL_DARK_BALL_PASSIVE, true);
+            pSummoned->CastSpell(pSummoned, SPELL_DARK_BALL_PASSIVE, TRIGGERED_OLD_TRIGGERED);
     }
 
     // function that handles the special ability for both twins
@@ -183,15 +183,15 @@ struct boss_fjolaAI : public ScriptedAI
         if (m_bIsVortex)
         {
             uiSpell = m_bIsLightTwin ? SPELL_LIGHT_VORTEX : SPELL_DARK_VORTEX;
-            pCaster->CastSpell(pCaster, uiSpell, false);
+            pCaster->CastSpell(pCaster, uiSpell, TRIGGERED_NONE);
             DoScriptText(m_bIsLightTwin ? SAY_TO_WHITE : SAY_TO_BLACK, pCaster);
         }
         else
         {
             uiSpell = m_bIsLightTwin ? SPELL_TWINS_PACT_LIGHT : SPELL_TWINS_PACT_DARK;
             uiShieldSpell = m_bIsLightTwin ? SPELL_SHIELD_OF_LIGHTS : SPELL_SHIELD_OF_DARKNESS;
-            pCaster->CastSpell(pCaster, uiSpell, false);
-            pCaster->CastSpell(pCaster, uiShieldSpell, true);
+            pCaster->CastSpell(pCaster, uiSpell, TRIGGERED_NONE);
+            pCaster->CastSpell(pCaster, uiShieldSpell, TRIGGERED_OLD_TRIGGERED);
             DoScriptText(SAY_COLORSWITCH, pCaster);
         }
 
@@ -235,7 +235,7 @@ struct boss_fjolaAI : public ScriptedAI
                     {
                         if (Creature* pEydis = m_pInstance->GetSingleCreatureFromStorage(NPC_EYDIS))
                         {
-                            pEydis->CastSpell(pEydis, SPELL_BERSERK, true);
+                            pEydis->CastSpell(pEydis, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                             DoScriptText(SAY_BERSERK, pEydis);
                         }
                     }

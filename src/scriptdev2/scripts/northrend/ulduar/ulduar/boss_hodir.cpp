@@ -188,7 +188,7 @@ struct boss_hodirAI : public ScriptedAI
                 }
 
                 m_uiEpilogueTimer = 10000;
-                m_creature->CastSpell(m_creature, SPELL_HODIR_CREDIT, true);
+                m_creature->CastSpell(m_creature, SPELL_HODIR_CREDIT, TRIGGERED_OLD_TRIGGERED);
                 m_creature->SetFactionTemporary(FACTION_ID_FRIENDLY, TEMPFACTION_NONE);
                 m_bEventFinished = true;
                 EnterEvadeMode();
@@ -208,8 +208,8 @@ struct boss_hodirAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_ICICLE)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_ICICLE_DUMMY, false);
-            pSummoned->CastSpell(pSummoned, SPELL_ICICLE, true);
+            pSummoned->CastSpell(pSummoned, SPELL_ICICLE_DUMMY, TRIGGERED_NONE);
+            pSummoned->CastSpell(pSummoned, SPELL_ICICLE, TRIGGERED_OLD_TRIGGERED);
             pSummoned->ForcedDespawn(5000);
         }
     }

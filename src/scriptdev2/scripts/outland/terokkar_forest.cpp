@@ -314,7 +314,7 @@ struct npc_hungry_nether_rayAI : public ScriptedPetAI
             if (m_creature->IsWithinDistInMap(pVictim, 10.0f))
             {
                 DoScriptText(EMOTE_FEED, m_creature);
-                m_creature->CastSpell(m_creature, SPELL_FEED_CREDIT, true);
+                m_creature->CastSpell(m_creature, SPELL_FEED_CREDIT, TRIGGERED_OLD_TRIGGERED);
             }
         }
     }
@@ -634,7 +634,7 @@ struct npc_mana_bomb_exp_triggerAI : public ScriptedAI
             m_uiEventTimer = 1000;
 
             if (m_uiEventCounter < 10)
-                m_creature->CastSpell(m_creature, SPELL_MANA_BOMB_LIGHTNING, false);
+                m_creature->CastSpell(m_creature, SPELL_MANA_BOMB_LIGHTNING, TRIGGERED_NONE);
 
             switch (m_uiEventCounter)
             {
@@ -657,7 +657,7 @@ struct npc_mana_bomb_exp_triggerAI : public ScriptedAI
                     DoScriptText(SAY_COUNT_5, m_creature);
                     break;
                 case 10:
-                    m_creature->CastSpell(m_creature, SPELL_MANA_BOMB_EXPL, false);
+                    m_creature->CastSpell(m_creature, SPELL_MANA_BOMB_EXPL, TRIGGERED_NONE);
                     break;
                 case 30:
                     if (pManaBomb)

@@ -135,7 +135,7 @@ struct boss_eregosAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_PLANAR_ANOMALY)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_PLANAR_ANOMALY_AGGRO, true);
+            pSummoned->CastSpell(pSummoned, SPELL_PLANAR_ANOMALY_AGGRO, TRIGGERED_OLD_TRIGGERED);
 
             // If this happens then something is really wrong
             if (m_vAnomalyTargets.empty())

@@ -161,7 +161,7 @@ struct boss_volkhanAI : public ScriptedAI
                 // only shatter brittle golems
                 if (pTemp->GetEntry() == NPC_BRITTLE_GOLEM)
                 {
-                    pTemp->CastSpell(pTemp, m_bIsRegularMode ? SPELL_SHATTER : SPELL_SHATTER_H, true);
+                    pTemp->CastSpell(pTemp, m_bIsRegularMode ? SPELL_SHATTER : SPELL_SHATTER_H, TRIGGERED_OLD_TRIGGERED);
                     ++m_uiBrittleGolemsCount;
                 }
             }
@@ -278,7 +278,7 @@ bool EffectDummyCreature_boss_volkhan(Unit* pCaster, uint32 uiSpellId, SpellEffe
             return true;
 
         for (uint8 i = 0; i < MAX_GOLEM; ++i)
-            pCreatureTarget->CastSpell(pCaster, SPELL_SUMMON_MOLTEN_GOLEM, true);
+            pCreatureTarget->CastSpell(pCaster, SPELL_SUMMON_MOLTEN_GOLEM, TRIGGERED_OLD_TRIGGERED);
 
         // always return true when we are handling this spell and effect
         return true;
@@ -299,7 +299,7 @@ bool EffectDummyCreature_npc_volkhan_anvil(Unit* pCaster, uint32 uiSpellId, Spel
         if (pCaster->GetEntry() != NPC_VOLKHAN || pCreatureTarget->GetEntry() != NPC_VOLKHAN_ANVIL)
             return true;
 
-        pCreatureTarget->CastSpell(pCaster, SPELL_TEMPER_DUMMY, false);
+        pCreatureTarget->CastSpell(pCaster, SPELL_TEMPER_DUMMY, TRIGGERED_NONE);
         // ToDo: research how the visual spell is used
 
         if (pCaster->getVictim())

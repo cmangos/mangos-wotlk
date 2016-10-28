@@ -183,7 +183,7 @@ struct boss_tyrannusAI : public ScriptedAI
                         if (Creature* pRimefang = m_pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
                         {
                             pRimefang->InterruptNonMeleeSpells(true);
-                            pRimefang->CastSpell(pTarget, SPELL_HOARFROST, false);
+                            pRimefang->CastSpell(pTarget, SPELL_HOARFROST, TRIGGERED_NONE);
                             DoScriptText(EMOTE_RIMEFANG_ICEBOLT, pRimefang, pTarget);
                         }
                     }
@@ -285,7 +285,7 @@ struct boss_rimefang_posAI : public ScriptedAI
             if (m_uiMountTimer <= uiDiff)
             {
                 if (Creature* pTyrannus = m_pInstance->GetSingleCreatureFromStorage(NPC_TYRANNUS))
-                    pTyrannus->CastSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, true);
+                    pTyrannus->CastSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiMountTimer = 0;
             }

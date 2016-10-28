@@ -864,7 +864,7 @@ struct npc_zeppitAI : public ScriptedPetAI
             if (m_creature->IsWithinDistInMap(pVictim, 10.0f))
             {
                 DoScriptText(EMOTE_GATHER_BLOOD, m_creature);
-                m_creature->CastSpell(m_creature, SPELL_GATHER_WARP_BLOOD, false);
+                m_creature->CastSpell(m_creature, SPELL_GATHER_WARP_BLOOD, TRIGGERED_NONE);
             }
         }
     }
@@ -951,7 +951,7 @@ struct npc_protectorate_demolitionistAI : public npc_escortAI
         if (pSummoned->GetEntry() == NPC_NEXUS_STALKER)
             DoScriptText(SAY_NEXUS_PROTECT, pSummoned);
         else if (pSummoned->GetEntry() == NPC_ARCHON)
-            pSummoned->CastSpell(pSummoned, SPELL_ETHEREAL_TELEPORT, true);
+            pSummoned->CastSpell(pSummoned, SPELL_ETHEREAL_TELEPORT, TRIGGERED_OLD_TRIGGERED);
 
         pSummoned->AI()->AttackStart(m_creature);
     }
@@ -1290,8 +1290,8 @@ struct npc_drijyaAI : public npc_escortAI
             case 19:
                 if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_explodeTriggerGuid))
                 {
-                    pTrigger->CastSpell(pTrigger, SPELL_SUMMON_FIRE, true);
-                    pTrigger->CastSpell(pTrigger, SPELL_EXPLOSION_VISUAL, true);
+                    pTrigger->CastSpell(pTrigger, SPELL_SUMMON_FIRE, TRIGGERED_OLD_TRIGGERED);
+                    pTrigger->CastSpell(pTrigger, SPELL_EXPLOSION_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 }
                 break;
             case 20:
@@ -1454,7 +1454,7 @@ struct npc_dimensiusAI : public Scripted_NoMovementAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_SPAWN_OF_DIMENSIUS)
-            pSummoned->CastSpell(m_creature, SPELL_DIMENSIUS_FEEDING, true);
+            pSummoned->CastSpell(m_creature, SPELL_DIMENSIUS_FEEDING, TRIGGERED_OLD_TRIGGERED);
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override

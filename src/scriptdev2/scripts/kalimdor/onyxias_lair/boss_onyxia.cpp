@@ -454,7 +454,7 @@ struct boss_onyxiaAI : public ScriptedAI
                 {
                     if (!m_creature->IsNonMeleeSpellCasted(false))
                     {
-                        m_creature->CastSpell(afSpawnLocations[2][0], afSpawnLocations[2][1], afSpawnLocations[2][2], SPELL_SUMMON_LAIR_GUARD, true);
+                        m_creature->CastSpell(afSpawnLocations[2][0], afSpawnLocations[2][1], afSpawnLocations[2][2], SPELL_SUMMON_LAIR_GUARD, TRIGGERED_OLD_TRIGGERED);
                         m_uiSummonGuardTimer = 30000;
                     }
                 }

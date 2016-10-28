@@ -209,7 +209,7 @@ bool GossipSelect_npc_sinclari(Player* pPlayer, Creature* pCreature, uint32 /*ui
 
     if (uiAction == GOSSIP_ACTION_INFO_DEF + 3)
     {
-        pCreature->CastSpell(pPlayer, SPELL_TELEPORT_INSIDE, true);
+        pCreature->CastSpell(pPlayer, SPELL_TELEPORT_INSIDE, TRIGGERED_OLD_TRIGGERED);
         pPlayer->CLOSE_GOSSIP_MENU();
     }
 
@@ -296,11 +296,11 @@ struct npc_prison_event_controllerAI : public ScriptedAI
             // Prepare to release the boss
             m_uiSaboteurPhase = 0;
             m_uiSaboteurTimer = 1000;
-            pSummoned->CastSpell(pSummoned, SPELL_SHIELD_DISRUPTION, false);
+            pSummoned->CastSpell(pSummoned, SPELL_SHIELD_DISRUPTION, TRIGGERED_NONE);
         }
         // For other summons, cast destroy seal when they reach the door
         else
-            pSummoned->CastSpell(pSummoned, SPELL_DESTROY_DOOR_SEAL, false);
+            pSummoned->CastSpell(pSummoned, SPELL_DESTROY_DOOR_SEAL, TRIGGERED_NONE);
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
@@ -378,16 +378,16 @@ struct npc_prison_event_controllerAI : public ScriptedAI
                 switch (m_uiSaboteurPhase)
                 {
                     case 0:
-                        pSaboteur->CastSpell(pSaboteur, SPELL_SHIELD_DISRUPTION, false);
+                        pSaboteur->CastSpell(pSaboteur, SPELL_SHIELD_DISRUPTION, TRIGGERED_NONE);
                         m_uiSaboteurTimer = 1000;
                         break;
                     case 1:
-                        pSaboteur->CastSpell(pSaboteur, SPELL_SHIELD_DISRUPTION, false);
+                        pSaboteur->CastSpell(pSaboteur, SPELL_SHIELD_DISRUPTION, TRIGGERED_NONE);
                         m_uiSaboteurTimer = 1000;
                         break;
                     case 2:
                         DoReleaseBoss();
-                        pSaboteur->CastSpell(pSaboteur, SPELL_SIMPLE_TELEPORT, false);
+                        pSaboteur->CastSpell(pSaboteur, SPELL_SIMPLE_TELEPORT, TRIGGERED_NONE);
                         pSaboteur->ForcedDespawn(1000);
                         m_uiSaboteurTimer = 0;
                         break;

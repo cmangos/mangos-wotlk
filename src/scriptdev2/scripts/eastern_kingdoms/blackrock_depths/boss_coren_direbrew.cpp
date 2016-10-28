@@ -87,7 +87,7 @@ struct boss_coren_direbrewAI : public ScriptedAI
         {
             case NPC_ILSA_DIREBREW:
             case NPC_URSULA_DIREBREW:
-                pSummoned->CastSpell(m_creature, SPELL_PORT_TO_COREN, true);
+                pSummoned->CastSpell(m_creature, SPELL_PORT_TO_COREN, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
 

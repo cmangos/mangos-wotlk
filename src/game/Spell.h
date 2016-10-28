@@ -366,7 +366,7 @@ class Spell
         void EffectGravityPull(SpellEffectIndex eff_idx);
         void EffectCreateTamedPet(SpellEffectIndex eff_ifx);
 
-        Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
+        Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
         ~Spell();
 
         void SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura = nullptr);
@@ -440,7 +440,10 @@ class Spell
         uint8 m_cast_count;
         uint32 m_glyphIndex;
         SpellCastTargets m_targets;
+        
+        // Trigger flag system
         bool m_ignoreHitResult;
+        bool m_ignoreUnselectableTarget;
 
         int32 GetCastTime() const { return m_casttime; }
         uint32 GetCastedTime() const { return m_timer; }

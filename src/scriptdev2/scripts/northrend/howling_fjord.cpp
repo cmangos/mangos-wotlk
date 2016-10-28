@@ -776,7 +776,7 @@ struct npc_firecrackers_bunnyAI : public ScriptedAI
         {
             // spawn the Guano loot
             pWho->GetMotionMaster()->MoveIdle();
-            pWho->CastSpell(m_creature, SPELL_SUMMON_DARKCLAW_GUANO, true);
+            pWho->CastSpell(m_creature, SPELL_SUMMON_DARKCLAW_GUANO, TRIGGERED_OLD_TRIGGERED);
             m_bHasValidBat = false;
         }
     }
@@ -910,7 +910,7 @@ struct npc_apothecary_hanesAI : public npc_escortAI
 
                 for (std::list<Creature*>::const_iterator itr = lTriggersInRange.begin(); itr != lTriggersInRange.end(); ++itr)
                 {
-                    (*itr)->CastSpell((*itr), SPELL_LOW_POLY_FIRE, true);
+                    (*itr)->CastSpell((*itr), SPELL_LOW_POLY_FIRE, TRIGGERED_OLD_TRIGGERED);
                     (*itr)->ForcedDespawn(30000);
                 }
                 break;

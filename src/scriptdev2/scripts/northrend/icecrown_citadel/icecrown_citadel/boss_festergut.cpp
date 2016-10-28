@@ -186,7 +186,7 @@ struct boss_festergutAI : public ScriptedAI
                 return;
 
             if (Creature* pPutricide = m_pInstance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
-                pPutricide->CastSpell(pSummoned, SPELL_MALLEABLE_GOO, true);
+                pPutricide->CastSpell(pSummoned, SPELL_MALLEABLE_GOO, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -224,7 +224,7 @@ struct boss_festergutAI : public ScriptedAI
                         if (Creature* pProfessor = m_pInstance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
                         {
                             pProfessor->HandleEmote(EMOTE_ONESHOT_TALK_NOSHEATHE);
-                            pProfessor->CastSpell(pProfessor, SPELL_GASEOUS_BLIGHT_INIT, true);
+                            pProfessor->CastSpell(pProfessor, SPELL_GASEOUS_BLIGHT_INIT, TRIGGERED_OLD_TRIGGERED);
                             DoScriptText((m_pInstance->GetData(TYPE_ROTFACE) == DONE && m_pInstance->IsHeroicDifficulty()) ? SAY_BLIGHT_ROTFACE_DEAD : SAY_BLIGHT, pProfessor);
                         }
                         m_uiGaseousBlightTimer = 1000;
@@ -320,12 +320,12 @@ bool EffectScriptEffectCreature_spell_inhale_blight(Unit* pCaster, uint32 uiSpel
         if (pCreatureTarget->HasAura(SPELL_GASEOUS_BLIGHT_1))
         {
             pGasStalker->RemoveAllAurasOnEvade();
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_GASEOUS_BLIGHT_2, true);
+            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_GASEOUS_BLIGHT_2, TRIGGERED_OLD_TRIGGERED);
         }
         else if (pCreatureTarget->HasAura(SPELL_GASEOUS_BLIGHT_2))
         {
             pGasStalker->RemoveAllAurasOnEvade();
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_GASEOUS_BLIGHT_3, true);
+            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_GASEOUS_BLIGHT_3, TRIGGERED_OLD_TRIGGERED);
         }
         else if (pCreatureTarget->HasAura(SPELL_GASEOUS_BLIGHT_3))
             pGasStalker->RemoveAllAurasOnEvade();

@@ -681,7 +681,7 @@ void instance_culling_of_stratholme::DoSpawnCorruptorIfNeeded(Unit* pSummoner)
     pSummoner->SummonCreature(NPC_GUARDIAN_OF_TIME, m_aHeroicEventSpawnLocs[2].m_fX, m_aHeroicEventSpawnLocs[2].m_fY, m_aHeroicEventSpawnLocs[2].m_fZ, m_aHeroicEventSpawnLocs[2].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
 
     if (Creature* pCorruptor = pSummoner->SummonCreature(NPC_INFINITE_CORRUPTER, m_aHeroicEventSpawnLocs[0].m_fX, m_aHeroicEventSpawnLocs[0].m_fY, m_aHeroicEventSpawnLocs[0].m_fZ, m_aHeroicEventSpawnLocs[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
-        pCorruptor->CastSpell(pCorruptor, SPELL_CORRUPTION_OF_TIME, false);
+        pCorruptor->CastSpell(pCorruptor, SPELL_CORRUPTION_OF_TIME, TRIGGERED_NONE);
 }
 
 // Function that updates all the stratholme humans to zombies

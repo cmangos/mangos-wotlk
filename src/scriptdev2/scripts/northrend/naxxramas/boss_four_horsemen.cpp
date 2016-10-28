@@ -156,7 +156,7 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
 
             // Cast achiev check for last boss killed
             if (m_pInstance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
-                m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, true);
+                m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -281,7 +281,7 @@ struct boss_rivendare_naxxAI : public ScriptedAI
 
             // Cast achiev check for last boss killed
             if (m_pInstance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
-                m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, true);
+                m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -388,7 +388,7 @@ struct boss_thane_korthazzAI : public ScriptedAI
 
             // Cast achiev check for last boss killed
             if (m_pInstance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
-                m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, true);
+                m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -497,7 +497,7 @@ struct boss_sir_zeliekAI : public ScriptedAI
 
             // Cast achiev check for last boss killed
             if (m_pInstance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
-                m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, true);
+                m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, TRIGGERED_OLD_TRIGGERED);
         }
     }
 

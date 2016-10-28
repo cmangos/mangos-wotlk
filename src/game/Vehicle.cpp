@@ -134,7 +134,7 @@ void VehicleInfo::Initialize()
             DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), itr->seatId);
             m_accessoryGuids.insert(summoned->GetObjectGuid());
             int32 basepoint0 = itr->seatId + 1;
-            summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, true);
+            summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
         }
     }
 

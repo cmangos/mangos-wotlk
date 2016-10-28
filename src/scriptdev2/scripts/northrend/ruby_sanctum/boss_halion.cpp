@@ -214,12 +214,12 @@ struct boss_halion_realAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_COMBUSTION:
-                pSummoned->CastSpell(pSummoned, SPELL_COMBUSTION_PERIODIC, true);
+                pSummoned->CastSpell(pSummoned, SPELL_COMBUSTION_PERIODIC, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_METEOR_STRIKE_MAIN:
                 // ToDo: summon the other meteor strikes around this one
-                pSummoned->CastSpell(pSummoned, SPELL_BIRTH, true);
-                pSummoned->CastSpell(pSummoned, SPELL_METEOR_VISUAL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_METEOR_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -263,7 +263,7 @@ struct boss_halion_realAI : public ScriptedAI
                     if (m_pInstance)
                     {
                         if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT, true))
-                            pHalion->CastSpell(pHalion, SPELL_BERSERK, true);
+                            pHalion->CastSpell(pHalion, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                     }
 
                     DoScriptText(SAY_BERSERK, m_creature);
@@ -432,17 +432,17 @@ struct boss_halion_twilightAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_CONSUMPTION:
-                pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION_PERIODIC, true);
+                pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION_PERIODIC, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_SHADOW_ORB_1:
             case NPC_SHADOW_ORB_2:
             case NPC_SHADOW_ORB_3:
             case NPC_SHADOW_ORB_4:
                 if (Creature* pCarrier = GetClosestCreatureWithEntry(pSummoned, NPC_ORB_CARRIER, 5.0f))
-                    pSummoned->CastSpell(pCarrier, SPELL_RIDE_VEHICLE_HARDCODED, true);
+                    pSummoned->CastSpell(pCarrier, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_ORB_CARRIER:
-                pSummoned->CastSpell(pSummoned, SPELL_TRACK_ROTATION, true);
+                pSummoned->CastSpell(pSummoned, SPELL_TRACK_ROTATION, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }

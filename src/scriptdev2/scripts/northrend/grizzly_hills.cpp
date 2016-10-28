@@ -57,7 +57,7 @@ struct npc_depleted_war_golemAI : public ScriptedPetAI
         {
             // Is distance expected?
             if (m_creature->IsWithinDistInMap(pVictim, 10.0f))
-                m_creature->CastSpell(m_creature, SPELL_CHARGE_GOLEM, true);
+                m_creature->CastSpell(m_creature, SPELL_CHARGE_GOLEM, TRIGGERED_OLD_TRIGGERED);
         }
     }
 };
@@ -90,7 +90,7 @@ bool EffectAuraDummy_npc_depleted_war_golem(const Aura* pAura, bool bApply)
             pCreature->clearUnitState(UNIT_STAT_STUNNED);
 
             // targets master
-            pCreature->CastSpell(pCreature, SPELL_GOLEM_CHARGE_CREDIT, true);
+            pCreature->CastSpell(pCreature, SPELL_GOLEM_CHARGE_CREDIT, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -261,7 +261,7 @@ struct npc_harrison_jonesAI : public npc_escortAI
                 GetCreatureListWithEntryInGrid(lBunniesInRange, m_creature, NPC_MUMMY_EFFECT_BUNNY, 50.0f);
 
                 for (std::list<Creature*>::const_iterator itr = lBunniesInRange.begin(); itr != lBunniesInRange.end(); ++itr)
-                    (*itr)->CastSpell((*itr), SPELL_BUNNY_IMMOLATION, true);
+                    (*itr)->CastSpell((*itr), SPELL_BUNNY_IMMOLATION, TRIGGERED_OLD_TRIGGERED);
 
                 m_creature->SetFacingTo(5.0f);
                 DoCastSpellIfCan(m_creature, SPELL_GONG_EFFECT);
@@ -325,8 +325,8 @@ struct npc_harrison_jonesAI : public npc_escortAI
                     {
                         if (Creature* pBunny = m_creature->GetMap()->GetCreature(m_lImmolationBunnyGuids.front()))
                         {
-                            pTecahuna->CastSpell(pBunny, SPELL_TECAHUNA_SPIRIT_BEAM, true);
-                            pBunny->CastSpell(pBunny, SPELL_SUMMON_DRAKKARI_KING, true, NULL, NULL, m_creature->GetObjectGuid());
+                            pTecahuna->CastSpell(pBunny, SPELL_TECAHUNA_SPIRIT_BEAM, TRIGGERED_OLD_TRIGGERED);
+                            pBunny->CastSpell(pBunny, SPELL_SUMMON_DRAKKARI_KING, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
                             pBunny->RemoveAurasDueToSpell(SPELL_BUNNY_IMMOLATION);
                             m_lImmolationBunnyGuids.remove(m_lImmolationBunnyGuids.front());
                         }
@@ -463,7 +463,7 @@ struct npc_emilyAI : public npc_escortAI
             case NPC_RAVENOUS_WORG:
                 // board the ravenous worg vehicle
                 if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
-                    pFloppy->CastSpell(pSummoned, SPELL_FLOPPY_BECOMES_LUNCH, true);
+                    pFloppy->CastSpell(pSummoned, SPELL_FLOPPY_BECOMES_LUNCH, TRIGGERED_OLD_TRIGGERED);
                 // no break;
             case NPC_HUNGRY_WORG:
                 if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))

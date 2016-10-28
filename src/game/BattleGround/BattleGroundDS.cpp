@@ -50,7 +50,7 @@ void BattleGroundDS::Update(uint32 diff)
             for (GuidList::const_iterator itr = m_lGateTriggersGuids.begin(); itr != m_lGateTriggersGuids.end(); ++itr)
             {
                 if (Creature* trigger = GetBgMap()->GetCreature(*itr))
-                    trigger->CastSpell(trigger, BG_DS_SPELL_FLUSH, true);
+                    trigger->CastSpell(trigger, BG_DS_SPELL_FLUSH, TRIGGERED_OLD_TRIGGERED);
             }
 
             // knockback players manually due to missing triggered spell 61698
@@ -118,7 +118,7 @@ void BattleGroundDS::Update(uint32 diff)
         if (m_uiWaterfallSpellTimer <= diff)
         {
             if (Creature* trigger = GetBgMap()->GetCreature(m_waterfallTriggerGuid))
-                trigger->CastSpell(trigger, BG_DS_SPELL_WATER_SPOUT, true);
+                trigger->CastSpell(trigger, BG_DS_SPELL_WATER_SPOUT, TRIGGERED_OLD_TRIGGERED);
 
             m_uiWaterfallSpellTimer = 1500;
         }

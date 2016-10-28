@@ -483,9 +483,9 @@ SpellAuraProcResult Unit::HandleHasteAuraProc(Unit* pVictim, uint32 damage, Aura
         return SPELL_AURA_PROC_FAILED;
 
     if (basepoints0)
-        CastCustomSpell(target, triggered_spell_id, &basepoints0, nullptr, nullptr, true, castItem, triggeredByAura);
+        CastCustomSpell(target, triggered_spell_id, &basepoints0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
     else
-        CastSpell(target, triggered_spell_id, true, castItem, triggeredByAura);
+        CastSpell(target, triggered_spell_id, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->AddSpellCooldown(triggered_spell_id, 0, time(nullptr) + cooldown);
@@ -548,9 +548,9 @@ SpellAuraProcResult Unit::HandleSpellCritChanceAuraProc(Unit* pVictim, uint32 /*
         return SPELL_AURA_PROC_FAILED;
 
     if (basepoints0)
-        CastCustomSpell(target, triggered_spell_id, &basepoints0, nullptr, nullptr, true, castItem, triggeredByAura);
+        CastCustomSpell(target, triggered_spell_id, &basepoints0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
     else
-        CastSpell(target, triggered_spell_id, true, castItem, triggeredByAura);
+        CastSpell(target, triggered_spell_id, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->AddSpellCooldown(triggered_spell_id, 0, time(nullptr) + cooldown);
@@ -939,7 +939,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                         return SPELL_AURA_PROC_FAILED;
 
                     // Glyph of Shadowfiend (need cast as self cast for owner, no hidden cooldown)
-                    owner->CastSpell(owner, 58227, true, castItem, triggeredByAura);
+                    owner->CastSpell(owner, 58227, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                     return SPELL_AURA_PROC_OK;
                 }
                 // Kill Command, pet aura
@@ -962,7 +962,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                         if (caster->GetEntry() != 33943 && caster->GetTypeId() == TYPEID_UNIT)
                         {
                             ((Creature*)caster)->UpdateEntry(33943);
-                            caster->CastSpell(caster, 64017, true);
+                            caster->CastSpell(caster, 64017, TRIGGERED_OLD_TRIGGERED);
                         }
                     }
 
@@ -1014,15 +1014,15 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
 
                     // will added first to stack
                     if (!aurHolder)
-                        CastSpell(this, 72521, true);       // Shadowmourne Visual Low
+                        CastSpell(this, 72521, TRIGGERED_OLD_TRIGGERED);       // Shadowmourne Visual Low
                     // half stack
                     else if (aurHolder->GetStackAmount() + 1 == 6)
-                        CastSpell(this, 72523, true);       // Shadowmourne Visual High
+                        CastSpell(this, 72523, TRIGGERED_OLD_TRIGGERED);       // Shadowmourne Visual High
                     // full stack
                     else if (aurHolder->GetStackAmount() + 1 >= aurHolder->GetSpellProto()->StackAmount)
                     {
                         RemoveAurasDueToSpell(triggered_spell_id);
-                        CastSpell(this, 71904, true);       // Chaos Bane
+                        CastSpell(this, 71904, TRIGGERED_OLD_TRIGGERED);       // Chaos Bane
                         return SPELL_AURA_PROC_OK;
                     }
                     break;
@@ -1101,7 +1101,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                         return SPELL_AURA_PROC_OK;
                     // Critical counted -> roll chance
                     if (roll_chance_i(triggerAmount))
-                        CastSpell(this, 48108, true, castItem, triggeredByAura);
+                        CastSpell(this, 48108, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                 }
                 mod->m_amount = 25;
                 return SPELL_AURA_PROC_OK;
@@ -1260,7 +1260,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     RemoveAurasDueToSpell(triggeredByAura->GetId());
 
                     // Cast finish spell (triggeredByAura already not exist!)
-                    CastSpell(this, 27285, true, castItem, nullptr, casterGuid);
+                    CastSpell(this, 27285, TRIGGERED_OLD_TRIGGERED, castItem, nullptr, casterGuid);
                     return SPELL_AURA_PROC_OK;              // no hidden cooldown
                 }
 
@@ -1282,7 +1282,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     RemoveAurasDueToSpell(triggeredByAura->GetId());
 
                     // Cast finish spell (triggeredByAura already not exist!)
-                    CastSpell(this, 32865, true, castItem, nullptr, casterGuid);
+                    CastSpell(this, 32865, TRIGGERED_OLD_TRIGGERED, castItem, nullptr, casterGuid);
                     return SPELL_AURA_PROC_OK;              // no hidden cooldown
                 }
                 // Damage counting
@@ -1372,7 +1372,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     return SPELL_AURA_PROC_FAILED;
 
                 // Energize 0.25% of max. mana
-                pVictim->CastSpell(pVictim, 57669, true, castItem, triggeredByAura);
+                pVictim->CastSpell(pVictim, 57669, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                 return SPELL_AURA_PROC_OK;                  // no hidden cooldown
             }
 
@@ -1441,7 +1441,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     // Heal amount - Self/Team
                     int32 team = triggerAmount * damage / 500;
                     int32 self = triggerAmount * damage / 100 - team;
-                    CastCustomSpell(this, 15290, &team, &self, nullptr, true, castItem, triggeredByAura);
+                    CastCustomSpell(this, 15290, &team, &self, nullptr, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                     return SPELL_AURA_PROC_OK;              // no hidden cooldown
                 }
                 // Priest Tier 6 Trinket (Ashtongue Talisman of Acumen)
@@ -1540,7 +1540,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                         if (SpellEntry const* manaCastEntry = sSpellStore.LookupEntry(60889))
                         {
                             int32 mana_percent = manaCastEntry->CalculateSimpleValue(EFFECT_INDEX_0) * heal_percent;
-                            CastCustomSpell(this, manaCastEntry, &mana_percent, nullptr, nullptr, true, castItem, triggeredByAura);
+                            CastCustomSpell(this, manaCastEntry, &mana_percent, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                         }
                     }
                     break;
@@ -1643,7 +1643,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     if (!second)
                         return SPELL_AURA_PROC_FAILED;
 
-                    pVictim->CastSpell(second, procSpell, true, nullptr, triggeredByAura, GetObjectGuid());
+                    pVictim->CastSpell(second, procSpell, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura, GetObjectGuid());
                     return SPELL_AURA_PROC_OK;
                 }
                 // Item - Druid T10 Balance 4P Bonus
@@ -1742,7 +1742,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     if (!target)
                         return SPELL_AURA_PROC_FAILED;
 
-                    CastSpell(this, 59628, true);           // Tricks of the Trade (caster timer)
+                    CastSpell(this, 59628, TRIGGERED_OLD_TRIGGERED);           // Tricks of the Trade (caster timer)
                     break;
                 }
             }
@@ -1845,7 +1845,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
             // Glyph of Mend Pet
             if (dummySpell->Id == 57870)
             {
-                pVictim->CastSpell(pVictim, 57894, true, nullptr, nullptr, GetObjectGuid());
+                pVictim->CastSpell(pVictim, 57894, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid());
                 return SPELL_AURA_PROC_OK;
             }
             // Misdirection
@@ -1894,7 +1894,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                         return SPELL_AURA_PROC_FAILED;
 
                     basepoints[0] = int32(pVictim->GetMaxHealth() * triggeredByAura->GetModifier()->m_amount / 100);
-                    pVictim->CastCustomSpell(pVictim, 20267, &basepoints[0], nullptr, nullptr, true, nullptr, triggeredByAura);
+                    pVictim->CastCustomSpell(pVictim, 20267, &basepoints[0], nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura);
                     return SPELL_AURA_PROC_OK;
                 }
                 // Judgement of Wisdom
@@ -1908,7 +1908,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     {
                         // 2% of maximum base mana
                         basepoints[0] = int32(pVictim->GetCreateMana() * 2 / 100);
-                        pVictim->CastCustomSpell(pVictim, 20268, &basepoints[0], nullptr, nullptr, true, nullptr, triggeredByAura);
+                        pVictim->CastCustomSpell(pVictim, 20268, &basepoints[0], nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura);
                     }
                     return SPELL_AURA_PROC_OK;
                 }
@@ -2001,7 +2001,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     // Add 5-stack effect from Holy Vengeance
                     const SpellAuraHolder* existing = target->GetSpellAuraHolder(31803, GetObjectGuid());
                     if (existing && existing->GetStackAmount() >= 5)
-                        CastSpell(target, 42463, true, nullptr, triggeredByAura);
+                        CastSpell(target, 42463, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura);
                     break;
                 }
                 // Judgements of the Wise
@@ -2016,7 +2016,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     triggered_spell_id = 31930;
 
                     // Replenishment
-                    CastSpell(this, 57669, true, nullptr, triggeredByAura);
+                    CastSpell(this, 57669, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura);
                     break;
                 // Paladin Tier 6 Trinket (Ashtongue Talisman of Zeal)
                 case 40470:
@@ -2078,7 +2078,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     basepoints[0] = triggeredByAura->GetModifier()->m_amount * damage / 100;
 
                     // cast with original caster set but beacon to beacon for apply caster mods and avoid LoS check
-                    beacon->CastCustomSpell(beacon, triggered_spell_id, &basepoints[0], nullptr, nullptr, true, castItem, triggeredByAura, pVictim->GetObjectGuid());
+                    beacon->CastCustomSpell(beacon, triggered_spell_id, &basepoints[0], nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura, pVictim->GetObjectGuid());
                     return SPELL_AURA_PROC_OK;
                 }
                 // Seal of Corruption (damage calc on apply aura)
@@ -2103,7 +2103,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                         }
                     }
                     if (stacks >= 5)
-                        CastSpell(target, 53739, true, nullptr, triggeredByAura);
+                        CastSpell(target, 53739, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura);
                     break;
                 }
                 // Glyph of Holy Light
@@ -2153,7 +2153,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                         RemoveAurasDueToSpell(71432);       // Mote of Anger
 
                         // Manifest Anger (main hand/off hand)
-                        CastSpell(pVictim, !haveOffhandWeapon() || roll_chance_i(50) ? 71433 : 71434, true);
+                        CastSpell(pVictim, !haveOffhandWeapon() || roll_chance_i(50) ? 71433 : 71434, TRIGGERED_OLD_TRIGGERED);
                         return SPELL_AURA_PROC_OK;
                     }
                     else
@@ -2306,7 +2306,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
 
                     // Attack Twice
                     for (uint32 i = 0; i < 2; ++i)
-                        CastCustomSpell(pVictim, triggered_spell_id, &basepoints[0], nullptr, nullptr, true, castItem, triggeredByAura);
+                        CastCustomSpell(pVictim, triggered_spell_id, &basepoints[0], nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
 
                     return SPELL_AURA_PROC_OK;
                 }
@@ -2501,7 +2501,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                             ((*itr)->GetSpellProto()->SpellFamilyFlags & uint64(0x0000002000000000)))
                     {
                         uint32 spell = (*itr)->GetSpellProto()->EffectTriggerSpell[(*itr)->GetEffIndex()];
-                        CastSpell(this, spell, true, castItem, triggeredByAura);
+                        CastSpell(this, spell, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                         return SPELL_AURA_PROC_OK;
                     }
                 }
@@ -2554,7 +2554,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                 if (procSpell->SpellFamilyFlags & uint64(0x0000000000000002))
                     ((Player*)this)->RemoveSpellCooldown(spellId);
 
-                CastSpell(pVictim, spellId, true, castItem, triggeredByAura);
+                CastSpell(pVictim, spellId, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
 
                 if (cooldown && GetTypeId() == TYPEID_PLAYER)
                     ((Player*)this)->AddSpellCooldown(dummySpell->Id, 0, time(nullptr) + cooldown);
@@ -2588,7 +2588,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                             default:
                                 return SPELL_AURA_PROC_FAILED;
                         }
-                        CastSpell(target, spell, true, castItem, triggeredByAura);
+                        CastSpell(target, spell, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                         if ((*itr)->GetHolder()->DropAuraCharge())
                             RemoveAuraHolderFromStack((*itr)->GetId());
                         return SPELL_AURA_PROC_OK;
@@ -2804,9 +2804,9 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                         basepoints[EFFECT_INDEX_0] ? &basepoints[EFFECT_INDEX_0] : nullptr,
                         basepoints[EFFECT_INDEX_1] ? &basepoints[EFFECT_INDEX_1] : nullptr,
                         basepoints[EFFECT_INDEX_2] ? &basepoints[EFFECT_INDEX_2] : nullptr,
-                        true, castItem, triggeredByAura);
+                        TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
     else
-        CastSpell(target, triggered_spell_id, true, castItem, triggeredByAura);
+        CastSpell(target, triggered_spell_id, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->AddSpellCooldown(triggered_spell_id, 0, time(nullptr) + cooldown);
@@ -2874,9 +2874,9 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 case 46939:                                 // Black Bow of the Betrayer
                     // On successful melee or ranged attack gain 8 mana and if possible drain 8 mana from the target.
                     if (isAlive())
-                        CastSpell(this, 29471, true, castItem, triggeredByAura);
+                        CastSpell(this, 29471, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                     if (pVictim && pVictim->isAlive())
-                        CastSpell(pVictim, 27526, true, castItem, triggeredByAura);
+                        CastSpell(pVictim, 27526, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                     return SPELL_AURA_PROC_OK;
                 case 31255:                                 // Deadly Swiftness (Rank 1)
                 {
@@ -3024,7 +3024,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                     int32 basepoints2 = (int32)(damage * 0.45f);
                     if (Unit* caster = triggeredByAura->GetCaster())
                         // Actually this spell should be sent with SMSG_SPELL_START
-                        CastCustomSpell(caster, 69034, &basepoints2, nullptr, nullptr, true, nullptr, triggeredByAura, GetObjectGuid());
+                        CastCustomSpell(caster, 69034, &basepoints2, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura, GetObjectGuid());
 
                     return SPELL_AURA_PROC_OK;
                 }
@@ -3125,7 +3125,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                     {
                         // basepoints of trigger spell stored in dummyeffect of spellProto
                         int32 basepoints2 = GetMaxPower(POWER_MANA) * (*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2) / 100;
-                        CastCustomSpell(this, 18371, &basepoints2, nullptr, nullptr, true, castItem, triggeredByAura);
+                        CastCustomSpell(this, 18371, &basepoints2, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                         break;
                     }
                 }
@@ -3361,7 +3361,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 if (!pVictim || !pVictim->isAlive())
                     return SPELL_AURA_PROC_FAILED;
                 // stacking
-                CastSpell(this, 37658, true, nullptr, triggeredByAura);
+                CastSpell(this, 37658, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura);
 
                 Aura* dummy = GetDummyAura(37658);
                 // release at 3 aura in stack (cont contain in basepoint of trigger aura)
@@ -3385,7 +3385,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 if (!pVictim || !pVictim->isAlive())
                     return SPELL_AURA_PROC_FAILED;
                 // stacking
-                CastSpell(this, 54842, true, nullptr, triggeredByAura);
+                CastSpell(this, 54842, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura);
 
                 // counting
                 Aura* dummy = GetDummyAura(54842);
@@ -3406,7 +3406,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 uint32 castSpell = auraSpellInfo->Id == 67758 ? 67759 : 67713;
 
                 // stacking
-                CastSpell(this, castSpell, true, nullptr, triggeredByAura);
+                CastSpell(this, castSpell, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura);
 
                 // counting
                 Aura* dummy = GetDummyAura(castSpell);
@@ -3736,9 +3736,9 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                         basepoints[EFFECT_INDEX_0] ? &basepoints[EFFECT_INDEX_0] : nullptr,
                         basepoints[EFFECT_INDEX_1] ? &basepoints[EFFECT_INDEX_1] : nullptr,
                         basepoints[EFFECT_INDEX_2] ? &basepoints[EFFECT_INDEX_2] : nullptr,
-                        true, castItem, triggeredByAura);
+                        TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
     else
-        CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
+        CastSpell(target, trigger_spell_id, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->AddSpellCooldown(trigger_spell_id, 0, time(nullptr) + cooldown);
@@ -3867,7 +3867,7 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(Unit* pVictim, uint3
     if (cooldown && GetTypeId() == TYPEID_PLAYER && ((Player*)this)->HasSpellCooldown(triggered_spell_id))
         return SPELL_AURA_PROC_FAILED;
 
-    CastSpell(pVictim, triggered_spell_id, true, castItem, triggeredByAura);
+    CastSpell(pVictim, triggered_spell_id, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->AddSpellCooldown(triggered_spell_id, 0, time(nullptr) + cooldown);
@@ -3926,7 +3926,7 @@ SpellAuraProcResult Unit::HandleMendingAuraProc(Unit* /*pVictim*/, uint32 /*dama
     }
 
     // heal
-    CastCustomSpell(this, 33110, &heal, nullptr, nullptr, true, nullptr, nullptr, caster_guid, spellProto);
+    CastCustomSpell(this, 33110, &heal, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, caster_guid, spellProto);
     return SPELL_AURA_PROC_OK;
 }
 
@@ -3982,7 +3982,7 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(Unit* pVictim, uint32 /*
             return SPELL_AURA_PROC_FAILED;
 
         int bp = triggeredByAura->GetModifier()->m_amount;
-        CastCustomSpell(pVictim, 68055, &bp, nullptr, nullptr, true, nullptr, triggeredByAura);
+        CastCustomSpell(pVictim, 68055, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura);
     }
 
     return SPELL_AURA_PROC_OK;
@@ -4005,7 +4005,7 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* /*pVictim*/, uint32
                 if (triggeredByAura->GetHolder()->GetAuraCharges() <= 1 && (procEx & PROC_EX_CRITICAL_HIT))
                     return SPELL_AURA_PROC_OK;              // charge counting (will removed)
 
-                CastSpell(this, 28682, true, castItem, triggeredByAura);
+                CastSpell(this, 28682, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                 return (procEx & PROC_EX_CRITICAL_HIT) ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED; // charge update only at crit hits, no hidden cooldowns
             }
             break;
@@ -4021,7 +4021,7 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* /*pVictim*/, uint32
                     if (procSpell->Effect[i] == SPELL_EFFECT_ENERGIZE)
                     {
                         int32 mana = procSpell->CalculateSimpleValue(SpellEffectIndex(i));
-                        CastCustomSpell(this, 54986, nullptr, &mana, nullptr, true, castItem, triggeredByAura);
+                        CastCustomSpell(this, 54986, nullptr, &mana, nullptr, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                         break;
                     }
                 }
@@ -4048,7 +4048,7 @@ SpellAuraProcResult Unit::HandleModDamagePercentDoneAuraProc(Unit* /*pVictim*/, 
         if (cooldown && GetTypeId() == TYPEID_PLAYER && ((Player*)this)->HasSpellCooldown(34075))
             return SPELL_AURA_PROC_FAILED;
 
-        CastCustomSpell(this, 34075, &bp, nullptr, nullptr, true, castItem, triggeredByAura);
+        CastCustomSpell(this, 34075, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
     }
     // Arcane Blast
     else if (spellInfo->Id == 36032 && procSpell->SpellFamilyName == SPELLFAMILY_MAGE && procSpell->SpellIconID == 2294)
@@ -4135,7 +4135,7 @@ SpellAuraProcResult Unit::HandleManaShieldAuraProc(Unit* pVictim, uint32 /*damag
     if (cooldown && GetTypeId() == TYPEID_PLAYER && ((Player*)this)->HasSpellCooldown(triggered_spell_id))
         return SPELL_AURA_PROC_FAILED;
 
-    CastSpell(target, triggered_spell_id, true, castItem, triggeredByAura);
+    CastSpell(target, triggered_spell_id, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->AddSpellCooldown(triggered_spell_id, 0, time(nullptr) + cooldown);

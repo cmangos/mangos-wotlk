@@ -73,10 +73,10 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_HIGHBORNE_BUNNY)
-            pSummoned->CastSpell(pSummoned, SPELL_RIBBON_OF_SOULS, false);
+            pSummoned->CastSpell(pSummoned, SPELL_RIBBON_OF_SOULS, TRIGGERED_NONE);
         else if (pSummoned->GetEntry() == NPC_HIGHBORNE_LAMENTER)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_HIGHBORNE_AURA, false);
+            pSummoned->CastSpell(pSummoned, SPELL_HIGHBORNE_AURA, TRIGGERED_NONE);
 
             pSummoned->SetLevitate(true);
             pSummoned->GetMotionMaster()->MovePoint(0, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ() + 5.0f);

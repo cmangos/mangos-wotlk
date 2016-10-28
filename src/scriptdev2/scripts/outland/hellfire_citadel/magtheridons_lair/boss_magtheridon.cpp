@@ -448,10 +448,10 @@ bool GOUse_go_manticron_cube(Player* pPlayer, GameObject* pGo)
 
             // visual is cast by cube
             if (Creature* pTrigger = GetClosestCreatureWithEntry(pGo, NPC_RAID_TRIGGER, 5.0f))
-                pTrigger->CastSpell(pTrigger, SPELL_SHADOW_GRASP_VISUAL, false);
+                pTrigger->CastSpell(pTrigger, SPELL_SHADOW_GRASP_VISUAL, TRIGGERED_NONE);
 
             // the real spell is cast by player
-            pPlayer->CastSpell(pPlayer, SPELL_SHADOW_GRASP, false, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->CastSpell(pPlayer, SPELL_SHADOW_GRASP, TRIGGERED_NONE, NULL, NULL, pGo->GetObjectGuid());
         }
     }
 

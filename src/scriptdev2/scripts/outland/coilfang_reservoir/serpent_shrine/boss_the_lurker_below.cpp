@@ -288,7 +288,7 @@ bool GOUse_go_strange_pool(Player* pPlayer, GameObject* pGo)
         {
             if (pInstance->GetData(TYPE_THELURKER_EVENT) == NOT_STARTED || pInstance->GetData(TYPE_THELURKER_EVENT) == FAIL)
             {
-                pPlayer->CastSpell(pPlayer, SPELL_LURKER_SPAWN_TRIGGER, true);
+                pPlayer->CastSpell(pPlayer, SPELL_LURKER_SPAWN_TRIGGER, TRIGGERED_OLD_TRIGGERED);
                 pInstance->SetData(TYPE_THELURKER_EVENT, IN_PROGRESS);
                 return true;
             }

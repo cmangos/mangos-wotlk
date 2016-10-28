@@ -610,7 +610,7 @@ void WorldSession::HandleSelfResOpcode(WorldPacket& /*recv_data*/)
     {
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL));
         if (spellInfo)
-            _player->CastSpell(_player, spellInfo, false);
+            _player->CastSpell(_player, spellInfo, TRIGGERED_NONE);
 
         _player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
     }
@@ -641,7 +641,7 @@ void WorldSession::HandleSpellClick(WorldPacket& recv_data)
             Unit* target = (itr->second.castFlags & 0x2) ? (Unit*)_player : (Unit*)unit;
 
             if (itr->second.spellId)
-                caster->CastSpell(target, itr->second.spellId, true);
+                caster->CastSpell(target, itr->second.spellId, TRIGGERED_OLD_TRIGGERED);
             else
                 sLog.outError("WorldSession::HandleSpellClick: npc_spell_click with entry %u has 0 in spell_id. Not handled custom case?", unit->GetEntry());
         }

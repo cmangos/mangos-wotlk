@@ -464,7 +464,7 @@ struct boss_sartharionAI : public ScriptedAI
             if (m_pInstance)
             {
                 if (Creature* pCyclone = m_creature->GetMap()->GetCreature(m_pInstance->SelectRandomFireCycloneGuid()))
-                    pCyclone->CastSpell(pCyclone, SPELL_CYCLONE_AURA_STRIKE, true);
+                    pCyclone->CastSpell(pCyclone, SPELL_CYCLONE_AURA_STRIKE, TRIGGERED_OLD_TRIGGERED);
 
                 switch (urand(0, 5))
                 {
@@ -620,7 +620,7 @@ struct dummy_dragonAI : public ScriptedAI
         // eject players and despawn portal owner
         if (Creature* pTemp = m_creature->GetMap()->GetCreature(m_portalOwnerGuid))
         {
-            pTemp->CastSpell(pTemp, SPELL_TWILIGHT_SHIFT_REMOVAL_ALL, true);
+            pTemp->CastSpell(pTemp, SPELL_TWILIGHT_SHIFT_REMOVAL_ALL, TRIGGERED_OLD_TRIGGERED);
             pTemp->ForcedDespawn(1000);
         }
     }
@@ -717,7 +717,7 @@ struct dummy_dragonAI : public ScriptedAI
 
         if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS || !m_pInstance->IsActivePortal())
         {
-            pCreature->CastSpell(pCreature, SPELL_TWILIGHT_SHIFT_REMOVAL_ALL, true);
+            pCreature->CastSpell(pCreature, SPELL_TWILIGHT_SHIFT_REMOVAL_ALL, TRIGGERED_OLD_TRIGGERED);
 
             if (GameObject* pPortal = GetClosestGameObjectWithEntry(m_creature, GO_TWILIGHT_PORTAL, 50.0f))
                 pPortal->SetLootState(GO_JUST_DEACTIVATED);
@@ -958,11 +958,11 @@ struct mob_shadronAI : public dummy_dragonAI
     {
         if (pSummoned->GetEntry() == NPC_DISCIPLE_OF_SHADRON)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_GIFT_OF_TWILIGTH_SHA, true);
+            pSummoned->CastSpell(pSummoned, SPELL_GIFT_OF_TWILIGTH_SHA, TRIGGERED_OLD_TRIGGERED);
             m_portalOwnerGuid = pSummoned->GetObjectGuid();
         }
         else if (pSummoned->GetEntry() == NPC_ACOLYTE_OF_SHADRON)
-            pSummoned->CastSpell(pSummoned, SPELL_GIFT_OF_TWILIGTH_SAR, true);
+            pSummoned->CastSpell(pSummoned, SPELL_GIFT_OF_TWILIGTH_SAR, TRIGGERED_OLD_TRIGGERED);
 
         // update phasemask manually
         pSummoned->SetPhaseMask(PHASEMASK_TWILIGHT_REALM, true);
@@ -1077,11 +1077,11 @@ struct mob_vesperonAI : public dummy_dragonAI
         // ToDo: these spells may break the encounter and make it unplayable. More research is required!!!
         if (pSummoned->GetEntry() == NPC_DISCIPLE_OF_VESPERON)
         {
-            //pSummoned->CastSpell(pSummoned, SPELL_TWILIGHT_TORMENT_VESP, true);
+            //pSummoned->CastSpell(pSummoned, SPELL_TWILIGHT_TORMENT_VESP, TRIGGERED_OLD_TRIGGERED);
             m_portalOwnerGuid = pSummoned->GetObjectGuid();
         }
         //else if (pSummoned->GetEntry() == NPC_ACOLYTE_OF_VESPERON)
-        //    pSummoned->CastSpell(pSummoned, SPELL_TWILIGHT_TORMENT_VESP_ACO, true);
+        //    pSummoned->CastSpell(pSummoned, SPELL_TWILIGHT_TORMENT_VESP_ACO, TRIGGERED_OLD_TRIGGERED);
 
         // update phasemask manually
         pSummoned->SetPhaseMask(PHASEMASK_TWILIGHT_REALM, true);

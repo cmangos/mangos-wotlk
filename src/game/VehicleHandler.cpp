@@ -130,7 +130,7 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket)
         SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(destVehicle->GetEntry());
         for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
             if (itr->second.IsFitToRequirements(_player, destVehicle->GetTypeId() == TYPEID_UNIT ? (Creature*)destVehicle : nullptr))
-                _player->CastSpell(destVehicle, itr->second.spellId, true);
+                _player->CastSpell(destVehicle, itr->second.spellId, TRIGGERED_OLD_TRIGGERED);
     }
     else
         srcVehicle->GetVehicleInfo()->SwitchSeat(_player, seat);
@@ -153,7 +153,7 @@ void WorldSession::HandleRideVehicleInteract(WorldPacket& recvPacket)
     if (!vehicle->IsInSameRaidWith(_player))
         return;
 
-    _player->CastSpell(vehicle, SPELL_RIDE_VEHICLE_HARDCODED, true);
+    _player->CastSpell(vehicle, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
 }
 
 void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)

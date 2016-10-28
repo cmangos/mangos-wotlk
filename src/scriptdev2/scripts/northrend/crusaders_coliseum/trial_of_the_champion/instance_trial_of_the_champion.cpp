@@ -794,7 +794,7 @@ void instance_trial_of_the_champion::DoSendChampionsToExit()
         {
             // kill credit spell on completion
             if (GetData(TYPE_GRAND_CHAMPIONS) == DONE)
-                pChampion->CastSpell(pChampion, SPELL_CHAMPION_KILL_CREDIT, true);
+                pChampion->CastSpell(pChampion, SPELL_CHAMPION_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
 
             pChampion->SetWalk(true);
             pChampion->SetStandState(UNIT_STAND_STATE_STAND);
@@ -824,7 +824,7 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
                 if (Creature* pTrigger = GetSingleCreatureFromStorage(NPC_WORLD_TRIGGER))
                     pHerald->GetMotionMaster()->MovePoint(0, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ());
 
-                pHerald->CastSpell(pHerald, SPELL_ARGENT_GET_PLAYER_COUNT, true);
+                pHerald->CastSpell(pHerald, SPELL_ARGENT_GET_PLAYER_COUNT, TRIGGERED_OLD_TRIGGERED);
                 pHerald->PlayDirectSound(SOUND_ID_CHALLENGE);
             }
             break;
@@ -859,7 +859,7 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
                 if (Creature* pTirion = GetSingleCreatureFromStorage(NPC_TIRION_FORDRING))
                     pHerald->SetFacingToObject(pTirion);
 
-                pHerald->CastSpell(pHerald, SPELL_ARGENT_SUMMON_BOSS_4, true);
+                pHerald->CastSpell(pHerald, SPELL_ARGENT_SUMMON_BOSS_4, TRIGGERED_OLD_TRIGGERED);
                 DoScriptText(m_uiGrandChampionEntry == NPC_EADRIC ? SAY_HERALD_EADRIC : SAY_HERALD_PALETRESS, pHerald);
 
                 DoUseDoorOrButton(GO_MAIN_GATE);
@@ -868,8 +868,8 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
                 // summon the selected champion
                 if (Creature* pChampion = pHerald->SummonCreature(m_uiGrandChampionEntry,  aArgentChallengeHelpers[9].fX, aArgentChallengeHelpers[9].fY, aArgentChallengeHelpers[9].fZ, aArgentChallengeHelpers[9].fO, TEMPSUMMON_DEAD_DESPAWN, 0))
                 {
-                    pChampion->CastSpell(pChampion, SPELL_SPECTATOR_FORCE_CHEER, true);
-                    pChampion->CastSpell(pChampion, SPELL_SPECTATOR_FORCE_CHEER_2, true);
+                    pChampion->CastSpell(pChampion, SPELL_SPECTATOR_FORCE_CHEER, TRIGGERED_OLD_TRIGGERED);
+                    pChampion->CastSpell(pChampion, SPELL_SPECTATOR_FORCE_CHEER_2, TRIGGERED_OLD_TRIGGERED);
 
                     if (Creature* pSpectator = GetSingleCreatureFromStorage(NPC_SPECTATOR_HORDE))
                         DoScriptText(EMOTE_HORDE_ARGENT_CHAMPION, pSpectator, pChampion);
@@ -937,7 +937,7 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
                 {
                     if (Creature* pGryphon = pHerald->SummonCreature(NPC_BLACK_KNIGHT_GRYPHON, aKnightPositions[1][0], aKnightPositions[1][1], aKnightPositions[1][2], aKnightPositions[1][3], TEMPSUMMON_TIMED_DESPAWN, 75000))
                     {
-                        pKnight->CastSpell(pGryphon, SPELL_RIDE_VEHICLE_HARDCODED, true);
+                        pKnight->CastSpell(pGryphon, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
                         pGryphon->SetWalk(false);
                         pGryphon->SetLevitate(true);
                     }
@@ -949,7 +949,7 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
             break;
         case SAY_HERALD_BLACK_KNIGHT_SPAWN:
             if (Creature* pHerald = GetSingleCreatureFromStorage(m_uiHeraldEntry))
-                pHerald->CastSpell(pHerald, SPELL_HERALD_FACE_DARK_KNIGHT, false);
+                pHerald->CastSpell(pHerald, SPELL_HERALD_FACE_DARK_KNIGHT, TRIGGERED_NONE);
             if (Creature* pGryphon = GetSingleCreatureFromStorage(NPC_BLACK_KNIGHT_GRYPHON))
                 pGryphon->GetMotionMaster()->MoveWaypoint();
             break;
@@ -969,11 +969,11 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
             break;
         case SPELL_DEATHS_RESPITE:
             if (Creature* pKnight = GetSingleCreatureFromStorage(NPC_BLACK_KNIGHT))
-                pKnight->CastSpell(pKnight, SPELL_DEATHS_RESPITE, false);
+                pKnight->CastSpell(pKnight, SPELL_DEATHS_RESPITE, TRIGGERED_NONE);
             break;
         case NPC_BLACK_KNIGHT_GRYPHON:
             if (Creature* pHerald = GetSingleCreatureFromStorage(m_uiHeraldEntry))
-                pHerald->CastSpell(pHerald, SPELL_ARGENT_HERALD_FEIGN_DEATH, true);
+                pHerald->CastSpell(pHerald, SPELL_ARGENT_HERALD_FEIGN_DEATH, TRIGGERED_OLD_TRIGGERED);
             break;
         case SAY_BLACK_KNIGHT_INTRO_3:
             if (Creature* pKnight = GetSingleCreatureFromStorage(NPC_BLACK_KNIGHT))
@@ -1039,7 +1039,7 @@ void instance_trial_of_the_champion::Update(uint32 uiDiff)
                             if (Creature* pMount = pChampion->SummonCreature(m_uiTeam == ALLIANCE ? aHordeChampions[uiIndex].uiMount : aAllianceChampions[uiIndex].uiMount,
                                                    pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), pTrigger->GetAngle(pCenterTrigger), TEMPSUMMON_DEAD_DESPAWN, 0))
                             {
-                                pChampion->CastSpell(pMount, SPELL_RIDE_VEHICLE_HARDCODED, true);
+                                pChampion->CastSpell(pMount, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
 
                                 // set guid
                                 m_ArenaChampionsGuids[m_uiIntroStage] = pChampion->GetObjectGuid();
@@ -1079,9 +1079,9 @@ void instance_trial_of_the_champion::Update(uint32 uiDiff)
 
                             switch (m_uiIntroStage)
                             {
-                                case 0: pHerald->CastSpell(pHerald, SPELL_ARGENT_SUMMON_CHAMPION_1, true); break;
-                                case 1: pHerald->CastSpell(pHerald, SPELL_ARGENT_SUMMON_CHAMPION_2, true); break;
-                                case 2: pHerald->CastSpell(pHerald, SPELL_ARGENT_SUMMON_CHAMPION_3, true); break;
+                                case 0: pHerald->CastSpell(pHerald, SPELL_ARGENT_SUMMON_CHAMPION_1, TRIGGERED_OLD_TRIGGERED); break;
+                                case 1: pHerald->CastSpell(pHerald, SPELL_ARGENT_SUMMON_CHAMPION_2, TRIGGERED_OLD_TRIGGERED); break;
+                                case 2: pHerald->CastSpell(pHerald, SPELL_ARGENT_SUMMON_CHAMPION_3, TRIGGERED_OLD_TRIGGERED); break;
                             }
 
                             // handle emote
@@ -1092,7 +1092,7 @@ void instance_trial_of_the_champion::Update(uint32 uiDiff)
                             if (Creature* pMount = pChampion->SummonCreature(m_uiTeam == ALLIANCE ? aHordeChampions[uiIndex].uiMount : aAllianceChampions[uiIndex].uiMount,
                                                    aIntroPositions[0][0], aIntroPositions[0][1], aIntroPositions[0][2], aIntroPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0))
                             {
-                                pChampion->CastSpell(pMount, SPELL_RIDE_VEHICLE_HARDCODED, true);
+                                pChampion->CastSpell(pMount, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
 
                                 pMount->SetWalk(false);
                                 pCenterTrigger->GetContactPoint(pChampion, fX, fY, fZ, 2 * INTERACTION_DISTANCE);

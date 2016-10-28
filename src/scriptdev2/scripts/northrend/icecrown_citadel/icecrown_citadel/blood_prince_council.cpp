@@ -204,7 +204,7 @@ struct npc_queen_lanathel_introAI : public ScriptedAI, private DialogueHelper
         {
             // This should be casted when they stand up - but because of the workaround, it will be casted here
             if (Creature* pOrb = m_pInstance->GetSingleCreatureFromStorage(NPC_BLOOD_ORB_CONTROL))
-                pOrb->CastSpell(pOrb, SPELL_INVOCATION_VALANAR, false);
+                pOrb->CastSpell(pOrb, SPELL_INVOCATION_VALANAR, TRIGGERED_NONE);
             if (Creature* pTaldaram = m_pInstance->GetSingleCreatureFromStorage(NPC_TALDARAM))
                 pTaldaram->HandleEmote(EMOTE_ONESHOT_ROAR);
             if (Creature* pKeleseth = m_pInstance->GetSingleCreatureFromStorage(NPC_KELESETH))
@@ -547,7 +547,7 @@ struct blood_prince_council_baseAI : public ScriptedAI
                 if (m_pInstance)
                 {
                     if (Creature* pOrb = m_pInstance->GetSingleCreatureFromStorage(NPC_BLOOD_ORB_CONTROL))
-                        pOrb->CastSpell(pOrb, SPELL_INVOCATION_VALANAR, false);
+                        pOrb->CastSpell(pOrb, SPELL_INVOCATION_VALANAR, TRIGGERED_NONE);
 
                     m_uiResetTimer = 0;
                 }
@@ -627,7 +627,7 @@ struct boss_valanar_iccAI : public blood_prince_council_baseAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_KINETIC_BOMB_TARGET)
-            pSummoned->CastSpell(pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ() + 20.0f, SPELL_KINETIC_BOMB, true, NULL, NULL, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ() + 20.0f, SPELL_KINETIC_BOMB, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
         else if (pSummoned->GetEntry() == NPC_KINETIC_BOMB)
         {
             // Handle Kinetic bomb movement

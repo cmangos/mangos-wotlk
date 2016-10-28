@@ -138,7 +138,7 @@ struct boss_rotfaceAI : public ScriptedAI
 
             if (Creature* pPutricide = m_pInstance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
             {
-                pPutricide->CastSpell(pPutricide, SPELL_OOZE_FLOOD_PERIODIC, true);
+                pPutricide->CastSpell(pPutricide, SPELL_OOZE_FLOOD_PERIODIC, TRIGGERED_OLD_TRIGGERED);
                 pPutricide->SetWalk(false);
                 pPutricide->GetMotionMaster()->MovePoint(102, afBalconyLocation[0], afBalconyLocation[1], afBalconyLocation[2]);
 
@@ -203,7 +203,7 @@ struct boss_rotfaceAI : public ScriptedAI
                 return;
 
             if (Creature* pPutricide = m_pInstance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
-                pPutricide->CastSpell(pSummoned, SPELL_VILE_GAS, true);
+                pPutricide->CastSpell(pSummoned, SPELL_VILE_GAS, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -285,7 +285,7 @@ struct mob_little_oozeAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_STICKY_OOZE)
-            pSummoned->CastSpell(pSummoned, SPELL_STICKY_AURA, true);
+            pSummoned->CastSpell(pSummoned, SPELL_STICKY_AURA, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -362,7 +362,7 @@ struct mob_big_oozeAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_STICKY_OOZE)
-            pSummoned->CastSpell(pSummoned, SPELL_STICKY_AURA, true);
+            pSummoned->CastSpell(pSummoned, SPELL_STICKY_AURA, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override

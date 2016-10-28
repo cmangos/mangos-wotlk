@@ -227,7 +227,7 @@ struct boss_flame_leviathanAI : public ScriptedAI
         if (Creature* pFlyMachine = m_creature->SummonCreature(NPC_BRANN_FLYING_MACHINE, 175.2838f, -210.4325f, 501.2375f, 1.42f, TEMPSUMMON_CORPSE_DESPAWN, 0))
         {
             if (Creature* pBrann = m_creature->SummonCreature(NPC_BRANN_BRONZEBEARD_LEVIATHAN, 175.2554f, -210.6305f, 500.7375f, 1.42f, TEMPSUMMON_CORPSE_DESPAWN, 0))
-                pBrann->CastSpell(pFlyMachine, SPELL_RIDE_VEHICLE, true);
+                pBrann->CastSpell(pFlyMachine, SPELL_RIDE_VEHICLE, TRIGGERED_OLD_TRIGGERED);
 
             pFlyMachine->SetWalk(false);
             pFlyMachine->GetMotionMaster()->MovePoint(1, 229.9419f, -130.3764f, 409.5681f);
@@ -262,16 +262,16 @@ struct boss_flame_leviathanAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_THORIM_HAMMER_VEHICLE:
-                pSummoned->CastSpell(pSummoned, SPELL_LIGHTNING_SKYBEAM, true);
+                pSummoned->CastSpell(pSummoned, SPELL_LIGHTNING_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_MIMIRON_INFERNO_VEHICLE:
-                pSummoned->CastSpell(pSummoned, SPELL_RED_SKYBEAM, true);
+                pSummoned->CastSpell(pSummoned, SPELL_RED_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_HODIR_FURY_VEHICLE:
-                pSummoned->CastSpell(pSummoned, SPELL_BLUE_SKYBEAM, true);
+                pSummoned->CastSpell(pSummoned, SPELL_BLUE_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_FREYA_WARD_VEHICLE:
-                pSummoned->CastSpell(pSummoned, SPELL_GREEN_SKYBEAM, true);
+                pSummoned->CastSpell(pSummoned, SPELL_GREEN_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -339,7 +339,7 @@ struct boss_flame_leviathanAI : public ScriptedAI
         // check the states twice: at reset and at aggro to make sure that some towers were not destroyed in the meanwhile
         if (m_pInstance->GetData(TYPE_TOWER_HODIR) == DONE)
         {
-            pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_FROST, true);
+            pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_FROST, TRIGGERED_OLD_TRIGGERED);
             ++uiActiveTowers;
             m_bUlduarTower[TOWER_ID_HODIR] = true;
         }
@@ -347,7 +347,7 @@ struct boss_flame_leviathanAI : public ScriptedAI
             pOrbital->RemoveAurasDueToSpell(SPELL_TOWER_OF_FROST);
         if (m_pInstance->GetData(TYPE_TOWER_FREYA) == DONE)
         {
-            pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_LIFE, true);
+            pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_LIFE, TRIGGERED_OLD_TRIGGERED);
             ++uiActiveTowers;
             m_bUlduarTower[TOWER_ID_FREYA] = true;
         }
@@ -355,7 +355,7 @@ struct boss_flame_leviathanAI : public ScriptedAI
             pOrbital->RemoveAurasDueToSpell(SPELL_TOWER_OF_LIFE);
         if (m_pInstance->GetData(TYPE_TOWER_MIMIRON) == DONE)
         {
-            pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_FLAMES, true);
+            pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_FLAMES, TRIGGERED_OLD_TRIGGERED);
             ++uiActiveTowers;
             m_bUlduarTower[TOWER_ID_MIMIRON] = true;
         }
@@ -363,7 +363,7 @@ struct boss_flame_leviathanAI : public ScriptedAI
             pOrbital->RemoveAurasDueToSpell(SPELL_TOWER_OF_FLAMES);
         if (m_pInstance->GetData(TYPE_TOWER_THORIM) == DONE)
         {
-            pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_STORMS, true);
+            pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_STORMS, TRIGGERED_OLD_TRIGGERED);
             ++uiActiveTowers;
             m_bUlduarTower[TOWER_ID_THORIM] = true;
         }
@@ -599,7 +599,7 @@ struct npc_hodir_fury_reticleAI : public ScriptedAI
 
         // cast Hodir Fury on point reached and search for another target
         if (Creature* pHodirFury = m_creature->GetMap()->GetCreature(m_hodirFuryGuid))
-            pHodirFury->CastSpell(m_creature, SPELL_HODIR_FURY, true);
+            pHodirFury->CastSpell(m_creature, SPELL_HODIR_FURY, TRIGGERED_OLD_TRIGGERED);
 
         m_uiTargetChaseTimer = 5000;
     }

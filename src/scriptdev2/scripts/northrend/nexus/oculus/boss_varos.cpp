@@ -273,8 +273,8 @@ struct npc_azure_ring_captainAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_ARCANE_BEAM)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BEAM_PERIODIC, true);
-            pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BEAM_SPAWN, true);
+            pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BEAM_PERIODIC, TRIGGERED_OLD_TRIGGERED);
+            pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BEAM_SPAWN, TRIGGERED_OLD_TRIGGERED);
             m_arcaneBeamGuid = pSummoned->GetObjectGuid();
         }
     }

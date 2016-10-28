@@ -188,7 +188,7 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
             Creature* pCaster = m_pInstance->instance->GetCreature(m_vAddGuids[i]);
             Creature* pTarget = m_pInstance->instance->GetCreature(m_vAddGuids[(i + 2) % s]);
             if (pCaster && pTarget)
-                pCaster->CastSpell(pTarget, SPELL_CHANNELING, false);
+                pCaster->CastSpell(pTarget, SPELL_CHANNELING, TRIGGERED_NONE);
         }
     }
 

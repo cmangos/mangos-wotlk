@@ -115,27 +115,27 @@ bool GossipSelect_go_icc_teleporter(Player* pPlayer, GameObject* pGo, uint32 uiS
     {
             // Lights Hammer
         case GOSSIP_ACTION_INFO_DEF:
-            pPlayer->CastSpell(pPlayer, SPELL_TELE_LIGHTS_HAMMER, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->CastSpell(pPlayer, SPELL_TELE_LIGHTS_HAMMER, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             break;
             // Oratory Damned
         case GOSSIP_ACTION_INFO_DEF + 1:
-            pPlayer->CastSpell(pPlayer, SPELL_TELE_ORATORY_DAMNED, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->CastSpell(pPlayer, SPELL_TELE_ORATORY_DAMNED, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             break;
             // Rampart of Skulls
         case GOSSIP_ACTION_INFO_DEF + 2:
-            pPlayer->CastSpell(pPlayer, SPELL_TELE_RAMPART_OF_SKULLS, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->CastSpell(pPlayer, SPELL_TELE_RAMPART_OF_SKULLS, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             break;
             // Deathbringer's Rise
         case GOSSIP_ACTION_INFO_DEF + 3:
-            pPlayer->CastSpell(pPlayer, SPELL_TELE_DEATHBRINGERS_RISE, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->CastSpell(pPlayer, SPELL_TELE_DEATHBRINGERS_RISE, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             break;
             // Upper Spire
         case GOSSIP_ACTION_INFO_DEF + 4:
-            pPlayer->CastSpell(pPlayer, SPELL_TELE_UPPER_SPIRE, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->CastSpell(pPlayer, SPELL_TELE_UPPER_SPIRE, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             break;
             // Sindragosa's Lair
         case GOSSIP_ACTION_INFO_DEF + 5:
-            pPlayer->CastSpell(pPlayer, GOSSIP_ITEM_TELE_SINDRAGOSAS_LAIR, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->CastSpell(pPlayer, GOSSIP_ITEM_TELE_SINDRAGOSAS_LAIR, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             break;
         default:
             return true;
@@ -167,7 +167,7 @@ bool AreaTrigger_at_frozen_throne_tele(Player* pPlayer, AreaTriggerEntry const* 
     if ((pInstance->GetData(TYPE_PROFESSOR_PUTRICIDE) == DONE && pInstance->GetData(TYPE_QUEEN_LANATHEL) == DONE &&
             pInstance->GetData(TYPE_SINDRAGOSA) == DONE) || pPlayer->isGameMaster())
     {
-        pPlayer->CastSpell(pPlayer, SPELL_TELE_FROZEN_THRONE, true);
+        pPlayer->CastSpell(pPlayer, SPELL_TELE_FROZEN_THRONE, TRIGGERED_OLD_TRIGGERED);
         return true;
     }
 
@@ -200,7 +200,7 @@ bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
         {
             if ((*itr)->GetPositionZ() >= 75.0f && (*itr)->GetPositionZ() < 82.0f)
             {
-                (*itr)->CastSpell((*itr), SPELL_WEB_BEAM, true);
+                (*itr)->CastSpell((*itr), SPELL_WEB_BEAM, TRIGGERED_OLD_TRIGGERED);
                 (*itr)->SetWalk(false);
                 (*itr)->GetMotionMaster()->MoveWaypoint();
                 (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
@@ -217,7 +217,7 @@ bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
         {
             if ((*itr)->GetPositionZ() >= 85.0f)
             {
-                (*itr)->CastSpell((*itr), SPELL_WEB_BEAM, true);
+                (*itr)->CastSpell((*itr), SPELL_WEB_BEAM, TRIGGERED_OLD_TRIGGERED);
                 (*itr)->SetWalk(false);
                 (*itr)->GetMotionMaster()->MoveWaypoint();
                 (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
@@ -261,7 +261,7 @@ bool AreaTrigger_at_putricides_trap(Player* pPlayer, AreaTriggerEntry const* pAt
     // cast spell and start event
     if (Creature* pTrap = pInstance->GetSingleCreatureFromStorage(NPC_PUTRICIDES_TRAP))
     {
-        pTrap->CastSpell(pTrap, SPELL_GIANT_INSECT_SWARM, false);
+        pTrap->CastSpell(pTrap, SPELL_GIANT_INSECT_SWARM, TRIGGERED_NONE);
         pInstance->SetData(TYPE_PLAGUE_WING_ENTRANCE, IN_PROGRESS);
     }
 

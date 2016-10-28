@@ -230,16 +230,16 @@ struct boss_netherspiteAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_VOID_ZONE:
-                pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION, false);
+                pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION, TRIGGERED_NONE);
                 break;
             case NPC_PORTAL_RED:
-                pSummoned->CastSpell(pSummoned, SPELL_RED_PORTAL, false);
+                pSummoned->CastSpell(pSummoned, SPELL_RED_PORTAL, TRIGGERED_NONE);
                 break;
             case NPC_PORTAL_GREEN:
-                pSummoned->CastSpell(pSummoned, SPELL_GREEN_PORTAL, false);
+                pSummoned->CastSpell(pSummoned, SPELL_GREEN_PORTAL, TRIGGERED_NONE);
                 break;
             case NPC_PORTAL_BLUE:
-                pSummoned->CastSpell(pSummoned, SPELL_BLUE_PORTAL, false);
+                pSummoned->CastSpell(pSummoned, SPELL_BLUE_PORTAL, TRIGGERED_NONE);
                 break;
         }
     }

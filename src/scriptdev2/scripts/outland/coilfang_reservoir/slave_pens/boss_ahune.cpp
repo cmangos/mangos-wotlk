@@ -301,9 +301,9 @@ struct npc_frozen_coreAI : public Scripted_NoMovementAI
     {
         if (pSummoned->GetEntry() == NPC_ICE_SPEAR_BUNNY)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_ICE_SPEAR_VISUAL, true);
-            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_ICE_SPEAR_GO, true);
-            pSummoned->CastSpell(pSummoned, SPELL_ICE_SPEAR_DELAY, true);
+            pSummoned->CastSpell(pSummoned, SPELL_ICE_SPEAR_VISUAL, TRIGGERED_OLD_TRIGGERED);
+            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_ICE_SPEAR_GO, TRIGGERED_OLD_TRIGGERED);
+            pSummoned->CastSpell(pSummoned, SPELL_ICE_SPEAR_DELAY, TRIGGERED_OLD_TRIGGERED);
         }
     }
 

@@ -195,8 +195,8 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
             case NPC_RIGHT_ARM:
             {
                 int32 uiSeat = (int32)SEAT_ID_RIGHT;
-                pSummoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &uiSeat, NULL, NULL, true);
-                pSummoned->CastSpell(pSummoned, SPELL_ARM_VISUAL, true);
+                pSummoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &uiSeat, NULL, NULL, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_ARM_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
                 if (m_creature->getVictim())
                     pSummoned->AI()->AttackStart(m_creature->getVictim());
@@ -205,8 +205,8 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
             case NPC_LEFT_ARM:
             {
                 int32 uiSeat = (int32)SEAT_ID_LEFT;
-                pSummoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &uiSeat, NULL, NULL, true);
-                pSummoned->CastSpell(pSummoned, SPELL_ARM_VISUAL, true);
+                pSummoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &uiSeat, NULL, NULL, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_ARM_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
                 if (m_creature->getVictim())
                     pSummoned->AI()->AttackStart(m_creature->getVictim());
@@ -218,8 +218,8 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
                 pSummoned->ForcedDespawn(10000);
 
                 // cast visuals and damage spell
-                pSummoned->CastSpell(m_creature, pSummoned->GetEntry() == NPC_FOCUSED_EYEBEAM_LEFT ? SPELL_EYEBEAM_VISUAL_LEFT : SPELL_EYEBEAM_VISUAL_RIGHT, true);
-                pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_EYEBEAM_PERIODIC : SPELL_EYEBEAM_PERIODIC_H, true);
+                pSummoned->CastSpell(m_creature, pSummoned->GetEntry() == NPC_FOCUSED_EYEBEAM_LEFT ? SPELL_EYEBEAM_VISUAL_LEFT : SPELL_EYEBEAM_VISUAL_RIGHT, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_EYEBEAM_PERIODIC : SPELL_EYEBEAM_PERIODIC_H, TRIGGERED_OLD_TRIGGERED);
 
                 // follow the summoner
                 if (pSummoned->IsTemporarySummon())
@@ -244,16 +244,16 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
             {
                 if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetKoloRubbleStalker(false)))
                 {
-                    pStalker->CastSpell(pStalker, m_bIsRegularMode ? SPELL_FALLING_RUBBLE : SPELL_FALLING_RUBBLE_H, true);
-                    pStalker->CastSpell(pStalker, SPELL_SUMMON_RUBBLE, true);
-                    pStalker->CastSpell(pStalker, SPELL_CANCEL_STONE_GRIP, true);
+                    pStalker->CastSpell(pStalker, m_bIsRegularMode ? SPELL_FALLING_RUBBLE : SPELL_FALLING_RUBBLE_H, TRIGGERED_OLD_TRIGGERED);
+                    pStalker->CastSpell(pStalker, SPELL_SUMMON_RUBBLE, TRIGGERED_OLD_TRIGGERED);
+                    pStalker->CastSpell(pStalker, SPELL_CANCEL_STONE_GRIP, TRIGGERED_OLD_TRIGGERED);
                 }
 
                 m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_OPEN_ARMS, false);
             }
 
             m_creature->RemoveAurasByCasterSpell(SPELL_RIDE_KOLOGARN_ARMS, pSummoned->GetObjectGuid());
-            pSummoned->CastSpell(m_creature, m_bIsRegularMode ? SPELL_ARM_DEAD_DAMAGE_KOLOGARN : SPELL_ARM_DEAD_DAMAGE_KOLOGARN_H, true);
+            pSummoned->CastSpell(m_creature, m_bIsRegularMode ? SPELL_ARM_DEAD_DAMAGE_KOLOGARN : SPELL_ARM_DEAD_DAMAGE_KOLOGARN_H, TRIGGERED_OLD_TRIGGERED);
             DoScriptText(SAY_ARM_LOST_LEFT, m_creature);
             m_uiRespawnLeftTimer = 48000;
 
@@ -273,16 +273,16 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
             {
                 if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetKoloRubbleStalker(true)))
                 {
-                    pStalker->CastSpell(pStalker, m_bIsRegularMode ? SPELL_FALLING_RUBBLE : SPELL_FALLING_RUBBLE_H, true);
-                    pStalker->CastSpell(pStalker, SPELL_SUMMON_RUBBLE, true);
-                    pStalker->CastSpell(pStalker, SPELL_CANCEL_STONE_GRIP, true);
+                    pStalker->CastSpell(pStalker, m_bIsRegularMode ? SPELL_FALLING_RUBBLE : SPELL_FALLING_RUBBLE_H, TRIGGERED_OLD_TRIGGERED);
+                    pStalker->CastSpell(pStalker, SPELL_SUMMON_RUBBLE, TRIGGERED_OLD_TRIGGERED);
+                    pStalker->CastSpell(pStalker, SPELL_CANCEL_STONE_GRIP, TRIGGERED_OLD_TRIGGERED);
                 }
 
                 m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_OPEN_ARMS, false);
             }
 
             m_creature->RemoveAurasByCasterSpell(SPELL_RIDE_KOLOGARN_ARMS, pSummoned->GetObjectGuid());
-            pSummoned->CastSpell(m_creature, m_bIsRegularMode ? SPELL_ARM_DEAD_DAMAGE_KOLOGARN : SPELL_ARM_DEAD_DAMAGE_KOLOGARN_H, true);
+            pSummoned->CastSpell(m_creature, m_bIsRegularMode ? SPELL_ARM_DEAD_DAMAGE_KOLOGARN : SPELL_ARM_DEAD_DAMAGE_KOLOGARN_H, TRIGGERED_OLD_TRIGGERED);
             DoScriptText(SAY_ARM_LOST_RIGHT, m_creature);
             m_uiRespawnRightTimer = 48000;
 
@@ -425,9 +425,9 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
                     if (m_pInstance)
                     {
                         if (Creature* pRightArm = m_pInstance->GetSingleCreatureFromStorage(NPC_RIGHT_ARM))
-                            pRightArm->CastSpell(pRightArm, SPELL_BERSERK, true);
+                            pRightArm->CastSpell(pRightArm, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                         if (Creature* pLeftArm = m_pInstance->GetSingleCreatureFromStorage(NPC_LEFT_ARM))
-                            pLeftArm->CastSpell(pLeftArm, SPELL_BERSERK, true);
+                            pLeftArm->CastSpell(pLeftArm, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                     }
 
                     DoScriptText(SAY_BERSERK, m_creature);

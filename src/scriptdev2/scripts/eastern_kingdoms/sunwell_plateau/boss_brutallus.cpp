@@ -213,7 +213,7 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
     {
         // Yell of Madrigosa on death
         if (pSummoned->GetEntry() == NPC_MADRIGOSA)
-            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_FELBLAZE, true);
+            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_FELBLAZE, TRIGGERED_OLD_TRIGGERED);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -225,7 +225,7 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
             pSummoned->GetMotionMaster()->MovePoint(0, aMadrigosaLoc[1].m_fX, aMadrigosaLoc[1].m_fY, aMadrigosaLoc[1].m_fZ, false);
         }
         else if (pSummoned->GetEntry() == NPC_BRUTALLUS_DEATH_CLOUD)
-            pSummoned->CastSpell(pSummoned, SPELL_BRUTALLUS_DEATH_CLOUD, true);
+            pSummoned->CastSpell(pSummoned, SPELL_BRUTALLUS_DEATH_CLOUD, TRIGGERED_OLD_TRIGGERED);
     }
 
     void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
@@ -275,7 +275,7 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
                 break;
             case YELL_MADR_ICE_BARRIER:
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
-                    pMadrigosa->CastSpell(pMadrigosa, SPELL_FREEZE, false);
+                    pMadrigosa->CastSpell(pMadrigosa, SPELL_FREEZE, TRIGGERED_NONE);
                 break;
             case YELL_MADR_INTRO:
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
@@ -288,7 +288,7 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
             case SPELL_FROST_BREATH:
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
                 {
-                    pMadrigosa->CastSpell(m_creature, SPELL_FROST_BREATH, false);
+                    pMadrigosa->CastSpell(m_creature, SPELL_FROST_BREATH, TRIGGERED_NONE);
                     pMadrigosa->GetMotionMaster()->MoveIdle();
                 }
                 break;
@@ -305,7 +305,7 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
                 break;
             case YELL_MADR_ICE_BLOCK:
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
-                    pMadrigosa->CastSpell(m_creature, SPELL_FROST_BLAST, true);
+                    pMadrigosa->CastSpell(m_creature, SPELL_FROST_BLAST, TRIGGERED_OLD_TRIGGERED);
                 m_uiMadrigosaSpellTimer = 2000;
                 break;
             case SPELL_FLAME_RING:
@@ -327,7 +327,7 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
             case YELL_MADR_TRAP:
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
                 {
-                    pMadrigosa->CastSpell(m_creature, SPELL_ENCAPSULATE, true);
+                    pMadrigosa->CastSpell(m_creature, SPELL_ENCAPSULATE, TRIGGERED_OLD_TRIGGERED);
                     // Need to remove the fire aura after 4 sec so Madrigosa won't die so soon
                     pMadrigosa->RemoveAurasDueToSpell(SPELL_FEL_FIREBALL);
                 }
@@ -370,7 +370,7 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
             if (m_uiMadrigosaSpellTimer <= uiDiff)
             {
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
-                    pMadrigosa->CastSpell(m_creature, SPELL_FROSTBOLT, true);
+                    pMadrigosa->CastSpell(m_creature, SPELL_FROSTBOLT, TRIGGERED_OLD_TRIGGERED);
                 m_uiMadrigosaSpellTimer = urand(1000, 2000);
             }
             else
@@ -475,7 +475,7 @@ bool EffectAuraDummy_spell_aura_dummy_npc_brutallus_cloud(const Aura* pAura, boo
                     // Set respawn pos to current pos
                     pMadrigosa->SetRespawnCoord(pMadrigosa->GetPositionX(), pMadrigosa->GetPositionY(), pMadrigosa->GetPositionZ(), pMadrigosa->GetOrientation());
 
-                    pMadrigosa->CastSpell(pMadrigosa, SPELL_FELBLAZE_PREVIZUAL, true);
+                    pMadrigosa->CastSpell(pMadrigosa, SPELL_FELBLAZE_PREVIZUAL, TRIGGERED_OLD_TRIGGERED);
                     pMadrigosa->ForcedDespawn(10000);
                 }
             }

@@ -175,7 +175,7 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
                     // cast achiev spell if timer is still running
                     if (m_uiWormAchievTimer)
                     {
-                        m_creature->CastSpell(m_creature, SPELL_JORMUNGAR_ACHIEV_CREDIT, true);
+                        m_creature->CastSpell(m_creature, SPELL_JORMUNGAR_ACHIEV_CREDIT, TRIGGERED_OLD_TRIGGERED);
                         m_uiWormAchievTimer = 0;
                     }
                 }
@@ -186,7 +186,7 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
                     // jormungar brother enrages
                     if (Creature* pWorm = m_pInstance->GetSingleCreatureFromStorage(pSummoned->GetEntry() == NPC_ACIDMAW ? NPC_DREADSCALE : NPC_ACIDMAW))
                     {
-                        pWorm->CastSpell(pWorm, SPELL_JORMUNGAR_ENRAGE, true);
+                        pWorm->CastSpell(pWorm, SPELL_JORMUNGAR_ENRAGE, TRIGGERED_OLD_TRIGGERED);
                         DoScriptText(EMOTE_JORMUNGAR_ENRAGE, pWorm);
                         m_uiWormAchievTimer = 10000;
                     }
@@ -252,7 +252,7 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
                 {
                     Creature* pBoss = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[i]);
                     if (pBoss && pBoss->isAlive())
-                        pBoss->CastSpell(pBoss, SPELL_BERSERK, true);
+                        pBoss->CastSpell(pBoss, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                 }
             }
             else
@@ -454,7 +454,7 @@ struct boss_gormokAI : public ScriptedAI
                 if (Creature* pSnobold = GetActiveSnobold())
                 {
                     m_creature->RemoveAurasByCasterSpell(SPELL_RIDE_VEHICLE_HARDCODED, pSnobold->GetObjectGuid());
-                    pSnobold->CastSpell(m_creature, SPELL_JUMP_TO_HAND, true);
+                    pSnobold->CastSpell(m_creature, SPELL_JUMP_TO_HAND, TRIGGERED_OLD_TRIGGERED);
 
                     m_uiSnoboldTimer = 3000;
                     m_uiJumpTimer = 20000;
@@ -471,7 +471,7 @@ struct boss_gormokAI : public ScriptedAI
             {
                 if (Creature* pSnobold = GetActiveSnobold())
                 {
-                    pSnobold->CastSpell(m_creature, SPELL_RISING_ANGER, true);
+                    pSnobold->CastSpell(m_creature, SPELL_RISING_ANGER, TRIGGERED_OLD_TRIGGERED);
 
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SNOBOLLED, SELECT_FLAG_PLAYER))
                     {
@@ -480,7 +480,7 @@ struct boss_gormokAI : public ScriptedAI
                         // pTarget->SetVehicleId(pSnobold->GetCreatureInfo()->VehicleTemplateId, pSnobold->GetEntry());
                         // pTarget->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
 
-                        pSnobold->CastSpell(pTarget, SPELL_SNOBOLLED, true);
+                        pSnobold->CastSpell(pTarget, SPELL_SNOBOLLED, TRIGGERED_OLD_TRIGGERED);
                         SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, m_creature, pSnobold);
                         --m_uiSnoboldsBoarded;
                     }
@@ -586,7 +586,7 @@ struct twin_jormungars_commonAI : public ScriptedAI
     void JustSummoned(Creature* pSummned) override
     {
         if (pSummned->GetEntry() == NPC_SLIME_POOL)
-            pSummned->CastSpell(pSummned, SPELL_SLIME_POOL_AURA, false);
+            pSummned->CastSpell(pSummned, SPELL_SLIME_POOL_AURA, TRIGGERED_NONE);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
@@ -778,7 +778,7 @@ struct boss_acidmawAI : public twin_jormungars_commonAI
         if (pSpellEntry->Id == SPELL_PARALYTIC_BITE || pSpellEntry->Id == SPELL_PARALYTIC_SPRAY)
         {
             pTarget->RemoveAurasDueToSpell(SPELL_BURNING_BILE);
-            pTarget->CastSpell(pTarget, SPELL_PARALYTIC_TOXIN, true);
+            pTarget->CastSpell(pTarget, SPELL_PARALYTIC_TOXIN, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -849,7 +849,7 @@ struct boss_dreadscaleAI : public twin_jormungars_commonAI
         if (pSpellEntry->Id == SPELL_BURNING_BITE || pSpellEntry->Id == SPELL_BURNING_SPRAY)
         {
             pTarget->RemoveAurasDueToSpell(SPELL_PARALYTIC_TOXIN);
-            pTarget->CastSpell(pTarget, SPELL_BURNING_BILE, true);
+            pTarget->CastSpell(pTarget, SPELL_BURNING_BILE, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -1016,7 +1016,7 @@ struct boss_icehowlAI : public ScriptedAI
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
         {
             if (i->getSource()->isAlive())
-                i->getSource()->CastSpell(i->getSource(), SPELL_SURGE_OF_ADRENALINE, true);
+                i->getSource()->CastSpell(i->getSource(), SPELL_SURGE_OF_ADRENALINE, TRIGGERED_OLD_TRIGGERED);
         }
     }
 

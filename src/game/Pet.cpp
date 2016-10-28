@@ -1655,7 +1655,7 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
     m_spells[spell_id] = newspell;
 
     if (IsPassiveSpell(spellInfo))
-        CastSpell(this, spell_id, true);
+        CastSpell(this, spell_id, TRIGGERED_OLD_TRIGGERED);
     else
         m_charmInfo->AddSpellToActionBar(spell_id, ActiveStates(newspell.active));
 
@@ -2198,13 +2198,13 @@ void Pet::CastOwnerTalentAuras()
                 switch (seTalent->Id)
                 {
                     case 34455: // Ferocious Inspiration Rank 1
-                        CastSpell(this, 75593, true); // Ferocious Inspiration 1%
+                        CastSpell(this, 75593, TRIGGERED_OLD_TRIGGERED); // Ferocious Inspiration 1%
                         break;
                     case 34459: // Ferocious Inspiration Rank 2
-                        CastSpell(this, 75446, true); // Ferocious Inspiration 2%
+                        CastSpell(this, 75446, TRIGGERED_OLD_TRIGGERED); // Ferocious Inspiration 2%
                         break;
                     case 34460: // Ferocious Inspiration Rank 3
-                        CastSpell(this, 75447, true); // Ferocious Inspiration 3%
+                        CastSpell(this, 75447, TRIGGERED_OLD_TRIGGERED); // Ferocious Inspiration 3%
                         break;
                 }
             }
@@ -2221,10 +2221,10 @@ void Pet::CastPetAura(PetAura const* aura)
     if (auraId == 35696)                                    // Demonic Knowledge
     {
         int32 basePoints = int32(aura->GetDamage() * (GetStat(STAT_STAMINA) + GetStat(STAT_INTELLECT)) / 100);
-        CastCustomSpell(this, auraId, &basePoints, nullptr, nullptr, true);
+        CastCustomSpell(this, auraId, &basePoints, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
     }
     else
-        CastSpell(this, auraId, true);
+        CastSpell(this, auraId, TRIGGERED_OLD_TRIGGERED);
 }
 
 struct DoPetLearnSpell

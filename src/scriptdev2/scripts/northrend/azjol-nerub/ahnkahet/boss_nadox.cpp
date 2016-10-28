@@ -71,7 +71,7 @@ struct mob_ahnkahar_eggAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_AHNKAHAR_GUARDIAN)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_GUARDIAN_AURA, true);
+            pSummoned->CastSpell(pSummoned, SPELL_GUARDIAN_AURA, TRIGGERED_OLD_TRIGGERED);
             DoScriptText(EMOTE_HATCH, m_creature);
         }
 
@@ -177,7 +177,7 @@ struct boss_nadoxAI : public ScriptedAI
             if (m_pInstance)
             {
                 if (Creature* pGuardianEgg = m_creature->GetMap()->GetCreature(m_pInstance->SelectRandomGuardianEggGuid()))
-                    pGuardianEgg->CastSpell(pGuardianEgg, SPELL_SUMMON_SWARM_GUARDIAN, false);
+                    pGuardianEgg->CastSpell(pGuardianEgg, SPELL_SUMMON_SWARM_GUARDIAN, TRIGGERED_NONE);
 
                 m_bGuardianSummoned = true;
             }
@@ -194,7 +194,7 @@ struct boss_nadoxAI : public ScriptedAI
                 if (Creature* pSwarmerEgg = m_creature->GetMap()->GetCreature(m_pInstance->SelectRandomSwarmerEggGuid()))
                 {
                     for (uint8 i = 0; i < 2; ++i)
-                        pSwarmerEgg->CastSpell(pSwarmerEgg, SPELL_SUMMON_SWARMERS, false);
+                        pSwarmerEgg->CastSpell(pSwarmerEgg, SPELL_SUMMON_SWARMERS, TRIGGERED_NONE);
                 }
             }
 

@@ -309,16 +309,16 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                 DoCastSpellIfCan(pSummoned, SPELL_ARCANE_BOMB, CAST_TRIGGERED);
                 break;
             case NPC_STATIC_FIELD:
-                pSummoned->CastSpell(pSummoned, SPELL_STATIC_FIELD, false);
+                pSummoned->CastSpell(pSummoned, SPELL_STATIC_FIELD, TRIGGERED_NONE);
                 break;
             case NPC_NEXUS_LORD:
             case NPC_SCION_OF_ETERNITY:
                 if (Creature* pDisk = GetClosestCreatureWithEntry(pSummoned, NPC_HOVER_DISK, 10.0f))
-                    pSummoned->CastSpell(pDisk, SPELL_RIDE_VEHICLE_HARDCODED, true);
+                    pSummoned->CastSpell(pDisk, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->SetInCombatWithZone();
                 break;
             case NPC_HOVER_DISK:
-                pSummoned->CastSpell(pSummoned, SPELL_FLIGHT, true);
+                pSummoned->CastSpell(pSummoned, SPELL_FLIGHT, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -327,7 +327,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     {
         if (pSummoned->GetEntry() == NPC_NEXUS_LORD || pSummoned->GetEntry() == NPC_SCION_OF_ETERNITY)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_DISC, true);
+            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_DISC, TRIGGERED_OLD_TRIGGERED);
             ++m_uiAddsDeadCount;
 
             // When all adds are killed start phase 3
@@ -340,7 +340,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                 if (m_pInstance)
                 {
                     if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_LARGE_TRIGGER))
-                        pTrigger->CastSpell(pTrigger, SPELL_DESTROY_PLATFORM_PRE, false);
+                        pTrigger->CastSpell(pTrigger, SPELL_DESTROY_PLATFORM_PRE, TRIGGERED_NONE);
                 }
             }
         }
@@ -367,7 +367,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                 if (m_pInstance)
                 {
                     if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_LARGE_TRIGGER))
-                        pTrigger->CastSpell(pTrigger, SPELL_DESTROY_PLATFORM_BOOM, false);
+                        pTrigger->CastSpell(pTrigger, SPELL_DESTROY_PLATFORM_BOOM, TRIGGERED_NONE);
                 }
                 break;
             case SPELL_SUMMON_RED_DRAGON:
@@ -654,7 +654,7 @@ struct npc_wyrmrest_skytalonAI : public ScriptedAI
 
                 // Force player to mount
                 if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
-                    pSummoner->CastSpell(m_creature, SPELL_RIDE_RED_DRAGON, true);
+                    pSummoner->CastSpell(m_creature, SPELL_RIDE_RED_DRAGON, TRIGGERED_OLD_TRIGGERED);
             }
 
             m_bHasMounted = true;

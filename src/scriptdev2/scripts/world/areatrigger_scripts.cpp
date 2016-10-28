@@ -57,7 +57,7 @@ bool AreaTrigger_at_childrens_week_spot(Player* pPlayer, AreaTriggerEntry const*
         if (pAt->id == TriggerOrphanSpell[i][0] &&
                 pPlayer->GetMiniPet() && pPlayer->GetMiniPet()->GetEntry() == TriggerOrphanSpell[i][1])
         {
-            pPlayer->CastSpell(pPlayer, TriggerOrphanSpell[i][2], true);
+            pPlayer->CastSpell(pPlayer, TriggerOrphanSpell[i][2], TRIGGERED_OLD_TRIGGERED);
             return true;
         }
     }
@@ -131,13 +131,13 @@ bool AreaTrigger_at_legion_teleporter(Player* pPlayer, AreaTriggerEntry const* /
     {
         if (pPlayer->GetTeam() == ALLIANCE && pPlayer->GetQuestRewardStatus(QUEST_GAINING_ACCESS_A))
         {
-            pPlayer->CastSpell(pPlayer, SPELL_TELE_A_TO, false);
+            pPlayer->CastSpell(pPlayer, SPELL_TELE_A_TO, TRIGGERED_NONE);
             return true;
         }
 
         if (pPlayer->GetTeam() == HORDE && pPlayer->GetQuestRewardStatus(QUEST_GAINING_ACCESS_H))
         {
-            pPlayer->CastSpell(pPlayer, SPELL_TELE_H_TO, false);
+            pPlayer->CastSpell(pPlayer, SPELL_TELE_H_TO, TRIGGERED_NONE);
             return true;
         }
         return false;
@@ -239,8 +239,8 @@ bool AreaTrigger_at_waygate(Player* pPlayer, AreaTriggerEntry const* pAt)
     {
         switch (pAt->id)
         {
-            case AT_WAYGATE_SHOLOZAR: pPlayer->CastSpell(pPlayer, SPELL_SHOLOZAR_TO_UNGORO_TELEPORT, false); break;
-            case AT_WAYGATE_UNGORO: pPlayer->CastSpell(pPlayer, SPELL_UNGORO_TO_SHOLOZAR_TELEPORT, false); break;
+            case AT_WAYGATE_SHOLOZAR: pPlayer->CastSpell(pPlayer, SPELL_SHOLOZAR_TO_UNGORO_TELEPORT, TRIGGERED_NONE); break;
+            case AT_WAYGATE_UNGORO: pPlayer->CastSpell(pPlayer, SPELL_UNGORO_TO_SHOLOZAR_TELEPORT, TRIGGERED_NONE); break;
         }
     }
 
@@ -260,7 +260,7 @@ enum
 bool AreaTrigger_at_stormwright_shelf(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
     if (!pPlayer->isDead() && pPlayer->GetQuestStatus(QUEST_STRENGTH_OF_THE_TEMPEST) == QUEST_STATUS_INCOMPLETE)
-        pPlayer->CastSpell(pPlayer, SPELL_CREATE_TRUE_POWER_OF_THE_TEMPEST, false);
+        pPlayer->CastSpell(pPlayer, SPELL_CREATE_TRUE_POWER_OF_THE_TEMPEST, TRIGGERED_NONE);
 
     return true;
 }
@@ -357,7 +357,7 @@ bool AreaTrigger_at_hot_on_the_trail(Player* pPlayer, AreaTriggerEntry const* pA
             if (pPlayer->GetQuestStatus(aHotOnTrailValues[i].uiQuestEntry) == QUEST_STATUS_INCOMPLETE &&
                     pPlayer->GetReqKillOrCastCurrentCount(aHotOnTrailValues[i].uiQuestEntry, aHotOnTrailValues[i].uiCreditEntry) == 0)
             {
-                pPlayer->CastSpell(pPlayer, aHotOnTrailValues[i].uiSpellEntry, true);
+                pPlayer->CastSpell(pPlayer, aHotOnTrailValues[i].uiSpellEntry, TRIGGERED_OLD_TRIGGERED);
                 return true;
             }
         }

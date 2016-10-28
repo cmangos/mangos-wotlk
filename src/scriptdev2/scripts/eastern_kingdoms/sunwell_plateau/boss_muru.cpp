@@ -145,7 +145,7 @@ struct boss_muruAI : public Scripted_NoMovementAI
         {
             case NPC_ENTROPIUS:
                 // Cast the Entropius spawn effect and force despawn
-                pSummoned->CastSpell(pSummoned, SPELL_ENTROPIUS_SPAWN, true);
+                pSummoned->CastSpell(pSummoned, SPELL_ENTROPIUS_SPAWN, TRIGGERED_OLD_TRIGGERED);
                 m_creature->ForcedDespawn(1000);
                 // no break here; All other summons should behave the same way
             default:
@@ -386,7 +386,7 @@ struct npc_portal_targetAI : public Scripted_NoMovementAI
                 if (m_uiTransformCount == MAX_TRANSFORM_CASTS / 2)
                 {
                     if (Creature* pMuru = m_pInstance->GetSingleCreatureFromStorage(NPC_MURU))
-                        pMuru->CastSpell(pMuru, SPELL_SUMMON_ENTROPIUS, false);
+                        pMuru->CastSpell(pMuru, SPELL_SUMMON_ENTROPIUS, TRIGGERED_NONE);
                 }
             }
             else

@@ -1246,16 +1246,16 @@ struct npc_totem_of_spiritsAI : public ScriptedPetAI
             switch (uiEntry)
             {
                 case NPC_EARTHEN_SOUL:
-                    pWho->CastSpell(m_creature, SPELL_EARTH_CAPTURED, true);
+                    pWho->CastSpell(m_creature, SPELL_EARTH_CAPTURED, TRIGGERED_OLD_TRIGGERED);
                     break;
                 case NPC_FIERY_SOUL:
-                    pWho->CastSpell(m_creature, SPELL_FIERY_CAPTURED, true);
+                    pWho->CastSpell(m_creature, SPELL_FIERY_CAPTURED, TRIGGERED_OLD_TRIGGERED);
                     break;
                 case NPC_WATERY_SOUL:
-                    pWho->CastSpell(m_creature, SPELL_WATER_CAPTURED, true);
+                    pWho->CastSpell(m_creature, SPELL_WATER_CAPTURED, TRIGGERED_OLD_TRIGGERED);
                     break;
                 case NPC_AIRY_SOUL:
-                    pWho->CastSpell(m_creature, SPELL_AIR_CAPTURED, true);
+                    pWho->CastSpell(m_creature, SPELL_AIR_CAPTURED, TRIGGERED_OLD_TRIGGERED);
                     break;
             }
 
@@ -1273,7 +1273,7 @@ struct npc_totem_of_spiritsAI : public ScriptedPetAI
 
         // make elementals cast the sieve is only way to make it work properly, due to the spell target modes 22/7
         if (uiEntry == NPC_EARTH_SPIRIT || uiEntry == NPC_FIERY_SPIRIT || uiEntry == NPC_WATER_SPIRIT || uiEntry == NPC_AIR_SPIRIT)
-            pVictim->CastSpell(pVictim, SPELL_ELEMENTAL_SIEVE, true);
+            pVictim->CastSpell(pVictim, SPELL_ELEMENTAL_SIEVE, TRIGGERED_OLD_TRIGGERED);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -1299,22 +1299,22 @@ bool EffectDummyCreature_npc_totem_of_spirits(Unit* /*pCaster*/, uint32 uiSpellI
     {
         case SPELL_EARTH_CAPTURED:
         {
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_EARTH_CAPTURED_CREDIT, true);
+            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_EARTH_CAPTURED_CREDIT, TRIGGERED_OLD_TRIGGERED);
             return true;
         }
         case SPELL_FIERY_CAPTURED:
         {
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_FIERY_CAPTURED_CREDIT, true);
+            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_FIERY_CAPTURED_CREDIT, TRIGGERED_OLD_TRIGGERED);
             return true;
         }
         case SPELL_WATER_CAPTURED:
         {
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_WATER_CAPTURED_CREDIT, true);
+            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_WATER_CAPTURED_CREDIT, TRIGGERED_OLD_TRIGGERED);
             return true;
         }
         case SPELL_AIR_CAPTURED:
         {
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_AIR_CAPTURED_CREDIT, true);
+            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_AIR_CAPTURED_CREDIT, TRIGGERED_OLD_TRIGGERED);
             return true;
         }
     }
@@ -1352,7 +1352,7 @@ bool EffectAuraDummy_npc_totem_of_spirits(const Aura* pAura, bool bApply)
         case NPC_AIR_SPIRIT:   uiSoulEntry = NPC_AIRY_SOUL;    break;
     }
 
-    pCreature->CastSpell(pCreature, SPELL_CALL_TO_THE_SPIRITS, true);
+    pCreature->CastSpell(pCreature, SPELL_CALL_TO_THE_SPIRITS, TRIGGERED_OLD_TRIGGERED);
     pCreature->SummonCreature(uiSoulEntry, pCaster->GetPositionX(), pCaster->GetPositionY(), pCaster->GetPositionZ(), 0, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 10000);
 
     return true;

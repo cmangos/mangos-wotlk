@@ -269,16 +269,16 @@ struct boss_professor_putricideAI : public ScriptedAI
                 pSummoned->ForcedDespawn(10000);
                 break;
             case NPC_GROWING_OOZE_PUDDLE:
-                pSummoned->CastSpell(pSummoned, SPELL_GROW_STACKER, true);
-                pSummoned->CastSpell(pSummoned, SPELL_SLIME_PUDDLE_DAMAGE, true);
+                pSummoned->CastSpell(pSummoned, SPELL_GROW_STACKER, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_SLIME_PUDDLE_DAMAGE, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_CHOKING_GAS_BOMB:
-                pSummoned->CastSpell(pSummoned, SPELL_CHOKING_GAS_PERIODIC, true);
-                pSummoned->CastSpell(pSummoned, SPELL_CHOKING_GAS_EXPLOSION_PER, true);
+                pSummoned->CastSpell(pSummoned, SPELL_CHOKING_GAS_PERIODIC, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_CHOKING_GAS_EXPLOSION_PER, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->ForcedDespawn(15000);
                 break;
             case NPC_GAS_CLOUD:
-                pSummoned->CastSpell(pSummoned, SPELL_GASEOUS_BLOAT_VISUAL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_GASEOUS_BLOAT_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 // no break;
             case NPC_VOLATILE_OOZE:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
@@ -537,8 +537,8 @@ bool EffectScriptEffectCreature_npc_putricide(Unit* pCaster, uint32 uiSpellId, S
             return false;
 
         // cast the triggered spell on each target
-        pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), true);
-        pCreatureTarget->CastSpell(pNearTarget, GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), true);
+        pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+        pCreatureTarget->CastSpell(pNearTarget, GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
         DoScriptText(urand(0, 1) ? SAY_SLIME_FLOW_1 : SAY_SLIME_FLOW_2, pCreatureTarget);
 
         return true;
@@ -777,7 +777,7 @@ bool EffectScriptEffectCreature_spell_ooze_flood(Unit* pCaster, uint32 uiSpellId
     {
         // Set target manually to hit exactly the stalker below the tap
         if (Creature* pStalker = GetClosestCreatureWithEntry(pCreatureTarget, pCreatureTarget->GetEntry(), 20.0f))
-            pCreatureTarget->CastSpell(pStalker, GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), true);
+            pCreatureTarget->CastSpell(pStalker, GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
 
         return true;
     }

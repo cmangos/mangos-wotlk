@@ -166,7 +166,7 @@ struct boss_brundirAI : public ScriptedAI
         else
         {
             m_pInstance->SetData(TYPE_ASSEMBLY, DONE);
-            m_creature->CastSpell(m_creature, SPELL_COUNCIL_KILL_CREDIT, true);
+            m_creature->CastSpell(m_creature, SPELL_COUNCIL_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
         }
 
         DoScriptText(urand(0, 1) ? SAY_BRUNDIR_DEATH_1 : SAY_BRUNDIR_DEATH_2, m_creature);
@@ -198,7 +198,7 @@ struct boss_brundirAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_OVERLOAD_VISUAL)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_OVERLOAD_AURA, true);
+            pSummoned->CastSpell(pSummoned, SPELL_OVERLOAD_AURA, TRIGGERED_OLD_TRIGGERED);
             // Visual npc- shouldn't move and should despawn in 6 sec
             pSummoned->GetMotionMaster()->MoveIdle();
             pSummoned->ForcedDespawn(6000);
@@ -466,7 +466,7 @@ struct boss_molgeimAI : public ScriptedAI
         else
         {
             m_pInstance->SetData(TYPE_ASSEMBLY, DONE);
-            m_creature->CastSpell(m_creature, SPELL_COUNCIL_KILL_CREDIT, true);
+            m_creature->CastSpell(m_creature, SPELL_COUNCIL_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
         }
 
         DoScriptText(urand(0, 1) ? SAY_MOLGEIM_DEATH_1 : SAY_MOLGEIM_DEATH_2, m_creature);
@@ -499,10 +499,10 @@ struct boss_molgeimAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_RUNE_OF_SUMMONING)
             pSummoned->CastSpell(pSummoned, SPELL_RUNE_OF_SUMMONING_AURA, true, NULL, NULL, m_creature->GetObjectGuid());
         else if (pSummoned->GetEntry() == NPC_RUNE_OF_POWER)
-            pSummoned->CastSpell(pSummoned, SPELL_RUNE_OF_POWER_AURA, true);
+            pSummoned->CastSpell(pSummoned, SPELL_RUNE_OF_POWER_AURA, TRIGGERED_OLD_TRIGGERED);
         else if (pSummoned->GetEntry() == NPC_LIGHTNING_ELEMENTAL)
         {
-            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_LIGHTNING_ELEMENTAL_PASSIVE : SPELL_LIGHTNING_ELEMENTAL_PASSIVE_H, true);
+            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_LIGHTNING_ELEMENTAL_PASSIVE : SPELL_LIGHTNING_ELEMENTAL_PASSIVE_H, TRIGGERED_OLD_TRIGGERED);
 
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 pSummoned->AI()->AttackStart(pTarget);
@@ -647,7 +647,7 @@ struct boss_steelbreakerAI : public ScriptedAI
         else
         {
             m_pInstance->SetData(TYPE_ASSEMBLY, DONE);
-            m_creature->CastSpell(m_creature, SPELL_COUNCIL_KILL_CREDIT, true);
+            m_creature->CastSpell(m_creature, SPELL_COUNCIL_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
         }
 
         DoScriptText(urand(0, 1) ? SAY_STEEL_DEATH_1 : SAY_STEEL_DEATH_2, m_creature);

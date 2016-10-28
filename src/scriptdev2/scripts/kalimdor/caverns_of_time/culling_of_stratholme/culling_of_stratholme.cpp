@@ -124,7 +124,7 @@ bool GossipSelect_npc_chromie(Player* pPlayer, Creature* pCreature, uint32 /*sen
                     pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INN_TELEPORT, pCreature->GetObjectGuid());
                     break;
                 case GOSSIP_ACTION_INFO_DEF+5:
-                    pCreature->CastSpell(pPlayer, SPELL_TELEPORT_COT_P4, true);
+                    pCreature->CastSpell(pPlayer, SPELL_TELEPORT_COT_P4, TRIGGERED_OLD_TRIGGERED);
                     if (instance_culling_of_stratholme* pInstance = (instance_culling_of_stratholme*)pCreature->GetInstanceData())
                     {
                         // only skip intro if not already started;
@@ -268,7 +268,7 @@ bool EffectAuraDummy_spell_aura_dummy_npc_crates_dummy(const Aura* pAura, bool b
                 // Finished event, give killcredit
                 if (pInstance->GetData(TYPE_GRAIN_EVENT) == DONE)
                 {
-                    pTarget->CastSpell(pTarget, SPELL_CRATES_KILL_CREDIT, true);
+                    pTarget->CastSpell(pTarget, SPELL_CRATES_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
                     pInstance->DoOrSimulateScriptTextForThisInstance(SAY_SOLDIERS_REPORT, NPC_LORDAERON_CRIER);
                 }
 
@@ -741,21 +741,21 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
             case NPC_INFINITE_HUNTER:
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_firstCitizenGuid))
                 {
-                    pCitizen->CastSpell(pCitizen, SPELL_TRANSFORM, true);
+                    pCitizen->CastSpell(pCitizen, SPELL_TRANSFORM, TRIGGERED_OLD_TRIGGERED);
                     pCitizen->UpdateEntry(NPC_INFINITE_HUNTER);
                 }
                 break;
             case NPC_INFINITE_AGENT:
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_secondCitizenGuid))
                 {
-                    pCitizen->CastSpell(pCitizen, SPELL_TRANSFORM, true);
+                    pCitizen->CastSpell(pCitizen, SPELL_TRANSFORM, TRIGGERED_OLD_TRIGGERED);
                     pCitizen->UpdateEntry(NPC_INFINITE_AGENT);
                 }
                 break;
             case NPC_INFINITE_ADVERSARY:
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_thirdCitizenGuid))
                 {
-                    pCitizen->CastSpell(pCitizen, SPELL_TRANSFORM, true);
+                    pCitizen->CastSpell(pCitizen, SPELL_TRANSFORM, TRIGGERED_OLD_TRIGGERED);
                     pCitizen->UpdateEntry(NPC_INFINITE_ADVERSARY);
                 }
                 break;
@@ -811,8 +811,8 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
 
                 if (Creature* pMalganis = m_pInstance->GetSingleCreatureFromStorage(NPC_MALGANIS))
                 {
-                    pMalganis->CastSpell(pMalganis, SPELL_SHADOWSTEP_COSMETIC, true);
-                    pMalganis->CastSpell(pMalganis, SPELL_MALGANIS_ACHIEVEMENT, true);
+                    pMalganis->CastSpell(pMalganis, SPELL_SHADOWSTEP_COSMETIC, TRIGGERED_OLD_TRIGGERED);
+                    pMalganis->CastSpell(pMalganis, SPELL_MALGANIS_ACHIEVEMENT, TRIGGERED_OLD_TRIGGERED);
                     pMalganis->ForcedDespawn(1000);
                 }
                 break;

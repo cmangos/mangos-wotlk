@@ -142,7 +142,7 @@ struct boss_sjonnirAI : public ScriptedAI
                 break;
             case NPC_MALFORMED_OOZE:
             {
-                pSummoned->CastSpell(pSummoned, SPELL_OOZE_COMBINE, true);
+                pSummoned->CastSpell(pSummoned, SPELL_OOZE_COMBINE, TRIGGERED_OLD_TRIGGERED);
 
                 // Always move to the center of the room
                 float fX, fY, fZ;

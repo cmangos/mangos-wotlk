@@ -75,7 +75,7 @@ void OutdoorPvPTF::HandlePlayerEnterZone(Player* player, bool isMainZone)
 
     // Handle the buffs
     if (player->GetTeam() == m_zoneOwner)
-        player->CastSpell(player, SPELL_AUCHINDOUN_BLESSING, true);
+        player->CastSpell(player, SPELL_AUCHINDOUN_BLESSING, TRIGGERED_OLD_TRIGGERED);
 }
 
 void OutdoorPvPTF::HandlePlayerLeaveZone(Player* player, bool isMainZone)

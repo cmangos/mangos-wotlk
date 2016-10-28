@@ -255,7 +255,7 @@ struct boss_jedogaAI : public ScriptedAI
 
         if (uiPointId == POINT_ID_PREPARE)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_VOLUNTEER_SPHERE, true);
+            pSummoned->CastSpell(pSummoned, SPELL_VOLUNTEER_SPHERE, TRIGGERED_OLD_TRIGGERED);
             pSummoned->SetFacingToObject(m_creature);
             pSummoned->SetStandState(UNIT_STAND_STATE_KNEEL);
         }
@@ -299,7 +299,7 @@ struct boss_jedogaAI : public ScriptedAI
                     pVolunteer->RemoveAurasDueToSpell(SPELL_VOLUNTEER_SPHERE);
                     pVolunteer->SetStandState(UNIT_STAND_STATE_STAND);
                     pVolunteer->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    pVolunteer->CastSpell(pVolunteer, SPELL_PILLAR_LIGHTNING, false);
+                    pVolunteer->CastSpell(pVolunteer, SPELL_PILLAR_LIGHTNING, TRIGGERED_NONE);
                     pVolunteer->SetWalk(true);
                     pVolunteer->GetMotionMaster()->MovePoint(POINT_ID_SACRIFICE, aJedogaLandingLoc[0], aJedogaLandingLoc[1], aJedogaLandingLoc[2]);
                 }
@@ -308,7 +308,7 @@ struct boss_jedogaAI : public ScriptedAI
                 if (m_pInstance)
                 {
                     if (Creature* pTemp = m_creature->GetMap()->GetCreature(m_pInstance->SelectJedogaSacrificeControllerGuid()))
-                        pTemp->CastSpell(pTemp, SPELL_SACRIFICE_VISUAL, false);
+                        pTemp->CastSpell(pTemp, SPELL_SACRIFICE_VISUAL, TRIGGERED_NONE);
                 }
                 break;
 
@@ -339,7 +339,7 @@ struct boss_jedogaAI : public ScriptedAI
                 for (GuidList::const_iterator itr = lControllersList.begin(); itr != lControllersList.end(); ++itr)
                 {
                     if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                        pTemp->CastSpell(m_creature, SPELL_BEAM_VISUAL, false);
+                        pTemp->CastSpell(m_creature, SPELL_BEAM_VISUAL, TRIGGERED_NONE);
                 }
 
                 if (DoCastSpellIfCan(m_creature, SPELL_LIGHTNING_VISUAL) == CAST_OK)

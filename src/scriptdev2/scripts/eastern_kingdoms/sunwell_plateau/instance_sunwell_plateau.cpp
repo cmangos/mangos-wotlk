@@ -323,9 +323,9 @@ void instance_sunwell_plateau::Update(uint32 uiDiff)
         if (m_uiMuruBerserkTimer < uiDiff)
         {
             if (Creature* pEntrpius = GetSingleCreatureFromStorage(NPC_ENTROPIUS, true))
-                pEntrpius->CastSpell(pEntrpius, SPELL_MURU_BERSERK, true);
+                pEntrpius->CastSpell(pEntrpius, SPELL_MURU_BERSERK, TRIGGERED_OLD_TRIGGERED);
             else if (Creature* pMuru = GetSingleCreatureFromStorage(NPC_MURU))
-                pMuru->CastSpell(pMuru, SPELL_MURU_BERSERK, true);
+                pMuru->CastSpell(pMuru, SPELL_MURU_BERSERK, TRIGGERED_OLD_TRIGGERED);
 
             m_uiMuruBerserkTimer = 10 * MINUTE * IN_MILLISECONDS;
         }
@@ -429,8 +429,8 @@ void instance_sunwell_plateau::DoEjectSpectralPlayers()
             if (!pPlayer->HasAura(SPELL_SPECTRAL_REALM_AURA))
                 continue;
 
-            pPlayer->CastSpell(pPlayer, SPELL_TELEPORT_NORMAL_REALM, true);
-            pPlayer->CastSpell(pPlayer, SPELL_SPECTRAL_EXHAUSTION, true);
+            pPlayer->CastSpell(pPlayer, SPELL_TELEPORT_NORMAL_REALM, TRIGGERED_OLD_TRIGGERED);
+            pPlayer->CastSpell(pPlayer, SPELL_SPECTRAL_EXHAUSTION, TRIGGERED_OLD_TRIGGERED);
             pPlayer->RemoveAurasDueToSpell(SPELL_SPECTRAL_REALM_AURA);
         }
     }
@@ -460,7 +460,7 @@ void instance_sunwell_plateau::JustDidDialogueStep(int32 iEntry)
             {
                 // ToDo: update this when the AoE spell targeting will support many explicit target. Kalec should target all creatures from the list
                 if (Creature* pTrigger = instance->GetCreature(m_lBackdoorTriggersList.front()))
-                    pKalec->CastSpell(pTrigger, SPELL_OPEN_BACK_DOOR, true);
+                    pKalec->CastSpell(pTrigger, SPELL_OPEN_BACK_DOOR, TRIGGERED_OLD_TRIGGERED);
             }
             break;
         case NPC_BRUTALLUS:

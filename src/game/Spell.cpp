@@ -311,7 +311,7 @@ void SpellCastTargets::write(ByteBuffer& data) const
         data << m_strTarget;
 }
 
-Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy)
+Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy)
 {
     MANGOS_ASSERT(caster != nullptr && info != nullptr);
     MANGOS_ASSERT(info == sSpellStore.LookupEntry(info->Id) && "`info` must be pointer to sSpellStore element");
@@ -364,7 +364,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
     m_castPositionX = m_castPositionY = m_castPositionZ = 0;
     m_TriggerSpells.clear();
     m_preCastSpells.clear();
-    m_IsTriggeredSpell = triggered;
+    m_IsTriggeredSpell = triggeredFlags & TRIGGERED_OLD_TRIGGERED;
     // m_AreaAura = false;
     m_CastItem = nullptr;
 
@@ -389,6 +389,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
     m_needAliveTargetMask = 0;
 
     m_ignoreHitResult = false;
+    m_ignoreUnselectableTarget = m_IsTriggeredSpell;
 
     // determine reflection
     m_canReflect = false;
@@ -396,6 +397,9 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
     m_spellFlags = SPELL_FLAG_NORMAL;
 
     m_canReflect = IsReflectableSpell(m_spellInfo);
+
+    if (triggeredFlags & TRIGGERED_IGNORE_UNSELECTABLE_FLAG)
+        m_ignoreUnselectableTarget = true;
 
     CleanupTargetList();
 }
@@ -1163,7 +1167,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             {
                 int32 bp = count * CalculateDamage(EFFECT_INDEX_2, unitTarget) * damageInfo.damage / 100;
                 if (bp)
-                    caster->CastCustomSpell(unitTarget, 70890, &bp, nullptr, nullptr, true);
+                    caster->CastCustomSpell(unitTarget, 70890, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
             }
         }
     }
@@ -3355,7 +3359,7 @@ void Spell::cast(bool skipCheck)
             else if (m_spellInfo->Id == 34026)
             {
                 if (m_caster->HasAura(37483))               // Improved Kill Command - Item set bonus
-                    m_caster->CastSpell(m_caster, 37482, true);// Exploited Weakness
+                    m_caster->CastSpell(m_caster, 37482, TRIGGERED_OLD_TRIGGERED);// Exploited Weakness
             }
             // Lock and Load
             else if (m_spellInfo->Id == 56453)
@@ -3809,7 +3813,7 @@ void Spell::finish(bool ok)
                     int32 auraBasePoints = (*i)->GetBasePoints();
                     int32 chance = m_caster->CalculateSpellDamage(unit, auraSpellInfo, auraSpellIdx, &auraBasePoints);
                     if (roll_chance_i(chance))
-                        m_caster->CastSpell(unit, procid, true, nullptr, (*i));
+                        m_caster->CastSpell(unit, procid, TRIGGERED_OLD_TRIGGERED, nullptr, (*i));
                 }
             }
         }
@@ -4875,7 +4879,7 @@ void Spell::CastTriggerSpells()
 void Spell::CastPreCastSpells(Unit* target)
 {
     for (SpellInfoList::const_iterator si = m_preCastSpells.begin(); si != m_preCastSpells.end(); ++si)
-        m_caster->CastSpell(target, (*si), true, m_CastItem);
+        m_caster->CastSpell(target, (*si), TRIGGERED_OLD_TRIGGERED, m_CastItem);
 }
 
 Unit* Spell::GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const
@@ -5898,7 +5902,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     {
                         if (strict)     // Summoning Disorientation, trigger pet stun (cast by pet so it doesn't attack player)
                             if (Pet* pet = ((Player*)m_caster)->GetPet())
-                                pet->CastSpell(pet, 32752, true, nullptr, nullptr, pet->GetObjectGuid());
+                                pet->CastSpell(pet, 32752, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pet->GetObjectGuid());
                     }
                     else
                         return SPELL_FAILED_ALREADY_HAVE_SUMMON;
@@ -7351,7 +7355,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff) const
 
             // unselectable targets skipped in all cases except TARGET_SCRIPT targeting
             // in case TARGET_SCRIPT target selected by server always and can't be cheated
-            if ((!m_IsTriggeredSpell || target != m_targets.getUnitTarget()) &&
+            if ((!m_ignoreUnselectableTarget || target != m_targets.getUnitTarget()) &&
                 target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) &&
                 (!target->GetTransportInfo() || (target->GetTransportInfo() &&
                     !((Unit*)target->GetTransportInfo()->GetTransport())->IsVehicle())) &&
@@ -7806,7 +7810,7 @@ void Spell::SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpel
 
         SpellCastResult locRes = sSpellMgr.GetSpellAllowedInLocationError(pSpell, target->GetMapId(), zone, area, target->GetCharmerOrOwnerPlayerOrPlayerItself());
         if (locRes != SPELL_CAST_OK || !((Player*)target)->CanStartFlyInArea(target->GetMapId(), zone, area))
-            target->CastSpell(target, spellId150, true, nullptr, nullptr, ObjectGuid(), parentSpell);
+            target->CastSpell(target, spellId150, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), parentSpell);
         else if (spellIdSpecial > 0)
         {
             for (PlayerSpellMap::const_iterator iter = ((Player*)target)->GetSpellMap().begin(); iter != ((Player*)target)->GetSpellMap().end(); ++iter)
@@ -7823,22 +7827,22 @@ void Spell::SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpel
                             // speed higher than 280 replace it
                             if (mountSpeed > 280)
                             {
-                                target->CastSpell(target, spellIdSpecial, true, nullptr, nullptr, ObjectGuid(), parentSpell);
+                                target->CastSpell(target, spellIdSpecial, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), parentSpell);
                                 return;
                             }
                         }
                     }
                 }
             }
-            target->CastSpell(target, pSpell, true, nullptr, nullptr, ObjectGuid(), parentSpell);
+            target->CastSpell(target, pSpell, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), parentSpell);
         }
         else
-            target->CastSpell(target, pSpell, true, nullptr, nullptr, ObjectGuid(), parentSpell);
+            target->CastSpell(target, pSpell, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), parentSpell);
     }
     else if (skillval >= 150 && spellId150 > 0)
-        target->CastSpell(target, spellId150, true, nullptr, nullptr, ObjectGuid(), parentSpell);
+        target->CastSpell(target, spellId150, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), parentSpell);
     else if (spellId75 > 0)
-        target->CastSpell(target, spellId75, true, nullptr, nullptr, ObjectGuid(), parentSpell);
+        target->CastSpell(target, spellId75, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), parentSpell);
 }
 
 void Spell::ClearCastItem()

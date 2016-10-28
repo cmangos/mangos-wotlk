@@ -65,9 +65,9 @@ void OutdoorPvPHP::HandlePlayerEnterZone(Player* player, bool isMainZone)
 
     // buff the player if same team is controlling all capture points
     if (m_towersAlliance == MAX_HP_TOWERS && player->GetTeam() == ALLIANCE)
-        player->CastSpell(player, SPELL_HELLFIRE_SUPERIORITY_ALLIANCE, true);
+        player->CastSpell(player, SPELL_HELLFIRE_SUPERIORITY_ALLIANCE, TRIGGERED_OLD_TRIGGERED);
     else if (m_towersHorde == MAX_HP_TOWERS && player->GetTeam() == HORDE)
-        player->CastSpell(player, SPELL_HELLFIRE_SUPERIORITY_HORDE, true);
+        player->CastSpell(player, SPELL_HELLFIRE_SUPERIORITY_HORDE, TRIGGERED_OLD_TRIGGERED);
 }
 
 void OutdoorPvPHP::HandlePlayerLeaveZone(Player* player, bool isMainZone)
@@ -155,7 +155,7 @@ void OutdoorPvPHP::HandlePlayerKillInsideArea(Player* player)
             {
                 // check capture point team
                 if (player->GetTeam() == m_towerOwner[i])
-                    player->CastSpell(player, player->GetTeam() == ALLIANCE ? SPELL_HELLFIRE_TOWER_TOKEN_ALLIANCE : SPELL_HELLFIRE_TOWER_TOKEN_HORDE, true);
+                    player->CastSpell(player, player->GetTeam() == ALLIANCE ? SPELL_HELLFIRE_TOWER_TOKEN_ALLIANCE : SPELL_HELLFIRE_TOWER_TOKEN_HORDE, TRIGGERED_OLD_TRIGGERED);
 
                 return;
             }

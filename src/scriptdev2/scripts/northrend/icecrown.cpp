@@ -249,7 +249,7 @@ struct npc_squad_leaderAI : public npc_escortAI
                 {
                     if ((*itr) && (*itr)->isAlive())
                     {
-                        (*itr)->CastSpell(*itr, (*itr)->GetEntry() == NPC_SKYBREAKER_INFANTRY ? SPELL_ALLIANCE_TROOP_CREDIT : SPELL_HORDE_TROOP_CREDIT, true);
+                        (*itr)->CastSpell(*itr, (*itr)->GetEntry() == NPC_SKYBREAKER_INFANTRY ? SPELL_ALLIANCE_TROOP_CREDIT : SPELL_HORDE_TROOP_CREDIT, TRIGGERED_OLD_TRIGGERED);
                         (*itr)->ForcedDespawn(10000);
                     }
                 }
@@ -807,7 +807,7 @@ struct npc_grand_admiral_westwindAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_WESTWIND_CREDIT_BUNNY)
-            pSummoned->CastSpell(pSummoned, SPELL_ADMIRAL_PORTAL, true);
+            pSummoned->CastSpell(pSummoned, SPELL_ADMIRAL_PORTAL, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override

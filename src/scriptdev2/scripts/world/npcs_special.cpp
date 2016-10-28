@@ -212,7 +212,7 @@ struct npc_air_force_botsAI : public ScriptedAI
                         if (!pLastSpawnedGuard)
                             return;
 
-                        pLastSpawnedGuard->CastSpell(pWho, SPELL_GUARDS_MARK, true);
+                        pLastSpawnedGuard->CastSpell(pWho, SPELL_GUARDS_MARK, TRIGGERED_OLD_TRIGGERED);
                     }
                     break;
                 }
@@ -1003,7 +1003,7 @@ struct npc_guardianAI : public ScriptedAI
 
         if (m_creature->isAttackReady())
         {
-            m_creature->CastSpell(m_creature->getVictim(), SPELL_DEATHTOUCH, true);
+            m_creature->CastSpell(m_creature->getVictim(), SPELL_DEATHTOUCH, TRIGGERED_OLD_TRIGGERED);
             m_creature->resetAttackTimer();
         }
     }
@@ -1061,7 +1061,7 @@ bool GossipSelect_npc_innkeeper(Player* pPlayer, Creature* pCreature, uint32 /*u
             break;
         case GOSSIP_ACTION_INFO_DEF+2:
             pPlayer->CLOSE_GOSSIP_MENU();
-            pCreature->CastSpell(pPlayer, SPELL_TRICK_OR_TREAT, true);
+            pCreature->CastSpell(pPlayer, SPELL_TRICK_OR_TREAT, TRIGGERED_OLD_TRIGGERED);
             break;
         case GOSSIP_OPTION_VENDOR:
             pPlayer->SEND_VENDORLIST(pCreature->GetObjectGuid());
@@ -1219,7 +1219,7 @@ struct npc_spring_rabbitAI : public ScriptedPetAI
 
                 case 2:                                     // Called for the rabbit first reached meeting point
                     if (Creature* pBunny = m_creature->GetMap()->GetAnyTypeCreature(m_partnerGuid))
-                        pBunny->CastSpell(pBunny, SPELL_SPRING_RABBIT_IN_LOVE, false);
+                        pBunny->CastSpell(pBunny, SPELL_SPRING_RABBIT_IN_LOVE, TRIGGERED_NONE);
 
                     DoCastSpellIfCan(m_creature, SPELL_SPRING_RABBIT_IN_LOVE);
                     // no break here
@@ -1234,7 +1234,7 @@ struct npc_spring_rabbitAI : public ScriptedPetAI
                 case 5:
                     // Let owner cast achievement related spell
                     if (Unit* pOwner = m_creature->GetCharmerOrOwner())
-                        pOwner->CastSpell(pOwner, SPELL_SPRING_FLING, true);
+                        pOwner->CastSpell(pOwner, SPELL_SPRING_FLING, TRIGGERED_OLD_TRIGGERED);
 
                     m_uiStep = 6;
                     m_uiStepTimer = 30000;

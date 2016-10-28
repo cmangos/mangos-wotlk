@@ -242,7 +242,7 @@ struct npc_kiljaeden_controllerAI : public Scripted_NoMovementAI, private Dialog
                 {
                     pKalec->GetMotionMaster()->Clear();
                     pKalec->GetMotionMaster()->MoveIdle();
-                    pKalec->CastSpell(pKalec, SPELL_KALEC_TELEPORT, true);
+                    pKalec->CastSpell(pKalec, SPELL_KALEC_TELEPORT, TRIGGERED_OLD_TRIGGERED);
                     pKalec->SetLevitate(false);
                 }
                 m_creature->SummonCreature(NPC_CORE_ENTROPIUS, aOutroLocations[5].m_fX, aOutroLocations[5].m_fY, aOutroLocations[5].m_fZ, aOutroLocations[5].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 0);
@@ -262,7 +262,7 @@ struct npc_kiljaeden_controllerAI : public Scripted_NoMovementAI, private Dialog
                 break;
             case SPELL_CALL_ENTROPIUS:
                 if (Creature* pVelen = m_pInstance->GetSingleCreatureFromStorage(NPC_VELEN))
-                    pVelen->CastSpell(pVelen, SPELL_CALL_ENTROPIUS, false);
+                    pVelen->CastSpell(pVelen, SPELL_CALL_ENTROPIUS, TRIGGERED_NONE);
                 // Set point id = 1 for movement event
                 if (Creature* pEntropius = m_creature->GetMap()->GetCreature(m_EntropiusGuid))
                 {
@@ -277,7 +277,7 @@ struct npc_kiljaeden_controllerAI : public Scripted_NoMovementAI, private Dialog
             case SPELL_BLAZE_TO_LIGHT:
                 if (Creature* pEntropius = m_creature->GetMap()->GetCreature(m_EntropiusGuid))
                 {
-                    pEntropius->CastSpell(pEntropius, SPELL_BLAZE_TO_LIGHT, true);
+                    pEntropius->CastSpell(pEntropius, SPELL_BLAZE_TO_LIGHT, TRIGGERED_OLD_TRIGGERED);
                     pEntropius->RemoveAurasDueToSpell(SPELL_ENTROPIUS_BODY);
                     pEntropius->SetWalk(true);
                     pEntropius->GetMotionMaster()->MovePoint(2, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
@@ -299,16 +299,16 @@ struct npc_kiljaeden_controllerAI : public Scripted_NoMovementAI, private Dialog
                 pSummoned->GetMotionMaster()->MovePoint(0, aOutroLocations[3].m_fX, aOutroLocations[3].m_fY, aOutroLocations[3].m_fZ);
                 // no break here
             case NPC_LIADRIN:
-                pSummoned->CastSpell(pSummoned, SPELL_TELEPORT_VISUAL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_TELEPORT_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_CORE_ENTROPIUS:
-                pSummoned->CastSpell(pSummoned, SPELL_ENTROPIUS_BODY, true);
+                pSummoned->CastSpell(pSummoned, SPELL_ENTROPIUS_BODY, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->SetLevitate(true);
                 m_EntropiusGuid = pSummoned->GetObjectGuid();
                 break;
             case NPC_INERT_PORTAL:
                 m_PortalGuid = pSummoned->GetObjectGuid();
-                pSummoned->CastSpell(pSummoned, SPELL_ARCANE_PORTAL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_ARCANE_PORTAL, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -336,7 +336,7 @@ struct npc_kiljaeden_controllerAI : public Scripted_NoMovementAI, private Dialog
             else if (pSummoned->GetEntry() == NPC_VELEN)
             {
                 // Cast teleport and despawn Velen, the portal and Kalec; Liadrin will despawn on timer
-                pSummoned->CastSpell(pSummoned, SPELL_TELEPORT_VISUAL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_TELEPORT_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->ForcedDespawn(1000);
 
                 // Note: portal should despawn only after all the soldiers have reached this point and "teleported" outside
@@ -432,7 +432,7 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
 
             // Reset the corrupt Sunwell aura
             if (Creature* pKiljaedenController = m_pInstance->GetSingleCreatureFromStorage(NPC_KILJAEDEN_CONTROLLER))
-                pKiljaedenController->CastSpell(pKiljaedenController, SPELL_ANVEENA_DRAIN, true);
+                pKiljaedenController->CastSpell(pKiljaedenController, SPELL_ANVEENA_DRAIN, TRIGGERED_OLD_TRIGGERED);
         }
 
         // Despawn on wipe
@@ -458,12 +458,12 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
         if (pSummoned->GetEntry() == NPC_KALECGOS)
         {
             DoScriptText(SAY_KALECGOS_INTRO, pSummoned);
-            pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BOLT, true);
+            pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BOLT, TRIGGERED_OLD_TRIGGERED);
             pSummoned->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), pSummoned->GetPositionZ(), 30.0f);
         }
         else if (pSummoned->GetEntry() == NPC_SHIELD_ORB)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SHADOW_BOLT_AURA, true);
+            pSummoned->CastSpell(pSummoned, SPELL_SHADOW_BOLT_AURA, TRIGGERED_OLD_TRIGGERED);
 
             // Start the movement of the shadow orb - calculate new position based on the angle between the boss and orb
             float fX, fY, fAng;
@@ -486,8 +486,8 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
 
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
                 {
-                    pPlayer->CastSpell(pSummoned, SPELL_SINISTER_REFL_CLONE, true);
-                    pSummoned->CastSpell(pSummoned, SPELL_SINISTER_REFL_CLASS, true);
+                    pPlayer->CastSpell(pSummoned, SPELL_SINISTER_REFL_CLONE, TRIGGERED_OLD_TRIGGERED);
+                    pSummoned->CastSpell(pSummoned, SPELL_SINISTER_REFL_CLASS, TRIGGERED_OLD_TRIGGERED);
                     pSummoned->AI()->AttackStart(pPlayer);
                 }
             }
@@ -561,7 +561,7 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
                 if (Creature* pAnveena = m_pInstance->GetSingleCreatureFromStorage(NPC_ANVEENA))
                 {
                     pAnveena->RemoveAurasDueToSpell(SPELL_ANVEENA_PRISON);
-                    pAnveena->CastSpell(pAnveena, SPELL_SACRIFICE_ANVEENA, true);
+                    pAnveena->CastSpell(pAnveena, SPELL_SACRIFICE_ANVEENA, TRIGGERED_OLD_TRIGGERED);
                     pAnveena->ForcedDespawn(3000);
                 }
                 m_uiPhase = PHASE_SACRIFICE;
@@ -579,7 +579,7 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
         if (GameObject* pGo = m_pInstance->GetSingleGameObjectFromStorage(uiEntry))
         {
             if (Creature* pTarget = GetClosestCreatureWithEntry(pGo, NPC_BLUE_ORB_TARGET, 5.0f))
-                pTarget->CastSpell(pTarget, SPELL_RING_BLUE_FLAME, false);
+                pTarget->CastSpell(pTarget, SPELL_RING_BLUE_FLAME, TRIGGERED_NONE);
         }
 
         // Make the orb usable
@@ -718,7 +718,7 @@ bool EffectAuraDummy_spell_aura_dummy_darkness_of_souls(const Aura* pAura, bool 
     {
         if (Creature* pTarget = (Creature*)pAura->GetTarget())
         {
-            pTarget->CastSpell(pTarget, pAura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2), true);
+            pTarget->CastSpell(pTarget, pAura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2), TRIGGERED_OLD_TRIGGERED);
 
             switch (urand(0, 2))
             {
@@ -813,8 +813,8 @@ struct npc_power_blue_flightAI : public ScriptedAI
 
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
                 {
-                    pPlayer->CastSpell(m_creature, SPELL_VENGEANCE_BLUE_FLIGHT, true);
-                    pPlayer->CastSpell(pPlayer, SPELL_POSSESS_DRAKE_IMMUNE, true);
+                    pPlayer->CastSpell(m_creature, SPELL_VENGEANCE_BLUE_FLIGHT, TRIGGERED_OLD_TRIGGERED);
+                    pPlayer->CastSpell(pPlayer, SPELL_POSSESS_DRAKE_IMMUNE, TRIGGERED_OLD_TRIGGERED);
                 }
             }
 

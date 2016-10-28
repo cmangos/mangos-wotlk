@@ -170,7 +170,7 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
             case NPC_ASTROMANCER_SOLARIAN_SPOTLIGHT:
                 // Note: this should be moved to database
                 pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                pSummoned->CastSpell(pSummoned, SPELL_SPOTLIGHT, false);
+                pSummoned->CastSpell(pSummoned, SPELL_SPOTLIGHT, TRIGGERED_NONE);
                 m_vSpotLightsGuidVector.push_back(pSummoned->GetObjectGuid());
                 break;
             case NPC_SOLARIUM_AGENT:

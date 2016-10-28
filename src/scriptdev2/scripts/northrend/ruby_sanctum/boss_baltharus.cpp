@@ -156,7 +156,7 @@ struct boss_baltharusAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_BALTHARUS_CLONE)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SIMPLE_TELEPORT, true);
+            pSummoned->CastSpell(pSummoned, SPELL_SIMPLE_TELEPORT, TRIGGERED_OLD_TRIGGERED);
             pSummoned->SetInCombatWithZone();
         }
     }
@@ -164,7 +164,7 @@ struct boss_baltharusAI : public ScriptedAI
     void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
     {
         if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpellEntry->Id == SPELL_ENERVATING_BRAND_PL)
-            pTarget->CastSpell(m_creature, SPELL_SIPHONED_MIGHT, true);
+            pTarget->CastSpell(m_creature, SPELL_SIPHONED_MIGHT, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -253,7 +253,7 @@ struct npc_baltharus_cloneAI : public ScriptedAI
     void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
     {
         if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpellEntry->Id == SPELL_ENERVATING_BRAND_PL)
-            pTarget->CastSpell(m_creature, SPELL_SIPHONED_MIGHT, true);
+            pTarget->CastSpell(m_creature, SPELL_SIPHONED_MIGHT, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override

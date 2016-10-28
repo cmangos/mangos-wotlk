@@ -246,7 +246,7 @@ void instance_draktharon_keep::SetData(uint32 uiType, uint32 uiData)
                 {
                     Creature* pCaster = instance->GetCreature(m_aNovosCrystalInfo[i].m_channelGuid);
                     if (pCaster && pTarget)
-                        pCaster->CastSpell(pTarget, SPELL_BEAM_CHANNEL, false);
+                        pCaster->CastSpell(pTarget, SPELL_BEAM_CHANNEL, TRIGGERED_NONE);
 
                     m_aNovosCrystalInfo[i].m_bWasUsed = false;
                 }

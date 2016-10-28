@@ -222,10 +222,10 @@ struct boss_razorscaleAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_DEVOURING_FLAME)
-            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_DEVOURING_FLAME_AURA : SPELL_DEVOURING_FLAME_AURA_H, true);
+            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_DEVOURING_FLAME_AURA : SPELL_DEVOURING_FLAME_AURA_H, TRIGGERED_OLD_TRIGGERED);
         else if (pSummoned->GetEntry() == NPC_RAZORSCALE_SPAWNER)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_MOLE_MACHINE, true);
+            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_MOLE_MACHINE, TRIGGERED_OLD_TRIGGERED);
 
             // for central spawners inform that they should spawn a sentinel
             if (pSummoned->GetPositionY() > -220.0f)
@@ -491,7 +491,7 @@ struct boss_razorscaleAI : public ScriptedAI
                     for (GuidList::const_iterator itr = m_lTrappersGuids.begin(); itr != m_lTrappersGuids.end(); ++itr)
                     {
                         if (Creature* pTrapper = m_creature->GetMap()->GetCreature(*itr))
-                            pTrapper->CastSpell(m_creature, SPELL_SHACKLE, false);
+                            pTrapper->CastSpell(m_creature, SPELL_SHACKLE, TRIGGERED_NONE);
                     }
 
                     // stun Razorscale
@@ -703,7 +703,7 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
                 {
                     if (Creature* pDefender = m_creature->GetMap()->GetCreature(*itr))
                     {
-                        pDefender->CastSpell(pDefender, SPELL_THREAT, true);
+                        pDefender->CastSpell(pDefender, SPELL_THREAT, TRIGGERED_OLD_TRIGGERED);
                         pDefender->SetWalk(false);
                         pDefender->GetMotionMaster()->MoveWaypoint();
                     }
@@ -858,7 +858,7 @@ bool EffectDummyCreature_npc_harpoon_fire_state(Unit* /*pCaster*/, uint32 uiSpel
     // always check spellid and effectindex
     if (uiSpellId == SPELL_FIREBOLT && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_HARPOON_FIRE_STATE)
     {
-        pCreatureTarget->CastSpell(pCreatureTarget, SPELL_HARPOON_FIRE, true);
+        pCreatureTarget->CastSpell(pCreatureTarget, SPELL_HARPOON_FIRE, TRIGGERED_OLD_TRIGGERED);
 
         // search for each entry of the nearby harpoon
         GameObject* pHarpoon = GetClosestGameObjectWithEntry(pCreatureTarget, GO_HARPOON_GUN_1, 5.0f);

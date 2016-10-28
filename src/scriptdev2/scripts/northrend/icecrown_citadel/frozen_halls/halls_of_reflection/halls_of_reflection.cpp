@@ -286,9 +286,9 @@ bool AreaTrigger_at_frostworn_general(Player* pPlayer, AreaTriggerEntry const* p
             // ToDo: research what is the difference between the two entries
             if (Creature* pReflection = pPlayerTarget->SummonCreature(urand(0, 1) ? NPC_SPIRITUAL_REFLECTION_1 : NPC_SPIRITUAL_REFLECTION_2, pSpawnCreature->GetPositionX(), pSpawnCreature->GetPositionY(), pSpawnCreature->GetPositionZ(), pSpawnCreature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
             {
-                pPlayerTarget->CastSpell(pReflection, SPELL_HALLS_OF_REFLECTION_CLONE_NAME, true);
-                pPlayerTarget->CastSpell(pReflection, SPELL_HALLS_OF_REFLECTION_CLONE, true);
-                pReflection->CastSpell(pReflection, SPELL_HALLS_OF_REFLECTION_GHOST, true);
+                pPlayerTarget->CastSpell(pReflection, SPELL_HALLS_OF_REFLECTION_CLONE_NAME, TRIGGERED_OLD_TRIGGERED);
+                pPlayerTarget->CastSpell(pReflection, SPELL_HALLS_OF_REFLECTION_CLONE, TRIGGERED_OLD_TRIGGERED);
+                pReflection->CastSpell(pReflection, SPELL_HALLS_OF_REFLECTION_GHOST, TRIGGERED_OLD_TRIGGERED);
             }
 
             lDugeonTrapsGuids.remove(*iter);
@@ -341,7 +341,7 @@ bool EffectDummyCreature_spell_summon_reflections(Unit* /*pCaster*/, uint32 uiSp
                         pCreature->SetLevitate(false);
                         pCreature->AI()->AttackStart(pSummoner);
                         pCreature->RemoveAurasDueToSpell(SPELL_FROZEN_POSITION);
-                        pCreature->CastSpell(pSummoner, SPELL_JUMPT_TO_TARGET, true);
+                        pCreature->CastSpell(pSummoner, SPELL_JUMPT_TO_TARGET, TRIGGERED_OLD_TRIGGERED);
                     }
                 }
             }
@@ -381,7 +381,7 @@ bool AreaTrigger_at_queldelar_start(Player* pPlayer, AreaTriggerEntry const* pAt
         if (Creature* pUther = pInstance->GetSingleCreatureFromStorage(NPC_UTHER))
             pUther->GetMotionMaster()->MoveWaypoint();
 
-        pPlayer->CastSpell(pPlayer, SPELL_QUELDELARS_WILL, true);
+        pPlayer->CastSpell(pPlayer, SPELL_QUELDELARS_WILL, TRIGGERED_OLD_TRIGGERED);
 
         pInstance->SetData(TYPE_QUEL_DELAR, IN_PROGRESS);
     }

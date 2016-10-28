@@ -71,7 +71,7 @@ struct npc_medivh_black_morassAI : public ScriptedAI
         if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
             return;
 
-        pSummoned->CastSpell(m_creature, SPELL_CORRUPT, false);
+        pSummoned->CastSpell(m_creature, SPELL_CORRUPT, TRIGGERED_NONE);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -322,7 +322,7 @@ struct npc_time_riftAI : public ScriptedAI
         if (uiMotionType != POINT_MOTION_TYPE || !uiPointId || pSummoned->GetEntry() != NPC_AEONUS)
             return;
 
-        pSummoned->CastSpell(pSummoned, SPELL_CORRUPT_AEONUS, false);
+        pSummoned->CastSpell(pSummoned, SPELL_CORRUPT_AEONUS, TRIGGERED_NONE);
     }
 
     void UpdateAI(const uint32 /*uiDiff*/) override { }

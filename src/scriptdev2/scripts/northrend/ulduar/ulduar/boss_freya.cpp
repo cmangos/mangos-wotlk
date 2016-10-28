@@ -355,7 +355,7 @@ struct boss_freyaAI : public ScriptedAI
                 }
 
                 DoScriptText(SAY_EPILOGUE, m_creature);
-                m_creature->CastSpell(m_creature, SPELL_FREYA_CREDIT, true);
+                m_creature->CastSpell(m_creature, SPELL_FREYA_CREDIT, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiEpilogueTimer = 10000;
                 m_bEventFinished = true;
@@ -377,9 +377,9 @@ struct boss_freyaAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_EONARS_GIFT:
-                pSummoned->CastSpell(pSummoned, SPELL_LIFEBINDERS_GIFT_VISUAL, true);
-                pSummoned->CastSpell(pSummoned, SPELL_AUTO_GROW, true);
-                pSummoned->CastSpell(pSummoned, SPELL_PHEROMONES, true);
+                pSummoned->CastSpell(pSummoned, SPELL_LIFEBINDERS_GIFT_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_AUTO_GROW, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_PHEROMONES, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_DETONATING_LASHER:
             case NPC_ANCIENT_CONSERVATOR:
@@ -398,7 +398,7 @@ struct boss_freyaAI : public ScriptedAI
                 pSummoned->AI()->AttackStart(m_creature->getVictim());
                 break;
             case NPC_NATURE_BOMB:
-                pSummoned->CastSpell(pSummoned, SPELL_NATURE_BOMB_GO, true);
+                pSummoned->CastSpell(pSummoned, SPELL_NATURE_BOMB_GO, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -408,15 +408,15 @@ struct boss_freyaAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_DETONATING_LASHER:
-                pSummoned->CastSpell(m_creature, SPELL_ATTUNED_2_STACKS, true);
+                pSummoned->CastSpell(m_creature, SPELL_ATTUNED_2_STACKS, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_ANCIENT_CONSERVATOR:
-                pSummoned->CastSpell(m_creature, SPELL_ATTUNED_25_STACKS, true);
+                pSummoned->CastSpell(m_creature, SPELL_ATTUNED_25_STACKS, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_WATER_SPIRIT:
             case NPC_STORM_LASHER:
             case NPC_SNAPLASHER:
-                pSummoned->CastSpell(m_creature, SPELL_ATTUNED_10_STACKS, true);
+                pSummoned->CastSpell(m_creature, SPELL_ATTUNED_10_STACKS, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -472,8 +472,8 @@ struct boss_freyaAI : public ScriptedAI
         {
             if (pElder->isAlive())
             {
-                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_BRIGHTLEAF_ESSENCE_CHANNEL : SPELL_BRIGHTLEAF_ESSENCE_CHANNEL_H, false, NULL, NULL, m_creature->GetObjectGuid());
-                pElder->CastSpell(pElder, SPELL_FULL_HEAL, true);
+                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_BRIGHTLEAF_ESSENCE_CHANNEL : SPELL_BRIGHTLEAF_ESSENCE_CHANNEL_H, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+                pElder->CastSpell(pElder, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiUnstableEnergyTimer = 25000;
                 ++uiEldersAlive;
@@ -483,8 +483,8 @@ struct boss_freyaAI : public ScriptedAI
         {
             if (pElder->isAlive())
             {
-                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_IRONBRANCH_ESSENCE_CHANNEL : SPELL_IRONBRANCH_ESSENCE_CHANNEL_H, false, NULL, NULL, m_creature->GetObjectGuid());
-                pElder->CastSpell(pElder, SPELL_FULL_HEAL, true);
+                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_IRONBRANCH_ESSENCE_CHANNEL : SPELL_IRONBRANCH_ESSENCE_CHANNEL_H, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+                pElder->CastSpell(pElder, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiIronRootsTimer = 60000;
                 ++uiEldersAlive;
@@ -494,8 +494,8 @@ struct boss_freyaAI : public ScriptedAI
         {
             if (pElder->isAlive())
             {
-                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_STONEBARK_ESSEMCE_CHANNEL : SPELL_STONEBARK_ESSEMCE_CHANNEL_H, false, NULL, NULL, m_creature->GetObjectGuid());
-                pElder->CastSpell(pElder, SPELL_FULL_HEAL, true);
+                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_STONEBARK_ESSEMCE_CHANNEL : SPELL_STONEBARK_ESSEMCE_CHANNEL_H, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+                pElder->CastSpell(pElder, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiGroundTremorTimer = 10000;
                 ++uiEldersAlive;
@@ -524,7 +524,7 @@ struct boss_freyaAI : public ScriptedAI
         {
             if (pElder->isAlive())
             {
-                pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, true);
+                pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, TRIGGERED_OLD_TRIGGERED);
                 pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
         }
@@ -532,7 +532,7 @@ struct boss_freyaAI : public ScriptedAI
         {
             if (pElder->isAlive())
             {
-                pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, true);
+                pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, TRIGGERED_OLD_TRIGGERED);
                 pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
         }
@@ -540,7 +540,7 @@ struct boss_freyaAI : public ScriptedAI
         {
             if (pElder->isAlive())
             {
-                pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, true);
+                pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, TRIGGERED_OLD_TRIGGERED);
                 pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
         }
@@ -609,9 +609,9 @@ struct boss_freyaAI : public ScriptedAI
                 }
                 else
                 {
-                    pSpirit->CastSpell(pSpirit, SPELL_FULL_HEAL, true);
-                    pStormLasher->CastSpell(pStormLasher, SPELL_FULL_HEAL, true);
-                    pSnapLasher->CastSpell(pSnapLasher, SPELL_FULL_HEAL, true);
+                    pSpirit->CastSpell(pSpirit, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
+                    pStormLasher->CastSpell(pStormLasher, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
+                    pSnapLasher->CastSpell(pSnapLasher, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
                 }
 
                 m_uiThreeAlliesTimer = 0;

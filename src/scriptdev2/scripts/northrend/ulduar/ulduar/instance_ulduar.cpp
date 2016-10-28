@@ -814,7 +814,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
 
                 if (Creature* pVoice = GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
                 {
-                    pVoice->CastSpell(pVoice, SPELL_CLEAR_INSANE, true);
+                    pVoice->CastSpell(pVoice, SPELL_CLEAR_INSANE, TRIGGERED_OLD_TRIGGERED);
                     pVoice->ForcedDespawn();
                 }
                 if (Creature* pSara = GetSingleCreatureFromStorage(NPC_SARA))
@@ -840,11 +840,11 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                             if (uiData == FAIL)
                             {
                                 pHelper->AI()->EnterEvadeMode();
-                                pHelper->CastSpell(pHelper, SPELL_KEEPER_ACTIVE, true);
+                                pHelper->CastSpell(pHelper, SPELL_KEEPER_ACTIVE, TRIGGERED_OLD_TRIGGERED);
                             }
                             else if (uiData == DONE)
                             {
-                                pHelper->CastSpell(pHelper, SPELL_TELEPORT, true);
+                                pHelper->CastSpell(pHelper, SPELL_TELEPORT, TRIGGERED_OLD_TRIGGERED);
                                 pHelper->ForcedDespawn(1000);
                             }
                         }
@@ -1167,28 +1167,28 @@ void instance_ulduar::SpawnKeeperHelper(uint32 uiWho)
             if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[1].fX, m_aKeeperHelperLocs[1].fY, m_aKeeperHelperLocs[1].fZ, m_aKeeperHelperLocs[1].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true))
             {
                 DoScriptText(m_aKeeperHelperLocs[1].iText, pKeeper);
-                pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, false);
+                pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, TRIGGERED_NONE);
             }
             break;
         case NPC_HODIR_HELPER:
             if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[2].fX, m_aKeeperHelperLocs[2].fY, m_aKeeperHelperLocs[2].fZ, m_aKeeperHelperLocs[2].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true))
             {
                 DoScriptText(m_aKeeperHelperLocs[2].iText, pKeeper);
-                pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, false);
+                pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, TRIGGERED_NONE);
             }
             break;
         case NPC_THORIM_HELPER:
             if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[3].fX, m_aKeeperHelperLocs[3].fY, m_aKeeperHelperLocs[3].fZ, m_aKeeperHelperLocs[3].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true))
             {
                 DoScriptText(m_aKeeperHelperLocs[3].iText, pKeeper);
-                pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, false);
+                pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, TRIGGERED_NONE);
             }
             break;
         case NPC_FREYA_HELPER:
             if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[0].fX, m_aKeeperHelperLocs[0].fY, m_aKeeperHelperLocs[0].fZ, m_aKeeperHelperLocs[0].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true))
             {
                 DoScriptText(m_aKeeperHelperLocs[0].iText, pKeeper);
-                pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, false);
+                pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, TRIGGERED_NONE);
             }
             break;
     }

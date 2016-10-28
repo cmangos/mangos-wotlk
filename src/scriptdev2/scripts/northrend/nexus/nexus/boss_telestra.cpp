@@ -166,7 +166,7 @@ struct boss_telestraAI : public ScriptedAI
                 if (m_uiCloneDeadCount == 3 || m_uiCloneDeadCount == 6)
                 {
                     m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_CLONES);
-                    m_creature->CastSpell(m_creature, SPELL_SPAWN_BACK_IN, false);
+                    m_creature->CastSpell(m_creature, SPELL_SPAWN_BACK_IN, TRIGGERED_NONE);
 
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
@@ -194,9 +194,9 @@ struct boss_telestraAI : public ScriptedAI
     {
         switch (pSummoned->GetEntry())
         {
-            case NPC_TELEST_FIRE: pSummoned->CastSpell(pSummoned, SPELL_FIRE_VISUAL, true); break;
-            case NPC_TELEST_ARCANE: pSummoned->CastSpell(pSummoned, SPELL_ARCANE_VISUAL, true); break;
-            case NPC_TELEST_FROST: pSummoned->CastSpell(pSummoned, SPELL_FROST_VISUAL, true); break;
+            case NPC_TELEST_FIRE: pSummoned->CastSpell(pSummoned, SPELL_FIRE_VISUAL, TRIGGERED_OLD_TRIGGERED); break;
+            case NPC_TELEST_ARCANE: pSummoned->CastSpell(pSummoned, SPELL_ARCANE_VISUAL, TRIGGERED_OLD_TRIGGERED); break;
+            case NPC_TELEST_FROST: pSummoned->CastSpell(pSummoned, SPELL_FROST_VISUAL, TRIGGERED_OLD_TRIGGERED); break;
         }
     }
 

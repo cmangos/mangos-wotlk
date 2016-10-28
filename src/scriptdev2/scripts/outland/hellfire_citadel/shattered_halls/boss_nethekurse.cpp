@@ -239,7 +239,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-        pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION, false, NULL, NULL, m_creature->GetObjectGuid());
+        pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
     }
 
     void KilledUnit(Unit* /*pVictim*/) override

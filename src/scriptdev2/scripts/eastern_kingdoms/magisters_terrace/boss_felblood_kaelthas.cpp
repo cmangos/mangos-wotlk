@@ -247,7 +247,7 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_FLAME_STRIKE_TRIGGER)
-            pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, false, NULL, NULL, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
         else
         {
             // Attack or follow target
@@ -267,8 +267,8 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
         if (pSpell->Id == SPELL_GRAVITY_LAPSE && pTarget->GetTypeId() == TYPEID_PLAYER)
         {
             DoCastSpellIfCan(pTarget, aGravityLapseSpells[m_uiGravityIndex], CAST_TRIGGERED);
-            pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_FLY, true, 0, 0, m_creature->GetObjectGuid());
-            pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_DOT, true, 0, 0, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_FLY, TRIGGERED_OLD_TRIGGERED, 0, 0, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_DOT, TRIGGERED_OLD_TRIGGERED, 0, 0, m_creature->GetObjectGuid());
             ++m_uiGravityIndex;
         }
     }

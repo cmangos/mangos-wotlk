@@ -305,7 +305,7 @@ struct npc_warden_mellicharAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->CastSpell(pSummoned, SPELL_SIMPLE_TELEPORT, false);
+        pSummoned->CastSpell(pSummoned, SPELL_SIMPLE_TELEPORT, TRIGGERED_NONE);
 
         if (pSummoned->GetEntry() != NPC_MILLHOUSE && pSummoned->GetEntry() != NPC_SKYRISS)
         {

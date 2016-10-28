@@ -267,12 +267,12 @@ void instance_karazhan::SetData(uint32 uiType, uint32 uiData)
                 // cast game end spells
                 if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH))
                 {
-                    pMedivh->CastSpell(pMedivh, SPELL_FORCE_KILL_BUNNY, true);
-                    pMedivh->CastSpell(pMedivh, SPELL_GAME_OVER, true);
-                    pMedivh->CastSpell(pMedivh, SPELL_CLEAR_BOARD, true);
+                    pMedivh->CastSpell(pMedivh, SPELL_FORCE_KILL_BUNNY, TRIGGERED_OLD_TRIGGERED);
+                    pMedivh->CastSpell(pMedivh, SPELL_GAME_OVER, TRIGGERED_OLD_TRIGGERED);
+                    pMedivh->CastSpell(pMedivh, SPELL_CLEAR_BOARD, TRIGGERED_OLD_TRIGGERED);
                 }
                 if (Creature* pController = GetSingleCreatureFromStorage(NPC_CHESS_VICTORY_CONTROLLER))
-                    pController->CastSpell(pController, SPELL_VICTORY_VISUAL, true);
+                    pController->CastSpell(pController, SPELL_VICTORY_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
                 // remove silence debuff
                 Map::PlayerList const& players = instance->GetPlayers();
@@ -290,8 +290,8 @@ void instance_karazhan::SetData(uint32 uiType, uint32 uiData)
                 // clean the board for reset
                 if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH))
                 {
-                    pMedivh->CastSpell(pMedivh, SPELL_GAME_OVER, true);
-                    pMedivh->CastSpell(pMedivh, SPELL_CLEAR_BOARD, true);
+                    pMedivh->CastSpell(pMedivh, SPELL_GAME_OVER, TRIGGERED_OLD_TRIGGERED);
+                    pMedivh->CastSpell(pMedivh, SPELL_CLEAR_BOARD, TRIGGERED_OLD_TRIGGERED);
                 }
 
                 // remove silence debuff
@@ -489,7 +489,7 @@ void instance_karazhan::DoPrepareChessEvent()
     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
     {
         if (Player* pPlayer = itr->getSource())
-            pPlayer->CastSpell(pPlayer, SPELL_GAME_IN_SESSION, true);
+            pPlayer->CastSpell(pPlayer, SPELL_GAME_IN_SESSION, TRIGGERED_OLD_TRIGGERED);
     }
 
     m_uiAllianceStalkerCount = 0;
@@ -561,7 +561,7 @@ void instance_karazhan::DoMoveChessPieceToSides(uint32 uiSpellId, uint32 uiFacti
     if (Creature* pStalker = instance->GetCreature(vStalkers[uiCount]))
     {
         // need to provide specific target, in order to ensure the logic of the event
-        pStatusBar->CastSpell(pStalker, uiSpellId, true);
+        pStatusBar->CastSpell(pStalker, uiSpellId, TRIGGERED_OLD_TRIGGERED);
         uiFaction == FACTION_ID_CHESS_ALLIANCE ? ++m_uiAllianceStalkerCount : ++m_uiHordeStalkerCount;
     }
 

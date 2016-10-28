@@ -212,7 +212,7 @@ struct boss_moroesAI : public ScriptedAI
                     DoScriptText(urand(0, 1) ? SAY_SPECIAL_1 : SAY_SPECIAL_2, m_creature);
                     DoResetThreat();
                     AttackStart(pTarget);
-                    pTarget->CastSpell(pTarget, SPELL_GARROTE, true);
+                    pTarget->CastSpell(pTarget, SPELL_GARROTE, TRIGGERED_OLD_TRIGGERED);
                 }
                 m_uiWaitTimer = 0;
             }

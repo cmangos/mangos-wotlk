@@ -402,7 +402,7 @@ bool GossipSelect_npc_mosswalker_victim(Player* pPlayer, Creature* pCreature, ui
                 case 3: DoScriptText(SAY_RESCUE_4, pCreature, pPlayer); break;
             }
 
-            pCreature->CastSpell(pPlayer, SPELL_MOSSWALKER_QUEST_CREDIT, true);
+            pCreature->CastSpell(pPlayer, SPELL_MOSSWALKER_QUEST_CREDIT, TRIGGERED_OLD_TRIGGERED);
         }
 
         // more details may apply, instead of just despawn

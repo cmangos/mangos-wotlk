@@ -142,7 +142,7 @@ struct boss_ignisAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_SCORCH)
-            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_SCORCH_AURA : SPELL_SCORCH_AURA_H, true);
+            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_SCORCH_AURA : SPELL_SCORCH_AURA_H, TRIGGERED_OLD_TRIGGERED);
     }
 
     // TODO: Use the vehicle boarding wrappers when they are implemented in core
@@ -318,7 +318,7 @@ bool EffectScriptEffectCreature_npc_iron_construct(Unit* pCaster, uint32 uiSpell
     {
         // chill the iron construct if molten (effect handled in core)
         if (pCreatureTarget->HasAura(SPELL_MOLTEN))
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_CHILL, true);
+            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_CHILL, TRIGGERED_OLD_TRIGGERED);
 
         return true;
     }

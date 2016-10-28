@@ -145,7 +145,7 @@ struct boss_eadricAI : public argent_champion_commonAI
 
         // ToDo: implement the mechanics for this achiev
         //DoCastSpellIfCan(m_creature, SPELL_EADRIC_ACHIEVEMENT, CAST_TRIGGERED);
-        m_creature->CastSpell(m_creature, SPELL_KILL_CREDIT_EADRIC, true);
+        m_creature->CastSpell(m_creature, SPELL_KILL_CREDIT_EADRIC, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -258,19 +258,19 @@ struct boss_paletressAI : public argent_champion_commonAI
     {
         DoScriptText(SAY_PALETRESS_DEFEAT, m_creature);
 
-        m_creature->CastSpell(m_creature, SPELL_KILL_CREDIT_PALETRESS, true);
+        m_creature->CastSpell(m_creature, SPELL_KILL_CREDIT_PALETRESS, TRIGGERED_OLD_TRIGGERED);
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->CastSpell(pSummoned, SPELL_SHADOWFORM, true);
-        pSummoned->CastSpell(pSummoned, SPELL_MEMORY_SPAWN_EFFECT, true);
+        pSummoned->CastSpell(pSummoned, SPELL_SHADOWFORM, TRIGGERED_OLD_TRIGGERED);
+        pSummoned->CastSpell(pSummoned, SPELL_MEMORY_SPAWN_EFFECT, TRIGGERED_OLD_TRIGGERED);
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
     {
         DoScriptText(SAY_PALETRESS_MEMORY_DIES, m_creature);
-        pSummoned->CastSpell(pSummoned, SPELL_CONFESSOR_ACHIEVEMENT, true);
+        pSummoned->CastSpell(pSummoned, SPELL_CONFESSOR_ACHIEVEMENT, TRIGGERED_OLD_TRIGGERED);
         m_creature->RemoveAurasDueToSpell(SPELL_REFLECTIVE_SHIELD);
     }
 

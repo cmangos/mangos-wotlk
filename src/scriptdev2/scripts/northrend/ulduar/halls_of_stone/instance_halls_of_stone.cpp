@@ -124,7 +124,7 @@ void instance_halls_of_stone::SetData(uint32 uiType, uint32 uiData)
                 case DONE:
                     // Cast achiev check spell - Note: it's not clear who casts this spell, but for the moment we'll use Abedneum
                     if (Creature* pEye = instance->GetCreature(m_aFaces[1].m_leftEyeGuid))
-                        pEye->CastSpell(pEye, SPELL_ACHIEVEMENT_CHECK, true);
+                        pEye->CastSpell(pEye, SPELL_ACHIEVEMENT_CHECK, TRIGGERED_OLD_TRIGGERED);
                     // Spawn the loot
                     DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_TRIBUNAL_CHEST : GO_TRIBUNAL_CHEST_H, 30 * MINUTE);
                     DoToggleGameObjectFlags(instance->IsRegularDifficulty() ? GO_TRIBUNAL_CHEST : GO_TRIBUNAL_CHEST_H, GO_FLAG_NO_INTERACT, false);
@@ -150,9 +150,9 @@ void instance_halls_of_stone::SetData(uint32 uiType, uint32 uiData)
 
                         // Cleanup when finished
                         if (Creature* pEye = instance->GetCreature(m_aFaces[i].m_leftEyeGuid))
-                            pEye->CastSpell(pEye, SPELL_KILL_TRIBUNAL_ADD, true);
+                            pEye->CastSpell(pEye, SPELL_KILL_TRIBUNAL_ADD, TRIGGERED_OLD_TRIGGERED);
                         if (Creature* pEye = instance->GetCreature(m_aFaces[i].m_rightEyeGuid))
-                            pEye->CastSpell(pEye, SPELL_KILL_TRIBUNAL_ADD, true);
+                            pEye->CastSpell(pEye, SPELL_KILL_TRIBUNAL_ADD, TRIGGERED_OLD_TRIGGERED);
                     }
                     break;
             }
@@ -387,28 +387,28 @@ void instance_halls_of_stone::ProcessFace(uint8 uiFace)
     {
         case FACE_KADDRAK:
             if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_leftEyeGuid))
-                pEye->CastSpell(pEye, instance->IsRegularDifficulty() ? SPELL_GLARE_OF_THE_TRIBUNAL : SPELL_GLARE_OF_THE_TRIBUNAL_H, true);
+                pEye->CastSpell(pEye, instance->IsRegularDifficulty() ? SPELL_GLARE_OF_THE_TRIBUNAL : SPELL_GLARE_OF_THE_TRIBUNAL_H, TRIGGERED_OLD_TRIGGERED);
             if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_rightEyeGuid))
-                pEye->CastSpell(pEye, instance->IsRegularDifficulty() ? SPELL_GLARE_OF_THE_TRIBUNAL : SPELL_GLARE_OF_THE_TRIBUNAL_H, true, NULL, NULL, m_aFaces[uiFace].m_leftEyeGuid);
+                pEye->CastSpell(pEye, instance->IsRegularDifficulty() ? SPELL_GLARE_OF_THE_TRIBUNAL : SPELL_GLARE_OF_THE_TRIBUNAL_H, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_aFaces[uiFace].m_leftEyeGuid);
             m_aFaces[uiFace].m_uiTimer = urand(1000, 2000);
             break;
         case FACE_MARNAK:
             if (Creature* pDarkMatter = GetSingleCreatureFromStorage(NPC_DARK_MATTER))
-                pDarkMatter->CastSpell(pDarkMatter, SPELL_DARK_MATTER_START, true);
+                pDarkMatter->CastSpell(pDarkMatter, SPELL_DARK_MATTER_START, TRIGGERED_OLD_TRIGGERED);
             // Note: Marnak doesn't cast anything directly. Keep this code for reference only.
             // if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_leftEyeGuid))
-            //    pEye->CastSpell(pEye, SPELL_SUMMON_DARK_MATTER_TARGET, true);
+            //    pEye->CastSpell(pEye, SPELL_SUMMON_DARK_MATTER_TARGET, TRIGGERED_OLD_TRIGGERED);
             // One should be enough..
             // if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_rightEyeGuid))
-            //    pEye->CastSpell(pEye, SPELL_SUMMON_DARK_MATTER_TARGET, true);
+            //    pEye->CastSpell(pEye, SPELL_SUMMON_DARK_MATTER_TARGET, TRIGGERED_OLD_TRIGGERED);
             m_aFaces[uiFace].m_uiTimer = urand(21000, 30000);
             break;
         case FACE_ABEDNEUM:
             if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_leftEyeGuid))
-                pEye->CastSpell(pEye, SPELL_SUMMON_SEARING_GAZE_TARGET, true);
+                pEye->CastSpell(pEye, SPELL_SUMMON_SEARING_GAZE_TARGET, TRIGGERED_OLD_TRIGGERED);
             // One should be enough..
             // if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_rightEyeGuid))
-            //    pEye->CastSpell(pEye, SPELL_SUMMON_SEARING_GAZE_TARGET, true);
+            //    pEye->CastSpell(pEye, SPELL_SUMMON_SEARING_GAZE_TARGET, TRIGGERED_OLD_TRIGGERED);
             m_aFaces[uiFace].m_uiTimer = urand(15000, 20000);
             break;
         default:

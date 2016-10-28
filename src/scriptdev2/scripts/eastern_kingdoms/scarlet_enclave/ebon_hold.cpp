@@ -601,7 +601,7 @@ struct npc_death_knight_initiateAI : public ScriptedAI
             {
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_duelerGuid))
                 {
-                    m_creature->CastSpell(pPlayer, SPELL_DUEL_VICTORY, true);
+                    m_creature->CastSpell(pPlayer, SPELL_DUEL_VICTORY, TRIGGERED_OLD_TRIGGERED);
                     m_creature->SetFacingToObject(pPlayer);
                 }
 
@@ -729,8 +729,8 @@ bool GossipSelect_npc_death_knight_initiate(Player* pPlayer, Creature* pCreature
 
         DoScriptText(m_auiRandomSay[urand(0, countof(m_auiRandomSay) - 1)], pCreature, pPlayer);
 
-        pCreature->CastSpell(pPlayer, SPELL_DUEL, true);
-        pCreature->CastSpell(pPlayer, SPELL_DUEL_FLAG, true);
+        pCreature->CastSpell(pPlayer, SPELL_DUEL, TRIGGERED_OLD_TRIGGERED);
+        pCreature->CastSpell(pPlayer, SPELL_DUEL_FLAG, TRIGGERED_OLD_TRIGGERED);
     }
     return true;
 }
@@ -787,7 +787,7 @@ struct npc_unworthy_initiate_anchorAI : public ScriptedAI
         {
             pInitiate->SetLootRecipient(pSource);
             m_creature->InterruptNonMeleeSpells(false);
-            m_creature->CastSpell(pInitiate, SPELL_CHAINED_PESANT_BREATH, false);
+            m_creature->CastSpell(pInitiate, SPELL_CHAINED_PESANT_BREATH, TRIGGERED_NONE);
         }
     }
 
@@ -881,7 +881,7 @@ struct npc_unworthy_initiateAI : public ScriptedAI
             if (npc_unworthy_initiate_anchorAI* pAnchorAI = dynamic_cast<npc_unworthy_initiate_anchorAI*>(pAnchor->AI()))
                 pAnchorAI->RegisterCloseInitiate(m_creature);
 
-            pAnchor->CastSpell(m_creature, SPELL_CHAINED_PESANT_CHEST, false);
+            pAnchor->CastSpell(m_creature, SPELL_CHAINED_PESANT_CHEST, TRIGGERED_NONE);
             m_myAnchorGuid = pAnchor->GetObjectGuid();
 
             m_uiAnchorCheckTimer = 0;
@@ -961,7 +961,7 @@ struct npc_unworthy_initiateAI : public ScriptedAI
                 if (m_uiPhase == PHASE_DRESSUP)
                 {
                     // ToDo: send the creature to the left / right in order to grab a weapon
-                    m_creature->CastSpell(m_creature, SPELL_INITIATE_VISUAL, false);
+                    m_creature->CastSpell(m_creature, SPELL_INITIATE_VISUAL, TRIGGERED_NONE);
 
                     m_uiPhase = PHASE_ACTIVATE;
                 }
@@ -1050,7 +1050,7 @@ struct npc_eye_of_acherusAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        m_creature->CastSpell(m_creature, 52694, true);     // HACK - Remove this when mangos supports proper spell casting
+        m_creature->CastSpell(m_creature, 52694, TRIGGERED_OLD_TRIGGERED);     // HACK - Remove this when mangos supports proper spell casting
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
@@ -1262,7 +1262,7 @@ bool EffectDummyCreature_npc_scarlet_ghoul(Unit* pCaster, uint32 uiSpellId, Spel
         {
             if (!pGhoulAi->m_bGotHit)                       // First hit
             {
-                pCreatureTarget->CastSpell(pCreatureTarget, 52517, false);
+                pCreatureTarget->CastSpell(pCreatureTarget, 52517, TRIGGERED_NONE);
                 pGhoulAi->m_bGotHit = true;
             }
             else                                            // Second hit
@@ -1526,7 +1526,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
         switch (pSummoned->GetEntry())
         {
             case NPC_VOLATILE_GHOUL:
-                pSummoned->CastSpell(pSummoned, SPELL_BIRTH, true);
+                pSummoned->CastSpell(pSummoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
                 // no break;
             case NPC_WARRIOR_OF_THE_FROZEN_WASTES:
                 m_lAttackersGUIDs.push_back(pSummoned->GetObjectGuid());
@@ -1840,7 +1840,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
         {
             Player* pPlayer = itr->getSource();
             if (pPlayer && pPlayer->GetQuestStatus(QUEST_ID_LIGHT_OF_DAWN) == QUEST_STATUS_INCOMPLETE && pPlayer->isAlive() && m_creature->IsWithinDistInMap(pPlayer, 50.0f))
-                pPlayer->CastSpell(pPlayer, SPELL_THE_LIGHT_OF_DAWN_CREDIT, true);
+                pPlayer->CastSpell(pPlayer, SPELL_THE_LIGHT_OF_DAWN_CREDIT, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -1996,7 +1996,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                             if (Creature* pAlexandros = m_creature->SummonCreature(NPC_HIGHLORD_ALEXANDROS_MOGRAINE, aEventLocations[4].m_fX, aEventLocations[4].m_fY, aEventLocations[4].m_fZ, aEventLocations[4].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
                             {
                                 DoScriptText(EMOTE_LIGHT_OF_DAWN_ALEXANDROS, pAlexandros);
-                                pAlexandros->CastSpell(pAlexandros, SPELL_ALEXANDROS_MOGRAINE_SPAWN, true);
+                                pAlexandros->CastSpell(pAlexandros, SPELL_ALEXANDROS_MOGRAINE_SPAWN, TRIGGERED_OLD_TRIGGERED);
                             }
                             m_uiEventTimer = 4000;
                             break;
@@ -2092,7 +2092,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                             {
                                 DoScriptText(SAY_LIGHT_OF_DAWN_KING_VISIT_2, pLichKing);
                                 if (Creature* pAlexandros = m_pInstance->GetSingleCreatureFromStorage(NPC_HIGHLORD_ALEXANDROS_MOGRAINE))
-                                    pLichKing->CastSpell(pAlexandros, SPELL_SOUL_FEAST_ALEX, false);
+                                    pLichKing->CastSpell(pAlexandros, SPELL_SOUL_FEAST_ALEX, TRIGGERED_NONE);
                             }
                             m_uiEventTimer = 2000;
                             break;
@@ -2111,7 +2111,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                             // the LK moves forward
                             if (Creature* pLichKing = m_pInstance->GetSingleCreatureFromStorage(NPC_THE_LICH_KING))
                             {
-                                pLichKing->CastSpell(pLichKing, SPELL_ICEBOUND_VISAGE, true);
+                                pLichKing->CastSpell(pLichKing, SPELL_ICEBOUND_VISAGE, TRIGGERED_OLD_TRIGGERED);
                                 pLichKing->GetMotionMaster()->MovePoint(POINT_MOVE_CHAPEL, aEventLocations[9].m_fX, aEventLocations[9].m_fY, aEventLocations[9].m_fZ);
                             }
                             m_uiEventTimer = 5000;
@@ -2127,7 +2127,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                             {
                                 DoScriptText(SAY_LIGHT_OF_DAWN_KING_VISIT_4, pLichKing);
                                 // Note: this should be cast by the LK - spell bug
-                                m_creature->CastSpell(m_creature, SPELL_REBUKE, true);
+                                m_creature->CastSpell(m_creature, SPELL_REBUKE, TRIGGERED_OLD_TRIGGERED);
                             }
                             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
                             m_uiEventTimer = 4000;
@@ -2158,7 +2158,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                                 if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_HIGHLORD_TIRION_FORDRING))
                                 {
                                     DoScriptText(EMOTE_LIGHT_OF_DAWN_GRASP, pTirion);
-                                    pLichKing->CastSpell(pTirion, SPELL_SOUL_FEAST_TIRION, false);
+                                    pLichKing->CastSpell(pTirion, SPELL_SOUL_FEAST_TIRION, TRIGGERED_NONE);
                                     pLichKing->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
                                 }
                             }
@@ -2203,20 +2203,20 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                             {
                                 DoScriptText(EMOTE_LIGHT_OF_DAWN_POWERFULL, pLichKing);
                                 DoScriptText(SAY_LIGHT_OF_DAWN_KING_VISIT_9, pLichKing);
-                                pLichKing->CastSpell(pLichKing, SPELL_APOCALYPSE, true);
+                                pLichKing->CastSpell(pLichKing, SPELL_APOCALYPSE, TRIGGERED_OLD_TRIGGERED);
                             }
                             m_uiEventTimer = 1000;
                             break;
                         case 39:
                             if (Creature* pLichKing = m_pInstance->GetSingleCreatureFromStorage(NPC_THE_LICH_KING))
                             {
-                                pLichKing->CastSpell(pLichKing, SPELL_POST_APOCALYPSE, true);
+                                pLichKing->CastSpell(pLichKing, SPELL_POST_APOCALYPSE, TRIGGERED_OLD_TRIGGERED);
 
                                 // despawn guards
                                 for (GuidList::const_iterator itr = m_lDefendersGUIDs.begin(); itr != m_lDefendersGUIDs.end(); ++itr)
                                 {
                                     if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                                        pTemp->DealDamage(pTemp, pTemp->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                                        pTemp->DealDamage(pTemp, pTemp->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, TRIGGERED_NONE);
                                 }
                                 // workaround for the light champions - spell doesn't work right
                                 for (uint8 i = 0; i < MAX_LIGHT_CHAMPIONS; i++)
@@ -2251,7 +2251,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                             DoScriptText(EMOTE_LIGHT_OF_DAWN_COLAPSE, m_creature);
                             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
                             if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_HIGHLORD_TIRION_FORDRING))
-                                pTirion->CastSpell(pTirion, SPELL_REBIRTH_OF_THE_ASHBRINGER, true);
+                                pTirion->CastSpell(pTirion, SPELL_REBIRTH_OF_THE_ASHBRINGER, TRIGGERED_OLD_TRIGGERED);
                             m_pInstance->DoRespawnGameObject(GO_LIGHT_OF_DAWN, 5 * MINUTE);
                             if (Creature* pLichKing = m_pInstance->GetSingleCreatureFromStorage(NPC_THE_LICH_KING))
                                 pLichKing->InterruptNonMeleeSpells(false);
@@ -2287,7 +2287,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                             if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_HIGHLORD_TIRION_FORDRING))
                             {
                                 DoScriptText(EMOTE_LIGHT_OF_DAWN_CHARGE, pTirion);
-                                pTirion->CastSpell(pTirion, SPELL_TIRION_CHARGE, true);
+                                pTirion->CastSpell(pTirion, SPELL_TIRION_CHARGE, TRIGGERED_OLD_TRIGGERED);
                             }
                             m_uiEventTimer = 2000;
                             break;
@@ -2320,7 +2320,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                         case 53:
                             // the lich king teleports to leave
                             if (Creature* pLichKing = m_pInstance->GetSingleCreatureFromStorage(NPC_THE_LICH_KING))
-                                pLichKing->CastSpell(pLichKing, SPELL_TELEPORT_VISUAL, false);
+                                pLichKing->CastSpell(pLichKing, SPELL_TELEPORT_VISUAL, TRIGGERED_NONE);
                             if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_HIGHLORD_TIRION_FORDRING))
                             {
                                 float fX, fY, fZ;
@@ -2352,7 +2352,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                             // tirion reaches darion and starts the epilogue
                             if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_HIGHLORD_TIRION_FORDRING))
                             {
-                                pTirion->CastSpell(m_creature, SPELL_LAY_ON_HANDS, true);
+                                pTirion->CastSpell(m_creature, SPELL_LAY_ON_HANDS, TRIGGERED_OLD_TRIGGERED);
                                 DoScriptText(SAY_LIGHT_OF_DAWN_EPILOGUE_1, pTirion);
                             }
                             m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);

@@ -151,7 +151,7 @@ struct boss_lord_marrowgarAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_COLDFLAME)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_COLDFLAME_AURA, true);
+            pSummoned->CastSpell(pSummoned, SPELL_COLDFLAME_AURA, TRIGGERED_OLD_TRIGGERED);
 
             float fX, fY;
             float fZ = pSummoned->GetPositionZ();
