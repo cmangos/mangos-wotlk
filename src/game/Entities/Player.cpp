@@ -21217,30 +21217,43 @@ void Player::SendCorpseReclaimDelay(bool load) const
     GetSession()->SendPacket(data);
 }
 
-Player* Player::GetNextRandomRaidMember(float radius)
+Player* Player::GetNextRaidMemberWithLowestLifePercentage(float radius, AuraType noAuraType)
 {
     Group* pGroup = GetGroup();
     if (!pGroup)
         return nullptr;
 
-    std::vector<Player*> nearMembers;
-    nearMembers.reserve(pGroup->GetMembersCount());
+    Player* lowestPercentagePlayer = nullptr;
+    uint32 lowestPercentage = 100;
 
     for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
     {
-        Player* Target = itr->getSource();
+        Player* target = itr->getSource();
 
-        // IsHostileTo check duel and controlled by enemy
-        if (Target && Target != this && IsWithinDistInMap(Target, radius) &&
-                !Target->HasInvisibilityAura() && !IsHostileTo(Target))
-            nearMembers.push_back(Target);
+        if (target && target != this)
+        {
+            // First not picked
+            if (!lowestPercentagePlayer)
+            {
+                lowestPercentagePlayer = target;
+                lowestPercentage = target->GetHealthPercent();
+                continue;
+            }
+
+            // IsHostileTo check duel and controlled by enemy
+            if (IsWithinDistInMap(target, radius) &&
+                !target->HasInvisibilityAura() && !IsHostileTo(target) && !target->HasAuraType(noAuraType))
+            {
+                if (target->GetHealthPercent() < lowestPercentage)
+                {
+                    lowestPercentagePlayer = target;
+                    lowestPercentage = target->GetHealthPercent();
+                }
+            }
+        }
     }
 
-    if (nearMembers.empty())
-        return nullptr;
-
-    uint32 randTarget = urand(0, nearMembers.size() - 1);
-    return nearMembers[randTarget];
+    return lowestPercentagePlayer;
 }
 
 PartyResult Player::CanUninviteFromGroup() const

@@ -3899,7 +3899,7 @@ SpellAuraProcResult Unit::HandleMendingAuraProc(Unit* /*pVictim*/, uint32 /*dama
         {
             caster->ApplySpellMod(spellProto->Id, SPELLMOD_RADIUS, radius);
 
-            if (Player* target = ((Player*)this)->GetNextRandomRaidMember(radius))
+            if (Player* target = ((Player*)this)->GetNextRaidMemberWithLowestLifePercentage(radius, SPELL_AURA_PRAYER_OF_MENDING))
             {
                 SpellAuraHolder* holder = GetSpellAuraHolder(spellProto->Id, caster->GetObjectGuid());
                 SpellAuraHolder* new_holder = CreateSpellAuraHolder(spellProto, target, caster);
