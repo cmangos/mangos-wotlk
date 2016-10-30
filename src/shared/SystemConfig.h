@@ -30,10 +30,6 @@
 #error "VERSION undeclared"
 #endif
 
-#ifndef _VERSION
-# define _VERSION(REVD,REVT,REVH) VERSION " (" REVD " " REVT " - " REVH ")"
-#endif
-
 // Format is YYYYMMDDRR where RR is the change in the conf file
 // for that day.
 #ifndef _MANGOSDCONFVERSION
@@ -94,7 +90,7 @@
 # define _AUCTIONHOUSEBOT_CONFIG   SYSCONFDIR"ahbot.conf"
 #endif
 
-#define _FULLVERSION(REVD,REVT,REVH) _PACKAGENAME "/" _VERSION(REVD,REVT,REVH) " for " _ENDIAN_PLATFORM
+#define _FULLVERSION _PACKAGENAME "/" VERSION " (" REVISION ") for " _ENDIAN_PLATFORM
 
 #define DEFAULT_PLAYER_LIMIT 100
 #define DEFAULT_WORLDSERVER_PORT 8085                       //8129
