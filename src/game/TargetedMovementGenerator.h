@@ -24,7 +24,7 @@
 
 class PathFinder;
 
-class TargetedMovementGeneratorBase
+class MANGOS_DLL_SPEC TargetedMovementGeneratorBase
 {
     public:
         TargetedMovementGeneratorBase(Unit& target) { i_target.link(&target, this); }
@@ -34,7 +34,7 @@ class TargetedMovementGeneratorBase
 };
 
 template<class T, typename D>
-class TargetedMovementGeneratorMedium
+class MANGOS_DLL_SPEC TargetedMovementGeneratorMedium
     : public MovementGeneratorMedium< T, D >, public TargetedMovementGeneratorBase
 {
     protected:
@@ -72,7 +72,7 @@ class TargetedMovementGeneratorMedium
 };
 
 template<class T>
-class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >
+class MANGOS_DLL_SPEC ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >
 {
     public:
         ChaseMovementGenerator(Unit& target, float offset, float angle)
@@ -97,7 +97,7 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMo
 };
 
 template<class T>
-class FollowMovementGenerator : public TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >
+class MANGOS_DLL_SPEC FollowMovementGenerator : public TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >
 {
     public:
         FollowMovementGenerator(Unit& target)

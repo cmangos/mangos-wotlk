@@ -229,7 +229,7 @@ class WorldSessionFilter : public PacketFilter
 };
 
 /// Player session in the World
-class WorldSession
+class MANGOS_DLL_SPEC WorldSession
 {
         friend class CharacterHandler;
 

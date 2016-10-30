@@ -24,7 +24,7 @@
 //=====================================================
 
 template<class TO, class FROM>
-class Reference : public LinkedListElement
+class MANGOS_DLL_SPEC Reference : public LinkedListElement
 {
     private:
 
