@@ -2904,20 +2904,28 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
         }
     }
 
-    // Max 40% chance to score a glancing blow against mobs that are higher level
-    // (can do only players and pets and not with ranged weapon)
-    if ((GetTypeId() == TYPEID_PLAYER || ((Creature*)this)->IsPet())
+    bool attackerIsPlayer = GetTypeId() == TYPEID_PLAYER ? true : false;
+    // You can glance against mobs which are a lower level than you!
+    // Only players and pets can glance, and only with normal melee attacks
+    if ((attackerIsPlayer || ((Creature*)this)->IsPet())
         && pVictim->GetTypeId() != TYPEID_PLAYER && !((Creature*)pVictim)->IsPet()
-        && getLevel() < pVictim->getLevel() && attType != RANGED_ATTACK)
+        && attType != RANGED_ATTACK)
     {
-        int32 attackerSkill = (attackerWeaponSkill > attackerMaxSkillValueForLevel) ? attackerMaxSkillValueForLevel : attackerWeaponSkill; // pick whichever is lower
-        int32 glancing_chance = (10 + victimDefenseSkill - attackerSkill) * 100;
-        glancing_chance = glancing_chance > 4000 ? 4000 : glancing_chance; // cap Glancing Blow chance at 40%
-
-        if (glancing_chance > 0 && roll < (sum += glancing_chance))
+        if (pVictim->getLevel() > 10)  // No glancing in starting zones or against critters
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum - glancing_chance, glancing_chance);
-            return MELEE_HIT_GLANCING;
+            int32 attackerSkill = (attackerWeaponSkill > attackerMaxSkillValueForLevel) ? attackerMaxSkillValueForLevel : attackerWeaponSkill; // pick whichever is lower
+
+            // All classes suffer the same amount of glancing in Wotlk and later
+            int32 glancing_chance = (10 + (victimDefenseSkill - attackerSkill)) * 100;
+
+            // cap is 60% - The 40% is the 'de facto' percentage for a SKILL CAPPED MAX LEVEL MELEE PLAYER (in classic)
+            glancing_chance = (glancing_chance > 6000) ? 6000 : glancing_chance;
+
+            if (glancing_chance > 0 && roll < (sum += glancing_chance))
+            {
+                DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum - glancing_chance, glancing_chance);
+                return MELEE_HIT_GLANCING;
+            }
         }
     }
 
