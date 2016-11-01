@@ -186,5 +186,3 @@ add_library(${LIBRARY_NAME} STATIC
 if(POSTGRESQL)
   target_link_libraries(${LIBRARY_NAME} ${PostgreSQL_LIBRARIES})
 endif()
-
-add_dependencies(${LIBRARY_NAME} revision.h)
