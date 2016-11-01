@@ -486,7 +486,7 @@ bool Unit::UpdateMeleeAttackingState()
         player->SwingErrorMsg(swingError);
     }
 
-    return swingError;
+    return !!swingError;
 }
 
 bool Unit::haveOffhandWeapon() const
@@ -1731,7 +1731,7 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
 
             // calculate values
             int32 attackerRating = GetWeaponSkillValue(damageInfo->attackType);
-            attackerRating = attackerRating > getLevel() * 5 ? getLevel() * 5 : attackerRating; // cap rating at level * 5, done in 2.0.1
+            attackerRating = static_cast<std::uint32_t>(attackerRating) > getLevel() * 5 ? getLevel() * 5 : attackerRating; // cap rating at level * 5, done in 2.0.1
             int32 diff = damageInfo->target->GetDefenseSkillValue() - attackerRating;
             float lowEnd  = baseLowEnd - (0.05f * diff);
             float highEnd = baseHighEnd - (0.03f * diff);
@@ -10645,8 +10645,8 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
     Player* controller = GetCharmerOrOwnerPlayerOrPlayerItself();
     const bool control = controller ? controller->IsClientControl(this) : false;
     const bool movement = (state != UNIT_FLAG_STUNNED);
-    const bool stun = (state & UNIT_FLAG_STUNNED);
-    const bool fleeing = (state & UNIT_FLAG_FLEEING);
+    const bool stun = !!(state & UNIT_FLAG_STUNNED);
+    const bool fleeing = !!(state & UNIT_FLAG_FLEEING);
 
     if (apply)
     {
