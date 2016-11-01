@@ -514,7 +514,7 @@ void Unit::SendHeartBeat()
     WorldPacket data(MSG_MOVE_HEARTBEAT, 64);
     data << GetPackGUID();
     data << m_movementInfo;
-    SendMessageToSet(&data, true);
+    SendMessageToSet(data, true);
 }
 
 void Unit::resetAttackTimer(WeaponAttackType type)
@@ -832,9 +832,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             data << pVictim->GetObjectGuid();               // victim
 
             if (group_tap)
-                group_tap->BroadcastPacket(&data, false, group_tap->GetMemberGroup(player_tap->GetObjectGuid()), player_tap->GetObjectGuid());
+                group_tap->BroadcastPacket(data, false, group_tap->GetMemberGroup(player_tap->GetObjectGuid()), player_tap->GetObjectGuid());
 
-            player_tap->SendDirectMessage(&data);
+            player_tap->SendDirectMessage(data);
         }
         else if (GetTypeId() == TYPEID_UNIT && this != pVictim)
             ProcDamageAndSpell(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0);
@@ -908,7 +908,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
                 playerVictim->DurabilityLossAll(0.10f, false);
                 // durability lost message
                 WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);
-                playerVictim->GetSession()->SendPacket(&data);
+                playerVictim->GetSession()->SendPacket(data);
             }
 
             if (!spiritOfRedemtionTalentReady)              // Before informing Battleground
@@ -1934,7 +1934,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
                     data << uint32(damage);                  // Damage
                     data << uint32(overkill);                // Overkill
                     data << uint32(i_spellProto->SchoolMask);
-                    pVictim->SendMessageToSet(&data, true);
+                    pVictim->SendMessageToSet(data, true);
 
                     pVictim->DealDamage(this, damage, nullptr, SPELL_DIRECT_DAMAGE, GetSpellSchoolMask(i_spellProto), i_spellProto, true);
 
@@ -1952,7 +1952,7 @@ void Unit::HandleEmoteCommand(uint32 emote_id)
     WorldPacket data(SMSG_EMOTE, 4 + 8);
     data << uint32(emote_id);
     data << GetObjectGuid();
-    SendMessageToSet(&data, true);
+    SendMessageToSet(data, true);
 }
 
 void Unit::HandleEmoteState(uint32 emote_id)
@@ -3038,7 +3038,7 @@ void Unit::SendMeleeAttackStart(Unit* pVictim)
     data << GetObjectGuid();
     data << pVictim->GetObjectGuid();
 
-    SendMessageToSet(&data, true);
+    SendMessageToSet(data, true);
     DEBUG_LOG("WORLD: Sent SMSG_ATTACKSTART");
 }
 
@@ -3051,7 +3051,7 @@ void Unit::SendMeleeAttackStop(Unit* victim)
     data << GetPackGUID();
     data << victim->GetPackGUID();                          // can be 0x00...
     data << uint32(0);                                      // can be 0x1
-    SendMessageToSet(&data, true);
+    SendMessageToSet(data, true);
     DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "%s %u stopped attacking %s %u", (GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), GetGUIDLow(), (victim->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), victim->GetGUIDLow());
 
     /*if(victim->GetTypeId() == TYPEID_UNIT)
@@ -5542,7 +5542,7 @@ void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log)
     data << uint32(log->blocked);                           // blocked
     data << uint32(log->HitInfo);
     data << uint8(0);                                       // flag to use extend data
-    SendMessageToSet(&data, true);
+    SendMessageToSet(data, true);
 }
 
 void Unit::SendSpellNonMeleeDamageLog(Unit* target, uint32 SpellID, uint32 Damage, SpellSchoolMask damageSchoolMask, uint32 AbsorbedDamage, uint32 Resist, bool PhysicalDamage, uint32 Blocked, bool CriticalHit)
@@ -5603,7 +5603,7 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
             return;
     }
 
-    aura->GetTarget()->SendMessageToSet(&data, true);
+    aura->GetTarget()->SendMessageToSet(data, true);
 }
 
 void Unit::ProcDamageAndSpell(Unit* pVictim, uint32 procAttacker, uint32 procVictim, uint32 procExtra, uint32 amount, WeaponAttackType attType, SpellEntry const* procSpell)
@@ -5628,7 +5628,7 @@ void Unit::SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo)
     data << target->GetObjectGuid();                        // target GUID
     data << uint8(missInfo);
     // end loop
-    SendMessageToSet(&data, true);
+    SendMessageToSet(data, true);
 }
 
 void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
@@ -5696,7 +5696,7 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
         data << uint32(0);
     }
 
-    SendMessageToSet(&data, true);
+    SendMessageToSet(data, true);
 }
 
 void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit* target, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount)
@@ -5766,7 +5766,7 @@ void Unit::SetPowerType(Powers new_powertype)
         data << GetPackGUID();
         data << uint8(new_powertype);
         data << uint32(curValue);
-        SendMessageToSet(&data, true);
+        SendMessageToSet(data, true);
     }
 }
 
@@ -6625,7 +6625,7 @@ void Unit::SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, uint32
     data << uint32(absorb);
     data << uint8(critical ? 1 : 0);
     data << uint8(0);                                       // unused in client?
-    SendMessageToSet(&data, true);
+    SendMessageToSet(data, true);
 }
 
 void Unit::SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype)
@@ -6636,7 +6636,7 @@ void Unit::SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Po
     data << uint32(SpellID);
     data << uint32(powertype);
     data << uint32(Damage);
-    SendMessageToSet(&data, true);
+    SendMessageToSet(data, true);
 }
 
 void Unit::EnergizeBySpell(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype)
@@ -8243,7 +8243,7 @@ void Unit::Unmount(bool from_aura)
     {
         WorldPacket data(SMSG_DISMOUNT, 8);
         data << GetPackGUID();
-        SendMessageToSet(&data, true);
+        SendMessageToSet(data, true);
     }
 
     // only resummon old pet if the player is already added to a map
@@ -8922,12 +8922,12 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
             if (mtype == MOVE_RUN)
                 data << uint8(0);                           // new 2.1.0
             data << float(GetSpeed(mtype));
-            ((Player*)this)->GetSession()->SendPacket(&data);
+            ((Player*)this)->GetSession()->SendPacket(data);
         }
         WorldPacket data(speedOpcodes[1], 12);
         data << GetPackGUID();
         data << float(GetSpeed(mtype));
-        SendMessageToSet(&data, false);
+        SendMessageToSet(data, false);
     }
 
     CallForAllControlledUnits(SetSpeedRateHelper(mtype, forced), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM | CONTROLLED_MINIPET);
@@ -10532,7 +10532,7 @@ void Unit::SendPetActionFeedback(uint8 msg)
 
     WorldPacket data(SMSG_PET_ACTION_FEEDBACK, 1);
     data << uint8(msg);
-    ((Player*)owner)->GetSession()->SendPacket(&data);
+    ((Player*)owner)->GetSession()->SendPacket(data);
 }
 
 void Unit::SendPetTalk(uint32 pettalk)
@@ -10544,7 +10544,7 @@ void Unit::SendPetTalk(uint32 pettalk)
     WorldPacket data(SMSG_PET_ACTION_SOUND, 8 + 4);
     data << GetObjectGuid();
     data << uint32(pettalk);
-    ((Player*)owner)->GetSession()->SendPacket(&data);
+    ((Player*)owner)->GetSession()->SendPacket(data);
 }
 
 void Unit::SendPetAIReaction()
@@ -10556,7 +10556,7 @@ void Unit::SendPetAIReaction()
     WorldPacket data(SMSG_AI_REACTION, 8 + 4);
     data << GetObjectGuid();
     data << uint32(AI_REACTION_HOSTILE);
-    ((Player*)owner)->GetSession()->SendPacket(&data);
+    ((Player*)owner)->GetSession()->SendPacket(data);
 }
 
 ///----------End of Pet responses methods----------
@@ -10732,7 +10732,7 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/)
         WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
         data<<GetGUID();
         data<<uint8(0);
-        SendMessageToSet(&data,true);
+        SendMessageToSet(data,true);
         */
 
         if (GetTypeId() != TYPEID_PLAYER)
@@ -10763,7 +10763,7 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/)
         WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
         data<<GetGUID();
         data<<uint8(1);
-        SendMessageToSet(&data,true);
+        SendMessageToSet(data,true);
         */
         // blizz like 2.0.x
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
@@ -10811,7 +10811,7 @@ void Unit::SetStandState(uint8 state)
     {
         WorldPacket data(SMSG_STANDSTATE_UPDATE, 1);
         data << (uint8)state;
-        ((Player*)this)->GetSession()->SendPacket(&data);
+        ((Player*)this)->GetSession()->SendPacket(data);
     }
 }
 
@@ -11333,7 +11333,7 @@ void Unit::SendThreatUpdate()
             data << (*itr)->getUnitGuid().WriteAsPacked();
             data << uint32((*itr)->getThreat());
         }
-        SendMessageToSet(&data, false);
+        SendMessageToSet(data, false);
     }
 }
 
@@ -11352,7 +11352,7 @@ void Unit::SendHighestThreatUpdate(HostileReference* pHostilReference)
             data << (*itr)->getUnitGuid().WriteAsPacked();
             data << uint32((*itr)->getThreat());
         }
-        SendMessageToSet(&data, false);
+        SendMessageToSet(data, false);
     }
 }
 
@@ -11361,7 +11361,7 @@ void Unit::SendThreatClear()
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Send SMSG_THREAT_CLEAR Message");
     WorldPacket data(SMSG_THREAT_CLEAR, 8);
     data << GetPackGUID();
-    SendMessageToSet(&data, false);
+    SendMessageToSet(data, false);
 }
 
 void Unit::SendThreatRemove(HostileReference* pHostileReference)
@@ -11370,7 +11370,7 @@ void Unit::SendThreatRemove(HostileReference* pHostileReference)
     WorldPacket data(SMSG_THREAT_REMOVE, 8 + 8);
     data << GetPackGUID();
     data << pHostileReference->getUnitGuid().WriteAsPacked();
-    SendMessageToSet(&data, false);
+    SendMessageToSet(data, false);
 }
 
 struct StopAttackFactionHelper
@@ -11589,7 +11589,7 @@ void Unit::SetVehicleId(uint32 entry, uint32 overwriteNpcEntry)
         WorldPacket data(SMSG_SET_VEHICLE_REC_ID, 16);
         data << GetPackGUID();
         data << uint32(entry);
-        SendMessageToSet(&data, true);
+        SendMessageToSet(data, true);
     }
 }
 
@@ -11638,7 +11638,7 @@ void Unit::SendCollisionHeightUpdate(float height)
         data << GetPackGUID();
         data << uint32(sWorld.GetGameTime());
         data << height;
-        ((Player*)this)->GetSession()->SendPacket(&data);
+        ((Player*)this)->GetSession()->SendPacket(data);
     }
 }
 

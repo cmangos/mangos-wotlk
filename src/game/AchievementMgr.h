@@ -296,7 +296,7 @@ class AchievementMgr
         void CompletedAchievement(AchievementEntry const* entry);
         void IncompletedAchievement(AchievementEntry const* entry);
         bool IsCompletedAchievement(AchievementEntry const* entry);
-        void BuildAllDataPacket(WorldPacket* data);
+        void BuildAllDataPacket(WorldPacket& data);
 
         Player* m_player;
         CriteriaProgressMap m_criteriaProgress;

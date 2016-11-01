@@ -84,5 +84,5 @@ void InstanceData::SendEncounterFrame(uint32 type, ObjectGuid sourceGuid /*= nul
             break;
     }
 
-    instance->SendToPlayers(&data);
+    instance->SendToPlayers(data);
 }

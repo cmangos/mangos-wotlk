@@ -61,7 +61,7 @@ void Channel::Join(Player* player, const char* password)
         if (!IsConstant())                                  // non send error message for built-in channels
         {
             MakePlayerAlreadyMember(&data, guid);
-            SendToOne(&data, guid);
+            SendToOne(data, guid);
         }
         return;
     }
@@ -69,21 +69,21 @@ void Channel::Join(Player* player, const char* password)
     if (IsBanned(guid))
     {
         MakeBanned(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
     if (m_password.length() > 0 && strcmp(password, m_password.c_str()))
     {
         MakeWrongPassword(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
     if (HasFlag(CHANNEL_FLAG_LFG) && sWorld.getConfig(CONFIG_BOOL_RESTRICTED_LFG_CHANNEL) && player->GetSession()->GetSecurity() == SEC_PLAYER)
     {
         MakeNotInLfg(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -96,7 +96,7 @@ void Channel::Join(Player* player, const char* password)
     if (m_announce && (player->GetSession()->GetSecurity() < SEC_GAMEMASTER || !sWorld.getConfig(CONFIG_BOOL_SILENTLY_GM_JOIN_TO_CHANNEL)))
     {
         MakeJoined(&data, guid);
-        SendToAll(&data);
+        SendToAll(data);
     }
 
     data.clear();
@@ -106,7 +106,7 @@ void Channel::Join(Player* player, const char* password)
     pinfo.flags = MEMBER_FLAG_NONE;
 
     MakeYouJoined(&data);
-    SendToOne(&data, guid);
+    SendToOne(data, guid);
 
     JoinNotify(guid);
 
@@ -128,7 +128,7 @@ void Channel::Leave(Player* player, bool send)
         {
             WorldPacket data;
             MakeNotMember(&data);
-            SendToOne(&data, guid);
+            SendToOne(data, guid);
         }
         return;
     }
@@ -138,7 +138,7 @@ void Channel::Leave(Player* player, bool send)
     {
         WorldPacket data;
         MakeYouLeft(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         player->LeftChannel(this);
         data.clear();
     }
@@ -150,7 +150,7 @@ void Channel::Leave(Player* player, bool send)
     {
         WorldPacket data;
         MakeLeft(&data, guid);
-        SendToAll(&data);
+        SendToAll(data);
     }
 
     LeaveNotify(guid);
@@ -170,7 +170,7 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
     {
         WorldPacket data;
         MakeNotMember(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -178,7 +178,7 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
     {
         WorldPacket data;
         MakeNotModerator(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -187,7 +187,7 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
     {
         WorldPacket data;
         MakePlayerNotFound(&data, targetName);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -196,7 +196,7 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
     {
         WorldPacket data;
         MakePlayerNotFound(&data, targetName);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -206,7 +206,7 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
     {
         WorldPacket data;
         MakeNotOwner(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -221,7 +221,7 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
     else
         MakePlayerKicked(&data, targetGuid, guid);
 
-    SendToAll(&data);
+    SendToAll(data);
     m_players.erase(targetGuid);
     target->LeftChannel(this);
 
@@ -240,7 +240,7 @@ void Channel::UnBan(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakeNotMember(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -248,7 +248,7 @@ void Channel::UnBan(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakeNotModerator(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -257,7 +257,7 @@ void Channel::UnBan(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakePlayerNotFound(&data, targetName);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -266,7 +266,7 @@ void Channel::UnBan(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakePlayerNotBanned(&data, targetName);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -275,7 +275,7 @@ void Channel::UnBan(Player* player, const char* targetName)
 
     WorldPacket data;
     MakePlayerUnbanned(&data, targetGuid, guid);
-    SendToAll(&data);
+    SendToAll(data);
 }
 
 void Channel::Password(Player* player, const char* password)
@@ -286,7 +286,7 @@ void Channel::Password(Player* player, const char* password)
     {
         WorldPacket data;
         MakeNotMember(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -294,7 +294,7 @@ void Channel::Password(Player* player, const char* password)
     {
         WorldPacket data;
         MakeNotModerator(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -303,7 +303,7 @@ void Channel::Password(Player* player, const char* password)
 
     WorldPacket data;
     MakePasswordChanged(&data, guid);
-    SendToAll(&data);
+    SendToAll(data);
 }
 
 void Channel::SetMode(Player* player, const char* targetName, bool moderator, bool set)
@@ -314,7 +314,7 @@ void Channel::SetMode(Player* player, const char* targetName, bool moderator, bo
     {
         WorldPacket data;
         MakeNotMember(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -322,7 +322,7 @@ void Channel::SetMode(Player* player, const char* targetName, bool moderator, bo
     {
         WorldPacket data;
         MakeNotModerator(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -331,7 +331,7 @@ void Channel::SetMode(Player* player, const char* targetName, bool moderator, bo
     {
         WorldPacket data;
         MakePlayerNotFound(&data, targetName);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -343,7 +343,7 @@ void Channel::SetMode(Player* player, const char* targetName, bool moderator, bo
     {
         WorldPacket data;
         MakePlayerNotFound(&data, targetName);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -354,7 +354,7 @@ void Channel::SetMode(Player* player, const char* targetName, bool moderator, bo
     {
         WorldPacket data;
         MakePlayerNotFound(&data, targetName);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -362,7 +362,7 @@ void Channel::SetMode(Player* player, const char* targetName, bool moderator, bo
     {
         WorldPacket data;
         MakeNotOwner(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -381,7 +381,7 @@ void Channel::SetOwner(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakeNotMember(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -389,7 +389,7 @@ void Channel::SetOwner(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakeNotOwner(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -398,7 +398,7 @@ void Channel::SetOwner(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakePlayerNotFound(&data, targetName);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -407,7 +407,7 @@ void Channel::SetOwner(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakePlayerNotFound(&data, targetName);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -415,7 +415,7 @@ void Channel::SetOwner(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakePlayerNotFound(&data, targetName);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -432,14 +432,14 @@ void Channel::SendWhoOwner(Player* player)
     {
         WorldPacket data;
         MakeNotMember(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
     // send channel owner
     WorldPacket data;
     MakeChannelOwner(&data);
-    SendToOne(&data, guid);
+    SendToOne(data, guid);
 }
 
 void Channel::List(Player* player)
@@ -450,7 +450,7 @@ void Channel::List(Player* player)
     {
         WorldPacket data;
         MakeNotMember(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -483,7 +483,7 @@ void Channel::List(Player* player)
 
     data.put<uint32>(pos, count);
 
-    SendToOne(&data, guid);
+    SendToOne(data, guid);
 }
 
 void Channel::Announce(Player* player)
@@ -494,7 +494,7 @@ void Channel::Announce(Player* player)
     {
         WorldPacket data;
         MakeNotMember(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -502,7 +502,7 @@ void Channel::Announce(Player* player)
     {
         WorldPacket data;
         MakeNotModerator(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -515,7 +515,7 @@ void Channel::Announce(Player* player)
     else
         MakeAnnouncementsOff(&data, guid);
 
-    SendToAll(&data);
+    SendToAll(data);
 }
 
 void Channel::Moderate(Player* player)
@@ -526,7 +526,7 @@ void Channel::Moderate(Player* player)
     {
         WorldPacket data;
         MakeNotMember(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -534,7 +534,7 @@ void Channel::Moderate(Player* player)
     {
         WorldPacket data;
         MakeNotModerator(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -547,7 +547,7 @@ void Channel::Moderate(Player* player)
     else
         MakeModerationOff(&data, guid);
 
-    SendToAll(&data);
+    SendToAll(data);
 }
 
 void Channel::Say(Player* player, const char* text, uint32 lang)
@@ -561,7 +561,7 @@ void Channel::Say(Player* player, const char* text, uint32 lang)
     {
         WorldPacket data;
         MakeNotMember(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -569,7 +569,7 @@ void Channel::Say(Player* player, const char* text, uint32 lang)
     {
         WorldPacket data;
         MakeMuted(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -577,7 +577,7 @@ void Channel::Say(Player* player, const char* text, uint32 lang)
     {
         WorldPacket data;
         MakeNotModerator(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -586,7 +586,7 @@ void Channel::Say(Player* player, const char* text, uint32 lang)
         lang = LANG_UNIVERSAL;
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_CHANNEL, text, Language(lang), player->GetChatTag(), guid, player->GetName(), ObjectGuid(), "", m_name.c_str());
-    SendToAll(&data, !m_players[guid].IsModerator() ? guid : ObjectGuid());
+    SendToAll(data, !m_players[guid].IsModerator() ? guid : ObjectGuid());
 }
 
 void Channel::Invite(Player* player, const char* targetName)
@@ -597,7 +597,7 @@ void Channel::Invite(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakeNotMember(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -606,7 +606,7 @@ void Channel::Invite(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakePlayerNotFound(&data, targetName);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -615,7 +615,7 @@ void Channel::Invite(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakePlayerAlreadyMember(&data, targetGuid);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -623,7 +623,7 @@ void Channel::Invite(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakePlayerInviteBanned(&data, targetName);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -631,7 +631,7 @@ void Channel::Invite(Player* player, const char* targetName)
     {
         WorldPacket data;
         MakeInviteWrongFaction(&data);
-        SendToOne(&data, guid);
+        SendToOne(data, guid);
         return;
     }
 
@@ -640,12 +640,12 @@ void Channel::Invite(Player* player, const char* targetName)
     if (!target->GetSocial()->HasIgnore(guid))
     {
         MakeInvite(&data, guid);
-        SendToOne(&data, targetGuid);
+        SendToOne(data, targetGuid);
         data.clear();
     }
 
     MakePlayerInvited(&data, targetName);
-    SendToOne(&data, guid);
+    SendToOne(data, guid);
 }
 
 void Channel::SetOwner(ObjectGuid guid, bool exclaim)
@@ -667,17 +667,17 @@ void Channel::SetOwner(ObjectGuid guid, bool exclaim)
 
         WorldPacket data;
         MakeModeChange(&data, m_ownerGuid, oldFlag);
-        SendToAll(&data);
+        SendToAll(data);
 
         if (exclaim)
         {
             MakeOwnerChanged(&data, m_ownerGuid);
-            SendToAll(&data);
+            SendToAll(data);
         }
     }
 }
 
-void Channel::SendToAll(WorldPacket* data, ObjectGuid guid)
+void Channel::SendToAll(WorldPacket const &data, ObjectGuid guid)
 {
     for (PlayerList::const_iterator i = m_players.begin(); i != m_players.end(); ++i)
         if (Player* plr = sObjectMgr.GetPlayer(i->first))
@@ -685,7 +685,7 @@ void Channel::SendToAll(WorldPacket* data, ObjectGuid guid)
                 plr->GetSession()->SendPacket(data);
 }
 
-void Channel::SendToOne(WorldPacket* data, ObjectGuid who)
+void Channel::SendToOne(WorldPacket const& data, ObjectGuid who)
 {
     if (Player* plr = ObjectMgr::GetPlayer(who))
         plr->GetSession()->SendPacket(data);
@@ -936,7 +936,7 @@ void Channel::JoinNotify(ObjectGuid guid)
     data << uint8(GetFlags());
     data << uint32(GetNumPlayers());
     data << GetName();
-    SendToAll(&data);
+    SendToAll(data);
 }
 
 void Channel::LeaveNotify(ObjectGuid guid)
@@ -946,5 +946,5 @@ void Channel::LeaveNotify(ObjectGuid guid)
     data << uint8(GetFlags());
     data << uint32(GetNumPlayers());
     data << GetName();
-    SendToAll(&data);
+    SendToAll(data);
 }

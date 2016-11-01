@@ -55,7 +55,7 @@ void WorldSession::SendTradeStatus(TradeStatusInfo const& info)
             break;
     }
 
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandleIgnoreTradeOpcode(WorldPacket& /*recvPacket*/)
@@ -115,7 +115,7 @@ void WorldSession::SendUpdateTrade(bool trader_state /*= true*/)
                 data << uint32(0);
         }
     }
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 //==============================================================

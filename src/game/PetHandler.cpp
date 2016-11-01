@@ -397,7 +397,7 @@ void WorldSession::SendPetNameQuery(ObjectGuid petguid, uint32 petnumber)
         data << uint8(0);
         data << uint32(0);
         data << uint8(0);
-        _player->GetSession()->SendPacket(&data);
+        _player->GetSession()->SendPacket(data);
         return;
     }
 
@@ -424,7 +424,7 @@ void WorldSession::SendPetNameQuery(ObjectGuid petguid, uint32 petnumber)
     else
         data << uint8(0);
 
-    _player->GetSession()->SendPacket(&data);
+    _player->GetSession()->SendPacket(data);
 }
 
 void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
@@ -785,7 +785,7 @@ void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name, Dec
     }
     else
         data << uint8(0);
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandlePetLearnTalent(WorldPacket& recv_data)

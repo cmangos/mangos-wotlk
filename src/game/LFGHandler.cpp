@@ -213,7 +213,7 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
         }
     }
 
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::SendLfgJoinResult(LfgJoinResult result)
@@ -238,7 +238,7 @@ void WorldSession::SendLfgJoinResult(LfgJoinResult result)
         }*/
     }
 
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 id)
@@ -268,5 +268,5 @@ void WorldSession::SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 
             data << uint32(id);
         data << "";
     }
-    SendPacket(&data);
+    SendPacket(data);
 }

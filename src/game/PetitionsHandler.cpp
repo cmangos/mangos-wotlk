@@ -282,7 +282,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recv_data)
         result->NextRow();
     }
     delete result;
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandlePetitionQueryOpcode(WorldPacket& recv_data)
@@ -358,7 +358,7 @@ void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid)
     else
         data << uint32(1);
 
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandlePetitionRenameOpcode(WorldPacket& recv_data)
@@ -428,7 +428,7 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket& recv_data)
     WorldPacket data(MSG_PETITION_RENAME, (8 + newname.size() + 1));
     data << ObjectGuid(petitionGuid);
     data << newname;
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
@@ -535,11 +535,11 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
         data << uint32(PETITION_SIGN_ALREADY_SIGNED);
 
         // close at signer side
-        SendPacket(&data);
+        SendPacket(data);
 
         // update for owner if online
         if (Player* owner = sObjectMgr.GetPlayer(ownerGuid))
-            owner->GetSession()->SendPacket(&data);
+            owner->GetSession()->SendPacket(data);
         return;
     }
 
@@ -554,7 +554,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
     data << uint32(PETITION_SIGN_OK);
 
     // close at signer side
-    SendPacket(&data);
+    SendPacket(data);
 
     // update signs count on charter, required testing...
     // Item *item = _player->GetItemByGuid(petitionguid));
@@ -563,7 +563,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
 
     // update for owner if online
     if (Player* owner = sObjectMgr.GetPlayer(ownerGuid))
-        owner->GetSession()->SendPacket(&data);
+        owner->GetSession()->SendPacket(data);
 }
 
 void WorldSession::HandlePetitionDeclineOpcode(WorldPacket& recv_data)
@@ -591,7 +591,7 @@ void WorldSession::HandlePetitionDeclineOpcode(WorldPacket& recv_data)
     {
         WorldPacket data(MSG_PETITION_DECLINE, 8);
         data << _player->GetObjectGuid();
-        owner->GetSession()->SendPacket(&data);
+        owner->GetSession()->SendPacket(data);
     }
 }
 
@@ -701,7 +701,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket& recv_data)
     }
 
     delete result;
-    player->GetSession()->SendPacket(&data);
+    player->GetSession()->SendPacket(data);
 }
 
 void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
@@ -742,7 +742,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
         {
             WorldPacket data(SMSG_TURN_IN_PETITION_RESULTS, 4);
             data << uint32(PETITION_TURN_ALREADY_IN_GUILD); // already in guild
-            _player->GetSession()->SendPacket(&data);
+            _player->GetSession()->SendPacket(data);
             return;
         }
     }
@@ -759,7 +759,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
         {
             // data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
             // data << (uint32)PETITION_TURN_ALREADY_IN_GUILD;   // already in guild
-            //_player->GetSession()->SendPacket(&data);
+            //_player->GetSession()->SendPacket(data);
             SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ALREADY_IN_ARENA_TEAM);
             return;
         }
@@ -777,7 +777,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
     {
         WorldPacket data(SMSG_TURN_IN_PETITION_RESULTS, 4);
         data << uint32(PETITION_TURN_NEED_MORE_SIGNATURES); // need more signatures...
-        SendPacket(&data);
+        SendPacket(data);
         delete result;
         return;
     }
@@ -886,7 +886,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
 
     WorldPacket data(SMSG_TURN_IN_PETITION_RESULTS, 4);
     data << uint32(PETITION_TURN_OK);
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandlePetitionShowListOpcode(WorldPacket& recv_data)
@@ -960,6 +960,6 @@ void WorldSession::SendPetitionShowList(ObjectGuid guid)
     //    data << uint32(0);                        // unknown
     //    data << uint32(9);                        // required signs?
     //}
-    SendPacket(&data);
+    SendPacket(data);
     DEBUG_LOG("Sent SMSG_PETITION_SHOWLIST");
 }

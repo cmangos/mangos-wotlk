@@ -223,8 +223,8 @@ class Channel
         void MakeVoiceOn(WorldPacket* data, ObjectGuid guid);                   //+ 0x22
         void MakeVoiceOff(WorldPacket* data, ObjectGuid guid);                  //+ 0x23
 
-        void SendToAll(WorldPacket* data, ObjectGuid guid = ObjectGuid());
-        void SendToOne(WorldPacket* data, ObjectGuid who);
+        void SendToAll(WorldPacket const& data, ObjectGuid guid = ObjectGuid());
+        void SendToOne(WorldPacket const& data, ObjectGuid who);
 
         bool IsOn(ObjectGuid who) const { return m_players.find(who) != m_players.end(); }
         bool IsBanned(ObjectGuid guid) const { return m_banned.find(guid) != m_banned.end(); }
@@ -247,7 +247,7 @@ class Channel
 
                 WorldPacket data;
                 MakeModeChange(&data, guid, oldFlag);
-                SendToAll(&data);
+                SendToAll(data);
             }
         }
 
@@ -260,7 +260,7 @@ class Channel
 
                 WorldPacket data;
                 MakeModeChange(&data, guid, oldFlag);
-                SendToAll(&data);
+                SendToAll(data);
             }
         }
 

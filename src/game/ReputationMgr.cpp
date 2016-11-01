@@ -117,7 +117,7 @@ void ReputationMgr::SendForceReactions()
         data << uint32(itr->first);                         // faction_id (Faction.dbc)
         data << uint32(itr->second);                        // reputation rank
     }
-    m_player->SendDirectMessage(&data);
+    m_player->SendDirectMessage(data);
 }
 
 void ReputationMgr::SendState(FactionState const* faction, bool anyRankIncreased)
@@ -151,7 +151,7 @@ void ReputationMgr::SendState(FactionState const* faction, bool anyRankIncreased
     }
 
     data.put<uint32>(p_count, count);
-    m_player->SendDirectMessage(&data);
+    m_player->SendDirectMessage(data);
 }
 
 void ReputationMgr::SendInitialReputations()
@@ -186,7 +186,7 @@ void ReputationMgr::SendInitialReputations()
         data << uint32(0x00000000);
     }
 
-    m_player->SendDirectMessage(&data);
+    m_player->SendDirectMessage(data);
 }
 
 void ReputationMgr::SendVisible(FactionState const* faction) const
@@ -197,7 +197,7 @@ void ReputationMgr::SendVisible(FactionState const* faction) const
     // make faction visible in reputation list at client
     WorldPacket data(SMSG_SET_FACTION_VISIBLE, 4);
     data << faction->ReputationListID;
-    m_player->SendDirectMessage(&data);
+    m_player->SendDirectMessage(data);
 }
 
 void ReputationMgr::Initialize()

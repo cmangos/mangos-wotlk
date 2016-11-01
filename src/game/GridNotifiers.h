@@ -28,6 +28,8 @@
 #include "Player.h"
 #include "Unit.h"
 
+#include <memory>
+
 namespace MaNGOS
 {
     struct VisibleNotifier
@@ -55,9 +57,9 @@ namespace MaNGOS
     struct MessageDeliverer
     {
         Player const& i_player;
-        WorldPacket* i_message;
+        WorldPacket const& i_message;
         bool i_toSelf;
-        MessageDeliverer(Player const& pl, WorldPacket* msg, bool to_self) : i_player(pl), i_message(msg), i_toSelf(to_self) {}
+        MessageDeliverer(Player const& pl, WorldPacket const& msg, bool to_self) : i_player(pl), i_message(msg), i_toSelf(to_self) {}
         void Visit(CameraMapType& m);
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
@@ -65,10 +67,10 @@ namespace MaNGOS
     struct MessageDelivererExcept
     {
         uint32        i_phaseMask;
-        WorldPacket*  i_message;
+        WorldPacket const & i_message;
         Player const* i_skipped_receiver;
 
-        MessageDelivererExcept(WorldObject const* obj, WorldPacket* msg, Player const* skipped)
+        MessageDelivererExcept(WorldObject const* obj, WorldPacket const& msg, Player const* skipped)
             : i_phaseMask(obj->GetPhaseMask()), i_message(msg), i_skipped_receiver(skipped) {}
 
         void Visit(CameraMapType& m);
@@ -78,8 +80,8 @@ namespace MaNGOS
     struct ObjectMessageDeliverer
     {
         uint32 i_phaseMask;
-        WorldPacket* i_message;
-        explicit ObjectMessageDeliverer(WorldObject const& obj, WorldPacket* msg)
+        WorldPacket const& i_message;
+        explicit ObjectMessageDeliverer(WorldObject const& obj, WorldPacket const& msg)
             : i_phaseMask(obj.GetPhaseMask()), i_message(msg) {}
         void Visit(CameraMapType& m);
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
@@ -88,12 +90,12 @@ namespace MaNGOS
     struct MessageDistDeliverer
     {
         Player const& i_player;
-        WorldPacket* i_message;
+        WorldPacket const& i_message;
         bool i_toSelf;
         bool i_ownTeamOnly;
         float i_dist;
 
-        MessageDistDeliverer(Player const& pl, WorldPacket* msg, float dist, bool to_self, bool ownTeamOnly)
+        MessageDistDeliverer(Player const& pl, WorldPacket const& msg, float dist, bool to_self, bool ownTeamOnly)
             : i_player(pl), i_message(msg), i_toSelf(to_self), i_ownTeamOnly(ownTeamOnly), i_dist(dist) {}
         void Visit(CameraMapType& m);
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
@@ -102,9 +104,9 @@ namespace MaNGOS
     struct ObjectMessageDistDeliverer
     {
         WorldObject const& i_object;
-        WorldPacket* i_message;
+        WorldPacket const& i_message;
         float i_dist;
-        ObjectMessageDistDeliverer(WorldObject const& obj, WorldPacket* msg, float dist) : i_object(obj), i_message(msg), i_dist(dist) {}
+        ObjectMessageDistDeliverer(WorldObject const& obj, WorldPacket const& msg, float dist) : i_object(obj), i_message(msg), i_dist(dist) {}
         void Visit(CameraMapType& m);
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
@@ -1241,16 +1243,11 @@ namespace MaNGOS
         public:
             explicit LocalizedPacketDo(Builder& builder) : i_builder(builder) {}
 
-            ~LocalizedPacketDo()
-            {
-                for (size_t i = 0; i < i_data_cache.size(); ++i)
-                    delete i_data_cache[i];
-            }
             void operator()(Player* p);
 
         private:
             Builder& i_builder;
-            std::vector<WorldPacket*> i_data_cache;         // 0 = default, i => i-1 locale index
+            std::vector<std::unique_ptr<WorldPacket>> i_data_cache;         // 0 = default, i => i-1 locale index
     };
 
     // Prepare using Builder localized packets with caching and send to player
@@ -1258,15 +1255,9 @@ namespace MaNGOS
     class LocalizedPacketListDo
     {
         public:
-            typedef std::vector<WorldPacket*> WorldPacketList;
+            typedef std::vector<std::unique_ptr<WorldPacket>> WorldPacketList;
             explicit LocalizedPacketListDo(Builder& builder) : i_builder(builder) {}
 
-            ~LocalizedPacketListDo()
-            {
-                for (size_t i = 0; i < i_data_cache.size(); ++i)
-                    for (size_t j = 0; j < i_data_cache[i].size(); ++j)
-                        delete i_data_cache[i][j];
-            }
             void operator()(Player* p);
 
         private:

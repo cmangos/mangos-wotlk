@@ -53,7 +53,7 @@ void WorldSession::SendNameQueryOpcode(Player* p)
     else
         data << uint8(0);                                   // is not declined
 
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::SendNameQueryOpcodeFromDB(ObjectGuid guid)
@@ -118,7 +118,7 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32
     else
         data << uint8(0);                                   // is not declined
 
-    session->SendPacket(&data);
+    session->SendPacket(data);
     delete result;
 }
 
@@ -182,7 +182,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         for (uint32 i = 0; i < 6; ++i)
             data << uint32(ci->QuestItems[i]);              // itemId[6], quest drop
         data << uint32(ci->MovementTemplateId);             // CreatureMovementInfo.dbc
-        SendPacket(&data);
+        SendPacket(data);
         DEBUG_LOG("WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");
     }
     else
@@ -191,7 +191,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
                   guid.GetString().c_str(), entry);
         WorldPacket data(SMSG_CREATURE_QUERY_RESPONSE, 4);
         data << uint32(entry | 0x80000000);
-        SendPacket(&data);
+        SendPacket(data);
         DEBUG_LOG("WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");
     }
 }
@@ -241,7 +241,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
         data << float(info->size);                          // go size
         for (uint32 i = 0; i < 6; ++i)
             data << uint32(info->questItems[i]);            // itemId[6], quest drop
-        SendPacket(&data);
+        SendPacket(data);
         DEBUG_LOG("WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }
     else
@@ -250,7 +250,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
                   guid.GetString().c_str(), entryID);
         WorldPacket data(SMSG_GAMEOBJECT_QUERY_RESPONSE, 4);
         data << uint32(entryID | 0x80000000);
-        SendPacket(&data);
+        SendPacket(data);
         DEBUG_LOG("WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }
 }
@@ -265,7 +265,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recv_data*/)
     {
         WorldPacket data(MSG_CORPSE_QUERY, 1);
         data << uint8(0);                                   // corpse not found
-        SendPacket(&data);
+        SendPacket(data);
         return;
     }
 
@@ -303,7 +303,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recv_data*/)
     data << float(z);
     data << uint32(corpsemapid);
     data << uint32(0);                                      // unknown
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recv_data)
@@ -376,7 +376,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recv_data)
         }
     }
 
-    SendPacket(&data);
+    SendPacket(data);
 
     DEBUG_LOG("WORLD: Sent SMSG_NPC_TEXT_UPDATE");
 }
@@ -422,7 +422,7 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recv_data)
             data << uint32(pPage->Next_Page);
             pageID = pPage->Next_Page;
         }
-        SendPacket(&data);
+        SendPacket(data);
 
         DEBUG_LOG("WORLD: Sent SMSG_PAGE_TEXT_QUERY_RESPONSE");
     }
@@ -440,7 +440,7 @@ void WorldSession::HandleCorpseMapPositionQueryOpcode(WorldPacket& recv_data)
     data << float(0);
     data << float(0);
     data << float(0);
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandleQueryQuestsCompletedOpcode(WorldPacket& /*recv_data */)
@@ -459,7 +459,7 @@ void WorldSession::HandleQueryQuestsCompletedOpcode(WorldPacket& /*recv_data */)
         }
     }
     data.put<uint32>(0, count);
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandleQuestPOIQueryOpcode(WorldPacket& recv_data)
@@ -528,7 +528,7 @@ void WorldSession::HandleQuestPOIQueryOpcode(WorldPacket& recv_data)
         }
     }
 
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::SendQueryTimeResponse()
@@ -536,5 +536,5 @@ void WorldSession::SendQueryTimeResponse()
     WorldPacket data(SMSG_QUERY_TIME_RESPONSE, 4 + 4);
     data << uint32(time(nullptr));
     data << uint32(sWorld.GetNextDailyQuestsResetTime() - time(nullptr));
-    SendPacket(&data);
+    SendPacket(data);
 }

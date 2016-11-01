@@ -177,7 +177,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
         data << holiday->TextureFilename;                   // m_textureFilename (holiday name)
     }*/
 
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandleCalendarGetEvent(WorldPacket& recv_data)
@@ -714,7 +714,7 @@ void WorldSession::HandleCalendarComplain(WorldPacket& recv_data)
         WorldPacket data(SMSG_COMPLAIN_RESULT, 1 + 1);
         data << uint8(0);
         data << uint8(0); // show complain saved. We can send 0x0C to show windows with ok button
-        SendPacket(&data);
+        SendPacket(data);
     }
 }
 
@@ -729,7 +729,7 @@ void WorldSession::HandleCalendarGetNumPending(WorldPacket& /*recv_data*/)
 
     WorldPacket data(SMSG_CALENDAR_SEND_NUM_PENDING, 4);
     data << uint32(pending);
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -764,10 +764,10 @@ void CalendarMgr::SendCalendarEventInviteAlert(CalendarInvite const* invite)
     if (event->IsGuildEvent() || event->IsGuildAnnouncement())
     {
         if (Guild* guild = sGuildMgr.GetGuildById(event->GuildId))
-            guild->BroadcastPacket(&data);
+            guild->BroadcastPacket(data);
     }
     else if (Player* player = sObjectMgr.GetPlayer(invite->InviteeGuid))
-        player->SendDirectMessage(&data);
+        player->SendDirectMessage(data);
 }
 
 void CalendarMgr::SendCalendarEventInvite(CalendarInvite const* invite)
@@ -805,7 +805,7 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const* invite)
     if (preInvite)
     {
         if (Player* sender = sObjectMgr.GetPlayer(invite->SenderGuid))
-            sender->SendDirectMessage(&data);
+            sender->SendDirectMessage(data);
     }
     else
         SendPacketToAllEventRelatives(data, event);
@@ -834,7 +834,7 @@ void CalendarMgr::SendCalendarCommandResult(Player* player, CalendarError err, c
 
     data << uint32(err);
     //data.hexlike();
-    player->SendDirectMessage(&data);
+    player->SendDirectMessage(data);
 }
 
 void CalendarMgr::SendCalendarEventRemovedAlert(CalendarEvent const* event)
@@ -896,7 +896,7 @@ void CalendarMgr::SendCalendarEvent(Player* player, CalendarEvent const* event, 
                          (event->IsGuildEvent() && event->GuildId == inviteeGuildId) ? "true" : "false", invite->Text.c_str());
     }
     //data.hexlike();
-    player->SendDirectMessage(&data);
+    player->SendDirectMessage(data);
 }
 
 void CalendarMgr::SendCalendarEventInviteRemove(CalendarInvite const* invite, uint32 flags)
@@ -925,7 +925,7 @@ void CalendarMgr::SendCalendarEventInviteRemoveAlert(Player* player, CalendarEve
         data << uint32(event->Flags);
         data << uint8(status);
         //data.hexlike();
-        player->SendDirectMessage(&data);
+        player->SendDirectMessage(data);
     }
 }
 
@@ -952,7 +952,7 @@ void CalendarMgr::SendCalendarClearPendingAction(Player* player)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SMSG_CALENDAR_CLEAR_PENDING_ACTION TO [%s]", player->GetObjectGuid().GetString().c_str());
         WorldPacket data(SMSG_CALENDAR_CLEAR_PENDING_ACTION, 0);
-        player->SendDirectMessage(&data);
+        player->SendDirectMessage(data);
     }
 }
 
@@ -996,14 +996,14 @@ void CalendarMgr::SendPacketToAllEventRelatives(WorldPacket packet, CalendarEven
     // Send packet to all guild members
     if (event->IsGuildEvent() || event->IsGuildAnnouncement())
         if (Guild* guild = sGuildMgr.GetGuildById(event->GuildId))
-            guild->BroadcastPacket(&packet);
+            guild->BroadcastPacket(packet);
 
     // Send packet to all invitees if event is non-guild, in other case only to non-guild invitees (packet was broadcasted for them)
     CalendarInviteMap const* cInvMap = event->GetInviteMap();
     for (CalendarInviteMap::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
         if (Player* player = sObjectMgr.GetPlayer(itr->second->InviteeGuid))
             if (!event->IsGuildEvent() || (event->IsGuildEvent() && player->GetGuildId() != event->GuildId))
-                player->SendDirectMessage(&packet);
+                player->SendDirectMessage(packet);
 }
 
 void CalendarMgr::SendCalendarRaidLockoutRemove(Player* player, DungeonPersistentState const* save)
@@ -1020,7 +1020,7 @@ void CalendarMgr::SendCalendarRaidLockoutRemove(Player* player, DungeonPersisten
     data << uint32(save->GetResetTime() - currTime);
     data << uint64(save->GetInstanceId());
     //data.hexlike();
-    player->SendDirectMessage(&data);
+    player->SendDirectMessage(data);
 }
 
 void CalendarMgr::SendCalendarRaidLockoutAdd(Player* player, DungeonPersistentState const* save)
@@ -1038,5 +1038,5 @@ void CalendarMgr::SendCalendarRaidLockoutAdd(Player* player, DungeonPersistentSt
     data << uint32(save->GetResetTime() - currTime);
     data << uint64(save->GetInstanceId());
     //data.hexlike();
-    player->SendDirectMessage(&data);
+    player->SendDirectMessage(data);
 }

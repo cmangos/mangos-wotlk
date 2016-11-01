@@ -150,7 +150,7 @@ void PlayerSocial::SendSocialList()
         }
     }
 
-    plr->GetSession()->SendPacket(&data);
+    plr->GetSession()->SendPacket(data);
     DEBUG_LOG("WORLD: Sent SMSG_CONTACT_LIST");
 }
 
@@ -257,12 +257,12 @@ void SocialMgr::SendFriendStatus(Player* player, FriendsResult result, ObjectGui
     }
 
     if (broadcast)
-        BroadcastToFriendListers(player, &data);
+        BroadcastToFriendListers(player, data);
     else
-        player->GetSession()->SendPacket(&data);
+        player->GetSession()->SendPacket(data);
 }
 
-void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket* packet)
+void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket const& packet)
 {
     if (!player)
         return;

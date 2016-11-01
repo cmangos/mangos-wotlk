@@ -200,7 +200,7 @@ void Weather::SendWeatherUpdateToPlayer(Player* player)
     data << float(m_grade);
     data << uint8(0);       // 1 = instant change, 0 = smooth change
 
-    player->GetSession()->SendPacket(&data);
+    player->GetSession()->SendPacket(data);
 }
 
 // Send the new weather to all players in the zone
@@ -216,7 +216,7 @@ bool Weather::SendWeatherForPlayersInZone(Map const* _map)
     data << uint8(0);       // 1 = instant change, 0 = smooth change
 
     ///- Send the weather packet to all players in this zone
-    if (!_map->SendToPlayersInZone(&data, m_zone))
+    if (!_map->SendToPlayersInZone(data, m_zone))
         return false;
 
     ///- Log the event

@@ -3382,7 +3382,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                         // this will reset death timer in the client
                         WorldPacket data(SMSG_FORCED_DEATH_UPDATE);
-                        player->GetSession()->SendPacket(&data);
+                        player->GetSession()->SendPacket(data);
                         player->ResetDeathTimer();
                     }
                 }
@@ -9512,7 +9512,7 @@ void SpellAuraHolder::SendAuraUpdate(bool remove) const
     else
         BuildUpdatePacket(data);
 
-    m_target->SendMessageToSet(&data, true);
+    m_target->SendMessageToSet(data, true);
 }
 
 void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)

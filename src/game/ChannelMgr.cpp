@@ -74,7 +74,7 @@ Channel* ChannelMgr::GetChannel(const std::string& name, Player* p, bool pkt)
         {
             WorldPacket data;
             MakeNotOnPacket(&data, name);
-            p->GetSession()->SendPacket(&data);
+            p->GetSession()->SendPacket(data);
         }
 
         return nullptr;

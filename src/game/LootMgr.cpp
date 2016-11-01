@@ -546,7 +546,7 @@ void GroupLootRoll::SendStartRoll()
             mask = RollVoteMask(mask & ~ROLL_VOTE_MASK_NEED);
         data.put<uint8>(voteMaskPos, uint8(mask));
 
-        plr->GetSession()->SendPacket(&data);
+        plr->GetSession()->SendPacket(data);
     }
 }
 
@@ -569,7 +569,7 @@ void GroupLootRoll::SendAllPassed()
         if (!plr || !plr->GetSession())
             continue;
 
-        plr->GetSession()->SendPacket(&data);
+        plr->GetSession()->SendPacket(data);
     }
 }
 
@@ -610,7 +610,7 @@ void GroupLootRoll::SendLootRollWon(ObjectGuid const& targetGuid, uint32 rollNum
         Player* plr = sObjectMgr.GetPlayer(itr->first);
         if (!plr || !plr->GetSession())
             continue;
-        plr->GetSession()->SendPacket(&data);
+        plr->GetSession()->SendPacket(data);
     }
 }
 
@@ -637,7 +637,7 @@ void GroupLootRoll::SendRoll(ObjectGuid const& targetGuid, uint32 rollNumber, ui
         if (!plr || !plr->GetSession())
             continue;
 
-        plr->GetSession()->SendPacket(&data);
+        plr->GetSession()->SendPacket(data);
     }
 }
 
@@ -1016,7 +1016,7 @@ void Loot::NotifyItemRemoved(Player* player, uint32 lootIndex)
     // notify a player that are looting this that the item was removed
     WorldPacket data(SMSG_LOOT_REMOVED, 1);
     data << uint8(lootIndex);
-    player->GetSession()->SendPacket(&data);
+    player->GetSession()->SendPacket(data);
 }
 
 void Loot::NotifyMoneyRemoved()
@@ -1031,7 +1031,7 @@ void Loot::NotifyMoneyRemoved()
         if (plr && plr->GetSession())
         {
             WorldPacket data(SMSG_LOOT_CLEAR_MONEY, 0);
-            plr->GetSession()->SendPacket(&data);
+            plr->GetSession()->SendPacket(data);
         }
         else
             m_playersLooting.erase(i);
@@ -1064,7 +1064,7 @@ void Loot::SendReleaseFor(Player* plr)
     WorldPacket data(SMSG_LOOT_RELEASE_RESPONSE, (8 + 1));
     data << m_guidTarget;
     data << uint8(1);
-    plr->GetSession()->SendPacket(&data);
+    plr->GetSession()->SendPacket(data);
     SetPlayerIsNotLooting(plr);
 }
 
@@ -1364,7 +1364,7 @@ void Loot::ShowContentTo(Player* plr)
     GetLootContentFor(plr, data);                           // fill the data with items contained in the loot (may be empty)
     SetPlayerIsLooting(plr);
 
-    plr->SendDirectMessage(&data);
+    plr->SendDirectMessage(data);
 }
 
 void Loot::GroupCheck()
@@ -1397,7 +1397,7 @@ void Loot::GroupCheck()
                 Player* looter = sObjectAccessor.FindPlayer(*itr);
                 if (!looter)
                     continue;
-                looter->GetSession()->SendPacket(&data);
+                looter->GetSession()->SendPacket(data);
             }
 
             for (uint8 itemSlot = 0; itemSlot < m_lootItems.size(); ++itemSlot)
@@ -1902,7 +1902,7 @@ void Loot::SendAllowedLooter()
 
     for (GuidSet::const_iterator itr = m_ownerSet.begin(); itr != m_ownerSet.end(); ++itr)
         if (Player* plr = ObjectAccessor::FindPlayer(*itr))
-            plr->GetSession()->SendPacket(&data);
+            plr->GetSession()->SendPacket(data);
 }
 
 InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
@@ -2117,7 +2117,7 @@ void Loot::SendGold(Player* player)
             data << uint32(money_per_player);
             data << uint8(0);// 0 is "you share of loot..."
 
-            plr->GetSession()->SendPacket(&data);
+            plr->GetSession()->SendPacket(data);
         }
     }
     else
@@ -2128,7 +2128,7 @@ void Loot::SendGold(Player* player)
         WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
         data << uint32(m_gold);
         data << uint8(1);                               // 1 is "you loot..."
-        player->GetSession()->SendPacket(&data);
+        player->GetSession()->SendPacket(data);
 
         if (m_guidTarget.IsItem())
         {
