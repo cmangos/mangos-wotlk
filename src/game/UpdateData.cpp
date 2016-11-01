@@ -24,6 +24,7 @@
 #include "Opcodes.h"
 #include "World.h"
 #include "ObjectGuid.h"
+
 #include <zlib/zlib.h>
 
 UpdateData::UpdateData() : m_blockCount(0)

@@ -36,9 +36,9 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "SocialMgr.h"
 #include "Auth/HMACSHA1.h"
-#include "zlib/zlib.h"
 #include "LootMgr.h"
 
+#include <zlib/zlib.h>
 #include <boost/asio/ip/address_v4.hpp>
 
 #include <mutex>
