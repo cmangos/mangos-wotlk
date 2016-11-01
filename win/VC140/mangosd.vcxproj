@@ -120,17 +120,17 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">.\mangosd__$(Platform)_$(Configuration)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">mangosd</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">.exe</TargetExt>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">..\..\bin\$(Platform)_$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">.\mangosd__$(Platform)_$(Configuration)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">mangosd</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">.exe</TargetExt>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">..\..\bin\$(Platform)_$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">.\mangosd__$(Platform)_$(Configuration)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">mangosd</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">.exe</TargetExt>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">true</LinkIncremental>
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'" />
