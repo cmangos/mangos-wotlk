@@ -1551,33 +1551,14 @@ bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const
     if (IsSkillBonusSpell(spellInfo->Id))
         return false;
 
-    // All stance spells. if any better way, change it.
-    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
-    {
-        switch (spellInfo->SpellFamilyName)
-        {
-            case SPELLFAMILY_PALADIN:
-                // Paladin aura Spell
-                if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_RAID)
-                    return false;
-                // Seal of Righteousness, 2 version of same rank
-                if ((spellInfo->SpellFamilyFlags & uint64(0x0000000008000000)) && spellInfo->SpellIconID == 25)
-                    return false;
-                break;
-            case SPELLFAMILY_DRUID:
-                // Druid form Spell
-                if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA &&
-                        spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT)
-                    return false;
-                break;
-            case SPELLFAMILY_ROGUE:
-                // Rogue Stealth
-                if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA &&
-                        spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT)
-                    return false;
-                break;
-        }
-    }
+    // All stances and stance-like spells
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX2_DISPLAY_IN_STANCE_BAR) || IsSpellHaveAura(spellInfo, SPELL_AURA_MOD_SHAPESHIFT))
+        return false;
+
+    // FIXME: Seal of Righteousness, 2 version of same rank
+    if ((spellInfo->SpellFamilyFlags & uint64(0x0000000008000000)) && spellInfo->SpellIconID == 25)
+        return false;
+
     return true;
 }
 
