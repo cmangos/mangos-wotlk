@@ -641,12 +641,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     *data << uint32(mask);
 
     if (mask & GROUP_UPDATE_FLAG_STATUS)
-    {
-        if (player->IsPvP())
-            *data << uint16(MEMBER_STATUS_ONLINE | MEMBER_STATUS_PVP);
-        else
-            *data << uint16(MEMBER_STATUS_ONLINE);
-    }
+        *data << uint16(GetGroupMemberStatus(player->GetObjectGuid()));
 
     if (mask & GROUP_UPDATE_FLAG_CUR_HP)
         *data << uint32(player->GetHealth());
@@ -806,7 +801,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
 
     Powers powerType = player->GetPowerType();
     data << uint32(mask1);                                  // group update mask
-    data << uint16(MEMBER_STATUS_ONLINE);                   // member's online status
+    data << uint16(GetGroupMemberStatus(guid));             // member's online status
     data << uint32(player->GetHealth());                    // GROUP_UPDATE_FLAG_CUR_HP
     data << uint32(player->GetMaxHealth());                 // GROUP_UPDATE_FLAG_MAX_HP
     data << uint8(powerType);                               // GROUP_UPDATE_FLAG_POWER_TYPE
