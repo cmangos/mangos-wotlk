@@ -623,7 +623,6 @@ UPDATE creature_template SET ScriptName='npc_scarlet_ghoul' WHERE entry=28845;
 UPDATE creature_template SET ScriptName='npc_highlord_darion_mograine' WHERE entry=29173;
 UPDATE creature_template SET ScriptName='npc_fellow_death_knight' WHERE entry IN (29199, 29204, 29200);
 UPDATE creature_template SET ScriptName='npc_lich_king_light_dawn' WHERE entry=29183;
-UPDATE creature_template SET ScriptName='npc_acherus_deathcharger' WHERE entry=28782;
 UPDATE creature_template SET ScriptName='npc_scarlet_courier' WHERE entry=29076;
 
 /* ELWYNN FOREST */
@@ -5904,8 +5903,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1609095,'$gPoppy:Mama;!',0,0,0,434,'scarlet ghoul SAY_GHUL_SPAWN_5'),
 (-1609096,'It puts the ghoul in the pit or else it gets the lash!',0,0,0,25,'gothik the harvester SAY_GOTHIK_THROW_IN_PIT'),
 
-(-1609097,'%s rears up, beckoning you to ride it.',0,2,0,0,'Acherus Deathcharger EMOTE_HORSE_READY'),
-(-1609098,'Impressive, death knight. Return to me in the world of the living for your reward.',0,0,0,2,'Salanar the Horseman SAY_RACE_FINISHED'),
+(-1609097,'REUSE ME',0,0,0,0,'REUSE ME'),
+(-1609098,'REUSE ME',0,0,0,0,'REUSE ME'),
 
 (-1609201,'Soldiers of the Scourge, stand ready! Prepare to unleash your fury upon the Argent Dawn!',14677,1,0,0,'Highlord Darion Mograine'),
 (-1609202,'The sky weeps at the devastation of these lands! Soon, Azeroth\'s futile tears will rain down upon us!',14678,1,0,0,'Highlord Darion Mograine'),
