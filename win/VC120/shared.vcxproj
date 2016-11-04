@@ -365,7 +365,6 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
-  </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\shared\Auth\AuthCrypt.cpp" />
     <ClCompile Include="..\..\src\shared\Auth\BigNumber.cpp" />
