@@ -2254,6 +2254,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         GetHolder()->SetAuraDuration(urand(1, 30)*IN_MILLISECONDS);
                         return;
                     }
+                    case 32441:                             // Brittle Bones
+                    {
+                        m_isPeriodic = true;
+                        m_modifier.periodictime = 10 * IN_MILLISECONDS; // randomly applies Rattled 32437
+                        m_periodicTimer = 0;
+                        return;
+                    }
                     case 33326:                             // Stolen Soul Dispel
                     {
                         target->RemoveAurasDueToSpell(32346);
@@ -7916,6 +7923,10 @@ void Aura::PeriodicDummyTick()
                     return;
                 }
 //              // Gossip NPC Periodic - Talk
+                case 32441:                                 // Brittle Bones
+                    if (roll_chance_i(33))
+                        target->CastSpell(target, 32437, true, nullptr, this);  // Rattled
+                    return;
 //              case 33208: break;
 //              // Gossip NPC Periodic - Despawn
 //              case 33209: break;
