@@ -1482,7 +1482,7 @@ void Player::SetDeathState(DeathState s)
         SetGroupUpdateFlag(GROUP_UPDATE_FLAG_STATUS);
 }
 
-bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
+bool Player::BuildEnumData(QueryResult* result, WorldPacket& p_data)
 {
     //             0               1                2                3                 4                  5                       6                        7
     //    "SELECT characters.guid, characters.name, characters.race, characters.class, characters.gender, characters.playerBytes, characters.playerBytes2, characters.level, "
@@ -1504,30 +1504,30 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
         return false;
     }
 
-    *p_data << ObjectGuid(HIGHGUID_PLAYER, guid);
-    *p_data << fields[1].GetString();                       // name
-    *p_data << uint8(pRace);                                // race
-    *p_data << uint8(pClass);                               // class
-    *p_data << uint8(fields[4].GetUInt8());                 // gender
+    p_data << ObjectGuid(HIGHGUID_PLAYER, guid);
+    p_data << fields[1].GetString();                       // name
+    p_data << uint8(pRace);                                // race
+    p_data << uint8(pClass);                               // class
+    p_data << uint8(fields[4].GetUInt8());                 // gender
 
     uint32 playerBytes = fields[5].GetUInt32();
-    *p_data << uint8(playerBytes);                          // skin
-    *p_data << uint8(playerBytes >> 8);                     // face
-    *p_data << uint8(playerBytes >> 16);                    // hair style
-    *p_data << uint8(playerBytes >> 24);                    // hair color
+    p_data << uint8(playerBytes);                          // skin
+    p_data << uint8(playerBytes >> 8);                     // face
+    p_data << uint8(playerBytes >> 16);                    // hair style
+    p_data << uint8(playerBytes >> 24);                    // hair color
 
     uint32 playerBytes2 = fields[6].GetUInt32();
-    *p_data << uint8(playerBytes2 & 0xFF);                  // facial hair
+    p_data << uint8(playerBytes2 & 0xFF);                  // facial hair
 
-    *p_data << uint8(fields[7].GetUInt8());                 // level
-    *p_data << uint32(fields[8].GetUInt32());               // zone
-    *p_data << uint32(fields[9].GetUInt32());               // map
+    p_data << uint8(fields[7].GetUInt8());                 // level
+    p_data << uint32(fields[8].GetUInt32());               // zone
+    p_data << uint32(fields[9].GetUInt32());               // map
 
-    *p_data << fields[10].GetFloat();                       // x
-    *p_data << fields[11].GetFloat();                       // y
-    *p_data << fields[12].GetFloat();                       // z
+    p_data << fields[10].GetFloat();                       // x
+    p_data << fields[11].GetFloat();                       // y
+    p_data << fields[12].GetFloat();                       // z
 
-    *p_data << uint32(fields[13].GetUInt32());              // guild id
+    p_data << uint32(fields[13].GetUInt32());              // guild id
 
     uint32 char_flags = 0;
     uint32 playerFlags = fields[14].GetUInt32();
@@ -1548,11 +1548,11 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
     else
         char_flags |= CHARACTER_FLAG_DECLINED;
 
-    *p_data << uint32(char_flags);                          // character flags
+    p_data << uint32(char_flags);                          // character flags
     // character customize flags
-    *p_data << uint32(atLoginFlags & AT_LOGIN_CUSTOMIZE ? CHAR_CUSTOMIZE_FLAG_CUSTOMIZE : CHAR_CUSTOMIZE_FLAG_NONE);
+    p_data << uint32(atLoginFlags & AT_LOGIN_CUSTOMIZE ? CHAR_CUSTOMIZE_FLAG_CUSTOMIZE : CHAR_CUSTOMIZE_FLAG_NONE);
     // First login
-    *p_data << uint8(atLoginFlags & AT_LOGIN_FIRST ? 1 : 0);
+    p_data << uint8(atLoginFlags & AT_LOGIN_FIRST ? 1 : 0);
 
     // Pets info
     {
@@ -1573,9 +1573,9 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
             }
         }
 
-        *p_data << uint32(petDisplayId);
-        *p_data << uint32(petLevel);
-        *p_data << uint32(petFamily);
+        p_data << uint32(petDisplayId);
+        p_data << uint32(petLevel);
+        p_data << uint32(petFamily);
     }
 
     Tokens data = StrSplit(fields[19].GetCppString(), " ");
@@ -1586,9 +1586,9 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
         const ItemPrototype* proto = ObjectMgr::GetItemPrototype(item_id);
         if (!proto)
         {
-            *p_data << uint32(0);
-            *p_data << uint8(0);
-            *p_data << uint32(0);
+            p_data << uint32(0);
+            p_data << uint8(0);
+            p_data << uint32(0);
             continue;
         }
 
@@ -1606,23 +1606,23 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
                 break;
         }
 
-        *p_data << uint32(proto->DisplayInfoID);
-        *p_data << uint8(proto->InventoryType);
-        *p_data << uint32(enchant ? enchant->aura_id : 0);
+        p_data << uint32(proto->DisplayInfoID);
+        p_data << uint8(proto->InventoryType);
+        p_data << uint32(enchant ? enchant->aura_id : 0);
     }
 
-    *p_data << uint32(0);                                   // bag 1 display id
-    *p_data << uint8(0);                                    // bag 1 inventory type
-    *p_data << uint32(0);                                   // enchant?
-    *p_data << uint32(0);                                   // bag 2 display id
-    *p_data << uint8(0);                                    // bag 2 inventory type
-    *p_data << uint32(0);                                   // enchant?
-    *p_data << uint32(0);                                   // bag 3 display id
-    *p_data << uint8(0);                                    // bag 3 inventory type
-    *p_data << uint32(0);                                   // enchant?
-    *p_data << uint32(0);                                   // bag 4 display id
-    *p_data << uint8(0);                                    // bag 4 inventory type
-    *p_data << uint32(0);                                   // enchant?
+    p_data << uint32(0);                                   // bag 1 display id
+    p_data << uint8(0);                                    // bag 1 inventory type
+    p_data << uint32(0);                                   // enchant?
+    p_data << uint32(0);                                   // bag 2 display id
+    p_data << uint8(0);                                    // bag 2 inventory type
+    p_data << uint32(0);                                   // enchant?
+    p_data << uint32(0);                                   // bag 3 display id
+    p_data << uint8(0);                                    // bag 3 inventory type
+    p_data << uint32(0);                                   // enchant?
+    p_data << uint32(0);                                   // bag 4 display id
+    p_data << uint8(0);                                    // bag 4 inventory type
+    p_data << uint32(0);                                   // enchant?
 
     return true;
 }
@@ -18263,7 +18263,7 @@ void Player::PetSpellInitialize()
     data << uint8(charmInfo->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0);
 
     // action bar loop
-    charmInfo->BuildActionBar(&data);
+    charmInfo->BuildActionBar(data);
 
     size_t spellsCountPos = data.wpos();
 
@@ -18347,7 +18347,7 @@ void Player::PossessSpellInitialize()
     data << uint32(0);
     data << uint32(0);
 
-    charmInfo->BuildActionBar(&data);
+    charmInfo->BuildActionBar(data);
 
     data << uint8(0);                                       // spells count
     data << uint8(0);                                       // cooldowns count
@@ -18395,7 +18395,7 @@ void Player::CharmSpellInitialize()
     else
         data << uint8(0) << uint8(0) << uint16(0);
 
-    charmInfo->BuildActionBar(&data);
+    charmInfo->BuildActionBar(data);
 
     data << uint8(addlist);
 
@@ -20599,7 +20599,7 @@ void Player::UpdateForQuestWorldObjects()
             }
         }
     }
-    udata.BuildPacket(&packet);
+    udata.BuildPacket(packet);
     GetSession()->SendPacket(packet);
 }
 
@@ -22260,11 +22260,11 @@ bool Player::canSeeSpellClickOn(Creature const* c) const
     return false;
 }
 
-void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
+void Player::BuildPlayerTalentsInfoData(WorldPacket& data)
 {
-    *data << uint32(GetFreeTalentPoints());                 // unspentTalentPoints
-    *data << uint8(m_specsCount);                           // talent group count (0, 1 or 2)
-    *data << uint8(m_activeSpec);                           // talent group index (0 or 1)
+    data << uint32(GetFreeTalentPoints());                 // unspentTalentPoints
+    data << uint8(m_specsCount);                           // talent group count (0, 1 or 2)
+    data << uint8(m_activeSpec);                           // talent group index (0 or 1)
 
     if (m_specsCount)
     {
@@ -22272,8 +22272,8 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
         for (uint32 specIdx = 0; specIdx < m_specsCount; ++specIdx)
         {
             uint8 talentIdCount = 0;
-            size_t pos = data->wpos();
-            *data << uint8(talentIdCount);                  // [PH], talentIdCount
+            size_t pos = data.wpos();
+            data << uint8(talentIdCount);                  // [PH], talentIdCount
 
             // find class talent tabs (all players have 3 talent tabs)
             uint32 const* talentTabIds = GetTalentTabPages(getClass());
@@ -22292,33 +22292,33 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
                     if (talent.talentEntry->TalentTab != talentTabId)
                         continue;
 
-                    *data << uint32(talent.talentEntry->TalentID);  // Talent.dbc
-                    *data << uint8(talent.currentRank);     // talentMaxRank (0-4)
+                    data << uint32(talent.talentEntry->TalentID);  // Talent.dbc
+                    data << uint8(talent.currentRank);     // talentMaxRank (0-4)
 
                     ++talentIdCount;
                 }
             }
 
-            data->put<uint8>(pos, talentIdCount);           // put real count
+            data.put<uint8>(pos, talentIdCount);           // put real count
 
-            *data << uint8(MAX_GLYPH_SLOT_INDEX);           // glyphs count
+            data << uint8(MAX_GLYPH_SLOT_INDEX);           // glyphs count
 
             // GlyphProperties.dbc
             for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
-                *data << uint16(m_glyphs[specIdx][i].GetId());
+                data << uint16(m_glyphs[specIdx][i].GetId());
         }
     }
 }
 
-void Player::BuildPetTalentsInfoData(WorldPacket* data)
+void Player::BuildPetTalentsInfoData(WorldPacket& data)
 {
     uint32 unspentTalentPoints = 0;
-    size_t pointsPos = data->wpos();
-    *data << uint32(unspentTalentPoints);                   // [PH], unspentTalentPoints
+    size_t pointsPos = data.wpos();
+    data << uint32(unspentTalentPoints);                   // [PH], unspentTalentPoints
 
     uint8 talentIdCount = 0;
-    size_t countPos = data->wpos();
-    *data << uint8(talentIdCount);                          // [PH], talentIdCount
+    size_t countPos = data.wpos();
+    data << uint8(talentIdCount);                          // [PH], talentIdCount
 
     Pet* pet = GetPet();
     if (!pet)
@@ -22326,7 +22326,7 @@ void Player::BuildPetTalentsInfoData(WorldPacket* data)
 
     unspentTalentPoints = pet->GetFreeTalentPoints();
 
-    data->put<uint32>(pointsPos, unspentTalentPoints);      // put real points
+    data.put<uint32>(pointsPos, unspentTalentPoints);      // put real points
 
     CreatureInfo const* ci = pet->GetCreatureInfo();
     if (!ci)
@@ -22370,13 +22370,13 @@ void Player::BuildPetTalentsInfoData(WorldPacket* data)
             if (curtalent_maxrank < 0)
                 continue;
 
-            *data << uint32(talentInfo->TalentID);          // Talent.dbc
-            *data << uint8(curtalent_maxrank);              // talentMaxRank (0-4)
+            data << uint32(talentInfo->TalentID);          // Talent.dbc
+            data << uint8(curtalent_maxrank);              // talentMaxRank (0-4)
 
             ++talentIdCount;
         }
 
-        data->put<uint8>(countPos, talentIdCount);          // put real count
+        data.put<uint8>(countPos, talentIdCount);          // put real count
 
         break;
     }
@@ -22387,17 +22387,17 @@ void Player::SendTalentsInfoData(bool pet)
     WorldPacket data(SMSG_TALENT_UPDATE, 50);
     data << uint8(pet ? 1 : 0);
     if (pet)
-        BuildPetTalentsInfoData(&data);
+        BuildPetTalentsInfoData(data);
     else
-        BuildPlayerTalentsInfoData(&data);
+        BuildPlayerTalentsInfoData(data);
     GetSession()->SendPacket(data);
 }
 
-void Player::BuildEnchantmentsInfoData(WorldPacket* data)
+void Player::BuildEnchantmentsInfoData(WorldPacket& data)
 {
     uint32 slotUsedMask = 0;
-    size_t slotUsedMaskPos = data->wpos();
-    *data << uint32(slotUsedMask);                          // slotUsedMask < 0x80000
+    size_t slotUsedMaskPos = data.wpos();
+    data << uint32(slotUsedMask);                          // slotUsedMask < 0x80000
 
     for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
     {
@@ -22408,11 +22408,11 @@ void Player::BuildEnchantmentsInfoData(WorldPacket* data)
 
         slotUsedMask |= (1 << i);
 
-        *data << uint32(item->GetEntry());                  // item entry
+        data << uint32(item->GetEntry());                  // item entry
 
         uint16 enchantmentMask = 0;
-        size_t enchantmentMaskPos = data->wpos();
-        *data << uint16(enchantmentMask);                   // enchantmentMask < 0x1000
+        size_t enchantmentMaskPos = data.wpos();
+        data << uint16(enchantmentMask);                   // enchantmentMask < 0x1000
 
         for (uint32 j = 0; j < MAX_ENCHANTMENT_SLOT; ++j)
         {
@@ -22423,17 +22423,17 @@ void Player::BuildEnchantmentsInfoData(WorldPacket* data)
 
             enchantmentMask |= (1 << j);
 
-            *data << uint16(enchId);                        // enchantmentId?
+            data << uint16(enchId);                        // enchantmentId?
         }
 
-        data->put<uint16>(enchantmentMaskPos, enchantmentMask);
+        data.put<uint16>(enchantmentMaskPos, enchantmentMask);
 
-        *data << uint16(item->GetItemRandomPropertyId());
-        *data << item->GetGuidValue(ITEM_FIELD_CREATOR).WriteAsPacked();
-        *data << uint32(item->GetItemSuffixFactor());
+        data << uint16(item->GetItemRandomPropertyId());
+        data << item->GetGuidValue(ITEM_FIELD_CREATOR).WriteAsPacked();
+        data << uint32(item->GetItemSuffixFactor());
     }
 
-    data->put<uint32>(slotUsedMaskPos, slotUsedMask);
+    data.put<uint32>(slotUsedMaskPos, slotUsedMask);
 }
 
 void Player::SendEquipmentSetList()

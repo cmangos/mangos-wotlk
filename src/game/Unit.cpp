@@ -10239,10 +10239,10 @@ void CharmInfo::LoadPetActionBar(const std::string& data)
     }
 }
 
-void CharmInfo::BuildActionBar(WorldPacket* data)
+void CharmInfo::BuildActionBar(WorldPacket& data)
 {
     for (uint32 i = 0; i < MAX_UNIT_ACTION_BAR_INDEX; ++i)
-        *data << uint32(PetActionBar[i].packedData);
+        data << uint32(PetActionBar[i].packedData);
 }
 
 void CharmInfo::SetSpellAutocast(uint32 spell_id, bool state)

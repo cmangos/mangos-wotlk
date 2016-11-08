@@ -73,7 +73,7 @@ Channel* ChannelMgr::GetChannel(const std::string& name, Player* p, bool pkt)
         if (pkt)
         {
             WorldPacket data;
-            MakeNotOnPacket(&data, name);
+            MakeNotOnPacket(data, name);
             p->GetSession()->SendPacket(data);
         }
 
@@ -103,8 +103,8 @@ void ChannelMgr::LeftChannel(const std::string& name)
     }
 }
 
-void ChannelMgr::MakeNotOnPacket(WorldPacket* data, const std::string& name)
+void ChannelMgr::MakeNotOnPacket(WorldPacket& data, const std::string& name)
 {
-    data->Initialize(SMSG_CHANNEL_NOTIFY, (1 + 10)); // we guess size
-    (*data) << (uint8)CHAT_NOT_MEMBER_NOTICE << name;
+    data.Initialize(SMSG_CHANNEL_NOTIFY, (1 + 10)); // we guess size
+    data << (uint8)CHAT_NOT_MEMBER_NOTICE << name;
 }

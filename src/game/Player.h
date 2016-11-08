@@ -1039,7 +1039,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void Update(uint32 update_diff, uint32 time) override;
 
-        static bool BuildEnumData(QueryResult* result,  WorldPacket* p_data);
+        static bool BuildEnumData(QueryResult* result,  WorldPacket& p_data);
 
         void SetInWater(bool apply);
 
@@ -1290,7 +1290,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur = true, bool ignore_condition = false);
         void ApplyEnchantment(Item* item, bool apply);
         void SendEnchantmentDurations();
-        void BuildEnchantmentsInfoData(WorldPacket* data);
+        void BuildEnchantmentsInfoData(WorldPacket& data);
         void AddItemDurations(Item* item);
         void RemoveItemDurations(Item* item);
         void SendItemDurations();
@@ -1589,8 +1589,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool resetTalents(bool no_cost = false, bool all_specs = false);
         uint32 resetTalentsCost() const;
         void InitTalentForLevel();
-        void BuildPlayerTalentsInfoData(WorldPacket* data);
-        void BuildPetTalentsInfoData(WorldPacket* data);
+        void BuildPlayerTalentsInfoData(WorldPacket& data);
+        void BuildPetTalentsInfoData(WorldPacket& data);
         void SendTalentsInfoData(bool pet);
         void LearnTalent(uint32 talentId, uint32 talentRank);
         void LearnPetTalent(ObjectGuid petGuid, uint32 talentId, uint32 talentRank);

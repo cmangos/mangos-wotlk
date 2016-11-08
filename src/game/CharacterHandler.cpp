@@ -149,7 +149,7 @@ void WorldSession::HandleCharEnum(QueryResult* result)
         {
             uint32 guidlow = (*result)[0].GetUInt32();
             DETAIL_LOG("Build enum data for char guid %u from account %u.", guidlow, GetAccountId());
-            if (Player::BuildEnumData(result, &data))
+            if (Player::BuildEnumData(result, data))
                 ++num;
         }
         while (result->NextRow());

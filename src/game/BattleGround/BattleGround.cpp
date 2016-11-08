@@ -524,7 +524,7 @@ void BattleGround::SendPacketToTeam(Team teamId, WorldPacket const &packet, Play
 void BattleGround::PlaySoundToAll(uint32 SoundID)
 {
     WorldPacket data;
-    sBattleGroundMgr.BuildPlaySoundPacket(&data, SoundID);
+    sBattleGroundMgr.BuildPlaySoundPacket(data, SoundID);
     SendPacketToAll(data);
 }
 
@@ -549,7 +549,7 @@ void BattleGround::PlaySoundToTeam(uint32 SoundID, Team teamId)
 
         if (team == teamId)
         {
-            sBattleGroundMgr.BuildPlaySoundPacket(&data, SoundID);
+            sBattleGroundMgr.BuildPlaySoundPacket(data, SoundID);
             plr->GetSession()->SendPacket(data);
         }
     }
@@ -632,14 +632,14 @@ void BattleGround::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, 
 void BattleGround::UpdateWorldState(uint32 Field, uint32 Value)
 {
     WorldPacket data;
-    sBattleGroundMgr.BuildUpdateWorldStatePacket(&data, Field, Value);
+    sBattleGroundMgr.BuildUpdateWorldStatePacket(data, Field, Value);
     SendPacketToAll(data);
 }
 
 void BattleGround::UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player* Source)
 {
     WorldPacket data;
-    sBattleGroundMgr.BuildUpdateWorldStatePacket(&data, Field, Value);
+    sBattleGroundMgr.BuildUpdateWorldStatePacket(data, Field, Value);
     Source->GetSession()->SendPacket(data);
 }
 
@@ -840,11 +840,11 @@ void BattleGround::EndBattleGround(Team winner)
 
         BlockMovement(plr);
 
-        sBattleGroundMgr.BuildPvpLogDataPacket(&data, this);
+        sBattleGroundMgr.BuildPvpLogDataPacket(data, this);
         plr->GetSession()->SendPacket(data);
 
         BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID(), GetArenaType());
-        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime(), GetArenaType(), plr->GetBGTeam());
+        sBattleGroundMgr.BuildBattleGroundStatusPacket(data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime(), GetArenaType(), plr->GetBGTeam());
         plr->GetSession()->SendPacket(data);
         plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_BATTLEGROUND, 1);
     }
@@ -1091,7 +1091,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
             if (SendPacket)
             {
                 WorldPacket data;
-                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_NONE, 0, 0, ARENA_TYPE_NONE, TEAM_NONE);
+                sBattleGroundMgr.BuildBattleGroundStatusPacket(data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_NONE, 0, 0, ARENA_TYPE_NONE, TEAM_NONE);
                 plr->GetSession()->SendPacket(data);
             }
 
@@ -1131,7 +1131,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
 
         // Let others know
         WorldPacket data;
-        sBattleGroundMgr.BuildPlayerLeftBattleGroundPacket(&data, guid);
+        sBattleGroundMgr.BuildPlayerLeftBattleGroundPacket(data, guid);
         SendPacketToTeam(team, data, plr, false);
     }
 
@@ -1226,7 +1226,7 @@ void BattleGround::AddPlayer(Player* plr)
     UpdatePlayersCountByTeam(team, false);                  // +1 player
 
     WorldPacket data;
-    sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);
+    sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(data, plr);
     SendPacketToTeam(team, data, plr, false);
 
     // add arena specific auras
@@ -1730,10 +1730,10 @@ void BattleGround::PlayerAddedToBGCheckIfBGIsRunning(Player* plr)
 
     BlockMovement(plr);
 
-    sBattleGroundMgr.BuildPvpLogDataPacket(&data, this);
+    sBattleGroundMgr.BuildPvpLogDataPacket(data, this);
     plr->GetSession()->SendPacket(data);
 
-    sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, GetEndTime(), GetStartTime(), GetArenaType(), plr->GetBGTeam());
+    sBattleGroundMgr.BuildBattleGroundStatusPacket(data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, GetEndTime(), GetStartTime(), GetArenaType(), plr->GetBGTeam());
     plr->GetSession()->SendPacket(data);
 }
 

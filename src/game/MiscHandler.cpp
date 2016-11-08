@@ -1093,7 +1093,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     data << plr->GetPackGUID();
 
     if (sWorld.getConfig(CONFIG_BOOL_TALENTS_INSPECTING) || _player->isGameMaster())
-        plr->BuildPlayerTalentsInfoData(&data);
+        plr->BuildPlayerTalentsInfoData(data);
     else
     {
         data << uint32(0);                                  // unspentTalentPoints
@@ -1101,7 +1101,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
         data << uint8(0);                                   // talentGroupIndex
     }
 
-    plr->BuildEnchantmentsInfoData(&data);
+    plr->BuildEnchantmentsInfoData(data);
 
     SendPacket(data);
 }

@@ -61,9 +61,9 @@ static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& o
     return plr->IsInWorld();
 }
 
-bool MapSessionFilter::Process(WorldPacket* packet)
+bool MapSessionFilter::Process(WorldPacket const& packet) const
 {
-    OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+    OpcodeHandler const& opHandle = opcodeTable[packet.GetOpcode()];
     if (opHandle.packetProcessing == PROCESS_INPLACE)
         return true;
 
@@ -73,9 +73,9 @@ bool MapSessionFilter::Process(WorldPacket* packet)
 
 // we should process ALL packets when player is not in world/logged in
 // OR packet handler is not thread-safe!
-bool WorldSessionFilter::Process(WorldPacket* packet)
+bool WorldSessionFilter::Process(WorldPacket const& packet) const
 {
-    OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+    OpcodeHandler const& opHandle = opcodeTable[packet.GetOpcode()];
     // check if packet handler is supposed to be safe
     if (opHandle.packetProcessing == PROCESS_INPLACE)
         return true;

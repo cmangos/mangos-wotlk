@@ -925,7 +925,7 @@ void Map::SendInitSelf(Player* player)
     }
 
     WorldPacket packet;
-    data.BuildPacket(&packet);
+    data.BuildPacket(packet);
     player->GetSession()->SendPacket(packet);
 }
 
@@ -952,7 +952,7 @@ void Map::SendInitTransports(Player* player)
     }
 
     WorldPacket packet;
-    transData.BuildPacket(&packet);
+    transData.BuildPacket(packet);
     player->GetSession()->SendPacket(packet);
 }
 
@@ -975,7 +975,7 @@ void Map::SendRemoveTransports(Player* player)
             (*i)->BuildOutOfRangeUpdateBlock(&transData);
 
     WorldPacket packet;
-    transData.BuildPacket(&packet);
+    transData.BuildPacket(packet);
     player->GetSession()->SendPacket(packet);
 }
 
@@ -1863,7 +1863,7 @@ void Map::SendObjectUpdates()
     WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
     for (UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
     {
-        iter->second.BuildPacket(&packet);
+        iter->second.BuildPacket(packet);
         iter->first->GetSession()->SendPacket(packet);
         packet.clear();                                     // clean the string
     }
