@@ -96,10 +96,9 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
 
     char const* full;
     if (m_session)
-        full = "|cffffffff|Hurl:" _FULLVERSION "|h";
+        full = _FULLVERSION(REVISION_DATE, REVISION_TIME, "|cffffffff|Hurl:" REVISION_ID "|h" REVISION_ID "|h|r");
     else
-        full = _FULLVERSION;
-
+        full = _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_ID);
     SendSysMessage(full);
 
     if (sScriptMgr.IsScriptLibraryLoaded())

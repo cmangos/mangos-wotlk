@@ -61,6 +61,8 @@ add_executable(${EXECUTABLE_NAME}
   ${EXECUTABLE_SRCS}
 )
 
+add_dependencies(${EXECUTABLE_NAME} revision.h)
+
 target_link_libraries(${EXECUTABLE_NAME}
   game
   shared
