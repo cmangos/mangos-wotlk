@@ -184,17 +184,17 @@ class MANGOS_DLL_SPEC Pet : public Creature
 
         void RegenerateAll(uint32 update_diff) override;    // overwrite Creature::RegenerateAll
         void LooseHappiness();
-        HappinessState GetHappinessState();
+        HappinessState GetHappinessState() const;
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint32 level);
         void SynchronizeLevelWithOwner();
         void InitStatsForLevel(uint32 level);
         bool HaveInDiet(ItemPrototype const* item) const;
-        uint32 GetCurrentFoodBenefitLevel(uint32 itemlevel);
+        uint32 GetCurrentFoodBenefitLevel(uint32 itemlevel) const;
         void SetDuration(int32 dur) { m_duration = dur; }
-        int32 GetDuration() { return m_duration; }
+        int32 GetDuration() const { return m_duration; }
 
-        int32 GetBonusDamage() { return m_bonusdamage; }
+        int32 GetBonusDamage() const { return m_bonusdamage; }
         void SetBonusDamage(int32 damage) { m_bonusdamage = damage; }
 
         bool UpdateStats(Stats stat) override;
@@ -237,7 +237,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
         bool m_retreating;
 
         void SetIsRetreating(bool retreating = false) { m_retreating = retreating; }
-        bool GetIsRetreating() { return m_retreating; }
+        bool GetIsRetreating() const { return m_retreating; }
 
         bool m_stayPosSet;
         float m_stayPosX;
@@ -246,12 +246,12 @@ class MANGOS_DLL_SPEC Pet : public Creature
         float m_stayPosO;
 
         void SetStayPosition(bool stay = false);
-        bool IsStayPosSet() { return m_stayPosSet; }
+        bool IsStayPosSet() const { return m_stayPosSet; }
 
-        float GetStayPosX() { return m_stayPosX; }
-        float GetStayPosY() { return m_stayPosY; }
-        float GetStayPosZ() { return m_stayPosZ; }
-        float GetStayPosO() { return m_stayPosO; }
+        float GetStayPosX() const { return m_stayPosX; }
+        float GetStayPosY() const { return m_stayPosY; }
+        float GetStayPosZ() const { return m_stayPosZ; }
+        float GetStayPosO() const { return m_stayPosO; }
 
         PetSpellMap     m_spells;
         AutoSpellList   m_autospells;
@@ -260,9 +260,9 @@ class MANGOS_DLL_SPEC Pet : public Creature
         uint32          m_openerMinRange;
         uint32          m_openerMaxRange;
 
-        uint32 GetSpellOpener()         { return m_opener; }
-        uint32 GetSpellOpenerMinRange() { return m_openerMinRange; }
-        uint32 GetSpellOpenerMaxRange() { return m_openerMaxRange; }
+        uint32 GetSpellOpener() const { return m_opener; }
+        uint32 GetSpellOpenerMinRange() const { return m_openerMinRange; }
+        uint32 GetSpellOpenerMaxRange() const { return m_openerMaxRange; }
 
         void SetSpellOpener(uint32 spellId = 0, uint32 minRange = 0, uint32 maxRange = 0)
         {
@@ -278,8 +278,8 @@ class MANGOS_DLL_SPEC Pet : public Creature
         uint32 resetTalentsCost() const;
         void InitTalentForLevel();
 
-        uint8 GetMaxTalentPointsForLevel(uint32 level);
-        uint8 GetFreeTalentPoints() { return GetByteValue(UNIT_FIELD_BYTES_1, 1); }
+        uint8 GetMaxTalentPointsForLevel(uint32 level) const;
+        uint8 GetFreeTalentPoints() const { return GetByteValue(UNIT_FIELD_BYTES_1, 1); }
         void SetFreeTalentPoints(uint8 points) { SetByteValue(UNIT_FIELD_BYTES_1, 1, points); }
         void UpdateFreeTalentPoints(bool resetIfNeed = true);
 

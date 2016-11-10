@@ -303,10 +303,10 @@ class MANGOS_DLL_SPEC CreatureAI
         ///== Helper functions =============================
 
         /// This function is used to do the actual melee damage (if possible)
-        bool DoMeleeAttackIfReady();
+        bool DoMeleeAttackIfReady() const;
 
         /// Internal helper function, to check if a spell can be cast
-        CanCastResult CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, bool isTriggered);
+        CanCastResult CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, bool isTriggered) const;
 
         /**
          * Function to cast a spell if possible
@@ -315,7 +315,7 @@ class MANGOS_DLL_SPEC CreatureAI
          * @param uiCastFlags Some flags to define how to cast, see enum CastFlags
          * @param OriginalCasterGuid the original caster of the spell if required, empty by default
          */
-        CanCastResult DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32 uiCastFlags = 0, ObjectGuid OriginalCasterGuid = ObjectGuid());
+        CanCastResult DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32 uiCastFlags = 0, ObjectGuid OriginalCasterGuid = ObjectGuid()) const;
 
         /// Set combat movement (on/off), also sets UNIT_STAT_NO_COMBAT_MOVEMENT
         void SetCombatMovement(bool enable, bool stopOrStartMovement = false);
@@ -349,7 +349,7 @@ class MANGOS_DLL_SPEC CreatureAI
         virtual void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*miscValue*/) {}
 
     protected:
-        void HandleMovementOnAttackStart(Unit* victim);
+        void HandleMovementOnAttackStart(Unit* victim) const;
 
         ///== Fields =======================================
 

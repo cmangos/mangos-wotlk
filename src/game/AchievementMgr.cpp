@@ -70,7 +70,7 @@ namespace MaNGOS
     };
 }                                                           // namespace MaNGOS
 
-bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* criteria)
+bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* criteria) const
 {
     switch (criteria->requiredType)
     {
@@ -604,7 +604,7 @@ void AchievementMgr::LoadFromDB(QueryResult* achievementResult, QueryResult* cri
     }
 }
 
-void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement)
+void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement) const
 {
     if (GetPlayer()->GetSession()->PlayerLoading())
         return;
@@ -646,7 +646,7 @@ void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement)
     GetPlayer()->SendMessageToSetInRange(data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY), true);
 }
 
-void AchievementMgr::SendCriteriaUpdate(uint32 id, CriteriaProgress const* progress)
+void AchievementMgr::SendCriteriaUpdate(uint32 id, CriteriaProgress const* progress) const
 {
     WorldPacket data(SMSG_CRITERIA_UPDATE, 8 + 4 + 8);
     data << uint32(id);
@@ -2246,7 +2246,7 @@ void AchievementMgr::BuildAllDataPacket(WorldPacket& data)
 }
 
 //==========================================================
-AchievementCriteriaEntryList const& AchievementGlobalMgr::GetAchievementCriteriaByType(AchievementCriteriaTypes type)
+AchievementCriteriaEntryList const& AchievementGlobalMgr::GetAchievementCriteriaByType(AchievementCriteriaTypes type) const
 {
     return m_AchievementCriteriasByType[type];
 }

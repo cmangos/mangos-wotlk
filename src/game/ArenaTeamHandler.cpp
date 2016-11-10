@@ -333,7 +333,7 @@ void WorldSession::HandleArenaTeamLeaderOpcode(WorldPacket& recv_data)
     at->BroadcastEvent(ERR_ARENA_TEAM_LEADER_CHANGED_SSS, _player->GetName(), name.c_str(), at->GetName().c_str());
 }
 
-void WorldSession::SendArenaTeamCommandResult(uint32 team_action, const std::string& team, const std::string& player, uint32 error_id)
+void WorldSession::SendArenaTeamCommandResult(uint32 team_action, const std::string& team, const std::string& player, uint32 error_id) const
 {
     WorldPacket data(SMSG_ARENA_TEAM_COMMAND_RESULT, 4 + team.length() + 1 + player.length() + 1 + 4);
     data << uint32(team_action);
@@ -343,7 +343,7 @@ void WorldSession::SendArenaTeamCommandResult(uint32 team_action, const std::str
     SendPacket(data);
 }
 
-void WorldSession::SendNotInArenaTeamPacket(uint8 type)
+void WorldSession::SendNotInArenaTeamPacket(uint8 type) const
 {
     WorldPacket data(SMSG_ARENA_ERROR, 4 + 1);              // 886 - You are not in a %uv%u arena team
     uint32 unk = 0;

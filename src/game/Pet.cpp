@@ -592,7 +592,7 @@ void Pet::LooseHappiness()
     ModifyPower(POWER_HAPPINESS, -addvalue);
 }
 
-HappinessState Pet::GetHappinessState()
+HappinessState Pet::GetHappinessState() const
 {
     if (GetPower(POWER_HAPPINESS) < HAPPINESS_LEVEL_SIZE)
         return UNHAPPY;
@@ -1145,7 +1145,7 @@ bool Pet::HaveInDiet(ItemPrototype const* item) const
     return !!(diet & FoodMask);
 }
 
-uint32 Pet::GetCurrentFoodBenefitLevel(uint32 itemlevel)
+uint32 Pet::GetCurrentFoodBenefitLevel(uint32 itemlevel) const
 {
     // -5 or greater food level
     if (getLevel() <= itemlevel + 5)                        // possible to feed level 60 pet with level 55 level food for full effect
@@ -1948,7 +1948,7 @@ uint32 Pet::resetTalentsCost() const
         return (m_resetTalentsCost + 1 * GOLD > 10 * GOLD ? 10 * GOLD : m_resetTalentsCost + 1 * GOLD);
 }
 
-uint8 Pet::GetMaxTalentPointsForLevel(uint32 level)
+uint8 Pet::GetMaxTalentPointsForLevel(uint32 level) const
 {
     uint8 points = (level >= 20) ? ((level - 16) / 4) : 0;
     // Mod points from owner SPELL_AURA_MOD_PET_TALENT_POINTS

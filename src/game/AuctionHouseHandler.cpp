@@ -49,7 +49,7 @@ void WorldSession::HandleAuctionHelloOpcode(WorldPacket& recv_data)
 }
 
 // this void causes that auction window is opened
-void WorldSession::SendAuctionHello(Unit* unit)
+void WorldSession::SendAuctionHello(Unit* unit) const
 {
     // always return pointer
     AuctionHouseEntry const* ahEntry = AuctionHouseMgr::GetAuctionHouseEntry(unit);
@@ -62,7 +62,7 @@ void WorldSession::SendAuctionHello(Unit* unit)
 }
 
 // call this method when player bids, creates, or deletes auction
-void WorldSession::SendAuctionCommandResult(AuctionEntry* auc, AuctionAction Action, AuctionError ErrorCode, InventoryResult invError)
+void WorldSession::SendAuctionCommandResult(AuctionEntry* auc, AuctionAction Action, AuctionError ErrorCode, InventoryResult invError) const
 {
     WorldPacket data(SMSG_AUCTION_COMMAND_RESULT, 16);
     data << uint32(auc ? auc->Id : 0);
@@ -91,7 +91,7 @@ void WorldSession::SendAuctionCommandResult(AuctionEntry* auc, AuctionAction Act
 }
 
 // this function sends notification, if bidder is online
-void WorldSession::SendAuctionBidderNotification(AuctionEntry* auction)
+void WorldSession::SendAuctionBidderNotification(AuctionEntry* auction) const
 {
     WorldPacket data(SMSG_AUCTION_BIDDER_NOTIFICATION, (8 * 4));
     data << uint32(auction->GetHouseId());
@@ -108,7 +108,7 @@ void WorldSession::SendAuctionBidderNotification(AuctionEntry* auction)
 }
 
 // this void causes on client to display: "Your auction sold"
-void WorldSession::SendAuctionOwnerNotification(AuctionEntry* auction)
+void WorldSession::SendAuctionOwnerNotification(AuctionEntry* auction) const
 {
     WorldPacket data(SMSG_AUCTION_OWNER_NOTIFICATION, (7 * 4));
     data << uint32(auction->Id);
@@ -133,7 +133,7 @@ void WorldSession::SendAuctionOwnerNotification(AuctionEntry* auction)
 }
 
 // shows ERR_AUCTION_REMOVED_S
-void WorldSession::SendAuctionRemovedNotification(AuctionEntry* auction)
+void WorldSession::SendAuctionRemovedNotification(AuctionEntry* auction) const
 {
     WorldPacket data(SMSG_AUCTION_REMOVED_NOTIFICATION, (3 * 4));
     data << uint32(auction->Id);
@@ -193,7 +193,7 @@ void WorldSession::SendAuctionCancelledToBidderMail(AuctionEntry* auction)
     }
 }
 
-AuctionHouseEntry const* WorldSession::GetCheckedAuctionHouseForAuctioneer(ObjectGuid guid)
+AuctionHouseEntry const* WorldSession::GetCheckedAuctionHouseForAuctioneer(ObjectGuid guid) const
 {
     Unit* auctioneer;
 

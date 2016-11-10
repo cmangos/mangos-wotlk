@@ -1215,7 +1215,7 @@ void BattleGroundMgr::Update(uint32 diff)
     }
 }
 
-void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket& data, BattleGround* bg, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, ArenaType arenatype, Team arenaTeam)
+void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket& data, BattleGround* bg, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, ArenaType arenatype, Team arenaTeam) const
 {
     // we can be in 2 queues in same time...
 
@@ -1262,7 +1262,7 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket& data, BattleGro
     }
 }
 
-void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket& data, BattleGround* bg)
+void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket& data, BattleGround* bg) const
 {
     uint8 type = (bg->isArena() ? 1 : 0);
     // last check on 3.0.3
@@ -1373,7 +1373,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket& data, BattleGround* bg)
     }
 }
 
-void BattleGroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket& data, GroupJoinBattlegroundResult result)
+void BattleGroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket& data, GroupJoinBattlegroundResult result) const
 {
     data.Initialize(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
     data << int32(result);
@@ -1381,26 +1381,26 @@ void BattleGroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket& data, Grou
         data << uint64(0);                                 // player guid
 }
 
-void BattleGroundMgr::BuildUpdateWorldStatePacket(WorldPacket& data, uint32 field, uint32 value)
+void BattleGroundMgr::BuildUpdateWorldStatePacket(WorldPacket& data, uint32 field, uint32 value) const
 {
     data.Initialize(SMSG_UPDATE_WORLD_STATE, 4 + 4);
     data << uint32(field);
     data << uint32(value);
 }
 
-void BattleGroundMgr::BuildPlaySoundPacket(WorldPacket& data, uint32 soundid)
+void BattleGroundMgr::BuildPlaySoundPacket(WorldPacket& data, uint32 soundid) const
 {
     data.Initialize(SMSG_PLAY_SOUND, 4);
     data << uint32(soundid);
 }
 
-void BattleGroundMgr::BuildPlayerLeftBattleGroundPacket(WorldPacket& data, ObjectGuid guid)
+void BattleGroundMgr::BuildPlayerLeftBattleGroundPacket(WorldPacket& data, ObjectGuid guid) const
 {
     data.Initialize(SMSG_BATTLEGROUND_PLAYER_LEFT, 8);
     data << ObjectGuid(guid);
 }
 
-void BattleGroundMgr::BuildPlayerJoinedBattleGroundPacket(WorldPacket& data, Player* plr)
+void BattleGroundMgr::BuildPlayerJoinedBattleGroundPacket(WorldPacket& data, Player* plr) const
 {
     data.Initialize(SMSG_BATTLEGROUND_PLAYER_JOINED, 8);
     data << plr->GetObjectGuid();
@@ -1744,7 +1744,7 @@ void BattleGroundMgr::InitAutomaticArenaPointDistribution()
     }
 }
 
-void BattleGroundMgr::DistributeArenaPoints()
+void BattleGroundMgr::DistributeArenaPoints() const
 {
     // used to distribute arena points based on last week's stats
     sWorld.SendWorldText(LANG_DIST_ARENA_POINTS_START);
@@ -1793,7 +1793,7 @@ void BattleGroundMgr::DistributeArenaPoints()
     sWorld.SendWorldText(LANG_DIST_ARENA_POINTS_END);
 }
 
-void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket& data, ObjectGuid guid, Player* plr, BattleGroundTypeId bgTypeId, uint8 fromWhere)
+void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket& data, ObjectGuid guid, Player* plr, BattleGroundTypeId bgTypeId, uint8 fromWhere) const
 {
     if (!plr)
         return;

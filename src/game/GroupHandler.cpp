@@ -42,7 +42,7 @@
     -FIX sending PartyMemberStats
 */
 
-void WorldSession::SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res)
+void WorldSession::SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res) const
 {
     WorldPacket data(SMSG_PARTY_COMMAND_RESULT, (4 + member.size() + 1 + 4 + 4));
     data << uint32(operation);
@@ -53,7 +53,7 @@ void WorldSession::SendPartyResult(PartyOperation operation, const std::string& 
     SendPacket(data);
 }
 
-void WorldSession::SendGroupInvite(Player* player, bool alreadyInGroup /*= false*/)
+void WorldSession::SendGroupInvite(Player* player, bool alreadyInGroup /*= false*/) const
 {
     WorldPacket data(SMSG_GROUP_INVITE, 10);                // guess size
     data << uint8(alreadyInGroup ? 0 : 1);                  // invited/already in group flag

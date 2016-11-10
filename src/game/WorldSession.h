@@ -246,20 +246,20 @@ class MANGOS_DLL_SPEC WorldSession
         void ReadAddonsInfo(WorldPacket& data);
         void SendAddonsInfo();
 
-        void SendPacket(WorldPacket const& packet);
-        void SendNotification(const char* format, ...) ATTR_PRINTF(2, 3);
-        void SendNotification(int32 string_id, ...);
-        void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName* declinedName);
-        void SendLfgSearchResults(LfgType type, uint32 entry);
-        void SendLfgJoinResult(LfgJoinResult result);
-        void SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 id);
-        void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
-        void SendGroupInvite(Player* player, bool alreadyInGroup = false);
-        void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2, 3);
-        void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
-        void SendSetPhaseShift(uint32 phaseShift);
-        void SendQueryTimeResponse();
-        void SendRedirectClient(std::string& ip, uint16 port);
+        void SendPacket(WorldPacket const& packet) const;
+        void SendNotification(const char* format, ...) const ATTR_PRINTF(2, 3);
+        void SendNotification(int32 string_id, ...) const;
+        void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName* declinedName) const;
+        void SendLfgSearchResults(LfgType type, uint32 entry) const;
+        void SendLfgJoinResult(LfgJoinResult result) const;
+        void SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 id) const;
+        void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res) const;
+        void SendGroupInvite(Player* player, bool alreadyInGroup = false) const;
+        void SendAreaTriggerMessage(const char* Text, ...) const ATTR_PRINTF(2, 3);
+        void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0) const;
+        void SendSetPhaseShift(uint32 phaseShift) const;
+        void SendQueryTimeResponse() const;
+        void SendRedirectClient(std::string& ip, uint16 port) const;
 
         AccountTypes GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
@@ -296,41 +296,41 @@ class MANGOS_DLL_SPEC WorldSession
         bool Update(PacketFilter& updater);
 
         /// Handle the authentication waiting queue (to be completed)
-        void SendAuthWaitQue(uint32 position);
+        void SendAuthWaitQue(uint32 position) const;
 
-        void SendNameQueryOpcode(Player* p);
-        void SendNameQueryOpcodeFromDB(ObjectGuid guid);
+        void SendNameQueryOpcode(Player* p) const;
+        void SendNameQueryOpcodeFromDB(ObjectGuid guid) const;
         static void SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32 accountId);
 
-        void SendTrainerList(ObjectGuid guid);
-        void SendTrainerList(ObjectGuid guid, const std::string& strTitle);
+        void SendTrainerList(ObjectGuid guid) const;
+        void SendTrainerList(ObjectGuid guid, const std::string& strTitle) const;
 
-        void SendListInventory(ObjectGuid guid);
-        bool CheckBanker(ObjectGuid guid);
-        void SendShowBank(ObjectGuid guid);
-        bool CheckMailBox(ObjectGuid guid);
-        void SendShowMailBox(ObjectGuid guid);
-        void SendTabardVendorActivate(ObjectGuid guid);
-        void SendSpiritResurrect();
-        void SendBindPoint(Creature* npc);
-        void SendGMTicketGetTicket(uint32 status, GMTicket* ticket = nullptr);
-        void SendGMResponse(GMTicket* ticket);
+        void SendListInventory(ObjectGuid guid) const;
+        bool CheckBanker(ObjectGuid guid) const;
+        void SendShowBank(ObjectGuid guid) const;
+        bool CheckMailBox(ObjectGuid guid) const;
+        void SendShowMailBox(ObjectGuid guid) const;
+        void SendTabardVendorActivate(ObjectGuid guid) const;
+        void SendSpiritResurrect() const;
+        void SendBindPoint(Creature* npc) const;
+        void SendGMTicketGetTicket(uint32 status, GMTicket* ticket = nullptr) const;
+        void SendGMResponse(GMTicket* ticket) const;
 
-        void SendAttackStop(Unit const* enemy);
+        void SendAttackStop(Unit const* enemy) const;
 
-        void SendBattlegGroundList(ObjectGuid guid, BattleGroundTypeId bgTypeId);
+        void SendBattlegGroundList(ObjectGuid guid, BattleGroundTypeId bgTypeId) const;
 
-        void SendTradeStatus(const TradeStatusInfo& status);
-        void SendUpdateTrade(bool trader_state = true);
+        void SendTradeStatus(const TradeStatusInfo& status) const;
+        void SendUpdateTrade(bool trader_state = true) const;
         void SendCancelTrade();
 
-        void SendPetitionQueryOpcode(ObjectGuid petitionguid);
+        void SendPetitionQueryOpcode(ObjectGuid petitionguid) const;
 
         // pet
-        void SendPetNameQuery(ObjectGuid guid, uint32 petnumber);
-        void SendStablePet(ObjectGuid guid);
-        void SendStableResult(uint8 res);
-        bool CheckStableMaster(ObjectGuid guid);
+        void SendPetNameQuery(ObjectGuid guid, uint32 petnumber) const;
+        void SendStablePet(ObjectGuid guid) const;
+        void SendStableResult(uint8 res) const;
+        bool CheckStableMaster(ObjectGuid guid) const;
 
         // Account Data
         AccountData* GetAccountData(AccountDataType type) { return &m_accountData[type]; }
@@ -357,37 +357,37 @@ class MANGOS_DLL_SPEC WorldSession
         }
 
         // auction
-        void SendAuctionHello(Unit* unit);
-        void SendAuctionCommandResult(AuctionEntry* auc, AuctionAction Action, AuctionError ErrorCode, InventoryResult invError = EQUIP_ERR_OK);
-        void SendAuctionBidderNotification(AuctionEntry* auction);
-        void SendAuctionOwnerNotification(AuctionEntry* auction);
-        void SendAuctionRemovedNotification(AuctionEntry* auction);
+        void SendAuctionHello(Unit* unit) const;
+        void SendAuctionCommandResult(AuctionEntry* auc, AuctionAction Action, AuctionError ErrorCode, InventoryResult invError = EQUIP_ERR_OK) const;
+        void SendAuctionBidderNotification(AuctionEntry* auction) const;
+        void SendAuctionOwnerNotification(AuctionEntry* auction) const;
+        void SendAuctionRemovedNotification(AuctionEntry* auction) const;
         static void SendAuctionOutbiddedMail(AuctionEntry* auction);
-        void SendAuctionCancelledToBidderMail(AuctionEntry* auction);
+        static void SendAuctionCancelledToBidderMail(AuctionEntry* auction);
         void BuildListAuctionItems(std::vector<AuctionEntry*> const& auctions, WorldPacket& data, std::wstring const& searchedname, uint32 listfrom, uint32 levelmin,
-                                   uint32 levelmax, uint32 usable, uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality, uint32& count, uint32& totalcount, bool isFull);
+                                   uint32 levelmax, uint32 usable, uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality, uint32& count, uint32& totalcount, bool isFull) const;
 
-        AuctionHouseEntry const* GetCheckedAuctionHouseForAuctioneer(ObjectGuid guid);
+        AuctionHouseEntry const* GetCheckedAuctionHouseForAuctioneer(ObjectGuid guid) const;
 
         // Item Enchantment
-        void SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGuid, uint32 itemId, uint32 spellId);
-        void SendItemEnchantTimeUpdate(ObjectGuid playerGuid, ObjectGuid itemGuid, uint32 slot, uint32 duration);
+        void SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGuid, uint32 itemId, uint32 spellId) const;
+        void SendItemEnchantTimeUpdate(ObjectGuid playerGuid, ObjectGuid itemGuid, uint32 slot, uint32 duration) const;
 
         // Taxi
-        void SendTaxiStatus(ObjectGuid guid);
-        void SendTaxiMenu(Creature* unit);
-        void SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathNode = 0);
-        bool SendLearnNewTaxiNode(Creature* unit);
-        void SendActivateTaxiReply(ActivateTaxiReply reply);
+        void SendTaxiStatus(ObjectGuid guid) const;
+        void SendTaxiMenu(Creature* unit) const;
+        void SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathNode = 0) const;
+        bool SendLearnNewTaxiNode(Creature* unit) const;
+        void SendActivateTaxiReply(ActivateTaxiReply reply) const;
 
         // Guild/Arena Team
-        void SendGuildCommandResult(uint32 typecmd, const std::string& str, uint32 cmdresult);
-        void SendArenaTeamCommandResult(uint32 team_action, const std::string& team, const std::string& player, uint32 error_id);
-        void SendNotInArenaTeamPacket(uint8 type);
-        void SendPetitionShowList(ObjectGuid guid);
-        void SendSaveGuildEmblem(uint32 msg);
+        void SendGuildCommandResult(uint32 typecmd, const std::string& str, uint32 cmdresult) const;
+        void SendArenaTeamCommandResult(uint32 team_action, const std::string& team, const std::string& player, uint32 error_id) const;
+        void SendNotInArenaTeamPacket(uint8 type) const;
+        void SendPetitionShowList(ObjectGuid guid) const;
+        void SendSaveGuildEmblem(uint32 msg) const;
 
-        void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
+    static void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
 
         // Account mute time
         time_t m_muteTime;
@@ -400,11 +400,11 @@ class MANGOS_DLL_SPEC WorldSession
         uint32 GetLatency() const { return m_latency; }
         void SetLatency(uint32 latency) { m_latency = latency; }
         void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
-        uint32 getDialogStatus(Player* pPlayer, Object* questgiver, uint32 defstatus);
+        uint32 getDialogStatus(const Player* pPlayer, const Object* questgiver, uint32 defstatus) const;
 
         // Misc
-        void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed);
-        void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit);
+        void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed) const;
+        void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) const;
 
         // opcodes handlers
         void Handle_NULL(WorldPacket& recvPacket);          // not used
@@ -691,17 +691,17 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleQuestLogRemoveQuest(WorldPacket& recv_data);
         void HandleQuestConfirmAccept(WorldPacket& recv_data);
         void HandleQuestgiverCompleteQuest(WorldPacket& recv_data);
-        bool CanInteractWithQuestGiver(ObjectGuid guid, char const* descr);
+        bool CanInteractWithQuestGiver(ObjectGuid guid, char const* descr) const;
 
         void HandleQuestgiverQuestAutoLaunch(WorldPacket& recvPacket);
         void HandlePushQuestToParty(WorldPacket& recvPacket);
         void HandleQuestPushResult(WorldPacket& recvPacket);
 
         bool processChatmessageFurtherAfterSecurityChecks(std::string&, uint32);
-        void SendPlayerNotFoundNotice(const std::string& name);
-        void SendPlayerAmbiguousNotice(const std::string& name);
-        void SendWrongFactionNotice();
-        void SendChatRestrictedNotice(ChatRestrictionType restriction);
+        void SendPlayerNotFoundNotice(const std::string& name) const;
+        void SendPlayerAmbiguousNotice(const std::string& name) const;
+        void SendWrongFactionNotice() const;
+        void SendChatRestrictedNotice(ChatRestrictionType restriction) const;
         void HandleMessagechatOpcode(WorldPacket& recvPacket);
         void HandleTextEmoteOpcode(WorldPacket& recvPacket);
         void HandleChatIgnoredOpcode(WorldPacket& recvPacket);
@@ -881,8 +881,8 @@ class MANGOS_DLL_SPEC WorldSession
         void ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket & packet);
 
         // logging helper
-        void LogUnexpectedOpcode(WorldPacket const& packet, const char* reason);
-        void LogUnprocessedTail(WorldPacket &packet);
+        void LogUnexpectedOpcode(WorldPacket const& packet, const char* reason) const;
+        void LogUnprocessedTail(WorldPacket &packet) const;
 
         uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
         Player * _player;

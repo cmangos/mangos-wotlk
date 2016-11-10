@@ -638,9 +638,9 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         const char* GetNameForLocaleIdx(int32 locale_idx) const override;
 
         void SaveToDB();
-        void SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask);
+        void SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask) const;
         bool LoadFromDB(uint32 guid, Map* map);
-        void DeleteFromDB();
+        void DeleteFromDB() const;
 
         void SetOwnerGuid(ObjectGuid ownerGuid)
         {
@@ -748,8 +748,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         bool IsHostileTo(Unit const* unit) const override;
         bool IsFriendlyTo(Unit const* unit) const override;
 
-        void SummonLinkedTrapIfAny();
-        void TriggerLinkedGameObject(Unit* target);
+        void SummonLinkedTrapIfAny() const;
+        void TriggerLinkedGameObject(Unit* target) const;
 
         // Destructible GO handling
         void DealGameObjectDamage(uint32 damage, uint32 spell, Unit* caster);
@@ -762,12 +762,12 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         bool IsCollisionEnabled() const;                    // Check if a go should collide. Like if a door is closed
 
-        GameObject* LookupFishingHoleAround(float range);
+        GameObject* LookupFishingHoleAround(float range) const;
 
         void SetCapturePointSlider(float value, bool isLocked);
         float GetCapturePointSliderValue() const { return m_captureSlider; }
 
-        float GetInteractionDistance();
+        float GetInteractionDistance() const;
 
         GridReference<GameObject>& GetGridRef() { return m_gridRef; }
 

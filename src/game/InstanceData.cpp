@@ -54,7 +54,7 @@ bool InstanceData::CheckConditionCriteriaMeet(Player const* /*source*/, uint32 i
     return false;
 }
 
-void InstanceData::SendEncounterFrame(uint32 type, ObjectGuid sourceGuid /*= nullptr*/, uint8 param1 /*= 0*/, uint8 param2 /*= 0*/)
+void InstanceData::SendEncounterFrame(uint32 type, ObjectGuid sourceGuid /*= nullptr*/, uint8 param1 /*= 0*/, uint8 param2 /*= 0*/) const
 {
     // size of this packet is at most 15 (usually less)
     WorldPacket data(SMSG_INSTANCE_ENCOUNTER, 15);

@@ -61,13 +61,13 @@ struct ServerPktHeader
         header[headerIndex++] = 0xFF & (cmd >> 8);
     }
 
-    uint8 getHeaderLength()
+    uint8 getHeaderLength() const
     {
         // cmd = 2 bytes, size= 2||3bytes
         return 2 + (isLargePacket() ? 3 : 2);
     }
 
-    bool isLargePacket()
+    bool isLargePacket() const
     {
         return size > 0x7FFF;
     }

@@ -82,7 +82,7 @@ class MANGOS_DLL_SPEC HostileReference : public Reference<Unit, ThreatManager>
             }
         }
 
-        float getTempThreatModifyer() { return iTempThreatModifyer; }
+        float getTempThreatModifyer() const { return iTempThreatModifyer; }
 
         //=================================================
         // check, if source can reach target and set the status
@@ -122,7 +122,7 @@ class MANGOS_DLL_SPEC HostileReference : public Reference<Unit, ThreatManager>
         // Inform the source, that the status of that reference was changed
         void fireStatusChanged(ThreatRefStatusChangeEvent& pThreatRefStatusChangeEvent);
 
-        Unit* getSourceUnit();
+        Unit* getSourceUnit() const;
     private:
         float iThreat;
         float iTempThreatModifyer;                          // used for taunt
@@ -201,7 +201,7 @@ class MANGOS_DLL_SPEC ThreatManager
 
         void UpdateForClient(uint32 time);
 
-        HostileReference* getCurrentVictim() { return iCurrentVictim; }
+        HostileReference* getCurrentVictim() const { return iCurrentVictim; }
 
         Unit*  getOwner() const { return iOwner; }
 

@@ -117,7 +117,7 @@ char const* WorldSession::GetPlayerName() const
 }
 
 /// Send a packet to the client
-void WorldSession::SendPacket(WorldPacket const& packet)
+void WorldSession::SendPacket(WorldPacket const& packet) const
 {
     if (m_Socket->IsClosed())
         return;
@@ -169,7 +169,7 @@ void WorldSession::QueuePacket(std::unique_ptr<WorldPacket> new_packet)
 }
 
 /// Logging helper for unexpected opcodes
-void WorldSession::LogUnexpectedOpcode(WorldPacket const& packet, const char* reason)
+void WorldSession::LogUnexpectedOpcode(WorldPacket const& packet, const char* reason) const
 {
     sLog.outError("SESSION: received unexpected opcode %s (0x%.4X) %s",
                   packet.GetOpcodeName(),
@@ -178,7 +178,7 @@ void WorldSession::LogUnexpectedOpcode(WorldPacket const& packet, const char* re
 }
 
 /// Logging helper for unexpected opcodes
-void WorldSession::LogUnprocessedTail(WorldPacket &packet)
+void WorldSession::LogUnprocessedTail(WorldPacket &packet) const
 {
     sLog.outError("SESSION: opcode %s (0x%.4X) have unprocessed tail data (read stop at " SIZEFMTD " from " SIZEFMTD ")",
                   packet.GetOpcodeName(),
@@ -497,7 +497,7 @@ void WorldSession::KickPlayer()
 
 /// Cancel channeling handler
 
-void WorldSession::SendAreaTriggerMessage(const char* Text, ...)
+void WorldSession::SendAreaTriggerMessage(const char* Text, ...) const
 {
     va_list ap;
     char szStr [1024];
@@ -514,7 +514,7 @@ void WorldSession::SendAreaTriggerMessage(const char* Text, ...)
     SendPacket(data);
 }
 
-void WorldSession::SendNotification(const char* format, ...)
+void WorldSession::SendNotification(const char* format, ...) const
 {
     if (format)
     {
@@ -531,7 +531,7 @@ void WorldSession::SendNotification(const char* format, ...)
     }
 }
 
-void WorldSession::SendNotification(int32 string_id, ...)
+void WorldSession::SendNotification(int32 string_id, ...) const
 {
     char const* format = GetMangosString(string_id);
     if (format)
@@ -549,7 +549,7 @@ void WorldSession::SendNotification(int32 string_id, ...)
     }
 }
 
-void WorldSession::SendSetPhaseShift(uint32 PhaseShift)
+void WorldSession::SendSetPhaseShift(uint32 PhaseShift) const
 {
     WorldPacket data(SMSG_SET_PHASE_SHIFT, 4);
     data << uint32(PhaseShift);
@@ -589,7 +589,7 @@ void WorldSession::Handle_Deprecated(WorldPacket& recvPacket)
                   recvPacket.GetOpcode());
 }
 
-void WorldSession::SendAuthWaitQue(uint32 position)
+void WorldSession::SendAuthWaitQue(uint32 position) const
 {
     if (position == 0)
     {
@@ -778,7 +778,7 @@ void WorldSession::SaveTutorialsData()
 }
 
 // Send chat information about aborted transfer (mostly used by Player::SendTransferAbortedByLockstatus())
-void WorldSession::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg)
+void WorldSession::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg) const
 {
     WorldPacket data(SMSG_TRANSFER_ABORTED, 4 + 2);
     data << uint32(mapid);
@@ -927,7 +927,7 @@ void WorldSession::SetPlayer(Player* plr)
         m_GUIDLow = _player->GetGUIDLow();
 }
 
-void WorldSession::SendRedirectClient(std::string& ip, uint16 port)
+void WorldSession::SendRedirectClient(std::string& ip, uint16 port) const
 {
     const uint32 ip2 = static_cast<uint32>(boost::asio::ip::address_v4::from_string(ip).to_ulong());
     WorldPacket pkt(SMSG_CONNECT_TO, 4 + 2 + 4 + 20);
@@ -970,7 +970,7 @@ void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket &pac
         LogUnprocessedTail(packet);
 }
 
-void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit)
+void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) const
 {
     WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 8 + 4);        // visual effect on guid
     data << guid;

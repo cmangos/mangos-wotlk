@@ -636,7 +636,7 @@ void BattleGround::UpdateWorldState(uint32 Field, uint32 Value)
     SendPacketToAll(data);
 }
 
-void BattleGround::UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player* Source)
+void BattleGround::UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player* Source) const
 {
     WorldPacket data;
     sBattleGroundMgr.BuildUpdateWorldStatePacket(data, Field, Value);
@@ -914,7 +914,7 @@ void BattleGround::RewardMark(Player* plr, uint32 count)
     }
 }
 
-void BattleGround::RewardSpellCast(Player* plr, uint32 spell_id)
+void BattleGround::RewardSpellCast(Player* plr, uint32 spell_id) const
 {
     // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
     if (plr->GetDummyAura(SPELL_AURA_PLAYER_INACTIVE))
@@ -957,7 +957,7 @@ void BattleGround::RewardItem(Player* plr, uint32 item_id, uint32 count)
         SendRewardMarkByMail(plr, item_id, no_space_count);
 }
 
-void BattleGround::SendRewardMarkByMail(Player* plr, uint32 mark, uint32 count)
+void BattleGround::SendRewardMarkByMail(Player* plr, uint32 mark, uint32 count) const
 {
     uint32 bmEntry = GetBattlemasterEntry();
     if (!bmEntry)
@@ -1506,7 +1506,7 @@ void BattleGround::OnObjectDBLoad(GameObject* obj)
     }
 }
 
-bool BattleGround::IsDoor(uint8 event1, uint8 event2)
+bool BattleGround::IsDoor(uint8 event1, uint8 event2) const
 {
     if (event1 == BG_EVENT_DOOR)
     {
@@ -1671,7 +1671,6 @@ void BattleGround::HandleTriggerBuff(ObjectGuid go_guid)
         return;
 
     obj->SetLootState(GO_JUST_DEACTIVATED);             // can be despawned or destroyed
-    return;
 }
 
 void BattleGround::HandleKillPlayer(Player* player, Player* killer)

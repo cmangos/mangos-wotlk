@@ -383,7 +383,7 @@ void ArenaTeam::Roster(WorldSession* session)
     DEBUG_LOG("WORLD: Sent SMSG_ARENA_TEAM_ROSTER");
 }
 
-void ArenaTeam::Query(WorldSession* session)
+void ArenaTeam::Query(WorldSession* session) const
 {
     WorldPacket data(SMSG_ARENA_TEAM_QUERY_RESPONSE, 4 * 7 + GetName().size() + 1);
     data << uint32(GetId());                                // team id
@@ -398,7 +398,7 @@ void ArenaTeam::Query(WorldSession* session)
     DEBUG_LOG("WORLD: Sent SMSG_ARENA_TEAM_QUERY_RESPONSE");
 }
 
-void ArenaTeam::Stats(WorldSession* session)
+void ArenaTeam::Stats(WorldSession* session) const
 {
     WorldPacket data(SMSG_ARENA_TEAM_STATS, 4 * 7);
     data << uint32(GetId());                                // team id
@@ -576,7 +576,7 @@ uint32 ArenaTeam::GetPoints(uint32 MemberRating)
     return (uint32) points;
 }
 
-float ArenaTeam::GetChanceAgainst(uint32 own_rating, uint32 enemy_rating)
+float ArenaTeam::GetChanceAgainst(uint32 own_rating, uint32 enemy_rating) const
 {
     // returns the chance to win against a team with the given rating, used in the rating adjustment calculation
     // ELO system

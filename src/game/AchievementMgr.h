@@ -198,7 +198,7 @@ struct AchievementCriteriaRequirement
         raw.value2 = _value2;
     }
 
-    bool IsValid(AchievementCriteriaEntry const* criteria);
+    bool IsValid(AchievementCriteriaEntry const* criteria) const;
     bool Meets(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1 = 0) const;
 };
 
@@ -290,8 +290,8 @@ class AchievementMgr
         void SetCriteriaProgress(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement, uint32 changeValue, ProgressType ptype);
 
     private:
-        void SendAchievementEarned(AchievementEntry const* achievement);
-        void SendCriteriaUpdate(uint32 id, CriteriaProgress const* progress);
+        void SendAchievementEarned(AchievementEntry const* achievement) const;
+        void SendCriteriaUpdate(uint32 id, CriteriaProgress const* progress) const;
         void CompletedCriteriaFor(AchievementEntry const* achievement);
         void CompletedAchievement(AchievementEntry const* entry);
         void IncompletedAchievement(AchievementEntry const* entry);
@@ -307,7 +307,7 @@ class AchievementMgr
 class AchievementGlobalMgr
 {
     public:
-        AchievementCriteriaEntryList const& GetAchievementCriteriaByType(AchievementCriteriaTypes type);
+        AchievementCriteriaEntryList const& GetAchievementCriteriaByType(AchievementCriteriaTypes type) const;
         AchievementCriteriaEntryList const* GetAchievementCriteriaByAchievement(uint32 id);
         AchievementEntryList const* GetAchievementByReferencedId(uint32 id) const;
         AchievementReward const* GetAchievementReward(AchievementEntry const* achievement, uint8 gender) const;

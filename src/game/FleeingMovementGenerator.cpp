@@ -135,14 +135,14 @@ void FleeingMovementGenerator<T>::Initialize(T& owner)
 }
 
 template<>
-void FleeingMovementGenerator<Player>::Finalize(Player& owner)
+void FleeingMovementGenerator<Player>::Finalize(Player& owner) const
 {
     owner.clearUnitState(UNIT_STAT_FLEEING | UNIT_STAT_FLEEING_MOVE);
     owner.StopMoving();
 }
 
 template<>
-void FleeingMovementGenerator<Creature>::Finalize(Creature& owner)
+void FleeingMovementGenerator<Creature>::Finalize(Creature& owner) const
 {
     owner.clearUnitState(UNIT_STAT_FLEEING | UNIT_STAT_FLEEING_MOVE);
 }

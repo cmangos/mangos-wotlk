@@ -1679,7 +1679,7 @@ class SpellMgr
         static bool IsProfessionSpell(uint32 spellId);
         static bool IsPrimaryProfessionSpell(uint32 spellId);
         bool IsPrimaryProfessionFirstRankSpell(uint32 spellId) const;
-        uint32 GetProfessionSpellMinLevel(uint32 spellId);
+        uint32 GetProfessionSpellMinLevel(uint32 spellId) const;
 
         bool IsSkillBonusSpell(uint32 spellId) const;
 
@@ -1723,7 +1723,7 @@ class SpellMgr
             return nullptr;
         }
 
-        SpellCastResult GetSpellAllowedInLocationError(SpellEntry const* spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player = nullptr);
+        SpellCastResult GetSpellAllowedInLocationError(SpellEntry const* spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player = nullptr) const;
 
         SpellAreaMapBounds GetSpellAreaMapBounds(uint32 spell_id) const
         {
@@ -1744,7 +1744,7 @@ class SpellMgr
     public:
         static SpellMgr& Instance();
 
-        void CheckUsedSpells(char const* table);
+        void CheckUsedSpells(char const* table) const;
 
         // Loading data at server startup
         void LoadSpellChains();

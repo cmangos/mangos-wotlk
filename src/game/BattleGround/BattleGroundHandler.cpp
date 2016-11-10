@@ -67,7 +67,7 @@ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recv_data)
     SendBattlegGroundList(guid, bgTypeId);
 }
 
-void WorldSession::SendBattlegGroundList(ObjectGuid guid, BattleGroundTypeId bgTypeId)
+void WorldSession::SendBattlegGroundList(ObjectGuid guid, BattleGroundTypeId bgTypeId) const
 {
     WorldPacket data;
     sBattleGroundMgr.BuildBattleGroundListPacket(data, guid, _player, bgTypeId, 0);

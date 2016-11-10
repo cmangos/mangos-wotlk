@@ -460,7 +460,7 @@ class MANGOS_DLL_SPEC Aura
                 m_periodicTick = maxticks - GetAuraDuration() / m_modifier.periodictime;
         }
 
-        bool IsPositive() { return m_positive; }
+        bool IsPositive() const { return m_positive; }
         bool IsPersistent() const { return m_isPersistent; }
         bool IsAreaAura() const { return m_isAreaAura; }
         bool IsPeriodic() const { return m_isPeriodic; }
@@ -510,7 +510,7 @@ class MANGOS_DLL_SPEC Aura
         void PeriodicTick();
         void PeriodicDummyTick();
 
-        bool IsCritFromAbilityAura(Unit* caster, uint32& damage);
+        bool IsCritFromAbilityAura(Unit* caster, uint32& damage) const;
         void ReapplyAffectedPassiveAuras();
 
         Modifier m_modifier;

@@ -138,7 +138,7 @@ class BattleGroundWS : public BattleGround
         virtual void Reset() override;
         void EndBattleGround(Team winner) override;
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
-        uint32 GetRemainingTimeInMinutes() { return m_EndTimer ? (m_EndTimer - 1) / (MINUTE * IN_MILLISECONDS) + 1 : 0; }
+        uint32 GetRemainingTimeInMinutes() const { return m_EndTimer ? (m_EndTimer - 1) / (MINUTE * IN_MILLISECONDS) + 1 : 0; }
 
         void UpdateFlagState(Team team, uint32 value);
         void UpdateTeamScore(Team team);

@@ -299,7 +299,7 @@ void WorldSession::HandlePetitionQueryOpcode(WorldPacket& recv_data)
     SendPetitionQueryOpcode(petitionguid);
 }
 
-void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid)
+void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid) const
 {
     uint32 petitionLowGuid = petitionguid.GetCounter();
 
@@ -900,7 +900,7 @@ void WorldSession::HandlePetitionShowListOpcode(WorldPacket& recv_data)
     SendPetitionShowList(guid);
 }
 
-void WorldSession::SendPetitionShowList(ObjectGuid guid)
+void WorldSession::SendPetitionShowList(ObjectGuid guid) const
 {
     Creature* pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_PETITIONER);
     if (!pCreature)

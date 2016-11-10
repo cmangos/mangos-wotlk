@@ -8865,7 +8865,7 @@ void Aura::HandleAuraSafeFall(bool Apply, bool Real)
         ((Player*)GetTarget())->ActivateTaxiPathTo(506, GetId());
 }
 
-bool Aura::IsCritFromAbilityAura(Unit* caster, uint32& damage)
+bool Aura::IsCritFromAbilityAura(Unit* caster, uint32& damage) const
 {
     if (!GetSpellProto()->IsFitToFamily(SPELLFAMILY_ROGUE, uint64(0x100000)) && // Rupture
             !caster->HasAffectedAura(SPELL_AURA_ABILITY_PERIODIC_CRIT, GetSpellProto()))

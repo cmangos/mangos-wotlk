@@ -704,7 +704,7 @@ void WorldSession::HandleListInventoryOpcode(WorldPacket& recv_data)
     SendListInventory(guid);
 }
 
-void WorldSession::SendListInventory(ObjectGuid vendorguid)
+void WorldSession::SendListInventory(ObjectGuid vendorguid) const
 {
     DEBUG_LOG("WORLD: Sent SMSG_LIST_INVENTORY");
 
@@ -867,7 +867,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode(WorldPacket& recv_data)
     _player->StoreItem(dest, pItem, true);
 }
 
-bool WorldSession::CheckBanker(ObjectGuid guid)
+bool WorldSession::CheckBanker(ObjectGuid guid) const
 {
     // GM case
     if (guid == GetPlayer()->GetObjectGuid())
@@ -1029,7 +1029,7 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket& recv_data)
         GetPlayer()->SetAmmo(item);
 }
 
-void WorldSession::SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGuid, uint32 itemId, uint32 spellId)
+void WorldSession::SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGuid, uint32 itemId, uint32 spellId) const
 {
     WorldPacket data(SMSG_ENCHANTMENTLOG, (8 + 8 + 4 + 4 + 1)); // last check 2.0.10
     data << ObjectGuid(targetGuid);
@@ -1040,7 +1040,7 @@ void WorldSession::SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGu
     SendPacket(data);
 }
 
-void WorldSession::SendItemEnchantTimeUpdate(ObjectGuid playerGuid, ObjectGuid itemGuid, uint32 slot, uint32 duration)
+void WorldSession::SendItemEnchantTimeUpdate(ObjectGuid playerGuid, ObjectGuid itemGuid, uint32 slot, uint32 duration) const
 {
     // last check 2.0.10
     WorldPacket data(SMSG_ITEM_ENCHANT_TIME_UPDATE, (8 + 4 + 4 + 8));

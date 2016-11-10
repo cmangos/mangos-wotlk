@@ -25,7 +25,7 @@
 #include "Player.h"
 #include "Chat.h"
 
-void WorldSession::SendGMTicketGetTicket(uint32 status, GMTicket* ticket /*= nullptr*/)
+void WorldSession::SendGMTicketGetTicket(uint32 status, GMTicket* ticket /*= nullptr*/) const
 {
     int len = ticket ? strlen(ticket->GetText()) : 0;
     WorldPacket data(SMSG_GMTICKET_GETTICKET, (4 + len + 1 + 4 + 2 + 4 + 4));
@@ -44,7 +44,7 @@ void WorldSession::SendGMTicketGetTicket(uint32 status, GMTicket* ticket /*= nul
     SendPacket(data);
 }
 
-void WorldSession::SendGMResponse(GMTicket* ticket)
+void WorldSession::SendGMResponse(GMTicket* ticket) const
 {
     int len = strlen(ticket->GetText()) + 1 + strlen(ticket->GetResponse()) + 1;
     WorldPacket data(SMSG_GMTICKET_GET_RESPONSE, 4 + 4 + len + 1 + 1 + 1);

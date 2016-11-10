@@ -2055,7 +2055,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
     return true;
 }
 
-bool Creature::CanInitiateAttack()
+bool Creature::CanInitiateAttack() const
 {
     if (hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED))
         return false;
@@ -2201,7 +2201,7 @@ bool Creature::LoadCreatureAddon(bool reload)
 }
 
 /// Sends a message to LocalDefense and WorldDefense channels for players of the other team
-void Creature::SendZoneUnderAttackMessage(Player* attacker)
+void Creature::SendZoneUnderAttackMessage(Player* attacker) const
 {
     sWorld.SendZoneUnderAttackMessage(GetZoneId(), attacker->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
 }
@@ -2676,7 +2676,7 @@ void Creature::ClearTemporaryFaction()
     m_temporaryFactionFlags = TEMPFACTION_NONE;
 }
 
-void Creature::SendAreaSpiritHealerQueryOpcode(Player* pl)
+void Creature::SendAreaSpiritHealerQueryOpcode(Player* pl) const
 {
     uint32 next_resurrect = 0;
     if (Spell* pcurSpell = GetCurrentSpell(CURRENT_CHANNELED_SPELL))

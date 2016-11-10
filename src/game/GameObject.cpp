@@ -568,7 +568,7 @@ void GameObject::SaveToDB()
     SaveToDB(GetMapId(), data->spawnMask, data->phaseMask);
 }
 
-void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
+void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask) const
 {
     const GameObjectInfo* goI = GetGOInfo();
 
@@ -691,7 +691,7 @@ struct GameObjectRespawnDeleteWorker
     uint32 i_guid;
 };
 
-void GameObject::DeleteFromDB()
+void GameObject::DeleteFromDB() const
 {
     if (!HasStaticDBSpawnData())
     {
@@ -925,7 +925,7 @@ bool GameObject::ActivateToQuest(Player* pTarget) const
     return false;
 }
 
-void GameObject::SummonLinkedTrapIfAny()
+void GameObject::SummonLinkedTrapIfAny() const
 {
     uint32 linkedEntry = GetGOInfo()->GetLinkedGameObjectEntry();
     if (!linkedEntry)
@@ -951,7 +951,7 @@ void GameObject::SummonLinkedTrapIfAny()
     GetMap()->Add(linkedGO);
 }
 
-void GameObject::TriggerLinkedGameObject(Unit* target)
+void GameObject::TriggerLinkedGameObject(Unit* target) const
 {
     uint32 trapEntry = GetGOInfo()->GetLinkedGameObjectEntry();
 
@@ -988,7 +988,7 @@ void GameObject::TriggerLinkedGameObject(Unit* target)
         trapGO->Use(target);
 }
 
-GameObject* GameObject::LookupFishingHoleAround(float range)
+GameObject* GameObject::LookupFishingHoleAround(float range) const
 {
     GameObject* ok = nullptr;
 
@@ -2405,7 +2405,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
     SetGoAnimProgress(GetMaxHealth() ? m_useTimes * 255 / GetMaxHealth() : 255);
 }
 
-float GameObject::GetInteractionDistance()
+float GameObject::GetInteractionDistance() const
 {
     switch (GetGoType())
     {
