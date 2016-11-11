@@ -5321,7 +5321,13 @@ SpellCastResult Spell::CheckCast(bool strict)
     SpellCastResult locRes = sSpellMgr.GetSpellAllowedInLocationError(m_spellInfo, m_caster->GetMapId(), zone, area,
                              m_caster->GetBeneficiaryPlayer());
     if (locRes != SPELL_CAST_OK)
-        return locRes;
+    {
+        if (!IsSpellDoNotReportFailure(m_spellInfo))
+            return locRes;
+        else
+            return SPELL_FAILED_DONT_REPORT;
+    }
+    
 
     // not let players cast spells at mount (and let do it to creatures)
     if (m_caster->IsMounted() && m_caster->GetTypeId() == TYPEID_PLAYER && !m_IsTriggeredSpell &&

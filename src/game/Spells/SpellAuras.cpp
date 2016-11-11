@@ -3063,6 +3063,16 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                     return;
                 }
+                case 32096:                                 // Thrallmar's Favor
+                case 32098:                                 // Honor Hold's Favor
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (apply) // cast/remove Buffbot Buff Effect
+                            target->CastSpell(target, 32172, TRIGGERED_NONE);
+                        else
+                            target->RemoveAurasDueToSpell(32172);
+                    }
+                    return;
                 case 35356:                                 // Spawn Feign Death
                 case 35357:                                 // Spawn Feign Death
                 case 42557:                                 // Feign Death
