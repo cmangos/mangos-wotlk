@@ -2902,7 +2902,8 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 // case 34783: break:                   // Spell Reflection
                 // case 35205: break:                   // Vanish
                 // case 35321: break;                   // Gushing Wound
-                // case 36096: break:                   // Spell Reflection
+                case 36096:                             // Spell Reflection
+                    return SPELL_AURA_PROC_OK;          // Missing Trigger spell with no evidence to tell what to trigger, need to return to trigger consumption
                 // case 36207: break:                   // Steal Weapon
                 // case 36576: break:                   // Shaleskin (Shaleskin Flayer, Shaleskin Ripper) 30023 trigger
                 // case 37030: break;                   // Chaotic Temperament
