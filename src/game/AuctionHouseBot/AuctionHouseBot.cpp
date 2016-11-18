@@ -1203,7 +1203,7 @@ bool AuctionBotSeller::Initialize()
             }
 
             default:
-                throw std::domain_error("Unrecognized item prototype class");
+                continue;
         }
 
         m_ItemPool[prototype->Quality][prototype->Class].push_back(itemID);
