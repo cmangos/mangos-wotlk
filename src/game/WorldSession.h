@@ -387,7 +387,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendPetitionShowList(ObjectGuid guid) const;
         void SendSaveGuildEmblem(uint32 msg) const;
 
-    static void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
+        static void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
 
         // Account mute time
         time_t m_muteTime;
