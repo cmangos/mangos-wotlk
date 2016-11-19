@@ -20,7 +20,7 @@
     \ingroup u2w
 */
 
-#include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
+#include "WorldSocket.h"
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
@@ -89,8 +89,11 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     m_muteTime(mute_time), m_GUIDLow(0), _player(nullptr), m_Socket(sock), _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
-    m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED)
-{}
+    m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED)
+{
+    LoadGlobalAccountData();
+    LoadTutorialsData();
+}
 
 /// WorldSession destructor
 WorldSession::~WorldSession()
@@ -98,10 +101,6 @@ WorldSession::~WorldSession()
     ///- unload player if not unloaded
     if (_player)
         LogoutPlayer(true);
-
-    // marks this session as finalized in the socket which references (BUT DOES NOT OWN) it.
-    // this lets the socket handling code know that the socket can be safely deleted
-    m_Socket->ClearSession();
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
@@ -161,13 +160,6 @@ void WorldSession::SendPacket(WorldPacket const& packet) const
     m_Socket->SendPacket(packet);
 }
 
-/// Add an incoming packet to the queue
-void WorldSession::QueuePacket(std::unique_ptr<WorldPacket> new_packet)
-{
-    std::lock_guard<std::mutex> guard(m_recvQueueLock);
-    m_recvQueue.push_back(std::move(new_packet));
-}
-
 /// Logging helper for unexpected opcodes
 void WorldSession::LogUnexpectedOpcode(WorldPacket const& packet, const char* reason) const
 {
@@ -189,14 +181,16 @@ void WorldSession::LogUnprocessedTail(WorldPacket &packet) const
 /// Update the WorldSession (triggered by World update)
 bool WorldSession::Update(PacketFilter& updater)
 {
-    std::lock_guard<std::mutex> guard(m_recvQueueLock);
+    auto recvQueue = std::move(m_Socket->PacketQueue());
+
+    m_Socket->Lock();
 
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not process packets if socket already closed
-    while (m_Socket && !m_Socket->IsClosed() && !m_recvQueue.empty())
+    while (m_Socket && !m_Socket->IsClosed() && !recvQueue.empty())
     {
-        auto const packet = std::move(m_recvQueue.front());
-        m_recvQueue.pop_front();
+        auto const packet = std::move(recvQueue.front());
+        recvQueue.pop_front();
 
         /*#if 1
         sLog.outError( "MOEP: %s (0x%.4X)",
@@ -299,13 +293,12 @@ bool WorldSession::Update(PacketFilter& updater)
 
         if (m_Socket->IsClosed() || (ShouldLogOut(currTime) && !m_playerLoading))
             LogoutPlayer(true);
-
-        // finalize the session if disconnected.
-        if (m_Socket->IsClosed())
-            return false;
     }
 
-    return true;
+    m_Socket->Unlock();
+
+    // finalize the session if disconnected.
+    return !m_Socket->IsClosed();
 }
 
 /// %Log the player out
@@ -559,6 +552,11 @@ void WorldSession::SendSetPhaseShift(uint32 PhaseShift) const
 const char* WorldSession::GetMangosString(int32 entry) const
 {
     return sObjectMgr.GetMangosString(entry, GetSessionDbLocaleIndex());
+}
+
+uint32 WorldSession::GetLatency() const
+{
+    return !m_Socket ? 0 : m_Socket->GetLatency();
 }
 
 void WorldSession::Handle_NULL(WorldPacket& recvPacket)
@@ -916,6 +914,11 @@ void WorldSession::SendAddonsInfo()
     }*/
 
     SendPacket(data);
+}
+
+const std::string &WorldSession::GetRemoteAddress() const
+{
+    return m_Socket->GetRemoteAddress();
 }
 
 void WorldSession::SetPlayer(Player* plr)

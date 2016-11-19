@@ -28,10 +28,10 @@
 #include "Socket.hpp"
 #include "Log.h"
 
-using namespace MaNGOS;
-
+namespace MaNGOS
+{
 Socket::Socket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler)
-    : m_socket(service), m_address("0.0.0.0"), m_outBufferFlushTimer(service),
+    : m_socket(service), m_address("0.0.0.0"), m_outBufferFlushTimer(service), m_usages(0),
       m_closeHandler(closeHandler), m_writeState(WriteState::Idle), m_readState(ReadState::Idle) {}
 
 bool Socket::Open()
@@ -111,7 +111,11 @@ void Socket::OnRead(const boost::system::error_code &error, size_t length)
     // we must repeat this in case we have read in multiple messages from the client
     while (m_inBuffer->m_readPosition < m_inBuffer->m_writePosition)
     {
-        if (!ProcessIncomingData())
+        Lock();
+        auto const result = ProcessIncomingData();
+        Unlock();
+
+        if (!result)
         {
             // this errno is set when there is not enough buffer data available to either complete a header, or the packet length
             // specified in the header goes past what we've read.  in this case, we will reset the buffer with the remaining data 
@@ -293,4 +297,5 @@ void Socket::OnWriteComplete(const boost::system::error_code &error, size_t leng
             [this](const boost::system::error_code &error, size_t length) { this->OnWriteComplete(error, length); });
     else
         m_writeState = WriteState::Idle;
+}
 }

@@ -107,7 +107,11 @@ namespace MaNGOS
         if (ec)
             worker->RemoveSocket(socket);
         else
+        {
+            socket->Lock();
             socket->Open();
+            socket->Unlock();
+        }
 
         BeginAccept();
     }
