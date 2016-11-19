@@ -82,8 +82,8 @@ struct ServerPktHeader
 #endif
 
 WorldSocket::WorldSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler)
-    : Socket(service, closeHandler), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0),
-      m_useExistingHeader(false), m_session(nullptr), m_seed(urand())
+    : Socket(service, closeHandler), m_lastPingTime(std::chrono::system_clock::time_point::min()), 
+    m_overSpeedPings(0), m_useExistingHeader(false), m_authenticated(false), m_seed(urand())
 {}
 
 void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
@@ -202,7 +202,7 @@ bool WorldSocket::ProcessIncomingData()
         switch (opcode)
         {
             case CMSG_AUTH_SESSION:
-                if (m_session)
+                if (m_authenticated)
                 {
                     sLog.outError("WorldSocket::ProcessIncomingData: Player send CMSG_AUTH_SESSION again");
                     return false;
@@ -220,13 +220,14 @@ bool WorldSocket::ProcessIncomingData()
 
             default:
             {
-                if (!m_session)
+                if (!m_authenticated)
                 {
                     sLog.outError("WorldSocket::ProcessIncomingData: Client not authed opcode = %u", uint32(opcode));
                     return false;
                 }
 
-                m_session->QueuePacket(std::move(pct));
+                std::lock_guard<std::mutex> guard(m_recvQueueLock);
+                m_recvQueue.push_back(std::move(pct));
 
                 return true;
             }
@@ -234,8 +235,8 @@ bool WorldSocket::ProcessIncomingData()
     }
     catch (ByteBufferException&)
     {
-        sLog.outError("WorldSocket::ProcessIncomingData ByteBufferException occured while parsing an instant handled packet (opcode: %u) from client %s, accountid=%i.",
-                      opcode, GetRemoteAddress().c_str(), m_session ? m_session->GetAccountId() : -1);
+        sLog.outError("WorldSocket::ProcessIncomingData ByteBufferException occured while parsing an instant handled packet (opcode: %u) from client %s.",
+                      opcode, GetRemoteAddress().c_str());
 
         if (sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG))
         {
@@ -245,8 +246,7 @@ bool WorldSocket::ProcessIncomingData()
 
         if (sWorld.getConfig(CONFIG_BOOL_KICK_PLAYER_ON_BAD_PACKET))
         {
-            DETAIL_LOG("Disconnecting session [account id %i / address %s] for badly formatted packet.",
-                       m_session ? m_session->GetAccountId() : -1, GetRemoteAddress().c_str());
+            DETAIL_LOG("Disconnecting socket [address %s] for badly formatted packet.", GetRemoteAddress().c_str());
 
             return false;
         }
@@ -453,28 +453,31 @@ bool WorldSocket::HandleAuthSession(WorldPacket &recvPacket)
     SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "UPDATE account SET last_ip = ? WHERE username = ?");
     stmt.PExecute(address.c_str(), account.c_str());
 
-    if (!(m_session = new WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale)))
-        return false;
+    auto const session = new WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale);
+    session->ReadAddonsInfo(recvPacket);
 
     m_crypt.Init(&K);
 
-    m_session->LoadGlobalAccountData();
-    m_session->LoadTutorialsData();
-    m_session->ReadAddonsInfo(recvPacket);
+    m_authenticated = true;
 
-    sWorld.AddSession(m_session);
+    sWorld.AddSession(session);
 
     return true;
 }
 
 bool WorldSocket::HandlePing(WorldPacket &recvPacket)
 {
+    if (!m_authenticated)
+    {
+        sLog.outError("WorldSocket::HandlePing: peer sent CMSG_PING, but is not authenticated or got recently kicked, address = %s", GetRemoteAddress().c_str());
+        return false;
+    }
+
     uint32 ping;
-    uint32 latency;
 
     // Get the ping packet content
     recvPacket >> ping;
-    recvPacket >> latency;
+    recvPacket >> m_latency;
 
     if (m_lastPingTime == std::chrono::system_clock::time_point::min())
         m_lastPingTime = std::chrono::system_clock::now();              // for 1st ping
@@ -492,35 +495,12 @@ bool WorldSocket::HandlePing(WorldPacket &recvPacket)
 
             if (max_count && m_overSpeedPings > max_count)
             {
-                if (m_session && m_session->GetSecurity() == SEC_PLAYER)
-                {
-                    sLog.outError("WorldSocket::HandlePing: Player kicked for "
-                                  "overspeeded pings address = %s",
-                                  GetRemoteAddress().c_str());
-
-                    return false;
-                }
+                sLog.outError("WorldSocket::HandlePing: Player kicked for overspeeded pings address = %s", GetRemoteAddress().c_str());
+                return false;
             }
         }
         else
             m_overSpeedPings = 0;
-    }
-
-    // critical section
-    {
-        if (m_session)
-        {
-            m_session->SetLatency(latency);
-            m_session->ResetClientTimeDelay();
-        }
-        else
-        {
-            sLog.outError("WorldSocket::HandlePing: peer sent CMSG_PING, "
-                          "but is not authenticated or got recently kicked,"
-                          " address = %s",
-                          GetRemoteAddress().c_str());
-            return false;
-        }
     }
 
     WorldPacket packet(SMSG_PONG, 4);

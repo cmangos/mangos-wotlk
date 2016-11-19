@@ -28,7 +28,6 @@
 #include "ObjectGuid.h"
 #include "AuctionHouseMgr.h"
 #include "Item.h"
-#include "WorldSocket.h"
 
 #include <deque>
 #include <mutex>
@@ -47,6 +46,7 @@ class Object;
 class Player;
 class Unit;
 class WorldPacket;
+class WorldSocket;
 class QueryResult;
 class LoginQueryHolder;
 class CharacterHandler;
@@ -266,7 +266,7 @@ class MANGOS_DLL_SPEC WorldSession
         Player* GetPlayer() const { return _player; }
         char const* GetPlayerName() const;
         void SetSecurity(AccountTypes security) { _security = security; }
-        const std::string &GetRemoteAddress() const { return m_Socket->GetRemoteAddress(); }
+        const std::string &GetRemoteAddress() const;
         void SetPlayer(Player* plr);
         uint8 Expansion() const { return m_expansion; }
 
@@ -290,8 +290,6 @@ class MANGOS_DLL_SPEC WorldSession
 
         void LogoutPlayer(bool Save);
         void KickPlayer();
-
-        void QueuePacket(std::unique_ptr<WorldPacket> new_packet);
 
         bool Update(PacketFilter& updater);
 
@@ -336,9 +334,7 @@ class MANGOS_DLL_SPEC WorldSession
         AccountData* GetAccountData(AccountDataType type) { return &m_accountData[type]; }
         void SetAccountData(AccountDataType type, time_t time_, const std::string& data);
         void SendAccountDataTimes(uint32 mask);
-        void LoadGlobalAccountData();
         void LoadAccountData(QueryResult* result, uint32 mask);
-        void LoadTutorialsData();
         void SendTutorialsData();
         void SaveTutorialsData();
         uint32 GetTutorialInt(uint32 intId)
@@ -387,7 +383,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendPetitionShowList(ObjectGuid guid) const;
         void SendSaveGuildEmblem(uint32 msg) const;
 
-    static void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
+        static void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
 
         // Account mute time
         time_t m_muteTime;
@@ -397,10 +393,9 @@ class MANGOS_DLL_SPEC WorldSession
         int GetSessionDbLocaleIndex() const { return m_sessionDbLocaleIndex; }
         const char* GetMangosString(int32 entry) const;
 
-        uint32 GetLatency() const { return m_latency; }
-        void SetLatency(uint32 latency) { m_latency = latency; }
-        void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
         uint32 getDialogStatus(const Player* pPlayer, const Object* questgiver, uint32 defstatus) const;
+
+        uint32 GetLatency() const;
 
         // Misc
         void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed) const;
@@ -873,6 +868,9 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleQuestPOIQueryOpcode(WorldPacket& recv_data);
 
     private:
+        void LoadGlobalAccountData();
+        void LoadTutorialsData();
+
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);
         bool VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGuid const& guid) const;
@@ -900,15 +898,11 @@ class MANGOS_DLL_SPEC WorldSession
         bool m_playerSave;                                  // code processed in LogoutPlayer with save request
         LocaleConstant m_sessionDbcLocale;
         int m_sessionDbLocaleIndex;
-        uint32 m_latency;
         uint32 m_clientTimeDelay;
         AccountData m_accountData[NUM_ACCOUNT_DATA_TYPES];
         uint32 m_Tutorials[8];
         TutorialDataState m_tutorialState;
         AddonsList m_addonsList;
-
-        std::mutex m_recvQueueLock;
-        std::deque<std::unique_ptr<WorldPacket>> m_recvQueue;
 };
 #endif
 /// @}

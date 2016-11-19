@@ -23,6 +23,7 @@
 #include <string>
 #include <mutex>
 #include <functional>
+#include <atomic>
 
 #include <boost/asio.hpp>
 
@@ -54,6 +55,9 @@ namespace MaNGOS
 
             WriteState m_writeState;
             ReadState m_readState;
+
+            // when there are usages of this socket, it cannot be deleted
+            std::atomic<int> m_usages;
 
             boost::asio::ip::tcp::socket m_socket;
 
@@ -94,8 +98,11 @@ namespace MaNGOS
             virtual bool Open();
             void Close();
 
+            void Lock() { ++m_usages; }
+            void Unlock() { --m_usages; }
+
             bool IsClosed() const { return !m_socket.is_open(); }
-            virtual bool Deletable() const { return IsClosed(); }
+            virtual bool Deletable() const { return !m_usages && IsClosed(); }
 
             bool Read(char *buffer, int length);
             void ReadSkip(int length) { m_inBuffer->Read(nullptr, length); }

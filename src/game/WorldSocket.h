@@ -25,16 +25,13 @@
 #ifndef _WORLDSOCKET_H
 #define _WORLDSOCKET_H
 
-#include "Common.h"
+#include "WorldPacket.h"
 #include "Auth/AuthCrypt.h"
 #include "Auth/BigNumber.h"
 #include "Network/Socket.hpp"
 
 #include <chrono>
 #include <functional>
-
-class WorldPacket;
-class WorldSession;
 
 /**
  * WorldSocket.
@@ -73,6 +70,9 @@ class WorldSession;
  *
  */
 
+#include <mutex>
+#include <deque>
+
 class WorldSocket : public MaNGOS::Socket
 {
     private:
@@ -101,15 +101,19 @@ class WorldSocket : public MaNGOS::Socket
         ClientPktHeader m_existingHeader;
         bool m_useExistingHeader;
 
+        bool m_authenticated;
+
         /// Class used for managing encryption of the headers
         AuthCrypt m_crypt;
 
-        /// Session to which received packets are routed
-        WorldSession *m_session;
-
         const uint32 m_seed;
 
+        uint32 m_latency;
+
         BigNumber m_s;
+
+        std::mutex m_recvQueueLock;
+        std::deque<std::unique_ptr<WorldPacket>> m_recvQueue;
 
         /// process one incoming packet.
         virtual bool ProcessIncomingData() override;
@@ -126,14 +130,13 @@ class WorldSocket : public MaNGOS::Socket
         // send a packet \o/
         void SendPacket(const WorldPacket& pct, bool immediate = false);
 
-        void ClearSession() { m_session = nullptr; }
-
         virtual bool Open() override;
-        virtual bool Deletable() const override { return !m_session && Socket::Deletable(); }
 
         /// Return the session key
         BigNumber &GetSessionKey() { return m_s; }
 
+        uint32 GetLatency() const { return m_latency; }
+        std::deque<std::unique_ptr<WorldPacket>> PacketQueue() { std::lock_guard<std::mutex> guard(m_recvQueueLock); return std::move(m_recvQueue); }
 };
 
 #endif  /* _WORLDSOCKET_H */
