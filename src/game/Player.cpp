@@ -13347,7 +13347,7 @@ Quest const* Player::GetNextQuest(ObjectGuid guid, Quest const* pQuest) const
  */
 bool Player::CanSeeStartQuest(Quest const* pQuest) const
 {
-    if (SatisfyQuestClass(pQuest, false) && SatisfyQuestRace(pQuest, false) && SatisfyQuestSkill(pQuest, false) &&
+    if (SatisfyQuestClass(pQuest, false) && SatisfyQuestRace(pQuest, false) && SatisfyQuestSkill(pQuest, false) && SatisfyQuestCondition(pQuest, false) &&
             SatisfyQuestExclusiveGroup(pQuest, false) && SatisfyQuestReputation(pQuest, false) &&
             SatisfyQuestPreviousQuest(pQuest, false) && SatisfyQuestNextChain(pQuest, false) &&
             SatisfyQuestPrevChain(pQuest, false) && SatisfyQuestDay(pQuest, false) && SatisfyQuestWeek(pQuest) &&
@@ -13367,7 +13367,7 @@ bool Player::CanTakeQuest(Quest const* pQuest, bool msg) const
 {
     return SatisfyQuestStatus(pQuest, msg) && SatisfyQuestExclusiveGroup(pQuest, msg) &&
            SatisfyQuestClass(pQuest, msg) && SatisfyQuestRace(pQuest, msg) && SatisfyQuestLevel(pQuest, msg) &&
-           SatisfyQuestSkill(pQuest, msg) && SatisfyQuestReputation(pQuest, msg) &&
+           SatisfyQuestSkill(pQuest, msg) && SatisfyQuestCondition(pQuest, msg) && SatisfyQuestReputation(pQuest, msg) &&
            SatisfyQuestPreviousQuest(pQuest, msg) && SatisfyQuestTimed(pQuest, msg) &&
            SatisfyQuestNextChain(pQuest, msg) && SatisfyQuestPrevChain(pQuest, msg) &&
            SatisfyQuestDay(pQuest, msg) && SatisfyQuestWeek(pQuest) && SatisfyQuestMonth(pQuest) &&
@@ -13408,7 +13408,7 @@ bool Player::CanCompleteQuest(uint32 quest_id) const
     {
         // a few checks, not all "satisfy" is needed
         if (SatisfyQuestPreviousQuest(qInfo, false) && SatisfyQuestLevel(qInfo, false) &&
-                SatisfyQuestSkill(qInfo, false) && SatisfyQuestRace(qInfo, false) && SatisfyQuestClass(qInfo, false))
+                SatisfyQuestSkill(qInfo, false) && SatisfyQuestCondition(qInfo, false) && SatisfyQuestRace(qInfo, false) && SatisfyQuestClass(qInfo, false))
             return true;
 
         return false;
@@ -13971,6 +13971,21 @@ bool Player::SatisfyQuestSkill(Quest const* qInfo, bool msg) const
     }
 
     return true;
+}
+
+bool Player::SatisfyQuestCondition(Quest const* qInfo, bool msg) const
+{
+    if (uint32 conditionId = qInfo->GetRequiredCondition())
+    {
+        bool result = sObjectMgr.IsPlayerMeetToCondition(conditionId, this, GetMap(), nullptr, CONDITION_FROM_QUEST);
+
+        if(!result && msg)
+            SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);
+
+        return result;
+    }
+    else
+        return true;
 }
 
 bool Player::SatisfyQuestLevel(Quest const* qInfo, bool msg) const
