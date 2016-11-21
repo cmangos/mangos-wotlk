@@ -107,8 +107,6 @@ class WorldSocket : public MaNGOS::Socket
         /// Session to which received packets are routed
         WorldSession *m_session;
 
-        bool m_deletable;
-
         const uint32 m_seed;
 
         BigNumber m_s;
@@ -128,10 +126,9 @@ class WorldSocket : public MaNGOS::Socket
         // send a packet \o/
         void SendPacket(const WorldPacket& pct, bool immediate = false);
 
-        void FinalizeSession() { m_session = nullptr; m_deletable = true; }
+        void FinalizeSession() { m_session = nullptr; }
 
         virtual bool Open() override;
-        virtual bool Deletable() const override { return m_deletable && Socket::Deletable(); }
 
         /// Return the session key
         BigNumber &GetSessionKey() { return m_s; }
