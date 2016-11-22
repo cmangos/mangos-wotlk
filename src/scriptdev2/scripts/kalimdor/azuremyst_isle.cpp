@@ -127,7 +127,7 @@ struct npc_draenei_survivorAI : public ScriptedAI
                     if (pPlayer->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    switch (urand(0, 5))
+                    switch (urand(0, 6))
                     {
                         case 0: DoScriptText(SAY_HEAL1, m_creature, pPlayer); break;
                         case 1: DoScriptText(SAY_HEAL2, m_creature, pPlayer); break;
@@ -135,6 +135,7 @@ struct npc_draenei_survivorAI : public ScriptedAI
                         case 3: DoScriptText(SAY_HEAL4, m_creature, pPlayer); break;
                         case 4: DoScriptText(SAY_HEAL5, m_creature, pPlayer); break;
                         case 5: DoScriptText(SAY_HEAL6, m_creature, pPlayer); break;
+                        case 6: break; // say nothing
                     }
 
                     pPlayer->TalkedToCreature(m_creature->GetEntry(), m_creature->GetObjectGuid());
