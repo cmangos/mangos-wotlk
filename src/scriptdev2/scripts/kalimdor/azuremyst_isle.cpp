@@ -35,14 +35,16 @@ EndContentData */
 
 enum
 {
-    SAY_HEAL1           = -1000176,
-    SAY_HEAL2           = -1000177,
-    SAY_HEAL3           = -1000178,
-    SAY_HEAL4           = -1000179,
-    SAY_HELP1           = -1000180,
-    SAY_HELP2           = -1000181,
-    SAY_HELP3           = -1000182,
-    SAY_HELP4           = -1000183,
+    SAY_HEAL1           = -1001216,
+    SAY_HEAL2           = -1001217,
+    SAY_HEAL3           = -1001218,
+    SAY_HEAL4           = -1001219,
+    SAY_HEAL5           = -1001220,
+    SAY_HEAL6           = -1001221,
+    SAY_HELP1           = -1001222,
+    SAY_HELP2           = -1001223,
+    SAY_HELP3           = -1001224,
+    SAY_HELP4           = -1001225,
 
     SPELL_IRRIDATION    = 35046,
     SPELL_STUNNED       = 28630
@@ -125,12 +127,14 @@ struct npc_draenei_survivorAI : public ScriptedAI
                     if (pPlayer->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    switch (urand(0, 3))
+                    switch (urand(0, 5))
                     {
                         case 0: DoScriptText(SAY_HEAL1, m_creature, pPlayer); break;
                         case 1: DoScriptText(SAY_HEAL2, m_creature, pPlayer); break;
                         case 2: DoScriptText(SAY_HEAL3, m_creature, pPlayer); break;
                         case 3: DoScriptText(SAY_HEAL4, m_creature, pPlayer); break;
+                        case 4: DoScriptText(SAY_HEAL5, m_creature, pPlayer); break;
+                        case 5: DoScriptText(SAY_HEAL6, m_creature, pPlayer); break;
                     }
 
                     pPlayer->TalkedToCreature(m_creature->GetEntry(), m_creature->GetObjectGuid());
