@@ -5636,6 +5636,11 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
             if (caster && caster->AI())
                 caster->AI()->JustSummoned(itr->creature);
         }
+        else if (m_originalCaster && m_originalCaster->AI())
+        {
+            // original caster is provided by script so we have to notify it as its not done in Object::SummonCreature
+            m_originalCaster->AI()->JustSummoned(itr->creature);
+        }
     }
 }
 
