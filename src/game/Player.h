@@ -2170,6 +2170,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool CanSwim() const { return true; }
         bool CanFly() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_CAN_FLY); }
+        bool CanWalk() const { return true; }
         bool IsFlying() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING); }
         bool IsFreeFlying() const { return HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED) || HasAuraType(SPELL_AURA_FLY); }
         bool CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area) const;
@@ -2243,7 +2244,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UnsummonPetTemporaryIfAny();
         void UnsummonPetIfAny();
         void ResummonPetTemporaryUnSummonedIfAny();
-        bool IsPetNeedBeTemporaryUnsummoned() const { return !IsInWorld() || !isAlive() || IsMounted() /*+in flight*/; }
+        bool IsPetNeedBeTemporaryUnsummoned() const;
 
         void SendCinematicStart(uint32 CinematicSequenceId) const;
         void SendMovieStart(uint32 MovieId) const;
@@ -2327,6 +2328,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasTitle(uint32 bitIndex) const;
         bool HasTitle(CharTitlesEntry const* title) const { return HasTitle(title->bit_index); }
         void SetTitle(CharTitlesEntry const* title, bool lost = false);
+
+        virtual CreatureAI* AI() override { if (m_charmInfo) return m_charmInfo->GetAI(); return nullptr; }
+        virtual CombatData* GetCombatData() override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); return m_combatData; }
 
         bool canSeeSpellClickOn(Creature const* creature) const;
 

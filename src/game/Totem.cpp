@@ -93,8 +93,8 @@ void Totem::Summon(Unit* owner)
     owner->GetMap()->Add((Creature*)this);
     AIM_Initialize();
 
-    if (owner->GetTypeId() == TYPEID_UNIT && ((Creature*)owner)->AI())
-        ((Creature*)owner)->AI()->JustSummoned((Creature*)this);
+    if (owner->AI())
+        owner->AI()->JustSummoned((Creature*)this);
 
     // there are some totems, which exist just for their visual appeareance
     if (!GetSpell())
@@ -139,8 +139,8 @@ void Totem::UnSummon()
             }
         }
 
-        if (owner->GetTypeId() == TYPEID_UNIT && ((Creature*)owner)->AI())
-            ((Creature*)owner)->AI()->SummonedCreatureDespawn((Creature*)this);
+        if (owner->AI())
+            owner->AI()->SummonedCreatureDespawn((Creature*)this);
     }
 
     // any totem unsummon look like as totem kill, req. for proper animation
