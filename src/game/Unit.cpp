@@ -3238,15 +3238,14 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
     return SPELL_MISS_NONE;
 }
 
-SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
+float Unit::MagicSpellMissChance(Unit *pVictim, const SpellEntry *spell)
 {
-    // Can`t miss on dead target (on skinning for example)
-    if (!pVictim->isAlive())
-        return SPELL_MISS_NONE;
+    if (spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS))
+        return 0;
 
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
     // PvP - PvE spell misschances per leveldif > 2
-    int32 lchance = pVictim->GetTypeId() == TYPEID_PLAYER ? 7 : 11;
+    int32 lchance = (pVictim->GetTypeId() == TYPEID_PLAYER) ? 7 : 11;
     int32 leveldif = int32(pVictim->GetLevelForTarget(this)) - int32(GetLevelForTarget(pVictim));
 
     // Base hit chance from attacker and victim levels
@@ -3296,10 +3295,19 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
     if (pVictim->GetTypeId() == TYPEID_PLAYER)
         HitChance -= int32(((Player*)pVictim)->GetRatingBonusValue(CR_HIT_TAKEN_SPELL) * 100.0f);
 
-    if (HitChance <  100) HitChance =  100;
-    if (HitChance > 10000) HitChance = 10000;
+    // TODO: Verify lower 1% bound for hit?
+    return (float(10000 - std::min(std::max(100, HitChance), 10000)) / 100.0f);
+}
 
-    int32 tmp = spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS) ? 0 : (10000 - HitChance);
+SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
+{
+    // Can`t miss on dead target (on skinning for example)
+    if (!pVictim->isAlive())
+        return SPELL_MISS_NONE;
+
+    SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
+
+    int32 tmp = int32(MagicSpellMissChance(pVictim, spell)) * 100;
 
     int32 rand = irand(0, 10000);
 
