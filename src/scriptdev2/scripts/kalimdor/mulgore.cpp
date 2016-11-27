@@ -116,7 +116,7 @@ struct npc_kyle_the_frenziedAI : public ScriptedAI
                             // Workaround for broken function GetGameObject
                             if (!pGo)
                             {
-                                const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_LUNCH);
+                                const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_LUNCH);
 
                                 uint32 uiGameobjectEntry = pSpell->EffectMiscValue[EFFECT_INDEX_1];
 

@@ -152,7 +152,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
         case ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA:
         case ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA:
         {
-            SpellEntry const* spellEntry = sSpellStore.LookupEntry(aura.spell_id);
+            SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(aura.spell_id);
             if (!spellEntry)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement %s (%u) have wrong spell id in value1 (%u), ignore.",

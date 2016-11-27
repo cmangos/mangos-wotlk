@@ -835,7 +835,7 @@ void WorldSession::BuildListAuctionItems(std::vector<AuctionEntry*> const& aucti
 
                 if (proto->Class == ITEM_CLASS_RECIPE)
                 {
-                    if (SpellEntry const* spell = sSpellStore.LookupEntry(proto->Spells[0].SpellId))
+                    if (SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(proto->Spells[0].SpellId))
                     {
                         if (_player->HasSpell(spell->EffectTriggerSpell[EFFECT_INDEX_0]))
                             continue;

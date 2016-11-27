@@ -715,7 +715,7 @@ struct npc_king_llaneAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_HEROISM);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_HEROISM);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_HEROISM);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -729,7 +729,7 @@ struct npc_king_llaneAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_SWEEP);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_SWEEP);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_SWEEP);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -826,7 +826,7 @@ struct npc_warchief_blackhandAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_BLOODLUST);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_BLOODLUST);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_BLOODLUST);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -840,7 +840,7 @@ struct npc_warchief_blackhandAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_CLEAVE);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_CLEAVE);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_CLEAVE);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -902,7 +902,7 @@ struct npc_human_conjurerAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(pTarget, SPELL_ELEMENTAL_BLAST);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_ELEMENTAL_BLAST);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_ELEMENTAL_BLAST);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -916,7 +916,7 @@ struct npc_human_conjurerAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(pTarget, SPELL_RAIN_OF_FIRE);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_RAIN_OF_FIRE);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_RAIN_OF_FIRE);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -978,7 +978,7 @@ struct npc_orc_warlockAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(pTarget, SPELL_FIREBALL);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_FIREBALL);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_FIREBALL);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -992,7 +992,7 @@ struct npc_orc_warlockAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(pTarget, SPELL_POISON_CLOUD_ACTION);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_POISON_CLOUD_ACTION);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_POISON_CLOUD_ACTION);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1068,7 +1068,7 @@ struct npc_human_footmanAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_HEROIC_BLOW);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_HEROIC_BLOW);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_HEROIC_BLOW);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1082,7 +1082,7 @@ struct npc_human_footmanAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_SHIELD_BLOCK);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_SHIELD_BLOCK);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_SHIELD_BLOCK);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1158,7 +1158,7 @@ struct npc_orc_gruntAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_VICIOUS_STRIKE);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_VICIOUS_STRIKE);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_VICIOUS_STRIKE);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1172,7 +1172,7 @@ struct npc_orc_gruntAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_WEAPON_DEFLECTION);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_WEAPON_DEFLECTION);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_WEAPON_DEFLECTION);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1234,7 +1234,7 @@ struct npc_water_elementalAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_GEYSER);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_GEYSER);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_GEYSER);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1248,7 +1248,7 @@ struct npc_water_elementalAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_WATER_SHIELD);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_WATER_SHIELD);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_WATER_SHIELD);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1310,7 +1310,7 @@ struct npc_summoned_daemonAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_HELLFIRE);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_HELLFIRE);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_HELLFIRE);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1324,7 +1324,7 @@ struct npc_summoned_daemonAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_FIRE_SHIELD);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_FIRE_SHIELD);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_FIRE_SHIELD);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1386,7 +1386,7 @@ struct npc_human_chargerAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_SMASH);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_SMASH);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_SMASH);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1400,7 +1400,7 @@ struct npc_human_chargerAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_STOMP);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_STOMP);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_STOMP);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1462,7 +1462,7 @@ struct npc_orc_wolfAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_BITE);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_BITE);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_BITE);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1476,7 +1476,7 @@ struct npc_orc_wolfAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_HOWL);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_HOWL);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_HOWL);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1538,7 +1538,7 @@ struct npc_human_clericAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(pTarget, SPELL_HEALING);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_HEALING);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_HEALING);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1552,7 +1552,7 @@ struct npc_human_clericAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_HOLY_LANCE);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_HOLY_LANCE);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_HOLY_LANCE);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1614,7 +1614,7 @@ struct npc_orc_necrolyteAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(pTarget, SPELL_SHADOW_MEND_ACTION);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_SHADOW_MEND_ACTION);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_SHADOW_MEND_ACTION);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
@@ -1628,7 +1628,7 @@ struct npc_orc_necrolyteAI : public npc_chess_piece_genericAI
             DoCastSpellIfCan(m_creature, SPELL_SHADOW_SPEAR);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_SHADOW_SPEAR);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_SHADOW_SPEAR);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 

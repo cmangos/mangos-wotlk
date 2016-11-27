@@ -2774,9 +2774,9 @@ void LoadLootTemplates_Spell()
     LootTemplates_Spell.LoadAndCollectLootIds(ids_set);
 
     // remove real entries and check existence loot
-    for (uint32 spell_id = 1; spell_id < sSpellStore.GetNumRows(); ++spell_id)
+    for (uint32 spell_id = 1; spell_id < sSpellTemplate.GetMaxEntry(); ++spell_id)
     {
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell_id);
         if (!spellInfo)
             continue;
 

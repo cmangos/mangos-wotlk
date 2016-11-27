@@ -26,6 +26,7 @@
 #include "SpellAuras.h"
 #include "DBCEnums.h"
 #include "DBCStores.h"
+#include "SQLStorages.h"
 
 template<class T>
 inline void MaNGOS::VisibleNotifier::Visit(GridRefManager<T>& m)
@@ -150,7 +151,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if (i_dynobject.IsAffecting(target))
         return;
 
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(i_dynobject.GetSpellId());
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(i_dynobject.GetSpellId());
     SpellEffectIndex eff_index  = i_dynobject.GetEffIndex();
 
     // Check target immune to spell or aura
