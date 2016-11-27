@@ -3017,6 +3017,10 @@ void Unit::SendMeleeAttackStop(Unit* victim) const
 
 bool Unit::IsSpellBlocked(Unit* pCaster, SpellEntry const* spellEntry, WeaponAttackType attackType)
 {
+    // Do not roll block twice: spells with this attribute are rolled as full block only (miss type)
+    if (spellEntry->HasAttribute(SPELL_ATTR_EX3_BLOCKABLE_SPELL))
+        return false;
+
     if (!HasInArc(M_PI_F, pCaster))
         return false;
 
@@ -3054,7 +3058,7 @@ bool Unit::IsSpellBlocked(Unit* pCaster, SpellEntry const* spellEntry, WeaponAtt
 
 float Unit::SpellResistChance(Unit *pVictim, const SpellEntry *spell)
 {
-    float resistChance = 0;
+    float resistChance = 0.0f;
 
     // TODO: Verify if this attribute affects other resistances (mechanics, etc)
     // Chance to fully resist a spell by magic resistance
@@ -3097,7 +3101,7 @@ float Unit::SpellResistChance(Unit *pVictim, const SpellEntry *spell)
 float Unit::MeleeSpellMissChance(Unit* pVictim, WeaponAttackType attType, int32 skillDiff, SpellEntry const* spell) const
 {
     if (spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS))
-        return 0;
+        return 0.0f;
 
     // Calculate hit chance (more correct for chance mod)
     float hitChance;
@@ -3291,7 +3295,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 float Unit::MagicSpellMissChance(Unit *pVictim, const SpellEntry *spell)
 {
     if (spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS))
-        return 0;
+        return 0.0f;
 
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
     // PvP - PvE spell misschances per leveldif > 2
