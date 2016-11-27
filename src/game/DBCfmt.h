@@ -99,7 +99,6 @@ const char SoundEntriesfmt[] = "nxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char SpellCastTimefmt[] = "nixx";
 const char SpellDurationfmt[] = "niii";
 const char SpellDifficultyfmt[] = "niiii";
-const char SpellEntryfmt[] = "niiiiiiiiiiiixixiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifxiiiiiiiiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiifffiiiiiiiiiiiiixssssssssssssssssxssssssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiiixfffxxxiiiiixxxxxxi";
 const char SpellFocusObjectfmt[] = "nxxxxxxxxxxxxxxxxx";
 const char SpellItemEnchantmentfmt[] = "nxiiiiiixxxiiissssssssssssssssxiiiixxx";
 const char SpellItemEnchantmentConditionfmt[] = "nbbbbbxxxxxbbbbbbbbbbiiiiiXXXXX";

@@ -36,14 +36,13 @@ const char WorldTemplatesrcfmt[] = "is";
 const char WorldTemplatedstfmt[] = "ii";
 const char ConditionsSrcFmt[] = "iiii";
 const char ConditionsDstFmt[] = "iiii";
-const char SpellTemplatesrcfmt[] = "iiiiiiiiiiiiiiiix";
-//                                  0         10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160     170       180  185
-const char SpellTemplatedstfmt[] = "ixxxiiiixxxxxxxxxxxxxxxxxxxxxxxxiixxxxixxxxxxFxxxxxxxxxxxxxxxxxxxxxxixxxxxFFFxxxxxxixxixxixxixxxxxFFFxxxxxxixxixxixxFFFxxxxxxxxxxxxxppppppppppppppppppppppppppppppppxxxxxxxxxxxFFFxxxxxx";
-//                                  Id  attr                        proc  DurationIndex                 Effect0        tarA0    effectAura0          triggerSpell0      SpellName[16]   Rank[16]
+const char SpellTemplatefmt[] = "iiiiiiiiiiiiiiiix";
 const char VehicleAccessorySrcFmt[] = "iiix";
 const char VehicleAccessoryDstFmt[] = "iii";
 const char CreatureTemplateSpellsFmt[] = "iiiiiiiii";
 const char SpellScriptTargetFmt[] = "iiii";
+const char SpellEntryfmt[] =    "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiifffiiiiiiiiiiiiiissssssssssssssssssssssssssssssssiiiiiLiiiifffiiiiiii";
+// const char SpellEntryfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiifffiiiiiiiiiiiiiissssssssssssssssssssssssssssssssiiiiiiiiiiifffiiiiii";
 
 SQLStorage sCreatureStorage(CreatureInfosrcfmt, CreatureInfodstfmt, "entry", "creature_template");
 SQLStorage sCreatureDataAddonStorage(CreatureDataAddonInfofmt, "guid", "creature_addon");
@@ -55,11 +54,13 @@ SQLStorage sPageTextStore(PageTextfmt, "entry", "page_text");
 SQLStorage sInstanceTemplate(InstanceTemplatesrcfmt, InstanceTemplatedstfmt, "map", "instance_template");
 SQLStorage sWorldTemplate(WorldTemplatesrcfmt, WorldTemplatedstfmt, "map", "world_template");
 SQLStorage sConditionStorage(ConditionsSrcFmt, ConditionsDstFmt, "condition_entry", "conditions");
+SQLStorage sSpellTemplate(SpellEntryfmt, "id", "spell_template");
 
 SQLHashStorage sGameObjectDataAddonStorage(GameObjectInfoAddonInfofmt, "guid", "gameobject_addon");
 SQLHashStorage sGOStorage(GameObjectInfosrcfmt, GameObjectInfodstfmt, "entry", "gameobject_template");
-SQLHashStorage sSpellTemplate(SpellTemplatesrcfmt, SpellTemplatedstfmt, "id", "spell_template");
 SQLHashStorage sCreatureTemplateSpellsStorage(CreatureTemplateSpellsFmt, "entry", "creature_template_spells");
 
 SQLMultiStorage sVehicleAccessoryStorage(VehicleAccessorySrcFmt, VehicleAccessoryDstFmt, "vehicle_entry", "vehicle_accessory");
 SQLMultiStorage sSpellScriptTargetStorage(SpellScriptTargetFmt, "entry", "spell_script_target");
+
+MANGOS_DLL_SPEC SQLStorage const* GetSpellStore() { return &sSpellTemplate; }

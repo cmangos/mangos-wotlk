@@ -537,8 +537,8 @@ bool EffectScriptEffectCreature_npc_putricide(Unit* pCaster, uint32 uiSpellId, S
             return false;
 
         // cast the triggered spell on each target
-        pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
-        pCreatureTarget->CastSpell(pNearTarget, GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+        pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+        pCreatureTarget->CastSpell(pNearTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
         DoScriptText(urand(0, 1) ? SAY_SLIME_FLOW_1 : SAY_SLIME_FLOW_2, pCreatureTarget);
 
         return true;
@@ -715,10 +715,10 @@ bool EffectScriptEffectCreature_spell_eat_ooze(Unit* pCaster, uint32 uiSpellId, 
             return false;
 
         // ToDo: research if the amount of stacks removal is correct
-        pCreatureTarget->RemoveAuraHolderFromStack(GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), 3);
+        pCreatureTarget->RemoveAuraHolderFromStack(GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), 3);
 
         // despawn if we don't have the grow aura anymore
-        if (!pCreatureTarget->HasAura(GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex)))
+        if (!pCreatureTarget->HasAura(GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex)))
         {
             pCreatureTarget->RemoveAllAurasOnEvade();
             pCreatureTarget->ForcedDespawn(5000);
@@ -777,7 +777,7 @@ bool EffectScriptEffectCreature_spell_ooze_flood(Unit* pCaster, uint32 uiSpellId
     {
         // Set target manually to hit exactly the stalker below the tap
         if (Creature* pStalker = GetClosestCreatureWithEntry(pCreatureTarget, pCreatureTarget->GetEntry(), 20.0f))
-            pCreatureTarget->CastSpell(pStalker, GetSpellStore()->LookupEntry(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+            pCreatureTarget->CastSpell(pStalker, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
 
         return true;
     }

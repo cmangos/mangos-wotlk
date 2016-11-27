@@ -794,7 +794,7 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                         case NPC_SENTRY_BOT:        newSpellId = SPELL_SUMMON_SENTRY_BOT; break;
                     }
 
-                    if (const SpellEntry* pSpell = GetSpellStore()->LookupEntry(newSpellId))
+                    if (const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(newSpellId))
                     {
                         pCaster->CastSpell(pCreatureTarget, pSpell->Id, TRIGGERED_OLD_TRIGGERED);
 

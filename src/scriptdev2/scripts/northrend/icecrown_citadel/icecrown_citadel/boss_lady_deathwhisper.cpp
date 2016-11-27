@@ -485,7 +485,7 @@ bool EffectDummyCreature_spell_mana_barrier(Unit* /*pCaster*/, uint32 uiSpellId,
                 pBossAI->DoStartSecondPhase();
         }
 
-        pCreatureTarget->DealHeal(pCreatureTarget, uiDamage, GetSpellStore()->LookupEntry(SPELL_MANA_BARRIER));
+        pCreatureTarget->DealHeal(pCreatureTarget, uiDamage, GetSpellStore()->LookupEntry<SpellEntry>(SPELL_MANA_BARRIER));
         pCreatureTarget->ModifyPower(POWER_MANA, -int32(uiDamage));
 
         // always return true when we are handling this spell and effect

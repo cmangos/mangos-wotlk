@@ -920,7 +920,7 @@ void BattleGround::RewardSpellCast(Player* plr, uint32 spell_id) const
     if (plr->GetDummyAura(SPELL_AURA_PLAYER_INACTIVE))
         return;
 
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell_id);
     if (!spellInfo)
     {
         sLog.outError("Battleground reward casting spell %u not exist.", spell_id);

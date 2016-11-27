@@ -86,7 +86,7 @@ void LoadSkillDiscoveryTable()
 
         if (reqSkillOrSpell > 0)                            // spell case
         {
-            SpellEntry const* reqSpellEntry = sSpellStore.LookupEntry(reqSkillOrSpell);
+            SpellEntry const* reqSpellEntry = sSpellTemplate.LookupEntry<SpellEntry>(reqSkillOrSpell);
             if (!reqSpellEntry)
             {
                 if (reportedReqSpells.find(reqSkillOrSpell) == reportedReqSpells.end())
@@ -143,9 +143,9 @@ void LoadSkillDiscoveryTable()
         sLog.outErrorDb("Some items can't be successfully discovered: have in chance field value < 0.000001 in `skill_discovery_template` DB table . List:\n%s", ssNonDiscoverableEntries.str().c_str());
 
     // report about empty data for explicit discovery spells
-    for (uint32 spell_id = 1; spell_id < sSpellStore.GetNumRows(); ++spell_id)
+    for (uint32 spell_id = 1; spell_id < sSpellTemplate.GetMaxEntry(); ++spell_id)
     {
-        SpellEntry const* spellEntry = sSpellStore.LookupEntry(spell_id);
+        SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(spell_id);
         if (!spellEntry)
             continue;
 

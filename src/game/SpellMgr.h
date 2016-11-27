@@ -20,7 +20,7 @@
 #define _SPELLMGR_H
 
 // For static or at-server-startup loaded spell data
-// For more high level function for sSpellStore data
+// For more high level function for sSpellTemplate data
 
 #include "Common.h"
 #include "SharedDefines.h"
@@ -31,6 +31,7 @@
 #include "GameObject.h"
 #include "Corpse.h"
 #include "Unit.h"
+#include "SQLStorages.h"
 
 #include <map>
 
@@ -326,7 +327,7 @@ inline bool IsAutocastable(SpellEntry const* spellInfo)
 
 inline bool IsAutocastable(uint32 spellId)
 {
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     if (!spellInfo)
         return false;
     return IsAutocastable(spellInfo);
@@ -852,7 +853,7 @@ inline bool IsPositiveEffectTargetMode(const SpellEntry* entry, SpellEffectIndex
         // Its possible to go infinite cycle with triggered spells. We are interested to peek only at the first layer so far
         if (!recursive && spellid && (spellid != entry->Id))
         {
-            if (const SpellEntry* triggered = sSpellStore.LookupEntry(spellid))
+            if (const SpellEntry* triggered = sSpellTemplate.LookupEntry<SpellEntry>(spellid))
             {
                 for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
                 {
@@ -1003,7 +1004,7 @@ inline bool IsPositiveSpellTargetModeForSpecificTarget(uint32 spellId, uint8 eff
 {
     if (!spellId)
         return false;
-    return IsPositiveSpellTargetModeForSpecificTarget(sSpellStore.LookupEntry(spellId), effectMask, caster, target);
+    return IsPositiveSpellTargetModeForSpecificTarget(sSpellTemplate.LookupEntry<SpellEntry>(spellId), effectMask, caster, target);
 }
 
 inline bool IsPositiveSpellTargetMode(const SpellEntry* entry, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)
@@ -1022,7 +1023,7 @@ inline bool IsPositiveSpellTargetMode(uint32 spellId, const WorldObject* caster,
 {
     if (!spellId)
         return false;
-    return IsPositiveSpellTargetMode(sSpellStore.LookupEntry(spellId), caster, target);
+    return IsPositiveSpellTargetMode(sSpellTemplate.LookupEntry<SpellEntry>(spellId), caster, target);
 }
 
 inline bool IsPositiveSpell(const SpellEntry* entry, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)
@@ -1041,7 +1042,7 @@ inline bool IsPositiveSpell(uint32 spellId, const WorldObject* caster = nullptr,
 {
     if (!spellId)
         return false;
-    return IsPositiveSpell(sSpellStore.LookupEntry(spellId), caster, target);
+    return IsPositiveSpell(sSpellTemplate.LookupEntry<SpellEntry>(spellId), caster, target);
 }
 
 inline bool IsDispelSpell(SpellEntry const* spellInfo)

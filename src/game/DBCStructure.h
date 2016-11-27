@@ -1721,7 +1721,7 @@ struct SpellEntry
         uint32    SpellVisual[2];                           // 131-132  m_spellVisualID
         uint32    SpellIconID;                              // 133      m_spellIconID
         uint32    activeIconID;                             // 134      m_activeIconID
-        // uint32    spellPriority;                         // 135      m_spellPriority not used
+        uint32    spellPriority;                            // 135      m_spellPriority not used
         char*     SpellName[16];                            // 136-151  m_name_lang
         // uint32    SpellNameFlag;                         // 152      m_name_flag not used
         char*     Rank[16];                                 // 153-168  m_nameSubtext_lang
@@ -1753,6 +1753,7 @@ struct SpellEntry
         // float   effectBonusCoefficient[3];               // 229-231  m_effectBonusCoefficient
         // uint32  spellDescriptionVariableID;              // 232      m_descriptionVariablesID
         uint32  SpellDifficultyId;                          // 233      m_difficulty (SpellDifficulty.dbc)
+        uint32  IsServerSide;
 
         // helpers
         int32 CalculateSimpleValue(SpellEffectIndex eff) const { return EffectBasePoints[eff] + int32(1); }

@@ -37,6 +37,7 @@
 #include "BattleGround/BattleGround.h"
 #include "SharedDefines.h"
 #include "Chat.h"
+#include "SQLStorages.h"
 
 #include<vector>
 
