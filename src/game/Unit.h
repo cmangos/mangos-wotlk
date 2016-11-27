@@ -1571,6 +1571,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         uint32 GetManaDrainReduction(uint32 amount) const { return GetCombatRatingDamageReduction(CR_CRIT_TAKEN_SPELL, 2.2f, 100.0f, amount); /*NOTE: Verify if cases with melee/ranged ratings exist*/ }
 
+        float  SpellResistChance(Unit* pVictim, SpellEntry const* spell);
         float  MeleeSpellMissChance(Unit* pVictim, WeaponAttackType attType, int32 skillDiff, SpellEntry const* spell) const;
         SpellMissInfo MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell);
         float  MagicSpellMissChance(Unit* pVictim, SpellEntry const* spell);
