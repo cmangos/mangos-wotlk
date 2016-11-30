@@ -18947,6 +18947,8 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
         prevnode = lastnode;
     }
 
+    m_taxi.SetLastNode(lastnode);
+
     // get mount model (in case non taximaster (npc==nullptr) allow more wide lookup)
     uint32 mount_display_id = sObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == nullptr);
 
@@ -19001,6 +19003,7 @@ bool Player::ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid /*= 0*/)
     return ActivateTaxiPathTo(nodes, nullptr, spellid);
 }
 
+// TODO: Check for bugs
 void Player::ContinueTaxiFlight() const
 {
     uint32 sourceNode = m_taxi.GetTaxiSource();
@@ -19790,7 +19793,7 @@ void Player::SetBattleGroundEntryPoint()
     {
         m_bgData.mountSpell  = 0;
         m_bgData.taxiPath[0] = m_taxi.GetTaxiSource();
-        m_bgData.taxiPath[1] = m_taxi.GetTaxiDestination();
+        m_bgData.taxiPath[1] = m_taxi.GetNextTaxiDestination();
 
         // On taxi we don't need check for dungeon
         m_bgData.joinPos = WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
