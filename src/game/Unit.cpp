@@ -11983,7 +11983,6 @@ bool Unit::TakeCharmOf(Unit* charmed)
     charmed->ClearInCombat();
 
     charmed->SetCharmerGuid(GetObjectGuid());
-    charmed->CastStop();
     SetCharm(charmed);
 
     CharmInfo* charmInfo = charmed->InitCharmInfo(charmed);
@@ -12157,6 +12156,8 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
     }
     else if (possessed->GetTypeId() == TYPEID_PLAYER)
     {
+        possessed->AttackStop(true, true);
+
         Player* possessedPlayer = static_cast<Player *>(possessed);
 
         if (player && player->IsInDuelWith(possessedPlayer))
