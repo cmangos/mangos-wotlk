@@ -543,9 +543,9 @@ uint32 WorldSession::getDialogStatus(const Player* pPlayer, const Object* questg
         QuestStatus status = pPlayer->GetQuestStatus(quest_id);
 
         if (status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(quest_id))
-            dialogStatusNew = pQuest->IsRepeatable() ? DIALOG_STATUS_REWARD_REP : DIALOG_STATUS_REWARD;
+            dialogStatusNew = pQuest->IsRepeatable() && pQuest->IsDailyOrWeekly() ? DIALOG_STATUS_REWARD_REP : DIALOG_STATUS_REWARD;
         else if (pQuest->IsAutoComplete() && pPlayer->CanTakeQuest(pQuest, false))
-            dialogStatusNew = pQuest->IsRepeatable() ? DIALOG_STATUS_AVAILABLE_REP : DIALOG_STATUS_AVAILABLE;
+            dialogStatusNew = pQuest->IsRepeatable() ? pQuest->IsDailyOrWeekly() ? DIALOG_STATUS_AVAILABLE_REP : DIALOG_STATUS_REWARD_REP : DIALOG_STATUS_AVAILABLE;
         else if (status == QUEST_STATUS_INCOMPLETE)
             dialogStatusNew = DIALOG_STATUS_INCOMPLETE;
 
@@ -573,10 +573,7 @@ uint32 WorldSession::getDialogStatus(const Player* pPlayer, const Object* questg
                 {
                     int32 lowLevelDiff = sWorld.getConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF);
 
-                    auto questStatusItr = pPlayer->getQuestStatusMap().find(quest_id);
-                    bool rewarded = (questStatusItr != pPlayer->getQuestStatusMap().end()) ? questStatusItr->second.m_rewarded : false;
-
-                    if (pQuest->IsAutoComplete() || (pQuest->IsRepeatable() && rewarded))
+                    if (pQuest->IsAutoComplete())
                     {
                         dialogStatusNew = DIALOG_STATUS_REWARD_REP;
                     }
