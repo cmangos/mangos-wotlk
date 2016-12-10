@@ -1,4 +1,4 @@
-IINSERT INTO spell_template(Id, Attributes, AttributesEx,AttributesEx2,AttributesEx3,ProcFlags,ProcChance,DurationIndex,Effect1,EffectImplicitTargetA1,EffectImplicitTargetB1,EffectRadiusIndex1,EffectApplyAuraName1,EffectMiscValue1,EffectMiscValueB1,EffectTriggerSpell1,SpellName) VALUES
+INSERT INTO spell_template(Id, Attributes, AttributesEx,AttributesEx2,AttributesEx3,ProcFlags,ProcChance,DurationIndex,Effect1,EffectImplicitTargetA1,EffectImplicitTargetB1,EffectRadiusIndex1,EffectApplyAuraName1,EffectMiscValue1,EffectMiscValueB1,EffectTriggerSpell1,SpellName) VALUES
 ('11756','384','268435456','0','0','0','101','4','76','47','0','15','0','144064','0','0','Summon Gordunni chest (COBALT)'),
 ('17694','256','268435456','0','0','0','101','4','28','47','0','9','0','11296','61','0','Summon Darrowshire Poltergeist (DND)'),
 ('19394','384','268435456','0','0','0','101','4','76','47','0','15','0','177681','0','0','Summon Gordunni chest (JUNK)'),
