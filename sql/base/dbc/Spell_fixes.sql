@@ -25,7 +25,6 @@ INSERT INTO spell_template(Id, Attributes, AttributesEx,AttributesEx2,Attributes
 ('37264','384','0','4','0','0','101','21','28','18','0','7','0','21729','64','0','1','Power Converters: Summon Electromental (from cata)'),
 ('37278','384','0','4','0','0','101','21','28','18','0','1','0','21737','64','0','1','Power Converters: Summon Mini-Electromental (from cata)'),
 ('37365','384','0','4','0','0','101','21','28','18','0','1','0','21757','64','0','1','Power Converters: Summon Big Flavor Electromental (from cata)'),
-('37492','0','0','0','0','0','0','0','61','0','0','0','0','13852','0','0','1','BOX O TRICKS EVENT TRIGGER'),
 ('38096','384','0','9','0','0','101','21','6','38','0','0','4','0','0','0','1','[DND]Destroy Sun Gate Portal Controller'),
 ('38854','384','0','0','0','0','101','3','28','18','0','0','0','22339','64','0','1','summon Redeemet Hatchling'),
 ('38865','384','0','0','0','0','101','3','28','18','0','0','0','22337','64','0','1','summon Malevolent Hatchling'),
@@ -57,3 +56,7 @@ INSERT INTO spell_template(Id, Attributes, AttributesEx,AttributesEx2,Attributes
 ('68620','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Trial of the Crusader - Resilience Will Fix It'),
 ('72827','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Icecrown Citadel - Full House'),
 ('72845','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Pit of Saron - Don''t Look Up');
+
+-- To Legion Hold(q.10596) -H  (q.10563) -A
+INSERT INTO spell_template (Id, Attributes, AttributesEx, ProcChance, DurationIndex, Effect1, Effect2, EffectImplicitTargetA1,EffectApplyAuraName1,EffectMiscValue2,IsServerSide,SpellName) VALUES
+('37492','384','268435456','101','3','6','61','1','12','13852','1','Crate Disguise Subspell');
