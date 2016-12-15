@@ -611,27 +611,21 @@ void Player::UpdateDodgePercentage()
 
 void Player::UpdateSpellCritChance(uint32 school)
 {
-    // For normal school set zero crit chance
-    if (school == SPELL_SCHOOL_NORMAL)
-    {
-        SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1, 0.0f);
-        return;
-    }
-    // For others recalculate it from:
     float crit = 0.0f;
-    // Crit from Intellect
+    // Base spell crit and spell crit from Intellect
     crit += GetSpellCritFromIntellect();
     // Increase crit from SPELL_AURA_MOD_SPELL_CRIT_CHANCE
     crit += GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
     // Increase crit from SPELL_AURA_MOD_ALL_CRIT_CHANCE
     crit += GetTotalAuraModifier(SPELL_AURA_MOD_ALL_CRIT_CHANCE);
     // Increase crit by school from SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL
-    crit += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, 1 << school);
+    crit += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, (1 << school));
     // Increase crit from spell crit ratings
     crit += GetRatingBonusValue(CR_CRIT_SPELL);
-
-    // Store crit value
-    SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + school, crit);
+    // Set current crit chance
+    m_modSpellCritChance[school] = crit;
+    // Set UI display value:
+    SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + school, std::max(0.0f, std::min(crit, 100.0f)));
 }
 
 void Player::UpdateMeleeHitChances()

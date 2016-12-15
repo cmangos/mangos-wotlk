@@ -108,6 +108,8 @@ static const uint8 classToIndex[MAX_CLASSES] = { 0, 0, 1, 0, 2, 0, 0, 0, 3, 0, 0
 
 #define CLASSMASK_WAND_USERS ((1<<(CLASS_PRIEST-1))|(1<<(CLASS_MAGE-1))|(1<<(CLASS_WARLOCK-1)))
 
+#define CLASSMASK_RELIC_USERS ((1<<(CLASS_PALADIN-1))|(1<<(CLASS_SHAMAN-1))|(1<<(CLASS_DRUID-1))|(1<<(CLASS_DEATH_KNIGHT-1)))
+
 #define PLAYER_MAX_BATTLEGROUND_QUEUES 2
 
 enum ReputationRank
