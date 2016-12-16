@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Azuregos
-SD%Complete: 90
-SDComment: Spell reflect not effecting dots (Core problem)
+SD%Complete: 99
+SDComment: Enrage is to be checked
 SDCategory: Azshara
 EndScriptData */
 
