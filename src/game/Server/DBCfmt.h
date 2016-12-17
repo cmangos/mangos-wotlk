@@ -33,7 +33,8 @@ const char ChatChannelsEntryfmt[] = "iixssssssssssssssssxxxxxxxxxxxxxxxxxx";
 // ChatChannelsEntryfmt, index not used (more compact store)
 const char ChrClassesEntryfmt[] = "nxixssssssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxixii";
 const char ChrRacesEntryfmt[] = "nxixiixixxxxixssssssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxi";
-const char CinematicSequencesEntryfmt[] = "nxxxxxxxxx";
+const char CinematicCameraEntryfmt[] = "nsiffff";
+const char CinematicSequencesEntryfmt[] = "nxixxxxxxx";
 const char CreatureDisplayInfofmt[] = "nixifxxxxxxxxxxx";
 const char CreatureDisplayInfoExtrafmt[] = "nixxxxxxxxxxxxxxxxxxx";
 const char CreatureModelDatafmt[] = "nixxfxxxxxxxxxxffxxxxxxxxxxx";

@@ -40,6 +40,7 @@
 #include "Chat/Chat.h"
 #include "Server/SQLStorages.h"
 #include "Loot/LootMgr.h"
+#include "Cinematics/CinematicMgr.h"
 
 #include<vector>
 
@@ -948,6 +949,8 @@ class TradeData
 class Player : public Unit
 {
         friend class WorldSession;
+        friend class CinematicMgr;
+
         friend void Item::AddToUpdateQueueOf(Player* player);
         friend void Item::RemoveFromUpdateQueueOf(Player* player);
     public:
@@ -1087,6 +1090,8 @@ class Player : public Unit
         void Yell(const std::string& text, const uint32 language) const;
         void TextEmote(const std::string& text) const;
         void Whisper(const std::string& text, const uint32 language, ObjectGuid receiver);
+
+        CinematicMgr* GetCinematicMgr() const { return _cinematicMgr; }
 
         /*********************************************************/
         /***                    TAXI SYSTEM                    ***/
@@ -2588,6 +2593,7 @@ class Player : public Unit
         Item* _StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool update);
 
         void UpdateKnownCurrencies(uint32 itemId, bool apply);
+
         void AdjustQuestReqItemCount(Quest const* pQuest, QuestStatusData& questStatusData);
 
         void SetCanDelayTeleport(bool setting) { m_bCanDelayTeleport = setting; }
@@ -2614,6 +2620,8 @@ class Player : public Unit
         Taxi::Tracker m_taxiTracker;
 
         void _fillGearScoreData(Item* item, GearScoreVec* gearScore, uint32& twoHandScore);
+
+        CinematicMgr* _cinematicMgr;
 
         Unit* m_mover;
         Camera m_camera;
