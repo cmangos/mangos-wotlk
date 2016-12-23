@@ -391,6 +391,9 @@ UPDATE creature_template SET ScriptName='npc_bloodmaul_stout_trigger' WHERE entr
 UPDATE creature_template SET ScriptName='npc_simon_game_bunny' WHERE entry=22923;
 UPDATE creature_template SET ScriptName='npc_light_orb_collector' WHERE entry IN (21926,22333);
 UPDATE creature_template SET ScriptName='npc_bloodmaul_dire_wolf' WHERE entry=20058;
+UPDATE creature_template SET ScriptName='npc_vimgol_visual_bunny' WHERE entry=23040;
+UPDATE creature_template SET ScriptName='npc_vimgol_middle_bunny' WHERE entry=23081;
+UPDATE creature_template SET ScriptName='npc_vimgol' WHERE entry=22911;
 
 /* BLASTED LANDS */
 UPDATE creature_template SET ScriptName='npc_fallen_hero_of_horde' WHERE entry=7572;

@@ -235,8 +235,15 @@ struct world_map_outland : public ScriptedMap
 
     void OnCreatureCreate(Creature* pCreature)
     {
-        if (pCreature->GetEntry() == NPC_EMISSARY_OF_HATE)
-            m_mNpcEntryGuidStore[NPC_EMISSARY_OF_HATE] = pCreature->GetObjectGuid();
+        switch (pCreature->GetEntry())
+        {
+            case NPC_EMISSARY_OF_HATE:
+                m_mNpcEntryGuidStore[NPC_EMISSARY_OF_HATE] = pCreature->GetObjectGuid();
+                break;
+            case NPC_VIMGOL_VISUAL_BUNNY:
+                m_mNpcEntryGuidCollection.insert(EntryGuidSet::value_type(pCreature->GetEntry(), pCreature->GetObjectGuid()));
+                break;
+        }
     }
 
     void OnCreatureDeath(Creature* pCreature)

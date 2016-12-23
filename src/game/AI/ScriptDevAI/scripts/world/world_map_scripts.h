@@ -29,6 +29,9 @@ enum
     NPC_EMISSARY_OF_HATE        = 25003,
     NPC_IRESPEAKER              = 24999,
     NPC_UNLEASHED_HELLION       = 25002,
+
+    // Quest 10998
+    NPC_VIMGOL_VISUAL_BUNNY = 23040,
 };
 
 enum SpawnIndexes

@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Blades_Edge_Mountains
 SD%Complete: 90
-SDComment: Quest support: 10503, 10504, 10506, 10512, 10545, 10556, 10609, 10674, 10859, 11058, 11080. (npc_daranelle needs bit more work before consider complete)
+SDComment: Quest support: 10503, 10504, 10506, 10512, 10545, 10556, 10609, 10674, 10859, 10998, 11058, 11080. (npc_daranelle needs bit more work before consider complete)
 SDCategory: Blade's Edge Mountains
 EndScriptData */
 
@@ -890,6 +890,321 @@ CreatureAI* GetAI_npc_light_orb_collector(Creature* pCreature)
     return new npc_light_orb_collectorAI(pCreature);
 }
 
+
+/*######
+## Grimoire business AIs
+######*/
+
+enum
+{
+    NPC_VIMGOL_THE_VILE         = 22911,
+    NPC_VIMGOL_VISUAL_BUNNY     = 23040,
+    NPC_VIMGOL_MIDDLE_BUNNY     = 23081,
+
+    SPELL_VIMGOL_POP_TEST_A     = 39834,
+    SPELL_VIMGOL_POP_TEST_B     = 39851,
+    SPELL_VIMGOL_POP_TEST_C     = 39852,
+    SPELL_VIMGOL_POP_TEST_D     = 39853,
+    SPELL_VIMGOL_POP_TEST_E     = 39854,
+
+    SPELL_PENTAGRAM_BEAM        = 39921,
+    SPELL_UNHOLY_GROWTH         = 40545,
+    SPELL_SUMMONED_DEMON        = 7741,
+    SPELL_INTERRUPT_UNHOLY_GROWTH = 40547,
+    SPELL_SUMMON_GRIMOIRE       = 39862,
+    SPELL_SHADOWBOLT_VOLLEY     = 40070,
+};
+
+struct npc_vimgol_AI : public ScriptedAI
+{
+    bool m_uiEnrage;
+    uint32 m_uiVolleyTimer;
+    uint32 m_uiCastTimer;
+
+    npc_vimgol_AI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        Reset();
+    }
+
+    void Reset() override
+    {
+        m_uiEnrage = false;
+        m_uiVolleyTimer = 5000;
+        m_uiCastTimer = 0;  
+    }
+
+    void MovementInform(uint32 uiMovementType, uint32 uiData) override 
+    {        
+        m_creature->GetMotionMaster()->Clear();
+        m_creature->CastSpell(m_creature, SPELL_UNHOLY_GROWTH, TRIGGERED_NONE);
+        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+    }
+
+    void JustDied(Unit* pKiller) override
+    {
+        DoCast(m_creature, SPELL_SUMMON_GRIMOIRE, true);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (!m_uiEnrage)
+        {
+            if (m_creature->GetHealthPercent() <= 50.0f)
+            {
+                m_uiEnrage = true;
+
+                if (Creature* pMiddleBunny = GetClosestCreatureWithEntry(m_creature, NPC_VIMGOL_MIDDLE_BUNNY, 60.0f))
+                {
+                    float x = pMiddleBunny->GetPositionX(), y = pMiddleBunny->GetPositionY(), z = pMiddleBunny->GetPositionZ();
+                    m_creature->UpdateAllowedPositionZ(x, y, z);
+                    m_creature->GetMotionMaster()->MovePoint(1, x, y, z);
+                }
+            }
+        }
+
+        if (m_uiVolleyTimer <= uiDiff)
+        {
+            DoCastSpellIfCan(m_creature, SPELL_SHADOWBOLT_VOLLEY);
+            m_uiVolleyTimer = 5000;
+        }
+        else
+            m_uiVolleyTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_vimgol(Creature* pCreature)
+{
+    return new npc_vimgol_AI(pCreature);
+}
+
+struct npc_vimgol_visual_bunnyAI : public ScriptedAI
+{
+    npc_vimgol_visual_bunnyAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pMap = (ScriptedMap*)pCreature->GetInstanceData();
+
+        EntryGuidSet bunnyGuids;
+
+        if (m_pMap)
+        {
+            m_pMap->GetCreatureGuidMapFromStorage(m_creature->GetEntry(), bunnyGuids);
+
+            for (EntryGuidSet::iterator it = bunnyGuids.begin(); it != bunnyGuids.end(); ++it)
+                if (it->second == m_creature->GetObjectGuid())
+                    m_uiBunnyId = std::distance(bunnyGuids.begin(), it);
+        }
+
+        Reset();
+    }
+
+    ScriptedMap* m_pMap;
+    typedef std::multimap<uint32, ObjectGuid> EntryGuidSet;
+    
+    uint8 m_uiBunnyId;
+    uint32 m_uiCastTimer;
+
+    void Reset() override
+    {
+        m_uiCastTimer = 0;
+    }
+
+    uint32 GetScriptData() override
+    {
+        return m_uiBunnyId;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiCastTimer <= uiDiff)
+        {
+            switch (m_uiBunnyId)
+            {
+                case 0:
+                    DoCastSpellIfCan(m_creature, SPELL_VIMGOL_POP_TEST_A);
+                    break;
+                case 1:
+                    DoCastSpellIfCan(m_creature, SPELL_VIMGOL_POP_TEST_B);
+                    break;
+                case 2:
+                    DoCastSpellIfCan(m_creature, SPELL_VIMGOL_POP_TEST_C);
+                    break;
+                case 3:
+                    DoCastSpellIfCan(m_creature, SPELL_VIMGOL_POP_TEST_D);
+                    break;
+                case 4:
+                    DoCastSpellIfCan(m_creature, SPELL_VIMGOL_POP_TEST_E);
+                    break;
+            }
+
+            m_uiCastTimer = 4000;
+        }
+        else
+            m_uiCastTimer -= uiDiff;
+    }
+};
+
+CreatureAI* GetAI_npc_vimgol_visual_bunny(Creature* pCreature)
+{
+    return new npc_vimgol_visual_bunnyAI(pCreature);
+}
+
+struct npc_vimgol_middle_bunnyAI : public ScriptedAI
+{
+    npc_vimgol_middle_bunnyAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pMap = (ScriptedMap*)pCreature->GetInstanceData();
+
+        if (m_pMap)
+            m_pMap->GetCreatureGuidMapFromStorage(NPC_VIMGOL_VISUAL_BUNNY, m_uiBunnyGuids);
+
+        Reset();
+    }
+
+    ScriptedMap* m_pMap;
+    typedef std::multimap<uint32, ObjectGuid> EntryGuidSet;
+    EntryGuidSet m_uiBunnyGuids;
+
+    bool m_uiSpawned;
+    bool m_uiActiveCircles[5];
+    uint32 m_uiScanTimer;
+    uint8 m_uiBeamTimer;
+    uint8 m_uiFireballSkipCounter;
+
+    void Reset() override
+    {
+        m_uiSpawned = false;
+
+        for (int i = 0; i < 5; i++)
+            m_uiActiveCircles[i] = false;
+
+        m_uiScanTimer = 0;
+        m_uiBeamTimer = 5;
+        m_uiFireballSkipCounter = 0;
+    }
+
+    uint8 playersInsideCircles()
+    {
+        uint32 tmpAuras[5] = {
+            SPELL_VIMGOL_POP_TEST_A, SPELL_VIMGOL_POP_TEST_B, SPELL_VIMGOL_POP_TEST_C,
+            SPELL_VIMGOL_POP_TEST_D, SPELL_VIMGOL_POP_TEST_E
+        };
+        uint8 tmpCounter = 0;
+
+        if (m_uiBunnyGuids.size() < 5 && m_pMap)
+        {
+            m_uiBunnyGuids.clear();
+            m_pMap->GetCreatureGuidMapFromStorage(NPC_VIMGOL_VISUAL_BUNNY, m_uiBunnyGuids);
+        }
+
+        for (int i = 0; i < 5; i++)
+            m_uiActiveCircles[i] = false;
+
+        std::list<Player*> playerList;
+        GetPlayerListWithEntryInWorld(playerList, m_creature, 30);
+        for (auto itr = playerList.begin(); itr != playerList.end(); ++itr)
+        {
+            if (!(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_A) && !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_B) && !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_C) &&
+                !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_D) && !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_E))
+                continue;
+
+            for (auto it = m_uiBunnyGuids.begin(); it != m_uiBunnyGuids.end(); ++it)
+            {
+                for (int i = 0; i < 5; ++i)
+                {
+                    if (!(*itr)->GetAura(tmpAuras[i], SpellEffectIndex(0)))
+                        continue;
+
+                    if (it->second != (*itr)->GetAura(tmpAuras[i], SpellEffectIndex(0))->GetCasterGuid())
+                        continue;
+
+                    m_uiActiveCircles[std::distance(m_uiBunnyGuids.begin(), it)] = true;
+                }
+            }
+        }
+
+        for (int i = 0; i < 5; i++)
+            if (m_uiActiveCircles[i])
+                ++tmpCounter;
+
+        return tmpCounter;
+    }
+
+    void CastBunnySpell(Creature* pTarget, uint32 uSpell)
+    {
+        if (!uSpell)
+            return;
+
+        std::list<Creature*> creatureList;
+        GetCreatureListWithEntryInGrid(creatureList, m_creature, NPC_VIMGOL_VISUAL_BUNNY, 200.0f);
+        for (auto& bunny : creatureList)
+            for (EntryGuidSet::iterator it = m_uiBunnyGuids.begin(); it != m_uiBunnyGuids.end(); ++it)
+                if (it->second == bunny->GetObjectGuid())
+                    if (m_uiActiveCircles[std::distance(m_uiBunnyGuids.begin(), it)])
+                        bunny->CastSpell(pTarget ? pTarget : bunny, uSpell, TRIGGERED_OLD_TRIGGERED);
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        pSummoned->CastSpell(pSummoned, SPELL_SUMMONED_DEMON, TRIGGERED_OLD_TRIGGERED);
+        CastBunnySpell(nullptr, SPELL_PENTAGRAM_BEAM);
+        m_uiSpawned = true;
+
+        for (int i = 0; i < 5; i++)
+            m_uiActiveCircles[i] = false;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiScanTimer <= uiDiff)
+        {
+            m_uiScanTimer = 1000;
+
+            if (m_uiSpawned)
+            {
+                if (Creature* pVimgol = GetClosestCreatureWithEntry(m_creature, NPC_VIMGOL_THE_VILE, 40.0f, true))
+                {
+                    m_uiFireballSkipCounter++;
+                    if (m_uiFireballSkipCounter == 3)
+                    {
+                        CastBunnySpell(pVimgol, SPELL_INTERRUPT_UNHOLY_GROWTH);
+                        m_uiFireballSkipCounter = 0;
+                    }
+                    if (playersInsideCircles() == 5)
+                        pVimgol->InterruptSpell(CURRENT_GENERIC_SPELL);
+                }
+                else
+                {
+                    m_uiSpawned = false;
+                    m_uiScanTimer = 30000;
+                }
+            }
+            else
+            {
+                if (playersInsideCircles() == 5)
+                    m_creature->SummonCreature(NPC_VIMGOL_THE_VILE, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                if (m_uiBeamTimer == 0)
+                {
+                    CastBunnySpell(nullptr, SPELL_PENTAGRAM_BEAM);
+                    m_uiBeamTimer = 5;
+                }
+                m_uiBeamTimer--;
+            }
+        }
+        else
+            m_uiScanTimer -= uiDiff;
+    }
+};
+
+CreatureAI* GetAI_npc_vimgol_middle_bunny(Creature* pCreature)
+{
+    return new npc_vimgol_middle_bunnyAI(pCreature);
+}
+
 /*######
 ## npc_bloodmaul_dire_wolf
 ######*/
@@ -1015,5 +1330,20 @@ void AddSC_blades_edge_mountains()
     pNewScript->Name = "npc_bloodmaul_dire_wolf";
     pNewScript->GetAI = &GetAI_npc_bloodmaul_dire_wolf;
     pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_diminution_powder;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_vimgol_visual_bunny";
+    pNewScript->GetAI = &GetAI_npc_vimgol_visual_bunny;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_vimgol_middle_bunny";
+    pNewScript->GetAI = &GetAI_npc_vimgol_middle_bunny;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_vimgol";
+    pNewScript->GetAI = &GetAI_npc_vimgol;
     pNewScript->RegisterSelf();
 }
