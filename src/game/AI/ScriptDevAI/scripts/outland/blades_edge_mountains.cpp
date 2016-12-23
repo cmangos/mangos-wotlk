@@ -264,7 +264,9 @@ enum
     SAY_BREW_3                  = -1000208,
 
     SPELL_INTOXICATION          = 35240,
-    SPELL_INTOXICATION_VISUAL   = 35777,
+    //SPELL_INTOXICATION_VISUAL   = 35777,
+
+    GO_TANKARD                  = 184315,
 };
 
 static const uint32 aOgreEntries[] = {19995, 19998, 20334, 20723, 20726, 20730, 20731, 20732, 21296};
@@ -288,12 +290,7 @@ struct npc_bloodmaul_stout_triggerAI : public ScriptedAI
     {
         if (m_bHasValidOgre && pWho->GetObjectGuid() == m_selectedOgreGuid && m_creature->IsWithinDistInMap(pWho, 3.5f))
         {
-            // This part it's not 100% accurate - most of it is guesswork
-            // Some animations or spells may be missing
-            pWho->CastSpell(pWho, SPELL_INTOXICATION_VISUAL, TRIGGERED_OLD_TRIGGERED);
-            pWho->CastSpell(pWho, SPELL_INTOXICATION, TRIGGERED_OLD_TRIGGERED);
-
-            // Handle evade after some time with EAI
+            // Handle interaction and run home with EAI
             m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, m_creature, (Creature*)pWho);
 
             // Give kill credit to the summoner player
@@ -303,6 +300,12 @@ struct npc_bloodmaul_stout_triggerAI : public ScriptedAI
 
                 if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
                     pSummoner->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
+            }
+
+            if (GameObject* tankard = GetClosestGameObjectWithEntry(m_creature, GO_TANKARD, 2.0f))
+            {
+                tankard->AddObjectToRemoveList();
+                m_creature->ForcedDespawn(2000);
             }
 
             m_bHasValidOgre = false;
@@ -350,6 +353,7 @@ struct npc_bloodmaul_stout_triggerAI : public ScriptedAI
                 // Move ogre to the point
                 float fX, fY, fZ;
                 pOgre->GetMotionMaster()->MoveIdle();
+                pOgre->SetWalk(false, true);
                 m_creature->GetContactPoint(pOgre, fX, fY, fZ);
                 pOgre->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
 
