@@ -1727,7 +1727,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000136,'Yes, my lord.',0,0,0,0,'dawnforge COMMANDER_DAWNFORGE_4 SAY_ARCANIST_ARDONIS_2'),
 (-1000137,'See to it, Ardonis!',0,0,0,0,'dawnforge COMMANDER_DAWNFORGE_5'),
 
-(-1000138,'Avruu\'s magic... it still controls me. You must fight me, mortal. It\'s the only way to break the spell!',0,0,0,0,'aeranas SAY_SUMMON'),
+(-1000138,'REUSE ME',0,0,0,0,'REUSE_ME'),
 (-1000139,'Avruu\'s magic is broken! I\'m free once again!',0,0,0,0,'aeranas SAY_FREE'),
 
 (-1000140,'Let\'s go.',0,0,1,0,'lilatha SAY_START'),

@@ -43,7 +43,6 @@ EndContentData */
 
 enum
 {
-    SAY_SUMMON                      = -1000138,
     SAY_FREE                        = -1000139,
 
     FACTION_HOSTILE                 = 16,
@@ -57,33 +56,19 @@ struct npc_aeranasAI : public ScriptedAI
 {
     npc_aeranasAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
-    uint32 m_uiFactionTimer;
     uint32 m_uiEnvelopingWindsTimer;
     uint32 m_uiShockTimer;
 
     void Reset() override
     {
-        m_uiFactionTimer         = 8000;
         m_uiEnvelopingWindsTimer = 9000;
         m_uiShockTimer           = 5000;
 
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-
-        DoScriptText(SAY_SUMMON, m_creature);
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiFactionTimer)
-        {
-            if (m_uiFactionTimer <= uiDiff)
-            {
-                m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
-                m_uiFactionTimer = 0;
-            }
-            else
-                m_uiFactionTimer -= uiDiff;
-        }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
