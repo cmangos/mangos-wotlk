@@ -196,6 +196,12 @@ void ScriptedInstance::DoStartTimedAchievement(AchievementCriteriaTypes criteria
         debug_log("SD2: DoStartTimedAchievement attempt start achievements but no players in map.");
 }
 
+void ScriptedInstance::GetCreatureGuidMapFromStorage(uint32 uiEntry, EntryGuidSet &uiEntryGuidSet, bool bSkipDebugLog)
+{
+    std::pair<EntryGuidSet::iterator, EntryGuidSet::iterator> range = m_mNpcEntryGuidCollection.equal_range(uiEntry);
+    uiEntryGuidSet.insert(range.first, range.second);
+}
+
 /**
    Constructor for DialogueHelper
 

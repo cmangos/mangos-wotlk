@@ -7547,6 +7547,58 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff) const
             if (target->GetTypeId() != TYPEID_PLAYER || target->IsInWater())
                 return false;
             break;
+        case 39921:                                         // Vimgol Pentagram Beam
+        {
+            if (target->GetTypeId() != TYPEID_UNIT || target->GetEntry() != 23040 || m_caster->GetTypeId() != TYPEID_UNIT || m_caster->GetEntry() != 23040)
+                return false;
+
+            uint8 pBunnyId = ((Creature*)m_caster)->AI()->GetScriptData();
+
+            std::list<Creature*> creatureList;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(target, 23040, 60);
+            MaNGOS::CreatureListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatureList, check);
+            Cell::VisitGridObjects(target, searcher, 60);
+
+            for (auto& creature : creatureList)
+            {
+                // Check that both have AI() before accessing
+                if (creature->AI() && ((Creature*)target)->AI() &&
+                    creature->AI()->GetScriptData() == ((Creature*)target)->AI()->GetScriptData())
+                    pBunnyId = creature->AI()->GetScriptData();
+            }
+
+            std::list<Player*> playerList;
+            MaNGOS::AnyPlayerInObjectRangeCheck checkPlayer(target, 4);
+            MaNGOS::PlayerListSearcher<MaNGOS::AnyPlayerInObjectRangeCheck> playerSearcher(playerList, checkPlayer);
+            Cell::VisitWorldObjects(target, playerSearcher, 4);
+            for (auto& player : playerList)
+            {
+                switch (pBunnyId)
+                {
+                    case 0:
+                        if (player->HasAura(39834))
+                            return true;
+                        break;
+                    case 1:
+                        if (player->HasAura(39851))
+                            return true;
+                        break;
+                    case 2:
+                        if (player->HasAura(39852))
+                            return true;
+                        break;
+                    case 3:
+                        if (player->HasAura(39853))
+                            return true;
+                        break;
+                    case 4:
+                        if (player->HasAura(39854))
+                            return true;
+                        break;
+                }
+            }
+            return false;
+        }
         case 68921:                                         // Soulstorm (FoS), only targets farer than 10 away
         case 69049:                                         // Soulstorm            - = -
             if (m_caster->IsWithinDist(target, 10.0f, false))

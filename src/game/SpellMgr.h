@@ -953,8 +953,14 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
                         case 13139:                         // net-o-matic special effect
                         case 44877:                         // Living Flare Master
                             return false;
-                        case 70346:
-                            return true;                    // Slime Puddle
+                        case 39834:                         // Vimgol population tester
+                        case 39851:                         // Vimgol population tester
+                        case 39852:                         // Vimgol population tester
+                        case 39853:                         // Vimgol population tester
+                        case 39854:                         // Vimgol population tester
+                        case 39921:                         // Vimgol Pentagram Beam
+                        case 70346:                         // Slime Puddle
+                            return true;
                         default:
                             break;
                     }
