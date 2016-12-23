@@ -1156,7 +1156,7 @@ enum
 
     SPELL_SUMMON_SMOKE      = 42456,                        // summon temp GO 185318
     SPELL_SUMMON_FIRE       = 42467,                        // summon temp GO 185319
-    SPELL_EXPLOSION_VISUAL  = 42458,
+    SPELL_EXPLOSION_VISUAL  = 30934,                        // Original spell 42458 (Doesn't exist in TBC)
 
     NPC_EXPLODE_TRIGGER     = 20296,
     NPC_TERROR_IMP          = 20399,
@@ -1169,7 +1169,7 @@ enum
 
     QUEST_ID_WARP_GATE      = 10310,
 
-    MAX_TROOPERS            = 9,
+    MAX_TROOPERS            = 3,
     MAX_IMPS                = 6,
 };
 
@@ -1177,6 +1177,7 @@ struct npc_drijyaAI : public npc_escortAI
 {
     npc_drijyaAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
+    bool m_uiSayCount;
     uint8 m_uiSpawnCount;
     uint32 m_uiSpawnImpTimer;
     uint32 m_uiSpawnTrooperTimer;
@@ -1194,22 +1195,29 @@ struct npc_drijyaAI : public npc_escortAI
             m_uiSpawnTrooperTimer   = 0;
             m_uiSpawnDestroyerTimer = 0;
             m_uiDestroyingTimer     = 0;
+            m_uiSayCount            = false;
         }
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        if (pWho->GetTypeId() != TYPEID_PLAYER)
+            return;
     }
 
     void AttackedBy(Unit* pWho) override
     {
-        if (pWho->GetEntry() == NPC_TERROR_IMP || pWho->GetEntry() == NPC_LEGION_TROOPER || pWho->GetEntry() == NPC_LEGION_DESTROYER)
+        if (!m_uiSayCount)
         {
-            if (urand(0, 1))
-                DoScriptText(SAY_DRIJYA_3, m_creature);
+            DoScriptText(SAY_DRIJYA_3, m_creature);
+            m_uiSayCount = true;
         }
     }
 
     void DoSpawnCreature(uint32 uiEntry)
     {
         if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_explodeTriggerGuid))
-            m_creature->SummonCreature(uiEntry, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), pTrigger->GetOrientation(), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
+            m_creature->SummonCreature(uiEntry, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), pTrigger->GetOrientation(), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -1240,58 +1248,58 @@ struct npc_drijyaAI : public npc_escortAI
                 break;
             case 7:
                 SetEscortPaused(true);
+                m_uiSayCount = false;
                 m_uiDestroyingTimer = 60000;
                 m_uiSpawnImpTimer = 15000;
                 m_uiSpawnCount = 0;
-                m_creature->HandleEmoteCommand(EMOTE_STATE_WORK);
-                if (Creature* pTrigger = GetClosestCreatureWithEntry(m_creature, NPC_EXPLODE_TRIGGER, 30.0f))
+                m_creature->HandleEmote(EMOTE_STATE_WORK);
+                if (Creature* pTrigger = GetClosestCreatureWithEntry(m_creature, NPC_EXPLODE_TRIGGER, 40.0f))
                     m_explodeTriggerGuid = pTrigger->GetObjectGuid();
                 break;
             case 8:
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOKE) == CAST_OK)
-                {
-                    if (Player* pPlayer = GetPlayerForEscort())
-                        m_creature->SetFacingToObject(pPlayer);
+                if (Player* pPlayer = GetPlayerForEscort())
+                    m_creature->SetFacingToObject(pPlayer);
 
-                    DoScriptText(SAY_DRIJYA_4, m_creature);
-                }
+                DoScriptText(SAY_DRIJYA_4, m_creature);
+                m_creature->HandleEmote(EMOTE_ONESHOT_NONE);
                 break;
             case 12:
                 SetEscortPaused(true);
+                m_uiSayCount = false;
                 m_uiDestroyingTimer = 60000;
                 m_uiSpawnTrooperTimer = 15000;
                 m_uiSpawnCount = 0;
-                m_creature->HandleEmoteCommand(EMOTE_STATE_WORK);
+                m_creature->HandleEmote(EMOTE_STATE_WORK);
                 break;
             case 13:
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOKE) == CAST_OK)
-                {
-                    if (Player* pPlayer = GetPlayerForEscort())
-                        m_creature->SetFacingToObject(pPlayer);
+                if (Player* pPlayer = GetPlayerForEscort())
+                    m_creature->SetFacingToObject(pPlayer);
 
-                    DoScriptText(SAY_DRIJYA_5, m_creature);
-                }
+                DoScriptText(SAY_DRIJYA_5, m_creature);
+                m_creature->HandleEmote(EMOTE_ONESHOT_NONE);
                 break;
             case 17:
                 SetEscortPaused(true);
+                m_uiSayCount = false;
                 m_uiDestroyingTimer = 60000;
                 m_uiSpawnDestroyerTimer = 15000;
-                m_creature->HandleEmoteCommand(EMOTE_STATE_WORK);
+                m_creature->HandleEmote(EMOTE_STATE_WORK);
                 break;
             case 18:
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOKE) == CAST_OK)
+                m_creature->HandleEmote(EMOTE_ONESHOT_NONE);
+                if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_explodeTriggerGuid))
                 {
-                    if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_explodeTriggerGuid))
-                        m_creature->SetFacingToObject(pTrigger);
-
-                    DoScriptText(SAY_DRIJYA_6, m_creature);
+                    pTrigger->CastSpell(pTrigger, SPELL_SUMMON_SMOKE, TRIGGERED_OLD_TRIGGERED);
+                    m_creature->SetFacingToObject(pTrigger);
                 }
+                DoScriptText(SAY_DRIJYA_6, m_creature);
+                m_creature->HandleEmote(EMOTE_ONESHOT_ROAR);
                 break;
             case 19:
                 if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_explodeTriggerGuid))
                 {
-                    pTrigger->CastSpell(pTrigger, SPELL_SUMMON_FIRE, TRIGGERED_OLD_TRIGGERED);
                     pTrigger->CastSpell(pTrigger, SPELL_EXPLOSION_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                    pTrigger->CastSpell(pTrigger, SPELL_SUMMON_FIRE, TRIGGERED_OLD_TRIGGERED);
                 }
                 break;
             case 20:
@@ -1347,7 +1355,7 @@ struct npc_drijyaAI : public npc_escortAI
                 if (m_uiSpawnCount == MAX_TROOPERS)
                     m_uiSpawnTrooperTimer = 0;
                 else
-                    m_uiSpawnTrooperTimer = 3500;
+                    m_uiSpawnTrooperTimer = 6000;
             }
             else
                 m_uiSpawnTrooperTimer -= uiDiff;
@@ -1369,7 +1377,6 @@ struct npc_drijyaAI : public npc_escortAI
             if (m_uiDestroyingTimer <= uiDiff)
             {
                 SetEscortPaused(false);
-                m_creature->HandleEmoteCommand(EMOTE_STATE_NONE);
                 m_uiDestroyingTimer = 0;
             }
             else
@@ -1378,8 +1385,6 @@ struct npc_drijyaAI : public npc_escortAI
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
-
-        DoMeleeAttackIfReady();
     }
 };
 
