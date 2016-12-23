@@ -1232,6 +1232,134 @@ bool QuestAccept_npc_skyguard_prisoner(Player* pPlayer, Creature* pCreature, con
     return false;
 }
 
+enum
+{
+    SPELL_TERRIFYING_SCREECH = 38021,
+    SPELL_FEATHER_BURST = 39068,
+
+    SAY_DEFENDER_GRASHNA = -1001241,
+
+    NPC_DEFENDER_GRASHNA = 22373,
+};
+
+struct npc_avatar_of_terokkAI : public ScriptedAI
+{
+    npc_avatar_of_terokkAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiAbilityTimer;
+
+    void Reset() override
+    {
+        m_uiAbilityTimer = 4000;
+    }
+
+    void JustDied(Unit* pKiller) override
+    {
+        if (Creature* grashna = GetClosestCreatureWithEntry(m_creature, NPC_DEFENDER_GRASHNA, 100.0f))
+        {
+            DoScriptText(SAY_DEFENDER_GRASHNA, grashna);
+
+            std::list<Player*> playerList;
+            GetPlayerListWithEntryInWorld(playerList, m_creature, 50.0f);
+            for (auto& player : playerList)
+            {
+                if (player->IsActiveQuest(10879))
+                {
+                    player->GroupEventHappens(10879, m_creature);
+                }
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
+            std::list<Player*> playerList;
+            GetPlayerListWithEntryInWorld(playerList, m_creature, 50.0f);
+            bool check = false;
+            for (auto& player : playerList)
+            {
+                if (player->IsActiveQuest(10879))
+                {
+                    AttackStart(player);
+                    check = true;
+                    break;
+                }
+            }
+            if (check == false)
+            {
+                return;
+            }
+        }
+
+        if (m_uiAbilityTimer <= uiDiff)
+        {
+            m_uiAbilityTimer = 12000;
+            DoCast(m_creature->getVictim(), SPELL_FEATHER_BURST);
+            return;
+        }
+        else
+            m_uiAbilityTimer -= uiDiff;
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_avatar_of_terokk(Creature* pCreature)
+{
+    return new npc_avatar_of_terokkAI(pCreature);
+}
+
+struct npc_minion_of_terokkAI : public ScriptedAI
+{
+    npc_minion_of_terokkAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiAbilityTimer;
+
+    void Reset() override
+    {
+        m_uiAbilityTimer = 4000;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
+            std::list<Player*> playerList;
+            GetPlayerListWithEntryInWorld(playerList, m_creature, 50.0f);
+            bool check = false;
+            for (auto* player : playerList)
+            {
+                if (player->IsActiveQuest(10879))
+                {
+                    AttackStart(player);
+                    check = true;
+                    break;
+                }
+            }
+            if (check == false)
+            {
+                return;
+            }
+        }
+
+        if (m_uiAbilityTimer <= uiDiff)
+        {
+            m_uiAbilityTimer = 15000;
+            DoCast(m_creature->getVictim(), SPELL_TERRIFYING_SCREECH);
+            return;
+        }
+        else
+            m_uiAbilityTimer -= uiDiff;
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_minion_of_terokk(Creature* pCreature)
+{
+    return new npc_minion_of_terokkAI(pCreature);
+}
+
 void AddSC_terokkar_forest()
 {
     Script* pNewScript;
@@ -1304,5 +1432,15 @@ void AddSC_terokkar_forest()
     pNewScript->Name = "npc_skyguard_prisoner";
     pNewScript->GetAI = &GetAI_npc_skyguard_prisoner;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_skyguard_prisoner;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_avatar_of_terokk";
+    pNewScript->GetAI = &GetAI_npc_avatar_of_terokk;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_minion_of_terokk";
+    pNewScript->GetAI = &GetAI_npc_minion_of_terokk;
     pNewScript->RegisterSelf();
 }
