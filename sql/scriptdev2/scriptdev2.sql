@@ -579,6 +579,7 @@ UPDATE creature_template SET ScriptName='npc_dalinda_malem' WHERE entry=5644;
 UPDATE creature_template SET ScriptName='npc_melizza_brimbuzzle' WHERE entry=12277;
 UPDATE creature_template SET ScriptName='npc_cork_gizelton' WHERE entry=11625;
 UPDATE creature_template SET ScriptName='npc_rigger_gizelton' WHERE entry=11626;
+UPDATE creature_template SET ScriptName='npc_magrami_spectre' WHERE entry=11560;
 
 /* DIRE MAUL */
 UPDATE instance_template SET ScriptName='instance_dire_maul' WHERE map=429;
@@ -2984,7 +2985,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001235,'FATHER! Father, I\'m saved!',0,0,0,1,'SAY_CREDIT_MOOTOO_Y'),
 (-1001236,'Daughter! You have returned!',0,0,0,5,'SAY_1_ELDER_MOOTOO'),
 (-1001237,'%s hugs Elder Mootoo.',0,2,0,5,'SAY_9_MOOTOO_Y'),
-(-1001238,'Mootoo thanks you, $n.',0,0,0,1,'SAY_2_ELDER_MOOTOO');
+(-1001238,'Mootoo thanks you, $n.',0,0,0,1,'SAY_2_ELDER_MOOTOO'),
+
+(-1001239,'%s is drawn to the ghost magnet...',0,2,0,0,'Magrami Spectre on spawn 1'),
+(-1001240,'%s is angered!',0,2,0,0,'Magrami Spectre on spawn 2');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
