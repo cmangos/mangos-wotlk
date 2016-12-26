@@ -27,6 +27,7 @@
 #include "Server/DBCEnums.h"
 #include "Server/DBCStores.h"
 #include "Server/SQLStorages.h"
+#include "Spells/SpellMgr.h"
 
 template<class T>
 inline void MaNGOS::VisibleNotifier::Visit(GridRefManager<T>& m)
@@ -157,6 +158,34 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     // Check target immune to spell or aura
     if (target->IsImmuneToSpell(spellInfo, false) || target->IsImmuneToSpellEffect(spellInfo, eff_index, false))
         return;
+
+    SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(spellInfo->Id);
+    if (bounds.first != bounds.second)
+    {
+        bool found = false;
+        for (SQLMultiStorage::SQLMultiSIterator<SpellTargetEntry> i_spellST = bounds.first; i_spellST != bounds.second; ++i_spellST)
+        {
+            if (i_spellST->CanNotHitWithSpellEffect(eff_index))
+                continue;
+
+            // only creature entries supported for this target type
+            if (i_spellST->type == SPELL_TARGET_TYPE_GAMEOBJECT)
+                continue;
+
+            if (target->GetEntry() == i_spellST->targetEntry)
+            {
+                if (i_spellST->type == SPELL_TARGET_TYPE_DEAD && ((Creature*)target)->IsCorpse())
+                    found = true;
+                else if (i_spellST->type == SPELL_TARGET_TYPE_CREATURE && target->isAlive())
+                    found = true;
+
+                break;
+            }
+        }
+
+        if (!found)
+            return;
+    }
 
     // Apply PersistentAreaAura on target
     // in case 2 dynobject overlap areas for same spell, same holder is selected, so dynobjects share holder
