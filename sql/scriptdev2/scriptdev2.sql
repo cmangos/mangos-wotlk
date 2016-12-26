@@ -409,6 +409,7 @@ UPDATE creature_template SET ScriptName='npc_scourged_flamespitter' WHERE entry=
 UPDATE creature_template SET ScriptName='npc_bonker_togglevolt' WHERE entry=25589;
 UPDATE creature_template SET ScriptName='npc_jenny' WHERE entry=25969;
 UPDATE creature_template SET ScriptName='npc_seaforium_depth_charge' WHERE entry=25401;
+UPDATE creature_template SET ScriptName='npc_mootoo_the_younger' WHERE entry=25504;
 
 /* BURNING STEPPES */
 UPDATE creature_template SET ScriptName='npc_ragged_john' WHERE entry=9563;
@@ -2969,7 +2970,21 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001222,'Oh, the pain...',0,0,7,0,'draenei_survivor SAY_HELP1'),
 (-1001223,'Everything hurts. Please, make it stop...',0,0,7,0,'draenei_survivor SAY_HELP2'),
 (-1001224,'Ughhh... I hurt. Can you help me?',0,0,7,0,'draenei_survivor SAY_HELP3'),
-(-1001225,'I don''t know if I can make it. Please help me...',0,0,7,0,'draenei_survivor SAY_HELP4');
+(-1001225,'I don''t know if I can make it. Please help me...',0,0,7,0,'draenei_survivor SAY_HELP4'),
+
+(-1001226,'Thank you for doing this, $r. I... I think I know how to get back to my father. Please don\'t let the bad things hurt me.',0,0,0,1,'SAY_MOOTOO_Y_START'),
+(-1001227,'I thought for sure that I would die like all the others!',0,0,0,1,'SAY_1_MOOTOO_Y'),
+(-1001228,'I can feel my father\'s aura. He\'s definitely this way... come on, $n.',0,0,0,1,'SAY_2_MOOTOO_Y'),
+(-1001229,'The mist is death... senseless, without compassion.',0,0,0,1,'SAY_3_MOOTOO_Y'),
+(-1001230,'So cold...',0,0,0,1,'SAY_4_MOOTOO_Y'),
+(-1001231,'What was that! Did you see that?',0,0,0,0,'SAY_5_MOOTOO_Y'),
+(-1001232,'Everyone is dead... Everyone and everything...',0,0,0,1,'SAY_6_MOOTOO_Y'),
+(-1001233,'I see a break in the mist up ahead. We\'re getting closer!',0,0,0,5,'SAY_7_MOOTOO_Y'),
+(-1001234,'How will we overcome the mist?',0,0,0,1,'SAY_8_MOOTOO_Y'),
+(-1001235,'FATHER! Father, I\'m saved!',0,0,0,1,'SAY_CREDIT_MOOTOO_Y'),
+(-1001236,'Daughter! You have returned!',0,0,0,5,'SAY_1_ELDER_MOOTOO'),
+(-1001237,'%s hugs Elder Mootoo.',0,2,0,5,'SAY_9_MOOTOO_Y'),
+(-1001238,'Mootoo thanks you, $n.',0,0,0,1,'SAY_2_ELDER_MOOTOO');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -10713,5 +10728,33 @@ INSERT INTO script_waypoint VALUES
 (17982, 37, -1915.010, -10581.500, 178.105, 1000, 'escort paused, SAY_ESCORT_LEGOSO_9, SAY_ESCORT_LEGOSO_10'),
 (17982, 38, -1952.080, -10560.300, 177.657, 4000, 'SAY_ESCORT_COUNT_3, SAY_ESCORT_COUNT_2, SAY_ESCORT_COUNT_1'),
 (17982, 39, -1952.080, -10560.300, 177.657, 1000, 'escort paused, SAY_LEGOSO_AGGRO');
+
+DELETE FROM script_waypoint WHERE entry=25504;
+INSERT INTO script_waypoint VALUES
+(25504, 1, 2886.78, 6732.96, 32.9695, 5000, 'SAY_MOOTOO_Y_START'),
+(25504, 2, 2882.26, 6734.51, 32.8864, 0, ''),
+(25504, 3, 2877.37, 6731.59, 32.8721, 0, ''),
+(25504, 4, 2874.18, 6725.85, 30.3087, 0, 'SAY_1_MOOTOO_Y'),
+(25504, 5, 2866.36, 6726.04, 26.7277, 0, ''),
+(25504, 6, 2863.97, 6731.91, 23.8372, 0, ''),
+(25504, 7, 2869.29, 6736.92, 20.5227, 0, ''),
+(25504, 8, 2874.16, 6731.88, 18.5042, 0, ''),
+(25504, 9, 2887.05, 6736.39, 13.997, 5000, 'SAY_2_MOOTOO_Y'),
+(25504, 10, 2887.05, 6736.39, 13.997, 2000, 'EMOTE_ONESHOT_POINT'),
+(25504, 11, 2901.68, 6741.25, 14.0413, 0, ''),
+(25504, 12, 2919.45, 6746.28, 13.7325, 0, 'SAY_3_MOOTOO_Y'),
+(25504, 13, 2947.18, 6738.71, 12.7117, 0, ''),
+(25504, 14, 2982.43, 6748.59, 10.2755, 0, 'SAY_4_MOOTOO_Y'),
+(25504, 15, 2985.05, 6776.05, 8.33081, 0, 'SAY_5_MOOTOO_Y'),
+(25504, 16, 2978.72, 6801.48, 5.83056, 0, 'SAY_6_MOOTOO_Y'),
+(25504, 17, 2957.81, 6818.86, 4.7594, 0, ''),
+(25504, 18, 2917.03, 6820.55, 5.87954, 0, 'SAY_4_MOOTOO_Y'),
+(25504, 19, 2890.04, 6825.68, 4.11676, 3000, 'SAY_7_MOOTOO_Y'),
+(25504, 20, 2850.31, 6812.35, 2.09411, 0, 'SAY_8_MOOTOO_Y'),
+(25504, 21, 2813.28, 6793.82, 4.44574, 0, ''),
+(25504, 22, 2807.22, 6772.41, 5.80334, 2000, 'SAY_CREDIT_MOOTOO_Y'),
+(25504, 23, 2807.38, 6765,    6.30617, 0, 'SAY_1_ELDER_MOOTOO'),
+(25504, 24, 2807.49, 6748.29, 8.25933, 3000, 'MOOTOO_Y_SAY_9'),
+(25504, 25, 2807.49, 6748.29, 8.25933, 5000, 'SAY_2_ELDER_MOOTOO');
 
 -- EOF

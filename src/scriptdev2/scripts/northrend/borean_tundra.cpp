@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Borean_Tundra
 SD%Complete: 100
-SDComment: Quest support: 11570, 11590, 11608, 11673, 11728, 11865, 11881, 11889, 11897, 11919, 11940.
+SDComment: Quest support: 11570, 11590, 11608, 11664, 11673, 11728, 11865, 11881, 11889, 11897, 11919, 11940.
 SDCategory: Borean Tundra
 EndScriptData */
 
@@ -31,6 +31,7 @@ npc_nexus_drake_hatchling
 npc_scourged_flamespitter
 npc_bonker_togglevolt
 npc_jenny
+npc_mootoo_the_younger
 EndContentData */
 
 #include "precompiled.h"
@@ -1195,69 +1196,195 @@ CreatureAI* GetAI_npc_seaforium_depth_charge(Creature* pCreature)
     return new npc_seaforium_depth_chargeAI(pCreature);
 }
 
+/*######
+## npc_mootoo_the_younger
+######*/
+
+enum
+{
+	SAY_MOOTOO_Y_START      = -1001226,
+	SAY_1_MOOTOO_Y          = -1001227,
+	SAY_2_MOOTOO_Y          = -1001228,
+	SAY_3_MOOTOO_Y          = -1001229,
+	SAY_4_MOOTOO_Y          = -1001230,
+	SAY_5_MOOTOO_Y          = -1001231,
+	SAY_6_MOOTOO_Y          = -1001232,
+	SAY_7_MOOTOO_Y          = -1001233,
+	SAY_8_MOOTOO_Y          = -1001234,
+	SAY_9_MOOTOO_Y          = -1001237,
+	SAY_CREDIT_MOOTOO_Y     = -1001235,
+	SAY_1_ELDER_MOOTOO      = -1001236,
+	SAY_2_ELDER_MOOTOO      = -1001238,
+
+	NPC_ELDER_MOOTOO        = 25503,
+
+	QUEST_ESCAPING_THE_MIST = 11664
+};
+
+struct npc_mootoo_the_youngerAI : public npc_escortAI
+{
+	npc_mootoo_the_youngerAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+
+	void Reset() override
+	{
+		if (!HasEscortState(STATE_ESCORT_ESCORTING))
+			m_creature->SetStandState(UNIT_STAND_STATE_SIT);
+	}
+
+	void WaypointReached(uint32 uiPointId) override
+	{
+		switch (uiPointId)
+		{
+			case 1:
+				m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+				if (Player* pPlayer = GetPlayerForEscort())
+					DoScriptText(SAY_MOOTOO_Y_START, m_creature, pPlayer);
+				break;
+			case 4:
+				DoScriptText(SAY_1_MOOTOO_Y, m_creature);
+				break;
+			case 9:
+				if (Player* pPlayer = GetPlayerForEscort())
+					DoScriptText(SAY_2_MOOTOO_Y, m_creature, pPlayer);
+				break;
+			case 10:
+				m_creature->HandleEmote(EMOTE_ONESHOT_POINT);
+				break;
+			case 12:
+				DoScriptText(SAY_3_MOOTOO_Y, m_creature);
+				break;
+			case 14:
+				DoScriptText(SAY_4_MOOTOO_Y, m_creature);
+				break;
+			case 15:
+				DoScriptText(SAY_5_MOOTOO_Y, m_creature);
+				break;
+			case 16:
+				DoScriptText(SAY_6_MOOTOO_Y, m_creature);
+				break;
+			case 18:
+				DoScriptText(SAY_4_MOOTOO_Y, m_creature);
+				break;
+			case 19:
+				DoScriptText(SAY_7_MOOTOO_Y, m_creature);
+				break;
+			case 20:
+				DoScriptText(SAY_8_MOOTOO_Y, m_creature);
+				break;
+			case 22:
+				DoScriptText(SAY_CREDIT_MOOTOO_Y, m_creature);
+				SetRun();
+				break;
+			case 23:
+				if (Player* pPlayer = GetPlayerForEscort())
+					pPlayer->GroupEventHappens(QUEST_ESCAPING_THE_MIST, m_creature);
+				if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_ELDER_MOOTOO, 30.0f))
+					DoScriptText(SAY_1_ELDER_MOOTOO, pFather);
+				break;
+			case 24:
+				DoScriptText(SAY_9_MOOTOO_Y, m_creature);
+				if (Player* pPlayer = GetPlayerForEscort())
+				if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_ELDER_MOOTOO, 30.0f))
+					DoScriptText(SAY_2_ELDER_MOOTOO, pFather, pPlayer);
+				break;
+			case 25:
+				if (Player* pPlayer = GetPlayerForEscort())
+				if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_ELDER_MOOTOO, 30.0f))
+					pFather->HandleEmote(EMOTE_ONESHOT_BOW);
+				SetEscortPaused(true);
+				m_creature->ForcedDespawn(10000);
+				break;
+		}
+	}
+
+	void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+	{
+		if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+			Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
+	}
+};
+
+bool QuestAccept_npc_mootoo_the_younger(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+	if (pQuest->GetQuestId() == QUEST_ESCAPING_THE_MIST)
+		pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+	return true;
+}
+
+CreatureAI* GetAI_npc_mootoo_the_youngerAI(Creature* pCreature)
+{
+	return new npc_mootoo_the_youngerAI(pCreature);
+}
+
 void AddSC_borean_tundra()
 {
-    Script* pNewScript;
+	Script* pNewScript;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_nesingwary_trapper";
-    pNewScript->GetAI = &GetAI_npc_nesingwary_trapper;
-    pNewScript->RegisterSelf();
+	pNewScript = new Script;
+	pNewScript->Name = "npc_nesingwary_trapper";
+	pNewScript->GetAI = &GetAI_npc_nesingwary_trapper;
+	pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_oil_stained_wolf";
-    pNewScript->GetAI = &GetAI_npc_oil_stained_wolf;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_oil_stained_wolf;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_oil_stained_wolf;
-    pNewScript->RegisterSelf();
+	pNewScript = new Script;
+	pNewScript->Name = "npc_oil_stained_wolf";
+	pNewScript->GetAI = &GetAI_npc_oil_stained_wolf;
+	pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_oil_stained_wolf;
+	pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_oil_stained_wolf;
+	pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_sinkhole_kill_credit";
-    pNewScript->GetAI = &GetAI_npc_sinkhole_kill_credit;
-    pNewScript->RegisterSelf();
+	pNewScript = new Script;
+	pNewScript->Name = "npc_sinkhole_kill_credit";
+	pNewScript->GetAI = &GetAI_npc_sinkhole_kill_credit;
+	pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_lurgglbr";
-    pNewScript->GetAI = &GetAI_npc_lurgglbr;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_lurgglbr;
-    pNewScript->RegisterSelf();
+	pNewScript = new Script;
+	pNewScript->Name = "npc_lurgglbr";
+	pNewScript->GetAI = &GetAI_npc_lurgglbr;
+	pNewScript->pQuestAcceptNPC = &QuestAccept_npc_lurgglbr;
+	pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_beryl_sorcerer";
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_beryl_sorcerer;
-    pNewScript->RegisterSelf();
+	pNewScript = new Script;
+	pNewScript->Name = "npc_beryl_sorcerer";
+	pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_beryl_sorcerer;
+	pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_captured_beryl_sorcerer";
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_captured_beryl_sorcerer;
-    pNewScript->RegisterSelf();
+	pNewScript = new Script;
+	pNewScript->Name = "npc_captured_beryl_sorcerer";
+	pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_captured_beryl_sorcerer;
+	pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_nexus_drake_hatchling";
-    pNewScript->GetAI = &GetAI_npc_nexus_drake_hatchling;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_nexus_drake_hatchling;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_nexus_drake_hatchling;
-    pNewScript->RegisterSelf();
+	pNewScript = new Script;
+	pNewScript->Name = "npc_nexus_drake_hatchling";
+	pNewScript->GetAI = &GetAI_npc_nexus_drake_hatchling;
+	pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_nexus_drake_hatchling;
+	pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_nexus_drake_hatchling;
+	pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_scourged_flamespitter";
-    pNewScript->GetAI = &GetAI_npc_scourged_flamespitter;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_scourged_flamespitter;
-    pNewScript->RegisterSelf();
+	pNewScript = new Script;
+	pNewScript->Name = "npc_scourged_flamespitter";
+	pNewScript->GetAI = &GetAI_npc_scourged_flamespitter;
+	pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_scourged_flamespitter;
+	pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_bonker_togglevolt";
-    pNewScript->GetAI = &GetAI_npc_bonker_togglevolt;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_bonker_togglevolt;
-    pNewScript->RegisterSelf();
+	pNewScript = new Script;
+	pNewScript->Name = "npc_bonker_togglevolt";
+	pNewScript->GetAI = &GetAI_npc_bonker_togglevolt;
+	pNewScript->pQuestAcceptNPC = &QuestAccept_npc_bonker_togglevolt;
+	pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_jenny";
-    pNewScript->GetAI = &GetAI_npc_jenny;
-    pNewScript->RegisterSelf();
+	pNewScript = new Script;
+	pNewScript->Name = "npc_jenny";
+	pNewScript->GetAI = &GetAI_npc_jenny;
+	pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_seaforium_depth_charge";
-    pNewScript->GetAI = &GetAI_npc_seaforium_depth_charge;
-    pNewScript->RegisterSelf();
+	pNewScript = new Script;
+	pNewScript->Name = "npc_seaforium_depth_charge";
+	pNewScript->GetAI = &GetAI_npc_seaforium_depth_charge;
+	pNewScript->RegisterSelf();
+
+	pNewScript = new Script;
+	pNewScript->Name = "npc_mootoo_the_younger";
+	pNewScript->GetAI = &GetAI_npc_mootoo_the_youngerAI;
+	pNewScript->pQuestAcceptNPC = &QuestAccept_npc_mootoo_the_younger;
+	pNewScript->RegisterSelf();
 }
