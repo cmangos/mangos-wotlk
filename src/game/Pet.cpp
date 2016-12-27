@@ -389,12 +389,16 @@ void Pet::SavePetToDB(PetSaveMode mode)
     if (!isControlled())
         return;
 
-    // not save not player pets
+    // dont save not player pets
     if (!GetOwnerGuid().IsPlayer())
         return;
 
     Player* pOwner = (Player*)GetOwner();
     if (!pOwner)
+        return;
+
+    // dont save shadowfiend
+    if (pOwner->getClass() == CLASS_PRIEST)
         return;
 
     // current/stable/not_in_slot
