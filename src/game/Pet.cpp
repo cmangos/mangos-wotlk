@@ -203,6 +203,8 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
         }
     }
 
+    m_petType = pet_type;
+
     uint32 pet_number = fields[0].GetUInt32();
 
     if (owner->IsPetNeedBeTemporaryUnsummoned())
