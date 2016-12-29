@@ -22233,7 +22233,7 @@ bool Player::IsPetNeedBeTemporaryUnsummoned() const
     if (sWorld.getConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT) && IsMounted())
         return true;
 
-    if (IsFlying())
+    if (HasAuraType(SPELL_AURA_FLY))
         return true;
 
     if (hasUnitState(UNIT_STAT_TAXI_FLIGHT))
