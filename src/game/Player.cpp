@@ -22233,7 +22233,7 @@ bool Player::IsPetNeedBeTemporaryUnsummoned() const
     if (sWorld.getConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT) && IsMounted())
         return true;
 
-    if (HasAuraType(SPELL_AURA_FLY))
+    if (HasAuraType(SPELL_AURA_FLY) || (IsMounted() && HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED))) // if not IsMounted and has aura, means we are removing flying mount
         return true;
 
     if (hasUnitState(UNIT_STAT_TAXI_FLIGHT))
