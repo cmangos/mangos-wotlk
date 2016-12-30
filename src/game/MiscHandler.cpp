@@ -341,6 +341,13 @@ void WorldSession::HandleLogoutCancelOpcode(WorldPacket& /*recv_data*/)
 
 void WorldSession::HandleTogglePvP(WorldPacket& recv_data)
 {
+    uint32 zoneId = GetPlayer()->GetZoneId();
+    if (AreaTableEntry const* zone = GetAreaEntryByAreaID(zoneId))
+    {
+        if (zone->flags & AREA_FLAG_SANCTUARY)
+            return;
+    }
+
     // this opcode can be used in two ways: Either set explicit new status or toggle old status
     if (recv_data.size() == 1)
     {

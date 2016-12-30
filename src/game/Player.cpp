@@ -7034,6 +7034,11 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     if (zone->flags & AREA_FLAG_SANCTUARY)                  // in sanctuary
     {
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY);
+
+        // Sanctuary zones removes pvp flags
+        if (IsPvP() || pvpInfo.endTimer != 0)
+            UpdatePvP(false);
+
         if (sWorld.IsFFAPvPRealm())
             SetFFAPvP(false);
     }
