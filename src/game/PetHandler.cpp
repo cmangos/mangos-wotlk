@@ -182,7 +182,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                                 }
                             }
                             else
-                                pet->Attack(targetUnit, true);
+                                petUnit->Attack(targetUnit, true);
                         }
                     }
                     break;
