@@ -1284,13 +1284,13 @@ struct npc_mootoo_the_youngerAI : public npc_escortAI
             case 24:
                 DoScriptText(SAY_9_MOOTOO_Y, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
-                if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_ELDER_MOOTOO, 30.0f))
-                    DoScriptText(SAY_2_ELDER_MOOTOO, pFather, pPlayer);
+                    if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_ELDER_MOOTOO, 30.0f))
+                        DoScriptText(SAY_2_ELDER_MOOTOO, pFather, pPlayer);
                 break;
             case 25:
                 if (Player* pPlayer = GetPlayerForEscort())
-                if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_ELDER_MOOTOO, 30.0f))
-                    pFather->HandleEmote(EMOTE_ONESHOT_BOW);
+                    if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_ELDER_MOOTOO, 30.0f))
+                        pFather->HandleEmote(EMOTE_ONESHOT_BOW);
                 SetEscortPaused(true);
                 m_creature->ForcedDespawn(10000);
                 break;
@@ -1307,8 +1307,12 @@ struct npc_mootoo_the_youngerAI : public npc_escortAI
 bool QuestAccept_npc_mootoo_the_younger(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
     if (pQuest->GetQuestId() == QUEST_ESCAPING_THE_MIST)
+    {
         pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
-    return true;
+        return true;
+    }
+
+    return false;
 }
 
 CreatureAI* GetAI_npc_mootoo_the_youngerAI(Creature* pCreature)
