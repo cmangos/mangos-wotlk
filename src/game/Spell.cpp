@@ -5977,7 +5977,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 // Failing gathering attempt for mining and herbalism was removed in patch 3.1.0: http://wowwiki.wikia.com/wiki/Patch_3.1.0
                 // chance for fail at orange LockPicking gathering attempt
                 // second check prevent fail at rechecks
-                if (m_spellState != SPELL_STATE_CREATED && skillId != SKILL_NONE && skillId != SKILL_HERBALISM && skillId != SKILL_MINING )
+                if (m_spellState > SPELL_STATE_STARTING && skillId != SKILL_NONE && skillId != SKILL_HERBALISM && skillId != SKILL_MINING )
                 {
                     bool canFailAtMax = skillId != SKILL_HERBALISM && skillId != SKILL_MINING;
 
