@@ -6705,8 +6705,12 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     // this enables pet details window (Shift+P)
     pet->InitPetCreateSpells();
 
-    // this add special Tamed Pet aura
+    // this add pet auras
+    pet->LearnPetPassives();
+    pet->CastPetAuras(true);
+    pet->CastOwnerTalentAuras();
     pet->InitTamedPetPassives(m_caster);
+    pet->UpdateAllStats();
 
     // caster have pet now
     plr->SetPet(pet);
@@ -6781,7 +6785,12 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     NewSummon->InitPetCreateSpells();
     NewSummon->InitLevelupSpellsForLevel();
     NewSummon->InitTalentForLevel();
+
+    NewSummon->LearnPetPassives();
+    NewSummon->CastPetAuras(true);
+    NewSummon->CastOwnerTalentAuras();
     NewSummon->InitTamedPetPassives(m_caster);
+    NewSummon->UpdateAllStats();
 
     map->Add((Creature*)NewSummon);
     NewSummon->AIM_Initialize();
