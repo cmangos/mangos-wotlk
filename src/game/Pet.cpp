@@ -290,10 +290,29 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     uint32 savedpower = fields[11].GetUInt32();
     Powers powerType = GetPowerType();
 
+    // load action bar, if data broken will fill later by default spells.
+    m_charmInfo->LoadPetActionBar(fields[13].GetCppString());
+
+    // since last save (in seconds)
+    uint32 timediff = uint32(time(nullptr) - fields[14].GetUInt64());
+
+    m_resetTalentsCost = fields[15].GetUInt32();
+    m_resetTalentsTime = fields[16].GetUInt64();
+
+    delete result;
+
+    // load spells/cooldowns/auras
+    _LoadAuras(timediff);
+
+    // init AB
+    LearnPetPassives();
+    CastPetAuras(current);
+    CastOwnerTalentAuras();
+
     // failsafe check
     savedhealth = savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth;
     savedpower = savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower;
-    
+
     if (getPetType() == SUMMON_PET)
     {
         savedhealth = GetMaxHealth();
@@ -313,24 +332,8 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
         }
     }
 
-    // load action bar, if data broken will fill later by default spells.
-    m_charmInfo->LoadPetActionBar(fields[13].GetCppString());
-
-    // since last save (in seconds)
-    uint32 timediff = uint32(time(nullptr) - fields[14].GetUInt64());
-
-    m_resetTalentsCost = fields[15].GetUInt32();
-    m_resetTalentsTime = fields[16].GetUInt64();
-
-    delete result;
-
-    // load spells/cooldowns/auras
-    _LoadAuras(timediff);
-
-    // init AB
-    LearnPetPassives();
-    CastPetAuras(current);
-    CastOwnerTalentAuras();
+    SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
+    SetPower(powerType, savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower);
 
     map->Add((Creature*)this);
     AIM_Initialize();
