@@ -39,6 +39,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/pet_ai.h"
+#include "Entities/TemporarySummon.h"
 
 /*#####
 # mob_mature_netherwing_drake
@@ -1523,6 +1524,9 @@ struct npc_spawned_oronok_tornheartAI : public ScriptedAI, private DialogueHelpe
                     m_gromtorGuid = pGromtor->GetObjectGuid();
                     pGromtor->GetMotionMaster()->MoveFollow(m_creature, 5.0f, M_PI_F / 2);
                 }
+                if (TemporarySummon* oronok = dynamic_cast<TemporarySummon*>(m_creature))
+                    if (Unit* summoner = oronok->GetMap()->GetUnit(oronok->GetSummonerGuid()))
+                        DoScriptText(SAY_ORONOK_TOGETHER, m_creature, summoner);
                 break;
             case NPC_EARTHMENDER_TORLOK:
                 if (Creature* pTorlok = GetClosestCreatureWithEntry(m_creature, NPC_EARTHMENDER_TORLOK, 25.0f))
