@@ -1224,65 +1224,55 @@ enum
 
 struct npc_totem_of_spiritsAI : public ScriptedPetAI
 {
-    npc_totem_of_spiritsAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
+    npc_totem_of_spiritsAI(Creature* pCreature) : ScriptedPetAI(pCreature)
+    {
+        Reset();
+        m_uiElementalSieveTimer = 2500; // needs to be cast non-stop without interference from evade and some such
+    }
+
+    uint32 m_uiElementalSieveTimer;
 
     void Reset() override {}
 
-    void UpdateAI(const uint32 /*uiDiff*/) override {}
     void AttackedBy(Unit* /*pAttacker*/) override {}
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiData) override
     {
-        if (pWho->GetTypeId() != TYPEID_UNIT)
-            return;
-
-        // Use the LoS function to check for the souls in range due to the fact that pets do not support SummonedMovementInform()
-        uint32 uiEntry = pWho->GetEntry();
-        if (uiEntry == NPC_EARTHEN_SOUL || uiEntry == NPC_FIERY_SOUL || uiEntry == NPC_WATERY_SOUL || uiEntry == NPC_AIRY_SOUL)
+        switch (pSummoned->GetEntry())
         {
-            // Only when it's close to the totem
-            if (!pWho->IsWithinDistInMap(m_creature, 1.5f))
-                return;
-
-            switch (uiEntry)
-            {
-                case NPC_EARTHEN_SOUL:
-                    pWho->CastSpell(m_creature, SPELL_EARTH_CAPTURED, TRIGGERED_OLD_TRIGGERED);
-                    break;
-                case NPC_FIERY_SOUL:
-                    pWho->CastSpell(m_creature, SPELL_FIERY_CAPTURED, TRIGGERED_OLD_TRIGGERED);
-                    break;
-                case NPC_WATERY_SOUL:
-                    pWho->CastSpell(m_creature, SPELL_WATER_CAPTURED, TRIGGERED_OLD_TRIGGERED);
-                    break;
-                case NPC_AIRY_SOUL:
-                    pWho->CastSpell(m_creature, SPELL_AIR_CAPTURED, TRIGGERED_OLD_TRIGGERED);
-                    break;
-            }
-
-            // Despawn the spirit soul after it's captured
-            ((Creature*)pWho)->ForcedDespawn();
+            case NPC_EARTHEN_SOUL:
+                pSummoned->CastSpell(m_creature, SPELL_EARTH_CAPTURED, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case NPC_FIERY_SOUL:
+                pSummoned->CastSpell(m_creature, SPELL_FIERY_CAPTURED, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case NPC_WATERY_SOUL:
+                pSummoned->CastSpell(m_creature, SPELL_WATER_CAPTURED, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case NPC_AIRY_SOUL:
+                pSummoned->CastSpell(m_creature, SPELL_AIR_CAPTURED, TRIGGERED_OLD_TRIGGERED);
+                break;
         }
-    }
 
-    void OwnerKilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_UNIT)
-            return;
-
-        uint32 uiEntry = pVictim->GetEntry();
-
-        // make elementals cast the sieve is only way to make it work properly, due to the spell target modes 22/7
-        if (uiEntry == NPC_EARTH_SPIRIT || uiEntry == NPC_FIERY_SPIRIT || uiEntry == NPC_WATER_SPIRIT || uiEntry == NPC_AIR_SPIRIT)
-            pVictim->CastSpell(pVictim, SPELL_ELEMENTAL_SIEVE, TRIGGERED_OLD_TRIGGERED);
+        // Despawn the spirit soul after it's captured
+        ((Creature*)pSummoned)->ForcedDespawn(1000);
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
         // After summoning the spirit soul, make it move towards the totem
-        float fX, fY, fZ;
-        m_creature->GetContactPoint(pSummoned, fX, fY, fZ);
-        pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+        pSummoned->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 4);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiElementalSieveTimer <= uiDiff)
+        {
+            m_creature->CastSpell(m_creature, SPELL_ELEMENTAL_SIEVE, TRIGGERED_OLD_TRIGGERED);
+            m_uiElementalSieveTimer = 2500;
+        }
+        else
+            m_uiElementalSieveTimer -= uiDiff;
     }
 };
 
@@ -1321,42 +1311,6 @@ bool EffectDummyCreature_npc_totem_of_spirits(Unit* /*pCaster*/, uint32 uiSpellI
     }
 
     return false;
-}
-
-bool EffectAuraDummy_npc_totem_of_spirits(const Aura* pAura, bool bApply)
-{
-    if (pAura->GetId() != SPELL_ELEMENTAL_SIEVE)
-        return true;
-
-    if (pAura->GetEffIndex() != EFFECT_INDEX_0)
-        return true;
-
-    if (bApply)                                             // possible it should be some visual effects, using "enraged soul" npc and "Cosmetic: ... soul" spell
-        return true;
-
-    Creature* pCreature = (Creature*)pAura->GetTarget();
-    Unit* pCaster = pAura->GetCaster();
-
-    // aura only affect the spirit totem, since this is the one that need to be in range.
-    // It is possible though, that player is the one who should actually have the aura
-    // and check for presense of spirit totem, but then we can't script the dummy.
-    if (!pCreature || !pCreature->IsPet() || !pCaster)
-        return true;
-
-    // Summon the soul of the spirit and cast the visual
-    uint32 uiSoulEntry = 0;
-    switch (pCaster->GetEntry())
-    {
-        case NPC_EARTH_SPIRIT: uiSoulEntry = NPC_EARTHEN_SOUL; break;
-        case NPC_FIERY_SPIRIT: uiSoulEntry = NPC_FIERY_SOUL;   break;
-        case NPC_WATER_SPIRIT: uiSoulEntry = NPC_WATERY_SOUL;  break;
-        case NPC_AIR_SPIRIT:   uiSoulEntry = NPC_AIRY_SOUL;    break;
-    }
-
-    pCreature->CastSpell(pCreature, SPELL_CALL_TO_THE_SPIRITS, TRIGGERED_OLD_TRIGGERED);
-    pCreature->SummonCreature(uiSoulEntry, pCaster->GetPositionX(), pCaster->GetPositionY(), pCaster->GetPositionZ(), 0, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 10000);
-
-    return true;
 }
 
 bool ProcessEventId_event_spell_soul_captured_credit(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool bIsStart)
@@ -1928,7 +1882,6 @@ void AddSC_shadowmoon_valley()
     pNewScript->Name = "npc_totem_of_spirits";
     pNewScript->GetAI = &GetAI_npc_totem_of_spirits;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_totem_of_spirits;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_totem_of_spirits;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
