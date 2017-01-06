@@ -1575,21 +1575,6 @@ struct npc_spawned_oronok_tornheartAI : public ScriptedAI, private DialogueHelpe
         }
     }
 
-    void Aggro(Unit* pWho) override
-    {
-        if (!m_bHasAttackStart && pWho->GetEntry() == NPC_EARTH_SPIRIT)
-        {
-            // Cyrukh starts to attack
-            if (Creature* pCyrukh = m_creature->GetMap()->GetCreature(m_cyrukhGuid))
-            {
-                pCyrukh->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-                pCyrukh->AI()->AttackStart(m_creature);
-                AttackStart(pCyrukh);
-                m_bHasAttackStart = true;
-            }
-        }
-    }
-
     void JustSummoned(Creature* pSummoned) override
     {
         switch (pSummoned->GetEntry())
@@ -1645,9 +1630,14 @@ struct npc_spawned_oronok_tornheartAI : public ScriptedAI, private DialogueHelpe
                 DoScriptText(SAY_ORONOK_READY, m_creature);
                 break;
             case POINT_ID_ELEMENTS:
-                // Attack the closest earth element
-                if (Creature* pElement = GetClosestCreatureWithEntry(m_creature, NPC_EARTH_SPIRIT, 50.0f))
-                    AttackStart(pElement);
+                // Cyrukh starts to attack
+                if (Creature* pCyrukh = m_creature->GetMap()->GetCreature(m_cyrukhGuid))
+                {
+                    pCyrukh->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                    pCyrukh->AI()->AttackStart(m_creature);
+                    AttackStart(pCyrukh);
+                    m_bHasAttackStart = true;
+                }
                 break;
             case POINT_ID_EPILOGUE:
                 StartNextDialogueText(NPC_EARTHMENDER_TORLOK);
