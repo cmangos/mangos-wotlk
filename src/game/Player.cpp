@@ -7421,8 +7421,8 @@ void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool appl
             armor = ssvarmor;
     }
     // Add armor bonus from ArmorDamageModifier if > 0
-    if (proto->ArmorDamageModifier > 0)
-        armor += uint32(proto->ArmorDamageModifier);
+    /*if (proto->ArmorDamageModifier > 0) This is wrong, the member is used by client to determine bonus armor. proto->Armor already has full armor
+        armor += uint32(proto->ArmorDamageModifier);*/
 
     if (armor)
     {
