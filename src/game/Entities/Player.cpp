@@ -20103,6 +20103,13 @@ void Player::SendComboPoints() const
     }*/
 }
 
+bool Player::AttackStop(bool targetSwitch, bool includingCast, bool includingCombo)
+{
+    if (includingCombo)
+        ClearComboPoints();
+    return Unit::AttackStop(targetSwitch, includingCast, includingCombo);
+}
+
 void Player::AddComboPoints(Unit* target, int8 count)
 {
     if (!count)
