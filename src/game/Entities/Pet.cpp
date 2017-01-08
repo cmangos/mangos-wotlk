@@ -138,7 +138,7 @@ SpellCastResult Pet::TryLoadFromDB(Unit* owner, uint32 petentry /*= 0*/, uint32 
     return SPELL_CAST_OK; // If errors occur down the line, one must think about data consistency
 }
 
-bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber /*= 0*/, bool current /*= false*/, uint32 healthPercentage /*= 0*/, bool permanentOnly /*= false*/)
+bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber /*= 0*/, bool current /*= false*/, uint32 healthPercentage /*= 0*/, bool permanentOnly /*= false*/, bool forced /*= false*/)
 {
     m_loading = true;
 
@@ -213,7 +213,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
 
     uint32 pet_number = fields[0].GetUInt32();
 
-    if (owner->IsPetNeedBeTemporaryUnsummoned())
+    if (!forced && owner->IsPetNeedBeTemporaryUnsummoned())
     {
         // set temporary summon that way its possible if the player unmount to resummon it automaticaly
         owner->SetTemporaryUnsummonedPetNumber(pet_number);

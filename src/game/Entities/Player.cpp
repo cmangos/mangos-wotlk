@@ -18354,6 +18354,17 @@ void Player::RemovePet(PetSaveMode mode)
 {
     if (Pet* pet = GetPet())
         pet->Unsummon(mode, this);
+    else if (m_temporaryUnsummonedPetNumber)
+    {
+        // TODO: Only edit pet in DB and reward reagent if necessary
+        Pet* NewPet = new Pet;
+        if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true,0,false,true))
+            delete NewPet;
+
+        m_temporaryUnsummonedPetNumber = 0;
+        if(NewPet)
+            NewPet->Unsummon(mode, this);
+    }
 }
 
 void Player::Say(const std::string& text, const uint32 language) const
