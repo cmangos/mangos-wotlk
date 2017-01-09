@@ -40,6 +40,7 @@ enum
 
     SPELL_BLADE_DANCE               = 30739,
     SPELL_CHARGE_H                  = 25821,
+    SPELL_DOUBLE_ATTACK             = 19818,
 
     TARGET_NUM                      = 5,
 
@@ -59,6 +60,7 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        m_creature->CastSpell(m_creature, SPELL_DOUBLE_ATTACK, TRIGGERED_NONE);
         Reset();
     }
 
