@@ -82,12 +82,12 @@ static inline SpellPartialResistDistribution InitSpellPartialResistDistribution(
             {
                 const uint8 arg = (column > SPELL_PARTIAL_RESIST_PCT_80) ? (100 - percentage) : percentage;
                 if (!(column % SPELL_PARTIAL_RESIST_PCT_100))
-                    values[column] = uint16(std::round((100.0f - (arg * 7.5f)) * 100));
+                    values[column] = uint16(::round((100.0f - (arg * 7.5f)) * 100));
                 else
                     values[column] = uint16(arg * 5 * 100);
             }
             else
-                values[column] = uint16(std::round(std::max(0.5f - (2.5f * std::abs((float(column) * 10 / 100) - (float(percentage) / 100))), 0.0f) * 10000));
+                values[column] = uint16(::round(std::max(0.5f - (2.5f * std::abs((float(column) * 10 / 100) - (float(percentage) / 100))), 0.0f) * 10000));
         }
         precalculated.push_back(values);
     }
@@ -116,7 +116,7 @@ static inline SpellPartialResistDistribution InitSpellPartialResistDistribution(
                 const uint32 upcoming = ahead.at(column);
                 const int64 diff = (int64(upcoming) - base);
                 // Use bigger types signed math to avoid potential erratic behavior on some compilers...
-                values[column] = uint32(std::max(0.0, (base + std::round(diff * (intermediate / double(100.0))))));
+                values[column] = uint32(std::max(0.0, (base + ::round(diff * (intermediate / double(100.0))))));
             }
         }
     }
