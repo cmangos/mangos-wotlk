@@ -60,3 +60,11 @@ INSERT INTO spell_template(Id, Attributes, AttributesEx,AttributesEx2,Attributes
 -- To Legion Hold(q.10596) -H  (q.10563) -A
 INSERT INTO spell_template (Id, Attributes, AttributesEx, ProcChance, DurationIndex, Effect1, Effect2, EffectImplicitTargetA1,EffectApplyAuraName1,EffectMiscValue2,IsServerSide,SpellName) VALUES
 ('37492','384','268435456','101','3','6','61','1','12','13852','1','Crate Disguise Subspell');
+
+-- trap used to tame bear is no longer present in TBC/WOTLK yet still present in trap data
+INSERT INTO spell_template (Id, Attributes, CastingTimeIndex, ProcChance, SpellLevel, RangeIndex, EquippedItemClass, Effect1, EffectDieSides1, EffectBaseDice1, EffectImplicitTargetA1, SpellIconID, SpellName, MaxTargetLevel, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, IsServerSide) VALUES
+('9439', '256', '1', '101', '1', '12', '-1', '3', '1', '1', '38', '1', 'Bear Captured in Trap', '60', '1', '1', '1', '1');
+
+-- generic proc double attack used in a lot of TBC instances based on sniffs
+INSERT INTO spell_template (Id, Category, Attributes, CastingTimeIndex, ProcChance, BaseLevel, SpellLevel, RangeIndex, EquippedItemClass, Effect1, EffectDieSides1, EffectBaseDice1, EffectImplicitTargetA1, SpellIconID, SpellName, DmgClass, PreventionType, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, IsServerSide) VALUES
+('18941', '65', '262416', '1', '101', '14', '14', '1', '-1', '19', '1', '1', '1', '108', 'Double Attack', '2', '2', '1', '1', '1', '1');
