@@ -234,7 +234,7 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
                         m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
                         m_uiWaitTimer = 0;
                         if (!m_bIsRegularMode)
-                            m_uiChargeTimer = 5000;
+                            m_uiChargeTimer = 500;
                     }
                     else
                     {
