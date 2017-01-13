@@ -8808,7 +8808,7 @@ bool Aura::IsCritFromAbilityAura(Unit* caster, uint32& damage) const
 
     if (caster->IsSpellCrit(GetTarget(), GetSpellProto(), GetSpellSchoolMask(GetSpellProto())))
     {
-        damage = caster->SpellCriticalDamageBonus(GetSpellProto(), damage, GetTarget());
+        damage = caster->CalculateCritAmount(GetTarget(), damage, GetSpellProto());
         return true;
     }
 
