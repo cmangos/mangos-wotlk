@@ -3486,16 +3486,8 @@ float Unit::GetCritChance(WeaponAttackType attType) const
 {
     float chance = 0.0f;
     if (GetTypeId() == TYPEID_UNIT)
-    {
-        // Totems use owner's crit chance (when owner is available)
-        if (((const Creature*)this)->IsTotem())
-        {
-            if (const Unit* owner = GetOwner())
-                return owner->GetCritChance(attType);
-        }
         // Base crit chance (needed for units only, already included for players)
         chance += 5.0f;
-    }
     chance += m_modCritChance[attType];
     return chance;
 }
@@ -3509,16 +3501,8 @@ float Unit::GetCritChance(SpellSchoolMask schoolMask) const
         return 0.0f;
 
     if (GetTypeId() == TYPEID_UNIT)
-    {
-        // Totems use owner's crit chance (when owner is available)
-        if (((const Creature*)this)->IsTotem())
-        {
-            if (const Unit* owner = GetOwner())
-                return owner->GetCritChance(schoolMask);
-        }
         // Base crit chance (needed for units only, already included for players)
         chance += 5.0f;
-    }
     // Pick highest spell crit available for given school mask
     for (uint8 school = 0; mask; ++school)
     {
@@ -3586,15 +3570,6 @@ float Unit::GetCritTakenChance(SpellSchoolMask dmgSchoolMask, SpellDmgClass dmgC
 
 float Unit::GetCritMultiplier(SpellSchoolMask dmgSchoolMask, uint32 creatureTypeMask, const SpellEntry *spell, bool heal) const
 {
-    if (GetTypeId() == TYPEID_UNIT)
-    {
-        // Totems use owner's crit multiplier
-        if (((const Creature*)this)->IsTotem())
-        {
-            if (const Unit* owner = GetOwner())
-                return owner->GetCritMultiplier(dmgSchoolMask, creatureTypeMask, spell, heal);
-        }
-    }
     // Default crit multiplier (attacks): 2x
     float multiplier = 2.0f;
     // Default crit multiplier for spells: 1.5x
@@ -3709,12 +3684,6 @@ uint32 Unit::CalculateCritAmount(CalcDamageInfo *meleeInfo) const
 
 float Unit::GetHitChance(WeaponAttackType attackType) const
 {
-    // Totems use owner's hit chance (when owner is available)
-    if (GetTypeId() == TYPEID_UNIT && ((const Creature*)this)->IsTotem())
-    {
-        if (const Unit* owner = GetOwner())
-            return owner->GetHitChance(attackType);
-    }
     if (attackType == RANGED_ATTACK)
         return m_modRangedHitChance;
     return m_modMeleeHitChance;
@@ -3727,12 +3696,6 @@ float Unit::GetHitChance(SpellSchoolMask schoolMask) const
     if (!uint32(schoolMask))
         return 0.0f;
 
-    // Totems use owner's hit chance (when owner is available)
-    if (GetTypeId() == TYPEID_UNIT && ((const Creature*)this)->IsTotem())
-    {
-        if (const Unit* owner = GetOwner())
-            return owner->GetHitChance(schoolMask);
-    }
     chance += m_modSpellHitChance;
     // Pick highest spell hit available for given school mask
     chance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT, schoolMask);
@@ -4120,12 +4083,6 @@ float Unit::GetExpertisePercent(WeaponAttackType attType) const
 
 int32 Unit::GetResistancePenetration(SpellSchools school) const
 {
-    // Totems use owner's penetration (when owner is available)
-    if (GetTypeId() == TYPEID_UNIT && ((const Creature*)this)->IsTotem())
-    {
-        if (const Unit* owner = GetOwner())
-            return owner->GetResistancePenetration(school);
-    }
     // Technically, it is target resistance mod, but it's used as penetration (negative sign) 99.9% of the time
     // So, let's logically reverse the sign and use it as such
     return -(GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, (1 << school)));
