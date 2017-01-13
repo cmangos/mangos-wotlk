@@ -5633,9 +5633,16 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
     // remove time effects
     else
     {
-        // Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
-        if (spellProto->Id == 41917)
-            target->CastSpell(target, 41915, TRIGGERED_OLD_TRIGGERED);
+        switch (spellProto->Id)
+        {
+            case 35201: // Paralytic Poison
+                if (m_removeMode == AURA_REMOVE_BY_DEFAULT)
+                    target->CastSpell(target, 35202, TRIGGERED_OLD_TRIGGERED); // Paralysis
+                break;
+            case 41917: // Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
+                target->CastSpell(target, 41915, TRIGGERED_OLD_TRIGGERED);
+                break;
+        }         
     }
 }
 
