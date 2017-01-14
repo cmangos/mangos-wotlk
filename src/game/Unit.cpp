@@ -9397,7 +9397,7 @@ void Unit::TauntApply(Unit* taunter)
         return;
 
     // Only attack taunter if this is a valid target
-    if (!hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED) && !IsSecondChoiceTarget(taunter, true))
+    if (CanReactInCombat() && !IsSecondChoiceTarget(taunter, true, true))
     {
         if (GetTargetGuid() || !target)
             SetInFront(taunter);
@@ -9470,7 +9470,7 @@ void Unit::FixateTarget(Unit* pVictim)
 
 //======================================================================
 
-bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea) const
+bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool taunt, bool checkThreatArea) const
 {
     MANGOS_ASSERT(pTarget);
 
@@ -9479,7 +9479,7 @@ bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea) const
 
     return
         pTarget->IsTargetUnderControl(*this) ||
-        pTarget->IsImmuneToDamage(GetMeleeDamageSchoolMask()) ||
+        (!taunt && pTarget->IsImmuneToDamage(GetMeleeDamageSchoolMask())) ||
         pTarget->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE) ||
         (thisCreature && checkThreatArea && thisCreature->IsOutOfThreatArea(pTarget));
 }
@@ -9512,7 +9512,7 @@ bool Unit::SelectHostileTarget()
         else
         {
             Unit* pFixateTarget = GetMap()->GetUnit(m_fixateTargetGuid);
-            if (pFixateTarget && pFixateTarget->isAlive() && !IsSecondChoiceTarget(pFixateTarget, true))
+            if (pFixateTarget && pFixateTarget->isAlive() && !IsSecondChoiceTarget(pFixateTarget, false, true))
                 target = pFixateTarget;
         }
     }
@@ -9528,7 +9528,7 @@ bool Unit::SelectHostileTarget()
         {
             if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
                     caster->isTargetableForAttack() && caster->isInAccessablePlaceFor((Creature*)this) &&
-                    !IsSecondChoiceTarget(caster, true))
+                    !IsSecondChoiceTarget(caster, true, true))
             {
                 target = caster;
                 break;
@@ -9542,7 +9542,7 @@ bool Unit::SelectHostileTarget()
 
     if (target)
     {
-        if (!hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED))
+        if (CanReactInCombat())
         {
             SetInFront(target);
             if (oldTarget != target)
