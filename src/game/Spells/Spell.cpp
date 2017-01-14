@@ -4074,9 +4074,6 @@ void Spell::SendSpellStart() const
     if (HasPersistentAuraEffect(m_spellInfo))
         castFlags |= CAST_FLAG_PERSISTENT_AA;
 
-    if (m_CastItem)
-        castFlags |= CAST_FLAG_UNKNOWN7;
-
     if (m_spellInfo->runeCostID)
         castFlags |= CAST_FLAG_UNKNOWN19;
 
