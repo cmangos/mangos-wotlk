@@ -18363,7 +18363,7 @@ void Player::RemovePet(PetSaveMode mode)
 {
     if (Pet* pet = GetPet())
         pet->Unsummon(mode, this);
-    else if (m_temporaryUnsummonedPetNumber)
+    else if (m_temporaryUnsummonedPetNumber && mode == PET_SAVE_REAGENTS)
     {
         // TODO: Only edit pet in DB and reward reagent if necessary
         Pet* NewPet = new Pet;
