@@ -5620,7 +5620,15 @@ SpellCastResult Spell::CheckCast(bool strict)
                 break;
             case SPELL_EFFECT_DUMMY:
             {
-                if (m_spellInfo->Id == 51582)               // Rocket Boots Engaged
+                // By Spell ID
+                if (m_spellInfo->Id == 19938)               // Awaken Lazy Peon
+                {
+                    Unit* target = m_targets.getUnitTarget();
+                    // 17743 = Lazy Peon Sleep | 10556 = Lazy Peon
+                    if (!target || !target->HasAura(17743) || target->GetEntry() != 10556)
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+                else if (m_spellInfo->Id == 51582)          // Rocket Boots Engaged
                 {
                     if (m_caster->IsInWater())
                         return SPELL_FAILED_ONLY_ABOVEWATER;
