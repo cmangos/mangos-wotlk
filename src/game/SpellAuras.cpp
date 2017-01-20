@@ -8806,7 +8806,7 @@ bool Aura::IsCritFromAbilityAura(Unit* caster, uint32& damage) const
             !caster->HasAffectedAura(SPELL_AURA_ABILITY_PERIODIC_CRIT, GetSpellProto()))
         return false;
 
-    if (caster->IsSpellCrit(GetTarget(), GetSpellProto(), GetSpellSchoolMask(GetSpellProto())))
+    if (caster->RollSpellCritOutcome(GetTarget(), GetSpellSchoolMask(GetSpellProto()), GetSpellProto()))
     {
         damage = caster->CalculateCritAmount(GetTarget(), damage, GetSpellProto());
         return true;
