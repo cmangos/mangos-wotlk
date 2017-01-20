@@ -3579,15 +3579,15 @@ float Unit::GetCritMultiplier(SpellSchoolMask dmgSchoolMask, uint32 creatureType
     // Override default multiplier for auras which are able to crit
     if (spell && IsSpellAppliesAura(spell))
     {
-        int32 override = 0;
+        int32 bonus = 0;
         const Unit::AuraList &auras = GetAurasByType(SPELL_AURA_ABILITY_PERIODIC_CRIT);
         for (Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
         {
             if ((*itr)->isAffectedOnSpell(spell))
-                override += (*itr)->GetModifier()->m_amount;
+                bonus += (*itr)->GetModifier()->m_amount;
         }
-        if (override)
-            multiplier = (1.0f + (override * 0.01f));
+        if (bonus)
+            multiplier = (1.0f + (bonus * pct));
     }
     // Multiplier bonus coefficient for damage
     if (!heal)
