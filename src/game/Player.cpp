@@ -10652,6 +10652,9 @@ InventoryResult Player::CanUseItem(Item* pItem, bool direct_action) const
 
             if (uint32 item_use_skill = pItem->GetSkill())
             {
+                // Fist weapons use unarmed skill calculations, but we must query fist weapon skill presence to use this item
+                if (pProto->SubClass == ITEM_SUBCLASS_WEAPON_FIST)
+                    item_use_skill = SKILL_FIST_WEAPONS;
                 if (GetSkillValue(item_use_skill) == 0)
                 {
                     // armor items with scaling stats can downgrade armor skill reqs if related class can learn armor use at some level
