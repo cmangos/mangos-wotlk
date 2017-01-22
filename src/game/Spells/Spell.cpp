@@ -5315,6 +5315,9 @@ SpellCastResult Spell::CheckCast(bool strict)
         // check if target is affected by Spirit of Redemption (Aura: 27827)
         if (target->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
             return SPELL_FAILED_BAD_TARGETS;
+
+        if (m_spellInfo->MaxTargetLevel && target->getLevel() > m_spellInfo->MaxTargetLevel)
+            return SPELL_FAILED_HIGHLEVEL;
     }
     // zone check
     uint32 zone, area;
