@@ -893,7 +893,6 @@ UPDATE creature_template SET ScriptName='npc_fiendish_portal' WHERE entry=17265;
 UPDATE creature_template SET ScriptName='npc_shade_of_aran_blizzard' WHERE entry=17161;
 UPDATE creature_template SET ScriptName='npc_netherspite_portal' WHERE entry IN (17367,17368,17369);
 UPDATE creature_template SET ScriptName='npc_infernal_target' WHERE entry=17644;
-UPDATE creature_template SET ScriptName='npc_berthold' WHERE entry=16153;
 UPDATE creature_template SET ScriptName='npc_barnes' WHERE entry=16812;
 UPDATE creature_template SET ScriptName='npc_grandmother' WHERE entry=17603;
 UPDATE creature_template SET ScriptName='npc_image_of_medivh' WHERE entry=17651;
