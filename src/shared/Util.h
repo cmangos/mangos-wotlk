@@ -120,7 +120,7 @@ struct Die
     }
     void set(uint8 side, float chancef)
     {
-        if (side && side < Sides)
+        if (side < Sides)
             chance[side] = chance_u(chancef);
     }
     uint32 chance[Sides];
