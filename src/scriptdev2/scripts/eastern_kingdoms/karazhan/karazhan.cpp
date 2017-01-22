@@ -23,7 +23,6 @@ EndScriptData */
 
 /* ContentData
 npc_barnes
-npc_berthold
 npc_image_of_medivh
 npc_image_arcanagos
 event_spell_medivh_journal
@@ -250,39 +249,6 @@ bool GossipSelect_npc_barnes(Player* pPlayer, Creature* pCreature, uint32 /*uiSe
             break;
     }
 
-    return true;
-}
-
-/*###
-# npc_berthold
-####*/
-
-enum
-{
-    GOSSIP_ITEM_TELEPORT        = -3532000,
-
-    SPELL_TELEPORT              = 39567
-};
-
-bool GossipHello_npc_berthold(Player* pPlayer, Creature* pCreature)
-{
-    if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
-    {
-        // Check if Shade of Aran event is done
-        if (pInstance->GetData(TYPE_ARAN) == DONE)
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELEPORT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-    }
-
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
-    return true;
-}
-
-bool GossipSelect_npc_berthold(Player* pPlayer, Creature* /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
-        pPlayer->CastSpell(pPlayer, SPELL_TELEPORT, TRIGGERED_OLD_TRIGGERED);
-
-    pPlayer->CLOSE_GOSSIP_MENU();
     return true;
 }
 
@@ -516,12 +482,6 @@ void AddSC_karazhan()
     pNewScript->GetAI = &GetAI_npc_barnesAI;
     pNewScript->pGossipHello = &GossipHello_npc_barnes;
     pNewScript->pGossipSelect = &GossipSelect_npc_barnes;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_berthold";
-    pNewScript->pGossipHello = &GossipHello_npc_berthold;
-    pNewScript->pGossipSelect = &GossipSelect_npc_berthold;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
