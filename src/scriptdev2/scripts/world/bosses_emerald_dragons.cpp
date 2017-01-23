@@ -132,7 +132,7 @@ struct boss_emerald_dragonAI : public ScriptedAI
         if (m_uiTailsweepTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_TAILSWEEP) == CAST_OK)
-                m_uiTailsweepTimer = 2000;
+                m_uiTailsweepTimer = urand(15000, 20000);
         }
         else
             m_uiTailsweepTimer -= uiDiff;
