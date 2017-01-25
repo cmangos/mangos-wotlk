@@ -737,6 +737,8 @@ class ObjectMgr
 
         void LoadGossipMenus();
 
+        void LoadDungeonEncounters();
+
         void LoadVendorTemplates();
         void LoadVendors() { LoadVendors("npc_vendor", false); }
         void LoadTrainerTemplates();

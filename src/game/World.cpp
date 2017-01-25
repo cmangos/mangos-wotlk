@@ -1097,6 +1097,9 @@ void World::SetInitialWorldSettings()
     sLog.outString(">>> Game Event Data loaded");
     sLog.outString();
 
+    sLog.outString("Loading Dungeon Encounters...");
+    sObjectMgr.LoadDungeonEncounters();                     // Load DungeonEncounter.dbc from DB
+
     sLog.outString("Loading Conditions...");                // Load Conditions
     sObjectMgr.LoadConditions();
 

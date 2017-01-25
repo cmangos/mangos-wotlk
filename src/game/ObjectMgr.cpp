@@ -4697,7 +4697,7 @@ void ObjectMgr::LoadInstanceEncounters()
         bar.step();
 
         uint32 entry = fields[0].GetUInt32();
-        DungeonEncounterEntry const* dungeonEncounter = sDungeonEncounterStore.LookupEntry(entry);
+        DungeonEncounterEntry const* dungeonEncounter = sDungeonEncounterStore.LookupEntry<DungeonEncounterEntry>(entry);
 
         if (!dungeonEncounter)
         {
@@ -7936,8 +7936,8 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             }
 
             uint32 completedEncounterMask = ((DungeonMap*)map)->GetPersistanceState()->GetCompletedEncountersMask();
-            DungeonEncounterEntry const* dbcEntry1 = sDungeonEncounterStore.LookupEntry(m_value1);
-            DungeonEncounterEntry const* dbcEntry2 = sDungeonEncounterStore.LookupEntry(m_value2);
+            DungeonEncounterEntry const* dbcEntry1 = sDungeonEncounterStore.LookupEntry<DungeonEncounterEntry>(m_value1);
+            DungeonEncounterEntry const* dbcEntry2 = sDungeonEncounterStore.LookupEntry<DungeonEncounterEntry>(m_value2);
             // Check that on proper map
             if (dbcEntry1->mapId != map->GetId())
             {
@@ -8425,8 +8425,8 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
         }
         case CONDITION_COMPLETED_ENCOUNTER:
         {
-            DungeonEncounterEntry const* dbcEntry1 = sDungeonEncounterStore.LookupEntry(value1);
-            DungeonEncounterEntry const* dbcEntry2 = sDungeonEncounterStore.LookupEntry(value2);
+            DungeonEncounterEntry const* dbcEntry1 = sDungeonEncounterStore.LookupEntry<DungeonEncounterEntry>(value1);
+            DungeonEncounterEntry const* dbcEntry2 = sDungeonEncounterStore.LookupEntry<DungeonEncounterEntry>(value2);
             if (!dbcEntry1)
             {
                 sLog.outErrorDb("Completed Encounter condition (entry %u, type %u) has an unknown DungeonEncounter entry %u defined (in value1), skipping.", entry, condition, value1);
@@ -9426,6 +9426,11 @@ void ObjectMgr::LoadGossipMenus()
 
     for (std::set<uint32>::const_iterator itr = gossipScriptSet.begin(); itr != gossipScriptSet.end(); ++itr)
         sLog.outErrorDb("Table `dbscripts_on_gossip` contains unused script, id %u.", *itr);
+}
+
+void ObjectMgr::LoadDungeonEncounters()
+{
+    sDungeonEncounterStore.Load();
 }
 
 void ObjectMgr::AddVendorItem(uint32 entry, uint32 item, uint32 maxcount, uint32 incrtime, uint32 extendedcost)
