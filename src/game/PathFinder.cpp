@@ -458,9 +458,6 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
 
     if (pointCount > 2 && sWorld.getConfig(CONFIG_BOOL_PATH_FIND_OPTIMIZE))
     {
-        uint32 tempPointCounter = 2;
-        uint8 cutLimit = 0;
-
         PointsArray tempPathPoints;
         tempPathPoints.resize(pointCount);
 
@@ -472,6 +469,9 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
 
         // Optimize points
         Vector3 emptyVec = { 0.0f, 0.0f, 0.0f };
+
+        uint32 tempPointCounter = 2;
+        uint8 cutLimit = 0;
 
         for (uint32 i = 1; i < pointCount - 1; ++i)
         {
@@ -496,7 +496,6 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
         m_pathPoints.resize(tempPointCounter);
 
         uint32 pointPos = 0;
-
         for (uint32 i = 0; i < pointCount; ++i)
         {
             if (tempPathPoints[i] != emptyVec)
