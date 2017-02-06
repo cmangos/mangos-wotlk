@@ -334,6 +334,8 @@ enum SelectFlags
     SELECT_FLAG_POWER_RUNIC         = 0x020,
     SELECT_FLAG_IN_MELEE_RANGE      = 0x040,
     SELECT_FLAG_NOT_IN_MELEE_RANGE  = 0x080,
+    SELECT_FLAG_HAS_AURA            = 0x100,
+    SELECT_FLAG_NOT_AURA            = 0x200,
 };
 
 enum RegenStatsFlags
