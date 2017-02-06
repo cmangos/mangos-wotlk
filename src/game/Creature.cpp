@@ -2136,9 +2136,9 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
 
     if (pSpellInfo)
     {
-        if (selectFlags)
+        if (selectFlags & (SELECT_FLAG_HAS_AURA | SELECT_FLAG_NOT_AURA))
         {
-            if (selectFlags & (SELECT_FLAG_HAS_AURA | SELECT_FLAG_NOT_AURA))
+            if (selectFlags & SELECT_FLAG_HAS_AURA)
             {
                 if (!pTarget->HasAura(pSpellInfo->Id))
                     return false;
