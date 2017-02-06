@@ -2109,7 +2109,7 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
 {
     if (selectFlags)
     {
-        if (selectFlags & SELECT_FLAG_PLAYER && pTarget->GetTypeId() != TYPEID_PLAYER)
+        if ((selectFlags & SELECT_FLAG_PLAYER) && pTarget->GetTypeId() != TYPEID_PLAYER)
             return false;
 
         if ((selectFlags & SELECT_FLAG_POWER_MANA) && pTarget->GetPowerType() != POWER_MANA)
@@ -2138,7 +2138,7 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
     {
         if (selectFlags)
         {
-            if (selectFlags & SELECT_FLAG_HAS_AURA)
+            if (selectFlags & (SELECT_FLAG_HAS_AURA | SELECT_FLAG_NOT_AURA))
             {
                 if (!pTarget->HasAura(pSpellInfo->Id))
                     return false;
@@ -2149,6 +2149,8 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
                 if (pTarget->HasAura(pSpellInfo->Id))
                     return false;
             }
+
+            return true;
         }
 
         switch (pSpellInfo->rangeIndex)
@@ -2191,6 +2193,7 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
         {
             std::vector<Unit*> suitableUnits;
             suitableUnits.reserve(threatlist.size() - position);
+
             if (position)
                 advance(itr, position);
 
@@ -2246,6 +2249,7 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
         case ATTACKING_TARGET_FARTHEST_AWAY:
         {
             std::list<Unit*> suitableUnits;
+            suitableUnits.reserve(threatlist.size());
 
             for (; itr != threatlist.end(); ++itr)
             {
@@ -2257,7 +2261,7 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
             }
 
             if (suitableUnits.empty() || position >= suitableUnits.size())
-                break;
+                return nullptr;
 
             if (suitableUnits.size() > 1)
             {
