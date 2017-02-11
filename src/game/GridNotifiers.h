@@ -1148,7 +1148,7 @@ namespace MaNGOS
                         return true;
                     }
                     else
-                        i_foundOfRange = true;
+                        i_foundOutOfRange = true;
                 }
                 return false;
             }
