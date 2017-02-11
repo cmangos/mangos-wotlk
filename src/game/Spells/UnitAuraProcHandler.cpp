@@ -1076,12 +1076,12 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 // Elemental Sieve
                 case 36035:
                 {
-                    Creature* pCaster = dynamic_cast<Creature*>(triggeredByAura->GetCaster());
+                    Pet* pCaster = dynamic_cast<Pet*>(triggeredByAura->GetCaster());
 
                     // aura only affect the spirit totem, since this is the one that need to be in range.
                     // It is possible though, that player is the one who should actually have the aura
                     // and check for presense of spirit totem, but then we can't script the dummy.
-                    if (!pCaster->IsPet())
+                    if (!pCaster)
                         return SPELL_AURA_PROC_FAILED;
 
                     // Summon the soul of the spirit and cast the visual
