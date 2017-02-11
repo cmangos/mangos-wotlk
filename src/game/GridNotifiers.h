@@ -1135,9 +1135,9 @@ namespace MaNGOS
     class NearestCreatureEntryWithLiveStateInObjectRangeCheck
     {
         public:
-            NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject const& obj, uint32 entry, bool onlyAlive, bool onlyDead, float range, bool excludeSelf = false)
-                : i_obj(obj), i_entry(entry), i_onlyAlive(onlyAlive), i_onlyDead(onlyDead), i_excludeSelf(excludeSelf), i_range(range) {}
-            WorldObject const& GetFocusObject() const { return i_obj; }
+            NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject const& obj, uint32 entry, bool onlyAlive, bool onlyDead, float range, bool excludeSelf = false, WorldObject* objForPhaseMaskCheck = nullptr)
+                : i_obj(obj), i_objForPhaseMaskCheck(objForPhaseMaskCheck), i_entry(entry), i_onlyAlive(onlyAlive), i_onlyDead(onlyDead), i_excludeSelf(excludeSelf), i_range(range) {}
+            WorldObject const& GetFocusObject() const { return i_objForPhaseMaskCheck ? *i_objForPhaseMaskCheck : i_obj; }
             bool operator()(Creature* u)
             {
                 if (u->GetEntry() == i_entry && ((i_onlyAlive && u->isAlive()) || (i_onlyDead && u->IsCorpse()) || (!i_onlyAlive && !i_onlyDead))
@@ -1151,6 +1151,7 @@ namespace MaNGOS
             float GetLastRange() const { return i_range; }
         private:
             WorldObject const& i_obj;
+            WorldObject* i_objForPhaseMaskCheck;
             uint32 i_entry;
             bool   i_onlyAlive;
             bool   i_onlyDead;
