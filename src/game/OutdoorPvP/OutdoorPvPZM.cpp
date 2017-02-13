@@ -324,12 +324,12 @@ bool OutdoorPvPZM::HandleGameObjectUse(Player* player, GameObject* go)
     // disable old banners - note the alliance and horde banners can despawn by self
     if (m_graveyardOwner == ALLIANCE)
     {
-        //RespawnGO(go, m_graveyardBannerAlliance, false);
+        RespawnGO(go, m_graveyardBannerAlliance, false);
         SetBeaconArtKit(go, m_beamGraveyardBlue, 0);
     }
     else if (m_graveyardOwner == HORDE)
     {
-        //RespawnGO(go, m_graveyardBannerHorde, false);
+        RespawnGO(go, m_graveyardBannerHorde, false);
         SetBeaconArtKit(go, m_beamGraveyardRed, 0);
     }
     else
