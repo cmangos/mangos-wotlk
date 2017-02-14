@@ -109,7 +109,7 @@ void GameEventMgr::LoadFromDB()
         mGameEvent.resize(max_event_id + 1);
     }
 
-    QueryResult* result = WorldDatabase.Query("SELECT entry,UNIX_TIMESTAMP(start_time),UNIX_TIMESTAMP(end_time),occurence,length,holiday,linkedTo,description FROM game_event");
+    QueryResult* result = WorldDatabase.Query("SELECT entry,UNIX_TIMESTAMP(start_time),UNIX_TIMESTAMP(end_time),occurence,length,holiday,linkedTo,EventGroup,description FROM game_event");
     if (!result)
     {
         mGameEvent.clear();
@@ -144,7 +144,8 @@ void GameEventMgr::LoadFromDB()
             pGameEvent.length       = fields[4].GetUInt32();
             pGameEvent.holiday_id   = HolidayIds(fields[5].GetUInt32());
             pGameEvent.linkedTo     = fields[6].GetUInt32();
-            pGameEvent.description  = fields[7].GetCppString();
+            pGameEvent.eventGroup   = fields[7].GetUInt32();
+            pGameEvent.description  = fields[8].GetCppString();
 
             if (pGameEvent.occurence == 0)
             {
@@ -152,6 +153,7 @@ void GameEventMgr::LoadFromDB()
                 pGameEvent.start = time_t(FAR_FUTURE);
                 pGameEvent.occurence = pGameEvent.length;
             }
+
             if (pGameEvent.length == 0)                     // length>0 is validity check
             {
                 sLog.outErrorDb("`game_event` game event id (%i) have length 0 and can't be used.", event_id);
@@ -171,6 +173,12 @@ void GameEventMgr::LoadFromDB()
                     sLog.outErrorDb("`game_event` game event id (%i) have nonexistent holiday id %u.", event_id, pGameEvent.holiday_id);
                     pGameEvent.holiday_id = HOLIDAY_NONE;
                 }
+            }
+
+            if (pGameEvent.eventGroup)
+            {
+                auto& group = mGameEventGroups[pGameEvent.eventGroup];
+                group.push_back(event_id);
             }
 
             ++count;
@@ -627,7 +635,7 @@ uint32 GameEventMgr::Update(ActiveEvents const* activeAtShutdown /*= nullptr*/)
     uint32 calcDelay;
     for (uint16 itr = 1; itr < mGameEvent.size(); ++itr)
     {
-        if (mGameEvent[itr].occurence == 0)
+        if (mGameEvent[itr].occurence == 0 || mGameEvent[itr].eventGroup)
             continue;
         // sLog.outErrorDb("Checking event %u",itr);
         if (CheckOneGameEvent(itr, currenttime))

@@ -39,6 +39,7 @@ struct GameEventData
     uint32 length;                                          // Length in minutes of the event
     HolidayIds holiday_id;
     uint32 linkedTo;
+    uint32 eventGroup;
     std::string description;
 
     bool isValid() const { return length > 0; }
@@ -90,6 +91,8 @@ class GameEventMgr
         template<typename T>
         int16 GetGameEventId(uint32 guid_or_poolid);
 
+        std::unordered_map<uint32, std::vector<uint32>> const& GetEventGroups() { return mGameEventGroups; }
+
         GameEventCreatureData const* GetCreatureUpdateDataForActiveEvent(uint32 lowguid) const;
     private:
         void ApplyNewEvent(uint16 event_id, bool resume);
@@ -112,6 +115,7 @@ class GameEventMgr
 
         typedef std::list<uint32> QuestList;
         typedef std::vector<QuestList> GameEventQuestMap;
+
         GameEventQuestMap mGameEventQuests;                 // events size, only positive event case
 
         GameEventCreatureDataMap mGameEventCreatureData;    // events size, only positive event case
@@ -127,6 +131,8 @@ class GameEventMgr
         GameEventDataMap  mGameEvent;
         ActiveEvents m_ActiveEvents;
         bool m_IsGameEventsInit;
+
+        std::unordered_map<uint32,std::vector<uint32>> mGameEventGroups;  // events size
 };
 
 #define sGameEventMgr MaNGOS::Singleton<GameEventMgr>::Instance()

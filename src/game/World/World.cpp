@@ -1380,6 +1380,10 @@ void World::SetInitialWorldSettings()
     SetMonthlyQuestResetTime();
     sLog.outString();
 
+    sLog.outString("Loading Quest Group chosen quests...");
+    LoadEventGroupChosen();
+    sLog.outString();
+
     sLog.outString("Starting Game Event system...");
     uint32 nextGameEvent = sGameEventMgr.Initialize();
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    // depend on next event
@@ -2112,6 +2116,60 @@ void World::SetMonthlyQuestResetTime(bool initialize)
     CharacterDatabase.PExecute("UPDATE saved_variables SET NextMonthlyQuestResetTime = '" UI64FMTD "'", uint64(m_NextMonthlyQuestReset));
 }
 
+void World::GenerateEventGroupEvents(bool daily, bool weekly, bool deleteColumns)
+{
+    auto& eventGroups = sGameEventMgr.GetEventGroups();
+    auto& events = sGameEventMgr.GetEventMap();
+    for (auto itr = m_eventGroupChosen.begin(); itr != m_eventGroupChosen.end();)
+    {
+        if (!daily && events[*itr].length == 1440) // dailies
+            ++itr;
+        else if (!weekly && events[*itr].length == 10080) // weeklies
+            ++itr;
+        else
+        {
+            sGameEventMgr.StopEvent(*itr);
+            itr = m_eventGroupChosen.erase(itr);
+        }
+    }
+
+    for (auto& data : eventGroups) // For each quest group pick a set
+    {
+        if (!daily && events[data.second[0]].length == 1440) // dailies
+            continue;
+        if (!weekly && events[data.second[0]].length == 10080) // weeklies
+            continue;
+        if (deleteColumns)
+            CharacterDatabase.PExecute("DELETE FROM event_group_chosen WHERE eventGroup = '%u'", data.first);
+
+        uint32 random = urand(0, data.second.size() - 1);
+        uint32 chosenId = data.second[random];
+        CharacterDatabase.PExecute("INSERT INTO event_group_chosen(eventGroup,entry) VALUES('%u','%u')",
+            data.first, chosenId);
+        m_eventGroupChosen.push_back(chosenId);
+        // start events
+        sGameEventMgr.StartEvent(chosenId);
+    }
+}
+
+void World::LoadEventGroupChosen()
+{
+    QueryResult* result = CharacterDatabase.Query("SELECT entry FROM event_group_chosen");
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            m_eventGroupChosen.push_back(fields[0].GetUInt32());
+            sGameEventMgr.StartEvent(fields[0].GetUInt32(), false, true);
+        } while (result->NextRow());
+
+        delete result;
+    }
+    else // if table not set yet, generate quests
+        GenerateEventGroupEvents(true, true, false);
+}
+
 void World::ResetDailyQuests()
 {
     DETAIL_LOG("Daily quests reset for all characters.");
@@ -2122,6 +2180,8 @@ void World::ResetDailyQuests()
 
     m_NextDailyQuestReset = time_t(m_NextDailyQuestReset + DAY);
     CharacterDatabase.PExecute("UPDATE saved_variables SET NextDailyQuestResetTime = '" UI64FMTD "'", uint64(m_NextDailyQuestReset));
+
+    GenerateEventGroupEvents(true, false, true); // generate dailies and save to DB
 }
 
 void World::ResetWeeklyQuests()
@@ -2134,6 +2194,8 @@ void World::ResetWeeklyQuests()
 
     m_NextWeeklyQuestReset = time_t(m_NextWeeklyQuestReset + WEEK);
     CharacterDatabase.PExecute("UPDATE saved_variables SET NextWeeklyQuestResetTime = '" UI64FMTD "'", uint64(m_NextWeeklyQuestReset));
+
+    GenerateEventGroupEvents(false, true, true); // generate weeklies and save to DB
 }
 
 void World::ResetMonthlyQuests()
