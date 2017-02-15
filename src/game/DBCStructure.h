@@ -1330,10 +1330,12 @@ struct MapEntry
     bool IsMountAllowed() const
     {
         return !IsDungeon() ||
-               MapID == 209 || MapID == 269 || MapID == 309 || // TanarisInstance, CavernsOfTime, Zul'gurub
-               MapID == 509 || MapID == 534 || MapID == 560 || // AhnQiraj, HyjalPast, HillsbradPast
-               MapID == 568 || MapID == 580 || MapID == 595 || // ZulAman, Sunwell Plateau, Culling of Stratholme
-               MapID == 603 || MapID == 615 || MapID == 616;// Ulduar, The Obsidian Sanctum, The Eye Of Eternity
+            MapID == 209 || MapID == 269 || MapID == 309 ||       // TanarisInstance, CavernsOfTime, Zul'gurub
+            MapID == 509 || MapID == 534 || MapID == 560 ||       // AhnQiraj, HyjalPast, HillsbradPast
+            MapID == 564 || MapID == 568 || MapID == 580 ||       // Black Temple, ZulAman, Sunwell Plateau
+            MapID == 578 || MapID == 595 || MapID == 603 ||       // Oculus, Culling of Stratholmem, Ulduar
+            MapID == 603 || MapID == 615 || MapID == 616 ||       // Ulduar, The Obsidian Sanctum, The Eye Of Eternity
+            MapID == 631 || MapID == 658 || MapID == 724;         // ICC, Pit of Saron, Ruby Sanctum
     }
 
     bool IsContinent() const
