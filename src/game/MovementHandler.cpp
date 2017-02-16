@@ -182,11 +182,11 @@ void WorldSession::HandleMoveWorldportAckOpcode()
                 }
             }
         }
-    }
 
-    // mount allow check
-    if (!mEntry->IsMountAllowed())
-        _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+        // mount allow check
+        if (!mInstance->mountAllowed)
+            _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+    }
 
     // honorless target
     if (GetPlayer()->pvpInfo.inHostileArea)
