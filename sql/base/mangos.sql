@@ -2871,6 +2871,7 @@ CREATE TABLE `instance_template` (
   `levelMin` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `levelMax` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `ScriptName` varchar(128) NOT NULL DEFAULT '',
+  `mountAllowed` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`map`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
