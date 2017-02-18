@@ -1779,6 +1779,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if (!(options & TELE_TO_NOT_LEAVE_COMBAT))
             CombatStop();
 
+        if (!IsWithinDist3d(x, y, z, GetMap()->GetVisibilityDistance()))
+            RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TELEPORTED);
+
         // this will be used instead of the current location in SaveToDB
         m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
         SetFallInformation(0, z);
@@ -1823,6 +1826,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             SetSelectionGuid(ObjectGuid());
 
             CombatStop();
+
+            RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TELEPORTED);
 
             ResetContestedPvP();
 
@@ -22224,7 +22229,7 @@ void Player::UnsummonPetIfAny()
     Pet* pet = GetPet();
     if (!pet)
         return;
- 
+
     pet->Unsummon(PET_SAVE_NOT_IN_SLOT, this);
 }
 
