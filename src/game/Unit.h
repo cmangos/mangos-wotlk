@@ -91,6 +91,7 @@ enum SpellAuraInterruptFlags
     AURA_INTERRUPT_FLAG_TELEPORTED                  = 0x00400000,   // 22
     AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT            = 0x00800000,   // 23   removed by entering pvp combat
     AURA_INTERRUPT_FLAG_DIRECT_DAMAGE               = 0x01000000    // 24   removed by any direct damage
+    AURA_INTERRUPT_FLAG_LANDING                     = 0x02000000,   // 25   removed by hitting the ground or water
 };
 
 enum SpellPartialResist

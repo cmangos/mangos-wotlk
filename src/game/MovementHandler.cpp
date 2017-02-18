@@ -286,6 +286,10 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     if (opcode == MSG_MOVE_FALL_LAND && plMover && !plMover->IsTaxiFlying())
         plMover->HandleFall(movementInfo);
 
+    // Remove auras that should be removed at landing on ground or water
+    if (opcode == MSG_MOVE_FALL_LAND || opcode == MSG_MOVE_START_SWIM)
+        mover->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LANDING); // Parachutes
+
     /* process position-change */
     HandleMoverRelocation(movementInfo);
 
