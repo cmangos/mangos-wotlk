@@ -60,6 +60,13 @@ enum BG_WS_WorldStates
     BG_WS_TIME_REMAINING          = 4248
 };
 
+#define WS_NORMAL_FLAG_CAPTURE_REPUTATION           35
+#define WS_WEEKEND_FLAG_CAPTURE_REPUTATION          45
+#define WS_NORMAL_WIN_KILLS                         1
+#define WS_WEEKEND_WIN_KILLS                        3
+#define WS_NORMAL_MAP_COMPLETE_KILLS                2
+#define WS_WEEKEND_MAP_COMPLETE_KILLS               4
+
 enum BG_WS_FlagState
 {
     BG_WS_FLAG_STATE_ON_BASE      = 0,
