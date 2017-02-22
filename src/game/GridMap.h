@@ -211,20 +211,20 @@ class MANGOS_DLL_SPEC Referencable
 class MANGOS_DLL_SPEC TerrainInfo : public Referencable<std::atomic_long>
 {
     public:
-        TerrainInfo(uint32 mapid);
+        TerrainInfo(uint32 mapId);
         ~TerrainInfo();
 
         uint32 GetMapId() const { return m_mapId; }
 
         // TODO: move all terrain/vmaps data info query functions
         // from 'Map' class into this class
-        float GetHeightStatic(float x, float y, float z, bool checkVMap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
+        float GetHeightStatic(float x, float y, float z, bool useVmaps = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
         float GetWaterLevel(float x, float y, float z, float* pGround = nullptr) const;
         float GetWaterOrGroundLevel(float x, float y, float z, float* pGround = nullptr, bool swim = false) const;
-        bool IsInWater(float x, float y, float z, GridMapLiquidData* data = nullptr) const;
+        bool IsInWater(float x, float y, float z, GridMapLiquidData* data = nullptr, float min_depth = 2.0f) const;
         bool IsSwimmable(float x, float y, float pZ, float radius = 1.5f, GridMapLiquidData* data = nullptr) const;
-	    bool IsAboveWater(float x, float y, float z, float* pWaterZ = nullptr) const;
-	    bool IsUnderWater(float x, float y, float z, float* pWaterZ = nullptr) const;
+        bool IsAboveWater(float x, float y, float z, float* pWaterZ = nullptr) const;
+        bool IsUnderWater(float x, float y, float z, float* pWaterZ = nullptr) const;
 
         GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr) const;
 
