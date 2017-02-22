@@ -477,17 +477,20 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
         {
             if (cutLimit < SKIP_POINT_LIMIT)
             {
-                G3D::Vector3 p  = tempPathPoints[i];     // Point
-                G3D::Vector3 p1 = tempPathPoints[i - 1]; // PrevPoint
-                G3D::Vector3 p2 = tempPathPoints[i + 1]; // NextPoint
+                G3D::Vector3 p1 = tempPathPoints[i - 1];     // previous point
+                G3D::Vector3 p  = tempPathPoints[i];         // point for cut (possible)
 
-                float lineLen = (p1.y - p2.y) * p.x + (p2.x - p1.x) * p.y + (p1.x * p2.y - p2.x * p1.y);
-
-                if (fabs(lineLen) < LINE_FAULT && fabs(p.z - p1.z) < MAX_Z_DIFF)
+                if (fabs(p.z - p1.z) < MAX_Z_DIFF)
                 {
-                    tempPathPoints[i] = emptyVec;
-                    cutLimit++;
-                    continue;
+                    G3D::Vector3 p2 = tempPathPoints[i + 1]; // next point
+                    float lineLen = (p1.y - p2.y) * p.x + (p2.x - p1.x) * p.y + (p1.x * p2.y - p2.x * p1.y);
+
+                    if (fabs(lineLen) < LINE_FAULT)
+                    {
+                        tempPathPoints[i] = emptyVec;
+                        cutLimit++;
+                        continue;
+                    }
                 }
             }
 
