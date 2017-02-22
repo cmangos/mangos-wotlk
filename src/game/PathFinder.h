@@ -43,6 +43,7 @@ class Unit;
 // May occupt visual bugs when lenght > 20y
 #define SKIP_POINT_LIMIT        6
 #define LINE_FAULT              0.5f
+#define MAX_Z_DIFF              0.5f
 
 #define VERTEX_SIZE             3
 #define INVALID_POLYREF         0

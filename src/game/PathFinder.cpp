@@ -27,7 +27,7 @@
 #include "../recastnavigation/Detour/Include/DetourMath.h"
 
 ////////////////// PathFinder //////////////////
-PathFinder::PathFinder(const Unit* owner) :
+PathFinder::PathFinder(Unit const* owner) :
     m_polyLength(0), m_type(PATHFIND_BLANK),
     m_useStraightPath(false), m_forceDestination(false), m_pointPathLimit(MAX_POINT_PATH_LENGTH),
     m_sourceUnit(owner), m_navMesh(nullptr), m_navMeshQuery(nullptr)
@@ -461,36 +461,38 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
         PointsArray tempPathPoints;
         tempPathPoints.resize(pointCount);
 
-        for (uint32 i = 0; i < pointCount; ++i)   // y, z, x  expected here
+        for (uint32 i = 0; i < pointCount; ++i)
         {
-            uint32 pointPos = i * VERTEX_SIZE;
-            tempPathPoints[i] = Vector3(pathPoints[pointPos + 2], pathPoints[pointPos], pathPoints[pointPos + 1]);
+            uint32 pointPos = i * VERTEX_SIZE;      //  Y                     Z                         X
+            tempPathPoints[i] = { pathPoints[pointPos + 2], pathPoints[pointPos], pathPoints[pointPos + 1] };
         }
 
         // Optimize points
-        Vector3 emptyVec = { 0.0f, 0.0f, 0.0f };
+        G3D::Vector3 emptyVec = { 0.0f, 0.0f, 0.0f };
 
         uint32 tempPointCounter = 2;
         uint8 cutLimit = 0;
 
         for (uint32 i = 1; i < pointCount - 1; ++i)
         {
-            G3D::Vector3 p  = tempPathPoints[i];     // Point
-            G3D::Vector3 p1 = tempPathPoints[i - 1]; // PrevPoint
-            G3D::Vector3 p2 = tempPathPoints[i + 1]; // NextPoint
-
-            float lineLen = (p1.y - p2.y) * p.x + (p2.x - p1.x) * p.y + (p1.x * p2.y - p2.x * p1.y);
-
-            if (fabs(lineLen) < LINE_FAULT && cutLimit < SKIP_POINT_LIMIT)
+            if (cutLimit < SKIP_POINT_LIMIT)
             {
-                tempPathPoints[i] = emptyVec;
-                cutLimit++;
+                G3D::Vector3 p  = tempPathPoints[i];     // Point
+                G3D::Vector3 p1 = tempPathPoints[i - 1]; // PrevPoint
+                G3D::Vector3 p2 = tempPathPoints[i + 1]; // NextPoint
+
+                float lineLen = (p1.y - p2.y) * p.x + (p2.x - p1.x) * p.y + (p1.x * p2.y - p2.x * p1.y);
+
+                if (fabs(lineLen) < LINE_FAULT && fabs(p.z - p1.z) < MAX_Z_DIFF)
+                {
+                    tempPathPoints[i] = emptyVec;
+                    cutLimit++;
+                    continue;
+                }
             }
-            else
-            {
-                tempPointCounter++;
-                cutLimit = 0;
-            }
+
+            tempPointCounter++;
+            cutLimit = 0;
         }
 
         m_pathPoints.resize(tempPointCounter);
