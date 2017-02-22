@@ -177,7 +177,7 @@ class GridMap
         static bool ExistVMap(uint32 mapid, int gx, int gy);
 
         uint16 getArea(float x, float y) const;
-        float getHeight(float x, float y) const { return (this->*m_gridGetHeight)(x, y); }
+        inline float getHeight(float x, float y) { return (this->*m_gridGetHeight)(x, y); }
         float getLiquidLevel(float x, float y) const;
         uint8 getTerrainType(float x, float y) const;
         GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr);
@@ -223,7 +223,8 @@ class MANGOS_DLL_SPEC TerrainInfo : public Referencable<std::atomic_long>
         float GetWaterOrGroundLevel(float x, float y, float z, float* pGround = nullptr, bool swim = false) const;
         bool IsInWater(float x, float y, float z, GridMapLiquidData* data = nullptr) const;
         bool IsSwimmable(float x, float y, float pZ, float radius = 1.5f, GridMapLiquidData* data = nullptr) const;
-        bool IsUnderWater(float x, float y, float z) const;
+	    bool IsAboveWater(float x, float y, float z, float* pWaterZ = nullptr) const;
+	    bool IsUnderWater(float x, float y, float z, float* pWaterZ = nullptr) const;
 
         GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr) const;
 

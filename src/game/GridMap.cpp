@@ -831,8 +831,6 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=tr
     float mapHeight = VMAP_INVALID_HEIGHT_VALUE;            // Store Height obtained by maps
     float vmapHeight = VMAP_INVALID_HEIGHT_VALUE;           // Store Height obtained by vmaps (in "corridor" of z (or slightly above z)
 
-    float z2 = z + 2.f;
-
     // find raw .map surface under Z coordinates (or well-defined above)
     if (GridMap* gmap = const_cast<TerrainInfo*>(this)->GetGrid(x, y))
         mapHeight = gmap->getHeight(x, y);
@@ -840,8 +838,10 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=tr
     if (useVmaps)
     {
         VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
-        if (vmgr->isHeightCalcEnabled())
+        if (vmgr && vmgr->isHeightCalcEnabled())
         {
+            float z2 = z + 2.0f;
+
             // if mapHeight has been found search vmap height at least until mapHeight point
             // this prevent case when original Z "too high above ground and vmap height search fail"
             // this will not affect most normal cases (no map in instance, or stay at ground at continent)
@@ -869,14 +869,14 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=tr
         {
             // we have mapheight and vmapheight and must select more appropriate
 
-            // we are already under the surface or vmap height above map heigt
-            if (z < mapHeight || vmapHeight > mapHeight)
+            // vmap height above map height
+            // or if the distance of the vmap height is less the land height distance
+            if (vmapHeight > mapHeight || fabs(mapHeight - z) > fabs(vmapHeight - z))
                 return vmapHeight;
             else
                 return mapHeight;                           // better use .map surface height
         }
-        else
-            return vmapHeight;                              // we have only vmapHeight (if have)
+        return vmapHeight;                                  // we have only vmapHeight (if have)
     }
 
     return mapHeight;
@@ -1091,24 +1091,38 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
     return result;
 }
 
-bool TerrainInfo::IsInWater(float x, float y, float pZ, GridMapLiquidData* data) const
+bool TerrainInfo::IsInWater(float x, float y, float pZ, GridMapLiquidData* data, float min_depth /*=2.0f*/) const
 {
     // Check surface in x, y point for liquid
     if (const_cast<TerrainInfo*>(this)->GetGrid(x, y))
     {
         GridMapLiquidData liquid_status;
         GridMapLiquidData* liquid_ptr = data ? data : &liquid_status;
-        if (getLiquidStatus(x, y, pZ, MAP_ALL_LIQUIDS, liquid_ptr))
+        GridMapLiquidStatus status = getLiquidStatus(x, y, pZ, MAP_ALL_LIQUIDS, liquid_ptr);
+
+        if (status == LIQUID_MAP_NO_WATER)
+            return false;
+
+        if (status & LIQUID_MAP_ABOVE_WATER)
+            return false;
+
+        if (status & LIQUID_MAP_WATER_WALK)
+            return false;
+
+        if ((status & LIQUID_MAP_IN_WATER) ||
+            (status & LIQUID_MAP_UNDER_WATER))
         {
-            // if (liquid_prt->level - liquid_prt->depth_level > 2) //???
-            return true;
+            if (liquid_ptr && (liquid_ptr->level - liquid_ptr->depth_level > min_depth)) // avoid water with depth < 2
+                return true;
+            else
+                return false;
         }
     }
     return false;
 }
 
 // check if creature is in water and have enough space to swim
-bool TerrainInfo::IsSwimmable(float x, float y, float pZ, float radius /*= 1.5f*/, GridMapLiquidData* data /*= 0*/) const
+bool TerrainInfo::IsSwimmable(float x, float y, float pZ, float radius /*=1.5f*/, GridMapLiquidData* data /*=nullptr*/) const
 {
     // Check surface in x, y point for liquid
     if (const_cast<TerrainInfo*>(this)->GetGrid(x, y))
@@ -1118,18 +1132,42 @@ bool TerrainInfo::IsSwimmable(float x, float y, float pZ, float radius /*= 1.5f*
         if (getLiquidStatus(x, y, pZ, MAP_ALL_LIQUIDS, liquid_ptr))
         {
             if (liquid_ptr->level - liquid_ptr->depth_level > radius) // is unit have enough space to swim
+                return true;
+        }
+    }
+    return false;
+}
+
+bool TerrainInfo::IsAboveWater(float x, float y, float z, float* pWaterZ/*= nullptr*/) const
+{
+    if (const_cast<TerrainInfo*>(this)->GetGrid(x, y))
+    {
+        GridMapLiquidData mapData;
+
+        if (getLiquidStatus(x, y, z, MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_OCEAN, &mapData) & LIQUID_MAP_ABOVE_WATER)
+        {
+            if (pWaterZ)
+                *pWaterZ = mapData.level;
+
             return true;
         }
     }
     return false;
 }
 
-bool TerrainInfo::IsUnderWater(float x, float y, float z) const
+bool TerrainInfo::IsUnderWater(float x, float y, float z, float* pWaterZ/*= nullptr*/) const
 {
     if (const_cast<TerrainInfo*>(this)->GetGrid(x, y))
     {
-        if (getLiquidStatus(x, y, z, MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_OCEAN)&LIQUID_MAP_UNDER_WATER)
+        GridMapLiquidData mapData;
+
+        if (getLiquidStatus(x, y, z, MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_OCEAN, &mapData) & LIQUID_MAP_UNDER_WATER)
+        {
+            if (pWaterZ)
+                *pWaterZ = mapData.level;
+
             return true;
+        }
     }
     return false;
 }
@@ -1157,8 +1195,10 @@ float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float* pGrou
 
         GridMapLiquidData liquid_status;
 
-        GridMapLiquidStatus res = getLiquidStatus(x, y, ground_z, MAP_ALL_LIQUIDS, &liquid_status);
-        return res ? (swim ? liquid_status.level - 2.0f : liquid_status.level) : ground_z;
+        if (!IsInWater(x, y, z, &liquid_status))
+            return ground_z;
+        else
+            return swim ? liquid_status.level - 2.0f : liquid_status.level;
     }
 
     return VMAP_INVALID_HEIGHT_VALUE;
