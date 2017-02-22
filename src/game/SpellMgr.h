@@ -304,11 +304,6 @@ inline bool IsSpellAbleToCrit(const SpellEntry* entry)
     return false;
 }
 
-inline bool IsSpellAffectedBySpellMods(SpellEntry const* spellInfo)
-{
-    return !(spellInfo->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_WITH_TRIGGERED) && IsPassiveSpell(spellInfo));
-}
-
 int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2);
 
 // order from less to more strict
@@ -323,6 +318,11 @@ inline bool IsPassiveSpellStackableWithRanks(SpellEntry const* spellProto)
 {
     MANGOS_ASSERT(IsPassiveSpell(spellProto));
     return !IsSpellHaveEffect(spellProto, SPELL_EFFECT_APPLY_AURA);
+}
+
+inline bool IsSpellAffectedBySpellMods(SpellEntry const* spellInfo)
+{
+    return !(spellInfo->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_WITH_TRIGGERED) && IsPassiveSpell(spellInfo));
 }
 
 inline bool IsAutocastable(SpellEntry const* spellInfo)
