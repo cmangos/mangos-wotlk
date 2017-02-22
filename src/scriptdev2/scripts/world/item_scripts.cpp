@@ -44,17 +44,19 @@ enum
 bool ItemUse_item_orb_of_draconic_energy(Player* pPlayer, Item* pItem, const SpellCastTargets& pTargets)
 {
     Creature* pEmberstrife = GetClosestCreatureWithEntry(pPlayer, NPC_EMBERSTRIFE, 20.0f);
-    // If Emberstrife is already mind controled or above 10% HP: force spell cast failure
-    if (pEmberstrife && pEmberstrife->HasAura(SPELL_DOMINION_SOUL) 
-        || 10 * pEmberstrife->GetHealth() > pEmberstrife->GetMaxHealth())
+    if (!pEmberstrife)
+        return false;
+
+    // If Emberstrife already mind controled or above 10% HP: force spell cast failure
+    if (pEmberstrife->HasAura(SPELL_DOMINION_SOUL) || pEmberstrife->GetHealthPercent() > 10.0f)
     {
         pPlayer->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
 
-        if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_DOMINION_SOUL))
+        if (SpellEntry const* pSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_DOMINION_SOUL))
             Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_TARGET_AURASTATE);
 
         return true;
-     }
+    }
 
     return false;
 }
