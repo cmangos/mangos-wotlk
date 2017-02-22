@@ -116,8 +116,6 @@ struct GridMapLiquidData
 class GridMap
 {
     private:
-
-        uint16 m_holes[16][16];
         uint32 m_flags;
 
         // Area data
@@ -151,6 +149,8 @@ class GridMap
         uint8* m_liquidFlags;
         float* m_liquid_map;
 
+        uint16* m_holes;
+
         bool loadAreaData(FILE* in, uint32 offset, uint32 size);
         bool loadHeightData(FILE* in, uint32 offset, uint32 size);
         bool loadGridMapLiquidData(FILE* in, uint32 offset, uint32 size);
@@ -170,7 +170,7 @@ class GridMap
         GridMap();
         ~GridMap();
 
-        bool loadData(char* filaname);
+        bool loadData(char const* filaname);
         void unloadData();
 
         static bool ExistMap(uint32 mapid, int gx, int gy);
