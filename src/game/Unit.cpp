@@ -9589,44 +9589,54 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
 {
     Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : nullptr;
 
-    uint8 comboPoints = unitPlayer ? unitPlayer->GetComboPoints() : 0;
-
-    int32 level = int32(getLevel());
-    if (level > (int32)spellProto->maxLevel && spellProto->maxLevel > 0)
-        level = (int32)spellProto->maxLevel;
-    else if (level < (int32)spellProto->baseLevel)
-        level = (int32)spellProto->baseLevel;
-    level -= (int32)spellProto->spellLevel;
-
     float basePointsPerLevel = spellProto->EffectRealPointsPerLevel[effect_index];
     int32 basePoints = effBasePoints ? *effBasePoints - 1 : spellProto->EffectBasePoints[effect_index];
-    basePoints += int32(level * basePointsPerLevel);
-    int32 randomPoints = int32(spellProto->EffectDieSides[effect_index]);
-    float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
 
+    if (basePointsPerLevel != 0.0f)
+    {
+        int32 level = int32(getLevel());
+        if (level > int32(spellProto->maxLevel) && spellProto->maxLevel > 0)
+            level = int32(spellProto->maxLevel);
+        else if (level < int32(spellProto->baseLevel))
+            level = int32(spellProto->baseLevel);
+
+        // if base level is greater than spell level, reduce by base level
+        level -= int32(std::max(spellProto->baseLevel, spellProto->spellLevel));
+        basePoints += int32(float(level) * basePointsPerLevel);
+    }
+
+    int32 randomPoints = int32(spellProto->EffectDieSides[effect_index]);
     switch (randomPoints)
     {
         case 0:                                             // not used
-        case 1: basePoints += 1; break;                     // range 1..1
+        case 1:
+            basePoints += 1;                                // range 1..1
+            break;
         default:
         {
             // range can have positive (1..rand) and negative (rand..1) values, so order its for irand
             int32 randvalue = (randomPoints >= 1)
-                              ? irand(1, randomPoints)
-                              : irand(randomPoints, 1);
+                ? irand(1, randomPoints)
+                : irand(randomPoints, 1);
 
             basePoints += randvalue;
             break;
         }
     }
 
-    int32 value = basePoints;
+    float value = float(basePoints);
+    float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
 
     // random damage
-    if (comboDamage != 0.0f && unitPlayer && target && (target->GetObjectGuid() == unitPlayer->GetComboTargetGuid() || IsOnlySelfTargeting(spellProto)))
-        value += (int32)(comboDamage * comboPoints);
+    if (comboDamage != 0.0f && unitPlayer && target &&
+        (target->GetObjectGuid() == unitPlayer->GetComboTargetGuid() || IsOnlySelfTargeting(spellProto)))
+    {
+        value += (comboDamage * float(unitPlayer->GetComboPoints()));
+    }
 
-    if (Player* modOwner = GetSpellModOwner())
+    Player* modOwner = GetSpellModOwner();
+
+    if (modOwner && IsSpellAffectedBySpellMods(spellProto))
     {
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ALL_EFFECTS, value);
 
@@ -9647,7 +9657,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
     if (spellProto->HasAttribute(SPELL_ATTR_LEVEL_DAMAGE_CALCULATION) && spellProto->spellLevel)
     {
         if (spellProto->EffectApplyAuraName[effect_index])
-            value += int32(std::max(0, int32(getLevel() - spellProto->maxLevel)) * basePointsPerLevel);
+            value += (std::max<float>(0.0f, float(getLevel() - spellProto->maxLevel)) * basePointsPerLevel);
         else if (spellProto->Effect[effect_index] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
                  spellProto->Effect[effect_index] != SPELL_EFFECT_KNOCK_BACK &&
                  !IsControlledByPlayer())
@@ -9659,7 +9669,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
         }
     }
 
-    return value;
+    return int32(value);
 }
 
 int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMask, int32 duration, Unit const* caster)
