@@ -919,11 +919,12 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
             // some explicitly required dummy effect sets
             switch (spellproto->Id)
             {
-                case 28441:                                 // AB Effect 000
-                    return false;
                 case 18153:                                 // Kodo Kombobulator
                 case 62105:                                 // To'kini's Blowgun
                     return true;
+                case 28441:                                 // AB Effect 000
+                case 42442:                                 // Vengeance Landing Cannonfire
+                    return false;
                 default:
                     break;
             }
