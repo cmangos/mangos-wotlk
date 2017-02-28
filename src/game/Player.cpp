@@ -14589,6 +14589,8 @@ void Player::ItemAddedQuestCheck(uint32 entry, uint32 count)
                     q_status.m_itemcount[j] += additemcount;
                     if (q_status.uState != QUEST_NEW)
                         q_status.uState = QUEST_CHANGED;
+
+                    SendQuestUpdateAddItem(qInfo, j, curitemcount, additemcount);
                 }
                 if (CanCompleteQuest(questid))
                     CompleteQuest(questid);
@@ -15045,15 +15047,27 @@ void Player::SendPushToPartyResponse(Player* pPlayer, uint32 msg) const
     }
 }
 
+void Player::SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint32 current, uint32 count)
+{
+    MANGOS_ASSERT(count < 65536 && "Quest slot count store is limited to 16 bits 2^16 = 65536 (0..65535)");
+
+    // Dedicated quest watcher update for items is deprecated
+    // Update player field and fire UNIT_QUEST_LOG_CHANGED for self
+    uint16 slot = FindQuestSlot(pQuest->GetQuestId());
+    if (slot < MAX_QUEST_LOG_SIZE)
+        SetQuestSlotCounter(slot, uint8(item_idx), uint16(current + count));
+}
+
 void Player::SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, ObjectGuid guid, uint32 creatureOrGO_idx, uint32 count)
 {
-    MANGOS_ASSERT(count < 65536 && "mob/GO count store in 16 bits 2^16 = 65536 (0..65536)");
+    MANGOS_ASSERT(count < 65536 && "Quest slot count store is limited to 16 bits 2^16 = 65536 (0..65535)");
 
     int32 entry = pQuest->ReqCreatureOrGOId[ creatureOrGO_idx ];
     if (entry < 0)
         // client expected gameobject template id in form (id|0x80000000)
         entry = (-entry) | 0x80000000;
 
+    // Update quest watcher and fire QUEST_WATCH_UPDATE
     WorldPacket data(SMSG_QUESTUPDATE_ADD_KILL, (4 * 4 + 8));
     DEBUG_LOG("WORLD: Sent SMSG_QUESTUPDATE_ADD_KILL");
     data << uint32(pQuest->GetQuestId());
@@ -15063,9 +15077,10 @@ void Player::SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, ObjectGuid guid
     data << guid;
     GetSession()->SendPacket(data);
 
-    uint16 log_slot = FindQuestSlot(pQuest->GetQuestId());
-    if (log_slot < MAX_QUEST_LOG_SIZE)
-        SetQuestSlotCounter(log_slot, creatureOrGO_idx, count);
+    // Update player field and fire UNIT_QUEST_LOG_CHANGED for self
+    uint16 slot = FindQuestSlot(pQuest->GetQuestId());
+    if (slot < MAX_QUEST_LOG_SIZE)
+        SetQuestSlotCounter(slot, uint8(creatureOrGO_idx), uint16(count));
 }
 
 void Player::SendQuestGiverStatusMultiple() const
