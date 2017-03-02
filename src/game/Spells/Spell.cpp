@@ -3806,6 +3806,8 @@ void Spell::update(uint32 difftime)
     // update pointers based at it's GUIDs
     UpdatePointers();
 
+    uint32 time = m_timer;
+
     if (m_targets.getUnitTargetGuid() && !m_targets.getUnitTarget())
     {
         cancel();
@@ -3884,7 +3886,7 @@ void Spell::update(uint32 difftime)
 
             if (m_timer == 0)
             {
-                SendChannelUpdate(0);
+                SendChannelUpdate(0, true);
 
                 // channeled spell processed independently for quest targeting
                 // cast at creature (or GO) quest objectives update at successful cast channel finished
@@ -4424,16 +4426,21 @@ void Spell::SendInterrupted(uint8 result) const
     m_caster->SendMessageToSet(data, true);
 }
 
-void Spell::SendChannelUpdate(uint32 time) const
+void Spell::SendChannelUpdate(uint32 time, bool properEnding) const
 {
     if (time == 0)
     {
-        m_caster->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid());
+        // Channel aura is removed during its update when channel ends properly
+        // If infinite channel remove aura right away
+        if (!properEnding || m_spellInfo->DurationIndex == 21)
+        {
+            m_caster->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid());
 
-        ObjectGuid target_guid = m_caster->GetChannelObjectGuid();
-        if (target_guid != m_caster->GetObjectGuid() && target_guid.IsUnit())
-            if (Unit* target = ObjectAccessor::GetUnit(*m_caster, target_guid))
-                target->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid());
+            ObjectGuid target_guid = m_caster->GetChannelObjectGuid();
+            if (target_guid != m_caster->GetObjectGuid() && target_guid.IsUnit())
+                if (Unit* target = ObjectAccessor::GetUnit(*m_caster, target_guid))
+                    target->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid());
+        }
 
         // Only finish channeling when latest channeled spell finishes
         if (m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != m_spellInfo->Id)

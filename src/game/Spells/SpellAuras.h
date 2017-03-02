@@ -190,6 +190,7 @@ class SpellAuraHolder
         bool HasMechanic(uint32 mechanic) const;
         bool HasMechanicMask(uint32 mechanicMask) const;
 
+        void SetCreationDelayFlag();
     private:
         SpellEntry const* m_spellProto;
 
@@ -218,6 +219,7 @@ class SpellAuraHolder
         bool m_isDeathPersist: 1;
         bool m_isRemovedOnShapeLost: 1;
         bool m_deleted: 1;
+        bool m_skipUpdate: 1;
 };
 
 typedef void(Aura::*pAuraHandler)(bool Apply, bool Real);
