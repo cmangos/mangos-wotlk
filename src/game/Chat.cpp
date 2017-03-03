@@ -213,7 +213,8 @@ ChatCommand* ChatHandler::getCommandTable()
         { "cinematic",      SEC_MODERATOR,      false, &ChatHandler::HandleDebugPlayCinematicCommand,       "", nullptr },
         { "movie",          SEC_MODERATOR,      false, &ChatHandler::HandleDebugPlayMovieCommand,           "", nullptr },
         { "sound",          SEC_MODERATOR,      false, &ChatHandler::HandleDebugPlaySoundCommand,           "", nullptr },
-        { nullptr,             0,                  false, nullptr,                                                "", nullptr }
+        { "music",          SEC_MODERATOR,      false, &ChatHandler::HandleDebugPlayMusicCommand,           "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 
     static ChatCommand debugSendCommandTable[] =
