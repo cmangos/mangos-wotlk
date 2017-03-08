@@ -17082,7 +17082,7 @@ DungeonPersistentState* Player::GetBoundInstanceSaveForSelfOrGroup(uint32 mapid)
     {
         // use the player's difficulty setting (it may not be the same as the group's)
         if (Group* group = GetGroup())
-            if (InstanceGroupBind const* groupBind = group->GetBoundInstance(mapid, this))
+            if (InstanceGroupBind const* groupBind = group->GetBoundInstance(mapid))
                 state = groupBind->state;
     }
 

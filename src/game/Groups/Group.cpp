@@ -781,7 +781,7 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
         if (player->IsInWorld())
         {
             // if the same group invites the player back, cancel the homebind timer
-            if (InstanceGroupBind* bind = GetBoundInstance(player->GetMapId(), player))
+            if (InstanceGroupBind* bind = GetBoundInstance(player->GetMapId()))
                 if (bind->state->GetInstanceId() == player->GetInstanceId())
                     player->m_InstanceValid = true;
         }
@@ -1331,13 +1331,13 @@ void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* Send
     }
 }
 
-InstanceGroupBind* Group::GetBoundInstance(uint32 mapid, Player* player)
+InstanceGroupBind* Group::GetBoundInstance(uint32 mapid)
 {
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
     if (!mapEntry)
         return nullptr;
 
-    Difficulty difficulty = player->GetDifficulty(mapEntry->IsRaid());
+    Difficulty difficulty = GetDifficulty(mapEntry->IsRaid());
 
     // some instances only have one difficulty
     MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mapid, difficulty);
