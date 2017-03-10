@@ -65,6 +65,12 @@ UPDATE spell_template SET AttributesEx2=AttributesEx2|4 WHERE id IN (29916, 2991
 INSERT INTO spell_template (Id, Category, Attributes, CastingTimeIndex, ProcChance, BaseLevel, SpellLevel, RangeIndex, EquippedItemClass, Effect1, EffectDieSides1, EffectBaseDice1, EffectImplicitTargetA1, SpellIconID, SpellName, DmgClass, PreventionType, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, IsServerSide) VALUES
 ('18941', '65', '262416', '1', '101', '14', '14', '1', '-1', '19', '1', '1', '1', '108', 'Double Attack', '2', '2', '1', '1', '1', '1');
 
+-- Solarium Priest Heal should be interruptable
+UPDATE spell_template SET InterruptFlags=InterruptFlags|4 WHERE id IN(33387);
+
+-- Nether Portal - Netherspite - Dominance should not be cast while casting, only blue beam was affected and not removed when it should be
+UPDATE spell_template SET AttributesEx4=0 WHERE id IN(30402);
+
 -- Spells used in Ragnaros encounter
 INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`ProcChance`,`DurationIndex`,`RangeIndex`,`EquippedItemClass`,`Effect1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES 
 ('21108','256','1','101','0','13','-1','3','0','16','0','876','Summon Sons of Flame','1'),
