@@ -957,13 +957,25 @@ bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, flo
     return true;
 }
 
-uint32 GetCreatureModelRace(uint32 model_id)
+uint32 GetCreatureModelRace(uint32 modelId)
 {
-    CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(model_id);
-    if (!displayEntry)
-        return 0;
-    CreatureDisplayInfoExtraEntry const* extraEntry = sCreatureDisplayInfoExtraStore.LookupEntry(displayEntry->ExtendedDisplayInfoID);
-    return extraEntry ? extraEntry->Race : 0;
+    if (CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(modelId))
+    {
+        if (CreatureDisplayInfoExtraEntry const* extraEntry = sCreatureDisplayInfoExtraStore.LookupEntry(displayEntry->ExtendedDisplayInfoID))
+            return extraEntry->Race;
+    }
+    return 0;
+}
+
+// for creatures - mid point, for mounts - spine, for characters - waist line
+float GetModelMidpoint(uint32 modelId)
+{
+    if (CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(modelId))
+    {
+        if (CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId))
+            return modelData->MountHeight;
+    }
+    return 0.0f;
 }
 
 // script support functions

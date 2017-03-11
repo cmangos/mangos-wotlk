@@ -11336,19 +11336,19 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
             float angle_offset = max_angle * (rand_norm_f() - 0.5f);
             m_caster->GetNearPoint2D(fx, fy, dis + m_caster->GetObjectBoundingRadius(), m_caster->GetOrientation() + angle_offset);
 
-            GridMapLiquidData liqData;
-            if (!m_caster->GetTerrain()->IsInWater(fx, fy, m_caster->GetPositionZ() + 1.f, &liqData))
-            {
-                SendCastResult(SPELL_FAILED_NOT_FISHABLE);
-                SendChannelUpdate(0);
-                return;
-            }
+            SpellCastResult err = SPELL_FAILED_SUCCESS;
+            float waistHeight = GetModelMidpoint(m_caster->GetDisplayId()) * m_caster->GetObjectScale();
 
-            fz = liqData.level;
-            // finally, check LoS
-            if (!m_caster->IsWithinLOS(fx, fy, fz))
+            if (!m_caster->GetTerrain()->IsAboveWater(fx, fy, m_caster->GetPositionZ() + waistHeight + 0.5f, &fz))
+                err = SPELL_FAILED_NOT_FISHABLE;
+            else if (m_caster->GetPositionZ() < (fz - waistHeight))
+                err = SPELL_FAILED_ONLY_ABOVEWATER;
+            else if (!m_caster->IsWithinLOS(fx, fy, fz))
+                err = SPELL_FAILED_LINE_OF_SIGHT;
+
+            if (err != SPELL_FAILED_SUCCESS)
             {
-                SendCastResult(SPELL_FAILED_LINE_OF_SIGHT);
+                SendCastResult(err);
                 SendChannelUpdate(0);
                 return;
             }
