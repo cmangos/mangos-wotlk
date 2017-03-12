@@ -214,21 +214,17 @@ namespace MMAP
 
             if (fread(&lheader, sizeof(GridMapLiquidHeader), 1, mapFile) == 1)
             {
-                bool success = true;
                 if (!(lheader.flags & MAP_LIQUID_NO_TYPE))
                 {
-                    success = fread(liquid_type, sizeof(liquid_type), 1, mapFile) == 1;
-                    if (success)
+                    if (fread(liquid_type, sizeof(liquid_type), 1, mapFile) == 1)
                         liquid_type_loaded = true;
                 }
 
-                if (success && !(lheader.flags & MAP_LIQUID_NO_HEIGHT))
+                if (!(lheader.flags & MAP_LIQUID_NO_HEIGHT))
                 {
                     uint32 dataSize = lheader.width * lheader.height;
                     liquid_map = new float[dataSize];
-                    success = fread(liquid_map, sizeof(float), dataSize, mapFile) == dataSize;
-
-                    if (!success)
+                    if (fread(liquid_map, sizeof(float), dataSize, mapFile) != dataSize)
                     {
                         delete[] liquid_map;
                         liquid_map = nullptr;
