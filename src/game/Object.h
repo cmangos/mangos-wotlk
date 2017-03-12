@@ -526,7 +526,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         InstanceData* GetInstanceData() const;
 
-        const char* GetName() const { return m_name.c_str(); }
+        char const* GetName() const { return m_name.c_str(); }
+        std::string const& GetNameStr() const { return m_name; }
         void SetName(const std::string& newname) { m_name = newname; }
 
         virtual const char* GetNameForLocaleIdx(int32 /*locale_idx*/) const { return GetName(); }
