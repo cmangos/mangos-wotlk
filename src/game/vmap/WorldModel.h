@@ -19,6 +19,7 @@
 #ifndef _WORLDMODEL_H
 #define _WORLDMODEL_H
 
+#include <G3D/HashTrait.h>
 #include <G3D/Vector3.h>
 #include <G3D/AABox.h>
 #include <G3D/Ray.h>
@@ -35,9 +36,8 @@ namespace VMAP
     class MeshTriangle
     {
         public:
-            MeshTriangle(): idx0(0), idx1(0), idx2(0)
-            {};
-            MeshTriangle(uint32 na, uint32 nb, uint32 nc): idx0(na), idx1(nb), idx2(nc) {};
+            MeshTriangle() : idx0(0), idx1(0), idx2(0) {}
+            MeshTriangle(uint32 na, uint32 nb, uint32 nc): idx0(na), idx1(nb), idx2(nc) {}
 
             uint32 idx0;
             uint32 idx1;
@@ -77,8 +77,8 @@ namespace VMAP
     {
         public:
             GroupModel() : iMogpFlags(0), iGroupWMOID(0), iLiquid(nullptr) {}
-            GroupModel(const GroupModel& other);
-            GroupModel(uint32 mogpFlags, uint32 groupWMOID, const AABox& bound):
+            GroupModel(GroupModel const& other);
+            GroupModel(uint32 mogpFlags, uint32 groupWMOID, AABox const& bound) :
                 iBound(bound), iMogpFlags(mogpFlags), iGroupWMOID(groupWMOID), iLiquid(nullptr) {}
             ~GroupModel() { delete iLiquid; }
 
@@ -105,19 +105,19 @@ namespace VMAP
 
 #ifdef MMAP_GENERATOR
         public:
-            void getMeshData(std::vector<Vector3>& vertices, std::vector<MeshTriangle>& triangles, WmoLiquid*& liquid);
+            void getMeshData(std::vector<Vector3>& outVertices, std::vector<MeshTriangle>& outTriangles, WmoLiquid*& liquid);
 #endif
     };
     /*! Holds a model (converted M2 or WMO) in its original coordinate space */
     class WorldModel
     {
         public:
-            WorldModel(): RootWMOID(0) {}
+            WorldModel(): RootWMOID(0), modelFlags(0) {}
 
             //! pass group models to WorldModel and create BIH. Passed vector is swapped with old geometry!
             void setGroupModels(std::vector<GroupModel>& models);
             void setRootWmoID(uint32 id) { RootWMOID = id; }
-            bool IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit, bool checkLOS = false) const;
+            bool IntersectRay(G3D::Ray const& ray, float& distance, bool stopAtFirstHit, bool checkLOS = false) const;
             bool IntersectPoint(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, AreaInfo& info) const;
             bool GetLocationInfo(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, LocationInfo& info) const;
             bool writeFile(const std::string& filename);
@@ -132,7 +132,7 @@ namespace VMAP
 
 #ifdef MMAP_GENERATOR
         public:
-            void getGroupModels(std::vector<GroupModel>& groupModels);
+            void getGroupModels(std::vector<GroupModel>& outGroupModels);
 #endif
     };
 } // namespace VMAP
