@@ -179,7 +179,7 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
         {
             // Check for swimming or flying shortcut
             if ((startPoly == INVALID_POLYREF && m_sourceUnit->GetTerrain()->IsUnderWater(startPos.x, startPos.y, startPos.z)) ||
-                    (endPoly == INVALID_POLYREF && m_sourceUnit->GetTerrain()->IsUnderWater(endPos.x, endPos.y, endPos.z)))
+                (endPoly == INVALID_POLYREF && m_sourceUnit->GetTerrain()->IsUnderWater(endPos.x, endPos.y, endPos.z)))
                 m_type = ((Creature*)m_sourceUnit)->CanSwim() ? PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH) : PATHFIND_NOPATH;
             else
                 m_type = ((Creature*)m_sourceUnit)->CanFly() ? PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH) : PATHFIND_NOPATH;
@@ -456,6 +456,16 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
         return;
     }
 
+    // Normalize calculated path points first
+    if (!sWorld.getConfig(CONFIG_BOOL_PATH_FIND_NORMALIZE_Z))
+    {
+        for (uint32 i = 0; i < pointCount; ++i)
+        {
+            uint32 pointPos = i * VERTEX_SIZE;                     //  X                     Y                         Z
+            m_sourceUnit->UpdateAllowedPositionZ(pathPoints[pointPos + 2], pathPoints[pointPos], pathPoints[pointPos + 1]);
+        }
+    }
+
     if (pointCount > 2 && sWorld.getConfig(CONFIG_BOOL_PATH_FIND_OPTIMIZE))
     {
         PointsArray tempPathPoints;
@@ -463,7 +473,7 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
 
         for (uint32 i = 0; i < pointCount; ++i)
         {
-            uint32 pointPos = i * VERTEX_SIZE;      //  Y                     Z                         X
+            uint32 pointPos = i * VERTEX_SIZE;      //  X                     Y                         Z
             tempPathPoints[i] = { pathPoints[pointPos + 2], pathPoints[pointPos], pathPoints[pointPos + 1] };
         }
 
@@ -543,8 +553,6 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
 
         m_type = PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH);
     }
-
-    NormalizePath();
 
     DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::BuildPointPath path type %d size %d poly-size %d\n", m_type, pointCount, m_polyLength);
 }
