@@ -79,6 +79,23 @@ class HashMapHolder
         static MapType  m_objectMap;
 };
 
+class PlayerNameMapHolder
+{
+    public:
+        typedef std::unordered_map<std::string, Player*> MapType;
+
+        static void Insert(Player* p);
+        static void Remove(Player* p);
+        static Player* Find(std::string const& name);
+
+    private:
+
+       // Non instanceable only static
+       PlayerNameMapHolder() {}
+
+       static MapType m_objectMap;
+};
+
 class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLevelLockable<ObjectAccessor, std::mutex> >
 {
         friend class MaNGOS::OperatorNew<ObjectAccessor>;
@@ -97,7 +114,7 @@ class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLev
 
         // Player access
         static Player* FindPlayer(ObjectGuid guid, bool inWorld = true);// if need player at specific map better use Map::GetPlayer
-        static Player* FindPlayerByName(const char* name);
+        static Player* FindPlayerByName(char const* name, bool inWorld = true);
         static void KickPlayer(ObjectGuid guid);
 
         HashMapHolder<Player>::MapType& GetPlayers()
@@ -118,9 +135,9 @@ class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLev
 
         // For call from Player/Corpse AddToWorld/RemoveFromWorld only
         void AddObject(Corpse* object) { HashMapHolder<Corpse>::Insert(object); }
-        void AddObject(Player* object) { HashMapHolder<Player>::Insert(object); }
+        void AddObject(Player* player);
         void RemoveObject(Corpse* object) { HashMapHolder<Corpse>::Remove(object); }
-        void RemoveObject(Player* object) { HashMapHolder<Player>::Remove(object); }
+        void RemoveObject(Player* player);
 
     private:
 
