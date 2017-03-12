@@ -57,7 +57,6 @@ class Model
             indices = NULL;
         }
         std::string filename;
-        char outfilename;
 };
 
 class ModelInstance

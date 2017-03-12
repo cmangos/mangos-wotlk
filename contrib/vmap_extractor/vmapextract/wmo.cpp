@@ -136,8 +136,10 @@ WMORoot::~WMORoot()
 {
 }
 
-WMOGroup::WMOGroup(std::string& filename) : filename(filename),
-    MOPY(0), MOVI(0), MoviEx(0), MOVT(0), MOBA(0), MobaEx(0), hlq(0), LiquEx(0), LiquBytes(0)
+WMOGroup::WMOGroup(std::string& filename) :
+    MOPY(nullptr), MOVI(nullptr), MoviEx(nullptr), MOVT(nullptr), MOBA(nullptr),
+    MobaEx(nullptr), hlq(nullptr), LiquEx(nullptr), LiquBytes(nullptr),
+    filename(filename)
 {
 }
 
