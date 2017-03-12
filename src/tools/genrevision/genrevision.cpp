@@ -70,9 +70,9 @@ bool extractDataFromSvn(std::string filename, bool url, RawData& data)
 bool extractDataFromGit(std::string filename, std::string path, bool url, RawData& data)
 {
     char buf[1024];
-    FILE* entriesFile = nullptr;
 
-    if (entriesFile = fopen(filename.c_str(), "r"))
+    FILE* entriesFile = fopen(filename.c_str(), "r");
+    if (entriesFile)
     {
         char hash_str[200];
         char branch_str[200];
@@ -134,8 +134,12 @@ bool extractDataFromGit(std::string filename, std::string path, bool url, RawDat
         else
             strcpy(data.rev_str, hash_str);
     }
-    else if (entriesFile = fopen((path + ".git/HEAD").c_str(), "r"))
+    else
     {
+        entriesFile = fopen((path + ".git/HEAD").c_str(), "r");
+        if (!entriesFile)
+            return false;
+
         if (!fgets(buf, sizeof(buf), entriesFile))
         {
             fclose(entriesFile);
@@ -168,8 +172,6 @@ bool extractDataFromGit(std::string filename, std::string path, bool url, RawDat
         else
             return false;
     }
-    else
-        return false;
 
     time_t rev_time = 0;
     // extracting date/time
