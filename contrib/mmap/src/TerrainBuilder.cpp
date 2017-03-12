@@ -826,25 +826,29 @@ namespace MMAP
             float p0[3], p1[3];
             int mid, tx, ty;
             float size;
-            if (10 != sscanf(buf, "%d %d,%d (%f %f %f) (%f %f %f) %f", &mid, &tx, &ty,
-                             &p0[0], &p0[1], &p0[2], &p1[0], &p1[1], &p1[2], &size))
+            if (sscanf(buf, "%d %d,%d (%f %f %f) (%f %f %f) %f", &mid, &tx, &ty,
+                &p0[0], &p0[1], &p0[2], &p1[0], &p1[1], &p1[2], &size) != 10)
+            {
+                continue;
+            }
+
+            if (mapID != mid || tileX != tx || tileY != ty)
                 continue;
 
-            if (mapID == mid, tileX == tx, tileY == ty)
-            {
-                meshData.offMeshConnections.append(p0[1]);
-                meshData.offMeshConnections.append(p0[2]);
-                meshData.offMeshConnections.append(p0[0]);
+            meshData.offMeshConnections.append(p0[1]);
+            meshData.offMeshConnections.append(p0[2]);
+            meshData.offMeshConnections.append(p0[0]);
 
-                meshData.offMeshConnections.append(p1[1]);
-                meshData.offMeshConnections.append(p1[2]);
-                meshData.offMeshConnections.append(p1[0]);
+            meshData.offMeshConnections.append(p1[1]);
+            meshData.offMeshConnections.append(p1[2]);
+            meshData.offMeshConnections.append(p1[0]);
 
-                meshData.offMeshConnectionDirs.append(1);          // 1 - both direction, 0 - one sided
-                meshData.offMeshConnectionRads.append(size);       // agent size equivalent
-                // can be used same way as polygon flags
-                meshData.offMeshConnectionsAreas.append((unsigned char)0xFF);
-                meshData.offMeshConnectionsFlags.append((unsigned short)0xFF);  // all movement masks can make this path
+            meshData.offMeshConnectionDirs.append(1);          // 1 - both direction, 0 - one sided
+            meshData.offMeshConnectionRads.append(size);       // agent size equivalent
+
+            // can be used same way as polygon flags
+            meshData.offMeshConnectionsAreas.append((unsigned char)0xFF);
+            meshData.offMeshConnectionsFlags.append((unsigned short)0xFF);  // all movement masks can make this path
             }
         }
 
