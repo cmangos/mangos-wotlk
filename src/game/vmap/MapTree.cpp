@@ -282,9 +282,9 @@ namespace VMAP
         iIsTiled = false;
         if (success)
         {
-            char tiled = 0;
-            if (fread(&tiled, sizeof(char), 1, rf) == 1)
-                iIsTiled = bool(tiled);
+            uint8 tiled;
+            if (fread(&tiled, sizeof(uint8), 1, rf) == 1)
+                iIsTiled = tiled != 0;
             else
                 success = false;
         }

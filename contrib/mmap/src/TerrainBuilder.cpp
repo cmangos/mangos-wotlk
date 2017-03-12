@@ -98,10 +98,15 @@ namespace MMAP
 
         GridMapHeightHeader hheader;
         fseek(mapFile, fheader.heightMapOffset, SEEK_SET);
-        fread(&hheader, sizeof(GridMapHeightHeader), 1, mapFile);
 
-        bool haveTerrain = !(hheader.flags & MAP_HEIGHT_NO_HEIGHT);
-        bool haveLiquid = fheader.liquidMapOffset && !m_skipLiquid;
+        bool haveTerrain = false;
+        bool haveLiquid = false;
+
+        if (fread(&hheader, sizeof(GridMapHeightHeader), 1, mapFile) == 1)
+        {
+            haveTerrain = !(hheader.flags & MAP_HEIGHT_NO_HEIGHT);
+            haveLiquid = fheader.liquidMapOffset && !m_skipLiquid;
+        }
 
         // no data in this map file
         if (!haveTerrain && !haveLiquid)
@@ -115,6 +120,7 @@ namespace MMAP
         memset(holes, 0, sizeof(holes));
         uint8 liquid_type[16][16];
         memset(liquid_type, 0, sizeof(liquid_type));
+        bool liquid_type_loaded = false;
         G3D::Array<int> ltriangles;
         G3D::Array<int> ttriangles;
 
@@ -203,20 +209,34 @@ namespace MMAP
         {
             GridMapLiquidHeader lheader;
             fseek(mapFile, fheader.liquidMapOffset, SEEK_SET);
-            fread(&lheader, sizeof(GridMapLiquidHeader), 1, mapFile);
 
-            float* liquid_map = NULL;
+            float* liquid_map = nullptr;
 
-            if (!(lheader.flags & MAP_LIQUID_NO_TYPE))
-                fread(liquid_type, sizeof(liquid_type), 1, mapFile);
-
-            if (!(lheader.flags & MAP_LIQUID_NO_HEIGHT))
+            if (fread(&lheader, sizeof(GridMapLiquidHeader), 1, mapFile) == 1)
             {
-                liquid_map = new float [lheader.width * lheader.height];
-                fread(liquid_map, sizeof(float), lheader.width * lheader.height, mapFile);
+                bool success = true;
+                if (!(lheader.flags & MAP_LIQUID_NO_TYPE))
+                {
+                    success = fread(liquid_type, sizeof(liquid_type), 1, mapFile) == 1;
+                    if (success)
+                        liquid_type_loaded = true;
+                }
+
+                if (success && !(lheader.flags & MAP_LIQUID_NO_HEIGHT))
+                {
+                    uint32 dataSize = lheader.width * lheader.height;
+                    liquid_map = new float[dataSize];
+                    success = fread(liquid_map, sizeof(float), dataSize, mapFile) == dataSize;
+
+                    if (!success)
+                    {
+                        delete[] liquid_map;
+                        liquid_map = nullptr;
+                    }
+                }
             }
 
-            if (liquid_type && liquid_map)
+            if (liquid_map)
             {
                 int count = meshData.liquidVerts.size() / 3;
                 float xoffset = (float(tileX) - 32) * GRID_SIZE;
@@ -259,7 +279,7 @@ namespace MMAP
                     }
                 }
 
-                delete [] liquid_map;
+                delete[] liquid_map;
 
                 int indices[3], loopStart, loopEnd, loopInc, triInc;
                 getLoopVars(portion, loopStart, loopEnd, loopInc);
@@ -313,7 +333,7 @@ namespace MMAP
                 uint8 liquidType = MAP_LIQUID_TYPE_NO_WATER;
 
                 // if there is no liquid, don't use liquid
-                if (!liquid_type || !meshData.liquidVerts.size() || !ltriangles.size())
+                if (!liquid_type_loaded || !meshData.liquidVerts.size() || !ltriangles.size())
                     useLiquid = false;
                 else
                 {

@@ -334,7 +334,7 @@ void instance_trial_of_the_crusader::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_FACTION_CHAMPIONS:
             if (uiData == SPECIAL)
-                StartNextDialogueText(m_auiEncounter[uiType] != FAIL ? SAY_TIRION_PVP_INTRO_1 : TYPE_FACTION_CHAMPIONS);
+                StartNextDialogueText(m_auiEncounter[uiType] != FAIL ? int32(SAY_TIRION_PVP_INTRO_1) : int32(TYPE_FACTION_CHAMPIONS));
             else if (uiData == FAIL)
             {
                 SetData(TYPE_WIPE_COUNT, m_auiEncounter[TYPE_WIPE_COUNT] + 1);
