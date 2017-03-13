@@ -39,8 +39,8 @@ enum
 
     // SOUND_RANDOM_AGGRO       = 8955,                     // soundId containing the 4 aggro sounds, we not using this
 
-    SPELL_POSIONBOLT_VOLLEY     = 28796,
-    SPELL_POSIONBOLT_VOLLEY_H   = 54098,
+    SPELL_POISONBOLT_VOLLEY     = 28796,
+    SPELL_POISONBOLT_VOLLEY_H   = 54098,
     SPELL_ENRAGE                = 28798,
     SPELL_ENRAGE_H              = 54100,
     SPELL_RAIN_OF_FIRE          = 28794,
@@ -155,7 +155,7 @@ struct boss_faerlinaAI : public ScriptedAI
         // Poison Bolt Volley
         if (m_uiPoisonBoltVolleyTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_POSIONBOLT_VOLLEY : SPELL_POSIONBOLT_VOLLEY_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_POISONBOLT_VOLLEY : SPELL_POISONBOLT_VOLLEY_H) == CAST_OK)
                 m_uiPoisonBoltVolleyTimer = 11000;
         }
         else
