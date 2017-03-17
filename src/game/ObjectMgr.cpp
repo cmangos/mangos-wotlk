@@ -44,6 +44,8 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "DBCStores.h"
+#include "OutdoorPvP/OutdoorPvPMgr.h"
+#include "OutdoorPvP/OutdoorPvP.h"
 
 #include <limits>
 #include "ItemEnchantmentMgr.h"
@@ -8029,6 +8031,13 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
 
             return !!creature;
         }
+        case CONDITION_PVP_SCRIPT:
+        {
+            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(m_value1))
+                return outdoorPvP->IsConditionFulfilled(player, m_value2, source, conditionSourceType);
+
+            return false;
+        }
         default:
             return false;
     }
@@ -8060,6 +8069,7 @@ bool PlayerCondition::CheckParamRequirements(Player const* pPlayer, Map const* m
             break;
         case CONDITION_INSTANCE_SCRIPT:
         case CONDITION_COMPLETED_ENCOUNTER:
+        case CONDITION_PVP_SCRIPT:
             if (!pPlayer && !source && !map)
             {
                 sLog.outErrorDb("CONDITION %u type %u used with bad parameters, called from %s, used with plr: %s, map %i, src %s",
@@ -8497,6 +8507,8 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
                 return false;
             }
         }
+        case CONDITION_PVP_SCRIPT:
+            break;
         case CONDITION_NONE:
             break;
         default:
