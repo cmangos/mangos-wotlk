@@ -42,6 +42,12 @@ OutdoorPvPZM::OutdoorPvPZM() : OutdoorPvP(),
     for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
         m_towerOwner[i] = TEAM_NONE;
 
+    for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
+    {
+        m_playerCarryingFlag[i] = false;
+        m_flagReady[i] = false;
+    }
+
     // initially set graveyard owner to neither faction
     sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, TEAM_INVALID);
 }
@@ -276,6 +282,8 @@ void OutdoorPvPZM::UpdateScoutState(Team team, bool spawned)
         m_scoutWorldStateAlliance = spawned ? WORLD_STATE_ZM_FLAG_READY_ALLIANCE : WORLD_STATE_ZM_FLAG_NOT_READY_ALLIANCE;
         SendUpdateWorldState(m_scoutWorldStateAlliance, WORLD_STATE_ADD);
 
+        m_flagReady[TEAM_INDEX_ALLIANCE] = spawned;
+
         if (spawned)
             sWorld.SendDefenseMessage(ZONE_ID_ZANGARMARSH, LANG_OPVP_ZM_SPAWN_FIELD_SCOUT_A);
     }
@@ -284,6 +292,8 @@ void OutdoorPvPZM::UpdateScoutState(Team team, bool spawned)
         SendUpdateWorldState(m_scoutWorldStateHorde, WORLD_STATE_REMOVE);
         m_scoutWorldStateHorde = spawned ? WORLD_STATE_ZM_FLAG_READY_HORDE : WORLD_STATE_ZM_FLAG_NOT_READY_HORDE;
         SendUpdateWorldState(m_scoutWorldStateHorde, WORLD_STATE_ADD);
+
+        m_flagReady[TEAM_INDEX_HORDE] = spawned;
 
         if (spawned)
             sWorld.SendDefenseMessage(ZONE_ID_ZANGARMARSH, LANG_OPVP_ZM_SPAWN_FIELD_SCOUT_H);
@@ -377,21 +387,6 @@ bool OutdoorPvPZM::HandleGameObjectUse(Player* player, GameObject* go)
     return false;
 }
 
-// ToDo: Handle the case when the player drops the flag
-//bool OutdoorPvPZM::HandleDropFlag(Player* player, uint32 spellId)
-//{
-//    if (spellId == SPELL_BATTLE_STANDARD_HORDE || spellId == SPELL_BATTLE_STANDARD_ALLIANCE)
-//    {
-//        // ToDo: implement this when the scout DB conditions are implemented
-//        // The scouts gossip options should check a DB condition if the gossip is pvp available
-//        // The idea is to set the Outdoor PvP condition to false on flag take - this will allow only one player to use the flag
-//        // on flag drop the condition can be set back to true if necessary, so the players can retake the flag
-//        return true;
-//    }
-//
-//    return false;
-//}
-
 // Handle the ZM beacons - this is done by npcs which have certain auras
 void OutdoorPvPZM::SetBeaconArtKit(const WorldObject* objRef, ObjectGuid creatureGuid, uint32 auraId)
 {
@@ -401,5 +396,35 @@ void OutdoorPvPZM::SetBeaconArtKit(const WorldObject* objRef, ObjectGuid creatur
             beam->CastSpell(beam, auraId, TRIGGERED_OLD_TRIGGERED);
         else
             beam->RemoveAllAuras();
+    }
+}
+
+// Check condition for ZM flag NPCs
+bool OutdoorPvPZM::IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType)
+{
+    switch (conditionId)
+    {
+        case OPVP_COND_ZM_ALLY_SCOUT_FLAG_READY:
+            return m_flagReady[TEAM_INDEX_ALLIANCE] && !m_playerCarryingFlag[TEAM_INDEX_ALLIANCE];
+        case OPVP_COND_ZM_HORDE_SCOUT_FLAG_READY:
+            return m_flagReady[TEAM_INDEX_HORDE] && !m_playerCarryingFlag[TEAM_INDEX_HORDE];
+    }
+
+    return false;
+}
+
+// Handle condition state change by checking the aura existance on players
+void OutdoorPvPZM::HandleConditionStateChange(uint32 conditionId, bool state)
+{
+    // state = false -> flag dropped
+    // state = true -> flag picked up
+    switch (conditionId)
+    {
+        case OPVP_COND_ZM_ALLY_SCOUT_FLAG_READY:
+            m_playerCarryingFlag[TEAM_INDEX_ALLIANCE] = state;
+            break;
+        case OPVP_COND_ZM_HORDE_SCOUT_FLAG_READY:
+            m_playerCarryingFlag[TEAM_INDEX_HORDE] = state;
+            break;
     }
 }

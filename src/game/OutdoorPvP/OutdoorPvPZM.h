@@ -96,9 +96,14 @@ enum
     WORLD_STATE_ZM_FLAG_READY_HORDE         = 2658,
     WORLD_STATE_ZM_FLAG_NOT_READY_HORDE     = 2657,
     WORLD_STATE_ZM_FLAG_READY_ALLIANCE      = 2655,
-    WORLD_STATE_ZM_FLAG_NOT_READY_ALLIANCE  = 2656
+    WORLD_STATE_ZM_FLAG_NOT_READY_ALLIANCE  = 2656,
 
             //WORLD_STATE_ZM_UNK                    = 2653
+
+    // condition entries (hardcoded)
+    // used to check the gossip options in DB for the flag provider NPC
+    OPVP_COND_ZM_ALLY_SCOUT_FLAG_READY      = 0,
+    OPVP_COND_ZM_HORDE_SCOUT_FLAG_READY     = 1,
 };
 
 struct ZangarmarshTowerEvent
@@ -145,7 +150,9 @@ class OutdoorPvPZM : public OutdoorPvP
 
         void HandlePlayerKillInsideArea(Player* player) override;
         bool HandleGameObjectUse(Player* player, GameObject* go) override;
-        //bool HandleDropFlag(Player* player, uint32 spellId) override;
+
+        bool IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType) override;
+        void HandleConditionStateChange(uint32 conditionId, bool state) override;
 
     private:
         // process capture events
@@ -168,6 +175,9 @@ class OutdoorPvPZM : public OutdoorPvP
         uint32 m_scoutWorldStateHorde;
         uint8 m_towersAlliance;
         uint8 m_towersHorde;
+
+        bool m_flagReady[PVP_TEAM_COUNT];
+        bool m_playerCarryingFlag[PVP_TEAM_COUNT];
 
         ObjectGuid m_towerBanners[MAX_ZM_TOWERS];
         ObjectGuid m_graveyardBannerAlliance;

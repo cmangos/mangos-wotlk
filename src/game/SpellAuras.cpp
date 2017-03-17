@@ -5080,6 +5080,18 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
     }
 
     target->ApplySpellImmune(GetId(), IMMUNITY_EFFECT, m_modifier.m_miscvalue, apply);
+
+    switch (GetSpellProto()->Id)
+    {
+        case 32430:                     // Battle Standard (Alliance - ZM OPVP)
+        case 32431:                     // Battle Standard (Horde - ZM OPVP)
+        {
+            // Handle OPVP script condition change on aura apply; Specific for Zangarmarsh outdoor pvp
+            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(3521))
+                outdoorPvP->HandleConditionStateChange(uint32(GetSpellProto()->Id == 32431), apply);
+            return;
+        }
+    }
 }
 
 void Aura::HandleAuraModStateImmunity(bool apply, bool Real)
