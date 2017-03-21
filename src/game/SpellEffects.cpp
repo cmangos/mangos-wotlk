@@ -1091,6 +1091,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 21108:                                 // Summon Sons of Flame
+                {
+                    // Trigger the eight summoning spells for the adds in Ragnaros encounter
+                    const uint32 spell_list[8] = {21110, 21111, 21112, 21113, 21114, 21115, 21116, 21117};
+                    for (int i = 0; i < 8; i++)
+                        m_caster->CastSpell(m_caster, spell_list[i], TRIGGERED_OLD_TRIGGERED, nullptr);
+                    return;
+                }
                 case 21147:                                 // Arcane Vacuum
                 {
                     if (unitTarget)
@@ -1105,6 +1113,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
 
                     return;
+                }
+                case 21908:                                 // Lava Burst Randomizer
+                {
+                    // randomly cast one of the nine Lava Burst spell A to I in Ragnaros encounter
+                    const uint32 spell_list[9] = {21886, 21900, 21901, 21902, 21903, 21904, 21905, 21906, 21907};
+                    m_caster->CastSpell(m_caster, spell_list[urand(0, 8)], TRIGGERED_OLD_TRIGGERED);
+                  return;
                 }
                 case 23019:                                 // Crystal Prison Dummy DND
                 {
