@@ -4716,7 +4716,6 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
         !IsDeathOnlySpell(aurSpellInfo) && !aurSpellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD) &&
         (GetTypeId() != TYPEID_PLAYER || !((Player*)this)->GetSession()->PlayerLoading()))
     {
-        delete holder;
         return false;
     }
 
@@ -4725,7 +4724,6 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
         sLog.outError("Holder (spell %u) add to spell aura holder list of %s (lowguid: %u) but spell aura holder target is %s (lowguid: %u)",
                       holder->GetId(), (GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), GetGUIDLow(),
                       (holder->GetTarget()->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), holder->GetTarget()->GetGUIDLow());
-        delete holder;
         return false;
     }
 
@@ -4745,7 +4743,6 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 {
                     // can be created with >1 stack by some spell mods
                     foundHolder->ModStackAmount(holder->GetStackAmount());
-                    delete holder;
                     return false;
                 }
 
@@ -4832,7 +4829,6 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
         if (!IsSpellHaveAura(aurSpellInfo, SPELL_AURA_CONTROL_VEHICLE) && !IsSpellHaveAura(aurSpellInfo, SPELL_AURA_TRIGGER_LINKED_AURA) &&
                 !RemoveNoStackAurasDueToAuraHolder(holder))
         {
-            delete holder;
             return false;                                   // couldn't remove conflicting aura with higher rank
         }
     }
@@ -4934,10 +4930,8 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
 
     // if aura deleted before boosts apply ignore
     // this can be possible it it removed indirectly by triggered spell effect at ApplyModifier
-    if (holder->IsDeleted())
-        return false;
-
-    holder->HandleSpellSpecificBoosts(true);
+    if (!holder->IsDeleted())
+        holder->HandleSpellSpecificBoosts(true);
 
     return true;
 }
@@ -5310,7 +5304,8 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, ObjectGuid casterGuid, U
     // strange but intended behaviour: Stolen single target auras won't be treated as single targeted
     new_holder->SetTrackedAuraType(TRACK_AURA_TYPE_NOT_TRACKED);
 
-    stealer->AddSpellAuraHolder(new_holder);
+    if (!stealer->AddSpellAuraHolder(new_holder))
+        delete new_holder;
 }
 
 void Unit::RemoveAurasDueToSpellByCancel(uint32 spellId)
