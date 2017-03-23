@@ -1783,9 +1783,9 @@ void BattleGroundMgr::DistributeArenaPoints() const
 
     PlayerPoints.clear();
 
-    sWorld.SendWorldText(LANG_DIST_ARENA_POINTS_ONLINE_END);
+    sWorld.SendWorldTextToAboveSecurity(SEC_GAMEMASTER, LANG_DIST_ARENA_POINTS_ONLINE_END);
 
-    sWorld.SendWorldText(LANG_DIST_ARENA_POINTS_TEAM_START);
+    sWorld.SendWorldTextToAboveSecurity(SEC_GAMEMASTER, LANG_DIST_ARENA_POINTS_TEAM_START);
     for (ObjectMgr::ArenaTeamMap::iterator titr = sObjectMgr.GetArenaTeamMapBegin(); titr != sObjectMgr.GetArenaTeamMapEnd(); ++titr)
     {
         if (ArenaTeam* at = titr->second)
@@ -1796,9 +1796,9 @@ void BattleGroundMgr::DistributeArenaPoints() const
         }
     }
 
-    sWorld.SendWorldText(LANG_DIST_ARENA_POINTS_TEAM_END);
+    sWorld.SendWorldTextToAboveSecurity(SEC_GAMEMASTER, LANG_DIST_ARENA_POINTS_TEAM_END);
 
-    sWorld.SendWorldText(LANG_DIST_ARENA_POINTS_END);
+    sWorld.SendWorldTextToAboveSecurity(SEC_GAMEMASTER, LANG_DIST_ARENA_POINTS_END);
 }
 
 void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket& data, ObjectGuid guid, Player* plr, BattleGroundTypeId bgTypeId, uint8 fromWhere) const
