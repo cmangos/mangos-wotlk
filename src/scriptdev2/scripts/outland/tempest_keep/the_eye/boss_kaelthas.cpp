@@ -233,7 +233,7 @@ struct boss_kaelthasAI : public ScriptedAI
 
     void GetAIInformation(ChatHandler& reader) override
     {
-        reader.PSendSysMessage("Kael'thas is currently in phase %u", m_uiPhase);
+        reader.PSendSysMessage("Kael'thas is currently in phase %u", uint32(m_uiPhase));
     }
 
     // Custom Move in LoS function

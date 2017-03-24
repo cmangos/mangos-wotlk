@@ -520,7 +520,7 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
 
     void GetAIInformation(ChatHandler& reader) override
     {
-        reader.PSendSysMessage("Simon Game Bunny, current game phase = %u, current level = %u", m_uiGamePhase, m_uiLevelCount);
+        reader.PSendSysMessage("Simon Game Bunny, current game phase = %u, current level = %u", uint32(m_uiGamePhase), m_uiLevelCount);
     }
 
     // Prepare levels
