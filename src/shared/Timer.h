@@ -23,10 +23,6 @@
 
 class WorldTimer
 {
-    private:
-        static uint32 m_iTime;
-        static uint32 m_iPrevTime;
-
     public:
         // get current server time
         static uint32 getMSTime();
@@ -51,6 +47,10 @@ class WorldTimer
         static uint32 tickPrevTime();
         // tick world timer
         static uint32 tick();
+
+     private:
+        static uint32 m_iTime;
+        static uint32 m_iPrevTime;
 };
 
 class IntervalTimer
