@@ -1906,6 +1906,7 @@ class Unit : public WorldObject
         void RemoveGuardian(Pet* pet);
         void RemoveGuardians();
         Pet* FindGuardianWithEntry(uint32 entry);
+        uint32 CountGuardiansWithEntry(uint32 entry);
         Pet* GetProtectorPet();                             // expected single case in guardian list
 
         CharmInfo* GetCharmInfo() { return m_charmInfo; }

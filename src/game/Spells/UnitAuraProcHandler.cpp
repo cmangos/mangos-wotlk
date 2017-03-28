@@ -2927,6 +2927,13 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 // case 35321: break;                   // Gushing Wound
                 case 36096:                             // Spell Reflection
                     return SPELL_AURA_PROC_OK;          // Missing Trigger spell with no evidence to tell what to trigger, need to return to trigger consumption
+                case 38164: //Unyielding Knights
+                    //this can only proc in hellfire peninsula 
+                    //with a maximum of 2 guardians
+                    //against fel orc faction only
+                    if (GetZoneId() != 3483 || pVictim->getFactionTemplateEntry()->faction != 943 || CountGuardiansWithEntry(20117) == 2)
+                        return SPELL_AURA_PROC_FAILED;
+                    break;
                 // case 36207: break:                   // Steal Weapon
                 // case 36576: break:                   // Shaleskin (Shaleskin Flayer, Shaleskin Ripper) 30023 trigger
                 // case 37030: break;                   // Chaotic Temperament
@@ -2962,6 +2969,13 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 // case 45205: break;                   // Copy Offhand Weapon
                 // case 45343: break;                   // Dark Flame Aura
                 // case 47300: break;                   // Dark Flame Aura
+                case 48473:                                 // Capture Soul - Doom Lord Kazzak
+                    if (pVictim->GetTypeId() != TYPEID_PLAYER) // only player death procs
+                        return SPELL_AURA_PROC_FAILED;
+                    if (Player* lootRecipient = ((Creature*)this)->GetLootRecipient()) // only same team as the one that tagged procs
+                        if (lootRecipient->GetTeam() != ((Player*)pVictim)->GetTeam()) // prevents horde/alliance griefing
+                            return SPELL_AURA_PROC_FAILED;
+                    break;
                 // case 48876: break;                   // Beast's Mark
                 //    trigger_spell_id = 48877; break;
                 // case 49059: break;                   // Horde, Hate Monster (Spar Buddy) (>30% Health)

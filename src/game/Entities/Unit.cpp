@@ -7157,6 +7157,18 @@ Pet* Unit::FindGuardianWithEntry(uint32 entry)
     return nullptr;
 }
 
+uint32 Unit::CountGuardiansWithEntry(uint32 entry)
+{
+    uint32 count = 0;
+
+    for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
+        if (Pet* pet = GetMap()->GetPet(*itr))
+            if (pet->GetEntry() == entry)
+                count++;
+
+    return count;
+}
+
 Pet* Unit::GetProtectorPet()
 {
     for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
