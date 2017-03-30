@@ -392,8 +392,9 @@ namespace VMAP
                 {
                     // acquire model instance
                     WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name);
-                    model->setModelFlags(spawn.flags);
-                    if (!model)
+                    if (model)
+                        model->setModelFlags(spawn.flags);
+                    else
                         ERROR_LOG("StaticMapTree::LoadMapTile() could not acquire WorldModel pointer for '%s'!", spawn.name.c_str());
 
                     // update tree
