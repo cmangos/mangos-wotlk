@@ -4963,20 +4963,6 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
                 holy = 0;
             addhealth += int32(ap * 0.15) + int32(holy * 15 / 100);
         }
-        // Vessel of the Naaru (Vial of the Sunwell trinket)
-        else if (m_spellInfo->Id == 45064)
-        {
-            // Amount of heal - depends from stacked Holy Energy
-            int damageAmount = 0;
-            Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-            for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
-                if ((*i)->GetId() == 45062)
-                    damageAmount += (*i)->GetModifier()->m_amount;
-            if (damageAmount)
-                m_caster->RemoveAurasDueToSpell(45062);
-
-            addhealth += damageAmount;
-        }
         // Death Pact (percent heal)
         else if (m_spellInfo->Id == 48743)
             addhealth = addhealth * unitTarget->GetMaxHealth() / 100;
@@ -5019,12 +5005,47 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 
             addhealth += tickheal * tickcount;
         }
-        // Runic Healing Injector & Healing Potion Injector effect increase for engineers
-        else if ((m_spellInfo->Id == 67486 || m_spellInfo->Id == 67489) && unitTarget->GetTypeId() == TYPEID_PLAYER)
+        else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_POTION)
         {
-            Player* player = (Player*)unitTarget;
-            if (player->HasSkill(SKILL_ENGINEERING))
-                addhealth += int32(addhealth * 0.25);
+            if (m_caster->HasAura(17619)) // Alchemists stone
+                addhealth *= 1.4f; // increase healing by 40%
+        }
+        else 
+        {
+            switch (m_spellInfo->Id)
+            {
+                // Crusader Enchant: Holy Strength amount decrease by 4% each level after 60
+                case 20007:
+                {
+                    if (GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->getLevel() > 60)
+                        addhealth = int32(addhealth * (1 - (((float(GetCaster()->getLevel()) - 60) * 4) / 100)));
+                    break;
+                }
+                // Vessel of the Naaru (Vial of the Sunwell trinket)
+                case  45064:
+                {
+                    // Amount of heal - depends from stacked Holy Energy
+                    int damageAmount = 0;
+                    Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                    for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+                        if ((*i)->GetId() == 45062)
+                            damageAmount += (*i)->GetModifier()->m_amount;
+                    if (damageAmount)
+                        m_caster->RemoveAurasDueToSpell(45062);
+                
+                    addhealth += damageAmount;
+                    break;
+                
+                }
+                case 67486: // Runic Healing Injector
+                case 67489: // Healing Potion Injector
+                {
+                    Player* player = (Player*)unitTarget;
+                    if (player->HasSkill(SKILL_ENGINEERING))
+                        addhealth += int32(addhealth * 0.25);
+                    break;
+                }
+            }
         }
 
         // Chain Healing
@@ -5357,6 +5378,12 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
         }
         default:
             break;
+    }
+    
+    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_POTION)
+    {
+        if (m_caster->HasAura(17619)) // Alchemists stone
+            damage *= 1.4f; // increase healing by 40%
     }
 
     if (level_diff > 0)
