@@ -420,7 +420,7 @@ bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
 
             if (!bApply)
             {
-                if (pAura->GetTarget()->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
+                if (pAura->GetTarget()->GetHealthPercent() <= 35)
                     ((Creature*)pAura->GetTarget())->UpdateEntry(NPC_DRAINED_PHASE_HUNTER);
             }
 
