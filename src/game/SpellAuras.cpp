@@ -2201,6 +2201,15 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (Unit* caster = GetCaster())
                             caster->CastSpell(caster, 13138, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         return;
+                    case 21094:                             // Separation Anxiety (Majordomo Executus)
+                    case 23487:                             // Separation Anxiety (Garr)
+                    {
+                        // expected to tick with 5 sec period (tick part see in Aura::PeriodicTick)
+                        m_isPeriodic = true;
+                        m_modifier.periodictime = 5 * IN_MILLISECONDS;
+                        m_periodicTimer = m_modifier.periodictime;
+                        return;
+                    }
                     case 28832:                             // Mark of Korth'azz
                     case 28833:                             // Mark of Blaumeux
                     case 28834:                             // Mark of Rivendare
@@ -7877,6 +7886,15 @@ void Aura::PeriodicDummyTick()
                     return;
 //              // Panda
 //              case 19230: break;
+                case 21094:                                 // Separation Anxiety (Majordomo Executus)
+                case 23487:                                 // Separation Anxiety (Garr)
+                    if (Unit* caster = GetCaster())
+                    {
+                        float m_radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(spell->EffectRadiusIndex[m_effIndex]));
+                        if (caster->isAlive() && !caster->IsWithinDistInMap(target, m_radius))
+                            target->CastSpell(target, (spell->Id == 21094 ? 21095 : 23492), TRIGGERED_OLD_TRIGGERED, nullptr);      // Spell 21095: Separation Anxiety for Majordomo Executus' adds, 23492: Separation Anxiety for Garr's adds
+                    }
+                    return;
                 case 30019:                                 // Control Piece
                 {
                     if (target->GetTypeId() != TYPEID_PLAYER)
