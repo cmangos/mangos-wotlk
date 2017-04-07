@@ -68,3 +68,16 @@ INSERT INTO spell_template (Id, Attributes, CastingTimeIndex, ProcChance, SpellL
 -- generic proc double attack used in a lot of TBC instances based on sniffs
 INSERT INTO spell_template (Id, Category, Attributes, CastingTimeIndex, ProcChance, BaseLevel, SpellLevel, RangeIndex, EquippedItemClass, Effect1, EffectDieSides1, EffectBaseDice1, EffectImplicitTargetA1, SpellIconID, SpellName, DmgClass, PreventionType, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, IsServerSide) VALUES
 ('18941', '65', '262416', '1', '101', '14', '14', '1', '-1', '19', '1', '1', '1', '108', 'Double Attack', '2', '2', '1', '1', '1', '1');
+
+-- Spells used in Ragnaros encounter
+INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`ProcChance`,`DurationIndex`,`RangeIndex`,`EquippedItemClass`,`Effect1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES 
+('21108','256','1','101','0','13','-1','3','0','16','0','876','Summon Sons of Flame','1'),
+('21110','256','1','101','30','13','-1','41','17','16','12143','876','Summon Son of Flame B','1'),
+('21111','256','1','101','30','13','-1','41','17','16','12143','876','Summon Son of Flame C','1'),
+('21112','256','1','101','30','13','-1','41','17','16','12143','876','Summon Son of Flame D','1'),
+('21113','256','1','101','30','13','-1','41','17','16','12143','876','Summon Son of Flame E','1'),
+('21114','256','1','101','30','13','-1','41','17','16','12143','876','Summon Son of Flame F','1'),
+('21115','256','1','101','30','13','-1','41','17','16','12143','876','Summon Son of Flame G','1'),
+('21116','256','1','101','30','13','-1','41','17','16','12143','876','Summon Son of Flame H','1'),
+('21117','256','1','101','30','13','-1','41','17','16','12143','876','Summon Son of Flame A','1'),
+('21908','256','1','101','0','1','-1','3','1','0','0','1','Lava Burst Randomizer','1');
