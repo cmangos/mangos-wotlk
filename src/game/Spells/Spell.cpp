@@ -1924,8 +1924,17 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_PET:
         {
             Pet* tmpUnit = m_caster->GetPet();
-            if (!tmpUnit) break;
-            targetUnitMap.push_back(tmpUnit);
+            if (tmpUnit)
+            {
+                if (!IsIgnoreLosSpell(m_spellInfo) && !m_caster->IsWithinLOSInMap(tmpUnit))
+                {
+                    SendCastResult(SPELL_FAILED_LINE_OF_SIGHT);
+                    cancel();
+                    return;
+                }
+
+                targetUnitMap.push_back(tmpUnit);
+            }
             break;
         }
         case TARGET_CHAIN_DAMAGE:
