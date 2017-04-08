@@ -183,7 +183,6 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
         }
     }
 
-
     // Check target immune to spell or aura
     if (target->IsImmuneToSpell(spellInfo, false) || target->IsImmuneToSpellEffect(spellInfo, eff_index, false))
         return;
@@ -216,7 +215,8 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
             delete holder;
     }
 
-    i_dynobject.AddAffected(target);
+    if (!i_dynobject.IsAffecting(target))
+        i_dynobject.AddAffected(target);
 }
 
 template<>
