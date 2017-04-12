@@ -325,7 +325,7 @@ struct boss_kiggler_the_crazedAI : public Council_Base_AI
             m_creature->SetInCombatWith(pWho);
             pWho->SetInCombatWith(m_creature);
 
-            m_creature->GetMotionMaster()->MoveChase(pWho, 20.0f);
+            m_creature->GetMotionMaster()->MoveChase(pWho, 20.0f, 0.0F, false);
         }
     }
 
@@ -452,7 +452,7 @@ struct boss_krosh_firehandAI : public Council_Base_AI
             m_creature->SetInCombatWith(pWho);
             pWho->SetInCombatWith(m_creature);
 
-            m_creature->GetMotionMaster()->MoveChase(pWho, 30.0f);
+            m_creature->GetMotionMaster()->MoveChase(pWho, 30.0f, 0.0F, false);
         }
     }
 
