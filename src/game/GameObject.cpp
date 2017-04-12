@@ -523,7 +523,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                 return;
 
             // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
-            m_respawnTime = m_spawnedByDefault ? time(nullptr) + m_respawnDelayTime : 0;
+            if (GameObjectData const* data = sObjectMgr.GetGOData(GetObjectGuid().GetCounter()))
+                m_respawnDelayTime = data->GetRandomRespawnTime();
 
             // if option not set then object will be saved at grid unload
             if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
@@ -611,7 +612,8 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask) const
     data.rotation.y = m_worldRotation.y;
     data.rotation.z = m_worldRotation.z;
     data.rotation.w = m_worldRotation.w;
-    data.spawntimesecs = m_spawnedByDefault ? (int32)m_respawnDelayTime : -(int32)m_respawnDelayTime;
+    data.spawntimesecsmin = m_spawnedByDefault ? (int32)m_respawnDelayTime : -(int32)m_respawnDelayTime;
+    data.spawntimesecsmax = m_spawnedByDefault ? (int32)m_respawnDelayTime : -(int32)m_respawnDelayTime;
     data.animprogress = GetGoAnimProgress();
     data.go_state = GetGoState();
     data.spawnMask = spawnMask;
@@ -633,6 +635,7 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask) const
        << m_worldRotation.z << ", "
        << m_worldRotation.w << ", "
        << m_respawnDelayTime << ", "
+       << m_respawnDelayTime << ", " // TODO: Add variance
        << uint32(GetGoAnimProgress()) << ", "
        << uint32(GetGoState()) << ")";
 
@@ -666,7 +669,7 @@ bool GameObject::LoadFromDB(uint32 guid, Map* map)
     if (!Create(guid, entry, map, phaseMask, x, y, z, ang, data->rotation, animprogress, go_state))
         return false;
 
-    if (!GetGOInfo()->GetDespawnPossibility() && !GetGOInfo()->IsDespawnAtAction() && data->spawntimesecs >= 0)
+    if (!GetGOInfo()->GetDespawnPossibility() && !GetGOInfo()->IsDespawnAtAction() && data->spawntimesecsmin >= 0)
     {
         SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN);
         m_spawnedByDefault = true;
@@ -675,10 +678,10 @@ bool GameObject::LoadFromDB(uint32 guid, Map* map)
     }
     else
     {
-        if (data->spawntimesecs >= 0)
+        if (data->spawntimesecsmin >= 0)
         {
             m_spawnedByDefault = true;
-            m_respawnDelayTime = data->spawntimesecs;
+            m_respawnDelayTime = data->GetRandomRespawnTime();
 
             m_respawnTime  = map->GetPersistentState()->GetGORespawnTime(GetGUIDLow());
 
@@ -692,7 +695,7 @@ bool GameObject::LoadFromDB(uint32 guid, Map* map)
         else
         {
             m_spawnedByDefault = false;
-            m_respawnDelayTime = -data->spawntimesecs;
+            m_respawnDelayTime = -data->spawntimesecsmin;
             m_respawnTime = 0;
         }
     }

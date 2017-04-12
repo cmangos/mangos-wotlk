@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "Object.h"
+#include "Util.h"
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
@@ -572,10 +573,12 @@ struct GameObjectData
     float posZ;
     float orientation;
     QuaternionData rotation;
-    int32  spawntimesecs;
+    int32 spawntimesecsmin;
+    int32 spawntimesecsmax;
     uint32 animprogress;
     GOState go_state;
     uint8 spawnMask;
+    uint32 GetRandomRespawnTime() const { return urand(uint32(spawntimesecsmin), uint32(spawntimesecsmax)); }
 };
 
 // from `gameobject_addon`
