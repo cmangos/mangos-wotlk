@@ -1686,7 +1686,7 @@ void WorldObject::AddObjectToRemoveList()
     GetMap()->AddObjectToRemoveList(this);
 }
 
-Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSummonType spwtype, uint32 despwtime, bool asActiveObject, bool setRun)
+Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSummonType spwtype, uint32 despwtime, bool asActiveObject/* = false*/, bool setRun/* = false*/, uint32 pathId/* = 0*/)
 {
     CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(id);
     if (!cinfo)
@@ -1719,6 +1719,8 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 
     // Active state set before added to map
     pCreature->SetActiveObjectState(asActiveObject);
+
+    pCreature->GetMotionMaster()->SetPathId(pathId);
 
     pCreature->Summon(spwtype, despwtime);                  // Also initializes the AI and MMGen
 
