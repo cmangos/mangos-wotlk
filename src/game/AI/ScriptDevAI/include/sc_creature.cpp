@@ -403,6 +403,9 @@ enum
     NPC_JAN_ALAI                = 23578,
     NPC_TALON_KING_IKISS        = 18473,
     NPC_KARGATH_BLADEFIST       = 16808,
+    NPC_NETHERMANCER_SEPETHREA  = 19221,
+    NPC_MOROES                  = 15687,
+    NPC_MOROGRIM_TIDEWALKER     = 21213,
     NPC_ANUBARAK                = 29120,
     NPC_SINDRAGOSA              = 36853,
     NPC_ZARITHRIAN              = 39746,
@@ -450,6 +453,17 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
             if (x < 255.0f && x > 205.0f)
                 return false;
             break;
+        case NPC_NETHERMANCER_SEPETHREA:
+            if (x > 266.0f)
+                return false;
+            break;
+        case NPC_MOROES:                                    // Moroes - Generate bounding box - TODO: Despawn Remaining Adds upon Evade after Death
+            if (x > -11027.73f && x < -10946.64f && y > -1952.38f && y < -1861.11f)
+                return false;
+            break;
+        case NPC_MOROGRIM_TIDEWALKER:                       // Morogrim - Natural Box made by room
+            if (x > 304.12f && x < 457.35f)
+                return false;
         case NPC_ANUBARAK:
             if (y < 281.0f && y > 228.0f)
                 return false;

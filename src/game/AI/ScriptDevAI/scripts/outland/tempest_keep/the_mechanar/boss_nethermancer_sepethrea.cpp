@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "mechanar.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -55,15 +56,23 @@ struct boss_nethermancer_sepethreaAI : public ScriptedAI
     ScriptedInstance* m_pInstance;
     bool m_bIsRegularMode;
 
-    uint32 m_uiFrostAttackTimer;
     uint32 m_uiArcaneBlastTimer;
     uint32 m_uiDragonsBreathTimer;
 
     void Reset() override
     {
-        m_uiFrostAttackTimer    = urand(8000, 17000);
         m_uiArcaneBlastTimer    = urand(14000, 25000);
         m_uiDragonsBreathTimer  = urand(20000, 26000);
+    }
+
+    // TODO: This is hack, need to find if there is an aura which procs this spell on melee hit
+    void DamageDeal(Unit* pDoneTo, uint32& uiDamage, DamageEffectType damagetype) override
+    {
+        if (damagetype != DIRECT_DAMAGE)
+            return;
+
+        if (roll_chance_i(25))
+            m_creature->CastSpell(pDoneTo, SPELL_FROST_ATTACK, TRIGGERED_OLD_TRIGGERED);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -94,39 +103,20 @@ struct boss_nethermancer_sepethreaAI : public ScriptedAI
             m_pInstance->SetData(TYPE_SEPETHREA, FAIL);
     }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_RAGING_FLAMES)
-        {
-            pSummoned->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
-            pSummoned->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
-
-            // ToDo: need to fixate target and make them walk!
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                pSummoned->GetMotionMaster()->MoveChase(pTarget);
-        }
-    }
-
     void UpdateAI(const uint32 uiDiff) override
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        // Frost Attack
-        if (m_uiFrostAttackTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_ATTACK) == CAST_OK)
-                m_uiFrostAttackTimer = urand(5000, 17000);
-        }
-        else
-            m_uiFrostAttackTimer -= uiDiff;
-
         // Arcane Blast
         if (m_uiArcaneBlastTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_BLAST) == CAST_OK)
+            {
                 m_uiArcaneBlastTimer = urand(15000, 30000);
+                m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -50.0f);
+            }
         }
         else
             m_uiArcaneBlastTimer -= uiDiff;
@@ -146,12 +136,103 @@ struct boss_nethermancer_sepethreaAI : public ScriptedAI
             m_uiDragonsBreathTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
+        
+        // don't allow her to be kited down the hallway leading to Pathaleon
+        EnterEvadeIfOutOfCombatArea(uiDiff);
     }
 };
 
 CreatureAI* GetAI_boss_nethermancer_sepethrea(Creature* pCreature)
 {
     return new boss_nethermancer_sepethreaAI(pCreature);
+}
+
+enum
+{
+    SPELL_RAGING_FLAMES = 35278,
+    SPELL_INFERNO = 35268,
+    SPELL_INFERNO_H = 39346,
+};
+
+struct npc_raging_flamesAI : public ScriptedAI
+{
+    npc_raging_flamesAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        if (m_creature->IsTemporarySummon())
+            m_summonerGuid = m_creature->GetSpawnerGuid();
+
+        Reset();
+    }
+
+    ScriptedInstance* m_pInstance;
+    bool m_bIsRegularMode;
+
+    uint32 m_uiRagingFlamesTimer;
+    uint32 m_uiInfernoTimer;
+
+    ObjectGuid m_summonerGuid;
+
+    void Reset() override
+    {
+        m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
+        m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
+        m_creature->SetMeleeDamageSchool(SPELL_SCHOOL_FIRE);
+        m_creature->SetSpeedRate(MOVE_RUN, m_bIsRegularMode ? 0.5f : 0.8f, true);
+
+        m_uiRagingFlamesTimer = m_bIsRegularMode ? 1200 : 700;
+        m_uiInfernoTimer = urand(15700, 30000);
+    }
+
+    void Aggro(Unit* /*pWho*/) override
+    {
+        FixateRandomTarget();
+    }
+
+    void FixateRandomTarget()
+    {
+        DoResetThreat();
+
+        if (Creature* pSummoner = m_creature->GetMap()->GetCreature(m_summonerGuid))
+            if (Unit* pNewTarget = pSummoner->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                m_creature->AddThreat(pNewTarget, 10000000.0f);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        // Return since we have no target
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        // Raging Flames
+        if (m_uiRagingFlamesTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_RAGING_FLAMES) == CAST_OK)
+                m_uiRagingFlamesTimer = 1000;
+        }
+        else
+            m_uiRagingFlamesTimer -= uiDiff;
+
+        // Inferno
+        if (m_uiInfernoTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_INFERNO : SPELL_INFERNO_H) == CAST_OK)
+            {
+                m_uiInfernoTimer = urand(15700, 28900);
+                FixateRandomTarget();
+            }
+        }
+        else
+            m_uiInfernoTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_raging_flames(Creature* pCreature)
+{
+    return new npc_raging_flamesAI(pCreature);
 }
 
 void AddSC_boss_nethermancer_sepethrea()
@@ -161,5 +242,10 @@ void AddSC_boss_nethermancer_sepethrea()
     pNewScript = new Script;
     pNewScript->Name = "boss_nethermancer_sepethrea";
     pNewScript->GetAI = &GetAI_boss_nethermancer_sepethrea;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_raging_flames";
+    pNewScript->GetAI = &GetAI_npc_raging_flames;
     pNewScript->RegisterSelf();
 }
