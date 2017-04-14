@@ -3177,24 +3177,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 32826:                                 // Polymorph Cast Visual
-                {
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
-                    {
-                        // Polymorph Cast Visual Rank 1
-                        const uint32 spell_list[6] =
-                        {
-                            32813,                          // Squirrel Form
-                            32816,                          // Giraffe Form
-                            32817,                          // Serpent Form
-                            32818,                          // Dragonhawk Form
-                            32819,                          // Worgen Form
-                            32820                           // Sheep Form
-                        };
-                        unitTarget->CastSpell(unitTarget, spell_list[urand(0, 5)], TRIGGERED_OLD_TRIGGERED);
-                    }
-                    return;
-                }
                 case 38194:                                 // Blink
                 {
                     // Blink
