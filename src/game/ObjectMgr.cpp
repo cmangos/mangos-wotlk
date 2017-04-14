@@ -1386,6 +1386,13 @@ void ObjectMgr::LoadCreatures()
             continue;
         }
 
+        if (data.spawntimesecsmax < data.spawntimesecsmin)
+        {
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `spawntimesecsmax` (%u) value lower than `spawntimesecsmin` (%u), it will be adjusted to %u.",
+                guid, data.id, uint32(data.spawntimesecsmax), uint32(data.spawntimesecsmin), uint32(data.spawntimesecsmin));
+            data.spawntimesecsmax = data.spawntimesecsmin;
+        }
+
         if (data.spawnMask & ~spawnMasks[data.mapid])
             sLog.outErrorDb("Table `creature` have creature (GUID: %u) that have wrong spawn mask %u including not supported difficulty modes for map (Id: %u).", guid, data.spawnMask, data.mapid);
 
@@ -1624,6 +1631,13 @@ void ObjectMgr::LoadGameObjects()
         if (data.spawntimesecsmin == 0 && gInfo->IsDespawnAtAction())
         {
             sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with `spawntimesecs` (0) value, but gameobejct marked as despawnable at action.", guid, data.id);
+        }
+
+        if (data.spawntimesecsmax < data.spawntimesecsmin)
+        {
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with `spawntimesecsmax` (%u) value lower than `spawntimesecsmin` (%u), it will be adjusted to %u.",
+                guid, data.id, uint32(data.spawntimesecsmax), uint32(data.spawntimesecsmin), uint32(data.spawntimesecsmin));
+            data.spawntimesecsmax = data.spawntimesecsmin;
         }
 
         if (go_state >= MAX_GO_STATE)
