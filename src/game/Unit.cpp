@@ -4301,7 +4301,7 @@ void Unit::_UpdateAutoRepeatSpell()
     bool isAutoShot = m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id == SPELL_ID_AUTOSHOT;
 
     // check movement
-    if (GetTypeId() == TYPEID_PLAYER && ((Player*)this)->isMoving())
+    if (GetTypeId() == TYPEID_PLAYER && ((Player*)this)->IsMoving())
     {
         // cancel wand shoot
         if (!isAutoShot)

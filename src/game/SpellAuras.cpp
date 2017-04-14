@@ -1865,7 +1865,7 @@ void Aura::TriggerSpell()
                             return;
 
                         // Reset reapply counter at move
-                        if (((Player*)triggerTarget)->isMoving())
+                        if (triggerTarget->IsMoving())
                         {
                             m_modifier.m_amount = 6;
                             return;
@@ -8178,7 +8178,7 @@ void Aura::PeriodicDummyTick()
                         return;
 
                     // if player is moving remove one aura stack
-                    if (((Player*)target)->isMoving())
+                    if (target->IsMoving())
                         target->RemoveAuraHolderFromStack(62039);
                     // otherwise add one aura stack each 3 seconds
                     else if (GetAuraTicks() % 3 && !target->HasAura(62821))
