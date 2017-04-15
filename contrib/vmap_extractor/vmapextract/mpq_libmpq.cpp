@@ -33,7 +33,7 @@ MPQArchive::MPQArchive(const char* filename)
         }
         return;
     }
-    gOpenArchives.push_front(this);
+    gOpenArchives.push_back(this);
 }
 
 void MPQArchive::close()
