@@ -7330,6 +7330,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
                     return;
                 }
+                case 18670:
+                case 18945:
+                    m_caster->getThreatManager().modifyThreatPercent(unitTarget, -50);
+                    return;
                 case 22539:                                 // Shadow Flame (All script effects, not just end ones to
                 case 22972:                                 // prevent player from dodging the last triggered spell)
                 case 22975:
