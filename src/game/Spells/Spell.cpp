@@ -7720,11 +7720,13 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff) const
     if (m_spellInfo->excludeTargetAuraSpell && target->HasAura(m_spellInfo->excludeTargetAuraSpell))
         return false;
 
-    if (target != m_caster)
+    Unit* realCaster = m_originalCaster ? m_originalCaster : m_caster;
+
+    if (target != realCaster)
     {
         // Check targets for not_selectable unit flag and remove
         // A player can cast spells on his pet (or other controlled unit) though in any state
-        if (target->GetMasterGuid() != m_caster->GetObjectGuid())
+        if (target->GetMasterGuid() != realCaster->GetObjectGuid())
         {
             // any unattackable target skipped
             if (!m_ignoreUnattackableTarget && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
@@ -7755,11 +7757,11 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff) const
             if (((Player*)target)->GetVisibility() == VISIBILITY_OFF)
                 return false;
 
-            if (((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id, m_caster, target))
+            if (((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id, realCaster, target))
                 return false;
         }
 
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (realCaster->GetTypeId() == TYPEID_PLAYER)
         {
             // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
             if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_TARGET_TAPPED))
