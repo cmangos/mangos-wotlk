@@ -265,6 +265,7 @@ struct boss_moroesAI : public ScriptedAI
         }
 
         DoMeleeAttackIfReady();
+        EnterEvadeIfOutOfCombatArea(uiDiff);
     }
 };
 
