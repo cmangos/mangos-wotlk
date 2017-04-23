@@ -439,6 +439,7 @@ class ChatHandler
         bool HandleReloadDBScriptsOnQuestEndCommand(char* args);
         bool HandleReloadDBScriptsOnQuestStartCommand(char* args);
         bool HandleReloadDBScriptsOnSpellCommand(char* args);
+        bool HandleReloadDBScriptsOnRelayCommand(char* args);
 
         bool HandleReloadEventAITextsCommand(char* args);
         bool HandleReloadEventAISummonsCommand(char* args);
