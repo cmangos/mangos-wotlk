@@ -330,7 +330,7 @@ void PetAI::UpdateAI(const uint32 diff)
         else if (!m_unit->hasUnitState(UNIT_STAT_MOVING))
             AttackStart(victim);
     }
-    else if (owner)
+    else
     {
         CharmInfo* charmInfo = m_unit->GetCharmInfo();
 
