@@ -845,6 +845,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_RANGED_MOVEMENT:          // Distance, Angle
                     case ACTION_T_CALL_FOR_HELP:            // Distance
                     case ACTION_T_DYNAMIC_MOVEMENT:         // EnableDynamicMovement (1 = on; 0 = off)
+                    case ACTION_T_SET_HEALTH_OR_POWER:      // Set Power or Health (PowerType Index, Value)
                         break;
 
                     case ACTION_T_RANDOM_SAY:

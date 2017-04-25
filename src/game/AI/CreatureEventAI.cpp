@@ -1072,6 +1072,28 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_reactState = ReactStates(action.setReactState.reactState);
             break;
         }
+        case ACTION_T_SET_HEALTH_OR_POWER:
+        {
+            switch (action.setPower.powerIndex)
+            {
+                case 0:
+                    m_creature->SetPower(POWER_MANA, action.setPower.value);
+                    break;
+                case 1:
+                    m_creature->SetPower(POWER_RAGE, action.setPower.value);
+                    break;
+                case 2:
+                    m_creature->SetPower(POWER_ENERGY, action.setPower.value);
+                    break;
+                case 3:
+                    m_creature->SetHealth(action.setPower.value);
+                    break;
+                case 4:
+                    m_creature->SetMaxHealth(action.setPower.value);
+                    break;
+            }
+            break;
+        }
         default:
             sLog.outError("CreatureEventAi::ProcessAction(): action(%u) not implemented", static_cast<uint32>(action.type));
             break;
