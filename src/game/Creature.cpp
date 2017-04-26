@@ -426,7 +426,11 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(GetCreatureInfo()->FactionAlliance))
     {
         if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLAG_PVP)
-            SetPvP(true);
+        {
+            const AreaTableEntry* zone = GetAreaEntryByAreaID(GetAreaId());
+            const bool sanctuary = (zone && (zone->flags & AREA_FLAG_SANCTUARY));
+            SetPvP(!sanctuary);
+        }
         else
             SetPvP(false);
     }
