@@ -7392,6 +7392,43 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, spell_id, TRIGGERED_OLD_TRIGGERED, nullptr);
                     return;
                 }
+                case 10101:                                 // Knock Away variants
+                case 18670:
+                case 18813:
+                case 18945:
+                case 19633:
+                case 20686:
+                case 23382:
+                case 25778:
+                case 30121:                                 // Forceful Howl - Plagued Deathhound
+                case 31389:                                 // Knock Away
+                case 32077:                                 // Boglord Bash
+                case 32637:                                 // Overrun - Doomwalker
+                case 32959:                                 // Knock Away
+                case 37597:                                 // Meat Slap
+                case 40486:                                 // Eject - Bloodboil
+                {
+                    // Knock Away variants and derrivatives with scripted threat reduction component
+                    if (!unitTarget)
+                        return;
+                    // Default (most of the time) reduction is 50%. TODO: Verify when possible per spell
+                    int32 pct = -50;
+                    // A subset of spells has different values
+                    switch (m_spellInfo->Id)
+                    {
+                        case 19633:
+                        case 25778:
+                        case 31389:
+                        case 40486:
+                            pct = -25;
+                            break;
+                        case 32637:
+                            pct = -100;
+                            break;
+                    }
+                    m_caster->getThreatManager().modifyThreatPercent(unitTarget, pct);
+                    return;
+                }
                 case 17512:                                 // Piccolo of the Flaming Fire
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -7409,10 +7446,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
                     return;
                 }
-                case 18670:
-                case 18945:
-                    m_caster->getThreatManager().modifyThreatPercent(unitTarget, -50);
-                    return;
                 case 22539:                                 // Shadow Flame (All script effects, not just end ones to
                 case 22972:                                 // prevent player from dodging the last triggered spell)
                 case 22975:
@@ -7615,15 +7648,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
 
                     unitTarget->CastSpell(unitTarget, spellid, TRIGGERED_NONE);
-                    return;
-                }
-                case 25778:                                 // Knock Away
-                {
-                    if (!unitTarget || m_caster->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    if (m_caster->getThreatManager().getThreat(unitTarget))
-                        m_caster->getThreatManager().modifyThreatPercent(unitTarget, -50);
                     return;
                 }
                 case 26004:                                 // Mistletoe
@@ -8004,15 +8028,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
-                case 40486:                                 // Eject
-                {
-                    if (!unitTarget || m_caster->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    if (m_caster->getThreatManager().getThreat(unitTarget))
-                        m_caster->getThreatManager().modifyThreatPercent(unitTarget, -40);
                     return;
                 }
                 case 41055:                                 // Copy Weapon
