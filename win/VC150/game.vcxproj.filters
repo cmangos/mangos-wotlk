@@ -1063,6 +1063,5 @@
     <ClInclude Include="..\..\src\game\AI\TotemAI.h">
       <Filter>AI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\PossessedAI.h" />
   </ItemGroup>
 </Project>
