@@ -188,6 +188,7 @@ void instance_old_hillsbrad::SetData(uint32 uiType, uint32 uiData)
                                 pOrc->GetRandomPoint(afInstanceLoc[0][0], afInstanceLoc[0][1], afInstanceLoc[0][2], 10.0f, fX, fY, fZ);
                                 pOrc->SetWalk(false);
                                 pOrc->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+                                pOrc->SetStandState(UNIT_STAND_STATE_STAND);
                             }
                         }
                         for (GuidList::const_iterator itr = m_lLeftPrisonersList.begin(); itr != m_lLeftPrisonersList.end(); ++itr)
@@ -197,6 +198,7 @@ void instance_old_hillsbrad::SetData(uint32 uiType, uint32 uiData)
                                 pOrc->GetRandomPoint(afInstanceLoc[1][0], afInstanceLoc[1][1], afInstanceLoc[1][2], 10.0f, fX, fY, fZ);
                                 pOrc->SetWalk(false);
                                 pOrc->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+                                pOrc->SetStandState(UNIT_STAND_STATE_STAND);
                             }
                         }
                     }
@@ -338,7 +340,7 @@ bool ProcessEventId_event_go_barrel_old_hillsbrad(uint32 /*uiEventId*/, Object* 
     {
         if (instance_old_hillsbrad* pInstance = (instance_old_hillsbrad*)((Player*)pSource)->GetInstanceData())
         {
-            if (pInstance->GetData(TYPE_BARREL_DIVERSION) == DONE)
+            if (pInstance->GetData(TYPE_BARREL_DIVERSION) == DONE || (GameObject*)pTarget->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT))
                 return true;
 
             pInstance->SetData(TYPE_BARREL_DIVERSION, IN_PROGRESS);
