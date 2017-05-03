@@ -41,7 +41,7 @@
 #include "DBCStructure.h"
 #include "WorldPacket.h"
 #include "Timer.h"
-#include "AI/CreatureAI.h"
+#include "AI/BaseAI/CreatureAI.h"
 
 #include <list>
 
@@ -1110,7 +1110,7 @@ enum ActionBarIndex
 
 #define MAX_UNIT_ACTION_BAR_INDEX (ACTION_BAR_INDEX_END-ACTION_BAR_INDEX_START)
 
-struct MANGOS_DLL_SPEC CharmInfo
+struct CharmInfo
 {
 public:
     explicit CharmInfo(Unit* unit);
@@ -1251,7 +1251,7 @@ enum PowerDefaults
 
 struct SpellProcEventEntry;                                 // used only privately
 
-class MANGOS_DLL_SPEC Unit : public WorldObject
+class Unit : public WorldObject
 {
     public:
         typedef std::set<Unit*> AttackerSet;

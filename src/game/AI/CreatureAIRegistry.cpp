@@ -16,20 +16,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "NullCreatureAI.h"
-#include "ReactorAI.h"
-#include "AggressorAI.h"
-#include "GuardAI.h"
-#include "PetAI.h"
-#include "TotemAI.h"
-#include "CreatureEventAI.h"
+#include "AI/BaseAI/NullCreatureAI.h"
+#include "AI/BaseAI/ReactorAI.h"
+#include "AI/BaseAI/AggressorAI.h"
+#include "AI/BaseAI/GuardAI.h"
+#include "AI/BaseAI/PetAI.h"
+#include "AI/BaseAI/TotemAI.h"
+#include "AI/EventAI/CreatureEventAI.h"
 #include "RandomMovementGenerator.h"
-#include "CreatureAIImpl.h"
+#include "AI/BaseAI/CreatureAIImpl.h"
 #include "MovementGeneratorImpl.h"
 #include "CreatureAIRegistry.h"
 #include "WaypointMovementGenerator.h"
-#include "GuardianAI.h"
-#include "PossessedAI.h"
+#include "AI/BaseAI/GuardianAI.h"
+#include "AI/BaseAI/PossessedAI.h"
 
 namespace AIRegistry
 {

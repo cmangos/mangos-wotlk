@@ -38,7 +38,7 @@
 #include "Log.h"
 #include "Unit.h"
 #include "Creature.h"
-#include "AI/CreatureAI.h"
+#include "AI/BaseAI/CreatureAI.h"
 #include "ObjectMgr.h"
 #include "SQLStorages.h"
 #include "movement/MoveSplineInit.h"

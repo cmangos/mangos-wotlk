@@ -27,7 +27,7 @@
 #include "GossipDef.h"
 #include "QuestDef.h"
 #include "ObjectAccessor.h"
-#include "ScriptMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Group.h"
 
 void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recv_data)
@@ -54,7 +54,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recv_data)
 
             if (!cr_questgiver->IsHostileTo(_player))       // not show quest status to enemies
             {
-                dialogStatus = sScriptMgr.GetDialogStatus(_player, cr_questgiver);
+                dialogStatus = sScriptDevAIMgr.GetDialogStatus(_player, cr_questgiver);
 
                 if (dialogStatus == DIALOG_STATUS_UNDEFINED)
                     dialogStatus = getDialogStatus(_player, cr_questgiver, DIALOG_STATUS_NONE);
@@ -64,7 +64,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recv_data)
         case TYPEID_GAMEOBJECT:
         {
             GameObject* go_questgiver = (GameObject*)questgiver;
-            dialogStatus = sScriptMgr.GetDialogStatus(_player, go_questgiver);
+            dialogStatus = sScriptDevAIMgr.GetDialogStatus(_player, go_questgiver);
 
             if (dialogStatus == DIALOG_STATUS_UNDEFINED)
                 dialogStatus = getDialogStatus(_player, go_questgiver, DIALOG_STATUS_NONE);
@@ -97,7 +97,7 @@ void WorldSession::HandleQuestgiverHelloOpcode(WorldPacket& recv_data)
     // Stop the npc if moving
     pCreature->StopMoving();
 
-    if (sScriptMgr.OnGossipHello(_player, pCreature))
+    if (sScriptDevAIMgr.OnGossipHello(_player, pCreature))
         return;
 
     _player->PrepareGossipMenu(pCreature, pCreature->GetCreatureInfo()->GossipMenuId);

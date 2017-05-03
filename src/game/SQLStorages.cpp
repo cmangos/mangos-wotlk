@@ -64,4 +64,4 @@ SQLHashStorage sCreatureTemplateSpellsStorage(CreatureTemplateSpellsFmt, "entry"
 SQLMultiStorage sVehicleAccessoryStorage(VehicleAccessorySrcFmt, VehicleAccessoryDstFmt, "vehicle_entry", "vehicle_accessory");
 SQLMultiStorage sSpellScriptTargetStorage(SpellScriptTargetFmt, "entry", "spell_script_target");
 
-MANGOS_DLL_SPEC SQLStorage const* GetSpellStore() { return &sSpellTemplate; }
+SQLStorage const* GetSpellStore() { return &sSpellTemplate; }

@@ -25,7 +25,7 @@
 #include "ObjectAccessor.h"
 #include "Language.h"
 #include "AccountMgr.h"
-#include "ScriptMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "SystemConfig.h"
 #include "revision.h"
 #include "Util.h"
@@ -100,13 +100,6 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
     else
         full = _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_ID);
     SendSysMessage(full);
-
-    if (sScriptMgr.IsScriptLibraryLoaded())
-    {
-        SendSysMessage(LANG_USING_SCRIPT_LIB);
-    }
-    else
-        SendSysMessage(LANG_USING_SCRIPT_LIB_NONE);
 
     PSendSysMessage(LANG_USING_WORLD_DB, sWorld.GetDBVersion());
     PSendSysMessage(LANG_USING_EVENT_AI, sWorld.GetCreatureEventAIVersion());

@@ -90,7 +90,7 @@ enum LevelRequirementVsMode
 
 #define MIN_UNLOAD_DELAY      1                             // immediate unload
 
-class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
+class Map : public GridRefManager<NGridType>
 {
         friend class MapReference;
         friend class ObjectGridLoader;
@@ -398,7 +398,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         WeatherSystem* m_weatherSystem;
 };
 
-class MANGOS_DLL_SPEC WorldMap : public Map
+class WorldMap : public Map
 {
     private:
         using Map::GetPersistentState;                      // hide in subclass for overwrite
@@ -410,7 +410,7 @@ class MANGOS_DLL_SPEC WorldMap : public Map
         WorldPersistentState* GetPersistanceState() const;
 };
 
-class MANGOS_DLL_SPEC DungeonMap : public Map
+class DungeonMap : public Map
 {
     private:
         using Map::GetPersistentState;                      // hide in subclass for overwrite
@@ -435,7 +435,7 @@ class MANGOS_DLL_SPEC DungeonMap : public Map
         bool m_unloadWhenEmpty;
 };
 
-class MANGOS_DLL_SPEC BattleGroundMap : public Map
+class BattleGroundMap : public Map
 {
     private:
         using Map::GetPersistentState;                      // hide in subclass for overwrite

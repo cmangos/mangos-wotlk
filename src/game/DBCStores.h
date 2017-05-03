@@ -41,8 +41,8 @@ uint32 GetAreaFlagByMapId(uint32 mapid);
 
 WMOAreaTableEntry const* GetWMOAreaTableEntryByTripple(int32 rootid, int32 adtid, int32 groupid);
 
-MANGOS_DLL_SPEC AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
-MANGOS_DLL_SPEC AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_id);
+AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
+AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_id);
 
 uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId);
 
@@ -93,8 +93,8 @@ bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, flo
 PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 level);
 PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattleGroundBracketId id);
 
-MANGOS_DLL_SPEC uint32 GetCreatureModelRace(uint32 modelId);
-MANGOS_DLL_SPEC float GetModelMidpoint(uint32 modelId);
+uint32 GetCreatureModelRace(uint32 modelId);
+float GetModelMidpoint(uint32 modelId);
 
 extern DBCStorage <AchievementEntry>             sAchievementStore;
 extern DBCStorage <AchievementCriteriaEntry>     sAchievementCriteriaStore;
@@ -207,12 +207,12 @@ extern DBCStorage <WorldSafeLocsEntry>           sWorldSafeLocsStore;
 void LoadDBCStores(const std::string& dataPath);
 
 // script support functions
-MANGOS_DLL_SPEC DBCStorage <SoundEntriesEntry>          const* GetSoundEntriesStore();
-MANGOS_DLL_SPEC DBCStorage <SpellRangeEntry>            const* GetSpellRangeStore();
-MANGOS_DLL_SPEC DBCStorage <FactionEntry>               const* GetFactionStore();
-MANGOS_DLL_SPEC DBCStorage <ItemEntry>                  const* GetItemDisplayStore();
-MANGOS_DLL_SPEC DBCStorage <CreatureDisplayInfoEntry>   const* GetCreatureDisplayStore();
-MANGOS_DLL_SPEC DBCStorage <EmotesEntry>                const* GetEmotesStore();
-MANGOS_DLL_SPEC DBCStorage <EmotesTextEntry>            const* GetEmotesTextStore();
+DBCStorage <SoundEntriesEntry>          const* GetSoundEntriesStore();
+DBCStorage <SpellRangeEntry>            const* GetSpellRangeStore();
+DBCStorage <FactionEntry>               const* GetFactionStore();
+DBCStorage <ItemEntry>                  const* GetItemDisplayStore();
+DBCStorage <CreatureDisplayInfoEntry>   const* GetCreatureDisplayStore();
+DBCStorage <EmotesEntry>                const* GetEmotesStore();
+DBCStorage <EmotesTextEntry>            const* GetEmotesTextStore();
 
 #endif

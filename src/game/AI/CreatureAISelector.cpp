@@ -16,16 +16,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "CreatureAISelector.h"
+#include "AI/CreatureAISelector.h"
 #include "Creature.h"
-#include "CreatureAIImpl.h"
-#include "NullCreatureAI.h"
+#include "AI/BaseAI/CreatureAIImpl.h"
+#include "AI/BaseAI/NullCreatureAI.h"
 #include "Policies/Singleton.h"
 #include "MovementGenerator.h"
-#include "ScriptMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Pet.h"
 #include "Log.h"
-#include "PetAI.h"
+#include "AI/BaseAI/PetAI.h"
 
 INSTANTIATE_SINGLETON_1(CreatureAIRegistry);
 INSTANTIATE_SINGLETON_1(MovementGeneratorRegistry);
@@ -34,7 +34,7 @@ namespace FactorySelector
 {
     CreatureAI* selectAI(Creature* creature)
     {
-        if (CreatureAI* scriptedAI = sScriptMgr.GetCreatureAI(creature))
+        if (CreatureAI* scriptedAI = sScriptDevAIMgr.GetCreatureAI(creature))
         {
             // charmed creature may have some script even if its not supposed to be that way (ex: Eye of Acherus)
             // Allow scripting AI for normal creatures and not controlled pets (guardians and mini-pets)

@@ -632,7 +632,7 @@ struct GameObjectDisplayInfoEntry;
 
 #define GO_ANIMPROGRESS_DEFAULT 0xFF
 
-class MANGOS_DLL_SPEC GameObject : public WorldObject
+class GameObject : public WorldObject
 {
     public:
         explicit GameObject();
