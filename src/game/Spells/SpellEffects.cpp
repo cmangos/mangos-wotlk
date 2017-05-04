@@ -1041,6 +1041,53 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 18350:                                 // Dummy Trigger
+                {
+                    if (m_triggeredByAuraSpell && unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        switch (m_triggeredByAuraSpell->Id)
+                        {
+                            case 28821: // Lightning Shield
+                            {
+                                // Need remove self if Lightning Shield not active
+                                Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
+                                for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                                {
+                                    SpellEntry const* spell = itr->second->GetSpellProto();
+                                    if (spell->SpellFamilyName == SPELLFAMILY_SHAMAN
+                                        && spell->SpellFamilyFlags & uint64(0x0000000000000400))
+                                        return;
+                                }
+
+                                unitTarget->RemoveAurasDueToSpell(28820);
+                                break;
+                            }
+                            case 37705: // Healing Discount
+                            {
+                                Player* playerTarget = (Player*) unitTarget;
+                                uint32 spellId = 0;
+                                switch (playerTarget->getClass())
+                                {
+                                    case CLASS_PALADIN:
+                                        spellId = 37723;
+                                        break;
+                                    case CLASS_PRIEST:
+                                        spellId = 37706;
+                                        break;
+                                    case CLASS_SHAMAN:
+                                        spellId = 37722;
+                                        break;
+                                    case CLASS_DRUID:
+                                        spellId = 37721;
+                                        break;
+                                }
+                                playerTarget->CastSpell(playerTarget, spellId, TRIGGERED_OLD_TRIGGERED);
+                                break;
+                            }
+                        }
+                    }
+                    return;
+                }
                 case 19395:                                 // Gordunni Trap
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)

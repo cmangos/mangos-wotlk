@@ -3351,12 +3351,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 }
             }
             */
-            // Healing Discount
-            if (auraSpellInfo->Id == 37705)
-            {
-                trigger_spell_id = 37706;
-                target = this;
-            }
             // Soul Preserver
             if (auraSpellInfo->Id == 60510)
             {
