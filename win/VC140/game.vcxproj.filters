@@ -1102,6 +1102,9 @@
     <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\outland\hellfire_peninsula.cpp">
       <Filter>AI\ScriptDevAI\scripts\outland</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\outland\auchindoun\shadow_labyrinth\boss_ambassador_hellmaw.cpp">
+      <Filter>AI\ScriptDevAI\scripts\outland\auchindoun\shadow_labyrinth</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\outland\auchindoun\shadow_labyrinth\boss_grandmaster_vorpil.cpp">
       <Filter>AI\ScriptDevAI\scripts\outland\auchindoun\shadow_labyrinth</Filter>
     </ClCompile>
