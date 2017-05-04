@@ -526,7 +526,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             pVehicle->SetCharmerGuid(pPlayer->GetObjectGuid());
 
             pVehicle->addUnitState(UNIT_STAT_CONTROLLED);
-            pVehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+            pVehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
 
             pPlayer->SetClientControl(pVehicle, 1);
             pPlayer->SetMover(pVehicle);
@@ -597,7 +597,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             pPlayer->SetMover(nullptr);
 
             pVehicle->clearUnitState(UNIT_STAT_CONTROLLED);
-            pVehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+            pVehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
 
             // must be called after movement control unapplying
             pPlayer->GetCamera().ResetView();
