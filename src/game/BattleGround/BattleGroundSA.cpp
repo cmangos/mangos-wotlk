@@ -17,6 +17,7 @@
  */
 
 #include "Player.h"
+#include "GameObject.h"
 #include "BattleGround.h"
 #include "BattleGroundSA.h"
 #include "Language.h"
