@@ -144,43 +144,52 @@ struct world_map_kalimdor : public ScriptedMap
         switch (pGo->GetEntry())
         {
             case GO_GHOST_MAGNET:
-                m_vGOEvents.push_back({ pGo->GetObjectGuid(),0,0 }); // insert new event with 0 timer
+                m_vGOEvents.push_back({ pGo->GetObjectGuid(), 0, 0 }); // insert new event with 0 timer
                 pGo->SetActiveObjectState(true);
                 break;
         }
     }
 
+    // Custom function used for quest 6134
     bool GhostOPlasmEventStep(GhostOPlasmEvent& eventData)
     {
-        if (eventData.despawnTimer > 180000)
+        if (eventData.despawnTimer > 3 * MINUTE * IN_MILLISECONDS)
         {
             for (auto guid : eventData.summonedMagrami)
-                if (Creature* magrami = instance->GetCreature(guid))
-                    if (magrami->isAlive()) // dont despawn corpses with loot
-                        magrami->ForcedDespawn();
+                if (Creature* pMagrami = instance->GetCreature(guid))
+                    if (pMagrami->isAlive()) // dont despawn corpses with loot
+                        pMagrami->ForcedDespawn();
 
-            if (GameObject* go = instance->GetGameObject(eventData.guid))
-                go->AddObjectToRemoveList(); // TODO: Establish rules for despawning temporary GOs that were used in their lifetime (buttons for example)
+            // remove gameobject from map
+            if (GameObject* pGo = instance->GetGameObject(eventData.guid))
+            {
+                pGo->SetActiveObjectState(false);
+                pGo->SetLootState(GO_JUST_DEACTIVATED);
+            }
 
             return false;
         }
-            
 
-        if (GameObject* go = instance->GetGameObject(eventData.guid))
+        if (GameObject* pGo = instance->GetGameObject(eventData.guid))
         {
             if (eventData.despawnTimer / 15000 >= eventData.phaseCounter)
             {
-                float x, y, z;
-                go->GetPosition(x, y, z); // do some urand radius shenanigans to spawn it further and make it walk to go using doing X and Y yourself and using function in MAP to get proper Z
-                uint32 random = urand(0, 35);
-                float xR = x + random, yR = y + (40 - random), zR = z;
-                instance->GetHeightInRange(0, xR, yR, zR);
-                Creature* creature = go->SummonCreature(NPC_MAGRAMI_SPECTRE, xR, yR, zR, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 180000); // add more timed logic here
-                instance->GetReachableRandomPointOnGround(0, x, y, z, 10.0f); // get position to which spectre will walk
-                eventData.phaseCounter++;
-                eventData.summonedMagrami.push_back(creature->GetObjectGuid());
-                creature->GetMotionMaster()->MovePoint(1, x, y, z);
+                float fX, fY, fZ;
+                pGo->GetPosition(fX, fY, fZ); // do some urand radius shenanigans to spawn it further and make it walk to go using doing X and Y yourself and using function in MAP to get proper Z
+                uint32 uiRandom = urand(0, 35);
+                float xR = fX + uiRandom, yR = fY + (40 - uiRandom), zR = fZ;
+                instance->GetHeightInRange(pGo->GetPhaseMask(), xR, yR, zR);
+
+                if (Creature* pCreature = pGo->SummonCreature(NPC_MAGRAMI_SPECTRE, xR, yR, zR, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 3 * MINUTE * IN_MILLISECONDS))
+                {
+                    // add more timed logic here
+                    instance->GetReachableRandomPointOnGround(pGo->GetPhaseMask(), fX, fY, fZ, 10.0f); // get position to which spectre will walk
+                    eventData.phaseCounter++;
+                    eventData.summonedMagrami.push_back(pCreature->GetObjectGuid());
+                    pCreature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+                }
             }
+
             return true;
         }
         else
@@ -194,7 +203,7 @@ struct world_map_kalimdor : public ScriptedMap
             for (auto iter = m_vGOEvents.begin(); iter != m_vGOEvents.end();)
             {
                 iter->despawnTimer += diff;
-                if (!GhostOPlasmEventStep((*iter)))                
+                if (!GhostOPlasmEventStep((*iter)))
                     iter = m_vGOEvents.erase(iter);
                 else
                     ++iter;

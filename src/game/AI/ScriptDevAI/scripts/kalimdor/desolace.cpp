@@ -82,17 +82,12 @@ struct npc_aged_dying_ancient_kodoAI : public ScriptedAI
                 }
 
                 // spell have no implemented effect (dummy), so useful to notify spellHit
-                m_creature->CastSpell(m_creature, SPELL_KODO_KOMBO_GOSSIP, TRIGGERED_OLD_TRIGGERED);
+                if (DoCastSpellIfCan(m_creature, SPELL_KODO_KOMBO_GOSSIP, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                {
+                    m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    m_uiDespawnTimer = 60000;
+                }
             }
-        }
-    }
-
-    void SpellHit(Unit* /*pCaster*/, SpellEntry const* pSpell) override
-    {
-        if (pSpell->Id == SPELL_KODO_KOMBO_GOSSIP)
-        {
-            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-            m_uiDespawnTimer = 60000;
         }
     }
 
@@ -704,33 +699,22 @@ struct npc_magrami_spectre : public ScriptedAI
 
     void JustRespawned() override
     {
-        m_creature->CastSpell(m_creature, SPELL_GHOST_SPAWN_IN, TRIGGERED_NONE);
-        m_creature->CastSpell(m_creature, SPELL_BLUE_AURA,TRIGGERED_NONE);
+        DoCastSpellIfCan(m_creature, SPELL_GHOST_SPAWN_IN, CAST_TRIGGERED);
+        DoCastSpellIfCan(m_creature, SPELL_BLUE_AURA, CAST_TRIGGERED);
 
-        switch (urand(0, 1))
-        {
-            case 0:
-                DoScriptText(SAY_EMOTE_1, m_creature);
-                break;
-            case 1:
-                DoScriptText(SAY_EMOTE_2, m_creature);
-                break;
-        }
+        DoScriptText(urand(0, 1) ? SAY_EMOTE_1 : SAY_EMOTE_2, m_creature);
     }
 
-    void MovementInform(uint32 uiMovementType, uint32 uiData) override
+    void MovementInform(uint32 uiMovementType, uint32 uiPointId) override
     {
-        if (uiMovementType == POINT_MOTION_TYPE)
+        if (uiMovementType == POINT_MOTION_TYPE && uiPointId == 1)
         {
-            if (uiData == 1)
-            {
-                float x, y, z;
-                m_creature->GetPosition(x, y, z);
-                m_creature->GetMotionMaster()->MoveRandomAroundPoint(x, y, z, 5.f);
-                m_creature->RemoveAurasDueToSpell(SPELL_BLUE_AURA);
-                m_creature->CastSpell(m_creature, SPELL_GREEN_AURA, TRIGGERED_NONE);
-                m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_NONE);
-            }
+            float fX, fY, fZ;
+            m_creature->GetPosition(fX, fY, fZ);
+            m_creature->GetMotionMaster()->MoveRandomAroundPoint(fX, fY, fZ, 5.f);
+            m_creature->RemoveAurasDueToSpell(SPELL_BLUE_AURA);
+            DoCastSpellIfCan(m_creature, SPELL_GREEN_AURA);
+            m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_NONE);
         }
     }
 
@@ -743,8 +727,8 @@ struct npc_magrami_spectre : public ScriptedAI
         {
             if (m_uiCurseTimer <= uiDiff)
             {
-                m_uiCurseTimer = 0;
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_CURSE_OF_MAGRAMI);
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CURSE_OF_MAGRAMI) == CAST_OK)
+                    m_uiCurseTimer = 0;
             }
             else
                 m_uiCurseTimer -= uiDiff;
