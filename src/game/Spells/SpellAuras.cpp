@@ -1687,7 +1687,14 @@ void Aura::TriggerSpell()
 //                    // Earthquake
 //                    case 46240: break;
                     case 46736:                             // Personalized Weather
-                        trigger_spell_id = 46737;
+                        switch (urand(0, 1))
+                        {
+                            case 0:
+                                return;
+                            case 1:
+                                trigger_spell_id = 46737;
+                                break;
+                        }
                         break;
 //                    // Stay Submerged
 //                    case 46981: break;
@@ -2892,6 +2899,23 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             {
                 target->CastSpell(target, 47030, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
+            }
+            case 46736:                                     // Personalized Weather
+            case 46738:
+            case 46739:
+            case 46740:
+            {
+                uint32 spellId = 0;
+                switch (urand(0, 5))
+                {
+                    case 0: spellId = 46736; break;
+                    case 1: spellId = 46738; break;
+                    case 2: spellId = 46739; break;
+                    case 3: spellId = 46740; break;
+                    case 4: return;
+                }
+                target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
+                break;
             }
             case 48385:                                     // Create Spirit Fount Beam
             {
