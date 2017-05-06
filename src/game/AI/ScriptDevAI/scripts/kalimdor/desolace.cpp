@@ -699,8 +699,8 @@ struct npc_magrami_spectre : public ScriptedAI
 
     void JustRespawned() override
     {
-        DoCastSpellIfCan(m_creature, SPELL_GHOST_SPAWN_IN, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_BLUE_AURA, CAST_TRIGGERED);
+        DoCastSpellIfCan(m_creature, SPELL_GHOST_SPAWN_IN);
+        DoCastSpellIfCan(m_creature, SPELL_BLUE_AURA);
 
         DoScriptText(urand(0, 1) ? SAY_EMOTE_1 : SAY_EMOTE_2, m_creature);
     }
