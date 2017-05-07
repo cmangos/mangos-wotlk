@@ -32,7 +32,6 @@
 
 #include <cstring>
 #include <cstdio>
-#include <intrin.h>
 
 // Uncomment the following line to turn off G3D::System memory
 // allocation and use the operating system's malloc.
@@ -49,6 +48,7 @@
 #   include <conio.h>
 #   include <sys/timeb.h>
 #   include "G3D/RegistryUtil.h"
+#   include <intrin.h>
 
 #elif defined(G3D_LINUX) 
 
