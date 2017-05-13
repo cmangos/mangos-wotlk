@@ -6373,7 +6373,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
             }
             else
             {
-                if (!_target->isTargetableForAttack())
+                if (!m_caster->CanAttackSpell(_target, m_spellInfo))
                     return SPELL_FAILED_BAD_TARGETS;            // guessed error
 
                 bool duelvsplayertar = false;
