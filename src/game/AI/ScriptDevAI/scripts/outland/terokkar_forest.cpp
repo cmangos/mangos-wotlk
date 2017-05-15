@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Terokkar_Forest
 SD%Complete: 80
-SDComment: Quest support: 9889, 10009, 10051, 10052, 10446/10447, 10852, 10873, 10887, 10896, 10898, 10922, 10988, 11085, 11093, 11096.
+SDComment: Quest support: 9889, 10009, 10051, 10052, 10446/10447, 10852, 10873, 10879, 10887, 10896, 10898, 10922, 10988, 11085, 11093, 11096.
 SDCategory: Terokkar Forest
 EndScriptData */
 
@@ -1234,13 +1234,30 @@ bool QuestAccept_npc_skyguard_prisoner(Player* pPlayer, Creature* pCreature, con
 
 enum
 {
-    SPELL_TERRIFYING_SCREECH = 38021,
-    SPELL_FEATHER_BURST = 39068,
+    SPELL_TERRIFYING_SCREECH    = 38021,
+    SPELL_FEATHER_BURST         = 39068,
 
-    SAY_DEFENDER_GRASHNA = -1001241,
+    SAY_DEFENDER_GRASHNA        = -1001241,
 
-    NPC_DEFENDER_GRASHNA = 22373,
+    NPC_DEFENDER_GRASHNA        = 22373,
+
+    QUEST_SKETTIS_OFFENSIVE     = 10879,
 };
+
+bool AttackPlayerWithQuest(Creature* creature)
+{
+    std::list<Player*> playerList;
+    GetPlayerListWithEntryInWorld(playerList, creature, 50.0f);
+    for (auto& player : playerList)
+    {
+        if (player->IsActiveQuest(10879))
+        {
+            creature->AI()->AttackStart(player);
+            return true;
+        }
+    }
+    return false;
+}
 
 struct npc_avatar_of_terokkAI : public ScriptedAI
 {
@@ -1262,36 +1279,15 @@ struct npc_avatar_of_terokkAI : public ScriptedAI
             std::list<Player*> playerList;
             GetPlayerListWithEntryInWorld(playerList, m_creature, 50.0f);
             for (auto& player : playerList)
-            {
-                if (player->IsActiveQuest(10879))
-                {
-                    player->GroupEventHappens(10879, m_creature);
-                }
-            }
+                if (player->IsActiveQuest(QUEST_SKETTIS_OFFENSIVE))
+                    player->GroupEventHappens(QUEST_SKETTIS_OFFENSIVE, m_creature);
         }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        {
-            std::list<Player*> playerList;
-            GetPlayerListWithEntryInWorld(playerList, m_creature, 50.0f);
-            bool check = false;
-            for (auto& player : playerList)
-            {
-                if (player->IsActiveQuest(10879))
-                {
-                    AttackStart(player);
-                    check = true;
-                    break;
-                }
-            }
-            if (check == false)
-            {
-                return;
-            }
-        }
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || !AttackPlayerWithQuest(m_creature))
+            return;
 
         if (m_uiAbilityTimer <= uiDiff)
         {
@@ -1323,25 +1319,8 @@ struct npc_minion_of_terokkAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        {
-            std::list<Player*> playerList;
-            GetPlayerListWithEntryInWorld(playerList, m_creature, 50.0f);
-            bool check = false;
-            for (auto* player : playerList)
-            {
-                if (player->IsActiveQuest(10879))
-                {
-                    AttackStart(player);
-                    check = true;
-                    break;
-                }
-            }
-            if (check == false)
-            {
-                return;
-            }
-        }
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || !AttackPlayerWithQuest(m_creature))
+            return;
 
         if (m_uiAbilityTimer <= uiDiff)
         {
