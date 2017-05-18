@@ -63,6 +63,8 @@ struct boss_doomwalkerAI : public ScriptedAI
         m_uiOverrunTimer   = urand(30000, 45000);
 
         m_bHasEnrage       = false;
+
+        m_creature->RemoveAurasDueToSpell(SPELL_MARK_OF_DEATH_AURA);
     }
 
     void KilledUnit(Unit* pVictim) override
