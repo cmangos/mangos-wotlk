@@ -2993,7 +2993,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001238,'Mootoo thanks you, $n.',0,0,0,1,'SAY_2_ELDER_MOOTOO'),
 
 (-1001239,'%s is drawn to the ghost magnet...',0,2,0,0,'Magrami Spectre on spawn 1'),
-(-1001240,'%s is angered!',0,2,0,0,'Magrami Spectre on spawn 2');
+(-1001240,'%s is angered!',0,2,0,0,'Magrami Spectre on spawn 2'),
 (-1001241,'The Avatar of Terokk has been defeated! Death to Terokk! Death to Skettis!',0,0,7,0,'Defender Grashna on Avatar of Terokk death');
 
 -- -1 033 000 SHADOWFANG KEEP
