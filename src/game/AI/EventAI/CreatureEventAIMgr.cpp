@@ -900,9 +900,9 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_PAUSE_WAYPOINTS:
                         break;
                     case ACTION_T_INTERRUPT_SPELL:
-                        if (action.interruptSpell.currentSpellType > CURRENT_MAX_SPELL)
+                        if (action.interruptSpell.currentSpellType >= CURRENT_MAX_SPELL)
                         {
-                            sLog.outErrorEventAI("Event %u Action %u uses invalid current spell type %u (must be smaller or equal to %u)", i, j + 1, action.interruptSpell.currentSpellType, CURRENT_MAX_SPELL);
+                            sLog.outErrorEventAI("Event %u Action %u uses invalid current spell type %u (must be smaller or equal to %u)", i, j + 1, action.interruptSpell.currentSpellType, CURRENT_MAX_SPELL - 1);
                             continue;
                         }
                         break;
