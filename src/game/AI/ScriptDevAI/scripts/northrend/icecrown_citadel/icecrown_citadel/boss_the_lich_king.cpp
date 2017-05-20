@@ -209,7 +209,7 @@ enum Phase
     PHASE_DEATH_AWAITS          = 12,   // strangulating Lich King, raid group finishing him
 };
 
-enum Point
+enum MovePoint
 {
     POINT_CENTER_LAND           = 1,
     POINT_CENTER_LAND_TIRION    = 2,
