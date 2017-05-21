@@ -23608,6 +23608,15 @@ void Player::DoInteraction(ObjectGuid const& interactObjGuid)
     SendForcedObjectUpdate();
 }
 
+void Player::SendLootError(ObjectGuid guid, LootError error) const
+{
+    WorldPacket data(SMSG_LOOT_RESPONSE, 10);
+    data << uint64(guid);
+    data << uint8(0);
+    data << uint8(error);
+    SendDirectMessage(data);
+}
+
 void Player::ResetDeathTimer()
 {
     // 6 minutes until repop at graveyard
