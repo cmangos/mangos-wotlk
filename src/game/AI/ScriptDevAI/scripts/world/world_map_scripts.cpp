@@ -241,7 +241,7 @@ struct world_map_outland : public ScriptedMap
                 m_mNpcEntryGuidStore[NPC_EMISSARY_OF_HATE] = pCreature->GetObjectGuid();
                 break;
             case NPC_VIMGOL_VISUAL_BUNNY:
-                m_mNpcEntryGuidCollection.insert(EntryGuidSet::value_type(pCreature->GetEntry(), pCreature->GetObjectGuid()));
+                m_mNpcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
                 break;
         }
     }

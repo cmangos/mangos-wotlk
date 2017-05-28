@@ -988,14 +988,14 @@ struct npc_vimgol_visual_bunnyAI : public ScriptedAI
     {
         m_pMap = (ScriptedMap*)pCreature->GetInstanceData();
 
-        EntryGuidSet bunnyGuids;
+        GuidVector bunnyGuids;
 
         if (m_pMap)
         {
-            m_pMap->GetCreatureGuidMapFromStorage(m_creature->GetEntry(), bunnyGuids);
+            m_pMap->GetCreatureGuidVectorFromStorage(m_creature->GetEntry(), bunnyGuids);
 
-            for (EntryGuidSet::iterator it = bunnyGuids.begin(); it != bunnyGuids.end(); ++it)
-                if (it->second == m_creature->GetObjectGuid())
+            for (auto it = bunnyGuids.begin(); it != bunnyGuids.end(); ++it)
+                if ((*it) == m_creature->GetObjectGuid())
                     m_uiBunnyId = std::distance(bunnyGuids.begin(), it);
         }
 
@@ -1003,7 +1003,6 @@ struct npc_vimgol_visual_bunnyAI : public ScriptedAI
     }
 
     ScriptedMap* m_pMap;
-    typedef std::multimap<uint32, ObjectGuid> EntryGuidSet;
     
     uint8 m_uiBunnyId;
     uint32 m_uiCastTimer;
@@ -1060,14 +1059,13 @@ struct npc_vimgol_middle_bunnyAI : public ScriptedAI
         m_pMap = (ScriptedMap*)pCreature->GetInstanceData();
 
         if (m_pMap)
-            m_pMap->GetCreatureGuidMapFromStorage(NPC_VIMGOL_VISUAL_BUNNY, m_uiBunnyGuids);
+            m_pMap->GetCreatureGuidVectorFromStorage(NPC_VIMGOL_VISUAL_BUNNY, m_uiBunnyGuids);
 
         Reset();
     }
 
     ScriptedMap* m_pMap;
-    typedef std::multimap<uint32, ObjectGuid> EntryGuidSet;
-    EntryGuidSet m_uiBunnyGuids;
+    GuidVector m_uiBunnyGuids;
 
     bool m_uiSpawned;
     bool m_uiActiveCircles[5];
@@ -1098,7 +1096,7 @@ struct npc_vimgol_middle_bunnyAI : public ScriptedAI
         if (m_uiBunnyGuids.size() < 5 && m_pMap)
         {
             m_uiBunnyGuids.clear();
-            m_pMap->GetCreatureGuidMapFromStorage(NPC_VIMGOL_VISUAL_BUNNY, m_uiBunnyGuids);
+            m_pMap->GetCreatureGuidVectorFromStorage(NPC_VIMGOL_VISUAL_BUNNY, m_uiBunnyGuids);
         }
 
         for (int i = 0; i < 5; i++)
@@ -1119,7 +1117,7 @@ struct npc_vimgol_middle_bunnyAI : public ScriptedAI
                     if (!(*itr)->GetAura(tmpAuras[i], SpellEffectIndex(0)))
                         continue;
 
-                    if (it->second != (*itr)->GetAura(tmpAuras[i], SpellEffectIndex(0))->GetCasterGuid())
+                    if ((*it) != (*itr)->GetAura(tmpAuras[i], SpellEffectIndex(0))->GetCasterGuid())
                         continue;
 
                     m_uiActiveCircles[std::distance(m_uiBunnyGuids.begin(), it)] = true;
@@ -1142,8 +1140,8 @@ struct npc_vimgol_middle_bunnyAI : public ScriptedAI
         std::list<Creature*> creatureList;
         GetCreatureListWithEntryInGrid(creatureList, m_creature, NPC_VIMGOL_VISUAL_BUNNY, 200.0f);
         for (auto& bunny : creatureList)
-            for (EntryGuidSet::iterator it = m_uiBunnyGuids.begin(); it != m_uiBunnyGuids.end(); ++it)
-                if (it->second == bunny->GetObjectGuid())
+            for (auto it = m_uiBunnyGuids.begin(); it != m_uiBunnyGuids.end(); ++it)
+                if ((*it) == bunny->GetObjectGuid())
                     if (m_uiActiveCircles[std::distance(m_uiBunnyGuids.begin(), it)])
                         bunny->CastSpell(pTarget ? pTarget : bunny, uSpell, TRIGGERED_OLD_TRIGGERED);
     }
