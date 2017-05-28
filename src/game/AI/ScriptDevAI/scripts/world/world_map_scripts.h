@@ -31,7 +31,11 @@ enum
     NPC_UNLEASHED_HELLION       = 25002,
 
     // Quest 10998
-    NPC_VIMGOL_VISUAL_BUNNY = 23040,
+    NPC_VIMGOL_VISUAL_BUNNY     = 23040,
+
+    // Quest 10310
+    GO_ROCKET_FIRE              = 183987,
+    GO_ROCKET_SMOKE             = 183988,
 };
 
 enum SpawnIndexes

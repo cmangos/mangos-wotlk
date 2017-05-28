@@ -265,7 +265,19 @@ struct world_map_outland : public ScriptedMap
         }
     }
 
-    void SetData(uint32 /*uiType*/, uint32 /*uiData*/) {}
+    void OnObjectCreate(GameObject* go) override
+    {
+        switch (go->GetEntry())
+        {
+            case GO_ROCKET_FIRE:
+            case GO_ROCKET_SMOKE:
+                m_mGoEntryGuidCollection[go->GetEntry()].push_back(go->GetObjectGuid());
+                std::sort(m_mGoEntryGuidCollection[go->GetEntry()].begin(), m_mGoEntryGuidCollection[go->GetEntry()].end());
+                break;
+        }
+    }
+
+    void SetData(uint32 /*uiType*/, uint32 /*uiData*/) override {}
 };
 
 InstanceData* GetInstanceData_world_map_outland(Map* pMap)
