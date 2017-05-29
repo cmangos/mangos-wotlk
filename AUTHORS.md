@@ -248,6 +248,7 @@ The Authors of ScriptDev2 are merged on 04 sept 2015.
 * Jolan
 * jorooo
 * jotapdiez
+* jpiolho
 * jsee
 * Junta
 * kaelima
@@ -255,6 +256,7 @@ The Authors of ScriptDev2 are merged on 04 sept 2015.
 * kamikazetg
 * KAPATEJIb (a.k.a. insider42, Insider)
 * kbz
+* kennumen
 * kid10 (a.k.a. kid 10)
 * killdozer
 * KillerFrca
@@ -267,6 +269,7 @@ The Authors of ScriptDev2 are merged on 04 sept 2015.
 * kolomati2
 * komdori
 * krofna
+* krullgor
 * ksergik
 * Kubius@getmangos.com
 * kyle1
@@ -319,6 +322,7 @@ The Authors of ScriptDev2 are merged on 04 sept 2015.
 * Naicisum
 * namreeb
 * narma
+* Natsukawa
 * Nay
 * NeatElves
 * Necro
@@ -330,6 +334,7 @@ The Authors of ScriptDev2 are merged on 04 sept 2015.
 * Nick Nitro
 * Nick Templeton
 * Nighoo (a.k.a. DaC, Daggy)
+* Nightterror
 * Nihilus
 * nitka
 * NoFantasy
@@ -392,6 +397,8 @@ The Authors of ScriptDev2 are merged on 04 sept 2015.
 * Rockette
 * rowman
 * rozr
+* rrtn
+* Runsttren
 * rsa (a.k.a. C:/Program Files (x86)/git/dev/rsa)
 * Saeba
 * Saeldur
@@ -497,6 +504,7 @@ The Authors of ScriptDev2 are merged on 04 sept 2015.
 * yavi
 * Yehonal
 * YuruY
+* yyhhrr
 * Zakamurite
 * zerg (a.k.a. Zerg2000)
 * zergtmn
