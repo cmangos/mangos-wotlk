@@ -54,9 +54,10 @@ class DungeonPersistentState;
 class Spell;
 class Item;
 
-// Playerbot mod
-#include "playerbot/PlayerbotMgr.h"
-#include "playerbot/PlayerbotAI.h"
+// ------ Playerbot mod ------ //
+#include "PlayerBot/PlayerbotMgr.h"
+#include "PlayerBot/PlayerbotAI.h"
+// ---- End Playerbot mod ---- //
 
 struct AreaTrigger;
 
@@ -1447,7 +1448,7 @@ class Player : public Unit
         void AddTimedQuest(uint32 quest_id) { m_timedquests.insert(quest_id); }
         void RemoveTimedQuest(uint32 quest_id) { m_timedquests.erase(quest_id); }
 
-        // Playerbot mod
+        // ------ Playerbot mod ------ //
         PlayerTalentMap GetTalents(uint8 spec) { return m_talents[spec]; }
         void chompAndTrim(std::string& str);
         bool getNextQuestId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId);
@@ -1458,6 +1459,7 @@ class Player : public Unit
         PlayerMails::reverse_iterator GetMailREnd() { return m_mail.rend();}
         void UpdateMail();
         uint32 GetSpec();
+        // ---- End Playerbot mod ---- //
         
 	//! Return collision height sent to client
         float GetCollisionHeight(bool mounted) const;
@@ -2348,7 +2350,7 @@ class Player : public Unit
 
         bool canSeeSpellClickOn(Creature const* creature) const;
 
-        // Playerbot mod:
+        // ------ Playerbot mod ------ //
         // A Player can either have a playerbotMgr (to manage its bots), or have playerbotAI (if it is a bot), or
         // neither. Code that enables bots must create the playerbotMgr and set it using SetPlayerbotMgr.
         void SetPlayerbotAI(PlayerbotAI* ai) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotAI=ai; }
@@ -2357,6 +2359,7 @@ class Player : public Unit
         PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr; }
         void SetBotDeathTimer() { m_deathTimer = 0; }
         bool IsInDuel() const { return duel && duel->startTime != 0; }
+        // ---- End Playerbot mod ---- //
 
         // function used for raise ally spell
         bool IsGhouled() const { return m_isGhouled; }
@@ -2631,9 +2634,10 @@ class Player : public Unit
         GridReference<Player> m_gridRef;
         MapReference m_mapRef;
 
-         // Playerbot mod:
+        // ------ Playerbot mod ------ //
         PlayerbotAI* m_playerbotAI;
         PlayerbotMgr* m_playerbotMgr;
+        // ---- End Playerbot mod ---- //
 
         // Homebind coordinates
         uint32 m_homebindMapId;
