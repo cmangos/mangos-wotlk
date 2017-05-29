@@ -1,6 +1,6 @@
 // a simple DK class by rrtn :)
 #include "PlayerbotDeathKnightAI.h"
-#include "PlayerbotMgr.h"
+#include "../Base/PlayerbotMgr.h"
 
 class PlayerbotAI;
 PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)

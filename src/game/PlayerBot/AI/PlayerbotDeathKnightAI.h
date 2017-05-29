@@ -1,7 +1,7 @@
 #ifndef _PLAYERDEATHKNIGHTAI_H
 #define _PLAYERDEATHKNIGHTAI_H
 
-#include "PlayerbotClassAI.h"
+#include "../Base/PlayerbotClassAI.h"
 
 enum
 {
