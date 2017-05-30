@@ -35,8 +35,9 @@
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
 
-// ------ Playerbot mod ------ //
-#include "PlayerBot/Base/PlayerbotAI.h"
+#ifdef BUILD_PLAYERBOT
+    #include "PlayerBot/Base/PlayerbotAI.h"
+#endif
 
 bool WorldSession::processChatmessageFurtherAfterSecurityChecks(std::string& msg, uint32 lang)
 {
@@ -228,7 +229,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 }
             }
 
-            // ------ Playerbot mod ------ //
+#ifdef BUILD_PLAYERBOT
             // Handle whispered command to bot
             if (player->GetPlayerbotAI())
             {
@@ -239,7 +240,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             else
                 // Unmodded core line code below
                 GetPlayer()->Whisper(msg, lang, player->GetObjectGuid());
-            // ---- End Playerbot mod ---- //
+#else
+            GetPlayer()->Whisper(msg, lang, player->GetObjectGuid());
+#endif
         } break;
 
         case CHAT_MSG_PARTY:
@@ -272,7 +275,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if ((type == CHAT_MSG_PARTY_LEADER) && !group->IsLeader(_player->GetObjectGuid()))
                 return;
 
-            // ------ Playerbot mod ------ //
+#ifdef BUILD_PLAYERBOT
             // Broadcast message to bot members
             for(GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr=itr->next())
             {
@@ -294,7 +297,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                     GetPlayer()->m_speakCount = 0;
                 }
             }
-            // ---- End Playerbot mod ---- //
+#endif
 
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, ChatMsg(type), msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());

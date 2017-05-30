@@ -625,8 +625,9 @@ class ChatHandler
         bool HandleWaterwalkCommand(char* args);
         bool HandleQuitCommand(char* args);
         bool HandleShowGearScoreCommand(char* args);
-        // ------ Playerbot mod ------ //
+#ifdef BUILD_PLAYERBOT
         bool HandlePlayerbotCommand(char* args);
+#endif
 
         bool HandleMmapPathCommand(char* args);
         bool HandleMmapLocCommand(char* args);
