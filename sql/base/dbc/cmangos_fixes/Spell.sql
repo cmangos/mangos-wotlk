@@ -137,3 +137,8 @@ INSERT INTO spell_template (Id,Attributes,CastingTimeIndex,ProcChance,DurationIn
 INSERT INTO spell_template (Id,Attributes,CastingTimeIndex,ProcChance,DurationIndex,RangeIndex,EquippedItemClass,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectRadiusIndex1,EffectMiscValue1,EffectMiscValueB1,DmgMultiplier1,SchoolMask,IsServerSide,SpellName) VALUES
 ('26632','256','1','101','25','1','-1','28','1','3','17','15','15962','64','1','1','1','Spawn Vekniss Hatchlings');
 
+-- Note: Changing effect is 99.99999% of the time not supposed to be done.
+-- Reason why in this case its done, is because the spell is a Party aura, with no radius and single target target, and also not exhibiting any party area aura behaviour on retail suggesting wrong data
+-- in case someone finds evidence to disprove this claim message Killerwife
+UPDATE spell_template SET Effect1=6 WHERE id IN(46012);
+
