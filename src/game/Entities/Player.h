@@ -1981,6 +1981,8 @@ class Player : public Unit
         float GetTotalPercentageModValue(BaseModGroup modGroup) const { return m_auraBaseMod[modGroup][FLAT_MOD] + m_auraBaseMod[modGroup][PCT_MOD]; }
         void _ApplyAllStatBonuses();
         void _RemoveAllStatBonuses();
+        void SetEnchantmentModifier(uint32 value, WeaponAttackType attType, bool apply);
+        uint32 GetEnchantmentModifier(WeaponAttackType attType);
         float GetArmorPenetrationPct() const { return m_armorPenetrationPct; }
         int32 GetSpellPenetrationItemMod() const { return m_spellPenetrationItemMod; }
 
@@ -2534,6 +2536,8 @@ class Player : public Unit
         uint16 m_baseManaRegen;
         float m_armorPenetrationPct;
         int32 m_spellPenetrationItemMod;
+
+        uint32 m_enchantmentFlatMod[MAX_ATTACK]; // TODO: Stat system - incorporate generically, exposes a required hidden weapon stat that does not apply when unarmed
 
         AuraList m_spellMods[MAX_SPELLMOD];
         EnchantDurationList m_enchantDuration;
