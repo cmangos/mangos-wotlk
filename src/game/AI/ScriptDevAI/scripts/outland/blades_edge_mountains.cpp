@@ -1297,6 +1297,39 @@ bool EffectScriptEffectCreature_spell_diminution_powder(Unit* pCaster, uint32 ui
     return false;
 }
 
+enum
+{
+    POINT_PLAYER_POSITION = 1,
+};
+
+struct npc_spirit_prisoner_of_bladespire : public ScriptedAI
+{
+    npc_spirit_prisoner_of_bladespire(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    void Reset() override {}
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            TemporarySummon* summon = (TemporarySummon*)m_creature;
+            if (Unit* summoner = summon->GetSummoner())
+                m_creature->GetMotionMaster()->MovePoint(POINT_PLAYER_POSITION, summoner->GetPositionX(), summoner->GetPositionY(), summoner->GetPositionZ());
+        }
+    }
+
+    void MovementInform(uint32 uiMovementType, uint32 uiData) override
+    {
+        if (uiMovementType == POINT_MOTION_TYPE && uiData == POINT_PLAYER_POSITION)
+            m_creature->ForcedDespawn();
+    }
+};
+
+CreatureAI* GetAI_npc_spirit_prisoner_of_bladespire(Creature* pCreature)
+{
+    return new npc_spirit_prisoner_of_bladespire(pCreature);
+}
+
 void AddSC_blades_edge_mountains()
 {
     Script* pNewScript;
@@ -1347,5 +1380,10 @@ void AddSC_blades_edge_mountains()
     pNewScript = new Script;
     pNewScript->Name = "npc_vimgol";
     pNewScript->GetAI = &GetAI_npc_vimgol;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_spirit_prisoner_of_bladespire";
+    pNewScript->GetAI = &GetAI_npc_spirit_prisoner_of_bladespire;
     pNewScript->RegisterSelf();
 }
