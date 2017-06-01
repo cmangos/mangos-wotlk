@@ -1019,6 +1019,8 @@ UPDATE creature_template SET ScriptName='npc_protectorate_demolitionist' WHERE e
 UPDATE creature_template SET ScriptName='npc_captured_vanguard' WHERE entry=20763;
 UPDATE creature_template SET ScriptName='npc_drijya' WHERE entry=20281;
 UPDATE creature_template SET ScriptName='npc_dimensius' WHERE entry=19554;
+UPDATE creature_template SET ScriptName='npc_salhadaar' WHERE entry=20454;
+UPDATE creature_template SET ScriptName='npc_energy_ball' WHERE entry=20769;
 
 /*  */
 /* THE NEXUS */
@@ -1730,7 +1732,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000136,'Yes, my lord.',0,0,0,0,'dawnforge COMMANDER_DAWNFORGE_4 SAY_ARCANIST_ARDONIS_2'),
 (-1000137,'See to it, Ardonis!',0,0,0,0,'dawnforge COMMANDER_DAWNFORGE_5'),
 
-(-1000138,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1000138,'Prepare to enter oblivion, meddlers. You have unleashed a god!',0,1,0,15,'Salhadaar SAY'),
 (-1000139,'Avruu\'s magic is broken! I\'m free once again!',0,0,0,0,'aeranas SAY_FREE'),
 
 (-1000140,'Let\'s go.',0,0,1,0,'lilatha SAY_START'),
