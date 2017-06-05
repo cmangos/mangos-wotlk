@@ -147,3 +147,8 @@ INSERT INTO spell_template(Id, SchoolMask, Category, Dispel, Mechanic, Attribute
 ('25676', '32','0', '0', '0', '536871168', '136', '4', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '13', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '77', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0','0', '0', '0', '22', '0', '0', '15', '0', '0', '12', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Drain Mana', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0');
 
 
+-- add one tunnel bore passive used by red bursters in HFP
+INSERT INTO spell_template(id,Attributes, AttributesEx,DurationIndex,Effect1,EffectImplicitTargetA1,EffectApplyAuraName1,EffectAmplitude1,EffectTriggerSpell1,SpellIconID,SpellName,DmgMultiplier1) VALUES
+(34038,134217984,268435456,21,6,1,23,1000,34039,1,'Tunnel Bore Red Passive',1);
+
+

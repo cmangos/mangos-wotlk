@@ -7881,6 +7881,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, urand(0, 1) ? 37429 : 37430, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 37751:                                 // Submerged
+                case 37752:                                 // Stand
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->SetStandState(m_spellInfo->Id == 37751 ? UNIT_STAND_STATE_CUSTOM : UNIT_STAND_STATE_STAND);
+                    return;
+                }
                 case 37775:                                 // Karazhan - Chess NPC Action - Poison Cloud
                 {
                     if (!unitTarget)
