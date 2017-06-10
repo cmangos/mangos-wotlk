@@ -18467,7 +18467,7 @@ void Player::PetSpellInitialize() const
     data << pet->GetObjectGuid();
     data << uint16(pet->GetCreatureInfo()->Family);         // creature family (required for pet talents)
     data << uint32(0);
-    data << uint8(charmInfo->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0);
+    data << uint8(charmInfo->GetAI()->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0);
 
     // action bar loop
     charmInfo->BuildActionBar(data);
@@ -18605,7 +18605,7 @@ void Player::CharmSpellInitialize() const
     data << charm->GetObjectGuid();
     data << uint16(0);
     data << uint32(0);
-    data << uint8(charmInfo->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0);
+    data << uint8(charmInfo->GetAI()->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0);
 
     charmInfo->BuildActionBar(data);
 

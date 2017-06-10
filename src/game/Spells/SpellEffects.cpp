@@ -5971,16 +5971,7 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
             spawnCreature->SetPvPSanctuary(true);
 
         if (CharmInfo* charmInfo = spawnCreature->GetCharmInfo())
-        {
             charmInfo->SetPetNumber(pet_number, false);
-
-            if (spawnCreature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
-                charmInfo->SetReactState(REACT_PASSIVE);
-            else if ((cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE) || petType == PROTECTOR_PET)
-                charmInfo->SetReactState(REACT_DEFENSIVE);
-            else
-                charmInfo->SetReactState(REACT_AGGRESSIVE);
-        }
 
         m_caster->AddGuardian(spawnCreature);
 
@@ -6190,7 +6181,7 @@ bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        spawnCreature->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
+        spawnCreature->GetCharmInfo()->GetAI()->SetReactState(REACT_DEFENSIVE);
         ((Player*)m_caster)->PetSpellInitialize();
         if (m_caster->getClass() != CLASS_PRIEST)
             spawnCreature->SavePetToDB(PET_SAVE_AS_CURRENT);
@@ -6841,8 +6832,6 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
 
     pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
 
-    pet->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
-
     // level of hunter pet can't be less owner level at 5 levels
     uint32 cLevel = creatureTarget->getLevel();
     uint32 plLevel = plr->getLevel();
@@ -6864,6 +6853,8 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     // add pet object to the world
     pet->GetMap()->Add((Creature*)pet);
     pet->AIM_Initialize();
+
+    pet->GetCharmInfo()->GetAI()->SetReactState(REACT_DEFENSIVE);
 
     // visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
@@ -6943,8 +6934,6 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     // Level of pet summoned
     uint32 level = std::max(m_caster->getLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
-
-    NewSummon->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
     NewSummon->SetOwnerGuid(m_caster->GetObjectGuid());
     NewSummon->setFaction(m_caster->getFaction());
     NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
@@ -6963,6 +6952,8 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     map->Add((Creature*)NewSummon);
     NewSummon->AIM_Initialize();
+
+    NewSummon->GetCharmInfo()->GetAI()->SetReactState(REACT_DEFENSIVE);
 
     m_caster->SetPet(NewSummon);
     DEBUG_LOG("New Pet has guid %u", NewSummon->GetGUIDLow());

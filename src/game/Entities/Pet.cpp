@@ -40,7 +40,7 @@ Pet::Pet(PetType type) :
     CharmInfo* charmInfo = InitCharmInfo(this);
 
     if (type == MINI_PET)                                   // always passive
-        charmInfo->SetReactState(REACT_PASSIVE);
+        charmInfo->GetAI()->SetReactState(REACT_PASSIVE);
 }
 
 Pet::~Pet()
@@ -300,7 +300,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[5].GetUInt32());
 
-    m_charmInfo->SetReactState(ReactStates(fields[6].GetUInt8()));
+    m_charmInfo->GetAI()->SetReactState(ReactStates(fields[6].GetUInt8()));
 
     uint32 savedhealth = fields[10].GetUInt32();
     uint32 savedpower = fields[11].GetUInt32();
@@ -497,7 +497,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         savePet.addUInt32(GetNativeDisplayId());
         savePet.addUInt32(getLevel());
         savePet.addUInt32(GetUInt32Value(UNIT_FIELD_PETEXPERIENCE));
-        savePet.addUInt32(uint32(m_charmInfo->GetReactState()));
+        savePet.addUInt32(uint32(m_charmInfo->GetAI()->GetReactState()));
         savePet.addUInt32(uint32(mode));
         savePet.addString(m_name);
         savePet.addUInt32(uint32(HasByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED) ? 0 : 1));
