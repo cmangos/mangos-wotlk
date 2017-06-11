@@ -111,7 +111,7 @@ bool GOUse_go_ethereum_stasis(Player* pPlayer, GameObject* pGo)
 
     pPlayer->SummonCreature(uiNpcStasisEntry[uiRandom],
                             pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetAngle(pPlayer),
-                            TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
+                            TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
 
     return false;
 }
