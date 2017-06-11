@@ -67,7 +67,7 @@ bool GOUse_go_ethereum_prison(Player* pPlayer, GameObject* pGo)
 
     if (Creature* pCreature = pPlayer->SummonCreature(uiNpcPrisonEntry[uiRandom],
                               pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetAngle(pPlayer),
-                              TEMPSUMMON_TIMED_OOC_DESPAWN, 30000))
+                              TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000))
     {
         if (!pCreature->IsHostileTo(pPlayer))
         {
