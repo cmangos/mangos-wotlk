@@ -52,7 +52,14 @@ enum
     SPELL_REP_CE   = 39460,
     SPELL_REP_CON  = 39474,
     SPELL_REP_KT   = 39475,
-    SPELL_REP_SPOR = 39476
+    SPELL_REP_SPOR = 39476,
+
+    SAY_LC         = -1000176,
+    SAY_SHAT       = -1000177,
+    SAY_CE         = -1000178,
+    SAY_CON        = -1000179,
+    SAY_KT         = -1000180,
+    SAY_SPOR       = -1000181
 };
 
 const uint32 uiNpcPrisonEntry[] =
@@ -75,15 +82,20 @@ bool GOUse_go_ethereum_prison(Player* pPlayer, GameObject* pGo)
 
             if (FactionTemplateEntry const* pFaction = pCreature->getFactionTemplateEntry())
             {
+                int32 textId = 0;
+
                 switch (pFaction->faction)
                 {
-                    case FACTION_LC:   uiSpell = SPELL_REP_LC;   break;
-                    case FACTION_SHAT: uiSpell = SPELL_REP_SHAT; break;
-                    case FACTION_CE:   uiSpell = SPELL_REP_CE;   break;
-                    case FACTION_CON:  uiSpell = SPELL_REP_CON;  break;
-                    case FACTION_KT:   uiSpell = SPELL_REP_KT;   break;
-                    case FACTION_SPOR: uiSpell = SPELL_REP_SPOR; break;
+                    case FACTION_LC:   uiSpell = SPELL_REP_LC;   textId = SAY_LC;    break;
+                    case FACTION_SHAT: uiSpell = SPELL_REP_SHAT; textId = SAY_SHAT;  break;
+                    case FACTION_CE:   uiSpell = SPELL_REP_CE;   textId = SAY_CE;    break;
+                    case FACTION_CON:  uiSpell = SPELL_REP_CON;  textId = SAY_CON;   break;
+                    case FACTION_KT:   uiSpell = SPELL_REP_KT;   textId = SAY_KT;    break;
+                    case FACTION_SPOR: uiSpell = SPELL_REP_SPOR; textId = SAY_SPOR;  break;
                 }
+
+                if (textId)
+                    DoScriptText(textId, pCreature, pPlayer);
 
                 if (uiSpell)
                     pCreature->CastSpell(pPlayer, uiSpell, TRIGGERED_NONE);

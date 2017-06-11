@@ -1778,12 +1778,12 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1000175,'Thank you, mortal.',0,0,11,0,' SAY_JUST_EATEN'),
 
-(-1000176,'REUSE ME',0,0,0,0,'REUSE_ME'),
-(-1000177,'REUSE ME',0,0,0,0,'REUSE_ME'),
-(-1000178,'REUSE ME',0,0,0,0,'REUSE_ME'),
-(-1000179,'REUSE ME',0,0,0,0,'REUSE_ME'),
-(-1000180,'REUSE ME',0,0,0,0,'REUSE_ME'),
-(-1000181,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1000176,'What is this? Where am I? How... How did I... Cursed ethereals! I was on an escort mission out of Shattrath when we were ambushed! I must return to the city at once! Your name will be recorded as a friend of the Lower City, $n.',0,0,0,0,'SAY_LC'),
+(-1000177,'Blessed Light! Free of my confines at last... Thank you, hero. A\'dal will be told of your heroics.',0,0,0,0,'SAY_SHAT'),
+(-1000178,'At last I am released! Thank you, gentle $r. I must return to the expedition at once! They will know of your deeds. This I vow.',0,0,0,0,'SAY_CE'),
+(-1000179,'I will tell the tale of your heroics to Haramad myself! All Consortium will know your name, $n. Thank you, my friend.',0,0,0,0,'SAY_CON'),
+(-1000180,'The Keepers of Time thank you for your assistance. The Timeless One shall be pleased with this outcome...',0,0,0,0,'SAY_KT'),
+(-1000181,'$R save me! Thank you! My people thank you too!',0,0,0,0,'SAY_SPOR'),
 (-1000182,'REUSE ME',0,0,0,0,'REUSE_ME'),
 (-1000183,'REUSE ME',0,0,0,0,'REUSE_ME'),
 
