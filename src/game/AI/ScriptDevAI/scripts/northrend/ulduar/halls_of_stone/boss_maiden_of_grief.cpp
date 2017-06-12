@@ -118,7 +118,7 @@ struct boss_maiden_of_griefAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PARTING_SORROW, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_PARTING_SORROW) == CAST_OK)
-                    m_uiPartingSorrowTimer = 12000 + rand() % 5000;
+                    m_uiPartingSorrowTimer = 12000 + urand() % 5000;
             }
         }
         else

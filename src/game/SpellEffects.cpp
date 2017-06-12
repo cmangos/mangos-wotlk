@@ -3695,7 +3695,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     for (uint32 i = 0; i < std::min(size_t(3), attackers.size()); ++i)
                     {
                         Unit::AttackerSet::iterator aItr = attackers.begin();
-                        std::advance(aItr, rand() % attackers.size());
+                        std::advance(aItr, urand() % attackers.size());
                         AddUnitTarget((*aItr), EFFECT_INDEX_1);
                         attackers.erase(aItr);
                     }

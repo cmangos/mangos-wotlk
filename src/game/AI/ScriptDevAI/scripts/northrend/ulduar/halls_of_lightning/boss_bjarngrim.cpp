@@ -184,7 +184,7 @@ struct boss_bjarngrimAI : public ScriptedAI
             if (m_creature->IsNonMeleeSpellCasted(false))
                 return;
 
-            int uiTempStance = rand() % (3 - 1);
+            int uiTempStance = irand() % (3 - 1);
 
             if (uiTempStance >= m_uiStance)
                 ++uiTempStance;
