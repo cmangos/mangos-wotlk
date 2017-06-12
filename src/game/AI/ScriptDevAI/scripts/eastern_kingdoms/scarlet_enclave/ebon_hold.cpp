@@ -1197,7 +1197,7 @@ struct npc_scarlet_ghoulAI : public ScriptedPetAI
         DoCastSpellIfCan(m_creature, SPELL_GHOUL_SUMMONED);
 
         if (m_creature->GetCharmInfo())
-            m_creature->GetCharmInfo()->GetAI()->SetReactState(REACT_DEFENSIVE);
+            m_creature->GetAI()->SetReactState(REACT_DEFENSIVE);
 
         Reset();
     }

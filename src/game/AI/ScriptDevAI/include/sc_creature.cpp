@@ -74,16 +74,7 @@ void ScriptedAI::UpdateAI(const uint32 /*uiDiff*/)
  */
 void ScriptedAI::EnterEvadeMode()
 {
-    m_creature->RemoveAllAurasOnEvade();
-    m_creature->DeleteThreatList();
-    m_creature->CombatStop(true);
-
-    // only alive creatures that are not on transport can return to home position
-    if (m_creature->isAlive() && !m_creature->IsBoarded())
-        m_creature->GetMotionMaster()->MoveTargetedHome();
-
-    m_creature->SetLootRecipient(NULL);
-
+    CreatureAI::EnterEvadeMode();
     Reset();
 }
 

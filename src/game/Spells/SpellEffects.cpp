@@ -6181,7 +6181,7 @@ bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        spawnCreature->GetCharmInfo()->GetAI()->SetReactState(REACT_DEFENSIVE);
+        spawnCreature->GetAI()->SetReactState(REACT_DEFENSIVE);
         ((Player*)m_caster)->PetSpellInitialize();
         if (m_caster->getClass() != CLASS_PRIEST)
             spawnCreature->SavePetToDB(PET_SAVE_AS_CURRENT);
@@ -6854,7 +6854,7 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     pet->GetMap()->Add((Creature*)pet);
     pet->AIM_Initialize();
 
-    pet->GetCharmInfo()->GetAI()->SetReactState(REACT_DEFENSIVE);
+    pet->GetAI()->SetReactState(REACT_DEFENSIVE);
 
     // visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
@@ -6953,7 +6953,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     map->Add((Creature*)NewSummon);
     NewSummon->AIM_Initialize();
 
-    NewSummon->GetCharmInfo()->GetAI()->SetReactState(REACT_DEFENSIVE);
+    NewSummon->GetAI()->SetReactState(REACT_DEFENSIVE);
 
     m_caster->SetPet(NewSummon);
     DEBUG_LOG("New Pet has guid %u", NewSummon->GetGUIDLow());
