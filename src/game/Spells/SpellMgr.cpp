@@ -822,6 +822,9 @@ uint32 GetAffectedTargets(SpellEntry const * spellInfo, Unit * caster)
                 case 67700:                                 // Penetrating Cold (25 man)
                 case 68510:                                 // Penetrating Cold (25 man, heroic)
                     return 5;
+                case 25676:                                 // Drain Mana (correct number has to be researched)
+                case 25754:
+                    return 6;
                 case 61694:                                 // Arcane Storm (h) (Malygos)
                     return 7;
                 case 38054:                                 // Random Rocket Missile
@@ -829,6 +832,9 @@ uint32 GetAffectedTargets(SpellEntry const * spellInfo, Unit * caster)
                 case 54098:                                 // Poison Bolt Volley (h) (Naxx, Faerlina)
                 case 54835:                                 // Curse of the Plaguebringer (h) (Naxx, Noth the Plaguebringer)
                     return 10;
+                case 26457:                                 // Drain Mana (correct number has to be researched)
+                case 26559:
+                    return 12;
                 case 25991:                                 // Poison Bolt Volley (AQ40, Pincess Huhuran)
                     return 15;
                 case 61916:                                 // Lightning Whirl (Ulduar, Stormcaller Brundir)
