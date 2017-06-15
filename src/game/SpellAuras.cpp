@@ -3498,6 +3498,20 @@ void Aura::HandleAuraFeatherFall(bool apply, bool Real)
         return;
 
     GetTarget()->SetFeatherFall(apply);
+
+    if (!apply)
+    {
+        switch (GetId())
+        {
+            case 36812:                                     // Soaring - Test Flight quests
+            case 37910:
+            case 37962:
+            case 37968:
+                if (Unit* target = GetTarget())
+                    target->CastSpell(target, 37108, TRIGGERED_NONE);
+                break;
+        }
+    }
 }
 
 void Aura::HandleAuraHover(bool apply, bool Real)

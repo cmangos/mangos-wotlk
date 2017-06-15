@@ -6320,6 +6320,14 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
+    switch (m_spellInfo->Id)
+    {
+        case 38170: // Spin Nether-Weather Vane
+            if (!m_caster->HasAura(37968)) // Can only be used while Soaring (last quest)
+                return SPELL_FAILED_FIZZLE;
+            break;
+    }
+
     // all ok
     return SPELL_CAST_OK;
 }
