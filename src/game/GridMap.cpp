@@ -1024,7 +1024,7 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
             if (data)
             {
                 // hardcoded in client like this
-                if (GetMapId() == 530 && liquid_type == 2)
+                if (GetMapId() == MAPID_CONTINENT_OUTLANDS && liquid_type == 2)
                     liquid_type = 15;
 
                 uint32 liquidFlagType = 0;
@@ -1081,7 +1081,7 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
             if (data)
             {
                 // hardcoded in client like this
-                if (GetMapId() == 530 && map_data.entry == 2)
+                if (GetMapId() == MAPID_CONTINENT_OUTLANDS && map_data.entry == 2)
                     map_data.entry = 15;
                 *data = map_data;
             }

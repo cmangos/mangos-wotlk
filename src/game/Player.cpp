@@ -21716,7 +21716,7 @@ bool Player::CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area) const
     // continent checked in SpellMgr::GetSpellAllowedInLocationError at cast and area update
     uint32 v_map = GetVirtualMapForMapAndZone(mapid, zone);
 
-    if (v_map == 571 && !HasSpell(54197))   // Cold Weather Flying
+    if (v_map == MAPID_CONTINENT_NORTHEND && !HasSpell(54197)) // Cold Weather Flying
         return false;
 
     // don't allow flying in Dalaran restricted areas

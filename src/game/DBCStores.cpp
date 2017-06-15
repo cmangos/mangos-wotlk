@@ -384,7 +384,7 @@ void LoadDBCStores(const std::string& dataPath)
             sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(uint16(area->ID), area->exploreFlag));
 
             // fill MapId->DBC records ( skip sub zones and continents )
-            if (area->zone == 0 && area->mapid != 0 && area->mapid != 1 && area->mapid != 530 && area->mapid != 571)
+            if (area->zone == 0 && !MAP_IS_CONTINENT(area->mapid))
                 sAreaFlagByMapID.insert(AreaFlagByMapID::value_type(area->mapid, area->exploreFlag));
         }
     }
@@ -778,7 +778,8 @@ uint32 GetAreaFlagByMapId(uint32 mapid)
 
 uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId)
 {
-    if (mapid != 530 && mapid != 571)                       // speed for most cases
+    // speed for most cases
+    if (mapid != MAPID_CONTINENT_OUTLANDS && mapid != MAPID_CONTINENT_NORTHEND)
         return mapid;
 
     if (WorldMapAreaEntry const* wma = sWorldMapAreaStore.LookupEntry(zoneId))

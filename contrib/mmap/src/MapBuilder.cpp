@@ -24,6 +24,7 @@
 
 #include "DetourNavMeshBuilder.h"
 #include "DetourCommon.h"
+#include "../SharedDefines.h"
 
 #include <climits>
 
@@ -775,16 +776,8 @@ namespace MMAP
     bool MapBuilder::shouldSkipMap(uint32 mapID)
     {
         if (m_skipContinents)
-            switch (mapID)
-            {
-                case 0:
-                case 1:
-                case 530:
-                case 571:
-                    return true;
-                default:
-                    break;
-            }
+            if (MAP_IS_CONTINENT(mapID))
+                return true;
 
         if (m_skipJunkMaps)
             switch (mapID)
