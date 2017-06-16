@@ -21,7 +21,7 @@
 
 #include "AI/BaseAI/CreatureAI.h"
 #include "Timer.h"
-#include "ObjectGuid.h"
+#include "Entities/ObjectGuid.h"
 
 class Creature;
 

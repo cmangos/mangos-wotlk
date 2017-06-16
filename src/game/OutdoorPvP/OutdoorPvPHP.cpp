@@ -18,11 +18,11 @@
 
 #include "OutdoorPvPHP.h"
 #include "WorldPacket.h"
-#include "World.h"
-#include "Object.h"
-#include "Creature.h"
-#include "GameObject.h"
-#include "Player.h"
+#include "World/World.h"
+#include "Entities/Object.h"
+#include "Entities/Creature.h"
+#include "Entities/GameObject.h"
+#include "Entities/Player.h"
 
 OutdoorPvPHP::OutdoorPvPHP() : OutdoorPvP(),
     m_towersAlliance(0),

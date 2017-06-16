@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
-#include "TemporarySummon.h"
+#include "Entities/TemporarySummon.h"
 
 /*#####
 ## npc_shaheen

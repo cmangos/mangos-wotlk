@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "eye_of_eternity.h"
-#include "TemporarySummon.h"
+#include "Entities/TemporarySummon.h"
 
 enum
 {

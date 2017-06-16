@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
 
 set(LIBRARY_NAME g3dlite)
 
@@ -123,15 +122,16 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/dep/include
   ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
-  ${CMAKE_SOURCE_DIR}/dep/zlib
+  ${ZLIB_INCLUDE_DIRS}
 )
 
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}
 )
 
-if(WIN32)
+if(MSVC)
   target_link_libraries(${LIBRARY_NAME}
-    zlib
+    ${ZLIB_LIBRARIES}
   )
+  set_target_properties(${LIBRARY_NAME} PROPERTIES FOLDER "Dependencies")
 endif()

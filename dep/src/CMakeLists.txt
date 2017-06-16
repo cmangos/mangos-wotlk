@@ -16,7 +16,16 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-if (BUILD_CORE)
+if (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER)
   add_subdirectory(gsoap)
+  set_target_properties(gsoap PROPERTIES FOLDER "Dependencies")
 endif()
+
 add_subdirectory(g3dlite)
+
+if(WIN32)
+  if(BUILD_EXTRACTORS)
+    add_subdirectory(bzip2)
+    set_target_properties(${BZIP2_LIBRARIES} PROPERTIES FOLDER "Dependencies")
+  endif()
+endif()

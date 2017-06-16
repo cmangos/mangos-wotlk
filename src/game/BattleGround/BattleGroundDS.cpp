@@ -16,12 +16,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Object.h"
-#include "Player.h"
+#include "Entities/Object.h"
+#include "Entities/Player.h"
 #include "BattleGround.h"
 #include "BattleGroundDS.h"
-#include "Language.h"
-#include "ObjectMgr.h"
+#include "Tools/Language.h"
+#include "Globals/ObjectMgr.h"
 #include "WorldPacket.h"
 
 BattleGroundDS::BattleGroundDS()

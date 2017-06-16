@@ -31,7 +31,7 @@ npc_bloodmaul_dire_wolf
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
-#include "TemporarySummon.h"
+#include "Entities/TemporarySummon.h"
 
 /*######
 ## mobs_nether_drake

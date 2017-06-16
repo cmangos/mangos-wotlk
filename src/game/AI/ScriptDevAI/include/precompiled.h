@@ -5,11 +5,11 @@
 #ifndef SC_PRECOMPILED_H
 #define SC_PRECOMPILED_H
 
-#include "Object.h"
-#include "Unit.h"
-#include "Creature.h"
-#include "GameObject.h"
-#include "SpellAuras.h"
+#include "Entities/Object.h"
+#include "Entities/Unit.h"
+#include "Entities/Creature.h"
+#include "Entities/GameObject.h"
+#include "Spells/SpellAuras.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "AI/ScriptDevAI/include/sc_creature.h"

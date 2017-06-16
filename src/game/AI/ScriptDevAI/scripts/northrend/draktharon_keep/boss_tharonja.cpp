@@ -22,7 +22,7 @@ SDCategory: Drak'Tharon Keep
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
-#include "ObjectMgr.h"
+#include "Globals/ObjectMgr.h"
 #include "draktharon_keep.h"
 
 enum

@@ -28,7 +28,7 @@ npc_decaying_ghoul
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
-#include "TemporarySummon.h"
+#include "Entities/TemporarySummon.h"
 
 /*######
 ## npc_gurgthock

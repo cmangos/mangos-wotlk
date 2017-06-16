@@ -16,14 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Object.h"
-#include "Player.h"
+#include "Entities/Object.h"
+#include "Entities/Player.h"
 #include "BattleGround.h"
 #include "BattleGroundEY.h"
-#include "Creature.h"
-#include "ObjectMgr.h"
+#include "Entities/Creature.h"
+#include "Globals/ObjectMgr.h"
 #include "BattleGroundMgr.h"
-#include "Language.h"
+#include "Tools/Language.h"
 #include "WorldPacket.h"
 
 BattleGroundEY::BattleGroundEY(): m_flagState(), m_towersAlliance(0), m_towersHorde(0), m_honorTicks(0), m_flagRespawnTimer(0), m_resourceUpdateTimer(0), m_felReaverFlagTimer(0)

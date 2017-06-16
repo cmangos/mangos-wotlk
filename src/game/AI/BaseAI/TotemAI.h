@@ -20,7 +20,7 @@
 #define MANGOS_TOTEMAI_H
 
 #include "AI/BaseAI/CreatureAI.h"
-#include "ObjectGuid.h"
+#include "Entities/ObjectGuid.h"
 
 class Creature;
 class Totem;

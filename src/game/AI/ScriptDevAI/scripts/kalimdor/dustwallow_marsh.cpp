@@ -34,7 +34,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
-#include "TemporarySummon.h"
+#include "Entities/TemporarySummon.h"
 
 /*######
 ## mobs_risen_husk_spirit

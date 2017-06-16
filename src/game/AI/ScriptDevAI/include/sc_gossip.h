@@ -5,9 +5,9 @@
 #ifndef SC_GOSSIP_H
 #define SC_GOSSIP_H
 
-#include "Player.h"
-#include "GossipDef.h"
-#include "QuestDef.h"
+#include "Entities/Player.h"
+#include "Entities/GossipDef.h"
+#include "Quests/QuestDef.h"
 
 // Gossip Item Text
 #define GOSSIP_TEXT_BROWSE_GOODS        "I'd like to browse your goods."

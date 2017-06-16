@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
 
 set(zlib_SRCS
   adler32.c
@@ -38,6 +37,6 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_library(zlib STATIC
+add_library(z STATIC
   ${zlib_SRCS}
 )

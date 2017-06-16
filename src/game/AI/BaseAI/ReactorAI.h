@@ -20,7 +20,7 @@
 #define MANGOS_REACTORAI_H
 
 #include "AI/BaseAI/CreatureAI.h"
-#include "ObjectGuid.h"
+#include "Entities/ObjectGuid.h"
 
 class Unit;
 

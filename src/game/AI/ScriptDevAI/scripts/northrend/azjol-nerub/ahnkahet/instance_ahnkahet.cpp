@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "ahnkahet.h"
-#include "TemporarySummon.h"
+#include "Entities/TemporarySummon.h"
 
 instance_ahnkahet::instance_ahnkahet(Map* pMap) : ScriptedInstance(pMap),
     m_bRespectElders(false),

@@ -17,13 +17,13 @@
  */
 
 #include "AI/CreatureAISelector.h"
-#include "Creature.h"
+#include "Entities/Creature.h"
 #include "AI/BaseAI/CreatureAIImpl.h"
 #include "AI/BaseAI/NullCreatureAI.h"
 #include "Policies/Singleton.h"
-#include "MovementGenerator.h"
+#include "MotionGenerators/MovementGenerator.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
-#include "Pet.h"
+#include "Entities/Pet.h"
 #include "Log.h"
 #include "AI/BaseAI/PetAI.h"
 

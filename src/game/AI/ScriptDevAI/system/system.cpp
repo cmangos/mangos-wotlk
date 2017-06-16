@@ -5,9 +5,9 @@
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "system.h"
 #include "ProgressBar.h"
-#include "ObjectMgr.h"
+#include "Globals/ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
-#include "WaypointManager.h"
+#include "MotionGenerators/WaypointManager.h"
 
 std::string  strSD2Version;
 

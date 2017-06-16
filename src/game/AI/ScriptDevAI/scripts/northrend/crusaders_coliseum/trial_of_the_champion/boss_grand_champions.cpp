@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "trial_of_the_champion.h"
-#include "TransportSystem.h"
+#include "Maps/TransportSystem.h"
 
 enum
 {

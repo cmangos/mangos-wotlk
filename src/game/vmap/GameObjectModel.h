@@ -23,8 +23,8 @@
 #include <G3D/Vector3.h>
 #include <G3D/AABox.h>
 #include <G3D/Ray.h>
-#include "../DBCStructure.h"
-#include "../GameObject.h"
+#include "Server/DBCStructure.h"
+#include "Entities//GameObject.h"
 
 #include "Platform/Define.h"
 

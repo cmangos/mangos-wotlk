@@ -21,8 +21,8 @@
 
 #include "Common.h"
 #include "Utilities/EventProcessor.h"
-#include "SharedDefines.h"
-#include "DBCEnums.h"
+#include "Globals/SharedDefines.h"
+#include "Server/DBCEnums.h"
 #include "BattleGround.h"
 
 #include <mutex>

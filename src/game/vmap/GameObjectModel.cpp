@@ -21,10 +21,10 @@
 #include "VMapDefinitions.h"
 #include "WorldModel.h"
 
-#include "../GameObject.h"
-#include "../World.h"
-#include "GameObjectModel.h"
-#include "../DBCStores.h"
+#include "Entities/GameObject.h"
+#include "World/World.h"
+#include "Vmap/GameObjectModel.h"
+#include "Server/DBCStores.h"
 
 struct GameobjectModelData
 {

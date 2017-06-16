@@ -39,7 +39,7 @@ EndContentData */
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "world_map_ebon_hold.h"
 #include "AI/ScriptDevAI/base/pet_ai.h"
-#include "TemporarySummon.h"
+#include "Entities/TemporarySummon.h"
 
 /*######
 ## npc_a_special_surprise

@@ -21,7 +21,7 @@
 #include "Timer.h"
 #include "BIHWrap.h"
 #include "RegularGrid.h"
-#include "GameObjectModel.h"
+#include "Vmap/GameObjectModel.h"
 
 template<> struct HashTrait< GameObjectModel>
 {

@@ -31,7 +31,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "halls_of_reflection.h"
-#include "TemporarySummon.h"
+#include "Entities/TemporarySummon.h"
 
 /*######
 ## at_frostmourne_chamber

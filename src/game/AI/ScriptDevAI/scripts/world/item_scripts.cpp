@@ -28,7 +28,7 @@ item_gor_dreks_ointment(i30175)     Protecting Our Own(q10488)
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
-#include "Spell.h"
+#include "Spells/Spell.h"
 
 
 /*#####
