@@ -1100,12 +1100,14 @@ uint32 Player::GetSpec()
 bool ChatHandler::HandlePlayerbotCommand(char* args)
 {
     if (!(m_session->GetSecurity() > SEC_PLAYER))
+    {
         if (botConfig.GetBoolDefault("PlayerbotAI.DisableBots", false))
         {
             PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
             SetSentErrorMessage(true);
             return false;
         }
+    }
 
     if (!m_session)
     {
