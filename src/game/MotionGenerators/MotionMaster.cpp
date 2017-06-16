@@ -25,7 +25,7 @@
 #include "MotionGenerators/TargetedMovementGenerator.h"
 #include "MotionGenerators/WaypointMovementGenerator.h"
 #include "MotionGenerators/RandomMovementGenerator.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSpline.h"
 #include "Movement/MoveSplineInit.h"
 #include "Maps/Map.h"
 #include "AI/CreatureAISelector.h"

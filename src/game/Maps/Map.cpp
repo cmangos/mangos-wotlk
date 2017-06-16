@@ -33,7 +33,7 @@
 #include "MapRefManager.h"
 #include "Server/DBCEnums.h"
 #include "Maps/MapPersistentStateMgr.h"
-#include "VMapFactory.h"
+#include "Vmap/VMapFactory.h"
 #include "MotionGenerators/MoveMap.h"
 #include "Calendar/Calendar.h"
 #include "Chat/Chat.h"

@@ -38,7 +38,7 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "Util.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
-#include "vmap/GameObjectModel.h"
+#include "Vmap/GameObjectModel.h"
 #include "Server/SQLStorages.h"
 #include <G3D/Quat.h>
 

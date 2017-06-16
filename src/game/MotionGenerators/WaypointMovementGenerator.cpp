@@ -24,7 +24,7 @@
 #include "MotionGenerators/WaypointManager.h"
 #include "DBScripts/ScriptMgr.h"
 #include "Movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSpline.h"
 
 #include <cassert>
 

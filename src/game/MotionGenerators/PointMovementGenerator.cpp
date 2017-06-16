@@ -22,7 +22,7 @@
 #include "Entities/TemporarySummon.h"
 #include "World/World.h"
 #include "Movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSpline.h"
 
 //----- Point Movement Generator
 template<class T>

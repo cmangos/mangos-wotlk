@@ -20,7 +20,7 @@
 #include "Entities/Creature.h"
 #include "Entities/Player.h"
 #include "Movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSpline.h"
 
 template<class T>
 void ConfusedMovementGenerator<T>::Initialize(T& unit)

@@ -22,7 +22,7 @@
 #include "Server/DBCEnums.h"
 #include "Server/DBCStores.h"
 #include "Maps/GridMap.h"
-#include "VMapFactory.h"
+#include "Vmap/VMapFactory.h"
 #include "MotionGenerators/MoveMap.h"
 #include "World/World.h"
 #include "Policies/Singleton.h"

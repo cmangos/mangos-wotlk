@@ -20,7 +20,7 @@
 #include "Entities/Creature.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "Movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSpline.h"
 
 void HomeMovementGenerator<Creature>::Initialize(Creature& owner)
 {

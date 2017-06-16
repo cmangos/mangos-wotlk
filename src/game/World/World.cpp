@@ -51,7 +51,7 @@
 #include "Policies/Singleton.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "OutdoorPvP/OutdoorPvP.h"
-#include "VMapFactory.h"
+#include "Vmap/VMapFactory.h"
 #include "MotionGenerators/MoveMap.h"
 #include "GameEvents/GameEventMgr.h"
 #include "Pools/PoolManager.h"

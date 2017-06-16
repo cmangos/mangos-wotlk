@@ -23,7 +23,7 @@
 #include "Entities/Player.h"
 #include "World/World.h"
 #include "Movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSpline.h"
 
 //-----------------------------------------------//
 template<class T, typename D>

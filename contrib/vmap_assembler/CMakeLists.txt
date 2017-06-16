@@ -24,17 +24,17 @@ if(UNIX)
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/src/shared
-                    ${CMAKE_SOURCE_DIR}/src/game/vmap
+                    ${CMAKE_SOURCE_DIR}/src/game/Vmap
                     ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
                     ${CMAKE_SOURCE_DIR}/src/framework)
 
 list(APPEND VMAP_ASSEMBLER_SOURCE
-    ${CMAKE_SOURCE_DIR}/src/game/vmap/BIH.cpp
-    ${CMAKE_SOURCE_DIR}/src/game/vmap/VMapManager2.cpp
-    ${CMAKE_SOURCE_DIR}/src/game/vmap/MapTree.cpp
-    ${CMAKE_SOURCE_DIR}/src/game/vmap/TileAssembler.cpp
-    ${CMAKE_SOURCE_DIR}/src/game/vmap/WorldModel.cpp
-    ${CMAKE_SOURCE_DIR}/src/game/vmap/ModelInstance.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Vmap/BIH.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Vmap/VMapManager2.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Vmap/MapTree.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Vmap/TileAssembler.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Vmap/WorldModel.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Vmap/ModelInstance.cpp
     vmap_assembler.cpp)
 
 IF(APPLE)

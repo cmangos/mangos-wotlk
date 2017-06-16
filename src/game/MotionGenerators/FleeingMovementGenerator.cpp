@@ -21,7 +21,7 @@
 #include "FleeingMovementGenerator.h"
 #include "Globals/ObjectAccessor.h"
 #include "Movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSpline.h"
 #include "MotionGenerators/PathFinder.h"
 
 #define MIN_QUIET_DISTANCE 28.0f

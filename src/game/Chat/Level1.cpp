@@ -35,7 +35,7 @@
 #include "Util.h"
 #include "Spells/SpellMgr.h"
 #ifdef _DEBUG_VMAPS
-#include "VMapFactory.h"
+#include "Vmap/VMapFactory.h"
 #endif
 
 //-----------------------Npc Commands-----------------------

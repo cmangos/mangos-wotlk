@@ -28,7 +28,7 @@ include_directories(
     ../../src
     ../../src/shared
     ../../src/game
-    ../../src/game/vmap
+    ../../src/game/Vmap
     ../../dep/include/g3dlite
     ../../src/framework
     ../../dep/recastnavigation/Detour/Include
@@ -38,12 +38,12 @@ include_directories(
 
 # TODO: Do we still need that vmaplib?
 add_library(vmaplib
-    ../../src/game/vmap/BIH.cpp
-    ../../src/game/vmap/VMapManager2.cpp
-    ../../src/game/vmap/MapTree.cpp
-    ../../src/game/vmap/TileAssembler.cpp
-    ../../src/game/vmap/WorldModel.cpp
-    ../../src/game/vmap/ModelInstance.cpp
+    ../../src/game/Vmap/BIH.cpp
+    ../../src/game/Vmap/VMapManager2.cpp
+    ../../src/game/Vmap/MapTree.cpp
+    ../../src/game/Vmap/TileAssembler.cpp
+    ../../src/game/Vmap/WorldModel.cpp
+    ../../src/game/Vmap/ModelInstance.cpp
 )
 
 IF(APPLE)
