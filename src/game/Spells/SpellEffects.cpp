@@ -703,7 +703,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                 else if (m_spellInfo->SpellFamilyFlags & uint64(0x100000000))
                 {
                     int32 base = irand((int32)m_caster->GetBaseWeaponDamage(RANGED_ATTACK, MINDAMAGE), (int32)m_caster->GetBaseWeaponDamage(RANGED_ATTACK, MAXDAMAGE));
-                    damage += int32(float(base) / m_caster->GetAttackTime(RANGED_ATTACK) * 2800 + m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1f);
+                    damage += int32(float(base) / m_caster->GetAttackTime(RANGED_ATTACK) * 2800);
                 }
                 break;
             }
