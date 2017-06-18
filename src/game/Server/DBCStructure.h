@@ -918,7 +918,7 @@ struct FactionEntry
 };
 
 /*
-// NOTE: FactionGroup.dbc - currently unused, please refer to related hardcoded enum FactionMasks
+// NOTE: FactionGroup.dbc - currently unused, please refer to related hardcoded enum FactionGroupMask
 struct FactionGroupEntry
 {
     uint32      ID;                                         // 0        m_ID
@@ -934,9 +934,9 @@ struct FactionTemplateEntry
     uint32      ID;                                         // 0        m_ID
     uint32      faction;                                    // 1        m_faction
     uint32      factionFlags;                               // 2        m_flags
-    uint32      ourMask;                                    // 3        m_factionGroup
-    uint32      friendlyMask;                               // 4        m_friendGroup
-    uint32      hostileMask;                                // 5        m_enemyGroup
+    uint32      factionGroupMask;                           // 3        m_factionGroup
+    uint32      friendGroupMask;                            // 4        m_friendGroup
+    uint32      enemyGroupMask;                             // 5        m_enemyGroup
     uint32      enemyFaction[4];                            // 6        m_enemies[4]
     uint32      friendFaction[4];                           // 10       m_friend[4]
     //-------------------------------------------------------  end structure
@@ -953,7 +953,7 @@ struct FactionTemplateEntry
                 if (friendFaction[i] == entry.faction)
                     return true;
         }
-        return (friendlyMask & entry.ourMask) || (ourMask & entry.friendlyMask);
+        return (friendGroupMask & entry.factionGroupMask) || (factionGroupMask & entry.friendGroupMask);
     }
     bool IsHostileTo(FactionTemplateEntry const& entry) const
     {
@@ -966,15 +966,15 @@ struct FactionTemplateEntry
                 if (friendFaction[i] == entry.faction)
                     return false;
         }
-        return (hostileMask & entry.ourMask) != 0;
+        return (enemyGroupMask & entry.factionGroupMask) != 0;
     }
-    bool IsHostileToPlayers() const { return (hostileMask & FACTION_MASK_PLAYER) != 0; }
+    bool IsHostileToPlayers() const { return (enemyGroupMask & FACTION_GROUP_MASK_PLAYER) != 0; }
     bool IsNeutralToAll() const
     {
         for (int i = 0; i < 4; ++i)
             if (enemyFaction[i] != 0)
                 return false;
-        return hostileMask == 0 && friendlyMask == 0;
+        return enemyGroupMask == 0 && friendGroupMask == 0;
     }
     bool IsContestedGuardFaction() const { return (factionFlags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD) != 0; }
 };
