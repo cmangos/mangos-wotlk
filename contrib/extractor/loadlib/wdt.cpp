@@ -4,21 +4,21 @@
 
 bool wdt_MWMO::prepareLoadedData()
 {
-    if (fcc != 'MWMO')
+    if (fcc != uint32('MWMO'))
         return false;
     return true;
 }
 
 bool wdt_MPHD::prepareLoadedData()
 {
-    if (fcc != 'MPHD')
+    if (fcc != uint32('MPHD'))
         return false;
     return true;
 }
 
 bool wdt_MAIN::prepareLoadedData()
 {
-    if (fcc != 'MAIN')
+    if (fcc != uint32('MAIN'))
         return false;
     return true;
 }
