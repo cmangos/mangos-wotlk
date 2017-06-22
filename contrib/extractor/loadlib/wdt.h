@@ -5,15 +5,18 @@
 //**************************************************************************************
 // WDT file class and structures
 //**************************************************************************************
+
 #define WDT_MAP_SIZE 64
+
+#define fcc_MWMO 0x4d574d4f // MWMO
+#define fcc_MPHD 0x4d504844 // MPHD
+#define fcc_MAIN 0x4d41494e // MAIN
 
 class wdt_MWMO
 {
-        union
-        {
-            uint32 fcc;
-            char   fcc_txt[4];
-        };
+    private:
+        uint32 fcc;
+
     public:
         uint32 size;
         bool prepareLoadedData();
@@ -21,14 +24,11 @@ class wdt_MWMO
 
 class wdt_MPHD
 {
-        union
-        {
-            uint32 fcc;
-            char   fcc_txt[4];
-        };
+    private:
+        uint32 fcc;
+
     public:
         uint32 size;
-
         uint32 data1;
         uint32 data2;
         uint32 data3;
@@ -42,14 +42,11 @@ class wdt_MPHD
 
 class wdt_MAIN
 {
-        union
-        {
-            uint32 fcc;
-            char   fcc_txt[4];
-        };
+    private:
+        uint32 fcc;
+
     public:
         uint32 size;
-
         struct adtData
         {
             uint32 exist;
@@ -62,7 +59,7 @@ class wdt_MAIN
 class WDT_file : public FileLoader
 {
     public:
-        bool   prepareLoadedData();
+        bool prepareLoadedData();
 
         WDT_file();
         ~WDT_file();

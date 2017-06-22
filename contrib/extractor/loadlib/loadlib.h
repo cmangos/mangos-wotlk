@@ -29,24 +29,25 @@ typedef uint8_t            uint8;
 
 #define FILE_FORMAT_VERSION    18
 
+#define fcc_MVER 0x4d564552 // MVER
+
 //
 // File version chunk
 //
+
 struct file_MVER
 {
-    union
-    {
-        uint32 fcc;
-        char   fcc_txt[4];
-    };
+    uint32 fcc;
     uint32 size;
     uint32 ver;
 };
 
 class FileLoader
 {
+    private:
         uint8*  data;
         uint32  data_size;
+
     public:
         virtual bool prepareLoadedData();
         uint8* GetData()     {return data;}
@@ -58,4 +59,5 @@ class FileLoader
         bool loadFile(char* filename, bool log = true);
         virtual void free();
 };
+
 #endif

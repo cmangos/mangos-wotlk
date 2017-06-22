@@ -4,23 +4,17 @@
 
 bool wdt_MWMO::prepareLoadedData()
 {
-    if (fcc != uint32('MWMO'))
-        return false;
-    return true;
+    return fcc == fcc_MWMO;
 }
 
 bool wdt_MPHD::prepareLoadedData()
 {
-    if (fcc != uint32('MPHD'))
-        return false;
-    return true;
+    return fcc == fcc_MPHD;
 }
 
 bool wdt_MAIN::prepareLoadedData()
 {
-    if (fcc != uint32('MAIN'))
-        return false;
-    return true;
+    return fcc == fcc_MAIN;
 }
 
 WDT_file::WDT_file()
