@@ -48,7 +48,7 @@ bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
     if (!ExtractOptUInt32(&args, failarg2, 0))
         return false;
 
-    WorldPacket data(SMSG_CAST_FAILED, 5);
+    WorldPacket data(SMSG_CAST_RESULT, 5);
     data << uint8(0);
     data << uint32(133);
     data << uint8(failnum);
