@@ -4301,7 +4301,7 @@ void Unit::_UpdateAutoRepeatSpell()
     bool isAutoShot = m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id == SPELL_ID_AUTOSHOT;
 
     // check movement
-    if (GetTypeId() == TYPEID_PLAYER && ((Player*)this)->IsMoving())
+    if (IsMoving())
     {
         // cancel wand shoot
         if (!isAutoShot)
@@ -4319,24 +4319,51 @@ void Unit::_UpdateAutoRepeatSpell()
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             return;
         }
-        // auto shot is delayed by everythihng, except ranged(!) CURRENT_GENERIC_SPELL's -> recheck that
+        // auto shot is delayed by everything, except ranged(!) CURRENT_GENERIC_SPELL's -> recheck that
         else if (!(m_currentSpells[CURRENT_GENERIC_SPELL] && m_currentSpells[CURRENT_GENERIC_SPELL]->IsRangedSpell()))
             return;
     }
 
-    // castroutine
+    // cast routine
     if (isAttackReady(RANGED_ATTACK))
     {
-        // Check if able to cast
-        if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CheckCast(true) != SPELL_CAST_OK)
+        // be sure the unit is stand up
+        if (getStandState() != UNIT_STAND_STATE_STAND)
+            SetStandState(UNIT_STAND_STATE_STAND);
+
+        Unit* currSpellTarget = m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_targets.getUnitTarget();
+        Unit* currTarget = nullptr;
+
+        // Check i there is new target
+        ObjectGuid const& currTargetGuid = GetTargetGuid();
+        if (!currTargetGuid.IsEmpty() && currTargetGuid.IsUnit())
         {
+            if (currTargetGuid != currSpellTarget->GetObjectGuid())
+                currTarget = GetMap()->GetUnit(currTargetGuid);
+            else
+                currTarget = currSpellTarget;
+        }
+
+        // some check about new target are necessary
+        if (!currTarget || !currTarget->isTargetableForAttack() || currTarget->IsFriendlyTo(this))
+        {
+            // no valid target
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             return;
         }
 
+        SpellCastTargets targets;
+        targets.setUnitTarget(currTarget);
+
         // we want to shoot
-        Spell* spell = new Spell(this, m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo, true);
-        spell->SpellStart(&(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_targets));
+        Spell* spell = new Spell(this, m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo, TRIGGERED_AUTOREPEAT);
+
+        // Check if able to cast
+        if (spell->SpellStart(&targets) != SPELL_CAST_OK)
+        {
+            InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+            return;
+        }
 
         // all went good, reset attack
         resetAttackTimer(RANGED_ATTACK);
