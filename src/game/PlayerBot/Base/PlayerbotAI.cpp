@@ -3803,6 +3803,8 @@ void PlayerbotAI::DoLoot()
     if (!wo || GetMaster()->GetDistance(wo) > float(m_mgr->m_confCollectDistanceMax))
     {
         m_lootCurrent = ObjectGuid();
+        if (GetManager()->m_confDebugWhisper)
+            TellMaster("Object is too far away.");
         return;
     }
 
@@ -3817,6 +3819,8 @@ void PlayerbotAI::DoLoot()
     if ((c && c->IsDespawned()) || (go && !go->IsSpawned()) || (!c && !go))
     {
         m_lootCurrent = ObjectGuid();
+        if (GetManager()->m_confDebugWhisper)
+            TellMaster("Object is not spawned.");
         return;
     }
 
@@ -3854,6 +3858,8 @@ void PlayerbotAI::DoLoot()
         m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), wo->GetPositionX(), wo->GetPositionY(), wo->GetPositionZ());
         // give time to move to point before trying again
         SetIgnoreUpdateTime(1);
+        if (GetManager()->m_confDebugWhisper)
+            TellMaster("Moving to loot %s", go ? go->GetName() : wo->GetName());
     }
 
     if (m_bot->GetDistance(wo) < INTERACTION_DISTANCE)
@@ -3863,6 +3869,9 @@ void PlayerbotAI::DoLoot()
         bool keyFailed = false;
         bool skillFailed = false;
         bool forceFailed = false;
+
+        if (GetManager()->m_confDebugWhisper)
+            TellMaster("Beginning to loot %s", go ? go->GetName() : wo->GetName());
 
         if (c)  // creature
         {
@@ -9000,6 +9009,18 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
     else if (ExtractCommand("help", input))
         _HandleCommandHelp(input, fromPlayer);
+
+    // debug can be enabled without needing to change playerbot.conf file
+    else if (text == "debug")
+    {
+        TellMaster("Debugging is on. Type 'no debug' to disable.");
+        GetManager()->m_confDebugWhisper = true;
+    }
+    else if (text == "no debug")
+    {
+        TellMaster("Debugging is off.");
+        GetManager()->m_confDebugWhisper = false;
+    }
 
     else if (fromPlayer.GetSession()->GetSecurity() > SEC_PLAYER && ExtractCommand("gm", input))
         _HandleCommandGM(input, fromPlayer);
