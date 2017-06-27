@@ -198,6 +198,15 @@ bool Group::LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant)
 
     member.group     = subgroup;
     member.assistant = assistant;
+
+    int32 lastMap = sObjectMgr.GetPlayerMapIdByGUID(member.guid);
+    if (lastMap < 0)
+    {
+        sLog.outError("Group::LoadMemberFromDB> MapId is not found for %s.", member.guid.GetString().c_str());
+        return false;
+    }
+    member.lastMap = uint32(lastMap);
+
     m_memberSlots.push_back(member);
 
     SubGroupCounterIncrease(subgroup);
@@ -1211,16 +1220,27 @@ void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* Send
     // we assume that when the difficulty changes, all instances that can be reset will be
     Difficulty diff = GetDifficulty(isRaid);
 
-    typedef std::set<uint32> OfflineMapSet;
-    OfflineMapSet mapsWithOfflinePlayer;                    // to store map of offline players
+    typedef std::set<uint32> Uint32Set;
+    Uint32Set mapsWithOfflinePlayer;                        // to store map of offline players
+    Uint32Set mapsWithBeingTeleportedPlayer;                // to store map of offline players
 
     if (method != INSTANCE_RESET_GROUP_DISBAND)
     {
         // Store maps in which are offline members for instance reset check.
         for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
         {
-            if (!ObjectAccessor::FindPlayer(itr->guid))
-                mapsWithOfflinePlayer.insert(itr->lastMap); // add last map from offline player
+            Player* plr = ObjectAccessor::FindPlayer(itr->guid);
+            if (!plr)
+            {
+                // add last map from offline player
+                mapsWithOfflinePlayer.insert(itr->lastMap);
+            }
+            else
+            {
+                // add teleport destination map
+                if (plr->IsBeingTeleported())
+                    mapsWithBeingTeleportedPlayer.insert(plr->GetTeleportDest().mapid);
+            }
         }
     }
 
@@ -1244,13 +1264,27 @@ void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* Send
             }
         }
 
-        bool isEmpty = true;
         // check if there are offline members on the map
         if (method != INSTANCE_RESET_GROUP_DISBAND && mapsWithOfflinePlayer.find(state->GetMapId()) != mapsWithOfflinePlayer.end())
-            isEmpty = false;
+        {
+            if (SendMsgTo)
+                SendMsgTo->SendResetInstanceFailed(1, state->GetMapId());
+            ++itr;
+            continue;
+        }
 
+        // check if there are teleporting members to the map
+        if (method != INSTANCE_RESET_GROUP_DISBAND && mapsWithBeingTeleportedPlayer.find(state->GetMapId()) != mapsWithBeingTeleportedPlayer.end())
+        {
+            if (SendMsgTo)
+                SendMsgTo->SendResetInstanceFailed(2, state->GetMapId());
+            ++itr;
+            continue;
+        }
+
+        bool isEmpty = true;
         // if the map is loaded, reset it if can
-        if (isEmpty && entry->IsDungeon() && !(method == INSTANCE_RESET_GROUP_DISBAND && !state->CanReset()))
+        if (entry->IsDungeon() && !(method == INSTANCE_RESET_GROUP_DISBAND && !state->CanReset()))
             if (Map* map = sMapMgr.FindMap(state->GetMapId(), state->GetInstanceId()))
                 isEmpty = ((DungeonMap*)map)->Reset(method);
 
