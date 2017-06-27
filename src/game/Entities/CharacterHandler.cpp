@@ -785,6 +785,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         SendNotification(LANG_RESET_TALENTS);               // we can use SMSG_TALENTS_INVOLUNTARILY_RESET here
     }
 
+    if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_TAXINODES))
+    {
+        pCurrChar->InitTaxiNodesForLevel();
+        pCurrChar->RemoveAtLoginFlag(AT_LOGIN_RESET_TAXINODES, true);
+        SendNotification("Your taxi nodes have been reset.");
+    }
+
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
 
