@@ -120,8 +120,13 @@ Quest::Quest(Field* questRecord)
     PointY = questRecord[119].GetFloat();
     PointOpt = questRecord[120].GetUInt32();
 
+    m_detailsemotecount = 0;
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
+    {
         DetailsEmote[i] = questRecord[121 + i].GetUInt32();
+        if (DetailsEmote[i] != 0)
+            m_detailsemotecount = i + 1;
+    }
 
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
         DetailsEmoteDelay[i] = questRecord[125 + i].GetUInt32();
