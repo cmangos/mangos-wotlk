@@ -2205,82 +2205,91 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     return;
                 }
 
-                // list out items available for trade
+                // list out items
                 std::ostringstream out;
-                std::list<std::string> lsItemsTradable;
-                std::list<std::string> lsItemsUntradable;
+                std::ostringstream outT;
+                std::ostringstream outNT;
+                uint8 countTotalTradeable = 0;
+                uint8 countTradeable = 0;
+                uint8 countNonTradeable = 0;
 
+                outT << "Tradeable:";
+                outNT << "Non-tradeable:";
                 // list out items in main backpack
                 for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
                 {
                     const Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
                     if (pItem)
                     {
-                        MakeItemLink(pItem, out, true);
                         if (pItem->CanBeTraded())
-                            lsItemsTradable.push_back(out.str());
+                        {
+                            countTradeable++;
+                            MakeItemLink(pItem, outT, true);
+                        }
                         else
-                            lsItemsUntradable.push_back(out.str());
-                        out.str("");
+                        {
+                            countNonTradeable++;
+                            MakeItemLink(pItem, outNT, true);
+                        }
                     }
                 }
+
+                countTotalTradeable = countTradeable;
+                out << "Backpack (" << countTradeable + countNonTradeable << "/16) ";
+                if (countTradeable > 0)
+                    out << outT.str();
+                if (countNonTradeable > 0)
+                    out << outNT.str();
+                SendWhisper(out.str().c_str(), *(m_bot->GetTrader()));
 
                 // list out items in other removable backpacks
                 for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
                 {
                     const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
                     if (pBag)
+                    {
+                        countTradeable = 0;
+                        countNonTradeable = 0;
+                        std::ostringstream outbagT;
+                        std::ostringstream outbagNT;
+                        outbagT << "Tradeable:";
+                        outbagNT << "Non-tradeable:";
+
                         for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
                         {
                             const Item* const pItem = m_bot->GetItemByPos(bag, slot);
                             if (pItem)
                             {
-                                MakeItemLink(pItem, out, true);
                                 if (pItem->CanBeTraded())
-                                    lsItemsTradable.push_back(out.str());
+                                {
+                                    countTradeable++;
+                                    MakeItemLink(pItem, outbagT, true);
+                                }
                                 else
-                                    lsItemsUntradable.push_back(out.str());
-                                out.str("");
+                                {
+                                    countNonTradeable++;
+                                    MakeItemLink(pItem, outbagNT, true);
+                                }
                             }
                         }
-                }
 
-                ChatHandler ch(m_bot->GetTrader());
-                out.str("");
-                out << "Items I have but cannot trade:";
-                uint32 count = 0;
-                for (std::list<std::string>::iterator iter = lsItemsUntradable.begin(); iter != lsItemsUntradable.end(); iter++)
-                {
-                    out << (*iter);
-                    // Why this roundabout way of posting max 20 items per whisper? To keep the list scrollable.
-                    count++;
-                    if (count % 20 == 0)
-                    {
-                        ch.SendSysMessage(out.str().c_str());
-                        out.str("");
+                        countTotalTradeable += countTradeable;
+                        std::ostringstream outbag;
+                        const ItemPrototype* const pBagProto = pBag->GetProto();
+                        std::string bagName = pBagProto->Name1;
+                        ItemLocalization(bagName, pBagProto->ItemId);
+                        outbag << bagName << " (";
+                        outbag << countTradeable + countNonTradeable << "/" << pBag->GetBagSize();
+                        outbag << ") ";
+                        if (countTradeable > 0)
+                            outbag << outbagT.str();
+                        if (countNonTradeable > 0)
+                            outbag << outbagNT.str();
+                        SendWhisper(outbag.str().c_str(), *(m_bot->GetTrader()));
                     }
                 }
-                if (count > 0)
-                    ch.SendSysMessage(out.str().c_str());
-
-                out.str("");
-                out << "I could give you:";
-                count = 0;
-                for (std::list<std::string>::iterator iter = lsItemsTradable.begin(); iter != lsItemsTradable.end(); iter++)
-                {
-                    out << (*iter);
-                    // Why this roundabout way of posting max 20 items per whisper? To keep the list scrollable.
-                    count++;
-                    if (count % 20 == 0)
-                    {
-                        ch.SendSysMessage(out.str().c_str());
-                        out.str("");
-                    }
-                }
-                if (count > 0)
-                    ch.SendSysMessage(out.str().c_str());
-                else
-                    ch.SendSysMessage("I have nothing to give you.");
+                if (countTotalTradeable == 0)
+                    SendWhisper("I have no items to give you.", *(m_bot->GetTrader()));
 
                 // calculate how much money bot has
                 // send bot the message
