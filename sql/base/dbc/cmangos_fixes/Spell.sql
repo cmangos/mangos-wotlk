@@ -153,6 +153,6 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 ('24019', '0', '0', '0', '256', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '3', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '22', '0', '0', '15', '0', '0', '10', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1474', '0', '0', 'Axe Flurry', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0');
 
 -- Removes aura interrupt flag by sitting for spells that do not make a creature sit, all seem to be copypasted for unknown reasons
-UPDATE spell_template SET AuraInterruptFlags=AuraInterruptFlags&~0x00040000 WHERE entry IN(6606,14915,16093,46765);
+UPDATE spell_template SET AuraInterruptFlags=AuraInterruptFlags&~0x00040000 WHERE Id IN(6606,14915,16093,46765);
 
 
