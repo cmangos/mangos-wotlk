@@ -776,7 +776,6 @@ inline bool IsHostileTarget(uint32 target)
         case TARGET_ALL_HOSTILE_UNITS_AROUND_CASTER:
         case TARGET_CURRENT_ENEMY_COORDINATES:
         case TARGET_LARGE_FRONTAL_CONE:
-        case TARGET_SINGLE_ENEMY:
         case TARGET_IN_FRONT_OF_CASTER_30:
             return true;
         default:

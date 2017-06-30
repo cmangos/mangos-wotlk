@@ -639,7 +639,6 @@ bool IsExplicitNegativeTarget(uint32 targetA)
     {
         case TARGET_CHAIN_DAMAGE:
         case TARGET_CURRENT_ENEMY_COORDINATES:
-        case TARGET_SINGLE_ENEMY:
             return true;
         default:
             break;
