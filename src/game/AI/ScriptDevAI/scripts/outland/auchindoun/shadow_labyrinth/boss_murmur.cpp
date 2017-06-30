@@ -142,7 +142,7 @@ struct boss_murmurAI : public Scripted_NoMovementAI
 
             if (m_uiThunderingStormTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_THUNDERING_STORM) == CAST_OK)
+                if (m_creature->CastSpell(m_creature, SPELL_THUNDERING_STORM, TRIGGERED_NONE) == SPELL_CAST_OK)
                     m_uiThunderingStormTimer = urand(5000, 6000);
             }
             else

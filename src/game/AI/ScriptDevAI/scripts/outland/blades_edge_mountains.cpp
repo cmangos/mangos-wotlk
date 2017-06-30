@@ -941,7 +941,7 @@ struct npc_vimgol_AI : public ScriptedAI
 
     void JustDied(Unit* pKiller) override
     {
-        DoCast(m_creature, SPELL_SUMMON_GRIMOIRE, true);
+        m_creature->CastSpell(m_creature, SPELL_SUMMON_GRIMOIRE, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override

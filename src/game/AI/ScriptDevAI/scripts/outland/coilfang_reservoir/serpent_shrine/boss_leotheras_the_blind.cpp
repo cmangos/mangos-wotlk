@@ -184,7 +184,7 @@ struct boss_leotheras_the_blindAI : public ScriptedAI
         {
             if (m_uiFinalFormTimer <= uiDiff)
             {
-                DoSpawnCreature(NPC_SHADOW_LEO, 0, 0, 0, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_SHADOW_LEO, 0, 0, 0, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
                 SetCombatMovement(true);
