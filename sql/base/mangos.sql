@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_13955_01_mangos_spell_chain_totems` bit(1) DEFAULT NULL
+  `required_13956_01_mangos_spell_chain_totems_typos` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -15603,7 +15603,7 @@ INSERT INTO `spell_chain` VALUES
 (57970,57969,2818,9,0),
 /* Fire Resistance Totem Auras */
 (8185,0,8185,1,0),
-(10534,8182,8185,2,0),
+(10534,8185,8185,2,0),
 (10535,10534,8185,3,0),
 (25562,10535,8185,4,0),
 (58738,25562,8185,5,0),
@@ -15670,7 +15670,7 @@ INSERT INTO `spell_chain` VALUES
 (10599,10598,10596,3,0),
 (25573,10599,10596,4,0),
 (58748,25573,10596,5,0),
-(58750,10599,10596,6,0),
+(58750,58748,10596,6,0),
 /* Searing Totem Attack */
 (3606,0,3606,1,0),
 (6350,3606,3606,2,0),
