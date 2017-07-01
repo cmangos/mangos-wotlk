@@ -1676,54 +1676,7 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
             damageInfo->HitInfo |= HITINFO_GLANCING;
             damageInfo->TargetState = VICTIMSTATE_NORMAL;
             damageInfo->procEx |= PROC_EX_NORMAL_HIT;
-            // calculate base values and mods
-            float baseLowEnd = 1.3f;
-            float baseHighEnd = 1.2f;
-            switch (getClass())                             // lowering base values for casters
-            {
-                case CLASS_SHAMAN:
-                case CLASS_PRIEST:
-                case CLASS_MAGE:
-                case CLASS_WARLOCK:
-                case CLASS_DRUID:
-                    baseLowEnd  -= 0.7f;
-                    baseHighEnd -= 0.3f;
-                    break;
-            }
-
-            float maxLowEnd = 0.6f;
-            switch (getClass())                             // upper for melee classes
-            {
-                case CLASS_WARRIOR:
-                case CLASS_ROGUE:
-                    maxLowEnd = 0.91f;                      // If the attacker is a melee class then instead the lower value of 0.91
-            }
-
-            // calculate values
-            int32 attackerRating = GetWeaponSkillValue(damageInfo->attackType);
-            attackerRating = static_cast<std::uint32_t>(attackerRating) > getLevel() * 5 ? getLevel() * 5 : attackerRating; // cap rating at level * 5, done in 2.0.1
-            int32 diff = damageInfo->target->GetDefenseSkillValue() - attackerRating;
-            float lowEnd  = baseLowEnd - (0.05f * diff);
-            float highEnd = baseHighEnd - (0.03f * diff);
-
-            // apply max/min bounds
-            if (lowEnd < 0.01f)                             // the low end must not go bellow 0.01f
-                lowEnd = 0.01f;
-            else if (lowEnd > maxLowEnd)                    // the smaller value of this and 0.6 is kept as the low end
-                lowEnd = maxLowEnd;
-
-            if (highEnd < 0.2f)                             // high end limits
-                highEnd = 0.2f;
-            if (highEnd > 0.99f)
-                highEnd = 0.99f;
-
-            if (lowEnd > highEnd)                           // prevent negative range size
-                lowEnd = highEnd;
-
-            float reducePercent = lowEnd + rand_norm_f() * (highEnd - lowEnd);
-
-            damageInfo->cleanDamage += damageInfo->damage - uint32(reducePercent *  damageInfo->damage);
-            damageInfo->damage   = uint32(reducePercent *  damageInfo->damage);
+            CalculateGlanceAmount(damageInfo);
             break;
         }
         case MELEE_HIT_CRUSHING:
@@ -3421,6 +3374,38 @@ float Unit::CalculateEffectiveDazeChance(const Unit *victim, WeaponAttackType at
     chance += (int32(GetWeaponSkillValue(attType, victim)) - int32(victim->GetDefenseSkillValue(this))) * 0.04f * 4;
     // Chance is capped at 40%
     return std::max(0.0f, std::min(chance, 40.0f));
+}
+
+uint32 Unit::CalculateGlanceAmount(CalcDamageInfo *meleeInfo) const
+{
+    if (!meleeInfo)
+        return 0;
+    // Post-2.0.1: capped skill value
+    const uint32 cap = GetMaxSkillValueForLevel();
+    const uint32 skill = std::min(GetWeaponSkillValue(meleeInfo->attackType, meleeInfo->target), cap);
+    const uint32 defense = meleeInfo->target->GetDefenseSkillValue(this);
+    const int32 difference = int32(defense - skill);
+    // Attacker's skill beats victim's defense: no action required
+    if (difference < 0)
+        return meleeInfo->damage;
+    // calculate base values and mods
+    const bool caster = (getClassMask() & CLASSMASK_WAND_USERS);
+    const float baseHighEnd = (caster ? 0.9f : 1.2f);
+    const float baseLowEnd = (caster ? 0.6f : 1.3f);
+    const float maxLowEnd = (caster ? 0.6f : 0.91f);
+
+    float highEnd = baseHighEnd - (0.03f * difference);
+    float lowEnd = baseLowEnd - (0.05f * difference);
+    // 0.2f <= highEnd <= 0.99f
+    highEnd = std::min(std::max(highEnd, 0.2f), 0.99f);
+    // 0.01f <= lowEnd <= maxLowEnd <= highEnd
+    lowEnd = std::min(std::max(lowEnd, 0.01f), std::min(maxLowEnd, highEnd));
+    // Roll for final glance damage multiplier and calculate amount of damage glancing blow will deal
+    const float multiplier = (urand(uint32(lowEnd * 100), uint32(highEnd * 100)) * 0.01f);
+    const uint32 result = uint32(meleeInfo->damage * multiplier);
+    meleeInfo->cleanDamage += (meleeInfo->damage - result);
+    meleeInfo->damage = result;
+    return result;
 }
 
 float Unit::CalculateAbilityDeflectChance(const Unit *attacker, const SpellEntry *ability) const
