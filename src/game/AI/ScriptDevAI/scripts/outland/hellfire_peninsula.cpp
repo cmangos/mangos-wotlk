@@ -379,8 +379,8 @@ struct npc_wounded_blood_elfAI : public npc_escortAI
             case 9:
                 DoScriptText(SAY_ELF_SUMMON1, m_creature, pPlayer);
                 // Spawn two Haal'eshi Talonguard
-                DoSpawnCreature(NPC_WINDWALKER, -15, -15, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
-                DoSpawnCreature(NPC_WINDWALKER, -17, -17, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_WINDWALKER, -15, -15, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_WINDWALKER, -17, -17, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
                 break;
             case 13:
                 DoScriptText(SAY_ELF_RESTING, m_creature, pPlayer);
@@ -388,8 +388,8 @@ struct npc_wounded_blood_elfAI : public npc_escortAI
             case 14:
                 DoScriptText(SAY_ELF_SUMMON2, m_creature, pPlayer);
                 // Spawn two Haal'eshi Windwalker
-                DoSpawnCreature(NPC_WINDWALKER, -15, -15, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
-                DoSpawnCreature(NPC_WINDWALKER, -17, -17, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_WINDWALKER, -15, -15, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_WINDWALKER, -17, -17, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
                 break;
             case 27:
                 DoScriptText(SAY_ELF_COMPLETE, m_creature, pPlayer);

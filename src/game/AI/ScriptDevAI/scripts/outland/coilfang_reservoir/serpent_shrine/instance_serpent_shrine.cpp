@@ -64,7 +64,7 @@ void instance_serpentshrine_cavern::OnCreatureCreate(Creature* pCreature)
         case NPC_TIDALVESS:
         case NPC_CARIBDIS:
         case NPC_LEOTHERAS:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_GREYHEART_SPELLBINDER:
             m_lSpellBindersGUIDList.push_back(pCreature->GetObjectGuid());
@@ -94,7 +94,7 @@ void instance_serpentshrine_cavern::OnObjectCreate(GameObject* pGo)
         case GO_SHIELD_GENERATOR_2:
         case GO_SHIELD_GENERATOR_3:
         case GO_SHIELD_GENERATOR_4:
-            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             break;
     }
 }

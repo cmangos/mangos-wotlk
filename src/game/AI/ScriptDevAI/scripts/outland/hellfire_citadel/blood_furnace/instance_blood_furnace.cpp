@@ -44,7 +44,7 @@ void instance_blood_furnace::OnCreatureCreate(Creature* pCreature)
         case NPC_BROGGOK:
         case NPC_KELIDAN_THE_BREAKER:
         case NPC_MAGTHERIDON:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
         case NPC_NASCENT_FEL_ORC:
@@ -89,7 +89,7 @@ void instance_blood_furnace::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_blood_furnace::SetData(uint32 uiType, uint32 uiData)

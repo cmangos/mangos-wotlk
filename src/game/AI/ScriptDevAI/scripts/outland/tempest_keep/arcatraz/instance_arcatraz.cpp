@@ -132,7 +132,7 @@ void instance_arcatraz::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_arcatraz::OnCreatureCreate(Creature* pCreature)
@@ -151,7 +151,7 @@ void instance_arcatraz::OnCreatureCreate(Creature* pCreature)
         case NPC_MELLICHAR:
         case NPC_DALLIAH:
         case NPC_SOCCOTHRATES:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_BLAZING_TRICKSTER:
         case NPC_PHASE_HUNTER:

@@ -99,7 +99,7 @@ void instance_dark_portal::OnCreatureCreate(Creature* pCreature)
         case NPC_MEDIVH:
         case NPC_SAAT:
         case NPC_DARK_PORTAL_DUMMY:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }

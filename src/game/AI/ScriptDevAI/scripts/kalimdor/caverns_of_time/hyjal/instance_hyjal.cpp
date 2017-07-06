@@ -60,7 +60,7 @@ void instance_mount_hyjal::OnPlayerEnter(Player* /*pPlayer*/)
 void instance_mount_hyjal::OnCreatureCreate(Creature* pCreature)
 {
     if (pCreature->GetEntry() == NPC_ARCHIMONDE)
-        m_mNpcEntryGuidStore[NPC_ARCHIMONDE] = pCreature->GetObjectGuid();
+        m_npcEntryGuidStore[NPC_ARCHIMONDE] = pCreature->GetObjectGuid();
 }
 
 void instance_mount_hyjal::OnObjectCreate(GameObject* pGo)

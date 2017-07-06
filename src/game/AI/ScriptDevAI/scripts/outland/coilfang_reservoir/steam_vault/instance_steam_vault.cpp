@@ -61,7 +61,7 @@ void instance_steam_vault::OnCreatureCreate(Creature* pCreature)
     {
         case NPC_STEAMRIGGER:
         case NPC_KALITHRESH:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_NAGA_DISTILLER:
             m_lNagaDistillerGuidList.push_back(pCreature->GetObjectGuid());
@@ -88,7 +88,7 @@ void instance_steam_vault::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_steam_vault::OnCreatureDeath(Creature* pCreature)

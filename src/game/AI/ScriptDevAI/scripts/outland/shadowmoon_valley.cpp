@@ -1839,7 +1839,7 @@ struct npc_veneratus_spawn_nodeAI : public Scripted_NoMovementAI
         if (pWho->GetEntry() == NPC_SPIRIT_HUNTER && m_creature->IsWithinDistInMap(pWho, 40.0f) && m_creature->IsWithinLOSInMap(pWho))
         {
             DoScriptText(SAY_VENERATUS_SPAWN, pWho);
-            DoSpawnCreature(NPC_VENERATUS, 0, 0, 0, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+            m_creature->SummonCreature(NPC_VENERATUS, 0, 0, 0, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
             m_creature->ForcedDespawn();
         }
     }

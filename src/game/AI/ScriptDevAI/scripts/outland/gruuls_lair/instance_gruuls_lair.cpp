@@ -52,7 +52,7 @@ bool instance_gruuls_lair::IsEncounterInProgress() const
 void instance_gruuls_lair::OnCreatureCreate(Creature* pCreature)
 {
     if (pCreature->GetEntry() == NPC_MAULGAR)
-        m_mNpcEntryGuidStore[NPC_MAULGAR] = pCreature->GetObjectGuid();
+        m_npcEntryGuidStore[NPC_MAULGAR] = pCreature->GetObjectGuid();
 }
 
 void instance_gruuls_lair::OnObjectCreate(GameObject* pGo)
@@ -69,7 +69,7 @@ void instance_gruuls_lair::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_gruuls_lair::SetData(uint32 uiType, uint32 uiData)

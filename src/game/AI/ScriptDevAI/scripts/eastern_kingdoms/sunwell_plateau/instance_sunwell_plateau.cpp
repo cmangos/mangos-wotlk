@@ -111,7 +111,7 @@ void instance_sunwell_plateau::OnCreatureCreate(Creature* pCreature)
         case NPC_ANVEENA:
         case NPC_VELEN:
         case NPC_LIADRIN:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_DECEIVER:
             m_lDeceiversGuidList.push_back(pCreature->GetObjectGuid());
@@ -188,7 +188,7 @@ void instance_sunwell_plateau::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_sunwell_plateau::SetData(uint32 uiType, uint32 uiData)

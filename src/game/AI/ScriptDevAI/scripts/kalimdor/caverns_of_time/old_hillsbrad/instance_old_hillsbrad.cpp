@@ -66,7 +66,7 @@ void instance_old_hillsbrad::OnCreatureCreate(Creature* pCreature)
         case NPC_DRAKE:
         case NPC_SKARLOC:
         case NPC_EPOCH:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_ORC_PRISONER:
             // Sort the orcs which are inside the houses
@@ -119,7 +119,7 @@ void instance_old_hillsbrad::OnObjectCreate(GameObject* pGo)
     if (pGo->GetEntry() == GO_ROARING_FLAME)
         m_lRoaringFlamesList.push_back(pGo->GetObjectGuid());
     else if (pGo->GetEntry() == GO_PRISON_DOOR)
-        m_mGoEntryGuidStore[GO_PRISON_DOOR] = pGo->GetObjectGuid();
+        m_goEntryGuidStore[GO_PRISON_DOOR] = pGo->GetObjectGuid();
 }
 
 void instance_old_hillsbrad::HandleThrallRelocation()

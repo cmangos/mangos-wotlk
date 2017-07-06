@@ -103,7 +103,7 @@ void instance_karazhan::OnCreatureCreate(Creature* pCreature)
         case NPC_IMAGE_OF_ARCANAGOS:
         case NPC_ECHO_MEDIVH:
         case NPC_CHESS_VICTORY_CONTROLLER:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_NIGHTBANE_HELPER:
             if (pCreature->GetPositionZ() < 100.0f)
@@ -198,7 +198,7 @@ void instance_karazhan::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_karazhan::SetData(uint32 uiType, uint32 uiData)

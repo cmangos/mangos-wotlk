@@ -55,7 +55,7 @@ void instance_the_eye::OnCreatureCreate(Creature* pCreature)
         case NPC_CAPERNIAN:
         case NPC_SANGUINAR:
         case NPC_KAELTHAS:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -69,7 +69,7 @@ void instance_the_eye::OnObjectCreate(GameObject* pGo)
         case GO_KAEL_STATUE_LEFT:
         case GO_KAEL_STATUE_RIGHT:
         case GO_BRIDGE_WINDOW:
-            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             break;
     }
 }

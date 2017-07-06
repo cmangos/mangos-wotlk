@@ -36,7 +36,7 @@ void instance_sethekk_halls::Initialize()
 void instance_sethekk_halls::OnCreatureCreate(Creature* pCreature)
 {
     if (pCreature->GetEntry() == NPC_ANZU)
-        m_mNpcEntryGuidStore[NPC_ANZU] = pCreature->GetObjectGuid();
+        m_npcEntryGuidStore[NPC_ANZU] = pCreature->GetObjectGuid();
 }
 
 void instance_sethekk_halls::OnObjectCreate(GameObject* pGo)
@@ -58,7 +58,7 @@ void instance_sethekk_halls::OnObjectCreate(GameObject* pGo)
             return;
     }
 
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_sethekk_halls::SetData(uint32 uiType, uint32 uiData)

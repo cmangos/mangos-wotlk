@@ -41,7 +41,7 @@ void instance_ramparts::OnCreatureCreate(Creature* pCreature)
     {
         case NPC_VAZRUDEN_HERALD:
         case NPC_VAZRUDEN:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_HELLFIRE_SENTRY:
             m_lSentryGUIDs.push_back(pCreature->GetObjectGuid());
@@ -55,7 +55,7 @@ void instance_ramparts::OnObjectCreate(GameObject* pGo)
     {
         case GO_FEL_IRON_CHEST:
         case GO_FEL_IRON_CHEST_H:
-            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             break;
     }
 }

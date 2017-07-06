@@ -55,7 +55,7 @@ void instance_uldaman::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_uldaman::OnCreatureCreate(Creature* pCreature)
@@ -70,7 +70,7 @@ void instance_uldaman::OnCreatureCreate(Creature* pCreature)
             m_lKeepers.push_back(pCreature->GetObjectGuid());
             break;
         case NPC_ARCHAEDAS:
-            m_mNpcEntryGuidStore[NPC_ARCHAEDAS] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[NPC_ARCHAEDAS] = pCreature->GetObjectGuid();
             break;
         default:
             break;

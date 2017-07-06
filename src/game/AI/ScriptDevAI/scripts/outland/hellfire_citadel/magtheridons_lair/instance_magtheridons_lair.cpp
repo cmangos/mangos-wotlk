@@ -53,7 +53,7 @@ void instance_magtheridons_lair::OnCreatureCreate(Creature* pCreature)
     switch (pCreature->GetEntry())
     {
         case NPC_MAGTHERIDON:
-            m_mNpcEntryGuidStore[NPC_MAGTHERIDON] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[NPC_MAGTHERIDON] = pCreature->GetObjectGuid();
             break;
         case NPC_CHANNELER:
             m_lChannelerGuidList.push_back(pCreature->GetObjectGuid());
@@ -66,7 +66,7 @@ void instance_magtheridons_lair::OnObjectCreate(GameObject* pGo)
     switch (pGo->GetEntry())
     {
         case GO_DOODAD_HF_MAG_DOOR01:                       // event door
-            m_mGoEntryGuidStore[GO_DOODAD_HF_MAG_DOOR01] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[GO_DOODAD_HF_MAG_DOOR01] = pGo->GetObjectGuid();
             break;
         case GO_DOODAD_HF_RAID_FX01:                        // hall
         case GO_MAGTHERIDON_COLUMN_003:                     // six columns
