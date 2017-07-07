@@ -2441,7 +2441,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             break;
         case TARGET_SINGLE_ENEMY:
         {
-            if (Unit* target = m_targets.getUnitTarget())
+            if (Unit* target = m_caster->GetMap()->GetUnit(m_caster->GetChannelObjectGuid()))
             {
                 Unit* magnetTarget = m_caster->SelectMagnetTarget(target, this, effIndex);
                 if (magnetTarget && (magnetTarget != target))
