@@ -165,7 +165,7 @@ struct npc_air_force_botsAI : public ScriptedAI
         if (!m_pSpawnAssoc)
             return;
 
-        if (m_creature->CanAttackOnSight(pWho) && m_creature->IsHostileTo(pWho))
+        if (m_creature->CanAttackOnSight(pWho))
         {
             Player* pPlayerTarget = pWho->GetTypeId() == TYPEID_PLAYER ? (Player*)pWho : NULL;
 
