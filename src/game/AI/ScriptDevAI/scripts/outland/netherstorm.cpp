@@ -1177,6 +1177,7 @@ struct npc_drijyaAI : public npc_escortAI
         m_instance = (ScriptedInstance*) m_creature->GetInstanceData();
         m_instance->GetGameObjectGuidVectorFromStorage(GO_ROCKET_SMOKE, m_uiSmokeGuids);
         m_instance->GetGameObjectGuidVectorFromStorage(GO_ROCKET_FIRE, m_uiFireGuids);
+        SetReactState(REACT_PASSIVE);
         Reset();
     }
 
@@ -1206,8 +1207,6 @@ struct npc_drijyaAI : public npc_escortAI
             m_uiSayCount            = false;
         }
     }
-
-    void MoveInLineOfSight(Unit* pWho) override {}
 
     void AttackedBy(Unit* pWho) override
     {
