@@ -5570,7 +5570,7 @@ SpellCastResult PlayerbotAI::Buff(uint32 spellId, Unit* target, void (*beforeCas
 
     // Target already has aura from spellId, skip for speed. May need to add exceptions
     if (target->HasAura(spellId))
-        return false;
+        return SPELL_FAILED_AURA_BOUNCED;
 
     SpellEntry const* spellProto = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
 
@@ -7318,7 +7318,10 @@ void PlayerbotAI::findNearbyCorpse()
         if (!corpse)
             continue;
 
-        if (!corpse->IsCorpse() || corpse->IsDespawned() || m_bot->CanAssist(corpse))
+        if (!corpse->IsCorpse() || corpse->IsDespawned() || m_bot->CanAssist(corpse) || !corpse->loot)
+            continue;
+
+        if (!corpse->loot->CanLoot(m_bot))
             continue;
 
         uint32 skillId = 0;
