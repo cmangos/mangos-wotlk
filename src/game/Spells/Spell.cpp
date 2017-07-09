@@ -4065,6 +4065,12 @@ void Spell::SendSpellStart() const
     if (IsRangedSpell())
         castFlags |= CAST_FLAG_AMMO;
 
+    if (HasPersistentAuraEffect(m_spellInfo))
+        castFlags |= CAST_FLAG_PERSISTENT_AA;
+
+    if (m_CastItem)
+        castFlags |= CAST_FLAG_UNKNOWN7;
+
     if (m_spellInfo->runeCostID)
         castFlags |= CAST_FLAG_UNKNOWN19;
 
@@ -4123,6 +4129,9 @@ void Spell::SendSpellGo()
     uint32 castFlags = CAST_FLAG_UNKNOWN9;
     if (IsRangedSpell())
         castFlags |= CAST_FLAG_AMMO;                        // arrows/bullets visual
+
+    if (m_CastItem)
+        castFlags |= CAST_FLAG_UNKNOWN7;
 
     if ((m_caster->GetTypeId() == TYPEID_PLAYER) && (m_caster->getClass() == CLASS_DEATH_KNIGHT) && m_spellInfo->runeCostID)
     {
