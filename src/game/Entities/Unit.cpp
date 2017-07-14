@@ -47,6 +47,7 @@
 #include "Movement/MoveSplineInit.h"
 #include "Movement/MoveSpline.h"
 #include "Entities/CreatureLinkingMgr.h"
+#include "Tools/Formulas.h"
 
 #include <math.h>
 #include <array>
@@ -10126,6 +10127,14 @@ float Unit::GetWeaponDamageRange(WeaponAttackType attType , WeaponDamageRange ty
         return 0.0f;
 
     return m_weaponDamage[attType][type];
+}
+
+bool Unit::IsTrivialForTarget(Unit const* unit) const
+{
+    if (!unit || GetTypeId() == TYPEID_PLAYER)
+        return false;
+
+    return MaNGOS::XP::IsTrivialLevelDifference(unit->GetLevelForTarget(this), GetLevelForTarget(unit));
 }
 
 void Unit::SetLevel(uint32 lvl)
