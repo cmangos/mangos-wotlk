@@ -2653,10 +2653,10 @@ void Player::GiveLevel(uint32 level)
         MailDraft(mailReward->mailTemplateId).SendMailTo(this, MailSender(MAIL_CREATURE, mailReward->senderEntry));
 
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
-
+#ifdef BUILD_PLAYERBOT
     if (m_playerbotAI)
         m_playerbotAI->GiveLevel(level);
-
+#endif
     // resend quests status directly
     SendQuestGiverStatusMultiple();
 }

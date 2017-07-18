@@ -507,15 +507,15 @@ bool PlayerbotClassAI::FleeFromPointIfCan(uint32 radius, Unit* pTarget, float x0
         z = z0 + 0.5f;
 
         // try to fix z
-        if (!m_bot->GetMap()->GetHeightInRange(x, y, z))
+        if (!m_bot->GetMap()->GetHeightInRange(m_bot->GetPhaseMask(), x, y, z))
             foundCoords = false;
 
         // check any collision
         float testZ = z + 0.5f; // needed to avoid some false positive hit detection of terrain or passable little object
-        if (m_bot->GetMap()->GetHitPosition(x0, y0, z0 + 0.5f, x, y, testZ, -0.1f))
+        if (m_bot->GetMap()->GetHitPosition(x0, y0, z0 + 0.5f, x, y, testZ, m_bot->GetPhaseMask(), -0.1f))
         {
             z = testZ;
-            if (!m_bot->GetMap()->GetHeightInRange(x, y, z))
+            if (!m_bot->GetMap()->GetHeightInRange(m_bot->GetPhaseMask(), x, y, z))
                 foundCoords = false;
         }
 

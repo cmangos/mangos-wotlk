@@ -1,22 +1,11 @@
-What it is:
-===========
-
-Playerbot lets you add another character from your account as a bot that you can command. Only characters from your account can be used, so you can have a maximum of 9 bots at one time per account.
-
-This was taken from the Trinity site, and modified slightly by me to get some of the kinks out.
-
-Bots will only use abilities that they have - for example, a priest will only use the renew spell if it has been trained. A bot's equipment will lose durability like any other character.
-
-All help is welcome be it through code development, reports from play testing or just discussion. Meet us in the MaNGOS forum thread.
-
-For MaNGOS 11834+
-
 Commands:
 =========
 
 /s .bot add BOTNAME (add character to world)
 /s .bot remove BOTNAME
 /invite BOTNAME (bot will auto accept invite)
+/t BOTNAME orders combat COMBATSORDER [TARGET] (assign combat orders like healing, assisting or tanking to a bot, see below for detailled explanations)
+
 
 For a full list of commands, use '/t BOTNAME help' or various subcommands e.g. '/t BOTNAME help auction remove'.
 
@@ -29,10 +18,12 @@ Note that these commands work both in whisper and in party chat (assuming the bo
 /t BOTNAME follow reset (resets the bots follow distance to the config default setting. this commmand will be phased out)
 /t BOTNAME follow auto (turns off auto variable follow distance which is ON by default)
 /t BOTNAME follow info (Shows Automatic Follow Distance, toggle status ON or OFF)
-/t BOTNAME combat delay <0-10> (sets the amount of time the bot will wait before engaging your target in combat)
-/t BOTNAME stay
+/t BOTNAME orders delay <0-10> (sets the amount of time the bot will wait before engaging your target or tank's target in combat)
+/t BOTNAME stay   (bot will remain at its current position)
 /t BOTNAME assist (you'll need to be attacking something and the bot only does melee atm)
 /t BOTNAME spells (replies with all spells known to bot)
+/t BOTNAME neutralize (bot will try to neutralize/crowd control its master's target: polymorph, shackle, hibernate...)
+/t BOTNAME pull (bot will try pull it's master's target if it has already tank orders)
 /t BOTNAME cast <SPELLID | (part of) SPELLNAME | [SPELLLINK]>
 /t BOTNAME craft < alchemy | a >                  (List all learnt alchemy [RECIPE]..)
                  < blacksmithing | b >            (List all learnt blacksmith [RECIPE]..)
@@ -207,19 +198,29 @@ Combat Orders explained:
   There are primary and secondary commands which can be combined. In this way it is
   possible to define a bot to assist the main tank and also protect the healer, making
   combat management much easier.
+  There are three levels of combat orders: primary, secondary and resist to a elemental damage school
   The commands assist and protect require a target parameter or a friendly player
   selected by bots master.
   Available Combat Orders:
-    tank        pri     try to bind all targets involved in combat by gaining highest threat
-    assist      pri     do damage on selected targets attacker without getting highest threat
-    heal        pri     concentrate on healing - no offensive spells, try to keep threat low
-    protect     sec     if target of protect get's directly attacked gain higher threat on attacker
-    reset       -       clear out assist and protect targets and set combat order to nothing
+    combat tank         primary     try to bind all targets involved in combat by gaining highest threat
+    combat assist       primary     do damage on selected targets attacker without getting highest threat
+    combat heal         primary     concentrate on healing - no offensive spells, try to keep threat low
+    combat nodispell    secondary   concentrate on healing - no offensive spells, try to keep threat low but will not dispel friendlies
+    combat protect      secondary   if target of protect get's directly attacked gain higher threat on attacker
+    combat passive      primary     bot will not engage combat: no attack or spell cast
+    combat resistfire   secondary   bot will try to equip resist fire equipment and use resist fire spells/auras
+    combat resistfrost  secondary   bot will try to equip resist frost equipment and use resist frost spells/auras
+    combat resistnature secondary   bot will try to equip resist nature equipment and use resist nature spells/auras
+    combat resistshadow secondary   bot will try to equip resist shadow equipment and use resist shadow spells/auras
+
+    combat reset       -       clear out assist and protect targets and set combat order to nothing
   Examples:
-    .bot co TheTank tank
-    .bot co MyHealer heal
-    .bot co TheBrutal assist TheTank
-    .bot co TheBrutal protect MyHealer
+    /t TheTank orders combat tank
+    /t MyHealer orders combat heal
+    /t TheBrutal orders combat assist TheTank
+    /t TheBrutal orders combat protect MyHealer
+    /t TheBrutal orders delay 2
+    /t TheTank orders combat resistfire
 
 Trading with bots:
 ==================
@@ -257,135 +258,3 @@ To use or equip items for your bot say:
 /w BOTNAME e [ITEMLINK1] [ITEMLINK2]
 
 If you inspect your bot, your bot will tell you what items you have in your inventory that you can equip. To create a link in the chat window, hold the shift key and press the left mouse button when clicking the link.
-
-
-Installation:
-=============
-Merge PlayerbotAI code with your favorite core/mods, or simply compile. Follow Mangos Core installation steps.
-
-Copy src/game/playerbot/playerbot.conf.dist.in for configuration variables!
-Install appropriate files from sql/playerbotai
-
-Developers:
-===========
-When updating the playerbot.conf version, keep in mind the following locations (YYYYMMDDVV = Year, Month, Day, Version (version starting at 01, counting up as releases happen on the same day)):
-* src/game/playerbot/config.h
-define PLAYERBOT_CONF_VERSION    YYYYMMDDVV
-* src/game/playerbot/config.h.in
-define PLAYERBOT_CONF_VERSION    YYYYMMDDVV
-* src/game/playerbot/playerbot.conf.dist.in
-ConfVersion=YYYYMMDDVV
-* Of course don't forget to update your server's playerbot.conf.
-
-When updating the sql file(s), keep in mind the following:
-
-=== File Name Description in [sql/playerbotai] folder ===
-
-    FULL_playerbotai_characters_r2_update
-    |    |           |          |  |
-    |    |           |          |  Only if the sql updates a previous sql
-    |    |           |          |
-    |    |           |          Playerbot revision related to sql 
-    |    |           |
-    |    |           |Name of affected DB (default recommended name)
-    |    |
-    |    Playerbot sql file..drrr!
-    |
-    For clean install, just apply this sql
-
-* src/game/playerbot/revision_sql.h
-#define REVISION_DB_PLAYERBOTAI "required_7_playerbotai_quest_autocomplete"
-NOTE: This string should be an exact copy of your SQL file's second field name in the `playerbotai_db_version` table.
-
-BotGuy NPC Menu System
-======================
-
-The new revised'botguy' utilizes NPCs already distributed throughout the world, to allow players to summon and dismiss
-bots at will, from their own account.
-
-This is a revised (more stable) version that utilizes the new 'GOSSIP MENU SYSTEM' to modify the menus of existing 
-NPCs(e.g Trainers etc) to include the bot Recruit/Dismiss menu.(No GameMaster account necessary).
-
-Install (Server administrators only)
-=======
-Please apply 'mangos_botguy.sql' (in sql/playerbotai) once to the world database to update the 'gossip_menu_option' table.
-
-GMGuy Quest Management System
-=============================
-
-There are various reasons why you would wish to use this feature. 
-
-  o - a problematic quest should break the quest chain, thus preventing the user from progressing in the game. 
-
-  o - as a debug tool to quickly progress in the game, for test purposes.
-
-Whatever the reason, this will enable all users to auto-completed selective quests. Only server admin can control which
-quests can be auto-completed. These are stored in the character database (playerbot_quest_data - table) that can be manage
-remotely, while the server is online. Please note that you need to be able to select the quest hlink [HLINK], so you will still
-need to follow the quest chain to complete a particular quest. This is not designed to be a cheat system in anyway.
-
-For admin (only)
-
-Syntax: [Quest Hlink] can be selected ([SHIFT KEY] & Left click with Mouse) from the player/bot quest log. 
-
-  o - gm quest add [Quest Hlink]..
-  o - gm quest del [Quest Hlink].. 
-
-Note: [Quest Hlink].. signifies multiple links
-
-For all users
-
-All quest objectives will be completed automatically, allowing the player/bot to simply turn a particular quest to the
-appropriate quest end point (collect reward). Thus enabling player/bot to continue with the next quest in the chain.
-
-Syntax:
-
-  o - quest complete [Quest Hlink]..
-
-
-                                    ---------------------------------------------------------
-
-ToDo
-====
-
-[DONE] ///---Quest---///
-[DONE] Bot can accept quest.
-[DONE] Bot can join quest.
-
-[DONE] ///---Loot---///
-[DONE] Bot can loot.
-[DONE] Bot can loot --- maybe only needed q item.
-
-//---Instance teleport Problems---///
-[DONE] Needs some fix.
-
-///---Combat and Movement Orders---///
-[DONE] Movement orders (stay, follow)
-[DONE] Combat orders (protect, assist)
-Combat order TANK
-Combat order HEAL
-
-///---Temporary item enchantments---///
-[DONE] Rogue	: Poison
-Warrior	: Sharpening Stone, Rune of Warding, Rune of Shielding.
-
-//---After fear bot's lose target---///
-Needs some fix.
-
-///---Move behind target---///
-[DONE] Rogue	: some abilitys require Rogue to be stealthed and behind target.
-
-///---Implement locale independet way of getting spellIDs---///
-[DONE] Hardcode lowest rank spellID, use function to get highest rank
-
-///---Maintenance on portal repository--- 21/07/2012
-[DONE] git fsck --full
-//cd .git/objects/pack
-[DONE] git gc --aggressive
-[DONE] git verify-pack -v *.idx
-object pack files (*.idx) verified, no errors
-///---Maintenance on portal repository--- 21/07/2012
-
-History:
-========
-This project was ported from a Trinity mod.
