@@ -462,6 +462,12 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
                 Player* const bot = it->second;
+
+                // If player and bot are on different maps: then player was teleported by GameObject
+                // let's return and let playerbot summon do its job by teleporting bots
+                if (bot->GetMap() != m_master->GetMap())
+                    return;
+
                 bot->GetPlayerbotAI()->FollowAutoReset();
                 GameObject *obj = m_master->GetMap()->GetGameObject(objGUID);
                 if (!obj)
