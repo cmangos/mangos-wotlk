@@ -26,6 +26,7 @@ class Player;
 class Unit;
 class Object;
 class Item;
+class PlayerbotClassAI;
 
 typedef std::unordered_map<ObjectGuid, Player*> PlayerBotMap;
 
