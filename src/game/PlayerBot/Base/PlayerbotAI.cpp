@@ -2298,83 +2298,53 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             WorldPacket p(packet); // (8+1+4+1+1+4+4+4+4+4+1)
             ObjectGuid guid;
             uint8 loot_type;
+            uint32 gold;
+            uint8 items;
 
             p >> guid;      // 8 corpse guid
             p >> loot_type; // 1 loot type
+            p >> gold;      // 4 gold
+            p >> items;     // 1 items count
 
-            // Create the loot object and check it exists
-            Loot* loot = sLootMgr.GetLoot(m_bot, guid);
-            if (!loot)
+            if (gold > 0)
             {
-                sLog.outError("PLAYERBOT Debug Error cannot get loot object info in SMSG_LOOT_RESPONSE!");
-                return;
+                WorldPacket* const packet = new WorldPacket(CMSG_LOOT_MONEY, 0);
+                m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(packet)));
             }
 
-            // Pickup money
-            if (loot->GetGoldAmount())
-                loot->SendGold(m_bot);
-
-            // Pick up the items
-            // Get the list of items first and iterate it
-            LootItemList lootList;
-            loot->GetLootItemsListFor(m_bot, lootList);
-
-            bool lootableItemsPresent = false;
-            for (LootItemList::const_iterator lootItr = lootList.begin(); lootItr != lootList.end(); ++lootItr)
+            for (uint8 i = 0; i < items; ++i)
             {
-                LootItem* lootItem = *lootItr;
+            uint32 itemid;
+                uint32 itemcount;
+                uint8 lootslot_type;
+                uint8 itemindex;
 
-                // Skip non lootable items
-                if (lootItem->GetSlotTypeForSharedLoot(m_bot, loot) != LOOT_SLOT_NORMAL)
+                p >> itemindex;         // 1 counter
+                p >> itemid;            // 4 itemid
+                p >> itemcount;         // 4 item stack count
+                p.read_skip<uint32>();  // 4 item model
+                p.read_skip<uint32>();  // 4 randomSuffix
+                p.read_skip<uint32>();  // 4 randomPropertyId
+                p >> lootslot_type;     // 1 LootSlotType
+
+                if (lootslot_type != LOOT_SLOT_NORMAL)
                     continue;
 
-                lootableItemsPresent = true;
-
-                // If bot is skinning or has collect all orders: autostore all items
-                // else bot has order to only loot quest or useful items
-                if (loot_type == LOOT_SKINNING || HasCollectFlag(COLLECT_FLAG_LOOT) || (loot_type == LOOT_CORPSE && (IsInQuestItemList(lootItem->itemId) || IsItemUseful(lootItem->itemId))))
+                // skinning or collect loot flag = just auto loot everything for getting object
+                // corpse = run checks
+                if (loot_type == LOOT_SKINNING || HasCollectFlag(COLLECT_FLAG_LOOT) ||
+                    (loot_type == LOOT_CORPSE && (IsInQuestItemList(itemid) || IsItemUseful(itemid))))
                 {
-                    // item may be blocked by roll system or already looted or another cheating possibility
-                    if (lootItem->isBlocked || lootItem->GetSlotTypeForSharedLoot(m_bot, loot) == MAX_LOOT_SLOT_TYPE)
-                    {
-                        sLog.outError("PLAYERBOT debug Bot %s have no right to loot itemId(%u)", m_bot->GetGuidStr().c_str(), lootItem->itemId);
-                            continue;
-                    }
-
-                    // Try to send the item to bot
-                    InventoryResult result = loot->SendItem(m_bot, lootItem);
-
-                    // If inventory is full: release loot
-                    if (result == EQUIP_ERR_INVENTORY_FULL)
-                    {
-                        loot->Release(m_bot);
-                        return;
-                    }
-
-                    ObjectGuid const& lguid = loot->GetLootGuid();
-
-                    // Check that bot has either equipped or received the item
-                    // then change item's loot state
-                    if (result == EQUIP_ERR_OK && lguid.IsItem())
-                    {
-                        if (Item* item = m_bot->GetItemByGuid(lguid))
-                        item->SetLootState(ITEM_LOOT_CHANGED);
-                    }
+                    WorldPacket* const packet = new WorldPacket(CMSG_AUTOSTORE_LOOT_ITEM, 1);
+                    *packet << itemindex;
+                    m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(packet)));
                 }
             }
 
-            if (!lootableItemsPresent)
-            {
-            // if previous is current, clear
-                if (m_lootPrev == m_lootCurrent)
-                    m_lootPrev = ObjectGuid();
-
-                // clear current target
-                m_lootCurrent = ObjectGuid();
-            }
-
             // release loot
-            loot->Release(m_bot);
+            WorldPacket* const packet = new WorldPacket(CMSG_LOOT_RELEASE, 8);
+            *packet << guid;
+            m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(packet)));
 
             return;
         }
@@ -2927,7 +2897,7 @@ Item* PlayerbotAI::FindConsumable(uint32 displayId) const
 
 static const uint32 uPriorizedManaPotionIds[12] =
 {
-    FEL_MANA_POTION, CRYSTAL_MANA_POTION, SUPER_MANA_POTION, UNSTABLE_MANA_POTION, 
+    FEL_MANA_POTION, CRYSTAL_MANA_POTION, SUPER_MANA_POTION, UNSTABLE_MANA_POTION,
     MAJOR_MANA_POTION, MAJOR_REJUVENATION_POTION, SUPERIOR_MANA_POTION,
     GREATER_MANA_POTION, MANA_POTION, LESSER_MANA_POTION,
     MINOR_MANA_POTION, MINOR_REJUVENATION_POTION
@@ -7929,6 +7899,7 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
     std::ostringstream mout;
     if (item->CanBeTraded() && pProto->Quality == ITEM_QUALITY_POOR) // trash sells automatically.
         autosell = 1;
+
     if (SellWhite == 1) // set this with the command 'sell all'
     {
         // here we'll do some checks for other items that are safe to automatically sell such as
