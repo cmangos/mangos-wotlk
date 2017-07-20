@@ -1,1 +1,1 @@
-#define REVISION_DB_PLAYERBOTAI "required_7_playerbotai_quest_autocomplete"
+#define REVISION_DB_PLAYERBOTAI "characters_playerbot_saved_data_001"
