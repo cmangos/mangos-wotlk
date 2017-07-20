@@ -1389,6 +1389,8 @@ void World::SetInitialWorldSettings()
     // Delete all characters which have been deleted X days before
     Player::DeleteOldCharacters();
 
+    PlayerbotMgr::SetInitialWorldSettings();
+
     sLog.outString("Initialize AuctionHouseBot...");
     sAuctionBot.Initialize();
     sLog.outString();

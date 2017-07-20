@@ -5587,13 +5587,13 @@ void Unit::RemoveNotOwnTrackedTargetAuras(uint32 newPhase)
             {
                 if (!newPhase)
                 {
-                    scTargets.erase(itr);                   // remove for caster in any case
+                    scTargets.erase(itr);                       // remove for caster in any case
 
                     // remove from target if target found
                     if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
                         itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, GetObjectGuid());
 
-                    itr = scTargets.begin();                // list can be changed at remove aura
+                    itr = scTargets.begin();                    // list can be changed at remove aura
                     continue;
                 }
                 else
