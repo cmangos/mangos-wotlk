@@ -54,6 +54,10 @@ class DungeonPersistentState;
 class Spell;
 class Item;
 
+// Playerbot mod
+#include "playerbot/PlayerbotMgr.h"
+#include "playerbot/PlayerbotAI.h"
+
 struct AreaTrigger;
 
 typedef std::deque<Mail*> PlayerMails;
@@ -1443,7 +1447,19 @@ class Player : public Unit
         void AddTimedQuest(uint32 quest_id) { m_timedquests.insert(quest_id); }
         void RemoveTimedQuest(uint32 quest_id) { m_timedquests.erase(quest_id); }
 
-        //! Return collision height sent to client
+        // Playerbot mod
+        PlayerTalentMap GetTalents(uint8 spec) { return m_talents[spec]; }
+        void chompAndTrim(std::string& str);
+        bool getNextQuestId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId);
+        void skill(std::list<uint32>& m_spellsToLearn);
+        void MakeTalentGlyphLink(std::ostringstream &out);
+        bool requiredQuests(const char* pQuestIdString);
+        PlayerMails::reverse_iterator GetMailRBegin() { return m_mail.rbegin();}
+        PlayerMails::reverse_iterator GetMailREnd() { return m_mail.rend();}
+        void UpdateMail();
+        uint32 GetSpec();
+        
+	//! Return collision height sent to client
         float GetCollisionHeight(bool mounted) const;
 
         /*********************************************************/
@@ -2332,6 +2348,16 @@ class Player : public Unit
 
         bool canSeeSpellClickOn(Creature const* creature) const;
 
+        // Playerbot mod:
+        // A Player can either have a playerbotMgr (to manage its bots), or have playerbotAI (if it is a bot), or
+        // neither. Code that enables bots must create the playerbotMgr and set it using SetPlayerbotMgr.
+        void SetPlayerbotAI(PlayerbotAI* ai) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotAI=ai; }
+        PlayerbotAI* GetPlayerbotAI() { return m_playerbotAI; }
+        void SetPlayerbotMgr(PlayerbotMgr* mgr) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotMgr=mgr; }
+        PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr; }
+        void SetBotDeathTimer() { m_deathTimer = 0; }
+        bool IsInDuel() const { return duel && duel->startTime != 0; }
+
         // function used for raise ally spell
         bool IsGhouled() const { return m_isGhouled; }
         void SetGhouled(bool enable) { m_isGhouled = enable; }
@@ -2604,6 +2630,10 @@ class Player : public Unit
 
         GridReference<Player> m_gridRef;
         MapReference m_mapRef;
+
+         // Playerbot mod:
+        PlayerbotAI* m_playerbotAI;
+        PlayerbotMgr* m_playerbotMgr;
 
         // Homebind coordinates
         uint32 m_homebindMapId;
