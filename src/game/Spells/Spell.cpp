@@ -399,6 +399,8 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
 
     m_affectedTargetCount = GetAffectedTargets(m_spellInfo, caster);
 
+    m_scriptValue = 0;
+
     CleanupTargetList();
 }
 
