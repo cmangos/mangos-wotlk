@@ -7535,6 +7535,14 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff) const
             if (target->GetTypeId() != TYPEID_PLAYER || target->IsInWater())
                 return false;
             break;
+        case 39090:                                         // Positive Charge
+            if (!target->HasAura(39091))                    // Only deal damage if target has Negative Charge
+                return false;
+            break;
+        case 39093:                                         // Negative Charge
+            if (!target->HasAura(39088))                    // Only deal damage if target has Positive Charge
+                return false;
+            break;
         case 39921:                                         // Vimgol Pentagram Beam
         {
             if (target->GetTypeId() != TYPEID_UNIT || target->GetEntry() != 23040 || m_caster->GetTypeId() != TYPEID_UNIT || m_caster->GetEntry() != 23040)

@@ -47,6 +47,7 @@
 #include "Tools/Language.h"
 #include "Maps/MapManager.h"
 #include "Loot/LootMgr.h"
+#include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -2091,6 +2092,24 @@ void Aura::TriggerSpell()
                     caster->CastSpell(triggerTarget, trigger_spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
+            case 39088:                                     // Positive Charge
+            case 39091:                                     // Negative Charge
+            {
+                uint32 buffAuraId = auraId == 39088 ? 39089 : 39092;
+                uint32 curCount = 0;
+                std::list<Player*> playerList;
+                GetPlayerListWithEntryInWorld(playerList, target, 10.0f); // official range
+                for (Player* player : playerList)
+                    if (target != player && player->HasAura(auraId))
+                        curCount++;
+
+                target->RemoveAurasDueToSpell(buffAuraId);
+                if (curCount)
+                    for (uint32 i = 0; i < curCount; i++)
+                        target->CastSpell(target, buffAuraId, TRIGGERED_OLD_TRIGGERED);
+
+                break;
+            }
             case 43149:                                     // Claw Rage
             {
                 // Need to provide explicit target for trigger spell target combination
@@ -2720,6 +2739,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 target->CastSpell(target, 36731, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
+            case 39088:                                     // Positive Charge
+                target->RemoveAurasDueToSpell(39089);
+                return;
+            case 39091:                                     // Negative Charge
+                target->RemoveAurasDueToSpell(39092);
+                return;
             case 41099:                                     // Battle Stance
             {
                 // Battle Aura
@@ -5251,6 +5276,9 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                     if (Creature* creature = (Creature*)target)
                         creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, creature, creature);
                 return;
+            case 37670:                                     // Nether Charge Timer
+                target->CastSpell(nullptr, GetSpellProto()->EffectTriggerSpell[m_effIndex], TRIGGERED_OLD_TRIGGERED);
+                break;
             case 42783:                                     // Wrath of the Astrom...
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE && GetEffIndex() + 1 < MAX_EFFECT_INDEX)
                     target->CastSpell(target, GetSpellProto()->CalculateSimpleValue(SpellEffectIndex(GetEffIndex() + 1)), TRIGGERED_OLD_TRIGGERED);

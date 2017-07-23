@@ -1491,6 +1491,35 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastCustomSpell(unitTarget, 37675, &basepoints0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 39096:                                 // Polarity Shift
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(39088);
+                    unitTarget->RemoveAurasDueToSpell(39091);
+
+                    // 39088 39091
+                    switch (m_scriptValue)
+                    {
+                        case 0: // first target random
+                            m_scriptValue = urand(0, 1) ? 39088 : 39091;
+                            unitTarget->CastSpell(unitTarget, m_scriptValue, TRIGGERED_OLD_TRIGGERED);
+                            break;
+                        case 39088: // second target the other
+                            m_scriptValue = 1;
+                            unitTarget->CastSpell(unitTarget, 39091, TRIGGERED_OLD_TRIGGERED);
+                            break;                           
+                        case 39091:
+                            m_scriptValue = 1;
+                            unitTarget->CastSpell(unitTarget, 39088, TRIGGERED_OLD_TRIGGERED);
+                            break;
+                        default: // third and later random
+                            unitTarget->CastSpell(unitTarget, urand(0, 1) ? 39088 : 39091, TRIGGERED_OLD_TRIGGERED);
+                            break;
+                    }
+                    return;
+                }
                 case 39189:                                 // Sha'tari Torch
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)

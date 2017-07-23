@@ -18,10 +18,6 @@ INSERT INTO spell_template(Id, Attributes, AttributesEx,AttributesEx2,Attributes
 ('34817','0','0','0','0','0','101','21','28','44','0','8','0','20078','64','0','1','Summon Summoned Bloodwarder Reservist right of the caster'),
 ('34818','0','0','0','0','0','101','21','28','43','0','8','0','20078','64','0','1','Summon Summoned Bloodwarder Reservist left of the caster'),
 ('34819','0','0','0','0','0','101','21','28','41','0','8','0','20078','64','0','1','Summon Summoned Bloodwarder Reservist front of the caster'),
-('35153','0','0','0','0','0','101','21','28','42','0','8','0','20405','64','0','1','Summon Nether Charge behind of the caster'),
-('35904','0','0','0','0','0','101','21','28','44','0','8','0','20405','64','0','1','Summon Nether Charge right of the caster'),
-('35905','0','0','0','0','0','101','21','28','43','0','8','0','20405','64','0','1','Summon Nether Charge left of the caster'),
-('35906','0','0','0','0','0','101','21','28','41','0','8','0','20405','64','0','1','Summon Nether Charge front of the caster'),
 ('37264','384','0','4','0','0','101','21','28','18','0','7','0','21729','64','0','1','Power Converters: Summon Electromental (from cata)'),
 ('37278','384','0','4','0','0','101','21','28','18','0','1','0','21737','64','0','1','Power Converters: Summon Mini-Electromental (from cata)'),
 ('37365','384','0','4','0','0','101','21','28','18','0','1','0','21757','64','0','1','Power Converters: Summon Big Flavor Electromental (from cata)'),
@@ -154,5 +150,12 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 
 -- Removes aura interrupt flag by sitting for spells that do not make a creature sit, all seem to be copypasted for unknown reasons
 UPDATE spell_template SET AuraInterruptFlags=AuraInterruptFlags&~0x00040000 WHERE Id IN(6606,14915,16093,46765);
+
+-- Mechano-Lord Capacitus - summon spells
+INSERT INTO spell_template(Id,SchoolMask,Attributes,AttributesEx,AttributesEx3,AttributesEx4,DurationIndex,rangeIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectRadiusIndex1,EffectMiscValue1,EffectMiscValueB1,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2) VALUES
+(35153,32,384,136,512,128,18,1,28,1,1,41,13,20405,64,143,'Summon Nether Charge NE',1,1),
+(35904,32,384,136,512,128,18,1,28,1,1,44,13,20405,64,143,'Summon Nether Charge NW',1,1),
+(35905,32,384,136,512,128,18,1,28,1,1,42,13,20405,64,143,'Summon Nether Charge SE',1,1),
+(35906,32,384,136,512,128,18,1,28,1,1,43,13,20405,64,143,'Summon Nether Charge SW',1,1);
 
 

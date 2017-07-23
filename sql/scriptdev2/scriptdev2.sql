@@ -1246,6 +1246,7 @@ UPDATE creature_template SET ScriptName='npc_mist' WHERE entry=3568;
 /*  */
 
 /* THE MECHANAR */
+UPDATE creature_template SET ScriptName='boss_mechano_lord_capacitus' WHERE entry = 19219;
 UPDATE creature_template SET ScriptName='boss_nethermancer_sepethrea' WHERE entry=19221;
 UPDATE creature_template SET ScriptName='boss_pathaleon_the_calculator' WHERE entry=19220;
 UPDATE creature_template SET ScriptName='mob_nether_wraith' WHERE entry=21062;
@@ -4341,12 +4342,12 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 -- -1 554 000 THE MECHANAR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
-(-1554000,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1554001,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1554002,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1554003,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1554004,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1554005,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1554000,'Think you can hurt me, huh? Think I\'m afraid of you?!',11165,1,0,0,'Say on Ability use 1'),
+(-1554001,'Go ahead, gimme your best shot. I can take it!',11166,1,0,0,'Say on Ability use 2'),
+(-1554002,'Bully!',11167,1,0,0, 'Say on Death'),
+(-1554003,'Can\'t say I didn\'t warn you!',11163,1,0,0,'Say on Player Kill 2'),
+(-1554004,'Damn, I\'m good!',11164,1,0,0,'Say on Player Kill 1'),
+(-1554005,'You should split while you can.',11162,1,0,0,'Say on Aggro'),
 (-1554006,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1554007,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1554008,'REUSE_ME',0,0,0,0,'REUSE_ME'),

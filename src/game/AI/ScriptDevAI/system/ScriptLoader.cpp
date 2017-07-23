@@ -456,6 +456,7 @@ extern void AddSC_boss_high_astromancer_solarian();
 extern void AddSC_boss_kaelthas();
 extern void AddSC_boss_void_reaver();
 extern void AddSC_instance_the_eye();
+extern void AddSC_boss_mechano_lord_capacitus();
 extern void AddSC_boss_nethermancer_sepethrea();            // TK, the_mechanar
 extern void AddSC_boss_pathaleon_the_calculator();
 extern void AddSC_instance_mechanar();
@@ -925,7 +926,8 @@ void AddScripts()
     AddSC_boss_kaelthas();
     AddSC_boss_void_reaver();
     AddSC_instance_the_eye();
-    AddSC_boss_nethermancer_sepethrea();                    // TK, the_mechanar
+    AddSC_boss_mechano_lord_capacitus();                    // TK, the_mechanar
+    AddSC_boss_nethermancer_sepethrea();
     AddSC_boss_pathaleon_the_calculator();
     AddSC_instance_mechanar();
 
