@@ -4801,8 +4801,6 @@ void PlayerbotAI::MovementReset()
         if (!m_followTarget)
             return;
 
-        WorldObject* distTarget = m_followTarget;   // target to distance check
-
         // don't follow while in combat
         if (m_bot->isInCombat())
             return;
@@ -4814,16 +4812,12 @@ void PlayerbotAI::MovementReset()
         if (pTarget)
         {
             // check player for follow situations
-            if (pTarget->IsBeingTeleported() || pTarget->IsTaxiFlying())
+            if (pTarget->IsBeingTeleported() || pTarget->IsTaxiFlying() || pTarget->GetCorpse())
                 return;
-
-            // use player's corpse as distance check target
-            if (pTarget->GetCorpse())
-                distTarget = pTarget->GetCorpse();
         }
 
         // is bot too far from the follow target
-        if (!m_bot->IsWithinDistInMap(distTarget, 50))
+        if (!m_bot->IsWithinDistInMap(m_followTarget, 50))
         {
             DoTeleport(*m_followTarget);
             return;
@@ -5117,9 +5111,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             if (!corpse)
                 // DEBUG_LOG ("[PlayerbotAI]: UpdateAI - %s has no corpse!", m_bot->GetName() );
                 return;
-            // teleport ghost from graveyard to corpse
-            // DEBUG_LOG ("[PlayerbotAI]: UpdateAI - Teleport %s to corpse...", m_bot->GetName() );
-            DoTeleport(*corpse);
+
             // check if we are allowed to resurrect now
             time_t resurrect_time = corpse->GetGhostTime() + m_bot->GetCorpseReclaimDelay(corpse->GetType() == CORPSE_RESURRECTABLE_PVP);
             if (resurrect_time > CurrentTime())
