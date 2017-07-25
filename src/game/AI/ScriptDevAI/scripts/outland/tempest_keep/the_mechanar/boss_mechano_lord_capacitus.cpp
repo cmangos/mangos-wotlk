@@ -106,7 +106,7 @@ struct boss_mechano_lord_capacitusAI : public ScriptedAI
         m_creature->GetPosition(x, y, z); // do some urand radius shenanigans to spawn it further and make it walk to go using doing X and Y yourself and using function in MAP to get proper Z
         float xR = x + urand(0, 35), yR = y + urand(0, 35), zR = z;
         // m_creature->GetMap()->GetReachableRandomPointOnGround(x, y, z, 10.0f); // get position to which spectre will walk
-        m_creature->GetMap()->GetHeightInRange(xR, yR, zR);
+        m_creature->GetMap()->GetHeightInRange(m_creature->GetPhaseMask(), xR, yR, zR);
         creature->GetMotionMaster()->MovePoint(1, xR, yR, zR);
     }
 
