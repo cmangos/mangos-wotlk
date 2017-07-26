@@ -37,9 +37,9 @@ bool GOUse_go_main_chambers_access_panel(Player* /*pPlayer*/, GameObject* pGo)
     if (!pInstance)
         return true;
 
-    if (pGo->GetEntry() == GO_ACCESS_PANEL_HYDRO)
+    if (pGo->GetEntry() == GO_ACCESS_PANEL_HYDRO && pInstance->GetData(TYPE_HYDROMANCER_THESPIA) != SPECIAL)
         pInstance->SetData(TYPE_HYDROMANCER_THESPIA, SPECIAL);
-    else if (pGo->GetEntry() == GO_ACCESS_PANEL_MEK)
+    else if (pGo->GetEntry() == GO_ACCESS_PANEL_MEK && pInstance->GetData(TYPE_MEKGINEER_STEAMRIGGER) != SPECIAL)
         pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, SPECIAL);
 
     return false;
