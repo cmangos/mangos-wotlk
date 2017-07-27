@@ -168,3 +168,8 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 ('29327', '0', '0', '0', '320', '268435456', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '6', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '23', '0', '0', '1000', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '29328', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Sapphiron\'s Wing Buffet', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0');
 
 
+-- Missing Elemental Shield spell from Classic (BWL)
+INSERT INTO `spell_template` (`Id`, `Attributes`, `AttributesEx`, `AttributesEx3`, `AttributesEx4`, `CastingTimeIndex`, `ProcChance`, `DurationIndex`, `rangeIndex`, `Effect1`, `EffectDieSides1`, `EffectBaseDice1`, `EffectImplicitTargetA1`, `EffectRadiusIndex1`, `EffectMiscValue1`, `SpellIconID`, `SpellName`, `DmgMultiplier1`, `DmgMultiplier2`) VALUES 
+(22276, 272, 0, 0, 0, 1, 101, 0, 1, 3, 1, 1, 1, 0, 0, 459, 'Elemental Shield', 1, 0);
+
+
