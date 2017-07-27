@@ -45,7 +45,7 @@ enum
     SPELL_BROODAF_GREEN         = 23169,                    // Brood Affliction Green 23169
 
     SPELL_CHROMATIC_MUT_1       = 23174,                    // Spell cast on player if they get all 5 debuffs
-    SPELL_ELEMENTAL_SHIELD      = 22276,
+    SPELL_ELEMENTAL_SHIELD_BWL  = 22276,
     SPELL_FRENZY                = 28371,                    // The frenzy spell may be wrong
     SPELL_ENRAGE                = 28747
 };
@@ -120,7 +120,7 @@ struct boss_chromaggusAI : public ScriptedAI
         // Shimmer Timer Timer
         if (m_uiShimmerTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_ELEMENTAL_SHIELD) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature, SPELL_ELEMENTAL_SHIELD_BWL) == CAST_OK)
             {
                 DoScriptText(EMOTE_SHIMMER, m_creature);
                 m_uiShimmerTimer = 45000;
