@@ -15,6 +15,9 @@ enum
 
     NPC_ONYXIA_WHELP            = 11262,
     NPC_ONYXIA_TRIGGER          = 12758,
+    NPC_ONYXIAN_WARDER          = 12129,
+
+    GO_WHELP_SPAWNER            = 176510,
 
     // Achievement Related
     TIME_LIMIT_MANY_WHELPS      = 10,                       // 10s timeframe to kill 50 whelps after liftoff
@@ -39,6 +42,9 @@ class instance_onyxias_lair : public ScriptedInstance
         bool IsEncounterInProgress() const override;
 
         void OnCreatureCreate(Creature* pCreature) override;
+        void OnCreatureDeath(Creature* pCreature) override;
+
+        void OnObjectCreate(GameObject* pGo) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
 
@@ -48,6 +54,7 @@ class instance_onyxias_lair : public ScriptedInstance
         uint32 m_uiEncounter;
         uint32 m_uiAchievWhelpsCount;
 
+        GuidList m_lWarderGUIDList;
         time_t m_tPhaseTwoStart;
 };
 

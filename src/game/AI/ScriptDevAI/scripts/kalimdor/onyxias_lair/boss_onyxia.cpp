@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Onyxia
 SD%Complete: 85
-SDComment: Phase 3 need additional code. The spawning Whelps need GO-Support.
+SDComment: Some visual improvements needed in phase 2: first part of lift off, flying animation while hoovering, visual when landing. Quel'Serrar event is missing.
 SDCategory: Onyxia's Lair
 EndScriptData */
 
@@ -31,6 +31,7 @@ enum
     SAY_PHASE_2_TRANS           = -1249002,
     SAY_PHASE_3_TRANS           = -1249003,
     EMOTE_BREATH                = -1249004,
+    SAY_KITE                    = -1249005,
 
     SPELL_WINGBUFFET            = 18500,
     SPELL_WINGBUFFET_H          = 69293,
@@ -66,6 +67,8 @@ enum
     SPELL_SUMMONWHELP           = 17646,                    // TODO this spell is only a summon spell, but would need a spell to activate the eggs
     SPELL_SUMMON_LAIR_GUARD     = 68968,
 
+    // SPELL_SUMMON_ONYXIAN_WHELPS = 20171,                    // Periodic spell triggering SPELL_SUMMON_ONYXIAN_WHELP every 2 secs. Possibly used in Phase 2 for summoning whelps but data like duration or caster are unkown
+    // SPELL_SUMMON_ONYXIAN_WHELP  = 20172,                    // Triggered by SPELL_SUMMON_ONYXIAN_WHELPS
     MAX_WHELPS_PER_PACK         = 40,
 
     POINT_ID_NORTH              = 0,
@@ -142,6 +145,7 @@ struct boss_onyxiaAI : public ScriptedAI
     uint8 m_uiSummonCount;
 
     bool m_bIsSummoningWhelps;
+    bool m_bHasYelledLured;
 
     uint32 m_uiPhaseTimer;
 
@@ -158,18 +162,20 @@ struct boss_onyxiaAI : public ScriptedAI
         m_uiWingBuffetTimer = urand(10000, 20000);
         m_uiCheckInLairTimer = 3000;
 
+        m_uiBellowingRoarTimer = 30000;
+
         m_uiMovePoint = POINT_ID_NORTH;                     // First point reached by the flying Onyxia
         m_uiMovementTimer = 25000;
 
         m_uiFireballTimer = 1000;
         m_uiSummonWhelpsTimer = 60000;
-        m_uiBellowingRoarTimer = 30000;
         m_uiWhelpTimer = 1000;
         m_uiSummonGuardTimer = 15000;
 
         m_uiSummonCount = 0;
 
         m_bIsSummoningWhelps = false;
+        m_bHasYelledLured = false;
 
         m_uiPhaseTimer = 0;
     }
@@ -312,7 +318,7 @@ struct boss_onyxiaAI : public ScriptedAI
                 if (m_uiBellowingRoarTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_BELLOWINGROAR) == CAST_OK)
-                        m_uiBellowingRoarTimer = 30000;
+                        m_uiBellowingRoarTimer = urand(15000, 45000);
                 }
                 else
                     m_uiBellowingRoarTimer -= uiDiff;
@@ -357,7 +363,16 @@ struct boss_onyxiaAI : public ScriptedAI
                     {
                         Creature* pOnyTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_ONYXIA_TRIGGER);
                         if (pOnyTrigger && !m_creature->IsWithinDistInMap(pOnyTrigger, 90.0f, false))
+                        {
+                            if (!m_bHasYelledLured)
+                            {
+                                m_bHasYelledLured = true;
+                                DoScriptText(SAY_KITE, m_creature);
+                            }
                             DoCastSpellIfCan(m_creature, SPELL_BREATH_ENTRANCE);
+                        }
+                        else
+                            m_bHasYelledLured = false;
                     }
                     m_uiCheckInLairTimer = 3000;
                 }
