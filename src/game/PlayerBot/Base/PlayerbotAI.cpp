@@ -2428,7 +2428,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     {
                         if (GetManager()->m_confDebugWhisper)
                             TellMaster("I can't take item; my inventory is full.");
-                        m_lootCurrent = ObjectGuid();
+                        m_inventory_full = true;
                         continue;
                     }
 
@@ -2439,6 +2439,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             }
 
             // release loot
+            m_lootPrev = m_lootCurrent;
+            m_lootCurrent = ObjectGuid();
             WorldPacket* const packet = new WorldPacket(CMSG_LOOT_RELEASE, 8);
             *packet << guid;
             m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(packet)));
@@ -2453,9 +2455,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
             p >> guid;
 
-            if (guid == m_lootCurrent)
+            if (guid == m_lootPrev)
             {
-                Creature* c = m_bot->GetMap()->GetCreature(m_lootCurrent);
+                Creature* c = m_bot->GetMap()->GetCreature(m_lootPrev);
 
                 if (c && c->GetCreatureInfo()->SkinningLootId && c->GetLootStatus() != CREATURE_LOOT_STATUS_LOOTED)
                 {
@@ -2470,23 +2472,18 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         uint32 reqSkillValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel - 10) * 10 : targetLevel * 5;
                         if (skillValue >= reqSkillValue)
                         {
-                            if (m_lootCurrent != m_lootPrev)    // if this wasn't previous loot try again
-                            {
-                                m_lootPrev = m_lootCurrent;
-                                SetIgnoreUpdateTime(3);
-                                return; // so that the DoLoot function is called again to get skin
-                            }
+                            m_lootCurrent = m_lootPrev;
+                            if (GetManager()->m_confDebugWhisper)
+                                TellMaster("I will try to skin next loot attempt.");
+
+                            SetIgnoreUpdateTime(1);
+                            return; // so that the DoLoot function is called again to get skin
                         }
                         else
                             TellMaster("My skill is %u but it requires %u", skillValue, reqSkillValue);
                     }
                 }
 
-                // if previous is current, clear
-                if (m_lootPrev == m_lootCurrent)
-                    m_lootPrev = ObjectGuid();
-                // clear current target
-                m_lootCurrent = ObjectGuid();
                 // clear movement
                 m_bot->GetMotionMaster()->Clear(false);
                 m_bot->GetMotionMaster()->MoveIdle();
@@ -3213,6 +3210,10 @@ void PlayerbotAI::Attack(Unit* forcedTarget)
         return;
 
     m_bot->Attack(m_targetCombat, true);
+
+    // add thingToAttack to loot list to loot after combat
+    if (HasCollectFlag(COLLECT_FLAG_COMBAT))
+        m_lootTargets.push_back(m_targetCombat->GetObjectGuid());
 }
 
 // intelligently sets a reasonable combat order for this bot
