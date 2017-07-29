@@ -1125,7 +1125,7 @@ struct npc_jennyAI : public FollowerAI
     {
         if (!m_bFollowStarted)
         {
-            if (Player* pSummoner = m_creature->GetCharmerOrOwnerPlayerOrPlayerItself())
+            if (Player* pSummoner = m_creature->GetBeneficiaryPlayer())
             {
                 StartFollow(pSummoner, pSummoner->getFaction(), GetQuestTemplateStore(QUEST_ID_LOADER_UP));
 

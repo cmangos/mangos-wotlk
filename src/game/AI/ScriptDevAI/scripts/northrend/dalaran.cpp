@@ -60,7 +60,7 @@ struct npc_dalaran_guardian_mageAI : public ScriptedAI
 
             if (m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
             {
-                if (Player* pPlayer = pWho->GetCharmerOrOwnerPlayerOrPlayerItself())
+                if (Player* pPlayer = pWho->GetBeneficiaryPlayer())
                 {
                     // it's mentioned that pet may also be teleported, if so, we need to tune script to apply to those in addition.
 

@@ -771,7 +771,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         SetInCombatWith(pVictim);
         pVictim->SetInCombatWith(this);
 
-        if (Player* attackedPlayer = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself())
+        if (Player* attackedPlayer = pVictim->GetBeneficiaryPlayer())
             SetContestedPvP(attackedPlayer);
     }
 
@@ -807,7 +807,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
          *                      Preparation: Who gets credit for killing whom, invoke SpiritOfRedemtion?
          */
         // for loot will be used only if group_tap == nullptr
-        Player* player_tap = GetCharmerOrOwnerPlayerOrPlayerItself();
+        Player* player_tap = GetBeneficiaryPlayer();
         Group* group_tap = nullptr;
 
         // in creature kill case group/player tap stored for creature
@@ -1141,7 +1141,7 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
         victim->AI()->JustDied(this);
 
     // Inform Owner
-    Unit* pOwner = victim->GetCharmerOrOwner();
+    Unit* pOwner = victim->GetMaster();
     if (victim->IsTemporarySummon())
     {
         TemporarySummon* pSummon = (TemporarySummon*)victim;
@@ -1174,7 +1174,7 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
     if (victim->GetInstanceId())
     {
         Map* m = victim->GetMap();
-        Player* creditedPlayer = GetCharmerOrOwnerPlayerOrPlayerItself();
+        Player* creditedPlayer = GetBeneficiaryPlayer();
         // TODO: do instance binding anyway if the charmer/owner is offline
 
         if (m->IsDungeon() && creditedPlayer)
@@ -2922,7 +2922,7 @@ bool Unit::CanCrush() const
     // Generally, only npcs and npc-controlled players/units are eligible to deal crushing blows
     if (GetTypeId() == TYPEID_PLAYER || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
         return GetCharmerGuid().IsCreature();
-    return !GetCharmerOrOwnerGuid().IsPlayer();
+    return !GetMasterGuid().IsPlayer();
 }
 
 bool Unit::CanGlance() const
@@ -3047,12 +3047,12 @@ bool Unit::CanCrushInCombat() const
 
 bool Unit::CanCrushInCombat(const Unit *victim) const
 {
-    return (victim && CanCrushInCombat() && victim->GetCharmerOrOwnerOrOwnGuid().IsPlayer());
+    return (victim && CanCrushInCombat() && victim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE));
 }
 
 bool Unit::CanGlanceInCombat(const Unit *victim) const
 {
-    return (victim && CanGlanceInCombat() && victim->GetCharmerOrOwnerOrOwnGuid().IsCreature() && victim->GetLevelForTarget(this) > 10);
+    return (victim && CanGlanceInCombat() && !victim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && victim->GetLevelForTarget(this) > 10);
 }
 
 bool Unit::CanDazeInCombat(const Unit *victim) const
@@ -4158,7 +4158,7 @@ float Unit::CalculateEffectiveMagicResistancePercent(const Unit *attacker, Spell
     const uint32 skill = std::max(attacker->GetMaxSkillValueForLevel(this), uint16(100));
     float percent = float(float(resistance) / (float(skill) + resistance)) * 100;
     // Bonus resistance by level difference when calculating damage hit for NPCs only
-    if (!binary && GetTypeId() == TYPEID_UNIT && GetCharmerOrOwnerOrOwnGuid().IsCreature())
+    if (!binary && GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
         percent += (0.4f * std::max(int32(GetMaxSkillValueForLevel(attacker) - skill), 0));
     // Magic resistance percentage cap
     const float cap = 100.0f; // Post-WotLK: effectively no artifical hard cap
@@ -6382,8 +6382,10 @@ bool Unit::IsHostileTo(Unit const* unit) const
         return true;
 
     // test pet/charm masters instead pers/charmeds
-    Unit const* testerOwner = GetCharmerOrOwner();
-    Unit const* targetOwner = unit->GetCharmerOrOwner();
+    const Unit* testerCharmer = GetCharmer();
+    const Unit* testerOwner = testerCharmer ? testerCharmer : GetOwner(true);
+    const Unit* targetCharmer = unit->GetCharmer();
+    const Unit* targetOwner = targetCharmer ? targetCharmer : unit->GetOwner(true);
 
     // always hostile to owner's enemy
     if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
@@ -6494,8 +6496,10 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
         return false;
 
     // test pet/charm masters instead pers/charmeds
-    Unit const* testerOwner = GetCharmerOrOwner();
-    Unit const* targetOwner = unit->GetCharmerOrOwner();
+    const Unit* testerCharmer = GetCharmer();
+    const Unit* testerOwner = testerCharmer ? testerCharmer : GetOwner(true);
+    const Unit* targetCharmer = unit->GetCharmer();
+    const Unit* targetOwner = targetCharmer ? targetCharmer : unit->GetOwner(true);
 
     // always non-friendly to owner's enemy
     if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
@@ -6902,44 +6906,78 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
     }
 }
 
-Unit* Unit::GetOwner() const
+ObjectGuid const& Unit::GetMasterGuid() const
 {
-    if (ObjectGuid ownerid = GetOwnerGuid())
-        return ObjectAccessor::GetUnit(*this, ownerid);
+    ObjectGuid const& guid = GetCharmerGuid();
+    return (guid ? guid : GetOwnerGuid());
+}
+
+Unit* Unit::GetOwner(bool recursive /*= false*/) const
+{
+    // Default, creator field as owner is present in everything: totems, pets, guardians, etc
+    Unit* owner = GetCreator();
+    // Query owner recursively (ascending)
+    if (recursive)
+    {
+        while (Unit* grandowner = (owner ? owner->GetOwner() : nullptr))
+            owner = grandowner;
+    }
+    return owner;
+}
+
+Unit* Unit::GetMaster() const
+{
+    Unit* charmer = GetCharmer();
+    return (charmer ? charmer : GetOwner());
+}
+
+Unit const* Unit::GetBeneficiary() const
+{
+    Unit const* master = GetMaster();
+    return (master ? master : this);
+}
+
+Unit* Unit::GetBeneficiary()
+{
+    Unit* master = GetMaster();
+    return (master ? master : this);
+}
+
+Player const* Unit::GetBeneficiaryPlayer() const
+{
+    Unit const* beneficiary = GetBeneficiary();
+    if (beneficiary)
+        return (beneficiary->GetTypeId() == TYPEID_PLAYER ? static_cast<Player const*>(beneficiary) : nullptr);
+    return (GetTypeId() == TYPEID_PLAYER ? static_cast<Player const*>(this) : nullptr);
+}
+
+Player* Unit::GetBeneficiaryPlayer()
+{
+    Unit* beneficiary = GetBeneficiary();
+    if (beneficiary)
+        return (beneficiary->GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(beneficiary) : nullptr);
+    return (GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this) : nullptr);
+}
+
+Unit* Unit::GetSummoner() const
+{
+    if (ObjectGuid const& guid = GetSummonerGuid())
+        return ObjectAccessor::GetUnit(*this, guid);
+    return nullptr;
+}
+
+Unit* Unit::GetCreator() const
+{
+    if (ObjectGuid const& guid = GetCreatorGuid())
+        return ObjectAccessor::GetUnit(*this, guid);
     return nullptr;
 }
 
 Unit* Unit::GetCharmer() const
 {
-    if (ObjectGuid charmerid = GetCharmerGuid())
-        return ObjectAccessor::GetUnit(*this, charmerid);
+    if (ObjectGuid const& guid = GetCharmerGuid())
+        return ObjectAccessor::GetUnit(*this, guid);
     return nullptr;
-}
-
-bool Unit::IsCharmerOrOwnerPlayerOrPlayerItself() const
-{
-    if (GetTypeId() == TYPEID_PLAYER)
-        return true;
-
-    return GetCharmerOrOwnerGuid().IsPlayer();
-}
-
-Player* Unit::GetCharmerOrOwnerPlayerOrPlayerItself()
-{
-    ObjectGuid guid = GetCharmerOrOwnerGuid();
-    if (guid.IsPlayer())
-        return ObjectAccessor::FindPlayer(guid);
-
-    return GetTypeId() == TYPEID_PLAYER ? (Player*)this : nullptr;
-}
-
-Player const* Unit::GetCharmerOrOwnerPlayerOrPlayerItself() const
-{
-    ObjectGuid guid = GetCharmerOrOwnerGuid();
-    if (guid.IsPlayer())
-        return ObjectAccessor::FindPlayer(guid);
-
-    return GetTypeId() == TYPEID_PLAYER ? (Player const*)this : nullptr;
 }
 
 Pet* Unit::GetPet() const
@@ -8594,7 +8632,7 @@ void Unit::Unmount(bool from_aura)
 
 void Unit::SetInCombatWith(Unit* enemy)
 {
-    Unit* eOwner = enemy->GetCharmerOrOwnerOrSelf();
+    Unit* eOwner = enemy->GetBeneficiary();
     if (eOwner->IsPvP())
     {
         SetInCombatState(true, enemy);
@@ -8604,7 +8642,7 @@ void Unit::SetInCombatWith(Unit* enemy)
     // check for duel
     if (eOwner->GetTypeId() == TYPEID_PLAYER && ((Player*)eOwner)->duel)
     {
-        if (Player const* myOwner = GetCharmerOrOwnerPlayerOrPlayerItself())
+        if (Player const* myOwner = GetBeneficiaryPlayer())
         {
             if (myOwner->IsInDuelWith((Player const*)eOwner))
             {
@@ -8828,7 +8866,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     }
 
     // always seen by owner
-    if (GetCharmerOrOwnerGuid() == u->GetObjectGuid())
+    if (GetMasterGuid() == u->GetObjectGuid())
         return true;
 
     // isInvisibleForAlive() those units can only be seen by dead or if other
@@ -9850,8 +9888,8 @@ void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, U
     if (limitduration > 0 && duration > limitduration)
     {
         // test pet/charm masters instead pets/charmeds
-        Unit const* targetOwner = GetCharmerOrOwner();
-        Unit const* casterOwner = caster->GetCharmerOrOwner();
+        Unit const* targetOwner = GetMaster();
+        Unit const* casterOwner = caster->GetMaster();
 
         Unit const* target = targetOwner ? targetOwner : this;
         Unit const* source = casterOwner ? casterOwner : caster;
@@ -11085,7 +11123,7 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
     if (!state || !(state & filter) || (state & ~filter))
         return;
 
-    Player* controller = GetCharmerOrOwnerPlayerOrPlayerItself();
+    Player* controller = GetBeneficiaryPlayer();
     const bool control = controller ? controller->IsClientControl(this) : false;
     const bool movement = (state != UNIT_FLAG_STUNNED);
     const bool stun = !!(state & UNIT_FLAG_STUNNED);
@@ -11541,7 +11579,7 @@ Aura* Unit::GetDummyAura(uint32 spell_id) const
 
 void Unit::SetContestedPvP(Player* attackedPlayer)
 {
-    Player* player = GetCharmerOrOwnerPlayerOrPlayerItself();
+    Player* player = GetBeneficiaryPlayer();
 
     if (!player || (attackedPlayer && (attackedPlayer == player || player->IsInDuelWith(attackedPlayer))))
         return;
@@ -11939,12 +11977,12 @@ bool Unit::IsAllowedDamageInArea(Unit* pVictim) const
         return true;
 
     // non player controlled unit can damage anywhere
-    Player const* pOwner = GetCharmerOrOwnerPlayerOrPlayerItself();
+    Player const* pOwner = GetBeneficiaryPlayer();
     if (!pOwner)
         return true;
 
     // can damage non player controlled victim anywhere
-    Player const* vOwner = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
+    Player const* vOwner = pVictim->GetBeneficiaryPlayer();
     if (!vOwner)
         return true;
 

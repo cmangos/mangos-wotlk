@@ -1089,7 +1089,7 @@ struct npc_eye_of_acherusAI : public ScriptedAI
         switch (m_phase)
         {
             case 0: // initialization > move to start position
-                if (Player* player = m_creature->GetCharmerOrOwnerPlayerOrPlayerItself())
+                if (Player* player = m_creature->GetBeneficiaryPlayer())
                 {
                     m_creature->SetPhaseMask(2, true);              // HACK remove when summon spells and auras are implemented properly in mangos
                     m_creature->SetDisplayId(26320);                // HACK remove when correct modelid will be taken by core
@@ -1112,7 +1112,7 @@ struct npc_eye_of_acherusAI : public ScriptedAI
 
                 if (m_timer < uiDiff)
                 {
-                    Player* player = m_creature->GetCharmerOrOwnerPlayerOrPlayerItself();
+                    Player* player = m_creature->GetBeneficiaryPlayer();
                     if (!player)
                         return;
 
@@ -1136,7 +1136,7 @@ struct npc_eye_of_acherusAI : public ScriptedAI
                 if (!m_reachPoint)
                     return;
 
-                if (Player* pPlayer = m_creature->GetCharmerOrOwnerPlayerOrPlayerItself())
+                if (Player* pPlayer = m_creature->GetBeneficiaryPlayer())
                     DoScriptText(EMOTE_CONTROL, m_creature, pPlayer);
 
                 if (m_creature->m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING))
@@ -1228,7 +1228,7 @@ struct npc_scarlet_ghoulAI : public ScriptedPetAI
     {
         if (!m_bDidInitText)
         {
-            Unit* pOwner = m_creature->GetCharmerOrOwner();
+            Unit* pOwner = m_creature->GetMaster();
             DoScriptText(SAY_GHUL_SPAWN_1 - urand(0, 4), m_creature, pOwner);
 
             m_bDidInitText = true;

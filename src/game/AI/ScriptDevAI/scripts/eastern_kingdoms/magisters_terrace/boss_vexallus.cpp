@@ -208,7 +208,7 @@ struct mob_pure_energyAI : public ScriptedAI
                 if (!pVex || !pVex->isAlive())
                     return;
 
-                if (Player* pPlayer = pKiller->GetCharmerOrOwnerPlayerOrPlayerItself())
+                if (Player* pPlayer = pKiller->GetBeneficiaryPlayer())
                     pPlayer->CastSpell(pPlayer, SPELL_ENERGY_FEEDBACK, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pVex->GetObjectGuid());
             }
         }

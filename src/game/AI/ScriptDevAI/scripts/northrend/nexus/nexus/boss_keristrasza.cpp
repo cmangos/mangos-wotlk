@@ -168,7 +168,7 @@ struct boss_keristraszaAI : public ScriptedAI
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
                     {
-                        if (Player* pPlayer = pTarget->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        if (Player* pPlayer = pTarget->GetBeneficiaryPlayer())
                             DoCastSpellIfCan(pPlayer, SPELL_CRYSTAL_CHAINS);
 
                         uiCrystalChainTimer = 30000;
@@ -180,7 +180,7 @@ struct boss_keristraszaAI : public ScriptedAI
                     {
                         uiCrystalChainTimer = 15000;
 
-                        Player* pPlayer = pSource->GetCharmerOrOwnerPlayerOrPlayerItself();
+                        Player* pPlayer = pSource->GetBeneficiaryPlayer();
 
                         if (!pPlayer)
                             return;

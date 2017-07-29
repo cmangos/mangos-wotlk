@@ -210,7 +210,7 @@ struct mob_enslaved_netherwing_drakeAI : public ScriptedAI
     {
         if (pSpell->Id == SPELL_HIT_FORCE_OF_NELTHARAKU && !m_uiFlyTimer)
         {
-            if (Player* pPlayer = pCaster->GetCharmerOrOwnerPlayerOrPlayerItself())
+            if (Player* pPlayer = pCaster->GetBeneficiaryPlayer())
             {
                 m_uiFlyTimer = 2500;
                 m_playerGuid = pPlayer->GetObjectGuid();
@@ -879,7 +879,7 @@ struct mob_torlothAI : public ScriptedAI
 
     void JustDied(Unit* pKiller) override
     {
-        if (Player* pPlayer = pKiller->GetCharmerOrOwnerPlayerOrPlayerItself())
+        if (Player* pPlayer = pKiller->GetBeneficiaryPlayer())
         {
             pPlayer->GroupEventHappens(QUEST_BATTLE_OF_THE_CRIMSON_WATCH, m_creature);
 

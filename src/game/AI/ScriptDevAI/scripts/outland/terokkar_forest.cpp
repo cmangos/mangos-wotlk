@@ -164,7 +164,7 @@ struct mob_netherweb_victimAI : public ScriptedAI
 
     void JustDied(Unit* pKiller) override
     {
-        if (Player* pPlayer = pKiller->GetCharmerOrOwnerPlayerOrPlayerItself())
+        if (Player* pPlayer = pKiller->GetBeneficiaryPlayer())
         {
             if (pPlayer->GetQuestStatus(QUEST_TAKEN_IN_NIGHT) == QUEST_STATUS_INCOMPLETE)
             {

@@ -51,7 +51,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
         return;
     }
 
-    if (_player->GetObjectGuid() != petUnit->GetCharmerOrOwnerGuid())
+    if (_player->GetObjectGuid() != petUnit->GetMasterGuid())
     {
         sLog.outError("HandlePetAction: %s isn't controlled by %s.", petGuid.GetString().c_str(), _player->GetGuidStr().c_str());
         return;
@@ -310,7 +310,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     if (unit_target2->GetTypeId() == TYPEID_PLAYER)
                         petUnit->SendCreateUpdateToPlayer((Player*)unit_target2);
                 }
-                if (Unit* powner = petUnit->GetCharmerOrOwner())
+                if (Unit* powner = petUnit->GetMaster())
                     if (powner->GetTypeId() == TYPEID_PLAYER)
                         petUnit->SendCreateUpdateToPlayer((Player*)powner);
                 result = SPELL_CAST_OK;
@@ -332,7 +332,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     Spell::SendCastResult(GetPlayer(), spellInfo, 0, result);
                 else
                 {
-                    Unit* owner = petUnit->GetCharmerOrOwner();
+                    Unit* owner = petUnit->GetMaster();
                     if (owner && owner->GetTypeId() == TYPEID_PLAYER)
                         Spell::SendCastResult((Player*)owner, spellInfo, 0, result, true);
                 }
@@ -365,7 +365,7 @@ void WorldSession::HandlePetStopAttack(WorldPacket& recv_data)
         return;
     }
 
-    if (_player->GetObjectGuid() != pet->GetCharmerOrOwnerGuid())
+    if (_player->GetObjectGuid() != pet->GetMasterGuid())
     {
         sLog.outError("HandlePetStopAttack: %s isn't charm/pet of %s.", petGuid.GetString().c_str(), _player->GetGuidStr().c_str());
         return;
@@ -780,7 +780,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     }
     else
     {
-        Unit* owner = petUnit->GetCharmerOrOwner();
+        Unit* owner = petUnit->GetMaster();
         if (owner && owner->GetTypeId() == TYPEID_PLAYER && !triggeredByAura)
             Spell::SendCastResult((Player*)owner, spellInfo, 0, result, true);
 

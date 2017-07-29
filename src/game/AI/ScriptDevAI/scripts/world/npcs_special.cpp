@@ -1313,7 +1313,7 @@ struct npc_spring_rabbitAI : public ScriptedPetAI
                     // no break here
                 case 5:
                     // Let owner cast achievement related spell
-                    if (Unit* pOwner = m_creature->GetCharmerOrOwner())
+                    if (Unit* pOwner = m_creature->GetMaster())
                         pOwner->CastSpell(pOwner, SPELL_SPRING_FLING, TRIGGERED_OLD_TRIGGERED);
 
                     m_uiStep = 6;

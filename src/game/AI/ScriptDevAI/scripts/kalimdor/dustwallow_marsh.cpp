@@ -78,7 +78,7 @@ struct mobs_risen_husk_spiritAI : public ScriptedAI
         if (uiDamage < m_creature->GetHealth())
             return;
 
-        if (Player* pPlayer = pDoneBy->GetCharmerOrOwnerPlayerOrPlayerItself())
+        if (Player* pPlayer = pDoneBy->GetBeneficiaryPlayer())
         {
             if (pPlayer->GetQuestStatus(QUEST_WHATS_HAUNTING_WITCH_HILL) == QUEST_STATUS_INCOMPLETE)
             {
@@ -646,7 +646,7 @@ struct npc_private_hendelAI : public ScriptedAI
         {
             uiDamage = 0;
 
-            if (Player* pPlayer = pDoneBy->GetCharmerOrOwnerPlayerOrPlayerItself())
+            if (Player* pPlayer = pDoneBy->GetBeneficiaryPlayer())
                 pPlayer->GroupEventHappens(QUEST_MISSING_DIPLO_PT16, m_creature);
 
             DoScriptText(EMOTE_SURRENDER, m_creature);

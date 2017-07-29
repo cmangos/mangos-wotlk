@@ -318,7 +318,7 @@ struct boss_flame_leviathanAI : public ScriptedAI
         {
             m_creature->FixateTarget(pTarget);
 
-            if (Player* pPlayer = pTarget->GetCharmerOrOwnerPlayerOrPlayerItself())
+            if (Player* pPlayer = pTarget->GetBeneficiaryPlayer())
                 DoScriptText(EMOTE_PURSUE, m_creature, pPlayer);
         }
     }

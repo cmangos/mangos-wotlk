@@ -87,7 +87,7 @@ bool Corpse::Create(uint32 guidlow, Player* owner)
     }
 
     SetObjectScale(DEFAULT_OBJECT_SCALE);
-    SetGuidValue(CORPSE_FIELD_OWNER, owner->GetObjectGuid());
+    SetOwnerGuid(owner->GetObjectGuid());
 
     m_grid = MaNGOS::ComputeGridPair(GetPositionX(), GetPositionY());
 
@@ -185,7 +185,7 @@ bool Corpse::LoadFromDB(uint32 lowguid, Field* fields)
 
     // overwrite possible wrong/corrupted guid
     SetGuidValue(OBJECT_FIELD_GUID, guid);
-    SetGuidValue(CORPSE_FIELD_OWNER, playerGuid);
+    SetOwnerGuid(playerGuid);
 
     SetObjectScale(DEFAULT_OBJECT_SCALE);
 

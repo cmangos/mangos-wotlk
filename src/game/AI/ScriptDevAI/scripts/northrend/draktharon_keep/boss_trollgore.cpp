@@ -98,7 +98,7 @@ struct boss_trollgoreAI : public ScriptedAI
 
     void KilledUnit(Unit* pVictim) override
     {
-        if (pVictim->GetCharmerOrOwnerPlayerOrPlayerItself())
+        if (pVictim->GetBeneficiaryPlayer())
             DoScriptText(SAY_KILL, m_creature);
     }
 

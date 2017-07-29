@@ -100,7 +100,7 @@ void instance_azjol_nerub::OnCreatureEnterCombat(Creature* pCreature)
     {
         // Creature enter combat is not equal to having a victim yet.
         if (!m_playerGuid && pCreature->getVictim())
-            m_playerGuid = pCreature->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself()->GetObjectGuid();
+            m_playerGuid = pCreature->getVictim()->GetBeneficiaryPlayer()->GetObjectGuid();
     }
     else if (uiEntry == NPC_ANUBAR_CRUSHER)
     {

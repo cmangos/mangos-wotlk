@@ -198,7 +198,7 @@ struct npc_silvermoon_harryAI : public ScriptedAI
     {
         if (uiDamage > m_creature->GetHealth() || (m_creature->GetHealth() - uiDamage) * 100 / m_creature->GetMaxHealth() < 20)
         {
-            if (Player* pPlayer = pDoneBy->GetCharmerOrOwnerPlayerOrPlayerItself())
+            if (Player* pPlayer = pDoneBy->GetBeneficiaryPlayer())
             {
                 if (!m_bHarryBeaten && pPlayer->GetQuestStatus(QUEST_GAMBLING_DEBT) == QUEST_STATUS_INCOMPLETE)
                 {
