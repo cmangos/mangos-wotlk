@@ -1,28 +1,4 @@
--- MySQL Manual Build
---
--- Host: localhost    Database: characters
--- ------------------------------------------------------
-
---
--- Table structure for table `playerbot_db_version`
---
-
--- When updating, don't forget to update revision_sql.h
-
-DROP TABLE IF EXISTS `playerbot_db_version`;
-CREATE TABLE `playerbot_db_version` (
-  `version` varchar(120) default NULL,
-  `characters_playerbot_saved_data_001` bit(1) default NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
-
---
--- Dumping data for table `playerbot_db_version`
---
-
-LOCK TABLES `playerbot_db_version` WRITE;
-INSERT INTO `playerbot_db_version` VALUES
-('PlayerbotAI default database.',NULL);
-UNLOCK TABLES;
+ALTER TABLE character_db_version CHANGE COLUMN required_12949_01_characters_mangle_cleanup required_13957_01_characters_playerbot_talentspec bit;
 
 --
 -- Table structure for table `playerbot_talentspec`
@@ -189,29 +165,3 @@ INSERT INTO `playerbot_talentspec` VALUES
 (NULL,'Pet Tenacity BM Hunter (Bear suggested)',-3,0x00000001,2116,2116,2116,2173,2173,2117,2277,2117,2122,2163,2163,2122,2172,2237,2123,2255,2255,2258,2258,2123,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
 (NULL,'Pet Cunning PvP (Bird of Prey suggested)',-1,0x00220000,2118,2118,2119,2127,2127,2127,2120,2120,2120,2165,2167,2167,2257,2257,2184,2278,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 UNLOCK TABLES;
-
--- ----------------------------
--- Table structure for `playerbot_saved_data`
--- ----------------------------
-DROP TABLE IF EXISTS `playerbot_saved_data`;
-CREATE TABLE `playerbot_saved_data` (
-  `guid` int(11) unsigned NOT NULL DEFAULT '0',
-  `combat_order` int(11) unsigned NOT NULL DEFAULT '0',
-  `primary_target` int(11) unsigned NOT NULL DEFAULT '0',
-  `secondary_target` int(11) unsigned NOT NULL DEFAULT '0',
-  `pname` varchar(12) NOT NULL DEFAULT '',
-  `sname` varchar(12) NOT NULL DEFAULT '',
-  `combat_delay` INT(11) unsigned NOT NULL DEFAULT '0',
-  `auto_follow` INT(11) unsigned NOT NULL DEFAULT '1',
-  `autoequip` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`guid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Persistent Playerbot settings per alt';
-
--- ----------------------------
--- Table structure for `playerbot_quest_data`
--- ----------------------------
-DROP TABLE IF EXISTS `playerbot_quest_data`;
-CREATE TABLE `playerbot_quest_data` (
-  `autocomplete` mediumint(8) unsigned NOT NULL,
-  PRIMARY KEY (`autocomplete`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
