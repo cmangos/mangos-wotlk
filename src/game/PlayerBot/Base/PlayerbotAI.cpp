@@ -2029,6 +2029,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 case CHAT_MSG_RAID:
                 case CHAT_MSG_RAID_LEADER:
                 case CHAT_MSG_PARTY:
+                case CHAT_MSG_PARTY_LEADER:
                 case CHAT_MSG_WHISPER:
                 {
                     ObjectGuid senderGuid;
@@ -2038,9 +2039,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     uint8 chattag;
 
                     p >> senderGuid;        // 8 player from guid
-                    if (msgtype == CHAT_MSG_PARTY)
-                        p >> senderGuid;        // 8 player from guid needs to be read again if message is from party channel
-
+                    p.read_skip<uint32>();  // 4 chat msg group
+                    p.read_skip<uint64>();  // 8 player from guid
                     p >> length;            // 4 length of text
                     p >> text;              // string message
                     p >> chattag;           // 1 AFK/DND/WHISPER_INFORM
