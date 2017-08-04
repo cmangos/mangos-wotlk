@@ -7518,11 +7518,21 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff) const
             // all ok by some way or another, skip normal check
             break;
         default:                                            // normal case
-            // Get GO cast coordinates if original caster -> GO
-            if (!IsIgnoreLosSpell(m_spellInfo) && target != m_caster)
-                if (WorldObject* caster = GetCastingObject())
-                    if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !target->IsWithinLOSInMap(caster))
-                        return false;
+            if (!IsIgnoreLosSpell(m_spellInfo))
+            {
+                if (target != m_caster)
+                {
+                    if (m_spellInfo->EffectImplicitTargetA[eff] == TARGET_DYNAMIC_OBJECT_COORDINATES)
+                    {
+                        if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
+                            if (!target->IsWithinLOSInMap(dynObj))
+                                return false;
+                    }
+                    else if (WorldObject* caster = GetCastingObject())
+                        if (!target->IsWithinLOSInMap(caster))
+                            return false;
+                }
+            }
             break;
     }
 
