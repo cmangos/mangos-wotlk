@@ -60,7 +60,6 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_creature->CastSpell(m_creature, SPELL_DOUBLE_ATTACK, TRIGGERED_NONE);
         Reset();
     }
 
@@ -94,6 +93,8 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
         m_uiBladeDanceTimer = 45000;
         m_uiSummonAssistantTimer = 30000;
         m_uiAssassinsTimer = 5000;
+
+        m_creature->CastSpell(m_creature, SPELL_DOUBLE_ATTACK, TRIGGERED_NONE);
     }
 
     void Aggro(Unit* /*pWho*/) override
