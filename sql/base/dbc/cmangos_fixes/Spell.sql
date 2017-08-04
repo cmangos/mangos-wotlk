@@ -179,4 +179,7 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- Songflower Serenade should not work on targets above level 63
 UPDATE spell_template SET MaxTargetLevel=63 WHERE id IN(15366);
 
+-- Watchkeeper Gargolmar - Mortal Wound should stack to 50/100%
+UPDATE `spell_template` SET `StackAmount` = 10 WHERE `id` IN (30641, 36814);
+
 
