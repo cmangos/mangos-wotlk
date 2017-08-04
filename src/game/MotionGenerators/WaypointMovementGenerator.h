@@ -130,6 +130,8 @@ class FlightPathMovementGenerator
         void DoEventIfAny(Player& player, TaxiPathNodeEntry const* node, bool departure);
         bool GetResetPosition(Player&, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const;
 
+        void OnFlightPathEnd(Player& player, uint32 finalNode);
+
         struct TaxiNodeChangeInfo
         {
             uint32 PathIndex;

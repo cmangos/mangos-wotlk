@@ -1522,16 +1522,8 @@ void Aura::TriggerSpell()
 //                    case 36556: break;
 //                    // Cursed Scarab Despawn Periodic
 //                    case 36561: break;
-                    case 36573:                             // Vision Guide
-                    {
-                        if (GetAuraTicks() == 10 && target->GetTypeId() == TYPEID_PLAYER)
-                        {
-                            ((Player*)target)->AreaExploredOrEventHappens(10525);
-                            target->RemoveAurasDueToSpell(36573);
-                        }
-
-                        return;
-                    }
+//                    // Vision Guide
+//                    case 36573: break;
 //                    // Cannon Charging (platform)
 //                    case 36785: break;
 //                    // Cannon Charging (self)
