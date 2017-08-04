@@ -829,7 +829,7 @@ bool QuestAccept_npc_maxx_a_million(Player* pPlayer, Creature* pCreature, const 
         if (npc_maxx_a_million_escortAI* pEscortAI = dynamic_cast<npc_maxx_a_million_escortAI*>(pCreature->AI()))
         {
             // Set Faction to Escort Faction
-            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER | TEMPFACTION_TOGGLE_PASSIVE);
+            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
             // Set emote-state to 0 (is EMOTE_STATE_STUN by default)
             pCreature->HandleEmote(EMOTE_ONESHOT_NONE);
 
@@ -1352,7 +1352,7 @@ struct npc_drijyaAI : public npc_escortAI
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
-            m_creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER | TEMPFACTION_TOGGLE_PASSIVE);
+            m_creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
             Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue), true);
         }
     }
@@ -1478,7 +1478,7 @@ struct npc_dimensiusAI : public Scripted_NoMovementAI
         m_bSpawnsFeeding = false;
 
         m_creature->SetDisplayId(MODEL_ID_DIMENSIUS_CLOUD);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PASSIVE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -1510,7 +1510,7 @@ struct npc_dimensiusAI : public Scripted_NoMovementAI
     {
         // event is sent by dbscript
         if (eventType == AI_EVENT_CUSTOM_EVENTAI_B && pSender->GetEntry() == NPC_CAPTAIN_SAEED)
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PASSIVE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
     }
 
     void UpdateAI(const uint32 uiDiff) override

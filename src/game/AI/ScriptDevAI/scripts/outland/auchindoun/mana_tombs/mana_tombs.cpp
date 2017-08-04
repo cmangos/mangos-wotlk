@@ -240,7 +240,7 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
             case NPC_SHADOW_LORD_XIRAXIS:
                 if (Creature* pXiraxis = m_creature->GetMap()->GetCreature(m_xiraxisGuid))
                 {
-                    pXiraxis->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                    pXiraxis->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
                     pXiraxis->AI()->AttackStart(m_creature);
                 }
                 break;

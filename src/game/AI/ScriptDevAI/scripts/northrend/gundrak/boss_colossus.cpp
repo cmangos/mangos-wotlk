@@ -177,7 +177,7 @@ struct boss_drakkari_colossusAI : public ScriptedAI
 
         // Reset unit flags
         SetCombatMovement(true);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
@@ -275,7 +275,7 @@ struct boss_drakkari_colossusAI : public ScriptedAI
             if (m_uiColossusStartTimer <= uiDiff)
             {
                 m_creature->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                 m_uiColossusStartTimer = 0;
             }
             else

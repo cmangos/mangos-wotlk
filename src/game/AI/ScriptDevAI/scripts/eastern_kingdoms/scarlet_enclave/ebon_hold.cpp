@@ -1649,7 +1649,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                 }
 
                 SetEscortPaused(false);
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                 SetRun(false);
                 m_creature->AI()->EnterEvadeMode();
 
@@ -1679,7 +1679,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                         else
                             pTemp->AI()->EnterEvadeMode();
 
-                        pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                        pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     }
                 }
@@ -1697,7 +1697,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                         // should be 2 handed when the DB data is correct
                         pGuard->HandleEmoteCommand(EMOTE_STATE_READY2H);
                         pGuard->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        pGuard->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                        pGuard->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                     }
                 }
 
@@ -2159,7 +2159,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                                 {
                                     DoScriptText(EMOTE_LIGHT_OF_DAWN_GRASP, pTirion);
                                     pLichKing->CastSpell(pTirion, SPELL_SOUL_FEAST_TIRION, TRIGGERED_NONE);
-                                    pLichKing->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                                    pLichKing->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                                 }
                             }
                             m_uiEventTimer = 2000;
@@ -2176,7 +2176,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                                 {
                                     if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
                                     {
-                                        pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                                        pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                                         pTemp->SetWalk(false);
                                         pTemp->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
                                         // attack gives us some issues
@@ -2187,7 +2187,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                                 {
                                     if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(aLightArmySpawnLoc[i].m_uiEntry))
                                     {
-                                        pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                                        pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                                         pTemp->SetWalk(false);
                                         pTemp->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
                                         // attack gives us some issues
@@ -2683,7 +2683,7 @@ struct npc_fellow_death_knightAI : public ScriptedAI
                 if (DoCastSpellIfCan(m_creature, SPELL_THE_LIGHT_OF_DAWN_DUMMY, CAST_TRIGGERED) == CAST_OK)
                 {
                     m_creature->Unmount();
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                 }
             }
 

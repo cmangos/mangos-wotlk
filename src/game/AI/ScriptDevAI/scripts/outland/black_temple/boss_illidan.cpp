@@ -386,7 +386,7 @@ struct boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
         m_creature->SetLevitate(false);
         SetCombatMovement(true);
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
     }
@@ -482,7 +482,7 @@ struct boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                 SetEquipmentSlots(false, EQUIP_ID_MAIN_HAND, EQUIP_ID_OFF_HAND, EQUIP_NO_CHANGE);
                 break;
             case NPC_ILLIDAN_STORMRAGE:
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                 m_creature->SetInCombatWithZone();
                 if (m_pInstance)
                 {

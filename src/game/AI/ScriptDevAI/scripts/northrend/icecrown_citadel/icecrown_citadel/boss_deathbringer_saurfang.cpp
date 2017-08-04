@@ -223,7 +223,7 @@ struct boss_deathbringer_saurfangAI : public ScriptedAI
             // ToDo: move this to the proper place after the intro will be implemented
             // Also the faction needs to be checked if it should be handled in database
             m_creature->SetFactionTemporary(FACTION_ID_UNDEAD, TEMPFACTION_NONE);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PASSIVE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             m_creature->SetRespawnCoord(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation());
         }
     }

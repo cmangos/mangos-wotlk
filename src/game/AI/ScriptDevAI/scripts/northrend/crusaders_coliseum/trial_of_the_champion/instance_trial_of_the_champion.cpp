@@ -670,7 +670,7 @@ void instance_trial_of_the_champion::DoSendNextArenaWave()
                 pHelper->SetWalk(false);
                 pCenterTrigger->GetContactPoint(pHelper, fX, fY, fZ, 2 * INTERACTION_DISTANCE);
                 pHelper->GetMotionMaster()->MovePoint(POINT_ID_COMBAT, fX, fY, fZ);
-                pHelper->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_PASSIVE);
+                pHelper->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
             }
         }
     }

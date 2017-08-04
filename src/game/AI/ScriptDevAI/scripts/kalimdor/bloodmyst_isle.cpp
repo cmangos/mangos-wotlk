@@ -377,7 +377,7 @@ struct npc_demolitionist_legosoAI : public npc_escortAI, private DialogueHelper
                 DoRespawnFires(false);
                 if (Creature* pSironas = GetClosestCreatureWithEntry(m_creature, NPC_SIRONAS, 40.0f))
                 {
-                    pSironas->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                    pSironas->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
                     pSironas->AI()->AttackStart(m_creature);
                 }
                 break;

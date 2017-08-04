@@ -125,7 +125,7 @@ void instance_zulaman::OnCreatureDeath(Creature* pCreature)
                     {
                         ++m_uiBearEventPhase;
                         if (m_uiBearEventPhase == MAX_BEAR_WAVES)
-                            pNalorakk->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                            pNalorakk->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         else
                         {
                             pNalorakk->SetWalk(false);
@@ -388,7 +388,7 @@ void instance_zulaman::SendNextBearWave(Unit* pTarget)
         Creature* pTemp = instance->GetCreature(*itr);
         if (pTemp && pTemp->isAlive())
         {
-            pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+            pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             pTemp->AI()->AttackStart(pTarget);
 
             // For the first wave we need to make them jump to the ground before attacking

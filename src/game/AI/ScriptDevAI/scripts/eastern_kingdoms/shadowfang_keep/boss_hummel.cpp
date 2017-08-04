@@ -88,7 +88,7 @@ struct npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
                 {
                     // WARNING: workaround -> faction should be set on event start
                     pHummel->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-                    pHummel->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_NON_ATTACKABLE);
+                    pHummel->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
 
                     if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_EventStarterGuid))
                         pHummel->AI()->AttackStart(pPlayer);
@@ -109,7 +109,7 @@ struct npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
 
                     // WARNING: workaround -> faction should be set on event start
                     pBaxter->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-                    pBaxter->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_NON_ATTACKABLE);
+                    pBaxter->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
                     if (pHummel->getVictim())
                         pBaxter->AI()->AttackStart(pHummel->getVictim());
                 }
@@ -127,7 +127,7 @@ struct npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
 
                     // WARNING: workaround -> faction should be set on event start
                     pFrye->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-                    pFrye->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_NON_ATTACKABLE);
+                    pFrye->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
                     if (pHummel->getVictim())
                         pFrye->AI()->AttackStart(pHummel->getVictim());
                 }

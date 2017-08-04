@@ -514,7 +514,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                     if (Creature* pSkarloc = m_pInstance->GetSingleCreatureFromStorage(NPC_SKARLOC))
                         pSummoned->GetMotionMaster()->MoveFollow(pSkarloc, 5.0f, pSummoned->GetAngle(pSkarloc) + M_PI_F);
 
-                    pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                    pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
                     m_lSkarlocAddsGuids.push_back(pSummoned->GetObjectGuid());
                 }
                 else
@@ -577,7 +577,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                             {
                                 if (Creature* pEpoch = m_pInstance->GetSingleCreatureFromStorage(NPC_EPOCH))
                                 {
-                                    pEpoch->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                                    pEpoch->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                                     pEpoch->AI()->AttackStart(m_creature);
                                     AttackStart(pEpoch);
                                 }
@@ -663,7 +663,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                         pTemp->SetWalk(false);
                         pTemp->GetRandomPoint(2480.19f, 696.15f, 55.78f, 5.0f, fX, fY, fZ);
                         pTemp->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
-                        pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                        pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                     }
                 }
                 break;
@@ -766,7 +766,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 // Allow the guards and Skarloc to attack
                 if (Creature* pSkarloc = m_pInstance->GetSingleCreatureFromStorage(NPC_SKARLOC))
                 {
-                    pSkarloc->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                    pSkarloc->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                     pSkarloc->AI()->AttackStart(m_creature);
                     AttackStart(pSkarloc);
                 }
@@ -774,7 +774,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 {
                     if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
                     {
-                        pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                        pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         pTemp->AI()->AttackStart(m_creature);
                     }
                 }
@@ -954,7 +954,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 }
 
                 // Attack Thrall
-                pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                 pTemp->AI()->AttackStart(m_creature);
             }
         }

@@ -203,7 +203,7 @@ bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
                 (*itr)->CastSpell((*itr), SPELL_WEB_BEAM, TRIGGERED_OLD_TRIGGERED);
                 (*itr)->SetWalk(false);
                 (*itr)->GetMotionMaster()->MoveWaypoint();
-                (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             }
         }
     }
@@ -220,7 +220,7 @@ bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
                 (*itr)->CastSpell((*itr), SPELL_WEB_BEAM, TRIGGERED_OLD_TRIGGERED);
                 (*itr)->SetWalk(false);
                 (*itr)->GetMotionMaster()->MoveWaypoint();
-                (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             }
         }
     }

@@ -341,7 +341,7 @@ struct npc_prison_event_controllerAI : public ScriptedAI
                     DoScriptText(pData->iSayEntry, pBoss);
 
                 pBoss->GetMotionMaster()->MovePoint(1, pData->fX, pData->fY, pData->fZ);
-                pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
                 // Handle Erekem guards
                 if (pData->uiType == TYPE_EREKEM)
@@ -357,7 +357,7 @@ struct npc_prison_event_controllerAI : public ScriptedAI
                         {
                             fMoveX = (pData->fX - pAdd->GetPositionX()) * .25;
                             pAdd->GetMotionMaster()->MovePoint(0, pData->fX - fMoveX, pData->fY, pData->fZ);
-                            pAdd->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                            pAdd->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         }
                     }
                 }

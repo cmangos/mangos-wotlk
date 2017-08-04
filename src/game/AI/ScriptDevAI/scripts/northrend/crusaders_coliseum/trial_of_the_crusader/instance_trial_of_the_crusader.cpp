@@ -746,7 +746,7 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
         case EVENT_JARAXXUS_START_ATTACK:
             if (Creature* pJaraxxus = GetSingleCreatureFromStorage(NPC_JARAXXUS))
             {
-                pJaraxxus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_PASSIVE);
+                pJaraxxus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
                 pJaraxxus->RemoveAurasDueToSpell(SPELL_ENSLAVE_JARAXXUS);
             }
             break;
@@ -831,12 +831,12 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
         case EVENT_TWINS_ATTACK:
             if (Creature* pTwin = GetSingleCreatureFromStorage(NPC_FJOLA))
             {
-                pTwin->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_PASSIVE);
+                pTwin->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
                 pTwin->CastSpell(pTwin, SPELL_TWIN_EMPATHY_LIGHT, TRIGGERED_OLD_TRIGGERED);
             }
             if (Creature* pTwin = GetSingleCreatureFromStorage(NPC_EYDIS))
             {
-                pTwin->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_PASSIVE);
+                pTwin->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
                 pTwin->CastSpell(pTwin, SPELL_TWIN_EMPATHY_DARK, TRIGGERED_OLD_TRIGGERED);
             }
             break;
