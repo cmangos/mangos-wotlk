@@ -310,7 +310,7 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
         else
         {
             m_pInstance->SetData(TYPE_ALGALON, FAIL);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         }
 
         // despawn everything
@@ -405,7 +405,7 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
                 DoCastSpellIfCan(m_creature, SPELL_REORIGINATION);
                 break;
             case SPELL_SUPERMASSIVE_FAIL:
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 break;
             case SAY_ENGAGE:
                 // summon Living Constellations at this point

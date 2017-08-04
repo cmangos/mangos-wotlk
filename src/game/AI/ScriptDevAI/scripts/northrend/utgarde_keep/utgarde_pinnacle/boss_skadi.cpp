@@ -124,7 +124,7 @@ struct boss_skadiAI : public ScriptedAI
 
         // Set immune during phase 1
         m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
     void AttackStart(Unit* pWho) override
@@ -178,7 +178,7 @@ struct boss_skadiAI : public ScriptedAI
         if (pSpell->Id == SPELL_SKADI_TELEPORT)
         {
             m_uiPhase = PHASE_NORMAL_COMBAT;
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
             m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
         }
     }
@@ -256,7 +256,7 @@ struct boss_skadiAI : public ScriptedAI
                     if (DoCastSpellIfCan(pGrauf, SPELL_RIDE_VEHICLE) == CAST_OK)
                     {
                         // Maybe this flag should be set by the vehicle flags - requires research
-                        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                         m_uiMountTimer = 0;
                     }
                 }

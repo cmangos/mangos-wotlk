@@ -774,7 +774,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
 
                 if (Creature* pEpoch = m_pInstance->GetSingleCreatureFromStorage(NPC_LORD_EPOCH))
                 {
-                    pEpoch->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    pEpoch->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                     pEpoch->AI()->AttackStart(m_creature);
                 }
                 break;
@@ -797,7 +797,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
 
                 if (Creature* pMalganis = m_pInstance->GetSingleCreatureFromStorage(NPC_MALGANIS))
                 {
-                    pMalganis->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    pMalganis->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                     pMalganis->AI()->AttackStart(m_creature);
                 }
                 break;

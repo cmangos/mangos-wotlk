@@ -304,7 +304,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
         m_uiBerserkTimer    = 0;
         m_uiCurrentSeatAura = SPELL_RIDE_VEHICLE_MIMIRON_0;
 
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
     void AttackStart(Unit* /*pWho*/) override { }
@@ -377,7 +377,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                     pLeviathan->SetInCombatWithZone();
                 }
                 // Note: maybe the flags are handled by the vehicle seats. Set them manually for the moment.
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                 break;
 
                 // Start phase 2 transition

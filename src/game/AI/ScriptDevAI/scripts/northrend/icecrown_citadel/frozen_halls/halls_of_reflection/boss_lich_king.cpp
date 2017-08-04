@@ -376,7 +376,7 @@ bool EffectScriptEffectCreature_spell_stun_break(Unit* pCaster, uint32 uiSpellId
     if (uiSpellId == SPELL_STUN_BREAK && uiEffIndex == EFFECT_INDEX_0)
     {
         pCreatureTarget->AI()->EnterEvadeMode();
-        pCreatureTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+        pCreatureTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
 
         return true;

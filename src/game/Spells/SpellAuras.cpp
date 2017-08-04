@@ -2369,7 +2369,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         return;
                     case 62109:                             // Tails Up: Aura
                         target->setFaction(1990);           // Ambient (hostile)
-                        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                         return;
                     case 63122:                             // Clear Insane
                         target->RemoveAurasDueToSpell(GetSpellProto()->CalculateSimpleValue(m_effIndex));
@@ -3166,7 +3166,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     return;
                 }
                 case 43874:                                 // Scourge Mur'gul Camp: Force Shield Arcane Purple x3
-                    target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE, apply);
+                    target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER, apply);
                     if (apply)
                         target->addUnitState(UNIT_STAT_ROOT);
                     return;

@@ -657,7 +657,7 @@ void instance_trial_of_the_champion::DoSendNextArenaWave()
 
             // set champions to attack
             if (Creature* pChampion = instance->GetCreature(m_ArenaChampionsGuids[i]))
-                pChampion->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                pChampion->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         }
     }
     // send trash waves of champions in the arena
@@ -670,7 +670,7 @@ void instance_trial_of_the_champion::DoSendNextArenaWave()
                 pHelper->SetWalk(false);
                 pCenterTrigger->GetContactPoint(pHelper, fX, fY, fZ, 2 * INTERACTION_DISTANCE);
                 pHelper->GetMotionMaster()->MovePoint(POINT_ID_COMBAT, fX, fY, fZ);
-                pHelper->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
+                pHelper->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_PASSIVE);
             }
         }
     }
@@ -986,7 +986,7 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
             if (Creature* pKnight = GetSingleCreatureFromStorage(NPC_BLACK_KNIGHT))
             {
                 pKnight->SetRespawnCoord(aKnightPositions[2][0], aKnightPositions[2][1], aKnightPositions[2][2], aKnightPositions[2][3]);
-                pKnight->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                pKnight->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             }
             break;
     }

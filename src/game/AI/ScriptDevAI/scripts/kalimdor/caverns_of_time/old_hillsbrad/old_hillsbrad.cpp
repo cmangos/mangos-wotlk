@@ -514,7 +514,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                     if (Creature* pSkarloc = m_pInstance->GetSingleCreatureFromStorage(NPC_SKARLOC))
                         pSummoned->GetMotionMaster()->MoveFollow(pSkarloc, 5.0f, pSummoned->GetAngle(pSkarloc) + M_PI_F);
 
-                    pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                     m_lSkarlocAddsGuids.push_back(pSummoned->GetObjectGuid());
                 }
                 else

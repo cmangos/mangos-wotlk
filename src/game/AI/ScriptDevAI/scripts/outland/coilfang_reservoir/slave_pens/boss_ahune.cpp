@@ -145,7 +145,7 @@ struct boss_ahuneAI : public Scripted_NoMovementAI
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
             if (Creature* pCore = m_creature->GetMap()->GetCreature(m_frozenCoreGuid))
-                pCore->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                pCore->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
         }
     }
 
@@ -254,7 +254,7 @@ struct boss_ahuneAI : public Scripted_NoMovementAI
                 DoCastSpellIfCan(m_creature, SPELL_BIRTH);
 
                 if (Creature* pCore = m_creature->GetMap()->GetCreature(m_frozenCoreGuid))
-                    pCore->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    pCore->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
 
                 m_uiPhase = PHASE_GROUND;
                 m_uiHailstoneTimer   = 1000;

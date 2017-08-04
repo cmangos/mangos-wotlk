@@ -147,7 +147,7 @@ struct boss_black_knightAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_BLACK_KNIGHT, FAIL);
 
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -162,7 +162,7 @@ struct boss_black_knightAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         // no aggro during the intro
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
             return;
 
         ScriptedAI::MoveInLineOfSight(pWho);

@@ -451,7 +451,7 @@ void instance_halls_of_reflection::DoSendNextSpiritWave()
             // Falric (wave 5)
             if (Creature* pFalric = GetSingleCreatureFromStorage(NPC_FALRIC))
             {
-                pFalric->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                pFalric->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                 if (Player* pPlayer = GetPlayerInMap(true, false))
                     pFalric->AI()->AttackStart(pPlayer);
 
@@ -462,7 +462,7 @@ void instance_halls_of_reflection::DoSendNextSpiritWave()
             // Marwyn (wave 10)
             if (Creature* pMarwyn = GetSingleCreatureFromStorage(NPC_MARWYN))
             {
-                pMarwyn->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                pMarwyn->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                 if (Player* pPlayer = GetPlayerInMap(true, false))
                     pMarwyn->AI()->AttackStart(pPlayer);
 
@@ -584,7 +584,7 @@ void instance_halls_of_reflection::Update(uint32 uiDiff)
             {
                 if (Creature* pCreature = instance->GetCreature(*itr))
                 {
-                    pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                     pCreature->AI()->AttackStart(pPlayer);
                 }
             }

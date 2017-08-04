@@ -173,19 +173,19 @@ struct npc_queen_lanathel_introAI : public ScriptedAI, private DialogueHelper
                 {
                     if (Creature* pTaldaram = m_pInstance->GetSingleCreatureFromStorage(NPC_TALDARAM))
                     {
-                        pTaldaram->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                        pTaldaram->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                         pTaldaram->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
                         pTaldaram->SetHealth(1);
                     }
                     if (Creature* pKeleseth = m_pInstance->GetSingleCreatureFromStorage(NPC_KELESETH))
                     {
-                        pKeleseth->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                        pKeleseth->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                         pKeleseth->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
                         pKeleseth->SetHealth(1);
                     }
                     if (Creature* pValanar = m_pInstance->GetSingleCreatureFromStorage(NPC_VALANAR))
                     {
-                        pValanar->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                        pValanar->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                         pValanar->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
                         pValanar->SetHealth(1);
                     }

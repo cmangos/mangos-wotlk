@@ -91,7 +91,7 @@ struct boss_jaraxxusAI : public ScriptedAI
 
         DoCastSpellIfCan(m_creature, SPELL_JARAXXUS_HITTIN_YA);
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
     void JustReachedHome() override

@@ -231,7 +231,7 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
                 // start combat
                 if (Creature* pBeast = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[m_uiPhase]))
                 {
-                    pBeast->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    pBeast->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
 
                     // first boss doesn't automatically attack
                     if (pBeast->GetEntry() != NPC_GORMOK)
@@ -422,7 +422,7 @@ struct boss_gormokAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
             return;
 
         ScriptedAI::MoveInLineOfSight(pWho);
@@ -834,7 +834,7 @@ struct boss_dreadscaleAI : public twin_jormungars_commonAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         // don't attack during intro
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
             return;
 
         twin_jormungars_commonAI::MoveInLineOfSight(pWho);
@@ -954,7 +954,7 @@ struct boss_icehowlAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
             return;
 
         ScriptedAI::MoveInLineOfSight(pWho);

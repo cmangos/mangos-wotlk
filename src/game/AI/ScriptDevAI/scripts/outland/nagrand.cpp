@@ -86,7 +86,7 @@ struct mob_lumpAI : public ScriptedAI
             m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
 
-            // should get unit_flags UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE at faction change, but unclear why/for what reason, skipped (no flags expected as default)
+            // should get unit_flags UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_PASSIVE at faction change, but unclear why/for what reason, skipped (no flags expected as default)
             m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_REACH_HOME);
 
             m_creature->SetStandState(UNIT_STAND_STATE_SIT);

@@ -746,7 +746,7 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
         case EVENT_JARAXXUS_START_ATTACK:
             if (Creature* pJaraxxus = GetSingleCreatureFromStorage(NPC_JARAXXUS))
             {
-                pJaraxxus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
+                pJaraxxus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_PASSIVE);
                 pJaraxxus->RemoveAurasDueToSpell(SPELL_ENSLAVE_JARAXXUS);
             }
             break;
@@ -810,7 +810,7 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
                 if (Creature* pCrusader = instance->GetCreature(m_vCrusadersGuidsVector[i]))
                 {
                     pCrusader->CastSpell(pCrusader, SPELL_ANCHOR_HERE, TRIGGERED_OLD_TRIGGERED);
-                    pCrusader->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    pCrusader->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
 
                     // some crusaders have to summon their pet
                     pCrusader->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCrusader, pCrusader);
@@ -831,12 +831,12 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
         case EVENT_TWINS_ATTACK:
             if (Creature* pTwin = GetSingleCreatureFromStorage(NPC_FJOLA))
             {
-                pTwin->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
+                pTwin->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_PASSIVE);
                 pTwin->CastSpell(pTwin, SPELL_TWIN_EMPATHY_LIGHT, TRIGGERED_OLD_TRIGGERED);
             }
             if (Creature* pTwin = GetSingleCreatureFromStorage(NPC_EYDIS))
             {
-                pTwin->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
+                pTwin->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_PASSIVE);
                 pTwin->CastSpell(pTwin, SPELL_TWIN_EMPATHY_DARK, TRIGGERED_OLD_TRIGGERED);
             }
             break;

@@ -132,7 +132,7 @@ struct boss_dorotheeAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         // Allow a short delay before attacking
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
             return;
 
         ScriptedAI::MoveInLineOfSight(pWho);
@@ -170,7 +170,7 @@ struct boss_dorotheeAI : public ScriptedAI
         {
             if (m_uiAggroTimer <= uiDiff)
             {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 m_creature->SetInCombatWithZone();
                 m_uiAggroTimer = 0;
             }
@@ -241,7 +241,7 @@ struct boss_strawmanAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
             return;
 
         ScriptedAI::MoveInLineOfSight(pWho);
@@ -249,7 +249,7 @@ struct boss_strawmanAI : public ScriptedAI
 
     void AttackStart(Unit* pWho) override
     {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
             return;
 
         ScriptedAI::AttackStart(pWho);
@@ -285,7 +285,7 @@ struct boss_strawmanAI : public ScriptedAI
         {
             if (m_uiAggroTimer <= uiDiff)
             {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 m_creature->SetInCombatWithZone();
                 m_uiAggroTimer = 0;
             }
@@ -355,7 +355,7 @@ struct boss_tinheadAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
             return;
 
         ScriptedAI::MoveInLineOfSight(pWho);
@@ -363,7 +363,7 @@ struct boss_tinheadAI : public ScriptedAI
 
     void AttackStart(Unit* pWho) override
     {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
             return;
 
         ScriptedAI::AttackStart(pWho);
@@ -385,7 +385,7 @@ struct boss_tinheadAI : public ScriptedAI
         {
             if (m_uiAggroTimer <= uiDiff)
             {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 m_creature->SetInCombatWithZone();
                 m_uiAggroTimer = 0;
             }
@@ -444,7 +444,7 @@ struct boss_roarAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
             return;
 
         ScriptedAI::MoveInLineOfSight(pWho);
@@ -452,7 +452,7 @@ struct boss_roarAI : public ScriptedAI
 
     void AttackStart(Unit* pWho) override
     {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
             return;
 
         ScriptedAI::AttackStart(pWho);
@@ -487,7 +487,7 @@ struct boss_roarAI : public ScriptedAI
         {
             if (m_uiAggroTimer <= uiDiff)
             {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 m_creature->SetInCombatWithZone();
                 m_uiAggroTimer = 0;
             }
