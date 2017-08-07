@@ -192,14 +192,8 @@ void Creature::CleanupsBeforeDelete()
 
 void Creature::RemoveCorpse(bool inPlace)
 {
-    if (!inPlace)
-    {
-        // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
-        if (uint16 poolid = sPoolMgr.IsPartOfAPool<Creature>(GetGUIDLow()))
-            sPoolMgr.UpdatePool<Creature>(*GetMap()->GetPersistentState(), poolid, GetGUIDLow());
-        if (!IsInWorld())                            // can be despawned by update pool
-            return;
-    }
+    if (!inPlace && !IsInWorld())
+       return;
 
     if ((getDeathState() != CORPSE && !m_isDeadByDefault) || (getDeathState() != ALIVE && m_isDeadByDefault))
         return;
@@ -576,6 +570,9 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                     GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, this);
 
                 GetMap()->Add(this);
+
+                if (uint16 poolid = sPoolMgr.IsPartOfAPool<Creature>(GetGUIDLow()))
+                    sPoolMgr.UpdatePool<Creature>(*GetMap()->GetPersistentState(), poolid, GetGUIDLow());
             }
             break;
         }
