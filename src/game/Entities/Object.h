@@ -26,6 +26,7 @@
 #include "Entities/ObjectGuid.h"
 #include "Globals/SharedDefines.h"
 #include "Camera.h"
+#include "Server/DBCStructure.h"
 
 #include <set>
 
@@ -835,6 +836,9 @@ class WorldObject : public Object
         void PrintCooldownList(ChatHandler& chat) const;
 
         virtual void InspectingLoot() {}
+
+        virtual bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const { return true; }
+        virtual bool CanAssistSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const { return true; }
 
     protected:
         explicit WorldObject();
