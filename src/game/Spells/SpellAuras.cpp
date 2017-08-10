@@ -2224,6 +2224,15 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             caster->CastCustomSpell(target, 28836, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         return;
                     }
+                    case 30410:                             // Shadow Grasp
+                    {
+                        if (target->GetAuraCount(30410) == 5)
+                        {
+                            target->CastSpell(target, 30168, TRIGGERED_OLD_TRIGGERED); // cast Shadow cage if stacks are 5
+                            target->InterruptSpell(CURRENT_CHANNELED_SPELL); // if he is casting blast nova interrupt channel, only magth channel spell                          
+                        }
+                        break;
+                    }
                     case 31606:                             // Stormcrow Amulet
                     {
                         CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(17970);
@@ -2669,6 +2678,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 // Poison Cloud
                 target->CastSpell(target, 28240, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
+            }
+            case 30410:                             // Shadow Grasp
+            {
+                if (target->HasAura(30168))
+                    target->RemoveAurasDueToSpell(30168); // remove Shadow cage if stacks are 5
             }
             case 32045:                                     // Soul Charge
             {
@@ -5627,6 +5641,9 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
     {
         switch (spellProto->Id)
         {
+            case 30410: // Shadow Grasp cast Mind Exhaustion on removal
+                target->CastSpell(target, 44032, TRIGGERED_OLD_TRIGGERED);
+                break;
             case 35201: // Paralytic Poison
                 if (m_removeMode == AURA_REMOVE_BY_DEFAULT)
                     target->CastSpell(target, 35202, TRIGGERED_OLD_TRIGGERED); // Paralysis

@@ -126,13 +126,8 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                 case IN_PROGRESS:
                     // Set boss in combat
                     if (Creature* pMagtheridon = GetSingleCreatureFromStorage(NPC_MAGTHERIDON))
-                    {
                         if (pMagtheridon->isAlive())
-                        {
-                            pMagtheridon->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            pMagtheridon->SetInCombatWithZone();
-                        }
-                    }
+                            pMagtheridon->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pMagtheridon, pMagtheridon);
                     // Enable cubes
                     for (GuidList::const_iterator itr = m_lCubeGuidList.begin(); itr != m_lCubeGuidList.end(); ++itr)
                         DoToggleGameObjectFlags(*itr, GO_FLAG_NO_INTERACT, false);
@@ -174,6 +169,7 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (pMagtheridon->isAlive())
                     {
+                        pMagtheridon->SetInCombatWithZone();
                         DoScriptText(EMOTE_EVENT_BEGIN, pMagtheridon);
                         m_uiCageBreakTimer = MINUTE * IN_MILLISECONDS;
                     }

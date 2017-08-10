@@ -42,11 +42,12 @@ enum
     SPELL_SHADOW_CAGE_DUMMY     = 30205,                    // dummy aura - in creature_template_addon
     SPELL_BLASTNOVA             = 30616,
     SPELL_CLEAVE                = 30619,
-    // SPELL_QUAKE               = 30657,                   // spell may be related but probably used in the recent versions of the script
-    // SPELL_QUAKE_TRIGGER       = 30576,                   // spell removed from DBC - triggers 30571
-    SPELL_QUAKE_KNOCKBACK       = 30571,
+    SPELL_QUAKE                 = 30657,                    // spell may be related but probably used in the recent versions of the script
+    // SPELL_QUAKE_TRIGGER      = 30576,                    // spell removed from DBC - triggers 30571
+    // SPELL_QUAKE_KNOCKBACK    = 30571,
     SPELL_BLAZE                 = 30541,                    // triggers 30542
     SPELL_BERSERK               = 27680,
+    SPELL_CONFLAGRATION         = 30757,                    // Used by Blaze GO
 
     // phase 3 spells
     SPELL_CAMERA_SHAKE          = 36455,
@@ -109,7 +110,7 @@ struct boss_magtheridonAI : public ScriptedAI
     void Reset() override
     {
         m_uiBerserkTimer    = 20 * MINUTE * IN_MILLISECONDS;
-        m_uiQuakeTimer      = 30000;
+        m_uiQuakeTimer      = 40000;
         m_uiBlazeTimer      = urand(10000, 15000);
         m_uiBlastNovaTimer  = 60000;
         m_uiCleaveTimer     = 15000;
@@ -121,20 +122,30 @@ struct boss_magtheridonAI : public ScriptedAI
 
         SetCombatMovement(true);
 
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override 
     {
-        DoScriptText(EMOTE_FREED, m_creature);
-        DoScriptText(urand(0, 1) ? SAY_AGGRO_1 : SAY_AGGRO_2, m_creature);
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-        m_creature->RemoveAurasDueToSpell(SPELL_SHADOW_CAGE_DUMMY);
+            DoScriptText(EMOTE_FREED, m_creature);
+            DoScriptText(urand(0, 1) ? SAY_AGGRO_1 : SAY_AGGRO_2, m_creature);
+
+            m_creature->RemoveAurasDueToSpell(SPELL_SHADOW_CAGE_DUMMY);
+
+            DoResetThreat(); // clear threat at start
+        }
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* pVictim) override
     {
-        DoScriptText(SAY_PLAYER_KILLED, m_creature);
+        if(pVictim->GetTypeId() == TYPEID_PLAYER)
+            DoScriptText(SAY_PLAYER_KILLED, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -160,6 +171,10 @@ struct boss_magtheridonAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        // IsStunned already handled in SelectHostileTarget
+        if (m_creature->HasAura(SPELL_SHADOW_CAGE_DUMMY) /*|| m_creature->IsStunned()*/ || m_creature->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+            return;
+
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
@@ -204,95 +219,70 @@ struct boss_magtheridonAI : public ScriptedAI
             }
             else
                 m_uiTransitionTimer -= uiDiff;
-
-            // Workaround for missing spell: no other spells during transition
-            if (!m_uiTransitionCount)
-                return;
         }
-
-        if (m_uiQuakeTimer < uiDiff)
+        else // not transitioning
         {
-            // Workaround for missing spell
-            // Note: this won't really stun the boss, but it won't allow him to use other spells
-            if (!m_uiQuakeCount)
+            // Transition to phase 3
+            if (!m_bIsPhase3 && m_creature->GetHealthPercent() < 30.0f)
             {
-                SetCombatMovement(false);
-                m_creature->GetMotionMaster()->Clear();
-                m_creature->GetMotionMaster()->MoveIdle();
+                // ToDo: maybe there is a spell here - requires additional research
+                DoScriptText(SAY_CHAMBER_DESTROY, m_creature);
+                m_uiTransitionTimer = 5000;
+                m_bIsPhase3 = true;
             }
-
-            if (m_uiQuakeCount < MAX_QUAKE_COUNT)
+            else
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_QUAKE_KNOCKBACK) == CAST_OK)
+                if (m_uiQuakeTimer < uiDiff)
                 {
-                    m_uiQuakeTimer = 1000;
-                    ++m_uiQuakeCount;
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_QUAKE) == CAST_OK)
+                        m_uiQuakeTimer = 50000;
+                }
+                else
+                    m_uiQuakeTimer -= uiDiff;
+
+                if (m_uiCleaveTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                        m_uiCleaveTimer = 10000;
+                }
+                else
+                    m_uiCleaveTimer -= uiDiff;
+
+                if (m_uiBlastNovaTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BLASTNOVA) == CAST_OK)
+                    {
+						m_creature->RemoveAurasDueToSpell(SPELL_QUAKE);
+                        DoScriptText(EMOTE_BLASTNOVA, m_creature);
+                        m_uiBlastNovaTimer = 60000;
+                        //m_creature->AttackStop(true); // needs to deselect target, probably needs to be moved to spell system
+                    }
+                }
+                else
+                    m_uiBlastNovaTimer -= uiDiff;
+
+                if (m_uiBlazeTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BLAZE) == CAST_OK)
+                        m_uiBlazeTimer = urand(10000, 15000);
+                }
+                else
+                    m_uiBlazeTimer -= uiDiff;
+
+                // Debris fall in phase 3
+                if (m_bIsPhase3)
+                {
+                    if (m_uiDebrisTimer < uiDiff)
+                    {
+                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1)) // dont use selecting for ID due to spell being "Self Only"
+                            if (m_creature->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), SPELL_DEBRIS_VISUAL, TRIGGERED_NONE) == SPELL_CAST_OK)
+                                m_uiDebrisTimer = urand(20000, 30000);
+                    }
+                    else
+                        m_uiDebrisTimer -= uiDiff;
                 }
             }
-            else
-            {
-                SetCombatMovement(true);
-                m_creature->GetMotionMaster()->Clear();
-                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-
-                m_uiQuakeTimer = 43000;
-                m_uiQuakeCount = 0;
-            }
-        }
-        else
-            m_uiQuakeTimer -= uiDiff;
-
-        // don't use other spells during quake
-        if (m_uiQuakeCount)
-            return;
-
-        if (m_uiCleaveTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-                m_uiCleaveTimer = 10000;
-        }
-        else
-            m_uiCleaveTimer -= uiDiff;
-
-        if (m_uiBlastNovaTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BLASTNOVA) == CAST_OK)
-            {
-                DoScriptText(EMOTE_BLASTNOVA, m_creature);
-                m_uiBlastNovaTimer = 60000;
-            }
-        }
-        else
-            m_uiBlastNovaTimer -= uiDiff;
-
-        if (m_uiBlazeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BLAZE) == CAST_OK)
-                m_uiBlazeTimer = urand(10000, 15000);
-        }
-        else
-            m_uiBlazeTimer -= uiDiff;
-
-        // Transition to phase 3
-        if (!m_bIsPhase3 && m_creature->GetHealthPercent() < 30.0f)
-        {
-            // ToDo: maybe there is a spell here - requires additional research
-            DoScriptText(SAY_CHAMBER_DESTROY, m_creature);
-            m_uiTransitionTimer = 5000;
-            m_bIsPhase3 = true;
-        }
-
-        // Debris fall in phase 3
-        if (m_bIsPhase3)
-        {
-            if (m_uiDebrisTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_QUAKE_EFFECT) == CAST_OK)
-                    m_uiDebrisTimer = urand(20000, 30000);
-            }
-            else
-                m_uiDebrisTimer -= uiDiff;
-        }
+        }               
 
         DoMeleeAttackIfReady();
     }
@@ -340,7 +330,7 @@ struct mob_hellfire_channelerAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoCastSpellIfCan(m_creature, SPELL_SOUL_TRANSFER, CAST_TRIGGERED);
+        m_creature->CastSpell(m_creature, SPELL_SOUL_TRANSFER, TRIGGERED_OLD_TRIGGERED);
     }
 
     void JustReachedHome() override
@@ -458,47 +448,6 @@ bool GOUse_go_manticron_cube(Player* pPlayer, GameObject* pGo)
     return true;
 }
 
-// TODO Remove this 'script' when combat and persistent area auras can be proper prevented from core-side
-struct npc_target_triggerAI : public Scripted_NoMovementAI
-{
-    npc_target_triggerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) {Reset();}
-
-    uint32 m_uiDebrisTimer;
-
-    void Reset() override
-    {
-        m_uiDebrisTimer = 0;
-    }
-
-    void AttackStart(Unit* /*pWho*/) override {}
-    void MoveInLineOfSight(Unit* /*pWho*/) override {}
-
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        // Workaround for missing core support for this type of dummy aura
-        if (pSpell->Id == SPELL_QUAKE_EFFECT)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_DEBRIS_VISUAL) == CAST_OK)
-                m_uiDebrisTimer = 5000;
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Cast debris damage after 5 seconds (on visual removal)
-        if (m_uiDebrisTimer)
-        {
-            if (m_uiDebrisTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_DEBRIS_DAMAGE) == CAST_OK)
-                    m_uiDebrisTimer = 0;
-            }
-            else
-                m_uiDebrisTimer -= uiDiff;
-        }
-    }
-};
-
 // ToDo: move this script to eventAI
 struct mob_abyssalAI : public ScriptedAI
 {
@@ -548,11 +497,6 @@ CreatureAI* GetAI_mob_hellfire_channeler(Creature* pCreature)
     return new mob_hellfire_channelerAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_target_triggerAI(Creature* pCreature)
-{
-    return new npc_target_triggerAI(pCreature);
-}
-
 CreatureAI* GetAI_mob_abyssalAI(Creature* pCreature)
 {
     return new mob_abyssalAI(pCreature);
@@ -575,11 +519,6 @@ void AddSC_boss_magtheridon()
     pNewScript = new Script;
     pNewScript->Name = "go_manticron_cube";
     pNewScript->pGOUse = &GOUse_go_manticron_cube;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_target_trigger";
-    pNewScript->GetAI = &GetAI_npc_target_triggerAI;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
