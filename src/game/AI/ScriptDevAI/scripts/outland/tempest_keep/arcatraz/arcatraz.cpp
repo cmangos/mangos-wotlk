@@ -91,6 +91,7 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
         InitializeDialogueHelper(m_pInstance);
         Reset();
         m_attackDistance = 25.0f;
+        StartNextDialogueText(NPC_MILLHOUSE);
     }
 
     ScriptedInstance* m_pInstance;
@@ -112,19 +113,6 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
         m_uiFireBlastTimer      = urand(6000, 14000);
         m_uiConeColtTimer       = urand(7000, 12000);
         m_uiArcaneMissileTimer  = urand(5000, 8000);
-
-        StartNextDialogueText(NPC_MILLHOUSE);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            HandleMovementOnAttackStart(pWho);
-        }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -180,8 +168,16 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
             case POINT_ID_CENTER:
                 m_creature->SetWalk(false);
                 m_creature->GetMotionMaster()->MovePoint(1, fRoomCenterCoords[0], fRoomCenterCoords[1], fRoomCenterCoords[2]);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                 break;
         }
+    }
+
+    void HandleMovementOnAttackStart(Unit* victim) const override
+    {
+        m_creature->GetMotionMaster()->MoveChase(victim, m_attackDistance, m_attackAngle, false);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -272,6 +268,7 @@ struct npc_warden_mellicharAI : public ScriptedAI
     npc_warden_mellicharAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        SetCombatMovement(false);
         Reset();
     }
 
@@ -283,7 +280,8 @@ struct npc_warden_mellicharAI : public ScriptedAI
     void Reset() override
     {
         m_uiIntroTimer = 5000;
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
     }
 
     void AttackStart(Unit* /*pWho*/) override {}
@@ -297,7 +295,8 @@ struct npc_warden_mellicharAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_BUBBLE_VISUAL);
 
         // In theory the Seal Sphere should protect the npc from being attacked, but because LoS isn't enabled for Gameobjects we have to use this workaround
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        SetReactState(REACT_PASSIVE);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_HARBINGERSKYRISS, IN_PROGRESS);
@@ -316,6 +315,7 @@ struct npc_warden_mellicharAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         if (m_pInstance)
         {
             if (Creature* pSkyriss = m_pInstance->GetSingleCreatureFromStorage(NPC_SKYRISS))
