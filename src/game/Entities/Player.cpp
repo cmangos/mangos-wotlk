@@ -18609,7 +18609,7 @@ void Player::CharmSpellInitialize() const
     data << charm->GetObjectGuid();
     data << uint16(0);
     data << uint32(0);
-    data << uint8(charm->GetAI()->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0);
+    data << uint8(charm->AI()->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0);
 
     charmInfo->BuildActionBar(data);
 

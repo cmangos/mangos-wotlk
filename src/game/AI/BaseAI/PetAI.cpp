@@ -46,7 +46,7 @@ PetAI::PetAI(Creature* creature) : CreatureAI(creature), inCombat(false)
             m_attackAngle = M_PI_F;
             break;
         case MINI_PET:
-            m_reactState = REACT_PASSIVE;
+            SetReactState(REACT_PASSIVE);
             break;
     }
 }
