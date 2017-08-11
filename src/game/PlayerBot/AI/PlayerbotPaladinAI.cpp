@@ -248,11 +248,11 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit *pTarget)
         case PALADIN_SPEC_RETRIBUTION:
             if (HAMMER_OF_WRATH > 0 && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.20 && m_ai->CastSpell (HAMMER_OF_WRATH, *pTarget))
                 return RETURN_CONTINUE;
-            if (ART_OF_WAR > 0 && EXORCISM > 0 && !m_bot->HasSpellCooldown(EXORCISM) && m_bot->HasAura(ART_OF_WAR, EFFECT_INDEX_0) && m_ai->CastSpell (EXORCISM, *pTarget))
+            if (ART_OF_WAR > 0 && EXORCISM > 0 && m_bot->IsSpellReady(EXORCISM) && m_bot->HasAura(ART_OF_WAR, EFFECT_INDEX_0) && m_ai->CastSpell (EXORCISM, *pTarget))
                 return RETURN_CONTINUE;
-            if (CRUSADER_STRIKE > 0 && !m_bot->HasSpellCooldown(CRUSADER_STRIKE) && m_ai->CastSpell (CRUSADER_STRIKE, *pTarget))
+            if (CRUSADER_STRIKE > 0 && m_bot->IsSpellReady(CRUSADER_STRIKE) && m_ai->CastSpell (CRUSADER_STRIKE, *pTarget))
                 return RETURN_CONTINUE;
-            if (DIVINE_STORM > 0 && /*m_ai->GetAttackerCount() >= 3 && meleeReach*/ !m_bot->HasSpellCooldown(DIVINE_STORM) && m_ai->CastSpell (DIVINE_STORM, *pTarget))
+            if (DIVINE_STORM > 0 && /*m_ai->GetAttackerCount() >= 3 && meleeReach*/ m_bot->IsSpellReady(DIVINE_STORM) && m_ai->CastSpell (DIVINE_STORM, *pTarget))
                 return RETURN_CONTINUE;
             if (JUDGEMENT_OF_LIGHT > 0 && m_ai->CastSpell (JUDGEMENT_OF_LIGHT, *pTarget))
                 return RETURN_CONTINUE;
@@ -278,17 +278,17 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit *pTarget)
 
         case PALADIN_SPEC_PROTECTION:
             //Taunt if orders specify
-            if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK && !newTarget && HAND_OF_RECKONING > 0 && !m_bot->HasSpellCooldown(HAND_OF_RECKONING) && m_ai->CastSpell(HAND_OF_RECKONING, *pTarget))
+            if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK && !newTarget && HAND_OF_RECKONING > 0 && m_bot->IsSpellReady(HAND_OF_RECKONING) && m_ai->CastSpell(HAND_OF_RECKONING, *pTarget))
                 return RETURN_CONTINUE;
-            if (CONSECRATION > 0 && !m_bot->HasSpellCooldown(CONSECRATION) && m_ai->CastSpell(CONSECRATION, *pTarget))
+            if (CONSECRATION > 0 && m_bot->IsSpellReady(CONSECRATION) && m_ai->CastSpell(CONSECRATION, *pTarget))
                 return RETURN_CONTINUE;
             if (HOLY_SHIELD > 0 && !m_bot->HasAura(HOLY_SHIELD) && m_ai->CastSpell(HOLY_SHIELD, *m_bot))
                 return RETURN_CONTINUE;
-            if (AVENGERS_SHIELD > 0 && !m_bot->HasSpellCooldown(AVENGERS_SHIELD) && m_ai->CastSpell(AVENGERS_SHIELD, *pTarget))
+            if (AVENGERS_SHIELD > 0 && m_bot->IsSpellReady(AVENGERS_SHIELD) && m_ai->CastSpell(AVENGERS_SHIELD, *pTarget))
                 return RETURN_CONTINUE;
-            if (HAMMER_OF_THE_RIGHTEOUS > 0 && !m_bot->HasSpellCooldown(HAMMER_OF_THE_RIGHTEOUS) && m_ai->CastSpell(HAMMER_OF_THE_RIGHTEOUS, *pTarget))
+            if (HAMMER_OF_THE_RIGHTEOUS > 0 && m_bot->IsSpellReady(HAMMER_OF_THE_RIGHTEOUS) && m_ai->CastSpell(HAMMER_OF_THE_RIGHTEOUS, *pTarget))
                 return RETURN_CONTINUE;
-            if (SHIELD_OF_RIGHTEOUSNESS > 0 && !m_bot->HasSpellCooldown(SHIELD_OF_RIGHTEOUSNESS) && m_ai->CastSpell(SHIELD_OF_RIGHTEOUSNESS, *pTarget))
+            if (SHIELD_OF_RIGHTEOUSNESS > 0 && m_bot->IsSpellReady(SHIELD_OF_RIGHTEOUSNESS) && m_ai->CastSpell(SHIELD_OF_RIGHTEOUSNESS, *pTarget))
                 return RETURN_CONTINUE;
             if (JUDGEMENT_OF_LIGHT > 0 && m_ai->CastSpell (JUDGEMENT_OF_LIGHT, *pTarget))
                 return RETURN_CONTINUE;
@@ -654,9 +654,9 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *targe
 // Match up with "Pull()" below
 bool PlayerbotPaladinAI::CanPull()
 {
-    if (HAND_OF_RECKONING && !m_bot->HasSpellCooldown(HAND_OF_RECKONING))
+    if (HAND_OF_RECKONING && m_bot->IsSpellReady(HAND_OF_RECKONING))
         return true;
-    if (EXORCISM && !m_bot->HasSpellCooldown(EXORCISM))
+    if (EXORCISM && m_bot->IsSpellReady(EXORCISM))
         return true;
 
     return false;

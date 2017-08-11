@@ -220,25 +220,6 @@ void MovementInfo::Write(ByteBuffer& data) const
 }
 
 ////////////////////////////////////////////////////////////
-// Methods of class GlobalCooldownMgr
-
-bool GlobalCooldownMgr::HasGlobalCooldown(SpellEntry const* spellInfo) const
-{
-    GlobalCooldownList::const_iterator itr = m_GlobalCooldowns.find(spellInfo->StartRecoveryCategory);
-    return itr != m_GlobalCooldowns.end() && itr->second.duration && WorldTimer::getMSTimeDiff(itr->second.cast_time, WorldTimer::getMSTime()) < itr->second.duration;
-}
-
-void GlobalCooldownMgr::AddGlobalCooldown(SpellEntry const* spellInfo, uint32 gcd)
-{
-    m_GlobalCooldowns[spellInfo->StartRecoveryCategory] = GlobalCooldown(gcd, WorldTimer::getMSTime());
-}
-
-void GlobalCooldownMgr::CancelGlobalCooldown(SpellEntry const* spellInfo)
-{
-    m_GlobalCooldowns[spellInfo->StartRecoveryCategory].duration = 0;
-}
-
-////////////////////////////////////////////////////////////
 // Methods of class Unit
 
 Unit::Unit() :
@@ -383,6 +364,7 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     // WARNING! Order of execution here is important, do not change.
     // Spells must be processed with event system BEFORE they go to _UpdateSpells.
     // Or else we may have some SPELL_STATE_FINISHED spells stalled in pointers, that is bad.
+    UpdateCooldowns(Clock::now());
     m_Events.Update(update_diff);
     _UpdateSpells(update_diff);
 
@@ -2130,7 +2112,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                 {
                     if (!preventDeathSpell &&
                             GetTypeId() == TYPEID_PLAYER && // Only players
-                            !((Player*)this)->HasSpellCooldown(31231) &&
+                            IsSpellReady(31231) &&
                             // Only if no cooldown
                             roll_chance_i((*i)->GetModifier()->m_amount))
                         // Only if roll
@@ -2441,8 +2423,9 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                 // Cheat Death
                 if (preventDeathSpell->SpellIconID == 2109)
                 {
-                    CastSpell(this, 31231, TRIGGERED_OLD_TRIGGERED);
-                    ((Player*)this)->AddSpellCooldown(31231, 0, time(nullptr) + 60);
+                    SpellEntry const* cheatDeath = sSpellTemplate.LookupEntry<SpellEntry>(31231);
+                    CastSpell(this, cheatDeath, TRIGGERED_OLD_TRIGGERED);
+                    AddCooldown(*cheatDeath, nullptr, false, 60 * IN_MILLISECONDS); // TODO this may be removed by fixing cooldown value in spell template
                     // with health > 10% lost health until health==10%, in other case no losses
                     uint32 health10 = GetMaxHealth() / 10;
                     RemainingDamage = GetHealth() > health10 ? GetHealth() - health10 : 0;
@@ -5987,13 +5970,13 @@ void Unit::AddGameObject(GameObject* gameObj)
     m_gameObj.push_back(gameObj);
     gameObj->SetOwnerGuid(GetObjectGuid());
 
-    if (GetTypeId() == TYPEID_PLAYER && gameObj->GetSpellId())
+    if (gameObj->GetSpellId())
     {
         SpellEntry const* createBySpell = sSpellTemplate.LookupEntry<SpellEntry>(gameObj->GetSpellId());
         // Need disable spell use for owner
         if (createBySpell && createBySpell->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
             // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
-            ((Player*)this)->AddSpellAndCategoryCooldowns(createBySpell, 0, nullptr, true);
+            AddCooldown(*createBySpell);
     }
 }
 
@@ -6032,7 +6015,7 @@ void Unit::RemoveGameObject(GameObject* gameObj, bool del)
             // Need activate spell use for owner
             if (createBySpell && createBySpell->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
                 // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
-                ((Player*)this)->SendCooldownEvent(createBySpell);
+                AddCooldown(*createBySpell);
         }
     }
 

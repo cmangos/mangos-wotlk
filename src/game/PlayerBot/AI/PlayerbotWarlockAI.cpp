@@ -209,7 +209,7 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit *pTarget)
     Unit *newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
     if (newTarget) // TODO: && party has a tank
     {
-        if (SOULSHATTER > 0 && shardCount > 0 && !m_bot->HasSpellCooldown(SOULSHATTER))
+        if (SOULSHATTER > 0 && shardCount > 0 && m_bot->IsSpellReady(SOULSHATTER))
             if (CastSpell(SOULSHATTER, m_bot))
                 return RETURN_CONTINUE;
 
@@ -247,7 +247,7 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit *pTarget)
                 return RETURN_CONTINUE;
             if (FIRE && m_ai->In_Reach(pTarget,FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
                 return RETURN_CONTINUE;
-            if (HAUNT && m_ai->In_Reach(pTarget,HAUNT) && !m_bot->HasSpellCooldown(HAUNT) && CastSpell(HAUNT, pTarget))
+            if (HAUNT && m_ai->In_Reach(pTarget,HAUNT) && m_bot->IsSpellReady(HAUNT) && CastSpell(HAUNT, pTarget))
                 return RETURN_CONTINUE;
             if (SHADOW_BOLT && m_ai->In_Reach(pTarget,SHADOW_BOLT) && CastSpell(SHADOW_BOLT, pTarget))
                 return RETURN_CONTINUE;
@@ -255,7 +255,7 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit *pTarget)
             return RETURN_NO_ACTION_OK;
 
         case WARLOCK_SPEC_DEMONOLOGY:
-            if (pet && DEMONIC_EMPOWERMENT && !m_bot->HasSpellCooldown(DEMONIC_EMPOWERMENT) && CastSpell(DEMONIC_EMPOWERMENT))
+            if (pet && DEMONIC_EMPOWERMENT && m_bot->IsSpellReady(DEMONIC_EMPOWERMENT) && CastSpell(DEMONIC_EMPOWERMENT))
                 return RETURN_CONTINUE;
             if (CURSE_OF_AGONY && m_ai->In_Reach(pTarget,CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
                 return RETURN_CONTINUE;
@@ -277,9 +277,9 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit *pTarget)
                 return RETURN_CONTINUE;
             if (FIRE && m_ai->In_Reach(pTarget,FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
                 return RETURN_CONTINUE;
-            if (CONFLAGRATE && m_ai->In_Reach(pTarget,CONFLAGRATE) && pTarget->HasAura(FIRE) && !m_bot->HasSpellCooldown(CONFLAGRATE) && CastSpell(CONFLAGRATE, pTarget))
+            if (CONFLAGRATE && m_ai->In_Reach(pTarget,CONFLAGRATE) && pTarget->HasAura(FIRE) && m_bot->IsSpellReady(CONFLAGRATE) && CastSpell(CONFLAGRATE, pTarget))
                 return RETURN_CONTINUE;
-            if (CHAOS_BOLT && m_ai->In_Reach(pTarget,CHAOS_BOLT) && !m_bot->HasSpellCooldown(CHAOS_BOLT) && CastSpell(CHAOS_BOLT, pTarget))
+            if (CHAOS_BOLT && m_ai->In_Reach(pTarget,CHAOS_BOLT) && m_bot->IsSpellReady(CHAOS_BOLT) && CastSpell(CHAOS_BOLT, pTarget))
                 return RETURN_CONTINUE;
             if (INCINERATE && m_ai->In_Reach(pTarget,INCINERATE) && pTarget->HasAura(FIRE) && CastSpell(INCINERATE, pTarget))
                 return RETURN_CONTINUE;
@@ -502,14 +502,14 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         Item* soulStone = m_ai->FindConsumable(SOULSTONE_DISPLAYID);
         if (!soulStone)
         {
-            if (shardCount > 0 && !m_bot->HasSpellCooldown(CREATE_SOULSTONE) && m_ai->CastSpell(CREATE_SOULSTONE))
+            if (shardCount > 0 && m_bot->IsSpellReady(CREATE_SOULSTONE) && m_ai->CastSpell(CREATE_SOULSTONE))
                 return;
         }
         else
         {
             uint32 soulStoneSpell = soulStone->GetProto()->Spells[0].SpellId;
             Player* master = GetMaster();
-            if (!master->HasAura(soulStoneSpell) && !m_bot->HasSpellCooldown(soulStoneSpell))
+            if (!master->HasAura(soulStoneSpell) && m_bot->IsSpellReady(soulStoneSpell))
             {
                 // TODO: first choice: healer. Second choice: anyone else with revive spell. Third choice: self or master.
                 m_ai->UseItem(soulStone, master);

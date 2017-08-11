@@ -332,11 +332,11 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit *pTarget)
                 return RETURN_CONTINUE;
             if (REND > 0 && !pTarget->HasAura(REND, EFFECT_INDEX_0) && m_ai->CastSpell(REND, *pTarget))
                 return RETURN_CONTINUE;
-            if (MORTAL_STRIKE > 0 && !m_bot->HasSpellCooldown(MORTAL_STRIKE) && m_ai->CastSpell(MORTAL_STRIKE, *pTarget))
+            if (MORTAL_STRIKE > 0 && m_bot->IsSpellReady(MORTAL_STRIKE) && m_ai->CastSpell(MORTAL_STRIKE, *pTarget))
                 return RETURN_CONTINUE;
-            if (SHATTERING_THROW > 0 && !pTarget->HasAura(SHATTERING_THROW, EFFECT_INDEX_0) && !m_bot->HasSpellCooldown(SHATTERING_THROW) && m_ai->CastSpell(SHATTERING_THROW, *pTarget))
+            if (SHATTERING_THROW > 0 && !pTarget->HasAura(SHATTERING_THROW, EFFECT_INDEX_0) && m_bot->IsSpellReady(SHATTERING_THROW) && m_ai->CastSpell(SHATTERING_THROW, *pTarget))
                 return RETURN_CONTINUE;
-            if (BLADESTORM > 0 && !m_bot->HasSpellCooldown(BLADESTORM) /*&& m_ai->GetAttackerCount() >= 3*/ && m_ai->CastSpell(BLADESTORM, *pTarget))
+            if (BLADESTORM > 0 && m_bot->IsSpellReady(BLADESTORM) /*&& m_ai->GetAttackerCount() >= 3*/ && m_ai->CastSpell(BLADESTORM, *pTarget))
                 return RETURN_CONTINUE;
             // No way to tell if overpower is active (yet), however taste for blood works
             if (OVERPOWER > 0 && m_bot->HasAura(TASTE_FOR_BLOOD) && m_ai->CastSpell(OVERPOWER, *pTarget))
@@ -352,9 +352,9 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit *pTarget)
         case WARRIOR_SPEC_FURY:
             if (EXECUTE > 0 && pTarget->GetHealthPercent() < 20 && m_ai->CastSpell (EXECUTE, *pTarget))
                 return RETURN_CONTINUE;
-            if (BLOODTHIRST > 0 && !m_bot->HasSpellCooldown(BLOODTHIRST) && m_ai->CastSpell(BLOODTHIRST, *pTarget))
+            if (BLOODTHIRST > 0 && m_bot->IsSpellReady(BLOODTHIRST) && m_ai->CastSpell(BLOODTHIRST, *pTarget))
                 return RETURN_CONTINUE;
-            if (WHIRLWIND > 0 && !m_bot->HasSpellCooldown(WHIRLWIND) && m_ai->CastSpell(WHIRLWIND, *pTarget))
+            if (WHIRLWIND > 0 && m_bot->IsSpellReady(WHIRLWIND) && m_ai->CastSpell(WHIRLWIND, *pTarget))
                 return RETURN_CONTINUE;
             if (SLAM > 0 && m_bot->HasAura(BLOODSURGE, EFFECT_INDEX_0) && m_ai->CastSpell(SLAM, *pTarget))
                 return RETURN_CONTINUE;
@@ -362,7 +362,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit *pTarget)
                 return RETURN_CONTINUE;
 
         case WARRIOR_SPEC_PROTECTION:
-            if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK && !newTarget && TAUNT > 0 && !m_bot->HasSpellCooldown(TAUNT) && m_ai->CastSpell(TAUNT, *pTarget))
+            if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK && !newTarget && TAUNT > 0 && m_bot->IsSpellReady(TAUNT) && m_ai->CastSpell(TAUNT, *pTarget))
                 return RETURN_CONTINUE;
             // No way to tell if revenge is active (yet)
             /*if (REVENGE > 0 && m_ai->CastSpell(REVENGE, *pTarget))
@@ -373,11 +373,11 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit *pTarget)
                 return RETURN_CONTINUE;
             if (DEMORALIZING_SHOUT > 0 && !pTarget->HasAura(DEMORALIZING_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(DEMORALIZING_SHOUT, *pTarget))
                 return RETURN_CONTINUE;
-            if (CONCUSSION_BLOW > 0 && !m_bot->HasSpellCooldown(CONCUSSION_BLOW) && m_ai->CastSpell(CONCUSSION_BLOW, *pTarget))
+            if (CONCUSSION_BLOW > 0 && m_bot->IsSpellReady(CONCUSSION_BLOW) && m_ai->CastSpell(CONCUSSION_BLOW, *pTarget))
                 return RETURN_CONTINUE;
-            if (SHOCKWAVE > 0 && !m_bot->HasSpellCooldown(SHOCKWAVE) && m_ai->CastSpell(SHOCKWAVE, *pTarget))
+            if (SHOCKWAVE > 0 && m_bot->IsSpellReady(SHOCKWAVE) && m_ai->CastSpell(SHOCKWAVE, *pTarget))
                 return RETURN_CONTINUE;
-            if (SHIELD_SLAM > 0 && !m_bot->HasSpellCooldown(SHIELD_SLAM) && m_ai->CastSpell(SHIELD_SLAM, *pTarget))
+            if (SHIELD_SLAM > 0 && m_bot->IsSpellReady(SHIELD_SLAM) && m_ai->CastSpell(SHIELD_SLAM, *pTarget))
                 return RETURN_CONTINUE;
             /*if (SUNDER > 0 && !pTarget->HasAura(SUNDER_ARMOR) && m_ai->CastSpell(SUNDER, *pTarget))
                 return RETURN_CONTINUE;*/
