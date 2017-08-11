@@ -1597,7 +1597,7 @@ struct npc_spawned_oronok_tornheartAI : public ScriptedAI, private DialogueHelpe
                 // Cyrukh starts to attack
                 if (Creature* pCyrukh = m_creature->GetMap()->GetCreature(m_cyrukhGuid))
                 {
-                    pCyrukh->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                    pCyrukh->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                     pCyrukh->AI()->AttackStart(m_creature);
                     AttackStart(pCyrukh);
                     m_bHasAttackStart = true;
