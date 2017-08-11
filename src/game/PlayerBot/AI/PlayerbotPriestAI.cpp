@@ -287,7 +287,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit *pTarget)
                 return RETURN_CONTINUE;
             if (SHADOW_WORD_PAIN > 0 && m_ai->In_Reach(pTarget,SHADOW_WORD_PAIN) && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && CastSpell(SHADOW_WORD_PAIN, pTarget))
                 return RETURN_CONTINUE;
-            if (MIND_BLAST > 0 && m_ai->In_Reach(pTarget,MIND_BLAST) && (!m_bot->HasSpellCooldown(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
+            if (MIND_BLAST > 0 && m_ai->In_Reach(pTarget,MIND_BLAST) && (m_bot->IsSpellReady(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
                 return RETURN_CONTINUE;
             if (MIND_FLAY > 0 && m_ai->In_Reach(pTarget,MIND_FLAY) && CastSpell(MIND_FLAY, pTarget))
             {
@@ -318,7 +318,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit *pTarget)
     }
 
     // No spec due to low level OR no spell found yet
-    if (MIND_BLAST > 0 && m_ai->In_Reach(pTarget,MIND_BLAST) && (!m_bot->HasSpellCooldown(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
+    if (MIND_BLAST > 0 && m_ai->In_Reach(pTarget,MIND_BLAST) && (m_bot->IsSpellReady(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
         return RETURN_CONTINUE;
     if (SHADOW_WORD_PAIN > 0 && m_ai->In_Reach(pTarget,SHADOW_WORD_PAIN) && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && CastSpell(SHADOW_WORD_PAIN, pTarget))
         return RETURN_CONTINUE;

@@ -230,13 +230,13 @@ CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuverPVE(Unit *pTarget)
     switch (spec)
     {
         case SHAMAN_SPEC_ENHANCEMENT:
-            if (STORMSTRIKE > 0 && (!m_bot->HasSpellCooldown(STORMSTRIKE)) && m_ai->CastSpell(STORMSTRIKE, *pTarget))
+            if (STORMSTRIKE > 0 && (m_bot->IsSpellReady(STORMSTRIKE)) && m_ai->CastSpell(STORMSTRIKE, *pTarget))
                 return RETURN_CONTINUE;
             if (FLAME_SHOCK > 0 && (!pTarget->HasAura(FLAME_SHOCK)) && m_ai->CastSpell(FLAME_SHOCK, *pTarget))
                 return RETURN_CONTINUE;
-            if (EARTH_SHOCK > 0 && (!m_bot->HasSpellCooldown(EARTH_SHOCK)) && m_ai->CastSpell(EARTH_SHOCK, *pTarget))
+            if (EARTH_SHOCK > 0 && (m_bot->IsSpellReady(EARTH_SHOCK)) && m_ai->CastSpell(EARTH_SHOCK, *pTarget))
                 return RETURN_CONTINUE;
-            if (LAVA_LASH > 0 && (!m_bot->HasSpellCooldown(LAVA_LASH)) && m_ai->CastSpell(LAVA_LASH, *pTarget))
+            if (LAVA_LASH > 0 && (m_bot->IsSpellReady(LAVA_LASH)) && m_ai->CastSpell(LAVA_LASH, *pTarget))
                 return RETURN_CONTINUE;
             if (MAELSTROM_WEAPON > 0 && LIGHTNING_BOLT > 0 && m_bot->HasAura(MAELSTROM_WEAPON) && m_ai->CastSpell(LIGHTNING_BOLT, *pTarget))
                 return RETURN_CONTINUE;
@@ -250,7 +250,7 @@ CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuverPVE(Unit *pTarget)
         case SHAMAN_SPEC_ELEMENTAL:
             if (FLAME_SHOCK > 0 && (!pTarget->HasAura(FLAME_SHOCK)) && m_ai->CastSpell(FLAME_SHOCK, *pTarget))
                 return RETURN_CONTINUE;
-            if (LAVA_BURST > 0 && (pTarget->HasAura(FLAME_SHOCK)) && (!m_bot->HasSpellCooldown(LAVA_BURST)) && m_ai->CastSpell(LAVA_BURST, *pTarget))
+            if (LAVA_BURST > 0 && (pTarget->HasAura(FLAME_SHOCK)) && (m_bot->IsSpellReady(LAVA_BURST)) && m_ai->CastSpell(LAVA_BURST, *pTarget))
                 return RETURN_CONTINUE;
             if (LIGHTNING_BOLT > 0 && m_ai->CastSpell(LIGHTNING_BOLT, *pTarget))
                 return RETURN_CONTINUE;

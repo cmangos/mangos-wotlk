@@ -5098,7 +5098,7 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
     }
     // Heroic Fury (Intercept cooldown remove)
     else if (apply && GetSpellProto()->Id == 60970 && target->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)target)->RemoveSpellCooldown(20252, true);
+        target->RemoveSpellCooldown(20252, true);
 }
 
 void Aura::HandleModMechanicImmunityMask(bool apply, bool /*Real*/)
@@ -6740,7 +6740,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             spellId1 = 49868;
 
             if (target->GetTypeId() == TYPEID_PLAYER)     // Spell 49868 have same category as main form spell and share cooldown
-                ((Player*)target)->RemoveSpellCooldown(49868);
+                target->RemoveSpellCooldown(49868);
             break;
         case FORM_GHOSTWOLF:
             spellId1 = 67116;
@@ -9142,7 +9142,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
         if (m_spellProto->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
         {
             Item* castItem = m_castItemGuid ? ((Player*)caster)->GetItemByGuid(m_castItemGuid) : nullptr;
-            ((Player*)caster)->AddSpellAndCategoryCooldowns(m_spellProto, castItem ? castItem->GetEntry() : 0, nullptr, true);
+            caster->AddCooldown(*m_spellProto, castItem ? castItem->GetProto() : nullptr, true);
         }
     }
 
@@ -9345,11 +9345,10 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
         }
 
         // reset cooldown state for spells
-        if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+        if (GetSpellProto()->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
         {
-            if (GetSpellProto()->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
-                // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
-                ((Player*)caster)->SendCooldownEvent(GetSpellProto());
+            // some spells need to start cooldown at aura fade (like stealth)
+            caster->AddCooldown(*GetSpellProto());
         }
     }
 }
@@ -9959,7 +9958,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 
                         // triggered spell have same category as main spell and cooldown
                         if (apply && m_target->GetTypeId() == TYPEID_PLAYER)
-                            ((Player*)m_target)->RemoveSpellCooldown(61848);
+                            m_target->RemoveSpellCooldown(61848);
                     }
                     else
                         return;
