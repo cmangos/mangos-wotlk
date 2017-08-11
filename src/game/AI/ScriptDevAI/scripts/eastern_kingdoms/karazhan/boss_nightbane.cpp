@@ -81,6 +81,8 @@ struct boss_nightbaneAI : public npc_escortAI
     uint32 m_uiSmokingBlastTimer;
     uint32 m_uiFireballBarrageTimer;
 
+    GuidVector m_skeletons;
+
     bool m_bCombatStarted;
 
     void Reset() override
@@ -89,7 +91,7 @@ struct boss_nightbaneAI : public npc_escortAI
         m_uiFlightPhase             = 1;
         m_bCombatStarted            = false;
 
-        m_uiBellowingRoarTimer      = urand(20000, 30000);
+        m_uiBellowingRoarTimer      = urand(30000, 45000);
         m_uiCharredEarthTimer       = urand(10000, 15000);
         m_uiSmolderingBreathTimer   = urand(9000, 13000);
         m_uiTailSweepTimer          = urand(12000, 15000);
@@ -97,11 +99,19 @@ struct boss_nightbaneAI : public npc_escortAI
 
         SetCombatMovement(true);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+        m_creature->SetCanFly(false);
+        m_creature->SetHover(false);
+        m_creature->SetLevitate(true);
+
+        m_skeletons.clear();
     }
 
     void DoResetAirTimers()
     {
-        m_uiPhaseResetTimer         = urand(20000, 40000);
+        m_uiPhaseResetTimer         = urand(45000, 55000);
         m_uiRainBonesTimer          = 3000;
         m_uiDistractingAshTimer     = urand(10000, 12000);
         m_uiSmokingBlastTimer       = urand(10000, 12000);
@@ -124,8 +134,35 @@ struct boss_nightbaneAI : public npc_escortAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_NIGHTBANE, FAIL);
 
+        for (ObjectGuid& guid : m_skeletons)
+            if (Creature* skeleton = m_creature->GetMap()->GetCreature(guid))
+                skeleton->ForcedDespawn();
+
         // reset boss on evade
         m_creature->ForcedDespawn();
+    }
+
+    void CorpseRemoved(uint32& respawnDelay) override
+    {
+        npc_escortAI::CorpseRemoved(respawnDelay);
+        if (m_pInstance)
+        {
+            if (m_pInstance->GetData(TYPE_NIGHTBANE) == FAIL)
+                respawnDelay = 30; // respawn after 30 seconds on failure
+        }
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        m_skeletons.push_back(summoned->GetObjectGuid());
+
+        if (m_creature->getVictim())
+            summoned->AI()->AttackStart(m_creature->getVictim());
+    }
+
+    void SummonedCreatureJustDied(Creature* summoned) override
+    {
+        m_skeletons.erase(std::remove(m_skeletons.begin(), m_skeletons.end(), summoned->GetObjectGuid()), m_skeletons.end());
     }
 
     void WaypointReached(uint32 uiPointId) override
@@ -134,9 +171,11 @@ struct boss_nightbaneAI : public npc_escortAI
         if (uiPointId == 31)
         {
             SetEscortPaused(true);
-            m_creature->SetLevitate(false);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetCanFly(false);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            m_creature->SetLevitate(false);
+            m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
 
             m_bCombatStarted = true;
             m_creature->SetInCombatWithZone();
@@ -159,21 +198,18 @@ struct boss_nightbaneAI : public npc_escortAI
                     m_uiPhase = PHASE_AIR;
                     break;
                 case POINT_ID_GROUND:
-                    m_creature->SetLevitate(false);
+                    // TODO: remove this once MMAPs are more reliable in the area
                     m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
-
+                    m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                    m_creature->SetCanFly(false);
+                    m_creature->SetHover(false);
                     m_uiPhase = PHASE_GROUND;
                     SetCombatMovement(true);
+                    DoResetThreat();
                     DoStartMovement(m_creature->getVictim());
                     break;
             }
         }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (m_creature->getVictim())
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
     }
 
     // Wrapper to handle movement to the closest trigger
@@ -203,7 +239,7 @@ struct boss_nightbaneAI : public npc_escortAI
         if (pChosenTrigger)
         {
             pChosenTrigger->GetPosition(fX, fY, fZ);
-            m_creature->GetMotionMaster()->MovePoint(bGround ? POINT_ID_GROUND : POINT_ID_AIR, fX, fY, fZ);
+            m_creature->GetMotionMaster()->MoveFlyOrLand(bGround ? POINT_ID_GROUND : POINT_ID_AIR, fX, fY, fZ, !bGround);
         }
     }
 
@@ -219,7 +255,7 @@ struct boss_nightbaneAI : public npc_escortAI
                 if (m_uiBellowingRoarTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_BELLOWING_ROAR) == CAST_OK)
-                        m_uiBellowingRoarTimer = urand(20000, 30000);
+                        m_uiBellowingRoarTimer = urand(30000, 45000);
                 }
                 else
                     m_uiBellowingRoarTimer -= uiDiff;
@@ -234,7 +270,7 @@ struct boss_nightbaneAI : public npc_escortAI
 
                 if (m_uiCharredEarthTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_CHARRED_EARTH) == CAST_OK)
                             m_uiCharredEarthTimer = urand(25000, 35000);
@@ -264,7 +300,9 @@ struct boss_nightbaneAI : public npc_escortAI
                     // Start air phase movement (handled by creature_movement_template)
                     SetCombatMovement(false);
                     m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
-                    m_creature->SetLevitate(true);
+                    m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                    m_creature->SetCanFly(true);
+                    m_creature->SetHover(true);
                     DoMoveToClosestTrigger(false);
 
                     DoScriptText(SAY_AIR_PHASE, m_creature);
@@ -284,7 +322,7 @@ struct boss_nightbaneAI : public npc_escortAI
                     {
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                         {
-                            if (DoCastSpellIfCan(pTarget, SPELL_RAIN_OF_BONES) == CAST_OK)
+                            if (m_creature->CastSpell(pTarget, SPELL_RAIN_OF_BONES, TRIGGERED_NONE) == SPELL_CAST_OK)
                             {
                                 DoScriptText(EMOTE_DEEP_BREATH, m_creature);
                                 m_uiRainBonesTimer = 0;
@@ -294,17 +332,6 @@ struct boss_nightbaneAI : public npc_escortAI
                     else
                         m_uiRainBonesTimer -= uiDiff;
                 }
-
-                if (m_uiDistractingAshTimer < uiDiff)
-                {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    {
-                        if (DoCastSpellIfCan(pTarget, SPELL_DISTRACTING_ASH) == CAST_OK)
-                            m_uiDistractingAshTimer = urand(7000, 13000);
-                    }
-                }
-                else
-                    m_uiDistractingAshTimer -= uiDiff;
 
                 if (m_uiSmokingBlastTimer < uiDiff)
                 {
@@ -317,13 +344,22 @@ struct boss_nightbaneAI : public npc_escortAI
                 else
                     m_uiSmokingBlastTimer -= uiDiff;
 
+                if (m_uiDistractingAshTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(pTarget, SPELL_DISTRACTING_ASH) == CAST_OK)
+                            m_uiDistractingAshTimer = urand(7000, 13000);
+                    }
+                }
+                else
+                    m_uiDistractingAshTimer -= uiDiff;
+
                 if (m_uiFireballBarrageTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_FIREBALL_BARRAGE, SELECT_FLAG_NOT_IN_MELEE_RANGE))
-                    {
-                        if (DoCastSpellIfCan(pTarget, SPELL_FIREBALL_BARRAGE) == CAST_OK)
-                            m_uiFireballBarrageTimer = urand(3000, 6000);
-                    }
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_FARTHEST_AWAY, 0, SPELL_FIREBALL_BARRAGE, SELECT_FLAG_PLAYER))
+                        if (pTarget->IsWithinDist(m_creature, 60.f) || m_creature->CastSpell(m_creature->getVictim(), SPELL_FIREBALL_BARRAGE, TRIGGERED_NONE) == SPELL_CAST_OK)
+                            m_uiFireballBarrageTimer = urand(3000, 6000);  // if farthest target is 40+ yd away
                 }
                 else
                     m_uiFireballBarrageTimer -= uiDiff;
@@ -335,7 +371,7 @@ struct boss_nightbaneAI : public npc_escortAI
                     DoMoveToClosestTrigger(true);
 
                     m_uiPhase = PHASE_TRANSITION;
-                    m_uiPhaseResetTimer = 20000;
+                    m_uiPhaseResetTimer = urand(45000, 55000);
                 }
                 else
                     m_uiPhaseResetTimer -= uiDiff;
@@ -363,19 +399,22 @@ bool ProcessEventId_event_spell_summon_nightbane(uint32 /*uiEventId*/, Object* p
 
         if (pInstance->GetData(TYPE_NIGHTBANE) == NOT_STARTED || pInstance->GetData(TYPE_NIGHTBANE) == FAIL)
         {
-            if (Creature* pNightbane = pInstance->GetSingleCreatureFromStorage(NPC_NIGHTBANE))
+            Creature* nightbane = pInstance->GetSingleCreatureFromStorage(NPC_NIGHTBANE);
+            if (nightbane && nightbane->isAlive())
             {
                 DoScriptText(EMOTE_AWAKEN, ((Player*)pSource));
                 pInstance->SetData(TYPE_NIGHTBANE, IN_PROGRESS);
 
                 // Sort of a hack, it is unclear how this really work but the values appear to be valid (see Onyxia, too)
-                pNightbane->SetStandState(UNIT_STAND_STATE_STAND);
-                pNightbane->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
-                pNightbane->SetLevitate(true);
+                nightbane->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                nightbane->SetStandState(UNIT_STAND_STATE_STAND);
+                nightbane->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+                nightbane->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                nightbane->SetLevitate(true);
 
                 // Switch to waypoint movement
-                if (boss_nightbaneAI* pNightbaneAI = dynamic_cast<boss_nightbaneAI*>(pNightbane->AI()))
-                    pNightbaneAI->Start(true);
+                if (boss_nightbaneAI* nightbaneAI = dynamic_cast<boss_nightbaneAI*>(nightbane->AI()))
+                    nightbaneAI->Start(true);
             }
         }
     }
