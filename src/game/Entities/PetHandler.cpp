@@ -334,7 +334,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                         Spell::SendCastResult((Player*)owner, spellInfo, 0, result, true);
                 }
 
-                if (creature && !creature->IsSpellReady(*spellInfo))
+                if (creature && creature->IsSpellReady(*spellInfo))
                     GetPlayer()->SendClearCooldown(spellid, petUnit);
 
                 charmInfo->SetSpellOpener();
