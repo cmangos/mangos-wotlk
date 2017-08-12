@@ -1562,6 +1562,11 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 34819, TRIGGERED_OLD_TRIGGERED); // Summon 20078 front of the caster
                     return;
                 }
+                case 35754:                                 // Charge
+                {
+                    unitTarget->CastSpell(unitTarget, 35769, TRIGGERED_NONE); // Cast Felfire upon itself on hit
+                    return;
+                }
                 case 36677:                                 // Chaos Breath
                 {
                     if (!unitTarget)

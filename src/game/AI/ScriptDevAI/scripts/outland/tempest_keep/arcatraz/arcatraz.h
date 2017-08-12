@@ -23,6 +23,7 @@ enum
 
     NPC_DALLIAH                     = 20885,
     NPC_SOCCOTHRATES                = 20886,
+    NPC_WRATH_SCRYER_FELFIRE        = 20978,
     NPC_MELLICHAR                   = 20904,                // Skyriss will kill this unit
     NPC_PRISON_APHPA_POD            = 21436,
     NPC_PRISON_BETA_POD             = 21437,

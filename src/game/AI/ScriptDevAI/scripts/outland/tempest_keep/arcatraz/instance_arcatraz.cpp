@@ -156,6 +156,9 @@ void instance_arcatraz::OnCreatureCreate(Creature* pCreature)
         case NPC_SOCCOTHRATES:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
+        case NPC_WRATH_SCRYER_FELFIRE:
+            m_npcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
+            break;
         case NPC_BLAZING_TRICKSTER:
         case NPC_PHASE_HUNTER:
         case NPC_AKKIRIS:
