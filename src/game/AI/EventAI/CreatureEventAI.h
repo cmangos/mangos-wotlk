@@ -129,6 +129,7 @@ enum EventAI_ActionType
     ACTION_T_SET_REACT_STATE            = 50,               // React state, unused, unused
     ACTION_T_PAUSE_WAYPOINTS            = 51,               // DoPause 0: unpause waypoint 1: pause waypoint, unused, unused
     ACTION_T_INTERRUPT_SPELL            = 52,               // SpellType enum CurrentSpellTypes, unused, unused
+    ACTION_T_RESET_COMBAT               = 53,               // No Params
 
     ACTION_T_END,
 };
