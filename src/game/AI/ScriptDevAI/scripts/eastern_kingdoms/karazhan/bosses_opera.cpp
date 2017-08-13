@@ -129,15 +129,6 @@ struct boss_dorotheeAI : public ScriptedAI
         DoScriptText(SAY_DOROTHEE_DEATH, m_creature);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        // Allow a short delay before attacking
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
-            return;
-
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
     void JustSummoned(Creature* pSummoned) override
     {
         if (m_creature->getVictim())
@@ -239,22 +230,6 @@ struct boss_strawmanAI : public ScriptedAI
         m_uiBrainWipeTimer = 7000;
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
-            return;
-
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
-            return;
-
-        ScriptedAI::AttackStart(pWho);
-    }
-
     void Aggro(Unit* /*pWho*/) override
     {
         DoCastSpellIfCan(m_creature, SPELL_CONFLAG_PROC);
@@ -353,22 +328,6 @@ struct boss_tinheadAI : public ScriptedAI
         m_creature->ForcedDespawn();
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
-            return;
-
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
-            return;
-
-        ScriptedAI::AttackStart(pWho);
-    }
-
     void JustDied(Unit* /*pKiller*/) override
     {
         DoScriptText(SAY_TINHEAD_DEATH, m_creature);
@@ -440,22 +399,6 @@ struct boss_roarAI : public ScriptedAI
         m_uiMangleTimer = 5000;
         m_uiShredTimer  = 10000;
         m_uiScreamTimer = 15000;
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
-            return;
-
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
-            return;
-
-        ScriptedAI::AttackStart(pWho);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -539,10 +482,12 @@ struct boss_croneAI : public ScriptedAI
     ScriptedInstance* m_pInstance;
 
     uint32 m_uiChainLightningTimer;
+    uint32 m_uiAggroTimer;
 
     void Reset() override
     {
         m_uiChainLightningTimer = 10000;
+        m_uiAggroTimer = 9000;
     }
 
     void JustReachedHome() override
@@ -578,6 +523,18 @@ struct boss_croneAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        if (m_uiAggroTimer)
+        {
+            if (m_uiAggroTimer <= uiDiff)
+            {
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                m_creature->SetInCombatWithZone();
+                m_uiAggroTimer = 0;
+            }
+            else
+                m_uiAggroTimer -= uiDiff;
+        }
+
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
