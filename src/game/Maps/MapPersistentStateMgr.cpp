@@ -473,7 +473,17 @@ void DungeonResetScheduler::LoadResetTimes()
         if (!t)
         {
             // initialize the reset time
-            t = today + period + diff;
+            // generate time by config on first server launch
+            tm localTm = *localtime(&now);
+            localTm.tm_hour = sWorld.getConfig(CONFIG_UINT32_QUEST_DAILY_RESET_HOUR);
+            localTm.tm_min = 0;
+            localTm.tm_sec = 0;
+            if (period > DAY) // resets bigger than 1 day start on config day
+                localTm.tm_mday += ((7 - localTm.tm_wday + sWorld.getConfig(CONFIG_UINT32_ARENA_FIRST_RESET_DAY)) % 7);
+            else // resets day and less start on next day
+                localTm.tm_mday += 1;
+            localTm.tm_isdst = -1;
+            t = mktime(&localTm);
             CharacterDatabase.DirectPExecute("INSERT INTO instance_reset VALUES ('%u','%u','" UI64FMTD "')", mapid, difficulty, (uint64)t);
         }
 
