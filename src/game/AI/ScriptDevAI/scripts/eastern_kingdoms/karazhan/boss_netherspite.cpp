@@ -38,7 +38,9 @@ enum
     SPELL_PORTAL_ATTUNEMENT     = 30425,
 
     // void zone spells
-    SPELL_CONSUMPTION           = 28865,
+    SPELL_CONSUMPTION           = 28865,                // Has serverside timer in TBC
+    SPELL_CONSUMPTION_TIMER     = 28874,                // Cast in EAI onto void zones on spawn
+    SPELL_ROOT                  = 18373,                // dummy root spell to prevent void zones from moving
 
     // ***** Netherspite portals spells ***** //
     // beam buffs
