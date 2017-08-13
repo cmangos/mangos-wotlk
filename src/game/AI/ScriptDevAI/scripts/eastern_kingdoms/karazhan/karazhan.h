@@ -144,20 +144,6 @@ enum OperaEvents
     OPERA_EVENT_ROMULO_AND_JUL      = 3
 };
 
-struct OperaSpawns
-{
-    uint32 uiEntry;
-    float fX, fY, fZ, fO;
-};
-
-static const OperaSpawns aOperaLocOz[MAX_OZ_OPERA_MOBS] =
-{
-    {NPC_DOROTHEE,  -10896.65f, -1757.62f, 90.55f, 4.86f},
-    {NPC_ROAR,      -10889.53f, -1758.10f, 90.55f, 4.57f},
-    {NPC_TINHEAD,   -10883.84f, -1758.85f, 90.55f, 4.53f},
-    {NPC_STRAWMAN,  -10902.11f, -1756.45f, 90.55f, 4.66f},
-};
-
 struct BasementSpawns
 {
     uint32 uiEntry;
@@ -170,6 +156,20 @@ static const BasementSpawns aBasementEnum[MAX_BASEMENT_MINIBOSSES] =
     {NPC_BAT_MINIBOSS,    EMOTE_BAT_SPAWN,    -10959.11f, -1940.86f, 46.19f, 3.769f},
     {NPC_DOG_MINIBOSS,    EMOTE_DOG_SPAWN,    -10900.01f, -2085.47f, 49.55f, 1.343f},
     {NPC_SPIDER_MINIBOSS, EMOTE_SPIDER_SPAWN, -10939.75f, -2041.11f, 49.55f, 1.361f},
+};
+
+struct OperaSpawns
+{
+    uint32 uiEntry;
+    float fX, fY, fZ, fO;
+};
+
+static const OperaSpawns aOperaLocOz[MAX_OZ_OPERA_MOBS] =
+{
+    { NPC_DOROTHEE,  -10896.65f, -1757.62f, 90.55f, 4.86f },
+    { NPC_ROAR,      -10889.53f, -1758.10f, 90.55f, 4.57f },
+    { NPC_TINHEAD,   -10883.84f, -1758.85f, 90.55f, 4.53f },
+    { NPC_STRAWMAN,  -10902.11f, -1756.45f, 90.55f, 4.66f },
 };
 
 static const OperaSpawns aOperaLocWolf = {NPC_GRANDMOTHER, -10892.01f, -1758.01f, 90.55f, 4.73f};
