@@ -60,8 +60,8 @@ void instance_old_hillsbrad::OnCreatureCreate(Creature* pCreature)
         case NPC_TARETHA:
         case NPC_EROZION:
         case NPC_ARMORER:
-        case NPC_TARREN_MILL_PROTECTOR:
-        case NPC_TARREN_MILL_LOOKOUT:
+        case NPC_BARN_PROTECTOR:
+        case NPC_BARN_LOOKOUT:
         case NPC_YOUNG_BLANCHY:
         case NPC_DRAKE:
         case NPC_SKARLOC:

@@ -32,6 +32,10 @@ enum
     NPC_TARREN_MILL_LOOKOUT         = 18094,
     NPC_YOUNG_BLANCHY               = 18651,
 
+    NPC_BARN_GUARDSMAN              = 23175,
+    NPC_BARN_PROTECTOR              = 23179,
+    NPC_BARN_LOOKOUT                = 23177,
+
     // bosses
     NPC_DRAKE                       = 17848,
     NPC_SKARLOC                     = 17862,
@@ -54,7 +58,7 @@ static const float afInstanceLoc[][4] =
     {2192.58f, 238.44f, 52.44f, 0},                 // left orcs outside loc
 };
 
-static const float aDrakeSummonLoc[4] = {2128.43f, 71.01f, 64.42f, 1.74f};
+static const float aDrakeSummonLoc[4] = {2150.68f, 126.91f, 77.71f, 4.19f};
 
 class instance_old_hillsbrad : public ScriptedInstance
 {
