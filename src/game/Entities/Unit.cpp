@@ -12063,6 +12063,38 @@ void Unit::SetVehicleId(uint32 entry, uint32 overwriteNpcEntry)
     }
 }
 
+Unit const* Unit::FindRootVehicle(const Unit* whichVehicle /*= nullptr*/) const
+{
+    // A server counterpart to client's API:
+    // Searches for a specific vehicle pointer through chain of transports and returns it, if not found or nullptr - returns root vehicle in chain of transports
+    const ObjectGuid &thisTransportGuid = m_movementInfo.GetTransportGuid();
+    if (this == whichVehicle || (thisTransportGuid.IsEmpty() || !thisTransportGuid.IsVehicle()))
+    {
+        if (const VehicleInfo* thisVehicleInfo = this->GetVehicleInfo())
+        {
+            if (thisVehicleInfo->GetVehicleEntry())
+                return this;
+        }
+    }
+    else
+    {
+        if (Unit const* vehicle = ObjectAccessor::GetUnit(*this, thisTransportGuid))
+        {
+            while (vehicle != whichVehicle)
+            {
+                const ObjectGuid &guid = vehicle->m_movementInfo.GetTransportGuid();
+                if (guid.IsEmpty() || !guid.IsVehicle())
+                    break;
+                vehicle = ObjectAccessor::GetUnit(*vehicle, guid);
+                if (!vehicle)
+                    return nullptr;
+            }
+            return vehicle;
+        }
+    }
+    return nullptr;
+}
+
 void Unit::UpdateSplineMovement(uint32 t_diff)
 {
     enum
