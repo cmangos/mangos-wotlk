@@ -6429,7 +6429,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
             }
         }
         // cooldown
-        if (m_caster->IsSpellReady(*m_spellInfo))
+        if (!m_caster->IsSpellReady(*m_spellInfo))
             return SPELL_FAILED_NOT_READY;
     }
 
