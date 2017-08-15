@@ -1257,6 +1257,7 @@ UPDATE creature_template SET ScriptName='boss_high_botanist_freywinn' WHERE entr
 UPDATE creature_template SET ScriptName='boss_laj' WHERE entry=17980;
 UPDATE creature_template SET ScriptName='boss_warp_splinter' WHERE entry=17977;
 UPDATE creature_template SET ScriptName='mob_warp_splinter_treant' WHERE entry=19949;
+UPDATE creature_template SET ScriptName='boss_thorngrin' WHERE entry IN(17978);
 
 /* THE ARCATRAZ */
 UPDATE instance_template SET ScriptName='instance_arcatraz' WHERE map=552;
@@ -4339,7 +4340,15 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1553009,'What am I doing? Why do I...',11232,1,0,0,'warp SAY_SLAY_2'),
 (-1553010,'Children, come to me!',11233,1,0,0,'warp SAY_SUMMON_1'),
 (-1553011,'Maybe this is not--No, we fight! Come to my aid.',11234,1,0,0,'warp SAY_SUMMON_2'),
-(-1553012,'So... confused. Do not... belong here!',11235,1,0,0,'warp SAY_DEATH');
+(-1553012,'So... confused. Do not... belong here!',11235,1,0,0,'warp SAY_DEATH'),
+(-1553013, 'You won\'t... get far.',11212,1,0,0,'Thorngrin YELL on Death'),
+(-1553014, 'I hate to say I told you so...',11207,1,0,0, 'Thorngrind YELL on Player Kill'),
+(-1553015, 'Your life will be mine!',11208,1,0,0,'Thorngrin YELL on Sacrifice'),
+(-1553016, 'You seek a prize, eh? How about death?',11206,1,0,0,'Thorngrin YELL on 20% HP'),
+(-1553017, 'I revel in your pain!',11209,1,0,0,'Thorngrin YELL on 50% HP'),
+(-1553018, 'I\'ll incinerate you!',11210,1,0,0,'Thorngrin YELL on Hellfire 1'),
+(-1553019, 'Scream while you burn! ',11211,1,0,0,'Thorngrin YELL on Hellfire 2'),
+(-1553020, 'What aggravation is this? You will die!',11205,1,0,0,'Thorngrin YELL on Aggro');
 
 -- -1 554 000 THE MECHANAR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
