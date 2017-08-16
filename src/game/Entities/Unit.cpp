@@ -6406,7 +6406,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
             return false;
 
         // Sanctuary
-        if (pTarget->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && pTester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
+        if (pTarget->IsPvPSanctuary() && pTester->IsPvPSanctuary())
             return false;
 
         // PvP FFA state
@@ -6520,7 +6520,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
             return true;
 
         // Sanctuary
-        if (pTarget->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && pTester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
+        if (pTarget->IsPvPSanctuary() && pTester->IsPvPSanctuary())
             return true;
 
         // PvP FFA state
@@ -11717,6 +11717,23 @@ void Unit::SetFFAPvP(bool state)
     CallForAllControlledUnits(SetFFAPvPHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
+struct SetPvPSanctuaryHelper
+{
+    explicit SetPvPSanctuaryHelper(bool _state) : state(_state) {}
+    void operator()(Unit* unit) const { unit->SetPvPSanctuary(state); }
+    bool state;
+};
+
+void Unit::SetPvPSanctuary(bool state)
+{
+    if (state)
+        SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
+    else
+        RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
+
+    CallForAllControlledUnits(SetPvPSanctuaryHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+}
+
 void Unit::RestoreOriginalFaction()
 {
     if (GetTypeId() == TYPEID_PLAYER)
@@ -12338,7 +12355,7 @@ bool Unit::TakeCharmOf(Unit* charmed)
             charmedPlayer->setFaction(getFaction());
 
         charmInfo->SetCharmState("PetAI");
-        charmed->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS); // important have to be after charminfo initialization
+        charmed->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_AURAS); // important have to be after charminfo initialization
                                                                                                            //charmedPlayer->SetWalk(IsWalking(), true);
 
         charmInfo->InitCharmCreateSpells();

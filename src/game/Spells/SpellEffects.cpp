@@ -5834,7 +5834,10 @@ bool Spell::DoSummonCritter(CreatureSummonPositions& list, SummonPropertiesEntry
     if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         critter->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
-    critter->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_UNK5);
+    if (m_caster->IsPvPSanctuary())
+        critter->SetPvPSanctuary(true);
+
+    critter->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK5);
 
     return true;
 }
@@ -5913,6 +5916,9 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
         if (m_caster->IsPvP())
             spawnCreature->SetPvP(true);
 
+        if (m_caster->IsPvPSanctuary())
+            spawnCreature->SetPvPSanctuary(true);
+
         if (CharmInfo* charmInfo = spawnCreature->GetCharmInfo())
         {
             charmInfo->SetPetNumber(pet_number, false);
@@ -5927,7 +5933,7 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
 
         m_caster->AddGuardian(spawnCreature);
 
-        spawnCreature->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_UNK5);
+        spawnCreature->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK5);
     }
 
     return true;
@@ -5993,6 +5999,9 @@ bool Spell::DoSummonTotem(SpellEffectIndex eff_idx, uint8 slot_dbc)
 
     if (m_caster->IsFFAPvP())
         pTotem->SetFFAPvP(true);
+
+    if (m_caster->IsPvPSanctuary())
+        pTotem->SetPvPSanctuary(true);
 
     // sending SMSG_TOTEM_CREATED before add to map (done in Summon)
     if (slot < MAX_TOTEM_SLOT && m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -6742,6 +6751,9 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     if (plr->IsFFAPvP())
         pet->SetFFAPvP(true);
 
+    if (plr->IsPvPSanctuary())
+        pet->SetPvPSanctuary(true);
+
     pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
 
     pet->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
@@ -6873,7 +6885,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     {
         NewSummon->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
-        NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS);
+        NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_AURAS);
 
         NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
 
@@ -6885,6 +6897,9 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
         if (m_caster->IsFFAPvP())
             NewSummon->SetFFAPvP(true);
+
+        if (m_caster->IsPvPSanctuary())
+            NewSummon->SetPvPSanctuary(true);
 
         NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
         ((Player*)m_caster)->PetSpellInitialize();
@@ -12110,6 +12125,9 @@ void Spell::EffectCreateTamedPet(SpellEffectIndex eff_idx)
 
     if (unitTarget->IsFFAPvP())
         newTamedPet->SetFFAPvP(true);
+
+    if (unitTarget->IsPvPSanctuary())
+        newTamedPet->SetPvPSanctuary(true);
 
     newTamedPet->InitStatsForLevel(unitTarget->getLevel());
     newTamedPet->InitPetCreateSpells();
