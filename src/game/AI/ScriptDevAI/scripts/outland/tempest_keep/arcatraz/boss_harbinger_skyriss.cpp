@@ -43,6 +43,9 @@ enum
     SPELL_MANA_BURN_H           = 39020,
     SPELL_66_ILLUSION           = 36931,                    // Summons 21466
     SPELL_33_ILLUSION           = 36932,                    // Summons 21467
+
+    SPELL_BIRTH                 = 26262,                    // Cast by illusions on spawn in EAI
+    SPELL_BLINK_VISUAL          = 36937,
 };
 
 struct boss_harbinger_skyrissAI : public ScriptedAI
