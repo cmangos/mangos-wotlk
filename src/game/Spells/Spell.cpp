@@ -1422,7 +1422,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
 
     if (realCaster && realCaster != unit)
     {
-        if (!realCaster->IsFriendlyTo(unit))
+        if (realCaster->CanAttack(unit))
         {
             // not break stealth by cast targeting
             if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
@@ -1453,7 +1453,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
                 realCaster->SetInCombatWithVictim(unit);
             }
         }
-        else
+        else if(realCaster->CanAssist(unit))
         {
             // assisting case, healing and resurrection
             if (unit->isInCombat() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
