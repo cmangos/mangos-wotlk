@@ -47,7 +47,7 @@ GroupMemberStatus GetGroupMemberStatus(const Player *member = nullptr)
             flags |= MEMBER_STATUS_DEAD;
         if (member->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
             flags |= MEMBER_STATUS_GHOST;
-        if (member->IsFFAPvP())
+        if (member->IsPvPFreeForAll())
             flags |= MEMBER_STATUS_PVP_FFA;
         if (member->isAFK())
             flags |= MEMBER_STATUS_AFK;

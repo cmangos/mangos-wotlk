@@ -2396,7 +2396,7 @@ void Player::SetGameMaster(bool on)
 
         CallForAllControlledUnits(SetGameMasterOnHelper(), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 
-        SetFFAPvP(false);
+        SetPvPFreeForAll(false);
         ResetContestedPvP();
 
         getHostileRefManager().setOnlineOfflineState(false);
@@ -2418,7 +2418,7 @@ void Player::SetGameMaster(bool on)
 
         // restore FFA PvP Server state
         if (sWorld.IsFFAPvPRealm())
-            SetFFAPvP(true);
+            SetPvPFreeForAll(true);
 
         // restore FFA PvP area state, remove not allowed for GM mounts
         UpdateArea(m_areaUpdateId);
@@ -6996,14 +6996,14 @@ void Player::UpdateArea(uint32 newArea)
     if (area && (area->flags & AREA_FLAG_ARENA))
     {
         if (!isGameMaster())
-            SetFFAPvP(true);
+            SetPvPFreeForAll(true);
     }
     else
     {
         // remove ffa flag only if not ffapvp realm
         // removal in sanctuaries and capitals is handled in zone update
-        if (IsFFAPvP() && !sWorld.IsFFAPvPRealm())
-            SetFFAPvP(false);
+        if (IsPvPFreeForAll() && !sWorld.IsFFAPvPRealm())
+            SetPvPFreeForAll(false);
     }
 
     if (area)
@@ -7097,7 +7097,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
             UpdatePvP(false);
 
         if (sWorld.IsFFAPvPRealm())
-            SetFFAPvP(false);
+            SetPvPFreeForAll(false);
     }
     else
     {
@@ -23170,7 +23170,7 @@ void Player::SetRestType(RestType n_r_type, uint32 areaTriggerId /*= 0*/)
 
         // Set player to FFA PVP when not in rested environment.
         if (sWorld.IsFFAPvPRealm())
-            SetFFAPvP(true);
+            SetPvPFreeForAll(true);
     }
     else
     {
@@ -23180,7 +23180,7 @@ void Player::SetRestType(RestType n_r_type, uint32 areaTriggerId /*= 0*/)
         time_inn_enter = time(nullptr);
 
         if (sWorld.IsFFAPvPRealm())
-            SetFFAPvP(false);
+            SetPvPFreeForAll(false);
     }
 }
 

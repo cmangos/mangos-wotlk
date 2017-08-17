@@ -6410,7 +6410,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
             return false;
 
         // PvP FFA state
-        if (pTester->IsFFAPvP() && pTarget->IsFFAPvP())
+        if (pTester->IsPvPFreeForAll() && pTarget->IsPvPFreeForAll())
             return true;
 
         //= PvP states
@@ -6524,7 +6524,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
             return true;
 
         // PvP FFA state
-        if (pTester->IsFFAPvP() && pTarget->IsFFAPvP())
+        if (pTester->IsPvPFreeForAll() && pTarget->IsPvPFreeForAll())
             return false;
 
         //= PvP states
@@ -11697,14 +11697,14 @@ void Unit::SetPvP(bool state)
     CallForAllControlledUnits(SetPvPHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
-struct SetFFAPvPHelper
+struct SetPvPFreeForAllHelper
 {
-    explicit SetFFAPvPHelper(bool _state) : state(_state) {}
-    void operator()(Unit* unit) const { unit->SetFFAPvP(state); }
+    explicit SetPvPFreeForAllHelper(bool _state) : state(_state) {}
+    void operator()(Unit* unit) const { unit->SetPvPFreeForAll(state); }
     bool state;
 };
 
-void Unit::SetFFAPvP(bool state)
+void Unit::SetPvPFreeForAll(bool state)
 {
     if (state)
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
@@ -11714,7 +11714,7 @@ void Unit::SetFFAPvP(bool state)
     if (GetTypeId() == TYPEID_PLAYER && ((Player*)this)->GetGroup())
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_STATUS);
 
-    CallForAllControlledUnits(SetFFAPvPHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+    CallForAllControlledUnits(SetPvPFreeForAllHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
 struct SetPvPSanctuaryHelper
