@@ -54,26 +54,6 @@ struct npc_medivh_black_morassAI : public ScriptedAI
 
     void AttackStart(Unit* /*pWho*/) override { }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // The rift trash mobs are summoned by Medivh, so we can control the movement
-        if (pSummoned->GetEntry() != NPC_TIME_RIFT && pSummoned->GetEntry() != NPC_COUNCIL_ENFORCER)
-        {
-            float fX, fY, fZ;
-            m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 20.0f, m_creature->GetAngle(pSummoned));
-            pSummoned->SetWalk(false);
-            pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
-        }
-    }
-
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override
-    {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        pSummoned->CastSpell(m_creature, SPELL_CORRUPT, TRIGGERED_NONE);
-    }
-
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
@@ -117,6 +97,25 @@ enum
     SAY_CHRONO_LORD_ENTER   = -1269006,
     SAY_TEMPORUS_ENTER      = -1269000,
     SAY_AEONUS_ENTER        = -1269012,
+
+    SPELL_INFINITE_WHELP            = 37606,
+    SPELL_INFINITE_ASSASSIN         = 31318,
+    SPELL_INFINITE_ASSASSIN_2       = 36229,
+    SPELL_INFINITE_CHRONOMANCER     = 31421,
+    SPELL_INFINITE_CHRONOMANCER_2   = 36231,
+    SPELL_INFINITE_EXECUTIONER      = 33363,
+    SPELL_INFINITE_EXECUTIONER_2    = 36232,
+    SPELL_INFINITE_VANQUISHER       = 33364,
+    SPELL_INFINITE_VANQUISHER_2     = 36233,
+    SPELL_RIFT_LORD                 = 31321,
+    SPELL_RIFT_LORD_2               = 36234,
+    SPELL_RIFT_KEEPER               = 36235,
+    SPELL_RIFT_KEEPER_2             = 36236,
+    SPELL_CHRONO_LORD_DEJA          = 31391,
+    SPELL_INFINITE_CHRONO_LORD      = 37177,
+    SPELL_TEMPORUS                  = 31392,
+    SPELL_INFINITE_TIMEREAVER       = 37178,
+    SPELL_RIFT_END_BOSS             = 31393,
 };
 
 struct RiftWaveData
@@ -172,21 +171,12 @@ struct npc_time_riftAI : public ScriptedAI
         }
     }
 
-    void DoSummonCreatureAtRift(uint32 uiCreatureEntry, Creature* pSummoner)
-    {
-        if (!uiCreatureEntry)
-            return;
-
-        float fX, fY, fZ;
-        m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f, fX, fY, fZ);
-        pSummoner->SummonCreature(uiCreatureEntry, fX, fY, fZ, m_creature->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
-    }
-
     void DoSummon()
     {
         if (!m_pInstance)
             return;
 
+        uint32 uiSpellId = 0;
         uint32 uiSummonEntry = 0;
 
         if (m_bIsFirstSummon)
@@ -196,49 +186,69 @@ struct npc_time_riftAI : public ScriptedAI
             switch (m_uiRiftNumber)
             {
                 case 6:
-                    uiSummonEntry = (m_pInstance->GetData(TYPE_CHRONO_LORD) == DONE && !m_bIsRegularMode) ? NPC_CHRONO_LORD : NPC_CHRONO_LORD_DEJA;
+                    uiSpellId = (m_pInstance->GetData(TYPE_CHRONO_LORD) == DONE && !m_bIsRegularMode) ? SPELL_INFINITE_CHRONO_LORD : SPELL_CHRONO_LORD_DEJA;
                     break;
                 case 12:
-                    uiSummonEntry = (m_pInstance->GetData(TYPE_TEMPORUS) == DONE && !m_bIsRegularMode) ? NPC_TIMEREAVER : NPC_TEMPORUS;
+                    uiSpellId = (m_pInstance->GetData(TYPE_TEMPORUS) == DONE && !m_bIsRegularMode) ? SPELL_INFINITE_TIMEREAVER : SPELL_TEMPORUS;
                     break;
                 case 18:
-                    uiSummonEntry = NPC_AEONUS;
+                    uiSpellId = SPELL_RIFT_END_BOSS;
                     break;
                 default:
-                    uiSummonEntry = urand(0, 1) ? NPC_RIFT_KEEPER : NPC_RIFT_LORD;
+                    switch (urand(0, 3))
+                    {
+                        case 0: uiSpellId = SPELL_RIFT_LORD; break;
+                        case 1: uiSpellId = SPELL_RIFT_LORD_2; break;
+                        case 2: uiSpellId = SPELL_RIFT_KEEPER; break;
+                        case 3: uiSpellId = SPELL_RIFT_KEEPER_2; break;
+                    }
                     break;
             }
 
             // Set the next rift delay
-            if (uiSummonEntry != NPC_AEONUS)
+            if (uiSpellId != NPC_AEONUS)
                 m_pInstance->SetData(TYPE_TIME_RIFT, SPECIAL);
 
-            DoSummonCreatureAtRift(uiSummonEntry, m_creature);
+            m_creature->CastSpell(m_creature, uiSpellId, TRIGGERED_OLD_TRIGGERED);
             m_bIsFirstSummon = false;
         }
         else
         {
-            // Some creatures are summoned by Medivh, because we can better handle the movement this way
-            Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_MEDIVH);
-            if (!pMedivh)
-                return;
-
             // Reset the RiftWaveCount if we reached the maximum number of the currentRiftWave is 0
             if ((m_uiRiftWaveCount > 2 && !m_uiRiftWaveId) || m_uiRiftWaveCount > 3)
                 m_uiRiftWaveCount = 0;
 
             uiSummonEntry = aPortalWaves[m_uiRiftWaveId].uiPortalMob[m_uiRiftWaveCount];
+
+            switch (uiSummonEntry)
+            {
+                case NPC_WHELP:
+                    uiSpellId = SPELL_INFINITE_WHELP;
+                    break;
+                case NPC_ASSASSIN:
+                    uiSpellId = urand(0, 1) ? SPELL_INFINITE_ASSASSIN : SPELL_INFINITE_ASSASSIN_2;
+                    break;
+                case NPC_CHRONOMANCER:
+                    uiSpellId = urand(0, 1) ? SPELL_INFINITE_CHRONOMANCER : SPELL_INFINITE_CHRONOMANCER_2;
+                    break;
+                case NPC_EXECUTIONER:
+                    uiSpellId = urand(0, 1) ? SPELL_INFINITE_EXECUTIONER : SPELL_INFINITE_EXECUTIONER_2;
+                    break;
+                case NPC_VANQUISHER:
+                    uiSpellId = urand(0, 1) ? SPELL_INFINITE_VANQUISHER : SPELL_INFINITE_VANQUISHER_2;
+                    break;
+            }
+
             ++m_uiRiftWaveCount;
 
-            // Summon the trash waves by Medivh, so we can better handle the movement
             // For Whelps we need to summon them in packs of 3
-            if (uiSummonEntry == NPC_WHELP)
+            if (uiSpellId == SPELL_INFINITE_WHELP)
             {
                 for (uint8 i = 0; i < 3; ++i)
-                    DoSummonCreatureAtRift(uiSummonEntry, pMedivh);
+                    m_creature->CastSpell(m_creature, uiSpellId, TRIGGERED_OLD_TRIGGERED);
             }
             else
-                DoSummonCreatureAtRift(uiSummonEntry, pMedivh);
+                m_creature->CastSpell(m_creature, uiSpellId, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -257,7 +267,9 @@ struct npc_time_riftAI : public ScriptedAI
             case NPC_CHRONO_LORD:
             case NPC_TIMEREAVER:
             case NPC_RIFT_KEEPER:
+            case NPC_RIFT_KEEPER_2:
             case NPC_RIFT_LORD:
+            case NPC_RIFT_LORD_2:
                 DoCastSpellIfCan(pSummoned, SPELL_RIFT_CHANNEL);
                 break;
             case NPC_AEONUS:
@@ -272,6 +284,18 @@ struct npc_time_riftAI : public ScriptedAI
                     {
                         float fX, fY, fZ;
                         pMedivh->GetNearPoint(pMedivh, fX, fY, fZ, 0, 20.0f, pMedivh->GetAngle(pSummoned));
+                        pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+                    }
+                }
+                break;
+            default:
+                if (m_pInstance)
+                {
+                    if (Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_MEDIVH))
+                    {
+                        float fX, fY, fZ;
+                        pMedivh->GetNearPoint(pMedivh, fX, fY, fZ, 0, 20.0f, pMedivh->GetAngle(pSummoned));
+                        pSummoned->SetWalk(false);
                         pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
                     }
                 }
@@ -291,7 +315,9 @@ struct npc_time_riftAI : public ScriptedAI
             case NPC_CHRONO_LORD:
             case NPC_TIMEREAVER:
             case NPC_RIFT_KEEPER:
+            case NPC_RIFT_KEEPER_2:
             case NPC_RIFT_LORD:
+            case NPC_RIFT_LORD_2:
                 m_creature->ForcedDespawn(3000);
                 // No need to set the data to DONE if there is a new portal spawned already
                 if (m_pInstance && m_uiRiftNumber == m_pInstance->GetCurrentRiftId())
@@ -310,7 +336,9 @@ struct npc_time_riftAI : public ScriptedAI
             case NPC_CHRONO_LORD:
             case NPC_TIMEREAVER:
             case NPC_RIFT_KEEPER:
+            case NPC_RIFT_KEEPER_2:
             case NPC_RIFT_LORD:
+            case NPC_RIFT_LORD_2:
                 // Despawn in case of event reset
                 m_creature->ForcedDespawn();
                 break;
@@ -319,10 +347,17 @@ struct npc_time_riftAI : public ScriptedAI
 
     void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override
     {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId || pSummoned->GetEntry() != NPC_AEONUS)
+        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
             return;
 
-        pSummoned->CastSpell(pSummoned, SPELL_CORRUPT_AEONUS, TRIGGERED_NONE);
+        Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_MEDIVH);
+        if (!pMedivh)
+            return;
+
+        if (pSummoned->GetEntry() == NPC_AEONUS)
+            pSummoned->CastSpell(pMedivh, SPELL_CORRUPT_AEONUS, TRIGGERED_NONE);
+        else
+            pSummoned->CastSpell(pMedivh, SPELL_CORRUPT, TRIGGERED_NONE);
     }
 
     void UpdateAI(const uint32 /*uiDiff*/) override { }

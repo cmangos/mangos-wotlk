@@ -215,6 +215,28 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 ('22288', '0', '0', '0', '400', '136', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '20', '40', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '6', '0', '0', '1', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '42', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '22289', '0', '0', '0', '0', '0', '0', '458', '0', '0', 'Brood Power: Green', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0'),
 ('28874', '0', '0', '0', '384', '268435456', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '6', '0', '0', '1', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '23', '0', '0', '1000', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '28865', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Consumption', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0');
 
+-- Caverns of Time: Black Morass spells
+INSERT INTO spell_template (Id, SchoolMask, Dispel, Mechanic, Attributes, CastingTimeIndex, procFlags, procChance, baseLevel, spellLevel, DurationIndex, RangeIndex, speed, EquippedItemClass, EquippedItemSubClassMask, Effect1, EffectDieSides1, EffectBaseDice1, EffectImplicitTargetA1, EffectRadiusIndex1, EffectApplyAuraName1, EffectMiscValue1, EffectTriggerSpell1, SpellIconID, SpellName, SpellFamilyName, DmgClass, EffectAmplitude1, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, EffectMiscValueB1) VALUES
+(30982,8,4,11,786880,1,20,20,70,70,21,2,30,-1,-1,6,1,1,1,0,42,0,30981,163,'Crippling Poison',8,1,0,1,1,1,0),
+(31318,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,17835,0,1,'Summon Infinite Assassin',0,0,0,1,0,0,64),
+(31391,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,17879,0,1,'Summon Black Morass Chrono Lord Deja',0,0,0,1,0,0,64),
+(31392,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,17880,0,1,'Summon Black Morass Temporus',0,0,0,1,0,0,64),
+(31393,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,17881,0,1,'Summon Black Morass Rift End Boss',0,0,0,1,0,0,64),
+(31421,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,17892,0,1,'Summon Infinite Chronomancer',0,0,0,1,0,0,64),
+(33363,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,18994,0,1,'Summon Infinite Executioner',0,0,0,1,0,0,64),
+(33364,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,18995,0,1,'Summon Infinite Vanquisher',0,0,0,1,0,0,64),
+(36229,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,21137,0,1,'Summon Infinite Assassin',0,0,0,1,0,0,64),
+(36231,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,21136,0,1,'Summon Infinite Chronomancer',0,0,0,1,0,0,64),
+(36232,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,21138,0,1,'Summon Infinite Executioner',0,0,0,1,0,0,64),
+(36233,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,21139,0,1,'Summon Infinite Vanquisher',0,0,0,1,0,0,64),
+(36234,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,21140,0,1,'Summon Black Morass Rift Lord Alt',0,0,0,1,0,0,64),
+(36235,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,21104,0,1,'Summon Black Morass Rift Keeper',0,0,0,1,0,0,64),
+(36236,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,21148,0,1,'Summon Black Morass Rift Keeper',0,0,0,1,0,0,64),
+(37606,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,72,7,0,21818,0,1,'Summon Infinite Assassin',0,0,0,1,0,0,64), -- Infinite Whelp
+(31321,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,17839,0,1,'Summon Black Morass Rift Lord',0,0,0,1,0,0,64),
+(37177,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,21697,0,1,'Summon Black Morass Infinite Chrono-Lord',0,0,0,1,0,0,64),
+(37178,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,21698,0,1,'Summon Black Morass Infinite Timereaver',0,0,0,1,0,0,64);
+
 -- Fumping summoning spells
 INSERT INTO spell_template(Id, Attributes, DurationIndex,rangeIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectRadiusIndex1,EffectMiscValue1,EffectMiscValueB1,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
 (39240,384,4,3,28,0,0,18,29,22483,64,1,'Summon Sand Gnome',1,1,1),

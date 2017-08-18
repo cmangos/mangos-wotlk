@@ -279,10 +279,14 @@ void instance_dark_portal::OnCreatureEnterCombat(Creature* pCreature)
             SetData(TYPE_AEONUS, IN_PROGRESS);
             // no break
         case NPC_ASSASSIN:
+        case NPC_ASSASSIN_2:
         case NPC_WHELP:
         case NPC_CHRONOMANCER:
+        case NPC_CHRONOMANCER_2:
         case NPC_EXECUTIONER:
+        case NPC_EXECUTIONER_2:
         case NPC_VANQUISHER:
+        case NPC_VANQUISHER_2:
             pCreature->InterruptNonMeleeSpells(false);
             break;
     }
@@ -305,10 +309,14 @@ void instance_dark_portal::OnCreatureEvade(Creature* pCreature)
             // no break;
             // Allow these guys to go and finish off Medivh
         case NPC_ASSASSIN:
+        case NPC_ASSASSIN_2:
         case NPC_WHELP:
         case NPC_CHRONOMANCER:
+        case NPC_CHRONOMANCER_2:
         case NPC_EXECUTIONER:
+        case NPC_EXECUTIONER_2:
         case NPC_VANQUISHER:
+        case NPC_VANQUISHER_2:
             if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
             {
                 float fX, fY, fZ;

@@ -38,14 +38,20 @@ enum
 
     // portal guardians
     NPC_RIFT_KEEPER         = 21104,
+    NPC_RIFT_KEEPER_2       = 21148,
     NPC_RIFT_LORD           = 17839,
+    NPC_RIFT_LORD_2         = 21140,
 
     // portal summons
     NPC_ASSASSIN            = 17835,
+    NPC_ASSASSIN_2          = 21137,
     NPC_WHELP               = 21818,
     NPC_CHRONOMANCER        = 17892,
+    NPC_CHRONOMANCER_2      = 21136,
     NPC_EXECUTIONER         = 18994,
+    NPC_EXECUTIONER_2       = 21138,
     NPC_VANQUISHER          = 18995,
+    NPC_VANQUISHER_2        = 21139,
 
     // additional npcs
     NPC_COUNCIL_ENFORCER    = 17023,
