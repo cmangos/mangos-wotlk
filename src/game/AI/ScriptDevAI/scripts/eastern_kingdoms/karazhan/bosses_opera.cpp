@@ -90,6 +90,7 @@ struct boss_dorotheeAI : public ScriptedAI
     boss_dorotheeAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        SetReactState(REACT_PASSIVE);
         Reset();
     }
 
@@ -162,6 +163,7 @@ struct boss_dorotheeAI : public ScriptedAI
             if (m_uiAggroTimer <= uiDiff)
             {
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                SetReactState(REACT_AGGRESSIVE);
                 m_creature->SetInCombatWithZone();
                 m_uiAggroTimer = 0;
             }
@@ -214,6 +216,7 @@ struct boss_strawmanAI : public ScriptedAI
     boss_strawmanAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        SetReactState(REACT_PASSIVE);
         Reset();
     }
 
@@ -261,6 +264,7 @@ struct boss_strawmanAI : public ScriptedAI
             if (m_uiAggroTimer <= uiDiff)
             {
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                SetReactState(REACT_AGGRESSIVE);
                 m_creature->SetInCombatWithZone();
                 m_uiAggroTimer = 0;
             }
@@ -299,6 +303,7 @@ struct boss_tinheadAI : public ScriptedAI
     boss_tinheadAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        SetReactState(REACT_PASSIVE);
         Reset();
     }
 
@@ -345,6 +350,7 @@ struct boss_tinheadAI : public ScriptedAI
             if (m_uiAggroTimer <= uiDiff)
             {
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                SetReactState(REACT_AGGRESSIVE);
                 m_creature->SetInCombatWithZone();
                 m_uiAggroTimer = 0;
             }
@@ -383,6 +389,7 @@ struct boss_roarAI : public ScriptedAI
     boss_roarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        SetReactState(REACT_PASSIVE);
         Reset();
     }
 
@@ -431,6 +438,7 @@ struct boss_roarAI : public ScriptedAI
             if (m_uiAggroTimer <= uiDiff)
             {
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                SetReactState(REACT_AGGRESSIVE);
                 m_creature->SetInCombatWithZone();
                 m_uiAggroTimer = 0;
             }
@@ -476,6 +484,7 @@ struct boss_croneAI : public ScriptedAI
     boss_croneAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        SetReactState(REACT_PASSIVE);
         Reset();
     }
 
@@ -528,6 +537,7 @@ struct boss_croneAI : public ScriptedAI
             if (m_uiAggroTimer <= uiDiff)
             {
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                SetReactState(REACT_AGGRESSIVE);
                 m_creature->SetInCombatWithZone();
                 m_uiAggroTimer = 0;
             }
