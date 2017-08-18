@@ -191,6 +191,17 @@ bool CreatureEventAI::IsTimerBasedEvent(EventAI_Type type) const
     }
 }
 
+bool CreatureEventAI::IsRepeatableEvent(EventAI_Type type) const
+{
+    switch (type)
+    {
+        case EVENT_T_SPAWNED: // Only happens once per spawn - repeatable doesnt make sense
+            return false;
+        default:
+            return true;
+    }
+}
+
 bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker, Creature* AIEventSender /*=nullptr*/)
 {
     if (!holder.Enabled || holder.Time)
@@ -512,7 +523,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionIn
     }
 
     // Disable non-repeatable events
-    if (!(holder.Event.event_flags & EFLAG_REPEATABLE))
+    if (IsRepeatableEvent(holder.Event.event_type) && !(holder.Event.event_flags & EFLAG_REPEATABLE))
         holder.Enabled = false;
 
     // Store random here so that all random actions match up
