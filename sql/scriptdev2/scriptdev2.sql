@@ -457,6 +457,10 @@ UPDATE creature_template SET ScriptName='npc_time_rift' WHERE entry=17838;
 UPDATE creature_template SET ScriptName='boss_ahune' WHERE entry=25740;
 UPDATE creature_template SET ScriptName='npc_frozen_core' WHERE entry=25865;
 UPDATE creature_template SET ScriptName='npc_ice_spear_bunny' WHERE entry=25985;
+UPDATE instance_template SET ScriptName='instance_slave_pens' WHERE map=547;
+INSERT INTO scripted_areatrigger VALUES
+(4295,'at_naturalist_bite');
+UPDATE creature_template SET ScriptName='npc_naturalist_bite' WHERE entry IN(17893); -- gossip only
 
 /* THE UNDERBOG */
 UPDATE creature_template SET ScriptName='mob_underbog_mushroom' WHERE entry=17990;
@@ -4172,6 +4176,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 -- -1 546 000 THE UNDERBOG
 
 -- -1 547 000 THE SLAVE PENS
+INSERT INTO script_texts(entry, content_default, sound, type, language, emote, comment) VALUES
+(-1547000,'Hey!  Over here!  Yeah, over here... I''m in this cage!!!',0,1,0,0,'Naturalist Bite on Areatrigger');
 
 -- -1 548 000 SERPENTSHRINE CAVERN
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

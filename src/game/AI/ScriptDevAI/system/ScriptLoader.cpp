@@ -422,6 +422,7 @@ extern void AddSC_boss_morogrim_tidewalker();
 extern void AddSC_boss_the_lurker_below();
 extern void AddSC_instance_serpentshrine_cavern();
 extern void AddSC_boss_ahune();                             // CR, slave_pens
+extern void AddSC_instance_slave_pens();
 extern void AddSC_boss_hydromancer_thespia();               // CR, steam_vault
 extern void AddSC_boss_mekgineer_steamrigger();
 extern void AddSC_boss_warlord_kalithresh();
@@ -894,6 +895,7 @@ void AddScripts()
     AddSC_boss_the_lurker_below();
     AddSC_instance_serpentshrine_cavern();
     AddSC_boss_ahune();                                     // CR, slave_pens
+    AddSC_instance_slave_pens();
     AddSC_boss_hydromancer_thespia();                       // CR, steam_vault
     AddSC_boss_mekgineer_steamrigger();
     AddSC_boss_warlord_kalithresh();
