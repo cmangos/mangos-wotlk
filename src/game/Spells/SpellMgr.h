@@ -377,6 +377,21 @@ inline bool IsSpellSetRun(SpellEntry const* spellInfo)
     }
 }
 
+inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
+{
+    if (IsSpellHaveAura(spellInfo, SPELL_AURA_FLY) || IsSpellHaveAura(spellInfo, SPELL_AURA_CONTROL_VEHICLE))
+        return false;
+
+    switch (spellInfo->Id)
+    {
+        case 39918:         // visual auras in Soulgrinder script
+        case 39920:
+            return false;
+        default:
+            return true;
+    }
+}
+
 bool IsExplicitPositiveTarget(uint32 targetA);
 bool IsExplicitNegativeTarget(uint32 targetA);
 
