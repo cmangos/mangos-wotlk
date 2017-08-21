@@ -40,7 +40,7 @@ void WorldSession::HandleInspectArenaTeamsOpcode(WorldPacket& recv_data)
     if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
         return;
 
-    if (_player->IsHostileTo(player))
+    if (!_player->CanInteract(player))
         return;
 
     for (uint8 i = 0; i < MAX_ARENA_SLOT; ++i)

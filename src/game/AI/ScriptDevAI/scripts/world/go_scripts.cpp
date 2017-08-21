@@ -76,7 +76,7 @@ bool GOUse_go_ethereum_prison(Player* pPlayer, GameObject* pGo)
                               pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetAngle(pPlayer),
                               TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000))
     {
-        if (!pCreature->IsHostileTo(pPlayer))
+        if (!pCreature->IsEnemy(pPlayer))
         {
             uint32 uiSpell = 0;
 

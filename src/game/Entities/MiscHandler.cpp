@@ -1090,7 +1090,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     if (!_player->IsWithinDistInMap(plr, INSPECT_DISTANCE, false))
         return;
 
-    if (_player->IsHostileTo(plr))
+    if (!_player->CanInteract(plr))
         return;
 
     WorldPacket data(SMSG_INSPECT_RESULTS, 50);
@@ -1126,7 +1126,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
         return;
 
-    if (_player->IsHostileTo(player))
+    if (!_player->CanInteract(player))
         return;
 
     WorldPacket data(MSG_INSPECT_HONOR_STATS, 8 + 1 + 4 * 4);

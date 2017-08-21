@@ -119,6 +119,7 @@ static const uint32 auiPortals[MAX_PORTALS] =
 ## boss_netherspite
 ######*/
 
+// TODO: Should propably have 25yd aggro range?
 struct boss_netherspiteAI : public ScriptedAI
 {
     boss_netherspiteAI(Creature* pCreature) : ScriptedAI(pCreature)
