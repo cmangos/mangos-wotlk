@@ -1102,6 +1102,14 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_creature->InterruptSpell((CurrentSpellTypes)action.interruptSpell.currentSpellType);
             break;
         }
+        case ACTION_T_RESET_COMBAT:
+        {
+            m_creature->RemoveAllAurasOnEvade();
+            m_creature->ClearTemporaryFaction();
+            m_creature->CombatStop(true);
+            m_creature->DeleteThreatList();
+            break;
+        }
         default:
             sLog.outError("CreatureEventAi::ProcessAction(): action(%u) not implemented", static_cast<uint32>(action.type));
             break;

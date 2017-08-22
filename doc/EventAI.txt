@@ -159,6 +159,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 50   ACTION_T_SET_REACT_STATE               ReactState                      Change react state of the creature
 51   ACTION_T_PAUSE_WAYPOINTS               DoPause                         Pause waypoints of creature
 52   ACTION_T_INTERRUPT_SPELL               SpellType - CurrentSpellTypes   Interrupt spell in given slot for creature
+53   ACTION_T_RESET_COMBAT                  No params                       Stops attacking, removes auras and clears threat list and clears temp. faction.
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -949,6 +950,12 @@ CURRENT_AUTOREPEAT_SPELL        = 2
 CURRENT_CHANNELED_SPELL         = 3
 Melee spells, generic spells and autorepeat spells have their interruptability based on interrupt flags, albeit this flag is wrongly missing for some spells.
 Main purpose of this command is to research and find channeled spells, which do not interrupt as a result of not having found an interrupt flag.
+
+---------------------------
+53 = ACTION_T_RESET_COMBAT:
+---------------------------
+This is used for mobs that need to stop attacking and leave combat without evading.
+Since the Threat List is cleared with combat stopping special targets are needed for events such as quest event after that point until resetting.
 
 =========================================
 Target Types
