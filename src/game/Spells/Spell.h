@@ -235,6 +235,57 @@ enum SpellTargets
 
 typedef std::multimap<uint64, uint64> SpellTargetTimeMap;
 
+// SpellLog class to manage spells logs that have to be sent to clients
+class SpellLog
+{
+public:
+    SpellLog(Spell* spell) :
+        m_spell(spell), m_spellLogDataEffectsCounter(0), m_spellLogDataEffectsCounterPos(0),
+        m_spellLogDataTargetsCounter(0), m_spellLogDataTargetsCounterPos(0), m_currentEffect(TOTAL_SPELL_EFFECTS) {}
+    SpellLog() = delete;
+    SpellLog(const SpellLog&) = delete;
+
+    void Initialize();
+
+    // Variadic template to add log data (warnings, devs should respect the correct packet structure)
+    template<typename... Args>
+    void AddLog(uint32 spellEffect, Args... args)
+    {
+        SetCurrentEffect(spellEffect);
+        AddLogData(args...);
+        ++m_spellLogDataEffectsCounter;
+    }
+
+    // Send collected logs
+    void SendToSet();
+
+private:
+    // Finalize previous log if need by setting total targets amount
+    void FinalizePrevious();
+
+    // Handle multi targets cases by adjusting targets counter if need
+    void SetCurrentEffect(uint32 effect);
+
+    // Variadic template to method to handle multi arguments passed with different types
+    template<typename T>
+    void AddLogData(T const& data) { m_spellLogData << data; }
+
+    template<typename T, typename... Args>
+    void AddLogData(T const& data, Args const&... args)
+    {
+        AddLogData(data);
+        AddLogData(args...);
+    }
+
+    Spell* m_spell;
+    WorldPacket m_spellLogData;
+    size_t m_spellLogDataEffectsCounterPos;
+    uint32 m_spellLogDataEffectsCounter;
+    size_t m_spellLogDataTargetsCounterPos;
+    uint32 m_spellLogDataTargetsCounter;
+    uint32 m_currentEffect;
+};
+
 class Spell
 {
         friend struct MaNGOS::SpellNotifierPlayer;
@@ -408,7 +459,7 @@ class Spell
         uint32 getState() const { return m_spellState; }
         void setState(uint32 state) { m_spellState = state; }
 
-        void DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype);
+        bool DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype);
 
         void WriteSpellGoTargets(WorldPacket& data);
         void WriteAmmoToPacket(WorldPacket& data) const;
@@ -423,7 +474,6 @@ class Spell
         void SendSpellStart() const;
         void SendSpellGo();
         void SendSpellCooldown();
-        void SendLogExecute() const;
         void SendInterrupted(uint8 result) const;
         void SendChannelUpdate(uint32 time) const;
         void SendChannelStart(uint32 duration);
@@ -708,6 +758,9 @@ class Spell
         bool DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectIndex effIdx, uint32 level);
         bool DoSummonPossessed(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectIndex effIdx, uint32 level);
         bool DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectIndex effIdx, uint32 level);
+
+        // needed to store all log for this spell
+        SpellLog m_spellLog;
 };
 
 enum ReplenishType
