@@ -293,6 +293,7 @@ struct npc_time_riftAI : public ScriptedAI
                 {
                     if (Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_MEDIVH))
                     {
+                        pSummoned->AI()->SetReactState(REACT_DEFENSIVE);
                         float fX, fY, fZ;
                         pMedivh->GetNearPoint(pMedivh, fX, fY, fZ, 0, 20.0f, pMedivh->GetAngle(pSummoned));
                         pSummoned->SetWalk(false);
