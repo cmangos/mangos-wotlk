@@ -769,8 +769,8 @@ UPDATE creature_template SET ScriptName='npc_gas_cloud_icc' WHERE entry=37562;
 UPDATE creature_template SET ScriptName='npc_growing_ooze_puddle' WHERE entry=37690;
 UPDATE creature_template SET ScriptName='npc_choking_gas_bomb' WHERE entry=38159;
 UPDATE creature_template SET ScriptName='boss_the_lich_king_icc' WHERE entry=36597;
+UPDATE creature_template SET `ScriptName`='npc_spell_dummy_ymirjar_deathbringer_summon_ymirjar' WHERE `entry`=38125;
 UPDATE gameobject_template SET ScriptName='go_icc_teleporter' WHERE entry IN (202235,202242,202243,202244,202245,202246);
-UPDATE `creature_template` SET `ScriptName`='npc_spell_dummy_ymirjar_deathbringer_summon_ymirjar' WHERE `entry`=38125;
 INSERT INTO scripted_event_id VALUES
 (23426,'event_gameobject_citadel_valve'),
 (23438,'event_gameobject_citadel_valve');
