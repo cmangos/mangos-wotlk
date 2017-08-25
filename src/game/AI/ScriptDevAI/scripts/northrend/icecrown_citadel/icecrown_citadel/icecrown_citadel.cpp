@@ -421,11 +421,11 @@ bool EffectDummyCreature_npc_spell_dummy_ymirjar_deathbringer_summon_ymirjar(Uni
     {
         if (pCreatureTarget->GetEntry() == NPC_YMIRJAR_DEATHBRINGER)
         {
-            pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
-            pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
-            pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
-            pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
-            pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+            pCreatureTarget->CastSpell(pCreatureTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+            pCreatureTarget->CastSpell(pCreatureTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+            pCreatureTarget->CastSpell(pCreatureTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+            pCreatureTarget->CastSpell(pCreatureTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+            pCreatureTarget->CastSpell(pCreatureTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
         }
         // always return true when we are handling this spell and effect
         return true;
