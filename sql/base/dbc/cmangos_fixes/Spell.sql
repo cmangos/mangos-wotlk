@@ -53,10 +53,6 @@ INSERT INTO spell_template(Id, Attributes, AttributesEx,AttributesEx2,Attributes
 INSERT INTO spell_template (Id, Attributes, AttributesEx, AttributesEx2, AttributesEx3, procFlags, procChance, DurationIndex, RangeIndex, Effect1, EffectImplicitTargetA1, EffectImplicitTargetB1, EffectRadiusIndex1, EffectApplyAuraName1, EffectMiscValue1, EffectMiscValueB1, EffectTriggerSpell1, SpellIconID, SpellName, DmgMultiplier1) VALUES
 (38096, 384, 0, 9, 0, 0, 101, 21, 96, 6, 38, 0, 0, 4, 0, 0, 0, 1, '[DND]Destroy Sun Gate Portal Controller', 1);
 
--- To Legion Hold(q.10596) -H  (q.10563) -A
-INSERT INTO spell_template (Id, Attributes, AttributesEx, ProcChance, DurationIndex, Effect1, Effect2, EffectImplicitTargetA1,EffectApplyAuraName1,EffectMiscValue2,IsServerSide,SpellName) VALUES
-('37492','384','268435456','101','3','6','61','1','12','13852','1','Crate Disguise Subspell');
-
 -- trap used to tame bear is no longer present in TBC/WOTLK yet still present in trap data
 INSERT INTO spell_template (Id, Attributes, CastingTimeIndex, ProcChance, SpellLevel, RangeIndex, EquippedItemClass, Effect1, EffectDieSides1, EffectBaseDice1, EffectImplicitTargetA1, SpellIconID, SpellName, MaxTargetLevel, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, IsServerSide) VALUES
 ('9439', '256', '1', '101', '1', '12', '-1', '3', '1', '1', '38', '1', 'Bear Captured in Trap', '60', '1', '1', '1', '1');
@@ -240,6 +236,10 @@ INSERT INTO spell_template (Id, SchoolMask, Dispel, Mechanic, Attributes, Castin
 (31321,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,17839,0,1,'Summon Black Morass Rift Lord',0,0,0,1,0,0,64),
 (37177,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,21697,0,1,'Summon Black Morass Infinite Chrono-Lord',0,0,0,1,0,0,64),
 (37178,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,21698,0,1,'Summon Black Morass Infinite Timereaver',0,0,0,1,0,0,64);
+
+-- To Legion Hold crate diguise missing spell
+INSERT INTO spell_template(Id, Attributes,AttributesEx4,InterruptFlags,DurationIndex,Effect1,Effect2,EffectImplicitTargetA1,EffectApplyAuraName1,EffectMiscValue2,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2) VALUES
+(37492,335544704,4,27,3,6,61,1,12,13852,1,'Crate Disguise Subspell',1,1);
 
 -- Fumping summoning spells
 INSERT INTO spell_template(Id, Attributes, DurationIndex,rangeIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectRadiusIndex1,EffectMiscValue1,EffectMiscValueB1,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
