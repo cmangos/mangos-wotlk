@@ -403,6 +403,37 @@ CreatureAI* GetAI_npc_putricides_trap(Creature* pCreature)
     return new npc_putricides_trapAI(pCreature);
 };
 
+enum
+{
+    SPELL_SUMMON_YMIRJAR        = 71303,
+
+    NPC_YMIRJAR_DEATHBRINGER    = 38125,
+};
+
+/* *************
+** npc_dummy_ymirjar_deathbringer_summon_ymirjar
+************* */
+
+bool EffectDummyCreature_npc_spell_dummy_ymirjar_deathbringer_summon_ymirjar(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+{
+    // always check spellid and effectindex
+    if (uiSpellId == SPELL_SUMMON_YMIRJAR && uiEffIndex == EFFECT_INDEX_0)
+    {
+        if (pCreatureTarget->GetEntry() == NPC_YMIRJAR_DEATHBRINGER)
+        {
+            pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+            pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+            pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+            pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+            pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
+        }
+        // always return true when we are handling this spell and effect
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_icecrown_citadel()
 {
     Script* pNewScript;
@@ -431,5 +462,10 @@ void AddSC_icecrown_citadel()
     pNewScript = new Script;
     pNewScript->Name = "npc_putricides_trap";
     pNewScript->GetAI = &GetAI_npc_putricides_trap;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_spell_dummy_ymirjar_deathbringer_summon_ymirjar";
+    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_spell_dummy_ymirjar_deathbringer_summon_ymirjar;
     pNewScript->RegisterSelf();
 }
