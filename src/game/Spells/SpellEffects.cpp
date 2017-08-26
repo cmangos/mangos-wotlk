@@ -1435,6 +1435,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 30012, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 32343:                                 // Revive Self
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->SetHealth(unitTarget->GetMaxHealth());
+                    return;
+                }
                 case 33060:                                 // Make a Wish
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
