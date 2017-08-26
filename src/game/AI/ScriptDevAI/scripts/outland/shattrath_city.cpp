@@ -190,6 +190,8 @@ struct npc_dirty_larryAI : public ScriptedAI
         if (uiDamage < m_creature->GetHealth())
             return;
 
+        uiDamage = 0;
+
         // damage will kill, this is pretty much the same as 1%HP left
         if (bEvent)
         {
