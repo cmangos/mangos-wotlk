@@ -20,6 +20,8 @@
     \ingroup u2w
 */
 
+#include <zlib.h>
+
 #include "Server/WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
@@ -38,7 +40,6 @@
 #include "Auth/HMACSHA1.h"
 #include "Loot/LootMgr.h"
 
-#include <zlib/zlib.h>
 #include <boost/asio/ip/address_v4.hpp>
 
 #include <mutex>

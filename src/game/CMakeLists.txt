@@ -26,7 +26,7 @@ include_directories(SYSTEM
   ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
   ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour/Include
   ${CMAKE_SOURCE_DIR}/dep/include
-  ${CMAKE_SOURCE_DIR}/dep
+  ${ZLIB_INCLUDE_DIRS}
   ${MYSQL_INCLUDE_DIR}
 )
 
