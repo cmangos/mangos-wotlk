@@ -1098,6 +1098,9 @@ struct boss_romuloAI : public ScriptedAI
 
         uiDamage = 0;
 
+        if (m_bIsFakingDeath)
+            return;
+
         if (m_Phase == PHASE_ROMULO)
         {
             DoScriptText(SAY_ROMULO_DEATH, m_creature);
