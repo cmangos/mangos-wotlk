@@ -1711,6 +1711,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
     switch (targetMode)
     {
+        case TARGET_RANDOM_DEST_LOC:
         case TARGET_RANDOM_NEARBY_LOC:
             // special case for Fatal Attraction (BT, Mother Shahraz)
             if (m_spellInfo->Id == 40869)

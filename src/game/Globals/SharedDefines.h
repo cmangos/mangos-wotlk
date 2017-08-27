@@ -1305,7 +1305,7 @@ enum Targets
     TARGET_70                          = 70,
     TARGET_RANDOM_NEARBY_LOC           = 72,                // used in teleport onto nearby locations
     TARGET_RANDOM_CIRCUMFERENCE_POINT  = 73,
-    TARGET_74                          = 74,
+    TARGET_RANDOM_DEST_LOC             = 74,
     TARGET_RANDOM_CIRCUMFERENCE_AROUND_TARGET = 75,         // TODO: Possibly reimplement
     TARGET_DYNAMIC_OBJECT_COORDINATES  = 76,
     TARGET_SINGLE_ENEMY                = 77,
