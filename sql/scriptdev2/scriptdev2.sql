@@ -3651,8 +3651,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1532037,'Guess I\'m not so rusty, after all.',9271,1,0,0,'tinhead SAY_TINHEAD_SLAY'),
 (-1532038,'%s begins to rust.',0,2,0,0,'tinhead EMOTE_RUST'),
 
-(-1532039,'Woe to each and every one of you my pretties! <cackles>',9179,1,0,0,'crone SAY_CRONE_AGGRO'),
-(-1532040,'It will all be over soon! <cackles>',9307,1,0,0,'crone SAY_CRONE_AGGRO2'),
+(-1532039,'Woe to each and every one of you my pretties! <cackles>',9179,1,0,25,'crone SAY_CRONE_INTRO'),
+(-1532040,'It will all be over soon! <cackles>',9307,1,0,25,'crone SAY_CRONE_INTRO2'),
 (-1532041,'How could you? What a cruel, cruel world!',9178,1,0,0,'crone SAY_CRONE_DEATH'),
 (-1532042,'Fixed you, didn\'t I? <cackles>',9180,1,0,0,'crone SAY_CRONE_SLAY'),
 

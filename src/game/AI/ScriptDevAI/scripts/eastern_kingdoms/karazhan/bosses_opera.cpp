@@ -48,8 +48,8 @@ enum
     SAY_TINHEAD_SLAY            = -1532037,
     EMOTE_RUST                  = -1532038,
 
-    SAY_CRONE_AGGRO             = -1532039,
-    SAY_CRONE_AGGRO2            = -1532040,
+    SAY_CRONE_INTRO             = -1532039,
+    SAY_CRONE_INTRO2            = -1532040,
     SAY_CRONE_DEATH             = -1532041,
     SAY_CRONE_SLAY              = -1532042,
 
@@ -75,6 +75,7 @@ enum
 
     // Crone
     SPELL_CHAIN_LIGHTNING       = 32337,
+    SPELL_FIERY_BROOM_PROC      = 32339,            // passive spell causing periodic damage
 
     // Cyclone
     SPELL_CYCLONE               = 32334,
@@ -484,17 +485,20 @@ struct boss_croneAI : public ScriptedAI
     boss_croneAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_creature->CastSpell(m_creature, SPELL_FIERY_BROOM_PROC, TRIGGERED_OLD_TRIGGERED);
         SetReactState(REACT_PASSIVE);
         Reset();
     }
 
     ScriptedInstance* m_pInstance;
 
+    uint32 m_uiIntroTimer;
     uint32 m_uiChainLightningTimer;
     uint32 m_uiAggroTimer;
 
     void Reset() override
     {
+        m_uiIntroTimer = 6000;
         m_uiChainLightningTimer = 10000;
         m_uiAggroTimer = 9000;
     }
@@ -509,8 +513,6 @@ struct boss_croneAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_CRONE_AGGRO : SAY_CRONE_AGGRO2, m_creature);
-
         // spawn the cyclone on aggro
         m_creature->SummonCreature(NPC_CYCLONE, afCycloneSpawnLoc[0], afCycloneSpawnLoc[1], afCycloneSpawnLoc[2], afCycloneSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
     }
@@ -532,6 +534,17 @@ struct boss_croneAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        if (m_uiIntroTimer)
+        {
+            if (m_uiIntroTimer <= uiDiff)
+            {
+                DoScriptText(urand(0, 1) ? SAY_CRONE_INTRO : SAY_CRONE_INTRO2, m_creature); // TODO: should be said at player who started event
+                m_uiIntroTimer = 0;
+            }
+            else
+                m_uiIntroTimer -= uiDiff;
+        }
+
         if (m_uiAggroTimer)
         {
             if (m_uiAggroTimer <= uiDiff)
