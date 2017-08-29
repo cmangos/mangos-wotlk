@@ -21,32 +21,61 @@
 
 SARC4::SARC4(uint8 len)
 {
+#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
+    m_ctx = EVP_CIPHER_CTX_new();
+    EVP_CIPHER_CTX_init(m_ctx);
+    EVP_EncryptInit_ex(m_ctx, EVP_rc4(), nullptr, nullptr, nullptr);
+    EVP_CIPHER_CTX_set_key_length(m_ctx, len);
+#else
     EVP_CIPHER_CTX_init(&m_ctx);
     EVP_EncryptInit_ex(&m_ctx, EVP_rc4(), nullptr, nullptr, nullptr);
     EVP_CIPHER_CTX_set_key_length(&m_ctx, len);
+#endif
 }
 
 SARC4::SARC4(uint8* seed, uint8 len)
 {
+#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
+    m_ctx = EVP_CIPHER_CTX_new();
+    EVP_CIPHER_CTX_init(m_ctx);
+    EVP_EncryptInit_ex(m_ctx, EVP_rc4(), nullptr, nullptr, nullptr);
+    EVP_CIPHER_CTX_set_key_length(m_ctx, len);
+    EVP_EncryptInit_ex(m_ctx, nullptr, nullptr, seed, nullptr);
+#else
     EVP_CIPHER_CTX_init(&m_ctx);
     EVP_EncryptInit_ex(&m_ctx, EVP_rc4(), nullptr, nullptr, nullptr);
     EVP_CIPHER_CTX_set_key_length(&m_ctx, len);
     EVP_EncryptInit_ex(&m_ctx, nullptr, nullptr, seed, nullptr);
+#endif
 }
 
 SARC4::~SARC4()
 {
+#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
+    EVP_CIPHER_CTX_cleanup(m_ctx);
+    EVP_CIPHER_CTX_free(m_ctx);
+#else
     EVP_CIPHER_CTX_cleanup(&m_ctx);
+#endif
 }
 
 void SARC4::Init(uint8* seed)
 {
+#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
+    EVP_EncryptInit_ex(m_ctx, nullptr, nullptr, seed, nullptr);
+#else
     EVP_EncryptInit_ex(&m_ctx, nullptr, nullptr, seed, nullptr);
+#endif
 }
 
 void SARC4::UpdateData(int len, uint8* data)
 {
     int outlen = 0;
+#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
+    EVP_EncryptUpdate(m_ctx, data, &outlen, data, len);
+    EVP_EncryptFinal_ex(m_ctx, data, &outlen);
+#else
     EVP_EncryptUpdate(&m_ctx, data, &outlen, data, len);
     EVP_EncryptFinal_ex(&m_ctx, data, &outlen);
+#endif
 }
