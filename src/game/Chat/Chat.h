@@ -589,7 +589,10 @@ class ChatHandler
         bool HandleUnmuteCommand(char* args);
         bool HandleMovegensCommand(char* args);
 
-        bool HandleCooldownCommand(char* args);
+        bool HandleCooldownListCommand(char* args);
+        bool HandleCooldownClearCommand(char* args);
+        bool HandleCooldownClearClientSideCommand(char* args);
+        bool HandleCooldownClearArenaCommand(char* args);
         bool HandleUnLearnCommand(char* args);
         bool HandleGetDistanceCommand(char* args);
         bool HandleModifyStandStateCommand(char* args);

@@ -312,7 +312,7 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarg
             pVictim->Attack(pTarget, true);
     }
 
-    if (PlayerbotAI::ORDERS_TANK & m_ai->GetCombatOrder() && !newTarget && GROWL > 0 && !m_bot->HasSpellCooldown(GROWL))
+    if (PlayerbotAI::ORDERS_TANK & m_ai->GetCombatOrder() && !newTarget && GROWL > 0 && m_bot->IsSpellReady(GROWL))
         if (CastSpell(GROWL, pTarget))
             return RETURN_CONTINUE;
 
@@ -323,7 +323,7 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarg
     if (SWIPE > 0 && m_ai->In_Reach(pTarget,SWIPE) && m_ai->GetAttackerCount() >= 2 && CastSpell(SWIPE, pTarget))
         return RETURN_CONTINUE;
 
-    if (ENRAGE > 0 && !m_bot->HasSpellCooldown(ENRAGE) && CastSpell(ENRAGE, m_bot))
+    if (ENRAGE > 0 && m_bot->IsSpellReady(ENRAGE) && CastSpell(ENRAGE, m_bot))
         return RETURN_CONTINUE;
 
     if (DEMORALIZING_ROAR > 0 && !pTarget->HasAura(DEMORALIZING_ROAR, EFFECT_INDEX_0) && CastSpell(DEMORALIZING_ROAR, pTarget))
@@ -383,13 +383,13 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverCat(Unit* pTarge
         }
     } // End 5 ComboPoints
 
-    if (newTarget && COWER > 0 && !m_bot->HasSpellCooldown(COWER) && CastSpell(COWER, pTarget))
+    if (newTarget && COWER > 0 && m_bot->IsSpellReady(COWER) && CastSpell(COWER, pTarget))
         return RETURN_CONTINUE;
 
     if (FAERIE_FIRE_FERAL > 0 && m_ai->In_Reach(pTarget,FAERIE_FIRE_FERAL) && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0) && CastSpell(FAERIE_FIRE_FERAL, pTarget))
         return RETURN_CONTINUE;
 
-    if (TIGERS_FURY > 0 && !m_bot->HasSpellCooldown(TIGERS_FURY) && CastSpell(TIGERS_FURY))
+    if (TIGERS_FURY > 0 && m_bot->IsSpellReady(TIGERS_FURY) && CastSpell(TIGERS_FURY))
         return RETURN_CONTINUE;
 
     if (MANGLE_CAT > 0 && !pTarget->HasAura(MANGLE_CAT) && CastSpell(MANGLE_CAT))

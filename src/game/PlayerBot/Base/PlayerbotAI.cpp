@@ -3557,11 +3557,11 @@ bool PlayerbotAI::CastNeutralize()
     uint8 creatureType = 0;
     creatureType = pCreature->GetCreatureInfo()->CreatureType;
 
-    switch (m_bot->getClass())
+    /*switch (m_bot->getClass())
     {
         default:
             return false;
-    }
+    }*/
 
     // A spellId was found
     if (m_spellIdCommand != 0)
@@ -5285,10 +5285,6 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
     if (spellId == 0)
         return false;
 
-    // check spell cooldown
-    if (m_bot->HasSpellCooldown(spellId))
-        return false;
-
     // see Creature.cpp 1738 for reference
     // don't allow bot to cast damage spells on friends
     const SpellEntry* const pSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
@@ -5297,6 +5293,10 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
         TellMaster("Missing spell entry in CastSpell for spellid %u.", spellId);
         return false;
     }
+
+    // check spell cooldown
+    if (!m_bot->IsSpellReady(*pSpellInfo))
+        return false;
 
     // set target
     ObjectGuid targetGUID = m_bot->GetSelectionGuid();
@@ -5422,15 +5422,15 @@ bool PlayerbotAI::CastPetSpell(uint32 spellId, Unit* target)
     if (!pet)
         return false;
 
-    if (pet->HasSpellCooldown(spellId))
-        return false;
-
     const SpellEntry* const pSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     if (!pSpellInfo)
     {
         TellMaster("Missing spell entry in CastPetSpell()");
         return false;
     }
+
+    if (!pet->IsSpellReady(*pSpellInfo))
+        return false;
 
     // set target
     Unit* pTarget;
