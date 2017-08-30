@@ -72,6 +72,7 @@ struct boss_talon_king_ikissAI : public ScriptedAI
     bool m_bManaShield;
     bool m_bBlink;
     bool m_bIntro;
+    bool m_reinitCombatMovement;
 
     void Reset() override
     {
@@ -83,6 +84,7 @@ struct boss_talon_king_ikissAI : public ScriptedAI
 
         m_bBlink = false;
         m_bManaShield = false;
+        m_reinitCombatMovement = false;
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -145,6 +147,8 @@ struct boss_talon_king_ikissAI : public ScriptedAI
             DoCastSpellIfCan(m_creature, SPELL_ARCANE_BUBBLE, CAST_TRIGGERED);
             DoResetThreat();
             m_bBlink = false;
+            m_reinitCombatMovement = true;
+            SetCombatMovement(false);
         }
 
         if (m_uiArcaneVolleyTimer < uiDiff)
@@ -200,6 +204,15 @@ struct boss_talon_king_ikissAI : public ScriptedAI
                 ++m_uiBlinkPhase;
             }
         }
+
+        if (m_creature->HasAura(SPELL_ARCANE_BUBBLE))
+            return;
+        else if (m_reinitCombatMovement)
+        {
+            m_reinitCombatMovement = false;
+            SetCombatMovement(true);
+        }
+
 
         if (!m_bBlink)
             DoMeleeAttackIfReady();
