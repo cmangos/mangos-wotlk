@@ -30,6 +30,7 @@ enum
     SPELL_CARNIVOROUS_BITE          = 36383,
     SPELL_CARNIVOROUS_BITE_H        = 39382,
     SPELL_INHIBIT_MAGIC             = 32264,
+    SPELL_INHIBIT_MAGIC_TRIGGER     = 33460, // periodically triggers 32264
     SPELL_ATTRACT_MAGIC             = 32265,
 
     SPELL_FOCUS_TARGET_VISUAL       = 32286,
@@ -61,7 +62,12 @@ struct boss_shirrakAI : public ScriptedAI
         m_uiAttractMagicTimer       = urand(20000, 24000);
         m_uiFocusFireCount          = 0;
 
-        DoCastSpellIfCan(m_creature, SPELL_INHIBIT_MAGIC);
+        DoCastSpellIfCan(m_creature, SPELL_INHIBIT_MAGIC_TRIGGER);
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        m_creature->RemoveAurasDueToSpell(SPELL_INHIBIT_MAGIC_TRIGGER); // TODO: Investigate passive spell removal on death
     }
 
     void JustSummoned(Creature* pSummoned) override

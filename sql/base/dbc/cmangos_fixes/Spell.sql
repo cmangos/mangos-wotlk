@@ -241,6 +241,10 @@ INSERT INTO spell_template (Id, SchoolMask, Dispel, Mechanic, Attributes, Castin
 INSERT INTO spell_template(Id, Attributes,AttributesEx4,InterruptFlags,DurationIndex,Effect1,Effect2,EffectImplicitTargetA1,EffectApplyAuraName1,EffectMiscValue2,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2) VALUES
 (37492,335544704,4,27,3,6,61,1,12,13852,1,'Crate Disguise Subspell',1,1);
 
+-- periodic trigger spell for Shirakk
+INSERT INTO spell_template(Id,SchoolMask,Attributes,baseLevel,spellLevel,DurationIndex,StackAmount,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectApplyAuraName1,EffectAmplitude1,EffectTriggerSpell1,SpellIconID,SpellName,PreventionType,DmgMultiplier1) VALUES
+(33460,32,384,65,65,21,4,6,1,1,1,23,3000,32264,542,'Inhibit Magic',1,1);
+
 -- Fumping summoning spells
 INSERT INTO spell_template(Id, Attributes, DurationIndex,rangeIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectRadiusIndex1,EffectMiscValue1,EffectMiscValueB1,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
 (39240,384,4,3,28,0,0,18,29,22483,64,1,'Summon Sand Gnome',1,1,1),
