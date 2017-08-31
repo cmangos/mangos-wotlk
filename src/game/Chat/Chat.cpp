@@ -243,11 +243,18 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,             0,                  false, nullptr,                                                "", nullptr }
     };
 
+    static ChatCommand bgCommandTable[] =
+    {
+        { "start",          SEC_GAMEMASTER,     false, &ChatHandler::HandleDebugBattlegroundStartCommand,   "", nullptr },
+        { "",               SEC_GAMEMASTER,     false, &ChatHandler::HandleDebugBattlegroundCommand,        "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                             "", nullptr }
+    };
+
     static ChatCommand debugCommandTable[] =
     {
         { "anim",           SEC_GAMEMASTER,     false, &ChatHandler::HandleDebugAnimCommand,                "", nullptr },
         { "arena",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugArenaCommand,               "", nullptr },
-        { "bg",             SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugBattlegroundCommand,        "", nullptr },
+        { "bg",             SEC_ADMINISTRATOR,  false, nullptr,                                             "", bgCommandTable },
         { "getitemstate",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugGetItemStateCommand,        "", nullptr },
         { "lootrecipient",  SEC_GAMEMASTER,     false, &ChatHandler::HandleDebugGetLootRecipientCommand,    "", nullptr },
         { "getitemvalue",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugGetItemValueCommand,        "", nullptr },
