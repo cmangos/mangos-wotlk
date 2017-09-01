@@ -75,7 +75,7 @@ void instance_violet_hold::ResetAll()
 
             // Spawn new boss replacement
             if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_SINCLARI_ALT))
-                pSummoner->SummonCreature(pData->uiGhostEntry, (*itr)->fX, (*itr)->fY, (*itr)->fZ, (*itr)->fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                pSummoner->SummonCreature(pData->uiGhostEntry, (*itr)->fX, (*itr)->fY, (*itr)->fZ, (*itr)->fO, TEMPSPAWN_DEAD_DESPAWN, 0);
 
             // Replace Erekem guards
             if (pData->uiType == TYPE_EREKEM)
@@ -101,7 +101,7 @@ void instance_violet_hold::ResetAll()
 
                         // Spawn a ghost guard for each original guard
                         pGuard->GetRespawnCoord(fX, fY, fZ, &fO);
-                        pGuard->SummonCreature(NPC_ARAKKOA_GUARD, fX, fY, fZ, fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        pGuard->SummonCreature(NPC_ARAKKOA_GUARD, fX, fY, fZ, fO, TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
                 }
             }
@@ -429,7 +429,7 @@ void instance_violet_hold::SpawnPortal()
         {
             uint32 uiPortalEntry = pData->pPortalType == PORTAL_TYPE_NORM ? NPC_PORTAL : NPC_PORTAL_ELITE;
 
-            pController->SummonCreature(uiPortalEntry, pData->fX, pData->fY, pData->fZ, pData->fOrient, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 1800 * IN_MILLISECONDS);
+            pController->SummonCreature(uiPortalEntry, pData->fX, pData->fY, pData->fZ, pData->fOrient, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 1800 * IN_MILLISECONDS);
         }
     }
 }
@@ -520,7 +520,7 @@ void instance_violet_hold::CallGuards(bool bRespawn)
 
 void instance_violet_hold::ProcessActivationCrystal(Unit* pUser, bool bIsIntro)
 {
-    if (Creature* pSummon = pUser->SummonCreature(NPC_DEFENSE_SYSTEM, fDefenseSystemLoc[0], fDefenseSystemLoc[1], fDefenseSystemLoc[2], fDefenseSystemLoc[3], TEMPSUMMON_TIMED_DESPAWN, 10000))
+    if (Creature* pSummon = pUser->SummonCreature(NPC_DEFENSE_SYSTEM, fDefenseSystemLoc[0], fDefenseSystemLoc[1], fDefenseSystemLoc[2], fDefenseSystemLoc[3], TEMPSPAWN_TIMED_DESPAWN, 10000))
     {
         pSummon->CastSpell(pSummon, SPELL_DEFENSE_SYSTEM_VISUAL, TRIGGERED_OLD_TRIGGERED);
 

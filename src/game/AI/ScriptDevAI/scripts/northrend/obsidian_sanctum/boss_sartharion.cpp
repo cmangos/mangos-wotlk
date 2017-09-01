@@ -381,7 +381,7 @@ struct boss_sartharionAI : public ScriptedAI
         }
 
         for (uint8 i = uiTsunamiStartLoc; i < uiTsunamiEndLoc; ++i)
-            m_creature->SummonCreature(NPC_FLAME_TSUNAMI, m_aTsunamiLoc[i].m_fX, m_aTsunamiLoc[i].m_fY, m_aTsunamiLoc[i].m_fZ, m_aTsunamiLoc[i].m_fO, TEMPSUMMON_TIMED_DESPAWN, 15000);
+            m_creature->SummonCreature(NPC_FLAME_TSUNAMI, m_aTsunamiLoc[i].m_fX, m_aTsunamiLoc[i].m_fY, m_aTsunamiLoc[i].m_fZ, m_aTsunamiLoc[i].m_fO, TEMPSPAWN_TIMED_DESPAWN, 15000);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -881,12 +881,12 @@ struct mob_tenebronAI : public dummy_dragonAI
             for (uint8 i = 0; i < MAX_TWILIGHT_EGGS; ++i)
             {
                 m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
-                m_creature->SummonCreature(uiSpawnEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(uiSpawnEntry, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
 
             // spawn the controller as well in order to eject players from twilight realm
             m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_TWILIGHT_EGG_CONTROLLER, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_TWILIGHT_EGG_CONTROLLER, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
             // used only for visual - the result is handled by the Twilight eggs script
             if (DoCastSpellIfCan(m_creature, SPELL_HATCH_EGGS_MAIN) == CAST_OK)
@@ -1011,7 +1011,7 @@ struct mob_shadronAI : public dummy_dragonAI
 
                 float fX, fY, fZ;
                 m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
-                m_creature->SummonCreature(uiSpawnEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(uiSpawnEntry, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                 m_uiAcolyteShadronTimer = 0;
             }
@@ -1121,7 +1121,7 @@ struct mob_vesperonAI : public dummy_dragonAI
 
                 float fX, fY, fZ;
                 m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
-                m_creature->SummonCreature(uiSpawnEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(uiSpawnEntry, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                 m_uiAcolyteVesperonTimer = 0;
             }

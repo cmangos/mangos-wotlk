@@ -143,7 +143,7 @@ struct boss_svalaAI : public ScriptedAI
                 m_creature->GetClosePoint(fX, fY, fZ, m_creature->GetObjectBoundingRadius(), 16.0f, 0.0f);
 
                 // we assume m_creature is spawned in proper location
-                m_creature->SummonCreature(NPC_ARTHAS_IMAGE, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_ARTHAS_IMAGE, fX, fY, fZ, 0.0f, TEMPSPAWN_TIMED_DESPAWN, 60000);
             }
 
             return;

@@ -130,7 +130,7 @@ struct boss_the_lurker_belowAI : public Scripted_NoMovementAI
     void DoSummonCoilfangNaga()
     {
         for (uint8 i = 0; i < MAX_SUBMERGE_ADDS; ++i)
-            m_creature->SummonCreature(aLurkerLoc[i].uiEntry, aLurkerLoc[i].fX, aLurkerLoc[i].fY, aLurkerLoc[i].fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(aLurkerLoc[i].uiEntry, aLurkerLoc[i].fX, aLurkerLoc[i].fY, aLurkerLoc[i].fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 
     // Custom threat management

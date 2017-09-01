@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "ulduar.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -428,7 +428,7 @@ struct boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
                 float fDist = frand(30.0f, 45.0f);
                 float fAng = frand(0, 2 * M_PI_F);
                 m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, fDist, fAng);
-                m_creature->SummonCreature(NPC_DEATH_RAY, fX, fY, fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 20000);
+                m_creature->SummonCreature(NPC_DEATH_RAY, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 20000);
             }
 
             pSummoned->CastSpell(pSummoned, SPELL_DEATH_RAY_VISUAL_ORIGIN, TRIGGERED_OLD_TRIGGERED);
@@ -448,7 +448,7 @@ struct boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
                 DoCastSpellIfCan(m_creature, SPELL_SHADOWY_BARRIER, CAST_TRIGGERED);
 
                 m_creature->SetFactionTemporary(FACTION_SARA_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
-                m_creature->SummonCreature(NPC_YOGGSARON, afYoggSaronSpawn[0], afYoggSaronSpawn[1], afYoggSaronSpawn[2], afYoggSaronSpawn[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_YOGGSARON, afYoggSaronSpawn[0], afYoggSaronSpawn[1], afYoggSaronSpawn[2], afYoggSaronSpawn[3], TEMPSPAWN_DEAD_DESPAWN, 0);
                 m_bIsHostile = true;
                 m_creature->SetInCombatWithZone();
                 break;
@@ -949,7 +949,7 @@ struct npc_voice_yogg_saronAI : public Scripted_NoMovementAI
                 {
                     fAng = (2 * M_PI_F / m_uiMaxPortals) * i;
                     m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 22.0f, fAng);
-                    m_creature->SummonCreature(NPC_DESCEND_INTO_MADNESS, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                    m_creature->SummonCreature(NPC_DESCEND_INTO_MADNESS, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 }
 
                 DoScriptText(EMOTE_VISION_BLAST, m_creature);
@@ -1104,68 +1104,68 @@ struct npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHe
         {
                 // stormwind
             case 0:
-                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1955.173f, 85.26153f, 239.7496f, 4.049f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1893.146f, 44.24343f, 239.7496f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1944.962f, 65.25938f, 240.4596f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1956.503f, 72.19462f, 239.7495f, 3.281f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1951.04f, 49.88875f, 239.7495f, 2.495f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1931.14f, 38.46949f, 239.7495f, 1.710f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1908.993f, 44.26659f, 239.7495f, 0.295f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1897.344f, 64.31419f, 239.7495f, 0.139f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1903.393f, 86.60285f, 239.7495f, 5.619f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1923.342f, 98.01228f, 239.7495f, 4.834f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1945.442f, 92.17952f, 239.7495f, 4.049f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1955.173f, 85.26153f, 239.7496f, 4.049f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1893.146f, 44.24343f, 239.7496f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1944.962f, 65.25938f, 240.4596f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1956.503f, 72.19462f, 239.7495f, 3.281f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1951.04f, 49.88875f, 239.7495f, 2.495f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1931.14f, 38.46949f, 239.7495f, 1.710f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1908.993f, 44.26659f, 239.7495f, 0.295f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1897.344f, 64.31419f, 239.7495f, 0.139f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1903.393f, 86.60285f, 239.7495f, 5.619f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1923.342f, 98.01228f, 239.7495f, 4.834f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1945.442f, 92.17952f, 239.7495f, 4.049f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 // the following are guesswork
-                m_creature->SummonCreature(NPC_GARONA, 1931.348f, 61.0330f, 241.7094f, 2.008f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_KING_LLANE, 1930.465f, 62.6740f, 242.3763f, 5.196f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_YOGGSARON_ILLUSION, 1927.326f, 68.120f, 242.376f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_GARONA, 1931.348f, 61.0330f, 241.7094f, 2.008f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_KING_LLANE, 1930.465f, 62.6740f, 242.3763f, 5.196f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_YOGGSARON_ILLUSION, 1927.326f, 68.120f, 242.376f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
 
                 // start dialogue
                 StartNextDialogueText(NPC_KING_LLANE);
                 break;
                 // chamber
             case 1:
-                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2063.156f, 27.95839f, 244.2707f, 5.288f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2061.257f, -53.8788f, 239.8633f, 2.478f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_RUBY_CONSORT, 2069.479f, -5.699653f, 239.8058f, 5.427f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_RUBY_CONSORT, 2069.298f, -43.53168f, 239.8006f, 0.471f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2063.156f, 27.95839f, 244.2707f, 5.288f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2061.257f, -53.8788f, 239.8633f, 2.478f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_RUBY_CONSORT, 2069.479f, -5.699653f, 239.8058f, 5.427f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_RUBY_CONSORT, 2069.298f, -43.53168f, 239.8006f, 0.471f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 // the following are guesswork
-                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2125.891f, -62.390f, 239.721f, 2.197f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2115.778f, 21.288f, 239.746f, 4.282f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_OBSIDIAN_CONSORT, 2144.349f, -36.108f, 239.719f, 3.116f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_OBSIDIAN_CONSORT, 2143.837f, -17.539f, 239.733f, 3.179f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_AZURE_CONSORT, 2139.173f, -51.239f, 239.747f, 2.413f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_AZURE_CONSORT, 2112.182f, -65.787f, 239.721f, 1.651f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_EMERALD_CONSORT, 2110.621f, 15.579f, 239.758f, 4.644f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_EMERALD_CONSORT, 2137.336f, 5.452f, 239.717f, 3.866f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_NELTHARION, 2117.588f, -25.318f,  242.646f, 3.15f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_ALEXSTRASZA, 2091.679f, -25.289f, 242.646f, 6.282f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_YSERA, 2114.504f, -16.118f, 242.646f, 3.91f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_MALYGOS, 2113.388f, -34.381f, 242.646f, 2.26f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_YOGGSARON_ILLUSION, 2104.555f, -25.635f, 242.646f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2125.891f, -62.390f, 239.721f, 2.197f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2115.778f, 21.288f, 239.746f, 4.282f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_OBSIDIAN_CONSORT, 2144.349f, -36.108f, 239.719f, 3.116f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_OBSIDIAN_CONSORT, 2143.837f, -17.539f, 239.733f, 3.179f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_AZURE_CONSORT, 2139.173f, -51.239f, 239.747f, 2.413f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_AZURE_CONSORT, 2112.182f, -65.787f, 239.721f, 1.651f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_EMERALD_CONSORT, 2110.621f, 15.579f, 239.758f, 4.644f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_EMERALD_CONSORT, 2137.336f, 5.452f, 239.717f, 3.866f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_NELTHARION, 2117.588f, -25.318f,  242.646f, 3.15f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_ALEXSTRASZA, 2091.679f, -25.289f, 242.646f, 6.282f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_YSERA, 2114.504f, -16.118f, 242.646f, 3.91f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_MALYGOS, 2113.388f, -34.381f, 242.646f, 2.26f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_YOGGSARON_ILLUSION, 2104.555f, -25.635f, 242.646f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
 
                 // start dialogue
                 StartNextDialogueText(NPC_NELTHARION);
                 break;
                 // icecrown
             case 2:
-                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1948.668f, -152.4481f, 240.073f, 1.919f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1879.845f, -72.91819f, 240.073f, 5.689f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1905.937f, -133.1651f, 240.073f, 5.777f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1935.621f, -121.0064f, 240.073f, 3.630f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1917.559f, -135.7448f, 240.073f, 4.188f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1919.125f, -140.9566f, 240.073f, 3.979f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1948.469f, -136.2951f, 240.0707f, 3.438f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1956.444f, -138.4028f, 240.1078f, 3.368f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1912.129f, -136.934f, 240.073f, 4.188f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1952.965f, -130.5295f, 240.1347f, 3.804f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1902.132f, -111.3594f, 240.0698f, 4.852f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1905.326f, -104.7865f, 240.0523f, 4.764f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1897.345f, -106.6076f, 240.1444f, 4.939f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_LICH_KING, 1908.557f, -152.4427f, 240.0719f, 4.238f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1948.668f, -152.4481f, 240.073f, 1.919f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1879.845f, -72.91819f, 240.073f, 5.689f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1905.937f, -133.1651f, 240.073f, 5.777f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1935.621f, -121.0064f, 240.073f, 3.630f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1917.559f, -135.7448f, 240.073f, 4.188f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1919.125f, -140.9566f, 240.073f, 3.979f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1948.469f, -136.2951f, 240.0707f, 3.438f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1956.444f, -138.4028f, 240.1078f, 3.368f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1912.129f, -136.934f, 240.073f, 4.188f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1952.965f, -130.5295f, 240.1347f, 3.804f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1902.132f, -111.3594f, 240.0698f, 4.852f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1905.326f, -104.7865f, 240.0523f, 4.764f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1897.345f, -106.6076f, 240.1444f, 4.939f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LICH_KING, 1908.557f, -152.4427f, 240.0719f, 4.238f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 // the following is guesswork
-                m_creature->SummonCreature(NPC_IMMOLATED_CHAMPION, 1915.371f, -139.9342f, 239.9896f, 4.159f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_YOGGSARON_ILLUSION, 1915.371f, -139.9342f, 239.9896f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_IMMOLATED_CHAMPION, 1915.371f, -139.9342f, 239.9896f, 4.159f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_YOGGSARON_ILLUSION, 1915.371f, -139.9342f, 239.9896f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
 
                 // start dialogue
                 StartNextDialogueText(NPC_LICH_KING);
@@ -1425,7 +1425,7 @@ struct npc_constrictor_tentacleAI : public Scripted_NoMovementAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        if (Player* pSummoner = m_creature->GetMap()->GetPlayer(((TemporarySummon*)m_creature)->GetSummonerGuid()))
+        if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
             pSummoner->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_SQUEEZE : SPELL_SQUEEZE_H);
     }
 };

@@ -103,7 +103,7 @@ void instance_ulduar::OnPlayerEnter(Player* pPlayer)
     {
         if (!GetSingleCreatureFromStorage(NPC_LEVIATHAN, true))
         {
-            pPlayer->SummonCreature(NPC_LEVIATHAN, afLeviathanMovePos[0], afLeviathanMovePos[1], afLeviathanMovePos[2], afLeviathanMovePos[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            pPlayer->SummonCreature(NPC_LEVIATHAN, afLeviathanMovePos[0], afLeviathanMovePos[1], afLeviathanMovePos[2], afLeviathanMovePos[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
             DoCallLeviathanHelp();
         }
     }
@@ -113,8 +113,8 @@ void instance_ulduar::OnPlayerEnter(Player* pPlayer)
     {
         if (!GetSingleCreatureFromStorage(NPC_BRANN_ARCHIVUM, true))
         {
-            pPlayer->SummonCreature(NPC_BRANN_ARCHIVUM, afBrannArchivumSpawnPos[0], afBrannArchivumSpawnPos[1], afBrannArchivumSpawnPos[2], afBrannArchivumSpawnPos[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
-            pPlayer->SummonCreature(instance->IsRegularDifficulty() ? NPC_PROSPECTOR_DOREN : NPC_PROSPECTOR_DOREN_H, afProspectorSpawnPos[0], afProspectorSpawnPos[1], afProspectorSpawnPos[2], afProspectorSpawnPos[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            pPlayer->SummonCreature(NPC_BRANN_ARCHIVUM, afBrannArchivumSpawnPos[0], afBrannArchivumSpawnPos[1], afBrannArchivumSpawnPos[2], afBrannArchivumSpawnPos[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
+            pPlayer->SummonCreature(instance->IsRegularDifficulty() ? NPC_PROSPECTOR_DOREN : NPC_PROSPECTOR_DOREN_H, afProspectorSpawnPos[0], afProspectorSpawnPos[1], afProspectorSpawnPos[2], afProspectorSpawnPos[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
         }
     }
 
@@ -122,7 +122,7 @@ void instance_ulduar::OnPlayerEnter(Player* pPlayer)
     if (GetData(TYPE_ALGALON_TIMER))
     {
         if (!GetSingleCreatureFromStorage(NPC_ALGALON, true))
-            pPlayer->SummonCreature(NPC_ALGALON, afAlgalonMovePos[0], afAlgalonMovePos[1], afAlgalonMovePos[2], afAlgalonMovePos[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            pPlayer->SummonCreature(NPC_ALGALON, afAlgalonMovePos[0], afAlgalonMovePos[1], afAlgalonMovePos[2], afAlgalonMovePos[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
 
         pPlayer->SendUpdateWorldState(WORLD_STATE_TIMER, 1);
         pPlayer->SendUpdateWorldState(WORLD_STATE_TIMER_COUNT, GetData(TYPE_ALGALON_TIMER));
@@ -134,7 +134,7 @@ void instance_ulduar::OnPlayerEnter(Player* pPlayer)
         for (uint8 i = 0; i < countof(m_aKeepersSpawnLocs); ++i)
         {
             if (GetData(m_aKeepersSpawnLocs[i].uiType) == DONE)
-                pPlayer->SummonCreature(m_aKeepersSpawnLocs[i].uiEntry, m_aKeepersSpawnLocs[i].fX, m_aKeepersSpawnLocs[i].fY, m_aKeepersSpawnLocs[i].fZ, m_aKeepersSpawnLocs[i].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true);
+                pPlayer->SummonCreature(m_aKeepersSpawnLocs[i].uiEntry, m_aKeepersSpawnLocs[i].fX, m_aKeepersSpawnLocs[i].fY, m_aKeepersSpawnLocs[i].fZ, m_aKeepersSpawnLocs[i].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true);
         }
 
         if (GetData(TYPE_YOGGSARON) != DONE)
@@ -142,7 +142,7 @@ void instance_ulduar::OnPlayerEnter(Player* pPlayer)
             for (uint8 i = 0; i < countof(m_aKeeperHelperLocs); ++i)
             {
                 if (GetData(m_aKeeperHelperLocs[i].uiType) == DONE)
-                    pPlayer->SummonCreature(m_aKeeperHelperLocs[i].uiEntry, m_aKeeperHelperLocs[i].fX, m_aKeeperHelperLocs[i].fY, m_aKeeperHelperLocs[i].fZ, m_aKeeperHelperLocs[i].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true);
+                    pPlayer->SummonCreature(m_aKeeperHelperLocs[i].uiEntry, m_aKeeperHelperLocs[i].fX, m_aKeeperHelperLocs[i].fY, m_aKeeperHelperLocs[i].fZ, m_aKeeperHelperLocs[i].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true);
             }
         }
 
@@ -592,8 +592,8 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
 
                 if (Player* pPlayer = GetPlayerInMap())
                 {
-                    pPlayer->SummonCreature(NPC_BRANN_ARCHIVUM, afBrannArchivumSpawnPos[0], afBrannArchivumSpawnPos[1], afBrannArchivumSpawnPos[2], afBrannArchivumSpawnPos[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
-                    pPlayer->SummonCreature(instance->IsRegularDifficulty() ? NPC_PROSPECTOR_DOREN : NPC_PROSPECTOR_DOREN_H, afProspectorSpawnPos[0], afProspectorSpawnPos[1], afProspectorSpawnPos[2], afProspectorSpawnPos[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+                    pPlayer->SummonCreature(NPC_BRANN_ARCHIVUM, afBrannArchivumSpawnPos[0], afBrannArchivumSpawnPos[1], afBrannArchivumSpawnPos[2], afBrannArchivumSpawnPos[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
+                    pPlayer->SummonCreature(instance->IsRegularDifficulty() ? NPC_PROSPECTOR_DOREN : NPC_PROSPECTOR_DOREN_H, afProspectorSpawnPos[0], afProspectorSpawnPos[1], afProspectorSpawnPos[2], afProspectorSpawnPos[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
                 }
             }
             else if (uiData == IN_PROGRESS)
@@ -1147,10 +1147,10 @@ void instance_ulduar::SpawnFriendlyKeeper(uint32 uiWho)
 
     switch (uiWho)
     {
-        case NPC_KEEPER_MIMIRON: pPlayer->SummonCreature(uiWho, m_aKeepersSpawnLocs[1].fX, m_aKeepersSpawnLocs[1].fY, m_aKeepersSpawnLocs[1].fZ, m_aKeepersSpawnLocs[1].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true); break;
-        case NPC_KEEPER_HODIR:   pPlayer->SummonCreature(uiWho, m_aKeepersSpawnLocs[2].fX, m_aKeepersSpawnLocs[2].fY, m_aKeepersSpawnLocs[2].fZ, m_aKeepersSpawnLocs[2].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true); break;
-        case NPC_KEEPER_THORIM:  pPlayer->SummonCreature(uiWho, m_aKeepersSpawnLocs[3].fX, m_aKeepersSpawnLocs[3].fY, m_aKeepersSpawnLocs[3].fZ, m_aKeepersSpawnLocs[3].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true); break;
-        case NPC_KEEPER_FREYA:   pPlayer->SummonCreature(uiWho, m_aKeepersSpawnLocs[0].fX, m_aKeepersSpawnLocs[0].fY, m_aKeepersSpawnLocs[0].fZ, m_aKeepersSpawnLocs[0].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true); break;
+        case NPC_KEEPER_MIMIRON: pPlayer->SummonCreature(uiWho, m_aKeepersSpawnLocs[1].fX, m_aKeepersSpawnLocs[1].fY, m_aKeepersSpawnLocs[1].fZ, m_aKeepersSpawnLocs[1].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true); break;
+        case NPC_KEEPER_HODIR:   pPlayer->SummonCreature(uiWho, m_aKeepersSpawnLocs[2].fX, m_aKeepersSpawnLocs[2].fY, m_aKeepersSpawnLocs[2].fZ, m_aKeepersSpawnLocs[2].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true); break;
+        case NPC_KEEPER_THORIM:  pPlayer->SummonCreature(uiWho, m_aKeepersSpawnLocs[3].fX, m_aKeepersSpawnLocs[3].fY, m_aKeepersSpawnLocs[3].fZ, m_aKeepersSpawnLocs[3].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true); break;
+        case NPC_KEEPER_FREYA:   pPlayer->SummonCreature(uiWho, m_aKeepersSpawnLocs[0].fX, m_aKeepersSpawnLocs[0].fY, m_aKeepersSpawnLocs[0].fZ, m_aKeepersSpawnLocs[0].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true); break;
     }
 }
 
@@ -1164,28 +1164,28 @@ void instance_ulduar::SpawnKeeperHelper(uint32 uiWho)
     switch (uiWho)
     {
         case NPC_MIMIRON_HELPER:
-            if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[1].fX, m_aKeeperHelperLocs[1].fY, m_aKeeperHelperLocs[1].fZ, m_aKeeperHelperLocs[1].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true))
+            if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[1].fX, m_aKeeperHelperLocs[1].fY, m_aKeeperHelperLocs[1].fZ, m_aKeeperHelperLocs[1].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true))
             {
                 DoScriptText(m_aKeeperHelperLocs[1].iText, pKeeper);
                 pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, TRIGGERED_NONE);
             }
             break;
         case NPC_HODIR_HELPER:
-            if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[2].fX, m_aKeeperHelperLocs[2].fY, m_aKeeperHelperLocs[2].fZ, m_aKeeperHelperLocs[2].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true))
+            if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[2].fX, m_aKeeperHelperLocs[2].fY, m_aKeeperHelperLocs[2].fZ, m_aKeeperHelperLocs[2].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true))
             {
                 DoScriptText(m_aKeeperHelperLocs[2].iText, pKeeper);
                 pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, TRIGGERED_NONE);
             }
             break;
         case NPC_THORIM_HELPER:
-            if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[3].fX, m_aKeeperHelperLocs[3].fY, m_aKeeperHelperLocs[3].fZ, m_aKeeperHelperLocs[3].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true))
+            if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[3].fX, m_aKeeperHelperLocs[3].fY, m_aKeeperHelperLocs[3].fZ, m_aKeeperHelperLocs[3].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true))
             {
                 DoScriptText(m_aKeeperHelperLocs[3].iText, pKeeper);
                 pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, TRIGGERED_NONE);
             }
             break;
         case NPC_FREYA_HELPER:
-            if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[0].fX, m_aKeeperHelperLocs[0].fY, m_aKeeperHelperLocs[0].fZ, m_aKeeperHelperLocs[0].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true))
+            if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[0].fX, m_aKeeperHelperLocs[0].fY, m_aKeeperHelperLocs[0].fZ, m_aKeeperHelperLocs[0].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true))
             {
                 DoScriptText(m_aKeeperHelperLocs[0].iText, pKeeper);
                 pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, TRIGGERED_NONE);
@@ -1223,7 +1223,7 @@ void instance_ulduar::OnCreatureDeath(Creature* pCreature)
                 StartNextDialogueText(SAY_PRE_LEVIATHAN_1);
                 SetData(TYPE_LEVIATHAN, SPECIAL);
                 SetData(TYPE_LEVIATHAN_GAUNTLET, DONE);
-                pCreature->SummonCreature(NPC_LEVIATHAN, afLeviathanSpawnPos[0], afLeviathanSpawnPos[1], afLeviathanSpawnPos[2], afLeviathanSpawnPos[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+                pCreature->SummonCreature(NPC_LEVIATHAN, afLeviathanSpawnPos[0], afLeviathanSpawnPos[1], afLeviathanSpawnPos[2], afLeviathanSpawnPos[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
             }
         }
         break;
@@ -1484,12 +1484,12 @@ void instance_ulduar::DoCallLeviathanHelp()
         return;
 
     for (uint8 i = 0; i < countof(afReinforcementsNormal); ++i)
-        pLeviathan->SummonCreature(afReinforcementsNormal[i].uiEntry, afReinforcementsNormal[i].fX, afReinforcementsNormal[i].fY, afReinforcementsNormal[i].fZ, afReinforcementsNormal[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+        pLeviathan->SummonCreature(afReinforcementsNormal[i].uiEntry, afReinforcementsNormal[i].fX, afReinforcementsNormal[i].fY, afReinforcementsNormal[i].fZ, afReinforcementsNormal[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
 
     if (!instance->IsRegularDifficulty())
     {
         for (uint8 i = 0; i < countof(afReinforcementsHeroic); ++i)
-            pLeviathan->SummonCreature(afReinforcementsHeroic[i].uiEntry, afReinforcementsHeroic[i].fX, afReinforcementsHeroic[i].fY, afReinforcementsHeroic[i].fZ, afReinforcementsHeroic[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            pLeviathan->SummonCreature(afReinforcementsHeroic[i].uiEntry, afReinforcementsHeroic[i].fX, afReinforcementsHeroic[i].fY, afReinforcementsHeroic[i].fZ, afReinforcementsHeroic[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
     }
 }
 
@@ -1507,12 +1507,12 @@ void instance_ulduar::DoSpawnHodirNpcs(Player* pSummoner)
     if (GetData(TYPE_HODIR) != DONE)
     {
         for (uint8 i = 0; i < countof(afHodirHelpersNormal); ++i)
-            pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? afHodirHelpersNormal[i].uiAllyEntry : afHodirHelpersNormal[i].uiHordeEntry, afHodirHelpersNormal[i].fX, afHodirHelpersNormal[i].fY, afHodirHelpersNormal[i].fZ, afHodirHelpersNormal[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? afHodirHelpersNormal[i].uiAllyEntry : afHodirHelpersNormal[i].uiHordeEntry, afHodirHelpersNormal[i].fX, afHodirHelpersNormal[i].fY, afHodirHelpersNormal[i].fZ, afHodirHelpersNormal[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
 
         if (!instance->IsRegularDifficulty())
         {
             for (uint8 i = 0; i < countof(afHodirHelpersHeroic); ++i)
-                pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? afHodirHelpersHeroic[i].uiAllyEntry : afHodirHelpersHeroic[i].uiHordeEntry, afHodirHelpersHeroic[i].fX, afHodirHelpersHeroic[i].fY, afHodirHelpersHeroic[i].fZ, afHodirHelpersHeroic[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+                pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? afHodirHelpersHeroic[i].uiAllyEntry : afHodirHelpersHeroic[i].uiHordeEntry, afHodirHelpersHeroic[i].fX, afHodirHelpersHeroic[i].fY, afHodirHelpersHeroic[i].fZ, afHodirHelpersHeroic[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
         }
     }
 }
@@ -1522,7 +1522,7 @@ void instance_ulduar::DoSpawnThorimNpcs(Player* pSummoner)
     if (GetData(TYPE_THORIM) != DONE)
     {
         for (uint8 i = 0; i < countof(afThorimSpawns); ++i)
-            pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? afThorimSpawns[i].uiAllyEntry : afThorimSpawns[i].uiHordeEntry, afThorimSpawns[i].fX, afThorimSpawns[i].fY, afThorimSpawns[i].fZ, afThorimSpawns[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? afThorimSpawns[i].uiAllyEntry : afThorimSpawns[i].uiHordeEntry, afThorimSpawns[i].fX, afThorimSpawns[i].fY, afThorimSpawns[i].fZ, afThorimSpawns[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
     }
 }
 
@@ -1620,9 +1620,9 @@ void instance_ulduar::Update(uint32 uiDiff)
             if (Creature* pGiant = GetSingleCreatureFromStorage(NPC_RUNE_GIANT))
             {
                 if (urand(0, 1))
-                    pGiant->SummonCreature(NPC_HONOR_GUARD_STAIRS, 2101.2f, -434.135f, 438.331f, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    pGiant->SummonCreature(NPC_HONOR_GUARD_STAIRS, 2101.2f, -434.135f, 438.331f, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 else
-                    pGiant->SummonCreature(NPC_RUNE_ACOLYTE_STAIRS, 2100.41f, -446.712f, 438.331f, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    pGiant->SummonCreature(NPC_RUNE_ACOLYTE_STAIRS, 2100.41f, -446.712f, 438.331f, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
             m_uiStairsSpawnTimer = urand(20000, 30000);
         }

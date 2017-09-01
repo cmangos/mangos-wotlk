@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "sunwell_plateau.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -473,9 +473,7 @@ struct npc_demonic_vaporAI : public ScriptedAI
         // Start following the summoner (player)
         if (m_creature->IsTemporarySummon())
         {
-            TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
-            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
                 m_creature->GetMotionMaster()->MoveFollow(pSummoner, 0, 0);
         }
     }

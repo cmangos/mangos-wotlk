@@ -260,7 +260,7 @@ void hyjalAI::SpawnCreatureForWave(uint32 uiMobEntry)
     }
 
     if (pSpawn)
-        m_creature->SummonCreature(uiMobEntry, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
+        m_creature->SummonCreature(uiMobEntry, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
 }
 
 void hyjalAI::JustSummoned(Creature* pSummoned)

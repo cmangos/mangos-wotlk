@@ -200,8 +200,8 @@ struct boss_warbringer_omroggAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        m_creature->SummonCreature(NPC_LEFT_HEAD, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
-        m_creature->SummonCreature(NPC_RIGHT_HEAD, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
+        m_creature->SummonCreature(NPC_LEFT_HEAD, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
+        m_creature->SummonCreature(NPC_RIGHT_HEAD, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
 
         if (Creature* pLeftHead = m_creature->GetMap()->GetCreature(m_leftHeadGuid))
         {

@@ -352,7 +352,7 @@ void instance_dark_portal::DoSpawnNextPortal()
         m_uiCurrentRiftId = uiTmp;
 
         // Summon next portal
-        pMedivh->SummonCreature(NPC_TIME_RIFT, afPortalLocation[uiTmp].fX, afPortalLocation[uiTmp].fY, afPortalLocation[uiTmp].fZ, afPortalLocation[uiTmp].fOrient, TEMPSUMMON_CORPSE_DESPAWN, 0);
+        pMedivh->SummonCreature(NPC_TIME_RIFT, afPortalLocation[uiTmp].fX, afPortalLocation[uiTmp].fY, afPortalLocation[uiTmp].fZ, afPortalLocation[uiTmp].fOrient, TEMPSPAWN_CORPSE_DESPAWN, 0);
     }
 }
 

@@ -21358,7 +21358,7 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
                                     CastSpell(this, liquidSpellId, TRIGGERED_OLD_TRIGGERED);
                                 else
                                 {
-                                    SummonCreature(21508, 0, 0, 0, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 2000);
+                                    SummonCreature(21508, 0, 0, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 2000);
                                     // Special update timer for the SSC water
                                     m_positionStatusUpdateTimer = 2000;
                                 }

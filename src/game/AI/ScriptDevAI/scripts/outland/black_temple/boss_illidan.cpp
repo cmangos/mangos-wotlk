@@ -619,7 +619,7 @@ struct boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
         m_fTargetMoveX = aEyeBlastPos[uiTargetLoc].fX;
         m_fTargetMoveY = aEyeBlastPos[uiTargetLoc].fY;
         m_fTargetMoveZ = aEyeBlastPos[uiTargetLoc].fZ;
-        m_creature->SummonCreature(NPC_ILLIDAN_TARGET, aEyeBlastPos[uiSpawnLoc].fX, aEyeBlastPos[uiSpawnLoc].fY, aEyeBlastPos[uiSpawnLoc].fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 15000);
+        m_creature->SummonCreature(NPC_ILLIDAN_TARGET, aEyeBlastPos[uiSpawnLoc].fX, aEyeBlastPos[uiSpawnLoc].fY, aEyeBlastPos[uiSpawnLoc].fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 15000);
 
         return true;
     }
@@ -1158,8 +1158,8 @@ struct npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
                 DoCastSpellIfCan(m_creature, SPELL_AKAMA_DOOR_FAIL);
                 break;
             case NPC_SPIRIT_OF_OLUM:
-                m_creature->SummonCreature(NPC_SPIRIT_OF_OLUM, 751.64f, 297.22f, 312.21f, 6.03f, TEMPSUMMON_TIMED_DESPAWN, 25000);
-                m_creature->SummonCreature(NPC_SPIRIT_OF_UDALO, 751.47f, 311.01f, 312.19f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_SPIRIT_OF_OLUM, 751.64f, 297.22f, 312.21f, 6.03f, TEMPSPAWN_TIMED_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_SPIRIT_OF_UDALO, 751.47f, 311.01f, 312.19f, 0.0f, TEMPSPAWN_TIMED_DESPAWN, 25000);
                 break;
             case SPELL_AKAMA_DOOR_CHANNEL:
                 DoCastSpellIfCan(m_creature, SPELL_AKAMA_DOOR_CHANNEL);
@@ -1211,7 +1211,7 @@ struct npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
             if (m_uiSummonMinionTimer < uiDiff)
             {
                 for (uint8 i = 0; i < MAX_ILLIDARI_ELITES; ++i)
-                    m_creature->SummonCreature(NPC_ILLIDARI_ELITE, aIllidariElitesPos[i].fX, aIllidariElitesPos[i].fY, aIllidariElitesPos[i].fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_ILLIDARI_ELITE, aIllidariElitesPos[i].fX, aIllidariElitesPos[i].fY, aIllidariElitesPos[i].fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                 m_uiSummonMinionTimer = urand(35000, 50000);
             }

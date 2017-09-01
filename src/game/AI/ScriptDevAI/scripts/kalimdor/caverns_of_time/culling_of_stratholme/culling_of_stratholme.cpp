@@ -256,7 +256,7 @@ bool EffectAuraDummy_spell_aura_dummy_npc_crates_dummy(const Aura* pAura, bool b
                         break;
                     case 4:
                         // Start NPC_MALCOM_MOORE Event
-                        pTarget->SummonCreature(NPC_MALCOM_MOORE, 1605.452f, 804.9279f, 122.961f, 5.19f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        pTarget->SummonCreature(NPC_MALCOM_MOORE, 1605.452f, 804.9279f, 122.961f, 5.19f, TEMPSPAWN_DEAD_DESPAWN, 0);
                         break;
                     case 5:
                         // Start NPC_BARTLEBY_BATTSON Event
@@ -519,7 +519,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
 
             // spawn Malganis if required
             if (m_pInstance && !m_pInstance->GetSingleCreatureFromStorage(NPC_MALGANIS, true))
-                m_creature->SummonCreature(NPC_MALGANIS, 2296.862F, 1501.015F, 128.445F, 5.13f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_MALGANIS, 2296.862F, 1501.015F, 128.445F, 5.13f, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
 
@@ -578,11 +578,11 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
         {
                 // spawn citizens - ground floor
             case 1:
-                if (Creature* pCitizen = m_creature->SummonCreature(NPC_TOWNHALL_CITIZEN, 2401.265f, 1202.789f, 134.103f, 1.466f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000))
+                if (Creature* pCitizen = m_creature->SummonCreature(NPC_TOWNHALL_CITIZEN, 2401.265f, 1202.789f, 134.103f, 1.466f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000))
                     m_firstCitizenGuid = pCitizen->GetObjectGuid();
-                if (Creature* pCitizen = m_creature->SummonCreature(NPC_TOWNHALL_RESIDENT, 2402.654f, 1205.786f, 134.122f, 2.89f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000))
+                if (Creature* pCitizen = m_creature->SummonCreature(NPC_TOWNHALL_RESIDENT, 2402.654f, 1205.786f, 134.122f, 2.89f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000))
                     m_secondCitizenGuid = pCitizen->GetObjectGuid();
-                if (Creature* pCitizen = m_creature->SummonCreature(NPC_TOWNHALL_CITIZEN, 2398.715f, 1207.334f, 134.122f, 5.27f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000))
+                if (Creature* pCitizen = m_creature->SummonCreature(NPC_TOWNHALL_CITIZEN, 2398.715f, 1207.334f, 134.122f, 5.27f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000))
                     m_thirdCitizenGuid = pCitizen->GetObjectGuid();
                 break;
             case 3:
@@ -608,13 +608,13 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
             case 13:
                 DoScriptText(SAY_ARTHAS_MORE_SORCERY, m_creature);
                 SetRun(false);
-                m_creature->SummonCreature(NPC_TIME_RIFT, 2433.357f, 1192.168f, 148.159f, 3.00f, TEMPSUMMON_TIMED_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_TIME_RIFT, 2433.357f, 1192.168f, 148.159f, 3.00f, TEMPSPAWN_TIMED_DESPAWN, 5000);
                 break;
             case 14:
-                m_creature->SummonCreature(NPC_INFINITE_AGENT, 2433.041f, 1191.158f, 148.128f, 4.99f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_INFINITE_HUNTER, 2433.176f, 1193.429f, 148.114f, 1.21f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_INFINITE_AGENT, 2433.396f, 1192.912f, 148.123f, 0.04f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_INFINITE_ADVERSARY, 2433.626f, 1192.069f, 148.117f, 5.48f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_INFINITE_AGENT, 2433.041f, 1191.158f, 148.128f, 4.99f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_INFINITE_HUNTER, 2433.176f, 1193.429f, 148.114f, 1.21f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_INFINITE_AGENT, 2433.396f, 1192.912f, 148.123f, 0.04f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_INFINITE_ADVERSARY, 2433.626f, 1192.069f, 148.117f, 5.48f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 SetEscortPaused(true);
                 break;
             case 15:
@@ -629,12 +629,12 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
             case 21:
                 DoScriptText(SAY_ARTHAS_WATCH_BACK, m_creature);
 
-                m_creature->SummonCreature(NPC_INFINITE_HUNTER, 2404.375f, 1179.395f, 148.138f, 5.14f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_INFINITE_AGENT, 2403.785f, 1179.004f, 148.138f, 4.58f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_INFINITE_HUNTER, 2413.933f, 1136.93f, 148.111f, 2.40f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_INFINITE_ADVERSARY, 2414.964f, 1136.857f, 148.088f, 0.90f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_TIME_RIFT, 2404.311f, 1178.306f, 148.158f, 1.60f, TEMPSUMMON_TIMED_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_TIME_RIFT, 2414.041f, 1136.068f, 148.159f, 2.23f, TEMPSUMMON_TIMED_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_INFINITE_HUNTER, 2404.375f, 1179.395f, 148.138f, 5.14f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_INFINITE_AGENT, 2403.785f, 1179.004f, 148.138f, 4.58f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_INFINITE_HUNTER, 2413.933f, 1136.93f, 148.111f, 2.40f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_INFINITE_ADVERSARY, 2414.964f, 1136.857f, 148.088f, 0.90f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_TIME_RIFT, 2404.311f, 1178.306f, 148.158f, 1.60f, TEMPSPAWN_TIMED_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_TIME_RIFT, 2414.041f, 1136.068f, 148.159f, 2.23f, TEMPSPAWN_TIMED_DESPAWN, 5000);
                 SetEscortPaused(true);
                 break;
             case 22:
@@ -648,12 +648,12 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
             case 26:
                 DoScriptText(SAY_ARTHAS_PERSISTENT, m_creature);
 
-                m_creature->SummonCreature(NPC_INFINITE_HUNTER, 2431.417f, 1105.167f, 148.075f, 1.26f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_INFINITE_AGENT, 2438.808f, 1113.769f, 148.075f, 3.11f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_INFINITE_ADVERSARY, 2440.917f, 1116.085f, 148.080f, 2.18f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_INFINITE_ADVERSARY, 2428.905f, 1102.929f, 148.125f, 1.97f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_TIME_RIFT, 2429.296f, 1102.007f, 148.159f, 6.21f, TEMPSUMMON_TIMED_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_TIME_RIFT, 2440.057f, 1114.226f, 148.159f, 6.10f, TEMPSUMMON_TIMED_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_INFINITE_HUNTER, 2431.417f, 1105.167f, 148.075f, 1.26f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_INFINITE_AGENT, 2438.808f, 1113.769f, 148.075f, 3.11f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_INFINITE_ADVERSARY, 2440.917f, 1116.085f, 148.080f, 2.18f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_INFINITE_ADVERSARY, 2428.905f, 1102.929f, 148.125f, 1.97f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_TIME_RIFT, 2429.296f, 1102.007f, 148.159f, 6.21f, TEMPSPAWN_TIMED_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_TIME_RIFT, 2440.057f, 1114.226f, 148.159f, 6.10f, TEMPSPAWN_TIMED_DESPAWN, 5000);
                 SetEscortPaused(true);
                 break;
             case 27:
@@ -762,8 +762,8 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
 
                 // epoch event dialogue
             case SAY_ARTHAS_WHAT_ELSE:
-                m_creature->SummonCreature(NPC_LORD_EPOCH, 2456.396f, 1113.969f, 150.032f, 3.15f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_TIME_RIFT_BIG, 2456.058f, 1113.838f, 150.091f, 1.74f, TEMPSUMMON_TIMED_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_LORD_EPOCH, 2456.396f, 1113.969f, 150.032f, 3.15f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_TIME_RIFT_BIG, 2456.058f, 1113.838f, 150.091f, 1.74f, TEMPSPAWN_TIMED_DESPAWN, 5000);
                 break;
             case NPC_ARTHAS:
                 m_creature->HandleEmote(EMOTE_ONESHOT_POINT_NOSHEATHE);

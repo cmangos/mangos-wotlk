@@ -1440,7 +1440,7 @@ void Aura::TriggerSpell()
                     case 31373:                             // Spellcloth
                     {
                         // Summon Elemental after create item
-                        triggerTarget->SummonCreature(17870, 0.0f, 0.0f, 0.0f, triggerTarget->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+                        triggerTarget->SummonCreature(17870, 0.0f, 0.0f, 0.0f, triggerTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
                         return;
                     }
                     case 31611:                             // Bloodmyst Tesla
@@ -1592,7 +1592,9 @@ void Aura::TriggerSpell()
                     {
                         float fX, fY, fZ;
                         triggerTarget->GetClosePoint(fX, fY, fZ, triggerTarget->GetObjectBoundingRadius(), 20.0f);
-                        triggerTarget->SummonCreature(22408, fX, fY, fZ, triggerTarget->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+                        Creature* wraith = triggerTarget->SummonCreature(22408, fX, fY, fZ, triggerTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
+                        if (Unit* caster = GetCaster())
+                            wraith->AI()->AttackStart(caster);
                         return;
                     }
 //                    // Drain World Tree Visual
@@ -2778,7 +2780,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 42517:                                     // Beam to Zelfrax
             {
                 // expecting target to be a dummy creature
-                Creature* pSummon = target->SummonCreature(23864, 0.0f, 0.0f, 0.0f, target->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+                Creature* pSummon = target->SummonCreature(23864, 0.0f, 0.0f, 0.0f, target->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
 
                 Unit* pCaster = GetCaster();
 

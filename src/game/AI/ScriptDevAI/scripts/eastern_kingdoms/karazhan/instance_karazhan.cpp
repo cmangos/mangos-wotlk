@@ -407,7 +407,7 @@ void instance_karazhan::OnCreatureDeath(Creature* pCreature)
             // Summon Chrone when all 4 Oz mobs are killed
             if (m_uiOzDeathCount == MAX_OZ_OPERA_MOBS)
             {
-                if (Creature* pCrone = pCreature->SummonCreature(NPC_CRONE, afChroneSpawnLoc[0], afChroneSpawnLoc[1], afChroneSpawnLoc[2], afChroneSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0))
+                if (Creature* pCrone = pCreature->SummonCreature(NPC_CRONE, afChroneSpawnLoc[0], afChroneSpawnLoc[1], afChroneSpawnLoc[2], afChroneSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     if (pCreature->getVictim())
                         pCrone->AI()->AttackStart(pCreature->getVictim());
@@ -437,7 +437,7 @@ void instance_karazhan::OnCreatureDeath(Creature* pCreature)
                     m_bBasementBossReady = false;
 
                     if (Creature* pBoss = pCreature->SummonCreature(aBasementEnum[uiIndex].uiEntry, aBasementEnum[uiIndex].fX, aBasementEnum[uiIndex].fY, aBasementEnum[uiIndex].fZ,
-                            aBasementEnum[uiIndex].fO, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 2 * HOUR * IN_MILLISECONDS, true))
+                            aBasementEnum[uiIndex].fO, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 2 * HOUR * IN_MILLISECONDS, true))
                         DoScriptText(aBasementEnum[uiIndex].iEmote, pBoss);
                 }
             }
@@ -592,20 +592,20 @@ void instance_karazhan::DoPrepareOperaStage(Creature* pOrganizer)
     {
         case OPERA_EVENT_WIZARD_OZ:
             for (uint8 i = 0; i < MAX_OZ_OPERA_MOBS; ++i)
-                pOrganizer->SummonCreature(aOperaLocOz[i].uiEntry, aOperaLocOz[i].fX, aOperaLocOz[i].fY, aOperaLocOz[i].fZ, aOperaLocOz[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                pOrganizer->SummonCreature(aOperaLocOz[i].uiEntry, aOperaLocOz[i].fX, aOperaLocOz[i].fY, aOperaLocOz[i].fZ, aOperaLocOz[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0);
             DoRespawnGameObject(GO_OZ_BACKDROP, 12 * HOUR);
             for (GuidList::const_iterator itr = m_lOperaHayGuidList.begin(); itr != m_lOperaHayGuidList.end(); ++itr)
                 DoRespawnGameObject(*itr, 12 * HOUR);
             break;
         case OPERA_EVENT_RED_RIDING_HOOD:
-            pOrganizer->SummonCreature(aOperaLocWolf.uiEntry, aOperaLocWolf.fX, aOperaLocWolf.fY, aOperaLocWolf.fZ, aOperaLocWolf.fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+            pOrganizer->SummonCreature(aOperaLocWolf.uiEntry, aOperaLocWolf.fX, aOperaLocWolf.fY, aOperaLocWolf.fZ, aOperaLocWolf.fO, TEMPSPAWN_DEAD_DESPAWN, 0);
             DoRespawnGameObject(GO_HOOD_BACKDROP, 12 * HOUR);
             DoRespawnGameObject(GO_HOOD_HOUSE,    12 * HOUR);
             for (GuidList::const_iterator itr = m_lOperaTreeGuidList.begin(); itr != m_lOperaTreeGuidList.end(); ++itr)
                 DoRespawnGameObject(*itr, 12 * HOUR);
             break;
         case OPERA_EVENT_ROMULO_AND_JUL:
-            pOrganizer->SummonCreature(aOperaLocJul.uiEntry, aOperaLocJul.fX, aOperaLocJul.fY, aOperaLocJul.fZ, aOperaLocJul.fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+            pOrganizer->SummonCreature(aOperaLocJul.uiEntry, aOperaLocJul.fX, aOperaLocJul.fY, aOperaLocJul.fZ, aOperaLocJul.fO, TEMPSPAWN_DEAD_DESPAWN, 0);
             DoRespawnGameObject(GO_RAJ_BACKDROP, 12 * HOUR);
             DoRespawnGameObject(GO_RAJ_MOON,     12 * HOUR);
             DoRespawnGameObject(GO_RAJ_BALCONY,  12 * HOUR);

@@ -22,7 +22,7 @@ SDCategory: Slave Pens
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -179,9 +179,7 @@ struct boss_ahuneAI : public Scripted_NoMovementAI
         {
             if (m_creature->IsTemporarySummon())
             {
-                TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
                     AttackStart(pSummoner);
             }
 
@@ -284,7 +282,7 @@ struct npc_frozen_coreAI : public Scripted_NoMovementAI
     void Reset() override
     {
         if (m_creature->IsTemporarySummon())
-            m_ahuheGuid = ((TemporarySummon*)m_creature)->GetSummonerGuid();
+            m_ahuheGuid = m_creature->GetSpawnerGuid();
 
         DoCastSpellIfCan(m_creature, SPELL_FROZEN_CORE_HIT, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoCastSpellIfCan(m_creature, SPELL_ICE_SPEAR_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);

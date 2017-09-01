@@ -22,7 +22,7 @@ SDCategory: Scarlet Monastery
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -226,7 +226,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
         {
             float fX, fY, fZ;
             m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_HEAD_OF_HORSEMAN, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_HEAD_OF_HORSEMAN, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
 
         // make head available
@@ -382,9 +382,7 @@ struct boss_head_of_horsemanAI : public ScriptedAI
         // end the event
         if (m_creature->IsTemporarySummon())
         {
-            TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
-            if (Unit* pHorseman = m_creature->GetMap()->GetUnit(pTemporary->GetSummonerGuid()))
+            if (Unit* pHorseman = m_creature->GetMap()->GetUnit(m_creature->GetSpawnerGuid()))
             {
                 pHorseman->CastSpell(pHorseman, SPELL_BODY_LEAVE_COMBAT, TRIGGERED_OLD_TRIGGERED);
                 pHorseman->CastSpell(pHorseman, SPELL_BODY_DEAD, TRIGGERED_OLD_TRIGGERED);

@@ -237,7 +237,7 @@ bool GOUse_go_southfury_moonstone(Player* pPlayer, GameObject* /*pGo*/)
     // implicitTarget=48 not implemented as of writing this code, and manual summon may be just ok for our purpose
     // pPlayer->CastSpell(pPlayer,SPELL_SUMMON_RIZZLE,TRIGGERED_NONE);
 
-    if (Creature* pCreature = pPlayer->SummonCreature(NPC_RIZZLE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0))
+    if (Creature* pCreature = pPlayer->SummonCreature(NPC_RIZZLE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0))
         pCreature->CastSpell(pPlayer, SPELL_BLACKJACK, TRIGGERED_NONE);
 
     return false;

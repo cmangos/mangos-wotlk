@@ -302,7 +302,7 @@ struct boss_rimefang_posAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_ICY_BLAST) == CAST_OK)
                 {
-                    m_creature->SummonCreature(NPC_ICY_BLAST, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 90000);
+                    m_creature->SummonCreature(NPC_ICY_BLAST, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 90000);
                     m_uiIcyBlastTimer = 8000;
                 }
             }

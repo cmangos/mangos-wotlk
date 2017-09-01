@@ -381,7 +381,7 @@ struct boss_aranAI : public ScriptedAI
             if (m_uiBerserkTimer <= uiDiff)
             {
                 for (uint8 i = 0; i < MAX_SHADOWS_OF_ARAN; ++i)
-                    DoSpawnCreature(NPC_SHADOW_OF_ARAN, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                    DoSpawnCreature(NPC_SHADOW_OF_ARAN, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
 
                 DoScriptText(SAY_TIMEOVER, m_creature);
                 m_uiBerserkTimer = 0;

@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "icecrown_citadel.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -337,10 +337,8 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
     {
         if (m_creature->IsTemporarySummon())
         {
-            TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
             // remove impale on death
-            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
                 pSummoner->RemoveAurasDueToSpell(SPELL_IMPALED);
         }
     }
@@ -351,10 +349,8 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
         {
             if (m_creature->IsTemporarySummon())
             {
-                TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
                 // Impale player
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
                     DoCastSpellIfCan(pSummoner, SPELL_IMPALED);
             }
 

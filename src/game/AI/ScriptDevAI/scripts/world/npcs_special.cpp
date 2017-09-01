@@ -137,7 +137,7 @@ struct npc_air_force_botsAI : public ScriptedAI
 
     Creature* SummonGuard()
     {
-        Creature* pSummoned = m_creature->SummonCreature(m_pSpawnAssoc->m_uiSpawnedCreatureEntry, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 300000);
+        Creature* pSummoned = m_creature->SummonCreature(m_pSpawnAssoc->m_uiSpawnedCreatureEntry, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 300000);
 
         if (pSummoned)
             m_spawnedGuid = pSummoned->GetObjectGuid();
@@ -801,7 +801,7 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
                             return;
                     }
 
-                    if (Creature* Patient = m_creature->SummonCreature(patientEntry, (*itr)->x, (*itr)->y, (*itr)->z, (*itr)->o, TEMPSUMMON_DEAD_DESPAWN, 0))
+                    if (Creature* Patient = m_creature->SummonCreature(patientEntry, (*itr)->x, (*itr)->y, (*itr)->z, (*itr)->o, TEMPSPAWN_DEAD_DESPAWN, 0))
                     {
                         totalSpawned++;
 

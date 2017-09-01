@@ -260,7 +260,7 @@ struct boss_archimondeAI : public ScriptedAI
                 {
                     float fX, fY, fZ;
                     m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 75.0f, urand(0, 1) ? frand(0, 2.8f) : frand(4.3f, M_PI_F * 2));
-                    m_creature->SummonCreature(NPC_ANCIENT_WISP, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 15000);
+                    m_creature->SummonCreature(NPC_ANCIENT_WISP, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 15000);
                     m_uiSummonWispTimer = urand(1000, 1500);
                 }
                 else

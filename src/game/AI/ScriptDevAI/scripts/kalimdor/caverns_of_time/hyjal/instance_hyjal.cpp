@@ -189,7 +189,7 @@ void instance_mount_hyjal::DoSpawnArchimonde()
 
     // Summon Archimonde
     if (Player* pPlayer = GetPlayerInMap())
-        pPlayer->SummonCreature(NPC_ARCHIMONDE, aArchimondeSpawnLoc[0], aArchimondeSpawnLoc[1], aArchimondeSpawnLoc[2], aArchimondeSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+        pPlayer->SummonCreature(NPC_ARCHIMONDE, aArchimondeSpawnLoc[0], aArchimondeSpawnLoc[1], aArchimondeSpawnLoc[2], aArchimondeSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
 }
 
 uint32 instance_mount_hyjal::GetData(uint32 uiType) const

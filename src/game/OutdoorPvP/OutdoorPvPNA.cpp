@@ -536,7 +536,7 @@ void OutdoorPvPNA::RespawnSoldier()
         {
             // summon a soldier replacement in the order they were set in the deque. delete the element after summon
             const HalaaSoldiersSpawns& location = m_deadSoldiers.front();
-            player->SummonCreature(m_zoneOwner == ALLIANCE ? NPC_ALLIANCE_HANAANI_GUARD : NPC_HORDE_HALAANI_GUARD, location.x, location.y, location.z, location.o, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            player->SummonCreature(m_zoneOwner == ALLIANCE ? NPC_ALLIANCE_HANAANI_GUARD : NPC_HORDE_HALAANI_GUARD, location.x, location.y, location.z, location.o, TEMPSPAWN_DEAD_DESPAWN, 0, true);
             m_deadSoldiers.pop();
             break;
         }

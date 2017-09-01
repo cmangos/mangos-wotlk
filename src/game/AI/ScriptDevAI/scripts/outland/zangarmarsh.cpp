@@ -111,8 +111,8 @@ struct npc_kayra_longmaneAI : public npc_escortAI
         {
             case 4:
                 DoScriptText(SAY_AMBUSH1, m_creature, pPlayer);
-                DoSpawnCreature(NPC_SLAVEBINDER, -10.0f, -5.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
-                DoSpawnCreature(NPC_SLAVEBINDER, -8.0f, 5.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
+                DoSpawnCreature(NPC_SLAVEBINDER, -10.0f, -5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                DoSpawnCreature(NPC_SLAVEBINDER, -8.0f, 5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 break;
             case 5:
                 DoScriptText(SAY_PROGRESS, m_creature, pPlayer);
@@ -120,8 +120,8 @@ struct npc_kayra_longmaneAI : public npc_escortAI
                 break;
             case 16:
                 DoScriptText(SAY_AMBUSH2, m_creature, pPlayer);
-                DoSpawnCreature(NPC_SLAVEBINDER, -10.0f, -5.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
-                DoSpawnCreature(NPC_SLAVEBINDER, -8.0f, 5.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
+                DoSpawnCreature(NPC_SLAVEBINDER, -10.0f, -5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                DoSpawnCreature(NPC_SLAVEBINDER, -8.0f, 5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 break;
             case 17:
                 DoScriptText(SAY_END, m_creature, pPlayer);
@@ -258,17 +258,17 @@ struct npc_fhwoorAI : public npc_escortAI
                 if (GameObject* pArk = GetClosestGameObjectWithEntry(m_creature, GO_ARK_OF_SSSLITH, 10.0f))
                     pArk->SetLootState(GO_JUST_DEACTIVATED);
                 // spawn npcs
-                m_creature->SummonCreature(NPC_ENCHANTRESS, 526.12f, 8136.96f, 21.64f, 0.57f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_SLAVEDRIVER, 524.09f, 8138.67f, 21.49f, 0.58f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_SLAVEDRIVER, 526.93f, 8133.88f, 21.56f, 0.58f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_ENCHANTRESS, 526.12f, 8136.96f, 21.64f, 0.57f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_SLAVEDRIVER, 524.09f, 8138.67f, 21.49f, 0.58f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_SLAVEDRIVER, 526.93f, 8133.88f, 21.56f, 0.58f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
             case 70:
                 DoScriptText(SAY_AMBUSH, m_creature);
                 // spawn npcs
                 m_bIsAmbush = true;
-                m_creature->SummonCreature(NPC_SSSLITH, 162.91f, 8192.08f, 22.55f, 5.98f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_ENCHANTRESS, 162.34f, 8193.99f, 22.85f, 5.98f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_SLAVEDRIVER, 163.07f, 8187.04f, 22.71f, 0.10f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_SSSLITH, 162.91f, 8192.08f, 22.55f, 5.98f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_ENCHANTRESS, 162.34f, 8193.99f, 22.85f, 5.98f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_SLAVEDRIVER, 163.07f, 8187.04f, 22.71f, 0.10f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 SetEscortPaused(true);
                 break;
             case 71:

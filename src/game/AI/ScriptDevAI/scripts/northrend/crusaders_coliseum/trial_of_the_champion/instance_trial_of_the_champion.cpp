@@ -568,7 +568,7 @@ void instance_trial_of_the_champion::OnCreatureDespawn(Creature* pCreature)
             float fX, fY, fZ, fO;
             pCreature->GetRespawnCoord(fX, fY, fZ, &fO);
             if (Creature* pHerald = GetSingleCreatureFromStorage(m_uiHeraldEntry))
-                pHerald->SummonCreature(pCreature->GetEntry(), fX, fY, fZ, fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                pHerald->SummonCreature(pCreature->GetEntry(), fX, fY, fZ, fO, TEMPSPAWN_DEAD_DESPAWN, 0);
             break;
         }
     }
@@ -622,13 +622,13 @@ void instance_trial_of_the_champion::DoSummonHeraldIfNeeded(Unit* pSummoner)
     if (GetSingleCreatureFromStorage(m_uiHeraldEntry, true))
         return;
 
-    pSummoner->SummonCreature(m_uiHeraldEntry, aHeraldPositions[0][0], aHeraldPositions[0][1], aHeraldPositions[0][2], aHeraldPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+    pSummoner->SummonCreature(m_uiHeraldEntry, aHeraldPositions[0][0], aHeraldPositions[0][1], aHeraldPositions[0][2], aHeraldPositions[0][3], TEMPSPAWN_DEAD_DESPAWN, 0);
 
     // summon champion mounts if required
     if (GetData(TYPE_GRAND_CHAMPIONS) != DONE)
     {
         for (uint8 i = 0; i < MAX_CHAMPIONS_MOUNTS; ++i)
-            pSummoner->SummonCreature(m_uiTeam == ALLIANCE ? aTrialChampionsMounts[i].uiEntryAlliance : aTrialChampionsMounts[i].uiEntryHorde, aTrialChampionsMounts[i].fX, aTrialChampionsMounts[i].fY, aTrialChampionsMounts[i].fZ, aTrialChampionsMounts[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+            pSummoner->SummonCreature(m_uiTeam == ALLIANCE ? aTrialChampionsMounts[i].uiEntryAlliance : aTrialChampionsMounts[i].uiEntryHorde, aTrialChampionsMounts[i].fX, aTrialChampionsMounts[i].fY, aTrialChampionsMounts[i].fZ, aTrialChampionsMounts[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 }
 
@@ -866,7 +866,7 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
                 m_uiGateResetTimer = 10000;             // ToDo: set this as door reset timer when fixed in core
 
                 // summon the selected champion
-                if (Creature* pChampion = pHerald->SummonCreature(m_uiGrandChampionEntry,  aArgentChallengeHelpers[9].fX, aArgentChallengeHelpers[9].fY, aArgentChallengeHelpers[9].fZ, aArgentChallengeHelpers[9].fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                if (Creature* pChampion = pHerald->SummonCreature(m_uiGrandChampionEntry,  aArgentChallengeHelpers[9].fX, aArgentChallengeHelpers[9].fY, aArgentChallengeHelpers[9].fZ, aArgentChallengeHelpers[9].fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     pChampion->CastSpell(pChampion, SPELL_SPECTATOR_FORCE_CHEER, TRIGGERED_OLD_TRIGGERED);
                     pChampion->CastSpell(pChampion, SPELL_SPECTATOR_FORCE_CHEER_2, TRIGGERED_OLD_TRIGGERED);
@@ -879,7 +879,7 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
 
                 for (uint8 i = 0; i < MAX_ARGENT_TRASH; ++i)
                 {
-                    if (Creature* pHelper = pHerald->SummonCreature(aArgentChallengeHelpers[i].uiEntry, aArgentChallengeHelpers[i].fX, aArgentChallengeHelpers[i].fY, aArgentChallengeHelpers[i].fZ, aArgentChallengeHelpers[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                    if (Creature* pHelper = pHerald->SummonCreature(aArgentChallengeHelpers[i].uiEntry, aArgentChallengeHelpers[i].fX, aArgentChallengeHelpers[i].fY, aArgentChallengeHelpers[i].fZ, aArgentChallengeHelpers[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                     {
                         pHelper->GetMotionMaster()->MovePoint(POINT_ID_CENTER, aArgentChallengeHelpers[i].fTargetX, aArgentChallengeHelpers[i].fTargetY, aArgentChallengeHelpers[i].fTargetZ, false);
                         pHelper->SetRespawnCoord(aArgentChallengeHelpers[i].fTargetX, aArgentChallengeHelpers[i].fTargetY, aArgentChallengeHelpers[i].fTargetZ, pHelper->GetOrientation());
@@ -933,9 +933,9 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
         case SAY_TIRION_ARGENT_CHAMPION_COMPLETE:
             if (Creature* pHerald = GetSingleCreatureFromStorage(m_uiHeraldEntry))
             {
-                if (Creature* pKnight = pHerald->SummonCreature(NPC_BLACK_KNIGHT, aKnightPositions[0][0], aKnightPositions[0][1], aKnightPositions[0][2], aKnightPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0))
+                if (Creature* pKnight = pHerald->SummonCreature(NPC_BLACK_KNIGHT, aKnightPositions[0][0], aKnightPositions[0][1], aKnightPositions[0][2], aKnightPositions[0][3], TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
-                    if (Creature* pGryphon = pHerald->SummonCreature(NPC_BLACK_KNIGHT_GRYPHON, aKnightPositions[1][0], aKnightPositions[1][1], aKnightPositions[1][2], aKnightPositions[1][3], TEMPSUMMON_TIMED_DESPAWN, 75000))
+                    if (Creature* pGryphon = pHerald->SummonCreature(NPC_BLACK_KNIGHT_GRYPHON, aKnightPositions[1][0], aKnightPositions[1][1], aKnightPositions[1][2], aKnightPositions[1][3], TEMPSPAWN_TIMED_DESPAWN, 75000))
                     {
                         pKnight->CastSpell(pGryphon, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
                         pGryphon->SetWalk(false);
@@ -1029,7 +1029,7 @@ void instance_trial_of_the_champion::Update(uint32 uiDiff)
 
                         // summon grand champion, mount and emote
                         if (Creature* pChampion = pHerald->SummonCreature(m_uiTeam == ALLIANCE ? aHordeChampions[uiIndex].uiEntry : aAllianceChampions[uiIndex].uiEntry,
-                                                  pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), pTrigger->GetAngle(pCenterTrigger), TEMPSUMMON_DEAD_DESPAWN, 0))
+                                                  pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), pTrigger->GetAngle(pCenterTrigger), TEMPSPAWN_DEAD_DESPAWN, 0))
                         {
                             // handle emote
                             if (Creature* pStalker = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? aHordeChampions[uiIndex].uiCrowdStalker : aAllianceChampions[uiIndex].uiCrowdStalker))
@@ -1037,7 +1037,7 @@ void instance_trial_of_the_champion::Update(uint32 uiDiff)
 
                             // summon champion mount
                             if (Creature* pMount = pChampion->SummonCreature(m_uiTeam == ALLIANCE ? aHordeChampions[uiIndex].uiMount : aAllianceChampions[uiIndex].uiMount,
-                                                   pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), pTrigger->GetAngle(pCenterTrigger), TEMPSUMMON_DEAD_DESPAWN, 0))
+                                                   pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), pTrigger->GetAngle(pCenterTrigger), TEMPSPAWN_DEAD_DESPAWN, 0))
                             {
                                 pChampion->CastSpell(pMount, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
 
@@ -1053,7 +1053,7 @@ void instance_trial_of_the_champion::Update(uint32 uiDiff)
                         {
                             pTrigger->GetNearPoint(pTrigger, fX, fY, fZ, 0, 5.0f, pTrigger->GetAngle(pCenterTrigger) - (M_PI_F * 0.25f) + j * (M_PI_F * 0.25f));
                             if (Creature* pHelper = pHerald->SummonCreature(m_uiTeam == ALLIANCE ? aHordeChampions[uiIndex].uiChampion : aAllianceChampions[uiIndex].uiChampion,
-                                                    fX, fY, fZ, pTrigger->GetAngle(pCenterTrigger), TEMPSUMMON_DEAD_DESPAWN, 0))
+                                                    fX, fY, fZ, pTrigger->GetAngle(pCenterTrigger), TEMPSPAWN_DEAD_DESPAWN, 0))
                                 m_sArenaHelpersGuids[m_uiIntroStage].insert(pHelper->GetObjectGuid());
                         }
 
@@ -1071,7 +1071,7 @@ void instance_trial_of_the_champion::Update(uint32 uiDiff)
 
                         // summon grand champion, mount and emote
                         if (Creature* pChampion = pHerald->SummonCreature(m_uiTeam == ALLIANCE ? aHordeChampions[uiIndex].uiEntry : aAllianceChampions[uiIndex].uiEntry,
-                                                  aIntroPositions[0][0], aIntroPositions[0][1], aIntroPositions[0][2], aIntroPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0))
+                                                  aIntroPositions[0][0], aIntroPositions[0][1], aIntroPositions[0][2], aIntroPositions[0][3], TEMPSPAWN_DEAD_DESPAWN, 0))
                         {
                             // text
                             DoScriptText(m_uiTeam == ALLIANCE ? aHordeChampions[uiIndex].iYellEntry : aAllianceChampions[uiIndex].iYellEntry, pHerald);
@@ -1090,7 +1090,7 @@ void instance_trial_of_the_champion::Update(uint32 uiDiff)
 
                             // summon champion mount
                             if (Creature* pMount = pChampion->SummonCreature(m_uiTeam == ALLIANCE ? aHordeChampions[uiIndex].uiMount : aAllianceChampions[uiIndex].uiMount,
-                                                   aIntroPositions[0][0], aIntroPositions[0][1], aIntroPositions[0][2], aIntroPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0))
+                                                   aIntroPositions[0][0], aIntroPositions[0][1], aIntroPositions[0][2], aIntroPositions[0][3], TEMPSPAWN_DEAD_DESPAWN, 0))
                             {
                                 pChampion->CastSpell(pMount, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
 
@@ -1106,7 +1106,7 @@ void instance_trial_of_the_champion::Update(uint32 uiDiff)
                                 for (uint8 j = 0; j < 3; ++j)
                                 {
                                     if (Creature* pHelper = pChampion->SummonCreature(m_uiTeam == ALLIANCE ? aHordeChampions[uiIndex].uiChampion : aAllianceChampions[uiIndex].uiChampion,
-                                                            aIntroPositions[j + 1][0], aIntroPositions[j + 1][1], aIntroPositions[j + 1][2], aIntroPositions[j + 1][3], TEMPSUMMON_DEAD_DESPAWN, 0))
+                                                            aIntroPositions[j + 1][0], aIntroPositions[j + 1][1], aIntroPositions[j + 1][2], aIntroPositions[j + 1][3], TEMPSPAWN_DEAD_DESPAWN, 0))
                                     {
                                         pHelper->GetMotionMaster()->MoveFollow(pMount, pHelper->GetDistance(pMount), M_PI_F / 2 + pHelper->GetAngle(pMount));
                                         m_sArenaHelpersGuids[m_uiIntroStage].insert(pHelper->GetObjectGuid());
@@ -1170,7 +1170,7 @@ void instance_trial_of_the_champion::Update(uint32 uiDiff)
                 uiIndex = m_vChampionsIndex[i];
 
                 if (Creature* pChampion = pHerald->SummonCreature(m_uiTeam == ALLIANCE ? aHordeChampions[uiIndex].uiEntry : aAllianceChampions[uiIndex].uiEntry,
-                                          aChampsPositions[i][0], aChampsPositions[i][1], aChampsPositions[i][2], aChampsPositions[i][3], TEMPSUMMON_DEAD_DESPAWN, 0))
+                                          aChampsPositions[i][0], aChampsPositions[i][1], aChampsPositions[i][2], aChampsPositions[i][3], TEMPSPAWN_DEAD_DESPAWN, 0))
                     m_ArenaChampionsGuids[i] = pChampion->GetObjectGuid();
             }
             m_uiChampionsTimer = 0;

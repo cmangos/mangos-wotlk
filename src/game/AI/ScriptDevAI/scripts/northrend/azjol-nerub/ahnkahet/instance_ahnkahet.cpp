@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "ahnkahet.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 instance_ahnkahet::instance_ahnkahet(Map* pMap) : ScriptedInstance(pMap),
     m_bRespectElders(false),
@@ -245,10 +245,8 @@ void instance_ahnkahet::OnCreatureDeath(Creature* pCreature)
                 // Handle insanity switch manually, because the boss can't hit phased players
                 if (pCreature->IsTemporarySummon())
                 {
-                    TemporarySummon* pTemporary = (TemporarySummon*)pCreature;
-
                     // Switch insanity phase for the master player
-                    if (Player* pPlayer = instance->GetPlayer(pTemporary->GetSummonerGuid()))
+                    if (Player* pPlayer = instance->GetPlayer(pCreature->GetSummonerGuid()))
                         HandleInsanitySwitch(pPlayer);
                 }
             }

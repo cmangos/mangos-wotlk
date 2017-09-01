@@ -31,7 +31,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "halls_of_reflection.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 /*######
 ## at_frostmourne_chamber
@@ -63,13 +63,13 @@ bool AreaTrigger_at_frostmourne_chamber(Player* pPlayer, AreaTriggerEntry const*
         // reset on Falric fail
         if (pInstance->GetData(TYPE_FALRIC) == FAIL)
         {
-            pPlayer->SummonCreature(NPC_FALRIC, afFalricSpawnLoc[0], afFalricSpawnLoc[1], afFalricSpawnLoc[2], afFalricSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
-            pPlayer->SummonCreature(NPC_MARWYN, afMarwybSpawnLoc[0], afMarwybSpawnLoc[1], afMarwybSpawnLoc[2], afMarwybSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            pPlayer->SummonCreature(NPC_FALRIC, afFalricSpawnLoc[0], afFalricSpawnLoc[1], afFalricSpawnLoc[2], afFalricSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+            pPlayer->SummonCreature(NPC_MARWYN, afMarwybSpawnLoc[0], afMarwybSpawnLoc[1], afMarwybSpawnLoc[2], afMarwybSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
         }
         // reset on Marwyn fail
         else if (pInstance->GetData(TYPE_FALRIC) == DONE && pInstance->GetData(TYPE_MARWYN) == FAIL)
         {
-            if (Creature* pMarwyn = pPlayer->SummonCreature(NPC_MARWYN, afMarwybSpawnLoc[0], afMarwybSpawnLoc[1], afMarwybSpawnLoc[2], afMarwybSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0))
+            if (Creature* pMarwyn = pPlayer->SummonCreature(NPC_MARWYN, afMarwybSpawnLoc[0], afMarwybSpawnLoc[1], afMarwybSpawnLoc[2], afMarwybSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0))
                 DoScriptText(SAY_MARWYN_GAUNTLET_START, pMarwyn);
         }
     }
@@ -284,7 +284,7 @@ bool AreaTrigger_at_frostworn_general(Player* pPlayer, AreaTriggerEntry const* p
 
             // spawn a spiritual reflection
             // ToDo: research what is the difference between the two entries
-            if (Creature* pReflection = pPlayerTarget->SummonCreature(urand(0, 1) ? NPC_SPIRITUAL_REFLECTION_1 : NPC_SPIRITUAL_REFLECTION_2, pSpawnCreature->GetPositionX(), pSpawnCreature->GetPositionY(), pSpawnCreature->GetPositionZ(), pSpawnCreature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
+            if (Creature* pReflection = pPlayerTarget->SummonCreature(urand(0, 1) ? NPC_SPIRITUAL_REFLECTION_1 : NPC_SPIRITUAL_REFLECTION_2, pSpawnCreature->GetPositionX(), pSpawnCreature->GetPositionY(), pSpawnCreature->GetPositionZ(), pSpawnCreature->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
             {
                 pPlayerTarget->CastSpell(pReflection, SPELL_HALLS_OF_REFLECTION_CLONE_NAME, TRIGGERED_OLD_TRIGGERED);
                 pPlayerTarget->CastSpell(pReflection, SPELL_HALLS_OF_REFLECTION_CLONE, TRIGGERED_OLD_TRIGGERED);
@@ -334,9 +334,7 @@ bool EffectDummyCreature_spell_summon_reflections(Unit* /*pCaster*/, uint32 uiSp
             {
                 if (pCreature->IsTemporarySummon())
                 {
-                    TemporarySummon* pTemporary = (TemporarySummon*)pCreature;
-
-                    if (Player* pSummoner = pCreature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                    if (Player* pSummoner = pCreature->GetMap()->GetPlayer(pCreature->GetSummonerGuid()))
                     {
                         pCreature->SetLevitate(false);
                         pCreature->AI()->AttackStart(pSummoner);

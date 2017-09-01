@@ -758,7 +758,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     }
 
                     CastSpell(this, 36206, TRIGGERED_OLD_TRIGGERED);
-                    pCaster->SummonCreature(uiSoulEntry, GetPositionX(), GetPositionY(), GetPositionZ(), 0, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 10000);
+                    pCaster->SummonCreature(uiSoulEntry, GetPositionX(), GetPositionY(), GetPositionZ(), 0, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 10000);
                     break;
                 }
                 // Vampiric Aura (boss spell)

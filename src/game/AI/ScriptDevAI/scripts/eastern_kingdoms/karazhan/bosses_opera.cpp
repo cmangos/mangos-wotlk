@@ -558,7 +558,7 @@ struct boss_croneAI : public ScriptedAI
         DoScriptText(urand(0, 1) ? SAY_CRONE_AGGRO : SAY_CRONE_AGGRO2, m_creature);
 
         // spawn the cyclone on aggro
-        m_creature->SummonCreature(NPC_CYCLONE, afCycloneSpawnLoc[0], afCycloneSpawnLoc[1], afCycloneSpawnLoc[2], afCycloneSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+        m_creature->SummonCreature(NPC_CYCLONE, afCycloneSpawnLoc[0], afCycloneSpawnLoc[1], afCycloneSpawnLoc[2], afCycloneSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -657,7 +657,7 @@ bool GossipSelect_npc_grandmother(Player* pPlayer, Creature* pCreature, uint32 /
 {
     if (uiAction == GOSSIP_ACTION_INFO_DEF)
     {
-        if (Creature* pBigBadWolf = pCreature->SummonCreature(NPC_BIG_BAD_WOLF, 0, 0, 0, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+        if (Creature* pBigBadWolf = pCreature->SummonCreature(NPC_BIG_BAD_WOLF, 0, 0, 0, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
             pBigBadWolf->AI()->AttackStart(pPlayer);
 
         pCreature->ForcedDespawn();
@@ -944,7 +944,7 @@ struct boss_julianneAI : public ScriptedAI
         {
             if (m_uiSummonRomuloTimer <= uiDiff)
             {
-                m_creature->SummonCreature(NPC_ROMULO, afRomuloSpawnLoc[0], afRomuloSpawnLoc[1], afRomuloSpawnLoc[2], afRomuloSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_ROMULO, afRomuloSpawnLoc[0], afRomuloSpawnLoc[1], afRomuloSpawnLoc[2], afRomuloSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
                 m_uiSummonRomuloTimer = 0;
             }
             else

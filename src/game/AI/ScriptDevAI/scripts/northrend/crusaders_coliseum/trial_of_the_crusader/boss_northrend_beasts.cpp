@@ -143,14 +143,14 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
             if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_A))
                 DoScriptText(SAY_TIRION_BEAST_2, pTirion);
 
-            m_creature->SummonCreature(NPC_DREADSCALE, aSpawnPositions[2][0], aSpawnPositions[2][1], aSpawnPositions[2][2], aSpawnPositions[2][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_DREADSCALE, aSpawnPositions[2][0], aSpawnPositions[2][1], aSpawnPositions[2][2], aSpawnPositions[2][3], TEMPSPAWN_DEAD_DESPAWN, 0);
         }
         else
         {
             if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_A))
                 DoScriptText(SAY_TIRION_BEAST_3, pTirion);
 
-            m_creature->SummonCreature(NPC_ICEHOWL, aSpawnPositions[4][0], aSpawnPositions[4][1], aSpawnPositions[4][2], aSpawnPositions[4][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_ICEHOWL, aSpawnPositions[4][0], aSpawnPositions[4][1], aSpawnPositions[4][2], aSpawnPositions[4][3], TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
 
@@ -224,7 +224,7 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
                 // for worm phase, summon brother on aggro
                 if (m_uiPhase == PHASE_WORMS)
                 {
-                    m_creature->SummonCreature(NPC_ACIDMAW, aSpawnPositions[3][0], aSpawnPositions[3][1], aSpawnPositions[3][2], aSpawnPositions[3][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_ACIDMAW, aSpawnPositions[3][0], aSpawnPositions[3][1], aSpawnPositions[3][2], aSpawnPositions[3][3], TEMPSPAWN_DEAD_DESPAWN, 0);
                     m_uiWormPhaseTimer = 45000;
                 }
 
@@ -1036,7 +1036,7 @@ struct boss_icehowlAI : public ScriptedAI
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER | SELECT_FLAG_IN_LOS))
                         {
                             DoScriptText(EMOTE_MASSIVE_CRASH, m_creature, pTarget);
-                            m_creature->SummonCreature(NPC_FURIOUS_CHARGE_STALKER, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 35000);
+                            m_creature->SummonCreature(NPC_FURIOUS_CHARGE_STALKER, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 35000);
                         }
 
                         // apply surge of adrenaline

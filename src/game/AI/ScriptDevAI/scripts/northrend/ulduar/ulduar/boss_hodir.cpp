@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "ulduar.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -340,7 +340,7 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
                 if (pHodir->getFaction() == FACTION_ID_FRIENDLY)
                     return;
 
-                if (Creature* pSummoner = m_creature->GetMap()->GetCreature(((TemporarySummon*)m_creature)->GetSummonerGuid()))
+                if (Creature* pSummoner = m_creature->GetMap()->GetCreature(m_creature->GetSummonerGuid()))
                     pSummoner->AI()->AttackStart(pHodir);
             }
         }
@@ -363,7 +363,7 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
             }
             else if (m_creature->GetEntry() == NPC_FLASH_FREEZE)
             {
-                if (Unit* pSummoner = m_creature->GetMap()->GetUnit(((TemporarySummon*)m_creature)->GetSummonerGuid()))
+                if (Unit* pSummoner = m_creature->GetMap()->GetUnit(m_creature->GetSummonerGuid()))
                 {
                     // kill frozen players
                     if (pSummoner->HasAura(SPELL_FREEZE))

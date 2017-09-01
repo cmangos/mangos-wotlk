@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "oculus.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -237,7 +237,7 @@ bool ProcessEventId_event_spell_call_captain(uint32 uiEventId, Object* pSource, 
         {
             if (uiEventId == aVarosCaptainData[i].uiEventId)
             {
-                if (Creature* pGuardian = pVaros->SummonCreature(NPC_AZURE_RING_CAPTAIN, aVarosCaptainData[i].fX, aVarosCaptainData[i].fY, aVarosCaptainData[i].fZ, aVarosCaptainData[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                if (Creature* pGuardian = pVaros->SummonCreature(NPC_AZURE_RING_CAPTAIN, aVarosCaptainData[i].fX, aVarosCaptainData[i].fY, aVarosCaptainData[i].fZ, aVarosCaptainData[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     pGuardian->SetWalk(false);
                     pGuardian->GetMotionMaster()->MovePoint(1, aVarosCaptainData[i].fDestX, aVarosCaptainData[i].fDestY, aVarosCaptainData[i].fDestZ);
@@ -317,9 +317,7 @@ struct npc_arcane_beamAI : public ScriptedAI
         // Start following the summoner (player)
         if (m_creature->IsTemporarySummon())
         {
-            TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
-            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
                 m_creature->GetMotionMaster()->MoveFollow(pSummoner, 0, 0);
         }
 

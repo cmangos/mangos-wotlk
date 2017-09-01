@@ -152,26 +152,26 @@ struct npc_squad_leaderAI : public npc_escortAI
                 // first horde attack
                 if (m_creature->GetEntry() == NPC_KORKRON_SQUAD_LEADER)
                 {
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7433.193f, 1838.199f, 402.43f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7441.071f, 1848.997f, 401.03f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7451.976f, 1850.776f, 402.96f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7433.193f, 1838.199f, 402.43f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7441.071f, 1848.997f, 401.03f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7451.976f, 1850.776f, 402.96f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 }
                 break;
             case 6:
                 // first alliance attack
                 if (m_creature->GetEntry() == NPC_SKYBREAKER_SQUAD_LEADER)
                 {
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7217.792f, 1602.024f, 378.86f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7235.733f, 1597.831f, 381.08f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7217.792f, 1602.024f, 378.86f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7235.733f, 1597.831f, 381.08f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 }
                 break;
             case 9:
                 // second horde attack
                 if (m_creature->GetEntry() == NPC_KORKRON_SQUAD_LEADER)
                 {
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7420.511f, 1813.180f, 425.14f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7411.768f, 1784.054f, 427.84f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7418.514f, 1805.596f, 425.50f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7420.511f, 1813.180f, 425.14f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7411.768f, 1784.054f, 427.84f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7418.514f, 1805.596f, 425.50f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 }
                 break;
             case 13:
@@ -192,9 +192,9 @@ struct npc_squad_leaderAI : public npc_escortAI
                 // second alliance attack
                 if (m_creature->GetEntry() == NPC_SKYBREAKER_SQUAD_LEADER)
                 {
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7328.375f, 1631.935f, 416.06f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7334.475f, 1618.401f, 412.93f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7341.556f, 1632.023f, 423.01f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7328.375f, 1631.935f, 416.06f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7334.475f, 1618.401f, 412.93f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7341.556f, 1632.023f, 423.01f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 }
                 break;
             case 20:
@@ -215,22 +215,22 @@ struct npc_squad_leaderAI : public npc_escortAI
                 // horde gate attack
                 if (m_creature->GetEntry() == NPC_KORKRON_SQUAD_LEADER)
                 {
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7280.229f, 1725.829f, 471.37f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7272.390f, 1732.530f, 472.43f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7285.863f, 1690.997f, 483.35f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7334.487f, 1690.376f, 443.32f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7371.765f, 1699.052f, 442.50f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7280.229f, 1725.829f, 471.37f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7272.390f, 1732.530f, 472.43f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7285.863f, 1690.997f, 483.35f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7334.487f, 1690.376f, 443.32f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7371.765f, 1699.052f, 442.50f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 }
                 break;
             case 25:
                 // alliance gate attack
                 if (m_creature->GetEntry() == NPC_SKYBREAKER_SQUAD_LEADER)
                 {
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7205.636f, 1648.500f, 453.59f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7224.602f, 1677.164f, 454.65f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7220.114f, 1667.603f, 451.01f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7220.528f, 1634.114f, 434.81f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7237.092f, 1687.461f, 459.81f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7205.636f, 1648.500f, 453.59f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7224.602f, 1677.164f, 454.65f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7220.114f, 1667.603f, 451.01f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7220.528f, 1634.114f, 434.81f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7237.092f, 1687.461f, 459.81f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 }
                 break;
             case 26:
@@ -781,7 +781,7 @@ struct npc_grand_admiral_westwindAI : public ScriptedAI
                 EnterEvadeMode();
 
                 // Note: the portal entry is guesswork!
-                m_creature->SummonCreature(NPC_WESTWIND_CREDIT_BUNNY, afPortalSpawnLoc[0], afPortalSpawnLoc[1], afPortalSpawnLoc[2], afPortalSpawnLoc[3], TEMPSUMMON_TIMED_DESPAWN, 20000);
+                m_creature->SummonCreature(NPC_WESTWIND_CREDIT_BUNNY, afPortalSpawnLoc[0], afPortalSpawnLoc[1], afPortalSpawnLoc[2], afPortalSpawnLoc[3], TEMPSPAWN_TIMED_DESPAWN, 20000);
                 DoScriptText(SAY_DEFEATED, m_creature);
 
                 // kill credit

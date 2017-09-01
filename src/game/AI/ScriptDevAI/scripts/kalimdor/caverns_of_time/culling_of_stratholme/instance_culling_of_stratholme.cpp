@@ -582,7 +582,7 @@ void instance_culling_of_stratholme::DoSpawnArthasIfNeeded(Unit* pSummoner)
 
     uint8 uiPosition = GetInstancePosition();
     if (uiPosition && uiPosition <= MAX_ARTHAS_SPAWN_POS)
-        pSummoner->SummonCreature(NPC_ARTHAS, m_aArthasSpawnLocs[uiPosition - 1].m_fX, m_aArthasSpawnLocs[uiPosition - 1].m_fY, m_aArthasSpawnLocs[uiPosition - 1].m_fZ, m_aArthasSpawnLocs[uiPosition - 1].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000, true);
+        pSummoner->SummonCreature(NPC_ARTHAS, m_aArthasSpawnLocs[uiPosition - 1].m_fX, m_aArthasSpawnLocs[uiPosition - 1].m_fY, m_aArthasSpawnLocs[uiPosition - 1].m_fZ, m_aArthasSpawnLocs[uiPosition - 1].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 10000, true);
 
     // no gossip flag in the following positions
     if (uiPosition == POS_ARTHAS_INTRO || uiPosition == POS_ARTHAS_WAVES)
@@ -601,19 +601,19 @@ void instance_culling_of_stratholme::DoSpawnArthasIfNeeded(Unit* pSummoner)
             pArthas->GetMotionMaster()->MoveWaypoint();
         }
         // spawn Jaina and Uther
-        if (Creature* pJaina = pSummoner->SummonCreature(NPC_JAINA_PROUDMOORE, m_aIntroActorsSpawnLocs[0].m_fX, m_aIntroActorsSpawnLocs[0].m_fY, m_aIntroActorsSpawnLocs[0].m_fZ, m_aIntroActorsSpawnLocs[0].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+        if (Creature* pJaina = pSummoner->SummonCreature(NPC_JAINA_PROUDMOORE, m_aIntroActorsSpawnLocs[0].m_fX, m_aIntroActorsSpawnLocs[0].m_fY, m_aIntroActorsSpawnLocs[0].m_fZ, m_aIntroActorsSpawnLocs[0].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 10000))
             pJaina->GetMotionMaster()->MoveWaypoint();
-        if (Creature* pUther = pSummoner->SummonCreature(NPC_UTHER_LIGHTBRINGER, m_aIntroActorsSpawnLocs[1].m_fX, m_aIntroActorsSpawnLocs[1].m_fY, m_aIntroActorsSpawnLocs[1].m_fZ, m_aIntroActorsSpawnLocs[1].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+        if (Creature* pUther = pSummoner->SummonCreature(NPC_UTHER_LIGHTBRINGER, m_aIntroActorsSpawnLocs[1].m_fX, m_aIntroActorsSpawnLocs[1].m_fY, m_aIntroActorsSpawnLocs[1].m_fZ, m_aIntroActorsSpawnLocs[1].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 10000))
         {
             pUther->SetWalk(false);
             pUther->GetMotionMaster()->MoveWaypoint();
 
             // spawn the knights
-            if (Creature* pKnight = pSummoner->SummonCreature(NPC_KNIGHT_SILVERHAND, m_aIntroActorsSpawnLocs[2].m_fX, m_aIntroActorsSpawnLocs[2].m_fY, m_aIntroActorsSpawnLocs[2].m_fZ, m_aIntroActorsSpawnLocs[2].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+            if (Creature* pKnight = pSummoner->SummonCreature(NPC_KNIGHT_SILVERHAND, m_aIntroActorsSpawnLocs[2].m_fX, m_aIntroActorsSpawnLocs[2].m_fY, m_aIntroActorsSpawnLocs[2].m_fZ, m_aIntroActorsSpawnLocs[2].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 10000))
                 pKnight->GetMotionMaster()->MoveFollow(pUther, pKnight->GetDistance(pUther), 2 * M_PI_F - pKnight->GetAngle(pUther));
-            if (Creature* pKnight = pSummoner->SummonCreature(NPC_KNIGHT_SILVERHAND, m_aIntroActorsSpawnLocs[3].m_fX, m_aIntroActorsSpawnLocs[3].m_fY, m_aIntroActorsSpawnLocs[3].m_fZ, m_aIntroActorsSpawnLocs[3].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+            if (Creature* pKnight = pSummoner->SummonCreature(NPC_KNIGHT_SILVERHAND, m_aIntroActorsSpawnLocs[3].m_fX, m_aIntroActorsSpawnLocs[3].m_fY, m_aIntroActorsSpawnLocs[3].m_fZ, m_aIntroActorsSpawnLocs[3].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 10000))
                 pKnight->GetMotionMaster()->MoveFollow(pUther, pKnight->GetDistance(pUther), 2 * M_PI_F - pKnight->GetAngle(pUther));
-            if (Creature* pKnight = pSummoner->SummonCreature(NPC_KNIGHT_SILVERHAND, m_aIntroActorsSpawnLocs[4].m_fX, m_aIntroActorsSpawnLocs[4].m_fY, m_aIntroActorsSpawnLocs[4].m_fZ, m_aIntroActorsSpawnLocs[4].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+            if (Creature* pKnight = pSummoner->SummonCreature(NPC_KNIGHT_SILVERHAND, m_aIntroActorsSpawnLocs[4].m_fX, m_aIntroActorsSpawnLocs[4].m_fY, m_aIntroActorsSpawnLocs[4].m_fZ, m_aIntroActorsSpawnLocs[4].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 10000))
                 pKnight->GetMotionMaster()->MoveFollow(pUther, pKnight->GetDistance(pUther), 2 * M_PI_F - pKnight->GetAngle(pUther));
         }
     }
@@ -632,15 +632,15 @@ void instance_culling_of_stratholme::DoSpawnChromieIfNeeded(Unit* pSummoner)
     {
         Creature* pChromie = GetSingleCreatureFromStorage(NPC_CHROMIE_END, true);
         if (!pChromie)
-            pSummoner->SummonCreature(NPC_CHROMIE_END, m_aChromieSpawnLocs[1].m_fX, m_aChromieSpawnLocs[1].m_fY, m_aChromieSpawnLocs[1].m_fZ, m_aChromieSpawnLocs[1].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+            pSummoner->SummonCreature(NPC_CHROMIE_END, m_aChromieSpawnLocs[1].m_fX, m_aChromieSpawnLocs[1].m_fY, m_aChromieSpawnLocs[1].m_fZ, m_aChromieSpawnLocs[1].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 10000);
     }
     else if (GetInstancePosition() >= POS_ARTHAS_INTRO)
     {
         Creature* pChromie = GetSingleCreatureFromStorage(NPC_CHROMIE_ENTRANCE, true);
         if (!pChromie)
         {
-            pSummoner->SummonCreature(NPC_CHROMIE_ENTRANCE, m_aChromieSpawnLocs[0].m_fX, m_aChromieSpawnLocs[0].m_fY, m_aChromieSpawnLocs[0].m_fZ, m_aChromieSpawnLocs[0].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
-            pSummoner->SummonCreature(NPC_HOURGLASS, m_aChromieSpawnLocs[2].m_fX, m_aChromieSpawnLocs[2].m_fY, m_aChromieSpawnLocs[2].m_fZ, m_aChromieSpawnLocs[2].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+            pSummoner->SummonCreature(NPC_CHROMIE_ENTRANCE, m_aChromieSpawnLocs[0].m_fX, m_aChromieSpawnLocs[0].m_fY, m_aChromieSpawnLocs[0].m_fZ, m_aChromieSpawnLocs[0].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 10000);
+            pSummoner->SummonCreature(NPC_HOURGLASS, m_aChromieSpawnLocs[2].m_fX, m_aChromieSpawnLocs[2].m_fY, m_aChromieSpawnLocs[2].m_fZ, m_aChromieSpawnLocs[2].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 10000);
         }
     }
 }
@@ -659,12 +659,12 @@ void instance_culling_of_stratholme::DoSetupEntranceSoldiers(Unit* pSummoner)
     }
 
     // spawn others in the right spot
-    pSummoner->SummonCreature(NPC_HIGH_ELF_MAGE_PRIEST, m_aIntroActorsSpawnLocs[5].m_fX, m_aIntroActorsSpawnLocs[5].m_fY, m_aIntroActorsSpawnLocs[5].m_fZ, m_aIntroActorsSpawnLocs[5].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 10000);
-    pSummoner->SummonCreature(NPC_HIGH_ELF_MAGE_PRIEST, m_aIntroActorsSpawnLocs[6].m_fX, m_aIntroActorsSpawnLocs[6].m_fY, m_aIntroActorsSpawnLocs[6].m_fZ, m_aIntroActorsSpawnLocs[6].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 10000);
-    pSummoner->SummonCreature(NPC_LORDAERON_FOOTMAN, m_aIntroActorsSpawnLocs[7].m_fX, m_aIntroActorsSpawnLocs[7].m_fY, m_aIntroActorsSpawnLocs[7].m_fZ, m_aIntroActorsSpawnLocs[7].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 10000);
-    pSummoner->SummonCreature(NPC_LORDAERON_FOOTMAN, m_aIntroActorsSpawnLocs[8].m_fX, m_aIntroActorsSpawnLocs[8].m_fY, m_aIntroActorsSpawnLocs[8].m_fZ, m_aIntroActorsSpawnLocs[8].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 10000);
-    pSummoner->SummonCreature(NPC_LORDAERON_FOOTMAN, m_aIntroActorsSpawnLocs[9].m_fX, m_aIntroActorsSpawnLocs[9].m_fY, m_aIntroActorsSpawnLocs[9].m_fZ, m_aIntroActorsSpawnLocs[9].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 10000);
-    pSummoner->SummonCreature(NPC_LORDAERON_FOOTMAN, m_aIntroActorsSpawnLocs[10].m_fX, m_aIntroActorsSpawnLocs[10].m_fY, m_aIntroActorsSpawnLocs[10].m_fZ, m_aIntroActorsSpawnLocs[10].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 10000);
+    pSummoner->SummonCreature(NPC_HIGH_ELF_MAGE_PRIEST, m_aIntroActorsSpawnLocs[5].m_fX, m_aIntroActorsSpawnLocs[5].m_fY, m_aIntroActorsSpawnLocs[5].m_fZ, m_aIntroActorsSpawnLocs[5].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 10000);
+    pSummoner->SummonCreature(NPC_HIGH_ELF_MAGE_PRIEST, m_aIntroActorsSpawnLocs[6].m_fX, m_aIntroActorsSpawnLocs[6].m_fY, m_aIntroActorsSpawnLocs[6].m_fZ, m_aIntroActorsSpawnLocs[6].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 10000);
+    pSummoner->SummonCreature(NPC_LORDAERON_FOOTMAN, m_aIntroActorsSpawnLocs[7].m_fX, m_aIntroActorsSpawnLocs[7].m_fY, m_aIntroActorsSpawnLocs[7].m_fZ, m_aIntroActorsSpawnLocs[7].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 10000);
+    pSummoner->SummonCreature(NPC_LORDAERON_FOOTMAN, m_aIntroActorsSpawnLocs[8].m_fX, m_aIntroActorsSpawnLocs[8].m_fY, m_aIntroActorsSpawnLocs[8].m_fZ, m_aIntroActorsSpawnLocs[8].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 10000);
+    pSummoner->SummonCreature(NPC_LORDAERON_FOOTMAN, m_aIntroActorsSpawnLocs[9].m_fX, m_aIntroActorsSpawnLocs[9].m_fY, m_aIntroActorsSpawnLocs[9].m_fZ, m_aIntroActorsSpawnLocs[9].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 10000);
+    pSummoner->SummonCreature(NPC_LORDAERON_FOOTMAN, m_aIntroActorsSpawnLocs[10].m_fX, m_aIntroActorsSpawnLocs[10].m_fY, m_aIntroActorsSpawnLocs[10].m_fZ, m_aIntroActorsSpawnLocs[10].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 10000);
 }
 
 // Function that will spawn the infinite corruptor if requires
@@ -677,10 +677,10 @@ void instance_culling_of_stratholme::DoSpawnCorruptorIfNeeded(Unit* pSummoner)
     if (pCorruptor)
         return;
 
-    pSummoner->SummonCreature(NPC_TIME_RIFT, m_aHeroicEventSpawnLocs[1].m_fX, m_aHeroicEventSpawnLocs[1].m_fY, m_aHeroicEventSpawnLocs[1].m_fZ, m_aHeroicEventSpawnLocs[1].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
-    pSummoner->SummonCreature(NPC_GUARDIAN_OF_TIME, m_aHeroicEventSpawnLocs[2].m_fX, m_aHeroicEventSpawnLocs[2].m_fY, m_aHeroicEventSpawnLocs[2].m_fZ, m_aHeroicEventSpawnLocs[2].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+    pSummoner->SummonCreature(NPC_TIME_RIFT, m_aHeroicEventSpawnLocs[1].m_fX, m_aHeroicEventSpawnLocs[1].m_fY, m_aHeroicEventSpawnLocs[1].m_fZ, m_aHeroicEventSpawnLocs[1].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+    pSummoner->SummonCreature(NPC_GUARDIAN_OF_TIME, m_aHeroicEventSpawnLocs[2].m_fX, m_aHeroicEventSpawnLocs[2].m_fY, m_aHeroicEventSpawnLocs[2].m_fZ, m_aHeroicEventSpawnLocs[2].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
 
-    if (Creature* pCorruptor = pSummoner->SummonCreature(NPC_INFINITE_CORRUPTER, m_aHeroicEventSpawnLocs[0].m_fX, m_aHeroicEventSpawnLocs[0].m_fY, m_aHeroicEventSpawnLocs[0].m_fZ, m_aHeroicEventSpawnLocs[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+    if (Creature* pCorruptor = pSummoner->SummonCreature(NPC_INFINITE_CORRUPTER, m_aHeroicEventSpawnLocs[0].m_fX, m_aHeroicEventSpawnLocs[0].m_fY, m_aHeroicEventSpawnLocs[0].m_fZ, m_aHeroicEventSpawnLocs[0].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
         pCorruptor->CastSpell(pCorruptor, SPELL_CORRUPTION_OF_TIME, TRIGGERED_NONE);
 }
 
@@ -767,12 +767,12 @@ void instance_culling_of_stratholme::DoSpawnNextScourgeWave()
             for (uint8 j = 0; j < 4; ++j)
             {
                 pSummoner->GetRandomPoint(m_aScourgeWavesLocs[m_uiCurrentUndeadPos].m_fX, m_aScourgeWavesLocs[m_uiCurrentUndeadPos].m_fY, m_aScourgeWavesLocs[m_uiCurrentUndeadPos].m_fZ, 5.0f, fX, fY, fZ);
-                pSummoner->SummonCreature(uiEntry, fX, fY, fZ, fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                pSummoner->SummonCreature(uiEntry, fX, fY, fZ, fO, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
         // spawn the selected mob
         else
-            pSummoner->SummonCreature(uiEntry, fX, fY, fZ, fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+            pSummoner->SummonCreature(uiEntry, fX, fY, fZ, fO, TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 
     // start infinite curruptor event on the first wave
@@ -806,14 +806,14 @@ void instance_culling_of_stratholme::DoSpawnBurningCityUndead(Unit* pSummoner)
             {
                 pSummoner->GetRandomPoint(m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 5.0f, fX, fY, fZ);
 
-                if (Creature* pUndead = pSummoner->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                if (Creature* pUndead = pSummoner->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
                     pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
             }
         }
         // spawn the selected mob
         else
         {
-            if (Creature* pUndead = pSummoner->SummonCreature(uiEntry, m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+            if (Creature* pUndead = pSummoner->SummonCreature(uiEntry, m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
                 pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
         }
 
@@ -822,7 +822,7 @@ void instance_culling_of_stratholme::DoSpawnBurningCityUndead(Unit* pSummoner)
         {
             pSummoner->GetRandomPoint(m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 20.0f, fX, fY, fZ);
 
-            if (Creature* pUndead = pSummoner->SummonCreature(NPC_ZOMBIE, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+            if (Creature* pUndead = pSummoner->SummonCreature(NPC_ZOMBIE, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
                 pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
         }
     }

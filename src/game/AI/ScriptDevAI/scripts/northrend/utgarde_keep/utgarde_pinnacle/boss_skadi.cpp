@@ -231,7 +231,7 @@ struct boss_skadiAI : public ScriptedAI
             m_IntroMobs = true;
             for (uint8 i = 0; i < MAX_INTRO_MOBS; ++i)
             {
-                if (Creature* pYmirjar = m_creature->SummonCreature(aSkadiIntroData[i].uiCreatureId, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                if (Creature* pYmirjar = m_creature->SummonCreature(aSkadiIntroData[i].uiCreatureId, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     pYmirjar->SetWalk(false);
                     pYmirjar->GetMotionMaster()->MovePoint(1, aSkadiIntroData[i].fX, aSkadiIntroData[i].fY, aSkadiIntroData[i].fZ);

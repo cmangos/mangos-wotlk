@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "magisters_terrace.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -199,11 +199,9 @@ struct mob_pure_energyAI : public ScriptedAI
     {
         if (m_creature->IsTemporarySummon())
         {
-            TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
-            if (pTemporary->GetSummonerGuid().IsCreature())
+            if (m_creature->GetSpawnerGuid().IsCreature())
             {
-                Creature* pVex = m_creature->GetMap()->GetCreature(pTemporary->GetSummonerGuid());
+                Creature* pVex = m_creature->GetMap()->GetCreature(m_creature->GetSpawnerGuid());
 
                 if (!pVex || !pVex->isAlive())
                     return;

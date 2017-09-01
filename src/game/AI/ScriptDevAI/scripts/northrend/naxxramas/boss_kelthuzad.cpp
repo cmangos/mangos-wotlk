@@ -274,7 +274,7 @@ struct boss_kelthuzadAI : public ScriptedAI
             float fNewX, fNewY, fNewZ;
             m_creature->GetRandomPoint(fX, fY, fZ, 12.0f, fNewX, fNewY, fNewZ);
 
-            m_creature->SummonCreature(uiNpcEntry, fNewX, fNewY, fNewZ, fAngle + M_PI_F, TEMPSUMMON_CORPSE_DESPAWN, 5000);
+            m_creature->SummonCreature(uiNpcEntry, fNewX, fNewY, fNewZ, fAngle + M_PI_F, TEMPSPAWN_CORPSE_DESPAWN, 5000);
         }
     }
 
@@ -295,7 +295,7 @@ struct boss_kelthuzadAI : public ScriptedAI
         MaNGOS::NormalizeMapCoord(fX);
         MaNGOS::NormalizeMapCoord(fY);
 
-        m_creature->SummonCreature(uiType, fX, fY, fZ, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 5000);
+        m_creature->SummonCreature(uiType, fX, fY, fZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 5000);
     }
 
     void JustSummoned(Creature* pSummoned) override

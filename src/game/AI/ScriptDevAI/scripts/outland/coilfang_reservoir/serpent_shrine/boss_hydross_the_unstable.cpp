@@ -183,7 +183,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
         for (uint8 i = 0; i < MAX_HYDROSS_ADDS; ++i)
         {
             m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 10, M_PI_F / 2 * i);
-            m_creature->SummonCreature(m_bCorruptedForm ? NPC_PURE_SPAWN : NPC_TAINTED_SPAWN, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(m_bCorruptedForm ? NPC_PURE_SPAWN : NPC_TAINTED_SPAWN, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
 

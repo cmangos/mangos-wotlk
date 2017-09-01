@@ -227,7 +227,7 @@ struct boss_kelesethAI : public ScriptedAI
     void SummonAdds()
     {
         for (uint8 i = 0; i < 4; ++i)
-            m_creature->SummonCreature(NPC_VRYKUL_SKELETON, fAddPosition[0] + urand() % 7, fAddPosition[1] + urand() % 7, fAddPosition[2], fAddPosition[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_VRYKUL_SKELETON, fAddPosition[0] + urand() % 7, fAddPosition[1] + urand() % 7, fAddPosition[2], fAddPosition[3], TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 
     void DespawnOrKillAdds(bool bDespawn)
@@ -314,7 +314,7 @@ struct boss_kelesethAI : public ScriptedAI
                 float fPosX, fPosY, fPosZ;
                 pTombTarget->GetPosition(fPosX, fPosY, fPosZ);
 
-                if (Creature* pFrostTomb = m_creature->SummonCreature(NPC_FROST_TOMB, fPosX, fPosY, fPosZ, 0, TEMPSUMMON_TIMED_DESPAWN, 20000))
+                if (Creature* pFrostTomb = m_creature->SummonCreature(NPC_FROST_TOMB, fPosX, fPosY, fPosZ, 0, TEMPSPAWN_TIMED_DESPAWN, 20000))
                 {
                     pFrostTomb->AddThreat(pTombTarget);
                     pFrostTomb->CastSpell(pTombTarget, SPELL_FROST_TOMB, TRIGGERED_NONE);

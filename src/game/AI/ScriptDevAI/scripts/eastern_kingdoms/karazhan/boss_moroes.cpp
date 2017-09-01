@@ -157,7 +157,7 @@ struct boss_moroesAI : public ScriptedAI
 
             // Summon the 4 entries
             for (uint8 i = 0; i < MAX_ACTIVE_GUESTS; ++i)
-                m_creature->SummonCreature(m_vGuestsEntryList[i], afLocations[i][0], afLocations[i][1], afLocations[i][2], afLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(m_vGuestsEntryList[i], afLocations[i][0], afLocations[i][1], afLocations[i][2], afLocations[i][3], TEMPSPAWN_CORPSE_DESPAWN, 0);
         }
         // Resummon the killed adds
         else
@@ -171,7 +171,7 @@ struct boss_moroesAI : public ScriptedAI
                 if (m_pInstance->GetSingleCreatureFromStorage(m_vGuestsEntryList[i], true))
                     continue;
 
-                m_creature->SummonCreature(m_vGuestsEntryList[i], afLocations[i][0], afLocations[i][1], afLocations[i][2], afLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(m_vGuestsEntryList[i], afLocations[i][0], afLocations[i][1], afLocations[i][2], afLocations[i][3], TEMPSPAWN_CORPSE_DESPAWN, 0);
             }
         }
     }

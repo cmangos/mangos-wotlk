@@ -143,7 +143,7 @@ struct npc_barnesAI : public npc_escortAI, private DialogueHelper
                         break;
                 }
                 SetEscortPaused(true);
-                m_creature->SummonCreature(NPC_SPOTLIGHT, 0, 0, 0, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_SPOTLIGHT, 0, 0, 0, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 break;
             case 8:
                 m_pInstance->DoUseDoorOrButton(GO_STAGE_DOOR_LEFT);
@@ -460,9 +460,9 @@ bool ProcessEventId_event_spell_medivh_journal(uint32 /*uiEventId*/, Object* pSo
     if (bIsStart && pSource->GetTypeId() == TYPEID_PLAYER)
     {
         // Summon Medivh and Arcanagos
-        if (Creature* pMedivh = ((Player*)pSource)->SummonCreature(NPC_IMAGE_OF_MEDIVH, afMedivhSpawnLoc[0], afMedivhSpawnLoc[1], afMedivhSpawnLoc[2], afMedivhSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0))
+        if (Creature* pMedivh = ((Player*)pSource)->SummonCreature(NPC_IMAGE_OF_MEDIVH, afMedivhSpawnLoc[0], afMedivhSpawnLoc[1], afMedivhSpawnLoc[2], afMedivhSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0))
         {
-            pMedivh->SummonCreature(NPC_IMAGE_OF_ARCANAGOS, afArcanagosSpawnLoc[0], afArcanagosSpawnLoc[1], afArcanagosSpawnLoc[2], afArcanagosSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            pMedivh->SummonCreature(NPC_IMAGE_OF_ARCANAGOS, afArcanagosSpawnLoc[0], afArcanagosSpawnLoc[1], afArcanagosSpawnLoc[2], afArcanagosSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
 
             // store the player who started the event
             if (npc_image_of_medivhAI* pMedivhAI = dynamic_cast<npc_image_of_medivhAI*>(pMedivh->AI()))

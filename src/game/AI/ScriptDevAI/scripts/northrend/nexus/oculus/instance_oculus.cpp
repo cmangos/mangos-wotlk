@@ -210,7 +210,7 @@ void instance_oculus::DoSpawnNextBossIfCan()
         if (GetSingleCreatureFromStorage(NPC_EREGOS, true))
             return;
 
-        pPlayer->SummonCreature(NPC_EREGOS, aOculusBossSpawnLocs[1][0], aOculusBossSpawnLocs[1][1], aOculusBossSpawnLocs[1][2], aOculusBossSpawnLocs[1][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+        pPlayer->SummonCreature(NPC_EREGOS, aOculusBossSpawnLocs[1][0], aOculusBossSpawnLocs[1][1], aOculusBossSpawnLocs[1][2], aOculusBossSpawnLocs[1][3], TEMPSPAWN_DEAD_DESPAWN, 0);
     }
     else if (GetData(TYPE_VAROS) == DONE)
     {
@@ -218,7 +218,7 @@ void instance_oculus::DoSpawnNextBossIfCan()
         if (GetSingleCreatureFromStorage(NPC_UROM, true))
             return;
 
-        pPlayer->SummonCreature(NPC_UROM, aOculusBossSpawnLocs[0][0], aOculusBossSpawnLocs[0][1], aOculusBossSpawnLocs[0][2], aOculusBossSpawnLocs[0][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+        pPlayer->SummonCreature(NPC_UROM, aOculusBossSpawnLocs[0][0], aOculusBossSpawnLocs[0][1], aOculusBossSpawnLocs[0][2], aOculusBossSpawnLocs[0][3], TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 }
 

@@ -129,7 +129,7 @@ struct boss_anzuAI : public ScriptedAI
             for (uint8 i = 0; i < MAX_BROODS; ++i)
             {
                 m_creature->GetRandomPoint(pClaw->GetPositionX(), pClaw->GetPositionY(), pClaw->GetPositionZ(), 7.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_BROOD_OF_ANZU, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_BROOD_OF_ANZU, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
             }
         }
     }
@@ -141,7 +141,7 @@ struct boss_anzuAI : public ScriptedAI
         {
             fAng = 2 * M_PI_F / 3 * i;
             m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 15.0f, fAng);
-            m_creature->SummonCreature(aSpiritsEntries[i], fX, fY, fZ, fAng + M_PI_F, TEMPSUMMON_CORPSE_DESPAWN, 0);
+            m_creature->SummonCreature(aSpiritsEntries[i], fX, fY, fZ, fAng + M_PI_F, TEMPSPAWN_CORPSE_DESPAWN, 0);
         }
     }
 

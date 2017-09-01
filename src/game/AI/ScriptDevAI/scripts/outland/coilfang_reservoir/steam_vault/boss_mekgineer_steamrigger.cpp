@@ -143,7 +143,7 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
         DoScriptText(SAY_MECHANICS, m_creature);
 
         for (uint8 i = 0; i < 3; ++i)
-            m_creature->SummonCreature(NPC_STEAMRIGGER_MECHANIC, aSteamriggerSpawnLocs[i].m_fX, aSteamriggerSpawnLocs[i].m_fY, aSteamriggerSpawnLocs[i].m_fZ, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
+            m_creature->SummonCreature(NPC_STEAMRIGGER_MECHANIC, aSteamriggerSpawnLocs[i].m_fX, aSteamriggerSpawnLocs[i].m_fY, aSteamriggerSpawnLocs[i].m_fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -190,7 +190,7 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
         {
             if (m_uiMechanicTimer < uiDiff)
             {
-                m_creature->SummonCreature(NPC_STEAMRIGGER_MECHANIC, aSteamriggerSpawnLocs[2].m_fX, aSteamriggerSpawnLocs[2].m_fY, aSteamriggerSpawnLocs[2].m_fZ, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
+                m_creature->SummonCreature(NPC_STEAMRIGGER_MECHANIC, aSteamriggerSpawnLocs[2].m_fX, aSteamriggerSpawnLocs[2].m_fY, aSteamriggerSpawnLocs[2].m_fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
                 m_uiMechanicTimer = 20000;
             }
             else

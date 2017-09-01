@@ -197,7 +197,7 @@ struct boss_jedogaAI : public ScriptedAI
             {
                 // In order to get a good movement position we need to handle the coordinates calculation here, inside the iteration.
                 m_creature->GetRandomPoint(aVolunteerPosition[j][0], aVolunteerPosition[j][1], aVolunteerPosition[j][2], 10.0f, fX, fY, fZ);
-                if (Creature* pVolunteer = m_creature->SummonCreature(NPC_TWILIGHT_VOLUNTEER, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                if (Creature* pVolunteer = m_creature->SummonCreature(NPC_TWILIGHT_VOLUNTEER, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     // Adjust coordinates based on the wave number and side
                     float fDist = i < 7 ? 20.0f : 30.0f;
@@ -215,7 +215,7 @@ struct boss_jedogaAI : public ScriptedAI
 
         // Summon one more Volunteer for the center position
         m_creature->GetRandomPoint(aVolunteerPosition[0][0], aVolunteerPosition[0][1], aVolunteerPosition[0][2], 10.0f, fX, fY, fZ);
-        if (Creature* pVolunteer = m_creature->SummonCreature(NPC_TWILIGHT_VOLUNTEER, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+        if (Creature* pVolunteer = m_creature->SummonCreature(NPC_TWILIGHT_VOLUNTEER, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
         {
             m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 20.0f, 7 * M_PI_F / 4);
             pVolunteer->GetMotionMaster()->MovePoint(POINT_ID_PREPARE, fX, fY, fZ);

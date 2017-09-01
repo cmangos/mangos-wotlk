@@ -382,7 +382,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
         {
             case NPC_SIF:
                 DoCastSpellIfCan(m_creature, SPELL_SHEAT_OF_LIGHTNING, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-                if (Creature* pSif = m_creature->SummonCreature(NPC_SIF, afSifSpawnLoc[0], afSifSpawnLoc[1], afSifSpawnLoc[2], afSifSpawnLoc[3], TEMPSUMMON_CORPSE_DESPAWN, 0))
+                if (Creature* pSif = m_creature->SummonCreature(NPC_SIF, afSifSpawnLoc[0], afSifSpawnLoc[1], afSifSpawnLoc[2], afSifSpawnLoc[3], TEMPSPAWN_CORPSE_DESPAWN, 0))
                     DoScriptText(SAY_SIF_BEGIN, pSif);
                 break;
             case SPELL_TOUCH_OF_DOMINION:
@@ -512,22 +512,22 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
                     uiMaxCommoners = vBunnies.size();
 
                 for (uint8 i = 0; i < uiMaxCommoners; ++i)
-                    m_creature->SummonCreature(NPC_DARK_RUNE_COMMONER, vBunnies[i]->GetPositionX(), vBunnies[i]->GetPositionY(), vBunnies[i]->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_DARK_RUNE_COMMONER, vBunnies[i]->GetPositionX(), vBunnies[i]->GetPositionY(), vBunnies[i]->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 break;
             }
             case 1:                     // warbringers (along with champions or evokers)
                 if (Creature* pBunny = SelectRandomUpperBunny())
-                    m_creature->SummonCreature(NPC_DARK_RUNE_WARBRINGER, pBunny->GetPositionX(), pBunny->GetPositionY(), pBunny->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_DARK_RUNE_WARBRINGER, pBunny->GetPositionX(), pBunny->GetPositionY(), pBunny->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 // warbringers can have another buddy summoned at the same time
                 if (roll_chance_i(75))
                 {
                     if (Creature* pBunny = SelectRandomUpperBunny())
-                        m_creature->SummonCreature(roll_chance_i(70) ? NPC_DARK_RUNE_CHAMPION : NPC_DARK_RUNE_EVOKER, pBunny->GetPositionX(), pBunny->GetPositionY(), pBunny->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_creature->SummonCreature(roll_chance_i(70) ? NPC_DARK_RUNE_CHAMPION : NPC_DARK_RUNE_EVOKER, pBunny->GetPositionX(), pBunny->GetPositionY(), pBunny->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
                 break;
             case 2:                     // evokers alone
                 if (Creature* pBunny = SelectRandomUpperBunny())
-                    m_creature->SummonCreature(NPC_DARK_RUNE_EVOKER, pBunny->GetPositionX(), pBunny->GetPositionY(), pBunny->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_DARK_RUNE_EVOKER, pBunny->GetPositionX(), pBunny->GetPositionY(), pBunny->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 break;
         }
 

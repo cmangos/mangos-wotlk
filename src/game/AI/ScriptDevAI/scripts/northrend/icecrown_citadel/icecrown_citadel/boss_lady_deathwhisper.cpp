@@ -260,13 +260,13 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
             for (uint8 i = 0; i < 3; ++i)
             {
                 if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_vLeftStalkersGuidVector[i]))
-                    m_creature->SummonCreature(aLeftSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(aLeftSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_vRightStalkersGuidVector[i]))
-                    m_creature->SummonCreature(aRightSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(aRightSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
 
             if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_middleStalkerGuid))
-                m_creature->SummonCreature(roll_chance_i(50) ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(roll_chance_i(50) ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
         }
         // On 10 man mode we summon on the left or on the right
         else
@@ -275,7 +275,7 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
             if (m_pInstance->IsHeroicDifficulty() && !m_bIsPhaseOne)
             {
                 if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_middleStalkerGuid))
-                    m_creature->SummonCreature(roll_chance_i(50) ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    m_creature->SummonCreature(roll_chance_i(50) ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
             }
             else
             {
@@ -283,7 +283,7 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
                 for (uint8 i = 0; i < 3; ++i)
                 {
                     if (Creature* pStalker = m_creature->GetMap()->GetCreature(vTempVector[i]))
-                        m_creature->SummonCreature(m_bIsLeftSideSummon ? aLeftSummonedCultists[i] : aRightSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_creature->SummonCreature(m_bIsLeftSideSummon ? aLeftSummonedCultists[i] : aRightSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
 
                 // change sides for next summoning

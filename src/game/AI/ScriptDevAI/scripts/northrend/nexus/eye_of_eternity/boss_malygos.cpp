@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "eye_of_eternity.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -268,7 +268,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     void JustDied(Unit* /*pKiller*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
-        m_creature->SummonCreature(NPC_ALEXSTRASZA, aAlextraszaSpawnPos[0], aAlextraszaSpawnPos[1], aAlextraszaSpawnPos[2], aAlextraszaSpawnPos[3], TEMPSUMMON_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+        m_creature->SummonCreature(NPC_ALEXSTRASZA, aAlextraszaSpawnPos[0], aAlextraszaSpawnPos[1], aAlextraszaSpawnPos[2], aAlextraszaSpawnPos[3], TEMPSPAWN_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MALYGOS, DONE);
@@ -394,15 +394,15 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         for (uint8 i = 0; i < m_uiMaxNexusLords; ++i)
         {
             m_creature->GetRandomPoint(aCenterMovePos[0], aCenterMovePos[1], aCenterMovePos[2], 50.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_HOVER_DISK, fX, fY, fZ + 30.0f, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
-            m_creature->SummonCreature(NPC_NEXUS_LORD, fX, fY, fZ + 30.0f, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_HOVER_DISK, fX, fY, fZ + 30.0f, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_NEXUS_LORD, fX, fY, fZ + 30.0f, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
 
         for (uint8 i = 0; i < m_uiMaxScions; ++i)
         {
             m_creature->GetRandomPoint(aCenterMovePos[0], aCenterMovePos[1], aCenterMovePos[2], 50.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_HOVER_DISK, fX, fY, fZ + 30.0f, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
-            m_creature->SummonCreature(NPC_SCION_OF_ETERNITY, fX, fY, fZ + 30.0f, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_HOVER_DISK, fX, fY, fZ + 30.0f, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_SCION_OF_ETERNITY, fX, fY, fZ + 30.0f, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
 
@@ -650,10 +650,8 @@ struct npc_wyrmrest_skytalonAI : public ScriptedAI
         {
             if (m_creature->IsTemporarySummon())
             {
-                TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
                 // Force player to mount
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
                     pSummoner->CastSpell(m_creature, SPELL_RIDE_RED_DRAGON, TRIGGERED_OLD_TRIGGERED);
             }
 

@@ -238,13 +238,13 @@ struct boss_halion_realAI : public ScriptedAI
             // NOTE: the spawn coords seem to be totally off, compared to the actual map layout - requires additional research!!!
 
             // Spawn the rotation focus first
-            // pHalion->SummonCreature(NPC_ORB_ROTATION_FOCUS, aRotationFocusPosition[0], aRotationFocusPosition[1], aRotationFocusPosition[2], aRotationFocusPosition[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            // pHalion->SummonCreature(NPC_ORB_ROTATION_FOCUS, aRotationFocusPosition[0], aRotationFocusPosition[1], aRotationFocusPosition[2], aRotationFocusPosition[3], TEMPSPAWN_DEAD_DESPAWN, 0);
 
             // Then spawn the orb carriers and the shadow orbs. ToDo: research if it's possible to make this dynamic
-            // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-            // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-            // pHalion->SummonCreature(NPC_SHADOW_ORB_1, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-            // pHalion->SummonCreature(NPC_SHADOW_ORB_2, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+            // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+            // pHalion->SummonCreature(NPC_SHADOW_ORB_1, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+            // pHalion->SummonCreature(NPC_SHADOW_ORB_2, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
 

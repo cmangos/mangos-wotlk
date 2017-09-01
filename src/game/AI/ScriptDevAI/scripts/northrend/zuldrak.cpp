@@ -28,7 +28,7 @@ npc_decaying_ghoul
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 /*######
 ## npc_gurgthock
@@ -84,7 +84,7 @@ bool QuestAccept_npc_gurgthock(Player* pPlayer, Creature* pCreature, const Quest
 {
     if (pQuest->GetQuestId() == QUEST_FROM_BEYOND)
     {
-        pCreature->SummonCreature(m_auiBosses[urand(0, 3)], m_afSpawnLocation[0], m_afSpawnLocation[1], m_afSpawnLocation[2], 0.0f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 600000);
+        pCreature->SummonCreature(m_auiBosses[urand(0, 3)], m_afSpawnLocation[0], m_afSpawnLocation[1], m_afSpawnLocation[2], 0.0f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 600000);
 
         if (npc_gurgthockAI* pGurthockAI = dynamic_cast<npc_gurgthockAI*>(pCreature->AI()))
             pGurthockAI->SetPlayer(pPlayer);
@@ -128,9 +128,7 @@ struct npc_ghoul_feeding_bunnyAI : public ScriptedAI
             // Give kill credit to the summoner player
             if (m_creature->IsTemporarySummon())
             {
-                TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
                     DoCastSpellIfCan(pSummoner, SPELL_GHOUL_KILL_CREDIT, CAST_TRIGGERED);
             }
         }

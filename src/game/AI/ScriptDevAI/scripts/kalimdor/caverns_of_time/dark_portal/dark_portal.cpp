@@ -179,7 +179,7 @@ struct npc_time_riftAI : public ScriptedAI
 
         float fX, fY, fZ;
         m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f, fX, fY, fZ);
-        pSummoner->SummonCreature(uiCreatureEntry, fX, fY, fZ, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+        pSummoner->SummonCreature(uiCreatureEntry, fX, fY, fZ, m_creature->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 
     void DoSummon()

@@ -127,7 +127,7 @@ struct boss_shirrakAI : public ScriptedAI
 
             // Summon focus fire at target location
             if (pTarget)
-                m_creature->SummonCreature(NPC_FOCUS_FIRE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 10000);
+                m_creature->SummonCreature(NPC_FOCUS_FIRE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 10000);
         }
         else
             m_uiFocusFireTimer -= uiDiff;

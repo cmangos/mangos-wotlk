@@ -49,7 +49,7 @@ void instance_old_hillsbrad::OnPlayerEnter(Player* pPlayer)
     if (GetSingleCreatureFromStorage(NPC_DRAKE, true))
         return;
 
-    pPlayer->SummonCreature(NPC_DRAKE, aDrakeSummonLoc[0], aDrakeSummonLoc[1], aDrakeSummonLoc[2], aDrakeSummonLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+    pPlayer->SummonCreature(NPC_DRAKE, aDrakeSummonLoc[0], aDrakeSummonLoc[1], aDrakeSummonLoc[2], aDrakeSummonLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
 }
 
 void instance_old_hillsbrad::OnCreatureCreate(Creature* pCreature)
@@ -173,7 +173,7 @@ void instance_old_hillsbrad::SetData(uint32 uiType, uint32 uiData)
 
                     if (Player* pPlayer = GetPlayerInMap())
                     {
-                        pPlayer->SummonCreature(NPC_DRAKE, aDrakeSummonLoc[0], aDrakeSummonLoc[1], aDrakeSummonLoc[2], aDrakeSummonLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                        pPlayer->SummonCreature(NPC_DRAKE, aDrakeSummonLoc[0], aDrakeSummonLoc[1], aDrakeSummonLoc[2], aDrakeSummonLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
 
                         // set the houses on fire
                         for (GuidList::const_iterator itr = m_lRoaringFlamesList.begin(); itr != m_lRoaringFlamesList.end(); ++itr)

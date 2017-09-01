@@ -95,7 +95,7 @@ void instance_halls_of_reflection::OnPlayerEnter(Player* pPlayer)
             for (uint8 i = 0; i < countof(aEventBeginLocations); ++i)
             {
                 if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocations[i].uiEntryHorde : aEventBeginLocations[i].uiEntryAlliance,
-                    aEventBeginLocations[i].fX, aEventBeginLocations[i].fY, aEventBeginLocations[i].fZ, aEventBeginLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true))
+                    aEventBeginLocations[i].fX, aEventBeginLocations[i].fY, aEventBeginLocations[i].fZ, aEventBeginLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true))
                 {
                     pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
                     pCreature->GetMotionMaster()->MoveWaypoint();
@@ -107,7 +107,7 @@ void instance_halls_of_reflection::OnPlayerEnter(Player* pPlayer)
             DoSetupEscapeEvent(pPlayer);
         // mini boss
         else if (GetData(TYPE_MARWYN) == DONE && !GetSingleCreatureFromStorage(NPC_FROSTSWORN_GENERAL, true))
-            pPlayer->SummonCreature(NPC_FROSTSWORN_GENERAL, afGeneralSpawnLoc[0], afGeneralSpawnLoc[1], afGeneralSpawnLoc[2], afGeneralSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            pPlayer->SummonCreature(NPC_FROSTSWORN_GENERAL, afGeneralSpawnLoc[0], afGeneralSpawnLoc[1], afGeneralSpawnLoc[2], afGeneralSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
     }
 
     // Quel'delar
@@ -236,7 +236,7 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
 
                 // spawn next mini boss
                 if (Player* pPlayer = GetPlayerInMap())
-                    pPlayer->SummonCreature(NPC_FROSTSWORN_GENERAL, afGeneralSpawnLoc[0], afGeneralSpawnLoc[1], afGeneralSpawnLoc[2], afGeneralSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+                    pPlayer->SummonCreature(NPC_FROSTSWORN_GENERAL, afGeneralSpawnLoc[0], afGeneralSpawnLoc[1], afGeneralSpawnLoc[2], afGeneralSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
             }
             else if (uiData == FAIL)
                 DoCleanupFrostmourneEvent();
@@ -423,7 +423,7 @@ void instance_halls_of_reflection::JustDidDialogueStep(int32 iEntry)
             break;
         case NPC_UTHER:
             if (Creature* pBunny = GetSingleCreatureFromStorage(NPC_FROSTMOURNE_ALTAR_BUNNY))
-                pBunny->SummonCreature(NPC_UTHER, afUtherSpawnLoc[0], afUtherSpawnLoc[1], afUtherSpawnLoc[2], afUtherSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                pBunny->SummonCreature(NPC_UTHER, afUtherSpawnLoc[0], afUtherSpawnLoc[1], afUtherSpawnLoc[2], afUtherSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
             break;
     }
 }
@@ -546,7 +546,7 @@ void instance_halls_of_reflection::DoSetupEscapeEvent(Player* pPlayer)
     for (uint8 i = 0; i < countof(aEventKingLocations); ++i)
     {
         if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventKingLocations[i].uiEntryHorde : aEventKingLocations[i].uiEntryAlliance,
-            aEventKingLocations[i].fX, aEventKingLocations[i].fY, aEventKingLocations[i].fZ, aEventKingLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true))
+            aEventKingLocations[i].fX, aEventKingLocations[i].fY, aEventKingLocations[i].fZ, aEventKingLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true))
             pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
     }
 }

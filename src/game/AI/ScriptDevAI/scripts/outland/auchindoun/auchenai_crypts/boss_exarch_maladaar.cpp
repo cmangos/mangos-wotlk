@@ -237,13 +237,13 @@ struct boss_exarch_maladaarAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         // When Exarch Maladaar is defeated D'ore appear.
-        DoSpawnCreature(NPC_DORE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 600000);
+        DoSpawnCreature(NPC_DORE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_DESPAWN, 600000);
     }
 
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
         if (pSpell->Id == SPELL_STOLEN_SOUL && pTarget->GetTypeId() == TYPEID_PLAYER)
-            DoSpawnCreature(NPC_STOLEN_SOUL, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 10000);
+            DoSpawnCreature(NPC_STOLEN_SOUL, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10000);
     }
 
     void UpdateAI(const uint32 uiDiff) override

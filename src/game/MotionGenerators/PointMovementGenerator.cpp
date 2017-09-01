@@ -19,7 +19,7 @@
 #include "MotionGenerators/PointMovementGenerator.h"
 #include "Entities/Creature.h"
 #include "AI/BaseAI/CreatureAI.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 #include "World/World.h"
 #include "Movement/MoveSplineInit.h"
 #include "Movement/MoveSpline.h"
@@ -90,9 +90,8 @@ void PointMovementGenerator<Creature>::MovementInform(Creature& unit)
 
     if (unit.IsTemporarySummon())
     {
-        TemporarySummon* pSummon = (TemporarySummon*)(&unit);
-        if (pSummon->GetSummonerGuid().IsAnyTypeCreature())
-            if (Creature* pSummoner = unit.GetMap()->GetCreature(pSummon->GetSummonerGuid()))
+        if (unit.GetSummonerGuid().IsAnyTypeCreature())
+            if (Creature* pSummoner = unit.GetMap()->GetCreature(unit.GetSummonerGuid()))
                 if (pSummoner->AI())
                     pSummoner->AI()->SummonedMovementInform(&unit, POINT_MOTION_TYPE, id);
     }

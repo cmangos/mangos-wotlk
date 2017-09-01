@@ -98,7 +98,7 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
             {
                 float fX, fY, fZ;
                 m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_HIGHBORNE_BUNNY, fX, fY, fZ + 15.0f, 0, TEMPSUMMON_TIMED_DESPAWN, 3000);
+                m_creature->SummonCreature(NPC_HIGHBORNE_BUNNY, fX, fY, fZ + 15.0f, 0, TEMPSPAWN_TIMED_DESPAWN, 3000);
 
                 m_uiLamentEventTimer = 2000;
 
@@ -118,7 +118,7 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
             if (m_uiSummonTimer <= uiDiff)
             {
                 for (uint8 i = 0; i < MAX_LAMENTERS; ++i)
-                    m_creature->SummonCreature(NPC_HIGHBORNE_LAMENTER, aHighborneLoc[i][0], aHighborneLoc[i][1], aHighborneLoc[i][2], aHighborneLoc[i][3], TEMPSUMMON_TIMED_DESPAWN, 160000);
+                    m_creature->SummonCreature(NPC_HIGHBORNE_LAMENTER, aHighborneLoc[i][0], aHighborneLoc[i][1], aHighborneLoc[i][2], aHighborneLoc[i][3], TEMPSPAWN_TIMED_DESPAWN, 160000);
 
                 m_uiLamentEventTimer = 2000;
                 m_uiSummonTimer = 0;

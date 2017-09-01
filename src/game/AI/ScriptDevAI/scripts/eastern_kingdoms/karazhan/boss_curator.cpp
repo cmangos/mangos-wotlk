@@ -153,7 +153,7 @@ struct boss_curatorAI : public ScriptedAI
                 // summon Astral Flare
                 float fX, fY, fZ;
                 m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_ASTRAL_FLARE, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_ASTRAL_FLARE, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
 
                 // reduce mana by 10% of maximum
                 if (int32 iMana = m_creature->GetMaxPower(POWER_MANA))

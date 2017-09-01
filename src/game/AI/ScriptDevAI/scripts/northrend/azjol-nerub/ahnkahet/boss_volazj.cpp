@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "ahnkahet.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -178,9 +178,7 @@ struct boss_volazjAI : public ScriptedAI
 
         if (pSummoned->IsTemporarySummon())
         {
-            TemporarySummon* pTemporary = (TemporarySummon*)pSummoned;
-
-            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(pSummoned->GetSummonerGuid()))
             {
                 pPlayer->CastSpell(pSummoned, SPELL_TWISTED_VISAGE_EFFECT, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->CastSpell(pPlayer, m_bIsRegularMode ? SPELL_TWISTED_VISAGE_SPAWN : SPELL_TWISTED_VISAGE_SPAWN_H, TRIGGERED_OLD_TRIGGERED);

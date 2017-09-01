@@ -31,7 +31,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 /*######
 ## npc_kelerun_bloodmourn
@@ -136,7 +136,7 @@ struct npc_kelerun_bloodmournAI : public ScriptedAI
             if (Creature* pCreature = m_creature->SummonCreature(uiChallengerId[i],
                                       fChallengerLoc[i][0], fChallengerLoc[i][1],
                                       fChallengerLoc[i][2], fChallengerLoc[i][3],
-                                      TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600000))
+                                      TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600000))
             {
                 m_aChallengerGuids[i] = pCreature->GetObjectGuid();
                 pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -414,9 +414,9 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         m_playerGuid = pPlayer->GetObjectGuid();
 
-        m_creature->SummonCreature(NPC_GHARSUL,    8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 4000);
-        m_creature->SummonCreature(NPC_ANGERSHADE, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 4000);
-        m_creature->SummonCreature(NPC_ANGERSHADE, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 4000);
+        m_creature->SummonCreature(NPC_GHARSUL,    8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 4000);
+        m_creature->SummonCreature(NPC_ANGERSHADE, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 4000);
+        m_creature->SummonCreature(NPC_ANGERSHADE, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 4000);
 
         m_creature->SetActiveObjectState(true);
     }
@@ -513,14 +513,14 @@ struct npc_infused_crystalAI : public Scripted_NoMovementAI
                 if (m_bFirstWave)
                 {
                     for (uint8 i = 0; i < 3; ++i)
-                        m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE);
+                        m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE);
                     m_uiWaveTimer = 29000;
                     m_bFirstWave = false;
                 }
                 else
                 {
                     for (uint8 i = 3; i < 6; ++i)
-                        m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE);
+                        m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE);
                     m_uiWaveTimer = 0;
                 }
             }
@@ -535,9 +535,7 @@ struct npc_infused_crystalAI : public Scripted_NoMovementAI
                 DoScriptText(SAY_DEFENSE_FINISH, m_creature);
                 if (m_creature->IsTemporarySummon())
                 {
-                    TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
-                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
                         pPlayer->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
                 }
                 m_uiFinishTimer = 0;

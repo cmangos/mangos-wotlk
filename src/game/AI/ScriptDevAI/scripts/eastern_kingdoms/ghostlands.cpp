@@ -101,9 +101,9 @@ struct npc_ranger_lilathaAI : public npc_escortAI
                 break;
             case 18:
                 DoScriptText(SAY_PROGRESS3, m_creature, pPlayer);
-                if (Creature* pSum1 = m_creature->SummonCreature(16342, 7627.083984f, -7532.538086f, 152.128616f, 1.082733f, TEMPSUMMON_DEAD_DESPAWN, 0))
+                if (Creature* pSum1 = m_creature->SummonCreature(16342, 7627.083984f, -7532.538086f, 152.128616f, 1.082733f, TEMPSPAWN_DEAD_DESPAWN, 0))
                     pSum1->AI()->AttackStart(m_creature);
-                if (Creature* pSum2 = m_creature->SummonCreature(16343, 7620.432129f, -7532.550293f, 152.454865f, 0.827478f, TEMPSUMMON_DEAD_DESPAWN, 0))
+                if (Creature* pSum2 = m_creature->SummonCreature(16343, 7620.432129f, -7532.550293f, 152.454865f, 0.827478f, TEMPSPAWN_DEAD_DESPAWN, 0))
                     pSum2->AI()->AttackStart(pPlayer);
                 break;
             case 19:

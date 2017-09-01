@@ -448,7 +448,7 @@ struct npc_teleportation_portalAI : public ScriptedAI
         if (m_creature->GetEntry() == NPC_PORTAL_INTRO)
         {
             // ToDo: uncomment this when the information and DB data is confirmed. Right now the mobs may overrun the guards after a few min of fightning
-            // m_creature->SummonCreature(m_pInstance->GetRandomMobForIntroPortal(), 0, 0, 0, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            // m_creature->SummonCreature(m_pInstance->GetRandomMobForIntroPortal(), 0, 0, 0, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             return;
         }
 
@@ -459,9 +459,9 @@ struct npc_teleportation_portalAI : public ScriptedAI
             {
                 // Summon a guardian keeper or Cyanigosa
                 if (m_uiMyPortalNumber == 18)
-                    m_creature->SummonCreature(NPC_CYANIGOSA, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
+                    m_creature->SummonCreature(NPC_CYANIGOSA, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
                 else
-                    m_creature->SummonCreature(m_pInstance->GetRandomPortalEliteEntry(), 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
+                    m_creature->SummonCreature(m_pInstance->GetRandomPortalEliteEntry(), 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
             }
             else if (m_creature->GetEntry() == NPC_PORTAL_ELITE)
             {
@@ -480,7 +480,7 @@ struct npc_teleportation_portalAI : public ScriptedAI
 
                         // Summon the trash pack around the portal
                         m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 3.0f, M_PI_F / 2 * i);
-                        pController->SummonCreature(uiSummonId, fX, fY, fZ, m_creature->GetOrientation(), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
+                        pController->SummonCreature(uiSummonId, fX, fY, fZ, m_creature->GetOrientation(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
                     }
 
                     // If this is a trash portal, set the current number in the
@@ -488,7 +488,7 @@ struct npc_teleportation_portalAI : public ScriptedAI
                         pControllerAI->DoSetCurrentTrashPortal(m_uiMyPortalNumber);
                 }
                 else
-                    pController->SummonCreature(NPC_AZURE_SABOTEUR, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
+                    pController->SummonCreature(NPC_AZURE_SABOTEUR, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
 
                 m_creature->ForcedDespawn(5000);
             }
@@ -503,7 +503,7 @@ struct npc_teleportation_portalAI : public ScriptedAI
         {
             // Allow the normal mobs to be summoned by the event controller
             if (Creature* pController = m_pInstance->GetSingleCreatureFromStorage(NPC_EVENT_CONTROLLER))
-                pController->SummonCreature(m_pInstance->GetRandomMobForNormalPortal(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+                pController->SummonCreature(m_pInstance->GetRandomMobForNormalPortal(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
 

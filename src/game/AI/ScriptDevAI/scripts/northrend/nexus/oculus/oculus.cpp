@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "oculus.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -50,8 +50,6 @@ struct npc_oculus_drakeAI : public ScriptedAI
     {
         if (m_creature->IsTemporarySummon())
         {
-            TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
             uint32 uiMountSpell = 0;
             switch (m_creature->GetEntry())
             {
@@ -61,7 +59,7 @@ struct npc_oculus_drakeAI : public ScriptedAI
             }
 
             // Force player to mount
-            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
             {
                 pSummoner->CastSpell(pSummoner, uiMountSpell, TRIGGERED_OLD_TRIGGERED);
 
@@ -90,8 +88,7 @@ struct npc_oculus_drakeAI : public ScriptedAI
         // Handle player parachute
         if (m_creature->IsTemporarySummon())
         {
-            TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
             {
                 pSummoner->RemoveAurasDueToSpell(SPELL_DRAKE_FLAG_VISUAL);
                 pSummoner->CastSpell(pSummoner, SPELL_PARACHUTE, TRIGGERED_OLD_TRIGGERED);

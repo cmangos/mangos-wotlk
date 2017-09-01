@@ -152,47 +152,47 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
             case NPC_BNAAR_C_CONSOLE:
                 if (urand(0, 1))
                 {
-                    if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2933.68f, 4162.55f, 164.00f, 1.60f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                    if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2933.68f, 4162.55f, 164.00f, 1.60f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                         pAdd->GetMotionMaster()->MovePoint(0, 2927.36f, 4212.97f, 164.00f);
                 }
                 else
                 {
-                    if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2927.36f, 4212.97f, 164.00f, 4.94f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                    if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2927.36f, 4212.97f, 164.00f, 4.94f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                         pAdd->GetMotionMaster()->MovePoint(0, 2933.68f, 4162.55f, 164.00f);
                 }
                 m_uiWaveTimer = 30000;
                 break;
             case NPC_CORUU_C_CONSOLE:
-                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2445.21f, 2765.26f, 134.49f, 3.93f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2445.21f, 2765.26f, 134.49f, 3.93f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                     pAdd->GetMotionMaster()->MovePoint(0, 2424.21f, 2740.15f, 133.81f);
-                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2429.86f, 2731.85f, 134.53f, 1.31f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2429.86f, 2731.85f, 134.53f, 1.31f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                     pAdd->GetMotionMaster()->MovePoint(0, 2435.37f, 2766.04f, 133.81f);
                 m_uiWaveTimer = 20000;
                 break;
             case NPC_DURO_C_CONSOLE:
-                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2986.80f, 2205.36f, 165.37f, 3.74f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2986.80f, 2205.36f, 165.37f, 3.74f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                     pAdd->GetMotionMaster()->MovePoint(0, 2985.15f, 2197.32f, 164.79f);
-                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2952.91f, 2191.20f, 165.32f, 0.22f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2952.91f, 2191.20f, 165.32f, 0.22f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                     pAdd->GetMotionMaster()->MovePoint(0, 2060.01f, 2185.27f, 164.67f);
                 m_uiWaveTimer = 15000;
                 break;
             case NPC_ARA_C_CONSOLE:
                 if (urand(0, 1))
                 {
-                    if ((pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 4035.11f, 4038.97f, 194.27f, 2.57f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                    if ((pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 4035.11f, 4038.97f, 194.27f, 2.57f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                         pAdd->GetMotionMaster()->MovePoint(0, 4003.42f, 4040.19f, 193.49f);
-                    if ((pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 4033.66f, 4036.79f, 194.28f, 2.57f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                    if ((pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 4033.66f, 4036.79f, 194.28f, 2.57f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                         pAdd->GetMotionMaster()->MovePoint(0, 4003.42f, 4040.19f, 193.49f);
-                    if ((pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 4037.13f, 4037.30f, 194.23f, 2.57f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                    if ((pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 4037.13f, 4037.30f, 194.23f, 2.57f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                         pAdd->GetMotionMaster()->MovePoint(0, 4003.42f, 4040.19f, 193.49f);
                 }
                 else
                 {
-                    if ((pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 3099.59f, 4049.30f, 194.22f, 0.05f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                    if ((pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 3099.59f, 4049.30f, 194.22f, 0.05f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                         pAdd->GetMotionMaster()->MovePoint(0, 4028.01f, 4035.17f, 193.59f);
-                    if ((pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 3999.72f, 4046.75f, 194.22f, 0.05f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                    if ((pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 3999.72f, 4046.75f, 194.22f, 0.05f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                         pAdd->GetMotionMaster()->MovePoint(0, 4028.01f, 4035.17f, 193.59f);
-                    if ((pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 3996.81f, 4048.26f, 194.22f, 0.05f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                    if ((pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 3996.81f, 4048.26f, 194.22f, 0.05f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                         pAdd->GetMotionMaster()->MovePoint(0, 4028.01f, 4035.17f, 193.59f);
                 }
                 m_uiWaveTimer = 15000;
@@ -207,29 +207,29 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
         switch (pCreature->GetEntry())
         {
             case NPC_BNAAR_C_CONSOLE:
-                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2946.52f, 4201.42f, 163.47f, 3.54f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2946.52f, 4201.42f, 163.47f, 3.54f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                     pAdd->GetMotionMaster()->MovePoint(0, 2927.49f, 4192.81f, 163.00f);
                 break;
             case NPC_CORUU_C_CONSOLE:
-                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2453.88f, 2737.85f, 133.27f, 2.59f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2453.88f, 2737.85f, 133.27f, 2.59f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                     pAdd->GetMotionMaster()->MovePoint(0, 2433.96f, 2751.53f, 133.85f);
-                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2441.62f, 2735.32f, 134.49f, 1.97f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2441.62f, 2735.32f, 134.49f, 1.97f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                     pAdd->GetMotionMaster()->MovePoint(0, 2433.96f, 2751.53f, 133.85f);
-                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2450.73f, 2754.50f, 134.49f, 3.29f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2450.73f, 2754.50f, 134.49f, 3.29f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                     pAdd->GetMotionMaster()->MovePoint(0, 2433.96f, 2751.53f, 133.85f);
                 break;
             case NPC_DURO_C_CONSOLE:
-                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2956.18f, 2202.85f, 165.32f, 5.45f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2956.18f, 2202.85f, 165.32f, 5.45f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                     pAdd->GetMotionMaster()->MovePoint(0, 2972.27f, 2193.22f, 164.48f);
-                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2975.30f, 2211.50f, 165.32f, 4.55f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2975.30f, 2211.50f, 165.32f, 4.55f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                     pAdd->GetMotionMaster()->MovePoint(0, 2972.27f, 2193.22f, 164.48f);
-                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_PROT, 2965.02f, 2217.45f, 164.16f, 4.96f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                if ((pAdd = m_creature->SummonCreature(NPC_SUNFURY_PROT, 2965.02f, 2217.45f, 164.16f, 4.96f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                     pAdd->GetMotionMaster()->MovePoint(0, 2972.27f, 2193.22f, 164.48f);
                 break;
             case NPC_ARA_C_CONSOLE:
-                if ((pAdd = m_creature->SummonCreature(NPC_ARA_ENGI, 3994.51f, 4020.46f, 192.18f, 0.91f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                if ((pAdd = m_creature->SummonCreature(NPC_ARA_ENGI, 3994.51f, 4020.46f, 192.18f, 0.91f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                     pAdd->GetMotionMaster()->MovePoint(0, 4008.35f, 4035.04f, 192.70f);
-                if ((pAdd = m_creature->SummonCreature(NPC_ARA_GORKLONN, 4021.56f, 4059.35f, 193.59f, 4.44f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000)))
+                if ((pAdd = m_creature->SummonCreature(NPC_ARA_GORKLONN, 4021.56f, 4059.35f, 193.59f, 4.44f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                     pAdd->GetMotionMaster()->MovePoint(0, 4016.62f, 4039.89f, 193.46f);
                 break;
         }
@@ -328,25 +328,25 @@ bool GOUse_go_manaforge_control_console(Player* pPlayer, GameObject* pGo)
             if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_BNAAR_ALDOR) == QUEST_STATUS_INCOMPLETE
                     || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_BNAAR_SCRYERS) == QUEST_STATUS_INCOMPLETE)
                     && pPlayer->HasItemCount(ITEM_BNAAR_ACESS_CRYSTAL, 1))
-                pManaforge = pPlayer->SummonCreature(NPC_BNAAR_C_CONSOLE, 2918.95f, 4189.98f, 161.88f, 0.34f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 125000);
+                pManaforge = pPlayer->SummonCreature(NPC_BNAAR_C_CONSOLE, 2918.95f, 4189.98f, 161.88f, 0.34f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 125000);
             break;
         case 3730:                                          // coruu
             if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_CORUU_ALDOR) == QUEST_STATUS_INCOMPLETE
                     || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_CORUU_SCRYERS) == QUEST_STATUS_INCOMPLETE)
                     && pPlayer->HasItemCount(ITEM_CORUU_ACESS_CRYSTAL, 1))
-                pManaforge = pPlayer->SummonCreature(NPC_CORUU_C_CONSOLE, 2426.77f, 2750.38f, 133.24f, 2.14f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 125000);
+                pManaforge = pPlayer->SummonCreature(NPC_CORUU_C_CONSOLE, 2426.77f, 2750.38f, 133.24f, 2.14f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 125000);
             break;
         case 3734:                                          // duro
             if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_DURO_ALDOR) == QUEST_STATUS_INCOMPLETE
                     || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_DURO_SCRYERS) == QUEST_STATUS_INCOMPLETE)
                     && pPlayer->HasItemCount(ITEM_DURO_ACESS_CRYSTAL, 1))
-                pManaforge = pPlayer->SummonCreature(NPC_DURO_C_CONSOLE, 2976.48f, 2183.29f, 163.20f, 1.85f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 125000);
+                pManaforge = pPlayer->SummonCreature(NPC_DURO_C_CONSOLE, 2976.48f, 2183.29f, 163.20f, 1.85f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 125000);
             break;
         case 3722:                                          // ara
             if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_ARA_ALDOR) == QUEST_STATUS_INCOMPLETE
                     || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_ARA_SCRYERS) == QUEST_STATUS_INCOMPLETE)
                     && pPlayer->HasItemCount(ITEM_ARA_ACESS_CRYSTAL, 1))
-                pManaforge = pPlayer->SummonCreature(NPC_ARA_C_CONSOLE, 4013.71f, 4028.76f, 192.10f, 1.25f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 125000);
+                pManaforge = pPlayer->SummonCreature(NPC_ARA_C_CONSOLE, 4013.71f, 4028.76f, 192.10f, 1.25f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 125000);
             break;
     }
 
@@ -526,7 +526,7 @@ struct npc_commander_dawnforgeAI : public ScriptedAI
                 break;
             case 4:
                 // spawn pathaleon's image
-                m_creature->SummonCreature(NPC_PATHALEON_THE_CALCULATOR_IMAGE, 2325.851563f, 2799.534668f, 133.084229f, 6.038996f, TEMPSUMMON_TIMED_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_PATHALEON_THE_CALCULATOR_IMAGE, 2325.851563f, 2799.534668f, 133.084229f, 6.038996f, TEMPSPAWN_TIMED_DESPAWN, 90000);
                 ++m_uiPhase;
                 m_uiPhaseTimer = 500;
                 break;
@@ -644,13 +644,13 @@ struct npc_bessyAI : public npc_escortAI
         switch (uiPointId)
         {
             case 3:
-                m_creature->SummonCreature(NPC_TORMENTED_SOUL, 2449.67f, 2183.11f, 96.85f, 6.20f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
-                m_creature->SummonCreature(NPC_TORMENTED_SOUL, 2449.53f, 2184.43f, 96.36f, 6.27f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
-                m_creature->SummonCreature(NPC_TORMENTED_SOUL, 2449.85f, 2186.34f, 97.57f, 6.08f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_TORMENTED_SOUL, 2449.67f, 2183.11f, 96.85f, 6.20f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_TORMENTED_SOUL, 2449.53f, 2184.43f, 96.36f, 6.27f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_TORMENTED_SOUL, 2449.85f, 2186.34f, 97.57f, 6.08f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 25000);
                 break;
             case 7:
-                m_creature->SummonCreature(NPC_SEVERED_SPIRIT, 2309.64f, 2186.24f, 92.25f, 6.06f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
-                m_creature->SummonCreature(NPC_SEVERED_SPIRIT, 2309.25f, 2183.46f, 91.75f, 6.22f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_SEVERED_SPIRIT, 2309.64f, 2186.24f, 92.25f, 6.06f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_SEVERED_SPIRIT, 2309.25f, 2183.46f, 91.75f, 6.22f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 25000);
                 break;
             case 12:
                 if (Player* pPlayer = GetPlayerForEscort())
@@ -999,12 +999,12 @@ struct npc_protectorate_demolitionistAI : public npc_escortAI
                 switch (m_uiEventStage)
                 {
                     case 0:
-                        m_creature->SummonCreature(NPC_ARCHON, 3875.69f, 2308.72f, 115.80f, 1.48f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                        m_creature->SummonCreature(NPC_ARCHON, 3875.69f, 2308.72f, 115.80f, 1.48f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                         m_uiEventTimer = 4000;
                         break;
                     case 1:
-                        m_creature->SummonCreature(NPC_NEXUS_STALKER, 3884.06f, 2325.22f, 111.37f, 3.45f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                        m_creature->SummonCreature(NPC_NEXUS_STALKER, 3861.54f, 2320.44f, 111.48f, 0.32f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                        m_creature->SummonCreature(NPC_NEXUS_STALKER, 3884.06f, 2325.22f, 111.37f, 3.45f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                        m_creature->SummonCreature(NPC_NEXUS_STALKER, 3861.54f, 2320.44f, 111.48f, 0.32f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                         m_uiEventTimer = 9000;
                         break;
                     case 2:
@@ -1221,7 +1221,7 @@ struct npc_drijyaAI : public npc_escortAI
     void DoSpawnCreature(uint32 uiEntry)
     {
         if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_explodeTriggerGuid))
-            m_creature->SummonCreature(uiEntry, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), pTrigger->GetOrientation(), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+            m_creature->SummonCreature(uiEntry, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), pTrigger->GetOrientation(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -1526,7 +1526,7 @@ struct npc_dimensiusAI : public Scripted_NoMovementAI
             for (uint8 i = 0; i < 4; ++i)
             {
                 m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 30.0f, i * (M_PI_F / 2));
-                m_creature->SummonCreature(NPC_SPAWN_OF_DIMENSIUS, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
+                m_creature->SummonCreature(NPC_SPAWN_OF_DIMENSIUS, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
             }
 
             m_uiRainTimer = 5000;

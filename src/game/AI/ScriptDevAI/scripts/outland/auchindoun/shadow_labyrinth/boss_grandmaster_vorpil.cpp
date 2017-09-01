@@ -131,7 +131,7 @@ struct boss_grandmaster_vorpilAI : public ScriptedAI
 
         // summon the other 4 portals
         for (uint8 i = 0; i < MAX_PORTALS; ++i)
-            m_creature->SummonCreature(NPC_VOID_PORTAL, aVorpilLocation[i].m_fX, aVorpilLocation[i].m_fY, aVorpilLocation[i].m_fZ, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_VOID_PORTAL, aVorpilLocation[i].m_fX, aVorpilLocation[i].m_fY, aVorpilLocation[i].m_fZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VORPIL, IN_PROGRESS);

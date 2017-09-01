@@ -146,7 +146,7 @@ struct boss_void_reaverAI : public ScriptedAI
                 Unit* pTarget = suitableTargets[urand(0, suitableTargets.size() - 1)];
 
                 if (pTarget)
-                    m_creature->SummonCreature(NPC_ARCANE_ORB_TARGET, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_ARCANE_ORB_TARGET, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 0);
 
                 m_uiArcaneOrbTimer = 3000;
             }

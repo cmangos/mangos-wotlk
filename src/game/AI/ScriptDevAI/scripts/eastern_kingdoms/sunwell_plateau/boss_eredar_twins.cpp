@@ -492,7 +492,7 @@ struct boss_sacrolashAI : public ScriptedAI
         {
             // Summon 3 shadow images at the boss position
             for (uint8 i = 0; i < 3; ++i)
-                m_creature->SummonCreature(NPC_SHADOW_IMAGE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                m_creature->SummonCreature(NPC_SHADOW_IMAGE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 3000);
 
             m_uiSummonShadowImage = urand(10000, 12000);
         }

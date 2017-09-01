@@ -192,10 +192,10 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
 
     void SpawnAssassin()
     {
-        m_creature->SummonCreature(NPC_SHATTERED_ASSASSIN, AssassEntrance[0], AssassEntrance[1] + 8, AssassEntrance[2], 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 24000);
-        m_creature->SummonCreature(NPC_SHATTERED_ASSASSIN, AssassEntrance[0], AssassEntrance[1] - 8, AssassEntrance[2], 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 24000);
-        m_creature->SummonCreature(NPC_SHATTERED_ASSASSIN, AssassExit[0], AssassExit[1] + 8, AssassExit[2], 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 24000);
-        m_creature->SummonCreature(NPC_SHATTERED_ASSASSIN, AssassExit[0], AssassExit[1] - 8, AssassExit[2], 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 24000);
+        m_creature->SummonCreature(NPC_SHATTERED_ASSASSIN, AssassEntrance[0], AssassEntrance[1] + 8, AssassEntrance[2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 24000);
+        m_creature->SummonCreature(NPC_SHATTERED_ASSASSIN, AssassEntrance[0], AssassEntrance[1] - 8, AssassEntrance[2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 24000);
+        m_creature->SummonCreature(NPC_SHATTERED_ASSASSIN, AssassExit[0], AssassExit[1] + 8, AssassExit[2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 24000);
+        m_creature->SummonCreature(NPC_SHATTERED_ASSASSIN, AssassExit[0], AssassExit[1] - 8, AssassExit[2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 24000);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -286,9 +286,9 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
                 {
                     switch (urand(0, 2))
                     {
-                        case 0: m_creature->SummonCreature(NPC_HEARTHEN_GUARD, AddsEntrance[0], AddsEntrance[1], AddsEntrance[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 20000); break;
-                        case 1: m_creature->SummonCreature(NPC_SHARPSHOOTER_GUARD, AddsEntrance[0], AddsEntrance[1], AddsEntrance[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 20000); break;
-                        case 2: m_creature->SummonCreature(NPC_REAVER_GUARD, AddsEntrance[0], AddsEntrance[1], AddsEntrance[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 20000); break;
+                        case 0: m_creature->SummonCreature(NPC_HEARTHEN_GUARD, AddsEntrance[0], AddsEntrance[1], AddsEntrance[2], 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000); break;
+                        case 1: m_creature->SummonCreature(NPC_SHARPSHOOTER_GUARD, AddsEntrance[0], AddsEntrance[1], AddsEntrance[2], 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000); break;
+                        case 2: m_creature->SummonCreature(NPC_REAVER_GUARD, AddsEntrance[0], AddsEntrance[1], AddsEntrance[2], 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000); break;
                     }
                 }
 

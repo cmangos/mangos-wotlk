@@ -70,7 +70,7 @@ void instance_forge_of_souls::ProcessEventNpcs(Player* pPlayer, bool bChanged)
         for (uint8 i = 0; i < countof(aEventBeginLocations); ++i)
         {
             if (Creature* pSummon = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocations[i].uiEntryHorde : aEventBeginLocations[i].uiEntryAlliance,
-                                    aEventBeginLocations[i].fSpawnX, aEventBeginLocations[i].fSpawnY, aEventBeginLocations[i].fSpawnZ, aEventBeginLocations[i].fSpawnO, TEMPSUMMON_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
+                                    aEventBeginLocations[i].fSpawnX, aEventBeginLocations[i].fSpawnY, aEventBeginLocations[i].fSpawnZ, aEventBeginLocations[i].fSpawnO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
                 m_lEventMobGUIDs.push_back(pSummon->GetObjectGuid());
         }
     }
@@ -88,7 +88,7 @@ void instance_forge_of_souls::ProcessEventNpcs(Player* pPlayer, bool bChanged)
             for (uint8 i = 0; i < countof(aEventEndLocations); ++i)
             {
                 pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventEndLocations[i].uiEntryHorde : aEventEndLocations[i].uiEntryAlliance,
-                                        aEventEndLocations[i].fSpawnX, aEventEndLocations[i].fSpawnY, aEventEndLocations[i].fSpawnZ, aEventEndLocations[i].fStartO, TEMPSUMMON_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS);
+                                        aEventEndLocations[i].fSpawnX, aEventEndLocations[i].fSpawnY, aEventEndLocations[i].fSpawnZ, aEventEndLocations[i].fStartO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS);
 
                 // TODO: Let the NPCs Move along their paths
             }
@@ -99,7 +99,7 @@ void instance_forge_of_souls::ProcessEventNpcs(Player* pPlayer, bool bChanged)
             for (uint8 i = 0; i < countof(aEventEndLocations); ++i)
             {
                 pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventEndLocations[i].uiEntryHorde : aEventEndLocations[i].uiEntryAlliance,
-                                        aEventEndLocations[i].fEndX, aEventEndLocations[i].fEndY, aEventEndLocations[i].fEndZ, aEventEndLocations[i].fEndO, TEMPSUMMON_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS);
+                                        aEventEndLocations[i].fEndX, aEventEndLocations[i].fEndY, aEventEndLocations[i].fEndZ, aEventEndLocations[i].fEndO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS);
             }
         }
     }

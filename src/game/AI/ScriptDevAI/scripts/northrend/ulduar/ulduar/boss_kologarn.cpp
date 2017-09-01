@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "ulduar.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -224,9 +224,7 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
                 // follow the summoner
                 if (pSummoned->IsTemporarySummon())
                 {
-                    TemporarySummon* pTemporary = (TemporarySummon*)pSummoned;
-
-                    if (Unit* pPlayer = m_creature->GetMap()->GetUnit(pTemporary->GetSummonerGuid()))
+                    if (Unit* pPlayer = m_creature->GetMap()->GetUnit(pSummoned->GetSummonerGuid()))
                         pSummoned->GetMotionMaster()->MoveChase(pPlayer);
                 }
                 break;
@@ -315,8 +313,8 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
         {
             if (m_uiMountArmsTimer <= uiDiff)
             {
-                m_creature->SummonCreature(NPC_RIGHT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
-                m_creature->SummonCreature(NPC_LEFT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_RIGHT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_LEFT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
                 m_uiMountArmsTimer = 0;
             }
             else
@@ -367,7 +365,7 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
             if (m_uiRespawnLeftTimer <= uiDiff)
             {
                 DoScriptText(EMOTE_ARM_LEFT, m_creature);
-                m_creature->SummonCreature(NPC_LEFT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_LEFT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
                 m_uiRespawnLeftTimer = 0;
             }
             else
@@ -394,7 +392,7 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
             if (m_uiRespawnRightTimer <= uiDiff)
             {
                 DoScriptText(EMOTE_ARM_RIGHT, m_creature);
-                m_creature->SummonCreature(NPC_RIGHT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_RIGHT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
                 m_uiRespawnRightTimer = 0;
             }
             else

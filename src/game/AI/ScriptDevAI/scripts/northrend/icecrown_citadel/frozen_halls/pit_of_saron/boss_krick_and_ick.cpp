@@ -138,7 +138,7 @@ struct boss_ickAI : public ScriptedAI
 
                 // Summon Jaina or Sylvanas for epilogue
                 pKrick->SummonCreature(m_pInstance->GetPlayerTeam() == HORDE ? NPC_SYLVANAS_PART1 : NPC_JAINA_PART1,
-                                       afOutroNpcSpawnLoc[0], afOutroNpcSpawnLoc[1], afOutroNpcSpawnLoc[2], afOutroNpcSpawnLoc[3], TEMPSUMMON_TIMED_DESPAWN, 2 * MINUTE * IN_MILLISECONDS);
+                                       afOutroNpcSpawnLoc[0], afOutroNpcSpawnLoc[1], afOutroNpcSpawnLoc[2], afOutroNpcSpawnLoc[3], TEMPSPAWN_TIMED_DESPAWN, 2 * MINUTE * IN_MILLISECONDS);
             }
 
             if (Creature* pTyrannus = m_pInstance->GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO))

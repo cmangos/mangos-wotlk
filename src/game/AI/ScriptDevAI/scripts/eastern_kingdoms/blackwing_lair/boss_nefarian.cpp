@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackwing_lair.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -119,9 +119,7 @@ struct boss_nefarianAI : public ScriptedAI
             // Cleanup encounter
             if (m_creature->IsTemporarySummon())
             {
-                TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
-                if (Creature* pNefarius = m_creature->GetMap()->GetCreature(pTemporary->GetSummonerGuid()))
+                if (Creature* pNefarius = m_creature->GetMap()->GetCreature(m_creature->GetSpawnerGuid()))
                     pNefarius->AI()->EnterEvadeMode();
             }
 

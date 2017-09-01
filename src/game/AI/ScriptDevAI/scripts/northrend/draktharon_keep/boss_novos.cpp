@@ -220,7 +220,7 @@ struct boss_novosAI : public Scripted_NoMovementAI
                     float fX, fY, fZ;
                     ++m_uiSummonedHandlers;
                     m_creature->GetRandomPoint(aHandlerSummonPos[m_uiSummonedHandlers % 2][0], aHandlerSummonPos[m_uiSummonedHandlers % 2][1], aHandlerSummonPos[m_uiSummonedHandlers % 2][2], 10.0f, fX, fY, fZ);
-                    m_creature->SummonCreature(NPC_CRYSTAL_HANDLER, fX, fY, fZ, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_CRYSTAL_HANDLER, fX, fY, fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                     DoScriptText(SAY_ADDS, m_creature);
                     DoScriptText(EMOTE_ASSISTANCE, m_creature);

@@ -77,14 +77,14 @@ void instance_sunwell_plateau::OnPlayerEnter(Player* pPlayer)
     {
         // Summon Felmyst in reload case if not already summoned
         if (!GetSingleCreatureFromStorage(NPC_FELMYST, true))
-            pPlayer->SummonCreature(NPC_FELMYST, aMadrigosaLoc[0].m_fX, aMadrigosaLoc[0].m_fY, aMadrigosaLoc[0].m_fZ, aMadrigosaLoc[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            pPlayer->SummonCreature(NPC_FELMYST, aMadrigosaLoc[0].m_fX, aMadrigosaLoc[0].m_fY, aMadrigosaLoc[0].m_fZ, aMadrigosaLoc[0].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
     }
 
     // Spawn M'uru after the Eredar Twins
     if (m_auiEncounter[TYPE_EREDAR_TWINS] == DONE && m_auiEncounter[TYPE_MURU] != DONE)
     {
         if (!GetSingleCreatureFromStorage(NPC_MURU, true))
-            pPlayer->SummonCreature(NPC_MURU, afMuruSpawnLoc[0], afMuruSpawnLoc[1], afMuruSpawnLoc[2], afMuruSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            pPlayer->SummonCreature(NPC_MURU, afMuruSpawnLoc[0], afMuruSpawnLoc[1], afMuruSpawnLoc[2], afMuruSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
     }
 }
 
@@ -144,7 +144,7 @@ void instance_sunwell_plateau::OnCreatureDeath(Creature* pCreature)
         {
             if (Creature* pController = GetSingleCreatureFromStorage(NPC_KILJAEDEN_CONTROLLER))
             {
-                if (Creature* pKiljaeden = pController->SummonCreature(NPC_KILJAEDEN, pController->GetPositionX(), pController->GetPositionY(), pController->GetPositionZ(), pController->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
+                if (Creature* pKiljaeden = pController->SummonCreature(NPC_KILJAEDEN, pController->GetPositionX(), pController->GetPositionY(), pController->GetPositionZ(), pController->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
                     pKiljaeden->SetInCombatWithZone();
 
                 pController->RemoveAurasDueToSpell(SPELL_ANVEENA_DRAIN);
@@ -228,7 +228,7 @@ void instance_sunwell_plateau::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
             {
                 if (Player* pPlayer = GetPlayerInMap())
-                    pPlayer->SummonCreature(NPC_MURU, afMuruSpawnLoc[0], afMuruSpawnLoc[1], afMuruSpawnLoc[2], afMuruSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+                    pPlayer->SummonCreature(NPC_MURU, afMuruSpawnLoc[0], afMuruSpawnLoc[1], afMuruSpawnLoc[2], afMuruSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
             }
             break;
         case TYPE_MURU:
@@ -443,7 +443,7 @@ void instance_sunwell_plateau::JustDidDialogueStep(int32 iEntry)
         case NPC_KALECGOS_MADRIGOSA:
             if (Creature* pTrigger = GetSingleCreatureFromStorage(NPC_FLIGHT_TRIGGER_LEFT))
             {
-                if (Creature* pKalec = pTrigger->SummonCreature(NPC_KALECGOS_MADRIGOSA, aKalecLoc[0].m_fX, aKalecLoc[0].m_fY, aKalecLoc[0].m_fZ, aKalecLoc[0].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 0))
+                if (Creature* pKalec = pTrigger->SummonCreature(NPC_KALECGOS_MADRIGOSA, aKalecLoc[0].m_fX, aKalecLoc[0].m_fY, aKalecLoc[0].m_fZ, aKalecLoc[0].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 0))
                 {
                     pKalec->SetWalk(false);
                     pKalec->SetLevitate(true);

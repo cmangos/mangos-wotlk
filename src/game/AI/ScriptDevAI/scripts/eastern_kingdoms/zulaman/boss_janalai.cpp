@@ -232,10 +232,10 @@ struct boss_janalaiAI : public ScriptedAI
         // This function involves a lot of guesswork!!!
         // The npc entry isn't sure and the locations are guessed
         m_bIsFlameWall = true;
-        m_creature->SummonCreature(NPC_FIRE_BOMB, afFireWallCoords[0][0], afFireWallCoords[0][1], afFireWallCoords[0][2], afFireWallCoords[0][3], TEMPSUMMON_TIMED_DESPAWN, 12000);
-        m_creature->SummonCreature(NPC_FIRE_BOMB, afFireWallCoords[1][0], afFireWallCoords[1][1], afFireWallCoords[1][2], afFireWallCoords[1][3], TEMPSUMMON_TIMED_DESPAWN, 12000);
-        m_creature->SummonCreature(NPC_FIRE_BOMB, afFireWallCoords[2][0], afFireWallCoords[2][1], afFireWallCoords[2][2], afFireWallCoords[2][3], TEMPSUMMON_TIMED_DESPAWN, 12000);
-        m_creature->SummonCreature(NPC_FIRE_BOMB, afFireWallCoords[3][0], afFireWallCoords[3][1], afFireWallCoords[3][2], afFireWallCoords[3][3], TEMPSUMMON_TIMED_DESPAWN, 12000);
+        m_creature->SummonCreature(NPC_FIRE_BOMB, afFireWallCoords[0][0], afFireWallCoords[0][1], afFireWallCoords[0][2], afFireWallCoords[0][3], TEMPSPAWN_TIMED_DESPAWN, 12000);
+        m_creature->SummonCreature(NPC_FIRE_BOMB, afFireWallCoords[1][0], afFireWallCoords[1][1], afFireWallCoords[1][2], afFireWallCoords[1][3], TEMPSPAWN_TIMED_DESPAWN, 12000);
+        m_creature->SummonCreature(NPC_FIRE_BOMB, afFireWallCoords[2][0], afFireWallCoords[2][1], afFireWallCoords[2][2], afFireWallCoords[2][3], TEMPSPAWN_TIMED_DESPAWN, 12000);
+        m_creature->SummonCreature(NPC_FIRE_BOMB, afFireWallCoords[3][0], afFireWallCoords[3][1], afFireWallCoords[3][2], afFireWallCoords[3][3], TEMPSPAWN_TIMED_DESPAWN, 12000);
         m_bIsFlameWall = false;
     }
 

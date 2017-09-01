@@ -111,13 +111,13 @@ void instance_azjol_nerub::OnCreatureEnterCombat(Creature* pCreature)
         DoScriptText(SAY_CRUSHER_AGGRO, pCreature);
 
         // Spawn 2 more crushers - note these are not the exact spawn coords, but we need to use this workaround for better movement
-        if (Creature* pCrusher = pCreature->SummonCreature(NPC_ANUBAR_CRUSHER, 485.25f, 611.46f, 771.42f, 4.74f, TEMPSUMMON_DEAD_DESPAWN, 0))
+        if (Creature* pCrusher = pCreature->SummonCreature(NPC_ANUBAR_CRUSHER, 485.25f, 611.46f, 771.42f, 4.74f, TEMPSPAWN_DEAD_DESPAWN, 0))
         {
             pCrusher->SetWalk(false);
             pCrusher->GetMotionMaster()->MovePoint(0, 517.51f, 561.439f, 734.0306f);
             pCrusher->HandleEmote(EMOTE_STATE_READYUNARMED);
         }
-        if (Creature* pCrusher = pCreature->SummonCreature(NPC_ANUBAR_CRUSHER, 575.21f, 611.47f, 771.46f, 3.59f, TEMPSUMMON_DEAD_DESPAWN, 0))
+        if (Creature* pCrusher = pCreature->SummonCreature(NPC_ANUBAR_CRUSHER, 575.21f, 611.47f, 771.46f, 3.59f, TEMPSPAWN_DEAD_DESPAWN, 0))
         {
             pCrusher->SetWalk(false);
             pCrusher->GetMotionMaster()->MovePoint(0, 543.414f, 551.728f, 732.0522f);

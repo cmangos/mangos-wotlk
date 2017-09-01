@@ -263,7 +263,7 @@ void instance_black_temple::DoSpawnAkamaIfCan()
 
     // Summon Akama after the council has been defeated
     if (Player* pPlayer = GetPlayerInMap())
-        pPlayer->SummonCreature(NPC_AKAMA, 617.754f, 307.768f, 271.735f, 6.197f, TEMPSUMMON_DEAD_DESPAWN, 0);
+        pPlayer->SummonCreature(NPC_AKAMA, 617.754f, 307.768f, 271.735f, 6.197f, TEMPSPAWN_DEAD_DESPAWN, 0);
 }
 
 void instance_black_temple::Load(const char* chrIn)

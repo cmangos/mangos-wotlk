@@ -198,13 +198,13 @@ struct boss_anubarak_trialAI : public ScriptedAI
         // Summon the spheres on random points
         for (uint8 i = 0; i < MAX_FROSTSPHERES; ++i)
         {
-            if (Creature* pTemp = m_creature->SummonCreature(NPC_FROSTSPHERE, aFrostSphereSpawnPositions[i][0], aFrostSphereSpawnPositions[i][1], aFrostSphereSpawnPositions[i][2], 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+            if (Creature* pTemp = m_creature->SummonCreature(NPC_FROSTSPHERE, aFrostSphereSpawnPositions[i][0], aFrostSphereSpawnPositions[i][1], aFrostSphereSpawnPositions[i][2], 0, TEMPSPAWN_DEAD_DESPAWN, 0))
                 m_vSpheresGuidVector[i] = pTemp->GetObjectGuid();
         }
 
         // It's not clear if these should be spawned by DB or summoned
         for (uint8 i = 0; i < MAX_BURROWS; ++i)
-            m_creature->SummonCreature(NPC_BURROW, aBurrowSpawnPositions[i][0], aBurrowSpawnPositions[i][1], aBurrowSpawnPositions[i][2], aBurrowSpawnPositions[i][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_BURROW, aBurrowSpawnPositions[i][0], aBurrowSpawnPositions[i][1], aBurrowSpawnPositions[i][2], aBurrowSpawnPositions[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
@@ -265,7 +265,7 @@ struct boss_anubarak_trialAI : public ScriptedAI
                 continue;
 
             // Summon a new frost sphere instead of the killed one
-            if (Creature* pTemp = m_creature->SummonCreature(NPC_FROSTSPHERE, aFrostSphereSpawnPositions[i][0], aFrostSphereSpawnPositions[i][1], aFrostSphereSpawnPositions[i][2], 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+            if (Creature* pTemp = m_creature->SummonCreature(NPC_FROSTSPHERE, aFrostSphereSpawnPositions[i][0], aFrostSphereSpawnPositions[i][1], aFrostSphereSpawnPositions[i][2], 0, TEMPSPAWN_DEAD_DESPAWN, 0))
                 m_vSpheresGuidVector[i] = pTemp->GetObjectGuid();
         }
     }

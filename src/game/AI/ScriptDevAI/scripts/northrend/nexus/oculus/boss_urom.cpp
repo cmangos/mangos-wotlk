@@ -238,13 +238,13 @@ struct boss_uromAI : public ScriptedAI
         for (uint8 i = 0; i < MAX_PLATFORMS; ++i)
         {
             m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 10.0f, M_PI_F / 2 * i);
-            m_creature->SummonCreature(uiTrashPacks[m_vuiTrashPacksIds[m_uiPlatformPhase]][i], fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
+            m_creature->SummonCreature(uiTrashPacks[m_vuiTrashPacksIds[m_uiPlatformPhase]][i], fX, fY, fZ, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
         }
 
         // Summon a fourth mob, which can be random
         uint32 uiEntry = uiTrashPacks[m_vuiTrashPacksIds[m_uiPlatformPhase]][urand(0, 2)];
         m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 10.0f, M_PI_F / 2 * 3);
-        m_creature->SummonCreature(uiEntry, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
+        m_creature->SummonCreature(uiEntry, fX, fY, fZ, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
     }
 
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override

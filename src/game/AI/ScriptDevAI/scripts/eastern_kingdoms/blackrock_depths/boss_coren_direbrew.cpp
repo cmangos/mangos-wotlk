@@ -105,7 +105,7 @@ struct boss_coren_direbrewAI : public ScriptedAI
         {
             float fX, fY, fZ;
             m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_ILSA_DIREBREW, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_ILSA_DIREBREW, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             m_uiPhase = 1;
         }
 
@@ -114,7 +114,7 @@ struct boss_coren_direbrewAI : public ScriptedAI
         {
             float fX, fY, fZ;
             m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_URSULA_DIREBREW, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_URSULA_DIREBREW, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             m_uiPhase = 2;
         }
 
