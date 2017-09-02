@@ -64,6 +64,11 @@ Map::~Map()
     m_weatherSystem = nullptr;
 }
 
+TimePoint Map::GetCurrentClockTime()
+{
+    return World::GetCurrentClockTime();
+}
+
 void Map::LoadMapAndVMap(int gx, int gy)
 {
     if (m_bLoadedGrids[gx][gy])

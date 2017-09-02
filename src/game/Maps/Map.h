@@ -304,6 +304,7 @@ class Map : public GridRefManager<NGridType>
         bool GetRandomPointInTheAir(uint32 phaseMask, float& x, float& y, float& z, float radius) const;
         bool GetRandomPointUnderWater(uint32 phaseMask, float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status) const;
 
+        TimePoint GetCurrentClockTime();
     private:
         void LoadMapAndVMap(int gx, int gy);
 
