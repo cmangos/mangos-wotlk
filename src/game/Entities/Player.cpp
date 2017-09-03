@@ -11060,7 +11060,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
                 else
                 {
                     m_weaponChangeTimer = spellProto->StartRecoveryTime;
-                    AddGCD(*spellProto, true);
+                    AddGCD(*spellProto, 0, true);
                 }
             }
         }
@@ -23459,7 +23459,7 @@ void Player::ResetDeathTimer()
     m_deathTimer = 6 * MINUTE * IN_MILLISECONDS;
 }
 
-void Player::AddGCD(SpellEntry const& spellEntry, bool updateClient)
+void Player::AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration /*= 0*/, bool updateClient /*= false*/)
 {
     int32 gcdDuration = spellEntry.StartRecoveryTime;
     if (!gcdDuration)
