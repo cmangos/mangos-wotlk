@@ -1558,6 +1558,38 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     ((Creature*)unitTarget)->ForcedDespawn(10000);
                     return;
                 }
+                case 39238:                                 // Fumping
+                {
+                    // Summon Mature Bone Sifter as default
+                    uint32 spellId;
+
+                    // 50/50 chance to summon Mature Bone Sifter instead of Sand Gnome
+                    switch (urand(0, 1))
+                    {
+                        case 0: spellId = 39241; break; // Summon Mature Bone Sifter
+                        case 1: spellId = 39240; break; // Summon Sand Gnome
+                    }
+                    
+                    m_caster->CastSpell(m_caster, spellId, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 39246:
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || eff_idx != EFFECT_INDEX_2)
+                        return;
+
+                    uint32 spellId;
+                    switch (urand(0, 2))
+                    {
+                        case 0: spellId = 39248; break; // Summon Hai'Shulud
+                        case 1: spellId = 39245; break; // Summon Mature Bone Sifter 2x
+                        case 2: spellId = 39247; break; // Summon Sand Gnome 2x
+                    }
+                    m_caster->CastSpell(unitTarget, 39248, TRIGGERED_OLD_TRIGGERED);
+
+                    ((Creature*)unitTarget)->ForcedDespawn();
+                    return;
+                }
                 case 39635:                                 // Throw Glaive (first)
                 case 39849:                                 // Throw Glaive (second)
                 {

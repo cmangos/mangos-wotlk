@@ -264,12 +264,6 @@ enum
     SAY_BLESS_4                         = -1000597,
     SAY_BLESS_5                         = -1000598,
 
-    // quest "The Big Bone Worm" 10930
-    SPELL_FUMPING                       = 39246,
-    SPELL_SUMMON_HAISHULUD              = 39248,
-    NPC_SAND_GNOME                      = 22483,
-    NPC_MATURE_BONE_SIFTER              = 22482,
-
     // quest 12813, by item 40587
     SPELL_DARKMENDER_TINCTURE           = 52741,
     SPELL_SUMMON_CORRUPTED_SCARLET      = 54415,
@@ -817,40 +811,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
 
             pCreatureTarget->CastSpell(pCreatureTarget, SPELL_ENRAGE, TRIGGERED_OLD_TRIGGERED);
 
-            return true;
-        }
-        case SPELL_FUMPING:
-        {
-            if (uiEffIndex == EFFECT_INDEX_2)
-            {
-                switch (urand(0, 2))
-                {
-                    case 0:
-                    {
-                        pCaster->CastSpell(pCreatureTarget, SPELL_SUMMON_HAISHULUD, TRIGGERED_OLD_TRIGGERED);
-                        break;
-                    }
-                    case 1:
-                    {
-                        for (int i = 0; i < 2; ++i)
-                        {
-                            if (Creature* pSandGnome = pCaster->SummonCreature(NPC_SAND_GNOME, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000))
-                                pSandGnome->AI()->AttackStart(pCaster);
-                        }
-                        break;
-                    }
-                    case 2:
-                    {
-                        for (int i = 0; i < 2; ++i)
-                        {
-                            if (Creature* pMatureBoneSifter = pCaster->SummonCreature(NPC_MATURE_BONE_SIFTER, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000))
-                                pMatureBoneSifter->AI()->AttackStart(pCaster);
-                        }
-                        break;
-                    }
-                }
-                pCreatureTarget->ForcedDespawn();
-            }
             return true;
         }
         case SPELL_AHUNAES_KNIFE:
