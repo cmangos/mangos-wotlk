@@ -192,10 +192,10 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 ('28874', '0', '0', '0', '384', '268435456', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '6', '0', '0', '1', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '23', '0', '0', '1000', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '28865', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Consumption', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0');
 
 -- Fumping summoning spells
-INSERT INTO spell_template(Id, Attributes, DurationIndex,rangeIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectBasePoints1,EffectImplicitTargetA1,EffectRadiusIndex1,EffectMiscValue1,EffectMiscValueB1,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
-(39240,384,4,3,28,0,0,0,18,29,22483,64,1,'Summon Sand Gnome',1,1,1),
-(39241,384,4,3,28,0,0,0,18,29,22482,64,1,'Summon Mature Bone Sifter',1,1,1),
-(39245,384,4,3,28,2,1,1,18,29,22482,64,1,'Summon Mature Bone Sifter',1,1,1),
-(39247,384,4,3,28,2,1,1,18,29,22483,64,1,'Summon Sand Gnome',1,1,1);
+INSERT INTO spell_template(Id, Attributes, DurationIndex,rangeIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectRadiusIndex1,EffectMiscValue1,EffectMiscValueB1,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
+(39240,384,4,3,28,0,0,18,29,22483,64,1,'Summon Sand Gnome',1,1,1),
+(39241,384,4,3,28,0,0,18,29,22482,64,1,'Summon Mature Bone Sifter',1,1,1),
+(39245,384,4,3,28,2,1,18,29,22482,64,1,'Summon Mature Bone Sifter',1,1,1),
+(39247,384,4,3,28,2,1,18,29,22483,64,1,'Summon Sand Gnome',1,1,1);
 
 
