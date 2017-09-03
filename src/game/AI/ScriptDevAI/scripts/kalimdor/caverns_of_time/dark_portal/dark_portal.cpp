@@ -139,7 +139,22 @@ struct npc_time_riftAI : public ScriptedAI
         m_bIsFirstSummon = true;
         m_uiRiftNumber   = 0;
         m_uiRiftWaveId   = 0;
-        Reset();
+        DoCastSpellIfCan(m_creature, SPELL_RIFT_PERIODIC);
+        SetReactState(REACT_PASSIVE);
+        m_uiRiftWaveCount = 0;
+        m_uiRiftNumber = 0;
+
+        if (m_pInstance)
+        {
+            m_uiRiftNumber = m_pInstance->GetCurrentRiftId();
+
+            if (m_uiRiftNumber < 6)
+                m_uiRiftWaveId = 0;
+            else if (m_uiRiftNumber > 12)
+                m_uiRiftWaveId = 2;
+            else
+                m_uiRiftWaveId = 1;
+        }
     }
 
     instance_dark_portal* m_pInstance;
@@ -153,22 +168,6 @@ struct npc_time_riftAI : public ScriptedAI
 
     void Reset() override
     {
-        DoCastSpellIfCan(m_creature, SPELL_RIFT_PERIODIC);
-
-        m_uiRiftWaveCount       = 0;
-        m_uiRiftNumber          = 0;
-
-        if (m_pInstance)
-        {
-            m_uiRiftNumber = m_pInstance->GetCurrentRiftId();
-
-            if (m_uiRiftNumber < 6)
-                m_uiRiftWaveId = 0;
-            else if (m_uiRiftNumber > 12)
-                m_uiRiftWaveId = 2;
-            else
-                m_uiRiftWaveId = 1;
-        }
     }
 
     void DoSummon()
