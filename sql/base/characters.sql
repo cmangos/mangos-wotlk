@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_13962_01_characters_event_group_chosen` bit(1) DEFAULT NULL
+  `required_13963_01_characters_account_instances_entered` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -55,6 +55,27 @@ CREATE TABLE `account_data` (
 LOCK TABLES `account_data` WRITE;
 /*!40000 ALTER TABLE `account_data` DISABLE KEYS */;
 /*!40000 ALTER TABLE `account_data` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `account_instances_entered`
+--
+
+DROP TABLE IF EXISTS `account_instances_entered`;
+CREATE TABLE `account_instances_entered` (
+   `AccountId` INT(11) UNSIGNED NOT NULL COMMENT 'Player account',
+   `ExpireTime` BIGINT(40) NOT NULL COMMENT 'Time when instance was entered',
+   `InstanceId` INT(11) UNSIGNED NOT NULL COMMENT 'ID of instance entered',
+   PRIMARY KEY(`AccountId`,`InstanceId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Instance reset limit system';
+
+--
+-- Dumping data for table `account_instances_entered`
+--
+
+LOCK TABLES `account_instances_entered` WRITE;
+/*!40000 ALTER TABLE `account_instances_entered` DISABLE KEYS */;
+/*!40000 ALTER TABLE `account_instances_entered` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
