@@ -447,29 +447,29 @@ bool EffectDummyCreature_npc_dragonmaw_peon(Unit* pCaster, uint32 uiSpellId, Spe
 
 enum
 {
-    SAY_WIL_START = -1000381,
-    SAY_WIL_AGGRO_1 = -1000382,
-    SAY_WIL_AGGRO_2 = -1000383,
-    SAY_WIL_FREE_SPIRITS = -1000384,
-    SAY_WIL_FIND_EXIT = -1000386,
-    SAY_WIL_PROGRESS_1 = -1000385,
-    SAY_WIL_PROGRESS_2 = -1000387,
-    SAY_WIL_PROGRESS_3 = -1000388,
-    SAY_WIL_PROGRESS_4 = -1001168,
-    SAY_WIL_PROGRESS_5 = -1001169,
-    SAY_WIL_JUST_AHEAD = -1000389,
-    SAY_WIL_END = -1000390,
+    SAY_WIL_START               = -1000381,
+    SAY_WIL_AGGRO_1             = -1000382,
+    SAY_WIL_AGGRO_2             = -1000383,
+    SAY_WIL_FREE_SPIRITS        = -1000384,
+    SAY_WIL_FIND_EXIT           = -1000386,
+    SAY_WIL_PROGRESS_1          = -1000385,
+    SAY_WIL_PROGRESS_2          = -1000387,
+    SAY_WIL_PROGRESS_3          = -1000388,
+    SAY_WIL_PROGRESS_4          = -1001168,
+    SAY_WIL_PROGRESS_5          = -1001169,
+    SAY_WIL_JUST_AHEAD          = -1000389,
+    SAY_WIL_END                 = -1000390,
 
-    SPELL_CHAIN_LIGHTNING = 16006,
-    SPELL_EARTHBING_TOTEM = 15786,
-    SPELL_FROST_SHOCK = 12548,
-    SPELL_HEALING_WAVE = 12491,
-    SPELL_WATER_BUBBLE = 35929,
-    SPELL_BREAK_WATER_PRISON = 35933,
+    SPELL_CHAIN_LIGHTNING       = 16006,
+    SPELL_EARTHBING_TOTEM       = 15786,
+    SPELL_FROST_SHOCK           = 12548,
+    SPELL_HEALING_WAVE          = 12491,
+    SPELL_WATER_BUBBLE          = 35929,
+    SPELL_BREAK_WATER_PRISON    = 35933,
 
-    QUEST_ESCAPE_COILSCAR = 10451,
-    NPC_COILSKAR_ASSASSIN = 21044,
-    NPC_CAPTURED_WATER_SPIRIT = 21029,
+    QUEST_ESCAPE_COILSCAR       = 10451,
+    NPC_COILSKAR_ASSASSIN       = 21044,
+    NPC_CAPTURED_WATER_SPIRIT   = 21029,
 };
 
 struct npc_wildaAI : public npc_escortAI
@@ -601,12 +601,14 @@ struct npc_wildaAI : public npc_escortAI
             return;
 
         // all spirits follow
-        for (std::list<Creature*>::const_iterator itr = lSpiritsInRange.begin(); itr != lSpiritsInRange.end(); ++itr)
+        for (Creature* spirit : lSpiritsInRange)
         {
-            (*itr)->RemoveAurasDueToSpell(SPELL_WATER_BUBBLE);
-            (*itr)->GetMotionMaster()->MoveFollow(m_creature, m_creature->GetDistance(*itr) * 0.25f, M_PI_F / 2 + m_creature->GetAngle(*itr));
-            (*itr)->SetFactionTemporary(FACTION_ESCORT_N_FRIEND_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
-            (*itr)->SetLevitate(false);
+            spirit->RemoveAurasDueToSpell(SPELL_WATER_BUBBLE);
+            spirit->StopMoving();
+            spirit->GetMotionMaster()->Clear(false, true);
+            spirit->GetMotionMaster()->MoveFollow(m_creature, m_creature->GetDistance(spirit) * 0.25f, M_PI_F / 2 + m_creature->GetAngle(spirit));
+            spirit->SetFactionTemporary(FACTION_ESCORT_N_FRIEND_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+            spirit->SetLevitate(false);
         }
     }
 
