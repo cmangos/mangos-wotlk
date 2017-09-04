@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Terokkar_Forest
 SD%Complete: 80
-SDComment: Quest support: 9889, 10009, 10051, 10052, 10446/10447, 10852, 10873, 10879, 10887, 10896, 10898, 10922, 10988, 11085, 11093, 11096.
+SDComment: Quest support: 9889, 10009, 10051, 10052, 10852, 10873, 10879, 10887, 10896, 10898, 10922, 10988, 11085, 11093, 11096.
 SDCategory: Terokkar Forest
 EndScriptData */
 
@@ -27,8 +27,6 @@ mob_netherweb_victim
 npc_akuno
 npc_hungry_nether_ray
 npc_letoll
-npc_mana_bomb_exp_trigger
-go_mana_bomb
 go_veil_skith_cage
 npc_captive_child
 npc_isla_starmane
@@ -570,125 +568,6 @@ bool QuestAccept_npc_letoll(Player* pPlayer, Creature* pCreature, const Quest* p
 
             pEscortAI->Start(false, pPlayer, pQuest, true);
         }
-    }
-
-    return true;
-}
-
-/*######
-## npc_mana_bomb_exp_trigger
-######*/
-
-enum
-{
-    SAY_COUNT_1                 = -1000472,
-    SAY_COUNT_2                 = -1000473,
-    SAY_COUNT_3                 = -1000474,
-    SAY_COUNT_4                 = -1000475,
-    SAY_COUNT_5                 = -1000476,
-
-    SPELL_MANA_BOMB_LIGHTNING   = 37843,
-    SPELL_MANA_BOMB_EXPL        = 35513,
-
-    NPC_MANA_BOMB_EXPL_TRIGGER  = 20767,
-    NPC_MANA_BOMB_KILL_TRIGGER  = 21039
-};
-
-struct npc_mana_bomb_exp_triggerAI : public ScriptedAI
-{
-    npc_mana_bomb_exp_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    GameObject* pManaBomb;
-
-    bool m_bIsActivated;
-    uint32 m_uiEventTimer;
-    uint32 m_uiEventCounter;
-
-    void Reset() override
-    {
-        pManaBomb = NULL;
-        m_bIsActivated = false;
-        m_uiEventTimer = 1000;
-        m_uiEventCounter = 0;
-    }
-
-    void DoTrigger(Player* pPlayer, GameObject* pGo)
-    {
-        if (m_bIsActivated)
-            return;
-
-        m_bIsActivated = true;
-
-        pPlayer->KilledMonsterCredit(NPC_MANA_BOMB_KILL_TRIGGER);
-
-        pManaBomb = pGo;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_bIsActivated)
-            return;
-
-        if (m_uiEventTimer < uiDiff)
-        {
-            m_uiEventTimer = 1000;
-
-            if (m_uiEventCounter < 10)
-                m_creature->CastSpell(m_creature, SPELL_MANA_BOMB_LIGHTNING, TRIGGERED_NONE);
-
-            switch (m_uiEventCounter)
-            {
-                case 5:
-                    if (pManaBomb)
-                        pManaBomb->SetGoState(GO_STATE_ACTIVE);
-
-                    DoScriptText(SAY_COUNT_1, m_creature);
-                    break;
-                case 6:
-                    DoScriptText(SAY_COUNT_2, m_creature);
-                    break;
-                case 7:
-                    DoScriptText(SAY_COUNT_3, m_creature);
-                    break;
-                case 8:
-                    DoScriptText(SAY_COUNT_4, m_creature);
-                    break;
-                case 9:
-                    DoScriptText(SAY_COUNT_5, m_creature);
-                    break;
-                case 10:
-                    m_creature->CastSpell(m_creature, SPELL_MANA_BOMB_EXPL, TRIGGERED_NONE);
-                    break;
-                case 30:
-                    if (pManaBomb)
-                        pManaBomb->SetGoState(GO_STATE_READY);
-
-                    Reset();
-                    break;
-            }
-
-            ++m_uiEventCounter;
-        }
-        else
-            m_uiEventTimer -= uiDiff;
-    }
-};
-
-CreatureAI* GetAI_npc_mana_bomb_exp_trigger(Creature* pCreature)
-{
-    return new npc_mana_bomb_exp_triggerAI(pCreature);
-}
-
-/*######
-## go_mana_bomb
-######*/
-
-bool GOUse_go_mana_bomb(Player* pPlayer, GameObject* pGo)
-{
-    if (Creature* pCreature = GetClosestCreatureWithEntry(pGo, NPC_MANA_BOMB_EXPL_TRIGGER, INTERACTION_DISTANCE))
-    {
-        if (npc_mana_bomb_exp_triggerAI* pBombAI = dynamic_cast<npc_mana_bomb_exp_triggerAI*>(pCreature->AI()))
-            pBombAI->DoTrigger(pPlayer, pGo);
     }
 
     return true;
@@ -1368,16 +1247,6 @@ void AddSC_terokkar_forest()
     pNewScript->Name = "npc_letoll";
     pNewScript->GetAI = &GetAI_npc_letoll;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_letoll;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_mana_bomb_exp_trigger";
-    pNewScript->GetAI = &GetAI_npc_mana_bomb_exp_trigger;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "go_mana_bomb";
-    pNewScript->pGOUse = &GOUse_go_mana_bomb;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

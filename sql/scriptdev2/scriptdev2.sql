@@ -1316,8 +1316,6 @@ UPDATE creature_template SET ScriptName='mob_unkor_the_ruthless' WHERE entry=182
 UPDATE creature_template SET ScriptName='npc_akuno' WHERE entry=22377;
 UPDATE creature_template SET ScriptName='npc_hungry_nether_ray' WHERE entry=23439;
 UPDATE creature_template SET ScriptName='npc_letoll' WHERE entry=22458;
-UPDATE creature_template SET ScriptName='npc_mana_bomb_exp_trigger' WHERE entry=20767;
-UPDATE gameobject_template SET ScriptName='go_mana_bomb' WHERE entry=184725;
 UPDATE creature_template SET ScriptName='npc_captive_child' WHERE entry=22314;
 UPDATE creature_template SET ScriptName='npc_isla_starmane' WHERE entry=18760;
 UPDATE creature_template SET ScriptName="npc_skywing" WHERE entry=22424;
@@ -2074,11 +2072,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000470,'Must be your lucky day. Alright, I\'ll talk. Just leave me alone. Look, you\'re not going to believe me, but it wa... oh, Light, looks like the girl could shoot...',0,0,0,0,'ogron SAY_OGR_RET_LUCKY'),
 (-1000471,'By the way, thanks for watching my back.',0,0,1,0,'ogron SAY_OGR_THANKS'),
 
-(-1000472,'1...',0,3,0,0,'mana bomb SAY_COUNT_1'),
-(-1000473,'2...',0,3,0,0,'mana bomb SAY_COUNT_2'),
-(-1000474,'3...',0,3,0,0,'mana bomb SAY_COUNT_3'),
-(-1000475,'4...',0,3,0,0,'mana bomb SAY_COUNT_4'),
-(-1000476,'5...',0,3,0,0,'mana bomb SAY_COUNT_5'),
+(-1000472,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1000473,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1000474,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1000475,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1000476,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 
 (-1000477,'Let us leave this place. I\'ve had enough of these madmen!',0,0,0,0,'akuno SAY_AKU_START'),
 (-1000478,'You\'ll go nowhere, fool!',0,0,0,0,'akuno SAY_AKU_AMBUSH_A'),
