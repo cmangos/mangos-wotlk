@@ -24,6 +24,11 @@ ADD_DEFINITIONS("-DUSE_LIBMPQ04")
 
 if(UNIX)
   ADD_DEFINITIONS("-ggdb")
+  add_definitions("-Dfopen64=fopen")
+  add_definitions("-Dfseeko64=fseeko")
+  add_definitions("-Dfseek64=fseek")
+  add_definitions("-Dftell64=ftell")
+  add_definitions("-Dftello64=ftello")
 endif()
 
 if (APPLE)
