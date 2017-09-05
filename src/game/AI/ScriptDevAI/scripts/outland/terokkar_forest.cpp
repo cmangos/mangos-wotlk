@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Terokkar_Forest
 SD%Complete: 80
-SDComment: Quest support: 9889, 10009, 10051, 10052, 10852, 10873, 10879, 10887, 10896, 10898, 10922, 10988, 11085, 11093, 11096.
+SDComment: Quest support: 9889, 10009, 10051, 10052, 10873, 10879, 10887, 10896, 10898, 10922, 10988, 11085, 11093, 11096.
 SDCategory: Terokkar Forest
 EndScriptData */
 
@@ -27,8 +27,6 @@ mob_netherweb_victim
 npc_akuno
 npc_hungry_nether_ray
 npc_letoll
-go_veil_skith_cage
-npc_captive_child
 npc_isla_starmane
 npc_skywing
 npc_cenarion_sparrowhawk
@@ -571,62 +569,6 @@ bool QuestAccept_npc_letoll(Player* pPlayer, Creature* pCreature, const Quest* p
     }
 
     return true;
-}
-
-/*######
-## go_veil_skith_cage & npc_captive_child
-#####*/
-
-enum
-{
-    QUEST_MISSING_FRIENDS     = 10852,
-    NPC_CAPTIVE_CHILD         = 22314,
-    SAY_THANKS_1              = -1000590,
-    SAY_THANKS_2              = -1000591,
-    SAY_THANKS_3              = -1000592,
-    SAY_THANKS_4              = -1000593
-};
-
-bool GOUse_go_veil_skith_cage(Player* pPlayer, GameObject* pGo)
-{
-    if (pPlayer->GetQuestStatus(QUEST_MISSING_FRIENDS) == QUEST_STATUS_INCOMPLETE)
-    {
-        std::list<Creature*> lChildrenList;
-        GetCreatureListWithEntryInGrid(lChildrenList, pGo, NPC_CAPTIVE_CHILD, INTERACTION_DISTANCE);
-        for (std::list<Creature*>::const_iterator itr = lChildrenList.begin(); itr != lChildrenList.end(); ++itr)
-        {
-            pPlayer->KilledMonsterCredit(NPC_CAPTIVE_CHILD, (*itr)->GetObjectGuid());
-            switch (urand(0, 3))
-            {
-                case 0: DoScriptText(SAY_THANKS_1, *itr); break;
-                case 1: DoScriptText(SAY_THANKS_2, *itr); break;
-                case 2: DoScriptText(SAY_THANKS_3, *itr); break;
-                case 3: DoScriptText(SAY_THANKS_4, *itr); break;
-            }
-
-            (*itr)->GetMotionMaster()->Clear();
-            (*itr)->GetMotionMaster()->MovePoint(0, -2648.049f, 5274.573f, 1.691529f);
-        }
-    }
-    return false;
-};
-
-struct npc_captive_child : public ScriptedAI
-{
-    npc_captive_child(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    void Reset() override {}
-
-    void MovementInform(uint32 uiMotionType, uint32 /*uiPointId*/) override
-    {
-        if (uiMotionType == POINT_MOTION_TYPE)
-            m_creature->ForcedDespawn();                    // we only have one waypoint
-    }
-};
-
-CreatureAI* GetAI_npc_captive_child(Creature* pCreature)
-{
-    return new npc_captive_child(pCreature);
 }
 
 /*#####
@@ -1247,16 +1189,6 @@ void AddSC_terokkar_forest()
     pNewScript->Name = "npc_letoll";
     pNewScript->GetAI = &GetAI_npc_letoll;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_letoll;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "go_veil_skith_cage";
-    pNewScript->pGOUse = &GOUse_go_veil_skith_cage;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_captive_child";
-    pNewScript->GetAI = &GetAI_npc_captive_child;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
