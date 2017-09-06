@@ -276,7 +276,6 @@ struct npc_time_riftAI : public ScriptedAI
                 // Remove Time Rift aura so it won't spawn other mobs
                 m_creature->RemoveAurasDueToSpell(SPELL_RIFT_PERIODIC);
                 // Move to Medivh and cast Corrupt on him
-                pSummoned->SetWalk(false);
                 if (m_pInstance)
                 {
                     if (Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_MEDIVH))
@@ -295,7 +294,6 @@ struct npc_time_riftAI : public ScriptedAI
                         pSummoned->AI()->SetReactState(REACT_DEFENSIVE);
                         float fX, fY, fZ;
                         pMedivh->GetNearPoint(pMedivh, fX, fY, fZ, 0, 20.0f, pMedivh->GetAngle(pSummoned));
-                        pSummoned->SetWalk(false);
                         pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
                     }
                 }
