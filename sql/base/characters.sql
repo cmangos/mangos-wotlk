@@ -1134,6 +1134,26 @@ LOCK TABLES `creature_respawn` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `event_group_chosen`
+--
+
+DROP TABLE IF EXISTS `event_group_chosen`;
+CREATE TABLE `event_group_chosen` (
+`eventGroup` mediumint(8) unsigned NOT NULL DEFAULT '0',
+`entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+PRIMARY KEY (`eventGroup`,`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Quest Group picked';
+
+--
+-- Dumping data for table `event_group_chosen`
+--
+
+LOCK TABLES `event_group_chosen` WRITE;
+/*!40000 ALTER TABLE `event_group_chosen` DISABLE KEYS */;
+/*!40000 ALTER TABLE `event_group_chosen` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `game_event_status`
 --
 
