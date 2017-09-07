@@ -345,7 +345,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit *pTarget)
                 return RETURN_CONTINUE;
             if (SLAM > 0 && m_ai->CastSpell(SLAM, *pTarget))
             {
-                m_ai->SetIgnoreUpdateTime(1.5); // TODO: SetIgnoreUpdateTime takes a uint8 - how will 1.5 work as a value?
+                m_ai->SetIgnoreUpdateTime(1);
                 return RETURN_CONTINUE;
             }
 
