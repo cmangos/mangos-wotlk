@@ -2009,6 +2009,7 @@ class Unit : public WorldObject
         ShapeshiftForm GetShapeshiftForm() const { return ShapeshiftForm(GetByteValue(UNIT_FIELD_BYTES_2, 3)); }
         void  SetShapeshiftForm(ShapeshiftForm form) { SetByteValue(UNIT_FIELD_BYTES_2, 3, form); }
 
+        bool IsShapeShifted() const;
         bool IsInFeralForm() const
         {
             ShapeshiftForm form = GetShapeshiftForm();
