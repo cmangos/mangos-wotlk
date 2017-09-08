@@ -2101,7 +2101,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                         currentAbsorb = max_absorb;
                     break;
                 }
-                // Reflective Shield (Lady Malande boss)
+                // Reflective Shield (Confessor Paletress boss)
                 if (spellProto->Id == 66515 && canReflect)
                 {
                     if (RemainingDamage < currentAbsorb)
