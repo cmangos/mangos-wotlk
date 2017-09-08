@@ -1701,6 +1701,72 @@ CreatureAI* GetAI_npc_burster_worm(Creature* pCreature)
     return new npc_burster_wormAI(pCreature);
 }
 
+/* *************
+** npc_dummy_aurosalia_polymorph_visual
+************* */
+
+enum
+{
+    // visual and idle spells
+    SPELL_POLYMORPH_VISUAL           = 32826,
+    NPC_AUROSALIA                    = 18744,
+};
+bool EffectDummyCreature_npc_dummy_aurosalia_polymorph_visual(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+{
+    // always check spellid and effectindex
+    if ((uiSpellId == SPELL_POLYMORPH_VISUAL && uiEffIndex == EFFECT_INDEX_0)
+    {
+        switch (urand(0, 5))
+        {
+          case 0:
+          {
+               if (pCaster->GetTypeId() == TYPEID_UNIT)
+                   pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, pCreatureTarget, pCreatureTarget);
+
+             return true;
+          }
+          case 1:
+          {
+               if (pCaster->GetTypeId() == TYPEID_UNIT)
+                   pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_B, pCreatureTarget, pCreatureTarget);
+
+             return true;
+          }
+          case 2:
+          {
+               if (pCaster->GetTypeId() == TYPEID_UNIT)
+                   pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_C, pCreatureTarget, pCreatureTarget);
+
+             return true;
+          }
+          case 3:
+          {
+               if (pCaster->GetTypeId() == TYPEID_UNIT)
+                   pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_D, pCreatureTarget, pCreatureTarget);
+
+             return true;
+          }
+          case 4:
+          {
+               if (pCaster->GetTypeId() == TYPEID_UNIT)
+                   pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_E, pCreatureTarget, pCreatureTarget);
+
+             return true;
+          }
+          case 5:
+          {
+               if (pCaster->GetTypeId() == TYPEID_UNIT)
+                   pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_F, pCreatureTarget, pCreatureTarget);
+
+             return true;
+          }
+        }
+        // always return true when we are handling this spell and effect
+        return true;
+    }
+
+    return false;
+}
 void AddSC_npcs_special()
 {
     Script* pNewScript;
@@ -1763,5 +1829,10 @@ void AddSC_npcs_special()
     pNewScript = new Script;
     pNewScript->Name = "npc_burster_worm";
     pNewScript->GetAI = &GetAI_npc_burster_worm;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_dummy_aurosalia_polymorph_visual";
+    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_dummy_aurosalia_polymorph_visual;
     pNewScript->RegisterSelf();
 }

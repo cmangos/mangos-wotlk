@@ -144,6 +144,7 @@ UPDATE creature_template SET ScriptName='npc_prof_leather' WHERE entry IN (7866,
 UPDATE creature_template SET ScriptName='npc_spring_rabbit' WHERE entry=32791;
 UPDATE creature_template SET ScriptName='npc_redemption_target' WHERE entry IN (6172,6177,17542,17768);
 UPDATE creature_template SET ScriptName='npc_burster_worm' WHERE entry IN (16844,16857,16968,21380,21849,22038,22466,22482,23285);
+UPDATE creature_template SET ScriptName='npc_dummy_aurosalia_polymorph_visual' WHERE entry=18744;
 
 /* SPELL */
 UPDATE creature_template SET ScriptName='spell_dummy_npc' WHERE entry IN (
