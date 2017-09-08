@@ -2101,6 +2101,18 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                         currentAbsorb = max_absorb;
                     break;
                 }
+                // Reflective Shield (Lady Malande boss)
+                if (spellProto->Id == 66515 && canReflect)
+                {
+                    if (RemainingDamage < currentAbsorb)
+                        reflectDamage = RemainingDamage / 4;
+                    else
+                        reflectDamage = currentAbsorb / 4;
+                    reflectSpell = 33619;
+                    reflectTriggeredBy = *i;
+                    reflectTriggeredBy->SetInUse(true);     // lock aura from final deletion until processing
+                    break;
+                }
                 break;
             }
             case SPELLFAMILY_DRUID:
