@@ -253,14 +253,14 @@ struct npc_kiljaeden_controllerAI : public Scripted_NoMovementAI, private Dialog
                 m_creature->SummonCreature(NPC_CORE_ENTROPIUS, aOutroLocations[5].m_fX, aOutroLocations[5].m_fY, aOutroLocations[5].m_fZ, aOutroLocations[5].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 0);
                 break;
             case NPC_RIFTWALKER:
-                if (Creature* pRiftwalker = pCreature->SummonCreature(NPC_RIFTWALKER, 1688.42f, 641.82f, 27.60f, 0.67f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                if (Creature* pRiftwalker = m_creature->SummonCreature(NPC_RIFTWALKER, 1688.42f, 641.82f, 27.60f, 0.67f, TEMPSUMMON_DEAD_DESPAWN, 0);
                 {
                     pRiftwalker->SetWalk(false);
                     pRiftwalker->CastSpell(pRiftwalker, SPELL_TELEPORT_VISUAL, TRIGGERED_OLD_TRIGGERED);
                     pRiftwalker->GetMotionMaster()->MovePoint(1, 1727.08f, 656.82f, 28.37f);
                     m_firstRiftwalkerGuid = pRiftwalker->GetObjectGuid();
                 }
-                if (Creature* pRiftwalker = pCreature->SummonCreature(NPC_RIFTWALKER, 1712.58f, 616.29f, 27.78f, 0.76f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                if (Creature* pRiftwalker = m_creature->SummonCreature(NPC_RIFTWALKER, 1712.58f, 616.29f, 27.78f, 0.76f, TEMPSUMMON_DEAD_DESPAWN, 0);
                 {
                     pRiftwalker->SetWalk(false);
                     pRiftwalker->CastSpell(pRiftwalker, SPELL_TELEPORT_VISUAL, TRIGGERED_OLD_TRIGGERED);
