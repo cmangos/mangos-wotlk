@@ -115,14 +115,14 @@ void instance_azjol_nerub::OnCreatureEnterCombat(Creature* pCreature)
         {
             pCrusher->SetWalk(false);
             pCrusher->GetMotionMaster()->MovePoint(0, 517.51f, 561.439f, 734.0306f);
-            pCrusher->GetMotionMaster()->SetRespawnCoord(517.51f, 561.439f, 734.0306f, pCrusher->GetOrientation());
+            pCrusher->SetRespawnCoord(517.51f, 561.439f, 734.0306f, pCrusher->GetOrientation());
             pCrusher->HandleEmote(EMOTE_STATE_READYUNARMED);
         }
         if (Creature* pCrusher = pCreature->SummonCreature(NPC_ANUBAR_CRUSHER, 575.21f, 611.47f, 771.46f, 3.59f, TEMPSUMMON_DEAD_DESPAWN, 0))
         {
             pCrusher->SetWalk(false);
             pCrusher->GetMotionMaster()->MovePoint(0, 543.414f, 551.728f, 732.0522f);
-            pCrusher->GetMotionMaster()->SetRespawnCoord(543.414f, 551.728f, 732.0522f, pCrusher->GetOrientation());
+            pCrusher->SetRespawnCoord(543.414f, 551.728f, 732.0522f, pCrusher->GetOrientation());
             pCrusher->HandleEmote(EMOTE_STATE_READYUNARMED);
         }
 
