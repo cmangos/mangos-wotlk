@@ -26,6 +26,7 @@ EndScriptData */
 
 enum
 {
+    SPELL_ASHTONGUE_RUSE    = 42090,        // Referrence for quest 10946.
     // spells
     // phase 1
     SPELL_FLAME_BUFFET      = 34121,        // if nobody is in range
@@ -43,6 +44,7 @@ enum
     SPELL_BERSERK           = 27680,        // this spell is used only during phase II
 
     NPC_EMBER_OF_ALAR       = 19551,        // scripted in Acid
+    NPC_ALAR                = 19514,        // Referrence for quest credit.
     NPC_FLAME_PATCH         = 20602,
     SPELL_FLAME_PATCH       = 35380,
 
@@ -108,6 +110,7 @@ struct boss_alarAI : public ScriptedAI
         // Start phase one and move to the closest platform
         m_uiPhase = PHASE_ONE;
         SetCombatMovement(false);
+        m_creature->SetWalk(false);
 
         m_uiRangeCheckTimer     = 0;
         m_uiCurrentPlatformId   = 0;
@@ -144,6 +147,12 @@ struct boss_alarAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ALAR, DONE);
+            
+        if (pKiller->GetTypeId() == TYPEID_PLAYER && pKiller->HasAura(SPELL_ASHTONGUE_RUSE))
+        {
+            if (Creature* pCredit = m_pInstance->GetSingleCreatureFromStorage(NPC_PALADIN_QUEST_CREDIT))
+                ((Player*)pKiller)->RewardPlayerAndGroupAtEvent(pCredit->GetEntry(), pCredit);
+        }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -296,7 +305,7 @@ struct boss_alarAI : public ScriptedAI
 
                     // move to next platform and summon one ember only if moving on platforms (we avoid the summoning during the Flame Quills move)
                     if (m_bCanSummonEmber)
-                        m_creature->SummonCreature(NPC_EMBER_OF_ALAR, 0, 0, 0, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_EMBER_OF_ALAR, 0, 0, 0, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                     m_creature->GetMotionMaster()->MovePoint(POINT_ID_PLATFORM, aPlatformLocation[m_uiCurrentPlatformId].m_fX, aPlatformLocation[m_uiCurrentPlatformId].m_fY, aPlatformLocation[m_uiCurrentPlatformId].m_fZ);
 
@@ -322,7 +331,7 @@ struct boss_alarAI : public ScriptedAI
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    m_creature->SummonCreature(NPC_FLAME_PATCH, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_FLAME_PATCH, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 30000);
                     m_uiFlamePatchTimer = 30000;
                 }
             }
@@ -397,7 +406,7 @@ struct boss_alarAI : public ScriptedAI
                         for (uint8 i = 0; i < 2; ++i)
                         {
                             m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 5.0f, fX, fY, fZ);
-                            m_creature->SummonCreature(NPC_EMBER_OF_ALAR, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                            m_creature->SummonCreature(NPC_EMBER_OF_ALAR, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                         }
 
                         m_uiPhase = PHASE_TWO;
