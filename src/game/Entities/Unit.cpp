@@ -11681,6 +11681,24 @@ void Unit::SetPvPFreeForAll(bool state)
     CallForAllControlledUnits(SetPvPFreeForAllHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
+bool Unit::IsPvPContested() const
+{
+    if (const Player* thisPlayer = GetControllingPlayer())
+        return thisPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP);
+    return false;
+}
+
+void Unit::SetPvPContested(bool state)
+{
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        if (state)
+            SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP);
+        else
+            RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP);
+    }
+}
+
 struct SetPvPSanctuaryHelper
 {
     explicit SetPvPSanctuaryHelper(bool _state) : state(_state) {}
