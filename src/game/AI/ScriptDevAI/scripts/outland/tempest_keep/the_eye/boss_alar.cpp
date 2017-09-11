@@ -26,6 +26,7 @@ EndScriptData */
 
 enum
 {
+    SPELL_ASHTONGUE_RUSE    = 42090,        // Referrence for quest 10946.
     // spells
     // phase 1
     SPELL_FLAME_BUFFET      = 34121,        // if nobody is in range
@@ -43,6 +44,7 @@ enum
     SPELL_BERSERK           = 27680,        // this spell is used only during phase II
 
     NPC_EMBER_OF_ALAR       = 19551,        // scripted in Acid
+    NPC_ALAR                = 19514,        // Referrence for quest credit.
     NPC_FLAME_PATCH         = 20602,
     SPELL_FLAME_PATCH       = 35380,
 
@@ -108,6 +110,7 @@ struct boss_alarAI : public ScriptedAI
         // Start phase one and move to the closest platform
         m_uiPhase = PHASE_ONE;
         SetCombatMovement(false);
+        m_creature->SetWalk(false);
 
         m_uiRangeCheckTimer     = 0;
         m_uiCurrentPlatformId   = 0;
@@ -144,6 +147,12 @@ struct boss_alarAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ALAR, DONE);
+            
+        if (pKiller->GetTypeId() == TYPEID_PLAYER && pKiller->HasAura(SPELL_ASHTONGUE_RUSE))
+        {
+            if (Creature* pCredit = m_pInstance->GetSingleCreatureFromStorage(NPC_ALAR))
+                ((Player*)pKiller)->RewardPlayerAndGroupAtEvent(pCredit->GetEntry(), pCredit);
+        }
     }
 
     void JustSummoned(Creature* pSummoned) override
