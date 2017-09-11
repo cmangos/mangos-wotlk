@@ -108,6 +108,7 @@ struct boss_alarAI : public ScriptedAI
         // Start phase one and move to the closest platform
         m_uiPhase = PHASE_ONE;
         SetCombatMovement(false);
+        m_creature->SetWalk(false);
 
         m_uiRangeCheckTimer     = 0;
         m_uiCurrentPlatformId   = 0;
@@ -144,6 +145,12 @@ struct boss_alarAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ALAR, DONE);
+            
+        std::list<Player*> playerList;
+            GetPlayerListWithEntryInWorld(playerList, m_creature, 150.0f);
+            for (auto& player : playerList)
+                if (player->GetQuestStatus(QUEST_RUSE_OF_THE_ASHTONGUE) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_ASHTONGUE_RUSE))
+                    player->KilledMonsterCredit(QUEST_RUSE_OF_THE_ASHTONGUE);
     }
 
     void JustSummoned(Creature* pSummoned) override
