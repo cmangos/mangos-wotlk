@@ -150,7 +150,7 @@ struct boss_alarAI : public ScriptedAI
             
         if (pKiller->GetTypeId() == TYPEID_PLAYER && pKiller->HasAura(SPELL_ASHTONGUE_RUSE))
         {
-            if (Creature* pCredit = m_pInstance->GetSingleCreatureFromStorage(NPC_PALADIN_QUEST_CREDIT))
+            if (Creature* pCredit = m_pInstance->GetSingleCreatureFromStorage(NPC_ALAR))
                 ((Player*)pKiller)->RewardPlayerAndGroupAtEvent(pCredit->GetEntry(), pCredit);
         }
     }
