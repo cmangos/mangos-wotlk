@@ -15,6 +15,7 @@ enum
     TYPE_VOIDREAVER             = 2,
     TYPE_KAELTHAS               = 3,
 
+    NPC_ALAR_PHOENIX_GOD        = 19514,
     // NPC_ASTROMANCER           = 18805,
     NPC_KAELTHAS                = 19622,
 
@@ -23,6 +24,8 @@ enum
     NPC_TELONICUS               = 20063,
     NPC_THALADRED               = 20064,
 
+    QUEST_RUSE_OF_THE_ASHTONGUE = 10946,                // Quest 10946 for attunement in Black Temple.
+    SPELL_ASHTONGUE_RUSE        = 42090,                // Player can complete 10946 quest, only if has aura 42090. If kill Alar without this aura - quest not completed.
     GO_ARCANE_DOOR_HORIZ_3      = 184325,               // combat doors for Kael
     GO_ARCANE_DOOR_HORIZ_4      = 184324,
     // GO_RAID_DOOR_4            = 184329,               // encounter doors - no longer used since 2.4.0
