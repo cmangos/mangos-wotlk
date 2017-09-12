@@ -1115,8 +1115,8 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
     Unit* pOwner = victim->GetMaster();
     if (victim->IsTemporarySummon())
     {
-        if (victim->GetSummonerGuid().IsCreatureOrVehicle())
-            if (Creature* pSummoner = victim->GetMap()->GetCreature(victim->GetSummonerGuid()))
+        if (victim->GetSpawnerGuid().IsCreatureOrVehicle())
+            if (Creature* pSummoner = victim->GetMap()->GetCreature(victim->GetSpawnerGuid()))
                 if (pSummoner->AI())
                     pSummoner->AI()->SummonedCreatureJustDied(victim);
     }
