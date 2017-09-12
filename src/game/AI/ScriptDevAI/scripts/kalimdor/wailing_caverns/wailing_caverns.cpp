@@ -474,7 +474,7 @@ bool GossipSelect_npc_disciple_of_naralex(Player* pPlayer, Creature* pCreature, 
         if (npc_disciple_of_naralexAI* pEscortAI = dynamic_cast<npc_disciple_of_naralexAI*>(pCreature->AI()))
         {
             pEscortAI->Start(false, pPlayer);               // Note: after 4.0.3 set him run = true
-            pCreature->SetFactionTemporary(FACTION_ESCORT_N_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
         }
         pPlayer->CLOSE_GOSSIP_MENU();
     }
