@@ -985,22 +985,10 @@ void Creature::PrepareBodyLootState()
     if (killer)
         loot = new Loot(killer, this, LOOT_CORPSE);
 
-    uint32 corpseLootedDelay;
-    if (sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED) > 0.0f)
-        corpseLootedDelay = (uint32)((m_corpseDelay * IN_MILLISECONDS) * sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED));
-    else
-        corpseLootedDelay = (m_respawnDelay * IN_MILLISECONDS) / 3;
-
-    // if m_respawnDelay is larger than default corpse delay always use corpseLootedDelay
-    if (m_respawnDelay > m_corpseDelay)
+    if (m_lootStatus == CREATURE_LOOT_STATUS_LOOTED && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
     {
-        m_corpseDecayTimer = corpseLootedDelay;
-    }
-    else
-    {
-        // if m_respawnDelay is relatively short and corpseDecayTimer is larger than corpseLootedDelay
-        if (m_corpseDecayTimer > corpseLootedDelay)
-            m_corpseDecayTimer = corpseLootedDelay;
+        // there is no loot so we can degrade corpse decay timer
+        ReduceCorpseDecayTimer();
     }
 }
 
@@ -2747,6 +2735,23 @@ void Creature::InspectingLoot()
         m_corpseDecayTimer = MINIMUM_LOOTING_TIME;
 }
 
+// reduce decay timer for corpse if need (for a corpse without loot)
+void Creature::ReduceCorpseDecayTimer()
+{
+    if (!IsInWorld())
+        return;
+
+    bool isDungeonEncounter = false;
+    if (GetMap()->IsDungeon())
+    {
+        if (sObjectMgr.IsEncounter(GetEntry(), GetMapId()))
+            isDungeonEncounter = true;
+    }
+
+    if (!isDungeonEncounter)
+        m_corpseDecayTimer = 2 * MINUTE * IN_MILLISECONDS;  // 2 minutes for a creature
+}
+
 // Set loot status. Also handle remove corpse timer
 void Creature::SetLootStatus(CreatureLootStatus status)
 {
@@ -2760,7 +2765,11 @@ void Creature::SetLootStatus(CreatureLootStatus status)
             if (m_creatureInfo->SkinningLootId)
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
             else
+            {
+                // there is no loot so we can degrade corpse decay
+                ReduceCorpseDecayTimer();
                 RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            }
             break;
         case CREATURE_LOOT_STATUS_SKINNED:
             m_corpseDecayTimer = 0; // remove corpse at next update
