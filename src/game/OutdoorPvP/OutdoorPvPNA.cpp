@@ -443,8 +443,7 @@ bool OutdoorPvPNA::HandleGameObjectUse(Player* player, GameObject* go)
             else if (go->GetEntry() == nagrandRoostsAlliance[i])
             {
                 // mark player as pvp
-                player->UpdatePvP(true, true);
-                player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
+                player->UpdatePvP(true);
 
                 // prevent despawning after go use
                 go->SetRespawnTime(0);
@@ -489,8 +488,7 @@ bool OutdoorPvPNA::HandleGameObjectUse(Player* player, GameObject* go)
             else if (go->GetEntry() == nagrandRoostsHorde[i])
             {
                 // mark player as pvp
-                player->UpdatePvP(true, true);
-                player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
+                player->UpdatePvP(true);
 
                 // prevent despawning after go use
                 go->SetRespawnTime(0);

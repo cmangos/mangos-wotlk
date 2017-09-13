@@ -304,10 +304,14 @@ struct PlayerInfo
 
 struct PvPInfo
 {
-    PvPInfo() : inHostileArea(false), endTimer(0) {}
+    PvPInfo() : inPvPCombat(false), inPvPEnforcedArea(false), inPvPCapturePoint(false), isPvPFlagCarrier(false), timerPvPRemaining(0), timerPvPContestedRemaining(0) {}
 
-    bool inHostileArea;
-    time_t endTimer;
+    bool inPvPCombat;
+    bool inPvPEnforcedArea;
+    bool inPvPCapturePoint;
+    bool isPvPFlagCarrier;
+    uint32 timerPvPRemaining;
+    uint32 timerPvPContestedRemaining;
 };
 
 struct DuelInfo
@@ -416,7 +420,7 @@ enum PlayerFlags
     PLAYER_FLAGS_UNK7                   = 0x00000040,
     PLAYER_FLAGS_UNK8                   = 0x00000080,       // pre-3.0.3 PLAYER_FLAGS_FFA_PVP flag for FFA PVP state
     PLAYER_FLAGS_CONTESTED_PVP          = 0x00000100,       // Player has been involved in a PvP combat and will be attacked by contested guards
-    PLAYER_FLAGS_IN_PVP                 = 0x00000200,
+    PLAYER_FLAGS_PVP_DESIRED            = 0x00000200,       // Stores player's permanent PvP flag preference
     PLAYER_FLAGS_HIDE_HELM              = 0x00000400,
     PLAYER_FLAGS_HIDE_CLOAK             = 0x00000800,
     PLAYER_FLAGS_PARTIAL_PLAY_TIME      = 0x00001000,       // played long time
@@ -425,7 +429,7 @@ enum PlayerFlags
     PLAYER_FLAGS_DEVELOPER              = 0x00008000,       // <Dev> chat tag, name prefix
     PLAYER_FLAGS_ENABLE_LOW_LEVEL_RAID  = 0x00010000,       // triggers lua event EVENT_ENABLE_LOW_LEVEL_RAID
     PLAYER_FLAGS_TAXI_BENCHMARK         = 0x00020000,       // taxi benchmark mode (on/off) (2.0.1)
-    PLAYER_FLAGS_PVP_TIMER              = 0x00040000,       // 3.0.2, pvp timer active (after you disable pvp manually)
+    PLAYER_FLAGS_PVP_TIMER              = 0x00040000,       // 3.0.2, pvp timer active (after you disable pvp manually or leave pvp zones)
     PLAYER_FLAGS_COMMENTATOR            = 0x00080000,
     PLAYER_FLAGS_UNK21                  = 0x00100000,
     PLAYER_FLAGS_UNK22                  = 0x00200000,
@@ -1675,7 +1679,8 @@ class Player : public Unit
         ActionButton const* GetActionButton(uint8 button);
 
         PvPInfo pvpInfo;
-        void UpdatePvP(bool state, bool ovrride = false);
+        void UpdatePvP(bool state, bool overriding = false);
+        void UpdatePvPContested(bool state, bool overriding = false);
         void UpdateZone(uint32 newZone, uint32 newArea);
         void UpdateArea(uint32 newArea);
         uint32 GetCachedZoneId() const { return m_zoneUpdateId; }
@@ -1685,15 +1690,8 @@ class Player : public Unit
         void UpdateZoneDependentPets();
 
         void UpdateAfkReport(time_t currTime);
-        void UpdatePvPFlag(time_t currTime);
-        void UpdateContestedPvP(uint32 currTime);
-        void SetContestedPvPTimer(uint32 newTime) {m_contestedPvPTimer = newTime;}
-        void ResetContestedPvP()
-        {
-            clearUnitState(UNIT_STAT_ATTACK_PLAYER);
-            RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP);
-            m_contestedPvPTimer = 0;
-        }
+        void UpdatePvPFlagTimer(uint32 diff);
+        void UpdatePvPContestedFlagTimer(uint32 diff);
 
         /** todo: -maybe move UpdateDuelFlag+DuelComplete to independent DuelHandler.. **/
         DuelInfo* duel;
@@ -2382,9 +2380,6 @@ class Player : public Unit
         }
 
     protected:
-
-        uint32 m_contestedPvPTimer;
-
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/
