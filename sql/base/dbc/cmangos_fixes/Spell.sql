@@ -297,6 +297,12 @@ INSERT INTO spell_template(Id,Attributes,AttributesEx,AttributesEx2,DurationInde
 INSERT INTO spell_template(Id,Attributes,AttributesEx,AttributesEx2,AttributesEx3,DurationIndex,Effect1,EffectImplicitTargetA1,EffectApplyAuraName1,EffectMiscValue1,SpellIconID,SpellName,DmgMultiplier1) VALUES
 (39311,2155872640,268435456,1,269484032,21,6,1,56,22509,1,'Scrapped Fel Reaver Transform',1);
 
+-- Mekgineer Steamrigger gnome summoning spells
+INSERT INTO spell_template(Id,Attributes,AttributesEx,AttributesEx2,InterruptFlags,baseLevel,spellLevel,rangeIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectRadiusIndex1,EffectMiscValue1,EffectMiscValueB1,SpellIconID,SpellName,DmgMultiplier1) VALUES
+(31528,272,268435456,4,15,60,60,6,28,1,1,17,16,17951,64,1,'Summon Gnome',1),
+(31529,272,268435456,4,15,60,60,6,28,1,1,17,16,17951,64,1,'Summon Gnome',1),
+(31530,272,268435456,4,15,60,60,6,28,1,1,17,16,17951,64,1,'Summon Gnome',1);
+
 -- Missing selector spells for BWL
 INSERT INTO spell_template (id, attributes, attributesEx, attributesEx2, CastingTimeIndex, ProcChance, RangeIndex, Effect1, EffectImplicitTargetA1, EffectImplicitTargetB1, EffectRadiusIndex1, EffectMiscValue1, SpellIconId, SpellName, DmgMultiplier1) VALUES
 (23195, 8388864, 0, 1, 1, 101, 1, 3, 1, 0, 0, 0, 1, 'Dragondog Breath Selection', 1),

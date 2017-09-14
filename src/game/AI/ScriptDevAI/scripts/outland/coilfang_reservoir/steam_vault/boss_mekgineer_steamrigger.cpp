@@ -48,6 +48,10 @@ enum
 
     NPC_STEAMRIGGER_MECHANIC    = 17951,
 
+    SPELL_SUMMON_GNOME_1        = 31528,
+    SPELL_SUMMON_GNOME_2        = 31529,
+    SPELL_SUMMON_GNOME_3        = 31530,
+
     // Mechanic spells
     SPELL_DISPEL_MAGIC          = 17201,
     SPELL_REPAIR                = 31532,
@@ -56,15 +60,15 @@ enum
 
 struct SummonLocation
 {
-    float m_fX, m_fY, m_fZ;
+    float m_fX, m_fY, m_fZ, m_ori;
 };
 
-// Spawn locations
+// Spawn locations used in spell_target_position
 static const SummonLocation aSteamriggerSpawnLocs[] =
 {
-    { -316.101f, -166.444f, -7.66f},
-    { -348.497f, -161.718f, -7.66f},
-    { -331.161f, -112.212f, -7.66f},
+    { -316.101f, -166.444f, -7.66f, 2.5f }, // TODO: this orientation is guesswork
+    { -348.497f, -161.719f, -7.66f, 0.3621517 },
+    { -331.161f, -112.212f, -7.66f, 5.259035 },
 };
 
 struct boss_mekgineer_steamriggerAI : public ScriptedAI
@@ -142,8 +146,9 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
     {
         DoScriptText(SAY_MECHANICS, m_creature);
 
-        for (uint8 i = 0; i < 3; ++i)
-            m_creature->SummonCreature(NPC_STEAMRIGGER_MECHANIC, aSteamriggerSpawnLocs[i].m_fX, aSteamriggerSpawnLocs[i].m_fY, aSteamriggerSpawnLocs[i].m_fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
+        m_creature->CastSpell(m_creature, SPELL_SUMMON_GNOME_1, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastSpell(m_creature, SPELL_SUMMON_GNOME_2, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastSpell(m_creature, SPELL_SUMMON_GNOME_3, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
