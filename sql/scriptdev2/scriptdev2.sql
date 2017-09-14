@@ -1041,6 +1041,7 @@ UPDATE creature_template SET ScriptName='npc_drijya' WHERE entry=20281;
 UPDATE creature_template SET ScriptName='npc_dimensius' WHERE entry=19554;
 UPDATE creature_template SET ScriptName='npc_salhadaar' WHERE entry=20454;
 UPDATE creature_template SET ScriptName='npc_energy_ball' WHERE entry=20769;
+UPDATE creature_template SET ScriptName='npc_scrap_reaver' WHERE entry IN(19849);
 UPDATE creature_template SET ScriptName='npc_scrapped_fel_reaver' WHERE entry IN(20243);
 
 /*  */

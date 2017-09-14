@@ -1806,6 +1806,199 @@ CreatureAI* GetAI_npc_energy_ball(Creature* pCreature)
 
 enum
 {
+    NPC_NEGATRON = 19851,
+
+    SPELL_SCRAP_REAVER = 34630,
+
+    SAY_ON_DEATH = -1000472,
+
+    AREA_PROVING_GROUNDS = 3873,
+};
+
+struct npc_scrap_reaverAI : ScriptedPetAI
+{
+    npc_scrap_reaverAI(Creature* creature) : ScriptedPetAI(creature)
+    {
+        m_dontDoAnything = false;
+        m_despawnTimer = 0;
+        m_scriptTimer = 0;
+        m_areaCheckTimer = 1000;
+    }
+
+    ObjectGuid m_negatron;
+
+    uint32 m_despawnTimer;
+    uint32 m_scriptTimer;
+    uint32 m_areaCheckTimer;
+
+    bool m_dontDoAnything;
+
+    void Reset() override
+    {
+
+    }
+
+    void JustRespawned() override
+    {
+        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A && !m_dontDoAnything)
+            Die();
+    }
+
+    void Die()
+    {
+        if (!m_dontDoAnything)
+        {
+            SetReactState(REACT_PASSIVE);
+            m_creature->GetMotionMaster()->Clear(false, true);
+            m_creature->GetMotionMaster()->MoveIdle();
+            m_creature->AttackStop();
+        }
+        m_dontDoAnything = true;
+        m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        if (m_negatron)
+            if (Creature* negatron = m_creature->GetMap()->GetCreature(m_negatron))
+                DoScriptText(SAY_ON_DEATH, m_creature, negatron);
+
+        m_despawnTimer = 5000;
+    }
+
+    void KilledUnit(Unit* victim) override
+    {
+        HandleKill(victim);
+    }
+
+    void OwnerKilledUnit(Unit* victim) override
+    {
+        HandleKill(victim);
+    }
+
+    void HandleKill(Unit* victim)
+    {
+        if (victim->GetEntry() == NPC_NEGATRON)
+        {
+            m_creature->GetMotionMaster()->Clear(false, true);
+            m_creature->GetMotionMaster()->MoveIdle();
+            m_dontDoAnything = true;
+            m_negatron = victim->GetObjectGuid();
+            m_scriptTimer = 10000;
+            SetReactState(REACT_PASSIVE);
+        }
+    }
+
+    void UpdateTimers(const uint32 diff)
+    {
+        if (m_despawnTimer)
+        {
+            if (m_despawnTimer <= diff)
+            {
+                m_despawnTimer = 0;
+                m_creature->RemoveAurasDueToSpell(SPELL_SCRAP_REAVER);
+
+                if (m_negatron)
+                    if (Creature* negatron = m_creature->GetMap()->GetCreature(m_negatron))
+                        negatron->ForcedDespawn();
+
+                m_creature->ForcedDespawn();
+            }
+            else
+                m_despawnTimer -= diff;
+        }
+
+        if (m_scriptTimer)
+        {
+            if (m_scriptTimer <= diff)
+            {
+                m_scriptTimer = 0;
+                Die();
+            }
+            else
+                m_scriptTimer -= diff;
+        }
+
+        if (m_areaCheckTimer)
+        {
+            if (m_areaCheckTimer <= diff)
+            {
+                m_areaCheckTimer = 1000;
+                if (m_creature->GetAreaId() != AREA_PROVING_GROUNDS)
+                    Die();
+            }
+            else
+                m_areaCheckTimer -= diff;
+        }
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+            return;
+
+        if (m_dontDoAnything)
+        {
+            UpdateTimers(diff);
+            return;
+        }
+
+        if (!m_creature->isAlive())                             // should not be needed, isAlive is checked in mangos before calling UpdateAI
+            return;
+
+        // UpdateAllies() is done in the generic PetAI in Mangos, but we can't do this from script side.
+        // Unclear what side effects this has, but is something to be resolved from Mangos.
+
+        if (m_creature->getVictim())                            // in combat
+        {
+            if (!m_creature->CanAttack(m_creature->getVictim()))
+            {
+                // target no longer valid for pet, so either attack stops or new target are selected
+                // doesn't normally reach this, because of how petAi is designed in Mangos. CombatStop
+                // are called before this update diff, and then pet will already have no victim.
+                ResetPetCombat();
+                return;
+            }
+
+            // update when in combat
+            UpdateTimers(diff);
+            DoMeleeAttackIfReady();
+        }
+        else if (m_creature->GetCharmInfo())
+        {
+            Unit* owner = m_creature->GetMaster();
+
+            if (!owner)
+                return;
+
+            if (owner->isInCombat() && !HasReactState(REACT_PASSIVE))
+            {
+                // Not correct in all cases.
+                // When mob initiate attack by spell, pet should not start attack before spell landed.
+                AttackStart(owner->getAttackerForHelper());
+            }
+            else if (m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
+            {
+                // not following, so start follow
+                if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
+                    m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+
+                // update when not in combat
+                UpdateTimers(diff);
+            }
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_scrap_reaver(Creature* creature)
+{
+    return new npc_scrap_reaverAI(creature);
+}
+
+enum
+{
     SPELL_FEL_ZAPPER            = 35282,
 
     NPC_ZAXXIS_AMBUSHER         = 20287,
@@ -2074,6 +2267,11 @@ void AddSC_netherstorm()
     pNewScript = new Script;
     pNewScript->Name = "npc_energy_ball";
     pNewScript->GetAI = &GetAI_npc_energy_ball;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_scrap_reaver";
+    pNewScript->GetAI = &GetAI_npc_scrap_reaver;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
