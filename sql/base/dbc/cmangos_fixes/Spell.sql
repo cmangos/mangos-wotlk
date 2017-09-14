@@ -293,6 +293,10 @@ INSERT INTO spell_template (id, attributes, attributesEx, attributesEx2, Casting
 INSERT INTO spell_template(Id,Attributes,AttributesEx,AttributesEx2,DurationIndex,rangeIndex,StackAmount,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectApplyAuraName1,SpellIconID,SpellName,DmgMultiplier1) VALUES
 (29050,384,268435456,2,225,13,500,6,99,1,1,61,1,'Grow',1);
 
+-- Its a fel reaver, but with heart transformation aura
+INSERT INTO spell_template(Id,Attributes,AttributesEx,AttributesEx2,AttributesEx3,DurationIndex,Effect1,EffectImplicitTargetA1,EffectApplyAuraName1,EffectMiscValue1,SpellIconID,SpellName,DmgMultiplier1) VALUES
+(39311,2155872640,268435456,1,269484032,21,6,1,56,22509,1,'Scrapped Fel Reaver Transform',1);
+
 -- Missing selector spells for BWL
 INSERT INTO spell_template (id, attributes, attributesEx, attributesEx2, CastingTimeIndex, ProcChance, RangeIndex, Effect1, EffectImplicitTargetA1, EffectImplicitTargetB1, EffectRadiusIndex1, EffectMiscValue1, SpellIconId, SpellName, DmgMultiplier1) VALUES
 (23195, 8388864, 0, 1, 1, 101, 1, 3, 1, 0, 0, 0, 1, 'Dragondog Breath Selection', 1),

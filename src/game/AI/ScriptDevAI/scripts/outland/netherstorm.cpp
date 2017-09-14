@@ -1804,6 +1804,205 @@ CreatureAI* GetAI_npc_energy_ball(Creature* pCreature)
     return new npc_energy_ballAI(pCreature);
 }
 
+enum
+{
+    SPELL_FEL_ZAPPER            = 35282,
+
+    NPC_ZAXXIS_AMBUSHER         = 20287,
+
+    SAY_EVENT_START             = -1000473,
+
+    COUNT_SPAWNING_LOCATIONS    = 4,
+};
+
+float spawningLocations[COUNT_SPAWNING_LOCATIONS][4] =
+{
+{ 2593.983f, 3946.436f, 137.4138f, 2.598825f },
+{ 2543.813f, 3932.396f, 135.5509f, 1.761495f },
+{ 2467.507f, 3961.973f, 114.759f, 0.7313454f },
+{ 2484.169f, 4042.952f, 131.2856f, 4.728844f },
+};
+
+// Used in DB with PathId
+float movementDestinations[COUNT_SPAWNING_LOCATIONS * 2][3] =
+{
+
+{ 2556.563f, 3969.015f, 131.099f }, // mid point for first
+{ 2535.538f, 3992.952f, 137.4138f}, // final point for first
+
+{ 2538.997f, 3957.29f, 128.0989f }, // mid point for second
+{ 2527.418f, 3972.693f, 127.7893f }, // final point for second
+
+{ 2496.478f, 3987.993f, 129.061f }, // first point for third
+{ 2510.035f, 3995.931f, 132.1609f }, // final point for third
+
+{ 2494.564f, 4020.812f, 133.1337f }, // first point for fourth - guesswork
+{ 2518.717f, 4008.459f, 133.8864f }, // final point for fourth - guesswork
+
+};
+
+struct npc_scrapped_fel_reaverAI : ScriptedAI
+{
+    npc_scrapped_fel_reaverAI(Creature* creature) : ScriptedAI(creature)
+    {
+        SetCombatMovement(false);
+        m_spawnsPerLocation.resize(COUNT_SPAWNING_LOCATIONS);
+        SetReactState(REACT_DEFENSIVE);
+        ResetEvent();
+    }
+
+    bool m_eventStarted;
+    GuidVector m_spawnsPerLocation;
+    int32 m_spawnTimer; // period is exactly 20 seconds with no time lost
+    uint8 m_locationCounter;
+    int32 m_eventTimer;
+    uint8 m_phaseCounter;
+
+    void Reset() override
+    {
+
+    }
+
+    void ResetEvent() // has to be separate because its not reset during combat etc
+    {
+        m_spawnTimer = 0;
+        m_locationCounter = 0;
+        m_eventTimer = 0;
+        m_phaseCounter = 0;
+        m_eventStarted = false;
+
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        m_creature->SetActiveObjectState(false);
+    }
+
+    void JustRespawned() override
+    {
+        ResetEvent();
+        ScriptedAI::JustRespawned();
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        for (uint32 i = 0; i < COUNT_SPAWNING_LOCATIONS; i++)
+        {
+            if (Creature* spawn = m_creature->GetMap()->GetCreature(m_spawnsPerLocation[i]))
+                spawn->ForcedDespawn();
+
+            m_spawnsPerLocation[i] = ObjectGuid();
+        }
+    }
+
+    void SpellHit(Unit* caster, const SpellEntry* spell) override
+    {
+        if (spell->Id == SPELL_FEL_ZAPPER)
+        {
+            m_creature->SetActiveObjectState(true);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+            m_eventStarted = true;
+            DoScriptText(SAY_EVENT_START, m_creature, caster);
+            m_eventTimer = 240 * IN_MILLISECONDS;
+            ProcessEvent();
+        }
+    }
+
+    void ClearSpawn(Creature* summoned)
+    {
+        for (uint32 i = 0; i < COUNT_SPAWNING_LOCATIONS; i++)
+        {
+            if (m_spawnsPerLocation[i] == summoned->GetObjectGuid())
+            {
+                m_spawnsPerLocation[i] = ObjectGuid();
+                break;
+            }
+        }
+    }
+
+    // Does not move in any way on evade TODO: Generically
+    void EnterEvadeMode() override
+    {
+        m_creature->RemoveAllAurasOnEvade();
+        m_creature->DeleteThreatList();
+        m_creature->CombatStop(true);
+
+        m_creature->SetLootRecipient(nullptr);
+
+        m_creature->TriggerEvadeEvents();
+    }
+
+    void SummonedMovementInform(Creature* summoned, uint32 motionType, uint32 data) override
+    {
+        if (motionType == WAYPOINT_MOTION_TYPE && data == 2 && m_creature->getVictim())
+            summoned->AI()->AttackStart(m_creature->getVictim());
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        m_spawnsPerLocation[m_locationCounter] = summoned->GetObjectGuid();
+        m_locationCounter = (m_locationCounter + 1) % COUNT_SPAWNING_LOCATIONS;
+    }
+
+    // new spawn location can happen after one dies
+    void SummonedCreatureJustDied(Creature* summoned) override
+    {
+        ClearSpawn(summoned);
+    }
+
+    // has to be done in both, because spawns can despawn before event ends (blizzlike) without dying and then respawn
+    void SummonedCreatureDespawn(Creature* summoned) override
+    {
+        ClearSpawn(summoned);
+    }
+
+    void ProcessEvent()
+    {
+        if (m_spawnTimer <= 0)
+        {
+            m_spawnTimer += 20 * IN_MILLISECONDS;
+            uint32 i;
+            // TODO: Sometimes possible to spawn two at once?
+            for (i = 0; i < COUNT_SPAWNING_LOCATIONS; i++, m_locationCounter = (m_locationCounter + 1) % COUNT_SPAWNING_LOCATIONS)
+                if (!m_spawnsPerLocation[m_locationCounter])
+                    break;
+
+            if (i != COUNT_SPAWNING_LOCATIONS)
+                m_creature->SummonCreature(NPC_ZAXXIS_AMBUSHER, spawningLocations[m_locationCounter][0], spawningLocations[m_locationCounter][1], spawningLocations[m_locationCounter][2], spawningLocations[m_locationCounter][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 240000, true, true, m_locationCounter + 1);
+        }
+        if (m_eventTimer <= 0)
+        {
+            switch (m_phaseCounter)
+            {
+                case 0: // stop spawning
+                    m_phaseCounter++;
+                    m_eventTimer = 100 * IN_MILLISECONDS;
+                    break;
+                case 1: // revert to unattackable when out of combat
+                    if (!m_creature->isInCombat())
+                        ResetEvent();                    
+                    break;
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (m_eventStarted)
+        {
+            m_spawnTimer -= diff;
+            if(m_eventTimer > 0)
+                m_eventTimer -= diff;
+            ProcessEvent();
+        }
+
+        if (!m_creature->SelectHostileTarget())
+            return;
+    }
+};
+
+CreatureAI* GetAI_npc_scrapped_fel_reaver(Creature* creature)
+{
+    return new npc_scrapped_fel_reaverAI(creature);
+}
+
 void AddSC_netherstorm()
 {
     Script* pNewScript;
@@ -1875,5 +2074,10 @@ void AddSC_netherstorm()
     pNewScript = new Script;
     pNewScript->Name = "npc_energy_ball";
     pNewScript->GetAI = &GetAI_npc_energy_ball;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_scrapped_fel_reaver";
+    pNewScript->GetAI = &GetAI_npc_scrapped_fel_reaver;
     pNewScript->RegisterSelf();
 }

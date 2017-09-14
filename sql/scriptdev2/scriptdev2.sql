@@ -1005,6 +1005,11 @@ UPDATE creature_template SET ScriptName='npc_drijya' WHERE entry=20281;
 UPDATE creature_template SET ScriptName='npc_dimensius' WHERE entry=19554;
 UPDATE creature_template SET ScriptName='npc_salhadaar' WHERE entry=20454;
 UPDATE creature_template SET ScriptName='npc_energy_ball' WHERE entry=20769;
+<<<<<<< HEAD
+=======
+UPDATE creature_template SET ScriptName='npc_scrap_reaver' WHERE entry IN(19849);
+UPDATE creature_template SET ScriptName='npc_scrapped_fel_reaver' WHERE entry IN(20243);
+>>>>>>> 4a003818b... Implement q.10309 Its a Fel Reaver but with Heart quest script
 
 /*  */
 /* THE NEXUS */
@@ -2096,8 +2101,13 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000470,'Must be your lucky day. Alright, I\'ll talk. Just leave me alone. Look, you\'re not going to believe me, but it wa... oh, Light, looks like the girl could shoot...',0,0,0,0,'ogron SAY_OGR_RET_LUCKY'),
 (-1000471,'By the way, thanks for watching my back.',0,0,1,0,'ogron SAY_OGR_THANKS'),
 
+<<<<<<< HEAD
 (-1000472,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1000473,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+=======
+(-1000472,'The %s, having fought the good fight, falls to pieces.',0,2,0,0,'Scrap Reaver X6000 - on death anim emote'),
+(-1000473,'The %s''s mechanical heart begins to beat softly.',0,2,0,0,'Scrapped Fel Reaver - on event start emote'),
+>>>>>>> 4a003818b... Implement q.10309 Its a Fel Reaver but with Heart quest script
 (-1000474,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1000475,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1000476,'REUSE_ME',0,0,0,0,'REUSE_ME'),
