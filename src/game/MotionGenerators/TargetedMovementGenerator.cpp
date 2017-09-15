@@ -176,7 +176,7 @@ void ChaseMovementGenerator<T>::_addUnitStateMove(T& u) { u.addUnitState(UNIT_ST
 template<class T>
 bool ChaseMovementGenerator<T>::_lostTarget(T& u) const
 {
-    return u.getVictim() != this->GetTarget();
+    return u.getVictim() != this->GetCurrentTarget();
 }
 
 template<class T>

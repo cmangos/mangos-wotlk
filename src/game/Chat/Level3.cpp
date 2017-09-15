@@ -6258,9 +6258,9 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
             {
                 Unit* target;
                 if (unit->GetTypeId() == TYPEID_PLAYER)
-                    target = static_cast<ChaseMovementGenerator<Player> const*>(*itr)->GetTarget();
+                    target = static_cast<ChaseMovementGenerator<Player> const*>(*itr)->GetCurrentTarget();
                 else
-                    target = static_cast<ChaseMovementGenerator<Creature> const*>(*itr)->GetTarget();
+                    target = static_cast<ChaseMovementGenerator<Creature> const*>(*itr)->GetCurrentTarget();
 
                 if (!target)
                     SendSysMessage(LANG_MOVEGENS_CHASE_NULL);
@@ -6274,9 +6274,9 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
             {
                 Unit* target;
                 if (unit->GetTypeId() == TYPEID_PLAYER)
-                    target = static_cast<FollowMovementGenerator<Player> const*>(*itr)->GetTarget();
+                    target = static_cast<FollowMovementGenerator<Player> const*>(*itr)->GetCurrentTarget();
                 else
-                    target = static_cast<FollowMovementGenerator<Creature> const*>(*itr)->GetTarget();
+                    target = static_cast<FollowMovementGenerator<Creature> const*>(*itr)->GetCurrentTarget();
 
                 if (!target)
                     SendSysMessage(LANG_MOVEGENS_FOLLOW_NULL);
