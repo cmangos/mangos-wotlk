@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Borean_Tundra
 SD%Complete: 100
-SDComment: Quest support: 11570, 11590, 11608, 11664, 11673, 11728, 11865, 11881, 11889, 11897, 11919, 11940.
+SDComment: Quest support: 11570, 11590, 11608, 11664, 11673, 11728, 11865, 11881, 11889, 11895, 11897, 11919, 11940.
 SDCategory: Borean Tundra
 EndScriptData */
 
@@ -32,6 +32,7 @@ npc_scourged_flamespitter
 npc_bonker_togglevolt
 npc_jenny
 npc_mootoo_the_younger
+npc_storm_totem
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -1320,6 +1321,24 @@ CreatureAI* GetAI_npc_mootoo_the_youngerAI(Creature* pCreature)
     return new npc_mootoo_the_youngerAI(pCreature);
 }
 
+/*######
+## npc_storm_totem
+######*/
+
+enum
+{
+    QUEST_MASTER_THE_STORM = 11895,
+    NPC_STORM_TEMPEST      = 26045,
+};
+
+bool NpcSpellClick_npc_storm_totem(Player* pPlayer, Creature* pClickedCreature, uint32 /*uiSpellId*/)
+{
+    if (pPlayer->GetQuestStatus(QUEST_MASTER_THE_STORM) == QUEST_STATUS_INCOMPLETE && !pPlayer->isInCombat() && !GetClosestCreatureWithEntry(pPlayer, NPC_STORM_TEMPEST, 30.0f))
+        pClickedCreature->SummonCreature(NPC_STORM_TEMPEST, 3403.64f, 4133.09f, 18.04f, 5.65f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
+
+    return true;
+}
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript;
@@ -1390,5 +1409,10 @@ void AddSC_borean_tundra()
     pNewScript->Name = "npc_mootoo_the_younger";
     pNewScript->GetAI = &GetAI_npc_mootoo_the_youngerAI;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_mootoo_the_younger;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_storm_totem";
+    pNewScript->pNpcSpellClick = &NpcSpellClick_npc_storm_totem;
     pNewScript->RegisterSelf();
 }
