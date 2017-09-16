@@ -3162,6 +3162,19 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 71303:                                 // Summon Ymirjar
+                {
+                    if (!unitTarget || !unitTarget->GetMap()->IsDungeon())
+                        return;
+
+                    // cast 5 times on 25 man and 2 times on 10 man
+                    uint8 maxCreatures = unitTarget->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || unitTarget->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC ? 5 : 2;
+
+                    for (uint8 i = 0; i < maxCreatures; ++i)
+                        m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
+
+                    return;
+                }
                 case 71307:                                 // Vile Gas
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
