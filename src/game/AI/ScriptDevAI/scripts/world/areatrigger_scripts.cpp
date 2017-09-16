@@ -25,9 +25,9 @@ EndScriptData */
 at_aldurthar_gate               5284,5285,5286,5287
 at_coilfang_waterfall           4591
 at_legion_teleporter            4560 Teleporter TO Invasion Point: Cataclysm
-at_ravenholdt
+at_ravenholdt                   3066
 at_spearborn_encampment         5030
-at_warsong_farms
+at_warsong_farms                4871, 4872, 4873
 at_stormwright_shelf            5108
 at_childrens_week_spot          3546,3547,3548,3552,3549,3550
 at_scent_larkorwi               1726,1727,1728,1729,1730,1731,1732,1733,1734,1735,1736,1737,1738,1739,1740
@@ -35,7 +35,8 @@ at_murkdeep                     1966
 at_hot_on_the_trail             5710, 5711, 5712, 5714, 5715, 5716
 at_ancient_leaf                 3587
 at_haramad_teleport             4479
-at_huldar_miran
+at_huldar_miran                 171
+at_area_52                      4422, 4466, 4471, 4472
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -509,6 +510,24 @@ bool AreaTrigger_at_huldar_miran(Player* pPlayer, AreaTriggerEntry const* /*pAt*
     return true;
 }
 
+/*######
+## at_area_52
+######*/
+
+enum
+{
+    SPELL_A52_NEURALYZER = 34400
+};
+
+bool AreaTrigger_at_area_52(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
+{
+    // ToDo: research if there should be other actions happening here
+    if (!pPlayer->HasAura(SPELL_A52_NEURALYZER))
+        pPlayer->CastSpell(pPlayer, SPELL_A52_NEURALYZER, TRIGGERED_NONE);
+
+    return false;
+}
+
 void AddSC_areatrigger_scripts()
 {
     Script* pNewScript;
@@ -586,5 +605,10 @@ void AddSC_areatrigger_scripts()
     pNewScript = new Script;
     pNewScript->Name = "at_huldar_miran";
     pNewScript->pAreaTrigger = &AreaTrigger_at_huldar_miran;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_area_52";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_area_52;
     pNewScript->RegisterSelf();
 }
