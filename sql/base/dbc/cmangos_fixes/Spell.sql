@@ -303,6 +303,14 @@ INSERT INTO spell_template(Id,Attributes,AttributesEx,AttributesEx2,InterruptFla
 (31529,272,268435456,4,15,60,60,6,28,1,1,17,16,17951,64,1,'Summon Gnome',1),
 (31530,272,268435456,4,15,60,60,6,28,1,1,17,16,17951,64,1,'Summon Gnome',1);
 
+-- Stonescythe Whelp serverside
+INSERT INTO spell_template(Id,Attributes,AttributesEx,baseLevel,spellLevel,DurationIndex,rangeIndex,Effect2,Effect3,EffectImplicitTargetA2,EffectImplicitTargetA3,EffectApplyAuraName2,EffectApplyAuraName3,SpellIconID,spellPriority,SpellName,StartRecoveryCategory,DmgClass,PreventionType,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
+(33897,67109248,268435456,20,20,21,5,6,6,1,1,60,26,2153,50,'Desperate Defense',133,1,1,1,1,1); -- tooltip Rooted. Not attacking.
+
+-- Vengeful Harbinger unknown serverside
+INSERT INTO spell_template(Id,AttributesEx5,CastingTimeIndex,rangeIndex,Effect1,EffectImplicitTargetA1,SpellIconID,SpellName,DmgMultiplier1) VALUES
+(36551,8,1,1,77,1,1,'AIClearReturnState',1); -- Tooltip: Calls AIClearReturnState(). Must be called during the On Leave Combat action.
+
 -- Missing selector spells for BWL
 INSERT INTO spell_template (id, attributes, attributesEx, attributesEx2, CastingTimeIndex, ProcChance, RangeIndex, Effect1, EffectImplicitTargetA1, EffectImplicitTargetB1, EffectRadiusIndex1, EffectMiscValue1, SpellIconId, SpellName, DmgMultiplier1) VALUES
 (23195, 8388864, 0, 1, 1, 101, 1, 3, 1, 0, 0, 0, 1, 'Dragondog Breath Selection', 1),
