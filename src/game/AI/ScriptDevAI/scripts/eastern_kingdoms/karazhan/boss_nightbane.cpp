@@ -152,6 +152,13 @@ struct boss_nightbaneAI : public npc_escortAI
         }
     }
 
+    void JustRespawned() override
+    {
+        npc_escortAI::JustRespawned();
+        if (GameObject* pUrn = m_pInstance->GetSingleGameObjectFromStorage(GO_BLACKENED_URN))
+            pUrn->ResetDoorOrButton();
+    }
+
     void JustSummoned(Creature* summoned) override
     {
         m_skeletons.push_back(summoned->GetObjectGuid());

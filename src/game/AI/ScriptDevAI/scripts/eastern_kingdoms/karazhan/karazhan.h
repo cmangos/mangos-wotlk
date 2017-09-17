@@ -224,7 +224,6 @@ class instance_karazhan : public ScriptedInstance
         uint32 m_uiOzDeathCount;
         uint32 m_uiTeam;                                    // Team of first entered player, used for the Chess event
         uint32 m_uiChessResetTimer;
-        uint32 m_uiNightbaneResetTimer;
 
         uint8 m_uiAllianceStalkerCount;
         uint8 m_uiHordeStalkerCount;
