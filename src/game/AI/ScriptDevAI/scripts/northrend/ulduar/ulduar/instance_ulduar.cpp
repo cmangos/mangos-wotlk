@@ -73,6 +73,7 @@ static UlduarKeeperSpawns m_aKeeperHelperLocs[] =
 
 instance_ulduar::instance_ulduar(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aUlduarDialogue),
     m_bHelpersLoaded(false),
+    m_bFreyaVigilance(false),
     m_uiAlgalonTimer(MINUTE* IN_MILLISECONDS),
     m_uiYoggResetTimer(0),
     m_uiShatterAchievTimer(0),
@@ -1196,11 +1197,28 @@ void instance_ulduar::SpawnKeeperHelper(uint32 uiWho)
 
 void instance_ulduar::OnCreatureEnterCombat(Creature* pCreature)
 {
-    switch (pCreature->GetEntry())
+    uint32 uiEntry = pCreature->GetEntry();
+    if (uiEntry == NPC_RUNE_GIANT)
+        m_uiStairsSpawnTimer = 0;
+        break;
+    
+    else if (uiEntry == NPC_CORRUPTED_SERVITOR || uiEntry == NPC_MISGUIDED_NYMPH || uiEntry == NPC_GUARDIAN_LASHER || uiEntry == NPC_FOREST_SWARMER || uiEntry == NPC_MANGROVE_ENT || uiEntry == NPC_IRONROOT_LASHER || uiEntry == NPC_NATURES_BLADE || uiEntry == NPC_GUARDIAN_OF_LIFE)
     {
-        case NPC_RUNE_GIANT:
-            m_uiStairsSpawnTimer = 0;
+        // Only for the first try
+        if (m_bFreyaVigilance)
+            return;
+      
+        if (Creature* pFreya = GetSingleCreatureFromStorage(NPC_FREYA))
+            {
+                if (pVezax->isAlive())
+                {
+                    pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCreature, pFreya);
+                    SetData(TYPE_VEZAX_HARD, DONE);
+                }
+            }
             break;
+            
+        m_bFreyaVigilance = true;
     }
 }
 
