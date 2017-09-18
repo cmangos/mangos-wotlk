@@ -203,6 +203,16 @@ enum
     NPC_KEEPER_MIMIRON          = 33244,
     NPC_KEEPER_THORIM           = 33242,
 
+    // Freya vigilance npc in the Freya hall for the Freya timed achievs 2980, 2981.
+    NPC_CORRUPTED_SERVITOR      = 33354,
+    NPC_MISGUIDED_NYMPH         = 33355,
+    NPC_GUARDIAN_LASHER         = 33430,
+    NPC_FOREST_SWARMER          = 33431,
+    NPC_MANGROVE_ENT            = 33525,
+    NPC_IRONROOT_LASHER         = 33526,
+    NPC_NATURES_BLADE           = 33527,
+    NPC_GUARDIAN_OF_LIFE        = 33528,
+    
     MAX_SPECIAL_ACHIEV_CRITS    = 20,
 
     TYPE_ACHIEV_CAT_LADY        = 0,
@@ -610,6 +620,7 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         bool m_abAchievCriteria[MAX_SPECIAL_ACHIEV_CRITS];
 
         bool m_bHelpersLoaded;
+        bool m_bFreyaVigilance;
 
         uint32 m_uiAlgalonTimer;
         uint32 m_uiYoggResetTimer;
