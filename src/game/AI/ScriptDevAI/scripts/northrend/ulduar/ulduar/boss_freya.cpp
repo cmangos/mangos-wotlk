@@ -421,7 +421,7 @@ struct boss_freyaAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         // handle Allies of Nature spawn
         if (eventType == AI_EVENT_CUSTOM_A)
