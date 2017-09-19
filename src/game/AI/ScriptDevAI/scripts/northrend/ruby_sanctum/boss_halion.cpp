@@ -201,10 +201,13 @@ struct boss_halion_realAI : public ScriptedAI
             m_pInstance->SetData(TYPE_HALION, DONE);
 
         DoScriptText(SAY_DEATH, m_creature);
+        DoRemoveTwilightPhaseAura();
     }
 
     void JustReachedHome() override
     {
+        DoRemoveTwilightPhaseAura();
+        
         if (m_pInstance)
             m_pInstance->SetData(TYPE_HALION, FAIL);
     }
@@ -224,6 +227,32 @@ struct boss_halion_realAI : public ScriptedAI
         }
     }
 
+    // On death or evade, Halion should remove all phase aura from players.
+    void DoRemoveTwilightPhaseAura()
+    {
+        // remove phase aura type.
+        Map* pMap = m_creature->GetMap();
+        if (pMap->IsDungeon())
+        {
+            Map::PlayerList const& PlayerList = pMap->GetPlayers();
+
+            if (PlayerList.isEmpty())
+                return;
+
+            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            {
+                if (i->getSource()->isAlive() && i->getSource()->HasAuraType(SPELL_AURA_PHASE))
+                    i->getSource()->RemoveSpellsCausingAura(SPELL_AURA_PHASE);
+            }
+        }
+    }
+    
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+            DoRemoveTwilightPhaseAura();
+    }
+    
     void DoPrepareTwilightPhase()
     {
         if (!m_pInstance)
@@ -413,6 +442,13 @@ struct boss_halion_twilightAI : public ScriptedAI
         // ToDo: handle the damage sharing!
 
         DoScriptText(SAY_DEATH, m_creature);
+        
+        // Allow real Halion to remove all phase aura from player.
+        if (m_pInstance)
+        {
+            if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
+                m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pHalion);
+        }
     }
 
     void KilledUnit(Unit* pVictim) override
