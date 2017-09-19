@@ -423,6 +423,8 @@ struct boss_freyaAI : public ScriptedAI
 
     void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
+        if (m_pInstance)
+        
         // handle Allies of Nature spawn
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -458,6 +460,10 @@ struct boss_freyaAI : public ScriptedAI
             if (!m_uiThreeAlliesTimer)
                 m_uiThreeAlliesTimer = 12000;
         }
+        // remove saronite barrier when animus dies
+        else if (pSender->GetEntry() == NPC_CORRUPTED_SERVITOR || pSender->GetEntry() == NPC_MISGUIDED_NYMPH || pSender->GetEntry() == NPC_GUARDIAN_LASHER || pSender->GetEntry() == NPC_FOREST_SWARMER || pSender->GetEntry() == NPC_MANGROVE_ENT || pSender->GetEntry() == NPC_IRONROOT_LASHER || pSender->GetEntry() == NPC_NATURES_BLADE || pSender->GetEntry() == NPC_GUARDIAN_OF_LIFE && eventType == AI_EVENT_CUSTOM_C)
+            // Start achievement only on first receive event.
+            m_pInstance->DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_FREYA_ID);
     }
 
     // check for all elders alive
