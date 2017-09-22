@@ -8744,9 +8744,10 @@ void Unit::ClearInCombat()
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
     if (GetTypeId() == TYPEID_PLAYER)
+    {
         static_cast<Player*>(this)->pvpInfo.inPvPCombat = false;
-    else
-        ((Player*)this)->UpdatePotionCooldown();
+        static_cast<Player*>(this)->UpdatePotionCooldown();
+    }
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LEAVE_COMBAT);
 }
