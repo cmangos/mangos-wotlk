@@ -71,6 +71,7 @@ enum EventAI_Type
     EVENT_T_ENERGY                  = 31,                   // EnergyMax%, EnergyMin%, RepeatMin, RepeatMax
     EVENT_T_SELECT_ATTACKING_TARGET = 32,                   // MinRange, MaxRange, RepeatMin, RepeatMax
     EVENT_T_FACING_TARGET           = 33,                   // Position, unused, RepeatMin, RepeatMax
+    EVENT_T_SPELLHIT_TARGET         = 34,                   // SpellID, School, RepeatMin, RepeatMax
 
     EVENT_T_END,
 };
@@ -670,6 +671,14 @@ struct CreatureEventAI_Event
             uint32 repeatMin;
             uint32 repeatMax;
         } facingTarget;
+        // EVENT_T_SPELLHIT_TARGET                          = 34
+        struct
+        {
+            uint32 spellId;
+            uint32 schoolMask;                              // -1 (==0xffffffff) is ok value for full mask, or must be more limited mask like (0 < 1) = 1 for normal/physical school
+            uint32 repeatMin;
+            uint32 repeatMax;
+        } spell_hit_target;
         // RAW
         struct
         {
@@ -737,6 +746,7 @@ class CreatureEventAI : public CreatureAI
         void AttackStart(Unit* who) override;
         void MoveInLineOfSight(Unit* who) override;
         void SpellHit(Unit* pUnit, const SpellEntry* pSpell) override;
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override;
         void DamageTaken(Unit* done_by, uint32& damage, DamageEffectType damagetype) override;
         void HealedBy(Unit* healer, uint32& healedAmount) override;
         void UpdateAI(const uint32 diff) override;

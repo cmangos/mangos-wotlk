@@ -273,6 +273,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         case EVENT_T_EVADE:
             break;
         case EVENT_T_SPELLHIT:
+        case EVENT_T_SPELLHIT_TARGET:
             // Spell hit is special case, param1 and param2 handled within CreatureEventAI::SpellHit
 
             // Repeat Timers
@@ -1488,6 +1489,16 @@ void CreatureEventAI::SpellHit(Unit* pUnit, const SpellEntry* pSpell)
             if (!i->Event.spell_hit.spellId || pSpell->Id == i->Event.spell_hit.spellId)
                 if (pSpell->SchoolMask & i->Event.spell_hit.schoolMask)
                     ProcessEvent(*i, pUnit);
+}
+
+void CreatureEventAI::SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell)
+{
+    for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
+        if (i->Event.event_type == EVENT_T_SPELLHIT_TARGET)
+            // If spell id matches (or no spell id) & if spell school matches (or no spell school)
+            if (!i->Event.spell_hit_target.spellId || pSpell->Id == i->Event.spell_hit_target.spellId)
+                if (pSpell->SchoolMask & i->Event.spell_hit_target.schoolMask)
+                    ProcessEvent(*i, pTarget);
 }
 
 void CreatureEventAI::UpdateAI(const uint32 diff)
