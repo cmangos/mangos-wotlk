@@ -554,7 +554,7 @@ CreatureAI* GetAI_npc_valkyr_herald(Creature* pCreature)
 ######*/
 
 // Note: UpdateAI NOT COMPLETED!!!
-struct npc_severed_essence : public ScriptedAI
+struct npc_valkyr_heraldAI : public ScriptedAI
 {
     npc_severed_essence(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
     {
@@ -599,8 +599,7 @@ struct npc_severed_essence : public ScriptedAI
                     m_uiSpellTimer = 6000;
                     break;
                 case CLASS_HUNTER:
-                    uint32 spellId = (m_pInstance->Is25ManDifficulty() ? SPELL_SHOOT_25 : SPELL_SHOOT_10);
-                    DoCastSpellIfCan(m_creature->getVictim(), spellId);
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT_10);
                     m_uiSpellTimer = 20000;
                     break;
                 case CLASS_ROGUE:
