@@ -554,9 +554,9 @@ CreatureAI* GetAI_npc_valkyr_herald(Creature* pCreature)
 ######*/
 
 // Note: UpdateAI NOT COMPLETED!!!
-struct npc_valkyr_heraldAI : public ScriptedAI
+struct npc_severed_essenceAI : public ScriptedAI
 {
-    npc_severed_essence(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    npc_severed_essenceAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
     {
         m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
         Reset();
