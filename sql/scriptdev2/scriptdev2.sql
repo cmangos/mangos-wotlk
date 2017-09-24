@@ -766,6 +766,8 @@ UPDATE creature_template SET ScriptName='npc_orange_gas_stalker' WHERE entry=366
 UPDATE creature_template SET ScriptName='boss_rotface' WHERE entry=36627;
 UPDATE creature_template SET ScriptName='mob_little_ooze' WHERE entry=36897;
 UPDATE creature_template SET ScriptName='mob_big_ooze' WHERE entry=36899;
+UPDATE creature_template SET ScriptName='npc_valkyr_herald' WHERE entry=37098;
+UPDATE creature_template SET ScriptName='npc_severed_essence' WHERE entry=38410;
 UPDATE creature_template SET ScriptName='boss_valithria_dreamwalker' WHERE entry=36789;
 UPDATE creature_template SET ScriptName='boss_professor_putricide' WHERE entry=36678;
 UPDATE creature_template SET ScriptName='npc_putricides_trap' WHERE entry=38879;

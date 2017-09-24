@@ -801,6 +801,7 @@ uint32 GetAffectedTargets(SpellEntry const * spellInfo, Unit * caster)
                 case 72838:                                 // Volatile Ooze Adhesive (ICC, Putricide 25h)
                 case 73022:                                 // Mutated Infection (Mode 2)
                 case 73023:                                 // Mutated Infection (Mode 3)
+                case 71906:                                 // Severed Essence (ICC, Valkyr Herald 10n and 10h)
                     return 1;
                 case 10258:                                 // Awaken Vault Warder (Uldaman)
                 case 28542:                                 // Life Drain (Naxx, Sapphiron)
@@ -836,6 +837,7 @@ uint32 GetAffectedTargets(SpellEntry const * spellInfo, Unit * caster)
                 case 64598:                                 // Cosmic Smash (h) (Ulduar, Algalon)
                 case 64620:                                 // Summon Fire Bot Trigger (Ulduar, Mimiron) hits npc 33856
                 case 70814:                                 // Bone Slice (ICC, Lord Marrowgar, heroic)
+                case 71942:                                 // Severed Essence (ICC, Valkyr Herald 25n and 25h)
                 case 72095:                                 // Frozen Orb (h) (Vault of Archavon, Toravon)
                 case 72089:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar) 25 man
                 case 70826:

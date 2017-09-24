@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: icecrown_citadel
 SD%Complete: 50%
-SDComment: Teleporters, Light's Hammer ATs, Putricide's trap.
+SDComment: Teleporters, Light's Hammer ATs, Putricide's trap, Valkyr Herald.
 SDCategory: Icecrown Citadel
 EndScriptData */
 
@@ -403,6 +403,248 @@ CreatureAI* GetAI_npc_putricides_trap(Creature* pCreature)
     return new npc_putricides_trapAI(pCreature);
 };
 
+enum
+{
+    // Val'kyr Herald
+    SPELL_SEVERED_ESSENCE_10        = 71906,
+    SPELL_SEVERED_ESSENCE_25        = 71942,
+    
+    //Druid spells
+    SPELL_CAT_FORM                  = 57655,
+    SPELL_MANGLE                    = 71925,
+    SPELL_RIP                       = 71926,
+    
+    //Warlock
+    SPELL_CORRUPTION                = 71937,
+    SPELL_SHADOW_BOLT               = 71936,
+    SPELL_RAIN_OF_CHAOS             = 71965,
+    
+    //Shaman
+    SPELL_REPLENISHING_RAINS        = 71956,
+    SPELL_LIGHTNING_BOLT            = 71934,
+    
+    //Rouge
+    SPELL_DISENGAGE                 = 57635,
+    SPELL_FOCUSED_ATTACKS           = 71955,
+    SPELL_SINISTER_STRIKE           = 57640,
+    SPELL_EVISCERATE                = 71933,
+    
+    //Mage
+    SPELL_FIREBALL                  = 71928,
+    
+    //Warior
+    SPELL_BLOODTHIRST               = 71938,
+    SPELL_HEROIC_LEAP               = 71961,
+    
+    //Dk
+    SPELL_DEATH_GRIP                = 57602,
+    SPELL_NECROTIC_STRIKE           = 71951,
+    SPELL_PLAGUE_STRIKE             = 71924,
+    
+    //Priest
+    SPELL_GREATER_HEAL              = 71931,
+    SPELL_RENEW                     = 71932,
+    
+    //Paladin
+    SPELL_CLEANSE                   = 57767,
+    SPELL_FLASH_OF_LIGHT            = 71930,
+    SPELL_RADIANCE_AURA             = 71953,
+    
+    //Hunter
+    SPELL_SHOOT_10                  = 71927,
+    SPELL_SHOOT_25                  = 72258,
+};
+
+/*######
+## npc_valkyr_herald
+######*/
+
+struct npc_valkyr_heraldAI : public ScriptedAI
+{
+    npc_valkyr_heraldAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_icecrown_citadel* m_pInstance;
+    
+    ObjectGuid m_targetGuid;
+
+    uint32 m_uiSummonSeveredEssenceTimer;
+
+    void Reset() override
+    {
+        m_targetGuid.Clear();
+        
+        SetCombatMovement(false);
+        m_creature->SetWalk(false);
+        
+        m_uiSummonSeveredEssenceTimer = urand(8000, 10000);
+    }
+
+    void Aggro(Unit* pWho) override
+    {
+        float fGroundZ = m_creature->GetMap()->GetHeight(m_creature->GetPhaseMask(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+        m_creature->GetMotionMaster()->MovePoint(1, pWho->GetPositionX(), pWho->GetPositionY(), fGroundZ, false);
+        m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
+    }
+
+    void MovementInform(uint32 uiType, uint32 uiPointId) override
+    {
+        if (uiType != POINT_MOTION_TYPE)
+            return;
+
+        SetCombatMovement(true);  
+    }
+    
+    void JustSummoned(Creature* pSummoned) override
+    {
+        if (pSummoned->GetEntry() == NPC_SEVERED_ESSENCE)
+        {
+            if (Player* pTarget = m_creature->GetMap()->GetPlayer(m_targetGuid))
+            {
+                if (npc_severed_essenceAI* pSeveredAI = dynamic_cast<npc_severed_essenceAI*>(pSummoned->AI()))
+                    pSeveredAI->SetSeveredEssenceInfo(pTarget);
+
+                pSummoned->AI()->AttackStart(pTarget);
+            }
+        }
+    }
+
+    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpellEntry) override
+    {
+        if (pSpellEntry->Id == SPELL_SEVERED_ESSENCE_10 || pSpellEntry->Id == SPELL_SEVERED_ESSENCE_25)
+            m_creature->SummonCreature(NPC_SEVERED_ESSENCE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 10 * IN_MILLISECONDS);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiSummonSeveredEssenceTimer < uiDiff)
+        {
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_STOLEN_SOUL, SELECT_FLAG_PLAYER))
+            {
+                uint32 spellId = (m_pInstance->Is25ManDifficulty() ? SPELL_SEVERED_ESSENCE_25 : SPELL_SEVERED_ESSENCE_10);
+                
+                if (DoCastSpellIfCan(m_creature, spellId) == CAST_OK)
+                {
+                    m_targetGuid = pTarget->GetObjectGuid();
+
+                    m_uiSummonSeveredEssenceTimer = urand(19000, 21000);
+                }
+            }
+        }
+        else
+            m_uiSummonSeveredEssenceTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_valkyr_herald(Creature* pCreature)
+{
+    return new npc_valkyr_heraldAI(pCreature);
+}
+
+/*######
+## npc_severed_essence
+######*/
+
+// Note: UpdateAI NOT COMPLETED!!!
+struct npc_severed_essence : public ScriptedAI
+{
+    npc_severed_essence(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    {
+        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
+        Reset();
+    }
+    
+    instance_icecrown_citadel* m_pInstance;
+    
+    uint8 m_uiSeveredEssenceClass;
+    uint32 m_uiSpellTimer;
+
+    ObjectGuid m_targetGuid;
+    
+    void Reset() override
+    {
+        m_uiSpellTimer = 1000;
+    }
+
+    void SetSeveredEssenceInfo(Unit* pTarget)
+    {
+        m_uiSeveredEssenceClass = pTarget->getClass();
+        m_targetGuid = pTarget->GetObjectGuid();
+        m_creature->SetDisplayId(pTarget->GetDisplayId());
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiSpellTimer < uiDiff)
+        {
+            switch (m_uiSeveredEssenceClass)
+            {
+                case CLASS_WARRIOR:
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_BLOODTHIRST);
+                    m_uiSpellTimer = 5000;
+                    break;
+                case CLASS_PALADIN:
+                    DoCastSpellIfCan(m_creature, SPELL_FLASH_OF_LIGHT);
+                    m_uiSpellTimer = 6000;
+                    break;
+                case CLASS_HUNTER:
+                    uint32 spellId = (m_pInstance->Is25ManDifficulty() ? SPELL_SHOOT_25 : SPELL_SHOOT_10);
+                    DoCastSpellIfCan(m_creature->getVictim(), spellId);
+                    m_uiSpellTimer = 20000;
+                    break;
+                case CLASS_ROGUE:
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_DISENGAGE);
+                    m_uiSpellTimer = 10000;
+                    break;
+                case CLASS_PRIEST:
+                    DoCastSpellIfCan(m_creature, SPELL_RENEW);
+                    m_uiSpellTimer = 5000;
+                    break;
+                case CLASS_SHAMAN:
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_LIGHTNING_BOLT);
+                    m_uiSpellTimer = 8000;
+                    break;
+                case CLASS_MAGE:
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL);
+                    m_uiSpellTimer = 5000;
+                    break;
+                case CLASS_WARLOCK:
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAIN_OF_CHAOS);
+                    m_uiSpellTimer = 20000;
+                    break;
+                case CLASS_DRUID:
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_MANGLE);
+                    m_uiSpellTimer = 10000;
+                    break;
+                case CLASS_DEATH_KNIGHT:
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_PLAGUE_STRIKE);
+                    m_uiSpellTimer = 10000;
+                    break;
+            }
+        }
+        else
+            m_uiSpellTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_severed_essence(Creature* pCreature)
+{
+    return new npc_severed_essenceAI(pCreature);
+}
+
 void AddSC_icecrown_citadel()
 {
     Script* pNewScript;
@@ -431,5 +673,15 @@ void AddSC_icecrown_citadel()
     pNewScript = new Script;
     pNewScript->Name = "npc_putricides_trap";
     pNewScript->GetAI = &GetAI_npc_putricides_trap;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_valkyr_herald";
+    pNewScript->GetAI = &GetAI_npc_valkyr_herald;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_severed_essence";
+    pNewScript->GetAI = &GetAI_npc_severed_essence;
     pNewScript->RegisterSelf();
 }

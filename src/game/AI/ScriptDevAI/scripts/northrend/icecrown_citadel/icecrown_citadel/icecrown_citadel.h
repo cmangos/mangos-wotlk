@@ -82,6 +82,10 @@ enum
     NPC_DARKFALLEN_BLOOD_KNIGHT     = 37595,
     NPC_DARKFALLEN_ADVISOR          = 37571,
     NPC_EMPOWERING_ORB_STALKER      = 36934,
+    
+    // Pre wing npc
+    NPC_VALKYR_HERALD               = 37098,
+    NPC_SEVERED_ESSENCE             = 38410,
 
     // achievement types
     MAX_SPECIAL_ACHIEV_CRITS        = 4,
