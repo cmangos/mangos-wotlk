@@ -4199,29 +4199,6 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
     // special cases
     switch (triggered_spell_id)
     {
-        case 18461:                                         // Vanish (not exist)
-        {
-            unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
-            unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
-            unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_STALKED);
-
-            // if this spell is given to NPC it must handle rest by it's own AI
-            if (unitTarget->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            uint32 spellId = 1784;
-            SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
-            if (spellEntry)
-            {
-                Player* playerTarget = static_cast<Player*>(unitTarget);
-                // reset cooldown on it if needed
-                if (!playerTarget->IsSpellReady(*spellEntry))
-                    playerTarget->RemoveSpellCooldown(*spellEntry);
-                m_caster->CastSpell(unitTarget, spellEntry, TRIGGERED_OLD_TRIGGERED);
-            }
-
-            return;
-        }
         case 29284:                                         // Brittle Armor - (need add max stack of 24575 Brittle Armor)
             m_caster->CastSpell(unitTarget, 24575, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID);
             return;

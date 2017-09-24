@@ -258,3 +258,8 @@ INSERT INTO spell_template (Id, Category, Attributes, AttributesEx, AttributesEx
 INSERT INTO spell_template (Id, SchoolMask, Category, Attributes, AttributesEx, AttributesEx3, AttributesEx4, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, ProcChance, DurationIndex, rangeIndex, Effect1, EffectDieSides1, EffectBaseDice1, EffectImplicitTargetA1, EffectRadiusIndex1, EffectMiscValue1, SpellIconID, SpellName, DmgMultiplier1, DmgMultiplier2) VALUES
 (23644, 4, 0, 536871168, 268435456, 0, 0, 1, 0, 0, 101, 0, 13, 1, 0, 0, 1, 0, 0, 1710, 'Burning Adrenaline', 1, 1);
 
+-- missing rogue vanish serverside
+INSERT INTO spell_template(Id,Attributes,AttributesEx,DurationIndex,Effect1,Effect2,EffectDieSides1,EffectDieSides2,EffectBaseDice1,EffectBaseDice2,EffectBasePoints1,EffectBasePoints2,EffectImplicitTargetA1,EffectImplicitTargetA2,EffectApplyAuraName1,EffectApplyAuraName2,EffectMiscValue1,EffectMiscValue2,SpellIconID,SpellName,SpellFamilyName,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
+(18461,262544,268599296,36,6,6,1,1,1,1,-1,-1,1,1,77,77,7,11,252,'Vanish Purge',7,1,1,1);
+
+
