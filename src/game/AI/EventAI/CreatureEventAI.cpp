@@ -1675,6 +1675,8 @@ inline Unit* CreatureEventAI::GetTargetByType(uint32 Target, Unit* pActionInvoke
 
             return m_creature->GetLootRecipient();
         }
+        case TARGET_T_ACTION_INVOKER_ENEMY:
+            resTarget = m_creature->IsHostileTo(pActionInvoker);
         default:
             isError = true;
             return nullptr;

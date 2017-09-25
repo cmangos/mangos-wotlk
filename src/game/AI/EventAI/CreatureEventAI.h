@@ -168,6 +168,8 @@ enum Target
     // Player associations
     TARGET_T_PLAYER_INVOKER                 = 13,           // Player who initiated hostile contact with this npc
     TARGET_T_PLAYER_TAPPED                  = 14,           // Player who currently holds to score the kill credit from the npc
+    
+    TARGET_T_ACTION_INVOKER_ENEMY           = 15,           // Unit enemy who caused this Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF, EVENT_T_RECEIVE_EMOTE, EVENT_T_RECEIVE_AI_EVENT)
 };
 
 enum EventFlags

@@ -217,6 +217,7 @@ bool IsValidTargetType(EventAI_Type eventType, EventAI_ActionType actionType, ui
             }
         case TARGET_T_ACTION_INVOKER:                       // Unit who caused this Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF, EVENT_T_RECEIVE_EMOTE, EVENT_T_RECEIVE_AI_EVENT)
         case TARGET_T_ACTION_INVOKER_OWNER:                 // Unit who is responsible for Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF, EVENT_T_RECEIVE_EMOTE, EVENT_T_RECEIVE_AI_EVENT)
+        case TARGET_T_ACTION_INVOKER_ENEMY:                 // Unit enemy who caused this Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF, EVENT_T_RECEIVE_EMOTE, EVENT_T_RECEIVE_AI_EVENT)
             switch (eventType)
             {
                 case EVENT_T_AGGRO:
@@ -701,7 +702,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             // TODO: spell must be cast on enemy, but is not
 
                             // used TARGET_T_ACTION_INVOKER, but likely should be _INVOKER_OWNER instead
-                            if (action.cast.target == TARGET_T_ACTION_INVOKER &&
+                            if (action.cast.target == TARGET_T_ACTION_INVOKER || action.cast.target == TARGET_T_ACTION_INVOKER_ENEMY &&
                                     (IsSpellHaveEffect(spell, SPELL_EFFECT_QUEST_COMPLETE) || IsSpellHaveEffect(spell, SPELL_EFFECT_CREATE_RANDOM_ITEM) || IsSpellHaveEffect(spell, SPELL_EFFECT_DUMMY)
                                      || IsSpellHaveEffect(spell, SPELL_EFFECT_KILL_CREDIT_PERSONAL) || IsSpellHaveEffect(spell, SPELL_EFFECT_KILL_CREDIT_GROUP)))
                                 sLog.outErrorEventAI("Event %u Action %u has TARGET_T_ACTION_INVOKER(%u) target type, but should have TARGET_T_ACTION_INVOKER_OWNER(%u).", i, j + 1, TARGET_T_ACTION_INVOKER, TARGET_T_ACTION_INVOKER_OWNER);
