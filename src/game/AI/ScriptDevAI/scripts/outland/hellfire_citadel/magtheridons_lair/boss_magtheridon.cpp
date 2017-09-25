@@ -101,23 +101,31 @@ struct boss_magtheridonAI : public ScriptedAI
     uint32 m_uiBlazeTimer;
     uint32 m_uiDebrisTimer;
     uint32 m_uiTransitionTimer;
+    uint32 m_uiCheckAuraBanishTimer;
     uint8 m_uiTransitionCount;
     uint8 m_uiQuakeCount;
+    uint8 m_uiShadowGraspCount;
+    
+    ObjectGuid m_banishedInvoker;
 
     bool m_bIsPhase3;
+    bool m_bIsBanished;
 
     void Reset() override
     {
-        m_uiBerserkTimer    = 20 * MINUTE * IN_MILLISECONDS;
-        m_uiQuakeTimer      = 30000;
-        m_uiBlazeTimer      = urand(10000, 15000);
-        m_uiBlastNovaTimer  = 60000;
-        m_uiCleaveTimer     = 15000;
-        m_uiTransitionTimer = 0;
-        m_uiTransitionCount = 0;
-        m_uiDebrisTimer     = urand(20000, 30000);
+        m_uiBerserkTimer         = 20 * MINUTE * IN_MILLISECONDS;
+        m_uiQuakeTimer           = 30000;
+        m_uiBlazeTimer           = urand(10000, 15000);
+        m_uiBlastNovaTimer       = 60000;
+        m_uiCleaveTimer          = 15000;
+        m_uiCheckAuraBanishTimer = 0;
+        m_uiTransitionTimer      = 0;
+        m_uiTransitionCount      = 0;
+        m_uiShadowGraspCount     = 0;
+        m_uiDebrisTimer          = urand(20000, 30000);
 
-        m_bIsPhase3         = false;
+        m_bIsPhase3              = false;
+        m_bIsBanished            = false;
 
         SetCombatMovement(true);
 
@@ -151,11 +159,25 @@ struct boss_magtheridonAI : public ScriptedAI
             m_pInstance->SetData(TYPE_MAGTHERIDON_EVENT, FAIL);
     }
 
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
     {
         // When banished by the cubes
-        if (pSpell->Id == SPELL_SHADOW_CAGE)
+        if (pSpell->Id == SPELL_SHADOW_CAGE && pCaster == m_creature)
             DoScriptText(SAY_BANISH, m_creature);
+        
+        else if (pSpell->Id == SPELL_SHADOW_GRASP && pCaster->HasAura(SPELL_SHADOW_GRASP))
+            {
+                 // PARTIALLY WORKAROUND!!! After count == 5, should banish self. After - if have aura Shadow Cage and have aura Shadow Grasp with count < 5, remove aura this.
+                ++m_uiShadowGraspCount;
+                if (m_uiShadowGraspCount == 5)
+                {
+                    m_creature->InterruptNonMeleeSpells(false);
+                    DoCastSpellIfCan(m_creature, SPELL_SHADOW_CAGE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                    m_banishedInvoker = pCaster->GetObjectGuid();
+                    m_uiCheckAuraBanishTimer = 1000;
+                    m_bIsBanished = true;
+                }
+            }
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -163,6 +185,33 @@ struct boss_magtheridonAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
+        if (m_uiCheckAuraBanishTimer)
+        {
+            // Check if the player remove shadow grasp aura.
+            if (m_uiCheckAuraBanishTimer <= uiDiff)
+            {
+                // If aura has removed, return to fight
+                if (!m_creature->HasAura(SPELL_SHADOW_CAGE))
+                {
+                    m_uiCheckAuraBanishTimer = 0;
+                    return;
+                }
+
+                Player* pPlayer = m_creature->GetMap()->GetPlayer(m_banishedInvoker);
+                if (!pPlayer && !pPlayer->HasAura(SPELL_SHADOW_GRASP) && m_creature->HasAura(SPELL_SHADOW_CAGE))
+                {
+                    m_creature->RemoveAurasDueToSpell(SPELL_SHADOW_CAGE);
+                    m_uiCheckAuraBanishTimer = 0;
+                    m_bIsBanished = false;
+                    return;
+                }
+
+                m_uiCheckAuraBanishTimer = 1000;
+            }
+            else
+                m_uiPossessEndTimer -= uiDiff;
+        }
+        
         if (m_uiBerserkTimer)
         {
             if (m_uiBerserkTimer <= uiDiff)
@@ -210,6 +259,9 @@ struct boss_magtheridonAI : public ScriptedAI
                 return;
         }
 
+        if (m_bIsBanished)
+            return;
+        
         if (m_uiQuakeTimer < uiDiff)
         {
             // Workaround for missing spell
