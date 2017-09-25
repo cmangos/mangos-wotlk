@@ -209,7 +209,7 @@ struct boss_magtheridonAI : public ScriptedAI
                 m_uiCheckAuraBanishTimer = 1000;
             }
             else
-                m_uiPossessEndTimer -= uiDiff;
+                m_uiCheckAuraBanishTimer -= uiDiff;
         }
         
         if (m_uiBerserkTimer)
