@@ -88,6 +88,8 @@ enum
     SPELL_HOLY_BOLT         = 57376,
     SPELL_HOLY_BOLT_H       = 57465,
     SPELL_CONDEMNATION      = 57377,
+    
+    MAX_MARK_STACKS         = 100,
 
     // horseman spirits (not used in 3.x.x)
     // NPC_SPIRIT_OF_BLAUMEUX = 16776,
@@ -177,6 +179,18 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
         m_creature->GetMotionMaster()->MoveIdle();
     }
 
+    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    {
+        if (pSpell->Id == SPELL_MARK_OF_BLAUMEUX)
+        {
+            if (SpellAuraHolder* pHorsemanMark = pTarget->GetSpellAuraHolder(SPELL_MARK_OF_BLAUMEUX))
+            {
+                if (pHorsemanMark && pHorsemanMark->GetStackAmount() == MAX_MARK_STACKS && !m_creature->HasAura(SPELL_BESERK))
+                    DoCastSpellIfCan(m_creature, SPELL_BESERK, CAST_TRIGGERED);
+            }
+        }
+    }
+    
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -304,6 +318,18 @@ struct boss_rivendare_naxxAI : public ScriptedAI
             m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
     }
 
+    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    {
+        if (pSpell->Id == SPELL_MARK_OF_RIVENDARE)
+        {
+            if (SpellAuraHolder* pHorsemanMark = pTarget->GetSpellAuraHolder(SPELL_MARK_OF_RIVENDARE))
+            {
+                if (pHorsemanMark && pHorsemanMark->GetStackAmount() == MAX_MARK_STACKS && !m_creature->HasAura(SPELL_BESERK))
+                    DoCastSpellIfCan(m_creature, SPELL_BESERK, CAST_TRIGGERED);
+            }
+        }
+    }
+    
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -411,6 +437,18 @@ struct boss_thane_korthazzAI : public ScriptedAI
             m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
     }
 
+    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    {
+        if (pSpell->Id == SPELL_MARK_OF_KORTHAZZ)
+        {
+            if (SpellAuraHolder* pHorsemanMark = pTarget->GetSpellAuraHolder(SPELL_MARK_OF_KORTHAZZ))
+            {
+                if (pHorsemanMark && pHorsemanMark->GetStackAmount() == MAX_MARK_STACKS && !m_creature->HasAura(SPELL_BESERK))
+                    DoCastSpellIfCan(m_creature, SPELL_BESERK, CAST_TRIGGERED);
+            }
+        }
+    }
+    
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -518,6 +556,18 @@ struct boss_sir_zeliekAI : public ScriptedAI
         m_creature->GetMotionMaster()->MoveIdle();
     }
 
+    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    {
+        if (pSpell->Id == SPELL_MARK_OF_ZELIEK)
+        {
+            if (SpellAuraHolder* pHorsemanMark = pTarget->GetSpellAuraHolder(SPELL_MARK_OF_ZELIEK))
+            {
+                if (pHorsemanMark && pHorsemanMark->GetStackAmount() == MAX_MARK_STACKS && !m_creature->HasAura(SPELL_BESERK))
+                    DoCastSpellIfCan(m_creature, SPELL_BESERK, CAST_TRIGGERED);
+            }
+        }
+    }
+    
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
