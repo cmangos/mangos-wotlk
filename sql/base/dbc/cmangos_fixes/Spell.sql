@@ -81,6 +81,13 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`ProcChance`,
 ('21117','256','1','101','30','13','-1','28','17','16','12143','876','Summon Son of Flame A','1'),
 ('21908','256','1','101','0','1','-1','3','1','0','0','1','Lava Burst Randomizer','1');
 
+INSERT INTO spell_template(Id,Attributes,CastingTimeIndex,DurationIndex,rangeIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectRadiusIndex1,EffectMiscValue1,SpellIconID,SpellName,DmgMultiplier1) VALUES
+(38726,256,1,30,1,76,1,1,72,14,185199,0,'Summon Serpentshrine Mushroom',1);
+
+INSERT INTO spell_template(Id,Attributes,CastingTimeIndex,DurationIndex,rangeIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectMiscValue1,EffectMiscValueB1,SpellIconID,SpellName,DmgMultiplier1) VALUES
+(38922,256,1,6,1,28,1,1,18,22347,64,111,'Summon Colossus Lurkers',1),
+(38928,256,1,6,1,28,9,1,18,22352,64,111,'Summon Colossus Ragers',1);
+
 -- ServerSide 'Fire Shield'
 INSERT INTO spell_template (Id,Dispel,Attributes,CastingTimeIndex,ProcChance,BaseLevel,SpellLevel,DurationIndex,RangeIndex,EquippedItemClass,EquippedItemSubClassMask,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectApplyAuraName1,EffectAmplitude1,EffectTriggerSpell1,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3,SchoolMask,IsServerSide,SpellName) VALUES
 ('13377','1','2512','1','101','40','40','21','1','-1','-1','6','1','1','21','23','3000','13376','1','1','1','2','1','Fire Shield');
