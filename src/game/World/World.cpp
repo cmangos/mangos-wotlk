@@ -1386,13 +1386,13 @@ void World::SetInitialWorldSettings()
     SetMonthlyQuestResetTime();
     sLog.outString();
 
-    sLog.outString("Loading Quest Group chosen quests...");
-    LoadEventGroupChosen();
-    sLog.outString();
-
     sLog.outString("Starting Game Event system...");
     uint32 nextGameEvent = sGameEventMgr.Initialize();
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    // depend on next event
+    sLog.outString();
+
+    sLog.outString("Loading Quest Group chosen quests...");
+    LoadEventGroupChosen();
     sLog.outString();
 
     sLog.outString("Loading grids for active creatures or transports...");
