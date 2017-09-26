@@ -10197,14 +10197,6 @@ float Unit::GetWeaponDamageRange(WeaponAttackType attType , WeaponDamageRange ty
     return m_weaponDamage[attType][type];
 }
 
-bool Unit::IsTrivialForTarget(Unit const* unit) const
-{
-    if (!unit || GetTypeId() == TYPEID_PLAYER)
-        return false;
-
-    return MaNGOS::XP::IsTrivialLevelDifference(unit->GetLevelForTarget(this), GetLevelForTarget(unit));
-}
-
 void Unit::SetLevel(uint32 lvl)
 {
     SetUInt32Value(UNIT_FIELD_LEVEL, lvl);

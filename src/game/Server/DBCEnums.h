@@ -287,6 +287,7 @@ enum FactionTemplateFlags
 {
     FACTION_TEMPLATE_FLAG_PVP               = 0x00000800,   // flagged for PvP
     FACTION_TEMPLATE_FLAG_CONTESTED_GUARD   = 0x00001000,   // faction will attack players that were involved in PvP combats
+    FACTION_TEMPLATE_FLAG_NEUTRAL_AGGRESSIVE= 0x00002000,   // always hostile to factions which should would be otherwise treated as neutral (one-sided)
 };
 
 enum FactionGroupMask

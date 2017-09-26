@@ -2169,18 +2169,18 @@ enum CreatureTypeFlags
     CREATURE_TYPEFLAGS_UNK5             = 0x00000010,       // controls something in client tooltip related to creature faction
     CREATURE_TYPEFLAGS_UNK6             = 0x00000020,       // may be sound related
     CREATURE_TYPEFLAGS_UNK7             = 0x00000040,       // may be related to attackable / not attackable creatures with spells, used together with lua_IsHelpfulSpell/lua_IsHarmfulSpell
-    CREATURE_TYPEFLAGS_UNK8             = 0x00000080,       // has something to do with unit interaction / quest status requests
+    CREATURE_TYPEFLAGS_INTERACT_DEAD    = 0x00000080,       // Creature can be interacted with even if it's dead
     CREATURE_TYPEFLAGS_HERBLOOT         = 0x00000100,       // Can be looted by herbalist
     CREATURE_TYPEFLAGS_MININGLOOT       = 0x00000200,       // Can be looted by miner
     CREATURE_TYPEFLAGS_UNK11            = 0x00000400,       // no idea, but it used by client
-    CREATURE_TYPEFLAGS_UNK12            = 0x00000800,       // related to possibility to cast spells while mounted
+    CREATURE_TYPEFLAGS_MOUNTED_COMBAT   = 0x00000800,       // possibility to attack and cast spells while mounted
     CREATURE_TYPEFLAGS_CAN_ASSIST       = 0x00001000,       // Can aid any player (and group) in combat. Typically seen for escorting NPC's
     CREATURE_TYPEFLAGS_UNK14            = 0x00002000,       // checked from calls in Lua_PetHasActionBar
     CREATURE_TYPEFLAGS_UNK15            = 0x00004000,       // Lua_UnitGUID, client does guid_low &= 0xFF000000 if this flag is set
     CREATURE_TYPEFLAGS_ENGINEERLOOT     = 0x00008000,       // Can be looted by engineer
     CREATURE_TYPEFLAGS_EXOTIC           = 0x00010000,       // Can be tamed by hunter as exotic pet
     CREATURE_TYPEFLAGS_UNK18            = 0x00020000,       // related to CreatureDisplayInfo and scaling in some way
-    CREATURE_TYPEFLAGS_UNK19            = 0x00040000,       // ? Related to vehicle/siege weapons?
+    CREATURE_TYPEFLAGS_SIEGE_WEAPON     = 0x00040000,       // Related to vehicle/siege weapons
     CREATURE_TYPEFLAGS_UNK20            = 0x00080000,       // may be has something to do with missiles
     CREATURE_TYPEFLAGS_UNK21            = 0x00100000,       // no idea, but it used by client, may be related to rendering
     CREATURE_TYPEFLAGS_UNK22            = 0x00200000,       // may be has something to do with animation (disable animation?)
@@ -2188,7 +2188,7 @@ enum CreatureTypeFlags
     CREATURE_TYPEFLAGS_SQUIRE           = 0x00800000,       // First seen in 3.2.2. Related to banner/backpack of creature/companion, used in CanInteract function by client
     CREATURE_TYPEFLAGS_UNK25            = 0x01000000,       // pet sounds related?
     CREATURE_TYPEFLAGS_UNK26            = 0x02000000,       // this one probably controls some creature visual
-    CREATURE_TYPEFLAGS_UNK27            = 0x04000000,       // creature has no type, or forces creature to be considered as in party, may be related to creature assistance
+    CREATURE_TYPEFLAGS_TREAT_AS_IN_RAID = 0x04000000,       // creature has no type, or forces creature to be considered as in party, may be related to creature assistance
     CREATURE_TYPEFLAGS_UNK28            = 0x08000000,       // used in Lua_ForceGossip
     CREATURE_TYPEFLAGS_UNK29            = 0x10000000,       // no idea, but it used by client
     CREATURE_TYPEFLAGS_UNK30            = 0x20000000,
@@ -2746,7 +2746,7 @@ enum ShapeshiftFormFlags
     SHAPESHIFT_FORM_FLAG_ALLOW_ACTIVITY     = 0x00000001,   // Form allows various player activities, which normally cause "You can't X while shapeshifted." errors (npc/go interaction, item use, etc)
     SHAPESHIFT_FORM_FLAG_UNK2               = 0x00000002,
     SHAPESHIFT_FORM_FLAG_UNK3               = 0x00000004,
-    SHAPESHIFT_FORM_FLAG_UNK4               = 0x00000008,
+    SHAPESHIFT_FORM_FLAG_ALLOW_NPC_INTERACT = 0x00000008,   // Form unconditionally allows talking to NPCs while shapeshifted (even if other activities are disabled)
     SHAPESHIFT_FORM_FLAG_UNK5               = 0x00000010,
     SHAPESHIFT_FORM_FLAG_UNK6               = 0x00000020,
     SHAPESHIFT_FORM_FLAG_UNK7               = 0x00000040,
