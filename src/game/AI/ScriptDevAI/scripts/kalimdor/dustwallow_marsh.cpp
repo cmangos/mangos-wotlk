@@ -226,16 +226,6 @@ struct npc_morokkAI : public npc_escortAI
         }
     }
 
-    void AttackedBy(Unit* pAttacker) override
-    {
-        if (m_creature->getVictim())
-            return;
-
-        if (m_creature->IsFriendlyTo(pAttacker))
-            return;
-
-        AttackStart(pAttacker);
-    }
 
     void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {

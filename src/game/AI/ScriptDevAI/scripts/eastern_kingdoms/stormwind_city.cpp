@@ -52,17 +52,6 @@ struct npc_bartlebyAI : public ScriptedAI
 
     void Reset() override {}
 
-    void AttackedBy(Unit* pAttacker) override
-    {
-        if (m_creature->getVictim())
-            return;
-
-        if (m_creature->IsFriendlyTo(pAttacker))
-            return;
-
-        AttackStart(pAttacker);
-    }
-
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (uiDamage > m_creature->GetHealth() || ((m_creature->GetHealth() - uiDamage) * 100 / m_creature->GetMaxHealth() < 15))
@@ -110,17 +99,6 @@ struct npc_dashel_stonefistAI : public ScriptedAI
     }
 
     void Reset() override {}
-
-    void AttackedBy(Unit* pAttacker) override
-    {
-        if (m_creature->getVictim())
-            return;
-
-        if (m_creature->IsFriendlyTo(pAttacker))
-            return;
-
-        AttackStart(pAttacker);
-    }
 
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
