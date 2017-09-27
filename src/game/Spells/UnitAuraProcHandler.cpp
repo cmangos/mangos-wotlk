@@ -849,7 +849,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     if (((Player*)this)->GetReputationRank(934) == REP_EXALTED)
                     {
                         // triggered at positive/self casts also, current attack target used then
-                        if (IsFriendlyTo(target))
+                        if (!CanAttack(target))
                         {
                             target = getVictim();
                             if (!target)
@@ -858,7 +858,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                                 if (!target)
                                     return SPELL_AURA_PROC_FAILED;
                             }
-                            if (IsFriendlyTo(target))
+                            if (!CanAttack(target))
                                 return SPELL_AURA_PROC_FAILED;
                         }
 
