@@ -3848,7 +3848,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
 
                     // 31989 -> dummy effect (step 1) + dummy effect (step 2) -> 31709 (taunt like spell for each target)
-                    Unit* friendTarget = !unitTarget || unitTarget->IsFriendlyTo(m_caster) ? unitTarget : unitTarget->getVictim();
+                    Unit* friendTarget = !unitTarget || m_caster->CanAssist(unitTarget) ? unitTarget : unitTarget->getVictim();
 
                     // non-standard cast requirement check
                     if (!friendTarget || friendTarget->getAttackers().empty())
