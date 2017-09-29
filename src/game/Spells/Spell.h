@@ -227,9 +227,6 @@ enum SpellState
 
 enum SpellTargets
 {
-    SPELL_TARGETS_HOSTILE,
-    SPELL_TARGETS_NOT_FRIENDLY,
-    SPELL_TARGETS_NOT_HOSTILE,
     SPELL_TARGETS_ASSISTABLE,
     SPELL_TARGETS_AOE_ATTACKABLE,
     SPELL_TARGETS_ALL
@@ -826,7 +823,7 @@ namespace MaNGOS
         float GetCenterY() const { return i_centerY; }
 
         SpellNotifierCreatureAndPlayer(Spell& spell, Spell::UnitList& data, float radius, SpellNotifyPushType type,
-                                       SpellTargets TargetType = SPELL_TARGETS_NOT_FRIENDLY, WorldObject* originalCaster = nullptr)
+                                       SpellTargets TargetType = SPELL_TARGETS_AOE_ATTACKABLE, WorldObject* originalCaster = nullptr)
             : i_data(&data), i_spell(spell), i_push_type(type), i_radius(radius), i_TargetType(TargetType),
               i_originalCaster(originalCaster), i_castingObject(i_spell.GetCastingObject())
         {
@@ -883,18 +880,6 @@ namespace MaNGOS
 
                 switch (i_TargetType)
                 {
-                    case SPELL_TARGETS_HOSTILE:
-                        if (!i_originalCaster->IsHostileTo(itr->getSource()))
-                            continue;
-                        break;
-                    case SPELL_TARGETS_NOT_FRIENDLY:
-                        if (i_originalCaster->IsFriendlyTo(itr->getSource()))
-                            continue;
-                        break;
-                    case SPELL_TARGETS_NOT_HOSTILE:
-                        if (i_originalCaster->IsHostileTo(itr->getSource()))
-                            continue;
-                        break;
                     case SPELL_TARGETS_ASSISTABLE:
                         if (!i_originalCaster->CanAssistSpell(itr->getSource(), i_spell.m_spellInfo))
                             continue;
