@@ -139,7 +139,7 @@ enum
 {
     NPC_FREED_WARRIOR       = 22459,
     QUEST_TAKEN_IN_NIGHT    = 10873
-                              // SPELL_FREE_WEBBED       = 38950
+    // SPELL_FREE_WEBBED    = 38950
 };
 
 const uint32 netherwebVictims[6] =
