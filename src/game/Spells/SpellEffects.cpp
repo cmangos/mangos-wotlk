@@ -1443,7 +1443,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 29858:                                 // Soulshatter
                 {
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->IsHostileTo(m_caster))
+                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->CanAttack(m_caster))
                         m_caster->CastSpell(unitTarget, 32835, TRIGGERED_OLD_TRIGGERED);
 
                     return;
