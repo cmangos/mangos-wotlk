@@ -23623,10 +23623,10 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
     if (!recTime && !categoryRecTime && (spellCategory == 76 || (IsAutoRepeatRangedSpell(&spellEntry) && spellEntry.Id != SPELL_ID_AUTOSHOT)))
         recTime = GetAttackTime(RANGED_ATTACK);
 
+    // blizzlike code for choosing which is recTime > categoryRecTime after spellmod application
     if (recTime)
         ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, recTime);
-
-    if (spellCategory && categoryRecTime)
+    else if (spellCategory && categoryRecTime)
         ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, categoryRecTime);
 
     if (recTime || categoryRecTime)
