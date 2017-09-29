@@ -9206,16 +9206,6 @@ void SpellAuraHolder::_AddSpellAuraHolder()
 
     Unit* caster = GetCaster();
 
-    // set infinity cooldown state for spells
-    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        if (m_spellProto->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
-        {
-            Item* castItem = m_castItemGuid ? ((Player*)caster)->GetItemByGuid(m_castItemGuid) : nullptr;
-            caster->AddCooldown(*m_spellProto, castItem ? castItem->GetProto() : nullptr, true);
-        }
-    }
-
     uint8 flags = 0;
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
