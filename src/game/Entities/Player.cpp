@@ -2397,6 +2397,8 @@ void Player::SetGameMaster(bool on)
         m_ExtraFlags |= PLAYER_EXTRA_GM_ON;
         setFaction(35);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+        SetImmuneToNPC(true);
+        SetImmuneToPlayer(true);
 
         CallForAllControlledUnits(SetGameMasterOnHelper(), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 
@@ -2413,6 +2415,8 @@ void Player::SetGameMaster(bool on)
         m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON;
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+        SetImmuneToNPC(false);
+        SetImmuneToPlayer(false);
 
         // restore phase
         AuraList const& phases = GetAurasByType(SPELL_AURA_PHASE);
