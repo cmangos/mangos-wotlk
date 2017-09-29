@@ -5892,16 +5892,13 @@ bool Spell::DoSummonCritter(CreatureSummonPositions& list, SummonPropertiesEntry
     if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         critter->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
-    if (m_caster->IsPvPFreeForAll())
-        critter->SetPvPFreeForAll(true);
-
-    if (m_caster->IsPvPSanctuary())
-        critter->SetPvPSanctuary(true);
-
-    critter->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK5);
-
+    // NOTE: All companions should have these (creatureinfo needs to be tuned accordingly before we can remove these two lines):
     critter->SetImmuneToNPC(true);
     critter->SetImmuneToPlayer(true);
+
+    // NOTE: Do not set PvP flags (confirmed) for companions.
+
+    critter->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK5);
 
     return true;
 }
@@ -6192,11 +6189,23 @@ bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
 
     m_caster->SetPet(spawnCreature);
 
+    if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        spawnCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
     if (m_caster->IsImmuneToNPC())
         spawnCreature->SetImmuneToNPC(true);
 
     if (m_caster->IsImmuneToPlayer())
         spawnCreature->SetImmuneToPlayer(true);
+
+    if (m_caster->IsPvP())
+        spawnCreature->SetPvP(true);
+
+    if (m_caster->IsPvPFreeForAll())
+        spawnCreature->SetPvPFreeForAll(true);
+
+    if (m_caster->IsPvPSanctuary())
+        spawnCreature->SetPvPSanctuary(true);
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -6831,6 +6840,9 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     pet->setFaction(plr->getFaction());
     pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
+    if (plr->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
     if (plr->IsImmuneToNPC())
         pet->SetImmuneToNPC(true);
 
@@ -6983,6 +6995,15 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     if (m_caster->IsImmuneToPlayer())
         NewSummon->SetImmuneToPlayer(true);
 
+    if (m_caster->IsPvP())
+        NewSummon->SetPvP(true);
+
+    if (m_caster->IsPvPFreeForAll())
+        NewSummon->SetPvPFreeForAll(true);
+
+    if (m_caster->IsPvPSanctuary())
+        NewSummon->SetPvPSanctuary(true);
+
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         NewSummon->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
@@ -6994,22 +7015,13 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         // generate new name for summon pet
         NewSummon->SetName(sObjectMgr.GeneratePetName(petentry));
 
-        if (m_caster->IsPvP())
-            NewSummon->SetPvP(true);
-
-        if (m_caster->IsPvPFreeForAll())
-            NewSummon->SetPvPFreeForAll(true);
-
-        if (m_caster->IsPvPSanctuary())
-            NewSummon->SetPvPSanctuary(true);
-
         NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
         ((Player*)m_caster)->PetSpellInitialize();
     }
     else
     {
+        NewSummon->SetFlag(UNIT_FIELD_FLAGS, cInfo->UnitFlags);
         NewSummon->SetUInt32Value(UNIT_NPC_FLAGS, cInfo->NpcFlags);
-        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS, cInfo->UnitFlags);
 
         // Notify Summoner
         if (m_originalCaster && (m_originalCaster != m_caster) && (m_originalCaster->AI()))
