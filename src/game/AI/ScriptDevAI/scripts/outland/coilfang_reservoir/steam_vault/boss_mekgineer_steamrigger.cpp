@@ -67,8 +67,8 @@ struct SummonLocation
 static const SummonLocation aSteamriggerSpawnLocs[] =
 {
     { -316.101f, -166.444f, -7.66f, 2.5f }, // TODO: this orientation is guesswork
-    { -348.497f, -161.719f, -7.66f, 0.3621517 },
-    { -331.161f, -112.212f, -7.66f, 5.259035 },
+    { -348.497f, -161.719f, -7.66f, 0.3621517f },
+    { -331.161f, -112.212f, -7.66f, 5.259035f },
 };
 
 struct boss_mekgineer_steamriggerAI : public ScriptedAI
