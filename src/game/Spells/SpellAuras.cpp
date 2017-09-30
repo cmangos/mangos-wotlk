@@ -3078,14 +3078,14 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
                             target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
 
-                            target->addUnitState(UNIT_STAT_DIED);
+                            target->addUnitState(UNIT_STAT_FEIGN_DEATH);
                         }
                         else
                         {
                             target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
                             target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
 
-                            target->clearUnitState(UNIT_STAT_DIED);
+                            target->clearUnitState(UNIT_STAT_FEIGN_DEATH);
                         }
                     }
                     return;
