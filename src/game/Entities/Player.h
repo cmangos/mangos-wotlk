@@ -1834,6 +1834,7 @@ class Player : public Unit
         void SendAttackSwingNotInRange() const;
         void SendAttackSwingBadFacingAttack() const;
         void SendAutoRepeatCancel(Unit* target) const;
+        void SendFeignDeathResisted() const;
         void SendExplorationExperience(uint32 Area, uint32 Experience) const;
 
         void SendDungeonDifficulty(bool IsInGroup) const;
