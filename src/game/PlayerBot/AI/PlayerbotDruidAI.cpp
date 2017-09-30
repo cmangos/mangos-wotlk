@@ -305,7 +305,7 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverBear(Unit* pTarg
     Unit* pVictim = pTarget->getVictim();
 
     // Face enemy, make sure you're attacking
-    if (!m_bot->HasInArc(M_PI_F, pTarget))
+    if (!m_bot->HasInArc(pTarget))
     {
         m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
         if (pVictim)
@@ -353,7 +353,7 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverCat(Unit* pTarge
     Unit* pVictim = pTarget->getVictim();
 
     // Face enemy, make sure you're attacking
-    if (!m_bot->HasInArc(M_PI_F, pTarget))
+    if (!m_bot->HasInArc(pTarget))
     {
         m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
         if (pVictim)
@@ -435,7 +435,7 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverSpellDPS(Unit* p
         return RETURN_CONTINUE;
 
     // Face enemy, make sure you're attacking
-    if (!m_bot->HasInArc(M_PI_F, pTarget))
+    if (!m_bot->HasInArc(pTarget))
     {
         m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
         if (m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_MELEE)
