@@ -287,7 +287,7 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
                     // Solarian casts Arcane Missiles on on random targets in the raid.
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
-                        if (!m_creature->HasInArc(2.5f, pTarget))
+                        if (!m_creature->HasInArc(pTarget, 2.5f))
                             pTarget = m_creature->getVictim();
 
                         if (pTarget)
