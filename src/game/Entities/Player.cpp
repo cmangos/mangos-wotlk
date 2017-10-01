@@ -21413,7 +21413,7 @@ Player* Player::GetNextRaidMemberWithLowestLifePercentage(float radius, AuraType
                 continue;
             }
 
-            // IsHostileTo check duel and controlled by enemy
+            // CanAssist check duel and controlled by enemy
             if (IsWithinDistInMap(target, radius) &&
                     !target->HasInvisibilityAura() && CanAssist(target) && !target->HasAuraType(noAuraType))
             {
