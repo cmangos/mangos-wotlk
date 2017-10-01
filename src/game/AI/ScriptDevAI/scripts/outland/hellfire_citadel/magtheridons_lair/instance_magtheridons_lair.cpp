@@ -122,6 +122,8 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                     // Reset door on Fail or Done
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_DOODAD_HF_MAG_DOOR01))
                         pDoor->ResetDoorOrButton();
+
+                    SetData(TYPE_CHANNELER_EVENT, DONE);
                     break;
                 case IN_PROGRESS:
                     // Set boss in combat
