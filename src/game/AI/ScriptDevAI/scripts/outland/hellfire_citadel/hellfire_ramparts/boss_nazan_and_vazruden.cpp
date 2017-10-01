@@ -147,7 +147,7 @@ struct boss_vazruden_heraldAI : public ScriptedAI
 
             if (m_pInstance->GetData(TYPE_NAZAN) == SPECIAL)
             {
-                m_creature->SetCombatStartPosition(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+                m_creature->SetCombatStartPosition(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation());
                 m_uiMovementTimer = 1000;
                 m_bIsEventInProgress = true;
             }
@@ -207,8 +207,8 @@ struct boss_vazruden_heraldAI : public ScriptedAI
 
     void DoMoveToAir()
     {
-        float fX, fY, fZ;
-        m_creature->GetCombatStartPosition(fX, fY, fZ);
+        float fX, fY, fZ, ori;
+        m_creature->GetCombatStartPosition(fX, fY, fZ, ori);
 
         // Remove Idle MMGen
         if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)

@@ -252,8 +252,8 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
             // Change to clean
             if (m_uiPosCheckTimer < uiDiff)
             {
-                float fPosX, fPosY, fPosZ;
-                m_creature->GetCombatStartPosition(fPosX, fPosY, fPosZ);
+                float fPosX, fPosY, fPosZ, ori;
+                m_creature->GetCombatStartPosition(fPosX, fPosY, fPosZ, ori);
 
                 if (m_creature->IsWithinDist2d(fPosX, fPosY, SWITCH_RADIUS))
                 {
@@ -295,8 +295,8 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
             // Change to corrupt
             if (m_uiPosCheckTimer < uiDiff)
             {
-                float fPosX, fPosY, fPosZ;
-                m_creature->GetCombatStartPosition(fPosX, fPosY, fPosZ);
+                float fPosX, fPosY, fPosZ, ori;
+                m_creature->GetCombatStartPosition(fPosX, fPosY, fPosZ, ori);
 
                 if (!m_creature->IsWithinDist2d(fPosX, fPosY, SWITCH_RADIUS))
                 {
