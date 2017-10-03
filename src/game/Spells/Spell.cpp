@@ -2459,7 +2459,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         {
             if (Unit* unitTarget = m_targets.getUnitTarget())
             {
-                if (unitTarget->CanAssistSpell(m_caster, m_spellInfo))
+                if (m_caster->CanAssistSpell(unitTarget, m_spellInfo))
                     targetUnitMap.push_back(unitTarget);
                 else
                 {
