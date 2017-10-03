@@ -5625,7 +5625,18 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         responsibleCaster = ((GameObject*)realCaster)->GetOwner();
 
     // Expected Amount: TODO - there are quite some exceptions (like totems, engineering dragonlings..)
-    uint32 amount = damage > 0 ? damage : 1;
+    uint32 amount = 1;
+    uint32 unk = 0; // no idea what it means, but 4000-25000 cant be right for summon count
+    switch (summon_prop->Group)
+    {
+        case SUMMON_PROP_GROUP_FRIENDLY:
+        case SUMMON_PROP_GROUP_CONTROLLABLE:
+            unk = damage;
+            break;
+        default:
+            amount = damage > 0 ? damage : 1; // old code
+            break;
+    }
 
     // basepoints of SUMMON_PROP_GROUP_VEHICLE is often a spellId, set amount to 1
     if (summon_prop->Group == SUMMON_PROP_GROUP_VEHICLE || summon_prop->Group == SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE || summon_prop->Group == SUMMON_PROP_GROUP_CONTROLLABLE)
