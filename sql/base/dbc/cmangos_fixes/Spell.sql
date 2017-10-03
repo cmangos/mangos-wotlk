@@ -219,3 +219,7 @@ INSERT INTO spell_template (Id, Category, Attributes, AttributesEx, AttributesEx
 (19827, 23, 256, 0, 0, 0, 1, 45000, 15000, 101, 21, 1, 41, 1, 1, 18, 16, 12420, 1, 'Summon Blackwing Mage', 1, 0),
 (19828, 23, 256, 0, 0, 0, 1, 75000, 15000, 101, 21, 1, 41, 1, 1, 18, 16, 12422, 1, 'Summon Death Talon Dragonspawn', 1, 0);
 
+-- Missing sub effect for Burning Adrenaline from Classic
+INSERT INTO spell_template (Id, SchoolMask, Category, Attributes, AttributesEx, AttributesEx3, AttributesEx4, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, ProcChance, DurationIndex, rangeIndex, Effect1, EffectDieSides1, EffectBaseDice1, EffectImplicitTargetA1, EffectRadiusIndex1, EffectMiscValue1, SpellIconID, SpellName, DmgMultiplier1, DmgMultiplier2) VALUES
+(23644, 4, 0, 536871168, 268435456, 0, 0, 1, 0, 0, 101, 0, 13, 1, 0, 0, 1, 0, 0, 1710, 'Burning Adrenaline', 1, 1);
+
