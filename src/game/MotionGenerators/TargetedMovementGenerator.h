@@ -58,6 +58,8 @@ class TargetedMovementGeneratorMedium
 
         void unitSpeedChanged() { m_speedChanged = true; }
 
+        void SetOffsetAndAngle(float offset, float angle);
+
     protected:
         void _setTargetLocation(T&, bool updateDestination);
         bool RequiresNewPosition(T& owner, float x, float y, float z) const;
@@ -86,7 +88,7 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMo
         void Finalize(T&);
         void Interrupt(T&);
         void Reset(T&);
-        void SetOffsetAndAngle(float offset, float angle, bool moveFurther);
+        void SetMovementParameters(float offset, float angle, bool moveFurther);
 
         static void _clearUnitStateMove(T& u);
         static void _addUnitStateMove(T& u);
