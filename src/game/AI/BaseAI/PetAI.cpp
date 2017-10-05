@@ -385,7 +385,7 @@ void PetAI::UpdateAllies()
     Unit* owner = m_unit->GetMaster();
     Group* group = nullptr;
 
-    m_updateAlliesTimer = 10 * IN_MILLISECONDS;             // update friendly targets every 10 seconds, lesser checks increase performance
+    m_updateAlliesTimer = 10 * IN_MILLISECONDS;             // update friendly targets every 10 seconds, fewer checks increase performance
 
     if (!owner)
         return;
