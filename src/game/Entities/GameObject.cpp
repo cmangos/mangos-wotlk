@@ -870,7 +870,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                     Player* ownerPlayer = (Player*)owner;
                     if ((GetMap()->IsBattleGroundOrArena() && ownerPlayer->GetBGTeam() != u->GetBGTeam()) ||
                             (ownerPlayer->IsInDuelWith(u)) ||
-                            (!ownerPlayer->CanCooperate(u)))
+                            (!ownerPlayer->IsInSameRaidWith(u)))
                         trapNotVisible = true;
                 }
                 else
