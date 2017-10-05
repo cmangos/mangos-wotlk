@@ -2467,7 +2467,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     {
                         if (Unit* targetOfUnitTarget = unitTarget->GetTarget(m_caster))
                         {
-                            if (targetOfUnitTarget->CanAssistSpell(m_caster, m_spellInfo))
+                            if (m_caster->CanAssistSpell(targetOfUnitTarget, m_spellInfo))
                             {
                                 switch (m_spellInfo->Id)
                                 {
