@@ -142,7 +142,7 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
                 {
                     m_CreatureEventAIList.push_back(CreatureEventAIHolder(*i));
                     // Cache for fast use
-                    if (i->event_type == EVENT_T_OOC_LOS)
+                    if (i->event_type == EVENT_T_OOC_LOS || i->event_type == EVENT_T_CREATURE_IN_LOS))
                         m_HasOOCLoSEvent = true;
                 }
             }
@@ -500,6 +500,20 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
             // Repeat Timers
             pHolder.UpdateRepeatTimer(m_creature, event.facingTarget.repeatMin, event.facingTarget.repeatMax);
             break;
+        }
+        case EVENT_T_CREATURE_IN_LOS:
+        {
+            // Prevent event from occuring on no unit or non creatures
+            if (!pActionInvoker || pActionInvoker->GetTypeId() != TYPEID_UNIT)
+                return false;
+            
+            // Creature id doesn't match up
+            if (((Creature*)pActionInvoker)->GetEntry() != event.creature_los.creatureIdEntry)
+                  return false;
+              
+              // Repeat Timers
+              pHolder.UpdateRepeatTimer(m_creature, event.creature_los.repeatMin, event.creature_los.repeatMax);
+              break;
         }
         default:
             sLog.outErrorEventAI("Creature %u using Event %u has invalid Event Type(%u), missing from ProcessEvent() Switch.", m_creature->GetEntry(), pHolder.Event.event_id, pHolder.Event.event_type);
@@ -1451,6 +1465,24 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
                 {
                     // if range is ok and we are actually in LOS
                     if (m_creature->IsWithinDistInMap(who, fMaxAllowedRange) && m_creature->IsWithinLOSInMap(who))
+                        ProcessEvent(*itr, who);
+                }
+            }
+        }
+    }
+    // Check for Creature LoS Event
+    if (m_HasOOCLoSEvent)
+    {
+        for (CreatureEventAIList::iterator itr = m_CreatureEventAIList.begin(); itr != m_CreatureEventAIList.end(); ++itr)
+        {
+            if (itr->Event.event_type == EVENT_T_CREATURE_IN_LOS)
+            {
+                // can trigger if closer than fMaxAllowedRange
+                float fMaxAllowedRange = (float)itr->Event.creature_los.maxRange;
+                uint32 entry = itr->Event.creature_los.creatureIdEntry;
+                {
+                    // if range is ok and we are actually in LOS
+                    if (pWho->GetEntry() == entry && m_creature->IsWithinDistInMap(who, fMaxAllowedRange))
                         ProcessEvent(*itr, who);
                 }
             }

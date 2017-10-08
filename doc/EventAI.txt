@@ -96,6 +96,7 @@ Some events such as EVENT_T_AGGRO, EVENT_T_DEATH, EVENT_T_SPAWNED, and EVENT_T_E
 31   EVENT_T_ENERGY                  EnergyMax%, EnergyMin%, RepeatMin, RepeatMax            Expires when the NPC's Energy% is between (Param1) and (Param2). Will repeat between every (Param3) and (Param4) If Event Conditions Are Still Met.
 32   EVENT_T_SELECT_ATTACKING_TARGET MinRange, MaxRange, RepeatMin, RepeatMax                Expires when the NPC has a target in threat table further than Param1 and closer than Param2. First time happens after and will repeat after Param3 and Param4.
 33   EVENT_T_FACING_TARGET           BackOrFront, unused, RepeatMin, RepeatMax               Expires when the NPC is in back (Param1=0) or in front (Param1=1) of its current target. Will repeat after Param3 and Param4.
+34   EVENT_T_CREATURE_IN_LOS         CreatureId, MaxRnage, RepeatMin, RepeatMax              Expires when a unit moves within distance (MaxAllowedRange) of the NPC. If (Param1) is 0 - not allow run this event. Creature should have entry for select. This depends generally on creature entry auth. Will repeat every (Param3) and (Param4). Expire in both case: if npc in combat and if npc out of combat.
 
 =========================================
 Action Types
@@ -505,6 +506,17 @@ Parameter 4: RepeatMax - Maximum Time used to calculate Random Repeat Event Expi
 
 COMBAT ONLY - Expires when the NPC is facing the back (or front) of its current target. Will repeat every (Param3) and (Param4).
 This is commonly used for events where a NPC needs to use abilities available only when facing its target's back/front (Such as rogues' backstab ability).
+
+---------------------
+10 = EVENT_T_CREATURE_IN_LOS:
+---------------------
+Parameter 1: Creature Id   - Creature, who invoker this Event. Cannot be = 0.
+Parameter 2: MaxAllowedRange  - Expires when a Unit moves within this distance to creature
+Parameter 3: RepeatMin        - Minimum Time used to calculate Random Repeat Expire
+Parameter 4: RepeatMax        - Maximum Time used to calculate Random Repeat Expire
+
+OUT OF COMBAT ONLY
+This Event is commonly used for creature id, who do something or say something to you when you walk past them Out of Combat and In Combat.
 
 =========================================
 Action Types
@@ -1024,8 +1036,8 @@ Target types are used by certain actions and may effect actions differently
 3    TARGET_T_HOSTILE_LAST_AGGRO        Dead Last on Aggro (no idea what this could be used for)
 4    TARGET_T_HOSTILE_RANDOM            Random Target on The Threat List
 5    TARGET_T_HOSTILE_RANDOM_NOT_TOP    Any Random Target Except Top Threat
-6    TARGET_T_ACTION_INVOKER            Unit Who Caused This Event to Occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF, EVENT_T_RECEIVE_EMOTE, EVENT_T_RECEIVE_AI_EVENT)
-7    TARGET_T_ACTION_INVOKER_OWNER      Unit who is responsible for Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF, EVENT_T_RECEIVE_EMOTE, EVENT_T_RECEIVE_AI_EVENT)
+6    TARGET_T_ACTION_INVOKER            Unit Who Caused This Event to Occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF, EVENT_T_RECEIVE_EMOTE, EVENT_T_RECEIVE_AI_EVENT, EVENT_T_CREATURE_IN_LOS)
+7    TARGET_T_ACTION_INVOKER_OWNER      Unit who is responsible for Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF, EVENT_T_RECEIVE_EMOTE, EVENT_T_RECEIVE_AI_EVENT, EVENT_T_CREATURE_IN_LOS)
 8    TARGET_T_HOSTILE_RANDOM_PLAYER          Random Player on The Threat List
 9    TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER  Any Random Player Except Top Threat
 10   TARGET_T_EVENT_SENDER              Creature who sent a received AIEvent - only triggered by EVENT_T_RECEIVE_AI_EVENT

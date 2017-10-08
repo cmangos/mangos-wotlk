@@ -71,6 +71,7 @@ enum EventAI_Type
     EVENT_T_ENERGY                  = 31,                   // EnergyMax%, EnergyMin%, RepeatMin, RepeatMax
     EVENT_T_SELECT_ATTACKING_TARGET = 32,                   // MinRange, MaxRange, RepeatMin, RepeatMax
     EVENT_T_FACING_TARGET           = 33,                   // Position, unused, RepeatMin, RepeatMax
+    EVENT_T_CREATURE_IN_LOS         = 34,                   // CreatureId, MaxRnage, RepeatMin, RepeatMax
 
     EVENT_T_END,
 };
@@ -670,6 +671,14 @@ struct CreatureEventAI_Event
             uint32 repeatMin;
             uint32 repeatMax;
         } facingTarget;
+        // EVENT_T_CREATURE_IN_LOS                          = 34
+        struct
+        {
+            uint32 creatureIdEntry;
+            uint32 maxRange;
+            uint32 repeatMin;
+            uint32 repeatMax;
+        } creature_los;
         // RAW
         struct
         {
