@@ -40,11 +40,11 @@ enum
     SPELL_TRANSFORM                 = 26232,
     SPELL_CTHUN_VULNERABLE          = 26235,
     SPELL_MOUTH_TENTACLE            = 26332,                // prepare target to teleport to stomach
-    // SPELL_DIGESTIVE_ACID_TELEPORT = 26220,               // removed from DBC. stomach teleport spell
+    SPELL_DIGESTIVE_ACID_TELEPORT   = 26220,                // removed from DBC (readded). stomach teleport spell
     SPELL_EXIT_STOMACH_KNOCKBACK    = 25383,                // spell id is wrong
-    // SPELL_EXIT_STOMACH_JUMP       = 26224,               // removed from DBC. should make the player jump to the ceiling
-    // SPELL_EXIT_STOMACH_EFFECT     = 26230,               // removed from DBC. used to complete the eject effect from the stomach
-    // SPELL_PORT_OUT_STOMACH_EFFECT = 26648,               // removed from DBC. used to kill players inside the stomach on evade
+    SPELL_EXIT_STOMACH_JUMP         = 26224,                // removed from DBC (readded). should make the player jump to the ceiling - not used yet
+    SPELL_EXIT_STOMACH_EFFECT       = 26230,                // removed from DBC (readded). used to complete the eject effect from the stomach - not used yet
+    SPELL_PORT_OUT_STOMACH_EFFECT   = 26648,                // removed from DBC (readded). used to kill players inside the stomach on evade
     SPELL_DIGESTIVE_ACID            = 26476,                // damage spell - should be handled by the map
     // SPELL_EXIT_STOMACH            = 26221,               // summons 15800
 
@@ -405,9 +405,8 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         // Kill any player from the stomach on evade - this is becuase C'thun cannot be soloed.
         for (GuidList::const_iterator itr = m_lPlayersInStomachList.begin(); itr != m_lPlayersInStomachList.end(); ++itr)
         {
-            // Workaround for missing spell 26648
             if (Player* pPlayer = m_creature->GetMap()->GetPlayer(*itr))
-                m_creature->DealDamage(pPlayer, pPlayer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                pPlayer->CastSpell(pPlayer, SPELL_PORT_OUT_STOMACH_EFFECT, TRIGGERED_OLD_TRIGGERED);
         }
 
         Scripted_NoMovementAI::EnterEvadeMode();
@@ -589,7 +588,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                         // Check for valid player
                         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_stomachEnterTargetGuid))
                         {
-                            DoTeleportPlayer(pPlayer, afCthunLocations[2][0], afCthunLocations[2][1], afCthunLocations[2][2], afCthunLocations[2][3]);
+                            pPlayer->CastSpell(pPlayer, SPELL_DIGESTIVE_ACID_TELEPORT, TRIGGERED_OLD_TRIGGERED);
                             m_lPlayersInStomachList.push_back(pPlayer->GetObjectGuid());
                         }
 
@@ -658,7 +657,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         else
             m_uiEyeTentacleTimer -= uiDiff;
 
-        // Note: this should be handled by the maps
+        // Note: this should be applied by the teleport spell
         if (m_uiDigestiveAcidTimer < uiDiff)
         {
             // Iterate the Stomach players list and apply the Digesti acid debuff on them every 4 sec

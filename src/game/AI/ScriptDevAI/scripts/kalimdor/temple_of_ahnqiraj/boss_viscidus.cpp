@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Viscidus
 SD%Complete: 90
-SDComment: Server side spells implementation need to be checked.
+SDComment: ToDo: Use aura proc to handle freeze event instead of direct function
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
@@ -50,14 +50,14 @@ enum
     SPELL_VISCIDUS_SUICIDE      = 26003,                    // cast when boss explodes and is below 5% Hp - should trigger 26002
     SPELL_DESPAWN_GLOBS         = 26608,
 
-    // SPELL_MEMBRANE_VISCIDUS   = 25994,                   // damage reduction spell - removed from DBC
-    // SPELL_VISCIDUS_WEAKNESS   = 25926,                   // aura which procs at damage - should trigger the slow spells - removed from DBC
-    // SPELL_VISCIDUS_SHRINKS    = 25893,                   // removed from DBC
-    // SPELL_VISCIDUS_SHRINKS_2  = 27934,                   // removed from DBC
-    // SPELL_VISCIDUS_GROWS      = 25897,                   // removed from DBC
-    // SPELL_SUMMON_GLOBS        = 25885,                   // summons npc 15667 using spells from 25865 to 25884; All spells have target coords - removed from DBC
-    // SPELL_VISCIDUS_TELEPORT   = 25904,                   // removed from DBC
-    // SPELL_SUMMONT_TRIGGER     = 26564,                   // summons 15992 - removed from DBC
+    SPELL_MEMBRANE_VISCIDUS     = 25994,                   // damage reduction spell - removed from DBC (readded)
+    SPELL_VISCIDUS_WEAKNESS     = 25926,                   // aura which procs at damage - should trigger the slow spells - removed from DBC (readded)
+    SPELL_VISCIDUS_SHRINKS      = 25893,                   // removed from DBC (readded)
+    SPELL_VISCIDUS_SHRINKS_HP   = 27934,                   // removed from DBC (readded)
+    SPELL_VISCIDUS_GROWS        = 25897,                   // removed from DBC (readded)
+    SPELL_SUMMON_GLOBS          = 25885,                   // summons npc 15667 using spells from 25865 to 25884; All spells have target coords - removed from DBC (readdeed)
+    SPELL_VISCIDUS_TELEPORT     = 25904,                   // teleport to room center - removed from DBC (readded)
+    SPELL_SUMMONT_TRIGGER       = 26564,                   // summons 15992 - removed from DBC (readded)
 
     NPC_GLOB_OF_VISCIDUS        = 15667,
     NPC_VISCIDUS_TRIGGER        = 15922,                    // handles aura 26575
@@ -110,10 +110,12 @@ struct boss_viscidusAI : public ScriptedAI
         m_uiPoisonShockTimer      = urand(7000, 12000);
         m_uiPoisonBoltVolleyTimer = urand(10000, 15000);
 
+        DoCastSpellIfCan(m_creature, SPELL_MEMBRANE_VISCIDUS, CAST_TRIGGERED);
+        DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_WEAKNESS, CAST_TRIGGERED);
+
         SetCombatMovement(true);
         m_creature->SetVisibility(VISIBILITY_ON);
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-        m_creature->SetObjectScale(DEFAULT_OBJECT_SCALE);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -156,9 +158,11 @@ struct boss_viscidusAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_GLOB_OF_VISCIDUS)
         {
             // shrink - modify scale
-            m_creature->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X, float(-4), true);
-            m_creature->UpdateModelData();
-            m_creature->SetHealth(m_creature->GetHealth() - (m_creature->GetMaxHealth() * 0.05f));
+            DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SHRINKS, CAST_TRIGGERED);
+
+            if (DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SHRINKS_HP, CAST_TRIGGERED) == CAST_OK)
+                m_creature->SetHealth(m_creature->GetHealth() - (m_creature->GetMaxHealth() * 0.05f));
+
             m_lGlobesGuidList.remove(pSummoned->GetObjectGuid());
 
             // suicide if required
@@ -186,6 +190,8 @@ struct boss_viscidusAI : public ScriptedAI
         if (pSummoned->GetEntry() != NPC_GLOB_OF_VISCIDUS || uiType != POINT_MOTION_TYPE || !uiPointId)
             return;
 
+        DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_GROWS, CAST_TRIGGERED);
+
         m_lGlobesGuidList.remove(pSummoned->GetObjectGuid());
         pSummoned->CastSpell(m_creature, SPELL_REJOIN_VISCIDUS, TRIGGERED_OLD_TRIGGERED);
         pSummoned->ForcedDespawn(1000);
@@ -203,9 +209,6 @@ struct boss_viscidusAI : public ScriptedAI
 
     void DamageTaken(Unit* pDealer, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
-        // apply missing aura: 50% damage reduction;
-        uiDamage = uiDamage * 0.5f;
-
         if (m_uiPhase != PHASE_FROZEN)
             return;
 
@@ -226,6 +229,8 @@ struct boss_viscidusAI : public ScriptedAI
                 m_uiHitCount = 0;
                 m_lGlobesGuidList.clear();
                 uint32 uiGlobeCount = m_creature->GetHealthPercent() / 5.0f;
+
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_GLOBS, CAST_TRIGGERED);
 
                 for (uint8 i = 0; i < uiGlobeCount; ++i)
                     DoCastSpellIfCan(m_creature, auiGlobSummonSpells[i], CAST_TRIGGERED);
@@ -302,10 +307,7 @@ struct boss_viscidusAI : public ScriptedAI
                 // Make invisible
                 m_creature->SetVisibility(VISIBILITY_OFF);
 
-                // Teleport to room center
-                float fX, fY, fZ, fO;
-                m_creature->GetRespawnCoord(fX, fY, fZ, &fO);
-                m_creature->NearTeleportTo(fX, fY, fZ, fO);
+                DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_TELEPORT, CAST_TRIGGERED);
                 m_uiExplodeDelayTimer = 0;
             }
             else
@@ -334,8 +336,10 @@ struct boss_viscidusAI : public ScriptedAI
         if (m_uiToxinTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                m_creature->SummonCreature(NPC_VISCIDUS_TRIGGER, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
-            m_uiToxinTimer = 30000;
+            {
+                if (DoCastSpellIfCan(pTarget, SPELL_SUMMONT_TRIGGER) == CAST_OK)
+                    m_uiToxinTimer = 30000;
+            }
         }
         else
             m_uiToxinTimer -= uiDiff;
