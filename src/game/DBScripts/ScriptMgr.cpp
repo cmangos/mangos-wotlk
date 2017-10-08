@@ -1638,16 +1638,20 @@ bool ScriptAction::HandleScriptStep()
                     break;
             }
 
+            PlayPacketParameters params(PLAY_SET);
+            if (pSoundTarget)
+                params = PlayPacketParameters(PLAY_TARGET, pSoundTarget);
+
             if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-                pSource->PlayMusic(m_script->playSound.soundId, pSoundTarget);
+                pSource->PlayMusic(m_script->playSound.soundId, params);
             else
             {
                 if (m_script->playSound.flags & 2)
-                    pSource->PlayDistanceSound(m_script->playSound.soundId, pSoundTarget);
+                    pSource->PlayDistanceSound(m_script->playSound.soundId, params);
                 else if (m_script->playSound.flags & (4 | 8))
                     m_map->PlayDirectSoundToMap(m_script->playSound.soundId, m_script->playSound.flags & 8 ? pSource->GetZoneId() : 0);
                 else
-                    pSource->PlayDirectSound(m_script->playSound.soundId, pSoundTarget);
+                    pSource->PlayDirectSound(m_script->playSound.soundId, params);
             }
             break;
         }

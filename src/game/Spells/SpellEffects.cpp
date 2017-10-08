@@ -11977,7 +11977,7 @@ void Spell::EffectPlaySound(SpellEffectIndex eff_idx)
         return;
     }
 
-    unitTarget->PlayDirectSound(soundId, (Player*)unitTarget);
+    unitTarget->PlayDirectSound(soundId, PlayPacketParameters(PLAY_TARGET, (Player*)unitTarget));
 }
 
 void Spell::EffectPlayMusic(SpellEffectIndex eff_idx)
@@ -11992,7 +11992,7 @@ void Spell::EffectPlayMusic(SpellEffectIndex eff_idx)
         return;
     }
 
-    m_caster->PlayMusic(soundId, (Player*)unitTarget);
+    m_caster->PlayMusic(soundId, PlayPacketParameters(PLAY_TARGET, (Player*)unitTarget));
 }
 
 void Spell::EffectSpecCount(SpellEffectIndex /*eff_idx*/)
