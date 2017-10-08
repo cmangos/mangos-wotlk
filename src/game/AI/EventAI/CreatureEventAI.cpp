@@ -1482,7 +1482,7 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
                 uint32 entry = itr->Event.creature_los.creatureIdEntry;
                 {
                     // if range is ok and we are actually in LOS
-                    if (pWho->GetEntry() == entry && m_creature->IsWithinDistInMap(who, fMaxAllowedRange))
+                    if (who->GetEntry() == entry && m_creature->IsWithinDistInMap(who, fMaxAllowedRange))
                         ProcessEvent(*itr, who);
                 }
             }
