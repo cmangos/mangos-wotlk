@@ -71,6 +71,7 @@ enum EventAI_Type
     EVENT_T_ENERGY                  = 31,                   // EnergyMax%, EnergyMin%, RepeatMin, RepeatMax
     EVENT_T_SELECT_ATTACKING_TARGET = 32,                   // MinRange, MaxRange, RepeatMin, RepeatMax
     EVENT_T_FACING_TARGET           = 33,                   // Position, unused, RepeatMin, RepeatMax
+    EVENT_T_CREATURE_IN_LOS         = 34,                   // CreatureId, MaxRnage, RepeatMin, RepeatMax
 
     EVENT_T_END,
 };
@@ -134,6 +135,8 @@ enum EventAI_ActionType
     ACTION_T_TEXT_NEW                   = 54,               // Text ID, target, template Id
     ACTION_T_ATTACK_START               = 55,               // Target, unused, unused
     ACTION_T_DESPAWN_GUARDIANS          = 56,               // Guardian Entry ID (or 0 to despawn all guardians), unused, unused
+    ACTION_T_TARGET_SPELL_TARGET        = 57,               // Target, SpellId, Target.
+    ACTION_T_SET_TRIGGERED_CAST         = 58,               // Allow control Triggered Cast or not for ACTION_T_TARGET_SPELL_TARGET. 0 = OLD_TRIGGERED_CAST, 1 = TRIGGERED_CAST flags.
 
     ACTION_T_END,
 };
@@ -495,6 +498,20 @@ struct CreatureEventAI_Action
             uint32 unused;
             uint32 unused2;
         } despawnGuardians;
+        // ACTION_T_TARGET_SPELL_TARGET                     = 57
+        struct
+        {
+            uint32 target;
+            uint32 spellId;
+            uint32 target;
+        } castTarget;
+        // ACTION_T_SET_TRIGGERED_CAST                      = 58
+        struct
+        {
+            uint32 state;                                   // Allow control OLD_TRIGGERED_CAST or New.
+            uint32 unused1;
+            uint32 unused2;
+        } setTriggeredCast;
         // RAW
         struct
         {
@@ -670,6 +687,14 @@ struct CreatureEventAI_Event
             uint32 repeatMin;
             uint32 repeatMax;
         } facingTarget;
+        // EVENT_T_CREATURE_IN_LOS                          = 34
+        struct
+        {
+            uint32 creatureIdEntry;
+            uint32 maxRange;
+            uint32 repeatMin;
+            uint32 repeatMax;
+        } creature_los;
         // RAW
         struct
         {
@@ -776,6 +801,7 @@ class CreatureEventAI : public CreatureAI
         bool   m_MeleeEnabled;                              // If we allow melee auto attack
         bool   m_DynamicMovement;                           // Core will control creatures movement if this is enabled
         bool   m_HasOOCLoSEvent;                            // Cache if a OOC-LoS Event exists
+        bool   m_bTriggered;                                // Check if we allow old triggered cast or new triggered cast.
         uint32 m_InvinceabilityHpLevel;                     // Minimal health level allowed at damage apply
 
         uint32 m_throwAIEventMask;                          // Automatically throw AIEvents that are encoded into this mask
