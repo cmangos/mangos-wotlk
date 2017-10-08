@@ -3367,7 +3367,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     {
                         // used for direct in code aura removes and spell proc event charges expire
                         if (m_removeMode != AURA_REMOVE_BY_DEFAULT)
+                        {
+                            if (Unit* misdirectTarget = target->getHostileRefManager().GetThreatRedirectionTarget())
+                                misdirectTarget->RemoveAurasDueToSpell(35079);
                             target->getHostileRefManager().ResetThreatRedirection();
+                        }
                     }
                     return;
                 }
