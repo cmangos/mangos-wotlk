@@ -86,6 +86,7 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
     m_MeleeEnabled(true),
     m_DynamicMovement(false),
     m_HasOOCLoSEvent(false),
+    m_bTriggered(false),
     m_InvinceabilityHpLevel(0),
     m_throwAIEventMask(0),
     m_throwAIEventStep(0),
@@ -142,7 +143,7 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
                 {
                     m_CreatureEventAIList.push_back(CreatureEventAIHolder(*i));
                     // Cache for fast use
-                    if (i->event_type == EVENT_T_OOC_LOS)
+                    if (i->event_type == EVENT_T_OOC_LOS || i->event_type == EVENT_T_CREATURE_IN_LOS)
                         m_HasOOCLoSEvent = true;
                 }
             }
@@ -499,6 +500,20 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
             LOG_PROCESS_EVENT;
             // Repeat Timers
             pHolder.UpdateRepeatTimer(m_creature, event.facingTarget.repeatMin, event.facingTarget.repeatMax);
+            break;
+        }
+        case EVENT_T_CREATURE_IN_LOS:
+        {
+            // Prevent event from occuring on no unit or non creatures
+            if (!pActionInvoker || pActionInvoker->GetTypeId() != TYPEID_UNIT)
+                return false;
+
+            // Creature id doesn't match up
+            if (((Creature*)pActionInvoker)->GetEntry() != event.creature_los.creatureIdEntry)
+                return false;
+
+            // Repeat Timers
+            pHolder.UpdateRepeatTimer(m_creature, event.creature_los.repeatMin, event.creature_los.repeatMax);
             break;
         }
         default:
@@ -1204,6 +1219,26 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 m_creature->RemoveGuardians();
             break;
         }
+        case ACTION_T_TARGET_SPELL_TARGET:
+        {
+            Unit* target = GetTargetByType(action.castTarget.target, pActionInvoker, pAIEventSender, reportTargetError);
+            if (!target)
+            {
+                if (reportTargetError)
+                    sLog.outErrorEventAI("Event %d attempt to start relay script but Target == nullptr. Creature %d", EventId, m_creature->GetEntry());
+                return;
+            }
+            if (!m_bTriggered)
+                target->CastSpell(target, action.castTarget.spellId, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+            else
+                target->CastSpell(target, action.castTarget.spellId, CAST_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+            break;
+        }
+        case ACTION_T_SET_TRIGGERED_CAST:
+        {
+            m_bTriggered = action.setTriggeredCast.state != 0;
+            break;
+        }
         default:
             sLog.outError("CreatureEventAi::ProcessAction(): action(%u) not implemented", static_cast<uint32>(action.type));
             break;
@@ -1457,6 +1492,25 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
         }
     }
 
+    // Check for Creature LoS Event
+    if (m_HasOOCLoSEvent)
+    {
+        for (CreatureEventAIList::iterator itr = m_CreatureEventAIList.begin(); itr != m_CreatureEventAIList.end(); ++itr)
+        {
+            if (itr->Event.event_type == EVENT_T_CREATURE_IN_LOS)
+            {
+                // can trigger if closer than fMaxAllowedRange
+                float fMaxAllowedRange = (float)itr->Event.creature_los.maxRange;
+                uint32 entry = itr->Event.creature_los.creatureIdEntry;
+                {
+                    // if range is ok and we are actually in LOS
+                    if (pWho->GetEntry() == entry && m_creature->IsWithinDistInMap(who, fMaxAllowedRange))
+                        ProcessEvent(*itr, who);
+                }
+            }
+        }
+    }
+    
     if (m_creature->IsCivilian() || m_creature->IsNeutralToAll())
         return;
 

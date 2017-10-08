@@ -229,6 +229,7 @@ bool IsValidTargetType(EventAI_Type eventType, EventAI_ActionType actionType, ui
                 case EVENT_T_FRIENDLY_MISSING_BUFF:
                 case EVENT_T_RECEIVE_EMOTE:
                 case EVENT_T_RECEIVE_AI_EVENT:
+                case EVENT_T_CREATURE_IN_LOS:
                     return true;
                 default:
                     sLog.outErrorEventAI("Event %u Action%u uses incorrect Target type %u for event-type %u", eventId, action, targetType, eventType);
@@ -549,6 +550,12 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         sLog.outErrorEventAI("Creature %u is using repeatable event(%u) with param4 < param3 (RepeatMax < RepeatMin). Event will never repeat.", temp.creature_id, i);
                     break;
                 }
+                case EVENT_T_CREATURE_IN_LOS:
+                    if (!sCreatureStorage.LookupEntry<CreatureInfo>(temp.creature_los.creatureIdEntry))
+                        sLog.outErrorEventAI("Creature %u are using event(%u) with nonexistent creature template id (%u) in param1, skipped.", temp.creature_id, i, temp.creature_los.creatureIdEntry);
+                    if (temp.creature_los.repeatMax < temp.creature_los.repeatMin)
+                        sLog.outErrorEventAI("Creature %u are using repeatable event(%u) with param4 < param3 (RepeatMax < RepeatMin). Event will never repeat.", temp.creature_id, i);
+                    break;
                 default:
                     sLog.outErrorEventAI("Creature %u using not checked at load event (%u) in event %u. Need check code update?", temp.creature_id, temp.event_id, i);
                     break;
@@ -999,6 +1006,16 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent Creature entry %u.", i, j + 1, action.despawnGuardians.entryId);
                             action.despawnGuardians.entryId = 0;
                         }
+                        break;
+                    case ACTION_T_TARGET_SPELL_TARGET:
+                    {
+                        const SpellEntry* spell = sSpellTemplate.LookupEntry<SpellEntry>(action.castTarget.spellId);
+                        if (!spell)
+                            sLog.outErrorEventAI("Event %u Action %u uses nonexistent SpellID %u.", i, j + 1, action.castTarget.spellId);
+                        IsValidTargetType(temp.event_type, action.type, action.castTarget.target, i, j + 1);
+                        break;
+                    }
+                    case ACTION_T_SET_TRIGGERED_CAST:
                         break;
                     default:
                         sLog.outErrorEventAI("Event %u Action %u have currently not checked at load action type (%u). Need check code update?", i, j + 1, temp.action[j].type);
