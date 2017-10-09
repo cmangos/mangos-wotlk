@@ -23,6 +23,7 @@ class WorldObject;
 class Aura;
 class Object;
 class ObjectGuid;
+class GameObjectAI;
 
 // *********************************************************
 // ************** Some defines used globally ***************
@@ -63,14 +64,14 @@ enum EscortFaction
 struct Script
 {
     Script() :
-        pGossipHello(NULL), pGossipHelloGO(NULL), pGossipSelect(NULL), pGossipSelectGO(NULL),
-        pGossipSelectWithCode(NULL), pGossipSelectGOWithCode(NULL),
-        pDialogStatusNPC(NULL), pDialogStatusGO(NULL),
-        pQuestAcceptNPC(NULL), pQuestAcceptGO(NULL), pQuestAcceptItem(NULL),
-        pQuestRewardedNPC(NULL), pQuestRewardedGO(NULL),
-        pGOUse(NULL), pItemUse(NULL), pAreaTrigger(NULL), pNpcSpellClick(NULL), pProcessEventId(NULL),
-        pEffectDummyNPC(NULL), pEffectDummyGO(NULL), pEffectDummyItem(NULL), pEffectScriptEffectNPC(NULL),
-        pEffectAuraDummy(NULL), GetAI(NULL), GetInstanceData(NULL)
+        pGossipHello(nullptr), pGossipHelloGO(nullptr), pGossipSelect(nullptr), pGossipSelectGO(nullptr),
+        pGossipSelectWithCode(nullptr), pGossipSelectGOWithCode(nullptr),
+        pDialogStatusNPC(nullptr), pDialogStatusGO(nullptr),
+        pQuestAcceptNPC(nullptr), pQuestAcceptGO(nullptr), pQuestAcceptItem(nullptr),
+        pQuestRewardedNPC(nullptr), pQuestRewardedGO(nullptr),
+        pGOUse(nullptr), pItemUse(nullptr), pAreaTrigger(nullptr), pNpcSpellClick(nullptr), pProcessEventId(nullptr),
+        pEffectDummyNPC(nullptr), pEffectDummyGO(nullptr), pEffectDummyItem(nullptr), pEffectScriptEffectNPC(nullptr),
+        pEffectAuraDummy(nullptr), GetGameObjectAI(nullptr), GetAI(nullptr), GetInstanceData(nullptr)
     {}
 
     std::string Name;
@@ -99,6 +100,7 @@ struct Script
     bool (*pEffectScriptEffectNPC)(Unit*, uint32, SpellEffectIndex, Creature*, ObjectGuid);
     bool (*pEffectAuraDummy)(const Aura*, bool);
 
+    GameObjectAI* (*GetGameObjectAI)(GameObject*);
     CreatureAI* (*GetAI)(Creature*);
     InstanceData* (*GetInstanceData)(Map*);
 
@@ -145,6 +147,7 @@ public:
     uint32 GetScriptIdsCount() const { return m_scriptNames.size(); }
 
     CreatureAI* GetCreatureAI(Creature* creature);
+    GameObjectAI* GetGameObjectAI(GameObject* gameobject);
 
     InstanceData* CreateInstanceData(Map* pMap);
     uint32 GetAreaTriggerScriptId(uint32 triggerId) const;
