@@ -1034,9 +1034,9 @@ void Object::ForceValuesUpdateAtIndex(uint32 index)
 }
 
 WorldObject::WorldObject() :
-    m_transportInfo(nullptr), m_currMap(nullptr),
-    m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL),
-    m_isActiveObject(false)
+    m_transportInfo(nullptr), m_isOnEventNotified(false),
+    m_currMap(nullptr), m_mapId(0),
+    m_InstanceId(0), m_isActiveObject(false), m_phaseMask(PHASEMASK_NORMAL)
 {
 }
 
@@ -1674,6 +1674,22 @@ void WorldObject::SetMap(Map* map)
     m_InstanceId = map->GetInstanceId();
 }
 
+void WorldObject::AddToWorld()
+{
+    if (m_isOnEventNotified)
+        m_currMap->AddToOnEventNotified(this);
+
+    Object::AddToWorld();
+}
+
+void WorldObject::RemoveFromWorld()
+{
+    if (m_isOnEventNotified)
+        m_currMap->RemoveFromOnEventNotified(this);
+
+    Object::RemoveFromWorld();
+}
+
 TerrainInfo const* WorldObject::GetTerrain() const
 {
     MANGOS_ASSERT(m_currMap);
@@ -2072,6 +2088,22 @@ void WorldObject::SetActiveObjectState(bool active)
             GetMap()->AddToActive(this);
     }
     m_isActiveObject = active;
+}
+
+void WorldObject::SetNotifyOnEventState(bool state)
+{
+    if (state == m_isOnEventNotified)
+        return;
+
+    m_isOnEventNotified = state;
+
+    if (!IsInWorld())
+        return;
+
+    if (state)
+        GetMap()->AddToOnEventNotified(this);
+    else
+        GetMap()->RemoveFromOnEventNotified(this);
 }
 
 void WorldObject::AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration /*= 0*/, bool /*updateClient = false*/)

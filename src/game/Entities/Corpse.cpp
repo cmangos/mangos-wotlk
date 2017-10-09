@@ -50,7 +50,7 @@ void Corpse::AddToWorld()
     if (!IsInWorld())
         sObjectAccessor.AddObject(this);
 
-    Object::AddToWorld();
+    WorldObject::AddToWorld();
 }
 
 void Corpse::RemoveFromWorld()

@@ -1081,6 +1081,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     pGameObj->SetSpellId(m_spellInfo->Id);
 
                     map->Add(pGameObj);
+                    pGameObj->AIM_Initialize();
                     return;
                 }
                 case 19869:                                 // Dragon Orb
@@ -1186,6 +1187,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     DEBUG_LOG("AddObject at SpellEfects.cpp EffectDummy");
                     map->Add(pGameObj);
+                    pGameObj->AIM_Initialize();
 
                     return;
                 }
@@ -7462,6 +7464,7 @@ void Spell::EffectSummonObjectWild(SpellEffectIndex eff_idx)
 
     // Wild object not have owner and check clickable by players
     map->Add(pGameObj);
+    pGameObj->AIM_Initialize();
 
     // Store the GO to the caster
     m_caster->AddWildGameObject(pGameObj);
@@ -10618,6 +10621,8 @@ void Spell::EffectDuel(SpellEffectIndex eff_idx)
 
     m_caster->AddGameObject(pGameObj);
     map->Add(pGameObj);
+    pGameObj->AIM_Initialize();
+
     // END
 
     // Send request
@@ -11088,6 +11093,7 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
     m_caster->AddGameObject(pGameObj);
 
     map->Add(pGameObj);
+    pGameObj->AIM_Initialize();
 
     m_caster->m_ObjectSlotGuid[slot] = pGameObj->GetObjectGuid();
 
@@ -11708,6 +11714,7 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
     // m_ObjToDel.push_back(pGameObj);
 
     cMap->Add(pGameObj);
+    pGameObj->AIM_Initialize();
 
     pGameObj->SummonLinkedTrapIfAny();
 
