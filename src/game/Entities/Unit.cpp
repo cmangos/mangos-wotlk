@@ -324,6 +324,8 @@ Unit::Unit() :
 
     m_isCreatureLinkingTrigger = false;
     m_isSpawningLinked = false;
+    
+    m_extraAttacksExecuting = false;
 }
 
 Unit::~Unit()
@@ -2580,12 +2582,14 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
 
 void Unit::DoExtraAttacks(Unit* pVictim)
 {
+    m_extraAttacksExecuting = true;
     while (m_extraAttacks)
     {
         AttackerStateUpdate(pVictim, BASE_ATTACK, true);
         if (m_extraAttacks > 0)
             --m_extraAttacks;
     }
+    m_extraAttacksExecuting = false;
 }
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackType attType, SpellSchoolMask schoolMask) const
