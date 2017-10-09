@@ -102,6 +102,7 @@ UPDATE gameobject_template SET ScriptName='go_andorhal_tower' WHERE entry IN (17
 UPDATE gameobject_template SET ScriptName='go_scourge_enclosure' WHERE entry=191548;
 UPDATE gameobject_template SET ScriptName='go_lab_work_reagents' WHERE entry IN (190462, 190473, 190478, 190459);
 UPDATE gameobject_template SET ScriptName='go_bells' WHERE entry IN(182064,175885,176573);
+UPDATE gameobject_template SET ScriptName='go_darkmoon_faire_music' WHERE entry=180335;
 
 /* GUARD */
 UPDATE creature_template SET ScriptName='guard_azuremyst' WHERE entry=18038;
