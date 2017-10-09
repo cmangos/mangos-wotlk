@@ -8239,6 +8239,8 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
 
             return false;
         }
+        case CONDITION_SPAWN_COUNT:
+            return source->GetMap()->SpawnedCountForEntry(m_value1) >= m_value2;
         default:
             return false;
     }
