@@ -558,7 +558,7 @@ struct npc_death_knight_initiateAI : public ScriptedAI
 
     void Reset() override
     {
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SWIMMING);
         m_duelerGuid.Clear();
 
         m_uiDuelStartStage      = 0;
@@ -724,7 +724,7 @@ bool GossipSelect_npc_death_knight_initiate(Player* pPlayer, Creature* pCreature
         pPlayer->CLOSE_GOSSIP_MENU();
 
         pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-        pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
+        pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SWIMMING);
         pCreature->SetFacingToObject(pPlayer);
 
         DoScriptText(m_auiRandomSay[urand(0, countof(m_auiRandomSay) - 1)], pCreature, pPlayer);
@@ -1197,7 +1197,7 @@ struct npc_scarlet_ghoulAI : public ScriptedPetAI
         DoCastSpellIfCan(m_creature, SPELL_GHOUL_SUMMONED);
 
         if (m_creature->GetCharmInfo())
-            m_creature->GetAI()->SetReactState(REACT_DEFENSIVE);
+            m_creature->AI()->SetReactState(REACT_DEFENSIVE);
 
         Reset();
     }

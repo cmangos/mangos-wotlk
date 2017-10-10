@@ -226,7 +226,7 @@ void instance_pit_of_saron::OnCreatureCreate(Creature* pCreature)
         case NPC_JAINA_PART2:
         case NPC_SYLVANAS_PART2:
         case NPC_SINDRAGOSA:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_STALKER:
             m_lTunnelStalkersGuidList.push_back(pCreature->GetObjectGuid());
@@ -266,7 +266,7 @@ void instance_pit_of_saron::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_pit_of_saron::SetData(uint32 uiType, uint32 uiData)

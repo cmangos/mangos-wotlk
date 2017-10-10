@@ -55,7 +55,7 @@ void instance_oculus::OnCreatureCreate(Creature* pCreature)
         case NPC_VAROS:
         case NPC_UROM:
         case NPC_EREGOS:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -66,7 +66,7 @@ void instance_oculus::OnObjectCreate(GameObject* pGo)
     {
         case GO_CACHE_EREGOS:
         case GO_CACHE_EREGOS_H:
-            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             break;
         case GO_DRAGON_CAGE_DOOR:
             m_lCageDoorGUIDs.push_back(pGo->GetObjectGuid());

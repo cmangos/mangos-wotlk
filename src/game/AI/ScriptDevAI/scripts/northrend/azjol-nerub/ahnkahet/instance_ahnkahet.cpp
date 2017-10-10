@@ -48,7 +48,7 @@ void instance_ahnkahet::OnCreatureCreate(Creature* pCreature)
         case NPC_TALDARAM:
         case NPC_JEDOGA_SHADOWSEEKER:
         case NPC_HERALD_VOLAZJ:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_AHNKAHAR_GUARDIAN_EGG:
             m_GuardianEggList.push_back(pCreature->GetObjectGuid());
@@ -100,7 +100,7 @@ void instance_ahnkahet::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_ahnkahet::SetData(uint32 uiType, uint32 uiData)

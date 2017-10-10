@@ -53,7 +53,7 @@ void instance_pinnacle::OnCreatureCreate(Creature* pCreature)
         case NPC_TORGYN:
         case NPC_SKADI:
         case NPC_GRAUF:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_WORLD_TRIGGER:
             if (pCreature->GetPositionX() < 250.0f)
@@ -84,7 +84,7 @@ void instance_pinnacle::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)

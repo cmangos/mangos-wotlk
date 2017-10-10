@@ -43,7 +43,7 @@ void instance_utgarde_keep::OnCreatureCreate(Creature* pCreature)
         case NPC_SKARVALD:
         case NPC_DALRONN:
         case NPC_INGVAR:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -87,7 +87,7 @@ void instance_utgarde_keep::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_utgarde_keep::OnCreatureDeath(Creature* pCreature)

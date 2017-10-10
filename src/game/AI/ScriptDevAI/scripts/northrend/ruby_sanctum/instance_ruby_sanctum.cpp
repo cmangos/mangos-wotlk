@@ -70,7 +70,7 @@ void instance_ruby_sanctum::OnCreatureCreate(Creature* pCreature)
             // Special case for Xerestrasza: she only needs to have questgiver flag if Baltharus is killed
             if (m_auiEncounter[TYPE_BALTHARUS] != DONE)
                 pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_ZARITHRIAN:
             if (m_auiEncounter[TYPE_SAVIANA] == DONE && m_auiEncounter[TYPE_BALTHARUS] == DONE)
@@ -80,7 +80,7 @@ void instance_ruby_sanctum::OnCreatureCreate(Creature* pCreature)
         case NPC_HALION_REAL:
         case NPC_HALION_TWILIGHT:
         case NPC_HALION_CONTROLLER:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_ZARITHRIAN_SPAWN_STALKER:
             m_lSpawnStalkersGuidList.push_back(pCreature->GetObjectGuid());
@@ -116,7 +116,7 @@ void instance_ruby_sanctum::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 // Wrapper to unlock the flame wall in from of Zarithrian

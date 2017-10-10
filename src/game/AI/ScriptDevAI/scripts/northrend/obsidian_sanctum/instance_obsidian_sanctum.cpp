@@ -53,7 +53,7 @@ void instance_obsidian_sanctum::OnCreatureCreate(Creature* pCreature)
         case NPC_VESPERON:
             pCreature->SetActiveObjectState(true);
         case NPC_SARTHARION:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_FIRE_CYCLONE:
             m_lFireCycloneGuidList.push_back(pCreature->GetObjectGuid());

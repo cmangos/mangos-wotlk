@@ -451,15 +451,15 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
                 return false;
             break;
         case NPC_ANUBARAK:
-            if (fY < 281.0f && fY > 228.0f)
+            if (y < 281.0f && y > 228.0f)
                 return false;
             break;
         case NPC_SINDRAGOSA:
-            if (fX > 4314.0f)
+            if (x > 4314.0f)
                 return false;
             break;
         case NPC_ZARITHRIAN:
-            if (fZ > 87.0f)
+            if (z > 87.0f)
                 return false;
             break;
         default:

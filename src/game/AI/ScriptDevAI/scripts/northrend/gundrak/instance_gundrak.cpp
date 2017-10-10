@@ -63,7 +63,7 @@ void instance_gundrak::OnCreatureCreate(Creature* pCreature)
         case NPC_SLADRAN:
         case NPC_ELEMENTAL:
         case NPC_COLOSSUS:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
         case NPC_INVISIBLE_STALKER:
@@ -140,7 +140,7 @@ void instance_gundrak::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_gundrak::Load(const char* chrIn)

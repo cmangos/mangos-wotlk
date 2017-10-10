@@ -50,7 +50,7 @@ void instance_halls_of_lightning::OnCreatureCreate(Creature* pCreature)
         case NPC_BJARNGRIM:
         case NPC_IONAR:
         case NPC_VOLKHAN_ANVIL:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -73,7 +73,7 @@ void instance_halls_of_lightning::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_halls_of_lightning::SetData(uint32 uiType, uint32 uiData)

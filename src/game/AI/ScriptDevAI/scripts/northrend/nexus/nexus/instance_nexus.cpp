@@ -75,7 +75,7 @@ void instance_nexus::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_nexus::OnCreatureCreate(Creature* pCreature)
@@ -84,7 +84,7 @@ void instance_nexus::OnCreatureCreate(Creature* pCreature)
     {
         case NPC_ORMOROK:
         case NPC_KERISTRASZA:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }

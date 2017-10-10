@@ -62,7 +62,7 @@ void instance_eye_of_eternity::OnCreatureCreate(Creature* pCreature)
         case NPC_ALEXSTRASZA:
         case NPC_LARGE_TRIGGER:
         case NPC_ALEXSTRASZAS_GIFT:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -79,7 +79,7 @@ void instance_eye_of_eternity::OnObjectCreate(GameObject* pGo)
         case GO_HEART_OF_MAGIC_H:
         case GO_ALEXSTRASZAS_GIFT:
         case GO_ALEXSTRASZAS_GIFT_H:
-            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             break;
     }
 }

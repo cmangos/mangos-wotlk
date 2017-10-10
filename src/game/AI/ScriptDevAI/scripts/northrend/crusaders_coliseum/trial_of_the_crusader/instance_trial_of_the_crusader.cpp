@@ -212,7 +212,7 @@ void instance_trial_of_the_crusader::OnCreatureCreate(Creature* pCreature)
             return;
     }
 
-    m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+    m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 }
 
 void instance_trial_of_the_crusader::OnObjectCreate(GameObject* pGo)
@@ -245,12 +245,12 @@ void instance_trial_of_the_crusader::OnObjectCreate(GameObject* pGo)
         case GO_CRUSADERS_CACHE_25:
         case GO_CRUSADERS_CACHE_10_H:
         case GO_CRUSADERS_CACHE_25_H:
-            m_mGoEntryGuidStore[GO_CRUSADERS_CACHE] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[GO_CRUSADERS_CACHE] = pGo->GetObjectGuid();
             return;
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_trial_of_the_crusader::OnPlayerEnter(Player* pPlayer)

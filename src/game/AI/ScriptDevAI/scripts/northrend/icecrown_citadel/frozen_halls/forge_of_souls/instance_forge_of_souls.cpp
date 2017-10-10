@@ -41,7 +41,7 @@ void instance_forge_of_souls::OnCreatureCreate(Creature* pCreature)
     switch (pCreature->GetEntry())
     {
         case NPC_BRONJAHM:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
         case NPC_CORRUPTED_SOUL_FRAGMENT:

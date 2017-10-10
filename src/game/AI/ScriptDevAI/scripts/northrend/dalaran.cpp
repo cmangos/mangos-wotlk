@@ -46,21 +46,21 @@ struct npc_dalaran_guardian_mageAI : public ScriptedAI
 {
     npc_dalaran_guardian_mageAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
-        if (m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
+        if (m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
             return;
 
-        if (pWho->isTargetableForAttack() && m_creature->IsHostileTo(pWho))
+        if (m_creature->CanAttackOnSight(who))
         {
             // exception for quests 20439 and 24451
-            if (pWho->HasAura(SPELL_COVENANT_DISGUISE_1) || pWho->HasAura(SPELL_COVENANT_DISGUISE_2) ||
-                    pWho->HasAura(SPELL_SUNREAVER_DISGUISE_1) || pWho->HasAura(SPELL_SUNREAVER_DISGUISE_2))
+            if (who->HasAura(SPELL_COVENANT_DISGUISE_1) || who->HasAura(SPELL_COVENANT_DISGUISE_2) ||
+                who->HasAura(SPELL_SUNREAVER_DISGUISE_1) || who->HasAura(SPELL_SUNREAVER_DISGUISE_2))
                 return;
 
-            if (m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
+            if (m_creature->IsWithinDistInMap(who, m_creature->GetAttackDistance(who)) && m_creature->IsWithinLOSInMap(who))
             {
-                if (Player* pPlayer = pWho->GetBeneficiaryPlayer())
+                if (Player* pPlayer = who->GetBeneficiaryPlayer())
                 {
                     // it's mentioned that pet may also be teleported, if so, we need to tune script to apply to those in addition.
 

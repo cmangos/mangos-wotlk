@@ -54,7 +54,7 @@ void world_map_ebon_hold::OnCreatureCreate(Creature* pCreature)
         case NPC_THE_LICH_KING:
         case NPC_HIGHLORD_ALEXANDROS_MOGRAINE:
         case NPC_DARION_MOGRAINE:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
             // Behemots and abominations are spawned by default on the map so they need to be handled here
@@ -127,7 +127,7 @@ void world_map_ebon_hold::OnObjectCreate(GameObject* pGo)
     switch (pGo->GetEntry())
     {
         case GO_LIGHT_OF_DAWN:
-            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             break;
         case GO_HOLY_LIGHTNING_1:
         case GO_HOLY_LIGHTNING_2:

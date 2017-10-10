@@ -72,7 +72,7 @@ void instance_halls_of_stone::OnCreatureCreate(Creature* pCreature)
             break;
         case NPC_DARK_MATTER:
         case NPC_SJONNIR:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -107,7 +107,7 @@ void instance_halls_of_stone::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_halls_of_stone::SetData(uint32 uiType, uint32 uiData)

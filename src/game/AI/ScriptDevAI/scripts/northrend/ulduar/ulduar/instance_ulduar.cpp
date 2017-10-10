@@ -294,7 +294,7 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
         default:
             return;
     }
-    m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+    m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 }
 
 void instance_ulduar::OnObjectCreate(GameObject* pGo)
@@ -454,7 +454,7 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 // Used in order to unlock the door to Vezax

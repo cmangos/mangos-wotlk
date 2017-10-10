@@ -159,7 +159,7 @@ void instance_violet_hold::OnCreatureCreate(Creature* pCreature)
         default:
             return;
     }
-    m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+    m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 }
 
 void instance_violet_hold::OnObjectCreate(GameObject* pGo)
@@ -195,7 +195,7 @@ void instance_violet_hold::OnObjectCreate(GameObject* pGo)
         case GO_PRISON_SEAL_DOOR:
             break;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_violet_hold::UpdateCellForBoss(uint32 uiBossEntry, bool bForceClosing /*= false*/)

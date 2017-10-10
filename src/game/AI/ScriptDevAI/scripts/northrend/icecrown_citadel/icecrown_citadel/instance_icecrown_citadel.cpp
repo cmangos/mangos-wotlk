@@ -164,7 +164,7 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_GAS_STALKER:
         case NPC_OOZE_TENTACLE_STALKER:
         case NPC_SLIMY_TENTACLE_STALKER:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_DEATHWHISPER_SPAWN_STALKER:
             m_lDeathwhisperStalkersGuids.push_back(pCreature->GetObjectGuid());
@@ -275,25 +275,25 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
         case GO_SAURFANG_CACHE_25:
         case GO_SAURFANG_CACHE_10_H:
         case GO_SAURFANG_CACHE_25_H:
-            m_mGoEntryGuidStore[GO_SAURFANG_CACHE] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[GO_SAURFANG_CACHE] = pGo->GetObjectGuid();
             return;
         case GO_GUNSHIP_ARMORY_A:
         case GO_GUNSHIP_ARMORY_A_25:
         case GO_GUNSHIP_ARMORY_A_10H:
         case GO_GUNSHIP_ARMORY_A_25H:
-            m_mGoEntryGuidStore[GO_GUNSHIP_ARMORY_A] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[GO_GUNSHIP_ARMORY_A] = pGo->GetObjectGuid();
             return;
         case GO_GUNSHIP_ARMORY_H:
         case GO_GUNSHIP_ARMORY_H_25:
         case GO_GUNSHIP_ARMORY_H_10H:
         case GO_GUNSHIP_ARMORY_H_25H:
-            m_mGoEntryGuidStore[GO_GUNSHIP_ARMORY_H] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[GO_GUNSHIP_ARMORY_H] = pGo->GetObjectGuid();
             return;
         case GO_DREAMWALKER_CACHE:
         case GO_DREAMWALKER_CACHE_25:
         case GO_DREAMWALKER_CACHE_10_H:
         case GO_DREAMWALKER_CACHE_25_H:
-            m_mGoEntryGuidStore[GO_DREAMWALKER_CACHE] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[GO_DREAMWALKER_CACHE] = pGo->GetObjectGuid();
             return;
         case GO_ICESHARD_1:
         case GO_ICESHARD_2:
@@ -368,7 +368,7 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_icecrown_citadel::OnCreatureEnterCombat(Creature* pCreature)

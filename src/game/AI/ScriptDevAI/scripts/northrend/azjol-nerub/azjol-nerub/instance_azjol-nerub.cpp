@@ -55,7 +55,7 @@ void instance_azjol_nerub::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_azjol_nerub::OnCreatureCreate(Creature* pCreature)
@@ -68,7 +68,7 @@ void instance_azjol_nerub::OnCreatureCreate(Creature* pCreature)
         case NPC_SILTHIK:
         case NPC_HADRONOX:
         case NPC_ANUBARAK:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_WORLD_TRIGGER:
             m_lTriggerGuids.push_back(pCreature->GetObjectGuid());
