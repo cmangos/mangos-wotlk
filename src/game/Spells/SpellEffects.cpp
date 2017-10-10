@@ -1158,37 +1158,16 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 23019:                                 // Crystal Prison Dummy DND
                 {
-                    if (!unitTarget || !unitTarget->isAlive() || unitTarget->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    Creature* creatureTarget = (Creature*)unitTarget;
-                    if (creatureTarget->IsPet())
-                        return;
-
-                    GameObject* pGameObj = new GameObject;
-
-                    Map* map = creatureTarget->GetMap();
-
-                    // create before death for get proper coordinates
-                    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), 179644, map, m_caster->GetPhaseMask(),
-                                          creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(),
-                                          creatureTarget->GetOrientation()))
+                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->isAlive())
                     {
-                        delete pGameObj;
-                        return;
+                        Creature* creatureTarget = (Creature*)unitTarget;
+                        if (!creatureTarget->IsPet())
+                        {
+                            creatureTarget->CastSpell(creatureTarget, 23022, TRIGGERED_OLD_TRIGGERED);
+                            creatureTarget->ForcedDespawn();
+                        }
                     }
-
-                    pGameObj->SetRespawnTime(creatureTarget->GetRespawnTime() - time(nullptr));
-                    pGameObj->SetOwnerGuid(m_caster->GetObjectGuid());
-                    pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel());
-                    pGameObj->SetSpellId(m_spellInfo->Id);
-
-                    creatureTarget->ForcedDespawn();
-
-                    DEBUG_LOG("AddObject at SpellEfects.cpp EffectDummy");
-                    map->Add(pGameObj);
-                    pGameObj->AIM_Initialize();
-
+                    
                     return;
                 }
                 case 23074:                                 // Arcanite Dragonling
