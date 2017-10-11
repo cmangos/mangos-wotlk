@@ -311,6 +311,9 @@ INSERT INTO spell_template(Id,Attributes,AttributesEx,baseLevel,spellLevel,Durat
 INSERT INTO spell_template(Id,AttributesEx5,CastingTimeIndex,rangeIndex,Effect1,EffectImplicitTargetA1,SpellIconID,SpellName,DmgMultiplier1) VALUES
 (36551,8,1,1,77,1,1,'AIClearReturnState',1); -- Tooltip: Calls AIClearReturnState(). Must be called during the On Leave Combat action.
 
+UPDATE spell_template SET MaxAffectedTargets=3 WHERE id=37790; -- Coilfang Ambusher - Spread Shot
+UPDATE spell_template SET MaxAffectedTargets=5 WHERE id=38296; -- Spitfire Totem - Scorch
+
 -- Missing selector spells for BWL
 INSERT INTO spell_template (id, attributes, attributesEx, attributesEx2, CastingTimeIndex, ProcChance, RangeIndex, Effect1, EffectImplicitTargetA1, EffectImplicitTargetB1, EffectRadiusIndex1, EffectMiscValue1, SpellIconId, SpellName, DmgMultiplier1) VALUES
 (23195, 8388864, 0, 1, 1, 101, 1, 3, 1, 0, 0, 0, 1, 'Dragondog Breath Selection', 1),
