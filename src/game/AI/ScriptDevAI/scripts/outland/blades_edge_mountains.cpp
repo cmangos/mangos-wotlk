@@ -1324,6 +1324,107 @@ CreatureAI* GetAI_npc_spirit_prisoner_of_bladespire(Creature* pCreature)
     return new npc_spirit_prisoner_of_bladespire(pCreature);
 }
 
+/*######
+## npc_deadsoul_orb
+######*/
+
+enum
+{
+    WAYPOINT_TRIGGER_1 = 20851,
+    WAYPOINT_TRIGGER_2 = 20852,
+    WAYPOINT_TRIGGER_3 = 20853,
+    WAYPOINT_TRIGGER_4 = 20855,
+    WAYPOINT_TRIGGER_5 = 20856,
+
+    ORB_TRIGGER_01 = 20666,
+};
+
+struct npc_deadsoul_orb : public ScriptedAI
+{
+    npc_deadsoul_orb(Creature* pCreature) : ScriptedAI(pCreature) 
+    { 
+        Reset(); 
+        nextTrigger = WAYPOINT_TRIGGER_1;
+        pointCount = 1;
+    }
+
+    uint32 nextTrigger;
+    uint8 pointCount;
+
+    void Reset() override 
+    {
+        MoveToNextTrigger();
+    }
+
+    void MovementInform(uint32 /*uiMovementType*/, uint32 uiData) override
+    {
+        switch (uiData)
+        {
+        case 1:
+        {
+            nextTrigger = WAYPOINT_TRIGGER_2;
+            pointCount++;
+            MoveToNextTrigger();
+            break;
+        }
+        case 2:
+        {
+            nextTrigger = WAYPOINT_TRIGGER_3;
+            pointCount++;
+            MoveToNextTrigger();
+            break;
+        }
+        case 3:
+        {
+            nextTrigger = WAYPOINT_TRIGGER_4;
+            pointCount++;
+            MoveToNextTrigger();
+            break;
+        }
+        case 4:
+        {
+            nextTrigger = WAYPOINT_TRIGGER_5;
+            pointCount++;
+            MoveToNextTrigger();
+            break;
+        }
+        case 5:
+        {
+            pointCount++;
+            m_creature->SetWalk(false);
+            MoveToNextTrigger();
+            break;
+        }
+        case 6:
+        {
+            if (Creature* orbTrigger = GetClosestCreatureWithEntry(m_creature, ORB_TRIGGER_01, 15))
+            {
+                m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, m_creature, orbTrigger);
+            }
+            m_creature->ForcedDespawn();
+        }
+        }
+    }
+
+    void MoveToNextTrigger()
+    {
+        if (pointCount == 6)
+            m_creature->GetMotionMaster()->MovePoint(pointCount, 2809.716, 5250.526, 274.4666);
+        else
+        {
+            if (Creature* waypointTrigger = GetClosestCreatureWithEntry(m_creature, nextTrigger, 50))
+            {
+                m_creature->GetMotionMaster()->MovePoint(pointCount, waypointTrigger->GetPositionX(), waypointTrigger->GetPositionY(), waypointTrigger->GetPositionZ());
+            }
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_deadsoul_orb(Creature* pCreature)
+{
+    return new npc_deadsoul_orb(pCreature);
+}
+
 void AddSC_blades_edge_mountains()
 {
     Script* pNewScript;
@@ -1379,5 +1480,10 @@ void AddSC_blades_edge_mountains()
     pNewScript = new Script;
     pNewScript->Name = "npc_spirit_prisoner_of_bladespire";
     pNewScript->GetAI = &GetAI_npc_spirit_prisoner_of_bladespire;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_deadsoul_orb";
+    pNewScript->GetAI = &GetAI_npc_deadsoul_orb;
     pNewScript->RegisterSelf();
 }

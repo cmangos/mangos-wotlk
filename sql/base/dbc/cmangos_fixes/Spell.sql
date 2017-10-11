@@ -262,4 +262,15 @@ INSERT INTO spell_template (Id, SchoolMask, Category, Attributes, AttributesEx, 
 INSERT INTO spell_template(Id,Attributes,AttributesEx,DurationIndex,Effect1,Effect2,EffectDieSides1,EffectDieSides2,EffectBaseDice1,EffectBaseDice2,EffectBasePoints1,EffectBasePoints2,EffectImplicitTargetA1,EffectImplicitTargetA2,EffectApplyAuraName1,EffectApplyAuraName2,EffectMiscValue1,EffectMiscValue2,SpellIconID,SpellName,SpellFamilyName,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
 (18461,262544,268599296,36,6,6,1,1,1,1,-1,-1,1,1,77,77,7,11,252,'Vanish Purge',7,1,1,1);
 
+INSERT INTO spell_template(Id,Attributes,CastingTimeIndex,AuraInterruptFlags,DurationIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectMiscValue1,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
+(37957,256,1,128,4,76,1,1,18,185033,289,'Gnome Mercy: Summon Collection of Souls Chest',1,1,1);
+
+INSERT INTO spell_template(Id,Attributes,CastingTimeIndex,AuraInterruptFlags,procChance,spelllevel,DurationIndex,rangeIndex,EquippedItemSubClassMask,Effect1,EffectImplicitTargetA1,EffectMiscValue1,EffectMiscValueB1,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
+(37987,256,1,128,101,1,4,1,-1,28,18,21947,64,289,'Gnome Mercy: Summon Collection of Souls Glowy',1,1,1);
+
+INSERT INTO spell_template(Id,Attributes,AttributesEx2,CastingTimeIndex,InterruptFlags,DurationIndex,rangeIndex,Effect1,EffectImplicitTargetA1,EffectRadiusIndex1,EffectMiscValue1,EffectMiscValueB1,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
+(35737,25166208,1,1,6,21,7,28,48,16,20845,64,261,'Summon Deadsoul Orb',1,1,1); -- Summons a Deadsoul Orb for effect
+
+INSERT INTO spell_template(Id,Attributes,AttributesEx,CastingTimeIndex,procChance,rangeIndex,EquippedItemClass,Effect1,EffectImplicitTargetA1,EffectImplicitTargetB1,EffectRadiusIndex1,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2) VALUES
+(34701,384,268436480,1,101,1,-1,3,22,15,13,191,'Random Aggro',1,1);
 
