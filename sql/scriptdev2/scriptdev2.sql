@@ -1850,12 +1850,12 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000272,'%s hands one glowing goggles over to Doctor Draxlegauge.',0,2,0,0,'phizzlethorpe EMOTE_PROGRESS_8'),
 (-1000273,'Doctor Draxlegauge will give you further instructions, $N. Many thanks for your help!',0,0,0,1,'phizzlethorpe SAY_PROGRESS_9'),
 
-(-1000274,'Time to teach you a lesson in manners, little $Gboy:girl;!',0,0,0,0,'larry SAY_START'),
-(-1000275,'Now I\'m gonna give you to the count of \'3\' to get out of here before I sick the dogs on you.',0,0,0,0,'larry SAY_COUNT'),
+(-1000274,'Time to teach you a lesson in manners, little $Gboy:girl;!',0,0,0,5,'larry SAY_START'),
+(-1000275,'Now I\'m gonna give you to the count of \'3\' to get out of here before I sick the dogs on you.',0,0,0,1,'larry SAY_COUNT'),
 (-1000276,'1...',0,0,0,0,'larry SAY_COUNT_1'),
 (-1000277,'2...',0,0,0,0,'larry SAY_COUNT_2'),
 (-1000278,'Time to meet your maker!',0,0,0,0,'larry SAY_ATTACK_5'),
-(-1000279,'Alright, we give up! Don\'t hurt us!',0,0,0,0,'larry SAY_GIVEUP'),
+(-1000279,'Alright, we give up! Don\'t hurt us!',0,0,0,20,'larry SAY_GIVEUP'),
 
 (-1000280,'A shadowy, sinister presence has invaded the Emerald Dream. Its power is poised to spill over into our world, $N. We must oppose it! That\'s why I cannot accompany you in person.',0,0,0,1,'clintar SAY_START'),
 (-1000281,'The Emerald Dream will never be yours!',0,0,0,0,'clintar SAY_AGGRO_1'),
@@ -2944,7 +2944,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1001239,'%s is drawn to the ghost magnet...',0,2,0,0,'Magrami Spectre on spawn 1'),
 (-1001240,'%s is angered!',0,2,0,0,'Magrami Spectre on spawn 2'),
-(-1001241,'The Avatar of Terokk has been defeated! Death to Terokk! Death to Skettis!',0,0,7,0,'Defender Grashna on Avatar of Terokk death');
+(-1001241,'The Avatar of Terokk has been defeated! Death to Terokk! Death to Skettis!',0,0,7,0,'Defender Grashna on Avatar of Terokk death'),
+
+(-1001242,'%s cracks his knuckles.',0,2,0,23,'larry EMOTE_KNUCKLES');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
