@@ -1077,20 +1077,24 @@ bool Unit::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE)
                 {
                     const Player* thisPlayer = GetControllingPlayer();
                     if (!thisPlayer)
-                        return true;
+                        return (!IsPvPSanctuary() && !target->IsPvPSanctuary());
 
                     const Player* unitPlayer = target->GetControllingPlayer();
                     if (!unitPlayer)
-                        return true;
+                        return (!IsPvPSanctuary() && !target->IsPvPSanctuary());
 
                     if (thisPlayer->IsInDuelWith(unitPlayer))
                         return true;
 
-                    if (unitPlayer->IsPvP() && (!isAOE || thisPlayer->IsPvP()))
+                    if (target->IsPvP() && (!isAOE || thisPlayer->IsPvP()))
+                        return (!IsPvPSanctuary() && !target->IsPvPSanctuary());
+
+                    if (IsPvPFreeForAll() && target->IsPvPFreeForAll())
                         return true;
 
-                    if (thisPlayer->IsPvPFreeForAll() && unitPlayer->IsPvPFreeForAll())
-                        return true;
+                    // WotLK+ TODO: Find out the meaning of this flag and rename
+                    if (HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK1) || target->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK1))
+                        return (!IsPvPSanctuary() && !target->IsPvPSanctuary());
 
                     return false;
                 }
