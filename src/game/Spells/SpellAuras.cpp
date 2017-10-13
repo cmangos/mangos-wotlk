@@ -2087,6 +2087,12 @@ void Aura::TriggerSpell()
                 target->CastSpell(target->getVictim(), trigger_spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
+            case 33419:                                     // Arcane Missiles - TODO: Review other spells with TARGET_CHAIN_DAMAGE
+            case 42483:                                     // Ooze Channel
+            {
+                triggerCaster = GetCaster();
+                break;
+            }
             case 44883:                                     // Encapsulate
             case 56505:                                     // Surge of Power
             {

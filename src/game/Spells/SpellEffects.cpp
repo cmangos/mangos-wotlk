@@ -1702,16 +1702,11 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 42489:                                 // Cast Ooze Zap When Energized
                 {
-                    // only process first effect
-                    // the logic is described by spell 42488 - Caster Spell 1 Only if Aura 2 Is On Caster (not used here)
-                    if (eff_idx != EFFECT_INDEX_0)
+                    if (!unitTarget || !m_caster->HasAura(42490) || (unitTarget->GetEntry() != 4393 && unitTarget->GetEntry() != 4394))
                         return;
 
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || !m_caster->HasAura(m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1)))
-                        return;
+                    m_caster->CastSpell(unitTarget, 42483, TRIGGERED_NONE);
 
-                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
-                    ((Creature*)unitTarget)->AI()->AttackStart(m_caster);
                     return;
                 }
                 case 42628:                                 // Fire Bomb (throw)
@@ -8215,6 +8210,19 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     int32 basePoints = m_spellInfo->CalculateSimpleValue(eff_idx);
                     unitTarget->CastCustomSpell(unitTarget, 42576, &basePoints, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 42492:                                 // Cast Energized
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (Player* pPlayer = unitTarget->GetBeneficiaryPlayer())
+                        if (pPlayer->GetQuestStatus(11174) != QUEST_STATUS_INCOMPLETE)
+                            return;
+
+                    m_caster->CastSpell(unitTarget, 42490, TRIGGERED_NONE);
+
                     return;
                 }
                 case 43365:                                 // The Cleansing: Shrine Cast
