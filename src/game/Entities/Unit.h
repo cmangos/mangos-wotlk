@@ -2453,6 +2453,13 @@ class Unit : public WorldObject
 
         CombatData* m_combatData;
 
+        virtual void SetBaseWalkSpeed(float speed) { m_baseSpeedWalk = speed; }
+        virtual void SetBaseRunSpeed(float speed) { m_baseSpeedRun = speed; }
+
+        // base speeds set by model/template
+        float m_baseSpeedWalk;
+        float m_baseSpeedRun;
+
     private:
         void CleanupDeletedAuras();
         void UpdateSplineMovement(uint32 t_diff);

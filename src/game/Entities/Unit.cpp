@@ -326,6 +326,9 @@ Unit::Unit() :
     m_isSpawningLinked = false;
     
     m_extraAttacksExecuting = false;
+
+    m_baseSpeedWalk = 0.f;
+    m_baseSpeedRun = 0.f;
 }
 
 Unit::~Unit()
@@ -9289,10 +9292,10 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
         switch (mtype)
         {
             case MOVE_RUN:
-                speed *= ((Creature*)this)->GetCreatureInfo()->SpeedRun;
+                speed *= m_baseSpeedRun;
                 break;
             case MOVE_WALK:
-                speed *= ((Creature*)this)->GetCreatureInfo()->SpeedWalk;
+                speed *= m_baseSpeedWalk;
                 break;
             default:
                 break;
@@ -11390,6 +11393,9 @@ void Unit::UpdateModelData()
             SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f);
         else
             SetFloatValue(UNIT_FIELD_COMBATREACH, GetObjectScale() * modelInfo->combat_reach);
+
+        SetBaseWalkSpeed(modelInfo->SpeedWalk);
+        SetBaseRunSpeed(modelInfo->SpeedRun);
     }
 }
 
