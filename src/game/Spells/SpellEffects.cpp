@@ -8191,18 +8191,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 42291, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 42492:                                 // Cast Energized
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    uint32 questId = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1);
-                    if (!questId || !GetQuestTemplateStore(questId) || !((Player*)unitTarget)->IsCurrentQuest(questId))
-                        return;
-
-                    m_caster->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 42578:                                 // Cannon Blast
                 {
                     if (!unitTarget)
