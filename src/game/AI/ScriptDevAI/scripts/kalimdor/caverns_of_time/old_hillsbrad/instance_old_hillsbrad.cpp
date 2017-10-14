@@ -97,7 +97,7 @@ void instance_old_hillsbrad::OnCreatureEnterCombat(Creature* pCreature)
     {
         case NPC_DRAKE:
             SetData(TYPE_DRAKE, IN_PROGRESS);
-            DoUpdateWorldState(WORLD_STATE_OH, 0);
+            DoUpdateWorldState(WORLD_STATE_OLD_HILLSBRAD_BARREL_COUNT, 0);
             break;
         case NPC_SKARLOC: SetData(TYPE_SKARLOC, IN_PROGRESS); break;
         case NPC_EPOCH:   SetData(TYPE_EPOCH, IN_PROGRESS);   break;
@@ -162,7 +162,7 @@ void instance_old_hillsbrad::SetData(uint32 uiType, uint32 uiData)
 
                 // Update barrels used and world state
                 ++m_uiBarrelCount;
-                DoUpdateWorldState(WORLD_STATE_OH, m_uiBarrelCount);
+                DoUpdateWorldState(WORLD_STATE_OLD_HILLSBRAD_BARREL_COUNT, m_uiBarrelCount);
 
                 debug_log("SD2: Instance Old Hillsbrad: go_barrel_old_hillsbrad count %u", m_uiBarrelCount);
 

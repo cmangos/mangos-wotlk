@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "OutdoorPvP.h"
 #include "Tools/Language.h"
+#include "World/WorldStateDefines.h"
 
 enum
 {
@@ -70,43 +71,6 @@ enum
     EVENT_SOUTH_TOWER_PROGRESS_HORDE            = 12500,
     EVENT_SOUTH_TOWER_NEUTRAL_ALLIANCE          = 12494,
     EVENT_SOUTH_TOWER_NEUTRAL_HORDE             = 12495,
-
-    // world states
-    // tower counter before the lock event
-    WORLD_STATE_TF_TOWER_COUNT_H                = 2622,
-    WORLD_STATE_TF_TOWER_COUNT_A                = 2621,
-    WORLD_STATE_TF_TOWERS_CONTROLLED            = 2620,
-
-    // timer for the lock event
-    WORLD_STATE_TF_TIME_MIN_FIRST_DIGIT         = 2512,
-    WORLD_STATE_TF_TIME_MIN_SECOND_DIGIT        = 2510,
-    WORLD_STATE_TF_TIME_HOURS                   = 2509,
-
-    // lock period - factions
-    WORLD_STATE_TF_LOCKED_NEUTRAL               = 2508,
-    WORLD_STATE_TF_LOCKED_HORDE                 = 2768,
-    WORLD_STATE_TF_LOCKED_ALLIANCE              = 2767,
-
-    // tower world states
-    WORLD_STATE_TF_WEST_TOWER_ALLIANCE          = 2683,
-    WORLD_STATE_TF_WEST_TOWER_HORDE             = 2682,
-    WORLD_STATE_TF_WEST_TOWER_NEUTRAL           = 2681,
-
-    WORLD_STATE_TF_NORTH_TOWER_ALLIANCE         = 2684,
-    WORLD_STATE_TF_NORTH_TOWER_HORDE            = 2685,
-    WORLD_STATE_TF_NORTH_TOWER_NEUTRAL          = 2686,
-
-    WORLD_STATE_TF_EAST_TOWER_ALLIANCE          = 2688,
-    WORLD_STATE_TF_EAST_TOWER_HORDE             = 2689,
-    WORLD_STATE_TF_EAST_TOWER_NEUTRAL           = 2690,
-
-    WORLD_STATE_TF_SOUTH_EAST_TOWER_ALLIANCE    = 2694,
-    WORLD_STATE_TF_SOUTH_EAST_TOWER_HORDE       = 2695,
-    WORLD_STATE_TF_SOUTH_EAST_TOWER_NEUTRAL     = 2696,
-
-    WORLD_STATE_TF_SOUTH_TOWER_ALLIANCE         = 2691,
-    WORLD_STATE_TF_SOUTH_TOWER_HORDE            = 2692,
-    WORLD_STATE_TF_SOUTH_TOWER_NEUTRAL          = 2693
 };
 
 struct TerokkarTowerEvent

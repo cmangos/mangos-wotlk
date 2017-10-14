@@ -116,7 +116,7 @@ void instance_mount_hyjal::OnCreatureDeath(Creature* pCreature)
             if (m_uiTrashCount)
             {
                 --m_uiTrashCount;
-                DoUpdateWorldState(WORLD_STATE_ENEMYCOUNT, m_uiTrashCount);
+                DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, m_uiTrashCount);
             }
             break;
     }
@@ -142,7 +142,7 @@ void instance_mount_hyjal::SetData(uint32 uiType, uint32 uiData)
 
         case TYPE_TRASH_COUNT:
             m_uiTrashCount = uiData;
-            DoUpdateWorldState(WORLD_STATE_ENEMYCOUNT, m_uiTrashCount);
+            DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, m_uiTrashCount);
             break;
 
         case TYPE_RETREAT:

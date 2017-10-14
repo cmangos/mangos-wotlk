@@ -67,6 +67,7 @@
 #include "Entities/Vehicle.h"
 #include "Calendar/Calendar.h"
 #include "Loot/LootMgr.h"
+#include "World/WorldStateDefines.h"
 #include "World/WorldState.h"
 
 #ifdef BUILD_PLAYERBOT
@@ -7004,8 +7005,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         sWorldState.HandlePlayerLeaveZone(this, m_zoneUpdateId);
         sOutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);
         sWorldState.HandlePlayerEnterZone(this, newZone);
-
-        SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
 
         if (sWorld.getConfig(CONFIG_BOOL_WEATHER))
         {

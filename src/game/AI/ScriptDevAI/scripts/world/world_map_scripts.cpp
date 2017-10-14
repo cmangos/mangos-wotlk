@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "world_map_scripts.h"
 #include "World/WorldState.h"
+#include "World/WorldStateDefines.h"
 #include <array>
 #include <ctime>
 
@@ -469,10 +470,12 @@ struct world_map_outland : public ScriptedMap
         switch (instanceConditionId)
         {
             case INSTANCE_CONDITION_ID_SOCRETHAR_GOSSIP:
+            {
                 Creature const* socrethar = GetSingleCreatureFromStorage(NPC_SOCRETHAR);
                 if (!socrethar || !socrethar->isAlive() || socrethar->isInCombat())
                     return true;
                 return false;
+            }
             case INSTANCE_CONDITION_ID_BASHIR_FLYING: // TODO: Implement
             case INSTANCE_CONDITION_ID_BASHIR_IN_PROGRESS:
                 return false;

@@ -22,6 +22,7 @@ SDCategory: Caverns of Time, Mount Hyjal
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
+#include "World/WorldStateDefines.h"
 #include "hyjalAI.h"
 
 struct HyjalLocation
@@ -179,9 +180,9 @@ void hyjalAI::Reset()
         return;
 
     // Reset World States
-    m_pInstance->DoUpdateWorldState(WORLD_STATE_WAVES, 0);
-    m_pInstance->DoUpdateWorldState(WORLD_STATE_ENEMY, 0);
-    m_pInstance->DoUpdateWorldState(WORLD_STATE_ENEMYCOUNT, 0);
+    m_pInstance->DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_WAVES, 0);
+    m_pInstance->DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENABLE, 0);
+    m_pInstance->DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, 0);
 
     // Reset Instance Data for trash count
     m_pInstance->SetData(TYPE_TRASH_COUNT, 0);
@@ -319,7 +320,7 @@ void hyjalAI::SummonedCreatureJustDied(Creature* pSummoned)
     m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
     // Reset world state for enemies to disable it
-    m_pInstance->DoUpdateWorldState(WORLD_STATE_ENEMY, 0);
+    m_pInstance->DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENABLE, 0);
 
     m_creature->SetActiveObjectState(false);
 }
@@ -357,9 +358,9 @@ void hyjalAI::SummonNextWave()
             stateValue -= MAX_WAVES;                        // Subtract 9 from it to give the proper wave number if we are greater than 8
 
         // Set world state to our current wave number
-        m_pInstance->DoUpdateWorldState(WORLD_STATE_WAVES, stateValue);
+        m_pInstance->DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_WAVES, stateValue);
         // Enable world state
-        m_pInstance->DoUpdateWorldState(WORLD_STATE_ENEMY, 1);
+        m_pInstance->DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENABLE, 1);
 
         m_pInstance->SetData(TYPE_TRASH_COUNT, m_uiEnemyCount);   // Send data for instance script to update count
 
@@ -374,11 +375,11 @@ void hyjalAI::SummonNextWave()
     else
     {
         // Set world state for waves to 0 to disable it.
-        m_pInstance->DoUpdateWorldState(WORLD_STATE_WAVES, 0);
-        m_pInstance->DoUpdateWorldState(WORLD_STATE_ENEMY, 1);
+        m_pInstance->DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_WAVES, 0);
+        m_pInstance->DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENABLE, 1);
 
         // Set World State for enemies invading to 1.
-        m_pInstance->DoUpdateWorldState(WORLD_STATE_ENEMYCOUNT, 1);
+        m_pInstance->DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, 1);
 
         m_bIsSummoningWaves = false;
     }
@@ -404,9 +405,9 @@ void hyjalAI::StartEvent()
 
     m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
-    m_pInstance->DoUpdateWorldState(WORLD_STATE_WAVES, 0);
-    m_pInstance->DoUpdateWorldState(WORLD_STATE_ENEMY, 0);
-    m_pInstance->DoUpdateWorldState(WORLD_STATE_ENEMYCOUNT, 0);
+    m_pInstance->DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_WAVES, 0);
+    m_pInstance->DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENABLE, 0);
+    m_pInstance->DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, 0);
 
     m_creature->SetActiveObjectState(true);
 }

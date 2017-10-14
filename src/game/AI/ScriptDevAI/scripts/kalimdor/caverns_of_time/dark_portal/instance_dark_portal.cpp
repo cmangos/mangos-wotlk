@@ -64,9 +64,9 @@ void instance_dark_portal::UpdateWorldState(bool bEnable)
 {
     m_uiWorldState = bEnable ? 1 : 0;
 
-    DoUpdateWorldState(WORLD_STATE_ID,     m_uiWorldState);
-    DoUpdateWorldState(WORLD_STATE_SHIELD, m_uiWorldStateShieldCount);
-    DoUpdateWorldState(WORLD_STATE_RIFT,   m_uiWorldStateRiftCount);
+    DoUpdateWorldState(WORLD_STATE_OPENING_THE_DARK_PORTAL_IS_ACTIVE,     m_uiWorldState);
+    DoUpdateWorldState(WORLD_STATE_OPENING_THE_DARK_PORTAL_SHIELD_STATE, m_uiWorldStateShieldCount);
+    DoUpdateWorldState(WORLD_STATE_OPENING_THE_DARK_PORTAL_RIFT_STATE,   m_uiWorldStateRiftCount);
 }
 
 void instance_dark_portal::OnPlayerEnter(Player* /*pPlayer*/)
@@ -166,7 +166,7 @@ void instance_dark_portal::SetData(uint32 uiType, uint32 uiData)
             if (uiData == SPECIAL)
             {
                 --m_uiWorldStateShieldCount;
-                DoUpdateWorldState(WORLD_STATE_SHIELD, m_uiWorldStateShieldCount);
+                DoUpdateWorldState(WORLD_STATE_OPENING_THE_DARK_PORTAL_SHIELD_STATE, m_uiWorldStateShieldCount);
 
                 // Yell at 75%, 50% and 25% shield
                 if (m_uiWorldStateShieldCount < 100 - 25 * m_uiMedivhYellCount)
@@ -507,7 +507,7 @@ void instance_dark_portal::Update(uint32 uiDiff)
     {
         if (m_uiNextPortalTimer <= uiDiff)
         {
-            DoUpdateWorldState(WORLD_STATE_RIFT, ++m_uiWorldStateRiftCount);
+            DoUpdateWorldState(WORLD_STATE_OPENING_THE_DARK_PORTAL_RIFT_STATE, ++m_uiWorldStateRiftCount);
 
             DoSpawnNextPortal();
             m_uiNextPortalTimer = 0;

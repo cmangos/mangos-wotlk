@@ -5,6 +5,8 @@
 #ifndef DEF_DARKPORTAL_H
 #define DEF_DARKPORTAL_H
 
+#include "World/WorldStateDefines.h"
+
 enum
 {
     MAX_ENCOUNTER           = 6,
@@ -16,10 +18,6 @@ enum
     TYPE_CHRONO_LORD        = 3,
     TYPE_TEMPORUS           = 4,
     TYPE_AEONUS             = 5,
-
-    WORLD_STATE_ID          = 2541,
-    WORLD_STATE_SHIELD      = 2540,
-    WORLD_STATE_RIFT        = 2784,
 
     QUEST_OPENING_PORTAL    = 10297,
     QUEST_MASTER_TOUCH      = 9836,

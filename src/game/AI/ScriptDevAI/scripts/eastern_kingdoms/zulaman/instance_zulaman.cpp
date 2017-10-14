@@ -51,12 +51,13 @@ bool instance_zulaman::IsEncounterInProgress() const
     return false;
 }
 
+// TODO: Add this to Init World state chain
 void instance_zulaman::OnPlayerEnter(Player* /*pPlayer*/)
 {
     if (GetData(TYPE_EVENT_RUN) == IN_PROGRESS)
     {
-        DoUpdateWorldState(WORLD_STATE_ID, 1);
-        DoUpdateWorldState(WORLD_STATE_COUNTER, GetData(TYPE_RUN_EVENT_TIME));
+        DoUpdateWorldState(WORLD_STATE_ZUL_AMAN_EVENT_RUN_IS_ACTIVE, 1);
+        DoUpdateWorldState(WORLD_STATE_ZUL_AMAN_TIME_COUNTER, GetData(TYPE_RUN_EVENT_TIME));
     }
 }
 
@@ -216,12 +217,12 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
                     SetData(TYPE_RUN_EVENT_TIME, m_auiEncounter[TYPE_RUN_EVENT_TIME]);
                 else
                     SetData(TYPE_RUN_EVENT_TIME, 20);   // 20 Minutes as default time
-                DoUpdateWorldState(WORLD_STATE_ID, 1);
+                DoUpdateWorldState(WORLD_STATE_ZUL_AMAN_EVENT_RUN_IS_ACTIVE, 1);
             }
             if (uiData == FAIL)
             {
                 DoTimeRunSay(RUN_FAIL);
-                DoUpdateWorldState(WORLD_STATE_ID, 0);
+                DoUpdateWorldState(WORLD_STATE_ZUL_AMAN_EVENT_RUN_IS_ACTIVE, 0);
                 // Kill remaining Event NPCs
                 for (auto& i : m_aEventNpcInfo)
                 {
@@ -236,7 +237,7 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
             {
                 DoTimeRunSay(RUN_DONE);
-                DoUpdateWorldState(WORLD_STATE_ID, 0);
+                DoUpdateWorldState(WORLD_STATE_ZUL_AMAN_EVENT_RUN_IS_ACTIVE, 0);
             }
             m_auiEncounter[uiType] = uiData;
             break;
@@ -295,7 +296,7 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_RUN_EVENT_TIME:
             m_auiEncounter[uiType] = uiData;
-            DoUpdateWorldState(WORLD_STATE_COUNTER, m_auiEncounter[uiType]);
+            DoUpdateWorldState(WORLD_STATE_ZUL_AMAN_TIME_COUNTER, m_auiEncounter[uiType]);
             break;
 
         case TYPE_RAND_VENDOR_1:

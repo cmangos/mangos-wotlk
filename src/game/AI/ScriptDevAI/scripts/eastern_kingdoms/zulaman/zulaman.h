@@ -5,6 +5,8 @@
 #ifndef DEF_ZULAMAN_H
 #define DEF_ZULAMAN_H
 
+#include "World/WorldStateDefines.h"
+
 enum InstanceZA
 {
     MAX_ENCOUNTER           = 8,
@@ -30,9 +32,6 @@ enum InstanceZA
     SAY_WAVE2_STAIR1        = -1568011,
     SAY_WAVE3_STAIR2        = -1568012,
     SAY_WAVE4_PLATFORM      = -1568013,
-
-    WORLD_STATE_ID          = 3104,
-    WORLD_STATE_COUNTER     = 3106,
 
     TYPE_EVENT_RUN          = 0,
     TYPE_AKILZON            = 1,

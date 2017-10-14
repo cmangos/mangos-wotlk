@@ -5,6 +5,8 @@
 #ifndef DEF_HYJAL_H
 #define DEF_HYJAL_H
 
+#include "World/WorldStateDefines.h"
+
 enum
 {
     MAX_ENCOUNTER               = 5,
@@ -17,10 +19,6 @@ enum
 
     TYPE_TRASH_COUNT            = 5,
     TYPE_RETREAT                = 6,
-
-    WORLD_STATE_WAVES           = 2842,
-    WORLD_STATE_ENEMY           = 2453,
-    WORLD_STATE_ENEMYCOUNT      = 2454,
 
     NPC_JAINA                   = 17772,
     NPC_THRALL                  = 17852,

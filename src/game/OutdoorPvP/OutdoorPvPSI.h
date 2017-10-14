@@ -21,6 +21,8 @@
 
 #include "Common.h"
 #include "OutdoorPvP.h"
+#include "Tools/Language.h"
+#include "World/WorldStateDefines.h"
 
 enum
 {
@@ -52,11 +54,6 @@ enum
     HONOR_REWARD_SILITHYST              = 19,
     REPUTATION_REWARD_SILITHYST         = 20,
     MAX_SILITHYST                       = 200,
-
-    // world states
-    WORLD_STATE_SI_GATHERED_A           = 2313,
-    WORLD_STATE_SI_GATHERED_H           = 2314,
-    WORLD_STATE_SI_SILITHYST_MAX        = 2317
 };
 
 class OutdoorPvPSI : public OutdoorPvP

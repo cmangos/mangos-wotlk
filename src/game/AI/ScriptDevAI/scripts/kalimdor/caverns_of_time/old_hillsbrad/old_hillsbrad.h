@@ -5,6 +5,8 @@
 #ifndef DEF_OLD_HILLSBRAD_H
 #define DEF_OLD_HILLSBRAD_H
 
+#include "World/WorldStateDefines.h"
+
 enum
 {
     MAX_ENCOUNTER                   = 7,
@@ -48,8 +50,6 @@ enum
     QUEST_ENTRY_DIVERSION           = 10283,
     QUEST_ENTRY_ESCAPE              = 10284,
     QUEST_ENTRY_RETURN              = 10285,
-
-    WORLD_STATE_OH                  = 2436,
 };
 
 static const float afInstanceLoc[][4] =

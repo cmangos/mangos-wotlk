@@ -35,6 +35,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "Entities/TemporarySpawn.h"
+#include "World/WorldStateDefines.h"
 
 /*######
 ## mobs_risen_husk_spirit
@@ -937,9 +938,6 @@ enum
     GO_COVE_CANNON              = 186432,               // cast 42578
     QUEST_ID_TETHYR             = 11198,
 
-    WORLD_STATE_TETHYR_SHOW     = 3083,
-    WORLD_STATE_TETHYR_COUNT    = 3082,
-
     MAX_MARKSMEN                = 12,
     PHASE_NORMAL                = 1,
     PHASE_SPOUT                 = 2,
@@ -953,6 +951,7 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
         if (m_creature->IsTemporarySummon())
             m_summonerGuid = m_creature->GetSpawnerGuid();
 
+        // TODO: Move this to Send Initial World State packet
         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_summonerGuid))
         {
             pPlayer->SendUpdateWorldState(WORLD_STATE_TETHYR_SHOW, 1);
