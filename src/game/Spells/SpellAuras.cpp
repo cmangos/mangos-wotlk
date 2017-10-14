@@ -9580,6 +9580,11 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         return;
                     break;
                 }
+                case 33896:                                 // Desperate Defense
+                {
+                    spellId1 = 33897;
+                    break;
+                }
                 case 55053:                                 // Deathbloom (25 man)
                 {
                     if (!apply && m_removeMode == AURA_REMOVE_BY_EXPIRE)
@@ -9826,7 +9831,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 }
                 return;
             }
-
             switch (GetId())
             {
                 // Abolish Disease (remove 1 more poison effect with Body and Soul)
