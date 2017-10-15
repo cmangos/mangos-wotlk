@@ -4800,6 +4800,7 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
 
     m_spellLog.AddLog(uint32(SPELL_EFFECT_POWER_DRAIN), unitTarget->GetPackGUID(), new_damage, uint32(powerType), gainMultiplier);
 
+<<<<<<< HEAD
     if (int32 gain = int32(new_damage * gainMultiplier))
         m_caster->EnergizeBySpell(m_caster, m_spellInfo->Id, gain, powerType);
 }
@@ -5626,16 +5627,23 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
 
     // Expected Amount: TODO - there are quite some exceptions (like totems, engineering dragonlings..)
     uint32 amount = 1;
+    uint32 health = 0; // totems have HP in base points
     uint32 unk = 0; // no idea what it means, but 4000-25000 cant be right for summon count
-    switch (summon_prop->Group)
+    if (prop_id == 121 || summon_prop->Title == UNITNAME_SUMMON_TITLE_TOTEM)
     {
-        case SUMMON_PROP_GROUP_FRIENDLY:
-        case SUMMON_PROP_GROUP_CONTROLLABLE:
-            unk = damage;
-            break;
-        default:
-            amount = damage > 0 ? damage : 1; // old code
-            break;
+        health = damage;
+    }
+    else
+    {
+        switch (summon_prop->Group)
+        {
+            case SUMMON_PROP_GROUP_CONTROLLABLE:
+                unk = damage;
+                break;
+            default:
+                amount = damage > 0 ? damage : 1; // old code
+                break;
+        }
     }
 
     // basepoints of SUMMON_PROP_GROUP_VEHICLE is often a spellId, set amount to 1
