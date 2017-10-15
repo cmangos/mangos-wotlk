@@ -4865,7 +4865,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 switch (trackedType)
                 {
                     case TRACK_AURA_TYPE_SINGLE_TARGET:
-                        if (IsSingleTargetSpells(itr_spellEntry, aurSpellInfo))
+                        if (sSpellMgr.IsSingleTargetSpells(itr_spellEntry, aurSpellInfo))
                         {
                             removed = true;
                             // remove from target if target found

@@ -395,9 +395,6 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
 bool IsExplicitPositiveTarget(uint32 targetA);
 bool IsExplicitNegativeTarget(uint32 targetA);
 
-bool IsSingleTargetSpell(SpellEntry const* spellInfo);
-bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellInfo2);
-
 inline bool IsBinarySpell(SpellEntry const* spellInfo)
 {
     // Spell is considered binary if:
@@ -1715,6 +1712,35 @@ class SpellMgr
 
         bool IsRankSpellDueToSpell(SpellEntry const* spellInfo_1, uint32 spellId_2) const;
         bool IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const;
+        bool IsSingleTargetSpell(SpellEntry const* entry)
+        {
+            if (entry->HasAttribute(SPELL_ATTR_EX5_SINGLE_TARGET_SPELL))
+                return true;
+
+            // single target triggered spell.
+            // Not real client side single target spell, but it' not triggered until prev. aura expired.
+            // This is allow store it in single target spells list for caster for spell proc checking
+            if (entry->Id == 38324)                             // Regeneration (triggered by 38299 (HoTs on Heals))
+                return true;
+
+            return false;
+        }
+
+        bool IsSingleTargetSpells(SpellEntry const* entry1, SpellEntry const* entry2)
+        {
+            if (!IsSingleTargetSpell(entry1) || !IsSingleTargetSpell(entry2))
+                return false;
+
+            // Early instance of same spell check
+            if (entry1 == entry2)
+                return true;
+
+            // One spell is a rank of another spell (same spell chain)
+            if (GetFirstSpellInChain(entry1->Id) == GetFirstSpellInChain(entry2->Id))
+                return true;
+
+            return false;
+        }
         bool canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const;
         bool IsRankedSpellNonStackableInSpellBook(SpellEntry const* spellInfo) const
         {

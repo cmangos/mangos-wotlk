@@ -643,44 +643,6 @@ bool IsExplicitNegativeTarget(uint32 targetA)
     return false;
 }
 
-bool IsSingleTargetSpell(SpellEntry const* spellInfo)
-{
-    // all other single target spells have if it has AttributesEx5
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX5_SINGLE_TARGET_SPELL))
-        return true;
-
-    // single target triggered spell.
-    // Not real client side single target spell, but it' not triggered until prev. aura expired.
-    // This is allow store it in single target spells list for caster for spell proc checking
-    if (spellInfo->Id == 38324)                             // Regeneration (triggered by 38299 (HoTs on Heals))
-        return true;
-
-    return false;
-}
-
-bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellInfo2)
-{
-    // TODO - need better check
-    // Equal icon and spellfamily
-    if (spellInfo1->SpellFamilyName == spellInfo2->SpellFamilyName &&
-            spellInfo1->SpellIconID == spellInfo2->SpellIconID)
-        return true;
-
-    SpellSpecific spec1 = GetSpellSpecific(spellInfo1->Id);
-    // spell with single target specific types
-    switch (spec1)
-    {
-        case SPELL_MAGE_POLYMORPH:
-            if (GetSpellSpecific(spellInfo2->Id) == spec1)
-                return true;
-            break;
-        default:
-            break;
-    }
-
-    return false;
-}
-
 uint32 GetAffectedTargets(SpellEntry const * spellInfo, Unit * caster)
 {
     // custom target amount cases
