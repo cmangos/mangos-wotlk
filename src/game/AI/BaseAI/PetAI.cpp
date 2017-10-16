@@ -167,7 +167,7 @@ void PetAI::UpdateAI(const uint32 diff)
             uint32 spellId = charminfo->GetSpellOpener();
             SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
 
-            Spell* spell = new Spell(m_unit, spellInfo, false);
+            Spell* spell = new Spell(m_unit, spellInfo, TRIGGERED_NONE);
 
             SpellCastResult result = spell->CheckPetCast(victim);
 
@@ -229,7 +229,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 else if (IsNonCombatSpell(spellInfo))
                     continue;
 
-                Spell* spell = new Spell(m_unit, spellInfo, false);
+                Spell* spell = new Spell(m_unit, spellInfo, TRIGGERED_NONE);
 
                 if (inCombat && !m_unit->hasUnitState(UNIT_STAT_FOLLOW) && spell->CanAutoCast(victim))
                 {

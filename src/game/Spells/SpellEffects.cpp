@@ -6684,7 +6684,7 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
             return;
         }
 
-        Spell* spell = new Spell(m_caster, spellInfo, true);
+        Spell* spell = new Spell(m_caster, spellInfo, TRIGGERED_OLD_TRIGGERED);
         SpellCastTargets targets;
         targets.setItemTarget(itemTarget);
         spell->SpellStart(&targets);

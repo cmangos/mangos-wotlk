@@ -263,7 +263,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
             petUnit->clearUnitState(UNIT_STAT_MOVING);
 
-            Spell* spell = new Spell(petUnit, spellInfo, false);
+            Spell* spell = new Spell(petUnit, spellInfo, TRIGGERED_NONE);
 
             SpellCastResult result = spell->CheckPetCast(unit_target);
 
@@ -762,7 +762,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 
     petUnit->clearUnitState(UNIT_STAT_MOVING);
 
-    Spell* spell = new Spell(petUnit, spellInfo, triggeredByAura ? true : false, petUnit->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : nullptr);
+    Spell* spell = new Spell(petUnit, spellInfo, triggeredByAura ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE, petUnit->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : nullptr);
     spell->m_cast_count = cast_count;                       // probably pending spell cast
     spell->m_targets = targets;
 
