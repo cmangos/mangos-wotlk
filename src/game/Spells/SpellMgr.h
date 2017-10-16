@@ -385,6 +385,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
 
     switch (spellInfo->Id)
     {
+        case 32007:         // Mo'arg Engineer Transform Visual
         case 39311:         // Scrapped Fel Reaver transform aura that is never removed even on evade
         case 39918:         // visual auras in Soulgrinder script
         case 39920:
