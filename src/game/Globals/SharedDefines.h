@@ -2059,6 +2059,7 @@ enum LockKeyType
 
 enum LockType
 {
+    LOCKTYPE_NONE                  = 0,
     LOCKTYPE_PICKLOCK              = 1,
     LOCKTYPE_HERBALISM             = 2,
     LOCKTYPE_MINING                = 3,
