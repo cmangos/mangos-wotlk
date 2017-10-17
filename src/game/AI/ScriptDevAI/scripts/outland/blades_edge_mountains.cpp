@@ -1344,20 +1344,22 @@ struct npc_deadsoul_orb : public ScriptedAI
     npc_deadsoul_orb(Creature* pCreature) : ScriptedAI(pCreature) 
     { 
         Reset(); 
+        m_creature->SetActiveObjectState(true); // Need to be active since the area is so large they might get unloaded on the way to the destination
         nextTrigger = WAYPOINT_TRIGGER_1;
         pointCount = 1;
+        MoveToNextTrigger();
     }
 
     uint32 nextTrigger;
     uint8 pointCount;
 
-    void Reset() override 
-    {
-        MoveToNextTrigger();
-    }
+    void Reset() override { }
 
-    void MovementInform(uint32 /*uiMovementType*/, uint32 uiData) override
+    void MovementInform(uint32 uiMovementType, uint32 uiData) override
     {
+        if (uiMovementType != POINT_MOTION_TYPE)
+            return;
+
         switch (uiData)
         {
         case 1:
@@ -1412,9 +1414,13 @@ struct npc_deadsoul_orb : public ScriptedAI
             m_creature->GetMotionMaster()->MovePoint(pointCount, 2809.716f, 5250.526f, 274.4666f);
         else
         {
-            if (Creature* waypointTrigger = GetClosestCreatureWithEntry(m_creature, nextTrigger, 50))
+            if (Creature* waypointTrigger = GetClosestCreatureWithEntry(m_creature, nextTrigger, 95.f))
             {
                 m_creature->GetMotionMaster()->MovePoint(pointCount, waypointTrigger->GetPositionX(), waypointTrigger->GetPositionY(), waypointTrigger->GetPositionZ());
+            }
+            else
+            {
+                m_creature->ForcedDespawn(3000);
             }
         }
     }
