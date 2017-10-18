@@ -1409,7 +1409,7 @@ struct npc_deadsoul_orb : public ScriptedAI
     void MoveToNextTrigger()
     {
         if (pointCount == 6)
-            m_creature->GetMotionMaster()->MovePoint(pointCount, 2809.716, 5250.526, 274.4666);
+            m_creature->GetMotionMaster()->MovePoint(pointCount, 2809.716f, 5250.526f, 274.4666f);
         else
         {
             if (Creature* waypointTrigger = GetClosestCreatureWithEntry(m_creature, nextTrigger, 50))
