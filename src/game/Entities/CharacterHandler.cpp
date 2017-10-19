@@ -654,6 +654,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     data << uint8(2);                                       // unknown value
     data << uint8(0);                                       // enable(1)/disable(0) voice chat interface in client
     SendPacket(data);
+    
+    // Send Spam records
+    SendExpectedSpamRecords();
 
     // Send MOTD
     {

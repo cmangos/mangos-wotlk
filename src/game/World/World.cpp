@@ -1386,6 +1386,10 @@ void World::SetInitialWorldSettings()
     SetMonthlyQuestResetTime();
     sLog.outString();
 
+    sLog.outString("Loading Spam records...");
+    LoadSpamRecords();
+    sLog.outString();
+
     sLog.outString("Starting Game Event system...");
     uint32 nextGameEvent = sGameEventMgr.Initialize();
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    // depend on next event
@@ -2176,6 +2180,27 @@ void World::LoadEventGroupChosen()
     }
     else // if table not set yet, generate quests
         GenerateEventGroupEvents(true, true, false);
+}
+
+void World::LoadSpamRecords(bool reload)
+{
+    QueryResult* result = WorldDatabase.Query("SELECT record FROM spam_records");
+
+    if (result)
+    {
+        if (reload)
+            m_spamRecords.clear();
+
+        while (result->NextRow())
+        {
+            Field* fields = result->Fetch();
+            std::string record = fields[0].GetCppString();
+
+            m_spamRecords.push_back(record);
+        }
+
+        delete result;
+    }
 }
 
 void World::ResetDailyQuests()

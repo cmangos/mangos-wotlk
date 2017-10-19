@@ -247,6 +247,7 @@ class WorldSession
         void SendAddonsInfo();
 
         void SendPacket(WorldPacket const& packet) const;
+        void SendExpectedSpamRecords();
         void SendNotification(const char* format, ...) const ATTR_PRINTF(2, 3);
         void SendNotification(int32 string_id, ...) const;
         void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName* declinedName) const;
