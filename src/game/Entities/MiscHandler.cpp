@@ -1237,30 +1237,17 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
 void WorldSession::HandleComplainOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_COMPLAIN");
-    recv_data.hexlike();
 
-    uint8 spam_type;                                        // 0 - mail, 1 - chat
-    ObjectGuid spammerGuid;
-    uint32 unk1 = 0;
-    uint32 unk2 = 0;
-    uint32 unk3 = 0;
-    uint32 unk4 = 0;
-    std::string description = "";
-    recv_data >> spam_type;                                 // unk 0x01 const, may be spam type (mail/chat)
-    recv_data >> spammerGuid;                               // player guid
-    switch (spam_type)
+    uint8 spamType;
+    recv_data >> spamType;                                 // Spam type (Mail = 0, Chat = 1)
+
+    switch (spamType)
     {
         case 0:
-            recv_data >> unk1;                              // const 0
-            recv_data >> unk2;                              // probably mail id
-            recv_data >> unk3;                              // const 0
+            HandleComplainMail(recv_data);
             break;
         case 1:
-            recv_data >> unk1;                              // probably language
-            recv_data >> unk2;                              // message type?
-            recv_data >> unk3;                              // probably channel id
-            recv_data >> unk4;                              // unk random value
-            recv_data >> description;                       // spam description string (messagetype, channel name, player name, message)
+            HandleComplainChat(recv_data);
             break;
     }
 
@@ -1271,8 +1258,40 @@ void WorldSession::HandleComplainOpcode(WorldPacket& recv_data)
     WorldPacket data(SMSG_COMPLAIN_RESULT, 1);
     data << uint8(0);
     SendPacket(data);
+}
 
-    DEBUG_LOG("REPORT SPAM: type %u, spammer %s, unk1 %u, unk2 %u, unk3 %u, unk4 %u, message %s", spam_type, spammerGuid.GetString().c_str(), unk1, unk2, unk3, unk4, description.c_str());
+void WorldSession::HandleComplainMail(WorldPacket& recv_data)
+{
+    ObjectGuid spammer;
+    uint32 unk1 = 0;
+    uint32 mailId = 0;
+    uint32 unk2 = 0;
+
+    recv_data >> spammer;
+    recv_data >> unk1;
+    recv_data >> mailId;
+    recv_data >> unk2;
+
+    DEBUG_LOG("REPORT SPAM MAIL: Spammer %s, unk1 %u, mailId %u, unk2 %u", spammer.GetString().c_str(), unk1, mailId, unk2);
+}
+
+void WorldSession::HandleComplainChat(WorldPacket& recv_data)
+{
+    ObjectGuid spammer;
+    uint32 unk1 = 0;
+    uint32 messageType = 0;
+    uint32 channelId = 0;
+    uint32 secondsSinceMessage = 0;
+    std::string description;
+
+    recv_data >> spammer;
+    recv_data >> unk1;
+    recv_data >> messageType;
+    recv_data >> channelId;
+    recv_data >> secondsSinceMessage;
+    recv_data >> description;
+
+    DEBUG_LOG("REPORT SPAM CHAT: Spammer %s, unk1 %u, messageType %u, channelId %u, secondsSinceMessage %u, description %s", spammer.GetString().c_str(), unk1, messageType, channelId, secondsSinceMessage, description.c_str());
 }
 
 void WorldSession::HandleRealmSplitOpcode(WorldPacket& recv_data)
