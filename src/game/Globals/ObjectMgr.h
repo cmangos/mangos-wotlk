@@ -812,7 +812,7 @@ class ObjectMgr
         uint32 GenerateAuctionID() { return m_AuctionIds.Generate(); }
         uint64 GenerateEquipmentSetGuid() { return m_EquipmentSetIds.Generate(); }
         uint32 GenerateGuildId() { return m_GuildIds.Generate(); }
-        // uint32 GenerateItemTextID() { return m_ItemGuids.Generate(); }
+        // uint32 GenerateItemTextID() { return m_ItemTextIds.Generate(); }Id
         uint32 GenerateMailID() { return m_MailIds.Generate(); }
         uint32 GeneratePetNumber() { return m_PetNumbers.Generate(); }
 
