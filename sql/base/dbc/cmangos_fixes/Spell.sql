@@ -321,6 +321,10 @@ INSERT INTO spell_template (Id,Attributes,AttributesEx,AttributesEx3,CastingTime
 (38889,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,1,1,1,42,1,1,29,61,79,22344,127,64,2154,'Summon Morcrush Shardling',1,1,1),
 (38890,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,1,1,1,43,1,1,29,61,79,22344,127,64,2154,'Summon Morcrush Shardling',1,1,1);
 
+-- Used by Alliance Peasants c.17931 in Hyjal Summit
+INSERT INTO spell_template (Id,Attributes,AttributesEx,CastingTimeIndex,procChance,DurationIndex,rangeIndex,EquippedItemClass,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectApplyAuraName1,EffectMiscValue1,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
+(34450,256,268435456,1,101,21,1,-1,6,1,1,1,56,19695,318,'Transform: Peasant w/ wood 1.5 scale',1,1,1);
+
 -- Missing selector spells for BWL
 INSERT INTO spell_template (id, attributes, attributesEx, attributesEx2, CastingTimeIndex, ProcChance, RangeIndex, Effect1, EffectImplicitTargetA1, EffectImplicitTargetB1, EffectRadiusIndex1, EffectMiscValue1, SpellIconId, SpellName, DmgMultiplier1) VALUES
 (23195, 8388864, 0, 1, 1, 101, 1, 3, 1, 0, 0, 0, 1, 'Dragondog Breath Selection', 1),
