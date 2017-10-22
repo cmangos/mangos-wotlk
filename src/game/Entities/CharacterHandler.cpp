@@ -651,44 +651,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
 
     data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 2);         // added in 2.2.0
-    data << uint8(2);                                       // unknown value
-    data << uint8(0);                                       // enable(1)/disable(0) voice chat interface in client
+    data << uint8(2);                                       // Can complain (0 = disabled, 1 = enabled, don't auto ignore, 2 = enabled, auto ignore)
+    data << uint8(0);                                       // Voice chat is enabled
     SendPacket(data);
     
     // Send Spam records
     SendExpectedSpamRecords();
-
-    // Send MOTD
-    {
-        data.Initialize(SMSG_MOTD, 50);                     // new in 2.0.1
-        data << (uint32)0;
-
-        uint32 linecount = 0;
-        std::string str_motd = sWorld.GetMotd();
-        std::string::size_type pos, nextpos;
-
-        pos = 0;
-        while ((nextpos = str_motd.find('@', pos)) != std::string::npos)
-        {
-            if (nextpos != pos)
-            {
-                data << str_motd.substr(pos, nextpos - pos);
-                ++linecount;
-            }
-            pos = nextpos + 1;
-        }
-
-        if (pos < str_motd.length())
-        {
-            data << str_motd.substr(pos);
-            ++linecount;
-        }
-
-        data.put(0, linecount);
-
-        SendPacket(data);
-        DEBUG_LOG("WORLD: Sent motd (SMSG_MOTD)");
-    }
+    SendMotd();
 
     // QueryResult *result = CharacterDatabase.PQuery("SELECT guildid,rank FROM guild_member WHERE guid = '%u'",pCurrChar->GetGUIDLow());
     QueryResult* resultGuild = holder->GetResult(PLAYER_LOGIN_QUERY_LOADGUILD);
