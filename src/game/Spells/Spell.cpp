@@ -5144,6 +5144,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 switch (m_spellInfo->Id)
                 {
                     // Except some spells from Taxi Flying cast
+                    case 7720:                              // Ritual of Summoning Effect
                     case 36573:                             // Vision Guide
                     case 42316:                             // Alcaz Survey Credit
                     case 42385:                             // Alcaz Survey Aura
