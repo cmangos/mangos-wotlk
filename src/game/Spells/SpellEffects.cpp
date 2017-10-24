@@ -8216,6 +8216,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_NONE);
+                    return;
+                }
+                case 36251:                                 // Hammer Slam
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_NONE);
+                    return;
                 }
                 case 37431:                                 // Spout
                 {
