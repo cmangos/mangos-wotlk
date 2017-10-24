@@ -4800,7 +4800,6 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
 
     m_spellLog.AddLog(uint32(SPELL_EFFECT_POWER_DRAIN), unitTarget->GetPackGUID(), new_damage, uint32(powerType), gainMultiplier);
 
-<<<<<<< HEAD
     if (int32 gain = int32(new_damage * gainMultiplier))
         m_caster->EnergizeBySpell(m_caster, m_spellInfo->Id, gain, powerType);
 }
@@ -8210,6 +8209,13 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         m_caster->SummonCreature(21002, x, y, z, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                     }
                     return;
+                }
+                case 36208:                                 // Steal Weapon
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_NONE);
                 }
                 case 37431:                                 // Spout
                 {

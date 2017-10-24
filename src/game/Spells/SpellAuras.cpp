@@ -5445,6 +5445,32 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
     SpellEntry const* spell = GetSpellProto();
     switch (spell->SpellFamilyName)
     {
+        case SPELLFAMILY_GENERIC:
+        {
+            if (!target)
+                return;
+
+            if (spell->Id == 36207) // Steal Weapon
+            {
+                if (target->GetTypeId() != TYPEID_UNIT)
+                    return;
+
+                if (apply)
+                {
+                    if (Player* playerCaster = GetCaster()->GetBeneficiaryPlayer())
+                    {
+                        if (Item* item = playerCaster->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                        {
+                            ((Creature*)target)->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, item->GetEntry());
+                        }
+                    }
+                }
+                else
+                {
+                    ((Creature*)target)->LoadEquipment(((Creature*)target)->GetCreatureInfo()->EquipmentTemplateId, true);
+                }
+            }
+        }
         case SPELLFAMILY_ROGUE:
         {
             switch (spell->Id)
