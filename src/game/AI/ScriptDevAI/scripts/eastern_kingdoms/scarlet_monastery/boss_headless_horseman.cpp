@@ -233,7 +233,10 @@ struct boss_headless_horsemanAI : public ScriptedAI
 
         // make head available
         if (Creature* pHead = m_creature->GetMap()->GetCreature(m_headGuid))
+        {
             DoCastSpellIfCan(pHead, SPELL_SEND_HEAD, CAST_TRIGGERED);
+            SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pHead);
+        }
 
         // only from second transition we start whirlwind
         if (m_creature->HasAura(SPELL_BODY_STAGE_2) || m_creature->HasAura(SPELL_BODY_STAGE_3))
