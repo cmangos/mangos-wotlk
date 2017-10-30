@@ -7580,10 +7580,16 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
         case 30769:                             // Pick Red Riding Hood
         case 30843:                             // Enfeeble
         case 31347:                             // Doom
-        case 37676:                             // Insidious Whisper
         case 40618:                             // Insignificance
         case 41376:                             // Spite
             if (m_caster->getVictim() == target)
+                return false;
+            break;
+        case 37676:                             // Insidious Whisper
+            if (m_caster->getVictim() == target) // skips tank
+                return false;
+
+            if (!target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED)) // not MCed
                 return false;
             break;
         case 68921:                                         // Soulstorm (FoS), only targets farer than 10 away
