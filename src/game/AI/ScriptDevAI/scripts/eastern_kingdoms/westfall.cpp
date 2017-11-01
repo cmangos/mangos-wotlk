@@ -44,7 +44,37 @@ enum
     SPELL_SHOOT         = 6660,
     QUEST_TOME_VALOR    = 1651,
     NPC_DEFIAS_RAIDER   = 6180,
-    EQUIP_ID_RIFLE      = 2511
+    EQUIP_ID_RIFLE      = 2511,
+
+    DAPHNE_SHOOT_CD     = 2000
+};
+
+enum Wave
+{
+    FIRST,
+    SECOND,
+    THIRD
+};
+
+float RaiderCoords[15][3] = 
+{
+    {-11428.520, 1612.757, 72.241}, // Spawn1
+    {-11422.998, 1616.106, 74.153}, // Spawn2
+    {-11430.354, 1618.334, 72.632}, // Spawn3
+    {-11423.307, 1621.033, 74.224}, // Spawn4
+    {-11427.141, 1623.220, 73.168}, // Spawn5
+    
+    {-11453.118, 1554.380, 53.100}, // WP1a
+    {-11449.692, 1554.672, 53.598}, // WP2a
+    {-11454.533, 1558.679, 52.497}, // WP3a
+    {-11449.488, 1557.817, 53.443}, // WP4a
+    {-11452.123, 1559.800, 52.890}, // WP5a
+                                 
+    {-11475.067, 1534.259, 50.199}, // WP1b
+    {-11470.306, 1533.835, 50.267}, // WP2b
+    {-11471.954, 1539.599, 50.273}, // WP3b
+    {-11465.560, 1534.399, 50.649}, // WP4b
+    {-11467.391, 1537.989, 50.726}  // WP5b
 };
 
 struct npc_daphne_stilwellAI : public npc_escortAI
@@ -58,15 +88,23 @@ struct npc_daphne_stilwellAI : public npc_escortAI
     uint32 m_uiWPHolder;
     uint32 m_uiShootTimer;
 
+    GuidList m_lSummonedRaidersGUIDs;
+
     void Reset() override
     {
         if (HasEscortState(STATE_ESCORT_ESCORTING))
         {
+            if (m_uiWPHolder >= 5)
+                m_creature->SetSheath(SHEATH_STATE_RANGED);
+
             switch (m_uiWPHolder)
             {
                 case 7: DoScriptText(SAY_DS_DOWN_1, m_creature); break;
                 case 8: DoScriptText(SAY_DS_DOWN_2, m_creature); break;
-                case 9: DoScriptText(SAY_DS_DOWN_3, m_creature); break;
+                case 9: 
+                    if (m_lSummonedRaidersGUIDs.size() == 0)
+                        DoScriptText(SAY_DS_DOWN_3, m_creature); 
+                    break;
             }
         }
         else
@@ -82,29 +120,22 @@ struct npc_daphne_stilwellAI : public npc_escortAI
         switch (uiPointId)
         {
             case 4:
-                SetEquipmentSlots(false, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE, EQUIP_ID_RIFLE);
-                m_creature->SetSheath(SHEATH_STATE_RANGED);
                 m_creature->HandleEmote(EMOTE_STATE_USESTANDING_NOSHEATHE);
                 break;
+            case 5:
+                SetEquipmentSlots(false, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE, EQUIP_ID_RIFLE);
+                m_creature->SetSheath(SHEATH_STATE_RANGED);
+                m_creature->HandleEmote(EMOTE_STATE_STAND);
+                break;
             case 7:
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11450.836f, 1569.755f, 54.267f, 4.230f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11449.697f, 1569.124f, 54.421f, 4.206f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.237f, 1568.307f, 54.620f, 4.206f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
+                DoSendWave(Wave::FIRST);
                 break;
             case 8:
-                m_creature->SetSheath(SHEATH_STATE_RANGED);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11450.836f, 1569.755f, 54.267f, 4.230f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11449.697f, 1569.124f, 54.421f, 4.206f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.237f, 1568.307f, 54.620f, 4.206f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.037f, 1570.213f, 54.961f, 4.283f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
+                DoSendWave(Wave::SECOND);
                 break;
             case 9:
-                m_creature->SetSheath(SHEATH_STATE_RANGED);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11450.836f, 1569.755f, 54.267f, 4.230f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11449.697f, 1569.124f, 54.421f, 4.206f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.237f, 1568.307f, 54.620f, 4.206f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.037f, 1570.213f, 54.961f, 4.283f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11449.018f, 1570.738f, 54.828f, 4.220f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
+                DoSendWave(Wave::THIRD);
+                SetEscortPaused(true);
                 break;
             case 10:
                 SetRun(false);
@@ -115,33 +146,119 @@ struct npc_daphne_stilwellAI : public npc_escortAI
             case 13:
                 SetEquipmentSlots(true);
                 m_creature->SetSheath(SHEATH_STATE_UNARMED);
-                m_creature->HandleEmote(EMOTE_STATE_USESTANDING_NOSHEATHE);
+                m_creature->HandleEmote(EMOTE_STATE_USESTANDING);
+                break;
+            case 14:
+                m_creature->HandleEmote(EMOTE_STATE_STAND);
                 break;
             case 17:
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->GroupEventHappens(QUEST_TOME_VALOR, m_creature);
                 break;
+            case 18:
+                DoEndEscort();
+                break;
         }
     }
 
-    void AttackStart(Unit* pWho) override
+    void DoSendWave(uint32 wave)
     {
-        if (!pWho)
-            return;
+        uint8 uiFirstWPOffset = 5;
 
-        if (m_creature->Attack(pWho, false))
+        switch (wave)
         {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-
-            m_creature->GetMotionMaster()->MoveChase(pWho, 30.0f);
+            case Wave::FIRST:
+                for (int counter = 0; counter < 3; counter++)
+                    if (Creature* pAdd = m_creature->SummonCreature(NPC_DEFIAS_RAIDER, RaiderCoords[counter][0], RaiderCoords[counter][1], RaiderCoords[counter][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000, false, true))
+                        pAdd->GetMotionMaster()->MovePoint(counter, RaiderCoords[uiFirstWPOffset + counter][0], RaiderCoords[uiFirstWPOffset + counter][1], RaiderCoords[uiFirstWPOffset + counter][2]);
+                break;
+            case Wave::SECOND:
+                for (int counter = 0; counter < 4; counter++)
+                    if (Creature* pAdd = m_creature->SummonCreature(NPC_DEFIAS_RAIDER, RaiderCoords[counter][0], RaiderCoords[counter][1], RaiderCoords[counter][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000, false, true))
+                        pAdd->GetMotionMaster()->MovePoint(counter, RaiderCoords[uiFirstWPOffset + counter][0], RaiderCoords[uiFirstWPOffset + counter][1], RaiderCoords[uiFirstWPOffset + counter][2]);
+                break;
+            case Wave::THIRD:
+                for (int counter = 0; counter < 5; counter++)
+                    if (Creature* pAdd = m_creature->SummonCreature(NPC_DEFIAS_RAIDER, RaiderCoords[counter][0], RaiderCoords[counter][1], RaiderCoords[counter][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000, false, true))
+                        pAdd->GetMotionMaster()->MovePoint(counter, RaiderCoords[uiFirstWPOffset + counter][0], RaiderCoords[uiFirstWPOffset + counter][1], RaiderCoords[uiFirstWPOffset + counter][2]);
+                break;
         }
+    }
+
+    void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiData) override
+    {
+        uint8 uiSecondWPOffset = 10;
+
+        if (pSummoned->GetEntry() == NPC_DEFIAS_RAIDER && uiMotionType == POINT_MOTION_TYPE) // sanity check
+        {
+            switch (uiData)
+            {
+                case 0:
+                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset][0], RaiderCoords[uiSecondWPOffset][1], RaiderCoords[uiSecondWPOffset][2]);
+                    break;
+                case 1:
+                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset+1][0], RaiderCoords[uiSecondWPOffset+1][1], RaiderCoords[uiSecondWPOffset+1][2]);
+                    break;
+                case 2:
+                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset+2][0], RaiderCoords[uiSecondWPOffset+2][1], RaiderCoords[uiSecondWPOffset+2][2]);
+                    break;
+                case 3:
+                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset+3][0], RaiderCoords[uiSecondWPOffset+3][1], RaiderCoords[uiSecondWPOffset+3][2]);
+                    break;
+                case 4:
+                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset+4][0], RaiderCoords[uiSecondWPOffset+4][1], RaiderCoords[uiSecondWPOffset+4][2]);
+                    break;
+                default:
+                    pSummoned->GetMotionMaster()->MoveIdle();
+                    break;
+            }
+        }
+    }
+
+    void Aggro(Unit* /*who*/) override
+    {
+        SetCombatMovement(false);
+    }
+
+    void JustReachedHome() override
+    {
+        if (HasEscortState(STATE_ESCORT_ESCORTING) && m_uiWPHolder >= 5)
+            m_creature->SetSheath(SHEATH_STATE_RANGED);
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->AI()->AttackStart(m_creature);
+        if (pSummoned->GetEntry() == NPC_DEFIAS_RAIDER)
+        {
+            m_lSummonedRaidersGUIDs.push_back(pSummoned->GetObjectGuid());
+        }
+    }
+
+    void SummonedCreatureJustDied(Creature* pSummoned) override 
+    {
+        m_lSummonedRaidersGUIDs.remove(pSummoned->GetObjectGuid());
+
+        if (m_uiWPHolder >= 9 && m_lSummonedRaidersGUIDs.size() == 0)
+            SetEscortPaused(false);
+    }
+
+    void SummonedCreatureDespawn(Creature* pSummoned) override // just in case this happens somehow
+    {
+        if (pSummoned->isAlive())
+            m_lSummonedRaidersGUIDs.remove(pSummoned->GetObjectGuid());
+    }
+
+    void JustDied(Unit* pKiller) override
+    {
+        m_lSummonedRaidersGUIDs.clear();
+
+        npc_escortAI::JustDied(pKiller);
+    }
+
+    void DoEndEscort()
+    {
+        m_creature->ForcedDespawn();
+        m_creature->Respawn();
     }
 
     void UpdateEscortAI(const uint32 uiDiff) override
@@ -151,10 +268,13 @@ struct npc_daphne_stilwellAI : public npc_escortAI
 
         if (m_uiShootTimer < uiDiff)
         {
-            m_uiShootTimer = 1000;
+            m_uiShootTimer = DAPHNE_SHOOT_CD;
 
-            if (!m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT);
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT) != CanCastResult::CAST_OK && !IsCombatMovement())
+            {
+                SetCombatMovement(true);
+                DoStartMovement(m_creature->getVictim());
+            }
         }
         else
             m_uiShootTimer -= uiDiff;
