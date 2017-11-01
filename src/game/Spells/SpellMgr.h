@@ -942,6 +942,22 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
     if (!spellproto)
         return false;
 
+    switch (spellproto->Id) // Spells whose effects are always positive
+    {
+        case 24742: // Magic Wings
+        case 42867:
+        case 34786: // Temporal Analysis - factions and unitflags of target/caster verified, should not incur combat
+        case 39384: // Fury Of Medivh visual - Burning Flames - Fury of medivh is friendly to all, and it hits all chess pieces, basically friendly fire damage
+            return true;
+        case 34190: // Arcane Orb - should be negative
+            /*34172 is cast onto friendly target, and fails bcs its delayed and we remove negative delayed on friendlies due to Duel code, if we change target pos code
+            bcs 34190 will be evaled as neg, 34172 will be evaled as neg, and hence be removed cos its negative delayed on a friendly*/
+            return false;
+        case 42399: // Neutral spell with TARGET_DUELVSPLAYER, caster faction 14, target faction 14, evaluates as negative spell
+            // because of POS/NEG decision, should in fact be NEUTRAL decision TODO: Increase check fidelity
+            return true;
+    }
+
     switch (spellproto->Effect[effIndex])
     {
         case SPELL_EFFECT_SEND_TAXI:                // Some NPCs that send taxis are neutral, so target mode fails
