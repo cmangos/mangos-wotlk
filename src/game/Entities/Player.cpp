@@ -14095,6 +14095,8 @@ void Player::FailQuest(uint32 questId)
 
 void Player::FailQuest(Quest const* quest)
 {
+    uint32 questId = quest->GetQuestId();
+
     SetQuestStatus(questId, QUEST_STATUS_FAILED);
 
     uint16 log_slot = FindQuestSlot(questId);
@@ -14105,7 +14107,7 @@ void Player::FailQuest(Quest const* quest)
         SetQuestSlotState(log_slot, QUEST_STATE_FAIL);
     }
 
-    if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAG_TIMED))
+    if (quest->HasSpecialFlag(QUEST_SPECIAL_FLAG_TIMED))
     {
         QuestStatusData& q_status = mQuestStatus[questId];
 
