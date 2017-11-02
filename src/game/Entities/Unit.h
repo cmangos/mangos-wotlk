@@ -1944,6 +1944,7 @@ class Unit : public WorldObject
         void RemoveAurasDueToSpellBySteal(uint32 spellId, ObjectGuid casterGuid, Unit* stealer);
         void RemoveAurasDueToSpellByCancel(uint32 spellId);
         void RemoveAurasTriggeredBySpell(uint32 spellId, ObjectGuid casterGuid = ObjectGuid());
+        void RemoveAuraStack(uint32 spellId);
 
         // removing unknown aura stacks by diff reasons and selections
         void RemoveNotOwnTrackedTargetAuras(uint32 newPhase = 0x0);
