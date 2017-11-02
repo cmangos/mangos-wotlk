@@ -528,7 +528,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             pVehicle->addUnitState(UNIT_STAT_POSSESSED);
             pVehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
 
-            pPlayer->SetClientControl(pVehicle, 1);
+            pPlayer->UpdateClientControl(pVehicle, true);
             pPlayer->SetMover(pVehicle);
 
             // Unconfirmed - default speed handling
@@ -593,7 +593,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             pPlayer->SetCharm(nullptr);
             pVehicle->SetCharmerGuid(ObjectGuid());
 
-            pPlayer->SetClientControl(pVehicle, 0);
+            pPlayer->UpdateClientControl(pVehicle, false);
             pPlayer->SetMover(nullptr);
 
             pVehicle->clearUnitState(UNIT_STAT_POSSESSED);
