@@ -205,6 +205,8 @@ struct boss_headless_horsemanAI : public ScriptedAI
         {
             m_bHorsemanLanded = true;
             m_creature->SetLevitate(false);
+            if (Unit* spawner = m_creature->GetSpawner())
+                AttackStart(spawner);
         }
     }
 
