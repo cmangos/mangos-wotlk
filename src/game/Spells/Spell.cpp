@@ -5478,7 +5478,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!target_hostile_checked)
                     {
                         target_hostile_checked = true;
-                        target_hostile = m_caster->IsHostileTo(target);
+                        target_hostile = !m_caster->CanAssist(target);
                     }
 
                     if (target_hostile)
@@ -5491,7 +5491,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!target_friendly_checked)
                     {
                         target_friendly_checked = true;
-                        target_friendly = m_caster->IsFriendlyTo(target);
+                        target_friendly = !m_caster->CanAttack(target);
                     }
 
                     if (target_friendly)
@@ -5510,7 +5510,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!target_hostile_checked)
                     {
                         target_hostile_checked = true;
-                        target_hostile = m_caster->IsHostileTo(target);
+                        target_hostile = !m_caster->CanAssist(target);
                     }
 
                     if (target_hostile)
@@ -5521,7 +5521,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!target_friendly_checked)
                     {
                         target_friendly_checked = true;
-                        target_friendly = m_caster->IsFriendlyTo(target);
+                        target_friendly = !m_caster->CanAttack(target);
                     }
 
                     if (target_friendly)
