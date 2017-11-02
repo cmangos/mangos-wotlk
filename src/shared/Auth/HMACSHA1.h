@@ -31,6 +31,7 @@ class HMACSHA1
 {
     public:
         HMACSHA1(uint32 len, uint8* seed);
+        HMACSHA1(uint32 len, uint8* seed, bool);
         ~HMACSHA1();
         void UpdateBigNumber(BigNumber* bn);
         void UpdateData(const uint8* data, int length);
