@@ -82,7 +82,7 @@ struct npc_draenei_survivorAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (m_bCanSayHelp && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsFriendlyTo(pWho) &&
+        if (m_bCanSayHelp && pWho->GetTypeId() == TYPEID_PLAYER && pWho->CanAssist(m_creature) &&
                 m_creature->IsWithinDistInMap(pWho, 25.0f))
         {
             // Random switch between 4 texts
