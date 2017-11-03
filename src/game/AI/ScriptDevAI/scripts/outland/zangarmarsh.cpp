@@ -86,19 +86,26 @@ CreatureAI* GetAI_npc_cooshcoosh(Creature* pCreature)
 
 enum
 {
-    SAY_START           = -1000343,
-    SAY_AMBUSH1         = -1000344,
-    SAY_PROGRESS        = -1000345,
-    SAY_AMBUSH2         = -1000346,
-    SAY_END             = -1000347,
+    SAY_START               = -1001238,
+    SAY_AMBUSH1             = -1001239,
+    SAY_PROGRESS1           = -1001240,
+    SAY_AMBUSH2             = -1001241,
+    SAY_PROGRESS2           = -1001242,
+    SAY_END                 = -1001243,
+    SAY_SLAVEBINDER_AMBUSH2 = -1001244,
 
-    QUEST_ESCAPE_FROM   = 9752,
-    NPC_SLAVEBINDER     = 18042
+    QUEST_ESCAPE_FROM       = 9752,
+    NPC_SLAVEBINDER         = 18042
 };
 
 struct npc_kayra_longmaneAI : public npc_escortAI
 {
     npc_kayra_longmaneAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+
+    void JustRespawned() override
+    {
+        m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
+    }
 
     void WaypointReached(uint32 i) override
     {
@@ -109,25 +116,35 @@ struct npc_kayra_longmaneAI : public npc_escortAI
 
         switch (i)
         {
+            case 0:
+                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                break;
             case 4:
                 DoScriptText(SAY_AMBUSH1, m_creature, pPlayer);
-                m_creature->SummonCreature(NPC_SLAVEBINDER, -10.0f, -5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_SLAVEBINDER, -8.0f, 5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_SLAVEBINDER, -916.4861f, 5355.635f, 18.25233f, 5.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_SLAVEBINDER, -918.9288f, 5358.43f, 18.05894f, 5.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 break;
             case 5:
-                DoScriptText(SAY_PROGRESS, m_creature, pPlayer);
+                DoScriptText(SAY_PROGRESS1, m_creature, pPlayer);
                 SetRun();
                 break;
             case 16:
                 DoScriptText(SAY_AMBUSH2, m_creature, pPlayer);
-                m_creature->SummonCreature(NPC_SLAVEBINDER, -10.0f, -5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_SLAVEBINDER, -8.0f, 5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 break;
             case 17:
-                DoScriptText(SAY_END, m_creature, pPlayer);
+            {
+                Creature* spawn = m_creature->SummonCreature(NPC_SLAVEBINDER, -668.2899f, 5382.913f, 22.32479f, 5.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                DoScriptText(SAY_SLAVEBINDER_AMBUSH2, spawn, pPlayer);
+                m_creature->SummonCreature(NPC_SLAVEBINDER, -669.2795f, 5386.802f, 23.01249f, 5.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 break;
-            case 25:
+            }
+            case 18:
+                DoScriptText(SAY_PROGRESS2, m_creature, pPlayer);
+                break;
+            case 26:
+                DoScriptText(SAY_END, m_creature, pPlayer);
                 pPlayer->GroupEventHappens(QUEST_ESCAPE_FROM, m_creature);
+                m_creature->ForcedDespawn(10000);
                 break;
         }
     }
@@ -140,6 +157,7 @@ bool QuestAccept_npc_kayra_longmane(Player* pPlayer, Creature* pCreature, const 
     if (pQuest->GetQuestId() == QUEST_ESCAPE_FROM)
     {
         DoScriptText(SAY_START, pCreature, pPlayer);
+        pCreature->SetFactionTemporary(FACTION_ESCORT_N_FRIEND_ACTIVE, TEMPFACTION_RESTORE_RESPAWN); // sniffed faction
 
         if (npc_kayra_longmaneAI* pEscortAI = dynamic_cast<npc_kayra_longmaneAI*>(pCreature->AI()))
             pEscortAI->Start(false, pPlayer, pQuest);

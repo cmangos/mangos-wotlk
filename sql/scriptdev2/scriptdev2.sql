@@ -1005,11 +1005,7 @@ UPDATE creature_template SET ScriptName='npc_drijya' WHERE entry=20281;
 UPDATE creature_template SET ScriptName='npc_dimensius' WHERE entry=19554;
 UPDATE creature_template SET ScriptName='npc_salhadaar' WHERE entry=20454;
 UPDATE creature_template SET ScriptName='npc_energy_ball' WHERE entry=20769;
-<<<<<<< HEAD
-=======
-UPDATE creature_template SET ScriptName='npc_scrap_reaver' WHERE entry IN(19849);
 UPDATE creature_template SET ScriptName='npc_scrapped_fel_reaver' WHERE entry IN(20243);
->>>>>>> 4a003818b... Implement q.10309 Its a Fel Reaver but with Heart quest script
 
 /*  */
 /* THE NEXUS */
@@ -1955,11 +1951,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000341,'%s eats his lunch.',0,2,0,0,'kyle EMOTE_EAT_LUNCH'),
 (-1000342,'%s thanks you with a special dance.',0,2,0,0,'kyle EMOTE_DANCE'),
 
-(-1000343,'Is the way clear? Let\'s get out while we can, $N.',0,0,0,0,'kayra SAY_START'),
-(-1000344,'Looks like we won\'t get away so easy. Get ready!',0,0,0,0,'kayra SAY_AMBUSH1'),
-(-1000345,'Let\'s keep moving. We\'re not safe here!',0,0,0,0,'kayra SAY_PROGRESS'),
-(-1000346,'Look out, $N! Enemies ahead!',0,0,0,0,'kayra SAY_AMBUSH2'),
-(-1000347,'We\'re almost to the refuge! Let\'s go.',0,0,0,0,'kayra SAY_END'),
+-- REUSE 343-347
 
 (-1000348,'Ah...the wondrous sound of kodos. I love the way they make the ground shake... inspect the beast for me.',0,0,0,0,'kodo round SAY_SMEED_HOME_1'),
 (-1000349,'Hey, look out with that kodo! You had better inspect that beast before i give you credit!',0,0,0,0,'kodo round SAY_SMEED_HOME_2'),
@@ -2101,13 +2093,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000470,'Must be your lucky day. Alright, I\'ll talk. Just leave me alone. Look, you\'re not going to believe me, but it wa... oh, Light, looks like the girl could shoot...',0,0,0,0,'ogron SAY_OGR_RET_LUCKY'),
 (-1000471,'By the way, thanks for watching my back.',0,0,1,0,'ogron SAY_OGR_THANKS'),
 
-<<<<<<< HEAD
-(-1000472,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1000473,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-=======
 (-1000472,'The %s, having fought the good fight, falls to pieces.',0,2,0,0,'Scrap Reaver X6000 - on death anim emote'),
 (-1000473,'The %s''s mechanical heart begins to beat softly.',0,2,0,0,'Scrapped Fel Reaver - on event start emote'),
->>>>>>> 4a003818b... Implement q.10309 Its a Fel Reaver but with Heart quest script
 (-1000474,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1000475,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1000476,'REUSE_ME',0,0,0,0,'REUSE_ME'),
@@ -2976,7 +2963,15 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001240,'%s is angered!',0,2,0,0,'Magrami Spectre on spawn 2'),
 (-1001241,'The Avatar of Terokk has been defeated! Death to Terokk! Death to Skettis!',0,0,7,0,'Defender Grashna on Avatar of Terokk death'),
 
-(-1001242,'%s cracks his knuckles.',0,2,0,23,'larry EMOTE_KNUCKLES');
+(-1001242,'%s cracks his knuckles.',0,2,0,23,'larry EMOTE_KNUCKLES'),
+-- (-1001237,'REUSE ME',0,0,0,0,'REUSE_ME'), -- dont use this
+(-1001238,'Is the way clear? Let\'s get out while we can, $N.',0,0,0,0,'kayra SAY_START'),
+(-1001239,'Looks like we won\'t get away so easy. Get ready!',0,0,0,0,'kayra SAY_AMBUSH1'),
+(-1001240,'Let\'s keep moving. We\'re not safe here!',0,0,0,0,'kayra SAY_PROGRESS1'),
+(-1001241,'Look out, $N! Enemies ahead!',0,0,0,0,'kayra SAY_AMBUSH2'),
+(-1001242,'We\'re almost to the refuge! Let\'s go.',0,0,0,0,'kayra SAY_PROGRESS2'),
+(-1001243,'I can see my fellow druids from here.  Thank you, $n.  I''m sure Ysiel will reward you for your actions!',0,0,0,0,'kayra SAY_END'),
+(-1001244,'You won''t escape us, druid!',0,0,0,0,'Umbrafen Slavebinder SAY_AMBUSH2');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -8219,6 +8214,7 @@ INSERT INTO script_waypoint VALUES
 (17876, 119, 2634.30, 661.698, 54.4147, 0, 'run off'),
 (17876, 120, 2652.21, 644.396, 56.1906, 0, '');
 
+-- kayra longmane
 DELETE FROM script_waypoint WHERE entry=17969;
 INSERT INTO script_waypoint VALUES
 (17969, 0, -930.048950, 5288.080078, 23.848402, 0, ''),
@@ -8226,7 +8222,7 @@ INSERT INTO script_waypoint VALUES
 (17969, 2, -924.297180, 5299.016113, 17.710915, 0, ''),
 (17969, 3, -928.390076, 5317.022949, 18.208593, 0, ''),
 (17969, 4, -930.620972, 5329.915039, 18.773422, 0, 'SAY_AMBUSH1'),
-(17969, 5, -931.490295, 5357.654785, 18.027155, 0, 'SAY_PROGRESS'),
+(17969, 5, -931.490295, 5357.654785, 18.027155, 0, 'SAY_PROGRESS1'),
 (17969, 6, -934.777771, 5369.341797, 22.278048, 0, ''),
 (17969, 7, -934.521851, 5373.407227, 22.834690, 0, ''),
 (17969, 8, -937.008545, 5382.980469, 22.699078, 0, ''),
@@ -8237,16 +8233,17 @@ INSERT INTO script_waypoint VALUES
 (17969, 13, -777.988953, 5391.982422, 23.001669, 0, ''),
 (17969, 14, -750.362000, 5385.786621, 22.765791, 0, ''),
 (17969, 15, -731.339417, 5382.449707, 22.517065, 0, ''),
-(17969, 16, -681.235901, 5381.377930, 22.050159, 2500, 'end bridge SAY_AMBUSH2'),
-(17969, 17, -637.944458, 5384.338379, 22.205647, 0, 'SAY_END'),
-(17969, 18, -608.954407, 5408.715332, 21.630386, 0, ''),
-(17969, 19, -598.134277, 5413.608398, 21.412275, 0, ''),
-(17969, 20, -571.268982, 5420.771973, 21.184925, 0, ''),
-(17969, 21, -553.099915, 5424.616211, 21.193716, 0, ''),
-(17969, 22, -524.745483, 5443.945313, 20.977013, 0, ''),
-(17969, 23, -502.984985, 5446.283691, 22.149435, 0, ''),
-(17969, 24, -472.463959, 5449.546875, 22.561453, 0, ''),
-(17969, 25, -454.533264, 5461.302246, 22.602837, 30000, 'quest complete');
+(17969, 16, -681.235901, 5381.377930, 22.050159, 3000, 'end bridge SAY_AMBUSH2'),
+(17969, 17, -681.235901, 5381.377930, 22.050159, 3000, 'end bridge SAY_SLAVEBINDER_AMBUSH2'),
+(17969, 18, -637.944458, 5384.338379, 22.205647, 0, 'SAY_PROGRESS2'),
+(17969, 19, -608.954407, 5408.715332, 21.630386, 0, ''),
+(17969, 20, -598.134277, 5413.608398, 21.412275, 0, ''),
+(17969, 21, -571.268982, 5420.771973, 21.184925, 0, ''),
+(17969, 22, -553.099915, 5424.616211, 21.193716, 0, ''),
+(17969, 23, -524.745483, 5443.945313, 20.977013, 0, ''),
+(17969, 24, -502.984985, 5446.283691, 22.149435, 0, ''),
+(17969, 25, -472.463959, 5449.546875, 22.561453, 0, ''),
+(17969, 26, -454.533264, 5461.302246, 22.602837, 30000, 'quest complete SAY_END');
 
 DELETE FROM script_waypoint WHERE entry=18209;
 INSERT INTO script_waypoint VALUES
