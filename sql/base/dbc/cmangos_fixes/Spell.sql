@@ -343,6 +343,9 @@ INSERT INTO spell_template (Id,Attributes,AttributesEx,AttributesEx3,CastingTime
 (37948,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,1,1,1,42,1,1,29,61,79,21936,127,64,2154,'Summon Crazed Shardling',1,1,1),
 (37949,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,1,1,1,43,1,1,29,61,79,21936,127,64,2154,'Summon Crazed Shardling',1,1,1);
 
+-- summoned creatures behave like wild summons and not like guardians per sniff data
+UPDATE spell_template SET EffectMiscValueB1=64 WHERE Id IN(33803,38611);
+
 -- Missing selector spells for BWL
 INSERT INTO spell_template (id, attributes, attributesEx, attributesEx2, CastingTimeIndex, ProcChance, RangeIndex, Effect1, EffectImplicitTargetA1, EffectImplicitTargetB1, EffectRadiusIndex1, EffectMiscValue1, SpellIconId, SpellName, DmgMultiplier1) VALUES
 (23195, 8388864, 0, 1, 1, 101, 1, 3, 1, 0, 0, 0, 1, 'Dragondog Breath Selection', 1),
