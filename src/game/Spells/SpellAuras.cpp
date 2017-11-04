@@ -2303,6 +2303,17 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                         return;
                     }
+                    case 31736:                                     // Ironvine Seeds
+                    {
+                        Unit* pCaster = GetCaster();
+
+                        Creature* SteamPumpOverseer = target->SummonCreature(18340, pCaster->GetPositionX()-20, pCaster->GetPositionY()+20, pCaster->GetPositionZ(), target->GetOrientation(), TEMPSPAWN_TIMED_OOC_DESPAWN, 10000);
+
+                        if (SteamPumpOverseer && pCaster)
+                            SteamPumpOverseer->GetMotionMaster()->MovePoint(0, pCaster->GetPositionX(), pCaster->GetPositionY(), pCaster->GetPositionZ());
+
+                        return;
+                    }
                     case 32045:                             // Soul Charge
                     case 32051:
                     case 32052:
