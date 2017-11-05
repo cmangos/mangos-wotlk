@@ -56,6 +56,9 @@ enum
     PHASE_REBIRTH           = 2,
     PHASE_TWO               = 3,
     PHASE_DIVE_BOMB         = 4,
+
+    QUEST_RUSE_ASHTONGUE    = 10946,        // Quest 10946 for attunement in Black Temple.
+    SPELL_ASHTONGUE_RUSE    = 42090,        // Player can complete 10946 quest, only if has aura 42090. If kill Alar without this aura - quest not completed.
 };
 
 struct EventLocation
@@ -144,6 +147,12 @@ struct boss_alarAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ALAR, DONE);
+
+        std::list<Player*> playerList;
+        GetPlayerListWithEntryInWorld(playerList, m_creature, 150.0f);
+        for (auto& player : playerList)
+            if (player->GetQuestStatus(QUEST_RUSE_ASHTONGUE) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_ASHTONGUE_RUSE))
+                player->AreaExploredOrEventHappens(QUEST_RUSE_ASHTONGUE);
     }
 
     void JustSummoned(Creature* pSummoned) override
