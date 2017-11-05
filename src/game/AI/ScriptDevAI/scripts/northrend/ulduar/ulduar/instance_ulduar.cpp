@@ -73,6 +73,7 @@ static UlduarKeeperSpawns m_aKeeperHelperLocs[] =
 
 instance_ulduar::instance_ulduar(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aUlduarDialogue),
     m_bHelpersLoaded(false),
+    m_bFreyaVigilance(false),
     m_uiAlgalonTimer(MINUTE* IN_MILLISECONDS),
     m_uiYoggResetTimer(0),
     m_uiShatterAchievTimer(0),
@@ -1200,7 +1201,30 @@ void instance_ulduar::OnCreatureEnterCombat(Creature* pCreature)
     {
         case NPC_RUNE_GIANT:
             m_uiStairsSpawnTimer = 0;
-            break;
+            break;      
+        case NPC_CORRUPTED_SERVITOR:
+        case NPC_MISGUIDED_NYMPH:
+        case NPC_GUARDIAN_LASHER:
+        case NPC_FOREST_SWARMER:
+        case NPC_MANGROVE_ENT:
+        case NPC_IRONROOT_LASHER:
+        case NPC_NATURES_BLADE:
+        case NPC_GUARDIAN_OF_LIFE:
+        {
+            // Only for the first try
+            if (m_bFreyaVigilance)
+                return;
+      
+            if (Creature* pFreya = GetSingleCreatureFromStorage(NPC_FREYA))
+                {
+                    if (pFreya->isAlive())
+                        pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCreature, pFreya);
+                }
+                break;
+            
+            m_bFreyaVigilance = true;
+        }
+        break;
     }
 }
 
