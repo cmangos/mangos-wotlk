@@ -82,14 +82,12 @@ struct boss_nightbaneAI : public npc_escortAI
     uint32 m_uiFireballBarrageTimer;
 
     bool m_bCombatStarted;
-    bool m_bNightbaneDamage;
 
     void Reset() override
     {
         m_uiPhase                   = PHASE_GROUND;
         m_uiFlightPhase             = 1;
         m_bCombatStarted            = false;
-        m_bNightbaneDamage          = false;
 
         m_uiBellowingRoarTimer      = urand(20000, 30000);
         m_uiCharredEarthTimer       = urand(10000, 15000);
