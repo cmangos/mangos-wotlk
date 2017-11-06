@@ -457,11 +457,6 @@ struct boss_freyaAI : public ScriptedAI
         {
             if (!m_uiThreeAlliesTimer)
                 m_uiThreeAlliesTimer = 12000;
-        }        
-        else if (eventType == AI_EVENT_CUSTOM_C)
-        {
-              if (m_pInstance)
-                  m_pInstance->DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_FREYA_ID);
         }
     }
 

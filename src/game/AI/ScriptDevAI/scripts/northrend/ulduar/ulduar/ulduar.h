@@ -57,6 +57,12 @@ enum
     // Other types - not saved
     TYPE_LEVIATHAN_GAUNTLET     = 32,
 
+    // Other types - saved
+    TYPE_FREYA_CONSPEEDATORY    = 33, // SetData ID
+
+    ACHIEV_FREYA_CONSPEEDATORY  = 0,  // Saving array ID
+    MAX_ACHIEV_ENCOUNTER        = 1,
+
     // The siege of ulduar
     NPC_LEVIATHAN               = 33113,
     // NPC_IGNIS                = 33118,
@@ -618,9 +624,9 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         uint32 m_auiUlduarKeepers[KEEPER_ENCOUNTER];
         uint32 m_auiUlduarTowers[KEEPER_ENCOUNTER];
         bool m_abAchievCriteria[MAX_SPECIAL_ACHIEV_CRITS];
+        uint32 m_achievEncounter[MAX_ACHIEV_ENCOUNTER]; // for achievements which need saving
 
         bool m_bHelpersLoaded;
-        bool m_bFreyaVigilance;
 
         uint32 m_uiAlgalonTimer;
         uint32 m_uiYoggResetTimer;

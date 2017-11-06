@@ -73,7 +73,6 @@ static UlduarKeeperSpawns m_aKeeperHelperLocs[] =
 
 instance_ulduar::instance_ulduar(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aUlduarDialogue),
     m_bHelpersLoaded(false),
-    m_bFreyaVigilance(false),
     m_uiAlgalonTimer(MINUTE* IN_MILLISECONDS),
     m_uiYoggResetTimer(0),
     m_uiShatterAchievTimer(0),
@@ -984,6 +983,11 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
         case TYPE_LEVIATHAN_GAUNTLET:
             m_uiGauntletStatus = uiData;
             return;
+        case TYPE_FREYA_CONSPEEDATORY:
+            m_achievEncounter[ACHIEV_FREYA_CONSPEEDATORY] = uiData;
+            if (uiData == DONE)
+                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_FREYA_ID);
+            break;
     }
 
     if (uiData == DONE || uiData == FAIL || uiData == SPECIAL || uiType == TYPE_ALGALON_TIMER)
@@ -999,7 +1003,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                    << m_auiEncounter[12] << " " << m_auiEncounter[13] << " " << m_auiEncounter[14] << " "
                    << m_auiEncounter[15] << " " << m_auiUlduarKeepers[0] << " " << m_auiUlduarKeepers[1] << " "
                    << m_auiUlduarKeepers[2] << " " << m_auiUlduarKeepers[3] << " " << m_auiUlduarTowers[0] << " "
-                   << m_auiUlduarTowers[1] << " " << m_auiUlduarTowers[2] << " " << m_auiUlduarTowers[3];
+                   << m_auiUlduarTowers[1] << " " << m_auiUlduarTowers[2] << " " << m_auiUlduarTowers[3] << m_achievEncounter[ACHIEV_FREYA_CONSPEEDATORY];
 
         m_strInstData = saveStream.str();
 
@@ -1134,6 +1138,10 @@ uint32 instance_ulduar::GetData(uint32 uiType) const
 
         case TYPE_LEVIATHAN_GAUNTLET:
             return m_uiGauntletStatus;
+
+            // Achievement encounters
+        case TYPE_FREYA_CONSPEEDATORY:
+            return m_achievEncounter[ACHIEV_FREYA_CONSPEEDATORY];
     }
 
     return 0;
@@ -1212,17 +1220,10 @@ void instance_ulduar::OnCreatureEnterCombat(Creature* pCreature)
         case NPC_GUARDIAN_OF_LIFE:
         {
             // Only for the first try
-            if (m_bFreyaVigilance)
+            if (GetData(TYPE_FREYA_CONSPEEDATORY) != DONE)
                 return;
 
-            if (Creature* pFreya = GetSingleCreatureFromStorage(NPC_FREYA))
-            {
-                if (pFreya->isAlive())
-                    pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCreature, pFreya);
-            }
-            break;
-
-            m_bFreyaVigilance = true;
+            SetData(TYPE_FREYA_CONSPEEDATORY, DONE);
         }
         break;
     }
@@ -1321,7 +1322,7 @@ void instance_ulduar::Load(const char* strIn)
                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11]
                >> m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14] >> m_auiEncounter[15]
                >> m_auiUlduarKeepers[0] >> m_auiUlduarKeepers[1] >> m_auiUlduarKeepers[2] >> m_auiUlduarKeepers[3]
-               >> m_auiUlduarTowers[0] >> m_auiUlduarTowers[1] >> m_auiUlduarTowers[2] >> m_auiUlduarTowers[3];
+               >> m_auiUlduarTowers[0] >> m_auiUlduarTowers[1] >> m_auiUlduarTowers[2] >> m_auiUlduarTowers[3] >> m_achievEncounter[ACHIEV_FREYA_CONSPEEDATORY];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
