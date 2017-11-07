@@ -1164,6 +1164,7 @@ UPDATE creature_template SET ScriptName='npc_injured_rainspeaker' WHERE entry=28
 UPDATE creature_template SET ScriptName='npc_mosswalker_victim' WHERE entry=28113;
 UPDATE creature_template SET ScriptName='npc_tipsy_mcmanus' WHERE entry=28566;
 UPDATE creature_template SET ScriptName='npc_wants_fruit_credit' WHERE entry IN (28535,28536,28537);
+UPDATE creature_template SET ScriptName='npc_avatar_of_freya' WHERE entry=27801;
 UPDATE gameobject_template SET ScriptName='go_quest_still_at_it_credit' WHERE entry IN (190635,190636);
 
 /* SILITHUS */
@@ -1443,6 +1444,7 @@ UPDATE creature_template SET ScriptName='npc_healthy_spore' WHERE entry=33215;
 UPDATE creature_template SET ScriptName='npc_water_spirit' WHERE entry=33202;
 UPDATE creature_template SET ScriptName='npc_snaplasher' WHERE entry=32916;
 UPDATE creature_template SET ScriptName='npc_storm_lasher' WHERE entry=32919;
+UPDATE creature_template SET ScriptName='npc_freya_deforestation' WHERE entry=33406;
 UPDATE creature_template SET ScriptName='boss_mimiron' WHERE entry=33350;
 UPDATE creature_template SET ScriptName='boss_leviathan_mk2' WHERE entry=33432;
 UPDATE creature_template SET ScriptName='boss_vx001' WHERE entry=33651;
