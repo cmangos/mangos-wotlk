@@ -281,3 +281,17 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 INSERT INTO spell_template (id, attributes, attributesEx, attributesEx2, CastingTimeIndex, ProcChance, RangeIndex, Effect1, EffectImplicitTargetA1, EffectImplicitTargetB1, EffectRadiusIndex1, SpellIconId, SpellName, DmgMultiplier1) VALUES
 (23173,384,268435456,4,1,101,1,3,22,15,12,1,'Brood Affliction',1);
 
+-- Missing selector spells for BWL
+INSERT INTO spell_template (id, attributes, attributesEx, attributesEx2, CastingTimeIndex, ProcChance, RangeIndex, Effect1, EffectImplicitTargetA1, EffectImplicitTargetB1, EffectRadiusIndex1, EffectMiscValue1, SpellIconId, SpellName, DmgMultiplier1) VALUES
+(23195, 8388864, 0, 1, 1, 101, 1, 3, 1, 0, 0, 0, 1, 'Dragondog Breath Selection', 1),
+(23317, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8446, 1, 'Dragondog Breath Selection (L1)', 1),
+(23318, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8447, 1, 'Dragondog Breath Selection (L2)', 1),
+(23319, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8448, 1, 'Dragondog Breath Selection (L3)', 1),
+(23320, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8449, 1, 'Dragondog Breath Selection (L4)', 1),
+(23321, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8450, 1, 'Dragondog Breath Selection (L5)', 1),
+(23322, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8451, 1, 'Dragondog Breath Selection (R1)', 1),
+(23323, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8452, 1, 'Dragondog Breath Selection (R2)', 1),
+(23324, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8453, 1, 'Dragondog Breath Selection (R3)', 1),
+(23325, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8454, 1, 'Dragondog Breath Selection (R4)', 1),
+(23326, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8455, 1, 'Dragondog Breath Selection (R5)', 1);
+
