@@ -45,6 +45,9 @@ enum
     NPC_EMBER_OF_ALAR       = 19551,        // scripted in Acid
     NPC_FLAME_PATCH         = 20602,
     SPELL_FLAME_PATCH       = 35380,
+    
+    QUEST_RUSE_ASHTONGUE    = 10946,                // Quest 10946 for attunement in Black Temple.
+    SPELL_ASHTONGUE_RUSE    = 42090,                // Player can complete 10946 quest, only if has aura 42090. If kill Alar without this aura - quest not completed.
 
     MAX_PLATFORMS           = 4,
 
@@ -108,6 +111,7 @@ struct boss_alarAI : public ScriptedAI
         // Start phase one and move to the closest platform
         m_uiPhase = PHASE_ONE;
         SetCombatMovement(false);
+        m_creature->SetWalk(false);
 
         m_uiRangeCheckTimer     = 0;
         m_uiCurrentPlatformId   = 0;
@@ -144,6 +148,12 @@ struct boss_alarAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ALAR, DONE);
+            
+            std::list<Player*> playerList;
+            GetPlayerListWithEntryInWorld(playerList, m_creature, 150.0f);
+            for (auto& player : playerList)
+                 if (player->GetQuestStatus(QUEST_RUSE_ASHTONGUE) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_ASHTONGUE_RUSE))
+                     player->KilledMonsterCredit(QUEST_RUSE_ASHTONGUE);
     }
 
     void JustSummoned(Creature* pSummoned) override
