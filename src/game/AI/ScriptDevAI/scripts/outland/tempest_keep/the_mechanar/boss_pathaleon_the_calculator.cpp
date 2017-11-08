@@ -60,7 +60,7 @@ struct boss_pathaleon_the_calculatorAI : public ScriptedAI
 {
     boss_pathaleon_the_calculatorAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<ScriptedInstance*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
@@ -101,8 +101,18 @@ struct boss_pathaleon_the_calculatorAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
+        m_creature->RemoveGuardians();
+
         if (m_pInstance)
             m_pInstance->SetData(TYPE_PATHALEON, DONE);
+    }
+
+    void JustReachedHome() override
+    {
+        m_creature->RemoveGuardians();
+
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_PATHALEON, FAIL);
     }
 
     void JustSummoned(Creature* pSummoned) override
