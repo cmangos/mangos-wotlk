@@ -75,6 +75,7 @@ struct boss_pyroguard_emberseerAI : public ScriptedAI
         m_uiGrowingStacks       = 0;
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -115,6 +116,7 @@ struct boss_pyroguard_emberseerAI : public ScriptedAI
             }
 
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         }
     }
 
