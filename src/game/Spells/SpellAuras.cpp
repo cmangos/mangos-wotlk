@@ -2070,6 +2070,24 @@ void Aura::TriggerSpell()
                 triggerTarget->CastCustomSpell(triggerTarget, trigger_spell_id, &m_modifier.m_amount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
+            case 28059:                                     // Positive Charge
+            case 28084:                                     // Negative Charge
+            {
+                uint32 buffAuraId = auraId == 28059 ? 29659 : 29660;
+                uint32 curCount = 0;
+                std::list<Player*> playerList;
+                GetPlayerListWithEntryInWorld(playerList, target, 10.0f);
+                for (Player* player : playerList)
+                    if (target != player && player->HasAura(auraId))
+                        curCount++;
+
+                target->RemoveAurasDueToSpell(buffAuraId);
+                if (curCount)
+                    for (uint32 i = 0; i < curCount; i++)
+                        target->CastSpell(target, buffAuraId, TRIGGERED_OLD_TRIGGERED);
+
+                break;
+            }
             case 33525:                                     // Ground Slam
                 triggerTarget->CastSpell(triggerTarget, trigger_spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, this, casterGUID);
                 return;
@@ -2711,7 +2729,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 target->CastSpell(target, 28240, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
-            case 30410:                             // Shadow Grasp
+            case 28059:                                     // Positive Charge
+                target->RemoveAurasDueToSpell(29659);
+                return;
+            case 28084:                                     // Negative Charge
+                target->RemoveAurasDueToSpell(29660);
+                return;
+            case 30410:                                     // Shadow Grasp
             {
                 if (target->HasAura(30168))
                     target->RemoveAurasDueToSpell(30168); // remove Shadow cage if stacks are 5
