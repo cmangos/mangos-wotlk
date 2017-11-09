@@ -8296,6 +8296,29 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 38353, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
                     return;
                 }
+                case 38629:                                 // Poison Keg
+                {
+                    if (!unitTarget)
+                        return;
+
+                    Unit* master = m_caster->GetMaster();
+                    if (master->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 spellId;
+
+                    switch (unitTarget->GetEntry())
+                    {
+                        case 22356: spellId = 38996; break; // [DND]Green Spot Grog Keg Credit
+                        case 22367: spellId = 38997; break; // [DND]Ripe Moonshine Keg Credit
+                        case 22368: spellId = 38998; break; // [DND]Fermented Seed Beer Keg Credit
+                    }
+
+                    Player* possessor = static_cast<Player*>(master);
+
+                    possessor->CastSpell(possessor, spellId, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 39338:                                 // Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Horde
                 case 39342:                                 // Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Alliance
                 {
