@@ -2576,7 +2576,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
                 while (t && next != tempTargetUnitMap.end())
                 {
-                    if (!prev->IsWithinDist(*next, CHAIN_SPELL_JUMP_RADIUS))
+                    if (!prev->IsWithinCombatDist(*next, CHAIN_SPELL_JUMP_RADIUS))
                     {
                         ++next;
                         continue;
