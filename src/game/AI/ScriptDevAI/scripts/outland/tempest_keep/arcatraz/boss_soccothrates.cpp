@@ -182,10 +182,6 @@ struct boss_soccothratesAI : public ScriptedAI, private DialogueHelper
         }
     }
 
-    template <typename T> T sgn(T val) {
-        return (T(0) < val) - (val < T(0));
-    }
-
     void SpellHitTarget(Unit* target, const SpellEntry* spell) override
     {
         if (spell->Id == SPELL_FELFIRE_LINE_UP)
