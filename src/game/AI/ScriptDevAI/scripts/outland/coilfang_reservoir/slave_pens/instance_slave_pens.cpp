@@ -112,7 +112,7 @@ void AddSC_instance_slave_pens()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "at_coilfang_waterfall";
+    pNewScript->Name = "at_naturalist_bite";
     pNewScript->pAreaTrigger = &AreaTrigger_at_naturalist_bite;
     pNewScript->RegisterSelf();
 
