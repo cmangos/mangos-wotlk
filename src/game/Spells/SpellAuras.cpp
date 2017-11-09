@@ -1555,8 +1555,6 @@ void Aura::TriggerSpell()
 //                    case 37440: break;
 //                    // Karazhan - Chess NPC AI, action timer
 //                    case 37504: break;
-//                    // Karazhan - Chess: Is Square OCCUPIED aura (DND)
-//                    case 39400: break;
 //                    // Banish
 //                    case 37546: break;
 //                    // Shriveling Gaze
