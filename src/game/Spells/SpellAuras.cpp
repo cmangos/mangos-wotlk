@@ -1374,8 +1374,6 @@ void Aura::TriggerSpell()
                         if (triggerTarget->GetTypeId() != TYPEID_UNIT)
                             return;
                         break;
-//                    // Overload
-//                    case 29768: break;
 //                    // Return Fire
 //                    case 29788: break;
 //                    // Return Fire
@@ -2076,6 +2074,12 @@ void Aura::TriggerSpell()
             case 16191:                                     // Mana Tide
             {
                 triggerTarget->CastCustomSpell(triggerTarget, trigger_spell_id, &m_modifier.m_amount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                return;
+            }
+            case 29768:                                     // Overload
+            {
+                int32 damage = m_modifier.m_amount * GetAuraTicks();
+                triggerCaster->CastCustomSpell(triggerTarget, triggeredSpellInfo, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this, casterGUID);
                 return;
             }
             case 33525:                                     // Ground Slam

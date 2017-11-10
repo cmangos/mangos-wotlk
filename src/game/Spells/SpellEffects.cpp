@@ -1574,6 +1574,11 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, spell_id, TRIGGERED_OLD_TRIGGERED, nullptr);
                     return;
                 }
+                case 29767:                                 // Overload
+                {
+                    m_caster->CastCustomSpell(m_caster, 29766, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
+                    return;
+                }
                 case 29858:                                 // Soulshatter
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->CanAttack(m_caster))

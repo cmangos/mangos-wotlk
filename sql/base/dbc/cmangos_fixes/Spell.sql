@@ -461,6 +461,10 @@ INSERT INTO spell_template (Id, Category, Dispel, Mechanic, Attributes, Attribut
 -- Fixes InterruptFlags for spell 18115 (Viewing Room Student Transform - Effect): it should not cancel on movement
 UPDATE spell_template SET InterruptFlags=0 WHERE id=18115;
 
+-- Karazhan Arcane Watchman spell
+INSERT INTO spell_template (Id, SchoolMask, Attributes, CastingTimeIndex, procChance, baseLevel, spellLevel, rangeIndex, EquippedItemClass, Effect1, EffectImplicitTargetA1, SpellIconId, SpellName, DmgMultiplier1) VALUES
+(29767,4,536871168,1,101,70,70,1,-1,3,1,122,'Overload',1);
+
 -- Fixes Well Fed buff for some seasonal food like Winter Veil cookies
 UPDATE spell_template SET Effect2=6, EffectDieSides2=1, EffectBaseDice2=1, EffectImplicitTargetA2=1, EffectApplyAuraName2=23, EffectAmplitude2=10000, EffectTriggerSpell2=24870 WHERE Id=24869;
 UPDATE spell_template SET EffectRealPointsPerLevel1=0.25, EffectRealPointsPerLevel2=0.25, EffectBaseDice1=0, EffectBaseDice2=0 WHERE id=24870;
