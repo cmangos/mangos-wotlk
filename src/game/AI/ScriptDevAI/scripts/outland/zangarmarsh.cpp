@@ -86,13 +86,13 @@ CreatureAI* GetAI_npc_cooshcoosh(Creature* pCreature)
 
 enum
 {
-    SAY_START               = -1001238,
-    SAY_AMBUSH1             = -1001239,
-    SAY_PROGRESS1           = -1001240,
-    SAY_AMBUSH2             = -1001241,
-    SAY_PROGRESS2           = -1001242,
-    SAY_END                 = -1001243,
-    SAY_SLAVEBINDER_AMBUSH2 = -1001244,
+    SAY_START               = -1001243,
+    SAY_AMBUSH1             = -1001244,
+    SAY_PROGRESS1           = -1001245,
+    SAY_AMBUSH2             = -1001246,
+    SAY_PROGRESS2           = -1001247,
+    SAY_END                 = -1001248,
+    SAY_SLAVEBINDER_AMBUSH2 = -1001249,
 
     QUEST_ESCAPE_FROM       = 9752,
     NPC_SLAVEBINDER         = 18042

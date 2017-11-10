@@ -2964,14 +2964,13 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001241,'The Avatar of Terokk has been defeated! Death to Terokk! Death to Skettis!',0,0,7,0,'Defender Grashna on Avatar of Terokk death'),
 
 (-1001242,'%s cracks his knuckles.',0,2,0,23,'larry EMOTE_KNUCKLES'),
--- (-1001237,'REUSE ME',0,0,0,0,'REUSE_ME'), -- dont use this
-(-1001238,'Is the way clear? Let\'s get out while we can, $N.',0,0,0,0,'kayra SAY_START'),
-(-1001239,'Looks like we won\'t get away so easy. Get ready!',0,0,0,0,'kayra SAY_AMBUSH1'),
-(-1001240,'Let\'s keep moving. We\'re not safe here!',0,0,0,0,'kayra SAY_PROGRESS1'),
-(-1001241,'Look out, $N! Enemies ahead!',0,0,0,0,'kayra SAY_AMBUSH2'),
-(-1001242,'We\'re almost to the refuge! Let\'s go.',0,0,0,0,'kayra SAY_PROGRESS2'),
-(-1001243,'I can see my fellow druids from here.  Thank you, $n.  I''m sure Ysiel will reward you for your actions!',0,0,0,0,'kayra SAY_END'),
-(-1001244,'You won''t escape us, druid!',0,0,0,0,'Umbrafen Slavebinder SAY_AMBUSH2');
+(-1001243,'Is the way clear? Let\'s get out while we can, $N.',0,0,0,0,'kayra SAY_START'),
+(-1001244,'Looks like we won\'t get away so easy. Get ready!',0,0,0,0,'kayra SAY_AMBUSH1'),
+(-1001245,'Let\'s keep moving. We\'re not safe here!',0,0,0,0,'kayra SAY_PROGRESS1'),
+(-1001246,'Look out, $N! Enemies ahead!',0,0,0,0,'kayra SAY_AMBUSH2'),
+(-1001247,'We\'re almost to the refuge! Let\'s go.',0,0,0,0,'kayra SAY_PROGRESS2'),
+(-1001248,'I can see my fellow druids from here.  Thank you, $n.  I''m sure Ysiel will reward you for your actions!',0,0,0,0,'kayra SAY_END'),
+(-1001249,'You won''t escape us, druid!',0,0,0,0,'Umbrafen Slavebinder SAY_AMBUSH2');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
