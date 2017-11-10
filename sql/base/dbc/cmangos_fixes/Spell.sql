@@ -252,10 +252,6 @@ INSERT INTO spell_template(Id, Attributes, DurationIndex,rangeIndex,Effect1,Effe
 (39245,384,4,3,28,2,1,18,29,22482,64,1,'Summon Mature Bone Sifter',1,1,1),
 (39247,384,4,3,28,2,1,18,29,22483,64,1,'Summon Sand Gnome',1,1,1);
 
--- Stonescythe Whelp serverside
-INSERT INTO spell_template(Id,Attributes,AttributesEx,baseLevel,spellLevel,DurationIndex,rangeIndex,Effect2,Effect3,EffectImplicitTargetA2,EffectImplicitTargetA3,EffectApplyAuraName2,EffectApplyAuraName3,SpellIconID,spellPriority,SpellName,StartRecoveryCategory,DmgClass,PreventionType,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
-(33897,67109248,268435456,20,20,21,5,6,6,1,1,60,26,2153,50,'Desperate Defense',133,1,1,1,1,1); -- tooltip Rooted. Not attacking.
-
 -- Missing Blackwing defenders summon spells (Razorgore encounter)
 INSERT INTO spell_template (Id, Category, Attributes, AttributesEx, AttributesEx3, AttributesEx4, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, ProcChance, DurationIndex, rangeIndex, Effect1, EffectDieSides1, EffectBaseDice1, EffectImplicitTargetA1, EffectRadiusIndex1, EffectMiscValue1, SpellIconID, SpellName, DmgMultiplier1, DmgMultiplier2) VALUES 
 (19826, 23, 256, 0, 0, 0, 1, 45000, 15000, 101, 21, 1, 41, 1, 1, 18, 16, 12416, 1, 'Summon Blackwing Legionnaire', 1, 0),
