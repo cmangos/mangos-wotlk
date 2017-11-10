@@ -98,7 +98,7 @@ struct boss_morogrim_tidewalkerAI : public ScriptedAI
 
         m_bIsPhase2             = false;
 
-        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK);
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void Aggro(Unit* /*pWho*/) override

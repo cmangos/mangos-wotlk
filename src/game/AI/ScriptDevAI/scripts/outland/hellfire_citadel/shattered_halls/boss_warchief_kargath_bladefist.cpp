@@ -94,7 +94,7 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
         m_uiSummonAssistantTimer = 30000;
         m_uiAssassinsTimer = 5000;
 
-        m_creature->CastSpell(m_creature, SPELL_DOUBLE_ATTACK, TRIGGERED_NONE);
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void Aggro(Unit* /*pWho*/) override
