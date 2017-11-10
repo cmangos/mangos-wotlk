@@ -2070,24 +2070,6 @@ void Aura::TriggerSpell()
                 triggerTarget->CastCustomSpell(triggerTarget, trigger_spell_id, &m_modifier.m_amount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
-            case 28059:                                     // Positive Charge
-            case 28084:                                     // Negative Charge
-            {
-                uint32 buffAuraId = auraId == 28059 ? 29659 : 29660;
-                uint32 curCount = 0;
-                std::list<Player*> playerList;
-                GetPlayerListWithEntryInWorld(playerList, target, 10.0f);
-                for (Player* player : playerList)
-                    if (target != player && player->HasAura(auraId))
-                        curCount++;
-
-                target->RemoveAurasDueToSpell(buffAuraId);
-                if (curCount)
-                    for (uint32 i = 0; i < curCount; i++)
-                        target->CastSpell(target, buffAuraId, TRIGGERED_OLD_TRIGGERED);
-
-                break;
-            }
             case 33525:                                     // Ground Slam
                 triggerTarget->CastSpell(triggerTarget, trigger_spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, this, casterGUID);
                 return;
@@ -2097,13 +2079,35 @@ void Aura::TriggerSpell()
                     caster->CastSpell(triggerTarget, trigger_spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
+            case 28059:                                     // Positive Charge
+            case 28084:                                     // Negative Charge
             case 39088:                                     // Positive Charge
             case 39091:                                     // Negative Charge
             {
-                uint32 buffAuraId = auraId == 39088 ? 39089 : 39092;
+                uint32 buffAuraId;
+                float range;
+                switch (auraId)
+                {
+                    case 28059:
+                        buffAuraId = 29659;
+                        range = 13.f;
+                        break;
+                    case 28084:
+                        buffAuraId = 29660;
+                        range = 13.f;
+                        break;
+                    case 39088:
+                        buffAuraId = 39089;
+                        range = 10.f;
+                        break;
+                    case 39091:
+                        buffAuraId = 39092;
+                        range = 10.f;
+                        break;
+                }
                 uint32 curCount = 0;
                 std::list<Player*> playerList;
-                GetPlayerListWithEntryInWorld(playerList, target, 10.0f); // official range
+                GetPlayerListWithEntryInWorld(playerList, target, range); // official range
                 for (Player* player : playerList)
                     if (target != player && player->HasAura(auraId))
                         curCount++;
