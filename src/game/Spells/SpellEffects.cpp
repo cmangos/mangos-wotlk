@@ -9115,7 +9115,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
                 case 51854:                                 // Deathbolt
                 {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || !unitTarget->HasAura(51845))
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(51845))
                         return;
 
                     m_caster->CastSpell(unitTarget, 51855, TRIGGERED_OLD_TRIGGERED);
