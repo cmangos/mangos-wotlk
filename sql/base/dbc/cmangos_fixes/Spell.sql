@@ -366,7 +366,4 @@ INSERT INTO spell_template (id, attributes, attributesEx, attributesEx2, Casting
 (23325, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8454, 1, 'Dragondog Breath Selection (R4)', 1),
 (23326, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8455, 1, 'Dragondog Breath Selection (R5)', 1);
 
--- missing chess event triggered spell serverside
-INSERT INTO spell_template(Id,Attributes,rangeIndex,Effect1,Effect2,EffectImplicitTargetA1,EffectImplicitTargetA2,EffectImplicitTargetB1,EffectImplicitTargetB2,EffectRadiusIndex1,EffectRadiusIndex2,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2) VALUES
-(39399,256,7,3,3,18,18,8,8,15,15,1,'Is Square OCCUPIED (DND)',1,1);
 
