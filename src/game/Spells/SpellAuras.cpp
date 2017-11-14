@@ -6040,15 +6040,44 @@ void Aura::HandleAuraModStat(bool apply, bool /*Real*/)
         return;
     }
 
+    Unit* target = GetTarget();
+
+    // Holy Strength amount decrease by 4% each level after 60 From Crusader Enchant
+    if (apply && GetId() == 20007)
+        if (GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->getLevel() > 60)
+            m_modifier.m_amount = int32(m_modifier.m_amount * (1 - (((float(GetCaster()->getLevel()) - 60) * 4) / 100)));
+
+    if (GetSpellProto()->IsFitToFamilyMask(0x0000000000008000))
+    {
+        if (apply)
+        {
+            int32 staminaToRemove = 0;
+            Unit::AuraList const& auraClassScripts = target->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+            for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
+            {
+                switch ((*itr)->GetModifier()->m_miscvalue)
+                {
+                    case 2388: staminaToRemove = m_modifier.m_amount * 10 / 100; break;
+                    case 2389: staminaToRemove = m_modifier.m_amount * 20 / 100; break;
+                    case 2390: staminaToRemove = m_modifier.m_amount * 30 / 100; break;
+                }
+            }
+            if (staminaToRemove)
+                GetCaster()->CastCustomSpell(target, 19486, &staminaToRemove, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+        else
+            target->RemoveAurasTriggeredBySpell(GetId(), GetCasterGuid()); // just do it every time, lookup is too time consuming
+    }
+
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i)
     {
         // -1 or -2 is all stats ( misc < -2 checked in function beginning )
         if (m_modifier.m_miscvalue < 0 || m_modifier.m_miscvalue == i)
         {
             // m_target->ApplyStatMod(Stats(i), m_modifier.m_amount,apply);
-            GetTarget()->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, float(m_modifier.m_amount), apply);
-            if (GetTarget()->GetTypeId() == TYPEID_PLAYER || ((Creature*)GetTarget())->IsPet())
-                GetTarget()->ApplyStatBuffMod(Stats(i), float(m_modifier.m_amount), apply);
+            target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, float(m_modifier.m_amount), apply);
+            if (target->GetTypeId() == TYPEID_PLAYER || ((Creature*)target)->IsPet())
+                target->ApplyStatBuffMod(Stats(i), float(m_modifier.m_amount), apply);
         }
     }
 }
