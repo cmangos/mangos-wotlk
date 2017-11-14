@@ -3385,7 +3385,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 else
                 {
                     // Final heal on duration end
-                    if (m_removeMode != AURA_REMOVE_BY_EXPIRE)
+                    if (m_removeMode != AURA_REMOVE_BY_EXPIRE || m_removeMode != AURA_REMOVE_BY_DISPEL)
                         return;
 
                     // final heal
