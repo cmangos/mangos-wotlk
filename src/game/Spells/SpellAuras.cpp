@@ -2629,6 +2629,23 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
                 break;
             }
+            case SPELLFAMILY_PALADIN:
+            {
+                if (GetSpellProto()->SpellVisual[0] == 9180) // Blessing of light
+                {
+                    if (Unit* caster = GetCaster())
+                    {
+                        if (Aura* aura = caster->GetAura(38320, EFFECT_INDEX_0)) // improved Blessing of light
+                        {
+                            if (GetEffIndex() == EFFECT_INDEX_0)
+                                m_modifier.m_amount += aura->m_modifier.m_amount; // holy light gets full amount
+                            else
+                                m_modifier.m_amount += (aura->m_modifier.m_amount / 2); // flash of light gets half
+                        }
+                    }
+                }
+                break;
+            }
             case SPELLFAMILY_SHAMAN:
             {
                 switch (GetId())
