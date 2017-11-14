@@ -7459,6 +7459,11 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
     }
     else
     {
+        if (spellProto->Id == 33810 && m_removeMode == AURA_REMOVE_BY_SHIELD_BREAK) // Rock Shell
+        {
+            caster->CastSpell(caster, 33811, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+            return;
+        }
         if (caster &&
                 // Power Word: Shield
                 spellProto->SpellFamilyName == SPELLFAMILY_PRIEST && spellProto->Mechanic == MECHANIC_SHIELD &&
