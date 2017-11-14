@@ -2078,7 +2078,9 @@ void Aura::TriggerSpell()
             }
             case 29768:                                     // Overload
             {
-                int32 damage = m_modifier.m_amount * GetAuraTicks();
+                int32 damage = m_modifier.m_amount * (pow(2.0f, GetAuraTicks()));
+                if (damage > 3200)
+                    damage = 3200;
                 triggerCaster->CastCustomSpell(triggerTarget, triggeredSpellInfo, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this, casterGUID);
                 return;
             }
