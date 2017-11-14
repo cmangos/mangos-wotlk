@@ -2321,6 +2321,11 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     if (Aura* aura = GetAura(60764, EFFECT_INDEX_0))
                         extra_attack_power += aura->GetModifier()->m_amount;
 
+                    if (Aura* aura = GetAura(34244, EFFECT_INDEX_0)) // Increased Windfury Weapon
+                    {
+                        extra_attack_power += aura->GetModifier()->m_amount;
+                    }
+
                     // Off-Hand case
                     if (castItem->GetSlot() == EQUIPMENT_SLOT_OFFHAND)
                     {
