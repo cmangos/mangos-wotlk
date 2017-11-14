@@ -3800,6 +3800,21 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 case FORM_DEFENSIVESTANCE:
                 case FORM_BERSERKERSTANCE:
                 {
+                    ShapeshiftForm previousForm = target->GetShapeshiftForm();
+                    uint32 ragePercent = 0;
+                    if (previousForm == FORM_DEFENSIVESTANCE)
+                    {
+                        Unit::AuraList const& auraClassScripts = target->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                        for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
+                        {
+                            if ((*itr)->GetModifier()->m_miscvalue == 831)
+                            {
+                                ragePercent = (*itr)->GetModifier()->m_amount;
+                            }
+                            else
+                                ++itr;
+                        }
+                    }
                     uint32 Rage_val = 0;
                     // Stance mastery + Tactical mastery (both passive, and last have aura only in defense stance, but need apply at any stance switch)
                     if (target->GetTypeId() == TYPEID_PLAYER)
@@ -3816,7 +3831,12 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                         }
                     }
 
-                    if (target->GetPower(POWER_RAGE) > Rage_val)
+                    if (ragePercent) // not zero
+                    {
+                        if (ragePercent != 100) // optimization
+                            target->SetPower(POWER_RAGE, (target->GetPower(POWER_RAGE) * ragePercent) / 100);
+                    }
+                    else if (target->GetPower(POWER_RAGE) > Rage_val)
                         target->SetPower(POWER_RAGE, Rage_val);
                     break;
                 }
