@@ -1385,10 +1385,6 @@ void Aura::TriggerSpell()
                     case 29917:                             // Feed Captured Animal
                         trigger_spell_id = 29916;
                         break;
-//                    // Flame Wreath
-//                    case 29946: break;
-//                    // Flame Wreath
-//                    case 29947: break;
 //                    // Mind Exhaustion Passive
 //                    case 30025: break;
 //                    // Nether Beam - Serenity

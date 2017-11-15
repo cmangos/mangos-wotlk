@@ -1607,6 +1607,22 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 30023:                                 // Periodic Trigger Dummy - triggered by many spells
+                {
+                    switch (m_triggeredByAuraSpell->Id)
+                    {
+                        case 29946: break; // Flame Wreath
+                        case 29947: // Flame Wreath
+                        {
+                            // Cast explosion debuff
+                            unitTarget->CastSpell(unitTarget, 29949, TRIGGERED_NONE);
+                            return;
+                        }
+                        default:
+                            break;
+                    }
+                    return;
+                }
                 case 30458:                                 // Nigh Invulnerability
                 {
                     if (!m_CastItem)
