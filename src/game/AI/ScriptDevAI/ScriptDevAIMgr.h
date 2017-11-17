@@ -69,7 +69,7 @@ struct Script
         pDialogStatusNPC(nullptr), pDialogStatusGO(nullptr),
         pQuestAcceptNPC(nullptr), pQuestAcceptGO(nullptr), pQuestAcceptItem(nullptr),
         pQuestRewardedNPC(nullptr), pQuestRewardedGO(nullptr),
-        pGOUse(nullptr), pItemUse(nullptr), pAreaTrigger(nullptr), pNpcSpellClick(nullptr), pProcessEventId(nullptr),
+        pGOUse(nullptr), pItemUse(nullptr), pAreaTrigger(nullptr), pItemLoot(nullptr), pNpcSpellClick(nullptr), pProcessEventId(nullptr),
         pEffectDummyNPC(nullptr), pEffectDummyGO(nullptr), pEffectDummyItem(nullptr), pEffectScriptEffectNPC(nullptr),
         pEffectAuraDummy(nullptr), GetGameObjectAI(nullptr), GetAI(nullptr), GetInstanceData(nullptr)
     {}
@@ -91,6 +91,7 @@ struct Script
     bool (*pQuestRewardedGO)(Player*, GameObject*, Quest const*);
     bool (*pGOUse)(Player*, GameObject*);
     bool (*pItemUse)(Player*, Item*, SpellCastTargets const&);
+    bool (*pItemLoot)(Player*, Item*, bool);
     bool (*pAreaTrigger)(Player*, AreaTriggerEntry const*);
     bool (*pNpcSpellClick)(Player*, Creature*, uint32);
     bool (*pProcessEventId)(uint32, Object*, Object*, bool);
@@ -131,6 +132,7 @@ class ScriptDevAIMgr
         uint32 GetDialogStatus(const Player* pPlayer, const GameObject* pGameObject) const;
         bool OnGameObjectUse(Player* pPlayer, GameObject* pGameObject);
         bool OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets);
+        bool OnItemLoot(Player* pPlayer, Item* pItem, bool apply);
         bool OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry);
         bool OnProcessEvent(uint32 eventId, Object* pSource, Object* pTarget, bool isStart);
         bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid);
