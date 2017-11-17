@@ -527,6 +527,7 @@ UPDATE creature_template SET ScriptName='mob_water_globule' WHERE entry=21913;
 UPDATE creature_template SET ScriptName='boss_lady_vashj' WHERE entry=21212;
 UPDATE creature_template SET ScriptName='mob_enchanted_elemental' WHERE entry=21958;
 UPDATE gameobject_template SET ScriptName='go_shield_generator' WHERE entry IN (185051,185052,185053,185054);
+UPDATE item_template SET ScriptName='item_tainted_core' WHERE entry=31088;
 /* The Lurker Below event */
 UPDATE gameobject_template SET ScriptName='go_strange_pool' WHERE entry=184956;
 UPDATE creature_template SET ScriptName='boss_the_lurker_below' WHERE entry=21217;

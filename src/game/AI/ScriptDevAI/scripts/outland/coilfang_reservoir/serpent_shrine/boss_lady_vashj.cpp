@@ -53,7 +53,6 @@ enum
     SPELL_MAGIC_BARRIER         = 38112,
     SPELL_SURGE                 = 38044,
     SPELL_SUMMON_TAINTED_ELEM   = 38139,                    // maybe also related to spell 38494
-    SPELL_PARALIZE              = 38132,                    // aura which should apply to the player which picked the tainted core
 
     // summons
     NPC_ENCHANTED_ELEMENTAL     = 21958,
@@ -61,6 +60,12 @@ enum
     NPC_COILFANG_STRIDER        = 22056,
     NPC_COILFANG_ELITE          = 22055,
     NPC_TOXIC_SPOREBAT          = 22140,
+
+    // tainted core mechanic
+    ITEM_TAINTED_CORE           = 31088,
+
+    SPELL_PARALYZE              = 38132,                    // aura which should apply to the player which picked the tainted core
+    SPELL_THROW_KEY             = 38134,                    // Uses up tainted core and gives it to another player
 
     // other
     POINT_MOVE_CENTER           = 1,
@@ -497,6 +502,15 @@ CreatureAI* GetAI_mob_enchanted_elemental(Creature* pCreature)
     return new mob_enchanted_elementalAI(pCreature);
 }
 
+bool OnLootItemTaintedCore(Player* player, Item* item, bool apply)
+{
+    if (apply)
+        player->CastSpell(player, SPELL_PARALYZE, TRIGGERED_OLD_TRIGGERED);
+    else
+        player->RemoveAurasDueToSpell(SPELL_PARALYZE);
+    return true;
+}
+
 void AddSC_boss_lady_vashj()
 {
     Script* pNewScript;
@@ -514,5 +528,10 @@ void AddSC_boss_lady_vashj()
     pNewScript = new Script;
     pNewScript->Name = "go_shield_generator";
     pNewScript->pGOUse = &GOUse_go_shield_generator;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "item_tainted_core";
+    pNewScript->pItemLoot = &OnLootItemTaintedCore;
     pNewScript->RegisterSelf();
 }
