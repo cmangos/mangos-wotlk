@@ -7459,7 +7459,7 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
                 // Devastate causing Sunder Armor Effect
                 // and no need to cast over max stack amount
                 if (!sunder || sunder->GetStackAmount() < sunder->GetSpellProto()->StackAmount)
-                    m_caster->CastSpell(unitTarget, 58567, TRIGGERED_OLD_TRIGGERED);
+                    m_caster->CastSpell(unitTarget, 58567, TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_HIT_CALCULATION);
             }
             break;
         }
