@@ -280,6 +280,16 @@ bool ScriptDevAIMgr::OnGameObjectUse(Player* pPlayer, GameObject* pGo)
     return pTempScript->pGOUse(pPlayer, pGo);
 }
 
+std::function<bool(Unit*)>* ScriptDevAIMgr::OnTrapSearch(GameObject* go)
+{
+    Script* pTempScript = GetScript(go->GetGOInfo()->ScriptId);
+
+    if (!pTempScript)
+        return nullptr;
+
+    return pTempScript->pTrapSearching;
+}
+
 bool ScriptDevAIMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
     Script* pTempScript = GetScript(pCreature->GetScriptId());
