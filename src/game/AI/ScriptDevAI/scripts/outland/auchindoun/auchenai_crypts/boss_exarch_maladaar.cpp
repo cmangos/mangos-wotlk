@@ -153,9 +153,11 @@ enum
     SPELL_STOLEN_SOUL        = 32346,
     SPELL_STOLEN_SOUL_VISUAL = 32395,
     SPELL_SUMMON_AVATAR      = 32424,
+    SPELL_PHASE_IN           = 33422,
 
     NPC_STOLEN_SOUL          = 18441,
-    NPC_DORE                 = 19412
+    NPC_DORE                 = 19412,
+    NPC_AVATAR_MARTYRED      = 18478,
 };
 
 struct boss_exarch_maladaarAI : public ScriptedAI
@@ -222,6 +224,8 @@ struct boss_exarch_maladaarAI : public ScriptedAI
                 pSummoned->AI()->AttackStart(pTarget);
             }
         }
+        else if (pSummoned->GetEntry() == NPC_AVATAR_MARTYRED)
+            pSummoned->CastSpell(pSummoned, SPELL_PHASE_IN, TRIGGERED_NONE);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
