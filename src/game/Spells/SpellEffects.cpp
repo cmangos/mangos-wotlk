@@ -54,6 +54,7 @@
 #include "Entities/Vehicle.h"
 #include "G3D/Vector3.h"
 #include "Loot/LootMgr.h"
+#include "Movement/MoveSpline.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
 {
@@ -11592,16 +11593,15 @@ void Spell::EffectPlayerPull(SpellEffectIndex eff_idx)
 
     float x, y, z;
     m_caster->GetPosition(x, y, z);
+    float dist = unitTarget->GetDistance2d(m_caster);
 
-    // move back a bit
-    x = x - (0.6 * cos(m_caster->GetOrientation() + M_PI_F));
-    y = y - (0.6 * sin(m_caster->GetOrientation() + M_PI_F));
-
-    // Try to normalize Z coord because GetContactPoint do nothing with Z axis
-    unitTarget->UpdateAllowedPositionZ(x, y, z);
-
-    float speed = m_spellInfo->speed ? m_spellInfo->speed : 27.0f;
-    unitTarget->GetMotionMaster()->MoveJump(x, y, z, speed, 2.5f);
+    // Projectile motion
+    float speedXY = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.1f;
+    float time = dist / speedXY;
+    float speedZ = ((m_caster->GetPositionZ() - unitTarget->GetPositionZ()) + 0.5f*time*time*Movement::gravity) / time;
+    float moveTimeHalf = speedZ / Movement::gravity;
+    float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -speedZ);
+    unitTarget->GetMotionMaster()->MoveJump(x, y, z, speedXY, max_height, 2.5f);
 }
 
 void Spell::EffectDispelMechanic(SpellEffectIndex eff_idx)
