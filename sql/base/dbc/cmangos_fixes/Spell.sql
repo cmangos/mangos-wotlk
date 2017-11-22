@@ -514,6 +514,12 @@ INSERT INTO spell_template (Id,Attributes,AttributesEx,AttributesEx3,CastingTime
 (36049,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,1,1,1,-31,-21,43,1,1,29,61,79,21079,127,64,2154,'Summon Motherlode Shardling',1,1,1),
 (36050,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,1,1,1,-31,-21,42,1,1,29,61,79,21079,127,64,2154,'Summon Motherlode Shardling',1,1,1);
 
+-- Used by Netherock c.20772 at certain health percentages
+INSERT INTO spell_template (Id,Attributes,AttributesEx,AttributesEx3,CastingTimeIndex,procChance,DurationIndex,rangeIndex,StackAmount,EquippedItemClass,Effect1,Effect2,Effect3,EffectDieSides1,EffectDieSides2,EffectDieSides3,EffectBaseDice1,EffectBaseDice2,EffectBaseDice3,EffectImplicitTargetA1,EffectImplicitTargetA2,EffectImplicitTargetA3,EffectRadiusIndex1,EffectApplyAuraName2,EffectApplyAuraName3,EffectMiscValue1,EffectMiscValue3,EffectMiscValueB1,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
+(36579,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,1,1, 1,-31,-21,48,1,1,29,61,79,21323,127,64,2154,'Summon Netherock Crumbler',1,1,1),
+(36584,384,268435456,1048576,1,101,4,1,3,-1,28,6,6, 1,1,1, 1,-31,-21,42,1,1,29,61,79,21323,127,64,2154,'Summon Netherock Crumbler',1,1,1),
+(36585,384,268435456,1048576,1,101,4,1,3,-1,28,6,6, 1,1,1, 1,-31,-21,43,1,1,29,61,79,21323,127,64,2154,'Summon Netherock Crumbler',1,1,1);
+
 -- Fixes Well Fed buff for some seasonal food like Winter Veil cookies
 UPDATE spell_template SET Effect2=6, EffectDieSides2=1, EffectBaseDice2=1, EffectImplicitTargetA2=1, EffectApplyAuraName2=23, EffectAmplitude2=10000, EffectTriggerSpell2=24870 WHERE Id=24869;
 UPDATE spell_template SET EffectRealPointsPerLevel1=0.25, EffectRealPointsPerLevel2=0.25, EffectBaseDice1=0, EffectBaseDice2=0 WHERE id=24870;
