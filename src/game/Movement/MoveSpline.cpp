@@ -246,7 +246,7 @@ namespace Movement
 
 /// ============================================================================================
 
-    MoveSpline::UpdateResult MoveSpline::_updateState(int32& ms_time_diff)
+    MoveSpline::UpdateResult MoveSpline::_updateState(uint32& ms_time_diff)
     {
         if (Finalized())
         {
@@ -256,7 +256,7 @@ namespace Movement
 
         UpdateResult result = Result_None;
 
-        int32 minimal_diff = std::min(ms_time_diff, segment_time_elapsed());
+        uint32 minimal_diff = std::min(ms_time_diff, segment_time_elapsed());
         MANGOS_ASSERT(minimal_diff >= 0);
         time_passed += minimal_diff;
         ms_time_diff -= minimal_diff;
