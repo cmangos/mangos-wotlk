@@ -1319,6 +1319,18 @@ inline bool IsIgnoreLosSpellCast(SpellEntry const* spellInfo)
     return spellInfo->rangeIndex == 13 || IsIgnoreLosSpell(spellInfo);
 }
 
+// applied when item is received/looted/equipped
+inline bool IsItemAura(SpellEntry const* spellInfo)
+{
+    switch (spellInfo->Id)
+    {
+        case 38132:
+            return true;
+        default:
+            return false;
+    }
+}
+
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)
 {
     return spellInfo->HasAttribute(SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS) || spellInfo->HasAttribute(SPELL_ATTR_EX_REQ_COMBO_POINTS);

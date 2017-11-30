@@ -17563,7 +17563,7 @@ void Player::_SaveAuras()
         // save singleTarget auras if self cast.
         bool selfCastHolder = holder->GetCasterGuid() == GetObjectGuid();
         TrackedAuraType trackedType = holder->GetTrackedAuraType();
-        if (!holder->IsPassive() && !IsChanneledSpell(holder->GetSpellProto()) &&
+        if (!holder->IsPassive() && !IsChanneledSpell(holder->GetSpellProto()) && !IsItemAura(holder->GetSpellProto()) &&
                 (trackedType == TRACK_AURA_TYPE_NOT_TRACKED || (trackedType == TRACK_AURA_TYPE_SINGLE_TARGET && selfCastHolder)))
         {
             int32  damage[MAX_EFFECT_INDEX];
