@@ -111,14 +111,20 @@ CreatureEventAI::CreatureEventAI(Creature* creature) : CreatureAI(creature),
             if (i->event_flags & EFLAG_DEBUG_ONLY)
                 continue;
 #endif
-            if (m_creature->GetMap()->IsDungeon())
+            // only check normal / heroic distinction if at least one is set, if none is set, event should occur at all times
+            if (i->event_flags & (EFLAG_DIFFICULTY_ALL))
             {
-                if ((1 << (m_creature->GetMap()->GetSpawnMode() + 1)) & i->event_flags)
+                if (m_creature->GetMap()->IsDungeon())
                 {
-                    ++events_count;
+                    if ((1 << (m_creature->GetMap()->GetSpawnMode() + 1)) & i->event_flags)
+                    {
+                        ++events_count;
+                    }
                 }
+                else if (IsEventFlagsFitForNormalMap(i->event_flags))
+                    ++events_count;
             }
-            else if (IsEventFlagsFitForNormalMap(i->event_flags))
+            else
                 ++events_count;
         }
         // EventMap had events but they were not added because they must be for instance
@@ -135,12 +141,17 @@ CreatureEventAI::CreatureEventAI(Creature* creature) : CreatureAI(creature),
                     continue;
 #endif
                 bool storeEvent = false;
-                if (m_creature->GetMap()->IsDungeon())
+                if (i->event_flags & (EFLAG_DIFFICULTY_ALL))
                 {
-                    if ((1 << (m_creature->GetMap()->GetSpawnMode() + 1)) & i->event_flags)
+                    if (m_creature->GetMap()->IsDungeon())
+                    {
+                        if ((1 << (m_creature->GetMap()->GetSpawnMode() + 1)) & i->event_flags)
+                            storeEvent = true;
+                    }
+                    else if (IsEventFlagsFitForNormalMap(i->event_flags))
                         storeEvent = true;
                 }
-                else if (IsEventFlagsFitForNormalMap(i->event_flags))
+                else
                     storeEvent = true;
 
                 if (storeEvent)
