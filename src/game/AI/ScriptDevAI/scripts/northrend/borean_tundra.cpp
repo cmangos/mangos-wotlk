@@ -875,17 +875,8 @@ struct npc_scourged_flamespitterAI : public ScriptedAI
     {
         m_uiIncinerateTimer = urand(1000, 2000);
         m_uiNetExpireTimer = 0;
-    }
 
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, false))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 10.0f);
-        }
+        m_attackDistance = 10.0f;
     }
 
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override

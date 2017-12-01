@@ -86,6 +86,8 @@ struct boss_eregosAI : public ScriptedAI
         m_uiSummonWhelpsTimer   = urand(15000, 20000);
         m_fHpPercent            = 60.0f;
         m_uiAnomalyTargetIndex  = 0;
+
+        m_attackDistance = 20.0f;
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -94,17 +96,6 @@ struct boss_eregosAI : public ScriptedAI
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_EREGOS, IN_PROGRESS);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, false))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 20.0f);
-        }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override

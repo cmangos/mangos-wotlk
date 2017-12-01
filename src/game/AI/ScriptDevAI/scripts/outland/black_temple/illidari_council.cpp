@@ -476,17 +476,8 @@ struct boss_high_nethermancer_zerevorAI : public boss_illidari_councilAI
         m_uiArcaneBoltTimer         = 3000;
         m_uiDampenMagicTimer        = 2000;
         m_uiArcaneExplosionTimer    = 13000;
-    }
 
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 20.0f);
-        }
+        m_attackDistance = 20.0f;
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -579,17 +570,8 @@ struct boss_lady_malandeAI : public boss_illidari_councilAI
         m_uiCircleOfHealingTimer    = 20000;
         m_uiDivineWrathTimer        = 5000;
         m_uiReflectiveShieldTimer   = 0;
-    }
 
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 20.0f);
-        }
+        m_attackDistance = 20.0f;
     }
 
     void KilledUnit(Unit* /*pVictim*/) override

@@ -898,17 +898,8 @@ struct npc_magister_aledisAI : public ScriptedAI
         m_uiPyroblastTimer      = urand(10000, 14000);
         m_uiFrostNovaTimer      = 0;
         m_uiFireballTimer       = 1000;
-    }
 
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, false))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 10.0f);
-        }
+        m_attackDistance = 10.0f;
     }
 
     void EnterEvadeMode() override

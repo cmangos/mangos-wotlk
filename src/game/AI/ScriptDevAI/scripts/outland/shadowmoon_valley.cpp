@@ -493,23 +493,14 @@ struct npc_wildaAI : public npc_escortAI
         m_uiHealingTimer = 0;
         m_uiShockTimer = 1000;
         m_uiLightningTimer = 2000;
+
+        m_attackDistance = 10.0f;
     }
 
     void Aggro(Unit* pWho) override
     {
         if (roll_chance_i(30))
             DoCastSpellIfCan(m_creature, SPELL_EARTHBING_TOTEM);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 10.0f);
-        }
     }
 
     void WaypointReached(uint32 uiPointId) override

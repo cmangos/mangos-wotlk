@@ -228,6 +228,8 @@ struct boss_kaelthasAI : public ScriptedAI
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
+        m_attackDistance = 25.0f;
+
         SetCombatMovement(true);
     }
 
@@ -251,17 +253,6 @@ struct boss_kaelthasAI : public ScriptedAI
 
             if (m_pInstance)
                 m_pInstance->SetData(TYPE_KAELTHAS, IN_PROGRESS);
-        }
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 25.0f);
         }
     }
 
@@ -346,7 +337,7 @@ struct boss_kaelthasAI : public ScriptedAI
                 m_creature->SetLevitate(false);
                 m_creature->InterruptNonMeleeSpells(false);
                 m_creature->GetMotionMaster()->Clear();
-                DoStartMovement(m_creature->getVictim(), 25.0f);
+                DoStartMovement(m_creature->getVictim());
                 m_uiShockBarrierTimer = 10000;
                 m_uiPhase = PHASE_7_GRAVITY;
             }
@@ -798,10 +789,7 @@ struct advisor_base_ai : public ScriptedAI
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             m_creature->GetMotionMaster()->Clear();
-            if (m_creature->GetEntry() == NPC_CAPERNIAN)
-                DoStartMovement(m_creature->getVictim(), 20.0f);
-            else
-                DoStartMovement(m_creature->getVictim());
+            DoStartMovement(m_creature->getVictim());
             m_bCanFakeDeath = false;
             m_bFakeDeath = false;
         }
@@ -958,6 +946,8 @@ struct boss_grand_astromancer_capernianAI : public advisor_base_ai
         m_uiConflagrationTimer   = 20000;
         m_uiArcaneExplosionTimer = 5000;
 
+        m_attackDistance = 20.0f;
+
         advisor_base_ai::Reset();
     }
 
@@ -968,8 +958,6 @@ struct boss_grand_astromancer_capernianAI : public advisor_base_ai
             m_creature->AddThreat(pWho);
             m_creature->SetInCombatWith(pWho);
             pWho->SetInCombatWith(m_creature);
-
-            m_creature->GetMotionMaster()->MoveChase(pWho, 20.0f);
         }
     }
 

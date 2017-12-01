@@ -430,19 +430,10 @@ struct npc_rethhedronAI : public ScriptedAI
         m_uiAbyssalTossTimer = 0;
         m_uiDelayTimer       = 0;
 
+        m_attackDistance = 30.0f;
+
         m_bLowHpYell        = false;
         m_bEventFinished    = false;
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 30.0f);
-        }
     }
 
     void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override

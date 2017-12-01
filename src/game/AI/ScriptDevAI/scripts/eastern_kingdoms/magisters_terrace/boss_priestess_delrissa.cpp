@@ -521,22 +521,13 @@ struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
         m_uiFearTimer           = 10000;
         m_uiDeathCoilTimer      = 8000;
 
+        m_attackDistance = 20.0f;
+
         priestess_companion_commonAI::Reset();
 
         // Check if we already have an imp summoned
         if (!GetClosestCreatureWithEntry(m_creature, NPC_FIZZLE, 50.0f))
             DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMP);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 20.0f);
-        }
     }
 
     bool UpdateCompanionAI(const uint32 uiDiff)
@@ -716,18 +707,9 @@ struct npc_yazzaiAI : public priestess_companion_commonAI
         m_uiFrostboltTimer  = 3000;
         m_uiBlinkTimer      = 8000;
 
-        priestess_companion_commonAI::Reset();
-    }
+        m_attackDistance = 20.0f;
 
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 20.0f);
-        }
+        priestess_companion_commonAI::Reset();
     }
 
     bool UpdateCompanionAI(const uint32 uiDiff)
@@ -962,22 +944,13 @@ struct npc_garaxxasAI : public priestess_companion_commonAI
         m_uiWingClipTimer       = 4000;
         m_uiFreezingTrapTimer   = 15000;
 
+        m_attackDistance = 20.0f;
+
         priestess_companion_commonAI::Reset();
 
         // Check if the pet was killed
         if (!GetClosestCreatureWithEntry(m_creature, NPC_SLIVER, 50.0f))
             m_creature->SummonCreature(NPC_SLIVER, 0, 0, 0, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 20.0f);
-        }
     }
 
     bool UpdateCompanionAI(const uint32 uiDiff)

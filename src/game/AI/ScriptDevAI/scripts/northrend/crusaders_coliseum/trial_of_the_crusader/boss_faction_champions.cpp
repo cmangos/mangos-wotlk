@@ -316,23 +316,6 @@ struct trial_crusader_commonAI : public ScriptedAI
         }
     }
 
-    void AttackStart(Unit* pWho) override
-    {
-        // ranged and healer AI have ranged attack
-        if (m_uiAIType == AI_TYPE_HEALER || m_uiAIType == AI_TYPE_RANGED)
-        {
-            if (m_creature->Attack(pWho, true))
-            {
-                m_creature->AddThreat(pWho);
-                m_creature->SetInCombatWith(pWho);
-                pWho->SetInCombatWith(m_creature);
-                DoStartMovement(pWho, 15.0f);
-            }
-        }
-        else
-            ScriptedAI::AttackStart(pWho);
-    }
-
     void KilledUnit(Unit* pVictim) override
     {
         if (!m_pInstance)
@@ -571,6 +554,7 @@ struct boss_crusader_druid_restoAI : public trial_crusader_commonAI
     void Reset() override
     {
         m_uiAIType              = AI_TYPE_HEALER;
+        m_attackDistance = 15.0f;
 
         trial_crusader_commonAI::Reset();
     }
@@ -639,6 +623,7 @@ struct boss_crusader_paladin_holyAI : public trial_crusader_commonAI
     void Reset() override
     {
         m_uiAIType              = AI_TYPE_HEALER;
+        m_attackDistance = 15.0f;
 
         trial_crusader_commonAI::Reset();
     }
@@ -716,6 +701,7 @@ struct boss_crusader_priest_discAI : public trial_crusader_commonAI
     void Reset() override
     {
         m_uiAIType              = AI_TYPE_HEALER;
+        m_attackDistance = 15.0f;
 
         trial_crusader_commonAI::Reset();
     }
@@ -793,6 +779,7 @@ struct boss_crusader_shaman_restoAI : public trial_crusader_commonAI
     void Reset() override
     {
         m_uiAIType              = AI_TYPE_HEALER;
+        m_attackDistance = 15.0f;
 
         trial_crusader_commonAI::Reset();
     }
@@ -876,6 +863,7 @@ struct boss_crusader_druid_balanceAI : public trial_crusader_commonAI
     void Reset() override
     {
         m_uiAIType              = AI_TYPE_RANGED;
+        m_attackDistance = 15.0f;
 
         trial_crusader_commonAI::Reset();
     }
@@ -933,6 +921,7 @@ struct boss_crusader_hunterAI : public trial_crusader_commonAI
     void Reset() override
     {
         m_uiAIType              = AI_TYPE_RANGED;
+        m_attackDistance = 15.0f;
 
         trial_crusader_commonAI::Reset();
     }
@@ -999,6 +988,7 @@ struct boss_crusader_mageAI : public trial_crusader_commonAI
     void Reset() override
     {
         m_uiAIType              = AI_TYPE_RANGED;
+        m_attackDistance = 15.0f;
 
         trial_crusader_commonAI::Reset();
     }
@@ -1057,6 +1047,7 @@ struct boss_crusader_priest_shadowAI : public trial_crusader_commonAI
     void Reset() override
     {
         m_uiAIType              = AI_TYPE_RANGED;
+        m_attackDistance = 15.0f;
 
         trial_crusader_commonAI::Reset();
     }
@@ -1130,6 +1121,7 @@ struct boss_crusader_warlockAI : public trial_crusader_commonAI
     void Reset() override
     {
         m_uiAIType              = AI_TYPE_RANGED;
+        m_attackDistance = 15.0f;
 
         trial_crusader_commonAI::Reset();
     }

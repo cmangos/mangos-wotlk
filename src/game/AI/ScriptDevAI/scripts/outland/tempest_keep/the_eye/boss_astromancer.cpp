@@ -417,17 +417,8 @@ struct mob_solarium_priestAI : public ScriptedAI
         m_uiHealTimer = 9000;
         m_uiHolySmiteTimer = 1;
         m_uiAoESilenceTimer = 15000;
-    }
 
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 25.0f);
-        }
+        m_attackDistance = 25.0f;
     }
 
     void UpdateAI(const uint32 uiDiff) override

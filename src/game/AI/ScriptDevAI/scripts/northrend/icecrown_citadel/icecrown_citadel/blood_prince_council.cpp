@@ -334,17 +334,8 @@ struct npc_dark_nucleusAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_SHADOW_RESONANCE_DMG, CAST_TRIGGERED);
 
         m_uiDistanceCheck = 1000;
-    }
 
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 10.0f);
-        }
+        m_attackDistance = 10.0f;
     }
 
     void DamageTaken(Unit* pDealer, uint32& /*uiDamage*/, DamageEffectType /*damagetype*/) override
@@ -704,17 +695,8 @@ struct boss_keleseth_iccAI : public blood_prince_council_baseAI
 
         m_uiShadowLanceTimer = urand(2000, 3000);
         m_uiSphereTimer      = 4000;
-    }
 
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 20.0f);
-        }
+        m_attackDistance = 20.0f;
     }
 
     void KilledUnit(Unit* pVictim) override

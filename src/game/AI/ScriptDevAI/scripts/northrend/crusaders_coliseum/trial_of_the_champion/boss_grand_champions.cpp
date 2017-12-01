@@ -472,17 +472,9 @@ struct boss_champion_mageAI : public trial_companion_commonAI
             return;
 
         if (m_pInstance->GetData(TYPE_ARENA_CHALLENGE) == DONE)
-        {
-            if (m_creature->Attack(pWho, true))
-            {
-                m_creature->AddThreat(pWho);
-                m_creature->SetInCombatWith(pWho);
-                pWho->SetInCombatWith(m_creature);
-                DoStartMovement(pWho, 20.0f);
-            }
-        }
-        else
-            trial_companion_commonAI::AttackStart(pWho);
+            m_attackDistance = 20.0f;
+        
+        trial_companion_commonAI::AttackStart(pWho);
     }
 
     bool UpdateChampionAI(const uint32 uiDiff)
@@ -657,17 +649,9 @@ struct boss_champion_hunterAI : public trial_companion_commonAI
             return;
 
         if (m_pInstance->GetData(TYPE_ARENA_CHALLENGE) == DONE)
-        {
-            if (m_creature->Attack(pWho, true))
-            {
-                m_creature->AddThreat(pWho);
-                m_creature->SetInCombatWith(pWho);
-                pWho->SetInCombatWith(m_creature);
-                DoStartMovement(pWho, 20.0f);
-            }
-        }
-        else
-            trial_companion_commonAI::AttackStart(pWho);
+            m_attackDistance = 20.0f;
+
+        trial_companion_commonAI::AttackStart(pWho);
     }
 
     bool UpdateChampionAI(const uint32 uiDiff)
@@ -836,17 +820,7 @@ struct npc_trial_grand_championAI : public ScriptedAI
         m_uiChargeTimer         = 1000;
         m_uiBlockTimer          = 0;
         m_uiChargeResetTimer    = 0;
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, frand(10.0f, 20.0f));
-        }
+        m_attackDistance = frand(10.0f, 20.0f);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -886,7 +860,8 @@ struct npc_trial_grand_championAI : public ScriptedAI
         {
             if (m_uiChargeResetTimer <= uiDiff)
             {
-                DoStartMovement(m_creature->getVictim(), frand(10.0f, 20.0f));
+                m_attackDistance = frand(10.0f, 20.0f);
+                DoStartMovement(m_creature->getVictim());
                 m_uiChargeResetTimer = 0;
                 m_uiChargeTimer = urand(2000, 4000);
             }
@@ -924,17 +899,7 @@ struct npc_champion_mountAI : public ScriptedAI
     void Reset() override
     {
         m_uiChargeResetTimer = 0;
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, frand(10.0f, 20.0f));
-        }
+        m_attackDistance = frand(10.0f, 20.0f);
     }
 
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
@@ -983,7 +948,8 @@ struct npc_champion_mountAI : public ScriptedAI
                 if (Creature* pOwner = m_creature->GetMap()->GetCreature(m_ownerGuid))
                     SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pOwner);
 
-                DoStartMovement(m_creature->getVictim(), frand(10.0f, 20.0f));
+                m_attackDistance = frand(10.0f, 20.0f);
+                DoStartMovement(m_creature->getVictim());
                 m_uiChargeResetTimer = 0;
             }
             else

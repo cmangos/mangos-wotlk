@@ -136,6 +136,8 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
         m_bFirstGravityLapse    = true;
         m_bIsFirstPhase         = true;
 
+        m_attackDistance = 20.0f;
+
         SetCombatMovement(true);
     }
 
@@ -230,17 +232,6 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                 break;
-        }
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 20.0f);
         }
     }
 
