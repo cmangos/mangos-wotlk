@@ -139,6 +139,8 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
         m_attackDistance = 20.0f;
 
         SetCombatMovement(true);
+
+        m_attackDistance = 20.0f;
     }
 
     void JustDied(Unit* /*pKiller*/) override

@@ -951,16 +951,6 @@ struct boss_grand_astromancer_capernianAI : public advisor_base_ai
         advisor_base_ai::Reset();
     }
 
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-        }
-    }
-
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_CAPERNIAN_AGGRO, m_creature);
