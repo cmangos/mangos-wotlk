@@ -2040,7 +2040,7 @@ struct npc_scrapped_fel_reaverAI : ScriptedAI
     {
         SetCombatMovement(false);
         m_spawnsPerLocation.resize(COUNT_SPAWNING_LOCATIONS);
-        SetReactState(REACT_DEFENSIVE);
+        SetReactState(REACT_PASSIVE);
         ResetEvent();
     }
 
@@ -2185,9 +2185,6 @@ struct npc_scrapped_fel_reaverAI : ScriptedAI
                 m_eventTimer -= diff;
             ProcessEvent();
         }
-
-        if (!m_creature->SelectHostileTarget())
-            return;
     }
 };
 
