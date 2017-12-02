@@ -54,6 +54,7 @@ class PlayerSocial;
 class DungeonPersistentState;
 class Spell;
 class Item;
+struct FactionTemplateEntry;
 
 #ifdef BUILD_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotMgr.h"
@@ -912,8 +913,10 @@ class PlayerTaxi
             return GetNextTaxiDestination();
         }
         bool empty() const { return m_TaxiDestinations.empty(); }
+        FactionTemplateEntry const* GetFlightMasterFactionTemplate() const;
+        void SetFlightMasterFactionTemplateId(uint32 factionTemplateId) { m_flightMasterFactionId = factionTemplateId; }
 
-        friend std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
+        friend std::ostringstream& operator<<(std::ostringstream& ss, PlayerTaxi const& taxi);
 
         std::deque<uint32> const& GetPath() const { return m_TaxiDestinations; }
 
@@ -923,6 +926,7 @@ class PlayerTaxi
         TaxiMask m_taximask;
         std::deque<uint32> m_TaxiDestinations;
         uint32 m_lastNode;
+        uint32 m_flightMasterFactionId;
 };
 
 std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
@@ -1294,7 +1298,8 @@ class Player : public Unit
         void SendNewItem(Item* item, uint32 count, bool received, bool created, bool broadcast = false, bool showInChat = true);
         bool BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot);
 
-        float GetReputationPriceDiscount(Creature const* pCreature) const;
+        float GetReputationPriceDiscount(Creature const* creature) const;
+        float GetReputationPriceDiscount(FactionTemplateEntry const* factionTemplate) const;
 
         Player* GetTrader() const { return m_trade ? m_trade->GetTrader() : nullptr; }
         TradeData* GetTradeData() const { return m_trade; }

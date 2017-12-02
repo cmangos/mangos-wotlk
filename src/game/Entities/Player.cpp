@@ -148,7 +148,7 @@ static const uint32 corpseReclaimDelay[MAX_DEATH_COUNT] = {30, 60, 120};
 
 //== PlayerTaxi ================================================
 
-PlayerTaxi::PlayerTaxi()
+PlayerTaxi::PlayerTaxi() : m_flightMasterFactionId(0)
 {
     // Taxi nodes
     memset(m_taximask, 0, sizeof(m_taximask));
@@ -284,12 +284,17 @@ uint32 PlayerTaxi::GetCurrentTaxiPath() const
     return path;
 }
 
-std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
+std::ostringstream& operator<<(std::ostringstream& ss, PlayerTaxi const& taxi)
 {
     for (int i = 0; i < TaxiMaskSize; ++i)
         ss << taxi.m_taximask[i] << " ";
     return ss;
 }
+FactionTemplateEntry const* PlayerTaxi::GetFlightMasterFactionTemplate() const
+{
+    return sFactionTemplateStore.LookupEntry(m_flightMasterFactionId);
+}
+
 //== TradeData =================================================
 
 TradeData* TradeData::GetTraderData() const
@@ -19092,9 +19097,12 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     if (npc)
     {
         float discount = GetReputationPriceDiscount(npc);
-        totalcost = (uint32)ceil(totalcost * discount);
-        firstcost = (uint32)ceil(firstcost * discount);
+        totalcost = uint32(ceil(totalcost * discount));
+        firstcost = uint32(ceil(firstcost * discount));
+        m_taxi.SetFlightMasterFactionTemplateId(npc->getFaction());
     }
+    else
+        m_taxi.SetFlightMasterFactionTemplateId(0);
 
     if (money < totalcost)
     {
@@ -20680,13 +20688,17 @@ bool Player::GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const
     return true;
 }
 
-float Player::GetReputationPriceDiscount(Creature const* pCreature) const
+float Player::GetReputationPriceDiscount(Creature const* creature) const
 {
-    FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
-    if (!vendor_faction || !vendor_faction->faction)
+    return GetReputationPriceDiscount(creature->getFactionTemplateEntry());
+}
+
+float Player::GetReputationPriceDiscount(FactionTemplateEntry const* factionTemplate) const
+{
+    if (!factionTemplate || !factionTemplate->faction)
         return 1.0f;
 
-    ReputationRank rank = GetReputationRank(vendor_faction->faction);
+    ReputationRank rank = GetReputationRank(factionTemplate->faction);
     if (rank <= REP_NEUTRAL)
         return 1.0f;
 
