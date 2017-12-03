@@ -4053,7 +4053,7 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(UNIT_FIELD_PETNUMBER);
     updateVisualBits.SetBit(UNIT_FIELD_PET_NAME_TIMESTAMP);
     updateVisualBits.SetBit(UNIT_DYNAMIC_FLAGS);
-    updateVisualBits.SetBit(UNIT_CHANNEL_SPELL);
+    updateVisualBits.SetBit(UNIT_FIELD_CHANNEL_SPELL);
     updateVisualBits.SetBit(UNIT_MOD_CAST_SPEED);
     updateVisualBits.SetBit(UNIT_NPC_FLAGS);
     updateVisualBits.SetBit(UNIT_FIELD_BASE_MANA);
@@ -15827,7 +15827,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     // clear channel spell data (if saved at channel spell casting)
     SetChannelObjectGuid(ObjectGuid());
-    SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
+    SetUInt32Value(UNIT_FIELD_CHANNEL_SPELL, 0);
 
     // clear charm/summon related fields
     SetCharm(nullptr);

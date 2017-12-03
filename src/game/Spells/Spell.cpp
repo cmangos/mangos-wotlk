@@ -4533,11 +4533,11 @@ void Spell::SendChannelUpdate(uint32 time, uint32 lastTick) const
         }
 
         // Only finish channeling when latest channeled spell finishes
-        if (m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != m_spellInfo->Id)
+        if (m_caster->GetUInt32Value(UNIT_FIELD_CHANNEL_SPELL) != m_spellInfo->Id)
             return;
 
         m_caster->SetChannelObjectGuid(ObjectGuid());
-        m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
+        m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_SPELL, 0);
     }
 
     WorldPacket data(MSG_CHANNEL_UPDATE, 8 + 4);
@@ -4589,7 +4589,7 @@ void Spell::SendChannelStart(uint32 duration)
     if (target)
         m_caster->SetChannelObjectGuid(target->GetObjectGuid());
 
-    m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, m_spellInfo->Id);
+    m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_SPELL, m_spellInfo->Id);
 }
 
 void Spell::SendResurrectRequest(Player* target) const
