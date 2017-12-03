@@ -624,7 +624,7 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         uint32 m_auiUlduarKeepers[KEEPER_ENCOUNTER];
         uint32 m_auiUlduarTowers[KEEPER_ENCOUNTER];
         bool m_abAchievCriteria[MAX_SPECIAL_ACHIEV_CRITS];
-        uint32 m_achievEncounter[MAX_ACHIEV_ENCOUNTER]; // for achievements which need saving
+        uint32 m_auiAchievEncounter[MAX_ACHIEV_ENCOUNTER]; // for achievements which need saving
 
         bool m_bHelpersLoaded;
 

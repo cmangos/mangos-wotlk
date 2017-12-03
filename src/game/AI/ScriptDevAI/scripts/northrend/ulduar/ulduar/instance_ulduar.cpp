@@ -979,15 +979,17 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             m_auiUlduarTowers[3] = uiData;
             break;
 
+            // Achievements that need to be saved
+        case TYPE_FREYA_CONSPEEDATORY:
+            m_auiAchievEncounter[ACHIEV_FREYA_CONSPEEDATORY] = uiData;
+            if (uiData == DONE)
+                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, ACHIEV_START_FREYA_ID);
+            break;
+
             // Other types - not saved
         case TYPE_LEVIATHAN_GAUNTLET:
             m_uiGauntletStatus = uiData;
             return;
-        case TYPE_FREYA_CONSPEEDATORY:
-            m_achievEncounter[ACHIEV_FREYA_CONSPEEDATORY] = uiData;
-            if (uiData == DONE)
-                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_FREYA_ID);
-            break;
     }
 
     if (uiData == DONE || uiData == FAIL || uiData == SPECIAL || uiType == TYPE_ALGALON_TIMER)
@@ -1003,7 +1005,8 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                    << m_auiEncounter[12] << " " << m_auiEncounter[13] << " " << m_auiEncounter[14] << " "
                    << m_auiEncounter[15] << " " << m_auiUlduarKeepers[0] << " " << m_auiUlduarKeepers[1] << " "
                    << m_auiUlduarKeepers[2] << " " << m_auiUlduarKeepers[3] << " " << m_auiUlduarTowers[0] << " "
-                   << m_auiUlduarTowers[1] << " " << m_auiUlduarTowers[2] << " " << m_auiUlduarTowers[3] << m_achievEncounter[ACHIEV_FREYA_CONSPEEDATORY];
+                   << m_auiUlduarTowers[1] << " " << m_auiUlduarTowers[2] << " " << m_auiUlduarTowers[3] << " "
+                   << m_auiAchievEncounter[ACHIEV_FREYA_CONSPEEDATORY];
 
         m_strInstData = saveStream.str();
 
@@ -1141,7 +1144,7 @@ uint32 instance_ulduar::GetData(uint32 uiType) const
 
             // Achievement encounters
         case TYPE_FREYA_CONSPEEDATORY:
-            return m_achievEncounter[ACHIEV_FREYA_CONSPEEDATORY];
+            return m_auiAchievEncounter[ACHIEV_FREYA_CONSPEEDATORY];
     }
 
     return 0;
@@ -1209,23 +1212,7 @@ void instance_ulduar::OnCreatureEnterCombat(Creature* pCreature)
     {
         case NPC_RUNE_GIANT:
             m_uiStairsSpawnTimer = 0;
-            break;      
-        case NPC_CORRUPTED_SERVITOR:
-        case NPC_MISGUIDED_NYMPH:
-        case NPC_GUARDIAN_LASHER:
-        case NPC_FOREST_SWARMER:
-        case NPC_MANGROVE_ENT:
-        case NPC_IRONROOT_LASHER:
-        case NPC_NATURES_BLADE:
-        case NPC_GUARDIAN_OF_LIFE:
-        {
-            // Only for the first try
-            if (GetData(TYPE_FREYA_CONSPEEDATORY) != DONE)
-                return;
-
-            SetData(TYPE_FREYA_CONSPEEDATORY, DONE);
-        }
-        break;
+            break;
     }
 }
 
@@ -1251,7 +1238,7 @@ void instance_ulduar::OnCreatureDeath(Creature* pCreature)
                 pCreature->SummonCreature(NPC_LEVIATHAN, afLeviathanSpawnPos[0], afLeviathanSpawnPos[1], afLeviathanSpawnPos[2], afLeviathanSpawnPos[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
             }
         }
-        break;
+            break;
         case NPC_DRUID_HORDE_N:
         case NPC_DRUID_HORDE_H:
         case NPC_SHAMAN_HORDE_N:
@@ -1303,6 +1290,22 @@ void instance_ulduar::OnCreatureDeath(Creature* pCreature)
                 }
             }
             break;
+        case NPC_CORRUPTED_SERVITOR:
+        case NPC_MISGUIDED_NYMPH:
+        case NPC_GUARDIAN_LASHER:
+        case NPC_FOREST_SWARMER:
+        case NPC_MANGROVE_ENT:
+        case NPC_IRONROOT_LASHER:
+        case NPC_NATURES_BLADE:
+        case NPC_GUARDIAN_OF_LIFE:
+        {
+            // Only for the first try
+            if (GetData(TYPE_FREYA_CONSPEEDATORY) == DONE)
+                return;
+
+            SetData(TYPE_FREYA_CONSPEEDATORY, DONE);
+        }
+        break;
     }
 }
 
@@ -1322,7 +1325,8 @@ void instance_ulduar::Load(const char* strIn)
                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11]
                >> m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14] >> m_auiEncounter[15]
                >> m_auiUlduarKeepers[0] >> m_auiUlduarKeepers[1] >> m_auiUlduarKeepers[2] >> m_auiUlduarKeepers[3]
-               >> m_auiUlduarTowers[0] >> m_auiUlduarTowers[1] >> m_auiUlduarTowers[2] >> m_auiUlduarTowers[3] >> m_achievEncounter[ACHIEV_FREYA_CONSPEEDATORY];
+               >> m_auiUlduarTowers[0] >> m_auiUlduarTowers[1] >> m_auiUlduarTowers[2] >> m_auiUlduarTowers[3]
+               >> m_auiAchievEncounter[ACHIEV_FREYA_CONSPEEDATORY];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
