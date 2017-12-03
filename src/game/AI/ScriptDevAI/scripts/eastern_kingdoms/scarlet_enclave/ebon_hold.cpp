@@ -558,7 +558,7 @@ struct npc_death_knight_initiateAI : public ScriptedAI
 
     void Reset() override
     {
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SWIMMING);
+        m_creature->SetImmuneToPlayer(true);
         m_duelerGuid.Clear();
 
         m_uiDuelStartStage      = 0;
@@ -591,6 +591,13 @@ struct npc_death_knight_initiateAI : public ScriptedAI
         }
     }
 
+    void EnterEvadeMode() override
+    {
+        // evade only when duel isn't complete
+        if (!m_bIsDuelComplete)
+            ScriptedAI::EnterEvadeMode();
+    }
+
     void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (uiDamage >= m_creature->GetHealth())
@@ -599,18 +606,18 @@ struct npc_death_knight_initiateAI : public ScriptedAI
 
             if (!m_bIsDuelComplete)
             {
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_duelerGuid))
-                {
-                    m_creature->CastSpell(pPlayer, SPELL_DUEL_VICTORY, TRIGGERED_OLD_TRIGGERED);
-                    m_creature->SetFacingToObject(pPlayer);
-                }
-
                 // complete duel and evade (without home movemnet)
                 m_bIsDuelComplete = true;
                 m_creature->RemoveAllAurasOnEvade();
                 m_creature->DeleteThreatList();
                 m_creature->CombatStop(true);
                 m_creature->SetLootRecipient(NULL);
+
+                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_duelerGuid))
+                {
+                    m_creature->CastSpell(pPlayer, SPELL_DUEL_VICTORY, TRIGGERED_OLD_TRIGGERED);
+                    m_creature->SetFacingToObject(pPlayer);
+                }
 
                 // remove duel flag
                 if (GameObject* pFlag = GetClosestGameObjectWithEntry(m_creature, GO_DUEL_FLAG, 30.0f))
@@ -652,6 +659,7 @@ struct npc_death_knight_initiateAI : public ScriptedAI
                         break;
                     case 4:
                         m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
+                        m_creature->SetImmuneToPlayer(false);
                         AttackStart(pPlayer);
                         m_uiDuelTimer = 0;
                         break;
@@ -837,6 +845,8 @@ struct npc_unworthy_initiateAI : public ScriptedAI
         m_uiDeathCoil_Timer = 6000;
         m_uiIcyTouch_Timer = 2000;
         m_uiPlagueStrike_Timer = 5000;
+
+        m_creature->SetImmuneToPlayer(true);
     }
 
     void JustReachedHome() override
@@ -974,6 +984,7 @@ struct npc_unworthy_initiateAI : public ScriptedAI
                     if (Player* pTarget = m_creature->GetLootRecipient())
                     {
                         DoScriptText(GetTextId(), m_creature, pTarget);
+                        m_creature->SetImmuneToPlayer(false);
                         AttackStart(pTarget);
                     }
                 }
