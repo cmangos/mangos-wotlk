@@ -59,6 +59,7 @@ enum
 
     QUEST_RUSE_ASHTONGUE    = 10946,        // Quest 10946 for attunement in Black Temple.
     SPELL_ASHTONGUE_RUSE    = 42090,        // Player can complete 10946 quest, only if has aura 42090. If kill Alar without this aura - quest not completed.
+    NPC_ASHTONGUE_CREDIT    = 22850,
 };
 
 struct EventLocation
@@ -148,11 +149,18 @@ struct boss_alarAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ALAR, DONE);
 
-        std::list<Player*> playerList;
-        GetPlayerListWithEntryInWorld(playerList, m_creature, 150.0f);
-        for (auto& player : playerList)
-            if (player->GetQuestStatus(QUEST_RUSE_ASHTONGUE) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_ASHTONGUE_RUSE))
-                player->AreaExploredOrEventHappens(QUEST_RUSE_ASHTONGUE);
+        // Handle quest completion
+        ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+
+        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+        {
+            if (Unit* pPlayer = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+            {
+                if (pPlayer->GetTypeId() == TYPEID_PLAYER && pPlayer->IsWithinDist(m_creature, DEFAULT_VISIBILITY_INSTANCE))
+                    if (pPlayer->HasAura(SPELL_ASHTONGUE_RUSE) && ((Player*)pPlayer)->GetQuestStatus(QUEST_RUSE_ASHTONGUE) == QUEST_STATUS_INCOMPLETE)
+                        ((Player*)pPlayer)->KilledMonsterCredit(NPC_ASHTONGUE_CREDIT);
+            }
+        }
     }
 
     void JustSummoned(Creature* pSummoned) override
