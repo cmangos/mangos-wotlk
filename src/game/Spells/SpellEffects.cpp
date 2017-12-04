@@ -1738,6 +1738,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->SetHealth(unitTarget->GetMaxHealth());
                     return;
                 }
+                case 32589:                                 // Crystal Shatter
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    ((Creature*)unitTarget)->ForcedDespawn(1000);
+                    return;
+                }
                 case 33060:                                 // Make a Wish
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)

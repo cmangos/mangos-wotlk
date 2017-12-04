@@ -8,6 +8,7 @@
 enum
 {
     MAX_ENCOUNTER           = 6,
+    MAX_CRYSTALS            = 3,
 
     TYPE_MEDIVH             = 0,
     TYPE_SHIELD             = 1,
@@ -69,6 +70,7 @@ enum
     // cosmetic spells
     SPELL_PORTAL_CRYSTAL    = 32564,            // summons 18553 - Dark Portal Crystal stalker
     SPELL_BANISH_GREEN      = 32567,
+    SPELL_CRYSTAL_SHATTER   = 32589,            // used by Dark Portal Dummy to remove 1 crystal per 25% shield lost
 
     // yells during the event
     SAY_SAAT_WELCOME        = -1269019,
@@ -142,11 +144,13 @@ class instance_dark_portal : public ScriptedInstance
         uint32 m_uiWorldState;
         uint32 m_uiWorldStateRiftCount;
         uint32 m_uiWorldStateShieldCount;
+        uint32 m_uiSummonedCrystalCount;
 
         bool m_bHasIntroYelled;
         uint32 m_uiMedivhYellCount;
 
         uint32 m_uiNextPortalTimer;
+        uint32 m_uiSummonCrystalTimer;
         uint8 m_uiCurrentRiftId;
 };
 

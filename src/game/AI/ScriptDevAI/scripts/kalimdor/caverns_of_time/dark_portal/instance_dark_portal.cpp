@@ -28,7 +28,9 @@ instance_dark_portal::instance_dark_portal(Map* pMap) : ScriptedInstance(pMap),
     m_uiWorldState(0),
     m_uiWorldStateRiftCount(0),
     m_uiWorldStateShieldCount(100),
+    m_uiSummonedCrystalCount(0),
 
+    m_uiSummonCrystalTimer(0),
     m_bHasIntroYelled(false),
     m_uiMedivhYellCount(1),
 
@@ -49,10 +51,12 @@ void instance_dark_portal::DoResetEvent()
 
     m_uiWorldStateShieldCount = 100;
     m_uiWorldStateRiftCount   = 0;
+    m_uiSummonedCrystalCount = 0;
 
     m_uiCurrentRiftId    = 0;
     m_uiNextPortalTimer  = 0;
     m_uiMedivhYellCount  = 1;
+    m_uiSummonCrystalTimer = 0;
 }
 
 void instance_dark_portal::UpdateWorldState(bool bEnable)
@@ -122,11 +126,11 @@ void instance_dark_portal::SetData(uint32 uiType, uint32 uiData)
                 }
 
                 // ToDo:
-                // Start the Portal Crystal casting - by the Dark Portal Dumm Npc
-                // Also Start summoning the Dark Portal Beams
+                // Start summoning the Dark Portal Beams
 
                 UpdateWorldState();
                 m_uiNextPortalTimer = 3000;
+                m_uiSummonCrystalTimer = 1000;
             }
             if (uiData == DONE)
             {
@@ -176,6 +180,9 @@ void instance_dark_portal::SetData(uint32 uiType, uint32 uiData)
                         DoScriptText(uiMedivhWeakYell[m_uiMedivhYellCount - 1], pMedivh);
                         ++m_uiMedivhYellCount;
                     }
+
+                    if (Creature* pDarkPortalDummy = GetSingleCreatureFromStorage(NPC_DARK_PORTAL_DUMMY))
+                        pDarkPortalDummy->CastSpell(pDarkPortalDummy, SPELL_CRYSTAL_SHATTER, TRIGGERED_OLD_TRIGGERED);
                 }
 
                 // Kill the npc when the shield is broken
@@ -380,6 +387,26 @@ void instance_dark_portal::Update(uint32 uiDiff)
         }
         else
             m_uiNextPortalTimer -= uiDiff;
+    }
+
+    if (m_uiSummonCrystalTimer)
+    {
+        if (m_uiSummonCrystalTimer <= uiDiff)
+        {
+            if (m_uiSummonedCrystalCount < MAX_CRYSTALS)
+            {
+                if (Creature* pDarkPortalDummy = GetSingleCreatureFromStorage(NPC_DARK_PORTAL_DUMMY))
+                {
+                    pDarkPortalDummy->CastSpell(pDarkPortalDummy, SPELL_PORTAL_CRYSTAL, TRIGGERED_OLD_TRIGGERED);
+                    m_uiSummonedCrystalCount++;
+                    m_uiSummonCrystalTimer = 5000;
+                }
+            }
+            else
+                m_uiSummonCrystalTimer = 0;
+        }
+        else
+            m_uiSummonCrystalTimer -= uiDiff;
     }
 }
 
