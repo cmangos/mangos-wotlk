@@ -826,7 +826,7 @@ void Spell::FillTargetMap()
                             break;
                     }
                     break;
-                case TARGET_SELF2:
+                case TARGET_DEST_DESTINATION:
                     switch (m_spellInfo->EffectImplicitTargetB[i])
                     {
                         case TARGET_NONE:
@@ -1982,8 +1982,18 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             break;
         }
         case TARGET_SELF:
-        case TARGET_SELF2:
             targetUnitMap.push_back(m_caster);
+            break;
+        case TARGET_DEST_DESTINATION:
+            // Uses destination supplied to spell or fill caster position
+            if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) == 0)
+            {
+                float x, y, z;
+                m_caster->GetPosition(x, y, z);
+                m_targets.setDestination(x, y, z);
+            }
+            if (IsDestinationOnlyEffect(m_spellInfo, effIndex))
+                targetUnitMap.push_back(m_caster); // TODO: Remove this when dest only effects are added
             break;
         case TARGET_RANDOM_ENEMY_CHAIN_IN_AREA:
         case TARGET_RANDOM_FRIEND_CHAIN_IN_AREA:
@@ -3275,7 +3285,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     // remove caster from the list if required by attribute
     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
     {
-        if (targetMode != TARGET_SELF && targetMode != TARGET_SELF2 && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_SUMMON)
+        if (targetMode != TARGET_SELF && targetMode != TARGET_DEST_DESTINATION && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_SUMMON)
             targetUnitMap.remove(m_caster);
     }
 

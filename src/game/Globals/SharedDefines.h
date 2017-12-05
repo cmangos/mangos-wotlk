@@ -1320,7 +1320,7 @@ enum Targets
     TARGET_POINT_AT_SE                 = 84,                // from spell desc: "(SE)"
     TARGET_POINT_AT_SW                 = 85,                // from spell desc: "(SW)"
     TARGET_RANDOM_NEARBY_DEST          = 86,                // "Test Nearby Dest Random" - random around selected destination
-    TARGET_SELF2                       = 87,
+    TARGET_DEST_DESTINATION            = 87,
     TARGET_88                          = 88,                // Smoke Flare(s) and Hurricane
     TARGET_DIRECTLY_FORWARD            = 89,
     TARGET_NONCOMBAT_PET               = 90,
