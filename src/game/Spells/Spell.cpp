@@ -2225,7 +2225,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                         if (!prev->IsWithinDist(*next, jumpRadius))
                             break;
 
-                        if (!prev->IsWithinLOSInMap(*next))
+                        if (!prev->IsWithinLOSInMap(*next, true))
                         {
                             ++next;
                             continue;
@@ -2871,6 +2871,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     tempTargetUnitMap.erase(tempTargetUnitMap.begin());
 
                 targetUnitMap.push_back(pUnitTarget);
+
                 uint32 t = unMaxTargets - 1;
                 Unit* prev = pUnitTarget;
                 UnitList::iterator next = tempTargetUnitMap.begin();
@@ -2883,7 +2884,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                         continue;
                     }
 
-                    if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !prev->IsWithinLOSInMap(*next))
+                    if (!IsIgnoreLosSpellEffect(m_spellInfo, effIndex) && !prev->IsWithinLOSInMap(*next, true))
                     {
                         ++next;
                         continue;
@@ -5398,7 +5399,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
             }
 
-            if (!IsIgnoreLosSpell(m_spellInfo) && !m_IsTriggeredSpell && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
+            if (!IsIgnoreLosSpell(m_spellInfo) && !m_IsTriggeredSpell && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target, true))
                 return SPELL_FAILED_LINE_OF_SIGHT;
 
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -7948,7 +7949,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff) const
         // fall through
         case SPELL_EFFECT_RESURRECT_NEW:
             // player far away, maybe his corpse near?
-            if (target != m_caster && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !target->IsWithinLOSInMap(m_caster))
+            if (target != m_caster && !IsIgnoreLosSpellEffect(m_spellInfo, eff) && !target->IsWithinLOSInMap(m_caster, true))
             {
                 if (!m_targets.getCorpseTargetGuid())
                     return false;
@@ -7960,7 +7961,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff) const
                 if (target->GetObjectGuid() != corpse->GetOwnerGuid())
                     return false;
 
-                if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !corpse->IsWithinLOSInMap(m_caster))
+                if (!IsIgnoreLosSpellEffect(m_spellInfo, eff) && !corpse->IsWithinLOSInMap(m_caster, true))
                     return false;
             }
 
@@ -7974,11 +7975,11 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff) const
                     if (m_spellInfo->EffectImplicitTargetA[eff] == TARGET_DYNAMIC_OBJECT_COORDINATES)
                     {
                         if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
-                            if (!target->IsWithinLOSInMap(dynObj))
+                            if (!target->IsWithinLOSInMap(dynObj, true))
                                 return false;
                     }
                     else if (WorldObject* caster = GetCastingObject())
-                        if (!target->IsWithinLOSInMap(caster))
+                        if (!target->IsWithinLOSInMap(caster, true))
                             return false;
                 }
             }
