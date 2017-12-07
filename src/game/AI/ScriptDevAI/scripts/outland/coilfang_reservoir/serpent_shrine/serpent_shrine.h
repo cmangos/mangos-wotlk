@@ -41,15 +41,15 @@ enum
     GO_SHIELD_GENERATOR_4           = 185054,
 
     // Objects and doors no longer used since 2.4.0
-    // GO_CONSOLE_HYDROSS            = 185117,
-    // GO_CONSOLE_LURKER             = 185118,
-    // GO_CONSOLE_LEOTHERAS          = 185115,
-    // GO_CONSOLE_KARATHRESS         = 185114,
-    // GO_CONSOLE_MOROGRIM           = 185116,
-    // GO_CONSOLE_VASHJ              = 184568,
-    // GO_BRIDGE_PART_1              = 184203,
-    // GO_BRIDGE_PART_2              = 184204,
-    // GO_BRIDGE_PART_3              = 184205,
+    GO_CONSOLE_HYDROSS              = 185117,
+    GO_CONSOLE_LURKER               = 185118,
+    GO_CONSOLE_LEOTHERAS            = 185115,
+    GO_CONSOLE_KARATHRESS           = 185114,
+    GO_CONSOLE_MOROGRIM             = 185116,
+    GO_CONSOLE_VASHJ                = 184568,
+    GO_BRIDGE_PART_1                = 184203,
+    GO_BRIDGE_PART_2                = 184204,
+    GO_BRIDGE_PART_3                = 184205,
 
     SPELL_LEOTHERAS_BANISH          = 37546,
 };

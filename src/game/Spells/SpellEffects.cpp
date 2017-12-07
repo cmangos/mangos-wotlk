@@ -8692,6 +8692,28 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 39495:                                 // Remove Tainted Cores
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 39496, TRIGGERED_NONE);
+                    return;
+                }
+                case 39497:                                 // Kael'Thas Sunstrider - Tempest Keep - Remove Enchanted Weapons
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 39498, TRIGGERED_NONE);
+                    unitTarget->CastSpell(unitTarget, 39499, TRIGGERED_NONE);
+                    unitTarget->CastSpell(unitTarget, 39500, TRIGGERED_NONE);
+                    unitTarget->CastSpell(unitTarget, 39501, TRIGGERED_NONE);
+                    unitTarget->CastSpell(unitTarget, 39502, TRIGGERED_NONE);
+                    unitTarget->CastSpell(unitTarget, 39503, TRIGGERED_NONE);
+                    unitTarget->CastSpell(unitTarget, 39504, TRIGGERED_NONE);
+                    return;
+                }
                 case 41055:                                 // Copy Weapon
                 case 63416:                                 // Copy Weapon
                 case 69891:                                 // Copy Weapon (No Threat)
