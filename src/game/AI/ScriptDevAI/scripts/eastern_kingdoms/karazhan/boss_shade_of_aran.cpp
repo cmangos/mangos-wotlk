@@ -159,6 +159,8 @@ struct boss_aranAI : public ScriptedAI
 
         m_attackDistance        = 100.f;
 
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
+
         for (uint32 i = 0; i < ARAN_ACTION_MAX; ++i)
             m_actionReadyStatus[i] = false;
 

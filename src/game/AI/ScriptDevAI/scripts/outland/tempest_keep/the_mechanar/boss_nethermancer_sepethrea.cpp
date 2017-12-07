@@ -176,8 +176,8 @@ struct npc_raging_flamesAI : public ScriptedAI
 
     void Reset() override
     {
-        m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
-        m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
         m_creature->SetMeleeDamageSchool(SPELL_SCHOOL_FIRE);
         m_creature->SetSpeedRate(MOVE_RUN, m_bIsRegularMode ? 0.5f : 0.8f, true);
 

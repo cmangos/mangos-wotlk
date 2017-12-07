@@ -489,6 +489,8 @@ struct boss_krosh_firehandAI : public Council_Base_AI
         m_uiGreaterFireballTimer = 4000;
         m_uiSpellShieldTimer     = 1000;
         m_uiBlastWaveTimer       = 12000;
+
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
     }
 
     void AttackStart(Unit* pWho) override

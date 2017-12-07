@@ -90,6 +90,9 @@ struct boss_moroesAI : public ScriptedAI
 
         m_bEnrage           = false;
 
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+
         DoSpawnGuests();
     }
 

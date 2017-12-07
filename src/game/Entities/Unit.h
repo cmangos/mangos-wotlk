@@ -302,7 +302,7 @@ class VehicleInfo;
 struct SpellImmune
 {
     uint32 type;
-    uint32 spellId;
+    Aura const* aura;
 };
 
 typedef std::list<SpellImmune> SpellImmuneList;
@@ -2282,8 +2282,8 @@ class Unit : public WorldObject
 
         void SetContestedPvP(Player* attackedPlayer = nullptr);
 
-        void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
-        void ApplySpellDispelImmunity(const SpellEntry* spellProto, DispelType type, bool apply);
+        void ApplySpellImmune(Aura const* aura, uint32 op, uint32 type, bool apply);
+        void ApplySpellDispelImmunity(Aura const* aura, DispelType type, bool apply);
         virtual bool IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf);
         virtual bool IsImmuneToDamage(SpellSchoolMask meleeSchoolMask);
         virtual bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const;

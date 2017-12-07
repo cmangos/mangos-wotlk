@@ -98,8 +98,8 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
         m_bCorruptedForm            = false;
 
         m_creature->SetMeleeDamageSchool(SPELL_SCHOOL_FROST);
-        m_creature->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, true);
-        m_creature->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, false);
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, true);
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, false);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -137,10 +137,10 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_PURE_SPAWN:
-                pSummoned->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, true);
+                pSummoned->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, true);
                 break;
             case NPC_TAINTED_SPAWN:
-                pSummoned->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, true);
+                pSummoned->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, true);
                 break;
             case NPC_TAINTED_ELEMENTAL:
                 pSummoned->GetMotionMaster()->MovePoint(POINT_ID_ELEMENTAL_CLEAN, aElementalCleanPoint[0], aElementalCleanPoint[1], aElementalCleanPoint[2]);
@@ -266,8 +266,8 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
                     DoSpawnAdds();
 
                     m_creature->SetMeleeDamageSchool(SPELL_SCHOOL_FROST);
-                    m_creature->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, true);
-                    m_creature->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, false);
+                    m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, true);
+                    m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, false);
 
                     m_bCorruptedForm = false;
                     m_uiMarkTimer    = 15000;
@@ -310,8 +310,8 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
                         DoSpawnAdds();
 
                         m_creature->SetMeleeDamageSchool(SPELL_SCHOOL_NATURE);
-                        m_creature->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, true);
-                        m_creature->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
+                        m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, true);
+                        m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
 
                         m_bCorruptedForm = true;
                         m_uiMarkTimer    = 15000;

@@ -1312,7 +1312,7 @@ struct boss_maievAI : public ScriptedAI, private DialogueHelper
         m_bHasYelledTrap      = false;
 
         // Not sure if this is correct, but she seems to ignore all the shadow damage inflicted
-        m_creature->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_SHADOW, true);
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_SHADOW, true);
     }
 
     void KilledUnit(Unit* pVictim) override
