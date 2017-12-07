@@ -4482,7 +4482,11 @@ void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool se
 
         if (m_currentSpells[spellType]->CanBeInterrupted())
         {
+            SpellEntry const* spellInfo = m_currentSpells[spellType]->m_spellInfo;
             m_currentSpells[spellType]->cancel();
+
+            if (AI())
+                AI()->OnSpellInterrupt(spellInfo);
 
             // cancel can interrupt spell already (caster cancel ->target aura remove -> caster iterrupt)
             if (m_currentSpells[spellType])
