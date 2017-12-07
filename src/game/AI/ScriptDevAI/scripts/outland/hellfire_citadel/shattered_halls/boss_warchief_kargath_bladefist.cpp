@@ -231,6 +231,7 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
                     {
                         // stop bladedance
                         m_bInBlade = false;
+                        SetCombatScriptStatus(false);
                         m_creature->SetSpeedRate(MOVE_RUN, 2.0f);
                         m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
                         m_uiWaitTimer = 0;
@@ -260,6 +261,7 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
                 m_uiTargetNum = TARGET_NUM;
                 m_uiWaitTimer = 1;
                 m_bInBlade = true;
+                SetCombatScriptStatus(true);
                 m_uiBladeDanceTimer = 30000;
                 m_creature->SetSpeedRate(MOVE_RUN, 4.0f);
                 return;
