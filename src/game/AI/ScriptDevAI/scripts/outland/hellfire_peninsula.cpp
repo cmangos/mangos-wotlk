@@ -353,17 +353,23 @@ enum
     SAY_ELF_RESTING             = -1000119,
     SAY_ELF_SUMMON2             = -1000120,
     SAY_ELF_COMPLETE            = -1000121,
-    SAY_ELF_AGGRO               = -1000122,
+    SAY_ELF_JUST_KILLED         = -1000122,
 
     NPC_WINDWALKER              = 16966,
     NPC_TALONGUARD              = 16967,
 
     QUEST_ROAD_TO_FALCON_WATCH  = 9375,
+
+    DBSCRIPT_END_TALERIS_INT	= 10028,
+
+    FACTION_TROLL_FROSTMANE = 33
 };
 
 struct npc_wounded_blood_elfAI : public npc_escortAI
 {
     npc_wounded_blood_elfAI(Creature* pCreature) : npc_escortAI(pCreature) {Reset();}
+
+    void Reset() override { }
 
     void WaypointReached(uint32 uiPointId) override
     {
@@ -377,40 +383,53 @@ struct npc_wounded_blood_elfAI : public npc_escortAI
             case 0:
                 DoScriptText(SAY_ELF_START, m_creature, pPlayer);
                 break;
-            case 9:
-                DoScriptText(SAY_ELF_SUMMON1, m_creature, pPlayer);
-                // Spawn two Haal'eshi Talonguard
-                m_creature->SummonCreature(NPC_WINDWALKER, -15, -15, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_WINDWALKER, -17, -17, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
-                break;
             case 13:
+                m_creature->SetFacingTo(3.7f);
+                DoScriptText(SAY_ELF_SUMMON1, m_creature, pPlayer);
+                m_creature->SummonCreature(NPC_TALONGUARD, -983.206f, 4163.884f, 38.01043f, 0.72f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10000);
+                m_creature->SummonCreature(NPC_TALONGUARD, -985.732f, 4157.546f, 43.50933f, 0.80f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10000);
+                break;
+            case 19:
                 DoScriptText(SAY_ELF_RESTING, m_creature, pPlayer);
+                m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 break;
-            case 14:
+            case 20:
+                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                break;
+            case 21:
                 DoScriptText(SAY_ELF_SUMMON2, m_creature, pPlayer);
-                // Spawn two Haal'eshi Windwalker
-                m_creature->SummonCreature(NPC_WINDWALKER, -15, -15, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_WINDWALKER, -17, -17, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_WINDWALKER, -864.001f, 4253.191f, 43.89390f, 5.27f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10000);
                 break;
-            case 27:
+            case 38:
                 DoScriptText(SAY_ELF_COMPLETE, m_creature, pPlayer);
-                // Award quest credit
+                break;
+            case 39:
+                m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+                break;
+            case 40:
                 pPlayer->GroupEventHappens(QUEST_ROAD_TO_FALCON_WATCH, m_creature);
+                pPlayer->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_END_TALERIS_INT, m_creature, m_creature);
                 break;
         }
     }
 
-    void Reset() override { }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (HasEscortState(STATE_ESCORT_ESCORTING))
-            DoScriptText(SAY_ELF_AGGRO, m_creature);
-    }
-
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->AI()->AttackStart(m_creature);
+        pSummoned->AddThreat(m_creature);
+        pSummoned->SetInCombatWith(m_creature);
+        m_creature->SetInCombatWith(pSummoned);
+    }
+
+    void KilledUnit(Unit* /*pVictim*/) override
+    {
+        if (urand(0, 3))
+            DoScriptText(SAY_ELF_JUST_KILLED, m_creature);
+    }
+
+    void JustRespawned() override
+    {
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
     }
 };
 
@@ -424,7 +443,8 @@ bool QuestAccept_npc_wounded_blood_elf(Player* pPlayer, Creature* pCreature, con
     if (pQuest->GetQuestId() == QUEST_ROAD_TO_FALCON_WATCH)
     {
         // Change faction so mobs attack
-        pCreature->SetFactionTemporary(FACTION_ESCORT_H_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+        pCreature->SetFactionTemporary(FACTION_TROLL_FROSTMANE, TEMPFACTION_RESTORE_RESPAWN);
+        pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
         if (npc_wounded_blood_elfAI* pEscortAI = dynamic_cast<npc_wounded_blood_elfAI*>(pCreature->AI()))
             pEscortAI->Start(false, pPlayer, pQuest);
