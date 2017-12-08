@@ -37,6 +37,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/pet_ai.h"
+#include "AI/ScriptDevAI/scripts/world/world_map_scripts.h"
 
 /*######
 ## npc_manaforge_control_console
@@ -1161,8 +1162,8 @@ enum
     NPC_LEGION_TROOPER      = 20402,
     NPC_LEGION_DESTROYER    = 20403,
 
-    GO_ROCKET_SMOKE         = 183988,
-    GO_ROCKET_FIRE          = 183987,
+    // GO_ROCKET_SMOKE         = 183988,
+    // GO_ROCKET_FIRE          = 183987,
 
     QUEST_ID_WARP_GATE      = 10310,
 
@@ -2193,6 +2194,707 @@ CreatureAI* GetAI_npc_scrapped_fel_reaver(Creature* creature)
     return new npc_scrapped_fel_reaverAI(creature);
 }
 
+/*
+## Deathblow to the Legion script
+*/
+
+enum
+{
+    QUEST_DEATHBLOW_TO_THE_LEGION = 10409,
+
+    FACTION_DEATHBLOW               = 250, // during quest they have different faction
+    FACTION_DEATHBLOW_IN_PROGRESS   = 495,
+    FACTION_SHATTRATH               = 1743,
+
+    FACTION_KAYLAAN_HOSTILE         = 14,
+    FACTION_KAYLAAN_REDEEMED        = 290,
+
+    NPC_ADYEN_THE_LIGHTWARDEN   = 18537,
+    NPC_EXARCH_ORELIS           = 19466,
+    NPC_ANCHORITE_KARJA         = 19467,
+    NPC_ISHANAH                 = 18538,
+    NPC_KAYLAAN_THE_LOST        = 20794,
+    NPC_WRATH_LORD              = 20929,
+    // NPC_SOCRETHAR              = 20132  // defined in world map script
+
+    GOSSIP_SHATTRATH                        = 8117,
+    GOSSIP_NETHERSTORM                      = 8215,
+    GOSSIP_SOCRETHAR_DEAD_PLACEHOLDER_ID    = 40000, // uses a placeholder id due to no sniff available
+    GOSSIP_ACTION_START_DEATHBLOW = 1,
+
+    SPELL_POWER_OF_THE_LEGION           = 35596,
+    SPELL_KAYLAN_WRATH                  = 35614,
+    SPELL_CANCEL_POWER_OF_THE_LEGION    = 35597,
+    SPELL_WRATH_OF_SOCRETHAR            = 35598, // Ishanah version
+    SPELL_RESURRECTION                  = 35599,
+    SPELL_WRATH_OF_SOCRETHAR2           = 35600, // Kaylaan version
+    SPELL_DIVINE_SHIELD                 = 13874,
+    SPELL_PERMANENT_FEIGN_DEATH         = 29266,
+
+    // combat spells
+    // Adyen
+    SPELL_CRUSADER_STRIKE   = 14518,
+    SPELL_HAMMER_OF_JUSTICE = 13005,
+
+    // Kaylaan TODO    
+
+    // Ishanah
+    SPELL_HOLY_SMITE        = 15238,
+    SPELL_POWER_WORD_SHIELD = 22187,
+    SPELL_GREATER_HEAL      = 35096,
+
+    // Anchorite Karja
+    SPELL_HOLY_FIRE = 17141,
+
+    // Exarch Orelis
+    SPELL_DEMORALIZING_SHOUT    = 13730,
+    SPELL_REND                  = 16509,
+    SPELL_HEROIC_STRIKE         = 29426,
+
+    // Socrethar
+    SPELL_CLEAVE                = 15496,
+    SPELL_SHADOW_BOLT_VOLLEY    = 28448,
+    SPELL_FIREBALL_BARRAGE      = 37540,
+
+    SAY_ADYEN_1     = -1001254,
+    SAY_SOCRETHAR_1 = -1001255,
+    SAY_ADYEN_2     = -1001256,
+    SAY_SOCRETHAR_2 = -1001257,
+    SAY_ORELIS_1    = -1001258,
+    SAY_KAYLAAN_1   = -1001259,
+    SAY_KAYLAAN_2   = -1001260,
+    SAY_KAYLAAN_3   = -1001261,
+    SAY_ADYEN_3     = -1001262,
+    SAY_KAYLAAN_4   = -1001263,
+    SAY_SOCRETHAR_3 = -1001264,
+    SAY_SOCRETHAR_4 = -1001265,
+    SAY_KAYLAAN_5   = -1001266,
+    SAY_KAYLAAN_6   = -1001267,
+    SAY_ISHANAH_1   = -1001268,
+    SAY_ISHANAH_2   = -1001269,
+    SAY_SOCRETHAR_5 = -1001270,
+    SAY_KAYLAAN_7   = -1001271,
+    SAY_KAYLAAN_8   = -1001272,
+    SAY_SOCRETHAR_6 = -1001273,
+
+    EVENT_SOCRETHAR_SAY_1   = 0,
+    EVENT_ADYEN_SAY_2       = 1,
+    EVENT_SOCRETHAR_SAY_2   = 2,
+    EVENT_KAYLAAN_MOVE      = 3,
+    EVENT_KAYLAAN_SAY_2     = 4,
+    EVENT_KAYLAAN_SAY_3     = 5,
+    EVENT_ADYEN_SAY_3       = 6,
+    EVENT_KAYLAAN_SAY_4     = 7,
+    EVENT_SOCRETHAR_CAST_POWER_OF_LEGION    = 8,
+    EVENT_SOCRETHAR_SAY_3                   = 9,
+    EVENT_KAYLAAN_SAY_5                     = 10,
+    EVENT_KAYLAAN_KNEEL                     = 11,
+    EVENT_ISHANAH_SAY_1                     = 12,
+    EVENT_ISHANAH_SAY_2                     = 13,
+    EVENT_SOCRETHAR_SAY_5                   = 14,
+    EVENT_SOCRETHAR_KILL_ISHANAH            = 15,
+    EVENT_KAYLAAN_HORRIFIED                 = 16,
+    EVENT_KAYLAAN_SAVE_ISHANAH              = 17,
+    EVENT_SOCRETHAR_SAY_6                   = 18,
+    EVENT_SOCRETHAR_KILL_KAYLAAN            = 19,
+    EVENT_SOCRETHAR_ATTACK                  = 20,
+
+    POINT_KAYLAAN_MOVE = 1,
+    POINT_KAYLAAN_SAVE_ISHANAH = 2,
+
+    PATH_ID_DEATHBLOW = 1,
+    WAYPOINT_ADYEN_LAST = 8,
+
+    DB_GUID_WRATH_LORD_1 = 73683,
+    DB_GUID_WRATH_LORD_2 = 73693,
+
+    PATH_ID_WRATH_LORD_1 = 1,
+    PATH_ID_WRATH_LORD_2 = 2,
+};
+
+struct npc_adyen_the_lightwardenAI : public ScriptedAI
+{
+    npc_adyen_the_lightwardenAI(Creature* creature) : ScriptedAI(creature), m_eventStarted(false) {}
+
+    ObjectGuid m_playerGuid;
+    ObjectGuid m_orelisGuid;
+    ObjectGuid m_karjaGuid;
+    ObjectGuid m_ishanahGuid;
+    ObjectGuid m_kaylaanGuid;
+    ObjectGuid m_socretharGuid;
+
+    uint32 m_crusaderStrikeTimer;
+    uint32 m_hammerOfJusticeTimer;
+
+    bool m_eventStarted;
+
+    std::map<uint32, uint32> m_timers;
+
+    void Reset() override
+    {
+        m_crusaderStrikeTimer = 10000;
+        m_hammerOfJusticeTimer = 20000;
+    }
+
+    void AddTimer(const uint32 id, const uint32 timer)
+    {
+        m_timers[id] = timer;
+    }
+
+    void UpdateTimers(const uint32 diff)
+    {
+        std::vector<uint32> removedTimers;
+
+        for (auto iter = m_timers.begin(); iter != m_timers.end(); ++iter)
+        {
+            if ((*iter).second <= diff)
+            {
+                ExecuteTimer((*iter).first);
+                removedTimers.push_back((*iter).first);
+            }
+            else
+                (*iter).second -= diff;
+        }
+
+        for (uint32 id : removedTimers)
+            m_timers.erase(id);
+    }
+
+    void ExecuteTimer(const uint32 id)
+    {
+        switch (id)
+        {
+            case EVENT_SOCRETHAR_SAY_1:
+                if (Creature* socrethar = m_creature->GetMap()->GetCreature(m_socretharGuid))
+                    DoScriptText(SAY_SOCRETHAR_1, socrethar, GetPlayerTarget());
+                AddTimer(EVENT_ADYEN_SAY_2, 6500);
+                break;
+            case EVENT_ADYEN_SAY_2:
+                DoScriptText(SAY_ADYEN_2, m_creature, GetPlayerTarget());
+                AddTimer(EVENT_SOCRETHAR_SAY_2, 6500);
+                m_creature->SummonCreature(NPC_KAYLAAN_THE_LOST, 4955.793f, 3926.349f, 208.391f, 4.570264f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 3600000, true, false, 1);
+                break;
+            case EVENT_SOCRETHAR_SAY_2:
+                if (Creature* socrethar = m_creature->GetMap()->GetCreature(m_socretharGuid))
+                    DoScriptText(SAY_SOCRETHAR_2, socrethar, GetPlayerTarget());
+                break;
+            case EVENT_KAYLAAN_MOVE:
+                if (Creature* kaylaan = m_creature->GetMap()->GetCreature(m_kaylaanGuid))
+                {
+                    kaylaan->SetStandState(UNIT_STAND_STATE_STAND);
+                    kaylaan->GetMotionMaster()->MovePoint(POINT_KAYLAAN_MOVE, 4940.221f, 3847.434f, 211.5027f);
+                }
+                break;
+            case EVENT_KAYLAAN_SAY_2:
+                if (Creature* kaylaan = m_creature->GetMap()->GetCreature(m_kaylaanGuid))
+                {
+                    DoScriptText(SAY_KAYLAAN_2, kaylaan, GetPlayerTarget());
+                    AddTimer(EVENT_KAYLAAN_SAY_3, 9000);
+                }
+                break;
+            case EVENT_KAYLAAN_SAY_3:
+                if (Creature* kaylaan = m_creature->GetMap()->GetCreature(m_kaylaanGuid))
+                    DoScriptText(SAY_KAYLAAN_3, kaylaan, GetPlayerTarget());
+                AddTimer(EVENT_ADYEN_SAY_3, 6000);
+                break;
+            case EVENT_ADYEN_SAY_3:
+                DoScriptText(SAY_ADYEN_3, m_creature, GetPlayerTarget());
+                AddTimer(EVENT_KAYLAAN_SAY_4, 7000);
+                break;
+            case EVENT_KAYLAAN_SAY_4:
+                if (Creature* kaylaan = m_creature->GetMap()->GetCreature(m_kaylaanGuid))
+                    DoScriptText(SAY_KAYLAAN_4, kaylaan, GetPlayerTarget());
+                AddTimer(EVENT_SOCRETHAR_CAST_POWER_OF_LEGION, 6000);
+                break;
+            case EVENT_SOCRETHAR_CAST_POWER_OF_LEGION:
+                if (Creature* socrethar = m_creature->GetMap()->GetCreature(m_socretharGuid))
+                    socrethar->CastSpell(nullptr, SPELL_POWER_OF_THE_LEGION, TRIGGERED_NONE);
+
+                AddTimer(EVENT_SOCRETHAR_SAY_3, 3500);
+                break;
+            case EVENT_SOCRETHAR_SAY_3:
+                if (Creature* socrethar = m_creature->GetMap()->GetCreature(m_socretharGuid))
+                    DoScriptText(SAY_SOCRETHAR_3, socrethar, GetPlayerTarget());
+
+                if (Creature* kaylaan = m_creature->GetMap()->GetCreature(m_kaylaanGuid))
+                {
+                    kaylaan->setFaction(FACTION_KAYLAAN_HOSTILE);
+                    if (Player* player = GetPlayerTarget())
+                        kaylaan->AI()->AttackStart(player);
+                    else
+                        kaylaan->AI()->AttackStart(m_creature);
+                    AttackStart(kaylaan);
+                    if (Creature* orelis = m_creature->GetMap()->GetCreature(m_orelisGuid))
+                        orelis->AI()->AttackStart(kaylaan);
+                    if (Creature* karja = m_creature->GetMap()->GetCreature(m_karjaGuid))
+                        karja->AI()->AttackStart(kaylaan);
+                }
+                break;
+            case EVENT_KAYLAAN_SAY_5:
+                if (Creature* kaylaan = m_creature->GetMap()->GetCreature(m_kaylaanGuid))
+                    DoScriptText(SAY_KAYLAAN_5, kaylaan, GetPlayerTarget());
+                break;
+            case EVENT_KAYLAAN_KNEEL:
+                if (Creature* kaylaan = m_creature->GetMap()->GetCreature(m_kaylaanGuid))
+                    kaylaan->SetStandState(UNIT_STAND_STATE_KNEEL);
+                AddTimer(EVENT_ISHANAH_SAY_1, 500);
+                break;
+            case EVENT_ISHANAH_SAY_1:
+                if (Creature* ishanah = m_creature->GetMap()->GetCreature(m_ishanahGuid))
+                    DoScriptText(SAY_ISHANAH_1, ishanah, m_creature->GetMap()->GetCreature(m_kaylaanGuid));
+                AddTimer(EVENT_ISHANAH_SAY_2, 7000);
+                break;
+            case EVENT_ISHANAH_SAY_2:
+                if (Creature* ishanah = m_creature->GetMap()->GetCreature(m_ishanahGuid))
+                    DoScriptText(SAY_ISHANAH_2, ishanah, m_creature->GetMap()->GetCreature(m_kaylaanGuid));
+                AddTimer(EVENT_SOCRETHAR_SAY_5, 7500);
+                break;
+            case EVENT_SOCRETHAR_SAY_5:
+                if (Creature* socrethar = m_creature->GetMap()->GetCreature(m_socretharGuid))
+                    DoScriptText(SAY_SOCRETHAR_5, socrethar, m_creature->GetMap()->GetCreature(m_kaylaanGuid));
+                AddTimer(EVENT_SOCRETHAR_KILL_ISHANAH, 3000);
+                break;
+            case EVENT_SOCRETHAR_KILL_ISHANAH:
+                if (Creature* socrethar = m_creature->GetMap()->GetCreature(m_socretharGuid))
+                    socrethar->CastSpell(nullptr, SPELL_WRATH_OF_SOCRETHAR, TRIGGERED_NONE);
+                AddTimer(EVENT_KAYLAAN_HORRIFIED, 7500);
+                break;
+            case EVENT_KAYLAAN_HORRIFIED:
+                if (Creature* kaylaan = m_creature->GetMap()->GetCreature(m_kaylaanGuid))
+                {
+                    kaylaan->CastSpell(kaylaan, SPELL_CANCEL_POWER_OF_THE_LEGION, TRIGGERED_NONE);
+                    DoScriptText(SAY_KAYLAAN_7, kaylaan, kaylaan);
+                    kaylaan->setFaction(FACTION_KAYLAAN_REDEEMED);
+                    kaylaan->SetStandState(UNIT_STAND_STATE_STAND);
+                    kaylaan->GetMotionMaster()->MovePoint(POINT_KAYLAAN_SAVE_ISHANAH, 4941.518f, 3837.293f, 211.5089f);
+                }
+                break;
+            case EVENT_KAYLAAN_SAVE_ISHANAH:
+                if (Creature* kaylaan = m_creature->GetMap()->GetCreature(m_kaylaanGuid))
+                    kaylaan->CastSpell(nullptr, SPELL_RESURRECTION, TRIGGERED_NONE);
+                AddTimer(EVENT_SOCRETHAR_SAY_6, 6000);
+                break;
+            case EVENT_SOCRETHAR_SAY_6:
+                if (Creature* socrethar = m_creature->GetMap()->GetCreature(m_socretharGuid))
+                    DoScriptText(SAY_SOCRETHAR_6, socrethar, m_creature->GetMap()->GetCreature(m_kaylaanGuid));
+                AddTimer(EVENT_SOCRETHAR_KILL_KAYLAAN, 6000);
+                break;
+            case EVENT_SOCRETHAR_KILL_KAYLAAN:
+                if (Creature* socrethar = m_creature->GetMap()->GetCreature(m_socretharGuid))
+                    socrethar->CastSpell(nullptr, SPELL_WRATH_OF_SOCRETHAR2, TRIGGERED_NONE);
+                AddTimer(EVENT_SOCRETHAR_ATTACK, 3500);
+                break;
+            case EVENT_SOCRETHAR_ATTACK:
+                if (Creature* socrethar = m_creature->GetMap()->GetCreature(m_socretharGuid))
+                {
+                    socrethar->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                    socrethar->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                    if (Creature* ishanah = m_creature->GetMap()->GetCreature(m_ishanahGuid))
+                        socrethar->AI()->AttackStart(ishanah);
+                    AttackStart(socrethar);
+                    if (Creature* orelis = m_creature->GetMap()->GetCreature(m_orelisGuid))
+                        orelis->AI()->AttackStart(socrethar);
+                    if (Creature* karja = m_creature->GetMap()->GetCreature(m_karjaGuid))
+                        karja->AI()->AttackStart(socrethar);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    Player* GetPlayerTarget()
+    {
+        return m_creature->GetMap()->GetPlayer(m_playerGuid);
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        switch (summoned->GetEntry())
+        {
+            case NPC_EXARCH_ORELIS:     m_orelisGuid = summoned->GetObjectGuid(); break;
+            case NPC_ANCHORITE_KARJA:   m_karjaGuid = summoned->GetObjectGuid(); break;
+            case NPC_ISHANAH:           m_ishanahGuid = summoned->GetObjectGuid(); break;
+            case NPC_KAYLAAN_THE_LOST:  m_kaylaanGuid = summoned->GetObjectGuid(); break;
+            default: break;
+        }
+    }
+
+    void StartEvent(Player* player)
+    {
+        if (Creature* socrethar = ((ScriptedInstance*)m_creature->GetMap()->GetInstanceData())->GetSingleCreatureFromStorage(NPC_SOCRETHAR))
+        {
+            if (!socrethar->isAlive())
+                return;
+
+            m_socretharGuid = socrethar->GetObjectGuid();
+            socrethar->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        }
+        else
+            return;
+
+        if (m_eventStarted)
+            return;
+
+        m_playerGuid = player->GetObjectGuid();
+        m_creature->setFaction(FACTION_DEATHBLOW_IN_PROGRESS);
+        // TODO: Formation movement
+        if (Creature* orelis = m_creature->GetMap()->GetCreature(m_orelisGuid))
+        {
+            orelis->setFaction(FACTION_DEATHBLOW_IN_PROGRESS);
+            orelis->GetMotionMaster()->MoveFollow(m_creature, 1.f, M_PI_F - M_PI_F / 4, true);
+        }
+        if (Creature* karja = m_creature->GetMap()->GetCreature(m_karjaGuid))
+        {
+            karja->setFaction(FACTION_DEATHBLOW_IN_PROGRESS);
+            karja->GetMotionMaster()->MoveFollow(m_creature, 1.f, M_PI_F + M_PI_F / 4, true);
+        }
+        if (Creature* wrathLord = m_creature->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, uint32(NPC_WRATH_LORD), uint32(DB_GUID_WRATH_LORD_1))))
+        {
+            wrathLord->GetMotionMaster()->Clear(false, true);
+            wrathLord->GetMotionMaster()->MoveWaypoint(PATH_ID_WRATH_LORD_1);
+        }
+        if (Creature* wrathLord = m_creature->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, uint32(NPC_WRATH_LORD), uint32(DB_GUID_WRATH_LORD_2))))
+        {
+            wrathLord->GetMotionMaster()->Clear(false, true);
+            wrathLord->GetMotionMaster()->MoveWaypoint(PATH_ID_WRATH_LORD_2);
+        }
+
+        m_creature->GetMotionMaster()->Clear(false, true);
+        m_creature->GetMotionMaster()->MoveWaypoint(PATH_ID_DEATHBLOW);
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        m_eventStarted = true;
+    }
+
+    void DespawnEvent()
+    {
+        if (Creature* orelis = m_creature->GetMap()->GetCreature(m_orelisGuid))
+            orelis->ForcedDespawn(10000);
+        if (Creature* karja = m_creature->GetMap()->GetCreature(m_karjaGuid))
+            karja->ForcedDespawn(10000);
+        m_creature->ForcedDespawn(10000);
+    }
+
+    void FailEvent()
+    {
+        if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+            player->FailQuestForGroup(QUEST_DEATHBLOW_TO_THE_LEGION);
+        if (Creature* orelis = m_creature->GetMap()->GetCreature(m_orelisGuid))
+            orelis->ForcedDespawn();
+        if (Creature* karja = m_creature->GetMap()->GetCreature(m_karjaGuid))
+            karja->ForcedDespawn();
+        if (Creature* ishanah = m_creature->GetMap()->GetCreature(m_ishanahGuid))
+            ishanah->ForcedDespawn();
+        m_creature->ForcedDespawn();
+    }
+
+    void EndEvent(Creature* ishanah)
+    {
+        if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+            player->GroupEventHappens(QUEST_DEATHBLOW_TO_THE_LEGION, m_creature);
+        if (Creature* orelis = m_creature->GetMap()->GetCreature(m_orelisGuid))
+            orelis->ForcedDespawn(60000); // can be dead
+        if (Creature* karja = m_creature->GetMap()->GetCreature(m_karjaGuid))
+            karja->ForcedDespawn(60000); // can be dead
+        ishanah->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        ishanah->ForcedDespawn(60000);
+        m_creature->ForcedDespawn(60000);
+    }
+
+    void MovementInform(uint32 movementType, uint32 data) override
+    {
+        if (movementType == WAYPOINT_MOTION_TYPE)
+            WaypointReached(data);
+    }
+
+    void SummonedMovementInform(Creature* summoned, uint32 movementType, uint32 data) override
+    {
+        switch (movementType)
+        {
+            case WAYPOINT_MOTION_TYPE:
+                SummonedWaypointReached(summoned, data);
+                break;
+            case POINT_MOTION_TYPE:
+                SummonedPointReached(summoned, data);
+                break;
+        }
+    }
+
+    void WaypointReached(uint32 pointId)
+    {
+        switch (pointId)
+        {
+            case WAYPOINT_ADYEN_LAST: // Last initial waypoint
+            {
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveIdle();
+                DoScriptText(SAY_ADYEN_1, m_creature, m_creature->GetMap()->GetPlayer(m_playerGuid));
+                AddTimer(EVENT_SOCRETHAR_SAY_1, 6500);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
+    void SummonedWaypointReached(Creature* summoned, uint32 pointId)
+    {
+        switch (summoned->GetEntry())
+        {
+            case NPC_ISHANAH:
+                switch (pointId)
+                {
+                    case 7:
+                        summoned->SetWalk(true);
+                        break;
+                    case 8:
+                        summoned->GetMotionMaster()->Clear(false, true);
+                        summoned->GetMotionMaster()->MoveIdle();
+                        if (Creature* kaylaan = m_creature->GetMap()->GetCreature(m_kaylaanGuid))
+                        {
+                            DoScriptText(SAY_KAYLAAN_6, kaylaan, GetPlayerTarget());
+                            kaylaan->SetFacingToObject(summoned);
+                        }
+                        if (Creature* socrethar = m_creature->GetMap()->GetCreature(m_socretharGuid))
+                            socrethar->SetFacingToObject(summoned);
+                        AddTimer(EVENT_KAYLAAN_KNEEL, 6000);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case NPC_KAYLAAN_THE_LOST:
+                switch (pointId)
+                {
+                    case 6:
+                        summoned->GetMotionMaster()->Clear(false, true);
+                        summoned->GetMotionMaster()->MoveIdle();
+                        summoned->SetStandState(UNIT_STAND_STATE_KNEEL);
+                        if (Creature* orelis = m_creature->GetMap()->GetCreature(m_orelisGuid))
+                            DoScriptText(SAY_ORELIS_1, orelis, GetPlayerTarget());
+                        AddTimer(EVENT_KAYLAAN_MOVE, 6500);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    void SummonedPointReached(Creature* summoned, uint32 pointId)
+    {
+        switch (summoned->GetEntry())
+        {
+            case NPC_KAYLAAN_THE_LOST:
+                switch (pointId)
+                {
+                    case POINT_KAYLAAN_MOVE:
+                        DoScriptText(SAY_KAYLAAN_1, summoned, GetPlayerTarget());
+                        summoned->SetFacingTo(3.837011f);
+                        AddTimer(EVENT_KAYLAAN_SAY_2, 9000);
+                        break;
+                    case POINT_KAYLAAN_SAVE_ISHANAH:
+                        summoned->CastSpell(summoned, SPELL_DIVINE_SHIELD, TRIGGERED_NONE);
+                        DoScriptText(SAY_KAYLAAN_8, summoned, summoned);
+                        AddTimer(EVENT_KAYLAAN_SAVE_ISHANAH, 1000);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    void SummonedJustReachedHome(Creature* summoned) override
+    {
+        switch (summoned->GetEntry())
+        {
+            case NPC_ISHANAH:
+            {
+                EndEvent(summoned);
+                break;
+            }
+            case NPC_ANCHORITE_KARJA:
+                summoned->GetMotionMaster()->MoveFollow(m_creature, 1.f, M_PI_F + M_PI_F / 4, true);
+                break;
+            case NPC_EXARCH_ORELIS:
+                summoned->GetMotionMaster()->MoveFollow(m_creature, 1.f, M_PI_F - M_PI_F / 4, true);
+                break;
+        }
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            Creature* ishanah = m_creature->SummonCreature(NPC_ISHANAH, 4866.2f, 3799.016f, 199.141f, 0.4680258f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 3600000, true, true, 1, FACTION_DEATHBLOW);
+            ishanah->SetUInt32Value(UNIT_NPC_FLAGS, 0);
+            ishanah->GetMotionMaster()->Clear(false, true);
+            ishanah->GetMotionMaster()->MoveWaypoint(PATH_ID_DEATHBLOW);
+            if (Creature* socrethar = m_creature->GetMap()->GetCreature(m_socretharGuid))
+                DoScriptText(SAY_SOCRETHAR_4, socrethar, sender);
+            AddTimer(EVENT_KAYLAAN_SAY_5, 7000);
+        }
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        FailEvent();
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        UpdateTimers(diff);
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_hammerOfJusticeTimer <= diff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HAMMER_OF_JUSTICE) == CAST_OK)
+            {
+                m_hammerOfJusticeTimer = 30000;
+                return;
+            }
+        }
+        else
+            m_hammerOfJusticeTimer -= diff;
+
+        if (m_crusaderStrikeTimer <= diff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CRUSADER_STRIKE) == CAST_OK)
+            {
+                m_crusaderStrikeTimer = 15000;
+                return;
+            }
+        }
+        else
+            m_crusaderStrikeTimer -= diff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+struct npc_kaylaan_the_lostAI : public ScriptedAI
+{
+    npc_kaylaan_the_lostAI(Creature* creature) : ScriptedAI(creature), m_deathPrevented(false) {}
+
+    bool m_deathPrevented;
+
+    void Reset() override
+    {
+
+    }
+
+    void SpellHitTarget(Unit* target, const SpellEntry* spell) override
+    {
+        if (target->GetEntry() == NPC_ISHANAH && spell->Id == SPELL_RESURRECTION)
+            target->RemoveAurasDueToSpell(SPELL_PERMANENT_FEIGN_DEATH);
+    }
+
+    void DamageTaken(Unit* /*killer*/, uint32& damage, DamageEffectType /*damagetype*/) override
+    {
+        if (damage < m_creature->GetHealth())
+            return;
+
+        damage = 0;
+
+        if (m_deathPrevented)
+            return;
+
+        m_deathPrevented = true;
+
+        m_creature->SetHealth(1);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+        m_creature->CastSpell(nullptr, SPELL_KAYLAN_WRATH, TRIGGERED_NONE);
+        EnterEvadeMode();
+    }
+
+    void JustReachedHome() override
+    {
+        if (Unit* spawner = m_creature->GetSpawner()) // spawner is Adyen
+            if (spawner->AI() && spawner->GetTypeId() == TYPEID_UNIT)
+                m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spawner, static_cast<Creature*>(spawner));
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+    }
+};
+
+CreatureAI* Getnpc_adyen_the_lightwardenAI(Creature* creature)
+{
+    return new npc_adyen_the_lightwardenAI(creature);
+}
+
+CreatureAI* Getnpc_kaylaan_the_lostAI(Creature* creature)
+{
+    return new npc_kaylaan_the_lostAI(creature);
+}
+
+bool AreaTrigger_at_socrethar_seat(Player* player, AreaTriggerEntry const* /*at*/)
+{
+    if (player->IsCurrentQuest(QUEST_DEATHBLOW_TO_THE_LEGION))
+    {
+        if (player->GetMap()->SpawnedCountForEntry(NPC_ADYEN_THE_LIGHTWARDEN) == 0)
+        {
+            Creature* adyen = player->SummonCreature(NPC_ADYEN_THE_LIGHTWARDEN, 4805.796f, 3774.112f, 210.6172f, 5.550147f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 3600000, true, false, 1, FACTION_DEATHBLOW, true);
+            adyen->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            Creature* orelis = adyen->SummonCreature(NPC_EXARCH_ORELIS, 4804.807f, 3775.562f, 210.6171f, 5.532694f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 3600000, true, false, 1, FACTION_DEATHBLOW);
+            orelis->SetUInt32Value(UNIT_NPC_FLAGS, 0);
+            Creature* karja = adyen->SummonCreature(NPC_ANCHORITE_KARJA, 4803.637f, 3773.844f, 210.6176f, 5.602507f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 3600000, true, false, 1, FACTION_DEATHBLOW);
+            karja->SetUInt32Value(UNIT_NPC_FLAGS, 0);
+        }
+    }
+    return false;
+}
+
+bool GossipHello_npc_adyen_the_lightwarden(Player* player, Creature* creature)
+{
+    uint32 gossipId = GOSSIP_SOCRETHAR_DEAD_PLACEHOLDER_ID;
+
+    // custom code required because it utilizes two entries
+    if (creature->getFaction() == FACTION_SHATTRATH)
+        gossipId = GOSSIP_SHATTRATH;
+    else
+    {
+        if (npc_adyen_the_lightwardenAI* ai = dynamic_cast<npc_adyen_the_lightwardenAI*>(creature->AI()))
+        {
+            if (ai->m_eventStarted)
+                gossipId = GOSSIP_NETHERSTORM;
+            else if (Creature* socrethar = ((ScriptedInstance*)creature->GetMap()->GetInstanceData())->GetSingleCreatureFromStorage(NPC_SOCRETHAR))
+            {
+                if (socrethar->isAlive())
+                    gossipId = GOSSIP_NETHERSTORM;
+                else
+                    ai->DespawnEvent();
+            }
+        }
+    }
+    player->PrepareGossipMenu(creature, gossipId);
+    player->SendPreparedGossip(creature);
+    return true;
+}
+
+bool GossipSelect_npc_adyen_the_lightwarden(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+{
+    if (action == 1)
+    {
+        if (npc_adyen_the_lightwardenAI* ai = dynamic_cast<npc_adyen_the_lightwardenAI*>(creature->AI()))
+            ai->StartEvent(player);
+
+        player->CLOSE_GOSSIP_MENU();
+    }
+    return true;
+}
+
 void AddSC_netherstorm()
 {
     Script* pNewScript;
@@ -2274,5 +2976,22 @@ void AddSC_netherstorm()
     pNewScript = new Script;
     pNewScript->Name = "npc_scrapped_fel_reaver";
     pNewScript->GetAI = &GetAI_npc_scrapped_fel_reaver;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_socrethar_seat";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_socrethar_seat;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_adyen_the_lightwarden";
+    pNewScript->GetAI = &Getnpc_adyen_the_lightwardenAI;
+    pNewScript->pGossipHello = &GossipHello_npc_adyen_the_lightwarden;
+    pNewScript->pGossipSelect = &GossipSelect_npc_adyen_the_lightwarden;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_kaylaan_the_lost";
+    pNewScript->GetAI = &Getnpc_kaylaan_the_lostAI;
     pNewScript->RegisterSelf();
 }

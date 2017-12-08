@@ -400,6 +400,9 @@ struct world_map_outland : public ScriptedMap
             case NPC_VIMGOL_VISUAL_BUNNY:
                 m_npcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
                 break;
+            case NPC_SOCRETHAR:
+                m_npcEntryGuidStore[NPC_SOCRETHAR] = pCreature->GetObjectGuid();
+                break;
         }
     }
 

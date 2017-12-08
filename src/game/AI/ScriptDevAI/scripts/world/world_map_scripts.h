@@ -37,6 +37,9 @@ enum
     GO_ROCKET_FIRE              = 183987,
     GO_ROCKET_SMOKE             = 183988,
 
+    // Quest 10409
+    NPC_SOCRETHAR = 20132,
+
     // Transports
     NPC_NEZRAZ                  = 3149,
     NPC_HINDENBURG              = 3150,

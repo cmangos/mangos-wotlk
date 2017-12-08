@@ -1773,6 +1773,21 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 34819, TRIGGERED_OLD_TRIGGERED); // Summon 20078 front of the caster
                     return;
                 }
+                case 35598:                                 // Wrath of Socrethar (pretend to kill Ishanah)
+                {
+                    unitTarget->CastSpell(unitTarget, 29266, TRIGGERED_NONE); // Permanent Feign Death
+                    return;
+                }
+                case 35600:                                 // Wrath of Socrethar (Kill Kaylaan)
+                {
+                    unitTarget->CastSpell(unitTarget, 29266, TRIGGERED_NONE); // Permanent Feign Death
+                    return;
+                }
+                case 35683:                                 // Placing Protectorate Disruptor
+                {
+                    unitTarget->InterruptSpell(CURRENT_CHANNELED_SPELL, false);
+                    return;
+                }
                 case 35754:                                 // Charge
                 {
                     unitTarget->CastSpell(unitTarget, 35769, TRIGGERED_NONE); // Cast Felfire upon itself on hit
@@ -8520,6 +8535,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     float x, y, z;
                     unitTarget->GetPosition(x, y, z);
                     unitTarget->CastSpell(x, y, z, unitTarget->GetMap()->IsRegularDifficulty() ? 23971 : 30928, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
+                    return;
+                }
+                case 35597:                                 // Cancel Power of the Legion
+                {
+                    unitTarget->RemoveAurasDueToSpell(35596); // remove aura Power of the Legion
                     return;
                 }
                 case 35865:                                 // Summon Nether Vapor

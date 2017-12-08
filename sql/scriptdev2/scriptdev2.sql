@@ -1046,6 +1046,10 @@ UPDATE creature_template SET ScriptName='npc_salhadaar' WHERE entry=20454;
 UPDATE creature_template SET ScriptName='npc_energy_ball' WHERE entry=20769;
 UPDATE creature_template SET ScriptName='npc_scrap_reaver' WHERE entry IN(19849);
 UPDATE creature_template SET ScriptName='npc_scrapped_fel_reaver' WHERE entry IN(20243);
+UPDATE creature_template SET ScriptName='npc_adyen_the_lightwarden' WHERE entry IN(18537);
+UPDATE creature_template SET ScriptName='npc_kaylaan_the_lost' WHERE entry IN(20794);
+INSERT INTO scripted_areatrigger VALUES
+(4523, 'at_socrethar_seat');
 
 /*  */
 /* THE NEXUS */
@@ -3024,7 +3028,28 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001251,'%s is stricken by a virulent poison.',0,2,0,0,'npc_artorius EMOTE_POISON'),
 (-1001252,'%s is immobilized.',0,2,0,0,'npc_solenor EMOTE_IMMOBILIZED'),
 (-1001253,'You dare interfere with this being''s testing? The battle must be fought alone! You shall all pay for this interference!',0,0,0,0,'the_cleaner SAY_CLEANER_AGGRO'),
--- reserved for exports
+(-1001254,'We''re here for you, lost brother.  It is custom to offer you a chance to repent before you are destroyed.  We offer you this chance, as the naaru''s law commands.', '0', '0', '0', '0','SAY_ADYEN_1'),
+(-1001255,'Do not make me laugh.  Is this the mighty Aldor army that''s come to defeat me?', '0', '1', '0', '153','SAY_SOCRETHAR_1'),
+(-1001256,'We may be few, Socrethar, but our faith is strong.  Something you will never understand.  Now that custom has been served, prepare to meet your end.', '0', '0', '0', '0','SAY_ADYEN_2'),
+(-1001257,'Yes, let us settle this.  Before we begin, however, there''s somebody I''d like you to meet.', '0', '1', '0', '1','SAY_SOCRETHAR_2'),
+(-1001258,'How... how could you?!', '0', '0', '0', '0','SAY_ORELIS_1'),
+(-1001259,'My heart has been filled with hate since our sworn enemies were allowed into our city.  I knew the one known as Voren''thal before he was called a Seer.  It was by his hand that my brother was slain.', '0', '0', '0', '0','SAY_KAYLAAN_1'),
+(-1001260,'I turned that hate on the Illidari and the Burning Legion... but they weren''t the ones who betrayed us.  We were the naaru''s chosen!  We lived and died for them!', '0', '0', '0', '0','SAY_KAYLAAN_2'),
+(-1001261,'Once the hatred in my heart became focused, everything became clear to me.  Shattrath must be destroyed and the naaru with it.', '0', '0', '0', '0','SAY_KAYLAAN_3'),
+(-1001262,'Socrethar is clouding your mind, Kaylaan!  You do not mean these words!  I remember training you when you were but a youngling.  Your will was strong even then!', '0', '0', '0', '0','SAY_ADYEN_3'),
+(-1001263,'You are wrong, Adyen.  My mind has never been clearer.', '0', '0', '0', '0','SAY_KAYLAAN_4'),
+(-1001264,'Slay these dogs, Kaylaan!  Earn your place in the Burning Legion!', '0', '1', '0', '25','SAY_SOCRETHAR_3'),
+(-1001265,'What are you waiting for?  Finish them, young one.  Let your hatred burn!', '0', '1', '0', '53','SAY_SOCRETHAR_4'),
+(-1001266,'Yes... master.', '0', '0', '0', '0','SAY_KAYLAAN_5'),
+(-1001267,'Teacher...', '0', '0', '0', '0','SAY_KAYLAAN_6'),
+(-1001268,'The Light wants its lost son back, Socrethar.', '0', '0', '0', '0','SAY_ISHANAH_1'),
+(-1001269,'I offer myself in exchange.  You will have Ishanah, the High Priestess of the Aldor, as your prisoner if you release Kaylaan from your dark grasp.', '0', '0', '0', '0','SAY_ISHANAH_2'),
+(-1001270,'You foolish old hag... Why would I do that when I can have you both?', '0', '1', '0', '0','SAY_SOCRETHAR_5'),
+(-1001271,'No!  What have I done?', '0', '1', '0', '0','SAY_KAYLAAN_7'),
+(-1001272,'Light grant me strength!', '0', '1', '0', '0','SAY_KAYLAAN_8'),
+(-1001273,'Oh, please!  This is sickening; I''m going to have to kill you all myself.', '0', '1', '0', '0','SAY_SOCRETHAR_6'),
+-- warning ids pending export
+(-1001277,'That could have gone better. $n, come here, please. I have something I need you to take care of for me.','0','4','0','0','Ambassador Sunsorrow - During Lament of the Highborne script'),
 (-1001278,'WE STRIKE!',0,1,0,15,'proudhoof SAY_QUEST_START'),
 (-1001279,'$N is going to join us on our assault. Let us bring peace to my ancestors!',0,0,0,396,'proudhoof SAY_QUEST_INTRO'),
 (-1001280,'An ambush. Return them to their rest!',0,0,0,5,'proudhoof SAY_AMBUSH'),
