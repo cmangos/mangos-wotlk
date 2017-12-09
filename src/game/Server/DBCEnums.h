@@ -469,13 +469,13 @@ enum VehicleFlags
     VEHICLE_FLAG_NO_STRAFE          = 0x00000001,           // Sets MOVEFLAG2_NO_STRAFE
     VEHICLE_FLAG_NO_JUMPING         = 0x00000002,           // Sets MOVEFLAG2_NO_JUMPING
     VEHICLE_FLAG_FULLSPEEDTURNING   = 0x00000004,           // Sets MOVEFLAG2_FULLSPEEDTURNING
-    VEHICLE_FLAG_UNK1               = 0x00000008,
+    VEHICLE_FLAG_UNK1               = 0x00000008,           // mostly found in flying vehicles
     VEHICLE_FLAG_ALLOW_PITCHING     = 0x00000010,           // Sets MOVEFLAG2_ALLOW_PITCHING
     VEHICLE_FLAG_FULLSPEEDPITCHING  = 0x00000020,           // Sets MOVEFLAG2_FULLSPEEDPITCHING
     VEHICLE_FLAG_CUSTOM_PITCH       = 0x00000040,           // If set use pitchMin and pitchMax from DBC, otherwise pitchMin = -pi/2, pitchMax = pi/2
-    VEHICLE_FLAG_UNK2               = 0x00000080,
-    VEHICLE_FLAG_UNK3               = 0x00000100,
-    VEHICLE_FLAG_UNK4               = 0x00000200,           // Vehicle is accessory?
+    VEHICLE_FLAG_UNK2               = 0x00000080,           // only one entry - 27593
+    VEHICLE_FLAG_UNK3               = 0x00000100,           // only one entry - 27593
+    VEHICLE_FLAG_UNK4               = 0x00000200,           // mostly cannons and turrets
     VEHICLE_FLAG_ADJUST_AIM_ANGLE   = 0x00000400,           // Lua_IsVehicleAimAngleAdjustable
     VEHICLE_FLAG_ADJUST_AIM_POWER   = 0x00000800,           // Lua_IsVehicleAimPowerAdjustable
     VEHICLE_FLAG_UNK5               = 0x00001000,
@@ -497,7 +497,7 @@ enum VehicleFlags
     VEHICLE_FLAG_UNK20              = 0x10000000,           // Vehicle not dismissed after eject passenger?
     VEHICLE_FLAG_UNK21              = 0x20000000,
     VEHICLE_FLAG_UNK22              = 0x40000000,
-    VEHICLE_FLAG_UNK23              = 0x80000000,
+    VEHICLE_FLAG_UNK23              = 0x80000000,           // only two entries: 36609 and 36619. Possible related to passenger stun
 };
 
 enum VehicleSeatFlags
@@ -543,6 +543,7 @@ enum VehicleSeatFlagsB
     SEAT_FLAG_B_EJECTABLE           = 0x00000020,           // Ejectable
     SEAT_FLAG_B_USABLE_FORCED_2     = 0x00000040,
     SEAT_FLAG_B_USABLE_FORCED_3     = 0x00000100,
+    SEAT_FLAG_B_KEEP_PET            = 0x00020000,
     SEAT_FLAG_B_USABLE_FORCED_4     = 0x02000000,
     SEAT_FLAG_B_CAN_SWITCH          = 0x04000000,
     SEAT_FLAG_B_PLAYERFRAME_UI      = 0x80000000            // Lua_UnitHasVehiclePlayerFrameUI
