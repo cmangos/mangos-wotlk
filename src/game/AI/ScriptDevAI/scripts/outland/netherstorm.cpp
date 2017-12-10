@@ -2236,7 +2236,11 @@ enum
     SPELL_CRUSADER_STRIKE   = 14518,
     SPELL_HAMMER_OF_JUSTICE = 13005,
 
-    // Kaylaan TODO    
+    // Kaylaan
+    SPELL_BURNING_LIGHT     = 37552,
+    SPELL_HOLY_SLAM         = 37572,
+    SPELL_HEAL              = 37569,
+    SPELL_AVENGERS_SHEILD   = 37554,
 
     // Ishanah
     SPELL_HOLY_SMITE        = 15238,
@@ -2779,15 +2783,39 @@ struct npc_adyen_the_lightwardenAI : public ScriptedAI
     }
 };
 
+enum KaylaanActions
+{
+    KAYLAAN_ACTION_HEAL,
+    KAYLAAN_ACTION_AVENGERS,
+    KAYLAAN_ACTION_HOLY_SLAM,
+    KAYLAAN_ACTION_BURNING_LIGHT,
+    KAYLAAN_ACTION_MAX,
+};
+
 struct npc_kaylaan_the_lostAI : public ScriptedAI
 {
     npc_kaylaan_the_lostAI(Creature* creature) : ScriptedAI(creature), m_deathPrevented(false) {}
 
     bool m_deathPrevented;
 
+    uint32 m_avengersShieldTimer;
+    uint32 m_burningLightTimer;
+    uint32 m_healTimer;
+    uint32 m_holySlamTimer;
+
+    bool m_actionReadyStatus[KAYLAAN_ACTION_MAX];
+
     void Reset() override
     {
+        m_avengersShieldTimer = 0;
+        m_burningLightTimer = 2000;
+        m_healTimer = 0;
+        m_holySlamTimer = 10000;
 
+        m_actionReadyStatus[KAYLAAN_ACTION_HEAL] = false;
+        m_actionReadyStatus[KAYLAAN_ACTION_AVENGERS] = true;
+        m_actionReadyStatus[KAYLAAN_ACTION_BURNING_LIGHT] = false;
+        m_actionReadyStatus[KAYLAAN_ACTION_HOLY_SLAM] = false;
     }
 
     void SpellHitTarget(Unit* target, const SpellEntry* spell) override
@@ -2822,10 +2850,123 @@ struct npc_kaylaan_the_lostAI : public ScriptedAI
                 m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spawner, static_cast<Creature*>(spawner));
     }
 
+    void UpdateActions()
+    {
+        if (!m_actionReadyStatus[KAYLAAN_ACTION_HEAL])
+            if (m_creature->GetHealthPercent() < 50.f && !m_healTimer)
+                m_actionReadyStatus[KAYLAAN_ACTION_HEAL] = true;
+    }
+
+    void ExecuteActions()
+    {
+        if (m_creature->IsNonMeleeSpellCasted(false) || m_combatScriptHappening)
+            return;
+
+        for (uint32 i = 0; i < KAYLAAN_ACTION_MAX; ++i)
+        {
+            if (m_actionReadyStatus[i])
+            {
+                switch (i)
+                {
+                    case KAYLAAN_ACTION_HEAL:
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_HEAL) == CAST_OK)
+                        {
+                            m_healTimer = 15000;
+                            m_actionReadyStatus[i] = false;
+                            return;
+                        }
+                        break;
+                    }
+                    case KAYLAAN_ACTION_AVENGERS:
+                    {
+                        if (m_creature->IsInRange(m_creature->getVictim(), 8.f, 30.f))
+                        {
+                            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_AVENGERS_SHEILD) == CAST_OK)
+                            {
+                                m_avengersShieldTimer = 15000;
+                                m_actionReadyStatus[i] = false;
+                                return;
+                            }
+                        }
+                        break;
+                    }
+                    case KAYLAAN_ACTION_HOLY_SLAM:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HOLY_SLAM) == CAST_OK)
+                        {
+                            m_holySlamTimer = 30000;
+                            m_actionReadyStatus[i] = false;
+                            return;
+                        }
+                        break;
+                    }
+                    case KAYLAAN_ACTION_BURNING_LIGHT:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BURNING_LIGHT) == CAST_OK)
+                        {
+                            m_burningLightTimer = 15000;
+                            m_actionReadyStatus[i] = false;
+                            return;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+
     void UpdateAI(const uint32 diff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
+
+        if (!m_actionReadyStatus[KAYLAAN_ACTION_AVENGERS])
+        {
+            if (m_avengersShieldTimer <= diff)
+            {
+                m_avengersShieldTimer = 0;
+                m_actionReadyStatus[KAYLAAN_ACTION_AVENGERS] = true;
+            }
+            else
+                m_avengersShieldTimer -= diff;
+        }
+
+        if (m_healTimer)
+        {
+            if (m_healTimer <= diff)
+                m_healTimer = 0;
+            else
+                m_healTimer -= diff;
+        }
+
+        if (!m_actionReadyStatus[KAYLAAN_ACTION_HOLY_SLAM])
+        {
+            if (m_holySlamTimer <= diff)
+            {
+                m_holySlamTimer = 0;
+                m_actionReadyStatus[KAYLAAN_ACTION_HOLY_SLAM] = true;
+            }
+            else
+                m_holySlamTimer -= diff;
+        }
+
+        if (!m_actionReadyStatus[KAYLAAN_ACTION_BURNING_LIGHT])
+        {
+            if (m_burningLightTimer <= diff)
+            {
+                m_burningLightTimer = 0;
+                m_actionReadyStatus[KAYLAAN_ACTION_BURNING_LIGHT] = true;
+            }
+            else
+                m_burningLightTimer -= diff;
+        }
+
+        UpdateActions();
+        ExecuteActions();
+
+        DoMeleeAttackIfReady();
     }
 };
 
