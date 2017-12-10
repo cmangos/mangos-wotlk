@@ -1536,8 +1536,6 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
         switch (pSummoned->GetEntry())
         {
             case NPC_VOLATILE_GHOUL:
-                pSummoned->CastSpell(pSummoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
-            // no break;
             case NPC_WARRIOR_OF_THE_FROZEN_WASTES:
                 m_lAttackersGUIDs.push_back(pSummoned->GetObjectGuid());
                 // make the scourge attack only during the battle
