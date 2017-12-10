@@ -199,6 +199,8 @@ void world_map_ebon_hold::DoUpdateBattleWorldState(uint32 uiStateId, uint32 uiSt
 void world_map_ebon_hold::DoResetBattle()
 {
     // reset all npcs to the original state
+    if (Creature* pDarion = GetSingleCreatureFromStorage(NPC_DARION_MOGRAINE))
+        pDarion->Respawn();
     if (Creature* pKoltira = GetSingleCreatureFromStorage(NPC_KOLTIRA_DEATHWEAVER))
         pKoltira->Respawn();
     if (Creature* pThassarian = GetSingleCreatureFromStorage(NPC_THASSARIAN))

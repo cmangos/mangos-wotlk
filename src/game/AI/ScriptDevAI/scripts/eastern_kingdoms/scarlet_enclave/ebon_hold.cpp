@@ -1771,6 +1771,18 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                     DoScriptText(SAY_LIGHT_OF_DAWN_STAND_2, pMaxwell);
 
                 DoCastSpellIfCan(m_creature, SPELL_THE_MIGHT_OF_MOGRAINE);
+
+                // unmount the death knights
+                m_creature->Unmount();
+                m_creature->SetImmuneToNPC(false);
+
+                if (Creature* pKoltira = m_pInstance->GetSingleCreatureFromStorage(NPC_KOLTIRA_DEATHWEAVER))
+                    pKoltira->Unmount();
+                if (Creature* pThassarian = m_pInstance->GetSingleCreatureFromStorage(NPC_THASSARIAN))
+                    pThassarian->Unmount();
+                if (Creature* pOrbaz = m_pInstance->GetSingleCreatureFromStorage(NPC_ORBAZ_BLOODBANE))
+                    pOrbaz->Unmount();
+
                 // max fight timer
                 m_uiFightTimer = 5 * MINUTE * IN_MILLISECONDS;
                 break;
@@ -1799,6 +1811,8 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                 }
                 break;
             case 5:
+                m_creature->Unmount();
+
                 // battle finished - remove light of dawn aura
                 DoScriptText(EMOTE_LIGHT_OF_DAWN_KNEEL, m_creature);
                 DoScriptText(SAY_LIGHT_OF_DAWN_OUTRO_3, m_creature);
@@ -2428,7 +2442,6 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                             m_uiEventTimer = 5 * MINUTE * IN_MILLISECONDS;
                             break;
                         case 66:
-                            m_pInstance->SetData(TYPE_BATTLE, NOT_STARTED);
                             if (Creature* pKoltira = m_pInstance->GetSingleCreatureFromStorage(NPC_KOLTIRA_DEATHWEAVER))
                                 pKoltira->ForcedDespawn();
                             if (Creature* pThassarian = m_pInstance->GetSingleCreatureFromStorage(NPC_THASSARIAN))
@@ -2440,7 +2453,10 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                                 if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(aLightArmySpawnLoc[i].m_uiEntry))
                                     pTemp->ForcedDespawn();
                             }
-                            SetEscortPaused(false);
+
+                            // reset the event
+                            m_creature->ForcedDespawn();
+                            m_pInstance->SetData(TYPE_BATTLE, NOT_STARTED);
                             m_uiEventTimer = 0;
                             break;
                     }
