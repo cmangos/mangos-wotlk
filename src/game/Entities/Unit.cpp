@@ -3565,8 +3565,9 @@ float Unit::GetCritMultiplier(SpellSchoolMask dmgSchoolMask, uint32 creatureType
         float bonus = 0;
         if (dmgSchoolMask)
             bonus += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, dmgSchoolMask); // Gems, talents
-        if (creatureTypeMask)
-            bonus += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS, creatureTypeMask); // Creature slaying
+        // ToDo: research if this is still needed, as there are no spells with aura 169
+        // if (creatureTypeMask)
+        //    bonus += GetTotalAuraModifierByMiscMask(SPELL_AURA_169, creatureTypeMask); // Creature slaying
         multiplier *= (1.0f + (bonus * pct));
     }
     else
