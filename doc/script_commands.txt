@@ -214,6 +214,7 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 
 14 SCRIPT_COMMAND_REMOVE_AURA               resultingSource = Unit
                                             * datalong = spell_id
+											* data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: remove aura by caster spell from script target
 
 15 SCRIPT_COMMAND_CAST_SPELL                resultingSource = Unit, cast spell at resultingTarget = Unit
                                             * datalong = spell id
