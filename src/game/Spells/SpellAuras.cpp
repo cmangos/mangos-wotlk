@@ -2011,6 +2011,7 @@ void Aura::TriggerSpell()
 
             switch (triggeredSpellInfo->EffectImplicitTargetA[0])
             {
+                case TARGET_RANDOM_DEST_LOC: // fireball barrage
                 case TARGET_CHAIN_DAMAGE:
                 case TARGET_DUELVSPLAYER:
                     triggerCaster = GetCaster();
