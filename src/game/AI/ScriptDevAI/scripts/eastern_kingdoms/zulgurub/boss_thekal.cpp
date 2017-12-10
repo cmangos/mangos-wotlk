@@ -276,7 +276,7 @@ struct boss_thekalAI : public boss_thekalBaseAI
                 else
                     m_uiResurrectTimer -= uiDiff;
 
-                // No break needed here
+            // No break needed here
             case PHASE_WAITING:
                 return;
 
@@ -426,7 +426,7 @@ struct mob_zealot_lorkhanAI : public boss_thekalBaseAI
                 else
                     m_uiResurrectTimer -= uiDiff;
 
-                // no break needed here
+            // no break needed here
             case PHASE_WAITING:
                 return;
 
@@ -579,7 +579,7 @@ struct mob_zealot_zathAI : public boss_thekalBaseAI
                 else
                     m_uiResurrectTimer -= uiDiff;
 
-                // no break needed here
+            // no break needed here
             case PHASE_WAITING:
                 return;
 

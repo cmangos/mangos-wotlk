@@ -190,11 +190,11 @@ struct boss_soccothratesAI : public ScriptedAI, private DialogueHelper
             float sX = m_creature->GetPositionX(), sY = m_creature->GetPositionY(); // source coords
             float tX = m_x, tY = m_y; // target coords
             float felfireDistX = (tX - sX) / 7, felfireDistY = (tY - sY) / 7;
-            float fX = sX + (felfireDistX*m_lineUpCounter), fY = sY + (felfireDistY*m_lineUpCounter);
+            float fX = sX + (felfireDistX * m_lineUpCounter), fY = sY + (felfireDistY * m_lineUpCounter);
             target->NearTeleportTo(fX, fY, m_creature->GetPositionZ(), m_creature->GetOrientation());
             m_lineUpCounter++;
         }
-        else if(spell->Id== SPELL_CHARGE && target->GetEntry()== NPC_CHARGE_TARGET)
+        else if (spell->Id == SPELL_CHARGE && target->GetEntry() == NPC_CHARGE_TARGET)
             SetCombatMovement(true);
     }
 

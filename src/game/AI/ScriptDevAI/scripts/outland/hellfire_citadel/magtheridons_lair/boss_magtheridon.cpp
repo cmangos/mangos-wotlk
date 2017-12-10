@@ -126,7 +126,7 @@ struct boss_magtheridonAI : public ScriptedAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override 
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -144,7 +144,7 @@ struct boss_magtheridonAI : public ScriptedAI
 
     void KilledUnit(Unit* pVictim) override
     {
-        if(pVictim->GetTypeId() == TYPEID_PLAYER)
+        if (pVictim->GetTypeId() == TYPEID_PLAYER)
             DoScriptText(SAY_PLAYER_KILLED, m_creature);
     }
 
@@ -252,7 +252,7 @@ struct boss_magtheridonAI : public ScriptedAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_BLASTNOVA) == CAST_OK)
                     {
-						m_creature->RemoveAurasDueToSpell(SPELL_QUAKE);
+                        m_creature->RemoveAurasDueToSpell(SPELL_QUAKE);
                         DoScriptText(EMOTE_BLASTNOVA, m_creature);
                         m_uiBlastNovaTimer = 60000;
                         //m_creature->AttackStop(true); // needs to deselect target, probably needs to be moved to spell system
@@ -282,7 +282,7 @@ struct boss_magtheridonAI : public ScriptedAI
                         m_uiDebrisTimer -= uiDiff;
                 }
             }
-        }               
+        }
 
         DoMeleeAttackIfReady();
     }

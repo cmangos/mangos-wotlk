@@ -34,7 +34,7 @@ namespace VMAP
 {
     bool IntersectTriangle(MeshTriangle const& tri, std::vector<Vector3>::const_iterator points, G3D::Ray const& ray, float& distance)
     {
-        #define EPS 1e-5f
+#define EPS 1e-5f
 
         // See RTR2 ch. 13.7 for the algorithm.
 
@@ -90,7 +90,7 @@ namespace VMAP
     {
         public:
             TriBoundFunc(std::vector<Vector3>& vert): vertices(vert.begin()) {}
-            void operator () (MeshTriangle const& tri, G3D::AABox& out) const
+            void operator()(MeshTriangle const& tri, G3D::AABox& out) const
             {
                 G3D::Vector3 lo = vertices[tri.idx0];
                 G3D::Vector3 hi = lo;
@@ -220,8 +220,8 @@ namespace VMAP
     uint32 WmoLiquid::GetFileSize()
     {
         return 2 * sizeof(uint32) +
-            sizeof(Vector3) +
-            (iTilesX + 1) * (iTilesY + 1) * sizeof(float) + iTilesX * iTilesY;
+               sizeof(Vector3) +
+               (iTilesX + 1) * (iTilesY + 1) * sizeof(float) + iTilesX * iTilesY;
     }
 
     bool WmoLiquid::writeToFile(FILE* wf)
@@ -373,7 +373,7 @@ namespace VMAP
     {
         GModelRayCallback(const std::vector<MeshTriangle>& tris, const std::vector<Vector3>& vert):
             vertices(vert.begin()), triangles(tris.begin()), hit(false) {}
-        bool operator () (G3D::Ray const& ray, uint32 entry, float& distance, bool /*pStopAtFirstHit*/, bool /*checkLOS*/)
+        bool operator()(G3D::Ray const& ray, uint32 entry, float& distance, bool /*pStopAtFirstHit*/, bool /*checkLOS*/)
         {
             bool result = IntersectTriangle(triangles[entry], vertices, ray, distance);
             if (result)

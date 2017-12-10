@@ -90,10 +90,10 @@ class PlayerNameMapHolder
 
     private:
 
-       // Non instanceable only static
-       PlayerNameMapHolder() {}
+        // Non instanceable only static
+        PlayerNameMapHolder() {}
 
-       static MapType m_objectMap;
+        static MapType m_objectMap;
 };
 
 class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLevelLockable<ObjectAccessor, std::mutex> >

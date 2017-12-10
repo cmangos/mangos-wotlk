@@ -151,7 +151,7 @@ void BattleGroundRV::HandleGameObjectCreate(GameObject* go)
     }
 }
 
-void BattleGroundRV::FillInitialWorldStates(WorldPacket &data, uint32& count)
+void BattleGroundRV::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
     FillInitialWorldState(data, count, 0xe11, GetAlivePlayersCountByTeam(ALLIANCE));
     FillInitialWorldState(data, count, 0xe10, GetAlivePlayersCountByTeam(HORDE));

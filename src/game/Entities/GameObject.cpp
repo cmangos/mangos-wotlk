@@ -808,8 +808,8 @@ bool GameObject::IsTransport() const
 bool GameObject::IsDynTransport() const
 {
     // If something is marked as a transport, don't transmit an out of range packet for it.
-    GameObjectInfo const * gInfo = GetGOInfo();
-    if(!gInfo) return false;
+    GameObjectInfo const* gInfo = GetGOInfo();
+    if (!gInfo) return false;
     return gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT || (gInfo->type == GAMEOBJECT_TYPE_TRANSPORT && !gInfo->transport.pause);
 }
 
@@ -852,8 +852,8 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                 {
                     Player* ownerPlayer = (Player*)owner;
                     if ((GetMap()->IsBattleGroundOrArena() && ownerPlayer->GetBGTeam() != u->GetBGTeam()) ||
-                        (ownerPlayer->IsInDuelWith(u)) ||
-                        (!ownerPlayer->CanCooperate(u)))
+                            (ownerPlayer->IsInDuelWith(u)) ||
+                            (!ownerPlayer->CanCooperate(u)))
                         trapNotVisible = true;
                 }
                 else

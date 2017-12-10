@@ -1235,7 +1235,7 @@ struct npc_drijyaAI : public npc_escortAI
         }
     }
 
-    void RespawnGo(ObjectGuid &guid)
+    void RespawnGo(ObjectGuid& guid)
     {
         if (GameObject* go = m_creature->GetMap()->GetGameObject(guid))
         {
@@ -1718,7 +1718,7 @@ struct npc_salhadaarAI : public ScriptedAI
 
                 if (m_uiStasisTimer <= uiDiff)
                 {
-                    if (Unit *target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_STASIS))
+                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_STASIS))
                     {
                         if (m_creature->CastSpell(target, SPELL_STASIS, TRIGGERED_NONE) == SPELL_CAST_OK) // cast stasis on random target every 22 seconds
                             m_uiStasisTimer = 22000;
@@ -1817,27 +1817,27 @@ enum
 
 float spawningLocations[COUNT_SPAWNING_LOCATIONS][4] =
 {
-{ 2593.983f, 3946.436f, 137.4138f, 2.598825f },
-{ 2543.813f, 3932.396f, 135.5509f, 1.761495f },
-{ 2467.507f, 3961.973f, 114.759f, 0.7313454f },
-{ 2484.169f, 4042.952f, 131.2856f, 4.728844f },
+    { 2593.983f, 3946.436f, 137.4138f, 2.598825f },
+    { 2543.813f, 3932.396f, 135.5509f, 1.761495f },
+    { 2467.507f, 3961.973f, 114.759f, 0.7313454f },
+    { 2484.169f, 4042.952f, 131.2856f, 4.728844f },
 };
 
 // Used in DB with PathId
 float movementDestinations[COUNT_SPAWNING_LOCATIONS * 2][3] =
 {
 
-{ 2556.563f, 3969.015f, 131.099f }, // mid point for first
-{ 2535.538f, 3992.952f, 137.4138f}, // final point for first
+    { 2556.563f, 3969.015f, 131.099f }, // mid point for first
+    { 2535.538f, 3992.952f, 137.4138f}, // final point for first
 
-{ 2538.997f, 3957.29f, 128.0989f }, // mid point for second
-{ 2527.418f, 3972.693f, 127.7893f }, // final point for second
+    { 2538.997f, 3957.29f, 128.0989f }, // mid point for second
+    { 2527.418f, 3972.693f, 127.7893f }, // final point for second
 
-{ 2496.478f, 3987.993f, 129.061f }, // first point for third
-{ 2510.035f, 3995.931f, 132.1609f }, // final point for third
+    { 2496.478f, 3987.993f, 129.061f }, // first point for third
+    { 2510.035f, 3995.931f, 132.1609f }, // final point for third
 
-{ 2494.564f, 4020.812f, 133.1337f }, // first point for fourth - guesswork
-{ 2518.717f, 4008.459f, 133.8864f }, // final point for fourth - guesswork
+    { 2494.564f, 4020.812f, 133.1337f }, // first point for fourth - guesswork
+    { 2518.717f, 4008.459f, 133.8864f }, // final point for fourth - guesswork
 
 };
 
@@ -1977,7 +1977,7 @@ struct npc_scrapped_fel_reaverAI : ScriptedAI
                     break;
                 case 1: // revert to unattackable when out of combat
                     if (!m_creature->isInCombat())
-                        ResetEvent();                    
+                        ResetEvent();
                     break;
             }
         }
@@ -1988,7 +1988,7 @@ struct npc_scrapped_fel_reaverAI : ScriptedAI
         if (m_eventStarted)
         {
             m_spawnTimer -= diff;
-            if(m_eventTimer > 0)
+            if (m_eventTimer > 0)
                 m_eventTimer -= diff;
             ProcessEvent();
         }

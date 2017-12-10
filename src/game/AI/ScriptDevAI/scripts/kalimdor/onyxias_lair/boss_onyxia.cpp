@@ -324,7 +324,7 @@ struct boss_onyxiaAI : public ScriptedAI
                 }
                 else
                     m_uiBellowingRoarTimer -= uiDiff;
-                // no break, phase 3 will use same abilities as in 1
+            // no break, phase 3 will use same abilities as in 1
             case PHASE_START:
             {
                 if (m_uiFlameBreathTimer < uiDiff)
@@ -482,7 +482,7 @@ struct boss_onyxiaAI : public ScriptedAI
             }
             case PHASE_BREATH_PRE:                          // Summon first rounds of whelps
                 DidSummonWhelps(uiDiff);
-                // no break here
+            // no break here
             default:                                        // Phase-switching phases
                 if (!m_uiPhaseTimer)
                     break;

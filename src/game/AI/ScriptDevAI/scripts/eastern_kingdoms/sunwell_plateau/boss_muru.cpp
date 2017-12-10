@@ -147,7 +147,7 @@ struct boss_muruAI : public Scripted_NoMovementAI
                 // Cast the Entropius spawn effect and force despawn
                 pSummoned->CastSpell(pSummoned, SPELL_ENTROPIUS_SPAWN, TRIGGERED_OLD_TRIGGERED);
                 m_creature->ForcedDespawn(1000);
-                // no break here; All other summons should behave the same way
+            // no break here; All other summons should behave the same way
             default:
                 pSummoned->AI()->AttackStart(m_creature->getVictim());
                 break;
@@ -341,11 +341,11 @@ struct npc_portal_targetAI : public Scripted_NoMovementAI
         // They could use the EffectDummyCreature to handle this, but this makes code easier
         switch (pSpell->Id)
         {
-                // Init sentinel summon timer
+            // Init sentinel summon timer
             case SPELL_OPEN_PORTAL:
                 m_uiSentinelTimer = 5000;
                 break;
-                // Start transition effect
+            // Start transition effect
             case SPELL_OPEN_ALL_PORTALS:
                 m_uiTransformTimer = 2000;
                 break;

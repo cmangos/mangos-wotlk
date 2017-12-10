@@ -297,7 +297,7 @@ struct npc_kiljaeden_controllerAI : public Scripted_NoMovementAI, private Dialog
         {
             case NPC_VELEN:
                 pSummoned->GetMotionMaster()->MovePoint(0, aOutroLocations[3].m_fX, aOutroLocations[3].m_fY, aOutroLocations[3].m_fZ);
-                // no break here
+            // no break here
             case NPC_LIADRIN:
                 pSummoned->CastSpell(pSummoned, SPELL_TELEPORT_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 break;
@@ -597,8 +597,8 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
                 // Transition phase is handled in the dialogue helper; however we don't want the spell timers to be decreased so we use a specific phase
                 break;
             case PHASE_SACRIFICE:
-                // Final phase - use the same spells
-                // no break;
+            // Final phase - use the same spells
+            // no break;
             case PHASE_ARMAGEDDON:
 
                 // In the last phase he uses Armageddon continuously
@@ -614,7 +614,7 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
                 if (m_uiPhase == PHASE_ARMAGEDDON && m_creature->GetHealthPercent() < 25.0f)
                     StartNextDialogueText(PHASE_SACRIFICE);
 
-                // no break - use the spells from the phases below;
+            // no break - use the spells from the phases below;
             case PHASE_DARKNESS:
 
                 // In the last phase he uses this spell more often
@@ -638,7 +638,7 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
                 if (m_uiPhase == PHASE_DARKNESS && m_creature->GetHealthPercent() < 55.0f)
                     StartNextDialogueText(PHASE_ARMAGEDDON);
 
-                // no break - use the spells from the phase below;
+            // no break - use the spells from the phase below;
             case PHASE_INFERNO:
 
                 if (m_uiKalecSummonTimer)

@@ -246,7 +246,7 @@ struct boss_anubarak_trialAI : public ScriptedAI
         {
             case NPC_ANUBARAK_SPIKE:
                 m_PursuingSpikesGuid = pSummoned->GetObjectGuid();
-                // no break here
+            // no break here
             case NPC_NERUBIAN_BURROWER:
             case NPC_SCARAB:
                 pSummoned->AI()->AttackStart(m_creature->getVictim());
@@ -314,7 +314,7 @@ struct boss_anubarak_trialAI : public ScriptedAI
                     }
                 }
 
-                // No break - the spells are used in both phase 1 and 3
+            // No break - the spells are used in both phase 1 and 3
             case PHASE_LEECHING_SWARM:
 
                 if (m_uiFreezingSlashTimer < uiDiff)

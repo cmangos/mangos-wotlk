@@ -133,7 +133,7 @@ class GameEventMgr
         ActiveEvents m_ActiveEvents;
         bool m_IsGameEventsInit;
 
-        std::unordered_map<uint32,std::vector<uint32>> mGameEventGroups;  // events size
+        std::unordered_map<uint32, std::vector<uint32>> mGameEventGroups; // events size
 };
 
 #define sGameEventMgr MaNGOS::Singleton<GameEventMgr>::Instance()

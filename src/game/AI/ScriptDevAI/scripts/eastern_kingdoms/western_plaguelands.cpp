@@ -630,7 +630,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
                         pIsillien->AI()->AttackStart(pPlayer);
                 }
                 break;
-                // tirion event
+            // tirion event
             case SAY_TIRION_5:
                 if (Creature* pIsillien = m_creature->GetMap()->GetCreature(m_isillenGuid))
                 {
@@ -641,7 +641,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
                     }
                 }
                 break;
-                // epilog dialogue
+            // epilog dialogue
             case EMOTE_HOLD_TAELAN:
                 if (Creature* pTirion = m_creature->GetMap()->GetCreature(m_tirionGuid))
                     pTirion->SetStandState(UNIT_STAND_STATE_KNEEL);
@@ -876,9 +876,8 @@ struct npc_isillienAI: public npc_escortAI
                 SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pTaelan);
             m_bTirionSpawned = true;
         }
-        else
-            if (m_uiSummonTirionTimer)
-                m_uiSummonTirionTimer -= uiDiff;
+        else if (m_uiSummonTirionTimer)
+            m_uiSummonTirionTimer -= uiDiff;
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;

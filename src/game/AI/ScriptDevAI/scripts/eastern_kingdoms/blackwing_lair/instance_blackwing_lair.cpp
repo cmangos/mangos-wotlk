@@ -606,7 +606,7 @@ InstanceData* GetInstanceData_instance_blackwing_lair(Map* pMap)
 
 struct go_ai_suppression : public GameObjectAI
 {
-    go_ai_suppression (GameObject* go) : GameObjectAI(go), m_uiFumeTimer(urand(0, 5 * IN_MILLISECONDS)) {}
+    go_ai_suppression(GameObject* go) : GameObjectAI(go), m_uiFumeTimer(urand(0, 5 * IN_MILLISECONDS)) {}
 
     uint32 m_uiFumeTimer;
 
@@ -633,7 +633,7 @@ struct go_ai_suppression : public GameObjectAI
 
 GameObjectAI* GetAI_go_suppression(GameObject* go)
 {
-    return new go_ai_suppression (go);
+    return new go_ai_suppression(go);
 }
 
 /*##############################

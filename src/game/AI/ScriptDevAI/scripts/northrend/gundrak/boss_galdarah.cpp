@@ -102,7 +102,7 @@ struct boss_galdarahAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_GALDARAH , IN_PROGRESS);
+            m_pInstance->SetData(TYPE_GALDARAH, IN_PROGRESS);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override

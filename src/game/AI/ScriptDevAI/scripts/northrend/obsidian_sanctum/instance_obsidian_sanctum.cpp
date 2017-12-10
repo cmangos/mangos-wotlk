@@ -46,8 +46,8 @@ void instance_obsidian_sanctum::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-            // The three dragons below set to active state once created.
-            // We must expect bigger raid to encounter main boss, and then three dragons must be active due to grid differences
+        // The three dragons below set to active state once created.
+        // We must expect bigger raid to encounter main boss, and then three dragons must be active due to grid differences
         case NPC_TENEBRON:
         case NPC_SHADRON:
         case NPC_VESPERON:

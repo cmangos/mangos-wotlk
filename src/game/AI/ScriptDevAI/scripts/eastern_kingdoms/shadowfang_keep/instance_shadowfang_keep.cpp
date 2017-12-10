@@ -68,8 +68,8 @@ void instance_shadowfang_keep::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[0] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
-            // For this we ignore voidwalkers, because if the server restarts
-            // They won't be there, but Fenrus is dead so the door can't be opened!
+        // For this we ignore voidwalkers, because if the server restarts
+        // They won't be there, but Fenrus is dead so the door can't be opened!
         case GO_SORCERER_DOOR:
             if (m_auiEncounter[2] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
@@ -93,12 +93,12 @@ void instance_shadowfang_keep::OnCreatureDeath(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-            // Remove lootable flag from Hummel
-            // Instance data is set to SPECIAL because the encounter depends on multiple bosses
+        // Remove lootable flag from Hummel
+        // Instance data is set to SPECIAL because the encounter depends on multiple bosses
         case NPC_HUMMEL:
             pCreature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             DoScriptText(SAY_HUMMEL_DEATH, pCreature);
-            // no break;
+        // no break;
         case NPC_FRYE:
         case NPC_BAXTER:
             SetData(TYPE_APOTHECARY, SPECIAL);

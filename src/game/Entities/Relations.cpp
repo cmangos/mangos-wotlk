@@ -149,7 +149,7 @@ static ReputationRank GetFactionReaction(FactionTemplateEntry const* thisTemplat
                         const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry(thisTemplate->faction);
                         if (thisFactionEntry && thisFactionEntry->HasReputation())
                         {
-                            const ReputationMgr &reputationMgr = unitPlayer->GetReputationMgr();
+                            const ReputationMgr& reputationMgr = unitPlayer->GetReputationMgr();
                             return reputationMgr.GetRank(thisFactionEntry);
                         }
                     }
@@ -243,7 +243,7 @@ ReputationRank Unit::GetReactionTo(Unit const* unit) const
 ///
 /// Client-side counterpart: <tt>CGUnit_C::UnitReaction(const CGUnit_C *this, const CGCorpse_C *corpse)</tt>
 /////////////////////////////////////////////////
-ReputationRank Unit::GetReactionTo(const Corpse *corpse) const
+ReputationRank Unit::GetReactionTo(const Corpse* corpse) const
 {
     // Simple sanity check
     if (!corpse)
@@ -279,7 +279,7 @@ ReputationRank GameObject::GetReactionTo(Unit const* unit) const
 
     if (const Unit* owner = GetOwner())
         return owner->GetReactionTo(unit);
-    else if(const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
+    else if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
     {
         if (const FactionTemplateEntry* factionTemplate = sFactionTemplateStore.LookupEntry(faction))
             return GetFactionReaction(factionTemplate, unit);
@@ -327,7 +327,7 @@ bool Unit::IsFriend(const Unit* unit) const
 /// Backbone of all spells which can target hostile units.
 /// Dependent 2.0+ macro API condition: <tt>[harm]</tt>
 /////////////////////////////////////////////////
-bool Unit::CanAttack(const Unit *unit) const
+bool Unit::CanAttack(const Unit* unit) const
 {
     // Simple sanity check
     if (!unit)
@@ -441,7 +441,7 @@ bool Unit::CanAttack(const Unit *unit) const
 /// Client-side counterpart: <tt>CGUnit_C::CanAttackNow(const CGUnit_C *this, const CGUnit_C *unit)</tt>
 /// Intended usage is to verify direct requests to attack something.
 /////////////////////////////////////////////////
-bool Unit::CanAttackNow(const Unit *unit) const
+bool Unit::CanAttackNow(const Unit* unit) const
 {
     // Simple sanity check
     if (!unit)
@@ -478,7 +478,7 @@ bool Unit::CanAttackNow(const Unit *unit) const
 /// Backbone of all spells which can target friendly units.
 /// Dependent 2.0+ macro API condition: <tt>[help]</tt>
 /////////////////////////////////////////////////
-bool Unit::CanAssist(const Unit *unit, bool ignoreFlags) const
+bool Unit::CanAssist(const Unit* unit, bool ignoreFlags) const
 {
     // Simple sanity check
     if (!unit)
@@ -580,7 +580,7 @@ bool Unit::CanAssist(Corpse const* corpse) const
 ///
 /// Client-side counterpart: <tt>CGUnit_C::CanCooperate(const CGUnit_C *this, const CGUnit_C *unit)</tt>
 /////////////////////////////////////////////////
-bool Unit::CanCooperate(const Unit *unit) const
+bool Unit::CanCooperate(const Unit* unit) const
 {
     // Simple sanity check
     if (!unit)
@@ -614,7 +614,7 @@ bool Unit::CanCooperate(const Unit *unit) const
 ///
 /// Client-side counterpart: <tt>CGUnit_C::CanInteract(const CGUnit_C *this, const CGGameObject_C *object)</tt>
 /////////////////////////////////////////////////
-bool Unit::CanInteract(const GameObject *object) const
+bool Unit::CanInteract(const GameObject* object) const
 {
     // Simple sanity check
     if (!object)
@@ -636,7 +636,7 @@ bool Unit::CanInteract(const GameObject *object) const
 ///
 /// Client-side counterpart: <tt>CGUnit_C::CanInteract(const CGUnit_C *this, const CGUnit_C *unit)</tt>
 /////////////////////////////////////////////////
-bool Unit::CanInteract(const Unit *unit) const
+bool Unit::CanInteract(const Unit* unit) const
 {
     // Simple sanity check
     if (!unit)
@@ -680,7 +680,7 @@ bool Unit::CanInteract(const Unit *unit) const
 ///
 /// Client-side counterpart: <tt>CGUnit_C::CanInteractNow(const CGUnit_C *this, const CGUnit_C *unit)</tt>
 /////////////////////////////////////////////////
-bool Unit::CanInteractNow(const Unit *unit) const
+bool Unit::CanInteractNow(const Unit* unit) const
 {
     // Simple sanity check
     if (!unit)
@@ -878,7 +878,7 @@ bool GameObject::IsEnemy(Unit const* unit) const
 
     if (const Unit* owner = GetOwner())
         return owner->IsEnemy(unit);
-    else if(const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
+    else if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
     {
         if (const FactionTemplateEntry* factionTemplate = sFactionTemplateStore.LookupEntry(faction))
             return (GetFactionReaction(factionTemplate, unit) < REP_UNFRIENDLY);
@@ -903,7 +903,7 @@ bool GameObject::IsFriend(Unit const* unit) const
 
     if (const Unit* owner = GetOwner())
         return owner->IsFriend(unit);
-    else if(const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
+    else if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
     {
         if (const FactionTemplateEntry* factionTemplate = sFactionTemplateStore.LookupEntry(faction))
             return (GetFactionReaction(factionTemplate, unit) > REP_NEUTRAL);
@@ -1130,7 +1130,7 @@ bool Unit::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
 /// It utilizes CanAttack with a small exclusion for Feign-Death targets and a hostile-only check.
 /// Typically used in AIs in MoveInLineOfSight
 /////////////////////////////////////////////////
-bool Unit::CanAttackOnSight(Unit * target)
+bool Unit::CanAttackOnSight(Unit* target)
 {
     return CanAttack(target) && !hasUnitState(UNIT_STAT_FEIGN_DEATH) && IsEnemy(target);
 }

@@ -817,7 +817,7 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
 {
     switch (iEntry)
     {
-            // start arena long intro
+        // start arena long intro
         case TYPE_ARENA_CHALLENGE:
             if (Creature* pHerald = GetSingleCreatureFromStorage(m_uiHeraldEntry))
             {
@@ -838,13 +838,13 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
                 // ToDo: play intro music
             }
             break;
-            // complete intro - start arena event
+        // complete intro - start arena event
         case NPC_TIRION_FORDRING:
             m_uiIntroStage = 0;
             m_uiIntroTimer = 1000;
             break;
 
-            // start argent challenge
+        // start argent challenge
         case NPC_ARGENT_MONK:
             if (Creature* pHerald = GetSingleCreatureFromStorage(m_uiHeraldEntry))
                 pHerald->GetMotionMaster()->MovePoint(0, aHeraldPositions[0][0], aHeraldPositions[0][1], aHeraldPositions[0][2]);
@@ -916,7 +916,7 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
                     pHerald->SetFacingToObject(pTirion);
             }
             break;
-            // argent challenge completed
+        // argent challenge completed
         case POINT_ID_EXIT:
             if (Creature* pChampion = GetSingleCreatureFromStorage(m_uiGrandChampionEntry))
             {
@@ -925,7 +925,7 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
             }
             break;
 
-            // start black knight intro
+        // start black knight intro
         case TYPE_BLACK_KNIGHT:
             if (Creature* pHerald = GetSingleCreatureFromStorage(m_uiHeraldEntry))
                 pHerald->GetMotionMaster()->MovePoint(0, aHeraldPositions[3][0], aHeraldPositions[3][1], aHeraldPositions[3][2]);
@@ -1002,7 +1002,7 @@ void instance_trial_of_the_champion::Update(uint32 uiDiff)
         {
             switch (m_uiIntroStage)
             {
-                    // spawn champions
+                // spawn champions
                 case 0:
                 case 1:
                 case 2:

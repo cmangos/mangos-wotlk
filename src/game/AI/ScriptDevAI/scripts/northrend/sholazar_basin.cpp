@@ -553,7 +553,7 @@ struct npc_tipsy_mcmanusAI : public ScriptedAI
             {
                 switch (m_uiTaskIndex)
                 {
-                        // fruit tasks
+                    // fruit tasks
                     case 0:
                     case 1:
                     case 3:

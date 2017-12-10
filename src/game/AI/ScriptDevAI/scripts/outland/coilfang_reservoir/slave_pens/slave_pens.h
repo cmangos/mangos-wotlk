@@ -15,17 +15,17 @@ enum
 
 class instance_slave_pens : public ScriptedInstance
 {
-public:
-    instance_slave_pens(Map* map);
-    void Initialize();
+    public:
+        instance_slave_pens(Map* map);
+        void Initialize();
 
-    void SetData(uint32 type, uint32 data) override;
-    uint32 GetData(uint32 type) const override;
+        void SetData(uint32 type, uint32 data) override;
+        uint32 GetData(uint32 type) const override;
 
-    void OnCreatureCreate(Creature* creature) override;
+        void OnCreatureCreate(Creature* creature) override;
 
-private:
-    bool m_naturalistYelled;
+    private:
+        bool m_naturalistYelled;
 };
 
 #endif

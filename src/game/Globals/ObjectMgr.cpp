@@ -1389,7 +1389,7 @@ void ObjectMgr::LoadCreatures()
         if (data.spawntimesecsmax < data.spawntimesecsmin)
         {
             sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `spawntimesecsmax` (%u) value lower than `spawntimesecsmin` (%u), it will be adjusted to %u.",
-                guid, data.id, uint32(data.spawntimesecsmax), uint32(data.spawntimesecsmin), uint32(data.spawntimesecsmin));
+                            guid, data.id, uint32(data.spawntimesecsmax), uint32(data.spawntimesecsmin), uint32(data.spawntimesecsmin));
             data.spawntimesecsmax = data.spawntimesecsmin;
         }
 
@@ -1636,7 +1636,7 @@ void ObjectMgr::LoadGameObjects()
         if (data.spawntimesecsmax < data.spawntimesecsmin)
         {
             sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with `spawntimesecsmax` (%u) value lower than `spawntimesecsmin` (%u), it will be adjusted to %u.",
-                guid, data.id, uint32(data.spawntimesecsmax), uint32(data.spawntimesecsmin), uint32(data.spawntimesecsmin));
+                            guid, data.id, uint32(data.spawntimesecsmax), uint32(data.spawntimesecsmin), uint32(data.spawntimesecsmin));
             data.spawntimesecsmax = data.spawntimesecsmin;
         }
 
@@ -4299,7 +4299,7 @@ void ObjectMgr::LoadQuests()
                 if (!sFactionStore.LookupEntry(qinfo->RewRepFaction[j]))
                 {
                     sLog.outErrorDb("Quest %u has `RewRepFaction%d` = %u but raw faction (faction.dbc) %u does not exist, quest will not reward reputation for this faction.",
-                                    qinfo->GetQuestId(), j + 1, qinfo->RewRepFaction[j] , qinfo->RewRepFaction[j]);
+                                    qinfo->GetQuestId(), j + 1, qinfo->RewRepFaction[j], qinfo->RewRepFaction[j]);
                     qinfo->RewRepFaction[j] = 0;            // quest will not reward this
                 }
             }
@@ -4386,7 +4386,7 @@ void ObjectMgr::LoadQuests()
             if (qNextItr == mQuestTemplates.end())
             {
                 sLog.outErrorDb("Quest %u has `NextQuestInChain` = %u but quest %u does not exist, quest chain will not work.",
-                                qinfo->GetQuestId(), qinfo->NextQuestInChain , qinfo->NextQuestInChain);
+                                qinfo->GetQuestId(), qinfo->NextQuestInChain, qinfo->NextQuestInChain);
                 qinfo->NextQuestInChain = 0;
             }
             else
@@ -7902,17 +7902,17 @@ bool ObjectMgr::CheckDeclinedNames(const std::wstring& mainpart, DeclinedName co
 
 char const* conditionSourceToStr[] =
 {
-    "loot system",                   // CONDITION_FROM_LOOT         
+    "loot system",                   // CONDITION_FROM_LOOT
     "referencing loot",              // CONDITION_FROM_REFERING_LOOT
-    "gossip menu",                   // CONDITION_FROM_GOSSIP_MENU  
+    "gossip menu",                   // CONDITION_FROM_GOSSIP_MENU
     "gossip menu option",            // CONDITION_FROM_GOSSIP_OPTION
-    "event AI",                      // CONDITION_FROM_EVENTAI      
-    "hardcoded",                     // CONDITION_FROM_HARDCODED    
-    "vendor's item check",           // CONDITION_FROM_VENDOR       
-    "spell_area check",              // CONDITION_FROM_SPELL_AREA 
-    "npc_spellclick_spells check",   // CONDITION_FROM_SPELLCLICK                  
-    "DBScript engine",               // CONDITION_FROM_DBSCRIPTS           
-    "trainer's spell check",         // CONDITION_FROM_TRAINER             
+    "event AI",                      // CONDITION_FROM_EVENTAI
+    "hardcoded",                     // CONDITION_FROM_HARDCODED
+    "vendor's item check",           // CONDITION_FROM_VENDOR
+    "spell_area check",              // CONDITION_FROM_SPELL_AREA
+    "npc_spellclick_spells check",   // CONDITION_FROM_SPELLCLICK
+    "DBScript engine",               // CONDITION_FROM_DBSCRIPTS
+    "trainer's spell check",         // CONDITION_FROM_TRAINER
     "areatrigger teleport check",    // CONDITION_FROM_AREATRIGGER_TELEPORT
     "quest template",                // CONDITION_FROM_QUEST
 };

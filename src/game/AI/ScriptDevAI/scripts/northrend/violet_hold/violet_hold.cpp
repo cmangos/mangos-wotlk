@@ -256,12 +256,12 @@ struct npc_prison_event_controllerAI : public ScriptedAI
         {
             case NPC_AZURE_CAPTAIN:
                 DoScriptText(EMOTE_DRAGONFLIGHT_PORTAL, pSummoned);
-                // no break
+            // no break
             case NPC_AZURE_RAIDER:
             case NPC_AZURE_SORCEROR:
             case NPC_AZURE_STALKER:
                 m_sTrashPackSet.insert(pSummoned->GetObjectGuid());
-                // no break
+            // no break
             case NPC_AZURE_INVADER:
             case NPC_MAGE_HUNTER:
             case NPC_AZURE_SPELLBREAKER:

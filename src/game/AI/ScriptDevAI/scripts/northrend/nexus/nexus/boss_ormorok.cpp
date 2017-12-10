@@ -129,7 +129,7 @@ struct boss_ormorokAI : public ScriptedAI
             case NPC_CRYSTAL_SPIKE_TRIGGER:
                 pSummoned->CastSpell(pSummoned, SPELL_CRYSTAL_SPIKE_PRE, TRIGGERED_OLD_TRIGGERED);
                 ++m_uiSpikeCount;
-                // no break;
+            // no break;
             case NPC_CRYSTAL_SPIKE_INITIAL:
                 // Update orientation so we can always face the boss
                 pSummoned->SetFacingToObject(m_creature);

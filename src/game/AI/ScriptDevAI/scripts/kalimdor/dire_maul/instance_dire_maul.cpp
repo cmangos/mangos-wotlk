@@ -54,11 +54,11 @@ void instance_dire_maul::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-            // East
+        // East
         case NPC_OLD_IRONBARK:
             break;
 
-            // West
+        // West
         case NPC_PRINCE_TORTHELDRIN:
             if (m_auiEncounter[TYPE_IMMOLTHAR] == DONE)
                 pCreature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER);
@@ -74,7 +74,7 @@ void instance_dire_maul::OnCreatureCreate(Creature* pCreature)
             m_luiHighborneSummonerGUIDs.push_back(pCreature->GetObjectGuid());
             return;
 
-            // North
+        // North
         case NPC_CHORUSH:
         case NPC_KING_GORDOK:
         case NPC_CAPTAIN_KROMCRUSH:
@@ -90,7 +90,7 @@ void instance_dire_maul::OnObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())
     {
-            // East
+        // East
         case GO_CONSERVATORY_DOOR:
             if (m_auiEncounter[TYPE_IRONBARK] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
@@ -107,7 +107,7 @@ void instance_dire_maul::OnObjectCreate(GameObject* pGo)
             m_lFelvineShardGUIDs.push_back(pGo->GetObjectGuid());
             break;
 
-            // West
+        // West
         case GO_CRYSTAL_GENERATOR_1:
             m_aCrystalGeneratorGuid[0] = pGo->GetObjectGuid();
             if (m_auiEncounter[TYPE_PYLON_1] == DONE)
@@ -155,7 +155,7 @@ void instance_dire_maul::OnObjectCreate(GameObject* pGo)
         case GO_WARLOCK_RITUAL_CIRCLE:
             break;
 
-            // North
+        // North
         case GO_NORTH_LIBRARY_DOOR:
             break;
 
@@ -169,7 +169,7 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
 {
     switch (uiType)
     {
-            // East
+        // East
         case TYPE_ZEVRIM:
             if (uiData == DONE)
             {
@@ -210,7 +210,7 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             break;
 
-            // West
+        // West
         case TYPE_WARPWOOD:
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_WARPWOOD_DOOR);
@@ -273,7 +273,7 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
             }
             break;
 
-            // North
+        // North
         case TYPE_KING_GORDOK:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
@@ -349,13 +349,13 @@ void instance_dire_maul::OnCreatureEnterCombat(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-            // West
-            // - Handling of guards of generators
+        // West
+        // - Handling of guards of generators
         case NPC_ARCANE_ABERRATION:
         case NPC_MANA_REMNANT:
             SortPylonGuards();
             break;
-            // - Set InstData for ImmolThar
+        // - Set InstData for ImmolThar
         case NPC_IMMOLTHAR:
             SetData(TYPE_IMMOLTHAR, IN_PROGRESS);
             break;
@@ -366,8 +366,8 @@ void instance_dire_maul::OnCreatureDeath(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-            // East
-            // - Handling Zevrim and Old Ironbark for the door event
+        // East
+        // - Handling Zevrim and Old Ironbark for the door event
         case NPC_ZEVRIM_THORNHOOF:
             SetData(TYPE_ZEVRIM, DONE);
             break;
@@ -375,13 +375,13 @@ void instance_dire_maul::OnCreatureDeath(Creature* pCreature)
             SetData(TYPE_IRONBARK, DONE);
             break;
 
-            // West
-            // - Handling of guards of generators
+        // West
+        // - Handling of guards of generators
         case NPC_ARCANE_ABERRATION:
         case NPC_MANA_REMNANT:
             PylonGuardJustDied(pCreature);
             break;
-            // - InstData settings
+        // - InstData settings
         case NPC_TENDRIS_WARPWOOD:
             SetData(TYPE_WARPWOOD, DONE);
             break;
@@ -389,12 +389,12 @@ void instance_dire_maul::OnCreatureDeath(Creature* pCreature)
             SetData(TYPE_IMMOLTHAR, DONE);
             break;
 
-            // North
-            // - Handling of Ogre Boss (Assume boss can be handled in Acid)
+        // North
+        // - Handling of Ogre Boss (Assume boss can be handled in Acid)
         case NPC_KING_GORDOK:
             SetData(TYPE_KING_GORDOK, DONE);
             break;
-            // Handle Ogre guards for Tribute Run chest
+        // Handle Ogre guards for Tribute Run chest
         case NPC_GUARD_MOLDAR:
             SetData(TYPE_MOLDAR, DONE);
             break;

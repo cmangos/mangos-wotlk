@@ -435,7 +435,7 @@ bool EffectScriptEffectCreature_spell_unstable_ooze(Unit* pCaster, uint32 uiSpel
                     break;
                 case 4:
                     pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-                    // no break;
+                // no break;
                 case 3:
                     DoScriptText(EMOTE_OOZE_GROW_3, pCreatureTarget);
                     break;

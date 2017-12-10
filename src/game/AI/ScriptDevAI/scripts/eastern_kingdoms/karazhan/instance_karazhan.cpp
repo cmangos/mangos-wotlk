@@ -180,7 +180,7 @@ void instance_karazhan::OnObjectCreate(GameObject* pGo)
         case GO_BLACKENED_URN:
             break;
 
-            // Opera event backgrounds
+        // Opera event backgrounds
         case GO_OZ_BACKDROP:
         case GO_HOOD_BACKDROP:
         case GO_HOOD_HOUSE:
@@ -321,7 +321,7 @@ void instance_karazhan::SetData(uint32 uiType, uint32 uiData)
             if (uiData == FAIL)
                 m_uiNightbaneResetTimer = 30000;
             break;
-            // Store the event type for the Opera
+        // Store the event type for the Opera
         case TYPE_OPERA_PERFORMANCE:
             m_uiOperaEvent = uiData;
             break;
@@ -437,7 +437,7 @@ void instance_karazhan::OnCreatureDeath(Creature* pCreature)
                     m_bBasementBossReady = false;
 
                     if (Creature* pBoss = pCreature->SummonCreature(aBasementEnum[uiIndex].uiEntry, aBasementEnum[uiIndex].fX, aBasementEnum[uiIndex].fY, aBasementEnum[uiIndex].fZ,
-                            aBasementEnum[uiIndex].fO, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 2 * HOUR * IN_MILLISECONDS, true))
+                                          aBasementEnum[uiIndex].fO, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 2 * HOUR * IN_MILLISECONDS, true))
                         DoScriptText(aBasementEnum[uiIndex].iEmote, pBoss);
                 }
             }

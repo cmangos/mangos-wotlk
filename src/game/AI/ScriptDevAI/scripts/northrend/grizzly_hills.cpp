@@ -464,7 +464,7 @@ struct npc_emilyAI : public npc_escortAI
                 // board the ravenous worg vehicle
                 if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
                     pFloppy->CastSpell(pSummoned, SPELL_FLOPPY_BECOMES_LUNCH, TRIGGERED_OLD_TRIGGERED);
-                // no break;
+            // no break;
             case NPC_HUNGRY_WORG:
                 if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
                     pSummoned->AI()->AttackStart(pFloppy);

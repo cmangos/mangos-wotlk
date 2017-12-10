@@ -169,7 +169,7 @@ struct boss_tharonjaAI : public ScriptedAI
                     }
                 }
 
-                // No break here, the last phase is exactly like the first, but he doesn't change anymore
+            // No break here, the last phase is exactly like the first, but he doesn't change anymore
             case PHASE_SKELETAL_END:
                 if (m_uiCurseLifeTimer < uiDiff)
                 {

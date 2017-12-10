@@ -278,10 +278,10 @@ bool instance_gundrak::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player 
         case ACHIEV_CRIT_SHARE_LOVE:
             // Return true if all the players in the group got stampeled
             return m_uisShareLoveAchievPlayers.size() == MIN_LOVE_SHARE_PLAYERS;
-            // ToDo: enable this criteria when the script will be implemented
-            // case ACHIEV_CRIT_WHY_SNAKES:
-            //    // Return true if not found in the set
-            //    return m_uisWhySnakesAchievPlayers.find(pSource->GetGUIDLow()) == m_uisWhySnakesAchievPlayers.end();
+        // ToDo: enable this criteria when the script will be implemented
+        // case ACHIEV_CRIT_WHY_SNAKES:
+        //    // Return true if not found in the set
+        //    return m_uisWhySnakesAchievPlayers.find(pSource->GetGUIDLow()) == m_uisWhySnakesAchievPlayers.end();
 
         default:
             return false;

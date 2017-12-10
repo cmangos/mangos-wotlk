@@ -370,7 +370,7 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
         if (pPlayer && pPlayer->GetQuestStatus(QUEST_UNEXPECTED_RESULT) == QUEST_STATUS_INCOMPLETE)
             pPlayer->SendQuestFailed(QUEST_UNEXPECTED_RESULT);
 
-        for (ObjectGuid &guid : summons)
+        for (ObjectGuid& guid : summons)
             if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
                 creature->ForcedDespawn();
         summons.clear();

@@ -164,7 +164,7 @@ void BattleGroundSA::UpdateTimerWorldState()
     UpdateWorldState(BG_SA_STATE_TIMER_MINUTES, secondsLeft / 60000);
 }
 
-void BattleGroundSA::FillInitialWorldStates(WorldPacket &data, uint32& count)
+void BattleGroundSA::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
     // fill attacker & defender states
     FillInitialWorldState(data, count, BG_SA_STATE_ATTACKER_ALLIANCE, m_attackingTeamIdx == TEAM_INDEX_ALLIANCE);

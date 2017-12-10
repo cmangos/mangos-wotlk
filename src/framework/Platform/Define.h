@@ -45,7 +45,7 @@
 #  ifndef _WIN32_WINNT
 #    define _WIN32_WINNT 0x0603
 #  endif
-   typedef HMODULE MANGOS_LIBRARY_HANDLE;
+typedef HMODULE MANGOS_LIBRARY_HANDLE;
 #  define MANGOS_SCRIPT_SUFFIX ".dll"
 #  define MANGOS_SCRIPT_PREFIX ""
 #  define MANGOS_LOAD_LIBRARY(libname)     LoadLibraryA(libname)
@@ -55,7 +55,7 @@
 #  define MANGOS_IMPORT __cdecl
 #else // PLATFORM != PLATFORM_WINDOWS
 #  include <dlfcn.h>
-   typedef void* MANGOS_LIBRARY_HANDLE;
+typedef void* MANGOS_LIBRARY_HANDLE;
 #  define MANGOS_LOAD_LIBRARY(libname)     dlopen(libname, RTLD_LAZY)
 #  define MANGOS_CLOSE_LIBRARY(hlib)       dlclose(hlib)
 #  define MANGOS_GET_PROC_ADDR(hlib, name) dlsym(hlib, name)

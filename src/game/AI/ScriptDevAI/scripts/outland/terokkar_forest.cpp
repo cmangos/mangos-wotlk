@@ -767,7 +767,7 @@ struct npc_skywingAI : public npc_escortAI
         switch (uiPointId)
         {
             case 6:
-                DoScriptText(SAY_SKYWING_TREE_DOWN , m_creature);
+                DoScriptText(SAY_SKYWING_TREE_DOWN, m_creature);
                 break;
             case 36:
                 DoScriptText(SAY_SKYWING_TREE_UP, m_creature);

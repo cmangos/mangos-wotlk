@@ -273,7 +273,7 @@ struct boss_jedogaAI : public ScriptedAI
 
         switch (uiPointId)
         {
-                // Prepare for combat
+            // Prepare for combat
             case POINT_ID_PREPARE:
 
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -282,14 +282,14 @@ struct boss_jedogaAI : public ScriptedAI
                 m_creature->SetLevitate(false);
                 break;
 
-                // Prepare for sacrifice lift off
+            // Prepare for sacrifice lift off
             case POINT_ID_SACRIFICE:
                 DoCastSpellIfCan(m_creature, SPELL_HOVER_FALL);
                 m_creature->SetLevitate(true);
                 m_creature->GetMotionMaster()->MovePoint(POINT_ID_LEVITATE, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 10.0f);
                 break;
 
-                // Call a volunteer to sacrifice
+            // Call a volunteer to sacrifice
             case POINT_ID_LEVITATE:
                 if (Creature* pVolunteer = m_creature->GetMap()->GetCreature(SelectRandomVolunteer()))
                 {
@@ -312,7 +312,7 @@ struct boss_jedogaAI : public ScriptedAI
                 }
                 break;
 
-                // Resume combat
+            // Resume combat
             case POINT_ID_COMBAT:
                 m_creature->RemoveAurasDueToSpell(SPELL_HOVER_FALL);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);

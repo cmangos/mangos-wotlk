@@ -207,7 +207,7 @@ struct boss_halion_realAI : public ScriptedAI
     void JustReachedHome() override
     {
         DoRemoveTwilightPhaseAura();
-        
+
         if (m_pInstance)
             m_pInstance->SetData(TYPE_HALION, FAIL);
     }
@@ -246,13 +246,13 @@ struct boss_halion_realAI : public ScriptedAI
             }
         }
     }
-    
+
     void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
             DoRemoveTwilightPhaseAura();
     }
-    
+
     void DoPrepareTwilightPhase()
     {
         if (!m_pInstance)
@@ -306,8 +306,8 @@ struct boss_halion_realAI : public ScriptedAI
         switch (m_uiPhase)
         {
             case PHASE_BOTH_REALMS:
-                // ToDo: handle corporeality
-                // no break;
+            // ToDo: handle corporeality
+            // no break;
             case PHASE_PHISYCAL_REALM:
 
                 if (m_uiTailLashTimer < uiDiff)
@@ -442,7 +442,7 @@ struct boss_halion_twilightAI : public ScriptedAI
         // ToDo: handle the damage sharing!
 
         DoScriptText(SAY_DEATH, m_creature);
-        
+
         // Allow real Halion to remove all phase aura from player.
         if (m_pInstance)
         {
@@ -494,8 +494,8 @@ struct boss_halion_twilightAI : public ScriptedAI
                 // nothing here - phase not handled by this npc
                 break;
             case PHASE_BOTH_REALMS:
-                // ToDo: handle corporeality
-                // no break;
+            // ToDo: handle corporeality
+            // no break;
             case PHASE_TWILIGHT_REALM:
 
                 if (m_uiTailLashTimer < uiDiff)

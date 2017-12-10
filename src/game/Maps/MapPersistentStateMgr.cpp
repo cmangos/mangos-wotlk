@@ -933,13 +933,13 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
         }
 
         // remove all binds for online player
-        std::list<DungeonPersistentState *> unbindList;
+        std::list<DungeonPersistentState*> unbindList;
 
         // note that we must build a list of states to unbind and then unbind them in two steps.  this is because the unbinding may
         // trigger the modification of the collection, which would invalidate the iterator and cause a crash.
         for (PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end(); ++itr)
             if (itr->second->GetMapId() == mapid && itr->second->GetDifficulty() == difficulty)
-                unbindList.push_back((DungeonPersistentState *)itr->second);
+                unbindList.push_back((DungeonPersistentState*)itr->second);
 
         for (auto i : unbindList)
             i->UnbindThisState();

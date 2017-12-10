@@ -538,11 +538,11 @@ bool instance_violet_hold::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Pla
 {
     switch (uiCriteriaId)
     {
-            // ToDo: uncomment these when they are implemented
-            // case ACHIEV_CRIT_DEFENSELES:
-            //    return m_bIsDefenseless;
-            // case ACHIEV_CRIT_DEHYDRATATION:
-            //    return m_bIsDehydratation;
+        // ToDo: uncomment these when they are implemented
+        // case ACHIEV_CRIT_DEFENSELES:
+        //    return m_bIsDefenseless;
+        // case ACHIEV_CRIT_DEHYDRATATION:
+        //    return m_bIsDehydratation;
         case ACHIEV_CRIT_VOID_DANCE:
             return m_bIsVoidDance;
 
@@ -754,7 +754,7 @@ instance_violet_hold::~instance_violet_hold()
     for (std::vector<BossSpawn*>::const_iterator itr = m_vRandomBosses.begin(); itr != m_vRandomBosses.end(); ++itr)
     {
         if (*itr)
-            delete(*itr);
+            delete (*itr);
     }
 }
 

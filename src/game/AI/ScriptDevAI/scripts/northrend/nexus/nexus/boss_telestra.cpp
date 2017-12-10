@@ -149,7 +149,7 @@ struct boss_telestraAI : public ScriptedAI
     {
         switch (pSpell->Id)
         {
-                // eventAi must make sure clones cast spells when each of them die
+            // eventAi must make sure clones cast spells when each of them die
             case SPELL_FIRE_DIES:
             case SPELL_ARCANE_DIES:
             case SPELL_FROST_DIES:

@@ -92,8 +92,8 @@ bool GridMap::loadData(char const* filename)
     }
 
     if (header.mapMagic == *((uint32 const*)(MAP_MAGIC)) &&
-        header.versionMagic == *((uint32 const*)(MAP_VERSION_MAGIC)) &&
-        IsAcceptableClientBuild(header.buildMagic))
+            header.versionMagic == *((uint32 const*)(MAP_VERSION_MAGIC)) &&
+            IsAcceptableClientBuild(header.buildMagic))
     {
         // loadup area data
         if (header.areaMapOffset && !loadAreaData(in, header.areaMapOffset, header.areaMapSize))
@@ -188,7 +188,7 @@ bool GridMap::loadHeightData(FILE* in, uint32 offset, uint32 /*size*/)
             m_uint16_V9 = new uint16[129 * 129];
             m_uint16_V8 = new uint16[128 * 128];
             if (fread(m_uint16_V9, sizeof(uint16), 129 * 129, in) != 129 * 129 ||
-                fread(m_uint16_V8, sizeof(uint16), 128 * 128, in) != 128 * 128)
+                    fread(m_uint16_V8, sizeof(uint16), 128 * 128, in) != 128 * 128)
                 return false;
             m_gridIntHeightMultiplier = (header.gridMaxHeight - header.gridHeight) / 65535;
             m_gridGetHeight = &GridMap::getHeightFromUint16;
@@ -198,7 +198,7 @@ bool GridMap::loadHeightData(FILE* in, uint32 offset, uint32 /*size*/)
             m_uint8_V9 = new uint8[129 * 129];
             m_uint8_V8 = new uint8[128 * 128];
             if (fread(m_uint8_V9, sizeof(uint8), 129 * 129, in) != 129 * 129 ||
-                fread(m_uint8_V8, sizeof(uint8), 128 * 128, in) != 128 * 128)
+                    fread(m_uint8_V8, sizeof(uint8), 128 * 128, in) != 128 * 128)
                 return false;
             m_gridIntHeightMultiplier = (header.gridMaxHeight - header.gridHeight) / 255;
             m_gridGetHeight = &GridMap::getHeightFromUint8;
@@ -208,7 +208,7 @@ bool GridMap::loadHeightData(FILE* in, uint32 offset, uint32 /*size*/)
             m_V9 = new float[129 * 129];
             m_V8 = new float[128 * 128];
             if (fread(m_V9, sizeof(float), 129 * 129, in) != 129 * 129 ||
-                fread(m_V8, sizeof(float), 128 * 128, in) != 128 * 128)
+                    fread(m_V8, sizeof(float), 128 * 128, in) != 128 * 128)
                 return false;
             m_gridGetHeight = &GridMap::getHeightFromFloat;
         }
@@ -672,8 +672,8 @@ bool GridMap::ExistMap(uint32 mapid, int gx, int gy)
     if (fread(&header, sizeof(header), 1, pf) != 1)
         return false;
     if (header.mapMagic != *((uint32 const*)(MAP_MAGIC)) ||
-        header.versionMagic != *((uint32 const*)(MAP_VERSION_MAGIC)) ||
-        !IsAcceptableClientBuild(header.buildMagic))
+            header.versionMagic != *((uint32 const*)(MAP_VERSION_MAGIC)) ||
+            !IsAcceptableClientBuild(header.buildMagic))
     {
         sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.", tmp);
         delete[] tmp;
@@ -1110,7 +1110,7 @@ bool TerrainInfo::IsInWater(float x, float y, float pZ, GridMapLiquidData* data,
             return false;
 
         if ((status & LIQUID_MAP_IN_WATER) ||
-            (status & LIQUID_MAP_UNDER_WATER))
+                (status & LIQUID_MAP_UNDER_WATER))
         {
             if (liquid_ptr && (liquid_ptr->level - liquid_ptr->depth_level > min_depth)) // avoid water with depth < 2
                 return true;

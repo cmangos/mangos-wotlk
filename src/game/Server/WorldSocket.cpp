@@ -81,9 +81,9 @@ struct ServerPktHeader
 #pragma pack(pop)
 #endif
 
-WorldSocket::WorldSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler)
+WorldSocket::WorldSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler)
     : Socket(service, closeHandler), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0),
-      m_useExistingHeader(false), m_session(nullptr),m_seed(urand())
+      m_useExistingHeader(false), m_session(nullptr), m_seed(urand())
 {}
 
 void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
@@ -98,9 +98,9 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
     m_crypt.EncryptSend((uint8*)header.header, header.getHeaderLength());
 
     if (pct.size() > 0)
-        Write(reinterpret_cast<const char *>(&header.header), header.getHeaderLength(), reinterpret_cast<const char *>(pct.contents()), pct.size());
+        Write(reinterpret_cast<const char*>(&header.header), header.getHeaderLength(), reinterpret_cast<const char*>(pct.contents()), pct.size());
     else
-        Write(reinterpret_cast<const char *>(&header.header), header.getHeaderLength());
+        Write(reinterpret_cast<const char*>(&header.header), header.getHeaderLength());
 
     if (immediate)
         ForceFlushOut();
@@ -142,13 +142,13 @@ bool WorldSocket::ProcessIncomingData()
     }
     else
     {
-        if (!Read((char *)&header, sizeof(ClientPktHeader)))
+        if (!Read((char*)&header, sizeof(ClientPktHeader)))
         {
             errno = EBADMSG;
             return false;
         }
 
-        m_crypt.DecryptRecv((uint8 *)&header, sizeof(ClientPktHeader));
+        m_crypt.DecryptRecv((uint8*)&header, sizeof(ClientPktHeader));
 
         EndianConvertReverse(header.size);
         EndianConvert(header.cmd);
@@ -159,7 +159,7 @@ bool WorldSocket::ProcessIncomingData()
     if ((header.size < 4) || (header.size > 0x2800) || (header.cmd >= NUM_MSG_TYPES))
     {
         sLog.outError("WorldSocket::ProcessIncomingData: client sent malformed packet size = %u , cmd = %u", header.size, header.cmd);
-    
+
         errno = EINVAL;
         return false;
     }
@@ -254,7 +254,7 @@ bool WorldSocket::ProcessIncomingData()
     return true;
 }
 
-bool WorldSocket::HandleAuthSession(WorldPacket &recvPacket)
+bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 {
     // NOTE: ATM the socket is singlethread, have this in mind ...
     uint8 digest[20];
@@ -439,7 +439,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket &recvPacket)
         return false;
     }
 
-    const std::string &address = GetRemoteAddress();
+    const std::string& address = GetRemoteAddress();
 
     DEBUG_LOG("WorldSocket::HandleAuthSession: Client '%s' authenticated successfully from %s.",
               account.c_str(),
@@ -465,7 +465,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket &recvPacket)
     return true;
 }
 
-bool WorldSocket::HandlePing(WorldPacket &recvPacket)
+bool WorldSocket::HandlePing(WorldPacket& recvPacket)
 {
     uint32 ping;
     uint32 latency;

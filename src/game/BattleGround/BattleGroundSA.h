@@ -151,7 +151,7 @@ class BattleGroundSA : public BattleGround
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player* plr) override;
         virtual void StartingEventOpenDoors() override;
-        virtual void FillInitialWorldStates(WorldPacket &d, uint32& count) override;
+        virtual void FillInitialWorldStates(WorldPacket& d, uint32& count) override;
         virtual void Reset() override;
 
         void HandleCreatureCreate(Creature* creature) override;

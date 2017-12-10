@@ -168,7 +168,7 @@ void BattleGroundDS::HandleKillPlayer(Player* player, Player* killer)
         return;
     }
 
-    BattleGround::HandleKillPlayer(player,killer);
+    BattleGround::HandleKillPlayer(player, killer);
 
     UpdateWorldState(0xe11, GetAlivePlayersCountByTeam(ALLIANCE));
     UpdateWorldState(0xe10, GetAlivePlayersCountByTeam(HORDE));
@@ -228,7 +228,7 @@ void BattleGroundDS::HandleGameObjectCreate(GameObject* go)
     }
 }
 
-void BattleGroundDS::FillInitialWorldStates(WorldPacket &data, uint32& count)
+void BattleGroundDS::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
     FillInitialWorldState(data, count, 0xe11, GetAlivePlayersCountByTeam(ALLIANCE));
     FillInitialWorldState(data, count, 0xe10, GetAlivePlayersCountByTeam(HORDE));

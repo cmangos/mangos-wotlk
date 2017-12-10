@@ -984,8 +984,8 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             {
                                 ScriptMgr::ScriptTemplateVector templateData;
                                 sScriptMgr.GetScriptStringTemplate(action.textNew.templateId, templateData);
-                                for(auto& data : templateData)
-                                    if(data.first)
+                                for (auto& data : templateData)
+                                    if (data.first)
                                         usedTextIds.insert(data.first);
                             }
                         }

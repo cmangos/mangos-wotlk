@@ -113,27 +113,27 @@ bool GossipSelect_go_icc_teleporter(Player* pPlayer, GameObject* pGo, uint32 uiS
 
     switch (uiAction)
     {
-            // Lights Hammer
+        // Lights Hammer
         case GOSSIP_ACTION_INFO_DEF:
             pPlayer->CastSpell(pPlayer, SPELL_TELE_LIGHTS_HAMMER, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             break;
-            // Oratory Damned
+        // Oratory Damned
         case GOSSIP_ACTION_INFO_DEF + 1:
             pPlayer->CastSpell(pPlayer, SPELL_TELE_ORATORY_DAMNED, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             break;
-            // Rampart of Skulls
+        // Rampart of Skulls
         case GOSSIP_ACTION_INFO_DEF + 2:
             pPlayer->CastSpell(pPlayer, SPELL_TELE_RAMPART_OF_SKULLS, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             break;
-            // Deathbringer's Rise
+        // Deathbringer's Rise
         case GOSSIP_ACTION_INFO_DEF + 3:
             pPlayer->CastSpell(pPlayer, SPELL_TELE_DEATHBRINGERS_RISE, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             break;
-            // Upper Spire
+        // Upper Spire
         case GOSSIP_ACTION_INFO_DEF + 4:
             pPlayer->CastSpell(pPlayer, SPELL_TELE_UPPER_SPIRE, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             break;
-            // Sindragosa's Lair
+        // Sindragosa's Lair
         case GOSSIP_ACTION_INFO_DEF + 5:
             pPlayer->CastSpell(pPlayer, GOSSIP_ITEM_TELE_SINDRAGOSAS_LAIR, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             break;

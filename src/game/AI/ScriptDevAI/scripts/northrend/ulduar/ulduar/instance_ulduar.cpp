@@ -73,7 +73,7 @@ static UlduarKeeperSpawns m_aKeeperHelperLocs[] =
 
 instance_ulduar::instance_ulduar(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aUlduarDialogue),
     m_bHelpersLoaded(false),
-    m_uiAlgalonTimer(MINUTE* IN_MILLISECONDS),
+    m_uiAlgalonTimer(MINUTE * IN_MILLISECONDS),
     m_uiYoggResetTimer(0),
     m_uiShatterAchievTimer(0),
     m_uiGauntletStatus(0),
@@ -301,8 +301,8 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())
     {
-            // -----------------    Doors & Other   -----------------
-            // The siege
+        // -----------------    Doors & Other   -----------------
+        // The siege
         case GO_SHIELD_WALL:
             break;
         case GO_LIGHTNING_DOOR:
@@ -337,14 +337,14 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
 
-            // Archivum
+        // Archivum
         case GO_IRON_ENTRANCE_DOOR:
             break;
         case GO_ARCHIVUM_DOOR:
             if (m_auiEncounter[TYPE_ASSEMBLY])
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
-            // Celestial Planetarium
+        // Celestial Planetarium
         case GO_CELESTIAL_ACCES:
         case GO_CELESTIAL_ACCES_H:
             // Note: weird, but unless flag is set, client will not respond as expected
@@ -360,14 +360,14 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
         case GO_UNIVERSE_FLOOR_COMBAT:
         case GO_AZEROTH_GLOBE:
             break;
-            // Shattered Hallway
+        // Shattered Hallway
         case GO_KOLOGARN_BRIDGE:
             if (m_auiEncounter[TYPE_KOLOGARN] == DONE)
                 pGo->SetGoState(GO_STATE_READY);
             break;
 
-            // -----------------    The Keepers    -----------------
-            // Hodir
+        // -----------------    The Keepers    -----------------
+        // Hodir
         case GO_HODIR_EXIT:
         case GO_HODIR_ICE_WALL:
             if (m_auiEncounter[TYPE_HODIR] == DONE)
@@ -375,13 +375,13 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
             break;
         case GO_HODIR_ENTER:
             break;
-            // Mimiron
+        // Mimiron
         case GO_MIMIRON_BUTTON:
         case GO_MIMIRON_DOOR_1:
         case GO_MIMIRON_DOOR_2:
         case GO_MIMIRON_DOOR_3:
         case GO_MIMIRON_ELEVATOR:
-            // Thorim
+        // Thorim
         case GO_DARK_IRON_PORTCULIS:
         case GO_RUNED_STONE_DOOR:
         case GO_THORIM_STONE_DOOR:
@@ -389,7 +389,7 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
         case GO_DOOR_LEVER:
             break;
 
-            // Prison
+        // Prison
         case GO_ANCIENT_GATE:
             if (m_auiEncounter[TYPE_MIMIRON] == DONE && m_auiEncounter[TYPE_HODIR] == DONE && m_auiEncounter[TYPE_THORIM] == DONE && m_auiEncounter[TYPE_FREYA] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
@@ -413,30 +413,30 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
             }
             break;
 
-            // -----------------    Chests    -----------------
-            // Kologarn
+        // -----------------    Chests    -----------------
+        // Kologarn
         case GO_CACHE_OF_LIVING_STONE_10:
         case GO_CACHE_OF_LIVING_STONE_25:
 
-            // Hodir
+        // Hodir
         case GO_CACHE_OF_WINTER_10:
         case GO_CACHE_OF_WINTER_25:
         case GO_CACHE_OF_RARE_WINTER_10:
         case GO_CACHE_OF_RARE_WINTER_25:
 
-            // Thorim
+        // Thorim
         case GO_CACHE_OF_STORMS_10:
         case GO_CACHE_OF_STORMS_25:
         case GO_CACHE_OF_STORMS_10_H:
         case GO_CACHE_OF_STORMS_25_H:
 
-            // Mimiron
+        // Mimiron
         case GO_CACHE_OF_INOV_10:
         case GO_CACHE_OF_INOV_25:
         case GO_CACHE_OF_INOV_10_H:
         case GO_CACHE_OF_INOV_25_H:
 
-            // Alagon
+        // Alagon
         case GO_GIFT_OF_OBSERVER_10:
         case GO_GIFT_OF_OBSERVER_25:
             break;
@@ -468,7 +468,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
 {
     switch (uiType)
     {
-            // Siege of Ulduar
+        // Siege of Ulduar
         case TYPE_LEVIATHAN:
             m_auiEncounter[uiType] = uiData;
             if (uiData != SPECIAL)
@@ -576,7 +576,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             }
             break;
 
-            // Antechamber of Ulduar
+        // Antechamber of Ulduar
         case TYPE_ASSEMBLY:
             // Don't set the same encounter data twice
             if (uiData == m_auiEncounter[uiType])
@@ -636,7 +636,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             }
             break;
 
-            // Keepers of Ulduar
+        // Keepers of Ulduar
         case TYPE_MIMIRON:
             // Don't set the same encounter data twice
             if (uiData == m_auiEncounter[uiType])
@@ -789,7 +789,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             }
             break;
 
-            // Ulduar Prison
+        // Ulduar Prison
         case TYPE_VEZAX:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
@@ -862,7 +862,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             }
             break;
 
-            // Celestial Planetarium
+        // Celestial Planetarium
         case TYPE_ALGALON:
             m_auiEncounter[uiType] = uiData;
             if (uiData != SPECIAL)
@@ -897,7 +897,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             break;
 
-            // Hard modes (not saved)
+        // Hard modes (not saved)
         case TYPE_LEVIATHAN_HARD:
             m_auiHardBoss[0] = uiData;
             return;
@@ -923,7 +923,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             m_auiHardBoss[7] = uiData;
             return;
 
-            // Ulduar keepers
+        // Ulduar keepers
         case TYPE_KEEPER_HODIR:
             if (uiData == m_auiUlduarKeepers[0] || uiData != DONE)
                 return;
@@ -949,7 +949,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             m_auiUlduarKeepers[3] = uiData;
             break;
 
-            // Ulduar towers
+        // Ulduar towers
         case TYPE_TOWER_HODIR:
             if (m_auiUlduarTowers[0] == uiData)
                 return;
@@ -979,14 +979,14 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             m_auiUlduarTowers[3] = uiData;
             break;
 
-            // Achievements that need to be saved
+        // Achievements that need to be saved
         case TYPE_FREYA_CONSPEEDATORY:
             m_auiAchievEncounter[ACHIEV_FREYA_CONSPEEDATORY] = uiData;
             if (uiData == DONE)
                 DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, ACHIEV_START_FREYA_ID);
             break;
 
-            // Other types - not saved
+        // Other types - not saved
         case TYPE_LEVIATHAN_GAUNTLET:
             m_uiGauntletStatus = uiData;
             return;
@@ -1101,7 +1101,7 @@ uint32 instance_ulduar::GetData(uint32 uiType) const
         case TYPE_CHAMPION_FAILED:
             return m_auiEncounter[15];
 
-            // Hard modes
+        // Hard modes
         case TYPE_LEVIATHAN_HARD:
             return m_auiHardBoss[0];
         case TYPE_XT002_HARD:
@@ -1119,7 +1119,7 @@ uint32 instance_ulduar::GetData(uint32 uiType) const
         case TYPE_YOGGSARON_HARD:
             return m_auiHardBoss[7];
 
-            // Ulduar Keepers
+        // Ulduar Keepers
         case TYPE_KEEPER_HODIR:
             return m_auiUlduarKeepers[0];
         case TYPE_KEEPER_THORIM:
@@ -1129,7 +1129,7 @@ uint32 instance_ulduar::GetData(uint32 uiType) const
         case TYPE_KEEPER_MIMIRON:
             return m_auiUlduarKeepers[3];
 
-            // Ulduar Towers
+        // Ulduar Towers
         case TYPE_TOWER_HODIR:
             return m_auiUlduarTowers[0];
         case TYPE_TOWER_THORIM:
@@ -1142,7 +1142,7 @@ uint32 instance_ulduar::GetData(uint32 uiType) const
         case TYPE_LEVIATHAN_GAUNTLET:
             return m_uiGauntletStatus;
 
-            // Achievement encounters
+        // Achievement encounters
         case TYPE_FREYA_CONSPEEDATORY:
             return m_auiAchievEncounter[ACHIEV_FREYA_CONSPEEDATORY];
     }
@@ -1238,7 +1238,7 @@ void instance_ulduar::OnCreatureDeath(Creature* pCreature)
                 pCreature->SummonCreature(NPC_LEVIATHAN, afLeviathanSpawnPos[0], afLeviathanSpawnPos[1], afLeviathanSpawnPos[2], afLeviathanSpawnPos[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
             }
         }
-            break;
+        break;
         case NPC_DRUID_HORDE_N:
         case NPC_DRUID_HORDE_H:
         case NPC_SHAMAN_HORDE_N:
@@ -1463,7 +1463,7 @@ bool instance_ulduar::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player c
         case ACHIEV_CRIT_DRIVE_CRAZY_N:
         case ACHIEV_CRIT_DRIVE_CRAZY_H:
             return m_abAchievCriteria[TYPE_ACHIEV_DRIVE_CRAZY];
-            // Champion / Conquerer of Ulduar
+        // Champion / Conquerer of Ulduar
         case ACHIEV_CRIT_CHAMP_LEVI:
         case ACHIEV_CRIT_CHAMP_RAZOR:
         case ACHIEV_CRIT_CHAMP_XT:

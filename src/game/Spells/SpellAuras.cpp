@@ -2271,7 +2271,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (target->GetAuraCount(30410) == 5)
                         {
                             target->CastSpell(target, 30168, TRIGGERED_OLD_TRIGGERED); // cast Shadow cage if stacks are 5
-                            target->InterruptSpell(CURRENT_CHANNELED_SPELL); // if he is casting blast nova interrupt channel, only magth channel spell                          
+                            target->InterruptSpell(CURRENT_CHANNELED_SPELL); // if he is casting blast nova interrupt channel, only magth channel spell
                         }
                         break;
                     }
@@ -4741,10 +4741,10 @@ void Aura::HandleInvisibility(bool apply, bool Real)
         if (Real && target->GetTypeId() == TYPEID_PLAYER)
         {
             if (((Player*)target)->IsSelfMover()) // check if the player doesnt have a mover, when player is hidden during MC of creature
-                {
-                    // apply glow vision
-                    target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
-                }
+            {
+                // apply glow vision
+                target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
+            }
         }
 
         // apply only if not in GM invisibility and not stealth
@@ -6451,8 +6451,8 @@ void Aura::HandleModSpellCritChanceShool(bool apply, bool Real)
                 target->m_modSpellCritChance[school] += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
             else
                 ((Player*)target)->UpdateSpellCritChance(school);
-         }
-     }
+        }
+    }
 }
 
 /********************************/
@@ -7515,8 +7515,8 @@ void Aura::PeriodicTick()
             {
                 // Only from non-grey units
                 if (roll_chance_i(10) &&                                                                        // 1-2 from drain with final and without glyph, 0-1 from damage
-                   ((Player*)pCaster)->isHonorOrXPTarget(target) &&                                             // Gain XP or Honor requirement
-                   (target->GetTypeId() == TYPEID_UNIT && !((Creature*)target)->IsTappedBy((Player*)pCaster)))  // Tapped by player requirement
+                        ((Player*)pCaster)->isHonorOrXPTarget(target) &&                                             // Gain XP or Honor requirement
+                        (target->GetTypeId() == TYPEID_UNIT && !((Creature*)target)->IsTappedBy((Player*)pCaster)))  // Tapped by player requirement
                 {
                     pCaster->CastSpell(pCaster, 43836, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 }
@@ -7669,7 +7669,7 @@ void Aura::PeriodicTick()
                 pdamage -= absorbHeal;
 
                 DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s heal of %s for %u health  (absorbed %u) inflicted by %u",
-                    GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, absorbHeal, GetId());
+                                  GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, absorbHeal, GetId());
 
                 int32 gain = target->ModifyHealth(pdamage);
                 SpellPeriodicAuraLogInfo pInfo(this, pdamage, (pdamage - uint32(gain)), absorbHeal, 0, 0.0f, isCrit);
@@ -8721,7 +8721,7 @@ void Aura::HandlePreventFleeing(bool apply, bool Real)
     Unit::AuraList const& fearAuras = GetTarget()->GetAurasByType(SPELL_AURA_MOD_FEAR);
     if (!fearAuras.empty())
     {
-        const Aura *first = fearAuras.front();
+        const Aura* first = fearAuras.front();
         if (apply)
             GetTarget()->SetFeared(false, first->GetCasterGuid());
         else
@@ -8842,7 +8842,7 @@ void Aura::HandleAuraAddMechanicAbilities(bool apply, bool Real)
         target->SetUInt16Value(PLAYER_FIELD_BYTES2, 0, 0);
         for (int i = 0; i < MAX_OVERRIDE_SPELLS; ++i)
             if (uint32 spellId = spellSet->Spells[i])
-                static_cast<Player*>(target)->removeSpell(spellId, false , false, false);
+                static_cast<Player*>(target)->removeSpell(spellId, false, false, false);
     }
 }
 

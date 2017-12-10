@@ -69,7 +69,7 @@ class BattleGroundRV : public BattleGround
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player* plr) override;
         virtual void StartingEventOpenDoors() override;
-        virtual void FillInitialWorldStates(WorldPacket &d, uint32& count) override;
+        virtual void FillInitialWorldStates(WorldPacket& d, uint32& count) override;
 
         void RemovePlayer(Player* plr, ObjectGuid guid) override;
         bool HandleAreaTrigger(Player* plr, uint32 triggerId) override;

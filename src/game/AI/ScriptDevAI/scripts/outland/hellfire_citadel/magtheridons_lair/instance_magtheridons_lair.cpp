@@ -117,7 +117,7 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                     m_uiCageBreakTimer = 0;
                     m_uiCageBreakStage = 0;
 
-                    // no break;
+                // no break;
                 case DONE:
                     // Reset door on Fail or Done
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_DOODAD_HF_MAG_DOOR01))

@@ -462,8 +462,8 @@ struct trial_crusader_commonAI : public ScriptedAI
             // also check for health percentage for self cast spells
             if (m_uiSpellTimer[uiIndex] || (uiTargetType == TARGET_TYPE_SELF && uiMinHealth && m_creature->GetHealthPercent() > uiMinHealth))
             {
-                 m_uiAbilityTimer = 2000;
-                 return;
+                m_uiAbilityTimer = 2000;
+                return;
             }
             else
             {

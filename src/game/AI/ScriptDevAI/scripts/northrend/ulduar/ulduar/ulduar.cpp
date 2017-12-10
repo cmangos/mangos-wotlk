@@ -136,47 +136,47 @@ bool GossipSelect_go_ulduar_teleporter(Player* pPlayer, GameObject* pGO, uint32 
 
     switch (uiAction)
     {
-            // Basecamp
+        // Basecamp
         case GOSSIP_ACTION_INFO_DEF:
             // pPlayer->CastSpell(pPlayer, SPELL_TELE_EXPEDITION_BASE_CAMP, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             pPlayer->TeleportTo(603, -706.122f, -92.6024f, 429.876f, 0);
             break;
-            // Formation Grounds
+        // Formation Grounds
         case GOSSIP_ACTION_INFO_DEF + 1:
             // pPlayer->CastSpell(pPlayer, SPELL_TELE_FORMATION_GROUNDS, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             pPlayer->TeleportTo(603, 131.248f, -35.3802f, 409.804f, 0);
             break;
-            // Colossal Forge
+        // Colossal Forge
         case GOSSIP_ACTION_INFO_DEF + 2:
             // pPlayer->CastSpell(pPlayer, SPELL_TELE_COLOSSAL_FORGE, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             pPlayer->TeleportTo(603, 553.233f, -12.3247f, 409.679f, 0);
             break;
-            // Scrapyard
+        // Scrapyard
         case GOSSIP_ACTION_INFO_DEF + 3:
             // pPlayer->CastSpell(pPlayer, SPELL_TELE_SCRAPYARD, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             pPlayer->TeleportTo(603, 926.292f, -11.4635f, 418.595f, 0);
             break;
-            // Antechamber
+        // Antechamber
         case GOSSIP_ACTION_INFO_DEF + 4:
             // pPlayer->CastSpell(pPlayer, SPELL_TELE_ANTECHAMBER_OF_ULDUAR, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             pPlayer->TeleportTo(603, 1498.09f, -24.246f, 420.967f, 0);
             break;
-            // Shattered walkway
+        // Shattered walkway
         case GOSSIP_ACTION_INFO_DEF + 5:
             // pPlayer->CastSpell(pPlayer, SPELL_TELE_SHATTERED_WALKWAY, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             pPlayer->TeleportTo(603, 1859.45f, -24.1f, 448.9f, 0);
             break;
-            // Conservatory of life
+        // Conservatory of life
         case GOSSIP_ACTION_INFO_DEF + 6:
             // pPlayer->CastSpell(pPlayer, SPELL_TELE_CONSERVATORY_OF_LIFE, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             pPlayer->TeleportTo(603, 2086.27f, -24.3134f, 421.239f, 0);
             break;
-            // Spark of imagination
+        // Spark of imagination
         case GOSSIP_ACTION_INFO_DEF + 7:
             // pPlayer->CastSpell(pPlayer, SPELL_TELE_SPARK_OF_IMAGINATION, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             pPlayer->TeleportTo(603, 2518.16f, 2569.03f, 412.299f, 0);
             break;
-            // Prison of Yogg-Saron
+        // Prison of Yogg-Saron
         case GOSSIP_ACTION_INFO_DEF + 8:
             // pPlayer->CastSpell(pPlayer, SPELL_TELE_PRISON_OF_YOGG, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
             pPlayer->TeleportTo(603, 1854.82f, -11.56f, 334.175f, 4.71f);

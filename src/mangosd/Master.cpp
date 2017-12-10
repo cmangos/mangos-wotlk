@@ -375,7 +375,7 @@ bool Master::_StartDB()
         return false;
     }
 #ifdef BUILD_PLAYERBOT
-    if(!CharacterDatabase.CheckRequiredField("playerbot_db_version",REVISION_DB_PLAYERBOTAI))
+    if (!CharacterDatabase.CheckRequiredField("playerbot_db_version", REVISION_DB_PLAYERBOTAI))
     {
         ///- Wait for already started DB delay threads to end
         WorldDatabase.HaltDelayThread();

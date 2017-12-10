@@ -95,7 +95,7 @@ void instance_halls_of_reflection::OnPlayerEnter(Player* pPlayer)
             for (uint8 i = 0; i < countof(aEventBeginLocations); ++i)
             {
                 if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocations[i].uiEntryHorde : aEventBeginLocations[i].uiEntryAlliance,
-                    aEventBeginLocations[i].fX, aEventBeginLocations[i].fY, aEventBeginLocations[i].fZ, aEventBeginLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true))
+                                          aEventBeginLocations[i].fX, aEventBeginLocations[i].fY, aEventBeginLocations[i].fZ, aEventBeginLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true))
                 {
                     pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
                     pCreature->GetMotionMaster()->MoveWaypoint();
@@ -255,7 +255,7 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
                 // ToDo: handle transports
                 // Note: loot needs to be hacked in DB until the ships are implemented
                 uint32 uiChestEntry = m_uiTeam == ALLIANCE ? (instance->IsRegularDifficulty() ? GO_CAPTAIN_CHEST_ALLIANCE : GO_CAPTAIN_CHEST_ALLIANCE_H) :
-                        (instance->IsRegularDifficulty() ? GO_CAPTAIN_CHEST_HORDE : GO_CAPTAIN_CHEST_HORDE_H);
+                                      (instance->IsRegularDifficulty() ? GO_CAPTAIN_CHEST_HORDE : GO_CAPTAIN_CHEST_HORDE_H);
                 DoRespawnGameObject(uiChestEntry, 60 * MINUTE);
                 DoToggleGameObjectFlags(uiChestEntry, GO_FLAG_NO_INTERACT, false);
 
@@ -546,7 +546,7 @@ void instance_halls_of_reflection::DoSetupEscapeEvent(Player* pPlayer)
     for (uint8 i = 0; i < countof(aEventKingLocations); ++i)
     {
         if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventKingLocations[i].uiEntryHorde : aEventKingLocations[i].uiEntryAlliance,
-            aEventKingLocations[i].fX, aEventKingLocations[i].fY, aEventKingLocations[i].fZ, aEventKingLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true))
+                                  aEventKingLocations[i].fX, aEventKingLocations[i].fY, aEventKingLocations[i].fZ, aEventKingLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true))
             pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
     }
 }

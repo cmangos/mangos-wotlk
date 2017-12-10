@@ -105,7 +105,7 @@ class WorldSocket : public MaNGOS::Socket
         AuthCrypt m_crypt;
 
         /// Session to which received packets are routed
-        WorldSession *m_session;
+        WorldSession* m_session;
 
         const uint32 m_seed;
 
@@ -115,13 +115,13 @@ class WorldSocket : public MaNGOS::Socket
         virtual bool ProcessIncomingData() override;
 
         /// Called by ProcessIncoming() on CMSG_AUTH_SESSION.
-        bool HandleAuthSession(WorldPacket &recvPacket);
+        bool HandleAuthSession(WorldPacket& recvPacket);
 
         /// Called by ProcessIncoming() on CMSG_PING.
-        bool HandlePing(WorldPacket &recvPacket);
+        bool HandlePing(WorldPacket& recvPacket);
 
     public:
-        WorldSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler);
+        WorldSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler);
 
         // send a packet \o/
         void SendPacket(const WorldPacket& pct, bool immediate = false);
@@ -131,7 +131,7 @@ class WorldSocket : public MaNGOS::Socket
         virtual bool Open() override;
 
         /// Return the session key
-        BigNumber &GetSessionKey() { return m_s; }
+        BigNumber& GetSessionKey() { return m_s; }
 
 };
 

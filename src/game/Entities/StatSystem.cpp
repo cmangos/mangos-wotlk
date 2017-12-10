@@ -578,7 +578,7 @@ static const float PLAYER_BASE_DODGE[MAX_CLASSES] =
     0.0000f, // [0]  <Unused>
     3.6640f, // [1]  Warrior
     3.4943f, // [2]  Paladin
-   -4.0873f, // [3]  Hunter
+    -4.0873f, // [3]  Hunter
     2.0957f, // [4]  Rogue
     3.4178f, // [5]  Priest
     3.6640f, // [6]  DK

@@ -335,9 +335,9 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
     // Load creature equipment
     if (eventData)
     {
-        if(eventData->equipment_id)
+        if (eventData->equipment_id)
             LoadEquipment(eventData->equipment_id);             // use event equipment if any for active event
-        else if(eventData->entry_id)
+        else if (eventData->entry_id)
             LoadEquipment(cinfo->EquipmentTemplateId, true);    // use changed entry default template
     }
     else if (!data || data->equipmentId == 0)
@@ -756,7 +756,7 @@ void Creature::DoFleeToGetAssistance()
         UpdateSpeed(MOVE_RUN, false);
 
         if (!pCreature)
-            SetFeared(true, getVictim()->GetObjectGuid(), 0 , sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
+            SetFeared(true, getVictim()->GetObjectGuid(), 0, sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
         else
         {
             SetTargetGuid(ObjectGuid());        // creature flee loose its target
@@ -1196,7 +1196,7 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
 
     uint32 rank = IsPet() ? 0 : cinfo->Rank;                // TODO :: IsPet probably not needed here
 
-                                                            // level
+    // level
     uint32 level = forcedLevel;
     uint32 const minlevel = cinfo->MinLevel;
     uint32 const maxlevel = cinfo->MaxLevel;
@@ -1579,7 +1579,7 @@ void Creature::SetDeathState(DeathState s)
 {
     if ((s == JUST_DIED && !m_isDeadByDefault) || (s == JUST_ALIVED && m_isDeadByDefault))
     {
-        if(CreatureData const* data = sObjectMgr.GetCreatureData(GetObjectGuid().GetCounter()))
+        if (CreatureData const* data = sObjectMgr.GetCreatureData(GetObjectGuid().GetCounter()))
             m_respawnDelay = data->GetRandomRespawnTime();
 
         m_corpseDecayTimer = m_corpseDelay * IN_MILLISECONDS; // the max/default time for corpse decay (before creature is looted/AllLootRemovedFromCorpse() is called)
@@ -2733,7 +2733,7 @@ void Creature::SetWaterWalk(bool enable)
     SendMessageToSet(data, true);
 }
 
-bool Creature::CanCrit(const SpellEntry *entry, SpellSchoolMask schoolMask, WeaponAttackType attType) const
+bool Creature::CanCrit(const SpellEntry* entry, SpellSchoolMask schoolMask, WeaponAttackType attType) const
 {
     // Creatures do not crit with their spells or abilities, unless it belongs to a player (pet, totem, etc)
     if (!GetOwnerGuid().IsPlayer())

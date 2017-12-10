@@ -425,7 +425,7 @@ class BattleGround
         void UpdateWorldState(uint32 Field, uint32 Value);
         void UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player* Source) const;
         virtual void EndBattleGround(Team winner);
-    static void BlockMovement(Player* plr);
+        static void BlockMovement(Player* plr);
 
         void SendMessageToAll(int32 entry, ChatMsg type, Player const* source = nullptr);
         void SendYellToAll(int32 entry, uint32 language, ObjectGuid guid);

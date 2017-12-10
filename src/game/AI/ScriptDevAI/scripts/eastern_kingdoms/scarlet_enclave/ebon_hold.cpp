@@ -428,7 +428,7 @@ struct npc_a_special_surpriseAI : public ScriptedAI
                             case 2: DoScriptText(SAY_EXEC_PROG_1, m_creature, pPlayer); break;
                             case 3: DoScriptText(SAY_EXEC_NAME_1, m_creature, pPlayer); break;
                             case 4: DoScriptText(SAY_EXEC_RECOG_1, m_creature, pPlayer); break;
-                                // case 5: // unknown
+                            // case 5: // unknown
                             case 6: DoScriptText(SAY_EXEC_THINK_3, m_creature, pPlayer); break;
                             case 7: DoScriptText(SAY_EXEC_LISTEN_1, m_creature, pPlayer); break;
                             case 8:
@@ -1537,7 +1537,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
         {
             case NPC_VOLATILE_GHOUL:
                 pSummoned->CastSpell(pSummoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
-                // no break;
+            // no break;
             case NPC_WARRIOR_OF_THE_FROZEN_WASTES:
                 m_lAttackersGUIDs.push_back(pSummoned->GetObjectGuid());
                 // make the scourge attack only during the battle
@@ -1617,7 +1617,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
 
         switch (pSummoned->GetEntry())
         {
-                // hug father
+            // hug father
             case NPC_DARION_MOGRAINE:
                 if (Creature* pAlexandros = m_pInstance->GetSingleCreatureFromStorage(NPC_HIGHLORD_ALEXANDROS_MOGRAINE))
                     DoScriptText(EMOTE_LIGHT_OF_DAWN_HUG, pSummoned, pAlexandros);
@@ -2876,7 +2876,7 @@ struct npc_scarlet_courierAI : public ScriptedAI
                 ++m_uiCombatStage;
             }
             else
-                 m_uiCombatTimer -= uiDiff;
+                m_uiCombatTimer -= uiDiff;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())

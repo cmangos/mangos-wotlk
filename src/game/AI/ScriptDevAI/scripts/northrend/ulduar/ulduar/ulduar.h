@@ -218,7 +218,7 @@ enum
     NPC_IRONROOT_LASHER         = 33526,
     NPC_NATURES_BLADE           = 33527,
     NPC_GUARDIAN_OF_LIFE        = 33528,
-    
+
     MAX_SPECIAL_ACHIEV_CRITS    = 20,
 
     TYPE_ACHIEV_CAT_LADY        = 0,

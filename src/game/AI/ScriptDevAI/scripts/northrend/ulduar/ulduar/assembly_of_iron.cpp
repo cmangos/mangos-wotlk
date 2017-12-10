@@ -253,7 +253,7 @@ struct boss_brundirAI : public ScriptedAI
 
         switch (uiPointId)
         {
-                // After lift up follow a target and set the target change timer
+            // After lift up follow a target and set the target change timer
             case POINT_ID_LIFT_OFF:
                 // TODO: the boss should follow without changing his Z position - missing core feature
                 // Current implementation with move point is wrong
@@ -265,7 +265,7 @@ struct boss_brundirAI : public ScriptedAI
                 m_uiTendrilsTargetTimer = 5000;
                 m_uiTendrilsFollowTimer = 500;
                 break;
-                // After reached the land remove all the auras and resume basic combat
+            // After reached the land remove all the auras and resume basic combat
             case POINT_ID_LAND:
                 m_creature->SetLevitate(false);
                 SetCombatMovement(true);
@@ -374,7 +374,7 @@ struct boss_brundirAI : public ScriptedAI
                     return;
                 }
 
-                // no break here; he uses the other spells as well
+            // no break here; he uses the other spells as well
             case PHASE_CHARGE_ONE:
 
                 if (m_uiWhirlTimer < uiDiff)
@@ -388,7 +388,7 @@ struct boss_brundirAI : public ScriptedAI
                 else
                     m_uiWhirlTimer -= uiDiff;
 
-                // no break here; he uses the other spells as well
+            // no break here; he uses the other spells as well
             case PHASE_NO_CHARGE:
 
                 if (m_uiChainLightningTimer < uiDiff)
@@ -559,7 +559,7 @@ struct boss_molgeimAI : public ScriptedAI
                 else
                     m_uiRuneSummonTimer -= uiDiff;
 
-                // no break here; he uses the other spells as well
+            // no break here; he uses the other spells as well
             case PHASE_CHARGE_ONE:
 
                 if (m_uiRuneDeathTimer < uiDiff)
@@ -576,7 +576,7 @@ struct boss_molgeimAI : public ScriptedAI
                 else
                     m_uiRuneDeathTimer -= uiDiff;
 
-                // no break here; he uses the other spells as well
+            // no break here; he uses the other spells as well
             case PHASE_NO_CHARGE:
 
                 if (m_uiShieldTimer < uiDiff)
@@ -716,7 +716,7 @@ struct boss_steelbreakerAI : public ScriptedAI
                 else
                     m_uiPowerTimer -= uiDiff;
 
-                // no break here; he uses the other spells as well
+            // no break here; he uses the other spells as well
             case PHASE_CHARGE_ONE:
 
                 if (m_uiDisruptionTimer < uiDiff)
@@ -734,7 +734,7 @@ struct boss_steelbreakerAI : public ScriptedAI
                 else
                     m_uiDisruptionTimer -= uiDiff;
 
-                // no break here; he uses the other spells as well
+            // no break here; he uses the other spells as well
             case PHASE_NO_CHARGE:
 
                 if (m_uiFusionPunchTimer < uiDiff)

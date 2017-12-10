@@ -746,7 +746,7 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
         {
             if ((pPlayer->GetTeam() == ALLIANCE && (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_NONE || pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_FAILED)) ||
-                (pPlayer->GetTeam() == HORDE && (pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_NONE || pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_FAILED)))
+                    (pPlayer->GetTeam() == HORDE && (pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_NONE || pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_FAILED)))
             {
                 Reset();
                 return;
@@ -823,7 +823,7 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
             if (totalSpawned == 0)
                 m_uiSummonPatientTimer = urand(2000, 3000); //lets check after 2 to 3 seconds since non where spawned
             else if (totalSpawned == 1)
-                m_uiSummonPatientTimer = urand(8000, 9000); //player has someone to heal still 
+                m_uiSummonPatientTimer = urand(8000, 9000); //player has someone to heal still
             else
                 m_uiSummonPatientTimer = 10000;
 
@@ -1302,7 +1302,7 @@ struct npc_spring_rabbitAI : public ScriptedPetAI
                         pBunny->CastSpell(pBunny, SPELL_SPRING_RABBIT_IN_LOVE, TRIGGERED_NONE);
 
                     DoCastSpellIfCan(m_creature, SPELL_SPRING_RABBIT_IN_LOVE);
-                    // no break here
+                // no break here
                 case 3:
                     m_uiStepTimer = 5000;
                     m_uiStep += 2;
@@ -1310,7 +1310,7 @@ struct npc_spring_rabbitAI : public ScriptedPetAI
 
                 case 4:                                     // Called for the rabbit first reached meeting point
                     DoCastSpellIfCan(m_creature, SEPLL_SUMMON_BABY_BUNNY);
-                    // no break here
+                // no break here
                 case 5:
                     // Let owner cast achievement related spell
                     if (Unit* pOwner = m_creature->GetMaster())
@@ -1484,7 +1484,7 @@ enum
 // TODO: Add random repositioning logic
 struct npc_burster_wormAI : public ScriptedAI
 {
-    npc_burster_wormAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiBorePassive(SetBorePassive()), m_boreDamageSpell(SetBoreDamageSpell()){ }
+    npc_burster_wormAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiBorePassive(SetBorePassive()), m_boreDamageSpell(SetBoreDamageSpell()) { }
 
     uint8 m_uiPhase;
 
@@ -1591,7 +1591,7 @@ struct npc_burster_wormAI : public ScriptedAI
     bool IsBoneWorm()
     {
         if (m_creature->GetEntry() == NPC_BONE_CRAWLER || m_creature->GetEntry() == NPC_HAISHULUD || m_creature->GetEntry() == NPC_BONE_SIFTER
-            || m_creature->GetEntry() == NPC_MATURE_BONE_SIFTER)
+                || m_creature->GetEntry() == NPC_MATURE_BONE_SIFTER)
             return true;
 
         return false;

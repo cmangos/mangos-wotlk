@@ -222,7 +222,7 @@ bool GossipSelect_npc_barnes(Player* pPlayer, Creature* pCreature, uint32 /*uiSe
             if (npc_barnesAI* pBarnesAI = dynamic_cast<npc_barnesAI*>(pCreature->AI()))
                 pBarnesAI->Start(false, NULL, NULL, true);
             break;
-            // GM gossip options
+        // GM gossip options
         case GOSSIP_ACTION_INFO_DEF+3:
             pPlayer->CLOSE_GOSSIP_MENU();
             if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())

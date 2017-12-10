@@ -68,6 +68,6 @@ class UpdateData
         GuidSet m_outOfRangeGUIDs;
         ByteBuffer m_data;
 
-    static void Compress(void* dst, uint32* dst_size, void* src, int src_size);
+        static void Compress(void* dst, uint32* dst_size, void* src, int src_size);
 };
 #endif

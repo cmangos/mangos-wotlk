@@ -25,7 +25,7 @@ EndScriptData */
 #include "shattered_halls.h"
 
 instance_shattered_halls::instance_shattered_halls(Map* pMap) : ScriptedInstance(pMap),
-    m_uiExecutionTimer(55 * MINUTE* IN_MILLISECONDS),
+    m_uiExecutionTimer(55 * MINUTE * IN_MILLISECONDS),
     m_uiTeam(0),
     m_uiExecutionStage(0)
 {

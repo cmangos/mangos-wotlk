@@ -889,14 +889,14 @@ class WorldSession
         bool VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGuid const& guid) const;
         void HandleMoverRelocation(MovementInfo& movementInfo);
 
-        void ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket & packet);
+        void ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket& packet);
 
         // logging helper
         void LogUnexpectedOpcode(WorldPacket const& packet, const char* reason) const;
-        void LogUnprocessedTail(WorldPacket &packet) const;
+        void LogUnprocessedTail(WorldPacket& packet) const;
 
         uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
-        Player * _player;
+        Player* _player;
         std::shared_ptr<WorldSocket> m_Socket;              // socket pointer is owned by the network thread which created it
 
         AccountTypes _security;

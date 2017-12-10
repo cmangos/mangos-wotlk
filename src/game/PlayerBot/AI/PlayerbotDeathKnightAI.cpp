@@ -157,7 +157,7 @@ CombatManeuverReturns PlayerbotDeathKnightAI::DoFirstCombatManeuverPVP(Unit* /*p
     return RETURN_NO_ACTION_OK;
 }
 
-CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit* pTarget)
 {
     switch (m_ai->GetScenarioType())
     {
@@ -177,7 +177,7 @@ CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuver(Unit *pTarget
     return RETURN_NO_ACTION_ERROR;
 }
 
-CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuverPVE(Unit *pTarget)
+CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuverPVE(Unit* pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -186,7 +186,7 @@ CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuverPVE(Unit *pTar
 
     // damage spells
     Unit* pVictim = pTarget->getVictim();
-    Pet *pet = m_bot->GetPet();
+    Pet* pet = m_bot->GetPet();
     float dist = m_bot->GetCombatDistance(pTarget, true);
     std::ostringstream out;
 
@@ -311,17 +311,17 @@ CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuverPVE(Unit *pTar
             LastSpellUnholyDK = 0;
 
         case SPELL_DK_FROST:
-            if (FROST_PRESENCE > 0 && !m_bot->HasAura(FROST_PRESENCE, EFFECT_INDEX_0) && !m_bot->HasAura(BLOOD_PRESENCE, EFFECT_INDEX_0) && !m_bot->HasAura(UNHOLY_PRESENCE, EFFECT_INDEX_0) && m_ai->CastSpell (FROST_PRESENCE, *m_bot))
+            if (FROST_PRESENCE > 0 && !m_bot->HasAura(FROST_PRESENCE, EFFECT_INDEX_0) && !m_bot->HasAura(BLOOD_PRESENCE, EFFECT_INDEX_0) && !m_bot->HasAura(UNHOLY_PRESENCE, EFFECT_INDEX_0) && m_ai->CastSpell(FROST_PRESENCE, *m_bot))
                 return RETURN_CONTINUE;
 
             if (DEATHCHILL > 0)
             {
-                if (!m_bot->HasAura(DEATHCHILL, EFFECT_INDEX_0) && !m_bot->HasAura(KILLING_MACHINE, EFFECT_INDEX_0) && m_ai->CastSpell (DEATHCHILL, *m_bot))
+                if (!m_bot->HasAura(DEATHCHILL, EFFECT_INDEX_0) && !m_bot->HasAura(KILLING_MACHINE, EFFECT_INDEX_0) && m_ai->CastSpell(DEATHCHILL, *m_bot))
                     return RETURN_CONTINUE;
             }
             else if (KILLING_MACHINE > 0)
             {
-                if (!m_bot->HasAura(KILLING_MACHINE, EFFECT_INDEX_0) && !m_bot->HasAura(DEATHCHILL, EFFECT_INDEX_0) && m_ai->CastSpell (KILLING_MACHINE, *m_bot))
+                if (!m_bot->HasAura(KILLING_MACHINE, EFFECT_INDEX_0) && !m_bot->HasAura(DEATHCHILL, EFFECT_INDEX_0) && m_ai->CastSpell(KILLING_MACHINE, *m_bot))
                     return RETURN_CONTINUE;
             }
 
@@ -419,7 +419,7 @@ CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuverPVE(Unit *pTar
             LastSpellFrostDK = 0;
 
         case SPELL_DK_BLOOD:
-            if (BLOOD_PRESENCE > 0 && !m_bot->HasAura(BLOOD_PRESENCE, EFFECT_INDEX_0) && !m_bot->HasAura(UNHOLY_PRESENCE, EFFECT_INDEX_0) && !m_bot->HasAura(FROST_PRESENCE, EFFECT_INDEX_0) && m_ai->CastSpell (BLOOD_PRESENCE, *m_bot))
+            if (BLOOD_PRESENCE > 0 && !m_bot->HasAura(BLOOD_PRESENCE, EFFECT_INDEX_0) && !m_bot->HasAura(UNHOLY_PRESENCE, EFFECT_INDEX_0) && !m_bot->HasAura(FROST_PRESENCE, EFFECT_INDEX_0) && m_ai->CastSpell(BLOOD_PRESENCE, *m_bot))
                 return RETURN_CONTINUE;
 
             if (MARK_OF_BLOOD > 0 && !pTarget->HasAura(MARK_OF_BLOOD, EFFECT_INDEX_0) && LastSpellBloodDK < 1 && m_ai->CastSpell(MARK_OF_BLOOD, *pTarget))
@@ -536,7 +536,7 @@ void PlayerbotDeathKnightAI::DoNonCombatActions()
 
     // buff master with HORN_OF_WINTER
     if (HORN_OF_WINTER > 0)
-        (!GetMaster()->HasAura(HORN_OF_WINTER, EFFECT_INDEX_0) && m_ai->CastSpell (HORN_OF_WINTER, *GetMaster()));
+        (!GetMaster()->HasAura(HORN_OF_WINTER, EFFECT_INDEX_0) && m_ai->CastSpell(HORN_OF_WINTER, *GetMaster()));
 
     // hp check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)

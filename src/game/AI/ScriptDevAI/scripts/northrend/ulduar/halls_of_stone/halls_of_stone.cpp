@@ -303,7 +303,7 @@ struct npc_brann_hosAI : public npc_escortAI
         {
             switch (m_uiStep)
             {
-                    // Begin Event
+                // Begin Event
                 case 0:
                     // TODO, this is wrong, must be "using or similar"
                     m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
@@ -324,7 +324,7 @@ struct npc_brann_hosAI : public npc_escortAI
                     m_uiPhaseTimer = 8500;
                     break;
 
-                    // Activate Kaddrak
+                // Activate Kaddrak
                 case 4:
                     DoScriptText(SAY_EVENT_A_1, m_creature);
                     m_uiPhaseTimer = 6500;
@@ -348,7 +348,7 @@ struct npc_brann_hosAI : public npc_escortAI
                     m_uiPhaseTimer = 20000;
                     break;
 
-                    // Activate Marnak
+                // Activate Marnak
                 case 9:
                     DoScriptText(SAY_EVENT_B_1, m_creature);
                     m_uiPhaseTimer = 6000;
@@ -386,7 +386,7 @@ struct npc_brann_hosAI : public npc_escortAI
                     m_uiPhaseTimer = 20000;
                     break;
 
-                    // Activate Abedneum
+                // Activate Abedneum
                 case 17:
                     if (m_pInstance)
                         m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_C_2_ABED);
@@ -446,7 +446,7 @@ struct npc_brann_hosAI : public npc_escortAI
                     m_uiPhaseTimer = 10000;
                     break;
 
-                    // End Event
+                // End Event
                 case 29:
                     DoScriptText(SAY_EVENT_END_01, m_creature);
                     m_creature->SetStandState(UNIT_STAND_STATE_STAND);// TODO TODO

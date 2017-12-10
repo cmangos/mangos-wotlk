@@ -176,7 +176,7 @@ class AuctionHouseMgr
 
         // auction messages
         void SendAuctionWonMail(AuctionEntry* auction);
-    static void SendAuctionSuccessfulMail(AuctionEntry* auction);
+        static void SendAuctionSuccessfulMail(AuctionEntry* auction);
         void SendAuctionExpiredMail(AuctionEntry* auction);
         static uint32 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item* pItem);
 

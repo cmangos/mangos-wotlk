@@ -68,9 +68,9 @@
 #include "Loot/LootMgr.h"
 
 #ifdef BUILD_PLAYERBOT
-    #include "PlayerBot/Base/PlayerbotAI.h"
-    #include "PlayerBot/Base/PlayerbotMgr.h"
-    #include "Config/Config.h"
+#include "PlayerBot/Base/PlayerbotAI.h"
+#include "PlayerBot/Base/PlayerbotMgr.h"
+#include "Config/Config.h"
 #endif
 
 #include <cmath>
@@ -90,7 +90,7 @@
 #define MAKE_SKILL_BONUS(t, p) MAKE_PAIR32(t,p)
 
 #ifdef BUILD_PLAYERBOT
-    extern Config botConfig;
+extern Config botConfig;
 #endif
 
 enum CharacterFlags
@@ -3707,7 +3707,7 @@ void Player::RemoveArenaSpellCooldowns()
 {
     // remove cooldowns on spells that has < 10 min CD (since patch 3.3, before it was 15 min)
     const uint32 MaxCDDelay = 10 * MINUTE * IN_MILLISECONDS;
-    auto cdCheck = [&](SpellEntry const& spellEntry) -> bool { return (spellEntry.RecoveryTime < MaxCDDelay && (spellEntry.CategoryRecoveryTime < MaxCDDelay)); };
+    auto cdCheck = [&](SpellEntry const & spellEntry) -> bool { return (spellEntry.RecoveryTime < MaxCDDelay && (spellEntry.CategoryRecoveryTime < MaxCDDelay)); };
     RemoveSomeCooldown(cdCheck);
 }
 
@@ -3769,7 +3769,7 @@ void Player::_LoadSpellCooldowns(QueryResult* result)
             if (item_id)
                 itemStr = " caused by item id(" + std::to_string(item_id) + ") ";
             sLog.outDebug("Adding spell cooldown to %s, SpellID(%u), recDuration(%us), category(%u), catRecDuration(%us)%s.", GetGuidStr().c_str(),
-                spell_id, spellCDDuration, category, catCDDuration, itemStr.c_str());
+                          spell_id, spellCDDuration, category, catCDDuration, itemStr.c_str());
 #endif
         }
         while (result->NextRow());
@@ -5307,7 +5307,7 @@ float Player::GetDodgeFromAgility(float amount)
     if (pclass >= MAX_CLASSES)
         return 0.0f;
     const uint32 level = std::min(getLevel(), uint32(GT_MAX_LEVEL));
-    const uint32 index = ((pclass - 1) * GT_MAX_LEVEL) + (level -1);
+    const uint32 index = ((pclass - 1) * GT_MAX_LEVEL) + (level - 1);
 
     // Dodge per agility is proportional to crit per agility, which is available from DBC files
     const GtChanceToMeleeCritEntry* entry = sGtChanceToMeleeCritStore.LookupEntry(index);
@@ -8566,7 +8566,7 @@ uint8 Player::FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) 
 }
 
 
-bool Player::ViableEquipSlots(ItemPrototype const* proto, uint8 *viable_slots) const
+bool Player::ViableEquipSlots(ItemPrototype const* proto, uint8* viable_slots) const
 {
     uint8 pClass;
 
@@ -10379,7 +10379,7 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16& dest, Item* pItem, bool
             if (eslot == NULL_SLOT)
                 return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
 
-            InventoryResult msg = CanUseItem(pItem , direct_action);
+            InventoryResult msg = CanUseItem(pItem, direct_action);
             if (msg != EQUIP_ERR_OK)
                 return msg;
             if (!swap && GetItemByPos(INVENTORY_SLOT_BAG_0, eslot))
@@ -10927,8 +10927,8 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
 
         ItemPrototype const* itemProto = pItem->GetProto();
         if (itemProto->Bonding == BIND_WHEN_PICKED_UP
-            || itemProto->Bonding == BIND_QUEST_ITEM
-            || (itemProto->Bonding == BIND_WHEN_EQUIPPED && IsBagPos(pos)))
+                || itemProto->Bonding == BIND_QUEST_ITEM
+                || (itemProto->Bonding == BIND_WHEN_EQUIPPED && IsBagPos(pos)))
             pItem->SetBinding(true);
 
         if (bag == INVENTORY_SLOT_BAG_0)
@@ -10977,8 +10977,8 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
     {
         ItemPrototype const* itemProto = pItem2->GetProto();
         if (itemProto->Bonding == BIND_WHEN_PICKED_UP
-            || itemProto->Bonding == BIND_QUEST_ITEM
-            || (itemProto->Bonding == BIND_WHEN_EQUIPPED && IsBagPos(pos)))
+                || itemProto->Bonding == BIND_QUEST_ITEM
+                || (itemProto->Bonding == BIND_WHEN_EQUIPPED && IsBagPos(pos)))
             pItem2->SetBinding(true);
 
         pItem2->SetCount(pItem2->GetCount() + count);
@@ -12896,16 +12896,16 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                 case GOSSIP_OPTION_BOT:
                 {
 #ifdef BUILD_PLAYERBOT
-                    if(botConfig.GetBoolDefault("PlayerbotAI.DisableBots", false) && !pCreature->isInnkeeper())
+                    if (botConfig.GetBoolDefault("PlayerbotAI.DisableBots", false) && !pCreature->isInnkeeper())
                     {
                         ChatHandler(this).PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
                         hasMenuItem = false;
                         break;
                     }
 
-                    std::string reqQuestIds = botConfig.GetStringDefault("PlayerbotAI.BotguyQuests","");
-                    uint32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost",0);
-                    if((reqQuestIds == "" || requiredQuests(reqQuestIds.c_str())) && !pCreature->isInnkeeper() && this->GetMoney() >= cost)
+                    std::string reqQuestIds = botConfig.GetStringDefault("PlayerbotAI.BotguyQuests", "");
+                    uint32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost", 0);
+                    if ((reqQuestIds == "" || requiredQuests(reqQuestIds.c_str())) && !pCreature->isInnkeeper() && this->GetMoney() >= cost)
                         pCreature->LoadBotMenu(this);
 #endif
                     hasMenuItem = false;
@@ -13172,50 +13172,50 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
             // DEBUG_LOG("GOSSIP_OPTION_BOT");
             PlayerTalkClass->CloseGossip();
             uint32 guidlo = PlayerTalkClass->GossipOptionSender(gossipListId);
-            uint32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost",0);
+            uint32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost", 0);
 
             if (!GetPlayerbotMgr())
                 SetPlayerbotMgr(new PlayerbotMgr(this));
 
-            if(GetPlayerbotMgr()->GetPlayerBot(ObjectGuid(HIGHGUID_PLAYER,guidlo)) != nullptr)
+            if (GetPlayerbotMgr()->GetPlayerBot(ObjectGuid(HIGHGUID_PLAYER, guidlo)) != nullptr)
             {
-                GetPlayerbotMgr()->LogoutPlayerBot(ObjectGuid(HIGHGUID_PLAYER,guidlo));
+                GetPlayerbotMgr()->LogoutPlayerBot(ObjectGuid(HIGHGUID_PLAYER, guidlo));
             }
-            else if(GetPlayerbotMgr()->GetPlayerBot(ObjectGuid(HIGHGUID_PLAYER,guidlo)) == nullptr)
+            else if (GetPlayerbotMgr()->GetPlayerBot(ObjectGuid(HIGHGUID_PLAYER, guidlo)) == nullptr)
             {
-                QueryResult *resultchar = CharacterDatabase.PQuery("SELECT COUNT(*) FROM characters WHERE online = '1' AND account = '%u'", m_session->GetAccountId());
-                if(resultchar)
+                QueryResult* resultchar = CharacterDatabase.PQuery("SELECT COUNT(*) FROM characters WHERE online = '1' AND account = '%u'", m_session->GetAccountId());
+                if (resultchar)
                 {
-                    Field *fields = resultchar->Fetch();
+                    Field* fields = resultchar->Fetch();
                     int maxnum = botConfig.GetIntDefault("PlayerbotAI.MaxNumBots", 9);
                     int acctcharcount = fields[0].GetUInt32();
-                    if(!(m_session->GetSecurity() > SEC_PLAYER))
-                        if(acctcharcount > maxnum)
+                    if (!(m_session->GetSecurity() > SEC_PLAYER))
+                        if (acctcharcount > maxnum)
                         {
-                            ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon anymore bots. (Current Max: |cffffffff%u|cffff0000)",maxnum);
+                            ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon anymore bots. (Current Max: |cffffffff%u|cffff0000)", maxnum);
                             delete resultchar;
                             return;
                         }
                 }
                 delete resultchar;
 
-                QueryResult *resultlvl = CharacterDatabase.PQuery("SELECT level,name FROM characters WHERE guid = '%u'", guidlo);
-                if(resultlvl)
+                QueryResult* resultlvl = CharacterDatabase.PQuery("SELECT level,name FROM characters WHERE guid = '%u'", guidlo);
+                if (resultlvl)
                 {
-                    Field *fields=resultlvl->Fetch();
+                    Field* fields = resultlvl->Fetch();
                     int maxlvl = botConfig.GetIntDefault("PlayerbotAI.RestrictBotLevel", 80);
                     int charlvl = fields[0].GetUInt32();
-                    if(!(m_session->GetSecurity() > SEC_PLAYER))
-                        if(charlvl > maxlvl)
+                    if (!(m_session->GetSecurity() > SEC_PLAYER))
+                        if (charlvl > maxlvl)
                         {
-                            ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high. (Current Max:lvl |cffffffff%u|cffff0000)",fields[1].GetString(),maxlvl);
+                            ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high. (Current Max:lvl |cffffffff%u|cffff0000)", fields[1].GetString(), maxlvl);
                             delete resultlvl;
                             return;
                         }
                 }
                 delete resultlvl;
 
-                GetPlayerbotMgr()->LoginPlayerBot(ObjectGuid(HIGHGUID_PLAYER,guidlo));
+                GetPlayerbotMgr()->LoginPlayerBot(ObjectGuid(HIGHGUID_PLAYER, guidlo));
                 this->ModifyMoney(-(int32)cost);
             }
             return;
@@ -13392,19 +13392,19 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
             uint32 quest_id = qmi0.m_qId;
             Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest_id);
 
-        if (pQuest)
-        {
-            if (icon == 4 && !GetQuestRewardStatus(quest_id))
-                PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanRewardQuest(pQuest, false), true);
-            else if (icon == 4)
-                PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanRewardQuest(pQuest, false), true);
-            // Send completable on repeatable and autoCompletable quest if player don't have quest
-            // TODO: verify if check for !pQuest->IsDaily() is really correct (possibly not)
-            else if (pQuest->IsAutoComplete() && pQuest->IsRepeatable() && !pQuest->IsDailyOrWeekly())
-                PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanCompleteRepeatableQuest(pQuest), true);
-            else
-                PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, guid, true);
-        }
+            if (pQuest)
+            {
+                if (icon == 4 && !GetQuestRewardStatus(quest_id))
+                    PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanRewardQuest(pQuest, false), true);
+                else if (icon == 4)
+                    PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanRewardQuest(pQuest, false), true);
+                // Send completable on repeatable and autoCompletable quest if player don't have quest
+                // TODO: verify if check for !pQuest->IsDaily() is really correct (possibly not)
+                else if (pQuest->IsAutoComplete() && pQuest->IsRepeatable() && !pQuest->IsDailyOrWeekly())
+                    PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanCompleteRepeatableQuest(pQuest), true);
+                else
+                    PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, guid, true);
+            }
         }
         // multiply entries
         else
@@ -14047,9 +14047,9 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
                 for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
                 {
                     if (spellProto->Effect[i] == SPELL_EFFECT_LEARN_SPELL ||
-                        spellProto->Effect[i] == SPELL_EFFECT_CREATE_ITEM ||
-                        spellProto->EffectImplicitTargetA[i] == TARGET_DUELVSPLAYER ||
-                        spellProto->EffectImplicitTargetA[i] == TARGET_SINGLE_FRIEND)
+                            spellProto->Effect[i] == SPELL_EFFECT_CREATE_ITEM ||
+                            spellProto->EffectImplicitTargetA[i] == TARGET_DUELVSPLAYER ||
+                            spellProto->EffectImplicitTargetA[i] == TARGET_SINGLE_FRIEND)
                     {
                         caster = (Unit*)questGiver;
                         break;
@@ -14160,7 +14160,7 @@ bool Player::SatisfyQuestCondition(Quest const* qInfo, bool msg) const
     {
         bool result = sObjectMgr.IsPlayerMeetToCondition(conditionId, this, GetMap(), nullptr, CONDITION_FROM_QUEST);
 
-        if(!result && msg)
+        if (!result && msg)
             SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);
 
         return result;
@@ -16842,7 +16842,7 @@ void Player::_LoadTalents(QueryResult* result)
             // prevent load talent for different class (cheating)
             if ((getClassMask() & talentTabInfo->ClassMask) == 0)
             {
-                sLog.outError("Player::_LoadTalents:Player (GUID: %u) has talent with ClassMask: %u , but Player's ClassMask is: %u , talentID: %u , this talent will be deleted from character_talent", GetGUIDLow(), talentTabInfo->ClassMask, getClassMask() , talentInfo->TalentID);
+                sLog.outError("Player::_LoadTalents:Player (GUID: %u) has talent with ClassMask: %u , but Player's ClassMask is: %u , talentID: %u , this talent will be deleted from character_talent", GetGUIDLow(), talentTabInfo->ClassMask, getClassMask(), talentInfo->TalentID);
                 CharacterDatabase.PExecute("DELETE FROM character_talent WHERE guid = '%u' AND talent_id = '%u'", GetGUIDLow(), talent_id);
                 continue;
             }
@@ -18403,11 +18403,11 @@ void Player::RemovePet(PetSaveMode mode)
     {
         // TODO: Only edit pet in DB and reward reagent if necessary
         Pet* NewPet = new Pet;
-        if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true,0,false,true))
+        if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true, 0, false, true))
             delete NewPet;
 
         m_temporaryUnsummonedPetNumber = 0;
-        if(NewPet)
+        if (NewPet)
             NewPet->Unsummon(mode, this);
     }
 }
@@ -21198,7 +21198,7 @@ void Player::UpdateClientControl(Unit const* target, bool enabled, bool forced) 
         // Do a double-check if we should enable it only
         if (forced || !enabled || IsClientControl(target))
         {
-            const PackedGuid &packedGuid = target->GetPackGUID();
+            const PackedGuid& packedGuid = target->GetPackGUID();
             WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, packedGuid.size() + 1);
             data << packedGuid;
             data << uint8(enabled);
@@ -21378,7 +21378,7 @@ Player* Player::GetNextRaidMemberWithLowestLifePercentage(float radius, AuraType
 
             // IsHostileTo check duel and controlled by enemy
             if (IsWithinDistInMap(target, radius) &&
-                !target->HasInvisibilityAura() && CanAssist(target) && !target->HasAuraType(noAuraType))
+                    !target->HasInvisibilityAura() && CanAssist(target) && !target->HasAuraType(noAuraType))
             {
                 if (target->GetHealthPercent() < lowestPercentage)
                 {
@@ -22129,7 +22129,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
             }
 
             // Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
-            DEBUG_LOG("FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d" , position->z, height, GetPositionZ(), movementInfo.GetFallTime(), height, damage, safe_fall);
+            DEBUG_LOG("FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d", position->z, height, GetPositionZ(), movementInfo.GetFallTime(), height, damage, safe_fall);
         }
     }
 }
@@ -23445,7 +23445,7 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
 
     // ToDo add achievement check
 
-    // check if this account try to abuse reseting instance 
+    // check if this account try to abuse reseting instance
     if (mapEntry->IsNonRaidDungeon() && ((map && map->GetDifficulty() == DUNGEON_DIFFICULTY_NORMAL) || (GetDifficulty(false) == DUNGEON_DIFFICULTY_NORMAL)))
     {
         if (!CanEnterNewInstance(state ? state->GetInstanceId() : 0))
@@ -23859,7 +23859,8 @@ void Player::_LoadCreatedInstanceTimers()
             if (expireTime > Clock::now())
                 m_enteredInstances.emplace(instanceId, expireTime);
 
-        } while (result->NextRow());
+        }
+        while (result->NextRow());
 
         delete result;
     }
@@ -23876,7 +23877,7 @@ void Player::_SaveNewInstanceIdTimer()
     for (auto enterInstItr : m_enteredInstances)
     {
         SqlStatement stmt = CharacterDatabase.CreateStatement(insertInsertTimer,
-            "INSERT INTO account_instances_entered (AccountId, ExpireTime, InstanceId) VALUES( ?, ?, ?)");
+                            "INSERT INTO account_instances_entered (AccountId, ExpireTime, InstanceId) VALUES( ?, ?, ?)");
 
         stmt.addUInt32(m_session->GetAccountId());
         stmt.addUInt64(Clock::to_time_t(enterInstItr.second));

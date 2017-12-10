@@ -308,9 +308,9 @@ namespace VMAP
         // global model spawns
         // only non-tiled maps have them, and if so exactly one (so far at least...)
         ModelSpawn spawn;
- #ifdef VMAP_DEBUG
+#ifdef VMAP_DEBUG
         DEBUG_LOG("Map isTiled: %u", static_cast<uint32>(iIsTiled));
- #endif
+#endif
         if (success && !iIsTiled && ModelSpawn::readFromFile(rf, spawn))
         {
             WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name);

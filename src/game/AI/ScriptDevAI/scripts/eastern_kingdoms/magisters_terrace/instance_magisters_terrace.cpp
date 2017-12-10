@@ -50,7 +50,7 @@ void instance_magisters_terrace::OnCreatureCreate(Creature* pCreature)
         case NPC_DELRISSA:
         case NPC_KALECGOS_DRAGON:
         case NPC_KAELTHAS:
-            // insert Delrissa adds here, for better handling
+        // insert Delrissa adds here, for better handling
         case NPC_KAGANI:
         case NPC_ELLRYS:
         case NPC_ERAMAS:

@@ -145,7 +145,7 @@ void instance_arcatraz::OnCreatureCreate(Creature* pCreature)
         case NPC_SKYRISS:
         case NPC_MILLHOUSE:
             m_lSkyrissEventMobsGuidList.push_back(pCreature->GetObjectGuid());
-            // no break here because we want them in both lists
+        // no break here because we want them in both lists
         case NPC_PRISON_APHPA_POD:
         case NPC_PRISON_BETA_POD:
         case NPC_PRISON_DELTA_POD:

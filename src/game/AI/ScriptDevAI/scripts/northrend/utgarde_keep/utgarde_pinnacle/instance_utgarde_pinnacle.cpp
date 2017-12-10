@@ -158,7 +158,7 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
                     if (Creature* pGrauf = GetSingleCreatureFromStorage(NPC_GRAUF))
                         pGrauf->AI()->EnterEvadeMode();
 
-                    // no break;
+                // no break;
                 case NOT_STARTED:
                     // Despawn all summons
                     for (GuidList::const_iterator itr = m_lskadiGauntletMobsList.begin(); itr != m_lskadiGauntletMobsList.end(); ++itr)
@@ -171,7 +171,7 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
                     if (Creature* pGrauf = GetSingleCreatureFromStorage(NPC_GRAUF))
                         pGrauf->GetMotionMaster()->MoveTargetedHome();
 
-                    // no break;
+                // no break;
                 case IN_PROGRESS:
 
                     // Remove the summon aura on phase 2 or fail

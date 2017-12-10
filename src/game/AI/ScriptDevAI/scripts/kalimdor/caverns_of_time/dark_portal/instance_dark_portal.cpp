@@ -277,7 +277,7 @@ void instance_dark_portal::OnCreatureEnterCombat(Creature* pCreature)
             break;
         case NPC_AEONUS:
             SetData(TYPE_AEONUS, IN_PROGRESS);
-            // no break
+        // no break
         case NPC_ASSASSIN:
         case NPC_ASSASSIN_2:
         case NPC_WHELP:
@@ -306,8 +306,8 @@ void instance_dark_portal::OnCreatureEvade(Creature* pCreature)
             break;
         case NPC_AEONUS:
             SetData(TYPE_AEONUS, FAIL);
-            // no break;
-            // Allow these guys to go and finish off Medivh
+        // no break;
+        // Allow these guys to go and finish off Medivh
         case NPC_ASSASSIN:
         case NPC_ASSASSIN_2:
         case NPC_WHELP:

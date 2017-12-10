@@ -114,7 +114,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuver(Unit* pTarget)
     return RETURN_NO_ACTION_ERROR;
 }
 
-CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuverPVE(Unit *pTarget)
+CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuverPVE(Unit* pTarget)
 {
     if (STEALTH > 0 && !m_bot->HasAura(STEALTH, EFFECT_INDEX_0) && m_ai->CastSpell(STEALTH, *m_bot))
     {
@@ -132,7 +132,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuverPVE(Unit *pTarget)
 }
 
 // TODO: blatant copy of PVE for now, please PVP-port it
-CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuverPVP(Unit *pTarget)
+CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuverPVP(Unit* pTarget)
 {
     if (STEALTH > 0 && !m_bot->HasAura(STEALTH, EFFECT_INDEX_0) && m_ai->CastSpell(STEALTH, *m_bot))
     {
@@ -149,7 +149,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuverPVP(Unit *pTarget)
     return RETURN_NO_ACTION_OK;
 }
 
-CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit *pTarget)
+CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit* pTarget)
 {
     switch (m_ai->GetScenarioType())
     {
@@ -169,7 +169,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit *pTarget)
     return RETURN_NO_ACTION_ERROR;
 }
 
-CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit* pTarget)
 {
     if (!pTarget) return RETURN_NO_ACTION_ERROR;
     if (!m_ai)    return RETURN_NO_ACTION_ERROR;
@@ -264,7 +264,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
                 return RETURN_CONTINUE;
             else if (KICK > 0 && m_ai->CastSpell(KICK, *pTarget))
                 return RETURN_CONTINUE;
-            // break; // No action? Go combat!
+        // break; // No action? Go combat!
 
         case RogueCombat:
         default:
@@ -276,35 +276,35 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget)
 
                 switch (pTarget->getClass())
                 {
-                case CLASS_SHAMAN:
-                    if (KIDNEY_SHOT > 0 && m_ai->CastSpell(KIDNEY_SHOT, *pTarget)) // 25 energy (checked above)
-                        return RETURN_CONTINUE;
-                    break;
+                    case CLASS_SHAMAN:
+                        if (KIDNEY_SHOT > 0 && m_ai->CastSpell(KIDNEY_SHOT, *pTarget)) // 25 energy (checked above)
+                            return RETURN_CONTINUE;
+                        break;
 
-                case CLASS_WARLOCK:
-                case CLASS_HUNTER:
-                    if (SLICE_DICE > 0 && m_ai->CastSpell(SLICE_DICE, *pTarget)) // 25 energy (checked above)
-                       return RETURN_CONTINUE;
-                    break;
+                    case CLASS_WARLOCK:
+                    case CLASS_HUNTER:
+                        if (SLICE_DICE > 0 && m_ai->CastSpell(SLICE_DICE, *pTarget)) // 25 energy (checked above)
+                            return RETURN_CONTINUE;
+                        break;
 
-                case CLASS_WARRIOR:
-                case CLASS_PALADIN:
-                case CLASS_DEATH_KNIGHT:
-                    if (EXPOSE_ARMOR > 0 && !pTarget->HasAura(EXPOSE_ARMOR, EFFECT_INDEX_0) && m_ai->CastSpell(EXPOSE_ARMOR, *pTarget)) // 25 energy (checked above)
-                        return RETURN_CONTINUE;
-                    break;
+                    case CLASS_WARRIOR:
+                    case CLASS_PALADIN:
+                    case CLASS_DEATH_KNIGHT:
+                        if (EXPOSE_ARMOR > 0 && !pTarget->HasAura(EXPOSE_ARMOR, EFFECT_INDEX_0) && m_ai->CastSpell(EXPOSE_ARMOR, *pTarget)) // 25 energy (checked above)
+                            return RETURN_CONTINUE;
+                        break;
 
 
-                case CLASS_MAGE:
-                case CLASS_PRIEST:
-                    if (RUPTURE > 0 && m_ai->CastSpell(RUPTURE, *pTarget)) // 25 energy (checked above)
-                        return RETURN_CONTINUE;
-                    break;
+                    case CLASS_MAGE:
+                    case CLASS_PRIEST:
+                        if (RUPTURE > 0 && m_ai->CastSpell(RUPTURE, *pTarget)) // 25 energy (checked above)
+                            return RETURN_CONTINUE;
+                        break;
 
-                case CLASS_ROGUE:
-                case CLASS_DRUID:
-                default:
-                    break; // fall through to below
+                    case CLASS_ROGUE:
+                    case CLASS_DRUID:
+                    default:
+                        break; // fall through to below
                 }
 
                 // default combo action for rogue/druid or if other combo action is unavailable/failed
@@ -382,7 +382,7 @@ void PlayerbotRogueAI::DoNonCombatActions()
 
     // Search and apply poisons to weapons
     // Mainhand ...
-    Item * poison, * weapon;
+    Item* poison, * weapon;
     weapon = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
     if (weapon && weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
     {

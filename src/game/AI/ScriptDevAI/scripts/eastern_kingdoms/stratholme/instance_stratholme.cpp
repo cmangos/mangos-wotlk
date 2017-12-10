@@ -101,7 +101,7 @@ void instance_stratholme::OnCreatureCreate(Creature* pCreature)
         case NPC_AURIUS:
             if (m_auiEncounter[TYPE_AURIUS] == DONE)
                 pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-            // no break here
+        // no break here
         case NPC_BARON:
         case NPC_YSIDA:
         case NPC_BARTHILAS:
@@ -223,7 +223,7 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
                     {
                         DoOrSimulateScriptTextForThisInstance(SAY_ANNOUNCE_RUN_START, NPC_BARON);
                         if (Creature* pYsida = pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[7].m_fX, aStratholmeLocation[7].m_fY, aStratholmeLocation[7].m_fZ, aStratholmeLocation[7].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
-                        	pYsida->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
+                            pYsida->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
                     }
 
                     m_uiBaronRunTimer = 45 * MINUTE * IN_MILLISECONDS;
@@ -968,7 +968,7 @@ void instance_stratholme::DoSpawnPlaguedCritters(uint8 uiGate, Player* pPlayer)
     if (!pPlayer)
         return;
 
-    uint32 uiEntry = aPlaguedCritters[urand(0,2)];
+    uint32 uiEntry = aPlaguedCritters[urand(0, 2)];
     for (uint8 i = 0; i < 30; ++i)
     {
         float fX, fY, fZ;

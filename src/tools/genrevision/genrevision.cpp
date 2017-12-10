@@ -179,13 +179,13 @@ bool extractDataFromGit(std::string filename, std::string path, bool url, RawDat
     {
         while (fgets(buf, sizeof(buf), logFile))
         {
-            char *hash = strchr(buf, ' ') + 1;
-            char *time = strchr(hash, ' ');
+            char* hash = strchr(buf, ' ') + 1;
+            char* time = strchr(hash, ' ');
             *(time++) = '\0';
 
             if (!strcmp(data.rev_str, hash))
             {
-                char *tab = strchr(time, '\t');
+                char* tab = strchr(time, '\t');
                 *tab = '\0';
 
                 tab = strrchr(time, ' ');
@@ -227,7 +227,7 @@ bool extractDataFromGit(std::string filename, std::string path, bool url, RawDat
     return true;
 }
 
-std::string generateHeader(char const* rev_str, char const* date_str, char const* time_str, char const *ver_str)
+std::string generateHeader(char const* rev_str, char const* date_str, char const* time_str, char const* ver_str)
 {
     std::ostringstream newData;
     newData << "#ifndef __REVISION_H__" << std::endl;
@@ -294,7 +294,7 @@ int main(int argc, char** argv)
 
     /// new data extraction
     char version[200];
-    if (FILE *versionFile = fopen((path + "/version.txt").c_str(), "r"))
+    if (FILE* versionFile = fopen((path + "/version.txt").c_str(), "r"))
     {
         if (!fgets(version, sizeof(version), versionFile))
         {

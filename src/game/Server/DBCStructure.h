@@ -2190,7 +2190,7 @@ struct ItemCategorySpellPair
     uint32 spellId;
     uint32 itemId;
     ItemCategorySpellPair(uint32 _spellId, uint32 _itemId) : spellId(_spellId), itemId(_itemId) {}
-    bool operator <(ItemCategorySpellPair const &pair) const { return spellId == pair.spellId ? itemId < pair.itemId : spellId < pair.spellId; }
+    bool operator <(ItemCategorySpellPair const& pair) const { return spellId == pair.spellId ? itemId < pair.itemId : spellId < pair.spellId; }
 };
 
 typedef std::set<ItemCategorySpellPair> ItemSpellCategorySet;

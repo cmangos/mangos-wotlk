@@ -190,13 +190,13 @@ struct boss_devourer_of_soulsAI : public ScriptedAI
     {
         switch (pSpellEntry->Id)
         {
-                // If we hit a target with phantom blast, the achievement_criteria is failed
+            // If we hit a target with phantom blast, the achievement_criteria is failed
             case SPELL_PHANTOM_BLAST:
             case SPELL_PHANTOM_BLAST_H:
                 if (m_pInstance)
                     m_pInstance->SetData(TYPE_ACHIEV_PHANTOM_BLAST, FAIL);
                 break;
-                // Might be placed somewhere else better, important is to note that this text is said after the 3s cast time
+            // Might be placed somewhere else better, important is to note that this text is said after the 3s cast time
             case SPELL_WAILING_SOULS:
                 DoScriptText(aTexts[5][m_uiFace], m_creature);
                 break;

@@ -48,7 +48,7 @@ enum
 struct boss_mechano_lord_capacitusAI : public ScriptedAI
 {
     boss_mechano_lord_capacitusAI(Creature* creature) : ScriptedAI(creature)
-    { 
+    {
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
         Reset();
     }

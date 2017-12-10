@@ -339,7 +339,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
 
         switch (iEntry)
         {
-                // Encounter intro (normal and hard mode)
+            // Encounter intro (normal and hard mode)
             case NPC_MIMIRON:
             case NPC_LEVIATHAN_MK_TURRET:
                 // jump on the top of the robot for intro / phase end text
@@ -380,7 +380,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                 break;
 
-                // Start phase 2 transition
+            // Start phase 2 transition
             case GO_MIMIRON_ELEVATOR:
                 m_pInstance->DoUseDoorOrButton(GO_MIMIRON_ELEVATOR);
                 break;
@@ -424,7 +424,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                 }
                 break;
 
-                // Start phase 3 transition
+            // Start phase 3 transition
             case NPC_ROCKET_STRIKE:
                 // mount on the top of the robot for phase end text
                 if (Creature* pVx001 = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001))
@@ -463,7 +463,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                 }
                 break;
 
-                // Start phase 4 transition
+            // Start phase 4 transition
             case NPC_COMPUTER:
                 // get the tank into combat position
                 if (Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
@@ -526,7 +526,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                 }
                 break;
 
-                // Start encounter epilogue
+            // Start encounter epilogue
             case SPELL_SLEEP_VISUAL:
                 DoCastSpellIfCan(m_creature, SPELL_SLEEP_VISUAL);
                 if (m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
@@ -560,7 +560,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
     {
         switch (eventType)
         {
-                // Red button pressed
+            // Red button pressed
             case AI_EVENT_CUSTOM_A:
                 StartNextDialogueText(SAY_SELF_DESTRUCT);
                 m_uiPhase = PHASE_LEVIATHAN;
@@ -570,19 +570,19 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                 m_uiDestructTimer = MINUTE * IN_MILLISECONDS;
                 m_uiFlamesTimer = 7000;
                 break;
-                // Leviathan phase finished
+            // Leviathan phase finished
             case AI_EVENT_CUSTOM_B:
                 StartNextDialogueText(NPC_LEVIATHAN_MK_TURRET);
                 break;
-                // VX001 phase finished
+            // VX001 phase finished
             case AI_EVENT_CUSTOM_C:
                 StartNextDialogueText(SPELL_TORSO_DISABLED);
                 break;
-                // Aerial unit phase finished
+            // Aerial unit phase finished
             case AI_EVENT_CUSTOM_D:
                 StartNextDialogueText(NPC_COMPUTER);
                 break;
-                // Robot piece destroyed
+            // Robot piece destroyed
             case AI_EVENT_CUSTOM_E:
                 if (!m_uiWakeUpTimer)
                     m_uiWakeUpTimer = 10000;

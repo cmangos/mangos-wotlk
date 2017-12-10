@@ -496,7 +496,7 @@ void BattleGround::SendPacketToAll(WorldPacket const& packet)
     }
 }
 
-void BattleGround::SendPacketToTeam(Team teamId, WorldPacket const &packet, Player* sender, bool self)
+void BattleGround::SendPacketToTeam(Team teamId, WorldPacket const& packet, Player* sender, bool self)
 {
     for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {

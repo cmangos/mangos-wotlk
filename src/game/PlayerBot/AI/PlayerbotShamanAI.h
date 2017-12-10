@@ -123,139 +123,139 @@ enum
     MAELSTROM_WEAPON_1              = 51532, //This is the final rank only, the spell family thing doesn't work so I decided to go with max only
 
     // Buffs that don't stack with totems
-    //IMPROVED_ICY_TALONS_1			= 55610,
-    //HORN_OF_WINTER_1				= 57330
+    //IMPROVED_ICY_TALONS_1         = 55610,
+    //HORN_OF_WINTER_1              = 57330
 };
 //class Player;
 
 class PlayerbotShamanAI : PlayerbotClassAI
 {
-public:
-    PlayerbotShamanAI(Player * const master, Player * const bot, PlayerbotAI * const ai);
-    virtual ~PlayerbotShamanAI();
+    public:
+        PlayerbotShamanAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        virtual ~PlayerbotShamanAI();
 
-    // all combat actions go here
-    CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
+        // all combat actions go here
+        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
 
-    // all non combat actions go here, ex buffs, heals, rezzes
-    void DoNonCombatActions();
+        // all non combat actions go here, ex buffs, heals, rezzes
+        void DoNonCombatActions();
 
-    // Utility Functions
-    bool CastHoTOnTank();
+        // Utility Functions
+        bool CastHoTOnTank();
 
-private:
-    CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
-    CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
+    private:
+        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
+        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
 
-    // Heals the target based off its hps
-    CombatManeuverReturns HealPlayer(Player* target);
-    Player* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
-    void DropTotems();
-    void CheckShields();
-    void UseCooldowns();
+        // Heals the target based off its hps
+        CombatManeuverReturns HealPlayer(Player* target);
+        Player* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
+        void DropTotems();
+        void CheckShields();
+        void UseCooldowns();
 
-    // ENHANCEMENT
-    uint32 ROCKBITER_WEAPON,
-           STONESKIN_TOTEM,
-           LIGHTNING_SHIELD,
-           FLAMETONGUE_WEAPON,
-           STRENGTH_OF_EARTH_TOTEM,
-           FOCUSED,
-           FROSTBRAND_WEAPON,
-           FROST_RESISTANCE_TOTEM,
-           FLAMETONGUE_TOTEM,
-           FIRE_RESISTANCE_TOTEM,
-           WINDFURY_WEAPON,
-           GROUNDING_TOTEM,
-           NATURE_RESISTANCE_TOTEM,
-           WIND_FURY_TOTEM,
-           STORMSTRIKE,
-           LAVA_LASH,
-           SHAMANISTIC_RAGE,
-           WRATH_OF_AIR_TOTEM,
-           EARTH_ELEMENTAL_TOTEM,
-           BLOODLUST,
-           HEROISM,
-           FERAL_SPIRIT,
-           MAELSTROM_WEAPON;
+        // ENHANCEMENT
+        uint32 ROCKBITER_WEAPON,
+               STONESKIN_TOTEM,
+               LIGHTNING_SHIELD,
+               FLAMETONGUE_WEAPON,
+               STRENGTH_OF_EARTH_TOTEM,
+               FOCUSED,
+               FROSTBRAND_WEAPON,
+               FROST_RESISTANCE_TOTEM,
+               FLAMETONGUE_TOTEM,
+               FIRE_RESISTANCE_TOTEM,
+               WINDFURY_WEAPON,
+               GROUNDING_TOTEM,
+               NATURE_RESISTANCE_TOTEM,
+               WIND_FURY_TOTEM,
+               STORMSTRIKE,
+               LAVA_LASH,
+               SHAMANISTIC_RAGE,
+               WRATH_OF_AIR_TOTEM,
+               EARTH_ELEMENTAL_TOTEM,
+               BLOODLUST,
+               HEROISM,
+               FERAL_SPIRIT,
+               MAELSTROM_WEAPON;
 
-    // RESTORATION
-    uint32 HEALING_WAVE,
-           LESSER_HEALING_WAVE,
-           ANCESTRAL_SPIRIT,
-           TREMOR_TOTEM,
-           HEALING_STREAM_TOTEM,
-           MANA_SPRING_TOTEM,
-           CHAIN_HEAL,
-           MANA_TIDE_TOTEM,
-           EARTH_SHIELD,
-           WATER_SHIELD,
-           EARTHLIVING_WEAPON,
-           RIPTIDE,
-           CURE_TOXINS,
-           CLEANSE_SPIRIT,
-           NATURES_SWIFTNESS_SHAMAN,
-           TIDAL_FORCE;
+        // RESTORATION
+        uint32 HEALING_WAVE,
+               LESSER_HEALING_WAVE,
+               ANCESTRAL_SPIRIT,
+               TREMOR_TOTEM,
+               HEALING_STREAM_TOTEM,
+               MANA_SPRING_TOTEM,
+               CHAIN_HEAL,
+               MANA_TIDE_TOTEM,
+               EARTH_SHIELD,
+               WATER_SHIELD,
+               EARTHLIVING_WEAPON,
+               RIPTIDE,
+               CURE_TOXINS,
+               CLEANSE_SPIRIT,
+               NATURES_SWIFTNESS_SHAMAN,
+               TIDAL_FORCE;
 
-    // ELEMENTAL
-    uint32 LIGHTNING_BOLT,
-           EARTH_SHOCK,
-           STONECLAW_TOTEM,
-           FLAME_SHOCK,
-           SEARING_TOTEM,
-           PURGE,
-           FIRE_NOVA_TOTEM,
-           WIND_SHOCK,
-           FROST_SHOCK,
-           MAGMA_TOTEM,
-           CHAIN_LIGHTNING,
-           TOTEM_OF_WRATH,
-           FIRE_ELEMENTAL_TOTEM,
-           LAVA_BURST,
-           EARTHBIND_TOTEM,
-           HEX,
-           ELEMENTAL_MASTERY,
-           THUNDERSTORM;
+        // ELEMENTAL
+        uint32 LIGHTNING_BOLT,
+               EARTH_SHOCK,
+               STONECLAW_TOTEM,
+               FLAME_SHOCK,
+               SEARING_TOTEM,
+               PURGE,
+               FIRE_NOVA_TOTEM,
+               WIND_SHOCK,
+               FROST_SHOCK,
+               MAGMA_TOTEM,
+               CHAIN_LIGHTNING,
+               TOTEM_OF_WRATH,
+               FIRE_ELEMENTAL_TOTEM,
+               LAVA_BURST,
+               EARTHBIND_TOTEM,
+               HEX,
+               ELEMENTAL_MASTERY,
+               THUNDERSTORM;
 
-    // racial
-    uint32 ARCANE_TORRENT,
-           GIFT_OF_THE_NAARU,
-           STONEFORM,
-           ESCAPE_ARTIST,
-           EVERY_MAN_FOR_HIMSELF,
-           SHADOWMELD,
-           BLOOD_FURY,
-           WAR_STOMP,
-           BERSERKING,
-           WILL_OF_THE_FORSAKEN;
+        // racial
+        uint32 ARCANE_TORRENT,
+               GIFT_OF_THE_NAARU,
+               STONEFORM,
+               ESCAPE_ARTIST,
+               EVERY_MAN_FOR_HIMSELF,
+               SHADOWMELD,
+               BLOOD_FURY,
+               WAR_STOMP,
+               BERSERKING,
+               WILL_OF_THE_FORSAKEN;
 
-    // totem buffs
-    uint32 STRENGTH_OF_EARTH_EFFECT,
-           FLAMETONGUE_EFFECT,
-           MAGMA_TOTEM_EFFECT,
-           STONECLAW_EFFECT,
-           FIRE_RESISTANCE_EFFECT,
-           FROST_RESISTANCE_EFFECT,
-           GROUDNING_EFFECT,
-           NATURE_RESISTANCE_EFFECT,
-           STONESKIN_EFFECT,
-           WINDFURY_EFFECT,
-           WRATH_OF_AIR_EFFECT,
-           CLEANSING_TOTEM_EFFECT,
-           HEALING_STREAM_EFFECT,
-           MANA_SPRING_EFFECT,
-           TREMOR_TOTEM_EFFECT,
-           TOTEM_OF_WRATH_EFFECT,
-           EARTHBIND_EFFECT;
+        // totem buffs
+        uint32 STRENGTH_OF_EARTH_EFFECT,
+               FLAMETONGUE_EFFECT,
+               MAGMA_TOTEM_EFFECT,
+               STONECLAW_EFFECT,
+               FIRE_RESISTANCE_EFFECT,
+               FROST_RESISTANCE_EFFECT,
+               GROUDNING_EFFECT,
+               NATURE_RESISTANCE_EFFECT,
+               STONESKIN_EFFECT,
+               WINDFURY_EFFECT,
+               WRATH_OF_AIR_EFFECT,
+               CLEANSING_TOTEM_EFFECT,
+               HEALING_STREAM_EFFECT,
+               MANA_SPRING_EFFECT,
+               TREMOR_TOTEM_EFFECT,
+               TOTEM_OF_WRATH_EFFECT,
+               EARTHBIND_EFFECT;
 
-    // Buffs that dont stack with totems
-    uint32 IMPROVED_ICY_TALONS,
-           HORN_OF_WINTER;
+        // Buffs that dont stack with totems
+        uint32 IMPROVED_ICY_TALONS,
+               HORN_OF_WINTER;
 
-    uint32 SpellSequence, LastSpellEnhancement, LastSpellRestoration, LastSpellElemental;
+        uint32 SpellSequence, LastSpellEnhancement, LastSpellRestoration, LastSpellElemental;
 };
 
 #endif

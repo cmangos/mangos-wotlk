@@ -262,7 +262,7 @@ struct boss_majordomoAI : public ScriptedAI
             {
                 switch (m_uiSpeech)
                 {
-                        // Majordomo retreat event
+                    // Majordomo retreat event
                     case 1:
                         DoScriptText(SAY_DEFEAT_1, m_creature);
                         m_uiSpeechTimer = 7500;
@@ -291,7 +291,7 @@ struct boss_majordomoAI : public ScriptedAI
                         m_uiSpeech = 0;
                         break;
 
-                        // Ragnaros Summon Event
+                    // Ragnaros Summon Event
                     case 10:
                         DoScriptText(SAY_SUMMON_1, m_creature);
                         ++m_uiSpeech;
@@ -374,7 +374,7 @@ struct boss_majordomoAI : public ScriptedAI
         // Damage/Magic Reflection Timer
         if (m_uiReflectionShieldTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, (urand(0 , 1) ? SPELL_DAMAGE_REFLECTION : SPELL_MAGIC_REFLECTION)) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature, (urand(0, 1) ? SPELL_DAMAGE_REFLECTION : SPELL_MAGIC_REFLECTION)) == CAST_OK)
                 m_uiReflectionShieldTimer = 30000;
         }
         else
@@ -384,7 +384,7 @@ struct boss_majordomoAI : public ScriptedAI
         if (m_uiTeleportTargetTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TELEPORT_TARGET) == CAST_OK)
-                m_uiTeleportTargetTimer = urand (25000, 30000);
+                m_uiTeleportTargetTimer = urand(25000, 30000);
         }
         else
             m_uiTeleportTargetTimer -= uiDiff;
@@ -395,7 +395,7 @@ struct boss_majordomoAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_TELEPORT_RANDOM) == CAST_OK)
-                    m_uiTeleportRandomTimer = urand (25000, 30000);
+                    m_uiTeleportRandomTimer = urand(25000, 30000);
             }
         }
         else

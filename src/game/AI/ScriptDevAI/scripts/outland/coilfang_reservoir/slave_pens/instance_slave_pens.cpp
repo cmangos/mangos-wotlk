@@ -48,7 +48,7 @@ uint32 instance_slave_pens::GetData(uint32 type) const
     return 0;
 }
 
-void instance_slave_pens::OnCreatureCreate(Creature * creature)
+void instance_slave_pens::OnCreatureCreate(Creature* creature)
 {
     switch (creature->GetEntry())
     {

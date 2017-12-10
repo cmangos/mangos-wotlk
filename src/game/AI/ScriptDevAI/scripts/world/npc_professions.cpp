@@ -372,7 +372,7 @@ void SendActionMenu_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature, ui
         case GOSSIP_ACTION_TRAIN:
             pPlayer->SEND_TRAINERLIST(pCreature->GetObjectGuid());
             break;
-            // Learn Armor/Weapon
+        // Learn Armor/Weapon
         case GOSSIP_ACTION_INFO_DEF + 1:
             if (!pPlayer->HasSpell(S_ARMOR))
             {
@@ -389,7 +389,7 @@ void SendActionMenu_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature, ui
             }
             pPlayer->CLOSE_GOSSIP_MENU();
             break;
-            // Unlearn Armor/Weapon
+        // Unlearn Armor/Weapon
         case GOSSIP_ACTION_INFO_DEF + 3:
             if (HasWeaponSub(pPlayer))
             {
@@ -432,7 +432,7 @@ void SendActionMenu_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature, ui
                 pPlayer->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW, NULL, NULL);
             pPlayer->CLOSE_GOSSIP_MENU();
             break;
-            // Learn Hammer/Axe/Sword
+        // Learn Hammer/Axe/Sword
         case GOSSIP_ACTION_INFO_DEF + 5:
             pPlayer->CastSpell(pPlayer, S_LEARN_HAMMER, TRIGGERED_OLD_TRIGGERED);
             pPlayer->CLOSE_GOSSIP_MENU();
@@ -445,7 +445,7 @@ void SendActionMenu_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature, ui
             pPlayer->CastSpell(pPlayer, S_LEARN_SWORD, TRIGGERED_OLD_TRIGGERED);
             pPlayer->CLOSE_GOSSIP_MENU();
             break;
-            // Unlearn Hammer/Axe/Sword
+        // Unlearn Hammer/Axe/Sword
         case GOSSIP_ACTION_INFO_DEF + 8:
             if (EquippedOk(pPlayer, S_UNLEARN_HAMMER))
             {
@@ -632,7 +632,7 @@ void SendActionMenu_npc_prof_leather(Player* pPlayer, Creature* pCreature, uint3
         case GOSSIP_ACTION_TRAIN:
             pPlayer->SEND_TRAINERLIST(pCreature->GetObjectGuid());
             break;
-            // Unlearn Leather
+        // Unlearn Leather
         case GOSSIP_ACTION_INFO_DEF + 1:
             if (EquippedOk(pPlayer, S_UNLEARN_DRAGON))
             {

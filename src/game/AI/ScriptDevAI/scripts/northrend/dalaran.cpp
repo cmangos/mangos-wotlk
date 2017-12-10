@@ -55,7 +55,7 @@ struct npc_dalaran_guardian_mageAI : public ScriptedAI
         {
             // exception for quests 20439 and 24451
             if (who->HasAura(SPELL_COVENANT_DISGUISE_1) || who->HasAura(SPELL_COVENANT_DISGUISE_2) ||
-                who->HasAura(SPELL_SUNREAVER_DISGUISE_1) || who->HasAura(SPELL_SUNREAVER_DISGUISE_2))
+                    who->HasAura(SPELL_SUNREAVER_DISGUISE_1) || who->HasAura(SPELL_SUNREAVER_DISGUISE_2))
                 return;
 
             if (m_creature->IsWithinDistInMap(who, m_creature->GetAttackDistance(who)) && m_creature->IsWithinLOSInMap(who))

@@ -182,7 +182,7 @@ struct boss_the_lurker_belowAI : public Scripted_NoMovementAI
                 else
                     m_uiSpoutEndTimer -= uiDiff;
 
-                // no break;
+            // no break;
             case PHASE_NORMAL:
 
                 // Count the first phase during Spout too

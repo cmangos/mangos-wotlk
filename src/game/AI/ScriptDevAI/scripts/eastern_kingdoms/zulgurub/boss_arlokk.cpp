@@ -24,7 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulgurub.h"
 
- /* ContentData
+/* ContentData
 boss_arlokk
 npc_zulian_prowler
 go_gong_of_bethekk

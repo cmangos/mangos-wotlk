@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Thorngrin_The_Tender
 SD%Complete: 99.9
-SDComment: 
+SDComment:
 SDCategory: Tempest Keep, The Botanica
 EndScriptData */
 

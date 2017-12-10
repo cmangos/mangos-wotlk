@@ -146,7 +146,7 @@ static const DialogueEntryTwoSide aTocDialogues[] =
     {SAY_LKING_ANUB_INTRO_2,        NPC_THE_LICHKING_VISUAL, 0, 0, 18500},
     {EVENT_DESTROY_FLOOR, 0, 0, 0,                          2500},
     {SAY_LKING_ANUB_INTRO_3,        NPC_THE_LICHKING, 0, 0, 0},
-    {0, 0, 0, 0 , 0}
+    {0, 0, 0, 0, 0}
 };
 
 instance_trial_of_the_crusader::instance_trial_of_the_crusader(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aTocDialogues),

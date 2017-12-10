@@ -543,7 +543,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
             case NPC_INFINITE_AGENT:
             case NPC_INFINITE_HUNTER:
                 pSummoned->AI()->AttackStart(m_creature);
-                // no break;
+            // no break;
             case NPC_TOWNHALL_CITIZEN:
             case NPC_TOWNHALL_RESIDENT:
                 m_lSummonedGuidsList.push_back(pSummoned->GetObjectGuid());
@@ -576,7 +576,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
     {
         switch (uiPointId)
         {
-                // spawn citizens - ground floor
+            // spawn citizens - ground floor
             case 1:
                 if (Creature* pCitizen = m_creature->SummonCreature(NPC_TOWNHALL_CITIZEN, 2401.265f, 1202.789f, 134.103f, 1.466f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000))
                     m_firstCitizenGuid = pCitizen->GetObjectGuid();
@@ -604,7 +604,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
                 SetRun();
                 break;
 
-                // spawn second wave - on the first floor
+            // spawn second wave - on the first floor
             case 13:
                 DoScriptText(SAY_ARTHAS_MORE_SORCERY, m_creature);
                 SetRun(false);
@@ -625,7 +625,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
                 SetRun();
                 break;
 
-                // spawn third wave - ambush
+            // spawn third wave - ambush
             case 21:
                 DoScriptText(SAY_ARTHAS_WATCH_BACK, m_creature);
 
@@ -644,7 +644,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
                 DoScriptText(SAY_ARTHAS_NOT_EASY, m_creature);
                 break;
 
-                // spawn forth wave - main hall
+            // spawn forth wave - main hall
             case 26:
                 DoScriptText(SAY_ARTHAS_PERSISTENT, m_creature);
 
@@ -664,7 +664,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
                 SetEscortPaused(true);
                 break;
 
-                // open passage
+            // open passage
             case 32:
                 StartNextDialogueText(SAY_ARTHAS_TAKE_A_MOMENT);
                 break;
@@ -672,13 +672,13 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
                 DoScriptText(SAY_ARTHAS_PASSAGE, m_creature);
                 break;
 
-                // townhall escort complete
+            // townhall escort complete
             case 46:
                 if (m_pInstance)
                     m_pInstance->SetData(TYPE_ARTHAS_TOWNHALL_EVENT, DONE);
                 break;
 
-                // burning stratholme
+            // burning stratholme
             case 57:
                 DoScriptText(SAY_ARTHAS_REST, m_creature);
                 m_creature->SetFacingTo(5.04f);
@@ -693,13 +693,13 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
                     m_pInstance->SetData(TYPE_ARTHAS_ESCORT_EVENT, DONE);
                 break;
 
-                // malganis fight
+            // malganis fight
             case 74:
                 StartNextDialogueText(SAY_ARTHAS_MALGANIS);
                 SetEscortPaused(true);
                 break;
 
-                // event epilog
+            // event epilog
             case 75:
                 StartNextDialogueText(SAY_MALGANIS_JOURNEY);
                 break;
@@ -713,7 +713,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
     {
         switch (iEntry)
         {
-                // townhall entrance dialogue
+            // townhall entrance dialogue
             case NPC_TOWNHALL_CITIZEN:
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_firstCitizenGuid))
                     pCitizen->SetFacingToObject(m_creature);
@@ -760,7 +760,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
                 }
                 break;
 
-                // epoch event dialogue
+            // epoch event dialogue
             case SAY_ARTHAS_WHAT_ELSE:
                 m_creature->SummonCreature(NPC_LORD_EPOCH, 2456.396f, 1113.969f, 150.032f, 3.15f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 m_creature->SummonCreature(NPC_TIME_RIFT_BIG, 2456.058f, 1113.838f, 150.091f, 1.74f, TEMPSPAWN_TIMED_DESPAWN, 5000);
@@ -779,18 +779,18 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
                 }
                 break;
 
-                // bookcase passage delay
+            // bookcase passage delay
             case GO_DOOR_BOOKCASE:
                 if (m_pInstance)
                     m_pInstance->DoUseDoorOrButton(GO_DOOR_BOOKCASE);
                 break;
 
-                // burning city complete delay
+            // burning city complete delay
             case SPELL_TRANSFORM:
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 break;
 
-                // malganis attack
+            // malganis attack
             case NPC_MALGANIS:
                 if (!m_pInstance)
                     return;
@@ -802,7 +802,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
                 }
                 break;
 
-                // malganis event complete
+            // malganis event complete
             case SAY_ARTHAS_HUNT_MALGANIS:
                 m_creature->PlayMusic(MUSIC_ID_EVENT_COMPLETE);
 

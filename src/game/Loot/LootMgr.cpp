@@ -1223,7 +1223,7 @@ void Loot::Release(Player* player)
                     player->DestroyItemCount(m_itemTarget, count, true);
                     break;
                 }
-                    // temporary loot, auto loot move
+                // temporary loot, auto loot move
                 case LOOT_DISENCHANTING:
                 {
                     if (!IsLootedFor(player))
@@ -1233,7 +1233,7 @@ void Loot::Release(Player* player)
                     player->DestroyItem(m_itemTarget->GetBagSlot(), m_itemTarget->GetSlot(), true);
                     break;
                 }
-                    // normal persistence loot
+                // normal persistence loot
                 default:
                 {
                     // must be destroyed only if no loot
@@ -1530,7 +1530,8 @@ void Loot::SetGroupLootRight(Player* player)
                     m_maxEnchantSkill = enchantSkill;
             }
 
-        } while (itr != currentLooterItr);
+        }
+        while (itr != currentLooterItr);
 
         if (m_lootMethod == MASTER_LOOT)
         {
@@ -1686,8 +1687,8 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
     // not check distance for GO in case owned GO (fishing bobber case, for example)
     // And permit out of range GO with no owner in case fishing hole
     if ((type != LOOT_FISHINGHOLE &&
-        ((type != LOOT_FISHING && type != LOOT_FISHING_FAIL) || gameObject->GetOwnerGuid() != player->GetObjectGuid()) &&
-        !gameObject->IsWithinDistInMap(player, INTERACTION_DISTANCE)))
+            ((type != LOOT_FISHING && type != LOOT_FISHING_FAIL) || gameObject->GetOwnerGuid() != player->GetObjectGuid()) &&
+            !gameObject->IsWithinDistInMap(player, INTERACTION_DISTANCE)))
     {
         sLog.outError("Loot::CreateLoot> cannot create game object loot, basic check failed!");
         return;
@@ -1977,9 +1978,8 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
                     go->SetLootState(GO_JUST_DEACTIVATED);
             }
         }
-        else
-            if (IsLootedFor(target))
-                SendReleaseFor(target);
+        else if (IsLootedFor(target))
+            SendReleaseFor(target);
         ForceLootAnimationCLientUpdate();
     }
     return msg;
@@ -2268,7 +2268,7 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
             if (loot.IsItemAlreadyIn(lsi->itemid))
             {
                 // the item is already looted, let's give a 50%  chance to pick another one
-                uint32 chance = urand(0,1);
+                uint32 chance = urand(0, 1);
 
                 if (chance)
                     continue;                               // pass this item

@@ -929,11 +929,11 @@ struct npc_vimgol_AI : public ScriptedAI
     {
         m_uiEnrage = false;
         m_uiVolleyTimer = 5000;
-        m_uiCastTimer = 0;  
+        m_uiCastTimer = 0;
     }
 
-    void MovementInform(uint32 uiMovementType, uint32 uiData) override 
-    {        
+    void MovementInform(uint32 uiMovementType, uint32 uiData) override
+    {
         m_creature->GetMotionMaster()->Clear();
         m_creature->CastSpell(m_creature, SPELL_UNHOLY_GROWTH, TRIGGERED_NONE);
         m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
@@ -1002,7 +1002,7 @@ struct npc_vimgol_visual_bunnyAI : public ScriptedAI
     }
 
     ScriptedMap* m_pMap;
-    
+
     uint8 m_uiBunnyId;
     uint32 m_uiCastTimer;
 
@@ -1086,7 +1086,8 @@ struct npc_vimgol_middle_bunnyAI : public ScriptedAI
 
     uint8 playersInsideCircles()
     {
-        uint32 tmpAuras[5] = {
+        uint32 tmpAuras[5] =
+        {
             SPELL_VIMGOL_POP_TEST_A, SPELL_VIMGOL_POP_TEST_B, SPELL_VIMGOL_POP_TEST_C,
             SPELL_VIMGOL_POP_TEST_D, SPELL_VIMGOL_POP_TEST_E
         };
@@ -1106,7 +1107,7 @@ struct npc_vimgol_middle_bunnyAI : public ScriptedAI
         for (auto itr = playerList.begin(); itr != playerList.end(); ++itr)
         {
             if (!(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_A) && !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_B) && !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_C) &&
-                !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_D) && !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_E))
+                    !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_D) && !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_E))
                 continue;
 
             for (auto it = m_uiBunnyGuids.begin(); it != m_uiBunnyGuids.end(); ++it)
@@ -1341,9 +1342,9 @@ enum
 
 struct npc_deadsoul_orb : public ScriptedAI
 {
-    npc_deadsoul_orb(Creature* pCreature) : ScriptedAI(pCreature) 
-    { 
-        Reset(); 
+    npc_deadsoul_orb(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        Reset();
         m_creature->SetActiveObjectState(true); // Need to be active since the area is so large they might get unloaded on the way to the destination
         nextTrigger = WAYPOINT_TRIGGER_1;
         pointCount = 1;
@@ -1362,49 +1363,49 @@ struct npc_deadsoul_orb : public ScriptedAI
 
         switch (uiData)
         {
-        case 1:
-        {
-            nextTrigger = WAYPOINT_TRIGGER_2;
-            pointCount++;
-            MoveToNextTrigger();
-            break;
-        }
-        case 2:
-        {
-            nextTrigger = WAYPOINT_TRIGGER_3;
-            pointCount++;
-            MoveToNextTrigger();
-            break;
-        }
-        case 3:
-        {
-            nextTrigger = WAYPOINT_TRIGGER_4;
-            pointCount++;
-            MoveToNextTrigger();
-            break;
-        }
-        case 4:
-        {
-            nextTrigger = WAYPOINT_TRIGGER_5;
-            pointCount++;
-            MoveToNextTrigger();
-            break;
-        }
-        case 5:
-        {
-            pointCount++;
-            m_creature->SetWalk(false);
-            MoveToNextTrigger();
-            break;
-        }
-        case 6:
-        {
-            if (Creature* orbTrigger = GetClosestCreatureWithEntry(m_creature, ORB_TRIGGER_01, 15))
+            case 1:
             {
-                m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, m_creature, orbTrigger);
+                nextTrigger = WAYPOINT_TRIGGER_2;
+                pointCount++;
+                MoveToNextTrigger();
+                break;
             }
-            m_creature->ForcedDespawn();
-        }
+            case 2:
+            {
+                nextTrigger = WAYPOINT_TRIGGER_3;
+                pointCount++;
+                MoveToNextTrigger();
+                break;
+            }
+            case 3:
+            {
+                nextTrigger = WAYPOINT_TRIGGER_4;
+                pointCount++;
+                MoveToNextTrigger();
+                break;
+            }
+            case 4:
+            {
+                nextTrigger = WAYPOINT_TRIGGER_5;
+                pointCount++;
+                MoveToNextTrigger();
+                break;
+            }
+            case 5:
+            {
+                pointCount++;
+                m_creature->SetWalk(false);
+                MoveToNextTrigger();
+                break;
+            }
+            case 6:
+            {
+                if (Creature* orbTrigger = GetClosestCreatureWithEntry(m_creature, ORB_TRIGGER_01, 15))
+                {
+                    m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, m_creature, orbTrigger);
+                }
+                m_creature->ForcedDespawn();
+            }
         }
     }
 

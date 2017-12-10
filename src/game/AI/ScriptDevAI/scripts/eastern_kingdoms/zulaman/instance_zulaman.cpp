@@ -25,7 +25,7 @@ EndScriptData */
 #include "zulaman.h"
 
 instance_zulaman::instance_zulaman(Map* pMap) : ScriptedInstance(pMap),
-    m_uiEventTimer(MINUTE* IN_MILLISECONDS),
+    m_uiEventTimer(MINUTE * IN_MILLISECONDS),
     m_uiGongCount(0),
     m_uiBearEventPhase(0),
     m_bIsBearPhaseInProgress(false)
@@ -75,7 +75,7 @@ void instance_zulaman::OnCreatureCreate(Creature* pCreature)
         case NPC_EAGLE_SPIRIT:
         case NPC_LYNX_SPIRIT:
         case NPC_DRAGONHAWK_SPIRIT:
-            // Insert Malacrass companions here for better handling
+        // Insert Malacrass companions here for better handling
         case NPC_ALYSON:
         case NPC_THURG:
         case NPC_SLITHER:

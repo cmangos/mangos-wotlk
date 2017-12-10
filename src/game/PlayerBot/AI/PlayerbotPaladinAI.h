@@ -82,127 +82,127 @@ enum PaladinSpells
 
 class PlayerbotPaladinAI : PlayerbotClassAI
 {
-public:
-    PlayerbotPaladinAI(Player * const master, Player * const bot, PlayerbotAI * const ai);
-    virtual ~PlayerbotPaladinAI();
+    public:
+        PlayerbotPaladinAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        virtual ~PlayerbotPaladinAI();
 
-    // all combat actions go here
-    CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
-    bool Pull();
+        // all combat actions go here
+        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
+        bool Pull();
 
-    // all non combat actions go here, ex buffs, heals, rezzes
-    void DoNonCombatActions();
+        // all non combat actions go here, ex buffs, heals, rezzes
+        void DoNonCombatActions();
 
-    // Utility Functions
-    bool CanPull();
-    bool CastHoTOnTank();
+        // Utility Functions
+        bool CanPull();
+        bool CastHoTOnTank();
 
-private:
-    CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
-    CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
+    private:
+        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
+        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
 
-    // Heals the target based off its hps
-    CombatManeuverReturns HealPlayer(Player* target);
-    Player* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
+        // Heals the target based off its hps
+        CombatManeuverReturns HealPlayer(Player* target);
+        Player* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
 
-    //Changes aura according to spec/orders
-    void CheckAuras();
-    //Changes Seal according to spec
-    bool CheckSeals();
+        //Changes aura according to spec/orders
+        void CheckAuras();
+        //Changes Seal according to spec
+        bool CheckSeals();
 
-    static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target);
+        static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target);
 
-    // make this public so the static function can access it. Either that or make an accessor function for each
-public:
-    // Retribution
-    uint32 RETRIBUTION_AURA,
-           SEAL_OF_COMMAND,
-           JUDGEMENT_OF_LIGHT,
-           JUDGEMENT_OF_WISDOM,
-           GREATER_BLESSING_OF_WISDOM,
-           GREATER_BLESSING_OF_MIGHT,
-           BLESSING_OF_WISDOM,
-           BLESSING_OF_MIGHT,
-           HAMMER_OF_JUSTICE,
-           RIGHTEOUS_FURY,
-           CRUSADER_AURA,
-           CRUSADER_STRIKE,
-           AVENGING_WRATH,
-           DIVINE_STORM,
-           JUDGEMENT_OF_JUSTICE,
-           ART_OF_WAR;
+        // make this public so the static function can access it. Either that or make an accessor function for each
+    public:
+        // Retribution
+        uint32 RETRIBUTION_AURA,
+               SEAL_OF_COMMAND,
+               JUDGEMENT_OF_LIGHT,
+               JUDGEMENT_OF_WISDOM,
+               GREATER_BLESSING_OF_WISDOM,
+               GREATER_BLESSING_OF_MIGHT,
+               BLESSING_OF_WISDOM,
+               BLESSING_OF_MIGHT,
+               HAMMER_OF_JUSTICE,
+               RIGHTEOUS_FURY,
+               CRUSADER_AURA,
+               CRUSADER_STRIKE,
+               AVENGING_WRATH,
+               DIVINE_STORM,
+               JUDGEMENT_OF_JUSTICE,
+               ART_OF_WAR;
 
-    // Holy
-    uint32 FLASH_OF_LIGHT,
-           HOLY_LIGHT,
-           DIVINE_SHIELD,
-           HAMMER_OF_WRATH,
-           CONSECRATION,
-           CONCENTRATION_AURA,
-           DIVINE_FAVOR,
-           SACRED_SHIELD,
-           HOLY_SHOCK,
-           HOLY_WRATH,
-           LAY_ON_HANDS,
-           EXORCISM,
-           REDEMPTION,
-           DIVINE_PLEA,
-           SEAL_OF_CORRUPTION,
-           SEAL_OF_JUSTICE,
-           SEAL_OF_LIGHT,
-           SEAL_OF_RIGHTEOUSNESS,
-           SEAL_OF_VENGEANCE,
-           SEAL_OF_WISDOM,
-           PURIFY,
-           CLEANSE;
+        // Holy
+        uint32 FLASH_OF_LIGHT,
+               HOLY_LIGHT,
+               DIVINE_SHIELD,
+               HAMMER_OF_WRATH,
+               CONSECRATION,
+               CONCENTRATION_AURA,
+               DIVINE_FAVOR,
+               SACRED_SHIELD,
+               HOLY_SHOCK,
+               HOLY_WRATH,
+               LAY_ON_HANDS,
+               EXORCISM,
+               REDEMPTION,
+               DIVINE_PLEA,
+               SEAL_OF_CORRUPTION,
+               SEAL_OF_JUSTICE,
+               SEAL_OF_LIGHT,
+               SEAL_OF_RIGHTEOUSNESS,
+               SEAL_OF_VENGEANCE,
+               SEAL_OF_WISDOM,
+               PURIFY,
+               CLEANSE;
 
-    // Protection
-    uint32 GREATER_BLESSING_OF_KINGS,
-           BLESSING_OF_KINGS,
-           HAND_OF_PROTECTION,
-           SHADOW_RESISTANCE_AURA,
-           DEVOTION_AURA,
-           FIRE_RESISTANCE_AURA,
-           FROST_RESISTANCE_AURA,
-           DEFENSIVE_STANCE,
-           BERSERKER_STANCE,
-           BATTLE_STANCE,
-           DIVINE_SACRIFICE,
-           DIVINE_PROTECTION,
-           DIVINE_INTERVENTION,
-           HOLY_SHIELD,
-           AVENGERS_SHIELD,
-           RIGHTEOUS_DEFENSE,
-           BLESSING_OF_SANCTUARY,
-           GREATER_BLESSING_OF_SANCTUARY,
-           HAND_OF_SACRIFICE,
-           SHIELD_OF_RIGHTEOUSNESS,
-           HAND_OF_RECKONING,
-           HAMMER_OF_THE_RIGHTEOUS;
+        // Protection
+        uint32 GREATER_BLESSING_OF_KINGS,
+               BLESSING_OF_KINGS,
+               HAND_OF_PROTECTION,
+               SHADOW_RESISTANCE_AURA,
+               DEVOTION_AURA,
+               FIRE_RESISTANCE_AURA,
+               FROST_RESISTANCE_AURA,
+               DEFENSIVE_STANCE,
+               BERSERKER_STANCE,
+               BATTLE_STANCE,
+               DIVINE_SACRIFICE,
+               DIVINE_PROTECTION,
+               DIVINE_INTERVENTION,
+               HOLY_SHIELD,
+               AVENGERS_SHIELD,
+               RIGHTEOUS_DEFENSE,
+               BLESSING_OF_SANCTUARY,
+               GREATER_BLESSING_OF_SANCTUARY,
+               HAND_OF_SACRIFICE,
+               SHIELD_OF_RIGHTEOUSNESS,
+               HAND_OF_RECKONING,
+               HAMMER_OF_THE_RIGHTEOUS;
 
-    // cannot be protected
-    uint32 FORBEARANCE;
+        // cannot be protected
+        uint32 FORBEARANCE;
 
-    // racial
-    uint32 ARCANE_TORRENT,
-           GIFT_OF_THE_NAARU,
-           STONEFORM,
-           ESCAPE_ARTIST,
-           EVERY_MAN_FOR_HIMSELF,
-           SHADOWMELD,
-           BLOOD_FURY,
-           WAR_STOMP,
-           BERSERKING,
-           WILL_OF_THE_FORSAKEN;
+        // racial
+        uint32 ARCANE_TORRENT,
+               GIFT_OF_THE_NAARU,
+               STONEFORM,
+               ESCAPE_ARTIST,
+               EVERY_MAN_FOR_HIMSELF,
+               SHADOWMELD,
+               BLOOD_FURY,
+               WAR_STOMP,
+               BERSERKING,
+               WILL_OF_THE_FORSAKEN;
 
-    //Non-Stacking buffs
-    uint32 PRAYER_OF_SHADOW_PROTECTION;
+        //Non-Stacking buffs
+        uint32 PRAYER_OF_SHADOW_PROTECTION;
 
-private:
-    uint32 SpellSequence, CombatCounter, HealCounter;
+    private:
+        uint32 SpellSequence, CombatCounter, HealCounter;
 };
 
 #endif

@@ -135,12 +135,12 @@ struct npc_dirty_larryAI : public ScriptedAI
         switch (uiStep)
         {
             case 1:
-                if (Creature* pCreepjack = m_creature->GetMap()->GetCreature(m_creepjackGuid)) 
+                if (Creature* pCreepjack = m_creature->GetMap()->GetCreature(m_creepjackGuid))
                     pCreepjack->SetStandState(UNIT_STAND_STATE_STAND);
-                
-                if (Creature* pMalone = m_creature->GetMap()->GetCreature(m_maloneGuid)) 
+
+                if (Creature* pMalone = m_creature->GetMap()->GetCreature(m_maloneGuid))
                     pMalone->SetStandState(UNIT_STAND_STATE_STAND);
-                
+
                 DoScriptText(SAY_START, m_creature, pPlayer);
                 return 2000;
             case 2:

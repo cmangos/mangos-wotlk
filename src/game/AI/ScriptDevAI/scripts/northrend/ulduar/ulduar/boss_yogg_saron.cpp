@@ -1102,7 +1102,7 @@ struct npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHe
     {
         switch (uiIndex)
         {
-                // stormwind
+            // stormwind
             case 0:
                 m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1955.173f, 85.26153f, 239.7496f, 4.049f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1893.146f, 44.24343f, 239.7496f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
@@ -1123,7 +1123,7 @@ struct npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHe
                 // start dialogue
                 StartNextDialogueText(NPC_KING_LLANE);
                 break;
-                // chamber
+            // chamber
             case 1:
                 m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2063.156f, 27.95839f, 244.2707f, 5.288f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2061.257f, -53.8788f, 239.8633f, 2.478f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
@@ -1147,7 +1147,7 @@ struct npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHe
                 // start dialogue
                 StartNextDialogueText(NPC_NELTHARION);
                 break;
-                // icecrown
+            // icecrown
             case 2:
                 m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1948.668f, -152.4481f, 240.073f, 1.919f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1879.845f, -72.91819f, 240.073f, 5.689f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);

@@ -353,7 +353,7 @@ enum TriggerCastFlags : uint32
     TRIGGERED_INSTANT_CAST                      = 0x00000008,   // Will ignore any cast time set in spell entry
     TRIGGERED_AUTOREPEAT                        = 0x00000010,   // Will signal spell system that this is internal autorepeat call
     TRIGGERED_IGNORE_UNATTACKABLE_FLAG          = 0x00000020,   // Ignores UNIT_FLAG_NOT_ATTACKABLE in CheckTarget
-    TRIGGERED_DO_NOT_PROC						= 0x00000040,   // Spells from scripts should not proc - DBScripts for example
+    TRIGGERED_DO_NOT_PROC                       = 0x00000040,   // Spells from scripts should not proc - DBScripts for example
     TRIGGERED_PET_CAST                          = 0x00000080,   // Spell that should report error through pet opcode
     TRIGGERED_FULL_MASK                         = 0xFFFFFFFF
 };
@@ -611,7 +611,7 @@ enum UnitFlags2
     UNIT_FLAG2_REGENERATE_POWER     = 0x00000800,
     UNIT_FLAG2_SPELL_CLICK_IN_GROUP = 0x00001000,
     UNIT_FLAG2_SPELL_CLICK_DISABLED = 0x00002000,
-    UNIT_FLAG2_INTERACT_ANY_REACTION= 0x00004000,
+    UNIT_FLAG2_INTERACT_ANY_REACTION = 0x00004000,
     UNIT_FLAG2_UNK15                = 0x00008000,
     UNIT_FLAG2_UNK16                = 0x00010000,
 };
@@ -985,13 +985,13 @@ uint32 createProcExtendMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missC
 
 struct CombatData
 {
-public:
-    CombatData(Unit* owner) : threatManager(ThreatManager(owner)), hostileRefManager(HostileRefManager(owner)) {};
+    public:
+        CombatData(Unit* owner) : threatManager(ThreatManager(owner)), hostileRefManager(HostileRefManager(owner)) {};
 
-    // Manage all Units threatening us
-    ThreatManager threatManager;
-    // Manage all Units that are threatened by us
-    HostileRefManager hostileRefManager;
+        // Manage all Units threatening us
+        ThreatManager threatManager;
+        // Manage all Units that are threatened by us
+        HostileRefManager hostileRefManager;
 };
 
 enum SpellAuraProcResult
@@ -1090,84 +1090,84 @@ enum ActionBarIndex
 
 struct CharmInfo
 {
-public:
-    explicit CharmInfo(Unit* unit);
-    ~CharmInfo();
+    public:
+        explicit CharmInfo(Unit* unit);
+        ~CharmInfo();
 
-    void SetCharmState(std::string const & ainame = "PetAI", bool withNewThreatList = true);
-    void ResetCharmState();
-    uint32 GetPetNumber() const { return m_petnumber; }
-    void SetPetNumber(uint32 petnumber, bool statwindow);
+        void SetCharmState(std::string const& ainame = "PetAI", bool withNewThreatList = true);
+        void ResetCharmState();
+        uint32 GetPetNumber() const { return m_petnumber; }
+        void SetPetNumber(uint32 petnumber, bool statwindow);
 
-    void SetCommandState(CommandStates st);
-    CommandStates GetCommandState() const { return m_CommandState; }
-    bool HasCommandState(CommandStates state) const { return (m_CommandState == state); }
+        void SetCommandState(CommandStates st);
+        CommandStates GetCommandState() const { return m_CommandState; }
+        bool HasCommandState(CommandStates state) const { return (m_CommandState == state); }
 
-    void InitVehicleCreateSpells();
-    void InitPossessCreateSpells();
-    void InitCharmCreateSpells();
-    void InitPetActionBar();
-    void InitEmptyActionBar();
+        void InitVehicleCreateSpells();
+        void InitPossessCreateSpells();
+        void InitCharmCreateSpells();
+        void InitPetActionBar();
+        void InitEmptyActionBar();
 
-    // return true if successful
-    bool AddSpellToActionBar(uint32 spellId, ActiveStates newstate = ACT_DECIDE, int32 prefPos = -1);
-    bool RemoveSpellFromActionBar(uint32 spell_id);
-    void LoadPetActionBar(const std::string& data);
-    void BuildActionBar(WorldPacket& data) const;
-    void SetSpellAutocast(uint32 spell_id, bool state);
-    void SetActionBar(uint8 index, uint32 spellOrAction, ActiveStates type)
-    {
-        PetActionBar[index].SetActionAndType(spellOrAction, type);
-    }
-    UnitActionBarEntry const* GetActionBarEntry(uint8 index) const { return &(PetActionBar[index]); }
+        // return true if successful
+        bool AddSpellToActionBar(uint32 spellId, ActiveStates newstate = ACT_DECIDE, int32 prefPos = -1);
+        bool RemoveSpellFromActionBar(uint32 spell_id);
+        void LoadPetActionBar(const std::string& data);
+        void BuildActionBar(WorldPacket& data) const;
+        void SetSpellAutocast(uint32 spell_id, bool state);
+        void SetActionBar(uint8 index, uint32 spellOrAction, ActiveStates type)
+        {
+            PetActionBar[index].SetActionAndType(spellOrAction, type);
+        }
+        UnitActionBarEntry const* GetActionBarEntry(uint8 index) const { return &(PetActionBar[index]); }
 
-    void ToggleCreatureAutocast(uint32 spellid, bool apply);
+        void ToggleCreatureAutocast(uint32 spellid, bool apply);
 
-    CharmSpellEntry* GetCharmSpell(uint8 index) { return &(m_charmspells[index]); }
+        CharmSpellEntry* GetCharmSpell(uint8 index) { return &(m_charmspells[index]); }
 
-    void SetIsRetreating(bool retreating = false) { m_retreating = retreating; }
-    bool GetIsRetreating() { return m_retreating; }
+        void SetIsRetreating(bool retreating = false) { m_retreating = retreating; }
+        bool GetIsRetreating() { return m_retreating; }
 
-    void SetStayPosition(bool stay = false);
-    bool IsStayPosSet() { return m_stayPosSet; }
+        void SetStayPosition(bool stay = false);
+        bool IsStayPosSet() { return m_stayPosSet; }
 
-    float GetStayPosX() { return m_stayPosX; }
-    float GetStayPosY() { return m_stayPosY; }
-    float GetStayPosZ() { return m_stayPosZ; }
-    float GetStayPosO() { return m_stayPosO; }
+        float GetStayPosX() { return m_stayPosX; }
+        float GetStayPosY() { return m_stayPosY; }
+        float GetStayPosZ() { return m_stayPosZ; }
+        float GetStayPosO() { return m_stayPosO; }
 
-    uint32 GetSpellOpener() { return m_opener; }
-    uint32 GetSpellOpenerMinRange() { return m_openerMinRange; }
-    uint32 GetSpellOpenerMaxRange() { return m_openerMaxRange; }
+        uint32 GetSpellOpener() { return m_opener; }
+        uint32 GetSpellOpenerMinRange() { return m_openerMinRange; }
+        uint32 GetSpellOpenerMaxRange() { return m_openerMaxRange; }
 
-    void SetSpellOpener(uint32 spellId = 0, uint32 minRange = 0, uint32 maxRange = 0)
-    {
-        m_opener = spellId;
-        m_openerMinRange = minRange;
-        m_openerMaxRange = maxRange;
-    }
+        void SetSpellOpener(uint32 spellId = 0, uint32 minRange = 0, uint32 maxRange = 0)
+        {
+            m_opener = spellId;
+            m_openerMinRange = minRange;
+            m_openerMaxRange = maxRange;
+        }
 
-    CreatureAI* GetAI() { return m_ai; }
-    CombatData* GetCombatData() { return m_combatData; };
+        CreatureAI* GetAI() { return m_ai; }
+        CombatData* GetCombatData() { return m_combatData; };
 
-private:
-    Unit*               m_unit;
-    CreatureAI*         m_ai;
-    CombatData*         m_combatData;
-    UnitActionBarEntry  PetActionBar[MAX_UNIT_ACTION_BAR_INDEX];
-    CharmSpellEntry     m_charmspells[CREATURE_MAX_SPELLS];
-    CommandStates       m_CommandState;
-    uint32              m_petnumber;
-    uint32              m_opener;
-    uint32              m_openerMinRange;
-    uint32              m_openerMaxRange;
-    uint8               m_unitFieldBytes2_1;
-    bool                m_retreating;
-    bool                m_stayPosSet;
-    float               m_stayPosX;
-    float               m_stayPosY;
-    float               m_stayPosZ;
-    float               m_stayPosO;
+    private:
+        Unit*               m_unit;
+        CreatureAI*         m_ai;
+        CombatData*         m_combatData;
+        UnitActionBarEntry  PetActionBar[MAX_UNIT_ACTION_BAR_INDEX];
+        CharmSpellEntry     m_charmspells[CREATURE_MAX_SPELLS];
+        CommandStates       m_CommandState;
+        uint32              m_petnumber;
+        uint32              m_opener;
+        uint32              m_openerMinRange;
+        uint32              m_openerMaxRange;
+        uint8               m_unitFieldBytes2_1;
+        bool                m_retreating;
+        bool                m_stayPosSet;
+        float               m_stayPosX;
+        float               m_stayPosY;
+        float               m_stayPosZ;
+        float               m_stayPosO;
 };
 
 // used in CallForAllControlledUnits/CheckAllControlledUnits
@@ -1667,8 +1667,8 @@ class Unit : public WorldObject
         virtual float GetMissChance(SpellSchoolMask schoolMask) const;
         virtual float GetMissChance(const SpellEntry* entry, SpellSchoolMask schoolMask) const;
 
-        float CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType attType, const SpellEntry *ability = nullptr) const;
-        float CalculateEffectiveMissChance(const Unit* victim, WeaponAttackType attType, const SpellEntry *ability = nullptr) const;
+        float CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType attType, const SpellEntry* ability = nullptr) const;
+        float CalculateEffectiveMissChance(const Unit* victim, WeaponAttackType attType, const SpellEntry* ability = nullptr) const;
 
         float CalculateSpellCritChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const;
         float CalculateSpellMissChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const;
@@ -2076,8 +2076,8 @@ class Unit : public WorldObject
         virtual void UpdateAttackPowerAndDamage(bool ranged = false) = 0;
         virtual void UpdateDamagePhysical(WeaponAttackType attType) = 0;
         float GetTotalAttackPowerValue(WeaponAttackType attType) const;
-        float GetWeaponDamageRange(WeaponAttackType attType , WeaponDamageRange type) const;
-        void SetBaseWeaponDamage(WeaponAttackType attType , WeaponDamageRange damageRange, float value) { m_weaponDamage[attType][damageRange] = value; }
+        float GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange type) const;
+        void SetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange damageRange, float value) { m_weaponDamage[attType][damageRange] = value; }
 
         // Visibility system
         UnitVisibility GetVisibility() const { return m_Visibility; }

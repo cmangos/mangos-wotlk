@@ -381,7 +381,7 @@ struct boss_kaelthasAI : public ScriptedAI
     {
         switch (m_uiPhase)
         {
-                // ***** Advisors phase ********
+            // ***** Advisors phase ********
             case PHASE_1_ADVISOR:
             {
                 if (!m_uiPhaseTimer)
@@ -662,7 +662,7 @@ struct boss_kaelthasAI : public ScriptedAI
             case PHASE_5_WAITING:
                 // Nothing here; wait for boss to arive at point
                 break;
-                // ***** Phase 6 - explode the bridge ********
+            // ***** Phase 6 - explode the bridge ********
             case PHASE_6_FLYING:
                 if (m_uiExplodeTimer)
                 {

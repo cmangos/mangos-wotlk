@@ -47,7 +47,7 @@ class AccountMgr
         bool CheckPassword(uint32 accid, std::string passwd) const;
 
         uint32 GetId(std::string username) const;
-    static AccountTypes GetSecurity(uint32 acc_id);
+        static AccountTypes GetSecurity(uint32 acc_id);
         bool GetName(uint32 acc_id, std::string& name) const;
         uint32 GetCharactersCount(uint32 acc_id) const;
         std::string CalculateShaPassHash(std::string& name, std::string& password) const;

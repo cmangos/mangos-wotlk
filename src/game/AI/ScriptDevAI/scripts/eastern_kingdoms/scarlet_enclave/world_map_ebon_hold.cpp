@@ -57,7 +57,7 @@ void world_map_ebon_hold::OnCreatureCreate(Creature* pCreature)
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
-            // Behemots and abominations are spawned by default on the map so they need to be handled here
+        // Behemots and abominations are spawned by default on the map so they need to be handled here
         case NPC_FLESH_BEHEMOTH:
         case NPC_RAMPAGING_ABOMINATION:
             m_lArmyGuids.push_back(pCreature->GetObjectGuid());
@@ -72,7 +72,7 @@ void world_map_ebon_hold::OnCreatureDeath(Creature* pCreature)
 
     switch (pCreature->GetEntry())
     {
-            // resummon the behemots or abominations if they die
+        // resummon the behemots or abominations if they die
         case NPC_FLESH_BEHEMOTH:
         case NPC_RAMPAGING_ABOMINATION:
             m_lArmyGuids.remove(pCreature->GetObjectGuid());// if remove respawning on reset won't work! (are there any spawned by default?) ?? - unclear related to ResetBattle()
@@ -95,7 +95,7 @@ void world_map_ebon_hold::OnCreatureEvade(Creature* pCreature)
 
     switch (pCreature->GetEntry())
     {
-            // don't let the scourge evade while the battle is running
+        // don't let the scourge evade while the battle is running
         case NPC_FLESH_BEHEMOTH:
         case NPC_RAMPAGING_ABOMINATION:
         case NPC_VOLATILE_GHOUL:

@@ -129,7 +129,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoFirstCombatManeuver(Unit* pTarget)
                 }
             }
             else if (PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder())
-               return HealPlayer(GetHealTarget());
+                return HealPlayer(GetHealTarget());
             else
                 return RETURN_NO_ACTION_OK; // wait it out
         }
@@ -175,7 +175,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoFirstCombatManeuverPVP(Unit* /*pTarg
     return RETURN_NO_ACTION_OK;
 }
 
-CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit* pTarget)
 {
 
     if (CheckSeals())
@@ -198,7 +198,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     return RETURN_NO_ACTION_ERROR;
 }
 
-CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit *pTarget)
+CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit* pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -237,26 +237,26 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit *pTarget)
     }
 
     //Used to determine if this bot has highest threat
-    Unit *newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
+    Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE)(PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
     switch (spec)
     {
         case PALADIN_SPEC_HOLY:
             if (m_ai->IsHealer())
                 return RETURN_NO_ACTION_OK;
-            // else: DPS (retribution, NEVER protection)
+        // else: DPS (retribution, NEVER protection)
 
         case PALADIN_SPEC_RETRIBUTION:
-            if (HAMMER_OF_WRATH > 0 && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.20 && m_ai->CastSpell (HAMMER_OF_WRATH, *pTarget))
+            if (HAMMER_OF_WRATH > 0 && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.20 && m_ai->CastSpell(HAMMER_OF_WRATH, *pTarget))
                 return RETURN_CONTINUE;
-            if (ART_OF_WAR > 0 && EXORCISM > 0 && m_bot->IsSpellReady(EXORCISM) && m_bot->HasAura(ART_OF_WAR, EFFECT_INDEX_0) && m_ai->CastSpell (EXORCISM, *pTarget))
+            if (ART_OF_WAR > 0 && EXORCISM > 0 && m_bot->IsSpellReady(EXORCISM) && m_bot->HasAura(ART_OF_WAR, EFFECT_INDEX_0) && m_ai->CastSpell(EXORCISM, *pTarget))
                 return RETURN_CONTINUE;
-            if (CRUSADER_STRIKE > 0 && m_bot->IsSpellReady(CRUSADER_STRIKE) && m_ai->CastSpell (CRUSADER_STRIKE, *pTarget))
+            if (CRUSADER_STRIKE > 0 && m_bot->IsSpellReady(CRUSADER_STRIKE) && m_ai->CastSpell(CRUSADER_STRIKE, *pTarget))
                 return RETURN_CONTINUE;
-            if (DIVINE_STORM > 0 && /*m_ai->GetAttackerCount() >= 3 && meleeReach*/ m_bot->IsSpellReady(DIVINE_STORM) && m_ai->CastSpell (DIVINE_STORM, *pTarget))
+            if (DIVINE_STORM > 0 && /*m_ai->GetAttackerCount() >= 3 && meleeReach*/ m_bot->IsSpellReady(DIVINE_STORM) && m_ai->CastSpell(DIVINE_STORM, *pTarget))
                 return RETURN_CONTINUE;
-            if (JUDGEMENT_OF_LIGHT > 0 && m_ai->CastSpell (JUDGEMENT_OF_LIGHT, *pTarget))
+            if (JUDGEMENT_OF_LIGHT > 0 && m_ai->CastSpell(JUDGEMENT_OF_LIGHT, *pTarget))
                 return RETURN_CONTINUE;
-            if (AVENGING_WRATH > 0 && m_ai->CastSpell (AVENGING_WRATH, *m_bot))
+            if (AVENGING_WRATH > 0 && m_ai->CastSpell(AVENGING_WRATH, *m_bot))
                 return RETURN_CONTINUE;
             /*if (HAMMER_OF_JUSTICE > 0 && !pTarget->HasAura(HAMMER_OF_JUSTICE, EFFECT_INDEX_0) && m_ai->CastSpell (HAMMER_OF_JUSTICE, *pTarget))
                 return RETURN_CONTINUE;*/
@@ -290,7 +290,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit *pTarget)
                 return RETURN_CONTINUE;
             if (SHIELD_OF_RIGHTEOUSNESS > 0 && m_bot->IsSpellReady(SHIELD_OF_RIGHTEOUSNESS) && m_ai->CastSpell(SHIELD_OF_RIGHTEOUSNESS, *pTarget))
                 return RETURN_CONTINUE;
-            if (JUDGEMENT_OF_LIGHT > 0 && m_ai->CastSpell (JUDGEMENT_OF_LIGHT, *pTarget))
+            if (JUDGEMENT_OF_LIGHT > 0 && m_ai->CastSpell(JUDGEMENT_OF_LIGHT, *pTarget))
                 return RETURN_CONTINUE;
             return RETURN_NO_ACTION_OK;
     }
@@ -339,7 +339,7 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
         Unit::SpellAuraHolderMap const& auras = target->GetSpellAuraHolderMap();
         for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
         {
-            SpellAuraHolder *holder = itr->second;
+            SpellAuraHolder* holder = itr->second;
             if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
             {
                 if (holder->GetSpellProto()->Dispel == DISPEL_DISEASE)
@@ -381,9 +381,9 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
 
     // You probably want to save this for tank/healer trouble
     if (hp < 30 && HAND_OF_PROTECTION > 0 && !target->HasAura(FORBEARANCE, EFFECT_INDEX_0)
-        && !target->HasAura(HAND_OF_PROTECTION, EFFECT_INDEX_0) && !target->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0)
-        && !target->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && (GetTargetJob(target) & (JOB_HEAL | JOB_TANK))
-        && m_ai->CastSpell(HAND_OF_PROTECTION, *target))
+            && !target->HasAura(HAND_OF_PROTECTION, EFFECT_INDEX_0) && !target->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0)
+            && !target->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && (GetTargetJob(target) & (JOB_HEAL | JOB_TANK))
+            && m_ai->CastSpell(HAND_OF_PROTECTION, *target))
         return RETURN_CONTINUE;
 
     // Isn't this more of a group heal spell?
@@ -484,7 +484,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     if (!m_bot)  return;
 
     if (!m_bot->isAlive() || m_bot->IsInDuel()) return;
-    
+
     CheckAuras();
 
     //Put up RF if tank
@@ -529,7 +529,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
  *
  * Return bool - returns true if a buff took place.
  */
-bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target)
+bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target)
 {
     if (!ai)          return false;
     if (spellId == 0) return false;

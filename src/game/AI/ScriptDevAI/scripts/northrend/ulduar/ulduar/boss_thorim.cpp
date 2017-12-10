@@ -357,7 +357,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
     {
         switch (pSummoned->GetEntry())
         {
-                // the lightning orb should clean out the whole hallway on arena berserk
+            // the lightning orb should clean out the whole hallway on arena berserk
             case NPC_LIGHTNING_ORB:
                 pSummoned->CastSpell(pSummoned, SPELL_LIGHTNING_DESTRUCTION, TRIGGERED_OLD_TRIGGERED);
                 break;
@@ -545,7 +545,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
 
         switch (m_uiPhase)
         {
-                // arena phase abilities
+            // arena phase abilities
             case PHASE_ARENA:
 
                 if (m_uiBerserkTimer)
@@ -595,7 +595,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
                     m_uiStormHammerTimer -= uiDiff;
 
                 break;
-                // solo phase abilities
+            // solo phase abilities
             case PHASE_SOLO:
 
                 if (m_uiBerserkTimer)
@@ -664,7 +664,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
 
                 DoMeleeAttackIfReady();
                 break;
-                // transition phase; nothing here, wait for transition to finish
+            // transition phase; nothing here, wait for transition to finish
             case PHASE_TRANSITION:
                 break;
         }

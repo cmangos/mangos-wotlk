@@ -287,7 +287,7 @@ enum FactionTemplateFlags
 {
     FACTION_TEMPLATE_FLAG_PVP               = 0x00000800,   // flagged for PvP
     FACTION_TEMPLATE_FLAG_CONTESTED_GUARD   = 0x00001000,   // faction will attack players that were involved in PvP combats
-    FACTION_TEMPLATE_FLAG_NEUTRAL_AGGRESSIVE= 0x00002000,   // always hostile to factions which should would be otherwise treated as neutral (one-sided)
+    FACTION_TEMPLATE_FLAG_NEUTRAL_AGGRESSIVE = 0x00002000,  // always hostile to factions which should would be otherwise treated as neutral (one-sided)
 };
 
 enum FactionGroupMask
@@ -296,7 +296,7 @@ enum FactionGroupMask
     FACTION_GROUP_MASK_ALLIANCE = 2,                              // player or creature from alliance team
     FACTION_GROUP_MASK_HORDE    = 4,                              // player or creature from horde team
     FACTION_GROUP_MASK_MONSTER  = 8                               // aggressive creature from monster team
-                                                                  // if none flags set then non-aggressive creature
+                                  // if none flags set then non-aggressive creature
 };
 
 enum MapTypes                                               // Lua_IsInInstance

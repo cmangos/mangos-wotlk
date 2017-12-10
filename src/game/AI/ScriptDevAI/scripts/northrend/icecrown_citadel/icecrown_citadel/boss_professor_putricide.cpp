@@ -279,7 +279,7 @@ struct boss_professor_putricideAI : public ScriptedAI
                 break;
             case NPC_GAS_CLOUD:
                 pSummoned->CastSpell(pSummoned, SPELL_GASEOUS_BLOAT_VISUAL, TRIGGERED_OLD_TRIGGERED);
-                // no break;
+            // no break;
             case NPC_VOLATILE_OOZE:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     pSummoned->AI()->AttackStart(pTarget);
