@@ -727,7 +727,6 @@ UPDATE gameobject_template SET ScriptName='go_manticron_cube' WHERE entry=181713
 UPDATE creature_template SET ScriptName='boss_magtheridon' WHERE entry=17257;
 UPDATE creature_template SET ScriptName='mob_abyssal' WHERE entry=17454;
 UPDATE creature_template SET ScriptName='mob_hellfire_channeler' WHERE entry=17256;
-UPDATE creature_template SET ScriptName='npc_target_trigger' WHERE entry=17474;
 
 /* HELLFIRE PENINSULA */
 UPDATE creature_template SET ScriptName='boss_doomlord_kazzak' WHERE entry=18728;
