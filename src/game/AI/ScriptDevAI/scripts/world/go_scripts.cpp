@@ -625,7 +625,7 @@ struct go_brewfest_music : public GameObjectAI
         }
     }
 
-    void UpdateAI(uint32 diff) override
+    void UpdateAI(const uint32 diff) override
     {
         if (!IsHolidayActive(HOLIDAY_BREWFEST)) // Check if Brewfest is active
             return;
@@ -695,7 +695,7 @@ struct go_midsummer_music : public GameObjectAI
 
     uint32 m_musicTimer;
 
-    void UpdateAI(uint32 diff) override
+    void UpdateAI(const uint32 diff) override
     {
         if (!IsHolidayActive(HOLIDAY_FIRE_FESTIVAL))
             return;
@@ -745,7 +745,7 @@ struct go_pirate_day_music : public GameObjectAI
 
     uint32 m_musicTimer;
 
-    void UpdateAI(uint32 diff) override
+    void UpdateAI(const uint32 diff) override
     {
         if (!IsHolidayActive(HOLIDAY_PIRATES_DAY))
             return;
