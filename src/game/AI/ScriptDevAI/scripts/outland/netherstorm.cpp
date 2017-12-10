@@ -2589,6 +2589,8 @@ struct npc_adyen_the_lightwardenAI : public ScriptedAI
             karja->ForcedDespawn();
         if (Creature* ishanah = m_creature->GetMap()->GetCreature(m_ishanahGuid))
             ishanah->ForcedDespawn();
+        if (Creature* socrethar = m_creature->GetMap()->GetCreature(m_socretharGuid))
+            socrethar->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->ForcedDespawn();
     }
 
