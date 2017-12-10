@@ -986,7 +986,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                         owner->RemoveAuraHolderFromStack(34027);
 
                     // Remove only single aura from stack
-                    if (triggeredByAura->GetStackAmount() > 1 && !triggeredByAura->GetHolder()->ModStackAmount(-1))
+                    if (triggeredByAura->GetStackAmount() > 1 && !triggeredByAura->GetHolder()->ModStackAmount(-1, nullptr))
                         return SPELL_AURA_PROC_CANT_TRIGGER;
                 }
                 // Grim Reprisal
@@ -4063,7 +4063,7 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(Unit* pVictim, uint32 /*
     if (spellInfo->Id == 55166)                             // Tidal Force
     {
         // Remove only single aura from stack
-        if (triggeredByAura->GetStackAmount() > 1 && !triggeredByAura->GetHolder()->ModStackAmount(-1))
+        if (triggeredByAura->GetStackAmount() > 1 && !triggeredByAura->GetHolder()->ModStackAmount(-1, nullptr))
             return SPELL_AURA_PROC_CANT_TRIGGER;
     }
     else if (spellInfo->Id == 53695 || spellInfo->Id == 53696)   // Judgements of the Just
@@ -4158,7 +4158,7 @@ SpellAuraProcResult Unit::HandleModRating(Unit* /*pVictim*/, uint32 /*damage*/, 
     if (spellInfo->Id == 71564)                             // Deadly Precision
     {
         // Remove only single aura from stack
-        if (triggeredByAura->GetStackAmount() > 1 && !triggeredByAura->GetHolder()->ModStackAmount(-1))
+        if (triggeredByAura->GetStackAmount() > 1 && !triggeredByAura->GetHolder()->ModStackAmount(-1, nullptr))
             return SPELL_AURA_PROC_CANT_TRIGGER;
     }
 
