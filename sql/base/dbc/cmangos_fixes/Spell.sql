@@ -536,6 +536,11 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 
 UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id=38650; -- Serpentshrine Lurker - Rancid Mushroom Primer
 
+-- Lady Vashj - Persuasion 38511
+-- missing scripted spell interaction with 38514, the damage/healing component mced targets should also be immune to all cc effects
+-- See this as basic, nerfed implementation from the once feared Persuasion Mechanic Vashj had
+UPDATE `spell_template` SET `MaxAffectedTargets` = 2 WHERE `Id` = 38511; -- 0
+
 -- Fixes Well Fed buff for some seasonal food like Winter Veil cookies
 UPDATE spell_template SET Effect2=6, EffectDieSides2=1, EffectBaseDice2=1, EffectImplicitTargetA2=1, EffectApplyAuraName2=23, EffectAmplitude2=10000, EffectTriggerSpell2=24870 WHERE Id=24869;
 UPDATE spell_template SET EffectRealPointsPerLevel1=0.25, EffectRealPointsPerLevel2=0.25, EffectBaseDice1=0, EffectBaseDice2=0 WHERE id=24870;
