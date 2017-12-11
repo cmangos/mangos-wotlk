@@ -338,7 +338,7 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
         if (m_creature->IsTemporarySummon())
         {
             // remove impale on death
-            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
+            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
                 pSummoner->RemoveAurasDueToSpell(SPELL_IMPALED);
         }
     }
@@ -350,7 +350,7 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
             if (m_creature->IsTemporarySummon())
             {
                 // Impale player
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
+                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
                     DoCastSpellIfCan(pSummoner, SPELL_IMPALED);
             }
 

@@ -1308,7 +1308,7 @@ struct npc_spirit_prisoner_of_bladespire : public ScriptedAI
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
-            if (Unit* summoner = m_creature->GetSummoner())
+            if (Unit* summoner = m_creature->GetSpawner())
                 m_creature->GetMotionMaster()->MovePoint(POINT_PLAYER_POSITION, summoner->GetPositionX(), summoner->GetPositionY(), summoner->GetPositionZ());
         }
     }

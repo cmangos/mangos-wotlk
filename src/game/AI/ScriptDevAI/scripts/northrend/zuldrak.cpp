@@ -128,7 +128,7 @@ struct npc_ghoul_feeding_bunnyAI : public ScriptedAI
             // Give kill credit to the summoner player
             if (m_creature->IsTemporarySummon())
             {
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
+                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
                     DoCastSpellIfCan(pSummoner, SPELL_GHOUL_KILL_CREDIT, CAST_TRIGGERED);
             }
         }

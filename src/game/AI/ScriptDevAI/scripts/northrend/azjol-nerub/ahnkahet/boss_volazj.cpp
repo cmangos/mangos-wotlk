@@ -178,7 +178,7 @@ struct boss_volazjAI : public ScriptedAI
 
         if (pSummoned->IsTemporarySummon())
         {
-            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(pSummoned->GetSummonerGuid()))
+            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(pSummoned->GetSpawnerGuid()))
             {
                 pPlayer->CastSpell(pSummoned, SPELL_TWISTED_VISAGE_EFFECT, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->CastSpell(pPlayer, m_bIsRegularMode ? SPELL_TWISTED_VISAGE_SPAWN : SPELL_TWISTED_VISAGE_SPAWN_H, TRIGGERED_OLD_TRIGGERED);

@@ -246,7 +246,7 @@ void instance_ahnkahet::OnCreatureDeath(Creature* pCreature)
                 if (pCreature->IsTemporarySummon())
                 {
                     // Switch insanity phase for the master player
-                    if (Player* pPlayer = instance->GetPlayer(pCreature->GetSummonerGuid()))
+                    if (Player* pPlayer = instance->GetPlayer(pCreature->GetSpawnerGuid()))
                         HandleInsanitySwitch(pPlayer);
                 }
             }

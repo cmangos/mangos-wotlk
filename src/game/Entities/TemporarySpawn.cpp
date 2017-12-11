@@ -253,7 +253,7 @@ void TemporarySpawn::UnSummon()
     if (m_linkedToOwnerAura & TEMPSPAWN_LINKED_AURA_REMOVE_OWNER)
         RemoveAuraFromOwner();
 
-    if (GetSummonerGuid().IsCreatureOrVehicle())
+    if (GetSpawnerGuid().IsCreatureOrVehicle())
     {
         if (Creature* sum = GetMap()->GetCreature(GetSpawnerGuid()))
             if (sum->AI())

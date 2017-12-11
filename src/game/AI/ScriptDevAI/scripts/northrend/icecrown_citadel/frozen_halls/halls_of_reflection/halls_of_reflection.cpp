@@ -334,7 +334,7 @@ bool EffectDummyCreature_spell_summon_reflections(Unit* /*pCaster*/, uint32 uiSp
             {
                 if (pCreature->IsTemporarySummon())
                 {
-                    if (Player* pSummoner = pCreature->GetMap()->GetPlayer(pCreature->GetSummonerGuid()))
+                    if (Player* pSummoner = pCreature->GetMap()->GetPlayer(pCreature->GetSpawnerGuid()))
                     {
                         pCreature->SetLevitate(false);
                         pCreature->AI()->AttackStart(pSummoner);

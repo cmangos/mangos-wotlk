@@ -224,7 +224,7 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
                 // follow the summoner
                 if (pSummoned->IsTemporarySummon())
                 {
-                    if (Unit* pPlayer = m_creature->GetMap()->GetUnit(pSummoned->GetSummonerGuid()))
+                    if (Unit* pPlayer = m_creature->GetMap()->GetUnit(pSummoned->GetSpawnerGuid()))
                         pSummoned->GetMotionMaster()->MoveChase(pPlayer);
                 }
                 break;

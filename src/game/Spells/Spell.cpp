@@ -2213,7 +2213,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 return;
 
             if (caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->IsTemporarySummon())
-                targetUnitMap.push_back(((Creature*)caster)->GetSummoner());
+                targetUnitMap.push_back(((Creature*)caster)->GetSpawner());
             else if (caster->GetTypeId() == TYPEID_GAMEOBJECT && !((GameObject*)caster)->HasStaticDBSpawnData())
                 targetUnitMap.push_back(((GameObject*)caster)->GetOwner());
             else

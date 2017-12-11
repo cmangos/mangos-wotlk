@@ -651,7 +651,7 @@ struct npc_wyrmrest_skytalonAI : public ScriptedAI
             if (m_creature->IsTemporarySummon())
             {
                 // Force player to mount
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
+                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
                     pSummoner->CastSpell(m_creature, SPELL_RIDE_RED_DRAGON, TRIGGERED_OLD_TRIGGERED);
             }
 

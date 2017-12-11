@@ -1425,7 +1425,7 @@ struct npc_constrictor_tentacleAI : public Scripted_NoMovementAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
+        if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
             pSummoner->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_SQUEEZE : SPELL_SQUEEZE_H);
     }
 };

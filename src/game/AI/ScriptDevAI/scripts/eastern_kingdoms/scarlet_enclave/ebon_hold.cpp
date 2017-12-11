@@ -2880,7 +2880,7 @@ struct npc_scarlet_courierAI : public ScriptedAI
                     case 1:
                         if (m_creature->IsTemporarySummon())
                         {
-                            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
+                            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
                                 m_creature->AI()->AttackStart(pSummoner);
                         }
 

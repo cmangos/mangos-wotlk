@@ -59,7 +59,7 @@ struct npc_oculus_drakeAI : public ScriptedAI
             }
 
             // Force player to mount
-            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
+            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
             {
                 pSummoner->CastSpell(pSummoner, uiMountSpell, TRIGGERED_OLD_TRIGGERED);
 
@@ -88,7 +88,7 @@ struct npc_oculus_drakeAI : public ScriptedAI
         // Handle player parachute
         if (m_creature->IsTemporarySummon())
         {
-            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
+            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
             {
                 pSummoner->RemoveAurasDueToSpell(SPELL_DRAKE_FLAG_VISUAL);
                 pSummoner->CastSpell(pSummoner, SPELL_PARACHUTE, TRIGGERED_OLD_TRIGGERED);

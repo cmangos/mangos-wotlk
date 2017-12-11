@@ -8498,7 +8498,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         if (pTarget->IsTemporarySummon() && int32(pTarget->GetEntry()) == pSpell->EffectMiscValue[eff_idx])
                         {
                             // can only affect "own" summoned
-                            if (pTarget->GetSummonerGuid() == m_caster->GetObjectGuid())
+                            if (pTarget->GetSpawnerGuid() == m_caster->GetObjectGuid())
                             {
                                 if (pTarget->hasUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE))
                                     pTarget->GetMotionMaster()->MovementExpired();
@@ -8547,7 +8547,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (const SpellEntry* pSpell = sSpellTemplate.LookupEntry<SpellEntry>(m_spellInfo->CalculateSimpleValue(eff_idx)))
                     {
                         // all ok, so make summoner cast the quest complete
-                        if (Unit* pSummoner = m_caster->GetSummoner())
+                        if (Unit* pSummoner = m_caster->GetSpawner())
                             pSummoner->CastSpell(pSummoner, pSpell, TRIGGERED_OLD_TRIGGERED);
                     }
 
@@ -9034,7 +9034,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     Unit* pCaster = images.front()->GetCaster();
-                    Unit* pSummoner = unitTarget->GetMap()->GetUnit(unitTarget->GetSummonerGuid());
+                    Unit* pSummoner = unitTarget->GetMap()->GetUnit(unitTarget->GetSpawnerGuid());
 
                     if (pSummoner && pSummoner == pCaster)
                         pSummon->UnSummon();
@@ -9120,9 +9120,9 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     if (((Creature*)m_caster)->IsTemporarySummon())
                     {
-                        if (m_caster->GetSummonerGuid().IsPlayer())
+                        if (m_caster->GetSpawnerGuid().IsPlayer())
                         {
-                            if (Player* pSummoner = sObjectMgr.GetPlayer(m_caster->GetSummonerGuid()))
+                            if (Player* pSummoner = sObjectMgr.GetPlayer(m_caster->GetSpawnerGuid()))
                                 pSummoner->CastSpell(pSummoner, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
                         }
                     }
@@ -9596,7 +9596,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case 63601: ownerAura = 62861; break;
                     };
 
-                    if (Unit* summoner = unitTarget->GetMap()->GetUnit(unitTarget->GetSummonerGuid()))
+                    if (Unit* summoner = unitTarget->GetMap()->GetUnit(unitTarget->GetSpawnerGuid()))
                         summoner->RemoveAurasDueToSpell(ownerAura);
                     return;
                 }
