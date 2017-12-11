@@ -535,7 +535,7 @@ struct npc_infused_crystalAI : public Scripted_NoMovementAI
                 DoScriptText(SAY_DEFENSE_FINISH, m_creature);
                 if (m_creature->IsTemporarySummon())
                 {
-                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
+                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
                         pPlayer->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
                 }
                 m_uiFinishTimer = 0;

@@ -199,9 +199,9 @@ struct mob_pure_energyAI : public ScriptedAI
     {
         if (m_creature->IsTemporarySummon())
         {
-            if (m_creature->GetSpawnerGuid().IsCreature())
+            if (m_creature->GetSummonerGuid().IsCreature())
             {
-                Creature* pVex = m_creature->GetMap()->GetCreature(m_creature->GetSpawnerGuid());
+                Creature* pVex = m_creature->GetMap()->GetCreature(m_creature->GetSummonerGuid());
 
                 if (!pVex || !pVex->isAlive())
                     return;

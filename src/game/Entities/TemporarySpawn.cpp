@@ -20,8 +20,8 @@
 #include "Log.h"
 #include "AI/BaseAI/CreatureAI.h"
 
-TemporarySpawn::TemporarySpawn(ObjectGuid summoner) :
-    Creature(CREATURE_SUBTYPE_TEMPORARY_SUMMON), m_type(TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN), m_timer(0), m_lifetime(0), m_spawner(summoner), m_linkedToOwnerAura(0)
+TemporarySpawn::TemporarySpawn() :
+    Creature(CREATURE_SUBTYPE_TEMPORARY_SUMMON), m_type(TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN), m_timer(0), m_lifetime(0), m_linkedToOwnerAura(0)
 {
 }
 
@@ -227,6 +227,15 @@ void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
     Creature::Update(update_diff, diff);
 }
 
+bool TemporarySpawn::CreateTempSpawn(ObjectGuid const& summoner, uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, Team team)
+{
+    if (!Create(guidlow, cPos, cinfo, team))
+        return false;
+
+    SetSummonerGuid(summoner);
+    return true;
+}
+
 void TemporarySpawn::SetSummonProperties(TempSpawnType type, uint32 lifetime)
 {
     m_type = type;
@@ -255,12 +264,12 @@ void TemporarySpawn::UnSummon()
 
     if (GetSummonerGuid().IsCreatureOrVehicle())
     {
-        if (Creature* sum = GetMap()->GetCreature(GetSpawnerGuid()))
+        if (Creature* sum = GetMap()->GetCreature(GetSummonerGuid()))
             if (sum->AI())
                 sum->AI()->SummonedCreatureDespawn(this);
     }
-    else if (GetSpawnerGuid().IsPlayer()) // if player that summoned this creature was MCing it, uncharm
-        if (Player* player = GetMap()->GetPlayer(GetSpawnerGuid()))
+    else if (GetSummonerGuid().IsPlayer()) // if player that summoned this creature was MCing it, uncharm
+        if (Player* player = GetMap()->GetPlayer(GetSummonerGuid()))
             if (player->GetMover() == this)
                 player->Uncharm();
 
@@ -293,8 +302,7 @@ void TemporarySpawn::SaveToDB()
 {
 }
 
-TemporarySpawnWaypoint::TemporarySpawnWaypoint(ObjectGuid summoner, uint32 waypoint_id, int32 path_id, uint32 pathOrigin) :
-    TemporarySpawn(summoner),
+TemporarySpawnWaypoint::TemporarySpawnWaypoint(uint32 waypoint_id, int32 path_id, uint32 pathOrigin) :
     m_waypoint_id(waypoint_id),
     m_path_id(path_id),
     m_pathOrigin(pathOrigin)

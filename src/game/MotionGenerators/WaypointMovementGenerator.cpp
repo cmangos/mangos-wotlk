@@ -128,8 +128,8 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
 
         if (creature.IsTemporarySummon())
         {
-            if (creature.GetSpawnerGuid().IsCreatureOrPet())
-                if (Creature* pSummoner = creature.GetMap()->GetAnyTypeCreature(creature.GetSpawnerGuid()))
+            if (creature.GetSummonerGuid().IsCreatureOrPet())
+                if (Creature* pSummoner = creature.GetMap()->GetAnyTypeCreature(creature.GetSummonerGuid()))
                     if (pSummoner->AI())
                         pSummoner->AI()->SummonedMovementInform(&creature, type, i_currentNode);
         }

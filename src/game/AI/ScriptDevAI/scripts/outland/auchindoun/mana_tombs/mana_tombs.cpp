@@ -224,7 +224,7 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
             case NPC_ETHEREAL_SPELLBINDER:
                 if (m_creature->IsTemporarySummon())
                 {
-                    if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
+                    if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
                         DoScriptText(SAY_SPAWN, m_creature, pSummoner);
                 }
                 break;

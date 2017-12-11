@@ -296,7 +296,7 @@ struct npc_bloodmaul_stout_triggerAI : public ScriptedAI
             // Give kill credit to the summoner player
             if (m_creature->IsTemporarySummon())
             {
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
+                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
                     pSummoner->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
             }
 
@@ -540,7 +540,7 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
 
             // Get original summoner
             if (m_creature->IsTemporarySummon())
-                m_masterPlayerGuid = m_creature->GetSpawnerGuid();
+                m_masterPlayerGuid = m_creature->GetSummonerGuid();
 
             // Get closest apexis
             if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_RELIC, 5.0f))
@@ -847,7 +847,7 @@ struct npc_light_orb_collectorAI : public ScriptedAI
             // Give kill credit to the player
             if (m_creature->IsTemporarySummon())
             {
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
+                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
                     pSummoner->KilledMonsterCredit(NPC_KILL_CREDIT_TRIGGER, m_creature->GetObjectGuid());
             }
 

@@ -119,7 +119,7 @@ struct boss_nefarianAI : public ScriptedAI
             // Cleanup encounter
             if (m_creature->IsTemporarySummon())
             {
-                if (Creature* pNefarius = m_creature->GetMap()->GetCreature(m_creature->GetSpawnerGuid()))
+                if (Creature* pNefarius = m_creature->GetMap()->GetCreature(m_creature->GetSummonerGuid()))
                     pNefarius->AI()->EnterEvadeMode();
             }
 

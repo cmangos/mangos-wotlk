@@ -25,15 +25,15 @@
 class TemporarySpawn : public Creature
 {
     public:
-        explicit TemporarySpawn(ObjectGuid summoner = ObjectGuid());
+        explicit TemporarySpawn();
         virtual ~TemporarySpawn() {};
 
         void Update(uint32 update_diff, uint32 time) override;
+        bool CreateTempSpawn(ObjectGuid const& summoner, uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, Team team = TEAM_NONE);
         void SetSummonProperties(TempSpawnType type, uint32 lifetime);
         void Summon(TempSpawnType type, uint32 lifetime);
         void UnSummon();
         void SaveToDB();
-        ObjectGuid const GetSpawnerGuid() const override { return m_spawner ; }
         void SetLinkedToOwnerAura(uint32 flags) { m_linkedToOwnerAura |= flags; };
     private:
         void RemoveAuraFromOwner();
@@ -49,14 +49,13 @@ class TemporarySpawn : public Creature
         TempSpawnType m_type;
         uint32 m_timer;
         uint32 m_lifetime;
-        ObjectGuid m_spawner;
         uint32 m_linkedToOwnerAura;
 };
 
 class TemporarySpawnWaypoint : public TemporarySpawn
 {
     public:
-        explicit TemporarySpawnWaypoint(ObjectGuid summoner, uint32 waypoint_id, int32 path_id, uint32 pathOrigin);
+        explicit TemporarySpawnWaypoint(uint32 waypoint_id, int32 path_id, uint32 pathOrigin);
 
         uint32 GetWaypointId() const { return m_waypoint_id; }
         int32 GetPathId() const { return m_path_id; }

@@ -179,7 +179,7 @@ struct boss_ahuneAI : public Scripted_NoMovementAI
         {
             if (m_creature->IsTemporarySummon())
             {
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
+                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
                     AttackStart(pSummoner);
             }
 
@@ -282,7 +282,7 @@ struct npc_frozen_coreAI : public Scripted_NoMovementAI
     void Reset() override
     {
         if (m_creature->IsTemporarySummon())
-            m_ahuheGuid = m_creature->GetSpawnerGuid();
+            m_ahuheGuid = m_creature->GetSummonerGuid();
 
         DoCastSpellIfCan(m_creature, SPELL_FROZEN_CORE_HIT, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoCastSpellIfCan(m_creature, SPELL_ICE_SPEAR_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
