@@ -300,19 +300,70 @@ struct npc_hungry_nether_rayAI : public ScriptedPetAI
 {
     npc_hungry_nether_rayAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
 
-    void Reset() override { }
+    uint32 m_uiFeedTimer;
+    uint8 m_uiFeedCounter;
+    bool m_bFeeding;
+
+    void Reset() override
+    {
+        m_uiFeedTimer = 0;
+        m_uiFeedCounter = 0;
+        m_bFeeding = false;
+    }
 
     void OwnerKilledUnit(Unit* pVictim) override
     {
         if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->GetEntry() == NPC_BLACK_WARP_CHASER)
         {
-            // Distance expected?
-            if (m_creature->IsWithinDistInMap(pVictim, 10.0f))
+            if (m_creature->IsWithinDistInMap(pVictim, 30.0f))
             {
-                DoScriptText(EMOTE_FEED, m_creature);
                 m_creature->CastSpell(m_creature, SPELL_FEED_CREDIT, TRIGGERED_OLD_TRIGGERED);
+                m_bFeeding = true;
+                m_creature->GetMotionMaster()->Clear(false);
+                m_creature->GetMotionMaster()->MovePoint(1, pVictim->GetPositionX(), pVictim->GetPositionY(), pVictim->GetPositionZ());
             }
         }
+    }
+
+    void MovementInform(uint32 uiType, uint32 uiPointId) override
+    {
+        if (uiType != POINT_MOTION_TYPE || !uiPointId)
+            return;
+
+        m_uiFeedTimer = 3000;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_bFeeding)
+        {
+            if (m_uiFeedTimer)
+            {
+                if (m_uiFeedTimer <= uiDiff)
+                {
+                    m_uiFeedCounter++;
+
+                    if (m_uiFeedCounter == 3)
+                        DoScriptText(EMOTE_FEED, m_creature);
+
+                    if (m_uiFeedCounter == 5)
+                    {
+                        m_uiFeedCounter = 0;
+                        m_uiFeedTimer = 0;
+                        m_bFeeding = false;
+                    }
+                    else
+                    {
+                        m_creature->HandleEmote(EMOTE_ONESHOT_ATTACKUNARMED);
+                        m_uiFeedTimer = 2000;
+                    }
+                }
+                else
+                    m_uiFeedTimer -= uiDiff;
+            }
+        }
+        else
+            ScriptedPetAI::UpdateAI(uiDiff);
     }
 };
 
