@@ -482,7 +482,7 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
         {
             if (pSummoned->IsTemporarySummon())
             {
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(pSummoned->GetSummonerGuid()))
+                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(pSummoned->GetSpawnerGuid()))
                 {
                     pPlayer->CastSpell(pSummoned, SPELL_SINISTER_REFL_CLONE, TRIGGERED_OLD_TRIGGERED);
                     pSummoned->CastSpell(pSummoned, SPELL_SINISTER_REFL_CLASS, TRIGGERED_OLD_TRIGGERED);
@@ -794,7 +794,7 @@ struct npc_power_blue_flightAI : public ScriptedAI
     {
         if (m_creature->IsTemporarySummon())
         {
-            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
+            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
                 pPlayer->RemoveAurasDueToSpell(SPELL_POSSESS_DRAKE_IMMUNE);
         }
     }
@@ -805,7 +805,7 @@ struct npc_power_blue_flightAI : public ScriptedAI
         {
             if (m_creature->IsTemporarySummon())
             {
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
+                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
                 {
                     pPlayer->CastSpell(m_creature, SPELL_VENGEANCE_BLUE_FLIGHT, TRIGGERED_OLD_TRIGGERED);
                     pPlayer->CastSpell(pPlayer, SPELL_POSSESS_DRAKE_IMMUNE, TRIGGERED_OLD_TRIGGERED);

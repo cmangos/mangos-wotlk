@@ -2815,11 +2815,11 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
 /// Helper function
 inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin wpOrigin, int32 pathId, uint32 wpId, WaypointNode const* wpNode, CreatureInfo const* waypointInfo)
 {
-    TemporarySpawnWaypoint* wpCreature = new TemporarySpawnWaypoint(wpId, pathId, (uint32)wpOrigin);
+    TemporarySpawnWaypoint* wpCreature = new TemporarySpawnWaypoint(wpOwner->GetObjectGuid(), wpId, pathId, (uint32)wpOrigin);
 
     CreatureCreatePos pos(wpOwner->GetMap(), wpNode->x, wpNode->y, wpNode->z, wpNode->orientation, wpOwner->GetPhaseMask());
 
-    if (!wpCreature->CreateTempSpawn(wpOwner->GetObjectGuid(), wpOwner->GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, waypointInfo))
+    if (!wpCreature->Create(wpOwner->GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, waypointInfo))
     {
         delete wpCreature;
         return nullptr;
@@ -2849,7 +2849,7 @@ inline void UnsummonVisualWaypoints(Player const* player, ObjectGuid ownerGuid)
         if (!wpTarget)
             continue;
 
-        if (wpTarget->GetSummonerGuid() == ownerGuid)
+        if (wpTarget->GetSpawnerGuid() == ownerGuid)
             wpTarget->UnSummon();
     }
 }
@@ -2900,10 +2900,10 @@ bool ChatHandler::HandleWpAddCommand(char* args)
             }
 
             // Who moves along this waypoint?
-            wpOwner = targetCreature->GetMap()->GetAnyTypeCreature(wpTarget->GetSummonerGuid());
+            wpOwner = targetCreature->GetMap()->GetAnyTypeCreature(wpTarget->GetSpawnerGuid());
             if (!wpOwner)
             {
-                PSendSysMessage(LANG_WAYPOINT_NOTFOUND_NPC, wpTarget->GetSummonerGuid().GetString().c_str());
+                PSendSysMessage(LANG_WAYPOINT_NOTFOUND_NPC, wpTarget->GetSpawnerGuid().GetString().c_str());
                 SetSentErrorMessage(true);
                 return false;
             }
@@ -3099,10 +3099,10 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
         }
 
         // Who moves along this waypoint?
-        wpOwner = targetCreature->GetMap()->GetAnyTypeCreature(wpTarget->GetSummonerGuid());
+        wpOwner = targetCreature->GetMap()->GetAnyTypeCreature(wpTarget->GetSpawnerGuid());
         if (!wpOwner)
         {
-            PSendSysMessage(LANG_WAYPOINT_NOTFOUND_NPC, wpTarget->GetSummonerGuid().GetString().c_str());
+            PSendSysMessage(LANG_WAYPOINT_NOTFOUND_NPC, wpTarget->GetSpawnerGuid().GetString().c_str());
             SetSentErrorMessage(true);
             return false;
         }
@@ -3349,10 +3349,10 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         }
 
         // Who moves along this waypoint?
-        wpOwner = targetCreature->GetMap()->GetAnyTypeCreature(wpTarget->GetSummonerGuid());
+        wpOwner = targetCreature->GetMap()->GetAnyTypeCreature(wpTarget->GetSpawnerGuid());
         if (!wpOwner)
         {
-            PSendSysMessage(LANG_WAYPOINT_NOTFOUND_NPC, wpTarget->GetSummonerGuid().GetString().c_str());
+            PSendSysMessage(LANG_WAYPOINT_NOTFOUND_NPC, wpTarget->GetSpawnerGuid().GetString().c_str());
             SetSentErrorMessage(true);
             return false;
         }
@@ -3487,10 +3487,10 @@ bool ChatHandler::HandleWpExportCommand(char* args)
             }
 
             // Who moves along this waypoint?
-            wpOwner = targetCreature->GetMap()->GetAnyTypeCreature(wpTarget->GetSummonerGuid());
+            wpOwner = targetCreature->GetMap()->GetAnyTypeCreature(wpTarget->GetSpawnerGuid());
             if (!wpOwner)
             {
-                PSendSysMessage(LANG_WAYPOINT_NOTFOUND_NPC, wpTarget->GetSummonerGuid().GetString().c_str());
+                PSendSysMessage(LANG_WAYPOINT_NOTFOUND_NPC, wpTarget->GetSpawnerGuid().GetString().c_str());
                 SetSentErrorMessage(true);
                 return false;
             }

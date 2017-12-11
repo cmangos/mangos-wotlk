@@ -1489,7 +1489,7 @@ struct npc_spawned_oronok_tornheartAI : public ScriptedAI, private DialogueHelpe
                     m_gromtorGuid = pGromtor->GetObjectGuid();
                     pGromtor->GetMotionMaster()->MoveFollow(m_creature, 5.0f, M_PI_F / 2);
                 }
-                if (Unit* summoner = m_creature->GetMap()->GetUnit(m_creature->GetSummonerGuid()))
+                if (Unit* summoner = m_creature->GetMap()->GetUnit(m_creature->GetSpawnerGuid()))
                     DoScriptText(SAY_ORONOK_TOGETHER, m_creature, summoner);
                 break;
             case NPC_EARTHMENDER_TORLOK:

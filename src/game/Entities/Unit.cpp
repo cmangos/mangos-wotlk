@@ -1118,8 +1118,8 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
     Unit* pOwner = victim->GetMaster();
     if (victim->IsTemporarySummon())
     {
-        if (victim->GetSummonerGuid().IsCreatureOrVehicle())
-            if (Creature* pSummoner = victim->GetMap()->GetCreature(victim->GetSummonerGuid()))
+        if (victim->GetSpawnerGuid().IsCreatureOrVehicle())
+            if (Creature* pSummoner = victim->GetMap()->GetCreature(victim->GetSpawnerGuid()))
                 if (pSummoner->AI())
                     pSummoner->AI()->SummonedCreatureJustDied(victim);
     }
@@ -6944,7 +6944,7 @@ Player const* Unit::GetControllingClientPlayer() const
 
 Unit* Unit::GetSpawner() const
 {
-    if (ObjectGuid guid = GetSummonerGuid())
+    if (ObjectGuid guid = GetSpawnerGuid())
         return ObjectAccessor::GetUnit(*this, guid);
     return nullptr;
 }
@@ -12325,14 +12325,14 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
         return nullptr;
     }
 
-    TemporarySpawn* pCreature = new TemporarySpawn();
+    TemporarySpawn* pCreature = new TemporarySpawn(GetObjectGuid());
 
     CreatureCreatePos pos(GetMap(), x, y, z, ang, GetPhaseMask());
 
     if (x == 0.0f && y == 0.0f && z == 0.0f)
         pos = CreatureCreatePos(this, GetOrientation(), CONTACT_DISTANCE, ang);
 
-    if (!pCreature->CreateTempSpawn(GetObjectGuid(), GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo))
+    if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo))
     {
         delete pCreature;
         return nullptr;

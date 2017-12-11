@@ -473,7 +473,7 @@ struct npc_demonic_vaporAI : public ScriptedAI
         // Start following the summoner (player)
         if (m_creature->IsTemporarySummon())
         {
-            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSummonerGuid()))
+            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
                 m_creature->GetMotionMaster()->MoveFollow(pSummoner, 0, 0);
         }
     }

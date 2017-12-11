@@ -951,7 +951,7 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
     {
         // send world states to player summoner
         if (m_creature->IsTemporarySummon())
-            m_summonerGuid = m_creature->GetSummonerGuid();
+            m_summonerGuid = m_creature->GetSpawnerGuid();
 
         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_summonerGuid))
         {

@@ -371,7 +371,7 @@ struct boss_head_of_horsemanAI : public ScriptedAI
         // end the event
         if (m_creature->IsTemporarySummon())
         {
-            if (Unit* pHorseman = m_creature->GetMap()->GetUnit(m_creature->GetSummonerGuid()))
+            if (Unit* pHorseman = m_creature->GetMap()->GetUnit(m_creature->GetSpawnerGuid()))
             {
                 pHorseman->CastSpell(pHorseman, SPELL_BODY_LEAVE_COMBAT, TRIGGERED_OLD_TRIGGERED);
                 pHorseman->CastSpell(pHorseman, SPELL_BODY_DEAD, TRIGGERED_OLD_TRIGGERED);
