@@ -5301,6 +5301,10 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
     // Heroic Fury (Intercept cooldown remove)
     else if (apply && GetSpellProto()->Id == 60970 && target->GetTypeId() == TYPEID_PLAYER)
         target->RemoveSpellCooldown(20252, true);
+
+    // PvP trinket
+    if (GetId() == 42292)
+        target->RemoveRankAurasDueToSpell(20184); // Judgement of justice - remove any rank
 }
 
 void Aura::HandleModMechanicImmunityMask(bool apply, bool /*Real*/)
