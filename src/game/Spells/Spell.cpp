@@ -7860,7 +7860,7 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
             break;
         case 39365:                                         // Thundering Storm - only hits 25-100yd range targets
         {
-            float dist = target->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
+            float dist = target->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_COMBAT_REACH);
             if (dist < 25.f || dist > 100.f)
                 return false;
             break;
