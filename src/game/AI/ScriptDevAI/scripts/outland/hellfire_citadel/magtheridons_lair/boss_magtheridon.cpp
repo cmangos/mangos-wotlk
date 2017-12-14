@@ -255,7 +255,6 @@ struct boss_magtheridonAI : public ScriptedAI
                         m_creature->RemoveAurasDueToSpell(SPELL_QUAKE);
                         DoScriptText(EMOTE_BLASTNOVA, m_creature);
                         m_uiBlastNovaTimer = 60000;
-                        //m_creature->AttackStop(true); // needs to deselect target, probably needs to be moved to spell system
                     }
                 }
                 else
