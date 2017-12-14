@@ -2340,7 +2340,7 @@ void Player::SetGameMaster(bool on)
         SetPvPFreeForAll(false);
         UpdatePvPContested(false, true);
 
-        getHostileRefManager().updateOnlineOfflineState(false);
+        getHostileRefManager().deleteReferences();
         CombatStopWithPets();
 
         SetPhaseMask(PHASEMASK_ANYWHERE, false);            // see and visible in all phases
@@ -2365,8 +2365,6 @@ void Player::SetGameMaster(bool on)
 
         // restore FFA PvP area state, remove not allowed for GM mounts
         UpdateArea(m_areaUpdateId);
-
-        getHostileRefManager().updateOnlineOfflineState(true);
     }
 
     m_camera.UpdateVisibilityForOwner();
