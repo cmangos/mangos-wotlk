@@ -120,10 +120,10 @@ bool AreaTrigger_at_coilfang_waterfall(Player* pPlayer, AreaTriggerEntry const* 
 
 enum
 {
-    SPELL_TELE_A_TO         = 37387,
+    SPELL_TELE_A_TO         = 37389,
     QUEST_GAINING_ACCESS_A  = 10589,
 
-    SPELL_TELE_H_TO         = 37389,
+    SPELL_TELE_H_TO         = 37387, // has cast time TODO: verify once sniff is acquired
     QUEST_GAINING_ACCESS_H  = 10604
 };
 
