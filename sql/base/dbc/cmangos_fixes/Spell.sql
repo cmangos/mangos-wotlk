@@ -595,4 +595,7 @@ INSERT INTO spell_template(Id, SchoolMask, Category, Dispel, Mechanic, Attribute
 INSERT INTO spell_template(Id,Attributes,rangeIndex,Effect1,EffectImplicitTargetA1,EffectItemType1,SpellIconID,SpellName,DmgMultiplier1) VALUES
 (37244,256,12,24,25,30658,1,'Give Flanis''s Pack',1);
 
+-- Random Rocket Missile - should only hit one target - per sniff evidence
+UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(38054);
+
 
