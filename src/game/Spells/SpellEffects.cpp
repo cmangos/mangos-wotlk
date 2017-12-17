@@ -1838,6 +1838,35 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastCustomSpell(unitTarget, 37675, &basepoints0, nullptr, nullptr, (TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_HIT_CALCULATION));
                     return;
                 }
+                case 38002:                                 // Fel Reaver Controller
+                case 38120:
+                case 38122:
+                case 38125:
+                case 38127:
+                case 38129:
+                {
+                    if (!unitTarget)
+                        return;
+
+                    uint32 spellId = 0;
+                    switch (m_spellInfo->Id)
+                    {
+                        case 38002: spellId = 38003; break;
+                        case 38120: spellId = 38121; break;
+                        case 38122: spellId = 38123; break;
+                        case 38125: spellId = 38126; break;
+                        case 38127: spellId = 38128; break;
+                        case 38129: spellId = 38130; break;
+                    }
+
+                    unitTarget->CastSpell(nullptr, spellId, TRIGGERED_NONE);
+                    return;
+                }
+                case 38020:                             // Fel Reaver Controller Tag
+                {
+                    unitTarget->CastSpell(unitTarget, 38022, TRIGGERED_NONE); // FRS Quest Credit
+                    return;
+                }
                 case 39096:                                 // Polarity Shift
                 {
                     if (!unitTarget)
@@ -8604,6 +8633,16 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 37456, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 38055:                                 // Destroy Deathforged Infernal
+                {
+                    if (!unitTarget)
+                        return;
+
+                    for (uint32 i = 0; i < 10; ++i)
+                        m_caster->CastSpell(nullptr, 38054, TRIGGERED_OLD_TRIGGERED);
+
+                    return;
+                }
                 case 38358:                                 // Tidal Surge
                 {
                     if (!unitTarget)
@@ -11290,17 +11329,23 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
             // Specific case for Darkmoon Faire Cannon (this is probably a hint that our logic about GO use / activation is not accurate)
             switch (m_spellInfo->Id)
             {
-            case 24731:
-            case 42868:
-                gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
-                return;
+                case 24731:
+                case 42868:
+                    gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
+                    break;
+                case 38054:
+                    gameObjTarget->Use(m_caster);
+                    break;
+                default:
+                {
+                    static ScriptInfo activateCommand = generateActivateCommand();
+
+                    int32 delay_secs = m_spellInfo->CalculateSimpleValue(eff_idx);
+
+                    gameObjTarget->GetMap()->ScriptCommandStart(activateCommand, delay_secs, m_caster, gameObjTarget);
+                    break;
+                }
             }
-
-            static ScriptInfo activateCommand = generateActivateCommand();
-
-            int32 delay_secs = m_spellInfo->CalculateSimpleValue(eff_idx);
-
-            gameObjTarget->GetMap()->ScriptCommandStart(activateCommand, delay_secs, m_caster, gameObjTarget);
             break;
         }
         case 12:                    // GO state active alternative - found mostly in Simon Game spells
