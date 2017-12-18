@@ -366,4 +366,7 @@ INSERT INTO spell_template (id, attributes, attributesEx, attributesEx2, Casting
 (23325, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8454, 1, 'Dragondog Breath Selection (R4)', 1),
 (23326, 8388992, 0, 1, 1, 101, 1, 61, 0, 0, 0, 8455, 1, 'Dragondog Breath Selection (R5)', 1);
 
+-- Shoot Flame Arrow - max 1 target
+UPDATE spell_template SET MaxAffectedTargets=1 WHERE id=42530;
+
 
