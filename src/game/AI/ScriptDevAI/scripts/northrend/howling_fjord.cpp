@@ -228,6 +228,9 @@ struct npc_silvermoon_harryAI : public ScriptedAI
                 EnterEvadeMode();
             else
                 m_uiResetBeatenTimer -= uiDiff;
+
+            // nothing more to do here we have to wait the reset
+            return;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
