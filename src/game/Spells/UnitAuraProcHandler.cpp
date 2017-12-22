@@ -2341,6 +2341,9 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                         triggered_spell_id = 25504;
                     }
 
+                    if (cooldown && !IsSpellReady(triggered_spell_id))
+                        return SPELL_AURA_PROC_FAILED;
+
                     // apply cooldown before cast to prevent processing itself
                     if (cooldown)
                         AddCooldown(*dummySpell, nullptr, false, cooldown * IN_MILLISECONDS);
