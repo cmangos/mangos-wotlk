@@ -10845,8 +10845,18 @@ void CharmInfo::InitCharmCreateSpells()
     }
 }
 
-bool CharmInfo::AddSpellToActionBar(uint32 spellId, ActiveStates newstate /*= ACT_DECIDE*/, int32 prefPos /*= -1*/)
+bool CharmInfo::AddSpellToActionBar(uint32 spellId, ActiveStates newstate, uint8 forceSlot)
 {
+    if (forceSlot != 255)
+    {
+        if (!PetActionBar[forceSlot].GetAction() && PetActionBar[forceSlot].IsActionBarForSpell())
+        {
+            SetActionBar(forceSlot, spellId, newstate == ACT_DECIDE ? IsAutocastable(spellId) ? ACT_DISABLED : ACT_PASSIVE : newstate);
+            return true;
+        }
+        return false;
+    }
+
     uint32 first_id = sSpellMgr.GetFirstSpellInChain(spellId);
 
     // new spell rank can be already listed
@@ -10862,16 +10872,6 @@ bool CharmInfo::AddSpellToActionBar(uint32 spellId, ActiveStates newstate /*= AC
         }
     }
 
-    // if provided a valid preferred position for this spell try to use it
-    if (prefPos >= 0 && prefPos <= MAX_UNIT_ACTION_BAR_INDEX)
-    {
-        if (!PetActionBar[prefPos].GetAction() && PetActionBar[prefPos].IsActionBarForSpell())
-        {
-            SetActionBar(prefPos, spellId, newstate == ACT_DECIDE ? ACT_DISABLED : newstate);
-            return true;
-        }
-    }
-
     // or use empty slot in other case
     for (uint8 i = 0; i < MAX_UNIT_ACTION_BAR_INDEX; ++i)
     {
@@ -10884,9 +10884,9 @@ bool CharmInfo::AddSpellToActionBar(uint32 spellId, ActiveStates newstate /*= AC
     return false;
 }
 
-bool CharmInfo::RemoveSpellFromActionBar(uint32 spell_id)
+bool CharmInfo::RemoveSpellFromActionBar(uint32 spellId)
 {
-    uint32 first_id = sSpellMgr.GetFirstSpellInChain(spell_id);
+    uint32 first_id = sSpellMgr.GetFirstSpellInChain(spellId);
 
     for (uint8 i = 0; i < MAX_UNIT_ACTION_BAR_INDEX; ++i)
     {
