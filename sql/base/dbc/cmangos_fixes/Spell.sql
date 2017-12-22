@@ -612,4 +612,10 @@ UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(38054);
 INSERT INTO spell_template(Id,Attributes,AttributesEx,DurationIndex,Effect1,Effect2,Effect3,EffectDieSides1,EffectDieSides2,EffectDieSides3,EffectBaseDice1,EffectBaseDice2,EffectBaseDice3,EffectBasePoints1,EffectBasePoints2,EffectBasePoints3,EffectImplicitTargetA1,EffectImplicitTargetA2,EffectImplicitTargetA3,EffectApplyAuraName1,EffectApplyAuraName2,EffectApplyAuraName3,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2,DmgMultiplier3) VALUES
 (37246,384,268435456,21,6,6,6,1,1,1,1,1,1,249,249,249,1,1,1,206,32,31,1,'Oronok Speed Increase',1,1,1);
 
+-- add cooldown and forcible sending for Teron Gorefiend possess spells - verified values against sniffs
+UPDATE spell_template SET RecoveryTime=10000,AttributesServerside=0x00000002 WHERE Id IN(37729);
+UPDATE spell_template SET RecoveryTime=25000,AttributesServerside=0x00000002 WHERE Id IN(37727);
+UPDATE spell_template SET RecoveryTime=10000,AttributesServerside=0x00000002 WHERE Id IN(37788);
+UPDATE spell_template SET RecoveryTime=180000,AttributesServerside=0x00000002 WHERE Id IN(37728);
+
 
