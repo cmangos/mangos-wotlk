@@ -4462,6 +4462,10 @@ void Aura::HandleModPossess(bool apply, bool Real)
                     caster->InterruptSpell(CURRENT_CHANNELED_SPELL);
                 }
                 break;
+            case 37748: // Teron Gorefiend - remove aura from caster when posses is removed
+                if (!apply)
+                    caster->RemoveAurasDueToSpell(37748);
+                break;
         }
     }
 }
