@@ -369,4 +369,9 @@ INSERT INTO spell_template (id, attributes, attributesEx, attributesEx2, Casting
 -- Shoot Flame Arrow - max 1 target
 UPDATE spell_template SET MaxAffectedTargets=1 WHERE id=42530;
 
+-- Allow caster to cast this self-target spell even if he is immune to the spell damage school
+UPDATE spell_template SET Attributes = Attributes | 0x20000000 WHERE id IN (22972, 22975, 22976, 22977, 22978, 22979, 22980, 22981, 22982, 22983, 22984, 22985, 22986);
 
+-- Fixed radius for the various spells used in summoning NPCs in Nefarian encounter
+-- Value in DBC made the adds spawn anywhere instead of near their spawner NPC
+UPDATE spell_template SET EffectRadiusIndex1=7 WHERE id IN (22654, 22655, 22656, 22657, 22658, 22680);
