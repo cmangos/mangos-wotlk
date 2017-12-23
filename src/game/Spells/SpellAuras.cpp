@@ -3197,6 +3197,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->RemoveAurasDueToSpell(32172);
                     }
                     return;
+                case 32567:                             // Green Banish State
+                {
+                    target->SetHover(apply);
+                    return;
+                }
                 case 35356:                                 // Spawn Feign Death
                 case 35357:                                 // Spawn Feign Death
                 case 42557:                                 // Feign Death
