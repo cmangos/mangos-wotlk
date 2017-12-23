@@ -6472,6 +6472,8 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         // Possible Unit-target for the spell
         Unit* expectedTarget = GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex(i));
+        if (!expectedTarget)
+            expectedTarget = m_caster;
 
         switch (m_spellInfo->EffectApplyAuraName[i])
         {
