@@ -623,4 +623,7 @@ INSERT INTO spell_template(Id,Attributes,AttributesEx2,AttributesEx3,Reagent1,Re
 (39496,8388864,132,268435456,31088,1,3,1,1,'Remove Tainted Cores',1);
 UPDATE spell_template SET AttributesEx3=0x00000100 WHERE Id IN(39495); -- sync spell with kael version of same mechanic, TARGET_ONLY_PLAYER attribute
 
+-- confirmed through guides and retail that free action potion influences it
+UPDATE spell_template SET EffectMechanic2=12 WHERE Id IN(38509);
+
 
