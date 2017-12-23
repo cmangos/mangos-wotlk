@@ -2988,7 +2988,7 @@ bool AreaTrigger_at_socrethar_seat(Player* player, AreaTriggerEntry const* /*at*
     {
         if (player->GetMap()->SpawnedCountForEntry(NPC_ADYEN_THE_LIGHTWARDEN) == 0)
         {
-            Creature* adyen = player->SummonCreature(NPC_ADYEN_THE_LIGHTWARDEN, 4805.796f, 3774.112f, 210.6172f, 5.550147f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 3600000, true, false, 1, FACTION_DEATHBLOW, true);
+            Creature* adyen = player->SummonCreature(NPC_ADYEN_THE_LIGHTWARDEN, 4805.796f, 3774.112f, 210.6172f, 5.550147f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 3600000, true, false, 1, FACTION_DEATHBLOW, 0, true);
             adyen->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
             Creature* orelis = adyen->SummonCreature(NPC_EXARCH_ORELIS, 4804.807f, 3775.562f, 210.6171f, 5.532694f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 3600000, true, false, 1, FACTION_DEATHBLOW);
             orelis->SetUInt32Value(UNIT_NPC_FLAGS, 0);

@@ -1810,7 +1810,7 @@ void WorldObject::AddObjectToRemoveList()
     GetMap()->AddObjectToRemoveList(this);
 }
 
-Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSpawnType spwtype, uint32 despwtime, bool asActiveObject, bool setRun, uint32 pathId, uint32 faction, bool spawnCounting)
+Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSpawnType spwtype, uint32 despwtime, bool asActiveObject, bool setRun, uint32 pathId, uint32 faction, uint32 modelId, bool spawnCounting)
 {
     CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(id);
     if (!cinfo)
@@ -1846,6 +1846,9 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 
     if (faction)
         pCreature->setFaction(faction);
+
+    if (modelId)
+        pCreature->SetDisplayId(modelId);
 
     if (spawnCounting)
         pCreature->SetSpawnCounting(true);
