@@ -872,13 +872,12 @@ bool QuestAccept_npc_apothecary_hanes(Player* pPlayer, Creature* pCreature, cons
 enum
 {
     ITEM_ID_SCALAWAG_FROG           = 35803,
-    ITEM_ID_SHINY_KNIFE             = 35813,
     NPC_SCALAWAG_FROG               = 26503,
 };
 
 bool NpcSpellClick_npc_scalawag_frog(Player* pPlayer, Creature* pClickedCreature, uint32 /*uiSpellId*/)
 {
-    if (pClickedCreature->GetEntry() == NPC_SCALAWAG_FROG && pPlayer->HasItemCount(ITEM_ID_SHINY_KNIFE, 1))
+    if (pClickedCreature->GetEntry() == NPC_SCALAWAG_FROG)
     {
         if (Item* pItem = pPlayer->StoreNewItemInInventorySlot(ITEM_ID_SCALAWAG_FROG, 1))
         {
