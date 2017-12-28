@@ -626,4 +626,10 @@ UPDATE spell_template SET AttributesEx3=0x00000100 WHERE Id IN(39495); -- sync s
 -- confirmed through guides and retail that free action potion influences it
 UPDATE spell_template SET EffectMechanic2=12 WHERE Id IN(38509);
 
+-- Fel and the Furious cooldowns
+UPDATE spell_template SET RecoveryTime=10000,AttributesServerside=0x00000002 WHERE Id IN(38055);
+UPDATE spell_template SET RecoveryTime=15000,AttributesServerside=0x00000002 WHERE Id IN(38052);
+UPDATE spell_template SET RecoveryTime=10000,AttributesServerside=0x00000002 WHERE Id IN(38006);
+UPDATE spell_template SET RecoveryTime=30000,AttributesServerside=0x00000002 WHERE Id IN(37920);
+
 
