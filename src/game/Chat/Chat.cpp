@@ -2098,7 +2098,7 @@ Player* ChatHandler::getSelectedPlayer() const
     return sObjectMgr.GetPlayer(guid);
 }
 
-Unit* ChatHandler::getSelectedUnit() const
+Unit* ChatHandler::getSelectedUnit(bool self) const
 {
     if (!m_session)
         return nullptr;
@@ -2106,7 +2106,7 @@ Unit* ChatHandler::getSelectedUnit() const
     ObjectGuid guid = m_session->GetPlayer()->GetSelectionGuid();
 
     if (!guid)
-        return m_session->GetPlayer();
+        return self ? m_session->GetPlayer() : nullptr;
 
     // can be selected player at another map
     return ObjectAccessor::GetUnit(*m_session->GetPlayer(), guid);
