@@ -495,7 +495,8 @@ uint8 VehicleInfo::GetTakenSeatsMask() const
 
 bool VehicleInfo::IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) const
 {
-    return seatFlags & SEAT_FLAG_CAN_EXIT ||
+    return seatFlags & (SEAT_FLAG_HAS_ENTER_ANIM | SEAT_FLAG_HAS_RIDE_ANIM) ||
+           seatFlags & SEAT_FLAG_CAN_EXIT ||
            seatFlags & SEAT_FLAG_UNCONTROLLED ||
            seatFlagsB &
            (SEAT_FLAG_B_USABLE_FORCED   | SEAT_FLAG_B_USABLE_FORCED_2 |
