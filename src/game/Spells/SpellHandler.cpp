@@ -156,6 +156,10 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
     recvPacket >> targets.ReadForCaster(pUser);
 
+    // some spell cast packet including more data (for projectiles?)
+    if (unk_flags & 0x02)
+        targets.ReadAdditionalData(recvPacket);
+
     targets.Update(pUser);
 
     if (!pItem->IsTargetValidForItemUse(targets.getUnitTarget()))
@@ -406,22 +410,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     // some spell cast packet including more data (for projectiles?)
     if (unk_flags & 0x02)
-    {
-        uint8 unk1;
-
-        recvPacket >> Unused<float>();                      // unk1, coords?
-        recvPacket >> Unused<float>();                      // unk1, coords?
-        recvPacket >> unk1;                                 // >> 1 or 0
-        if (unk1)
-        {
-            ObjectGuid guid;                                // guid - unused
-            MovementInfo movementInfo;
-
-            recvPacket >> Unused<uint32>();                 // >> MSG_MOVE_STOP
-            recvPacket >> guid.ReadAsPacked();
-            recvPacket >> movementInfo;
-        }
-    }
+        targets.ReadAdditionalData(recvPacket);
 
     // auto-selection buff level base at target level (in spellInfo)
     if (Unit* target = targets.getUnitTarget())

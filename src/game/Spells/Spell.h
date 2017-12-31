@@ -113,6 +113,8 @@ class SpellCastTargets
 
         SpellCastTargetsReader ReadForCaster(Unit* caster) { return SpellCastTargetsReader(*this, caster); }
 
+        void ReadAdditionalData(ByteBuffer& data);
+
         SpellCastTargets& operator=(const SpellCastTargets& target)
         {
             m_unitTarget = target.m_unitTarget;
@@ -140,6 +142,9 @@ class SpellCastTargets
 
             m_targetMask = target.m_targetMask;
 
+            m_elevation = target.m_elevation;
+            m_speed = target.m_speed;
+
             return *this;
         }
 
@@ -151,6 +156,12 @@ class SpellCastTargets
         void setSource(float x, float y, float z);
         void getDestination(float& x, float& y, float& z) const { x = m_destX; y = m_destY; z = m_destZ; }
         void getSource(float& x, float& y, float& z) const { x = m_srcX; y = m_srcY, z = m_srcZ; }
+
+        float getElevation() const { return m_elevation; }
+        void  setElevation(float elevation) { m_elevation = elevation; }
+
+        float getSpeed() const { return m_speed; }
+        void  setSpeed(float speed) { m_speed = speed; }
 
         void setGOTarget(GameObject* target);
         ObjectGuid getGOTargetGuid() const { return m_GOTargetGUID; }
@@ -199,6 +210,8 @@ class SpellCastTargets
         ObjectGuid m_srcTransportGUID;
         ObjectGuid m_destTransportGUID;
         uint32 m_itemTargetEntry;
+
+        float m_elevation, m_speed;
 };
 
 inline ByteBuffer& operator<< (ByteBuffer& buf, SpellCastTargets const& targets)

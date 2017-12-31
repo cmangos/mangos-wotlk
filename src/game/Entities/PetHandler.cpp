@@ -755,6 +755,10 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 
     recvPacket >> targets.ReadForCaster(petUnit);
 
+    // some spell cast packet including more data (for projectiles?)
+    if (unk_flags & 0x02)
+        targets.ReadAdditionalData(recvPacket);
+
     petUnit->clearUnitState(UNIT_STAT_MOVING);
 
     Spell* spell = new Spell(petUnit, spellInfo, (triggeredByAura ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE) + TRIGGERED_PET_CAST, petUnit->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : nullptr);
