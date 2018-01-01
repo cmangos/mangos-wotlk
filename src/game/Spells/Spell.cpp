@@ -318,23 +318,30 @@ void SpellCastTargets::write(ByteBuffer& data) const
         data << m_strTarget;
 }
 
-void SpellCastTargets::ReadAdditionalData(ByteBuffer& data)
+void SpellCastTargets::ReadAdditionalSpellData(ByteBuffer& data, uint8 castFlags)
 {
-    data >> m_elevation;
-    data >> m_speed;
-
-    uint8 moveFlag;
-    data >> moveFlag;
-
-    if (moveFlag)
+    if (castFlags & 0x02)                                   // Trajectory data
     {
-        ObjectGuid guid;                                // unk guid (possible - active mover) - unused
-        MovementInfo movementInfo;                      // MovementInfo
+        data >> m_elevation;
+        data >> m_speed;
 
-        data >> Unused<uint32>();                       // >> MSG_MOVE_STOP
-        data >> guid.ReadAsPacked();
-        data >> movementInfo;
+        uint8 moveFlag;
+        data >> moveFlag;
+
+        if (moveFlag)
+        {
+            ObjectGuid guid;                                // unk guid (possible - active mover) - unused
+            MovementInfo movementInfo;                      // MovementInfo
+
+            data >> Unused<uint32>();                       // >> MSG_MOVE_STOP
+            data >> guid.ReadAsPacked();
+            data >> movementInfo;
+
+            setSource(movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z);
+        }
     }
+
+    // Note: no other additional spell data can be found in 3.3.5a. However newer versions have additional information (4.x has flag 0x08 for archeology)
 }
 
 // SpellLog class

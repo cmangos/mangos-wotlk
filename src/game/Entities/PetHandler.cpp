@@ -719,11 +719,11 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     ObjectGuid guid;
     uint32 spellid;
     uint8  cast_count;
-    uint8  unk_flags;                                       // flags (if 0x02 - some additional data are received)
+    uint8  cast_flags;                                      // flags (if 0x02 - some additional data are received)
 
-    recvPacket >> guid >> cast_count >> spellid >> unk_flags;
+    recvPacket >> guid >> cast_count >> spellid >> cast_flags;
 
-    DEBUG_LOG("WORLD: CMSG_PET_CAST_SPELL, %s, cast_count: %u, spellid %u, unk_flags %u", guid.GetString().c_str(), cast_count, spellid, unk_flags);
+    DEBUG_LOG("WORLD: CMSG_PET_CAST_SPELL, %s, cast_count: %u, spellid %u, unk_flags %u", guid.GetString().c_str(), cast_count, spellid, cast_flags);
 
     Unit* petUnit = _player->GetMap()->GetUnit(guid);
     if (!petUnit || (guid != _player->GetPetGuid() && guid != _player->GetCharmGuid()))
@@ -755,9 +755,8 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 
     recvPacket >> targets.ReadForCaster(petUnit);
 
-    // some spell cast packet including more data (for projectiles?)
-    if (unk_flags & 0x02)
-        targets.ReadAdditionalData(recvPacket);
+    // some spell cast packet including more data (for projectiles)
+    targets.ReadAdditionalSpellData(recvPacket, cast_flags);
 
     petUnit->clearUnitState(UNIT_STAT_MOVING);
 
