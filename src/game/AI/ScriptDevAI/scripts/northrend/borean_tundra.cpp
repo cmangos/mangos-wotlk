@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Borean_Tundra
 SD%Complete: 100
-SDComment: Quest support: 11570, 11590, 11608, 11664, 11673, 11728, 11865, 11881, 11889, 11895, 11897, 11919, 11940.
+SDComment: Quest support: 11570, 11590, 11592, 11608, 11664, 11673, 11728, 11865, 11881, 11889, 11895, 11897, 11919, 11940.
 SDCategory: Borean Tundra
 EndScriptData */
 
@@ -33,6 +33,7 @@ npc_bonker_togglevolt
 npc_jenny
 npc_mootoo_the_younger
 npc_storm_totem
+npc_proudhoof
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -1339,6 +1340,178 @@ bool NpcSpellClick_npc_storm_totem(Player* pPlayer, Creature* pClickedCreature, 
     return true;
 }
 
+/*######
+## npc_proudhoof
+######*/
+
+enum
+{
+    SAY_QUEST_START         = -1001250,
+    SAY_QUEST_INTRO         = -1001251,
+    SAY_AMBUSH              = -1001252,
+    SAY_AGGRO               = -1001253,
+    SAY_AMBUSH_COMPLETE     = -1001254,
+    SAY_FINAL_BATTLE        = -1001255,
+    SAY_QUEST_END           = -1001256,
+
+    SPELL_FORCEFUL_CLEAVE   = 35473,
+
+    NPC_RISEN_LONGRUNNER    = 25350,
+    NPC_GHOSTLY_SAGE        = 25351,
+    NPC_COMMANDER_STEELJAW  = 25359,
+    NPC_CARAVAN_GUARD       = 25338,
+
+    QUEST_WE_STRIKE         = 11592,
+
+    MAX_PROUDHOOF_SPAWNS    = 6,
+};
+
+struct ProudhoofSpawns
+{
+    uint32 uiEntry;
+    float fX, fY, fZ, fO;
+};
+
+static const ProudhoofSpawns aProudhoofSpawns[MAX_PROUDHOOF_SPAWNS] =
+{
+    { NPC_RISEN_LONGRUNNER,     3970.342f, 5769.431f, 72.759f, 0.549f },
+    { NPC_RISEN_LONGRUNNER,     3987.955f, 5790.864f, 74.124f, 4.443f },
+    { NPC_RISEN_LONGRUNNER,     3981.751f, 5767.377f, 71.785f, 1.508f },
+    { NPC_GHOSTLY_SAGE,         3995.641f, 5773.730f, 71.079f, 2.772f },
+    { NPC_GHOSTLY_SAGE,         3973.069f, 5783.232f, 74.131f, 5.856f },
+    { NPC_COMMANDER_STEELJAW,   3880.034f, 5719.530f, 66.578f, 1.048f },
+};
+
+struct npc_proudhoofAI : public npc_escortAI
+{
+    npc_proudhoofAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+
+    uint32 m_uiCleaveTimer;
+
+    void Reset() override
+    {
+        m_uiCleaveTimer = urand(2000, 5000);
+    }
+
+    void Aggro(Unit* /*pWho*/) override
+    {
+        // random chance of saying aggro
+        if (!urand(0, 10))
+            DoScriptText(SAY_AGGRO, m_creature);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            // remove npc flags and set factions
+            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+            m_creature->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+
+            // change faction to the guards as well
+            std::list<Creature*> lGuardsList;
+            GetCreatureListWithEntryInGrid(lGuardsList, m_creature, NPC_CARAVAN_GUARD, 20.0f);
+            for (std::list<Creature*>::const_iterator itr = lGuardsList.begin(); itr != lGuardsList.end(); ++itr)
+            {
+                if (!(*itr)->isAlive())
+                    continue;
+
+                (*itr)->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+            }
+
+            // start escort
+            Start(true, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
+        }
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        pSummoned->AI()->AttackStart(m_creature);
+    }
+
+    void JustRespawned() override
+    {
+        // reset stand state if required
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+    }
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+            case 1:
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    if (Creature* pGuard = GetClosestCreatureWithEntry(m_creature, NPC_CARAVAN_GUARD, 10.0f))
+                        m_creature->SetFacingToObject(pGuard);
+
+                    DoScriptText(SAY_QUEST_INTRO, m_creature, pPlayer);
+                }
+                break;
+            case 2:
+                DoScriptText(SAY_QUEST_START, m_creature);
+                break;
+            case 11:
+                DoScriptText(SAY_AMBUSH, m_creature);
+                break;
+            case 12:
+                for (uint8 i = 0; i < MAX_PROUDHOOF_SPAWNS - 1; ++i)
+                    m_creature->SummonCreature(aProudhoofSpawns[i].uiEntry, aProudhoofSpawns[i].fX, aProudhoofSpawns[i].fY, aProudhoofSpawns[i].fZ, aProudhoofSpawns[i].fO, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                break;
+            case 13:
+                DoScriptText(SAY_AMBUSH_COMPLETE, m_creature);
+                break;
+            case 19:
+                DoScriptText(SAY_FINAL_BATTLE, m_creature);
+                break;
+            case 20:
+                m_creature->SummonCreature(aProudhoofSpawns[5].uiEntry, aProudhoofSpawns[5].fX, aProudhoofSpawns[5].fY, aProudhoofSpawns[5].fZ, aProudhoofSpawns[5].fO, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                break;
+            case 21:
+                if (Player* pPlayer = GetPlayerForEscort())
+                    pPlayer->GroupEventHappens(QUEST_WE_STRIKE, m_creature);
+                break;
+            case 22:
+                DoScriptText(SAY_QUEST_END, m_creature);
+                if (Player* pPlayer = GetPlayerForEscort())
+                    m_creature->SetFacingToObject(pPlayer);
+                break;
+        }
+    }
+
+    void UpdateEscortAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiCleaveTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FORCEFUL_CLEAVE) == CAST_OK)
+                m_uiCleaveTimer = urand(4000, 8000);
+        }
+        else
+            m_uiCleaveTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_proudhoofAI(Creature* pCreature)
+{
+    return new npc_proudhoofAI(pCreature);
+}
+
+bool QuestAccept_npc_proudhoof(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_WE_STRIKE)
+    {
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript;
@@ -1414,5 +1587,11 @@ void AddSC_borean_tundra()
     pNewScript = new Script;
     pNewScript->Name = "npc_storm_totem";
     pNewScript->pNpcSpellClick = &NpcSpellClick_npc_storm_totem;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_proudhoof";
+    pNewScript->GetAI = &GetAI_npc_proudhoofAI;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_proudhoof;
     pNewScript->RegisterSelf();
 }

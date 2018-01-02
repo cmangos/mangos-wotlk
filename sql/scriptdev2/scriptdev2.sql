@@ -418,6 +418,7 @@ UPDATE creature_template SET ScriptName='npc_jenny' WHERE entry=25969;
 UPDATE creature_template SET ScriptName='npc_seaforium_depth_charge' WHERE entry=25401;
 UPDATE creature_template SET ScriptName='npc_mootoo_the_younger' WHERE entry=25504;
 UPDATE creature_template SET ScriptName='npc_storm_totem' WHERE entry=26048;
+UPDATE creature_template SET ScriptName='npc_proudhoof' WHERE entry=25335;
 
 /* BURNING STEPPES */
 UPDATE creature_template SET ScriptName='npc_ragged_john' WHERE entry=9563;
@@ -2980,7 +2981,15 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001246,'Look out, $N! Enemies ahead!',0,0,0,0,'kayra SAY_AMBUSH2'),
 (-1001247,'We\'re almost to the refuge! Let\'s go.',0,0,0,0,'kayra SAY_PROGRESS2'),
 (-1001248,'I can see my fellow druids from here.  Thank you, $n.  I''m sure Ysiel will reward you for your actions!',0,0,0,0,'kayra SAY_END'),
-(-1001249,'You won''t escape us, druid!',0,0,0,0,'Umbrafen Slavebinder SAY_AMBUSH2');
+(-1001249,'You won''t escape us, druid!',0,0,0,0,'Umbrafen Slavebinder SAY_AMBUSH2'),
+
+(-1001250,'WE STRIKE!',0,1,0,15,'proudhoof SAY_QUEST_START'),
+(-1001251,'$N is going to join us on our assault. Let us bring peace to my ancestors!',0,0,0,396,'proudhoof SAY_QUEST_INTRO'),
+(-1001252,'An ambush. Return them to their rest!',0,0,0,5,'proudhoof SAY_AMBUSH'),
+(-1001253,'I will not stop until this place is once again at peace.',0,0,0,0,'proudhoof SAY_AGGRO'),
+(-1001254,'Regain your strength. The place where Steeljaw was felled is just ahead.',0,0,0,396,'proudhoof SAY_AMBUSH_COMPLETE'),
+(-1001255,'There\'s the dog\'s banner and there\'s his corpse. What\'s that? He\'s upon us!',0,0,0,25,'proudhoof SAY_FINAL_BATTLE'),
+(-1001256,'You fought well. Now go north to your orc outpost and inform Overlord Bor\'gorok of our success!',0,0,0,113,'proudhoof SAY_QUEST_END');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -10783,5 +10792,30 @@ INSERT INTO script_waypoint VALUES
 (25504, 23, 2807.38, 6765,    6.30617, 0, 'SAY_1_ELDER_MOOTOO'),
 (25504, 24, 2807.49, 6748.29, 8.25933, 3000, 'MOOTOO_Y_SAY_9'),
 (25504, 25, 2807.49, 6748.29, 8.25933, 5000, 'SAY_2_ELDER_MOOTOO');
+
+DELETE FROM script_waypoint WHERE entry=25335;
+INSERT INTO script_waypoint VALUES
+(25335, 1, 4138.37,5785.34,60.9668, 14000, 'SAY_QUEST_INTRO'),
+(25335, 2, 4138.37,5785.34,60.9668, 2000, 'SAY_QUEST_START'),
+(25335, 3, 4121.40,5791.31,62.7287, 0, ''),
+(25335, 4, 4101.44,5799.44,67.9234, 0, ''),
+(25335, 5, 4083.93,5805.44,71.3223, 0, ''),
+(25335, 6, 4068.87,5807.64,73.8006, 0, ''),
+(25335, 7, 4052.77,5802.65,75.0299, 0, ''),
+(25335, 8, 4038.37,5795.23,75.4015, 0, ''),
+(25335, 9, 4025.04,5789.23,75.1928, 0, ''),
+(25335, 10, 4006.38,5787.30,73.1468, 0, ''),
+(25335, 11, 3984.42,5778.06,73.1662, 3000, 'SAY_AMBUSH'),
+(25335, 12, 3984.42,5778.06,73.1662, 5000, 'summon mobs'),
+(25335, 13, 3984.42,5778.06,73.1662, 10000, 'SAY_AMBUSH_COMPLETE'),
+(25335, 14, 3952.68,5758.44,70.4093, 0, ''),
+(25335, 15, 3939.55,5758.72,69.3329, 0, ''),
+(25335, 16, 3919.01,5753.34,69.2061, 0, ''),
+(25335, 17, 3894.65,5745.70,70.2652, 0, ''),
+(25335, 18, 3888.48,5734.52,69.0002, 0, ''),
+(25335, 19, 3883.36,5725.31,67.5505, 5000, 'SAY_FINAL_BATTLE'),
+(25335, 20, 3883.36,5725.31,67.5505, 5000, 'summon boss'),
+(25335, 21, 3883.36,5725.31,67.5505, 10000, 'quest complete'),
+(25335, 22, 3883.36,5725.31,67.5505, 10000, 'SAY_QUEST_END');
 
 -- EOF
