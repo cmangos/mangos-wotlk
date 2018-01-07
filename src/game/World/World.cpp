@@ -723,6 +723,10 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_OUTDOORPVP_TF_ENABLED,                       "OutdoorPvp.TFEnabled", true);
     setConfig(CONFIG_BOOL_OUTDOORPVP_NA_ENABLED,                       "OutdoorPvp.NAEnabled", true);
     setConfig(CONFIG_BOOL_OUTDOORPVP_GH_ENABLED,                       "OutdoorPvp.GHEnabled", true);
+    setConfig(CONFIG_BOOL_BATTLEFIELD_WG_ENABLED,                      "Battlefield.WGEnabled", true);
+    setConfig(CONFIG_UINT32_BATTLEFIELD_COOLDOWN_DURATION,             "Battlefield.CooldownDuraton", 150);
+    setConfig(CONFIG_UINT32_BATTLEFIELD_BATTLE_DURATION,               "Battlefield.BattleDuration", 30);
+    setConfig(CONFIG_UINT32_BATTLEFIELD_MAX_PLAYERS_PER_TEAM,          "Battlefield.MaxPlayersPerTeam", 120);
 
     setConfig(CONFIG_BOOL_OFFHAND_CHECK_AT_TALENTS_RESET, "OffhandCheckAtTalentsReset", false);
 

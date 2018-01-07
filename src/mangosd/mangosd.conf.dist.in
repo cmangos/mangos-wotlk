@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2016101401
+ConfVersion=2017010701
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -1621,6 +1621,7 @@ Arena.StartPersonalRating = -1
 #    OutdoorPvp.TFEnabled               #Enable Terokkar Forest  Outdoor pvp
 #    OutdoorPvp.NAEnabled               #Enable Halaa (Nagrand) Outdoor pvp
 #    OutdoorPvp.GHEnabled               #Enable Venture Bay (Grizzly Hills) Outdoor pvp
+#    OutdoorPvp.WGEnabled               #Enable Wintergrasp Outdoor pvp
 #        Default: 1 (enable)
 #                 0 (disable)
 #
@@ -1633,6 +1634,33 @@ OutdoorPvp.ZMEnabled = 1
 OutdoorPvp.TFEnabled = 1
 OutdoorPvp.NAEnabled = 1
 OutdoorPvp.GHEnabled = 1
+OutdoorPvp.WGEnabled = 1
+
+###################################################################################################################
+# BATTLEFIELD CONFIG
+#
+#    Battlefield.WGEnabled              #Enable Wintergrasp Battlefield
+#        Default: 1 (enable)
+#                 0 (disable)
+#
+#    Battlefield.CooldownDuraton
+#        Duration of the battlefield cooldown (in minutes)
+#        Default: 150 (2 hours and 30 minutes)
+#
+#    Battlefield.BattleDuration
+#        Maximum duration of the battlefield battle (in minutes)
+#        Default: 30 (minutes)
+#
+#    Battlefield.MaxPlayersPerTeam
+#        Maximum allowed players for each team in battlefields
+#        Default: 120
+#
+###################################################################################################################
+
+Battlefield.WGEnabled = 1
+Battlefield.CooldownDuraton = 150
+Battlefield.BattleDuration = 30
+Battlefield.MaxPlayersPerTeam = 120
 
 ###################################################################################################################
 # NETWORK CONFIG
