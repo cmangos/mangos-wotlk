@@ -21424,7 +21424,7 @@ void Player::UpdateGroupLeaderFlag(const bool remove /*= false*/)
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
 }
 
-void Player::SetBattleGroundRaid(Group* group, int8 subgroup)
+void Player::SetBattleRaid(Group* group, int8 subgroup)
 {
     // we must move references from m_group to m_originalGroup
     SetOriginalGroup(GetGroup(), GetSubGroup());

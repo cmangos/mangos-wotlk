@@ -2294,7 +2294,7 @@ class Player : public Unit
         PartyResult CanUninviteFromGroup() const;
         void UpdateGroupLeaderFlag(const bool remove = false);
         // BattleGround Group System
-        void SetBattleGroundRaid(Group* group, int8 subgroup = -1);
+        void SetBattleRaid(Group* group, int8 subgroup = -1);
         void RemoveFromBattleGroundRaid();
         Group* GetOriginalGroup() const { return m_originalGroup.getTarget(); }
         GroupReference& GetOriginalGroupRef() { return m_originalGroup; }
