@@ -52,6 +52,7 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "BattleGround/BattleGroundAV.h"
 #include "OutdoorPvP/OutdoorPvP.h"
+#include "Battlefield/Battlefield.h"
 #include "Arena/ArenaTeam.h"
 #include "Chat/Chat.h"
 #include "Database/DatabaseImpl.h"
@@ -4795,7 +4796,9 @@ Corpse* Player::CreateCorpse()
         flags |= CORPSE_FLAG_HIDE_HELM;
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
         flags |= CORPSE_FLAG_HIDE_CLOAK;
-    if (InBattleGround() && !InArena())
+    OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetCachedZoneId());
+    if ((InBattleGround() && !InArena()) || (outdoorPvP && outdoorPvP->IsBattleField() &&
+        ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && ((Battlefield*)outdoorPvP)->HasPlayer(GetObjectGuid())))
         flags |= CORPSE_FLAG_LOOTABLE;                      // to be able to remove insignia
     corpse->SetUInt32Value(CORPSE_FIELD_FLAGS, flags);
 
@@ -8278,7 +8281,9 @@ bool Player::CheckAmmoCompatibility(const ItemPrototype* ammo_proto) const
     Called by remove insignia spell effect    */
 void Player::RemovedInsignia(Player* looterPlr)
 {
-    if (!GetBattleGroundId())
+    OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetCachedZoneId());
+    if (!GetBattleGroundId() && (!outdoorPvP || !outdoorPvP->IsBattleField() ||
+        ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() != BF_STATUS_IN_PROGRESS || !((Battlefield*)outdoorPvP)->HasPlayer(GetObjectGuid())))
         return;
 
     // If not released spirit, do it !
@@ -8362,6 +8367,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid) const
         case 3518:                                          // Nagrand
         case 3519:                                          // Terokkar Forest
         case 3521:                                          // Zangarmarsh
+        case 4197:                                          // Wintergrasp
             if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
                 outdoorPvP->FillInitialWorldStates(data, count);
             break;
@@ -15693,6 +15699,12 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         }
     }
 
+    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(fields[34].GetUInt32()))
+    {
+        if (outdoorPvP->IsBattleField())
+            ((Battlefield*)outdoorPvP)->HandlePlayerLoggedIn(this);
+    }
+
     if (transGUID != 0)
     {
         m_movementInfo.SetTransportData(ObjectGuid(HIGHGUID_MO_TRANSPORT, transGUID), fields[26].GetFloat(), fields[27].GetFloat(), fields[28].GetFloat(), fields[29].GetFloat(), 0, -1);
@@ -21883,6 +21895,13 @@ bool Player::CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area) const
 
     if (v_map == 571 && !HasSpell(54197))   // Cold Weather Flying
         return false;
+
+    // Disallow mounting in wintergrasp when battle is in progress
+    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zone))
+    {
+        if (outdoorPvP->IsBattleField())
+            return ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() != BF_STATUS_IN_PROGRESS;
+    }
 
     // don't allow flying in Dalaran restricted areas
     // (no other zones currently has areas with AREA_FLAG_CANNOT_FLY)
