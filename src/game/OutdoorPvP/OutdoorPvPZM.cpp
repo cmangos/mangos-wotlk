@@ -146,7 +146,7 @@ void OutdoorPvPZM::HandleGameObjectCreate(GameObject* go)
 }
 
 // Cast player spell on opponent kill
-void OutdoorPvPZM::HandlePlayerKillInsideArea(Player* player)
+void OutdoorPvPZM::HandlePlayerKillInsideArea(Player* player, Unit* victim)
 {
     for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
     {

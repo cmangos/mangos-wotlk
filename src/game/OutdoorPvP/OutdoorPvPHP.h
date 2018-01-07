@@ -159,7 +159,7 @@ class OutdoorPvPHP : public OutdoorPvP
         void HandleObjectiveComplete(uint32 eventId, const std::list<Player*>& players, Team team) override;
 
         void HandleGameObjectCreate(GameObject* go) override;
-        void HandlePlayerKillInsideArea(Player* player) override;
+        void HandlePlayerKillInsideArea(Player* player, Unit* /*victim*/) override;
 
     private:
         // process capture events

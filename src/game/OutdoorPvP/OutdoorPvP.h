@@ -87,7 +87,7 @@ class OutdoorPvP
         virtual void Update(uint32 /*diff*/) {}
 
         // Handle player kill
-        void HandlePlayerKill(Player* killer, Player* victim);
+        void HandlePlayerKill(Player* killer, Unit* victim);
 
         // Handle script condition fulfillment
         virtual bool IsConditionFulfilled(Player const* /*source*/, uint32 /*conditionId*/, WorldObject const* /*conditionSource*/, uint32 /*conditionSourceType*/) { return false; }
@@ -105,7 +105,7 @@ class OutdoorPvP
         virtual void SendRemoveWorldStates(Player* /*player*/) {}
 
         // handle npc/player kill
-        virtual void HandlePlayerKillInsideArea(Player* /*killer*/) {}
+        virtual void HandlePlayerKillInsideArea(Player* /*killer*/, Unit* /*victim*/) {}
 
         // send world state update to all players present
         void SendUpdateWorldState(uint32 field, uint32 value);

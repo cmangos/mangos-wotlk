@@ -95,12 +95,12 @@ void OutdoorPvP::HandleGameObjectRemove(GameObject* go)
 }
 
 /**
-   Function that handles player kills in the main outdoor pvp zones
+   Function that handles kills in the main outdoor pvp zones
 
-   @param   player who killed another player
+   @param   player who killed another unit
    @param   victim who was killed
  */
-void OutdoorPvP::HandlePlayerKill(Player* killer, Player* victim)
+void OutdoorPvP::HandlePlayerKill(Player* killer, Unit* victim)
 {
     if (Group* group = killer->GetGroup())
     {
@@ -118,14 +118,14 @@ void OutdoorPvP::HandlePlayerKill(Player* killer, Player* victim)
             // creature kills must be notified, even if not inside objective / not outdoor pvp active
             // player kills only count if active and inside objective
             if (groupMember->CanUseCapturePoint())
-                HandlePlayerKillInsideArea(groupMember);
+                HandlePlayerKillInsideArea(groupMember, victim);
         }
     }
     else
     {
         // creature kills must be notified, even if not inside objective / not outdoor pvp active
         if (killer && killer->CanUseCapturePoint())
-            HandlePlayerKillInsideArea(killer);
+            HandlePlayerKillInsideArea(killer, victim);
     }
 }
 
