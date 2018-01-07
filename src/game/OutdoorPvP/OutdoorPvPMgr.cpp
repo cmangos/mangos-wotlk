@@ -28,6 +28,8 @@
 #include "OutdoorPvPSI.h"
 #include "OutdoorPvPTF.h"
 #include "OutdoorPvPZM.h"
+#include "BattleField/BattleField.h"
+#include "BattleField/BattleFieldWG.h"
 
 INSTANTIATE_SINGLETON_1(OutdoorPvPMgr);
 
@@ -49,6 +51,14 @@ OutdoorPvPMgr::~OutdoorPvPMgr()
         m_scripts[OPVP_ID_##a] = new OutdoorPvP##a();               \
         ++counter;                                                  \
     }
+
+#define LOAD_BATTLEFIELD(a)                                         \
+    if (sWorld.getConfig(CONFIG_BOOL_BATTLEFIELD_##a##_ENABLED))    \
+    {                                                               \
+        m_scripts[OPVP_ID_##a] = new Battlefield##a();              \
+        ++counter;                                                  \
+    }
+
 /**
    Function which loads all outdoor pvp scripts
  */
@@ -63,6 +73,7 @@ void OutdoorPvPMgr::InitOutdoorPvP()
     LOAD_OPVP_ZONE(TF);
     LOAD_OPVP_ZONE(NA);
     LOAD_OPVP_ZONE(GH);
+    LOAD_BATTLEFIELD(WG)
 
     sLog.outString(">> Loaded %u Outdoor PvP zones", counter);
     sLog.outString();
@@ -86,6 +97,8 @@ OutdoorPvP* OutdoorPvPMgr::GetScript(uint32 zoneId)
             return m_scripts[OPVP_ID_NA];
         case ZONE_ID_GRIZZLY_HILLS:
             return m_scripts[OPVP_ID_GH];
+        case ZONE_ID_WINTERGRASP:
+            return m_scripts[OPVP_ID_WG];
         default:
             return nullptr;
     }
@@ -163,4 +176,19 @@ void OutdoorPvPMgr::Update(uint32 diff)
             m_scripts[i]->Update(m_updateTimer.GetCurrent());
 
     m_updateTimer.Reset();
+}
+
+/**
+   Function that returns the battlefield script by id
+
+   @param   battlefield id
+ */
+Battlefield* OutdoorPvPMgr::GetBattlefieldById(uint32 id)
+{
+    for (uint8 i = 0; i < MAX_OPVP_ID; ++i)
+        if (OutdoorPvP* script = m_scripts[i])
+            if (script->IsBattleField() && ((Battlefield*)script)->GetBattlefieldId() == id)
+                return (Battlefield*)script;
+
+    return NULL;
 }

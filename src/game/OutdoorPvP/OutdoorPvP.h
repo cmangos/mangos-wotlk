@@ -52,7 +52,7 @@ class OutdoorPvP
         friend class OutdoorPvPMgr;
 
     public:
-        OutdoorPvP() {}
+        OutdoorPvP() : m_isBattleField(false) {}
         virtual ~OutdoorPvP() {}
 
         // called when the zone is initialized
@@ -89,6 +89,19 @@ class OutdoorPvP
         // Handle player kill
         void HandlePlayerKill(Player* killer, Unit* victim);
 
+        // applies buff to a team inside the specific zone
+        void BuffTeam(Team team, uint32 spellId, bool remove = false);
+
+        // send world state update to all players present
+        void SendUpdateWorldState(uint32 field, uint32 value);
+
+        // set banner visual
+        void SetBannerVisual(const WorldObject* objRef, ObjectGuid goGuid, uint32 artKit, uint32 animId);
+        void SetBannerVisual(GameObject* go, uint32 artKit, uint32 animId);
+
+        // check if zone is battlefield
+        bool IsBattleField() const { return m_isBattleField; }
+
         // Handle script condition fulfillment
         virtual bool IsConditionFulfilled(Player const* /*source*/, uint32 /*conditionId*/, WorldObject const* /*conditionSource*/, uint32 /*conditionSourceType*/) { return false; }
 
@@ -107,24 +120,16 @@ class OutdoorPvP
         // handle npc/player kill
         virtual void HandlePlayerKillInsideArea(Player* /*killer*/, Unit* /*victim*/) {}
 
-        // send world state update to all players present
-        void SendUpdateWorldState(uint32 field, uint32 value);
-
-        // applies buff to a team inside the specific zone
-        void BuffTeam(Team team, uint32 spellId, bool remove = false);
-
         // get banner artkit based on controlling team
         uint32 GetBannerArtKit(Team team, uint32 artKitAlliance = CAPTURE_ARTKIT_ALLIANCE, uint32 artKitHorde = CAPTURE_ARTKIT_HORDE, uint32 artKitNeutral = CAPTURE_ARTKIT_NEUTRAL) const;
-
-        // set banner visual
-        void SetBannerVisual(const WorldObject* objRef, ObjectGuid goGuid, uint32 artKit, uint32 animId);
-        void SetBannerVisual(GameObject* go, uint32 artKit, uint32 animId);
 
         // Handle gameobject spawn / despawn
         void RespawnGO(const WorldObject* objRef, ObjectGuid goGuid, bool respawn);
 
         // store the players inside the area
         GuidZoneMap m_zonePlayers;
+
+        bool m_isBattleField;
 };
 
 #endif

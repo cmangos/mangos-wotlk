@@ -24,6 +24,7 @@
 #include "GroupReference.h"
 #include "GroupRefManager.h"
 #include "BattleGround/BattleGround.h"
+#include "BattleField/Battlefield.h"
 #include "Server/DBCEnums.h"
 #include "Globals/SharedDefines.h"
 
@@ -32,6 +33,7 @@ struct ItemPrototype;
 class WorldSession;
 class Map;
 class BattleGround;
+class BattleField;
 class DungeonPersistentState;
 class Field;
 class Unit;
@@ -211,6 +213,7 @@ class Group
         void ConvertToRaid();
 
         void SetBattlegroundGroup(BattleGround* bg) { m_bgGroup = bg; }
+        void SetBattlefieldGroup(Battlefield* bf) { m_bfGroup = bf; }
         GroupJoinBattlegroundResult CanJoinBattleGroundQueue(BattleGround const* bgOrTemplate, BattleGroundQueueTypeId bgQueueTypeId, uint32 MinPlayerCount, uint32 MaxPlayerCount, bool isRated, uint32 arenaSlot);
 
         void ChangeMembersGroup(ObjectGuid guid, uint8 group);
@@ -369,6 +372,7 @@ class Group
         Difficulty          m_dungeonDifficulty;
         Difficulty          m_raidDifficulty;
         BattleGround*       m_bgGroup;
+        Battlefield*        m_bfGroup;
         ObjectGuid          m_targetIcons[TARGET_ICON_COUNT];
         LootMethod          m_lootMethod;
         ItemQualities       m_lootThreshold;

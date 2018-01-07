@@ -36,8 +36,14 @@ enum OutdoorPvPTypes
     OPVP_ID_TF,
     OPVP_ID_NA,
     OPVP_ID_GH,
+    OPVP_ID_WG,
 
     MAX_OPVP_ID
+};
+
+enum BattlefieldTypes
+{
+    BATTLEFIELD_WG = 1,
 };
 
 enum OutdoorPvPZones
@@ -72,7 +78,9 @@ enum OutdoorPvPZones
 
     ZONE_ID_NAGRAND                 = 3518,
 
-    ZONE_ID_GRIZZLY_HILLS           = 394
+    ZONE_ID_GRIZZLY_HILLS           = 394,
+
+    ZONE_ID_WINTERGRASP             = 4197,
 };
 
 struct CapturePointSlider
@@ -88,6 +96,7 @@ class Player;
 class GameObject;
 class Creature;
 class OutdoorPvP;
+class Battlefield;
 
 typedef std::map<uint32 /*capture point entry*/, CapturePointSlider /*slider value and lock state*/> CapturePointSliderMap;
 
@@ -114,6 +123,9 @@ class OutdoorPvPMgr
         // Save and load capture point slider
         CapturePointSliderMap const* GetCapturePointSliderMap() const { return &m_capturePointSlider; }
         void SetCapturePointSlider(uint32 entry, CapturePointSlider value) { m_capturePointSlider[entry] = value; }
+
+        // return assigned battlefield script by id
+        Battlefield * GetBattlefieldById(uint32 id);
 
     private:
         // return assigned outdoor pvp script
