@@ -632,8 +632,25 @@ UPDATE spell_template SET RecoveryTime=15000,AttributesServerside=0x00000002 WHE
 UPDATE spell_template SET RecoveryTime=10000,AttributesServerside=0x00000002 WHERE Id IN(38006);
 UPDATE spell_template SET RecoveryTime=30000,AttributesServerside=0x00000002 WHERE Id IN(37920);
 
+-- blackheart the inciter mechanics
+INSERT INTO spell_template(Id,Attributes,AttributesEx2,AttributesEx3,rangeIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectRadiusIndex1,EffectMiscValue1,EffectMiscValueB1,SpellIconID,SpellName,DmgMultiplier1) VALUES
+(33677,256,4,256,1,28,1,1,18,16,19300,64,1,'Incite Chaos',1),
+(33680,256,4,256,1,28,1,1,18,16,19301,64,1,'Incite Chaos',1),
+(33681,256,4,256,1,28,1,1,18,16,19302,64,1,'Incite Chaos',1),
+(33682,256,4,256,1,28,1,1,18,16,19303,64,1,'Incite Chaos',1),
+(33683,256,4,256,1,28,1,1,18,16,19304,64,1,'Incite Chaos',1);
+
+INSERT INTO spell_template(Id,Attributes,AttributesEx2,AttributesEx3,rangeIndex,Effect1,EffectImplicitTargetA1,SpellIconID,SpellName,DmgMultiplier1) VALUES
+(33687,256,4,256,13,77,1,1,'Incite Chaos',1);
+INSERT INTO spell_template(Id,Attributes,AttributesEx2,rangeIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectBasePoints1,EffectImplicitTargetA1,SpellIconID,SpellName,DmgMultiplier1) VALUES
+(34915,256,4,13,63,1,1,9999,25,24,'Threat',1); -- Description: Adds a large amount of threat to the target.
+
+INSERT INTO spell_template(Id,Attributes,AttributesEx3,DurationIndex,Effect1,Effect2,EffectDieSides1,EffectDieSides2,EffectBaseDice1,EffectBaseDice2,EffectImplicitTargetA1,EffectImplicitTargetA2,EffectApplyAuraName1,EffectApplyAuraName2,EffectMiscValue1,EffectMiscValue2,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2) VALUES
+(38713,384,268435456,21,6,6,1,1,1,1,1,1,139,139,1010,965,1,'Spellbind Broken',1,1);
+
 -- Add missing server-side spell for Guard Slip'kik Trigger
 DELETE FROM spell_template WHERE id=31770;
 INSERT INTO spell_template (Id, Category, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, CasterAuraState, TargetAuraState, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcFlags, ProcChance, ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerlevel, ManaPerSecond, ManaPerSecondPerLevel, RangeIndex, Speed, StackAmount, Totem1, Totem2, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, Effect1, Effect2, Effect3, EffectDieSides1, EffectDieSides2, EffectDieSides3, EffectBaseDice1, EffectBaseDice2, EffectBaseDice3, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectMechanic1, EffectMechanic2, EffectMechanic3, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, EffectImplicitTargetB1, EffectImplicitTargetB2, EffectImplicitTargetB3, EffectRadiusIndex1, EffectRadiusIndex2, EffectRadiusIndex3, EffectApplyAuraName1, EffectApplyAuraName2, EffectApplyAuraName3, EffectAmplitude1, EffectAmplitude2, EffectAmplitude3, EffectMultipleValue1, EffectMultipleValue2, EffectMultipleValue3, EffectChainTarget1, EffectChainTarget2, EffectChainTarget3, EffectItemType1, EffectItemType2, EffectItemType3, EffectMiscValue1, EffectMiscValue2, EffectMiscValue3, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectPointsPerComboPoint1, EffectPointsPerComboPoint2, EffectPointsPerComboPoint3, SpellVisual, SpellIconID, ActiveIconID, SpellPriority, SpellName, SpellName2, SpellName3, SpellName4, SpellName5, SpellName6, SpellName7, SpellName8, Rank, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8, ManaCostPercentage, StartRecoveryCategory, StartRecoveryTime, MaxTargetLevel, SpellFamilyName, SpellFamilyFlags, MaxAffectedTargets, DmgClass, PreventionType, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, IsServerSide) VALUES
 (31770,0,0,0,256,0,4,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,101,0,0,0,0,0,0,0,0,0,0,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22,0,0,7,0,0,28,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,'Guard Slip\'kik Trigger','','','','','','','','','','','','','','','',0,0,0,0,0,0,0,0,0,1,0,0,0);
+
 
