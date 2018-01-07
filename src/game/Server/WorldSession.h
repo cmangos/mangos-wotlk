@@ -103,6 +103,15 @@ enum PartyOperation
     PARTY_OP_SWAP = 4
 };
 
+enum BattlefieldLeaveReason
+{
+    BATTLEFIELD_LEAVE_REASON_CLOSE      = 0x00000001,
+    //BATTLEFIELD_LEAVE_REASON_UNK1     = 0x00000002, (not used)
+    //BATTLEFIELD_LEAVE_REASON_UNK2     = 0x00000004, (not used)
+    BATTLEFIELD_LEAVE_REASON_EXITED     = 0x00000008,
+    BATTLEFIELD_LEAVE_REASON_LOW_LEVEL  = 0x00000010
+};
+
 enum PartyResult
 {
     ERR_PARTY_RESULT_OK                 = 0,
@@ -864,6 +873,17 @@ class WorldSession
         void HandleCalendarEventModeratorStatus(WorldPacket& recv_data);
         void HandleCalendarComplain(WorldPacket& recv_data);
         void HandleCalendarGetNumPending(WorldPacket& recv_data);
+
+        // Battlefield
+        void SendBattlefieldWarInvite(uint32 battlefieldId, uint32 zoneId, uint32 acceptDelay);
+        void SendBattlefieldQueueInvite(uint32 battlefieldId);
+        void SendBattlefieldQueueResponse(uint32 battlefieldId, uint32 zoneId, bool canJoin, bool queueFull);
+        void SendBattlefieldEnteredResponse(uint32 battlefieldId);
+        void SendBattlefieldLeaveMessage(uint32 battlefieldId, BattlefieldLeaveReason reason);
+
+        void HandleBattlefieldQueueResponse(WorldPacket& recv_data);
+        void HandleBattlefieldWarResponse(WorldPacket& recv_data);
+        void HandleBattlefieldExitRequest(WorldPacket& recv_data);
 
         void HandleSpellClick(WorldPacket& recv_data);
         void HandleGetMirrorimageData(WorldPacket& recv_data);
