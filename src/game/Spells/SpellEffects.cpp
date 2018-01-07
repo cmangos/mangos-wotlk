@@ -3895,6 +3895,19 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                 return;
             }
+            switch (m_spellInfo->Id)
+            {
+                case 36448:                                 // Focused Bursts
+                case 36475:                                 // Focused Bursts
+                {
+                    if (!unitTarget || eff_idx != EFFECT_INDEX_0)
+                        return;
+
+                    uint32 spellid = m_spellInfo->EffectBasePoints[urand(0, MAX_EFFECT_INDEX - 1)] + 1;
+                    m_caster->CastSpell(unitTarget, spellid, TRIGGERED_OLD_TRIGGERED, nullptr);
+                    return;
+                }
+            }
             break;
         }
         case SPELLFAMILY_DRUID:

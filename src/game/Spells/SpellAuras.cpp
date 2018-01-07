@@ -3565,6 +3565,21 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
             }
             break;
+        case SPELLFAMILY_PRIEST:
+        {
+            switch (GetId())
+            {
+                case 36414: // Focused Bursts
+                {
+                    if (apply)
+                        target->clearUnitState(UNIT_STAT_MELEE_ATTACKING);
+                    else
+                        target->addUnitState(UNIT_STAT_MELEE_ATTACKING);
+                    return;
+                }
+            }
+            break;
+        }
     }
 
     // pet auras
