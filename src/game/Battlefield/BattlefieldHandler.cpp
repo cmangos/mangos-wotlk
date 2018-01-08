@@ -20,6 +20,9 @@
 #include "Server/WorldSession.h"
 #include "OutdoorPvP/OutdoorPvPMgr.h"
 #include "Battlefield/Battlefield.h"
+#include "WorldPacket.h"
+#include "Log.h"
+#include "Server/Opcodes.h"
 
 /**
 Invite a player to join and teleport to a battlefield
