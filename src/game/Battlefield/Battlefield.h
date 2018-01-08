@@ -24,7 +24,7 @@
 #include "Globals/SharedDefines.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 
-class BattleField;
+class Battlefield;
 class Group;
 
 enum BattlefieldStatus

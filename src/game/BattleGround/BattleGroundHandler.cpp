@@ -338,7 +338,7 @@ void WorldSession::HandleBattlefieldListOpcode(WorldPacket& recv_data)
     SendPacket(data);
 }
 
-void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
+void WorldSession::HandleBattlefieldPortOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_BATTLEFIELD_PORT");
 

@@ -28,8 +28,8 @@
 #include "OutdoorPvPSI.h"
 #include "OutdoorPvPTF.h"
 #include "OutdoorPvPZM.h"
-#include "BattleField/BattleField.h"
-#include "BattleField/BattleFieldWG.h"
+#include "Battlefield/Battlefield.h"
+#include "Battlefield/BattlefieldWG.h"
 
 INSTANTIATE_SINGLETON_1(OutdoorPvPMgr);
 
@@ -187,7 +187,7 @@ Battlefield* OutdoorPvPMgr::GetBattlefieldById(uint32 id)
 {
     for (uint8 i = 0; i < MAX_OPVP_ID; ++i)
         if (OutdoorPvP* script = m_scripts[i])
-            if (script->IsBattleField() && ((Battlefield*)script)->GetBattlefieldId() == id)
+            if (script->IsBattlefield() && ((Battlefield*)script)->GetBattlefieldId() == id)
                 return (Battlefield*)script;
 
     return NULL;

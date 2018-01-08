@@ -751,7 +751,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x2D2*/ { "SMSG_PLAY_SOUND",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2D3*/ { "CMSG_BATTLEFIELD_STATUS",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldStatusOpcode   },
     /*0x2D4*/ { "SMSG_BATTLEFIELD_STATUS",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x2D5*/ { "CMSG_BATTLEFIELD_PORT",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattleFieldPortOpcode     },
+    /*0x2D5*/ { "CMSG_BATTLEFIELD_PORT",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldPortOpcode     },
     /*0x2D6*/ { "MSG_INSPECT_HONOR_STATS",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleInspectHonorStatsOpcode   },
     /*0x2D7*/ { "CMSG_BATTLEMASTER_HELLO",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlemasterHelloOpcode   },
     /*0x2D8*/ { "CMSG_MOVE_START_SWIM_CHEAT",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },

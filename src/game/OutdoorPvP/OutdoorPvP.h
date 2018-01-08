@@ -52,7 +52,7 @@ class OutdoorPvP
         friend class OutdoorPvPMgr;
 
     public:
-        OutdoorPvP() : m_isBattleField(false) {}
+        OutdoorPvP() : m_isBattlefield(false) {}
         virtual ~OutdoorPvP() {}
 
         // called when the zone is initialized
@@ -100,7 +100,7 @@ class OutdoorPvP
         void SetBannerVisual(GameObject* go, uint32 artKit, uint32 animId);
 
         // check if zone is battlefield
-        bool IsBattleField() const { return m_isBattleField; }
+        bool IsBattlefield() const { return m_isBattlefield; }
 
         // Handle script condition fulfillment
         virtual bool IsConditionFulfilled(Player const* /*source*/, uint32 /*conditionId*/, WorldObject const* /*conditionSource*/, uint32 /*conditionSourceType*/) { return false; }
@@ -129,7 +129,7 @@ class OutdoorPvP
         // store the players inside the area
         GuidZoneMap m_zonePlayers;
 
-        bool m_isBattleField;
+        bool m_isBattlefield;
 };
 
 #endif

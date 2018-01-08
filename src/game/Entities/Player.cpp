@@ -4797,7 +4797,7 @@ Corpse* Player::CreateCorpse()
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
         flags |= CORPSE_FLAG_HIDE_CLOAK;
     OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetCachedZoneId());
-    if ((InBattleGround() && !InArena()) || (outdoorPvP && outdoorPvP->IsBattleField() &&
+    if ((InBattleGround() && !InArena()) || (outdoorPvP && outdoorPvP->IsBattlefield() &&
         ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && ((Battlefield*)outdoorPvP)->HasPlayer(GetObjectGuid())))
         flags |= CORPSE_FLAG_LOOTABLE;                      // to be able to remove insignia
     corpse->SetUInt32Value(CORPSE_FIELD_FLAGS, flags);
@@ -8282,7 +8282,7 @@ bool Player::CheckAmmoCompatibility(const ItemPrototype* ammo_proto) const
 void Player::RemovedInsignia(Player* looterPlr)
 {
     OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetCachedZoneId());
-    if (!GetBattleGroundId() && (!outdoorPvP || !outdoorPvP->IsBattleField() ||
+    if (!GetBattleGroundId() && (!outdoorPvP || !outdoorPvP->IsBattlefield() ||
         ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() != BF_STATUS_IN_PROGRESS || !((Battlefield*)outdoorPvP)->HasPlayer(GetObjectGuid())))
         return;
 
@@ -15701,7 +15701,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(fields[34].GetUInt32()))
     {
-        if (outdoorPvP->IsBattleField())
+        if (outdoorPvP->IsBattlefield())
             ((Battlefield*)outdoorPvP)->HandlePlayerLoggedIn(this);
     }
 
@@ -21899,7 +21899,7 @@ bool Player::CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area) const
     // Disallow mounting in wintergrasp when battle is in progress
     if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zone))
     {
-        if (outdoorPvP->IsBattleField())
+        if (outdoorPvP->IsBattlefield())
             return ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() != BF_STATUS_IN_PROGRESS;
     }
 

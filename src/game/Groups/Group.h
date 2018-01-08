@@ -24,7 +24,7 @@
 #include "GroupReference.h"
 #include "GroupRefManager.h"
 #include "BattleGround/BattleGround.h"
-#include "BattleField/Battlefield.h"
+#include "Battlefield/Battlefield.h"
 #include "Server/DBCEnums.h"
 #include "Globals/SharedDefines.h"
 
@@ -33,7 +33,7 @@ struct ItemPrototype;
 class WorldSession;
 class Map;
 class BattleGround;
-class BattleField;
+class Battlefield;
 class DungeonPersistentState;
 class Field;
 class Unit;

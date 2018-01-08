@@ -29,7 +29,7 @@
 
 Battlefield::Battlefield() : OutdoorPvP(), m_battleFieldId(0)
 {
-    m_isBattleField = true;
+    m_isBattlefield = true;
 
     // init generic timers for all battlefields
     m_battleDuration = sWorld.getConfig(CONFIG_UINT32_BATTLEFIELD_BATTLE_DURATION) * MINUTE * IN_MILLISECONDS;
@@ -479,7 +479,7 @@ bool Battlefield::CanAddPlayerToRaid(Player* player)
         DEBUG_LOG("Battlefield: No free raid for %s!", player->GetGuidStr().c_str());
         if (IsTeamFull(teamIdx))
         {
-            DEBUG_LOG("Battlefield: BattleField is full! Can't add player %s!", player->GetGuidStr().c_str());
+            DEBUG_LOG("Battlefield: Battlefield is full! Can't add player %s!", player->GetGuidStr().c_str());
             return false;
         }
 
