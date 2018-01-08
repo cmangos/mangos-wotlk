@@ -23,6 +23,7 @@
 #include "WorldPacket.h"
 #include "Log.h"
 #include "Server/Opcodes.h"
+#include "Entities/Player.h"
 
 /**
 Invite a player to join and teleport to a battlefield

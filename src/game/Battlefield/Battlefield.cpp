@@ -408,7 +408,7 @@ void Battlefield::QuestCreditTeam(uint32 credit, Team team, WorldObject* source,
         if (!plr)
             continue;
 
-        if (plr->GetTeam() != team || source && radius > 0.0f && source->GetDistance2d(plr->GetPositionX(), plr->GetPositionY()) > radius)
+        if ((plr->GetTeam() != team || source) && radius > 0.0f && source->GetDistance2d(plr->GetPositionX(), plr->GetPositionY()) > radius)
             continue;
 
         plr->KilledMonsterCredit(credit);
