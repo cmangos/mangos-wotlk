@@ -2136,6 +2136,14 @@ void Aura::TriggerSpell()
 
                 break;
             }
+            case 36657:                                     // Death Count
+            case 38818:                                     // Death Count
+            {
+                Unit* caster = GetCaster(); // should only go off if caster is still alive
+                if (!caster || !caster->isAlive())
+                    return;
+                break;
+            }
             case 43149:                                     // Claw Rage
             {
                 // Need to provide explicit target for trigger spell target combination
