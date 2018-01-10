@@ -6843,57 +6843,18 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
     }
 }
 
-ObjectGuid const& Unit::GetMasterGuid() const
-{
-    ObjectGuid const& guid = GetCharmerGuid();
-    return (guid ? guid : GetOwnerGuid());
-}
-
-Unit* Unit::GetOwner(bool recursive /*= false*/) const
-{
-    // Default, creator field as owner is present in everything: totems, pets, guardians, etc
-    Unit* owner = GetCreator();
-    // Query owner recursively (ascending)
-    if (recursive)
-    {
-        while (Unit* grandowner = (owner ? owner->GetOwner() : nullptr))
-            owner = grandowner;
-    }
-    return owner;
-}
-
-Unit* Unit::GetMaster() const
-{
-    Unit* charmer = GetCharmer();
-    return (charmer ? charmer : GetOwner());
-}
-
-Unit const* Unit::GetBeneficiary() const
-{
-    Unit const* master = GetMaster();
-    return (master ? master : this);
-}
-
-Unit* Unit::GetBeneficiary()
+Unit* Unit::GetBeneficiary() const
 {
     Unit* master = GetMaster();
-    return (master ? master : this);
+    return (master ? master : const_cast<Unit*>(this));
 }
 
-Player const* Unit::GetBeneficiaryPlayer() const
+Player* Unit::GetBeneficiaryPlayer() const
 {
     Unit const* beneficiary = GetBeneficiary();
     if (beneficiary)
-        return (beneficiary->GetTypeId() == TYPEID_PLAYER ? static_cast<Player const*>(beneficiary) : nullptr);
-    return (GetTypeId() == TYPEID_PLAYER ? static_cast<Player const*>(this) : nullptr);
-}
-
-Player* Unit::GetBeneficiaryPlayer()
-{
-    Unit* beneficiary = GetBeneficiary();
-    if (beneficiary)
-        return (beneficiary->GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(beneficiary) : nullptr);
-    return (GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this) : nullptr);
+        return (beneficiary->GetTypeId() == TYPEID_PLAYER ? const_cast<Player*>(static_cast<Player const*>(beneficiary)) : nullptr);
+    return (GetTypeId() == TYPEID_PLAYER ? const_cast<Player*>(static_cast<Player const*>(this)) : nullptr);
 }
 
 Player const* Unit::GetControllingPlayer() const
@@ -6948,80 +6909,99 @@ Player const* Unit::GetControllingClientPlayer() const
     return nullptr;
 }
 
-Unit* Unit::GetSpawner() const
+Unit* Unit::GetCharm(WorldObject const* pov /*= nullptr*/) const
 {
-    if (ObjectGuid guid = GetSpawnerGuid())
-        return ObjectAccessor::GetUnit(*this, guid);
+    if (ObjectGuid const& guid = GetCharmGuid())
+    {
+        if (Unit* unit = ObjectAccessor::GetUnit((pov ? *pov : *this), guid))
+            return unit;
+        // Bugcheck
+        sLog.outError("Unit::GetCharm: Object guid field management continuity violation, charmed unit with guid %s does not exist.", guid.GetString().c_str());
+        // const_cast<Unit*>(this)->SetCharm(nullptr);
+    }
     return nullptr;
 }
 
-Unit* Unit::GetSummoner() const
-{
-    if (ObjectGuid const& guid = GetSummonerGuid())
-        return ObjectAccessor::GetUnit(*this, guid);
-    return nullptr;
-}
-
-Unit* Unit::GetCreator() const
-{
-    if (ObjectGuid const& guid = GetCreatorGuid())
-        return ObjectAccessor::GetUnit(*this, guid);
-    return nullptr;
-}
-
-Unit* Unit::GetCharmer() const
+Unit* Unit::GetCharmer(WorldObject const* pov /*= nullptr*/) const
 {
     if (ObjectGuid const& guid = GetCharmerGuid())
-        return ObjectAccessor::GetUnit(*this, guid);
+    {
+        if (Unit* unit = ObjectAccessor::GetUnit((pov ? *pov : *this), guid))
+            return unit;
+        // Bugcheck
+        sLog.outError("Unit::GetCharmer: Object guid field management continuity violation, charmer unit with guid %s does not exist.", guid.GetString().c_str());
+        // const_cast<Unit*>(this)->SetCharmer(nullptr);
+    }
     return nullptr;
 }
 
-Pet* Unit::GetPet() const
+Unit* Unit::GetCreator(WorldObject const* pov /*= nullptr*/) const
 {
-    if (ObjectGuid pet_guid = GetPetGuid())
+    if (ObjectGuid const& guid = GetCreatorGuid())
     {
-        if (Pet* pet = GetMap()->GetPet(pet_guid))
-            return pet;
-
-        sLog.outError("Unit::GetPet: %s not exist.", pet_guid.GetString().c_str());
-        const_cast<Unit*>(this)->SetPet(nullptr);
+        if (Unit* unit = ObjectAccessor::GetUnit((pov ? *pov : *this), guid))
+            return unit;
+        // Bugcheck
+        sLog.outError("Unit::GetCreator: Object guid field management continuity violation, creator unit with guid %s does not exist.", guid.GetString().c_str());
+        // const_cast<Unit*>(this)->SetCreator(nullptr);
     }
-
     return nullptr;
 }
 
-Pet* Unit::_GetPet(ObjectGuid guid) const
+Unit* Unit::GetTarget(WorldObject const* pov /*= nullptr*/) const
 {
-    return GetMap()->GetPet(guid);
-}
-
-void Unit::RemoveMiniPet()
-{
-    if (Pet* pet = GetMiniPet())
-        pet->Unsummon(PET_SAVE_AS_DELETED, this);
-    else
-        SetCritterGuid(ObjectGuid());
-}
-
-Pet* Unit::GetMiniPet() const
-{
-    if (!GetCritterGuid())
-        return nullptr;
-
-    return GetMap()->GetPet(GetCritterGuid());
-}
-
-Unit* Unit::GetCharm() const
-{
-    if (ObjectGuid charm_guid = GetCharmGuid())
+    if (ObjectGuid const& guid = GetTargetGuid())
     {
-        if (Unit* pet = ObjectAccessor::GetUnit(*this, charm_guid))
-            return pet;
-
-        sLog.outError("Unit::GetCharm: Charmed %s not exist.", charm_guid.GetString().c_str());
-        const_cast<Unit*>(this)->SetCharm(nullptr);
+        if (Unit* unit = ObjectAccessor::GetUnit((pov ? *pov : *this), guid))
+            return unit;
+        // Bugcheck
+        sLog.outError("Unit::GetTarget: Object guid field management continuity violation, target unit with guid %s does not exist.", guid.GetString().c_str());
+        // const_cast<Unit*>(this)->SetTarget(nullptr);
     }
+    return nullptr;
+}
 
+Unit* Unit::GetChannelObject(WorldObject const* pov /*= nullptr*/) const
+{
+    if (ObjectGuid const& guid = GetChannelObjectGuid())
+    {
+        if (Unit* unit = ObjectAccessor::GetUnit((pov ? *pov : *this), guid))
+            return unit;
+        // Bugcheck
+        sLog.outError("Unit::GetChannelObject: Object guid field management continuity violation, channel unit with guid %s does not exist.", guid.GetString().c_str());
+        // const_cast<Unit*>(this)->SetChannelObject(nullptr);
+    }
+    return nullptr;
+}
+
+Unit* Unit::GetOwner(bool recursive /*= false*/, WorldObject const* pov /*= nullptr*/) const
+{
+    // Default, creator field as owner is present in everything: totems, pets, guardians, etc
+    Unit* owner = GetCreator(pov);
+    // Query owner recursively (ascending)
+    if (recursive)
+    {
+        while (Unit* grandowner = (owner ? owner->GetOwner(pov) : nullptr))
+            owner = grandowner;
+    }
+    return owner;
+}
+
+Unit* Unit::GetMaster(WorldObject const* pov /*= nullptr*/) const
+{
+    Unit* charmer = GetCharmer(pov);
+    return (charmer ? charmer : GetOwner(pov));
+}
+
+Unit* Unit::GetSpawner(WorldObject const* pov /*= nullptr*/) const
+{
+    if (ObjectGuid const& guid = GetSpawnerGuid())
+    {
+        if (Unit* unit = ObjectAccessor::GetUnit((pov ? *pov : *this), guid))
+            return unit;
+        // Bugcheck
+        sLog.outError("Unit::GetSpawner: Object guid field management continuity violation, spawner unit with guid %s does not exist.", guid.GetString().c_str());
+    }
     return nullptr;
 }
 
@@ -7043,17 +7023,39 @@ void Unit::Uncharm()
     }
 }
 
-void Unit::SetPet(Pet* pet)
+Pet* Unit::GetPet() const
 {
-    SetPetGuid(pet ? pet->GetObjectGuid() : ObjectGuid());
+    if (ObjectGuid pet_guid = GetPetGuid())
+    {
+        if (Pet* pet = GetMap()->GetPet(pet_guid))
+            return pet;
 
-    if (pet && GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->SendPetGUIDs();
+        sLog.outError("Unit::GetPet: %s not exist.", pet_guid.GetString().c_str());
+        const_cast<Unit*>(this)->SetPet(nullptr);
+    }
+
+    return nullptr;
 }
 
-void Unit::SetCharm(Unit* pet)
+Pet* Unit::_GetPet(ObjectGuid guid) const
 {
-    SetCharmGuid(pet ? pet->GetObjectGuid() : ObjectGuid());
+    return GetMap()->GetPet(guid);
+}
+
+Pet* Unit::GetMiniPet() const
+{
+    if (!GetCritterGuid())
+        return nullptr;
+
+    return GetMap()->GetPet(GetCritterGuid());
+}
+
+void Unit::RemoveMiniPet()
+{
+    if (Pet* pet = GetMiniPet())
+        pet->Unsummon(PET_SAVE_AS_DELETED, this);
+    else
+        SetCritterGuid(ObjectGuid());
 }
 
 void Unit::AddGuardian(Pet* pet)
@@ -8763,7 +8765,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
-    if (isCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
+    if (HasCharmer() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
     // interrupt all delayed non-combat casts
@@ -8800,7 +8802,7 @@ void Unit::ClearInCombat()
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
-    if (isCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
+    if (HasCharmer() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -11071,19 +11073,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
 SpellSchoolMask Unit::GetMeleeDamageSchoolMask() const
 {
     return SPELL_SCHOOL_MASK_NORMAL;
-}
-
-Player* Unit::GetSpellModOwner() const
-{
-    if (GetTypeId() == TYPEID_PLAYER)
-        return (Player*)this;
-    if (((Creature*)this)->IsPet() || ((Creature*)this)->IsTotem())
-    {
-        Unit* owner = GetOwner();
-        if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-            return (Player*)owner;
-    }
-    return nullptr;
 }
 
 ///----------Pet responses methods-----------------

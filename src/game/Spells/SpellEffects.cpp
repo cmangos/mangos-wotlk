@@ -6388,7 +6388,7 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
     list[0].creature = spawnCreature;
 
     // Changes to be sent
-    spawnCreature->SetCreatorGuid(m_caster->GetObjectGuid());
+    spawnCreature->SetOwnerGuid(m_caster->GetObjectGuid());
     spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
     //spawnCreature->SetLevel(level); // Do we need to set level for vehicles?
 
@@ -10078,7 +10078,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     // Left or Right direction?
                     m_caster->CastSpell(m_caster, urand(0, 1) ? 68875 : 68876, TRIGGERED_NONE);
                     // Clear TargetGuid for sweeping
-                    m_caster->SetTargetGuid(ObjectGuid());
+                    m_caster->SetTarget(nullptr);
                     return;
                 case 69048:                                 // Mirrored Soul
                 {
@@ -11909,7 +11909,7 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
     {
         case GAMEOBJECT_TYPE_FISHINGNODE:
         {
-            m_caster->SetChannelObjectGuid(pGameObj->GetObjectGuid());
+            m_caster->SetChannelObject(pGameObj);
             m_caster->AddGameObject(pGameObj);              // will removed at spell cancel
 
             // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))

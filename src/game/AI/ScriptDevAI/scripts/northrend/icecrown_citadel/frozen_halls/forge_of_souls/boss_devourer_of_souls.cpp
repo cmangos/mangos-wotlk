@@ -228,11 +228,8 @@ struct boss_devourer_of_soulsAI : public ScriptedAI
         if (m_uiFace == FACE_WAILING)
         {
             // Some special handling in case of starting phase of wailings
-            if (ObjectGuid targetGuid = m_creature->GetTargetGuid())
-            {
-                if (Unit* pTarget = m_creature->GetMap()->GetUnit(targetGuid))
-                    m_creature->SetFacingTo(m_creature->GetAngle(pTarget));
-            }
+            if (Unit* pTarget = m_creature->GetTarget())
+                m_creature->SetFacingTo(m_creature->GetAngle(pTarget));
 
             if (m_creature->getThreatManager().isThreatListEmpty() || !m_creature->getThreatManager().getHostileTarget())
                 m_creature->SelectHostileTarget();          // Most likely must evade, use additional checks in case evading would be prevented

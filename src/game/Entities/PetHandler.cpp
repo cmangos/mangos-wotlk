@@ -121,7 +121,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             }
         }
 
-        if (!petUnit->GetCharmerGuid())
+        if (!petUnit->HasCharmer())
             return;
     }
 
@@ -517,7 +517,7 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
             // sign for autocast
             if (act_state == ACT_ENABLED && spell_id)
             {
-                if (petUnit->isCharmed())
+                if (petUnit->HasCharmer())
                     charmInfo->ToggleCreatureAutocast(spell_id, true);
                 else if (pet)
                     pet->ToggleAutocast(spell_id, true);
@@ -525,7 +525,7 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
             // sign for no/turn off autocast
             else if (act_state == ACT_DISABLED && spell_id)
             {
-                if (petUnit->isCharmed())
+                if (petUnit->HasCharmer())
                     charmInfo->ToggleCreatureAutocast(spell_id, false);
                 else if (pet)
                     pet->ToggleAutocast(spell_id, false);
@@ -638,7 +638,7 @@ void WorldSession::HandlePetAbandon(WorldPacket& recv_data)
             else
                 petUnit->SetDeathState(CORPSE);
         }
-        else if (petUnit->GetObjectGuid() == _player->GetCharmGuid())
+        else if (_player->HasCharm(petUnit->GetObjectGuid()))
         {
             _player->Uncharm();
         }
@@ -683,7 +683,7 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
     recvPacket >> guid >> spellid >> state;
 
     Unit* petUnit = _player->GetMap()->GetUnit(guid);
-    if (!petUnit || (guid != _player->GetPetGuid() && guid != _player->GetCharmGuid()))
+    if (!petUnit || (guid != _player->GetPetGuid() && !_player->HasCharm(guid)))
     {
         sLog.outError("HandlePetSpellAutocastOpcode. %s isn't pet of %s .", guid.GetString().c_str(), _player->GetGuidStr().c_str());
         return;
@@ -703,7 +703,7 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (petUnit->isCharmed())
+    if (petUnit->HasCharmer())
         // state can be used as boolean
         petUnit->GetCharmInfo()->ToggleCreatureAutocast(spellid, !!state);
     else if (pet)
@@ -726,7 +726,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     DEBUG_LOG("WORLD: CMSG_PET_CAST_SPELL, %s, cast_count: %u, spellid %u, unk_flags %u", guid.GetString().c_str(), cast_count, spellid, cast_flags);
 
     Unit* petUnit = _player->GetMap()->GetUnit(guid);
-    if (!petUnit || (guid != _player->GetPetGuid() && guid != _player->GetCharmGuid()))
+    if (!petUnit || (guid != _player->GetPetGuid() && !_player->HasCharm(guid)))
     {
         sLog.outError("HandlePetSpellAutocastOpcode. %s isn't pet of %s .", guid.GetString().c_str(), _player->GetGuidStr().c_str());
         return;

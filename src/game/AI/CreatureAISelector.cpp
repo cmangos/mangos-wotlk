@@ -38,7 +38,7 @@ namespace FactorySelector
         {
             // charmed creature may have some script even if its not supposed to be that way (ex: Eye of Acherus)
             // Allow scripting AI for normal creatures and not controlled pets (guardians and mini-pets)
-            if (creature->isCharmed() || !(creature->IsPet() && static_cast<Pet*>(creature)->isControlled()))
+            if (creature->HasCharmer() || !(creature->IsPet() && static_cast<Pet*>(creature)->isControlled()))
                 return scriptedAI;
         }
 

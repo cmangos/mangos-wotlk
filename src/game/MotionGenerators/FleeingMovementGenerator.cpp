@@ -129,7 +129,7 @@ void FleeingMovementGenerator<T>::Initialize(T& owner)
     owner.StopMoving();
 
     if (owner.GetTypeId() == TYPEID_UNIT)
-        owner.SetTargetGuid(ObjectGuid());
+        owner.SetTarget(nullptr);
 
     _setTargetLocation(owner);
 }

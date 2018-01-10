@@ -1028,7 +1028,7 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
                 if (DoCastSpellIfCan(m_creature, urand(0, 1) ? SPELL_SPOUT_LEFT : SPELL_SPOUT_RIGHT, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
                 {
                     // Remove the target focus
-                    m_creature->SetTargetGuid(ObjectGuid());
+                    m_creature->SetTarget(nullptr);
                     m_uiPhase = PHASE_SPOUT;
                 }
             }
@@ -1146,7 +1146,7 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
                     if (DoCastSpellIfCan(pTarget, SPELL_WATER_BOLT) == CAST_OK)
                     {
                         // mimic boss turning because of the missing threat system
-                        m_creature->SetTargetGuid(pTarget->GetObjectGuid());
+                        m_creature->SetTarget(pTarget);
                         m_creature->SetInFront(pTarget);
 
                         m_uiWaterBoltTimer = urand(0, 1000);

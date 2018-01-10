@@ -1216,7 +1216,7 @@ struct boss_vx001AI : public ScriptedAI
                 m_uiBurstEndTimer = 3000;
 
                 // Remove the target focus but allow the boss to face the burst target
-                m_creature->SetTargetGuid(ObjectGuid());
+                m_creature->SetTarget(nullptr);
                 m_creature->SetFacingToObject(pSummoned);
                 break;
             case NPC_FROST_BOMB:
@@ -1242,7 +1242,7 @@ struct boss_vx001AI : public ScriptedAI
             // Set victim to old target (if not while Burst or Laser)
             if (pOldTarget && pOldTarget->isAlive() && !m_uiBurstEndTimer && !m_uiLaserEndTimer)
             {
-                m_creature->SetTargetGuid(pOldTarget->GetObjectGuid());
+                m_creature->SetTarget(pOldTarget);
                 m_creature->SetInFront(pOldTarget);
             }
 

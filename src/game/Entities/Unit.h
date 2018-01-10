@@ -1846,70 +1846,69 @@ class Unit : public WorldObject
 
         bool IsTargetUnderControl(Unit const& target) const;
 
-        // Owner: creator by default, summoner for pets
+        // Convenience checkers/getters/setters counterparts for some of the protected Unit guid fields
+        // See the comments next to protected methods for meanings
+        bool HasCharm(ObjectGuid const& exactGuid = ObjectGuid()) const { return (exactGuid.IsEmpty() ? GetCharmGuid().IsUnit() : (GetCharmGuid() == exactGuid)); }
+        bool HasCharmer(ObjectGuid const& exactGuid = ObjectGuid()) const { return (exactGuid.IsEmpty() ? GetCharmerGuid().IsUnit() : (GetCharmerGuid() == exactGuid)); }
+        bool HasTarget(ObjectGuid const& exactGuid = ObjectGuid()) const { return (exactGuid.IsEmpty() ? GetTargetGuid().IsUnit() : (GetTargetGuid() == exactGuid)); }
+        bool HasChannelObject(ObjectGuid const& exactGuid = ObjectGuid()) const { return (exactGuid.IsEmpty() ? !(GetChannelObjectGuid().IsEmpty()) : (GetChannelObjectGuid() == exactGuid)); }
+
+        Unit* GetCharm(WorldObject const* pov = nullptr) const;
+        Unit* GetCharmer(WorldObject const* pov = nullptr) const;
+        Unit* GetCreator(WorldObject const* pov = nullptr) const;
+        Unit* GetTarget(WorldObject const* pov = nullptr) const;
+        Unit* GetChannelObject(WorldObject const* pov = nullptr) const;
+
+        void SetCharm(Unit* charmed) { SetCharmGuid(charmed ? charmed->GetObjectGuid() : ObjectGuid()); }
+        void SetCharmer(Unit* charmer) { SetCharmerGuid(charmer ? charmer->GetObjectGuid() : ObjectGuid()); }
+        void SetTarget(WorldObject* target) { SetTargetGuid(target ? target->GetObjectGuid() : ObjectGuid()); }
+        void SetChannelObject(WorldObject* object) { SetChannelObjectGuid(object ? object->GetObjectGuid() : ObjectGuid()); }
+
+        // Purely logical guid constructs getters/setters
+        // Owner: automatically resolves to creator guid and additionally to summoner guid
         ObjectGuid const& GetOwnerGuid() const override { return GetCreatorGuid(); }
         void SetOwnerGuid(ObjectGuid owner) override { SetCreatorGuid(owner); }
-        // Master: charmer or owner
-        ObjectGuid const& GetMasterGuid() const;
-
-        ObjectGuid const& GetSummonerGuid() const { return GetGuidValue(UNIT_FIELD_SUMMONEDBY); }
-        void SetSummonerGuid(ObjectGuid owner) { SetGuidValue(UNIT_FIELD_SUMMONEDBY, owner); }
-        ObjectGuid const& GetCreatorGuid() const { return GetGuidValue(UNIT_FIELD_CREATEDBY); }
-        void SetCreatorGuid(ObjectGuid creator) { SetGuidValue(UNIT_FIELD_CREATEDBY, creator); }
-        ObjectGuid const& GetPetGuid() const { return GetGuidValue(UNIT_FIELD_SUMMON); }
-        void SetPetGuid(ObjectGuid pet) { SetGuidValue(UNIT_FIELD_SUMMON, pet); }
-        ObjectGuid const& GetCharmerGuid() const { return GetGuidValue(UNIT_FIELD_CHARMEDBY); }
-        void SetCharmerGuid(ObjectGuid owner) { SetGuidValue(UNIT_FIELD_CHARMEDBY, owner); }
-        ObjectGuid const& GetCharmGuid() const { return GetGuidValue(UNIT_FIELD_CHARM); }
-        void SetCharmGuid(ObjectGuid charm) { SetGuidValue(UNIT_FIELD_CHARM, charm); }
-        ObjectGuid const& GetTargetGuid() const { return GetGuidValue(UNIT_FIELD_TARGET); }
-        void SetTargetGuid(ObjectGuid targetGuid) { SetGuidValue(UNIT_FIELD_TARGET, targetGuid); }
-        ObjectGuid const& GetChannelObjectGuid() const { return GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT); }
-        void SetChannelObjectGuid(ObjectGuid targetGuid) { SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, targetGuid); }
-        ObjectGuid const& GetCritterGuid() const { return GetGuidValue(UNIT_FIELD_CRITTER); }
-        void SetCritterGuid(ObjectGuid critterGuid) { SetGuidValue(UNIT_FIELD_CRITTER, critterGuid); }
+        // Pet: automatically resolves to summon guid (permanent pet)
+        ObjectGuid const& GetPetGuid() const { return GetSummonGuid(); }
+        void SetPetGuid(ObjectGuid pet) { SetSummonGuid(pet); }
+        // Selection: by default resolves to target, overriden in Player
+        virtual ObjectGuid const& GetSelectionGuid() const { return GetTargetGuid(); }
+        virtual void SetSelectionGuid(ObjectGuid guid) { SetTargetGuid(guid); }
+        // Master: automatically resolves to charmer or owner guid
+        ObjectGuid const& GetMasterGuid() const { ObjectGuid const& guid = GetCharmerGuid(); return (guid ? guid : GetOwnerGuid()); }
+        // Spawner: guid of a unit, who is reponsible for starting this unit's parent script (only for script-spawned units within Unit hierarchy)
         virtual ObjectGuid const GetSpawnerGuid() const { return ObjectGuid(); }
 
-        Player* GetSpellModOwner() const;
+        // Convenience unit getters for some of the logical guid constructs above
+        Unit* GetOwner(bool recursive = false, WorldObject const* pov = nullptr) const;
+        Unit* GetMaster(WorldObject const* pov = nullptr) const;
+        Unit* GetSpawner(WorldObject const* pov = nullptr) const;
 
-        Unit* GetOwner(bool recursive = false) const;
-        Unit* GetMaster() const;
-
-        // Beneficiary: master or self (serverside)
-        Unit const* GetBeneficiary() const;
-        Unit* GetBeneficiary();
-        Player const* GetBeneficiaryPlayer() const;
-        Player* GetBeneficiaryPlayer();
-
-        // Controlling player: limited recursive master/beneficiary (clientside)
+        // Additional related server-side and client-side ownership-related methods
+        // Spell mod owner: static player whose spell mods apply to this unit (server-side)
+        virtual Player* GetSpellModOwner() const { return nullptr; }
+        // Beneficiary: owner of the xp/loot/etc credit, master or self (server-side)
+        Unit* GetBeneficiary() const;
+        Player* GetBeneficiaryPlayer() const;
+        // Controlling player: official client PoV and term on which player is the "master" of the unit at the moment, limited recursive master/beneficiary logic (client-side)
         Player const* GetControllingPlayer() const;
-
-        // Controlling client: movement control owner at the moment (serverside)
+        // Controlling client: server PoV on which client (player) controls movement of the unit at the moment, obtain "mover" (server-side)
         Player const* GetControllingClientPlayer() const;
 
-        Unit* GetSpawner() const; // serverside only logic used to determine spawner of unit
-
-        Unit* GetSummoner() const;
-        Unit* GetCreator() const;
-        Unit* GetCharmer() const;
-        Unit* GetCharm() const;
         virtual void Uncharm();
 
-        void RemoveMiniPet();
+        Pet* GetPet() const;
+        void SetPet(Unit* pet) { SetPetGuid(pet ? pet->GetObjectGuid() : ObjectGuid()); }
+
         Pet* GetMiniPet() const;
         void SetMiniPet(Unit* pet) { SetCritterGuid(pet ? pet->GetObjectGuid() : ObjectGuid()); }
-        Pet* GetPet() const;
-
-        void SetPet(Pet* pet);
-        void SetCharm(Unit* pet);
+        void RemoveMiniPet();
 
         void AddGuardian(Pet* pet);
         void RemoveGuardian(Pet* pet);
         void RemoveGuardians();
         Pet* FindGuardianWithEntry(uint32 entry);
         Pet* GetProtectorPet();                             // expected single case in guardian list
-
-        bool isCharmed() const { return !GetCharmerGuid().IsEmpty(); }
 
         CharmInfo* GetCharmInfo() { return m_charmInfo; }
         virtual CharmInfo* InitCharmInfo(Unit* charm);
@@ -2446,6 +2445,32 @@ class Unit : public WorldObject
         // base speeds set by model/template
         float m_baseSpeedWalk;
         float m_baseSpeedRun;
+
+        // Protected unit guid fields getters/setters
+        // Charm: temporary pet unit guid
+        ObjectGuid const& GetCharmGuid() const { return GetGuidValue(UNIT_FIELD_CHARM); }
+        void SetCharmGuid(ObjectGuid const& charm) { SetGuidValue(UNIT_FIELD_CHARM, charm); }
+        // Summon: permanent pet unit guid (do not use: managed by SetPetGuid/GetPetGuid)
+        ObjectGuid const& GetSummonGuid() const { return GetGuidValue(UNIT_FIELD_SUMMON); }
+        void SetSummonGuid(ObjectGuid const& summon) { SetGuidValue(UNIT_FIELD_SUMMON, summon); }
+        // Charmer: temporary owner unit guid [nameplate]
+        ObjectGuid const& GetCharmerGuid() const { return GetGuidValue(UNIT_FIELD_CHARMEDBY); }
+        void SetCharmerGuid(ObjectGuid const& owner) { SetGuidValue(UNIT_FIELD_CHARMEDBY, owner); }
+        // Summoner: permanent owner unit guid for player pets [nameplate] (do not use: managed by SetOwnerGuid/GetOwnerGuid)
+        ObjectGuid const& GetSummonerGuid() const { return GetGuidValue(UNIT_FIELD_SUMMONEDBY); }
+        void SetSummonerGuid(ObjectGuid const& owner) { SetGuidValue(UNIT_FIELD_SUMMONEDBY, owner); }
+        // Creator: permanent owner unit guid for npc pets or non-pet units [nameplate] (do not use: managed by SetOwnerGuid/GetOwnerGuid)
+        ObjectGuid const& GetCreatorGuid() const { return GetGuidValue(UNIT_FIELD_CREATEDBY); }
+        void SetCreatorGuid(ObjectGuid const& creator) { SetGuidValue(UNIT_FIELD_CREATEDBY, creator); }
+        // Target: current target guid as advertised on unit frames (also known as selection)
+        ObjectGuid const& GetTargetGuid() const { return GetGuidValue(UNIT_FIELD_TARGET); }
+        void SetTargetGuid(ObjectGuid const& targetGuid) { SetGuidValue(UNIT_FIELD_TARGET, targetGuid); }
+        // Channel target: current channeling spell's target worldobject guid
+        ObjectGuid const& GetChannelObjectGuid() const { return GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT); }
+        void SetChannelObjectGuid(ObjectGuid const& targetGuid) { SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, targetGuid); }
+        // Critter: permanent mini-pet unit guid
+        ObjectGuid const& GetCritterGuid() const { return GetGuidValue(UNIT_FIELD_CRITTER); }
+        void SetCritterGuid(ObjectGuid critterGuid) { SetGuidValue(UNIT_FIELD_CRITTER, critterGuid); }
 
     private:
         void CleanupDeletedAuras();

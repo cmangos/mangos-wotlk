@@ -150,7 +150,7 @@ struct boss_the_lurker_belowAI : public Scripted_NoMovementAI
             // Set victim to old target (if not while Spout)
             if (pOldTarget && pOldTarget->isAlive() && m_uiPhase != PHASE_SPOUT)
             {
-                m_creature->SetTargetGuid(pOldTarget->GetObjectGuid());
+                m_creature->SetTarget(pOldTarget);
                 m_creature->SetInFront(pOldTarget);
             }
 
@@ -209,7 +209,7 @@ struct boss_the_lurker_belowAI : public Scripted_NoMovementAI
                             DoScriptText(EMOTE_DEEP_BREATH, m_creature);
 
                             // Remove the target focus but allow the boss to face the current victim
-                            m_creature->SetTargetGuid(ObjectGuid());
+                            m_creature->SetTarget(nullptr);
                             m_creature->SetFacingToObject(m_creature->getVictim());
 
                             m_uiPhase = PHASE_SPOUT;

@@ -1721,7 +1721,7 @@ ChatTagFlags Player::GetChatTag() const
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options /*=0*/, AreaTrigger const* at /*=nullptr*/)
 {
     // do not let charmed players/creatures teleport
-    if (isCharmed())
+    if (HasCharmer())
         return false;
 
     if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
@@ -21201,7 +21201,7 @@ bool Player::IsClientControl(Unit const* target) const
 
     // If unit is possessed, it must be charmed by the player
     if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED))
-        return (target->GetCharmerGuid() == GetObjectGuid());
+        return target->HasCharmer(GetObjectGuid());
 
     // Players only have control over self by default
     return (target == this);

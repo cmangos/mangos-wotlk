@@ -1129,6 +1129,8 @@ class Player : public Unit
         void ResetTimeSync();
         void SendTimeSync();
 
+        Player* GetSpellModOwner() const override { return const_cast<Player*>(this); }
+
         void SetDeathState(DeathState s) override;          // overwrite Unit::SetDeathState
 
         float GetRestBonus() const { return m_rest_bonus; }
@@ -1155,7 +1157,6 @@ class Player : public Unit
         void UpdateInnerTime(time_t time) { time_inn_enter = time; }
 
         void RemovePet(PetSaveMode mode);
-
         uint32 GetPhaseMaskForSpawn() const;                // used for proper set phase for DB at GM-mode creature/GO spawn
 
         void Say(const std::string& text, const uint32 language) const;
@@ -1541,8 +1542,8 @@ class Player : public Unit
         QuestStatusMap& getQuestStatusMap() { return mQuestStatus; };
         const QuestStatusMap& getQuestStatusMap() const { return mQuestStatus; };
 
-        ObjectGuid const& GetSelectionGuid() const { return m_curSelectionGuid; }
-        void SetSelectionGuid(ObjectGuid guid) { m_curSelectionGuid = guid; SetTargetGuid(guid); }
+        ObjectGuid const& GetSelectionGuid() const override { return m_curSelectionGuid; }
+        void SetSelectionGuid(ObjectGuid guid) override { m_curSelectionGuid = guid; SetTargetGuid(guid); }
 
         uint8 GetComboPoints() const { return m_comboPoints; }
         ObjectGuid const& GetComboTargetGuid() const { return m_comboTargetGuid; }

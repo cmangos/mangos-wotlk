@@ -524,7 +524,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             pPlayer->GetCamera().SetView(pVehicle);
 
             pPlayer->SetCharm(pVehicle);
-            pVehicle->SetCharmerGuid(pPlayer->GetObjectGuid());
+            pVehicle->SetCharmer(pPlayer);
 
             pVehicle->addUnitState(UNIT_STAT_POSSESSED);
             pVehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
@@ -564,7 +564,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
             passenger->SetCharm(pVehicle);
-            pVehicle->SetCharmerGuid(passenger->GetObjectGuid());
+            pVehicle->SetCharmer(passenger);
         }
 
         ((Creature*)passenger)->AI()->SetCombatMovement(false);
@@ -594,7 +594,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
             pPlayer->SetCharm(nullptr);
-            pVehicle->SetCharmerGuid(ObjectGuid());
+            pVehicle->SetCharmer(nullptr);
 
             pPlayer->UpdateClientControl(pVehicle, false);
             pPlayer->SetMover(nullptr);
@@ -620,7 +620,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
             passenger->SetCharm(nullptr);
-            pVehicle->SetCharmerGuid(ObjectGuid());
+            pVehicle->SetCharmer(nullptr);
         }
 
         // Reinitialize movement

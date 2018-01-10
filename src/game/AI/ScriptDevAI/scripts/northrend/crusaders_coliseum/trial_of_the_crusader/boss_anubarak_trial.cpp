@@ -574,7 +574,7 @@ struct npc_anubarak_trial_frostsphereAI : public Scripted_NoMovementAI
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->ClearAllReactives();
-        m_creature->SetTargetGuid(ObjectGuid());
+        m_creature->SetTarget(nullptr);
 
         // Set proper Z position
         m_creature->SetWalk(false);

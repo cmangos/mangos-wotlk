@@ -526,7 +526,7 @@ struct boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
             case NPC_MAIEV_SHADOWSONG:
                 // Resume combat and attack Maiev
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                m_creature->SetTargetGuid(m_creature->getVictim()->GetObjectGuid());
+                m_creature->SetTarget(m_creature->getVictim());
                 SetCombatMovement(false);
                 m_creature->GetMotionMaster()->Clear();
                 m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
@@ -575,7 +575,7 @@ struct boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                 break;
             case NPC_MAIEV_SHADOWSONG:
                 pSummoned->SetFacingToObject(m_creature);
-                m_creature->SetTargetGuid(pSummoned->GetObjectGuid());
+                m_creature->SetTarget(pSummoned);
                 break;
         }
     }
