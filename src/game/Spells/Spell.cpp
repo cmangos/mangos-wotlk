@@ -4300,6 +4300,9 @@ void Spell::finish(bool ok)
 
 void Spell::SendCastResult(SpellCastResult result) const
 {
+    if (m_triggeredByAuraSpell) // should not report these
+        return;
+
     Player const* recipient;
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
     {
