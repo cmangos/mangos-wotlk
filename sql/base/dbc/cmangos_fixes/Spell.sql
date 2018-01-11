@@ -23,6 +23,7 @@ INSERT INTO spell_template(Id, Attributes, AttributesEx,AttributesEx2,Attributes
 ('37365','384','0','4','0','0','101','21','28','18','0','1','0','21757','64','0','1','Power Converters: Summon Big Flavor Electromental (from cata)'),
 ('38854','384','0','0','0','0','101','3','28','18','0','0','0','22339','64','0','1','summon Redeemet Hatchling'),
 ('38865','384','0','0','0','0','101','3','28','18','0','0','0','22337','64','0','1','summon Malevolent Hatchling'),
+('43169','256','0','4','0','0','101','3','76','18','0','0','0','186598','0','0','1','Draconis Gastritis: Summon Tillinghast''s Plagued Meat'),
 ('43388','150995328','32','0','268435456','0','0','0','0','0','0','0','0','0','0','0','1','Suicide, No Blood, No Logging'),
 ('44920','0','0','0','0','0','101','21','6','1','0','0','56','24941','0','0','1','Model - Shattered Sun Marksman - BE Male Tier 4'),
 ('44924','0','0','0','0','0','101','21','6','1','0','0','56','24945','0','0','1','Model - Shattered Sun Marksman - BE Female Tier 4'),
