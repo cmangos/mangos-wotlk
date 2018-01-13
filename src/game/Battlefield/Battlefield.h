@@ -61,7 +61,7 @@ class BattlefieldBuilding
 
         virtual void SetupBuilding(Team owner, bool reset) {};
 
-        bool IsIntact() { return state == BF_GO_STATE_NEUTRAL_INTACT || state == BF_GO_STATE_HORDE_INTACT || state == BF_GO_STATE_ALLIANCE_INTACT;; };
+        bool IsIntact() { return state == BF_GO_STATE_NEUTRAL_INTACT || state == BF_GO_STATE_HORDE_INTACT || state == BF_GO_STATE_ALLIANCE_INTACT; };
         bool IsDamaged() { return state == BF_GO_STATE_NEUTRAL_DAMAGED || state == BF_GO_STATE_HORDE_DAMAGED || state == BF_GO_STATE_ALLIANCE_DAMAGED; };
         bool IsDestroyed() { return state == BF_GO_STATE_NEUTRAL_DESTROYED || state == BF_GO_STATE_HORDE_DESTROYED || state == BF_GO_STATE_ALLIANCE_DESTROYED; };
 
