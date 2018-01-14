@@ -1950,7 +1950,7 @@ void GameObject::SetLootState(LootState state)
 
     // Call for GameObjectAI script
     if (m_AI)
-        m_AI->OnStateChange();
+        m_AI->OnLootStateChange();
 }
 
 void GameObject::SetGoState(GOState state)
