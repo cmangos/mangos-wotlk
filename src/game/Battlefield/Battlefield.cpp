@@ -26,6 +26,7 @@
 #include "Maps/MapManager.h"
 #include "Spells/SpellAuras.h"
 #include "Entities/Unit.h"
+#include "Chat/Chat.h"
 
 Battlefield::Battlefield() : OutdoorPvP(), m_battleFieldId(0)
 {
@@ -55,7 +56,7 @@ void Battlefield::HandlePlayerEnterZone(Player* player, bool isMainZone)
     {
         if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS)
         {
-            m_invitedPlayers[GetTeamIndexByTeamId(player->GetTeam())][player->GetObjectGuid()] = time(NULL) + BF_TIME_TO_ACCEPT;
+            m_invitedPlayers[GetTeamIndexByTeamId(player->GetTeam())][player->GetObjectGuid()] = time(nullptr) + BF_TIME_TO_ACCEPT;
             player->GetSession()->SendBattlefieldWarInvite(m_battleFieldId, m_zoneId, BF_TIME_TO_ACCEPT);
         }
         else if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN && m_timer < m_startInviteDelay)
@@ -92,7 +93,7 @@ void Battlefield::HandlePlayerLeaveZone(Player* player, bool isMainZone)
         if (HasPlayer(itr->first))
         {
             player->GetSession()->SendBattlefieldLeaveMessage(m_battleFieldId, BATTLEFIELD_LEAVE_REASON_EXITED);
-            itr->second->removeTime = time(NULL);
+            itr->second->removeTime = time(nullptr);
             itr->second->removeDelay = BF_UNACCEPTED_REMOVE_DELAY;
         }
         else
@@ -184,7 +185,7 @@ void Battlefield::UpdateBattlefieldPlayers()
     bool bRemoved = false;
     for (BattlefieldPlayerMap::iterator itr = m_activePlayers.begin(); itr != m_activePlayers.end();)
     {
-        if (itr->second->removeTime && itr->second->removeTime + itr->second->removeDelay < time(NULL))
+        if (itr->second->removeTime && itr->second->removeTime + itr->second->removeDelay < time(nullptr))
         {
             delete itr->second;
             if (Player* player = sObjectMgr.GetPlayer(itr->first))
@@ -215,7 +216,7 @@ Function that starts battlefield battle
 */
 void Battlefield::StartBattle(Team defender)
 {
-    m_startTime = time(NULL);
+    m_startTime = time(nullptr);
     m_status = BF_STATUS_IN_PROGRESS;
     m_timer = m_battleDuration;
     m_zoneOwner = defender;
@@ -253,7 +254,7 @@ void Battlefield::StartBattle(Team defender)
 
         if (itr2 != m_queuedPlayers[idx].end())
         {
-            m_invitedPlayers[idx][itr->first] = time(NULL) + BF_TIME_TO_ACCEPT;
+            m_invitedPlayers[idx][itr->first] = time(nullptr) + BF_TIME_TO_ACCEPT;
             plr->GetSession()->SendBattlefieldWarInvite(m_battleFieldId, m_zoneId, BF_TIME_TO_ACCEPT);
             m_queuedPlayers[idx].erase(itr2);
         }
@@ -263,7 +264,7 @@ void Battlefield::StartBattle(Team defender)
             SendRemoveWorldStates(plr);
             if (m_activePlayers.find(itr->first) != m_activePlayers.end())
             {
-                m_activePlayers[itr->first]->removeTime = time(NULL);
+                m_activePlayers[itr->first]->removeTime = time(nullptr);
                 m_activePlayers[itr->first]->removeDelay = BF_UNACCEPTED_REMOVE_DELAY;
             }
         }
@@ -276,7 +277,7 @@ void Battlefield::StartBattle(Team defender)
         {
             if (Player* plr = sObjectMgr.GetPlayer(*itr, true))
             {
-                m_invitedPlayers[i][plr->GetObjectGuid()] = time(NULL) + BF_TIME_TO_ACCEPT;
+                m_invitedPlayers[i][plr->GetObjectGuid()] = time(nullptr) + BF_TIME_TO_ACCEPT;
                 plr->GetSession()->SendBattlefieldWarInvite(m_battleFieldId, m_zoneId, BF_TIME_TO_ACCEPT);
             }
 
@@ -347,7 +348,7 @@ void Battlefield::Update(uint32 diff)
         {
             for (std::map<ObjectGuid, time_t>::iterator itr = m_invitedPlayers[i].begin(); itr != m_invitedPlayers[i].end();)
             {
-                if (itr->second < time(NULL))
+                if (itr->second < time(nullptr))
                 {
                     if (Player* player = sObjectMgr.GetPlayer(itr->first))
                         player->GetSession()->SendBattlefieldLeaveMessage(m_battleFieldId, BATTLEFIELD_LEAVE_REASON_EXITED);
@@ -594,7 +595,7 @@ void Battlefield::HandleBattlefieldGroupDisband(Player* player)
 
     if (m_activePlayers.find(player->GetObjectGuid()) != m_activePlayers.end())
     {
-        m_activePlayers[player->GetObjectGuid()]->removeTime = time(NULL);
+        m_activePlayers[player->GetObjectGuid()]->removeTime = time(nullptr);
         m_activePlayers[player->GetObjectGuid()]->removeDelay = BF_UNACCEPTED_REMOVE_DELAY;
     }
 }
@@ -656,7 +657,7 @@ void Battlefield::HandleQueueInviteResponse(Player* player, bool accepted)
     {
         if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS)
         {
-            m_invitedPlayers[teamIdx][player->GetObjectGuid()] = time(NULL) + BF_TIME_TO_ACCEPT;
+            m_invitedPlayers[teamIdx][player->GetObjectGuid()] = time(nullptr) + BF_TIME_TO_ACCEPT;
             player->GetSession()->SendBattlefieldWarInvite(m_battleFieldId, m_zoneId, BF_TIME_TO_ACCEPT);
         }
         else
@@ -715,7 +716,7 @@ void Battlefield::HandleWarInviteResponse(Player* player, bool accepted)
             player->GetSession()->SendBattlefieldLeaveMessage(m_battleFieldId, BATTLEFIELD_LEAVE_REASON_EXITED);
             if (m_activePlayers.find(player->GetObjectGuid()) != m_activePlayers.end())
             {
-                m_activePlayers[player->GetObjectGuid()]->removeTime = time(NULL);
+                m_activePlayers[player->GetObjectGuid()]->removeTime = time(nullptr);
                 m_activePlayers[player->GetObjectGuid()]->removeDelay = BF_UNACCEPTED_REMOVE_DELAY;
             }
         }
@@ -738,7 +739,7 @@ void Battlefield::HandleExitRequest(Player* player)
 
         if (m_activePlayers.find(player->GetObjectGuid()) != m_activePlayers.end())
         {
-            m_activePlayers[player->GetObjectGuid()]->removeTime = time(NULL);
+            m_activePlayers[player->GetObjectGuid()]->removeTime = time(nullptr);
             m_activePlayers[player->GetObjectGuid()]->removeDelay = BF_UNACCEPTED_REMOVE_DELAY;
         }
     }
@@ -754,7 +755,7 @@ void Battlefield::HandleExitRequest(Player* player)
 
             if (m_activePlayers.find(player->GetObjectGuid()) != m_activePlayers.end())
             {
-                m_activePlayers[player->GetObjectGuid()]->removeTime = time(NULL);
+                m_activePlayers[player->GetObjectGuid()]->removeTime = time(nullptr);
                 m_activePlayers[player->GetObjectGuid()]->removeDelay = BF_UNACCEPTED_REMOVE_DELAY;
             }
         }
@@ -765,8 +766,9 @@ void Battlefield::HandleExitRequest(Player* player)
 Function that sends a zone wide warning to all players
 
 @param   text id
+@param   source object. Can be null
 */
-void Battlefield::SendZoneWarning(int32 entry)
+void Battlefield::SendZoneWarning(int32 entry, WorldObject* source)
 {
     for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
     {
@@ -780,23 +782,13 @@ void Battlefield::SendZoneWarning(int32 entry)
         if (player->GetZoneId() != m_zoneId)
             continue;
 
-        int32 loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
+        int32 locIdx = player->GetSession()->GetSessionDbLocaleIndex();
 
-        char const* text = sObjectMgr.GetMangosString(entry, loc_idx);
+        char const* text = sObjectMgr.GetMangosString(entry, locIdx);
 
-        WorldPacket data(SMSG_MESSAGECHAT, 200);
-        data << uint8(CHAT_MSG_RAID_BOSS_EMOTE);
-        data << uint32(LANG_UNIVERSAL);
-        data << ObjectGuid();
-        data << uint32(0);
-        data << uint32(1);
-        data << uint8(0);
-        data << ObjectGuid();
-        data << uint32(strlen(text) + 1);
-        data << text;
-        data << uint8(0);
-        data << float(0.0f);
-        data << uint8(0);
+        WorldPacket data;
+        ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_BOSS_EMOTE, text, LANG_UNIVERSAL, CHAT_TAG_NONE,
+            source ? source->GetObjectGuid() : ObjectGuid(), source ? source->GetName() : "", player->GetObjectGuid(), player->GetName());
 
         player->GetSession()->SendPacket(data);
     }

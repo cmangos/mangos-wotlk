@@ -37,7 +37,7 @@ void WorldSession::SendBattlefieldWarInvite(uint32 battlefieldId, uint32 zoneId,
     WorldPacket data(SMSG_BATTLEFIELD_MANAGER_ENTRY_INVITE, 12);
     data << uint32(battlefieldId);
     data << uint32(zoneId);
-    data << uint32(time(NULL) + acceptDelay);
+    data << uint32(time(nullptr) + acceptDelay);
 
     SendPacket(data);
 }

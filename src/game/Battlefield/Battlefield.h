@@ -169,7 +169,7 @@ class Battlefield : public OutdoorPvP
         void UpdateBattlefieldPlayers();
 
         // sends a raid warning to all players in the zone
-        void SendZoneWarning(int32 /*entry*/);
+        void SendZoneWarning(int32 /*entry*/, WorldObject* source = nullptr);
 
         // update the graveyard on capture event
         virtual void UpdateGraveyardOwner(uint8 id, PvpTeamIndex newOwner) {};
@@ -178,7 +178,7 @@ class Battlefield : public OutdoorPvP
         virtual void RewardPlayersOnBattleEnd(Team /*winner*/) {};
 
         // ToDo!!! for review!
-        void QuestCreditTeam(uint32 credit, Team team, WorldObject* source = NULL, float radius = -1.0f);
+        void QuestCreditTeam(uint32 credit, Team team, WorldObject* source = nullptr, float radius = -1.0f);
 
         // Group system
         bool CanAddPlayerToRaid(Player* /*player*/);

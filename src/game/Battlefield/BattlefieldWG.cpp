@@ -262,3 +262,13 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
 {
     return false;
 }
+
+bool BattlefieldWG::IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType)
+{
+    return false;
+}
+
+void BattlefieldWG::HandleConditionStateChange(uint32 conditionId, bool state)
+{
+
+}
