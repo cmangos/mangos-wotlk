@@ -309,6 +309,7 @@ struct npc_hungry_nether_rayAI : public ScriptedPetAI
         m_uiFeedTimer = 0;
         m_uiFeedCounter = 0;
         m_bFeeding = false;
+        SetReactState(REACT_PASSIVE);
     }
 
     void OwnerKilledUnit(Unit* pVictim) override
