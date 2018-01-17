@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Borean_Tundra
 SD%Complete: 100
-SDComment: Quest support: 11570, 11590, 11592, 11608, 11664, 11673, 11728, 11865, 11881, 11889, 11895, 11897, 11919, 11940.
+SDComment: Quest support: 11570, 11590, 11592, 11608, 11664, 11673, 11728, 11865, 11878, 11881, 11889, 11895, 11897, 11919, 11940.
 SDCategory: Borean Tundra
 EndScriptData */
 
@@ -34,12 +34,14 @@ npc_jenny
 npc_mootoo_the_younger
 npc_storm_totem
 npc_proudhoof
+npc_orphaned_mammoth_calf
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "Entities/TemporarySpawn.h"
 #include "AI/ScriptDevAI/base/follower_ai.h"
+#include "AI/ScriptDevAI/base/pet_ai.h"
 
 /*######
 ## npc_nesingwary_trapper
@@ -1496,7 +1498,7 @@ struct npc_proudhoofAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_proudhoofAI(Creature* pCreature)
+CreatureAI* GetAI_npc_proudhoof(Creature* pCreature)
 {
     return new npc_proudhoofAI(pCreature);
 }
@@ -1510,6 +1512,51 @@ bool QuestAccept_npc_proudhoof(Player* pPlayer, Creature* pCreature, const Quest
     }
 
     return false;
+}
+
+/*######
+## npc_orphaned_mammoth_calf
+######*/
+
+enum
+{
+    SPELL_MAMMOTH_CALL_CREDIT   = 46231,
+    SOUND_ID_QUEST_COMPLETE     = 9917,
+
+    NPC_KHUNOK_THE_BEHEMOTH     = 25862,
+};
+
+struct npc_orphaned_mammoth_calfAI : public ScriptedPetAI
+{
+    npc_orphaned_mammoth_calfAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
+
+    bool m_bIsComplete;
+
+    void Reset() override
+    {
+        m_bIsComplete = false;
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        if (!m_bIsComplete && pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_KHUNOK_THE_BEHEMOTH && m_creature->IsWithinDistInMap(pWho, 30.0f))
+        {
+            if (!m_creature->GetOwner())
+                return;
+
+            m_bIsComplete = true;
+            pWho->CastSpell(m_creature->GetOwner(), SPELL_MAMMOTH_CALL_CREDIT, TRIGGERED_OLD_TRIGGERED);
+            pWho->PlayDirectSound(SOUND_ID_QUEST_COMPLETE);
+            pWho->HandleEmote(EMOTE_ONESHOT_MOUNTSPECIAL);
+        }
+
+        ScriptedPetAI::MoveInLineOfSight(pWho);
+    }
+};
+
+CreatureAI* GetAI_npc_orphaned_mammoth_calf(Creature* pCreature)
+{
+    return new npc_orphaned_mammoth_calfAI(pCreature);
 }
 
 void AddSC_borean_tundra()
@@ -1591,7 +1638,12 @@ void AddSC_borean_tundra()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_proudhoof";
-    pNewScript->GetAI = &GetAI_npc_proudhoofAI;
+    pNewScript->GetAI = &GetAI_npc_proudhoof;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_proudhoof;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_orphaned_mammoth_calf";
+    pNewScript->GetAI = &GetAI_npc_orphaned_mammoth_calf;
     pNewScript->RegisterSelf();
 }

@@ -2284,6 +2284,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 46237:                                 // Dismiss Orphaned Mammoth
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || !unitTarget->GetOwner())
+                        return;
+
+                    // remove player aura and despawn
+                    unitTarget->GetOwner()->RemoveAurasDueToSpell(46233);
+                    ((Creature*)unitTarget)->ForcedDespawn(5000);
+                }
                 case 46292:                                 // Cataclysm Breath
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)

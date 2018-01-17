@@ -419,6 +419,7 @@ UPDATE creature_template SET ScriptName='npc_seaforium_depth_charge' WHERE entry
 UPDATE creature_template SET ScriptName='npc_mootoo_the_younger' WHERE entry=25504;
 UPDATE creature_template SET ScriptName='npc_storm_totem' WHERE entry=26048;
 UPDATE creature_template SET ScriptName='npc_proudhoof' WHERE entry=25335;
+UPDATE creature_template SET ScriptName='npc_orphaned_mammoth_calf' WHERE entry=25861;
 
 /* BURNING STEPPES */
 UPDATE creature_template SET ScriptName='npc_ragged_john' WHERE entry=9563;
