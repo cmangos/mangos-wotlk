@@ -240,7 +240,8 @@ ChatCommand* ChatHandler::getCommandTable()
         { "sellerror",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendSellErrorCommand,       "", nullptr },
         { "setphaseshift",  SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendSetPhaseShiftCommand,   "", nullptr },
         { "spellfail",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendSpellFailCommand,       "", nullptr },
-        { nullptr,             0,                  false, nullptr,                                                "", nullptr }
+        { "spellVisual",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSpellVisual,                "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 
     static ChatCommand bgCommandTable[] =
