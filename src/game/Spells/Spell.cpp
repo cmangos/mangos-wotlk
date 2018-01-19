@@ -7837,6 +7837,10 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
             if (!target->HasAura(39088))                    // Only deal damage if target has Positive Charge
                 return false;
             break;
+        case 39095:                                         // Amplify Damage - weird logic confirmed on retail
+            if (m_caster->getThreatManager().getThreatList().size() >= 2 && target == m_caster->getVictim())
+                return false;
+            break;
         case 39365:                                         // Thundering Storm - only hits 25-100yd range targets
         {
             float dist = target->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_COMBAT_REACH);
