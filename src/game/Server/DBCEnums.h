@@ -481,7 +481,7 @@ enum VehicleFlags
     VEHICLE_FLAG_UNK5               = 0x00001000,
     VEHICLE_FLAG_UNK6               = 0x00002000,
     VEHICLE_FLAG_UNK7               = 0x00004000,
-    VEHICLE_FLAG_UNK8               = 0x00008000,
+    VEHICLE_FLAG_PASSIVE            = 0x00008000,           // Vehicle has a passive reaction to hostiles?
     VEHICLE_FLAG_UNK9               = 0x00010000,
     VEHICLE_FLAG_UNK10              = 0x00020000,
     VEHICLE_FLAG_UNK11              = 0x00040000,
@@ -494,7 +494,7 @@ enum VehicleFlags
     VEHICLE_FLAG_UNK17              = 0x02000000,
     VEHICLE_FLAG_UNK18              = 0x04000000,
     VEHICLE_FLAG_UNK19              = 0x08000000,
-    VEHICLE_FLAG_UNK20              = 0x10000000,           // Vehicle not dismissed after eject passenger?
+    VEHICLE_FLAG_NOT_DISMISSED      = 0x10000000,           // Vehicle not dismissed after eject passenger?
     VEHICLE_FLAG_UNK21              = 0x20000000,
     VEHICLE_FLAG_UNK22              = 0x40000000,
     VEHICLE_FLAG_UNK23              = 0x80000000,           // only two entries: 36609 and 36619. Possible related to passenger stun

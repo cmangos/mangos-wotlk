@@ -236,10 +236,6 @@ void CreatureAI::AttackStart(Unit* who)
     if (!who || HasReactState(REACT_PASSIVE))
         return;
 
-    // Vehicles which can be controlled, cannot attack
-    if (!m_creature->CanAttackByItself())
-        return;
-
     if (m_creature->Attack(who, m_meleeEnabled))
     {
         m_creature->AddThreat(who);

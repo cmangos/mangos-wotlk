@@ -478,9 +478,6 @@ void Scripted_NoMovementAI::GetAIInformation(ChatHandler& reader)
 
 void Scripted_NoMovementAI::AttackStart(Unit* who)
 {
-    if (!m_creature->CanAttackByItself())
-        return;
-
     if (who && m_creature->Attack(who, true))
     {
         m_creature->AddThreat(who);

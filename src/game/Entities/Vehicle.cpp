@@ -156,6 +156,10 @@ void VehicleInfo::Initialize()
     if (vehicleFlags & VEHICLE_FLAG_FIXED_POSITION)
         pVehicle->SetRoot(true);
 
+    // TODO: Guesswork, but it looks correct
+    if (vehicleFlags & VEHICLE_FLAG_PASSIVE)
+        pVehicle->AI()->SetReactState(REACT_PASSIVE);
+
     // Initialize power type based on DBC values (creatures only)
     if (pVehicle->GetTypeId() == TYPEID_UNIT)
     {
@@ -356,7 +360,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         // TODO: Guesswork, but seems to be fairly near correct
         // Only if the passenger was on control seat? Also depending on some flags
         if ((seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL) &&
-                !(m_vehicleEntry->m_flags & (VEHICLE_FLAG_UNK4 | VEHICLE_FLAG_UNK20)))
+                !(m_vehicleEntry->m_flags & (VEHICLE_FLAG_UNK4 | VEHICLE_FLAG_NOT_DISMISSED)))
         {
             if (((Creature*)m_owner)->IsTemporarySummon())
                 ((Creature*)m_owner)->ForcedDespawn(1000);
@@ -511,6 +515,8 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
     if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
         passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
+    // ToDo: change passenger model id for SEAT_FLAG_HIDE_PASSENGER?
+
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
         Player* pPlayer = (Player*)passenger;
@@ -525,6 +531,10 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 
             pPlayer->SetCharm(pVehicle);
             pVehicle->SetCharmer(pPlayer);
+
+            pVehicle->GetMotionMaster()->Clear();
+            pVehicle->GetMotionMaster()->MoveIdle();
+            pVehicle->StopMoving(true);
 
             pVehicle->addUnitState(UNIT_STAT_POSSESSED);
             pVehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
@@ -548,6 +558,9 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 
                 // set vehicle faction as per the controller faction
                 ((Creature*)pVehicle)->SetFactionTemporary(pPlayer->getFaction(), TEMPFACTION_NONE);
+
+                // set vehicle react state to passive; player will control the vehicle
+                pVehicle->AI()->SetReactState(REACT_PASSIVE);
             }
         }
 
@@ -565,6 +578,10 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
         {
             passenger->SetCharm(pVehicle);
             pVehicle->SetCharmer(passenger);
+
+            // Change vehicle react state; ToDo: also change the vehicle faction?
+            if (pVehicle->GetTypeId() == TYPEID_UNIT)
+                pVehicle->AI()->SetReactState(passenger->AI()->GetReactState());
         }
 
         ((Creature*)passenger)->AI()->SetCombatMovement(false);
@@ -583,6 +600,8 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
     if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
         passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
+    // ToDo: reset passenger model id for SEAT_FLAG_HIDE_PASSENGER?
+
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
         Player* pPlayer = (Player*)passenger;
@@ -599,6 +618,9 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             pPlayer->UpdateClientControl(pVehicle, false);
             pPlayer->SetMover(nullptr);
 
+            pVehicle->StopMoving(true);
+            pVehicle->GetMotionMaster()->Clear();
+
             pVehicle->clearUnitState(UNIT_STAT_POSSESSED);
             pVehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
 
@@ -607,9 +629,15 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             // must be called after movement control unapplying
             pPlayer->GetCamera().ResetView();
 
-            // reset vehicle faction
             if (pVehicle->GetTypeId() == TYPEID_UNIT)
+            {
+                // reset vehicle faction
                 ((Creature*)pVehicle)->ClearTemporaryFaction();
+
+                // Reset react state
+                if (!(GetVehicleEntry()->m_flags & VEHICLE_FLAG_PASSIVE))
+                    pVehicle->AI()->SetReactState(REACT_AGGRESSIVE);
+            }
         }
 
         if (seatFlags & SEAT_FLAG_CAN_CAST)

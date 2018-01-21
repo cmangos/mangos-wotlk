@@ -31,7 +31,6 @@ npc_eye_of_acherus
 npc_scarlet_ghoul
 npc_highlord_darion_mograine
 npc_fellow_death_knight
-npc_acherus_deathcharger
 npc_scarlet_courier
 EndContentData */
 

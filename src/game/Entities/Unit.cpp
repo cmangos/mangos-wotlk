@@ -6736,27 +6736,6 @@ void Unit::CombatStopWithPets(bool includingCast)
     CallForAllControlledUnits(CombatStopWithPetsHelper(includingCast), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
-/// Returns true if a vehicle can attack other units by itself (without any controller)
-bool Unit::CanAttackByItself() const
-{
-    if (!IsVehicle())
-        return true;
-
-    for (uint8 i = 0; i < MAX_VEHICLE_SEAT; ++i)
-    {
-        if (uint32 seatId = m_vehicleInfo->GetVehicleEntry()->m_seatID[i])
-        {
-            if (VehicleSeatEntry const* seatEntry = sVehicleSeatStore.LookupEntry(seatId))
-            {
-                if (seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL)
-                    return false;
-            }
-        }
-    }
-
-    return true;
-}
-
 void Unit::RemoveAllAttackers()
 {
     while (!m_attackers.empty())

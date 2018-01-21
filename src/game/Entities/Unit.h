@@ -1414,7 +1414,6 @@ class Unit : public WorldObject
         /// Returns the Unit::m_attackers, that stores the units that are attacking you
         AttackerSet const& getAttackers() const { return m_attackers; }
 
-        bool CanAttackByItself() const;                     //< Used to check if a vehicle is allowed attack other units by itself
         Unit* getVictim() const { return m_attacking; }     //< Returns the victim that this unit is currently attacking
         void CombatStop(bool includingCast = false, bool includingCombo = true);        //< Stop this unit from combat, if includingCast==true, also interrupt casting
         void CombatStopWithPets(bool includingCast = false);
