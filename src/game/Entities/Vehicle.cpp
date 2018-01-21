@@ -225,11 +225,17 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
         WorldPacket data(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA);
         pPlayer->GetSession()->SendPacket(data);
 
-        // SMSG_BREAK_TARGET (?)
-    }
+        data.Initialize(SMSG_BREAK_TARGET, m_owner->GetPackGUID().size());
+        data << m_owner->GetPackGUID();
+        pPlayer->GetSession()->SendPacket(data);
 
-    if (!passenger->IsRooted())
-        passenger->SetRoot(true);
+        pPlayer->SetRoot(true);
+    }
+    else if (passenger->GetTypeId() == TYPEID_UNIT)
+    {
+        if (!passenger->IsRooted())
+            ((Creature*)passenger)->SetRoot(true);
+    }
 
     Movement::MoveSplineInit init(*passenger);
     init.MoveTo(0.0f, 0.0f, 0.0f);                          // ToDo: Set correct local coords
