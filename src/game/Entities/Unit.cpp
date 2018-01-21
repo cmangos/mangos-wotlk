@@ -8877,7 +8877,7 @@ void Unit::ClearInCombat()
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
-    if (HasCharmer() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
+    if (HasCharmer() || (GetTypeId() != TYPEID_PLAYER && (((Creature*)this)->IsPet() || ((Creature*)this)->IsVehicle())))
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -9713,7 +9713,7 @@ bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool taunt, bool checkThreatArea)
     const Creature* thisCreature = GetTypeId() == TYPEID_UNIT ? static_cast<const Creature*>(this) : nullptr;
 
     return
-        pTarget->IsTargetUnderControl(*this) ||
+        (!pTarget->IsVehicle() && pTarget->IsTargetUnderControl(*this)) ||
         (!taunt && pTarget->IsImmuneToDamage(GetMeleeDamageSchoolMask())) ||
         pTarget->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE) ||
         (thisCreature && checkThreatArea && thisCreature->IsOutOfThreatArea(pTarget));

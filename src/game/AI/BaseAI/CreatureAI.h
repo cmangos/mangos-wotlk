@@ -316,6 +316,9 @@ class CreatureAI
         /// This function is used to do the actual melee damage (if possible)
         bool DoMeleeAttackIfReady() const;
 
+        /// Helper function which handles the combat reaction for vehicle passengers
+        void AttackPassengersIfCan(Unit* who);
+
         /// Internal helper function, to check if a spell can be cast
         CanCastResult CanCastSpell(Unit* target, const SpellEntry* spellInfo, bool isTriggered) const;
 

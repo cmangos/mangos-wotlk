@@ -18,6 +18,7 @@
 
 #include "AI/BaseAI/CreatureAI.h"
 #include "Entities/Creature.h"
+#include "Entities/Vehicle.h"
 #include "Server/DBCStores.h"
 #include "Spells/Spell.h"
 #include "Spells/SpellMgr.h"
@@ -247,6 +248,39 @@ void CreatureAI::AttackStart(Unit* who)
             m_creature->CastSpell(m_creature, 43783, TRIGGERED_OLD_TRIGGERED);
 
         HandleMovementOnAttackStart(who);
+
+        // for controlled vehicles set the creature in combat with the passengers
+        if (who->IsVehicle())
+            AttackPassengersIfCan(who);
+    }
+}
+
+void CreatureAI::AttackPassengersIfCan(Unit* who)
+{
+    if (!who->IsVehicle())
+        return;
+
+    // set the victim's passengers in combat (if possible)
+    for (uint8 i = 0; i < MAX_VEHICLE_SEAT; ++i)
+    {
+        uint32 seatId = who->GetVehicleInfo()->GetVehicleEntry()->m_seatID[i];
+        if (!seatId)
+            continue;
+
+        Unit* passenger = who->GetVehicleInfo()->GetPassenger(i);
+        if (!passenger)
+            continue;
+
+        if (VehicleSeatEntry const* seatEntry = sVehicleSeatStore.LookupEntry(seatId))
+        {
+            // validate seat flags
+            if (seatEntry->m_flags & SEAT_FLAG_NOT_SELECTABLE || seatEntry->m_flags & SEAT_FLAG_HIDE_PASSENGER)
+                continue;
+
+            m_creature->AddThreat(passenger);
+            m_creature->SetInCombatWith(passenger);
+            passenger->SetInCombatWith(m_creature);
+        }
     }
 }
 
