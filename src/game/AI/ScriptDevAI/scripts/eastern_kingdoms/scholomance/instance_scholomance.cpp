@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "scholomance.h"
+#include "GameEvents/GameEventMgr.h"
 
 instance_scholomance::instance_scholomance(Map* pMap) : ScriptedInstance(pMap),
     m_uiGandlingEvent(0),
@@ -243,6 +244,10 @@ void instance_scholomance::DoSpawnGandlingIfCan(bool bByPlayerEnter)
     {
         if (Creature* pGandling = pPlayer->SummonCreature(NPC_DARKMASTER_GANDLING, aGandlingSpawnLocs[0].m_fX, aGandlingSpawnLocs[0].m_fY, aGandlingSpawnLocs[0].m_fZ, aGandlingSpawnLocs[0].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
         {
+            // Switch model to Christmas Gandling if Winter Veil event is active
+            if (IsHolidayActive(HOLIDAY_FEAST_OF_WINTER_VEIL))
+                pGandling->CastSpell(pGandling, SPELL_XMAS_GANDLING, TRIGGERED_NONE);
+
             if (!bByPlayerEnter)
                 DoScriptText(SAY_GANDLING_SPAWN, pGandling);
         }
