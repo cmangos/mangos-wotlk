@@ -816,6 +816,8 @@ class Creature : public Unit
         void SetSpawnCounting(bool state) { m_countSpawns = state; }
 
         uint32 GetDetectionRange() const override { return m_creatureInfo->Detection; }
+
+        void LockOutSpells(SpellSchoolMask schoolMask, uint32 duration) override;
     protected:
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 
