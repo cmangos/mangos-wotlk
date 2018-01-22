@@ -8367,6 +8367,9 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid) const
             break;
     }
 
+    if (InstanceData* instanceData = GetMap()->GetInstanceData())
+        instanceData->FillInitialWorldStates(data, count, zoneid, areaid);
+
     FillBGWeekendWorldStates(data, count);
 
     data.put<uint16>(count_pos, count);                     // set actual world state amount
