@@ -4608,10 +4608,7 @@ void Player::BuildPlayerRepop()
 {
     // case when player is ghouled (raise ally)
     if (IsGhouled())
-    {
         BreakCharmOutgoing();
-        ResetControlState(false);
-    }
 
     WorldPacket data(SMSG_PRE_RESURRECT, GetPackGUID().size());
     data << GetPackGUID();
@@ -4666,10 +4663,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 {
     // case when player is ghouled (raise ally)
     if (IsGhouled())
-    {
         BreakCharmOutgoing();
-        ResetControlState(false);
-    }
 
     WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);        // remove spirit healer position
     data << uint32(-1);
@@ -21152,10 +21146,7 @@ void Player::ResurectUsingRequestData()
     }
 
     if (IsGhouled())
-    {
         BreakCharmOutgoing();
-        ResetControlState(false);
-    }
 
     /// Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
     if (m_resurrectGuid.IsPlayer())

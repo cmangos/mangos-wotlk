@@ -4371,7 +4371,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
     }
     else
     {
-        caster->ResetControlState();
+        caster->Uncharm(target);
 
         // clean dummy auras from caster : TODO check if its right in all case
         caster->RemoveAurasDueToSpell(GetId());
@@ -4411,7 +4411,7 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
         caster->TakePossessOf(target);
     }
     else
-        caster->ResetControlState();
+        caster->Uncharm(target);
 }
 
 void Aura::HandleAuraModPetTalentsPoints(bool /*Apply*/, bool Real)
@@ -4451,7 +4451,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
         caster->TakeCharmOf(target);
     }
     else
-        caster->ResetControlState();
+        caster->Uncharm(target);
 }
 
 void Aura::HandleModConfuse(bool apply, bool Real)
