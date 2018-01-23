@@ -36,6 +36,7 @@ class TemporarySpawn : public Creature
         ObjectGuid const GetSpawnerGuid() const override { return m_spawner ; }
         void SetLinkedToOwnerAura(uint32 flags) { m_linkedToOwnerAura |= flags; };
     private:
+        bool CheckAuraOnOwner();
         void RemoveAuraFromOwner();
         void SaveToDB(uint32, uint8, uint32) override       // overwrited of Creature::SaveToDB     - don't must be called
         {
