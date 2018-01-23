@@ -4744,6 +4744,10 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             else
                 delete pObj;
         }
+
+        if (Unit* caster = GetCaster())
+            if (CreatureAI* ai = caster->AI())
+                ai->JustStunnedTarget(GetSpellProto(), target);
     }
     else
     {
@@ -4992,6 +4996,10 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         // Frost root aura -> freeze/unfreeze target
         if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
             target->ModifyAuraState(AURA_STATE_FROZEN, apply);
+
+        if (Unit* caster = GetCaster())
+            if (CreatureAI* ai = caster->AI())
+                ai->JustRootedTarget(GetSpellProto(), target);
     }
     else
     {
