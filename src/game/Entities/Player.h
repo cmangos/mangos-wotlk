@@ -1761,6 +1761,9 @@ class Player : public Unit
         uint32 GetBaseDefenseSkillValue() const { return GetBaseSkillValue(SKILL_DEFENSE); }
         uint32 GetBaseWeaponSkillValue(WeaponAttackType attType) const;
 
+        uint32 GetPureDefenseSkillValue() const { return GetPureSkillValue(SKILL_DEFENSE); }
+        uint32 GetPureWeaponSkillValue(WeaponAttackType attType) const;
+
         float GetHealthBonusFromStamina() const;
         float GetManaBonusFromIntellect() const;
 
