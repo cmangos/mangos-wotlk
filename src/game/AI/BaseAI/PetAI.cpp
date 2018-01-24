@@ -49,6 +49,18 @@ PetAI::PetAI(Creature* creature) : CreatureAI(creature), inCombat(false)
             SetReactState(REACT_PASSIVE);
             break;
     }
+
+    switch (creature->GetUInt32Value(UNIT_CREATED_BY_SPELL))
+    {
+        case 688: // imp
+            m_attackDistance = 25.f;
+            m_meleeEnabled = false;
+            break;
+        case 31687: // water ele
+            m_attackDistance = 30.f;
+            m_meleeEnabled = false;
+            break;
+    }
 }
 
 PetAI::PetAI(Unit* unit) : CreatureAI(unit), inCombat(false)
