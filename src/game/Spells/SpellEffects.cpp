@@ -3938,6 +3938,19 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
                 }
             }
+            switch (m_spellInfo->Id)
+            {
+                case 29284:                                 // Brittle Armor - dummy exists so that max stacks are added
+                {
+                    m_caster->CastSpell(unitTarget, 24575, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID);
+                    return;
+                }
+                case 29286:                                 // Mercurial Shield - dummy exists so that max stacks are added
+                {
+                    m_caster->CastSpell(unitTarget, 26464, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID);
+                    return;
+                }
+            }
             break;
         }
         case SPELLFAMILY_ROGUE:
@@ -4148,21 +4161,16 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
                     }
 
-                    // 31989 -> dummy effect (step 1) + dummy effect (step 2) -> 31709 (taunt like spell for each target)
+                    // 31989 -> dummy effect (step 1) + taunt (step 2) -> 31790 (hits each target) + 31980 - UNK purpose
                     Unit* friendTarget = !unitTarget || m_caster->CanAssist(unitTarget) ? unitTarget : unitTarget->getVictim();
 
                     // non-standard cast requirement check
                     if (!friendTarget || friendTarget->getAttackers().empty())
                     {
-                        m_caster->RemoveSpellCooldown(m_spellInfo->Id, true);
+                        m_caster->RemoveSpellCooldown(*m_spellInfo, true);
                         SendCastResult(SPELL_FAILED_TARGET_AFFECTING_COMBAT);
                         return;
                     }
-
-                    // Righteous Defense (step 2) (in old version 31980 dummy effect)
-                    // Clear targets for eff 1
-                    for (TargetList::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                        ihit->effectMask &= ~(1 << 1);
 
                     // not empty (checked), copy
                     Unit::AttackerSet attackers = friendTarget->getAttackers();
@@ -4173,11 +4181,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     {
                         Unit::AttackerSet::iterator aItr = attackers.begin();
                         std::advance(aItr, urand() % attackers.size());
-                        AddUnitTarget((*aItr), EFFECT_INDEX_1);
+                        m_caster->CastSpell((*aItr), 31790, TRIGGERED_NONE); // step 2
                         attackers.erase(aItr);
                     }
-
-                    // now let next effect cast spell at each target.
                     return;
                 }
                 case 37877:                                 // Blessing of Faith
@@ -4609,34 +4615,10 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
     // special cases
     switch (triggered_spell_id)
     {
-        case 29284:                                         // Brittle Armor - (need add max stack of 24575 Brittle Armor)
-            m_caster->CastSpell(unitTarget, 24575, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID);
+        // Flame Wreath: Explosion
+        case 29950:
+            m_caster->RemoveAurasDueToSpellByCancel(29947);
             return;
-        case 29286:                                         // Mercurial Shield - (need add max stack of 26464 Mercurial Shield)
-            m_caster->CastSpell(unitTarget, 26464, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID);
-            return;
-        case 31980:                                         // Righteous Defense
-        {
-            m_caster->CastSpell(unitTarget, 31790, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID);
-            return;
-        }
-        case 35729:                                         // Cloak of Shadows
-        {
-            Unit::SpellAuraHolderMap& Auras = unitTarget->GetSpellAuraHolderMap();
-            for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
-            {
-                // Remove all harmful spells on you except positive/passive/physical auras
-                if (!iter->second->IsPositive() &&
-                        !iter->second->IsPassive() &&
-                        !iter->second->IsDeathPersistent() &&
-                        (GetSpellSchoolMask(iter->second->GetSpellProto()) & SPELL_SCHOOL_MASK_NORMAL) == 0)
-                {
-                    m_caster->RemoveAurasDueToSpell(iter->second->GetSpellProto()->Id);
-                    iter = Auras.begin();
-                }
-            }
-            return;
-        }
         case 41967:                                         // Priest Shadowfiend (34433) need apply mana gain trigger aura on pet
         {
             if (Unit* pet = unitTarget->GetPet())
