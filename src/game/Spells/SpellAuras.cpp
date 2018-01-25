@@ -1146,45 +1146,6 @@ void Aura::TriggerSpell()
                         target->CastSpell(target, 23171, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         return;
                     }
-                    case 23184:                             // Mark of Frost
-                    case 25041:                             // Mark of Nature
-                    case 37125:                             // Mark of Death
-                    {
-                        std::list<Player*> targets;
-
-                        // spells existed in 1.x.x; 23183 - mark of frost; 25042 - mark of nature; both had radius of 100.0 yards in 1.x.x DBC
-                        // spells are used by Azuregos and the Emerald dragons in order to put a stun debuff on the players which resurrect during the encounter
-                        // in order to implement the missing spells we need to make a grid search for hostile players and check their auras; if they are marked apply debuff
-                        // spell 37127 used for the Mark of Death, is used server side, so it needs to be implemented here
-
-                        uint32 markSpellId = 0;
-                        uint32 debuffSpellId = 0;
-
-                        switch (auraId)
-                        {
-                            case 23184:
-                                markSpellId = 23182;
-                                debuffSpellId = 23186;
-                                break;
-                            case 25041:
-                                markSpellId = 25040;
-                                debuffSpellId = 25043;
-                                break;
-                            case 37125:
-                                markSpellId = 37128;
-                                debuffSpellId = 37131;
-                                break;
-                        }
-
-                        MaNGOS::AnyPlayerInObjectRangeWithAuraCheck u_check(GetTarget(), 100.0f, markSpellId);
-                        MaNGOS::PlayerListSearcher<MaNGOS::AnyPlayerInObjectRangeWithAuraCheck > checker(targets, u_check);
-                        Cell::VisitWorldObjects(GetTarget(), checker, 100.0f);
-
-                        for (std::list<Player*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
-                            (*itr)->CastSpell((*itr), debuffSpellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, casterGUID);
-
-                        return;
-                    }
                     case 23493:                             // Restoration
                     {
                         uint32 heal = triggerTarget->GetMaxHealth() / 10;
@@ -1203,22 +1164,6 @@ void Aura::TriggerSpell()
 //                    case 23792: break;
 //                    // Axe Flurry
 //                    case 24018: break;
-                    case 24210:                             // Mark of Arlokk
-                    {
-                        // Replacement for (classic) spell 24211 (doesn't exist anymore)
-                        std::list<Creature*> lList;
-
-                        // Search for all Zulian Prowler in range
-                        MaNGOS::AllCreaturesOfEntryInRangeCheck check(triggerTarget, 15101, 15.0f);
-                        MaNGOS::CreatureListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(lList, check);
-                        Cell::VisitGridObjects(triggerTarget, searcher, 15.0f);
-
-                        for (std::list<Creature*>::const_iterator itr = lList.begin(); itr != lList.end(); ++itr)
-                            if ((*itr)->isAlive())
-                                (*itr)->AddThreat(triggerTarget, float(5000));
-
-                        return;
-                    }
 //                    // Restoration
 //                    case 24379: break;
 //                    // Happy Pet
@@ -2271,6 +2216,33 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         m_isPeriodic = true;
                         m_modifier.periodictime = 5 * IN_MILLISECONDS;
                         m_periodicTimer = m_modifier.periodictime;
+                        return;
+                    }
+                    case 23183:                             // Mark of Frost
+                    {
+                        if (Unit* target = GetTarget())
+                        {
+                            if (target->HasAura(23182))
+                                target->CastSpell(target, 23186, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCaster()->GetObjectGuid());
+                        }
+                        return;
+                    }
+                    case 25042:                             // Mark of Nature
+                    {
+                        if (Unit* target = GetTarget())
+                        {
+                            if (target->HasAura(25040))
+                                target->CastSpell(target, 25043, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCaster()->GetObjectGuid());
+                        }
+                        return;
+                    }
+                    case 37127:                             // Mark of Death
+                    {
+                        if (Unit* target = GetTarget())
+                        {
+                            if (target->HasAura(37128))
+                                target->CastSpell(target, 37131, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCaster()->GetObjectGuid());
+                        }
                         return;
                     }
                     case 28832:                             // Mark of Korth'azz

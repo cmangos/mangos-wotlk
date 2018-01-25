@@ -1099,38 +1099,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 19411:                                 // Lava Bomb
                 case 20474:                                 // Lava Bomb
                 {
-                    // Hack alert!
-                    // This dummy are expected to cast spell 20494 to summon GO entry 177704
-                    // Spell does not exist client side, so we have to make a hack, creating the GO (SPELL_EFFECT_SUMMON_OBJECT_WILD)
-                    // Spell should appear in both SMSG_SPELL_START/GO and SMSG_SPELLLOGEXECUTE
-
-                    // For later, creating custom spell
-                    // _START: packguid: target, cast flags: 0xB, TARGET_FLAG_SELF
-                    // _GO: packGuid: target, cast flags: 0x4309, TARGET_FLAG_DEST_LOCATION
-                    // LOG: spell: 20494, effect, pguid: goguid
-
-                    GameObject* pGameObj = new GameObject;
-
-                    Map* map = unitTarget->GetMap();
-
-                    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), 177704,
-                                          map, m_caster->GetPhaseMask(),
-                                          unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(),
-                                          unitTarget->GetOrientation()))
-                    {
-                        delete pGameObj;
-                        return;
-                    }
-
-                    DEBUG_LOG("Gameobject, create custom in SpellEffects.cpp EffectDummy");
-
-                    // Expect created without owner, but with level from _template
-                    pGameObj->SetRespawnTime(MINUTE / 2);
-                    pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, pGameObj->GetGOInfo()->trap.level);
-                    pGameObj->SetSpellId(m_spellInfo->Id);
-
-                    map->Add(pGameObj);
-                    pGameObj->AIM_Initialize();
+                    if (unitTarget)
+                        unitTarget->CastSpell(unitTarget, 20494, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 19869:                                 // Dragon Orb
