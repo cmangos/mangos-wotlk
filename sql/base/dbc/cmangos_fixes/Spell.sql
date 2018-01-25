@@ -669,4 +669,7 @@ INSERT INTO spell_template(Id,Attributes,AttributesEx,AttributesEx2,AttributesEx
 INSERT INTO spell_template(Id,Attributes,AttributesEx,baseLevel,spellLevel,DurationIndex,rangeIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectBasePoints1,EffectImplicitTargetA1,EffectApplyAuraName1,EffectMiscValue1,SpellIconID,SpellName,SpellFamilyName,SpellFamilyFlags,DmgMultiplier1,DmgMultiplier2) VALUES
 (35729,262544,33824,66,66,37,1,6,1,1,-1,1,39,126,1933,'Cloak of Shadows',8,1073741824,1,1);
 
+-- Greyheart Nether-Mage - Blink only hits one target
+UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id=38642;
+
 
