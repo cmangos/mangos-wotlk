@@ -2277,10 +2277,14 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                 // Windfury Weapon (Passive) 1-5 Ranks
                 case 33757:
                 {
+                    // TODO: unify handling of all enchantments - some are in procs some are in Player::CastItemCombatSpell
                     if (GetTypeId() != TYPEID_PLAYER)
                         return SPELL_AURA_PROC_FAILED;
 
                     if (!castItem || !castItem->IsEquipped())
+                        return SPELL_AURA_PROC_FAILED;
+
+                    if (castItem->GetSlot() == EQUIPMENT_SLOT_MAINHAND && procFlag & PROC_FLAG_SUCCESSFUL_OFFHAND_HIT)
                         return SPELL_AURA_PROC_FAILED;
 
                     // custom cooldown processing case
