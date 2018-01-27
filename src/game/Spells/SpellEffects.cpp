@@ -300,7 +300,7 @@ void Spell::EffectEnvironmentalDMG(SpellEffectIndex eff_idx)
         ((Player*)m_caster)->EnvironmentalDamage(DAMAGE_FIRE, damage);
 }
 
-void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
+void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
 {
     if (unitTarget && unitTarget->isAlive())
     {
@@ -327,7 +327,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                     {
                         uint32 count = 0;
                         for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                            if (ihit->effectMask & (1 << effect_idx))
+                            if (ihit->effectMask & (1 << eff_idx))
                                 ++count;
 
                         damage /= count;                    // divide to all targets
@@ -371,7 +371,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                     // Touch the Nightmare
                     case 50341:
                     {
-                        if (effect_idx == EFFECT_INDEX_2)
+                        if (eff_idx == EFFECT_INDEX_2)
                             damage = int32(unitTarget->GetMaxHealth() * 0.3f);
                         break;
                     }
@@ -563,7 +563,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                 {
                     // converts up to 30 points of energy into ($f1+$AP/410) additional damage
                     float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    float multiple = ap / 410 + m_spellInfo->DmgMultiplier[effect_idx];
+                    float multiple = ap / 410 + m_spellInfo->DmgMultiplier[eff_idx];
                     damage += int32(((Player*)m_caster)->GetComboPoints() * ap * 7 / 100);
                     uint32 energy = m_caster->GetPower(POWER_ENERGY);
                     uint32 used_energy = energy > 30 ? 30 : energy;
@@ -753,7 +753,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
         }
 
         if (damage >= 0)
-            m_damage += damage;
+            m_damagePerEffect[eff_idx] = damage;
     }
 }
 
@@ -5112,7 +5112,7 @@ void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
     m_spellLog.AddLog(uint32(SPELL_EFFECT_POWER_BURN), unitTarget->GetPackGUID(), new_damage, uint32(powertype), multiplier);
 }
 
-void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
+void Spell::EffectHeal(SpellEffectIndex eff_idx)
 {
     if (unitTarget && unitTarget->isAlive() && damage >= 0)
     {
@@ -5235,7 +5235,7 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
         addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
         addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
 
-        m_healing += addhealth;
+        m_healingPerEffect[eff_idx] = addhealth;
     }
 }
 
