@@ -171,15 +171,8 @@ class SpellAuraHolder
             if (update)
                 SendAuraUpdate(false);
         }
-        bool DropAuraCharge()                               // return true if last charge dropped
-        {
-            if (m_procCharges == 0)
-                return false;
 
-            --m_procCharges;
-            SendAuraUpdate(false);
-            return m_procCharges == 0;
-        }
+        bool DropAuraCharge();                               // return true if last charge dropped
 
         time_t GetAuraApplyTime() const { return m_applyTime; }
 
@@ -451,6 +444,8 @@ class Aura
             return maxDuration > 0 && m_modifier.periodictime > 0 ? maxDuration / m_modifier.periodictime : 0;
         }
         uint32 GetStackAmount() const { return GetHolder()->GetStackAmount(); }
+
+        bool DropAuraCharge();                               // return true if last charge dropped
 
         void SetLoadedState(int32 damage, uint32 periodicTime)
         {

@@ -10647,6 +10647,20 @@ void SpellAuraHolder::SetAuraMaxDuration(int32 duration)
         SetAuraFlags(GetAuraFlags() & ~AFLAG_DURATION);
 }
 
+bool SpellAuraHolder::DropAuraCharge()
+{
+    if (m_procCharges == 0)
+        return false;
+
+    --m_procCharges;
+
+    if (GetCasterGuid() != m_target->GetObjectGuid() && IsAreaAura())
+        if (Unit* caster = GetCaster())
+            caster->RemoveAuraCharge(m_spellProto->Id);
+
+    return m_procCharges == 0;
+}
+
 bool SpellAuraHolder::HasMechanic(uint32 mechanic) const
 {
     if (mechanic == m_spellProto->Mechanic)
