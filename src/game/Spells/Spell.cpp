@@ -5358,258 +5358,263 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     if (Unit* target = m_targets.getUnitTarget())
     {
-        // target state requirements (not allowed state), apply to self also
-        if (m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
-            return SPELL_FAILED_TARGET_AURASTATE;
-
-        if (!m_IsTriggeredSpell && IsDeathOnlySpell(m_spellInfo) && target->isAlive())
-            return SPELL_FAILED_TARGET_NOT_DEAD;
-
-        // Target aura req check if need
-        if (m_spellInfo->targetAuraSpell && !target->HasAura(m_spellInfo->targetAuraSpell))
-            return SPELL_FAILED_CASTER_AURASTATE;
-        if (m_spellInfo->excludeTargetAuraSpell)
+        // TARGET_SCRIPT fills unit target per client requirement but should not be checked against common things
+        // TODO: Find a nicer and more efficient way to check for this
+        if (!IsSpellWithScriptUnitTarget(m_spellInfo))
         {
-            // Special cases of non existing auras handling
-            if (m_spellInfo->excludeTargetAuraSpell == 61988)
+            // target state requirements (not allowed state), apply to self also
+            if (m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
+                return SPELL_FAILED_TARGET_AURASTATE;
+
+            if (!m_IsTriggeredSpell && IsDeathOnlySpell(m_spellInfo) && target->isAlive())
+                return SPELL_FAILED_TARGET_NOT_DEAD;
+
+            // Target aura req check if need
+            if (m_spellInfo->targetAuraSpell && !target->HasAura(m_spellInfo->targetAuraSpell))
+                return SPELL_FAILED_CASTER_AURASTATE;
+            if (m_spellInfo->excludeTargetAuraSpell)
             {
-                // Avenging Wrath Marker
-                if (target->HasAura(61987))
+                // Special cases of non existing auras handling
+                if (m_spellInfo->excludeTargetAuraSpell == 61988)
+                {
+                    // Avenging Wrath Marker
+                    if (target->HasAura(61987))
+                        return SPELL_FAILED_CASTER_AURASTATE;
+                }
+                else if (target->HasAura(m_spellInfo->excludeTargetAuraSpell))
                     return SPELL_FAILED_CASTER_AURASTATE;
             }
-            else if (target->HasAura(m_spellInfo->excludeTargetAuraSpell))
-                return SPELL_FAILED_CASTER_AURASTATE;
-        }
 
-        // totem immunity for channeled spells(needs to be before spell cast)
-        // spell attribs for player channeled spells
-        if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET) // TODO: Investigate this condition
+            // totem immunity for channeled spells(needs to be before spell cast)
+            // spell attribs for player channeled spells
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET) // TODO: Investigate this condition
                 && m_spellInfo->HasAttribute(SPELL_ATTR_EX5_HASTE_AFFECT_DURATION)
                 && target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsTotem())
-            return SPELL_FAILED_IMMUNE;
+                return SPELL_FAILED_IMMUNE;
 
-        bool non_caster_target = target != m_caster && !IsSpellWithCasterSourceTargetsOnly(m_spellInfo);
+            bool non_caster_target = target != m_caster && !IsSpellWithCasterSourceTargetsOnly(m_spellInfo);
 
-        if (non_caster_target)
-        {
-            // target state requirements (apply to non-self only), to allow cast affects to self like Dirty Deeds
-            if (m_spellInfo->TargetAuraState && !target->HasAuraStateForCaster(AuraState(m_spellInfo->TargetAuraState), m_caster->GetObjectGuid()) &&
+            if (non_caster_target)
+            {
+                // target state requirements (apply to non-self only), to allow cast affects to self like Dirty Deeds
+                if (m_spellInfo->TargetAuraState && !target->HasAuraStateForCaster(AuraState(m_spellInfo->TargetAuraState), m_caster->GetObjectGuid()) &&
                     !m_caster->IsIgnoreUnitState(m_spellInfo, m_spellInfo->TargetAuraState == AURA_STATE_FROZEN ? IGNORE_UNIT_TARGET_NON_FROZEN : IGNORE_UNIT_TARGET_STATE))
-                return SPELL_FAILED_TARGET_AURASTATE;
+                    return SPELL_FAILED_TARGET_AURASTATE;
 
-            // Not allow casting on flying player
-            if (target->IsTaxiFlying())
-            {
-                switch (m_spellInfo->Id)
+                // Not allow casting on flying player
+                if (target->IsTaxiFlying())
                 {
-                    // Except some spells from Taxi Flying cast
-                    case 7720:                              // Ritual of Summoning Effect
-                    case 36573:                             // Vision Guide
-                    case 42316:                             // Alcaz Survey Credit
-                    case 42385:                             // Alcaz Survey Aura
-                        break;
-                    default:
-                        return SPELL_FAILED_BAD_TARGETS;
+                    switch (m_spellInfo->Id)
+                    {
+                        // Except some spells from Taxi Flying cast
+                        case 7720:                              // Ritual of Summoning Effect
+                        case 36573:                             // Vision Guide
+                        case 42316:                             // Alcaz Survey Credit
+                        case 42385:                             // Alcaz Survey Aura
+                            break;
+                        default:
+                            return SPELL_FAILED_BAD_TARGETS;
+                    }
                 }
-            }
 
-            if (!IsIgnoreLosSpell(m_spellInfo) && !m_IsTriggeredSpell && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target, true))
-                return SPELL_FAILED_LINE_OF_SIGHT;
+                if (!IsIgnoreLosSpell(m_spellInfo) && !m_IsTriggeredSpell && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target, true))
+                    return SPELL_FAILED_LINE_OF_SIGHT;
 
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                // auto selection spell rank implemented in WorldSession::HandleCastSpellOpcode
-                // this case can be triggered if rank not found (too low-level target for first rank)
-                if (!m_CastItem && !m_IsTriggeredSpell)
-                    // spell expected to be auto-downranking in cast handle, so must be same
-                    if (m_spellInfo != sSpellMgr.SelectAuraRankForLevel(m_spellInfo, target->getLevel()))
-                        return SPELL_FAILED_LOWLEVEL;
-
-                // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
-                if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_TARGET_TAPPED))
-                    if (Creature const* targetCreature = dynamic_cast<Creature*>(target))
-                        if ((!targetCreature->GetLootRecipientGuid().IsEmpty()) && !targetCreature->IsTappedBy((Player*)m_caster))
-                            return SPELL_FAILED_CANT_CAST_ON_TAPPED;
-            }
-
-            if (strict && m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER && !IsAreaOfEffectSpell(m_spellInfo))
-                return SPELL_FAILED_BAD_TARGETS;
-        }
-        else if (m_caster == target)
-        {
-            if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->IsInWorld())
-            {
-                // Additional check for some spells
-                // If 0 spell effect empty - client not send target data (need use selection)
-                // TODO: check it on next client version
-                if (m_targets.m_targetMask == TARGET_FLAG_SELF &&
-                        m_spellInfo->EffectImplicitTargetA[EFFECT_INDEX_1] == TARGET_CHAIN_DAMAGE)
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 {
-                    target = m_caster->GetMap()->GetUnit(((Player*)m_caster)->GetSelectionGuid());
-                    if (!target)
-                        return SPELL_FAILED_BAD_TARGETS;
+                    // auto selection spell rank implemented in WorldSession::HandleCastSpellOpcode
+                    // this case can be triggered if rank not found (too low-level target for first rank)
+                    if (!m_CastItem && !m_IsTriggeredSpell)
+                        // spell expected to be auto-downranking in cast handle, so must be same
+                        if (m_spellInfo != sSpellMgr.SelectAuraRankForLevel(m_spellInfo, target->getLevel()))
+                            return SPELL_FAILED_LOWLEVEL;
 
-                    m_targets.setUnitTarget(target);
+                    // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_TARGET_TAPPED))
+                        if (Creature const* targetCreature = dynamic_cast<Creature*>(target))
+                            if ((!targetCreature->GetLootRecipientGuid().IsEmpty()) && !targetCreature->IsTappedBy((Player*)m_caster))
+                                return SPELL_FAILED_CANT_CAST_ON_TAPPED;
                 }
-            }
 
-            // Some special spells with non-caster only mode
-
-            // Fire Shield
-            if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK &&
-                    m_spellInfo->SpellIconID == 16)
-                return SPELL_FAILED_BAD_TARGETS;
-
-            // Focus Magic (main spell)
-            if (m_spellInfo->Id == 54646)
-                return SPELL_FAILED_BAD_TARGETS;
-
-            // Lay on Hands (self cast)
-            if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
-                    m_spellInfo->SpellFamilyFlags & uint64(0x0000000000008000))
-            {
-                if (target->HasAura(25771))                 // Forbearance
-                    return SPELL_FAILED_CASTER_AURASTATE;
-                if (target->HasAura(61987))                 // Avenging Wrath Marker
-                    return SPELL_FAILED_CASTER_AURASTATE;
-            }
-        }
-
-        // check pet presents
-        for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
-        {
-            if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_PET)
-            {
-                Pet* pet = m_caster->GetPet();
-                if (!pet)
-                {
-                    if (m_triggeredByAuraSpell)             // not report pet not existence for triggered spells
-                        return SPELL_FAILED_DONT_REPORT;
-                    else
-                        return SPELL_FAILED_NO_PET;
-                }
-                else if (!pet->isAlive())
-                    return SPELL_FAILED_TARGETS_DEAD;
-                break;
-            }
-        }
-
-        // check creature type
-        // ignore self casts (including area casts when caster selected as target)
-        if (non_caster_target)
-        {
-            if (!CheckTargetCreatureType(target))
-            {
-                if (target->GetTypeId() == TYPEID_PLAYER)
-                    return SPELL_FAILED_TARGET_IS_PLAYER;
-                else
+                if (strict && m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER && !IsAreaOfEffectSpell(m_spellInfo))
                     return SPELL_FAILED_BAD_TARGETS;
             }
-
-            // simple cases
-            // TODO: To function properly, need to extend to pos/neutral/neg
-            bool explicit_target_mode = false;
-            bool target_hostile = false;
-            bool target_hostile_checked = false;
-            bool target_friendly = false;
-            bool target_friendly_checked = false;
-            for (int k = 0; k < MAX_EFFECT_INDEX;  ++k)
+            else if (m_caster == target)
             {
-                if (IsExplicitPositiveTarget(m_spellInfo->EffectImplicitTargetA[k]))
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->IsInWorld())
                 {
-                    if (!target_hostile_checked)
+                    // Additional check for some spells
+                    // If 0 spell effect empty - client not send target data (need use selection)
+                    // TODO: check it on next client version
+                    if (m_targets.m_targetMask == TARGET_FLAG_SELF &&
+                        m_spellInfo->EffectImplicitTargetA[EFFECT_INDEX_1] == TARGET_CHAIN_DAMAGE)
                     {
-                        target_hostile_checked = true;
-                        target_hostile = !m_caster->CanAssist(target);
+                        target = m_caster->GetMap()->GetUnit(((Player*)m_caster)->GetSelectionGuid());
+                        if (!target)
+                            return SPELL_FAILED_BAD_TARGETS;
+
+                        m_targets.setUnitTarget(target);
                     }
-
-                    if (target_hostile)
-                        return SPELL_FAILED_BAD_TARGETS;
-
-                    explicit_target_mode = true;
                 }
-                else if (IsExplicitNegativeTarget(m_spellInfo->EffectImplicitTargetA[k]))
+
+                // Some special spells with non-caster only mode
+
+                // Fire Shield
+                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK &&
+                    m_spellInfo->SpellIconID == 16)
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                // Focus Magic (main spell)
+                if (m_spellInfo->Id == 54646)
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                // Lay on Hands (self cast)
+                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
+                    m_spellInfo->SpellFamilyFlags & uint64(0x0000000000008000))
                 {
-                    if (!target_friendly_checked)
-                    {
-                        target_friendly_checked = true;
-                        target_friendly = !m_caster->CanAttack(target);
-                    }
-
-                    if (target_friendly)
-                        return SPELL_FAILED_BAD_TARGETS;
-
-                    explicit_target_mode = true;
+                    if (target->HasAura(25771))                 // Forbearance
+                        return SPELL_FAILED_CASTER_AURASTATE;
+                    if (target->HasAura(61987))                 // Avenging Wrath Marker
+                        return SPELL_FAILED_CASTER_AURASTATE;
                 }
             }
-            // TODO: this check can be applied and for player to prevent cheating when IsPositiveSpell will return always correct result.
-            // check target for pet/charmed casts (not self targeted), self targeted cast used for area effects and etc
-            if (!explicit_target_mode && m_caster->GetTypeId() == TYPEID_UNIT && m_caster->GetMasterGuid())
+
+            // check pet presents
+            for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
             {
-                // check correctness positive/negative cast target (pet cast real check and cheating check)
-                if (IsPositiveSpell(m_spellInfo->Id, m_caster, target))
+                if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_PET)
                 {
-                    if (!target_hostile_checked)
+                    Pet* pet = m_caster->GetPet();
+                    if (!pet)
                     {
-                        target_hostile_checked = true;
-                        target_hostile = m_caster->CanAttack(target) && m_caster->IsEnemy(target);
+                        if (m_triggeredByAuraSpell)             // not report pet not existence for triggered spells
+                            return SPELL_FAILED_DONT_REPORT;
+                        else
+                            return SPELL_FAILED_NO_PET;
                     }
-
-                    if (target_hostile)
-                        return SPELL_FAILED_BAD_TARGETS;
-                }
-                else
-                {
-                    if (!target_friendly_checked)
-                    {
-                        target_friendly_checked = true;
-                        target_friendly = m_caster->CanAssist(target) && m_caster->IsFriend(target);
-                    }
-
-                    if (target_friendly)
-                        return SPELL_FAILED_BAD_TARGETS;
+                    else if (!pet->isAlive())
+                        return SPELL_FAILED_TARGETS_DEAD;
+                    break;
                 }
             }
-        }
 
-        if (IsPositiveSpell(m_spellInfo->Id, m_caster, target))
-            if (target->IsImmuneToSpell(m_spellInfo, target == m_caster) && !target->hasUnitState(UNIT_STAT_ISOLATED))
-                return SPELL_FAILED_TARGET_AURASTATE;
+            // check creature type
+            // ignore self casts (including area casts when caster selected as target)
+            if (non_caster_target)
+            {
+                if (!CheckTargetCreatureType(target))
+                {
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                        return SPELL_FAILED_TARGET_IS_PLAYER;
+                    else
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
 
-        // Must be behind the target.
-        if (m_spellInfo->AttributesEx2 == SPELL_ATTR_EX2_FACING_TARGETS_BACK && m_spellInfo->HasAttribute(SPELL_ATTR_EX_FACING_TARGET) && target->HasInArc(m_caster))
-        {
-            // Exclusion for Pounce: Facing Limitation was removed in 2.0.1, but it still uses the same, old Ex-Flags
-            // Exclusion for Mutilate:Facing Limitation was removed in 2.0.1 and 3.0.3, but they still use the same, old Ex-Flags
-            // Exclusion for Throw: Facing limitation was added in 3.2.x, but that shouldn't be
-            if (!m_spellInfo->IsFitToFamily(SPELLFAMILY_DRUID, uint64(0x0000000000020000)) &&
+                // simple cases
+                // TODO: To function properly, need to extend to pos/neutral/neg
+                bool explicit_target_mode = false;
+                bool target_hostile = false;
+                bool target_hostile_checked = false;
+                bool target_friendly = false;
+                bool target_friendly_checked = false;
+                for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
+                {
+                    if (IsExplicitPositiveTarget(m_spellInfo->EffectImplicitTargetA[k]))
+                    {
+                        if (!target_hostile_checked)
+                        {
+                            target_hostile_checked = true;
+                            target_hostile = !m_caster->CanAssist(target);
+                        }
+
+                        if (target_hostile)
+                            return SPELL_FAILED_BAD_TARGETS;
+
+                        explicit_target_mode = true;
+                    }
+                    else if (IsExplicitNegativeTarget(m_spellInfo->EffectImplicitTargetA[k]))
+                    {
+                        if (!target_friendly_checked)
+                        {
+                            target_friendly_checked = true;
+                            target_friendly = !m_caster->CanAttack(target);
+                        }
+
+                        if (target_friendly)
+                            return SPELL_FAILED_BAD_TARGETS;
+
+                        explicit_target_mode = true;
+                    }
+                }
+                // TODO: this check can be applied and for player to prevent cheating when IsPositiveSpell will return always correct result.
+                // check target for pet/charmed casts (not self targeted), self targeted cast used for area effects and etc
+                if (!explicit_target_mode && m_caster->GetTypeId() == TYPEID_UNIT && m_caster->GetMasterGuid())
+                {
+                    // check correctness positive/negative cast target (pet cast real check and cheating check)
+                    if (IsPositiveSpell(m_spellInfo->Id, m_caster, target))
+                    {
+                        if (!target_hostile_checked)
+                        {
+                            target_hostile_checked = true;
+                            target_hostile = m_caster->CanAttack(target) && m_caster->IsEnemy(target);
+                        }
+
+                        if (target_hostile)
+                            return SPELL_FAILED_BAD_TARGETS;
+                    }
+                    else
+                    {
+                        if (!target_friendly_checked)
+                        {
+                            target_friendly_checked = true;
+                            target_friendly = m_caster->CanAssist(target) && m_caster->IsFriend(target);
+                        }
+
+                        if (target_friendly)
+                            return SPELL_FAILED_BAD_TARGETS;
+                    }
+                }
+            }
+
+            if (IsPositiveSpell(m_spellInfo->Id, m_caster, target))
+                if (target->IsImmuneToSpell(m_spellInfo, target == m_caster) && !target->hasUnitState(UNIT_STAT_ISOLATED))
+                    return SPELL_FAILED_TARGET_AURASTATE;
+
+            // Must be behind the target.
+            if (m_spellInfo->AttributesEx2 == SPELL_ATTR_EX2_FACING_TARGETS_BACK && m_spellInfo->HasAttribute(SPELL_ATTR_EX_FACING_TARGET) && target->HasInArc(m_caster))
+            {
+                // Exclusion for Pounce: Facing Limitation was removed in 2.0.1, but it still uses the same, old Ex-Flags
+                // Exclusion for Mutilate:Facing Limitation was removed in 2.0.1 and 3.0.3, but they still use the same, old Ex-Flags
+                // Exclusion for Throw: Facing limitation was added in 3.2.x, but that shouldn't be
+                if (!m_spellInfo->IsFitToFamily(SPELLFAMILY_DRUID, uint64(0x0000000000020000)) &&
                     !m_spellInfo->IsFitToFamily(SPELLFAMILY_ROGUE, uint64(0x0020000000000000)) &&
                     m_spellInfo->Id != 2764)
-            {
-                SendInterrupted(2);
-                return SPELL_FAILED_NOT_BEHIND;
+                {
+                    SendInterrupted(2);
+                    return SPELL_FAILED_NOT_BEHIND;
+                }
             }
-        }
 
-        // Caster must be facing the targets front
-        if (((m_spellInfo->Attributes == (SPELL_ATTR_ABILITY | SPELL_ATTR_NOT_SHAPESHIFT | SPELL_ATTR_DONT_AFFECT_SHEATH_STATE | SPELL_ATTR_STOP_ATTACK_TARGET)) && !m_caster->IsFacingTargetsFront(target))
+            // Caster must be facing the targets front
+            if (((m_spellInfo->Attributes == (SPELL_ATTR_ABILITY | SPELL_ATTR_NOT_SHAPESHIFT | SPELL_ATTR_DONT_AFFECT_SHEATH_STATE | SPELL_ATTR_STOP_ATTACK_TARGET)) && !m_caster->IsFacingTargetsFront(target))
                 // Caster must be facing the target!
                 || (m_spellInfo->HasAttribute(SPELL_ATTR_EX_FACING_TARGET) && !m_caster->HasInArc(target)))
-        {
-            SendInterrupted(2);
-            return SPELL_FAILED_NOT_INFRONT;
+            {
+                SendInterrupted(2);
+                return SPELL_FAILED_NOT_INFRONT;
+            }
+
+            // check if target is in combat
+            if (non_caster_target && m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET) && target->isInCombat())
+                return SPELL_FAILED_TARGET_AFFECTING_COMBAT;
+
+            // check if target is affected by Spirit of Redemption (Aura: 27827)
+            if (target->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
+                return SPELL_FAILED_BAD_TARGETS;
+
+            if (m_spellInfo->MaxTargetLevel && target->getLevel() > m_spellInfo->MaxTargetLevel)
+                return SPELL_FAILED_HIGHLEVEL;
         }
-
-        // check if target is in combat
-        if (non_caster_target && m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET) && target->isInCombat())
-            return SPELL_FAILED_TARGET_AFFECTING_COMBAT;
-
-        // check if target is affected by Spirit of Redemption (Aura: 27827)
-        if (target->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
-            return SPELL_FAILED_BAD_TARGETS;
-
-        if (m_spellInfo->MaxTargetLevel && target->getLevel() > m_spellInfo->MaxTargetLevel)
-            return SPELL_FAILED_HIGHLEVEL;
     }
     // zone check
     uint32 zone, area;
