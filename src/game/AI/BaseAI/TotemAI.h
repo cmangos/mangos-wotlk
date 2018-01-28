@@ -32,6 +32,7 @@ class TotemAI : public CreatureEventAI
     public:
         explicit TotemAI(Creature* creature);
 
+        void SpellHit(Unit* unit, const SpellEntry* spellInfo) override;
         void MoveInLineOfSight(Unit* who) override;
         void AttackStart(Unit* who) override;
         void EnterEvadeMode() override;

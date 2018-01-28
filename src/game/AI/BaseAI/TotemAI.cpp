@@ -157,3 +157,10 @@ Totem& TotemAI::getTotem() const
 {
     return static_cast<Totem&>(*m_creature);
 }
+
+void TotemAI::SpellHit(Unit* unit, const SpellEntry* spellInfo)
+{
+    // TODO: Give grounding totem SD2
+    if (m_creature->GetEntry() == 5925 && !m_creature->HasAura(8178) && m_creature->isAlive()) // Grounding Totem redirection aura
+        m_creature->CastSpell(nullptr, 45317, TRIGGERED_NONE); // Grounding Totem - Suicide spell - verified vs sniff
+}
