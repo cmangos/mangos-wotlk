@@ -21466,19 +21466,19 @@ Player* Player::GetNextRaidMemberWithLowestLifePercentage(float radius, AuraType
 
         if (target && target != this)
         {
-            // First not picked
-            if (!lowestPercentagePlayer)
-            {
-                lowestPercentagePlayer = target;
-                lowestPercentage = target->GetHealthPercent();
-                continue;
-            }
-
+            float x, y, z;
+            GetPosition(x, y, z);
             // CanAssist check duel and controlled by enemy
-            if (IsWithinDistInMap(target, radius) &&
+            if (target->IsWithinDist3d(x, y, z, radius) &&
                     !target->HasInvisibilityAura() && CanAssist(target) && !target->HasAuraType(noAuraType))
             {
-                if (target->GetHealthPercent() < lowestPercentage)
+                // First not picked
+                if (!lowestPercentagePlayer)
+                {
+                    lowestPercentagePlayer = target;
+                    lowestPercentage = target->GetHealthPercent();
+                }
+                else if (target->GetHealthPercent() < lowestPercentage)
                 {
                     lowestPercentagePlayer = target;
                     lowestPercentage = target->GetHealthPercent();
