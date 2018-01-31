@@ -1044,10 +1044,28 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 18350:                                 // Dummy Trigger
                 {
-                    if (m_triggeredByAuraSpell && unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    if (m_triggeredByAuraSpell && unitTarget)
                     {
                         switch (m_triggeredByAuraSpell->Id)
                         {
+                            case 13810: // Frost Trap Aura
+                            {
+                                // Need to check casting of entrapment on every pulse
+                                // Chose this route so that whole proc system doesnt have to run
+                                // IDs are in reverse order because its more likely someone will have max rank
+                                float chance = 0.f;
+                                uint32 entrapmentIDs[] = { 19388 , 19387, 19184 };
+                                for (uint32 spellId : entrapmentIDs)
+                                    if (SpellAuraHolder* holder = m_caster->GetSpellAuraHolder(spellId))
+                                    {
+                                        chance = holder->GetSpellProto()->procChance;
+                                        break;
+                                    }
+
+                                if (roll_chance_f(chance))
+                                    m_caster->CastSpell(unitTarget, 19185, TRIGGERED_OLD_TRIGGERED);
+                                break;
+                            }
                             case 28821: // Lightning Shield
                             {
                                 // Need remove self if Lightning Shield not active
@@ -1065,9 +1083,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             }
                             case 37705: // Healing Discount
                             {
-                                Player* playerTarget = (Player*) unitTarget;
                                 uint32 spellId = 0;
-                                switch (playerTarget->getClass())
+                                switch (unitTarget->getClass())
                                 {
                                     case CLASS_PALADIN:
                                         spellId = 37723;
@@ -1082,7 +1099,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                                         spellId = 37721;
                                         break;
                                 }
-                                playerTarget->CastSpell(playerTarget, spellId, TRIGGERED_OLD_TRIGGERED);
+                                unitTarget->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
                                 break;
                             }
                         }
