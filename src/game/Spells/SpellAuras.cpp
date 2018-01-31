@@ -5318,9 +5318,16 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
     else if (apply && GetSpellProto()->Id == 60970 && target->GetTypeId() == TYPEID_PLAYER)
         target->RemoveSpellCooldown(20252, true);
 
-    // PvP trinket
-    if (GetId() == 42292)
-        target->RemoveRankAurasDueToSpell(20184); // Judgement of justice - remove any rank
+    switch (GetId())
+    {
+        case 18461: // Vanish Purge
+            if (m_effIndex == EFFECT_INDEX_0)
+                target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STALKED);
+            break;
+        case 42292: // PvP trinket
+            target->RemoveRankAurasDueToSpell(20184); // Judgement of justice - remove any rank
+            break;
+    }
 }
 
 void Aura::HandleModMechanicImmunityMask(bool apply, bool /*Real*/)
