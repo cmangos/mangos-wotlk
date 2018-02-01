@@ -435,12 +435,8 @@ bool GOUse_go_manticron_cube(Player* pPlayer, GameObject* pGo)
             if (!pMagtheridon->isAlive())
                 return true;
 
-            // visual is cast by cube
-            if (Creature* pTrigger = GetClosestCreatureWithEntry(pGo, NPC_RAID_TRIGGER, 5.0f))
-                pTrigger->CastSpell(pTrigger, SPELL_SHADOW_GRASP_VISUAL, TRIGGERED_NONE);
-
-            // the real spell is cast by player
-            pPlayer->CastSpell(pPlayer, SPELL_SHADOW_GRASP, TRIGGERED_NONE, NULL, NULL, pGo->GetObjectGuid());
+            // the real spell is cast by player - casts SPELL_SHADOW_GRASP_VISUAL
+            pPlayer->CastSpell(pPlayer, SPELL_SHADOW_GRASP, TRIGGERED_NONE, nullptr, nullptr, pGo->GetObjectGuid());
         }
     }
 

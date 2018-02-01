@@ -2276,9 +2276,14 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             caster->CastCustomSpell(target, 28836, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         return;
                     }
-                    case 30410:                             // Shadow Grasp
+                    case 30410:                             // Shadow Grasp - upon trigger
                     {
-                        if (target->GetAuraCount(30410) == 5)
+                        target->CastSpell(nullptr, 30166, TRIGGERED_OLD_TRIGGERED); // Triggered in sniff
+                        break;
+                    }
+                    case 30166:                             // Shadow Grasp - upon magtheridon
+                    {
+                        if (target->GetAuraCount(30166) == 5)
                         {
                             target->CastSpell(target, 30168, TRIGGERED_OLD_TRIGGERED); // cast Shadow cage if stacks are 5
                             target->InterruptSpell(CURRENT_CHANNELED_SPELL); // if he is casting blast nova interrupt channel, only magth channel spell
@@ -2776,7 +2781,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 28084:                                     // Negative Charge
                 target->RemoveAurasDueToSpell(29660);
                 return;
-            case 30410:                                     // Shadow Grasp
+            case 30410:                                     // Shadow Grasp - upon trigger
+            {
+                target->InterruptSpell(CURRENT_CHANNELED_SPELL);
+                break;
+            }
+            case 30166:                                     // Shadow Grasp - upon magtheridon
             {
                 if (target->HasAura(30168))
                     target->RemoveAurasDueToSpell(30168); // remove Shadow cage if stacks are 5
