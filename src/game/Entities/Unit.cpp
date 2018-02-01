@@ -2601,20 +2601,20 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     if (Unit* magnetTarget = SelectMagnetTarget(pVictim))
         pVictim = magnetTarget;
 
-    CalcDamageInfo damageInfo;
-    CalculateMeleeDamage(pVictim, &damageInfo, attType);
+    CalcDamageInfo meleeDamageInfo;
+    CalculateMeleeDamage(pVictim, &meleeDamageInfo, attType);
     // Send log damage message to client
-    DealDamageMods(pVictim, damageInfo.damage, &damageInfo.absorb, DIRECT_DAMAGE);
-    SendAttackStateUpdate(&damageInfo);
-    ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.damage, damageInfo.attackType);
-    DealMeleeDamage(&damageInfo, true);
+    DealDamageMods(pVictim, meleeDamageInfo.damage, &meleeDamageInfo.absorb, DIRECT_DAMAGE);
+    SendAttackStateUpdate(&meleeDamageInfo);
+    DealMeleeDamage(&meleeDamageInfo, true);
+    ProcDamageAndSpell(meleeDamageInfo.target, meleeDamageInfo.procAttacker, meleeDamageInfo.procVictim, meleeDamageInfo.procEx, meleeDamageInfo.damage, meleeDamageInfo.attackType);
 
     if (GetTypeId() == TYPEID_PLAYER)
         DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "AttackerStateUpdate: (Player) %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
-                         GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
+            GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), meleeDamageInfo.damage, meleeDamageInfo.absorb, meleeDamageInfo.blocked_amount, meleeDamageInfo.resist);
     else
         DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "AttackerStateUpdate: (NPC)    %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
-                         GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
+            GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), meleeDamageInfo.damage, meleeDamageInfo.absorb, meleeDamageInfo.blocked_amount, meleeDamageInfo.resist);
 
     if (Unit* owner = GetOwner())
         if (owner->GetTypeId() == TYPEID_UNIT)
