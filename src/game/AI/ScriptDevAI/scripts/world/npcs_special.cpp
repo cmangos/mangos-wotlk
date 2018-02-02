@@ -1778,12 +1778,13 @@ enum FireElementalActions
     ELEMENTAL_ACTION_MAX,
 };
 
-struct npc_shaman_fire_elementalAI : ScriptedAI
+struct npc_shaman_fire_elementalAI : public ScriptedAI
 {
     npc_shaman_fire_elementalAI(Creature* creature) : ScriptedAI(creature)
     {
         m_fireNovaParams.range.minRange = 0;
-        m_fireNovaParams.range.maxRange = 15;
+        m_fireNovaParams.range.maxRange = 10;
+        Reset();
     }
 
     uint32 m_actionTimers[ELEMENTAL_ACTION_MAX];
@@ -1849,12 +1850,13 @@ struct npc_shaman_fire_elementalAI : ScriptedAI
     }
 };
 
-struct npc_shaman_earth_elementalAI : ScriptedAI
+struct npc_shaman_earth_elementalAI : public ScriptedAI
 {
     npc_shaman_earth_elementalAI(Creature* creature) : ScriptedAI(creature)
     {
         m_angeredEarthParams.range.minRange = 0;
         m_angeredEarthParams.range.maxRange = 15;
+        Reset();
     }
 
     uint32 m_angeredEarthTimer;
