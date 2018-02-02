@@ -1824,7 +1824,7 @@ struct npc_shaman_fire_elementalAI : ScriptedAI
         if (m_actionReadyStatus[ELEMENTAL_ACTION_FIRE_NOVA])
         {
             std::vector<Unit*> unitVector;
-            m_creature->SelectAttackingTargetCount(unitVector, ATTACKING_TARGET_ALL_SUITABLE, uint32(0), uint32(0), SELECT_FLAG_RANGE_AOE_RANGE, m_fireNovaParams);
+            m_creature->SelectAttackingTargets(unitVector, ATTACKING_TARGET_ALL_SUITABLE, uint32(0), uint32(0), SELECT_FLAG_RANGE_AOE_RANGE, m_fireNovaParams);
             if (unitVector.size() >= 1)
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_FIRE_NOVA) == CAST_OK)
@@ -1874,7 +1874,7 @@ struct npc_shaman_earth_elementalAI : ScriptedAI
         {
             m_angeredEarthTimer = 0;
             std::vector<Unit*> unitVector;
-            m_creature->SelectAttackingTargetCount(unitVector, ATTACKING_TARGET_ALL_SUITABLE, uint32(0), uint32(0), SELECT_FLAG_RANGE_AOE_RANGE, m_angeredEarthParams);
+            m_creature->SelectAttackingTargets(unitVector, ATTACKING_TARGET_ALL_SUITABLE, uint32(0), uint32(0), SELECT_FLAG_RANGE_AOE_RANGE, m_angeredEarthParams);
             if (unitVector.size() >= 1)
                 if (DoCastSpellIfCan(nullptr, SPELL_ANGERED_EARTH) == CAST_OK)
                     m_angeredEarthTimer = 15000;
