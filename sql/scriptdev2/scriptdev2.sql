@@ -157,6 +157,7 @@ UPDATE creature_template SET ScriptName='npc_burster_worm' WHERE entry IN (16844
 UPDATE creature_template SET ScriptName='npc_the_cleaner' WHERE entry=14503;
 UPDATE creature_template SET ScriptName='npc_shaman_earth_elemental' WHERE entry IN(15352); -- greater earth elemental
 UPDATE creature_template SET ScriptName='npc_shaman_fire_elemental' WHERE entry IN(15438); -- greater fire elemental
+UPDATE creature_template SET ScriptName='npc_snakes' WHERE entry IN(19921,19833);
 
 /* SPELL */
 UPDATE creature_template SET ScriptName='spell_dummy_npc' WHERE entry IN (

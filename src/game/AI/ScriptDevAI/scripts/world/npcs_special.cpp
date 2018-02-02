@@ -1896,6 +1896,54 @@ CreatureAI* GetAI_npc_shaman_earth_elemental(Creature* pCreature)
     return new npc_shaman_earth_elementalAI(pCreature);
 }
 
+enum
+{
+    SPELL_DEADLY_POISON_PASSIVE = 34657,
+    SPELL_MIND_NUMBING_POISON   = 25810,
+    SPELL_CRIPPLING_POISON      = 25809,
+
+    // SPELL_RANDOM_AGGRO = 34701 // unk purpose
+};
+
+struct npc_snakesAI : public ScriptedAI
+{
+    npc_snakesAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
+
+    uint32 m_spellTimer;
+
+    void Reset() override
+    {
+        m_spellTimer = 3000;
+
+        DoCastSpellIfCan(nullptr, SPELL_DEADLY_POISON_PASSIVE, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_spellTimer <= diff)
+        {
+            if (urand(0, 2) == 0)
+            {
+                uint32 spellId = urand(0, 1) ? SPELL_MIND_NUMBING_POISON : SPELL_CRIPPLING_POISON;
+                DoCastSpellIfCan(m_creature->getVictim(), spellId);
+            }
+            m_spellTimer = 3000;
+        }
+        else
+            m_spellTimer -= diff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_snakes(Creature* pCreature)
+{
+    return new npc_snakesAI(pCreature);
+}
+
 void AddSC_npcs_special()
 {
     Script* pNewScript;
@@ -1973,5 +2021,10 @@ void AddSC_npcs_special()
     pNewScript = new Script;
     pNewScript->Name = "npc_shaman_earth_elemental";
     pNewScript->GetAI = &GetAI_npc_shaman_earth_elemental;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_snakes";
+    pNewScript->GetAI = &GetAI_npc_snakes;
     pNewScript->RegisterSelf();
 }
