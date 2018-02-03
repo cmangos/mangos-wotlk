@@ -223,6 +223,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "movie",          SEC_MODERATOR,      false, &ChatHandler::HandleDebugPlayMovieCommand,           "", nullptr },
         { "sound",          SEC_MODERATOR,      false, &ChatHandler::HandleDebugPlaySoundCommand,           "", nullptr },
         { "music",          SEC_MODERATOR,      false, &ChatHandler::HandleDebugPlayMusicCommand,           "", nullptr },
+        { "petdismiss",     SEC_MODERATOR,      false, &ChatHandler::HandleDebugPetDismissSound,            "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 
