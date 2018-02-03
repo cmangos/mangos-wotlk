@@ -328,6 +328,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     _LoadSpells();
     InitLevelupSpellsForLevel();
     // TODO: confirm two line above work in all situation
+    InitPetScalingAuras();
 
     // remove arena auras if in arena
     if (map->IsBattleArena())
@@ -1058,6 +1059,8 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                 SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 1);
             }
 
+
+
             break;
         }
         case SUMMON_PET:
@@ -1238,6 +1241,8 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     // Set base Armor
     SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, armor);
 
+    InitPetScalingAuras();
+
     // Need to update stats - calculates max health/mana etc
     UpdateAllStats();
 
@@ -1253,6 +1258,65 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     SetPower(POWER_RAGE, 0);
 
     return;
+}
+
+void Pet::InitPetScalingAuras()
+{
+    switch (GetUInt32Value(UNIT_CREATED_BY_SPELL))
+    {
+        case 13481: // Tame Beast - Hunter
+            CastSpell(nullptr, 34902, TRIGGERED_NONE);
+            CastSpell(nullptr, 34903, TRIGGERED_NONE);
+            CastSpell(nullptr, 34904, TRIGGERED_NONE);
+            break;
+        case 688: // Imp - Warlock
+        case 691: // Felhunter
+        case 697: // Voidwalker
+        case 712: // Succubus
+        case 30146: // Felguard
+            CastSpell(nullptr, 34947, TRIGGERED_NONE);
+            CastSpell(nullptr, 34956, TRIGGERED_NONE);
+            CastSpell(nullptr, 34957, TRIGGERED_NONE);
+            CastSpell(nullptr, 34958, TRIGGERED_NONE);
+            break;
+        case 12740: // Infernal - Warlock - unique - isnt updated on stat changes
+            CastSpell(nullptr, 36186, TRIGGERED_NONE);
+            CastSpell(nullptr, 36188, TRIGGERED_NONE);
+            CastSpell(nullptr, 36189, TRIGGERED_NONE);
+            CastSpell(nullptr, 36190, TRIGGERED_NONE);
+            break;
+        case 31687: // Water Elemental - Mage
+            CastSpell(nullptr, 35657, TRIGGERED_NONE);
+            CastSpell(nullptr, 35658, TRIGGERED_NONE);
+            CastSpell(nullptr, 35659, TRIGGERED_NONE);
+            CastSpell(nullptr, 35660, TRIGGERED_NONE);
+            break;
+        case 32982: // Fire Elemental - Shaman
+            CastSpell(nullptr, 35665, TRIGGERED_NONE);
+            CastSpell(nullptr, 35666, TRIGGERED_NONE);
+            CastSpell(nullptr, 35667, TRIGGERED_NONE);
+            CastSpell(nullptr, 35668, TRIGGERED_NONE);
+            break;
+        case 33663: // Earth Elemental - Shaman
+            CastSpell(nullptr, 35674, TRIGGERED_NONE);
+            CastSpell(nullptr, 35675, TRIGGERED_NONE);
+            CastSpell(nullptr, 35676, TRIGGERED_NONE);
+            break;
+        case 33831: // Force Of Nature - Treants - Druid
+            CastSpell(nullptr, 35669, TRIGGERED_NONE);
+            CastSpell(nullptr, 35670, TRIGGERED_NONE);
+            CastSpell(nullptr, 35671, TRIGGERED_NONE);
+            CastSpell(nullptr, 35672, TRIGGERED_NONE);
+            break;
+        case 34433: // Shadowfiend - Priest
+            CastSpell(nullptr, 35661, TRIGGERED_NONE);
+            CastSpell(nullptr, 35662, TRIGGERED_NONE);
+            CastSpell(nullptr, 35663, TRIGGERED_NONE);
+            CastSpell(nullptr, 35664, TRIGGERED_NONE);
+            break;
+        default:
+            break;
+    }
 }
 
 bool Pet::HaveInDiet(ItemPrototype const* item) const
