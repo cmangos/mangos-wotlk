@@ -2382,7 +2382,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 p.read_skip<uint32>();  // 4 randomPropertyId
                 p >> lootslot_type;     // 1 LootSlotType
 
-                if (lootslot_type != LOOT_SLOT_NORMAL)
+                if (lootslot_type != LOOT_SLOT_NORMAL && lootslot_type != LOOT_SLOT_OWNER)
                     continue;
 
                 // skinning or collect loot flag = just auto loot everything for getting object
