@@ -1794,7 +1794,7 @@ struct npc_shaman_fire_elementalAI : public ScriptedAI
 
     void Reset() override
     {
-        DoCastSpellIfCan(nullptr, SPELL_FIRE_SHIELD, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
+        DoCastSpellIfCan(m_creature, SPELL_FIRE_SHIELD, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
 
         m_actionTimers[ELEMENTAL_ACTION_FIRE_NOVA] = 10000;
         m_actionTimers[ELEMENTAL_ACTION_FIRE_BLAST] = 5000;
