@@ -3284,19 +3284,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
         }
         case SPELLFAMILY_PRIEST:
         {
-            // Greater Heal Refund (Avatar Raiment set)
-            if (auraSpellInfo->Id == 37594)
-            {
-                // Not give if target already have full health
-                if (pVictim->GetHealth() == pVictim->GetMaxHealth())
-                    return SPELL_AURA_PROC_FAILED;
-                // If your Greater Heal brings the target to full health, you gain $37595s1 mana.
-                if (pVictim->GetHealth() + damage < pVictim->GetMaxHealth())
-                    return SPELL_AURA_PROC_FAILED;
-                trigger_spell_id = 37595;
-            }
-            // Blessed Recovery
-            else if (auraSpellInfo->SpellIconID == 1875)
+            if (auraSpellInfo->SpellIconID == 1875)
             {
                 switch (auraSpellInfo->Id)
                 {

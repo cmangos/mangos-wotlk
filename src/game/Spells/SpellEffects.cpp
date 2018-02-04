@@ -1063,6 +1063,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                                 unitTarget->RemoveAurasDueToSpell(28820);
                                 break;
                             }
+                            case 37594: // Greater Heal Refund
+                            {
+                                // If your Greater Heal brings the target to full health, you gain $37595s1 mana.
+                                if (unitTarget->GetHealth() == unitTarget->GetMaxHealth())
+                                    m_caster->CastSpell(nullptr, 37595, TRIGGERED_OLD_TRIGGERED);
+                                break;
+                            }
                             case 37705: // Healing Discount
                             {
                                 Player* playerTarget = (Player*) unitTarget;
