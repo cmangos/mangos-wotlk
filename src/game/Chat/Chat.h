@@ -238,6 +238,7 @@ class ChatHandler
         bool HandleDebugUpdateWorldStateCommand(char* args);
         bool HandleDebugWaypoint(char* args);
         bool HandleDebugSpellVisual(char* args);
+        bool HandleDebugMoveflags(char* args);
 
         bool HandleDebugPlayCinematicCommand(char* args);
         bool HandleDebugPlayMovieCommand(char* args);
