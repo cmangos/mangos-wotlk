@@ -18,6 +18,7 @@ enum
     NPC_BROGGOK                     = 17380,
     NPC_KELIDAN_THE_BREAKER         = 17377,
     NPC_NASCENT_FEL_ORC             = 17398,                // Used in the Broggok event
+    NPC_FEL_ORC_NEOPHYTE            = 17429,
     NPC_MAGTHERIDON                 = 21174,
     NPC_SHADOWMOON_CHANNELER        = 17653,
 
@@ -37,6 +38,8 @@ enum
     GO_PRISON_CELL_BROGGOK_2        = 181818,               // Broggok cell back right  (SE)
     GO_PRISON_CELL_BROGGOK_3        = 181820,               // Broggok cell front left  (NW)
     GO_PRISON_CELL_BROGGOK_4        = 181821,               // Broggok cell front right (SW)
+
+    GO_PRISON_CELL_DOOR_LEVER       = 181982,
 
     SAY_BROGGOK_INTRO               = -1542015,
 };
@@ -65,7 +68,7 @@ class instance_blood_furnace : public ScriptedInstance
         void OnObjectCreate(GameObject* pGo) override;
 
         void OnCreatureDeath(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
+        void OnCreatureEvade(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
@@ -74,8 +77,6 @@ class instance_blood_furnace : public ScriptedInstance
 
         void Load(const char* chrIn) override;
         const char* Save() const override { return m_strInstData.c_str(); }
-
-        void GetMovementDistanceForIndex(uint32 uiIndex, float& dx, float& dy);
 
         void GetKelidanAddList(GuidList& lList) { lList = m_lChannelersGuids; m_lChannelersGuids.clear(); }
 
@@ -88,9 +89,11 @@ class instance_blood_furnace : public ScriptedInstance
 
         BroggokEventInfo m_aBroggokEvent[MAX_ORC_WAVES];
 
-        uint32 m_uiBroggokEventTimer;                       // Timer for opening the event cages; only on heroic mode = 30 secs
+        uint32 m_uiBroggokEventTimer;                       // Timer for opening the event cages; 90s on normal, 30s on heroic difficulty
         uint32 m_uiBroggokEventPhase;
         uint32 m_uiRandYellTimer;                           // Random yell for Magtheridon
+
+        GameObject* m_lLeverGO;
 
         GuidList m_luiNascentOrcGuids;
         GuidList m_lChannelersGuids;

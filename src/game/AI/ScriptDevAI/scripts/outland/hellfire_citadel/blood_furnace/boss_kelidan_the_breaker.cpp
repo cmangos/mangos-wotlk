@@ -190,6 +190,9 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
             if (pCaster && pTarget)
                 pCaster->CastSpell(pTarget, SPELL_CHANNELING, TRIGGERED_NONE);
         }
+
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
     }
 
     void AddJustAggroed(Unit* pWho)
@@ -213,6 +216,8 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
         ++m_uiKilledAdds;
         if (m_uiKilledAdds == MAX_ADDS)
         {
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             m_creature->InterruptNonMeleeSpells(true);
             AttackStart(pKiller);
         }

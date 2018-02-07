@@ -36,7 +36,7 @@ enum
 
     SPELL_POISON            = 30914,
 
-    POINT_EVENT_COMBAT      = 1,
+    POINT_EVENT_COMBAT      = 7,
 };
 
 struct boss_broggokAI : public ScriptedAI
@@ -45,6 +45,7 @@ struct boss_broggokAI : public ScriptedAI
     {
         m_pInstance = (instance_blood_furnace*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+
         Reset();
     }
 
@@ -59,7 +60,7 @@ struct boss_broggokAI : public ScriptedAI
     {
         m_uiAcidSprayTimer = 10000;
         m_uiPoisonSpawnTimer = 5000;
-        m_uiPoisonBoltTimer = 7000;
+        m_uiPoisonBoltTimer = 12000;
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -72,11 +73,7 @@ struct boss_broggokAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        // ToDo: set correct flags and data in DB!!!
-        pSummoned->setFaction(16);
-        pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        pSummoned->CastSpell(pSummoned, SPELL_POISON, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+        pSummoned->CastSpell(pSummoned, SPELL_POISON, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
     void JustDied(Unit* /*pWho*/) override
@@ -85,40 +82,14 @@ struct boss_broggokAI : public ScriptedAI
             m_pInstance->SetData(TYPE_BROGGOK_EVENT, DONE);
     }
 
-    void EnterEvadeMode() override
-    {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
-        m_creature->CombatStop(true);
-        m_creature->LoadCreatureAddon(true);
-
-        m_creature->SetLootRecipient(NULL);
-
-        Reset();
-
-        if (!m_creature->isAlive())
-            return;
-
-        if (m_pInstance)
-        {
-            float dx, dy;
-            float fRespX, fRespY, fRespZ;
-            m_creature->GetRespawnCoord(fRespX, fRespY, fRespZ);
-            m_pInstance->GetMovementDistanceForIndex(4, dx, dy);
-            m_creature->GetMotionMaster()->MovePoint(POINT_EVENT_COMBAT, dx, dy, fRespZ);
-        }
-        else
-            m_creature->GetMotionMaster()->MoveTargetedHome();
-    }
-
     // Reset Orientation
     void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
     {
-        if (uiMotionType != POINT_MOTION_TYPE || uiPointId != POINT_EVENT_COMBAT)
+        if (uiPointId != POINT_EVENT_COMBAT)
             return;
 
-        if (GameObject* pFrontDoor = m_pInstance->GetSingleGameObjectFromStorage(GO_DOOR_BROGGOK_FRONT))
-            m_creature->SetFacingToObject(pFrontDoor);
+        m_creature->GetMotionMaster()->MoveIdle();
+        m_creature->SetInCombatWithZone();
     }
 
     void UpdateAI(const uint32 uiDiff) override
