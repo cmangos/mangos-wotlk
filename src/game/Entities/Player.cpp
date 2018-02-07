@@ -18734,7 +18734,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& bas
         return 0;
 
     int32 totalpct = 0;
-    int32 totalflat = 0;
+    int32 addedFlat = 0;
     for (AuraList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
     {
         Aura* aura = *itr;
@@ -18745,7 +18745,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& bas
             continue;
 
         if (mod->m_auraname == SPELL_AURA_ADD_FLAT_MODIFIER)
-            totalflat += mod->m_amount;
+            addedFlat += mod->m_amount;
         else
         {
             // skip percent mods for null basevalue (most important for spell mods with charges )
@@ -18761,8 +18761,8 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& bas
         }
     }
 
-    float diff = (float)basevalue * (float)totalpct / 100.0f + (float)totalflat;
-    basevalue = T((float)basevalue + diff);
+    T diff = basevalue * totalpct / 100 + addedFlat * (100 + totalpct) / 100;
+    basevalue = T(basevalue + diff);
     return T(diff);
 }
 
