@@ -458,7 +458,7 @@ class Spell
         void _handle_finish_phase();
 
         SpellCastResult CheckItems();
-        SpellCastResult CheckRange(bool strict) const;
+        SpellCastResult CheckRange(bool strict);
         SpellCastResult CheckPower();
         SpellCastResult CheckOrTakeRunePower(bool take);
         SpellCastResult CheckCasterAuras() const;
@@ -603,6 +603,7 @@ class Spell
         bool m_reflectable;                                  // can reflect this spell?
         uint8 m_spellFlags;                                 // for spells whose target was changed in cast i.e. due to reflect
         bool m_autoRepeat;
+        float m_maxRange;                                   // For channeled spell check
         uint8 m_runesState;
 
         uint8 m_delayAtDamageCount;
