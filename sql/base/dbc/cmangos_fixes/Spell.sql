@@ -197,6 +197,15 @@ UPDATE spell_template SET MaxTargetLevel=63 WHERE id IN(15366);
 -- Watchkeeper Gargolmar - Mortal Wound should stack to 50/100%
 UPDATE `spell_template` SET `StackAmount` = 10 WHERE `id` IN (30641, 36814);
 
+-- Warlock Ritual of Summoning
+UPDATE spell_template SET EffectRadiusIndex1=8 WHERE id=698; -- 5 yd summoning radius
+
+-- Halaa Fire Bomb - should not put caster or targets into combat - no threat attribute - possibly questionable addition, but should work as if it had one
+UPDATE spell_template SET AttributesEx=AttributesEx|0x00000400 WHERE id IN(31962);
+
+-- Warp Spring Coil - Armor penetration proc - definitely should not have charges - is not consumed, or shown with charge clientside
+UPDATE spell_template SET procCharges=0,procFlags=0,procChance=0 WHERE id IN(37174);
+
 -- Infernal spell used in the Stair of Destiny battle event
 INSERT INTO spell_template (Id, SchoolMask, Attributes, AttributesEx, AttributesEx2, Targets, CastingTimeIndex, procChance, DurationIndex, rangeIndex, EquippedItemClass, Effect1, EffectRadiusIndex1, EffectMiscValue1, SpellIconID, SpellName, DmgMultiplier1, DmgMultiplier2, EffectMiscValueB1) VALUES
 (33636,1,256,524288,4,64,1,101,62,13,-1,28,27,18946,2034,'Infernal',1,1,64); -- 'Stunned.'
