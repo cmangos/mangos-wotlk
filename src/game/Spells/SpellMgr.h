@@ -129,6 +129,40 @@ inline bool IsAuraApplyEffect(SpellEntry const* spellInfo, SpellEffectIndex effe
     return false;
 }
 
+inline bool IsAuraApplyEffects(SpellEntry const* entry, SpellEffectIndexMask mask)
+{
+    if (!entry)
+        return false;
+    uint32 emptyMask = 0;
+    for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        const uint32 current = (1 << i);
+        if (entry->Effect[i])
+        {
+            if ((mask & current) && !IsAuraApplyEffect(entry, SpellEffectIndex(i)))
+                return false;
+        }
+        else
+            emptyMask |= current;
+    }
+    // Check if all queried effects are actually empty
+    const bool empty = !(mask & ~emptyMask);
+    return !empty;
+}
+
+inline bool IsDestinationOnlyEffect(SpellEntry const* spellInfo, SpellEffectIndex effIdx)
+{
+    switch (spellInfo->Effect[effIdx])
+    {
+        case SPELL_EFFECT_PERSISTENT_AREA_AURA:
+        case SPELL_EFFECT_TRANS_DOOR:
+        case SPELL_EFFECT_SUMMON:
+            return true;
+        default:
+            return false;
+    }
+}
+
 inline bool IsSpellAppliesAura(SpellEntry const* spellInfo, uint32 effectMask = ((1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)))
 {
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
