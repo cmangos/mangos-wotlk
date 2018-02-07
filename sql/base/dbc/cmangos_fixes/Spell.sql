@@ -71,6 +71,9 @@ UPDATE spell_template SET InterruptFlags=InterruptFlags|4 WHERE id IN(33387);
 -- Nether Portal - Netherspite - Dominance should not be cast while casting, only blue beam was affected and not removed when it should be
 UPDATE spell_template SET AttributesEx4=0 WHERE id IN(30402);
 
+-- Gift of the Doomsayer - Normal version has heroic version proc spell, instead of normal version proc spell
+UPDATE spell_template SET EffectTriggerSpell1=36174 WHERE id IN(36173);
+
 -- Spells used in Ragnaros encounter
 INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`ProcChance`,`DurationIndex`,`RangeIndex`,`EquippedItemClass`,`Effect1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES 
 ('21108','256','1','101','0','13','-1','3','0','16','0','876','Summon Sons of Flame','1'),
