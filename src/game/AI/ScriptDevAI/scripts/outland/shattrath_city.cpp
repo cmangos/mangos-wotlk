@@ -30,6 +30,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "World/WorldState.h"
 
 enum
 {
@@ -659,6 +660,25 @@ bool GossipHello_npc_salsalabim(Player* pPlayer, Creature* pCreature)
     return true;
 }
 
+enum
+{
+    QUEST_KAELTHAS_AND_THE_VERDANT_SPHERE = 11007,
+
+    SCRIPT_RELAY_ID = 10061,
+};
+
+bool QuestRewarded_npc_adal(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_KAELTHAS_AND_THE_VERDANT_SPHERE)
+    {
+        sWorldState.HandleExternalEvent(CUSTOM_EVENT_ADALS_SONG_OF_BATTLE);
+        pPlayer->GetMap()->ScriptsStart(sRelayScripts, SCRIPT_RELAY_ID, pCreature, pPlayer, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE); // only once active per adal
+        return true; // handled
+    }
+
+    return false; // unhandled
+}
+
 void AddSC_shattrath_city()
 {
     Script* pNewScript;
@@ -679,5 +699,10 @@ void AddSC_shattrath_city()
     pNewScript->Name = "npc_salsalabim";
     pNewScript->GetAI = &GetAI_npc_salsalabim;
     pNewScript->pGossipHello = &GossipHello_npc_salsalabim;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_adal";
+    pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_adal;
     pNewScript->RegisterSelf();
 }

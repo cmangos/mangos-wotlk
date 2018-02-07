@@ -36,6 +36,14 @@ enum
     // Quest 10310
     GO_ROCKET_FIRE              = 183987,
     GO_ROCKET_SMOKE             = 183988,
+
+    // Transports
+    NPC_NEZRAZ                  = 3149,
+    NPC_HINDENBURG              = 3150,
+    NPC_FREZZA                  = 9564,
+    NPC_ZAPETTA                 = 9566,
+    NPC_SNURK_BUCKSQUICK        = 12136,
+    NPC_SQUIBBY_OVERSPECK       = 12137,
 };
 
 enum SpawnIndexes

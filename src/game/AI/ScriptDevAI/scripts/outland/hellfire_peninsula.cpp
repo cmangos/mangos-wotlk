@@ -1131,6 +1131,197 @@ bool EffectAuraDummy_spell_aura_dummy_living_flare(const Aura* pAura, bool bAppl
     return true;
 }
 
+enum
+{
+    QUEST_FALL_OF_MAGETHERIDON_A = 11002,
+    QUEST_FALL_OF_MAGETHERIDON_H = 11003,
+
+    YELL_1_DELAY = 2000,
+    YELL_2_DELAY = 8000,
+
+    YELL_TROLLBANE_1 = -1000590,
+    YELL_TROLLBANE_2 = -1000591,
+
+    YELL_NAZGREL_1 = -1000592,
+    YELL_NAZGREL_2 = -1000593,
+
+    SPELL_TROLLBANES_COMMAND = 39911,
+    SPELL_NAZGRELS_FAVOR = 39913,
+
+    MAX_SEARCH_DIST = 2170,
+
+    OBJECT_MAGTHERIDONS_HEAD = 184640
+
+    //	NPC_DANATH_TROLLBANE = 16819,
+    //	NPC_NAZGREL = 3230
+};
+
+// 16819/force-commander-danath-trollbane
+struct npc_danath_trollbaneAI : public ScriptedAI
+{
+    npc_danath_trollbaneAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    bool    m_bYelling = false; // if true, someone turned in the quest
+    bool    m_bOnYell2 = false; // to avoid yelling the first line again
+
+    uint32  m_uiYell1DelayRemaining = 0;
+    uint32  m_uiYell2DelayRemaining = 0;
+
+    ObjectGuid  m_guidInvoker;
+
+    void Reset() override
+    {
+        m_bYelling = false;
+        m_bOnYell2 = false;
+        m_uiYell1DelayRemaining = 0;
+        m_uiYell2DelayRemaining = 0;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_bYelling) // if yelling...
+        {
+            // Handle 1st yell
+            if (!m_bOnYell2 && m_uiYell1DelayRemaining < uiDiff)
+            {
+                if (Unit* invoker = m_creature->GetMap()->GetUnit(m_guidInvoker))
+                    DoScriptText(YELL_TROLLBANE_1, m_creature, invoker);
+                m_bOnYell2 = true;
+            }
+            else
+                m_uiYell1DelayRemaining -= uiDiff;
+
+            // Handle 2nd yell
+            if (m_bOnYell2 && m_uiYell2DelayRemaining < uiDiff)
+            {
+                DoScriptText(YELL_TROLLBANE_2, m_creature);
+                m_bYelling = false;
+                m_bOnYell2 = false;
+
+                // Mount Magtheridon's Head (update object)
+                if (GameObject* goHead = GetClosestGameObjectWithEntry(m_creature, OBJECT_MAGTHERIDONS_HEAD, 100.0f))
+                    if (Unit* invoker = m_creature->GetMap()->GetUnit(m_guidInvoker))
+                        goHead->Use(invoker);
+            }
+            else
+                m_uiYell2DelayRemaining -= uiDiff;
+        }
+
+        DoMeleeAttackIfReady(); // be sure to fight back if in combat
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_START_EVENT && pSender == m_creature) // sanity check
+            if (m_bYelling == false) // don't override anything if yelling already...
+            {
+                m_uiYell1DelayRemaining = YELL_1_DELAY;
+                m_uiYell2DelayRemaining = YELL_2_DELAY;
+                m_guidInvoker = pInvoker->GetObjectGuid();
+                m_bYelling = true;
+            }
+    }
+};
+
+bool QuestComplete_npc_trollbane(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_FALL_OF_MAGETHERIDON_A)
+    {
+        // And trigger yelling
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
+    }
+
+    return true;
+}
+
+CreatureAI* GetAI_danath_trollbane(Creature* pCreature)
+{
+    return new npc_danath_trollbaneAI(pCreature);
+}
+
+// 3230/nazgrel
+struct npc_nazgrelAI : public ScriptedAI
+{
+    npc_nazgrelAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    bool    m_bYelling = false;
+    bool    m_bOnYell2 = false;
+
+    uint32  m_uiYell1DelayRemaining = 0;
+    uint32  m_uiYell2DelayRemaining = 0;
+
+    ObjectGuid  m_guidInvoker;
+
+    void Reset() override
+    {
+        m_bYelling = false;
+        m_bOnYell2 = false;
+        m_uiYell1DelayRemaining = 0;
+        m_uiYell2DelayRemaining = 0;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_bYelling) // if yelling...
+        {
+            // Handle 1st yell
+            if (!m_bOnYell2 && m_uiYell1DelayRemaining < uiDiff)
+            {
+                if (Unit* invoker = m_creature->GetMap()->GetUnit(m_guidInvoker))
+                    DoScriptText(YELL_NAZGREL_1, m_creature, invoker);
+                m_bOnYell2 = true;
+            }
+            else
+                m_uiYell1DelayRemaining -= uiDiff;
+
+            // Handle 2nd yell
+            if (m_bOnYell2 && m_uiYell2DelayRemaining < uiDiff)
+            {
+                DoScriptText(YELL_NAZGREL_2, m_creature);
+                m_bYelling = false;
+                m_bOnYell2 = false;
+
+                // Mount Magtheridon's Head (update object)
+                if (GameObject* goHead = GetClosestGameObjectWithEntry(m_creature, OBJECT_MAGTHERIDONS_HEAD, 100.0f))
+                    if (Unit* invoker = m_creature->GetMap()->GetUnit(m_guidInvoker))
+                        goHead->Use(invoker);
+            }
+            else
+                m_uiYell2DelayRemaining -= uiDiff;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_START_EVENT && pSender == m_creature) // sanity check
+        {
+            if (m_bYelling == false) // don't override anything if yelling already...
+            {
+                m_uiYell1DelayRemaining = YELL_1_DELAY;
+                m_uiYell2DelayRemaining = YELL_2_DELAY;
+                m_bYelling = true;
+                m_guidInvoker = pInvoker->GetObjectGuid();
+            }
+        }
+    }
+};
+
+// 16819/force-commander-danath-trollbane
+bool QuestComplete_npc_nazgrel(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_FALL_OF_MAGETHERIDON_H) // And trigger yelling        
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
+
+    return true;
+}
+
+CreatureAI* GetAI_nazgrel(Creature* pCreature)
+{
+    return new npc_nazgrelAI(pCreature);
+}
+
 void AddSC_hellfire_peninsula()
 {
     Script* pNewScript;
@@ -1186,5 +1377,17 @@ void AddSC_hellfire_peninsula()
     pNewScript->Name = "npc_living_flare";
     pNewScript->GetAI = &GetAI_npc_living_flare;
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_living_flare;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_danath_trollbane";
+    pNewScript->GetAI = &GetAI_danath_trollbane;
+    pNewScript->pQuestRewardedNPC = &QuestComplete_npc_trollbane;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_nazgrel";
+    pNewScript->GetAI = &GetAI_nazgrel;
+    pNewScript->pQuestRewardedNPC = &QuestComplete_npc_nazgrel;
     pNewScript->RegisterSelf();
 }

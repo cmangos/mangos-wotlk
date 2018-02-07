@@ -67,6 +67,7 @@
 #include "Entities/CreatureLinkingMgr.h"
 #include "Calendar/Calendar.h"
 #include "Weather/Weather.h"
+#include "World/WorldState.h"
 
 #include <mutex>
 
@@ -1547,6 +1548,7 @@ void World::Update(uint32 diff)
     sMapMgr.Update(diff);
     sBattleGroundMgr.Update(diff);
     sOutdoorPvPMgr.Update(diff);
+    sWorldState.Update(diff);
 
     ///- Update groups with offline leaders
     if (m_timers[WUPDATE_GROUPS].Passed())

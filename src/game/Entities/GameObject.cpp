@@ -40,6 +40,8 @@
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Vmap/GameObjectModel.h"
 #include "Server/SQLStorages.h"
+#include "World/WorldState.h"
+
 #include <G3D/Quat.h>
 
 GameObject::GameObject() : WorldObject(),
@@ -462,6 +464,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
         }
         case GO_JUST_DEACTIVATED:
         {
+            sWorldState.HandleGameObjectRevertState(this);
+
             switch (GetGoType())
             {
                 case GAMEOBJECT_TYPE_GOOBER:
@@ -1130,6 +1134,8 @@ void GameObject::Use(Unit* user)
     bool scriptReturnValue = user->GetTypeId() == TYPEID_PLAYER && sScriptDevAIMgr.OnGameObjectUse((Player*)user, this);
     if (!scriptReturnValue)
         GetMap()->ScriptsStart(sGameObjectTemplateScripts, GetEntry(), spellCaster, this);
+
+    sWorldState.HandleGameObjectUse(this, user);
 
     switch (GetGoType())
     {
