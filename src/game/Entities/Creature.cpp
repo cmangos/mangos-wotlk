@@ -1783,6 +1783,11 @@ bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectInd
         else if (spellInfo->Effect[index] == SPELL_EFFECT_ATTACK_ME)
             return true;
     }
+    // Haste spell aura immunity
+    if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_HASTE_SPELL_IMMUNITY)
+        if (spellInfo->Effect[index] == SPELL_EFFECT_APPLY_AURA)
+            if (spellInfo->EffectApplyAuraName[index] == SPELL_AURA_HASTE_SPELLS)
+                return true;
 
     return Unit::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
 }
