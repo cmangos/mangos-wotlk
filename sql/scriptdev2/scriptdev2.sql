@@ -4232,15 +4232,15 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1544003,'Away, you mindless parasites. My blood is my own!',10250,6,0,0,'magtheridon SAY_TAUNT4'),
 (-1544004,'How long do you believe your pathetic sorcery can hold me?',10251,6,0,0,'magtheridon SAY_TAUNT5'),
 (-1544005,'My blood will be the end of you!',10252,6,0,0,'magtheridon SAY_TAUNT6'),
-(-1544006,'I...am...UNLEASHED!!!',10253,1,0,0,'magtheridon SAY_FREED'),
+(-1544006,'I... am... unleashed!',10253,1,0,0,'magtheridon SAY_FREED'),
 (-1544007,'Thank you for releasing me. Now...die!',10254,1,0,0,'magtheridon SAY_AGGRO'),
-(-1544008,'Not again...NOT AGAIN!',10256,1,0,0,'magtheridon SAY_BANISH'),
-(-1544009,'I will not be taken so easily. Let the walls of this prison tremble...and FALL!!!',10257,1,0,0,'magtheridon SAY_CHAMBER_DESTROY'),
+(-1544008,'Not again... NOT AGAIN!',10256,1,0,0,'magtheridon SAY_BANISH'),
+(-1544009,'I will not be taken so easily! Let the walls of this prison tremble... and fall!',10257,1,0,0,'magtheridon SAY_CHAMBER_DESTROY'),
 (-1544010,'Did you think me weak? Soft? Who is the weak one now?!',10255,1,0,0,'magtheridon SAY_PLAYER_KILLED'),
-(-1544011,'The Legion...will consume you...all...',10258,1,0,0,'magtheridon SAY_DEATH'),
+(-1544011,'The Legion will consume you all!',10258,1,0,0,'magtheridon SAY_DEATH'),
 (-1544012,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1544013,'%s begins to cast Blast Nova!',0,3,0,0,'magtheridon EMOTE_BLASTNOVA'),
-(-1544014,'%s\'s bonds begin to weaken!',0,2,0,0,'magtheridon EMOTE_BEGIN'),
+(-1544014,'%s''s bonds begin to weaken!',0,2,0,0,'magtheridon EMOTE_BEGIN'),
 (-1544015,'%s breaks free!',0,2,0,0,'magtheridon EMOTE_FREED'),
 (-1544016,'%s is nearly free of his bonds!',0,2,0,0,'magtheridon EMOTE_NEARLY_FREE');
 
@@ -4881,27 +4881,28 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 -- -1 565 000 GRUUL'S LAIR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
-(-1565000,'Gronn are the real power in outland.',11367,1,0,0,'maulgar SAY_AGGRO'),
+(-1565000,'Gronn are the real power in Outland!',11367,1,0,0,'maulgar SAY_AGGRO'),
 (-1565001,'You will not defeat the hand of Gruul!',11368,1,0,0,'maulgar SAY_ENRAGE'),
-(-1565002,'You won\'t kill next one so easy!',11369,1,0,0,'maulgar SAY_OGRE_DEATH1'),
+(-1565002,'You won''t kill next one so easy.',11369,1,0,0,'maulgar SAY_OGRE_DEATH1'),
 (-1565003,'Pah! Does not prove anything!',11370,1,0,0,'maulgar SAY_OGRE_DEATH2'),
 (-1565004,'I\'m not afraid of you.',11371,1,0,0,'maulgar SAY_OGRE_DEATH3'),
 (-1565005,'Good, now you fight me!',11372,1,0,0,'maulgar SAY_OGRE_DEATH4'),
-(-1565006,'You not so tough afterall!',11373,1,0,0,'maulgar SAY_SLAY1'),
+(-1565006,'You not so tough after all!',11373,1,0,0,'maulgar SAY_SLAY1'),
 (-1565007,'Aha-ha ha ha!',11374,1,0,0,'maulgar SAY_SLAY2'),
-(-1565008,'Mulgar is king!',11375,1,0,0,'maulgar SAY_SLAY3'),
-(-1565009,'Gruul... will crush you...',11376,1,0,0,'maulgar SAY_DEATH'),
+(-1565008,'Maulgar is king!',11375,1,0,0,'maulgar SAY_SLAY3'),
+(-1565009,'Gruul... will crush you.',11376,1,0,0,'maulgar SAY_DEATH'),
 
 (-1565010,'Come... and die.',11355,1,0,0,'gruul SAY_AGGRO'),
-(-1565011,'Scurry',11356,1,0,0,'gruul SAY_SLAM1'),
-(-1565012,'No escape',11357,1,0,0,'gruul SAY_SLAM2'),
-(-1565013,'Stay',11358,1,0,0,'gruul SAY_SHATTER1'),
-(-1565014,'Beg... for life',11359,1,0,0,'gruul SAY_SHATTER2'),
-(-1565015,'No more',11360,1,0,0,'gruul SAY_SLAY1'),
-(-1565016,'Unworthy',11361,1,0,0,'gruul SAY_SLAY2'),
-(-1565017,'Die',11362,1,0,0,'gruul SAY_SLAY3'),
+(-1565011,'Scurry.',11356,1,0,0,'gruul SAY_SLAM1'),
+(-1565012,'No escape.',11357,1,0,0,'gruul SAY_SLAM2'),
+(-1565013,'Stay.',11358,1,0,0,'gruul SAY_SHATTER1'),
+(-1565014,'Beg for life.',11359,1,0,0,'gruul SAY_SHATTER2'),
+(-1565015,'No more.',11360,1,0,0,'gruul SAY_SLAY1'),
+(-1565016,'Unworthy.',11361,1,0,0,'gruul SAY_SLAY2'),
+(-1565017,'Die.',11362,1,0,0,'gruul SAY_SLAY3'),
 (-1565018,'Aaargh...',11363,1,0,0,'gruul SAY_DEATH'),
-(-1565019,'%s grows in size!',0,2,0,0,'gruul EMOTE_GROW');
+(-1565019,'%s grows in size!',0,2,0,0,'gruul EMOTE_GROW'),
+(-1565020,'%s roars!',0,2,0,0,'gruul EMOTE_SHATTER'),
 
 -- -1 568 000 ZUL'AMAN
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

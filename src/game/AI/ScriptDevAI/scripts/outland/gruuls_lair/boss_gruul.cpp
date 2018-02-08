@@ -37,6 +37,7 @@ enum
     SAY_DEATH                   = -1565018,
 
     EMOTE_GROW                  = -1565019,
+    EMOTE_SLAM                  = -1565020,
 
     SPELL_GROWTH                = 36300,
     SPELL_CAVE_IN               = 36240,
@@ -177,6 +178,7 @@ struct boss_gruulAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SHATTER) == CAST_OK)
                 {
+                    DoScriptText(EMOTE_SLAM, m_creature);
                     DoScriptText(urand(0, 1) ? SAY_SHATTER1 : SAY_SHATTER2, m_creature);
                     m_uiGroundSlamTimer     = 120000;
                     m_uiHurtfulStrikeTimer  = 8000;
