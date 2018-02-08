@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Moonglade
 SD%Complete: 100
-SDComment: Quest support: 8736, 10965.
+SDComment: Quest support: 8736, 8868, 10965.
 SDCategory: Moonglade
 EndScriptData */
 
@@ -30,6 +30,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "Globals/ObjectMgr.h"
+#include "AI/ScriptDevAI/scripts/world/world_map_scripts.h"
 
 /*######
 # npc_clintar_dw_spirit
@@ -966,6 +967,24 @@ CreatureAI* GetAI_boss_eranikus(Creature* pCreature)
     return new boss_eranikusAI(pCreature);
 }
 
+/*######
+## go_omen_cluster
+######*/
+
+bool GOUse_go_omen_cluster(Player* /*pPlayer*/, GameObject* pGo)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+
+    if (!pInstance)
+        return false;
+
+    // Omen encounter is set to NOT_STARTED every time the GO cluster is used
+    // This increases an internal counter that handles the event in the map script
+    pInstance->SetData(TYPE_OMEN, NOT_STARTED);
+
+    return true;
+}
+
 void AddSC_moonglade()
 {
     Script* pNewScript;
@@ -986,5 +1005,10 @@ void AddSC_moonglade()
     pNewScript = new Script;
     pNewScript->Name = "boss_eranikus";
     pNewScript->GetAI = &GetAI_boss_eranikus;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_omen_cluster";
+    pNewScript->pGOUse = &GOUse_go_omen_cluster;
     pNewScript->RegisterSelf();
 }
