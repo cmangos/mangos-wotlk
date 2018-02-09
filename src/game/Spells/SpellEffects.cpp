@@ -8480,6 +8480,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 30768, TRIGGERED_OLD_TRIGGERED);
                     break;
                 }
+                case 30834:                                 // Infernal Relay
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(nullptr, 30835, TRIGGERED_NONE);
+                    break;
+                }
                 case 30835:                                 // Infernal Relay
                 {
                     if (!unitTarget)
