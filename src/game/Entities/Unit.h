@@ -1519,10 +1519,10 @@ class Unit : public WorldObject
         void SetImmuneToPlayer(bool state);
 
         // extensions of CanAttack and CanAssist API needed serverside
-        virtual bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const override;
-        virtual bool CanAssistSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const override;
+        virtual bool CanAttackSpell(Unit const* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const override;
+        virtual bool CanAssistSpell(Unit const* target, SpellEntry const* spellInfo = nullptr) const override;
 
-        virtual bool CanAttackOnSight(Unit* target); // Used in MoveInLineOfSight checks
+        virtual bool CanAttackOnSight(Unit const* target); // Used in MoveInLineOfSight checks
 
         bool IsPvP() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
         void SetPvP(bool state);

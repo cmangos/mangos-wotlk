@@ -987,7 +987,7 @@ bool DynamicObject::IsFriend(Unit const* unit) const
 /// Dynamic objects act as serverside proxy casters for units.
 /// It utilizes owners CanAttackSpell if owner exists
 /////////////////////////////////////////////////
-bool DynamicObject::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE) const
+bool DynamicObject::CanAttackSpell(const Unit* target, SpellEntry const* spellInfo, bool isAOE) const
 {
     if (Unit* owner = GetCaster())
         return owner->CanAttackSpell(target, spellInfo, isAOE);
@@ -1004,7 +1004,7 @@ bool DynamicObject::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bo
 /// Dynamic objects act as serverside proxy casters for units.
 /// It utilizes owners CanAssistSpell if owner exists
 /////////////////////////////////////////////////
-bool DynamicObject::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
+bool DynamicObject::CanAssistSpell(const Unit* target, SpellEntry const* spellInfo) const
 {
     if (Unit* owner = GetCaster())
         return owner->CanAttackSpell(target, spellInfo);
@@ -1021,7 +1021,7 @@ bool DynamicObject::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) co
 /// Some gameobjects can be involved in spell casting, so server needs additional API support.
 /// It utilizes owners CanAttackSpell if owner exists
 /////////////////////////////////////////////////
-bool GameObject::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE) const
+bool GameObject::CanAttackSpell(const Unit* target, SpellEntry const* spellInfo, bool isAOE) const
 {
     Unit* owner = GetOwner();
     if (owner)
@@ -1039,7 +1039,7 @@ bool GameObject::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool 
 /// Some gameobjects can be involved in spell casting, so server needs additional API support.
 /// It utilizes owners CanAssistSpell if owner exists
 /////////////////////////////////////////////////
-bool GameObject::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
+bool GameObject::CanAssistSpell(const Unit* target, SpellEntry const* spellInfo) const
 {
     Unit* owner = GetOwner();
     if (owner)
@@ -1058,7 +1058,7 @@ bool GameObject::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
 /// Also an additional fine grained check needs to be done for AOE spells, because they
 /// need to skip PVP enabled targets in some special cases. (Chain spells, AOE)
 /////////////////////////////////////////////////
-bool Unit::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE) const
+bool Unit::CanAttackSpell(const Unit* target, SpellEntry const* spellInfo, bool isAOE) const
 {
     if (spellInfo)
     {
@@ -1116,7 +1116,7 @@ bool Unit::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE)
 /// This function is not intented to have client-side counterpart by original design.
 /// It utilizes owners CanAssistSpell if owner exists
 /////////////////////////////////////////////////
-bool Unit::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
+bool Unit::CanAssistSpell(const Unit* target, SpellEntry const* spellInfo) const
 {
     return CanAssist(target);
 }
@@ -1130,7 +1130,7 @@ bool Unit::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
 /// It utilizes CanAttack with a small exclusion for Feign-Death targets and a hostile-only check.
 /// Typically used in AIs in MoveInLineOfSight
 /////////////////////////////////////////////////
-bool Unit::CanAttackOnSight(Unit* target)
+bool Unit::CanAttackOnSight(const Unit* target)
 {
     return CanAttack(target) && !target->hasUnitState(UNIT_STAT_FEIGN_DEATH) && IsEnemy(target);
 }
