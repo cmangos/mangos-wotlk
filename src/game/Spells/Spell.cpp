@@ -6940,7 +6940,7 @@ SpellCastResult Spell::CheckRange(bool strict)
         range_mod += 8.0f / 3.0f;
 
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
-    bool friendly = target ? target->IsFriendlyTo(m_caster) : false;
+    bool friendly = target ? target->CanAssist(m_caster) : false;
     float max_range = GetSpellMaxRange(srange, friendly) + range_mod;
     float min_range = GetSpellMinRange(srange, friendly);
 

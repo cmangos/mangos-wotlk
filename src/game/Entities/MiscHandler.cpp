@@ -1553,7 +1553,7 @@ void WorldSession::HandleQueryInspectAchievementsOpcode(WorldPacket& recv_data)
     if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
         return;
 
-    if (_player->IsHostileTo(player))
+    if (_player->CanAttack(player))
         return;
 
     player->GetAchievementMgr().SendRespondInspectAchievements(_player);

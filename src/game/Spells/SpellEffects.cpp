@@ -3701,7 +3701,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 finish(true);
 
                 // replace cast by selected spell, this also make it interruptible including target death case
-                if (m_caster->IsFriendlyTo(unitTarget))
+                if (m_caster->CanAssist(unitTarget))
                     m_caster->CastSpell(unitTarget, heal, TRIGGERED_NONE);
                 else
                     m_caster->CastSpell(unitTarget, hurt, TRIGGERED_NONE);
@@ -4140,7 +4140,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             // Death Coil
             if (m_spellInfo->SpellFamilyFlags & uint64(0x002000))
             {
-                if (m_caster->IsFriendlyTo(unitTarget))
+                if (m_caster->CanAssist(unitTarget))
                 {
                     if (!unitTarget || unitTarget->GetCreatureType() != CREATURE_TYPE_UNDEAD)
                         return;
@@ -4248,7 +4248,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     checkSuccess = false;
                 }
 
-                if (!m_caster->IsFriendlyTo(unitTarget))
+                if (!m_caster->CanAssist(unitTarget))
                 {
                     SendCastResult(SPELL_FAILED_TARGET_ENEMY);
                     checkSuccess = false;

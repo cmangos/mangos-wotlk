@@ -824,7 +824,7 @@ namespace MaNGOS
             bool operator()(GameObject* go)
             {
                 if (go->GetGoType() == i_type
-                        && (!i_onlyHostile || go->IsHostileTo(&i_obj)) && (!i_onlyFriendly || go->IsFriendlyTo(&i_obj))
+                        && (!i_onlyHostile || go->CanAttackSpell(&i_obj)) && (!i_onlyFriendly || go->CanAssistSpell(&i_obj))
                         && go->IsWithinDist3d(i_x, i_y, i_z, i_range))
                     return true;
 

@@ -185,15 +185,6 @@ struct npc_silvermoon_harryAI : public ScriptedAI
         m_uiResetBeatenTimer = MINUTE * IN_MILLISECONDS;
     }
 
-    void AttackedBy(Unit* pAttacker) override
-    {
-        if (m_creature->getVictim())
-            return;
-
-        if (m_creature->IsHostileTo(pAttacker))
-            AttackStart(pAttacker);
-    }
-
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (uiDamage > m_creature->GetHealth() || (m_creature->GetHealth() - uiDamage) * 100 / m_creature->GetMaxHealth() < 20)

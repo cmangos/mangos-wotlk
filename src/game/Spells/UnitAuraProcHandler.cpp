@@ -1518,7 +1518,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                 // Glyph of Dispel Magic
                 case 55677:
                 {
-                    if (!target->IsFriendlyTo(this))
+                    if (!target->CanAssist(this))
                         return SPELL_AURA_PROC_FAILED;
 
                     basepoints[0] = int32(target->GetMaxHealth() * triggerAmount / 100);

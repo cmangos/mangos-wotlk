@@ -1228,7 +1228,7 @@ struct npc_spring_rabbitAI : public ScriptedPetAI
         if (m_creature->getVictim())
             return;
 
-        if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_SPRING_RABBIT && CanStartWhatRabbitsDo() && m_creature->IsFriendlyTo(pWho) && m_creature->IsWithinDistInMap(pWho, DIST_START_EVENT, true))
+        if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_SPRING_RABBIT && CanStartWhatRabbitsDo() && m_creature->IsFriend(pWho) && m_creature->IsWithinDistInMap(pWho, DIST_START_EVENT, true))
         {
             if (npc_spring_rabbitAI* pOtherBunnyAI = GetPartnerAI((Creature*)pWho))
             {
