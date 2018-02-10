@@ -18697,14 +18697,12 @@ void Player::AddSpellMod(Aura* aura, bool apply)
         m_spellMods[mod->m_miscvalue].remove(aura);
 }
 
-template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue)
+template <class T> void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue)
 {
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
-    if (!spellInfo)
-        return 0;
-
-    int32 totalpct = 0;
-    int32 addedFlat = 0;
+    if (!spellInfo) return;
+    int32 totalpct = 100;
+    int32 totalflat = 0;
     for (AuraList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
     {
         Aura* aura = *itr;
@@ -18715,7 +18713,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& bas
             continue;
 
         if (mod->m_auraname == SPELL_AURA_ADD_FLAT_MODIFIER)
-            addedFlat += mod->m_amount;
+            totalflat += mod->m_amount;
         else
         {
             // skip percent mods for null basevalue (most important for spell mods with charges )
@@ -18731,14 +18729,13 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& bas
         }
     }
 
-    T diff = basevalue * totalpct / 100 + addedFlat * (100 + totalpct) / 100;
-    basevalue = T(basevalue + diff);
-    return T(diff);
+    if (totalflat != 0 || totalpct != 100)
+        basevalue = T((basevalue + totalflat) * std::max(0, totalpct) / 100);
 }
 
-template int32 Player::ApplySpellMod<int32>(uint32 spellId, SpellModOp op, int32& basevalue);
-template uint32 Player::ApplySpellMod<uint32>(uint32 spellId, SpellModOp op, uint32& basevalue);
-template float Player::ApplySpellMod<float>(uint32 spellId, SpellModOp op, float& basevalue);
+template void Player::ApplySpellMod<int32>(uint32 spellId, SpellModOp op, int32& basevalue);
+template void Player::ApplySpellMod<uint32>(uint32 spellId, SpellModOp op, uint32& basevalue);
+template void Player::ApplySpellMod<float>(uint32 spellId, SpellModOp op, float& basevalue);
 
 // send Proficiency
 void Player::SendProficiency(ItemClass itemClass, uint32 itemSubclassMask) const

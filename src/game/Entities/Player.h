@@ -1667,7 +1667,7 @@ class Player : public Unit
         SpellEntry const* GetKnownTalentRankById(int32 talentId) const;
 
         void AddSpellMod(Aura* aura, bool apply);
-        template <class T> T ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue);
+        template <class T> void ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue);
 
         void SetResurrectRequestData(Unit* caster, uint32 health, uint32 mana);
         void SetResurrectRequestDataToGhoul(Unit* caster);
