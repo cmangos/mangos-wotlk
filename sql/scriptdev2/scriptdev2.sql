@@ -4902,7 +4902,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1565017,'Die.',11362,1,0,0,'gruul SAY_SLAY3'),
 (-1565018,'Aaargh...',11363,1,0,0,'gruul SAY_DEATH'),
 (-1565019,'%s grows in size!',0,2,0,0,'gruul EMOTE_GROW'),
-(-1565020,'%s roars!',0,2,0,0,'gruul EMOTE_SHATTER'),
+(-1565020,'%s roars!',0,2,0,0,'gruul EMOTE_SHATTER');
 
 -- -1 568 000 ZUL'AMAN
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
