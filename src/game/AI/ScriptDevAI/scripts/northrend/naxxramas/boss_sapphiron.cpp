@@ -116,7 +116,6 @@ struct boss_sapphironAI : public ScriptedAI
 
         SetCombatMovement(true);
         m_creature->SetLevitate(false);
-        // m_creature->ApplySpellMod(SPELL_FROST_AURA, SPELLMOD_DURATION, -1);
     }
 
     void Aggro(Unit* /*pWho*/) override
