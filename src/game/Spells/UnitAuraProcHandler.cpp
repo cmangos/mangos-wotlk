@@ -2012,14 +2012,11 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                 case 33776:
                 {
                     // if healed by another unit (pVictim)
-                    if (this == pVictim)
+                    if (this == pVictim || procSpell->HasAttribute(SPELL_ATTR_ABILITY))
                         return SPELL_AURA_PROC_FAILED;
 
-                    // dont count overhealing
-                    uint32 diff = GetMaxHealth() - GetHealth();
-                    if (!diff)
-                        return SPELL_AURA_PROC_FAILED;
-                    basepoints[0] = triggerAmount * (damage > diff ? diff : damage) / 100;
+                    // TODO: make it not work on overhealing by using gain instead of damage
+                    basepoints[0] = triggerAmount * damage / 100;
                     target = this;
                     triggered_spell_id = 31786;
                     break;
