@@ -8007,6 +8007,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 22682, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 23853:                                 // Jub Jub Cooldown
+                {
+                    unitTarget->CastSpell(nullptr, 23852, TRIGGERED_NONE);
+                    return;
+                }
                 case 24194:                                 // Uther's Tribute
                 case 24195:                                 // Grom's Tribute
                 {
