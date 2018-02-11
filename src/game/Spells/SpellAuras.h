@@ -485,6 +485,9 @@ class Aura
         bool IsLastAuraOnHolder();
 
         bool HasMechanic(uint32 mechanic) const;
+
+        void UseMagnet() { m_magnetUsed = true; }
+        bool IsMagnetUsed() { return m_magnetUsed; }
     protected:
         Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr);
 
@@ -514,6 +517,7 @@ class Aura
         bool m_isPeriodic: 1;
         bool m_isAreaAura: 1;
         bool m_isPersistent: 1;
+        bool m_magnetUsed: 1;
 
         SpellAuraHolder* const m_spellAuraHolder;
     private:
