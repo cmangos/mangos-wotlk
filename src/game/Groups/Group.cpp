@@ -29,6 +29,7 @@
 #include "BattleGround/BattleGround.h"
 #include "Maps/MapManager.h"
 #include "Maps/MapPersistentStateMgr.h"
+#include "Spells/SpellAuras.h"
 #ifdef BUILD_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotMgr.h"
 #include "Config/Config.h"
@@ -355,12 +356,26 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
     }
 #endif
 
+    Player* player = sObjectMgr.GetPlayer(guid);
+    for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
+    {
+        if (Player* groupMember = itr->getSource())
+        {
+            if (groupMember->GetObjectGuid() == guid)
+                continue;
+
+            groupMember->RemoveAllGroupBuffsFromCaster(guid);
+            if (player)
+                player->RemoveAllGroupBuffsFromCaster(groupMember->GetObjectGuid());
+        }
+    }
+
     // remove member and change leader (if need) only if strong more 2 members _before_ member remove
     if (GetMembersCount() > GetMembersMinCount())
     {
         bool leaderChanged = _removeMember(guid);
 
-        if (Player* player = sObjectMgr.GetPlayer(guid))
+        if (player)
         {
             // quest related GO state dependent from raid membership
             if (isRaidGroup())

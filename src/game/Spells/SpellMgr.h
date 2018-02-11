@@ -1407,6 +1407,37 @@ inline uint32 GetDispellMask(DispelType dispel)
         return (1 << dispel);
 }
 
+inline bool IsPartyOrRaidTarget(uint32 target)
+{
+    switch (target)
+    {
+        case TARGET_RANDOM_FRIEND_CHAIN_IN_AREA:
+        case TARGET_ALL_PARTY_AROUND_CASTER:
+        case TARGET_ALL_PARTY:
+        case TARGET_ALL_PARTY_AROUND_CASTER_2:
+        case TARGET_SINGLE_PARTY:
+        case TARGET_AREAEFFECT_PARTY:
+        case TARGET_ALL_RAID_AROUND_CASTER:
+        case TARGET_SINGLE_FRIEND_2:
+        case TARGET_58:
+        case TARGET_AREAEFFECT_PARTY_AND_CLASS:
+            return true;
+        default:
+            return false;
+    }
+}
+
+inline bool IsGroupBuff(SpellEntry const* spellInfo)
+{
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (IsPartyOrRaidTarget(spellInfo->EffectImplicitTargetA[i]))
+            return true;
+    }
+
+    return false;
+}
+
 // Diminishing Returns interaction with spells
 DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto, bool triggered);
 bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group);

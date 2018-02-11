@@ -1987,6 +1987,8 @@ class Unit : public WorldObject
         void RemoveArenaAuras(bool onleave = false);
         void RemoveAllAurasOnDeath();
         void RemoveAllAurasOnEvade();
+        void RemoveAllGroupBuffsFromCaster(ObjectGuid casterGUID);
+        // wotlk only
         template <class T>
         void RemoveAurasWithAttribute(T flags);
 
