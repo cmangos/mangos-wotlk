@@ -722,4 +722,7 @@ INSERT INTO spell_template(Id,SchoolMask,Category,Dispel,Mechanic,Attributes,Att
 -- fix threshalisk charge - TODO: Remove this ugly hack when sniff data is available - really oddball spell
 UPDATE `spell_template` SET `EffectImplicitTargetA2` = '6' WHERE id = '35385';
 
+-- Well Fed buff which is missing food buff attribute
+UPDATE spell_template SET AttributesEx2=AttributesEx2|0x80000000 WHERE Id IN(46687);
+
 
