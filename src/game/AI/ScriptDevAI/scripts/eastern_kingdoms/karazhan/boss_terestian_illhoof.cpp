@@ -34,6 +34,7 @@ enum
     SAY_SACRIFICE2              = -1532070,
     SAY_SUMMON1                 = -1532071,
     SAY_SUMMON2                 = -1532072,
+    SAY_KILREK_DEATH            = -1532136,
 
     // spells
     SPELL_SUMMON_DEMONCHAINS    = 30120,                    // Summons demonic chains that maintain the ritual of sacrifice.
@@ -139,6 +140,7 @@ struct boss_terestianAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_KILREK:
+                DoScriptText(SAY_KILREK_DEATH, pSummoned, pSummoned);
                 pSummoned->CastSpell(m_creature, SPELL_BROKEN_PACT, TRIGGERED_OLD_TRIGGERED);
                 m_uiSummonKilrekTimer = 30000;
                 break;

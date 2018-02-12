@@ -433,7 +433,12 @@ void instance_karazhan::OnCreatureDeath(Creature* pCreature)
 
                     if (Creature* pBoss = pCreature->SummonCreature(aBasementEnum[uiIndex].uiEntry, aBasementEnum[uiIndex].fX, aBasementEnum[uiIndex].fY, aBasementEnum[uiIndex].fZ,
                                           aBasementEnum[uiIndex].fO, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 2 * HOUR * IN_MILLISECONDS, true))
-                        DoScriptText(aBasementEnum[uiIndex].iEmote, pBoss);
+                    {
+                        if (aBasementEnum[uiIndex].emote2)
+                            DoScriptText(urand(0, 1) ? aBasementEnum[uiIndex].emote1 : aBasementEnum[uiIndex].emote2, pBoss);
+                        else
+                            DoScriptText(aBasementEnum[uiIndex].emote1, pBoss);
+                    }
                 }
             }
             break;

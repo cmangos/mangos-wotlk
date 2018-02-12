@@ -135,6 +135,7 @@ enum
     EMOTE_BAT_SPAWN                 = -1532133,
     EMOTE_DOG_SPAWN                 = -1532134,
     EMOTE_SPIDER_SPAWN              = -1532135,
+    EMOTE_SPIDER_SPAWN2             = -1532138,
 };
 
 enum OperaEvents
@@ -147,15 +148,16 @@ enum OperaEvents
 struct BasementSpawns
 {
     uint32 uiEntry;
-    int32 iEmote;
+    int32 emote1;
+    int32 emote2;
     float fX, fY, fZ, fO;
 };
 
 static const BasementSpawns aBasementEnum[MAX_BASEMENT_MINIBOSSES] =
 {
-    {NPC_BAT_MINIBOSS,    EMOTE_BAT_SPAWN,    -10959.11f, -1940.86f, 46.19f, 3.769f},
-    {NPC_DOG_MINIBOSS,    EMOTE_DOG_SPAWN,    -10900.01f, -2085.47f, 49.55f, 1.343f},
-    {NPC_SPIDER_MINIBOSS, EMOTE_SPIDER_SPAWN, -10939.75f, -2041.11f, 49.55f, 1.361f},
+    {NPC_BAT_MINIBOSS,    EMOTE_BAT_SPAWN, 0,   -10959.11f, -1940.86f, 46.19f, 3.769f},
+    {NPC_DOG_MINIBOSS,    EMOTE_DOG_SPAWN, 0,   -10900.01f, -2085.47f, 49.55f, 1.343f},
+    {NPC_SPIDER_MINIBOSS, EMOTE_SPIDER_SPAWN, EMOTE_SPIDER_SPAWN2, -10939.75f, -2041.11f, 49.55f, 1.361f},
 };
 
 struct OperaSpawns

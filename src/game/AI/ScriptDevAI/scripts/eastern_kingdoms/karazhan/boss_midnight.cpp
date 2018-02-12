@@ -37,6 +37,7 @@ enum
     SAY_DEATH                   = -1532008,
     SAY_RANDOM1                 = -1532009,
     SAY_RANDOM2                 = -1532010,
+    SAY_MIDNIGHT_CALL           = -1532137,
 
     // Midnight
     SPELL_MOUNT                 = 29770,
@@ -105,6 +106,7 @@ struct boss_midnightAI : public ScriptedAI
 
         if (pSummoned->GetEntry() == NPC_ATTUMEN)
         {
+            DoScriptText(SAY_MIDNIGHT_CALL, m_creature);
             // Attumen yells when spawned
             switch (urand(0, 2))
             {
