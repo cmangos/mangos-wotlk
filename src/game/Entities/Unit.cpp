@@ -7540,8 +7540,9 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell, SpellEffectIndex eff)
                 {
                     if (roll_chance_i((*i)->GetModifier()->m_amount))
                     {
-                        if ((*i)->GetHolder()->DropAuraCharge())
-                            RemoveSpellAuraHolder((*i)->GetHolder());
+                        if (SpellAuraHolder* holder = (*i)->GetHolder())
+                            if (holder->DropAuraCharge())
+                                victim->RemoveSpellAuraHolder(holder);
                         return magnet;
                     }
                 }
