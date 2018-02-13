@@ -1410,8 +1410,10 @@ void Aura::TriggerSpell()
                     }
 //                    // Teleport Test
 //                    case 32236: break;
-//                    // Earthquake
-//                    case 32686: break;
+                    case 32686:                             // Earthquake
+                        if (urand(0, 1)) // 50% chance to trigger
+                            triggerCaster->CastSpell(triggerTarget, 13360, TRIGGERED_OLD_TRIGGERED);
+                        break;
 //                    // Possess
 //                    case 33401: break;
 //                    // Draw Shadows
