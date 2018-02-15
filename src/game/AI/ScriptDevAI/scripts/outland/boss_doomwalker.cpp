@@ -35,6 +35,8 @@ enum
     SAY_SLAY_3                  = -1000166,
     SAY_DEATH                   = -1000167,
 
+    EMOTE_FRENZY                = -1000002,
+
     SPELL_EARTHQUAKE            = 32686,
     SPELL_CRUSH_ARMOR           = 33661,
     SPELL_LIGHTNING_WRATH       = 33665,
@@ -105,7 +107,10 @@ struct boss_doomwalkerAI : public ScriptedAI
         if (m_creature->GetHealthPercent() <= 20.0f && !m_bHasEnrage)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+            {
+                DoScriptText(EMOTE_FRENZY, m_creature);
                 m_bHasEnrage = true;
+            }
         }
 
         // Spell Overrun
