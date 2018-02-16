@@ -38,7 +38,7 @@ enum
     GROMGOLOG_EVENT_4   = 15325,
 };
 
-WorldState::WorldState() : m_isMagtheridonHeadSpawnedHorde(false), m_isMagtheridonHeadSpawnedAlliance(false)
+WorldState::WorldState() : m_isMagtheridonHeadSpawnedHorde(false), m_isMagtheridonHeadSpawnedAlliance(false), m_adalSongOfBattleTimer(0)
 {
     m_transportStates[GROMGOL_UNDERCITY]    = GROMGOLUC_EVENT_1;
     m_transportStates[GROMGOL_ORGRIMMAR]    = OGUC_EVENT_1;
