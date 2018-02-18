@@ -39,7 +39,7 @@ enum
     NPC_CAPTURE_CREDIT_BROKEN_HILL          = 19032,
 
     // misc
-    HONOR_REWARD_HELLFIRE                   = 18,
+    HONOR_REWARD_HELLFIRE                   = 10, // pre 2.0.6 is 18
 
     // gameobjects
     GO_TOWER_BANNER_OVERLOOK                = 182525,
