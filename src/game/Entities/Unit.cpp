@@ -10645,7 +10645,7 @@ void CharmInfo::SetCharmState(std::string const& ainame /*= "PetAI"*/, bool with
     // Save entire bytes2_1
     m_unitFieldBytes2_1 = m_unit->GetByteValue(UNIT_FIELD_BYTES_2, 1);
     // Save select unit flags
-    const uint32 flags = (UNIT_FLAG_PLAYER_CONTROLLED | UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_PVP);
+    const uint32 flags = (UNIT_FLAG_PLAYER_CONTROLLED | UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
     m_unitFieldFlags = (m_unit->GetUInt32Value(UNIT_FIELD_FLAGS) & flags);
 }
 
@@ -10655,7 +10655,7 @@ void CharmInfo::ResetCharmState()
     // Restore entire bytes2_1
     m_unit->SetByteValue(UNIT_FIELD_BYTES_2, 1, m_unitFieldBytes2_1);
     // Restore select unit flags
-    const uint32 flags = (UNIT_FLAG_PLAYER_CONTROLLED | UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_PVP);
+    const uint32 flags = (UNIT_FLAG_PLAYER_CONTROLLED | UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
     m_unit->SetUInt32Value(UNIT_FIELD_FLAGS, ((m_unit->GetUInt32Value(UNIT_FIELD_FLAGS) & ~flags) | m_unitFieldFlags));
 }
 

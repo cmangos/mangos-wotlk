@@ -1486,7 +1486,7 @@ bool ChatHandler::HandleModifyMountCommand(char* args)
     if (needReportToTarget(chr))
         ChatHandler(chr).PSendSysMessage(LANG_MOUNT_GIVED, GetNameLink().c_str());
 
-    chr->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
+    // chr->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
     chr->Mount(mId);
 
     WorldPacket data(SMSG_FORCE_RUN_SPEED_CHANGE, (8 + 4 + 1 + 4));
