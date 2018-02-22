@@ -622,6 +622,7 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY");
 
+    // TODO: Add parsing
     _player->SendQuestGiverStatusMultiple();
 }
 

@@ -192,7 +192,8 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
                 m_creature->SummonCreature(NPC_NEXUS_TERROR, -15.76f, -225.36f,  0.79f, 2.93f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
                 break;
             case 26:
-                SetEscortPaused(true);
+                if (m_uiSummonCount)
+                    SetEscortPaused(true);
                 DoScriptText(SAY_THIRD_STOP, m_creature);
                 break;
             case 29:
