@@ -11006,10 +11006,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
 
                 if (spellId1)
-                    m_caster->CastSpell(unitTarget, spellId1, TRIGGERED_OLD_TRIGGERED);
+                    m_caster->CastSpell(unitTarget, spellId1, TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_HIT_CALCULATION);
 
                 if (spellId2)
-                    m_caster->CastSpell(unitTarget, spellId2, TRIGGERED_OLD_TRIGGERED);
+                    m_caster->CastSpell(unitTarget, spellId2, TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_HIT_CALCULATION);
 
                 return;
             }
