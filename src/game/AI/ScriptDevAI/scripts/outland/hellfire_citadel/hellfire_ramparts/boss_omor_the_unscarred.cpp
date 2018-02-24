@@ -72,7 +72,7 @@ struct boss_omor_the_unscarredAI : public ScriptedAI
         m_uiShadowWhipTimer = 2000;
         m_uiAuraTimer = urand(12300, 23300);
         m_uiDemonicShieldTimer = 1000;
-        m_uiShadowboltTimer = urand(6600, 8900);
+        m_uiShadowboltTimer = urand(0, 2000);
         m_uiSummonTimer = urand(19600, 23100);
         m_playerGuid.Clear();
         m_bCanPullBack = false;
@@ -188,10 +188,10 @@ struct boss_omor_the_unscarredAI : public ScriptedAI
 
         if (m_uiShadowboltTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H) == CAST_OK)
-                    m_uiShadowboltTimer = urand(4200, 7300);
+                    m_uiShadowboltTimer = urand(3000, 4000);
             }
             else
                 m_uiShadowboltTimer = 2000;
