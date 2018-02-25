@@ -652,6 +652,8 @@ UPDATE creature_template SET ScriptName='npc_private_hendel' WHERE entry=4966;
 UPDATE creature_template SET ScriptName='npc_stinky_ignatz' WHERE entry=4880;
 UPDATE creature_template SET ScriptName='boss_tethyr' WHERE entry=23899;
 INSERT INTO scripted_areatrigger VALUES
+(302,'at_sentry_point');
+INSERT INTO scripted_areatrigger VALUES
 (4752,'at_nats_landing');
 UPDATE creature_template SET ScriptName = 'npc_mottled_drywallow_crocolisk' WHERE entry = 4344;
 
