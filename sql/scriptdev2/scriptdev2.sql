@@ -3054,7 +3054,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001271,'No!  What have I done?', '0', '1', '0', '0','SAY_KAYLAAN_7'),
 (-1001272,'Light grant me strength!', '0', '1', '0', '0','SAY_KAYLAAN_8'),
 (-1001273,'Oh, please!  This is sickening; I''m going to have to kill you all myself.', '0', '1', '0', '0','SAY_SOCRETHAR_6'),
--- warning ids pending export
+(-1001274,'Now you''re gonna get it good, $n!', '0', '0', '0', '0','dashel stonefist SAY_STONEFIST_1'),
+(-1001275,'Okay, okay! Enough fighting. No one else needs to get hurt.', '0', '0', '0', '0','dashel stonefist SAY_STONEFIST_2'),
+(-1001276,'It''s okay, boys. Back off. You''ve done enough. I''ll meet up with you later.', '0', '0', '0', '0','dashel stonefist SAY_STONEFIST_3'),
 (-1001277,'That could have gone better. $n, come here, please. I have something I need you to take care of for me.','0','4','0','0','Ambassador Sunsorrow - During Lament of the Highborne script'),
 -- warning ids pending export
 (-1001312,'WE STRIKE!',0,1,0,15,'proudhoof SAY_QUEST_START'),
