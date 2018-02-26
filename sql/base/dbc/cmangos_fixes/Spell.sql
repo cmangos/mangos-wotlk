@@ -737,4 +737,11 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- World Breaker spell should have one charge based on tooltip, for some reason it uses invisible aura
 UPDATE spell_template SET procCharges=1 WHERE Id IN(36111);
 
+INSERT INTO spell_template(Id,Category,Attributes,baseLevel,spellLevel,DurationIndex,rangeIndex,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectRadiusIndex1,EffectMiscValue1,EffectMiscValueB1,SpellIconID,SpellName,DmgMultiplier1,DmgMultiplier2) VALUES
+(35256,1152,256,63,63,21,7,28,1,1,41,8,20479,64,1952,'Summon Unstable Mushroom',1,1);
+
+-- Spell for Deathwail Fel Fireball
+INSERT INTO spell_template(Id,Attributes,CastingTimeIndex,DurationIndex,Effect1,EffectImplicitTargetA1,EffectMiscValue1,SpellName,DmgMultiplier1) VALUES
+(38375,384,1,31,76,18,185133,'Summon Fel Fire',1);
+
 
