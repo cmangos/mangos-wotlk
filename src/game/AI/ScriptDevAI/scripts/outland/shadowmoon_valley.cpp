@@ -52,6 +52,7 @@ enum
     SPELL_PLACE_CARCASS         = 38439,
     SPELL_JUST_EATEN            = 38502,
     SPELL_NETHER_BREATH         = 38467,
+    SPELL_INTANGIBLE_PRESENCE   = 36513,
 
     QUEST_KINDNESS              = 10804,
     NPC_EVENT_PINGER            = 22131,
@@ -67,7 +68,8 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
 
     uint32 m_uiEatTimer;
     uint32 m_uiCreditTimer;
-    uint32 m_uiCastTimer;
+    uint32 m_uiNetherbreathTimer;
+    uint32 m_uiIntangiblePresenceTimer;
 
     void Reset() override
     {
@@ -75,7 +77,8 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
 
         m_uiEatTimer    = 0;
         m_uiCreditTimer = 0;
-        m_uiCastTimer   = 5000;
+        m_uiNetherbreathTimer = 5000;
+        m_uiIntangiblePresenceTimer = 12000;
     }
 
     void SpellHit(Unit* pCaster, SpellEntry const* pSpell) override
@@ -135,7 +138,6 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
 
             return;
         }
-
         if (m_uiCreditTimer)
         {
             if (m_uiCreditTimer <= uiDiff)
@@ -161,13 +163,21 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (m_uiCastTimer < uiDiff)
+        if (m_uiNetherbreathTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature->getVictim(), SPELL_NETHER_BREATH);
-            m_uiCastTimer = 5000;
+            m_uiNetherbreathTimer = urand(9000, 13000);
         }
         else
-            m_uiCastTimer -= uiDiff;
+            m_uiNetherbreathTimer -= uiDiff;
+
+        if (m_uiIntangiblePresenceTimer < uiDiff)
+        {
+            DoCastSpellIfCan(m_creature->getVictim(), SPELL_INTANGIBLE_PRESENCE);
+            m_uiIntangiblePresenceTimer = urand(12000, 16000);
+        }
+        else
+            m_uiIntangiblePresenceTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
