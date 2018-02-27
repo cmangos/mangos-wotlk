@@ -7825,7 +7825,8 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
             if (!target->HasAura(29659))                    // Only deal damage if target has Positive Charge
                 return false;
             break;
-        case 29511:
+        case 29511:                                         // Repentance
+        case 40449:                                         // Protean Subdual
             if (target->GetTypeId() == TYPEID_PLAYER && target == m_caster->getVictim())
                 return false;
             break;
