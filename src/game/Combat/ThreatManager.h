@@ -63,6 +63,9 @@ class HostileReference : public Reference<Unit, ThreatManager>
         }
 
         float getThreat() const { return iThreat; }
+        float getFadeoutThreatReduction() const { return iFadeoutThreadReduction; }
+        void setFadeoutThreatReduction(float value);
+        void resetFadeoutThreatReduction();
 
         bool isOnline() const { return iOnline; }
 
@@ -72,17 +75,15 @@ class HostileReference : public Reference<Unit, ThreatManager>
 
         // used for temporary setting a threat and reducting it later again.
         // the threat modification is stored
-        void setTempThreat(float pThreat) { iTempThreatModifyer = pThreat - getThreat(); if (iTempThreatModifyer != 0.0f) addThreat(iTempThreatModifyer);  }
+        void setTempThreat(float pThreat) { iTempThreatModifier = pThreat - getThreat(); if (iTempThreatModifier != 0.0f) addThreat(iTempThreatModifier);  }
 
         void resetTempThreat()
         {
-            if (iTempThreatModifyer != 0.0f)
-            {
-                addThreat(-iTempThreatModifyer);  iTempThreatModifyer = 0.0f;
-            }
+            if (iTempThreatModifier != 0.0f)
+                addThreat(-iTempThreatModifier);  iTempThreatModifier = 0.0f;
         }
 
-        float getTempThreatModifyer() const { return iTempThreatModifyer; }
+        float getTempThreatModifier() const { return iTempThreatModifier; }
 
         //=================================================
         // check, if source can reach target and set the status
@@ -125,7 +126,8 @@ class HostileReference : public Reference<Unit, ThreatManager>
         Unit* getSourceUnit() const;
     private:
         float iThreat;
-        float iTempThreatModifyer;                          // used for taunt
+        float iTempThreatModifier;                          // used for taunt
+        float iFadeoutThreadReduction;                      // used for fade
         ObjectGuid iUnitGuid;
         bool iOnline;
         bool iAccessible;
