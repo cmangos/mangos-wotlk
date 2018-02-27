@@ -8253,7 +8253,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
  */
 uint32 Unit::SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack)
 {
-    float  TakenTotalMod = 1.0f;
+    float TakenTotalMod = 1.0f;
 
     // Healing taken percent
     float minval = float(GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT));
@@ -8284,6 +8284,31 @@ uint32 Unit::SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellProto,
 
     // Taken fixed damage bonus auras
     int32 TakenAdvertisedBenefit = SpellBaseHealingBonusTaken(GetSpellSchoolMask(spellProto));
+
+    // Blessing of Light dummy affects healing taken from Holy Light and Flash of Light
+    if (spellProto->SpellFamilyName == SPELLFAMILY_PALADIN && (spellProto->SpellFamilyFlags & uint64(0x00000000C0000000)))
+    {
+        AuraList const& auraDummy = GetAurasByType(SPELL_AURA_DUMMY);
+        for (AuraList::const_iterator i = auraDummy.begin(); i != auraDummy.end(); ++i)
+        {
+            if ((*i)->GetSpellProto()->SpellVisual[0] == 9180)
+            {
+                if (((spellProto->SpellFamilyFlags & uint64(0x0000000040000000)) && (*i)->GetEffIndex() == EFFECT_INDEX_1) ||  // Flash of Light
+                        ((spellProto->SpellFamilyFlags & uint64(0x0000000080000000)) && (*i)->GetEffIndex() == EFFECT_INDEX_0))    // Holy Light
+                {
+                    TakenAdvertisedBenefit += ((*i)->GetModifier()->m_amount);  // BoL is penalized since 2.3.0
+                    // Note: This forces the caster to keep libram equipped, but works regardless if the BOL is his or not
+                    if (Aura* aura = pCaster->GetAura(38320, EFFECT_INDEX_0)) // improved Blessing of light
+                    {
+                        if ((*i)->GetEffIndex() == EFFECT_INDEX_0)
+                            TakenAdvertisedBenefit += aura->GetModifier()->m_amount; // holy light gets full amount
+                        else
+                            TakenAdvertisedBenefit += (aura->GetModifier()->m_amount / 2); // flash of light gets half
+                    }
+                }
+            }
+        }
+    }
 
     // apply benefit affected by spell power implicit coeffs and spell level penalties
     TakenTotal = pCaster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false, SCALE_SPELLPOWER_HEALING);
