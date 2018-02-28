@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_13974_01_mangos_game_event_primary_key` bit(1) DEFAULT NULL
+  `required_13975_01_mangos_creature_waypoint_refurbishing` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1184,9 +1184,10 @@ CREATE TABLE `creature_movement` (
   `position_x` float NOT NULL DEFAULT '0',
   `position_y` float NOT NULL DEFAULT '0',
   `position_z` float NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
   `waittime` int(10) unsigned NOT NULL DEFAULT '0',
   `script_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `orientation` float NOT NULL DEFAULT '0',
+  `comment` text,
   PRIMARY KEY (`id`,`point`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature System';
 
@@ -1211,9 +1212,10 @@ CREATE TABLE `creature_movement_template` (
   `position_x` float NOT NULL DEFAULT '0',
   `position_y` float NOT NULL DEFAULT '0',
   `position_z` float NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
   `waittime` int(10) unsigned NOT NULL DEFAULT '0',
   `script_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `orientation` float NOT NULL DEFAULT '0',
+  `comment` text,
   PRIMARY KEY (`entry`,`pathId`,`point`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature waypoint system';
 
@@ -15299,14 +15301,17 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS script_waypoint;
 CREATE TABLE script_waypoint (
-  entry mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'creature_template entry',
-  pointid mediumint(8) unsigned NOT NULL DEFAULT '0',
-  location_x float NOT NULL DEFAULT '0',
-  location_y float NOT NULL DEFAULT '0',
-  location_z float NOT NULL DEFAULT '0',
-  waittime int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'waittime in millisecs',
-  point_comment text,
-  PRIMARY KEY (entry, pointid)
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'creature_template entry',
+  `pathId` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+  `pointid` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `position_x` float NOT NULL DEFAULT '0',
+  `position_y` float NOT NULL DEFAULT '0',
+  `position_z` float NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
+  `waittime` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'waittime in millisecs',
+  `script_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `comment` text,
+  PRIMARY KEY (entry, pathId, pointid)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Script Creature waypoints';
 
 --
