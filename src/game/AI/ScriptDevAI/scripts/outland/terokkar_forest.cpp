@@ -1023,24 +1023,19 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
             m_creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+
             Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
 
-            // ToDo: add additional WP when DB will support it
+            SetEscortPaused(true);
+
             if (m_creature->GetPositionZ() < 310.0f)
-            {
-                SetEscortPaused(true);
-                //SetCurrentWaypoint(WP_ID_SPAWN_1);
-                //SetEscortPaused(false);
-                script_error_log("NPC entry %u, location %f, %f, %f does not have waypoints implemented for current spawn location. Please contact customer support!", m_creature->GetEntry(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
-            }
+                SetCurrentWaypoint(19);
             else if (m_creature->GetPositionZ() < 330.0f)
-            {
-                SetEscortPaused(true);
-                //SetCurrentWaypoint(WP_ID_SPAWN_2);
-                //SetEscortPaused(false);
-                script_error_log("NPC entry %u, location %f, %f, %f does not have waypoints implemented for current spawn location. Please contact customer support!", m_creature->GetEntry(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
-            }
-            // else just use standard WP
+                SetCurrentWaypoint(28);
+            else
+                SetCurrentWaypoint(0);
+
+            SetEscortPaused(false);
 
             // open cage
             if (GameObject* pCage = GetClosestGameObjectWithEntry(m_creature, GO_PRISONER_CAGE, 10.0f))
@@ -1069,21 +1064,45 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
         switch (uiPointId)
         {
             case 0:
+            case 19:
+            case 28:
                 DoScriptText(SAY_ESCORT_START, m_creature);
                 break;
-            case 13:
+
+            case 12:
                 m_creature->SummonCreature(NPC_WING_GUARD, -4179.043f, 3081.007f, 328.28f, 4.51f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 m_creature->SummonCreature(NPC_WING_GUARD, -4181.610f, 3081.289f, 328.32f, 4.52f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
-            case 14:
+            case 23:
+                m_creature->SummonCreature(NPC_WING_GUARD, -3653.75f, 3750.8f, 302.101f, 2.11185f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_WING_GUARD, -3649.91f, 3754.08f, 303.007f, 2.3911f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                break;
+            case 31:
+                m_creature->SummonCreature(NPC_WING_GUARD, -3680.32f, 3318.81f, 311.501f, 1.55334f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_WING_GUARD, -3677.91f, 3317.93f, 311.573f, 1.48353f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                break;
+
+            case 13:
+            case 24:
+            case 32:
                 DoScriptText(SAY_AMBUSH_END, m_creature);
                 break;
-            case 18:
+
+            case 17:
+            case 26:
+            case 35:
                 DoScriptText(SAY_ESCORT_COMPLETE, m_creature);
                 SetRun();
 
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->GroupEventHappens(QUEST_ID_ESCAPE_SKETTIS, m_creature);
+
+                break;
+
+            case 18:
+            case 27:
+            case 36:
+                m_creature->ForcedDespawn();
                 break;
         }
     }
