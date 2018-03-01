@@ -11629,7 +11629,26 @@ Unit* Unit::SelectRandomUnfriendlyTarget(Unit* except /*= nullptr*/, float radiu
     // remove not LoS targets
     for (std::list<Unit*>::iterator tIter = targets.begin(); tIter != targets.end();)
     {
+        bool remove = false;
         if (!IsWithinLOSInMap(*tIter))
+            remove = true;
+        else
+        {
+            // 2.4.2 - sweeping strikes no longer hits critters
+            switch ((*tIter)->GetTypeId())
+            {
+                case TYPEID_UNIT:
+                {
+                    Creature* target = static_cast<Creature*>(*tIter);
+                    if (target->IsCritter())
+                        remove = true;
+                    break;
+                }
+                default: break;
+            }
+        }
+
+        if (remove)
         {
             std::list<Unit*>::iterator tIter2 = tIter;
             ++tIter;

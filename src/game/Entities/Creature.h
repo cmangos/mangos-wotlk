@@ -576,6 +576,7 @@ class Creature : public Unit
         bool IsPet() const { return m_subtype == CREATURE_SUBTYPE_PET; }
         bool IsTotem() const { return m_subtype == CREATURE_SUBTYPE_TOTEM; }
         bool IsTemporarySummon() const { return m_subtype == CREATURE_SUBTYPE_TEMPORARY_SUMMON; }
+        bool IsCritter() const { return m_creatureInfo->CreatureType == CREATURE_TYPE_CRITTER; }
 
 #ifdef BUILD_PLAYERBOT
         // Adds functionality to load/unload bots from NPC, also need to apply SQL scripts
