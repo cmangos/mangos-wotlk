@@ -11386,30 +11386,36 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
     }
 }
 
-void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/, bool disengage /*= true*/)
+void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/, uint32 spellID /*= 0*/, bool dynamic /*= true*/, bool success /*= true*/)
 {
     if (apply)
     {
-        if (GetTypeId() != TYPEID_PLAYER)
-            StopMoving();
-        else
-            ((Player*)this)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
-
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
 
-        if (disengage)
+        if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         {
-            addUnitState(UNIT_STAT_FEIGN_DEATH);
-            CombatStop();
-            getHostileRefManager().deleteReferences();
+            if (success)
+            {
+                // Successful FD: set state, stop attack (+clear target for player-controlled npcs) and clear combat
+                addUnitState(UNIT_STAT_FEIGN_DEATH);
+                CombatStop();
+                getHostileRefManager().deleteReferences();
+            }
+            else
+            {
+                // Unsuccessful FD: do not set UNIT_STAT_FEIGN_DEATH, send resist message and stop attack (+clear target for player-controlled npcs)
+                if (GetTypeId() == TYPEID_PLAYER)
+                {
+                    static_cast<Player*>(this)->SendFeignDeathResisted();
+                    static_cast<Player*>(this)->SendAttackSwingCancelAttack();
+                }
+                AttackStop(true, false, true);
+            }
         }
         else
         {
-            if (GetTypeId() == TYPEID_PLAYER)
-            {
-                static_cast<Player*>(this)->SendFeignDeathResisted();
-                static_cast<Player*>(this)->SendAttackSwingCancelAttack();
-            }
+            // NPC FD is always successful, but never observed to disengage from combat
+            addUnitState(UNIT_STAT_FEIGN_DEATH);
             AttackStop(true, false, true);
         }
 
@@ -11418,32 +11424,27 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/, b
         // blizz like 2.0.x
         SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
         // blizz like 2.0.x
-        SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+        if (dynamic)
+            SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
 
         // prevent interrupt message
-        if (casterGuid == GetObjectGuid())
-            FinishSpell(CURRENT_GENERIC_SPELL, false);
+        if (spellID && casterGuid == GetObjectGuid())
+        {
+            if (m_currentSpells[CURRENT_GENERIC_SPELL] && m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Id == spellID)
+                FinishSpell(CURRENT_GENERIC_SPELL, false);
+        }
         InterruptNonMeleeSpells(true);
     }
-    else
+    else if (IsFeigningDeath())
     {
+        clearUnitState(UNIT_STAT_FEIGN_DEATH);
+
         // blizz like 2.0.x
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
         // blizz like 2.0.x
         RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
         // blizz like 2.0.x
         RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
-
-        clearUnitState(UNIT_STAT_FEIGN_DEATH);
-
-        if (GetTypeId() != TYPEID_PLAYER && isAlive())
-        {
-            // restore appropriate movement generator
-            if (getVictim())
-                GetMotionMaster()->MoveChase(getVictim());
-            else
-                GetMotionMaster()->Initialize();
-        }
     }
 }
 

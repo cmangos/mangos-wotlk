@@ -3144,7 +3144,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     // Some appear to be used depending on creature location, in water, at solid ground, in air/suspended, etc
                     // For now, just handle all the same way
                     if (target->GetTypeId() == TYPEID_UNIT)
-                        target->SetFeignDeath(apply);
+                        target->SetFeignDeath(apply, GetCasterGuid(), GetId());
 
                     return;
                 }
@@ -3163,26 +3163,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 case 42557:                                 // Feign Death
                 case 51329:                                 // Feign Death
                 {
+                    // UNIT_DYNFLAG_DEAD does not appear with these spells.
+                    // All of the spells appear to be present at spawn and not used to feign in combat or similar.
                     if (target->GetTypeId() == TYPEID_UNIT)
-                    {
-                        // Flags not set like it's done in SetFeignDeath()
-                        // UNIT_DYNFLAG_DEAD does not appear with these spells.
-                        // All of the spells appear to be present at spawn and not used to feign in combat or similar.
-                        if (apply)
-                        {
-                            target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
-                            target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+                        target->SetFeignDeath(apply, GetCasterGuid(), GetId(), false);
 
-                            target->addUnitState(UNIT_STAT_FEIGN_DEATH);
-                        }
-                        else
-                        {
-                            target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
-                            target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
-
-                            target->clearUnitState(UNIT_STAT_FEIGN_DEATH);
-                        }
-                    }
                     return;
                 }
                 case 40133:                                 // Summon Fire Elemental
@@ -4541,30 +4526,40 @@ void Aura::HandleFeignDeath(bool apply, bool Real)
 
     Unit* target = GetTarget();
 
-    bool disengage = true;
-    if (apply && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    // Do not remove it yet if more effects are up, do it for the last effect
+    if (!apply && target->HasAuraType(SPELL_AURA_FEIGN_DEATH))
+        return;
+
+    if (apply)
     {
-        const SpellEntry* entry = GetSpellProto();
-        const SpellSchoolMask schoolMask = GetSpellSchoolMask(entry);
-        const Unit::AttackerSet& attackers = target->getAttackers();
-        for (Unit::AttackerSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
+        bool success = true;
+
+        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         {
-            Unit* opponent = (*itr);
-            if (opponent && !opponent->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+            // Players and player-controlled units do an additional success roll for this aura on application
+            const SpellEntry* entry = GetSpellProto();
+            const SpellSchoolMask schoolMask = GetSpellSchoolMask(entry);
+            auto attackers = target->getAttackers();
+            for (auto i = attackers.begin(); i != attackers.end(); ++i)
             {
-                if (target->MagicSpellHitResult(opponent, entry, schoolMask) != SPELL_MISS_NONE)
+                if ((*i) && !(*i)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
                 {
-                    disengage = false;
-                    break;
+                    if (target->MagicSpellHitResult((*i), entry, schoolMask) != SPELL_MISS_NONE)
+                    {
+                        success = false;
+                        break;
+                    }
                 }
             }
         }
+
+        if (success)
+            target->InterruptSpellsCastedOnMe();
+
+        target->SetFeignDeath(apply, GetCasterGuid(), GetId(), true, success);
     }
-
-    if (apply && disengage)
-        target->InterruptSpellsCastedOnMe();
-
-    target->SetFeignDeath(apply, GetCasterGuid(), disengage);
+    else
+        target->SetFeignDeath(false);
 }
 
 void Aura::HandleAuraModDisarm(bool apply, bool Real)
