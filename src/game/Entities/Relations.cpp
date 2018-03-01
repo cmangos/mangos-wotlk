@@ -1099,8 +1099,6 @@ bool Unit::CanAttackSpell(const Unit* target, SpellEntry const* spellInfo, bool 
                     return false;
                 }
             }
-            else
-                return IsEnemy(target); // non player controlled can only hit hostiles with AOE
         }
 
         return true;
