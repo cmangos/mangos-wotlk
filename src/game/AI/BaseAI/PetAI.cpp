@@ -243,7 +243,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
                 Spell* spell = new Spell(m_unit, spellInfo, TRIGGERED_NONE);
 
-                if (inCombat && !m_unit->hasUnitState(UNIT_STAT_FOLLOW) && spell->CanAutoCast(victim))
+                if (inCombat && spell->CanAutoCast(victim))
                 {
                     targetSpellStore.push_back(TargetSpellList::value_type(victim, spell));
                     continue;
