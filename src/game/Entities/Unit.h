@@ -1022,13 +1022,13 @@ struct ProcSystemArguments
     SpellEntry const* procSpell;
     WeaponAttackType attType;
 
-    Spell const* spell;
+    Spell* spell;
 
     // Healing specific information
     uint32 healthGain;
 
     explicit ProcSystemArguments(Unit* victim, uint32 procFlagsAttacker, uint32 procFlagsVictim, uint32 procExtra, uint32 amount, WeaponAttackType attType = BASE_ATTACK,
-        SpellEntry const* procSpell = nullptr, Spell const* spell = nullptr, uint32 healthGain = 0)
+        SpellEntry const* procSpell = nullptr, Spell* spell = nullptr, uint32 healthGain = 0)
         : victim(victim), procFlagsAttacker(procFlagsAttacker), procFlagsVictim(procFlagsVictim), procExtra(procExtra), damage(amount),
             attType(attType), procSpell(procSpell), spell(spell), healthGain(healthGain)
     {}
@@ -1049,7 +1049,7 @@ struct ProcExecutionData
     uint32 damage; // contains full heal or full damage
     SpellEntry const* procSpell;
 
-    Spell const* spell;
+    Spell* spell;
 
     // Healing specific information
     uint32 healthGain;
