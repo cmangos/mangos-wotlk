@@ -6850,9 +6850,37 @@ Player const* Unit::GetControllingPlayer() const
     return nullptr;
 }
 
-Player const* Unit::GetControllingClientPlayer() const
+bool Unit::IsClientControlled(Player const* exactClient /*= nullptr*/) const
+{
+    // Severvide method to check if unit is client controlled (optionally check for specific client in control)
+
+    // Applies only to player controlled units
+    if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        return false;
+
+    // These flags are meant to be used when server controls this unit, client control is taken away
+    if (HasFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_UNK_0 | UNIT_FLAG_CLIENT_CONTROL_LOST | UNIT_FLAG_CONFUSED | UNIT_FLAG_FLEEING)))
+        return false;
+
+    // If unit is possessed, it has lost original control...
+    if (ObjectGuid const &guid = GetCharmerGuid())
+    {
+        // ... but if it is a possessing charm, then we have to check if some other player controls it
+        if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED) && guid.IsPlayer())
+            return (exactClient ? (exactClient->GetObjectGuid() == guid) : true);
+        return false;
+    }
+
+    // By default: players have client control over themselves
+    if (GetTypeId() == TYPEID_PLAYER)
+        return (exactClient ? (exactClient == this) : true);
+    return false;
+}
+
+Player const* Unit::GetClientControlling() const
 {
     // Serverside reverse "mover" deduction logic at controlled unit
+
     // Applies only to player controlled units
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
@@ -6870,9 +6898,8 @@ Player const* Unit::GetControllingClientPlayer() const
         else if (GetTypeId() == TYPEID_PLAYER)
         {
             // Check if anything prevents original client from controlling
-            Player const* player = static_cast<Player const*>(this);
-            if (player->IsClientControl(player))
-                return player;
+            if (IsClientControlled(static_cast<Player const*>(this)))
+                return static_cast<Player const*>(this);
         }
     }
     return nullptr;
@@ -11316,7 +11343,7 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
         // Apply confusion or fleeing: update client control state before altering flags
         if (state & (UNIT_FLAG_CONFUSED | UNIT_FLAG_FLEEING))
         {
-            if (const Player* controllingClientPlayer = GetControllingClientPlayer())
+            if (const Player* controllingClientPlayer = GetClientControlling())
                 controllingClientPlayer->UpdateClientControl(this, false);
         }
 
@@ -11329,7 +11356,7 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
         // Remove confusion or fleeing: update client control state after altering flags
         if (state & (UNIT_FLAG_CONFUSED | UNIT_FLAG_FLEEING))
         {
-            if (const Player* controllingClientPlayer = GetControllingClientPlayer())
+            if (const Player* controllingClientPlayer = GetClientControlling())
                 controllingClientPlayer->UpdateClientControl(this, true);
         }
     }
@@ -12514,7 +12541,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
         player->PossessSpellInitialize();
 
         // Take away client control immediately if we are not supposed to have control at the moment
-        if (!player->IsClientControl(pCreature))
+        if (!pCreature->IsClientControlled(player))
             player->UpdateClientControl(pCreature, false);
     }
 
@@ -12538,7 +12565,7 @@ bool Unit::TakePossessOf(Unit* possessed)
         player->UnsummonPetTemporaryIfAny();
 
     // Update possessed's client control status before altering flags
-    if (const Player* controllingClientPlayer = possessed->GetControllingClientPlayer())
+    if (const Player* controllingClientPlayer = possessed->GetClientControlling())
         controllingClientPlayer->UpdateClientControl(possessed, false);
 
     // stop combat but keep threat list
@@ -12615,7 +12642,7 @@ bool Unit::TakePossessOf(Unit* possessed)
         }
 
         // Take away client control immediately if we are not supposed to have control at the moment
-        if (!player->IsClientControl(possessed))
+        if (!possessed->IsClientControlled(player))
             player->UpdateClientControl(possessed, false);
     }
 
@@ -12630,7 +12657,7 @@ bool Unit::TakeCharmOf(Unit* charmed, bool advertised /*= true*/)
         charmerPlayer->UnsummonPetTemporaryIfAny();
 
     // Update charmed's client control status before altering flags
-    if (const Player* controllingClientPlayer = charmed->GetControllingClientPlayer())
+    if (const Player* controllingClientPlayer = charmed->GetClientControlling())
         controllingClientPlayer->UpdateClientControl(charmed, false);
 
     // stop combat but keep threat list
@@ -12909,7 +12936,7 @@ void Unit::Uncharm(Unit* charmed)
     }
 
     // Update possessed's client control status after altering flags
-    if (const Player* controllingClientPlayer = charmed->GetControllingClientPlayer())
+    if (const Player* controllingClientPlayer = charmed->GetClientControlling())
         controllingClientPlayer->UpdateClientControl(charmed, true);
 
     if (player)

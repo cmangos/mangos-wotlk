@@ -560,9 +560,9 @@ enum UnitVisibility
 // Value masks for UNIT_FIELD_FLAGS
 enum UnitFlags
 {
-    UNIT_FLAG_UNK_0                 = 0x00000001,
+    UNIT_FLAG_UNK_0                 = 0x00000001,           // Movement checks disabled, likely paired with loss of client control packet.
     UNIT_FLAG_NON_ATTACKABLE        = 0x00000002,           // not attackable
-    UNIT_FLAG_NON_MOVING_DEPRECATED = 0x00000004,           // TODO: Needs research
+    UNIT_FLAG_CLIENT_CONTROL_LOST   = 0x00000004,           // Generic unspecified loss of control initiated by server script, movement checks disabled, paired with loss of client control packet.
     UNIT_FLAG_PLAYER_CONTROLLED     = 0x00000008,           // players, pets, totems, guardians, companions, charms, any units associated with players
     UNIT_FLAG_RENAME                = 0x00000010,
     UNIT_FLAG_PREPARATION           = 0x00000020,           // don't take reagents for spells with SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP
@@ -578,13 +578,13 @@ enum UnitFlags
     UNIT_FLAG_SWIMMING              = 0x00008000,           // related to jerky movement in water?
     UNIT_FLAG_UNK_16                = 0x00010000,           // removes attackable icon
     UNIT_FLAG_PACIFIED              = 0x00020000,           // 3.0.3 ok
-    UNIT_FLAG_STUNNED               = 0x00040000,           // 3.0.3 ok
+    UNIT_FLAG_STUNNED               = 0x00040000,           // Unit is a subject to stun, turn and strafe movement disabled
     UNIT_FLAG_IN_COMBAT             = 0x00080000,
-    UNIT_FLAG_TAXI_FLIGHT           = 0x00100000,           // disable casting at client side spell not allowed by taxi flight (mounted?), probably used with 0x4 flag
+    UNIT_FLAG_TAXI_FLIGHT           = 0x00100000,           // Unit is on taxi, paired with a duplicate loss of client control packet (likely a legacy serverside hack). Disables any spellcasts not allowed in taxi flight client-side.
     UNIT_FLAG_DISARMED              = 0x00200000,           // 3.0.3, disable melee spells casting..., "Required melee weapon" added to melee spells tooltip.
-    UNIT_FLAG_CONFUSED              = 0x00400000,
-    UNIT_FLAG_FLEEING               = 0x00800000,
-    UNIT_FLAG_POSSESSED             = 0x01000000,           // remote control e.g. Eyes of the Beast: let master use melee attack, make unit unselectable via mouse for master in world (as if it was own character)
+    UNIT_FLAG_CONFUSED              = 0x00400000,           // Unit is a subject to confused movement, movement checks disabled, paired with loss of client control packet.
+    UNIT_FLAG_FLEEING               = 0x00800000,           // Unit is a subject to fleeing movement, movement checks disabled, paired with loss of client control packet.
+    UNIT_FLAG_POSSESSED             = 0x01000000,           // Unit is under remote control by another unit, movement checks disabled, paired with loss of client control packet. New master is allowed to use melee attack and can't select this unit via mouse in the world (as if it was own character).
     UNIT_FLAG_NOT_SELECTABLE        = 0x02000000,
     UNIT_FLAG_SKINNABLE             = 0x04000000,
     UNIT_FLAG_MOUNT                 = 0x08000000,
@@ -1892,8 +1892,11 @@ class Unit : public WorldObject
         Player* GetBeneficiaryPlayer() const;
         // Controlling player: official client PoV and term on which player is the "master" of the unit at the moment, limited recursive master/beneficiary logic (client-side)
         Player const* GetControllingPlayer() const;
+
+        // Client controlled: check if unit currently is under client control (has active "mover"), optionally check for specific client (server-side)
+        bool IsClientControlled(Player const* exactClient = nullptr) const;
         // Controlling client: server PoV on which client (player) controls movement of the unit at the moment, obtain "mover" (server-side)
-        Player const* GetControllingClientPlayer() const;
+        Player const* GetClientControlling() const;
 
         Pet* GetPet() const;
         void SetPet(Unit* pet) { SetPetGuid(pet ? pet->GetObjectGuid() : ObjectGuid()); }
