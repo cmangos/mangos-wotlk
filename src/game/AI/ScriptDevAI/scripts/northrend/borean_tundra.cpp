@@ -1057,11 +1057,14 @@ enum
 {
     SPELL_CREATES_CARRIED       = 46340,
     // SPELL_DROP_CRATE         = 46342,                // triggered by dummy aura proc
+    SPELL_JENNY_CREDIT_TRIGGER  = 46357,
     SPELL_JENNY_CREDIT          = 46358,
 
     NPC_FEZZIX                  = 25849,
 
     QUEST_ID_LOADER_UP          = 11881,
+
+    // Note: spell 46338 has to be allowed in the following areas: 4116; 4117; 4119; 4035; 4037; 4043. Requires DBC update for this to work
 };
 
 struct npc_jennyAI : public FollowerAI
@@ -1077,12 +1080,7 @@ struct npc_jennyAI : public FollowerAI
     bool m_bEventComplete;
     bool m_bFollowStarted;
 
-    uint32 m_uiDropDelayTimer;
-
-    void Reset() override
-    {
-        m_uiDropDelayTimer = 0;
-    }
+    void Reset() override { }
 
     void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
@@ -1102,6 +1100,7 @@ struct npc_jennyAI : public FollowerAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_JENNY_CREDIT) == CAST_OK)
             {
+                pWho->CastSpell(m_creature, SPELL_JENNY_CREDIT_TRIGGER, TRIGGERED_OLD_TRIGGERED);
                 SetFollowComplete(true);
 
                 float fX, fY, fZ;
@@ -1125,14 +1124,6 @@ struct npc_jennyAI : public FollowerAI
                 if (DoCastSpellIfCan(m_creature, SPELL_CREATES_CARRIED) == CAST_OK)
                     m_bFollowStarted = true;
             }
-        }
-
-        if (m_uiDropDelayTimer)
-        {
-            if (m_uiDropDelayTimer <= uiDiff)
-                m_uiDropDelayTimer = 0;
-            else
-                m_uiDropDelayTimer -= uiDiff;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
