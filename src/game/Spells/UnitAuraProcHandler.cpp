@@ -937,6 +937,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     }
                     return SPELL_AURA_PROC_FAILED;
                 }
+                // Crates Carried
+                case 46340:
+                {
+                    triggered_spell_id = 46342;
+                    target = this;
+                    break;
+                }
                 /*
                 // Sunwell Exalted Caster Neck (??? neck)
                 // cast ??? Light's Wrath if Exalted by Aldor

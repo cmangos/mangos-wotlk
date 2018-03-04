@@ -1056,7 +1056,7 @@ bool QuestAccept_npc_bonker_togglevolt(Player* pPlayer, Creature* pCreature, con
 enum
 {
     SPELL_CREATES_CARRIED       = 46340,
-    SPELL_DROP_CRATE            = 46342,
+    // SPELL_DROP_CRATE         = 46342,                // triggered by dummy aura proc
     SPELL_JENNY_CREDIT          = 46358,
 
     NPC_FEZZIX                  = 25849,
@@ -1070,6 +1070,7 @@ struct npc_jennyAI : public FollowerAI
     {
         m_bFollowStarted = false;
         m_bEventComplete = false;
+        SetReactState(REACT_PASSIVE);
         Reset();
     }
 
@@ -1083,26 +1084,14 @@ struct npc_jennyAI : public FollowerAI
         m_uiDropDelayTimer = 0;
     }
 
-    void AttackedBy(Unit* pAttacker) override
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
-        if (!m_uiDropDelayTimer)
+        if (eventType == AI_EVENT_CUSTOM_A)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_DROP_CRATE) == CAST_OK)
-            {
-                m_creature->RemoveAuraHolderFromStack(SPELL_CREATES_CARRIED);
-                m_uiDropDelayTimer = 10000;
-
-                // check if all crates are dropped
-                if (!m_creature->HasAura(SPELL_CREATES_CARRIED))
-                {
-                    FollowerAI::JustDied(pAttacker);
-                    m_creature->ForcedDespawn();
-                }
-            }
+            FollowerAI::JustDied(m_creature);
+            m_creature->ForcedDespawn();
         }
     }
-
-    void AttackStart(Unit* pWho) override { }
 
     void MoveInLineOfSight(Unit* pWho) override
     {
@@ -1154,6 +1143,16 @@ struct npc_jennyAI : public FollowerAI
 CreatureAI* GetAI_npc_jenny(Creature* pCreature)
 {
     return new npc_jennyAI(pCreature);
+}
+
+bool EffectAuraDummy_spell_aura_dummy_crates_carried(const Aura* pAura, bool bApply)
+{
+    if (pAura->GetId() == SPELL_CREATES_CARRIED && pAura->GetEffIndex() == EFFECT_INDEX_0 && !bApply)
+    {
+        if (Creature* pTarget = (Creature*)pAura->GetTarget())
+            pTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pTarget, pTarget);
+    }
+    return true;
 }
 
 /*######
@@ -1618,6 +1617,7 @@ void AddSC_borean_tundra()
     pNewScript = new Script;
     pNewScript->Name = "npc_jenny";
     pNewScript->GetAI = &GetAI_npc_jenny;
+    pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_crates_carried;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
