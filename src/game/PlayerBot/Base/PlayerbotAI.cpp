@@ -2423,7 +2423,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                                                       (HasCollectFlag(COLLECT_FLAG_SKIN) && reqSkill == SKILL_SKINNING)))
                     {
                         // calculate skill requirement
-                        uint32 skillValue = m_bot->GetPureSkillValue(reqSkill);
+                        uint32 skillValue = m_bot->GetSkillValue(reqSkill);
                         uint32 targetLevel = c->getLevel();
                         uint32 reqSkillValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel - 10) * 10 : targetLevel * 5;
                         if (skillValue >= reqSkillValue)
