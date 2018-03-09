@@ -36,11 +36,13 @@ enum
     EMOTE_LAMENT_START          = -1000193,
     SAY_LAMENT_END              = -1000196,
     EMOTE_LAMENT_END            = -1000197,
+    SAY_AMBASSADOR              = -1001277,
 
     SPELL_HIGHBORNE_AURA        = 37090,
     SPELL_SYLVANAS_CAST         = 36568,
     SPELL_RIBBON_OF_SOULS       = 37099,
 
+    NPC_AMBASSADOR              = 16287,
     NPC_HIGHBORNE_LAMENTER      = 21628,
     NPC_HIGHBORNE_BUNNY         = 21641,
 
@@ -64,10 +66,15 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
     uint32 m_uiLamentEventTimer;
     uint32 m_uiSummonTimer;
 
+    bool m_uiAmbassador;
+
+    ObjectGuid m_guidCurrentPlayer;
+
     void Reset() override
     {
         m_uiLamentEventTimer = 0;
         m_uiSummonTimer = 0;
+        m_uiAmbassador = false;
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -80,14 +87,19 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
 
             pSummoned->SetLevitate(true);
             pSummoned->GetMotionMaster()->MovePoint(0, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ() + 5.0f);
+
+            pSummoned->SetFacingToObject(m_creature);
         }
     }
 
-    void DoStartLamentEvent()
+    void DoStartLamentEvent(ObjectGuid playerGuid)
     {
         DoScriptText(EMOTE_LAMENT_START, m_creature);
         DoCastSpellIfCan(m_creature, SPELL_SYLVANAS_CAST);
+        m_uiLamentEventTimer = 5000;
         m_uiSummonTimer = 13000;
+        m_uiAmbassador = false;
+        m_guidCurrentPlayer = playerGuid;
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -96,6 +108,14 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
         {
             if (m_uiLamentEventTimer <= uiDiff)
             {
+                if (!m_uiAmbassador) // On first ribbon, whisper to player
+                {
+                    m_uiAmbassador = true;
+                    if (Creature* ambassador = GetClosestCreatureWithEntry(m_creature, NPC_AMBASSADOR, 50.f))
+                        if (Player* player = m_creature->GetMap()->GetPlayer(m_guidCurrentPlayer))
+                            DoScriptText(SAY_AMBASSADOR, ambassador, player);
+                }
+
                 float fX, fY, fZ;
                 m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
                 m_creature->SummonCreature(NPC_HIGHBORNE_BUNNY, fX, fY, fZ + 15.0f, 0, TEMPSPAWN_TIMED_DESPAWN, 3000);
@@ -120,7 +140,6 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
                 for (uint8 i = 0; i < MAX_LAMENTERS; ++i)
                     m_creature->SummonCreature(NPC_HIGHBORNE_LAMENTER, aHighborneLoc[i][0], aHighborneLoc[i][1], aHighborneLoc[i][2], aHighborneLoc[i][3], TEMPSPAWN_TIMED_DESPAWN, 160000);
 
-                m_uiLamentEventTimer = 2000;
                 m_uiSummonTimer = 0;
             }
             else
@@ -139,12 +158,12 @@ CreatureAI* GetAI_npc_lady_sylvanas_windrunner(Creature* pCreature)
     return new npc_lady_sylvanas_windrunnerAI(pCreature);
 }
 
-bool QuestRewarded_npc_lady_sylvanas_windrunner(Player* /*pPlayer*/, Creature* pCreature, Quest const* pQuest)
+bool QuestRewarded_npc_lady_sylvanas_windrunner(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
     if (pQuest->GetQuestId() == QUEST_ID_JOURNEY_UNDERCITY)
     {
         if (npc_lady_sylvanas_windrunnerAI* pSylvanAI = dynamic_cast<npc_lady_sylvanas_windrunnerAI*>(pCreature->AI()))
-            pSylvanAI->DoStartLamentEvent();
+            pSylvanAI->DoStartLamentEvent(pPlayer->GetObjectGuid());
     }
 
     return true;
