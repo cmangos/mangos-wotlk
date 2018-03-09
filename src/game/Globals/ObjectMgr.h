@@ -766,13 +766,14 @@ class ObjectMgr
 
         void LoadGossipMenus();
 
+        void LoadSpellTemplate();
         void LoadDungeonEncounters();
+        void LoadSQLDBCs();
 
         void LoadVendorTemplates();
         void LoadVendors() { LoadVendors("npc_vendor", false); }
         void LoadTrainerTemplates();
         void LoadTrainers() { LoadTrainers("npc_trainer", false); }
-        void LoadSpellTemplate();
 
         /// @param _map Map* of the map for which to load active entities. If nullptr active entities on continents are loaded
         void LoadActiveEntities(Map* _map);

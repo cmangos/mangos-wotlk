@@ -33,6 +33,7 @@ extern SQLStorage sWorldTemplate;
 extern SQLStorage sConditionStorage;
 extern SQLStorage sSpellTemplate;
 extern SQLStorage sDungeonEncounterStore;
+extern SQLStorage sAreaGroupStore;
 
 extern SQLHashStorage sGOStorage;
 extern SQLHashStorage sGameObjectDataAddonStorage;

@@ -7158,6 +7158,7 @@ struct SQLSpellLoader : public SQLStorageLoaderBase<SQLSpellLoader, SQLHashStora
 
 void ObjectMgr::LoadSpellTemplate()
 {
+    sLog.outString("Loading spell_template...");
     sSpellTemplate.Load();
 
     /* TODO add validation for spell_dbc */
@@ -7185,6 +7186,18 @@ void ObjectMgr::LoadSpellTemplate()
 
     sLog.outString(">> Loaded %u spell_dbc records", sSpellTemplate.GetRecordCount());
     sLog.outString();
+}
+
+void ObjectMgr::LoadDungeonEncounters()
+{
+    sLog.outString("Loading Dungeon Encounters...");
+    sDungeonEncounterStore.Load();
+}
+
+void ObjectMgr::LoadSQLDBCs()
+{
+    LoadSpellTemplate();
+    LoadDungeonEncounters();
 }
 
 void ObjectMgr::DeleteCreatureData(uint32 guid)
@@ -9655,11 +9668,6 @@ void ObjectMgr::LoadGossipMenus()
 
     for (std::set<uint32>::const_iterator itr = gossipScriptSet.begin(); itr != gossipScriptSet.end(); ++itr)
         sLog.outErrorDb("Table `dbscripts_on_gossip` contains unused script, id %u.", *itr);
-}
-
-void ObjectMgr::LoadDungeonEncounters()
-{
-    sDungeonEncounterStore.Load();
 }
 
 void ObjectMgr::AddVendorItem(uint32 entry, uint32 item, uint32 maxcount, uint32 incrtime, uint32 extendedcost)

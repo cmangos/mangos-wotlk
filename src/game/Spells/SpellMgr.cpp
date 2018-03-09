@@ -3943,7 +3943,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spell
     if (areaGroupId > 0)
     {
         bool found = false;
-        AreaGroupEntry const* groupEntry = sAreaGroupStore.LookupEntry(areaGroupId);
+        AreaGroupEntry const* groupEntry = sAreaGroupStore.LookupEntry<AreaGroupEntry>(areaGroupId);
         while (groupEntry)
         {
             for (uint32 i = 0; i < 6; ++i)
@@ -3952,7 +3952,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spell
             if (found || !groupEntry->nextGroup)
                 break;
             // Try search in next group
-            groupEntry = sAreaGroupStore.LookupEntry(groupEntry->nextGroup);
+            groupEntry = sAreaGroupStore.LookupEntry<AreaGroupEntry>(groupEntry->nextGroup);
         }
 
         if (!found)
