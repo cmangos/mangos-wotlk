@@ -55,7 +55,13 @@ void OutdoorPvPTF::FillInitialWorldStates(WorldPacket& data, uint32& count)
             FillInitialWorldState(data, count, m_towerWorldState[i], WORLD_STATE_ADD);
     }
     else
-        UpdateTimerWorldState();
+    {
+        uint32 firstDigit, secondDigit, hoursLeft;
+        CalculateTimerWorldStateValues(firstDigit, secondDigit, hoursLeft);
+        FillInitialWorldState(data, count, WORLD_STATE_TF_TIME_MIN_FIRST_DIGIT, firstDigit);
+        FillInitialWorldState(data, count, WORLD_STATE_TF_TIME_MIN_SECOND_DIGIT, secondDigit);
+        FillInitialWorldState(data, count, WORLD_STATE_TF_TIME_HOURS, hoursLeft);
+    }
 }
 
 void OutdoorPvPTF::SendRemoveWorldStates(Player* player)
@@ -330,14 +336,21 @@ void OutdoorPvPTF::Update(uint32 diff)
 void OutdoorPvPTF::UpdateTimerWorldState()
 {
     // Calculate time
-    uint32 minutesLeft = m_zoneLockTimer / 60000;
-    uint32 hoursLeft = minutesLeft / 60;
-    minutesLeft -= hoursLeft * 60;
-    uint32 firstDigit = minutesLeft / 10;
+    uint32 firstDigit, secondDigit, hoursLeft;
+    CalculateTimerWorldStateValues(firstDigit, secondDigit, hoursLeft);
 
     SendUpdateWorldState(WORLD_STATE_TF_TIME_MIN_FIRST_DIGIT, firstDigit);
-    SendUpdateWorldState(WORLD_STATE_TF_TIME_MIN_SECOND_DIGIT, minutesLeft - firstDigit * 10);
+    SendUpdateWorldState(WORLD_STATE_TF_TIME_MIN_SECOND_DIGIT, secondDigit);
     SendUpdateWorldState(WORLD_STATE_TF_TIME_HOURS, hoursLeft);
+}
+
+void OutdoorPvPTF::CalculateTimerWorldStateValues(uint32& firstDigit, uint32& secondDigit, uint32& hoursLeft)
+{
+    uint32 minutesLeft = m_zoneLockTimer / 60000;
+    hoursLeft = minutesLeft / 60;
+    minutesLeft -= hoursLeft * 60;
+    firstDigit = minutesLeft / 10;
+    secondDigit = minutesLeft - firstDigit * 10;
 }
 
 // Handle the Terokkar towers lock during the update timer
