@@ -3278,7 +3278,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1189033,'You felt death once...',0,0,0,0,'horseman SAY_PLAYER3'),
 (-1189034,'Now, know demise!',0,0,0,0,'horseman SAY_PLAYER4'),
 
-(-1189035,'The master has fallen! Avenge him my brethren!',5834,1,0,0,'trainee SAY_TRAINEE_SPAWN');
+(-1189035,'The master has fallen! Avenge him my brethren!',5834,1,0,0,'trainee SAY_TRAINEE_SPAWN'),
+
+(-1189036,'Bow down! Kneel before the Ashbringer! A new dawn approaches, brother and sisters! Our message will be delivered to the filth of this world through the chosen one!',0,6,0,0,'mograine SAY_ASHBRINGER_ENTRANCE');
 
 -- -1 209 000 ZUL'FARRAK
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

@@ -1561,6 +1561,19 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
+                case 28414:                                 // Call of the Ashbringer
+                {
+                    if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+                    static constexpr uint32 AshbringerSounds[12] = { 8906,8907,8908,8920,8921,8922,8923,8924,8925,8926,8927,8928 };
+                    m_caster->PlayDirectSound(AshbringerSounds[urand(0, 11)]);
+                    return;
+                }
+                case 28697:                                 // Forgiveness
+                {
+                    m_caster->DealDamage(unitTarget, unitTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false, m_damageInfo);
+                    return;
+                }
                 case 29126:                                 // Cleansing Flames (Darnassus)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
