@@ -1027,6 +1027,7 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
         case 35941: // Gravity Lapse - Neutral spell with TARGET_ONLY_PLAYER attribute, should hit all players in the room
         case 39495: // Remove Tainted Cores
         case 39497: // Remove Enchanted Weapons - both should hit all players in zone with the given items, uses a neutral target type
+        case 34700: // Allergic Reaction - Neutral target type - needs to be a debuff
             return false;
     }
 
