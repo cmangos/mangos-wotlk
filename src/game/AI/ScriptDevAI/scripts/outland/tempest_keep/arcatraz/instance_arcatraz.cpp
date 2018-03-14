@@ -92,7 +92,8 @@ static const DialogueEntry aArcatrazDialogue[] =
 instance_arcatraz::instance_arcatraz(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aArcatrazDialogue),
     m_uiResetDelayTimer(0),
     m_uiEntranceEventTimer(0),
-    m_uiKilledWardens(0)
+    m_uiKilledWarders(0),
+    m_uiKilledDefenders(0)
 {
     Initialize();
 }
@@ -428,16 +429,16 @@ void instance_arcatraz::JustDidDialogueStep(int32 iEntry)
 
 void instance_arcatraz::OnCreatureDeath(Creature* pCreature)
 {
-    if (pCreature->GetEntry() == NPC_ARCATRAZ_WARDEN || pCreature->GetEntry() == NPC_ARCATRAZ_DEFENDER)
-    {
-        ++m_uiKilledWardens;
+    if (pCreature->GetEntry() == NPC_ARCATRAZ_WARDER)
+        ++m_uiKilledWarders;
+    else if (pCreature->GetEntry() == NPC_ARCATRAZ_DEFENDER)
+        ++m_uiKilledDefenders;
 
-        // Stop the intro spawns when the wardens are killed
-        if (m_uiKilledWardens == MAX_WARDENS)
-        {
-            SetData(TYPE_ENTRANCE, DONE);
-            m_uiEntranceEventTimer = 0;
-        }
+    // Stop the intro spawns when the wardens are killed
+    if (m_uiKilledDefenders == MAX_DEFENDERS && m_uiKilledWarders == MAX_WARDERS)
+    {
+        SetData(TYPE_ENTRANCE, DONE);
+        m_uiEntranceEventTimer = 0;
     }
 }
 
@@ -467,11 +468,18 @@ void instance_arcatraz::Update(uint32 uiDiff)
 
             uint32 uiEntry = urand(0, 10) ? NPC_PROTEAN_HORROR : NPC_PROTEAN_NIGHTMARE;
 
+            // Protean Horrors stop spawning once 4 warders are killed
+            // Protean Nightmares stop spawning once 3 defenders are killed
+            if ((uiEntry == NPC_PROTEAN_HORROR && m_uiKilledWarders == MAX_WARDERS) || (uiEntry == NPC_PROTEAN_NIGHTMARE && m_uiKilledDefenders == MAX_DEFENDERS))
+            {
+                m_uiEntranceEventTimer = urand(0, 10) ? urand(2000, 3500) : urand(5000, 7000);
+                return;
+            }
+
             // Summon and move the intro creatures into combat positions
             if (Creature* pTemp = pPlayer->SummonCreature(uiEntry, aEntranceSpawnLoc[0], aEntranceSpawnLoc[1], aEntranceSpawnLoc[2], aEntranceSpawnLoc[3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000))
             {
-                pTemp->SetWalk(false);
-                pTemp->GetMotionMaster()->MovePoint(0, aEntranceMoveLoc[0], aEntranceMoveLoc[1], aEntranceMoveLoc[2]);
+                pTemp->GetMotionMaster()->MoveWaypoint(1);
             }
             m_uiEntranceEventTimer = urand(0, 10) ? urand(2000, 3500) : urand(5000, 7000);
         }

@@ -1351,6 +1351,7 @@ UPDATE creature_template SET ScriptName='boss_dalliah' WHERE entry=20885;
 UPDATE creature_template SET ScriptName='boss_soccothrates' WHERE entry=20886;
 UPDATE creature_template SET ScriptName='npc_warden_mellichar' WHERE entry=20904;
 UPDATE creature_template SET ScriptName='npc_millhouse_manastorm' WHERE entry=20977;
+UPDATE creature_template SET ScriptName='npc_arcatraz_defender' WHERE entry=20857;
 
 /* THE EYE */
 UPDATE instance_template SET ScriptName='instance_the_eye' WHERE map=550;

@@ -8,7 +8,8 @@
 enum
 {
     MAX_ENCOUNTER                   = 10,
-    MAX_WARDENS                     = 7,
+    MAX_WARDERS                     = 4,
+    MAX_DEFENDERS                   = 3,
 
     TYPE_ENTRANCE                   = 0,
     TYPE_ZEREKETH                   = 1,
@@ -34,7 +35,7 @@ enum
     // intro event related
     NPC_PROTEAN_NIGHTMARE           = 20864,
     NPC_PROTEAN_HORROR              = 20865,
-    NPC_ARCATRAZ_WARDEN             = 20859,
+    NPC_ARCATRAZ_WARDER             = 20859,
     NPC_ARCATRAZ_DEFENDER           = 20857,
 
     // Harbinger Skyriss event related (trash mobs are scripted in ACID)
@@ -76,7 +77,6 @@ static const SpawnLocation aSummonPosition[5] =
 static const float aDalliahStartPos[4] = {118.6038f, 96.84682f, 22.44115f, 1.012f};
 static const float aSoccotharesStartPos[4] = {122.1035f, 192.7203f, 22.44115f, 5.235f};
 
-static const float aEntranceMoveLoc[3] = {82.020f, 0.306f, -11.026f};
 static const float aEntranceSpawnLoc[4] = {173.471f, -0.138f, -10.101f, 3.123f};
 
 class instance_arcatraz : public ScriptedInstance, private DialogueHelper
@@ -107,7 +107,8 @@ class instance_arcatraz : public ScriptedInstance, private DialogueHelper
 
         uint32 m_uiResetDelayTimer;
         uint32 m_uiEntranceEventTimer;
-        uint8 m_uiKilledWardens;
+        uint8 m_uiKilledWarders;
+        uint8 m_uiKilledDefenders;
 
         GuidList m_lSkyrissEventMobsGuidList;
 };

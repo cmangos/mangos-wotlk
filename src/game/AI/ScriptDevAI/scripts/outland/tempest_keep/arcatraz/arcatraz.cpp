@@ -347,6 +347,82 @@ CreatureAI* GetAI_npc_warden_mellichar(Creature* pCreature)
     return new npc_warden_mellicharAI(pCreature);
 }
 
+/*######
+## npc_arcatraz_defender
+######*/
+
+enum
+{
+    SPELL_FLAMING_WEAPON    = 36601,
+    SPELL_FLAMING_WEAPON_H  = 38804,
+    SPELL_INFECTED_BLOOD    = 36621,
+    SPELL_INFECTED_BLOOD_H  = 38812,
+    SPELL_PROTEAN_SUBDUAL   = 36288,
+    SPELL_PROTEAN_SUBDUAL_H = 40449,
+};
+
+struct npc_arcatraz_defenderAI : public ScriptedAI
+{
+    npc_arcatraz_defenderAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        Reset();
+    }
+
+    bool m_bIsRegularMode;
+    uint32 m_uiFlamingWeaponTimer;
+    uint32 m_uiInfectedBloodTimer;
+    uint32 m_uiProteanSubdualTimer;
+
+    void Reset() override
+    {
+        m_uiFlamingWeaponTimer = urand(3000, 6000);
+        m_uiInfectedBloodTimer = 5000;
+        m_uiProteanSubdualTimer = 2000;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiFlamingWeaponTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FLAMING_WEAPON : SPELL_FLAMING_WEAPON_H) == CAST_OK)
+                m_uiFlamingWeaponTimer = urand(3000, 6000);
+        }
+        else
+            m_uiFlamingWeaponTimer -= uiDiff;
+
+        if (m_uiInfectedBloodTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_INFECTED_BLOOD : SPELL_INFECTED_BLOOD_H) == CAST_OK)
+                m_uiInfectedBloodTimer = urand(5000, 9000);
+        }
+        else
+            m_uiInfectedBloodTimer -= uiDiff;
+
+        // this spell should only be used against Protean Horror and Protean Nightmare, never players
+        if (m_creature->getVictim()->GetTypeId() != TYPEID_PLAYER)
+        {
+            if (m_uiProteanSubdualTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PROTEAN_SUBDUAL : SPELL_PROTEAN_SUBDUAL_H) == CAST_OK)
+                    m_uiProteanSubdualTimer = urand(2000, 3000);
+            }
+            else
+                m_uiProteanSubdualTimer -= uiDiff;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_arcatraz_defender(Creature* pCreature)
+{
+    return new npc_arcatraz_defenderAI(pCreature);
+}
+
 void AddSC_arcatraz()
 {
     Script* pNewScript;
@@ -359,5 +435,10 @@ void AddSC_arcatraz()
     pNewScript = new Script;
     pNewScript->Name = "npc_warden_mellichar";
     pNewScript->GetAI = &GetAI_npc_warden_mellichar;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_arcatraz_defender";
+    pNewScript->GetAI = &GetAI_npc_arcatraz_defender;
     pNewScript->RegisterSelf();
 }
