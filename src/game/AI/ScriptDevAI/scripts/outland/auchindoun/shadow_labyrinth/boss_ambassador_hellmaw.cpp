@@ -45,6 +45,7 @@ struct boss_ambassador_hellmawAI : public ScriptedAI
     {
         m_pInstance = (instance_shadow_labyrinth*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        SetReactState(REACT_PASSIVE);
         Reset();
     }
 
@@ -111,6 +112,7 @@ struct boss_ambassador_hellmawAI : public ScriptedAI
                 if (m_pInstance->IsHellmawUnbanished())
                 {
                     m_creature->RemoveAurasDueToSpell(SPELL_BANISH);
+                    SetReactState(REACT_AGGRESSIVE);
                     m_creature->GetMotionMaster()->MoveWaypoint();
                     m_uiBanishTimer = 0;
                 }
