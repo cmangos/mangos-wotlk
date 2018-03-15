@@ -1321,6 +1321,8 @@ inline bool IsIgnoreLosSpell(SpellEntry const* spellInfo)
         case 31628:                                 // Green Beam
         case 31630:                                 // Green Beam
         case 31631:                                 // Green Beam
+        case 24742:                                 // Magic Wings
+        case 42867:                                 // both need LOS, likely TARGET_DUELVSPLAYER should use LOS ignore from normal radius, not per-effect radius WIP
             return true;
         default:
             break;
