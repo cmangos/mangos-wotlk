@@ -97,7 +97,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
     bool m_bIsMainEvent;
     bool m_bSpinOnce;
     // bool m_bHasTaunted;
-    bool m_bPhase;
+    bool m_firstPhase;
 
     uint32 m_uiPeonEngagedCount;
     uint32 m_uiPeonKilledCount;
@@ -117,7 +117,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         m_bIsMainEvent = false;
         // m_bHasTaunted = false;
         m_bSpinOnce = false;
-        m_bPhase = false;
+        m_firstPhase = true;
 
         m_uiPeonEngagedCount = 0;
         m_uiPeonKilledCount = 0;
@@ -190,17 +190,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         if (m_bIsIntroEvent || !m_bIsMainEvent)
             return;
 
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-
-            if (m_bPhase)
-                DoStartNoMovement(pWho);
-            else
-                DoStartMovement(pWho);
-        }
+        ScriptedAI::AttackStart(pWho);
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -293,23 +283,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         if (!m_bIsMainEvent)
             return;
 
-        if (m_bPhase)
-        {
-            if (!m_bSpinOnce)
-            {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_DARK_SPIN);
-                m_bSpinOnce = true;
-            }
-
-            if (m_uiCleaveTimer < uiDiff)
-            {
-                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHADOW_CLEAVE : SPELL_SHADOW_SLAM_H);
-                m_uiCleaveTimer = urand(6000, 8500);
-            }
-            else
-                m_uiCleaveTimer -= uiDiff;
-        }
-        else
+        if (m_firstPhase)
         {
             if (m_uiShadowFissureTimer < uiDiff)
             {
@@ -330,9 +304,26 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
                 m_uiDeathCoilTimer -= uiDiff;
 
             if (m_creature->GetHealthPercent() <= 20.0f)
-                m_bPhase = true;
+                m_firstPhase = false;
 
             DoMeleeAttackIfReady();
+        }
+        else
+        {
+            if (!m_bSpinOnce)
+            {
+                SetCombatMovement(false);
+                DoCastSpellIfCan(nullptr, SPELL_DARK_SPIN);
+                m_bSpinOnce = true;
+            }
+
+            if (m_uiCleaveTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHADOW_CLEAVE : SPELL_SHADOW_SLAM_H);
+                m_uiCleaveTimer = urand(6000, 8500);
+            }
+            else
+                m_uiCleaveTimer -= uiDiff;
         }
     }
 };
