@@ -355,8 +355,6 @@ enum
 {
     SPELL_FLAMING_WEAPON    = 36601,
     SPELL_FLAMING_WEAPON_H  = 38804,
-    SPELL_INFECTED_BLOOD    = 36621,
-    SPELL_INFECTED_BLOOD_H  = 38812,
     SPELL_PROTEAN_SUBDUAL   = 36288,
     SPELL_PROTEAN_SUBDUAL_H = 40449,
 };
@@ -371,13 +369,11 @@ struct npc_arcatraz_defenderAI : public ScriptedAI
 
     bool m_bIsRegularMode;
     uint32 m_uiFlamingWeaponTimer;
-    uint32 m_uiInfectedBloodTimer;
     uint32 m_uiProteanSubdualTimer;
 
     void Reset() override
     {
         m_uiFlamingWeaponTimer = urand(3000, 6000);
-        m_uiInfectedBloodTimer = 5000;
         m_uiProteanSubdualTimer = 2000;
     }
 
@@ -393,14 +389,6 @@ struct npc_arcatraz_defenderAI : public ScriptedAI
         }
         else
             m_uiFlamingWeaponTimer -= uiDiff;
-
-        if (m_uiInfectedBloodTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_INFECTED_BLOOD : SPELL_INFECTED_BLOOD_H) == CAST_OK)
-                m_uiInfectedBloodTimer = urand(5000, 9000);
-        }
-        else
-            m_uiInfectedBloodTimer -= uiDiff;
 
         // this spell should only be used against Protean Horror and Protean Nightmare, never players
         if (m_creature->getVictim()->GetTypeId() != TYPEID_PLAYER)
