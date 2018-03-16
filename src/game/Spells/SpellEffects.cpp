@@ -8581,6 +8581,23 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, 32300, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 33525:                                 // Ground Slam - Gruul
+                {
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        float angle = frand(0, M_PI_F * 2);
+                        ((Player*)unitTarget)->GetSession()->SendKnockBack(angle, 15.f, urand(15, 24));
+                    }
+                    return;
+                }
+                case 33654:                                 // Shatter - Gruul
+                {
+                    if (unitTarget->HasAura(33652) && unitTarget->GetTypeId() == TYPEID_PLAYER)
+                        unitTarget->CastSpell(nullptr, 33671, TRIGGERED_OLD_TRIGGERED);
+                    unitTarget->RemoveAurasDueToSpell(33572);
+                    unitTarget->RemoveAurasDueToSpell(33652);
+                    return;
+                }
                 case 33676:                                 // Incite Chaos
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
