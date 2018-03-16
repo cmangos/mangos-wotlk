@@ -69,6 +69,9 @@ void instance_shadow_labyrinth::OnCreatureCreate(Creature* pCreature)
         case NPC_HELLMAW:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
+        case NPC_CONTAINMENT_BEAM:
+            m_npcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
+            break;
     }
 }
 
@@ -153,6 +156,14 @@ void instance_shadow_labyrinth::OnCreatureDeath(Creature* pCreature)
                 DoScriptText(SAY_HELLMAW_INTRO, pHellmaw);
                 pHellmaw->GetMotionMaster()->MoveWaypoint();
                 pHellmaw->RemoveAurasDueToSpell(SPELL_BANISH);
+            }
+
+            GuidVector containmentVector;
+            GetCreatureGuidVectorFromStorage(NPC_CONTAINMENT_BEAM, containmentVector);
+            for (ObjectGuid& guid : containmentVector)
+            {
+                if (Creature* pBeam = pCreature->GetMap()->GetCreature(guid))
+                    pBeam->ForcedDespawn();
             }
         }
     }

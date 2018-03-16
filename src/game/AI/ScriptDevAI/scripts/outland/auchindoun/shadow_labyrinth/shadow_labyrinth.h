@@ -20,6 +20,7 @@ enum
     NPC_HELLMAW             = 18731,
     NPC_VORPIL              = 18732,
     NPC_CABAL_RITUALIST     = 18794,
+    NPC_CONTAINMENT_BEAM    = 21159,
 
     GO_REFECTORY_DOOR       = 183296,                       // door opened when blackheart the inciter dies
     GO_SCREAMING_HALL_DOOR  = 183295,                       // door opened when grandmaster vorpil dies
