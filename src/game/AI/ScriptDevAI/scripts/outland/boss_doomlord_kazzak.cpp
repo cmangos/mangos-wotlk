@@ -39,9 +39,9 @@ enum
     SAY_RAND2                       = -1000158,
 
     SPELL_SHADOW_VOLLEY             = 32963,
-    SPELL_CLEAVE                    = 31779,
+    SPELL_CLEAVE                    = 16044,
     SPELL_THUNDERCLAP               = 36706,
-    SPELL_VOID_BOLT                 = 39329,
+    SPELL_VOID_BOLT                 = 21066,
     SPELL_MARK_OF_KAZZAK            = 32960,
     SPELL_FRENZY                    = 32964,        // triggers 32963
     SPELL_CAPTURE_SOUL              = 48473,        // procs 32966 on player kill
@@ -110,15 +110,6 @@ struct boss_doomlordkazzakAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        // ShadowVolley_Timer
-        if (m_uiShadowVolleyTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_VOLLEY) == CAST_OK)
-                m_uiShadowVolleyTimer = urand(10000, 30000);
-        }
-        else
-            m_uiShadowVolleyTimer -= uiDiff;
-
         // Cleave_Timer
         if (m_uiCleaveTimer < uiDiff)
         {
@@ -131,7 +122,7 @@ struct boss_doomlordkazzakAI : public ScriptedAI
         // ThunderClap_Timer
         if (m_uiThunderClapTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_THUNDERCLAP) == CAST_OK)
+            if (DoCastSpellIfCan(nullptr, SPELL_THUNDERCLAP) == CAST_OK)
                 m_uiThunderClapTimer = urand(10000, 14000);
         }
         else
@@ -140,7 +131,7 @@ struct boss_doomlordkazzakAI : public ScriptedAI
         // VoidBolt_Timer
         if (m_uiVoidBoltTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_VOID_BOLT, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_VOID_BOLT) == CAST_OK)
                     m_uiVoidBoltTimer = urand(15000, 18000);
@@ -164,7 +155,7 @@ struct boss_doomlordkazzakAI : public ScriptedAI
         // Enrage_Timer
         if (m_uiEnrageTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+            if (DoCastSpellIfCan(nullptr, SPELL_FRENZY) == CAST_OK)
             {
                 DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
                 m_uiEnrageTimer = 60000;
@@ -178,7 +169,7 @@ struct boss_doomlordkazzakAI : public ScriptedAI
         {
             if (m_uiGreatEnrageTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
                     m_uiGreatEnrageTimer = 0;
             }
             else
@@ -188,7 +179,7 @@ struct boss_doomlordkazzakAI : public ScriptedAI
         // Twisted Reflection
         if (m_uiTwistedReflectionTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_TWISTED_REFLECTION, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_TWISTED_REFLECTION) == CAST_OK)
                     m_uiTwistedReflectionTimer = 15000;
