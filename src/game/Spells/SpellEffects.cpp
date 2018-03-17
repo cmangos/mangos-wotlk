@@ -3829,33 +3829,32 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    Player* pCaster = ((Player*)m_caster);
+                    Player* pCaster = static_cast<Player*>(m_caster);
 
                     Item* item = pCaster->GetWeaponForAttack(OFF_ATTACK);
                     if (!item)
                         return;
 
-                    // all poison enchantments is temporary
-                    uint32 enchant_id = item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT);
-                    if (!enchant_id)
-                        return;
-
-                    SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-                    if (!pEnchant)
-                        return;
-
-                    for (int s = 0; s < 3; ++s)
+                    // all poison enchantments is temporary					
+                    if (uint32 enchant_id = item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
                     {
-                        if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
-                            continue;
+                        SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+                        if (!pEnchant)
+                            return;
 
-                        SpellEntry const* combatEntry = sSpellTemplate.LookupEntry<SpellEntry>(pEnchant->spellid[s]);
-                        if (!combatEntry || combatEntry->Dispel != DISPEL_POISON)
-                            continue;
+                        for (int s = 0; s < 3; ++s)
+                        {
+                            if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+                                continue;
 
-                        m_caster->CastSpell(unitTarget, combatEntry, TRIGGERED_OLD_TRIGGERED, item);
+                            SpellEntry const* combatEntry = sSpellTemplate.LookupEntry<SpellEntry>(pEnchant->spellid[s]);
+                            if (!combatEntry || combatEntry->Dispel != DISPEL_POISON)
+                                continue;
+
+                            m_caster->CastSpell(unitTarget, combatEntry, TRIGGERED_OLD_TRIGGERED, item);
+                        }
                     }
-
+                    
                     m_caster->CastSpell(unitTarget, 5940, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
