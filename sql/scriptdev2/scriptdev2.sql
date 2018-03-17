@@ -4903,7 +4903,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1565008,'Maulgar is king!',11375,1,0,0,'maulgar SAY_SLAY3'),
 (-1565009,'Gruul... will crush you.',11376,1,0,0,'maulgar SAY_DEATH'),
 
-(-1565010,'Come... and die.',11355,1,0,0,'gruul SAY_AGGRO'),
+(-1565010,'Come.... and die.',11355,1,0,0,'gruul SAY_AGGRO'),
 (-1565011,'Scurry.',11356,1,0,0,'gruul SAY_SLAM1'),
 (-1565012,'No escape.',11357,1,0,0,'gruul SAY_SLAM2'),
 (-1565013,'Stay.',11358,1,0,0,'gruul SAY_SHATTER1'),

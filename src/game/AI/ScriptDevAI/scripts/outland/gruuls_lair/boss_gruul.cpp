@@ -41,60 +41,68 @@ enum
 
     SPELL_GROWTH                = 36300,
     SPELL_CAVE_IN               = 36240,
+    SPELL_GROUND_SLAM_DUMMY     = 39188,
+    SPELL_LOOK_AROUND           = 33965,
     SPELL_GROUND_SLAM           = 33525,                    // AoE Ground Slam applying Ground Slam to everyone with a script effect (most likely the knock back, we can code it to a set knockback)
     SPELL_REVERBERATION         = 36297,
     SPELL_SHATTER               = 33654,
 
     SPELL_SHATTER_EFFECT        = 33671,
-    SPELL_HURTFUL_STRIKE        = 33813,
+    SPELL_HURTFUL_STRIKE        = 33812,                    // Finds target for 33813
     SPELL_STONED                = 33652,                    // Spell is self cast by target
-
-    SPELL_MAGNETIC_PULL         = 28337,
-    SPELL_KNOCK_BACK            = 24199                     // Knockback spell until correct implementation is made
 };
 
 struct boss_gruulAI : public ScriptedAI
 {
     boss_gruulAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_instance = static_cast<ScriptedInstance*>(pCreature->GetInstanceData());
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
-    uint32 m_uiGrowthTimer;
-    uint32 m_uiCaveInTimer;
-    uint32 m_uiCaveInStaticTimer;
-    uint32 m_uiGroundSlamTimer;
-    uint32 m_uiHurtfulStrikeTimer;
-    uint32 m_uiReverberationTimer;
+    enum GruulActions
+    {
+        GRUUL_ACTION_SHATTER,
+        GRUUL_ACTION_GROW,
+        GRUUL_ACTION_GROUND_SLAM,
+        GRUUL_ACTION_REVERBERATION,
+        GRUUL_ACTION_CAVE_IN,
+        GRUUL_ACTION_HURTFUL_STRIKE,
+        GRUUL_ACTION_MAX,
+    };
 
-    bool m_bPerformingGroundSlam;
+    bool m_actionReadyStatus[GRUUL_ACTION_MAX];
+    std::unordered_map<uint32, uint32> m_timers;
+    bool m_lookAround;
 
     void Reset() override
     {
-        m_uiGrowthTimer             = 30000;
-        m_uiCaveInTimer             = 27000;
-        m_uiCaveInStaticTimer       = 30000;
-        m_uiGroundSlamTimer         = 35000;
-        m_uiHurtfulStrikeTimer      = 8000;
-        m_uiReverberationTimer      = 60000 + 45000;
-        m_bPerformingGroundSlam     = false;
+        SetCombatMovement(true);
+
+        for (uint32 i = 0; i < GRUUL_ACTION_MAX; ++i)
+            m_actionReadyStatus[i] = false;
+
+        m_timers[GRUUL_ACTION_GROW] = 30000;
+        m_timers[GRUUL_ACTION_CAVE_IN] = 10000;
+        m_timers[GRUUL_ACTION_REVERBERATION] = 60000 + 55000;
+        m_timers[GRUUL_ACTION_GROUND_SLAM] = urand(35000,40000);
+        m_timers[GRUUL_ACTION_HURTFUL_STRIKE] = 6000;
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GRUUL_EVENT, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_GRUUL_EVENT, IN_PROGRESS);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GRUUL_EVENT, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_GRUUL_EVENT, FAIL);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -111,145 +119,133 @@ struct boss_gruulAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GRUUL_EVENT, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_GRUUL_EVENT, DONE);
     }
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    void ExecuteActions()
     {
-        // This to emulate effect1 (77) of SPELL_GROUND_SLAM, knock back to any direction
-        // It's initially wrong, since this will cause fall damage, which is by comments, not intended.
-        if (pSpell->Id == SPELL_GROUND_SLAM)
+        if (!CanExecuteCombatAction())
+            return;
+
+        for (uint32 i = 0; i < GRUUL_ACTION_MAX; ++i)
         {
-            if (pTarget->GetTypeId() == TYPEID_PLAYER)
+            if (!m_actionReadyStatus[i])
+                continue;
+
+            switch (i)
             {
-                switch (urand(0, 1))
+                case GRUUL_ACTION_SHATTER:
                 {
-                    case 0: pTarget->CastSpell(pTarget, SPELL_MAGNETIC_PULL, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid()); break;
-                    case 1: pTarget->CastSpell(pTarget, SPELL_KNOCK_BACK, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid()); break;
+                    if (DoCastSpellIfCan(nullptr, SPELL_SHATTER) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_SLAM, m_creature);
+                        DoScriptText(urand(0, 1) ? SAY_SHATTER1 : SAY_SHATTER2, m_creature);
+
+                        SetCombatMovement(true);
+                        m_meleeEnabled = true;
+                        if (m_creature->getVictim())
+                            m_creature->MeleeAttackStart(m_creature->getVictim());
+                        m_actionReadyStatus[i] = false;
+                        return;
+                    }
+                    continue;
+                }
+                case GRUUL_ACTION_GROW:
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_GROWTH) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_GROW, m_creature);
+                        m_timers[GRUUL_ACTION_GROW] = 30000;
+                        m_actionReadyStatus[i] = false;
+                        return;
+                    }
+                    continue;
+                }
+                case GRUUL_ACTION_GROUND_SLAM:
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_GROUND_SLAM_DUMMY) == CAST_OK)
+                    {
+                        m_creature->CastSpell(nullptr, SPELL_GROUND_SLAM, TRIGGERED_NONE);
+                        DoScriptText(urand(0, 1) ? SAY_SLAM1 : SAY_SLAM2, m_creature);
+                        SetCombatMovement(false);
+                        m_meleeEnabled = false;
+                        m_creature->MeleeAttackStop(m_creature->getVictim());
+                        m_creature->SetTarget(nullptr);
+                        m_timers[GRUUL_ACTION_GROUND_SLAM] = urand(70000, 80000);
+                        m_actionReadyStatus[i] = false;
+                        m_actionReadyStatus[GRUUL_ACTION_SHATTER] = true; // top priority, blocked by stun
+                        m_lookAround = true;
+                        return;
+                    }
+                    continue;
+                }
+                case GRUUL_ACTION_REVERBERATION:
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_REVERBERATION) == CAST_OK)
+                    {
+                        m_timers[GRUUL_ACTION_REVERBERATION] = urand(35000, 45000);
+                        m_actionReadyStatus[i] = false;
+                        return;
+                    }
+                    continue;
+                }
+                case GRUUL_ACTION_CAVE_IN:
+                {
+                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                    {
+                        if (DoCastSpellIfCan(target, SPELL_CAVE_IN) == CAST_OK)
+                        {
+                            m_timers[GRUUL_ACTION_CAVE_IN] = 8500;
+                            m_actionReadyStatus[i] = false;
+                            return;
+                        }
+                    }
+                    continue;
+                }
+                case GRUUL_ACTION_HURTFUL_STRIKE:
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_HURTFUL_STRIKE) == CAST_OK)
+                    {
+                        m_timers[GRUUL_ACTION_HURTFUL_STRIKE] = 8000;
+                        m_actionReadyStatus[i] = false;
+                        return;
+                    }
+                    continue;
                 }
             }
         }
+    }
 
-        // this part should be in mangos
-        if (pSpell->Id == SPELL_SHATTER)
+    void SpellHitTarget(Unit* /*target*/, const SpellEntry* spell) override 
+    {
+        if (spell->Id == SPELL_GROUND_SLAM && m_lookAround)
         {
-            // this spell must have custom handling in mangos, dealing damage based on distance
-            pTarget->CastSpell(pTarget, SPELL_SHATTER_EFFECT, TRIGGERED_OLD_TRIGGERED);
-
-            if (pTarget->HasAura(SPELL_STONED))
-                pTarget->RemoveAurasDueToSpell(SPELL_STONED);
-
-            // clear this, if we are still performing
-            if (m_bPerformingGroundSlam)
-            {
-                m_bPerformingGroundSlam = false;
-
-                // and correct movement, if not already
-                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
-                {
-                    if (m_creature->getVictim())
-                        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-                }
-            }
+            m_lookAround = false;
+            m_creature->CastSpell(nullptr, SPELL_LOOK_AROUND, TRIGGERED_NONE);
         }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget())
             return;
 
-        // Gruul can cast this spell up to 30 times
-        if (m_uiGrowthTimer < uiDiff)
+        for (auto& data : m_timers)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_GROWTH) == CAST_OK)
+            if (!m_actionReadyStatus[data.first])
             {
-                DoScriptText(EMOTE_GROW, m_creature);
-                m_uiGrowthTimer = 30000;
+                if (data.second <= uiDiff)
+                {
+                    m_actionReadyStatus[data.first] = true;
+                    data.second = 0;
+                }
+                else data.second -= uiDiff;
             }
         }
-        else
-            m_uiGrowthTimer -= uiDiff;
+        ExecuteActions();
 
-        if (m_bPerformingGroundSlam)
-        {
-            if (m_uiGroundSlamTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SHATTER) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_SLAM, m_creature);
-                    DoScriptText(urand(0, 1) ? SAY_SHATTER1 : SAY_SHATTER2, m_creature);
-                    m_uiGroundSlamTimer     = 120000;
-                    m_uiHurtfulStrikeTimer  = 8000;
-
-                    // Give a little time to the players to undo the damage from shatter
-                    if (m_uiReverberationTimer < 10000)
-                        m_uiReverberationTimer += 10000;
-                }
-            }
-            else
-                m_uiGroundSlamTimer -= uiDiff;
-        }
-        else
-        {
-            // Hurtful Strike
-            if (m_uiHurtfulStrikeTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 1, SPELL_HURTFUL_STRIKE, SELECT_FLAG_PLAYER))
-                    DoCastSpellIfCan(pTarget, SPELL_HURTFUL_STRIKE);
-                else
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_HURTFUL_STRIKE);
-
-                m_uiHurtfulStrikeTimer = 8000;
-            }
-            else
-                m_uiHurtfulStrikeTimer -= uiDiff;
-
-            // Reverberation
-            if (m_uiReverberationTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_REVERBERATION) == CAST_OK)
-                    m_uiReverberationTimer = urand(15000, 25000);
-            }
-            else
-                m_uiReverberationTimer -= uiDiff;
-
-            // Cave In
-            if (m_uiCaveInTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_CAVE_IN) == CAST_OK)
-                    {
-                        if (m_uiCaveInStaticTimer >= 4000)
-                            m_uiCaveInStaticTimer -= 2000;
-
-                        m_uiCaveInTimer = m_uiCaveInStaticTimer;
-                    }
-                }
-            }
-            else
-                m_uiCaveInTimer -= uiDiff;
-
-            // Ground Slam, Gronn Lord's Grasp, Stoned, Shatter
-            if (m_uiGroundSlamTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_GROUND_SLAM) == CAST_OK)
-                {
-                    DoScriptText(urand(0, 1) ? SAY_SLAM1 : SAY_SLAM2, m_creature);
-                    m_creature->GetMotionMaster()->Clear();
-                    m_creature->GetMotionMaster()->MoveIdle();
-
-                    m_bPerformingGroundSlam = true;
-                    m_uiGroundSlamTimer     = 10000;
-                }
-            }
-            else
-                m_uiGroundSlamTimer -= uiDiff;
-
-            DoMeleeAttackIfReady();
-        }
+        DoMeleeAttackIfReady();
     }
 };
 
