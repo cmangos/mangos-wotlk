@@ -119,9 +119,7 @@ OutdoorPvP* OutdoorPvPMgr::GetScriptOfAffectedZone(uint32 zoneId)
         case ZONE_ID_HELLFIRE_CITADEL:
         case ZONE_ID_BLOOD_FURNACE:
         case ZONE_ID_SHATTERED_HALLS:
-        case ZONE_ID_MAGTHERIDON_LAIR:
             return m_scripts[OPVP_ID_HP];
-        case ZONE_ID_SERPENTSHRINE_CAVERN:
         case ZONE_ID_STREAMVAULT:
         case ZONE_ID_UNDERBOG:
         case ZONE_ID_SLAVE_PENS:
