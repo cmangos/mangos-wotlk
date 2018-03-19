@@ -46,7 +46,7 @@ enum
     SPELL_SW_PAIN_PHASE1        = 30854,                    // Shadow word pain during phase 1
     SPELL_SW_PAIN_PHASE3        = 30898,                    // Shadow word pain during phase 3
     SPELL_SUNDER_ARMOR          = 30901,                    // Sunder armor during phase 2
-    SPELL_THRASH_AURA           = 12787,                    // Passive proc chance for thrash
+    SPELL_THRASH_AURA           = 3417,                     // Passive proc chance for thrash
     SPELL_SUMMON_AXES           = 30891,                    // Summon 17650
     SPELL_EQUIP_AXES            = 30857,                    // Visual for axe equiping - transition to phase 2
     SPELL_AMPLIFY_DAMAGE        = 39095,                    // Amplifiy during phase 3 3
