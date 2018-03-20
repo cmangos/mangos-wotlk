@@ -3405,7 +3405,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         return;
 
                     // final heal
-                    if (target->IsInWorld() && GetStackAmount() > 0)
+                    if (target->IsInWorld())
                     {
                         int32 amount = m_modifier.m_amount;
                         target->CastCustomSpell(nullptr, 33778, &amount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this, GetCasterGuid());
