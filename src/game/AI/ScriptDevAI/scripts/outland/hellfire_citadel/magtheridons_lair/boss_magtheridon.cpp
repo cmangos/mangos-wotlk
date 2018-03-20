@@ -419,13 +419,33 @@ struct mob_hellfire_channelerAI : public ScriptedAI
 ## go_manticron_cube
 ######*/
 
-bool GOUse_go_manticron_cube(Player* pPlayer, GameObject* pGo)
+struct go_manticron_cubeAI : public GameObjectAI
 {
-    // if exhausted or already channeling return
-    if (pPlayer->HasAura(SPELL_MIND_EXHAUSTION) || pPlayer->HasAura(SPELL_SHADOW_GRASP))
+    go_manticron_cubeAI(GameObject* go) : GameObjectAI(go), m_lastUser(ObjectGuid()) {}
+
+    ObjectGuid m_lastUser;
+
+    void SetManticronCubeUser(ObjectGuid user) { m_lastUser = user; }
+    Player* GetManticronCubeLastUser() { return m_go->GetMap()->GetPlayer(m_lastUser); }
+};
+
+GameObjectAI* GetAIgo_manticron_cube(GameObject* go)
+{
+    return new go_manticron_cubeAI(go);
+}
+
+bool GOUse_go_manticron_cube(Player* player, GameObject* go)
+{
+    // if current player is exhausted or last user is still channeling
+    if (player->HasAura(SPELL_MIND_EXHAUSTION))
         return true;
 
-    if (ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData())
+    go_manticron_cubeAI* ai = static_cast<go_manticron_cubeAI*>(go->AI());
+    Player* lastUser = ai->GetManticronCubeLastUser();
+    if (lastUser && lastUser->HasAura(SPELL_SHADOW_GRASP))
+        return true;
+
+    if (ScriptedInstance* pInstance = (ScriptedInstance*)go->GetInstanceData())
     {
         if (pInstance->GetData(TYPE_MAGTHERIDON_EVENT) != IN_PROGRESS)
             return true;
@@ -436,7 +456,7 @@ bool GOUse_go_manticron_cube(Player* pPlayer, GameObject* pGo)
                 return true;
 
             // the real spell is cast by player - casts SPELL_SHADOW_GRASP_VISUAL
-            pPlayer->CastSpell(pPlayer, SPELL_SHADOW_GRASP, TRIGGERED_NONE, nullptr, nullptr, pGo->GetObjectGuid());
+            player->CastSpell(nullptr, SPELL_SHADOW_GRASP, TRIGGERED_NONE);
         }
     }
 
@@ -514,6 +534,7 @@ void AddSC_boss_magtheridon()
     pNewScript = new Script;
     pNewScript->Name = "go_manticron_cube";
     pNewScript->pGOUse = &GOUse_go_manticron_cube;
+    pNewScript->GetGameObjectAI = &GetAIgo_manticron_cube;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
