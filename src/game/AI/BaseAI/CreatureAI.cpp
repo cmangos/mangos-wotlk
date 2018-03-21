@@ -39,7 +39,8 @@ CreatureAI::CreatureAI(Creature* creature) :
     m_reactState(REACT_AGGRESSIVE),
     m_meleeEnabled(true),
     m_visibilityDistance(VISIBLE_RANGE),
-    m_moveFurther(true)
+    m_moveFurther(true),
+    m_combatScriptHappening(false)
 {
     m_dismountOnAggro = !(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT);
 
@@ -58,7 +59,8 @@ CreatureAI::CreatureAI(Unit* unit) :
     m_reactState(REACT_AGGRESSIVE),
     m_meleeEnabled(true),
     m_visibilityDistance(VISIBLE_RANGE),
-    m_moveFurther(true)
+    m_moveFurther(true),
+    m_combatScriptHappening(false)
 {
 }
 
@@ -544,6 +546,11 @@ Unit* CreatureAI::DoSelectLowestHpFriendly(float range, float minMissing, bool p
     }
 
     return pUnit;
+}
+
+bool CreatureAI::CanExecuteCombatAction()
+{
+    return m_unit->CanReactInCombat() && !m_unit->hasUnitState(UNIT_STAT_DONT_TURN | UNIT_STAT_SEEKING_ASSISTANCE | UNIT_STAT_CHANNELING) && !m_combatScriptHappening;
 }
 
 void CreatureAI::SetMeleeEnabled(bool state)
