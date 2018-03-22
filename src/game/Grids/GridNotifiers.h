@@ -750,6 +750,32 @@ namespace MaNGOS
             AllGameObjectEntriesListInObjectRangeCheck(AllGameObjectEntriesListInObjectRangeCheck const&);
     };
 
+    // x y z version of above - WOTLK: needs phase support
+    class AllGameObjectEntriesListInPosRangeCheck
+    {
+        public:
+            AllGameObjectEntriesListInPosRangeCheck(WorldObject const& obj, float x, float y, float z, std::set<uint32>& entries, float range, bool is3D = true) : i_obj(obj), i_x(x), i_y(y), i_z(z), i_entries(entries), i_range(range), i_is3D(is3D) {}
+            WorldObject const& GetFocusObject() const { return i_obj; }
+            bool operator()(GameObject* go)
+            {
+                if (go->isSpawned() && i_entries.find(go->GetEntry()) != i_entries.end() && go->IsWithinDist3d(i_x, i_y, i_z, i_range))
+                    return true;
+
+                return false;
+            }
+
+            std::vector<uint32> i_ranges;
+        private:
+            float i_x, i_y, i_z;
+            std::set<uint32>& i_entries;
+            float  i_range;
+            bool   i_is3D;
+            WorldObject const& i_obj;
+
+            // prevent clone this object
+            AllGameObjectEntriesListInPosRangeCheck(AllGameObjectEntriesListInObjectRangeCheck const&);
+    };
+
     // Success at gameobject in range of xyz, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO)
     class NearestGameObjectEntryInPosRangeCheck
     {
