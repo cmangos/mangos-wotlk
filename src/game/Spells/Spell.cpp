@@ -1103,8 +1103,9 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex, CheckExcepti
     {
         if (targetGUID == ihit->targetGUID)                 // Found in list
         {
+            ihit->effectMask |= 1 << effIndex;
             if (!immuned)
-                ihit->effectMask |= 1 << effIndex;          // Add only effect mask if not immuned
+                ihit->effectHitMask |= 1 << effIndex;          // Add only effect mask if not immuned
             return;
         }
     }
@@ -1114,7 +1115,8 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex, CheckExcepti
     // Get spell hit result on target
     TargetInfo target;
     target.targetGUID = targetGUID;                         // Store target GUID
-    target.effectMask = immuned ? 0 : (1 << effIndex);      // Store index of effect if not immuned
+    target.effectHitMask = immuned && !exception == EXCEPTION_MAGNET ? 0 : (1 << effIndex); // Store not immuned effects
+    target.effectMask = (1 << effIndex);                    // Store index of effect
     target.processed  = false;                              // Effects not applied on target
     target.magnet = (exception == EXCEPTION_MAGNET);
 
@@ -1295,7 +1297,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     target->processed = true;                               // Target checked in apply effects procedure
 
     // Get mask of effects for target
-    uint32 effectMask = target->effectMask;
+    uint32 effectMask = target->effectHitMask;
 
     Unit* unit = m_caster->GetObjectGuid() == target->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, target->targetGUID);
     if (!unit)
@@ -1318,7 +1320,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     uint32 procAttacker;
     uint32 procVictim;
     uint32 procEx       = PROC_EX_NONE;
-    PrepareMasksForProcSystem(effectMask, procAttacker, procVictim, caster, unitTarget);
+    PrepareMasksForProcSystem(target->effectMask, procAttacker, procVictim, caster, unitTarget);
     if (target->magnet)
         procEx |= PROC_EX_MAGNET;
 
@@ -1326,7 +1328,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     // for example caster bonus or animation,
     // except miss case where will assigned PROC_EX_* flags later
     if (((procAttacker | procVictim) & NEGATIVE_TRIGGER_MASK) &&
-            !(target->effectMask & m_negativeEffectMask) && missInfo == SPELL_MISS_NONE)
+            !(target->effectHitMask & m_negativeEffectMask) && missInfo == SPELL_MISS_NONE)
     {
         procAttacker = PROC_FLAG_NONE;
         procVictim   = PROC_FLAG_NONE;
@@ -1693,7 +1695,7 @@ void Spell::DoAllEffectOnTarget(ItemTargetInfo* target)
 void Spell::HandleDelayedSpellLaunch(TargetInfo* target)
 {
     // Get mask of effects for target
-    uint32 mask = target->effectMask;
+    uint32 mask = target->effectHitMask;
 
     Unit* unit = m_caster->GetObjectGuid() == target->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, target->targetGUID);
     if (!unit)
@@ -1774,13 +1776,13 @@ bool Spell::IsAliveUnitPresentInTargetList()
 
     for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
     {
-        if (ihit->missCondition == SPELL_MISS_NONE && (needAliveTargetMask & ihit->effectMask))
+        if (ihit->missCondition == SPELL_MISS_NONE && (needAliveTargetMask & ihit->effectHitMask))
         {
             Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, ihit->targetGUID);
 
             // either unit is alive and normal spell, or unit dead and deathonly-spell
             if (unit && (unit->isAlive() != IsDeathOnlySpell(m_spellInfo)))
-                needAliveTargetMask &= ~ihit->effectMask;   // remove from need alive mask effect that have alive target
+                needAliveTargetMask &= ~ihit->effectHitMask;   // remove from need alive mask effect that have alive target
         }
     }
 
@@ -4670,7 +4672,7 @@ void Spell::WriteSpellGoTargets(WorldPacket& data)
 
     for (TargetList::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
     {
-        if (ihit->effectMask == 0)                          // No effect apply - all immuned add state
+        if (ihit->effectHitMask == 0)                       // No effect apply - all immuned add state
         {
             // possibly SPELL_MISS_IMMUNE2 for this??
             ihit->missCondition = SPELL_MISS_IMMUNE2;
@@ -4680,7 +4682,7 @@ void Spell::WriteSpellGoTargets(WorldPacket& data)
         {
             ++hit;
             data << ihit->targetGUID;
-            m_needAliveTargetMask |= ihit->effectMask;
+            m_needAliveTargetMask |= ihit->effectHitMask;
         }
         else
         {
@@ -4792,7 +4794,7 @@ void Spell::SendChannelStart(uint32 duration)
     {
         for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
         {
-            if ((itr->effectMask & (1 << EFFECT_INDEX_0)) && itr->reflectResult == SPELL_MISS_NONE &&
+            if ((itr->effectHitMask & (1 << EFFECT_INDEX_0)) && itr->reflectResult == SPELL_MISS_NONE &&
                     itr->targetGUID != m_caster->GetObjectGuid())
             {
                 target = ObjectAccessor::GetUnit(*m_caster, itr->targetGUID);
@@ -5260,7 +5262,7 @@ void Spell::CastPreCastSpells(Unit* target)
 Unit* Spell::GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const
 {
     for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
-        if (itr->effectMask & (1 << effIndex))
+        if (itr->effectHitMask & (1 << effIndex))
             return m_caster->GetMap()->GetUnit(itr->targetGUID);
 
     return m_targets.getUnitTarget();
@@ -8095,7 +8097,7 @@ bool Spell::IsTriggeredSpellWithRedundantCastTime() const
 bool Spell::HaveTargetsForEffect(SpellEffectIndex effect) const
 {
     for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
-        if (itr->effectMask & (1 << effect))
+        if (itr->effectHitMask & (1 << effect))
             return true;
 
     for (GOTargetList::const_iterator itr = m_UniqueGOTargetInfo.begin(); itr != m_UniqueGOTargetInfo.end(); ++itr)
