@@ -1210,6 +1210,8 @@ UPDATE creature_template SET ScriptName='npc_spawned_oronok_tornheart' WHERE ent
 UPDATE creature_template SET ScriptName='npc_domesticated_felboar' WHERE entry=21195;
 UPDATE creature_template SET ScriptName='npc_shadowmoon_tuber_node' WHERE entry=21347;
 UPDATE creature_template SET ScriptName='npc_veneratus_spawn_node' WHERE entry=21334;
+UPDATE creature_template SET ScriptName='mob_shadowmoon_soulstealer' WHERE entry=22061;
+UPDATE creature_template SET ScriptName='npc_shadowlord_deathwail' WHERE entry=22006;
 
 /* SHATTRATH */
 UPDATE creature_template SET ScriptName='npc_dirty_larry' WHERE entry=19720;
@@ -3069,6 +3071,16 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001316,'Regain your strength. The place where Steeljaw was felled is just ahead.',0,0,0,396,'proudhoof SAY_AMBUSH_COMPLETE'),
 (-1001317,'There\'s the dog\'s banner and there\'s his corpse. What\'s that? He\'s upon us!',0,0,0,25,'proudhoof SAY_FINAL_BATTLE'),
 (-1001318,'You fought well. Now go north to your orc outpost and inform Overlord Bor\'gorok of our success!',0,0,0,113,'proudhoof SAY_QUEST_END');
+
+-- -1 010 000 Classic texts
+
+-- -1 015 000 TBC texts
+INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1015002, 'You will never get the Heart of Fury!  Its power belongs to Illidan!', '0', '1', '0', '0', 'Shadowlord Deathwail - yell on descent'),
+(-1015003, '%s retrieves the Heart of Fury.', '0', '2', '0', '0', 'Shadowlord Deathwail - grabs heart'),
+(-1015004, 'Master... I\'ve failed you...', '0', '1', '0', '0', 'Shadowlord Deathwail - death');
+
+-- -1 020 000 WOTLK texts
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
