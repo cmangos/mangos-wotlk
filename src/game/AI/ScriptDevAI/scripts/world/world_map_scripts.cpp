@@ -36,6 +36,10 @@ struct world_map_eastern_kingdoms : public ScriptedMap
     {
         switch (pCreature->GetEntry())
         {
+            case NPC_NEZRAZ:
+            case NPC_HINDENBURG:
+            case NPC_ZAPETTA:
+            case NPC_SQUIBBY_OVERSPECK:
             case NPC_JONATHAN:
             case NPC_WRYNN:
             case NPC_BOLVAR:
@@ -91,6 +95,8 @@ struct world_map_kalimdor : public ScriptedMap
     {
         switch (pCreature->GetEntry())
         {
+            case NPC_FREZZA:
+            case NPC_SNURK_BUCKSQUICK:
             case NPC_MURKDEEP:
             case NPC_OMEN:
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
