@@ -7194,10 +7194,17 @@ void ObjectMgr::LoadDungeonEncounters()
     sDungeonEncounterStore.Load();
 }
 
+void ObjectMgr::LoadAreaGroups()
+{
+    sLog.outString("Loading Area Groups");
+    sAreaGroupStore.Load();
+}
+
 void ObjectMgr::LoadSQLDBCs()
 {
     LoadSpellTemplate();
     LoadDungeonEncounters();
+    LoadAreaGroups();
 }
 
 void ObjectMgr::DeleteCreatureData(uint32 guid)

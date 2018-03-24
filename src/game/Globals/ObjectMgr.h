@@ -768,6 +768,7 @@ class ObjectMgr
 
         void LoadSpellTemplate();
         void LoadDungeonEncounters();
+        void LoadAreaGroups();
         void LoadSQLDBCs();
 
         void LoadVendorTemplates();
