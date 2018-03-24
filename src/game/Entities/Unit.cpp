@@ -9839,8 +9839,6 @@ bool Unit::SelectHostileTarget()
                 oldTarget->_removeAttacker(this);
             }
         }
-        else
-            target = oldTarget;
     }
 
     if (target)
