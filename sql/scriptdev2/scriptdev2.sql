@@ -503,6 +503,9 @@ UPDATE creature_template SET ScriptName='npc_naturalist_bite' WHERE entry IN(178
 /* THE UNDERBOG */
 UPDATE creature_template SET ScriptName='mob_underbog_mushroom' WHERE entry=17990;
 UPDATE creature_template SET ScriptName='boss_hungarfen' WHERE entry=17770;
+UPDATE instance_template SET ScriptName='instance_underbog' WHERE map=546;
+INSERT INTO scripted_areatrigger VALUES
+(4302,'at_ghazan_surface');
 
 /* THE STEAMVAULT */
 UPDATE instance_template SET ScriptName='instance_steam_vault' WHERE map=545;
