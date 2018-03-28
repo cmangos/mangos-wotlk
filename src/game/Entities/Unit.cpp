@@ -3517,6 +3517,9 @@ float Unit::GetReflectChance(SpellSchoolMask schoolMask) const
 
 bool Unit::CanCrit(const SpellEntry* entry, SpellSchoolMask schoolMask, WeaponAttackType attType) const
 {
+    // Only players, player pets and totems can crit with spells
+    if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        return false;
     if (HasAffectedAura(SPELL_AURA_ABILITY_PERIODIC_CRIT, entry))
         return true;
     if (!IsSpellAbleToCrit(entry))
