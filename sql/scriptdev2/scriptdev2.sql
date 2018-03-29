@@ -106,6 +106,7 @@ UPDATE gameobject_template SET ScriptName='go_darkmoon_faire_music' WHERE entry=
 UPDATE gameobject_template SET ScriptName='go_pirate_day_music' WHERE entry=190363;
 UPDATE gameobject_template SET ScriptName='go_midsummer_music' WHERE entry=188174;
 UPDATE gameobject_template SET ScriptName='go_brewfest_music' WHERE entry=186221;
+UPDATE gameobject_template SET ScriptName='go_elemental_rift' WHERE entry IN (179664, 179665, 179666, 179667);
 
 /* GUARD */
 UPDATE creature_template SET ScriptName='guard_azuremyst' WHERE entry=18038;
