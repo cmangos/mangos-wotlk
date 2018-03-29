@@ -1846,6 +1846,21 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
                             (spellInfo_2->Id == 21992 && spellInfo_1->Id == 27648))
                         return false;
 
+                    // Cannon Prep (stun) and Cannon Prep (transform) - Elwynn Forest
+                    if ((spellInfo_1->Id == 24754 && spellInfo_2->Id == 24743) ||
+                            (spellInfo_2->Id == 24754 && spellInfo_1->Id == 24743))
+                        return false;
+
+                    // Cannon Prep (stun) and Cannon Prep (transform) - Mulgore
+                    if ((spellInfo_1->Id == 24754 && spellInfo_2->Id == 24832) ||
+                            (spellInfo_2->Id == 24754 && spellInfo_1->Id == 24832))
+                        return false;
+
+                    // Cannon Prep (stun) and Cannon Prep (transform) - Terokkar Forest
+                    if ((spellInfo_1->Id == 24754 && spellInfo_2->Id == 42825) ||
+                            (spellInfo_2->Id == 24754 && spellInfo_1->Id == 42825))
+                        return false;
+
                     // Lightning Speed (Mongoose) and Fury of the Crashing Waves (Tsunami Talisman)
                     if ((spellInfo_1->Id == 28093 && spellInfo_2->Id == 42084) ||
                             (spellInfo_2->Id == 28093 && spellInfo_1->Id == 42084))

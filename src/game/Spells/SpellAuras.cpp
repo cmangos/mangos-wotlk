@@ -1222,6 +1222,11 @@ void Aura::TriggerSpell()
 //                    case 24379: break;
 //                    // Happy Pet
 //                    case 24716: break;
+                    case 24743:                             // Cannon Prep
+                    case 24832:                             // Cannon Prep
+                    case 42825:                             // Cannon Prep
+                        trigger_spell_id = auraId == 42825 ? 42868 : 24731;
+                        break;
                     case 24780:                             // Dream Fog
                     {
                         // Note: In 1.12 triggered spell 24781 still exists, need to script dummy effect for this spell then
