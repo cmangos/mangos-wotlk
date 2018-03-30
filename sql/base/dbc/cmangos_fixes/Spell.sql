@@ -545,9 +545,6 @@ INSERT INTO spell_template (Id, Category, Dispel, Mechanic, Attributes, Attribut
 (24754, 0, 0, 0, 256, 268435456, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 101, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'Cannon Prep', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0),
 (42825, 0, 0, 0, 256, 268435456, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 101, 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 25, 25, 0, 0, 0, 0, 0, 0, 56, 67, 23, 0, 0, 5000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15214, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'Cannon Prep', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0);
 
--- Added missing triggered spell for spells Cannon Prep
-UPDATE spell_template SET EffectTriggerSpell3=24731 WHERE id IN (24743, 24832);
-UPDATE spell_template SET EffectTriggerSpell3=42868 WHERE id=42825;
 -- Added Ignore LoS attribute for Magic Wings spell (trigger NPC is not always in LoS of player)
-UPDATE spell_template SET AttributesEx2=AttributesEx2|0x00000004 WHERE id=24742;
+UPDATE spell_template SET AttributesEx2=AttributesEx2|0x00000004 WHERE id IN (24742, 42867);
 

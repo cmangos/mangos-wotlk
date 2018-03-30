@@ -3835,7 +3835,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (!item)
                         return;
 
-                    // all poison enchantments is temporary					
+                    // all poison enchantments is temporary
                     if (uint32 enchant_id = item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
                     {
                         SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
@@ -3854,7 +3854,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             m_caster->CastSpell(unitTarget, combatEntry, TRIGGERED_OLD_TRIGGERED, item);
                         }
                     }
-                    
+
                     m_caster->CastSpell(unitTarget, 5940, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
@@ -5107,7 +5107,7 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
             if (m_caster->HasAura(17619)) // Alchemists stone
                 addhealth *= 1.4f; // increase healing by 40%
         }
-        else 
+        else
         {
             switch (m_spellInfo->Id)
             {
@@ -5129,10 +5129,10 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
                             damageAmount += (*i)->GetModifier()->m_amount;
                     if (damageAmount)
                         m_caster->RemoveAurasDueToSpell(45062);
-                
+
                     addhealth += damageAmount;
                     break;
-                
+
                 }
                 case 67486: // Runic Healing Injector
                 case 67489: // Healing Potion Injector
@@ -5476,7 +5476,7 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
         default:
             break;
     }
-    
+
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_POTION)
     {
         if (m_caster->HasAura(17619)) // Alchemists stone
@@ -6116,7 +6116,7 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
             // UNIT_FIELD_CREATEDBY are not set for these kind of spells.
             // Does exceptions exist? If so, what are they?
             // summon->SetCreatorGuid(m_caster->GetObjectGuid());
-            
+
             switch(m_spellInfo->Id)
             {
                 case 1122: // Warlock Infernal - requires custom code - generalized in WOTLK
@@ -8069,6 +8069,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 24742:                                 // Magic Wings
+                case 42867:                                 // Magic Wings (Terrokar Forest)
                 {
                     if(!unitTarget)
                         return;
