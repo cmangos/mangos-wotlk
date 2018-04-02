@@ -548,3 +548,6 @@ INSERT INTO spell_template (Id, Category, Dispel, Mechanic, Attributes, Attribut
 -- Added Ignore LoS attribute for Magic Wings spell (trigger NPC is not always in LoS of player)
 UPDATE spell_template SET AttributesEx2=AttributesEx2|0x00000004 WHERE id IN (24742, 42867);
 
+-- Shoot Gun - max 1 target
+UPDATE spell_template SET MaxAffectedTargets=1 WHERE id=45761;
+
