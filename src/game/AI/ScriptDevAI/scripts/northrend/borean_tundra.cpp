@@ -1067,27 +1067,28 @@ enum
     // Note: spell 46338 has to be allowed in the following areas: 4116; 4117; 4119; 4035; 4037; 4043. Requires DBC update for this to work
 };
 
-struct npc_jennyAI : public FollowerAI
+struct npc_jennyAI : public ScriptedPetAI
 {
-    npc_jennyAI(Creature* pCreature) : FollowerAI(pCreature)
+    npc_jennyAI(Creature* pCreature) : ScriptedPetAI(pCreature)
     {
-        m_bFollowStarted = false;
         m_bEventComplete = false;
         SetReactState(REACT_PASSIVE);
+        DoCastSpellIfCan(m_creature, SPELL_CREATES_CARRIED);
         Reset();
     }
 
     bool m_bEventComplete;
-    bool m_bFollowStarted;
 
     void Reset() override { }
 
     void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
-        if (eventType == AI_EVENT_CUSTOM_A)
+        if (eventType == AI_EVENT_CUSTOM_A && !m_bEventComplete)
         {
-            FollowerAI::JustDied(m_creature);
-            m_creature->ForcedDespawn();
+            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
+                pSummoner->FailQuest(QUEST_ID_LOADER_UP);
+
+            ((Pet*)m_creature)->Unsummon(PET_SAVE_AS_DELETED);
         }
     }
 
@@ -1101,33 +1102,14 @@ struct npc_jennyAI : public FollowerAI
             if (DoCastSpellIfCan(m_creature, SPELL_JENNY_CREDIT) == CAST_OK)
             {
                 pWho->CastSpell(m_creature, SPELL_JENNY_CREDIT_TRIGGER, TRIGGERED_OLD_TRIGGERED);
-                SetFollowComplete(true);
+                m_bEventComplete = true;
 
                 float fX, fY, fZ;
                 pWho->GetContactPoint(m_creature, fX, fY, fZ);
                 m_creature->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
-                m_creature->ForcedDespawn(15000);
-
-                m_bEventComplete = true;
+                ((Pet*)m_creature)->Unsummon(PET_SAVE_AS_DELETED);
             }
         }
-    }
-
-    void UpdateFollowerAI(const uint32 uiDiff)
-    {
-        if (!m_bFollowStarted)
-        {
-            if (Player* pSummoner = m_creature->GetBeneficiaryPlayer())
-            {
-                StartFollow(pSummoner, pSummoner->getFaction(), GetQuestTemplateStore(QUEST_ID_LOADER_UP));
-
-                if (DoCastSpellIfCan(m_creature, SPELL_CREATES_CARRIED) == CAST_OK)
-                    m_bFollowStarted = true;
-            }
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
     }
 };
 
