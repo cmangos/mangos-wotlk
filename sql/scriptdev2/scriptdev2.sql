@@ -1217,7 +1217,6 @@ UPDATE gameobject_template SET ScriptName='go_quest_still_at_it_credit' WHERE en
 UPDATE creature_template SET ScriptName='npc_anachronos_the_ancient' WHERE entry=15381;
 UPDATE gameobject_template SET ScriptName='go_crystalline_tear' WHERE entry=180633;
 UPDATE creature_template SET ScriptName='npc_solenor' WHERE entry IN (14530,14536);
-UPDATE creature_template SET ScriptName='npc_creeping_doom' WHERE entry=14761;
 
 /* SILVERMOON */
 
