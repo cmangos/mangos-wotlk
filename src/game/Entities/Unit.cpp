@@ -8221,20 +8221,22 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
                     DoneTotalMod *= (glyph->GetModifier()->m_amount * ownHotCount + 100.0f) / 100.0f;
             }
         }
-        // Lifebloom
-        else if (spellProto->IsFitToFamilyMask(uint64(0x0000001000000000)))
+    }
+
+    AuraList const& auraDummy = GetAurasByType(SPELL_AURA_DUMMY);
+    for (AuraList::const_iterator i = auraDummy.begin(); i != auraDummy.end(); ++i)
+    {
+        if (!(*i)->isAffectedOnSpell(spellProto))
+            continue;
+        switch ((*i)->GetSpellProto()->Id)
         {
-            AuraList const& dummyList = owner->GetAurasByType(SPELL_AURA_DUMMY);
-            for (AuraList::const_iterator i = dummyList.begin(); i != dummyList.end(); ++i)
-            {
-                switch ((*i)->GetId())
-                {
-                    case 34246:                             // Idol of the Emerald Queen        TODO: can be flat modifier aura
-                    case 60779:                             // Idol of Lush Moss
-                        DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount / 7;
-                        break;
-                }
-            }
+            case 28851: // Flash of Light - need to create generic container for this and the above
+            case 28853:
+            case 32403:
+            case 34246: // Lifebloom
+            case 60779: // Idol of Lush Moss
+                DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount;
+                break;
         }
     }
 

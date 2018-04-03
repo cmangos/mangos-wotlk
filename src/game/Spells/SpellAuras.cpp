@@ -3382,7 +3382,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     return;
                 }
             }
-
             // Lifebloom
             if (GetSpellProto()->SpellFamilyFlags & uint64(0x1000000000))
             {
