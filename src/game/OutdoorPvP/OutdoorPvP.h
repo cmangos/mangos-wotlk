@@ -113,6 +113,8 @@ class OutdoorPvP
         // Player related stuff
         virtual void HandlePlayerEnterZone(Player* /*player*/, bool /*isMainZone*/);
         virtual void HandlePlayerLeaveZone(Player* /*player*/, bool /*isMainZone*/);
+        virtual void HandlePlayerEnterArea(Player* /*player*/, uint32 /*areaId*/, bool /*isMainZone*/) {}
+        virtual void HandlePlayerLeaveArea(Player* /*player*/, uint32 /*areaId*/, bool /*isMainZone*/) {}
 
         // remove world states
         virtual void SendRemoveWorldStates(Player* /*player*/) {}

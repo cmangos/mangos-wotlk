@@ -686,6 +686,8 @@ class BattlefieldWG : public Battlefield
 
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;
+        void HandlePlayerEnterArea(Player* player, uint32 areaId, bool isMainZone) override;
+        void HandlePlayerLeaveArea(Player* player, uint32 areaId, bool isMainZone) override;
         void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         void SendRemoveWorldStates(Player* player) override;
 

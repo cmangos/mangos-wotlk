@@ -165,6 +165,36 @@ void OutdoorPvPMgr::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
         affectedScript->HandlePlayerLeaveZone(player, false);
 }
 
+/**
+   Function that handles the player who enters a specific area in a specific zone id
+
+   @param   player to be handled in the event
+   @param   zone id used for the current outdoor pvp script
+   @param   area id refered by the function
+ */
+void OutdoorPvPMgr::HandlePlayerEnterArea(Player* player, uint32 zoneId, uint32 areaId)
+{
+    if (OutdoorPvP* script = GetScript(zoneId))
+        script->HandlePlayerEnterArea(player, areaId, true);
+    else if (OutdoorPvP* script = GetScriptOfAffectedZone(zoneId))
+        script->HandlePlayerEnterArea(player, areaId, false);
+}
+
+/**
+   Function that handles the player who leaves a specific area in a specific zone id
+
+   @param   player to be handled in the event
+   @param   zone id used for the current outdoor pvp script
+   @param   area id refered by the function
+ */
+void OutdoorPvPMgr::HandlePlayerLeaveArea(Player* player, uint32 zoneId, uint32 areaId)
+{
+    if (OutdoorPvP* script = GetScript(zoneId))
+        script->HandlePlayerLeaveArea(player, areaId, true);
+    else if (OutdoorPvP* script = GetScriptOfAffectedZone(zoneId))
+        script->HandlePlayerLeaveArea(player, areaId, false);
+}
+
 void OutdoorPvPMgr::Update(uint32 diff)
 {
     m_updateTimer.Update(diff);

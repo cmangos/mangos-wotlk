@@ -6997,6 +6997,10 @@ uint32 Player::GetLevelFromDB(ObjectGuid guid)
 
 void Player::UpdateArea(uint32 newArea)
 {
+    // handle outdoor pvp zones
+    sOutdoorPvPMgr.HandlePlayerLeaveArea(this, GetCachedZoneId(), m_areaUpdateId);
+    sOutdoorPvPMgr.HandlePlayerEnterArea(this, GetCachedZoneId(), newArea);
+
     m_areaUpdateId    = newArea;
 
     AreaTableEntry const* area = GetAreaEntryByAreaID(newArea);

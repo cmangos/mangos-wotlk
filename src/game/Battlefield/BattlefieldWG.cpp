@@ -147,8 +147,28 @@ void BattlefieldWG::HandlePlayerLeaveZone(Player* player, bool isMainZone)
     player->RemoveAurasDueToSpell(SPELL_LIEUTENANT);
     player->RemoveAurasDueToSpell(SPELL_TOWER_CONTROL);
 
-    // remove flight restriction
-    player->RemoveAurasDueToSpell(SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA);
+    // remove flight restriction (not required - removed by timer)
+    // player->RemoveAurasDueToSpell(SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA);
+}
+
+void BattlefieldWG::HandlePlayerEnterArea(Player* player, uint32 areaId, bool isMainZone)
+{
+    switch (areaId)
+    {
+        case AREA_ID_WINTERGRASP_FORTRESS:
+        case AREA_ID_THE_SUNKEN_RING:
+        case AREA_ID_THE_BROKEN_TEMPLE:
+        case AREA_ID_THE_CHILLED_QUAGMIRE:
+        case AREA_ID_WESTPARK_WORKSHOP:
+        case AREA_ID_EASTPARK_WORKSHOP:
+            // ToDo: handle SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE and SPELL_HORDE_CONTROLS_FACTORY_PHASE
+            return;
+    }
+}
+
+void BattlefieldWG::HandlePlayerLeaveArea(Player* player, uint32 areaId, bool isMainZone)
+{
+    // ToDo: handle SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE and SPELL_HORDE_CONTROLS_FACTORY_PHASE
 }
 
 void BattlefieldWG::HandleCreatureCreate(Creature* creature)
