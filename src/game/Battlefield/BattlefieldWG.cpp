@@ -220,9 +220,7 @@ void BattlefieldWG::Update(uint32 diff)
     if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN && m_timer <= 3 * MINUTE * IN_MILLISECONDS && !m_sentPrebattleWarning)
     {
         m_sentPrebattleWarning = true;
-
-        // ToDo: recheck language
-        //SendZoneWarning(LANG_OPVP_WG_ABOUT_TO_BEGIN);
+        SendZoneWarning(LANG_OPVP_WG_ABOUT_TO_BEGIN);
     }
 }
 
@@ -230,10 +228,9 @@ void BattlefieldWG::StartBattle(Team defender)
 {
     Battlefield::StartBattle(defender);
 
-    // ToDo: recheck language
-    //SendZoneWarning(LANG_OPVP_WG_BATTLE_BEGIN);
+    SendZoneWarning(LANG_OPVP_WG_BATTLE_BEGIN);
 
-    // ToDo: Enable restricted flight area
+    // Enable restricted flight area - handled in Player::UpdateArea()
 }
 
 void BattlefieldWG::EndBattle(Team winner, bool byTimer)
@@ -285,6 +282,16 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
 
 bool BattlefieldWG::IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType)
 {
+    switch (conditionId)
+    {
+        case OPVP_COND_WG_MAX_ALLIANCE_VEHICLES:
+        case OPVP_COND_WG_MAX_HORDE_VEHICLES:
+            // Todo: return false if the max allowed vehicles for ally / horde is has been reached
+            return false;
+        case OPVP_COND_WG_BATTLEFIELD_IN_PROGRESS:
+            return GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS;
+    }
+
     return false;
 }
 

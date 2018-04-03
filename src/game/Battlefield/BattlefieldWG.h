@@ -57,8 +57,8 @@ enum
     // misc spells
     SPELL_WINTERGRASP_WATER                     = 36444,            // water damage against vehicles
     SPELL_ESSENCE_WINTERGRASP_MAP               = 57940,            // map wide buff
-    SPELL_ESSENCE_WINTERGRASP_ZONE              = 58045,            // zone specidif buff (includes phasing)
-    // SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA = 58730,            // no fly zone aura
+    SPELL_ESSENCE_WINTERGRASP_ZONE              = 58045,            // zone specidif buff (includes phasing 257) - allows the player to see the Greater Elemental Spirits
+    // SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA = 58730,            // no fly zone aura - Implemented in Player::UpdateArea()
     SPELL_VICTORY_AURA_COSMETIC                 = 60044,
     SPELL_RULERS_OF_WINTERGRASP                 = 52108,            // increase damage buff
     // SPELL_ACH_DESTROYED_TOWER                = 60676,
@@ -581,10 +581,17 @@ enum
     FACTION_ID_WARSONG                          = 1979,
     FACTION_ID_VALLIANCE                        = 1891,
 
+    FACTION_ID_ALLIANCE_GENERIC_1               = 1732,             // used by GOs and creatures
+    FACTION_ID_ALLIANCE_GENERIC_2               = 1733,             // ToDo: to be confirmed
+    FACTION_ID_HORDE_GENERIC_1                  = 1734,             // ToDo: to be confirmed
+    FACTION_ID_HORDE_GENERIC_2                  = 1735,             // used by GOs and creatures
+
 
     // ***** Condition entries *****
     // used to check the gossip options in DB for various npcs
-    // ToDo: add condition entries here
+    OPVP_COND_WG_MAX_ALLIANCE_VEHICLES          = 0,
+    OPVP_COND_WG_MAX_HORDE_VEHICLES             = 1,
+    OPVP_COND_WG_BATTLEFIELD_IN_PROGRESS        = 2,
 };
 
 struct WintergraspGoData
