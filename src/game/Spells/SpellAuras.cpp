@@ -2394,7 +2394,8 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 54729:                             // Winged Steed of the Ebon Blade
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 0, 0, 54726, 54727, 0);
                         return;
-                    case 58600:                             // Restricted Flight Area
+                    case 58600:                             // Restricted Flight Area (Dalaran)
+                    case 58730:                             // Restricted Flight Area (Wintergrasp)
                     {
                         if (!target || target->GetTypeId() != TYPEID_PLAYER)
                             return;
@@ -3022,12 +3023,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                 return;
             }
-            case 58600:                                     // Restricted Flight Area
+            case 58600:                                     // Restricted Flight Area (Dalaran)
+            case 58730:                                     // Restricted Flight Area (Wintergrasp)
             {
                 AreaTableEntry const* area = GetAreaEntryByAreaID(target->GetAreaId());
 
                 // Dalaran restricted flight zone (recheck before apply unmount)
-                if (area && target->GetTypeId() == TYPEID_PLAYER && (area->flags & AREA_FLAG_CANNOT_FLY) &&
+                if (area && target->GetTypeId() == TYPEID_PLAYER && (GetId() == 58600 && area->flags & AREA_FLAG_CANNOT_FLY || GetId() == 58730 && area->flags & AREA_FLAG_OUTDOOR_PVP) &&
                         ((Player*)target)->IsFreeFlying() && !((Player*)target)->isGameMaster())
                 {
                     target->CastSpell(target, 58601, TRIGGERED_OLD_TRIGGERED); // Remove Flight Auras (also triggered Parachute (45472))

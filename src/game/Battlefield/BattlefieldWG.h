@@ -58,7 +58,7 @@ enum
     SPELL_WINTERGRASP_WATER                     = 36444,            // water damage against vehicles
     SPELL_ESSENCE_WINTERGRASP_MAP               = 57940,            // map wide buff
     SPELL_ESSENCE_WINTERGRASP_ZONE              = 58045,            // zone specidif buff (includes phasing)
-    SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA    = 58730,            // no fly zone aura
+    // SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA = 58730,            // no fly zone aura
     SPELL_VICTORY_AURA_COSMETIC                 = 60044,
     SPELL_RULERS_OF_WINTERGRASP                 = 52108,            // increase damage buff
     // SPELL_ACH_DESTROYED_TOWER                = 60676,

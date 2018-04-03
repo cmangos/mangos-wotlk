@@ -7022,9 +7022,13 @@ void Player::UpdateArea(uint32 newArea)
         if ((area->flags & AREA_FLAG_CANNOT_FLY) && IsFreeFlying() && !isGameMaster() && !HasAura(58600))
             CastSpell(this, 58600, TRIGGERED_OLD_TRIGGERED);                   // Restricted Flight Area
 
-        // TODO: implement wintergrasp parachute when battle in progress
-        /* if ((area->flags & AREA_FLAG_OUTDOOR_PVP) && IsFreeFlying() && <WINTERGRASP_BATTLE_IN_PROGRESS> && !isGameMaster())
-            CastSpell(this, 58730, TRIGGERED_OLD_TRIGGERED); */
+        // Wintergrasp parachute when battle in progress
+        if ((area->flags & AREA_FLAG_OUTDOOR_PVP) && IsFreeFlying() && !isGameMaster() && !HasAura(58730))
+        {
+            OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetCachedZoneId());
+            if (outdoorPvP && outdoorPvP->IsBattlefield() && ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS)
+                CastSpell(this, 58730, TRIGGERED_OLD_TRIGGERED);
+        }
     }
 
     UpdateAreaDependentAuras();

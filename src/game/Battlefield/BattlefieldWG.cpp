@@ -124,9 +124,9 @@ void BattlefieldWG::HandlePlayerEnterZone(Player* player, bool isMainZone)
     if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN && GetDefender() == player->GetTeam())
         player->CastSpell(player, SPELL_ESSENCE_WINTERGRASP_ZONE, TRIGGERED_OLD_TRIGGERED);
 
-    // apply flight restriction during combat
-    if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && player->IsFreeFlying() && !player->isGameMaster() && !player->HasAura(SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA))
-        player->CastSpell(player, SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA, TRIGGERED_OLD_TRIGGERED);
+    // Note: flight restriction during combat - Implemented in Player::UpdateArea()
+    //if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && player->IsFreeFlying() && !player->isGameMaster() && !player->HasAura(SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA))
+    //    player->CastSpell(player, SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA, TRIGGERED_OLD_TRIGGERED);
 
     // ToDo:
     // update tower control aura and the score aura
