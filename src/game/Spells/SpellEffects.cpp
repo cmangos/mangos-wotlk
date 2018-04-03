@@ -9652,6 +9652,19 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
                     break;
                 }
+                case 56659:                                 // Build Demolisher (Force)
+                case 56662:                                 // Build Siege Vehicle (Force)
+                case 56664:                                 // Build Catapult (Force)
+                case 56666:                                 // Build Fighter Jet (Force)
+                case 56668:                                 // Build Bomber (Force)
+                case 56670:                                 // Build Shredder (Force)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_NONE);
+                    break;
+                }
                 case 57082:                                 // Crystal Spikes (h1)
                 {
                     if (!unitTarget)
