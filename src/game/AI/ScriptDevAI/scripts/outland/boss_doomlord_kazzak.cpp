@@ -131,11 +131,8 @@ struct boss_doomlordkazzakAI : public ScriptedAI
         // VoidBolt_Timer
         if (m_uiVoidBoltTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_VOID_BOLT, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_VOID_BOLT) == CAST_OK)
-                    m_uiVoidBoltTimer = urand(15000, 18000);
-            }
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VOID_BOLT) == CAST_OK)
+                m_uiVoidBoltTimer = urand(15000, 18000);
         }
         else
             m_uiVoidBoltTimer -= uiDiff;
