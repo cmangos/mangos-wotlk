@@ -5541,6 +5541,10 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                     // Cast "crossed flames debuff"
                     target->CastSpell(target, 29947, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
+            case 33401:                                     // Possess
+                if (Unit* caster = GetCaster())
+                    caster->CastSpell(target, 32830, TRIGGERED_NONE);
+                return;
             case 35515:                                     // Salaadin's Tesla
                 if ((m_removeMode != AURA_REMOVE_BY_STACK) && (!target->HasAura(35515)))
                     if (Creature* creature = (Creature*)target)
