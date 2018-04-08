@@ -15017,8 +15017,23 @@ void Player::MoneyChanged(uint32 count)
     }
 }
 
+enum TitleFactions
+{
+    FACTION_LEAGUE_OF_ARATHOR       = 509, 
+    FACTION_STORMPIKE_GUARD         = 730,   
+    FACTION_SILVERWING_SENTINELS    = 890,
+
+    FACTION_DEFILERS                = 510,
+    FACTION_FROSTWOLF_CLAN          = 729,
+    FACTION_WARSONG_OUTRIDERS       = 889,
+
+    TITLE_CONQUEROR                 = 47,
+    TITLE_JUSTICAR                  = 48,
+};
+
 void Player::ReputationChanged(FactionEntry const* factionEntry)
 {
+    ReputationMgr const& repMgr = GetReputationMgr();
     for (int i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
     {
         if (uint32 questid = GetQuestSlotQuestId(i))
@@ -15030,17 +15045,47 @@ void Player::ReputationChanged(FactionEntry const* factionEntry)
                     QuestStatusData& q_status = mQuestStatus[questid];
                     if (q_status.m_status == QUEST_STATUS_INCOMPLETE)
                     {
-                        if (GetReputationMgr().GetReputation(factionEntry) >= qInfo->GetRepObjectiveValue())
+                        if (repMgr.GetReputation(factionEntry) >= qInfo->GetRepObjectiveValue())
                             if (CanCompleteQuest(questid))
                                 CompleteQuest(questid);
                     }
                     else if (q_status.m_status == QUEST_STATUS_COMPLETE)
                     {
-                        if (GetReputationMgr().GetReputation(factionEntry) < qInfo->GetRepObjectiveValue())
+                        if (repMgr.GetReputation(factionEntry) < qInfo->GetRepObjectiveValue())
                             IncompleteQuest(questid);
                     }
                 }
             }
+        }
+    }
+
+    switch (factionEntry->ID)
+    {
+        case FACTION_LEAGUE_OF_ARATHOR:
+        case FACTION_STORMPIKE_GUARD:
+        case FACTION_SILVERWING_SENTINELS:
+        {
+            FactionEntry const* factionEntryArathor = sFactionStore.LookupEntry(FACTION_LEAGUE_OF_ARATHOR);
+            if (repMgr.GetRank(factionEntryArathor) < REP_EXALTED) break;
+            FactionEntry const* factionEntryStormpike = sFactionStore.LookupEntry(FACTION_STORMPIKE_GUARD);
+            if (repMgr.GetRank(factionEntryStormpike) < REP_EXALTED) break;
+            FactionEntry const* factionEntrySentinels = sFactionStore.LookupEntry(FACTION_SILVERWING_SENTINELS);
+            if (repMgr.GetRank(factionEntrySentinels) < REP_EXALTED) break;
+            SetTitle(TITLE_JUSTICAR);
+            break;
+        }
+        case FACTION_DEFILERS:
+        case FACTION_FROSTWOLF_CLAN:
+        case FACTION_WARSONG_OUTRIDERS:
+        {
+            FactionEntry const* factionEntryDefilers = sFactionStore.LookupEntry(FACTION_DEFILERS);
+            if (repMgr.GetRank(factionEntryDefilers) < REP_EXALTED) break;
+            FactionEntry const* factionEntryFrostwolf = sFactionStore.LookupEntry(FACTION_FROSTWOLF_CLAN);
+            if (repMgr.GetRank(factionEntryFrostwolf) < REP_EXALTED) break;
+            FactionEntry const* factionEntryWarsong = sFactionStore.LookupEntry(FACTION_WARSONG_OUTRIDERS);
+            if (repMgr.GetRank(factionEntryWarsong) < REP_EXALTED) break;
+            SetTitle(TITLE_CONQUEROR);
+            break;
         }
     }
 }
@@ -21760,6 +21805,12 @@ bool Player::HasTitle(uint32 bitIndex) const
     uint32 fieldIndexOffset = bitIndex / 32;
     uint32 flag = 1 << (bitIndex % 32);
     return HasFlag(PLAYER__FIELD_KNOWN_TITLES + fieldIndexOffset, flag);
+}
+
+void Player::SetTitle(uint32 titleId, bool lost)
+{
+    if (CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(titleId))
+        SetTitle(titleEntry, lost);
 }
 
 void Player::SetTitle(CharTitlesEntry const* title, bool lost)

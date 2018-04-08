@@ -662,18 +662,27 @@ bool GossipHello_npc_salsalabim(Player* pPlayer, Creature* pCreature)
 
 enum
 {
-    QUEST_KAELTHAS_AND_THE_VERDANT_SPHERE = 11007,
+    QUEST_KAELTHAS_AND_THE_VERDANT_SPHERE   = 11007,
+    QUEST_TRIAL_OF_THE_NAARU_MAGTHERIDON    = 10888,
+    QUEST_CUDGEL_OF_KARDESH                 = 10901,
+    TITLE_CHAMPION_OF_THE_NAARU             = 53,
 
     SCRIPT_RELAY_ID = 10061,
 };
 
-bool QuestRewarded_npc_adal(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
+bool QuestRewarded_npc_adal(Player* player, Creature* creature, Quest const* quest)
 {
-    if (pQuest->GetQuestId() == QUEST_KAELTHAS_AND_THE_VERDANT_SPHERE)
+    switch (quest->GetQuestId())
     {
-        sWorldState.HandleExternalEvent(CUSTOM_EVENT_ADALS_SONG_OF_BATTLE);
-        pPlayer->GetMap()->ScriptsStart(sRelayScripts, SCRIPT_RELAY_ID, pCreature, pPlayer, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE); // only once active per adal
-        return true; // handled
+        case QUEST_TRIAL_OF_THE_NAARU_MAGTHERIDON:
+            if (player->GetQuestStatus(QUEST_CUDGEL_OF_KARDESH) == QUEST_STATUS_COMPLETE)
+                player->SetTitle(TITLE_CHAMPION_OF_THE_NAARU);
+            break;
+        case QUEST_KAELTHAS_AND_THE_VERDANT_SPHERE:
+            sWorldState.HandleExternalEvent(CUSTOM_EVENT_ADALS_SONG_OF_BATTLE);
+            player->GetMap()->ScriptsStart(sRelayScripts, SCRIPT_RELAY_ID, creature, player, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE); // only once active per adal
+            return true; // handled
+            break;
     }
 
     return false; // unhandled

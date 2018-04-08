@@ -159,6 +159,9 @@ UPDATE creature_template SET ScriptName='npc_shaman_earth_elemental' WHERE entry
 UPDATE creature_template SET ScriptName='npc_shaman_fire_elemental' WHERE entry IN(15438); -- greater fire elemental
 UPDATE creature_template SET ScriptName='npc_snakes' WHERE entry IN(19921,19833);
 
+/*Quest (quest scripts which are not in one zone)*/
+UPDATE creature_template SET ScriptName='npc_quest_attunement' WHERE entry IN(22421,18528,19935);
+
 /* SPELL */
 UPDATE creature_template SET ScriptName='spell_dummy_npc' WHERE entry IN (
 -- eastern kingdoms
