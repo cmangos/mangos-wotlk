@@ -31,18 +31,23 @@ enum
     EMOTE_GROUND_CRACK              = -1564012,
 
     // Spells
+    SPELL_MOLTEN_PUNCH              = 40126,
+    // Phase 1
     SPELL_HATEFUL_STRIKE            = 41926,
-    SPELL_CHARGE                    = 41581,
     SPELL_MOLTEN_FLAME              = 40980,
+    SPELL_BERSERK                   = 45078,
+    // Phase 2
+    SPELL_CHARGE                    = 41581,
     SPELL_VOLCANIC_ERUPTION_BOSS    = 40276,
     SPELL_VOLCANIC_ERUPTION_VOLCANO = 40117,
-    SPELL_MOLTEN_PUNCH              = 40126,
-    SPELL_BERSERK                   = 45078,
     SPELL_SLOW_SELF                 = 41922,
+    SPELL_RANDOM_TARGET             = 41951, // Serverside in tbc/wotlk - sometime later changed to Fixate and visible in client
 
     NPC_VOLCANO                     = 23085,
     NPC_STALKER                     = 23095,
 };
+
+// TODO: Threat reset between phases
 
 /* Non existed spells that were used in 3.2
  * Stalker:  40257 41930
