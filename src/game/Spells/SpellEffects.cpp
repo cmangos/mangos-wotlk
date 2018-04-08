@@ -3916,6 +3916,19 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                 return;
             }
+
+            switch (m_spellInfo->Id)
+            {
+                case 39977:                                 // Remove Impaling Spine
+                {
+                    if (!unitTarget)
+                        return;
+
+                    if (unitTarget->HasAura(39837))
+                        unitTarget->RemoveAurasDueToSpell(39837);
+                    return;
+                }
+            }
             break;
         }
         case SPELLFAMILY_PRIEST:

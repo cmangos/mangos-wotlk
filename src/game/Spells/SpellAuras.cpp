@@ -4710,25 +4710,13 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         Unit* caster = GetCaster();
         target->SetStunned(true, (caster ? caster->GetObjectGuid() : ObjectGuid()), GetSpellProto()->Id);
 
-        // Summon the Naj'entus Spine GameObject on target if spell is Impaling Spine
-        if (GetId() == 39837)
-        {
-            GameObject* pObj = new GameObject;
-            if (pObj->Create(target->GetMap()->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), 185584, target->GetMap(), target->GetPhaseMask(),
-                             target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation()))
-            {
-                pObj->SetRespawnTime(GetAuraDuration() / IN_MILLISECONDS);
-                pObj->SetSpellId(GetId());
-                target->AddGameObject(pObj);
-                target->GetMap()->Add(pObj);
-            }
-            else
-                delete pObj;
-        }
-
         if (Unit* caster = GetCaster())
             if (CreatureAI* ai = caster->AI())
                 ai->JustStunnedTarget(GetSpellProto(), target);
+
+        // Summon the Naj'entus Spine GameObject on target if spell is Impaling Spine
+        if (GetId() == 39837)
+            target->CastSpell(nullptr, 39929, TRIGGERED_OLD_TRIGGERED);
     }
     else
     {

@@ -744,3 +744,7 @@ INSERT INTO spell_template(Id,Attributes,CastingTimeIndex,DurationIndex,Effect1,
 (38375,384,1,31,76,18,185133,'Summon Fel Fire',1);
 
 
+-- fully guesswork, only ID, name and icon valid - rest verified with sniff
+INSERT INTO spell_template(Id,DurationIndex,Effect1,EffectImplicitTargetA1,EffectMiscValue1,SpellIconID,SpellName,DmgMultiplier1,IsServerSide) VALUES
+(39929,9,76,18,185584,1236,'Summon Naj''entus Spine',1,2);
+

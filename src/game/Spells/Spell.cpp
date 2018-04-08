@@ -2259,6 +2259,23 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     break;
             }
 
+            // 30571 - Quake - Target Trigger is supposed to knockback players, spell has SPELL_ATTR_EX3_TARGET_ONLY_PLAYER, possibly need to consult Faction from sniffs and tweak that
+            // TODO: In future try to find out if neutral target types shouldnt have this
+            switch (m_spellInfo->Id)
+            {
+                case 39384:
+                case 30659:
+                case 36823:
+                case 39497: // remove weapons on kael, should hit all players, including the ones MCed
+                case 30571: // this spell needs custom targeting and is handled later, in sniff faction has 35 and no matter to what positive effect is set it doesnt work
+                case 39977: // needs to hit all targets, due to being neutral spell, it checks for specific aura
+                    targetB = SPELL_TARGETS_ALL;
+                    break;
+                case 45339:
+                    targetB = SPELL_TARGETS_AOE_ATTACKABLE;
+                    break;
+            }
+
             UnitList tempTargetUnitMap;
             SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(m_spellInfo->Id);
 
