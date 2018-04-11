@@ -337,11 +337,10 @@ struct npc_infantryAI : public ScriptedAI
     void EnterEvadeMode() override
     {
         m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
         m_creature->LoadCreatureAddon(true);
 
-        m_creature->SetLootRecipient(NULL);
+        m_creature->SetLootRecipient(nullptr);
 
         Reset();
 
@@ -750,7 +749,6 @@ struct npc_grand_admiral_westwindAI : public ScriptedAI
     void EnterEvadeMode() override
     {
         m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
 
         if (m_bIsDefeated)
@@ -760,7 +758,7 @@ struct npc_grand_admiral_westwindAI : public ScriptedAI
             if (m_creature->isAlive())
                 m_creature->GetMotionMaster()->MoveTargetedHome();
 
-            m_creature->SetLootRecipient(NULL);
+            m_creature->SetLootRecipient(nullptr);
 
             Reset();
         }

@@ -221,7 +221,6 @@ struct npc_dirty_larryAI : public ScriptedAI
         {
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             SetReactState(REACT_PASSIVE);
-            m_creature->DeleteThreatList();
             m_creature->CombatStop();
 
             if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))

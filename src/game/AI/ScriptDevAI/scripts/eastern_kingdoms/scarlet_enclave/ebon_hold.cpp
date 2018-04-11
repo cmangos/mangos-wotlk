@@ -608,7 +608,6 @@ struct npc_death_knight_initiateAI : public ScriptedAI
                 // complete duel and evade (without home movemnet)
                 m_bIsDuelComplete = true;
                 m_creature->RemoveAllAurasOnEvade();
-                m_creature->DeleteThreatList();
                 m_creature->CombatStop(true);
                 m_creature->SetLootRecipient(NULL);
 
@@ -2693,7 +2692,6 @@ struct npc_fellow_death_knightAI : public ScriptedAI
         else if (m_pInstance->GetData(TYPE_BATTLE) == DONE)
         {
             m_creature->RemoveAllAurasOnEvade();
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
             m_creature->LoadCreatureAddon(true);
             m_creature->SetLootRecipient(NULL);

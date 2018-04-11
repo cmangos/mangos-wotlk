@@ -400,7 +400,6 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
         if (m_bTaelanDead)
         {
             m_creature->RemoveAllAurasOnEvade();
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
             m_creature->SetLootRecipient(NULL);
 
@@ -827,7 +826,6 @@ struct npc_isillienAI: public npc_escortAI
         if (m_bTaelanDead)
         {
             m_creature->RemoveAllAurasOnEvade();
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
             m_creature->SetLootRecipient(NULL);
 
@@ -983,7 +981,6 @@ struct npc_tirion_fordringAI: public npc_escortAI
     void EnterEvadeMode() override
     {
         m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
         m_creature->SetLootRecipient(NULL);
 

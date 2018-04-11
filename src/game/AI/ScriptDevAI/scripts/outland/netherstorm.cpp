@@ -2115,7 +2115,6 @@ struct npc_scrapped_fel_reaverAI : ScriptedAI
     void EnterEvadeMode() override
     {
         m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
 
         m_creature->SetLootRecipient(nullptr);

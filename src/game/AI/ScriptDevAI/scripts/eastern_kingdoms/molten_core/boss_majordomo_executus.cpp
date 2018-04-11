@@ -139,7 +139,6 @@ struct boss_majordomoAI : public ScriptedAI
         {
             // Exit combat
             m_creature->RemoveAllAurasOnEvade();
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
             m_creature->SetLootRecipient(NULL);
 

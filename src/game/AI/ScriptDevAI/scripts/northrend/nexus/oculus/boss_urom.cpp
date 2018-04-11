@@ -208,10 +208,9 @@ struct boss_uromAI : public ScriptedAI
         if (m_bIsPlatformPhase)
         {
             m_creature->RemoveAllAurasOnEvade();
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
 
-            m_creature->SetLootRecipient(NULL);
+            m_creature->SetLootRecipient(nullptr);
 
             ResetPlatformVariables();
         }

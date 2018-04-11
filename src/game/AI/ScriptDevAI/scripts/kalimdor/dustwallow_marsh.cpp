@@ -272,7 +272,6 @@ struct npc_morokkAI : public npc_escortAI
                     m_creature->setFaction(FACTION_MOR_RUNNING);
                     m_bIsSuccess = true;
                     m_creature->RemoveAllAurasOnEvade();
-                    m_creature->DeleteThreatList();
                     m_creature->CombatStop(true);
                     m_creature->SetImmuneToPlayer(true);
                     SetEscortPaused(false);
@@ -711,7 +710,6 @@ struct npc_private_hendelAI : public ScriptedAI
                 if ((*itr)->isAlive())
                 {
                     (*itr)->RemoveAllAurasOnEvade();
-                    (*itr)->DeleteThreatList();
                     (*itr)->CombatStop(true);
                     (*itr)->SetWalk(false);
                     (*itr)->GetMotionMaster()->MovePoint(0, fSentryFleePoint[0], fSentryFleePoint[1], fSentryFleePoint[2]);

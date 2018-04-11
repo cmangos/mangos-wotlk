@@ -196,7 +196,6 @@ struct npc_silvermoon_harryAI : public ScriptedAI
                     uiDamage = 0;                           // Take 0 damage
 
                     m_creature->RemoveAllAurasOnDeath();
-                    m_creature->DeleteThreatList();
                     m_creature->CombatStop(true);
 
                     DoScriptText(SAY_BEATEN, m_creature);

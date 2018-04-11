@@ -1148,7 +1148,6 @@ struct boss_vx001AI : public ScriptedAI
                     // Note: we won't remove all auras because of the hard mode; Debuffs should be removed by the spell above
                     // m_creature->RemoveAllAurasOnEvade();
                     m_creature->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_HEAT_WAVE : SPELL_HEAT_WAVE_H);
-                    m_creature->DeleteThreatList();
                     m_creature->CombatStop();
                     m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 }

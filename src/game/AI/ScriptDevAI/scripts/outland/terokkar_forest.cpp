@@ -75,7 +75,6 @@ struct mob_unkor_the_ruthlessAI : public ScriptedAI
         m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_REACH_HOME);
         m_creature->SetStandState(UNIT_STAND_STATE_SIT);
         m_creature->RemoveAllAuras();
-        m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
         m_uiUnfriendlyTimer = 60000;
     }

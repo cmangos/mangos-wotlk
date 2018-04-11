@@ -83,7 +83,6 @@ struct mob_lumpAI : public ScriptedAI
             uiDamage = 0;                               // Take 0 damage
 
             m_creature->RemoveAllAuras();
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
 
             // should get unit_flags UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC at faction change, but unclear why/for what reason, skipped (no flags expected as default)

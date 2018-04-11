@@ -345,11 +345,10 @@ struct mob_molten_golemAI : public ScriptedAI
     {
         // Evade but keep the current location
         m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
         m_creature->LoadCreatureAddon(true);
 
-        m_creature->SetLootRecipient(NULL);
+        m_creature->SetLootRecipient(nullptr);
 
         // Update creature to Brittle Golem
         // Note: the npc has the proper flags in DB and won't engate in combat anymore

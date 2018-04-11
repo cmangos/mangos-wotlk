@@ -131,9 +131,8 @@ struct boss_jaraxxusAI : public ScriptedAI
         if (m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS)
         {
             m_creature->RemoveAllAurasOnEvade();
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
-            m_creature->SetLootRecipient(NULL);
+            m_creature->SetLootRecipient(nullptr);
             Reset();
         }
         else

@@ -1283,7 +1283,6 @@ bool EffectScriptEffectCreature_spell_diminution_powder(Unit* pCaster, uint32 ui
         // Note: we can't remove all auras because it will also remove the current aura; so currently we only remove periodic damage auras
         // This might be wrong and we might need to change this to something like "RemoveAllAurasExceptId(...)"
         pCreatureTarget->RemoveSpellsCausingAura(SPELL_AURA_PERIODIC_DAMAGE);
-        pCreatureTarget->DeleteThreatList();
         pCreatureTarget->CombatStop(true);
 
         pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);

@@ -2319,7 +2319,6 @@ void Player::SetGameMaster(bool on)
         SetPvPFreeForAll(false);
         UpdatePvPContested(false, true);
 
-        getHostileRefManager().deleteReferences();
         CombatStopWithPets();
 
         SetPhaseMask(PHASEMASK_ANYWHERE, false);            // see and visible in all phases

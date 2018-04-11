@@ -77,7 +77,6 @@ struct npc_aeranasAI : public ScriptedAI
         {
             m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
             m_creature->RemoveAllAuras();
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
             DoScriptText(SAY_FREE, m_creature);
             return;
@@ -284,7 +283,6 @@ struct npc_demoniac_scryerAI : public ScriptedAI
 
                 if (m_creature->isInCombat())
                 {
-                    m_creature->DeleteThreatList();
                     m_creature->CombatStop();
                 }
 
@@ -925,7 +923,6 @@ struct npc_magister_aledisAI : public ScriptedAI
     void EnterEvadeMode() override
     {
         m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
 
         if (!m_bIsDefeated)

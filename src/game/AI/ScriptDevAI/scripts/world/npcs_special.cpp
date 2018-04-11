@@ -1580,7 +1580,6 @@ struct npc_burster_wormAI : public ScriptedAI
     void EnterEvadeMode() override
     {
         m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
         m_creature->LoadCreatureAddon(true);
         m_creature->SetLootRecipient(nullptr);

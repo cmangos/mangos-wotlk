@@ -812,7 +812,6 @@ bool EffectDummyCreature_npc_nexus_drake_hatchling(Unit* pCaster, uint32 uiSpell
 
         // evade and set friendly and start following
         pCreatureTarget->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-        pCreatureTarget->DeleteThreatList();
         pCreatureTarget->CombatStop(true);
         pCreatureTarget->AI()->SendAIEvent(AI_EVENT_START_EVENT, pCaster, pCreatureTarget);
 
