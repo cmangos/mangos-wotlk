@@ -406,7 +406,11 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
 
 struct mob_solarium_priestAI : public ScriptedAI
 {
-    mob_solarium_priestAI(Creature* pCreature) : ScriptedAI(pCreature)  { Reset(); }
+    mob_solarium_priestAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_attackDistance = 25.f;
+        Reset();
+    }
 
     uint32 m_uiHealTimer;
     uint32 m_uiHolySmiteTimer;
@@ -417,17 +421,6 @@ struct mob_solarium_priestAI : public ScriptedAI
         m_uiHealTimer = 9000;
         m_uiHolySmiteTimer = 1;
         m_uiAoESilenceTimer = 15000;
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            m_creature->GetMotionMaster()->MoveChase(pWho, 25.0f, 0.0f);
-        }
     }
 
     void UpdateAI(const uint32 uiDiff) override

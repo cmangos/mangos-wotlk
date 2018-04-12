@@ -179,7 +179,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                                     break;
 
                                 // Ignore command if target is moving home
-                                if (targetUnit->IsEvadingHome())
+                                if (targetUnit->GetCombatManager().IsEvadingHome())
                                     break;
 
                                 petUnit->AttackStop();

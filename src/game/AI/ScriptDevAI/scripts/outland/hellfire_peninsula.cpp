@@ -415,9 +415,7 @@ struct npc_wounded_blood_elfAI : public npc_escortAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->AddThreat(m_creature);
-        pSummoned->SetInCombatWith(m_creature);
-        m_creature->SetInCombatWith(pSummoned);
+        pSummoned->AI()->AttackStart(m_creature);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -1141,8 +1139,9 @@ struct npc_magister_aledisAI : public ScriptedAI
 
         SetCombatMovement(true);
         SetCombatScriptStatus(false);
+        m_meleeEnabled = false;
 
-        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP); // TODO: check if needs to be removed somewhere
     }
 
     uint32 GetInitialActionTimer(AledisActions id)
@@ -1171,19 +1170,6 @@ struct npc_magister_aledisAI : public ScriptedAI
     {
         m_bAllyAttacker = false;
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-        if (m_creature->Attack(pWho, false))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            HandleMovementOnAttackStart(pWho);
-        }
     }
 
     void EnterEvadeMode() override

@@ -159,6 +159,7 @@ struct boss_aranAI : public ScriptedAI
         m_bDrinkInterrupted     = false;
 
         m_attackDistance        = 100.f;
+        m_meleeEnabled          = false;
 
         for (bool& m_actionReadyStatu : m_actionReadyStatus)
             m_actionReadyStatu = false;
@@ -500,6 +501,14 @@ struct boss_aranAI : public ScriptedAI
                             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                             m_uiManaRecoveryTimer = 2000;
                             m_bIsDrinking = false;
+
+                            SetCombatMovement(true);
+                            SetCombatScriptStatus(false);
+                            if (m_creature->getVictim())
+                            {
+                                m_creature->MeleeAttackStart(m_creature->getVictim());
+                                m_creature->SetTarget(m_creature->getVictim());
+                            }
                         }
                         break;
                 }

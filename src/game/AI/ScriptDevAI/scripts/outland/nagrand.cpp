@@ -302,9 +302,7 @@ struct npc_nagrand_captiveAI : public npc_escortAI
         if (pSummoned->IsTotem())
             return;
         
-        pSummoned->AddThreat(m_creature);
-        pSummoned->SetInCombatWith(m_creature);
-        m_creature->SetInCombatWith(pSummoned);
+        pSummoned->AI()->AttackStart(m_creature);
     }
 
     void JustRespawned() override

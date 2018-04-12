@@ -115,7 +115,7 @@ struct npc_dirty_larryAI : public ScriptedAI
         {
             if (Creature* pCreepjack = m_creature->GetMap()->GetCreature(m_creepjackGuid))
             {
-                if (!pCreepjack->IsInEvadeMode() && pCreepjack->isAlive())
+                if (!pCreepjack->GetCombatManager().IsInEvadeMode() && pCreepjack->isAlive())
                     pCreepjack->AI()->EnterEvadeMode();
 
                 pCreepjack->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
@@ -123,7 +123,7 @@ struct npc_dirty_larryAI : public ScriptedAI
 
             if (Creature* pMalone = m_creature->GetMap()->GetCreature(m_maloneGuid))
             {
-                if (!pMalone->IsInEvadeMode() && pMalone->isAlive())
+                if (!pMalone->GetCombatManager().IsInEvadeMode() && pMalone->isAlive())
                     pMalone->AI()->EnterEvadeMode();
 
                 pMalone->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
@@ -228,14 +228,14 @@ struct npc_dirty_larryAI : public ScriptedAI
 
             if (Creature* pCreepjack = m_creature->GetMap()->GetCreature(m_creepjackGuid))
             {
-                if (!pCreepjack->IsInEvadeMode() && pCreepjack->isAlive())
+                if (!pCreepjack->GetCombatManager().IsInEvadeMode() && pCreepjack->isAlive())
                     pCreepjack->AI()->EnterEvadeMode();
 
                 pCreepjack->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             }
             if (Creature* pMalone = m_creature->GetMap()->GetCreature(m_maloneGuid))
             {
-                if (!pMalone->IsInEvadeMode() && pMalone->isAlive())
+                if (!pMalone->GetCombatManager().IsInEvadeMode() && pMalone->isAlive())
                     pMalone->AI()->EnterEvadeMode();
 
                 pMalone->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);

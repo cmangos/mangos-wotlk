@@ -384,7 +384,7 @@ struct mob_shadowmoon_channelerAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_setupTimer && !m_creature->IsInEvadeMode())
+        if (m_setupTimer && !m_creature->GetCombatManager().IsInEvadeMode())
         {
             if (m_setupTimer <= uiDiff)
             {

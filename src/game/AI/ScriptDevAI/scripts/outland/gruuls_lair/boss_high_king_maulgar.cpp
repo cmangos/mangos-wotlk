@@ -478,6 +478,8 @@ struct boss_krosh_firehandAI : public Council_Base_AI
     {
         m_paramsBlastWave.range.minRange = 0;
         m_paramsBlastWave.range.maxRange = 15;
+        m_attackDistance = 30.f;
+        m_meleeEnabled = false;
         Reset();
     }
 
@@ -491,21 +493,6 @@ struct boss_krosh_firehandAI : public Council_Base_AI
         m_uiGreaterFireballTimer = 4000;
         m_uiSpellShieldTimer     = 1000;
         m_uiBlastWaveTimer       = 12000;
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (!pWho)
-            return;
-
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-
-            m_creature->GetMotionMaster()->MoveChase(pWho, 30.0f, 0.0F, false);
-        }
     }
 
     void UpdateAI(const uint32 uiDiff) override

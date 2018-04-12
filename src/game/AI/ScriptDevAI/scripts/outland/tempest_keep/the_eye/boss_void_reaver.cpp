@@ -61,7 +61,10 @@ struct boss_void_reaverAI : public CombatAI
         AddCombatAction(VOID_REAVER_POUNDING, 12000u);
         AddCombatAction(VOID_REAVER_ARCANE_ORB, 3000u);
         AddCombatAction(VOID_REAVER_KNOCK_AWAY, 30000u);
-        Reset();
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit* unit, float x, float y, float z)->bool
+        {
+            return m_creature->GetDistance2d(432.59f, 371.93f) > 105.0f;
+        });
     }
 
     ScriptedInstance* m_instance;
@@ -161,13 +164,6 @@ struct boss_void_reaverAI : public CombatAI
                 break;
             }
         }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        CombatAI::UpdateAI(diff);
-        if (m_creature->isInCombat())
-            EnterEvadeIfOutOfCombatArea(diff);
     }
 };
 

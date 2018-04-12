@@ -121,7 +121,7 @@ void instance_black_temple::OnCreatureCreate(Creature* creature)
                 creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             break;
         case NPC_RELIQUARY_COMBAT_TRIGGER:
-            // creature->SetLeashingDisable(true);
+            creature->GetCombatManager().SetLeashingDisable(true);
             m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
         case NPC_ANGERED_SOUL_FRAGMENT:

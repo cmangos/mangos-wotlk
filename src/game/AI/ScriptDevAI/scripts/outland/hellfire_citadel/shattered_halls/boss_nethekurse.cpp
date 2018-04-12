@@ -109,6 +109,8 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         m_uiDeathCoilTimer = 20000;
         m_uiShadowFissureTimer = 8000;
         m_uiCleaveTimer = 5000;
+
+        SetCombatMovement(true);
     }
 
     void DoYellForPeonAggro(Unit* /*pWho*/)

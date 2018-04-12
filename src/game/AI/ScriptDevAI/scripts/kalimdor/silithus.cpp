@@ -923,11 +923,7 @@ struct npc_solenorAI : public ScriptedAI
                     if (Unit* pUnit = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
                     {
                         if (pUnit->isAlive())
-                        {
-                            pCleaner->SetInCombatWith(pUnit);
-                            pCleaner->AddThreat(pUnit);
                             pCleaner->AI()->AttackStart(pUnit);
-                        }
                     }
                 }
             }

@@ -822,7 +822,7 @@ struct npc_reliquary_combat_triggerAI : public ScriptedAI
     {
         SetCombatMovement(false);
         SetReactState(REACT_PASSIVE);
-        // m_creature->SetLeashingDisable(true);
+        m_creature->GetCombatManager().SetLeashingDisable(true);
     }
 
     void Reset() override

@@ -128,6 +128,8 @@ struct boss_magtheridonAI : public ScriptedAI
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+        m_creature->GetCombatManager().SetLeashingDisable(true);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
@@ -136,6 +138,7 @@ struct boss_magtheridonAI : public ScriptedAI
         {
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->GetCombatManager().SetLeashingDisable(false);
 
             DoScriptText(EMOTE_FREED, m_creature);
             DoScriptText(SAY_AGGRO, m_creature);

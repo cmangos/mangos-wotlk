@@ -1884,6 +1884,8 @@ struct npc_fel_cannon : public Scripted_NoMovementAI
             }
 
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
+
+            m_creature->GetCombatManager().SetLeashingDisable(true);
         }
     }
 

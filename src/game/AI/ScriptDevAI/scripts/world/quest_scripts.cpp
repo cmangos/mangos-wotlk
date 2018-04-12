@@ -170,7 +170,7 @@ struct npc_xiri : public ScriptedAI
             {
                 Creature* akama = GetClosestCreatureWithEntry(m_creature, NPC_AKAMA, 300.0f);
 
-                if (akama && !akama->isInCombat() && !akama->IsInEvadeMode())
+                if (akama && !akama->isInCombat() && !akama->GetCombatManager().IsInEvadeMode())
                 {
                     akama->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
                     akama->AI()->SetReactState(REACT_PASSIVE);
@@ -240,7 +240,7 @@ struct npc_xiri : public ScriptedAI
             {
                 Creature* akama = GetClosestCreatureWithEntry(m_creature, NPC_AKAMA, 300.0f);
 
-                if (akama && !akama->isInCombat() && !akama->IsInEvadeMode())
+                if (akama && !akama->isInCombat() && !akama->GetCombatManager().IsInEvadeMode())
                 {
                     akama->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
 
