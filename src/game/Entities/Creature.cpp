@@ -645,7 +645,7 @@ void Creature::RegenerateAll(uint32 update_diff)
     if (m_regenTimer != 0)
         return;
 
-    if (!isInCombat() || IsPolymorphed())
+    if (isInCombat() && IsEvadeRegen() || !isInCombat() || IsPolymorphed())
         RegenerateHealth();
 
     RegeneratePower();
@@ -2434,11 +2434,6 @@ uint8 Creature::getRace() const
 {
     uint8 race = Unit::getRace();
     return race ? race : GetCreatureModelRace(GetNativeDisplayId());
-}
-
-bool Creature::IsInEvadeMode() const
-{
-    return !i_motionMaster.empty() && i_motionMaster.GetCurrentMovementGeneratorType() == HOME_MOTION_TYPE;
 }
 
 bool Creature::HasSpell(uint32 spellID) const
