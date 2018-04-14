@@ -417,6 +417,8 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     m_bHasBeenAliveAtDelayedTeleport = true;                // overwrite always at setup teleport data, so not used infact
     m_teleport_options = 0;
 
+    m_needsZoneUpdate = false;
+
     m_trade = nullptr;
 
     m_cinematic = 0;
@@ -6205,6 +6207,21 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
         // group update
         if (GetGroup() && (old_x != x || old_y != y))
             SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POSITION);
+
+        if (m_needsZoneUpdate)
+        {
+            // Get server side data
+            uint32 newzone, newarea;
+            GetZoneAndAreaId(newzone, newarea);
+            if (!MapCoordinateVsZoneCheck(x, y, GetMapId(), m_newZone))
+            {
+                sLog.outError("Delayed Zone Update: Client sent invalid zoneId for X,Y & MAP Coordinates. GUID: %u zoneId: %u Expected %u, Coords: %f %f %f", GetGUIDLow(), m_newZone, newzone, x, y, z);
+                m_newZone = newzone;
+            }
+
+            UpdateZone(m_newZone, newarea);
+            m_needsZoneUpdate = false;
+        }
     }
 
     if (m_positionStatusUpdateTimer)                        // Update position's state only on interval
