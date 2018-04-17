@@ -4544,6 +4544,27 @@ void Aura::HandleModCharm(bool apply, bool Real)
     }
     else
         caster->Uncharm(target);
+
+    if (apply)
+    {
+        switch (GetId())
+        {
+            case 32830: // Possess - invisible
+                caster->CastSpell(caster, 32832, TRIGGERED_OLD_TRIGGERED);
+                break;
+        }
+    }
+    else
+    {
+        switch (GetId())
+        {
+            case 32830: // Possess
+                target->CastSpell(target, 13360, TRIGGERED_OLD_TRIGGERED);
+                if (caster->GetTypeId() == TYPEID_UNIT)
+                    static_cast<Creature*>(caster)->ForcedDespawn();
+                break;
+        }
+    }
 }
 
 
@@ -9910,11 +9931,12 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         return;
                     break;
                 }
-                case 33896:                                 // Desperate Defense
-                {
+                case 32830: // Possess
+                    spellId1 = 32831;
+                    break;
+                case 33896: // Desperate Defense
                     spellId1 = 33897;
                     break;
-                }
                 case 55053:                                 // Deathbloom (25 man)
                 {
                     if (!apply && m_removeMode == AURA_REMOVE_BY_EXPIRE)
@@ -9927,10 +9949,8 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     break;
                 }
                 case 50720:                                 // Vigilance (warrior spell but not have warrior family)
-                {
                     spellId1 = 68066;                       // Damage Reduction
                     break;
-                }
                 case 57350:                                 // Illusionary Barrier
                 {
                     if (!apply && m_target->GetPowerType() == POWER_MANA)
@@ -9951,10 +9971,8 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     return;
                 }
                 case 62692:                                 // Aura of Despair
-                {
                     spellId1 = 64848;
                     break;
-                }
                 case 71905:                                 // Soul Fragment
                 {
                     if (!apply)
