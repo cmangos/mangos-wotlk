@@ -12741,6 +12741,7 @@ bool Unit::TakeCharmOf(Unit* charmed, bool advertised /*= true*/)
 
     CharmInfo* charmInfo = charmed->InitCharmInfo(charmed);
     charmInfo->SetUnitFlagSave(charmed->GetUInt32Value(UNIT_FIELD_FLAGS));
+    charmed->DeleteThreatList();
 
     if (charmed->GetTypeId() == TYPEID_PLAYER)
     {
@@ -12756,6 +12757,7 @@ bool Unit::TakeCharmOf(Unit* charmed, bool advertised /*= true*/)
 
         charmInfo->InitCharmCreateSpells();
         charmed->AI()->SetReactState(REACT_DEFENSIVE);
+
         charmInfo->SetCommandState(COMMAND_FOLLOW);
         charmInfo->SetIsRetreating(true);
 
@@ -12991,6 +12993,8 @@ void Unit::Uncharm(Unit* charmed)
 
         while (charmedPlayer->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
             charmedPlayer->GetMotionMaster()->MovementExpired(true);
+
+        charmedPlayer->DeleteThreatList(); // TODO: Add threat management for player during charm, only entries with 0 threat
     }
 
     // Update possessed's client control status after altering flags
@@ -13014,6 +13018,26 @@ void Unit::Uncharm(Unit* charmed)
         charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
     charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+
+    if (charmed->isAlive()) // must be done after flag update
+    {
+        if (charmed->CanAttack(this))
+        {
+            if (!charmed->isInCombat())
+            {
+                SetInCombatWithVictim(charmed);
+                charmed->SetInCombatWithAggressor(this);
+            }
+            else
+            {
+                if (charmed->GetTypeId() == TYPEID_UNIT)
+                    charmed->AddThreat(this, GetMaxHealth()); // Simulates being charmed
+                this->AddThreat(charmed);
+            }
+        }
+    }
+    else
+        charmed->GetCombatData()->threatManager.clearReferences();
 
     if (player)
     {
