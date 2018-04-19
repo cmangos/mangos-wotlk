@@ -1311,10 +1311,10 @@ enum Targets
     TARGET_68                          = 68,
     TARGET_69                          = 69,
     TARGET_70                          = 70,
-    TARGET_RANDOM_NEARBY_LOC           = 72,                // used in teleport onto nearby locations
-    TARGET_RANDOM_CIRCUMFERENCE_POINT  = 73,
-    TARGET_RANDOM_DEST_LOC             = 74,
-    TARGET_RANDOM_CIRCUMFERENCE_AROUND_TARGET = 75,         // TODO: Possibly reimplement
+    TARGET_RANDOM_DEST_CASTER          = 72,                // used in teleport onto nearby locations
+    TARGET_RANDOM_DEST_CASTER_CIRCUMFERENCE = 73,
+    TARGET_RANDOM_DEST_TARGET          = 74,
+    TARGET_RANDOM_DEST_TARGET_CIRCUMFERENCE = 75,           // TODO: Possibly reimplement
     TARGET_DYNAMIC_OBJECT_COORDINATES  = 76,
     TARGET_SINGLE_ENEMY                = 77,
     TARGET_POINT_AT_NORTH              = 78,                // 78-85 possible _COORDINATES at radius with pi/4 step around target in unknown order, N?

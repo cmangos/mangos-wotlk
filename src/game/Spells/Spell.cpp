@@ -1865,8 +1865,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
     switch (targetMode)
     {
-        case TARGET_RANDOM_DEST_LOC:
-        case TARGET_RANDOM_NEARBY_LOC:
+        case TARGET_RANDOM_DEST_TARGET:
+        case TARGET_RANDOM_DEST_CASTER:
             // special case for Fatal Attraction (BT, Mother Shahraz)
             if (m_spellInfo->Id == 40869)
                 radius = 30.0f;
@@ -1874,12 +1874,22 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // Get a random point in circle. Use sqrt(rand) to correct distribution when converting polar to Cartesian coordinates.
             radius *= sqrtf(rand_norm_f());
         // no 'break' expected since we use code in case TARGET_RANDOM_CIRCUMFERENCE_POINT!!!
-        case TARGET_RANDOM_CIRCUMFERENCE_POINT:
+        case TARGET_RANDOM_DEST_TARGET_CIRCUMFERENCE:
+        case TARGET_RANDOM_DEST_CASTER_CIRCUMFERENCE:
         {
+            Unit* target;
+            switch (targetMode)
+            {
+                case TARGET_RANDOM_DEST_TARGET:
+                case TARGET_RANDOM_DEST_TARGET_CIRCUMFERENCE:
+                    target = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster; break;
+                default:
+                    target = m_caster; break;
+            }
             // Get a random point AT the circumference
             float angle = 2.0f * M_PI_F * rand_norm_f();
             float dest_x, dest_y, dest_z;
-            m_caster->GetClosePoint(dest_x, dest_y, dest_z, 0.0f, radius, angle);
+            target->GetClosePoint(dest_x, dest_y, dest_z, 0.0f, radius, angle, nullptr);
             m_targets.setDestination(dest_x, dest_y, dest_z);
 
             // This targetMode is often used as 'last' implicitTarget for positive spells, that just require coordinates
@@ -3135,7 +3145,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             break;
         }
         case TARGET_DEST_CASTER_FRONT_LEAP:
-        case TARGET_RANDOM_CIRCUMFERENCE_AROUND_TARGET:
         {
             float dist = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
             const float IN_OR_UNDER_LIQUID_RANGE = 0.8f;                // range to make player under liquid or on liquid surface from liquid level
