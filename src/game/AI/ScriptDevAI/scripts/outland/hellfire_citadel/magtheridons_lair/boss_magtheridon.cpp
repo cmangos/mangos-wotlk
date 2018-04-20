@@ -27,8 +27,8 @@ EndScriptData */
 enum
 {
     // yells
-    SAY_AGGRO_1                 = -1544006,
-    SAY_AGGRO_2                 = -1544007,
+    SAY_AGGRO                   = -1544006,
+    SAY_UNUSED                  = -1544007,
     SAY_BANISH                  = -1544008,
     SAY_CHAMBER_DESTROY         = -1544009,
     SAY_PLAYER_KILLED           = -1544010,
@@ -134,7 +134,7 @@ struct boss_magtheridonAI : public ScriptedAI
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
             DoScriptText(EMOTE_FREED, m_creature);
-            DoScriptText(urand(0, 1) ? SAY_AGGRO_1 : SAY_AGGRO_2, m_creature);
+            DoScriptText(SAY_AGGRO, m_creature);
 
             m_creature->RemoveAurasDueToSpell(SPELL_SHADOW_CAGE_DUMMY);
 
