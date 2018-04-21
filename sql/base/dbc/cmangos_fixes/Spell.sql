@@ -748,3 +748,6 @@ INSERT INTO spell_template(Id,Attributes,CastingTimeIndex,DurationIndex,Effect1,
 INSERT INTO spell_template(Id,DurationIndex,Effect1,EffectImplicitTargetA1,EffectMiscValue1,SpellIconID,SpellName,DmgMultiplier1,IsServerSide) VALUES
 (39929,9,76,18,185584,1236,'Summon Naj''entus Spine',1,2);
 
+INSERT INTO spell_template(Id,SchoolMask,Attributes,AttributesEx,AttributesEx2,InterruptFlags,AuraInterruptFlags,ChannelInterruptFlags,baseLevel,spellLevel,rangeIndex,Effect1,EffectImplicitTargetA1,EffectRadiusIndex1,SpellIconID,SpellName,SpellFamilyFlags,DmgMultiplier1,DmgMultiplier2) VALUES
+(32941,32,268435840,4,4,7,5131,5135,20,20,13,3,38,16,548,'Blue Beam Dummy',8388608,1,1);
+
