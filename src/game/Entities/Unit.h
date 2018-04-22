@@ -1690,6 +1690,7 @@ class Unit : public WorldObject
         virtual int32 GetResistancePenetration(SpellSchools school) const;
 
         float CalculateEffectiveMagicResistancePercent(const Unit* attacker, SpellSchoolMask schoolMask, bool binary = false) const;
+        float RollMagicPartialResistRatioAgainst(const Unit* victim, SpellSchoolMask schoolMask, DamageEffectType dmgType, bool binary = false) const;
 
         float CalculateSpellResistChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const;
 
@@ -2277,7 +2278,7 @@ class Unit : public WorldObject
         virtual bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const;
 
         uint32 CalcArmorReducedDamage(Unit* pVictim, const uint32 damage);
-        void CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, uint32* resist, bool canReflect = false, bool ignoreResists = false, bool binary = false);
+        void CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, uint32* resist, bool canReflect = false, bool canResist = true, bool binary = false);
         void CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damageInfo, SpellEntry const* spellProto, WeaponAttackType attType = BASE_ATTACK);
         void CalculateHealAbsorb(uint32 heal, uint32* absorb);
 
