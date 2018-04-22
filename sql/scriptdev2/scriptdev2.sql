@@ -1415,6 +1415,9 @@ UPDATE creature_template SET ScriptName="npc_cenarion_sparrowhawk" WHERE entry=2
 UPDATE creature_template SET ScriptName="npc_skyguard_prisoner" WHERE entry=23383;
 UPDATE creature_template SET ScriptName='npc_avatar_of_terokk' WHERE entry=22375;
 UPDATE creature_template SET ScriptName='npc_minion_of_terokk' WHERE entry=22376;
+UPDATE creature_template SET ScriptName='boss_terokk' WHERE entry IN(21838);
+INSERT INTO scripted_event_id VALUES
+(15014, 'event_summon_terokk');
 
 /* THOUSAND NEEDLES */
 UPDATE creature_template SET ScriptName='npc_kanati' WHERE entry=10638;
@@ -3069,6 +3072,13 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001275,'Okay, okay! Enough fighting. No one else needs to get hurt.', '0', '0', '0', '0','dashel stonefist SAY_STONEFIST_2'),
 (-1001276,'It''s okay, boys. Back off. You''ve done enough. I''ll meet up with you later.', '0', '0', '0', '0','dashel stonefist SAY_STONEFIST_3'),
 (-1001277,'That could have gone better. $n, come here, please. I have something I need you to take care of for me.','0','4','0','0','Ambassador Sunsorrow - During Lament of the Highborne script'),
+(-1001278,'Who calls me to this world?  The stars are not yet aligned... my powers fail me!  You will pay for this!',0,0,0,1,'Terokk SAY_SPAWN'),
+(-1001279,'Show me what you''re made of, $n!',0,6,0,1,'Terokk SAY_CHOSEN_ONE'),
+(-1001280,'Kwa! You cannot kill me, I am immortal!',0,6,0,1,'Terokk SAY_DIVINE_SHIELD'),
+(-1001281,'%s becomes enraged as his shield shatters.',0,3,0,1,'Terokk SAY_ENRAGE'),
+(-1001282,'Enemy sighted!  Fall into formation and prepare for bombing maneuvers!',0,6,0,1,'Skyguard Ace SAY_SPAWN'),
+(-1001283,'Quickly! Use the flames and support the ground troops. Its ancient magic should cleanse Terokk''s shield.',0,6,0,1,'Skyguard Ace SAY_FLAMES'),
+(-1001284,'They did it!  Enemy down!  Return to base!',0,6,0,1,'Skyguard Ace SAY_TEROKK_DOWN'),
 -- warning ids pending export
 (-1001312,'WE STRIKE!',0,1,0,15,'proudhoof SAY_QUEST_START'),
 (-1001313,'$N is going to join us on our assault. Let us bring peace to my ancestors!',0,0,0,396,'proudhoof SAY_QUEST_INTRO'),

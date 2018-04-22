@@ -1602,8 +1602,13 @@ void Aura::TriggerSpell()
                     case 40511:                             // Demon Transform 1
                         trigger_spell_id = 40398;
                         break;
-//                    // Ancient Flames
-//                    case 40657: break;
+                    case 40657:                             // Ancient Flames 
+                    {
+                        // 40720 is called Terokk Shield
+                        if (target->GetEntry() == 21838)
+                            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, (Creature*)target);
+                        return;
+                    }
 //                    // Ethereal Ring Cannon: Cannon Aura
 //                    case 40734: break;
 //                    // Cage Trap
