@@ -10838,7 +10838,7 @@ uint32 Unit::GetCreatePowers(Powers power) const
 void Unit::AddToWorld()
 {
     WorldObject::AddToWorld();
-    ScheduleAINotify(0);
+    ScheduleAINotify(GetTypeId() == TYPEID_UNIT ? sWorld.getConfig(CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY) : 0);
 }
 
 void Unit::RemoveFromWorld()
@@ -12341,44 +12341,47 @@ bool Unit::IsAllowedDamageInArea(Unit* pVictim) const
     return true;
 }
 
-class RelocationNotifyEvent : public BasicEvent
+class UnitVisitObjectsInRangeNotifyEvent : public BasicEvent
 {
     public:
-        RelocationNotifyEvent(Unit& owner) : BasicEvent(), m_owner(owner)
+        UnitVisitObjectsInRangeNotifyEvent(Unit& owner) : BasicEvent(), m_owner(owner)
         {
             m_owner._SetAINotifyScheduled(true);
         }
 
-        bool Execute(uint64 /*e_time*/, uint32 /*p_time*/)
+        bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) override
         {
             float radius = MAX_CREATURE_ATTACK_RADIUS * sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
             if (m_owner.GetTypeId() == TYPEID_PLAYER)
             {
-                MaNGOS::PlayerRelocationNotifier notify((Player&)m_owner);
+                MaNGOS::PlayerVisitObjectsNotifier notify(static_cast<Player&>(m_owner));
                 Cell::VisitAllObjects(&m_owner, notify, radius);
             }
             else // if(m_owner.GetTypeId() == TYPEID_UNIT)
             {
-                MaNGOS::CreatureRelocationNotifier notify((Creature&)m_owner);
+                Creature& creature = static_cast<Creature&>(m_owner);
+                //since visitor was called we override can aggro with true if creature is alive
+                creature.SetCanAggro(creature.isAlive());
+                MaNGOS::CreatureVisitObjectsNotifier notify(creature);
                 Cell::VisitAllObjects(&m_owner, notify, radius);
             }
             m_owner._SetAINotifyScheduled(false);
             return true;
         }
 
-        void Abort(uint64)
+        void Abort(uint64) override
         {
             m_owner._SetAINotifyScheduled(false);
         }
 
     private:
-        Unit& m_owner;
+        Unit & m_owner;
 };
 
 void Unit::ScheduleAINotify(uint32 delay)
 {
     if (!IsAINotifyScheduled())
-        m_Events.AddEvent(new RelocationNotifyEvent(*this), m_Events.CalculateTime(delay));
+        m_Events.AddEvent(new UnitVisitObjectsInRangeNotifyEvent(*this), m_Events.CalculateTime(delay));
 }
 
 void Unit::OnRelocated()
