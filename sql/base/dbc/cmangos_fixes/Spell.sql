@@ -755,6 +755,6 @@ INSERT INTO spell_template(Id,SchoolMask,Attributes,AttributesEx,AttributesEx2,I
 UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(40722);
 
 -- Dissipate e.g used by 17378
-INSERT INTO `spell_template` (`Id`, `Attributes`, `CastingTimeIndex`, `procChance`, `DurationIndex`, `rangeIndex`, `EquippedItemClass`, `Effect1`, `EffectImplicitTargetA1`, `SpellIconID`, `SpellName`, `DmgMultiplier1`, `AreaId`, `AttributesServerside`) VALUES
+INSERT INTO `spell_template` (`Id`, `Attributes`, `CastingTimeIndex`, `procChance`, `DurationIndex`, `rangeIndex`, `EquippedItemClass`, `Effect1`, `EffectImplicitTargetA1`, `SpellIconID`, `SpellName`, `DmgMultiplier1`, `AreaId`, `IsServerSide`) VALUES
 (32763, 384, 1, 101, 21, 1, -1, 6, 1, 1, 'Dissipate', 1, 3521, 1);
 
