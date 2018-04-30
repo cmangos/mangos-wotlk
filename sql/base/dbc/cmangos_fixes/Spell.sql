@@ -758,3 +758,8 @@ UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(40722);
 INSERT INTO `spell_template` (`Id`, `Attributes`, `CastingTimeIndex`, `procChance`, `DurationIndex`, `rangeIndex`, `EquippedItemClass`, `Effect1`, `EffectImplicitTargetA1`, `SpellIconID`, `SpellName`, `DmgMultiplier1`, `AreaId`, `IsServerSide`) VALUES
 (32763, 384, 1, 101, 21, 1, -1, 6, 1, 1, 'Dissipate', 1, 3521, 1);
 
+-- Used by Raging Colossus c.19188 at certain health percentages - multiple spawns issue to be resolved
+DELETE FROM `spell_template` WHERE `Id` = 33903;
+INSERT INTO `spell_template` (`Id`, `Attributes`, `AttributesEx`, `AttributesEx3`, `CastingTimeIndex`, `procChance`, `DurationIndex`, `rangeIndex`, `StackAmount`, `EquippedItemClass`, `Effect1`, `Effect2`, `EffectDieSides1`, `EffectDieSides2`, `EffectBaseDice1`, `EffectBaseDice2`, `EffectBasePoints2`, `EffectImplicitTargetA1`, `EffectImplicitTargetA2`, `EffectRadiusIndex1`, `EffectApplyAuraName2`, `EffectMiscValue1`, `EffectMiscValueB1`, `SpellIconID`, `SpellName`, `DmgMultiplier1`, `DmgMultiplier2`, `IsServerSide`) VALUES
+(33903, 384, 268435456, 1048576, 1, 101, 4, 1, 3, -1, 28, 6, 1, 1, 1, 1, -31, 48, 1, 29, 61, 19419, 64, 2154, 'Summon Crystalhide Rageling', 1, 1, 1);
+
