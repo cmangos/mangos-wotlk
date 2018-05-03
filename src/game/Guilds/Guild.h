@@ -74,8 +74,8 @@ enum Typecommand
     GUILD_QUIT_S    = 0x03,
     // 0x05?
     GUILD_FOUNDER_S = 0x0E,
-    GUILD_UNK1      = 0x13,
-    GUILD_UNK2      = 0x14
+    GUILD_UNK1      = 0x13,     // triggers UI event EVENT_GUILD_ROSTER_UPDATE
+    GUILD_UNK2      = 0x14      // triggers UI event EVENT_GUILD_ROSTER_UPDATE
 };
 
 enum CommandErrors
