@@ -4847,6 +4847,8 @@ INSERT INTO `mangos_string` VALUES
 (1672,'The south-eastern keep tower has been destroyed!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1673,'You have reached Rank 1: Corporal',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1674,'You have reached Rank 2: First Lieutenant',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+(1702,'Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat and taunt state %u',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1703,'Showing threat for %s [Entry %u]',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `mangos_string` ENABLE KEYS */;
 UNLOCK TABLES;
 

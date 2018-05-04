@@ -822,7 +822,7 @@ struct boss_thaladred_the_darkenerAI : public advisor_base_ai
     void Aggro(Unit* pWho) override
     {
         DoScriptText(SAY_THALADRED_AGGRO, m_creature);
-        m_creature->TauntApply(pWho);
+        m_creature->FixateTarget(pWho);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -844,7 +844,7 @@ struct boss_thaladred_the_darkenerAI : public advisor_base_ai
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 DoResetThreat();
-                m_creature->TauntApply(pTarget);
+                m_creature->FixateTarget(pTarget);
                 DoScriptText(EMOTE_THALADRED_GAZE, m_creature, pTarget);
             }
             m_uiGazeTimer = 10000;

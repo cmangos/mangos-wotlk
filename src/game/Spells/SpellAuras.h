@@ -413,6 +413,7 @@ class Aura
         void HandleFactionOverride(bool apply, bool Real);
         void HandlePrayerOfMending(bool apply, bool Real);
         void HandleTriggerLinkedAura(bool apply, bool Real);
+        void HandleAuraDetaunt(bool Apply, bool Real);
 
         virtual ~Aura();
 

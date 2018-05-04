@@ -1828,6 +1828,7 @@ class Unit : public WorldObject
             return m_spellAuraHolders.find(spellId) != m_spellAuraHolders.end();
         }
         bool HasAuraOfDifficulty(uint32 spellId) const;
+        bool HasAuraTypeWithCaster(AuraType auratype, ObjectGuid caster) const;
 
         virtual bool HasSpell(uint32 /*spellID*/) const { return false; }
 
@@ -2194,11 +2195,10 @@ class Unit : public WorldObject
         void AddThreat(Unit* pVictim, float threat = 0.0f, bool crit = false, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NONE, SpellEntry const* threatSpell = nullptr);
         float ApplyTotalThreatModifier(float threat, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NORMAL);
         void DeleteThreatList();
-        bool IsSecondChoiceTarget(Unit* pTarget, bool taunt, bool checkThreatArea) const;
+        bool IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea);
         bool SelectHostileTarget();
-        void TauntApply(Unit* pVictim);
-        void TauntFadeOut(Unit* taunter);
-        void FixateTarget(Unit* pVictim);
+        void TauntUpdate();
+        void FixateTarget(Unit* taunter);
         ObjectGuid GetFixateTargetGuid() const { return m_fixateTargetGuid; }
         ThreatManager& getThreatManager() { return GetCombatData()->threatManager; }
         ThreatManager const& getThreatManager() const { return const_cast<Unit*>(this)->GetCombatData()->threatManager; }

@@ -45,6 +45,14 @@ class ThreatCalcHelper
         static float CalcThreat(Unit* pHatedUnit, Unit* pHatingUnit, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell);
 };
 
+enum TauntState : uint32
+{
+    STATE_DETAUNTED,
+    STATE_NONE,
+    STATE_TAUNTED,
+    STATE_FIXATED = UINT32_MAX,
+};
+
 //==============================================================
 class HostileReference : public Reference<Unit, ThreatManager>
 {
@@ -72,18 +80,6 @@ class HostileReference : public Reference<Unit, ThreatManager>
         // The Unit might be in water and the creature can not enter the water, but has range attack
         // in this case online = true, but accessable = false
         bool isAccessable() const { return iAccessible; }
-
-        // used for temporary setting a threat and reducting it later again.
-        // the threat modification is stored
-        void setTempThreat(float pThreat) { iTempThreatModifier = pThreat - getThreat(); if (iTempThreatModifier != 0.0f) addThreat(iTempThreatModifier);  }
-
-        void resetTempThreat()
-        {
-            if (iTempThreatModifier != 0.0f)
-                addThreat(-iTempThreatModifier);  iTempThreatModifier = 0.0f;
-        }
-
-        float getTempThreatModifier() const { return iTempThreatModifier; }
 
         //=================================================
         // check, if source can reach target and set the status
@@ -119,14 +115,18 @@ class HostileReference : public Reference<Unit, ThreatManager>
 
         // Tell our refFrom (source) object, that the link is cut (Target destroyed)
         void sourceObjectDestroyLink() override;
-    private:
+
+        // Priority alterations
+        void SetTauntState(TauntState state) { m_tauntState = state; }
+        TauntState GetTauntState() const { return m_tauntState; }
+    protected:
         // Inform the source, that the status of that reference was changed
         void fireStatusChanged(ThreatRefStatusChangeEvent& pThreatRefStatusChangeEvent);
 
         Unit* getSourceUnit() const;
     private:
         float iThreat;
-        float iTempThreatModifier;                          // used for taunt
+        TauntState m_tauntState;
         float iFadeoutThreadReduction;                      // used for fade
         ObjectGuid iUnitGuid;
         bool iOnline;
@@ -140,17 +140,6 @@ typedef std::list<HostileReference*> ThreatList;
 
 class ThreatContainer
 {
-    private:
-        ThreatList iThreatList;
-        bool iDirty;
-    protected:
-        friend class ThreatManager;
-
-        void remove(HostileReference* pRef) { iThreatList.remove(pRef); }
-        void addReference(HostileReference* pHostileReference) { iThreatList.push_back(pHostileReference); }
-        void clearReferences();
-        // Sort the list if necessary
-        void update();
     public:
         ThreatContainer() { iDirty = false; }
         ~ThreatContainer() { clearReferences(); }
@@ -172,6 +161,17 @@ class ThreatContainer
         HostileReference* getReferenceByTarget(Unit* pVictim);
 
         ThreatList const& getThreatList() const { return iThreatList; }
+    protected:
+        friend class ThreatManager;
+
+        void remove(HostileReference* pRef) { iThreatList.remove(pRef); }
+        void addReference(HostileReference* pHostileReference) { iThreatList.push_back(pHostileReference); }
+        void clearReferences();
+        // Sort the list if necessary
+        void update();
+    private:
+        ThreatList iThreatList;
+        bool iDirty;
 };
 
 //=================================================
@@ -211,8 +211,8 @@ class ThreatManager
 
         Unit* getHostileTarget();
 
-        void tauntApply(Unit* pTaunter);
-        void tauntFadeOut(Unit* pTaunter);
+        void TauntUpdate();
+        void FixateTarget(Unit* victim);
 
         void setCurrentVictim(HostileReference* pHostileReference);
         void setCurrentVictimByTarget(Unit* target); // Used in SPELL_EFFECT_ATTACK_ME to set the current target to the taunter

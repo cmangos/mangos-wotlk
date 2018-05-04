@@ -278,7 +278,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleAuraModRangedHaste,                        //218 SPELL_AURA_HASTE_RANGED
     &Aura::HandleModManaRegen,                              //219 SPELL_AURA_MOD_MANA_REGEN_FROM_STAT
     &Aura::HandleModRatingFromStat,                         //220 SPELL_AURA_MOD_RATING_FROM_STAT
-    &Aura::HandleNULL,                                      //221 ignored
+    &Aura::HandleAuraDetaunt,                               //221 SPELL_AURA_DETAUNT
     &Aura::HandleUnused,                                    //222 unused (3.0.8a-3.2.2a) only for spell 44586 that not used in real spell cast
     &Aura::HandleNULL,                                      //223 dummy code (cast damage spell to attacker) and another dymmy (jump to another nearby raid member)
     &Aura::HandleUnused,                                    //224 unused (3.0.8a-3.2.2a)
@@ -5130,18 +5130,7 @@ void Aura::HandleModTaunt(bool apply, bool Real)
     if (!target->isAlive() || !target->CanHaveThreatList())
         return;
 
-    Unit* caster = GetCaster();
-
-    if (!caster || !caster->isAlive())
-        return;
-
-    if (apply)
-        target->TauntApply(caster);
-    else
-    {
-        // When taunt aura fades out, mob will switch to previous target if current has less than 1.1 * secondthreat
-        target->TauntFadeOut(caster);
-    }
+    target->TauntUpdate();
 }
 
 void Aura::HandleAuraFakeInebriation(bool apply, bool Real)
@@ -9236,6 +9225,20 @@ void Aura::HandlePhase(bool apply, bool Real)
                 itr->second->ApplyOrRemoveSpellIfCan((Player*)target, zone, area, false);
         }
     }
+}
+
+void Aura::HandleAuraDetaunt(bool Apply, bool Real)
+{
+    // only at real add/remove aura
+    if (!Real)
+        return;
+
+    Unit* caster = GetCaster();
+
+    if (!caster || !caster->isAlive() || !caster->CanHaveThreatList())
+        return;
+
+    caster->TauntUpdate();
 }
 
 void Aura::HandleAuraSafeFall(bool Apply, bool Real)
