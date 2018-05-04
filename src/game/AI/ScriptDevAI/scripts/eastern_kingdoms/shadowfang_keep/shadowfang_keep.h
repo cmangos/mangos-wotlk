@@ -19,6 +19,7 @@ enum
 
     SAY_BOSS_DIE_AD         = -1033007,
     SAY_BOSS_DIE_AS         = -1033008,
+    YELL_PACK_DEAD          = -1033026,
 
     NPC_ASH                 = 3850,
     NPC_ADA                 = 3849,
@@ -33,6 +34,13 @@ enum
     NPC_VALENTINE_BOSS_MGR  = 36643,                        // controller npc for the apothecary event
     NPC_APOTHECARY_GENERATOR = 36212,                       // the npc which summons the crazed apothecary
 
+    // Wolf Master Nandos intro event
+    NPC_MASTER_NANDOS       = 3927,
+    NPC_LUPINE_HORROR       = 3863,
+    NPC_WOLFGUARD_WORG      = 5058,
+    NPC_BLEAK_WORG          = 3861,
+    NPC_SLAVERING_WORG      = 3862,
+
     GO_COURTYARD_DOOR       = 18895,                        // door to open when talking to NPC's
     GO_SORCERER_DOOR        = 18972,                        // door to open when Fenrus the Devourer
     GO_ARUGAL_DOOR          = 18971,                        // door to open when Wolf Master Nandos
@@ -46,6 +54,13 @@ enum
     MAX_APOTHECARY          = 3,
 };
 
+struct Waypoint
+{
+    float fX, fY, fZ;
+};
+
+static const Waypoint nandosMovement = {-170.6f, 2182.45f, 151.91f};
+
 class instance_shadowfang_keep : public ScriptedInstance
 {
     public:
@@ -54,6 +69,7 @@ class instance_shadowfang_keep : public ScriptedInstance
         void Initialize() override;
 
         void OnCreatureCreate(Creature* pCreature) override;
+        void OnCreatureDeath(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
         void DoSpeech();
 
@@ -71,6 +87,7 @@ class instance_shadowfang_keep : public ScriptedInstance
         std::string m_strInstData;
 
         uint8 m_uiApothecaryDead;
+        GuidList m_lNandosWolvesGuids;
 };
 
 #endif

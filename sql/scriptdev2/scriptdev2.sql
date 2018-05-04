@@ -3065,7 +3065,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1033022,'But what does it matter. It is time for this to end.',0,0,0,0,'hummel SAY_INTRO_3'),
 (-1033023,'Baxter! Get in there and help! NOW!',0,0,0,0,'hummel SAY_CALL_BAXTER'),
 (-1033024,'It is time, Frye! Attack!',0,0,0,0,'hummel SAY_CALL_FRYE'),
-(-1033025,'...please don\'t think less of me.',0,0,0,0,'hummel SAY_DEATH');
+(-1033025,'...please don\'t think less of me.',0,0,0,0,'hummel SAY_DEATH'),
+
+(-1033026,'I can\'t believe it! You\'ve destroyed my pack... Now face my wrath!',0,1,0,0,'wolf master nandos YELL_PACK_DEAD');
 
 -- -1 034 000 STOCKADES
 
