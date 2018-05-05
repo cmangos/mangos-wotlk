@@ -68,6 +68,7 @@ enum
     SPELL_DRINK                 = 30024,
     SPELL_MANA_POTION           = 32453,
     SPELL_PYROBLAST             = 29978,
+    SPELL_DISPEL_BLIZZARD       = 29970,
 
     // super spells
     SPELL_FLAME_WREATH          = 30004,                // triggers 29946 on targets
@@ -300,6 +301,7 @@ struct boss_aranAI : public ScriptedAI
                         case ARAN_ACTION_DRINK:
                             if (DoCastSpellIfCan(m_creature, SPELL_MASS_POLYMORPH) == CAST_OK)
                             {
+                                m_creature->CastSpell(nullptr, SPELL_DISPEL_BLIZZARD, TRIGGERED_NONE);
                                 DoScriptText(SAY_DRINK, m_creature);
                                 SetCombatMovement(false);
                                 SetCombatScriptStatus(true);

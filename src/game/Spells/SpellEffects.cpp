@@ -1634,8 +1634,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 29969:                                 // Summon Blizzard
                 {
                     if (unitTarget)
-                        unitTarget->CastSpell(unitTarget, 29952, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
+                        unitTarget->CastSpell(nullptr, 29952, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
 
+                    return;
+                }
+                case 29970:                                 // Dispel Blizzard
+                {
+                    if (unitTarget)
+                        unitTarget->RemoveAurasDueToSpell(29952);
                     return;
                 }
                 case 29979:                                 // Massive Magnetic Pull
