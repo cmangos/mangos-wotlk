@@ -60,12 +60,15 @@ enum
     GOSSIP_ITEM_OPERA_2     = -3532002,
     GOSSIP_ITEM_JUL_WIPE    = -3532003,
     GOSSIP_ITEM_WOLF_WIPE   = -3532004,
+    GOSSIP_ITEM_OPERA_OZ_WIPE = -3532019,
 
+    TEXT_ID_MOROES_ALIVE    = 8969,
     TEXT_ID_OPERA_1         = 8970,
     TEXT_ID_OPERA_2         = 8971,
     TEXT_ID_OPERA_WOLF_WIPE = 8975,
-    TEXT_ID_OPERA_OZ_WIPE   = 8781,             // guesswork, not confirmed
-    // TEXT_ID_OPERA_JUL_WIPE  = ????,           // Item not found in DB: "The romantic plays are really tough, but you'll do better this time. You have TALENT. Ready?"
+    TEXT_ID_OPERA_OZ_WIPE   = 8981,
+    TEXT_ID_OPERA_JUL_WIPE  = 8982,
+    TEXT_ID_OPERA_DONE      = 10471,
 
     // SPELL_SPOTLIGHT       = 25824,            // in creature_template_addon
     SPELL_TUXEDO            = 32616,
@@ -182,23 +185,49 @@ bool GossipHello_npc_barnes(Player* pPlayer, Creature* pCreature)
     if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
     {
         // Check if opera event is not yet in progress
-        if (pInstance->GetData(TYPE_OPERA) == IN_PROGRESS || pInstance->GetData(TYPE_OPERA) == DONE)
+        if (pInstance->GetData(TYPE_OPERA) == IN_PROGRESS)
             return true;
 
         // Check for death of Moroes
-        if (pInstance->GetData(TYPE_MOROES) == DONE)
+        if (pInstance->GetData(TYPE_MOROES) != DONE)
+            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_MOROES_ALIVE, pCreature->GetObjectGuid());
+        else
         {
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_OPERA_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-
-            // for GMs we add the possibility to change the event
-            if (pPlayer->isGameMaster())
+            switch (pInstance->GetData(TYPE_OPERA))
             {
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_OZ",   GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_HOOD", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_RAJ",  GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+                case NOT_STARTED:
+                    pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_OPERA_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                    // for GMs we add the possibility to change the event
+                    if (pPlayer->isGameMaster())
+                    {
+                        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_OZ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+                        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_HOOD", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+                        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_RAJ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+                    }
+                    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_OPERA_1, pCreature->GetObjectGuid());
+                    break;
+                case FAIL:
+                    if (pPlayer->isGameMaster())
+                    {
+                        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_OZ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+                        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_HOOD", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+                        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_RAJ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+                    }
+                    uint32 gossipItemText;
+                    uint32 gossipMenuText;
+                    switch (pInstance->GetData(TYPE_OPERA_PERFORMANCE))
+                    {
+                        case OPERA_EVENT_WIZARD_OZ: gossipItemText = GOSSIP_ITEM_OPERA_OZ_WIPE; gossipMenuText = TEXT_ID_OPERA_OZ_WIPE; break;
+                        case OPERA_EVENT_RED_RIDING_HOOD: gossipItemText = GOSSIP_ITEM_WOLF_WIPE; gossipMenuText = TEXT_ID_OPERA_WOLF_WIPE; break;
+                        case OPERA_EVENT_ROMULO_AND_JUL:  gossipItemText = GOSSIP_ITEM_JUL_WIPE; gossipMenuText = TEXT_ID_OPERA_JUL_WIPE; break;
+                    }
+                    pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, gossipItemText, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+                    pPlayer->SEND_GOSSIP_MENU(gossipMenuText, pCreature->GetObjectGuid());
+                    break;
+                case DONE:
+                    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_OPERA_DONE, pCreature->GetObjectGuid());
+                    break;
             }
-
-            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_OPERA_1, pCreature->GetObjectGuid());
 
             return true;
         }

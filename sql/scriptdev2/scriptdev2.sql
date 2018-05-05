@@ -7015,7 +7015,8 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3532015,'Control Human Conjurer','human conjurer GOSSIP_ITEM_HUMAN_CONJURER'),
 (-3532016,'Control Human Cleric','human cleric GOSSIP_ITEM_HUMAN_CLERIC'),
 (-3532017,'Control King Llane','king llane GOSSIP_ITEM_KING_LLANE'),
-(-3532018,'Please reset the chess board, we would like to play again.','medivh GOSSIP_ITEM_RESET_BOARD');
+(-3532018,'Please reset the chess board, we would like to play again.','medivh GOSSIP_ITEM_RESET_BOARD'),
+(-3532019,'I''ll nail it!','barnes GOSSIP_ITEM_OPERA_OZ_WIPE');
 
 -- -3 534 000 THE BATTLE OF MT. HYJAL
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
