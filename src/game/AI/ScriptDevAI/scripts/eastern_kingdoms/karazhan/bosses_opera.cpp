@@ -986,7 +986,7 @@ struct boss_julianneAI : public ScriptedAI
 
         if (m_uiPowerfulAttractionTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_POWERFUL_ATTRACTION) == CAST_OK)
                     m_uiPowerfulAttractionTimer = urand(5000, 30000);
